@@ -17,8 +17,8 @@ code**:
   code reads it instead of hardcoded item lists.
 - Runtime lookups are **as fast as hardcoded checks** (see section 1).
 - The data model is **equivalent to OpenMU's `ItemDefinition`** where both
-  sides overlap, so data can be moved between client and server with
-  file-based import and export on both sides.
+  sides overlap, so data can be moved between client and server: by file on
+  both sides, and by an update from the server in MuEditor (phase 7).
 - Items can be **added and removed** on client and server, and linked to
   their model data with MuEditor tools.
 - Every data field can be edited in **focused MuEditor editors** (several
@@ -38,7 +38,7 @@ share with items) is planned in the
 | D1 | Data format | JSON files as the source of truth, loaded once at startup into flat tables. Runtime speed must be as close to hardcoded as possible; a binary cache is added only if startup parsing is measurably too slow. Chosen over a database or SQL text files; see section 2. |
 | D2 | Exchange format with OpenMU | JSON keyed by `(Group, Number)`, not SQL `UPDATE` statements (SQL would break whenever OpenMU's database schema changes). |
 | D3 | Server rules | Check what OpenMU already enforces (see "Server-side checks today"), then extend OpenMU's tables or add new ones following OpenMU's usual workflow. |
-| D4 | Sync | File-based import and export on **both** sides. No live connection or pull button. |
+| D4 | Sync | File-based import and export on **both** sides, each import with a diff the user checks by hand (an export writes its side's data), plus a read-only Update from server in MuEditor (phase 7, section 6). The client never writes to the server. |
 | D5 | Editors | Several focused editors instead of one big table. |
 | D6 | Add/remove | Items can be created and removed on client and server; MuEditor tools link a new item to its model data. |
 | D7 | File layout | One JSON file per item group. Splitting the mixed groups 12–15 into category files was dropped: with new groups (D21) the group *is* the category, so the file layout is decided together with phase 12. |
@@ -49,12 +49,12 @@ share with items) is planned in the
 | D12 | Id ranges | No reserved number ranges for custom items, and no range checks (`type >= X && type <= Y`) in new code; everything an item "is" comes from its data. OpenMU must keep supporting the original Season 6 client **and** this client (see section 7). |
 | D13 | Other item files | `ItemAddOption`, `SocketItem`, `Mix`, `pet` and set options are decided later, when we know more. |
 | D14 | Item options | The item file only holds **links** to the option groups an item can have (Luck, additional option, excellent, wing, harmony, guardian, socket, …). The option definitions (values, chances, levels) live in their own files. Related data stays together in one file, e.g. an option definition with all its levels and values. |
-| D15 | Tooltips | Tooltips become data-driven with JSON data, converted from `ItemTooltip*` / `ItemLevelTooltip` (see "Unused item files in the repo"). Phase 8, after the item phases; moved earlier if the item changes turn out to need it. The tooltip bmd files stay in the repo until then. |
+| D15 | Tooltips | Tooltips become data-driven with JSON data, converted from `ItemTooltip*` / `ItemLevelTooltip` (see "Unused item files in the repo"). Phase 8, after the item phases; moved earlier if the item changes turn out to need it. The tooltip bmd files stayed in the repo until then; they were removed once the item data held the tooltips and the names by level (#815). **Update (2026-10-22, #815):** an item's own tooltip texts (its `description` lines) live in its item file, with their translations, as client-only fields that the OpenMU exchange leaves out (D22). Texts and layouts that many items share get a tooltip file of their own. |
 | D16 | Unused item bmd copies | Removed on this branch; the game only loads `Item_<lang>.bmd`. |
 | D17 | Translations in phase 2 | Item names moved into phase 2, because the per-language bmd files were the only place the Portuguese and Spanish names existed. Names are `LocalizedString`s imported from all three files; the UI locale (the same setting as the `.resx` texts) picks the shown name, also when it changes at runtime. On disk, each item's `name` is an object of names by language (`{"en": "Blade", "es": "Espada", "pt": "Lâmina"}`, English first) in the item files; separate translation files were tried and dropped as extra maintenance. Phase 5 keeps only the translation tooling. |
 | D18 | Repairing the legacy data | The bmd import recovers names that ran past the 30-byte name field and takes the fields they overwrote from a language whose name did not reach them (defaults when none has them). Names that are not UTF-8 are read as Windows-1252. The changes are listed in the phase 2 PR and in `docs/item-data.md`. |
 | D19 | Editor sync | Every item editor change goes into the database right away (phase 2), so the editor and the database never differ. Moving the editor fully onto the database stays in phase 6 (done: the item tools edit the database, the item table is gone). |
-| D22 | Model data files | Model and display data (model file, textures, inventory and ground display, cloth, effects) lives in separate files, `Data/Items/Models/GroupNN_*.json`, one per item group, items by `number`. It is client-only: the item files keep what client and server share, and only those take part in the OpenMU exchange. Separate files also keep the item files small and let the model editor and the stats editor change different files. |
+| D22 | Model data files | Model and display data (model file, textures, inventory and ground display, cloth, effects) lives in separate files, `Data/Items/Models/GroupNN_*.json`, one per item group, items by `number`. It is client-only: the item files keep what client and server share, and only those take part in the OpenMU exchange. The exception is an item's own tooltip texts (D15): they stay in the item file next to its name, as client-only fields that the exchange leaves out. Separate files also keep the item files small and let the model editor and the stats editor change different files. |
 | D23 | Model slots | Two steps. **Own model slots (phase 4a–4c):** every item keeps its own model slot, `MODEL_ITEM + item type`, as today; the data only says which file is loaded into it, so the ~100 places that compute `+ MODEL_ITEM` / `- MODEL_ITEM` stay unchanged. **Shared models (phase 4d, right after them):** models become entries of their own, and items reference them by name, so several items can share one model (loaded once; 4d1, done). Every item keeps a slot of its own, and the conversions between item types and model slots go through one place, `ToModelSlot` / `ToItemType` (4d2), so a moved item can keep its slot (phase 12) and the named slots of items (`MODEL_KRIS`, …) stay valid. One slot per shared model, with objects keeping item types, is not planned: about 240 places identify items by their model slot (see "Item-specific code that is left"), and none of them gains anything while each item has its own slot. Phase 12 (level variants as items of their own) shares models without loading them twice. |
 | D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (color names from a glow color list, `Data/Effects/GlowColors.json`, which has the colors of the old `PartObjectColor*` palettes; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and an item effect (the item branches of `RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. The named looks are code for now; D25 moves what they are made of into data. |
 | D25 | Looks in data | Items keep naming their looks; what a named look is made of moves from code into data (phase 13). Skills, monsters and NPCs use the same look format, so the decision lives in the [roadmap](2026-09-29-data-driven-content-roadmap-design.md). |
@@ -81,8 +81,9 @@ share with items) is planned in the
 
 ### Unused item files in the repo
 
-No code in the repo loads these files, and `git log -S` finds no loader
-in the history either. They use the usual bmd encoding (`BuxConvert` XOR
+No code in the repo loaded these files, and `git log -S` finds no loader
+in the history either. They were removed once the item data held what
+they describe (#815, step 5); the git history keeps them. They use the usual bmd encoding (`BuxConvert` XOR
 `FC CF AB`, restarted for every record), followed by a 4-byte trailer
 (probably a checksum). They exist for `Eng`, `Por` and `Spn`.
 
@@ -111,9 +112,12 @@ this branch (D16).
   `Group`, `Number`, `Width`, `Height`, `Durability`, `Value`, `DropLevel`,
   `MaximumItemLevel`, `ItemSlot`, `Skill`, `QualifiedCharacters`,
   `Requirements`, `BasePowerUpAttributes`, `PossibleItemOptions`,
-  `PossibleItemSetGroups`, `MaximumSockets`, `ConsumeEffect`, and the flags
+  `PossibleItemSetGroups`, `MaximumSockets`, `ConsumeEffect`,
+  `MaximumDropLevel`, `PetExperienceFormula`, `DropItems`, the flags
   `IsAmmunition`, `IsBoundToCharacter`, `IsQuestItem`, `DropsFromMonsters`,
-  `StorageLimitPerCharacter`.
+  `StorageLimitPerCharacter`, and since PR A the six rule flags
+  `IsTradable`, `IsDroppable`, `IsStorable`, `IsSellableToNpc`,
+  `IsPersonalStoreSellable` and `IsRepairable`.
 - Names are `LocalizedString`: `"English||de=Deutsch||fr=Français"`, English
   (neutral) first.
 - Identity: `(Group, Number)`. Initialization creates deterministic GUIDs
@@ -124,7 +128,9 @@ this branch (D16).
 - Data changes ship as `UpdatePlugInBase` plug-ins. The admin panel's
   generic config grid (`EditConfigGrid`) can already **add and delete**
   item definitions; deleting fails while something still references the
-  item. There is no file import or export for config yet.
+  item. The admin panel can download the whole configuration as JSON and
+  back up the database; there is no export or import of single items yet
+  (phase 7, section 6).
 
 ### Server-side checks today
 
@@ -287,11 +293,12 @@ Each field belongs to one of two groups:
 | Name | `LocalizedString`, same format as OpenMU | yes |
 | Size and slot | width, height, item slot, two-handed | yes |
 | Stats | damage, defense, speed, durability, requirements, resistances, class requirements, value, skill | yes (mapped to OpenMU requirements and power-ups) |
-| Server flags | ammunition, bound to character, quest item, drops from monsters, storage limit | yes |
-| Rule flags | tradable, droppable, storable, sellable to NPC, personal-shop sellable, repairable, usable/consumable, equippable | yes, after OpenMU is extended (D3) |
+| Server flags | ammunition, quest item | yes; bound to character, drops from monsters and storage limit are server-only |
+| Rule flags | tradable, droppable, storable, sellable to NPC, personal-shop sellable, repairable | yes (OpenMU has them since PR A) |
 | Categories/tags | wing, flying, mount, pet, potion, jewel, ticket, cash shop, event, … | client-only at first; shared where OpenMU gets matching data |
 | Model | model file, texture folders, cloth flag (in the model files, D22) | client-only |
 | Rendering | inventory offset, rotation and scale; ground rotation and scale; glow color, render style, effects (D24) | client-only |
+| Tooltip texts | `description` (D15) | client-only, in the item files; the exchange file leaves them out |
 
 ### 4. Rule code on top of data
 
@@ -316,24 +323,237 @@ Each field belongs to one of two groups:
 - Stats are no longer duplicated per language: one data set, only names are
   translated.
 
-### 6. OpenMU sync (file-based, both sides)
+### 6. OpenMU sync (phase 7)
 
-- **Server is authoritative.** The client never writes to the server, not
-  even in editor mode.
-- One **exchange file format** (JSON, with a format version) keyed by
-  `(Group, Number)`, containing only the shared fields.
-- Item sets, drop settings and option definitions get their own exchange
-  files later (D11, D14). The item file only links to the option groups an
-  item can have.
-- **Client → server:** MuEditor exports the file; the admin imports it in a
-  new OpenMU admin panel import page.
-- **Server → client:** a new OpenMU admin panel export page writes the same
-  file; MuEditor imports it and updates the shared fields.
-- Import on both sides shows a **diff** (new, changed, removed items) and
-  applies only what the user confirms.
-- Removals in an import are only applied when confirmed; on the server they
-  fail if characters still own the item (existing OpenMU behavior).
-- The OpenMU import/export pages are a separate OpenMU PR.
+- **The server is authoritative.** The client never writes to the server,
+  not even in editor mode. Item data moves by file in both directions, and
+  MuEditor can also download it from the server (Update from server).
+- **What moves:** the item fields both sides have, and the item formulas:
+  everything in `Stats/ItemStats.json` except the profile rules, so a
+  formula OpenMU changes reaches the client too.
+- **Every import shows a diff** (added, changed and removed items and
+  formula entries, field by field) that the user checks by hand; only the
+  checked rows are applied, after a confirmation that says what changes.
+  The same holds for OpenMU's import page. An export shows no diff: it
+  writes the client's data, and the side that imports the file shows what
+  it changes (a diff there and one at export only confused).
+- Item sets, drop settings and option definitions get exchange files of
+  their own later (D11, D14).
+- Phase 7 has five steps, one PR each: **1** the exchange file with Export
+  and Import in MuEditor (MuMain); **2** the item formulas as data in OpenMU;
+  **3** OpenMU's read-only export endpoint; **4** Update from server in
+  MuEditor (MuMain); **5** OpenMU's import page. Steps 2, 3 and 5 are phase
+  B's part.
+
+**The exchange file.**
+
+- One UTF-8 JSON file in the layout of the item files: fixed key order,
+  items sorted by (group, number), LF line endings.
+- Header: `formatVersion` (1), `source` (`"MuMain"` or `"OpenMU"`), `server`
+  (only in a file from OpenMU: an id its export creates once per
+  installation and keeps, step 3; the id of OpenMU's game configuration
+  cannot serve, as its initialization gives every installation the same
+  one) and `gameVersion` (`"season6"`; a file of another version is
+  refused, D8).
+- `formulas`: the item stat file without its `formatVersion` and
+  `profileRules`: `dropLevelBonus`, `tables`, `default` and `profiles`, with
+  the keys and meanings of `Stats/ItemStats.json`.
+- `items`: each item with the shared fields, in the keys and meanings of the
+  item files (section 3, `docs/item-data.md`):
+  - `group`, `number`, `name`, `width`, `height`, `slot`, `level`,
+    `durability`, `magicDurability`, `skill`;
+  - `damageMin`, `damageMax`, `attackSpeed`, `walkSpeed`, `magicPower`,
+    `defense`, `blockRate`, `resistances`;
+  - `requirements`, `requirementsByLevel`, `classRequirements`;
+  - `sellValue`, `buyPrice`;
+  - `tradable`, `droppable`, `storable`, `sellable`, `personalShopSellable`,
+    `repairable`;
+  - the tags `ammunition`, `secondClassQuestItem`, `thirdClassQuestItem`;
+  - the formula fields `statProfile` (the profile the item uses: the one its
+    rules give or the picked one; `"default"` for the default; always
+    written), `excellentBonus` and `excellentRaisesLevel`.
+- Not in the file: what is client-only (the model and display data, D22;
+  `description`; the other tags, `wingTier`, `weaponKind`, `twoHanded`,
+  `potionPriority`, `attackType`, `magicDefense`, the rental flags) and what
+  is server-only (`DropsFromMonsters`, `MaximumDropLevel`, `MaximumItemLevel`,
+  `IsBoundToCharacter`, `StorageLimitPerCharacter`, `PetExperienceFormula`,
+  `ConsumeEffect`, `MaximumSockets`, the item options and sets, the drop
+  items and the power-ups the client has no field for, e.g. `CanFly`).
+- The file uses the client's names and meanings; OpenMU converts to and from
+  its model (steps 3 and 5). Its export and import report the cases where
+  that is not exact:
+  - hand slots: OpenMU gives one-handed weapons a Dark Knight, Magic
+    Gladiator or Rage Fighter may use both hands ({0, 1}); the file has
+    `mainHand`, and OpenMU's import gives {0, 1} by the same rule;
+  - OpenMU's one `Value` is the client's `buyPrice` in groups 12 and 15 and
+    its `sellValue` elsewhere (a byte in the client);
+  - OpenMU's `Durability` of an item without a slot is its stack size, and
+    its `Skill` of a scroll or orb is the skill it teaches; neither is
+    exchanged;
+  - OpenMU's drop level is a byte (the Horn of Fenrir has 300 in the client);
+  - OpenMU has one `IsQuestItem` for the client's two tags
+    `secondClassQuestItem` and `thirdClassQuestItem` (the same eight items);
+  - a class set with a gap, a requirement by level that goes down, magic
+    power's rounding (OpenMU halves each part, the client the sum), the
+    `@src` and `@stamp` parts of OpenMU's names and its `;` level variant
+    names (three items), and a (group, number) that exists twice on the
+    server (a locked row of the import, which leaves it as it is; an
+    export replaces such a file after its confirmation).
+- A field left out has its default, as in the item files. A reader warns
+  about keys it does not know and refuses a `formatVersion` it does not
+  know; the version only goes up for a change that older readers would
+  misread.
+
+**The orbs, crystals and scrolls** (the 44 items of groups 12 and 15 that
+have stat requirements and no slot) keep their requirements as the values
+the game asks for, as OpenMU stores them, instead of a weight that the drop
+level formula grows. Their stat profiles write `"base"` for the stat
+requirements: the `scroll` profile of group 15, and a new `orb` profile with
+a rule of its own for group 12. The values are converted once; a test pins
+them and checks that the game asks for the same at +0 (above +0 the value
+stays as it is, as on OpenMU; the game shows these items only at +0). The
+Orb of Summoning keeps its energy by level. The bmd files of the original
+client hold weights for these items, so Import from bmd turns them into the
+values with the original client's formulas, and Export as bmd and Export as
+S6E3 turn the values back into the smallest weight that gives them (the
+nearest one, with a note, when none gives a value exactly). Which
+requirements convert follows the item's stat profile, as in the game: one
+the profile keeps as it is while the default grows it.
+
+**The Item Sync window** (MuEditor, `_EDITOR` builds only; the Item Sync
+tool of section 9):
+
+- **Export…**: a save dialog picks the file, and the client's items and
+  formulas are written into it, without a diff. A file that is there is
+  replaced after a confirmation with what changes in it (items added,
+  changed and removed, formula entries that change; or that it cannot be
+  read as an exchange file); a file that has the client's data already is
+  left as it is.
+- **Import…**: an open dialog picks the file; the diff compares it with the
+  client's data, and the checked rows are applied to the client after a
+  confirmation with what they change (items added, changed and removed,
+  formula entries; what is not checked or not listed stays as it is).
+- **Update from server** (step 4) downloads the server's file and goes on as
+  Import.
+- **Compare two files**: a read-only diff of two exchange files (e.g. a
+  client export and a server export), what changes from file A to file B,
+  in every language; its rows can be marked as known differences. Only the
+  client has it: OpenMU's import page compares a file with its live data,
+  the client's Import a file with the client's data, and a comparison of
+  two files is a tool for the one who edits the items.
+- The file dialogs are SDL3's (`SDL_ShowOpenFileDialog`,
+  `SDL_ShowSaveFileDialog`), on every platform. Their callback can run on
+  another thread, so it only hands the path to the window, which reads it
+  in its next frame. On Linux they need the desktop portal or zenity.
+- **The diff** lists, for items, the added ones, the changed ones with their
+  fields (client value, file value) and the removed ones; for the formulas,
+  the drop level bonus, each term of the default and of each profile, and
+  each table. A checkbox per field, with a toggle per item and per column.
+  Checked by default: the differences of the file. Unchecked by default:
+  removals, inexact fields and known differences. (Local edits and
+  conflicts come with the last server state in step 4.)
+- **Known differences** are the items' fields and formula entries meant to
+  differ between the client and a server (e.g. the Dark Horse is repairable
+  on OpenMU on purpose). They are kept in the repo, in
+  `Data/Items/Sync/KnownDifferences.json` (the game does not read it), so
+  they are shared and survive a new build folder; the diff shows them
+  greyed and unchecked, and a row can be added to the list from the diff.
+- **Names:** only the client's UI languages are taken from a file; a
+  language the file lacks stays as it is, and no language is removed.
+- **Stat profile:** a file's profile that the item's rules give leaves the
+  item following its rules (also when the rules give the default; only a
+  pick is stored as `"default"`); another one becomes a pick (section 9).
+  Export writes the profile the item uses.
+- **Added items:** `twoHanded` follows the rule all shipped items follow
+  (groups 0 to 5, a hand slot, width 2 or more), the weapon kind follows the
+  group as for Add item, then the profile is compared with the rules. The
+  row flags what the rules need and the file cannot give: a wing tier, or
+  the tags `cape`, `sceptre` and `summonerBook`. The other client-only
+  fields take their defaults. A number that has a model entry but no item
+  keeps that model; otherwise the row says the item has no model, and the
+  Item Browser's "without a model" filter lists it (Item Checks gets no
+  check for it: 33 shipped items have no model entry, several drawn by
+  code).
+- **Removed items** remove the item and its model entry, as Remove item
+  does, with its "used by" list. An item the game holds (worn or in an
+  item window) is not removed, and its size and slot stay; a new item of a
+  type the game holds (the client had no data for it) is not added. The
+  import checks this again when it is applied.
+- **Apply** (after its confirmation): the changed items and the changed item
+  stat file are checked first, with the checks of a save: a row with an error is unchecked and
+  shows the message. Then everything checked is one step of the undo
+  history: the item stat file first, so the items' profiles follow the new
+  rules, then the items. The size and slot of a held item are left out of
+  the change (the item tools refuse a whole change that would move them).
+  Save Items writes the files, as for any edit.
+
+**Update from server** (step 4):
+
+- `GET <admin panel URL>/api/items/exchange` (step 3), with the API key in
+  the `X-Api-Key` header. The key comes from the environment variable
+  `MU_OPENMU_API_KEY` and is never written to a file or a log; the user
+  creates it on OpenMU's API keys page (the Viewer role is enough).
+- The URL is a setting of its own in `MuEditor/MuEditor.ini` (`[OpenMU]
+  AdminPanelUrl`, read and written by the editor's settings like its other
+  sections), never in `config.ini`, which ships to players. https is
+  required except for `localhost`, `127.0.0.1` and `[::1]`; plain http on a
+  local network is an opt-in (OpenMU's all-in-one setup serves plain http
+  on port 80).
+- The download runs on a worker thread with libcurl (already linked into
+  every build; its global init runs once before the thread starts), with
+  timeouts and a cancel; the key stays out of curl's verbose output and the
+  editor's log. The window shows its state and the errors (no URL, no
+  connection, 401 key, 403 role or setup mode, 404 no endpoint, 429 too many
+  requests, an unknown format).
+- The last file of each server is kept as its last server state,
+  `MuEditor/ItemSync/<server>.json`, on the developer's machine. It makes
+  the diff three-way: a field only the server changed is a server change
+  (checked), a field only the client changed is a local edit (unchecked,
+  "to export"), a field both changed is a conflict (unchecked). The request
+  sends its ETag, so an unchanged server answers with nothing to download.
+- The remove warning names the items that were in the last server state
+  (section 7).
+
+**OpenMU** (phase B, separate OpenMU PRs):
+
+- **Step 2, formulas as data:** the named stat profiles, the level bonus
+  tables (data already), the default terms and the drop level bonus become
+  part of OpenMU's game configuration, and each item definition names its
+  profile and gets `excellentBonus` and `excellentRaisesLevel`.
+  `ItemExtensions.GetRequirement` and `ItemPowerUpFactory` read them, and so
+  does the price calculation, which has a copy of the drop level bonus of
+  its own (`ItemPriceCalculator`). Their defaults give exactly what today's code computes (a test for
+  every item, item level, excellent and ancient), with a migration and an
+  update plug-in. The two sides compute differently today in a few places
+  (see the phase 3 mapping: the order of the ancient and excellent drop
+  level bonus, leadership, the option level's strength, the level
+  requirement per item level, magic power's rounding); the first sync shows
+  them as formula differences, and each is decided then.
+- **Step 3, the export endpoint:** `GET /api/items/exchange` in the admin
+  panel, read only. It takes the API key scheme alone, with a policy of its
+  own (the existing ones also accept the admin panel's login cookie), and
+  refuses while the server has no admin user yet: OpenMU lets every request
+  through then, its API keys page included, so anyone could make a key. Requests are
+  limited per key and per address, and one export is built at a time (429
+  otherwise). The export is built once and kept in memory with an ETag, and
+  rebuilt when the configuration changes, so a repeated request costs
+  nothing worth noting; it reads a fresh configuration context, not the
+  admin panel's shared one. A page of the admin panel offers the same file
+  as a download, for Import without a connection. In the all-in-one setup
+  the admin panel runs in the game server's process: it should not be
+  reachable from the internet (localhost, a VPN, a firewall), or it runs as
+  a host of its own (the distributed setup).
+- **Step 5, the import page:** an admin panel page (Administrator role)
+  takes the client's export and shows the same diff. The checked rows are
+  applied in one configuration context. A new item takes the server-only
+  values (maximum item level, options, sets) from a template item picked
+  on the page. Names keep OpenMU's `@src` and `;` parts. A removal fails
+  while something still references the item (existing behavior).
+
+**Later:** the server's item data reaching every player at game start or
+in the launcher is a follow-up idea for a service of its own, hosted apart
+from the game servers
+([follow-up ideas](2026-10-06-possible-follow-up-ideas.md)).
 
 ### 7. Adding and removing items
 
@@ -389,7 +609,7 @@ table:
 | **Model and visuals** | Model file picker for `Data\Item\*.bmd` with 3D preview, texture folder, inventory and ground display values, cloth flag, and glow, render style and effects chosen from lists (D24), each with the list of the other items that use the same look. |
 | **Look editor** (phase 13) | The shared look editor of the [roadmap](2026-09-29-data-driven-content-roadmap-design.md), opened for the looks of the selected item: its building blocks with a live preview, bone picking, the items that use a look and the warning before a shared look changes. |
 | **Item Translations** | Items × languages grid (every UI language, English first), the missing names counted per language, a filter for them, "same as English" for names that do not change. Built in phase 5, before the other tools. |
-| **OpenMU sync** | Import, diff and export of the exchange file. |
+| **Item Sync** (phase 7) | Export, Import and Update from server of the exchange file; Import and Update from server with a diff checked by hand (section 6). |
 
 Common features: validation before saving (duplicate ids, missing English
 name, missing model file), and undo for the current session.
@@ -413,9 +633,9 @@ in both repos (as separate PRs, one per repo).
 | 4e | Clear model loading errors | Client | MuMain | 4 | One message for missing model files and textures of item models that names the item, the model entry, the texture and the searched folders. |
 | 5 | Translation tooling | Client | MuMain | 2 | Translations editor (items × languages), missing names counted in the editor. The names themselves moved to phase 2 (D17). Done before phase 6. |
 | 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9) on the rules of D26, including add/remove items and picking the looks of an item from lists. Takes over phase 5's item list. Done. |
-| 7 | Item sync, client side | Client | MuMain | 2, 6 | MuEditor import/export of the item exchange file, with diff. |
-| B | Item sync, server side | Server | OpenMU | 7 (file format) | Admin panel import/export pages for the item exchange file, with diff. |
-| 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. |
+| 7 | Item sync, client side | Client | MuMain | 2, 6 | The exchange file of items and item formulas; MuEditor's Export, Import (step 1) and Update from server (step 4), the imports with a diff (section 6). The client-only fields of the item files (tags at first, `description`) are left out. |
+| B | Item sync, server side | Server | OpenMU | 7 (file format) | The item formulas as data (step 2), the read-only export endpoint (step 3) and the import page (step 5), as steps of phase 7 (section 6). |
+| 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. In steps (#815): an item's own texts go into its item file (`description`, D15), shared texts and layouts into a tooltip file. |
 | 9 | Item option definitions | Both | MuMain + C | 2 | Option groups in their own JSON files matching OpenMU's `ItemOptionDefinition`; exchange file and editor. |
 | 10 | Item sets | Both | MuMain + C | 2 | Item sets in JSON matching OpenMU's `ItemSetGroup`; exchange file and editor; based on the `item-set-editor` branch. Moved earlier if needed. |
 | C | Option and set sync, server side | Server | OpenMU | 9, 10 | Admin panel import/export for the option definition and item set exchange files. |
@@ -547,6 +767,9 @@ server with original clients (after phases 6 and B).
 
    **A (OpenMU):** new rule fields/tables with migration, initialization,
    update plug-in and server enforcement, based on the mapping above.
+   (Done: OpenMU has had the six rule flags since MUnique/OpenMU#983, with
+   these values, and gives the Dark Horse `CanFly`. The exchange of phase 7
+   uses the table above with that.)
 
    **3b Remaining item lists (done).** The lists of item ids outside
    the phase 3 files that repeat data the items already have (tags, `slot`,
@@ -1011,22 +1234,33 @@ server with original clients (after phases 6 and B).
      ancient or how high its + level goes (OpenMU has `PossibleItemOptions`,
      item sets and `MaximumItemLevel`; maybe a phase after 12, once level
      variants are items of their own).
-   - Formula sync with OpenMU comes later: only the level bonus tables have
-     data there today (`ItemLevelBonusTable`); the requirement formula, the
-     excellent and ancient bonuses and the drop level bonus are C# code
-     (`ItemExtensions.GetRequirement`, `ItemPowerUpFactory`). A formula
-     exchange file of its own, close to `ItemStats.json` and keyed by stable
-     names, and an OpenMU change that makes the requirement formula data
-     (defaults equal to today's code) would let both sides share them. The
-     client's profile rules stay client-side; the exchange expands profiles
-     per item. Found while checking: 70 items have other drop levels in the
-     client than in OpenMU (e.g. the Lilium armour, 131 against 113), so
-     their requirements already differ between the two.
-7. **Item sync, client side**: MuEditor import/export of the item exchange
-   file and diff.
+   - Formula sync with OpenMU is part of phase 7 (section 6): only the
+     level bonus tables are data there today (`ItemLevelBonusTable`); the
+     requirement formula, the excellent and ancient bonuses and the drop
+     level bonus are C# code (`ItemExtensions.GetRequirement`,
+     `ItemPowerUpFactory`), which phase 7's step 2 turns into data. The
+     client's profile rules stay client-side.
+7. **Item sync** (section 6), in five steps, one PR each:
+   1. **The exchange file, Export and Import (MuMain).** The file of items
+      and item formulas, its reader and writer, the Item Sync window with
+      the diff, the known differences, and the orbs, crystals and scrolls
+      keeping their requirements as values. A test takes every shipped item and the
+      shipped formulas to the file and back unchanged.
+   2. **The item formulas as data (OpenMU).** Stat profiles, default terms
+      and the drop level bonus in the game configuration, each item naming
+      its profile; defaults equal to today's code, tested for every item and
+      level; migration and update plug-in.
+   3. **The export endpoint (OpenMU).** `GET /api/items/exchange`, always
+      behind an API key, rate limited, cached with an ETag, and a download
+      button.
+   4. **Update from server (MuMain).** The download in MuEditor, the last
+      server state and the three-way diff. The differences the first real
+      diff shows are fixed on the side that is wrong, each in a change of
+      its own.
+   5. **The import page (OpenMU).** The client's export with the same diff;
+      new items take their server-only values from a template item.
 
-   **B (OpenMU):** admin panel import and export pages for the item
-   exchange file, with diff.
+   **B (OpenMU):** steps 2, 3 and 5.
 8. **Data-driven tooltips** (D15): convert `ItemTooltip_<lang>`,
    `ItemTooltipText_<lang>` and `ItemLevelTooltip_<lang>` into JSON (line
    texts as `LocalizedString`, like item names), and let `RenderItemInfo()`

@@ -41,9 +41,6 @@ bool IsValidCharacterIndex(int index)
 extern bool g_PetEnableDuel;
 
 extern double WorldTime;
-extern wchar_t TextList[50][100];
-extern int TextListColor[50];
-extern int TextBold[50];
 
 CSPetSystem::CSPetSystem()
     : m_PetOwner(nullptr), m_PetTarget(nullptr), m_PetCharacter(), m_PetType(PET_TYPE_NONE), m_pPetInfo(nullptr),

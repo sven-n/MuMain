@@ -10,7 +10,6 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
-#include <fstream>
 #include <optional>
 
 #ifndef _WIN32
@@ -22,7 +21,6 @@ namespace Data::Items
 namespace
 {
 constexpr const char* JsonExtension = ".json";
-constexpr const char* TemporaryExtension = ".tmp";
 
 // Same order as the ITEM_GROUP_* constants.
 constexpr std::array<const char*, MAX_ITEM_TYPE> GroupFileNames = {
@@ -91,27 +89,12 @@ struct FileToSave
     std::string text;
 };
 
-std::filesystem::path GetTemporaryPath(const std::filesystem::path& path)
-{
-    std::filesystem::path temporaryPath = path;
-    temporaryPath += TemporaryExtension;
-    return temporaryPath;
-}
-
 bool WriteTemporaryFile(const FileToSave& file, std::vector<ItemDataIssue>& issues)
 {
-    const std::filesystem::path temporaryPath = GetTemporaryPath(file.path);
-    std::error_code error;
-    std::filesystem::create_directories(file.path.parent_path(), error);
-    std::ofstream stream(temporaryPath, std::ios::binary | std::ios::trunc);
-    stream << file.text;
-    // Closing flushes; checking only afterwards also catches a failing final
-    // write (e.g. a full disk) before any old file is replaced.
-    stream.close();
-    if (!stream)
+    std::string error;
+    if (!Data::WriteTemporaryFile(file.path, file.text, error))
     {
-        AddError(issues, temporaryPath.string(), "could not be written");
-        std::filesystem::remove(temporaryPath, error);
+        AddError(issues, GetTemporaryPath(file.path).string(), error);
         return false;
     }
     return true;
@@ -119,13 +102,10 @@ bool WriteTemporaryFile(const FileToSave& file, std::vector<ItemDataIssue>& issu
 
 bool ReplaceWithTemporaryFile(const std::filesystem::path& path, std::vector<ItemDataIssue>& issues)
 {
-    const std::filesystem::path temporaryPath = GetTemporaryPath(path);
-    std::error_code error;
-    std::filesystem::rename(temporaryPath, path, error);
-    if (error)
+    std::string error;
+    if (!Data::ReplaceWithTemporaryFile(path, error))
     {
-        AddError(issues, path.string(), "could not be replaced: " + error.message());
-        std::filesystem::remove(temporaryPath, error);
+        AddError(issues, path.string(), error);
         return false;
     }
     return true;
@@ -291,6 +271,25 @@ ItemStatsLoadResult LoadItemStatsFile(const std::filesystem::path& file)
     return result;
 }
 
+std::filesystem::path GetItemTooltipFile()
+{
+    return GetItemDataDirectory() / "Tooltips" / ItemTooltipFileName;
+}
+
+ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file)
+{
+    ItemTooltipLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddError(result.issues, source, "could not be read");
+        return result;
+    }
+    ReadItemTooltipJson(*text, source, result.file, result.issues);
+    return result;
+}
+
 std::filesystem::path GetGlowColorsFile()
 {
     return std::filesystem::path(Effects::GlowColorsFile);
@@ -314,6 +313,13 @@ ItemDataSaveResult SaveItemDataDirectory(const std::filesystem::path& directory,
                                          std::vector<ItemDataIssue>& issues)
 {
     return SaveItemAndModelDataDirectories(directory, items, ItemModelSave{}, issues);
+}
+
+ItemDataSaveResult WriteItemTextFile(const std::filesystem::path& file, const std::string& text,
+                                     std::vector<ItemDataIssue>& issues)
+{
+    const FileToSave files[] = {{file, text}};
+    return WriteChangedFiles(files, issues);
 }
 
 ItemDataSaveResult SaveItemAndModelDataDirectories(const std::filesystem::path& itemDirectory,

@@ -474,24 +474,6 @@ bool GMUnitedMarketPlace::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-bool GMUnitedMarketPlace::PlayMonsterSound(OBJECT* o)
-{
-    if (IsUnitedMarketPlace() == false)
-    {
-        return false;
-    }
-
-    float fDis_x, fDis_y;
-    fDis_x = o->Position[0] - Hero->Object.Position[0];
-    fDis_y = o->Position[1] - Hero->Object.Position[1];
-    float fDistance = sqrtf(fDis_x * fDis_x + fDis_y * fDis_y);
-
-    if (fDistance > 500.0f)
-        return true;
-
-    return false;
-}
-
 void GMUnitedMarketPlace::PlayObjectSound(OBJECT* o)
 {
     if (IsUnitedMarketPlace() == false)

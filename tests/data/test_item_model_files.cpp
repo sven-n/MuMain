@@ -5,6 +5,7 @@
 #include "ItemModelDatabaseScope.h"
 #include "TestFiles.h"
 #include "TestModelSlots.h"
+#include "../render/BmdModulusTestEncryption.h"
 
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
@@ -27,6 +28,7 @@
 #include "Render/Items/ItemGlow.h"
 #include "Render/Items/ItemModelLookup.h"
 #include "Render/Items/ItemRenderStyles.h"
+#include "Render/Models/BmdModulusCipher.h"
 #include "Render/Models/ZzzBMD.h"
 #ifdef _EDITOR
 #include "UI/ItemTools/ItemHeldByCharacter.h"
@@ -1875,4 +1877,82 @@ TEST_CASE("The item effect of a model is the one of its item, or of its event mo
     CHECK(ApplyPartObjectEffect(&model, &object, object.Type, 1.f, level, 0) == Result::None);
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
+}
+
+namespace
+{
+// Opens `bytes` as a model file of the folder through the game's loader.
+bool OpensAsModel(const TemporaryModelFolder& folder, const std::string& name, const std::vector<unsigned char>& bytes)
+{
+    folder.Write(name, std::string(bytes.begin(), bytes.end()));
+    BMD bmd;
+    const std::wstring directory = folder.Directory().wstring() + L"/";
+    return bmd.Open2(directory.c_str(), std::filesystem::path(name).wstring().c_str());
+}
+
+// "BMD", version 14, the payload size, then `payload`.
+std::vector<unsigned char> Version14File(std::int32_t payloadSize, const std::vector<std::uint8_t>& payload)
+{
+    std::vector<unsigned char> bytes = {'B', 'M', 'D', 0x0E};
+    const auto* size = reinterpret_cast<const unsigned char*>(&payloadSize);
+    bytes.insert(bytes.end(), size, size + sizeof(payloadSize));
+    bytes.insert(bytes.end(), payload.begin(), payload.end());
+    return bytes;
+}
+} // namespace
+
+TEST_CASE("A model file cut short or with a broken version 14 size fails to open [data][items][models]")
+{
+    TemporaryModelFolder folder;
+    const auto filler = [](std::size_t count) { return std::vector<std::uint8_t>(count, 0x5A); };
+    using Render::Models::BmdModulusCipher::BodyOffset;
+    using Render::Models::BmdModulusCipher::ModelHeaderSize;
+
+    CHECK_FALSE(OpensAsModel(folder, "empty.bmd", {}));
+    CHECK_FALSE(OpensAsModel(folder, "header.bmd", {'B', 'M', 'D'}));
+    // Version 14 without its payload size, with a negative one, one past the file, and one byte too short for the
+    // keys and a model header (the name and the counts), which the loader would read past the payload.
+    CHECK_FALSE(OpensAsModel(folder, "nosize.bmd", {'B', 'M', 'D', 0x0E, 0x10}));
+    CHECK_FALSE(OpensAsModel(folder, "negative.bmd", Version14File(-1, filler(64))));
+    CHECK_FALSE(OpensAsModel(folder, "pastend.bmd", Version14File(4096, filler(64))));
+    const std::int32_t tooShort = static_cast<std::int32_t>(BodyOffset + ModelHeaderSize - 1);
+    CHECK_FALSE(OpensAsModel(folder, "short.bmd", Version14File(tooShort, filler(tooShort))));
+    // Version 12 without its size, and with one past the file.
+    CHECK_FALSE(OpensAsModel(folder, "v12nosize.bmd", {'B', 'M', 'D', 0x0C}));
+    CHECK_FALSE(OpensAsModel(folder, "v12pastend.bmd", {'B', 'M', 'D', 0x0C, 0x00, 0x10, 0x00, 0x00, 0x01}));
+}
+
+// A model encrypted the way the files are opens through the loader, whatever ciphers it picks: the decryption and
+// the loader's offsets agree. The body is the smallest model (a name and no meshes, bones or actions); with padding
+// after it, the first stage's end chunks run too.
+TEST_CASE("A version 14 model opens with every pair of ciphers [data][items][models]")
+{
+    TemporaryModelFolder folder;
+    constexpr std::size_t Padding = 1100;
+    for (const std::size_t padding : {std::size_t{0}, Padding})
+    {
+        std::vector<std::uint8_t> body(Render::Models::BmdModulusCipher::ModelHeaderSize + padding, 0);
+        const char name[] = "Version14.smd";
+        std::copy(std::begin(name), std::end(name), body.begin());
+        for (std::size_t second = 0; second < BmdModulusTest::AlgorithmCount; ++second)
+        {
+            for (std::size_t first = 0; first < BmdModulusTest::AlgorithmCount; ++first)
+            {
+                CAPTURE(padding);
+                CAPTURE(second);
+                CAPTURE(first);
+                const std::vector<std::uint8_t> payload = BmdModulusTest::Encrypt(second, first, body);
+                folder.Write("good.bmd", [&]
+                {
+                    const auto bytes = Version14File(static_cast<std::int32_t>(payload.size()), payload);
+                    return std::string(bytes.begin(), bytes.end());
+                }());
+                BMD bmd;
+                const std::wstring directory = folder.Directory().wstring() + L"/";
+                REQUIRE(bmd.Open2(directory.c_str(), L"good.bmd"));
+                CHECK(std::string(bmd.Name) == name);
+                CHECK(bmd.NumMeshs == 0);
+            }
+        }
+    }
 }

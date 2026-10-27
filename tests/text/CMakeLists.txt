@@ -13,6 +13,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME utf8_tests
+    SOURCES
+        test_utf8.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME sdl_ttf_text_cache_tests
     SOURCES
         test_sdl_ttf_text_cache.cpp

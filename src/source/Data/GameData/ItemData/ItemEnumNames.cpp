@@ -79,6 +79,9 @@ constexpr std::array<EnumName<ItemTag>, static_cast<size_t>(ItemTag::Count)> Ite
     {ItemTag::GemJewelry, "gemJewelry"},
     {ItemTag::LuckyItemTicket, "luckyItemTicket"},
     {ItemTag::Valuable, "valuable"},
+    {ItemTag::NoLevelRequirement, "noLevelRequirement"},
+    {ItemTag::NoDurabilityLine, "noDurabilityLine"},
+    {ItemTag::NoBlankAfterOptions, "noBlankAfterOptions"},
 }};
 
 constexpr std::array<EnumName<ItemRequirement>, ItemRequirementCount> ItemRequirementNames = {{
@@ -89,6 +92,38 @@ constexpr std::array<EnumName<ItemRequirement>, ItemRequirementCount> ItemRequir
     {ItemRequirement::Vitality, "vitality"},
     {ItemRequirement::Leadership, "leadership"},
 }};
+
+constexpr std::array<EnumName<ItemTextColor>, ItemTextColorCount> ItemTextColorNames = {{
+    {ItemTextColor::White, "white"},
+    {ItemTextColor::Blue, "blue"},
+    {ItemTextColor::Red, "red"},
+    {ItemTextColor::Yellow, "yellow"},
+    {ItemTextColor::Green, "green"},
+    {ItemTextColor::DarkRed, "darkRed"},
+    {ItemTextColor::Purple, "purple"},
+    {ItemTextColor::DarkBlue, "darkBlue"},
+    {ItemTextColor::DarkYellow, "darkYellow"},
+    {ItemTextColor::GreenBlue, "greenBlue"},
+    {ItemTextColor::Gray, "gray"},
+    {ItemTextColor::RedPurple, "redPurple"},
+    {ItemTextColor::Violet, "violet"},
+    {ItemTextColor::Orange, "orange"},
+}};
+
+// One entry per color, in the order of their values: a color added to ItemTextColor without a name here fails to
+// compile, instead of being saved as a number that reading the file then refuses.
+constexpr bool NamesEveryTextColor()
+{
+    for (size_t index = 0; index < ItemTextColorNames.size(); ++index)
+    {
+        if (ItemTextColorNames[index].name == nullptr || static_cast<size_t>(ItemTextColorNames[index].value) != index)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+static_assert(NamesEveryTextColor(), "every ItemTextColor needs its name in ItemTextColorNames");
 } // namespace
 
 std::span<const EnumName<ItemSlot>> GetEnumNames(ItemSlot)
@@ -109,6 +144,11 @@ std::span<const EnumName<WeaponKind>> GetEnumNames(WeaponKind)
 std::span<const EnumName<ItemTag>> GetEnumNames(ItemTag)
 {
     return ItemTagNames;
+}
+
+std::span<const EnumName<ItemTextColor>> GetEnumNames(ItemTextColor)
+{
+    return ItemTextColorNames;
 }
 
 std::span<const EnumName<ItemRequirement>> GetEnumNames(ItemRequirement)

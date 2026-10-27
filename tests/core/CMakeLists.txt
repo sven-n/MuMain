@@ -112,6 +112,16 @@ if(ENABLE_CONTROL_SOCKET)
             MuClient
     )
 
+    # The tooltip commands' argument checks, which return before they need item data.
+    mu_add_test(
+        NAME test_control_tooltip_commands
+        SOURCES
+            test_control_tooltip_commands.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        LINK_LIBS
+            MuClient
+    )
+
     # The item commands' argument checks, which return before they need item data.
     mu_add_test(
         NAME test_control_item_commands
@@ -147,4 +157,10 @@ mu_add_test(
     SOURCES
         test_gold_amount_tier.cpp
         ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Items/GoldAmountTier.cpp
+)
+
+mu_add_test(
+    NAME zen_amount_tests
+    SOURCES
+        test_zen_amount.cpp
 )

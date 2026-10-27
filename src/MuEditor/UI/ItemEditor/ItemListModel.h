@@ -69,8 +69,4 @@ std::vector<int> GetFreeItemNumbers(int group);
 // group has none.
 int GetNextFreeItemNumber(int group, int from);
 
-// Whether the UTF-8 text contains the search; only the letters A to Z ignore
-// case. The item searches of the editor share it.
-bool ContainsIgnoringCase(std::string_view text, std::string_view search);
-
 #endif // _EDITOR

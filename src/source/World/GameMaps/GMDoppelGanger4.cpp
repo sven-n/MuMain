@@ -717,28 +717,6 @@ bool CGMDoppelGanger4::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 }
 
 // 몬스터 사운드
-bool CGMDoppelGanger4::PlayMonsterSound(OBJECT* o)
-{
-    if (IsDoppelGanger4() == false)
-        return false;
-
-    return g_DoppelGanger1.PlayMonsterSound(o);
-
-    // 	float fDis_x, fDis_y;
-    // 	fDis_x = o->Position[0] - Hero->Object.Position[0];
-    // 	fDis_y = o->Position[1] - Hero->Object.Position[1];
-    // 	float fDistance = sqrtf(fDis_x*fDis_x+fDis_y*fDis_y);
-    //
-    // 	if (fDistance > 500.0f)
-    // 		return true;
-    //
-    // 	switch(o->Type)
-    // 	{
-    // 	}
-
-    return false;
-}
-
 void CGMDoppelGanger4::PlayObjectSound(OBJECT* o)
 {
 }

@@ -4,9 +4,11 @@
 #include "ItemDataHandler.h"
 #include "ItemDataLoader.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
+#include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Core/Text/Utf8.h"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstring>
@@ -19,33 +21,35 @@ namespace
 constexpr size_t LegacyNameFieldSize = sizeof(ITEM_ATTRIBUTE_FILE_LEGACY::Name);
 constexpr size_t NameFieldSize = sizeof(ITEM_ATTRIBUTE_FILE::Name);
 
-// Where a field lives in a file record and in ITEM_ATTRIBUTE.
+// Where a field lives in a file record and in ITEM_ATTRIBUTE, and its size in each (a ByteInFile field is one byte in
+// the file and two in ITEM_ATTRIBUTE).
 struct FieldLayout
 {
     std::string name;
     size_t fileOffset = 0;
     size_t attributeOffset = 0;
-    size_t size = 0;
+    size_t fileSize = 0;
+    size_t attributeSize = 0;
 };
 
 template <typename TFileFormat> std::vector<FieldLayout> BuildFieldLayouts()
 {
     std::vector<FieldLayout> fields;
 #define ADD_ITEM_FIELD(name, type, arraySize, width, i18nName)                                                         \
-    fields.push_back(                                                                                                  \
-        {#name, offsetof(TFileFormat, name), offsetof(ITEM_ATTRIBUTE, name), sizeof(ITEM_ATTRIBUTE::name)});
+    fields.push_back({#name, offsetof(TFileFormat, name), offsetof(ITEM_ATTRIBUTE, name), sizeof(TFileFormat::name),   \
+                      sizeof(ITEM_ATTRIBUTE::name)});
     ITEM_FIELDS_SIMPLE(ADD_ITEM_FIELD)
 #undef ADD_ITEM_FIELD
 
     for (size_t i = 0; i < MAX_CLASS; ++i)
     {
         fields.push_back({"RequireClass[" + std::to_string(i) + "]", offsetof(TFileFormat, RequireClass) + i,
-                          offsetof(ITEM_ATTRIBUTE, RequireClass) + i, 1});
+                          offsetof(ITEM_ATTRIBUTE, RequireClass) + i, 1, 1});
     }
     for (size_t i = 0; i < MAX_RESISTANCE + 1; ++i)
     {
         fields.push_back({"Resistance[" + std::to_string(i) + "]", offsetof(TFileFormat, Resistance) + i,
-                          offsetof(ITEM_ATTRIBUTE, Resistance) + i, 1});
+                          offsetof(ITEM_ATTRIBUTE, Resistance) + i, 1, 1});
     }
     return fields;
 }
@@ -77,61 +81,11 @@ struct LanguageRecord
     // True when the name (or its terminating null byte) overwrote the field.
     bool IsDamaged(const FieldLayout& field) const
     {
-        return NameRanOn() && field.fileOffset <= nameEnd && field.fileOffset + field.size > file->nameFieldSize;
+        return NameRanOn() && field.fileOffset <= nameEnd && field.fileOffset + field.fileSize > file->nameFieldSize;
     }
 };
 
 // ------------------------------------------------------------ name decoding
-
-// Number of bytes of the UTF-8 sequence that starts with `lead`, or 0 when
-// `lead` cannot start one.
-size_t GetUtf8SequenceLength(unsigned char lead)
-{
-    if (lead < 0x80)
-    {
-        return 1;
-    }
-    if ((lead & 0xE0) == 0xC0)
-    {
-        return 2;
-    }
-    if ((lead & 0xF0) == 0xE0)
-    {
-        return 3;
-    }
-    if ((lead & 0xF8) == 0xF0)
-    {
-        return 4;
-    }
-    return 0;
-}
-
-bool IsUtf8ContinuationByte(char character)
-{
-    return (static_cast<unsigned char>(character) & 0xC0) == 0x80;
-}
-
-bool IsValidUtf8(std::string_view text)
-{
-    size_t i = 0;
-    while (i < text.size())
-    {
-        const size_t length = GetUtf8SequenceLength(static_cast<unsigned char>(text[i]));
-        if (length == 0 || i + length > text.size())
-        {
-            return false;
-        }
-        for (size_t j = 1; j < length; ++j)
-        {
-            if (!IsUtf8ContinuationByte(text[i + j]))
-            {
-                return false;
-            }
-        }
-        i += length;
-    }
-    return true;
-}
 
 // Windows-1252 differs from Latin-1 only in 0x80-0x9F.
 constexpr std::array<char32_t, 32> Windows1252HighControls = {
@@ -189,7 +143,7 @@ std::string ReplaceKoreanQuotes(std::string_view text)
 
 std::string DecodeName(std::string_view raw, bool& reencoded)
 {
-    reencoded = !IsValidUtf8(raw);
+    reencoded = !Core::Text::IsValidUtf8(raw);
     return reencoded ? Windows1252ToUtf8(ReplaceKoreanQuotes(raw)) : std::string(raw);
 }
 
@@ -215,7 +169,7 @@ std::optional<LanguageRecord> ReadRecord(const LanguageFile& file, int itemType)
 long long ReadFieldValue(const LanguageRecord& record, const FieldLayout& field)
 {
     unsigned long long value = 0;
-    std::memcpy(&value, record.bytes + field.fileOffset, field.size);
+    std::memcpy(&value, record.bytes + field.fileOffset, field.fileSize);
     return static_cast<long long>(value);
 }
 
@@ -234,7 +188,8 @@ const ITEM_ATTRIBUTE& GetDefaultAttribute()
 long long ReadDefaultValue(const FieldLayout& field)
 {
     unsigned long long value = 0;
-    std::memcpy(&value, reinterpret_cast<const BYTE*>(&GetDefaultAttribute()) + field.attributeOffset, field.size);
+    std::memcpy(&value, reinterpret_cast<const BYTE*>(&GetDefaultAttribute()) + field.attributeOffset,
+                field.attributeSize);
     return static_cast<long long>(value);
 }
 
@@ -242,10 +197,18 @@ void CopyField(const LanguageRecord* source, const FieldLayout& sourceField, con
                ITEM_ATTRIBUTE& target)
 {
     auto* targetBytes = reinterpret_cast<BYTE*>(&target) + targetField.attributeOffset;
-    const BYTE* sourceBytes = source != nullptr
-                                  ? source->bytes + sourceField.fileOffset
-                                  : reinterpret_cast<const BYTE*>(&GetDefaultAttribute()) + targetField.attributeOffset;
-    std::memcpy(targetBytes, sourceBytes, targetField.size);
+    // The value, widened from the file's size to ITEM_ATTRIBUTE's (both little-endian, unsigned).
+    unsigned long long value = 0;
+    if (source != nullptr)
+    {
+        std::memcpy(&value, source->bytes + sourceField.fileOffset, sourceField.fileSize);
+    }
+    else
+    {
+        std::memcpy(&value, reinterpret_cast<const BYTE*>(&GetDefaultAttribute()) + targetField.attributeOffset,
+                    targetField.attributeSize);
+    }
+    std::memcpy(targetBytes, &value, targetField.attributeSize);
 }
 
 // The first record that has an undamaged value for the field.
@@ -349,14 +312,139 @@ void ImportItem(const std::vector<LanguageFile>& files, int itemType, ItemBmdImp
 }
 } // namespace
 
+namespace
+{
+constexpr int MaxRequirement = 65535;
+
+// The stat requirements the original client grew from a weight: in the definition and in the
+// bmd record.
+struct GrownRequirement
+{
+    ItemRequirement requirement;
+    ItemRequirementStat stat;
+    WORD ItemRequirements::* value;
+    WORD ITEM_ATTRIBUTE::* weight;
+};
+constexpr GrownRequirement GrownRequirements[] = {
+    {ItemRequirement::Strength, ItemRequirementStat::Strength, &ItemRequirements::strength,
+     &ITEM_ATTRIBUTE::RequireStrength},
+    {ItemRequirement::Dexterity, ItemRequirementStat::Dexterity, &ItemRequirements::dexterity,
+     &ITEM_ATTRIBUTE::RequireDexterity},
+    {ItemRequirement::Energy, ItemRequirementStat::Energy, &ItemRequirements::energy, &ITEM_ATTRIBUTE::RequireEnergy},
+    {ItemRequirement::Vitality, ItemRequirementStat::Vitality, &ItemRequirements::vitality,
+     &ITEM_ATTRIBUTE::RequireVitality},
+};
+
+// The original client's requirement growth, which its bmd files hold the weights for: its code, so
+// it stays as it was also when the item stat file's formulas change.
+//   add + weight * drop level * percent / 100, energy with a percent of its own; a scroll's energy
+//   (group 15) from its level requirement where it has one.
+constexpr long long OriginalRequirementAdd = 20;
+constexpr long long OriginalRequirementPercent = 3;
+constexpr long long OriginalEnergyRequirementPercent = 4;
+constexpr long long PercentDivisor = 100;
+
+// What the original client asked for with `weight`.
+int GrowWeight(const ItemDefinition& definition, ItemRequirement requirement, int weight)
+{
+    if (weight == 0)
+    {
+        return 0;
+    }
+    const bool energy = requirement == ItemRequirement::Energy;
+    const bool fromLevelRequirement = energy && definition.group == ITEM_GROUP_ETC && definition.requirements.level > 0;
+    const long long basis = fromLevelRequirement ? definition.requirements.level : definition.level;
+    const long long percent = energy ? OriginalEnergyRequirementPercent : OriginalRequirementPercent;
+    return static_cast<int>(
+        std::min<long long>(OriginalRequirementAdd + weight * basis * percent / PercentDivisor, MaxRequirement));
+}
+} // namespace
+
+namespace
+{
+// The profile the item uses: the one it names, or the one its rules give.
+const ItemStatProfile& FindItemProfile(const ItemStatProfiles& profiles, const ItemDefinition& definition)
+{
+    const std::string name =
+        definition.statProfile.empty() ? DeriveStatProfile(profiles, definition) : definition.statProfile;
+    const int profile = profiles.Find(name);
+    return profiles.Get(profile == ItemStatProfiles::UnknownProfile ? ItemStatProfiles::DefaultProfile : profile);
+}
+
+// Whether the item keeps the requirement as a value where the original client grew a weight.
+bool HoldsWeightInBmd(const ItemStatProfiles& profiles, const ItemStatProfile& profile, ItemRequirementStat stat)
+{
+    return profile.requirements.Get(stat).keepBase &&
+           !profiles.Get(ItemStatProfiles::DefaultProfile).requirements.Get(stat).keepBase;
+}
+} // namespace
+
+bool HasRequirementWeightsInBmd(const ItemStatProfiles& profiles, const ItemDefinition& definition)
+{
+    const ItemStatProfile& profile = FindItemProfile(profiles, definition);
+    return std::ranges::any_of(GrownRequirements, [&](const GrownRequirement& grown)
+                               { return HoldsWeightInBmd(profiles, profile, grown.stat); });
+}
+
+void ToRequirementValues(const ItemStatProfiles& profiles, ItemDefinition& definition)
+{
+    const ItemStatProfile& profile = FindItemProfile(profiles, definition);
+    for (const GrownRequirement& grown : GrownRequirements)
+    {
+        if (HoldsWeightInBmd(profiles, profile, grown.stat))
+        {
+            WORD& value = definition.requirements.*grown.value;
+            value = static_cast<WORD>(GrowWeight(definition, grown.requirement, value));
+        }
+    }
+}
+
+std::vector<ItemRequirement> ToBmdRequirementWeights(const ItemStatProfiles& profiles, const ItemDefinition& definition,
+                                                     ITEM_ATTRIBUTE& attribute)
+{
+    std::vector<ItemRequirement> inexact;
+    const ItemStatProfile& profile = FindItemProfile(profiles, definition);
+    for (const GrownRequirement& grown : GrownRequirements)
+    {
+        if (!HoldsWeightInBmd(profiles, profile, grown.stat))
+        {
+            continue;
+        }
+        const int value = definition.requirements.*grown.value;
+        // The weights grow the value without going down: the smallest that reaches it.
+        int low = 0;
+        int high = MaxRequirement;
+        while (low < high)
+        {
+            const int middle = low + (high - low) / 2;
+            if (GrowWeight(definition, grown.requirement, middle) < value)
+            {
+                low = middle + 1;
+            }
+            else
+            {
+                high = middle;
+            }
+        }
+        int weight = low;
+        const int reached = GrowWeight(definition, grown.requirement, weight);
+        if (reached != value)
+        {
+            // Past the value, or none reaches it: the nearer of this weight and the one below.
+            if (weight > 0 && value - GrowWeight(definition, grown.requirement, weight - 1) <= reached - value)
+            {
+                --weight;
+            }
+            inexact.push_back(grown.requirement);
+        }
+        attribute.*grown.weight = static_cast<WORD>(weight);
+    }
+    return inexact;
+}
+
 std::span<const ItemBmdLanguage> GetItemBmdLanguages()
 {
-    static const std::array<ItemBmdLanguage, 3> Languages = {{
-        {L"Eng", std::string(LocalizedString::NeutralLocale)},
-        {L"Por", "pt"},
-        {L"Spn", "es"},
-    }};
-    return Languages;
+    return GetLegacyLanguages();
 }
 
 ItemBmdImportResult ImportItemBmdFiles(std::span<const ItemBmdLanguage> languages)

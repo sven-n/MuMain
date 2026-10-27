@@ -250,23 +250,7 @@ int mu::ui::window::CSkillList::GetHotKey(int iHotKey)
 
 int mu::ui::window::CSkillList::GetSkillIndex(int iSkillType)
 {
-    // special handling for skills with different skill id for the trigger
-    if (iSkillType == AT_SKILL_NOVA_BEGIN)
-    {
-        iSkillType = AT_SKILL_NOVA;
-    }
-
-    int iReturn = -1;
-    for (int i = 0; i < MAX_MAGIC; ++i)
-    {
-        if (CharacterAttribute->Skill[i] == iSkillType)
-        {
-            iReturn = i;
-            break;
-        }
-    }
-
-    return iReturn;
+    return gSkillManager.FindSkillIndex(iSkillType);
 }
 
 void mu::ui::window::CSkillList::UseHotKey(int iHotKey)

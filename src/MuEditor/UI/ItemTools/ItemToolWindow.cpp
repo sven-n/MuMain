@@ -8,9 +8,9 @@
 #include "ItemNamesakes.h"
 #include "ItemSelection.h"
 
-#include "../MuEditor/Core/MuEditorCore.h"
-#include "../MuEditor/UI/Common/MuEditorLayout.h"
-#include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "../MuEditor/UI/Common/ToolGroups.h"
+#include "../MuEditor/UI/Common/ToolWindowFrame.h"
+#include "../MuEditor/UI/Common/UndoTarget.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -18,7 +18,6 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 #include "imgui.h"
-#include "imgui_internal.h"
 
 #include <cstdint>
 #include <string>
@@ -45,7 +44,7 @@ void LogRefusal()
     }
 }
 
-void Undo()
+void UndoItemEdit()
 {
     if (g_ItemEdits.GetHistory().CanUndo() && !g_ItemEdits.Undo())
     {
@@ -53,7 +52,7 @@ void Undo()
     }
 }
 
-void Redo()
+void RedoItemEdit()
 {
     if (g_ItemEdits.GetHistory().CanRedo() && !g_ItemEdits.Redo())
     {
@@ -61,81 +60,57 @@ void Redo()
     }
 }
 
-// Only while the keyboard is the editor's and this window has the focus: ImGui
-// keeps the focus in the window when the game window takes the keyboard back
-// (Alt+Tab with the editor inside the game window). A text field keeps its own
-// Ctrl+Z.
-void HandleUndoKeys()
+// The item edit history, for the editor bar's Undo and Redo.
+class ItemUndoTarget final : public UndoTarget
 {
-    if (!g_MuEditorCore.IsKeyboardWithEditor())
+public:
+    // The fallback of the bar: item edits stay undoable with the item tools
+    // closed, as they always were.
+    bool IsOpen() const override
     {
-        return;
+        return true;
     }
-    if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Z))
+    bool CanUndo() const override
     {
-        Undo();
+        return g_ItemEdits.GetHistory().CanUndo();
     }
-    if (ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiKey_Y) || ImGui::Shortcut(ImGuiMod_Ctrl | ImGuiMod_Shift | ImGuiKey_Z))
+    bool CanRedo() const override
     {
-        Redo();
+        return g_ItemEdits.GetHistory().CanRedo();
     }
-}
+    std::string GetUndoLabel() const override
+    {
+        return g_ItemEdits.GetHistory().GetUndoLabel();
+    }
+    std::string GetRedoLabel() const override
+    {
+        return g_ItemEdits.GetHistory().GetRedoLabel();
+    }
+    void Undo() override
+    {
+        UndoItemEdit();
+    }
+    void Redo() override
+    {
+        RedoItemEdit();
+    }
+};
 } // namespace
 
 bool Begin(const char* title, const char* windowId, bool* open)
 {
-    char fullTitle[MuEditor::WindowIds::TitleCapacity];
-    MuEditor::Layout::DockBesideItemTools(windowId);
-    MuEditor::Layout::PrepareToolWindow();
-    if (!ImGui::Begin(MuEditor::WindowIds::Title(fullTitle, title, windowId), open,
-                      ImGuiWindowFlags_NoCollapse | MuEditor::Layout::ToolWindowBarFlags(windowId)))
-    {
-        return false;
-    }
-    MuEditor::Layout::RenderToolWindowBar();
-    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByPopup |
-                               ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) ||
-        ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId))
-    {
-        g_MuEditorCore.SetHoveringUI(true);
-    }
-    HandleUndoKeys();
-    return true;
+    return ToolWindowFrame::Begin(title, windowId, open, GetItemTools(), GetUndoTarget());
 }
 
 void End()
 {
-    ImGui::End();
+    ToolWindowFrame::End();
 }
 
-void RenderUndoRedo()
+UndoTarget& GetUndoTarget()
 {
-    // In the editor's bar: a click leaves the focus in the item tool, where
-    // Ctrl+Z and Ctrl+Y undo and redo.
-    ImGui::PushItemFlag(ImGuiItemFlags_NoFocus, true);
-    const ItemEditHistory& history = g_ItemEdits.GetHistory();
-    ImGui::BeginDisabled(!history.CanUndo());
-    if (ImGui::Button(I18N::Editor::Undo))
-    {
-        Undo();
-    }
-    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) && history.CanUndo())
-    {
-        ImGui::SetTooltip("%s (Ctrl+Z)", history.GetUndoLabel().c_str());
-    }
-    ImGui::EndDisabled();
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!history.CanRedo());
-    if (ImGui::Button(I18N::Editor::Redo))
-    {
-        Redo();
-    }
-    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) && history.CanRedo())
-    {
-        ImGui::SetTooltip("%s (Ctrl+Y)", history.GetRedoLabel().c_str());
-    }
-    ImGui::EndDisabled();
-    ImGui::PopItemFlag();
+    static ItemUndoTarget target;
+    return target;
 }
 
 bool RenderSelectedItem(int itemType)
@@ -152,8 +127,8 @@ bool RenderSelectedItem(int itemType)
                             I18N::Editor::NoItemAtThisNumber);
         return false;
     }
-    // In the UI language, as the item browser shows it and its namesakes are
-    // found.
+    // In the item name language, as the item browser shows it and its
+    // namesakes are found.
     ImGui::Text("%s (%d,%d)", Core::Text::ToUtf8(item->name.c_str()).c_str(), Data::Items::GetItemGroup(itemType),
                 Data::Items::GetItemNumber(itemType));
     RenderNamesakeQualifier(itemType);

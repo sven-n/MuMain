@@ -124,7 +124,6 @@ private:
                           WrittenRequirementSection& section);
     void ReadRequirementFormula(const OrderedJson& json, const std::string& field,
                                 std::optional<RequirementFormula>& formula);
-    void WarnAboutUnusedTables(const ItemStatFile& file);
     void ReadProfileRules(const OrderedJson& root, ItemStatFile& file);
     bool ReadRule(const OrderedJson& json, const std::string& field, const ItemStatFile& file, StatProfileRule& rule);
     // A condition's list of values: the names of `TEnum`, `what` being their kind
@@ -176,7 +175,6 @@ void ItemStatsReader::Read(const OrderedJson& root, ItemStatFile& file)
     ReadDefaults(root, file);
     ReadProfiles(root, file);
     ReadProfileRules(root, file);
-    WarnAboutUnusedTables(file);
 }
 
 void ItemStatsReader::ReadDropLevelBonus(const OrderedJson& root, ItemStatFile& file)
@@ -563,34 +561,6 @@ void ItemStatsReader::ReadRequirementFormula(const OrderedJson& json, const std:
     formula = values;
 }
 
-void ItemStatsReader::WarnAboutUnusedTables(const ItemStatFile& file)
-{
-    std::set<std::string, std::less<>> used;
-    const auto collect = [&used](const std::array<WrittenStatSection, ItemStatCount>& sections)
-    {
-        for (const WrittenStatSection& section : sections)
-        {
-            if (section.table)
-            {
-                used.insert(*section.table);
-            }
-        }
-    };
-    collect(file.defaults);
-    for (const WrittenStatProfile& profile : file.profiles)
-    {
-        collect(profile.stats);
-    }
-    for (const LevelBonusTable& table : file.tables)
-    {
-        if (!used.contains(table.name))
-        {
-            AddIssue(ItemDataIssueSeverity::Warning, std::string(Keys::Tables) + "." + table.name,
-                     "no stat uses this table");
-        }
-    }
-}
-
 void AddValue(ItemTagSet& values, ItemTag tag)
 {
     values.Set(tag);
@@ -957,6 +927,22 @@ std::string WriteItemStatsJson(const ItemStatFile& file)
 {
     OrderedJson root;
     root[Keys::FormatVersion] = ItemStatsJsonFormatVersion;
+    OrderedJson formulas = WriteItemStatFormulasJson(file);
+    for (auto& [key, value] : formulas.items())
+    {
+        root[key] = std::move(value);
+    }
+    root[Keys::ProfileRules] = OrderedJson::array();
+    for (const StatProfileRule& rule : file.profileRules)
+    {
+        root[Keys::ProfileRules].push_back(WriteProfileRule(rule));
+    }
+    return LayOutItemStatsText(root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace)) + "\n";
+}
+
+OrderedJson WriteItemStatFormulasJson(const ItemStatFile& file)
+{
+    OrderedJson root;
     root[Keys::DropLevelBonus][Keys::Excellent] = file.excellentDropLevelBonus;
     root[Keys::DropLevelBonus][Keys::Ancient] = file.ancientDropLevelBonus;
 
@@ -993,14 +979,28 @@ std::string WriteItemStatsJson(const ItemStatFile& file)
         }
         root[Keys::Profiles].push_back(std::move(json));
     }
+    return root;
+}
 
-    root[Keys::ProfileRules] = OrderedJson::array();
-    for (const StatProfileRule& rule : file.profileRules)
+void ReadItemStatFormulasJson(const OrderedJson& json, const std::string& source, ItemStatFile& file,
+                              std::vector<ItemDataIssue>& issues)
+{
+    if (!json.is_object())
     {
-        root[Keys::ProfileRules].push_back(WriteProfileRule(rule));
+        Json::AddFileIssue(issues, source, ItemDataIssue::NoItem, "", "the formulas must be an object");
+        return;
     }
+    ItemStatsReader(source, issues).Read(json, file);
+    if (json.contains(Keys::ProfileRules))
+    {
+        issues.push_back({ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                          Keys::ProfileRules, "the profile rules stay with the client, ignored"});
+        file.profileRules.clear();
+    }
+}
 
-    std::string text = root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
+std::string LayOutItemStatsText(std::string text)
+{
     text = Json::PutListEntriesOnOneLine(text, Keys::ProfileRules);
     text = Json::PutObjectsOnOneLine(text, Keys::DropLevelBonus);
     text = Json::PutObjectsOnOneLine(text, Keys::Caption);
@@ -1013,6 +1013,6 @@ std::string WriteItemStatsJson(const ItemStatFile& file)
         text = Json::PutObjectsOnOneLine(text, requirementKey);
     }
     text = Json::PutListsOnOneLine(text, Keys::Values);
-    return text + "\n";
+    return text;
 }
 } // namespace Data::Items

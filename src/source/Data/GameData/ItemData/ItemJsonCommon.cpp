@@ -186,6 +186,12 @@ bool ReadFileVersion(std::string_view text, const std::string& source, int maxFo
 std::optional<std::string> ReadTextFile(const std::filesystem::path& path)
 {
     constexpr std::string_view Utf8ByteOrderMark = "\xEF\xBB\xBF";
+    // Only a regular file: on Linux a folder opens, and reading it throws.
+    std::error_code error;
+    if (!std::filesystem::is_regular_file(path, error))
+    {
+        return std::nullopt;
+    }
     std::ifstream file(path, std::ios::binary);
     if (!file)
     {

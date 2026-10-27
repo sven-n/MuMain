@@ -12,6 +12,7 @@
 #include "Data/DataHandler/ItemData/ItemBmdImport.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
+#include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 
@@ -21,11 +22,21 @@
 // Owns loading the item data (Data/Items/*.json) into the item database and
 // the item models (Data/Items/Models/*.json) into the item model database, and
 // keeps ItemAttribute[], the table most game code still reads, filled from
-// the database. Item names follow the UI locale.
+// the database. Item names follow the UI locale, or stay English while
+// translated item names are off (SetTranslateItemNames).
 class CItemDataHandler
 {
 public:
     static CItemDataHandler& GetInstance();
+
+    // Whether item names follow the UI locale; off shows them in English. The
+    // game sets it from [UI] TranslateItemNames at start and when the option
+    // changes. Once items are loaded, the names change at once.
+    void SetTranslateItemNames(bool translate);
+    bool GetTranslateItemNames() const
+    {
+        return m_translateItemNames;
+    }
 
     // Data/Local/<language>/Item_<language>.bmd (legacy item files).
     static std::wstring GetItemFilePath(const std::wstring& language);
@@ -42,14 +53,16 @@ public:
 
 #ifdef _EDITOR
     // Puts the item into the item database at its (group, number) and refills
-    // its row of ItemAttribute[]: the item in the UI locale, or an empty row
+    // its row of ItemAttribute[]: the item in the item name language, or an empty row
     // when it no longer exists (no names). The weapon kind and the stat
     // profile follow the data (FollowGroupWeaponKind, FollowStatProfile)
     // unless the definition changes them itself: then they are the user's pick.
     // An empty stat profile is no pick: it follows the data.
     void SetItem(const Data::Items::ItemDefinition& definition);
-    // Like SetItem for several items, with the database lists built once.
-    void SetItems(std::span<const Data::Items::ItemDefinition> definitions);
+    // Like SetItem for several items, with the database lists built once; AsGiven keeps the stat
+    // profile each item names as a pick.
+    void SetItems(std::span<const Data::Items::ItemDefinition> definitions,
+                  Data::Items::StatProfileStore profiles = Data::Items::StatProfileStore::Follow);
     // Stores the definitions exactly as they are, nothing derived (the undo of
     // the item tools puts back what an edit stored), and refills their rows of
     // ItemAttribute[].
@@ -119,7 +132,7 @@ public:
     // Sets the item's name in `locale` (an empty text removes the translation;
     // the English name cannot be emptied) in the item database, whole also when
     // it is longer than ITEM_ATTRIBUTE's name; ItemAttribute shows the name in
-    // the UI locale. False when the item does not exist, when the English name
+    // the item name language. False when the item does not exist, when the English name
     // would be empty (also when the item has none yet) or when the text has
     // LocalizedString::Separator, which the item checks refuse.
     bool SetItemName(int itemType, std::string_view locale, std::string text);
@@ -168,10 +181,15 @@ public:
 
     // Writes Item_<language>.bmd for every legacy language, with the names
     // of that language. Files that already have the data are left as they
-    // are and do not count as a failure.
+    // are and do not count as a failure. Items with a value the files cannot
+    // hold (damage or magic power above 255) are named in the change log and
+    // nothing is written.
     bool ExportAsBmd(std::string& changeLog);
 
-    bool ExportAsS6E3(wchar_t* fileName);
+    // Writes the S6E3 legacy file, with the item names of the UI locale, also while translated item names are off;
+    // an item with a value the file cannot hold is named in `problems` instead. `notes` gets a line for each
+    // requirement the bmd cannot hold exactly (ToBmdRequirementWeights); so does ExportAsBmd's change log.
+    bool ExportAsS6E3(wchar_t* fileName, std::string& problems, std::string& notes);
     bool ExportToCsv(wchar_t* fileName);
 #endif
 
@@ -185,6 +203,11 @@ private:
     ~CItemDataHandler() = default;
 
     void FillItemAttributes();
+    // The language of the item names: the UI locale, or English while
+    // translated item names are off.
+    std::string_view ItemNameLocale() const;
+    // Shows the item names in that language.
+    void RefreshItemNames();
     void RegisterLocaleObserver();
     static void OnLocaleChanged(void* context) noexcept;
 
@@ -220,9 +243,11 @@ private:
     void TakeBackModelMoves();
     // The definition SetItem stores: the weapon kind and the stat profile
     // follow the data unless `definition` changes them from `previous` (the
-    // item as it is, or the one a new item copies; nullptr: none).
-    static Data::Items::ItemDefinition WithDerivedFields(const Data::Items::ItemDefinition& definition,
-                                                         const Data::Items::ItemDefinition* previous);
+    // item as it is, or the one a new item copies; nullptr: none), or the
+    // profile is AsGiven.
+    static Data::Items::ItemDefinition
+    WithDerivedFields(const Data::Items::ItemDefinition& definition, const Data::Items::ItemDefinition* previous,
+                      Data::Items::StatProfileStore profiles = Data::Items::StatProfileStore::Follow);
     // ItemAttribute[itemType] from the item database: the item, or all zero.
     static void RefillItemAttribute(int itemType);
 
@@ -251,6 +276,9 @@ private:
 #endif
 
     bool m_localeObserverRegistered = false;
+    bool m_translateItemNames = true;
+    // Load succeeded once: there are item names to show.
+    bool m_loaded = false;
 
     // Prevent copying
     CItemDataHandler(const CItemDataHandler&) = delete;

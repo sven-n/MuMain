@@ -247,7 +247,7 @@ void COMGEM::CalcGen()
     }
 }
 
-char COMGEM::CalcCompiledCount(const ITEM* p)
+int COMGEM::CalcCompiledCount(const ITEM* p)
 {
     if (CheckOneItem(p) % 2)
         return (p->Level + 1) * FIRST;

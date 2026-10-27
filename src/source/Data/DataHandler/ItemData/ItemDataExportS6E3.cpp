@@ -4,6 +4,7 @@
 
 #include "ItemDataExportS6E3.h"
 #include "Data/DataHandler/DataFileIO.h"
+#include "Data/GameData/ItemData/ItemFileFit.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Core/Globals/_struct.h"
 #include "Core/Globals/_define.h"
@@ -11,12 +12,18 @@
 #include "Data/Translation/MultiLanguage.h"
 #include <memory>
 
-// External references
-extern ITEM_ATTRIBUTE* ItemAttribute;
-
-bool ItemDataExportS6E3::SaveLegacy(wchar_t* fileName)
+bool ItemDataExportS6E3::SaveLegacy(wchar_t* fileName, const ITEM_ATTRIBUTE* attributes, std::string* outProblems)
 {
     const int Size = sizeof(ITEM_ATTRIBUTE_FILE_LEGACY);
+
+    if (const std::vector<ItemFileMisfit> misfits = FindItemFileMisfits(attributes, MAX_ITEM); !misfits.empty())
+    {
+        if (outProblems != nullptr)
+        {
+            *outProblems += DescribeItemFileMisfits(misfits);
+        }
+        return false;
+    }
 
     FILE* fp = _wfopen(fileName, L"wb");
     if (fp == NULL)
@@ -27,13 +34,13 @@ bool ItemDataExportS6E3::SaveLegacy(wchar_t* fileName)
     auto Buffer = std::make_unique<BYTE[]>(Size * MAX_ITEM);
     BYTE* pSeek = Buffer.get();
 
-    // Convert ItemAttribute to ITEM_ATTRIBUTE_FILE_LEGACY format
+    // Convert the attributes to ITEM_ATTRIBUTE_FILE_LEGACY format
     for (int i = 0; i < MAX_ITEM; i++)
     {
         ITEM_ATTRIBUTE_FILE_LEGACY dest;
         memset(&dest, 0, Size);
 
-        CopyItemAttributeToDestination(dest, ItemAttribute[i]);
+        CopyItemAttributeToDestination(dest, attributes[i]);
 
         memcpy(pSeek, &dest, Size);
         pSeek += Size;

@@ -6,9 +6,9 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "Engine/Object/ZzzObject.h"
 
-namespace
+namespace App::Control
 {
-std::string KindName(int objectKind)
+std::string_view ObjectKindName(int objectKind)
 {
     switch (objectKind)
     {
@@ -18,16 +18,26 @@ std::string KindName(int objectKind)
         return "monster";
     case KIND_NPC:
         return "npc";
+    case KIND_TRAP:
+        return "trap";
     case KIND_PET:
         return "pet";
+    case KIND_TMP:
+        return "other";
     default:
         return "unknown";
     }
 }
-} // namespace
 
-namespace App::Control
+std::optional<int> MonsterNumberOf(const CHARACTER& character)
 {
+    if (character.MonsterIndex == MONSTER_UNDEFINED)
+    {
+        return std::nullopt;
+    }
+    return static_cast<int>(character.MonsterIndex);
+}
+
 Events::ObjectDescription DescribeGameObject(int key)
 {
     Events::ObjectDescription description;
@@ -46,7 +56,8 @@ Events::ObjectDescription DescribeGameObject(int key)
 
     const CHARACTER& character = CharactersClient[index];
     description.name = Core::Text::ToUtf8(character.ID);
-    description.kind = KindName(character.Object.Kind);
+    description.kind = ObjectKindName(character.Object.Kind);
+    description.monster = MonsterNumberOf(character);
     description.x = character.PositionX;
     description.y = character.PositionY;
     description.known = true;
@@ -55,17 +66,7 @@ Events::ObjectDescription DescribeGameObject(int key)
 
 std::wstring ItemDisplayName(int itemType, int itemLevel)
 {
-    // The empty marker is -1; type 0 is a real item (the Dark Knight's
-    // starting Kris), so it must not be treated as an empty slot.
-    if (itemType < 0)
-    {
-        return {};
-    }
-
-    // Longest name the item tables hold, plus room for the terminator.
-    wchar_t name[128] = {};
-    GetItemName(itemType, itemLevel, name);
-    return name;
+    return GetItemName(itemType, itemLevel);
 }
 
 std::wstring DropName(int itemSlot)
