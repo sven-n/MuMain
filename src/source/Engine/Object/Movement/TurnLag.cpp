@@ -34,8 +34,7 @@ void UpdateTurnLag(CHARACTER* c)
         c->Motion.TurnLagFacing = facing;
     }
     // The body turned by this much since the last frame: the wings don't, at first. Off, no new lag; the last settles.
-    const float turned =
-        EnhancedMovementEnabled() ? FarAngle(c->Motion.TurnLagFacing, facing, false) : 0.f;
+    const float turned = EnhancedMovementEnabled() ? FarAngle(c->Motion.TurnLagFacing, facing, false) : 0.f;
     c->Motion.TurnLagFacing = facing;
     if (turned == 0.f && c->Motion.TurnLag == 0.f && c->Motion.TurnLagSpeed == 0.f)
     {

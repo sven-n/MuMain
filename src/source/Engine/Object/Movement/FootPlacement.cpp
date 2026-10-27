@@ -133,8 +133,8 @@ void BendLeg(float (*bones)[3][4], const Leg& leg, float raise)
 void PlaceFeet(const CHARACTER* c, float (*bones)[3][4])
 {
     const OBJECT* o = &c->Object;
-    if (!EnhancedMovementEnabled() || o->Type != MODEL_PLAYER || c->Dead != 0 || IsRiding(c) ||
-        IsFlying(o) || o->Scale <= 0.f)
+    if (!EnhancedMovementEnabled() || o->Type != MODEL_PLAYER || c->Dead != 0 || IsRiding(c) || IsFlying(o) ||
+        o->Scale <= 0.f)
     {
         return;
     }

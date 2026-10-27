@@ -3534,17 +3534,18 @@ void TurnHeadInWorld(const float parent[3][4], float local[3][4], const vec3_t a
         for (int c = 0; c < 3; ++c)
         {
             const float length = std::sqrt(head[0][c] * head[0][c] + head[1][c] * head[1][c] + head[2][c] * head[2][c]);
-            const float dot = length > 0.f ? std::fabs(head[0][c] * forward[0] + head[1][c] * forward[1] +
-                                                       head[2][c] * forward[2]) / length
-                                           : 0.f;
+            const float dot =
+                length > 0.f
+                    ? std::fabs(head[0][c] * forward[0] + head[1][c] * forward[1] + head[2][c] * forward[2]) / length
+                    : 0.f;
             if (dot > best)
             {
                 best = dot;
                 along = c;
             }
         }
-        const float length =
-            std::sqrt(head[0][along] * head[0][along] + head[1][along] * head[1][along] + head[2][along] * head[2][along]);
+        const float length = std::sqrt(head[0][along] * head[0][along] + head[1][along] * head[1][along] +
+                                       head[2][along] * head[2][along]);
         const float axis[3] = {head[0][along] / length, head[1][along] / length, head[2][along] / length};
         BoneMath::RotationAbout(axis, roll * (Q_PI / 180.f), world);
     }

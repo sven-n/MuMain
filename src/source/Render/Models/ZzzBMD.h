@@ -208,10 +208,10 @@ public:
     int           BoneHead;
     // A Biped's head and the neck and spine bones below it (Bip01 Head, Neck, Spine1, Spine; -1 where the chain
     // stops), found when the model loads: the head's turn spreads into them (HeadTurn.h) while BoneHead is that head.
-    short         HeadTurnBones[4] = {-1, -1, -1, -1};
+    short HeadTurnBones[4] = {-1, -1, -1, -1};
     // The Biped's ponytail root (Bip01 Ponytail1, -1: none), found when the model loads: Animation's PonytailLag
     // swings it about the head's upright, so the hair trails behind a turn.
-    short         PonytailBone = -1;
+    short PonytailBone = -1;
 
     int           BoneFoot[4];
     float         BodyScale;

@@ -5619,7 +5619,8 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
                     o->HeadTargetAngle[0] = (float)(rand() % 128 - 64);
                     o->HeadTargetAngle[1] = (float)(rand() % 32 - 16);
                     for (int i = 0; i < 2; i++)
-                        if (o->HeadTargetAngle[i] < 0) o->HeadTargetAngle[i] += 360.f;
+                        if (o->HeadTargetAngle[i] < 0)
+                            o->HeadTargetAngle[i] += 360.f;
                 }
             }
 
