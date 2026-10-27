@@ -87,6 +87,11 @@ std::optional<SDL_GPUTextureCreateInfo> GetSdlGpuDepthTextureInfo(SdlGpuTargetSi
     info.type = SDL_GPU_TEXTURETYPE_2D;
     info.format = SdlGpuDepthFormat;
     info.usage = SDL_GPU_TEXTUREUSAGE_DEPTH_STENCIL_TARGET;
+    // A single-sample depth is also read: the ambient occlusion.
+    if (sampleCount == SDL_GPU_SAMPLECOUNT_1)
+    {
+        info.usage |= SDL_GPU_TEXTUREUSAGE_SAMPLER;
+    }
     info.width = size.width;
     info.height = size.height;
     info.layer_count_or_depth = 1u;

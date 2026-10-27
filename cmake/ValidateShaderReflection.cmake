@@ -223,6 +223,24 @@ function(mu_expect_msl_binding_order shader_name json member resource_kind msl)
     endforeach()
 endfunction()
 
+# Likewise for uniform buffers: SDL pushes uniform slot N into MSL buffer N, so each block must sit
+# at its binding (uniform buffers come first, before any storage buffer).
+function(mu_expect_msl_uniform_order shader_name json msl)
+    mu_json_array_length(uniform_count "${json}" ubos)
+    if(uniform_count LESS 2)
+        return()
+    endif()
+    math(EXPR last_uniform "${uniform_count} - 1")
+    foreach(uniform_index RANGE 0 ${last_uniform})
+        string(JSON uniform_name GET "${json}" ubos ${uniform_index} name)
+        string(JSON uniform_binding GET "${json}" ubos ${uniform_index} binding)
+        if(NOT msl MATCHES "constant[ \t]+${uniform_name}&[ \t]+[A-Za-z0-9_]+[ \t]+\\[\\[buffer\\(${uniform_binding}\\)\\]\\]")
+            mu_add_shader_validation_error(
+                "${shader_name}: MSL uniform buffer ${uniform_name} is not at index ${uniform_binding}")
+        endif()
+    endforeach()
+endfunction()
+
 function(mu_expect_msl_layout shader_name stage msl input_locations sampler_count storage_count uniform_count)
     # A vertex shader without vertex inputs (generated geometry) has no [[stage_in]].
     if(stage STREQUAL "vert" AND NOT input_locations STREQUAL "" AND NOT msl MATCHES "\\[\\[stage_in\\]\\]")
@@ -269,10 +287,15 @@ set(shader_specs
     "skinned_textured.vert|vert|0,1,2,3,4,5|0|1|1"
     "skinned_shadow.vert|vert|0,3,4|0|2|2"
     "skinned_lit.frag|frag||1|0|3"
+    "world_lit.vert|vert|0,1,2|0|0|1"
+    "world_lit.frag|frag||2|0|3"
+    "shadow_mask.frag|frag||0|0|0"
     "post_fullscreen.vert|vert||0|0|0"
     "post_bloom_down.frag|frag||1|0|1"
     "post_bloom_up.frag|frag||1|0|1"
-    "post_composite.frag|frag||3|0|1"
+    "post_composite.frag|frag||5|0|1"
+    "post_ao.frag|frag||1|0|1"
+    "post_ao_blur.frag|frag||2|0|1"
 )
 
 foreach(shader_spec IN LISTS shader_specs)
@@ -293,6 +316,11 @@ foreach(shader_spec IN LISTS shader_specs)
         set(json_path "${MU_SHADER_REFLECTION_OUTPUT_DIR}/${shader_name}.json")
         set(msl_path "${MU_SHADER_REFLECTION_OUTPUT_DIR}/${shader_name}.msl")
         file(READ "${source_path}" hlsl)
+        # As mu_add_shader: declared bindings, except beside storage buffers.
+        set(msl_flags)
+        if(NOT hlsl MATCHES "StructuredBuffer|ByteAddressBuffer")
+            set(msl_flags --msl-decoration-binding)
+        endif()
 
         execute_process(
             COMMAND "${GLSLANG_EXE}" -V -D -S "${stage}" -e main -o "${spv_path}" "${source_path}"
@@ -320,7 +348,7 @@ foreach(shader_spec IN LISTS shader_specs)
         file(WRITE "${json_path}" "${reflection_json}")
 
         execute_process(
-            COMMAND "${SPIRV_CROSS_EXE}" "${spv_path}" --msl --output "${msl_path}"
+            COMMAND "${SPIRV_CROSS_EXE}" "${spv_path}" --msl ${msl_flags} --output "${msl_path}"
             RESULT_VARIABLE msl_result
             ERROR_VARIABLE msl_error
         )
@@ -354,6 +382,7 @@ foreach(shader_spec IN LISTS shader_specs)
     mu_expect_msl_layout("${shader_name}" "${stage}" "${msl}" "${input_locations}" "${sampler_count}" "${storage_count}" "${uniform_count}")
     mu_expect_msl_binding_order("${shader_name}" "${reflection_json}" separate_images texture "${msl}")
     mu_expect_msl_binding_order("${shader_name}" "${reflection_json}" separate_samplers sampler "${msl}")
+    mu_expect_msl_uniform_order("${shader_name}" "${reflection_json}" "${msl}")
 endforeach()
 
 get_property(validation_errors GLOBAL PROPERTY MU_SHADER_VALIDATION_ERRORS)

@@ -28,8 +28,13 @@
 //   $dynlights spell <g> <r> <f>   dynamic.effectGain, .effectRange, .effectFade
 //   $dynlights cap <c>             dynamic.effectCap
 //   $dynlights reach <m>           dynamic.effectRangeMax
+//   $dynlights shadow <o>          dynamic.shadowOpacity
+//   $dynlights shadowangle <a>     dynamic.shadowAngle
+//   $dynlights shadowlights <n>    dynamic.shadowLights
 //   $bloom falloff <f>             bloom.levelFalloff
 //   $bloom <v>                     bloom.strength
+//   $ao radius <r>                 ao.radius
+//   $ao <v>                        ao.strength
 namespace Render::Look
 {
 

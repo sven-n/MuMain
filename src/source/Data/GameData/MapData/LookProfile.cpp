@@ -41,9 +41,14 @@ constexpr std::array<LookValueInfo, LookValueCount> Infos = {{
     {LookValue::DynamicEffectRangeMax, "dynamic.effectRangeMax", 0.0, 0.0, 16.0},
     {LookValue::DynamicEffectFade, "dynamic.effectFade", 0.0, 0.0, 2.0},
     {LookValue::DynamicEffectCap, "dynamic.effectCap", 0.0, 0.0, 8.0},
+    {LookValue::GroundShadowOpacity, "dynamic.shadowOpacity", 0.6, 0.0, 1.0},
+    {LookValue::GroundShadowAngle, "dynamic.shadowAngle", 180.0, 0.0, 360.0},
+    {LookValue::GroundShadowLights, "dynamic.shadowLights", 0.0, 0.0, 4.0},
     {LookValue::BloomStrength, "bloom.strength", 0.6, 0.0, 2.0},
     {LookValue::BloomLevelFalloff, "bloom.levelFalloff", 0.5, 0.25, 1.0},
     {LookValue::GradingStrength, "grading.strength", 1.0, 0.0, 1.0},
+    {LookValue::AmbientOcclusionStrength, "ao.strength", 0.0, 0.0, 2.0},
+    {LookValue::AmbientOcclusionRadius, "ao.radius", 60.0, 10.0, 300.0},
 }};
 
 constexpr bool InfosFollowLookValueOrder()

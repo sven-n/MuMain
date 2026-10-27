@@ -43,9 +43,14 @@ enum class LookValue : std::uint8_t
     DynamicEffectRangeMax,
     DynamicEffectFade,
     DynamicEffectCap,
+    GroundShadowOpacity,
+    GroundShadowAngle,
+    GroundShadowLights,
     BloomStrength,
     BloomLevelFalloff,
     GradingStrength,
+    AmbientOcclusionStrength,
+    AmbientOcclusionRadius,
     Count,
 };
 

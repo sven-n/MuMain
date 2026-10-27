@@ -25,7 +25,7 @@ cbuffer Skinning : register(b0, space1)
 cbuffer Shadow : register(b1, space1)
 {
     float4 shadowOrigin;     // xyz: BodyOrigin, w: height of TW_HEIGHT cells
-    float4 shadowProjection; // x, y: sx, sy; z: 0 where RequestTerrainHeight() returns 0
+    float4 shadowProjection; // x, y: sx, sy; z: 0 where RequestTerrainHeight() returns 0; w: axis angle
 };
 
 // The skinned vertex layout; glslang would otherwise number these 0, 1, 2 (dxc ignores vk::location).
@@ -59,7 +59,10 @@ float4 clipPosition(float3 position)
 float3 shearShadow(float3 position)
 {
     float3 relative = position - shadowOrigin.xyz;
-    relative.x += relative.z * (relative.x + shadowProjection.x) / (relative.z - shadowProjection.y);
+    // The shear acts along the axis at angle w (0: x, as in Classic).
+    const float2 axis = float2(cos(shadowProjection.w), sin(shadowProjection.w));
+    const float along = dot(relative.xy, axis);
+    relative.xy += axis * (relative.z * (along + shadowProjection.x) / (relative.z - shadowProjection.y));
     return relative + shadowOrigin.xyz;
 }
 

@@ -176,6 +176,8 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/Render/Lighting/DynamicLightHistory.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Lighting/DynamicLightList.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Lighting/DynamicLightSelection.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Lighting/WorldDynamicLights.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Lighting/LightShadowCasters.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Terrain/TerrainLightGrid.cpp
 )
 

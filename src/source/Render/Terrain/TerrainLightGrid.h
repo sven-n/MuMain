@@ -25,7 +25,7 @@ void AddLight(float (*grid)[3], float x, float y, const float* color, int range)
 // AddLight, and records the light in the frame's light list as a point light over terrain of the
 // given height. A light without range changes no vertex and is not recorded.
 void AddDynamicLight(float (*grid)[3], Lighting::DynamicLightList& frameLights, float x, float y, const float* color,
-                     int range, float terrainHeight);
+                     int range, float terrainHeight, bool castsShadows = true);
 
 using HeightSampler = float (*)(float, float);
 

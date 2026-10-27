@@ -129,6 +129,7 @@ require_world_set(s_pipelinesSkinned "skinned" Skinned Textured Classic)
 require_world_set(s_pipelines3DEnhancedFog "3d-enhanced-fog" ThreeDimensional TexturedEnhancedFog EnhancedLighting)
 require_world_set(s_pipelinesSkinnedEnhancedFog "skinned-enhanced-fog" Skinned TexturedEnhancedFog EnhancedLighting)
 require_world_set(s_pipelinesSkinnedLit "skinned-lit" Skinned SkinnedLit EnhancedLighting)
+require_world_set(s_pipelinesWorldLit "world-lit" ThreeDimensionalWorldLit WorldLit EnhancedLighting)
 
 # The four depth/cull states every world set is built in: suffix, depth test, depth write, culling.
 function(require_world_state member suffix depth_test depth_write cull)
@@ -180,7 +181,7 @@ require_source("${renderer_source}" "depth_write=\\{\\}" "pipeline diagnostics m
 require_source("${renderer_source}" "cull=\\{\\}" "pipeline diagnostics must include cull state")
 require_source("${renderer_source}" "error=\\{\\}" "pipeline diagnostics must include the SDL error")
 require_source("${build_source}"
-    "pipelineInfo\\.vertex_shader[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinnedShadow[ \t\r\n]*:[ \t\r\n]*s_vertShader2D"
+    "pipelineInfo\\.vertex_shader[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinnedShadow[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::ThreeDimensionalWorldLit[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderWorldLit[ \t\r\n]*:[ \t\r\n]*s_vertShader2D"
     "pipeline vertex shader handles must remain selected from the pipeline layout")
 require_source("${build_source}"
     "pipelineInfo\\.fragment_shader[ \t\r\n]*=[ \t\r\n]*GetFragmentShader\\(description\\.fragmentShader\\)"
@@ -202,7 +203,7 @@ require_source("${depth_state_source}" "\\.compare_op[ \t\r\n]*=[ \t\r\n]*SDL_GP
 reject_source("${renderer_source}" "SDL_GPU_COMPAREOP_LESS([^_]|$)"
     "no pipeline may compare depth with strict LESS")
 require_source("${log_source}"
-    "vertexShaderName[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*\"skinned_textured\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*\"skinned_shadow\\.vert\"[ \t\r\n]*:[ \t\r\n]*\"basic_textured\\.vert\""
+    "vertexShaderName[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*\"skinned_textured\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*\"skinned_shadow\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::ThreeDimensionalWorldLit[ \t\r\n]*\\?[ \t\r\n]*\"world_lit\\.vert\"[ \t\r\n]*:[ \t\r\n]*\"basic_textured\\.vert\""
     "pipeline diagnostics must map the built vertex layout to its exact shader identifier")
 require_source("${log_source}"
     "fragmentShaderName[ \t\r\n]*=[ \t\r\n]*GetFragmentShaderName\\(description\\.fragmentShader\\)"

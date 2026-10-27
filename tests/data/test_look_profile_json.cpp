@@ -261,10 +261,12 @@ TEST_CASE("the shipped look profile holds the tuned Enhanced values [data][look]
         {LookValue::DiffuseScale, 1.0},        {LookValue::DiffuseAmbient, 0.3},
         {LookValue::DiffuseFloor, 0.15},       {LookValue::RimStrength, 0.4},
         {LookValue::DynamicWrap, 0.3},         {LookValue::DynamicMapSmoothing, 0.5},
-        {LookValue::DynamicEffectGain, 2.5},   {LookValue::DynamicEffectRange, 3.0},
+        {LookValue::DynamicEffectGain, 0.5},   {LookValue::DynamicEffectRange, 2.0},
         {LookValue::DynamicEffectRangeMax, 8}, {LookValue::DynamicEffectFade, 0.5},
         {LookValue::DynamicEffectCap, 2.5},    {LookValue::BloomStrength, 1.0},
-        {LookValue::BloomLevelFalloff, 0.6},
+        {LookValue::BloomLevelFalloff, 0.6},   {LookValue::GroundShadowAngle, 135},
+        {LookValue::GroundShadowLights, 2},    {LookValue::AmbientOcclusionStrength, 0.8},
+        {LookValue::SpecularScale, 0.8},
     };
     for (const Data::Maps::LookValueInfo& info : Data::Maps::LookValueInfos())
     {
