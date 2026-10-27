@@ -36,6 +36,8 @@ protected:
     void BuildRmlUi();
     void SyncView();
     void RefreshName();
+    void RefreshIcon();
+    void FitName();
     static void OnLocaleChanged(void* context) noexcept;
 
     void BindRmlModel(Rml::DataModelConstructor& c, UI::MapName::MapNameRmlModel& model);

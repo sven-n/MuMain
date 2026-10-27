@@ -66,6 +66,8 @@ separate files for them; `ornament.py` cuts them out of the images:
 It writes `SwirlLeft.OZT`, `SwirlRight.OZT`, one icon per image named like the image
 (`lorencia.OZT`), and `Layout.json` with where each piece sat in the 166 x 90 image, so the
 original banner can be put back together. The game reads them as `.tga`, like its other OZT files.
+The map banner is built from them; `MapIcons.json` beside them, kept by hand, says which icon
+each map shows.
 
 - **Swirls.** Every image has the same two swirls; a few exports differ only in their dark edge
   (Devias softer; Dungeon, Icarus, Tarkan, Balgass and Swamp of Peace harder in some languages;

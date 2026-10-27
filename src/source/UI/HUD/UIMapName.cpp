@@ -5,13 +5,17 @@
 #include "stdafx.h"
 #include "UIMapName.h"
 #include "World/MapInfra/MapManager.h"
+#include "UI/HUD/MapNameOrnament.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlSyncField.h"
 #include "Core/Utilities/StringUtils.h"
 #include "I18N/All.h"
 
+#include <RmlUi/Core/ElementDocument.h>
+
 #include <algorithm>
+#include <cmath>
 
 #ifdef ASG_ADD_GENS_SYSTEM
 #include "Engine/Object/ZzzInventory.h"
@@ -19,6 +23,14 @@
 
 #define	UIMN_SHOW_TIME			5000
 #define	UIMN_ALPHA_VARIATION	0.015f
+
+namespace
+{
+// How much of a long name's squeeze also makes it lower, as a power of the width's squeeze: the
+// originals' long names (Crywolf Fortress, Illusion Temple) are about 0.6x as wide as the font
+// writes them and 0.85x as high as their short names.
+constexpr float ShareOfSqueezeInHeight = 1.f / 3.f;
+} // namespace
 
 CUIMapName::CUIMapName()
 {
@@ -43,6 +55,43 @@ void CUIMapName::RefreshName()
               name != nullptr ? StringUtils::WideToNarrow(name) : Rml::String());
 }
 
+void CUIMapName::RefreshIcon()
+{
+    using UI::MapName::MapNameRmlModel;
+    const auto* icon = UI::MapName::GetMapNameOrnament().FindIcon(gMapManager.WorldActive);
+    auto& binder = m_RmlView.Binder();
+    SyncField(binder, &MapNameRmlModel::icon, "icon", icon != nullptr);
+    if (icon == nullptr)
+        return;
+    SyncField(binder, &MapNameRmlModel::iconSource, "icon_source",
+              Rml::CreateString("/%s/%s.tga", UI::MapName::OrnamentDirectory, icon->image.c_str()));
+    SyncField(binder, &MapNameRmlModel::iconStyle, "icon_style",
+              Rml::CreateString("left: %gdp; top: %gdp; width: %gdp; height: %gdp;", icon->x, icon->y, icon->width,
+                                icon->height));
+}
+
+// The original images fitted a long name into the image's width, mostly with narrower letters and
+// a little with smaller ones; the banner does the same with a name wider than its #name_room.
+void CUIMapName::FitName()
+{
+    Rml::ElementDocument* document = m_RmlView.Document();
+    Rml::Element* text = document->GetElementById("name_text");
+    Rml::Element* room = document->GetElementById("name_room");
+    if (text == nullptr || room == nullptr)
+        return;
+
+    const float width = text->GetOffsetWidth();
+    const float roomWidth = room->GetOffsetWidth();
+    Rml::String transform = "none";
+    if (width > roomWidth && roomWidth > 0.f)
+    {
+        const float squeeze = roomWidth / width;
+        transform = Rml::CreateString("scale(%.4f, %.4f)", squeeze, std::pow(squeeze, ShareOfSqueezeInHeight));
+    }
+    using UI::MapName::MapNameRmlModel;
+    SyncField(m_RmlView.Binder(), &MapNameRmlModel::nameTransform, "name_transform", std::move(transform));
+}
+
 void CUIMapName::Init()
 {
     m_eState = HIDE;
@@ -61,6 +110,7 @@ void CUIMapName::ShowMapName()
     m_dwDeltaTickSum = 0;
 
     RefreshName();
+    RefreshIcon();
     if (gMapManager.WorldActive == WD_40AREA_FOR_GM || m_RmlView.GetModel().mapName.empty())
     {
         m_eState = HIDE;
@@ -137,6 +187,10 @@ void CUIMapName::BindRmlModel(Rml::DataModelConstructor& c, UI::MapName::MapName
 {
     c.Bind("alpha", &model.alpha);
     c.Bind("map_name", &model.mapName);
+    c.Bind("name_transform", &model.nameTransform);
+    c.Bind("icon", &model.icon);
+    c.Bind("icon_source", &model.iconSource);
+    c.Bind("icon_style", &model.iconStyle);
     c.Bind("strife", &model.strife);
     c.Bind("strife_source", &model.strifeSource);
 }
@@ -158,6 +212,7 @@ void CUIMapName::SyncView()
 
     using UI::MapName::MapNameRmlModel;
     SyncField(m_RmlView.Binder(), &MapNameRmlModel::alpha, "alpha", std::clamp(m_fAlpha, 0.0f, 1.0f));
+    FitName();
 #ifdef ASG_ADD_GENS_SYSTEM
     if (m_RmlView.GetModel().strife != m_bStrife || (m_bStrife && m_RmlView.GetModel().strifeSource.empty()))
     {

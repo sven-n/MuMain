@@ -6,6 +6,7 @@
 #include "Network/Server/ServerListManager.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Sprites/GlobalBitmap.h"
+#include "UI/HUD/MapNameOrnament.h"
 #include "UI/HUD/UIMapName.h"
 #include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlPointer.h"
@@ -119,20 +120,16 @@ void CheckName(int mapId, const wchar_t* expected)
     CHECK(std::wstring(gMapManager.GetMapName(mapId)) == expected);
 }
 
-void CheckTextEffects(Rml::Element& text, float scale)
+// RmlUi draws font effects in pixels whatever the unit, so the theme's outline is 3 px at every scale.
+void CheckTextEffects(Rml::Element& text)
 {
-    Rml::Vector2f position, size;
-    REQUIRE(UI::RmlBridge::DrawnBox(text, Rml::BoxArea::Border, position, size));
-    const auto referenceSize = text.GetBox().GetSize(Rml::BoxArea::Border);
-    CHECK(std::abs(size.x - referenceSize.x * scale) <= PixelTolerance);
-    CHECK(std::abs(size.y - referenceSize.y * scale) <= PixelTolerance);
     const auto* property = text.GetProperty(Rml::PropertyId::FontEffect);
     REQUIRE(property != nullptr);
     const auto effects = property->Get<Rml::FontEffectsPtr>();
     REQUIRE(effects != nullptr);
     REQUIRE(effects->list.size() == 2);
     constexpr int probeSize = 10;
-    constexpr int edgeWidth = 2;
+    constexpr int edgeWidth = 3;
     Rml::FontGlyph glyph;
     for (const auto& effect : effects->list)
     {
@@ -322,7 +319,7 @@ TEST_CASE("map-name Gens texture is retried after loading [ui][map-name][gpu]" *
     CHECK(banner.Model().strifeSource.empty());
 }
 
-TEST_CASE("map-name text wraps above a shared lower ornament across themes and scales [ui][map-name]")
+TEST_CASE("map-name banner keeps the original image's box across themes and scales [ui][map-name]")
 {
     MapNameFixture fixture;
     MapNameProbe banner;
@@ -349,20 +346,31 @@ TEST_CASE("map-name text wraps above a shared lower ornament across themes and s
             CAPTURE(warning);
             fixture.Configure(viewport, percent);
             banner.SetText(name);
+            fixture.Refresh();
+            banner.Render(); // fits the laid-out name into its room
             banner.SetWarning(warning);
             fixture.Refresh();
             auto* document = banner.Document();
             auto* frame = document->GetElementById("banner");
             auto* text = document->GetElementById("name_text");
-            auto* middle = document->GetElementById("name");
-            CheckBounds(*frame, *document);
-            CheckBounds(*text, *middle);
-            CheckBounds(*middle, *frame);
-            CHECK(document->GetElementById("ornament_top") == nullptr);
-            CheckBounds(*document->GetElementById("ornament_bottom"), *frame);
+            const float dp = fixture.context->GetDensityIndependentPixelRatio();
             Rml::Vector2f position, size;
             REQUIRE(UI::RmlBridge::DrawnBox(*frame, Rml::BoxArea::Border, position, size));
             CHECK(position.x + size.x / 2.f == doctest::Approx(viewport.x / 2.f).epsilon(0.002));
+            CHECK(std::abs(size.x - 166.f * dp) <= PixelTolerance);
+            CHECK(std::abs(size.y - 90.f * dp) <= PixelTolerance);
+            for (const char* piece : {"swirl_left", "swirl_right", "icon"})
+            {
+                CAPTURE(piece);
+                REQUIRE(document->GetElementById(piece) != nullptr);
+                CheckBounds(*document->GetElementById(piece), *frame);
+            }
+            // A long name is squeezed into the room, centred on the banner.
+            Rml::Vector2f textPosition, textSize;
+            REQUIRE(UI::RmlBridge::DrawnBox(*text, Rml::BoxArea::Border, textPosition, textSize));
+            CHECK(textSize.x <= document->GetElementById("name_room")->GetOffsetWidth() + PixelTolerance);
+            CHECK(textPosition.x + textSize.x / 2.f == doctest::Approx(viewport.x / 2.f).epsilon(0.002));
+            CHECK(textPosition.y + textSize.y <= position.y + size.y);
             if (warning)
             {
                 Rml::Vector2f warningPosition, warningSize;
@@ -371,10 +379,8 @@ TEST_CASE("map-name text wraps above a shared lower ornament across themes and s
                 CHECK(warningPosition.y + warningSize.y <= position.y + PixelTolerance);
                 CHECK(warningPosition.x + warningSize.x / 2.f ==
                       doctest::Approx(viewport.x / 2.f).epsilon(0.002));
-                CHECK(std::abs(warningSize.x - 166.f * fixture.context->GetDensityIndependentPixelRatio()) <=
-                      PixelTolerance);
-                CHECK(std::abs(warningSize.y - 28.f * fixture.context->GetDensityIndependentPixelRatio()) <=
-                      PixelTolerance);
+                CHECK(std::abs(warningSize.x - 166.f * dp) <= PixelTolerance);
+                CHECK(std::abs(warningSize.y - 28.f * dp) <= PixelTolerance);
             }
             fixture.context->ProcessMouseMove(static_cast<int>(position.x + size.x / 2.f),
                                              static_cast<int>(position.y + size.y / 2.f), 0);
@@ -382,9 +388,48 @@ TEST_CASE("map-name text wraps above a shared lower ornament across themes and s
             CHECK(text->GetComputedValues().font_size() > 0.f);
             CHECK(text->GetComputedValues().font_weight() == Rml::Style::FontWeight::Normal);
             CHECK(text->GetComputedValues().color() == Rml::Colourb(240, 236, 226));
-            CheckTextEffects(*text, fixture.context->GetDensityIndependentPixelRatio());
+            CheckTextEffects(*text);
         }
     }
+}
+
+TEST_CASE("map-name icon follows the map from the ornament files [ui][map-name]")
+{
+    MapNameFixture fixture;
+    MapNameProbe banner;
+    banner.Init();
+    gMapManager.WorldActive = WD_0LORENCIA;
+    banner.ShowMapName();
+    CHECK(banner.Model().icon);
+    CHECK(banner.Model().iconSource == "/Data/Interface/MapNameOrnament/lorencia.tga");
+    CHECK(banner.Model().iconStyle == "left: 59dp; top: 46dp; width: 43dp; height: 36dp;");
+    for (int map : {static_cast<int>(WD_11BLOODCASTLE1), 17, 52})
+    {
+        CAPTURE(map);
+        gMapManager.WorldActive = map;
+        banner.ShowMapName();
+        CHECK(banner.Model().iconSource == "/Data/Interface/MapNameOrnament/bloodcastle.tga");
+    }
+    gMapManager.WorldActive = 43;
+    banner.ShowMapName();
+    CHECK_FALSE(banner.Model().icon);
+}
+
+TEST_CASE("map-name ornament files leave out what they do not describe [ui][map-name]")
+{
+    constexpr const char* layout = R"({"icons": {"lorencia": {"x": 59, "y": 46, "width": 43, "height": 36},
+                                                 "broken": {"x": 1}}})";
+    UI::MapName::MapNameOrnament ornament;
+    REQUIRE(ornament.Read(layout, R"({"maps": [{"map": 0, "icon": "lorencia"}, {"map": 1, "icon": "missing"},
+                                              {"map": 2, "icon": "broken"}, {"map": "3", "icon": "lorencia"}]})"));
+    REQUIRE(ornament.FindIcon(0) != nullptr);
+    CHECK(ornament.FindIcon(0)->image == "lorencia");
+    CHECK(ornament.FindIcon(0)->width == doctest::Approx(43.f));
+    for (int map : {1, 2, 3})
+        CHECK(ornament.FindIcon(map) == nullptr);
+    CHECK_FALSE(ornament.Read("{", R"({"maps": []})"));
+    CHECK(ornament.FindIcon(0) == nullptr);
+    CHECK_FALSE(ornament.Read(layout, "[]"));
 }
 
 TEST_CASE("map-name bundled italic family and missing-font fallback stay paired [ui][map-name]")

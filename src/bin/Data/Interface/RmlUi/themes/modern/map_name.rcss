@@ -1,23 +1,21 @@
-/* Centered entry HUD at the original 220/480 viewport-height anchor.
-   A compact text field grows vertically for long names. The classic silver MU ornament
-   is shared by every map and fits its slots without changing its aspect ratio. */
-@spritesheet map-name-decoration
-{
-    src: "../../../MapName_Karutan.tga";
-    map-name-rule: 0px 44px 166px 42px;
-}
-
+/* The original 166 x 90 map-name image at its 220/480 viewport-height anchor, in dp so it follows
+   the UI scale like the original did. The swirls and the map's icon sit where they were in the
+   images (Data/Interface/MapNameOrnament/Layout.json, written by tools/MapNameFont/ornament.py);
+   the name is drawn at the original lettering's size and baseline. */
 body { pointer-events: none; }
-/* RmlUi font effects use pixel metrics; scale the reference-pixel banner as a unit. */
-#banner { top: 45.8333%; width: 163.75px; max-width: calc(90% / var(--ui-scale)); pointer-events: none;
-    transform: translateX(-50%) scale(var(--ui-scale)); transform-origin: center top; }
-#ornament_bottom { display: block; width: 100px; max-width: 100%; margin: -4px auto 0; height: 25.3012px; decorator: image(map-name-rule contain); }
+#banner { top: 45.8333%; width: 166dp; height: 90dp; pointer-events: none; }
+.ornament { position: absolute; }
+#swirl_left { left: 2dp; top: 46dp; width: 54dp; height: 26dp; }
+#swirl_right { left: 109dp; top: 46dp; width: 55dp; height: 27dp; }
+/* The room a name may take; the client squeezes a longer name into it, as the originals were. */
+#name_room { position: absolute; left: 1dp; right: 1dp; top: 0; height: 0; }
+/* Far wider than the banner, so a long name stays on one line and keeps its centre. */
 #name {
-    min-height: 24px;
-    display: flex; align-items: center; justify-content: center;
-    font-family: token(font-map-name); font-size: 23px; font-weight: normal; font-style: token(font-map-name-style); line-height: 1.1;
-    color: #f0ece2; font-effect: outline(2px #100e0b), shadow(2px 2px #000000);
-    text-align: center;
+    position: absolute; left: -1000dp; right: -1000dp; top: -2dp; transform-origin: 50% 50%;
+    font-family: token(font-map-name); font-size: 50dp; line-height: 50dp; font-weight: normal; font-style: token(font-map-name-style);
+    /* RmlUi draws font effects in pixels whatever the unit; these suit the common 1.5-2.25 dp ratios. */
+    color: #f0ece2; font-effect: outline(3px #100e0b), shadow(3px 3px #000000);
+    text-align: center; white-space: nowrap;
 }
-#name_text { max-width: 100%; word-break: break-word; }
-#strife { position: absolute; top: -28px; width: 166px; height: 28px; }
+#name_text { display: inline-block; }
+#strife { position: absolute; left: 0; top: -28dp; width: 166dp; height: 28dp; }
