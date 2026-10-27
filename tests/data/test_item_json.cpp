@@ -435,6 +435,29 @@ TEST_CASE("An item's name lines are kept through write and read, with or without
     const ReadResult notObject = Read(R"({"formatVersion": 1, "group": 13, "items": [
         {"number": 37, "name": "Horn of Fenrir", "nameLines": ["{name}"]}]})");
     CHECK(HasIssue(notObject.issues, ItemDataIssueSeverity::Error, "nameLines[0]"));
+
+    // The name is always bold and the first row: a name line's "bold" and "after" are errors.
+    const ReadResult boldAndAfter = Read(R"({"formatVersion": 1, "group": 13, "items": [
+        {"number": 37, "name": "Horn of Fenrir", "nameLines": [{"text": "{name}", "bold": true, "after": "options"}]}]})");
+    CHECK(HasIssue(boldAndAfter.issues, ItemDataIssueSeverity::Error, "nameLines[0].bold"));
+    CHECK(HasIssue(boldAndAfter.issues, ItemDataIssueSeverity::Error, "nameLines[0].after"));
+}
+
+TEST_CASE("A description line's \"@\" names a shared text [data][items]")
+{
+    // "@" alone names none: an error, as in a layout, not a silent blank line.
+    const ReadResult empty = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 10, "name": "Town Portal Scroll", "description": [{"text": "@"}]}]})");
+    CHECK(HasIssue(empty.issues, ItemDataIssueSeverity::Error, "description[0].text"));
+    const ReadResult named = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 10, "name": "Town Portal Scroll", "description": [{"text": "@durability"}]}]})");
+    CHECK_FALSE(HasErrors(named.issues));
+    REQUIRE(named.items.size() == 1);
+    CHECK(named.items.front().description.front().textName == "durability");
+    // So does a level value's.
+    const ReadResult levelValue = Read(R"({"formatVersion": 1, "group": 14, "items": [
+        {"number": 10, "name": "Town Portal Scroll", "levelValues": {"stat": ["ENG", "@"]}}]})");
+    CHECK(HasIssue(levelValue.issues, ItemDataIssueSeverity::Error, "levelValues.stat[1]"));
 }
 
 TEST_CASE("An item's stat profile is kept through write and read [data][items]")

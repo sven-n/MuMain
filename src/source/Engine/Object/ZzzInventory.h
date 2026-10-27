@@ -227,7 +227,12 @@ bool GetAttackDamage(int* iMinDamage, int* iMaxDamage);
 // name lines whose levels and conditions hold (the item data's nameLines), else its name with " +level" above +0.
 // Without `item`, one of the type at the level, whose durability and options are 0.
 std::wstring GetItemNameText(int type, int level, const ITEM* item = nullptr);
-void GetItemName(int iType, int iLevel, wchar_t* Text);
+// Writes GetItemNameText into a buffer of `textSize` characters, cut short to fit.
+void GetItemName(int iType, int iLevel, wchar_t* Text, size_t textSize);
+template <size_t N> void GetItemName(int iType, int iLevel, wchar_t (&Text)[N])
+{
+    GetItemName(iType, iLevel, Text, N);
+}
 std::wstring GetItemName(int iType, int iLevel);
 std::wstring GetItemDisplayName(ITEM* pItem);
 void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana);
@@ -242,11 +247,11 @@ struct ItemTooltipLine
     int color = 0;
     bool bold = false;
 };
-// The lines of `ip`'s information tooltip, built as RenderItemInfoAtPx builds them but not drawn; none when it shows
-// no tooltip or the pet manager draws its own (the Dark Lord's pets).
 // How the tooltip measures a description piece for wrapping: the game's font (g_pRenderText), unless a test sets
 // a measure of its own, which needs no font; nullptr puts the font back.
 void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure);
+// The lines of `ip`'s information tooltip, built as RenderItemInfoAtPx builds them but not drawn; none when it shows
+// no tooltip or the pet manager draws its own (the Dark Lord's pets).
 std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inventype = 0,
                                                    bool bItemTextListBoxUse = false);
 void RenderRepairInfoAtPx(float x, float y, ITEM* ip, bool Sell);

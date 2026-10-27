@@ -1,3 +1,4 @@
+using System.Text.Json;
 using MuMain.Tools.InGameTests.Clients;
 using MuMain.Tools.InGameTests.Control;
 
@@ -91,12 +92,37 @@ internal static class Meeting
     }
 
     /// <summary>Where the client of <paramref name="observer"/> sees the player <paramref name="name"/>, or null.</summary>
-    public static async Task<(int X, int Y)?> SeenPositionAsync(GameClient observer, string name)
+    public static Task<(int X, int Y)?> SeenPositionAsync(GameClient observer, string name)
+        => SeenPositionAsync(observer, entry => IsNamed(entry, name));
+
+    /// <summary>Where the client of <paramref name="observer"/> sees <paramref name="npc"/>, or null.</summary>
+    public static Task<(int X, int Y)?> SeenPositionAsync(GameClient observer, Npc npc)
+        => SeenPositionAsync(observer, entry => IsNpc(entry, npc));
+
+    /// <summary>
+    /// Where the client of <paramref name="observer"/> draws the player <paramref name="name"/>,
+    /// in window pixels: the middle of the box the mouse picks it by. Waits until it is on screen.
+    /// </summary>
+    public static Task<(double X, double Y)> PixelOfAsync(GameClient observer, string name)
+        => PixelOfAsync(observer, entry => IsNamed(entry, name), name);
+
+    /// <summary>The same for <paramref name="npc"/>, found by its monster number.</summary>
+    public static Task<(double X, double Y)> PixelOfAsync(GameClient observer, Npc npc)
+        => PixelOfAsync(observer, entry => IsNpc(entry, npc), $"{npc.Name} ({npc.Number})");
+
+    private static bool IsNamed(JsonElement entry, string name)
+        => entry.TryGetProperty("name", out var entryName) && entryName.GetString() == name;
+
+    // Summons and transformed players carry a monster number too, as players.
+    private static bool IsNpc(JsonElement entry, Npc npc)
+        => entry.TryGetProperty("monster", out var monster) && monster.ValueKind == JsonValueKind.Number
+            && monster.GetInt32() == npc.Number && entry.GetProperty("kind").GetString() != "player";
+
+    private static async Task<(int X, int Y)?> SeenPositionAsync(GameClient observer, Func<JsonElement, bool> matches)
     {
         foreach (var entry in (await observer.StateAsync()).GetProperty("nearby").EnumerateArray())
         {
-            if (entry.TryGetProperty("name", out var entryName) && entryName.GetString() == name
-                && entry.TryGetProperty("position", out var position))
+            if (matches(entry) && entry.TryGetProperty("position", out var position))
             {
                 return (position[0].GetInt32(), position[1].GetInt32());
             }
@@ -105,12 +131,7 @@ internal static class Meeting
         return null;
     }
 
-    /// <summary>
-    /// Where the client of <paramref name="observer"/> draws the character <paramref name="name"/>
-    /// (a player or an NPC), in window pixels: the middle of the box the mouse picks it by. Waits
-    /// until it is on screen.
-    /// </summary>
-    public static async Task<(double X, double Y)> PixelOfAsync(GameClient observer, string name)
+    private static async Task<(double X, double Y)> PixelOfAsync(GameClient observer, Func<JsonElement, bool> matches, string what)
     {
         (double X, double Y)? pixel = null;
         await Expect.EventuallyAsync(
@@ -118,8 +139,8 @@ internal static class Meeting
             {
                 foreach (var entry in (await observer.StateAsync()).GetProperty("nearby").EnumerateArray())
                 {
-                    if (entry.GetProperty("name").GetString() == name
-                        && entry.TryGetProperty("pixel", out var found) && found.ValueKind == System.Text.Json.JsonValueKind.Object)
+                    if (matches(entry)
+                        && entry.TryGetProperty("pixel", out var found) && found.ValueKind == JsonValueKind.Object)
                     {
                         pixel = (found.GetProperty("x").GetDouble(), found.GetProperty("y").GetDouble());
                         return true;
@@ -129,7 +150,7 @@ internal static class Meeting
                 return false;
             },
             TimeSpan.FromSeconds(10),
-            $"{name} is not on the {observer.Role}'s screen");
+            $"{what} is not on the {observer.Role}'s screen");
         return pixel!.Value;
     }
 

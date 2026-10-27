@@ -3,6 +3,7 @@
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 
+#include <cstdint>
 #include <string>
 
 // Converts between the legacy ITEM_ATTRIBUTE record (item.bmd layout, and the
@@ -56,6 +57,15 @@ std::string DeriveStatProfile(const ItemStatProfiles& profiles, const ItemDefini
 // "default", stays as long as it differs.
 std::string FollowStatProfile(const ItemStatProfiles& profiles, const ItemDefinition* previous,
                               const ItemDefinition& updated);
+
+// How storing an item treats the stat profile it names (not "", which follows the data): Follow
+// keeps it only while it differs from the one the item had, as a pick of the item tools; AsGiven
+// keeps every one as given, for an import that decided each item's profile itself.
+enum class StatProfileStore : std::uint8_t
+{
+    Follow,
+    AsGiven,
+};
 
 // The attribute's name becomes the neutral (English) name.
 ItemDefinition ToItemDefinition(const ITEM_ATTRIBUTE& attribute, int itemType);

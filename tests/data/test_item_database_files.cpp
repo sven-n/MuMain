@@ -12,6 +12,7 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/DataHandler/ItemData/ItemBmdImport.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/DataHandler/ItemData/ItemDataLoader.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
@@ -63,6 +64,7 @@
 #include "UI/ItemTools/MuItemModelUI.h"
 #include "UI/ItemTools/MuItemRequirementsUI.h"
 #include "UI/ItemTools/MuItemRulesUI.h"
+#include "UI/ItemTools/MuItemSyncUI.h"
 #include "UI/ItemTranslations/MuItemTranslationsUI.h"
 #include "UI/MapEditor/MapEditorUI.h"
 #include "TestModelSlots.h"
@@ -213,6 +215,7 @@ const ItemDefinition* FindItem(const std::vector<ItemDefinition>& items, int ite
     });
     return found != items.end() ? &*found : nullptr;
 }
+
 } // namespace
 
 TEST_CASE("Shipped item data loads without problems [data][items]")
@@ -308,11 +311,15 @@ std::string FilledLine(const ItemDefinition& item, const ItemDescriptionLine& li
                             });
 }
 
-// The durability lines of the descriptions (step 5b-3b), which came from another part of the old code.
+// The durability lines of the descriptions (step 5b-3b), which came from another part of the old code: the durability
+// shared texts, or a line shown by the item's durability ("durability", "durability=2"). Another shared text, or a line
+// with another condition, is no durability line, so the old-code comparisons keep it.
 bool IsDurabilityLine(const ItemDescriptionLine& line)
 {
-    return !line.when.empty() || line.textName == "durability" || line.textName == "numberOfItems" ||
-           line.textName == "life" || line.textName == "usableTimes";
+    return line.textName == "durability" || line.textName == "numberOfItems" || line.textName == "life" ||
+           line.textName == "usableTimes" ||
+           std::any_of(line.when.begin(), line.when.end(),
+                       [](const TooltipCondition& condition) { return condition.name == "durability"; });
 }
 
 // A line the tooltip code wrote for the wings, capes and pets before it was their descriptions: one of the game's
@@ -605,6 +612,7 @@ TEST_CASE("The tooltip texts by item level come from the descriptions as from th
             std::vector<OldLine> lines;
             for (const ItemDescriptionLine& line : found->description)
             {
+                // Not the durability lines, which came from another part of the old code.
                 if (line.IsShownAt(level) && !IsDurabilityLine(line))
                 {
                     lines.push_back({FilledLine(*found, line, level, profiles), line.color});
@@ -855,11 +863,12 @@ TEST_CASE("The second item chain's tooltip texts keep their translations [data][
 }
 
 // What the old code printed for an item's level lines in the UI's language, where the texts are the game's that other
-// code still prints: one entry per line of OldLevelLines, empty for a text only the tooltip had (removed since). The
-// Fruits' stat lines aren't compared: their stat words are corrected here, and stay wrong in the game's texts.
+// code still prints: one entry per line of OldLevelLines, empty for a text only the tooltip had (removed since). A
+// Fruit's stat lines started with the stat's name; the rest of them was a removed text.
 struct PrintedOldLine
 {
     std::string text;
+    bool isPrefix = false;
 };
 
 std::string PrintWithName(const wchar_t* format, const wchar_t* name)
@@ -877,8 +886,10 @@ std::vector<std::optional<PrintedOldLine>> PrintedOldLevelLines(int group, int n
     const auto printed = [](const wchar_t* text) { return std::optional<PrintedOldLine>({Core::Text::ToUtf8(text)}); };
     if (group == 13 && number == 15 && level <= 4)
     {
-        std::vector<std::optional<PrintedOldLine>> lines = {std::nullopt, std::nullopt,
-                                                            printed(I18N::Game::ItCanBeUsedWithItemRemoved)};
+        const wchar_t* const stats[] = {I18N::Game::ENG, I18N::Game::STA, I18N::Game::AGI, I18N::Game::STR,
+                                        I18N::Game::Command};
+        const PrintedOldLine stat{Core::Text::ToUtf8(stats[level]) + " ", true};
+        std::vector<std::optional<PrintedOldLine>> lines = {stat, stat, printed(I18N::Game::ItCanBeUsedWithItemRemoved)};
         if (level == 4)
         {
             lines.push_back(PrintedOldLine{PrintWithName(I18N::Game::CanBeEquippedByS, I18N::Game::DarkLord)});
@@ -927,18 +938,24 @@ TEST_CASE("The tooltip texts by item level are the game's texts in every languag
                         continue;
                     }
                     const std::string text = FilledLine(*found, *shown[index], level, profiles, locale);
-                    CHECK(text == old[index]->text);
+                    if (old[index]->isPrefix)
+                    {
+                        CHECK(text.starts_with(old[index]->text));
+                    }
+                    else
+                    {
+                        CHECK(text == old[index]->text);
+                    }
                     ++compared;
                 }
             }
             I18N::SetLocale("en");
         }
     }
-    // The Fruits' last line at +0 to +3 and last two at +4, in every language.
-    CHECK(compared == (4 * 1 + 2) * static_cast<int>(std::size(I18N::GetAvailableLocales())));
+    // The Fruits' 3 lines at +0 to +3 and 4 at +4, in every language.
+    CHECK(compared == (4 * 3 + 4) * static_cast<int>(std::size(I18N::GetAvailableLocales())));
 }
 
-// The texts the tooltip code wrote for these items are their descriptions now, in every UI language.
 // The damage texts without the English "of" and the Fruits' stat words, as #828 fixed them: rendered with 12 in each
 // language they had wrong, and no translation of the two texts keeps "% of".
 TEST_CASE("The damage texts and the Fruits' stat words read right in every language [data][items]")
@@ -1013,6 +1030,7 @@ TEST_CASE("The damage texts and the Fruits' stat words read right in every langu
     }
 }
 
+// The texts the tooltip code wrote for these items are their descriptions now, in every UI language.
 TEST_CASE("The original items' tooltip texts are in their descriptions [data][items]")
 {
     struct DescribedItem
@@ -1222,6 +1240,66 @@ TEST_CASE("Bmd import recovers long names and repairs the fields they overwrote 
     CHECK(result.repairs.front().fromLocale == "pt");
 }
 
+// The orbs, crystals and scrolls keep their requirements as values (their profiles keep the base
+// value); the original client's bmd files hold weights for them, which its code grew.
+TEST_CASE("The orbs, crystals and scrolls hold their requirements as weights in a bmd file [data][items]")
+{
+    const ItemStatsLoadResult stats = LoadItemStatsFile(ShippedClientDirectory / GetItemStatsFile());
+    REQUIRE(stats.issues.empty());
+    const ItemStatProfiles profiles(stats.file);
+
+    // Healing Orb: 20 + weight * drop level * 4 / 100.
+    ItemDefinition orb;
+    orb.group = 12;
+    orb.number = 8;
+    orb.level = 8;
+    orb.statProfile = "orb";
+    orb.requirements.energy = 100;
+    REQUIRE(HasRequirementWeightsInBmd(profiles, orb));
+    ToRequirementValues(profiles, orb);
+    CHECK(orb.requirements.energy == 52);
+    ITEM_ATTRIBUTE attribute{};
+    CHECK(ToBmdRequirementWeights(profiles, orb, attribute).empty());
+    CHECK(attribute.RequireEnergy == 100);
+    // Without a profile it names, the rules give it the orb profile.
+    ItemDefinition ruledOrb = orb;
+    ruledOrb.statProfile.clear();
+    CHECK(HasRequirementWeightsInBmd(profiles, ruledOrb));
+    // Given the default profile, its requirements grow like any item's: weights.
+    ItemDefinition defaultOrb = orb;
+    defaultOrb.statProfile = "default";
+    CHECK_FALSE(HasRequirementWeightsInBmd(profiles, defaultOrb));
+
+    // Scroll of Wizardry Enhance: the energy from the level requirement, 20 + weight * 220 * 4 / 100.
+    ItemDefinition scroll;
+    scroll.group = 15;
+    scroll.number = 28;
+    scroll.level = 100;
+    scroll.statProfile = "scroll";
+    scroll.requirements.level = 220;
+    scroll.requirements.energy = 118;
+    ToRequirementValues(profiles, scroll);
+    CHECK(scroll.requirements.level == 220);
+    CHECK(scroll.requirements.energy == 1058);
+    CHECK(ToBmdRequirementWeights(profiles, scroll, attribute).empty());
+    CHECK(attribute.RequireEnergy == 118);
+
+    // A value no weight gives (each weight adds 4): the nearest one.
+    ItemDefinition steps = orb;
+    steps.level = 100;
+    steps.requirements.energy = 27;
+    const std::vector<ItemRequirement> inexact = ToBmdRequirementWeights(profiles, steps, attribute);
+    CHECK(inexact == std::vector<ItemRequirement>{ItemRequirement::Energy});
+    CHECK(attribute.RequireEnergy == 2);
+
+    // A weapon keeps its weights in both.
+    ItemDefinition kris;
+    kris.group = 0;
+    kris.slot = ItemSlot::MainHand;
+    kris.statProfile = "weapon";
+    CHECK_FALSE(HasRequirementWeightsInBmd(profiles, kris));
+}
+
 TEST_CASE("Bmd import reads Portuguese and Spanish names as Windows-1252 [data][items]")
 {
     TemporaryClientFolder folder;
@@ -1246,6 +1324,27 @@ TEST_CASE("Bmd import reads Portuguese and Spanish names as Windows-1252 [data][
     CHECK(gaionsOrder->names.GetNeutral() == "Gaion's Order");
 }
 
+TEST_CASE("Bmd import reads a name that only looks like UTF-8 as Windows-1252 [data][items]")
+{
+    TemporaryClientFolder folder;
+    LegacyItemFile english;
+    english.SetName(BladeType, "Blade");
+    english.Write(folder.LegacyItemFilePath(L"Eng"));
+    LegacyItemFile portuguese;
+    // C0 AF would be an overlong form of '/' in UTF-8; read as Windows-1252 it is U+00C0 U+00AF.
+    portuguese.SetName(BladeType, "Blade \xC0\xAF");
+    portuguese.Write(folder.LegacyItemFilePath(L"Por"));
+    ClientDataScope client(folder.Directory());
+
+    const ItemBmdImportResult result = ImportItemBmdFiles();
+    REQUIRE_FALSE(HasErrors(result.issues));
+    CHECK(result.reencodedNameCount == 1);
+
+    const ItemDefinition* blade = FindItem(result.items, BladeType);
+    REQUIRE(blade != nullptr);
+    CHECK(blade->names.Get("pt") == "Blade \xC3\x80\xC2\xAF");
+}
+
 TEST_CASE("A folder that cannot be written is a write failure, not a data error [data][items]")
 {
     const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");
@@ -1256,7 +1355,29 @@ TEST_CASE("A folder that cannot be written is a write failure, not a data error 
 
     std::vector<ItemDataIssue> issues;
     CHECK(SaveItemDataDirectory(blocked, shipped.items, issues) == ItemDataSaveResult::WriteFailed);
-    CHECK_FALSE(issues.empty());
+    // The issue names the temporary file that could not be written.
+    CHECK(std::any_of(issues.begin(), issues.end(), [](const ItemDataIssue& issue)
+                      { return issue.message == "could not be written" && issue.source.ends_with(".json.tmp"); }));
+}
+
+TEST_CASE("A file that cannot be replaced is a write failure and leaves no temporary file [data][items]")
+{
+    const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    const std::filesystem::path itemDirectory = folder.Directory() / GetItemDataDirectory();
+    // A folder with the name of the sword file: the written file cannot take its place.
+    const std::filesystem::path swordFile = itemDirectory / GetItemGroupFileName(0);
+    std::filesystem::remove(swordFile);
+    std::filesystem::create_directories(swordFile / "inside");
+
+    std::vector<ItemDataIssue> issues;
+    CHECK(SaveItemDataDirectory(itemDirectory, shipped.items, issues) == ItemDataSaveResult::WriteFailed);
+    CHECK(std::any_of(
+        issues.begin(), issues.end(), [&](const ItemDataIssue& issue)
+        { return issue.source == swordFile.string() && issue.message.starts_with("could not be replaced: "); }));
+    CHECK(std::filesystem::is_directory(swordFile));
+    CHECK_FALSE(std::filesystem::exists(swordFile.string() + ".tmp"));
 }
 
 // The items and their models are saved together: when one of the files
@@ -1911,6 +2032,52 @@ TEST_CASE("A bmd import moves the models of moved items back [data][items][edito
 
 // The names of a language whose item.bmd is missing stay as they are, like
 // the names of the languages that have none (German).
+// Export as bmd writes the weights the original client grows into the requirements the client
+// keeps, and Import from bmd takes them back.
+TEST_CASE("Export as bmd and Import from bmd keep the orbs', crystals' and scrolls' requirements [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    std::vector<ItemDefinition> weighted;
+    for (const ItemDefinition& item : g_ItemDatabase.GetAllSlots())
+    {
+        if (item.Exists() && HasRequirementWeightsInBmd(g_ItemDatabase.GetStatProfiles(), item) &&
+            (item.requirements.strength > 0 || item.requirements.dexterity > 0 || item.requirements.energy > 0 ||
+             item.requirements.vitality > 0))
+        {
+            weighted.push_back(item);
+        }
+    }
+    REQUIRE(weighted.size() == 44);
+
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+    CHECK(changeLog.find("no weight gives") == std::string::npos);
+    // The file holds the weight: the Healing Orb's energy of 52 as 100.
+    ItemDataLoader::RawItemFile raw;
+    REQUIRE(ItemDataLoader::ReadRawFile(CItemDataHandler::GetItemFilePath(L"Eng").c_str(), raw));
+    REQUIRE_FALSE(raw.isLegacyFormat);
+    REQUIRE(raw.recordSize == static_cast<int>(sizeof(ITEM_ATTRIBUTE_FILE)));
+    ITEM_ATTRIBUTE_FILE healingOrb;
+    std::memcpy(&healingOrb, raw.GetRecord(MakeItemType(12, 8)), sizeof(healingOrb));
+    CHECK(healingOrb.RequireEnergy == 100);
+    REQUIRE_FALSE(HasErrors(g_ItemDataHandler.ImportFromBmd().issues));
+    for (const ItemDefinition& item : weighted)
+    {
+        CAPTURE(g_ItemDatabase.GetLogName(MakeItemType(item.group, item.number)));
+        const ItemDefinition* imported = g_ItemDatabase.Find(item.group, item.number);
+        REQUIRE(imported != nullptr);
+        CHECK(imported->requirements == item.requirements);
+    }
+}
+
 TEST_CASE("A bmd import keeps the names of a language whose item.bmd is missing [data][items][editor]")
 {
     TemporaryClientFolder folder;
@@ -2344,7 +2511,7 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
     // The editor was built from these sources, and the code names the Kris.
     REQUIRE(kris.codeKnown);
     CHECK_FALSE(kris.code.empty());
-    // No set file is loaded here, so the set numbers are all 0: no set.
+    // The Kris is in no ancient set, whether or not an earlier test loaded the set files.
     CHECK_FALSE(kris.inAncientSet);
 
     const MuEditor::Items::ItemUsage nothing = MuEditor::Items::FindItemUsage(MakeItemType(0, 100));
@@ -2433,6 +2600,7 @@ void RenderItemTools()
     g_MuItemCategoriesUI.Render(&open);
     g_MuItemModelUI.Render(&open);
     g_MuItemGlowColorsUI.Render(&open);
+    g_MuItemSyncUI.Render(&open);
     g_MuItemFormulasUI.Render(&open);
     g_MuItemChecksUI.Render(&open);
     g_MuItemTranslationsUI.Render(&open);
@@ -2704,9 +2872,82 @@ TEST_CASE(
     RenderItemTool(g_MuItemRequirementsUI, true);
     RenderItemTool(g_MuItemRequirementsUI, true);
 
-    // The weight list asks; nothing is stored until one is taken.
-    CHECK(OpenPopupWindow() != nullptr);
-    CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == typedWeight);
+    // The weight list asks; nothing is stored until one is taken. Also not when
+    // the list takes the keyboard from the weight field: activated by
+    // navigation, as this test clicks, it became active a frame before the +0
+    // field was reported left, with the weight of the typed value.
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        INFO("frame " << frame);
+        CHECK(OpenPopupWindow() != nullptr);
+        CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == typedWeight);
+        RenderItemTool(g_MuItemRequirementsUI, true);
+    }
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// A click from a +0 value into the +0 field of a requirement drawn above it
+// makes that field active, earlier in the same frame, before the first one is
+// reported left: the typed value still asks for its own weight.
+TEST_CASE("A +0 value left by a click into the +0 field above it still asks for its weight [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    g_ItemSelection.Select(KrisType);
+    const ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    REQUIRE(MuEditor::Items::HasWeight(kris, ItemRequirement::Strength));
+    REQUIRE(MuEditor::Items::HasWeight(kris, ItemRequirement::Dexterity));
+    int value = MuEditor::Items::ComputeZeroValue(kris, ItemRequirement::Dexterity) + 1;
+    while (MuEditor::Items::FindWeightsGiving(kris, ItemRequirement::Dexterity, value).GetCount() < 2)
+    {
+        ++value;
+        REQUIRE(value < 1000);
+    }
+    REQUIRE(MuEditor::Items::ChooseWeight(kris, ItemRequirement::Dexterity, value, kris.requirements.dexterity).kind ==
+            MuEditor::Items::WeightChoice::Kind::Pick);
+
+    TestImGuiContext context;
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    const ImGuiID strength =
+        ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, {KrisType, static_cast<int>(ItemRequirement::Strength)},
+                        I18N::Metadata::ReqStrength);
+    const ImGuiID dexterity =
+        ItemToolFieldId(MuEditor::WindowIds::ItemRequirements, {KrisType, static_cast<int>(ItemRequirement::Dexterity)},
+                        I18N::Metadata::ReqDexterity);
+    ImGui::ActivateItemByID(dexterity);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    REQUIRE(ImGui::GetActiveID() == dexterity);
+    RenderItemTool(g_MuItemRequirementsUI, true, std::to_string(value).c_str());
+    ImGui::ActivateItemByID(strength);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+
+    // The list asks, and nothing is stored until a weight is taken.
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        INFO("frame " << frame);
+        RenderItemTool(g_MuItemRequirementsUI, true);
+        CHECK(OpenPopupWindow() != nullptr);
+        CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == kris.requirements.strength);
+        CHECK(g_ItemDatabase.Find(KrisType)->requirements.dexterity == kris.requirements.dexterity);
+    }
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+
+    // It is the list of the typed dexterity value.
+    const ImGuiWindow* list = OpenPopupWindow();
+    REQUIRE(list != nullptr);
+    ImGui::ActivateItemByID(ImGui::GetIDWithSeed(I18N::Editor::TakeThisWeight, nullptr, list->ID));
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    RenderItemTool(g_MuItemRequirementsUI, true);
+    CHECK(OpenPopupWindow() == nullptr);
+    CHECK(MuEditor::Items::FindWeightsGiving(kris, ItemRequirement::Dexterity, value)
+              .Contains(g_ItemDatabase.Find(KrisType)->requirements.dexterity));
+    CHECK(g_ItemDatabase.Find(KrisType)->requirements.strength == kris.requirements.strength);
+    CHECK(g_ItemEdits.GetHistory().CanUndo());
     g_ItemEdits.GetHistory().Clear();
 }
 
@@ -3762,7 +4003,8 @@ TEST_CASE("The bmd exports refuse damage or magic power past 255 and name the it
 
     std::wstring legacyFile = (folder.Directory() / "Item_S6E3.bmd").wstring();
     std::string problems;
-    CHECK_FALSE(g_ItemDataHandler.ExportAsS6E3(legacyFile.data(), problems));
+    std::string notes;
+    CHECK_FALSE(g_ItemDataHandler.ExportAsS6E3(legacyFile.data(), problems, notes));
     CHECK(problems == named);
     CHECK_FALSE(std::filesystem::exists(legacyFile));
 
@@ -3772,7 +4014,7 @@ TEST_CASE("The bmd exports refuse damage or magic power past 255 and name the it
     std::string savedChangeLog;
     CHECK(g_ItemDataHandler.ExportAsBmd(savedChangeLog));
     problems.clear();
-    CHECK(g_ItemDataHandler.ExportAsS6E3(legacyFile.data(), problems));
+    CHECK(g_ItemDataHandler.ExportAsS6E3(legacyFile.data(), problems, notes));
     CHECK(problems.empty());
     CHECK(std::filesystem::exists(legacyFile));
 }

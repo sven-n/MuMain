@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Network/Server/WSclient.h"
 #include "UI/Core/UIManager.h"
 #include "Audio/DSPlaySound.h"
@@ -1488,23 +1489,12 @@ namespace battleCastle
         return c;
     }
 
-    bool    SettingBattleCastleMonsterLinkBone(CHARACTER* c, int Type)
+    void ResetCastleGateAttackCount(CHARACTER* c, int Type)
     {
-        switch (Type)
+        if (Type == MODEL_CASTLE_GATE1)
         {
-        case MODEL_NPC_CAPATULT_ATT:
-            Vector(-200.f, -50.f, -100.f, c->Object.BoundingBoxMin);
-            Vector(200.f, 50.f, 100.f, c->Object.BoundingBoxMax);
-            break;
-
-        case MODEL_CASTLE_GATE1:
-            Vector(-140.f, -140.f, 0.f, c->Object.BoundingBoxMin);
-            Vector(140.f, 140.f, 300.f, c->Object.BoundingBoxMax);
             c->SwordCount = 0;
-            return true;
         }
-
-        return false;
     }
 
     bool    StopBattleCastleMonster(CHARACTER* c, OBJECT* o)
@@ -1691,8 +1681,7 @@ namespace battleCastle
         case MODEL_BATTLE_GUARD1:
         case MODEL_BATTLE_GUARD2:
             o->AI = GUARD_ATTACK;
-            SetAction(o, 5);
-            return true;
+            return GameLogic::Monsters::Attacks::Play(*c, *o);
         }
         return false;
     }
@@ -1975,10 +1964,7 @@ namespace battleCastle
         case MODEL_CASTLE_GATE1:
             if (o->CurrentAction == MONSTER01_DIE)
             {
-                if (o->CurrentAction == MONSTER01_DIE)
-                {
-                    o->Live = false;
-                }
+                o->Live = false;
                 PlayBuffer(SOUND_HIT_GATE2);
                 b->RenderMeshEffect(0, MODEL_GATE_PART1);
             }
@@ -1996,10 +1982,7 @@ namespace battleCastle
 
                 if (o->CurrentAction == MONSTER01_DIE)
                 {
-                    if (o->CurrentAction == MONSTER01_DIE)
-                    {
-                        o->Live = false;
-                    }
+                    o->Live = false;
 
                     PlayBuffer(SOUND_BC_GUARD_STONE_DIS);
                     b->RenderMeshEffect(0, MODEL_STONE_COFFIN);

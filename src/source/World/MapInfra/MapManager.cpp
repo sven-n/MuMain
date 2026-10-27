@@ -6,6 +6,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Data/DataHandler/LoadData.h"
+#include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "UI/Core/WindowSystem.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "Render/Models/ZzzBMD.h"
@@ -182,11 +183,6 @@ void CMapManager::Load() // OK
         LoadBitmap(L"Effect\\Map_Smoke1.jpg", BITMAP_CHROME + 2, GL_LINEAR, GL_REPEAT);
         LoadBitmap(L"Effect\\Map_Smoke2.tga", BITMAP_CHROME + 3, GL_LINEAR, GL_REPEAT);
         LoadBitmap(L"Effect\\mhoujin_R.jpg", BITMAP_MAGIC_CIRCLE, GL_LINEAR, GL_CLAMP_TO_EDGE);
-
-        gLoadData.AccessModel(MODEL_ARROW_TANKER, L"Data\\Monster\\", L"arrowstusk");
-        gLoadData.OpenTexture(MODEL_ARROW_TANKER, L"Monster\\");
-        gLoadData.AccessModel(MODEL_ARROW_TANKER_HIT, L"Data\\Monster\\", L"arrowstusk");
-        gLoadData.OpenTexture(MODEL_ARROW_TANKER_HIT, L"Monster\\");
 
         LoadBitmap(L"Effect\\Impack03.jpg", BITMAP_EXT_LOG_IN + 2);
         LoadBitmap(L"Logo\\chasellight.jpg", BITMAP_EFFECT);
@@ -590,19 +586,6 @@ void CMapManager::Load() // OK
             gLoadData.AccessModel(MODEL_MAP_TORNADO, L"Data\\Object52\\", L"typhoonall");
             gLoadData.OpenTexture(MODEL_MAP_TORNADO, L"Object52\\");
 
-            gLoadData.AccessModel(MODEL_TOTEMGOLEM_PART1, L"Data\\Monster\\", L"totemhead");
-            gLoadData.OpenTexture(MODEL_TOTEMGOLEM_PART1, L"Monster\\");
-            gLoadData.AccessModel(MODEL_TOTEMGOLEM_PART2, L"Data\\Monster\\", L"totembody");
-            gLoadData.OpenTexture(MODEL_TOTEMGOLEM_PART2, L"Monster\\");
-            gLoadData.AccessModel(MODEL_TOTEMGOLEM_PART3, L"Data\\Monster\\", L"totemleft");
-            gLoadData.OpenTexture(MODEL_TOTEMGOLEM_PART3, L"Monster\\");
-            gLoadData.AccessModel(MODEL_TOTEMGOLEM_PART4, L"Data\\Monster\\", L"totemright");
-            gLoadData.OpenTexture(MODEL_TOTEMGOLEM_PART4, L"Monster\\");
-            gLoadData.AccessModel(MODEL_TOTEMGOLEM_PART5, L"Data\\Monster\\", L"totemleg");
-            gLoadData.OpenTexture(MODEL_TOTEMGOLEM_PART5, L"Monster\\");
-            gLoadData.AccessModel(MODEL_TOTEMGOLEM_PART6, L"Data\\Monster\\", L"totemleg2");
-            gLoadData.OpenTexture(MODEL_TOTEMGOLEM_PART6, L"Monster\\");
-
             LoadWaveFile(SOUND_ELBELAND_VILLAGEPROTECTION01, L"Data\\Sound\\w52\\SE_Obj_villageprotection01.wav", 1);
             LoadWaveFile(SOUND_ELBELAND_WATERFALLSMALL01, L"Data\\Sound\\w52\\SE_Obj_waterfallsmall01.wav", 1);
             LoadWaveFile(SOUND_ELBELAND_WATERWAY01, L"Data\\Sound\\w52\\SE_Obj_waterway01.wav", 1);
@@ -622,17 +605,6 @@ void CMapManager::Load() // OK
     break;
     case WD_63PK_FIELD:
     {
-        gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD, L"Data\\Monster\\", L"pk_manhead_green");
-        gLoadData.OpenTexture(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_HEAD, L"Monster\\");
-
-        gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_HEAD, L"Data\\Monster\\", L"pk_manhead_red");
-        gLoadData.OpenTexture(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_HEAD, L"Monster\\");
-
-        gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY, L"Data\\Monster\\", L"assassin_dieg");
-        gLoadData.OpenTexture(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY, L"Monster\\");
-
-        gLoadData.AccessModel(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY, L"Data\\Monster\\", L"assassin_dier");
-        gLoadData.OpenTexture(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY, L"Monster\\");
     }
     break;
     case WD_56MAP_SWAMP_OF_QUIET:
@@ -642,78 +614,6 @@ void CMapManager::Load() // OK
         LoadBitmap(L"Monster\\blue_shadows.jpg", BITMAP_SHADOW_KINGHT_BLUE, GL_LINEAR, GL_REPEAT);
         LoadBitmap(L"Monster\\green_shadows.jpg", BITMAP_SHADOW_ROOK_GREEN, GL_LINEAR, GL_REPEAT);
 
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_ANKLE_LEFT, L"Data\\Monster\\", L"shadow_pawn_7_ankle_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_ANKLE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_ANKLE_RIGHT, L"Data\\Monster\\", L"shadow_pawn_7_ankle_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_ANKLE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_BELT, L"Data\\Monster\\", L"shadow_pawn_7_belt");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_BELT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_CHEST, L"Data\\Monster\\", L"shadow_pawn_7_chest");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_CHEST, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_HELMET, L"Data\\Monster\\", L"shadow_pawn_7_helmet");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_HELMET, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_KNEE_LEFT, L"Data\\Monster\\", L"shadow_pawn_7_knee_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_KNEE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_KNEE_RIGHT, L"Data\\Monster\\", L"shadow_pawn_7_knee_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_KNEE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_WRIST_LEFT, L"Data\\Monster\\", L"shadow_pawn_7_wrist_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_WRIST_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_PAWN_WRIST_RIGHT, L"Data\\Monster\\", L"shadow_pawn_7_wrist_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_PAWN_WRIST_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_ANKLE_LEFT, L"Data\\Monster\\", L"shadow_knight_7_ankle_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_ANKLE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_ANKLE_RIGHT, L"Data\\Monster\\", L"shadow_knight_7_ankle_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_ANKLE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_BELT, L"Data\\Monster\\", L"shadow_knight_7_belt");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_BELT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_CHEST, L"Data\\Monster\\", L"shadow_knight_7_chest");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_CHEST, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_HELMET, L"Data\\Monster\\", L"shadow_knight_7_helmet");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_HELMET, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_KNEE_LEFT, L"Data\\Monster\\", L"shadow_knight_7_knee_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_KNEE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_KNEE_RIGHT, L"Data\\Monster\\", L"shadow_knight_7_knee_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_KNEE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_WRIST_LEFT, L"Data\\Monster\\", L"shadow_knight_7_wrist_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_WRIST_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_KNIGHT_WRIST_RIGHT, L"Data\\Monster\\", L"shadow_knight_7_wrist_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_KNIGHT_WRIST_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_ANKLE_LEFT, L"Data\\Monster\\", L"shadow_rock_7_ankle_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_ANKLE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_ANKLE_RIGHT, L"Data\\Monster\\", L"shadow_rock_7_ankle_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_ANKLE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_BELT, L"Data\\Monster\\", L"shadow_rock_7_belt");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_BELT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_CHEST, L"Data\\Monster\\", L"shadow_rock_7_chest");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_CHEST, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_HELMET, L"Data\\Monster\\", L"shadow_rock_7_helmet");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_HELMET, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_KNEE_LEFT, L"Data\\Monster\\", L"shadow_rock_7_knee_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_KNEE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_KNEE_RIGHT, L"Data\\Monster\\", L"shadow_rock_7_knee_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_KNEE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_WRIST_LEFT, L"Data\\Monster\\", L"shadow_rock_7_wrist_left");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_WRIST_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_SHADOW_ROOK_WRIST_RIGHT, L"Data\\Monster\\", L"shadow_rock_7_wrist_right");
-        gLoadData.OpenTexture(MODEL_SHADOW_ROOK_WRIST_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_ANKLE_LEFT, L"Data\\Monster\\", L"ex01shadow_rock_7_ankle_left");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_ANKLE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_ANKLE_RIGHT, L"Data\\Monster\\", L"ex01shadow_rock_7_ankle_right");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_ANKLE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_BELT, L"Data\\Monster\\", L"ex01shadow_rock_7_belt");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_BELT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_CHEST, L"Data\\Monster\\", L"ex01shadow_rock_7_chest");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_CHEST, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_HELMET, L"Data\\Monster\\", L"ex01shadow_rock_7_helmet");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_HELMET, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_KNEE_LEFT, L"Data\\Monster\\", L"ex01shadow_rock_7_knee_left");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_KNEE_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_KNEE_RIGHT, L"Data\\Monster\\", L"ex01shadow_rock_7_knee_right");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_KNEE_RIGHT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_WRIST_LEFT, L"Data\\Monster\\", L"ex01shadow_rock_7_wrist_left");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_WRIST_LEFT, L"Monster\\");
-        gLoadData.AccessModel(MODEL_EX01_SHADOW_MASTER_WRIST_RIGHT, L"Data\\Monster\\", L"ex01shadow_rock_7_wrist_right");
-        gLoadData.OpenTexture(MODEL_EX01_SHADOW_MASTER_WRIST_RIGHT, L"Monster\\");
         break;
     case WD_65DOPPLEGANGER1:
         LoadBitmap(L"Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
@@ -828,38 +728,7 @@ void CMapManager::Load() // OK
         LoadWaveFile(SOUND_EMPIREGUARDIAN_WEATHER_FOG, L"Data\\Sound\\w69w70w71w72\\ImperialGuardianFort_out2.wav");
         LoadWaveFile(SOUND_EMPIREGUARDIAN_WEATHER_STORM, L"Data\\Sound\\w69w70w71w72\\ImperialGuardianFort_out3.wav");
         LoadWaveFile(SOUND_EMPIREGUARDIAN_INDOOR_SOUND, L"Data\\Sound\\w69w70w71w72\\ImperialGuardianFort_in.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE, L"Data\\Sound\\w69w70w71w72\\GaionKalein_move.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_RAGE, L"Data\\Sound\\w69w70w71w72\\GaionKalein_rage.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_DEATH, L"Data\\Sound\\w69w70w71w72\\GrandWizard_death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01, L"Data\\Sound\\w69w70w71w72\\Jelint_attack1.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03, L"Data\\Sound\\w69w70w71w72\\Jelint_attack3.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01, L"Data\\Sound\\w69w70w71w72\\Jelint_move01.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02, L"Data\\Sound\\w69w70w71w72\\Jelint_move02.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE, L"Data\\Sound\\w69w70w71w72\\Jelint_rage.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH, L"Data\\Sound\\w69w70w71w72\\Jelint_death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\Raymond_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE, L"Data\\Sound\\w69w70w71w72\\Raymond_rage.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_ERCANNE_MONSTER_ATTACK03, L"Data\\Sound\\w69w70w71w72\\Ercanne_attack3.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\1Deasuler_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK03, L"Data\\Sound\\w69w70w71w72\\1Deasuler_attack3.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK01, L"Data\\Sound\\w69w70w71w72\\2Vermont_attack1.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\2Vermont_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH, L"Data\\Sound\\w69w70w71w72\\2Vermont_death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_3CORP_CATO_ATTACK02, L"Data\\Sound\\w69w70w71w72\\3Cato_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE, L"Data\\Sound\\w69w70w71w72\\3Cato_move.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_4CORP_GALLIA_ATTACK02, L"Data\\Sound\\w69w70w71w72\\4Gallia_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_QUATERMASTER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\QuaterMaster_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01, L"Data\\Sound\\w69w70w71w72\\CombatMaster_attack1.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\CombatMaster_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03, L"Data\\Sound\\w69w70w71w72\\CombatMaster_attack3.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_GRANDWIZARD_DEATH, L"Data\\Sound\\w69w70w71w72\\GrandWizard_death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_ASSASSINMASTER_DEATH, L"Data\\Sound\\w69w70w71w72\\AssassinMaster_Death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK01, L"Data\\Sound\\w69w70w71w72\\CavalryLeader_attack1.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\CavalryLeader_attack2.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE01, L"Data\\Sound\\w69w70w71w72\\CavalryLeader_move01.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE02, L"Data\\Sound\\w69w70w71w72\\CavalryLeader_move02.wav");
         LoadWaveFile(SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02, L"Data\\Sound\\w69w70w71w72\\GrandWizard_death.wav");
-        LoadWaveFile(SOUND_EMPIREGUARDIAN_PRIEST_STOP, L"Data\\Sound\\w69w70w71w72\\Priest_stay.wav");
         break;
     case WD_73NEW_LOGIN_SCENE:
     case WD_74NEW_CHARACTER_SCENE:
@@ -884,59 +753,6 @@ void CMapManager::Load() // OK
         LoadBitmap(L"Object9\\sand02.jpg", BITMAP_CHROME + 3, GL_LINEAR, GL_REPEAT);
         LoadBitmap(L"Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-        gLoadData.AccessModel(MODEL_CONDRA_ARM_L, L"Data\\Monster\\", L"condra_7_arm_left");
-        gLoadData.OpenTexture(MODEL_CONDRA_ARM_L, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_ARM_L2, L"Data\\Monster\\", L"condra_7_arm_left_2");
-        gLoadData.OpenTexture(MODEL_CONDRA_ARM_L2, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_SHOULDER, L"Data\\Monster\\", L"condra_7_shoulder_right");
-        gLoadData.OpenTexture(MODEL_CONDRA_SHOULDER, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_ARM_R, L"Data\\Monster\\", L"condra_7_arm_right");
-        gLoadData.OpenTexture(MODEL_CONDRA_ARM_R, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_ARM_R2, L"Data\\Monster\\", L"condra_7_arm_right_2");
-        gLoadData.OpenTexture(MODEL_CONDRA_ARM_R2, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_CONE_L, L"Data\\Monster\\", L"condra_7_cone_left");
-        gLoadData.OpenTexture(MODEL_CONDRA_CONE_L, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_CONE_R, L"Data\\Monster\\", L"condra_7_cone_right");
-        gLoadData.OpenTexture(MODEL_CONDRA_CONE_R, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_PELVIS, L"Data\\Monster\\", L"condra_7_pelvis");
-        gLoadData.OpenTexture(MODEL_CONDRA_PELVIS, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_STOMACH, L"Data\\Monster\\", L"condra_7_stomach");
-        gLoadData.OpenTexture(MODEL_CONDRA_STOMACH, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CONDRA_NECK, L"Data\\Monster\\", L"condra_7_neck");
-        gLoadData.OpenTexture(MODEL_CONDRA_NECK, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_ARM_L, L"Data\\Monster\\", L"nar_condra_7_arm_left");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_ARM_L, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_ARM_L2, L"Data\\Monster\\", L"nar_condra_7_arm_left_2");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_ARM_L2, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_SHOULDER_L, L"Data\\Monster\\", L"nar_condra_7_shoulder_left");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_SHOULDER_L, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_SHOULDER_R, L"Data\\Monster\\", L"nar_condra_7_shoulder_right");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_SHOULDER_R, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_ARM_R, L"Data\\Monster\\", L"nar_condra_7_arm_right");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_ARM_R, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_ARM_R2, L"Data\\Monster\\", L"nar_condra_7_arm_right_2");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_ARM_R2, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_ARM_R3, L"Data\\Monster\\", L"nar_condra_7_arm_right_3");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_ARM_R3, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_CONE_1, L"Data\\Monster\\", L"nar_condra_7_cone_1");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_CONE_1, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_CONE_2, L"Data\\Monster\\", L"nar_condra_7_cone_2");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_CONE_2, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_CONE_3, L"Data\\Monster\\", L"nar_condra_7_cone_3");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_CONE_3, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_CONE_4, L"Data\\Monster\\", L"nar_condra_7_cone_4");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_CONE_4, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_CONE_5, L"Data\\Monster\\", L"nar_condra_7_cone_5");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_CONE_5, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_CONE_6, L"Data\\Monster\\", L"nar_condra_7_cone_6");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_CONE_6, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_PELVIS, L"Data\\Monster\\", L"nar_condra_7_pelvis");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_PELVIS, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_STOMACH, L"Data\\Monster\\", L"nar_condra_7_stomach");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_STOMACH, L"Monster\\");
-        gLoadData.AccessModel(MODEL_NARCONDRA_NECK, L"Data\\Monster\\", L"nar_condra_7_neck");
-        gLoadData.OpenTexture(MODEL_NARCONDRA_NECK, L"Monster\\");
-
         LoadWaveFile(SOUND_KARUTAN_DESERT_ENV, L"Data\\Sound\\Karutan\\Karutan_desert_env.wav", 1);
         LoadWaveFile(SOUND_KARUTAN_INSECT_ENV, L"Data\\Sound\\Karutan\\Karutan_insect_env.wav", 1);
         LoadWaveFile(SOUND_KARUTAN_KARDAMAHAL_ENV, L"Data\\Sound\\Karutan\\Kardamahal_entrance_env.wav", 1);
@@ -959,35 +775,6 @@ void CMapManager::Load() // OK
         LoadBitmap(L"Object25\\water1.tga", BITMAP_MAPTILE, GL_LINEAR, GL_REPEAT, false);
         LoadBitmap(L"Object25\\water2.jpg", BITMAP_MAPTILE + 1, GL_NEAREST, GL_CLAMP_TO_EDGE);
 
-        gLoadData.AccessModel(MODEL_CUNDUN_PART1, L"Data\\Monster\\", L"cd71a", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART1, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PART2, L"Data\\Monster\\", L"cd71b", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART2, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PART3, L"Data\\Monster\\", L"cd71c", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART3, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PART4, L"Data\\Monster\\", L"cd71d", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART4, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PART5, L"Data\\Monster\\", L"cd71e", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART5, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PART6, L"Data\\Monster\\", L"cd71f", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART6, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PART7, L"Data\\Monster\\", L"cd71g", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART7, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PART8, L"Data\\Monster\\", L"cd71h", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PART8, L"Monster\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_DRAGON_HEAD, L"Data\\Skill\\", L"dragonhead", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_DRAGON_HEAD, L"Skill\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_PHOENIX, L"Data\\Skill\\", L"phoenix", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_PHOENIX, L"Skill\\");
-        gLoadData.AccessModel(MODEL_CUNDUN_GHOST, L"Data\\Monster\\", L"cundun_gone", -1);
-        gLoadData.OpenTexture(MODEL_CUNDUN_GHOST, L"Monster\\");
-        Models[MODEL_CUNDUN_PART6].Actions[0].Loop = false;
-        Models[MODEL_CUNDUN_PART6].Actions[0].PlaySpeed = 0.13f;
-        Models[MODEL_CUNDUN_PART7].Actions[0].Loop = false;
-        Models[MODEL_CUNDUN_PART7].Actions[0].PlaySpeed = 0.13f;
-        Models[MODEL_CUNDUN_PHOENIX].Actions[0].Loop = true;
-        Models[MODEL_CUNDUN_GHOST].Actions[0].Loop = false;
-
         LoadWaveFile(SOUND_KALIMA_AMBIENT, L"Data\\Sound\\aKalima.wav", 1);
         LoadWaveFile(SOUND_KALIMA_AMBIENT2, L"Data\\Sound\\aKalima01.wav", 1);
         LoadWaveFile(SOUND_KALIMA_AMBIENT3, L"Data\\Sound\\aKalima02.wav", 1);
@@ -1006,6 +793,8 @@ void CMapManager::Load() // OK
         LoadWaveFile(SOUND_GREAT_POISON, L"Data\\Sound\\eGreatPoison.wav", 1);
         LoadWaveFile(SOUND_GREAT_SHIELD, L"Data\\Sound\\eGreatShield.wav", 1);
     }
+
+    Data::Monsters::ModelLoader::OpenMapParts(this->WorldActive);
 
     if (this->WorldActive != WD_7ATLANSE)
     {

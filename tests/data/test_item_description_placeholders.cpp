@@ -324,12 +324,6 @@ TEST_CASE("A description line can show a skill's mana [data][items]")
     CHECK(HasGameDataValuePrefix("monsterName:x"));
     CHECK_FALSE(HasGameDataValuePrefix("monster"));
 
-    // A number that is no skill's.
-    weapon.description[0].values = {{"mana", "skillMana:9999"}};
-    const std::vector<ItemDataIssue> unknownMana = CheckNames(weapon);
-    REQUIRE(unknownMana.size() == 1);
-    weapon.description[0].values = {{"mana", "skillMana:22"}};
-
     // Name lines are checked as description lines are: their placeholders, and their texts' braces.
     ItemNameLine ring;
     ring.hasText = true;
@@ -346,6 +340,7 @@ TEST_CASE("A description line can show a skill's mana [data][items]")
     CHECK_FALSE(IssuesOf(CheckSyntax(weapon), "nameLines[0].text").empty());
     weapon.nameLines.clear();
 
+    // A number that is no skill's.
     weapon.description[0].values = {{"mana", "skillMana:9999"}};
     const std::vector<ItemDataIssue> unknown = CheckNames(weapon);
     REQUIRE(unknown.size() == 1);

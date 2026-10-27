@@ -1,4 +1,4 @@
-// Bounds of the entries of head code 45, the transformed players that come into view.
+// Bounds and equipment application for head code 45, transformed players coming into view.
 #pragma once
 
 #include <cstddef>
@@ -6,6 +6,8 @@
 #include <span>
 
 #include "Network/Server/WSclient.h"
+
+class CHARACTER;
 
 namespace Network::Viewport
 {

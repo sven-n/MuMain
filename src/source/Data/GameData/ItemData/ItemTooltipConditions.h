@@ -22,7 +22,7 @@ struct TooltipCondition
 {
     enum class Kind : unsigned char
     {
-        Value, // a built-in value (or {level}, or a table of the item stat file), compared with `number`
+        Value, // a built-in value (or {level}), compared with `number`
         State,
         Tag,
         Class, // the hero's class is `number` (CLASS_WIZARD, ...)

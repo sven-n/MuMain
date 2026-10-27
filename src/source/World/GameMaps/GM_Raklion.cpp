@@ -2,6 +2,7 @@
 // GM_Raklion.cpp: implementation of the CGM_Raklion class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -2315,153 +2316,27 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     switch (c->MonsterIndex)
     {
     case MONSTER_ICE_WALKER:
-    {
-        if (c->MonsterSkill == 29)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-        }
-        return true;
-    }
-    break;
     case MONSTER_GIANT_MAMMOTH:
-    {
-        if (c->MonsterSkill == 30)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-        }
-        return true;
-    }
-    break;
     case MONSTER_ICE_GIANT:
-    {
-        if (c->MonsterSkill == 31)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-        }
-        return true;
-    }
-    break;
     case MONSTER_COOLUTIN:
-    {
-        if (c->MonsterSkill == 32)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-        }
-        return true;
-    }
     case MONSTER_IRON_KNIGHT:
-    {
-        if (c->MonsterSkill == 33)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-        }
-        return true;
-    }
-    break;
+    case MONSTER_DARK_MAMMOTH:
+    case MONSTER_DARK_GIANT:
+    case MONSTER_DARK_IRON_KNIGHT:
+    case MONSTER_DARK_COOLUTIN:
+        return GameLogic::Monsters::Attacks::Play(*c, *o);
     case MONSTER_SELUPAN:
-    {
-        SetBossMonsterAction(c, o);
-        return true;
-    }
-    break;
+        return SetBossMonsterAction(c, o);
     case MONSTER_SPIDER_EGGS_1:
     case MONSTER_SPIDER_EGGS_2:
     case MONSTER_SPIDER_EGGS_3:
-    {
         return false;
-    }
-    break;
-    case MONSTER_DARK_MAMMOTH:
-    {
-        if (c->MonsterSkill == ATMON_SKILL_EX_DARKMEMUD_ATTACKSKILL)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        return true;
-    }
-    break;
-    case MONSTER_DARK_GIANT:
-    {
-        if (c->MonsterSkill == ATMON_SKILL_EX_DARKGIANT_ATTACKSKILL)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        return true;
-    }
-    break;
-    case MONSTER_DARK_IRON_KNIGHT:
-    {
-        if (c->MonsterSkill == ATMON_SKILL_EX_DARKAIONNIGHT_ATTACKSKILL)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        return true;
-    }
-    break;
-    case MONSTER_DARK_COOLUTIN:
-    {
-        if (c->MonsterSkill == ATMON_SKILL_EX_DARKCOOLERTIN_ATTACKSKILL)
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        return true;
-    }
-    break;
     }
 
     return false;
 }
 
-void CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
+bool CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
 {
     if (c->MonsterSkill == 37 || !(c->MonsterSkill >= 34 && c->MonsterSkill <= 42) || m_bBossHeightMove == true)
     {
@@ -2469,30 +2344,14 @@ void CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
         m_bBossHeightMove = false;
     }
 
-    if (c->MonsterSkill == 34)
+    // The animation is Selupan's attacks'; its skills' sounds and effects stay here.
+    const bool played = GameLogic::Monsters::Attacks::Play(*c, *o);
+    if (c->MonsterSkill == 38)
     {
-        SetAction(o, MONSTER01_ATTACK2);
-    }
-    else if (c->MonsterSkill == 35)
-    {
-        SetAction(o, MONSTER01_ATTACK1);
-    }
-    else if (c->MonsterSkill == 36)
-    {
-        SetAction(o, MONSTER01_ATTACK3);
-    }
-    else if (c->MonsterSkill == 37)
-    {
-        SetAction(o, MONSTER01_APEAR);
-    }
-    else if (c->MonsterSkill == 38)
-    {
-        SetAction(o, MONSTER01_ATTACK4);
         PlayBuffer(SOUND_RAKLION_SERUFAN_WORD4);
     }
     else if (c->MonsterSkill == 39)
     {
-        SetAction(o, MONSTER01_ATTACK4);
         PlayBuffer(SOUND_RAKLION_SERUFAN_CURE);
 
         vec3_t vLight, vPos, vAngle;
@@ -2513,216 +2372,23 @@ void CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
     }
     else if (c->MonsterSkill == 40)
     {
-        SetAction(o, MONSTER01_ATTACK4);
         PlayBuffer(SOUND_RAKLION_SERUFAN_WORD3);
-    }
-    else if (c->MonsterSkill == 41)
-    {
     }
     else if (c->MonsterSkill == 42)
     {
-        SetAction(o, MONSTER01_ATTACK4);
 
         vec3_t vLight;
         Vector(0.3f, 0.2f, 0.1f, vLight);
         CreateEffect(MODEL_STORM2, o->Position, o->Angle, vLight, 1, NULL, -1, 0, 0, 0, 1.6f);
         CreateEffect(MODEL_SUMMON, o->Position, o->Angle, vLight, 3);
     }
-    else
-    {
-        SetAction(o, MONSTER01_ATTACK4);
-    }
+    return played;
 }
 
 bool CGM_Raklion::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (IsIceCity() == false)
         return false;
-
-    return false;
-}
-
-bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
-{
-    if (IsIceCity() == false)
-        return false;
-
-    float fDis_x, fDis_y;
-    fDis_x = o->Position[0] - Hero->Object.Position[0];
-    fDis_y = o->Position[1] - Hero->Object.Position[1];
-    float fDistance = sqrtf(fDis_x * fDis_x + fDis_y * fDis_y);
-
-    if (fDistance > 500.0f)
-        return true;
-
-    switch (o->Type)
-    {
-    case MODEL_ICE_WALKER: // Ice Walker
-        if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_RAKLION_ICEWALKER_ATTACK);
-        }
-        else if (MONSTER01_WALK == o->CurrentAction)
-        {
-            if (rand_fps_check(20))
-            {
-                PlayBuffer(SOUND_RAKLION_ICEWALKER_MOVE);
-            }
-        }
-        else if (MONSTER01_DIE == o->CurrentAction)
-        {
-            {
-                PlayBuffer(SOUND_ELBELAND_WOLFHUMAN_DEATH01);
-            }
-        }
-        return true;
-    case MODEL_GIANT_MAMMOTH:
-        if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_ATTACK);
-        }
-        else if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(100))
-            {
-                PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_MOVE);
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_DEATH);
-        }
-        return true;
-    case MODEL_ICE_GIANT:
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(100))
-            {
-                PlayBuffer(SOUND_RAKLION_ICEGIANT_MOVE);
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_RAKLION_ICEGIANT_DEATH);
-        }
-        return true;
-    case MODEL_COOLUTIN:
-        if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_RAKLION_COOLERTIN_ATTACK);
-        }
-        else if (MONSTER01_WALK == o->CurrentAction)
-        {
-            if (rand_fps_check(20))
-            {
-                PlayBuffer(SOUND_RAKLION_COOLERTIN_MOVE);
-            }
-        }
-        else if (MONSTER01_DIE == o->CurrentAction)
-        {
-            {
-                PlayBuffer(SOUND_MONSTER_HELLSPIDERDIE);
-            }
-        }
-
-        return true;
-    case MODEL_IRON_KNIGHT:
-        if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_RAKLION_IRON_KNIGHT_ATTACK);
-        }
-        else if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2 ||
-                 o->CurrentAction == MONSTER01_WALK)
-        {
-            PlayBuffer(SOUND_RAKLION_IRON_KNIGHT_MOVE);
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_MONSTER_DEATH1);
-        }
-        return true;
-
-    case MODEL_SELUPAN:
-        if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_RAKLION_SERUFAN_ATTACK1);
-        }
-        else if (o->CurrentAction == MONSTER01_ATTACK3)
-        {
-            PlayBuffer(SOUND_RAKLION_SERUFAN_ATTACK2);
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_RAKLION_SERUFAN_WORD2);
-        }
-        return true;
-
-    case MODEL_DARK_MAMMOTH:
-        if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_ATTACK);
-        }
-        else if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(100))
-            {
-                PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_MOVE);
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_DEATH);
-        }
-        return true;
-    case MODEL_DARK_GIANT:
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            if (rand_fps_check(100))
-            {
-                PlayBuffer(SOUND_RAKLION_ICEGIANT_MOVE);
-            }
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_RAKLION_ICEGIANT_DEATH);
-        }
-        return true;
-    case MODEL_DARK_IRON_KNIGHT:
-        if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_RAKLION_IRON_KNIGHT_ATTACK);
-        }
-        else if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2 ||
-                 o->CurrentAction == MONSTER01_WALK)
-        {
-            PlayBuffer(SOUND_RAKLION_IRON_KNIGHT_MOVE);
-        }
-        else if (o->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_MONSTER_DEATH1);
-        }
-        return true;
-    case MODEL_DARK_COOLUTIN:
-        if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
-        {
-            PlayBuffer(SOUND_RAKLION_COOLERTIN_ATTACK);
-        }
-        else if (MONSTER01_WALK == o->CurrentAction)
-        {
-            if (rand_fps_check(20))
-            {
-                PlayBuffer(SOUND_RAKLION_COOLERTIN_MOVE);
-            }
-        }
-        else if (MONSTER01_DIE == o->CurrentAction)
-        {
-            {
-                PlayBuffer(SOUND_MONSTER_HELLSPIDERDIE);
-            }
-        }
-
-        return true;
-    }
 
     return false;
 }

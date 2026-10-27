@@ -38,7 +38,6 @@ public: // Character
 
 public: // Sound
     // 몬스터 사운드
-    virtual bool PlayMonsterSound(OBJECT* o);
     // 오브젝트 사운드
     virtual void PlayObjectSound(OBJECT* o);
 

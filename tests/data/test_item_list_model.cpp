@@ -8,11 +8,13 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "UI/Common/TextSearch.h"
 #include "UI/ItemEditor/ItemListModel.h"
 
 #include <vector>
 
 using namespace Data::Items;
+using MuEditor::TextSearch::ContainsIgnoringCase;
 
 namespace
 {

@@ -471,10 +471,12 @@ void FormatRewardText(SRequestRewardText& line, const SQuestReward& reward)
         break;
 
     case QUEST_REWARD_ITEM:
-        FormatRequestRewardText(line, I18N::Game::QuestRewardItem,
-                                GetItemNameText(reward.m_pItem->Type, reward.m_pItem->Level).c_str(),
+    {
+        const std::wstring itemName = ::GetItemName((int)reward.m_pItem->Type, reward.m_pItem->Level);
+        FormatRequestRewardText(line, I18N::Game::QuestRewardItem, itemName.c_str(),
                                 static_cast<unsigned long>(reward.m_dwValue));
         break;
+    }
 
     case QUEST_REWARD_BUFF:
     {
@@ -552,9 +554,10 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 break;
             case QUEST_REQUEST_ITEM:
             {
+                const std::wstring itemName =
+                    ::GetItemName((int)pRequestInfo->m_pItem->Type, pRequestInfo->m_pItem->Level);
                 FormatRequestRewardText(
-                    aDest[nLine], I18N::Game::QuestRequirementItem,
-                    GetItemNameText(pRequestInfo->m_pItem->Type, pRequestInfo->m_pItem->Level).c_str(),
+                    aDest[nLine], I18N::Game::QuestRequirementItem, itemName.c_str(),
                     static_cast<unsigned long>(MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue)),
                     static_cast<unsigned long>(pRequestInfo->m_dwValue));
             }
@@ -626,11 +629,14 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             else
                 aDest[nLine].m_eKind = RRTK_REQUIREMENT;
 
-            FormatRequestRewardText(
-                aDest[nLine], I18N::Game::QuestRequirementItem,
-                GetItemNameText(pRequestInfo->m_pItem->Type, pRequestInfo->m_pItem->Level).c_str(),
-                static_cast<unsigned long>(MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue)),
-                static_cast<unsigned long>(pRequestInfo->m_dwValue));
+            {
+                const std::wstring itemName =
+                    ::GetItemName((int)pRequestInfo->m_pItem->Type, pRequestInfo->m_pItem->Level);
+                FormatRequestRewardText(
+                    aDest[nLine], I18N::Game::QuestRequirementItem, itemName.c_str(),
+                    static_cast<unsigned long>(MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue)),
+                    static_cast<unsigned long>(pRequestInfo->m_dwValue));
+            }
             break;
 
         case QUEST_REQUEST_LEVEL:
