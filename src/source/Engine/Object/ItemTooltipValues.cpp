@@ -10,6 +10,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Network/Server/SocketSystem.h"
@@ -159,6 +160,7 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
     values.heroLevel = CharacterAttribute != nullptr ? CharacterAttribute->Level : 0;
     values.name = attribute->Name;
     values.levelPlusOne = item.Level + 1;
+    values.bundleCount = COMGEM::CalcCompiledCount(&item);
     values.excellentFlags = item.ExcellentFlags & 63;
     if (g_pItemAddOptioninfo != nullptr)
     {
@@ -210,6 +212,7 @@ constexpr NamedValue PlainValues[] = {
     {"maxDurability", &ItemTooltipValues::maxDurability},
     {"heroLevel", &ItemTooltipValues::heroLevel},
     {"levelPlusOne", &ItemTooltipValues::levelPlusOne},
+    {"bundleCount", &ItemTooltipValues::bundleCount},
     {"excellentFlags", &ItemTooltipValues::excellentFlags},
     {"addOptionValue1", &ItemTooltipValues::addOptionValue1},
     {"addOptionValue2", &ItemTooltipValues::addOptionValue2},

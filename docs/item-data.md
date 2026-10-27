@@ -93,8 +93,9 @@ names, ancient set prefixes are omitted, and money uses `Zen +amount`. A languag
 change may require updating saved keywords; option words follow the UI language
 too. Ordinary equipment keeps contiguous keywords such as `+7+Skill` in English.
 `+N` matches the displayed name's number, not necessarily the raw source level:
-Kundun tiers and jewel bundles use their displayed numbers, while seeds and some
-quest items omit their source level. Unmapped variant levels fall back to the base
+Kundun tiers use their displayed numbers, while seeds and some quest items omit
+their source level. Jewel and stone bundles show their count instead (`x10` to
+`x30`), so a keyword such as `Bless +2` no longer matches them; `Bless x20` does. Unmapped variant levels fall back to the base
 name and `+level`.
 
 A saved keyword holds **at most 14 encoded bytes** (14 single-byte characters,
@@ -436,8 +437,9 @@ placeholder is one of:
   charms' effect in the game's ItemAddOption data): `addOptionValue1`,
   `addOptionValue2` and `addOptionDuration`, a text such as "1 Hour"; the
   hero's `heroLevel`; and for the [name lines](#name-lines) the item's `name`
-  (its `name` in the item names' language), `levelPlusOne` (its level + 1)
-  and `excellentFlags` (its excellent options, 0 to 63; the Horn of Fenrir's
+  (its `name` in the item names' language), `levelPlusOne` (its level + 1),
+  `bundleCount` (how many jewels or stones a bundle holds, as the game counts
+  them; 0 for other items) and `excellentFlags` (its excellent options, 0 to 63; the Horn of Fenrir's
   1, 2 and 4 are its Destroy, Protect and Illusion kinds);
 - a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
   as `table:` and its name: the table's value at the item's + level
