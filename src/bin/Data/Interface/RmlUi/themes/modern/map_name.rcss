@@ -9,13 +9,18 @@ body { pointer-events: none; }
 #swirl_right { left: 109dp; top: 46dp; width: 55dp; height: 27dp; }
 /* The room a name may take; the client squeezes a longer name into it, as the originals were. */
 #name_room { position: absolute; left: 1dp; right: 1dp; top: 0; height: 0; }
-/* Far wider than the banner, so a long name stays on one line and keeps its centre. */
-#name {
-    position: absolute; left: -1000dp; right: -1000dp; top: -2dp; transform-origin: 50% 50%;
+/* The name, far wider than the banner so a long name stays on one line and keeps its centre, in
+   the originals' silver: this grey at the baseline under a white top (#name_shine), and a black
+   edge with a thin grey rim that fades out. RmlUi draws font effects in pixels whatever the
+   unit; these suit the common 1.5-2.25 dp ratios. */
+#name, #name_shine {
+    position: absolute; left: -1000dp; right: -1000dp; top: -2dp; height: 50dp; transform-origin: 50% 50%;
     font-family: token(font-map-name); font-size: 50dp; line-height: 50dp; font-weight: normal; font-style: token(font-map-name-style);
-    /* RmlUi draws font effects in pixels whatever the unit; these suit the common 1.5-2.25 dp ratios. */
-    color: #f0ece2; font-effect: outline(3px #100e0b), shadow(3px 3px #000000);
     text-align: center; white-space: nowrap;
 }
+#name { color: #686766; font-effect: glow(2px 4px 0px 0px #000000b0), outline(3px #000000), outline(1px #5e5955); }
 #name_text { display: inline-block; }
+/* The same name in white over it, without the edge, faded out from just below the x-height to
+   the baseline. */
+#name_shine { color: #fafafa; mask-image: linear-gradient(to bottom, #ffffff 20.75dp, #ffffff00 40.5dp); }
 #strife { position: absolute; left: 0; top: -28dp; width: 166dp; height: 28dp; }

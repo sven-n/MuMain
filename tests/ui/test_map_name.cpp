@@ -120,32 +120,45 @@ void CheckName(int mapId, const wchar_t* expected)
     CHECK(std::wstring(gMapManager.GetMapName(mapId)) == expected);
 }
 
-// RmlUi draws font effects in pixels whatever the unit, so the theme's outline is 3 px at every scale.
+// The originals' edge: a soft dark halo, a black outline and a thin grey rim against the fill, in
+// that order behind the text. RmlUi draws font effects in pixels whatever the unit, so their
+// widths are the same at every scale.
 void CheckTextEffects(Rml::Element& text)
 {
     const auto* property = text.GetProperty(Rml::PropertyId::FontEffect);
     REQUIRE(property != nullptr);
     const auto effects = property->Get<Rml::FontEffectsPtr>();
     REQUIRE(effects != nullptr);
-    REQUIRE(effects->list.size() == 2);
+    REQUIRE(effects->list.size() == 3);
     constexpr int probeSize = 10;
-    constexpr int edgeWidth = 3;
     Rml::FontGlyph glyph;
     for (const auto& effect : effects->list)
     {
         Rml::Vector2i origin(0, 0), dimensions(probeSize, probeSize);
         REQUIRE(effect->GetGlyphMetrics(origin, dimensions, glyph));
-        if (effect->HasUniqueTexture())
-        {
-            CHECK(origin == Rml::Vector2i(-edgeWidth, -edgeWidth));
-            CHECK(dimensions == Rml::Vector2i(probeSize + 2 * edgeWidth, probeSize + 2 * edgeWidth));
-        }
-        else
-        {
-            CHECK(origin == Rml::Vector2i(edgeWidth, edgeWidth));
-            CHECK(dimensions == Rml::Vector2i(probeSize, probeSize));
-        }
+        CHECK(effect->GetLayer() == Rml::FontEffect::Layer::Back);
     }
+    for (const auto& [index, width] : {std::pair{1, 3}, std::pair{2, 1}})
+    {
+        CAPTURE(index);
+        Rml::Vector2i origin(0, 0), dimensions(probeSize, probeSize);
+        REQUIRE(effects->list[index]->GetGlyphMetrics(origin, dimensions, glyph));
+        CHECK(origin == Rml::Vector2i(-width, -width));
+        CHECK(dimensions == Rml::Vector2i(probeSize + 2 * width, probeSize + 2 * width));
+    }
+}
+
+// The silver's light top: the same name in white, without the edge, faded out by a mask.
+void CheckShine(Rml::Element& shine, Rml::Element& text)
+{
+    CHECK(shine.GetComputedValues().font_size() == text.GetComputedValues().font_size());
+    CHECK(shine.GetComputedValues().color() == Rml::Colourb(250, 250, 250));
+    const auto* effects = shine.GetProperty(Rml::PropertyId::FontEffect);
+    CHECK((effects == nullptr || effects->Get<Rml::FontEffectsPtr>() == nullptr ||
+           effects->Get<Rml::FontEffectsPtr>()->list.empty()));
+    const auto* mask = shine.GetProperty(Rml::PropertyId::MaskImage);
+    REQUIRE(mask != nullptr);
+    CHECK(mask->ToString().find("linear-gradient") != Rml::String::npos);
 }
 
 void CheckBounds(Rml::Element& child, Rml::Element& parent)
@@ -345,6 +358,9 @@ TEST_CASE("map-name banner keeps the original image's box across themes and scal
             CAPTURE(name);
             CAPTURE(warning);
             fixture.Configure(viewport, percent);
+            // Render() runs the banner's real-time fade; showing it again keeps a slow run from
+            // hiding the document, which RmlUi then stops laying out.
+            banner.ShowMapName();
             banner.SetText(name);
             fixture.Refresh();
             banner.Render(); // fits the laid-out name into its room
@@ -387,8 +403,10 @@ TEST_CASE("map-name banner keeps the original image's box across themes and scal
             CHECK_FALSE(UI::RmlBridge::IsPointerOver(frame));
             CHECK(text->GetComputedValues().font_size() > 0.f);
             CHECK(text->GetComputedValues().font_weight() == Rml::Style::FontWeight::Normal);
-            CHECK(text->GetComputedValues().color() == Rml::Colourb(240, 236, 226));
+            CHECK(text->GetComputedValues().color() == Rml::Colourb(104, 103, 102));
             CheckTextEffects(*text);
+            REQUIRE(document->GetElementById("name_shine") != nullptr);
+            CheckShine(*document->GetElementById("name_shine"), *text);
         }
     }
 }

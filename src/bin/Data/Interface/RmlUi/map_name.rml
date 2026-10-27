@@ -15,6 +15,7 @@
 		<img id="icon" class="ornament" data-if="icon" data-attr-src="icon_source" data-attr-style="icon_style"/>
 		<div id="name_room"/>
 		<div id="name" data-style-transform="name_transform"><span id="name_text">{{map_name}}</span></div>
+		<div id="name_shine" data-style-transform="name_transform">{{map_name}}</div>
 	</div>
 </body>
 </rml>
