@@ -45,7 +45,7 @@ mu_add_test(
         test_server_list_json.cpp
         test_server_list_manager.cpp
         test_server_list_window.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS
         MuClient
 )
@@ -125,7 +125,7 @@ mu_add_test(
         test_item_sync_diff.cpp
         test_item_tooltips.cpp
         test_item_value_formulas.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS
         MuClient
         # The test's version 14 model is encrypted with Crypto++'s ciphers.
@@ -142,7 +142,8 @@ mu_add_test(
     NAME test_character_bones
     SOURCES
         test_character_bones.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        test_character_realism_bones.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS
         MuClient
 )
@@ -167,7 +168,7 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectSourceCases.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectSourceCondition.cpp
         ${CMAKE_SOURCE_DIR}/tests/effects/EffectTestData.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS
         MuClient
 )
@@ -183,7 +184,7 @@ mu_add_test(
     NAME test_effect_registry_before_load
     SOURCES
         test_effect_registry_before_load.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS
         MuClient
 )

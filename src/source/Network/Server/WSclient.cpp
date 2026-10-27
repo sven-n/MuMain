@@ -3571,7 +3571,14 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
     }
     // if(c->Helper.Type == MODEL_HELPER+37) return;
 
-    c->Object.Angle[2] = ((float)(Data->Angle) - 1.f) * 45.f;
+    const float angle = ((float)(Data->Angle) - 1.f) * 45.f;
+    // Standing, another character turns toward the new direction with its feet stepping around; any other action
+    // (an attack, a skill) faces it at once.
+    const bool standing = Data->Action == AT_STAND1 || Data->Action == AT_STAND2;
+    if (!standing || c == Hero)
+    {
+        c->Object.Angle[2] = angle;
+    }
     c->Movement = false;
 
     c->Object.Position[0] = c->TargetX * TERRAIN_SCALE + TERRAIN_SCALE * 0.5f;
@@ -3581,6 +3588,10 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
     case AT_STAND1:
     case AT_STAND2:
         SetPlayerStop(c);
+        if (c != Hero)
+        {
+            StartStandingTurn(c, angle);
+        }
         break;
     case AT_ATTACK1:
     case AT_ATTACK2:

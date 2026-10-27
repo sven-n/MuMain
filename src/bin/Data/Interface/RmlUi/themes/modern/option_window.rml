@@ -281,6 +281,10 @@
 						<div class="opt-tuning-reset" data-event-click="option_reset_all_tuning">{{tuning_reset_all_label}}</div>
 					</div>
 					<div class="opt-tuning-error" data-class-hidden="tuning_save_message == ''">{{tuning_save_message}}</div>
+					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_enhanced_movement">
+						<span class="opt-label">{{enhanced_movement_label}}</span>
+						<div class="opt-control"><div class="opt-toggle" data-class-checked="enhanced_movement"><div class="opt-toggle-knob"></div></div></div>
+					</div>
 					<div class="opt-row opt-row-tipped">
 						<span class="opt-label">{{antialiasing_row_label}}</span>
 						<div class="opt-control">

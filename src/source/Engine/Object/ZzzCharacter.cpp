@@ -19,6 +19,18 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Engine/Object/EnhancedMovement.h"
+#include "Engine/Object/Movement/FlightFeel.h"
+#include "Engine/Object/Movement/Greetings.h"
+#include "Engine/Object/Movement/LookAt.h"
+#include "Engine/Object/Movement/Momentum.h"
+#include "Engine/Object/Movement/MovementBones.h"
+#include "Engine/Object/Movement/PoseFade.h"
+#include "Engine/Object/Movement/SlopeLean.h"
+#include "Engine/Object/Movement/SnapTurn.h"
+#include "Engine/Object/Movement/Stride.h"
+#include "Engine/Object/Movement/TurnLag.h"
+#include "Engine/Object/Movement/Wings.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -2452,6 +2464,40 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
         {
             PlaySpeed /= 2.f;
         }
+        // A standing turn's steps (the walk FinishPendingTurn plays) are slower than a walk's: the feet shuffle
+        // around rather than march.
+        constexpr float StandingTurnStepSpeed = 0.5f;
+        if (c->TurnAction != -1 && o->CurrentAction == c->TurnAction)
+        {
+            PlaySpeed *= StandingTurnStepSpeed;
+        }
+        // Walking or running, the feet keep to the ground: the steps play as fast as the character really moves
+        // (CharacterMoveSpeed: its gear, mount, buffs and freezes), for the stride the action takes (StepPerKey).
+        const bool enhancedMovement = Engine::Characters::EnhancedMovementEnabled();
+        if (enhancedMovement && o->Type == MODEL_PLAYER && c->Movement && o->Scale > 0.f)
+        {
+            const float step = Engine::Characters::StepPerKey(o->CurrentAction);
+            if (step > 0.f)
+            {
+                // (Slowing to a stop or speeding up, at the share of its speed it has: StepMomentum.)
+                PlaySpeed = CharacterMoveSpeed(c) * c->Motion.MomentumPace / (step * o->Scale);
+            }
+        }
+        // Hovering in place, the body's breathing keeps the wings' beat: one of its cycles per wing beat (at their
+        // speed, RenderCharacterBackItem's), instead of about one and a half.
+        if (enhancedMovement && o->Type == MODEL_PLAYER &&
+            (o->CurrentAction == PLAYER_STOP_FLY || o->CurrentAction == PLAYER_STOP_FLY_CROSSBOW) &&
+            c->Wing.Type >= 0 && Models[c->Wing.Type].NumActions > 0)
+        {
+            // Scaled rather than set, keeping what slowed it above (a freeze).
+            const int wingKeys = Models[c->Wing.Type].Actions[0].NumAnimationKeys;
+            const Action_t& body = b->Actions[o->CurrentAction];
+            if (wingKeys > 1 && body.NumAnimationKeys > 1 && body.PlaySpeed > 0.f && c->Wing.PlaySpeed > 0.f)
+            {
+                PlaySpeed *= c->Wing.PlaySpeed * static_cast<float>(body.NumAnimationKeys) /
+                             (static_cast<float>(wingKeys) * body.PlaySpeed);
+            }
+        }
         if (o->Type != MODEL_PLAYER)
         {
             switch (o->Type)
@@ -2483,7 +2529,10 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
         return false;
     }
 
+    Engine::Characters::UpdatePoseFade(c, o, PlaySpeed);
     Play = b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, PlaySpeed, o->Position, o->Angle);
+    c->Motion.FadeLastAction = o->CurrentAction;
+    c->Motion.FadeLastFrame = o->AnimationFrame;
     if (o->CurrentAction == PLAYER_CHANGE_UP)
     {
         if (Play == false)
@@ -5549,17 +5598,35 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
             && !g_isCharacterBuff(o, eBuff_Hp_up_Ourforces)
             && !g_isCharacterBuff(o, eBuff_Def_up_Ourforces))
         {
-            if (o->Type != MODEL_PLAYER)
-                MoveHead(c);
-            if (c != Hero && c->Dead == 0 && rand_fps_check(32))
+            // Someone to look at (UpdateLookAt) comes before the idle glances; the hero's head is MoveHero's.
+            const bool enhancedMovement = Engine::Characters::EnhancedMovementEnabled();
+            if (!enhancedMovement)
             {
-                o->HeadTargetAngle[0] = (float)(rand() % 128 - 64);
-                o->HeadTargetAngle[1] = (float)(rand() % 32 - 16);
-                for (int i = 0; i < 2; i++)
-                    if (o->HeadTargetAngle[i] < 0) o->HeadTargetAngle[i] += 360.f;
+                c->Motion.LookTarget = -1;
+            }
+            const CHARACTER* lookAt =
+                enhancedMovement && c != Hero && c->Dead == 0 ? Engine::Characters::UpdateLookAt(c) : nullptr;
+            if (lookAt != nullptr)
+            {
+                Engine::Characters::LookTowards(o, lookAt, Engine::Characters::LookViewDegrees);
+            }
+            else
+            {
+                if (o->Type != MODEL_PLAYER)
+                    MoveHead(c);
+                if (c != Hero && c->Dead == 0 && rand_fps_check(32))
+                {
+                    o->HeadTargetAngle[0] = (float)(rand() % 128 - 64);
+                    o->HeadTargetAngle[1] = (float)(rand() % 32 - 16);
+                    for (int i = 0; i < 2; i++)
+                        if (o->HeadTargetAngle[i] < 0)
+                            o->HeadTargetAngle[i] += 360.f;
+                }
             }
 
+            Engine::Characters::RemoveNod(c);
             SmoothHeadAngles(o->HeadAngle, o->HeadTargetAngle, FPS_ANIMATION_FACTOR);
+            Engine::Characters::UpdateNod(c);
         }
 
         vec3_t p, Position;
@@ -6301,11 +6368,17 @@ float CharacterMoveSpeed(CHARACTER* c)
 
 void MoveCharacterPosition(CHARACTER* c)
 {
+    MoveCharacterPosition(c, c->Object.Angle[2]);
+}
+
+void MoveCharacterPosition(CHARACTER* c, float heading, float pace)
+{
     OBJECT* o = &c->Object;
     float Matrix[3][4];
-    AngleMatrix(o->Angle, Matrix);
+    const vec3_t direction = {o->Angle[0], o->Angle[1], heading};
+    AngleMatrix(direction, Matrix);
     vec3_t v, Velocity;
-    Vector(0.f, -CharacterMoveSpeed(c), 0.f, v);
+    Vector(0.f, -CharacterMoveSpeed(c) * pace, 0.f, v);
     VectorRotate(v, Matrix, Velocity);
     VectorAddScaled(o->Position, Velocity, o->Position, FPS_ANIMATION_FACTOR);
 
@@ -6325,6 +6398,19 @@ void MoveCharacterPosition(CHARACTER* c)
         o->Position[2] += (-absf(sinf(o->Timer)) * 70.f + 70.f) * FPS_ANIMATION_FACTOR;
     }
     o->Timer += 0.15f * FPS_ANIMATION_FACTOR;
+    // The height starts over from the terrain: no flight hover in it yet (UpdateFlightFeel adds it back).
+    c->Motion.FlightHoverApplied = 0.f;
+}
+
+CHARACTER* CharacterOfObject(const OBJECT* o)
+{
+    const auto offset = reinterpret_cast<const char*>(o) - reinterpret_cast<const char*>(&CharactersClient[0].Object);
+    if (offset < 0 || offset % static_cast<std::ptrdiff_t>(sizeof(CHARACTER)) != 0)
+    {
+        return nullptr;
+    }
+    const auto index = offset / static_cast<std::ptrdiff_t>(sizeof(CHARACTER));
+    return index < MAX_CHARACTERS_CLIENT ? &CharactersClient[index] : nullptr;
 }
 
 void MoveMonsterClient(CHARACTER* c, OBJECT* o)
@@ -6377,7 +6463,9 @@ void MoveMonsterClient(CHARACTER* c, OBJECT* o)
                 SetPlayerStop(c);
             }
 
-            MoveCharacterPosition(c);
+            float heading = Engine::Characters::EnhancedMovementEnabled() ? c->MoveHeading : o->Angle[2];
+            const float pace = Engine::Characters::StepMomentum(c, heading);
+            MoveCharacterPosition(c, heading, pace);
         }
     }
     else
@@ -6397,7 +6485,16 @@ void MoveCharacterClient(CHARACTER* cc)
         co->Visible = TestFrustrum2D(co->Position[0] * 0.01f, co->Position[1] * 0.01f, -20.f);
 
         MoveMonsterClient(cc, co);
+        FinishPendingTurn(cc);
         MoveCharacter(cc, co);
+        // The hero's comes after its move, in MoveHero.
+        if (cc != Hero)
+        {
+            Engine::Characters::UpdateFlightFeel(cc);
+            Engine::Characters::UpdateTurnLag(cc);
+            Engine::Characters::UpdateSlopeLean(cc);
+        }
+        Engine::Characters::UpdateSnapTurn(cc);
         MoveCharacterVisual(cc, co);
 
         battleCastle::MoveBattleCastleMonster(cc, co);
@@ -6482,9 +6579,9 @@ void AnimateCharacterBones(OBJECT* o)
     BMD* model = &Models[o->Type];
     if (model->NumBones <= 0) return;
 
-    // Model space, as render builds them: the model's BodyOrigin and BodyScale belong to whichever object set them last.
-    model->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
-                     o->HeadAngle, false, false, nullptr, o->CurrentAction);
+    // Model space, as render builds them: the model's BodyOrigin and BodyScale belong to whichever object set them
+    // last. With what the movement features change in how it's drawn, as the render builds (AnimateBones).
+    Engine::Characters::AnimateBones(o, *model, o->BoneTransform, false, o->CurrentAction);
     o->EnableBoneMatrix = true;
 }
 
@@ -6927,6 +7024,11 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         for (int r = 0; r < 3; ++r)
             for (int c = 0; c < 4; ++c)
                 ParentMatrix[r][c] = o->BoneTransform[f->LinkBone][r][c];
+        // A player's wings turn with its back and trail a turn (and sit straight on a Uniria or a Dinorant).
+        if (o->Type == MODEL_PLAYER && f == &c->Wing)
+        {
+            Engine::Characters::PlaceWingsOnBack(c, f->LinkBone, ParentMatrix);
+        }
     }
     if (Type == MODEL_BOSS_HEAD)
     {

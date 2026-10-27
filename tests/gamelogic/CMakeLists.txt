@@ -10,7 +10,16 @@ mu_add_test(
     NAME test_head_movement
     SOURCES
         test_head_movement.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_smooth_turning
+    SOURCES
+        test_smooth_turning.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS
         MuClient
 )
@@ -19,7 +28,7 @@ mu_add_test(
     NAME test_earthquake_falloff
     SOURCES
         test_earthquake_falloff.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS
         MuClient
 )
@@ -28,7 +37,7 @@ mu_add_test(
     NAME test_reference_frame_steps
     SOURCES
         test_reference_frame_steps.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS
         MuClient
 )
@@ -53,6 +62,15 @@ mu_add_test(
     NAME test_helper_attack_rotation
     SOURCES
         test_helper_attack_rotation.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME test_character_realism
+    SOURCES
+        test_character_realism.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
+    LINK_LIBS
+        MuClient
 )

@@ -224,7 +224,7 @@ mu_add_test(
     NAME light_mood_terrain_tests
     SOURCES
         test_light_mood_terrain.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS
         MuClient
 )

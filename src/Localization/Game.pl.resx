@@ -1434,6 +1434,9 @@
   <data name="Light Mood" xml:space="preserve">
     <value>Ciemniejsze światło mapy</value>
   </data>
+  <data name="Enhanced Movement" xml:space="preserve">
+    <value>Ulepszony ruch</value>
+  </data>
   <data name="Bloom And Colour Grading" xml:space="preserve">
     <value>Poświata i korekcja kolorów</value>
   </data>

@@ -31,6 +31,7 @@ EnhancedLighting=1
 DynamicLights=1
 LightMood=1
 PostProcessing=1
+EnhancedMovement=1
 DisableEffects=0
 DisableParticles=0
 DisableSkillEffectModels=0

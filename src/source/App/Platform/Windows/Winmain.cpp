@@ -66,6 +66,7 @@
 #include "Core/Platform/sdl3/SDLWindowFlags.h"
 #include "Core/Platform/BundledFonts.h"
 #include "Engine/Pathing/ZzzPath.h"
+#include "Engine/Object/EnhancedMovement.h"
 #include "App/Platform/Windows/Local.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 
@@ -2305,6 +2306,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     }
     g_ItemDataHandler.SetTranslateItemNames(GameConfig::GetInstance().GetTranslateItemNames());
     g_MonsterDataHandler.SetNamesChangedCallback(&GameLogic::Monsters::Names::RefreshShownNames);
+    Engine::Characters::SetEnhancedMovementEnabled(GameConfig::GetInstance().GetEnhancedMovement());
 
 #ifdef _EDITOR
     // Initialize MU Editor with the live SDL GPU window.

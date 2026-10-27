@@ -70,6 +70,9 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeyDynamicLights[] = L"DynamicLights";
     inline constexpr wchar_t CfgKeyLightMood[] = L"LightMood";
     inline constexpr wchar_t CfgKeyPostProcessing[] = L"PostProcessing";
+    // The character realism features (smooth turning, look-at, flight feel, mount lean, foot
+    // placement and the like); off moves and draws characters as before them. Both looks.
+    inline constexpr wchar_t CfgKeyEnhancedMovement[] = L"EnhancedMovement";
 
     inline constexpr wchar_t CfgKeyRenderBackend[] = L"Backend";
     // DXP-23's per-system effect-cost toggles (MainScene.h's SetDisableEffects/SetDisableParticles/
@@ -152,6 +155,7 @@ namespace CfgDefaults
     inline constexpr bool CfgDefaultDynamicLights = true;
     inline constexpr bool CfgDefaultLightMood = true;
     inline constexpr bool CfgDefaultPostProcessing = true;
+    inline constexpr bool CfgDefaultEnhancedMovement = true;
 
     inline constexpr bool CfgDefaultDisableEffects = false;
     inline constexpr bool CfgDefaultDisableParticles = false;

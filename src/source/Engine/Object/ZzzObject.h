@@ -4,6 +4,10 @@
 
 extern OBJECT_BLOCK ObjectBlock[256];
 extern OBJECT Mounts[];
+// How far each mount's head turns to a side now (following its rider's) and rolls (its idle shake), in degrees, by its
+// slot in Mounts (MoveMount).
+extern float MountHeadTurn[];
+extern float MountHeadRoll[];
 extern OBJECT Boids[];
 extern OBJECT Fishs[];
 
