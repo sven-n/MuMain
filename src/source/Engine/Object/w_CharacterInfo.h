@@ -199,6 +199,11 @@ public:
     // looks around for another, in seconds.
     short       LookTarget = -1;
     float       LookScanSeconds = 0.f;
+    // A sudden turn (an attack facing its target) drawn quickly rather than at once (UpdateSnapTurn): how far the drawn
+    // body is still behind the facing, in degrees, how fast it catches up, and the facing it last saw (NAN: none yet).
+    float       SnapTurnOffset = 0.f;
+    float       SnapTurnSpeed = 0.f;
+    float       SnapTurnFacing = NAN;
     char		CollisionTime; // unused?
 
     short       GuildMarkIndex;

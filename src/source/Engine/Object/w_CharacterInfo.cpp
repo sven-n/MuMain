@@ -86,6 +86,9 @@ void CHARACTER::Initialize()
     TurnLagFacing = NAN;
     LookTarget = -1;
     LookScanSeconds = 0.f;
+    SnapTurnOffset = 0.f;
+    SnapTurnSpeed = 0.f;
+    SnapTurnFacing = NAN;
     MovementType = 0;
     CollisionTime = 0;
     GuildMarkIndex = 0;

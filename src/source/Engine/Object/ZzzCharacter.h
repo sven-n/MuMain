@@ -31,8 +31,9 @@ void MoveCharacterClient(CHARACTER* cc);
 void MoveCharactersClient();
 void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters);
 void WaitCharactersAnimation();
-// `turnLag`: how far the ponytail trails behind the body's turn (CHARACTER::TurnLag), in degrees.
-void AnimateCharacterBones(OBJECT* o, float turnLag = 0.f);
+// `turnLag`: how far the ponytail trails behind the body's turn (CHARACTER::TurnLag), and `facingOffset` how far the
+// drawn body is behind its facing (CHARACTER::SnapTurnOffset), in degrees.
+void AnimateCharacterBones(OBJECT* o, float turnLag = 0.f, float facingOffset = 0.f);
 
 extern size_t g_LastActiveCharacterCount;
 extern bool g_LastAnimationWasParallel;
@@ -68,6 +69,11 @@ void UpdateFlightFeel(CHARACTER* c);
 float MountLeanFromRider(float riderLean);
 // The wings and the ponytail trailing a little behind the body's turn and settling after it (each frame, everyone).
 void UpdateTurnLag(CHARACTER* c);
+// A sudden turn of the facing (an attack snapping to its target) drawn as a quick eased turn instead (each frame,
+// everyone): the facing itself, which the attack and its effects aim by, still turns at once.
+void UpdateSnapTurn(CHARACTER* c);
+// The client character whose object `o` is, or nullptr (a mount, an item, a map object).
+CHARACTER* CharacterOfObject(const OBJECT* o);
 // Who the character's head looks at, if anyone (each frame): a player looks at what it attacks or the nearest enemy in
 // sight in a combat zone, else the nearest NPC, else another player passing by; a monster at its target; an NPC at the
 // hero passing by.

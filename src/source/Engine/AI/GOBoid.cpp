@@ -230,12 +230,13 @@ void UpdateMountFeel(OBJECT* o, int slot)
     // The head turns where the rider's does and nods with it, and rolls when it shakes: turned in the world
     // (BMD::Animation's HeadTurnUp, HeadRoll), so it doesn't matter how the model's head bone lies.
     // Only where the rider looks on purpose (at someone, or the hero at the cursor): its idle glances are its own.
-    const CHARACTER* rider = nullptr;
-    for (int i = 0; i < MAX_CHARACTERS_CLIENT && rider == nullptr; ++i)
-    {
-        rider = &CharactersClient[i].Object == o->Owner ? &CharactersClient[i] : nullptr;
-    }
+    const CHARACTER* rider = CharacterOfObject(o->Owner);
     const bool followsRider = rider != nullptr && (rider->LookTarget >= 0 || (rider == Hero && !HeroIsGlancing()));
+    // It turns with its rider's drawn body, which catches up with a sudden turn (UpdateSnapTurn).
+    if (rider != nullptr)
+    {
+        o->Angle[2] += rider->SnapTurnOffset;
+    }
     const float riderTurn = followsRider ? Render::Models::HeadTurn::SignedYaw(o->Owner->HeadAngle[0]) : 0.f;
     // A positive head angle looks clockwise seen from above (LookTowards: facing minus where the target is), the
     // other way round from a turn about the upright.

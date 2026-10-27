@@ -6691,6 +6691,55 @@ void LookTowards(OBJECT* o, const CHARACTER* target, float maxDegrees)
     o->HeadTargetAngle[1] = pitch < 0.f ? pitch + 360.f : pitch;
 }
 
+namespace
+{
+// A facing turned this far in one frame is a sudden turn (walking and standing turns ease and never go this fast); it's
+// drawn catching up as fast as this, eased, which turns half around in about this long.
+constexpr float SnapTurnDegrees = 30.f;
+constexpr float SnapTurnSeconds = 0.15f;
+// A half turn (180 degrees) eased in and out in SnapTurnSeconds: speeding up for half the time and slowing down for
+// the other half, d = a t^2 / 4.
+constexpr float SnapTurnAcceleration = 4.f * 180.f / (SnapTurnSeconds * SnapTurnSeconds);
+constexpr float SnapTurnMaxSpeed = SnapTurnAcceleration * SnapTurnSeconds / 2.f;
+} // namespace
+
+CHARACTER* CharacterOfObject(const OBJECT* o)
+{
+    const auto offset = reinterpret_cast<const char*>(o) - reinterpret_cast<const char*>(&CharactersClient[0].Object);
+    if (offset < 0 || offset % static_cast<std::ptrdiff_t>(sizeof(CHARACTER)) != 0)
+    {
+        return nullptr;
+    }
+    const auto index = offset / static_cast<std::ptrdiff_t>(sizeof(CHARACTER));
+    return index < MAX_CHARACTERS_CLIENT ? &CharactersClient[index] : nullptr;
+}
+
+void UpdateSnapTurn(CHARACTER* c)
+{
+    const OBJECT* o = &c->Object;
+    const float facing = o->Angle[2];
+    if (std::isnan(c->SnapTurnFacing))
+    {
+        c->SnapTurnFacing = facing;
+    }
+    const float turned = FarAngle(c->SnapTurnFacing, facing, false);
+    c->SnapTurnFacing = facing;
+    if (std::fabs(turned) >= SnapTurnDegrees)
+    {
+        // The drawn body stays where it was, and catches up from there.
+        c->SnapTurnOffset = std::clamp(c->SnapTurnOffset - turned, -180.f, 180.f);
+    }
+    if (c->SnapTurnOffset == 0.f && c->SnapTurnSpeed == 0.f)
+    {
+        return;
+    }
+    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
+    // StepEasedTurn on the offset, toward 0: it lands there with no speed left. Kept as -180 to 180.
+    const float stepped =
+        StepEasedTurn(c->SnapTurnOffset, 0.f, c->SnapTurnSpeed, seconds, SnapTurnMaxSpeed, SnapTurnAcceleration);
+    c->SnapTurnOffset = stepped > 180.f ? stepped - 360.f : stepped;
+}
+
 void MoveMonsterClient(CHARACTER* c, OBJECT* o)
 {
     if (c == Hero) return;
@@ -6769,6 +6818,7 @@ void MoveCharacterClient(CHARACTER* cc)
             UpdateFlightFeel(cc);
             UpdateTurnLag(cc);
         }
+        UpdateSnapTurn(cc);
         MoveCharacterVisual(cc, co);
 
         battleCastle::MoveBattleCastleMonster(cc, co);
@@ -6843,19 +6893,21 @@ void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
     {
         for (CHARACTER* c : activeChars)
         {
-            AnimateCharacterBones(&c->Object, c->TurnLag);
+            AnimateCharacterBones(&c->Object, c->TurnLag, c->SnapTurnOffset);
         }
     }
 }
 
-void AnimateCharacterBones(OBJECT* o, float turnLag)
+void AnimateCharacterBones(OBJECT* o, float turnLag, float facingOffset)
 {
     BMD* model = &Models[o->Type];
     if (model->NumBones <= 0) return;
 
-    // Model space, as render builds them: the model's BodyOrigin and BodyScale belong to whichever object set them last.
-    model->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
-                     o->HeadAngle, false, false, nullptr, o->CurrentAction, MAX_BONES, turnLag);
+    // Model space, as render builds them: the model's BodyOrigin and BodyScale belong to whichever object set them
+    // last. The body is drawn facing a little behind a sudden turn (UpdateSnapTurn).
+    vec3_t angle = {o->Angle[0], o->Angle[1], o->Angle[2] + facingOffset};
+    model->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, angle, o->HeadAngle,
+                     false, false, nullptr, o->CurrentAction, MAX_BONES, turnLag);
     o->EnableBoneMatrix = true;
 }
 
@@ -7298,10 +7350,10 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         for (int r = 0; r < 3; ++r)
             for (int c = 0; c < 4; ++c)
                 ParentMatrix[r][c] = o->BoneTransform[f->LinkBone][r][c];
-        // A player's wings take only their bone's place (Bone05, on the spine), not its turn: they turn with the back
-        // (the two spine bones below the neck, where they sit) when the head's turn twists it (HeadTurn.h, as
-        // BMD::Animation turns the bones), about the upright through Spine1. A bone's turn about its X axis is the
-        // opposite way round from the world's upright, hence the minus.
+        // A player's wings hang from Bone05, on the lower spine (Bip01 Spine), so the head's turn reaches them only by
+        // that bone's small share: they turn with the back too (the two spine bones below the neck, where they sit;
+        // HeadTurn.h, as BMD::Animation turns the bones), about the upright through Spine1. A bone's turn about its X
+        // axis is the opposite way round from the world's upright, hence the minus.
         if (o->Type == MODEL_PLAYER && f == &c->Wing)
         {
             static const int spine1Bone = []

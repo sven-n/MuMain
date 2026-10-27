@@ -4,7 +4,7 @@
 
 // How a character's head turn (OBJECT::HeadAngle) spreads into the neck and spine of a Biped skeleton (Bip01 Head on
 // Neck, Spine1 and Spine), so the shoulders follow the head as a person's do. BMD::Animation turns the bones by it,
-// and a player's wings, which take only their bone's place and not its turn, turn with the back by it.
+// and a player's wings turn with the back by it (their bone, on the lower spine, gets only the Spine bone's share).
 namespace Render::Models::HeadTurn
 {
 // The share of the head's turn the neck and spine take together; the head keeps the rest, so it ends up turned as far

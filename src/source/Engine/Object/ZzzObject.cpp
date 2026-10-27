@@ -268,6 +268,26 @@ void BodyLight(OBJECT* o, BMD* b)
     }
 }
 
+namespace
+{
+// Builds an object's bones for drawing (Calc_RenderObject, Calc_ObjectAnimation; AnimateCharacterBones builds a
+// character's the same way ahead of time): a character's body a little behind a sudden turn (UpdateSnapTurn) and its
+// ponytail trailing a turn (UpdateTurnLag); a mount's head turned where its rider looks and rolled when it shakes
+// (MountHeadTurn, MountHeadRoll).
+void AnimateObjectBones(OBJECT* o, BMD* b, bool translate)
+{
+    const CHARACTER* character = CharacterOfObject(o);
+    vec3_t angle = {o->Angle[0], o->Angle[1], o->Angle[2] + (character != nullptr ? character->SnapTurnOffset : 0.f)};
+    const float turnLag = character != nullptr ? character->TurnLag : 0.f;
+    const bool mount = o >= Mounts && o < Mounts + MAX_MOUNTS;
+    const float headTurn = mount ? MountHeadTurn[o - Mounts] : 0.f;
+    const float headRoll = mount ? MountHeadRoll[o - Mounts] : 0.f;
+    b->Animation(o->EnableBoneMatrix ? o->BoneTransform : BoneTransform, o->AnimationFrame, o->PriorAnimationFrame,
+                 o->PriorAction, angle, o->HeadAngle, false, !translate, nullptr, -1, MAX_BONES, turnLag, headTurn,
+                 headRoll);
+}
+} // namespace
+
 extern float BoneScale;
 
 bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
@@ -318,20 +338,7 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 #ifdef MU_ENABLE_CONTROL_SOCKET
     const bool checkBones = BeginPrepassBoneCheck(o, b->NumBones);
 #endif
-    // A mount's head turns where its rider looks and rolls when it shakes (MountHeadTurn, MountHeadRoll).
-    const bool mount = o >= Mounts && o < Mounts + MAX_MOUNTS;
-    const float headTurn = mount ? MountHeadTurn[o - Mounts] : 0.f;
-    const float headRoll = mount ? MountHeadRoll[o - Mounts] : 0.f;
-    if (o->EnableBoneMatrix)
-    {
-        b->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
-                     o->HeadAngle, false, !Translate, nullptr, -1, MAX_BONES, 0.f, headTurn, headRoll);
-    }
-    else
-    {
-        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle,
-                     false, !Translate, nullptr, -1, MAX_BONES, 0.f, headTurn, headRoll);
-    }
+    AnimateObjectBones(o, b, Translate);
 
 #ifdef MU_ENABLE_CONTROL_SOCKET
     if (checkBones) EndPrepassBoneCheck(o, b->NumBones);
@@ -436,14 +443,7 @@ bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select)
 #ifdef MU_ENABLE_CONTROL_SOCKET
     const bool checkBones = BeginPrepassBoneCheck(o, b->NumBones);
 #endif
-    if (o->EnableBoneMatrix)
-    {
-        b->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, !Translate);
-    }
-    else
-    {
-        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, !Translate);
-    }
+    AnimateObjectBones(o, b, Translate);
 #ifdef MU_ENABLE_CONTROL_SOCKET
     if (checkBones) EndPrepassBoneCheck(o, b->NumBones);
 #endif
