@@ -21,6 +21,7 @@
 #include "Render/Models/Gltf/EmbeddedTextures.h"
 #include "Render/Models/Gltf/GlbLoader.h"
 #include "Render/Models/Gltf/SkinnedModel.h"
+#include "Render/Models/ModelDraw.h"
 #include "Render/Models/ModelLod.h"
 #include "Render/Models/SkinnedVertexPacking.h"
 #include "Render/Models/ZzzBMD.h"
@@ -2224,7 +2225,9 @@ int ShadowCorners(const BMD& model, int mesh, const TestGround& ground, std::vec
 {
     std::vector<std::array<float, 3>> vertices;
     std::vector<std::uint32_t> indices;
-    model.ProjectWeightedShadowMesh(mesh, ProjectOntoTestGround, &ground, vertices, indices);
+    Render::ModelDrawing::ShadowDraw draw{.model = &model, .bodyScale = model.BodyScale};
+    VectorCopy(model.BodyOrigin, draw.bodyOrigin);
+    model.ProjectWeightedShadowMesh(draw, mesh, ProjectOntoTestGround, &ground, vertices, indices);
     REQUIRE(std::all_of(indices.begin(), indices.end(), [&](std::uint32_t index) { return index < vertices.size(); }));
     corners.resize(indices.size());
     for (size_t c = 0; c < indices.size(); ++c)
