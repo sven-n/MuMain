@@ -854,6 +854,41 @@ TEST_CASE("Every item's name at every level is its tooltip's name [data][items][
     CHECK(different == 0);
 }
 
+// The ten jewel and stone bundles name their count, 10 per level from 10 at +0, in the item names' language.
+TEST_CASE("A bundle's name has its count at every level [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+
+    const std::pair<int, std::wstring> bundles[] = {
+        {30, L"Bundle of Jewel of Bless"},        {31, L"Bundle of Jewel of Soul"},
+        {136, L"Bundle of Jewel of Life"},        {137, L"Bundle of Jewel of Creation"},
+        {138, L"Bundle of Jewel of Guardian"},    {139, L"Bundle of Gemstone"},
+        {140, L"Bundle of Jewel of Harmony"},     {141, L"Bundle of Jewel of Chaos"},
+        {142, L"Bundle of Lower Refining Stone"}, {143, L"Bundle of Higher Refining Stone"},
+    };
+    for (const auto& [number, name] : bundles)
+    {
+        for (int level = 0; level <= 3; ++level)
+        {
+            INFO("12/" << number << " +" << level);
+            CHECK(GetItemNameText(ITEM_WING + number, level) == name + L" x" + std::to_wstring(10 * (level + 1)));
+        }
+    }
+
+    // In another language, with translated item names on: the translated name, the same count.
+    const std::string uiLocale = I18N::GetCurrentLocale();
+    const bool translateItemNames = g_ItemDataHandler.GetTranslateItemNames();
+    g_ItemDataHandler.SetTranslateItemNames(true);
+    I18N::SetLocale("es");
+    const std::wstring spanish = GetItemNameText(ITEM_WING + 142, 3);
+    I18N::SetLocale(uiLocale.c_str());
+    g_ItemDataHandler.SetTranslateItemNames(translateItemNames);
+    CHECK(spanish == L"Fardo de Piedras de Más Baja Refinación x40");
+}
+
 TEST_CASE("With translated item names off, the names are English and the rest of the tooltip is translated "
           "[data][items][tooltip]")
 {
