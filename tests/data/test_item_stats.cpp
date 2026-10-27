@@ -4,6 +4,7 @@
 
 #include "ClientDataScope.h"
 #include "ItemStatProfilesScope.h"
+#include "LevelBasisScrollProfile.h"
 #include "TestFiles.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
@@ -208,7 +209,7 @@ TEST_CASE("Every shipped item names the stat profile the profile rules give [dat
         itemsWithProfile += definition.statProfile.empty() || hornOfFenrir ? 0 : 1;
     }
     CHECK(DeriveStatProfile(g_ItemDatabase.GetStatProfiles(), *g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)) == "helper");
-    CHECK(itemsWithProfile == 566);
+    CHECK(itemsWithProfile == 578);
 }
 
 TEST_CASE("The shipped profile rules give each kind of item its profile [data][items]")
@@ -285,7 +286,7 @@ TEST_CASE("The items each shipped profile rule gives its profile [data][items]")
 {
     ShippedItemAttributes items;
     const ItemStatProfiles& profiles = g_ItemDatabase.GetStatProfiles();
-    const std::vector<int> expected = {2, 10, 3, 22, 113, 327, 6, 4, 2, 5, 7, 0, 36, 32};
+    const std::vector<int> expected = {2, 10, 3, 22, 113, 327, 6, 4, 2, 5, 7, 0, 12, 36, 32};
     REQUIRE(profiles.GetRules().size() == expected.size());
     std::vector<int> counts(expected.size());
     int withoutRule = 0;
@@ -304,7 +305,7 @@ TEST_CASE("The items each shipped profile rule gives its profile [data][items]")
         ++counts[static_cast<size_t>(rule)];
     }
     CHECK(counts == expected);
-    CHECK(withoutRule == 342);
+    CHECK(withoutRule == 330);
 }
 
 // The fixed excellent bonus of the three chaos weapons is item data.
@@ -405,21 +406,26 @@ TEST_CASE("Item requirements come from the item's stat profile [data][items]")
     CHECK(stats(ITEM_BOOK_OF_SAHAMUTT, 15, 0, 0, 12).requireStrength ==
           ComputeItem(ITEM_BOOK_OF_SAHAMUTT, 15, 0, 0, 12).RequireStrength);
 
-    // Scrolls: energy from the level requirement, the level requirement + 4 per level.
+    // Scrolls: the energy as stored, the level requirement + 4 per level.
     const int wizardryEnhance = MakeItemType(15, 28);
     CHECK(stats(wizardryEnhance, 5).requireEnergy == 1058);
     CHECK(stats(wizardryEnhance, 5).requireLevel == 240);
 
-    // A level requirement given by level is the one the energy comes from.
+    // The "levelRequirement" basis, which no shipped profile uses any more: the energy comes
+    // from the level requirement, also one given by level.
+    const LevelBasisScrollProfile levelBasis(ClientDirectory);
+    constexpr int energyWeight = 118;
     ItemDefinition givenByLevel = *g_ItemDatabase.Find(wizardryEnhance);
     RequirementByLevel levels{};
     levels.fill(100);
     givenByLevel.requirements.level = 0;
+    givenByLevel.requirements.energy = energyWeight;
     givenByLevel.requirementsByLevel.Set(ItemRequirement::Level, levels);
     g_ItemDatabase.Set(givenByLevel);
     items[wizardryEnhance].RequireLevel = 0;
+    items[wizardryEnhance].RequireEnergy = energyWeight;
     CHECK(stats(wizardryEnhance, 5).requireLevel == 100);
-    CHECK(stats(wizardryEnhance, 5).requireEnergy == 20 + items[wizardryEnhance].RequireEnergy * 100 * 4 / 100);
+    CHECK(stats(wizardryEnhance, 5).requireEnergy == 20 + energyWeight * 100 * 4 / 100);
 }
 
 // The item editor computes an item it has not stored from its definition: for every
@@ -940,4 +946,58 @@ TEST_CASE("The item help window builds its content again only when what it shows
     g_ItemDatabase.SetDisplayLocale("pt");
     CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != namesInEnglish);
     g_ItemDatabase.SetDisplayLocale("en");
+}
+
+// Scrolls and orbs keep their stat requirements as the values the game asks for (their profiles
+// keep the base value), as OpenMU stores them. These are the values the drop level formula gave
+// them before; +0 is the only level they have.
+TEST_CASE("Scrolls and orbs ask for their requirements as stored [data][items]")
+{
+    struct StoredRequirements
+    {
+        int group;
+        int number;
+        int strength;
+        int dexterity;
+        int energy;
+        int vitality;
+        int leadership;
+    };
+    constexpr StoredRequirements expected[] = {
+        {12, 8, 0, 0, 52, 0, 0},     {12, 9, 0, 0, 72, 0, 0},     {12, 10, 0, 0, 92, 0, 0},
+        {12, 16, 596, 0, 0, 0, 0},   {12, 18, 0, 646, 0, 0, 0},   {12, 21, 0, 0, 79, 0, 0},
+        {12, 22, 0, 0, 153, 0, 400}, {12, 23, 0, 0, 102, 0, 300}, {12, 24, 0, 0, 126, 0, 340},
+        {12, 35, 0, 0, 150, 0, 70},  {12, 46, 0, 0, 168, 0, 0},   {12, 48, 0, 0, 84, 0, 0},
+        {15, 0, 0, 0, 140, 0, 0},    {15, 1, 0, 0, 104, 0, 0},    {15, 2, 0, 0, 72, 0, 0},
+        {15, 3, 0, 0, 40, 0, 0},     {15, 4, 0, 0, 160, 0, 0},    {15, 5, 0, 0, 88, 0, 0},
+        {15, 6, 0, 0, 120, 0, 0},    {15, 7, 0, 0, 180, 0, 0},    {15, 8, 0, 0, 220, 0, 0},
+        {15, 9, 0, 0, 260, 0, 0},    {15, 10, 0, 0, 56, 0, 0},    {15, 11, 0, 0, 345, 0, 0},
+        {15, 12, 0, 0, 500, 0, 0},   {15, 13, 0, 0, 724, 0, 0},   {15, 14, 0, 0, 644, 0, 0},
+        {15, 15, 0, 0, 408, 0, 0},   {15, 16, 0, 0, 953, 0, 0},   {15, 17, 0, 0, 849, 0, 0},
+        {15, 18, 0, 0, 1052, 0, 0},  {15, 19, 0, 0, 245, 0, 0},   {15, 20, 0, 0, 150, 0, 0},
+        {15, 21, 0, 0, 823, 0, 0},   {15, 22, 0, 0, 375, 0, 0},   {15, 23, 0, 0, 620, 0, 0},
+        {15, 24, 0, 0, 180, 0, 0},   {15, 26, 0, 0, 663, 0, 0},   {15, 27, 0, 0, 912, 0, 0},
+        {15, 28, 0, 0, 1058, 0, 0},  {15, 29, 0, 0, 1058, 0, 0},  {15, 34, 0, 0, 404, 0, 0},
+        {15, 35, 0, 0, 132, 0, 0},   {15, 36, 0, 0, 80, 0, 0},
+    };
+    ShippedItemAttributes items;
+    for (const StoredRequirements& row : expected)
+    {
+        CAPTURE(row.group);
+        CAPTURE(row.number);
+        const int itemType = MakeItemType(row.group, row.number);
+        const ItemDefinition* item = g_ItemDatabase.Find(itemType);
+        REQUIRE(item != nullptr);
+        CHECK(item->requirements.strength == row.strength);
+        CHECK(item->requirements.dexterity == row.dexterity);
+        CHECK(item->requirements.energy == row.energy);
+        CHECK(item->requirements.vitality == row.vitality);
+        CHECK(item->requirements.leadership == row.leadership);
+        const auto values = GameLogic::Items::ComputeItemStats(items[itemType], {itemType, 0, 0, 0, 0});
+        CHECK(values.requireStrength == row.strength);
+        CHECK(values.requireDexterity == row.dexterity);
+        CHECK(values.requireEnergy == row.energy);
+        CHECK(values.requireVitality == row.vitality);
+        CHECK(values.requireLeadership == row.leadership);
+    }
 }

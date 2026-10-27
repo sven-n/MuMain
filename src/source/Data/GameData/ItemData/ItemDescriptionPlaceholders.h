@@ -65,6 +65,7 @@ enum class TooltipValue : unsigned char
     LevelPlusOne,
     Name, // a text
     ExcellentFlags,
+    BundleCount,
     Count,
 };
 // The built-in value of that name, or nothing for another name.

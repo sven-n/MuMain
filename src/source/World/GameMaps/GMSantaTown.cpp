@@ -249,26 +249,6 @@ bool CGMSantaTown::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-bool CGMSantaTown::PlayMonsterSound(OBJECT* o)
-{
-    if (IsSantaTown() == false)
-        return false;
-
-    // 	float fDis_x, fDis_y;
-    // 	fDis_x = o->Position[0] - Hero->Object.Position[0];
-    // 	fDis_y = o->Position[1] - Hero->Object.Position[1];
-    // 	float fDistance = sqrtf(fDis_x*fDis_x+fDis_y*fDis_y);
-    //
-    // 	if (fDistance > 500.0f)
-    // 		return true;
-    //
-    // 	switch(o->Type)
-    // 	{
-    // 	}
-
-    return false;
-}
-
 void CGMSantaTown::PlayObjectSound(OBJECT* o) {}
 
 void CGMSantaTown::PlayBGM()

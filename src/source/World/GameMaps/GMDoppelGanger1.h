@@ -28,7 +28,6 @@ public:
     virtual bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
 
 public:
-    virtual bool PlayMonsterSound(OBJECT* o);
     virtual void PlayObjectSound(OBJECT* o);
     void PlayBGM();
 

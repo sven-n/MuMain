@@ -33,7 +33,6 @@ public: // Character
     bool MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
 
 public: // Sound
-    virtual bool PlayMonsterSound(OBJECT* o);
     virtual void PlayObjectSound(OBJECT* o);
     void PlayBGM();
 

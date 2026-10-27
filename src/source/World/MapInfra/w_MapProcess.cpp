@@ -146,6 +146,7 @@ BaseMap& MapProcess::FindBaseMap(ENUM_WORLD type)
     throw;
 }
 
+// cppcheck-suppress unknownMacro ; Smart_Ptr is the std::shared_ptr macro of _define.h
 void MapProcess::Register(Smart_Ptr(BaseMap) pMap)
 {
     ENUM_WORLD type = pMap->FindMapIndex();
@@ -504,33 +505,6 @@ bool MapProcess::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
             {
                 bool result = basemap.lock()->SetCurrentActionMonster(c, o);
-                if (result)
-                {
-                    return true;
-                }
-            }
-        }
-        else
-        {
-            m_MapList.erase(tempiter);
-        }
-    }
-    return false;
-}
-
-bool MapProcess::PlayMonsterSound(OBJECT* o)
-{
-    for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
-    {
-        auto tempiter = iter;
-        ++iter;
-        Weak_Ptr(BaseMap) basemap = *tempiter;
-
-        if (basemap.expired() == false)
-        {
-            if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
-            {
-                bool result = basemap.lock()->PlayMonsterSound(o);
                 if (result)
                 {
                     return true;

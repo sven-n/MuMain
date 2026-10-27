@@ -31,7 +31,7 @@ struct Piece
         Table,       // `table`'s bonus at the item's level
         SkillMana,   // the mana skill `number` costs
         SkillName,   // `name`
-        MonsterName, // `name`
+        MonsterName, // monster `number`'s name, looked up when written
         LevelValue,  // the item's level value: `levelTexts` at the item's level
     };
     std::wstring literal;

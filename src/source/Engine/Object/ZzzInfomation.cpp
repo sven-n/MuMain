@@ -30,9 +30,9 @@
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
 
 CLASS_ATTRIBUTE     ClassAttribute[MAX_CLASS];
-MONSTER_SCRIPT      MonsterScript[MAX_MONSTER];
 GATE_ATTRIBUTE* GateAttribute = NULL;
 SKILL_ATTRIBUTE* SkillAttribute = NULL;
 ITEM_ATTRIBUTE* ItemAttribute = NULL;
@@ -165,42 +165,6 @@ void OpenGateScript(const wchar_t* FileName)
             fread(Buffer, Size, 1, fp);
             BuxConvert(Buffer, Size);
             memcpy(&GateAttribute[i], Buffer, Size);
-        }
-        delete[] Buffer;
-        fclose(fp);
-    }
-    else
-    {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        SendMessage(g_hWnd, WM_DESTROY, 0, 0);
-    }
-}
-
-void OpenMonsterSkillScript(const wchar_t* FileName)
-{
-    memset(MonsterSkill, -1, sizeof(Script_Skill));
-
-    FILE* fp = _wfopen(FileName, L"rb");
-    if (fp != NULL)
-    {
-        int Size = (sizeof(Script_Skill) + sizeof(int));
-        BYTE* Buffer = new BYTE[Size];
-        int FileCount = 0;
-        fread(&FileCount, sizeof(int), 1, fp);
-        for (int i = 0; i < FileCount; i++)
-        {
-            fread(Buffer, Size, 1, fp);
-            BuxConvert(Buffer, Size);
-            int dummy = -1;
-            int Seek = 0;
-            memcpy(&dummy, Buffer + Seek, sizeof(int));
-            Seek += sizeof(int);
-            memcpy(MonsterSkill[dummy].Skill_Num, Buffer + Seek, sizeof(int) * MAX_MONSTERSKILL_NUM);
-            Seek += (sizeof(int) * MAX_MONSTERSKILL_NUM);
-            memcpy(&MonsterSkill[dummy].Slot, Buffer + Seek, sizeof(int));
         }
         delete[] Buffer;
         fclose(fp);
@@ -1783,63 +1747,9 @@ WORD ItemWalkSpeed(ITEM* Item)
     return WalkSpeed;
 }
 
-int EditMonsterNumber = 0;
-int MonsterKey = 0;
-
-void OpenMonsterScript(wchar_t* FileName)
-{
-    if ((SMDFile = _wfopen(FileName, L"rb")) == nullptr)
-    {
-        wchar_t Text[256];
-        mu_swprintf(Text, L"%ls - File not exist.", FileName);
-        g_ErrorReport.Write(Text);
-        MessageBox(g_hWnd, Text, NULL, MB_OK);
-        return;
-    }
-
-    while (true)
-    {
-        SMDToken token = GetToken();
-        if (token == END) break;
-        if (token == NAME && strcmp("end", TokenString) == 0) break;
-        MONSTER_SCRIPT* m = &MonsterScript[EditMonsterNumber++];
-        m->Type = static_cast<int>(TokenNumber);
-        token = GetToken();
-        token = GetToken();
-
-        CMultiLanguage::ConvertFromUtf8(m->Name, TokenString);
-        m->Name[MAX_MONSTER_NAME] = L'\0';
-        
-        //Token = (*GetToken)();m->Level = (int)TokenNumber;
-        //for(int i=0;i<23;i++) Token = (*GetToken)();
-    }
-    fclose(SMDFile);
-}
-
 const wchar_t* getMonsterName(int type)
 {
-    for (int i = 0; i < MAX_MONSTER; ++i)
-    {
-        if (MonsterScript[i].Type == type)
-        {
-            return MonsterScript[i].Name;
-        }
-    }
-
-    return L"()";
-}
-
-void MonsterConvert(MONSTER* m, int Level)
-{
-    MONSTER_SCRIPT* p = &MonsterScript[m->Type];
-    MONSTER_ATTRIBUTE* c = &p->Attribute;
-    m->Level = Level;
-    m->Attribute.AttackSpeed = c->AttackSpeed;
-    m->Attribute.AttackDamageMin = c->AttackDamageMin / 2 + c->AttackDamageMin / 2 * (m->Level) / 9;
-    m->Attribute.AttackDamageMax = c->AttackDamageMax / 2 + c->AttackDamageMax / 2 * (m->Level) / 9;
-    m->Attribute.Defense = c->Defense / 2 + c->Defense / 2 * (m->Level) / 9;
-    m->Attribute.AttackRating = c->AttackRating / 2 + c->AttackRating / 2 * (m->Level) / 9;
-    m->Attribute.SuccessfulBlocking = c->SuccessfulBlocking / 2 + c->SuccessfulBlocking / 2 * (m->Level) / 9;
+    return Data::Monsters::GetMonsterName(type);
 }
 
 void CreateClassAttribute(int Class, int Strength, int Dexterity, int Vitality, int Energy, int Life, int Mana, int LevelLife, int LevelMana, int VitalityToLife, int EnergyToMana)

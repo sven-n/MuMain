@@ -309,7 +309,8 @@ treats a player, e.g. the rules of a map; a new kind gets a new value in
 - **Ask for pixels, don't hard-code them.** The windows follow the responsive
   layout; `slot-pixel` and `ui` give the pixels for the current window size,
   and `nearby` where a player or an NPC is drawn (`Meeting.PixelOfAsync`,
-  `Npcs.TalkAsync`).
+  `Npcs.TalkAsync`). Players are found by name, NPCs by their monster number
+  (`Npc.Number`): the client shows NPC names in its own language.
 - **Use the shared steps.** `Meeting` walks characters to a spot or to each
   other, `Trading` requests, accepts and confirms a trade, `Npcs` walks up to
   an NPC and talks to it, and `Keys.PressUntilAsync` presses a key until its

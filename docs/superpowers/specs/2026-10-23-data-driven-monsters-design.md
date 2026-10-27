@@ -14,7 +14,9 @@
 > each, every finding checked by a second reviewer, then a completeness check)
 > and a final check of this text corrected and completed the first draft;
 > Q-MN8 to Q-MN15 are the questions it raised. The owner chose three PRs for
-> the work that can start now (see "Pull requests and phases").
+> the work that can start now (see "Pull requests and phases"). Q-MN16 to
+> Q-MN19 were answered on 2026-10-25, at the start of PR 2, and Q-MN20 to
+> Q-MN25 the same day, after MN3.
 >
 > The counts come from reading and searching the code, not from a compiler.
 > Where code is sorted into kinds, a count can be off by a few.
@@ -557,15 +559,15 @@ of its own after the owner agrees.
 
 | # | Problem | Where | Phase |
 |---|---|---|---|
-| P1 | `Monster50.bmd` (MOLT) is missing; spawning a Molt stops the game. | `ZzzCharacter.cpp:13617` | MN3 |
+| P1 | `Monster50.bmd` (MOLT) is missing; spawning a Molt stops the game. Agreed fix: log it and keep running (Q-MN18). | `ZzzCharacter.cpp:13617` | MN3 |
 | P2 | Numbers without a creator become a Bull Fighter: 76, 658–668 and 523, which OpenMU spawns in every Imperial Guardian run. A fix must still return a character for every number (callers rely on it). Agreed fixes (Q-MN15): 523 becomes an invisible trap with the trap kind, 658–668 get the statue 380's model and the NPC kind. | `ZzzCharacter.cpp:14118` | MN4 |
-| P3 | Kentauros, Berserker Warrior, Kentauros Warrior and Genocider Warrior (355, 553, 554, 556): the handler picks the skill animation and then returns "not handled", so the generic pattern overwrites it. | `GM_Kanturu_1st.cpp:604-657` | MN2 |
-| P4 | Selupan never clears its skill, so normal attacks repeat the last skill's animation, sound and effects. Dark Ghost's skills 51 and 52 are the same. | `GM_Raklion.cpp:2464`, `GMEmpireGuardian2.cpp:1099` | MN2 |
-| P5 | Dark Iron Knight (565) plays attack 2 for skill 32, Dark Coolutin (564) for 77: the two constants look swapped. | `GM_Raklion.cpp:2429-2458` | MN2 |
-| P6 | Skills 78–81 of monster 566 (`MERCENARY_GUILD_FELICIA`) are not below `ATMON_SKILL_END` (78) and never animate. | `WSclient.cpp:4104` | MN2 |
+| P3 | Kentauros, Berserker Warrior, Kentauros Warrior and Genocider Warrior (355, 553, 554, 556): the handler picks the skill animation and then returns "not handled", so the generic pattern overwrites it. Agreed: fixed, the skill plays attack 2 (Q-MN21). | `GM_Kanturu_1st.cpp:604-657` | MN2 |
+| P4 | Selupan never clears its skill, so normal attacks repeat the last skill's animation, sound and effects. Dark Ghost's skills 51 and 52 are the same. Agreed: fixed, the skill is cleared (Q-MN22): when the attack ends, also when a hit's shock ends it early, at once for Selupan's skill 41, which plays no attack, and by any other attack, which plays as a normal one also while the skill's attack plays (review of PR 2). | `GM_Raklion.cpp:2464`, `GMEmpireGuardian2.cpp:1099` | MN2 |
+| P5 | Dark Iron Knight (565) plays attack 2 for skill 32, Dark Coolutin (564) for 77: the two constants look swapped. Agreed: swapped (Q-MN23). | `GM_Raklion.cpp:2429-2458` | MN2 |
+| P6 | Skills 78–81 of monster 566 (`MERCENARY_GUILD_FELICIA`) are not below `ATMON_SKILL_END` (78) and never animate. Agreed first: they animate (Q-MN24). Then dropped, not a bug (Q-MN26): 566 is only ever an NPC (Tercia's model, whose file has stop1 and stop2 only; kind `npc` since MN1; one 566 in the client's name file and in OpenMU, a PassiveNpc), no handler answers for it, and only `MonsterSkill.bmd` has a row for it, which no client code could reach. | `WSclient.cpp:4104` | MN2 |
 | P7 | 566 (`MERCENARY_GUILD_FELICIA`) and 567 (`PRIESTESS_VEINA`) use NPC models but count as monsters: a click attacks them instead of talking, they get the red outline and are MU Helper targets, while OpenMU makes 566 a PassiveNpc with a dialogue. | `ZzzCharacter.cpp:13086` | MN1 |
 | P8 | `MonsterScript` is read by position, not by number: `MonsterScript[450]` is monster 494; the legacy edit mode does the same; `MonsterConvert` is unused. | `UI/Dialogs/CustomMessageBox.cpp:1003`, `EditObjects.cpp:73`, `ZzzInterface.cpp:4110`, `ZzzInfomation.cpp:1832` | MN1 |
-| P9 | A `-1` in sound slot 1 or 3 plays sound 209; models without slots play slot 0 of the generic table; the Dragon's slot sounds are silent. | `ZzzCharacter.cpp:436-1556`, `ZzzOpenData.cpp:2396` | MN3 |
+| P9 | A `-1` in sound slot 1 or 3 plays sound 209; models without slots play slot 0 of the generic table; the Dragon's slot sounds are silent. Agreed: all three fixed (Q-MN19). The other slots that name numbers nothing loads (Devil, Balrog, Bahamut, Valkyrie, Lizard King, Soldier, Giant Ogre, Dark Skull Soldier, Dark Phoenix Shield) are fixed the same way (Q-MN20). | `ZzzCharacter.cpp:436-1556`, `ZzzOpenData.cpp:2396` | MN3 |
 | P10 | A condition that can never be true (`==` && `==`). | `ZzzCharacter.cpp:10054` | MN8 |
 | P11 | `MonsterSkill.bmd`'s loader clears only entry 0 and does not check the monster number. | `ZzzInfomation.cpp:182` | MN2 |
 | P12 | `CreateHellGate` uses the name as a printf format and copies 200 bytes into the 130-byte name, overwriting the gate's key, level, monster number and more with stack bytes. OpenMU sends these gates (0x1F). | `ZzzCharacter.cpp:15146-15156` | MN1 |
@@ -574,8 +576,11 @@ of its own after the owner agrees.
 | P15 | 12 `EnableShadow = false` lines in the creators do nothing (`CreateCharacterPointer` sets it, the renderer switches it each frame). | `ZzzCharacter.cpp:13462-14742` | MN4 |
 | P16 | A comparison with a Korean guild master name that no name file has; the branch is dead. | `WSclient.cpp:1950` | MN1 |
 | P17 | `Setting_Monster` uses the character before its null check. | `ZzzCharacter.cpp:13207`, `:13212` | MN4 |
-| P18 | The random Kanturu 1st monsters (Berserker, Gigantis, Genocider, Splinter Wolf, Iron Rider) pick attack 1 with a chance that depends on the frame rate (`rand_fps_check(2)` in a one-time choice: about 21 % at 60 FPS, 9 % at 144 FPS). | `GM_Kanturu_1st.cpp:595`, `:640` | MN2 |
+| P18 | The random Kanturu 1st monsters (Berserker, Gigantis, Genocider, Splinter Wolf, Iron Rider) pick attack 1 with a chance that depends on the frame rate (`rand_fps_check(2)` in a one-time choice: about 21 % at 60 FPS, 9 % at 144 FPS). Agreed: 50/50 with `rand() % 2`, also for the Gigantis Warrior (Q-MN25). | `GM_Kanturu_1st.cpp:595`, `:640` | MN2 |
 | P19 | `RenderCharacter` skips the shadow of Kalima gate 1 only, not gates 2–7. | `ZzzCharacter.cpp:8715` | MN8 |
+| P20 | Destler, Kato, Galia and the Cavalry Captain (508, 510, 511, 517) play appear at speed 0, and the Cavalry Captain also attack3: their models give these animations no speed (here and in the original client), so they stand still in them until another animation starts. Destler, Kato and Galia play appear for skill 59 and in their rage, the Cavalry Captain for skills 55 (appear) and 56 (attack3). Found by Monster Checks. Agreed: fixed with each model's attack 3 speed, 0.33 for the Cavalry Captain (Q-MN27). | `Models.json`, `ZzzOpenData.cpp` before MN3 | MN3 |
+| P21 | The Dark Ghost's second attack plays the fire pillar sound, which only the Balgass maps (41, 42) load: silent on Empire Guardian 2 unless the hero was there earlier. Agreed: its model loads it (Q-MN31). | `GMEmpireGuardian2.cpp:1230` before MN7 | MN7 |
+| P22 | 13 models play sounds that only another model loads: Raklion's dark twins, the PK field's Burning Lava Giant and Cruel Blood Assassin, the Swamp's Sapi Queen, Ice Napin and Shadow Master, and Crypos play their normal versions' sounds (silent unless those appeared); the Coolutin's death (the Hell Spider's sound), the Forsaker's second attack (Selupan's) and the Cavalry Captain's death (the Giant Mammoth's) are silent on their maps. Agreed: each model loads the sounds its events play (Q-MN32). | the sound hooks before MN7 | MN7 |
 
 ## Target design
 
@@ -634,11 +639,14 @@ the defaults of its range. The examples show the shape; field names are
 decided in each phase.
 
 Sounds keep their ids while code names them: a model's sounds are entries of
-(sound id by its `SOUND_*` name, file, channels, 3D), its slots point at ids,
-and loads without a slot are "extra sounds" that code and the hooks play
-(MN7). The +5 shift for `SubType` 9 stays as a named second set. New sounds
-need ids, of which only a few unused ones are left below 450; a pool for them
-is decided in MN3.
+(file, channels, 3D, and the sound id by its `SOUND_*` name where code plays
+the sound by that id), its slots point at sounds, and loads without a slot are
+"extra sounds" that code and the hooks play (MN7). The +5 shift for `SubType`
+9 stays as a named second set. A sound without a named id gets a number when
+it is loaded, from a part of the sound table that grows as sounds are loaded
+(Q-MN16): no fixed range limits new sounds, a file loaded by two models gets
+one number, and a map change frees them with the monster models. The audio
+backend's tables, sized by the `SOUND_*` list today, grow for them.
 
 ### 3. Data fields
 
@@ -753,10 +761,10 @@ Focused tools that share one monster selection (`MonsterSelection`, like
 | Tool | Purpose |
 |---|---|
 | **Monster Browser** | All monster numbers with name, kind and model; search and filters (kind, has a hook, missing model file; map once a source exists, MN6); add (numbers 0–1023 only), copy and remove. Remove warns when the number is named in code, used by data (quest NPCs and kill targets, `NPCDialogue` keys) or in the last OpenMU import. Source references find `MONSTER_` names (not `MONSTER_MODEL_*` or `MONSTER01_*`), raw numbers in `MonsterIndex` comparisons, ranges, and the code keyed by the monster's model. |
-| **Monster Setup** | Model (from the model list), scale, outline (with "computed"), skin, meshes, render tier, equipment as items (item pickers), the merchants' part models, the other setup fields, NPC rules. Says when a model change switches the attack path (`player` and monster models attack differently). |
+| **Monster Setup** | Model (from the model list), scale, outline (with "computed"), skin, meshes, render tier, the merchants' part models, the other setup fields, NPC rules. The equipment (weapons, armor, wings and helpers as items, with item pickers) gets a tab of its own, **Monster Equipment** (Q-MN33). Says when a model change switches the attack path (`player` and monster models attack differently). |
 | **Monster Attacks** | The skill → animation tables, `otherwise` or `otherwiseRandom`, `clearSkill`; the map gate of the handler that reads the table; whether each skill reaches the lookup directly or only on the next 0x18; the skills OpenMU sends (after MN6). Read-only with a note for player-shaped monsters. A player skill opens the skill tools once SK1 exists. |
 | **Monster Model** | The model entry: file picker over every folder the monster and NPC models use (`Data/Monster`, `Data/NPC` with subfolders, `Object35`, `Item/xmas`, the part model folders, in their on-disk spelling); texture folders; animation speeds and "hold last frame" with an animation picker, and the speed factors code applies on top (transformed ×1.5, Illusion of Kundun die ×4, Erohim die ½); sounds with play buttons; the slot range and what depends on it; users of the model: monsters, ambient boids, map objects, effects (D26). |
-| **Monster Preview** | The selected monster in a preview, with the item model preview's camera (orbit, pan, zoom) and a character path in the preview scene (weapons, body parts, skin). Animation preview: pick any animation of the model; play, pause and a frame slider; speed edits in Monster Model show at once; the model's sounds play at their moment (idle, attack, die); the return to idle after an attack and the impact frame of attack 1 and 2 are marked; the speed factors the game adds on top (transformed ×1.5, Illusion of Kundun die ×4, Erohim die ½) are shown as "in game". Player-shaped monsters show their equipment once MN4c moved it into data. In the world: a drawn copy outside `CharactersClient`, or a real character with a key the server never uses (outside 0–0x7FFF), a kind that cannot be targeted, no MU Helper target, removed when the preview closes or the map changes. Monsters on map object slots (traps) only on a map that loaded the object; refused when the character table is full. |
+| **Monster Preview** | The selected monster in a preview, with the item model preview's camera (orbit, pan, zoom) and a character path in the preview scene (weapons, body parts, skin). Animation preview: pick any animation of the model; play, pause and a frame slider; speed edits in Monster Model show at once; the model's sounds play at their moment (idle, attack, die); the return to idle after an attack and the impact frame of attack 1 and 2 are marked; the speed factors the game adds on top (transformed ×1.5, Illusion of Kundun die ×4, Erohim die ½) are shown as "in game". Player-shaped monsters show their equipment once MN4c moved it into data; a **Show equipment** checkbox turns the weapons, gear and skin on and off (Q-MN33). Only in the editor's window: there is no view of the previewed monster in the world (Q-MN17). |
 | **Monster Translations** | Names × languages (the generic grid, D56). |
 | **Monster Checks** | Missing model files (case-resolved), animations a model does not have or with speed 0, the animation warnings of section 6, a kind against OpenMU's `ObjectKind` (allowed pairs; 0x1F numbers and summons are players in game), a monster of kind "monster" on an NPC-range model, unused models (counting non-monster users), item types that no longer exist, names over 64 units, no free model slots. |
 | **Look editor** (MN8) | The roadmap's shared look editor for the looks of the selected monster. |
@@ -855,7 +863,7 @@ model entries.
 | MN6 | OpenMU sync, client side | MN1, MN2, items 7 | Exchange of number and names (D53); the read-only kind, window and skill data for the checks; the skill check against `attacks`. |
 | MN-B | OpenMU sync, server side | MN6 (file format) | OpenMU: monsters in the exchange pages of items phase B, with the event monster skills collected from settings and code. |
 | MN7 | Sounds per animation | MN3 | The global and the 7 map `PlayMonsterSound` hooks (with the 500-unit cut-off), the trap sounds of `SetPlayerAttack` and the per-map sound loads become sound events of the models. Monster recorder, sound part. |
-| MN8 | Looks | MN4, items 13, FX1 | Glow, render styles, per-frame visuals, attack effects (with a skill-number condition), the trap effects of `SetPlayerAttack`, death debris, the no-shadow lists of `RenderCharacter`, cloth (Magic Skeleton, the Crust family, the Death King robe, Dark Phoenix hair; items kept cloth in code, so the look format needs a cloth block or cloth stays a hook), `RenderLinkObject`'s monster check, and the item render styles only monsters use (`helperNpcPlate`, `monsterBattleBow`) move to the monsters' looks. Look recorder of items phase 13. P10, P19. |
+| MN8 | Looks | MN4, items 13, FX1 | Glow, render styles, per-frame visuals, attack effects (with a skill-number condition), the trap effects of `SetPlayerAttack`, death debris, the no-shadow lists of `RenderCharacter`, cloth (Magic Skeleton, the Crust family, the Death King robe, Dark Phoenix hair; items kept cloth in code, so the look format needs a cloth block or cloth stays a hook), `RenderLinkObject`'s monster check, and the item render styles only monsters use (`helperNpcPlate`, `monsterBattleBow`) move to the monsters' looks. The sounds those per-frame visuals play (about 200 `PlayBuffer` calls in 12 files: Aida, Crywolf, Kanturu 1st to 3rd, the Hunting Ground, the Balgass barracks, Illusion Temple, the events, Empire Guardian, Hellas, Raklion) and their maps' loads of them move into the models' sound events then, with two more kinds of event: once when an animation starts (the `SubType` flag they use) and a chance every frame while it plays (Q-MN34). Look recorder of items phase 13. P10, P19. |
 | MN9 | Cleanup | all MN phases | What later areas still need moves to the roadmap; then remove this document. |
 
 MN1 is first because every later phase adds fields to its monster entries, and
@@ -976,6 +984,25 @@ groups:
 | Q-MN13 | Keep the handlers' map gates in code, or give `attacks` a map field? | Keep them in code; `attacks` is read where a handler answers today (D48). |
 | Q-MN14 | How the skill is cleared: a `clearSkill` field per monster, or hooks? | The field, filled by the converter (D48). |
 | Q-MN15 | 523 (Trap) and 658–668 (statues): give them proper bodies as fixes in MN4? | Yes, as P2 fixes after the comparison: 523 an invisible trap with the trap kind, 658–668 the statue 380's model and the NPC kind. For 658–668 OpenMU's Illusion Temple still decides whether it sends 380 or these numbers. |
+| Q-MN16 | New model sounds need ids, and only about 10 are free below 450. A pool of ids, or no new ids in MN3? *(2026-10-25)* | Neither: the fixed ids are a legacy of the `SOUND_*` list and the audio backend's fixed tables, not a need of speed. Sounds are named by file and get a number when loaded, from a table that grows without limit; sounds that code plays by name keep their named ids (section 2). |
+| Q-MN17 | The previewed monster in the world: a drawn copy, or a real character? *(2026-10-25)* | Neither: the preview stays in the editor's window. A view in the world is hard to use and does not look good. |
+| Q-MN18 | P1: Molt (68) has no model file; OpenMU has no monster 68, so no one notices. Keep stopping the game when a server sends it? *(2026-10-25)* | No: a missing monster model file is logged and listed by Monster Checks, the monster appears without a body, and the game keeps running. A fix of its own after MN3's comparison. |
+| Q-MN19 | P9: fix the sound slot quirks (a -1 in the second slot of a pair plays the unloaded id 209; models without slots play the Bull Fighter's sounds where those are loaded; the Dragon's slots point at ids nobody loads)? *(2026-10-25)* | All three, one commit each, after MN3's comparison. |
+| Q-MN20 | Other models' sound slots also name numbers that nothing loads, as the Dragon's did (Devil, Balrog, Bahamut, Valkyrie, Lizard King, Soldier, Giant Ogre, Dark Skull Soldier, Dark Phoenix Shield): fix them too? *(2026-10-25)* | Yes, like the Dragon: each slot names the sound it was meant to play. |
+| Q-MN21 | P3: the Kanturu 1st handler's skill animation is overwritten by the generic pattern. Fix? *(2026-10-25)* | Yes: the skill plays attack 2. |
+| Q-MN22 | P4: Selupan and Dark Ghost never clear their skill, so normal attacks repeat it. Fix? *(2026-10-25)* | Yes: the skill is cleared after its attack. |
+| Q-MN23 | P5: swap the skill numbers of the Dark Iron Knight and the Dark Coolutin? *(2026-10-25)* | Yes. |
+| Q-MN24 | P6: animate Felicia's skills 78–81? *(2026-10-25)* | Yes, with the animations her table entries name. Replaced by Q-MN26: the question called 566 a monster, but it is an NPC (P6). |
+| Q-MN25 | P18: the random Kanturu 1st monsters choose by frame rate. How should they choose? *(2026-10-25)* | 50/50 with `rand() % 2`, as the Hellas monsters. |
+| Q-MN26 | P6 again, with what the original code does: 566 is only ever an NPC whose model has no attack animations. What happens with P6? *(2026-10-25)* | Dropped: not a bug. |
+| Q-MN27 | P20: fix the bosses' appear (and the Cavalry Captain's attack 3) at speed 0? *(2026-10-25)* | Yes: appear gets each model's attack 3 speed (Destler 0.4, Kato 0.4, Galia 0.45); the Cavalry Captain's appear and attack 3 get 0.33. |
+| Q-MN28 | MN7: where do the trap sounds of `SetPlayerAttack` go, as traps have no model entry? *(2026-10-25)* | Into the attacks: `sound` (and `soundAtMonster` for a sound played at the monster) in the monster entry's `attacks`, played whenever the attacks play. |
+| Q-MN29 | MN7: the sound hooks draw with `rand_fps_check` once per step, attack, hit or idle loop, so the chances depend on the frame rate. Fix after the move? *(2026-10-25)* | Yes, like P18: picks become 50/50 with `rand() % 2`, chances 1 in n with `rand() % n`, in a commit of their own after the comparison. |
+| Q-MN30 | MN7: the Empire Guardian maps load 31 sounds their monsters' events play; every other monster loads its sounds with its model at its first appearance. Move them into the models? *(2026-10-25)* | Yes, into the models, as for all other monsters; a model does not load a sound again that is already loaded from the same file. The map keeps its ambient sounds and DEFENDER_ATTACK02, which a player weapon plays too. A preload per map can come later. |
+| Q-MN31 | P21: the Dark Ghost's fire pillar sound is loaded only on the Balgass maps. Fix? *(2026-10-25)* | Yes: its model loads it. |
+| Q-MN32 | P22: 13 more models play sounds only another model loads. Fix the same way? *(2026-10-25)* | Yes: each model lists the sounds its events play. |
+| Q-MN33 | Monsters miss their weapons and player-shaped monsters their whole look in Monster Preview, because the equipment is still code (MN4). When? *(2026-10-25)* | In PR 3 (MN4), not before. Monster Preview gets a **Show equipment** checkbox, and the equipment gets a tab of its own, **Monster Equipment**. |
+| Q-MN34 | Monsters 340 to 417 and others show no sounds in Monster Model: their maps' per-frame visual code plays them (about 200 calls in 12 files), not `PlayMonsterSound`. Move them in PR 2 (an MN7b step) or later? *(2026-10-26)* | Later, in MN8 with the per-frame visuals. |
 
 ## Open questions
 

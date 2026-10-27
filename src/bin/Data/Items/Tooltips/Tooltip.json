@@ -319,7 +319,7 @@
       "es": "Requisito de carisma: {requiredLeadership}",
       "id": "Persyaratan Karisma: {requiredLeadership}",
       "ja": "使用可能な統率: {requiredLeadership}",
-      "pl": "Wymagania dotyczące charyzmy: {requiredLeadership}",
+      "pl": "Wymagane dowodzenie: {requiredLeadership}",
       "pt": "Requisito de Carisma: {requiredLeadership}",
       "ru": "Требование к харизме: {requiredLeadership}",
       "tl": "Kinakailangan ng Charisma: {requiredLeadership}",
@@ -457,7 +457,8 @@
       "zh-TW": "當您右鍵單擊滑鼠時。"
     },
     "piecesOfTwenty": {
-      "en": "{durability} / 20"
+      "en": "{durability} / 20",
+      "ja": "{durability}個/ 20個"
     },
     "cannotRepair": {
       "en": "Cannot Repair",
@@ -1167,7 +1168,7 @@
       "es": "oliva del amor",
       "id": "Zaitun cinta",
       "ja": "愛のオリーブ",
-      "pl": "Oliwka miłości",
+      "pl": "Olive of Love",
       "pt": "Oliveira do amor",
       "ru": "Оливка любви",
       "tl": "Olibo ng pag-ibig",
@@ -1180,9 +1181,9 @@
       "name": "default",
       "lines": [
         {"section": "name"},
-        {"text": "@oneHandedDamage", "when": ["hasDamage", "!tag:noDamageLine", "!skillBook", "!twoHanded"], "colors": [{"when": ["damageHarmonyBonus"], "color": "yellow"}, {"when": ["excellent"], "color": "blue"}]},
-        {"text": "@twoHandedDamage", "when": ["hasDamage", "!tag:noDamageLine", "!skillBook", "twoHanded"], "colors": [{"when": ["damageHarmonyBonus"], "color": "yellow"}, {"when": ["excellent"], "color": "blue"}]},
-        {"text": "@wizardryDamage", "when": ["hasDamage", "!tag:noDamageLine", "skillBook"], "colors": [{"when": ["damageHarmonyBonus"], "color": "yellow"}, {"when": ["excellent"], "color": "blue"}]},
+        {"text": "@oneHandedDamage", "when": ["hasDamage", "!skillBook", "!twoHanded"], "colors": [{"when": ["damageHarmonyBonus"], "color": "yellow"}, {"when": ["excellent"], "color": "blue"}]},
+        {"text": "@twoHandedDamage", "when": ["hasDamage", "!skillBook", "twoHanded"], "colors": [{"when": ["damageHarmonyBonus"], "color": "yellow"}, {"when": ["excellent"], "color": "blue"}]},
+        {"text": "@wizardryDamage", "when": ["hasDamage", "skillBook"], "colors": [{"when": ["damageHarmonyBonus"], "color": "yellow"}, {"when": ["excellent"], "color": "blue"}]},
         {"text": "@defense", "when": ["defense"], "colors": [{"when": ["defenseHarmonyBonus"], "color": "yellow"}, {"when": ["armour", "excellent"], "color": "blue"}]},
         {"text": "@magicDefense", "when": ["magicDefense"]},
         {"text": "@blockRate", "when": ["blockRate"], "colors": [{"when": ["excellent"], "color": "blue"}]},
@@ -1199,9 +1200,9 @@
         {"text": "@waterResistance", "when": ["waterResistance"]},
         {"text": "@requiredLevel", "when": ["requiredLevel", "!tag:noLevelRequirement"], "colors": [{"when": ["missingLevel"], "color": "red"}]},
         {"text": "@lacking", "values": {"missing": "missingLevel"}, "when": ["requiredLevel", "!tag:noLevelRequirement", "missingLevel"], "color": "red"},
-        {"text": "@requiredStrength", "when": ["requiredStrength", "!tag:luckyItem"], "colors": [{"when": ["missingStrength"], "color": "red"}, {"when": ["strengthReduced"], "color": "yellow"}]},
+        {"text": "@requiredStrength", "when": ["strengthRequired", "!tag:luckyItem"], "colors": [{"when": ["missingStrength"], "color": "red"}, {"when": ["strengthReduced"], "color": "yellow"}]},
         {"text": "@lacking", "values": {"missing": "missingStrength"}, "when": ["requiredStrength", "!tag:luckyItem", "missingStrength"], "color": "red"},
-        {"text": "@requiredDexterity", "when": ["requiredDexterity", "!tag:luckyItem"], "colors": [{"when": ["missingDexterity"], "color": "red"}, {"when": ["dexterityReduced"], "color": "yellow"}]},
+        {"text": "@requiredDexterity", "when": ["dexterityRequired", "!tag:luckyItem"], "colors": [{"when": ["missingDexterity"], "color": "red"}, {"when": ["dexterityReduced"], "color": "yellow"}]},
         {"text": "@lacking", "values": {"missing": "missingDexterity"}, "when": ["requiredDexterity", "!tag:luckyItem", "missingDexterity"], "color": "red"},
         {"text": "@requiredVitality", "when": ["requiredVitality", "!tag:luckyItem"], "colors": [{"when": ["missingVitality"], "color": "red"}]},
         {"text": "@lacking", "values": {"missing": "missingVitality"}, "when": ["requiredVitality", "!tag:luckyItem", "missingVitality"], "color": "red"},

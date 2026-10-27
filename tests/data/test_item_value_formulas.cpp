@@ -8,6 +8,7 @@
 #include "UI/ItemTools/ItemValueFormulaText.h"
 #include "UI/ItemTools/ItemStatProfileWidgets.h"
 #include "ClientDataScope.h"
+#include "LevelBasisScrollProfile.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -154,33 +155,44 @@ TEST_CASE("The item tools show the formula of each value of an item [data][items
           "to +15) [item: requirementsByLevel]");
     // Book of Samut
     CHECK(requirement(5, 21, ItemRequirement::Energy) == "20 + 135 × (52 + 1 × item level) × 3 / 100 [book]");
-    // Scroll of Wizardry Enhance and Scroll of Fire Ball: energy from the level requirement.
-    CHECK(requirement(15, 28, ItemRequirement::Energy) ==
-          "20 + 118 × 220 × 4 / 100 at every item level (220: the level requirement) [scroll]");
-    CHECK(requirement(15, 3, ItemRequirement::Energy) ==
-          "20 + 100 × (5 + 3 × item level) × 4 / 100 (no level requirement: from the drop level) [scroll]");
+    // Scroll of Wizardry Enhance, Scroll of Fire Ball and Healing Orb: the energy as stored.
+    CHECK(requirement(15, 28, ItemRequirement::Energy) == "1058, kept as is [scroll]");
+    CHECK(requirement(15, 3, ItemRequirement::Energy) == "40, kept as is [scroll]");
+    CHECK(requirement(12, 8, ItemRequirement::Energy) == "52, kept as is [orb]");
     // Scroll of Critical Damage: leadership kept as it is.
     CHECK(requirement(12, 23, ItemRequirement::Leadership) == "300, kept as is [default]");
     // The Horn of Fenrir, whose profile is picked.
     CHECK(requirement(13, 37, ItemRequirement::Level) ==
           "300 at every item level [default]; excellent options do not raise it [item: excellentRaisesLevel]");
 
-    // A scroll's energy takes the level requirement given by level where it is above 0.
-    ItemDefinition poison = *g_ItemDatabase.Find(MakeItemType(15, 0));
-    RequirementByLevel levels{};
-    poison.requirementsByLevel.Set(ItemRequirement::Level, levels);
-    CHECK(DescribeRequirementFormula(poison, ItemRequirement::Energy, ExpandItemStatProfile(poison)).text ==
-          "20 + 100 × (30 + 3 × item level) × 4 / 100 (no level requirement: from the drop level) [scroll]");
-    levels.fill(50);
-    levels[0] = 0;
-    poison.requirementsByLevel.Set(ItemRequirement::Level, levels);
-    CHECK(DescribeRequirementFormula(poison, ItemRequirement::Energy, ExpandItemStatProfile(poison)).text ==
-          "20 + 100 × level requirement × 4 / 100 (the level requirement given at each item level); where the level "
-          "requirement is 0: 20 + 100 × (30 + 3 × item level) × 4 / 100 [scroll]");
-    levels[0] = 50;
-    poison.requirementsByLevel.Set(ItemRequirement::Level, levels);
-    CHECK(DescribeRequirementFormula(poison, ItemRequirement::Energy, ExpandItemStatProfile(poison)).text ==
-          "20 + 100 × level requirement × 4 / 100 (the level requirement given at each item level) [scroll]");
+    // The "levelRequirement" basis, which no shipped profile uses any more: the energy takes
+    // the level requirement given by level where it is above 0.
+    {
+        const LevelBasisScrollProfile levelBasis(ClientDirectory);
+        ItemDefinition poison = *g_ItemDatabase.Find(MakeItemType(15, 0));
+        poison.requirements.energy = 100;
+        RequirementByLevel levels{};
+        poison.requirementsByLevel.Set(ItemRequirement::Level, levels);
+        CHECK(DescribeRequirementFormula(poison, ItemRequirement::Energy,
+                                         ExpandStatProfile(levelBasis.GetFile(), "scroll"))
+                  .text ==
+              "20 + 100 × (30 + 3 × item level) × 4 / 100 (no level requirement: from the drop level) [scroll]");
+        levels.fill(50);
+        levels[0] = 0;
+        poison.requirementsByLevel.Set(ItemRequirement::Level, levels);
+        CHECK(
+            DescribeRequirementFormula(poison, ItemRequirement::Energy,
+                                       ExpandStatProfile(levelBasis.GetFile(), "scroll"))
+                .text ==
+            "20 + 100 × level requirement × 4 / 100 (the level requirement given at each item level); where the level "
+            "requirement is 0: 20 + 100 × (30 + 3 × item level) × 4 / 100 [scroll]");
+        levels[0] = 50;
+        poison.requirementsByLevel.Set(ItemRequirement::Level, levels);
+        CHECK(DescribeRequirementFormula(poison, ItemRequirement::Energy,
+                                         ExpandStatProfile(levelBasis.GetFile(), "scroll"))
+                  .text ==
+              "20 + 100 × level requirement × 4 / 100 (the level requirement given at each item level) [scroll]");
+    }
 
     // Excellent options raise only a level requirement above 0.
     ItemDefinition krisByLevel = *g_ItemDatabase.Find(MakeItemType(0, 0));

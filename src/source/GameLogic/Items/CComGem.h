@@ -22,7 +22,7 @@ namespace COMGEM
     void	GetBack();
     void	CalcGen();
     int		CalcItemValue(const ITEM*);
-    char	CalcCompiledCount(const ITEM*);
+    int CalcCompiledCount(const ITEM*);
     int		CalcEmptyInv();
     char	CheckOneItem(const ITEM*);
     bool	CheckMyInvValid();

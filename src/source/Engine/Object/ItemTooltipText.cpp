@@ -7,6 +7,7 @@
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Engine/Object/ItemTooltipValues.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "GameLogic/Items/ItemNameParts.h"
 #include "GameLogic/Skills/SkillManager.h"
 
 #include <algorithm>
@@ -83,15 +84,13 @@ bool Resolve(std::string_view name, std::span<const std::pair<std::string, std::
             piece.name = SkillAttribute[data->number].Name;
             return true;
         case Data::Items::GameDataValueKind::MonsterName:
-        {
-            const auto monster = std::find_if(std::begin(MonsterScript), std::end(MonsterScript),
-                                              [&](const MONSTER_SCRIPT& entry) { return entry.Type == data->number; });
-            if (monster == std::end(MonsterScript))
+            // Looked up when written: the name follows "Translate item names" and the monster list, which can change
+            // without the item data changing.
+            if (GameLogic::Items::NameParts::MonsterName(data->number) == nullptr)
                 return false;
             piece.kind = Piece::Kind::MonsterName;
-            piece.name = monster->Name;
+            piece.number = data->number;
             return true;
-        }
         }
         return false;
     }
@@ -215,11 +214,11 @@ size_t Write(const Compiled& text, int level, const ItemTooltipValues& values, w
             {
                 AppendNumber(level, out, capacity, length);
             }
-            else if (const wchar_t* valueText = GetItemTooltipText(values, piece.value))
+            else if (const wchar_t* valueText = TooltipValues::GetItemTooltipText(values, piece.value))
             {
                 Append(valueText, std::wcslen(valueText), out, capacity, length);
             }
-            else if (const std::optional<int> value = GetItemTooltipValue(values, piece.value))
+            else if (const std::optional<int> value = TooltipValues::GetItemTooltipValue(values, piece.value))
             {
                 AppendNumber(*value, out, capacity, length);
             }
@@ -235,9 +234,20 @@ size_t Write(const Compiled& text, int level, const ItemTooltipValues& values, w
             break;
         }
         case Piece::Kind::SkillName:
-        case Piece::Kind::MonsterName:
             Append(piece.name, std::wcslen(piece.name), out, capacity, length);
             break;
+        case Piece::Kind::MonsterName:
+        {
+            const wchar_t* name = GameLogic::Items::NameParts::MonsterName(piece.number);
+            if (name == nullptr)
+            {
+                // No longer in the monster list: the rest of the line as written.
+                Append(piece.rest.c_str(), piece.rest.size(), out, capacity, length);
+                return length;
+            }
+            Append(name, std::wcslen(name), out, capacity, length);
+            break;
+        }
         case Piece::Kind::LevelValue:
             if (level < 0 || level >= static_cast<int>(piece.levelTexts.size()))
             {

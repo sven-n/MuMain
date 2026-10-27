@@ -53,6 +53,7 @@ namespace MUHelper
 
     void CMuHelper::Save(const ConfigData& config)
     {
+        m_attackSkills.Reset();
         m_config = config;
 
         PRECEIVE_MUHELPER_DATA netData;
@@ -63,6 +64,7 @@ namespace MUHelper
 
     void CMuHelper::Load(const ConfigData& config)
     {
+        m_attackSkills.Reset();
         m_config = config;
     }
 
@@ -106,6 +108,7 @@ namespace MUHelper
             return;
         }
 
+        m_attackSkills.Reset();
         m_iTotalCost = 0;
         m_iComboState = 0;
         m_iCurrentBuffIndex = 0;
@@ -738,29 +741,30 @@ namespace MUHelper
         return 1;
     }
 
+    bool CMuHelper::SelectAttackTarget()
+    {
+        if (m_iCurrentTarget != -1)
+        {
+            const auto* target = FindCharacterByKey(m_iCurrentTarget);
+            if (target != nullptr && target->Object.Live && target->Dead == 0)
+                return true;
+            DeleteTarget(m_iCurrentTarget);
+        }
+        CleanupTargets();
+        if (m_config.bLongRangeCounterAttack)
+            m_iCurrentTarget = GetFarthestAttackingTarget();
+        if (m_iCurrentTarget == -1)
+            m_iCurrentTarget = GetNearestTarget();
+        return m_iCurrentTarget != -1;
+    }
+
     int CMuHelper::Attack()
     {
-        if (m_iCurrentTarget == -1)
+        if (!SelectAttackTarget())
         {
-            if (!m_setTargets.empty())
-            {
-                CleanupTargets();
-
-                if (m_config.bLongRangeCounterAttack)
-                {
-                    m_iCurrentTarget = GetFarthestAttackingTarget();
-                }
-                
-                if (m_iCurrentTarget == -1)
-                {
-                    m_iCurrentTarget = GetNearestTarget();
-                }
-            }
-            else
-            {
+            if (m_setTargets.empty())
                 m_iComboState = 0;
-                return 0;
-            }
+            return 0;
         }
 
         if (m_config.bUseCombo)
@@ -774,8 +778,11 @@ namespace MUHelper
             const float fSkillDistance = gSkillManager.GetSkillDistance(m_iCurrentSkill, Hero);
             if (GameLogic::Combat::CanExecuteSkill(Hero, m_iCurrentSkill, fSkillDistance))
             {
-                return SimulateAttack(m_iCurrentSkill);
+                const auto result = CastSkill(m_iCurrentSkill, true, m_iCurrentTarget);
+                m_attackSkills.Complete(result);
+                return result == GameLogic::Automation::SkillResult::Cast ? 1 : 0;
             }
+            m_attackSkills.Complete(GameLogic::Automation::SkillResult::Refused);
         }
 
         if (m_config.bFallbackBasicAttack)
@@ -791,55 +798,7 @@ namespace MUHelper
 
     ActionSkillType CMuHelper::SelectAttackSkill()
     {
-        const size_t safeSize = std::min({m_config.aiSkill.size(), m_config.aiSkillCondition.size(), m_config.aiSkillInterval.size()});
-        for (int i = 1; i < (int)safeSize; i++)
-        {
-            const int iSkillId = m_config.aiSkill[i];
-            if (iSkillId <= 0 || iSkillId >= MAX_SKILLS)
-            {
-                continue;
-            }
-
-            if ((m_config.aiSkillCondition[i] & ON_TIMER)
-                && m_config.aiSkillInterval[i] != 0
-                && m_iSecondsElapsed > 0
-                && m_iSecondsElapsed % m_config.aiSkillInterval[i] == 0)
-            {
-                return (ActionSkillType)iSkillId;
-            }
-
-            if (m_config.aiSkillCondition[i] & ON_CONDITION)
-            {
-                int iCount = 0;
-                if (m_config.aiSkillCondition[i] & ON_MOBS_NEARBY)
-                {
-                    iCount = (int)m_setTargets.size();
-                }
-                else if (m_config.aiSkillCondition[i] & ON_MOBS_ATTACKING)
-                {
-                    iCount = (int)m_setTargetsAttacking.size();
-                }
-                else
-                {
-                    continue;
-                }
-
-                if (((m_config.aiSkillCondition[i] & ON_MORE_THAN_TWO_MOBS)   && iCount >= 2)
-                    || ((m_config.aiSkillCondition[i] & ON_MORE_THAN_THREE_MOBS) && iCount >= 3)
-                    || ((m_config.aiSkillCondition[i] & ON_MORE_THAN_FOUR_MOBS)  && iCount >= 4)
-                    || ((m_config.aiSkillCondition[i] & ON_MORE_THAN_FIVE_MOBS)  && iCount >= 5))
-                {
-                    return (ActionSkillType)iSkillId;
-                }
-            }
-        }
-
-        if (m_config.aiSkill[0] > 0)
-        {
-            return (ActionSkillType)m_config.aiSkill[0];
-        }
-
-        return AT_SKILL_UNDEFINED;
+        return m_attackSkills.Select(m_config, m_iSecondsElapsed, m_setTargets.size(), m_setTargetsAttacking.size());
     }
 
     int CMuHelper::SimulateComboAttack()
@@ -867,6 +826,11 @@ namespace MUHelper
 
     int CMuHelper::SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget)
     {
+        return CastSkill(iSkill, bTargetRequired, iTarget) == GameLogic::Automation::SkillResult::Cast ? 1 : 0;
+    }
+
+    GameLogic::Automation::SkillResult CMuHelper::CastSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget)
+    {
         using GameLogic::Automation::SkillResult;
 
         // Players are allowed here, and must be: the helper casts its buffs and
@@ -881,7 +845,7 @@ namespace MUHelper
             DeleteTarget(iTarget);
         }
 
-        return result == SkillResult::Cast ? 1 : 0;
+        return result;
     }
 
     int CMuHelper::SimulateBasicAttack(int iTarget)

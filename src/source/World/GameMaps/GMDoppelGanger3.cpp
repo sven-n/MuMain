@@ -500,14 +500,4 @@ bool CGMDoppelGanger3::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-bool CGMDoppelGanger3::PlayMonsterSound(OBJECT* o)
-{
-    if (IsDoppelGanger3() == false)
-        return false;
-
-    return g_DoppelGanger1.PlayMonsterSound(o);
-
-    return false;
-}
-
 void CGMDoppelGanger3::PlayObjectSound(OBJECT* o) {}

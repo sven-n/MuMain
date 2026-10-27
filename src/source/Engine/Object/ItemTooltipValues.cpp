@@ -10,6 +10,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "Network/Server/SocketSystem.h"
@@ -74,12 +75,14 @@ void ComputeDamage(const ITEM& item, ItemTooltipValues& values)
     values.hasDamage = damageMin > 0;
 }
 
-ItemTooltipValues::Requirement HeroRequirement(int required, int heroValue, int reduction)
+// `heroValue` is nothing without a hero: then nothing is missing.
+ItemTooltipValues::Requirement HeroRequirement(int required, std::optional<int> heroValue, int reduction)
 {
     ItemTooltipValues::Requirement requirement;
     requirement.required = required - reduction;
-    requirement.missing = heroValue < requirement.required ? requirement.required - heroValue : 0;
+    requirement.missing = heroValue && *heroValue < requirement.required ? requirement.required - *heroValue : 0;
     requirement.reduced = reduction != 0;
+    requirement.asked = required != 0;
     return requirement;
 }
 
@@ -108,20 +111,34 @@ void ComputeRequirements(const ITEM& item, ItemTooltipValues& values)
         }
     }
 
-    // No hero yet (an item named before one exists): one with no level and no stats.
-    static const CHARACTER_ATTRIBUTE NoHero{};
-    const CHARACTER_ATTRIBUTE& hero = CharacterAttribute != nullptr ? *CharacterAttribute : NoHero;
-    values.level = HeroRequirement(item.RequireLevel, hero.Level, 0);
-    values.strength =
-        HeroRequirement(item.RequireStrength, static_cast<WORD>(hero.Strength + hero.AddStrength), strengthReduction);
-    values.dexterity = HeroRequirement(item.RequireDexterity, static_cast<WORD>(hero.Dexterity + hero.AddDexterity),
-                                       dexterityReduction);
-    values.vitality = HeroRequirement(item.RequireVitality, static_cast<WORD>(hero.Vitality + hero.AddVitality), 0);
-    values.energy = HeroRequirement(item.RequireEnergy, static_cast<WORD>(hero.Energy + hero.AddEnergy), 0);
-    values.leadership = HeroRequirement(item.RequireCharisma, static_cast<WORD>(hero.Charisma + hero.AddCharisma), 0);
+    // The hero's stats as the old code read them (WORD sums); none without a hero.
+    const CHARACTER_ATTRIBUTE* hero = CharacterAttribute;
+    const auto stat = [hero](auto value) -> std::optional<int>
+    { return hero != nullptr ? std::optional<int>(value(*hero)) : std::nullopt; };
+    values.level =
+        HeroRequirement(item.RequireLevel, stat([](const CHARACTER_ATTRIBUTE& h) { return int(h.Level); }), 0);
+    values.strength = HeroRequirement(
+        item.RequireStrength,
+        stat([](const CHARACTER_ATTRIBUTE& h) { return int(static_cast<WORD>(h.Strength + h.AddStrength)); }),
+        strengthReduction);
+    values.dexterity = HeroRequirement(
+        item.RequireDexterity,
+        stat([](const CHARACTER_ATTRIBUTE& h) { return int(static_cast<WORD>(h.Dexterity + h.AddDexterity)); }),
+        dexterityReduction);
+    values.vitality = HeroRequirement(
+        item.RequireVitality,
+        stat([](const CHARACTER_ATTRIBUTE& h) { return int(static_cast<WORD>(h.Vitality + h.AddVitality)); }), 0);
+    values.energy = HeroRequirement(
+        item.RequireEnergy,
+        stat([](const CHARACTER_ATTRIBUTE& h) { return int(static_cast<WORD>(h.Energy + h.AddEnergy)); }), 0);
+    values.leadership = HeroRequirement(
+        item.RequireCharisma,
+        stat([](const CHARACTER_ATTRIBUTE& h) { return int(static_cast<WORD>(h.Charisma + h.AddCharisma)); }), 0);
 }
 } // namespace
 
+namespace Engine::Items::TooltipValues
+{
 ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
 {
     ITEM_ATTRIBUTE* attribute = &ItemAttribute[item.Type];
@@ -139,28 +156,18 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
                            (type >= ITEM_CAPE_OF_FIGHTER && type <= ITEM_CAPE_OF_OVERRULE);
     values.timed = item.bPeriodItem;
     values.hasOptions = item.SpecialNum > 0;
+    // No hero yet (the character screen, a tooltip built before the world loads): level 0.
     values.heroLevel = CharacterAttribute != nullptr ? CharacterAttribute->Level : 0;
     values.name = attribute->Name;
     values.levelPlusOne = item.Level + 1;
+    values.bundleCount = COMGEM::CalcCompiledCount(&item);
     values.excellentFlags = item.ExcellentFlags & 63;
     if (g_pItemAddOptioninfo != nullptr)
     {
         const ITEM_ADD_OPTION& addOption = g_pItemAddOptioninfo->GetItemAddOtioninfo(item.Type);
         values.addOptionValue1 = addOption.m_byValue1;
         values.addOptionValue2 = addOption.m_byValue2;
-        // The duration text only changes with the time, so it is written again only then (the tooltip computes these
-        // values every frame it shows).
-        static DWORD durationTime = 0;
-        static std::wstring duration;
-        if (duration.empty() || addOption.m_Time != durationTime)
-        {
-            duration.clear();
-            g_StringTime(addOption.m_Time, duration, true);
-            durationTime = addOption.m_Time;
-        }
-        const size_t length = std::min(duration.size(), values.addOptionDuration.size() - 1);
-        std::copy_n(duration.c_str(), length, values.addOptionDuration.data());
-        values.addOptionDuration[length] = L'\0';
+        values.addOptionTime = addOption.m_Time;
     }
     ComputeDamage(item, values);
 
@@ -252,6 +259,8 @@ std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, Data::It
         return values.levelPlusOne;
     case TooltipValue::ExcellentFlags:
         return values.excellentFlags;
+    case TooltipValue::BundleCount:
+        return values.bundleCount;
     case TooltipValue::Level:
     case TooltipValue::AddOptionDuration:
     case TooltipValue::Name:
@@ -265,11 +274,25 @@ const wchar_t* GetItemTooltipText(const ItemTooltipValues& values, Data::Items::
 {
     if (value == Data::Items::TooltipValue::Name)
     {
-        return values.name;
+        return values.name != nullptr ? values.name : L"";
     }
     if (value == Data::Items::TooltipValue::AddOptionDuration)
     {
-        return values.addOptionDuration.data();
+        // Written only here, for a line that shows it: g_StringTime needs the buff system. The text only changes with
+        // the time, so it is written again only then. Without the buff system (the tests) it's an empty text.
+        if (!g_BuffSystem)
+        {
+            return L"";
+        }
+        static DWORD durationTime = 0;
+        static std::wstring duration;
+        if (duration.empty() || values.addOptionTime != durationTime)
+        {
+            duration.clear();
+            g_StringTime(values.addOptionTime, duration, true);
+            durationTime = values.addOptionTime;
+        }
+        return duration.c_str();
     }
     return nullptr;
 }
@@ -299,6 +322,10 @@ bool GetItemTooltipState(const ItemTooltipValues& values, Data::Items::TooltipSt
         return values.strength.reduced;
     case TooltipState::DexterityReduced:
         return values.dexterity.reduced;
+    case TooltipState::StrengthRequired:
+        return values.strength.asked;
+    case TooltipState::DexterityRequired:
+        return values.dexterity.asked;
     case TooltipState::WizardryWeapon:
         return values.wizardryWeapon;
     case TooltipState::HasDurability:
@@ -321,9 +348,23 @@ std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::str
 
 std::optional<std::string> GetItemTooltipText(const ItemTooltipValues& values, std::string_view name)
 {
-    const std::optional<Data::Items::TooltipValue> value = Data::Items::FindBuiltInPlaceholder(name);
-    const wchar_t* text = value ? GetItemTooltipText(values, *value) : nullptr;
-    return text != nullptr ? std::optional<std::string>(Core::Text::ToUtf8(text)) : std::nullopt;
+    if (name == "name")
+    {
+        return values.name != nullptr ? Core::Text::ToUtf8(values.name) : std::string();
+    }
+    if (name == "addOptionDuration")
+    {
+        // Written only here, for the line that shows it: g_StringTime needs the buff system, and every tooltip
+        // computes the values each frame. Without the buff system (the tests) it's an empty text.
+        if (!g_BuffSystem)
+        {
+            return std::string();
+        }
+        std::wstring duration;
+        g_StringTime(values.addOptionTime, duration, true);
+        return Core::Text::ToUtf8(duration.c_str());
+    }
+    return std::nullopt;
 }
 
 bool GetItemTooltipState(const ItemTooltipValues& values, std::string_view name)
@@ -379,3 +420,19 @@ Data::Items::ItemTextColor GetTooltipLineColor(const Data::Items::TooltipLayoutL
 {
     return GetTooltipColor(line.colors, line.color, type, level, values);
 }
+std::vector<std::string_view> GetItemTooltipValueNames()
+{
+    // The built-in values that are numbers, by the names the placeholder checks give them.
+    const ItemTooltipValues values;
+    std::vector<std::string_view> names;
+    for (size_t index = 0; index < static_cast<size_t>(Data::Items::TooltipValue::Count); ++index)
+    {
+        const auto value = static_cast<Data::Items::TooltipValue>(index);
+        if (GetItemTooltipValue(values, value).has_value())
+        {
+            names.push_back(Data::Items::GetBuiltInPlaceholderName(value));
+        }
+    }
+    return names;
+}
+} // namespace Engine::Items::TooltipValues
