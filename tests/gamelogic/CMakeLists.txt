@@ -62,6 +62,15 @@ mu_add_test(
     NAME test_helper_attack_rotation
     SOURCES
         test_helper_attack_rotation.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
+)
+
+mu_add_test(
+    NAME test_character_realism
+    SOURCES
+        test_character_realism.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
+    LINK_LIBS
+        MuClient
 )

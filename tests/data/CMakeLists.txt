@@ -142,6 +142,7 @@ mu_add_test(
     NAME test_character_bones
     SOURCES
         test_character_bones.cpp
+        test_character_realism_bones.cpp
         $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS
         MuClient
