@@ -61,6 +61,8 @@ bool CheckFullSet(CHARACTER* c);
 void MoveCharacterPosition(CHARACTER* c);
 // Moves the character one frame along `heading` (a walking character's MoveHeading) instead of its facing.
 void MoveCharacterPosition(CHARACTER* c, float heading);
+// A flying winged player's bank into a turn and slow up-and-down drift, faded in and out (each frame, everyone).
+void UpdateFlightFeel(CHARACTER* c);
 void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter = NULL, OBJECT* pHelper = NULL);
 void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCharacter = nullptr,
                            OBJECT* pHelper = nullptr);

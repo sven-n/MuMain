@@ -183,6 +183,13 @@ public:
     // How fast the facing turns toward MoveHeading now, in degrees per second (signed): a turn speeds up and slows
     // down (TurnTowardsMoveHeading) instead of starting and stopping at full speed.
     float       TurnSpeed = 0.f;
+    // A flying character's feel (UpdateFlightFeel): the roll it banks by into a turn, how far the gentle up-and-down
+    // of its flight has faded in (0 to 1), and the height it last added for it (Object.Position[2]).
+    float       FlightBank = 0.f;
+    float       FlightHover = 0.f;
+    float       FlightHoverApplied = 0.f;
+    // The sideways shift last added (Object.Position x, y) so the bank pivots at the chest, not the feet.
+    float       FlightPivotShift[2] = {0.f, 0.f};
     char		CollisionTime; // unused?
 
     short       GuildMarkIndex;

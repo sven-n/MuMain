@@ -3124,6 +3124,10 @@ void MoveHero()
         GameLogic::Combat::UseSkillRagePosition(c);
     }
 
+    // After the hero's own move (MoveCharacterPosition sets its height from the terrain), so the flight's drift is in
+    // the height drawn; MoveCharacterClient does the others.
+    UpdateFlightFeel(c);
+
     CheckGate();
 
     // Core::Input::IsMouseOverUI() added as a 4th gate here too -- same rationale as the duplicate

@@ -2460,6 +2460,21 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o)
         {
             PlaySpeed *= StandingTurnStepSpeed;
         }
+        // Hovering in place, the body's breathing keeps the wings' beat: one of its cycles per wing beat (at their
+        // speed, RenderCharacterBackItem's), instead of about one and a half.
+        if (o->Type == MODEL_PLAYER &&
+            (o->CurrentAction == PLAYER_STOP_FLY || o->CurrentAction == PLAYER_STOP_FLY_CROSSBOW) &&
+            c->Wing.Type >= 0 && Models[c->Wing.Type].NumActions > 0)
+        {
+            // Scaled rather than set, keeping what slowed it above (a freeze).
+            const int wingKeys = Models[c->Wing.Type].Actions[0].NumAnimationKeys;
+            const Action_t& body = b->Actions[o->CurrentAction];
+            if (wingKeys > 1 && body.NumAnimationKeys > 1 && body.PlaySpeed > 0.f && c->Wing.PlaySpeed > 0.f)
+            {
+                PlaySpeed *= c->Wing.PlaySpeed * static_cast<float>(body.NumAnimationKeys) /
+                             (static_cast<float>(wingKeys) * body.PlaySpeed);
+            }
+        }
         if (o->Type != MODEL_PLAYER)
         {
             switch (o->Type)
@@ -6339,6 +6354,90 @@ void MoveCharacterPosition(CHARACTER* c, float heading)
         o->Position[2] += (-absf(sinf(o->Timer)) * 70.f + 70.f) * FPS_ANIMATION_FACTOR;
     }
     o->Timer += 0.15f * FPS_ANIMATION_FACTOR;
+    // The height starts over from the terrain: no flight hover in it yet (UpdateFlightFeel adds it back).
+    c->FlightHoverApplied = 0.f;
+}
+
+namespace
+{
+// How a winged player flies (the fly animations, moving or hovering, outside the safe zones): it banks into a turn, up
+// to this many degrees at the turn's top speed, and drifts slowly up and down (above its usual height) by this much,
+// this many times a second, fading in and out over about this long.
+constexpr float FlightMaxBankDegrees = 8.f;
+constexpr float FlightHoverHeight = 30.f;
+constexpr float FlightHoverCyclesPerSecond = 0.15f;
+constexpr float FlightEaseSeconds = 0.25f;
+// The turning speed that banks fully: a walk's turns are short and rarely reach WalkTurnDegreesPerSecond.
+constexpr float FlightFullBankTurnSpeed = 300.f;
+// The bank pivots this high above the feet (about the waist), as a flying body banks about its middle.
+constexpr float FlightBankPivotHeight = 65.f;
+
+bool IsFlying(const OBJECT* o)
+{
+    // Flying on, or hovering in place.
+    return o->Type == MODEL_PLAYER &&
+           (o->CurrentAction == PLAYER_FLY || o->CurrentAction == PLAYER_FLY_CROSSBOW ||
+            o->CurrentAction == PLAYER_STOP_FLY || o->CurrentAction == PLAYER_STOP_FLY_CROSSBOW);
+}
+} // namespace
+
+void UpdateFlightFeel(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+    const bool flying = IsFlying(o);
+    if (!flying && c->FlightBank == 0.f && c->FlightHover == 0.f && c->FlightHoverApplied == 0.f &&
+        c->FlightPivotShift[0] == 0.f && c->FlightPivotShift[1] == 0.f)
+    {
+        return;
+    }
+    const float seconds = FPS_ANIMATION_FACTOR / static_cast<float>(REFERENCE_FPS);
+    // Eased toward its target over about FlightEaseSeconds, the same at any frame rate.
+    const float ease = seconds > 0.f ? 1.f - std::exp(-seconds / FlightEaseSeconds) : 0.f;
+
+    // Bank: rolled into the turn by how fast it turns (TurnSpeed), the wings with it (they hang from the root).
+    const float wantedBank =
+        flying ? std::clamp(c->TurnSpeed / FlightFullBankTurnSpeed, -1.f, 1.f) * FlightMaxBankDegrees : 0.f;
+    const float bank = std::fabs(wantedBank - c->FlightBank) < 0.01f && wantedBank == 0.f
+                           ? 0.f
+                           : c->FlightBank + (wantedBank - c->FlightBank) * ease;
+    o->Angle[1] += bank - c->FlightBank;
+    c->FlightBank = bank;
+    // The model rolls about its feet; moving it back by how far the roll carried the waist makes it pivot there.
+    float shift[2] = {0.f, 0.f};
+    if (bank != 0.f)
+    {
+        const vec3_t waist = {0.f, 0.f, FlightBankPivotHeight};
+        const vec3_t rolled = {o->Angle[0], o->Angle[1], o->Angle[2]};
+        const vec3_t upright = {o->Angle[0], o->Angle[1] - bank, o->Angle[2]};
+        float matrix[3][4];
+        vec3_t withBank, withoutBank;
+        AngleMatrix(rolled, matrix);
+        VectorRotate(waist, matrix, withBank);
+        AngleMatrix(upright, matrix);
+        VectorRotate(waist, matrix, withoutBank);
+        shift[0] = withoutBank[0] - withBank[0];
+        shift[1] = withoutBank[1] - withBank[1];
+    }
+    o->Position[0] += shift[0] - c->FlightPivotShift[0];
+    o->Position[1] += shift[1] - c->FlightPivotShift[1];
+    c->FlightPivotShift[0] = shift[0];
+    c->FlightPivotShift[1] = shift[1];
+
+    // Hover: faded in while it flies.
+    const float wantedHover = flying ? 1.f : 0.f;
+    c->FlightHover = std::fabs(wantedHover - c->FlightHover) < 0.01f
+                         ? wantedHover
+                         : c->FlightHover + (wantedHover - c->FlightHover) * ease;
+    // Up and back down once a cycle, each character on its own beat (its key), easing in and out at the top and the
+    // bottom (smootherstep, which lingers there longer than a sine), and only upward from its usual height, which near
+    // the ground is just above it.
+    const float phase = static_cast<float>(c->Key) * 0.37f;
+    const float cycle = static_cast<float>(WorldTime) * 0.001f * FlightHoverCyclesPerSecond + phase;
+    const float rise = 1.f - std::fabs(2.f * (cycle - std::floor(cycle)) - 1.f); // 0 to 1 and back, linearly
+    const float eased = rise * rise * rise * (rise * (rise * 6.f - 15.f) + 10.f);
+    const float height = c->FlightHover * FlightHoverHeight * eased;
+    o->Position[2] += height - c->FlightHoverApplied;
+    c->FlightHoverApplied = height;
 }
 
 void MoveMonsterClient(CHARACTER* c, OBJECT* o)
@@ -6413,6 +6512,11 @@ void MoveCharacterClient(CHARACTER* cc)
         MoveMonsterClient(cc, co);
         FinishPendingTurn(cc);
         MoveCharacter(cc, co);
+        // The hero's comes after its move, in MoveHero.
+        if (cc != Hero)
+        {
+            UpdateFlightFeel(cc);
+        }
         MoveCharacterVisual(cc, co);
 
         battleCastle::MoveBattleCastleMonster(cc, co);

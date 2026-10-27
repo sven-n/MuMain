@@ -529,6 +529,12 @@ bool MovePath(CHARACTER* c, bool Turn)
     PATH_t* p = &c->Path;
     // Walking again: the turn the last walk left is this walk's now.
     c->TurnPending = false;
+    // The path is followed from the character's own position: without the sideways shift a flying bank adds for its
+    // pivot (UpdateFlightFeel puts it back), which would otherwise turn the heading and so the bank, rocking it.
+    c->Object.Position[0] -= c->FlightPivotShift[0];
+    c->Object.Position[1] -= c->FlightPivotShift[1];
+    c->FlightPivotShift[0] = 0.f;
+    c->FlightPivotShift[1] = 0.f;
 
     std::lock_guard<SpinLock> guard(p->Lock);
 
