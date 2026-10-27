@@ -55,6 +55,15 @@ function(mu_add_test)
     doctest_discover_tests(${MAT_NAME} PROPERTIES TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS})
 endfunction()
 
+# Winmain.cpp (the client's globals), compiled once for every test that needs it: it's the client's biggest file, and
+# each test compiling its own copy took most of a test build.
+add_library(mu_test_winmain OBJECT ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp)
+target_link_libraries(mu_test_winmain PRIVATE MuClient)
+target_include_directories(mu_test_winmain PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
+if(MSVC)
+    target_compile_options(mu_test_winmain PRIVATE /utf-8)
+endif()
+
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
 add_test(
     NAME windows_workflow_contract

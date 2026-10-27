@@ -170,7 +170,7 @@ mu_add_test(
     NAME ui_scaling_tests
     SOURCES
         test_ui_scaling.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
 )
 
@@ -178,7 +178,7 @@ mu_add_test(
     NAME mu_helper_tests
     SOURCES
         test_mu_helper.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
 )
 
@@ -247,7 +247,7 @@ mu_add_test(
     NAME rml_themed_view_tests
     SOURCES
         test_rml_themed_view.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
 )
 
@@ -255,7 +255,7 @@ mu_add_test(
     NAME world_label_layer_tests
     SOURCES
         test_world_label_layer.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
 )
 
@@ -263,7 +263,7 @@ mu_add_test(
     NAME rml_counter_scale_tests
     SOURCES
         test_rml_counter_scale.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
 )
 
@@ -271,7 +271,7 @@ mu_add_test(
     NAME rml_slot_placement_tests
     SOURCES
         test_rml_slot_placement.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
 )
 
@@ -280,7 +280,7 @@ mu_add_test(
     SOURCES
         test_rml_party_trade_layout.cpp
         RmlLayoutFixture.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
 )
 target_compile_definitions(rml_party_trade_layout_tests PRIVATE
@@ -293,7 +293,7 @@ mu_add_test(
     NAME item_grid_px_tests
     SOURCES
         test_item_grid_px.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
 )
 
@@ -301,7 +301,7 @@ mu_add_test(
     NAME rml_scale_inputs_tests
     SOURCES
         test_rml_scale_inputs.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
 )
 
@@ -309,7 +309,7 @@ mu_add_test(
     NAME rml_runtime_scale_tests
     SOURCES
         test_rml_runtime_scale.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
 )
 
@@ -318,7 +318,7 @@ mu_add_test(
     SOURCES
         test_theme_file_interface.cpp
         test_theme_inheritance.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
 )
 target_compile_definitions(theme_file_interface_tests PRIVATE
@@ -336,7 +336,7 @@ mu_add_test(
     NAME generic_dialog_lifetime_tests
     SOURCES
         test_generic_dialog_lifetime.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
 )
 
@@ -344,7 +344,7 @@ mu_add_test(
     NAME rml_document_scene_tests
     SOURCES
         test_rml_document_scene.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
 )
 
@@ -352,7 +352,7 @@ add_executable(rml_text_layout_tests
     test_rml_text_layout.cpp
     RmlTextLayoutAudit.cpp
     RmlLayoutFixture.cpp
-    ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    $<TARGET_OBJECTS:mu_test_winmain>
 )
 target_link_libraries(rml_text_layout_tests PRIVATE mu_test_main MuClient)
 target_include_directories(rml_text_layout_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
@@ -377,7 +377,7 @@ mu_add_test(
     SOURCES
         test_rml_styling_regressions.cpp
         RmlLayoutFixture.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient
 )
 target_compile_definitions(rml_styling_regression_tests PRIVATE

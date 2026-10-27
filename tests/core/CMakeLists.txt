@@ -58,7 +58,7 @@ mu_add_test(
     NAME test_audio_playback
     SOURCES
         test_audio_playback.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS
         MuClient
 )
@@ -107,7 +107,7 @@ if(ENABLE_CONTROL_SOCKET)
         NAME test_synthetic_input
         SOURCES
             test_synthetic_input.cpp
-            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+            $<TARGET_OBJECTS:mu_test_winmain>
         LINK_LIBS
             MuClient
     )

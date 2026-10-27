@@ -47,7 +47,7 @@ mu_add_test(
     SOURCES
         test_bundled_font_roles.cpp
         test_translation_glyph_coverage.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS MuClient SDL3_ttf::SDL3_ttf SDL3::SDL3
 )
 target_compile_definitions(bundled_font_role_tests PRIVATE

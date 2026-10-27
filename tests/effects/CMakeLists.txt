@@ -15,7 +15,7 @@ mu_add_test(
         EffectRecorder.cpp
         EffectTestData.cpp
         test_effect_creation.cpp
-        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        $<TARGET_OBJECTS:mu_test_winmain>
     LINK_LIBS
         MuClient
 )
