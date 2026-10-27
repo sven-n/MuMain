@@ -88,6 +88,12 @@ void CHARACTER::Initialize()
     MomentumHeading = NAN;
     MomentumAt = -1.0;
     SlopePitch = 0.f;
+    NodLeft = 0.f;
+    NodApplied = 0.f;
+    NodBowApplied = 0.f;
+    NodCooldown = 0.f;
+    WatchedHeroSeconds = 0.f;
+    NoddedAtHero = false;
     LookTarget = -1;
     LookScanSeconds = 0.f;
     SnapTurnOffset = 0.f;

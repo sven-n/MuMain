@@ -202,6 +202,16 @@ public:
     double      MomentumAt = -1.0;
     // The pitch a slope gives the character now (UpdateSlopeLean), in degrees, as last added to Object.Angle[0].
     float       SlopePitch = 0.f;
+    // A nod (UpdateNod): how far through it the head is (seconds left, 0: none), the pitch it last added to
+    // Object.HeadAngle[1], how long until it may nod again, how long it has been looking at the hero, and whether it
+    // already nodded at the hero this look.
+    float       NodLeft = 0.f;
+    float       NodApplied = 0.f;
+    // The bow that goes with it (Object.Angle[0], as last added).
+    float       NodBowApplied = 0.f;
+    float       NodCooldown = 0.f;
+    float       WatchedHeroSeconds = 0.f;
+    bool        NoddedAtHero = false;
     // The character its head looks at (UpdateLookAt; an index into CharactersClient, -1: none) and how long until it
     // looks around for another, in seconds.
     short       LookTarget = -1;

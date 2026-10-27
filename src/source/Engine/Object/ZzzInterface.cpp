@@ -3101,8 +3101,13 @@ void MoveHero()
     const bool followCursor = UpdateCursorLook(frameSeconds);
     const CHARACTER* lookAt = bLookAtMouse ? UpdateLookAt(c) : nullptr;
     const float glanceYaw = bLookAtMouse && lookAt == nullptr ? UpdateIdleGlance(frameSeconds) : -1.f;
-    // An enemy in sight keeps the head whatever the mouse does; an NPC gives it to the cursor while the mouse is in use.
-    if (lookAt != nullptr && (lookAt->Object.Kind == KIND_MONSTER || !followCursor))
+    // Someone who just nodded at the hero gets its head for a moment (it nods back, UpdateNod); an enemy in sight keeps
+    // the head whatever the mouse does; an NPC gives it to the cursor while the mouse is in use.
+    if (const CHARACTER* nodder = bLookAtMouse ? HeroNodAttention() : nullptr)
+    {
+        LookTowards(o, nodder, HeroLookDegrees);
+    }
+    else if (lookAt != nullptr && (lookAt->Object.Kind == KIND_MONSTER || !followCursor))
     {
         LookTowards(o, lookAt, HeroLookDegrees);
     }

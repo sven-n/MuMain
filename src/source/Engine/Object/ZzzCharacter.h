@@ -92,6 +92,13 @@ CHARACTER* CharacterOfObject(const OBJECT* o);
 const CHARACTER* UpdateLookAt(CHARACTER* c);
 // Turns the head toward `target`, at most `maxDegrees` to either side.
 void LookTowards(OBJECT* o, const CHARACTER* target, float maxDegrees);
+// Nods, from the hero's point of view: a player or NPC that has looked at the hero for a moment nods once, and the
+// hero turns its head to it and nods back. RemoveNod takes last frame's nod off the head before the head eases to its
+// target; UpdateNod moves the nods on and puts this frame's back (each frame, everyone).
+void RemoveNod(CHARACTER* c);
+void UpdateNod(CHARACTER* c);
+// Who the hero is turning its head to, to nod back (MoveHero's head), or nullptr.
+const CHARACTER* HeroNodAttention();
 void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter = NULL, OBJECT* pHelper = NULL);
 void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCharacter = nullptr,
                            OBJECT* pHelper = nullptr);
