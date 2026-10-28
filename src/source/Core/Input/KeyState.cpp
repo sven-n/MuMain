@@ -25,6 +25,7 @@ namespace Core::Input
             if (vk >= '1' && vk <= '9') return static_cast<SDL_Scancode>(SDL_SCANCODE_1 + (vk - '1'));
             if (vk == '0') return SDL_SCANCODE_0;
 
+            // clang-format off: a table, one key a line.
             switch (vk)
             {
             case VK_UP:      return SDL_SCANCODE_UP;
@@ -55,8 +56,10 @@ namespace Core::Input
             case VK_F11:     return SDL_SCANCODE_F11;
             case VK_F12:     return SDL_SCANCODE_F12;
             case VK_SNAPSHOT: return SDL_SCANCODE_PRINTSCREEN;
+            case VK_MENU:    return SDL_SCANCODE_LALT;
             default:         return SDL_SCANCODE_UNKNOWN;
             }
+            // clang-format on
         }
 
     void RecordLeftMouseButtonPressEdge()
