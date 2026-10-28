@@ -32,9 +32,41 @@
 
 namespace
 {
+constexpr float RavenMagicTurnDegrees = 40.f;
+constexpr float RavenRecoveryHeight = 250.f;
+constexpr float RavenMinimumFlightTurnDegrees = 5.f;
+constexpr float RavenMaximumFlightTurnDegrees = 19.f;
+constexpr float RavenMaximumCourseChangeDegrees = 59.f;
+
 bool IsValidCharacterIndex(int index)
 {
     return index >= 0 && index < MAX_CHARACTERS_CLIENT;
+}
+
+void MoveFlyingPet(OBJECT* pet)
+{
+    AngleMatrix(pet->Angle, pet->Matrix);
+
+    vec3_t direction;
+    VectorRotate(pet->Direction, pet->Matrix, direction);
+    VectorAddScaled(pet->Position, direction, pet->Position, FPS_ANIMATION_FACTOR);
+}
+
+void CreateRavenAttackTrail(OBJECT* pet)
+{
+    if (!rand_fps_check(1))
+    {
+        return; // Emit at the reference rate, even when the attack spans many rendered frames.
+    }
+
+    constexpr int jointCount = 10;
+    constexpr float minimumLength = 20.f;
+    constexpr float maximumLength = 59.f;
+    for (int i = 0; i < jointCount; ++i)
+    {
+        CreateJoint(BITMAP_LIGHT, pet->Position, pet->Position, pet->Angle, 1, nullptr,
+                    Random::RangeFloat(minimumLength, maximumLength));
+    }
 }
 } // namespace
 
@@ -446,13 +478,11 @@ void CSPetDarkSpirit::MovePet(void)
         if (Distance >= FlyRange * FlyRange)
         {
             float Angle = CreateAngle2D(o->Position, TargetPosition);
-            o->Angle[2] = TurnAngle2(o->Angle[2], Angle, Random::RangeFloat(0, 14) + 5.f);
+            const float referenceTurn =
+                Random::RangeFloat(RavenMinimumFlightTurnDegrees, RavenMaximumFlightTurnDegrees);
+            o->Angle[2] = TurnAngle2(o->Angle[2], Angle, referenceTurn * FPS_ANIMATION_FACTOR);
         }
-        AngleMatrix(o->Angle, o->Matrix);
-
-        vec3_t Direction;
-        VectorRotate(o->Direction, o->Matrix, Direction);
-        VectorAdd(o->Position, Direction, o->Position);
+        MoveFlyingPet(o);
 
         int speedRandom = 28;
         int CharacterHeight = 250;
@@ -488,10 +518,11 @@ void CSPetDarkSpirit::MovePet(void)
             else
             {
                 Speed = -(Random::RangeFloat(0, 7) + 32.f) * 0.1f;
-                o->Angle[2] += Random::RangeFloat(0, 59) * FPS_ANIMATION_FACTOR;
+                // The gate already limits these course changes to the reference rate.
+                o->Angle[2] += Random::RangeFloat(0, RavenMaximumCourseChangeDegrees);
             }
 
-            Speed += o->Direction[1] * FPS_ANIMATION_FACTOR;
+            Speed += o->Direction[1];
             Speed = Speed / 2.f;
 
             o->Direction[0] = 0.f;
@@ -556,7 +587,7 @@ void CSPetDarkSpirit::MovePet(void)
             OBJECT* to = &tc->Object;
 
             float Angle = CreateAngle2D(o->Position, to->Position);
-            o->Angle[2] = TurnAngle2(o->Angle[2], Angle, 40.f);
+            o->Angle[2] = TurnAngle2(o->Angle[2], Angle, RavenMagicTurnDegrees * FPS_ANIMATION_FACTOR);
         }
     }
     else if (o->AI == PET_STAND)
@@ -613,7 +644,7 @@ void CSPetDarkSpirit::MovePet(void)
     {
         o->LifeTime = 0;
         VectorCopy(TargetPosition, o->Position);
-        o->Position[2] += 250.f * FPS_ANIMATION_FACTOR;
+        o->Position[2] += RavenRecoveryHeight;
     }
 }
 
@@ -689,11 +720,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
     case PET_ATTACK:
         if (c->AttackTime >= 0 && c->AttackTime <= 2 && m_PetTarget != NULL)
         {
-            for (int i = 0; i < 10; i++)
-            {
-                CreateJoint(BITMAP_LIGHT, o->Position, o->Position, o->Angle, 1, NULL,
-                            (Random::RangeFloat(0, 39) + 20.f));
-            }
+            CreateRavenAttackTrail(o);
 
             if (c->CheckAttackTime(1))
             {
