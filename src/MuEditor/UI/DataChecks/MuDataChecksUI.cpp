@@ -17,6 +17,7 @@
 #include "../MuEditor/UI/MonsterTools/MonsterCheckArea.h"
 #include "../MuEditor/UI/MonsterTools/MonsterToolWindow.h"
 #include "I18N/All.h"
+#include "Render/Look/LookTuning.h"
 #include "imgui.h"
 
 #include <utility>
@@ -118,6 +119,7 @@ void MuDataChecksUI::RunChecks()
     m_checkedItemVersion = Items::ToolWindow::GetDataVersion();
     m_checkedMonsterVersion = Monsters::ToolWindow::GetDataVersion();
     m_checkedFileSaves = SavedDataFiles::GetSaveCount();
+    m_checkedLookSaves = Render::Look::SaveCount();
 }
 
 void MuDataChecksUI::RenderCheckLine()
@@ -159,7 +161,7 @@ bool MuDataChecksUI::DataChangedSinceCheck() const
 {
     return Items::ToolWindow::GetDataVersion() != m_checkedItemVersion ||
            Monsters::ToolWindow::GetDataVersion() != m_checkedMonsterVersion ||
-           SavedDataFiles::GetSaveCount() != m_checkedFileSaves;
+           SavedDataFiles::GetSaveCount() != m_checkedFileSaves || Render::Look::SaveCount() != m_checkedLookSaves;
 }
 } // namespace MuEditor::DataChecks
 

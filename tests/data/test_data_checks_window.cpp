@@ -11,9 +11,11 @@
 #include "ToolWindowsScope.h"
 
 #include "Core/MuEditorCore.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "I18N/All.h"
+#include "Render/Look/LookTuning.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/Common/SavedDataFiles.h"
 #include "UI/DataChecks/MuDataChecksUI.h"
@@ -23,7 +25,9 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
+#include <filesystem>
 #include <memory>
+#include <random>
 #include <string>
 #include <vector>
 
@@ -153,7 +157,7 @@ TEST_CASE("Data Checks: the problems stay until Check all, also of a monster rem
     CHECK(g_MonsterSelection.GetNumber() == 2);
 }
 
-TEST_CASE("Data Checks: a save of the server list or the looks counts as a change since the check [editor]")
+TEST_CASE("Data Checks: a save of the server list counts as a change since the check [editor]")
 {
     const ToolWindowsScope windows;
     StartWith({Monster(2, "Budge Dragon")});
@@ -163,6 +167,57 @@ TEST_CASE("Data Checks: a save of the server list or the looks counts as a chang
     CHECK_FALSE(checks->DataChangedSinceCheck());
 
     MuEditor::SavedDataFiles::NoteSaved();
+    CHECK(checks->DataChangedSinceCheck());
+
+    PressCheckAll(*checks);
+    CHECK_FALSE(checks->DataChangedSinceCheck());
+}
+
+// An empty client folder with the look files' folders; the working directory
+// while it lives, so a look save writes its files there.
+class LookFolder
+{
+public:
+    LookFolder()
+        // CTest runs the test cases as parallel processes; each needs its own folder.
+        : m_directory(std::filesystem::temp_directory_path() /
+                      ("mu_test_data_checks_looks_" + std::to_string(std::random_device{}()))),
+          m_previousDirectory(std::filesystem::current_path())
+    {
+        // Set up the log file before switching directories, so none is written there.
+        mu::log::Init();
+        std::filesystem::create_directories(m_directory / "Data" / "Render");
+        std::filesystem::create_directories(m_directory / "Data" / "Maps");
+        std::filesystem::current_path(m_directory);
+    }
+
+    ~LookFolder()
+    {
+        std::error_code ignored;
+        std::filesystem::current_path(m_previousDirectory, ignored);
+        std::filesystem::remove_all(m_directory, ignored);
+    }
+
+    LookFolder(const LookFolder&) = delete;
+    LookFolder& operator=(const LookFolder&) = delete;
+
+private:
+    std::filesystem::path m_directory;
+    std::filesystem::path m_previousDirectory;
+};
+
+TEST_CASE("Data Checks: a save of the looks, also by $look save, counts as a change since the check [editor]")
+{
+    const ToolWindowsScope windows;
+    StartWith({Monster(2, "Budge Dragon")});
+    TestImGuiContext context;
+    const std::unique_ptr<MuDataChecksUI> checks = MonsterChecksWindow();
+    RenderChecks(*checks);
+    CHECK_FALSE(checks->DataChangedSinceCheck());
+
+    // The chat command saves without the DevEditor; both go through SaveLive.
+    const LookFolder folder;
+    REQUIRE(Render::Look::HandleDeveloperCommand(L"$look save"));
     CHECK(checks->DataChangedSinceCheck());
 
     PressCheckAll(*checks);

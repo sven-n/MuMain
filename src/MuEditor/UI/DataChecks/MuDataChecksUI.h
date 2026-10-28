@@ -44,8 +44,9 @@ private:
     // The item and monster tools' data versions when the checks ran.
     long long m_checkedItemVersion = 0;
     int m_checkedMonsterVersion = 0;
-    // SavedDataFiles::GetSaveCount() when the checks ran.
+    // SavedDataFiles::GetSaveCount() and Render::Look::SaveCount() when the checks ran.
     int m_checkedFileSaves = 0;
+    int m_checkedLookSaves = 0;
 };
 } // namespace MuEditor::DataChecks
 

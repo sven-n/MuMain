@@ -17,7 +17,6 @@
 #include "UI/Console/MuEditorConsoleUI.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/Common/MuEditorLayout.h"
-#include "UI/Common/SavedDataFiles.h"
 
 // External C functions
 extern "C" CameraManager& CameraManager_Instance();
@@ -606,9 +605,9 @@ void CDevEditorUI::RenderLookPanel()
         (void)Render::Look::ResetLive(std::nullopt);
     }
     ImGui::SameLine();
-    if (ImGui::Button(I18N::Editor::LookSave) && Render::Look::SaveLive())
+    if (ImGui::Button(I18N::Editor::LookSave))
     {
-        MuEditor::SavedDataFiles::NoteSaved();
+        (void)Render::Look::SaveLive();
     }
     ImGui::Separator();
 

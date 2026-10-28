@@ -32,6 +32,9 @@ bool ResetLive(std::optional<std::string_view> name);
 bool LoadLive(std::string_view candidate);
 // Writes the live values into the shipped files.
 bool SaveLive();
+// How many times SaveLive wrote the files in this session, by `$look save` or the DevEditor's
+// Save; Data Checks compares it to say that the looks changed since its last check.
+[[nodiscard]] int SaveCount();
 
 // `$look show|set|reset|load|save` and the aliases; false when the text is none of them.
 bool HandleDeveloperCommand(std::wstring_view command);
