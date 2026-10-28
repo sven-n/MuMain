@@ -1315,6 +1315,9 @@
   <data name="Monster models" xml:space="preserve">
     <value>Monster models</value>
   </data>
+  <data name="Model files" xml:space="preserve">
+    <value>Model files</value>
+  </data>
   <data name="Data checks what note" xml:space="preserve">
     <value>Items and monsters are checked as their Save would write them; the server list, effects and looks as the game reads their files at start.</value>
   </data>

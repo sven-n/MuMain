@@ -7,6 +7,7 @@
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "Data/DataHandler/EffectData/EffectTypeStorage.h"
+#include "Data/DataHandler/ModelData/ModelFileDataHandler.h"
 #include "Data/GameData/MapData/LightMood.h"
 #include "Data/GameData/MapData/LookProfile.h"
 #include "Data/GameData/ServerListData/ServerListJson.h"
@@ -15,6 +16,7 @@
 #include "Render/Look/LookFiles.h"
 #include "imgui.h"
 
+#include <cstdlib>
 #include <utility>
 
 namespace MuEditor::DataChecks
@@ -81,6 +83,19 @@ std::unique_ptr<DataCheckArea> CreateEffectCheckArea()
             issues.insert(issues.end(), found.begin(), found.end());
         },
         &ToolWindows::effectBrowser, WindowIds::EffectBrowser);
+}
+
+std::unique_ptr<DataCheckArea> CreateModelFileCheckArea()
+{
+    return std::make_unique<FileCheckArea>(
+        &I18N::Editor::ModelFiles,
+        [](std::vector<ItemDataIssue>& issues)
+        {
+            std::vector<ItemDataIssue> found =
+                Data::Models::ReadModelFileTable(std::getenv(Data::Models::DataOverlayVariable), "Data").issues;
+            issues.insert(issues.end(), found.begin(), found.end());
+        },
+        nullptr, nullptr);
 }
 
 std::unique_ptr<DataCheckArea> CreateLookCheckArea()

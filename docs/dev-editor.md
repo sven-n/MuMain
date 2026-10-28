@@ -104,8 +104,9 @@ cursor. In the Map Editor's thumbnail grids they move in both directions.
 
 **Windows > Data Checks** lists the problems of all game data in one table:
 the items, the monsters and the monster models as their Save would write
-them now, and the server list, the effect catalogue and the looks (the look
-profile and the light moods) as the game reads their files at start.
+them now, and the glTF model file table, the server list, the effect
+catalogue and the looks (the look profile and the light moods) as the game
+reads their files at start.
 
 Problems have three levels, the same in every area: **fatal** (the data
 cannot be used: the game does not start with it, and Save refuses it),

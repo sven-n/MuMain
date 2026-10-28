@@ -40,6 +40,9 @@ private:
 std::unique_ptr<DataCheckArea> CreateServerListCheckArea();
 // The effect catalogue in Data/Effects; a click opens the Effect Browser.
 std::unique_ptr<DataCheckArea> CreateEffectCheckArea();
+// The glTF model file table (Data/Models/ModelFiles.json, the developer
+// overlay MU_DATA_OVERLAY first); it has no tool to open.
+std::unique_ptr<DataCheckArea> CreateModelFileCheckArea();
 // The look profile (Data/Render/Look.json) and the light moods
 // (Data/Maps/LightMood.json); a click opens the Dev Editor.
 std::unique_ptr<DataCheckArea> CreateLookCheckArea();

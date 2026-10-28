@@ -77,7 +77,7 @@ The problems of all game data in one window:
 - **MuDataChecksUI** - The window: Check all, a box per level and per area, and the table
 - **IssueTable** - The table of the problems, the worst first, with their area; a click opens a problem
 - **DataCheckArea** - What an area of data gives the window: its name, its checks, what a problem is about and how a click opens it
-- **FileCheckArea** - The areas whose data is files the game reads at start: the server list, the effect catalogue and the looks
+- **FileCheckArea** - The areas whose data is files the game reads at start: the model file table, the server list, the effect catalogue and the looks
 
 ### Shared Tool Parts (UI/Common)
 Parts the item tools and the monster tools both use:
