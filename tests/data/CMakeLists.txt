@@ -59,6 +59,7 @@ target_compile_definitions(server_list_data_tests PRIVATE
 mu_add_test(
     NAME monster_data_tests
     SOURCES
+        test_data_check_areas.cpp
         test_data_checks_window.cpp
         test_issue_table.cpp
         test_legacy_monster_kind.cpp

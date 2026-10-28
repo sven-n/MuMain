@@ -143,6 +143,28 @@ TEST_CASE("Data Checks' table shows the worst first and opens a row through its 
     CHECK(monsters.opened == "w1");
 }
 
+TEST_CASE("Data Checks' table hides a level with its box [editor]")
+{
+    TestImGuiContext context;
+    RecordingArea items("Items");
+    const std::array<DataCheckArea*, 1> areas = {&items};
+    IssueTable table;
+    table.SetIssues({Issue(ItemDataIssueSeverity::Fatal, "f1"), Issue(ItemDataIssueSeverity::Error, "e1")});
+    RenderFrame(table, areas);
+
+    const ImGuiWindow* window = ImGui::FindWindowByName(WindowName);
+    REQUIRE(window != nullptr);
+    ImGui::ActivateItemByID(ImGui::GetIDWithSeed("###ShowFatal", nullptr, window->ID));
+    RenderFrame(table, areas);
+
+    // The box hides the rows, not the count.
+    CHECK(table.GetCount(ItemDataIssueSeverity::Fatal) == 1);
+    ClickRow(table, areas, 0, I18N::Editor::Fatal);
+    CHECK(items.opened.empty());
+    ClickRow(table, areas, 1, I18N::Editor::Error);
+    CHECK(items.opened == "e1");
+}
+
 TEST_CASE("Data Checks' table hides an area's problems, and the counts follow [editor]")
 {
     TestImGuiContext context;

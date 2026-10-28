@@ -187,7 +187,7 @@ TEST_CASE("Data Checks: an area's box hides its problems [editor][monsters]")
     CHECK(g_MonsterSelection.GetNumber() == 7);
 }
 
-TEST_CASE("Data Checks: the editor's window checks every area and draws without ImGui errors [editor]")
+TEST_CASE("Data Checks: the editor's window with all its areas draws without ImGui errors [editor]")
 {
     const ToolWindowsScope windows;
     StartWith({Monster(2, "Budge Dragon")});
