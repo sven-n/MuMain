@@ -8,6 +8,7 @@
         "en": "Light Spear",
         "de": "Leichter Speer",
         "es": "Jabalina de Luz",
+        "pl": "Lekka włócznia",
         "pt": "Lança de luz"
       },
       "width": 2,
@@ -39,6 +40,7 @@
         "en": "Spear",
         "de": "Speer",
         "es": "Jabalina",
+        "pl": "Włócznia",
         "pt": "Lança"
       },
       "width": 2,
@@ -69,6 +71,7 @@
         "en": "Dragon Lance",
         "de": "Drachenlanze",
         "es": "Lanza Dragón",
+        "pl": "Smocza lanca",
         "pt": "Lança do dragão"
       },
       "width": 2,
@@ -99,6 +102,7 @@
         "en": "Giant Trident",
         "de": "Riesendreizack",
         "es": "Tridente Gigante",
+        "pl": "Trójząb olbrzyma",
         "pt": "Tridente gigante"
       },
       "width": 2,
@@ -129,6 +133,7 @@
         "en": "Serpent Spear",
         "de": "Schlangenspeer",
         "es": "Jabalina Serpiente",
+        "pl": "Wężowa włócznia",
         "pt": "Lança da serpente"
       },
       "width": 2,
@@ -160,6 +165,7 @@
         "en": "Double Poleaxe",
         "de": "Doppelstangenaxt",
         "es": "Hacha Doble de Mástil",
+        "pl": "Podwójny czekan",
         "pt": "Gadanha dupla"
       },
       "width": 2,
@@ -190,6 +196,7 @@
         "en": "Halberd",
         "de": "Hellebarde",
         "es": "Alabarda",
+        "pl": "Halabarda",
         "pt": "Alabarda"
       },
       "width": 2,
@@ -220,6 +227,7 @@
         "en": "Berdysh",
         "de": "Berdysch",
         "es": "Berdiche",
+        "pl": "Berdysz",
         "pt": "Berdysh"
       },
       "width": 2,
@@ -251,6 +259,7 @@
         "en": "Great Scythe",
         "de": "Großartige Sense",
         "es": "Gran Guadaña",
+        "pl": "Wielka kosa",
         "pt": "Grande foice"
       },
       "width": 2,
@@ -282,6 +291,7 @@
         "en": "Bill of Balrog",
         "de": "Hippe des Balrog",
         "es": "Pico de Balrog",
+        "pl": "Gizarma Balroga",
         "pt": "Gancho de Balrog"
       },
       "width": 2,
@@ -313,6 +323,7 @@
         "en": "Dragon Spear",
         "de": "Drachenspeer",
         "es": "Jabalina Dragón",
+        "pl": "Smocza włócznia",
         "pt": "Lança do dragão"
       },
       "width": 2,
@@ -342,6 +353,7 @@
         "en": "Brova",
         "de": "Brova",
         "es": "Brova",
+        "pl": "Brova",
         "pt": "Brova"
       },
       "width": 2,
