@@ -1,25 +1,7 @@
-#pragma clang diagnostic ignored "-Wmissing-prototypes"
-
 #include <metal_stdlib>
 #include <simd/simd.h>
 
 using namespace metal;
-
-struct VSInput
-{
-    float3 pos;
-    float4 color;
-    int positionBoneIndex;
-};
-
-struct VSOutput
-{
-    float4 pos;
-    float2 uv;
-    float4 color;
-    float fogFactor;
-    float clipDist;
-};
 
 struct Skinning
 {
@@ -67,144 +49,82 @@ struct main0_in
     int input_positionBoneIndex [[attribute(4)]];
 };
 
-static inline __attribute__((always_inline))
-float4 loadBoneRow(thread const uint& row, const device boneRows& boneRows_1)
-{
-    return boneRows_1._data[row];
-}
-
-static inline __attribute__((always_inline))
-float3 transformPosition(thread const float3& position, thread const int& boneIndex, constant Skinning& _64, const device boneRows& boneRows_1)
-{
-    if ((boneIndex < 0) || (boneIndex >= int(_64.palette.y)))
-    {
-        return position;
-    }
-    uint row = _64.palette.x + (uint(boneIndex) * 3u);
-    uint param = row;
-    float4 row0 = loadBoneRow(param, boneRows_1);
-    uint param_1 = row + 1u;
-    float4 row1 = loadBoneRow(param_1, boneRows_1);
-    uint param_2 = row + 2u;
-    float4 row2 = loadBoneRow(param_2, boneRows_1);
-    float3 transformed;
-    if (_64.boneScaleAndRestPoseScale.x == 1.0)
-    {
-        float restScale = (_64.boneScaleAndRestPoseScale.y != 0.0) ? _64.boneScaleAndRestPoseScale.y : 1.0;
-        float4 restPosition = float4(position * restScale, 1.0);
-        transformed = float3(dot(row0, restPosition), dot(row1, restPosition), dot(row2, restPosition));
-    }
-    else
-    {
-        transformed = float3(dot(row0.xyz, position), dot(row1.xyz, position), dot(row2.xyz, position));
-        transformed = (transformed * _64.boneScaleAndRestPoseScale.x) + float3(row0.w, row1.w, row2.w);
-    }
-    if (_64.palette.z != 0u)
-    {
-        transformed = _64.bodyOriginAndScale.xyz + (transformed * _64.bodyOriginAndScale.w);
-    }
-    return transformed;
-}
-
-static inline __attribute__((always_inline))
-float3 shearShadow(thread const float3& position, constant Shadow& _76)
-{
-    float3 relative = position - _76.shadowOrigin.xyz;
-    relative.x += ((relative.z * (relative.x + _76.shadowProjection.x)) / (relative.z - _76.shadowProjection.y));
-    return relative + _76.shadowOrigin.xyz;
-}
-
-static inline __attribute__((always_inline))
-uint loadTerrainWord(thread const uint& word, const device terrainWords& terrainWords_1)
-{
-    return terrainWords_1._data[word];
-}
-
-static inline __attribute__((always_inline))
-float terrainCornerHeight(thread const int& x, thread const int& y, const device terrainWords& terrainWords_1)
-{
-    uint param = (uint(y & 255) * 256u) + uint(x & 255);
-    return as_type<float>(loadTerrainWord(param, terrainWords_1));
-}
-
-static inline __attribute__((always_inline))
-float terrainHeight(thread float& x, thread float& y, constant Shadow& _76, const device terrainWords& terrainWords_1)
-{
-    if (((_76.shadowProjection.z == 0.0) || (x < 0.0)) || (y < 0.0))
-    {
-        return 0.0;
-    }
-    x /= 100.0;
-    y /= 100.0;
-    int xi = int(x);
-    int yi = int(y);
-    uint index = uint((yi * 256) + xi);
-    uint param = 65536u + (index >> uint(5));
-    if ((index >= 65536u) || (((loadTerrainWord(param, terrainWords_1) >> (index & 31u)) & 1u) != 0u))
-    {
-        return _76.shadowOrigin.w;
-    }
-    float xd = x - float(xi);
-    float yd = y - float(yi);
-    int param_1 = xi;
-    int param_2 = yi;
-    float h1 = terrainCornerHeight(param_1, param_2, terrainWords_1);
-    int param_3 = xi;
-    int param_4 = yi + 1;
-    float h2 = terrainCornerHeight(param_3, param_4, terrainWords_1);
-    int param_5 = xi + 1;
-    int param_6 = yi;
-    float h3 = terrainCornerHeight(param_5, param_6, terrainWords_1);
-    int param_7 = xi + 1;
-    int param_8 = yi + 1;
-    float h4 = terrainCornerHeight(param_7, param_8, terrainWords_1);
-    float left = h1 + ((h2 - h1) * yd);
-    float right = h3 + ((h4 - h3) * yd);
-    return left + ((right - left) * xd);
-}
-
-static inline __attribute__((always_inline))
-float4 clipPosition(thread const float3& position, constant Skinning& _64)
-{
-    return _64.mvp * float4(position, 1.0);
-}
-
-static inline __attribute__((always_inline))
-VSOutput _main(thread const VSInput& _input, constant Skinning& _64, constant Shadow& _76, const device boneRows& boneRows_1, const device terrainWords& terrainWords_1)
-{
-    float3 param = _input.pos;
-    int param_1 = _input.positionBoneIndex;
-    float3 param_2 = transformPosition(param, param_1, _64, boneRows_1);
-    float3 position = shearShadow(param_2, _76);
-    float param_3 = position.x;
-    float param_4 = position.y;
-    float _388 = terrainHeight(param_3, param_4, _76, terrainWords_1);
-    position.z = _388 + 5.0;
-    float3 param_5 = position;
-    VSOutput _output;
-    _output.pos = clipPosition(param_5, _64);
-    _output.uv = float2(0.0);
-    _output.color = _input.color;
-    _output.clipDist = _output.pos.w - 1.0;
-    float range = _64.fogParameters.y - _64.fogParameters.x;
-    _output.fogFactor = (range > 0.001000000047497451305389404296875) ? fast::clamp((_64.fogParameters.y - abs(_output.pos.w)) / range, 0.0, 1.0) : 1.0;
-    return _output;
-}
-
-vertex main0_out main0(main0_in in [[stage_in]], constant Skinning& _64 [[buffer(0)]], constant Shadow& _76 [[buffer(1)]], const device boneRows& boneRows_1 [[buffer(2)]], const device terrainWords& terrainWords_1 [[buffer(3)]])
+vertex main0_out main0(main0_in in [[stage_in]], constant Skinning& _68 [[buffer(0)]], constant Shadow& _80 [[buffer(1)]], const device boneRows& boneRows_1 [[buffer(2)]], const device terrainWords& terrainWords_1 [[buffer(3)]])
 {
     main0_out out = {};
-    VSInput _input;
-    _input.pos = in.input_pos;
-    _input.color = in.input_color;
-    _input.positionBoneIndex = in.input_positionBoneIndex;
-    VSInput param = _input;
-    VSOutput flattenTemp = _main(param, _64, _76, boneRows_1, terrainWords_1);
-    out.gl_Position = flattenTemp.pos;
-    out._entryPointOutput_uv = flattenTemp.uv;
-    out._entryPointOutput_color = flattenTemp.color;
-    out._entryPointOutput_fogFactor = flattenTemp.fogFactor;
-    out.gl_ClipDistance[0] = flattenTemp.clipDist;
+    float3 _947;
+    do
+    {
+        if ((in.input_positionBoneIndex < 0) || (in.input_positionBoneIndex >= int(_68.palette.y)))
+        {
+            _947 = in.input_pos;
+            break;
+        }
+        uint _582 = _68.palette.x + (uint(in.input_positionBoneIndex) * 3u);
+        float4 _554 = boneRows_1._data[_582];
+        uint _586 = _582 + 1u;
+        float4 _556 = boneRows_1._data[_586];
+        uint _589 = _582 + 2u;
+        float4 _558 = boneRows_1._data[_589];
+        float3 _945;
+        if (_68.boneScaleAndRestPoseScale.x == 1.0)
+        {
+            float4 _607 = float4(in.input_pos * ((_68.boneScaleAndRestPoseScale.y != 0.0) ? _68.boneScaleAndRestPoseScale.y : 1.0), 1.0);
+            _945 = float3(dot(boneRows_1._data[_582], _607), dot(boneRows_1._data[_586], _607), dot(boneRows_1._data[_589], _607));
+        }
+        else
+        {
+            _945 = (float3(dot(boneRows_1._data[_582].xyz, in.input_pos), dot(boneRows_1._data[_586].xyz, in.input_pos), dot(boneRows_1._data[_589].xyz, in.input_pos)) * _68.boneScaleAndRestPoseScale.x) + float3(_554.w, _556.w, _558.w);
+        }
+        float3 _946;
+        if (_68.palette.z != 0u)
+        {
+            _946 = _68.bodyOriginAndScale.xyz + (_945 * _68.bodyOriginAndScale.w);
+        }
+        else
+        {
+            _946 = _945;
+        }
+        _947 = _946;
+        break;
+    } while(false);
+    float3 _676 = _947 - _80.shadowOrigin.xyz;
+    _676.x += ((_676.z * (_676.x + _80.shadowProjection.x)) / (_676.z - _80.shadowProjection.y));
+    float3 _492 = _676 + _80.shadowOrigin.xyz;
+    float _948;
+    do
+    {
+        if (((_80.shadowProjection.z == 0.0) || (_492.x < 0.0)) || (_492.y < 0.0))
+        {
+            _948 = 0.0;
+            break;
+        }
+        float _744 = _492.x * 0.00999999977648258209228515625;
+        float _746 = _492.y * 0.00999999977648258209228515625;
+        int _748 = int(_744);
+        int _750 = int(_746);
+        uint _755 = uint((_750 * 256) + _748);
+        if ((_755 >= 65536u) || (((terrainWords_1._data[65536u + (_755 >> uint(5))] >> (_755 & 31u)) & 1u) != 0u))
+        {
+            _948 = _80.shadowOrigin.w;
+            break;
+        }
+        float _779 = _746 - float(_750);
+        float _836 = as_type<float>(terrainWords_1._data[(uint(_750 & 255) * 256u) + uint(_748 & 255)]);
+        float _872 = as_type<float>(terrainWords_1._data[(uint(_750 & 255) * 256u) + uint((_748 + 1) & 255)]);
+        float _802 = _836 + ((as_type<float>(terrainWords_1._data[(uint((_750 + 1) & 255) * 256u) + uint(_748 & 255)]) - _836) * _779);
+        _948 = _802 + (((_872 + ((as_type<float>(terrainWords_1._data[(uint((_750 + 1) & 255) * 256u) + uint((_748 + 1) & 255)]) - _872) * _779)) - _802) * (_744 - float(_748)));
+        break;
+    } while(false);
+    _492.z = _948 + 5.0;
+    float4 _905 = _68.mvp * float4(_492, 1.0);
+    float4 _911 = _905;
+    float _527 = _68.fogParameters.y - _68.fogParameters.x;
+    out.gl_Position = _905;
+    out._entryPointOutput_uv = float2(0.0);
+    out._entryPointOutput_color = in.input_color;
+    out._entryPointOutput_fogFactor = (_527 > 0.001000000047497451305389404296875) ? fast::clamp((_68.fogParameters.y - abs(_911.w)) / _527, 0.0, 1.0) : 1.0;
+    out.gl_ClipDistance[0] = _911.w - 1.0;
     out.gl_ClipDistance_0 = out.gl_ClipDistance[0];
     return out;
 }

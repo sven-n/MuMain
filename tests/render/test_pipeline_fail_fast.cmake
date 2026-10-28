@@ -83,13 +83,21 @@ require_source("${renderer_source}" "constexpr[ \t]+int[ \t]+k_PipelineCount[ \t
 require_shader_load_assignment(s_vertShader2D basic_textured vert VERTEX)
 require_shader_load_assignment(s_fragShaderTex basic_textured frag FRAGMENT)
 require_shader_load_assignment(s_vertShaderSkinned skinned_textured vert VERTEX)
+require_shader_load_assignment(s_vertShaderSkinnedWeighted skinned_weighted vert VERTEX)
 require_shader_load_assignment(s_vertShaderSkinnedShadow skinned_shadow vert VERTEX)
+require_shader_load_assignment(s_vertShaderSkinnedWeightedShadow skinned_weighted_shadow vert VERTEX)
 require_source("${executable_load_source}"
     "s_vertShaderSkinnedShadow[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_shadow\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*false[ \t\r\n]*\\);"
     "skinned_shadow.vert must be optional")
 require_source("${executable_load_source}"
+    "s_vertShaderSkinnedWeightedShadow[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_weighted_shadow\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*false[ \t\r\n]*\\);"
+    "skinned_weighted_shadow.vert must be optional")
+require_source("${executable_load_source}"
     "s_vertShaderSkinned[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_textured\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*true[ \t\r\n]*\\);"
     "skinned_textured.vert must be fatal")
+require_source("${executable_load_source}"
+    "s_vertShaderSkinnedWeighted[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_weighted\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*true[ \t\r\n]*\\);"
+    "skinned_weighted.vert must be fatal")
 require_shader_load_assignment(s_fragShaderTexFog basic_textured_fog frag FRAGMENT)
 require_shader_load_assignment(s_fragShaderLit skinned_lit frag FRAGMENT)
 require_source("${executable_load_source}"
@@ -110,8 +118,8 @@ string(REGEX MATCHALL "buildOptionalPipeline[ \t\r\n]*\\(" optional_calls "${cre
 list(LENGTH required_calls required_call_count)
 list(LENGTH optional_calls optional_call_count)
 # Required: the 2D depth-off set and the world sets' required build. Optional: the 2D depth-on set,
-# the two GPU body-shadow sets and the world sets' optional build.
-if(NOT required_call_count EQUAL 2 OR NOT optional_call_count EQUAL 4)
+# the four GPU body-shadow sets (BMD and weighted vertices) and the world sets' optional build.
+if(NOT required_call_count EQUAL 2 OR NOT optional_call_count EQUAL 6)
     message(FATAL_ERROR "CreatePipelines must build the required 2D and world sets and the optional 2D, shadow and world sets")
 endif()
 
@@ -180,7 +188,7 @@ require_source("${renderer_source}" "depth_write=\\{\\}" "pipeline diagnostics m
 require_source("${renderer_source}" "cull=\\{\\}" "pipeline diagnostics must include cull state")
 require_source("${renderer_source}" "error=\\{\\}" "pipeline diagnostics must include the SDL error")
 require_source("${build_source}"
-    "pipelineInfo\\.vertex_shader[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinnedShadow[ \t\r\n]*:[ \t\r\n]*s_vertShader2D"
+    "pipelineInfo\\.vertex_shader[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedWeighted[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinnedWeighted[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinnedShadow[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedWeightedShadow[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinnedWeightedShadow[ \t\r\n]*:[ \t\r\n]*s_vertShader2D"
     "pipeline vertex shader handles must remain selected from the pipeline layout")
 require_source("${build_source}"
     "pipelineInfo\\.fragment_shader[ \t\r\n]*=[ \t\r\n]*GetFragmentShader\\(description\\.fragmentShader\\)"
@@ -202,7 +210,7 @@ require_source("${depth_state_source}" "\\.compare_op[ \t\r\n]*=[ \t\r\n]*SDL_GP
 reject_source("${renderer_source}" "SDL_GPU_COMPAREOP_LESS([^_]|$)"
     "no pipeline may compare depth with strict LESS")
 require_source("${log_source}"
-    "vertexShaderName[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*\"skinned_textured\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*\"skinned_shadow\\.vert\"[ \t\r\n]*:[ \t\r\n]*\"basic_textured\\.vert\""
+    "vertexShaderName[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*\"skinned_textured\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedWeighted[ \t\r\n]*\\?[ \t\r\n]*\"skinned_weighted\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*\"skinned_shadow\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedWeightedShadow[ \t\r\n]*\\?[ \t\r\n]*\"skinned_weighted_shadow\\.vert\"[ \t\r\n]*:[ \t\r\n]*\"basic_textured\\.vert\""
     "pipeline diagnostics must map the built vertex layout to its exact shader identifier")
 require_source("${log_source}"
     "fragmentShaderName[ \t\r\n]*=[ \t\r\n]*GetFragmentShaderName\\(description\\.fragmentShader\\)"

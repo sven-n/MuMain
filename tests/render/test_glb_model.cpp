@@ -1072,7 +1072,7 @@ namespace
 {
 // skinned_textured.vert's weighted branch on the CPU: the palette rows of each
 // joint applied to the bind position, weighted by the unorm weights.
-void ShadeWeightedPosition(const mu::SkinnedVertex3D& vertex, const std::vector<float>& palette, float out[3])
+void ShadeWeightedPosition(const mu::SkinnedWeightedVertex3D& vertex, const std::vector<float>& palette, float out[3])
 {
     out[0] = out[1] = out[2] = 0.f;
     for (int k = 0; k < 4; ++k)
@@ -1087,7 +1087,7 @@ void ShadeWeightedPosition(const mu::SkinnedVertex3D& vertex, const std::vector<
     }
 }
 
-void ShadeWeightedNormal(const mu::SkinnedVertex3D& vertex, const std::vector<float>& palette, float boneScale,
+void ShadeWeightedNormal(const mu::SkinnedWeightedVertex3D& vertex, const std::vector<float>& palette, float boneScale,
                          float restPoseScale, float out[3])
 {
     const float restScale = restPoseScale != 0.f ? restPoseScale : 1.f;
@@ -1123,7 +1123,7 @@ Difference GpuAgainstCpuSkin(const BMD& model, const BoneMatrices& bones, float 
     for (int v = 0; v < model.Meshs[0].NumVertices; ++v)
     {
         const auto& source = skinned->meshVertices[0][v];
-        const mu::SkinnedVertex3D packed = Render::Models::PackWeightedSkinnedVertex(source, 0.f, 0.f);
+        const mu::SkinnedWeightedVertex3D packed = Render::Models::PackWeightedSkinnedVertex(source, 0.f, 0.f);
         float gpu[3];
         float cpu[3];
         ShadeWeightedPosition(packed, palette, gpu);
@@ -1188,8 +1188,7 @@ TEST_CASE("glb_model: a BMD vertex packs as before, one bone and no weights")
 {
     const float position[3] = {1.f, 2.f, 3.f};
     const float normal[3] = {0.f, 0.f, 1.f};
-    const mu::SkinnedVertex3D packed =
-        Render::Models::PackBmdSkinnedVertex(position, 7, normal, 9, 0.25f, 0.75f);
+    const mu::SkinnedVertex3D packed = Render::Models::PackBmdSkinnedVertex(position, 7, normal, 9, 0.25f, 0.75f);
     CHECK(packed.x == 1.f);
     CHECK(packed.y == 2.f);
     CHECK(packed.z == 3.f);
@@ -1198,12 +1197,6 @@ TEST_CASE("glb_model: a BMD vertex packs as before, one bone and no weights")
     CHECK(packed.v == 0.75f);
     CHECK(packed.positionBoneIndex == 7);
     CHECK(packed.normalBoneIndex == 9);
-    for (int k = 0; k < 4; ++k)
-    {
-        CHECK(packed.joints[k] == 0);
-        // weights.x == 0 sends the vertex down the shader's single-bone branch.
-        CHECK(packed.weights[k] == 0);
-    }
 }
 
 TEST_CASE("glb_model: a weighted vertex packs its bind position and four joints with weights summing to 255")
@@ -1214,7 +1207,7 @@ TEST_CASE("glb_model: a weighted vertex packs its bind position and four joints 
     vertex.weights = {0.2f, 0.5f, 0.3f, 0.f};
     vertex.bindPosition = {5.f, 6.f, 7.f};
     vertex.bindNormal = {0.f, 1.f, 0.f};
-    const mu::SkinnedVertex3D packed = Render::Models::PackWeightedSkinnedVertex(vertex, 0.5f, 0.125f);
+    const mu::SkinnedWeightedVertex3D packed = Render::Models::PackWeightedSkinnedVertex(vertex, 0.5f, 0.125f);
     CHECK(packed.x == 5.f);
     CHECK(packed.z == 7.f);
     CHECK(packed.ny == 1.f);
@@ -2143,16 +2136,15 @@ TEST_CASE("glb_model: a mesh is packed once per LOD, indexed, and expands to the
     const auto* skinned = SkinnedModelOf(*model);
     REQUIRE(skinned->LodCount() == 3);
     const Mesh_t& mesh = model->Meshs[0];
-    const auto same = [](const mu::SkinnedVertex3D& a, const mu::SkinnedVertex3D& b) {
-        return std::memcmp(&a, &b, sizeof(a)) == 0;
-    };
-    std::vector<mu::SkinnedVertex3D> corners;
+    const auto same = [](const mu::SkinnedWeightedVertex3D& a, const mu::SkinnedWeightedVertex3D& b)
+    { return std::memcmp(&a, &b, sizeof(a)) == 0; };
+    std::vector<mu::SkinnedWeightedVertex3D> corners;
 
     // LOD 0: the BMD mesh's corners on the file's skin, as the per-corner draw packed them.
     auto& lod0 = Render::Models::PackedWeightedMeshOf(*skinned, mesh, 0, 0, nullptr);
     REQUIRE(lod0.indices.size() == static_cast<size_t>(mesh.NumTriangles) * 3);
     CHECK(lod0.vertices.size() <= lod0.indices.size());
-    mu::ExpandIndexedCorners<mu::SkinnedVertex3D>(lod0.vertices, lod0.indices, corners);
+    mu::ExpandIndexedCorners<mu::SkinnedWeightedVertex3D>(lod0.vertices, lod0.indices, corners);
     size_t corner = 0;
     bool lod0Same = true;
     for (int t = 0; t < mesh.NumTriangles; ++t)
@@ -2175,7 +2167,7 @@ TEST_CASE("glb_model: a mesh is packed once per LOD, indexed, and expands to the
     auto& lod1 = Render::Models::PackedWeightedMeshOf(*skinned, mesh, 0, 1, lodMesh);
     REQUIRE(lod1.indices.size() == lodMesh->triangles.size() * 3);
     CHECK(lod1.vertices.size() <= lodMesh->vertices.size());
-    mu::ExpandIndexedCorners<mu::SkinnedVertex3D>(lod1.vertices, lod1.indices, corners);
+    mu::ExpandIndexedCorners<mu::SkinnedWeightedVertex3D>(lod1.vertices, lod1.indices, corners);
     corner = 0;
     bool lod1Same = true;
     for (const auto& triangle : lodMesh->triangles)
@@ -2191,7 +2183,7 @@ TEST_CASE("glb_model: a mesh is packed once per LOD, indexed, and expands to the
     CHECK(lod1Same);
 
     // Kept on the model: a later draw gets the same vertices at the same address (the GPU cache key).
-    const mu::SkinnedVertex3D* lod1Vertices = lod1.vertices.data();
+    const mu::SkinnedWeightedVertex3D* lod1Vertices = lod1.vertices.data();
     auto& again = Render::Models::PackedWeightedMeshOf(*skinned, mesh, 0, 1, lodMesh);
     CHECK(&again == &lod1);
     CHECK(again.vertices.data() == lod1Vertices);
@@ -2414,10 +2406,10 @@ std::array<float, 4> AlternatingTangent(size_t vertex)
 
 // skinned_textured.vert's tangent: the packed tangent (snorm16) through skinWeightedNormal
 // (the shader skins it like the normal), then normalised as skinned_lit.frag does.
-std::array<float, 4> ShadeWeightedTangent(const mu::SkinnedVertex3D& packed, const std::vector<float>& palette,
+std::array<float, 4> ShadeWeightedTangent(const mu::SkinnedWeightedVertex3D& packed, const std::vector<float>& palette,
                                           float boneScale, float restPoseScale)
 {
-    mu::SkinnedVertex3D asNormal = packed;
+    mu::SkinnedWeightedVertex3D asNormal = packed;
     asNormal.nx = static_cast<float>(packed.tangent[0]) / 32767.f;
     asNormal.ny = static_cast<float>(packed.tangent[1]) / 32767.f;
     asNormal.nz = static_cast<float>(packed.tangent[2]) / 32767.f;
@@ -2493,7 +2485,7 @@ TEST_CASE("glb_model: a mesh without a normal map has no tangents and no map")
         CHECK(vertex.bindTangent == std::array<float, 4>{});
     for (const auto& vertex : skinned->meshVertices[0])
     {
-        const mu::SkinnedVertex3D packed = Render::Models::PackWeightedSkinnedVertex(vertex, 0.f, 0.f);
+        const mu::SkinnedWeightedVertex3D packed = Render::Models::PackWeightedSkinnedVertex(vertex, 0.f, 0.f);
         for (int c = 0; c < 4; ++c)
             CHECK(packed.tangent[c] == 0);
     }
@@ -2526,11 +2518,6 @@ TEST_CASE("glb_model: tangents pack as snorm16 with the handedness in w; BMD ver
             CHECK(std::fabs(static_cast<float>(packed[c]) / 32767.f - tangent[c]) <= 0.5f / 32767.f + 1e-7f);
         CHECK(packed[3] == (tangent[3] > 0.f ? 32767 : -32767));
     }
-    const float position[3] = {1.f, 2.f, 3.f};
-    const float normal[3] = {0.f, 0.f, 1.f};
-    const mu::SkinnedVertex3D bmd = Render::Models::PackBmdSkinnedVertex(position, 7, normal, 9, 0.f, 0.f);
-    for (int c = 0; c < 4; ++c)
-        CHECK(bmd.tangent[c] == 0);
 }
 
 TEST_CASE("glb_model: GPU tangent skinning follows the normal and keeps the handedness of both UV islands")
@@ -2568,7 +2555,7 @@ TEST_CASE("glb_model: GPU tangent skinning follows the normal and keeps the hand
     for (size_t v = 0; v < skinned->meshVertices[0].size(); ++v)
     {
         const auto& vertex = skinned->meshVertices[0][v];
-        const mu::SkinnedVertex3D packed = Render::Models::PackWeightedSkinnedVertex(vertex, 0.f, 0.f);
+        const mu::SkinnedWeightedVertex3D packed = Render::Models::PackWeightedSkinnedVertex(vertex, 0.f, 0.f);
         const std::array<float, 4> t = ShadeWeightedTangent(packed, palette, 1.f, 0.f);
         float nRaw[3];
         ShadeWeightedNormal(packed, palette, 1.f, 0.f, nRaw);

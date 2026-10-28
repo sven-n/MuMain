@@ -10,6 +10,7 @@
 namespace
 {
 using Vertex = mu::SkinnedVertex3D;
+using WeightedVertex = mu::SkinnedWeightedVertex3D;
 
 Vertex BmdVertex(std::int32_t positionBone, std::int32_t normalBone)
 {
@@ -18,7 +19,7 @@ Vertex BmdVertex(std::int32_t positionBone, std::int32_t normalBone)
     return Render::Models::PackBmdSkinnedVertex(Position, positionBone, Normal, normalBone, 0.f, 0.f);
 }
 
-Vertex WeightedVertex(short secondaryJoint)
+WeightedVertex PackedWeighted(short secondaryJoint)
 {
     Render::Models::Gltf::SkinnedVertex vertex;
     vertex.count = 2;
@@ -39,12 +40,12 @@ TEST_CASE("a mesh indexes one past its highest position or normal bone [render][
 
 TEST_CASE("a packed weighted mesh retains its secondary-only bone [render][skinning]")
 {
-    const std::array<Vertex, 1> vertices{WeightedVertex(1)};
+    const std::array<WeightedVertex, 1> vertices{PackedWeighted(1)};
     REQUIRE(vertices[0].positionBoneIndex == 0);
     REQUIRE(vertices[0].normalBoneIndex == 0);
     REQUIRE(vertices[0].weights[0] == 204u);
     REQUIRE(vertices[0].weights[1] == 51u);
-    const std::uint32_t bonesIndexed = Render::BonesIndexed(std::span<const Vertex>(vertices));
+    const std::uint32_t bonesIndexed = Render::BonesIndexed(std::span<const WeightedVertex>(vertices));
     CHECK(bonesIndexed == 2u);
     CHECK(Render::PaletteBonesToUpload(200u, bonesIndexed) == 2u);
 }
@@ -52,10 +53,10 @@ TEST_CASE("a packed weighted mesh retains its secondary-only bone [render][skinn
 TEST_CASE("a packed weighted mesh retains a sparse high secondary joint [render][skinning]")
 {
     constexpr short SecondaryJoint = 173;
-    const std::array<Vertex, 1> vertices{WeightedVertex(SecondaryJoint)};
+    const std::array<WeightedVertex, 1> vertices{PackedWeighted(SecondaryJoint)};
     REQUIRE(vertices[0].positionBoneIndex == 0);
     REQUIRE(vertices[0].joints[1] == SecondaryJoint);
-    const std::uint32_t bonesIndexed = Render::BonesIndexed(std::span<const Vertex>(vertices));
+    const std::uint32_t bonesIndexed = Render::BonesIndexed(std::span<const WeightedVertex>(vertices));
     CHECK(bonesIndexed == static_cast<std::uint32_t>(SecondaryJoint) + 1u);
     CHECK(Render::PaletteBonesToUpload(200u, bonesIndexed) == bonesIndexed);
     CHECK(Render::PaletteBonesToUpload(100u, bonesIndexed) == 100u);
@@ -67,27 +68,29 @@ TEST_CASE("a packed weighted mesh counts all four positive-weight lanes [render]
     vertex.count = 4;
     vertex.joints = {0, 1, 2, 127};
     vertex.weights = {0.6f, 0.2f, 0.15f, 0.05f};
-    const std::array<Vertex, 1> vertices{Render::Models::PackWeightedSkinnedVertex(vertex, 0.f, 0.f)};
+    const std::array<WeightedVertex, 1> vertices{Render::Models::PackWeightedSkinnedVertex(vertex, 0.f, 0.f)};
     REQUIRE(vertices[0].weights[3] > 0u);
-    CHECK(Render::BonesIndexed(std::span<const Vertex>(vertices)) == 128u);
+    CHECK(Render::BonesIndexed(std::span<const WeightedVertex>(vertices)) == 128u);
 }
 
-TEST_CASE("a mesh ignores inactive joint slots in weighted and BMD vertices [render][skinning]")
+TEST_CASE("a mesh ignores inactive joint slots in weighted and unweighted vertices [render][skinning]")
 {
-    Vertex weighted = WeightedVertex(1);
+    WeightedVertex weighted = PackedWeighted(1);
     weighted.joints[2] = 255u;
     weighted.joints[3] = 254u;
     REQUIRE(weighted.weights[2] == 0u);
     REQUIRE(weighted.weights[3] == 0u);
-    const std::array<Vertex, 1> weightedVertices{weighted};
-    CHECK(Render::BonesIndexed(std::span<const Vertex>(weightedVertices)) == 2u);
+    const std::array<WeightedVertex, 1> weightedVertices{weighted};
+    CHECK(Render::BonesIndexed(std::span<const WeightedVertex>(weightedVertices)) == 2u);
 
-    Vertex bmd = BmdVertex(4, 7);
-    bmd.joints[0] = 255u;
-    bmd.joints[1] = 254u;
-    REQUIRE(bmd.weights[0] == 0u);
-    const std::array<Vertex, 2> mixedVertices{weighted, bmd};
-    CHECK(Render::BonesIndexed(std::span<const Vertex>(mixedVertices)) == 8u);
+    // A weighted mesh's vertex without weights follows its bones, as a BMD vertex.
+    WeightedVertex unweighted{};
+    unweighted.positionBoneIndex = 4;
+    unweighted.normalBoneIndex = 7;
+    unweighted.joints[0] = 255u;
+    unweighted.joints[1] = 254u;
+    const std::array<WeightedVertex, 2> mixedVertices{weighted, unweighted};
+    CHECK(Render::BonesIndexed(std::span<const WeightedVertex>(mixedVertices)) == 8u);
 }
 
 TEST_CASE("a mesh with no bone indices counts as unknown [render][skinning]")

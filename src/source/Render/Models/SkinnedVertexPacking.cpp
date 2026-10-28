@@ -49,20 +49,20 @@ mu::SkinnedVertex3D PackBmdSkinnedVertex(const float position[3], int positionBo
     return {position[0], position[1], position[2], normal[0], normal[1], normal[2], u, v, positionBone, normalBone};
 }
 
-mu::SkinnedVertex3D PackWeightedSkinnedVertex(const Gltf::SkinnedVertex& vertex, float u, float v)
+mu::SkinnedWeightedVertex3D PackWeightedSkinnedVertex(const Gltf::SkinnedVertex& vertex, float u, float v)
 {
     const std::array<int, MaxWeightsPerVertex> order = ByWeight(vertex);
     const int dominantJoint = vertex.joints[order[0]];
-    mu::SkinnedVertex3D packed{vertex.bindPosition[0],
-                               vertex.bindPosition[1],
-                               vertex.bindPosition[2],
-                               vertex.bindNormal[0],
-                               vertex.bindNormal[1],
-                               vertex.bindNormal[2],
-                               u,
-                               v,
-                               dominantJoint,
-                               dominantJoint};
+    mu::SkinnedWeightedVertex3D packed{vertex.bindPosition[0],
+                                       vertex.bindPosition[1],
+                                       vertex.bindPosition[2],
+                                       vertex.bindNormal[0],
+                                       vertex.bindNormal[1],
+                                       vertex.bindNormal[2],
+                                       u,
+                                       v,
+                                       dominantJoint,
+                                       dominantJoint};
     // The other weights are rounded; the largest takes the rest, so they sum to 255 exactly.
     int rest = static_cast<int>(WeightUnits);
     for (int k = 1; k < vertex.count; ++k)
