@@ -888,24 +888,7 @@ void CMapManager::Load() // OK
     else
     {
         wchar_t DirName[32];
-        int iMapWorld = this->WorldActive + 1;
-
-        if (this->InBloodCastle() == true)
-        {
-            iMapWorld = WD_11BLOODCASTLE1 + 1;
-        }
-        else if (this->InChaosCastle() == true)
-        {
-            iMapWorld = WD_18CHAOS_CASTLE + 1;
-        }
-        else if (this->InHellas() == true)
-        {
-            iMapWorld = WD_24HELLAS + 1;
-        }
-        else if (gMapManager.IsCursedTemple())
-        {
-            iMapWorld = WD_45CURSEDTEMPLE_LV1 + 2;
-        }
+        const int iMapWorld = GetFilesFolder(this->WorldActive);
 
         mu_swprintf(DirName, L"Data\\Object%d\\", iMapWorld);
         for (i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
@@ -962,12 +945,49 @@ void CMapManager::Load() // OK
     }
 }
 
+void CMapManager::SetServerMap(int serverMap)
+{
+    m_serverMap = serverMap;
+    WorldActive = GetLoadedWorld(serverMap);
+    m_serverMapWorld = WorldActive;
+}
+
+int CMapManager::GetServerMap() const
+{
+    return m_serverMapWorld == WorldActive ? m_serverMap : WorldActive;
+}
+
+int CMapManager::GetLoadedWorld(int serverMap)
+{
+    return serverMap == 32 ? WD_9DEVILSQUARE : serverMap;
+}
+
+int CMapManager::GetFilesFolder(int serverMap)
+{
+    const int world = GetLoadedWorld(serverMap);
+    if (InBloodCastle(world))
+    {
+        return WD_11BLOODCASTLE1 + 1;
+    }
+    if (InHellas(world))
+    {
+        return WD_24HELLAS + 1;
+    }
+    if (InChaosCastle(world))
+    {
+        return WD_18CHAOS_CASTLE + 1;
+    }
+    if (world >= WD_45CURSEDTEMPLE_LV1 && world <= WD_45CURSEDTEMPLE_LV6)
+    {
+        return WD_45CURSEDTEMPLE_LV1 + 2;
+    }
+    return world + 1;
+}
+
 void CMapManager::LoadWorld(int Map)
 {
-    if (Map == 32 && this->WorldActive == 32)
-    {
-        Map = this->WorldActive = 9;
-    }
+    SetServerMap(Map);
+    Map = this->WorldActive;
 
     this->DeleteObjects();
     DeleteNpcs();
@@ -991,24 +1011,7 @@ void CMapManager::LoadWorld(int Map)
 
     wchar_t FileName[64];
     wchar_t WorldName[32];
-    int  iMapWorld = this->WorldActive + 1;
-
-    if (InBloodCastle(Map) == true)
-    {
-        iMapWorld = WD_11BLOODCASTLE1 + 1;
-    }
-    else if (gMapManager.InHellas(Map) == true)
-    {
-        iMapWorld = WD_24HELLAS + 1;
-    }
-    else if (InChaosCastle(Map) == true)
-    {
-        iMapWorld = WD_18CHAOS_CASTLE + 1;
-    }
-    else if (gMapManager.IsCursedTemple())
-    {
-        iMapWorld = WD_45CURSEDTEMPLE_LV1 + 2;
-    }
+    int iMapWorld = GetFilesFolder(Map);
 
     battleCastle::Init();
 

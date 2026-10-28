@@ -92,8 +92,28 @@ public:
     bool InBattleCastle(int iMap = -1);
     const wchar_t* GetMapName(int iMap);
 
+    // The hero's map as the server names it (monsters design, D67): WorldActive
+    // becomes the world the client loads for it, Devil Square (9) for Devil
+    // Square 5-7 (32). LoadWorld calls it.
+    void SetServerMap(int serverMap);
+    // The server's number of the hero's map, which data that names maps uses:
+    // WorldActive, but 32 in Devil Square 5-7. Where WorldActive was set alone
+    // (the tests, the photo viewer), WorldActive.
+    int GetServerMap() const;
+    // The world the client loads for a server map.
+    static int GetLoadedWorld(int serverMap);
+    // The number n of the Data/World<n> and Data/Object<n> folders a server map
+    // loads: one for all rounds of Blood Castle, Chaos Castle, Kalima, Illusion
+    // Temple and Devil Square.
+    int GetFilesFolder(int serverMap);
+
 public:
     int WorldActive;
+
+private:
+    int m_serverMap = -1;
+    // WorldActive when SetServerMap ran.
+    int m_serverMapWorld = -1;
 };
 
 extern CMapManager gMapManager;
