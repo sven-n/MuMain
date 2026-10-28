@@ -585,6 +585,9 @@ static SDL_GPUGraphicsPipeline* s_pipelines2DDepthOff[k_PipelineCount] = {};
 // Body shadows (skinned_shadow.vert): the depth states RenderBodyShadow() draws with.
 static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedShadow[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedShadowDepthOff[k_PipelineCount] = {};
+// The same two for SkinnedWeightedVertex3D (skinned_weighted_shadow.vert).
+static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedWeightedShadow[k_PipelineCount] = {};
+static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedWeightedShadowDepthOff[k_PipelineCount] = {};
 
 // The world sets: 3D (Vertex3D, pitch=40) and GPU-skinned geometry in the four depth/cull states,
 // depth-read-only for transparent and additive draws such as particles. Every world set is listed
@@ -1177,6 +1180,7 @@ static SDL_GPUShader* s_vertShaderShadow = nullptr;  // shadow_volume.vert
 static SDL_GPUShader* s_vertShaderSkinned = nullptr; // skinned_textured.vert
 static SDL_GPUShader* s_vertShaderSkinnedWeighted = nullptr; // skinned_weighted.vert
 static SDL_GPUShader* s_vertShaderSkinnedShadow = nullptr; // skinned_shadow.vert
+static SDL_GPUShader* s_vertShaderSkinnedWeightedShadow = nullptr; // skinned_weighted_shadow.vert
 static SDL_GPUShader* s_fragShaderTexFog = nullptr;  // basic_textured_fog.frag (Enhanced, optional)
 static SDL_GPUShader* s_fragShaderLit = nullptr;     // skinned_lit.frag (Enhanced, optional)
 // Post-processing (optional): without them post-processing is unavailable.
@@ -4688,8 +4692,7 @@ public:
                                                  const ShadowProjection& projection) override
     {
         const auto cached = s_skinnedMeshes.find(mesh);
-        // skinned_shadow.vert reads the BMD vertex.
-        if (cached == s_skinnedMeshes.end() || cached->second.stride != sizeof(SkinnedVertex3D))
+        if (cached == s_skinnedMeshes.end())
         {
             return false;
         }
@@ -5132,9 +5135,13 @@ private:
         if (shadow)
         {
             // Only the states the CPU shadow is drawn in; the heights must be on the GPU.
+            SDL_GPUGraphicsPipeline* const* depthOn =
+                weighted ? s_pipelinesSkinnedWeightedShadow : s_pipelinesSkinnedShadow;
+            SDL_GPUGraphicsPipeline* const* depthOff =
+                weighted ? s_pipelinesSkinnedWeightedShadowDepthOff : s_pipelinesSkinnedShadowDepthOff;
             pipeline = !s_terrainHeightVersion ? nullptr
-                       : !m_depthTestEnabled   ? s_pipelinesSkinnedShadowDepthOff[pipelineIdx]
-                       : !m_depthMaskEnabled   ? s_pipelinesSkinnedShadow[pipelineIdx]
+                       : !m_depthTestEnabled   ? depthOff[pipelineIdx]
+                       : !m_depthMaskEnabled   ? depthOn[pipelineIdx]
                                                : nullptr;
         }
         if (!pipeline)
@@ -5616,6 +5623,8 @@ private:
         // shadows stay on the CPU.
         s_vertShaderSkinnedShadow =
             createShader("skinned_shadow", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 2, 2, /*fatal=*/false);
+        s_vertShaderSkinnedWeightedShadow =
+            createShader("skinned_weighted_shadow", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 2, 2, /*fatal=*/false);
 
         // Enhanced lighting — non-fatal: without them Enhanced lighting is unavailable.
         // Uniform buffers: FogUniforms (b0) per draw, SceneLighting (b1) per frame.
@@ -5687,6 +5696,11 @@ private:
             SDL_ReleaseGPUShader(s_device, s_vertShaderSkinnedShadow);
             s_vertShaderSkinnedShadow = nullptr;
         }
+        if (s_vertShaderSkinnedWeightedShadow)
+        {
+            SDL_ReleaseGPUShader(s_device, s_vertShaderSkinnedWeightedShadow);
+            s_vertShaderSkinnedWeightedShadow = nullptr;
+        }
         if (s_fragShaderTexFog)
         {
             SDL_ReleaseGPUShader(s_device, s_fragShaderTexFog);
@@ -5717,8 +5731,9 @@ private:
         TwoDimensional,
         ThreeDimensional,
         Skinned,
-        SkinnedWeighted, // SkinnedWeightedVertex3D, with skinned_weighted.vert
-        SkinnedShadow,   // the skinned layout, with skinned_shadow.vert
+        SkinnedWeighted,       // SkinnedWeightedVertex3D, with skinned_weighted.vert
+        SkinnedShadow,         // the skinned layout, with skinned_shadow.vert
+        SkinnedWeightedShadow, // the weighted layout, with skinned_weighted_shadow.vert
     };
 
     enum class FragmentShader
@@ -5991,7 +6006,8 @@ private:
             numAttribs = 6;
 
             // The weighted vertex starts with the same fields.
-            if (description.vertexLayout == VertexLayout::SkinnedWeighted)
+            if (description.vertexLayout == VertexLayout::SkinnedWeighted ||
+                description.vertexLayout == VertexLayout::SkinnedWeightedShadow)
             {
                 vertexAttribs[6] = {};
                 vertexAttribs[6].location = 6;
@@ -6039,10 +6055,11 @@ private:
 
         SDL_GPUGraphicsPipelineCreateInfo pipelineInfo{};
         pipelineInfo.vertex_shader =
-            description.vertexLayout == VertexLayout::Skinned           ? s_vertShaderSkinned
-            : description.vertexLayout == VertexLayout::SkinnedWeighted ? s_vertShaderSkinnedWeighted
-            : description.vertexLayout == VertexLayout::SkinnedShadow   ? s_vertShaderSkinnedShadow
-                                                                        : s_vertShader2D;
+            description.vertexLayout == VertexLayout::Skinned                 ? s_vertShaderSkinned
+            : description.vertexLayout == VertexLayout::SkinnedWeighted       ? s_vertShaderSkinnedWeighted
+            : description.vertexLayout == VertexLayout::SkinnedShadow         ? s_vertShaderSkinnedShadow
+            : description.vertexLayout == VertexLayout::SkinnedWeightedShadow ? s_vertShaderSkinnedWeightedShadow
+                                                                              : s_vertShader2D;
         pipelineInfo.fragment_shader = GetFragmentShader(description.fragmentShader);
         pipelineInfo.vertex_input_state = vtxInputState;
         pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
@@ -6074,10 +6091,11 @@ private:
                                  : description.vertexLayout == VertexLayout::ThreeDimensional ? "3D"
                                                                                               : "skinned";
         const char* vertexShaderName =
-            description.vertexLayout == VertexLayout::Skinned           ? "skinned_textured.vert"
-            : description.vertexLayout == VertexLayout::SkinnedWeighted ? "skinned_weighted.vert"
-            : description.vertexLayout == VertexLayout::SkinnedShadow   ? "skinned_shadow.vert"
-                                                                        : "basic_textured.vert";
+            description.vertexLayout == VertexLayout::Skinned                 ? "skinned_textured.vert"
+            : description.vertexLayout == VertexLayout::SkinnedWeighted       ? "skinned_weighted.vert"
+            : description.vertexLayout == VertexLayout::SkinnedShadow         ? "skinned_shadow.vert"
+            : description.vertexLayout == VertexLayout::SkinnedWeightedShadow ? "skinned_weighted_shadow.vert"
+                                                                              : "basic_textured.vert";
         const char* fragmentShaderName = GetFragmentShaderName(description.fragmentShader);
         const char* cullMode = description.cullFaceEnabled ? "back" : "none";
         if (required)
@@ -6252,6 +6270,15 @@ private:
                     s_pipelinesSkinnedShadowDepthOff[i], blendState,
                     {"skinned-shadow-depth-off", table[i].name, i, false, false, VertexLayout::SkinnedShadow, false});
             }
+            if (s_vertShaderSkinnedWeightedShadow)
+            {
+                buildOptionalPipeline(s_pipelinesSkinnedWeightedShadow[i], blendState,
+                                      {"skinned-weighted-shadow", table[i].name, i, true, false,
+                                       VertexLayout::SkinnedWeightedShadow, false});
+                buildOptionalPipeline(s_pipelinesSkinnedWeightedShadowDepthOff[i], blendState,
+                                      {"skinned-weighted-shadow-depth-off", table[i].name, i, false, false,
+                                       VertexLayout::SkinnedWeightedShadow, false});
+            }
         }
 
         s_enhancedLightingAvailable = IsWorldFamilyComplete(WorldSetFamily::EnhancedLighting);
@@ -6289,7 +6316,8 @@ private:
         DestroyEnhancedPipelines();
         ReleaseWorldFamily(WorldSetFamily::Classic);
         for (SDL_GPUGraphicsPipeline** set :
-             {s_pipelines2D, s_pipelines2DDepthOff, s_pipelinesSkinnedShadow, s_pipelinesSkinnedShadowDepthOff})
+             {s_pipelines2D, s_pipelines2DDepthOff, s_pipelinesSkinnedShadow, s_pipelinesSkinnedShadowDepthOff,
+              s_pipelinesSkinnedWeightedShadow, s_pipelinesSkinnedWeightedShadowDepthOff})
         {
             for (int i = 0; i < k_PipelineCount; ++i)
             {
@@ -6446,7 +6474,8 @@ private:
     {
         std::vector<SDL_GPUGraphicsPipeline**> slots;
         for (SDL_GPUGraphicsPipeline** set :
-             {s_pipelines2D, s_pipelines2DDepthOff, s_pipelinesSkinnedShadow, s_pipelinesSkinnedShadowDepthOff})
+             {s_pipelines2D, s_pipelines2DDepthOff, s_pipelinesSkinnedShadow, s_pipelinesSkinnedShadowDepthOff,
+              s_pipelinesSkinnedWeightedShadow, s_pipelinesSkinnedWeightedShadowDepthOff})
         {
             for (int i = 0; i < k_PipelineCount; ++i)
             {

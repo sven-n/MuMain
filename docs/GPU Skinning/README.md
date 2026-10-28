@@ -37,8 +37,9 @@ and HLSL shaders compiled for the active SDL GPU backend.
   preventing stale reuse when a memory address is recycled.
 - Mesh, chrome, oil, and metal texture-coordinate modes are generated in the
   skinned vertex shader.
-- Projected body shadows draw the cached mesh with `skinned_shadow.vert.hlsl`,
-  which places each vertex on a GPU copy of the terrain heights.
+- Projected body shadows draw the cached mesh with `skinned_shadow.vert.hlsl`
+  (`skinned_weighted_shadow.vert.hlsl` for glTF models), which places each
+  vertex on a GPU copy of the terrain heights.
 - CPU skinning remains the fallback for unsupported draws. Cloth, shadow-volume,
   shadow-map, and vertex-wave paths retain their required CPU behavior.
 - Legacy GL-shaped helpers remain compatibility APIs only. The build guard
@@ -51,7 +52,7 @@ and HLSL shaders compiled for the active SDL GPU backend.
 | Renderer contract | [`MuRenderer.h`](../../src/source/Render/Renderer/MuRenderer.h) |
 | SDL GPU backend | [`MuRendererSDLGpu.cpp`](../../src/source/Render/Renderer/MuRendererSDLGpu.cpp) |
 | BMD submission and CPU fallback | [`ZzzBMD.cpp`](../../src/source/Render/Models/ZzzBMD.cpp), [`ZzzBMD.h`](../../src/source/Render/Models/ZzzBMD.h) |
-| Skinning shaders | [`skinned_textured.vert.hlsl`](../../src/shaders/skinned_textured.vert.hlsl), [`skinned_shadow.vert.hlsl`](../../src/shaders/skinned_shadow.vert.hlsl) |
+| Skinning shaders | [`skinned_textured.vert.hlsl`](../../src/shaders/skinned_textured.vert.hlsl), [`skinned_weighted.vert.hlsl`](../../src/shaders/skinned_weighted.vert.hlsl), [`skinned_shadow.vert.hlsl`](../../src/shaders/skinned_shadow.vert.hlsl), [`skinned_weighted_shadow.vert.hlsl`](../../src/shaders/skinned_weighted_shadow.vert.hlsl) |
 | Terrain heights for shadows | [`TerrainHeightGrid.h`](../../src/source/Render/Terrain/TerrainHeightGrid.h) |
 | Compatibility wrappers | [`ZzzOpenglUtil.cpp`](../../src/source/Render/Textures/ZzzOpenglUtil.cpp), [`GLCompatShim.cpp`](../../src/source/Render/Renderer/GLCompatShim.cpp) |
 | Guard | [`check_gl_wrapper_monopoly.py`](../../tools/check_gl_wrapper_monopoly.py) |

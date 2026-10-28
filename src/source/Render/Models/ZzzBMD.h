@@ -475,6 +475,10 @@ private:
     // The same shadow from a cached rest-pose stream skinned on the GPU; false leaves it to the CPU.
     [[nodiscard]] bool RenderGpuMeshShadow(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx,
         float sy, std::uint32_t color) const;
+    // A model file's shadow, each mesh from the mesh its body draw caches on the GPU; a mesh the GPU cannot
+    // draw gets its CPU shadow (AddWeightedMeshShadowTriangles).
+    void RenderWeightedMeshShadow(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx, float sy,
+                                  std::uint32_t color) const;
 };
 
 extern BMD* Models;

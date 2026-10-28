@@ -178,6 +178,21 @@ SkinPalette CurrentWeightedSkinPalette(const Render::Models::Gltf::SkinnedModel&
     return {cache.palette, cache.version};
 }
 
+// A packed mesh's triangle corners (the mesh cache draws without indices), plus a scrolling texture's offset.
+std::span<const mu::SkinnedWeightedVertex3D> WeightedCorners(const Render::Models::Gltf::PackedMesh& mesh, float waveU,
+                                                             float waveV)
+{
+    const std::size_t cornerCount = mesh.indices.empty() ? mesh.vertices.size() : mesh.indices.size();
+    auto corners = GetRendererSkinnedVertexScratch<mu::SkinnedWeightedVertex3D>(cornerCount);
+    for (std::size_t i = 0; i < cornerCount; ++i)
+    {
+        corners[i] = mesh.vertices[mesh.indices.empty() ? i : mesh.indices[i]];
+        corners[i].u += waveU;
+        corners[i].v += waveV;
+    }
+    return corners;
+}
+
 std::pair<int, int> ResolveMeshRange(int meshCount, int requestedStart, int requestedEnd)
 {
     return {requestedStart == -1 ? 0 : requestedStart, requestedEnd == -1 ? meshCount : requestedEnd};
@@ -1937,21 +1952,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         const void* cacheKey = packedMesh && !packedMesh->vertices.empty()
                                    ? static_cast<const void*>(packedMesh->vertices.data())
                                    : static_cast<const void*>(m);
-        auto buildWeightedVertices = [&]() -> std::span<const mu::SkinnedWeightedVertex3D>
-        {
-            // The triangle corners (the cache draws without indices), plus this draw's wave.
-            const auto& vertices = packedMesh->vertices;
-            const auto& indices = packedMesh->indices;
-            const std::size_t cornerCount = indices.empty() ? vertices.size() : indices.size();
-            auto corners = GetRendererSkinnedVertexScratch<mu::SkinnedWeightedVertex3D>(cornerCount);
-            for (std::size_t i = 0; i < cornerCount; ++i)
-            {
-                corners[i] = vertices[indices.empty() ? i : indices[i]];
-                corners[i].u += waveU;
-                corners[i].v += waveV;
-            }
-            return corners.first(cornerCount);
-        };
+        auto buildWeightedVertices = [&] { return WeightedCorners(*packedMesh, waveU, waveV); };
         auto buildSkinnedVertices = [&]() -> std::span<const mu::SkinnedVertex3D>
         {
             auto skinnedVertices = GetRendererSkinnedVertexScratch(maxVertexCount);
@@ -3053,6 +3054,18 @@ void ProjectOntoGround(float position[3], const void* context)
     const auto* ground = static_cast<const ShadowGround*>(context);
     CalcShadowPosition(reinterpret_cast<vec3_t*>(position), ground->origin, ground->sx, ground->sy);
 }
+
+// CalcShadowPosition's projection for skinned_shadow.vert.
+mu::ShadowProjection BodyShadowProjection(const vec3_t origin, const float sx, const float sy)
+{
+    return {
+        .origin = {origin[0], origin[1], origin[2]},
+        .shearX = sx,
+        .shearHeight = sy,
+        .specialHeight = g_fSpecialHeight,
+        .terrain = SceneFlag != SERVER_LIST_SCENE && SceneFlag != WEBZEN_SCENE && SceneFlag != LOADING_SCENE,
+    };
+}
 } // namespace
 
 void BMD::ProjectWeightedShadowMesh(const int mesh, const ShadowProjection project, const void* context,
@@ -3250,9 +3263,7 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
 bool BMD::RenderGpuMeshShadow(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh,
     const float sx, const float sy, const std::uint32_t color) const
 {
-    // A model file's vertices blend up to four joints; this stream follows one bone per vertex.
-    if (!m_pCurrentBoneTransform || startMesh < 0 || endMesh > NumMeshs || endMesh > MAX_MESH ||
-        Render::Models::Gltf::SkinnedModelOf(*this))
+    if (!m_pCurrentBoneTransform || startMesh < 0 || endMesh > NumMeshs || endMesh > MAX_MESH)
     {
         return false;
     }
@@ -3327,14 +3338,65 @@ bool BMD::RenderGpuMeshShadow(const int blendMesh, const int hiddenMesh, const i
         .restPoseScale = m_LastSkinScale,
         .translate = m_LastTranslate,
     };
-    const mu::ShadowProjection projection{
-        .origin = {BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]},
-        .shearX = sx,
-        .shearHeight = sy,
-        .specialHeight = g_fSpecialHeight,
-        .terrain = SceneFlag != SERVER_LIST_SCENE && SceneFlag != WEBZEN_SCENE && SceneFlag != LOADING_SCENE,
+    return renderer.RenderCachedSkinnedShadow(key, color, skinning, BodyShadowProjection(BodyOrigin, sx, sy));
+}
+
+void BMD::RenderWeightedMeshShadow(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh,
+                                   const float sx, const float sy, const std::uint32_t color) const
+{
+    const auto* gltf = Render::Models::Gltf::SkinnedModelOf(*this);
+    auto& renderer = mu::GetRenderer();
+    if (!gltf || !m_pCurrentBoneTransform || startMesh < 0 || endMesh > NumMeshs || endMesh > MAX_MESH ||
+        !renderer.SetTerrainHeights({BackTerrainHeight, Render::kTerrainCells}, {TerrainWall, Render::kTerrainCells},
+                                    TerrainHeightVersion()))
+    {
+        AddWeightedMeshShadowTriangles(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy, color);
+        return;
+    }
+
+    // What the body draw skins with (BMD::RenderMesh).
+    const SkinPalette palette =
+        CurrentWeightedSkinPalette(*gltf, m_pCurrentBoneTransform, m_LastBoneScale, m_LastSkinScale);
+    const mu::SkinningParameters skinning{
+        .boneMatrices = palette.matrices,
+        .paletteVersion = palette.version,
+        .bodyOrigin = {BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]},
+        .bodyScale = BodyScale,
+        .boneScale = m_LastBoneScale,
+        .restPoseScale = m_LastSkinScale,
+        .translate = m_LastTranslate,
     };
-    return renderer.RenderCachedSkinnedShadow(key, color, skinning, projection);
+    const mu::ShadowProjection projection = BodyShadowProjection(BodyOrigin, sx, sy);
+    const bool cpuVerticesCurrent = m_SkinStamp == g_SkinStampCounter;
+    for (int i = startMesh; i < endMesh; i++)
+    {
+        if (i == hiddenMesh || Meshs[i].NumTriangles <= 0 || Meshs[i].Texture == blendMesh)
+        {
+            continue;
+        }
+        bool absent = false;
+        const Render::Models::Gltf::LodMesh* lodMesh = gltf->LodMeshFor(ActiveLod, i, absent);
+        if (absent)
+        {
+            continue;
+        }
+        // As RenderGpuMeshShadow: CPU vertices already skinned this frame draw their own shadow.
+        if (!lodMesh && cpuVerticesCurrent && m_CpuVertsReady[i])
+        {
+            AddWeightedMeshShadowTriangles(blendMesh, hiddenMesh, i, i + 1, sx, sy, color);
+            continue;
+        }
+
+        const auto& packed = Render::Models::PackedWeightedMeshOf(*gltf, Meshs[i], i, lodMesh ? ActiveLod : 0, lodMesh);
+        const void* key = packed.vertices.data();
+        const bool cached =
+            !packed.vertices.empty() && (renderer.IsSkinnedMeshCached(key) ||
+                                         renderer.CacheWeightedSkinnedMesh(key, WeightedCorners(packed, 0.f, 0.f)));
+        if (!cached || !renderer.RenderCachedSkinnedShadow(key, color, skinning, projection))
+        {
+            AddWeightedMeshShadowTriangles(blendMesh, hiddenMesh, i, i + 1, sx, sy, color);
+        }
+    }
 }
 
 void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber,
@@ -3362,7 +3424,11 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
     const float sy = 4000.f;
     const std::uint32_t shadowColor = PackABGR(0.f, 0.f, 0.f, std::clamp(alpha, 0.f, 1.f));
 
-    if (clothesCount == 0)
+    if (clothesCount == 0 && Render::Models::Gltf::SkinnedModelOf(*this))
+    {
+        RenderWeightedMeshShadow(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy, shadowColor);
+    }
+    else if (clothesCount == 0)
     {
         if (!RenderGpuMeshShadow(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy, shadowColor))
         {
