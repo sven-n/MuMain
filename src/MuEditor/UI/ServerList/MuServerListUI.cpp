@@ -314,7 +314,7 @@ void CMuServerListUI::RenderToolbar()
     ImGui::EndDisabled();
     if (!m_edits.IsComplete() && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
     {
-        ImGui::SetTooltip("%s", I18N::Editor::SaveOffAfterReadErrors);
+        ImGui::SetTooltip("%s", I18N::Editor::SaveOffAfterFatalReadProblems);
     }
     ImGui::SameLine();
     if (ImGui::Button(I18N::Editor::Revert))
@@ -415,7 +415,7 @@ void CMuServerListUI::RenderStatus()
     }
     if (!m_edits.IsComplete())
     {
-        RenderError(I18N::Editor::SaveOffAfterReadErrors);
+        RenderError(I18N::Editor::SaveOffAfterFatalReadProblems);
     }
     if (m_issues.empty())
     {

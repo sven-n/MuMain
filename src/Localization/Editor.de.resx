@@ -1966,8 +1966,8 @@
   <data name="Server list order note" xml:space="preserve">
     <value>Die Reihenfolge der Liste ist die der Schaltflächen auf dem Anmeldebildschirm, der jede Änderung sofort zeigt. Speichern schreibt {0}.</value>
   </data>
-  <data name="Save off after read errors" xml:space="preserve">
-    <value>Die Datei hatte beim Lesen Fehler, daher enthält die Liste nur die Gruppen, die gelesen werden konnten. Speichern bleibt aus, bis die Datei korrigiert ist und Zurücksetzen sie neu einliest; es würde die anderen Gruppen aus der Datei entfernen.</value>
+  <data name="Save off after fatal read problems" xml:space="preserve">
+    <value>Die Datei hatte beim Lesen fatale Probleme, daher enthält die Liste nur die Gruppen, die gelesen werden konnten. Speichern bleibt aus, bis die Datei korrigiert ist und Zurücksetzen sie neu einliest; es würde die anderen Gruppen aus der Datei entfernen.</value>
   </data>
   <data name="Step add" xml:space="preserve">
     <value>{0} hinzufügen</value>
