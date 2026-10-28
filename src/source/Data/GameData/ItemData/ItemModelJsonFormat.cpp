@@ -142,14 +142,14 @@ private:
     int m_number = ItemDataIssue::NoItem;
     // Shared models: their name before the fields in messages.
     std::string m_fieldPrefix;
-    bool m_hasErrors = false;
+    bool m_hasFatal = false;
     std::vector<ItemDataIssue>& m_issues;
 };
 
 void ItemModelReader::AddIssue(ItemDataIssueSeverity severity, const std::string& field, const std::string& message)
 {
     m_issues.push_back({severity, m_source, m_group, m_number, m_fieldPrefix + field, message});
-    m_hasErrors = m_hasErrors || severity == ItemDataIssueSeverity::Fatal;
+    m_hasFatal = m_hasFatal || severity == ItemDataIssueSeverity::Fatal;
 }
 
 bool ItemModelReader::ReadFile(const OrderedJson& json, std::string& file)
@@ -302,7 +302,7 @@ bool ItemModelReader::Read(const OrderedJson& json, ItemModelDefinition& model)
     ReadLookName(json, Keys::RenderStyle, model.renderStyle);
     ReadLookName(json, Keys::ItemEffect, model.itemEffect);
     WarnAboutUnknownKeys(json, ItemModelKeys);
-    return !m_hasErrors;
+    return !m_hasFatal;
 }
 
 bool ItemModelReader::ReadShared(const OrderedJson& json, size_t index, SharedItemModel& model)
@@ -329,7 +329,7 @@ bool ItemModelReader::ReadShared(const OrderedJson& json, size_t index, SharedIt
     ReadTextureFolders(json, model.textureFolders);
     ReadNoneBlendMeshes(json, model.noneBlendMeshes);
     WarnAboutUnknownKeys(json, SharedModelKeys);
-    return !m_hasErrors;
+    return !m_hasFatal;
 }
 
 // Calls read(entry, index) for every entry of the "models" list of a model

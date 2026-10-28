@@ -368,14 +368,14 @@ private:
     const std::string& m_source;
     int m_group;
     int m_number = ItemDataIssue::NoItem;
-    bool m_hasErrors = false;
+    bool m_hasFatal = false;
     std::vector<ItemDataIssue>& m_issues;
 };
 
 void ItemReader::AddIssue(ItemDataIssueSeverity severity, const std::string& field, const std::string& message)
 {
     m_issues.push_back({severity, m_source, m_group, m_number, field, message});
-    m_hasErrors = m_hasErrors || severity == ItemDataIssueSeverity::Fatal;
+    m_hasFatal = m_hasFatal || severity == ItemDataIssueSeverity::Fatal;
 }
 
 template <typename T> void ItemReader::ReadValue(const OrderedJson& json, const std::string& field, T& value)
@@ -977,7 +977,7 @@ bool ItemReader::Read(const OrderedJson& json, ItemDefinition& definition)
 
     static const std::set<std::string, std::less<>> KnownItemKeys = GetKnownItemKeys();
     WarnAboutUnknownKeys(json, KnownItemKeys, "");
-    return !m_hasErrors;
+    return !m_hasFatal;
 }
 
 } // namespace
