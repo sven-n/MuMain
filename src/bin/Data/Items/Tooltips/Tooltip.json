@@ -631,7 +631,7 @@
     },
     "devilSquareInvitationIngredient": {
       "en": "It is used to combine items for a Devil Square Invitation",
-      "zh-CN": "用于合成恶魔广场邀请函",
+      "zh-CN": "用于合成恶魔广场入场券",
       "de": "Wird verwendet, um Gegenstände zu einer Einladung für Devil Square zu kombinieren",
       "es": "Se utiliza para combinar elementos para una invitación de Devil Square.",
       "id": "Ini digunakan untuk menggabungkan item untuk Undangan Kotak Setan",
@@ -645,7 +645,7 @@
     },
     "reinforcementJewel": {
       "en": "Jewel for item reinforcement",
-      "zh-CN": "用于强化物品的宝石",
+      "zh-CN": "用于强化道具的宝石",
       "de": "Juwel zur Gegenstandsverstärkung",
       "es": "Joya para refuerzo de artículos.",
       "id": "Permata untuk penguatan item",
@@ -659,7 +659,7 @@
     },
     "grantPowerToReinforcedItem": {
       "en": "Grant actual power to reinforced item.",
-      "zh-CN": "赋予强化物品实际力量。",
+      "zh-CN": "用于提升道具的再生属性",
       "de": "Verleiht einem verstärkten Gegenstand echte Kraft.",
       "es": "Otorga poder real al elemento reforzado.",
       "id": "Berikan kekuatan sebenarnya pada item yang diperkuat.",

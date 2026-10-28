@@ -435,6 +435,24 @@ translations are added. Item names and server messages are separate data.
 This batch also translates 12 existing item tooltip texts required for every
 UI language by the item data tests; shared texts cover 15 items.
 
+The item tooltips were checked against the contributor-provided Chinese official
+client archive `Muonline-Season20Part2-taren-0616.zip` on 2026-10-28, matching
+item group/number in `Data/Local/itemtooltip.bmd` to text IDs in
+`Data/Local/itemtooltiptext.bmd`. The source text IDs are 39, 69–70, 189–192,
+194, 201–203 and 281–282. Wording follows those texts where compatible, with
+punctuation and unclear phrasing normalized; the fruit text retains the English
+meaning of creating fruit, and the siege text describes creating and improving
+siege structures rather than copying the source's awkward wording.
+
+Season 20's refining stones (14/43 and 14/44) have different descriptions and
+uses from Season 6. Their shared translation retains the older use of improving
+an item's harmony option, supported by the Chinese operator's
+[historical enhancement guide](https://mu.zhaouc.com/Guide/ItemSystem/01_itemSys.html).
+It is an adapted translation, not the Season 20 tooltip. Future batches should
+use official Chinese resources as a terminology reference, check item IDs and
+version-specific behavior, and preserve the current English text's meaning and
+placeholders. Do not import a newer client's rules merely to match its wording.
+
 Rebuild the client, then select **简体中文** in the Options language dropdown.
 Select **Noto Sans SC** in the font dropdown to use Simplified Chinese glyph
 forms. The regular and bold faces are bundled under `fonts/` and provide
