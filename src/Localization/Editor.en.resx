@@ -1345,8 +1345,8 @@
   <data name="Message" xml:space="preserve">
     <value>Message</value>
   </data>
-  <data name="No errors or warnings" xml:space="preserve">
-    <value>No errors or warnings</value>
+  <data name="No fatal problems, errors or warnings" xml:space="preserve">
+    <value>No fatal problems, errors or warnings</value>
   </data>
   <data name="Item Rules" xml:space="preserve">
     <value>Item Rules</value>

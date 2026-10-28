@@ -177,10 +177,11 @@ void IssueTable::RenderChangedNote(const char* text)
 
 void IssueTable::RenderTable(std::span<DataCheckArea* const> areas)
 {
-    // The shown areas have no problem of any level.
-    if (std::all_of(m_counts.begin(), m_counts.end(), [](int count) { return count == 0; }))
+    // Only when the check found nothing: with problems in hidden areas or of
+    // hidden levels the table is empty.
+    if (m_issues.empty())
     {
-        ImGui::TextDisabled("%s", I18N::Editor::NoErrorsOrWarnings);
+        ImGui::TextDisabled("%s", I18N::Editor::NoFatalProblemsErrorsOrWarnings);
         return;
     }
     constexpr ImGuiTableFlags flags = ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV |
