@@ -13,8 +13,6 @@
 
 namespace MuEditor::ToolWindowFrame
 {
-namespace
-{
 // Only while the keyboard is the editor's and this window has the focus: ImGui
 // keeps the focus in the window when the game window takes the keyboard back
 // (Alt+Tab with the editor inside the game window). A text field keeps its own
@@ -36,7 +34,6 @@ void HandleUndoKeys(UndoTarget& undo)
         undo.Redo();
     }
 }
-} // namespace
 
 bool Begin(const char* title, const char* windowId, bool* open, const ToolGroup& group, UndoTarget& undo)
 {
@@ -54,12 +51,7 @@ bool Begin(const char* title, const char* windowId, bool* open, const ToolGroup&
         UndoTargets::Activate(undo);
     }
     Layout::RenderToolWindowBar();
-    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByPopup |
-                               ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) ||
-        ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId))
-    {
-        g_MuEditorCore.SetHoveringUI(true);
-    }
+    NoteHovered();
     HandleUndoKeys(undo);
     return true;
 }
@@ -67,6 +59,16 @@ bool Begin(const char* title, const char* windowId, bool* open, const ToolGroup&
 void End()
 {
     ImGui::End();
+}
+
+void NoteHovered()
+{
+    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByPopup |
+                               ImGuiHoveredFlags_AllowWhenBlockedByActiveItem) ||
+        ImGui::IsPopupOpen("", ImGuiPopupFlags_AnyPopupId))
+    {
+        g_MuEditorCore.SetHoveringUI(true);
+    }
 }
 } // namespace MuEditor::ToolWindowFrame
 

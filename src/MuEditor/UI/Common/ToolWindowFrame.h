@@ -18,6 +18,14 @@ namespace MuEditor::ToolWindowFrame
 // Undo and Redo act on `undo`.
 bool Begin(const char* title, const char* windowId, bool* open, const ToolGroup& group, UndoTarget& undo);
 void End();
+
+// Ctrl+Z, Ctrl+Y and Ctrl+Shift+Z act on `undo`; only while the keyboard is
+// the editor's. Begin calls it for the window's own undo.
+void HandleUndoKeys(UndoTarget& undo);
+
+// The mouse over the current window (or one of its popups) is over the
+// editor, not the game. Begin calls it.
+void NoteHovered();
 } // namespace MuEditor::ToolWindowFrame
 
 #endif // _EDITOR

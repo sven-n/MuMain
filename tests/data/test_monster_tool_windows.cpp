@@ -18,6 +18,7 @@
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/Common/ToolGroups.h"
 #include "UI/Common/UndoTarget.h"
+#include "UI/ItemTools/ItemToolWindow.h"
 #include "UI/MonsterTools/MonsterEdits.h"
 #include "UI/MonsterTools/MonsterSelection.h"
 #include "UI/MonsterTools/MonsterToolWindow.h"
@@ -353,6 +354,22 @@ TEST_CASE("The editor bar's undo is the monster tools' while a monster tool is o
     target.Undo();
     CHECK(g_MonsterDatabase.Find(2)->names.GetNeutral() == "Budge Dragon 3");
     CHECK(target.CanUndo());
+}
+
+// Data Checks has no undo of its own: its Ctrl+Z acts on the target the
+// editor bar shows, the tool worked in last while it is open.
+TEST_CASE("The bar's undo target is the tool worked in last while it is open [editor][monsters]")
+{
+    ToolWindowsScope windows;
+    MuEditor::UndoTarget& monsters = MuEditor::Monsters::ToolWindow::GetUndoTarget();
+    MuEditor::UndoTarget& items = MuEditor::Items::ToolWindow::GetUndoTarget();
+    MuEditor::UndoTargets::Activate(monsters);
+
+    // No monster tool is open.
+    CHECK(&MuEditor::UndoTargets::GetCurrent(items) == &items);
+
+    g_MuEditorCore.GetToolWindows().monsterTranslations = true;
+    CHECK(&MuEditor::UndoTargets::GetCurrent(items) == &monsters);
 }
 
 #endif // _EDITOR

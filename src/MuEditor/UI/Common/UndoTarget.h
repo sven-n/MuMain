@@ -37,6 +37,10 @@ void Activate(UndoTarget& target);
 // `fallback` before any was or while that tool is closed. A click does not take
 // the focus from the tool.
 void RenderBarButtons(UndoTarget& fallback);
+
+// The target the bar's buttons act on: the tool worked in last while it is
+// open, else `fallback`.
+UndoTarget& GetCurrent(UndoTarget& fallback);
 } // namespace UndoTargets
 } // namespace MuEditor
 

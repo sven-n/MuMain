@@ -10,6 +10,8 @@
 #include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/Common/SavedDataFiles.h"
+#include "../MuEditor/UI/Common/ToolWindowFrame.h"
+#include "../MuEditor/UI/Common/UndoTarget.h"
 #include "../MuEditor/UI/ItemTools/ItemCheckArea.h"
 #include "../MuEditor/UI/ItemTools/ItemToolWindow.h"
 #include "../MuEditor/UI/MonsterTools/MonsterCheckArea.h"
@@ -80,7 +82,8 @@ void MuDataChecksUI::Render(bool* open)
 }
 
 // A tool window with the editor's bar, docked beside the item tools until it
-// has a place of its own; it has no undo of its own.
+// has a place of its own. It changes no data: Ctrl+Z and Ctrl+Y act on the
+// tool worked in last, as the bar's Undo and Redo do.
 bool MuDataChecksUI::BeginWindow(bool* open)
 {
     char title[WindowIds::TitleCapacity];
@@ -92,10 +95,8 @@ bool MuDataChecksUI::BeginWindow(bool* open)
         return false;
     }
     Layout::RenderToolWindowBar();
-    if (ImGui::IsWindowHovered(ImGuiHoveredFlags_RootAndChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
-    {
-        g_MuEditorCore.SetHoveringUI(true);
-    }
+    ToolWindowFrame::NoteHovered();
+    ToolWindowFrame::HandleUndoKeys(UndoTargets::GetCurrent(Items::ToolWindow::GetUndoTarget()));
     return true;
 }
 
