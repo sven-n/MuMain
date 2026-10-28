@@ -18,6 +18,11 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
                       bool Translate, int RenderType = 0, bool bRightHandItem = true);
 void RenderCharacter(CHARACTER* c, OBJECT* o, int Select = 0);
 void RenderCharactersClient();
+// Whether RenderCharactersClient draws the character this frame.
+bool IsCharacterDrawn(CHARACTER* c);
+// The effects, sounds and state changes of the characters drawn this frame, after every Move* of the frame: their
+// bones are final, and what they spawn is drawn this frame.
+void UpdateCharacterEffects();
 
 /**
  * @brief Builds a generous axis-aligned pick box for the character selection screen.

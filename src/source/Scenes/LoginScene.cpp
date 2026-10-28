@@ -323,6 +323,7 @@ void NewMoveLogInScene()
         MoveParticles();
         MoveBoids();
         ThePetProcess().UpdatePets();
+        UpdateCharacterEffects();
     }
 
     // ESC menu toggle is handled by CSceneUICoordinator::Update()

@@ -313,6 +313,7 @@ static void UpdateGameEntities()
         MoveParticles();
     }
     MovePointers();
+    UpdateCharacterEffects();
 
     g_Direction.CheckDirection();
 
