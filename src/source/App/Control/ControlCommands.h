@@ -39,6 +39,12 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>& act);
 // Writes the tooltip lines of every item at every level, in a few variants, to a text file (`out`): a snapshot to
 // compare the tooltip code before and after a change with.
 std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>& act);
+// An item's name at a level, as the windows, messages and quests name it.
+std::string ItemName(const Request& request, std::unique_ptr<Act>& act);
+// Writes the name of every item at every level to a text file (`out`), to compare before and after a change.
+std::string ItemNameSnapshot(const Request& request, std::unique_ptr<Act>& act);
+// The lines of an item's repair tooltip, built for an item the command makes, without drawing them.
+std::string RepairTooltip(const Request& request, std::unique_ptr<Act>& act);
 std::string ClickUi(const Request& request, std::unique_ptr<Act>& act);
 std::string HoverUi(const Request& request, std::unique_ptr<Act>& act);
 std::string DragUi(const Request& request, std::unique_ptr<Act>& act);

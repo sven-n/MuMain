@@ -36,9 +36,15 @@
 #include <filesystem>
 #include <fstream>
 #include <map>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <vector>
+
+#ifdef MU_ENABLE_CONTROL_SOCKET
+#include "App/Control/ControlCommands.h"
+#include "App/Control/ControlProtocol.h"
+#endif
 
 namespace
 {
@@ -925,3 +931,94 @@ TEST_CASE("With translated item names off, the names are English and the rest of
     CHECK(std::any_of(ring.begin(), ring.end(),
                       [](const ItemTooltipLine& line) { return line.text.ends_with(L"Transformation Ring"); }));
 }
+
+// A full item's durability is the one the repair window counts as full (CalcMaxDurability): it grows with the level,
+// an excellent or ancient option raises it, a staff or stick starts from its magic durability, and the item's byte
+// holds at most 255.
+TEST_CASE("An item's full durability follows its level, options and magic durability [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+
+    const auto full = [](int group, int number, int level, BYTE excellent, BYTE ancient)
+    {
+        ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(group, number);
+        params.Level = static_cast<BYTE>(level);
+        params.HasExcellentOption = excellent > 0;
+        params.ExcellentFlags = excellent;
+        params.IsAncient = ancient > 0;
+        params.AncientDiscriminator = ancient;
+        return static_cast<int>(Engine::Items::TooltipSnapshot::FullDurability(params));
+    };
+    // The Kris (0/0): 20 at +0, 34 at +9, 15 more with an excellent option, 20 more as an ancient item.
+    CHECK(full(0, 0, 0, 0, 0) == 20);
+    CHECK(full(0, 0, 9, 0, 0) == 34);
+    CHECK(full(0, 0, 0, 1, 0) == 35);
+    CHECK(full(0, 0, 0, 0, 1) == 40);
+    // The Skull Staff (5/0) and the Storm Blitz Stick (5/19) have no durability of their own, only a magic one.
+    CHECK(full(5, 0, 0, 0, 0) == 20);
+    CHECK(full(5, 19, 0, 0, 0) == 95);
+    // The Dark Horse (13/4) is at 255 already; its excellent option's 15 more don't fit the byte.
+    CHECK(full(13, 4, 0, 1, 0) == 255);
+}
+
+#ifdef MU_ENABLE_CONTROL_SOCKET
+namespace
+{
+std::string RunCommand(std::string (*command)(const App::Control::Request&, std::unique_ptr<App::Control::Act>&),
+                       const std::string& raw)
+{
+    std::unique_ptr<App::Control::Act> act;
+    return command(App::Control::Request::Parse(raw), act);
+}
+} // namespace
+
+// Without `durability`, `tooltip` and `repair-tooltip` make a full item, at the durability the repair window counts as
+// full, so its repair costs nothing; the item's level and options count. The drawn repair tooltip's RepairEnable stays
+// as it is.
+TEST_CASE("The item commands make a full item when the durability is left out [data][items][tooltip][control]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+
+    const std::pair<const char*, int> items[] = {
+        {R"("group":0,"number":0,"level":9)", 34}, // the Kris +9
+        {R"("group":0,"number":0,"excellent":1)", 35},
+        {R"("group":0,"number":0,"ancient":1)", 40},
+        {R"("group":5,"number":0)", 20},  // the Skull Staff
+        {R"("group":5,"number":19)", 95}, // the Storm Blitz Stick
+    };
+    const int repairEnable = RepairEnable;
+    RepairEnable = 7;
+    for (const auto& [fields, full] : items)
+    {
+        INFO(fields);
+        const std::string durability = Core::Text::ToUtf8(Formatted(L"Durability: [%d/%d]", full, full).c_str());
+        const std::string tooltip =
+            RunCommand(&App::Control::Commands::ItemTooltip, std::string(R"({"cmd":"tooltip",)") + fields + "}");
+        CHECK(tooltip.find(durability) != std::string::npos);
+        const std::string repair = RunCommand(&App::Control::Commands::RepairTooltip,
+                                              std::string(R"({"cmd":"repair-tooltip",)") + fields + "}");
+        CHECK(repair.find(durability) != std::string::npos);
+        CHECK(repair.find("Repairing cost: 0") != std::string::npos);
+    }
+    CHECK(RepairEnable == 7);
+    RepairEnable = repairEnable;
+
+    // A durability given is kept.
+    const std::string worn = RunCommand(&App::Control::Commands::ItemTooltip,
+                                        R"({"cmd":"tooltip","group":0,"number":0,"level":9,"durability":20})");
+    CHECK(worn.find("Durability: [20/34]") != std::string::npos);
+    SetItemTooltipTextMeasure(nullptr);
+}
+#endif

@@ -28,6 +28,7 @@
 #include "json.hpp"
 
 #include <cmath>
+#include <cstdio>
 #include <optional>
 #include <utility>
 
@@ -460,6 +461,27 @@ json ObjectPixel(const OBJECT& object)
     pixel["y"] = std::round(y);
     return pixel;
 }
+
+// A color the render text takes (red in the low byte, then green, blue, alpha) as `#rrggbb`.
+std::string HexColor(DWORD color)
+{
+    char text[8];
+    std::snprintf(text, sizeof(text), "#%02x%02x%02x", static_cast<unsigned>(color & 0xFF),
+                  static_cast<unsigned>((color >> 8) & 0xFF), static_cast<unsigned>((color >> 16) & 0xFF));
+    return text;
+}
+
+// The name a drop shows on the ground, while Alt shows every drop's name or the pointer is over it.
+json GroundLabel(ITEM_t& drop)
+{
+    const GroundItemLabel label = DescribeGroundItemLabel(&drop.Object, &drop.Item);
+    json described;
+    described["text"] = Core::Text::ToUtf8(label.text.c_str());
+    described["color"] = HexColor(label.textColor);
+    described["background"] = HexColor(label.backgroundColor);
+    described["bold"] = label.bold;
+    return described;
+}
 } // namespace
 
 namespace App::Control
@@ -583,6 +605,8 @@ json NearbyArray()
         described["name"] = ItemName(drop.Item);
         const std::pair<int, int> tile = App::Control::DropTile(index);
         described["position"] = json::array({tile.first, tile.second});
+        described["label"] = GroundLabel(Items[index]);
+        described["pixel"] = ObjectPixel(drop.Object);
         nearby.push_back(std::move(described));
     }
 
