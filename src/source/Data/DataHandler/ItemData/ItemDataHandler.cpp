@@ -640,7 +640,7 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
                       GetItemStatsFile().generic_string(), issues);
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     std::vector<ItemDefinition> items;
-    std::ranges::copy_if(g_ItemDatabase.GetAllSlots(), std::back_inserter(items), &ItemDefinition::Exists);
+    std::ranges::copy_if(g_ItemDatabase.GetAllSlots(), std::back_inserter(items), &ItemDefinition::HasEntry);
     ValidateItems(items, issues);
     // The file as Load read it was checked then.
     if (m_statFileChanged)

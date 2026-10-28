@@ -267,7 +267,11 @@ OrderedJson WriteItemObject(const ItemDefinition& definition)
 {
     OrderedJson item;
     item[Keys::Number] = definition.number;
-    item[Keys::Name] = Json::WriteLocalizedString(definition.names);
+    // An entry without a name has none.
+    if (!definition.names.IsEmpty())
+    {
+        item[Keys::Name] = Json::WriteLocalizedString(definition.names);
+    }
     if (!definition.tags.IsEmpty())
     {
         item[Keys::Tags] = WriteTags(definition.tags);
@@ -332,8 +336,8 @@ OrderedJson WriteItemObject(const ItemDefinition& definition)
 class ItemReader
 {
 public:
-    ItemReader(const std::string& source, int group, std::vector<ItemDataIssue>& issues)
-        : m_source(source), m_group(group), m_issues(issues)
+    ItemReader(const std::string& source, int group, std::vector<ItemDataIssue>& issues, bool nameRequired = true)
+        : m_source(source), m_group(group), m_issues(issues), m_nameRequired(nameRequired)
     {
     }
 
@@ -370,6 +374,8 @@ private:
     int m_number = ItemDataIssue::NoItem;
     bool m_hasFatal = false;
     std::vector<ItemDataIssue>& m_issues;
+    // An item file's entry without a name has none.
+    bool m_nameRequired = true;
 };
 
 void ItemReader::AddIssue(ItemDataIssueSeverity severity, const std::string& field, const std::string& message)
@@ -449,10 +455,13 @@ bool ItemReader::ReadIdentity(const OrderedJson& json, ItemDefinition& definitio
     const auto name = json.find(Keys::Name);
     if (name == json.end())
     {
-        AddIssue(ItemDataIssueSeverity::Fatal, Keys::Name, "missing");
-        return false;
+        if (m_nameRequired)
+        {
+            AddIssue(ItemDataIssueSeverity::Fatal, Keys::Name, "missing");
+            return false;
+        }
     }
-    if (!ReadNames(*name, definition.names))
+    else if (!ReadNames(*name, definition.names))
     {
         return false;
     }
@@ -1002,9 +1011,11 @@ void ReadItemGroupJson(std::string_view text, const std::string& source, std::ve
     for (const OrderedJson& json : *itemList)
     {
         ItemDefinition definition;
-        ItemReader reader(source, group, issues);
+        // An entry without a name is a number the client uses without an item there.
+        ItemReader reader(source, group, issues, false);
         if (reader.Read(json, definition))
         {
+            definition.entryWithoutName = !definition.Exists();
             items.push_back(std::move(definition));
         }
     }
@@ -1020,7 +1031,7 @@ std::string WriteItemGroupJson(int group, std::span<const ItemDefinition> items)
     std::vector<const ItemDefinition*> groupItems;
     for (const ItemDefinition& definition : items)
     {
-        if (definition.group == group && definition.Exists())
+        if (definition.group == group && definition.HasEntry())
         {
             groupItems.push_back(&definition);
         }

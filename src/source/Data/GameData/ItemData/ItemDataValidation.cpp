@@ -334,6 +334,11 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
             issues.push_back({ItemDataIssueSeverity::Fatal, "", definition.group, definition.number, "number",
                               "the item is defined more than once"});
         }
+        // The game does not know an entry without a name; its values are checked once it has one.
+        if (definition.entryWithoutName && !definition.Exists())
+        {
+            continue;
+        }
 
         ValidateName(definition, issues);
         ValidateDescription(definition, issues);

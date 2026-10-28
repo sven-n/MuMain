@@ -19,7 +19,8 @@ namespace Data::Items
 // the required English name, and names that fit the LocalizedString format.
 // Also the description texts: the English text, the language codes, the
 // braces in every language, and the English text's placeholders in each
-// translation. Appends the problems to `issues`.
+// translation. An entry without a name is only checked for its id. Appends
+// the problems to `issues`.
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues);
 
 // A translation of an item name or a description text in a language the game

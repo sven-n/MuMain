@@ -120,6 +120,35 @@ TEST_CASE("Item JSON output is sorted and stable [data][items]")
     CHECK(WriteItemGroupJson(0, result.items) == text);
 }
 
+TEST_CASE("An item file entry without a name is kept through read and write [data][items]")
+{
+    const std::string text = WriteItemGroupJson(0, std::vector<ItemDefinition>{MakeKris()});
+    const ReadResult kris = Read(text);
+    REQUIRE(kris.items.size() == 1);
+    CHECK_FALSE(kris.items.front().entryWithoutName);
+
+    const ReadResult result = Read(GroupFile(0, R"({"number": 3})"));
+    REQUIRE(result.issues.empty());
+    REQUIRE(result.items.size() == 1);
+    const ItemDefinition& entry = result.items.front();
+    CHECK(entry.entryWithoutName);
+    CHECK(entry.HasEntry());
+    CHECK_FALSE(entry.Exists());
+    CHECK(entry.number == 3);
+
+    const std::string written = WriteItemGroupJson(0, result.items);
+    CHECK(written.find("\"name\"") == std::string::npos);
+    CHECK(Read(written).items == result.items);
+
+    // Only its id is checked; an item without a name is still an error.
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(result.items, issues);
+    CHECK(issues.empty());
+    ItemDefinition twice = entry;
+    ValidateItems(std::vector<ItemDefinition>{entry, twice}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "number"));
+}
+
 TEST_CASE("Item JSON only writes items of the requested group [data][items]")
 {
     ItemDefinition otherGroup = MakeKris();

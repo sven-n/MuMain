@@ -186,6 +186,11 @@ void ItemDatabase::Store(int itemType, ItemDefinition definition)
     ++m_nameVersion;
     definition.group = GetItemGroup(itemType);
     definition.number = GetItemNumber(itemType);
+    // A name makes the entry an item.
+    if (definition.Exists())
+    {
+        definition.entryWithoutName = false;
+    }
     UpdateDisplayName(definition);
 
     RuleData ruleData;
