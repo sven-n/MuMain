@@ -71,13 +71,10 @@ RmlUiRuntime::~RmlUiRuntime()
 
 namespace
 {
-void LoadChineseFonts()
+void LoadChineseFont(const BundledFont& font)
 {
-    for (const BundledFont& font : {kNotoSansTcFont, kNotoSansScFont})
-    {
-        Rml::LoadFontFace(font.regular, true);
-        Rml::LoadFontFace(font.bold);
-    }
+    Rml::LoadFontFace(font.regular, true);
+    Rml::LoadFontFace(font.bold);
 }
 
 void LoadBundledFonts()
@@ -99,8 +96,9 @@ void LoadBundledFonts()
     // data still carries in Korean, such as the lucky item menu) draws from it instead of as
     // boxes, as the native text renderer drew it. Noto Sans TC goes first so Traditional Chinese
     // keeps its own glyphs and punctuation, as in the native text renderer's fallback order.
-    LoadChineseFonts();
+    LoadChineseFont(kNotoSansTcFont);
     Rml::LoadFontFace("fonts/NanumGothic-Regular.ttf", true);
+    LoadChineseFont(kNotoSansScFont);
 
     // Third, explicitly-named face -- already bundled for the legacy GDI text shim's own font
     // picker (BundledFonts.h) but never previously registered with RmlUi. Loaded for its Unicode

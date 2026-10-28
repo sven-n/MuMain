@@ -432,6 +432,8 @@ Options window, including its graphics tuning labels and help text. Shared
 labels also appear translated wherever other screens use the same resource key.
 Other game text, NPC dialogue and editor text fall back to English until their
 translations are added. Item names and server messages are separate data.
+This batch also translates 12 existing item tooltip texts required for every
+UI language by the item data tests; shared texts cover 15 items.
 
 Rebuild the client, then select **简体中文** in the Options language dropdown.
 Select **Noto Sans SC** in the font dropdown to use Simplified Chinese glyph

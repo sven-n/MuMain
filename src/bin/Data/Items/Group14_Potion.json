@@ -727,6 +727,7 @@
         {
           "text": {
             "en": "It is used to increase your item level up to 6",
+            "zh-CN": "用于将物品等级提升至最高 +6",
             "de": "Wird verwendet, um das Gegenstandslevel auf bis zu 6 zu erhöhen",
             "es": "Se utiliza para aumentar el nivel de tu objeto hasta 6.",
             "id": "Ini digunakan untuk meningkatkan level item Anda hingga 6",
@@ -764,6 +765,7 @@
         {
           "text": {
             "en": "It is used to increase your item level up to 7,8,9",
+            "zh-CN": "用于将物品等级提升至 +7、+8 或 +9",
             "de": "Wird verwendet, um das Gegenstandslevel auf 7, 8 oder 9 zu erhöhen",
             "es": "Se utiliza para aumentar el nivel de tu objeto hasta 7,8,9.",
             "id": "Ini digunakan untuk meningkatkan level item Anda hingga 7,8,9",
@@ -813,6 +815,7 @@
         {
           "text": {
             "en": "Increases item option by 1 level",
+            "zh-CN": "将物品追加属性提升 1 级",
             "de": "Erhöht die Gegenstandsoption um 1 Stufe",
             "es": "Aumenta la opción de artículo en 1 nivel.",
             "id": "Meningkatkan opsi item sebanyak 1 level",
@@ -1065,6 +1068,7 @@
         {
           "text": {
             "en": "Used to create fruits that increase stats",
+            "zh-CN": "用于合成提升角色属性的果实",
             "de": "Wird zur Herstellung von Früchten verwendet, die Werte erhöhen",
             "es": "Se utiliza para crear frutas que aumentan las estadísticas.",
             "id": "Digunakan untuk membuat buah yang meningkatkan statistik",
@@ -1347,6 +1351,7 @@
         {
           "text": {
             "en": "Create and improve items for siege",
+            "zh-CN": "用于制作和强化攻城物品",
             "de": "Erstellen und verbessern Sie Gegenstände für die Belagerung",
             "es": "Crea y mejora elementos para el asedio.",
             "id": "Buat dan tingkatkan item untuk pengepungan",
@@ -1620,6 +1625,7 @@
         {
           "text": {
             "en": "Jewel with impurities",
+            "zh-CN": "含有杂质的宝石",
             "de": "Juwel mit Verunreinigungen",
             "es": "Joya con impurezas",
             "id": "Permata dengan kotoran",
@@ -4893,6 +4899,7 @@
         {
           "text": {
             "en": "Jewel used for repairing a Lucky Item.",
+            "zh-CN": "用于修理幸运物品的宝石。",
             "de": "Juwel, das zum Reparieren eines Glücksgegenstands verwendet wird.",
             "es": "Joya utilizada para reparar un artículo de la suerte.",
             "id": "Permata yang digunakan untuk memperbaiki Barang Keberuntungan.",

@@ -251,6 +251,8 @@ TEST_CASE("only a family taller than DejaVu Sans lifts its text [platform][bundl
     REQUIRE(liberation.Load("Liberation Sans", kPointSize, kBigPointSize, kPointSize));
     SdlTtfFontSet noto;
     REQUIRE(noto.Load("Noto Sans TC", kPointSize, kBigPointSize, kPointSize));
+    SdlTtfFontSet notoSc;
+    REQUIRE(notoSc.Load("Noto Sans SC", kPointSize, kBigPointSize, kPointSize));
 
     for (SdlTtfFontRole role : kRoles)
     {
@@ -262,6 +264,11 @@ TEST_CASE("only a family taller than DejaVu Sans lifts its text [platform][bundl
     CHECK(Render::Text::LayoutLift(noto.Get(SdlTtfFontRole::Normal)) == 4);
     CHECK(Render::Text::LayoutLift(noto.Get(SdlTtfFontRole::Big)) == 8);
     CHECK(Render::Text::LayoutLift(noto.Get(SdlTtfFontRole::Fixed)) == 0); // Cousine
+    // Noto Sans SC uses the same ascent as Noto Sans TC.
+    CHECK(Render::Text::LayoutLift(notoSc.Get(SdlTtfFontRole::Normal)) == 4);
+    CHECK(Render::Text::LayoutLift(notoSc.Get(SdlTtfFontRole::Bold)) == 4);
+    CHECK(Render::Text::LayoutLift(notoSc.Get(SdlTtfFontRole::Big)) == 8);
+    CHECK(Render::Text::LayoutLift(notoSc.Get(SdlTtfFontRole::Fixed)) == 0); // Cousine
 }
 
 TEST_CASE("a failed reload keeps the current fonts [platform][bundled_font]")
