@@ -1,5 +1,7 @@
 #include <array>
 #include <cstdint>
+#include <cstring>
+#include <vector>
 
 #include <doctest.h>
 
@@ -95,4 +97,66 @@ TEST_CASE("2D and 3D command families retain independent history [render][quad]"
     CHECK(Render::PreviousDrawCommand(history, Render::DrawCommandFamily::Quads3D) == 99);
     CHECK(Render::PreviousDrawCommand(history, Render::DrawCommandFamily::TextTriangles2D) == 7);
     CHECK(Render::PreviousDrawCommand(history, Render::DrawCommandFamily::ScreenQuads2D) == 8);
+}
+
+namespace
+{
+// A backend without index buffers: keeps IMuRenderer's indexed default and records what reaches it.
+class CornerRecordingRenderer final : public mu::IMuRenderer
+{
+public:
+    std::vector<mu::Vertex3D> triangles;
+
+    void RenderQuad2D(std::span<const mu::Vertex2D>, std::uint32_t) override {}
+    void RenderTriangles(std::span<const mu::Vertex3D> vertices, std::uint32_t) override
+    {
+        triangles.assign(vertices.begin(), vertices.end());
+    }
+    void RenderQuad3D(std::span<const mu::Vertex3D>, std::uint32_t) override {}
+    void RenderQuadStrip(std::span<const mu::Vertex3D>, std::uint32_t) override {}
+    void SetBlendMode(mu::BlendMode) override {}
+    void DisableBlend() override {}
+    void SetDepthTest(bool) override {}
+    void SetFog(const mu::FogParams&) override {}
+    void BeginScene(int, int, int, int) override {}
+    void EndScene() override {}
+    void Begin2DPass() override {}
+    void End2DPass() override {}
+    void ClearScreen() override {}
+    void RenderLines(std::span<const mu::Vertex3D>, std::uint32_t) override {}
+};
+} // namespace
+
+TEST_CASE("indexed triangles expand to their corners in index order [render][indexed]")
+{
+    std::array<mu::Vertex3D, 4> vertices{};
+    for (std::size_t i = 0; i < vertices.size(); ++i)
+    {
+        vertices[i].x = static_cast<float>(i);
+        vertices[i].color = 0xFF000000u | static_cast<std::uint32_t>(i);
+    }
+    const std::array<std::uint16_t, 6> indices{2, 0, 1, 1, 3, 2};
+    std::vector<mu::Vertex3D> corners;
+    mu::ExpandIndexedCorners<mu::Vertex3D>(vertices, indices, corners);
+    REQUIRE(corners.size() == indices.size());
+    for (std::size_t i = 0; i < indices.size(); ++i)
+    {
+        CHECK(std::memcmp(&corners[i], &vertices[indices[i]], sizeof(mu::Vertex3D)) == 0);
+    }
+}
+
+TEST_CASE("a backend without index buffers draws indexed triangles as their corners [render][indexed]")
+{
+    CornerRecordingRenderer renderer;
+    std::array<mu::Vertex3D, 3> vertices{};
+    for (std::size_t i = 0; i < 3; ++i)
+    {
+        vertices[i].y = static_cast<float>(i) + 0.5f;
+    }
+    const std::array<std::uint16_t, 6> indices{0, 1, 2, 2, 1, 0};
+
+    renderer.RenderIndexedTriangles(vertices, indices, 0u);
+    REQUIRE(renderer.triangles.size() == 6);
+    CHECK(renderer.triangles[3].y == vertices[2].y);
+    CHECK(renderer.triangles[5].y == vertices[0].y);
 }

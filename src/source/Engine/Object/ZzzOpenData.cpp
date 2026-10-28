@@ -31,6 +31,7 @@
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
 
 #include "Data/DataHandler/EffectData/EffectDataHandler.h"
+#include "Data/DataHandler/ModelData/ModelFileDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
@@ -413,6 +414,18 @@ static void OpenMonsterData()
 
 // Loads the effect types (Data/Effects) and builds the effect registry from
 // their creation values; errors stop the game.
+// Reads the model file table (Data/Models/ModelFiles.json, MU_DATA_OVERLAY
+// first); errors stop the game, as for the effect data. A missing table names
+// no model file.
+static void OpenModelFileData()
+{
+    std::string errorMessage;
+    if (!Data::Models::LoadModelFileTable(errorMessage))
+    {
+        StopOnDataError("Model file data error", errorMessage);
+    }
+}
+
 static void OpenEffectTypeData()
 {
     std::string errorMessage;
@@ -2095,6 +2108,7 @@ void OpenBasicData(HDC hDC)
 
     OpenItems();
     OpenEffectTypeData();
+    OpenModelFileData();
     TitleSceneUI::RenderSceneUI(hDC, 4, 11);
 
     OpenItemTextures();

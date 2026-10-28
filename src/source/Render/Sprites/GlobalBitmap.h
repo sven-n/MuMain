@@ -7,6 +7,7 @@
 #include <map>
 #include <optional>
 #include <memory>
+#include <span>
 #include <string>
 #include <vector>
 #include <setjmp.h>
@@ -185,6 +186,13 @@ public:
     // RmlUi also blends premultiplied: premultiplyAlpha scales the colours of an image with
     // alpha (TGA/OZT) before the upload.
     GLuint LoadImageExclusive(const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE, bool padToPowerOfTwo = true, bool premultiplyAlpha = false);
+    // Loads RGBA8 pixels (rows top first) as the texture `name`, a path like a
+    // file's ("Data\Monster\Monster14.glb#skin": an image a model file carries),
+    // or takes the one already loaded under that name; BITMAP_UNKNOWN when the
+    // pixels do not fit the size or the upload fails. Without `hasAlpha` the
+    // texture is opaque like a .jpg one (Components 3).
+    GLuint LoadImagePixels(const std::wstring& name, std::span<const std::uint8_t> rgba, int width, int height,
+                           bool hasAlpha, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
     void UnloadImage(GLuint uiBitmapIndex, bool bForce = false);
     void UnloadAllImages();
 
@@ -254,6 +262,10 @@ protected:
     bool OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode,
                  bool worldTexture, bool padToPowerOfTwo = true, bool premultiplyAlpha = false,
                  bool keepPixels = false);
+    // Uploads the RGBA8 pixels of a bitmap (Components 4: they have alpha) and adds
+    // it under its BitmapIndex; the bitmap keeps its pixels.
+    bool UploadBitmap(std::unique_ptr<BITMAP_t> bitmap, std::span<const std::uint8_t> rgba, GLuint uiFilter,
+                      GLuint uiWrapMode);
     // Decode a file OpenJpegTurbo/OpenTga read and upload it as the texture.
     bool LoadJpegFile(GLuint uiBitmapIndex, const std::wstring& filename, const TextureFileBytes& file, GLuint uiFilter,
                       GLuint uiWrapMode, bool worldTexture, bool padToPowerOfTwo, bool keepPixels);

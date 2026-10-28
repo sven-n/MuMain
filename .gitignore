@@ -63,6 +63,9 @@ src/bin/Data/Monsters/**/*.tmp
 # Colour grading tables (PNG) of the Enhanced post-processing, one per world.
 !src/bin/Data/Grading/
 !src/bin/Data/Grading/**
+# Model data (JSON), e.g. the model files that replace a model's BMD.
+!src/bin/Data/Models/
+!src/bin/Data/Models/**
 **/obj/
 *.user
 *.suo
