@@ -8,7 +8,7 @@
 #include <optional>
 #include <vector>
 
-// The checks of the monsters' attacks for Monster Checks (monsters design,
+// The checks of the monsters' attacks for Data Checks (monsters design,
 // section 6). All are warnings: the game plays the attacks as they are.
 // - Attacks that no handler reads, also after a model change in Monster
 //   Setup takes a monster away from a model-keyed handler.

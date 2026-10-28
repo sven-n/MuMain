@@ -1122,17 +1122,13 @@ shows it in the others.
 - **Item Model**: see [Item Model](#item-model).
 - **Glow Colors**: the glow color list, see [Glow Colors](#glow-colors).
 - **Item Formulas**: the item stat file, see [Item Formulas](#item-formulas).
-- **Item Checks**: the checks of a save as a list, fatal problems first. A
-  click on a problem of an item selects it and opens the tool of its field; an arrow
-  key onto it only selects the item. A click on a problem of the item stat
-  file (a profile or a table nothing uses) opens Item Formulas at it.
 - **Item Sync**: Export and Import of the items and item formulas with an
   OpenMU server, see [Item Sync](#item-sync).
 - **Item Translations**: the names in all languages, see
   [translation-system.md → In the item editor](translation-system.md#in-the-item-editor).
 
-In the browser, Item Rules, Item Categories, Item Checks and Item
-Translations, the arrow keys move the selection (see
+In the browser, Item Rules, Item Categories and Item Translations, the
+arrow keys move the selection (see
 [dev-editor.md](dev-editor.md)). In the lists of the items that use a model
 or a look they only move the cursor: selecting one there shows that item's
 form instead, with its own list.
@@ -1160,7 +1156,11 @@ How changes work:
   `Stats/ItemStats.json` when the item formulas changed; the other model
   files are not touched. It lists each UI language that misses item names, with
   how many. With fatal problems nothing is written, and they are listed in
-  the editor console and in **Item Checks**. Warnings (a model file that is
+  the editor console and in **Data Checks** (see
+  [dev-editor.md → Data Checks](dev-editor.md#data-checks)): a click on a
+  problem of an item selects it and opens the tool of its field; one of the
+  item stat file (a profile or a table nothing uses) opens Item Formulas at
+  it. Warnings (a model file that is
   missing, a file several items name themselves instead of through a
   shared model, a render style or item effect that does not exist) do not
   stop it. If a file cannot be written (read-only folder, full disk), no

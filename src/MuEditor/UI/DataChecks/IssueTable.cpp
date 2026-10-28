@@ -4,18 +4,18 @@
 
 #include "IssueTable.h"
 
-#include "IssueSubjects.h"
-#include "KeyboardSelection.h"
+#include "DataCheckArea.h"
+
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/UI/Common/KeyboardSelection.h"
 #include "I18N/All.h"
 #include "imgui.h"
 
 #include <algorithm>
-#include <array>
 #include <string>
 #include <utility>
 
-namespace MuEditor
+namespace MuEditor::DataChecks
 {
 namespace
 {
@@ -23,10 +23,12 @@ using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
 
 // Pixel widths before the editor UI scale.
-constexpr float KindColumnWidth = 70.0f;
+constexpr float LevelColumnWidth = 70.0f;
+constexpr float AreaColumnWidth = 110.0f;
+constexpr float WhatColumnWidth = 220.0f;
 constexpr float FieldColumnWidth = 160.0f;
 constexpr float TooltipWrapWidth = 420.0f;
-constexpr int ColumnCount = 4;
+constexpr int ColumnCount = 5;
 
 constexpr ImVec4 FatalColor{1.0f, 0.4f, 0.4f, 1.0f};
 constexpr ImVec4 ErrorColor{1.0f, 0.6f, 0.35f, 1.0f};
@@ -34,7 +36,7 @@ constexpr ImVec4 ErrorColor{1.0f, 0.6f, 0.35f, 1.0f};
 constexpr ImVec4 WarningColor{1.0f, 0.8f, 0.3f, 1.0f};
 
 // How the table shows a level: the format of its box ("Fatal: 2"), its name
-// in the kind column, its color and the box's id. The labels are read when
+// in the level column, its color and the box's id. The labels are read when
 // drawn, so they follow the editor language.
 struct LevelLook
 {
@@ -82,27 +84,53 @@ void RenderIssueTooltip(const ItemDataIssue& issue)
     ImGui::EndTooltip();
 }
 
-// The box that shows or hides a kind of problem, with their count. The id
-// stays when the count changes.
+// The box that shows or hides a level, with its count. The id stays when the
+// count changes.
 bool RenderKindBox(const char* countFormat, int count, const char* id, bool& shown)
 {
     const std::string label = I18N::Format(countFormat, {std::to_string(count)}) + id;
     return ImGui::Checkbox(label.c_str(), &shown);
 }
+
+void SetUpColumns()
+{
+    const float uiScale = g_MuEditorCore.GetUIScale();
+    ImGui::TableSetupScrollFreeze(0, 1);
+    ImGui::TableSetupColumn(I18N::Editor::Level, ImGuiTableColumnFlags_None, LevelColumnWidth * uiScale);
+    ImGui::TableSetupColumn(I18N::Editor::Area, ImGuiTableColumnFlags_None, AreaColumnWidth * uiScale);
+    ImGui::TableSetupColumn(I18N::Editor::What, ImGuiTableColumnFlags_None, WhatColumnWidth * uiScale);
+    ImGui::TableSetupColumn(I18N::Editor::Field, ImGuiTableColumnFlags_None, FieldColumnWidth * uiScale);
+    ImGui::TableSetupColumn(I18N::Editor::Message, ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableHeadersRow();
+}
 } // namespace
 
-void IssueTable::SetIssues(std::vector<ItemDataIssue> issues)
+void IssueTable::SetIssues(std::vector<AreaIssue> issues)
 {
     m_issues = std::move(issues);
-    std::stable_sort(m_issues.begin(), m_issues.end(), [](const ItemDataIssue& left, const ItemDataIssue& right)
-                     { return LevelIndex(left.severity) < LevelIndex(right.severity); });
-    m_counts.fill(0);
-    for (const ItemDataIssue& issue : m_issues)
-    {
-        ++m_counts[LevelIndex(issue.severity)];
-    }
+    std::stable_sort(m_issues.begin(), m_issues.end(), [](const AreaIssue& left, const AreaIssue& right)
+                     { return LevelIndex(left.issue.severity) < LevelIndex(right.issue.severity); });
     m_clickedIssue = NoIssue;
     FilterIssues();
+}
+
+void IssueTable::SetAreaShown(int area, bool shown)
+{
+    if (area < 0)
+    {
+        return;
+    }
+    if (static_cast<size_t>(area) >= m_shownAreas.size())
+    {
+        m_shownAreas.resize(static_cast<size_t>(area) + 1, true);
+    }
+    m_shownAreas[static_cast<size_t>(area)] = shown;
+    FilterIssues();
+}
+
+bool IssueTable::IsAreaShown(int area) const
+{
+    return area < 0 || static_cast<size_t>(area) >= m_shownAreas.size() || m_shownAreas[static_cast<size_t>(area)];
 }
 
 int IssueTable::GetCount(ItemDataIssueSeverity severity) const
@@ -113,9 +141,17 @@ int IssueTable::GetCount(ItemDataIssueSeverity severity) const
 void IssueTable::FilterIssues()
 {
     m_shownIssues.clear();
+    m_counts.fill(0);
     for (int index = 0; index < static_cast<int>(m_issues.size()); ++index)
     {
-        if (m_shown[LevelIndex(m_issues[index].severity)])
+        const AreaIssue& issue = m_issues[index];
+        if (!IsAreaShown(issue.area))
+        {
+            continue;
+        }
+        const size_t level = LevelIndex(issue.issue.severity);
+        ++m_counts[level];
+        if (m_shownLevels[level])
         {
             m_shownIssues.push_back(index);
         }
@@ -130,10 +166,10 @@ void IssueTable::RenderKindBoxes()
         {
             ImGui::SameLine();
         }
-        bool shown = m_shown[level];
+        bool shown = m_shownLevels[level];
         if (RenderKindBox(*Levels[level].countFormat, m_counts[level], Levels[level].boxId, shown))
         {
-            m_shown[level] = shown;
+            m_shownLevels[level] = shown;
             FilterIssues();
         }
     }
@@ -144,17 +180,10 @@ void IssueTable::RenderChangedNote(const char* text)
     ImGui::TextColored(WarningColor, "%s", text);
 }
 
-void IssueTable::RenderNotes(const char* saveNote, const char* clickNote)
+void IssueTable::RenderTable(std::span<DataCheckArea* const> areas)
 {
-    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
-    ImGui::TextWrapped("%s", saveNote);
-    ImGui::TextWrapped("%s", clickNote);
-    ImGui::PopStyleColor();
-}
-
-void IssueTable::RenderTable(IssueSubjects& subjects)
-{
-    if (m_issues.empty())
+    // The shown areas have no problem of any level.
+    if (std::all_of(m_counts.begin(), m_counts.end(), [](int count) { return count == 0; }))
     {
         ImGui::TextDisabled("%s", I18N::Editor::NoErrorsOrWarnings);
         return;
@@ -165,13 +194,7 @@ void IssueTable::RenderTable(IssueSubjects& subjects)
     {
         return;
     }
-    const float uiScale = g_MuEditorCore.GetUIScale();
-    ImGui::TableSetupScrollFreeze(0, 1);
-    ImGui::TableSetupColumn(I18N::Editor::Kind, ImGuiTableColumnFlags_None, KindColumnWidth * uiScale);
-    ImGui::TableSetupColumn(subjects.GetHeader(), ImGuiTableColumnFlags_None, subjects.GetColumnWidth() * uiScale);
-    ImGui::TableSetupColumn(I18N::Editor::Field, ImGuiTableColumnFlags_None, FieldColumnWidth * uiScale);
-    ImGui::TableSetupColumn(I18N::Editor::Message, ImGuiTableColumnFlags_WidthStretch);
-    ImGui::TableHeadersRow();
+    SetUpColumns();
 
     ImGuiListClipper clipper;
     clipper.Begin(static_cast<int>(m_shownIssues.size()));
@@ -179,15 +202,17 @@ void IssueTable::RenderTable(IssueSubjects& subjects)
     {
         for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; ++row)
         {
-            RenderRow(subjects, m_shownIssues[row]);
+            RenderRow(areas, m_shownIssues[row]);
         }
     }
     ImGui::EndTable();
 }
 
-void IssueTable::RenderRow(IssueSubjects& subjects, int issueIndex)
+void IssueTable::RenderRow(std::span<DataCheckArea* const> areas, int issueIndex)
 {
-    const ItemDataIssue& issue = m_issues[issueIndex];
+    const AreaIssue& row = m_issues[issueIndex];
+    const ItemDataIssue& issue = row.issue;
+    DataCheckArea* area = row.area >= 0 && static_cast<size_t>(row.area) < areas.size() ? areas[row.area] : nullptr;
     const LevelLook& level = Levels[LevelIndex(issue.severity)];
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
@@ -202,16 +227,24 @@ void IssueTable::RenderRow(IssueSubjects& subjects, int issueIndex)
     if (clicked)
     {
         m_clickedIssue = issueIndex;
-        subjects.Open(issue, !movedOnto);
+        if (area != nullptr)
+        {
+            area->Open(issue, !movedOnto);
+        }
     }
     ImGui::TableSetColumnIndex(1);
-    subjects.RenderCell(issue);
+    ImGui::TextUnformatted(area != nullptr ? area->GetName() : "");
     ImGui::TableSetColumnIndex(2);
-    const std::string_view field = subjects.GetField(issue);
-    ImGui::TextUnformatted(field.data(), field.data() + field.size());
+    if (area != nullptr)
+    {
+        area->RenderSubject(issue);
+    }
     ImGui::TableSetColumnIndex(3);
+    const std::string_view field = area != nullptr ? area->GetField(issue) : std::string_view(issue.field);
+    ImGui::TextUnformatted(field.data(), field.data() + field.size());
+    ImGui::TableSetColumnIndex(4);
     ImGui::TextUnformatted(issue.message.c_str());
 }
-} // namespace MuEditor
+} // namespace MuEditor::DataChecks
 
 #endif // _EDITOR

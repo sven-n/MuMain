@@ -2,7 +2,7 @@
 
 #include "doctest.h"
 
-// What Monster Checks finds in the monster table and which monster tool a
+// What Data Checks finds in the monster table and which monster tool a
 // problem opens (MN1), without ImGui.
 #ifdef _EDITOR
 

@@ -1288,12 +1288,6 @@
   <data name="Remove the model entry" xml:space="preserve">
     <value>Remove the model entry</value>
   </data>
-  <data name="Item Checks" xml:space="preserve">
-    <value>Item Checks</value>
-  </data>
-  <data name="Check" xml:space="preserve">
-    <value>Check</value>
-  </data>
   <data name="Errors: {0}" xml:space="preserve">
     <value>Errors: {0}</value>
   </data>
@@ -1302,6 +1296,36 @@
   </data>
   <data name="Warnings: {0}" xml:space="preserve">
     <value>Warnings: {0}</value>
+  </data>
+  <data name="Data Checks" xml:space="preserve">
+    <value>Data Checks</value>
+  </data>
+  <data name="Check all data" xml:space="preserve">
+    <value>Check all</value>
+  </data>
+  <data name="Areas" xml:space="preserve">
+    <value>Areas:</value>
+  </data>
+  <data name="Area" xml:space="preserve">
+    <value>Area</value>
+  </data>
+  <data name="What" xml:space="preserve">
+    <value>What</value>
+  </data>
+  <data name="Monster models" xml:space="preserve">
+    <value>Monster models</value>
+  </data>
+  <data name="Data checks what note" xml:space="preserve">
+    <value>Items and monsters are checked as their Save would write them; the server list, effects and looks as the game reads their files at start.</value>
+  </data>
+  <data name="Data checks save note" xml:space="preserve">
+    <value>Each Save refuses data with fatal problems and saves data with errors and warnings.</value>
+  </data>
+  <data name="Data checks click note" xml:space="preserve">
+    <value>Click a problem to select what it is about and open its tool.</value>
+  </data>
+  <data name="The data changed since the last check; check again." xml:space="preserve">
+    <value>The data changed since the last check; check again.</value>
   </data>
   <data name="Error" xml:space="preserve">
     <value>Error</value>
@@ -1320,15 +1344,6 @@
   </data>
   <data name="No errors or warnings" xml:space="preserve">
     <value>No errors or warnings</value>
-  </data>
-  <data name="The items changed since the last check; check again." xml:space="preserve">
-    <value>The items changed since the last check; check again.</value>
-  </data>
-  <data name="Save Items refuses fatal problems, saves errors and warnings." xml:space="preserve">
-    <value>Save Items refuses data with fatal problems and saves data with errors and warnings.</value>
-  </data>
-  <data name="Click a problem of an item to select the item and open the tool of its field." xml:space="preserve">
-    <value>Click a problem of an item to select the item and open the tool of its field.</value>
   </data>
   <data name="Item Rules" xml:space="preserve">
     <value>Item Rules</value>
@@ -2002,9 +2017,6 @@
   <data name="Monster Translations" xml:space="preserve">
     <value>Monster Translations</value>
   </data>
-  <data name="Monster Checks" xml:space="preserve">
-    <value>Monster Checks</value>
-  </data>
   <data name="The monsters changed since this step; it is not undone." xml:space="preserve">
     <value>The monsters changed since this step; it is not undone.</value>
   </data>
@@ -2112,18 +2124,6 @@
   </data>
   <data name="Monster names not exported" xml:space="preserve">
     <value>Not every file was written. See the console.</value>
-  </data>
-  <data name="Monster" xml:space="preserve">
-    <value>Monster</value>
-  </data>
-  <data name="The monsters changed since the last check; check again." xml:space="preserve">
-    <value>The monsters changed since the last check; check again.</value>
-  </data>
-  <data name="Save Monsters refuses fatal problems, saves errors and warnings." xml:space="preserve">
-    <value>Save Monsters refuses data with fatal problems and saves data with errors and warnings.</value>
-  </data>
-  <data name="Monster checks click note" xml:space="preserve">
-    <value>Click a problem of a monster to select the monster and open the tool of its field.</value>
   </data>
   <data name="Item Sync" xml:space="preserve">
     <value>Item Sync</value>

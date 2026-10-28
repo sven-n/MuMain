@@ -48,7 +48,7 @@ stores it when a field is left.
 - **MuItemModelUI** - The model entry with a preview, file picker, shared models and looks (ItemModelPreview, ItemModelFilePicker, ItemSharedModelForm, ItemModelForms)
 - **MuItemGlowColorsUI** - The glow color list: new colors, changed values and unused colors removed (GlowColorDialog, which the model tool's color fields open too)
 - **MuItemFormulasUI** - The item stat file: drop level bonus, default, profiles, level bonus tables and profile rules, changed on a copy and applied after the list of the items it reaches (ItemStatTermFields, ItemStatFileChange)
-- **MuItemChecksUI** - The checks of a save in the shared problem table, each leading to its item and field (ItemCheckTargets)
+- **ItemCheckArea** - The items in Data Checks: the checks of a save, each leading to its item and field (ItemCheckTargets)
 - **MuItemSyncUI** - Import and Export of the item exchange file with OpenMU: the import's diff of the items and formulas with a box per field (ItemSyncDiff, which also keeps the known differences), applied as one undo step after a confirmation; the export of the client's data, confirmed when it replaces a file (ItemSyncApply); and a read-only comparison of two files
 - **ItemToolWindow** - What every item tool window shares: its title, the selected item, and the item edit history as the editor bar's undo target
 
@@ -69,13 +69,19 @@ each step ("Budge Dragon (2): kind").
 - **MuMonsterPreviewUI** - The selected monster's model in a preview with the item preview's camera: any animation with play, pause and a frame slider, the slot sounds, the hit frame and the game's speed factors (MonsterPreviewScene, with the effect preview's pose, PreviewModelPose)
 - **MuMonsterAttacksUI** - The attacks of the selected monster: the animation each monster skill and player skill plays, what any other attack plays (or a draw), when the monster skill is cleared, their sound, and the handlers that read them (MonsterAttackReaders)
 - **MuMonsterTranslationsUI** - Monster names as a grid of numbers and languages (the shared names grid, with MonsterNameRows as its rows), and the import and export of the old NpcName txt files (MonsterNpcNameFiles)
-- **MuMonsterChecksUI** - The checks of a save and of the attacks in the shared problem table, each leading to its monster and field (MonsterChecks, MonsterAttackChecks, MonsterCheckTargets)
+- **MonsterCheckArea** - The monsters and the monster models in Data Checks: the checks of a save and of the attacks, each leading to its monster and field (MonsterChecks, MonsterAttackChecks, MonsterCheckTargets)
 - **MonsterToolWindow** - What every monster tool window shares: the monster tools' frame, and the monster edit history as the editor bar's undo target while a monster tool is open
+
+### Data Checks (UI/DataChecks)
+The problems of all game data in one window:
+- **MuDataChecksUI** - The window: Check all, a box per level and per area, and the table
+- **IssueTable** - The table of the problems, the worst first, with their area; a click opens a problem
+- **DataCheckArea** - What an area of data gives the window: its name, its checks, what a problem is about and how a click opens it
+- **FileCheckArea** - The areas whose data is files the game reads at start: the server list, the effect catalogue and the looks
 
 ### Shared Tool Parts (UI/Common)
 Parts the item tools and the monster tools both use:
 - **NamesGrid.h/cpp**, **NamesGridRows.h** - The names x languages grid of Item Translations and Monster Translations; the rows say what is listed and how a name is stored
-- **IssueTable.h/cpp**, **IssueSubjects.h** - The problem table of Item Checks and Monster Checks; the subjects name what a problem is about and open its tool
 - **TextSearch.h/cpp** - The search of the editor's lists (a part of a name, A to Z in either case, or a whole number)
 - **CodeTokenLine.h/cpp**, **CodeRanges.h/cpp**, **CodeReference.h**, **CodeReferenceList.h/cpp** - Reading the sources for the lines that name an item or a monster, and their list in the remove dialogs
 

@@ -18,14 +18,13 @@ struct ToolWindows
     bool itemGlowColors = false;
     bool itemFormulas = false;
     bool itemSync = false;
-    bool itemChecks = false;
     bool itemTranslations = false;
     bool monsterBrowser = false;
     bool monsterTranslations = false;
-    bool monsterChecks = false;
     bool monsterModel = false;
     bool monsterPreview = false;
     bool monsterAttacks = false;
+    bool dataChecks = false;
     bool serverList = false;
     bool skillEditor = false;
     bool devEditor = false;

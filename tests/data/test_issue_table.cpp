@@ -2,24 +2,29 @@
 
 #include "doctest.h"
 
-// The problem table of the checks tools: three levels, counted apart, the
-// worst first, each row named by its level.
+// The problem table of Data Checks: three levels, counted apart, the worst
+// first, each row named by its level and opened through its area; boxes hide
+// levels and areas.
 #ifdef _EDITOR
 
 #include "TestImGuiContext.h"
 
 #include "I18N/All.h"
-#include "UI/Common/IssueSubjects.h"
-#include "UI/Common/IssueTable.h"
+#include "UI/DataChecks/DataCheckArea.h"
+#include "UI/DataChecks/IssueTable.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
+#include <array>
 #include <string>
 #include <string_view>
 #include <vector>
 
 using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
+using MuEditor::DataChecks::AreaIssue;
+using MuEditor::DataChecks::DataCheckArea;
+using MuEditor::DataChecks::IssueTable;
 
 namespace
 {
@@ -28,20 +33,19 @@ constexpr char TableId[] = "##Issues";
 constexpr ImVec2 WindowSize(900.0f, 500.0f);
 
 // Remembers the problem a click opened.
-class RecordingSubjects final : public MuEditor::IssueSubjects
+class RecordingArea final : public DataCheckArea
 {
 public:
-    const char* GetHeader() const override
+    explicit RecordingArea(const char* name) : m_name(name) {}
+
+    const char* GetName() const override
     {
-        return "Subject";
+        return m_name;
     }
 
-    float GetColumnWidth() const override
-    {
-        return 100.0f;
-    }
+    void Check(std::vector<ItemDataIssue>&) override {}
 
-    void RenderCell(const ItemDataIssue& issue) const override
+    void RenderSubject(const ItemDataIssue& issue) const override
     {
         ImGui::TextUnformatted(issue.source.c_str());
     }
@@ -57,39 +61,43 @@ public:
     }
 
     std::string opened;
+
+private:
+    const char* m_name;
 };
 
-ItemDataIssue Issue(ItemDataIssueSeverity severity, const char* message)
+AreaIssue Issue(ItemDataIssueSeverity severity, const char* message, int area = 0)
 {
-    return {severity, "file.json", ItemDataIssue::NoItem, ItemDataIssue::NoItem, "field", message};
+    return {{severity, "file.json", ItemDataIssue::NoItem, ItemDataIssue::NoItem, "field", message}, area};
 }
 
-void RenderFrame(MuEditor::IssueTable& table, RecordingSubjects& subjects)
+void RenderFrame(IssueTable& table, std::span<DataCheckArea* const> areas)
 {
     ImGui::NewFrame();
     ImGui::SetNextWindowSize(WindowSize);
     ImGui::Begin(WindowName);
     table.RenderKindBoxes();
-    table.RenderTable(subjects);
+    table.RenderTable(areas);
     ImGui::End();
     ImGui::Render();
     CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
 }
 
-// Clicks the row at `index` (among the shown rows), named by its level.
-void ClickRow(MuEditor::IssueTable& table, RecordingSubjects& subjects, int index, const char* levelLabel)
+// Clicks the row of the problem at `index` (among all problems, the worst
+// first), named by its level.
+void ClickRow(IssueTable& table, std::span<DataCheckArea* const> areas, int index, const char* levelLabel)
 {
     const ImGuiWindow* window = ImGui::FindWindowByName(WindowName);
     REQUIRE(window != nullptr);
     const ImGuiID tableId = ImGui::GetIDWithSeed(TableId, nullptr, window->ID);
     ImGui::ActivateItemByID(ImGui::GetIDWithSeed(levelLabel, nullptr, ImGui::GetIDWithSeed(index, tableId)));
-    RenderFrame(table, subjects);
+    RenderFrame(table, areas);
 }
 } // namespace
 
-TEST_CASE("The issue table counts fatal problems, errors and warnings apart [editor]")
+TEST_CASE("Data Checks' table counts fatal problems, errors and warnings apart [editor]")
 {
-    MuEditor::IssueTable table;
+    IssueTable table;
     table.SetIssues({Issue(ItemDataIssueSeverity::Warning, "w1"), Issue(ItemDataIssueSeverity::Fatal, "f1"),
                      Issue(ItemDataIssueSeverity::Error, "e1"), Issue(ItemDataIssueSeverity::Fatal, "f2"),
                      Issue(ItemDataIssueSeverity::Warning, "w2")});
@@ -99,23 +107,54 @@ TEST_CASE("The issue table counts fatal problems, errors and warnings apart [edi
     CHECK(table.GetCount(ItemDataIssueSeverity::Warning) == 2);
 }
 
-TEST_CASE("The issue table shows the worst first, each level in the order found [editor]")
+TEST_CASE("Data Checks' table shows the worst first and opens a row through its area [editor]")
 {
     TestImGuiContext context;
-    MuEditor::IssueTable table;
-    RecordingSubjects subjects;
-    table.SetIssues({Issue(ItemDataIssueSeverity::Warning, "w1"), Issue(ItemDataIssueSeverity::Error, "e1"),
-                     Issue(ItemDataIssueSeverity::Fatal, "f1"), Issue(ItemDataIssueSeverity::Fatal, "f2")});
-    RenderFrame(table, subjects);
+    RecordingArea items("Items");
+    RecordingArea monsters("Monsters");
+    const std::array<DataCheckArea*, 2> areas = {&items, &monsters};
+    IssueTable table;
+    table.SetIssues({Issue(ItemDataIssueSeverity::Warning, "w1", 1), Issue(ItemDataIssueSeverity::Error, "e1", 0),
+                     Issue(ItemDataIssueSeverity::Fatal, "f1", 1), Issue(ItemDataIssueSeverity::Fatal, "f2", 0)});
+    RenderFrame(table, areas);
 
-    ClickRow(table, subjects, 0, I18N::Editor::Fatal);
-    CHECK(subjects.opened == "f1");
-    ClickRow(table, subjects, 1, I18N::Editor::Fatal);
-    CHECK(subjects.opened == "f2");
-    ClickRow(table, subjects, 2, I18N::Editor::Error);
-    CHECK(subjects.opened == "e1");
-    ClickRow(table, subjects, 3, I18N::Editor::Warning);
-    CHECK(subjects.opened == "w1");
+    ClickRow(table, areas, 0, I18N::Editor::Fatal);
+    CHECK(monsters.opened == "f1");
+    ClickRow(table, areas, 1, I18N::Editor::Fatal);
+    CHECK(items.opened == "f2");
+    ClickRow(table, areas, 2, I18N::Editor::Error);
+    CHECK(items.opened == "e1");
+    ClickRow(table, areas, 3, I18N::Editor::Warning);
+    CHECK(monsters.opened == "w1");
+}
+
+TEST_CASE("Data Checks' table hides an area's problems, and the counts follow [editor]")
+{
+    TestImGuiContext context;
+    RecordingArea items("Items");
+    RecordingArea monsters("Monsters");
+    const std::array<DataCheckArea*, 2> areas = {&items, &monsters};
+    IssueTable table;
+    table.SetIssues({Issue(ItemDataIssueSeverity::Fatal, "item fatal", 0),
+                     Issue(ItemDataIssueSeverity::Fatal, "monster fatal", 1),
+                     Issue(ItemDataIssueSeverity::Warning, "monster warning", 1)});
+
+    table.SetAreaShown(1, false);
+
+    CHECK_FALSE(table.IsAreaShown(1));
+    CHECK(table.IsAreaShown(0));
+    CHECK(table.GetCount(ItemDataIssueSeverity::Fatal) == 1);
+    CHECK(table.GetCount(ItemDataIssueSeverity::Warning) == 0);
+    RenderFrame(table, areas);
+    // The monsters' fatal problem (index 1) has no row; the items' (index 0) has.
+    ClickRow(table, areas, 1, I18N::Editor::Fatal);
+    CHECK(monsters.opened.empty());
+    ClickRow(table, areas, 0, I18N::Editor::Fatal);
+    CHECK(items.opened == "item fatal");
+
+    table.SetAreaShown(1, true);
+    CHECK(table.GetCount(ItemDataIssueSeverity::Fatal) == 2);
+    CHECK(table.GetCount(ItemDataIssueSeverity::Warning) == 1);
 }
 
 #endif // _EDITOR

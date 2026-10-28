@@ -17,7 +17,7 @@
 #include <string>
 #include <vector>
 
-// Monster Checks with the models open, as in the game once the monsters
+// Data Checks with the models open, as in the game once the monsters
 // appeared: the shipped attacks play no animation that their model lacks.
 TEST_CASE("Monster attacks: the shipped attacks play only animations that their opened models have "
           "[monsters][models][editor]")

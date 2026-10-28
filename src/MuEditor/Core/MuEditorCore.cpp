@@ -18,11 +18,11 @@
 #include "Core/Input/SyntheticInput.h"
 #include "../Config/MuEditorConfig.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
+#include "../MuEditor/UI/DataChecks/MuDataChecksUI.h"
 #include "../MuEditor/UI/ItemTools/ItemHeldByCharacter.h"
 #include "../MuEditor/UI/ItemTools/MuItemBasicsUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemBrowserUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemCategoriesUI.h"
-#include "../MuEditor/UI/ItemTools/MuItemChecksUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemFormulasUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemSyncUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemGlowColorsUI.h"
@@ -36,7 +36,6 @@
 #include "../MuEditor/UI/ItemTranslations/MuItemTranslationsUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterBrowserUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterAttacksUI.h"
-#include "../MuEditor/UI/MonsterTools/MuMonsterChecksUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterModelUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterPreviewUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterTranslationsUI.h"
@@ -620,10 +619,6 @@ void CMuEditorCore::RenderItemTools()
     {
         g_MuItemSyncUI.Render(&m_windows.itemSync);
     }
-    if (m_windows.itemChecks)
-    {
-        g_MuItemChecksUI.Render(&m_windows.itemChecks);
-    }
 }
 
 // The monster browser and the monster tools beside it; they show the monster
@@ -649,10 +644,6 @@ void CMuEditorCore::RenderMonsterTools()
     if (m_windows.monsterTranslations)
     {
         g_MuMonsterTranslationsUI.Render(&m_windows.monsterTranslations);
-    }
-    if (m_windows.monsterChecks)
-    {
-        g_MuMonsterChecksUI.Render(&m_windows.monsterChecks);
     }
 }
 
@@ -932,6 +923,10 @@ void CMuEditorCore::Render()
         }
         RenderItemTools();
         RenderMonsterTools();
+        if (m_windows.dataChecks)
+        {
+            g_MuDataChecksUI.Render(&m_windows.dataChecks);
+        }
 
         // Render console (if enabled)
         if (m_windows.console)
