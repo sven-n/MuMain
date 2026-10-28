@@ -1435,7 +1435,11 @@ number, fields with their default value left out, LF line endings.
 **The diff of an import**:
 
 - The **Items** list says for each item what the import does to it in the
-  client (Added, Changed, Removed). The box of an added or removed item
+  client (Added, Changed). The items only the client has are listed apart,
+  folded: "Only in the client (219), not on the server" (or "not in the
+  file"). The file leaves them as they are, and the summary says so; each
+  one is removed only when its own box is checked (Removed). The box of an
+  added or removed item
   checks the whole item, the box of a changed one all its fields. A click on a row shows its fields (and selects the item in the
   item tools): each field (`width`, `requirements.strength`, `name.de`,
   `tags.ammunition`, …) with its value now and the file's, and a box of its
@@ -1451,8 +1455,13 @@ number, fields with their default value left out, LF line endings.
   item your character wears or an item window shows (they stay; such an
   item is not removed either, nor added when the client has no data for it
   yet), and a drop level above 255, which OpenMU keeps in a byte.
-- **Check all** and **Check none** take every row; **A field in all items**
-  checks or unchecks one field in every changed item.
+- **Check all** takes every row but the items only the client has;
+  **Check none** takes every row. **A field in all items** checks or
+  unchecks one field in every changed item.
+- **Copy as Markdown** on a list's header copies the list (also a folded
+  one) as a Markdown table in English: each item's group, number and name,
+  for the items that differ also the change and the number of fields. Paste
+  it into an issue, e.g. one asking OpenMU for the items it lacks.
 - **Names**: only the client's UI languages are taken from the file; a
   language the file lacks stays as it is, and no language is removed.
 - **Stat profile**: a file's profile that the item's profile rules give

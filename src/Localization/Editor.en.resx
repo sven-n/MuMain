@@ -2153,7 +2153,7 @@
     <value>From OpenMU, server {0}</value>
   </data>
   <data name="The diff counts" xml:space="preserve">
-    <value>{0} added, {1} changed, {2} removed items; {3} formula entries</value>
+    <value>{0} added, {1} changed items; {2} formula entries</value>
   </data>
   <data name="Check all" xml:space="preserve">
     <value>Check all</value>
@@ -2889,5 +2889,26 @@
   </data>
   <data name="The file does not carry all fields of an item, it is not added" xml:space="preserve">
     <value>The file does not carry all of an item's fields: it is not added.</value>
+  </data>
+  <data name="Every item of the file matches the client" xml:space="preserve">
+    <value>Every item the file has matches the client.</value>
+  </data>
+  <data name="Items only in the client {0} stay unless checked" xml:space="preserve">
+    <value>{0} items are only in the client: they stay as they are unless you check them in their list below.</value>
+  </data>
+  <data name="Only in the client ({0}), not on the server" xml:space="preserve">
+    <value>Only in the client ({0}), not on the server</value>
+  </data>
+  <data name="Only in the client ({0}), not in the file" xml:space="preserve">
+    <value>Only in the client ({0}), not in the file</value>
+  </data>
+  <data name="Copy as Markdown" xml:space="preserve">
+    <value>Copy as Markdown</value>
+  </data>
+  <data name="Copied {0} rows" xml:space="preserve">
+    <value>Copied {0} rows</value>
+  </data>
+  <data name="Copies the list as a Markdown table" xml:space="preserve">
+    <value>Copies the list as a Markdown table (group, number and English name of each item), e.g. for an issue on GitHub.</value>
   </data>
 </root>

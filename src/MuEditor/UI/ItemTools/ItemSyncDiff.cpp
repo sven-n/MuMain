@@ -517,6 +517,47 @@ void ApplyFormulas(const ItemExchangeFile& source, ItemExchangeFile& target, con
         target.formulas = std::move(*formulas);
     }
 }
+
+// The columns of WriteSyncRowsMarkdown's table; the change column's head is the caller's.
+constexpr const char* MarkdownItemColumns = "Group | Number | Item";
+constexpr const char* MarkdownFieldsColumn = "Fields";
+constexpr const char* MarkdownCellSeparator = " | ";
+constexpr const char* MarkdownSeparatorCell = "---|";
+constexpr int MarkdownItemColumnCount = 3;
+// The change and the field count.
+constexpr int MarkdownChangeColumnCount = 2;
+
+// A Markdown table cell: a | would end it early, a line break the row.
+std::string MarkdownCell(std::string_view text)
+{
+    std::string cell;
+    for (const char c : text)
+    {
+        if (c == '|')
+        {
+            cell += "\\|";
+        }
+        else
+        {
+            cell += c == '\n' || c == '\r' ? ' ' : c;
+        }
+    }
+    return cell;
+}
+
+// What the row does in the client, in the English of the Markdown table.
+const char* MarkdownChange(SyncChange change)
+{
+    switch (change)
+    {
+    case SyncChange::New:
+        return "Added";
+    case SyncChange::Removed:
+        return "Removed";
+    default:
+        return "Changed";
+    }
+}
 } // namespace
 
 ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchangeFile& file, const SyncOptions& options)
@@ -586,6 +627,80 @@ ItemSyncDiff BuildItemSyncDiff(const ItemExchangeFile& client, const ItemExchang
         CompareFormulas(*current.formulas, *incoming.formulas, options, diff);
     }
     return diff;
+}
+
+bool IsOnlyInClient(const SyncItem& row)
+{
+    return row.change == SyncChange::Removed;
+}
+
+void SetRowChecked(SyncItem& row, bool checked)
+{
+    if (row.change != SyncChange::Changed)
+    {
+        row.checked = checked && row.locked.empty();
+        return;
+    }
+    for (SyncField& field : row.fields)
+    {
+        field.checked = checked && field.locked.empty();
+    }
+}
+
+void SetAllRowsChecked(ItemSyncDiff& diff, bool checked)
+{
+    for (SyncItem& row : diff.items)
+    {
+        if (!checked || !IsOnlyInClient(row))
+        {
+            SetRowChecked(row, checked);
+        }
+    }
+    for (SyncFormula& row : diff.formulas)
+    {
+        row.checked = checked;
+    }
+}
+
+std::string WriteSyncRowsMarkdown(std::span<const SyncItem* const> rows, std::string_view title,
+                                  std::string_view changeColumn)
+{
+    const bool withChange = !changeColumn.empty();
+    std::string text(title);
+    text += "\n\n| ";
+    if (withChange)
+    {
+        text += MarkdownCell(changeColumn) + MarkdownCellSeparator;
+    }
+    text += MarkdownItemColumns;
+    if (withChange)
+    {
+        text += std::string(MarkdownCellSeparator) + MarkdownFieldsColumn;
+    }
+    text += " |\n|";
+    const int columns = MarkdownItemColumnCount + (withChange ? MarkdownChangeColumnCount : 0);
+    for (int column = 0; column < columns; ++column)
+    {
+        text += MarkdownSeparatorCell;
+    }
+    text += "\n";
+    for (const SyncItem* row : rows)
+    {
+        text += "| ";
+        if (withChange)
+        {
+            text += MarkdownChange(row->change);
+            text += MarkdownCellSeparator;
+        }
+        text += std::to_string(row->group) + MarkdownCellSeparator + std::to_string(row->number) +
+                MarkdownCellSeparator + MarkdownCell(row->name);
+        if (withChange)
+        {
+            text += MarkdownCellSeparator + std::to_string(row->fields.size());
+        }
+        text += " |\n";
+    }
+    return text;
 }
 
 int CountFormulaDifferences(const Data::Items::ItemStatFile& current, const Data::Items::ItemStatFile& incoming)

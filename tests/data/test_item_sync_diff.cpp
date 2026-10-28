@@ -511,6 +511,68 @@ TEST_CASE("A file with a field list changes only those fields and adds no item [
                                { return MakeItemType(item.group, item.number) == MakeItemType(0, 200); }));
 }
 
+// Import and Update from server list an item only the client has apart from the others: Check all
+// leaves it unchecked, so it is removed only when its own box is checked; Check none unchecks it.
+TEST_CASE("Check all leaves the items only the client has unchecked [data][items][editor]")
+{
+    Sides sides;
+    ++sides.FileItem(KrisType).width;
+    std::erase_if(sides.file.items,
+                  [](const ItemDefinition& item) { return MakeItemType(item.group, item.number) == ShortSwordType; });
+
+    ItemSyncDiff diff = sides.Diff();
+    const SyncItem* krisRow = FindRow(diff, KrisType);
+    const SyncItem* shortSwordRow = FindRow(diff, ShortSwordType);
+    REQUIRE(krisRow != nullptr);
+    REQUIRE(shortSwordRow != nullptr);
+    SyncItem& kris = diff.items[static_cast<size_t>(krisRow - diff.items.data())];
+    SyncItem& shortSword = diff.items[static_cast<size_t>(shortSwordRow - diff.items.data())];
+    REQUIRE(kris.fields.size() == 1);
+    CHECK_FALSE(IsOnlyInClient(kris));
+    CHECK(IsOnlyInClient(shortSword));
+    CHECK_FALSE(shortSword.checked);
+
+    SetAllRowsChecked(diff, false);
+    CHECK_FALSE(kris.fields[0].checked);
+    SetAllRowsChecked(diff, true);
+    CHECK(kris.fields[0].checked);
+    CHECK_FALSE(shortSword.checked);
+
+    SetRowChecked(shortSword, true);
+    CHECK(shortSword.checked);
+    SetAllRowsChecked(diff, false);
+    CHECK_FALSE(shortSword.checked);
+}
+
+TEST_CASE("Copy as Markdown writes the rows as a table [data][items][editor]")
+{
+    SyncItem added;
+    added.group = 12;
+    added.number = 73;
+    added.change = SyncChange::New;
+    added.name = "Sphere (4)";
+    added.fields.resize(2);
+    SyncItem removed;
+    removed.group = 14;
+    removed.number = 15;
+    removed.change = SyncChange::Removed;
+    removed.name = "Zen | Gold\nCoin";
+    const std::vector<const SyncItem*> rows = {&added, &removed};
+
+    const std::string onlyInClient = "Items only in the client (2)\n\n"
+                                     "| Group | Number | Item |\n"
+                                     "|---|---|---|\n"
+                                     "| 12 | 73 | Sphere (4) |\n"
+                                     "| 14 | 15 | Zen \\| Gold Coin |\n";
+    CHECK(WriteSyncRowsMarkdown(rows, "Items only in the client (2)", "") == onlyInClient);
+    CHECK(WriteSyncRowsMarkdown(rows, "Items that differ (2)", "In the client") ==
+          "Items that differ (2)\n\n"
+          "| In the client | Group | Number | Item | Fields |\n"
+          "|---|---|---|---|---|\n"
+          "| Added | 12 | 73 | Sphere (4) | 2 |\n"
+          "| Removed | 14 | 15 | Zen \\| Gold Coin | 0 |\n");
+}
+
 // Update from server compares the downloaded text as Import compares a file, and Apply compares
 // it again afterwards, without a path.
 TEST_CASE("Item Sync applies a file from the server [data][items][editor]")

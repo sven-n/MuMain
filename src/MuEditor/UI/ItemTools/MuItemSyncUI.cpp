@@ -28,6 +28,7 @@
 #include <cstdint>
 #include <set>
 #include <string>
+#include <string_view>
 #include <system_error>
 #include <tuple>
 #include <utility>
@@ -42,6 +43,8 @@ constexpr float FieldsColumnWidth = 80.0f;
 constexpr float FieldColumnWidth = 220.0f;
 constexpr float KnownColumnWidth = 60.0f;
 constexpr float ItemListHeight = 260.0f;
+// What a short item list adds to its rows' height (the table's borders).
+constexpr float ItemListBorders = 4.0f;
 constexpr float FieldListHeight = 220.0f;
 constexpr float PopupTextWidth = 480.0f;
 constexpr const char* NoValue = "-";
@@ -49,6 +52,15 @@ constexpr const char* ExchangeFileName = "ItemExchange.json";
 // The name of the checkbox column: a header takes the ID of its label under PushID(column), so
 // it must differ from the rows' "##Checked" under PushID(row), or row 0 has the header's ID.
 constexpr const char* CheckColumn = "##CheckColumn";
+// The titles and change columns of Copy as Markdown: English whatever the editor's language, as
+// the copied table is meant for issues and chats.
+constexpr const char* MarkdownDifferFromServer = "Items that differ between the client and the server";
+constexpr const char* MarkdownDifferFromFile = "Items that differ between the client and the file";
+constexpr const char* MarkdownDifferBetweenFiles = "Items that differ from file A to file B";
+constexpr const char* MarkdownOnlyInClientFromServer = "Items only in the client, not on the server";
+constexpr const char* MarkdownOnlyInClientFromFile = "Items only in the client, not in the file";
+constexpr const char* MarkdownInTheClient = "In the client";
+constexpr const char* MarkdownFromAToB = "From A to B";
 constexpr const char* ApplyPopupId = "###ItemSyncApply";
 constexpr const char* ExportPopupId = "###ItemSyncExport";
 
@@ -176,19 +188,6 @@ void KeepUnchecked(ItemSyncDiff& diff, const UncheckedRows& unchecked)
     for (SyncFormula& row : diff.formulas)
     {
         row.checked = row.checked && !unchecked.formulas.contains(row.entry);
-    }
-}
-
-void SetRowChecked(SyncItem& row, bool checked)
-{
-    if (IsWhole(row))
-    {
-        row.checked = checked && row.locked.empty();
-        return;
-    }
-    for (SyncField& field : row.fields)
-    {
-        field.checked = checked && field.locked.empty();
     }
 }
 
@@ -627,6 +626,7 @@ void CMuItemSyncUI::CompareText(const std::optional<std::string>& text, const st
     m_diff.reset();
     m_shownItem = -1;
     m_shownUsage = {};
+    m_copiedList = ItemList::None;
     m_file = {};
 
     std::vector<ItemDataIssue> issues;
@@ -680,6 +680,7 @@ void CMuItemSyncUI::CompareFiles(const std::filesystem::path& a, const std::file
     m_diff.reset();
     m_shownItem = -1;
     m_shownUsage = {};
+    m_copiedList = ItemList::None;
     m_fileA = {};
     m_file = {};
 
@@ -880,14 +881,7 @@ bool CMuItemSyncUI::WriteExport()
 
 void CMuItemSyncUI::SetAllChecked(bool checked)
 {
-    for (SyncItem& row : m_diff->items)
-    {
-        SetRowChecked(row, checked);
-    }
-    for (SyncFormula& row : m_diff->formulas)
-    {
-        row.checked = checked;
-    }
+    SetAllRowsChecked(*m_diff, checked);
 }
 
 void CMuItemSyncUI::RenderSummary()
@@ -924,12 +918,17 @@ void CMuItemSyncUI::RenderSummary()
     {
         ImGui::TextColored(SuccessColor, "%s", m_result.c_str());
     }
-    if (m_diff->IsEmpty())
+    // The items only the client has are no difference the file makes: they stay as they are.
+    if (added + changed == 0 && m_diff->formulas.empty())
     {
         // The client always has formulas, so they were compared when the file has them too.
-        ImGui::TextColored(SuccessColor, "%s",
-                           m_file.formulas ? I18N::Editor::TheFileMatchesTheClient
-                                           : I18N::Editor::TheFileMatchesTheClientInAllItems);
+        const char* matches = I18N::Editor::EveryItemOfTheFileMatchesTheClient;
+        if (removed == 0)
+        {
+            matches = m_file.formulas ? I18N::Editor::TheFileMatchesTheClient
+                                      : I18N::Editor::TheFileMatchesTheClientInAllItems;
+        }
+        ImGui::TextColored(SuccessColor, "%s", matches);
         ImGui::TextDisabled("%s", I18N::Editor::HowToSeeDifferences);
     }
     else
@@ -938,10 +937,15 @@ void CMuItemSyncUI::RenderSummary()
         {
             ImGui::TextDisabled("%s", I18N::Editor::StillListedBelowTheRowsThatWereNotChecked);
         }
-        ImGui::TextUnformatted(I18N::Format(I18N::Editor::TheDiffCounts,
-                                            {std::to_string(added), std::to_string(changed), std::to_string(removed),
-                                             std::to_string(m_diff->formulas.size())})
-                                   .c_str());
+        ImGui::TextUnformatted(
+            I18N::Format(I18N::Editor::TheDiffCounts,
+                         {std::to_string(added), std::to_string(changed), std::to_string(m_diff->formulas.size())})
+                .c_str());
+    }
+    if (removed > 0)
+    {
+        ImGui::TextUnformatted(
+            I18N::Format(I18N::Editor::ItemsOnlyInTheClient0StayUnlessChecked, {std::to_string(removed)}).c_str());
     }
     if (g_ItemDatabase.GetVersion() != m_diffVersion)
     {
@@ -1006,7 +1010,16 @@ void CMuItemSyncUI::RenderFieldToggle()
 
 void CMuItemSyncUI::RenderItems()
 {
-    if (m_diff->items.empty())
+    // An import lists the items only the client has apart from the others, folded: the file does
+    // not change them. A comparison of two files lists them with the others.
+    std::vector<int> differ;
+    std::vector<int> onlyInClient;
+    for (int index = 0; index < static_cast<int>(m_diff->items.size()); ++index)
+    {
+        const bool apart = !m_comparingFiles && IsOnlyInClient(m_diff->items[static_cast<size_t>(index)]);
+        (apart ? onlyInClient : differ).push_back(index);
+    }
+    if (differ.empty())
     {
         if (m_diff->comparedItems > 0)
         {
@@ -1014,21 +1027,93 @@ void CMuItemSyncUI::RenderItems()
                 m_comparingFiles ? I18N::Editor::ItemsAll0AreTheSameInBothFiles : I18N::Editor::ItemsAll0AreTheSame;
             ImGui::TextDisabled("%s", I18N::Format(format, {std::to_string(m_diff->sameItems)}).c_str());
         }
-        return;
     }
-    const std::string header =
-        I18N::Format(I18N::Editor::ItemsThatDiffer0Of1,
-                     {std::to_string(m_diff->items.size()), std::to_string(m_diff->comparedItems)}) +
-        "###SyncItems";
-    if (!ImGui::CollapsingHeader(header.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+    else
     {
-        return;
+        const int compared = m_diff->comparedItems - static_cast<int>(onlyInClient.size());
+        const std::string header =
+            I18N::Format(I18N::Editor::ItemsThatDiffer0Of1, {std::to_string(differ.size()), std::to_string(compared)}) +
+            "###SyncItems";
+        if (RenderItemListHeader(ItemList::Differ, header, differ))
+        {
+            RenderItemTable("##SyncItems", differ);
+        }
     }
+    if (!onlyInClient.empty())
+    {
+        const char* format =
+            m_fromServer ? I18N::Editor::OnlyInTheClient0NotOnTheServer : I18N::Editor::OnlyInTheClient0NotInTheFile;
+        const std::string header = I18N::Format(format, {std::to_string(onlyInClient.size())}) + "###SyncOnlyInClient";
+        if (RenderItemListHeader(ItemList::OnlyInClient, header, onlyInClient))
+        {
+            RenderItemTable("##SyncOnlyInClient", onlyInClient);
+        }
+    }
+}
+
+bool CMuItemSyncUI::RenderItemListHeader(ItemList list, const std::string& header, const std::vector<int>& rows)
+{
+    // The header spans the window; the button is drawn over its right end.
+    const float right = ImGui::GetCursorPosX() + ImGui::GetContentRegionAvail().x;
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_AllowOverlap;
+    if (list == ItemList::Differ)
+    {
+        flags |= ImGuiTreeNodeFlags_DefaultOpen;
+    }
+    const bool open = ImGui::CollapsingHeader(header.c_str(), flags);
+    const std::string label =
+        (m_copiedList == list ? I18N::Format(I18N::Editor::Copied0Rows, {std::to_string(m_copiedRows)})
+                              : std::string(I18N::Editor::CopyAsMarkdown)) +
+        "###CopyItemList";
+    const float width = ImGui::CalcTextSize(label.c_str(), nullptr, true).x + ImGui::GetStyle().FramePadding.x * 2.0f;
+    ImGui::SameLine(right - width);
+    ImGui::PushID(static_cast<int>(list));
+    if (ImGui::SmallButton(label.c_str()))
+    {
+        CopyItemList(list, rows);
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::CopiesTheListAsAMarkdownTable);
+    }
+    ImGui::PopID();
+    return open;
+}
+
+void CMuItemSyncUI::CopyItemList(ItemList list, const std::vector<int>& rows)
+{
+    std::vector<const SyncItem*> items;
+    items.reserve(rows.size());
+    for (const int index : rows)
+    {
+        items.push_back(&m_diff->items[static_cast<size_t>(index)]);
+    }
+    const char* title = m_fromServer ? MarkdownOnlyInClientFromServer : MarkdownOnlyInClientFromFile;
+    std::string_view changeColumn;
+    if (list == ItemList::Differ)
+    {
+        title = m_comparingFiles ? MarkdownDifferBetweenFiles
+                                 : (m_fromServer ? MarkdownDifferFromServer : MarkdownDifferFromFile);
+        changeColumn = m_comparingFiles ? MarkdownFromAToB : MarkdownInTheClient;
+    }
+    const std::string text =
+        WriteSyncRowsMarkdown(items, std::string(title) + " (" + std::to_string(rows.size()) + ")", changeColumn);
+    ImGui::SetClipboardText(text.c_str());
+    m_copiedList = list;
+    m_copiedRows = static_cast<int>(rows.size());
+}
+
+void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows)
+{
     // A comparison of two files has no boxes.
     const bool checkable = !m_comparingFiles;
     constexpr ImGuiTableFlags Flags =
         ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SizingStretchProp;
-    if (ImGui::BeginTable("##SyncItems", checkable ? 4 : 3, Flags, ImVec2(0.0f, Scaled(ItemListHeight))))
+    // A short list is as high as its rows (and the head), a long one scrolls.
+    const float rowHeight = ImGui::GetFrameHeight() + ImGui::GetStyle().CellPadding.y * 2.0f;
+    const float height =
+        std::min(Scaled(ItemListHeight), rowHeight * static_cast<float>(rows.size() + 1) + Scaled(ItemListBorders));
+    if (ImGui::BeginTable(id, checkable ? 4 : 3, Flags, ImVec2(0.0f, height)))
     {
         ImGui::TableSetupScrollFreeze(0, 1);
         if (checkable)
@@ -1041,11 +1126,12 @@ void CMuItemSyncUI::RenderItems()
         ImGui::TableSetupColumn(I18N::Editor::Fields, ImGuiTableColumnFlags_WidthFixed, Scaled(FieldsColumnWidth));
         ImGui::TableHeadersRow();
         ImGuiListClipper clipper;
-        clipper.Begin(static_cast<int>(m_diff->items.size()));
+        clipper.Begin(static_cast<int>(rows.size()));
         while (clipper.Step())
         {
-            for (int index = clipper.DisplayStart; index < clipper.DisplayEnd; ++index)
+            for (int line = clipper.DisplayStart; line < clipper.DisplayEnd; ++line)
             {
+                const int index = rows[static_cast<size_t>(line)];
                 SyncItem& row = m_diff->items[static_cast<size_t>(index)];
                 ImGui::PushID(index);
                 ImGui::TableNextRow();
@@ -1090,7 +1176,8 @@ void CMuItemSyncUI::RenderItems()
         }
         ImGui::EndTable();
     }
-    if (m_shownItem >= 0 && m_shownItem < static_cast<int>(m_diff->items.size()))
+    // The shown item's fields come under the list it is in.
+    if (std::ranges::find(rows, m_shownItem) != rows.end())
     {
         RenderItemFields(m_diff->items[static_cast<size_t>(m_shownItem)]);
     }

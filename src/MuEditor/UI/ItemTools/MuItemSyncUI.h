@@ -126,6 +126,15 @@ public:
     }
 
 private:
+    // A list of the diff's items: the ones that differ, and in an import the ones only the client
+    // has (in a section of their own).
+    enum class ItemList : uint8_t
+    {
+        None,
+        Differ,
+        OnlyInClient,
+    };
+
     CMuItemSyncUI() = default;
 
     void TakeChosenFile();
@@ -140,6 +149,12 @@ private:
     void RenderSummary();
     void RenderFieldToggle();
     void RenderItems();
+    // The list's header with its Copy as Markdown button (on the header, so a folded list can be
+    // copied too); true while the list is open.
+    bool RenderItemListHeader(ItemList list, const std::string& header, const std::vector<int>& rows);
+    // The table of the diff's items at `rows`, and the fields of the shown one when it is there.
+    void RenderItemTable(const char* id, const std::vector<int>& rows);
+    void CopyItemList(ItemList list, const std::vector<int>& rows);
     void RenderItemFields(MuEditor::Items::SyncItem& row);
     void RenderFormulas();
     void RenderApply();
@@ -177,6 +192,9 @@ private:
     // import removes it.
     int m_shownItem = -1;
     MuEditor::Items::ItemUsage m_shownUsage;
+    // The list Copy as Markdown copied last for this diff, which its button says, and how many rows.
+    ItemList m_copiedList = ItemList::None;
+    int m_copiedRows = 0;
     // The fields of the changed items, for "A field in all items" (built with the diff), and the
     // one picked there.
     std::vector<std::string> m_toggleFields;
