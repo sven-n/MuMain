@@ -190,7 +190,8 @@ void CItemEditorActions::LogImportResult(const Data::Items::ItemBmdImportResult&
     LogIssues(result.validationIssues);
     if (Data::Items::HasFatal(result.validationIssues))
     {
-        g_MuEditorConsoleUI.LogEditor("Fix the errors above before saving; Save refuses data with errors.");
+        g_MuEditorConsoleUI.LogEditor(
+            "Fix the fatal problems above before saving; Save refuses data with fatal problems.");
     }
 }
 
