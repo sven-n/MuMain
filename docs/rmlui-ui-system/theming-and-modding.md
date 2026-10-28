@@ -160,7 +160,9 @@ placement. A name wider than the banner is fitted to it like the originals did: 
 letters, a little smaller. The lettering is the originals' silver: `#name` draws the name in
 the grey of the letters' bottom with the dark edge, and `#name_shine` draws it again in white
 on top, faded out by its `mask-image` gradient from just below the x-height to the baseline.
-RmlUi draws the edge (`font-effect`) in pixels, so it keeps its size at every UI scale.
+The banner scales as a unit using the shared UI scale, so the lettering, edge, halo and
+ornaments keep their proportions at every UI scale. Its stylesheet uses reference `px`,
+including the icon coordinates read from `Layout.json`.
 
 The map banner uses MU Map Name, a font bundled in `fonts/MuMapName-Italic.otf` and generated
 from the original client's map-name images (`tools/MapNameFont`), so any name in Latin, Polish

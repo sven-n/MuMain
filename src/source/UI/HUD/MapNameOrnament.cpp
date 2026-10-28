@@ -5,7 +5,10 @@
 
 #include "json.hpp"
 
+#include <cmath>
+#include <cstdint>
 #include <filesystem>
+#include <limits>
 #include <optional>
 
 namespace UI::MapName
@@ -25,9 +28,39 @@ std::optional<Json> ParseObject(std::string_view text)
     return json;
 }
 
-bool IsNumber(const Json& object, const char* key)
+std::optional<float> ReadFiniteFloat(const Json& object, const char* key)
 {
-    return object.contains(key) && object[key].is_number();
+    const auto value = object.find(key);
+    if (value == object.end() || !value->is_number())
+        return std::nullopt;
+
+    const double number = value->get<double>();
+    if (!std::isfinite(number) || number < -std::numeric_limits<float>::max() ||
+        number > std::numeric_limits<float>::max())
+        return std::nullopt;
+
+    const float result = static_cast<float>(number);
+    return std::isfinite(result) ? std::optional<float>(result) : std::nullopt;
+}
+
+std::optional<int> ReadMapNumber(const Json& entry)
+{
+    const auto map = entry.find("map");
+    if (map == entry.end() || !map->is_number_integer())
+        return std::nullopt;
+
+    if (map->is_number_unsigned())
+    {
+        const auto number = map->get<std::uint64_t>();
+        if (number > static_cast<std::uint64_t>(std::numeric_limits<int>::max()))
+            return std::nullopt;
+        return static_cast<int>(number);
+    }
+
+    const auto number = map->get<std::int64_t>();
+    if (number < std::numeric_limits<int>::min() || number > std::numeric_limits<int>::max())
+        return std::nullopt;
+    return static_cast<int>(number);
 }
 
 // Layout.json's "icons": { "<image>": { "x": 59, "y": 46, "width": 43, "height": 36 }, ... }
@@ -35,13 +68,13 @@ std::optional<MapIcon> ReadPlacement(const std::string& image, const Json& place
 {
     if (!placement.is_object())
         return std::nullopt;
-    for (const char* key : {"x", "y", "width", "height"})
-    {
-        if (!IsNumber(placement, key))
-            return std::nullopt;
-    }
-    return MapIcon{image, placement["x"].get<float>(), placement["y"].get<float>(), placement["width"].get<float>(),
-                   placement["height"].get<float>()};
+    const auto x = ReadFiniteFloat(placement, "x");
+    const auto y = ReadFiniteFloat(placement, "y");
+    const auto width = ReadFiniteFloat(placement, "width");
+    const auto height = ReadFiniteFloat(placement, "height");
+    if (!x || !y || !width || !height || *width <= 0.f || *height <= 0.f)
+        return std::nullopt;
+    return MapIcon{image, *x, *y, *width, *height};
 }
 
 std::string ReadFileText(const char* name)
@@ -58,20 +91,30 @@ bool MapNameOrnament::Read(std::string_view layoutJson, std::string_view mapIcon
     m_Icons.clear();
     const auto layout = ParseObject(layoutJson);
     const auto mapIcons = ParseObject(mapIconsJson);
-    if (!layout || !mapIcons || !(*layout)["icons"].is_object() || !(*mapIcons)["maps"].is_array())
+    if (!layout || !mapIcons)
         return false;
 
-    const Json& icons = (*layout)["icons"];
-    for (const Json& entry : (*mapIcons)["maps"])
+    const auto iconsValue = layout->find("icons");
+    const auto mapsValue = mapIcons->find("maps");
+    if (iconsValue == layout->end() || !iconsValue->is_object() || mapsValue == mapIcons->end() ||
+        !mapsValue->is_array())
+        return false;
+
+    const Json& icons = *iconsValue;
+    for (const Json& entry : *mapsValue)
     {
-        if (!entry.is_object() || !entry.contains("map") || !entry["map"].is_number_integer() ||
-            !entry.contains("icon") || !entry["icon"].is_string())
+        if (!entry.is_object())
             continue;
-        const auto image = entry["icon"].get<std::string>();
-        if (!icons.contains(image))
+        const auto map = ReadMapNumber(entry);
+        const auto imageValue = entry.find("icon");
+        if (!map || imageValue == entry.end() || !imageValue->is_string())
             continue;
-        if (auto icon = ReadPlacement(image, icons[image]))
-            m_Icons[entry["map"].get<int>()] = std::move(*icon);
+        const auto image = imageValue->get<std::string>();
+        const auto placement = icons.find(image);
+        if (placement == icons.end())
+            continue;
+        if (auto icon = ReadPlacement(image, *placement))
+            m_Icons[*map] = std::move(*icon);
     }
     return true;
 }

@@ -19,6 +19,9 @@
 #include "UI/Scaling/UITransform.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/HUD/ChatLogWindow.h"
+#include "UI/HUD/UIMapName.h"
+
+extern CUIMapName* g_pUIMapName;
 
 namespace UI::RmlBridge
 {
@@ -55,6 +58,8 @@ void InstallRuntimeHooks()
         UpdateMarquees(context);
         if (auto* chat = g_pChatListBox)
             chat->AfterRmlLayout(context);
+        if (g_pUIMapName)
+            g_pUIMapName->AfterRmlLayout(context);
     };
     hooks.resolveTextureFile = [](const Rml::String& source) { return ResolveThemeResource(source, true); };
     hooks.createFileInterface = [] { return std::make_unique<ThemeFileInterface>(); };

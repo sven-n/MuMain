@@ -1,26 +1,27 @@
-/* The original 166 x 90 map-name image at its 220/480 viewport-height anchor, in dp so it follows
-   the UI scale like the original did. The swirls and the map's icon sit where they were in the
+/* The original 166 x 90 map-name image at its 220/480 viewport-height anchor, in reference pixels; the whole banner
+   follows the shared UI scale, including the font effects. The swirls and the map's icon sit where they were in the
    images (Data/Interface/MapNameOrnament/Layout.json, written by tools/MapNameFont/ornament.py);
    the name is drawn at the original lettering's size and baseline. */
 body { pointer-events: none; }
-#banner { top: 45.8333%; width: 166dp; height: 90dp; pointer-events: none; }
+#banner { top: 45.8333%; width: 166px; height: 90px; pointer-events: none;
+    transform: translateX(-50%) scale(var(--ui-scale)); transform-origin: center top; }
 .ornament { position: absolute; }
-#swirl_left { left: 2dp; top: 46dp; width: 54dp; height: 26dp; }
-#swirl_right { left: 109dp; top: 46dp; width: 55dp; height: 27dp; }
+#swirl_left { left: 2px; top: 46px; width: 54px; height: 26px; }
+#swirl_right { left: 109px; top: 46px; width: 55px; height: 27px; }
 /* The room a name may take; the client squeezes a longer name into it, as the originals were. */
-#name_room { position: absolute; left: 1dp; right: 1dp; top: 0; height: 0; }
+#name_room { position: absolute; left: 1px; right: 1px; top: 0; height: 0; }
 /* The name, far wider than the banner so a long name stays on one line and keeps its centre, in
    the originals' silver: this grey at the baseline under a white top (#name_shine), and a black
    edge with a thin grey rim that fades out. RmlUi draws font effects in pixels whatever the
-   unit; these suit the common 1.5-2.25 dp ratios. */
+   unit; the parent transform scales them together with the lettering. */
 #name, #name_shine {
-    position: absolute; left: -1000dp; right: -1000dp; top: -2dp; height: 50dp; transform-origin: 50% 50%;
-    font-family: token(font-map-name); font-size: 50dp; line-height: 50dp; font-weight: normal; font-style: token(font-map-name-style);
+    position: absolute; left: -1000px; right: -1000px; top: -2px; height: 50px; transform-origin: 50% 50%;
+    font-family: token(font-map-name); font-size: 50px; line-height: 50px; font-weight: normal; font-style: token(font-map-name-style);
     text-align: center; white-space: nowrap;
 }
 #name { color: #686766; font-effect: glow(2px 4px 0px 0px #000000b0), outline(3px #000000), outline(1px #5e5955); }
 #name_text { display: inline-block; }
 /* The same name in white over it, without the edge, faded out from just below the x-height to
    the baseline. */
-#name_shine { color: #fafafa; mask-image: linear-gradient(to bottom, #ffffff 20.75dp, #ffffff00 40.5dp); }
-#strife { position: absolute; left: 0; top: -28dp; width: 166dp; height: 28dp; }
+#name_shine { color: #fafafa; mask-image: linear-gradient(to bottom, #ffffff 20.75px, #ffffff00 40.5px); }
+#strife { position: absolute; left: 0; top: -28px; width: 166px; height: 28px; }
