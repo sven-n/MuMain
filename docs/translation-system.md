@@ -489,6 +489,8 @@ The login batch adds 18 entries for account/password fields, remember-account
 and remember-password controls, the password-saving confirmation, server titles,
 login progress and common account errors. These are contributor translations
 of the current English resources, not extracted official-client UI text.
+The password-saving warning wraps continuous text, including Chinese, within
+the dialog in both themes.
 Server names are preserved, and untranslated connection/subscription errors
 continue to fall back to English. Shared entries such as OK and incorrect
 password also translate their other existing uses.
