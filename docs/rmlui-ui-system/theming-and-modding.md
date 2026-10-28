@@ -166,7 +166,9 @@ including the icon coordinates read from `Layout.json`.
 
 The map banner uses MU Map Name, a font bundled in `fonts/MuMapName-Italic.otf` and generated
 from the original client's map-name images (`tools/MapNameFont`), so any name in Latin, Polish
-or Cyrillic is written in the original lettering. It is italic only, at normal weight. A theme
+or Cyrillic is written in the original lettering. It is italic only, at normal weight. The banner
+uses the bundled Noto fallback faces for Chinese and Japanese; Noto Sans JP supplies Japanese
+characters missing from the TC subset, including 帯, 廃 and 闘 in map names. A theme
 whose `font-map-name`
 family isn't available gets the theme's title font, including the player's selected title
 font. Liberation Sans is the final fallback if no title face is available. An unavailable

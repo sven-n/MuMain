@@ -20,6 +20,8 @@
 #include <RmlUi/Core/FontEffect.h>
 #include <RmlUi/Core/FontGlyph.h>
 #include <SDL3/SDL.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #include <algorithm>
 #include <array>
 #include <climits>
@@ -27,6 +29,7 @@
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <string>
 #include <utility>
 
@@ -92,6 +95,7 @@ public:
         UI::RmlBridge::ClearThemeFontCache();
         UI::RmlBridge::SetContextResolver([this](std::string_view) { return context; });
         REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/NotoSansTC-Regular.otf", true));
+        REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/NotoSansJP-Regular.otf", true));
         I18N::SetLocale("en");
         g_ServerListManager->m_byNonPvP = 0;
     }
@@ -532,4 +536,29 @@ TEST_CASE("map-name bundled file is the italic MU Map Name face at normal weight
     { return engine->GetFontFaceHandle("mu map name", style, Rml::Style::FontWeight::Normal, 18); };
     CHECK(face(Rml::Style::FontStyle::Italic) != 0);
     CHECK(face(Rml::Style::FontStyle::Normal) == 0);
+}
+
+TEST_CASE("map-name Japanese fallback covers every named map [ui][map-name]")
+{
+    MapNameFixture fixture;
+    I18N::SetLocale("ja");
+    FT_Library rawLibrary = nullptr;
+    REQUIRE(FT_Init_FreeType(&rawLibrary) == 0);
+    std::unique_ptr<FT_LibraryRec_, decltype(&FT_Done_FreeType)> library(rawLibrary, FT_Done_FreeType);
+    FT_Face rawFace = nullptr;
+    const auto filename = std::string(MU_FONT_DIR) + "/NotoSansJP-Regular.otf";
+    REQUIRE(FT_New_Face(library.get(), filename.c_str(), 0, &rawFace) == 0);
+    std::unique_ptr<FT_FaceRec_, decltype(&FT_Done_Face)> face(rawFace, FT_Done_Face);
+    for (int map = 0; map <= WD_81KARUTAN2; ++map)
+    {
+        const wchar_t* name = gMapManager.FindMapName(map);
+        if (!name)
+            continue;
+        for (const wchar_t* character = name; *character; ++character)
+        {
+            CAPTURE(map);
+            CAPTURE(static_cast<unsigned>(*character));
+            CHECK(FT_Get_Char_Index(face.get(), *character) != 0);
+        }
+    }
 }

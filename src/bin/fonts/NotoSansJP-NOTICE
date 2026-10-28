@@ -1,0 +1,10 @@
+NotoSansJP-Regular.otf, Noto Sans JP Regular 2.004 (unmodified regional subset).
+
+Source: https://github.com/notofonts/noto-cjk/blob/523d033d6cb47f4a80c58a35753646f5c3608a78/Sans/SubsetOTF/JP/NotoSansJP-Regular.otf
+SHA-256: dff723ba59d57d136764a04b9b2d03205544f7cd785a711442d6d2d085ac5073
+Copyright 2014-2021 Adobe (http://www.adobe.com/), with Reserved Font Name 'Source'.
+Licensed under the SIL Open Font License 1.1; see NotoSansJP-LICENSE.
+
+Loaded after Noto Sans TC as a fallback for Japanese characters absent from its
+regional subset. The existing primary families and Traditional Chinese glyphs
+retain their priority.

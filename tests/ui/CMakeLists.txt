@@ -23,7 +23,7 @@ mu_add_test(
         test_map_name_ornament.cpp
         RmlLayoutFixture.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
-    LINK_LIBS MuClient
+    LINK_LIBS MuClient Freetype::Freetype
 )
 target_compile_definitions(map_name_tests PRIVATE
     MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
