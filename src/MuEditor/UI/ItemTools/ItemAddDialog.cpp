@@ -9,6 +9,7 @@
 #include "ItemGroupNames.h"
 #include "ItemSelection.h"
 #include "ItemTextInput.h"
+#include "ItemUsageView.h"
 
 #include "../MuEditor/UI/ItemEditor/ItemListModel.h"
 #include "Data/GameData/Common/LocalizedString.h"
@@ -176,9 +177,11 @@ void CItemAddDialog::RenderNumber()
     {
         m_number = GetNextFreeItemNumber(m_group, m_number + 1);
     }
-    if (!Data::Items::IsFreeItemType(Data::Items::MakeItemType(m_group, m_number)))
+    const int itemType = Data::Items::MakeItemType(m_group, m_number);
+    if (!Data::Items::IsFreeItemType(itemType))
     {
         ImGui::TextColored(NotFreeColor, "%s", I18N::Editor::ThisNumberIsNotFree);
+        UsageView::RenderNumberHolder(itemType);
     }
 }
 

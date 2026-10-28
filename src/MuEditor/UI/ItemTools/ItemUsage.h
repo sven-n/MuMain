@@ -8,6 +8,7 @@
 
 #include <span>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace MuEditor::Items
@@ -49,6 +50,21 @@ struct ItemUsage
 };
 
 ItemUsage FindItemUsage(int itemType);
+
+// What takes a number that is not free (Data::Items::IsFreeItemType), as the
+// add, duplicate and move dialogs show it: the item on it, or a model entry
+// without an item (Sphere 4 and 5 have only their models).
+struct ItemNumberHolder
+{
+    // "Kris (0,0)"; empty when no item is on the number.
+    std::string item;
+    // The shared model a model entry without an item names, else its file.
+    std::string model;
+    // "ITEM_SPHERE_4"; empty when the sources were not found or name no constant for it.
+    std::string_view codeName;
+};
+
+ItemNumberHolder FindItemNumberHolder(int itemType);
 } // namespace MuEditor::Items
 
 #endif // _EDITOR

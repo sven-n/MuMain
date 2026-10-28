@@ -2776,4 +2776,16 @@
   <data name="Preview volume note" xml:space="preserve">
     <value>Die Lautstärke der Geräuschvorschauen der Monster-Werkzeuge (Abspielen, die Geräusche der Vorschau). Die Geräuschlautstärke des Spiels bleibt, wie sie ist, und dies wird nicht gespeichert.</value>
   </data>
+  <data name="Taken by the item {0}" xml:space="preserve">
+    <value>Belegt vom Gegenstand {0}</value>
+  </data>
+  <data name="Taken by a model without an item {0}" xml:space="preserve">
+    <value>Belegt von einem Modell ohne Gegenstand: {0}</value>
+  </data>
+  <data name="The code calls it {0}" xml:space="preserve">
+    <value>Im Code heißt es {0}</value>
+  </data>
+  <data name="The list shows it with the filter Models without an item" xml:space="preserve">
+    <value>Die Gegenstandsliste zeigt es mit dem Filter „Modelle ohne Gegenstand“</value>
+  </data>
 </root>

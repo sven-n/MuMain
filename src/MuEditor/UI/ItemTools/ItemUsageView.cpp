@@ -80,6 +80,33 @@ void RenderUsesAtNumber(const ItemUsage& usage)
     CodeReferenceList::Render(usage.codeKnown, usage.code,
                               I18N::Editor::TheSourcesWereNotFoundCodeThatNamesTheItemIsNotKnown);
 }
+
+void RenderNumberHolder(int itemType)
+{
+    const ItemNumberHolder holder = FindItemNumberHolder(itemType);
+    if (!holder.item.empty())
+    {
+        ImGui::BulletText("%s", I18N::Format(I18N::Editor::TakenByTheItem0, {holder.item}).c_str());
+        return;
+    }
+    if (holder.model.empty())
+    {
+        return;
+    }
+    ImGui::BulletText("%s", I18N::Format(I18N::Editor::TakenByAModelWithoutAnItem0, {holder.model}).c_str());
+    if (!holder.codeName.empty())
+    {
+        ImGui::BulletText("%s", I18N::Format(I18N::Editor::TheCodeCallsIt0, {std::string(holder.codeName)}).c_str());
+    }
+    ImGui::BulletText("%s", I18N::Editor::TheListShowsItWithTheFilterModelsWithoutAnItem);
+    const ItemUsage usage = FindItemUsage(itemType);
+    RenderGameData(usage);
+    // The move dialog lists the code of the moved item too.
+    ImGui::PushID("NumberHolder");
+    CodeReferenceList::Render(usage.codeKnown, usage.code,
+                              I18N::Editor::TheSourcesWereNotFoundCodeThatNamesTheItemIsNotKnown);
+    ImGui::PopID();
+}
 } // namespace MuEditor::Items::UsageView
 
 #endif // _EDITOR

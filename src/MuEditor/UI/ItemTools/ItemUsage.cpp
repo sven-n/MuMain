@@ -93,6 +93,28 @@ ItemUsage FindItemUsage(int itemType)
     FindGameData(itemType, usage);
     return usage;
 }
+
+ItemNumberHolder FindItemNumberHolder(int itemType)
+{
+    ItemNumberHolder holder;
+    if (!Data::Items::IsValidItemType(itemType))
+    {
+        return holder;
+    }
+    if (g_ItemDatabase.Find(itemType) != nullptr)
+    {
+        holder.item = g_ItemDatabase.GetLogName(itemType);
+        return holder;
+    }
+    const Data::Items::ItemModelDefinition* model = g_ItemModelDatabase.Find(itemType);
+    if (model == nullptr)
+    {
+        return holder;
+    }
+    holder.model = model->model.empty() ? model->file : model->model;
+    holder.codeName = GetItemCodeReferences().GetCodeName(itemType);
+    return holder;
+}
 } // namespace MuEditor::Items
 
 #endif // _EDITOR

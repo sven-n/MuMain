@@ -1065,6 +1065,12 @@ shows it in the others.
     model the game has opened), so the item keeps its looks.
   - **Remove item**: the item and its model entry.
 
+  Below a number that is not free, the add, duplicate and move dialogs say
+  what takes it: the item on it, or a model entry without an item (Sphere 4
+  and 5 have only their models), with what the code calls the number, the
+  list filter that shows it (*Models without an item*) and what uses the
+  number.
+
   Moving and removing first list what goes with the item (its tags, its
   model entry and the shared model it names) and what uses it by its
   number and stays there: the source lines that name it (read from the

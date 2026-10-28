@@ -2797,4 +2797,16 @@
   <data name="Preview volume note" xml:space="preserve">
     <value>The volume of the monster tools' sound previews (Play, the preview's sounds). The game's sound volume stays as it is, and this is not saved.</value>
   </data>
+  <data name="Taken by the item {0}" xml:space="preserve">
+    <value>Taken by the item {0}</value>
+  </data>
+  <data name="Taken by a model without an item {0}" xml:space="preserve">
+    <value>Taken by a model without an item: {0}</value>
+  </data>
+  <data name="The code calls it {0}" xml:space="preserve">
+    <value>The code calls it {0}</value>
+  </data>
+  <data name="The list shows it with the filter Models without an item" xml:space="preserve">
+    <value>The item list shows it with the filter "Models without an item"</value>
+  </data>
 </root>

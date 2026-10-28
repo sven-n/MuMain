@@ -2519,6 +2519,37 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
     CHECK(nothing.tags.empty());
 }
 
+TEST_CASE("A number that is not free names what takes it [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+
+    const MuEditor::Items::ItemNumberHolder kris = MuEditor::Items::FindItemNumberHolder(KrisType);
+    CHECK(kris.item == "Kris (0,0)");
+    CHECK(kris.model.empty());
+
+    // Sphere 4 has its model entry but no item yet.
+    const int sphere4Type = MakeItemType(12, 73);
+    REQUIRE_FALSE(IsFreeItemType(sphere4Type));
+    const MuEditor::Items::ItemNumberHolder sphere4 = MuEditor::Items::FindItemNumberHolder(sphere4Type);
+    CHECK(sphere4.item.empty());
+    CHECK(sphere4.model == "Data/Item/s30_sphere_body04.bmd");
+    // The editor was built from these sources, which name it.
+    CHECK(sphere4.codeName == "ITEM_SPHERE_4");
+
+    const MuEditor::Items::ItemNumberHolder freeNumber = MuEditor::Items::FindItemNumberHolder(MakeItemType(0, 100));
+    CHECK(freeNumber.item.empty());
+    CHECK(freeNumber.model.empty());
+    CHECK(freeNumber.codeName.empty());
+}
+
 namespace
 {
 // The id of a field an item tool window draws, inside the ID scopes it pushes

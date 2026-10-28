@@ -73,6 +73,7 @@ void CItemMoveDialog::Render()
     if (!free)
     {
         ImGui::TextColored(NotFreeColor, "%s", I18N::Editor::ThisNumberIsNotFree);
+        UsageView::RenderNumberHolder(target);
     }
     ImGui::Separator();
     if (m_usage.GoesWithItem())
