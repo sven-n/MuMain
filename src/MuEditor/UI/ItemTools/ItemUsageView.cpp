@@ -98,7 +98,7 @@ void RenderNumberHolder(int itemType)
     {
         ImGui::BulletText("%s", I18N::Format(I18N::Editor::TheCodeCallsIt0, {std::string(holder.codeName)}).c_str());
     }
-    ImGui::BulletText("%s", I18N::Editor::TheListShowsItWithTheFilterModelsWithoutAnItem);
+    ImGui::BulletText("%s", I18N::Editor::TheItemBrowserListsItAsNoItemAtThisNumber);
     const ItemUsage usage = FindItemUsage(itemType);
     RenderGameData(usage);
     // The move dialog lists the code of the moved item too.

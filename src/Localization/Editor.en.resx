@@ -2806,7 +2806,7 @@
   <data name="The code calls it {0}" xml:space="preserve">
     <value>The code calls it {0}</value>
   </data>
-  <data name="The list shows it with the filter Models without an item" xml:space="preserve">
-    <value>The item list shows it with the filter "Models without an item"</value>
+  <data name="The Item Browser lists it as No item at this number" xml:space="preserve">
+    <value>The Item Browser lists it as "No item at this number"</value>
   </data>
 </root>

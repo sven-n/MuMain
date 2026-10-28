@@ -249,10 +249,9 @@ bool CMuItemBrowserUI::RevealSelection(int selectedItemType)
     const std::vector<int>& listed = m_list.GetItemTypes(m_filter);
     if (std::ranges::find(listed, selectedItemType) == listed.end())
     {
-        // A number without an item is only in the list of models without one.
+        // All items lists it, an item or a model without one.
         m_filter = {};
         m_search.clear();
-        m_filter.modelsWithoutItem = g_ItemDatabase.Find(selectedItemType) == nullptr;
     }
     return true;
 }

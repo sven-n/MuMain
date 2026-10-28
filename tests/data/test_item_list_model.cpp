@@ -164,6 +164,41 @@ TEST_CASE("The item list filters by group, tag, rule flag and missing model [edi
     CHECK(list.GetItemTypes(filter) == std::vector<int>{MakeItemType(14, 13)});
 }
 
+TEST_CASE("The item browser's All items lists the numbers with only a model too [editor][items]")
+{
+    GlobalItemsScope scope(Items);
+    ItemModelDatabaseScope restoreModels;
+    ItemModelDefinition orphan;
+    orphan.number = 30;
+    orphan.file = "Data/Item/Sword31.bmd";
+    g_ItemModelDatabase.Build(std::vector<ItemModelDefinition>{orphan}, Data::Effects::GlowColorList{});
+    const int orphanType = MakeItemType(0, 30);
+    CItemListModel browser(CItemListModel::ModelsWithoutItem::InAllItems);
+    CItemListModel translations;
+
+    CItemListModel::Filter filter;
+    CHECK(browser.GetItemTypes(filter) ==
+          std::vector<int>{MakeItemType(0, 0), MakeItemType(0, 5), orphanType, MakeItemType(14, 13)});
+    CHECK(translations.GetItemTypes(filter) ==
+          std::vector<int>{MakeItemType(0, 0), MakeItemType(0, 5), MakeItemType(14, 13)});
+    // The search and the group still apply; it is found by its number.
+    filter.search = "0,30";
+    CHECK(browser.GetItemTypes(filter) == std::vector<int>{orphanType});
+    filter.search = "Kris";
+    CHECK(browser.GetItemTypes(filter) == std::vector<int>{MakeItemType(0, 0)});
+    filter = {};
+    filter.group = 14;
+    CHECK(browser.GetItemTypes(filter) == std::vector<int>{MakeItemType(14, 13)});
+    // An item filter lists items only.
+    filter = {};
+    filter.withoutModel = true;
+    CHECK(browser.GetItemTypes(filter) ==
+          std::vector<int>{MakeItemType(0, 0), MakeItemType(0, 5), MakeItemType(14, 13)});
+    filter = {};
+    filter.missingLocale = "pt";
+    CHECK(browser.GetItemTypes(filter) == std::vector<int>{MakeItemType(14, 13)});
+}
+
 TEST_CASE("A new item can take a number with neither an item nor a model [editor][items]")
 {
     GlobalItemsScope scope(Items);

@@ -1045,8 +1045,12 @@ shows it in the others.
 - **Item Browser**: the items with a search (a name in any language,
   `group,number` or the item type) and filters: group, tag, a rule flag
   that is off, items without a model, numbers that have a model but no
-  item, items without a name in a language. An item whose name another
-  item has too shows in grey what tells them apart, in the list and above
+  item, items without a name in a language. *All items* lists everything
+  that is at a number: the numbers that have a model but no item (Sphere 4
+  and 5) are among the items, as *No item at this number*; a filter of
+  the items (tag, rule flag, missing model or name) leaves them out. An
+  item whose name another item has too shows in grey what tells them
+  apart, in the list and above
   each tool: the tags it has that not all its namesakes have (the lucky
   sets: `luckyItem`), or `#1`, `#2` by number where no tag does (the Seals of
   Wealth, the tiers of the seed spheres); the one namesake without such a tag
@@ -1067,9 +1071,8 @@ shows it in the others.
 
   Below a number that is not free, the add, duplicate and move dialogs say
   what takes it: the item on it, or a model entry without an item (Sphere 4
-  and 5 have only their models), with what the code calls the number, the
-  list filter that shows it (*Models without an item*) and what uses the
-  number.
+  and 5 have only their models), with what the code calls the number, how
+  the Item Browser lists it and what uses the number.
 
   Moving and removing first list what goes with the item (its tags, its
   model entry and the shared model it names) and what uses it by its

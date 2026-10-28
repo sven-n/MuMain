@@ -68,16 +68,11 @@ bool CItemListModel::Lists(int itemType, const Filter& filter) const
     {
         return false;
     }
-    if (filter.modelsWithoutItem)
+    if (!slot.Exists())
     {
-        // Empty slots may not have their ids; the search goes by the number.
-        Data::Items::ItemDefinition number;
-        number.group = Data::Items::GetItemGroup(itemType);
-        number.number = Data::Items::GetItemNumber(itemType);
-        return !slot.Exists() && g_ItemModelDatabase.Find(itemType) != nullptr &&
-               MatchesItemSearch(number, filter.search);
+        return ListsModelWithoutItem(itemType, filter);
     }
-    if (!slot.Exists() || !MatchesItemSearch(slot, filter.search))
+    if (filter.modelsWithoutItem || !MatchesItemSearch(slot, filter.search))
     {
         return false;
     }
@@ -94,6 +89,22 @@ bool CItemListModel::Lists(int itemType, const Filter& filter) const
         return false;
     }
     return !filter.withoutModel || g_ItemModelDatabase.Find(itemType) == nullptr;
+}
+
+bool CItemListModel::ListsModelWithoutItem(int itemType, const Filter& filter) const
+{
+    const bool itemFilter = filter.tag || filter.notAllowed || !filter.missingLocale.empty() || filter.withoutModel;
+    const bool listed =
+        filter.modelsWithoutItem || (m_modelsWithoutItem == ModelsWithoutItem::InAllItems && !itemFilter);
+    if (!listed || g_ItemModelDatabase.Find(itemType) == nullptr)
+    {
+        return false;
+    }
+    // Empty slots may not have their ids; the search goes by the number.
+    Data::Items::ItemDefinition number;
+    number.group = Data::Items::GetItemGroup(itemType);
+    number.number = Data::Items::GetItemNumber(itemType);
+    return MatchesItemSearch(number, filter.search);
 }
 
 const std::vector<int>& CItemListModel::GetItemTypes(const Filter& filter)
