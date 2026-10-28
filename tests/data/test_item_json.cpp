@@ -136,7 +136,7 @@ TEST_CASE("Invalid item JSON is reported [data][items]")
 
     CHECK(result.items.empty());
     REQUIRE(result.issues.size() == 1);
-    CHECK(result.issues.front().severity == ItemDataIssueSeverity::Error);
+    CHECK(result.issues.front().severity == ItemDataIssueSeverity::Fatal);
     CHECK(result.issues.front().source == Source);
 }
 
@@ -144,13 +144,14 @@ TEST_CASE("A newer item file format is rejected [data][items]")
 {
     const ReadResult result = Read(R"({"formatVersion": 99, "group": 0, "items": []})");
 
-    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "formatVersion"));
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "formatVersion"));
 }
 
 TEST_CASE("Item groups and numbers must be in range [data][items]")
 {
-    CHECK(HasIssue(Read(GroupFile(16, "")).issues, ItemDataIssueSeverity::Error, "group"));
-    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 512, "name": "X"})")).issues, ItemDataIssueSeverity::Error, "number"));
+    CHECK(HasIssue(Read(GroupFile(16, "")).issues, ItemDataIssueSeverity::Fatal, "group"));
+    CHECK(
+        HasIssue(Read(GroupFile(0, R"({"number": 512, "name": "X"})")).issues, ItemDataIssueSeverity::Fatal, "number"));
 }
 
 TEST_CASE("Item values must fit their type [data][items]")
@@ -158,8 +159,8 @@ TEST_CASE("Item values must fit their type [data][items]")
     const ReadResult result = Read(GroupFile(0, R"({"number": 0, "name": "Kris", "width": 256, "twoHanded": 1})"));
 
     CHECK(result.items.empty());
-    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "width"));
-    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "twoHanded"));
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "width"));
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "twoHanded"));
 }
 
 TEST_CASE("Damage and magic power past 255 are kept through write and read [data][items]")
@@ -181,7 +182,7 @@ TEST_CASE("Damage and magic power past 255 are kept through write and read [data
 
     // Up to what the field holds.
     const ReadResult tooHigh = Read(GroupFile(0, R"({"number": 0, "name": "Kris", "damageMax": 65536})"));
-    CHECK(HasIssue(tooHigh.issues, ItemDataIssueSeverity::Error, "damageMax"));
+    CHECK(HasIssue(tooHigh.issues, ItemDataIssueSeverity::Fatal, "damageMax"));
 }
 
 TEST_CASE("Unknown item fields are warnings [data][items]")
@@ -192,7 +193,7 @@ TEST_CASE("Unknown item fields are warnings [data][items]")
     REQUIRE(result.items.size() == 1);
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "sparkle"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "requirements.luck"));
-    CHECK_FALSE(HasErrors(result.issues));
+    CHECK_FALSE(HasFatal(result.issues));
 }
 
 TEST_CASE("Item validation finds duplicates and missing English names [data][items]")
@@ -206,15 +207,33 @@ TEST_CASE("Item validation finds duplicates and missing English names [data][ite
     std::vector<ItemDataIssue> issues;
     ValidateItems(std::vector<ItemDefinition>{kris, duplicate, noEnglishName}, issues);
 
-    CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "number"));
-    CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "name"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "number"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "name"));
 }
 
 TEST_CASE("Item issues describe where the problem is [data][items]")
 {
-    const ItemDataIssue issue{ItemDataIssueSeverity::Error, Source, 0, 5, "width", "must be a whole number"};
+    const ItemDataIssue issue{ItemDataIssueSeverity::Fatal, Source, 0, 5, "width", "must be a whole number"};
 
-    CHECK(issue.ToString() == "error: Group00_Sword.json: item (0,5) width: must be a whole number");
+    CHECK(issue.ToString() == "fatal: Group00_Sword.json: item (0,5) width: must be a whole number");
+}
+
+TEST_CASE("Item issues name their level: fatal, error or warning [data][items]")
+{
+    ItemDataIssue issue{ItemDataIssueSeverity::Error, Source, ItemDataIssue::NoItem,
+                        ItemDataIssue::NoItem,        "",     "names a model file that is missing"};
+    CHECK(issue.ToString() == "error: Group00_Sword.json: names a model file that is missing");
+    issue.severity = ItemDataIssueSeverity::Warning;
+    CHECK(issue.ToString() == "warning: Group00_Sword.json: names a model file that is missing");
+}
+
+TEST_CASE("Only fatal issues make data unusable [data][items]")
+{
+    std::vector<ItemDataIssue> issues{{ItemDataIssueSeverity::Error, Source, 0, 5, "model", "missing"},
+                                      {ItemDataIssueSeverity::Warning, Source, 0, 5, "name.pt", "missing"}};
+    CHECK_FALSE(Data::Items::HasFatal(issues));
+    issues.push_back({ItemDataIssueSeverity::Fatal, Source, 0, 5, "width", "must be a whole number"});
+    CHECK(Data::Items::HasFatal(issues));
 }
 
 TEST_CASE("Item names are written as an object with English first [data][items]")
@@ -242,19 +261,19 @@ TEST_CASE("Item names must be texts [data][items]")
     const ReadResult result = Read(GroupFile(0, R"({"number": 0, "name": {"en": "Kris", "pt": 5}})"));
 
     CHECK(result.items.empty());
-    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "name.pt"));
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "name.pt"));
 }
 
 TEST_CASE("Numbers too large for their field do not wrap around [data][items]")
 {
-    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 4294967297, "name": "X"})")).issues, ItemDataIssueSeverity::Error,
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 4294967297, "name": "X"})")).issues, ItemDataIssueSeverity::Fatal,
                    "number"));
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "buyPrice": 18446744073709551615})")).issues,
-                   ItemDataIssueSeverity::Error, "buyPrice"));
+                   ItemDataIssueSeverity::Fatal, "buyPrice"));
     CHECK(HasIssue(Read(R"({"formatVersion": 4294967297, "group": 0, "items": []})").issues,
-                   ItemDataIssueSeverity::Error, "formatVersion"));
+                   ItemDataIssueSeverity::Fatal, "formatVersion"));
     CHECK(HasIssue(Read(R"({"formatVersion": 1, "group": 4294967296, "items": []})").issues,
-                   ItemDataIssueSeverity::Error, "group"));
+                   ItemDataIssueSeverity::Fatal, "group"));
 }
 
 TEST_CASE("Item name language codes must be codes [data][items]")
@@ -270,15 +289,15 @@ TEST_CASE("Item name language codes must be codes [data][items]")
 
     std::vector<ItemDataIssue> issues;
     ValidateItems(std::vector<ItemDefinition>{kris}, issues);
-    CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "name"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "name"));
 
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{empty}, issues);
-    CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "name"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "name"));
 
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{valid}, issues);
-    CHECK_FALSE(HasErrors(issues));
+    CHECK_FALSE(HasFatal(issues));
 }
 
 TEST_CASE("Item tags, wing tier, potion priority and rule flags are kept through write and read [data][items]")
@@ -331,7 +350,7 @@ TEST_CASE("An item's description is kept through write and read [data][items]")
     const ReadResult result = Read(text);
     REQUIRE(result.items.size() == 1);
     CHECK(result.items.front().description == jewel.description);
-    CHECK_FALSE(HasErrors(result.issues));
+    CHECK_FALSE(HasFatal(result.issues));
     CHECK(WriteItemGroupJson(14, result.items) == text);
 
     // A line break in a text is kept; the tooltip starts a new line there.
@@ -344,7 +363,7 @@ TEST_CASE("An item's description is kept through write and read [data][items]")
 
     const ReadResult badColor = Read(R"({"formatVersion": 1, "group": 14, "items": [
         {"number": 13, "name": "Jewel of Bless", "description": [{"text": "x", "color": "pink"}]}]})");
-    CHECK(HasErrors(badColor.issues));
+    CHECK(HasFatal(badColor.issues));
 }
 
 TEST_CASE("A description line's item levels are kept through write and read, and checked [data][items]")
@@ -377,7 +396,7 @@ TEST_CASE("A description line's item levels are kept through write and read, and
     const ReadResult result = Read(text);
     REQUIRE(result.items.size() == 1);
     CHECK(result.items.front().description == scroll.description);
-    CHECK_FALSE(HasErrors(result.issues));
+    CHECK_FALSE(HasFatal(result.issues));
     CHECK(WriteItemGroupJson(14, result.items) == text);
 
     for (const char* levels : {R"("levels": [8, 1])", R"("levels": [0, 16])", R"("levels": [-1, 2])",
@@ -390,7 +409,7 @@ TEST_CASE("A description line's item levels are kept through write and read, and
         const ReadResult bad = Read(std::string(R"({"formatVersion": 1, "group": 14, "items": [
             {"number": 10, "name": "Town Portal Scroll", "description": [{"text": "x", )") +
                                     levels + "}]}]}");
-        CHECK(HasIssue(bad.issues, ItemDataIssueSeverity::Error, "description[0].levels"));
+        CHECK(HasIssue(bad.issues, ItemDataIssueSeverity::Fatal, "description[0].levels"));
     }
 }
 
@@ -429,18 +448,18 @@ TEST_CASE("An item's name lines are kept through write and read, with or without
     const ReadResult result = Read(text);
     REQUIRE(result.items.size() == 1);
     CHECK(result.items.front().nameLines == horn.nameLines);
-    CHECK_FALSE(HasErrors(result.issues));
+    CHECK_FALSE(HasFatal(result.issues));
     CHECK(WriteItemGroupJson(13, result.items) == text);
 
     const ReadResult notObject = Read(R"({"formatVersion": 1, "group": 13, "items": [
         {"number": 37, "name": "Horn of Fenrir", "nameLines": ["{name}"]}]})");
-    CHECK(HasIssue(notObject.issues, ItemDataIssueSeverity::Error, "nameLines[0]"));
+    CHECK(HasIssue(notObject.issues, ItemDataIssueSeverity::Fatal, "nameLines[0]"));
 
     // The name is always bold and the first row: a name line's "bold" and "after" are errors.
     const ReadResult boldAndAfter = Read(R"({"formatVersion": 1, "group": 13, "items": [
         {"number": 37, "name": "Horn of Fenrir", "nameLines": [{"text": "{name}", "bold": true, "after": "options"}]}]})");
-    CHECK(HasIssue(boldAndAfter.issues, ItemDataIssueSeverity::Error, "nameLines[0].bold"));
-    CHECK(HasIssue(boldAndAfter.issues, ItemDataIssueSeverity::Error, "nameLines[0].after"));
+    CHECK(HasIssue(boldAndAfter.issues, ItemDataIssueSeverity::Fatal, "nameLines[0].bold"));
+    CHECK(HasIssue(boldAndAfter.issues, ItemDataIssueSeverity::Fatal, "nameLines[0].after"));
 }
 
 TEST_CASE("A description or name line longer than the tooltip shows is a warning [data][items]")
@@ -464,7 +483,7 @@ TEST_CASE("A description or name line longer than the tooltip shows is a warning
     CHECK(read("description", quoted(MaxDescriptionLineLength)).issues.empty());
     const ReadResult longDescription = read("description", quoted(MaxDescriptionLineLength + 1));
     CHECK(HasIssue(longDescription.issues, ItemDataIssueSeverity::Warning, "description[0].text"));
-    CHECK_FALSE(HasErrors(longDescription.issues));
+    CHECK_FALSE(HasFatal(longDescription.issues));
     REQUIRE(longDescription.items.size() == 1);
     CHECK(longDescription.items.front().description.size() == 1);
     CHECK(read("nameLines", quoted(MaxNameLineLength)).issues.empty());
@@ -482,16 +501,16 @@ TEST_CASE("A description line's \"@\" names a shared text [data][items]")
     // "@" alone names none: an error, as in a layout, not a silent blank line.
     const ReadResult empty = Read(R"({"formatVersion": 1, "group": 14, "items": [
         {"number": 10, "name": "Town Portal Scroll", "description": [{"text": "@"}]}]})");
-    CHECK(HasIssue(empty.issues, ItemDataIssueSeverity::Error, "description[0].text"));
+    CHECK(HasIssue(empty.issues, ItemDataIssueSeverity::Fatal, "description[0].text"));
     const ReadResult named = Read(R"({"formatVersion": 1, "group": 14, "items": [
         {"number": 10, "name": "Town Portal Scroll", "description": [{"text": "@durability"}]}]})");
-    CHECK_FALSE(HasErrors(named.issues));
+    CHECK_FALSE(HasFatal(named.issues));
     REQUIRE(named.items.size() == 1);
     CHECK(named.items.front().description.front().textName == "durability");
     // So does a level value's.
     const ReadResult levelValue = Read(R"({"formatVersion": 1, "group": 14, "items": [
         {"number": 10, "name": "Town Portal Scroll", "levelValues": {"stat": ["ENG", "@"]}}]})");
-    CHECK(HasIssue(levelValue.issues, ItemDataIssueSeverity::Error, "levelValues.stat[1]"));
+    CHECK(HasIssue(levelValue.issues, ItemDataIssueSeverity::Fatal, "levelValues.stat[1]"));
 }
 
 TEST_CASE("An item's stat profile is kept through write and read [data][items]")
@@ -510,9 +529,9 @@ TEST_CASE("An item's stat profile is kept through write and read [data][items]")
     CHECK(WriteItemGroupJson(0, std::vector<ItemDefinition>{MakeKris()}).find("statProfile") == std::string::npos);
 
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "statProfile": "two words"})")).issues,
-                   ItemDataIssueSeverity::Error, "statProfile"));
+                   ItemDataIssueSeverity::Fatal, "statProfile"));
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "statProfile": 5})")).issues,
-                   ItemDataIssueSeverity::Error, "statProfile"));
+                   ItemDataIssueSeverity::Fatal, "statProfile"));
 }
 
 TEST_CASE("An item's excellent bonus is kept through write and read, and warns without damage [data][items]")
@@ -531,7 +550,7 @@ TEST_CASE("An item's excellent bonus is kept through write and read, and warns w
     std::vector<ItemDataIssue> issues;
     ValidateItems(std::vector<ItemDefinition>{helm}, issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "excellentBonus"));
-    CHECK_FALSE(HasErrors(issues));
+    CHECK_FALSE(HasFatal(issues));
 
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{axe}, issues);
@@ -583,11 +602,11 @@ TEST_CASE("An item's requirements by level are kept through write and read [data
     CHECK(result.items.front().requirementsByLevel == orb.requirementsByLevel);
 
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "requirementsByLevel": {"luck": 1}})")).issues,
-                   ItemDataIssueSeverity::Error, "requirementsByLevel.luck"));
+                   ItemDataIssueSeverity::Fatal, "requirementsByLevel.luck"));
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "requirementsByLevel": {"level": [1, 2]}})")).issues,
-                   ItemDataIssueSeverity::Error, "requirementsByLevel.level"));
+                   ItemDataIssueSeverity::Fatal, "requirementsByLevel.level"));
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "requirementsByLevel": {"level": 70000}})")).issues,
-                   ItemDataIssueSeverity::Error, "requirementsByLevel.level"));
+                   ItemDataIssueSeverity::Fatal, "requirementsByLevel.level"));
 
     // A base value next to the list is not used.
     ItemDefinition both = orb;
@@ -623,7 +642,7 @@ TEST_CASE("Item validation checks the stat profiles against the stat file [data]
     std::vector<ItemDataIssue> issues;
     ValidateStatProfiles(std::vector<ItemDefinition>{shield, unknown, withoutProfile, deletedUnknown, deletedSceptre},
                          profiles, "ItemStats.json", issues);
-    CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "statProfile"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "statProfile"));
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "profiles.sceptre"));
     CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "profiles.shield"));
     CHECK(issues.size() == 2);
@@ -693,20 +712,20 @@ TEST_CASE("Item weapon kinds are written by name after the slot and read back [d
 
 TEST_CASE("Unknown slots, wing tiers, weapon kinds and tags are errors [data][items]")
 {
-    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "slot": 11})")).issues,
-                   ItemDataIssueSeverity::Error, "slot"));
+    CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "slot": 11})")).issues, ItemDataIssueSeverity::Fatal,
+                   "slot"));
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "slot": "tail"})")).issues,
-                   ItemDataIssueSeverity::Error, "slot"));
+                   ItemDataIssueSeverity::Fatal, "slot"));
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "wingTier": "fifth"})")).issues,
-                   ItemDataIssueSeverity::Error, "wingTier"));
+                   ItemDataIssueSeverity::Fatal, "wingTier"));
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "weaponKind": "wand"})")).issues,
-                   ItemDataIssueSeverity::Error, "weaponKind"));
+                   ItemDataIssueSeverity::Fatal, "weaponKind"));
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "tags": ["jewl"]})")).issues,
-                   ItemDataIssueSeverity::Error, "tags"));
+                   ItemDataIssueSeverity::Fatal, "tags"));
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "tags": "jewel"})")).issues,
-                   ItemDataIssueSeverity::Error, "tags"));
+                   ItemDataIssueSeverity::Fatal, "tags"));
     CHECK(HasIssue(Read(GroupFile(0, R"({"number": 0, "name": "X", "tradable": 0})")).issues,
-                   ItemDataIssueSeverity::Error, "tradable"));
+                   ItemDataIssueSeverity::Fatal, "tradable"));
 }
 
 TEST_CASE("Item validation checks slots, wing tiers and weapon kinds [data][items]")
@@ -744,22 +763,22 @@ TEST_CASE("Item validation checks slots, wing tiers and weapon kinds [data][item
 
     std::vector<ItemDataIssue> issues;
     ValidateItems(std::vector<ItemDefinition>{unnamedSlot}, issues);
-    CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "slot"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "slot"));
 
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{wingTierWithoutWingSlot}, issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "wingTier"));
-    CHECK_FALSE(HasErrors(issues));
+    CHECK_FALSE(HasFatal(issues));
 
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{weaponKindWithoutHandSlot}, issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "weaponKind"));
-    CHECK_FALSE(HasErrors(issues));
+    CHECK_FALSE(HasFatal(issues));
 
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{bowInRightHand}, issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "weaponKind"));
-    CHECK_FALSE(HasErrors(issues));
+    CHECK_FALSE(HasFatal(issues));
 
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{spear}, issues);
@@ -776,12 +795,12 @@ TEST_CASE("Item validation checks slots, wing tiers and weapon kinds [data][item
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{swordWithoutKind}, issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "weaponKind"));
-    CHECK_FALSE(HasErrors(issues));
+    CHECK_FALSE(HasFatal(issues));
 
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{swordWithPotionPriority}, issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "potionPriority"));
-    CHECK_FALSE(HasErrors(issues));
+    CHECK_FALSE(HasFatal(issues));
 
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{potion}, issues);
@@ -805,7 +824,7 @@ TEST_CASE("Item validation warns about an item without the stat profile the prof
     std::vector<ItemDataIssue> issues;
     ValidateStatProfiles(std::vector<ItemDefinition>{shield}, profiles, "ItemStats.json", issues);
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "statProfile"));
-    CHECK_FALSE(HasErrors(issues));
+    CHECK_FALSE(HasFatal(issues));
     // The item checks run before the stat file is read; they leave it to the stat profile checks.
     issues.clear();
     ValidateItems(std::vector<ItemDefinition>{shield}, issues);
@@ -843,6 +862,6 @@ TEST_CASE("A slot saved as a number before phase 3 still loads [data][items]")
     REQUIRE(result.items.size() == 1);
     CHECK(result.items.front().slot == ItemSlot::Wings);
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "slot"));
-    CHECK_FALSE(HasErrors(result.issues));
+    CHECK_FALSE(HasFatal(result.issues));
     CHECK(WriteItemGroupJson(0, result.items).find(R"("slot": "wings")") != std::string::npos);
 }

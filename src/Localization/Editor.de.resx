@@ -460,8 +460,8 @@
   <data name="Failed to export items as bmd" xml:space="preserve">
     <value>Die Gegenstände konnten nicht als bmd-Dateien exportiert werden.</value>
   </data>
-  <data name="Item data has errors" xml:space="preserve">
-    <value>Die Gegenstandsdaten enthalten Fehler und wurden nicht gespeichert. Siehe Konsole.</value>
+  <data name="Item data has fatal problems" xml:space="preserve">
+    <value>Die Gegenstandsdaten haben fatale Probleme und wurden nicht gespeichert. Siehe Konsole.</value>
   </data>
   <data name="Item data could not be written" xml:space="preserve">
     <value>Die Gegenstandsdateien konnten nicht geschrieben werden. Siehe Konsole.</value>
@@ -1276,11 +1276,17 @@
   <data name="Errors: {0}" xml:space="preserve">
     <value>Fehler: {0}</value>
   </data>
+  <data name="Fatal: {0}" xml:space="preserve">
+    <value>Fatal: {0}</value>
+  </data>
   <data name="Warnings: {0}" xml:space="preserve">
     <value>Warnungen: {0}</value>
   </data>
   <data name="Error" xml:space="preserve">
     <value>Fehler</value>
+  </data>
+  <data name="Fatal" xml:space="preserve">
+    <value>Fatal</value>
   </data>
   <data name="Warning" xml:space="preserve">
     <value>Warnung</value>
@@ -1297,8 +1303,8 @@
   <data name="The items changed since the last check; check again." xml:space="preserve">
     <value>Die Gegenstände haben sich seit der letzten Prüfung geändert; prüfen Sie erneut.</value>
   </data>
-  <data name="Save Items refuses data with errors and saves data with warnings." xml:space="preserve">
-    <value>Gegenstände speichern verweigert Daten mit Fehlern und speichert Daten mit Warnungen.</value>
+  <data name="Save Items refuses fatal problems, saves errors and warnings." xml:space="preserve">
+    <value>Gegenstände speichern verweigert Daten mit fatalen Problemen und speichert Daten mit Fehlern und Warnungen.</value>
   </data>
   <data name="Click a problem of an item to select the item and open the tool of its field." xml:space="preserve">
     <value>Ein Klick auf das Problem eines Gegenstands wählt ihn aus und öffnet das Werkzeug seines Felds.</value>
@@ -2092,8 +2098,8 @@
   <data name="The monsters changed since the last check; check again." xml:space="preserve">
     <value>Die Monster haben sich seit der letzten Prüfung geändert; prüfen Sie erneut.</value>
   </data>
-  <data name="Save Monsters refuses data with errors and saves data with warnings." xml:space="preserve">
-    <value>Monster speichern verweigert Daten mit Fehlern und speichert Daten mit Warnungen.</value>
+  <data name="Save Monsters refuses fatal problems, saves errors and warnings." xml:space="preserve">
+    <value>Monster speichern verweigert Daten mit fatalen Problemen und speichert Daten mit Fehlern und Warnungen.</value>
   </data>
   <data name="Monster checks click note" xml:space="preserve">
     <value>Ein Klick auf das Problem eines Monsters wählt es aus und öffnet das Werkzeug seines Felds.</value>

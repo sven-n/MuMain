@@ -98,7 +98,7 @@ private:
     };
     PendingChange m_pending;
     bool m_openConfirm = false;
-    // The errors of the last change that was refused.
+    // The fatal problems of the last change that was refused.
     std::vector<Data::Items::ItemDataIssue> m_errors;
 
     NamePurpose m_namePurpose = NamePurpose::NewProfile;

@@ -111,7 +111,7 @@ void CMuItemChecksUI::Render(bool* open)
             RunChecks();
         }
         RenderCheckLine();
-        MuEditor::IssueTable::RenderNotes(I18N::Editor::SaveItemsRefusesDataWithErrorsAndSavesDataWithWarnings,
+        MuEditor::IssueTable::RenderNotes(I18N::Editor::SaveItemsRefusesFatalProblemsSavesErrorsAndWarnings,
                                           I18N::Editor::ClickAProblemOfAnItemToSelectTheItemAndOpenTheToolOfItsField);
         ImGui::Separator();
         ItemIssueSubjects subjects;

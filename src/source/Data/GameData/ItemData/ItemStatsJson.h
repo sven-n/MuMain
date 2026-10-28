@@ -63,7 +63,7 @@ namespace Data::Items
 constexpr int ItemStatsJsonFormatVersion = 1;
 constexpr const char* ItemStatsFileName = "ItemStats.json";
 
-// Reads the file into `file` and adds its problems to `issues`; with errors
+// Reads the file into `file` and adds its problems to `issues`; with fatal problems
 // the file must not be used. `source` names the file in messages.
 void ReadItemStatsJson(std::string_view text, const std::string& source, ItemStatFile& file,
                        std::vector<ItemDataIssue>& issues);

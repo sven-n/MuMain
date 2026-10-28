@@ -98,7 +98,7 @@ struct DataDirectories
                                                   std::vector<Items::ItemDataIssue>& issues);
 
 // Reads the entries of the table text into `models` (file paths unchecked).
-// Entries with errors are left out; `issues` lists errors and warnings.
+// Entries with fatal problems are left out; `issues` lists errors and warnings.
 void ReadModelFilesJson(std::string_view text, const std::string& source, std::vector<ModelFileEntry>& models,
                         std::vector<Items::ItemDataIssue>& issues);
 

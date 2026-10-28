@@ -167,7 +167,7 @@ TEST_CASE("Monster checks: Run finds the name problems of the table and sends th
     REQUIRE(issues.size() == 4);
     const ItemDataIssue* separator = FindIssue(issues, 7, "must not contain");
     REQUIRE(separator != nullptr);
-    CHECK(separator->severity == ItemDataIssueSeverity::Error);
+    CHECK(separator->severity == ItemDataIssueSeverity::Fatal);
     const ItemDataIssue* language = FindIssue(issues, 9, "never shown");
     REQUIRE(language != nullptr);
     CHECK(language->severity == ItemDataIssueSeverity::Warning);

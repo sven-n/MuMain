@@ -164,10 +164,10 @@ TEST_CASE("Monster data: the editor's checks are those of loading and saving [da
     g_MonsterDataHandler.Validate(issues);
 
     REQUIRE(issues.size() == 3);
-    CHECK(Data::Items::HasErrors(issues));
+    CHECK(Data::Items::HasFatal(issues));
     CHECK(FindIssue(issues, 2) == nullptr);
     REQUIRE(FindIssue(issues, 7) != nullptr);
-    CHECK(FindIssue(issues, 7)->severity == ItemDataIssueSeverity::Error);
+    CHECK(FindIssue(issues, 7)->severity == ItemDataIssueSeverity::Fatal);
     REQUIRE(FindIssue(issues, 9) != nullptr);
     CHECK(FindIssue(issues, 9)->severity == ItemDataIssueSeverity::Warning);
     CHECK(FindIssue(issues, 9)->message.find("never shown") != std::string::npos);
@@ -214,7 +214,7 @@ TEST_CASE("Monster data: the editor saves the table and reverts to the file [dat
 
         CHECK_FALSE(g_MonsterDataHandler.Save(issues));
 
-        CHECK(Data::Items::HasErrors(issues));
+        CHECK(Data::Items::HasFatal(issues));
         CHECK(Data::Monsters::LoadMonstersFile(folder.MonstersFile()).monsters == std::vector{BudgeDragon()});
     }
     SUBCASE("a revert of a broken file keeps the table")
@@ -223,7 +223,7 @@ TEST_CASE("Monster data: the editor saves the table and reverts to the file [dat
 
         CHECK_FALSE(g_MonsterDataHandler.Revert(issues));
 
-        CHECK(Data::Items::HasErrors(issues));
+        CHECK(Data::Items::HasFatal(issues));
         REQUIRE(g_MonsterDatabase.Find(2) != nullptr);
         CHECK(g_MonsterDatabase.Find(7) == nullptr);
     }

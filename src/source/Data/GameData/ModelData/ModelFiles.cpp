@@ -43,10 +43,10 @@ void AddIssue(std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity
     issues.push_back({severity, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field, message});
 }
 
-void AddError(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& field,
+void AddFatal(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& field,
               const std::string& message)
 {
-    AddIssue(issues, ItemDataIssueSeverity::Error, source, field, message);
+    AddIssue(issues, ItemDataIssueSeverity::Fatal, source, field, message);
 }
 
 void AddWarning(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& field,
@@ -101,7 +101,7 @@ bool ReadActions(const OrderedJson& json, const std::string& field, const std::s
     const std::string actionsField = field + "." + Keys::Actions;
     if (!actions->is_object())
     {
-        AddError(issues, source, actionsField, "must be an object of action indices");
+        AddFatal(issues, source, actionsField, "must be an object of action indices");
         return false;
     }
     bool valid = true;
@@ -111,14 +111,14 @@ bool ReadActions(const OrderedJson& json, const std::string& field, const std::s
         int index = 0;
         if (!ReadActionIndex(key, index))
         {
-            AddError(issues, source, actionField,
+            AddFatal(issues, source, actionField,
                      "is no action index (0 to " + std::to_string(MaxModelFileActionIndex) + ")");
             valid = false;
             continue;
         }
         if (!value.is_object())
         {
-            AddError(issues, source, actionField, "must be an object with a clip and/or a crossfade");
+            AddFatal(issues, source, actionField, "must be an object with a clip and/or a crossfade");
             valid = false;
             continue;
         }
@@ -128,7 +128,7 @@ bool ReadActions(const OrderedJson& json, const std::string& field, const std::s
         {
             if (!name->is_string() || name->get<std::string>().empty())
             {
-                AddError(issues, source, actionField + "." + Keys::Clip, "must be a clip name");
+                AddFatal(issues, source, actionField + "." + Keys::Clip, "must be a clip name");
                 valid = false;
             }
             else
@@ -141,7 +141,7 @@ bool ReadActions(const OrderedJson& json, const std::string& field, const std::s
         {
             if (!crossfade->is_number() || !std::isfinite(crossfade->get<double>()) || crossfade->get<double>() < 0.0)
             {
-                AddError(issues, source, actionField + "." + Keys::Crossfade, "must be a number of ticks, 0 or more");
+                AddFatal(issues, source, actionField + "." + Keys::Crossfade, "must be a number of ticks, 0 or more");
                 valid = false;
             }
             else
@@ -174,7 +174,7 @@ bool ReadLodScreenHeights(const OrderedJson& heights, const std::string& field, 
     const std::string heightsField = field + "." + Keys::ScreenHeights;
     if (!heights.is_array() || heights.size() > static_cast<size_t>(MaxLodThresholds))
     {
-        AddError(issues, source, heightsField,
+        AddFatal(issues, source, heightsField,
                  "must be a list of at most " + std::to_string(MaxLodThresholds) + " screen heights");
         return false;
     }
@@ -184,7 +184,7 @@ bool ReadLodScreenHeights(const OrderedJson& heights, const std::string& field, 
         if (!height.is_number() || !std::isfinite(height.get<double>()) || height.get<double>() <= 0.0 ||
             (!values.empty() && height.get<float>() >= values.back()))
         {
-            AddError(issues, source, heightsField, "must be positive numbers, each below the one before");
+            AddFatal(issues, source, heightsField, "must be positive numbers, each below the one before");
             return false;
         }
         values.push_back(height.get<float>());
@@ -205,7 +205,7 @@ bool ReadLod(const OrderedJson& json, const std::string& field, const std::strin
     const std::string lodField = field + "." + Keys::Lod;
     if (!lod->is_object())
     {
-        AddError(issues, source, lodField, "must be an object with screenHeights and/or a hysteresis");
+        AddFatal(issues, source, lodField, "must be an object with screenHeights and/or a hysteresis");
         return false;
     }
     LodSettings settings;
@@ -219,7 +219,7 @@ bool ReadLod(const OrderedJson& json, const std::string& field, const std::strin
         if (!hysteresis->is_number() || !std::isfinite(hysteresis->get<double>()) || hysteresis->get<double>() < 0.0 ||
             hysteresis->get<double>() >= 1.0)
         {
-            AddError(issues, source, lodField + "." + Keys::Hysteresis, "must be a number from 0 to below 1");
+            AddFatal(issues, source, lodField + "." + Keys::Hysteresis, "must be a number from 0 to below 1");
             valid = false;
         }
         else
@@ -248,14 +248,14 @@ bool ReadEntry(const OrderedJson& json, size_t index, const std::string& source,
     const std::string field = std::string(Keys::Models) + "[" + std::to_string(index) + "]";
     if (!json.is_object())
     {
-        AddError(issues, source, field, "must be an object with a model and a file");
+        AddFatal(issues, source, field, "must be an object with a model and a file");
         return false;
     }
     bool valid = true;
     const auto model = json.find(Keys::Model);
     if (model == json.end() || !model->is_string())
     {
-        AddError(issues, source, field + "." + Keys::Model, "missing or not text");
+        AddFatal(issues, source, field + "." + Keys::Model, "missing or not text");
         valid = false;
     }
     else
@@ -264,7 +264,7 @@ bool ReadEntry(const OrderedJson& json, size_t index, const std::string& source,
         const ModelFileSymbol* symbol = FindModelFileSymbol(entry.model);
         if (!symbol)
         {
-            AddError(issues, source, field + "." + Keys::Model, entry.model + " is no model that may have a file");
+            AddFatal(issues, source, field + "." + Keys::Model, entry.model + " is no model that may have a file");
             valid = false;
         }
         else
@@ -275,12 +275,12 @@ bool ReadEntry(const OrderedJson& json, size_t index, const std::string& source,
     const auto file = json.find(Keys::File);
     if (file == json.end() || !file->is_string())
     {
-        AddError(issues, source, field + "." + Keys::File, "missing or not text");
+        AddFatal(issues, source, field + "." + Keys::File, "missing or not text");
         valid = false;
     }
     else if (!IsDataRelativePath(file->get<std::string>()))
     {
-        AddError(issues, source, field + "." + Keys::File,
+        AddFatal(issues, source, field + "." + Keys::File,
                  "must be a path relative to Data/ with \"/\" separators and no \"..\"");
         valid = false;
     }
@@ -365,7 +365,7 @@ void ReadModelFilesJson(std::string_view text, const std::string& source, std::v
     const auto list = root.find(Keys::Models);
     if (list == root.end() || !list->is_array())
     {
-        AddError(issues, source, Keys::Models, "missing or not a list of models");
+        AddFatal(issues, source, Keys::Models, "missing or not a list of models");
         return;
     }
     std::set<int> types;
@@ -378,7 +378,7 @@ void ReadModelFilesJson(std::string_view text, const std::string& source, std::v
         }
         if (!types.insert(entry.type).second)
         {
-            AddError(issues, source, std::string(Keys::Models) + "[" + std::to_string(index) + "]",
+            AddFatal(issues, source, std::string(Keys::Models) + "[" + std::to_string(index) + "]",
                      entry.model + " has more than one file");
             continue;
         }
@@ -413,7 +413,7 @@ ModelFiles LoadModelFiles(const DataDirectories& directories)
     const std::optional<std::string> text = Items::Json::ReadTextFile(*table);
     if (!text)
     {
-        AddError(result.issues, source, "", "could not be read");
+        AddFatal(result.issues, source, "", "could not be read");
         return result;
     }
     std::vector<ModelFileEntry> models;
@@ -423,7 +423,7 @@ ModelFiles LoadModelFiles(const DataDirectories& directories)
         const std::optional<std::filesystem::path> file = directories.Find(entry.file);
         if (!file)
         {
-            AddError(result.issues, source, entry.model, "the file " + entry.file + " is not found");
+            AddFatal(result.issues, source, entry.model, "the file " + entry.file + " is not found");
             continue;
         }
         entry.path = *file;

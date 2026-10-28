@@ -375,7 +375,7 @@ void OpenPlayerTextures()
     }
 }
 
-// The game cannot run with broken item, effect or server list data: shows the errors and quits.
+// The game cannot run with broken item, effect or server list data: shows the fatal problems and quits.
 static void StopOnDataError(const char* title, const std::string& errorMessage)
 {
     const std::wstring message = Core::Text::FromUtf8(errorMessage);

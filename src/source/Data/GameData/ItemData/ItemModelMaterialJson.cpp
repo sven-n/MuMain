@@ -40,7 +40,7 @@ void Read(const OrderedJson& json, ItemModelDefinition& model, const ModelJson::
     {
         if (specular < 0.0 || specular > MaxSpecular)
         {
-            reader.Error(SpecularKey, "must be from 0 to " + std::to_string(static_cast<int>(MaxSpecular)));
+            reader.Fatal(SpecularKey, "must be from 0 to " + std::to_string(static_cast<int>(MaxSpecular)));
         }
         else
         {

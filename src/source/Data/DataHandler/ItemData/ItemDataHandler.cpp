@@ -158,11 +158,11 @@ bool CItemDataHandler::Load(std::string& errorMessage)
                                tooltips.issues);
     result.issues.insert(result.issues.end(), tooltips.issues.begin(), tooltips.issues.end());
     ItemStatProfiles statProfiles;
-    if (!HasErrors(stats.issues))
+    if (!HasFatal(stats.issues))
     {
         statProfiles = ItemStatProfiles(stats.file);
         ValidateStatProfiles(result.items, statProfiles, GetItemStatsFile().generic_string(), result.issues);
-        if (!HasErrors(tooltips.issues))
+        if (!HasFatal(tooltips.issues))
         {
             ValidateDescriptionPlaceholders(result.items, statProfiles, tooltips.file,
                                             GetItemStatsFile().generic_string(), result.issues);
@@ -170,14 +170,14 @@ bool CItemDataHandler::Load(std::string& errorMessage)
                               result.issues);
         }
     }
-    if (!HasErrors(tooltips.issues))
+    if (!HasFatal(tooltips.issues))
     {
         ValidateDescriptionTexts(result.items, tooltips.file, GetItemTooltipFile().generic_string(), result.issues);
     }
     Data::LogDataIssues(ItemDataLabel, result.issues);
-    if (HasErrors(result.issues))
+    if (HasFatal(result.issues))
     {
-        errorMessage = Data::DescribeDataErrors(ItemDataName, GetItemDataDirectory(), result.issues);
+        errorMessage = Data::DescribeFatalIssues(ItemDataName, GetItemDataDirectory(), result.issues);
         return false;
     }
     const double loadMilliseconds = MillisecondsSince(loadStart);
@@ -207,14 +207,14 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
     GlowColorsLoadResult colors = LoadGlowColorsFile(GetGlowColorsFile());
     ItemModelDataLoadResult result = LoadItemModelDataDirectory(GetItemModelDataDirectory());
     result.issues.insert(result.issues.begin(), colors.issues.begin(), colors.issues.end());
-    if (!HasErrors(colors.issues))
+    if (!HasFatal(colors.issues))
     {
         ValidateItemModelGlowColors(result.models, colors.colors, result.issues);
     }
     Data::LogDataIssues(ItemDataLabel, result.issues);
-    if (HasErrors(result.issues))
+    if (HasFatal(result.issues))
     {
-        errorMessage = Data::DescribeDataErrors(ItemDataName, GetItemModelDataDirectory(), result.issues);
+        errorMessage = Data::DescribeFatalIssues(ItemDataName, GetItemModelDataDirectory(), result.issues);
         return false;
     }
 
@@ -674,7 +674,7 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     // Everything is checked before anything is written, so all problems are
     // reported at once.
     Validate(issues);
-    if (HasErrors(issues))
+    if (HasFatal(issues))
     {
         return ItemDataSaveResult::InvalidData;
     }
@@ -706,7 +706,7 @@ void CItemDataHandler::SetStatFile(const ItemStatFile& file)
 ItemBmdImportResult CItemDataHandler::ImportFromBmd()
 {
     ItemBmdImportResult result = ImportItemBmdFiles();
-    if (HasErrors(result.issues))
+    if (HasFatal(result.issues))
     {
         return result;
     }

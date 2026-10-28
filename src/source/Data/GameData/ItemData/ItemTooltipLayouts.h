@@ -98,7 +98,7 @@ struct ItemTooltipFile
     const TooltipLayout* FindLayout(std::string_view name) const;
 };
 
-// Reads the file into `file` and adds its problems to `issues`; with errors the file must not be used. `source`
+// Reads the file into `file` and adds its problems to `issues`; with fatal problems the file must not be used. `source`
 // names the file in messages. Whether every shared text is used is checked with the items (ValidateDescriptionTexts).
 void ReadItemTooltipJson(std::string_view text, const std::string& source, ItemTooltipFile& file,
                          std::vector<ItemDataIssue>& issues);

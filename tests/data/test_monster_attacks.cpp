@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-using Data::Items::HasErrors;
+using Data::Items::HasFatal;
 using Data::Items::ItemDataIssue;
 using Data::Monsters::ChooseMonsterAttack;
 using Data::Monsters::MonsterAttackChoice;
@@ -210,7 +210,7 @@ TEST_CASE("Monster attacks: wrong values are errors that name the monster and th
     {
         INFO(wrong.attacks);
         const ReadResult result = ReadMonster(wrong.attacks);
-        CHECK(HasErrors(result.issues));
+        CHECK(HasFatal(result.issues));
         CHECK(HasIssueAbout(result.issues, wrong.field, wrong.message));
         CHECK(result.monsters.empty());
     }
@@ -219,7 +219,7 @@ TEST_CASE("Monster attacks: wrong values are errors that name the monster and th
 TEST_CASE("Monster attacks: an unknown field is a warning [data][monsters]")
 {
     const ReadResult result = ReadMonster(R"({ "otherwise": "shock", "map": 30 })");
-    CHECK_FALSE(HasErrors(result.issues));
+    CHECK_FALSE(HasFatal(result.issues));
     REQUIRE(result.issues.size() == 1);
     REQUIRE(result.monsters.size() == 1);
     CHECK(result.monsters[0].attacks->otherwise == MONSTER01_SHOCK);

@@ -63,7 +63,7 @@ public:
         mu::log::Init();
         const ItemDataLoadResult result =
             LoadItemDataDirectory(std::filesystem::path(MU_TEST_DATA_DIR) / "Items");
-        REQUIRE_FALSE(HasErrors(result.issues));
+        REQUIRE_FALSE(HasFatal(result.issues));
         g_ItemDatabase.Build(result.items);
         Hero = &m_character;
     }

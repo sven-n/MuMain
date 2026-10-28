@@ -43,7 +43,7 @@ void ValidateName(const MonsterDefinition& monster, std::vector<ItemDataIssue>& 
     {
         if (LocalizedString::ContainsSeparator(text))
         {
-            AddIssue(issues, ItemDataIssueSeverity::Error, monster,
+            AddIssue(issues, ItemDataIssueSeverity::Fatal, monster,
                      "the " + locale + " name must not contain \"" + std::string(LocalizedString::Separator) + "\"");
         }
         if (IsTooLongForGame(text))
@@ -59,7 +59,7 @@ void ValidateName(const MonsterDefinition& monster, std::vector<ItemDataIssue>& 
     {
         if (!LocalizedString::IsValidLocaleCode(locale))
         {
-            AddIssue(issues, ItemDataIssueSeverity::Error, monster,
+            AddIssue(issues, ItemDataIssueSeverity::Fatal, monster,
                      "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)");
             continue;
         }

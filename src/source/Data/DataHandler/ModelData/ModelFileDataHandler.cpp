@@ -67,9 +67,9 @@ bool LoadModelFileTable(std::string& errorMessage)
 {
     ModelFiles table = ReadModelFileTable(std::getenv(DataOverlayVariable), "Data");
     LogDataIssues(ModelFileDataLabel, table.issues);
-    if (Items::HasErrors(table.issues))
+    if (Items::HasFatal(table.issues))
     {
-        errorMessage = DescribeDataErrors(ModelFileDataName, table.table.parent_path(), table.issues);
+        errorMessage = DescribeFatalIssues(ModelFileDataName, table.table.parent_path(), table.issues);
         return false;
     }
     for (const ModelFileEntry& entry : table.models)

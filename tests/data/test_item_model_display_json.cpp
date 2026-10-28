@@ -34,9 +34,9 @@ bool HasIssue(const std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity se
                        [&](const ItemDataIssue& issue) { return issue.severity == severity && issue.field == field; });
 }
 
-bool HasError(const std::string& fields, const std::string& field)
+bool HasFatalIssue(const std::string& fields, const std::string& field)
 {
-    return HasIssue(ReadModel(fields).issues, ItemDataIssueSeverity::Error, field);
+    return HasIssue(ReadModel(fields).issues, ItemDataIssueSeverity::Fatal, field);
 }
 
 ItemModelDefinition MakeKris()
@@ -108,15 +108,15 @@ TEST_CASE("Item model display defaults are left out [data][items]")
 
 TEST_CASE("Item model display values are checked [data][items]")
 {
-    CHECK(HasError(R"("inventory": [])", "inventory"));
-    CHECK(HasError(R"("inventory": {"anchor": [0.5]})", "inventory.anchor"));
-    CHECK(HasError(R"("inventory": {"offset": [1, 2, 3, 4]})", "inventory.offset"));
-    CHECK(HasError(R"("inventory": {"rotation": [1, 2]})", "inventory.rotation"));
-    CHECK(HasError(R"("inventory": {"rotation": [1, "2", 3]})", "inventory.rotation"));
-    CHECK(HasError(R"("inventory": {"scale": 0})", "inventory.scale"));
-    CHECK(HasError(R"("inventory": {"bodyHeight": "high"})", "inventory.bodyHeight"));
-    CHECK(HasError(R"("ground": {"scale": -1})", "ground.scale"));
-    CHECK(HasError(R"("cloth": 1)", "cloth"));
+    CHECK(HasFatalIssue(R"("inventory": [])", "inventory"));
+    CHECK(HasFatalIssue(R"("inventory": {"anchor": [0.5]})", "inventory.anchor"));
+    CHECK(HasFatalIssue(R"("inventory": {"offset": [1, 2, 3, 4]})", "inventory.offset"));
+    CHECK(HasFatalIssue(R"("inventory": {"rotation": [1, 2]})", "inventory.rotation"));
+    CHECK(HasFatalIssue(R"("inventory": {"rotation": [1, "2", 3]})", "inventory.rotation"));
+    CHECK(HasFatalIssue(R"("inventory": {"scale": 0})", "inventory.scale"));
+    CHECK(HasFatalIssue(R"("inventory": {"bodyHeight": "high"})", "inventory.bodyHeight"));
+    CHECK(HasFatalIssue(R"("ground": {"scale": -1})", "ground.scale"));
+    CHECK(HasFatalIssue(R"("cloth": 1)", "cloth"));
     CHECK(ReadModel(R"("inventory": {"offset": [1, 2]}, "ground": {"scale": 0.5}, "cloth": false)").issues.empty());
 }
 

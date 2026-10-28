@@ -269,7 +269,7 @@ void CMuServerListUI::LoadFile()
 {
     Data::ServerList::ServerListLoadResult loaded =
         Data::ServerList::LoadServerListFile(Data::ServerList::ServerListFile);
-    m_edits.Reset(std::move(loaded.groups), !Data::Items::HasErrors(loaded.issues));
+    m_edits.Reset(std::move(loaded.groups), !Data::Items::HasFatal(loaded.issues));
     m_issues = std::move(loaded.issues);
     m_status.clear();
     m_statusIsError = false;
@@ -302,7 +302,7 @@ void CMuServerListUI::Save()
 
 void CMuServerListUI::RenderToolbar()
 {
-    // A save after a read with errors would remove the groups the read left out.
+    // A save after a read with fatal problems would remove the groups the read left out.
     ImGui::BeginDisabled(!m_edits.IsComplete());
     if (ImGui::Button(I18N::Editor::Save))
     {
@@ -422,7 +422,7 @@ void CMuServerListUI::RenderStatus()
     for (const Data::Items::ItemDataIssue& issue : m_issues)
     {
         const std::string line = issue.field + ": " + issue.message;
-        if (issue.severity == Data::Items::ItemDataIssueSeverity::Error)
+        if (issue.severity == Data::Items::ItemDataIssueSeverity::Fatal)
         {
             RenderError(line.c_str());
         }

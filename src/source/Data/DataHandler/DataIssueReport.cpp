@@ -8,8 +8,8 @@ namespace Data
 {
 namespace
 {
-// How many errors the player sees; all of them go to the log.
-constexpr size_t MaxErrorsInMessage = 10;
+// How many fatal problems the player sees; all of them go to the log.
+constexpr size_t MaxFatalInMessage = 10;
 } // namespace
 
 using Items::ItemDataIssue;
@@ -20,7 +20,7 @@ void LogDataIssues(std::string_view label, std::span<const ItemDataIssue> issues
     const auto logger = mu::log::Get("data");
     for (const ItemDataIssue& issue : issues)
     {
-        if (issue.severity == ItemDataIssueSeverity::Error)
+        if (issue.severity != ItemDataIssueSeverity::Warning)
         {
             MU_LOG_ERROR(logger, "{} {}", label, issue.ToString());
         }
@@ -31,25 +31,25 @@ void LogDataIssues(std::string_view label, std::span<const ItemDataIssue> issues
     }
 }
 
-std::string DescribeDataErrors(std::string_view what, const std::filesystem::path& directory,
-                               std::span<const ItemDataIssue> issues)
+std::string DescribeFatalIssues(std::string_view what, const std::filesystem::path& directory,
+                                std::span<const ItemDataIssue> issues)
 {
-    std::string message = "The " + std::string(what) + " in " + directory.string() + " has errors:\n";
-    size_t errorCount = 0;
+    std::string message = "The " + std::string(what) + " in " + directory.string() + " cannot be used:\n";
+    size_t fatalCount = 0;
     for (const ItemDataIssue& issue : issues)
     {
-        if (issue.severity != ItemDataIssueSeverity::Error)
+        if (issue.severity != ItemDataIssueSeverity::Fatal)
         {
             continue;
         }
-        if (++errorCount <= MaxErrorsInMessage)
+        if (++fatalCount <= MaxFatalInMessage)
         {
             message += "\n" + issue.ToString();
         }
     }
-    if (errorCount > MaxErrorsInMessage)
+    if (fatalCount > MaxFatalInMessage)
     {
-        message += "\n... and " + std::to_string(errorCount - MaxErrorsInMessage) + " more";
+        message += "\n... and " + std::to_string(fatalCount - MaxFatalInMessage) + " more";
     }
     return message + "\n\nAll problems are listed in MuError.log.";
 }

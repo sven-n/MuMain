@@ -349,7 +349,7 @@ std::optional<Data::Items::ItemStatFile> UnflattenFormulas(const Fields& fields,
     std::vector<ItemDataIssue> readIssues;
     Data::Items::ItemStatFile file;
     Data::Items::ReadItemStatFormulasJson(json, "formulas", file, readIssues);
-    const bool valid = !Data::Items::HasErrors(readIssues);
+    const bool valid = !Data::Items::HasFatal(readIssues);
     issues.insert(issues.end(), readIssues.begin(), readIssues.end());
     return valid ? std::optional(std::move(file)) : std::nullopt;
 }

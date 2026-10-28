@@ -58,12 +58,12 @@ bool ItemModelValueReader::ReadNumber(const char* key, double& value, bool mustB
     }
     if (!field->is_number() || !std::isfinite(field->get<double>()))
     {
-        Error(key, "must be a number");
+        Fatal(key, "must be a number");
         return false;
     }
     if (mustBePositive && field->get<double>() <= 0.0)
     {
-        Error(key, "must be greater than 0");
+        Fatal(key, "must be greater than 0");
         return false;
     }
     value = field->get<double>();
@@ -83,14 +83,14 @@ bool ItemModelValueReader::ReadNumbers(const char* key, std::span<double> values
                                   : std::to_string(minCount) + " or " + std::to_string(values.size());
     if (!field->is_array() || field->size() < minCount || field->size() > values.size())
     {
-        Error(key, "must be a list of " + sizes + " numbers");
+        Fatal(key, "must be a list of " + sizes + " numbers");
         return false;
     }
     for (const OrderedJson& entry : *field)
     {
         if (!entry.is_number() || !std::isfinite(entry.get<double>()))
         {
-            Error(key, "must be a list of " + sizes + " numbers");
+            Fatal(key, "must be a list of " + sizes + " numbers");
             return false;
         }
     }
@@ -116,7 +116,7 @@ bool ItemModelValueReader::ReadInteger(const char* key, int& value, int minValue
     const std::optional<int> number = ToInteger(*field, minValue, maxValue);
     if (!number)
     {
-        Error(key, "must be a whole number from " + std::to_string(minValue) + " to " + std::to_string(maxValue));
+        Fatal(key, "must be a whole number from " + std::to_string(minValue) + " to " + std::to_string(maxValue));
         return false;
     }
     value = *number;
@@ -134,7 +134,7 @@ bool ItemModelValueReader::ReadIndexes(const char* key, std::vector<int>& values
     const std::string message = "must be a list of whole numbers from 0 to " + std::to_string(maxValue);
     if (!field->is_array() || field->empty())
     {
-        Error(key, message);
+        Fatal(key, message);
         return false;
     }
     std::vector<int> indexes;
@@ -143,7 +143,7 @@ bool ItemModelValueReader::ReadIndexes(const char* key, std::vector<int>& values
         const std::optional<int> index = ToIndex(entry, maxValue);
         if (!index)
         {
-            Error(key, message);
+            Fatal(key, message);
             return false;
         }
         indexes.push_back(*index);
@@ -165,14 +165,14 @@ bool ItemModelValueReader::ReadPerLevelIndexes(const char* key, std::array<int, 
         const std::optional<int> index = ToIndex(entry, maxValue);
         if (!index)
         {
-            Error(entryField.c_str(), "must be a whole number from 0 to " + std::to_string(maxValue));
+            Fatal(entryField.c_str(), "must be a whole number from 0 to " + std::to_string(maxValue));
             valid = false;
             return;
         }
         value = *index;
     };
     const auto addError = [this](const std::string& errorField, const std::string& message)
-    { Error(errorField.c_str(), message); };
+    { Fatal(errorField.c_str(), message); };
     return Json::ReadPerLevelValues(*field, key, values, readIndex, addError) && valid;
 }
 
@@ -185,7 +185,7 @@ bool ItemModelValueReader::ReadBool(const char* key, bool& value)
     }
     if (!field->is_boolean())
     {
-        Error(key, "must be true or false");
+        Fatal(key, "must be true or false");
         return false;
     }
     value = field->get<bool>();
@@ -201,16 +201,16 @@ bool ItemModelValueReader::ReadName(const char* key, std::string& value)
     }
     if (!field->is_string() || !Json::IsName(field->get_ref<const std::string&>()))
     {
-        Error(key, "must be a name of letters and digits");
+        Fatal(key, "must be a name of letters and digits");
         return false;
     }
     value = field->get<std::string>();
     return true;
 }
 
-void ItemModelValueReader::Error(const char* key, const std::string& message)
+void ItemModelValueReader::Fatal(const char* key, const std::string& message)
 {
-    m_report(ItemDataIssueSeverity::Error, m_objectKey + "." + key, message);
+    m_report(ItemDataIssueSeverity::Fatal, m_objectKey + "." + key, message);
 }
 
 void ItemModelValueReader::WarnAboutUnknownKeys()

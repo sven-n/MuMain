@@ -460,8 +460,8 @@
   <data name="Failed to export items as bmd" xml:space="preserve">
     <value>Nie udało się wyeksportować przedmiotów jako plików bmd.</value>
   </data>
-  <data name="Item data has errors" xml:space="preserve">
-    <value>Dane przedmiotów zawierają błędy i nie zostały zapisane. Zobacz konsolę.</value>
+  <data name="Item data has fatal problems" xml:space="preserve">
+    <value>Dane przedmiotów mają krytyczne problemy i nie zostały zapisane. Zobacz konsolę.</value>
   </data>
   <data name="Item data could not be written" xml:space="preserve">
     <value>Nie udało się zapisać plików danych przedmiotów. Zobacz konsolę.</value>

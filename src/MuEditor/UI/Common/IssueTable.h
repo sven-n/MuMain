@@ -4,24 +4,32 @@
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 
+#include <array>
 #include <vector>
 
 namespace MuEditor
 {
 class IssueSubjects;
 
-// The problems a checks tool found (Item Checks, Monster Checks): errors
-// first, a box for each kind with its count that shows or hides it, and a
-// table of the kind, the subject (IssueSubjects), the field and the message.
-// A click on a row selects its subject and opens the tool of its field.
+// The problems a checks tool found (Item Checks, Monster Checks): the worst
+// first (fatal, error, warning), a box for each level with its count that
+// shows or hides it, and a table of the level, the subject (IssueSubjects),
+// the field and the message. A click on a row selects its subject and opens
+// the tool of its field.
 class IssueTable
 {
 public:
-    // The problems of a check, errors first, each kind in the order the checks
-    // found them. No row is clicked then.
+    // Fatal, Error, Warning.
+    static constexpr int LevelCount = 3;
+
+    // The problems of a check, the worst first, each level in the order the
+    // checks found them. No row is clicked then.
     void SetIssues(std::vector<Data::Items::ItemDataIssue> issues);
 
-    // The "Errors: 2" and "Warnings: 5" boxes, side by side.
+    // How many problems of this level the last check found.
+    int GetCount(Data::Items::ItemDataIssueSeverity severity) const;
+
+    // The "Fatal: 1", "Errors: 2" and "Warnings: 5" boxes, side by side.
     void RenderKindBoxes();
     // "No errors or warnings", or the table of the problems the boxes show.
     void RenderTable(IssueSubjects& subjects);
@@ -40,10 +48,9 @@ private:
     std::vector<Data::Items::ItemDataIssue> m_issues;
     // Indexes into m_issues, in its order.
     std::vector<int> m_shownIssues;
-    int m_errorCount = 0;
-    int m_warningCount = 0;
-    bool m_showErrors = true;
-    bool m_showWarnings = true;
+    // By level, worst first.
+    std::array<int, LevelCount> m_counts{};
+    std::array<bool, LevelCount> m_shown{true, true, true};
     // The index into m_issues of the problem clicked last, or NoIssue.
     int m_clickedIssue = NoIssue;
 };

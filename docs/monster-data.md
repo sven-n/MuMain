@@ -361,9 +361,13 @@ until their next action. Monster Checks warns about both.
 At startup `Data/Monsters/Monsters.json` is read and checked, and after the
 effect catalogue `Data/Monsters/Models.json`.
 
-**Errors** stop the start with a message ("Monster data error") that names
-the file, the monster and the field. All problems are also written to
-`MuError.log`. Errors are:
+Problems have three levels, the same in every data area and editor tool:
+**fatal** ones make the data unusable, **errors** name something that is
+missing (the game runs without it), **warnings** are worth knowing.
+
+**Fatal problems** stop the start with a message ("Monster data error")
+that names the file, the monster and the field. All problems are also written
+to `MuError.log`. Fatal problems are:
 
 - a file that cannot be read, invalid JSON, a missing or unsupported
   `formatVersion`, no `monsters` list
@@ -385,8 +389,8 @@ the file, the monster and the field. All problems are also written to
 - a name longer than 64 characters: the game shows it cut
 - a name in a language the game has no UI texts for (it is never shown)
 
-In the model list, errors (they stop the start with "Monster data error" too,
-naming the model list) are a
+In the model list, fatal problems (they stop the start with "Monster data
+error" too, naming the model list) are a
 value of the wrong form (each names the model and the field), a slot that is
 no model slot of the two ranges or is there twice, a sound slot that names no
 sound of the model and no `SOUND_*` number, a sound `id`, bitmap slot or
@@ -549,11 +553,12 @@ How changes work:
 - **Save Monsters** (in the Monster Browser and Monster Translations) runs
   the checks and writes `Data/Monsters/Monsters.json` and
   `Data/Monsters/Models.json` next to the game. With
-  errors nothing is written, and the problems are listed under the button;
+  fatal problems nothing is written, and the problems are listed under the
+  button;
   warnings do not stop it. The new file takes the old one's place only when
   it was written whole.
 - **Revert** reads both files again: the changes since they were saved are
-  lost, and so is the undo history. A file with errors is not taken; its
+  lost, and so is the undo history. A file with fatal problems is not taken; its
   monsters or models stay as they are and the problems are listed.
 
 The game runs from the build folder, which has a copy of `src/bin/Data`.

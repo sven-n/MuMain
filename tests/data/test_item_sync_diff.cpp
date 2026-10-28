@@ -365,7 +365,7 @@ TEST_CASE("Formulas the item stat file's checks refuse are not taken [data][item
     }
     std::vector<ItemDataIssue> issues;
     const ItemExchangeFile applied = ApplyItemSyncDiff(sides.client, sides.file, diff, issues);
-    CHECK(HasErrors(issues));
+    CHECK(HasFatal(issues));
     CHECK(*applied.formulas == *sides.client.formulas);
 }
 

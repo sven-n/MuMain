@@ -723,7 +723,7 @@ TEST_CASE("Item stats and requirements stop at 65535 [data][items]")
 {
     ShippedItemAttributes items;
     ItemStatsLoadResult stats = LoadItemStatsFile(ClientDirectory / GetItemStatsFile());
-    REQUIRE_FALSE(HasErrors(stats.issues));
+    REQUIRE_FALSE(HasFatal(stats.issues));
     WrittenStatSection& damage = stats.file.defaults[static_cast<size_t>(ItemStat::Damage)];
     damage.excellent.values.times = 65535;
     damage.ancient.values = {65535, 65535, 1, true};

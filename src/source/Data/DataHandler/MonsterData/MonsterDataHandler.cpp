@@ -92,9 +92,9 @@ bool MonsterDataHandler::Load(std::string& errorMessage)
     MonsterDataLoadResult result = LoadMonstersFile(GetMonstersFile());
     ValidateLocales(result.monsters, result.issues);
     LogDataIssues(MonsterDataLabel, result.issues);
-    if (Items::HasErrors(result.issues))
+    if (Items::HasFatal(result.issues))
     {
-        errorMessage = DescribeDataErrors(MonsterDataName, GetMonstersFile(), result.issues);
+        errorMessage = DescribeFatalIssues(MonsterDataName, GetMonstersFile(), result.issues);
         return false;
     }
 
@@ -111,9 +111,9 @@ bool MonsterDataHandler::LoadModels(std::string& errorMessage)
     const auto loadStart = std::chrono::steady_clock::now();
     const MonsterModelsLoadResult result = LoadMonsterModelsFile(GetMonsterModelsFile());
     LogDataIssues(MonsterModelsLabel, result.issues);
-    if (Items::HasErrors(result.issues))
+    if (Items::HasFatal(result.issues))
     {
-        errorMessage = DescribeDataErrors(MonsterModelsName, GetMonsterModelsFile(), result.issues);
+        errorMessage = DescribeFatalIssues(MonsterModelsName, GetMonsterModelsFile(), result.issues);
         return false;
     }
 
@@ -210,7 +210,7 @@ bool MonsterDataHandler::Revert(std::vector<Items::ItemDataIssue>& issues)
     MonsterDataLoadResult result = LoadMonstersFile(GetMonstersFile());
     ValidateLocales(result.monsters, result.issues);
     issues.insert(issues.end(), result.issues.begin(), result.issues.end());
-    if (Items::HasErrors(result.issues))
+    if (Items::HasFatal(result.issues))
     {
         return false;
     }
@@ -265,7 +265,7 @@ bool MonsterDataHandler::RevertModels(std::vector<Items::ItemDataIssue>& issues)
 {
     const MonsterModelsLoadResult result = LoadMonsterModelsFile(GetMonsterModelsFile());
     issues.insert(issues.end(), result.issues.begin(), result.issues.end());
-    if (Items::HasErrors(result.issues))
+    if (Items::HasFatal(result.issues))
     {
         return false;
     }
@@ -293,7 +293,7 @@ bool MonsterDataHandler::SaveAll(std::vector<Items::ItemDataIssue>& issues)
     std::string error;
     if (!WriteTextFiles(files, failed, error))
     {
-        issues.push_back({Items::ItemDataIssueSeverity::Error, failed.generic_string(), Items::ItemDataIssue::NoItem,
+        issues.push_back({Items::ItemDataIssueSeverity::Fatal, failed.generic_string(), Items::ItemDataIssue::NoItem,
                           Items::ItemDataIssue::NoItem, "", error});
         return false;
     }
@@ -307,7 +307,7 @@ bool MonsterDataHandler::RevertAll(std::vector<Items::ItemDataIssue>& issues)
     const MonsterModelsLoadResult models = LoadMonsterModelsFile(GetMonsterModelsFile());
     issues.insert(issues.end(), monsters.issues.begin(), monsters.issues.end());
     issues.insert(issues.end(), models.issues.begin(), models.issues.end());
-    if (Items::HasErrors(monsters.issues) || Items::HasErrors(models.issues))
+    if (Items::HasFatal(monsters.issues) || Items::HasFatal(models.issues))
     {
         return false;
     }

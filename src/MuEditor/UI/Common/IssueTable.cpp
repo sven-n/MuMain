@@ -11,6 +11,7 @@
 #include "imgui.h"
 
 #include <algorithm>
+#include <array>
 #include <string>
 #include <utility>
 
@@ -19,6 +20,7 @@ namespace MuEditor
 namespace
 {
 using Data::Items::ItemDataIssue;
+using Data::Items::ItemDataIssueSeverity;
 
 // Pixel widths before the editor UI scale.
 constexpr float KindColumnWidth = 70.0f;
@@ -26,13 +28,41 @@ constexpr float FieldColumnWidth = 160.0f;
 constexpr float TooltipWrapWidth = 420.0f;
 constexpr int ColumnCount = 4;
 
-constexpr ImVec4 ErrorColor{1.0f, 0.4f, 0.4f, 1.0f};
+constexpr ImVec4 FatalColor{1.0f, 0.4f, 0.4f, 1.0f};
+constexpr ImVec4 ErrorColor{1.0f, 0.6f, 0.35f, 1.0f};
 // Also the note that the problems are from before the last change.
 constexpr ImVec4 WarningColor{1.0f, 0.8f, 0.3f, 1.0f};
 
-bool IsError(const ItemDataIssue& issue)
+// How the table shows a level: the format of its box ("Fatal: 2"), its name
+// in the kind column, its color and the box's id. The labels are read when
+// drawn, so they follow the editor language.
+struct LevelLook
 {
-    return issue.severity == Data::Items::ItemDataIssueSeverity::Error;
+    ItemDataIssueSeverity severity;
+    const char* const* countFormat;
+    const char* const* name;
+    ImVec4 color;
+    const char* boxId;
+};
+
+// Worst first: the order of the boxes and of the rows.
+const std::array<LevelLook, IssueTable::LevelCount> Levels = {{
+    {ItemDataIssueSeverity::Fatal, &I18N::Editor::Fatal0, &I18N::Editor::Fatal, FatalColor, "###ShowFatal"},
+    {ItemDataIssueSeverity::Error, &I18N::Editor::Errors0, &I18N::Editor::Error, ErrorColor, "###ShowErrors"},
+    {ItemDataIssueSeverity::Warning, &I18N::Editor::Warnings0, &I18N::Editor::Warning, WarningColor, "###ShowWarnings"},
+}};
+
+// The level's place in Levels.
+size_t LevelIndex(ItemDataIssueSeverity severity)
+{
+    for (size_t index = 0; index < Levels.size(); ++index)
+    {
+        if (Levels[index].severity == severity)
+        {
+            return index;
+        }
+    }
+    return Levels.size() - 1;
 }
 
 // The whole message, which the column may cut, and the file it is about.
@@ -64,11 +94,20 @@ bool RenderKindBox(const char* countFormat, int count, const char* id, bool& sho
 void IssueTable::SetIssues(std::vector<ItemDataIssue> issues)
 {
     m_issues = std::move(issues);
-    std::stable_partition(m_issues.begin(), m_issues.end(), IsError);
-    m_errorCount = static_cast<int>(std::count_if(m_issues.begin(), m_issues.end(), IsError));
-    m_warningCount = static_cast<int>(m_issues.size()) - m_errorCount;
+    std::stable_sort(m_issues.begin(), m_issues.end(), [](const ItemDataIssue& left, const ItemDataIssue& right)
+                     { return LevelIndex(left.severity) < LevelIndex(right.severity); });
+    m_counts.fill(0);
+    for (const ItemDataIssue& issue : m_issues)
+    {
+        ++m_counts[LevelIndex(issue.severity)];
+    }
     m_clickedIssue = NoIssue;
     FilterIssues();
+}
+
+int IssueTable::GetCount(ItemDataIssueSeverity severity) const
+{
+    return m_counts[LevelIndex(severity)];
 }
 
 void IssueTable::FilterIssues()
@@ -76,7 +115,7 @@ void IssueTable::FilterIssues()
     m_shownIssues.clear();
     for (int index = 0; index < static_cast<int>(m_issues.size()); ++index)
     {
-        if (IsError(m_issues[index]) ? m_showErrors : m_showWarnings)
+        if (m_shown[LevelIndex(m_issues[index].severity)])
         {
             m_shownIssues.push_back(index);
         }
@@ -85,14 +124,18 @@ void IssueTable::FilterIssues()
 
 void IssueTable::RenderKindBoxes()
 {
-    if (RenderKindBox(I18N::Editor::Errors0, m_errorCount, "###ShowErrors", m_showErrors))
+    for (size_t level = 0; level < Levels.size(); ++level)
     {
-        FilterIssues();
-    }
-    ImGui::SameLine();
-    if (RenderKindBox(I18N::Editor::Warnings0, m_warningCount, "###ShowWarnings", m_showWarnings))
-    {
-        FilterIssues();
+        if (level > 0)
+        {
+            ImGui::SameLine();
+        }
+        bool shown = m_shown[level];
+        if (RenderKindBox(*Levels[level].countFormat, m_counts[level], Levels[level].boxId, shown))
+        {
+            m_shown[level] = shown;
+            FilterIssues();
+        }
     }
 }
 
@@ -145,14 +188,13 @@ void IssueTable::RenderTable(IssueSubjects& subjects)
 void IssueTable::RenderRow(IssueSubjects& subjects, int issueIndex)
 {
     const ItemDataIssue& issue = m_issues[issueIndex];
-    const bool error = IsError(issue);
+    const LevelLook& level = Levels[LevelIndex(issue.severity)];
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
     ImGui::PushID(issueIndex);
-    ImGui::PushStyleColor(ImGuiCol_Text, error ? ErrorColor : WarningColor);
-    const bool clicked =
-        ImGui::Selectable(error ? I18N::Editor::Error : I18N::Editor::Warning, issueIndex == m_clickedIssue,
-                          ImGuiSelectableFlags_SpanAllColumns | KeyboardSelection::RowFlags);
+    ImGui::PushStyleColor(ImGuiCol_Text, level.color);
+    const bool clicked = ImGui::Selectable(*level.name, issueIndex == m_clickedIssue,
+                                           ImGuiSelectableFlags_SpanAllColumns | KeyboardSelection::RowFlags);
     const bool movedOnto = KeyboardSelection::MovedOnto();
     ImGui::PopStyleColor();
     ImGui::PopID();

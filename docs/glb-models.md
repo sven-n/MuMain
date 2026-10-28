@@ -40,8 +40,8 @@ Code: `src/source/Data/GameData/ModelData/` (the table),
 - No table, or an empty `models` list: every monster is drawn from its BMD
   and nothing is logged.
 - An unknown model, a model named twice, a file found nowhere or a malformed
-  table is a data error: the game stops at start with a message, as for the
-  effect data.
+  table is a fatal problem: the game stops at start with a message, as for
+  the effect data.
 - An unknown field, or an action entry with neither a clip nor a crossfade,
   is a warning; the entry is kept.
 
@@ -125,7 +125,7 @@ the root bone, with one log line.
   meshes, animation and skinning with the BMDs; it also covers the refusals,
   LODs, normal maps, embedded images and the GPU vertex packing.
 - `tests/data/test_model_files.cpp` (`model_files_data_tests`) covers the
-  table, its errors and warnings, and the overlay.
+  table, its fatal problems and warnings, and the overlay.
 - `tests/render/test_animation_sampling.cpp` and
   `test_animation_playback_rule.cpp` cover the playback rule BMD and GLB
   models share.

@@ -116,7 +116,7 @@ void ReadCloth(const OrderedJson& json, bool& cloth, const ReportIssue& report)
     }
     if (!field->is_boolean())
     {
-        report(ItemDataIssueSeverity::Error, ClothKey, "must be true or false");
+        report(ItemDataIssueSeverity::Fatal, ClothKey, "must be true or false");
         return;
     }
     cloth = field->get<bool>();

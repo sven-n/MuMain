@@ -204,7 +204,7 @@ TEST_CASE("Saving the shipped item models from the model database gives the ship
     ItemModelDatabase database;
     database.Build(ShippedModels().models, Data::Effects::GlowColorList{});
     const ItemDataLoadResult items = LoadItemDataDirectory(DataDirectory / "Items");
-    REQUIRE_FALSE(HasErrors(items.issues));
+    REQUIRE_FALSE(HasFatal(items.issues));
     const std::filesystem::path folder =
         std::filesystem::temp_directory_path() / ("mu_test_item_models_" + std::to_string(std::random_device{}()));
     ItemGroupSet allGroups;

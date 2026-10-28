@@ -81,7 +81,7 @@ bool MonsterFileActions::Save()
 bool MonsterFileActions::Revert()
 {
     m_issues.clear();
-    // A file with errors leaves its table as it is; the problems say why.
+    // A file with fatal problems leaves its table as it is; the problems say why.
     const bool reverted = g_MonsterEdits.Revert(m_issues);
     m_status.clear();
     m_statusIsError = false;
@@ -111,7 +111,7 @@ void MonsterFileActions::RenderStatus() const
             lastSource = &issue.source;
         }
         const std::string line = issue.field.empty() ? issue.message : issue.field + ": " + issue.message;
-        if (issue.severity == Data::Items::ItemDataIssueSeverity::Error)
+        if (issue.severity == Data::Items::ItemDataIssueSeverity::Fatal)
         {
             RenderError(line.c_str());
         }

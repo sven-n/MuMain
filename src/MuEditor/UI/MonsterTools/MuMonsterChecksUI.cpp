@@ -108,7 +108,7 @@ void MuMonsterChecksUI::Render(bool* open)
             RunChecks();
         }
         RenderCheckLine();
-        IssueTable::RenderNotes(I18N::Editor::SaveMonstersRefusesDataWithErrorsAndSavesDataWithWarnings,
+        IssueTable::RenderNotes(I18N::Editor::SaveMonstersRefusesFatalProblemsSavesErrorsAndWarnings,
                                 I18N::Editor::MonsterChecksClickNote);
         ImGui::Separator();
         MonsterIssueSubjects subjects;

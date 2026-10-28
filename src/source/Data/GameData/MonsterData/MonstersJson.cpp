@@ -43,9 +43,9 @@ class IssueList
 public:
     IssueList(const std::string& source, std::vector<ItemDataIssue>& issues) : m_source(source), m_issues(issues) {}
 
-    void Error(const std::string& field, const std::string& message, int monster = ItemDataIssue::NoItem)
+    void Fatal(const std::string& field, const std::string& message, int monster = ItemDataIssue::NoItem)
     {
-        Add(ItemDataIssueSeverity::Error, field, message, monster);
+        Add(ItemDataIssueSeverity::Fatal, field, message, monster);
     }
 
     void Warning(const std::string& field, const std::string& message, int monster = ItemDataIssue::NoItem)
@@ -81,7 +81,7 @@ std::optional<int> ReadMonsterNumber(const OrderedJson& json, const std::string&
     if (value == json.end() || !value->is_number_integer() || !Items::Json::ReadWholeNumber(*value, number) ||
         number < 0 || number >= MonsterNumberCount)
     {
-        issues.Error(field + "." + NumberKey,
+        issues.Fatal(field + "." + NumberKey,
                      "missing or not a whole number from 0 to " + std::to_string(MonsterNumberCount - 1));
         return std::nullopt;
     }
@@ -93,12 +93,12 @@ bool ReadNames(const OrderedJson& json, int number, LocalizedString& names, Issu
     const auto value = json.find(NameKey);
     if (value == json.end())
     {
-        issues.Error(MonsterField(number, NameKey), "missing", number);
+        issues.Fatal(MonsterField(number, NameKey), "missing", number);
         return false;
     }
     return Items::Json::ReadLocalizedString(*value, MonsterField(number, NameKey), names,
                                             [&](const std::string& field, const std::string& message)
-                                            { issues.Error(field, message, number); });
+                                            { issues.Fatal(field, message, number); });
 }
 
 bool ReadKind(const OrderedJson& json, int number, MonsterKind& kind, IssueList& issues)
@@ -108,7 +108,7 @@ bool ReadKind(const OrderedJson& json, int number, MonsterKind& kind, IssueList&
         value != json.end() && value->is_string() ? FindMonsterKind(value->get<std::string>()) : std::nullopt;
     if (!found)
     {
-        issues.Error(MonsterField(number, KindKey), "missing or not monster, npc, trap or other", number);
+        issues.Fatal(MonsterField(number, KindKey), "missing or not monster, npc, trap or other", number);
         return false;
     }
     kind = *found;
@@ -124,7 +124,7 @@ bool ReadModel(const OrderedJson& json, int number, std::string& model, IssueLis
     }
     if (!value->is_string() || !FindMonsterModelReference(value->get<std::string>()))
     {
-        issues.Error(MonsterField(number, ModelKey),
+        issues.Fatal(MonsterField(number, ModelKey),
                      "must be a model of the model list (MONSTER_MODEL_..., MODEL_...), player, MODEL_WARCRAFT, "
                      "MODEL_BALL or mapObject <number>",
                      number);
@@ -165,7 +165,7 @@ bool ReadAttackEntries(const OrderedJson& json, const char* key, int number, std
     const std::string field = MonsterField(number, AttacksKey) + "." + key;
     if (!value->is_object())
     {
-        issues.Error(field, "must be an object of skill numbers and animations", number);
+        issues.Fatal(field, "must be an object of skill numbers and animations", number);
         return false;
     }
     bool valid = true;
@@ -183,7 +183,7 @@ bool ReadAttackEntries(const OrderedJson& json, const char* key, int number, std
         }
         if (!isNumber || skill > MaxSkillNumber)
         {
-            issues.Error(field + "." + skillText,
+            issues.Fatal(field + "." + skillText,
                          "must be a skill number from 0 to " + std::to_string(MaxSkillNumber) +
                              ", without leading zeros",
                          number);
@@ -193,7 +193,7 @@ bool ReadAttackEntries(const OrderedJson& json, const char* key, int number, std
         const std::optional<int> animation = ReadAttackAnimation(entry.value());
         if (!animation)
         {
-            issues.Error(field + "." + skillText, "must be an animation (attack1, shock, appear, ...) or none", number);
+            issues.Fatal(field + "." + skillText, "must be an animation (attack1, shock, appear, ...) or none", number);
             valid = false;
             continue;
         }
@@ -213,7 +213,7 @@ bool ReadAttacks(const OrderedJson& json, int number, std::optional<MonsterAttac
     const std::string field = MonsterField(number, AttacksKey);
     if (!value->is_object())
     {
-        issues.Error(field, "must be an object", number);
+        issues.Fatal(field, "must be an object", number);
         return false;
     }
     MonsterAttacks read;
@@ -223,7 +223,7 @@ bool ReadAttacks(const OrderedJson& json, int number, std::optional<MonsterAttac
     const auto random = value->find(OtherwiseRandomKey);
     if (otherwise != value->end() && random != value->end())
     {
-        issues.Error(field, "has otherwise or otherwiseRandom, not both", number);
+        issues.Fatal(field, "has otherwise or otherwiseRandom, not both", number);
         valid = false;
     }
     if (otherwise != value->end())
@@ -235,7 +235,7 @@ bool ReadAttacks(const OrderedJson& json, int number, std::optional<MonsterAttac
         }
         else
         {
-            issues.Error(field + "." + OtherwiseKey, "must be an animation (attack1, shock, appear, ...) or none",
+            issues.Fatal(field + "." + OtherwiseKey, "must be an animation (attack1, shock, appear, ...) or none",
                          number);
             valid = false;
         }
@@ -245,7 +245,7 @@ bool ReadAttacks(const OrderedJson& json, int number, std::optional<MonsterAttac
         read.otherwiseRandom = random->is_string() ? FindMonsterAttackRandom(random->get<std::string>()) : std::nullopt;
         if (!read.otherwiseRandom)
         {
-            issues.Error(field + "." + OtherwiseRandomKey, "must be rand, randFps or bali", number);
+            issues.Fatal(field + "." + OtherwiseRandomKey, "must be rand, randFps or bali", number);
             valid = false;
         }
     }
@@ -260,7 +260,7 @@ bool ReadAttacks(const OrderedJson& json, int number, std::optional<MonsterAttac
         }
         else
         {
-            issues.Error(field + "." + ClearSkillKey, "must be never, onMatch, onNoMatch, always or afterAttack",
+            issues.Fatal(field + "." + ClearSkillKey, "must be never, onMatch, onNoMatch, always or afterAttack",
                          number);
             valid = false;
         }
@@ -273,7 +273,7 @@ bool ReadAttacks(const OrderedJson& json, int number, std::optional<MonsterAttac
         }
         else
         {
-            issues.Error(field + "." + SoundKey, "must be a SOUND_ id that the monster data can name", number);
+            issues.Fatal(field + "." + SoundKey, "must be a SOUND_ id that the monster data can name", number);
             valid = false;
         }
     }
@@ -285,7 +285,7 @@ bool ReadAttacks(const OrderedJson& json, int number, std::optional<MonsterAttac
         }
         else
         {
-            issues.Error(field + "." + SoundAtMonsterKey, "must be true or false", number);
+            issues.Fatal(field + "." + SoundAtMonsterKey, "must be true or false", number);
             valid = false;
         }
     }
@@ -346,7 +346,7 @@ std::optional<MonsterDefinition> ReadMonster(const OrderedJson& json, const std:
 {
     if (!json.is_object())
     {
-        issues.Error(field, "must be an object");
+        issues.Fatal(field, "must be an object");
         return std::nullopt;
     }
     const std::optional<int> number = ReadMonsterNumber(json, field, issues);
@@ -400,7 +400,7 @@ void ReadMonstersJson(std::string_view text, const std::string& source, std::vec
     const auto entries = root.find(MonstersKey);
     if (entries == root.end() || !entries->is_array())
     {
-        list.Error(MonstersKey, "missing or not a list of monsters");
+        list.Fatal(MonstersKey, "missing or not a list of monsters");
         return;
     }
     std::set<int> numbers;
@@ -413,7 +413,7 @@ void ReadMonstersJson(std::string_view text, const std::string& source, std::vec
         }
         if (!numbers.insert(monster->number).second)
         {
-            list.Error(MonsterField(monster->number, NumberKey), "is in the list more than once", monster->number);
+            list.Fatal(MonsterField(monster->number, NumberKey), "is in the list more than once", monster->number);
             continue;
         }
         monsters.push_back(std::move(*monster));

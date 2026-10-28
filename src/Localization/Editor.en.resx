@@ -460,8 +460,8 @@
   <data name="Failed to export items as bmd" xml:space="preserve">
     <value>Failed to export the items as bmd files.</value>
   </data>
-  <data name="Item data has errors" xml:space="preserve">
-    <value>The item data has errors and was not saved. See the console.</value>
+  <data name="Item data has fatal problems" xml:space="preserve">
+    <value>The item data has fatal problems and was not saved. See the console.</value>
   </data>
   <data name="Item data could not be written" xml:space="preserve">
     <value>The item data files could not be written. See the console.</value>
@@ -1297,11 +1297,17 @@
   <data name="Errors: {0}" xml:space="preserve">
     <value>Errors: {0}</value>
   </data>
+  <data name="Fatal: {0}" xml:space="preserve">
+    <value>Fatal: {0}</value>
+  </data>
   <data name="Warnings: {0}" xml:space="preserve">
     <value>Warnings: {0}</value>
   </data>
   <data name="Error" xml:space="preserve">
     <value>Error</value>
+  </data>
+  <data name="Fatal" xml:space="preserve">
+    <value>Fatal</value>
   </data>
   <data name="Warning" xml:space="preserve">
     <value>Warning</value>
@@ -1318,8 +1324,8 @@
   <data name="The items changed since the last check; check again." xml:space="preserve">
     <value>The items changed since the last check; check again.</value>
   </data>
-  <data name="Save Items refuses data with errors and saves data with warnings." xml:space="preserve">
-    <value>Save Items refuses data with errors and saves data with warnings.</value>
+  <data name="Save Items refuses fatal problems, saves errors and warnings." xml:space="preserve">
+    <value>Save Items refuses data with fatal problems and saves data with errors and warnings.</value>
   </data>
   <data name="Click a problem of an item to select the item and open the tool of its field." xml:space="preserve">
     <value>Click a problem of an item to select the item and open the tool of its field.</value>
@@ -2113,8 +2119,8 @@
   <data name="The monsters changed since the last check; check again." xml:space="preserve">
     <value>The monsters changed since the last check; check again.</value>
   </data>
-  <data name="Save Monsters refuses data with errors and saves data with warnings." xml:space="preserve">
-    <value>Save Monsters refuses data with errors and saves data with warnings.</value>
+  <data name="Save Monsters refuses fatal problems, saves errors and warnings." xml:space="preserve">
+    <value>Save Monsters refuses data with fatal problems and saves data with errors and warnings.</value>
   </data>
   <data name="Monster checks click note" xml:space="preserve">
     <value>Click a problem of a monster to select the monster and open the tool of its field.</value>

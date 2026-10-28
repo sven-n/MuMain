@@ -6,7 +6,7 @@
 
 namespace MuEditor::Monsters
 {
-// Monster Checks: the errors and warnings Save Monsters finds in the monster
+// Monster Checks: the fatal problems and warnings Save Monsters finds in the monster
 // list (MonsterChecks), errors first. A click on a problem of a monster
 // selects the monster and opens the tool of its field. The checks run when the
 // window is first shown and on Check, as Item Checks does.

@@ -4,7 +4,7 @@
 
 #include "../MuEditor/UI/Common/IssueTable.h"
 
-// The item checks (section 9): the errors and warnings Save Items finds in the
+// The item checks (section 9): the fatal problems and warnings Save Items finds in the
 // item data and the item models, errors first. A click on a problem of an
 // item selects the item and opens the tool of its field. The checks run when
 // the window is first shown and on Check, not every frame: they write and

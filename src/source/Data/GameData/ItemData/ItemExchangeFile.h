@@ -74,7 +74,7 @@ ItemDefinition ToExchangeItem(const ItemDefinition& item);
 // The exchange file of the client's items and formulas.
 ItemExchangeFile BuildItemExchange(std::span<const ItemDefinition> items, const ItemStatFile& formulas);
 
-// Reads the file into `file` and adds its problems to `issues`; with errors it must not be
+// Reads the file into `file` and adds its problems to `issues`; with fatal problems it must not be
 // used, except for an item that is there twice: an error of that item, which then is in
 // `repeatedItems` and not read, while the rest of the file can be used. Fields
 // the exchange file has not got are left out with a warning. `source` names the file in

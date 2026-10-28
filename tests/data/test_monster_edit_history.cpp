@@ -473,7 +473,7 @@ TEST_CASE("Saving the monster edits writes the model list too, a revert reads it
     const bool written = g_MonsterEdits.Save(issues);
     INFO(Lines(issues));
     REQUIRE(written);
-    CHECK_FALSE(Data::Items::HasErrors(issues));
+    CHECK_FALSE(Data::Items::HasFatal(issues));
     const Data::Monsters::MonsterModelsLoadResult saved =
         Data::Monsters::LoadMonsterModelsFile(folder.Path() / Data::Monsters::GetMonsterModelsFile());
     CHECK(saved.models == std::vector{faster});
@@ -507,7 +507,7 @@ TEST_CASE("Saving the monster edits writes neither file when one has errors [edi
 
     CHECK_FALSE(g_MonsterEdits.Save(issues));
 
-    CHECK(Data::Items::HasErrors(issues));
+    CHECK(Data::Items::HasFatal(issues));
     // Before, the monster list was written and the model list was not.
     CHECK_FALSE(std::filesystem::exists(folder.MonstersFile()));
     CHECK_FALSE(std::filesystem::exists(folder.Path() / Data::Monsters::GetMonsterModelsFile()));
@@ -534,7 +534,7 @@ TEST_CASE("Saving the monster edits writes neither file when one cannot be writt
     REQUIRE(std::filesystem::create_directory(Data::GetTemporaryPath(modelsFile)));
     issues.clear();
     CHECK_FALSE(g_MonsterEdits.Save(issues));
-    CHECK(Data::Items::HasErrors(issues));
+    CHECK(Data::Items::HasFatal(issues));
     CHECK(Data::ReadTextFile(monstersFile) == monsters);
     CHECK_FALSE(std::filesystem::exists(Data::GetTemporaryPath(monstersFile)));
     std::filesystem::remove(Data::GetTemporaryPath(modelsFile));
@@ -547,7 +547,7 @@ TEST_CASE("Saving the monster edits writes neither file when one cannot be writt
     REQUIRE(Data::WriteTextFile(modelsFile / "kept.txt", "kept", error));
     issues.clear();
     CHECK_FALSE(g_MonsterEdits.Save(issues));
-    CHECK(Data::Items::HasErrors(issues));
+    CHECK(Data::Items::HasFatal(issues));
     CHECK(Data::ReadTextFile(monstersFile) == monsters);
     CHECK_FALSE(std::filesystem::exists(Data::GetTemporaryPath(monstersFile)));
     CHECK_FALSE(std::filesystem::exists(Data::GetTemporaryPath(modelsFile)));
@@ -568,7 +568,7 @@ TEST_CASE("A revert of the monster edits changes nothing when one file has error
 
     CHECK_FALSE(g_MonsterEdits.Revert(issues));
 
-    CHECK(Data::Items::HasErrors(issues));
+    CHECK(Data::Items::HasFatal(issues));
     // Before, the monster list was read again and the history cleared.
     CHECK(g_MonsterDatabase.Find(3) != nullptr);
     CHECK(g_MonsterEdits.GetHistory().CanUndo());

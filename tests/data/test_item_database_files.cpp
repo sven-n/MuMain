@@ -246,10 +246,10 @@ TEST_CASE("The shipped descriptions' placeholders and shared texts are known [da
 {
     const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
     const ItemStatsLoadResult stats = LoadItemStatsFile(DataDirectory / "Items" / "Stats" / ItemStatsFileName);
-    REQUIRE_FALSE(HasErrors(stats.issues));
+    REQUIRE_FALSE(HasFatal(stats.issues));
     const ItemTooltipLoadResult tooltips =
         LoadItemTooltipFile(DataDirectory / "Items" / "Tooltips" / ItemTooltipFileName);
-    REQUIRE_FALSE(HasErrors(tooltips.issues));
+    REQUIRE_FALSE(HasFatal(tooltips.issues));
     std::vector<ItemDataIssue> issues;
     ValidateDescriptionPlaceholders(result.items, ItemStatProfiles(stats.file), tooltips.file, ItemStatsFileName,
                                     issues);
@@ -454,7 +454,7 @@ TEST_CASE("The wings', capes' and pets' tooltip values come from their data as f
 {
     const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
     const ItemStatsLoadResult stats = LoadItemStatsFile(DataDirectory / "Items" / "Stats" / ItemStatsFileName);
-    REQUIRE_FALSE(HasErrors(stats.issues));
+    REQUIRE_FALSE(HasFatal(stats.issues));
     const ItemStatProfiles profiles(stats.file);
     // The test switches the UI language, and once a test has loaded the item data every switch refills
     // ItemAttribute: it needs an item table of its own.
@@ -596,7 +596,7 @@ TEST_CASE("The tooltip texts by item level come from the descriptions as from th
                                              {13, 18}, {13, 31}, {14, 7},  {14, 10}, {14, 21}};
     const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
     const ItemStatsLoadResult stats = LoadItemStatsFile(DataDirectory / "Items" / "Stats" / ItemStatsFileName);
-    REQUIRE_FALSE(HasErrors(stats.issues));
+    REQUIRE_FALSE(HasFatal(stats.issues));
     const ItemStatProfiles profiles(stats.file);
     for (const auto& [group, number] : items)
     {
@@ -906,7 +906,7 @@ TEST_CASE("The tooltip texts by item level are the game's texts in every languag
     constexpr std::pair<int, int> items[] = {{13, 15}};
     const ItemDataLoadResult result = LoadItemDataDirectory(DataDirectory / "Items");
     const ItemStatsLoadResult stats = LoadItemStatsFile(DataDirectory / "Items" / "Stats" / ItemStatsFileName);
-    REQUIRE_FALSE(HasErrors(stats.issues));
+    REQUIRE_FALSE(HasFatal(stats.issues));
     const ItemStatProfiles profiles(stats.file);
     // The test switches the UI language: it needs an item table of its own.
     ClientDataScope client(ShippedClientDirectory);
@@ -1226,7 +1226,7 @@ TEST_CASE("Bmd import recovers long names and repairs the fields they overwrote 
     ClientDataScope client(folder.Directory());
 
     const ItemBmdImportResult result = ImportItemBmdFiles();
-    REQUIRE_FALSE(HasErrors(result.issues));
+    REQUIRE_FALSE(HasFatal(result.issues));
     CHECK(result.importedLocales == std::vector<std::string>{"en", "pt"});
     CHECK(result.recoveredNameCount == 1);
 
@@ -1313,7 +1313,7 @@ TEST_CASE("Bmd import reads Portuguese and Spanish names as Windows-1252 [data][
     ClientDataScope client(folder.Directory());
 
     const ItemBmdImportResult result = ImportItemBmdFiles();
-    REQUIRE_FALSE(HasErrors(result.issues));
+    REQUIRE_FALSE(HasFatal(result.issues));
 
     const ItemDefinition* blade = FindItem(result.items, BladeType);
     REQUIRE(blade != nullptr);
@@ -1337,7 +1337,7 @@ TEST_CASE("Bmd import reads a name that only looks like UTF-8 as Windows-1252 [d
     ClientDataScope client(folder.Directory());
 
     const ItemBmdImportResult result = ImportItemBmdFiles();
-    REQUIRE_FALSE(HasErrors(result.issues));
+    REQUIRE_FALSE(HasFatal(result.issues));
     CHECK(result.reencodedNameCount == 1);
 
     const ItemDefinition* blade = FindItem(result.items, BladeType);
@@ -1386,9 +1386,9 @@ TEST_CASE("A file that cannot be replaced is a write failure and leaves no tempo
 TEST_CASE("A save that cannot write all its files replaces none of them [data][items]")
 {
     const ItemDataLoadResult shipped = LoadItemDataDirectory(DataDirectory / "Items");
-    REQUIRE_FALSE(HasErrors(shipped.issues));
+    REQUIRE_FALSE(HasFatal(shipped.issues));
     const ItemModelDataLoadResult shippedModels = LoadItemModelDataDirectory(DataDirectory / "Items" / "Models");
-    REQUIRE_FALSE(HasErrors(shippedModels.issues));
+    REQUIRE_FALSE(HasFatal(shippedModels.issues));
     ItemModelDatabase models;
     models.Build(shippedModels.models, Data::Effects::GlowColorList{});
     TemporaryClientFolder folder;
@@ -1678,7 +1678,7 @@ TEST_CASE("A bmd import keeps the size and slot of the held items that had data 
     }
     REQUIRE(held.size() == 2);
 
-    REQUIRE_FALSE(HasErrors(g_ItemDataHandler.ImportFromBmd().issues));
+    REQUIRE_FALSE(HasFatal(g_ItemDataHandler.ImportFromBmd().issues));
     CItemEditorActions::KeepHeldItemShapes(held);
     CHECK(g_ItemDatabase.Find(BladeType)->width == widerBlade.width);
     const ItemDefinition* imported = g_ItemDatabase.Find(KrisType);
@@ -1974,7 +1974,7 @@ TEST_CASE("A moved item takes its model along, and saving writes it [data][items
     std::vector<ItemDataIssue> issues;
     CHECK(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
     const ItemModelDataLoadResult saved = LoadItemModelDataDirectory(folder.Directory() / GetItemModelDataDirectory());
-    CHECK_FALSE(HasErrors(saved.issues));
+    CHECK_FALSE(HasFatal(saved.issues));
     const auto findModel = [&saved](int group, int number) -> const ItemModelDefinition*
     {
         const auto model =
@@ -2018,7 +2018,7 @@ TEST_CASE("A bmd import moves the models of moved items back [data][items][edito
     }
 
     const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
-    REQUIRE_FALSE(HasErrors(result.issues));
+    REQUIRE_FALSE(HasFatal(result.issues));
     REQUIRE(g_ItemDatabase.Find(KrisType) != nullptr);
     REQUIRE(g_ItemModelDatabase.Find(KrisType) != nullptr);
     CHECK(g_ItemModelDatabase.Find(KrisType)->file == krisModelFile);
@@ -2068,7 +2068,7 @@ TEST_CASE("Export as bmd and Import from bmd keep the orbs', crystals' and scrol
     ITEM_ATTRIBUTE_FILE healingOrb;
     std::memcpy(&healingOrb, raw.GetRecord(MakeItemType(12, 8)), sizeof(healingOrb));
     CHECK(healingOrb.RequireEnergy == 100);
-    REQUIRE_FALSE(HasErrors(g_ItemDataHandler.ImportFromBmd().issues));
+    REQUIRE_FALSE(HasFatal(g_ItemDataHandler.ImportFromBmd().issues));
     for (const ItemDefinition& item : weighted)
     {
         CAPTURE(g_ItemDatabase.GetLogName(MakeItemType(item.group, item.number)));
@@ -2091,7 +2091,7 @@ TEST_CASE("A bmd import keeps the names of a language whose item.bmd is missing 
     REQUIRE(std::filesystem::remove(folder.LegacyItemFilePath(L"Spn")));
 
     const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
-    REQUIRE_FALSE(HasErrors(result.issues));
+    REQUIRE_FALSE(HasFatal(result.issues));
     CHECK(result.importedLocales == std::vector<std::string>{"en", "pt"});
     const ItemDefinition* shortSword = g_ItemDatabase.Find(0, 1);
     REQUIRE(shortSword != nullptr);
@@ -2112,7 +2112,7 @@ TEST_CASE("Exporting the items as bmd and importing them again gives the same da
     REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
 
     const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
-    REQUIRE_FALSE(HasErrors(result.issues));
+    REQUIRE_FALSE(HasFatal(result.issues));
     CHECK(result.validationIssues.empty());
     // Tags, wing tiers, weapon kinds, potion priorities and rule flags are not in the bmd files;
     // the items keep the ones they have, so the files below match.
@@ -2140,7 +2140,7 @@ TEST_CASE("A bmd round trip keeps missing names missing and names that are the s
     REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
 
     const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
-    REQUIRE_FALSE(HasErrors(result.issues));
+    REQUIRE_FALSE(HasFatal(result.issues));
     CHECK_FALSE(HasNameIn(*g_ItemDatabase.Find(BladeType), "pt"));
     CHECK(GetOwnName(*g_ItemDatabase.Find(KrisType), "es") == "Kris");
     CHECK(HasNameIn(*g_ItemDatabase.Find(BladeType), "es"));
@@ -3673,7 +3673,7 @@ TEST_CASE("The editor's checks report problems of the item models [data][items][
 
     std::vector<ItemDataIssue> issues;
     g_ItemDataHandler.Validate(issues);
-    REQUIRE_FALSE(HasErrors(issues));
+    REQUIRE_FALSE(HasFatal(issues));
     // The folder has the data files but not the .bmd files.
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 0, "file"));
     issues.clear();
@@ -3684,7 +3684,7 @@ TEST_CASE("The editor's checks report problems of the item models [data][items][
         kris.model = "noSuchModel";
         g_ItemModelDatabase.Set(kris, g_GlowColors);
         g_ItemDataHandler.Validate(issues);
-        CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, 0, 0, "model"));
+        CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, 0, 0, "model"));
         std::vector<ItemDataIssue> saveIssues;
         CHECK(g_ItemDataHandler.Save(saveIssues) == ItemDataSaveResult::InvalidData);
     }
@@ -3696,21 +3696,21 @@ TEST_CASE("The editor's checks report problems of the item models [data][items][
         g_ItemDataHandler.Validate(issues);
         CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 0, "renderStyle"));
         CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, 0, 0, "itemEffect"));
-        CHECK_FALSE(HasErrors(issues));
+        CHECK_FALSE(HasFatal(issues));
     }
     SUBCASE("a value the model file reader refuses")
     {
         kris.inventory.scale = 0.0;
         g_ItemModelDatabase.Set(kris, g_GlowColors);
         g_ItemDataHandler.Validate(issues);
-        CHECK(HasErrors(issues));
+        CHECK(HasFatal(issues));
     }
     SUBCASE("a glow color that is not in the list")
     {
         kris.glow.color = "noSuchColor";
         g_ItemModelDatabase.Set(kris, g_GlowColors);
         g_ItemDataHandler.Validate(issues);
-        CHECK(HasErrors(issues));
+        CHECK(HasFatal(issues));
     }
     SUBCASE("a value of a shared model the reader refuses")
     {
@@ -3732,7 +3732,7 @@ TEST_CASE("The editor's checks report problems of the item models [data][items][
         g_ItemDataHandler.Validate(issues);
         CHECK(std::ranges::any_of(
             issues, [](const ItemDataIssue& issue)
-            { return issue.severity == ItemDataIssueSeverity::Error && issue.source == SharedItemModelsFileName; }));
+            { return issue.severity == ItemDataIssueSeverity::Fatal && issue.source == SharedItemModelsFileName; }));
     }
     SUBCASE("a file that two items name themselves")
     {
@@ -3757,7 +3757,7 @@ TEST_CASE("An item that names a profile the item stat file does not have blocks 
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
 
     ItemStatsLoadResult stats = LoadItemStatsFile(folder.Directory() / GetItemStatsFile());
-    REQUIRE_FALSE(HasErrors(stats.issues));
+    REQUIRE_FALSE(HasFatal(stats.issues));
     std::erase_if(stats.file.profiles, [](const WrittenStatProfile& profile) { return profile.name == "shield"; });
     std::erase_if(stats.file.profileRules, [](const StatProfileRule& rule) { return rule.profile == "shield"; });
     ItemStatProfilesScope restoreProfiles;
@@ -3774,14 +3774,14 @@ TEST_CASE("An item that names a profile the item stat file does not have blocks 
     CHECK(std::ranges::any_of(issues,
                               [](const ItemDataIssue& issue)
                               {
-                                  return issue.severity == ItemDataIssueSeverity::Error &&
+                                  return issue.severity == ItemDataIssueSeverity::Fatal &&
                                          issue.field == "statProfile" &&
                                          issue.message.find("\"shield\"") != std::string::npos;
                               }));
     CHECK(std::ranges::any_of(issues,
                               [](const ItemDataIssue& issue)
                               {
-                                  return issue.severity == ItemDataIssueSeverity::Error && issue.group == 0 &&
+                                  return issue.severity == ItemDataIssueSeverity::Fatal && issue.group == 0 &&
                                          issue.number == 0 && issue.field != "statProfile";
                               }));
 }
@@ -3837,7 +3837,7 @@ TEST_CASE("Save Items writes the item stat file when the editor changed it [data
         CHECK(std::ranges::any_of(issues,
                                   [](const ItemDataIssue& issue)
                                   {
-                                      return issue.severity == ItemDataIssueSeverity::Error &&
+                                      return issue.severity == ItemDataIssueSeverity::Fatal &&
                                              issue.source == GetItemStatsFile().generic_string();
                                   }));
         CHECK(TestFiles::ReadWholeFile(statsFile) == shippedText);
@@ -3968,7 +3968,7 @@ TEST_CASE("A change of the profile rules gives the items that follow them the ne
 
         std::vector<ItemDataIssue> issues;
         g_ItemDataHandler.Validate(issues);
-        CHECK_FALSE(HasErrors(issues));
+        CHECK_FALSE(HasFatal(issues));
 
         REQUIRE(edits.Undo());
         CHECK(g_ItemDatabase.Find(KrisType)->statProfile == "weapon");

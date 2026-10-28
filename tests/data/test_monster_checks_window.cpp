@@ -80,7 +80,7 @@ void PressCheck()
     Click(ImGui::GetIDWithSeed(I18N::Editor::Check, nullptr, ChecksWindow()->ID));
 }
 
-// The row of a problem: its index among the problems, errors first, and its
+// The row of a problem: its index among the problems, the worst first, and its
 // kind, which is the row's label.
 ImGuiID ProblemRowId(int index, const char* kindLabel)
 {
@@ -99,8 +99,8 @@ TEST_CASE("Monster Checks: a click on a name problem selects the monster and ope
     RenderChecks();
     PressCheck();
 
-    // The separator of 7 is the only error, so it comes first.
-    Click(ProblemRowId(0, I18N::Editor::Error));
+    // The separator of 7 is the only fatal problem, so it comes first.
+    Click(ProblemRowId(0, I18N::Editor::Fatal));
 
     CHECK(g_MonsterSelection.GetNumber() == 7);
     CHECK(g_MuEditorCore.GetToolWindows().monsterTranslations);

@@ -25,7 +25,7 @@ public:
     {
         Data::Items::ItemStatsLoadResult stats =
             Data::Items::LoadItemStatsFile(clientDirectory / Data::Items::GetItemStatsFile());
-        REQUIRE_FALSE(Data::Items::HasErrors(stats.issues));
+        REQUIRE_FALSE(Data::Items::HasFatal(stats.issues));
         m_file = std::move(stats.file);
         Data::Items::WrittenStatProfile* scroll = nullptr;
         for (Data::Items::WrittenStatProfile& profile : m_file.profiles)

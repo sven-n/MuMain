@@ -218,10 +218,10 @@ TEST_CASE("Description texts are checked like item names [data][items]")
 
     // The blank line has none; "d e" is no language code and, like "xx", no language the game shows.
     REQUIRE(issues.size() == 4);
-    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Fatal);
     CHECK(issues[0].field == "description[1].text");
     CHECK(issues[0].message == "the English text is missing");
-    CHECK(issues[1].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[1].severity == ItemDataIssueSeverity::Fatal);
     CHECK(issues[1].field == "description[2].text");
     CHECK(issues[2].severity == ItemDataIssueSeverity::Warning);
     CHECK(issues[2].field == "description[2].text");
@@ -252,7 +252,7 @@ TEST_CASE("Level values written in place are checked like description texts [dat
     std::erase_if(issues, [](const ItemDataIssue& issue) { return !issue.field.starts_with("levelValues"); });
 
     REQUIRE(issues.size() == 2);
-    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Fatal);
     CHECK(issues[0].field == "levelValues.stat[1]");
     CHECK(issues[0].message == "the English text is missing");
     CHECK(issues[1].severity == ItemDataIssueSeverity::Warning);
@@ -283,7 +283,7 @@ TEST_CASE("Name line texts written in place are checked like description texts [
 
     // A line without a text keeps the standard name and has nothing to check.
     REQUIRE(issues.size() == 2);
-    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Fatal);
     CHECK(issues[0].field == "nameLines[0].text");
     CHECK(issues[1].severity == ItemDataIssueSeverity::Warning);
     CHECK(issues[1].field == "nameLines[1].text");

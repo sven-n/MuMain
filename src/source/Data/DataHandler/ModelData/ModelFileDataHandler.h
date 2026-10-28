@@ -19,7 +19,7 @@ namespace Data::Models
 
 // Reads MU_DATA_OVERLAY and the game's table once, on the loading screen, and
 // logs every issue. False, with the message that stops the start in
-// `errorMessage`, when the table has errors (as for the effect data).
+// `errorMessage`, when the table has fatal problems (as for the effect data).
 bool LoadModelFileTable(std::string& errorMessage);
 
 // The table LoadModelFileTable read; no models before.

@@ -56,9 +56,9 @@ bool HasIssue(const std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity se
                        [&](const ItemDataIssue& issue) { return issue.severity == severity && issue.field == field; });
 }
 
-bool HasError(const std::vector<ItemDataIssue>& issues, const std::string& field)
+bool HasFatalIssue(const std::vector<ItemDataIssue>& issues, const std::string& field)
 {
-    return HasIssue(issues, ItemDataIssueSeverity::Error, field);
+    return HasIssue(issues, ItemDataIssueSeverity::Fatal, field);
 }
 
 // A valid list of the particle types: every symbol with the name "typeN".
@@ -107,19 +107,19 @@ TEST_CASE("Effect types are read with their name and code [data][effects]")
 
 TEST_CASE("Effect type files of the wrong kind or a newer format are errors [data][effects]")
 {
-    CHECK(HasError(Read(R"({"formatVersion": 1, "kind": "joint", "types": []})").issues, "kind"));
-    CHECK(HasError(Read(R"({"formatVersion": 1, "types": []})").issues, "kind"));
-    CHECK(Data::Items::HasErrors(Read(R"({"formatVersion": 2, "kind": "particle", "types": []})").issues));
-    CHECK(HasError(Read(R"({"formatVersion": 1, "kind": "particle"})").issues, "types"));
+    CHECK(HasFatalIssue(Read(R"({"formatVersion": 1, "kind": "joint", "types": []})").issues, "kind"));
+    CHECK(HasFatalIssue(Read(R"({"formatVersion": 1, "types": []})").issues, "kind"));
+    CHECK(Data::Items::HasFatal(Read(R"({"formatVersion": 2, "kind": "particle", "types": []})").issues));
+    CHECK(HasFatalIssue(Read(R"({"formatVersion": 1, "kind": "particle"})").issues, "types"));
 }
 
 TEST_CASE("Effect type entries without name or code are errors, unknown fields warnings [data][effects]")
 {
     const ReadResult result = Read(R"({"formatVersion": 1, "kind": "particle", "extra": 1, "types": [
         {"name": "smoke"}, {"code": "BITMAP_SMOKE"}, 5, {"name": "smoke", "code": "BITMAP_SMOKE", "scale": 2}]})");
-    CHECK(HasError(result.issues, "types[0].code"));
-    CHECK(HasError(result.issues, "types[1].name"));
-    CHECK(HasError(result.issues, "types[2]"));
+    CHECK(HasFatalIssue(result.issues, "types[0].code"));
+    CHECK(HasFatalIssue(result.issues, "types[1].name"));
+    CHECK(HasFatalIssue(result.issues, "types[2]"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[3].scale"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "extra"));
     CHECK(result.types.size() == 1);
@@ -132,23 +132,23 @@ TEST_CASE("Every effect type symbol needs exactly one valid name [data][effects]
     std::vector<EffectTypeEntry> types = NameEveryParticle();
     const std::string missingCode = types.back().code;
     types.pop_back();
-    CHECK(HasError(Validate(types), missingCode));
+    CHECK(HasFatalIssue(Validate(types), missingCode));
 
     types = NameEveryParticle();
     types[0].name = "2line";
     types[1].name = "smoke-2";
     types[3].name = types[2].name;
     const std::vector<ItemDataIssue> issues = Validate(types);
-    CHECK(HasError(issues, "2line"));
-    CHECK(HasError(issues, "smoke-2"));
-    CHECK(HasError(issues, types[2].name));
+    CHECK(HasFatalIssue(issues, "2line"));
+    CHECK(HasFatalIssue(issues, "smoke-2"));
+    CHECK(HasFatalIssue(issues, types[2].name));
 
     types = NameEveryParticle();
     types.push_back({"unknownType", "BITMAP_SMOKE+99"});
     types.push_back({"secondSmoke", types[0].code});
     const std::vector<ItemDataIssue> codeIssues = Validate(types);
-    CHECK(HasError(codeIssues, "unknownType"));
-    CHECK(HasError(codeIssues, "secondSmoke"));
+    CHECK(HasFatalIssue(codeIssues, "unknownType"));
+    CHECK(HasFatalIssue(codeIssues, "secondSmoke"));
 }
 
 TEST_CASE("Effect type files are written sorted by name with a fixed field order [data][effects]")
@@ -253,22 +253,22 @@ TEST_CASE("Wrong vectors, offsets and copies are errors, unknown parts warnings 
                               "copy.startPosition", "copy.headTargetAngle"})
     {
         INFO(std::string(field));
-        CHECK(HasError(result.issues, std::string("types[0].create.") + field));
+        CHECK(HasFatalIssue(result.issues, std::string("types[0].create.") + field));
     }
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[0].create.direction.w"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[0].create.offset.angle"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[0].create.offset.scale"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[0].create.copy.light"));
-    CHECK(HasError(result.issues, "types[1].create.offset"));
-    CHECK(HasError(result.issues, "types[1].create.copy"));
+    CHECK(HasFatalIssue(result.issues, "types[1].create.offset"));
+    CHECK(HasFatalIssue(result.issues, "types[1].create.copy"));
     // A field gets one value or one copy.
-    CHECK(HasError(result.issues, "types[2].create.copy.scale"));
-    CHECK(HasError(result.issues, "types[2].create.copy.direction"));
+    CHECK(HasFatalIssue(result.issues, "types[2].create.copy.scale"));
+    CHECK(HasFatalIssue(result.issues, "types[2].create.copy.direction"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[2].create.offset"));
     // The old field of the light copy is an error, so an old file is not
     // changed without one; an offset of the start position without the copy
     // into it adds to what the slot held before.
-    CHECK(HasError(result.issues, "types[3].create.copyLightToDirection"));
+    CHECK(HasFatalIssue(result.issues, "types[3].create.copyLightToDirection"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[3].create.offset.startPosition"));
 
     REQUIRE(result.types.size() == 4);
@@ -287,12 +287,12 @@ TEST_CASE("Wrong creation values are errors, unknown ones warnings, and only eff
         {"name": "ghost", "code": "MODEL_CUNDUN_GHOST", "create": {"lifeTime": "long", "blendMesh": 1.5,
          "hiddenMesh": -3, "light": [1, 1], "copy": {"direction": 1}, "size": 2}}]})",
                                    EffectKind::Effect);
-    CHECK(HasError(result.issues, "types[0].create"));
-    CHECK(HasError(result.issues, "types[1].create.lifeTime"));
-    CHECK(HasError(result.issues, "types[1].create.blendMesh"));
-    CHECK(HasError(result.issues, "types[1].create.hiddenMesh"));
-    CHECK(HasError(result.issues, "types[1].create.light"));
-    CHECK(HasError(result.issues, "types[1].create.copy.direction"));
+    CHECK(HasFatalIssue(result.issues, "types[0].create"));
+    CHECK(HasFatalIssue(result.issues, "types[1].create.lifeTime"));
+    CHECK(HasFatalIssue(result.issues, "types[1].create.blendMesh"));
+    CHECK(HasFatalIssue(result.issues, "types[1].create.hiddenMesh"));
+    CHECK(HasFatalIssue(result.issues, "types[1].create.light"));
+    CHECK(HasFatalIssue(result.issues, "types[1].create.copy.direction"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[1].create.size"));
     REQUIRE(result.types.size() == 2);
     CHECK_FALSE(result.types[0].create.has_value());
@@ -303,10 +303,10 @@ TEST_CASE("Wrong creation values are errors, unknown ones warnings, and only eff
         {"name": "fire", "code": "BITMAP_FIRE", "create": {"lifeTime": 2, "scale": 1e39, "alpha": 5,
          "light": [1, 1e39, 0], "blendMesh": 0.0}}]})",
                                    EffectKind::Effect);
-    CHECK(HasError(ranges.issues, "types[0].create.scale"));
-    CHECK(HasError(ranges.issues, "types[0].create.alpha"));
-    CHECK(HasError(ranges.issues, "types[0].create.light"));
-    CHECK(HasError(ranges.issues, "types[0].create.blendMesh"));
+    CHECK(HasFatalIssue(ranges.issues, "types[0].create.scale"));
+    CHECK(HasFatalIssue(ranges.issues, "types[0].create.alpha"));
+    CHECK(HasFatalIssue(ranges.issues, "types[0].create.light"));
+    CHECK(HasFatalIssue(ranges.issues, "types[0].create.blendMesh"));
     REQUIRE(ranges.types.size() == 1);
     CHECK(ranges.types[0].create == EffectCreateParams{.lifeTime = 2});
 
@@ -318,7 +318,7 @@ TEST_CASE("Wrong creation values are errors, unknown ones warnings, and only eff
     CHECK(HasIssue(empty.issues, ItemDataIssueSeverity::Warning, "types[0].create"));
     CHECK(HasIssue(empty.issues, ItemDataIssueSeverity::Warning, "types[1].create"));
     CHECK(HasIssue(empty.issues, ItemDataIssueSeverity::Warning, "types[1].create.lifetime"));
-    CHECK_FALSE(Data::Items::HasErrors(empty.issues));
+    CHECK_FALSE(Data::Items::HasFatal(empty.issues));
 
     const ReadResult particles = Read(R"({"formatVersion": 1, "kind": "particle", "types": [
         {"name": "smoke", "code": "BITMAP_SMOKE", "create": {"lifeTime": 2}}]})");
@@ -418,10 +418,10 @@ TEST_CASE(
          {"alphaTarget", "renderType", "animation", "offset.lifeTime", "copy.startPosition", "copy.eyeRight"})
     {
         INFO(std::string(field));
-        CHECK(HasError(wrong.issues, std::string("types[0].create.") + field));
+        CHECK(HasFatalIssue(wrong.issues, std::string("types[0].create.") + field));
     }
-    CHECK(HasError(wrong.issues, "types[1].create.copy.startPosition"));
-    CHECK(HasError(wrong.issues, "types[2].create.variants[0].startPosition"));
+    CHECK(HasFatalIssue(wrong.issues, "types[1].create.copy.startPosition"));
+    CHECK(HasFatalIssue(wrong.issues, "types[2].create.variants[0].startPosition"));
     // Offsets of a component of the start position or of the lifeTime that
     // nothing sets add to what the slot held before.
     CHECK(HasIssue(wrong.issues, ItemDataIssueSeverity::Warning, "types[3].create.offset.startPosition"));
@@ -462,21 +462,21 @@ TEST_CASE("Wrong variants are errors, empty ones warnings [data][effects]")
         {"name": "spear", "code": "MODEL_SPEAR", "create": {"lifeTime": 5, "copy": {"direction": "light"}, "variants": [
          {"subTypes": [1, 5], "direction": {"x": 1}}, {"subType": 5, "lifeTime": 6}]}}]})",
                                    EffectKind::Effect);
-    CHECK(HasError(result.issues, "types[0].create.variants"));
+    CHECK(HasFatalIssue(result.issues, "types[0].create.variants"));
     for (const char* field : {"variants[0]", "variants[1].subType", "variants[2].subType", "variants[3].subType",
                               "variants[4].subTypes", "variants[6]", "variants[7].variants"})
     {
         INFO(std::string(field));
-        CHECK(HasError(result.issues, std::string("types[1].create.") + field));
+        CHECK(HasFatalIssue(result.issues, std::string("types[1].create.") + field));
     }
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[1].create.variants[5]"));
     // Part of a direction the row copies the light into.
-    CHECK(HasError(result.issues, "types[2].create.variants[0].direction"));
+    CHECK(HasFatalIssue(result.issues, "types[2].create.variants[0].direction"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[2].create.variants[1].offset.startPosition"));
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "types[3].create.variants"));
     // A variant dropped for an error does not take its SubTypes from the later ones.
-    CHECK(HasError(result.issues, "types[4].create.variants[0].direction"));
-    CHECK_FALSE(HasError(result.issues, "types[4].create.variants[1]"));
+    CHECK(HasFatalIssue(result.issues, "types[4].create.variants[0].direction"));
+    CHECK_FALSE(HasFatalIssue(result.issues, "types[4].create.variants[1]"));
     REQUIRE(result.types.size() == 5);
     REQUIRE(result.types[4].create.has_value());
     REQUIRE(result.types[4].create->variants.size() == 1);

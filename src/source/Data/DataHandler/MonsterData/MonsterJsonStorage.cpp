@@ -17,10 +17,10 @@ using Items::ItemDataIssue;
 
 constexpr const char* MonstersFile = "Data/Monsters/Monsters.json";
 
-void AddFileError(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& message)
+void AddFatalFileIssue(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& message)
 {
     issues.push_back(
-        {Items::ItemDataIssueSeverity::Error, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "", message});
+        {Items::ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "", message});
 }
 } // namespace
 
@@ -36,7 +36,7 @@ MonsterDataLoadResult LoadMonstersFile(const std::filesystem::path& file)
     const std::optional<std::string> text = ReadTextFile(file);
     if (!text)
     {
-        AddFileError(result.issues, source, "could not be read");
+        AddFatalFileIssue(result.issues, source, "could not be read");
         return result;
     }
     ReadMonstersJson(*text, source, result.monsters, result.issues);
@@ -57,7 +57,7 @@ bool SaveMonstersFile(const std::filesystem::path& file, std::span<const Monster
     std::string error;
     if (!WriteTextFile(file, *text, error))
     {
-        AddFileError(issues, file.generic_string(), error);
+        AddFatalFileIssue(issues, file.generic_string(), error);
         return false;
     }
     return true;
@@ -74,7 +74,7 @@ std::optional<std::string> MakeMonstersFileText(const std::filesystem::path& fil
     const std::size_t firstValidationIssue = issues.size();
     ValidateMonsterNames(readBack, issues);
     NameIssueSource(issues, firstValidationIssue, file);
-    if (Items::HasErrors(issues))
+    if (Items::HasFatal(issues))
     {
         return std::nullopt;
     }

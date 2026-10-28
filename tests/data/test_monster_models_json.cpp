@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-using Data::Items::HasErrors;
+using Data::Items::HasFatal;
 using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
 using Data::Monsters::MonsterModelDefinition;
@@ -228,7 +228,7 @@ TEST_CASE("Monster models: a sound event names a sound of the model or a SOUND_ 
 
     INFO(Messages(issues));
     REQUIRE(issues.size() == 1);
-    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Fatal);
     CHECK(issues[0].field == "model MONSTER_MODEL_HOUND soundEvents[0].sounds[2]");
     CHECK(issues[0].message.find("is no sound of the model") != std::string::npos);
 }
@@ -319,7 +319,7 @@ TEST_CASE("Monster models: wrong values are errors that name the model and the f
         INFO(test.model);
         INFO(Messages(read.issues));
         CHECK(read.models.empty());
-        CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Error, test.field, test.message));
+        CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Fatal, test.field, test.message));
     }
 }
 
@@ -327,11 +327,11 @@ TEST_CASE("Monster models: a slot must be a model slot of the monster area and b
 {
     ReadResult read = Read(ModelsFile(Model("MODEL_PLAYER")));
     CHECK(read.models.empty());
-    CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Error, "models[0].slot", "monster model type"));
+    CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Fatal, "models[0].slot", "monster model type"));
 
     read = Read(ModelsFile(Model("MONSTER_MODEL_HOUND") + ", " + Model("MONSTER_MODEL_HOUND")));
     CHECK(read.models.size() == 1);
-    CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Error, "model MONSTER_MODEL_HOUND slot", "more than once"));
+    CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Fatal, "model MONSTER_MODEL_HOUND slot", "more than once"));
 }
 
 TEST_CASE("Monster models: both weapons may hang on one bone [data][monsters]")
@@ -349,7 +349,7 @@ TEST_CASE("Monster models: unknown fields are warnings and are ignored [data][mo
         "MONSTER_MODEL_HOUND",
         R"("scale": 1, "sounds": [{"file": "Data/Sound/a.wav", "volume": 1}], "parts": [{"effect": "x", "file": "Data/Monster/p.bmd", "textureFolders": ["Monster"], "speed": 1}])")));
     INFO(Messages(read.issues));
-    CHECK_FALSE(HasErrors(read.issues));
+    CHECK_FALSE(HasFatal(read.issues));
     REQUIRE(read.models.size() == 1);
     CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Warning, "model MONSTER_MODEL_HOUND scale", "unknown"));
     CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Warning, "model MONSTER_MODEL_HOUND sounds[0].volume",

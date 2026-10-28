@@ -714,11 +714,14 @@ a profile no item names is a warning.
 ## Loading and errors
 
 At startup all `*.json` files in `Data/Items` and `Stats/ItemStats.json` are
-read and checked.
+read and checked. Problems have three levels, the same in every data area
+and editor tool: **fatal** ones make the data unusable, **errors** name
+something that is missing (the game runs without it), **warnings** are worth
+knowing.
 
-**Errors** stop the start with a message that names the file, the item and
-the field (**Copy text** copies it). All problems are also written to
-`MuError.log`. Errors are:
+**Fatal problems** stop the start with a message that names the file, the
+item and the field (**Copy text** copies it). All problems are also written to
+`MuError.log`. Fatal problems are:
 
 - invalid JSON, a missing or unsupported `formatVersion`, an invalid `group`
 - an item without `number` or `name`, a number outside 0–511
@@ -1119,8 +1122,8 @@ shows it in the others.
 - **Item Model**: see [Item Model](#item-model).
 - **Glow Colors**: the glow color list, see [Glow Colors](#glow-colors).
 - **Item Formulas**: the item stat file, see [Item Formulas](#item-formulas).
-- **Item Checks**: the checks of a save as a list, errors first. A click on
-  a problem of an item selects it and opens the tool of its field; an arrow
+- **Item Checks**: the checks of a save as a list, fatal problems first. A
+  click on a problem of an item selects it and opens the tool of its field; an arrow
   key onto it only selects the item. A click on a problem of the item stat
   file (a profile or a table nothing uses) opens Item Formulas at it.
 - **Item Sync**: Export and Import of the items and item formulas with an
@@ -1156,7 +1159,7 @@ How changes work:
   `Data/Effects/GlowColors.json` when a glow color changed and
   `Stats/ItemStats.json` when the item formulas changed; the other model
   files are not touched. It lists each UI language that misses item names, with
-  how many. With errors nothing is written, and the errors are listed in
+  how many. With fatal problems nothing is written, and they are listed in
   the editor console and in **Item Checks**. Warnings (a model file that is
   missing, a file several items name themselves instead of through a
   shared model, a render style or item effect that does not exist) do not
@@ -1413,8 +1416,8 @@ number, fields with their default value left out, LF line endings.
 - An item a file has more than once (OpenMU does not keep the group and
   number unique) is a locked row: the import leaves it as it is.
 - Before the import is applied, the data as it would be gets the checks of
-  a save. With errors nothing changes; the errors are listed and the rows of
-  their items are unchecked.
+  a save. With fatal problems nothing changes; they are listed and the rows
+  of their items are unchecked.
 
 **Known differences** are fields and formula entries meant to differ
 between the client and the server. Ticking **Known** on a field, on an

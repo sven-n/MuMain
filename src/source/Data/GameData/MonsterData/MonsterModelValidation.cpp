@@ -54,7 +54,7 @@ void ValidateSlotSet(const MonsterModelDefinition& model, const MonsterSoundSlot
         {
             continue;
         }
-        problems.Add(ItemDataIssueSeverity::Error, key + "[" + std::to_string(i) + "]",
+        problems.Add(ItemDataIssueSeverity::Fatal, key + "[" + std::to_string(i) + "]",
                      "\"" + value +
                          "\" is no sound of the model (its id, or its file when it has none) and no SOUND_ id");
     }
@@ -67,7 +67,7 @@ void ValidateSounds(const MonsterModelDefinition& model, ModelProblems& problems
         const std::string& id = model.sounds[i].id;
         if (!id.empty() && !FindMonsterSoundId(id))
         {
-            problems.Add(ItemDataIssueSeverity::Error, "sounds[" + std::to_string(i) + "].id",
+            problems.Add(ItemDataIssueSeverity::Fatal, "sounds[" + std::to_string(i) + "].id",
                          "\"" + id + "\" is not a SOUND_ id that code plays a model sound by");
         }
     }
@@ -88,7 +88,7 @@ void ValidateSounds(const MonsterModelDefinition& model, ModelProblems& problems
             {
                 continue;
             }
-            problems.Add(ItemDataIssueSeverity::Error,
+            problems.Add(ItemDataIssueSeverity::Fatal,
                          "soundEvents[" + std::to_string(event) + "].sounds[" + std::to_string(i) + "]",
                          "\"" + sounds[i] +
                              "\" is no sound of the model (its id, or its file when it has none) and no SOUND_ id");
@@ -107,12 +107,12 @@ void ValidateParts(const MonsterModelDefinition& model, ModelProblems& problems)
             const std::optional<int> slot = FindMonsterModelSlot(part.slot);
             if (!slot || !IsNpcRangeSlot(*slot))
             {
-                problems.Add(ItemDataIssueSeverity::Error, key + ".slot", "\"" + part.slot + "\" is not an NPC slot");
+                problems.Add(ItemDataIssueSeverity::Fatal, key + ".slot", "\"" + part.slot + "\" is not an NPC slot");
             }
         }
         else if (!g_EffectTypeCatalogue.FindType(Effects::EffectKind::Effect, part.effect))
         {
-            problems.Add(ItemDataIssueSeverity::Error, key + ".effect",
+            problems.Add(ItemDataIssueSeverity::Fatal, key + ".effect",
                          "\"" + part.effect + "\" is not an effect type of Data/Effects/EffectTypes.json");
         }
     }
@@ -144,7 +144,7 @@ void ValidateMonsterModelNames(std::span<const MonsterModelDefinition> models, c
         {
             if (!FindMonsterModelBitmapSlot(model.bitmaps[i].slot))
             {
-                problems.Add(ItemDataIssueSeverity::Error, "bitmaps[" + std::to_string(i) + "].slot",
+                problems.Add(ItemDataIssueSeverity::Fatal, "bitmaps[" + std::to_string(i) + "].slot",
                              "\"" + model.bitmaps[i].slot + "\" is not a bitmap slot of monster models");
             }
         }
