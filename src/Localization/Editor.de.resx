@@ -1298,7 +1298,7 @@
     <value>Modelldateien</value>
   </data>
   <data name="Data checks what note" xml:space="preserve">
-    <value>Gegenstände und Monster werden so geprüft, wie ihr Speichern sie schreiben würde; Serverliste, Effekte und Looks so, wie das Spiel ihre Dateien beim Start liest.</value>
+    <value>Gegenstände und Monster werden so geprüft, wie ihr Speichern sie schreiben würde; die glTF-Modelldateitabelle, Serverliste, Effekte und Looks so, wie das Spiel ihre Dateien beim Start liest.</value>
   </data>
   <data name="Data checks save note" xml:space="preserve">
     <value>Jedes Speichern verweigert Daten mit fatalen Problemen und speichert Daten mit Fehlern und Warnungen.</value>

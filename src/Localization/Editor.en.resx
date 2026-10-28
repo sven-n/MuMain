@@ -1319,7 +1319,7 @@
     <value>Model files</value>
   </data>
   <data name="Data checks what note" xml:space="preserve">
-    <value>Items and monsters are checked as their Save would write them; the server list, effects and looks as the game reads their files at start.</value>
+    <value>Items and monsters are checked as their Save would write them; the glTF model file table, the server list, effects and looks as the game reads their files at start.</value>
   </data>
   <data name="Data checks save note" xml:space="preserve">
     <value>Each Save refuses data with fatal problems and saves data with errors and warnings.</value>
