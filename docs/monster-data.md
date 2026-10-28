@@ -284,7 +284,7 @@ Preview tools show it):
   fast after frame 6; Erohim plays die at half its speed.
 
 A model whose file is missing has no body: the monster appears without one
-and the game keeps running; the file is logged and listed by Monster Checks.
+and the game keeps running; the file is logged and listed by Data Checks.
 Molt's `Data/Monster/Monster50.bmd` is missing, here and in the original
 client (OpenMU has no monster 68).
 
@@ -348,22 +348,26 @@ Playing an attack (`SetPlayerAttack`) for a monster:
    by a count of the character.
 
 So `attacks` work where a handler answers for the monster: the Monster
-Attacks tool says which one, and Monster Checks lists the attacks no handler
+Attacks tool says which one, and Data Checks lists the attacks no handler
 reads (a monster moved to another model loses a model-keyed handler).
 
 The game counts only attack 1 and attack 2 as attacks: a hit plays shock
 over any other animation, and only they have a hit frame. After appear, only
 Maya's hands and Selupan go back to stop1; other models play it again
-until their next action. Monster Checks warns about both.
+until their next action. Data Checks warns about both.
 
 ## Loading and errors
 
 At startup `Data/Monsters/Monsters.json` is read and checked, and after the
 effect catalogue `Data/Monsters/Models.json`.
 
-**Errors** stop the start with a message ("Monster data error") that names
-the file, the monster and the field. All problems are also written to
-`MuError.log`. Errors are:
+Problems have three levels, the same in every data area and editor tool:
+**fatal** ones make the data unusable, **errors** name something that is
+missing (the game runs without it), **warnings** are worth knowing.
+
+**Fatal problems** stop the start with a message ("Monster data error")
+that names the file, the monster and the field. All problems are also written
+to `MuError.log`. Fatal problems are:
 
 - a file that cannot be read, invalid JSON, a missing or unsupported
   `formatVersion`, no `monsters` list
@@ -385,8 +389,8 @@ the file, the monster and the field. All problems are also written to
 - a name longer than 64 characters: the game shows it cut
 - a name in a language the game has no UI texts for (it is never shown)
 
-In the model list, errors (they stop the start with "Monster data error" too,
-naming the model list) are a
+In the model list, fatal problems (they stop the start with "Monster data
+error" too, naming the model list) are a
 value of the wrong form (each names the model and the field), a slot that is
 no model slot of the two ranges or is there twice, a sound slot that names no
 sound of the model and no `SOUND_*` number, a sound `id`, bitmap slot or
@@ -406,8 +410,9 @@ ctest --test-dir <build folder> --build-config Debug -R monster --output-on-fail
 
 The monster tools (editor builds, F12, **Windows → Monsters**) edit the
 monsters of the running game: **Monster Browser**, **Monster Model**,
-**Monster Preview**, **Monster Attacks**, **Monster Translations** and
-**Monster Checks**. They
+**Monster Preview**, **Monster Attacks** and **Monster Translations**; their
+problems are listed in **Data Checks**
+([dev-editor.md → Data Checks](dev-editor.md#data-checks)). They
 share one selected monster: selecting it in one tool shows it in the others.
 In the first layout (also after **Windows > Reset Layout**) the Monster
 Browser is a tab beside the Item Browser and the others are tabs beside the
@@ -502,9 +507,10 @@ item tools.
   tool opens it); while it is not open, stop1 to attack5. Each change is one
   undo step and reaches the monsters' next attack. A player-shaped monster
   shows a note instead.
-- **Monster Checks**: the checks of loading and saving, run on the monsters
-  and models as they are now: a name with `||` or a language code that is not one
-  (errors), an empty English name, a name longer than 64 characters and a
+- In **Data Checks**, the areas Monsters and Monster models: the checks of
+  loading and saving, run on the monsters and models as they are now: a name
+  with `||` or a language code that is not one (fatal), an empty English
+  name, a name longer than 64 characters and a
   name in a language the game has no UI texts for (warnings), and the checks
   of the model list's load (a model or part file that is not in the client
   folder is a warning), and the checks of the attacks (warnings): attacks
@@ -523,7 +529,7 @@ item tools.
   an arrow key onto it only selects the monster. There is no check of the
   kind: a kind that differs from the old rules (566, 567) is not a problem.
 
-In the browser, Monster Translations and Monster Checks, the arrow keys move
+In the browser and Monster Translations, the arrow keys move
 the selection (see [dev-editor.md](dev-editor.md)).
 
 How changes work:
@@ -549,11 +555,12 @@ How changes work:
 - **Save Monsters** (in the Monster Browser and Monster Translations) runs
   the checks and writes `Data/Monsters/Monsters.json` and
   `Data/Monsters/Models.json` next to the game. With
-  errors nothing is written, and the problems are listed under the button;
+  fatal problems nothing is written, and the problems are listed under the
+  button;
   warnings do not stop it. The new file takes the old one's place only when
   it was written whole.
 - **Revert** reads both files again: the changes since they were saved are
-  lost, and so is the undo history. A file with errors is not taken; its
+  lost, and so is the undo history. A file with fatal problems is not taken; its
   monsters or models stay as they are and the problems are listed.
 
 The game runs from the build folder, which has a copy of `src/bin/Data`.

@@ -238,7 +238,7 @@ bool ReadExchangeFile(const std::filesystem::path& path, const std::string& name
     }
     else
     {
-        fileIssues.push_back({Data::Items::ItemDataIssueSeverity::Error, name, ItemDataIssue::NoItem,
+        fileIssues.push_back({Data::Items::ItemDataIssueSeverity::Fatal, name, ItemDataIssue::NoItem,
                               ItemDataIssue::NoItem, "", "could not be read"});
     }
     const bool usable = Data::Items::CanImportItemExchange(file, fileIssues);
@@ -618,7 +618,7 @@ bool CMuItemSyncUI::Apply()
         for (const ItemDataIssue& issue : issues)
         {
             m_messages.push_back(issue.ToString());
-            // The rows of the items with errors are unchecked; an error of no item is one of the
+            // The rows of the items with fatal problems are unchecked; a fatal problem of no item is one of the
             // formulas, which an issue cannot trace back to its row: all of them are unchecked.
             formulasRefused = formulasRefused || issue.group == ItemDataIssue::NoItem;
             for (SyncItem& row : m_diff->items)

@@ -125,7 +125,7 @@ TEST_CASE("A tooltip file's typos are errors with the name meant [data][items][t
         [](const std::string& texts, const std::string& lines, const std::string& field, const std::string& message)
     {
         INFO(lines);
-        CHECK(Read(TooltipFile(texts, lines)).Has(ItemDataIssueSeverity::Error, field, message));
+        CHECK(Read(TooltipFile(texts, lines)).Has(ItemDataIssueSeverity::Fatal, field, message));
     };
     const std::string defense = R"("defense": "Defense: {defense}")";
     error(defense, R"({"text": "@defence"},)", "layouts[0].lines[1].text", "did you mean \"@defense\"?");
@@ -149,7 +149,7 @@ TEST_CASE("A tooltip file's typos are errors with the name meant [data][items][t
     // A reference that's like no text names none.
     error(defense, R"({"text": "@nothing"},)", "layouts[0].lines[1].text", "\"@nothing\" is not a text of \"texts\"");
     CHECK_FALSE(Read(TooltipFile(defense, R"({"text": "@nothing"},)"))
-                    .Has(ItemDataIssueSeverity::Error, "layouts[0].lines[1].text", "did you mean"));
+                    .Has(ItemDataIssueSeverity::Fatal, "layouts[0].lines[1].text", "did you mean"));
     // A translation that drops a placeholder, adds one, or breaks a brace.
     error(R"("defense": {"en": "Defense: {defense}", "de": "Verteidigung"})", R"({"text": "@defense"},)",
           "texts.defense.de", "the English text {defense}");
@@ -166,28 +166,28 @@ TEST_CASE("A tooltip layout has the four sections once each, in their order [dat
     CHECK(read(R"({"section": "name"}, {"section": "description"}, {"section": "classes"}, {"section": "options"})")
               .issues.empty());
     CHECK(read(R"({"section": "name"}, {"section": "classes"}, {"section": "description"}, {"section": "options"})")
-              .Has(ItemDataIssueSeverity::Error, "layouts[0].lines[2].section", "in the order"));
+              .Has(ItemDataIssueSeverity::Fatal, "layouts[0].lines[2].section", "in the order"));
     CHECK(read(R"({"section": "name"}, {"section": "description"}, {"section": "options"})")
-              .Has(ItemDataIssueSeverity::Error, "layouts[0].lines", "must have the sections"));
+              .Has(ItemDataIssueSeverity::Fatal, "layouts[0].lines", "must have the sections"));
     CHECK(read(R"({"text": ""}, {"section": "name"}, {"section": "description"}, {"section": "classes"},
                   {"section": "options"})")
-              .Has(ItemDataIssueSeverity::Error, "layouts[0].lines[1].section", "start after the name"));
+              .Has(ItemDataIssueSeverity::Fatal, "layouts[0].lines[1].section", "start after the name"));
     CHECK(read(R"({"section": "name"}, {"section": "description"}, {"section": "classes"}, {"section": "options"},
                   {"text": ""})")
-              .Has(ItemDataIssueSeverity::Error, "layouts[0].lines[4]", "no line comes after it"));
+              .Has(ItemDataIssueSeverity::Fatal, "layouts[0].lines[4]", "no line comes after it"));
     CHECK(read(R"({"section": "name"}, {"section": "summary"})")
-              .Has(ItemDataIssueSeverity::Error, "layouts[0].lines[1].section", "must be \"name\""));
+              .Has(ItemDataIssueSeverity::Fatal, "layouts[0].lines[1].section", "must be \"name\""));
 }
 
 TEST_CASE("A tooltip file needs the default layout [data][items][tooltip]")
 {
     const ReadResult result = Read(R"({"formatVersion": 1, "layouts": []})");
-    CHECK(result.Has(ItemDataIssueSeverity::Error, "layouts", "must have the layout \"default\""));
+    CHECK(result.Has(ItemDataIssueSeverity::Fatal, "layouts", "must have the layout \"default\""));
 
     // A layout of another name doesn't stand in for it.
     const ReadResult other = Read(R"({"formatVersion": 1, "layouts": [{"name": "compact", "lines": [
         {"section": "name"}, {"section": "description"}, {"section": "classes"}, {"section": "options"}]}]})");
-    CHECK(other.Has(ItemDataIssueSeverity::Error, "layouts", "must have the layout \"default\""));
+    CHECK(other.Has(ItemDataIssueSeverity::Fatal, "layouts", "must have the layout \"default\""));
     CHECK(other.Has(ItemDataIssueSeverity::Warning, "layouts[0].name", "only the \"default\" layout is used"));
 }
 
@@ -195,7 +195,7 @@ TEST_CASE("A tooltip file warns about a line value its text does not have [data]
 {
     const ReadResult result = Read(
         TooltipFile(R"("used": "Defense: {defense}")", R"({"text": "@used", "values": {"missing": "missingLevel"}},)"));
-    CHECK_FALSE(HasErrors(result.issues));
+    CHECK_FALSE(HasFatal(result.issues));
     CHECK(result.Has(ItemDataIssueSeverity::Warning, "layouts[0].lines[1].values.missing", "has no {missing}"));
 }
 
@@ -239,13 +239,13 @@ TEST_CASE("A shared text is used by a layout or an item description [data][items
                                       issue.message.find(message) != std::string::npos;
                            });
     };
-    CHECK(has(ItemDataIssueSeverity::Error, "description[1].text", "did you mean \"@life\"?"));
-    CHECK(has(ItemDataIssueSeverity::Error, "description[2].text", "{notATable}"));
+    CHECK(has(ItemDataIssueSeverity::Fatal, "description[1].text", "did you mean \"@life\"?"));
+    CHECK(has(ItemDataIssueSeverity::Fatal, "description[2].text", "{notATable}"));
     // A shared text names a table only through the line's values, also one the stat file has: the editor's table
     // counts and rename read an item's own data.
-    CHECK(has(ItemDataIssueSeverity::Error, "description[3].text", "names the table {table:capeDamageIncrease}"));
-    CHECK_FALSE(has(ItemDataIssueSeverity::Error, "description[4].text", ""));
-    CHECK_FALSE(has(ItemDataIssueSeverity::Error, "description[4].values.percent", ""));
+    CHECK(has(ItemDataIssueSeverity::Fatal, "description[3].text", "names the table {table:capeDamageIncrease}"));
+    CHECK_FALSE(has(ItemDataIssueSeverity::Fatal, "description[4].text", ""));
+    CHECK_FALSE(has(ItemDataIssueSeverity::Fatal, "description[4].values.percent", ""));
     CHECK(has(ItemDataIssueSeverity::Warning, "description[4].values.missing", "has no {missing}"));
     CHECK(has(ItemDataIssueSeverity::Warning, "texts.unused", "neither a layout nor an item description"));
     CHECK_FALSE(has(ItemDataIssueSeverity::Warning, "texts.life", ""));
@@ -381,9 +381,9 @@ TEST_CASE("A tooltip file's texts are checked like item names [data][items][tool
                     R"("unknown": {"en": "A text", "xx": "Ein Text"}, "blank": "")",
                     R"({"text": "@onlyGerman"}, {"text": "@badCode"}, {"text": "@unknown"}, {"text": "@blank"},)"));
 
-    CHECK(result.Has(ItemDataIssueSeverity::Error, "texts.onlyGerman", "the English text is missing"));
-    CHECK(result.Has(ItemDataIssueSeverity::Error, "texts.badCode", "\"d e\" is not a language code"));
-    CHECK_FALSE(result.Has(ItemDataIssueSeverity::Error, "texts.blank", "English"));
+    CHECK(result.Has(ItemDataIssueSeverity::Fatal, "texts.onlyGerman", "the English text is missing"));
+    CHECK(result.Has(ItemDataIssueSeverity::Fatal, "texts.badCode", "\"d e\" is not a language code"));
+    CHECK_FALSE(result.Has(ItemDataIssueSeverity::Fatal, "texts.blank", "English"));
 
     const char* uiLocales[] = {"en", "de"};
     std::vector<ItemDataIssue> issues;

@@ -76,9 +76,9 @@ private:
         m_issues.push_back({severity, m_source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field, message});
     }
 
-    void AddError(const std::string& field, const std::string& message)
+    void AddFatal(const std::string& field, const std::string& message)
     {
-        AddIssue(ItemDataIssueSeverity::Error, field, message);
+        AddIssue(ItemDataIssueSeverity::Fatal, field, message);
     }
 
     void WarnAboutUnknownKeys(const OrderedJson& json, const KeySet& knownKeys, const std::string& prefix)
@@ -111,19 +111,19 @@ private:
 bool ItemTooltipReader::ReadText(const OrderedJson& json, const std::string& field, LocalizedString& text)
 {
     if (!Json::ReadLocalizedString(json, field, text, [this](const std::string& errorField, const std::string& message)
-                                   { AddError(errorField, message); }))
+                                   { AddFatal(errorField, message); }))
     {
         return false;
     }
     if (!text.IsEmpty() && text.GetNeutral().empty())
     {
-        AddError(field, "the English text is missing");
+        AddFatal(field, "the English text is missing");
     }
     for (const auto& [locale, translation] : text.GetTranslations())
     {
         if (!LocalizedString::IsValidLocaleCode(locale))
         {
-            AddError(field, "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)");
+            AddFatal(field, "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)");
         }
     }
     return true;
@@ -135,7 +135,7 @@ void ItemTooltipReader::CheckPlaceholders(const LocalizedString& text, const std
     const PlaceholderScan english = ScanPlaceholders(text.GetNeutral());
     if (!english.error.empty())
     {
-        AddError(field, english.error);
+        AddFatal(field, english.error);
         return;
     }
     const std::set<std::string> englishNames(english.names.begin(), english.names.end());
@@ -144,13 +144,13 @@ void ItemTooltipReader::CheckPlaceholders(const LocalizedString& text, const std
         const PlaceholderScan scan = ScanPlaceholders(translation);
         if (!scan.error.empty())
         {
-            AddError(field + "." + locale, scan.error);
+            AddFatal(field + "." + locale, scan.error);
             continue;
         }
         const std::set<std::string> names(scan.names.begin(), scan.names.end());
         if (names != englishNames)
         {
-            AddError(field + "." + locale,
+            AddFatal(field + "." + locale,
                      "has the placeholders " + ListNames(names) + ", the English text " + ListNames(englishNames));
         }
     }
@@ -165,7 +165,7 @@ void ItemTooltipReader::ReadTexts(const OrderedJson& root, ItemTooltipFile& file
     }
     if (!texts->is_object())
     {
-        AddError(Keys::Texts, "must be an object of texts by name");
+        AddFatal(Keys::Texts, "must be an object of texts by name");
         return;
     }
     for (const auto& [name, json] : texts->items())
@@ -173,7 +173,7 @@ void ItemTooltipReader::ReadTexts(const OrderedJson& root, ItemTooltipFile& file
         const std::string field = std::string(Keys::Texts) + "." + name;
         if (!Json::IsName(name))
         {
-            AddError(field, "a text's name has only letters and digits");
+            AddFatal(field, "a text's name has only letters and digits");
             continue;
         }
         LocalizedString text;
@@ -190,14 +190,14 @@ void ItemTooltipReader::ReadConditions(const OrderedJson& json, const std::strin
 {
     ReadTooltipConditions(json, field, R"(["defense", "!excellent", "tag:sceptre"])", conditions,
                           [this](const std::string& errorField, const std::string& message)
-                          { AddError(errorField, message); });
+                          { AddFatal(errorField, message); });
 }
 
 void ItemTooltipReader::ReadColor(const OrderedJson& json, const std::string& field, ItemTextColor& color)
 {
     if (!json.is_string() || !FindEnumValue(json.get<std::string>(), color))
     {
-        AddError(field, "must be a color name (docs/item-data.md)");
+        AddFatal(field, "must be a color name (docs/item-data.md)");
     }
 }
 
@@ -206,7 +206,7 @@ void ItemTooltipReader::ReadColorRules(const OrderedJson& json, const std::strin
 {
     if (!json.is_array())
     {
-        AddError(field, "must be a list of {\"when\": [...], \"color\": ...}");
+        AddFatal(field, "must be a list of {\"when\": [...], \"color\": ...}");
         return;
     }
     for (size_t index = 0; index < json.size(); ++index)
@@ -217,14 +217,14 @@ void ItemTooltipReader::ReadColorRules(const OrderedJson& json, const std::strin
         const auto color = entry.is_object() ? entry.find(Keys::Color) : entry.end();
         if (when == entry.end() || color == entry.end())
         {
-            AddError(entryField, "must be {\"when\": [...], \"color\": ...}");
+            AddFatal(entryField, "must be {\"when\": [...], \"color\": ...}");
             continue;
         }
         TooltipColorRule rule;
         ReadConditions(*when, entryField + "." + Keys::When, rule.when);
         if (rule.when.empty())
         {
-            AddError(entryField + "." + Keys::When, "a color rule needs a condition; the line's \"color\" is the "
+            AddFatal(entryField + "." + Keys::When, "a color rule needs a condition; the line's \"color\" is the "
                                                     "color when no rule holds");
         }
         ReadColor(*color, entryField + "." + Keys::Color, rule.color);
@@ -237,7 +237,7 @@ void ItemTooltipReader::ReadLineValues(const OrderedJson& json, const std::strin
 {
     if (!json.is_object())
     {
-        AddError(field, "must be an object of placeholders and the built-in values they show");
+        AddFatal(field, "must be an object of placeholders and the built-in values they show");
         return;
     }
     for (const auto& [placeholder, value] : json.items())
@@ -245,12 +245,12 @@ void ItemTooltipReader::ReadLineValues(const OrderedJson& json, const std::strin
         const std::string entryField = field + "." + placeholder;
         if (!Json::IsName(placeholder))
         {
-            AddError(entryField, "a placeholder has only letters and digits");
+            AddFatal(entryField, "a placeholder has only letters and digits");
             continue;
         }
         if (!value.is_string() || !IsBuiltInPlaceholder(value.get<std::string>()))
         {
-            AddError(entryField, "must name a built-in value (docs/item-data.md)");
+            AddFatal(entryField, "must name a built-in value (docs/item-data.md)");
             continue;
         }
         line.values.emplace_back(placeholder, value.get<std::string>());
@@ -280,7 +280,7 @@ void ItemTooltipReader::CheckLinePlaceholders(const TooltipLayoutLine& line, con
             continue;
         }
         const std::string suggestion = SuggestPlaceholder(name, known);
-        AddError(field + "." + Keys::Text,
+        AddFatal(field + "." + Keys::Text,
                  "has the unknown placeholder {" + name + "}; " +
                      (suggestion.empty() ? "a placeholder is a built-in value (docs/item-data.md) or one the line's "
                                            "\"values\" names"
@@ -307,7 +307,7 @@ bool ItemTooltipReader::ReadSection(const OrderedJson& json, const std::string& 
             return true;
         }
     }
-    AddError(field, "must be \"name\", \"description\", \"classes\" or \"options\"");
+    AddFatal(field, "must be \"name\", \"description\", \"classes\" or \"options\"");
     return false;
 }
 
@@ -317,7 +317,7 @@ void ItemTooltipReader::ReadLine(const OrderedJson& json, const std::string& fie
     const auto text = json.find(Keys::Text);
     if (text == json.end())
     {
-        AddError(field, "must have a \"text\" (\"\" for a blank line) or a \"section\"");
+        AddFatal(field, "must have a \"text\" (\"\" for a blank line) or a \"section\"");
         return;
     }
     if (text->is_string() && text->get<std::string>().starts_with(TextReference))
@@ -331,7 +331,7 @@ void ItemTooltipReader::ReadLine(const OrderedJson& json, const std::string& fie
                 names.push_back(name);
             }
             const std::string suggestion = SuggestPlaceholder(line.textName, names);
-            AddError(field + "." + Keys::Text,
+            AddFatal(field + "." + Keys::Text,
                      "\"@" + line.textName + "\" is not a text of \"texts\"" +
                          (suggestion.empty() ? "" : "; did you mean \"@" + suggestion + "\"?"));
         }
@@ -361,7 +361,7 @@ void ItemTooltipReader::ReadLine(const OrderedJson& json, const std::string& fie
         }
         else
         {
-            AddError(field + "." + Keys::Bold, "must be true or false");
+            AddFatal(field + "." + Keys::Bold, "must be true or false");
         }
     }
     if (const auto values = json.find(Keys::Values); values != json.end())
@@ -378,7 +378,7 @@ void ItemTooltipReader::ReadLayout(const OrderedJson& json, const std::string& f
     const auto name = json.find(Keys::Name);
     if (name == json.end() || !name->is_string() || !Json::IsName(name->get<std::string>()))
     {
-        AddError(field + "." + Keys::Name, "must be a name of letters and digits");
+        AddFatal(field + "." + Keys::Name, "must be a name of letters and digits");
     }
     else
     {
@@ -387,7 +387,7 @@ void ItemTooltipReader::ReadLayout(const OrderedJson& json, const std::string& f
     const auto lines = json.find(Keys::Lines);
     if (lines == json.end() || !lines->is_array())
     {
-        AddError(field + "." + Keys::Lines, "must be a list of lines");
+        AddFatal(field + "." + Keys::Lines, "must be a list of lines");
         return;
     }
 
@@ -398,7 +398,7 @@ void ItemTooltipReader::ReadLayout(const OrderedJson& json, const std::string& f
         const std::string lineField = field + "." + Keys::Lines + "[" + std::to_string(index) + "]";
         if (!entry.is_object())
         {
-            AddError(lineField, "must be an object");
+            AddFatal(lineField, "must be an object");
             continue;
         }
         TooltipLayoutLine line;
@@ -410,12 +410,12 @@ void ItemTooltipReader::ReadLayout(const OrderedJson& json, const std::string& f
             }
             if (line.section <= lastSection)
             {
-                AddError(lineField + "." + Keys::Section,
+                AddFatal(lineField + "." + Keys::Section,
                          "the sections come once each, in the order name, description, classes, options");
             }
             if (lastSection == TooltipSection::None && index != 0)
             {
-                AddError(lineField + "." + Keys::Section, "the lines start after the name section");
+                AddFatal(lineField + "." + Keys::Section, "the lines start after the name section");
             }
             lastSection = std::max(lastSection, line.section);
             WarnAboutUnknownKeys(entry, SectionLineKeys, lineField + ".");
@@ -424,7 +424,7 @@ void ItemTooltipReader::ReadLayout(const OrderedJson& json, const std::string& f
         {
             if (lastSection == TooltipSection::Options)
             {
-                AddError(lineField, "the options section ends the tooltip, so no line comes after it");
+                AddFatal(lineField, "the options section ends the tooltip, so no line comes after it");
             }
             ReadLine(entry, lineField, file, line);
         }
@@ -434,7 +434,7 @@ void ItemTooltipReader::ReadLayout(const OrderedJson& json, const std::string& f
                                           { return line.section != TooltipSection::None; });
     if (sections != SectionNames.size() || lastSection != TooltipSection::Options)
     {
-        AddError(field + "." + Keys::Lines, "must have the sections name, description, classes and options");
+        AddFatal(field + "." + Keys::Lines, "must have the sections name, description, classes and options");
     }
 }
 
@@ -443,7 +443,7 @@ void ItemTooltipReader::ReadLayouts(const OrderedJson& root, ItemTooltipFile& fi
     const auto layouts = root.find(Keys::Layouts);
     if (layouts == root.end() || !layouts->is_array())
     {
-        AddError(Keys::Layouts, "must be a list of layouts");
+        AddFatal(Keys::Layouts, "must be a list of layouts");
         return;
     }
     for (size_t index = 0; index < layouts->size(); ++index)
@@ -452,7 +452,7 @@ void ItemTooltipReader::ReadLayouts(const OrderedJson& root, ItemTooltipFile& fi
         const std::string field = std::string(Keys::Layouts) + "[" + std::to_string(index) + "]";
         if (!entry.is_object())
         {
-            AddError(field, "must be an object");
+            AddFatal(field, "must be an object");
             continue;
         }
         TooltipLayout layout;
@@ -460,7 +460,7 @@ void ItemTooltipReader::ReadLayouts(const OrderedJson& root, ItemTooltipFile& fi
         WarnAboutUnknownKeys(entry, LayoutKeys, field + ".");
         if (!layout.name.empty() && file.FindLayout(layout.name) != nullptr)
         {
-            AddError(field + "." + Keys::Name, "the layout \"" + layout.name + "\" is defined more than once");
+            AddFatal(field + "." + Keys::Name, "the layout \"" + layout.name + "\" is defined more than once");
             continue;
         }
         if (!layout.name.empty() && layout.name != DefaultTooltipLayout)
@@ -472,7 +472,7 @@ void ItemTooltipReader::ReadLayouts(const OrderedJson& root, ItemTooltipFile& fi
     }
     if (file.FindLayout(DefaultTooltipLayout) == nullptr)
     {
-        AddError(Keys::Layouts, "must have the layout \"default\", which every item's tooltip uses");
+        AddFatal(Keys::Layouts, "must have the layout \"default\", which every item's tooltip uses");
     }
 }
 

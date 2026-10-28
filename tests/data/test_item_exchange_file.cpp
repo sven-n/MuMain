@@ -132,29 +132,29 @@ TEST_CASE("The exchange file reader refuses what cannot be exchanged [data][item
     SUBCASE("a file of another game version")
     {
         ReadExchange(FileWithItem(kris, R"("source": "OpenMU", "gameVersion": "season4")"), issues);
-        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "season6"));
+        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Fatal, "season6"));
     }
     SUBCASE("an unknown source")
     {
         ReadExchange(FileWithItem(kris, R"("source": "Other", "gameVersion": "season6")"), issues);
-        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "MuMain"));
+        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Fatal, "MuMain"));
     }
     SUBCASE("an empty server is as if there were none")
     {
         const ItemExchangeFile file = ReadExchange(
             R"({"formatVersion": 1, "source": "OpenMU", "server": "", "gameVersion": "season6", "items": []})", issues);
-        CHECK_FALSE(HasErrors(issues));
+        CHECK_FALSE(HasFatal(issues));
         CHECK(file.server.empty());
     }
     SUBCASE("a newer format")
     {
         ReadExchange(R"({"formatVersion": 2, "source": "OpenMU", "gameVersion": "season6", "items": []})", issues);
-        CHECK(HasErrors(issues));
+        CHECK(HasFatal(issues));
     }
     SUBCASE("an item without a group")
     {
         const ItemExchangeFile file = ReadExchange(FileWithItem(R"({"number": 0, "name": "Kris"})"), issues);
-        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "group"));
+        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Fatal, "group"));
         CHECK(file.items.empty());
         CHECK_FALSE(CanImportItemExchange(file, issues));
     }
@@ -162,7 +162,7 @@ TEST_CASE("The exchange file reader refuses what cannot be exchanged [data][item
     {
         const std::string other = R"({"group": 0, "number": 1, "name": "Short Sword"})";
         const ItemExchangeFile file = ReadExchange(FileWithItem(kris + ", " + other + ", " + kris), issues);
-        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "2 times"));
+        CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Fatal, "2 times"));
         REQUIRE(file.items.size() == 1);
         CHECK(file.items[0].number == 1);
         CHECK(file.repeatedItems == std::vector<std::pair<int, int>>{{0, 0}});
@@ -181,7 +181,7 @@ TEST_CASE("The exchange file reader leaves out what stays with the client [data]
             FileWithItem(
                 R"({"group": 0, "number": 0, "name": "Kris", "weaponKind": "sword", "statProfile": "weapon"})"),
             issues);
-        CHECK_FALSE(HasErrors(issues));
+        CHECK_FALSE(HasFatal(issues));
         CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "stay with the client"));
         REQUIRE(file.items.size() == 1);
         CHECK(file.items[0].weaponKind == WeaponKind::None);
@@ -192,7 +192,7 @@ TEST_CASE("The exchange file reader leaves out what stays with the client [data]
         const ItemExchangeFile file = ReadExchange(
             FileWithItem(R"({"group": 0, "number": 0, "name": "Kris", "description": [{"text": "A short dagger"}]})"),
             issues);
-        CHECK_FALSE(HasErrors(issues));
+        CHECK_FALSE(HasFatal(issues));
         CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "stay with the client"));
         REQUIRE(file.items.size() == 1);
         CHECK(file.items[0].description.empty());
@@ -207,7 +207,7 @@ TEST_CASE("The exchange file reader leaves out what stays with the client [data]
         REQUIRE(at != std::string::npos);
         text.insert(at, R"("profileRules": [{"profile": "default", "tags": ["ammunition"]}], )");
         const ItemExchangeFile file = ReadExchange(text, issues);
-        CHECK_FALSE(HasErrors(issues));
+        CHECK_FALSE(HasFatal(issues));
         CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "profile rules"));
         REQUIRE(file.formulas);
         CHECK(file.formulas->profileRules.empty());

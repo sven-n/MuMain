@@ -2,7 +2,7 @@
 
 #include "doctest.h"
 
-// What Monster Checks finds in the monster table and which monster tool a
+// What Data Checks finds in the monster table and which monster tool a
 // problem opens (MN1), without ImGui.
 #ifdef _EDITOR
 
@@ -151,7 +151,7 @@ TEST_CASE("Monster checks: the attacks go to Monster Attacks [editor][monsters]"
     CHECK(GetToolForField("monster 459 attackSpeed") == MonsterTool::Browser);
 }
 
-TEST_CASE("Monster checks: Run finds the name problems of the table and sends them to Monster Translations "
+TEST_CASE("Monster checks: RunMonsters finds the name problems of the table and sends them to Monster Translations "
           "[editor][monsters]")
 {
     MonsterDefinition unknownLanguage = Monster(9, "Thunder Lich");
@@ -162,12 +162,12 @@ TEST_CASE("Monster checks: Run finds the name problems of the table and sends th
     g_MonsterModelDatabase.Build({});
     std::vector<ItemDataIssue> issues;
 
-    MuEditor::Monsters::MonsterChecks::Run(issues);
+    MuEditor::Monsters::MonsterChecks::RunMonsters(issues);
 
     REQUIRE(issues.size() == 4);
     const ItemDataIssue* separator = FindIssue(issues, 7, "must not contain");
     REQUIRE(separator != nullptr);
-    CHECK(separator->severity == ItemDataIssueSeverity::Error);
+    CHECK(separator->severity == ItemDataIssueSeverity::Fatal);
     const ItemDataIssue* language = FindIssue(issues, 9, "never shown");
     REQUIRE(language != nullptr);
     CHECK(language->severity == ItemDataIssueSeverity::Warning);
@@ -186,7 +186,7 @@ TEST_CASE("Monster checks: Run finds the name problems of the table and sends th
     }
 }
 
-TEST_CASE("Monster checks: Run lists a model whose file is not in the client folder (P1) [editor][monsters]")
+TEST_CASE("Monster checks: RunModels lists a model whose file is not in the client folder (P1) [editor][monsters]")
 {
     g_MonsterDatabase.Build({}, "en");
     Data::Monsters::MonsterModelDefinition molt;
@@ -195,7 +195,7 @@ TEST_CASE("Monster checks: Run lists a model whose file is not in the client fol
     g_MonsterModelDatabase.Build(std::array{molt});
     std::vector<ItemDataIssue> issues;
 
-    MuEditor::Monsters::MonsterChecks::Run(issues);
+    MuEditor::Monsters::MonsterChecks::RunModels(issues);
     g_MonsterModelDatabase.Build({});
 
     REQUIRE(issues.size() == 1);

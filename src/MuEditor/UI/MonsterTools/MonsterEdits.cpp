@@ -49,7 +49,7 @@ bool IsMonsterNumber(int number)
 }
 
 // Whether the model list's save would take the model: written and read back
-// as the save does, with the checks of its names, without errors.
+// as the save does, with the checks of its names, without fatal problems.
 bool CanStoreModel(const MonsterModelDefinition& model)
 {
     const std::string text = Data::Monsters::WriteMonsterModelsJson(std::span<const MonsterModelDefinition>(&model, 1));
@@ -57,7 +57,7 @@ bool CanStoreModel(const MonsterModelDefinition& model)
     std::vector<Data::Items::ItemDataIssue> issues;
     Data::Monsters::ReadMonsterModelsJson(text, "", readBack, issues);
     Data::Monsters::ValidateMonsterModelNames(readBack, "", issues);
-    return !Data::Items::HasErrors(issues);
+    return !Data::Items::HasFatal(issues);
 }
 } // namespace
 
@@ -252,7 +252,7 @@ bool MonsterEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
     return true;
 }
 
-// Both files or neither: when one has errors, the edits and their history
+// Both files or neither: when one has fatal problems, the edits and their history
 // stay.
 bool MonsterEdits::Revert(std::vector<Data::Items::ItemDataIssue>& issues)
 {

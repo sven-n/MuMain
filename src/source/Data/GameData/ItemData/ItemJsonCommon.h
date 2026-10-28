@@ -57,7 +57,7 @@ bool ReadFileHeader(std::string_view text, const std::string& source, int maxFor
                     int& group, std::vector<ItemDataIssue>& issues);
 
 // Reads "number" of a list entry: a whole number from 0 to MAX_ITEM_INDEX - 1.
-// On errors an issue is added (with `addIssue`) and false is returned.
+// On fatal problems an issue is added (with `addIssue`) and false is returned.
 template <typename TAddIssue> bool ReadNumber(const OrderedJson& json, int& number, TAddIssue&& addIssue)
 {
     const auto field = json.find(Keys::Number);

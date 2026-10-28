@@ -40,7 +40,7 @@ void CItemEditorActions::RenderSaveButton()
             ImGui::OpenPopup("Save Success");
             break;
         case Data::Items::ItemDataSaveResult::InvalidData:
-            g_MuEditorConsoleUI.LogEditor(I18N::Editor::ItemDataHasErrors);
+            g_MuEditorConsoleUI.LogEditor(I18N::Editor::ItemDataHasFatalProblems);
             ImGui::OpenPopup("Save Failed");
             break;
         case Data::Items::ItemDataSaveResult::WriteFailed:
@@ -67,7 +67,7 @@ bool CItemEditorActions::RenderImportBmdButton()
     }
     const Data::Items::ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
     LogIssues(result.issues);
-    if (Data::Items::HasErrors(result.issues))
+    if (Data::Items::HasFatal(result.issues))
     {
         g_MuEditorConsoleUI.LogEditor(I18N::Editor::FailedToImportItemsFromBmd);
         ImGui::OpenPopup("Import Bmd Failed");
@@ -137,7 +137,7 @@ void CItemEditorActions::RenderExportBmdButton()
 
 void CItemEditorActions::LogMissingItemNames()
 {
-    // English never misses a name: an item without one has errors.
+    // English never misses a name: an item without one has fatal problems.
     for (const Data::Items::ItemNameCount& count :
          Data::Items::CountItemNames(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales()))
     {
@@ -188,9 +188,10 @@ void CItemEditorActions::LogImportResult(const Data::Items::ItemBmdImportResult&
     g_MuEditorConsoleUI.LogEditor(std::to_string(result.keptEnglishNameCount) +
                                   " items the English file lacks kept their current English name");
     LogIssues(result.validationIssues);
-    if (Data::Items::HasErrors(result.validationIssues))
+    if (Data::Items::HasFatal(result.validationIssues))
     {
-        g_MuEditorConsoleUI.LogEditor("Fix the errors above before saving; Save refuses data with errors.");
+        g_MuEditorConsoleUI.LogEditor(
+            "Fix the fatal problems above before saving; Save refuses data with fatal problems.");
     }
 }
 

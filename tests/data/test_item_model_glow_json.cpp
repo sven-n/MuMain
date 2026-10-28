@@ -36,9 +36,9 @@ bool HasIssue(const std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity se
                        [&](const ItemDataIssue& issue) { return issue.severity == severity && issue.field == field; });
 }
 
-bool HasError(const std::string& fields, const std::string& field)
+bool HasFatalIssue(const std::string& fields, const std::string& field)
 {
-    return HasIssue(ReadModel(fields).issues, ItemDataIssueSeverity::Error, field);
+    return HasIssue(ReadModel(fields).issues, ItemDataIssueSeverity::Fatal, field);
 }
 
 bool Contains(const std::string& text, const std::string& part)
@@ -129,23 +129,24 @@ TEST_CASE("Item model glow defaults are left out [data][items]")
 
 TEST_CASE("Item model glow values are checked [data][items]")
 {
-    CHECK(HasError(R"("glow": [])", "glow"));
-    CHECK(HasError(R"("glow": {"level": 32})", "glow.level"));
-    CHECK(HasError(R"("glow": {"level": -1})", "glow.level"));
-    CHECK(HasError(R"("glow": {"level": 2.5})", "glow.level"));
-    CHECK(HasError(R"("glow": {"level": [0, 1, 2]})", "glow.level"));
-    CHECK(HasError(R"("glow": {"level": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 32]})", "glow.level[15]"));
-    CHECK(HasError(R"("glow": {"color": [1, 0.5, 0]})", "glow.color"));
-    CHECK(HasError(R"("glow": {"color": ""})", "glow.color"));
-    CHECK(HasError(R"("glow": {"shineColor": "light blue"})", "glow.shineColor"));
-    CHECK(HasError(R"("glow": {"ancientColor": 3})", "glow.ancientColor"));
-    CHECK(HasError(R"("glow": {"meshes": []})", "glow.meshes"));
-    CHECK(HasError(R"("glow": {"meshes": [0, -1]})", "glow.meshes"));
-    CHECK(HasError(R"("glow": {"meshes": [1], "hiddenMesh": 0})", "glow.meshes"));
-    CHECK(HasError(R"("glow": {"shineHiddenMesh": "all"})", "glow.shineHiddenMesh"));
-    CHECK(HasError(R"("glow": {"shineWhite": 1})", "glow.shineWhite"));
-    CHECK(HasError(R"("glow": {"excellent": "no"})", "glow.excellent"));
-    CHECK(HasError(R"("glow": {"excellentMesh": -2})", "glow.excellentMesh"));
+    CHECK(HasFatalIssue(R"("glow": [])", "glow"));
+    CHECK(HasFatalIssue(R"("glow": {"level": 32})", "glow.level"));
+    CHECK(HasFatalIssue(R"("glow": {"level": -1})", "glow.level"));
+    CHECK(HasFatalIssue(R"("glow": {"level": 2.5})", "glow.level"));
+    CHECK(HasFatalIssue(R"("glow": {"level": [0, 1, 2]})", "glow.level"));
+    CHECK(HasFatalIssue(R"("glow": {"level": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 32]})",
+                        "glow.level[15]"));
+    CHECK(HasFatalIssue(R"("glow": {"color": [1, 0.5, 0]})", "glow.color"));
+    CHECK(HasFatalIssue(R"("glow": {"color": ""})", "glow.color"));
+    CHECK(HasFatalIssue(R"("glow": {"shineColor": "light blue"})", "glow.shineColor"));
+    CHECK(HasFatalIssue(R"("glow": {"ancientColor": 3})", "glow.ancientColor"));
+    CHECK(HasFatalIssue(R"("glow": {"meshes": []})", "glow.meshes"));
+    CHECK(HasFatalIssue(R"("glow": {"meshes": [0, -1]})", "glow.meshes"));
+    CHECK(HasFatalIssue(R"("glow": {"meshes": [1], "hiddenMesh": 0})", "glow.meshes"));
+    CHECK(HasFatalIssue(R"("glow": {"shineHiddenMesh": "all"})", "glow.shineHiddenMesh"));
+    CHECK(HasFatalIssue(R"("glow": {"shineWhite": 1})", "glow.shineWhite"));
+    CHECK(HasFatalIssue(R"("glow": {"excellent": "no"})", "glow.excellent"));
+    CHECK(HasFatalIssue(R"("glow": {"excellentMesh": -2})", "glow.excellentMesh"));
     CHECK(ReadModel(R"("glow": {"level": 0, "hiddenMesh": 1, "shineMeshes": [0], "excellent": true})").issues.empty());
 }
 
@@ -205,24 +206,24 @@ TEST_CASE("The glow color list is checked [data][effects]")
         return issues;
     };
 
-    CHECK(HasIssue(errorsOf(R"({"colors": {}})"), ItemDataIssueSeverity::Error, "formatVersion"));
-    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1})"), ItemDataIssueSeverity::Error, "colors"));
+    CHECK(HasIssue(errorsOf(R"({"colors": {}})"), ItemDataIssueSeverity::Fatal, "formatVersion"));
+    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1})"), ItemDataIssueSeverity::Fatal, "colors"));
     CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {"light blue": [0, 0, 1]}})"),
-                   ItemDataIssueSeverity::Error, "colors.light blue"));
-    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {"blue": [0, 0, 2]}})"), ItemDataIssueSeverity::Error,
+                   ItemDataIssueSeverity::Fatal, "colors.light blue"));
+    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {"blue": [0, 0, 2]}})"), ItemDataIssueSeverity::Fatal,
                    "colors.blue"));
-    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {"blue": [0, 1]}})"), ItemDataIssueSeverity::Error,
+    CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {"blue": [0, 1]}})"), ItemDataIssueSeverity::Fatal,
                    "colors.blue"));
     CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {}, "shades": 3})"), ItemDataIssueSeverity::Warning,
                    "shades"));
     // The JSON reader would keep only the last of two equal names.
     CHECK(HasIssue(errorsOf(R"({"formatVersion": 1, "colors": {"gold": [1, 0.7, 0.2], "gold": [1, 1, 0]}})"),
-                   ItemDataIssueSeverity::Error, "colors.gold"));
+                   ItemDataIssueSeverity::Fatal, "colors.gold"));
     // Repeated keys elsewhere are no color names.
     const std::vector<ItemDataIssue> notes =
         errorsOf(R"({"formatVersion": 1, "colors": {}, "notes": {"a": 1, "a": 2}})");
     CHECK(HasIssue(notes, ItemDataIssueSeverity::Warning, "notes"));
-    CHECK_FALSE(HasErrors(notes));
+    CHECK_FALSE(HasFatal(notes));
 }
 
 TEST_CASE("Item model glow colors must be in the glow color list [data][items]")
@@ -239,7 +240,7 @@ TEST_CASE("Item model glow colors must be in the glow color list [data][items]")
 
     model.glow.color = "teal";
     ValidateItemModelGlowColors(std::vector<ItemModelDefinition>{model}, colors, issues);
-    CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "glow.color"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "glow.color"));
 
     // The default colors must be in the list.
     issues.clear();

@@ -24,7 +24,7 @@ EffectTypesLoadResult LoadEffectTypeFiles(const std::filesystem::path& directory
         const std::optional<std::string> text = ReadTextFile(file);
         if (!text)
         {
-            result.issues.push_back({Items::ItemDataIssueSeverity::Error, source, Items::ItemDataIssue::NoItem,
+            result.issues.push_back({Items::ItemDataIssueSeverity::Fatal, source, Items::ItemDataIssue::NoItem,
                                      Items::ItemDataIssue::NoItem, "", "could not be read"});
             continue;
         }
@@ -33,7 +33,7 @@ EffectTypesLoadResult LoadEffectTypeFiles(const std::filesystem::path& directory
         std::vector<Items::ItemDataIssue> readIssues;
         std::vector<EffectTypeEntry>& types = result.types[ToIndex(kind)];
         ReadEffectTypesJson(*text, source, kind, types, readIssues);
-        if (!Items::HasErrors(readIssues))
+        if (!Items::HasFatal(readIssues))
         {
             ValidateEffectTypes(kind, types, source, readIssues);
         }

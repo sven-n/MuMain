@@ -460,8 +460,8 @@
   <data name="Failed to export items as bmd" xml:space="preserve">
     <value>Die Gegenstände konnten nicht als bmd-Dateien exportiert werden.</value>
   </data>
-  <data name="Item data has errors" xml:space="preserve">
-    <value>Die Gegenstandsdaten enthalten Fehler und wurden nicht gespeichert. Siehe Konsole.</value>
+  <data name="Item data has fatal problems" xml:space="preserve">
+    <value>Die Gegenstandsdaten haben fatale Probleme und wurden nicht gespeichert. Siehe Konsole.</value>
   </data>
   <data name="Item data could not be written" xml:space="preserve">
     <value>Die Gegenstandsdateien konnten nicht geschrieben werden. Siehe Konsole.</value>
@@ -1267,20 +1267,53 @@
   <data name="Remove the model entry" xml:space="preserve">
     <value>Modelleintrag entfernen</value>
   </data>
-  <data name="Item Checks" xml:space="preserve">
-    <value>Gegenstandsprüfung</value>
-  </data>
-  <data name="Check" xml:space="preserve">
-    <value>Prüfen</value>
-  </data>
   <data name="Errors: {0}" xml:space="preserve">
     <value>Fehler: {0}</value>
+  </data>
+  <data name="Fatal: {0}" xml:space="preserve">
+    <value>Fatal: {0}</value>
   </data>
   <data name="Warnings: {0}" xml:space="preserve">
     <value>Warnungen: {0}</value>
   </data>
+  <data name="Data Checks" xml:space="preserve">
+    <value>Datenprüfung</value>
+  </data>
+  <data name="Check all data" xml:space="preserve">
+    <value>Alle prüfen</value>
+  </data>
+  <data name="Areas" xml:space="preserve">
+    <value>Bereiche:</value>
+  </data>
+  <data name="Area" xml:space="preserve">
+    <value>Bereich</value>
+  </data>
+  <data name="What" xml:space="preserve">
+    <value>Was</value>
+  </data>
+  <data name="Monster models" xml:space="preserve">
+    <value>Monstermodelle</value>
+  </data>
+  <data name="Model files" xml:space="preserve">
+    <value>Modelldateien</value>
+  </data>
+  <data name="Data checks what note" xml:space="preserve">
+    <value>Gegenstände und Monster werden so geprüft, wie ihr Speichern sie schreiben würde; die glTF-Modelldateitabelle, Serverliste, Effekte und Looks so, wie das Spiel ihre Dateien beim Start liest.</value>
+  </data>
+  <data name="Data checks save note" xml:space="preserve">
+    <value>Jedes Speichern verweigert Daten mit fatalen Problemen und speichert Daten mit Fehlern und Warnungen.</value>
+  </data>
+  <data name="Data checks click note" xml:space="preserve">
+    <value>Ein Klick auf ein Problem wählt aus, worum es geht, und öffnet sein Werkzeug.</value>
+  </data>
+  <data name="The data changed since the last check; check again." xml:space="preserve">
+    <value>Die Daten haben sich seit der letzten Prüfung geändert; prüfen Sie erneut.</value>
+  </data>
   <data name="Error" xml:space="preserve">
     <value>Fehler</value>
+  </data>
+  <data name="Fatal" xml:space="preserve">
+    <value>Fatal</value>
   </data>
   <data name="Warning" xml:space="preserve">
     <value>Warnung</value>
@@ -1291,17 +1324,8 @@
   <data name="Message" xml:space="preserve">
     <value>Meldung</value>
   </data>
-  <data name="No errors or warnings" xml:space="preserve">
-    <value>Keine Fehler oder Warnungen</value>
-  </data>
-  <data name="The items changed since the last check; check again." xml:space="preserve">
-    <value>Die Gegenstände haben sich seit der letzten Prüfung geändert; prüfen Sie erneut.</value>
-  </data>
-  <data name="Save Items refuses data with errors and saves data with warnings." xml:space="preserve">
-    <value>Gegenstände speichern verweigert Daten mit Fehlern und speichert Daten mit Warnungen.</value>
-  </data>
-  <data name="Click a problem of an item to select the item and open the tool of its field." xml:space="preserve">
-    <value>Ein Klick auf das Problem eines Gegenstands wählt ihn aus und öffnet das Werkzeug seines Felds.</value>
+  <data name="No fatal problems, errors or warnings" xml:space="preserve">
+    <value>Keine fatalen Probleme, Fehler oder Warnungen</value>
   </data>
   <data name="Item Rules" xml:space="preserve">
     <value>Gegenstandsregeln</value>
@@ -1942,8 +1966,8 @@
   <data name="Server list order note" xml:space="preserve">
     <value>Die Reihenfolge der Liste ist die der Schaltflächen auf dem Anmeldebildschirm, der jede Änderung sofort zeigt. Speichern schreibt {0}.</value>
   </data>
-  <data name="Save off after read errors" xml:space="preserve">
-    <value>Die Datei hatte beim Lesen Fehler, daher enthält die Liste nur die Gruppen, die gelesen werden konnten. Speichern bleibt aus, bis die Datei korrigiert ist und Zurücksetzen sie neu einliest; es würde die anderen Gruppen aus der Datei entfernen.</value>
+  <data name="Save off after fatal read problems" xml:space="preserve">
+    <value>Die Datei hatte beim Lesen fatale Probleme, daher enthält die Liste nur die Gruppen, die gelesen werden konnten. Speichern bleibt aus, bis die Datei korrigiert ist und Zurücksetzen sie neu einliest; es würde die anderen Gruppen aus der Datei entfernen.</value>
   </data>
   <data name="Step add" xml:space="preserve">
     <value>{0} hinzufügen</value>
@@ -1974,9 +1998,6 @@
   </data>
   <data name="Monster Translations" xml:space="preserve">
     <value>Monsterübersetzungen</value>
-  </data>
-  <data name="Monster Checks" xml:space="preserve">
-    <value>Monsterprüfung</value>
   </data>
   <data name="The monsters changed since this step; it is not undone." xml:space="preserve">
     <value>Die Monster haben sich seit diesem Schritt geändert; er wird nicht rückgängig gemacht.</value>
@@ -2085,18 +2106,6 @@
   </data>
   <data name="Monster names not exported" xml:space="preserve">
     <value>Nicht jede Datei wurde geschrieben. Siehe Konsole.</value>
-  </data>
-  <data name="Monster" xml:space="preserve">
-    <value>Monster</value>
-  </data>
-  <data name="The monsters changed since the last check; check again." xml:space="preserve">
-    <value>Die Monster haben sich seit der letzten Prüfung geändert; prüfen Sie erneut.</value>
-  </data>
-  <data name="Save Monsters refuses data with errors and saves data with warnings." xml:space="preserve">
-    <value>Monster speichern verweigert Daten mit Fehlern und speichert Daten mit Warnungen.</value>
-  </data>
-  <data name="Monster checks click note" xml:space="preserve">
-    <value>Ein Klick auf das Problem eines Monsters wählt es aus und öffnet das Werkzeug seines Felds.</value>
   </data>
   <data name="Item Sync" xml:space="preserve">
     <value>Item-Abgleich</value>

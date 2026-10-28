@@ -219,6 +219,7 @@ void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* 
     // The item tools, which share one selected item, and the monster tools.
     RenderToolGroupMenu(MuEditor::GetItemTools(), windows);
     RenderToolGroupMenu(MuEditor::GetMonsterTools(), windows);
+    ImGui::MenuItem(I18N::Editor::DataChecks, nullptr, &windows.dataChecks);
     ImGui::MenuItem(I18N::Editor::ServerList, nullptr, &windows.serverList);
     ImGui::MenuItem("Skill Editor", nullptr, &windows.skillEditor);
     ImGui::MenuItem("Dev Editor", nullptr, &windows.devEditor);

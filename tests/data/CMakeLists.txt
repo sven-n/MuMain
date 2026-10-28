@@ -59,13 +59,15 @@ target_compile_definitions(server_list_data_tests PRIVATE
 mu_add_test(
     NAME monster_data_tests
     SOURCES
+        test_data_check_areas.cpp
+        test_data_checks_window.cpp
+        test_issue_table.cpp
         test_legacy_monster_kind.cpp
         test_monster_attack_checks.cpp
         test_monster_attack_readers.cpp
         test_monster_attacks.cpp
         test_monster_browser_window.cpp
         test_monster_check_targets.cpp
-        test_monster_checks_window.cpp
         test_monster_code_references.cpp
         test_monster_data_edits.cpp
         test_monster_data_files.cpp

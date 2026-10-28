@@ -6,7 +6,7 @@
 
 #include <string_view>
 
-// Where Monster Checks sends a problem: the monster tool that edits the field
+// Where Data Checks sends a problem: the monster tool that edits the field
 // it names, so a click on the problem opens that tool for the monster.
 namespace MuEditor::Monsters
 {

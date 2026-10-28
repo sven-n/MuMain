@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-using Data::Items::HasErrors;
+using Data::Items::HasFatal;
 using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
 using Data::Maps::LightMood;
@@ -93,7 +93,7 @@ TEST_CASE("a value out of range makes the whole file unusable [data][lightmood]"
       "maps": [ { "world": 10, "base": 0.1 } ]
     })");
 
-    CHECK(HasErrors(result.issues));
+    CHECK(HasFatal(result.issues));
     // The file, the map and the value are named.
     CHECK_MESSAGE(Messages(result.issues).find("LightMood.json: maps[world 10].base: is 0.1, must be from 0.2 to 1") !=
                       std::string::npos,
@@ -167,12 +167,12 @@ TEST_CASE("an unknown field is a warning and keeps the file usable [data][lightm
 
 TEST_CASE("a broken or missing light mood file is an error [data][lightmood]")
 {
-    CHECK(HasErrors(Read("{ not json").issues));
-    CHECK(HasErrors(Read(R"({ "formatVersion": 2, "default": {} })").issues));
+    CHECK(HasFatal(Read("{ not json").issues));
+    CHECK(HasFatal(Read(R"({ "formatVersion": 2, "default": {} })").issues));
 
     const Data::Maps::LightMoodLoadResult missing =
         Data::Maps::LoadLightMoodFile(std::filesystem::temp_directory_path() / "mu_no_such_light_mood.json");
-    CHECK(HasErrors(missing.issues));
+    CHECK(HasFatal(missing.issues));
     CHECK_MESSAGE(Messages(missing.issues).find("could not be read") != std::string::npos, Messages(missing.issues));
     CHECK(missing.data.defaultMood == LightMood{});
 }
@@ -201,7 +201,7 @@ TEST_CASE("the shadow keep and the cool shade are optional and range-checked [da
   "default": { "base": 0.7, "figures": 0.7, "dynamicGain": 1, "background": 1, "sun": 0.6 },
   "maps": [ { "world": 0, "name": "Lorencia", "shadowKeep": 0.9, "shadeCool": 0.1, "brightScale": 0.85 } ]
 })");
-    REQUIRE_FALSE(HasErrors(result.issues));
+    REQUIRE_FALSE(HasFatal(result.issues));
     CHECK(result.data.defaultMood.shadowKeep == 0.0);
     CHECK(result.data.ForWorld(Lorencia).shadowKeep == doctest::Approx(0.9));
     CHECK(result.data.ForWorld(Lorencia).shadeCool == doctest::Approx(0.1));
@@ -212,7 +212,7 @@ TEST_CASE("the shadow keep and the cool shade are optional and range-checked [da
   "formatVersion": 1,
   "default": { "base": 0.7, "figures": 0.7, "dynamicGain": 1, "background": 1, "sun": 0.6, "shadowKeep": 2, "shadeCool": -0.1, "brightScale": 1.2 }
 })");
-    CHECK(HasErrors(outOfRange.issues));
+    CHECK(HasFatal(outOfRange.issues));
     CHECK(Messages(outOfRange.issues).find("default.shadowKeep") != std::string::npos);
     CHECK(Messages(outOfRange.issues).find("default.shadeCool") != std::string::npos);
     CHECK(Messages(outOfRange.issues).find("default.brightScale") != std::string::npos);

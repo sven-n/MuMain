@@ -204,7 +204,7 @@ TEST_CASE("Monster attack checks: the draw's animations, an animation the open m
               "animation that plays goes on"});
 }
 
-// What Monster Checks shows for the shipped lists while no model is open
+// What Data Checks shows for the shipped lists while no model is open
 // (docs/monster-data.md): the attacks that play other animations than attack 1
 // and 2, as the converter took them from the code. Every animation they play
 // has a speed (P20 gave the Empire Guardian bosses' appear one).

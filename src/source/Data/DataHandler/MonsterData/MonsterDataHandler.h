@@ -50,13 +50,13 @@ public:
 
     // Reads the file, logs its problems and the load time, and fills the table
     // with the names in the UI language (I18N::GetCurrentLocale), which it
-    // follows from then on. On errors the table stays as it was and
+    // follows from then on. On fatal problems the table stays as it was and
     // `errorMessage` describes them; the game must not start then.
     bool Load(std::string& errorMessage);
 
     // Reads the model list (Data/Monsters/Models.json) into the model table
     // (g_MonsterModelDatabase), after the effect catalogue, whose effect
-    // types it names. Like Load, it logs the problems; on errors the table
+    // types it names. Like Load, it logs the problems; on fatal problems the table
     // stays as it was and `errorMessage` describes them.
     bool LoadModels(std::string& errorMessage);
 
@@ -95,7 +95,7 @@ public:
     // the old file stays then. The problems found are added to `issues`.
     bool Save(std::vector<Items::ItemDataIssue>& issues);
     // Reads the monster list file again, as Load does: the changes since it
-    // was saved are gone. On errors the table stays as it is; the problems
+    // was saved are gone. On fatal problems the table stays as it is; the problems
     // found are added to `issues`.
     bool Revert(std::vector<Items::ItemDataIssue>& issues);
 
@@ -115,7 +115,7 @@ public:
     // The problems found are added to `issues`.
     bool SaveModels(std::vector<Items::ItemDataIssue>& issues);
     // Reads the model list file again, as LoadModels does; the models that
-    // changed are opened again. On errors the table stays as it is; the
+    // changed are opened again. On fatal problems the table stays as it is; the
     // problems found are added to `issues`.
     bool RevertModels(std::vector<Items::ItemDataIssue>& issues);
 
@@ -123,7 +123,7 @@ public:
     // of one find errors.
     bool SaveAll(std::vector<Items::ItemDataIssue>& issues);
     // Revert and RevertModels together: neither table changes when one file
-    // has errors.
+    // has fatal problems.
     bool RevertAll(std::vector<Items::ItemDataIssue>& issues);
 
     // Told after ReopenChangedModels with the slots it opened again; the

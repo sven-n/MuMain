@@ -122,9 +122,9 @@ public:
     {
     }
 
-    void Error(const std::string& key, const std::string& message)
+    void Fatal(const std::string& key, const std::string& message)
     {
-        Add(ItemDataIssueSeverity::Error, key, message);
+        Add(ItemDataIssueSeverity::Fatal, key, message);
         m_valid = false;
     }
 
@@ -182,13 +182,13 @@ std::string RangeText(long long low, long long high)
 }
 
 // A list of whole numbers from low to high, each once unless `repeats`;
-// false on errors, which are reported.
+// false on fatal problems, which are reported.
 bool ReadWholeList(const OrderedJson& json, const std::string& key, long long low, long long high,
                    std::vector<int>& values, ModelIssues& issues, bool repeats = false)
 {
     if (!json.is_array())
     {
-        issues.Error(key, "must be a list of whole numbers");
+        issues.Fatal(key, "must be a list of whole numbers");
         return false;
     }
     std::set<int> seen;
@@ -197,12 +197,12 @@ bool ReadWholeList(const OrderedJson& json, const std::string& key, long long lo
         const std::optional<int> value = ReadWholeIn(json[i], low, high);
         if (!value)
         {
-            issues.Error(key + "[" + std::to_string(i) + "]", RangeText(low, high));
+            issues.Fatal(key + "[" + std::to_string(i) + "]", RangeText(low, high));
             return false;
         }
         if (!seen.insert(*value).second && !repeats)
         {
-            issues.Error(key, "has " + std::to_string(*value) + " more than once");
+            issues.Fatal(key, "has " + std::to_string(*value) + " more than once");
             return false;
         }
         values.push_back(*value);
@@ -214,7 +214,7 @@ bool ReadText(const OrderedJson& json, const std::string& key, std::string& text
 {
     if (!json.is_string() || json.get_ref<const std::string&>().empty())
     {
-        issues.Error(key, "must be a text");
+        issues.Fatal(key, "must be a text");
         return false;
     }
     text = json.get<std::string>();
@@ -230,7 +230,7 @@ bool ReadPath(const OrderedJson& json, const std::string& key, std::string& path
     const std::string problem = Paths::FindPathProblem(path);
     if (!problem.empty())
     {
-        issues.Error(key, problem);
+        issues.Fatal(key, problem);
         return false;
     }
     return true;
@@ -252,7 +252,7 @@ bool ReadModelFile(const OrderedJson& json, std::string& file, ModelIssues& issu
     const auto value = json.find(Keys::File);
     if (value == json.end())
     {
-        issues.Error(Keys::File, "missing");
+        issues.Fatal(Keys::File, "missing");
         return false;
     }
     if (!ReadPath(*value, Keys::File, file, issues))
@@ -261,7 +261,7 @@ bool ReadModelFile(const OrderedJson& json, std::string& file, ModelIssues& issu
     }
     if (!EndsWithIgnoringCase(file, ModelFileExtension))
     {
-        issues.Error(Keys::File, "must be a .bmd file");
+        issues.Fatal(Keys::File, "must be a .bmd file");
         return false;
     }
     return true;
@@ -272,7 +272,7 @@ bool ReadFolders(const OrderedJson& json, const std::string& key, std::vector<st
 {
     if (!json.is_array() || json.empty())
     {
-        issues.Error(key, "must be a list of one folder or more");
+        issues.Fatal(key, "must be a list of one folder or more");
         return false;
     }
     for (size_t i = 0; i < json.size(); ++i)
@@ -291,7 +291,7 @@ bool ReadSpeeds(const OrderedJson& json, std::vector<MonsterAnimationSpeed>& spe
 {
     if (!json.is_object())
     {
-        issues.Error(Keys::Animations, "must be an object of animation speeds");
+        issues.Fatal(Keys::Animations, "must be an object of animation speeds");
         return false;
     }
     for (const auto& [name, value] : json.items())
@@ -300,12 +300,12 @@ bool ReadSpeeds(const OrderedJson& json, std::vector<MonsterAnimationSpeed>& spe
         const std::optional<int> animation = FindMonsterAnimation(name);
         if (!animation)
         {
-            issues.Error(key, "is not an animation (stop1, stop2, walk, attack1, ... or a number from 12)");
+            issues.Fatal(key, "is not an animation (stop1, stop2, walk, attack1, ... or a number from 12)");
             return false;
         }
         if (!value.is_number() || value.get<double>() < 0.0 || !std::isfinite(value.get<double>()))
         {
-            issues.Error(key, "must be a number of 0 or more");
+            issues.Fatal(key, "must be a number of 0 or more");
             return false;
         }
         speeds.emplace_back(*animation, static_cast<float>(value.get<double>()));
@@ -319,7 +319,7 @@ bool ReadAnimationList(const OrderedJson& json, const std::string& key, std::vec
 {
     if (!json.is_array())
     {
-        issues.Error(key, "must be a list of animations");
+        issues.Fatal(key, "must be a list of animations");
         return false;
     }
     for (size_t i = 0; i < json.size(); ++i)
@@ -328,12 +328,12 @@ bool ReadAnimationList(const OrderedJson& json, const std::string& key, std::vec
             json[i].is_string() ? FindMonsterAnimation(json[i].get<std::string>()) : std::nullopt;
         if (!animation)
         {
-            issues.Error(key + "[" + std::to_string(i) + "]", "is not an animation");
+            issues.Fatal(key + "[" + std::to_string(i) + "]", "is not an animation");
             return false;
         }
         if (std::find(animations.begin(), animations.end(), *animation) != animations.end())
         {
-            issues.Error(key, "has " + GetMonsterAnimationName(*animation) + " more than once");
+            issues.Fatal(key, "has " + GetMonsterAnimationName(*animation) + " more than once");
             return false;
         }
         animations.push_back(*animation);
@@ -349,7 +349,7 @@ void ReadLoad(const OrderedJson& json, MonsterModelLoad& load, ModelIssues& issu
     const auto folders = json.find(Keys::TextureFolders);
     if (folders == json.end())
     {
-        issues.Error(Keys::TextureFolders, "missing");
+        issues.Fatal(Keys::TextureFolders, "missing");
     }
     else
     {
@@ -373,7 +373,7 @@ void ReadWorldFolders(const OrderedJson& json, std::vector<MonsterModelWorldFold
 {
     if (!json.is_array())
     {
-        issues.Error(Keys::WorldTextureFolders, "must be a list");
+        issues.Fatal(Keys::WorldTextureFolders, "must be a list");
         return;
     }
     for (size_t i = 0; i < json.size(); ++i)
@@ -382,7 +382,7 @@ void ReadWorldFolders(const OrderedJson& json, std::vector<MonsterModelWorldFold
         const OrderedJson& entry = json[i];
         if (!entry.is_object() || !entry.contains(Keys::Worlds) || !entry.contains(Keys::Folders))
         {
-            issues.Error(key, "must be an object with worlds and folders");
+            issues.Fatal(key, "must be an object with worlds and folders");
             return;
         }
         MonsterModelWorldFolders folders;
@@ -403,7 +403,7 @@ void ReadTextureNames(const OrderedJson& json, std::vector<std::pair<int, std::s
 {
     if (!json.is_object())
     {
-        issues.Error(Keys::TextureNames, "must be an object of texture names by mesh");
+        issues.Fatal(Keys::TextureNames, "must be an object of texture names by mesh");
         return;
     }
     for (const auto& [mesh, value] : json.items())
@@ -413,7 +413,7 @@ void ReadTextureNames(const OrderedJson& json, std::vector<std::pair<int, std::s
         const auto [end, error] = std::from_chars(mesh.data(), mesh.data() + mesh.size(), number);
         if (error != std::errc() || end != mesh.data() + mesh.size() || number < 0 || number > MaxMeshIndex)
         {
-            issues.Error(key, "the mesh must be a number from 0 to " + std::to_string(MaxMeshIndex));
+            issues.Fatal(key, "the mesh must be a number from 0 to " + std::to_string(MaxMeshIndex));
             return;
         }
         std::string name;
@@ -423,7 +423,7 @@ void ReadTextureNames(const OrderedJson& json, std::vector<std::pair<int, std::s
         }
         if (name.size() > MaxTextureNameLength)
         {
-            issues.Error(key, "must have at most " + std::to_string(MaxTextureNameLength) + " characters");
+            issues.Fatal(key, "must have at most " + std::to_string(MaxTextureNameLength) + " characters");
             return;
         }
         names.emplace_back(number, std::move(name));
@@ -435,7 +435,7 @@ void ReadSounds(const OrderedJson& json, std::vector<MonsterModelSound>& sounds,
 {
     if (!json.is_array())
     {
-        issues.Error(Keys::Sounds, "must be a list of sounds");
+        issues.Fatal(Keys::Sounds, "must be a list of sounds");
         return;
     }
     for (size_t i = 0; i < json.size(); ++i)
@@ -444,14 +444,14 @@ void ReadSounds(const OrderedJson& json, std::vector<MonsterModelSound>& sounds,
         const OrderedJson& entry = json[i];
         if (!entry.is_object())
         {
-            issues.Error(key, "must be an object");
+            issues.Fatal(key, "must be an object");
             return;
         }
         MonsterModelSound sound;
         const auto file = entry.find(Keys::File);
         if (file == entry.end())
         {
-            issues.Error(key + "." + Keys::File, "missing");
+            issues.Fatal(key + "." + Keys::File, "missing");
             return;
         }
         if (!ReadPath(*file, key + "." + Keys::File, sound.file, issues))
@@ -468,7 +468,7 @@ void ReadSounds(const OrderedJson& json, std::vector<MonsterModelSound>& sounds,
             const std::optional<int> count = ReadWholeIn(*channels, 1, MaxSoundChannels);
             if (!count)
             {
-                issues.Error(key + "." + Keys::Channels, RangeText(1, MaxSoundChannels));
+                issues.Fatal(key + "." + Keys::Channels, RangeText(1, MaxSoundChannels));
                 return;
             }
             sound.channels = *count;
@@ -477,7 +477,7 @@ void ReadSounds(const OrderedJson& json, std::vector<MonsterModelSound>& sounds,
         {
             if (!spatial->is_boolean())
             {
-                issues.Error(key + "." + Keys::Spatial, "must be true or false");
+                issues.Fatal(key + "." + Keys::Spatial, "must be true or false");
                 return;
             }
             sound.spatial = spatial->get<bool>();
@@ -505,7 +505,7 @@ bool ReadSlotPair(const OrderedJson& json, const std::string& key, MonsterSoundS
 {
     if (!json.is_array() || json.size() != 2)
     {
-        issues.Error(key, "must be a list of two sounds");
+        issues.Fatal(key, "must be a list of two sounds");
         return false;
     }
     return ReadSlotValue(json[0], key + "[0]", slots[first], issues) &&
@@ -517,7 +517,7 @@ bool ReadSlotSet(const OrderedJson& json, const std::string& key, const KeySet& 
 {
     if (!json.is_object() || !json.contains(Keys::Idle) || !json.contains(Keys::Attack) || !json.contains(Keys::Die))
     {
-        issues.Error(key, "must be an object with idle, attack and die");
+        issues.Fatal(key, "must be an object with idle, attack and die");
         return false;
     }
     const std::string prefix = key + ".";
@@ -569,7 +569,7 @@ bool ReadSoundDraw(const OrderedJson& json, const std::string& key, MonsterSound
     const std::optional<MonsterSoundDraw> found = FindSoundDraw(json);
     if (!found)
     {
-        issues.Error(key, std::string("must be ") + RandFpsDraw + " or " + RandDraw);
+        issues.Fatal(key, std::string("must be ") + RandFpsDraw + " or " + RandDraw);
         return false;
     }
     draw = *found;
@@ -583,7 +583,7 @@ bool ReadFrames(const OrderedJson& json, const std::string& key, std::pair<float
     if (!json.is_array() || json.size() != 2 || !isFrame(json[0]) || !isFrame(json[1]) ||
         json[0].get<double>() >= json[1].get<double>())
     {
-        issues.Error(key, "must be two frames, the first below the second: [7, 8]");
+        issues.Fatal(key, "must be two frames, the first below the second: [7, 8]");
         return false;
     }
     frames = {static_cast<float>(json[0].get<double>()), static_cast<float>(json[1].get<double>())};
@@ -594,13 +594,13 @@ bool ReadChance(const OrderedJson& json, const std::string& key, MonsterSoundCha
 {
     if (!json.is_object() || !json.contains(Keys::OneIn) || !json.contains(Keys::Draw))
     {
-        issues.Error(key, "must be an object with oneIn and draw");
+        issues.Fatal(key, "must be an object with oneIn and draw");
         return false;
     }
     const std::optional<int> oneIn = ReadWholeIn(json[Keys::OneIn], 1, MaxOneIn);
     if (!oneIn)
     {
-        issues.Error(key + "." + Keys::OneIn, RangeText(1, MaxOneIn));
+        issues.Fatal(key + "." + Keys::OneIn, RangeText(1, MaxOneIn));
         return false;
     }
     chance.oneIn = *oneIn;
@@ -619,7 +619,7 @@ bool ReadEventSounds(const OrderedJson& json, const std::string& key, std::vecto
 {
     if (!json.is_array() || json.empty())
     {
-        issues.Error(key, "must be a list of one sound or more");
+        issues.Fatal(key, "must be a list of one sound or more");
         return false;
     }
     for (size_t i = 0; i < json.size(); ++i)
@@ -638,7 +638,7 @@ bool ReadSoundEvent(const OrderedJson& entry, const std::string& key, MonsterSou
 {
     if (!entry.is_object() || !entry.contains(Keys::Animations) || !entry.contains(Keys::Sounds))
     {
-        issues.Error(key, "must be an object with animations and sounds");
+        issues.Fatal(key, "must be an object with animations and sounds");
         return false;
     }
     const std::string prefix = key + ".";
@@ -648,7 +648,7 @@ bool ReadSoundEvent(const OrderedJson& entry, const std::string& key, MonsterSou
     }
     if (event.animations.empty())
     {
-        issues.Error(prefix + Keys::Animations, "must name one animation or more");
+        issues.Fatal(prefix + Keys::Animations, "must name one animation or more");
         return false;
     }
     if (const auto frames = entry.find(Keys::Frames); frames != entry.end())
@@ -664,7 +664,7 @@ bool ReadSoundEvent(const OrderedJson& entry, const std::string& key, MonsterSou
     {
         if (!armed->is_boolean())
         {
-            issues.Error(prefix + Keys::DeathEffectArmed, "must be true or false");
+            issues.Fatal(prefix + Keys::DeathEffectArmed, "must be true or false");
             return false;
         }
         event.deathEffectArmed = armed->get<bool>();
@@ -693,7 +693,7 @@ bool ReadSoundEvent(const OrderedJson& entry, const std::string& key, MonsterSou
     }
     if (event.pick && event.sounds.size() != PickSounds)
     {
-        issues.Error(prefix + Keys::Sounds, "must be two sounds with pick");
+        issues.Fatal(prefix + Keys::Sounds, "must be two sounds with pick");
         return false;
     }
     Items::Json::WarnAboutUnknownKeys(entry, SoundEventKeys, prefix,
@@ -706,7 +706,7 @@ void ReadSoundEvents(const OrderedJson& json, std::vector<MonsterSoundEvent>& ev
 {
     if (!json.is_array())
     {
-        issues.Error(Keys::SoundEvents, "must be a list of sound events");
+        issues.Fatal(Keys::SoundEvents, "must be a list of sound events");
         return;
     }
     for (size_t i = 0; i < json.size(); ++i)
@@ -739,7 +739,7 @@ bool ReadChoice(const OrderedJson& entry, const char* key, const std::string& fi
         value = false;
         return true;
     }
-    issues.Error(field + "." + key, std::string("must be ") + yes + " or " + no);
+    issues.Fatal(field + "." + key, std::string("must be ") + yes + " or " + no);
     return false;
 }
 
@@ -747,7 +747,7 @@ void ReadBitmaps(const OrderedJson& json, std::vector<MonsterModelBitmap>& bitma
 {
     if (!json.is_array())
     {
-        issues.Error(Keys::Bitmaps, "must be a list of bitmaps");
+        issues.Fatal(Keys::Bitmaps, "must be a list of bitmaps");
         return;
     }
     for (size_t i = 0; i < json.size(); ++i)
@@ -756,7 +756,7 @@ void ReadBitmaps(const OrderedJson& json, std::vector<MonsterModelBitmap>& bitma
         const OrderedJson& entry = json[i];
         if (!entry.is_object() || !entry.contains(Keys::File) || !entry.contains(Keys::Slot))
         {
-            issues.Error(key, "must be an object with file and slot");
+            issues.Fatal(key, "must be an object with file and slot");
             return;
         }
         MonsterModelBitmap bitmap;
@@ -778,7 +778,7 @@ void ReadParts(const OrderedJson& json, std::vector<MonsterModelPart>& parts, Mo
 {
     if (!json.is_array())
     {
-        issues.Error(Keys::Parts, "must be a list of part models");
+        issues.Fatal(Keys::Parts, "must be a list of part models");
         return;
     }
     for (size_t i = 0; i < json.size(); ++i)
@@ -787,7 +787,7 @@ void ReadParts(const OrderedJson& json, std::vector<MonsterModelPart>& parts, Mo
         const OrderedJson& entry = json[i];
         if (!entry.is_object())
         {
-            issues.Error(key, "must be an object");
+            issues.Fatal(key, "must be an object");
             return;
         }
         MonsterModelPart part;
@@ -795,7 +795,7 @@ void ReadParts(const OrderedJson& json, std::vector<MonsterModelPart>& parts, Mo
         const bool hasEffect = entry.contains(Keys::Effect);
         if (hasSlot == hasEffect)
         {
-            issues.Error(key, "must have a slot or an effect, not both");
+            issues.Fatal(key, "must have a slot or an effect, not both");
             return;
         }
         if ((hasSlot && !ReadText(entry[Keys::Slot], key + "." + Keys::Slot, part.slot, issues)) ||
@@ -820,7 +820,7 @@ bool ReadPoint(const OrderedJson& json, const std::string& key, std::array<float
     if (!json.is_array() || json.size() != point.size() ||
         !std::all_of(json.begin(), json.end(), [](const OrderedJson& value) { return value.is_number(); }))
     {
-        issues.Error(key, "must be a list of three numbers");
+        issues.Fatal(key, "must be a list of three numbers");
         return false;
     }
     for (size_t i = 0; i < point.size(); ++i)
@@ -834,7 +834,7 @@ void ReadBox(const OrderedJson& json, MonsterModelBody& body, ModelIssues& issue
 {
     if (!json.is_object())
     {
-        issues.Error(Keys::BoundingBox, "must be an object with min and max");
+        issues.Fatal(Keys::BoundingBox, "must be an object with min and max");
         return;
     }
     const std::string prefix = std::string(Keys::BoundingBox) + ".";
@@ -855,7 +855,7 @@ void ReadLinkBones(const OrderedJson& json, MonsterModelBody& body, ModelIssues&
 {
     if (!json.is_array() || json.size() > MaxLinkBones)
     {
-        issues.Error(Keys::LinkBones, "must be a list of at most two bones");
+        issues.Fatal(Keys::LinkBones, "must be a list of at most two bones");
         return;
     }
     std::vector<int> linkBones;
@@ -879,7 +879,7 @@ void ReadOptionalWhole(const OrderedJson& json, const char* key, long long low, 
     const std::optional<int> number = ReadWholeIn(*field, low, high);
     if (!number)
     {
-        issues.Error(key, RangeText(low, high));
+        issues.Fatal(key, RangeText(low, high));
         return;
     }
     value = number;
@@ -945,14 +945,14 @@ std::optional<MonsterModelDefinition> ReadModel(const OrderedJson& json, size_t 
     const std::string entry = std::string(Keys::Models) + "[" + std::to_string(index) + "]";
     if (!json.is_object())
     {
-        issues.push_back({ItemDataIssueSeverity::Error, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, entry,
+        issues.push_back({ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, entry,
                           "must be an object"});
         return std::nullopt;
     }
     const auto slot = json.find(Keys::Slot);
     if (slot == json.end() || !slot->is_string() || !FindMonsterModelSlot(slot->get<std::string>()))
     {
-        issues.push_back({ItemDataIssueSeverity::Error, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+        issues.push_back({ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
                           entry + "." + Keys::Slot,
                           "missing or not a monster model type (MONSTER_MODEL_...) or an NPC model slot"});
         return std::nullopt;
@@ -1295,7 +1295,7 @@ void ReadMonsterModelsJson(std::string_view text, const std::string& source,
     const auto entries = root.find(Keys::Models);
     if (entries == root.end() || !entries->is_array())
     {
-        addFileIssue(ItemDataIssueSeverity::Error, Keys::Models, "missing or not a list of models");
+        addFileIssue(ItemDataIssueSeverity::Fatal, Keys::Models, "missing or not a list of models");
         return;
     }
     std::set<int> slots;
@@ -1308,7 +1308,7 @@ void ReadMonsterModelsJson(std::string_view text, const std::string& source,
         }
         if (!slots.insert(*FindMonsterModelSlot(model->slot)).second)
         {
-            addFileIssue(ItemDataIssueSeverity::Error, MonsterModelField(model->slot, Keys::Slot),
+            addFileIssue(ItemDataIssueSeverity::Fatal, MonsterModelField(model->slot, Keys::Slot),
                          "is in the list more than once");
             continue;
         }

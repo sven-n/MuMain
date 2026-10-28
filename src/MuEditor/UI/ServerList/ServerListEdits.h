@@ -62,7 +62,7 @@ public:
     {
         m_saved = m_groups;
     }
-    // Whether the groups are all the file has. After a read with errors they
+    // Whether the groups are all the file has. After a read with fatal problems they
     // are not, and a save would remove the groups left out from the file.
     bool IsComplete() const
     {

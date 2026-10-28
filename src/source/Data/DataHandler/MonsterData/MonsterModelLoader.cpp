@@ -244,7 +244,7 @@ bool Open(int slot)
     const bool monsterRange = IsMonsterRangeSlot(slot);
     BMD& target = ::Models[slot];
     // A model whose file is missing has no body, and the game keeps running
-    // (P1): AccessModel logs the file, and Monster Checks lists it.
+    // (P1): AccessModel logs the file, and Data Checks lists it.
     OpenFile(slot, model->load.file);
     // A monster model without meshes gets nothing more, and its sound slots
     // stay without sounds; an NPC model still loads its sounds.

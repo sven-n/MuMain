@@ -158,7 +158,7 @@ void CheckHeldItems(const ImportChange& change, std::vector<ItemDataIssue>& issu
         const ItemDefinition& slot = g_ItemDatabase.GetAllSlots()[static_cast<size_t>(itemType)];
         if (!KeepsShape(slot, item) && IsHeldByCharacter(itemType))
         {
-            issues.push_back({Data::Items::ItemDataIssueSeverity::Error, "", item.group, item.number, "",
+            issues.push_back({Data::Items::ItemDataIssueSeverity::Fatal, "", item.group, item.number, "",
                               slot.Exists()
                                   ? "is worn or in an item window now, so its size and slot stay: compare again"
                                   : "is worn or in an item window now, so it is not added: compare again"});
@@ -168,7 +168,7 @@ void CheckHeldItems(const ImportChange& change, std::vector<ItemDataIssue>& issu
     {
         if (IsHeldByCharacter(itemType))
         {
-            issues.push_back({Data::Items::ItemDataIssueSeverity::Error, "", Data::Items::GetItemGroup(itemType),
+            issues.push_back({Data::Items::ItemDataIssueSeverity::Fatal, "", Data::Items::GetItemGroup(itemType),
                               Data::Items::GetItemNumber(itemType), "",
                               "is worn or in an item window now, so it is not removed: compare again"});
         }
@@ -213,7 +213,7 @@ void CheckImportedData(const ImportChange& change, const ItemStatProfiles& profi
         Data::Items::ValidateItemStatsAsWritten(*statFile, checkIssues);
     }
     std::ranges::copy_if(checkIssues, std::back_inserter(issues), [](const ItemDataIssue& issue)
-                         { return issue.severity == Data::Items::ItemDataIssueSeverity::Error; });
+                         { return issue.severity == Data::Items::ItemDataIssueSeverity::Fatal; });
 }
 
 // The change as one step of the undo history: the item stat file first, so the items' profiles
@@ -248,7 +248,7 @@ bool ApplyItemSyncImport(const ItemSyncDiff& diff, const ItemExchangeFile& file,
     std::vector<ItemDataIssue> applyIssues;
     const ItemExchangeFile applied = ApplyItemSyncDiff(client, file, diff, applyIssues);
     issues.insert(issues.end(), applyIssues.begin(), applyIssues.end());
-    if (Data::Items::HasErrors(applyIssues))
+    if (Data::Items::HasFatal(applyIssues))
     {
         return false;
     }

@@ -18,12 +18,12 @@
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/Common/ToolGroups.h"
 #include "UI/Common/UndoTarget.h"
+#include "UI/ItemTools/ItemToolWindow.h"
 #include "UI/MonsterTools/MonsterEdits.h"
 #include "UI/MonsterTools/MonsterSelection.h"
 #include "UI/MonsterTools/MonsterToolWindow.h"
 #include "UI/MonsterTools/MuMonsterAttacksUI.h"
 #include "UI/MonsterTools/MuMonsterBrowserUI.h"
-#include "UI/MonsterTools/MuMonsterChecksUI.h"
 #include "UI/MonsterTools/MuMonsterModelUI.h"
 #include "UI/MonsterTools/MuMonsterPreviewUI.h"
 #include "UI/MonsterTools/MuMonsterTranslationsUI.h"
@@ -56,7 +56,6 @@ void RenderMonsterTools()
     g_MuMonsterPreviewUI.Render(&open);
     g_MuMonsterAttacksUI.Render(&open);
     g_MuMonsterTranslationsUI.Render(&open);
-    g_MuMonsterChecksUI.Render(&open);
 }
 
 // The editor window, which holds the dock space of the tool windows.
@@ -99,7 +98,6 @@ TEST_CASE("The monster tools draw their frames without ImGui errors [editor][mon
     }
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterBrowser) != nullptr);
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterTranslations) != nullptr);
-    CHECK(ImGui::FindWindowByName(WindowIds::MonsterChecks) != nullptr);
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterModel) != nullptr);
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterPreview) != nullptr);
     CHECK(ImGui::FindWindowByName(WindowIds::MonsterAttacks) != nullptr);
@@ -265,7 +263,7 @@ TEST_CASE("The first layout docks the monster browser beside the item browser, i
         ImGui::End();
         for (const char* window : {WindowIds::ItemBrowser, WindowIds::ItemBasics, WindowIds::MonsterBrowser,
                                    WindowIds::MonsterModel, WindowIds::MonsterPreview, WindowIds::MonsterAttacks,
-                                   WindowIds::MonsterTranslations, WindowIds::MonsterChecks})
+                                   WindowIds::MonsterTranslations, WindowIds::DataChecks})
         {
             ImGui::Begin(window);
             ImGui::End();
@@ -278,7 +276,7 @@ TEST_CASE("The first layout docks the monster browser beside the item browser, i
 
     CHECK(DockIdOf(WindowIds::MonsterBrowser) == DockIdOf(WindowIds::ItemBrowser));
     CHECK(DockIdOf(WindowIds::MonsterTranslations) == DockIdOf(WindowIds::ItemBasics));
-    CHECK(DockIdOf(WindowIds::MonsterChecks) == DockIdOf(WindowIds::ItemBasics));
+    CHECK(DockIdOf(WindowIds::DataChecks) == DockIdOf(WindowIds::ItemBasics));
     CHECK(DockIdOf(WindowIds::MonsterModel) == DockIdOf(WindowIds::ItemBasics));
     CHECK(DockIdOf(WindowIds::MonsterPreview) == DockIdOf(WindowIds::ItemBasics));
     CHECK(DockIdOf(WindowIds::MonsterAttacks) == DockIdOf(WindowIds::ItemBasics));
@@ -346,7 +344,7 @@ TEST_CASE("The editor bar's undo is the monster tools' while a monster tool is o
     REQUIRE(g_MonsterEdits.SetMonsterName("Name", 2, "en", "Budge Dragon 2"));
 
     CHECK_FALSE(target.IsOpen());
-    g_MuEditorCore.GetToolWindows().monsterChecks = true;
+    g_MuEditorCore.GetToolWindows().monsterTranslations = true;
     CHECK(target.IsOpen());
     CHECK(target.CanUndo());
     CHECK(target.GetUndoLabel() == "Name");
@@ -356,6 +354,22 @@ TEST_CASE("The editor bar's undo is the monster tools' while a monster tool is o
     target.Undo();
     CHECK(g_MonsterDatabase.Find(2)->names.GetNeutral() == "Budge Dragon 3");
     CHECK(target.CanUndo());
+}
+
+// Data Checks has no undo of its own: its Ctrl+Z acts on the target the
+// editor bar shows, the tool worked in last while it is open.
+TEST_CASE("The bar's undo target is the tool worked in last while it is open [editor][monsters]")
+{
+    ToolWindowsScope windows;
+    MuEditor::UndoTarget& monsters = MuEditor::Monsters::ToolWindow::GetUndoTarget();
+    MuEditor::UndoTarget& items = MuEditor::Items::ToolWindow::GetUndoTarget();
+    MuEditor::UndoTargets::Activate(monsters);
+
+    // No monster tool is open.
+    CHECK(&MuEditor::UndoTargets::GetCurrent(items) == &items);
+
+    g_MuEditorCore.GetToolWindows().monsterTranslations = true;
+    CHECK(&MuEditor::UndoTargets::GetCurrent(items) == &monsters);
 }
 
 #endif // _EDITOR

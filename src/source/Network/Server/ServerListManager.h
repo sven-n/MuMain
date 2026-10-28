@@ -33,7 +33,7 @@ public:
 
     void InsertServerGroup(int iConnectIndex, int iServerPercent);
     void Release();
-    // Reads Data/Local/ServerList.json. False when it has errors; they are in
+    // Reads Data/Local/ServerList.json. False when it has fatal problems; they are in
     // errorMessage then, for the player.
     bool LoadServerListScript(std::string& errorMessage);
     // The groups the login screen names the servers with, in their order.

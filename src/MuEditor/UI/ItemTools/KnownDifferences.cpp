@@ -55,7 +55,7 @@ KnownDifferences LoadKnownDifferences(const std::filesystem::path& file, std::ve
     const auto addError = [&](const std::string& field, const std::string& message)
     {
         issues.push_back(
-            {ItemDataIssueSeverity::Error, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field, message});
+            {ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field, message});
     };
     if (const auto items = root.find("items"); items != root.end() && items->is_array())
     {

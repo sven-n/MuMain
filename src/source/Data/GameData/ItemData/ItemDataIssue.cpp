@@ -6,9 +6,23 @@
 
 namespace Data::Items
 {
+const char* GetSeverityName(ItemDataIssueSeverity severity)
+{
+    switch (severity)
+    {
+    case ItemDataIssueSeverity::Fatal:
+        return "fatal";
+    case ItemDataIssueSeverity::Error:
+        return "error";
+    case ItemDataIssueSeverity::Warning:
+        break;
+    }
+    return "warning";
+}
+
 std::string ItemDataIssue::ToString() const
 {
-    std::string result = severity == ItemDataIssueSeverity::Error ? "error: " : "warning: ";
+    std::string result = std::string(GetSeverityName(severity)) + ": ";
     if (!source.empty())
     {
         result += source + ": ";
@@ -28,9 +42,9 @@ std::string ItemDataIssue::ToString() const
     return result + message;
 }
 
-bool HasErrors(std::span<const ItemDataIssue> issues)
+bool HasFatal(std::span<const ItemDataIssue> issues)
 {
     return std::any_of(issues.begin(), issues.end(),
-                       [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+                       [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Fatal; });
 }
 } // namespace Data::Items

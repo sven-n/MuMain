@@ -37,14 +37,14 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
     const LocalizedString& names = definition.names;
     if (names.GetNeutral().empty())
     {
-        AddIssue(issues, ItemDataIssueSeverity::Error, definition, "the English name is missing");
+        AddIssue(issues, ItemDataIssueSeverity::Fatal, definition, "the English name is missing");
     }
 
     const auto check = [&](const std::string& locale, const std::string& text)
     {
         if (LocalizedString::ContainsSeparator(text))
         {
-            AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+            AddIssue(issues, ItemDataIssueSeverity::Fatal, definition,
                      "the " + locale + " name must not contain \"" + std::string(LocalizedString::Separator) + "\"");
         }
         if (IsTooLongForGame(text))
@@ -60,7 +60,7 @@ void ValidateName(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
     {
         if (!LocalizedString::IsValidLocaleCode(locale))
         {
-            AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+            AddIssue(issues, ItemDataIssueSeverity::Fatal, definition,
                      "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)");
             continue;
         }
@@ -131,13 +131,13 @@ void ValidateItemText(const ItemDefinition& definition, const LocalizedString& t
     }
     if (text.GetNeutral().empty())
     {
-        AddIssue(issues, ItemDataIssueSeverity::Error, definition, "the English text is missing", field.c_str());
+        AddIssue(issues, ItemDataIssueSeverity::Fatal, definition, "the English text is missing", field.c_str());
     }
     for (const auto& [locale, translation] : text.GetTranslations())
     {
         if (!LocalizedString::IsValidLocaleCode(locale))
         {
-            AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+            AddIssue(issues, ItemDataIssueSeverity::Fatal, definition,
                      "\"" + locale + "\" is not a language code (letters, digits and \"-\" only)", field.c_str());
         }
     }
@@ -151,7 +151,7 @@ void ValidateLinePlaceholderBraces(const ItemDefinition& definition, const Local
     const std::set<std::string> englishNames(english.names.begin(), english.names.end());
     if (!english.error.empty())
     {
-        AddIssue(issues, ItemDataIssueSeverity::Error, definition, english.error,
+        AddIssue(issues, ItemDataIssueSeverity::Fatal, definition, english.error,
                  TextField(lineField, LocalizedString::NeutralLocale).c_str());
     }
     for (const auto& [locale, translation] : text.GetTranslations())
@@ -160,13 +160,13 @@ void ValidateLinePlaceholderBraces(const ItemDefinition& definition, const Local
         const PlaceholderScan scan = ScanPlaceholders(translation);
         if (!scan.error.empty())
         {
-            AddIssue(issues, ItemDataIssueSeverity::Error, definition, scan.error, field.c_str());
+            AddIssue(issues, ItemDataIssueSeverity::Fatal, definition, scan.error, field.c_str());
             continue;
         }
         const std::set<std::string> names(scan.names.begin(), scan.names.end());
         if (english.error.empty() && names != englishNames)
         {
-            AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+            AddIssue(issues, ItemDataIssueSeverity::Fatal, definition,
                      "has the placeholders " + ListPlaceholders(names) + ", the English text " +
                          ListPlaceholders(englishNames),
                      field.c_str());
@@ -222,7 +222,7 @@ void ValidateSlot(const ItemDefinition& definition, std::vector<ItemDataIssue>& 
 {
     if (definition.slot != ItemSlot::None && FindEnumName(definition.slot) == nullptr)
     {
-        AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+        AddIssue(issues, ItemDataIssueSeverity::Fatal, definition,
                  "slot " + std::to_string(static_cast<int>(definition.slot)) + " is not an equipment slot", "slot");
     }
     if (definition.wingTier != WingTier::None && definition.slot != ItemSlot::Wings)
@@ -324,14 +324,14 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
     {
         if (!IsValidItemId(definition.group, definition.number))
         {
-            issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, "number",
+            issues.push_back({ItemDataIssueSeverity::Fatal, "", definition.group, definition.number, "number",
                               "the item id is out of range"});
             continue;
         }
 
         if (!seenItemTypes.insert(MakeItemType(definition.group, definition.number)).second)
         {
-            issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, "number",
+            issues.push_back({ItemDataIssueSeverity::Fatal, "", definition.group, definition.number, "number",
                               "the item is defined more than once"});
         }
 
@@ -380,7 +380,7 @@ void ValidateStatProfiles(std::span<const ItemDefinition> items, const ItemStatP
         const int profile = profiles.Find(definition.statProfile);
         if (profile == ItemStatProfiles::UnknownProfile)
         {
-            AddIssue(issues, ItemDataIssueSeverity::Error, definition,
+            AddIssue(issues, ItemDataIssueSeverity::Fatal, definition,
                      "\"" + definition.statProfile + "\" is not a profile of " + statFile, "statProfile");
             continue;
         }
@@ -435,7 +435,7 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
             continue;
         }
         const auto addError = [&](const std::string& field, const std::string& message)
-        { issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field, message}); };
+        { issues.push_back({ItemDataIssueSeverity::Fatal, "", definition.group, definition.number, field, message}); };
         std::set<std::string, std::less<>> shownLevelValues;
         for (const auto& [line, field] : TooltipLinesOf(definition))
         {
@@ -784,13 +784,13 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
             if (text == nullptr)
             {
                 const std::string suggestion = SuggestPlaceholder(name, textNames);
-                issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field,
+                issues.push_back({ItemDataIssueSeverity::Fatal, "", definition.group, definition.number, field,
                                   "\"@" + name + "\" is not a text of " + tooltipFile +
                                       (suggestion.empty() ? "" : "; did you mean \"@" + suggestion + "\"?")});
             }
             else if (isLevelValue && !ScanPlaceholders(text->GetNeutral()).names.empty())
             {
-                issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field,
+                issues.push_back({ItemDataIssueSeverity::Fatal, "", definition.group, definition.number, field,
                                   "\"@" + name + "\" has placeholders, which a level value cannot have"});
             }
         };
@@ -813,7 +813,7 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
                 }
                 else if (!ScanPlaceholders(value.text.GetNeutral()).names.empty())
                 {
-                    issues.push_back({ItemDataIssueSeverity::Error, "", definition.group, definition.number, field,
+                    issues.push_back({ItemDataIssueSeverity::Fatal, "", definition.group, definition.number, field,
                                       "has placeholders, which a level value cannot have"});
                 }
             }
@@ -889,7 +889,7 @@ void ValidateItemModels(std::span<const ItemModelDefinition> models, std::vector
     {
         if (!seenItemTypes.insert(MakeItemType(model.group, model.number)).second)
         {
-            issues.push_back({ItemDataIssueSeverity::Error, "", model.group, model.number, "number",
+            issues.push_back({ItemDataIssueSeverity::Fatal, "", model.group, model.number, "number",
                               "the model is defined more than once"});
         }
     }
@@ -903,7 +903,7 @@ void ApplySharedItemModels(std::vector<ItemModelDefinition>& models, std::span<c
     {
         if (!byName.emplace(shared.name, &shared).second)
         {
-            issues.push_back({ItemDataIssueSeverity::Error, sharedModelsSource, ItemDataIssue::NoItem,
+            issues.push_back({ItemDataIssueSeverity::Fatal, sharedModelsSource, ItemDataIssue::NoItem,
                               ItemDataIssue::NoItem, shared.name, "the shared model is defined more than once"});
         }
     }
@@ -919,7 +919,7 @@ void ApplySharedItemModels(std::vector<ItemModelDefinition>& models, std::span<c
         if (shared == byName.end())
         {
             // An entry that could not be read is left out, with an error of its own.
-            issues.push_back({ItemDataIssueSeverity::Error, "", model.group, model.number, "model",
+            issues.push_back({ItemDataIssueSeverity::Fatal, "", model.group, model.number, "model",
                               "the shared model \"" + model.model + "\" is not in " + sharedModelsSource +
                                   " or could not be read there"});
             continue;
@@ -993,7 +993,7 @@ void ValidateItemModelGlowColors(std::span<const ItemModelDefinition> models,
     {
         if (!names.contains(name))
         {
-            issues.push_back({ItemDataIssueSeverity::Error, colorList, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+            issues.push_back({ItemDataIssueSeverity::Fatal, colorList, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
                               "colors", "the default glow color \"" + std::string(name) + "\" is missing"});
         }
     }
@@ -1007,7 +1007,7 @@ void ValidateItemModelGlowColors(std::span<const ItemModelDefinition> models,
         {
             if (!names.contains(*name))
             {
-                issues.push_back({ItemDataIssueSeverity::Error, "", model.group, model.number, field,
+                issues.push_back({ItemDataIssueSeverity::Fatal, "", model.group, model.number, field,
                                   "\"" + *name + "\" is not in " + colorList});
             }
         }

@@ -17,9 +17,13 @@ namespace Data::Models
 // game's Data/ directory `game`, the overlay's issues included.
 [[nodiscard]] ModelFiles ReadModelFileTable(const char* overlayValue, const std::filesystem::path& game);
 
+// The table as the game reads it at start: MU_DATA_OVERLAY's value and the
+// game's Data/ directory (LoadModelFileTable and Data Checks).
+[[nodiscard]] ModelFiles ReadGameModelFileTable();
+
 // Reads MU_DATA_OVERLAY and the game's table once, on the loading screen, and
 // logs every issue. False, with the message that stops the start in
-// `errorMessage`, when the table has errors (as for the effect data).
+// `errorMessage`, when the table has fatal problems (as for the effect data).
 bool LoadModelFileTable(std::string& errorMessage);
 
 // The table LoadModelFileTable read; no models before.

@@ -1268,7 +1268,7 @@ TEST_CASE("glb_model: the overlay's model file table puts its GLB into the opene
     const YetiOverlay overlay(ReadBytes(YetiGlb));
     const Data::Models::ModelFiles table = overlay.Table();
     INFO(table.issues.size());
-    CHECK_FALSE(Data::Items::HasErrors(table.issues));
+    CHECK_FALSE(Data::Items::HasFatal(table.issues));
     REQUIRE(table.models.size() == 1);
     CHECK(Data::Models::ModelFileTextureName(table.models[0]) == L"Data\\Monster\\Monster14.glb");
 

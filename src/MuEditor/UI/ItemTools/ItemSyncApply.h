@@ -35,8 +35,8 @@ std::vector<std::string> DescribeNewItem(const Data::Items::ItemDefinition& exch
 
 // Applies the checked rows of an import of `file` to the client's data as one step of the undo
 // history: the item formulas first, so the items follow the new profile rules, then the
-// items. The data as it would be is checked first, with the checks of a save; with errors
-// nothing changes, false is returned and the errors are in `issues`.
+// items. The data as it would be is checked first, with the checks of a save; with fatal problems
+// nothing changes, false is returned and the fatal problems are in `issues`.
 bool ApplyItemSyncImport(const ItemSyncDiff& diff, const Data::Items::ItemExchangeFile& file,
                          std::vector<Data::Items::ItemDataIssue>& issues);
 

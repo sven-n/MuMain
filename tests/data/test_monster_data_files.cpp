@@ -24,7 +24,7 @@
 #include <string_view>
 #include <vector>
 
-using Data::Items::HasErrors;
+using Data::Items::HasFatal;
 using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
 using Data::Monsters::MonsterDefinition;
@@ -244,7 +244,7 @@ TEST_CASE("Monster data: saving writes what loads back, and refuses errors [data
     monsters[0].names.Set("en", "Budge||Dragon");
     issues.clear();
     CHECK_FALSE(Data::Monsters::SaveMonstersFile(file, monsters, issues));
-    CHECK(HasErrors(issues));
+    CHECK(HasFatal(issues));
     CHECK(Data::Monsters::LoadMonstersFile(file).monsters[0].names.GetNeutral() == "Budge Dragon");
     CHECK_FALSE(std::filesystem::exists(file.string() + ".tmp"));
 }

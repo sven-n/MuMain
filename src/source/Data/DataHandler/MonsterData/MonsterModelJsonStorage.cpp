@@ -28,7 +28,7 @@ MonsterModelsLoadResult LoadMonsterModelsFile(const std::filesystem::path& file)
     const std::optional<std::string> text = ReadTextFile(file);
     if (!text)
     {
-        result.issues.push_back({Items::ItemDataIssueSeverity::Error, source, Items::ItemDataIssue::NoItem,
+        result.issues.push_back({Items::ItemDataIssueSeverity::Fatal, source, Items::ItemDataIssue::NoItem,
                                  Items::ItemDataIssue::NoItem, "", "could not be read"});
         return result;
     }
@@ -49,7 +49,7 @@ bool SaveMonsterModelsFile(const std::filesystem::path& file, std::span<const Mo
     std::string error;
     if (!WriteTextFile(file, *text, error))
     {
-        issues.push_back({Items::ItemDataIssueSeverity::Error, file.generic_string(), Items::ItemDataIssue::NoItem,
+        issues.push_back({Items::ItemDataIssueSeverity::Fatal, file.generic_string(), Items::ItemDataIssue::NoItem,
                           Items::ItemDataIssue::NoItem, "", error});
         return false;
     }
@@ -68,7 +68,7 @@ std::optional<std::string> MakeMonsterModelsFileText(const std::filesystem::path
     ValidateMonsterModelNames(readBack, source, found);
     ValidateMonsterModelFiles(readBack, source, found);
     issues.insert(issues.end(), found.begin(), found.end());
-    if (Items::HasErrors(found))
+    if (Items::HasFatal(found))
     {
         return std::nullopt;
     }

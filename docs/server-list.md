@@ -3,8 +3,8 @@
 The server groups on the login screen (Valhalla, Helheim, ...) and the names
 and colors of their channels come from `Data/Local/ServerList.json`. It
 replaced the encrypted `Data/Local/ServerList.bmd` of the original client. The
-game reads it at start; with errors in it the game shows them and stops, as it
-does for broken item data. All problems are also written to the log.
+game reads it at start; with fatal problems in it the game shows them and
+stops, as it does for broken item data. All problems are also written to the log.
 
 ## How the login screen uses it
 
@@ -88,8 +88,9 @@ the name the login screen gives it.
   ID. The channel table shows which channels the connect server sent, with
   their load.
 - **Save** writes `Data/Local/ServerList.json` in the folder the game runs
-  from. It refuses a list with errors (a group without a name, an ID used
-  twice) and lists them. When the file itself had errors as it was read
+  from. It refuses a list with fatal problems (a group without a name, an ID
+  used twice) and lists them. When the file itself had fatal problems as it
+  was read
   (changed by hand while the game ran), the window has only the groups that
   could be read: Save stays off then, so it cannot remove the others, until
   the file is fixed and **Revert** reads it again.

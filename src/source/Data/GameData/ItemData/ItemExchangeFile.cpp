@@ -71,13 +71,13 @@ bool ExchangeReader::ReadText(const OrderedJson& root, const char* key, bool req
     {
         if (required)
         {
-            AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, key, "missing");
+            AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, key, "missing");
         }
         return false;
     }
     if (!field->is_string())
     {
-        AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, key, "must be a text");
+        AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, key, "must be a text");
         return false;
     }
     if (field->get_ref<const std::string&>().empty())
@@ -85,7 +85,7 @@ bool ExchangeReader::ReadText(const OrderedJson& root, const char* key, bool req
         // An empty optional text is as if it were not there (the writer leaves it out).
         if (required)
         {
-            AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, key, "must be a text");
+            AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, key, "must be a text");
         }
         return false;
     }
@@ -104,7 +104,7 @@ void ExchangeReader::Read(const OrderedJson& root, ItemExchangeFile& file)
     {
         if (text != ItemExchangeSourceMuMain && text != ItemExchangeSourceOpenMU)
         {
-            AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, Keys::Source,
+            AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, Keys::Source,
                      std::string("must be \"") + ItemExchangeSourceMuMain + "\" or \"" + ItemExchangeSourceOpenMU +
                          "\"");
         }
@@ -115,7 +115,7 @@ void ExchangeReader::Read(const OrderedJson& root, ItemExchangeFile& file)
     {
         if (text != ItemExchangeGameVersion)
         {
-            AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, Keys::GameVersion,
+            AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, Keys::GameVersion,
                      std::string("only \"") + ItemExchangeGameVersion + "\" data can be exchanged");
         }
         file.gameVersion = text;
@@ -135,7 +135,7 @@ void ExchangeReader::ReadItems(const OrderedJson& root, ItemExchangeFile& file)
     const auto list = root.find(Keys::Items);
     if (list == root.end() || !list->is_array())
     {
-        AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, Keys::Items,
+        AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, Keys::Items,
                  "missing or not a list");
         return;
     }
@@ -155,7 +155,7 @@ void ExchangeReader::ReadItems(const OrderedJson& root, ItemExchangeFile& file)
     {
         if (count > 1)
         {
-            AddIssue(ItemDataIssueSeverity::Error, key.first, key.second, "",
+            AddIssue(ItemDataIssueSeverity::Fatal, key.first, key.second, "",
                      "is in the file " + std::to_string(count) + " times; none of them is read");
             file.repeatedItems.push_back(key);
         }
@@ -170,7 +170,7 @@ void ExchangeReader::ReadItem(const OrderedJson& json, size_t index, std::vector
     const std::string field = std::string(Keys::Items) + "[" + std::to_string(index) + "]";
     if (!json.is_object())
     {
-        AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field,
+        AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field,
                  "an item must be an object");
         return;
     }
@@ -179,7 +179,7 @@ void ExchangeReader::ReadItem(const OrderedJson& json, size_t index, std::vector
     if (groupField == json.end() || !groupField->is_number_integer() || !Json::ReadWholeNumber(*groupField, group) ||
         group < 0 || group >= MAX_ITEM_TYPE)
     {
-        AddIssue(ItemDataIssueSeverity::Error, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field + "." + Keys::Group,
+        AddIssue(ItemDataIssueSeverity::Fatal, ItemDataIssue::NoItem, ItemDataIssue::NoItem, field + "." + Keys::Group,
                  "missing or not a group from 0 to " + std::to_string(MAX_ITEM_TYPE - 1));
         return;
     }
@@ -336,7 +336,7 @@ bool CanImportItemExchange(const ItemExchangeFile& file, std::span<const ItemDat
                                 [&](const ItemDataIssue& issue)
                                 {
                                     const std::pair<int, int> key{issue.group, issue.number};
-                                    return issue.severity == ItemDataIssueSeverity::Error &&
+                                    return issue.severity == ItemDataIssueSeverity::Fatal &&
                                            std::ranges::find(file.repeatedItems, key) == file.repeatedItems.end();
                                 });
 }

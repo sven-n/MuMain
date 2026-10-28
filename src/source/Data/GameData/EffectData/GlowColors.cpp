@@ -83,7 +83,7 @@ bool ReadValue(const OrderedJson& json, GlowColorValue& value)
     return true;
 }
 
-void AddError(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& field,
+void AddFatal(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& field,
               const std::string& message)
 {
     Items::Json::AddFileIssue(issues, source, ItemDataIssue::NoItem, field, message);
@@ -102,12 +102,12 @@ void ReadGlowColorsJson(std::string_view text, const std::string& source, std::v
     const auto list = root.find(ColorsKey);
     if (list == root.end() || !list->is_object())
     {
-        AddError(issues, source, ColorsKey, "missing or not an object of names and colors");
+        AddFatal(issues, source, ColorsKey, "missing or not an object of names and colors");
         return;
     }
     for (const std::string& name : FindRepeatedColorNames(text))
     {
-        AddError(issues, source, std::string(ColorsKey) + "." + name, "is in the list more than once");
+        AddFatal(issues, source, std::string(ColorsKey) + "." + name, "is in the list more than once");
     }
     for (const auto& [name, json] : list->items())
     {
@@ -115,11 +115,11 @@ void ReadGlowColorsJson(std::string_view text, const std::string& source, std::v
         GlowColorValue value{};
         if (!Items::Json::IsName(name))
         {
-            AddError(issues, source, field, "a name has only letters and digits");
+            AddFatal(issues, source, field, "a name has only letters and digits");
         }
         else if (!ReadValue(json, value))
         {
-            AddError(issues, source, field, "must be a list of red, green and blue from 0 to 1");
+            AddFatal(issues, source, field, "must be a list of red, green and blue from 0 to 1");
         }
         else
         {

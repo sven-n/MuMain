@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-using Data::Items::HasErrors;
+using Data::Items::HasFatal;
 using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
 using Data::Monsters::MonsterDefinition;
@@ -119,14 +119,14 @@ TEST_CASE("Monster data: a number twice is an error, the first one is kept [data
 
 TEST_CASE("Monster data: a bad header or list is an error, unknown fields are warnings [data][monsters]")
 {
-    CHECK(HasErrors(Read("not json").issues));
-    CHECK(HasErrors(Read(R"({ "formatVersion": 2, "monsters": [] })").issues));
+    CHECK(HasFatal(Read("not json").issues));
+    CHECK(HasFatal(Read(R"({ "formatVersion": 2, "monsters": [] })").issues));
     CHECK(HasIssueAbout(Read(R"({ "formatVersion": 1, "monsters": {} })").issues, "monsters", "a list"));
     CHECK(HasIssueAbout(Read(MonsterFile("5")).issues, "monsters[0]", "an object"));
 
     const ReadResult unknown = Read(R"({ "formatVersion": 1, "color": "red", "monsters": [
         { "number": 7, "name": "X", "kind": "monster", "scale": 2 } ] })");
-    CHECK_FALSE(HasErrors(unknown.issues));
+    CHECK_FALSE(HasFatal(unknown.issues));
     CHECK(HasIssueAbout(unknown.issues, "color", "unknown field"));
     CHECK(HasIssueAbout(unknown.issues, "monster 7 scale", "unknown field"));
     CHECK(unknown.monsters.size() == 1);
@@ -172,7 +172,7 @@ TEST_CASE("Monster data: an empty English name and a long name are warnings [dat
 
     Data::Monsters::ValidateMonsterNames(monsters, issues);
 
-    CHECK_FALSE(HasErrors(issues));
+    CHECK_FALSE(HasFatal(issues));
     REQUIRE(issues.size() == 2);
     CHECK(issues[0].number == 252);
     CHECK(issues[0].message.find("English name is empty") != std::string::npos);
@@ -219,7 +219,7 @@ TEST_CASE("Monster data: the separator and bad language codes are errors [data][
 
     CHECK(HasIssueAbout(issues, "monster 7 name", "must not contain"));
     CHECK(HasIssueAbout(issues, "monster 8 name", "not a language code"));
-    CHECK(HasErrors(issues));
+    CHECK(HasFatal(issues));
 }
 
 TEST_CASE("Monster data: a name in a language the game has no texts for is a warning [data][monsters]")

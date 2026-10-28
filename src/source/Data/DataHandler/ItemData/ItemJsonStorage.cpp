@@ -52,9 +52,9 @@ std::vector<std::filesystem::path> FindJsonFiles(const std::filesystem::path& di
     return files;
 }
 
-void AddError(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& message)
+void AddFatal(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& message)
 {
-    issues.push_back({ItemDataIssueSeverity::Error, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "", message});
+    issues.push_back({ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, "", message});
 }
 
 // Reads every *.json file of the folder with readFile(text, source).
@@ -65,7 +65,7 @@ void ReadJsonFiles(const std::filesystem::path& directory, const char* noFilesMe
     const std::vector<std::filesystem::path> files = FindJsonFiles(directory);
     if (files.empty())
     {
-        AddError(issues, directory.string(), noFilesMessage);
+        AddFatal(issues, directory.string(), noFilesMessage);
         return;
     }
 
@@ -75,7 +75,7 @@ void ReadJsonFiles(const std::filesystem::path& directory, const char* noFilesMe
         const std::optional<std::string> text = ReadTextFile(file);
         if (!text)
         {
-            AddError(issues, source, "could not be read");
+            AddFatal(issues, source, "could not be read");
             continue;
         }
         readFile(*text, source);
@@ -94,7 +94,7 @@ bool WriteTemporaryFile(const FileToSave& file, std::vector<ItemDataIssue>& issu
     std::string error;
     if (!Data::WriteTemporaryFile(file.path, file.text, error))
     {
-        AddError(issues, GetTemporaryPath(file.path).string(), error);
+        AddFatal(issues, GetTemporaryPath(file.path).string(), error);
         return false;
     }
     return true;
@@ -105,7 +105,7 @@ bool ReplaceWithTemporaryFile(const std::filesystem::path& path, std::vector<Ite
     std::string error;
     if (!Data::ReplaceWithTemporaryFile(path, error))
     {
-        AddError(issues, path.string(), error);
+        AddFatal(issues, path.string(), error);
         return false;
     }
     return true;
@@ -264,7 +264,7 @@ ItemStatsLoadResult LoadItemStatsFile(const std::filesystem::path& file)
     const std::optional<std::string> text = ReadTextFile(file);
     if (!text)
     {
-        AddError(result.issues, source, "could not be read");
+        AddFatal(result.issues, source, "could not be read");
         return result;
     }
     ReadItemStatsJson(*text, source, result.file, result.issues);
@@ -283,7 +283,7 @@ ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file)
     const std::optional<std::string> text = ReadTextFile(file);
     if (!text)
     {
-        AddError(result.issues, source, "could not be read");
+        AddFatal(result.issues, source, "could not be read");
         return result;
     }
     ReadItemTooltipJson(*text, source, result.file, result.issues);
@@ -302,7 +302,7 @@ GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file)
     const std::optional<std::string> text = ReadTextFile(file);
     if (!text)
     {
-        AddError(result.issues, source, "could not be read");
+        AddFatal(result.issues, source, "could not be read");
         return result;
     }
     Effects::ReadGlowColorsJson(*text, source, result.colors, result.issues);
@@ -328,7 +328,7 @@ ItemDataSaveResult SaveItemAndModelDataDirectories(const std::filesystem::path& 
 {
     ValidateItems(GetExistingItems(items), issues);
     ValidateExistingItemModels(models.models, issues);
-    if (HasErrors(issues))
+    if (HasFatal(issues))
     {
         return ItemDataSaveResult::InvalidData;
     }
@@ -354,7 +354,7 @@ void ValidateItemModelsAsWritten(std::span<const ItemModelDefinition> models, st
         ReadItemModelGroupJson(WriteItemModelGroupJson(group, models), GetItemGroupFileName(group), readBack,
                                readIssues);
         std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
-                     [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+                     [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Fatal; });
     }
 }
 
@@ -365,7 +365,7 @@ void ValidateSharedItemModelsAsWritten(std::span<const SharedItemModel> sharedMo
     std::vector<ItemDataIssue> readIssues;
     ReadSharedItemModelsJson(WriteSharedItemModelsJson(sharedModels), SharedItemModelsFileName, readBack, readIssues);
     std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
-                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Fatal; });
 }
 
 void ValidateGlowColorsAsWritten(std::span<const Effects::GlowColor> colors, std::vector<ItemDataIssue>& issues)
@@ -374,7 +374,7 @@ void ValidateGlowColorsAsWritten(std::span<const Effects::GlowColor> colors, std
     std::vector<ItemDataIssue> readIssues;
     Effects::ReadGlowColorsJson(Effects::WriteGlowColorsJson(colors), Effects::GlowColorsFile, readBack, readIssues);
     std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
-                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Fatal; });
 }
 
 #ifdef _EDITOR
@@ -384,7 +384,7 @@ void ValidateItemStatsAsWritten(const ItemStatFile& file, std::vector<ItemDataIs
     std::vector<ItemDataIssue> readIssues;
     ReadItemStatsJson(WriteItemStatsJson(file), GetItemStatsFile().generic_string(), readBack, readIssues);
     std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
-                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Error; });
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Fatal; });
 }
 #endif
 

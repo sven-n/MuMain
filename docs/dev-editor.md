@@ -38,7 +38,7 @@ bar.
 The editor opens in a window of its own, beside the game window where the
 screen has room (else over its right side), and stays in front of the game. Its
 **Windows** menu opens the tool windows: Item, Monster
-([monster-data.md](monster-data.md)), Server List
+([monster-data.md](monster-data.md)), Data Checks ([below](#data-checks)), Server List
 ([server-list.md](server-list.md)), Skill, Dev and Map Editor, the Effect
 Browser and the console. They open as tabs docked in the editor window, the
 console along the bottom. Drag a tab out to float a tool window anywhere, over
@@ -99,6 +99,30 @@ While the editor has the keyboard, the arrow keys (and PageUp, PageDown,
 Home and End) move through its lists and tables, and the row they move onto
 is selected as a click would select it; Ctrl with an arrow only moves the
 cursor. In the Map Editor's thumbnail grids they move in both directions.
+
+### Data Checks
+
+**Windows > Data Checks** lists the problems of all game data in one table:
+the items, the monsters and the monster models as their Save would write
+them now, and the glTF model file table, the server list, the effect
+catalogue and the looks (the look profile and the light moods) as the game
+reads their files at start.
+
+Problems have three levels, the same in every area: **fatal** (the data
+cannot be used: Save refuses it, and the game does not start with it; only
+the looks start anyway, with the built-in look values and the Classic
+light),
+**error** (something it names is missing, e.g. an item or a model file: the
+game runs without it, Save keeps it) and **warning** (it works, but is worth
+knowing). The worst come first. The boxes above the table show or hide each
+level, with its count, and each area. **Check all** checks again; a change in
+the item or monster tools does not, and a note says when the data changed
+since the last check.
+
+A click on a problem selects what it is about and opens its tool: the item
+or monster tool of its field, Item Formulas for the item stat file, the
+Server List, the Effect Browser, or the Dev Editor for the looks. An arrow
+key onto a problem only selects it.
 
 ---
 

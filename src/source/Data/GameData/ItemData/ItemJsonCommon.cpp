@@ -165,7 +165,7 @@ bool IsName(std::string_view text)
 void AddFileIssue(std::vector<ItemDataIssue>& issues, const std::string& source, int group, const std::string& field,
                   const std::string& message)
 {
-    issues.push_back({ItemDataIssueSeverity::Error, source, group, ItemDataIssue::NoItem, field, message});
+    issues.push_back({ItemDataIssueSeverity::Fatal, source, group, ItemDataIssue::NoItem, field, message});
 }
 
 bool ReadFileVersion(std::string_view text, const std::string& source, int maxFormatVersion, OrderedJson& root,

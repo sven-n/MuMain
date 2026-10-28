@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-using Data::Items::HasErrors;
+using Data::Items::HasFatal;
 using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
 using Data::ServerList::ChannelType;
@@ -124,9 +124,9 @@ TEST_CASE("ServerListJson: an empty list is a valid file")
 
 TEST_CASE("ServerListJson: the file needs its version and a list of groups")
 {
-    CHECK(HasErrors(Read("not json").issues));
-    CHECK(HasErrors(Read(R"({ "groups": [] })").issues));
-    CHECK(HasErrors(Read(R"({ "formatVersion": 2, "groups": [] })").issues));
+    CHECK(HasFatal(Read("not json").issues));
+    CHECK(HasFatal(Read(R"({ "groups": [] })").issues));
+    CHECK(HasFatal(Read(R"({ "formatVersion": 2, "groups": [] })").issues));
 
     const ReadResult noList = Read(R"({ "formatVersion": 1, "groups": {} })");
     CHECK(HasIssueAbout(noList.issues, "groups", "not a list"));
@@ -142,7 +142,7 @@ TEST_CASE("ServerListJson: a group needs an id and a name")
     CHECK(HasIssueAbout(badId.issues, "groups[0].id", "from 0 to 3276"));
 
     const ReadResult negativeId = Read(GroupFile(R"({ "id": -1, "name": "Valhalla" })"));
-    CHECK(HasErrors(negativeId.issues));
+    CHECK(HasFatal(negativeId.issues));
 
     const ReadResult noName = Read(GroupFile(R"({ "id": 0 })"));
     CHECK(HasIssueAbout(noName.issues, "groups[0].name", "missing or empty"));
@@ -173,7 +173,7 @@ TEST_CASE("ServerListJson: channels are numbered 1 to 20 and have a known type")
     CHECK(HasIssueAbout(tooHigh.issues, "groups[0].channels.21", "1 to 20"));
 
     const ReadResult notANumber = Read(GroupFile(R"({ "id": 0, "name": "A", "channels": {"1a": "gold"} })"));
-    CHECK(HasErrors(notANumber.issues));
+    CHECK(HasFatal(notANumber.issues));
 
     const ReadResult unknownType = Read(GroupFile(R"({ "id": 0, "name": "A", "channels": {"1": "silver"} })"));
     CHECK(HasIssueAbout(unknownType.issues, "groups[0].channels.1", "normal, nonPvp, goldPvp or gold"));
@@ -189,7 +189,7 @@ TEST_CASE("ServerListJson: a name or description that is too long is cut")
     const ReadResult read =
         Read(GroupFile(R"({ "id": 0, "name": ")" + longName + R"(", "description": ")" + longDescription + R"(" })"));
 
-    CHECK_FALSE(HasErrors(read.issues));
+    CHECK_FALSE(HasFatal(read.issues));
     CHECK(HasIssueAbout(read.issues, "groups[0].name", "longer than 32 characters"));
     CHECK(HasIssueAbout(read.issues, "groups[0].description", "longer than 254 characters"));
     REQUIRE(read.groups.size() == 1);
@@ -242,7 +242,7 @@ TEST_CASE("ServerListJson: unknown fields and a second test server are warnings"
         { "id": 0, "name": "A", "testServer": true, "order": 3 },
         { "id": 1, "name": "B", "testServer": true } ] })");
 
-    CHECK_FALSE(HasErrors(read.issues));
+    CHECK_FALSE(HasFatal(read.issues));
     CHECK(HasWarnings(read.issues));
     CHECK(HasIssueAbout(read.issues, "color", "unknown field"));
     CHECK(HasIssueAbout(read.issues, "groups[0].order", "unknown field"));

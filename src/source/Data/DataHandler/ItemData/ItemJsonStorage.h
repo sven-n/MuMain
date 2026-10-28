@@ -102,7 +102,7 @@ enum class ItemDataSaveResult
 // Item groups by number, e.g. the groups whose model files a save writes.
 using ItemGroupSet = std::bitset<MAX_ITEM_TYPE>;
 
-// Validates the items and, when there are no errors, writes one file per
+// Validates the items and, when there are no fatal problems, writes one file per
 // group. Each changed file is written to a temporary file first; only when
 // all of them could be written do they replace the old files, so a full disk
 // or a folder that cannot be written leaves every file as it was. Files

@@ -17,7 +17,7 @@
 #include <utility>
 #include <vector>
 
-using Data::Items::HasErrors;
+using Data::Items::HasFatal;
 using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
 using Data::Models::ActionClip;
@@ -208,7 +208,7 @@ TEST_CASE("ReadModelFilesJson reports bad LOD settings and leaves the entry out"
         const ReadResult result =
             Read(Table(std::string(R"({ "model": "MODEL_ELITE_YETI", "file": "a.glb", )") + lod + " }"));
         CHECK(result.models.empty());
-        CHECK(HasErrors(result.issues));
+        CHECK(HasFatal(result.issues));
     }
     const ReadResult unknown =
         Read(Table(R"({ "model": "MODEL_ELITE_YETI", "file": "a.glb", "lod": { "distance": 3 } })"));
@@ -222,19 +222,19 @@ TEST_CASE("ReadModelFilesJson reports table errors and leaves the entry out")
     {
         const ReadResult result = Read(Table(R"({ "model": "MODEL_NOTHING", "file": "Monster/x.glb" })"));
         CHECK(result.models.empty());
-        CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "models[0].model", "MODEL_NOTHING is no model"));
+        CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "models[0].model", "MODEL_NOTHING is no model"));
     }
     SUBCASE("model that is not a monster")
     {
         const ReadResult result = Read(Table(R"({ "model": "MODEL_PLAYER", "file": "Player/x.glb" })"));
         CHECK(result.models.empty());
-        CHECK(HasErrors(result.issues));
+        CHECK(HasFatal(result.issues));
     }
     SUBCASE("missing file")
     {
         const ReadResult result = Read(Table(R"({ "model": "MODEL_ELITE_YETI" })"));
         CHECK(result.models.empty());
-        CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "models[0].file", "missing"));
+        CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "models[0].file", "missing"));
     }
     SUBCASE("paths outside Data/")
     {
@@ -245,7 +245,7 @@ TEST_CASE("ReadModelFilesJson reports table errors and leaves the entry out")
             const ReadResult result =
                 Read(Table(std::string(R"({ "model": "MODEL_ELITE_YETI", "file": ")") + file + "\" }"));
             CHECK(result.models.empty());
-            CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "models[0].file", "relative to Data/"));
+            CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "models[0].file", "relative to Data/"));
         }
     }
     SUBCASE("model named twice")
@@ -254,7 +254,7 @@ TEST_CASE("ReadModelFilesJson reports table errors and leaves the entry out")
                                                 { "model": "MODEL_ELITE_YETI", "file": "b.glb" })"));
         REQUIRE(result.models.size() == 1);
         CHECK(result.models[0].file == "a.glb");
-        CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "models[1]", "more than one file"));
+        CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "models[1]", "more than one file"));
     }
     SUBCASE("bad action entries")
     {
@@ -266,18 +266,18 @@ TEST_CASE("ReadModelFilesJson reports table errors and leaves the entry out")
                                   "models[0].actions.40000"})
         {
             CAPTURE(field);
-            CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, field, "no action index"));
+            CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, field, "no action index"));
         }
-        CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "models[0].actions.3.crossfade", "ticks"));
-        CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "models[0].actions.4.clip", "clip name"));
-        CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "models[0].actions.5", "must be an object"));
+        CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "models[0].actions.3.crossfade", "ticks"));
+        CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "models[0].actions.4.clip", "clip name"));
+        CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "models[0].actions.5", "must be an object"));
     }
     SUBCASE("file header")
     {
-        CHECK(HasErrors(Read(R"({ "models": [] })").issues));
-        CHECK(HasErrors(Read(R"({ "formatVersion": 2, "models": [] })").issues));
-        CHECK(HasErrors(Read(R"({ "formatVersion": 1 })").issues));
-        CHECK(HasErrors(Read("not json").issues));
+        CHECK(HasFatal(Read(R"({ "models": [] })").issues));
+        CHECK(HasFatal(Read(R"({ "formatVersion": 2, "models": [] })").issues));
+        CHECK(HasFatal(Read(R"({ "formatVersion": 1 })").issues));
+        CHECK(HasFatal(Read("not json").issues));
     }
 }
 
@@ -287,7 +287,7 @@ TEST_CASE("ReadModelFilesJson warns about unknown fields and empty actions but k
         { "model": "MODEL_ELITE_YETI", "file": "a.glb", "scale": 2,
           "actions": { "1": { "clip": "idle", "speed": 2 }, "2": {} } } ] })");
     INFO(Messages(result.issues));
-    CHECK_FALSE(HasErrors(result.issues));
+    CHECK_FALSE(HasFatal(result.issues));
     REQUIRE(result.models.size() == 1);
     CHECK(result.models[0].actions.size() == 1);
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "comment", "unknown field"));
@@ -318,6 +318,21 @@ TEST_CASE("ReadModelFileTable: a game without the table and without an overlay d
     CHECK(files.models.empty());
     CHECK(files.issues.empty());
     CHECK(files.Find(MODEL_ELITE_YETI) == nullptr);
+    CHECK(files.overlay.empty());
+}
+
+// The start logs the overlay it searched; Data Checks reads the table again
+// without logging it.
+TEST_CASE("ReadModelFileTable: names the overlay's Data/ it searched")
+{
+    TemporaryDirectory game;
+    TemporaryDirectory overlayRoot;
+    overlayRoot.Write("Data/Monster/Monster14.glb", "overlay");
+    const std::string overlay = overlayRoot.Path().string();
+
+    const ModelFiles files = Data::Models::ReadModelFileTable(overlay.c_str(), game.Path() / "Data");
+
+    CHECK(files.overlay == overlayRoot.Path() / "Data");
 }
 
 TEST_CASE("LoadModelFiles: a file found nowhere is an error")
@@ -332,7 +347,8 @@ TEST_CASE("LoadModelFiles: a file found nowhere is an error")
     CHECK(files.models[0].path == game.Path() / "Monster/Monster02.glb");
     CHECK(files.Find(MODEL_HOUND) == &files.models[0]);
     CHECK(files.Find(MODEL_ELITE_YETI) == nullptr);
-    CHECK(HasIssue(files.issues, ItemDataIssueSeverity::Error, "MODEL_ELITE_YETI", "Monster/Monster14.glb is not found"));
+    CHECK(
+        HasIssue(files.issues, ItemDataIssueSeverity::Fatal, "MODEL_ELITE_YETI", "Monster/Monster14.glb is not found"));
 }
 
 TEST_CASE("LoadModelFiles: the overlay's Data/ wins for the table and the files")
@@ -401,7 +417,7 @@ TEST_CASE("LoadModelFiles: the overlay's Data/ wins for the table and the files"
         const std::string missing = (overlayRoot.Path() / "missing").string();
         const DataDirectories directories = Data::Models::MakeDataDirectories(missing.c_str(), game.Path(), issues);
         CHECK_FALSE(directories.overlay.has_value());
-        CHECK_FALSE(HasErrors(issues));
+        CHECK_FALSE(HasFatal(issues));
         CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "", "no directory"));
         CHECK(Data::Models::LoadModelFiles(directories).models.size() == 1);
     }

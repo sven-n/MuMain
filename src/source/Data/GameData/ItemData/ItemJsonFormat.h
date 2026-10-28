@@ -44,7 +44,7 @@ std::span<const char* const> GetClassKeys();
 // One item as the item files have it, without its group, which the file has. The item
 // exchange file with OpenMU (ItemExchangeFile) has its items so too.
 Json::OrderedJson WriteItemJson(const ItemDefinition& definition);
-// Reads what WriteItemJson writes into `definition`, an item of `group`; false with errors.
+// Reads what WriteItemJson writes into `definition`, an item of `group`; false with fatal problems.
 // The problems are added to `issues`.
 bool ReadItemJson(const Json::OrderedJson& json, const std::string& source, int group, ItemDefinition& definition,
                   std::vector<ItemDataIssue>& issues);

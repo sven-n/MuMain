@@ -60,9 +60,9 @@ bool CServerListManager::LoadServerListScript(std::string& errorMessage)
     const std::filesystem::path file = Data::ServerList::ServerListFile;
     Data::ServerList::ServerListLoadResult result = Data::ServerList::LoadServerListFile(file);
     Data::LogDataIssues("Server list:", result.issues);
-    if (Data::Items::HasErrors(result.issues))
+    if (Data::Items::HasFatal(result.issues))
     {
-        errorMessage = Data::DescribeDataErrors(ServerListName, file, result.issues);
+        errorMessage = Data::DescribeFatalIssues(ServerListName, file, result.issues);
         return false;
     }
     SetServerGroups(result.groups);

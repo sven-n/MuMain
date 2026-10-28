@@ -106,7 +106,7 @@ FakeFileSystem Shipped()
 LookFiles Load(FakeFileSystem& fileSystem)
 {
     Render::Look::LookFilesLoad loaded = Render::Look::LoadLookFiles(fileSystem, LookFile, MoodFile);
-    REQUIRE_FALSE(Data::Items::HasErrors(loaded.issues));
+    REQUIRE_FALSE(Data::Items::HasFatal(loaded.issues));
     return loaded.files;
 }
 

@@ -5,9 +5,11 @@
 #include "MuServerListUI.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/UI/Common/IssueLevels.h"
 #include "../MuEditor/UI/Common/KeyboardSelection.h"
 #include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "../MuEditor/UI/Common/SavedDataFiles.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/ServerListData/ServerListJson.h"
@@ -269,7 +271,7 @@ void CMuServerListUI::LoadFile()
 {
     Data::ServerList::ServerListLoadResult loaded =
         Data::ServerList::LoadServerListFile(Data::ServerList::ServerListFile);
-    m_edits.Reset(std::move(loaded.groups), !Data::Items::HasErrors(loaded.issues));
+    m_edits.Reset(std::move(loaded.groups), !Data::Items::HasFatal(loaded.issues));
     m_issues = std::move(loaded.issues);
     m_status.clear();
     m_statusIsError = false;
@@ -296,13 +298,14 @@ void CMuServerListUI::Save()
         return;
     }
     m_edits.MarkSaved();
+    MuEditor::SavedDataFiles::NoteSaved();
     m_status = I18N::Format(I18N::Editor::SavedTo0, {Data::ServerList::ServerListFile});
     m_statusIsError = false;
 }
 
 void CMuServerListUI::RenderToolbar()
 {
-    // A save after a read with errors would remove the groups the read left out.
+    // A save after a read with fatal problems would remove the groups the read left out.
     ImGui::BeginDisabled(!m_edits.IsComplete());
     if (ImGui::Button(I18N::Editor::Save))
     {
@@ -311,7 +314,7 @@ void CMuServerListUI::RenderToolbar()
     ImGui::EndDisabled();
     if (!m_edits.IsComplete() && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
     {
-        ImGui::SetTooltip("%s", I18N::Editor::SaveOffAfterReadErrors);
+        ImGui::SetTooltip("%s", I18N::Editor::SaveOffAfterFatalReadProblems);
     }
     ImGui::SameLine();
     if (ImGui::Button(I18N::Editor::Revert))
@@ -412,7 +415,7 @@ void CMuServerListUI::RenderStatus()
     }
     if (!m_edits.IsComplete())
     {
-        RenderError(I18N::Editor::SaveOffAfterReadErrors);
+        RenderError(I18N::Editor::SaveOffAfterFatalReadProblems);
     }
     if (m_issues.empty())
     {
@@ -422,14 +425,7 @@ void CMuServerListUI::RenderStatus()
     for (const Data::Items::ItemDataIssue& issue : m_issues)
     {
         const std::string line = issue.field + ": " + issue.message;
-        if (issue.severity == Data::Items::ItemDataIssueSeverity::Error)
-        {
-            RenderError(line.c_str());
-        }
-        else
-        {
-            RenderNote(line.c_str());
-        }
+        MuEditor::IssueLevels::RenderLine(issue.severity, line.c_str());
     }
 }
 

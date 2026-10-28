@@ -26,7 +26,7 @@ struct MonsterDataLoadResult
 // Reads and checks the file; one that cannot be read is an error.
 MonsterDataLoadResult LoadMonstersFile(const std::filesystem::path& file);
 
-// Writes the monsters to the file when they read back without errors; the
+// Writes the monsters to the file when they read back without fatal problems; the
 // problems found are added to `issues`. The old file stays when the new one
 // cannot be written whole.
 bool SaveMonstersFile(const std::filesystem::path& file, std::span<const MonsterDefinition> monsters,
@@ -34,7 +34,7 @@ bool SaveMonstersFile(const std::filesystem::path& file, std::span<const Monster
 
 // The text SaveMonstersFile writes, so that a caller can check more files
 // before it writes any (with WriteTextFiles): the text for the file when the
-// monsters read back without errors, nullopt otherwise; the problems found are
+// monsters read back without fatal problems, nullopt otherwise; the problems found are
 // added to `issues`.
 std::optional<std::string> MakeMonstersFileText(const std::filesystem::path& file,
                                                 std::span<const MonsterDefinition> monsters,
