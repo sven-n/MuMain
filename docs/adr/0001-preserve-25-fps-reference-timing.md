@@ -59,6 +59,17 @@ Yaw and pitch follow the shortest angular path; roll and look-target selection a
 This also applies to helper NPCs using player models, such as Leo the Helper.
 No player configuration or FPS cap is required.
 
+## Dark Raven timing
+
+The Dark Lord's Dark Raven travels and turns using the same 25-FPS reference timing as other creatures.
+Its stored flight direction is a displacement per reference frame; rotating it into world space does not change that unit.
+Only the displacement applied to its position takes the frame factor.
+Random course changes already occur at the reference rate, so each event keeps its full random turn and averages the new speed with the full previous speed.
+Its recovery teleport places it 250 units above the owner regardless of frame rate.
+The opening attack trail emits its ten-joint batches at the reference rate rather than on every rendered frame.
+Animation playback and attack timers retain their existing elapsed-time scaling.
+Players do not need to change VSync or their FPS limit for the intended flight and attack presentation.
+
 ## Consequences
 
 - Raw per-frame increments are defects unless the value is intentionally
