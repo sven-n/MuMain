@@ -124,6 +124,38 @@ TEST_CASE("RenderBodyShadow hands the active drawer the call and the model state
     CHECK(draw.lod == 2);
 }
 
+TEST_CASE("Both draws carry the skinning the model's last Transform set up [render][model_draw]")
+{
+    extern float BoneScale;
+    auto model = std::make_unique<BMD>();
+    auto bones = std::make_unique<float[][3][4]>(MAX_BONES);
+    vec3_t boxMin{};
+    vec3_t boxMax{};
+    OBB_t obb{};
+    BoneScale = 1.5f;
+    model->TransformCheap(bones.get(), boxMin, boxMax, &obb, true, 0.75f);
+    BoneScale = 1.f;
+    const unsigned int version = g_BoneTransformVersion;
+
+    RecordingDrawer drawer;
+    {
+        DrawerScope scope(drawer);
+        model->RenderMesh(0, RENDER_TEXTURE);
+        model->RenderBodyShadow();
+    }
+
+    REQUIRE(drawer.draws.size() == 1);
+    REQUIRE(drawer.shadows.size() == 1);
+    for (const Render::ModelDrawing::ModelSkin& skin : {drawer.draws[0].skin, drawer.shadows[0].skin})
+    {
+        CHECK(skin.bones == bones.get());
+        CHECK(skin.boneVersion == version);
+        CHECK(skin.boneScale == doctest::Approx(1.5f));
+        CHECK(skin.restPoseScale == doctest::Approx(0.75f));
+        CHECK(skin.translate);
+    }
+}
+
 TEST_CASE("Without a drawer set, the default drawer draws [render][model_draw]")
 {
     RecordingDrawer drawer;

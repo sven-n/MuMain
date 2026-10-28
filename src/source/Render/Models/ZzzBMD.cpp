@@ -151,8 +151,11 @@ struct SkinPalette
 // The weighted palette of a glTF model's current bones, rebuilt only when the
 // bones or scales changed since the last draw (one body draws several meshes).
 SkinPalette CurrentWeightedSkinPalette(const Render::Models::Gltf::SkinnedModel& model,
-                                       const float (*boneMatrices)[3][4], float boneScale, float restPoseScale)
+                                       const Render::ModelDrawing::ModelSkin& skin)
 {
+    const float (*boneMatrices)[3][4] = skin.bones;
+    const float boneScale = skin.boneScale;
+    const float restPoseScale = skin.restPoseScale;
     static thread_local struct
     {
         const Render::Models::Gltf::SkinnedModel* model = nullptr;
@@ -164,14 +167,14 @@ SkinPalette CurrentWeightedSkinPalette(const Render::Models::Gltf::SkinnedModel&
         std::uint32_t version = 0;
     } cache;
     const bool current = cache.model == &model && cache.boneMatrices == boneMatrices &&
-                         cache.boneVersion == g_BoneTransformVersion && cache.boneScale == boneScale &&
+                         cache.boneVersion == skin.boneVersion && cache.boneScale == boneScale &&
                          cache.restPoseScale == restPoseScale && !cache.palette.empty();
     if (!current)
     {
         Render::Models::BuildWeightedSkinPalette(model, boneMatrices, boneScale, restPoseScale, cache.palette);
         cache.model = &model;
         cache.boneMatrices = boneMatrices;
-        cache.boneVersion = g_BoneTransformVersion;
+        cache.boneVersion = skin.boneVersion;
         cache.boneScale = boneScale;
         cache.restPoseScale = restPoseScale;
         ++cache.version;
@@ -646,6 +649,17 @@ void BMD::TransformCheap(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_
     // Its only consumer (ZzzCharacter.cpp's character-select pick-box fallback height) already
     // floors the result, and Models[] is shared-by-type mutable state already, so a stale value
     // here is no worse than the existing sharing model.
+}
+
+Render::ModelDrawing::ModelSkin BMD::CurrentSkin() const
+{
+    Render::ModelDrawing::ModelSkin skin{.bones = m_pCurrentBoneTransform,
+                                         .boneVersion = g_BoneTransformVersion,
+                                         .boneScale = m_LastBoneScale,
+                                         .restPoseScale = m_LastSkinScale,
+                                         .translate = m_LastTranslate};
+    VectorCopy(m_LastLightPosition, skin.lightDirection);
+    return skin;
 }
 
 void BMD::SkinVertex(int mesh, int vertexIndex, float (*BoneMatrix)[3][4], bool Translate, float _Scale,
@@ -1568,7 +1582,8 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
                                         .lightEnable = LightEnable,
                                         .hideSkin = HideSkin,
                                         .streamMesh = StreamMesh,
-                                        .lod = ActiveLod};
+                                        .lod = ActiveLod,
+                                        .skin = CurrentSkin()};
     VectorCopy(BodyLight, draw.bodyLight);
     VectorCopy(BodyOrigin, draw.bodyOrigin);
     Render::ModelDrawing::ActiveModelDrawer().DrawMesh(draw);
@@ -1948,7 +1963,7 @@ void BMD::DrawMesh(Render::ModelDrawing::MeshDraw& draw) const
 
     const std::size_t maxVertexCount = static_cast<std::size_t>(m->NumTriangles) * 3;
     const Render::Models::Gltf::SkinnedModel* gltfModel = Render::Models::Gltf::SkinnedModelOf(*this);
-    const bool gpuSkinningEligible = CanGpuSkinMesh(finalRenderFlags, renderFlags, m_pCurrentBoneTransform);
+    const bool gpuSkinningEligible = CanGpuSkinMesh(finalRenderFlags, renderFlags, draw.skin.bones);
     bool gpuSkinningSubmitted = false;
     if (gpuSkinningEligible)
     {
@@ -2007,18 +2022,17 @@ void BMD::DrawMesh(Render::ModelDrawing::MeshDraw& draw) const
         };
 
         const SkinPalette palette =
-            gltfModel
-                ? CurrentWeightedSkinPalette(*gltfModel, m_pCurrentBoneTransform, m_LastBoneScale, m_LastSkinScale)
-                : SkinPalette{{&m_pCurrentBoneTransform[0][0][0], static_cast<std::size_t>(MAX_BONES) * 12u},
-                              g_BoneTransformVersion};
+            gltfModel ? CurrentWeightedSkinPalette(*gltfModel, draw.skin)
+                      : SkinPalette{{&draw.skin.bones[0][0][0], static_cast<std::size_t>(MAX_BONES) * 12u},
+                                    draw.skin.boneVersion};
         mu::SkinningParameters skinning{
             .boneMatrices = palette.matrices,
             .paletteVersion = palette.version,
             .bodyOrigin = {draw.bodyOrigin[0], draw.bodyOrigin[1], draw.bodyOrigin[2]},
             .bodyScale = draw.bodyScale,
-            .boneScale = m_LastBoneScale,
-            .restPoseScale = m_LastSkinScale,
-            .lightDirection = {m_LastLightPosition[0], m_LastLightPosition[1], m_LastLightPosition[2]},
+            .boneScale = draw.skin.boneScale,
+            .restPoseScale = draw.skin.restPoseScale,
+            .lightDirection = {draw.skin.lightDirection[0], draw.skin.lightDirection[1], draw.skin.lightDirection[2]},
             .highlightKnee = Render::Lighting::LightMood::Active().highlightKnee,
             .textureCoordinateOffset = {blendMeshTextureCoordU, blendMeshTextureCoordV},
             .chromeWave = wave,
@@ -2026,7 +2040,7 @@ void BMD::DrawMesh(Render::ModelDrawing::MeshDraw& draw) const
             .chromeLight = {static_cast<float>(cos(WorldTime * 0.001f)), static_cast<float>(sin(WorldTime * 0.002f))},
             .chromeTimeTerm = static_cast<float>(WorldTime) * 0.00006f,
             .textureCoordinates = textureCoordinates,
-            .translate = m_LastTranslate,
+            .translate = draw.skin.translate,
             .lightEnabled = usesCpuLighting,
             .specularStrength = texture->IsSkin || texture->IsHair ? 0.0f : SpecularStrength,
         };
@@ -2523,10 +2537,10 @@ void BMD::ProjectWeightedShadowMesh(const Render::ModelDrawing::ShadowDraw& draw
         for (std::size_t v = 0; v < lodMesh->vertices.size(); ++v)
         {
             float* position = vertices[v].data();
-            Render::Models::Gltf::SkinnedModel::SkinPosition(lodMesh->vertices[v], m_pCurrentBoneTransform,
-                                                             m_LastBoneScale, m_LastSkinScale, position);
+            Render::Models::Gltf::SkinnedModel::SkinPosition(lodMesh->vertices[v], draw.skin.bones, draw.skin.boneScale,
+                                                             draw.skin.restPoseScale, position);
             // As BMD::SkinVertex finishes a skinned position.
-            if (m_LastTranslate)
+            if (draw.skin.translate)
             {
                 VectorScale(position, draw.bodyScale, position);
                 VectorAdd(position, draw.bodyOrigin, position);
@@ -2685,19 +2699,16 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
     mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
-bool BMD::RenderGpuMeshShadow(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh,
-                              const float* origin, const float bodyScale, const float sx, const float sy,
-                              const std::uint32_t color) const
+bool BMD::RenderGpuMeshShadow(const Render::ModelDrawing::ShadowDraw& draw, const int startMesh, const int endMesh,
+                              const float sx, const float sy, const std::uint32_t color) const
 {
-    if (!m_pCurrentBoneTransform || startMesh < 0 || endMesh > NumMeshs || endMesh > MAX_MESH)
+    if (!draw.skin.bones || startMesh < 0 || endMesh > NumMeshs || endMesh > MAX_MESH)
     {
         return false;
     }
 
     const auto drawn = [&](int i)
-    {
-        return i != hiddenMesh && Meshs[i].NumTriangles > 0 && Meshs[i].Texture != blendMesh;
-    };
+    { return i != draw.hiddenMesh && Meshs[i].NumTriangles > 0 && Meshs[i].Texture != draw.blendMesh; };
     const bool cpuVerticesCurrent = m_SkinStamp == g_SkinStampCounter;
     for (int i = startMesh; i < endMesh; i++)
     {
@@ -2716,10 +2727,10 @@ bool BMD::RenderGpuMeshShadow(const int blendMesh, const int hiddenMesh, const i
         return false;
     }
 
-    const auto stream = ShadowStreams()
-                            .try_emplace({reinterpret_cast<std::uintptr_t>(this), startMesh, endMesh, hiddenMesh,
-                                          blendMesh})
-                            .first;
+    const auto stream =
+        ShadowStreams()
+            .try_emplace({reinterpret_cast<std::uintptr_t>(this), startMesh, endMesh, draw.hiddenMesh, draw.blendMesh})
+            .first;
     const void* key = &*stream;
     if (!renderer.IsSkinnedMeshCached(key))
     {
@@ -2756,15 +2767,15 @@ bool BMD::RenderGpuMeshShadow(const int blendMesh, const int hiddenMesh, const i
 
     // What EnsureCpuVertices() would skin with now.
     const mu::SkinningParameters skinning{
-        .boneMatrices = {&m_pCurrentBoneTransform[0][0][0], MAX_BONES * 12u},
-        .paletteVersion = g_BoneTransformVersion,
-        .bodyOrigin = {origin[0], origin[1], origin[2]},
-        .bodyScale = bodyScale,
-        .boneScale = m_LastBoneScale,
-        .restPoseScale = m_LastSkinScale,
-        .translate = m_LastTranslate,
+        .boneMatrices = {&draw.skin.bones[0][0][0], MAX_BONES * 12u},
+        .paletteVersion = draw.skin.boneVersion,
+        .bodyOrigin = {draw.bodyOrigin[0], draw.bodyOrigin[1], draw.bodyOrigin[2]},
+        .bodyScale = draw.bodyScale,
+        .boneScale = draw.skin.boneScale,
+        .restPoseScale = draw.skin.restPoseScale,
+        .translate = draw.skin.translate,
     };
-    return renderer.RenderCachedSkinnedShadow(key, color, skinning, BodyShadowProjection(origin, sx, sy));
+    return renderer.RenderCachedSkinnedShadow(key, color, skinning, BodyShadowProjection(draw.bodyOrigin, sx, sy));
 }
 
 void BMD::RenderWeightedMeshShadow(const Render::ModelDrawing::ShadowDraw& draw, const int startMesh, const int endMesh,
@@ -2772,7 +2783,7 @@ void BMD::RenderWeightedMeshShadow(const Render::ModelDrawing::ShadowDraw& draw,
 {
     const auto* gltf = Render::Models::Gltf::SkinnedModelOf(*this);
     auto& renderer = mu::GetRenderer();
-    if (!gltf || !m_pCurrentBoneTransform || startMesh < 0 || endMesh > NumMeshs || endMesh > MAX_MESH ||
+    if (!gltf || !draw.skin.bones || startMesh < 0 || endMesh > NumMeshs || endMesh > MAX_MESH ||
         !renderer.SetTerrainHeights({BackTerrainHeight, Render::kTerrainCells}, {TerrainWall, Render::kTerrainCells},
                                     TerrainHeightVersion()))
     {
@@ -2781,16 +2792,15 @@ void BMD::RenderWeightedMeshShadow(const Render::ModelDrawing::ShadowDraw& draw,
     }
 
     // What the body draw skins with (BMD::RenderMesh).
-    const SkinPalette palette =
-        CurrentWeightedSkinPalette(*gltf, m_pCurrentBoneTransform, m_LastBoneScale, m_LastSkinScale);
+    const SkinPalette palette = CurrentWeightedSkinPalette(*gltf, draw.skin);
     const mu::SkinningParameters skinning{
         .boneMatrices = palette.matrices,
         .paletteVersion = palette.version,
         .bodyOrigin = {draw.bodyOrigin[0], draw.bodyOrigin[1], draw.bodyOrigin[2]},
         .bodyScale = draw.bodyScale,
-        .boneScale = m_LastBoneScale,
-        .restPoseScale = m_LastSkinScale,
-        .translate = m_LastTranslate,
+        .boneScale = draw.skin.boneScale,
+        .restPoseScale = draw.skin.restPoseScale,
+        .translate = draw.skin.translate,
     };
     const mu::ShadowProjection projection = BodyShadowProjection(draw.bodyOrigin, sx, sy);
     const bool cpuVerticesCurrent = m_SkinStamp == g_SkinStampCounter;
@@ -2837,7 +2847,8 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
                                           .clothesCount = clothesCount,
                                           .alpha = alpha,
                                           .bodyScale = BodyScale,
-                                          .lod = ActiveLod};
+                                          .lod = ActiveLod,
+                                          .skin = CurrentSkin()};
     VectorCopy(BodyOrigin, draw.bodyOrigin);
     Render::ModelDrawing::ActiveModelDrawer().DrawShadow(draw);
 }
@@ -2872,8 +2883,7 @@ void BMD::DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) const
     }
     else if (draw.clothesCount == 0)
     {
-        if (!RenderGpuMeshShadow(draw.blendMesh, draw.hiddenMesh, startMesh, endMesh, draw.bodyOrigin, draw.bodyScale,
-                                 sx, sy, shadowColor))
+        if (!RenderGpuMeshShadow(draw, startMesh, endMesh, sx, sy, shadowColor))
         {
             AddMeshShadowTriangles(draw.blendMesh, draw.hiddenMesh, startMesh, endMesh, draw.bodyOrigin, sx, sy,
                                    shadowColor);
