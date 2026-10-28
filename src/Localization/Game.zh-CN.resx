@@ -316,4 +316,16 @@
   <data name="VSync" xml:space="preserve">
     <value>垂直同步</value>
   </data>
+  <data name="Translate Item Names" xml:space="preserve">
+    <value>翻译物品名称</value>
+  </data>
+  <data name="Texture Pack" xml:space="preserve">
+    <value>纹理包</value>
+  </data>
+  <data name="Original Textures" xml:space="preserve">
+    <value>原始纹理</value>
+  </data>
+  <data name="Texture Pack Tooltip" xml:space="preserve">
+    <value>纹理包位于 Data/TexturePacks；更改后需重启游戏才能生效</value>
+  </data>
 </root>
