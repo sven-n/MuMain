@@ -1136,7 +1136,9 @@ TEST_CASE("Item names stay English while translated item names are off, also aft
 TEST_CASE("Item data errors stop loading [data][items]")
 {
     TemporaryClientFolder folder;
-    folder.WriteItemFile("Group00_Sword.json", R"({"formatVersion": 1, "group": 0, "items": [{"number": 0}]})");
+    // An entry without a name is fine; a name that is not a text is not.
+    folder.WriteItemFile("Group00_Sword.json",
+                         R"({"formatVersion": 1, "group": 0, "items": [{"number": 0, "name": 5}]})");
     ClientDataScope client(folder.Directory());
 
     std::string errorMessage;
@@ -1380,6 +1382,29 @@ TEST_CASE("A file that cannot be replaced is a write failure and leaves no tempo
     CHECK_FALSE(std::filesystem::exists(swordFile.string() + ".tmp"));
 }
 
+TEST_CASE("Every number with a model has an entry in the item files [data][items]")
+{
+    const ItemDataLoadResult items = LoadItemDataDirectory(DataDirectory / "Items");
+    REQUIRE_FALSE(HasErrors(items.issues));
+    const ItemModelDataLoadResult models = LoadItemModelDataDirectory(DataDirectory / "Items" / "Models");
+    std::vector<ItemDataIssue> issues;
+    ValidateModelsHaveItemEntries(items.items, models.models, issues);
+    for (const ItemDataIssue& issue : issues)
+    {
+        INFO(issue.group << "," << issue.number << ": " << issue.message);
+        CHECK(false);
+    }
+
+    // Sphere 4 and 5: the client draws them and code names them, but has no item there yet.
+    for (const int number : {73, 74})
+    {
+        const auto entry = std::ranges::find_if(items.items, [number](const ItemDefinition& item)
+                                                { return item.group == 12 && item.number == number; });
+        REQUIRE(entry != items.items.end());
+        CHECK(entry->entryWithoutName);
+    }
+}
+
 // The items and their models are saved together: when one of the files
 // cannot be written, none is replaced, so a moved item never loses its model
 // on disk.
@@ -1394,12 +1419,12 @@ TEST_CASE("A save that cannot write all its files replaces none of them [data][i
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
     const std::filesystem::path itemDirectory = folder.Directory() / GetItemDataDirectory();
-    // Kris moves to a free number, so its group file changes.
+    // Kris's price changes, so its group file changes.
     std::vector<ItemDefinition> items = shipped.items;
     const auto kris = std::find_if(items.begin(), items.end(), [](const ItemDefinition& item)
                                    { return MakeItemType(item.group, item.number) == KrisType; });
     REQUIRE(kris != items.end());
-    kris->number = 100;
+    kris->buyPrice += 1;
     // A file where the model folder should be: no model file can be written.
     const std::filesystem::path blockedModels = folder.Directory() / "blocked";
     std::ofstream(blockedModels) << "not a folder";

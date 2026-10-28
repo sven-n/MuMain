@@ -329,6 +329,7 @@ ItemDataSaveResult SaveItemAndModelDataDirectories(const std::filesystem::path& 
 {
     ValidateItems(GetItemEntries(items), issues);
     ValidateExistingItemModels(models.models, issues);
+    ValidateModelsHaveItemEntries(items, models.models, issues);
     if (HasFatal(issues))
     {
         return ItemDataSaveResult::InvalidData;

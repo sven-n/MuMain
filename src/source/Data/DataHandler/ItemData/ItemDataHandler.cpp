@@ -24,6 +24,7 @@
 #include <iterator>
 #include <chrono>
 #include <memory>
+#include <set>
 
 #ifdef _EDITOR
 #include "Data/DataHandler/CommonDataSaver.h"
@@ -110,6 +111,24 @@ ItemStatFile InWriterOrder(ItemStatFile file)
     std::ranges::stable_sort(file.tables, byName);
     std::ranges::stable_sort(file.profiles, byName);
     return file;
+}
+
+// The bmd files have no entries without a name: the import keeps the ones at numbers it
+// brings no item to, so the numbers the client uses stay in the item files.
+void KeepEntriesWithoutName(std::vector<ItemDefinition>& items)
+{
+    std::set<int> imported;
+    for (const ItemDefinition& item : items)
+    {
+        imported.insert(MakeItemType(item.group, item.number));
+    }
+    for (const ItemDefinition& slot : g_ItemDatabase.GetAllSlots())
+    {
+        if (slot.entryWithoutName && !imported.contains(MakeItemType(slot.group, slot.number)))
+        {
+            items.push_back(slot);
+        }
+    }
 }
 #endif
 } // namespace
@@ -651,6 +670,7 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     std::vector<ItemModelDefinition> models;
     std::ranges::copy_if(g_ItemModelDatabase.GetAllSlots(), std::back_inserter(models), &ItemModelDefinition::Exists);
     ValidateItemModels(models, issues);
+    ValidateModelsHaveItemEntries(g_ItemDatabase.GetAllSlots(), models, issues);
     std::vector<ItemModelDefinition> sharedUsers = models;
     ApplySharedItemModels(sharedUsers, g_ItemModelDatabase.GetSharedModels(), SharedItemModelsFileName, issues);
     // Without a color list (no models loaded) every color would be missing.
@@ -714,6 +734,7 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     result.keptEnglishNameCount = KeepCurrentEnglishNames(result.items);
     KeepMissingNamesMissing(result.items, result.importedLocales);
     KeepFieldsNotInBmd(result.items, result.importedLocales);
+    KeepEntriesWithoutName(result.items);
     // With its stat profile known, a requirement the item keeps as a value takes the value the
     // bmd file's weight gave in the original client.
     for (ItemDefinition& item : result.items)

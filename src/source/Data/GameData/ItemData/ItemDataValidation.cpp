@@ -900,6 +900,29 @@ void ValidateItemModels(std::span<const ItemModelDefinition> models, std::vector
     }
 }
 
+void ValidateModelsHaveItemEntries(std::span<const ItemDefinition> items, std::span<const ItemModelDefinition> models,
+                                   std::vector<ItemDataIssue>& issues)
+{
+    std::set<int> entries;
+    for (const ItemDefinition& item : items)
+    {
+        if (item.HasEntry() && IsValidItemId(item.group, item.number))
+        {
+            entries.insert(MakeItemType(item.group, item.number));
+        }
+    }
+    for (const ItemModelDefinition& model : models)
+    {
+        if (model.Exists() && IsValidItemId(model.group, model.number) &&
+            !entries.contains(MakeItemType(model.group, model.number)))
+        {
+            issues.push_back({ItemDataIssueSeverity::Error, "", model.group, model.number, "number",
+                              "has a model but no entry in the item file; add {\"number\": " +
+                                  std::to_string(model.number) + "} there"});
+        }
+    }
+}
+
 void ApplySharedItemModels(std::vector<ItemModelDefinition>& models, std::span<const SharedItemModel> sharedModels,
                            const std::string& sharedModelsSource, std::vector<ItemDataIssue>& issues)
 {
