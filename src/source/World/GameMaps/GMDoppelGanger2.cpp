@@ -546,7 +546,7 @@ bool CGMDoppelGanger2::RenderObjectVisual(OBJECT* o, BMD* b)
     return false;
 }
 
-bool CGMDoppelGanger2::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool CGMDoppelGanger2::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     vec3_t vPos, vLight;
 
@@ -610,6 +610,15 @@ bool CGMDoppelGanger2::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             }
         }
         return true;
+    }
+
+    return false;
+}
+
+bool CGMDoppelGanger2::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    switch (o->Type)
+    {
     case MODEL_DOPPELGANGER:
         b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
                       o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);

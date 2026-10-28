@@ -606,7 +606,7 @@ bool CGM_PK_Field::MoveMonsterVisual(OBJECT* o, BMD* b)
     return false;
 }
 
-bool CGM_PK_Field::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool CGM_PK_Field::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (!gMapManager.IsPKField())
     {

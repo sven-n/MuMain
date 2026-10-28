@@ -997,9 +997,9 @@ bool GMEmpireGuardian3::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool GMEmpireGuardian3::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    if (g_EmpireGuardian1.RenderMonsterVisual(c, o, b))
+    if (g_EmpireGuardian1.UpdateMonsterEffects(c, o, b))
     {
         return true;
     }
@@ -1077,9 +1077,6 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             CreateParticle(BITMAP_SMOKELINE2, Position, o->Angle, Light, 3, 0.2f);
         }
 
-        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.5f, 1, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-
         if (g_isNotCharacterBuff(o) == true && g_isCharacterBuff(o, eBuff_Berserker) == true)
         {
             vec3_t vLightRage, vPosRage;
@@ -1103,6 +1100,17 @@ bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     case MODEL_BANSHEE:
     {
     }
+        return true;
+    }
+    return false;
+}
+
+bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    if (o->Type == MODEL_DUAL_BERSERKER)
+    {
+        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.5f, 1, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
         return true;
     }
     return false;
