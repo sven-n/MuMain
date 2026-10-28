@@ -17,7 +17,8 @@ namespace MuEditor::DataChecks
 class FileCheckArea final : public DataCheckArea
 {
 public:
-    using CheckFiles = std::function<void(std::vector<Data::Items::ItemDataIssue>& issues)>;
+    // Reads the area's files as the game does and gives their problems.
+    using CheckFiles = std::function<std::vector<Data::Items::ItemDataIssue>()>;
 
     // `name` is a translated text, read when drawn; `tool` and `toolWindowId`
     // are the window a click opens, nullptr for none.

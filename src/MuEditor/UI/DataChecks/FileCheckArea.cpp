@@ -16,6 +16,7 @@
 #include "Render/Look/LookFiles.h"
 #include "imgui.h"
 
+#include <iterator>
 #include <utility>
 
 namespace MuEditor::DataChecks
@@ -35,7 +36,8 @@ const char* FileCheckArea::GetName() const
 
 void FileCheckArea::Check(std::vector<ItemDataIssue>& issues)
 {
-    m_check(issues);
+    std::vector<ItemDataIssue> found = m_check();
+    issues.insert(issues.end(), std::make_move_iterator(found.begin()), std::make_move_iterator(found.end()));
 }
 
 void FileCheckArea::RenderSubject(const ItemDataIssue& issue) const
@@ -62,12 +64,7 @@ std::unique_ptr<DataCheckArea> CreateServerListCheckArea()
 {
     return std::make_unique<FileCheckArea>(
         &I18N::Editor::ServerList,
-        [](std::vector<ItemDataIssue>& issues)
-        {
-            std::vector<ItemDataIssue> found =
-                Data::ServerList::LoadServerListFile(Data::ServerList::ServerListFile).issues;
-            issues.insert(issues.end(), found.begin(), found.end());
-        },
+        [] { return Data::ServerList::LoadServerListFile(Data::ServerList::ServerListFile).issues; },
         &ToolWindows::serverList, WindowIds::ServerList);
 }
 
@@ -75,37 +72,24 @@ std::unique_ptr<DataCheckArea> CreateEffectCheckArea()
 {
     return std::make_unique<FileCheckArea>(
         &I18N::Editor::Effects,
-        [](std::vector<ItemDataIssue>& issues)
-        {
-            std::vector<ItemDataIssue> found =
-                Data::Effects::LoadEffectTypeFiles(Data::Effects::GetEffectDataDirectory()).issues;
-            issues.insert(issues.end(), found.begin(), found.end());
-        },
+        [] { return Data::Effects::LoadEffectTypeFiles(Data::Effects::GetEffectDataDirectory()).issues; },
         &ToolWindows::effectBrowser, WindowIds::EffectBrowser);
 }
 
 std::unique_ptr<DataCheckArea> CreateModelFileCheckArea()
 {
     return std::make_unique<FileCheckArea>(
-        &I18N::Editor::ModelFiles,
-        [](std::vector<ItemDataIssue>& issues)
-        {
-            std::vector<ItemDataIssue> found = Data::Models::ReadGameModelFileTable().issues;
-            issues.insert(issues.end(), found.begin(), found.end());
-        },
-        nullptr, nullptr);
+        &I18N::Editor::ModelFiles, [] { return Data::Models::ReadGameModelFileTable().issues; }, nullptr, nullptr);
 }
 
 std::unique_ptr<DataCheckArea> CreateLookCheckArea()
 {
     return std::make_unique<FileCheckArea>(
         &I18N::Editor::Looks,
-        [](std::vector<ItemDataIssue>& issues)
+        []
         {
             Render::Look::DiskLookFileSystem files;
-            std::vector<ItemDataIssue> found =
-                Render::Look::LoadLookFiles(files, Data::Maps::LookProfileFile, Data::Maps::LightMoodFile).issues;
-            issues.insert(issues.end(), found.begin(), found.end());
+            return Render::Look::LoadLookFiles(files, Data::Maps::LookProfileFile, Data::Maps::LightMoodFile).issues;
         },
         &ToolWindows::devEditor, WindowIds::DevEditor);
 }

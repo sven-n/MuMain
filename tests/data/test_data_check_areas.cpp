@@ -24,6 +24,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
@@ -130,6 +131,29 @@ TEST_CASE("Data Checks: a click on a file area's problem opens its window, the m
             CHECK(g_MuEditorCore.GetToolWindows().*each.window);
         }
     }
+}
+
+TEST_CASE("Data Checks: a file area appends the problems its files have [editor]")
+{
+    MuEditor::DataChecks::FileCheckArea area(
+        &I18N::Editor::ServerList,
+        []
+        {
+            ItemDataIssue second = FileIssue();
+            second.field = "second";
+            return std::vector<ItemDataIssue>{FileIssue(), second};
+        },
+        nullptr, nullptr);
+    ItemDataIssue earlier = FileIssue();
+    earlier.field = "earlier";
+    std::vector<ItemDataIssue> issues{earlier};
+
+    area.Check(issues);
+
+    REQUIRE(issues.size() == 3);
+    CHECK(issues[0].field == "earlier");
+    CHECK(issues[1].field == "field");
+    CHECK(issues[2].field == "second");
 }
 
 #endif // _EDITOR
