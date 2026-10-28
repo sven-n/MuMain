@@ -92,14 +92,20 @@ namespace Engine::Items::TooltipValues
 // are shown but nothing is missing.
 ItemTooltipValues ComputeItemTooltipValues(const ITEM& item);
 
-// The value of a built-in placeholder (ItemDescriptionPlaceholders' names, without {level}), or nothing for another
-// name.
+// The value of a built-in value that is a number, or nothing for {level} (the item's level, which the caller has) and
+// the texts ({name}, {addOptionDuration}).
+std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, Data::Items::TooltipValue value);
+// The text of a built-in value that is a text ({name}, {addOptionDuration}), or nullptr for another. The duration is
+// written here, for a line showing it, and kept until another time or another UI language is asked for; empty without
+// the buff system.
+const wchar_t* GetItemTooltipText(const ItemTooltipValues& values, Data::Items::TooltipValue value);
+// The state.
+bool GetItemTooltipState(const ItemTooltipValues& values, Data::Items::TooltipState state);
+
+// The same by name (ItemDescriptionPlaceholders' and GetTooltipStates' names), for the tests and the editor: nothing,
+// or false, for another name.
 std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::string_view name);
-
-// The value of a built-in placeholder that is a text ({name}, {addOptionDuration}), or nothing for another name.
 std::optional<std::string> GetItemTooltipText(const ItemTooltipValues& values, std::string_view name);
-
-// The state of that name (Data::Items::GetTooltipStates); false for another name.
 bool GetItemTooltipState(const ItemTooltipValues& values, std::string_view name);
 
 // Whether every condition holds for the item of `type` at item level `level`: a value (a built-in, or {level}) is not 0

@@ -408,7 +408,7 @@ TEST_CASE("An item's name lines are kept through write and read, with or without
     destroy.text.Set("en", "{name} +Destroy");
     destroy.color = ItemTextColor::Blue;
     TooltipCondition kind;
-    kind.name = "excellentFlags";
+    kind.value = TooltipValue::ExcellentFlags;
     kind.comparison = TooltipCondition::Comparison::Equal;
     kind.number = 1;
     destroy.when = {kind};
@@ -441,6 +441,40 @@ TEST_CASE("An item's name lines are kept through write and read, with or without
         {"number": 37, "name": "Horn of Fenrir", "nameLines": [{"text": "{name}", "bold": true, "after": "options"}]}]})");
     CHECK(HasIssue(boldAndAfter.issues, ItemDataIssueSeverity::Error, "nameLines[0].bold"));
     CHECK(HasIssue(boldAndAfter.issues, ItemDataIssueSeverity::Error, "nameLines[0].after"));
+}
+
+TEST_CASE("A description or name line longer than the tooltip shows is a warning [data][items]")
+{
+    const auto read = [](const std::string& field, const std::string& text)
+    {
+        return Read(
+            GroupFile(13, R"({"number": 13, "name": "Jewel of Bless", ")" + field + R"(": [{"text": )" + text + "}]}"));
+    };
+    const auto quoted = [](size_t length, const std::string& character = "x")
+    {
+        std::string text;
+        for (size_t index = 0; index < length; ++index)
+        {
+            text += character;
+        }
+        return "\"" + text + "\"";
+    };
+
+    // Up to the limit, nothing; one character more, a warning naming the language, and the line is still read.
+    CHECK(read("description", quoted(MaxDescriptionLineLength)).issues.empty());
+    const ReadResult longDescription = read("description", quoted(MaxDescriptionLineLength + 1));
+    CHECK(HasIssue(longDescription.issues, ItemDataIssueSeverity::Warning, "description[0].text"));
+    CHECK_FALSE(HasErrors(longDescription.issues));
+    REQUIRE(longDescription.items.size() == 1);
+    CHECK(longDescription.items.front().description.size() == 1);
+    CHECK(read("nameLines", quoted(MaxNameLineLength)).issues.empty());
+    CHECK(HasIssue(read("nameLines", quoted(MaxNameLineLength + 1)).issues, ItemDataIssueSeverity::Warning,
+                   "nameLines[0].text"));
+
+    // Counted in UTF-16 characters, in every language: "ä" is one, an emoji two.
+    CHECK(read("nameLines", R"({"en": "x", "de": )" + quoted(MaxNameLineLength, "ä") + "}").issues.empty());
+    CHECK(HasIssue(read("nameLines", R"({"en": "x", "de": )" + quoted(MaxNameLineLength / 2 + 1, "😀") + "}").issues,
+                   ItemDataIssueSeverity::Warning, "nameLines[0].text"));
 }
 
 TEST_CASE("A description line's \"@\" names a shared text [data][items]")

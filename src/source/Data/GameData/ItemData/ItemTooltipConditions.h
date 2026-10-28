@@ -1,7 +1,9 @@
 #pragma once
 
+#include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemTagSet.h"
 
+#include <optional>
 #include <span>
 #include <string>
 #include <string_view>
@@ -17,6 +19,30 @@ namespace Data::Items
 // (Engine/Object/ItemTooltipValues), listed in docs/item-data.md.
 std::span<const std::string_view> GetTooltipStates();
 bool IsTooltipState(std::string_view name);
+
+// The states by number, in GetTooltipStates' order: what a condition naming one is resolved to when it is read.
+enum class TooltipState : unsigned char
+{
+    HasDamage,
+    SkillBook,
+    TwoHanded,
+    Excellent,
+    Ancient,
+    DamageHarmonyBonus,
+    DefenseHarmonyBonus,
+    Armour,
+    StrengthReduced,
+    DexterityReduced,
+    StrengthRequired,
+    DexterityRequired,
+    WizardryWeapon,
+    HasDurability,
+    Timed,
+    HasOptions,
+    Count,
+};
+// The state of that name, or nothing for another name.
+std::optional<TooltipState> FindTooltipState(std::string_view name);
 
 struct TooltipCondition
 {
@@ -37,12 +63,19 @@ struct TooltipCondition
         Greater,
         GreaterOrEqual,
     };
+    // What the condition names, by number, so a condition is checked without comparing names: its name as the file
+    // writes it is GetName()'s, made from these, so the two can't disagree.
     Kind kind = Kind::Value;
-    std::string name; // of the value or state
-    ItemTag tag = ItemTag::Count;
+    TooltipValue value = TooltipValue::Count; // Kind::Value
+    TooltipState state = TooltipState::Count; // Kind::State
+    ItemTag tag = ItemTag::Count;             // Kind::Tag
     bool negated = false;
     Comparison comparison = Comparison::NotZero;
-    int number = 0;
+    int number = 0; // the number a value is compared with; the class of Kind::Class
+
+    // The name of the value, state or class as the file writes it ("durability", "excellent", "darkLord"; the tag's
+    // for Kind::Tag), without the "!" and the comparison; empty for one that names nothing.
+    std::string_view GetName() const;
 
     bool operator==(const TooltipCondition& other) const = default;
 };

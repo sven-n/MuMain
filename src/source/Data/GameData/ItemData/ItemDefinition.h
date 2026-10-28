@@ -96,6 +96,12 @@ struct TooltipColorRule
     bool operator==(const TooltipColorRule& other) const = default;
 };
 
+// The longest a description line's and a name line's text is shown, in UTF-16 characters with its placeholders filled
+// (a description line before it wraps): the tooltip writes them into rows of these sizes and cuts a longer text there.
+// Reading an item warns about a text written longer.
+constexpr size_t MaxDescriptionLineLength = 511;
+constexpr size_t MaxNameLineLength = 255;
+
 // One line of an item's description in its tooltip: a text with its translations or a shared text of the tooltip file
 // (neither: a blank line), the conditions it shows on (all of them; ItemTooltipConditions.h), its color, and the item
 // levels it is shown at (both included; every level unless set).

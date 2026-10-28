@@ -319,7 +319,7 @@ bool IsDurabilityLine(const ItemDescriptionLine& line)
     return line.textName == "durability" || line.textName == "numberOfItems" || line.textName == "life" ||
            line.textName == "usableTimes" ||
            std::any_of(line.when.begin(), line.when.end(),
-                       [](const TooltipCondition& condition) { return condition.name == "durability"; });
+                       [](const TooltipCondition& condition) { return condition.value == TooltipValue::Durability; });
 }
 
 // A line the tooltip code wrote for the wings, capes and pets before it was their descriptions: one of the game's

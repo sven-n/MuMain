@@ -24,6 +24,54 @@ inline constexpr std::string_view LevelPlaceholder = "level";
 std::span<const std::string_view> GetBuiltInPlaceholders();
 bool IsBuiltInPlaceholder(std::string_view name);
 
+// The built-in values by number, in GetBuiltInPlaceholders' order: what a condition or placeholder naming one is
+// resolved to when its file is read, so drawing a tooltip compares no names.
+enum class TooltipValue : unsigned char
+{
+    Level,
+    DamageMin,
+    DamageMax,
+    Defense,
+    MagicDefense,
+    BlockRate,
+    AttackSpeed,
+    WalkSpeed,
+    MagicPower,
+    Durability,
+    MaxDurability,
+    IceResistance,
+    PoisonResistance,
+    LightningResistance,
+    FireResistance,
+    EarthResistance,
+    WindResistance,
+    WaterResistance,
+    RequiredLevel,
+    RequiredStrength,
+    RequiredDexterity,
+    RequiredVitality,
+    RequiredEnergy,
+    RequiredLeadership,
+    MissingLevel,
+    MissingStrength,
+    MissingDexterity,
+    MissingVitality,
+    MissingEnergy,
+    MissingLeadership,
+    AddOptionValue1,
+    AddOptionValue2,
+    AddOptionDuration, // a text
+    HeroLevel,
+    LevelPlusOne,
+    Name, // a text
+    ExcellentFlags,
+    BundleCount,
+    Count,
+};
+// The built-in value of that name, or nothing for another name.
+std::optional<TooltipValue> FindBuiltInPlaceholder(std::string_view name);
+std::string_view GetBuiltInPlaceholderName(TooltipValue value);
+
 // "table:<name>" names a level bonus table.
 inline constexpr std::string_view TablePlaceholderPrefix = "table:";
 // The placeholder of the table (without its braces): "table:<table>".
@@ -57,6 +105,22 @@ struct PlaceholderScan
     std::string error; // empty when the text is fine
 };
 PlaceholderScan ScanPlaceholders(std::string_view text);
+
+// The placeholders of a text with where each is (from its "{" to past its "}"), up to the first problem of its braces:
+// `stop` is where that problem starts, or npos when the whole text was read. FillPlaceholders leaves the text as
+// written from `stop` on.
+struct PlaceholderSpan
+{
+    size_t begin = 0;
+    size_t end = 0;
+    std::string_view name;
+};
+struct PlaceholderSpans
+{
+    std::vector<PlaceholderSpan> spans;
+    size_t stop = std::string_view::npos;
+};
+PlaceholderSpans FindPlaceholders(std::string_view text);
 
 // The value of {level} or "table:" and a table of `profiles` for an item at `level`, or nothing for another name (the
 // stat line values come from the game, see FillPlaceholders with valueOf).

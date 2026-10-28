@@ -26,6 +26,7 @@ constexpr std::array<std::string_view, 38> BuiltIns = {
     "addOptionDuration", "heroLevel",           "levelPlusOne",     "name",
     "excellentFlags",    "bundleCount",
 };
+static_assert(BuiltIns.size() == static_cast<size_t>(TooltipValue::Count), "a name for every TooltipValue, in order");
 
 // The placeholder of `text` that starts at the "{" at `open`: its name and the position after its "}", or the problem.
 struct Placeholder
@@ -123,6 +124,29 @@ PlaceholderScan ScanPlaceholders(std::string_view text)
     return scan;
 }
 
+PlaceholderSpans FindPlaceholders(std::string_view text)
+{
+    PlaceholderSpans found;
+    size_t position = 0;
+    while (position < text.size())
+    {
+        const size_t brace = text.find_first_of("{}", position);
+        if (brace == std::string_view::npos)
+        {
+            break;
+        }
+        const Placeholder placeholder = text[brace] == '{' ? ReadPlaceholder(text, brace) : Placeholder{};
+        if (!placeholder.error.empty() || placeholder.end == std::string_view::npos)
+        {
+            found.stop = brace;
+            break;
+        }
+        found.spans.push_back({brace, placeholder.end, placeholder.name});
+        position = placeholder.end;
+    }
+    return found;
+}
+
 std::optional<int> GetPlaceholderValue(std::string_view name, int level, const ItemStatProfiles& profiles)
 {
     if (name == LevelPlaceholder)
@@ -180,7 +204,20 @@ std::optional<GameDataValue> ReadGameDataValue(std::string_view name)
 
 bool IsBuiltInPlaceholder(std::string_view name)
 {
-    return std::find(BuiltIns.begin(), BuiltIns.end(), name) != BuiltIns.end();
+    return FindBuiltInPlaceholder(name).has_value();
+}
+
+std::optional<TooltipValue> FindBuiltInPlaceholder(std::string_view name)
+{
+    const auto found = std::find(BuiltIns.begin(), BuiltIns.end(), name);
+    return found == BuiltIns.end() ? std::nullopt
+                                   : std::optional<TooltipValue>(static_cast<TooltipValue>(found - BuiltIns.begin()));
+}
+
+std::string_view GetBuiltInPlaceholderName(TooltipValue value)
+{
+    const size_t index = static_cast<size_t>(value);
+    return index < BuiltIns.size() ? BuiltIns[index] : std::string_view{};
 }
 
 std::string FillPlaceholders(std::string_view text, int level, const ItemStatProfiles& profiles)

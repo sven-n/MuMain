@@ -13,6 +13,7 @@
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "I18N/All.h"
 #include "Network/Server/SocketSystem.h"
 #include "UI/Core/UIManager.h"
 #include "UI/Inventory/UIJewelHarmony.h"
@@ -192,81 +193,162 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
     return values;
 }
 
-namespace
+std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, Data::Items::TooltipValue value)
 {
-struct NamedValue
-{
-    std::string_view name;
-    int ItemTooltipValues::* value;
-};
-constexpr NamedValue PlainValues[] = {
-    {"damageMin", &ItemTooltipValues::damageMin},
-    {"damageMax", &ItemTooltipValues::damageMax},
-    {"defense", &ItemTooltipValues::defense},
-    {"magicDefense", &ItemTooltipValues::magicDefense},
-    {"blockRate", &ItemTooltipValues::blockRate},
-    {"attackSpeed", &ItemTooltipValues::attackSpeed},
-    {"walkSpeed", &ItemTooltipValues::walkSpeed},
-    {"magicPower", &ItemTooltipValues::magicPower},
-    {"durability", &ItemTooltipValues::durability},
-    {"maxDurability", &ItemTooltipValues::maxDurability},
-    {"heroLevel", &ItemTooltipValues::heroLevel},
-    {"levelPlusOne", &ItemTooltipValues::levelPlusOne},
-    {"bundleCount", &ItemTooltipValues::bundleCount},
-    {"excellentFlags", &ItemTooltipValues::excellentFlags},
-    {"addOptionValue1", &ItemTooltipValues::addOptionValue1},
-    {"addOptionValue2", &ItemTooltipValues::addOptionValue2},
-};
+    using Data::Items::TooltipValue;
+    switch (value)
+    {
+    case TooltipValue::DamageMin:
+        return values.damageMin;
+    case TooltipValue::DamageMax:
+        return values.damageMax;
+    case TooltipValue::Defense:
+        return values.defense;
+    case TooltipValue::MagicDefense:
+        return values.magicDefense;
+    case TooltipValue::BlockRate:
+        return values.blockRate;
+    case TooltipValue::AttackSpeed:
+        return values.attackSpeed;
+    case TooltipValue::WalkSpeed:
+        return values.walkSpeed;
+    case TooltipValue::MagicPower:
+        return values.magicPower;
+    case TooltipValue::Durability:
+        return values.durability;
+    case TooltipValue::MaxDurability:
+        return values.maxDurability;
+    case TooltipValue::IceResistance:
+    case TooltipValue::PoisonResistance:
+    case TooltipValue::LightningResistance:
+    case TooltipValue::FireResistance:
+    case TooltipValue::EarthResistance:
+    case TooltipValue::WindResistance:
+    case TooltipValue::WaterResistance:
+        return values.resistances[static_cast<size_t>(value) - static_cast<size_t>(TooltipValue::IceResistance)];
+    case TooltipValue::RequiredLevel:
+        return values.level.required;
+    case TooltipValue::RequiredStrength:
+        return values.strength.required;
+    case TooltipValue::RequiredDexterity:
+        return values.dexterity.required;
+    case TooltipValue::RequiredVitality:
+        return values.vitality.required;
+    case TooltipValue::RequiredEnergy:
+        return values.energy.required;
+    case TooltipValue::RequiredLeadership:
+        return values.leadership.required;
+    case TooltipValue::MissingLevel:
+        return values.level.missing;
+    case TooltipValue::MissingStrength:
+        return values.strength.missing;
+    case TooltipValue::MissingDexterity:
+        return values.dexterity.missing;
+    case TooltipValue::MissingVitality:
+        return values.vitality.missing;
+    case TooltipValue::MissingEnergy:
+        return values.energy.missing;
+    case TooltipValue::MissingLeadership:
+        return values.leadership.missing;
+    case TooltipValue::AddOptionValue1:
+        return values.addOptionValue1;
+    case TooltipValue::AddOptionValue2:
+        return values.addOptionValue2;
+    case TooltipValue::HeroLevel:
+        return values.heroLevel;
+    case TooltipValue::LevelPlusOne:
+        return values.levelPlusOne;
+    case TooltipValue::ExcellentFlags:
+        return values.excellentFlags;
+    case TooltipValue::BundleCount:
+        return values.bundleCount;
+    case TooltipValue::Level:
+    case TooltipValue::AddOptionDuration:
+    case TooltipValue::Name:
+    case TooltipValue::Count:
+        break;
+    }
+    return std::nullopt;
+}
 
-constexpr std::string_view ResistanceNames[] = {"iceResistance",  "poisonResistance", "lightningResistance",
-                                                "fireResistance", "earthResistance",  "windResistance",
-                                                "waterResistance"};
-
-// "required<Stat>" and "missing<Stat>" for each.
-struct NamedRequirement
+const wchar_t* GetItemTooltipText(const ItemTooltipValues& values, Data::Items::TooltipValue value)
 {
-    std::string_view requiredName;
-    std::string_view missingName;
-    ItemTooltipValues::Requirement ItemTooltipValues::* requirement;
-};
-constexpr NamedRequirement Requirements[] = {
-    {"requiredLevel", "missingLevel", &ItemTooltipValues::level},
-    {"requiredStrength", "missingStrength", &ItemTooltipValues::strength},
-    {"requiredDexterity", "missingDexterity", &ItemTooltipValues::dexterity},
-    {"requiredVitality", "missingVitality", &ItemTooltipValues::vitality},
-    {"requiredEnergy", "missingEnergy", &ItemTooltipValues::energy},
-    {"requiredLeadership", "missingLeadership", &ItemTooltipValues::leadership},
-};
-} // namespace
+    if (value == Data::Items::TooltipValue::Name)
+    {
+        return values.name != nullptr ? values.name : L"";
+    }
+    if (value == Data::Items::TooltipValue::AddOptionDuration)
+    {
+        // Written only here, for a line that shows it: g_StringTime needs the buff system. The text changes with the
+        // time and with the UI's language (its words for hours, minutes and seconds), so it is written again only when
+        // either does. Without the buff system it's an empty text.
+        if (!g_BuffSystem)
+        {
+            return L"";
+        }
+        static DWORD durationTime = 0;
+        static std::string durationLocale;
+        static std::wstring duration;
+        const char* const locale = I18N::GetCurrentLocale();
+        if (duration.empty() || values.addOptionTime != durationTime || durationLocale != locale)
+        {
+            duration.clear();
+            g_StringTime(values.addOptionTime, duration, true);
+            durationTime = values.addOptionTime;
+            durationLocale = locale;
+        }
+        return duration.c_str();
+    }
+    return nullptr;
+}
+
+bool GetItemTooltipState(const ItemTooltipValues& values, Data::Items::TooltipState state)
+{
+    using Data::Items::TooltipState;
+    switch (state)
+    {
+    case TooltipState::HasDamage:
+        return values.hasDamage;
+    case TooltipState::SkillBook:
+        return values.skillBook;
+    case TooltipState::TwoHanded:
+        return values.twoHanded;
+    case TooltipState::Excellent:
+        return values.excellent;
+    case TooltipState::Ancient:
+        return values.ancient;
+    case TooltipState::DamageHarmonyBonus:
+        return values.damageHarmonyBonus;
+    case TooltipState::DefenseHarmonyBonus:
+        return values.defenseHarmonyBonus;
+    case TooltipState::Armour:
+        return values.armour;
+    case TooltipState::StrengthReduced:
+        return values.strength.reduced;
+    case TooltipState::DexterityReduced:
+        return values.dexterity.reduced;
+    case TooltipState::StrengthRequired:
+        return values.strength.asked;
+    case TooltipState::DexterityRequired:
+        return values.dexterity.asked;
+    case TooltipState::WizardryWeapon:
+        return values.wizardryWeapon;
+    case TooltipState::HasDurability:
+        return values.hasDurability;
+    case TooltipState::Timed:
+        return values.timed;
+    case TooltipState::HasOptions:
+        return values.hasOptions;
+    case TooltipState::Count:
+        break;
+    }
+    return false;
+}
 
 std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, std::string_view name)
 {
-    for (const NamedValue& named : PlainValues)
-    {
-        if (named.name == name)
-        {
-            return values.*named.value;
-        }
-    }
-    for (size_t index = 0; index < std::size(ResistanceNames); ++index)
-    {
-        if (ResistanceNames[index] == name)
-        {
-            return values.resistances[index];
-        }
-    }
-    for (const NamedRequirement& named : Requirements)
-    {
-        if (named.requiredName == name)
-        {
-            return (values.*named.requirement).required;
-        }
-        if (named.missingName == name)
-        {
-            return (values.*named.requirement).missing;
-        }
-    }
-    return std::nullopt;
+    const std::optional<Data::Items::TooltipValue> value = Data::Items::FindBuiltInPlaceholder(name);
+    return value ? GetItemTooltipValue(values, *value) : std::nullopt;
 }
 
 std::optional<std::string> GetItemTooltipText(const ItemTooltipValues& values, std::string_view name)
@@ -292,49 +374,8 @@ std::optional<std::string> GetItemTooltipText(const ItemTooltipValues& values, s
 
 bool GetItemTooltipState(const ItemTooltipValues& values, std::string_view name)
 {
-    struct Named
-    {
-        std::string_view name;
-        bool ItemTooltipValues::* state;
-    };
-    static constexpr Named States[] = {
-        {"hasDamage", &ItemTooltipValues::hasDamage},
-        {"skillBook", &ItemTooltipValues::skillBook},
-        {"twoHanded", &ItemTooltipValues::twoHanded},
-        {"excellent", &ItemTooltipValues::excellent},
-        {"ancient", &ItemTooltipValues::ancient},
-        {"damageHarmonyBonus", &ItemTooltipValues::damageHarmonyBonus},
-        {"defenseHarmonyBonus", &ItemTooltipValues::defenseHarmonyBonus},
-        {"armour", &ItemTooltipValues::armour},
-        {"wizardryWeapon", &ItemTooltipValues::wizardryWeapon},
-        {"hasDurability", &ItemTooltipValues::hasDurability},
-        {"timed", &ItemTooltipValues::timed},
-        {"hasOptions", &ItemTooltipValues::hasOptions},
-    };
-    for (const Named& named : States)
-    {
-        if (named.name == name)
-        {
-            return values.*named.state;
-        }
-    }
-    if (name == "strengthReduced")
-    {
-        return values.strength.reduced;
-    }
-    if (name == "dexterityReduced")
-    {
-        return values.dexterity.reduced;
-    }
-    if (name == "strengthRequired")
-    {
-        return values.strength.asked;
-    }
-    if (name == "dexterityRequired")
-    {
-        return values.dexterity.asked;
-    }
-    return false;
+    const std::optional<Data::Items::TooltipState> state = Data::Items::FindTooltipState(name);
+    return state && GetItemTooltipState(values, *state);
 }
 
 bool AreTooltipConditionsMet(std::span<const Data::Items::TooltipCondition> conditions, int type, int level,
@@ -347,15 +388,13 @@ bool AreTooltipConditionsMet(std::span<const Data::Items::TooltipCondition> cond
         {
         case TooltipCondition::Kind::Value:
         {
-            std::optional<int> value = GetItemTooltipValue(values, condition.name);
-            if (!value)
-            {
-                value = Data::Items::GetPlaceholderValue(condition.name, level, g_ItemDatabase.GetStatProfiles());
-            }
+            const std::optional<int> value = condition.value == Data::Items::TooltipValue::Level
+                                                 ? std::optional<int>(level)
+                                                 : GetItemTooltipValue(values, condition.value);
             return value && Data::Items::CompareTooltipValue(condition, *value);
         }
         case TooltipCondition::Kind::State:
-            return GetItemTooltipState(values, condition.name);
+            return GetItemTooltipState(values, condition.state);
         case TooltipCondition::Kind::Tag:
             return g_ItemDatabase.HasTag(type, condition.tag);
         case TooltipCondition::Kind::Class:
@@ -388,16 +427,16 @@ Data::Items::ItemTextColor GetTooltipLineColor(const Data::Items::TooltipLayoutL
 }
 std::vector<std::string_view> GetItemTooltipValueNames()
 {
+    // The built-in values that are numbers, by the names the placeholder checks give them.
+    const ItemTooltipValues values;
     std::vector<std::string_view> names;
-    for (const NamedValue& named : PlainValues)
+    for (size_t index = 0; index < static_cast<size_t>(Data::Items::TooltipValue::Count); ++index)
     {
-        names.push_back(named.name);
-    }
-    names.insert(names.end(), std::begin(ResistanceNames), std::end(ResistanceNames));
-    for (const NamedRequirement& named : Requirements)
-    {
-        names.push_back(named.requiredName);
-        names.push_back(named.missingName);
+        const auto value = static_cast<Data::Items::TooltipValue>(index);
+        if (GetItemTooltipValue(values, value).has_value())
+        {
+            names.push_back(Data::Items::GetBuiltInPlaceholderName(value));
+        }
     }
     return names;
 }
