@@ -2692,6 +2692,18 @@
   <data name="A draw" xml:space="preserve">
     <value>Eine Ziehung</value>
   </data>
+  <data name="A rotation" xml:space="preserve">
+    <value>Eine Rotation</value>
+  </data>
+  <data name="The generic pattern" xml:space="preserve">
+    <value>Das allgemeine Muster (Angriff 1, Angriff 2, Angriff 2)</value>
+  </data>
+  <data name="Played in turn, counted for each monster from its creation." xml:space="preserve">
+    <value>Der Reihe nach gespielt, gezählt für jedes Monster ab seiner Erstellung.</value>
+  </data>
+  <data name="Add an animation" xml:space="preserve">
+    <value>Animation hinzufügen</value>
+  </data>
   <data name="Clear the monster skill" xml:space="preserve">
     <value>Monsterskill löschen</value>
   </data>

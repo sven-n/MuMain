@@ -340,20 +340,42 @@ void MuMonsterAttacksUI::RenderOtherwise(MonsterDefinition& monster, int modelSl
 {
     MonsterAttacks& attacks = *monster.attacks;
     const std::string label = StepLabel::Attacks(monster);
-    if (ImGui::RadioButton(I18N::Editor::AnAnimation, !attacks.otherwiseRandom))
+    const bool animations = !attacks.otherwiseRandom && !attacks.otherwiseGeneric;
+    const bool rotation = animations && Data::Monsters::IsRotation(attacks);
+    if (ImGui::RadioButton(I18N::Editor::AnAnimation, animations && !rotation) && !(animations && !rotation))
     {
         attacks.otherwiseRandom.reset();
+        attacks.otherwiseGeneric = false;
+        attacks.otherwise.resize(1);
         m_draft.AfterChange(true, label);
     }
     ImGui::SameLine();
-    ImGui::BeginDisabled(attacks.otherwiseRandom.has_value());
-    if (AnimationCombo("##Otherwise", attacks.otherwise, modelSlot))
+    ImGui::BeginDisabled(!animations || rotation);
+    if (AnimationCombo("##Otherwise", attacks.otherwise.front(), modelSlot))
     {
         m_draft.AfterChange(true, label);
     }
     ImGui::EndDisabled();
+    if (ImGui::RadioButton(I18N::Editor::ARotation, rotation) && !rotation)
+    {
+        attacks.otherwiseRandom.reset();
+        attacks.otherwiseGeneric = false;
+        attacks.otherwise.resize(2, attacks.otherwise.front());
+        m_draft.AfterChange(true, label);
+    }
+    if (rotation)
+    {
+        RenderRotation(monster, modelSlot);
+    }
+    if (ImGui::RadioButton(I18N::Editor::TheGenericPattern, attacks.otherwiseGeneric) && !attacks.otherwiseGeneric)
+    {
+        attacks.otherwiseRandom.reset();
+        attacks.otherwiseGeneric = true;
+        m_draft.AfterChange(true, label);
+    }
     if (ImGui::RadioButton(I18N::Editor::ADraw, attacks.otherwiseRandom.has_value()) && !attacks.otherwiseRandom)
     {
+        attacks.otherwiseGeneric = false;
         attacks.otherwiseRandom = MonsterAttackRandom::Rand;
         m_draft.AfterChange(true, label);
     }
@@ -374,6 +396,45 @@ void MuMonsterAttacksUI::RenderOtherwise(MonsterDefinition& monster, int modelSl
         ImGui::EndCombo();
     }
     ImGui::EndDisabled();
+}
+
+void MuMonsterAttacksUI::RenderRotation(MonsterDefinition& monster, int modelSlot)
+{
+    std::vector<int>& rotation = monster.attacks->otherwise;
+    const std::string label = StepLabel::Attacks(monster);
+    ImGui::Indent();
+    RenderNote(I18N::Editor::PlayedInTurnCountedForEachMonsterFromItsCreation);
+    std::optional<size_t> removed;
+    for (size_t index = 0; index < rotation.size(); ++index)
+    {
+        ImGui::PushID(static_cast<int>(index));
+        ImGui::Text("%zu", index + 1);
+        ImGui::SameLine();
+        if (AnimationCombo("##Turn", rotation[index], modelSlot))
+        {
+            m_draft.AfterChange(true, label);
+        }
+        ImGui::SameLine();
+        // A rotation has two animations at least; one is "an animation".
+        ImGui::BeginDisabled(rotation.size() <= 2);
+        if (ImGui::SmallButton(I18N::Editor::Remove))
+        {
+            removed = index;
+        }
+        ImGui::EndDisabled();
+        ImGui::PopID();
+    }
+    if (removed)
+    {
+        rotation.erase(rotation.begin() + static_cast<std::ptrdiff_t>(*removed));
+        m_draft.AfterChange(true, label);
+    }
+    if (ImGui::SmallButton(I18N::Editor::AddAnAnimation))
+    {
+        rotation.push_back(rotation.back());
+        m_draft.AfterChange(true, label);
+    }
+    ImGui::Unindent();
 }
 
 void MuMonsterAttacksUI::RenderClearSkill(MonsterDefinition& monster)

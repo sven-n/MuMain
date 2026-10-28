@@ -70,6 +70,7 @@ struct AnimationUses
     std::vector<int> skills;
     bool otherwise = false;
     bool draw = false;
+    bool generic = false;
 
     std::string Describe() const
     {
@@ -89,6 +90,10 @@ struct AnimationUses
         if (draw)
         {
             parts.emplace_back("the draw");
+        }
+        if (generic)
+        {
+            parts.emplace_back("the generic pattern");
         }
         std::string text;
         for (size_t i = 0; i < parts.size(); ++i)
@@ -127,9 +132,20 @@ std::map<int, AnimationUses> CollectUses(const MonsterAttacks& attacks)
             uses[animation].draw = true;
         }
     }
+    else if (attacks.otherwiseGeneric)
+    {
+        for (const int animation : {MONSTER01_ATTACK1, MONSTER01_ATTACK2})
+        {
+            uses[animation].generic = true;
+        }
+    }
     else
     {
-        uses[attacks.otherwise].otherwise = true;
+        // Each animation of a rotation.
+        for (const int animation : attacks.otherwise)
+        {
+            uses[animation].otherwise = true;
+        }
     }
     uses.erase(Data::Monsters::NoAttackAnimation);
     return uses;

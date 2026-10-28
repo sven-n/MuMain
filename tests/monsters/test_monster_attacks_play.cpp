@@ -80,13 +80,20 @@ public:
     // life of the scope.
     void RemoveAttacks(int number)
     {
+        SetAttacks(number, std::nullopt);
+    }
+
+    // The monster list with these attacks in the monster's entry, for the
+    // life of the scope.
+    void SetAttacks(int number, const std::optional<Data::Monsters::MonsterAttacks>& attacks)
+    {
         std::vector<Data::Monsters::MonsterDefinition> changed = m_monsters;
         const auto monster =
             std::find_if(changed.begin(), changed.end(),
                          [number](const Data::Monsters::MonsterDefinition& entry) { return entry.number == number; });
         REQUIRE(monster != changed.end());
         REQUIRE(monster->attacks.has_value());
-        monster->attacks.reset();
+        monster->attacks = attacks;
         g_MonsterDatabase.Build(changed, "en");
     }
 
@@ -182,6 +189,52 @@ TEST_CASE("Monster attacks: the Kanturu 1st warriors play attack 2 for their ski
             character.SwordCount = count;
             CHECK(Attack(character, NoMonsterSkill) == MONSTER01_ATTACK1);
         }
+    }
+}
+
+TEST_CASE("Monster attacks: a rotation plays in turn, counted for each monster from its creation (Q-MN69) "
+          "[monsters][attacks]")
+{
+    AttackScope scope(WD_37KANTURU_1ST);
+    Data::Monsters::MonsterAttacks rotation;
+    rotation.otherwise = {MONSTER01_ATTACK2, MONSTER01_ATTACK1, MONSTER01_ATTACK1};
+    scope.SetAttacks(MONSTER_BERSERKER, rotation);
+    CHARACTER& first = scope.Create(MONSTER_BERSERKER);
+    const std::array<int, 4> expected = {MONSTER01_ATTACK2, MONSTER01_ATTACK1, MONSTER01_ATTACK1, MONSTER01_ATTACK2};
+    for (size_t turn = 0; turn < expected.size(); ++turn)
+    {
+        INFO("turn " << turn);
+        // The generic pattern's count does not move the rotation.
+        first.SwordCount = static_cast<BYTE>(turn * 5 + 1);
+        CHECK(NormalAttack(first) == expected[turn]);
+    }
+
+    // A monster created in the same slot starts its rotation again.
+    CHARACTER& second = scope.Create(MONSTER_BERSERKER);
+    REQUIRE(&second == &first);
+    CHECK(NormalAttack(second) == MONSTER01_ATTACK2);
+    CHECK(NormalAttack(second) == MONSTER01_ATTACK1);
+}
+
+TEST_CASE("Monster attacks: \"generic\" plays as a monster without attacks, at any count (Q-MN69) "
+          "[monsters][attacks]")
+{
+    AttackScope scope(WD_37KANTURU_1ST);
+    CHARACTER& character = scope.Create(MONSTER_BERSERKER);
+    for (int count = 0; count < 256; count += 7)
+    {
+        INFO("SwordCount " << count);
+        scope.RemoveAttacks(MONSTER_BERSERKER);
+        character.SwordCount = static_cast<BYTE>(count);
+        const int without = NormalAttack(character);
+        const BYTE countWithout = character.SwordCount;
+
+        Data::Monsters::MonsterAttacks generic;
+        generic.otherwiseGeneric = true;
+        scope.SetAttacks(MONSTER_BERSERKER, generic);
+        character.SwordCount = static_cast<BYTE>(count);
+        CHECK(NormalAttack(character) == without);
+        CHECK(character.SwordCount == countWithout);
     }
 }
 

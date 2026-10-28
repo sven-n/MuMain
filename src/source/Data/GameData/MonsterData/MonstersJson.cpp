@@ -33,6 +33,8 @@ constexpr const char* ClearSkillKey = "clearSkill";
 constexpr const char* SoundKey = "sound";
 constexpr const char* SoundAtMonsterKey = "soundAtMonster";
 constexpr const char* NoAnimationName = "none";
+// `otherwise`'s value for the generic pattern (Q-MN69).
+constexpr const char* GenericPatternName = "generic";
 // The skill numbers the packets carry (a WORD; 65535 is "no skill").
 constexpr long long MaxSkillNumber = 65534;
 
@@ -203,6 +205,56 @@ bool ReadAttackEntries(const OrderedJson& json, const char* key, int number, std
     return valid;
 }
 
+// `otherwise`: one animation, the generic pattern, or a rotation of two or
+// more animations.
+bool ReadOtherwise(const OrderedJson& value, MonsterAttacks& attacks)
+{
+    if (value.is_string() && value.get<std::string>() == GenericPatternName)
+    {
+        attacks.otherwiseGeneric = true;
+        return true;
+    }
+    if (const std::optional<int> animation = ReadAttackAnimation(value))
+    {
+        attacks.otherwise = {*animation};
+        return true;
+    }
+    if (!value.is_array() || value.size() < 2)
+    {
+        return false;
+    }
+    std::vector<int> rotation;
+    for (const OrderedJson& entry : value)
+    {
+        const std::optional<int> animation = ReadAttackAnimation(entry);
+        if (!animation)
+        {
+            return false;
+        }
+        rotation.push_back(*animation);
+    }
+    attacks.otherwise = std::move(rotation);
+    return true;
+}
+
+OrderedJson WriteOtherwise(const MonsterAttacks& attacks)
+{
+    if (attacks.otherwiseGeneric)
+    {
+        return GenericPatternName;
+    }
+    if (!IsRotation(attacks))
+    {
+        return AttackAnimationName(attacks.otherwise.empty() ? MONSTER01_ATTACK1 : attacks.otherwise.front());
+    }
+    OrderedJson rotation = OrderedJson::array();
+    for (const int animation : attacks.otherwise)
+    {
+        rotation.push_back(AttackAnimationName(animation));
+    }
+    return rotation;
+}
+
 bool ReadAttacks(const OrderedJson& json, int number, std::optional<MonsterAttacks>& attacks, IssueList& issues)
 {
     const auto value = json.find(AttacksKey);
@@ -226,19 +278,13 @@ bool ReadAttacks(const OrderedJson& json, int number, std::optional<MonsterAttac
         issues.Fatal(field, "has otherwise or otherwiseRandom, not both", number);
         valid = false;
     }
-    if (otherwise != value->end())
+    if (otherwise != value->end() && !ReadOtherwise(*otherwise, read))
     {
-        const std::optional<int> animation = ReadAttackAnimation(*otherwise);
-        if (animation)
-        {
-            read.otherwise = *animation;
-        }
-        else
-        {
-            issues.Fatal(field + "." + OtherwiseKey, "must be an animation (attack1, shock, appear, ...) or none",
-                         number);
-            valid = false;
-        }
+        issues.Fatal(field + "." + OtherwiseKey,
+                     "must be an animation (attack1, shock, appear, ...), none, generic or a list of two or more "
+                     "animations played in turn",
+                     number);
+        valid = false;
     }
     if (random != value->end())
     {
@@ -328,7 +374,7 @@ OrderedJson WriteAttacks(const MonsterAttacks& attacks)
     }
     else
     {
-        json[OtherwiseKey] = AttackAnimationName(attacks.otherwise);
+        json[OtherwiseKey] = WriteOtherwise(attacks);
     }
     json[ClearSkillKey] = std::string(GetMonsterSkillClearName(attacks.clearSkill));
     if (!attacks.sound.empty())
@@ -443,6 +489,7 @@ std::string WriteMonstersJson(std::span<const MonsterDefinition> monsters)
     std::string compact = Items::Json::PutObjectsOnOneLine(text, NameKey);
     compact = Items::Json::PutObjectsOnOneLine(compact, MonsterSkillsKey);
     compact = Items::Json::PutObjectsOnOneLine(compact, SkillsKey);
+    compact = Items::Json::PutListsOnOneLine(compact, OtherwiseKey);
     return compact + "\n";
 }
 } // namespace Data::Monsters

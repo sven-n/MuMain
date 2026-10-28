@@ -20,6 +20,11 @@ void OnAttackEnded(CHARACTER& character);
 // True for the animations an attack plays: attack 1 to 5 and appear.
 bool IsAttackAnimation(int animation);
 
+// The generic pattern's next animation, for a monster without attacks or
+// whose attacks say "generic": attack 1 when CHARACTER::SwordCount % 3 is 0,
+// else attack 2; the count goes on by one.
+int NextGenericAttack(CHARACTER& character);
+
 // The attack that a monster skill packet (0x69, ReceiveMonsterSkill) starts,
 // for the life of the scope. Attacks that clear the skill after the attack
 // play the skill only for this attack: any other attack of the monster is a

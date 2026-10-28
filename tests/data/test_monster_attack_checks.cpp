@@ -50,7 +50,7 @@ MonsterAttacks Attacks(std::vector<Data::Monsters::MonsterAttackEntry> monsterSk
 {
     MonsterAttacks attacks;
     attacks.monsterSkills = std::move(monsterSkills);
-    attacks.otherwise = otherwise;
+    attacks.otherwise = {otherwise};
     return attacks;
 }
 
@@ -202,6 +202,30 @@ TEST_CASE("Monster attack checks: the draw's animations, an animation the open m
               "is 0: the monster stands still in it until its next action",
               "attack3 (8) is played by monster skill 30, which MONSTER_MODEL_ICE_WALKER does not have: the "
               "animation that plays goes on"});
+}
+
+TEST_CASE("Monster attack checks: each animation of a rotation, and the generic pattern's speed (Q-MN69) "
+          "[editor][monsters]")
+{
+    MonsterAttacks rotation;
+    rotation.otherwise = {MONSTER01_ATTACK1, MONSTER01_ATTACK3};
+    MonsterAttacks generic;
+    generic.otherwiseGeneric = true;
+    const std::array monsters = {Monster(MONSTER_ICE_WALKER, "MONSTER_MODEL_ICE_WALKER", rotation),
+                                 Monster(MONSTER_ICE_GIANT, "MONSTER_MODEL_ICE_WALKER", generic)};
+    Data::Monsters::MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_ICE_WALKER";
+    model.load.file = "Data/Monster/Monster146.bmd";
+    model.load.speeds = {{MONSTER01_ATTACK2, 0.0f}, {MONSTER01_ATTACK3, 0.25f}};
+    g_MonsterModelDatabase.Build(std::array{model});
+
+    const std::vector<ItemDataIssue> issues = Check(monsters);
+    g_MonsterModelDatabase.Build({});
+
+    CHECK(Messages(issues, MONSTER_ICE_WALKER).size() == 1);
+    CHECK(HasMessage(issues, MONSTER_ICE_WALKER, "attack3 (8) is played by any other attack: the game counts only"));
+    CHECK(Messages(issues, MONSTER_ICE_GIANT).size() == 1);
+    CHECK(HasMessage(issues, MONSTER_ICE_GIANT, "attack2 (4) is played by the generic pattern, whose speed"));
 }
 
 // What Data Checks shows for the shipped lists while no model is open

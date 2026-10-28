@@ -1262,11 +1262,7 @@ void SetPlayerAttack(CHARACTER* c)
 
             if (Success)
             {
-                if (c->SwordCount % 3 == 0)
-                    SetAction(&c->Object, MONSTER01_ATTACK1);
-                else
-                    SetAction(&c->Object, MONSTER01_ATTACK2);
-                c->SwordCount++;
+                SetAction(&c->Object, GameLogic::Monsters::Attacks::NextGenericAttack(*c));
             }
         }
     }
@@ -1330,11 +1326,7 @@ void SetPlayerMagic(CHARACTER* c)
     }
     else
     {
-        if (c->SwordCount % 3 == 0)
-            SetAction(&c->Object, MONSTER01_ATTACK1);
-        else
-            SetAction(&c->Object, MONSTER01_ATTACK2);
-        c->SwordCount++;
+        SetAction(&c->Object, GameLogic::Monsters::Attacks::NextGenericAttack(*c));
     }
 }
 
@@ -11673,6 +11665,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     o->EnableBoneMatrix = true;
     o->EnableShadow = false;
     c->Dead = 0;
+    c->AttackRotation = 0;
     c->Blood = false;
     c->GuildTeam = 0;
     c->Run = 0;

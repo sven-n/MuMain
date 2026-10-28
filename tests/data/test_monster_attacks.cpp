@@ -32,7 +32,7 @@ MonsterAttacks IceWalker()
 {
     MonsterAttacks attacks;
     attacks.monsterSkills = {{29, MONSTER01_ATTACK2}};
-    attacks.otherwise = MONSTER01_ATTACK1;
+    attacks.otherwise = {MONSTER01_ATTACK1};
     attacks.clearSkill = MonsterSkillClear::OnMatch;
     return attacks;
 }
@@ -74,7 +74,7 @@ TEST_CASE("Monster attacks: a player skill entry plays when no monster skill ent
     MonsterAttacks attacks;
     attacks.monsterSkills = {{1, MONSTER01_ATTACK3}};
     attacks.skills = {{17, MONSTER01_ATTACK2}, {200, NoAttackAnimation}};
-    attacks.otherwise = MONSTER01_ATTACK1;
+    attacks.otherwise = {MONSTER01_ATTACK1};
     CHECK(ChooseMonsterAttack(attacks, NoSkill, 17).animation == MONSTER01_ATTACK2);
     CHECK(ChooseMonsterAttack(attacks, 1, 17).animation == MONSTER01_ATTACK3);
     // None: the animation that plays goes on.
@@ -90,6 +90,58 @@ TEST_CASE("Monster attacks: a random draw replaces otherwise, not an entry [data
     CHECK(ChooseMonsterAttack(attacks, NoSkill, 0).random == MonsterAttackRandom::RandFps);
     CHECK_FALSE(ChooseMonsterAttack(attacks, 9, 0).random);
     CHECK(ChooseMonsterAttack(attacks, 9, 0).animation == MONSTER01_ATTACK2);
+}
+
+TEST_CASE("Monster attacks: a rotation plays its animations in turn, generic the generic pattern (Q-MN69) "
+          "[data][monsters]")
+{
+    MonsterAttacks attacks;
+    attacks.monsterSkills = {{9, MONSTER01_ATTACK3}};
+    attacks.otherwise = {MONSTER01_ATTACK2, MONSTER01_ATTACK1, MONSTER01_ATTACK4};
+    CHECK(Data::Monsters::IsRotation(attacks));
+    CHECK(ChooseMonsterAttack(attacks, NoSkill, 0, 0) ==
+          MonsterAttackChoice{MONSTER01_ATTACK2, std::nullopt, false, false, true});
+    CHECK(ChooseMonsterAttack(attacks, NoSkill, 0, 1).animation == MONSTER01_ATTACK1);
+    CHECK(ChooseMonsterAttack(attacks, NoSkill, 0, 2).animation == MONSTER01_ATTACK4);
+    CHECK(ChooseMonsterAttack(attacks, NoSkill, 0, 3).animation == MONSTER01_ATTACK2);
+    // An entry plays its animation; the rotation waits.
+    CHECK(ChooseMonsterAttack(attacks, 9, 0, 1) == MonsterAttackChoice{MONSTER01_ATTACK3, std::nullopt, false});
+
+    attacks.otherwise = {MONSTER01_ATTACK2};
+    CHECK_FALSE(Data::Monsters::IsRotation(attacks));
+    CHECK(ChooseMonsterAttack(attacks, NoSkill, 0, 1) == MonsterAttackChoice{MONSTER01_ATTACK2, std::nullopt, false});
+
+    attacks.otherwiseGeneric = true;
+    CHECK(ChooseMonsterAttack(attacks, NoSkill, 0, 1) ==
+          MonsterAttackChoice{NoAttackAnimation, std::nullopt, false, true, false});
+    CHECK(ChooseMonsterAttack(attacks, 9, 0, 1).animation == MONSTER01_ATTACK3);
+}
+
+TEST_CASE("Monster attacks: a rotation and generic read and write, the rotation on one line [data][monsters]")
+{
+    MonsterDefinition rotation;
+    rotation.number = 350;
+    rotation.names.Set("en", "Berserker");
+    rotation.attacks.emplace();
+    rotation.attacks->otherwise = {MONSTER01_ATTACK2, MONSTER01_ATTACK1, NoAttackAnimation};
+    MonsterDefinition generic;
+    generic.number = 291;
+    generic.names.Set("en", "Fire Golem");
+    generic.attacks.emplace();
+    generic.attacks->otherwiseGeneric = true;
+    const std::vector<MonsterDefinition> monsters = {rotation, generic};
+
+    const std::string text = Data::Monsters::WriteMonstersJson(monsters);
+    CHECK(text.find(R"("otherwise": ["attack2", "attack1", "none"])") != std::string::npos);
+    CHECK(text.find(R"("otherwise": "generic")") != std::string::npos);
+
+    std::vector<MonsterDefinition> read;
+    std::vector<ItemDataIssue> issues;
+    Data::Monsters::ReadMonstersJson(text, "Monsters.json", read, issues);
+    CHECK(issues.empty());
+    REQUIRE(read.size() == 2);
+    CHECK(read[0] == generic);
+    CHECK(read[1] == rotation);
 }
 
 TEST_CASE("Monster attacks: the monster skill is cleared never, on a match, on no match, always or after the attack "
@@ -124,7 +176,7 @@ TEST_CASE("Monster attacks: the list reads and writes them, the skill tables on 
     monster.names.Set("en", "Selupan");
     monster.attacks.emplace();
     monster.attacks->monsterSkills = {{34, MONSTER01_ATTACK2}, {37, MONSTER01_APEAR}, {41, NoAttackAnimation}};
-    monster.attacks->otherwise = MONSTER01_ATTACK4;
+    monster.attacks->otherwise = {MONSTER01_ATTACK4};
     MonsterDefinition hellas;
     hellas.number = 294;
     hellas.names.Set("en", "Schriker");
@@ -136,14 +188,14 @@ TEST_CASE("Monster attacks: the list reads and writes them, the skill tables on 
     trap.number = 101;
     trap.names.Set("en", "Iron Stick");
     trap.attacks.emplace();
-    trap.attacks->otherwise = MONSTER01_STOP2;
+    trap.attacks->otherwise = {MONSTER01_STOP2};
     trap.attacks->sound = "SOUND_TRAP01";
     trap.attacks->soundAtMonster = true;
     MonsterDefinition fire;
     fire.number = 102;
     fire.names.Set("en", "Fire Trap");
     fire.attacks.emplace();
-    fire.attacks->otherwise = NoAttackAnimation;
+    fire.attacks->otherwise = {NoAttackAnimation};
     fire.attacks->sound = "SOUND_FLAME";
     const std::vector<MonsterDefinition> monsters = {monster, hellas, trap, fire};
 
@@ -175,7 +227,7 @@ TEST_CASE("Monster attacks: without otherwise they play attack 1, and nothing is
     CHECK(result.issues.empty());
     REQUIRE(result.monsters.size() == 1);
     REQUIRE(result.monsters[0].attacks);
-    CHECK(result.monsters[0].attacks->otherwise == MONSTER01_ATTACK1);
+    CHECK(result.monsters[0].attacks->otherwise == std::vector<int>{MONSTER01_ATTACK1});
     CHECK(result.monsters[0].attacks->clearSkill == MonsterSkillClear::Never);
 }
 
@@ -199,6 +251,11 @@ TEST_CASE("Monster attacks: wrong values are errors that name the monster and th
              {R"({ "skills": {"07": "attack2"} })", "monster 456 attacks.skills.07", "without leading zeros"},
              {R"({ "skills": {"17": "jump"} })", "monster 456 attacks.skills.17", "must be an animation"},
              {R"({ "otherwise": 3 })", "monster 456 attacks.otherwise", "must be an animation"},
+             // A rotation has two animations at least, and generic is no animation.
+             {R"({ "otherwise": ["attack1"] })", "monster 456 attacks.otherwise", "two or more animations"},
+             {R"({ "otherwise": ["attack1", "jump"] })", "monster 456 attacks.otherwise", "two or more animations"},
+             {R"({ "otherwise": ["generic", "attack1"] })", "monster 456 attacks.otherwise", "two or more animations"},
+             {R"({ "otherwise": "generic", "otherwiseRandom": "rand" })", "monster 456 attacks", "not both"},
              {R"({ "otherwiseRandom": "dice" })", "monster 456 attacks.otherwiseRandom", "rand, randFps or bali"},
              {R"({ "otherwise": "attack1", "otherwiseRandom": "rand" })", "monster 456 attacks", "not both"},
              {R"({ "clearSkill": "sometimes" })", "monster 456 attacks.clearSkill", "never, onMatch"},
@@ -222,5 +279,5 @@ TEST_CASE("Monster attacks: an unknown field is a warning [data][monsters]")
     CHECK_FALSE(HasFatal(result.issues));
     REQUIRE(result.issues.size() == 1);
     REQUIRE(result.monsters.size() == 1);
-    CHECK(result.monsters[0].attacks->otherwise == MONSTER01_SHOCK);
+    CHECK(result.monsters[0].attacks->otherwise == std::vector<int>{MONSTER01_SHOCK});
 }

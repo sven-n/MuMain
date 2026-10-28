@@ -54,6 +54,7 @@ void CHARACTER::Initialize()
     Run = 0;
     Skill = 0;
     SwordCount = 0;
+    AttackRotation = 0;
     byExtensionSkill = 0;
     m_byDieType = 0;
     StormTime = 0;

@@ -63,9 +63,21 @@ bool Play(CHARACTER& character, OBJECT& object)
         // with its sounds and effects (P4).
         character.MonsterSkill = -1;
     }
-    const Data::Monsters::MonsterAttackChoice choice =
-        Data::Monsters::ChooseMonsterAttack(*attacks, character.MonsterSkill, character.Skill);
-    const int animation = choice.random ? Draw(*choice.random) : choice.animation;
+    const Data::Monsters::MonsterAttackChoice choice = Data::Monsters::ChooseMonsterAttack(
+        *attacks, character.MonsterSkill, character.Skill, character.AttackRotation);
+    int animation = choice.animation;
+    if (choice.random)
+    {
+        animation = Draw(*choice.random);
+    }
+    else if (choice.generic)
+    {
+        animation = NextGenericAttack(character);
+    }
+    if (choice.advancesRotation)
+    {
+        character.AttackRotation = (character.AttackRotation + 1) % static_cast<int>(attacks->otherwise.size());
+    }
     if (animation != Data::Monsters::NoAttackAnimation)
     {
         SetAction(&object, animation);
@@ -119,5 +131,12 @@ bool IsAttackAnimation(int animation)
     default:
         return false;
     }
+}
+
+int NextGenericAttack(CHARACTER& character)
+{
+    const int animation = character.SwordCount % 3 == 0 ? MONSTER01_ATTACK1 : MONSTER01_ATTACK2;
+    character.SwordCount++;
+    return animation;
 }
 } // namespace GameLogic::Monsters::Attacks

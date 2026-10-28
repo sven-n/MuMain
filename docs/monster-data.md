@@ -305,7 +305,7 @@ skill it attacks with (Selupan's):
 |---|---|
 | `monsterSkills` | The monster skills (packet 0x69) and the animation each plays |
 | `skills` | The player skills (packets 0x19 and 0x1E) and the animation each plays |
-| `otherwise` | What any other skill, a stale skill or a normal attack plays; `attack1` when left out |
+| `otherwise` | What any other skill, a stale skill or a normal attack plays: one animation, a list of two or more played in turn (a rotation), or `generic` (the generic pattern, as a monster without attacks plays it); `attack1` when left out |
 | `otherwiseRandom` | In place of `otherwise`, a draw of the original client: `rand` (attack 1 or 2, half and half), `randFps` (attack 1 or 2 with a chance that depends on the frame rate) or `bali` (Bali's draw of attack 1 to 4) |
 | `clearSkill` | When the monster skill is cleared: `never` (when left out), `onMatch` (an entry named it), `onNoMatch` (no entry named it), `always` (right after the animation was chosen) or `afterAttack` (the skill plays only the attack its packet starts and stays while that attack plays; it is cleared when the animation ends, when a hit's shock ends attack 3 to 5 or appear early, at once when the entry plays `none`, and by any other attack, which is a normal one also while the skill's attack plays) |
 | `sound` | A `SOUND_*` sound the attacks play each time they play (the traps') |
@@ -315,6 +315,11 @@ An animation is a name of the model's animations (`attack1` to `attack5`,
 `appear`, `shock`, `stop2`, …) or `none`: the animation that plays goes on.
 The monster skill's entry comes first, then the player skill's, else
 `otherwise`. The player skill is never cleared.
+
+A rotation, `"otherwise": ["attack1", "attack3"]`, plays attack 1, attack 3,
+attack 1, … : each monster counts its own from its creation, and a skill
+entry that plays does not move it on. `"otherwise": "generic"` plays the
+generic pattern (below) with the count it uses.
 
 ### When the game plays an attack
 
@@ -345,7 +350,8 @@ Playing an attack (`SetPlayerAttack`) for a monster:
    guards' AI, Maya's scene, Selupan's height, sounds and effects, and the
    rage of the Empire Guardian bosses (in a rage a boss plays appear).
 4. If none answered, the generic pattern plays: attack 1, attack 2, attack 2
-   by a count of the character.
+   by a count of the character (`SwordCount`: attack 1 when it divides by 3;
+   each attack and spell adds 1 to it, the pattern 1 more).
 
 So `attacks` work where a handler answers for the monster: the Monster
 Attacks tool says which one, and Data Checks lists the attacks no handler
@@ -498,8 +504,9 @@ item tools.
   **Remove the attacks** gives it the generic pattern again. Each table
   (monster skills, player skills) has a row per skill with its animation and
   **Remove**, and a number field with **Add**; a monster skill that 0x69
-  plays no attack for is marked. **Any other attack** is an animation or a
-  draw, and **Clear the monster skill** says when the skill is cleared.
+  plays no attack for is marked. **Any other attack** is an animation, a
+  rotation (its animations in turn, with **Remove** and **Add an
+  animation**), the generic pattern or a draw, and **Clear the monster skill** says when the skill is cleared.
   **Sound of the attacks** is a `SOUND_*` id they play each time (the traps'),
   **At the monster (3D)** plays it there; a name the monster data does not
   know is not stored, and the field says so. The
