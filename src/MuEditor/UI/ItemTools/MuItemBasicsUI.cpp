@@ -34,20 +34,24 @@ namespace
 {
 constexpr float NameWidth = 260.0f;
 
+// An item, or an entry without a name: its English name makes it an item.
 std::optional<ItemDefinition> LoadItem(int itemType)
 {
-    const ItemDefinition* item = g_ItemDatabase.Find(itemType);
-    return item != nullptr ? std::optional<ItemDefinition>(*item) : std::nullopt;
+    if (!Data::Items::IsValidItemType(itemType) || !g_ItemDatabase.GetAllSlots()[itemType].HasEntry())
+    {
+        return std::nullopt;
+    }
+    return g_ItemDatabase.GetAllSlots()[itemType];
 }
 
 // What refuses the English name the draft changed: empty, or with the
 // separator the save refuses. An item without an English name (from a bmd
-// import) can still be edited.
+// import) and an entry without a name can still be edited.
 const char* RefuseEnglishName(const ItemDefinition& item)
 {
-    const ItemDefinition* stored = g_ItemDatabase.Find(Data::Items::MakeItemType(item.group, item.number));
+    const ItemDefinition& stored = g_ItemDatabase.GetAllSlots()[Data::Items::MakeItemType(item.group, item.number)];
     const std::string& english = item.names.GetNeutral();
-    if (stored != nullptr && stored->names.GetNeutral() == english)
+    if (stored.names.GetNeutral() == english)
     {
         return nullptr;
     }

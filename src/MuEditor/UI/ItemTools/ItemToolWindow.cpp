@@ -124,7 +124,8 @@ bool RenderSelectedItem(int itemType)
     if (item == nullptr)
     {
         ImGui::TextDisabled("(%d,%d) %s", Data::Items::GetItemGroup(itemType), Data::Items::GetItemNumber(itemType),
-                            I18N::Editor::NoItemAtThisNumber);
+                            g_ItemDatabase.GetAllSlots()[itemType].HasEntry() ? I18N::Editor::EntryWithoutAName
+                                                                              : I18N::Editor::NoItemAtThisNumber);
         return false;
     }
     // In the item name language, as the item browser shows it and its

@@ -70,7 +70,7 @@ bool CItemListModel::Lists(int itemType, const Filter& filter) const
     }
     if (!slot.Exists())
     {
-        return ListsModelWithoutItem(itemType, filter);
+        return ListsNumberWithoutItem(itemType, slot.HasEntry(), filter);
     }
     if (filter.modelsWithoutItem || !MatchesItemSearch(slot, filter.search))
     {
@@ -91,12 +91,15 @@ bool CItemListModel::Lists(int itemType, const Filter& filter) const
     return !filter.withoutModel || g_ItemModelDatabase.Find(itemType) == nullptr;
 }
 
-bool CItemListModel::ListsModelWithoutItem(int itemType, const Filter& filter) const
+bool CItemListModel::ListsNumberWithoutItem(int itemType, bool hasEntry, const Filter& filter) const
 {
     const bool itemFilter = filter.tag || filter.notAllowed || !filter.missingLocale.empty() || filter.withoutModel;
-    const bool listed =
-        filter.modelsWithoutItem || (m_modelsWithoutItem == ModelsWithoutItem::InAllItems && !itemFilter);
-    if (!listed || g_ItemModelDatabase.Find(itemType) == nullptr)
+    const bool hasModel = g_ItemModelDatabase.Find(itemType) != nullptr;
+    // Models without an item: the numbers with a model the game knows no item for.
+    const bool listed = filter.modelsWithoutItem ? hasModel
+                                                 : m_numbersWithoutItem == NumbersWithoutItem::InAllItems &&
+                                                       !itemFilter && (hasEntry || hasModel);
+    if (!listed)
     {
         return false;
     }

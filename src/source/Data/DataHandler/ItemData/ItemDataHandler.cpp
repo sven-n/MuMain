@@ -395,7 +395,8 @@ bool CItemDataHandler::AddItem(const ItemDefinition& definition, const ItemModel
 
 bool CItemDataHandler::RemoveItem(int itemType)
 {
-    if (g_ItemDatabase.Find(itemType) == nullptr)
+    // An entry without a name goes as an item does.
+    if (!IsValidItemType(itemType) || !g_ItemDatabase.GetAllSlots()[itemType].HasEntry())
     {
         return false;
     }
@@ -415,7 +416,8 @@ bool CItemDataHandler::RemoveItem(int itemType)
 
 bool CItemDataHandler::MoveItem(int fromItemType, int toItemType)
 {
-    if (g_ItemDatabase.Find(fromItemType) == nullptr || !IsFreeItemType(toItemType))
+    if (!IsValidItemType(fromItemType) || !g_ItemDatabase.GetAllSlots()[fromItemType].HasEntry() ||
+        !IsFreeItemType(toItemType))
     {
         return false;
     }

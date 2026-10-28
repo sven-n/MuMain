@@ -2809,4 +2809,16 @@
   <data name="The Item Browser lists it as No item at this number" xml:space="preserve">
     <value>The Item Browser lists it as "No item at this number"</value>
   </data>
+  <data name="Entry without a name" xml:space="preserve">
+    <value>Entry without a name</value>
+  </data>
+  <data name="Taken by an entry without a name" xml:space="preserve">
+    <value>Taken by an entry without a name</value>
+  </data>
+  <data name="Its model {0}" xml:space="preserve">
+    <value>Its model: {0}</value>
+  </data>
+  <data name="The Item Browser lists it as Entry without a name" xml:space="preserve">
+    <value>The Item Browser lists it as "Entry without a name"</value>
+  </data>
 </root>

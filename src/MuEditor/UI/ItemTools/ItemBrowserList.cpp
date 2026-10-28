@@ -48,7 +48,8 @@ void RenderRow(int itemType, bool selected, int& clicked)
     }
     else
     {
-        ImGui::TextDisabled("%s", I18N::Editor::NoItemAtThisNumber);
+        ImGui::TextDisabled("%s", g_ItemDatabase.GetAllSlots()[itemType].HasEntry() ? I18N::Editor::EntryWithoutAName
+                                                                                    : I18N::Editor::NoItemAtThisNumber);
     }
     ImGui::TableSetColumnIndex(2);
     if (const Data::Items::ItemModelDefinition* model = g_ItemModelDatabase.Find(itemType))

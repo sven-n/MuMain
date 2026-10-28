@@ -20,16 +20,17 @@ class CItemListModel
 {
 public:
     // Whether the list without an item filter (tag, rule flag, missing name,
-    // missing model) has the numbers that have a model entry but no item too:
-    // the item browser's All items lists everything that is at a number.
-    enum class ModelsWithoutItem : uint8_t
+    // missing model) has the numbers without an item too, the entries without a
+    // name and the model entries without an item entry: the item browser's All
+    // items lists everything that is at a number.
+    enum class NumbersWithoutItem : uint8_t
     {
         OnlyWithTheirFilter,
         InAllItems,
     };
 
-    explicit CItemListModel(ModelsWithoutItem modelsWithoutItem = ModelsWithoutItem::OnlyWithTheirFilter)
-        : m_modelsWithoutItem(modelsWithoutItem)
+    explicit CItemListModel(NumbersWithoutItem numbersWithoutItem = NumbersWithoutItem::OnlyWithTheirFilter)
+        : m_numbersWithoutItem(numbersWithoutItem)
     {
     }
 
@@ -68,9 +69,9 @@ public:
 private:
     std::vector<int> m_itemTypes;
     bool Lists(int itemType, const Filter& filter) const;
-    bool ListsModelWithoutItem(int itemType, const Filter& filter) const;
+    bool ListsNumberWithoutItem(int itemType, bool hasEntry, const Filter& filter) const;
 
-    ModelsWithoutItem m_modelsWithoutItem;
+    NumbersWithoutItem m_numbersWithoutItem;
 
     Filter m_filter;
     int m_version = -1;

@@ -173,7 +173,7 @@ TEST_CASE("The item browser's All items lists the numbers with only a model too 
     orphan.file = "Data/Item/Sword31.bmd";
     g_ItemModelDatabase.Build(std::vector<ItemModelDefinition>{orphan}, Data::Effects::GlowColorList{});
     const int orphanType = MakeItemType(0, 30);
-    CItemListModel browser(CItemListModel::ModelsWithoutItem::InAllItems);
+    CItemListModel browser(CItemListModel::NumbersWithoutItem::InAllItems);
     CItemListModel translations;
 
     CItemListModel::Filter filter;
@@ -197,6 +197,49 @@ TEST_CASE("The item browser's All items lists the numbers with only a model too 
     filter = {};
     filter.missingLocale = "pt";
     CHECK(browser.GetItemTypes(filter) == std::vector<int>{MakeItemType(14, 13)});
+}
+
+TEST_CASE("The item browser lists the entries without a name among the numbers without an item [editor][items]")
+{
+    std::vector<ItemDefinition> items = Items;
+    for (const int number : {40, 41})
+    {
+        ItemDefinition entry;
+        entry.number = number;
+        entry.entryWithoutName = true;
+        items.push_back(entry);
+    }
+    GlobalItemsScope scope(items);
+    ItemModelDatabaseScope restoreModels;
+    // 0,40 has a model, as Sphere 4 and 5 have; 0,41 has none.
+    ItemModelDefinition model;
+    model.number = 40;
+    model.file = "Data/Item/Sword31.bmd";
+    g_ItemModelDatabase.Build(std::vector<ItemModelDefinition>{model}, Data::Effects::GlowColorList{});
+    const int withModel = MakeItemType(0, 40);
+    const int withoutModel = MakeItemType(0, 41);
+    CItemListModel browser(CItemListModel::NumbersWithoutItem::InAllItems);
+    CItemListModel translations;
+
+    CItemListModel::Filter filter;
+    CHECK(browser.GetItemTypes(filter) ==
+          std::vector<int>{MakeItemType(0, 0), MakeItemType(0, 5), withModel, withoutModel, MakeItemType(14, 13)});
+    CHECK(translations.GetItemTypes(filter) ==
+          std::vector<int>{MakeItemType(0, 0), MakeItemType(0, 5), MakeItemType(14, 13)});
+    filter.search = "0,41";
+    CHECK(browser.GetItemTypes(filter) == std::vector<int>{withoutModel});
+    // Models without an item: the game knows no item at 0,40.
+    filter = {};
+    filter.modelsWithoutItem = true;
+    CHECK(browser.GetItemTypes(filter) == std::vector<int>{withModel});
+    filter = {};
+    filter.missingLocale = "pt";
+    CHECK(browser.GetItemTypes(filter) == std::vector<int>{MakeItemType(14, 13)});
+
+    // An entry takes its number.
+    const std::vector<int> free = GetFreeItemNumbers(0);
+    CHECK(std::ranges::find(free, 40) == free.end());
+    CHECK(std::ranges::find(free, 41) == free.end());
 }
 
 TEST_CASE("A new item can take a number with neither an item nor a model [editor][items]")

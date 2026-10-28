@@ -89,16 +89,28 @@ void RenderNumberHolder(int itemType)
         ImGui::BulletText("%s", I18N::Format(I18N::Editor::TakenByTheItem0, {holder.item}).c_str());
         return;
     }
-    if (holder.model.empty())
+    if (holder.entryWithoutName)
+    {
+        ImGui::BulletText("%s", I18N::Editor::TakenByAnEntryWithoutAName);
+        if (!holder.model.empty())
+        {
+            ImGui::BulletText("%s", I18N::Format(I18N::Editor::ItsModel0, {holder.model}).c_str());
+        }
+    }
+    else if (holder.model.empty())
     {
         return;
     }
-    ImGui::BulletText("%s", I18N::Format(I18N::Editor::TakenByAModelWithoutAnItem0, {holder.model}).c_str());
+    else
+    {
+        ImGui::BulletText("%s", I18N::Format(I18N::Editor::TakenByAModelWithoutAnItem0, {holder.model}).c_str());
+    }
     if (!holder.codeName.empty())
     {
         ImGui::BulletText("%s", I18N::Format(I18N::Editor::TheCodeCallsIt0, {std::string(holder.codeName)}).c_str());
     }
-    ImGui::BulletText("%s", I18N::Editor::TheItemBrowserListsItAsNoItemAtThisNumber);
+    ImGui::BulletText("%s", holder.entryWithoutName ? I18N::Editor::TheItemBrowserListsItAsEntryWithoutAName
+                                                    : I18N::Editor::TheItemBrowserListsItAsNoItemAtThisNumber);
     const ItemUsage usage = FindItemUsage(itemType);
     RenderGameData(usage);
     // The move dialog lists the code of the moved item too.

@@ -43,6 +43,7 @@
 #include "UI/Common/MuEditorLayout.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/ItemEditor/ItemEditorActions.h"
+#include "UI/ItemEditor/ItemListModel.h"
 #include "UI/ItemTools/GlowColorDialog.h"
 #include "UI/ItemTools/ItemAddDialog.h"
 #include "UI/ItemTools/ItemEdits.h"
@@ -2560,19 +2561,53 @@ TEST_CASE("A number that is not free names what takes it [data][items][editor]")
     CHECK(kris.item == "Kris (0,0)");
     CHECK(kris.model.empty());
 
-    // Sphere 4 has its model entry but no item yet.
+    // Sphere 4 has its entry without a name and its model, but no item yet.
     const int sphere4Type = MakeItemType(12, 73);
     REQUIRE_FALSE(IsFreeItemType(sphere4Type));
     const MuEditor::Items::ItemNumberHolder sphere4 = MuEditor::Items::FindItemNumberHolder(sphere4Type);
     CHECK(sphere4.item.empty());
+    CHECK(sphere4.entryWithoutName);
     CHECK(sphere4.model == "Data/Item/s30_sphere_body04.bmd");
+    CHECK(MuEditor::Items::GetEntryLabel(sphere4Type) == "Entry without a name (12,73)");
+    CHECK(MuEditor::Items::GetEntryLabel(KrisType) == "Kris (0,0)");
     // The editor was built from these sources, which name it.
     CHECK(sphere4.codeName == "ITEM_SPHERE_4");
 
     const MuEditor::Items::ItemNumberHolder freeNumber = MuEditor::Items::FindItemNumberHolder(MakeItemType(0, 100));
     CHECK(freeNumber.item.empty());
+    CHECK_FALSE(freeNumber.entryWithoutName);
     CHECK(freeNumber.model.empty());
     CHECK(freeNumber.codeName.empty());
+}
+
+TEST_CASE("An entry without a name moves and goes as an item does [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    const int sphere4Type = MakeItemType(12, 73);
+    const int freeType = MakeItemType(12, GetNextFreeItemNumber(12, 75));
+    REQUIRE(IsFreeItemType(freeType));
+
+    REQUIRE(g_ItemEdits.MoveItem("Move", sphere4Type, freeType));
+    CHECK(IsFreeItemType(sphere4Type));
+    CHECK(g_ItemDatabase.GetAllSlots()[freeType].entryWithoutName);
+    CHECK(g_ItemModelDatabase.Find(freeType) != nullptr);
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(g_ItemDatabase.GetAllSlots()[sphere4Type].entryWithoutName);
+
+    REQUIRE(g_ItemEdits.RemoveItem("Remove", sphere4Type));
+    CHECK(IsFreeItemType(sphere4Type));
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(g_ItemDatabase.GetAllSlots()[sphere4Type].entryWithoutName);
+    CHECK(g_ItemModelDatabase.Find(sphere4Type) != nullptr);
+    g_ItemEdits.GetHistory().Clear();
 }
 
 namespace

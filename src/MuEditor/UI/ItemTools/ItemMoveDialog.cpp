@@ -31,7 +31,7 @@ constexpr ImVec4 NotFreeColor{1.0f, 0.4f, 0.4f, 1.0f};
 
 void CItemMoveDialog::Open(int itemType)
 {
-    if (g_ItemDatabase.Find(itemType) == nullptr)
+    if (!Data::Items::IsValidItemType(itemType) || !g_ItemDatabase.GetAllSlots()[itemType].HasEntry())
     {
         return;
     }
@@ -51,7 +51,7 @@ void CItemMoveDialog::Render()
     {
         return;
     }
-    ImGui::TextUnformatted(g_ItemDatabase.GetLogName(m_itemType).c_str());
+    ImGui::TextUnformatted(GetEntryLabel(m_itemType).c_str());
     ImGui::SetNextItemWidth(FieldWidth);
     if (ImGui::BeginCombo(I18N::Editor::Group, GetItemGroupLabel(m_group).c_str()))
     {
