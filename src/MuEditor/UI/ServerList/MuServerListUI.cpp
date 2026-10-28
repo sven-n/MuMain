@@ -5,6 +5,7 @@
 #include "MuServerListUI.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/UI/Common/IssueLevels.h"
 #include "../MuEditor/UI/Common/KeyboardSelection.h"
 #include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
@@ -424,14 +425,7 @@ void CMuServerListUI::RenderStatus()
     for (const Data::Items::ItemDataIssue& issue : m_issues)
     {
         const std::string line = issue.field + ": " + issue.message;
-        if (issue.severity == Data::Items::ItemDataIssueSeverity::Fatal)
-        {
-            RenderError(line.c_str());
-        }
-        else
-        {
-            RenderNote(line.c_str());
-        }
+        MuEditor::IssueLevels::RenderLine(issue.severity, line.c_str());
     }
 }
 

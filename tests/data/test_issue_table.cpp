@@ -10,6 +10,7 @@
 #include "TestImGuiContext.h"
 
 #include "I18N/All.h"
+#include "UI/Common/IssueLevels.h"
 #include "UI/DataChecks/DataCheckArea.h"
 #include "UI/DataChecks/IssueTable.h"
 #include "imgui.h"
@@ -94,6 +95,20 @@ void ClickRow(IssueTable& table, std::span<DataCheckArea* const> areas, int inde
     RenderFrame(table, areas);
 }
 } // namespace
+
+TEST_CASE("Each problem level has a name and a color of its own [editor]")
+{
+    using MuEditor::IssueLevels::GetColor;
+    using MuEditor::IssueLevels::GetName;
+    CHECK(std::string(GetName(ItemDataIssueSeverity::Fatal)) == I18N::Editor::Fatal);
+    CHECK(std::string(GetName(ItemDataIssueSeverity::Error)) == I18N::Editor::Error);
+    CHECK(std::string(GetName(ItemDataIssueSeverity::Warning)) == I18N::Editor::Warning);
+    const auto same = [](ImVec4 left, ImVec4 right)
+    { return left.x == right.x && left.y == right.y && left.z == right.z && left.w == right.w; };
+    CHECK_FALSE(same(GetColor(ItemDataIssueSeverity::Fatal), GetColor(ItemDataIssueSeverity::Error)));
+    CHECK_FALSE(same(GetColor(ItemDataIssueSeverity::Error), GetColor(ItemDataIssueSeverity::Warning)));
+    CHECK_FALSE(same(GetColor(ItemDataIssueSeverity::Fatal), GetColor(ItemDataIssueSeverity::Warning)));
+}
 
 TEST_CASE("Data Checks' table counts fatal problems, errors and warnings apart [editor]")
 {

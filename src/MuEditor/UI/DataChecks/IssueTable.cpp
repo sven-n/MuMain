@@ -7,6 +7,7 @@
 #include "DataCheckArea.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/UI/Common/IssueLevels.h"
 #include "../MuEditor/UI/Common/KeyboardSelection.h"
 #include "I18N/All.h"
 #include "imgui.h"
@@ -30,28 +31,21 @@ constexpr float FieldColumnWidth = 160.0f;
 constexpr float TooltipWrapWidth = 420.0f;
 constexpr int ColumnCount = 5;
 
-constexpr ImVec4 FatalColor{1.0f, 0.4f, 0.4f, 1.0f};
-constexpr ImVec4 ErrorColor{1.0f, 0.6f, 0.35f, 1.0f};
-// Also the note that the problems are from before the last change.
-constexpr ImVec4 WarningColor{1.0f, 0.8f, 0.3f, 1.0f};
-
-// How the table shows a level: the format of its box ("Fatal: 2"), its name
-// in the level column, its color and the box's id. The labels are read when
-// drawn, so they follow the editor language.
-struct LevelLook
+// The box of a level: the format of its label ("Fatal: 2"), read when drawn
+// so it follows the editor language, and its id. The level's name and color
+// are those of IssueLevels.
+struct LevelBox
 {
     ItemDataIssueSeverity severity;
     const char* const* countFormat;
-    const char* const* name;
-    ImVec4 color;
     const char* boxId;
 };
 
 // Worst first: the order of the boxes and of the rows.
-const std::array<LevelLook, IssueTable::LevelCount> Levels = {{
-    {ItemDataIssueSeverity::Fatal, &I18N::Editor::Fatal0, &I18N::Editor::Fatal, FatalColor, "###ShowFatal"},
-    {ItemDataIssueSeverity::Error, &I18N::Editor::Errors0, &I18N::Editor::Error, ErrorColor, "###ShowErrors"},
-    {ItemDataIssueSeverity::Warning, &I18N::Editor::Warnings0, &I18N::Editor::Warning, WarningColor, "###ShowWarnings"},
+const std::array<LevelBox, IssueTable::LevelCount> Levels = {{
+    {ItemDataIssueSeverity::Fatal, &I18N::Editor::Fatal0, "###ShowFatal"},
+    {ItemDataIssueSeverity::Error, &I18N::Editor::Errors0, "###ShowErrors"},
+    {ItemDataIssueSeverity::Warning, &I18N::Editor::Warnings0, "###ShowWarnings"},
 }};
 
 // The level's place in Levels.
@@ -177,7 +171,8 @@ void IssueTable::RenderKindBoxes()
 
 void IssueTable::RenderChangedNote(const char* text)
 {
-    ImGui::TextColored(WarningColor, "%s", text);
+    // In the warnings' color.
+    ImGui::TextColored(IssueLevels::GetColor(ItemDataIssueSeverity::Warning), "%s", text);
 }
 
 void IssueTable::RenderTable(std::span<DataCheckArea* const> areas)
@@ -213,12 +208,11 @@ void IssueTable::RenderRow(std::span<DataCheckArea* const> areas, int issueIndex
     const AreaIssue& row = m_issues[issueIndex];
     const ItemDataIssue& issue = row.issue;
     DataCheckArea* area = row.area >= 0 && static_cast<size_t>(row.area) < areas.size() ? areas[row.area] : nullptr;
-    const LevelLook& level = Levels[LevelIndex(issue.severity)];
     ImGui::TableNextRow();
     ImGui::TableSetColumnIndex(0);
     ImGui::PushID(issueIndex);
-    ImGui::PushStyleColor(ImGuiCol_Text, level.color);
-    const bool clicked = ImGui::Selectable(*level.name, issueIndex == m_clickedIssue,
+    ImGui::PushStyleColor(ImGuiCol_Text, IssueLevels::GetColor(issue.severity));
+    const bool clicked = ImGui::Selectable(IssueLevels::GetName(issue.severity), issueIndex == m_clickedIssue,
                                            ImGuiSelectableFlags_SpanAllColumns | KeyboardSelection::RowFlags);
     const bool movedOnto = KeyboardSelection::MovedOnto();
     ImGui::PopStyleColor();

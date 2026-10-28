@@ -6,6 +6,8 @@
 
 #include "MonsterEdits.h"
 
+#include "../MuEditor/UI/Common/IssueLevels.h"
+
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/DataHandler/MonsterData/MonsterModelJsonStorage.h"
 #include "I18N/All.h"
@@ -23,13 +25,6 @@ std::string MonsterFileNames()
 {
     return Data::Monsters::GetMonstersFile().generic_string() + ", " +
            Data::Monsters::GetMonsterModelsFile().generic_string();
-}
-
-void RenderNote(const char* text)
-{
-    ImGui::PushTextWrapPos(0.0f);
-    ImGui::TextDisabled("%s", text);
-    ImGui::PopTextWrapPos();
 }
 
 void RenderError(const char* text)
@@ -111,14 +106,7 @@ void MonsterFileActions::RenderStatus() const
             lastSource = &issue.source;
         }
         const std::string line = issue.field.empty() ? issue.message : issue.field + ": " + issue.message;
-        if (issue.severity == Data::Items::ItemDataIssueSeverity::Fatal)
-        {
-            RenderError(line.c_str());
-        }
-        else
-        {
-            RenderNote(line.c_str());
-        }
+        IssueLevels::RenderLine(issue.severity, line.c_str());
     }
 }
 } // namespace MuEditor::Monsters
