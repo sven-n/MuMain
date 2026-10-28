@@ -318,6 +318,21 @@ TEST_CASE("ReadModelFileTable: a game without the table and without an overlay d
     CHECK(files.models.empty());
     CHECK(files.issues.empty());
     CHECK(files.Find(MODEL_ELITE_YETI) == nullptr);
+    CHECK(files.overlay.empty());
+}
+
+// The start logs the overlay it searched; Data Checks reads the table again
+// without logging it.
+TEST_CASE("ReadModelFileTable: names the overlay's Data/ it searched")
+{
+    TemporaryDirectory game;
+    TemporaryDirectory overlayRoot;
+    overlayRoot.Write("Data/Monster/Monster14.glb", "overlay");
+    const std::string overlay = overlayRoot.Path().string();
+
+    const ModelFiles files = Data::Models::ReadModelFileTable(overlay.c_str(), game.Path() / "Data");
+
+    CHECK(files.overlay == overlayRoot.Path() / "Data");
 }
 
 TEST_CASE("LoadModelFiles: a file found nowhere is an error")

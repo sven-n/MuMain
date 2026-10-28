@@ -16,7 +16,6 @@
 #include "Render/Look/LookFiles.h"
 #include "imgui.h"
 
-#include <cstdlib>
 #include <utility>
 
 namespace MuEditor::DataChecks
@@ -91,8 +90,7 @@ std::unique_ptr<DataCheckArea> CreateModelFileCheckArea()
         &I18N::Editor::ModelFiles,
         [](std::vector<ItemDataIssue>& issues)
         {
-            std::vector<ItemDataIssue> found =
-                Data::Models::ReadModelFileTable(std::getenv(Data::Models::DataOverlayVariable), "Data").issues;
+            std::vector<ItemDataIssue> found = Data::Models::ReadGameModelFileTable().issues;
             issues.insert(issues.end(), found.begin(), found.end());
         },
         nullptr, nullptr);

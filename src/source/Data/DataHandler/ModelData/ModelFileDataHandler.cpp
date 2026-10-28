@@ -23,6 +23,8 @@ namespace
 constexpr std::string_view ModelFileDataLabel = "Model file data";
 constexpr std::string_view ModelFileDataName = "model file table";
 constexpr const wchar_t* GameDataPrefix = L"Data\\";
+// The game's Data/ directory, relative to the client folder.
+constexpr const char* GameDataDirectory = "Data";
 
 ModelFiles& ModelFileTable()
 {
@@ -57,15 +59,24 @@ ModelFiles ReadModelFileTable(const char* overlayValue, const std::filesystem::p
     table.issues.insert(table.issues.begin(), overlayIssues.begin(), overlayIssues.end());
     if (directories.overlay)
     {
-        MU_LOG_INFO(mu::log::Get("data"), "Data overlay {} is searched before {}",
-                    directories.overlay->generic_string(), game.generic_string());
+        table.overlay = *directories.overlay;
     }
     return table;
 }
 
+ModelFiles ReadGameModelFileTable()
+{
+    return ReadModelFileTable(std::getenv(DataOverlayVariable), GameDataDirectory);
+}
+
 bool LoadModelFileTable(std::string& errorMessage)
 {
-    ModelFiles table = ReadModelFileTable(std::getenv(DataOverlayVariable), "Data");
+    ModelFiles table = ReadGameModelFileTable();
+    if (!table.overlay.empty())
+    {
+        MU_LOG_INFO(mu::log::Get("data"), "Data overlay {} is searched before {}", table.overlay.generic_string(),
+                    GameDataDirectory);
+    }
     LogDataIssues(ModelFileDataLabel, table.issues);
     if (Items::HasFatal(table.issues))
     {

@@ -108,6 +108,8 @@ struct ModelFiles
     std::vector<Items::ItemDataIssue> issues;
     // The table that was read; empty when there is none.
     std::filesystem::path table;
+    // The overlay's Data/ directory, searched before the game's; empty without one.
+    std::filesystem::path overlay;
 
     // The entry of a model index (Models[type]), or nullptr.
     [[nodiscard]] const ModelFileEntry* Find(int type) const;
