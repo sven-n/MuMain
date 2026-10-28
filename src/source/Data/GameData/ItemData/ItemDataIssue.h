@@ -6,7 +6,8 @@
 namespace Data::Items
 {
 // How bad a problem of game data is. The checks show the three levels apart;
-// only Fatal stops the game at start and makes Save refuse the data.
+// only Fatal makes Save refuse the data and stops the game at start, except
+// for the look files, which then give way to the built-in look values.
 enum class ItemDataIssueSeverity
 {
     // The data works, but is probably wrong.

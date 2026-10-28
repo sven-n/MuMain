@@ -109,7 +109,9 @@ catalogue and the looks (the look profile and the light moods) as the game
 reads their files at start.
 
 Problems have three levels, the same in every area: **fatal** (the data
-cannot be used: the game does not start with it, and Save refuses it),
+cannot be used: Save refuses it, and the game does not start with it; only
+the looks start anyway, with the built-in look values and the Classic
+light),
 **error** (something it names is missing, e.g. an item or a model file: the
 game runs without it, Save keeps it) and **warning** (it works, but is worth
 knowing). The worst come first. The boxes above the table show or hide each
