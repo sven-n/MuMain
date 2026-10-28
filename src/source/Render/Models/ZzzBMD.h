@@ -245,9 +245,9 @@ public:
     // Render::Models in this header would hide the global Models[] from code
     // inside namespace Render.
     std::shared_ptr<const void> GltfModel;
-    // The LOD of a model from a glTF binary that GPU-skinned draws use (0: the
-    // BMD's meshes); set per object around its draw (RenderObject) and 0
-    // otherwise. Draws on the CPU path keep LOD 0.
+    // The LOD of a model from a glTF binary (0: the BMD's meshes) that
+    // RenderMesh and RenderBodyShadow put in their draws; set per object around
+    // its draw (RenderObject) and 0 otherwise. Draws on the CPU path keep LOD 0.
     int ActiveLod = 0;
 
     float (*m_pCurrentBoneTransform)[3][4]; // Active bone matrix palette stored during Transform()
@@ -420,7 +420,7 @@ public:
     // Moves a skinned position onto the ground for the planar shadow (with `context`).
     using ShadowProjection = void (*)(float position[3], const void* context);
     // The planar shadow of model file mesh `mesh` (BMD::GltfModel) at the LOD
-    // being drawn (ActiveLod; the LODs share the skin), placed by `draw`:
+    // of `draw` (the LODs share the skin), placed by `draw`:
     // `vertices` gets its vertices, each skinned once (LOD 0: the
     // VertexTransform of EnsureCpuVertices; a coarser LOD: its own vertices with
     // the same arithmetic) and projected once; `indices` its triangles' corners

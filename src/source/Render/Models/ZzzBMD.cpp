@@ -1567,7 +1567,8 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
                                         .bodyScale = BodyScale,
                                         .lightEnable = LightEnable,
                                         .hideSkin = HideSkin,
-                                        .streamMesh = StreamMesh};
+                                        .streamMesh = StreamMesh,
+                                        .lod = ActiveLod};
     VectorCopy(BodyLight, draw.bodyLight);
     VectorCopy(BodyOrigin, draw.bodyOrigin);
     Render::ModelDrawing::ActiveModelDrawer().DrawMesh(draw);
@@ -1954,14 +1955,14 @@ void BMD::DrawMesh(Render::ModelDrawing::MeshDraw& draw) const
         // A coarser LOD of a model file draws its own mesh, or nothing beyond its meshes.
         bool absentFromLod = false;
         const Render::Models::Gltf::LodMesh* lodMesh =
-            gltfModel ? gltfModel->LodMeshFor(ActiveLod, meshIndex, absentFromLod) : nullptr;
+            gltfModel ? gltfModel->LodMeshFor(draw.lod, meshIndex, absentFromLod) : nullptr;
         if (absentFromLod)
         {
             return;
         }
         if (lodMesh && explicitTextureIndex == -1 && finalRenderFlags == RENDER_TEXTURE)
         {
-            const unsigned int lodTexture = gltfModel->lodTextures[ActiveLod - 1][meshIndex];
+            const unsigned int lodTexture = gltfModel->lodTextures[draw.lod - 1][meshIndex];
             if (lodTexture != BITMAP_UNKNOWN)
             {
                 BindTexture(static_cast<int>(lodTexture));
@@ -1979,7 +1980,7 @@ void BMD::DrawMesh(Render::ModelDrawing::MeshDraw& draw) const
         // under its vertices' address; a BMD mesh is cached under the mesh.
         const Render::Models::Gltf::PackedMesh* packedMesh =
             gltfModel
-                ? &Render::Models::PackedWeightedMeshOf(*gltfModel, *m, meshIndex, lodMesh ? ActiveLod : 0, lodMesh)
+                ? &Render::Models::PackedWeightedMeshOf(*gltfModel, *m, meshIndex, lodMesh ? draw.lod : 0, lodMesh)
                 : nullptr;
         const void* cacheKey = packedMesh && !packedMesh->vertices.empty()
                                    ? static_cast<const void*>(packedMesh->vertices.data())
@@ -2033,7 +2034,7 @@ void BMD::DrawMesh(Render::ModelDrawing::MeshDraw& draw) const
         if (gltfModel && useMeshTextureCoordinates)
         {
             const Render::Models::Gltf::NormalMapTexture normalMap =
-                gltfModel->NormalMapTextureFor(ActiveLod, meshIndex);
+                gltfModel->NormalMapTextureFor(draw.lod, meshIndex);
             skinning.normalTextureId = normalMap.texture;
             skinning.normalMapScale = normalMap.scale;
         }
@@ -2510,7 +2511,7 @@ void BMD::ProjectWeightedShadowMesh(const Render::ModelDrawing::ShadowDraw& draw
         return;
     }
     bool absent = false;
-    const Render::Models::Gltf::LodMesh* lodMesh = gltf->LodMeshFor(ActiveLod, mesh, absent);
+    const Render::Models::Gltf::LodMesh* lodMesh = gltf->LodMeshFor(draw.lod, mesh, absent);
     if (absent)
     {
         return;
@@ -2800,7 +2801,7 @@ void BMD::RenderWeightedMeshShadow(const Render::ModelDrawing::ShadowDraw& draw,
             continue;
         }
         bool absent = false;
-        const Render::Models::Gltf::LodMesh* lodMesh = gltf->LodMeshFor(ActiveLod, i, absent);
+        const Render::Models::Gltf::LodMesh* lodMesh = gltf->LodMeshFor(draw.lod, i, absent);
         if (absent)
         {
             continue;
@@ -2812,7 +2813,7 @@ void BMD::RenderWeightedMeshShadow(const Render::ModelDrawing::ShadowDraw& draw,
             continue;
         }
 
-        const auto& packed = Render::Models::PackedWeightedMeshOf(*gltf, Meshs[i], i, lodMesh ? ActiveLod : 0, lodMesh);
+        const auto& packed = Render::Models::PackedWeightedMeshOf(*gltf, Meshs[i], i, lodMesh ? draw.lod : 0, lodMesh);
         const void* key = packed.vertices.data();
         const bool cached =
             !packed.vertices.empty() && (renderer.IsSkinnedMeshCached(key) ||
@@ -2835,7 +2836,8 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
                                           .clothes = pClothes,
                                           .clothesCount = clothesCount,
                                           .alpha = alpha,
-                                          .bodyScale = BodyScale};
+                                          .bodyScale = BodyScale,
+                                          .lod = ActiveLod};
     VectorCopy(BodyOrigin, draw.bodyOrigin);
     Render::ModelDrawing::ActiveModelDrawer().DrawShadow(draw);
 }

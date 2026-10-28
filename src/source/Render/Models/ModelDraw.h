@@ -31,6 +31,8 @@ struct MeshDraw
     bool lightEnable = false;
     bool hideSkin = false;
     char streamMesh = -1;
+    // The LOD of a model file to draw (0: the BMD's meshes).
+    int lod = 0;
 };
 
 // One model's shadow projected on the ground: the call's arguments and the model state the draw reads.
@@ -49,6 +51,8 @@ struct ShadowDraw
 
     float bodyOrigin[3] = {};
     float bodyScale = 1.f;
+    // The LOD of a model file whose meshes cast the shadow (0: the BMD's meshes).
+    int lod = 0;
 };
 
 class ModelDrawer

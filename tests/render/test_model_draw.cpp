@@ -50,6 +50,7 @@ TEST_CASE("RenderMesh hands the active drawer the call and the model state it re
     model->LightEnable = true;
     model->HideSkin = true;
     model->StreamMesh = 2;
+    model->ActiveLod = 1;
 
     RecordingDrawer drawer;
     {
@@ -74,6 +75,7 @@ TEST_CASE("RenderMesh hands the active drawer the call and the model state it re
     CHECK(draw.lightEnable);
     CHECK(draw.hideSkin);
     CHECK(draw.streamMesh == 2);
+    CHECK(draw.lod == 1);
 }
 
 TEST_CASE("The light a drawer leaves in the draw is the model's light for the next mesh [render][model_draw]")
@@ -98,6 +100,7 @@ TEST_CASE("RenderBodyShadow hands the active drawer the call and the model state
     auto model = std::make_unique<BMD>();
     Vector(100.f, 200.f, 300.f, model->BodyOrigin);
     model->BodyScale = 1.25f;
+    model->ActiveLod = 2;
     int clothes = 0;
 
     RecordingDrawer drawer;
@@ -118,6 +121,7 @@ TEST_CASE("RenderBodyShadow hands the active drawer the call and the model state
     CHECK(draw.alpha == doctest::Approx(0.5f));
     CHECK(draw.bodyOrigin[2] == doctest::Approx(300.f));
     CHECK(draw.bodyScale == doctest::Approx(1.25f));
+    CHECK(draw.lod == 2);
 }
 
 TEST_CASE("Without a drawer set, the default drawer draws [render][model_draw]")
