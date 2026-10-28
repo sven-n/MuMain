@@ -914,7 +914,9 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
             return true;
         }
 
-        return false;
+        // Handled even when refused: a false here falls through to the right-click drop
+        // fallback and throws the skill item on the ground.
+        return true;
     }
 
     if (pItem->Type == ITEM_FRUITS)
