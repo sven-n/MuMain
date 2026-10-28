@@ -104,7 +104,8 @@ ItemDefinition UnflattenItem(int group, int number, const Fields& fields, std::v
         }
     }
     ItemDefinition item;
-    Data::Items::ReadItemJson(json, "", group, item, issues);
+    // The client's entry without a name has none until the file gives it one.
+    Data::Items::ReadItemJson(json, "", group, item, issues, false);
     return Data::Items::ToExchangeItem(item);
 }
 

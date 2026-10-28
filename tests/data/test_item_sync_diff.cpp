@@ -600,6 +600,64 @@ TEST_CASE("Item Sync applies a file from the server [data][items][editor]")
     g_ItemEdits.GetHistory().Clear();
 }
 
+// Sphere 4 and 5: the client has their numbers as entries without a name (models, no item), the
+// server has the items. Neither side has an item where the server has nothing.
+TEST_CASE("Update from server fills the client's entry without a name [data][items][editor]")
+{
+    Sides sides;
+    g_ItemEdits.GetHistory().Clear();
+    const int sphere4Type = MakeItemType(12, 73);
+    const ItemDefinition before = g_ItemDatabase.GetAllSlots()[sphere4Type];
+    REQUIRE(before.entryWithoutName);
+    ItemDefinition sphere4;
+    sphere4.group = 12;
+    sphere4.number = 73;
+    sphere4.names = Data::LocalizedString::Parse("Sphere (4)");
+    sphere4.width = 1;
+    sphere4.height = 1;
+    sphere4.statProfile = std::string(StatProfileNames::Default);
+    sides.file.items.push_back(sphere4);
+    const std::string url = "http://localhost:8080/api/items/exchange";
+
+    // Without fields there is nothing to compare: no row, as for every other item.
+    sides.file.fields = std::set<std::string, std::less<>>{};
+    g_MuItemSyncUI.CompareServerFile(WriteItemExchangeJson(sides.file), url);
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    CHECK(g_MuItemSyncUI.GetDiff()->items.empty());
+
+    // Its size is a change of the entry, applied to it: it stays an entry without a name.
+    sides.file.fields = std::set<std::string, std::less<>>{"height", "width"};
+    g_MuItemSyncUI.CompareServerFile(WriteItemExchangeJson(sides.file), url);
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    REQUIRE(g_MuItemSyncUI.GetDiff()->items.size() == 1);
+    const SyncItem& row = g_MuItemSyncUI.GetDiff()->items.front();
+    CHECK(MakeItemType(row.group, row.number) == sphere4Type);
+    CHECK(row.change == SyncChange::Changed);
+    CHECK(row.locked.empty());
+    CHECK(row.fields.size() == 2);
+    REQUIRE(g_MuItemSyncUI.Apply());
+    const ItemDefinition& entry = g_ItemDatabase.GetAllSlots()[sphere4Type];
+    CHECK(entry.entryWithoutName);
+    CHECK(entry.width == 1);
+    CHECK(entry.height == 1);
+    CHECK(g_ItemDatabase.Find(sphere4Type) == nullptr);
+
+    // Its name makes it the item.
+    sides.file.fields = std::set<std::string, std::less<>>{"height", "name", "width"};
+    g_MuItemSyncUI.CompareServerFile(WriteItemExchangeJson(sides.file), url);
+    REQUIRE(g_MuItemSyncUI.GetDiff());
+    REQUIRE(g_MuItemSyncUI.GetDiff()->items.size() == 1);
+    REQUIRE(g_MuItemSyncUI.Apply());
+    REQUIRE(g_ItemDatabase.Find(sphere4Type) != nullptr);
+    CHECK(g_ItemDatabase.Find(sphere4Type)->names.GetNeutral() == "Sphere (4)");
+    CHECK_FALSE(g_ItemDatabase.Find(sphere4Type)->entryWithoutName);
+
+    REQUIRE(g_ItemEdits.Undo());
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(g_ItemDatabase.GetAllSlots()[sphere4Type] == before);
+    g_ItemEdits.GetHistory().Clear();
+}
+
 TEST_CASE("Update from server needs an address and an API key [data][items][editor]")
 {
     // The address field is empty in a new editor.

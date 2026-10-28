@@ -100,9 +100,18 @@ const char* ChangeName(SyncChange change)
     }
 }
 
-std::string ItemLabel(const SyncItem& row)
+// An item without a name on both sides is the client's entry without a name, unless two files
+// are compared.
+std::string ItemLabel(const SyncItem& row, bool comparingFiles)
 {
-    return row.name + " (" + std::to_string(row.group) + "," + std::to_string(row.number) + ")";
+    std::string name = row.name;
+    const int itemType = Data::Items::MakeItemType(row.group, row.number);
+    if (name.empty() && !comparingFiles && Data::Items::IsValidItemType(itemType) &&
+        g_ItemDatabase.GetAllSlots()[itemType].HasEntry())
+    {
+        name = I18N::Editor::EntryWithoutAName;
+    }
+    return name + " (" + std::to_string(row.group) + "," + std::to_string(row.number) + ")";
 }
 
 // The fields a click on the row's box changes: New and Removed rows are one box.
@@ -647,7 +656,7 @@ void CMuItemSyncUI::CompareText(const std::optional<std::string>& text, const st
         locales.emplace_back(locale);
     }
     const SyncOptions options{&m_known, locales, [](int itemType) { return IsHeldByCharacter(itemType); }};
-    m_diff = BuildItemSyncDiff(BuildClientExchange(), m_file, options);
+    m_diff = BuildItemSyncDiff(BuildClientComparison(m_file), m_file, options);
     m_diffVersion = g_ItemDatabase.GetVersion();
     std::set<std::string> names;
     for (const SyncItem& row : m_diff->items)
@@ -1153,7 +1162,7 @@ void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows
                 {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
                 }
-                if (ImGui::Selectable(ItemLabel(row).c_str(), m_shownItem == index,
+                if (ImGui::Selectable(ItemLabel(row, m_comparingFiles).c_str(), m_shownItem == index,
                                       ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap))
                 {
                     m_shownItem = index;
@@ -1185,7 +1194,7 @@ void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows
 
 void CMuItemSyncUI::RenderItemFields(SyncItem& row)
 {
-    ImGui::TextUnformatted(I18N::Format(I18N::Editor::FieldsOf0, {ItemLabel(row)}).c_str());
+    ImGui::TextUnformatted(I18N::Format(I18N::Editor::FieldsOf0, {ItemLabel(row, m_comparingFiles)}).c_str());
     if (!row.locked.empty())
     {
         ImGui::TextColored(WarningColor, "%s", row.locked.c_str());

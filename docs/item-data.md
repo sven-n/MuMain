@@ -1469,6 +1469,11 @@ number, fields with their default value left out, LF line endings.
   Item Basics).
 - An item only a file with a `fields` list has is a locked row: the file
   lacks some of its fields, so it is not added.
+- **The client's entries without a name** count where the file has an item
+  at their number: the row changes the entry with the fields the file
+  carries (Changed), and it stays an entry without a name until the file
+  gives it a name. Where the file has no item either, neither side has
+  one: there is no row. The export leaves them out.
 - **Added items** get the client-only fields at their defaults; the
   two-handed flag follows the rule of the shipped items (groups 0 to 5, a
   hand slot, two cells wide or more) and the weapon kind follows the group,
