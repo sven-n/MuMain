@@ -45,11 +45,6 @@ void FileCheckArea::RenderSubject(const ItemDataIssue& issue) const
     ImGui::TextUnformatted(issue.source.c_str());
 }
 
-std::string_view FileCheckArea::GetField(const ItemDataIssue& issue) const
-{
-    return issue.field;
-}
-
 void FileCheckArea::Open(const ItemDataIssue&, bool clicked)
 {
     if (!clicked || m_tool == nullptr)

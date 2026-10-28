@@ -19,7 +19,6 @@ public:
     // "Kris (0,0)", "(0,5)" for a number without an item (a model without
     // one), or the file for a problem that is not about one item.
     void RenderSubject(const Data::Items::ItemDataIssue& issue) const override;
-    std::string_view GetField(const Data::Items::ItemDataIssue& issue) const override;
     // A problem that is not about one item has nothing to open, except one of
     // the item stat file, which opens Item Formulas at its entry.
     void Open(const Data::Items::ItemDataIssue& issue, bool clicked) override;

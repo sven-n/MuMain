@@ -53,11 +53,6 @@ void ItemCheckArea::RenderSubject(const ItemDataIssue& issue) const
     ImGui::TextUnformatted(g_ItemDatabase.GetLogName(itemType).c_str());
 }
 
-std::string_view ItemCheckArea::GetField(const ItemDataIssue& issue) const
-{
-    return issue.field;
-}
-
 void ItemCheckArea::Open(const ItemDataIssue& issue, bool clicked)
 {
     if (!IsAboutAnItem(issue))

@@ -27,7 +27,6 @@ public:
     const char* GetName() const override;
     void Check(std::vector<Data::Items::ItemDataIssue>& issues) override;
     void RenderSubject(const Data::Items::ItemDataIssue& issue) const override;
-    std::string_view GetField(const Data::Items::ItemDataIssue& issue) const override;
     void Open(const Data::Items::ItemDataIssue& issue, bool clicked) override;
 
 private:
