@@ -1406,7 +1406,8 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
             line.textName.empty() ? &line.text : g_ItemDatabase.GetTooltipFile().FindText(line.textName);
         // In the UI's language, also when the item names stay English ("Translate item names" off).
         const std::string_view locale = I18N::GetCurrentLocale();
-        wchar_t filled[512];
+        // A longer text is cut here; reading the item warns about one (Data::Items::MaxDescriptionLineLength).
+        wchar_t filled[Data::Items::MaxDescriptionLineLength + 1];
         const size_t length =
             lineText == nullptr
                 ? 0
@@ -1579,7 +1580,8 @@ static std::optional<std::wstring> ItemNameLineText(const Data::Items::ItemNameL
         return std::nullopt;
     // In the item names' language, as the item's name.
     const std::string& locale = g_ItemDatabase.GetDisplayLocale();
-    wchar_t filled[256];
+    // A longer text is cut here; reading the item warns about one (Data::Items::MaxNameLineLength).
+    wchar_t filled[Data::Items::MaxNameLineLength + 1];
     const size_t length = TooltipText::Write(TooltipText::Compile(text->Get(locale), line.values, &definition, locale),
                                              level, values, filled, std::size(filled));
     if (length == 0)

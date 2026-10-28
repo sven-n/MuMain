@@ -10,8 +10,11 @@
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ItemTooltipText.h"
 #include "Engine/Object/ItemTooltipValues.h"
+#include "Engine/Object/ZzzInfomation.h"
 
+#include <cwchar>
 #include <filesystem>
+#include <iterator>
 #include <string>
 #include <utility>
 #include <vector>
@@ -23,10 +26,12 @@ const std::filesystem::path ClientDirectory = std::filesystem::path(MU_TEST_DATA
 namespace TooltipText = Engine::Items::TooltipText;
 using Bindings = std::vector<std::pair<std::string, std::string>>;
 
-// The text compiled (in English) and written for the item at `level`, into a row of `capacity` characters.
+// The text compiled (in English) and written for the item at `level`, into a row of `capacity` characters. The texts
+// here aren't the item data's, so each one is compiled anew: a compiled text is found by where its text is.
 std::wstring Fill(const std::string& text, const ItemTooltipValues& values, int level = 0, const Bindings& bound = {},
                   const Data::Items::ItemDefinition* definition = nullptr, size_t capacity = 100)
 {
+    TooltipText::Clear();
     std::vector<wchar_t> row(capacity, L'?');
     const size_t length =
         TooltipText::Write(TooltipText::Compile(text, bound, definition, "en"), level, values, row.data(), capacity);
@@ -130,4 +135,30 @@ TEST_CASE("A tooltip text is compiled again when the item data changes [data][it
     const int before = g_ItemDatabase.GetVersion();
     g_ItemDatabase.SetTooltipFile(g_ItemDatabase.GetTooltipFile());
     CHECK(g_ItemDatabase.GetVersion() != before);
+}
+
+TEST_CASE("A tooltip text's skill name is looked up when the text is written [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipText::Clear();
+
+    // Compiled while the skill list isn't there: written then, the rest of the line stays as written.
+    SKILL_ATTRIBUTE* const previous = SkillAttribute;
+    SkillAttribute = nullptr;
+    // A skill's name is a line's value, as the wings' skill lines bind it.
+    const std::string text = "Skill: {skill} (wings)";
+    const Bindings bound = {{"skill", "skillName:30"}};
+    const TooltipText::Compiled& compiled = TooltipText::Compile(text, bound, nullptr, "en");
+    const ItemTooltipValues values;
+    wchar_t row[100];
+    CHECK(std::wstring(row, TooltipText::Write(compiled, 0, values, row, std::size(row))) == L"Skill: {skill} (wings)");
+
+    // Once the skill list is there, the same compiled text writes the skill's name.
+    std::vector<SKILL_ATTRIBUTE> skills(MAX_SKILLS);
+    std::wcscpy(skills[30].Name, L"Twister");
+    SkillAttribute = skills.data();
+    CHECK(std::wstring(row, TooltipText::Write(compiled, 0, values, row, std::size(row))) == L"Skill: Twister (wings)");
+    SkillAttribute = previous;
 }

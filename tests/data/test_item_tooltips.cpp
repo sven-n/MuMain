@@ -538,6 +538,36 @@ TEST_CASE("An item's add option values come from its add option [data][items][to
     CHECK_FALSE(duration->empty());
 }
 
+TEST_CASE("An item's duration text follows the UI's language [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    using Data::Items::TooltipValue;
+    using Engine::Items::TooltipValues::GetItemTooltipText;
+
+    // An hour and a second: the words for hours and seconds differ between English and German.
+    ItemTooltipValues values;
+    values.addOptionTime = 3601;
+    const auto written = [&]
+    {
+        std::wstring text;
+        g_StringTime(values.addOptionTime, text, true);
+        return text;
+    };
+    I18N::SetLocale("en");
+    const std::wstring english = GetItemTooltipText(values, TooltipValue::AddOptionDuration);
+    CHECK(english == written());
+    // The same time after a language change is written again in the new language.
+    I18N::SetLocale("de");
+    const std::wstring german = GetItemTooltipText(values, TooltipValue::AddOptionDuration);
+    CHECK(german == written());
+    CHECK(german != english);
+    I18N::SetLocale("en");
+    CHECK(GetItemTooltipText(values, TooltipValue::AddOptionDuration) == english);
+}
+
 TEST_CASE("The Weapon of Archangel shows its reward weapon's skill mana from the skill data [data][items][tooltip]")
 {
     ClientDataScope client(ClientDirectory);

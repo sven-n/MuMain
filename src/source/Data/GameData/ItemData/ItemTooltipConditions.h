@@ -63,16 +63,19 @@ struct TooltipCondition
         Greater,
         GreaterOrEqual,
     };
+    // What the condition names, by number, so a condition is checked without comparing names: its name as the file
+    // writes it is GetName()'s, made from these, so the two can't disagree.
     Kind kind = Kind::Value;
-    std::string name; // of the value or state, as the file writes it
-    ItemTag tag = ItemTag::Count;
+    TooltipValue value = TooltipValue::Count; // Kind::Value
+    TooltipState state = TooltipState::Count; // Kind::State
+    ItemTag tag = ItemTag::Count;             // Kind::Tag
     bool negated = false;
     Comparison comparison = Comparison::NotZero;
-    int number = 0;
-    // The value or state `name` names, resolved when the condition is read (ReadTooltipCondition), so a condition is
-    // checked without comparing names.
-    TooltipValue value = TooltipValue::Count;
-    TooltipState state = TooltipState::Count;
+    int number = 0; // the number a value is compared with; the class of Kind::Class
+
+    // The name of the value, state or class as the file writes it ("durability", "excellent", "darkLord"; the tag's
+    // for Kind::Tag), without the "!" and the comparison; empty for one that names nothing.
+    std::string_view GetName() const;
 
     bool operator==(const TooltipCondition& other) const = default;
 };

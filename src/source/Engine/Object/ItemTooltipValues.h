@@ -96,7 +96,8 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item);
 // the texts ({name}, {addOptionDuration}).
 std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, Data::Items::TooltipValue value);
 // The text of a built-in value that is a text ({name}, {addOptionDuration}), or nullptr for another. The duration is
-// written here, for a line showing it, and kept until another time is asked for; empty without the buff system.
+// written here, for a line showing it, and kept until another time or another UI language is asked for; empty without
+// the buff system.
 const wchar_t* GetItemTooltipText(const ItemTooltipValues& values, Data::Items::TooltipValue value);
 // The state.
 bool GetItemTooltipState(const ItemTooltipValues& values, Data::Items::TooltipState state);

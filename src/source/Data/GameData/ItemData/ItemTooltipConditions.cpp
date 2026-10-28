@@ -85,6 +85,29 @@ std::optional<TooltipState> FindTooltipState(std::string_view name)
                                  : std::optional<TooltipState>(static_cast<TooltipState>(found - States.begin()));
 }
 
+std::string_view TooltipCondition::GetName() const
+{
+    switch (kind)
+    {
+    case Kind::Value:
+        return value != TooltipValue::Count ? GetBuiltInPlaceholderName(value) : std::string_view();
+    case Kind::State:
+        return state != TooltipState::Count ? States[static_cast<size_t>(state)] : std::string_view();
+    case Kind::Tag:
+    {
+        const char* name = FindEnumName(tag);
+        return name != nullptr ? std::string_view(name) : std::string_view();
+    }
+    case Kind::Class:
+    {
+        const std::span<const char* const> classes = GetClassKeys();
+        return number >= 0 && static_cast<size_t>(number) < classes.size() ? std::string_view(classes[number])
+                                                                           : std::string_view();
+    }
+    }
+    return {};
+}
+
 bool ReadTooltipCondition(std::string_view text, TooltipCondition& condition, std::string& error)
 {
     std::string_view name = text;
@@ -110,7 +133,6 @@ bool ReadTooltipCondition(std::string_view text, TooltipCondition& condition, st
     {
         name.remove_prefix(ClassPrefix.size());
         condition.kind = TooltipCondition::Kind::Class;
-        condition.name = name;
         const std::span<const char* const> classes = GetClassKeys();
         const auto found = std::find(classes.begin(), classes.end(), name);
         if (found == classes.end())
@@ -128,7 +150,6 @@ bool ReadTooltipCondition(std::string_view text, TooltipCondition& condition, st
         name.begin();
     const std::string_view comparison = name.substr(nameEnd);
     name = name.substr(0, nameEnd);
-    condition.name = name;
     const std::optional<TooltipValue> value = FindBuiltInPlaceholder(name);
     if (!comparison.empty())
     {
@@ -204,14 +225,13 @@ std::string WriteTooltipCondition(const TooltipCondition& condition)
     std::string text(condition.negated ? Negation : std::string_view());
     if (condition.kind == TooltipCondition::Kind::Tag)
     {
-        const char* tag = FindEnumName(condition.tag);
-        return text + std::string(TagPrefix) + (tag != nullptr ? tag : "");
+        return text + std::string(TagPrefix) + std::string(condition.GetName());
     }
     if (condition.kind == TooltipCondition::Kind::Class)
     {
-        return text + std::string(ClassPrefix) + condition.name;
+        return text + std::string(ClassPrefix) + std::string(condition.GetName());
     }
-    text += condition.name;
+    text += condition.GetName();
     for (const ComparisonName& entry : Comparisons)
     {
         if (entry.comparison == condition.comparison)

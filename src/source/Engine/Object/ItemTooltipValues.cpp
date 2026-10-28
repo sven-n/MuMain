@@ -13,6 +13,7 @@
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "I18N/All.h"
 #include "Network/Server/SocketSystem.h"
 #include "UI/Core/UIManager.h"
 #include "UI/Inventory/UIJewelHarmony.h"
@@ -278,19 +279,23 @@ const wchar_t* GetItemTooltipText(const ItemTooltipValues& values, Data::Items::
     }
     if (value == Data::Items::TooltipValue::AddOptionDuration)
     {
-        // Written only here, for a line that shows it: g_StringTime needs the buff system. The text only changes with
-        // the time, so it is written again only then. Without the buff system (the tests) it's an empty text.
+        // Written only here, for a line that shows it: g_StringTime needs the buff system. The text changes with the
+        // time and with the UI's language (its words for hours, minutes and seconds), so it is written again only when
+        // either does. Without the buff system it's an empty text.
         if (!g_BuffSystem)
         {
             return L"";
         }
         static DWORD durationTime = 0;
+        static std::string durationLocale;
         static std::wstring duration;
-        if (duration.empty() || values.addOptionTime != durationTime)
+        const char* const locale = I18N::GetCurrentLocale();
+        if (duration.empty() || values.addOptionTime != durationTime || durationLocale != locale)
         {
             duration.clear();
             g_StringTime(values.addOptionTime, duration, true);
             durationTime = values.addOptionTime;
+            durationLocale = locale;
         }
         return duration.c_str();
     }

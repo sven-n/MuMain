@@ -340,7 +340,9 @@ Each line is `{"text": ..., "values": {...}, "when": [...], "color": ...,
 - **An empty text** (`{"text": ""}`) is a blank line.
 - **Long lines** wrap at about the width of the original tooltips' widest
   lines, and `\n` in a text breaks the line there (`\n\n` leaves a blank
-  line).
+  line). A line's text is shown up to 511 characters (with its placeholders
+  filled, before it wraps), a name line's up to 255; a text written longer
+  is a warning, and the tooltip cuts it there.
 - **`color`** is one of the tooltip colors: `white` (left out), `blue`,
   `red`, `yellow`, `green`, `darkRed`, `purple`, `darkBlue`, `darkYellow`,
   `greenBlue`, `gray`, `redPurple`, `violet`, `orange`.

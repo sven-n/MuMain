@@ -346,7 +346,7 @@ private:
     void ReadTags(const OrderedJson& json, ItemTagSet& tags);
     void ReadDescription(const OrderedJson& json, std::vector<ItemDescriptionLine>& description);
     void ReadNameLines(const OrderedJson& json, std::vector<ItemNameLine>& nameLines);
-    bool ReadLine(const OrderedJson& entry, const std::string& field, ItemDescriptionLine& line);
+    bool ReadLine(const OrderedJson& entry, const std::string& field, size_t maxLength, ItemDescriptionLine& line);
     void ReadDescriptionLevels(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
     void ReadDescriptionConditions(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
     void ReadDescriptionValues(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
@@ -361,6 +361,7 @@ private:
                        const std::array<const char*, Count>& keys);
     void WarnAboutUnknownKeys(const OrderedJson& json, const std::set<std::string, std::less<>>& knownKeys,
                               const std::string& prefix);
+    void WarnAboutLongText(const LocalizedString& text, const std::string& field, size_t maxLength);
 
     template <typename T> void ReadValue(const OrderedJson& json, const std::string& field, T& value);
 
@@ -517,7 +518,7 @@ void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescri
             continue;
         }
         ItemDescriptionLine line;
-        if (ReadLine(entry, field, line))
+        if (ReadLine(entry, field, MaxDescriptionLineLength, line))
         {
             description.push_back(std::move(line));
         }
@@ -557,15 +558,17 @@ void ItemReader::ReadNameLines(const OrderedJson& json, std::vector<ItemNameLine
         ItemNameLine line;
         line.hasText = entry.contains(Keys::Text);
         line.hasColor = entry.contains(Keys::Color);
-        if (ReadLine(entry, field, line))
+        if (ReadLine(entry, field, MaxNameLineLength, line))
         {
             nameLines.push_back(std::move(line));
         }
     }
 }
 
-// The fields of one line of a description or of the name lines; false when its text could not be read.
-bool ItemReader::ReadLine(const OrderedJson& entry, const std::string& field, ItemDescriptionLine& line)
+// The fields of one line of a description or of the name lines; false when its text could not be read. A text longer
+// than `maxLength` (MaxDescriptionLineLength, MaxNameLineLength) is a warning: the tooltip cuts it there.
+bool ItemReader::ReadLine(const OrderedJson& entry, const std::string& field, size_t maxLength,
+                          ItemDescriptionLine& line)
 {
     bool read = true;
     if (const auto text = entry.find(Keys::Text); text != entry.end())
@@ -587,6 +590,7 @@ bool ItemReader::ReadLine(const OrderedJson& entry, const std::string& field, It
             read = Json::ReadLocalizedString(*text, field + "." + Keys::Text, line.text,
                                              [this](const std::string& errorField, const std::string& message)
                                              { AddIssue(ItemDataIssueSeverity::Error, errorField, message); });
+            WarnAboutLongText(line.text, field + "." + Keys::Text, maxLength);
         }
     }
     if (const auto values = entry.find(Keys::Values); values != entry.end())
@@ -863,6 +867,39 @@ void ItemReader::WarnAboutUnknownKeys(const OrderedJson& json, const std::set<st
 {
     Json::WarnAboutUnknownKeys(json, knownKeys, prefix, [this](const std::string& field, const std::string& message)
                                { AddIssue(ItemDataIssueSeverity::Warning, field, message); });
+}
+
+// UTF-16 characters, as the client's wide strings hold the text: a character past U+FFFF counts as two.
+static size_t Utf16Length(std::string_view text)
+{
+    size_t length = 0;
+    for (const char c : text)
+    {
+        const auto byte = static_cast<unsigned char>(c);
+        if ((byte & 0xC0) != 0x80)
+        {
+            length += byte >= 0xF0 ? 2 : 1;
+        }
+    }
+    return length;
+}
+
+void ItemReader::WarnAboutLongText(const LocalizedString& text, const std::string& field, size_t maxLength)
+{
+    const auto check = [&](std::string_view locale, const std::string& written)
+    {
+        if (Utf16Length(written) > maxLength)
+        {
+            AddIssue(ItemDataIssueSeverity::Warning, field,
+                     "is longer than " + std::to_string(maxLength) + " characters in \"" + std::string(locale) +
+                         "\": the tooltip shows only the first " + std::to_string(maxLength));
+        }
+    };
+    check(LocalizedString::NeutralLocale, text.GetNeutral());
+    for (const auto& [locale, translation] : text.GetTranslations())
+    {
+        check(locale, translation);
+    }
 }
 
 void ItemReader::ReadRequirementsByLevel(const OrderedJson& json, ItemDefinition& definition)

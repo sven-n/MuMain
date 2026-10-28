@@ -21,8 +21,8 @@ namespace
 {
 using Data::Items::TooltipValue;
 
-// What a compiled text depends on: the text (its characters stay where they are until the item data changes), the
-// line's bindings and item, and the language of its level values.
+// What a compiled text depends on: the text (its characters stay where they are until the item data changes, so where
+// they are stands for what they say), the line's bindings and item, and the language of its level values.
 struct Key
 {
     const char* text = nullptr;
@@ -78,17 +78,12 @@ bool Resolve(std::string_view name, std::span<const std::pair<std::string, std::
             piece.number = data->number;
             return true;
         case Data::Items::GameDataValueKind::SkillName:
-            if (SkillAttribute == nullptr)
-                return false;
-            piece.kind = Piece::Kind::SkillName;
-            piece.name = SkillAttribute[data->number].Name;
-            return true;
         case Data::Items::GameDataValueKind::MonsterName:
-            // Looked up when written: the name follows "Translate item names" and the monster list, which can change
-            // without the item data changing.
-            if (GameLogic::Items::NameParts::MonsterName(data->number) == nullptr)
-                return false;
-            piece.kind = Piece::Kind::MonsterName;
+            // Looked up when written, as main did: the skill list and the monster list (which the monster editor
+            // changes without the item data changing) decide then whether the name is there, and a monster's name
+            // follows "Translate item names".
+            piece.kind = data->kind == Data::Items::GameDataValueKind::SkillName ? Piece::Kind::SkillName
+                                                                                 : Piece::Kind::MonsterName;
             piece.number = data->number;
             return true;
         }
@@ -127,8 +122,6 @@ Compiled CompileText(std::string_view text, std::span<const std::pair<std::strin
                      const Data::Items::ItemDefinition* definition, std::string_view language)
 {
     Compiled compiled;
-    compiled.source = text;
-    compiled.bound.assign(bound.begin(), bound.end());
     const Data::Items::PlaceholderSpans found = Data::Items::FindPlaceholders(text);
     size_t position = 0;
     for (const Data::Items::PlaceholderSpan& span : found.spans)
@@ -180,16 +173,11 @@ const Compiled& Compile(std::string_view text, std::span<const std::pair<std::st
     }
     Key key{text.data(), text.size(), bound.data(), definition};
     std::copy_n(language.data(), std::min(language.size(), key.language.size() - 1), key.language.data());
+    // No text is compared: the item data, the stat file and the tooltip file change only by raising the version.
     const auto found = cache.find(key);
     if (found == cache.end())
     {
         return cache.emplace(key, CompileText(text, bound, definition, language)).first->second;
-    }
-    // The key is where the text is; a text that changed in place (or another one there) is compiled again.
-    if (found->second.source != text ||
-        !std::equal(bound.begin(), bound.end(), found->second.bound.begin(), found->second.bound.end()))
-    {
-        found->second = CompileText(text, bound, definition, language);
     }
     return found->second;
 }
@@ -234,14 +222,14 @@ size_t Write(const Compiled& text, int level, const ItemTooltipValues& values, w
             break;
         }
         case Piece::Kind::SkillName:
-            Append(piece.name, std::wcslen(piece.name), out, capacity, length);
-            break;
         case Piece::Kind::MonsterName:
         {
-            const wchar_t* name = GameLogic::Items::NameParts::MonsterName(piece.number);
+            const wchar_t* name = piece.kind == Piece::Kind::SkillName
+                                      ? (SkillAttribute != nullptr ? SkillAttribute[piece.number].Name : nullptr)
+                                      : GameLogic::Items::NameParts::MonsterName(piece.number);
             if (name == nullptr)
             {
-                // No longer in the monster list: the rest of the line as written.
+                // Not in the skill list or the monster list: the rest of the line as written.
                 Append(piece.rest.c_str(), piece.rest.size(), out, capacity, length);
                 return length;
             }

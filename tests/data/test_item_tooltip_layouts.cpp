@@ -92,12 +92,12 @@ TEST_CASE("A tooltip layout line has its text, conditions, colors, style and val
     const TooltipLayoutLine& line = FirstLine(result);
     CHECK(line.textName == "lacking");
     REQUIRE(line.when.size() == 3);
-    // Read with the value and the state they name resolved.
-    CHECK(line.when[0] == TooltipCondition{TooltipCondition::Kind::Value, "requiredLevel", ItemTag::Count, false,
-                                           TooltipCondition::Comparison::NotZero, 0, TooltipValue::RequiredLevel});
-    CHECK(line.when[1] == TooltipCondition{TooltipCondition::Kind::State, "excellent", ItemTag::Count, true,
-                                           TooltipCondition::Comparison::NotZero, 0, TooltipValue::Count,
-                                           TooltipState::Excellent});
+    // Read as the value and the state they name.
+    CHECK(line.when[0] == TooltipCondition{TooltipCondition::Kind::Value, TooltipValue::RequiredLevel});
+    CHECK(line.when[0].GetName() == "requiredLevel");
+    CHECK(line.when[1] == TooltipCondition{TooltipCondition::Kind::State, TooltipValue::Count, TooltipState::Excellent,
+                                           ItemTag::Count, true});
+    CHECK(line.when[1].GetName() == "excellent");
     CHECK(line.when[2].kind == TooltipCondition::Kind::Tag);
     CHECK(line.when[2].tag == ItemTag::Sceptre);
     CHECK(line.color == ItemTextColor::Red);
@@ -303,36 +303,35 @@ TEST_CASE("A tooltip line's conditions all hold, each turned around by \"!\" [da
     ItemTooltipValues values;
     values.defense = 12;
     values.excellent = true;
-    // Conditions written here by name are resolved as reading them does.
-    const auto met = [&](std::vector<TooltipCondition> conditions, int type = ScrollOfPoisonType, int level = 0)
+    // Conditions as a file writes them, read.
+    const auto met = [&](std::vector<std::string_view> texts, int type = ScrollOfPoisonType, int level = 0)
     {
-        for (TooltipCondition& condition : conditions)
+        std::vector<TooltipCondition> conditions(texts.size());
+        for (size_t index = 0; index < texts.size(); ++index)
         {
-            condition.value = FindBuiltInPlaceholder(condition.name).value_or(TooltipValue::Count);
-            condition.state = FindTooltipState(condition.name).value_or(TooltipState::Count);
+            std::string error;
+            REQUIRE(ReadTooltipCondition(texts[index], conditions[index], error));
         }
         return AreTooltipConditionsMet(conditions, type, level, values);
     };
-    using Kind = TooltipCondition::Kind;
     CHECK(met({}));
-    CHECK(met({{Kind::Value, "defense"}, {Kind::State, "excellent"}}));
-    CHECK_FALSE(met({{Kind::Value, "defense"}, {Kind::State, "ancient"}}));
-    CHECK(met({{Kind::State, "ancient", ItemTag::Count, true}}));
-    CHECK_FALSE(met({{Kind::Value, "magicDefense"}}));
+    CHECK(met({"defense", "excellent"}));
+    CHECK_FALSE(met({"defense", "ancient"}));
+    CHECK(met({"!ancient"}));
+    CHECK_FALSE(met({"magicDefense"}));
     // {level} is a value too.
-    CHECK_FALSE(met({{Kind::Value, "level"}}));
-    CHECK(met({{Kind::Value, "level"}}, ScrollOfPoisonType, 3));
+    CHECK_FALSE(met({"level"}));
+    CHECK(met({"level"}, ScrollOfPoisonType, 3));
     // A tag, and a tag turned around: the Battle Scepter is a sceptre, the Kris is not.
-    CHECK(met({{Kind::Tag, "", ItemTag::Sceptre}}, MakeItemType(2, 8)));
-    CHECK_FALSE(met({{Kind::Tag, "", ItemTag::Sceptre}}, MakeItemType(0, 0)));
-    CHECK(met({{Kind::Tag, "", ItemTag::Sceptre, true}}, MakeItemType(0, 0)));
+    CHECK(met({"tag:sceptre"}, MakeItemType(2, 8)));
+    CHECK_FALSE(met({"tag:sceptre"}, MakeItemType(0, 0)));
+    CHECK(met({"!tag:sceptre"}, MakeItemType(0, 0)));
     // A value compared with a number.
     values.durability = 2;
-    using Comparison = TooltipCondition::Comparison;
-    CHECK(met({{Kind::Value, "durability", ItemTag::Count, false, Comparison::Equal, 2}}));
-    CHECK_FALSE(met({{Kind::Value, "durability", ItemTag::Count, false, Comparison::Equal, 1}}));
-    CHECK(met({{Kind::Value, "durability", ItemTag::Count, true, Comparison::Equal, 1}}));
-    CHECK(met({{Kind::Value, "level", ItemTag::Count, false, Comparison::NotEqual, 1}}, ScrollOfPoisonType, 2));
+    CHECK(met({"durability=2"}));
+    CHECK_FALSE(met({"durability=1"}));
+    CHECK(met({"!durability=1"}));
+    CHECK(met({"level!=1"}, ScrollOfPoisonType, 2));
 }
 
 TEST_CASE("A tooltip line takes the color of its first color rule that holds [data][items][tooltip]")
