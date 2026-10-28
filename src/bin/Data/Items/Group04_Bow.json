@@ -8,6 +8,7 @@
         "en": "Short Bow",
         "de": "Kurzbogen",
         "es": "Arco Corto",
+        "pl": "Krótki łuk",
         "pt": "Arco curto"
       },
       "width": 2,
@@ -37,6 +38,7 @@
         "en": "Bow",
         "de": "Bogen",
         "es": "Arco",
+        "pl": "Łuk",
         "pt": "Arco"
       },
       "width": 2,
@@ -66,6 +68,7 @@
         "en": "Elven Bow",
         "de": "Elfenbogen",
         "es": "Arco de los Elfos",
+        "pl": "Elfi łuk",
         "pt": "Arco élfico"
       },
       "width": 2,
@@ -95,6 +98,7 @@
         "en": "Battle Bow",
         "de": "Kampfbogen",
         "es": "Arco de Batalla",
+        "pl": "Łuk bojowy",
         "pt": "Arco de batalha"
       },
       "width": 2,
@@ -124,6 +128,7 @@
         "en": "Tiger Bow",
         "de": "Tigerbogen",
         "es": "Arco Tigre",
+        "pl": "Tygrysi łuk",
         "pt": "Arco do tigre"
       },
       "width": 2,
@@ -153,6 +158,7 @@
         "en": "Silver Bow",
         "de": "Silberbogen",
         "es": "Arco Plateado",
+        "pl": "Srebrny łuk",
         "pt": "Arco de prata"
       },
       "width": 2,
@@ -182,6 +188,7 @@
         "en": "Chaos Nature Bow",
         "de": "Chaos-Naturbogen",
         "es": "Arco Naturaleza del Caos",
+        "pl": "Łuk Natury Chaosu",
         "pt": "Arco da natureza do caos"
       },
       "width": 2,
@@ -211,6 +218,7 @@
         "en": "Bolt",
         "de": "Bolzen",
         "es": "Rayo",
+        "pl": "Bełty",
         "pt": "Dardo"
       },
       "tags": ["ammunition", "noDurabilityLine"],
@@ -234,6 +242,7 @@
         "en": "Crossbow",
         "de": "Armbrust",
         "es": "Ballesta",
+        "pl": "Kusza",
         "pt": "Besta"
       },
       "width": 2,
@@ -263,6 +272,7 @@
         "en": "Golden Crossbow",
         "de": "Goldene Armbrust",
         "es": "Ballesta Dorada",
+        "pl": "Złota kusza",
         "pt": "Besta dourada"
       },
       "width": 2,
@@ -292,6 +302,7 @@
         "en": "Arquebus",
         "de": "Arkebuse",
         "es": "Arcabuz",
+        "pl": "Arkebuz",
         "pt": "Arquebus"
       },
       "width": 2,
@@ -321,6 +332,7 @@
         "en": "Light Crossbow",
         "de": "Leichte Armbrust",
         "es": "Ballesta de Luz",
+        "pl": "Lekka kusza",
         "pt": "Besta leve"
       },
       "width": 2,
@@ -350,6 +362,7 @@
         "en": "Serpent Crossbow",
         "de": "Schlangenarmbrust",
         "es": "Ballesta Serpiente",
+        "pl": "Wężowa kusza",
         "pt": "Besta da serpente"
       },
       "width": 2,
@@ -379,6 +392,7 @@
         "en": "Bluewing Crossbow",
         "de": "Blauschwingen-Armbrust",
         "es": "Ballesta Ala Azul",
+        "pl": "Kusza Błękitnego Skrzydła",
         "pt": "Besta Bluewing"
       },
       "width": 2,
@@ -408,6 +422,7 @@
         "en": "Aquagold Crossbow",
         "de": "Aquagold-Armbrust",
         "es": "Ballesta Acuadorada",
+        "pl": "Kusza Wodnego Złota",
         "pt": "Besta Aquagold"
       },
       "width": 2,
@@ -437,6 +452,7 @@
         "en": "Arrow",
         "de": "Pfeil",
         "es": "Flecha",
+        "pl": "Strzały",
         "pt": "Flecha"
       },
       "tags": ["ammunition", "noDurabilityLine"],
@@ -460,6 +476,7 @@
         "en": "Saint Crossbow",
         "de": "Heilige Armbrust",
         "es": "Ballesta de Santo",
+        "pl": "Święta kusza",
         "pt": "Besta do santo"
       },
       "width": 2,
@@ -489,6 +506,7 @@
         "en": "Celestial Bow",
         "de": "Himmlischer Bogen",
         "es": "Arco Celestial",
+        "pl": "Niebiański łuk",
         "pt": "Arco celestial"
       },
       "width": 2,
@@ -518,6 +536,7 @@
         "en": "Divine Crossbow of Archangel",
         "de": "Göttliche Armbrust des Erzengels",
         "es": "Ballesta Divina de Arcángel",
+        "pl": "Boska Kusza Archanioła",
         "pt": "Besta divina do arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
@@ -562,6 +581,7 @@
         "en": "Great Reign Crossbow",
         "de": "Großartige Herrschaftsarmbrust",
         "es": "Ballesta del Gran Reino",
+        "pl": "Kusza Wielkich Rządów",
         "pt": "Grande besta do Império"
       },
       "width": 2,
@@ -591,6 +611,7 @@
         "en": "Arrow Viper Bow",
         "de": "Pfeilvipernbogen",
         "es": "Arco Flecha Víbora",
+        "pl": "Łuk Żmii",
         "pt": "Arco víbora de flecha"
       },
       "width": 2,
@@ -620,6 +641,7 @@
         "en": "Sylph Wind Bow",
         "de": "Sylphenwindbogen",
         "es": "Arco Viento Sílfide",
+        "pl": "Łuk Wiatru Sylfy",
         "pt": "Arco vento da silfe"
       },
       "width": 2,
@@ -650,6 +672,7 @@
         "en": "Albatross Bow",
         "de": "Albatrosbogen",
         "es": "Arco Albatros",
+        "pl": "Łuk Albatrosa",
         "pt": "Arco do albatroz"
       },
       "width": 2,
@@ -678,6 +701,7 @@
         "en": "Dark Stinger",
         "de": "Dunkler Stachel",
         "es": "Punzón Oscuro",
+        "pl": "Mroczne Żądło",
         "pt": "Golpeador negro"
       },
       "width": 2,
@@ -708,6 +732,7 @@
         "en": "Aileen Bowr",
         "de": "Aileen-Bogen",
         "es": "Arco Aileen",
+        "pl": "Łuk Aileen",
         "pt": "Arco do Aileen"
       },
       "width": 2,

@@ -8,6 +8,7 @@
         "en": "Bronze Helm",
         "de": "Bronzehelm",
         "es": "Yelmo de Bronce",
+        "pl": "Brązowy hełm",
         "pt": "Elmo de bronze"
       },
       "width": 2,
@@ -33,6 +34,7 @@
         "en": "Dragon Helm",
         "de": "Drachenhelm",
         "es": "Yelmo Dragón",
+        "pl": "Smoczy hełm",
         "pt": "Elmo do dragão"
       },
       "width": 2,
@@ -57,6 +59,7 @@
         "en": "Pad Helm",
         "de": "Polsterhelm",
         "es": "Yelmo Relleno",
+        "pl": "Pikowany hełm",
         "pt": "Elmo acolchoado"
       },
       "width": 2,
@@ -80,6 +83,7 @@
         "en": "Legendary Helm",
         "de": "Legendärer Helm",
         "es": "Yelmo Legendario",
+        "pl": "Legendarny hełm",
         "pt": "Elmo lendário"
       },
       "width": 2,
@@ -103,6 +107,7 @@
         "en": "Bone Helm",
         "de": "Knochenhelm",
         "es": "Yelmo de Hueso",
+        "pl": "Kościany hełm",
         "pt": "Elmo de osso"
       },
       "width": 2,
@@ -126,6 +131,7 @@
         "en": "Leather Helm",
         "de": "Lederhelm",
         "es": "Yelmo de Cuero",
+        "pl": "Skórzany hełm",
         "pt": "Elmo de couro"
       },
       "width": 2,
@@ -151,6 +157,7 @@
         "en": "Scale Helm",
         "de": "Schuppenhelm",
         "es": "Yelmo de Escamas",
+        "pl": "Łuskowy hełm",
         "pt": "Elmo de escamas"
       },
       "width": 2,
@@ -176,6 +183,7 @@
         "en": "Sphinx Mask",
         "de": "Sphinxmaske",
         "es": "Máscara Esfinge",
+        "pl": "Maska Sfinksa",
         "pt": "Máscara da esfinge"
       },
       "width": 2,
@@ -199,6 +207,7 @@
         "en": "Brass Helm",
         "de": "Messinghelm",
         "es": "Yelmo de Metal",
+        "pl": "Mosiężny hełm",
         "pt": "Elmo de latão"
       },
       "width": 2,
@@ -224,6 +233,7 @@
         "en": "Plate Helm",
         "de": "Plattenhelm",
         "es": "Yelmo de Plata",
+        "pl": "Płytowy hełm",
         "pt": "Elmo de placa"
       },
       "width": 2,
@@ -248,6 +258,7 @@
         "en": "Vine Helm",
         "de": "Rankenhelm",
         "es": "Yelmo Vid",
+        "pl": "Hełm z pnączy",
         "pt": "Elmo da vinha"
       },
       "width": 2,
@@ -272,6 +283,7 @@
         "en": "Silk Helm",
         "de": "Seidenhelm",
         "es": "Yelmo de Seda",
+        "pl": "Jedwabny hełm",
         "pt": "Elmo de seda"
       },
       "width": 2,
@@ -296,6 +308,7 @@
         "en": "Wind Helm",
         "de": "Windhelm",
         "es": "Yelmo Viento",
+        "pl": "Hełm Wiatru",
         "pt": "Elmo do vento"
       },
       "width": 2,
@@ -320,6 +333,7 @@
         "en": "Spirit Helm",
         "de": "Geisterhelm",
         "es": "Yelmo Espíritu",
+        "pl": "Hełm Ducha",
         "pt": "Elmo do espírito"
       },
       "width": 2,
@@ -344,6 +358,7 @@
         "en": "Guardian Helm",
         "de": "Wächterhelm",
         "es": "Yelmo Guardián",
+        "pl": "Hełm Strażnika",
         "pt": "Elmo do guardião"
       },
       "width": 2,
@@ -368,6 +383,7 @@
         "en": "Black Dragon Helm",
         "de": "Schwarzdrachenhelm",
         "es": "Yelmo Dragón Negro",
+        "pl": "Hełm Czarnego Smoka",
         "pt": "Elmo do dragão negro"
       },
       "width": 2,
@@ -392,6 +408,7 @@
         "en": "Dark Phoenix Helm",
         "de": "Dunkelphönixhelm",
         "es": "Yelmo Fénix Oscuro",
+        "pl": "Hełm Mrocznego Feniksa",
         "pt": "Elmo da fênix negra"
       },
       "width": 2,
@@ -416,6 +433,7 @@
         "en": "Grand Soul Helm",
         "de": "Großseelenhelm",
         "es": "Yelmo Gran Alma",
+        "pl": "Hełm Wielkiej Duszy",
         "pt": "Grande elmo da alma"
       },
       "width": 2,
@@ -440,6 +458,7 @@
         "en": "Divine Helm",
         "de": "Göttlicher Helm",
         "es": "Yelmo Divino",
+        "pl": "Boski hełm",
         "pt": "Elmo divino"
       },
       "width": 2,
@@ -464,6 +483,7 @@
         "en": "Great Dragon Helm",
         "de": "Großartiger Drachenhelm",
         "es": "Yelmo Gran Dragón",
+        "pl": "Hełm Wielkiego Smoka",
         "pt": "Grande elmo do dragão"
       },
       "width": 2,
@@ -488,6 +508,7 @@
         "en": "Dark Soul Helm",
         "de": "Dunkelseelenhelm",
         "es": "Yelmo Alma Oscura",
+        "pl": "Hełm Mrocznej Duszy",
         "pt": "Elmo da alma negra"
       },
       "width": 2,
@@ -512,6 +533,7 @@
         "en": "Red Spirit Helm",
         "de": "Rotgeisterhelm",
         "es": "Yelmo Espíritu Rojo",
+        "pl": "Hełm Czerwonego Ducha",
         "pt": "Elmo do espírito vermelho"
       },
       "width": 2,
@@ -536,6 +558,7 @@
         "en": "Light Plate Mask",
         "de": "Leichtplattenmaske",
         "es": "Máscara Plata de Luz",
+        "pl": "Lekka maska płytowa",
         "pt": "Máscara de placa leve"
       },
       "width": 2,
@@ -560,6 +583,7 @@
         "en": "Adamantine Mask",
         "de": "Adamantmaske",
         "es": "Máscara Adamantina",
+        "pl": "Adamantytowa maska",
         "pt": "Máscara de adamantina"
       },
       "width": 2,
@@ -584,6 +608,7 @@
         "en": "Dark Steel Mask",
         "de": "Dunkelstahlmaske",
         "es": "Máscara Acero Oscuro",
+        "pl": "Maska z mrocznej stali",
         "pt": "Máscara de aço negro"
       },
       "width": 2,
@@ -608,6 +633,7 @@
         "en": "Dark Master Mask",
         "de": "Dunkelmeistermaske",
         "es": "Máscara Amo Oscuro",
+        "pl": "Maska Mrocznego Mistrza",
         "pt": "Máscara do Mestre Negro"
       },
       "width": 2,
@@ -632,6 +658,7 @@
         "en": "Dragon Knight Helm",
         "de": "Drachenritterhelm",
         "es": "Yelmo Caballero Dragón",
+        "pl": "Hełm Smoczego Rycerza",
         "pt": "Elmo do cavaleiro dragão"
       },
       "width": 2,
@@ -657,6 +684,7 @@
         "en": "Venom Mist Helm",
         "de": "Giftnebelhelm",
         "es": "Yelmo Bruma de Veneno",
+        "pl": "Hełm Jadowitej Mgły",
         "pt": "Elmo da névoa de veneno"
       },
       "width": 2,
@@ -682,6 +710,7 @@
         "en": "Sylphid Ray Helm",
         "de": "Sylphenstrahlhelm",
         "es": "Yelmo Rayo de Sílfide",
+        "pl": "Hełm Sylphid Ray",
         "pt": "Elmo do raio silfídico"
       },
       "width": 2,
@@ -707,6 +736,7 @@
         "en": "Sunlight Mask",
         "de": "Sonnenlichtmaske",
         "es": "Máscara Luz Solar",
+        "pl": "Maska Słońca",
         "pt": "Máscara da luz do sol"
       },
       "width": 2,
@@ -732,6 +762,7 @@
         "en": "Ashcrow Helm",
         "de": "Aschkrähenhelm",
         "es": "Yelmo Cuervo Ceniza",
+        "pl": "Hełm Ashcrow",
         "pt": "Elmo de Ashcrow"
       },
       "width": 2,
@@ -755,6 +786,7 @@
         "en": "Eclipse Helm",
         "de": "Finsternishelm",
         "es": "Yelmo Eclipse",
+        "pl": "Hełm Zaćmienia",
         "pt": "Elmo do eclipse"
       },
       "width": 2,
@@ -778,6 +810,7 @@
         "en": "Iris Helm",
         "de": "Iris-Helm",
         "es": "Yelmo Iris",
+        "pl": "Hełm Iris",
         "pt": "Elmo de Iris"
       },
       "width": 2,
@@ -801,6 +834,7 @@
         "en": "Glorious Mask",
         "de": "Glorreiche Maske",
         "es": "Máscara Gloriosa",
+        "pl": "Chwalebna maska",
         "pt": "Máscara gloriosa"
       },
       "width": 2,
@@ -824,6 +858,7 @@
         "en": "Violent Wind Helm",
         "de": "Sturmwindhelm",
         "es": "Yelmo Viento Violento",
+        "pl": "Hełm Gwałtownego Wiatru",
         "pt": "Elmo do vento violento"
       },
       "width": 2,
@@ -847,6 +882,7 @@
         "en": "Red Wing Helm",
         "de": "Rotschwingenhelm",
         "es": "Yelmo Ala Roja",
+        "pl": "Hełm Czerwonego Skrzydła",
         "pt": "Elmo da asa vermelha"
       },
       "width": 2,
@@ -871,6 +907,7 @@
         "en": "Ancient Helm",
         "de": "Uralter Helm",
         "es": "Yelmo Antiguo",
+        "pl": "Pradawny hełm",
         "pt": "Elmo antigo"
       },
       "width": 2,
@@ -895,6 +932,7 @@
         "en": "Demonic Helm",
         "de": "Dämonischer Helm",
         "es": "Yelmo Demoníaco",
+        "pl": "Demoniczny hełm",
         "pt": "Elmo demoníaco"
       },
       "width": 2,
@@ -918,6 +956,7 @@
         "en": "Storm Blitz Helm",
         "de": "Sturmblitzhelm",
         "es": "Yelmo Ráfaga Tormentosa",
+        "pl": "Hełm Burzowego Błysku",
         "pt": "Elmo Relâmpago de Tempestade"
       },
       "width": 2,
@@ -943,6 +982,7 @@
         "en": "Eternal Wing Helm",
         "de": "Ewigschwingenhelm",
         "es": "Yelmo Ala Eterna",
+        "pl": "Hełm Wiecznego Skrzydła",
         "pt": "Elmo da asa eterna"
       },
       "width": 2,
@@ -968,6 +1008,7 @@
         "en": "Titan  Helm",
         "de": "Titanenhelm",
         "es": "Yelmo Titán",
+        "pl": "Hełm Tytana",
         "pt": "Elmo do titã"
       },
       "width": 2,
@@ -992,6 +1033,7 @@
         "en": "Brave Helm",
         "de": "Tapferer Helm",
         "es": "Yelmo Valeroso",
+        "pl": "Hełm Śmiałka",
         "pt": "Elmo do guerreiro"
       },
       "width": 2,
@@ -1016,6 +1058,7 @@
         "en": "Seraphim Helm",
         "de": "Seraphim-Helm",
         "es": "Yelmo Serafín",
+        "pl": "Hełm Serafina",
         "pt": "Elmo de serafim"
       },
       "width": 2,
@@ -1040,6 +1083,7 @@
         "en": "Faith Helm",
         "de": "Glaubenshelm",
         "es": "Yelmo de Fe",
+        "pl": "Hełm Wiary",
         "pt": "Elmo da fé"
       },
       "width": 2,
@@ -1065,6 +1109,7 @@
         "en": "Royal Mask",
         "de": "Königliche Maske",
         "es": "Máscara Real",
+        "pl": "Królewska maska",
         "pt": "Máscara real"
       },
       "width": 2,
@@ -1089,6 +1134,7 @@
         "en": "Hades Helm",
         "de": "Hades-Helm",
         "es": "Yelmo Hades",
+        "pl": "Hełm Hadesa",
         "pt": "Elmo de Hades"
       },
       "width": 2,
@@ -1114,6 +1160,7 @@
         "en": "Sacred Fire Helm",
         "de": "Heiligfeuerhelm",
         "es": "Casco de Fuego Sagrado",
+        "pl": "Hełm Świętego Ognia",
         "pt": "Elmo de Fogo Sagrado"
       },
       "width": 2,
@@ -1138,6 +1185,7 @@
         "en": "Storm Jahad Helm",
         "de": "Sturm-Jahad-Helm",
         "es": "Casco de Tormenta Zahard",
+        "pl": "Hełm Storm Jahad",
         "pt": "Elmo de Tempestade Zahard"
       },
       "width": 2,
@@ -1161,6 +1209,7 @@
         "en": "Piercing Groove Helm",
         "de": "Durchbohrerhelm",
         "es": "Casco de Tallo Perforador",
+        "pl": "Hełm Piercing Groove",
         "pt": "Elmo de Entalhe Perfurante"
       },
       "width": 2,
@@ -1184,6 +1233,7 @@
         "en": "Scale Helm",
         "de": "Schuppenhelm",
         "es": "Yelmo de Escamas",
+        "pl": "Łuskowy hełm",
         "pt": "Elmo de escamas"
       },
       "tags": ["luckyItem"],
@@ -1216,6 +1266,7 @@
         "en": "Silk Helm",
         "de": "Seidenhelm",
         "es": "Yelmo de Seda",
+        "pl": "Jedwabny hełm",
         "pt": "Elmo de seda"
       },
       "tags": ["luckyItem"],
@@ -1246,6 +1297,7 @@
         "en": "Sphinx Helm",
         "de": "Sphinxhelm",
         "es": "Casco Esfinge",
+        "pl": "Hełm Sfinksa",
         "pt": "Elmo de Esfinge"
       },
       "tags": ["luckyItem"],
@@ -1276,6 +1328,7 @@
         "en": "Violent Wind Helm",
         "de": "Sturmwindhelm",
         "es": "Yelmo Viento Violento",
+        "pl": "Hełm Gwałtownego Wiatru",
         "pt": "Elmo do vento violento"
       },
       "tags": ["luckyItem"],
@@ -1306,6 +1359,7 @@
         "en": "Adamantine Mask",
         "de": "Adamantmaske",
         "es": "Máscara Adamantina",
+        "pl": "Adamantytowa maska",
         "pt": "Máscara de adamantina"
       },
       "tags": ["luckyItem"],
@@ -1336,6 +1390,7 @@
         "en": "Dragon Helm",
         "de": "Drachenhelm",
         "es": "Casco Dragón",
+        "pl": "Smoczy hełm",
         "pt": "Elmo de Dragão"
       },
       "tags": ["luckyItem"],
@@ -1366,6 +1421,7 @@
         "en": "Guardian Helm",
         "de": "Wächterhelm",
         "es": "Yelmo Guardián",
+        "pl": "Hełm Strażnika",
         "pt": "Elmo de Guardião"
       },
       "tags": ["luckyItem"],
@@ -1396,6 +1452,7 @@
         "en": "Legendary Helm",
         "de": "Legendärer Helm",
         "es": "Casco Legendario",
+        "pl": "Legendarny hełm",
         "pt": "Elmo Lendário"
       },
       "tags": ["luckyItem"],
@@ -1426,6 +1483,7 @@
         "en": "Red Wing Helm",
         "de": "Rotschwingenhelm",
         "es": "Yelmo Ala Roja",
+        "pl": "Hełm Czerwonego Skrzydła",
         "pt": "Elmo da asa vermelha"
       },
       "tags": ["luckyItem"],
@@ -1456,6 +1514,7 @@
         "en": "Storm Jahad Helm",
         "de": "Sturm-Jahad-Helm",
         "es": "Casco de Tormenta Zahard",
+        "pl": "Hełm Storm Jahad",
         "pt": "Elmo de Tempestade Zahard"
       },
       "tags": ["luckyItem"],
@@ -1486,6 +1545,7 @@
         "en": "Phoenix Soul Helmet",
         "de": "Phönixseelenhelm",
         "es": "Casco de Alma de Fénix",
+        "pl": "Hełm Duszy Feniksa",
         "pt": "Elmo de Alma de Fênix"
       },
       "width": 2,

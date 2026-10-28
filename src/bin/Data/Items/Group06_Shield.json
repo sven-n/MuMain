@@ -8,6 +8,7 @@
         "en": "Small Shield",
         "de": "Kleiner Schild",
         "es": "Escudo Pequeño",
+        "pl": "Mała tarcza",
         "pt": "Escudo pequeno"
       },
       "width": 2,
@@ -37,6 +38,7 @@
         "en": "Horn Shield",
         "de": "Hornschild",
         "es": "Escudo Cuerno",
+        "pl": "Rogowa tarcza",
         "pt": "Escudo de chifre"
       },
       "width": 2,
@@ -64,6 +66,7 @@
         "en": "Kite Shield",
         "de": "Normannenschild",
         "es": "Escudo Cometa",
+        "pl": "Tarcza migdałowa",
         "pt": "Escudo ogival"
       },
       "width": 2,
@@ -91,6 +94,7 @@
         "en": "Elven Shield",
         "de": "Elfenschild",
         "es": "Escudo de los Elfos",
+        "pl": "Elfia tarcza",
         "pt": "Escudo élfico"
       },
       "width": 2,
@@ -117,6 +121,7 @@
         "en": "Buckler",
         "de": "Faustschild",
         "es": "Broquel",
+        "pl": "Puklerz",
         "pt": "Broquel"
       },
       "width": 2,
@@ -147,6 +152,7 @@
         "en": "Dragon Slayer Shield",
         "de": "Drachentöterschild",
         "es": "Escudo Mata Dragones",
+        "pl": "Tarcza Pogromcy Smoków",
         "pt": "Escudo do matador de dragões"
       },
       "width": 2,
@@ -176,6 +182,7 @@
         "en": "Skull Shield",
         "de": "Schädelschild",
         "es": "Escudo Calavera",
+        "pl": "Tarcza czaszki",
         "pt": "Escudo da caveira"
       },
       "width": 2,
@@ -206,6 +213,7 @@
         "en": "Spiked Shield",
         "de": "Stachelschild",
         "es": "Escudo con Púas",
+        "pl": "Kolczasta tarcza",
         "pt": "Escudo com espinhos"
       },
       "width": 2,
@@ -234,6 +242,7 @@
         "en": "Tower Shield",
         "de": "Turmschild",
         "es": "Escudo Torre",
+        "pl": "Tarcza wieżowa",
         "pt": "Escudo de torre"
       },
       "width": 2,
@@ -263,6 +272,7 @@
         "en": "Plate Shield",
         "de": "Plattenschild",
         "es": "Escudo de Plata",
+        "pl": "Płytowa tarcza",
         "pt": "Escudo de placa"
       },
       "width": 2,
@@ -291,6 +301,7 @@
         "en": "Large Round Shield",
         "de": "Großer Rundschild",
         "es": "Escudo Redondo Grande",
+        "pl": "Duża okrągła tarcza",
         "pt": "Grande escudo redondo"
       },
       "width": 2,
@@ -319,6 +330,7 @@
         "en": "Serpent Shield",
         "de": "Schlangenschild",
         "es": "Escudo Serpiente",
+        "pl": "Wężowa tarcza",
         "pt": "Escudo da serpente"
       },
       "width": 2,
@@ -348,6 +360,7 @@
         "en": "Bronze Shield",
         "de": "Bronzeschild",
         "es": "Escudo de Bronce",
+        "pl": "Brązowa tarcza",
         "pt": "Escudo de bronze"
       },
       "width": 2,
@@ -375,6 +388,7 @@
         "en": "Dragon Shield",
         "de": "Drachenschild",
         "es": "Escudo Dragón",
+        "pl": "Smocza tarcza",
         "pt": "Escudo do dragão"
       },
       "width": 2,
@@ -403,6 +417,7 @@
         "en": "Legendary Shield",
         "de": "Legendärer Schild",
         "es": "Escudo Legendario",
+        "pl": "Legendarna tarcza",
         "pt": "Escudo lendário"
       },
       "width": 2,
@@ -431,6 +446,7 @@
         "en": "Grand Soul Shield",
         "de": "Großseelenschild",
         "es": "Escudo Gran Alma",
+        "pl": "Tarcza Wielkiej Duszy",
         "pt": "Grande escudo da alma"
       },
       "width": 2,
@@ -457,6 +473,7 @@
         "en": "Elemental Shield",
         "de": "Elementarschild",
         "es": "Escudo Elemental",
+        "pl": "Tarcza żywiołów",
         "pt": "Escudo elemental"
       },
       "width": 2,
@@ -484,6 +501,7 @@
         "en": "Crimson Glory",
         "de": "Purpurruhm",
         "es": "Gloria Carmesí",
+        "pl": "Szkarłatna Chwała",
         "pt": "Glória carmesim"
       },
       "width": 2,
@@ -512,6 +530,7 @@
         "en": "Salamander Shield",
         "de": "Salamanderschild",
         "es": "Escudo Salamandra",
+        "pl": "Tarcza Salamandry",
         "pt": "Escudo da salamandra"
       },
       "width": 2,
@@ -540,6 +559,7 @@
         "en": "Frost Barrier",
         "de": "Frostbarriere",
         "es": "Barrera Congelada",
+        "pl": "Mroźna Bariera",
         "pt": "Barreira gelada"
       },
       "width": 2,
@@ -568,6 +588,7 @@
         "en": "Guardian Shield",
         "de": "Wächterschild",
         "es": "Escudo Guardián",
+        "pl": "Tarcza Strażnika",
         "pt": "Escudo do guardião"
       },
       "width": 2,
@@ -596,6 +617,7 @@
         "en": "Cross Shield",
         "de": "Kreuzschild",
         "es": "Escudo Cruz",
+        "pl": "Tarcza z krzyżem",
         "pt": "Escudo em cruz"
       },
       "width": 2,
