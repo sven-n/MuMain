@@ -2658,11 +2658,12 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
     }
 }
 
-int BuildRepairInfoText(ITEM* ip)
+RepairInfoText BuildRepairInfoText(ITEM* ip)
 {
+    RepairInfoText info;
     if (GameLogic::Items::IsRepairBan(ip) == true)
     {
-        return 0;
+        return info;
     }
 
     ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
@@ -2690,11 +2691,11 @@ int BuildRepairInfoText(ITEM* ip)
         maxDurability = CalcMaxDurability(ip, p, Level);
         if (ip->Durability < maxDurability)
         {
-            RepairEnable = 2;
+            info.repairEnable = 2;
 
             int iGold = ItemValue(ip, 2);
             if (iGold == -1)
-                return 0;
+                return info;
             ConvertRepairGold(iGold, ip->Durability, maxDurability, ip->Type, Text);
             mu_swprintf(TextList[TextNum], I18N::Game::RepairingCostS, Text);
 
@@ -2702,7 +2703,7 @@ int BuildRepairInfoText(ITEM* ip)
         }
         else
         {
-            RepairEnable = 1;
+            info.repairEnable = 1;
             mu_swprintf(TextList[TextNum], I18N::Game::RepairingCostS, L"0");
             TextListColor[TextNum] = Color;
         }
@@ -2732,7 +2733,8 @@ int BuildRepairInfoText(ITEM* ip)
     }
 
     mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-    return TextNum;
+    info.lineCount = TextNum;
+    return info;
 }
 
 // (sx, sy) in the screen's 640x480 stretch, `screen`.
@@ -2747,7 +2749,12 @@ static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int s
     // tooltip would otherwise have lingered.
     UI::Tooltip::HideLegacyTextList();
 
-    if (BuildRepairInfoText(ip) == 0)
+    const RepairInfoText info = BuildRepairInfoText(ip);
+    if (info.repairEnable)
+    {
+        RepairEnable = *info.repairEnable;
+    }
+    if (info.lineCount == 0)
     {
         return;
     }

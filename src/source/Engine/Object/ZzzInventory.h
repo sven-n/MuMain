@@ -255,9 +255,17 @@ void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure);
 std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inventype = 0,
                                                    bool bItemTextListBoxUse = false);
 void RenderRepairInfoAtPx(float x, float y, ITEM* ip, bool Sell);
+// What BuildRepairInfoText built: the count of lines, and what a click on the item does in repair mode.
+struct RepairInfoText
+{
+    // 0 when the item shows no repair tooltip.
+    int lineCount = 0;
+    // RepairEnable for the drawn tooltip: 2 a click repairs the item, 1 it has nothing to repair; none: as it was.
+    std::optional<int> repairEnable;
+};
 // Fills TextList, TextListColor and TextBold with the repair tooltip's lines for the item, as RenderRepairInfoAtPx
-// shows them; the count of lines, or 0 when the item shows no repair tooltip.
-int BuildRepairInfoText(ITEM* ip);
+// shows them; leaves RepairEnable to the caller that draws them.
+RepairInfoText BuildRepairInfoText(ITEM* ip);
 // A drop's name on the ground (Alt, or the pointer over it): its text, colors and whether its font is bold.
 struct GroundItemLabel
 {

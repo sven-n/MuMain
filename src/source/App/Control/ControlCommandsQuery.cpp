@@ -237,7 +237,7 @@ std::string& MutableBuildIdentifier()
 
 // Absolute path for a caller-given one, so the answer names a file the
 // caller can open regardless of the client's working directory. Used by every
-// command that writes a file (`screenshot`, `tooltip-snapshot`).
+// command that writes a file (`screenshot`, `tooltip-snapshot`, `item-name-snapshot`).
 std::filesystem::path ResolveScreenshotPath(const std::string& requested)
 {
     // Through the wide form: a std::string given to std::filesystem::path is
@@ -492,9 +492,19 @@ bool ReadBounded(const Request& request, const char* key, int max, int& value)
 {
     return !request.Has(key) || (request.GetInt(key, value) && value >= 0 && value <= max);
 }
-} // namespace
 
-std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
+// The answer to a request that names an item number no item uses: it would get the lines of an empty item.
+std::string NoSuchItem(const Request& request, int group, int number)
+{
+    return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                       "no item has group " + std::to_string(group) + " and number " + std::to_string(number));
+}
+
+// Reads the item a request names into `params`: `group` and `number`, and the fields `level`, `durability`, `luck`,
+// `skill`, `option`, `excellent`, `ancient`, `harmony` and `harmony_level`, as the server would send them (left out:
+// 0, and full durability for the item as made). Returns the `bad_request` to answer when a field is missing or can't
+// be held, or no item uses the number; empty when the item is read.
+std::string ReadItemParameters(const Request& request, const std::string& command, ItemCreationParams& params)
 {
     int group = -1;
     int number = -1;
@@ -502,7 +512,7 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
         number < 0 || number >= MAX_ITEM_INDEX)
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
-                           "`tooltip` needs `group` and `number` of an item");
+                           "`" + command + "` needs `group` and `number` of an item");
     }
 
     // The item's fields hold these values (as the item packet has them); a value they can't hold is a `bad_request`,
@@ -529,18 +539,14 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
                            "`harmony_level` needs `harmony`, the Jewel of Harmony option");
     }
-    // An item number no item uses would answer with the tooltip of an empty item.
     if (g_ItemDatabase.Find(group, number) == nullptr)
     {
-        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
-                           "no item has group " + std::to_string(group) + " and number " + std::to_string(number));
+        return NoSuchItem(request, group, number);
     }
 
-    ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(group, number);
+    params = Engine::Items::TooltipSnapshot::FullItemParameters(group, number);
     if (level >= 0)
         params.Level = static_cast<BYTE>(level);
-    if (durability >= 0)
-        params.Durability = static_cast<BYTE>(durability);
     bool flag = false;
     if (request.GetBool("luck", flag))
         params.WithLuck = flag;
@@ -567,6 +573,20 @@ std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
         params.HarmonyOptionType = static_cast<BYTE>(harmony);
         if (harmonyLevel >= 0)
             params.HarmonyOptionLevel = static_cast<BYTE>(harmonyLevel);
+    }
+    // The full durability grows with the level and the options, so it is taken once they are set.
+    params.Durability =
+        durability >= 0 ? static_cast<BYTE>(durability) : Engine::Items::TooltipSnapshot::FullDurability(params);
+    return {};
+}
+} // namespace
+
+std::string ItemTooltip(const Request& request, std::unique_ptr<Act>&)
+{
+    ItemCreationParams params{};
+    if (std::string refusal = ReadItemParameters(request, "tooltip", params); !refusal.empty())
+    {
+        return refusal;
     }
 
     const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(params);
@@ -619,43 +639,25 @@ std::string ItemTooltipSnapshot(const Request& request, std::unique_ptr<Act>&)
     return EncodeResult(request.EncodedId(), result.dump());
 }
 
-namespace
-{
-// The six excellent options, as bits 0 to 5 of an item's excellent flags.
-constexpr int MaxExcellentFlags = 63;
-
-// Reads `group` and `number` (and `level`, 0 when left out) into an item type; false when they name no item slot.
-bool ReadItemType(const Request& request, int& type, int& level)
+std::string ItemName(const Request& request, std::unique_ptr<Act>&)
 {
     int group = -1;
     int number = -1;
-    if (!request.GetInt("group", group) || !request.GetInt("number", number) || group < 0 || group >= MAX_ITEM_TYPE ||
-        number < 0 || number >= MAX_ITEM_INDEX)
-    {
-        return false;
-    }
-    level = 0;
-    if (request.Has("level") && (!request.GetInt("level", level) || level < 0 || level >= Data::Items::ItemLevelCount))
-    {
-        return false;
-    }
-    type = group * MAX_ITEM_INDEX + number;
-    return true;
-}
-} // namespace
-
-std::string ItemName(const Request& request, std::unique_ptr<Act>&)
-{
-    int type = 0;
     int level = 0;
-    if (!ReadItemType(request, type, level))
+    if (!request.GetInt("group", group) || !request.GetInt("number", number) || group < 0 || group >= MAX_ITEM_TYPE ||
+        number < 0 || number >= MAX_ITEM_INDEX ||
+        !ReadBounded(request, "level", Data::Items::ItemLevelCount - 1, level))
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
                            "`item-name` needs `group` and `number` of an item, and a `level` of 0 to 15");
     }
+    if (g_ItemDatabase.Find(group, number) == nullptr)
+    {
+        return NoSuchItem(request, group, number);
+    }
 
     json result;
-    result["name"] = Core::Text::ToUtf8(App::Control::ItemDisplayName(type, level).c_str());
+    result["name"] = Core::Text::ToUtf8(App::Control::ItemDisplayName(group * MAX_ITEM_INDEX + number, level).c_str());
     return EncodeResult(request.EncodedId(), result.dump());
 }
 
@@ -672,7 +674,8 @@ std::string ItemNameSnapshot(const Request& request, std::unique_ptr<Act>&)
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`group` is an item group, 0 to 15");
     }
-    std::ofstream out(std::filesystem::path(Core::Text::FromUtf8(path)), std::ios::binary);
+    const std::filesystem::path file = ResolveScreenshotPath(path);
+    std::ofstream out(file, std::ios::binary);
     if (!out)
     {
         return EncodeError(request.EncodedId(), ErrorCode::Failed, "the file could not be written");
@@ -702,60 +705,24 @@ std::string ItemNameSnapshot(const Request& request, std::unique_ptr<Act>&)
 
     json result;
     result["names"] = names;
-    result["out"] = path;
+    result["out"] = Core::Text::ToUtf8(file.wstring().c_str());
     return EncodeResult(request.EncodedId(), result.dump());
 }
 
 std::string RepairTooltip(const Request& request, std::unique_ptr<Act>&)
 {
-    int type = 0;
-    int level = 0;
-    if (!ReadItemType(request, type, level))
-    {
-        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
-                           "`repair-tooltip` needs `group` and `number` of an item, and a `level` of 0 to 15");
-    }
-
-    // The item's byte fields: a value they can't hold is a `bad_request`, not a wrapped one.
-    int durability = -1;
-    if (request.Has("durability") && (!request.GetInt("durability", durability) || durability < 0 || durability > 255))
-    {
-        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`durability` is 0 to 255");
-    }
-    int excellent = 0;
-    if (request.Has("excellent") &&
-        (!request.GetInt("excellent", excellent) || excellent < 0 || excellent > MaxExcellentFlags))
-    {
-        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
-                           "`excellent` is the excellent options' bits, 0 to " + std::to_string(MaxExcellentFlags));
-    }
-
-    // An item as the server would send it: full durability unless `durability` says otherwise.
     ItemCreationParams params{};
-    params.Group = type / MAX_ITEM_INDEX;
-    params.Number = type % MAX_ITEM_INDEX;
-    params.Level = static_cast<BYTE>(level);
-    params.Durability = static_cast<BYTE>(durability >= 0 ? durability : ItemAttribute[type].Durability);
-    if (excellent > 0)
+    if (std::string refusal = ReadItemParameters(request, "repair-tooltip", params); !refusal.empty())
     {
-        params.HasExcellentOption = true;
-        params.ExcellentFlags = static_cast<BYTE>(excellent);
+        return refusal;
     }
-    ITEM* item = g_pNewItemMng->CreateItemByParameters(&params);
-    if (item == nullptr)
-    {
-        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "the item could not be made");
-    }
-
-    // Building the lines also sets whether a click would repair; that is the drawn tooltip's to say.
-    const int repairEnable = RepairEnable;
-    const int lineCount = BuildRepairInfoText(item);
-    RepairEnable = repairEnable;
-    g_pNewItemMng->DeleteItem(item);
+    ITEM item;
+    FillItemFromParameters(item, params);
+    const RepairInfoText repair = BuildRepairInfoText(&item);
 
     json result;
     result["lines"] = json::array();
-    for (int line = 0; line < lineCount; ++line)
+    for (int line = 0; line < repair.lineCount; ++line)
     {
         result["lines"].push_back({{"text", Core::Text::ToUtf8(TextList[line])},
                                    {"color", TextListColor[line]},
