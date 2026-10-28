@@ -9,6 +9,7 @@
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "../MuEditor/UI/Common/SavedDataFiles.h"
 #include "../MuEditor/UI/ItemTools/ItemCheckArea.h"
 #include "../MuEditor/UI/ItemTools/ItemToolWindow.h"
 #include "../MuEditor/UI/MonsterTools/MonsterCheckArea.h"
@@ -115,6 +116,7 @@ void MuDataChecksUI::RunChecks()
     m_checked = true;
     m_checkedItemVersion = Items::ToolWindow::GetDataVersion();
     m_checkedMonsterVersion = Monsters::ToolWindow::GetDataVersion();
+    m_checkedFileSaves = SavedDataFiles::GetSaveCount();
 }
 
 void MuDataChecksUI::RenderCheckLine()
@@ -149,12 +151,14 @@ void MuDataChecksUI::RenderAreaBoxes()
     }
 }
 
-// The items and the monsters can change in the editor; the files of the other
-// areas only outside it.
+// The items and the monsters change in their tools; of the other areas' files
+// the editor writes the server list and the look files. Changes made outside
+// the editor are not seen.
 bool MuDataChecksUI::DataChangedSinceCheck() const
 {
     return Items::ToolWindow::GetDataVersion() != m_checkedItemVersion ||
-           Monsters::ToolWindow::GetDataVersion() != m_checkedMonsterVersion;
+           Monsters::ToolWindow::GetDataVersion() != m_checkedMonsterVersion ||
+           SavedDataFiles::GetSaveCount() != m_checkedFileSaves;
 }
 } // namespace MuEditor::DataChecks
 

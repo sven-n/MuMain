@@ -26,12 +26,15 @@ public:
 
     void Render(bool* open);
 
+    // The item or monster data changed, or the editor saved a file of the
+    // other areas, since the last check.
+    bool DataChangedSinceCheck() const;
+
 private:
     bool BeginWindow(bool* open);
     void RunChecks();
     void RenderCheckLine();
     void RenderAreaBoxes();
-    bool DataChangedSinceCheck() const;
 
     std::vector<std::unique_ptr<DataCheckArea>> m_areas;
     // m_areas as the table takes them.
@@ -41,6 +44,8 @@ private:
     // The item and monster tools' data versions when the checks ran.
     long long m_checkedItemVersion = 0;
     int m_checkedMonsterVersion = 0;
+    // SavedDataFiles::GetSaveCount() when the checks ran.
+    int m_checkedFileSaves = 0;
 };
 } // namespace MuEditor::DataChecks
 

@@ -8,6 +8,7 @@
 #include "../MuEditor/UI/Common/KeyboardSelection.h"
 #include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "../MuEditor/UI/Common/SavedDataFiles.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/ServerListData/ServerListJson.h"
@@ -296,6 +297,7 @@ void CMuServerListUI::Save()
         return;
     }
     m_edits.MarkSaved();
+    MuEditor::SavedDataFiles::NoteSaved();
     m_status = I18N::Format(I18N::Editor::SavedTo0, {Data::ServerList::ServerListFile});
     m_statusIsError = false;
 }

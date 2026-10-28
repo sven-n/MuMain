@@ -15,6 +15,7 @@
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "I18N/All.h"
 #include "UI/Common/MuEditorWindowIds.h"
+#include "UI/Common/SavedDataFiles.h"
 #include "UI/DataChecks/MuDataChecksUI.h"
 #include "UI/MonsterTools/MonsterCheckArea.h"
 #include "UI/MonsterTools/MonsterEdits.h"
@@ -150,6 +151,22 @@ TEST_CASE("Data Checks: the problems stay until Check all, also of a monster rem
     g_MonsterSelection.Select(2);
     Click(*checks, ProblemRowId(0, I18N::Editor::Warning));
     CHECK(g_MonsterSelection.GetNumber() == 2);
+}
+
+TEST_CASE("Data Checks: a save of the server list or the looks counts as a change since the check [editor]")
+{
+    const ToolWindowsScope windows;
+    StartWith({Monster(2, "Budge Dragon")});
+    TestImGuiContext context;
+    const std::unique_ptr<MuDataChecksUI> checks = MonsterChecksWindow();
+    RenderChecks(*checks);
+    CHECK_FALSE(checks->DataChangedSinceCheck());
+
+    MuEditor::SavedDataFiles::NoteSaved();
+    CHECK(checks->DataChangedSinceCheck());
+
+    PressCheckAll(*checks);
+    CHECK_FALSE(checks->DataChangedSinceCheck());
 }
 
 TEST_CASE("Data Checks: an area's box hides its problems [editor][monsters]")
