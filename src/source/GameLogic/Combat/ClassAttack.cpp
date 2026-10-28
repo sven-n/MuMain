@@ -617,6 +617,16 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
             case AT_SKILL_TWISTING_SLASH_MASTERY:
                 o->Angle[2] = CreateAngle2D(o->Position, c->TargetPosition);
                 {
+                    if (!CheckTile(c, o, Distance))
+                    {
+                        if (PathFinding2(c->PositionX, c->PositionY, TargetX, TargetY, &c->Path, Distance))
+                        {
+                            c->Movement = true;
+                            c->MovementType = MOVEMENT_SKILL;
+                            SendMove(c, o);
+                        }
+                        break;
+                    }
                     BYTE PathX[1];
                     BYTE PathY[1];
                     PathX[0] = (c->PositionX);
