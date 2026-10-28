@@ -573,8 +573,8 @@ TEST_CASE("font style tokens stay paired with the resolved family and use suppor
 {
     Fixture fixture;
     REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf"));
-    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf",
-                              "Liberation Sans", Rml::Style::FontStyle::Italic, Rml::Style::FontWeight::Normal));
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf", "Liberation Sans",
+                              Rml::Style::FontStyle::Italic, Rml::Style::FontWeight::Normal));
     REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/DejaVuSans.ttf"));
     const auto parent = fixture.Theme("parent");
     const auto child = fixture.Theme("child");
@@ -595,8 +595,8 @@ TEST_CASE("font style tokens stay paired with the resolved family and use suppor
 TEST_CASE("unpaired theme families require a regular font face [ui][rml-theme]")
 {
     Fixture fixture;
-    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf",
-                              "Liberation Sans", Rml::Style::FontStyle::Italic, Rml::Style::FontWeight::Normal));
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf", "Liberation Sans",
+                              Rml::Style::FontStyle::Italic, Rml::Style::FontWeight::Normal));
     fixture.Write(fixture.Theme("child") / "tokens.ini",
                   "[Tokens]\nfont-body=Liberation Sans\nfont-title=Liberation Sans\n");
     const UI::RmlBridge::ThemeInheritance theme(fixture.Theme("child"));
@@ -608,8 +608,8 @@ TEST_CASE("missing map-name font falls back to the selected title family [ui][ma
 {
     Fixture fixture;
     REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf"));
-    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf",
-                              "Liberation Sans", Rml::Style::FontStyle::Italic, Rml::Style::FontWeight::Normal));
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf", "Liberation Sans",
+                              Rml::Style::FontStyle::Italic, Rml::Style::FontWeight::Normal));
     REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/DejaVuSans.ttf"));
     fixture.Write(fixture.Theme("child") / "tokens.ini", "[Tokens]\nfont-title=DejaVu Sans\nfont-title-style=italic\n");
     const UI::RmlBridge::ThemeInheritance theme(fixture.Theme("child"));
