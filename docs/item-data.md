@@ -1317,8 +1317,8 @@ values until they are made again.
 
 Item Sync exchanges the items and the item formulas with an OpenMU server
 through a file, the *item exchange file*. The server stays authoritative:
-the client never writes to it. (OpenMU's export and import of the file, and
-Update from server, which downloads it, are later steps of phase 7; see the
+the client never writes to it. (OpenMU's import page is a later step of
+phase 7; see the
 [design](superpowers/specs/2026-09-25-data-driven-items-design.md).)
 
 - **Import…** opens a file and lists how it differs from the client's
@@ -1337,6 +1337,21 @@ Update from server, which downloads it, are later steps of phase 7; see the
   change"), or that it cannot be read as an exchange file; a file that has
   the client's data already is left as it is. The written file says
   `"source": "MuMain"`.
+- **Update from server** downloads the server's file from its admin panel
+  and goes on as Import (the summary says "Update from …"). Enter the admin
+  panel's address next to the button (e.g. `https://admin.example.org`; it
+  is kept in `MuEditor/MuEditor.ini`, `[OpenMU] AdminPanelUrl`). The address
+  must be https; plain http only works for this computer (`localhost`,
+  `127.0.0.1`, `[::1]`). The editor asks for
+  `<address>/api/items/exchange` with the API key of the environment
+  variable `MU_OPENMU_API_KEY`: create a key on the admin panel's API keys
+  page (the Viewer role is enough) and set the variable before starting the
+  editor. The key is never written to a file or a log. The download runs in
+  the background and can be cancelled; the window says why one failed (no
+  address, no key, the server cannot be reached, 401 unknown key, 403 the
+  key lacks the Viewer role or the admin panel has no user yet, 404 an
+  OpenMU without the file, 429 too many requests). After Apply, the window
+  compares the downloaded file again without downloading it again.
 - **Compare two files** (folded under the path field) compares two exchange
   files, e.g. a client export with a server export, without the client's
   data: pick file A and file B (**Swap** swaps them), then **Compare the
@@ -1392,6 +1407,14 @@ number, fields with their default value left out, LF line endings.
   names the server's installation.
 - Only `season6` data is exchanged; a file of another `gameVersion` is
   refused, as is a `formatVersion` the client does not know.
+- `fields` (format version 2) lists the item fields the file carries, by
+  their keys (`"fields": ["width", "height"]`). OpenMU's export adds its
+  fields one at a time, so it names the ones it has. Only these fields are
+  compared and taken; the client keeps its values of the others, and a file
+  that does not list `name` has items without one. A file without `fields`
+  carries every field; the client's own export writes it so, as version 1.
+  An editor that only reads version 1 refuses a file with the list, instead
+  of reading the fields it lacks as their defaults.
 - `formulas` is the [item stat file](#item-stats-by-level) without its
   `formatVersion` and its profile rules, which stay with the client.
 - `items` has the fields both sides have, with the keys and meanings of the
@@ -1435,6 +1458,8 @@ number, fields with their default value left out, LF line endings.
 - **Stat profile**: a file's profile that the item's profile rules give
   leaves the item following its rules; another one becomes a pick (see
   Item Basics).
+- An item only a file with a `fields` list has is a locked row: the file
+  lacks some of its fields, so it is not added.
 - **Added items** get the client-only fields at their defaults; the
   two-handed flag follows the rule of the shipped items (groups 0 to 5, a
   hand slot, two cells wide or more) and the weapon kind follows the group,

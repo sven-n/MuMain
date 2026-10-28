@@ -11,6 +11,7 @@
 #include "ItemToolWindow.h"
 #include "ItemUsageView.h"
 
+#include "../MuEditor/Config/MuEditorConfig.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
@@ -226,13 +227,14 @@ float ChangeColumnWidth()
     return width;
 }
 
-// Reads an exchange file into `file`, its problems into `issues`; false when it cannot be used (an
-// item it has twice is no obstacle: the diff locks its row).
-bool ReadExchangeFile(const std::filesystem::path& path, const std::string& name, Data::Items::ItemExchangeFile& file,
-                      std::vector<ItemDataIssue>& issues)
+// Reads the text of an exchange file (nothing: it could not be read) into `file`, its problems
+// into `issues`; false when it cannot be used (an item it has twice is no obstacle: the diff locks
+// its row).
+bool ReadExchangeText(const std::optional<std::string>& text, const std::string& name,
+                      Data::Items::ItemExchangeFile& file, std::vector<ItemDataIssue>& issues)
 {
     std::vector<ItemDataIssue> fileIssues;
-    if (const std::optional<std::string> text = Data::Items::Json::ReadTextFile(path))
+    if (text)
     {
         ReadItemExchangeJson(*text, name, file, fileIssues);
     }
@@ -244,6 +246,43 @@ bool ReadExchangeFile(const std::filesystem::path& path, const std::string& name
     const bool usable = Data::Items::CanImportItemExchange(file, fileIssues);
     issues.insert(issues.end(), fileIssues.begin(), fileIssues.end());
     return usable;
+}
+
+bool ReadExchangeFile(const std::filesystem::path& path, const std::string& name, Data::Items::ItemExchangeFile& file,
+                      std::vector<ItemDataIssue>& issues)
+{
+    return ReadExchangeText(Data::Items::Json::ReadTextFile(path), name, file, issues);
+}
+
+// What an Update from server that has no file says.
+std::string DescribeServerProblem(const ServerDownload& download)
+{
+    switch (download.problem)
+    {
+    case ServerUpdateProblem::NoUrl:
+        return I18N::Editor::EnterTheAddressOfTheOpenMUAdminPanel;
+    case ServerUpdateProblem::InsecureUrl:
+        return I18N::Editor::TheAdminPanelAddressMustBeHttps;
+    case ServerUpdateProblem::NoKey:
+        return I18N::Format(I18N::Editor::SetTheEnvironmentVariable0ToAnApiKey, {OpenMUApiKeyVariable});
+    case ServerUpdateProblem::NoConnection:
+        return I18N::Format(I18N::Editor::TheAdminPanelCouldNotBeReached0, {download.detail});
+    case ServerUpdateProblem::KeyRefused:
+        return I18N::Format(I18N::Editor::TheAdminPanelRefusesTheApiKey0, {OpenMUApiKeyVariable});
+    case ServerUpdateProblem::NotAllowed:
+        return I18N::Editor::TheApiKeyMayNotDownloadTheItems;
+    case ServerUpdateProblem::NoEndpoint:
+        return I18N::Editor::TheAdminPanelHasNoItemExchange;
+    case ServerUpdateProblem::TooManyRequests:
+        return I18N::Editor::TooManyRequestsTryAgainInAMinute;
+    case ServerUpdateProblem::OtherStatus:
+        return I18N::Format(I18N::Editor::TheAdminPanelAnsweredWithHttpStatus0, {std::to_string(download.status)});
+    case ServerUpdateProblem::Cancelled:
+        return I18N::Editor::TheUpdateWasCancelled;
+    case ServerUpdateProblem::None:
+        break;
+    }
+    return {};
 }
 
 // How many rows add, change and remove an item.
@@ -299,7 +338,9 @@ void CMuItemSyncUI::Render(bool* open)
             m_knownLoaded = true;
         }
         TakeChosenFile();
+        TakeServerDownload();
         RenderButtons();
+        RenderServer();
         RenderExportResult();
         // An Apply whose comparison afterwards could not read the file still says what it did.
         if (!m_diff && !m_result.empty())
@@ -392,6 +433,99 @@ void CMuItemSyncUI::OpenFileDialog(FileAction action)
     }
 }
 
+bool CMuItemSyncUI::UpdateFromServer()
+{
+    m_serverMessage.clear();
+    if (m_download.IsRunning())
+    {
+        return false;
+    }
+    if (!m_adminPanelUrlLoaded)
+    {
+        m_adminPanelUrl = g_MuEditorConfig.GetOpenMUAdminPanelUrl();
+        m_adminPanelUrlLoaded = true;
+    }
+    ServerDownload refused;
+    const std::optional<std::string> url = GetExchangeUrl(m_adminPanelUrl, refused.problem);
+    const std::string apiKey = url ? ReadOpenMUApiKey() : std::string();
+    if (url && apiKey.empty())
+    {
+        refused.problem = ServerUpdateProblem::NoKey;
+    }
+    if (refused.problem != ServerUpdateProblem::None)
+    {
+        m_serverMessage = DescribeServerProblem(refused);
+        return false;
+    }
+    m_downloadUrl = *url;
+    return m_download.Start(*url, apiKey);
+}
+
+void CMuItemSyncUI::TakeServerDownload()
+{
+    std::optional<ServerDownload> download = m_download.TakeResult();
+    if (!download)
+    {
+        return;
+    }
+    if (download->problem != ServerUpdateProblem::None)
+    {
+        m_serverMessage = DescribeServerProblem(*download);
+        g_MuEditorConsoleUI.LogEditor(m_downloadUrl + ": " + m_serverMessage);
+        return;
+    }
+    // A diff must not change under an open confirmation; the download is then dropped.
+    if (m_confirmApply || m_pendingExport)
+    {
+        m_serverMessage = I18N::Editor::TheUpdateWasCancelled;
+        return;
+    }
+    CompareServerFile(download->body, m_downloadUrl);
+}
+
+void CMuItemSyncUI::RenderServer()
+{
+    if (!m_adminPanelUrlLoaded)
+    {
+        m_adminPanelUrl = g_MuEditorConfig.GetOpenMUAdminPanelUrl();
+        m_adminPanelUrlLoaded = true;
+    }
+    const bool downloading = m_download.IsRunning();
+    ImGui::BeginDisabled(downloading);
+    if (ImGui::Button(I18N::Editor::UpdateFromServer))
+    {
+        UpdateFromServer();
+    }
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(-Scaled(FieldColumnWidth));
+    InputString(I18N::Editor::AdminPanelAddress, m_adminPanelUrl);
+    if (ImGui::IsItemDeactivatedAfterEdit())
+    {
+        g_MuEditorConfig.SetOpenMUAdminPanelUrl(m_adminPanelUrl);
+        g_MuEditorConfig.Save();
+    }
+    ImGui::EndDisabled();
+    ImGui::PushTextWrapPos(0.0f);
+    if (downloading)
+    {
+        ImGui::TextUnformatted(I18N::Format(I18N::Editor::Downloading0, {m_downloadUrl}).c_str());
+        ImGui::SameLine();
+        if (ImGui::SmallButton(I18N::Editor::Cancel))
+        {
+            m_download.Cancel();
+        }
+    }
+    else if (!m_serverMessage.empty())
+    {
+        ImGui::TextColored(ErrorColor, "%s", m_serverMessage.c_str());
+    }
+    else
+    {
+        ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::WhatUpdateFromServerDoes, {OpenMUApiKeyVariable}).c_str());
+    }
+    ImGui::PopTextWrapPos();
+}
+
 void CMuItemSyncUI::RenderButtons()
 {
     if (ImGui::Button(I18N::Editor::Import))
@@ -469,10 +603,24 @@ void CMuItemSyncUI::RenderExportResult()
 
 void CMuItemSyncUI::Compare(const std::filesystem::path& path)
 {
+    m_fromServer = false;
+    m_serverText.clear();
+    m_path = ToText(path);
+    CompareText(Data::Items::Json::ReadTextFile(path), m_path);
+}
+
+void CMuItemSyncUI::CompareServerFile(const std::string& text, const std::string& url)
+{
+    m_fromServer = true;
+    m_serverText = text;
+    CompareText(text, url);
+}
+
+void CMuItemSyncUI::CompareText(const std::optional<std::string>& text, const std::string& name)
+{
     m_comparingFiles = false;
     m_toggleFields.clear();
-    m_path = ToText(path);
-    m_comparedPath = m_path;
+    m_comparedPath = name;
     m_result.clear();
     m_messages.clear();
     m_messagesAreErrors = false;
@@ -482,7 +630,7 @@ void CMuItemSyncUI::Compare(const std::filesystem::path& path)
     m_file = {};
 
     std::vector<ItemDataIssue> issues;
-    const bool usable = ReadExchangeFile(path, m_path, m_file, issues);
+    const bool usable = ReadExchangeText(text, name, m_file, issues);
     for (const ItemDataIssue& issue : issues)
     {
         m_messages.push_back(issue.ToString());
@@ -555,7 +703,8 @@ void CMuItemSyncUI::CompareFiles(const std::filesystem::path& a, const std::file
 
 CMuItemSyncUI::ApplyBlocker CMuItemSyncUI::GetApplyBlocker() const
 {
-    if (m_path != m_comparedPath)
+    // A file from the server is not the path field's.
+    if (!m_fromServer && m_path != m_comparedPath)
     {
         return ApplyBlocker::OtherPath;
     }
@@ -647,7 +796,14 @@ bool CMuItemSyncUI::Apply()
     // The differences that are left; what was not checked stays unchecked, so a second click
     // does not take it after all.
     const UncheckedRows unchecked = FindUnchecked(*m_diff);
-    Compare(ToPath(path));
+    if (m_fromServer)
+    {
+        CompareServerFile(std::string(m_serverText), path);
+    }
+    else
+    {
+        Compare(ToPath(path));
+    }
     if (m_diff)
     {
         KeepUnchecked(*m_diff, unchecked);
@@ -761,7 +917,7 @@ void CMuItemSyncUI::RenderSummary()
         ImGui::PopTextWrapPos();
         return;
     }
-    RenderFileLine(I18N::Editor::ImportFrom0, m_comparedPath, m_file);
+    RenderFileLine(m_fromServer ? I18N::Editor::UpdateFrom0 : I18N::Editor::ImportFrom0, m_comparedPath, m_file);
     ImGui::PushTextWrapPos(0.0f);
     // What the last Apply did comes before what it left.
     if (!m_result.empty())

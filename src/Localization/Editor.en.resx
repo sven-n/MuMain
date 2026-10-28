@@ -2842,4 +2842,52 @@
   <data name="The Item Browser lists it as Entry without a name" xml:space="preserve">
     <value>The Item Browser lists it as "Entry without a name"</value>
   </data>
+  <data name="Update from server" xml:space="preserve">
+    <value>Update from server</value>
+  </data>
+  <data name="Admin panel address" xml:space="preserve">
+    <value>Admin panel address</value>
+  </data>
+  <data name="Update from {0}" xml:space="preserve">
+    <value>Update from {0}</value>
+  </data>
+  <data name="Downloading {0}" xml:space="preserve">
+    <value>Downloading {0} ...</value>
+  </data>
+  <data name="What Update from server does" xml:space="preserve">
+    <value>Update from server downloads the items of an OpenMU server from its admin panel and lists how they differ from the client's, as Import does. The API key comes from the environment variable {0}.</value>
+  </data>
+  <data name="Enter the address of the OpenMU admin panel" xml:space="preserve">
+    <value>Enter the address of the OpenMU admin panel, e.g. https://admin.example.org or http://localhost:8080.</value>
+  </data>
+  <data name="The admin panel address must be https" xml:space="preserve">
+    <value>The admin panel's address must start with https://; http:// only works for this computer (localhost, 127.0.0.1, [::1]).</value>
+  </data>
+  <data name="Set the environment variable {0} to an api key" xml:space="preserve">
+    <value>Set the environment variable {0} to an API key of the admin panel (its API keys page; the Viewer role is enough) and start the editor again.</value>
+  </data>
+  <data name="The admin panel could not be reached ({0})" xml:space="preserve">
+    <value>The admin panel could not be reached ({0}).</value>
+  </data>
+  <data name="The admin panel refuses the api key ({0})" xml:space="preserve">
+    <value>The admin panel does not know the API key (401). Check {0}.</value>
+  </data>
+  <data name="The api key may not download the items" xml:space="preserve">
+    <value>The API key may not download the items (403): it needs the Viewer role, and the admin panel needs a user.</value>
+  </data>
+  <data name="The admin panel has no item exchange" xml:space="preserve">
+    <value>The admin panel has no item exchange file (404): it needs a newer OpenMU.</value>
+  </data>
+  <data name="Too many requests, try again in a minute" xml:space="preserve">
+    <value>Too many requests (429): try again in a minute.</value>
+  </data>
+  <data name="The admin panel answered with http status {0}" xml:space="preserve">
+    <value>The admin panel answered with HTTP status {0}.</value>
+  </data>
+  <data name="The update was cancelled" xml:space="preserve">
+    <value>The update was cancelled.</value>
+  </data>
+  <data name="The file does not carry all fields of an item, it is not added" xml:space="preserve">
+    <value>The file does not carry all of an item's fields: it is not added.</value>
+  </data>
 </root>

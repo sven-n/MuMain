@@ -374,7 +374,8 @@ private:
     int m_number = ItemDataIssue::NoItem;
     bool m_hasFatal = false;
     std::vector<ItemDataIssue>& m_issues;
-    // An item file's entry without a name has none.
+    // An item file's entry without a name has none, and so has an item of an exchange file
+    // that does not carry the names.
     bool m_nameRequired = true;
 };
 
@@ -1060,9 +1061,9 @@ OrderedJson WriteItemJson(const ItemDefinition& definition)
 }
 
 bool ReadItemJson(const OrderedJson& json, const std::string& source, int group, ItemDefinition& definition,
-                  std::vector<ItemDataIssue>& issues)
+                  std::vector<ItemDataIssue>& issues, bool nameRequired)
 {
-    ItemReader reader(source, group, issues);
+    ItemReader reader(source, group, issues, nameRequired);
     return reader.Read(json, definition);
 }
 

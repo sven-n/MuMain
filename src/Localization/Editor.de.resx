@@ -2821,4 +2821,52 @@
   <data name="The Item Browser lists it as Entry without a name" xml:space="preserve">
     <value>Die Gegenstandsliste zeigt es als „Eintrag ohne Namen“</value>
   </data>
+  <data name="Update from server" xml:space="preserve">
+    <value>Vom Server aktualisieren</value>
+  </data>
+  <data name="Admin panel address" xml:space="preserve">
+    <value>Adresse des Admin-Panels</value>
+  </data>
+  <data name="Update from {0}" xml:space="preserve">
+    <value>Aktualisierung von {0}</value>
+  </data>
+  <data name="Downloading {0}" xml:space="preserve">
+    <value>{0} wird heruntergeladen ...</value>
+  </data>
+  <data name="What Update from server does" xml:space="preserve">
+    <value>Vom Server aktualisieren lädt die Items eines OpenMU-Servers aus seinem Admin-Panel herunter und listet wie Import auf, worin sie sich von denen des Clients unterscheiden. Der API-Schlüssel kommt aus der Umgebungsvariable {0}.</value>
+  </data>
+  <data name="Enter the address of the OpenMU admin panel" xml:space="preserve">
+    <value>Geben Sie die Adresse des OpenMU-Admin-Panels ein, z. B. https://admin.example.org oder http://localhost:8080.</value>
+  </data>
+  <data name="The admin panel address must be https" xml:space="preserve">
+    <value>Die Adresse des Admin-Panels muss mit https:// beginnen; http:// geht nur für diesen Computer (localhost, 127.0.0.1, [::1]).</value>
+  </data>
+  <data name="Set the environment variable {0} to an api key" xml:space="preserve">
+    <value>Setzen Sie die Umgebungsvariable {0} auf einen API-Schlüssel des Admin-Panels (seine Seite API-Schlüssel; die Rolle Viewer genügt) und starten Sie den Editor neu.</value>
+  </data>
+  <data name="The admin panel could not be reached ({0})" xml:space="preserve">
+    <value>Das Admin-Panel ist nicht erreichbar ({0}).</value>
+  </data>
+  <data name="The admin panel refuses the api key ({0})" xml:space="preserve">
+    <value>Das Admin-Panel kennt den API-Schlüssel nicht (401). Prüfen Sie {0}.</value>
+  </data>
+  <data name="The api key may not download the items" xml:space="preserve">
+    <value>Der API-Schlüssel darf die Items nicht herunterladen (403): Er braucht die Rolle Viewer, und das Admin-Panel braucht einen Benutzer.</value>
+  </data>
+  <data name="The admin panel has no item exchange" xml:space="preserve">
+    <value>Das Admin-Panel hat keine Item-Austauschdatei (404): Es braucht ein neueres OpenMU.</value>
+  </data>
+  <data name="Too many requests, try again in a minute" xml:space="preserve">
+    <value>Zu viele Anfragen (429): Versuchen Sie es in einer Minute erneut.</value>
+  </data>
+  <data name="The admin panel answered with http status {0}" xml:space="preserve">
+    <value>Das Admin-Panel antwortete mit dem HTTP-Status {0}.</value>
+  </data>
+  <data name="The update was cancelled" xml:space="preserve">
+    <value>Die Aktualisierung wurde abgebrochen.</value>
+  </data>
+  <data name="The file does not carry all fields of an item, it is not added" xml:space="preserve">
+    <value>Die Datei enthält nicht alle Felder eines Items: Es wird nicht hinzugefügt.</value>
+  </data>
 </root>
