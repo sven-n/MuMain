@@ -10,6 +10,7 @@
 #include "UI/HUD/UIMapName.h"
 #include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlPointer.h"
+#include "UI/RmlBridge/RmlNativeTextFit.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/ThemeFonts.h"
 #include "UI/RmlBridge/ThemeInheritance.h"
@@ -19,6 +20,7 @@
 #include <RmlUi/Core/FontEngineInterface.h>
 #include <RmlUi/Core/FontEffect.h>
 #include <RmlUi/Core/FontGlyph.h>
+#include <RmlUi/Core/TextShapingContext.h>
 #include <SDL3/SDL.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -124,32 +126,37 @@ void CheckName(int mapId, const wchar_t* expected)
     CHECK(std::wstring(gMapManager.GetMapName(mapId)) == expected);
 }
 
-// The originals' edge: a soft dark halo, a black outline and a thin grey rim against the fill, in
-// that order behind the text. RmlUi draws font effects in pixels whatever the unit, so their
-// reference widths are scaled with the whole banner.
+// One screen-pixel outline keeps contrast without introducing a blurred halo.
 void CheckTextEffects(Rml::Element& text)
 {
     const auto* property = text.GetProperty(Rml::PropertyId::FontEffect);
     REQUIRE(property != nullptr);
     const auto effects = property->Get<Rml::FontEffectsPtr>();
     REQUIRE(effects != nullptr);
-    REQUIRE(effects->list.size() == 3);
-    constexpr int probeSize = 10;
+    REQUIRE(effects->list.size() == 1);
     Rml::FontGlyph glyph;
-    for (const auto& effect : effects->list)
-    {
-        Rml::Vector2i origin(0, 0), dimensions(probeSize, probeSize);
-        REQUIRE(effect->GetGlyphMetrics(origin, dimensions, glyph));
-        CHECK(effect->GetLayer() == Rml::FontEffect::Layer::Back);
-    }
-    for (const auto& [index, width] : {std::pair{1, 3}, std::pair{2, 1}})
-    {
-        CAPTURE(index);
-        Rml::Vector2i origin(0, 0), dimensions(probeSize, probeSize);
-        REQUIRE(effects->list[index]->GetGlyphMetrics(origin, dimensions, glyph));
-        CHECK(origin == Rml::Vector2i(-width, -width));
-        CHECK(dimensions == Rml::Vector2i(probeSize + 2 * width, probeSize + 2 * width));
-    }
+    Rml::Vector2i origin(0, 0), dimensions(10, 10);
+    REQUIRE(effects->list[0]->GetGlyphMetrics(origin, dimensions, glyph));
+    CHECK(effects->list[0]->GetLayer() == Rml::FontEffect::Layer::Back);
+    CHECK(origin == Rml::Vector2i(-2, -2));
+    CHECK(dimensions == Rml::Vector2i(14, 14));
+}
+
+void CheckSharpText(Rml::Element& text)
+{
+    auto* node = rmlui_dynamic_cast<Rml::ElementText*>(text.GetFirstChild());
+    REQUIRE(node != nullptr);
+    const auto& values = text.GetComputedValues();
+    const Rml::TextShapingContext shaping{values.language(), values.direction(), values.font_kerning(),
+                                          values.letter_spacing()};
+    REQUIRE(text.GetFontFaceHandle() != 0);
+    const int width = Rml::GetFontEngineInterface()->GetStringWidth(text.GetFontFaceHandle(), node->GetText(), shaping);
+    CHECK(width <= text.GetOffsetWidth() + PixelTolerance);
+    Rml::Vector2f position, size;
+    REQUIRE(UI::RmlBridge::DrawnBox(text, Rml::BoxArea::Border, position, size));
+    const auto layout = text.GetBox().GetSize(Rml::BoxArea::Border);
+    CHECK(size.x == doctest::Approx(layout.x).epsilon(0.002));
+    CHECK(size.y == doctest::Approx(layout.y).epsilon(0.002));
 }
 
 // The silver's light top: the same name in white, without the edge, faded out by a mask.
@@ -336,7 +343,7 @@ TEST_CASE("map-name Gens texture is retried after loading [ui][map-name][gpu]" *
     CHECK(banner.Model().strifeSource.empty());
 }
 
-TEST_CASE("map-name banner keeps the original image's box across themes and scales [ui][map-name]")
+TEST_CASE("map-name text uses final-size rasters without deformation across themes and scales [ui][map-name]")
 {
     MapNameFixture fixture;
     REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/MuMapName-Italic.otf"));
@@ -350,10 +357,17 @@ TEST_CASE("map-name banner keeps the original image's box across themes and scal
         UI::RmlBridge::SetActiveThemeName(theme);
         UI::RmlBridge::ReloadAllThemedDocuments();
         for (int percent : {75, 100, 125, 150})
-            for (Rml::Vector2i viewport :
-                 {Rml::Vector2i(800, 600), {1280, 720}, {1920, 1080}, {2560, 1440}, {3440, 1440}, {3840, 2160}})
-                for (const char* name : {"Lorencia", "The Extremely Long Forgotten Refinery Tower", "Żółć Привет",
-                                         "冰風谷", "AnExceptionallyLongUnbrokenMapNameForWrapping"})
+            for (Rml::Vector2i viewport : {Rml::Vector2i(800, 600),
+                                           {1280, 720},
+                                           {1366, 768},
+                                           {1600, 900},
+                                           {1920, 1080},
+                                           {2560, 1440},
+                                           {3440, 1440},
+                                           {3840, 2160}})
+                for (const char* name :
+                     {"Lorencia", "Balgass' Resting Place", "The Extremely Long Forgotten Refinery Tower",
+                      "Żółć Привет", "冰風谷", "AnExceptionallyLongUnbrokenMapNameForWrapping"})
                     for (bool warning : {false, true})
                     {
                         CAPTURE(theme);
@@ -368,7 +382,7 @@ TEST_CASE("map-name banner keeps the original image's box across themes and scal
                         banner.ShowMapName();
                         banner.SetText(name);
                         fixture.Refresh();
-                        banner.AfterRmlLayout(fixture.context); // same post-layout pass as the runtime
+                        UI::RmlBridge::FitNativeTextToBoxes(fixture.context); // same post-layout pass as the runtime
                         banner.SetWarning(warning);
                         fixture.Refresh();
                         auto* document = banner.Document();
@@ -379,7 +393,7 @@ TEST_CASE("map-name banner keeps the original image's box across themes and scal
                         Rml::Vector2f position, size;
                         REQUIRE(UI::RmlBridge::DrawnBox(*frame, Rml::BoxArea::Border, position, size));
                         CHECK(position.x + size.x / 2.f == doctest::Approx(viewport.x / 2.f).epsilon(0.002));
-                        CHECK(std::abs(size.x - 166.f * dp) <= PixelTolerance);
+                        CHECK(std::abs(size.x - std::min(384.f * dp, viewport.x * 0.9f)) <= PixelTolerance);
                         CHECK(std::abs(size.y - 90.f * dp) <= PixelTolerance);
                         for (const char* piece : {"swirl_left", "swirl_right", "icon"})
                         {
@@ -387,11 +401,10 @@ TEST_CASE("map-name banner keeps the original image's box across themes and scal
                             REQUIRE(document->GetElementById(piece) != nullptr);
                             CheckBounds(*document->GetElementById(piece), *frame);
                         }
-                        // A long name is squeezed into the room, centred on the banner.
+                        // Fitting changes the raster font size; the drawn glyph geometry stays at 1:1.
                         Rml::Vector2f textPosition, textSize;
                         REQUIRE(UI::RmlBridge::DrawnBox(*text, Rml::BoxArea::Border, textPosition, textSize));
-                        CHECK(textSize.x <=
-                              document->GetElementById("name_room")->GetOffsetWidth() * dp + PixelTolerance);
+                        CHECK(textSize.x <= document->GetElementById("name_room")->GetOffsetWidth() + PixelTolerance);
                         CHECK(textPosition.x + textSize.x / 2.f == doctest::Approx(viewport.x / 2.f).epsilon(0.002));
                         CHECK(textPosition.y + textSize.y <= position.y + size.y);
                         if (warning)
@@ -408,11 +421,14 @@ TEST_CASE("map-name banner keeps the original image's box across themes and scal
                         fixture.context->ProcessMouseMove(static_cast<int>(position.x + size.x / 2.f),
                                                           static_cast<int>(position.y + size.y / 2.f), 0);
                         CHECK_FALSE(UI::RmlBridge::IsPointerOver(frame));
-                        CHECK(text->GetComputedValues().font_size() == 50.f);
+                        CHECK(text->GetComputedValues().font_size() <= 50.f * dp + 0.01f);
+                        if (std::string_view(name) == "Lorencia" || std::string_view(name) == "Balgass' Resting Place")
+                            CHECK(text->GetComputedValues().font_size() == doctest::Approx(50.f * dp));
+                        CheckSharpText(*text);
                         CHECK(text->GetComputedValues().font_family() == "mu map name");
-                        CHECK(UI::RmlBridge::DrawnScale(*frame) == doctest::Approx(dp).epsilon(0.002));
+                        CHECK(UI::RmlBridge::DrawnScale(*frame) == doctest::Approx(1.f).epsilon(0.002));
                         CHECK(text->GetComputedValues().font_weight() == Rml::Style::FontWeight::Normal);
-                        CHECK(text->GetComputedValues().color() == Rml::Colourb(104, 103, 102));
+                        CHECK(text->GetComputedValues().color() == Rml::Colourb(142, 139, 134));
                         CheckTextEffects(*text);
                         REQUIRE(document->GetElementById("name_shine") != nullptr);
                         CheckShine(*document->GetElementById("name_shine"), *text);
@@ -431,7 +447,7 @@ TEST_CASE("map-name fitting follows same-name typography and room changes [ui][m
     banner.Render();
     banner.SetText("The Extremely Long Forgotten Refinery Tower");
     fixture.Refresh();
-    banner.AfterRmlLayout(fixture.context);
+    UI::RmlBridge::FitNativeTextToBoxes(fixture.context);
     fixture.context->Render(); // RmlUi resolves transform matrices when drawing.
     auto* document = banner.Document();
     auto* text = document->GetElementById("name_text");
@@ -440,29 +456,31 @@ TEST_CASE("map-name fitting follows same-name typography and room changes [ui][m
     REQUIRE(text != nullptr);
     REQUIRE(room != nullptr);
     REQUIRE(layer != nullptr);
-    const auto originalFit = layer->GetProperty(Rml::PropertyId::Transform)->ToString();
+    const float originalFit = text->GetComputedValues().font_size();
     for (const char* id : {"name", "name_shine"})
         REQUIRE(document->GetElementById(id)->SetProperty("letter-spacing", "4px"));
     fixture.Refresh();
-    banner.AfterRmlLayout(fixture.context);
+    UI::RmlBridge::FitNativeTextToBoxes(fixture.context);
     fixture.context->Render(); // RmlUi resolves transform matrices when drawing.
-    CHECK(layer->GetProperty(Rml::PropertyId::Transform)->ToString() != originalFit);
+    CHECK(text->GetComputedValues().font_size() < originalFit);
+    CheckSharpText(*text);
     Rml::Vector2f position, size;
     REQUIRE(UI::RmlBridge::DrawnBox(*text, Rml::BoxArea::Border, position, size));
     CHECK(size.x <=
           room->GetOffsetWidth() * UI::RmlBridge::DrawnScale(*document->GetElementById("banner")) + PixelTolerance);
     REQUIRE(room->SetProperty("right", "40px"));
     fixture.Refresh();
-    banner.AfterRmlLayout(fixture.context);
+    UI::RmlBridge::FitNativeTextToBoxes(fixture.context);
     fixture.context->Render(); // RmlUi resolves transform matrices when drawing.
     REQUIRE(UI::RmlBridge::DrawnBox(*text, Rml::BoxArea::Border, position, size));
     CHECK(size.x <=
           room->GetOffsetWidth() * UI::RmlBridge::DrawnScale(*document->GetElementById("banner")) + PixelTolerance);
     banner.SetText("A");
     fixture.Refresh();
-    banner.AfterRmlLayout(fixture.context);
+    UI::RmlBridge::FitNativeTextToBoxes(fixture.context);
     fixture.context->Render(); // RmlUi resolves transform matrices when drawing.
-    CHECK(layer->GetProperty(Rml::PropertyId::Transform)->ToString() == "none");
+    CHECK(text->GetComputedValues().font_size() == layer->GetComputedValues().font_size());
+    CheckSharpText(*text);
 }
 
 TEST_CASE("map-name icon follows the map from the ornament files [ui][map-name]")
@@ -474,7 +492,7 @@ TEST_CASE("map-name icon follows the map from the ornament files [ui][map-name]"
     banner.ShowMapName();
     CHECK(banner.Model().icon);
     CHECK(banner.Model().iconSource == "/Data/Interface/MapNameOrnament/lorencia.tga");
-    CHECK(banner.Model().iconStyle == "left: 59px; top: 46px; width: 43px; height: 36px;");
+    CHECK(banner.Model().iconStyle == "left: 59dp; top: 46dp; width: 43dp; height: 36dp;");
     for (int map : {static_cast<int>(WD_11BLOODCASTLE1), 17, 52})
     {
         CAPTURE(map);

@@ -21,6 +21,7 @@ mu_add_test(
     SOURCES
         test_map_name.cpp
         test_map_name_ornament.cpp
+        test_text_fit.cpp
         RmlLayoutFixture.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient Freetype::Freetype

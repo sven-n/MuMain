@@ -139,9 +139,9 @@ and inheritance cycles make a theme unavailable for selection.
 
 ## Map-name banner
 
-The world-entry banner shows localized map names in both maintained themes. It is the original
-166 x 90 map-name image rebuilt from its pieces: the name, a swirl on each side and the map's own
-icon between them (a leaf for Lorencia, snowflakes for Devias), at the original's size and place.
+The world-entry banner shows localized map names in both maintained themes. Its original
+166 x 90 ornament uses a swirl on each side and the map's own icon between them. Text has a
+separate, wider field (up to 384dp and 90% of the viewport) so long names keep their proportions.
 Adding a map name no longer needs an individual name image. Unrecognized maps and the GM area do
 not show a banner; other map-name displays use “Unknown map” when no name is defined. The Gens
 warning still appears at its original readable size on eligible battle maps.
@@ -156,13 +156,11 @@ The pieces are in `Data/Interface/MapNameOrnament`, cut out of the original imag
   `{ "map": <number>, "icon": "<icon file name>" }`; a map without an entry shows only the swirls.
 
 Edit a theme's `map_name.rcss` to change the font size, colors, swirl places or the banner's
-placement. A name wider than the banner is fitted to it like the originals did: mostly narrower
-letters, a little smaller. The lettering is the originals' silver: `#name` draws the name in
-the grey of the letters' bottom with the dark edge, and `#name_shine` draws it again in white
-on top, faded out by its `mask-image` gradient from just below the x-height to the baseline.
-The banner scales as a unit using the shared UI scale, so the lettering, edge, halo and
-ornaments keep their proportions at every UI scale. Its stylesheet uses reference `px`,
-including the icon coordinates read from `Layout.json`.
+placement. A name wider than the text field is reduced by changing its font size, preserving
+the letters' aspect ratio. Text is rasterized at its final screen size with a thin dark outline,
+without a glow or a transform that stretches a smaller glyph bitmap. The silver gradient follows
+the fitted font size. The banner uses `dp` layout directly; icon coordinates in `Layout.json`
+are reference pixels interpreted as `dp`.
 
 The map banner uses MU Map Name, a font bundled in `fonts/MuMapName-Italic.otf` and generated
 from the original client's map-name images (`tools/MapNameFont`), so any name in Latin, Polish

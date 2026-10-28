@@ -12,10 +12,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "I18N/All.h"
 
-#include <RmlUi/Core/ElementDocument.h>
-
 #include <algorithm>
-#include <cmath>
 
 #ifdef ASG_ADD_GENS_SYSTEM
 #include "Engine/Object/ZzzInventory.h"
@@ -23,14 +20,6 @@
 
 #define UIMN_SHOW_TIME 5000
 #define UIMN_ALPHA_VARIATION 0.015f
-
-namespace
-{
-// How much of a long name's squeeze also makes it lower, as a power of the width's squeeze: the
-// originals' long names (Crywolf Fortress, Illusion Temple) are about 0.6x as wide as the font
-// writes them and 0.85x as high as their short names.
-constexpr float ShareOfSqueezeInHeight = 1.f / 3.f;
-} // namespace
 
 CUIMapName::CUIMapName()
 {
@@ -66,44 +55,8 @@ void CUIMapName::RefreshIcon()
     SyncField(binder, &MapNameRmlModel::iconSource, "icon_source",
               Rml::CreateString("/%s/%s.tga", UI::MapName::OrnamentDirectory, icon->image.c_str()));
     SyncField(binder, &MapNameRmlModel::iconStyle, "icon_style",
-              Rml::CreateString("left: %gpx; top: %gpx; width: %gpx; height: %gpx;", icon->x, icon->y, icon->width,
+              Rml::CreateString("left: %gdp; top: %gdp; width: %gdp; height: %gdp;", icon->x, icon->y, icon->width,
                                 icon->height));
-}
-
-void CUIMapName::CacheNameElements()
-{
-    auto* document = m_RmlView.Document();
-    auto* text = document->GetElementById("name_text");
-    auto* room = document->GetElementById("name_room");
-    m_NameText = text ? text->GetObserverPtr() : Rml::ObserverPtr<Rml::Element>();
-    m_NameRoom = room ? room->GetObserverPtr() : Rml::ObserverPtr<Rml::Element>();
-    m_FittedRoomWidth = 0.f;
-}
-
-// The original images fitted a long name into the image's width, mostly with narrower letters and
-// a little with smaller ones; the banner does the same with a name wider than its #name_room.
-void CUIMapName::AfterRmlLayout(Rml::Context* context)
-{
-    auto* document = m_RmlView.Document();
-    if (!document || document->GetContext() != context || !document->IsVisible() || !m_NameText || !m_NameRoom)
-        return;
-
-    const float roomWidth = m_NameRoom->GetOffsetWidth();
-    const float width = m_NameText->GetOffsetWidth();
-    if (roomWidth <= 0.f || (width == m_FittedTextWidth && roomWidth == m_FittedRoomWidth))
-        return;
-    m_FittedTextWidth = width;
-    m_FittedRoomWidth = roomWidth;
-    Rml::String transform = "none";
-    if (width > roomWidth && roomWidth > 0.f)
-    {
-        const float squeeze = roomWidth / width;
-        transform = Rml::CreateString("scale(%.4f, %.4f)", squeeze, std::pow(squeeze, ShareOfSqueezeInHeight));
-    }
-    for (const char* id : {"name", "name_shine"})
-        if (auto* element = document->GetElementById(id))
-            element->SetProperty("transform", transform);
-    document->UpdateDocument(); // Fit before this frame is drawn, after bindings and layout settled.
 }
 
 void CUIMapName::Init()
