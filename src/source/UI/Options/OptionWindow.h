@@ -211,6 +211,7 @@ namespace mu::ui::window
         void RmlUIScaleChanged(int index);
         // Saves the choice only: the texture loader reads the pack at startup.
         void RmlTexturePackChanged(int index);
+        void RmlToggleS6PlayerModels();
         void RmlClickClose();
 
         // One tuning slider (UI::Options::TuningRow) as the RmlUi model binds it.
@@ -402,6 +403,9 @@ namespace mu::ui::window
             Rml::String texturePackValueLabel;
             // The row's hint: where packs come from and that a change needs a restart.
             Rml::String texturePackTooltip;
+            bool useS6PlayerModels = true;
+            Rml::String s6PlayerModelsLabel;
+            Rml::String s6PlayerModelsTooltip;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, OptionRmlModel& model);
         void SyncImpliedEffectRows(OptionRmlModel& model);

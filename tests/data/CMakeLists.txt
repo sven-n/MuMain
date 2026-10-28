@@ -212,11 +212,14 @@ target_compile_definitions(test_item_database_files PRIVATE
     MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
 )
 
-# Animates the shipped player model the way the character pre-pass does.
+# Animates the shipped player model the way the character pre-pass does, and
+# reads the shipped player body parts and their textures through the game's
+# loaders.
 mu_add_test(
     NAME test_character_bones
     SOURCES
         test_character_bones.cpp
+        test_player_body_models.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
@@ -290,4 +293,14 @@ mu_add_test(
 target_compile_definitions(model_files_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
     MU_TEST_ENUM_HEADER="${CMAKE_SOURCE_DIR}/src/source/Core/Globals/_enum.h"
+)
+
+mu_add_test(
+    NAME player_model_selector_tests
+    SOURCES test_player_model_selector.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+target_compile_definitions(player_model_selector_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
