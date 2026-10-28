@@ -1543,11 +1543,13 @@ const wchar_t* CMapManager::GetMapName(int iMap)
     {
         return (I18N::Game::DevilSquare);
     }
-    if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasBarrackMap())
+    // The map asked for, not the hero's: a party member's or a portal's map
+    // was named after the barracks while the hero was there.
+    if (iMap == WD_41CHANGEUP3RD_1ST)
         return I18N::Game::BalgassBarrack;
-    else if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasRefugeMap())
+    if (iMap == WD_42CHANGEUP3RD_2ND)
         return I18N::Game::BalgassRestingPlace;
-    if (this->IsCursedTemple())
+    if (iMap >= WD_45CURSEDTEMPLE_LV1 && iMap <= WD_45CURSEDTEMPLE_LV6)
     {
         return (I18N::Game::IllusionTemple);
     }
