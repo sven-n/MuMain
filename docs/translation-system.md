@@ -472,6 +472,19 @@ Chinese glyphs should render without boxes, and labels and help should fit at
 75% and 150% UI scale. Switch back to English and restart to check that the
 language choice is retained.
 
+The next batch adds the character-selection and in-game system menus in both
+themes: the title, exit, server selection, character switching, close/cancel,
+and the warning shown when the Chaos mixing window blocks leaving. These seven
+entries are contributor translations checked against the current English
+resources and menu actions, not claimed as verbatim official-client strings.
+Shared entries such as Cancel also appear translated in other dialogs. Login
+fields and the rest of the character-selection screen remain outside this batch.
+
+To check this batch, open the menu on the character-selection screen and with
+Esc in game. Check both themes at 75% and 150% scale, then switch between English
+and Simplified Chinese and reopen the menu. Verify close/cancel, options, server
+selection, character switching and exit still perform their usual actions.
+
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
 resource keys, legacy IDs, formatting arguments and command tokens unchanged.
 Missing translations intentionally use the existing English fallback.
