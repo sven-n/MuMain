@@ -485,6 +485,22 @@ Esc in game. Check both themes at 75% and 150% scale, then switch between Englis
 and Simplified Chinese and reopen the menu. Verify close/cancel, options, server
 selection, character switching and exit still perform their usual actions.
 
+The login batch adds 18 entries for account/password fields, remember-account
+and remember-password controls, the password-saving confirmation, server titles,
+login progress and common account errors. These are contributor translations
+of the current English resources, not extracted official-client UI text.
+Server names are preserved, and untranslated connection/subscription errors
+continue to fall back to English. Shared entries such as OK and incorrect
+password also translate their other existing uses.
+
+After rebuilding, check the login window and password-saving confirmation in
+both themes at 75% and 150% scale. Confirm that server names and numbers remain
+correct, labels and the warning fit, and Chinese glyphs render correctly. Check
+empty account/password validation, cancel the password-saving prompt, and log in
+normally to check progress messages. Switch back to English and restart to check
+language persistence. Account-blocked and already-connected messages can be
+checked when the server returns those states; no account changes are required.
+
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
 resource keys, legacy IDs, formatting arguments and command tokens unchanged.
 Missing translations intentionally use the existing English fallback.
