@@ -478,7 +478,8 @@ void CSPetDarkSpirit::MovePet(void)
         if (Distance >= FlyRange * FlyRange)
         {
             float Angle = CreateAngle2D(o->Position, TargetPosition);
-            const float referenceTurn = Random::RangeFloat(RavenMinimumFlightTurnDegrees, RavenMaximumFlightTurnDegrees);
+            const float referenceTurn =
+                Random::RangeFloat(RavenMinimumFlightTurnDegrees, RavenMaximumFlightTurnDegrees);
             o->Angle[2] = TurnAngle2(o->Angle[2], Angle, referenceTurn * FPS_ANIMATION_FACTOR);
         }
         MoveFlyingPet(o);
