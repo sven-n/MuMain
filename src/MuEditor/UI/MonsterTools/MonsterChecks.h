@@ -25,9 +25,6 @@ void RunMonsters(std::vector<Data::Items::ItemDataIssue>& issues);
 // of a model has no number and names the model in its field
 // ("model MONSTER_MODEL_MOLT file").
 void RunModels(std::vector<Data::Items::ItemDataIssue>& issues);
-
-// RunMonsters, then RunModels.
-void Run(std::vector<Data::Items::ItemDataIssue>& issues);
 } // namespace MuEditor::Monsters::MonsterChecks
 
 #endif // _EDITOR

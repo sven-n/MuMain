@@ -22,12 +22,6 @@ void RunModels(std::vector<Data::Items::ItemDataIssue>& issues)
 {
     g_MonsterDataHandler.ValidateModels(issues);
 }
-
-void Run(std::vector<Data::Items::ItemDataIssue>& issues)
-{
-    RunMonsters(issues);
-    RunModels(issues);
-}
 } // namespace MuEditor::Monsters::MonsterChecks
 
 #endif // _EDITOR
