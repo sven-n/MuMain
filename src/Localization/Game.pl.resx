@@ -12604,4 +12604,7 @@
   <data name="Other items" xml:space="preserve">
     <value>Inne przedmioty</value>
   </data>
+  <data name="MagicStoneOfOwner" xml:space="preserve">
+    <value>Magiczny kamień gracza %ls</value>
+  </data>
 </root>
