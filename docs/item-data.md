@@ -1494,7 +1494,10 @@ only item data. The import is there to bring in your own old item files.
   The imported items are at their bmd numbers, so the models of items you
   moved since the start go back to their old numbers too. The entries
   without a name stay where the import brings no item (the bmd format has
-  none); a moved one goes back to its old number with its model.
+  none); a moved one goes back to its old number with its model. A model
+  entry stays even where the bmd files have no item (an item added or
+  named since the start): its number gets an entry without a name, so
+  every number with a model still has an entry.
   Save afterwards to keep the result. The console lists what the import had to fix (see below) and any
   problem the imported data still has; Save refuses it until those are
   fixed.

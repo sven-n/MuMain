@@ -2102,6 +2102,48 @@ TEST_CASE("A bmd import puts a moved entry without a name back with its model [d
     CHECK(issues.empty());
 }
 
+TEST_CASE("After a bmd import every number with a model has an entry [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope models;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+    // Items the bmd files do not have: Sphere 4 named since the start, and an item added with a model.
+    const int sphere4Type = MakeItemType(12, 73);
+    ItemDefinition sphere4 = g_ItemDatabase.GetAllSlots()[sphere4Type];
+    sphere4.names = Data::LocalizedString::Parse("Sphere 4");
+    g_ItemDataHandler.SetItem(sphere4);
+    REQUIRE(g_ItemDatabase.Find(sphere4Type) != nullptr);
+    const int addedType = MakeItemType(0, 100);
+    REQUIRE(IsFreeItemType(addedType));
+    ItemDefinition added;
+    added.group = 0;
+    added.number = 100;
+    added.names = Data::LocalizedString::Parse("Added Sword");
+    REQUIRE(g_ItemModelDatabase.Find(KrisType) != nullptr);
+    REQUIRE(g_ItemDataHandler.AddItem(added, g_ItemModelDatabase.Find(KrisType)));
+
+    const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
+    REQUIRE_FALSE(HasFatal(result.issues));
+    for (const int itemType : {sphere4Type, addedType})
+    {
+        CAPTURE(itemType);
+        CHECK(g_ItemDatabase.Find(itemType) == nullptr);
+        CHECK(g_ItemDatabase.GetAllSlots()[itemType].entryWithoutName);
+        CHECK(g_ItemModelDatabase.Find(itemType) != nullptr);
+    }
+    std::vector<ItemDataIssue> issues;
+    ValidateModelsHaveItemEntries(g_ItemDatabase.GetAllSlots(), g_ItemModelDatabase.GetAllSlots(), issues);
+    CHECK(issues.empty());
+}
+
 // The names of a language whose item.bmd is missing stay as they are, like
 // the names of the languages that have none (German).
 // Export as bmd writes the weights the original client grows into the requirements the client

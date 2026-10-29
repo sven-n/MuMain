@@ -154,6 +154,29 @@ void KeepEntriesWithoutName(std::vector<ItemDefinition>& items, std::span<const 
         items.push_back(std::move(entry));
     }
 }
+
+// Every number with a model keeps an entry: where the bmd files have no item for a model (an
+// item added or named since the start), its number gets an entry without a name.
+void GiveModelsAnEntry()
+{
+    std::vector<ItemDefinition> entries;
+    for (int itemType = 0; itemType < MAX_ITEM; ++itemType)
+    {
+        if (g_ItemModelDatabase.Find(itemType) == nullptr || g_ItemDatabase.GetAllSlots()[itemType].HasEntry())
+        {
+            continue;
+        }
+        ItemDefinition entry;
+        entry.group = GetItemGroup(itemType);
+        entry.number = GetItemNumber(itemType);
+        entry.entryWithoutName = true;
+        entries.push_back(std::move(entry));
+    }
+    if (!entries.empty())
+    {
+        g_ItemDatabase.SetMany(entries);
+    }
+}
 #endif
 } // namespace
 
@@ -786,6 +809,7 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     // The bmd files have the items at their old numbers; their models go back
     // there too.
     TakeBackModelMoves();
+    GiveModelsAnEntry();
     return result;
 }
 
