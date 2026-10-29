@@ -74,6 +74,14 @@ struct _MASTER_SKILL_TOOLTIP_FILE
     char Info7[64];
 };
 
+// The header texts of one class family's master skill tree: the class name and, per category
+// column, the format of the points spent in that column.
+struct MasterTreeHeaderTexts
+{
+    const wchar_t* const* className;
+    const wchar_t* const* categoryPoints[MAX_MASTER_SKILL_CATEGORY];
+};
+
 namespace mu::ui::window
 {
 // The master skill tree. Drawn entirely by RmlUi (master_level.rml): the window keeps the tree
@@ -98,6 +106,8 @@ public:
     void OpenMasterSkillTooltip(const wchar_t* path);
     void InitMasterSkillPoint();
     void SetMasterType(CLASS_TYPE Class);
+    // Null for a class without a master skill tree.
+    static const MasterTreeHeaderTexts* GetHeaderTexts(CLASS_TYPE Class);
 
     bool SetMasterSkillTreeInfo(int index, BYTE skillLevel, float value, float nextValue);
     void SkillUpgrade(int index, BYTE skillLevel, float value, float nextValue);
@@ -115,8 +125,7 @@ private:
     BYTE ConsumePoint;
     int CurSkillID;
     MASTER_SKILL_TREE_CLASS classCode;
-    DWORD CategoryTextIndex;
-    DWORD ClassNameTextIndex;
+    const MasterTreeHeaderTexts* HeaderTexts;
 
     std::map<ActionSkillType, _MASTER_SKILL_TOOLTIP> map_masterSkillToolTip;
     std::map<BYTE, _MASTER_SKILLTREE_DATA> map_masterData;

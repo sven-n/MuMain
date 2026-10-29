@@ -86,6 +86,9 @@ namespace mu::ui::window
 
         DWORD GetSelQuestIndex();
 
+        // The job change tab's quest state line, by CSQuest::getCurrQuestState().
+        static const wchar_t* GetJobChangeStateText(BYTE byState);
+
         // Invoked directly from RmlUi data-event-click bindings (see Create()), not polled.
         void RmlClickSelectTab(int nTab);
         void RmlClickSelectQuest(int nQuestIndex);
@@ -124,7 +127,7 @@ namespace mu::ui::window
         };
 
         void SyncRmlModel();
-        static std::vector<TextLine> BuildTextLines(int nGlobalTextIndex, int nPixelWidth);
+        static std::vector<TextLine> BuildTextLines(const wchar_t* text, int nPixelWidth);
 
         struct MyQuestInfoRmlModel
         {

@@ -143,6 +143,8 @@ public:
     const wchar_t* GetSummary(DWORD dwQuestIndex);
     bool IsRequestRewardQS(DWORD dwQuestIndex);
     bool GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, DWORD dwQuestIndex);
+    // The format of an event map request line (QUEST_REQUEST_EVENT_MAP_*); empty for any other request type.
+    static const wchar_t* GetEventMapRequestFormat(DWORD dwRequestType);
     void SetEPRequestRewardState(DWORD dwQuestIndex, bool ProgressState);
     bool IsEPRequestRewardState(DWORD dwQuestIndex);
     bool IsQuestByEtc(DWORD dwQuestIndex);

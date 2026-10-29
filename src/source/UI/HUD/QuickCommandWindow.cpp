@@ -21,8 +21,17 @@ namespace
 {
 // The five actions, top to bottom: trade, buy, party, follow, duel.
 constexpr int kQuickCommandCount = 5;
-constexpr int kQuickCommandTextIds[kQuickCommandCount] = {943, 1124, 944, 948, 949};
+const wchar_t* const* const kQuickCommandLabels[kQuickCommandCount] = {
+    &I18N::Game::Trade, &I18N::Game::Buy1124, &I18N::Game::Party, &I18N::Game::Follow, &I18N::Game::Duel,
+};
 } // namespace
+
+const wchar_t* mu::ui::window::CQuickCommandWindow::GetCommandLabel(int index)
+{
+    if (index < 0 || index >= kQuickCommandCount)
+        return L"";
+    return *kQuickCommandLabels[index];
+}
 
 // cppcheck-suppress uninitMemberVar
 mu::ui::window::CQuickCommandWindow::CQuickCommandWindow()
@@ -180,7 +189,7 @@ void mu::ui::window::CQuickCommandWindow::BindRmlModel(Rml::DataModelConstructor
 
     model.rows.clear();
     for (int i = 0; i < kQuickCommandCount; ++i)
-        model.rows.push_back({StringUtils::WideToNarrow(I18N::Game::Lookup(kQuickCommandTextIds[i]))});
+        model.rows.push_back({StringUtils::WideToNarrow(GetCommandLabel(i))});
 }
 
 void mu::ui::window::CQuickCommandWindow::BuildRmlUi()

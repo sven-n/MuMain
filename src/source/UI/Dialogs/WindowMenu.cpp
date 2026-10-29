@@ -20,7 +20,10 @@ using namespace mu::ui::window;
 namespace
 {
 // The row labels, top to bottom (CWindowMenu::MenuEntry order).
-constexpr int kMenuTextIds[CWindowMenu::MENU_MAX_INDEX] = {1741, 1742, 364, 1743, 3055, 3103};
+const wchar_t* const* const kMenuLabels[CWindowMenu::MENU_MAX_INDEX] = {
+    &I18N::Game::SystemEsc, &I18N::Game::HelpF1, &I18N::Game::GuildG,
+    &I18N::Game::MoveM,     &I18N::Game::MapTab, &I18N::Game::GensInfoB,
+};
 
 template <typename Model>
 void SyncFloat(RmlModelBinder<Model>& binder, float Model::* field, const char* name, float value)
@@ -32,6 +35,13 @@ void SyncFloat(RmlModelBinder<Model>& binder, float Model::* field, const char* 
     binder.MarkDirty(name);
 }
 } // namespace
+
+const wchar_t* mu::ui::window::CWindowMenu::GetMenuLabel(int entry)
+{
+    if (entry < 0 || entry >= MENU_MAX_INDEX)
+        return L"";
+    return *kMenuLabels[entry];
+}
 
 mu::ui::window::CWindowMenu::CWindowMenu()
 {
@@ -174,7 +184,7 @@ void mu::ui::window::CWindowMenu::BindRmlModel(Rml::DataModelConstructor& c, Win
 
     model.rows.clear();
     for (int i = 0; i < MENU_MAX_INDEX; ++i)
-        model.rows.push_back({StringUtils::WideToNarrow(I18N::Game::Lookup(kMenuTextIds[i])), i});
+        model.rows.push_back({StringUtils::WideToNarrow(GetMenuLabel(i)), i});
 }
 
 void mu::ui::window::CWindowMenu::BuildRmlUi()

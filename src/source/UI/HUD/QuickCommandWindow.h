@@ -42,6 +42,8 @@ namespace mu::ui::window
         void CloseQuickCommand();
         void SetID(const wchar_t* strID);
         void SetSelectedCharacterIndex(int iIndex);
+        // The label of the menu's row (trade, buy, party, follow, duel); empty outside the menu.
+        static const wchar_t* GetCommandLabel(int index);
 
     private:
         void BuildRmlUi();

@@ -46,6 +46,10 @@ public:
     void OpeningProcess();
     void ClosingProcess();
 
+    // The event notes above the Rena counts, and the closing notes below them; empty past the last note.
+    static const wchar_t* GetIntroNote(int index);
+    static const wchar_t* GetClosingNote(int index);
+
 private:
     void SyncView();
     void Render3D(const Rml::Vector2f& offset, const Rml::Vector2f& size);

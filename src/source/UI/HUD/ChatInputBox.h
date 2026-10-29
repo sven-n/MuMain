@@ -150,6 +150,9 @@ namespace mu::ui::window
 
         void SetWhsprID(const wchar_t* strWhsprID);
 
+        // The hint of a button in the button row (ChatInputRmlModel::buttonHints order); empty past the row.
+        static const wchar_t* GetButtonHint(size_t index);
+
     protected:
         void GetChatText(type_string& strText);
         void GetWhsprID(type_string& strWhsprID);

@@ -36,6 +36,25 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
+namespace
+{
+// Native's string table for the buttons' hints (RenderTooltip()), in the button row's order.
+const wchar_t* const* const kButtonHints[] = {
+    &I18N::Game::RegularChat,        &I18N::Game::PartyChat,
+    &I18N::Game::GuiltChat,          &I18N::Game::GensChatOnOff,
+    &I18N::Game::WhisperBlockOnOff,  &I18N::Game::SystemMessagePopUp,
+    &I18N::Game::ChatDisplayOnOffF2, &I18N::Game::ChatWindowBackgroundOnOffF5,
+    &I18N::Game::SizeAdjustmentF4,   &I18N::Game::TransparencyAdjustment,
+};
+} // namespace
+
+const wchar_t* mu::ui::window::CChatInputBox::GetButtonHint(size_t index)
+{
+    if (index >= std::size(kButtonHints))
+        return L"";
+    return *kButtonHints[index];
+}
+
 mu::ui::window::CChatInputBox::CChatInputBox()
 {
     Init();
@@ -592,11 +611,9 @@ void mu::ui::window::CChatInputBox::SyncRmlModel()
         m_RmlView.MarkDirty("input_msg_type");
     }
 
-    // Native's string table for the buttons' hints (RenderTooltip()).
-    static constexpr int kHintText[10] = {1681, 1682, 1683, 3321, 1684, 1685, 750, 1686, 751, 752};
     for (size_t i = 0; i < model.buttonHints.size(); ++i)
     {
-        Rml::String hint = StringUtils::WideToNarrow(I18N::Game::Lookup(kHintText[i]));
+        Rml::String hint = StringUtils::WideToNarrow(GetButtonHint(i));
         if (model.buttonHints[i] != hint)
         {
             model.buttonHints[i] = std::move(hint);

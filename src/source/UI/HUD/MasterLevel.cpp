@@ -45,6 +45,22 @@ namespace
     constexpr float kExperienceHintX = 8.0f;
     constexpr float kExperienceHintY = 15.0f;
 
+    // Per class family: the master class's name and the category columns' point formats, left to right.
+    const MasterTreeHeaderTexts kWizardHeaderTexts = {
+        &I18N::Game::GrandMaster, {&I18N::Game::PeaceD, &I18N::Game::WisdomD, &I18N::Game::OvercomeD}};
+    const MasterTreeHeaderTexts kKnightHeaderTexts = {
+        &I18N::Game::BladeMaster, {&I18N::Game::ProtectionD, &I18N::Game::BraveryD, &I18N::Game::AngerD}};
+    const MasterTreeHeaderTexts kElfHeaderTexts = {
+        &I18N::Game::HighElf, {&I18N::Game::BlessingD, &I18N::Game::SalvationD, &I18N::Game::StormD}};
+    const MasterTreeHeaderTexts kDarkHeaderTexts = {
+        &I18N::Game::DualMaster, {&I18N::Game::SolidityD, &I18N::Game::FightingSpiritD, &I18N::Game::UltimatumD}};
+    const MasterTreeHeaderTexts kDarkLordHeaderTexts = {
+        &I18N::Game::LordEmperor, {&I18N::Game::DeterminationD, &I18N::Game::JusticeD, &I18N::Game::ConquerD}};
+    const MasterTreeHeaderTexts kSummonerHeaderTexts = {
+        &I18N::Game::DimensionMaster, {&I18N::Game::GuardianD, &I18N::Game::ChaosD, &I18N::Game::HonorD}};
+    const MasterTreeHeaderTexts kRageFighterHeaderTexts = {
+        &I18N::Game::FistMaster, {&I18N::Game::WillpowerD, &I18N::Game::DeterminationD, &I18N::Game::DestructionD}};
+
     template <typename Model>
     void SyncString(RmlModelBinder<Model>& binder, Rml::String Model::* field, const char* name, Rml::String value)
     {
@@ -73,8 +89,7 @@ mu::ui::window::CMasterLevel::CMasterLevel()
     this->ConsumePoint = 0;
     this->CurSkillID = 0;
     this->classCode = MASTER_SKILL_TREE_CLASS_NONE;
-    this->CategoryTextIndex = 0;
-    this->ClassNameTextIndex = 0;
+    this->HeaderTexts = nullptr;
     this->InitMasterSkillPoint();
     this->ClearSkillTreeData();
     this->ClearSkillTooltipData();
@@ -281,49 +296,45 @@ void mu::ui::window::CMasterLevel::SetMasterType(CLASS_TYPE Class)
 
     this->SetMasterSkillToolTipData();
 
+    // A class without a master skill tree keeps the current texts.
+    const MasterTreeHeaderTexts* headerTexts = GetHeaderTexts(Class);
+    if (headerTexts == nullptr)
+        return;
+
+    this->HeaderTexts = headerTexts;
+}
+
+const MasterTreeHeaderTexts* mu::ui::window::CMasterLevel::GetHeaderTexts(CLASS_TYPE Class)
+{
     switch (Class)
     {
     case CLASS_WIZARD:
     case CLASS_SOULMASTER:
     case CLASS_GRANDMASTER:
-        this->CategoryTextIndex = 1751;
-        this->ClassNameTextIndex = 1669;
-        break;
+        return &kWizardHeaderTexts;
     case CLASS_KNIGHT:
     case CLASS_BLADEKNIGHT:
     case CLASS_BLADEMASTER:
-        this->CategoryTextIndex = 1755;
-        this->ClassNameTextIndex = 1668;
-        break;
+        return &kKnightHeaderTexts;
     case CLASS_ELF:
     case CLASS_MUSEELF:
     case CLASS_HIGHELF:
-        this->CategoryTextIndex = 1759;
-        this->ClassNameTextIndex = 1670;
-        break;
+        return &kElfHeaderTexts;
     case CLASS_DARK:
     case CLASS_DUELMASTER:
-        this->CategoryTextIndex = 1763;
-        this->ClassNameTextIndex = 1671;
-        break;
+        return &kDarkHeaderTexts;
     case CLASS_DARK_LORD:
     case CLASS_LORDEMPEROR:
-        this->CategoryTextIndex = 1767;
-        this->ClassNameTextIndex = 1672;
-        break;
+        return &kDarkLordHeaderTexts;
     case CLASS_SUMMONER:
     case CLASS_BLOODYSUMMONER:
     case CLASS_DIMENSIONMASTER:
-        this->CategoryTextIndex = 3136;
-        this->ClassNameTextIndex = 1689;
-        break;
+        return &kSummonerHeaderTexts;
     case CLASS_RAGEFIGHTER:
     case CLASS_TEMPLENIGHT:
-        this->CategoryTextIndex = 3330;
-        this->ClassNameTextIndex = 3151;
-        break;
+        return &kRageFighterHeaderTexts;
     default:
-        return;
+        return nullptr;
     }
 }
 
@@ -602,8 +613,9 @@ void mu::ui::window::CMasterLevel::SyncHeaderTexts()
 {
     wchar_t buffer[256] = {};
 
+    const wchar_t* className = this->HeaderTexts != nullptr ? *this->HeaderTexts->className : L"";
     SyncString(m_RmlView.Binder(), &MasterLevelRmlModel::classNameText, "class_name_text",
-               StringUtils::WideToNarrow(I18N::Game::Lookup(this->ClassNameTextIndex)));
+               StringUtils::WideToNarrow(className));
     SyncString(m_RmlView.Binder(), &MasterLevelRmlModel::closeHint, "close_hint",
                StringUtils::WideToNarrow(I18N::Game::Close388));
 
@@ -631,7 +643,8 @@ void mu::ui::window::CMasterLevel::SyncHeaderTexts()
     const char* const columnNames[MAX_MASTER_SKILL_CATEGORY] = {"column_text_0", "column_text_1", "column_text_2"};
     for (int column = 0; column < MAX_MASTER_SKILL_CATEGORY; ++column)
     {
-        mu_swprintf(buffer, I18N::Game::Lookup(this->CategoryTextIndex + column), this->CategoryPoint[column]);
+        const wchar_t* pointsFormat = this->HeaderTexts != nullptr ? *this->HeaderTexts->categoryPoints[column] : L"";
+        mu_swprintf(buffer, pointsFormat, this->CategoryPoint[column]);
         SyncString(m_RmlView.Binder(), columnFields[column], columnNames[column], StringUtils::WideToNarrow(buffer));
     }
 }
