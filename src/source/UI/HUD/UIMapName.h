@@ -25,6 +25,10 @@ protected:
 public:
     CUIMapName();
     virtual ~CUIMapName();
+    // Registered with the locale observers by address: a copy or a move would leave the list
+    // pointing at the wrong object.
+    CUIMapName(const CUIMapName&) = delete;
+    CUIMapName& operator=(const CUIMapName&) = delete;
 
     void Init();
     void ShowMapName();
