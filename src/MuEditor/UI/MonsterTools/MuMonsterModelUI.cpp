@@ -184,7 +184,7 @@ void MuMonsterModelUI::RenderModel(MonsterModelDefinition& model, int slot)
     }
     if (ImGui::CollapsingHeader(I18N::Editor::SoundEvents, ImGuiTreeNodeFlags_DefaultOpen))
     {
-        SoundEventsEditor::Render(model, slot, ShownModel::IsOpen(slot), m_draft, m_soundEventMaps);
+        SoundEventsEditor::Render(model, slot, ShownModel::IsOpen(slot), m_draft);
     }
     if (ImGui::CollapsingHeader(I18N::Editor::MoreOfTheModelEntry))
     {

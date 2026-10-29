@@ -82,6 +82,7 @@ The problems of all game data in one window:
 ### Shared Tool Parts (UI/Common)
 Parts the item tools and the monster tools both use:
 - **NamesGrid.h/cpp**, **NamesGridRows.h** - The names x languages grid of Item Translations and Monster Translations; the rows say what is listed and how a name is stored
+- **MapPicker.h/cpp** - The one way the tools pick maps: the server's map numbers, the rounds of an event (Devil Square, Blood Castle, Kalima, ...) under one name, each with its server number and world folder (docs/monster-data.md)
 - **TextSearch.h/cpp** - The search of the editor's lists (a part of a name, A to Z in either case, or a whole number)
 - **CodeTokenLine.h/cpp**, **CodeRanges.h/cpp**, **CodeReference.h**, **CodeReferenceList.h/cpp** - Reading the sources for the lines that name an item or a monster, and their list in the remove dialogs
 

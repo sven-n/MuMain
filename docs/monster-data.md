@@ -220,6 +220,16 @@ Maps are the numbers the server sends (`mapTextureFolders`, `soundEventMaps`,
 a part's `maps`, and a monster's map variants): Devil Square 1–4 is 9 and
 Devil Square 5–7 is 32, although the client loads both as Devil Square (9).
 
+### The map picker
+
+The monster tools pick maps in one picker: a button that names the chosen
+maps opens a list of the maps a server sends, each with its server number
+and the `Data/World<n>` folder it loads. The rounds of an event are one row
+under the event's name: Devil Square 1–4 and 5–7, Blood Castle 1–8, Chaos
+Castle 1–7, Kalima 1–7, Illusion Temple 1–6, Doppelganger 1–4, Empire
+Guardian 1–4 and Karutan 1–2; its box picks all rounds, its arrow shows them
+one by one. A list that has all rounds of an event names the event.
+
 A sound without an `id` gets a number of its own when it is first loaded,
 after the `SOUND_*` list; the same file keeps the same number for the
 session. A sound keeps its `SOUND_*` number (`id`) when code plays it by that
@@ -482,8 +492,8 @@ item tools.
     a chance of one in n, a pick of one of two sounds, and its sounds, picked
     from the model's own; **Play** plays them, **Remove** removes the event.
     **Add a sound event** adds one for attack1 with the model's first sound
-    (a model without sounds cannot have events). **Maps** lists the maps the
-    events play on (empty: every map).
+    (a model without sounds cannot have events). **Maps** picks the maps the
+    events play on in the [map picker](#the-map-picker) (none: every map).
   - **More of the model entry**: the values the tool shows but does not edit
     (head bone, stream mesh, part models, bitmaps, box, weapon bones); they
     are edited in the file.
