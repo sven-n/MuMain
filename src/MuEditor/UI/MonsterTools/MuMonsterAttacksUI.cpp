@@ -357,6 +357,8 @@ void MuMonsterAttacksUI::RenderEntries(MonsterDefinition& monster, int modelSlot
     const std::string label = StepLabel::Attacks(monster);
     std::optional<size_t> removed;
     const float scale = g_MuEditorCore.GetUIScale();
+    // The two lists' rows have ids of their own.
+    ImGui::PushID(monsterSkills ? "MonsterSkills" : "Skills");
     for (size_t index = 0; index < entries.size(); ++index)
     {
         ImGui::PushID(static_cast<int>(index));
@@ -380,6 +382,7 @@ void MuMonsterAttacksUI::RenderEntries(MonsterDefinition& monster, int modelSlot
         }
         ImGui::PopID();
     }
+    ImGui::PopID();
     if (removed)
     {
         entries.erase(entries.begin() + static_cast<std::ptrdiff_t>(*removed));

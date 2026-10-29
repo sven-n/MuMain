@@ -172,6 +172,14 @@ ImGuiID AttacksItemId(int number, std::optional<int> variant, const char* label)
     return ImGui::GetIDWithSeed(label, nullptr, scope);
 }
 
+// The id of an item in a row of Monster Attacks' monster skills (`list`
+// "MonsterSkills") or player skills ("Skills").
+ImGuiID AttacksRowItemId(int number, int variant, const char* list, int row, const char* label)
+{
+    const ImGuiID rows = AttacksItemId(number, variant, list);
+    return ImGui::GetIDWithSeed(label, nullptr, ImGui::GetIDWithSeed(row, rows));
+}
+
 // Monster Attacks' choices for any other attack, clicked one after another.
 TEST_CASE("Monster Attacks: any other attack plays an animation, a rotation, the generic pattern or a draw (Q-MN69) "
           "[editor][monsters]")
@@ -265,6 +273,45 @@ TEST_CASE("Monster Attacks: a map variant is added with the monster's attacks, e
     click(AttacksItemId(2, 0, I18N::Editor::RemoveTheMapVariant));
     CHECK(stored().mapVariants.empty());
     CHECK(stored().attacks == budge.attacks);
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+}
+
+// The first rows of the monster skills and of the player skills are items of
+// their own: before, they had one id, and the second row's Remove did nothing.
+TEST_CASE("Monster Attacks: a player skill row is removed while the monster skills have a row too [editor][monsters]")
+{
+    MonsterDefinition budge = Monster(2, "Budge Dragon");
+    budge.model = "MONSTER_MODEL_BUDGE_DRAGON";
+    budge.attacks.emplace();
+    budge.attacks->monsterSkills = {{34, MONSTER01_ATTACK2}};
+    budge.attacks->skills = {{12, MONSTER01_ATTACK3}};
+    const std::array monsters = {budge};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(2);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterAttacksUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(2)->attacks; };
+    render();
+
+    click(AttacksRowItemId(2, AllMaps, "Skills", 0, I18N::Editor::Remove));
+    CHECK(stored().skills.empty());
+    CHECK(stored().monsterSkills == budge.attacks->monsterSkills);
+    click(AttacksRowItemId(2, AllMaps, "MonsterSkills", 0, I18N::Editor::Remove));
+    CHECK(stored().monsterSkills.empty());
     g_MonsterSelection.Select(MonsterSelection::NoMonster);
 }
 
