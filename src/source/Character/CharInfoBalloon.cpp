@@ -34,16 +34,20 @@ namespace
     struct GuildStatusText
     {
         std::uint8_t status;
-        int textIndex;
+        const wchar_t* const* text;
     };
 
-    constexpr std::array<GuildStatusText, 5> kGuildStatusTexts{ {
-        {   0, 1330 },
-        {  32, 1302 },
-        {  64, 1301 },
-        { 128, 1300 },
-        { 255, 488 },
-    } };
+    const std::array<GuildStatusText, 5> kGuildStatusTexts{{
+        {0, &I18N::Game::Members},
+        {32, &I18N::Game::BattleM},
+        {64, &I18N::Game::AssistM},
+        {128, &I18N::Game::Master},
+        {255, &I18N::Game::Commoner},
+    }};
+
+    // Shown for a guild status missing from kGuildStatusTexts (OpenMU sends only those five); the
+    // client has always shown the font name's text there.
+    const wchar_t* const* const kUnknownGuildStatusText = &I18N::Game::Gulim;
 
     BalloonNameStatus ResolveNameStatus(std::uint8_t controlCode)
     {
@@ -57,17 +61,6 @@ namespace
             return BalloonNameStatus::Operator;
 
         return BalloonNameStatus::Normal;
-    }
-
-    int ResolveGuildTextIndex(std::uint8_t guildStatus)
-    {
-        const auto it = std::lower_bound(
-            kGuildStatusTexts.begin(),
-            kGuildStatusTexts.end(),
-            guildStatus,
-            [](const GuildStatusText& entry, std::uint8_t status) { return entry.status < status; });
-
-        return (it != kGuildStatusTexts.end() && it->status == guildStatus) ? it->textIndex : 0;
     }
 }
 
@@ -125,6 +118,15 @@ void CCharInfoBalloon::Render()
                          static_cast<int>(UI::Scaling::SizeY(screen, static_cast<float>(nPosY))));
 }
 
+const wchar_t* CCharInfoBalloon::GetGuildStatusText(std::uint8_t guildStatus)
+{
+    const auto it =
+        std::lower_bound(kGuildStatusTexts.begin(), kGuildStatusTexts.end(), guildStatus,
+                         [](const GuildStatusText& entry, std::uint8_t status) { return entry.status < status; });
+
+    return (it != kGuildStatusTexts.end() && it->status == guildStatus) ? *it->text : *kUnknownGuildStatusText;
+}
+
 void CCharInfoBalloon::SetInfo()
 {
     if (m_pCharInfo == nullptr)
@@ -142,8 +144,7 @@ void CCharInfoBalloon::SetInfo()
 
     CopyWideString(m_szName, m_pCharInfo->ID);
 
-    const int guildTextIndex = ResolveGuildTextIndex(m_pCharInfo->GuildStatus);
-    mu_swprintf_s(m_szGuild, L"(%ls)", I18N::Game::Lookup(guildTextIndex));
+    mu_swprintf_s(m_szGuild, L"(%ls)", GetGuildStatusText(m_pCharInfo->GuildStatus));
     mu_swprintf_s(m_szClass, L"%ls %d",
         gCharacterManager.GetCharacterClassText(m_pCharInfo->Class),
         m_pCharInfo->Level);

@@ -108,6 +108,10 @@ void RenderProtectGuildMark(CHARACTER* c);
 void MakeElfHelper(CHARACTER* c);
 int GetFenrirType(CHARACTER* c);
 
+// The lines the event NPCs drawn as players say while standing in `world`, one picked at random;
+// empty for a world without lines of its own.
+std::span<const wchar_t* const* const> GetPlayerNpcChatTexts(int world);
+
 extern int EquipmentLevelSet;
 extern bool g_bAddDefense;
 

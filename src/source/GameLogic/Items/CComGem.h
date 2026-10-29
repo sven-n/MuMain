@@ -38,7 +38,8 @@ namespace COMGEM
     void	ProcessCSAction();
 
     int		GetJewelRequireCount(int i);
-    int		GetJewelIndex(int _nJewel, int _nType);
+    // The name of a jewel type (eGEMTYPE, plain or packed) in the current language; empty for any other value.
+    const wchar_t* GetJewelName(int _nJewel);
     int		Check_Jewel(int _nJewel, int _nType = 0, bool _bModel = false);
 
     inline	void	SetMode(BOOL mode) { m_bType = mode; }

@@ -3303,6 +3303,29 @@ void OnlyNpcChatProcess(CHARACTER* c, OBJECT* o)
     }
 }
 
+namespace
+{
+const wchar_t* const* const kDeviasPlayerNpcChatTexts[] = {
+    &I18N::Game::RegisterTheLuckyNumberOnThe100WinningCard,
+    &I18N::Game::PleaseCheckOutTheAnnouncementOn,
+};
+const wchar_t* const* const kLorenciaPlayerNpcChatTexts[] = {
+    &I18N::Game::CollectingStonesPleaseGiveMeStonesThatYouVeAcquired,
+};
+// Said in a world without lines of its own (none: these NPCs stand only in Lorencia and Devias); the
+// client has always shown the font name's text there.
+const wchar_t* const* const kDefaultPlayerNpcChatText = &I18N::Game::Gulim;
+} // namespace
+
+std::span<const wchar_t* const* const> GetPlayerNpcChatTexts(int world)
+{
+    if (world == WD_2DEVIAS)
+        return kDeviasPlayerNpcChatTexts;
+    if (world == WD_0LORENCIA)
+        return kLorenciaPlayerNpcChatTexts;
+    return {};
+}
+
 void PlayerNpcStopAnimationSetting(CHARACTER* c, OBJECT* o)
 {
     int action = rand() % 100;
@@ -3334,29 +3357,27 @@ void PlayerNpcStopAnimationSetting(CHARACTER* c, OBJECT* o)
             SetAction(&c->Object, PLAYER_UNKNOWN1);
         }
 
-        int TextIndex = 0;
+        const wchar_t* const* text = kDefaultPlayerNpcChatText;
         if (gMapManager.WorldActive == WD_2DEVIAS)
         {
-            int iTextIndices[] = { 904, 905 };
-            int iNumTextIndices = 2;
+            const auto texts = GetPlayerNpcChatTexts(WD_2DEVIAS);
 
-            static int s_iTextIndex = iTextIndices[0];
+            static const wchar_t* const* s_text = texts[0];
             if (o->CurrentAction != o->PriorAction)
-                s_iTextIndex = iTextIndices[rand() % iNumTextIndices];
-            TextIndex = s_iTextIndex;
+                s_text = texts[rand() % texts.size()];
+            text = s_text;
         }
         else if (gMapManager.WorldActive == WD_0LORENCIA)
         {
-            int iTextIndices[] = { 823 };
-            int iNumTextIndices = 1;
-            static int s_iTextIndex = iTextIndices[0];
+            const auto texts = GetPlayerNpcChatTexts(WD_0LORENCIA);
+            static const wchar_t* const* s_text = texts[0];
             if (o->CurrentAction != o->PriorAction)
-                s_iTextIndex = iTextIndices[rand() % iNumTextIndices];
-            TextIndex = s_iTextIndex;
+                s_text = texts[rand() % texts.size()];
+            text = s_text;
         }
 
         wchar_t szText[512];
-        mu_swprintf(szText, I18N::Game::Lookup(TextIndex));
+        mu_swprintf(szText, *text);
         UI::Chat::CreateChat(c->ID, szText, c);
     }
 }

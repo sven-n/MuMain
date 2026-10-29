@@ -223,8 +223,7 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::SyncGemList()
         {
             wchar_t text[MAX_GLOBAL_TEXT_STRING] = {};
             const int jewel = COMGEM::Check_Jewel(entry.type);
-            mu_swprintf(text, L"%ls,  %d", I18N::Game::Lookup(COMGEM::GetJewelIndex(jewel, COMGEM::eGEM_NAME)),
-                        (entry.level + 1) * kJewelsPerBundleLevel);
+            mu_swprintf(text, L"%ls,  %d", COMGEM::GetJewelName(jewel), (entry.level + 1) * kJewelsPerBundleLevel);
             m_ListRows.push_back({StringUtils::WideToNarrow(text), static_cast<int>(m_ListRows.size()), false});
         }
     }
@@ -276,7 +275,7 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::DisjointBtnDown(c
     const int nIdx = COMGEM::m_cGemType;
 
     wchar_t strText[256] = { 0, };
-    mu_swprintf(strText, I18N::Game::AreYouSureToDisbandSD, I18N::Game::Lookup(COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)), iGemLevel);
+    mu_swprintf(strText, I18N::Game::AreYouSureToDisbandSD, COMGEM::GetJewelName(nIdx), iGemLevel);
     mu::ui::window::GenericDialogConfig cfg;
     cfg.showCancel = true;
     cfg.lines.push_back({ strText, true });
@@ -1008,11 +1007,11 @@ void mu::ui::window::ShowCherryBlossomMenuDialog()
     // class either (see WindowCommon.h's own comment), this dialog looks like unfinished/parked
     // native content, not a working feature.
     GenericMenuConfig::MenuButton btnWhite;
-    btnWhite.label = I18N::Game::Lookup(2542);
+    btnWhite.label = L"";
     cfg.buttons.push_back(std::move(btnWhite));
 
     GenericMenuConfig::MenuButton btnRed;
-    btnRed.label = I18N::Game::Lookup(2543);
+    btnRed.label = L"";
     cfg.buttons.push_back(std::move(btnRed));
 
     GenericMenuConfig::MenuButton btnGold;
@@ -1095,11 +1094,10 @@ void mu::ui::window::ShowGemIntegrationJewelDialog()
     // wrapped labels, decoupled from `compact`'s own "small Close/Cancel button" meaning.
     cfg.columns = 2;
 
-    int nBtnIndex[COMGEM::eGEMTYPE_END] = { 1806, 1807, 3312, 3313, 3314, 2081, 3315, 3316, 3317, 3318 };
     for (int i = 0; i < (int)COMGEM::eGEMTYPE_END; ++i)
     {
         GenericMenuConfig::MenuButton btn;
-        btn.label = I18N::Game::Lookup(nBtnIndex[i]);
+        btn.label = COMGEM::GetJewelName(i * 2);
         btn.onClick = [i]
         {
             COMGEM::SetGem(i * 2);
@@ -1148,7 +1146,7 @@ void mu::ui::window::ShowGemIntegrationMixDialog()
             wchar_t strText[256] = { 0, };
             mu::ui::window::GenericDialogConfig confirmCfg;
             confirmCfg.showCancel = true;
-            mu_swprintf(strText, I18N::Game::Lookup(COMGEM::GetJewelIndex(COMGEM::m_cGemType, 0)), I18N::Game::JewelOfSoul, COMGEM::m_cCount);
+            mu_swprintf(strText, COMGEM::GetJewelName(COMGEM::m_cGemType), I18N::Game::JewelOfSoul, COMGEM::m_cCount);
             confirmCfg.lines.push_back({ strText, true });
             mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
             confirmCfg.lines.push_back({ strText, true });

@@ -65,6 +65,11 @@ public:
     void Show(bool bShow) override;
     void UpdateDisplay();
 
+    // A class's name (its job button and, while selected, the description title) and its
+    // description, in the current language. `classType` is one of the MAX_CLASS creatable classes.
+    static const wchar_t* GetJobName(CLASS_TYPE classType);
+    static const wchar_t* GetJobDescription(CLASS_TYPE classType);
+
     // Invoked from the RmlUi document's data-event-click bindings (see Create()). Act
     // immediately here instead of setting a flag for UpdateWhileActive() to consume later -- see
     // CLoginMainWin::RmlClickMenu()'s header comment for
