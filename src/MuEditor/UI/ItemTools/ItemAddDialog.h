@@ -11,10 +11,10 @@
 namespace MuEditor::Items
 {
 // The dialog that adds an item (section 7): a group, a free number (one with
-// neither an item nor a model entry), the English name, and either a copy of
-// the selected item's values or a size and slot of its own. Duplicate copies
-// an item with its model; a model file of its own becomes a shared model that
-// both items use, so it is still opened once.
+// neither an entry in the item files nor a model entry), the English name,
+// and either a copy of the selected item's values or a size and slot of its
+// own. Duplicate copies an item with its model; a model file of its own
+// becomes a shared model that both items use, so it is still opened once.
 class CItemAddDialog
 {
 public:

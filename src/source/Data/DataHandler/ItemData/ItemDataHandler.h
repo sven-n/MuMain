@@ -76,12 +76,13 @@ public:
     // a pick; otherwise they follow the new item's data.
     bool AddItem(const Data::Items::ItemDefinition& definition, const Data::Items::ItemModelDefinition* model,
                  const Data::Items::ItemDefinition* copiedFrom = nullptr);
-    // Removes the item and its model entry; the item type is free again. False
-    // when there is no item.
+    // Removes the item, or the entry without a name, and its model entry; the
+    // item type is free again. False when the item files have no entry there
+    // (ItemDatabase::FindEntry).
     bool RemoveItem(int itemType);
-    // Moves the item, with its ItemAttribute row and its model, to a free item
-    // type (OnItemsSwapped). False when there is no item or the target is not
-    // free.
+    // Moves the item, or the entry without a name, with its ItemAttribute row
+    // and its model, to a free item type (OnItemsSwapped). False when the item
+    // files have no entry there or the target is not free.
     bool MoveItem(int fromItemType, int toItemType);
 
     // Sets the model entry at its (group, number); an entry without a file and
