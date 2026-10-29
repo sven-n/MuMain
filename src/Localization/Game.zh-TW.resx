@@ -116,6 +116,9 @@
     <value>儲備：工作</value>
     <comment>legacy_id=28,29</comment>
   </data>
+  <data name="Unknown map" xml:space="preserve">
+    <value>未知地圖</value>
+  </data>
   <data name="Lorencia" xml:space="preserve">
     <value>洛倫西亞</value>
     <comment>legacy_id=30</comment>

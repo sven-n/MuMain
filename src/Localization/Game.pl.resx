@@ -116,6 +116,9 @@
     <value>Rezerwa: Praca</value>
     <comment>legacy_id=28,29</comment>
   </data>
+  <data name="Unknown map" xml:space="preserve">
+    <value>Nieznana mapa</value>
+  </data>
   <data name="Lorencia" xml:space="preserve">
     <value>Lorencia</value>
     <comment>legacy_id=30</comment>

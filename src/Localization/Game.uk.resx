@@ -116,6 +116,9 @@
     <value>Резерв : Робота</value>
     <comment>legacy_id=28,29</comment>
   </data>
+  <data name="Unknown map" xml:space="preserve">
+    <value>Невідома карта</value>
+  </data>
   <data name="Lorencia" xml:space="preserve">
     <value>Лоренсія</value>
     <comment>legacy_id=30</comment>

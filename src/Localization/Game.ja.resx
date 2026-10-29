@@ -116,6 +116,9 @@
     <value>予約:職業</value>
     <comment>legacy_id=28,29</comment>
   </data>
+  <data name="Unknown map" xml:space="preserve">
+    <value>不明なマップ</value>
+  </data>
   <data name="Lorencia" xml:space="preserve">
     <value>ロレンシア</value>
     <comment>legacy_id=30</comment>

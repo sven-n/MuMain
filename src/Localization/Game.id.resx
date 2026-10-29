@@ -116,6 +116,9 @@
     <value>Cadangan : Pekerjaan</value>
     <comment>legacy_id=28,29</comment>
   </data>
+  <data name="Unknown map" xml:space="preserve">
+    <value>Peta tidak dikenal</value>
+  </data>
   <data name="Lorencia" xml:space="preserve">
     <value>Lorencia</value>
     <comment>legacy_id=30</comment>
