@@ -6,6 +6,7 @@ mu_add_test(
     NAME legacy_text_ids_tests
     SOURCES
         test_legacy_text_character.cpp
+        test_legacy_text_items.cpp
         test_legacy_text_dialog.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient

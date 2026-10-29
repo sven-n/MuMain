@@ -46,6 +46,14 @@ namespace
     constexpr int kPetCommandCount = AT_PET_COMMAND_END - AT_PET_COMMAND_DEFAULT;
     constexpr int kTooltipLineLimit = 50;
 
+    // The pet command names, in PET_COMMAND order.
+    const wchar_t* const* const kPetCommandNames[PET_CMD_END] = {
+        &I18N::Game::BasicAction,
+        &I18N::Game::RandomAutomaticAttack,
+        &I18N::Game::AttackWithOwner,
+        &I18N::Game::AttackTarget,
+    };
+
     std::wstring SanitizeWideStringFormat(const wchar_t* format)
     {
         if (format == nullptr)
@@ -341,6 +349,16 @@ static std::uint8_t g_tabBar = 0;
         }
     }
 
+    const wchar_t* GetPetCommandName(int command)
+    {
+        if (command < PET_CMD_DEFAULT || command >= PET_CMD_END)
+        {
+            return L"";
+        }
+
+        return *kPetCommandNames[command];
+    }
+
     bool BuildPetCmdTooltipModel(int Type, UI::Skills::Tooltip::Model& outModel)
     {
         if (Type < AT_PET_COMMAND_DEFAULT || Type >= AT_PET_COMMAND_END) return false;
@@ -366,7 +384,7 @@ static std::uint8_t g_tabBar = 0;
             ++outModel.skipCount;
         };
 
-        pushLine(I18N::Game::Lookup(1219 + cmdType), LineColor::Blue, true, false);
+        pushLine(GetPetCommandName(cmdType), LineColor::Blue, true, false);
         pushLine(L"\n", LineColor::White, false, true);
         pushLine(L"\n", LineColor::White, false, true);
 

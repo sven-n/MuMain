@@ -193,6 +193,10 @@ namespace mu::ui::window
 
         void AlertTrade();
 
+        // The warning before confirming a trade whose items changed, one text per line; empty outside its lines.
+        static constexpr int TRADE_ALERT_LINES = 4;
+        static const wchar_t* GetTradeAlertLine(int line);
+
         int GetPointedItemIndexMyInven();
         int GetPointedItemIndexYourInven();
 
