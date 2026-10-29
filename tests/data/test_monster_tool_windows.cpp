@@ -20,6 +20,7 @@
 #include "UI/Common/ToolGroups.h"
 #include "UI/Common/UndoTarget.h"
 #include "UI/ItemTools/ItemToolWindow.h"
+#include "UI/MonsterTools/MonsterAttackPreview.h"
 #include "UI/MonsterTools/MonsterEdits.h"
 #include "UI/MonsterTools/MonsterSelection.h"
 #include "UI/MonsterTools/MonsterToolWindow.h"
@@ -313,6 +314,124 @@ TEST_CASE("Monster Attacks: a player skill row is removed while the monster skil
     click(AttacksRowItemId(2, AllMaps, "MonsterSkills", 0, I18N::Editor::Remove));
     CHECK(stored().monsterSkills.empty());
     g_MonsterSelection.Select(MonsterSelection::NoMonster);
+}
+
+TEST_CASE("Monster Attacks: Play next attack plays a rotation in turn and the generic pattern as the game counts "
+          "(D48) [editor][monsters]")
+{
+    using MuEditor::Monsters::AttackPreview::Counts;
+    using MuEditor::Monsters::AttackPreview::NextOtherwise;
+    Data::Monsters::MonsterAttacks attacks;
+    attacks.otherwise = {MONSTER01_ATTACK2, MONSTER01_ATTACK1, MONSTER01_ATTACK3};
+    // Skill entries are no other attacks.
+    attacks.monsterSkills = {{0, MONSTER01_ATTACK4}};
+    attacks.skills = {{0, MONSTER01_ATTACK5}};
+    Counts counts;
+    for (const int expected : {MONSTER01_ATTACK2, MONSTER01_ATTACK1, MONSTER01_ATTACK3, MONSTER01_ATTACK2})
+    {
+        CHECK(NextOtherwise(attacks, counts) == expected);
+    }
+    CHECK(counts.rotation == 1);
+
+    // SetPlayerAttack counts each attack, the pattern its own: attack 1, 2, 2
+    // as the Fire Golem plays in Devil Square.
+    attacks.otherwiseGeneric = true;
+    counts = {};
+    for (const int expected :
+         {MONSTER01_ATTACK1, MONSTER01_ATTACK2, MONSTER01_ATTACK2, MONSTER01_ATTACK1, MONSTER01_ATTACK2})
+    {
+        CHECK(NextOtherwise(attacks, counts) == expected);
+    }
+    CHECK(counts.swordCount == 10);
+    CHECK(counts.rotation == 0);
+
+    // A draw picks one of its animations.
+    attacks.otherwiseGeneric = false;
+    attacks.otherwiseRandom = Data::Monsters::MonsterAttackRandom::Bali;
+    for (int draw = 0; draw < 20; ++draw)
+    {
+        const int animation = NextOtherwise(attacks, counts);
+        CHECK(animation >= MONSTER01_ATTACK1);
+        CHECK(animation <= MONSTER01_ATTACK4);
+    }
+    attacks.otherwiseRandom.reset();
+    attacks.otherwise = {Data::Monsters::NoAttackAnimation};
+    CHECK(NextOtherwise(attacks, counts) == Data::Monsters::NoAttackAnimation);
+}
+
+// The test binary opens no models: Play opens the Monster Preview, which says
+// so, beside Monster Attacks; Play next attack says what it played.
+TEST_CASE("Monster Attacks: Play opens the Monster Preview beside it, Play next attack goes through the rotation and "
+          "starts again (D48) [editor][monsters]")
+{
+    const ToolWindowsScope windows;
+    MonsterDefinition hound = Monster(3, "Hound");
+    hound.model = "MONSTER_MODEL_HOUND";
+    hound.attacks.emplace();
+    hound.attacks->skills = {{12, MONSTER01_ATTACK3}, {13, Data::Monsters::NoAttackAnimation}};
+    hound.attacks->otherwise = {MONSTER01_ATTACK2, MONSTER01_ATTACK1};
+    const std::array monsters = {hound};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    Data::Monsters::MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_HOUND";
+    model.load.file = "Data/Monster/Monster02.bmd";
+    const std::array models = {model};
+    g_MonsterModelDatabase.Build(models);
+    TestImGuiContext context;
+    g_MonsterSelection.Select(3);
+    // In the editor window's first layout, as the editor draws it.
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        BeginEditorWindow();
+        MuEditor::Layout::SubmitDockSpace(false);
+        ImGui::End();
+        bool open = true;
+        if (g_MuEditorCore.GetToolWindows().monsterPreview)
+        {
+            g_MuMonsterPreviewUI.Render(&open);
+        }
+        g_MuMonsterAttacksUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    render();
+    click(AttacksItemId(3, AllMaps, I18N::Editor::FromTheStart));
+    CHECK_FALSE(g_MuMonsterAttacksUI.GetLastPlayed());
+
+    // No animation, nothing to play.
+    click(AttacksRowItemId(3, AllMaps, "Skills", 1, I18N::Editor::Play));
+    CHECK_FALSE(g_MuEditorCore.GetToolWindows().monsterPreview);
+    click(AttacksRowItemId(3, AllMaps, "Skills", 0, I18N::Editor::Play));
+    CHECK(g_MuEditorCore.GetToolWindows().monsterPreview);
+    // In the first layout both are tabs of one node: the preview goes beside,
+    // shown from its second frame.
+    render();
+    CHECK(DockIdOf(WindowIds::MonsterPreview) != DockIdOf(WindowIds::MonsterAttacks));
+    CHECK_FALSE(ImGui::FindWindowByName(WindowIds::MonsterAttacks)->Hidden);
+    CHECK_FALSE(ImGui::FindWindowByName(WindowIds::MonsterPreview)->Hidden);
+
+    for (const int expected : {MONSTER01_ATTACK2, MONSTER01_ATTACK1, MONSTER01_ATTACK2})
+    {
+        click(AttacksItemId(3, AllMaps, I18N::Editor::PlayNextAttack));
+        CHECK(g_MuMonsterAttacksUI.GetLastPlayed() == expected);
+    }
+    click(AttacksItemId(3, AllMaps, I18N::Editor::FromTheStart));
+    CHECK_FALSE(g_MuMonsterAttacksUI.GetLastPlayed());
+    click(AttacksItemId(3, AllMaps, I18N::Editor::PlayNextAttack));
+    CHECK(g_MuMonsterAttacksUI.GetLastPlayed() == MONSTER01_ATTACK2);
+
+    // Playing stores nothing.
+    CHECK_FALSE(g_MonsterEdits.GetHistory().CanUndo());
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterModelDatabase.Build({});
 }
 
 // The model tools with a monster whose model has an entry with sounds and

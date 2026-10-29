@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Data/GameData/MonsterData/MonsterAttacks.h"
+
+#include <cstdint>
+
 class CHARACTER;
 class OBJECT;
 
@@ -24,6 +28,12 @@ bool IsAttackAnimation(int animation);
 // whose attacks say "generic": attack 1 when CHARACTER::SwordCount % 3 is 0,
 // else attack 2; the count goes on by one.
 int NextGenericAttack(CHARACTER& character);
+// The same on a count of its own (the editor's preview).
+int NextGenericAttack(std::uint8_t& swordCount);
+
+// The animation a draw picks, with rand() and rand_fps_check() as the old
+// code's draws.
+int DrawAttack(Data::Monsters::MonsterAttackRandom random);
 
 // The attack that a monster skill packet (0x69, ReceiveMonsterSkill) starts,
 // for the life of the scope. Attacks that clear the skill after the attack

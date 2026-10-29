@@ -157,12 +157,14 @@ void MuMonsterPreviewUI::RenderPreview(int slot)
     {
         m_slot = slot;
         m_animation = 0;
+        m_once = false;
         Restart(slot);
     }
     // An edit may leave the model with fewer animations.
     if (m_animation >= Models[slot].NumActions)
     {
         m_animation = 0;
+        m_once = false;
         Restart(slot);
     }
     ImGui::TextDisabled("%s", std::string(Data::Monsters::GetMonsterModelSymbol(slot)).c_str());
@@ -186,6 +188,7 @@ void MuMonsterPreviewUI::RenderControls(int slot, const MonsterModelDefinition& 
             if (ImGui::Selectable(AnimationLabel(animation).c_str(), animation == m_animation))
             {
                 m_animation = animation;
+                m_once = false;
                 Restart(slot);
             }
         }
@@ -195,6 +198,7 @@ void MuMonsterPreviewUI::RenderControls(int slot, const MonsterModelDefinition& 
     if (ImGui::Button(m_playing ? I18N::Editor::Pause : I18N::Editor::PlayAnimation))
     {
         m_playing = !m_playing;
+        m_once = false;
     }
     ImGui::SameLine();
     if (ImGui::Button(I18N::Editor::FromTheStart))
@@ -300,8 +304,33 @@ void MuMonsterPreviewUI::Advance(int slot, const MonsterModelDefinition& values)
     const int played = PlayedFrames(action);
     if (played > 0 && m_frame >= static_cast<float>(played))
     {
+        if (m_once)
+        {
+            // SetPlayerStop after the attack.
+            m_once = false;
+            m_animation = MONSTER01_STOP1;
+            Restart(slot);
+            return;
+        }
         m_frame = std::fmod(m_frame, static_cast<float>(played));
         Restart(slot);
+    }
+}
+
+void MuMonsterPreviewUI::PlayAttack(int slot, int animation, std::optional<int> sound)
+{
+    if (!ShownModel::IsOpen(slot) || animation < 0 || animation >= Models[slot].NumActions)
+    {
+        return;
+    }
+    m_slot = slot;
+    m_animation = animation;
+    m_playing = true;
+    m_once = true;
+    Restart(slot);
+    if (m_sounds && sound)
+    {
+        SoundPreview::Play(*sound);
     }
 }
 

@@ -11,7 +11,10 @@
 #include "imgui_internal.h"
 
 #include <algorithm>
+#include <optional>
+#include <string>
 #include <string_view>
+#include <utility>
 
 namespace
 {
@@ -24,6 +27,10 @@ constexpr float ItemBrowserWidthShare = 0.35f;
 constexpr char DockSpaceName[] = "ToolWindows";
 // The editor window's dock space, as last submitted; 0 before.
 ImGuiID g_dockSpace = 0;
+// The share of a dock node a window shown beside another one takes.
+constexpr float BesideWidthShare = 0.5f;
+// ShowBeside's window and the one it goes beside, until the next dock space.
+std::pair<std::string, std::string> g_showBeside;
 void BuildDefaultLayout(ImGuiID dockSpace, ImVec2 size)
 {
     ImGui::DockBuilderRemoveNode(dockSpace);
@@ -94,6 +101,46 @@ ImGuiDockNode* FindDockNode(const char* windowId)
 // Beside the item browser: the node next to the browser's, so the browser
 // stays in view. In a layout from before the item tools the console is the
 // browser's neighbour (the tools were above it): then the browser's own node.
+// The dock node a window is docked in or has its place in (imgui.ini): 0 for
+// a floating one, nullopt for one that has no place yet.
+std::optional<ImGuiID> PlacedDockId(const char* windowId)
+{
+    if (const ImGuiWindow* window = ImGui::FindWindowByName(windowId))
+    {
+        return window->DockNode != nullptr ? window->DockNode->ID : window->DockId;
+    }
+    if (const ImGuiWindowSettings* settings = ImGui::FindWindowSettingsByID(ImHashStr(windowId)))
+    {
+        return settings->DockId;
+    }
+    return std::nullopt;
+}
+
+// ShowBeside, before the dock space's windows of this frame.
+void ApplyShowBeside()
+{
+    if (g_showBeside.first.empty())
+    {
+        return;
+    }
+    const auto [windowId, besideId] = std::exchange(g_showBeside, {});
+    ImGuiDockNode* beside = FindDockNode(besideId.c_str());
+    const std::optional<ImGuiID> placed = PlacedDockId(windowId.c_str());
+    // A window without a place docks with its group's tools: beside it too.
+    if (beside != nullptr && beside->IsLeafNode() && (!placed || *placed == beside->ID))
+    {
+        ImGuiID kept = 0;
+        const ImGuiID right = ImGui::DockBuilderSplitNode(beside->ID, ImGuiDir_Right, BesideWidthShare, nullptr, &kept);
+        ImGui::DockBuilderDockWindow(windowId.c_str(), right);
+        ImGui::DockBuilderFinish(ImGui::DockNodeGetRootNode(ImGui::DockBuilderGetNode(kept))->ID);
+        return;
+    }
+    if (placed && *placed != 0)
+    {
+        ImGui::SetWindowFocus(windowId.c_str());
+    }
+}
+
 ImGuiDockNode* BesideBrowser(ImGuiDockNode* browser)
 {
     if (browser == nullptr || browser->ParentNode == nullptr)
@@ -149,7 +196,13 @@ void SubmitDockSpace(bool resetLayout)
         // Never empty, also when the editor window is down to its menu bar.
         BuildDefaultLayout(dockSpace, ImMax(ImGui::GetContentRegionAvail(), ImVec2(1.0f, 1.0f)));
     }
+    ApplyShowBeside();
     ImGui::DockSpace(dockSpace);
+}
+
+void ShowBeside(const char* windowId, const char* besideId)
+{
+    g_showBeside = {windowId, besideId};
 }
 
 ImGuiWindowFlags ToolWindowBarFlags(const char* windowName)

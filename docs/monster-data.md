@@ -551,11 +551,19 @@ item tools.
   whose maps **Plays on** picks in the [map picker](#the-map-picker) (Save
   refuses a variant without maps); the tables then edit the variant's
   attacks, and **Remove the map variant** removes it. Each table
-  (monster skills, player skills) has a row per skill with its animation and
-  **Remove**, and a number field with **Add**; a monster skill that 0x69
-  plays no attack for is marked. **Any other attack** is an animation, a
+  (monster skills, player skills) has a row per skill with its animation,
+  **Play** and **Remove**, and a number field with **Add**; a monster skill
+  that 0x69 plays no attack for is marked. **Play** plays the animation once
+  in Monster Preview (and opens it), with the model's attack sound and the
+  attacks' sound, then the model stands; skill effects do not play. A
+  Monster Preview that is a tab beside Monster Attacks moves to the right
+  half of their place, so both show. **Any other attack** is an animation, a
   rotation (its animations in turn, with **Remove** and **Add an
   animation**), the generic pattern or a draw, and **Clear the monster skill** says when the skill is cleared.
+  **Play next attack** plays what the monster's next such attack plays and
+  says which: the rotation in turn, the generic pattern and the draws as the
+  game counts them for one monster from its creation; **From the start**
+  starts the counts again.
   **Sound of the attacks** is a `SOUND_*` id they play each time (the traps'),
   **At the monster (3D)** plays it there; a name the monster data does not
   know is not stored, and the field says so. The

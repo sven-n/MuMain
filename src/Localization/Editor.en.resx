@@ -2479,6 +2479,21 @@
   <data name="Play animation" xml:space="preserve">
     <value>Play</value>
   </data>
+  <data name="Play" xml:space="preserve">
+    <value>Play</value>
+  </data>
+  <data name="Play next attack" xml:space="preserve">
+    <value>Play next attack</value>
+  </data>
+  <data name="Play next attack note" xml:space="preserve">
+    <value>The animation of the next attack that no skill entry plays, counted as the game counts for one monster from its creation.</value>
+  </data>
+  <data name="Played {0}" xml:space="preserve">
+    <value>Played {0}</value>
+  </data>
+  <data name="Plays it once in the Monster Preview, with the attack sounds." xml:space="preserve">
+    <value>Plays it once in the Monster Preview, with the attack sounds.</value>
+  </data>
   <data name="Play this sound" xml:space="preserve">
     <value>Play</value>
   </data>

@@ -8,6 +8,8 @@
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewTarget.h"
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
 
+#include <optional>
+
 namespace MuEditor::Monsters
 {
 // The Monster Preview tool (monsters design, section 9): the selected
@@ -17,7 +19,8 @@ namespace MuEditor::Monsters
 // Model tool's, also while one is being dragged; the model's slot sounds play
 // when their animation starts; the impact frame of attacks 1 and 2 and the
 // animation that follows are marked, and the speed factors the game adds can
-// be played too. Only in the editor's window (Q-MN17).
+// be played too; Monster Attacks' Play plays an attack once (Q-MN73). Only in
+// the editor's window (Q-MN17).
 class MuMonsterPreviewUI
 {
 public:
@@ -29,6 +32,22 @@ public:
     void BeforeFrame()
     {
         m_target.BeforeFrame();
+    }
+
+    // The Monster Attacks tool's Play: the attack animation once from the
+    // start with the slot's attack sound and `sound` (the attacks' own), then
+    // the model stands as the game's does. Nothing while the model of `slot`
+    // is not open or lacks the animation.
+    void PlayAttack(int slot, int animation, std::optional<int> sound);
+
+    // The animation shown, and whether it plays.
+    int GetAnimation() const
+    {
+        return m_animation;
+    }
+    bool IsPlaying() const
+    {
+        return m_playing;
     }
 
 private:
@@ -52,6 +71,8 @@ private:
     float m_frame = 0.0f;
     float m_turnDegrees = 0.0f;
     bool m_playing = true;
+    // An attack Play started: the model stands when it ends.
+    bool m_once = false;
     bool m_turn = false;
     bool m_sounds = true;
     bool m_gameFactors = true;

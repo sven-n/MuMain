@@ -10,9 +10,11 @@
 #include "MonsterShownModel.h"
 #include "MonsterStepLabel.h"
 #include "MonsterToolWindow.h"
+#include "MuMonsterPreviewUI.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MapPicker.h"
+#include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "Core/Globals/_define.h"
 #include "Core/Globals/_enum.h"
@@ -255,6 +257,7 @@ void MuMonsterAttacksUI::RenderAttacks(MonsterDefinition& monster, int modelSlot
     if (ImGui::CollapsingHeader(I18N::Editor::AnyOtherAttack, ImGuiTreeNodeFlags_DefaultOpen))
     {
         RenderOtherwise(monster, modelSlot);
+        RenderPlayNext(monster);
         RenderClearSkill(monster);
     }
     if (ImGui::CollapsingHeader(I18N::Editor::AttackSound, ImGuiTreeNodeFlags_DefaultOpen))
@@ -369,6 +372,8 @@ void MuMonsterAttacksUI::RenderEntries(MonsterDefinition& monster, int modelSlot
         {
             m_draft.AfterChange(true, label);
         }
+        ImGui::SameLine();
+        RenderPlayButton(monster, animation);
         ImGui::SameLine();
         if (ImGui::SmallButton(I18N::Editor::Remove))
         {
@@ -504,6 +509,66 @@ void MuMonsterAttacksUI::RenderRotation(MonsterDefinition& monster, int modelSlo
         m_draft.AfterChange(true, label);
     }
     ImGui::Unindent();
+}
+
+void MuMonsterAttacksUI::RenderPlayNext(MonsterDefinition& monster)
+{
+    if (m_countsMonster != monster.number || m_countsVariant != m_variant)
+    {
+        m_countsMonster = monster.number;
+        m_countsVariant = m_variant;
+        m_counts = {};
+        m_lastPlayed.reset();
+    }
+    ImGui::BeginDisabled(!ShownModel::FindSlot(monster));
+    if (ImGui::SmallButton(I18N::Editor::PlayNextAttack))
+    {
+        m_lastPlayed = AttackPreview::NextOtherwise(*ShownAttacks(monster), m_counts);
+        PlayInPreview(monster, *m_lastPlayed);
+    }
+    ImGui::EndDisabled();
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::PlayNextAttackNote);
+    }
+    ImGui::SameLine();
+    if (ImGui::SmallButton(I18N::Editor::FromTheStart))
+    {
+        m_counts = {};
+        m_lastPlayed.reset();
+    }
+    if (m_lastPlayed)
+    {
+        ImGui::SameLine();
+        ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::Played0, {AnimationLabel(*m_lastPlayed)}).c_str());
+    }
+}
+
+void MuMonsterAttacksUI::RenderPlayButton(MonsterDefinition& monster, int animation)
+{
+    ImGui::BeginDisabled(!ShownModel::FindSlot(monster) || animation == NoAttackAnimation);
+    if (ImGui::SmallButton(I18N::Editor::Play))
+    {
+        PlayInPreview(monster, animation);
+    }
+    ImGui::EndDisabled();
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::PlaysItOnceInTheMonsterPreviewWithTheAttackSounds);
+    }
+}
+
+void MuMonsterAttacksUI::PlayInPreview(MonsterDefinition& monster, int animation)
+{
+    const std::optional<int> slot = ShownModel::FindSlot(monster);
+    if (!slot || animation == NoAttackAnimation)
+    {
+        return;
+    }
+    // Shown beside this tool, not as a tab over it.
+    g_MuEditorCore.GetToolWindows().monsterPreview = true;
+    Layout::ShowBeside(WindowIds::MonsterPreview, WindowIds::MonsterAttacks);
+    g_MuMonsterPreviewUI.PlayAttack(*slot, animation, Data::Monsters::FindMonsterSoundId(ShownAttacks(monster)->sound));
 }
 
 void MuMonsterAttacksUI::RenderClearSkill(MonsterDefinition& monster)
