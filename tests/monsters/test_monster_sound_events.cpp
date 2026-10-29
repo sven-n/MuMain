@@ -177,8 +177,12 @@ TEST_CASE("Monster sounds: PlayEvents plays a model's events on any map and at a
         played.clear();
         const Data::Monsters::MonsterModelDefinition* model = g_MonsterModelDatabase.Find(slot);
         REQUIRE(model != nullptr);
-        GameLogic::Monsters::SoundEvents::PlayEvents(*model, animation, frame, deathEffectArmed,
-                                                     [&played](int sound) { played.push_back(sound); });
+        GameLogic::Monsters::SoundEvents::Situation situation;
+        situation.animation = animation;
+        situation.frame = frame;
+        situation.deathEffectArmed = deathEffectArmed;
+        GameLogic::Monsters::SoundEvents::PlayEvents(*model, situation,
+                                                     [&played](int sound, bool) { played.push_back(sound); });
         return played;
     };
 
@@ -272,6 +276,144 @@ TEST_CASE("Monster sounds: a model without sound events plays none of them [mons
     object.CurrentAction = MONSTER01_ATTACK1;
     CHECK_FALSE(GameLogic::Monsters::SoundEvents::Play(object));
     CHECK(scope.Creation().Load().TakePlayedSounds().empty());
+}
+
+namespace
+{
+using Data::Monsters::MonsterSoundMoment;
+using GameLogic::Monsters::SoundEvents::Situation;
+using Played = std::vector<std::pair<int, bool>>;
+
+Played PlayIn(const Data::Monsters::MonsterModelDefinition& model, const Situation& situation)
+{
+    Played played;
+    GameLogic::Monsters::SoundEvents::PlayEvents(model, situation, [&played](int sound, bool atMonster)
+                                                 { played.emplace_back(sound, atMonster); });
+    return played;
+}
+
+Situation At(MonsterSoundMoment moment, int animation = MONSTER01_STOP1)
+{
+    Situation situation;
+    situation.moment = moment;
+    situation.animation = animation;
+    return situation;
+}
+
+Situation In(int animation)
+{
+    Situation situation;
+    situation.animation = animation;
+    return situation;
+}
+
+Data::Monsters::MonsterSoundEvent Event(std::vector<MonsterSoundMoment> moments, std::vector<std::string> sounds)
+{
+    Data::Monsters::MonsterSoundEvent event;
+    event.moments = std::move(moments);
+    event.sounds = std::move(sounds);
+    return event;
+}
+} // namespace
+
+TEST_CASE("Monster sounds: an event at moments plays there, whatever the animation (Q-MN76) [monsters][sounds]")
+{
+    Data::Monsters::MonsterModelDefinition model;
+    Data::Monsters::MonsterSoundEvent walk;
+    walk.animations = {MONSTER01_WALK};
+    walk.sounds = {"SOUND_MONSTER_DSIDLE1"};
+    model.soundEvents = {Event({MonsterSoundMoment::Attack, MonsterSoundMoment::Hit}, {"SOUND_MONSTER_BULLATTACK1"}),
+                         walk};
+
+    CHECK(PlayIn(model, At(MonsterSoundMoment::Attack, MONSTER01_STOP2)) == Played{{SOUND_MONSTER_BULLATTACK1, false}});
+    // At a moment, the events of the animation do not play.
+    CHECK(PlayIn(model, At(MonsterSoundMoment::Hit, MONSTER01_WALK)) == Played{{SOUND_MONSTER_BULLATTACK1, false}});
+    CHECK(PlayIn(model, At(MonsterSoundMoment::Death)).empty());
+    // In an animation, the events of a moment do not play.
+    CHECK(PlayIn(model, In(MONSTER01_ATTACK1)).empty());
+    CHECK(PlayIn(model, In(MONSTER01_WALK)) == Played{{SOUND_MONSTER_DSIDLE1, false}});
+}
+
+TEST_CASE("Monster sounds: an event plays by SubType, heard anywhere and at the monster (Q-MN76) [monsters][sounds]")
+{
+    Data::Monsters::MonsterModelDefinition model;
+    Data::Monsters::MonsterSoundEvent first = Event({MonsterSoundMoment::Death}, {"SOUND_MONSTER_DSDEATH"});
+    first.notSubType = 9;
+    first.heardAnywhere = true;
+    first.atMonster = true;
+    Data::Monsters::MonsterSoundEvent second = Event({MonsterSoundMoment::Death}, {"SOUND_MONSTER_LSDEATH"});
+    second.subType = 9;
+    model.soundEvents = {first, second};
+
+    Situation death = At(MonsterSoundMoment::Death);
+    CHECK(PlayIn(model, death) == Played{{SOUND_MONSTER_DSDEATH, true}});
+    death.subType = 9;
+    CHECK(PlayIn(model, death) == Played{{SOUND_MONSTER_LSDEATH, false}});
+    // Far from the hero or on another map: only the event heard anywhere.
+    death.heard = false;
+    CHECK(PlayIn(model, death).empty());
+    death.subType = 0;
+    CHECK(PlayIn(model, death) == Played{{SOUND_MONSTER_DSDEATH, true}});
+}
+
+TEST_CASE("Monster sounds: a pick with one sound plays it in one draw of two, else none (Q-MN76) [monsters][sounds]")
+{
+    Data::Monsters::MonsterModelDefinition model;
+    Data::Monsters::MonsterSoundEvent idle = Event({MonsterSoundMoment::Walk}, {"SOUND_MONSTER_DSIDLE1"});
+    idle.pick = Data::Monsters::MonsterSoundDraw::Rand;
+    model.soundEvents = {idle};
+
+    int played = 0;
+    for (unsigned int seed = 1; seed <= 20; ++seed)
+    {
+        std::srand(seed);
+        const bool first = std::rand() % 2 == 0;
+        const int next = std::rand();
+        std::srand(seed);
+        const Played sounds = PlayIn(model, At(MonsterSoundMoment::Walk));
+        CHECK(sounds == (first ? Played{{SOUND_MONSTER_DSIDLE1, false}} : Played{}));
+        // One draw either way.
+        CHECK(std::rand() == next);
+        played += first ? 1 : 0;
+    }
+    CHECK(played > 0);
+    CHECK(played < 20);
+}
+
+TEST_CASE("Monster sounds: PlayMoment plays a character's events at the character (Q-MN76) [monsters][sounds]")
+{
+    SoundScope scope(WD_0LORENCIA);
+    std::vector<Data::Monsters::MonsterModelDefinition> models;
+    for (const Data::Monsters::MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
+    {
+        models.push_back(*model);
+    }
+    std::vector<Data::Monsters::MonsterModelDefinition> changed = models;
+    for (Data::Monsters::MonsterModelDefinition& model : changed)
+    {
+        if (Data::Monsters::FindMonsterModelReference(model.slot) == MODEL_RAYMOND)
+        {
+            Data::Monsters::MonsterSoundEvent hit = Event({MonsterSoundMoment::Hit}, {"SOUND_MONSTER_BULLATTACK1"});
+            hit.heardAnywhere = true;
+            hit.atMonster = true;
+            model.soundEvents.push_back(hit);
+        }
+    }
+    g_MonsterModelDatabase.Build(changed);
+
+    OBJECT object;
+    object.Type = MODEL_RAYMOND;
+    object.CurrentAction = MONSTER01_SHOCK;
+    // Raymond's other events name the Empire Guardian maps; this is Lorencia,
+    // and the character is far from the hero.
+    object.Position[0] = Hero->Object.Position[0] + 1000.0f;
+    object.Position[1] = Hero->Object.Position[1];
+    CHECK(GameLogic::Monsters::SoundEvents::PlayMoment(object, MonsterSoundMoment::Hit));
+    CHECK(scope.Creation().Load().TakePlayedSounds() ==
+          std::vector<PlayedSound>{{SOUND_MONSTER_BULLATTACK1, &object, false}});
+    CHECK(GameLogic::Monsters::SoundEvents::PlayMoment(object, MonsterSoundMoment::Attack));
+    CHECK(scope.Creation().Load().TakePlayedSounds().empty());
+    g_MonsterModelDatabase.Build(models);
 }
 
 TEST_CASE("Monster sounds: the traps' attacks play their sounds, the Iron Stick's at the trap [monsters][sounds]")

@@ -98,7 +98,19 @@ MonsterModelDefinition FullModel()
     die.animations = {MONSTER01_DIE};
     die.deathEffectArmed = true;
     die.sounds = {"Data/Sound/mDarkKnightDie.wav", "SOUND_MONSTER_DARKKNIGHT1"};
-    model.soundEvents = {walk, breath, die};
+    Data::Monsters::MonsterSoundEvent idle;
+    idle.moments = {Data::Monsters::MonsterSoundMoment::Stand, Data::Monsters::MonsterSoundMoment::Walk};
+    idle.notSubType = 9;
+    idle.heardAnywhere = true;
+    idle.atMonster = true;
+    idle.chance = Data::Monsters::MonsterSoundChance{16, Data::Monsters::MonsterSoundDraw::RandFps};
+    idle.pick = Data::Monsters::MonsterSoundDraw::Rand;
+    idle.sounds = {"SOUND_MONSTER_DARKKNIGHT1"};
+    Data::Monsters::MonsterSoundEvent bigDeath;
+    bigDeath.moments = {Data::Monsters::MonsterSoundMoment::Death};
+    bigDeath.subType = 9;
+    bigDeath.sounds = {"Data/Sound/mDarkKnightDie.wav"};
+    model.soundEvents = {walk, breath, die, idle, bigDeath};
     model.soundEventMaps = {{69}, {70, 2}};
     model.bitmaps = {{"Monster/bv01_2.jpg", "BITMAP_MONSTER_SKIN", true, true}, {"Monster/iui02.tga", "BITMAP_ROBE+3"}};
     Data::Monsters::MonsterModelPart part;
@@ -210,6 +222,49 @@ TEST_CASE("Monster models: each sound event is written on a line of its own [dat
     CHECK(read.models[0] == model);
 }
 
+TEST_CASE("Monster models: a sound event at moments is written with on and its conditions (Q-MN76) [data][monsters]")
+{
+    MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_HOUND";
+    model.load.file = "Data/Monster/Monster02.bmd";
+    model.load.textureFolders = {"Monster"};
+    Data::Monsters::MonsterSoundEvent idle;
+    idle.moments = {Data::Monsters::MonsterSoundMoment::Stand, Data::Monsters::MonsterSoundMoment::Walk};
+    idle.notSubType = 9;
+    idle.heardAnywhere = true;
+    idle.atMonster = true;
+    idle.chance = Data::Monsters::MonsterSoundChance{16, Data::Monsters::MonsterSoundDraw::RandFps};
+    idle.pick = Data::Monsters::MonsterSoundDraw::Rand;
+    idle.sounds = {"SOUND_KARUTAN_ORCUS_MOVE1"};
+    Data::Monsters::MonsterSoundEvent death;
+    death.moments = {Data::Monsters::MonsterSoundMoment::Death};
+    death.subType = 9;
+    death.sounds = {"SOUND_KARUTAN_ORCUS_DEATH"};
+    model.soundEvents = {idle, death};
+
+    const std::string text = Data::Monsters::WriteMonsterModelsJson(std::vector<MonsterModelDefinition>{model});
+    INFO(text);
+    CHECK(text.find(R"(      "soundEvents": [
+        {"on": ["stand", "walk"], "notSubType": 9, "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KARUTAN_ORCUS_MOVE1"]},
+        {"on": ["death"], "subType": 9, "sounds": ["SOUND_KARUTAN_ORCUS_DEATH"]}
+      ])") != std::string::npos);
+    const ReadResult read = Read(text);
+    INFO(Messages(read.issues));
+    CHECK(read.issues.empty());
+    REQUIRE(read.models.size() == 1);
+    CHECK(read.models[0] == model);
+
+    // Read in any order, moments are sorted.
+    const ReadResult unsorted = Read(ModelsFile(Model(
+        "MONSTER_MODEL_HOUND",
+        R"("sounds": [{"file": "Data/Sound/a.wav"}], "soundEvents": [{"on": ["walk", "attack"], "sounds": ["Data/Sound/a.wav"]}])")));
+    INFO(Messages(unsorted.issues));
+    REQUIRE(unsorted.models.size() == 1);
+    CHECK(unsorted.models[0].soundEvents[0].moments ==
+          std::vector<Data::Monsters::MonsterSoundMoment>{Data::Monsters::MonsterSoundMoment::Attack,
+                                                          Data::Monsters::MonsterSoundMoment::Walk});
+}
+
 TEST_CASE("Monster models: a sound event names a sound of the model or a SOUND_ id [data][monsters]")
 {
     MonsterModelDefinition model;
@@ -291,7 +346,24 @@ TEST_CASE("Monster models: wrong values are errors that name the model and the f
          "three numbers"},
         {Model("MONSTER_MODEL_HOUND", R"("headBone": 1.5)"), "model MONSTER_MODEL_HOUND headBone", "whole number"},
         {Model("MONSTER_MODEL_HOUND", R"("soundEvents": [{"sounds": ["a"]}])"),
-         "model MONSTER_MODEL_HOUND soundEvents[0]", "animations and sounds"},
+         "model MONSTER_MODEL_HOUND soundEvents[0]", "animations or on (not both) and sounds"},
+        {Model("MONSTER_MODEL_HOUND", R"("soundEvents": [{"animations": ["walk"], "on": ["walk"], "sounds": ["a"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0]", "animations or on (not both) and sounds"},
+        {Model("MONSTER_MODEL_HOUND", R"("soundEvents": [{"on": [], "sounds": ["a"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0].on", "one moment or more"},
+        {Model("MONSTER_MODEL_HOUND", R"("soundEvents": [{"on": ["jump"], "sounds": ["a"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0].on[0]", "not a moment"},
+        {Model("MONSTER_MODEL_HOUND", R"("soundEvents": [{"on": ["hit", "hit"], "sounds": ["a"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0].on", "hit more than once"},
+        {Model("MONSTER_MODEL_HOUND", R"("soundEvents": [{"on": ["hit"], "subType": -1, "sounds": ["a"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0].subType", "0 to 32767"},
+        {Model("MONSTER_MODEL_HOUND",
+               R"("soundEvents": [{"on": ["hit"], "subType": 9, "notSubType": 9, "sounds": ["a"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0].notSubType", "cannot be used with subType"},
+        {Model("MONSTER_MODEL_HOUND", R"("soundEvents": [{"on": ["hit"], "heardAnywhere": 1, "sounds": ["a"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0].heardAnywhere", "true or false"},
+        {Model("MONSTER_MODEL_HOUND", R"("soundEvents": [{"on": ["hit"], "atMonster": "yes", "sounds": ["a"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0].atMonster", "true or false"},
         {Model("MONSTER_MODEL_HOUND", R"("soundEvents": [{"animations": [], "sounds": ["a"]}])"),
          "model MONSTER_MODEL_HOUND soundEvents[0].animations", "one animation or more"},
         {Model("MONSTER_MODEL_HOUND", R"("soundEvents": [{"animations": ["walk"], "sounds": []}])"),
@@ -305,8 +377,9 @@ TEST_CASE("Monster models: wrong values are errors that name the model and the f
         {Model("MONSTER_MODEL_HOUND",
                R"("soundEvents": [{"animations": ["walk"], "chance": {"oneIn": 2, "draw": "dice"}, "sounds": ["a"]}])"),
          "model MONSTER_MODEL_HOUND soundEvents[0].chance.draw", "randFps or rand"},
-        {Model("MONSTER_MODEL_HOUND", R"("soundEvents": [{"animations": ["walk"], "pick": "rand", "sounds": ["a"]}])"),
-         "model MONSTER_MODEL_HOUND soundEvents[0].sounds", "two sounds with pick"},
+        {Model("MONSTER_MODEL_HOUND",
+               R"("soundEvents": [{"animations": ["walk"], "pick": "rand", "sounds": ["a", "b", "c"]}])"),
+         "model MONSTER_MODEL_HOUND soundEvents[0].sounds", "one or two sounds with pick"},
         {Model("MONSTER_MODEL_HOUND",
                R"("soundEvents": [{"animations": ["die"], "deathEffectArmed": 1, "sounds": ["a"]}])"),
          "model MONSTER_MODEL_HOUND soundEvents[0].deathEffectArmed", "true or false"},

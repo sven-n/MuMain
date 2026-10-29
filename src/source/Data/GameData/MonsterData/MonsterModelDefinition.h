@@ -72,25 +72,54 @@ struct MonsterSoundChance
     bool operator==(const MonsterSoundChance&) const = default;
 };
 
-// Sounds that the game plays for a character of the model while it is in one
-// of `animations` (monsters design, MN7): PlayMonsterSound, at the start of an
-// attack, a hit and the death, at each step of a walk and at the end of each
-// loop of stop1 and stop2, on top of the sound slots.
+// The moments of the game that play a sound event whatever the character's
+// animation (monsters design, Q-MN76): where the sound slots played.
+enum class MonsterSoundMoment
+{
+    // SetPlayerAttack, at frame 0.
+    Attack,
+    // SetPlayerShock, at frame 0.
+    Hit,
+    // SetPlayerDie, at frame 0, Chaos Castle included (Q-MN77).
+    Death,
+    // SetPlayerStop: the character is set to stand (a walk ends, the server
+    // stops it).
+    Stand,
+    // SetPlayerWalk: each step of a walk.
+    Walk,
+};
+
+// Sounds that the game plays for a character of the model (monsters design,
+// MN7, Q-MN76): while it is in one of `animations` (PlayMonsterSound, at the
+// start of an attack, a hit and the death, at each step of a walk and at the
+// end of each loop of stop1 and stop2), or at one of `moments`. An event
+// names animations or moments.
 struct MonsterSoundEvent
 {
     // Sorted.
     std::vector<int> animations;
+    // Sorted.
+    std::vector<MonsterSoundMoment> moments;
     // Only while the animation's frame is from `first` to below `second`.
     std::optional<std::pair<float, float>> frames;
     // Only while the character's death effect is armed (OBJECT::LifeTime 100).
     bool deathEffectArmed = false;
+    // Only for a character with this SubType, or with another one.
+    std::optional<int> subType;
+    std::optional<int> notSubType;
+    // Heard at any distance from the hero and on every map; else within 500
+    // units and on the model's soundEventMaps.
+    bool heardAnywhere = false;
+    // Played with the character as PlayBuffer's object, which does not start
+    // the sound again while it plays.
+    bool atMonster = false;
     std::optional<MonsterSoundChance> chance;
-    // Plays the first of two sounds when a draw of one in two comes up
-    // (rand_fps_check(2), or rand() % 2 == 0), else the second.
+    // Plays the first sound when a draw of one in two comes up
+    // (rand_fps_check(2), or rand() % 2 == 0), else the second, or none
+    // without a second.
     std::optional<MonsterSoundDraw> pick;
-    // The sounds, played together (one of the two with `pick`), each named
-    // as a sound slot names it: by its id, or by the file of a sound of the
-    // model without one.
+    // The sounds, played together (one of them with `pick`), each named by
+    // its id, or by the file of a sound of the model without one.
     std::vector<std::string> sounds;
 
     bool operator==(const MonsterSoundEvent&) const = default;

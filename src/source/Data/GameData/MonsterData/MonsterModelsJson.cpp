@@ -6,6 +6,7 @@
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterSoundMoments.h"
 
 #include <algorithm>
 #include <array>
@@ -67,6 +68,11 @@ constexpr const char* Chance = "chance";
 constexpr const char* OneIn = "oneIn";
 constexpr const char* Draw = "draw";
 constexpr const char* Pick = "pick";
+constexpr const char* On = "on";
+constexpr const char* SubType = "subType";
+constexpr const char* NotSubType = "notSubType";
+constexpr const char* HeardAnywhere = "heardAnywhere";
+constexpr const char* AtMonster = "atMonster";
 // The names of the map lists before maps were the server's numbers (monsters
 // design, D67); a file that has them is refused with the new name.
 constexpr const char* OldWorldTextureFolders = "worldTextureFolders";
@@ -108,16 +114,19 @@ const KeySet SecondSetKeys{Keys::Idle, Keys::Attack, Keys::Die};
 const KeySet BitmapKeys{Keys::File, Keys::Slot, Keys::Filter, Keys::Wrap};
 const KeySet MapFolderKeys{Keys::Maps, Keys::Folders};
 const KeySet BoxKeys{Keys::Min, Keys::Max};
-const KeySet SoundEventKeys{Keys::Animations, Keys::Frames, Keys::DeathEffectArmed,
-                            Keys::Chance,     Keys::Pick,   Keys::Sounds};
+const KeySet SoundEventKeys{Keys::Animations, Keys::On,         Keys::Frames,        Keys::DeathEffectArmed,
+                            Keys::SubType,    Keys::NotSubType, Keys::HeardAnywhere, Keys::AtMonster,
+                            Keys::Chance,     Keys::Pick,       Keys::Sounds};
 const KeySet ChanceKeys{Keys::OneIn, Keys::Draw};
 
 constexpr const char* RandFpsDraw = "randFps";
 constexpr const char* RandDraw = "rand";
 // A sound event's chance: one in 1 to this.
 constexpr int MaxOneIn = 100000;
-// A pick chooses one of two sounds.
+// A pick chooses one of two sounds, or one sound or none.
 constexpr size_t PickSounds = 2;
+// OBJECT::SubType is a short.
+constexpr int MaxSubType = 32767;
 
 constexpr std::string_view ModelFileExtension = ".bmd";
 // A texture name fits Texture_t::FileName with its terminating zero.
@@ -356,6 +365,34 @@ bool ReadAnimationList(const OrderedJson& json, const std::string& key, std::vec
         animations.push_back(*animation);
     }
     std::sort(animations.begin(), animations.end());
+    return true;
+}
+
+bool ReadMomentList(const OrderedJson& json, const std::string& key, std::vector<MonsterSoundMoment>& moments,
+                    ModelIssues& issues)
+{
+    if (!json.is_array())
+    {
+        issues.Fatal(key, "must be a list of moments");
+        return false;
+    }
+    for (size_t i = 0; i < json.size(); ++i)
+    {
+        const std::optional<MonsterSoundMoment> moment =
+            json[i].is_string() ? FindMonsterSoundMoment(json[i].get<std::string>()) : std::nullopt;
+        if (!moment)
+        {
+            issues.Fatal(key + "[" + std::to_string(i) + "]", "is not a moment (attack, hit, death, stand or walk)");
+            return false;
+        }
+        if (std::find(moments.begin(), moments.end(), *moment) != moments.end())
+        {
+            issues.Fatal(key, "has " + std::string(GetMonsterSoundMomentName(*moment)) + " more than once");
+            return false;
+        }
+        moments.push_back(*moment);
+    }
+    std::sort(moments.begin(), moments.end());
     return true;
 }
 
@@ -658,21 +695,80 @@ bool ReadEventSounds(const OrderedJson& json, const std::string& key, std::vecto
     return true;
 }
 
+// A true or false field of a sound event; false when it is missing.
+bool ReadEventFlag(const OrderedJson& entry, const char* key, const std::string& prefix, bool& value,
+                   ModelIssues& issues)
+{
+    const auto flag = entry.find(key);
+    if (flag == entry.end())
+    {
+        return true;
+    }
+    if (!flag->is_boolean())
+    {
+        issues.Fatal(prefix + key, "must be true or false");
+        return false;
+    }
+    value = flag->get<bool>();
+    return true;
+}
+
+bool ReadEventSubType(const OrderedJson& entry, const char* key, const std::string& prefix, std::optional<int>& value,
+                      ModelIssues& issues)
+{
+    const auto subType = entry.find(key);
+    if (subType == entry.end())
+    {
+        return true;
+    }
+    value = ReadWholeIn(*subType, 0, MaxSubType);
+    if (!value)
+    {
+        issues.Fatal(prefix + key, RangeText(0, MaxSubType));
+        return false;
+    }
+    return true;
+}
+
+// When the event plays: in animations, or at moments (Q-MN76).
+bool ReadEventWhen(const OrderedJson& entry, const std::string& prefix, MonsterSoundEvent& event, ModelIssues& issues)
+{
+    if (entry.contains(Keys::Animations))
+    {
+        if (!ReadAnimationList(entry[Keys::Animations], prefix + Keys::Animations, event.animations, issues))
+        {
+            return false;
+        }
+        if (event.animations.empty())
+        {
+            issues.Fatal(prefix + Keys::Animations, "must name one animation or more");
+            return false;
+        }
+        return true;
+    }
+    if (!ReadMomentList(entry[Keys::On], prefix + Keys::On, event.moments, issues))
+    {
+        return false;
+    }
+    if (event.moments.empty())
+    {
+        issues.Fatal(prefix + Keys::On, "must name one moment or more");
+        return false;
+    }
+    return true;
+}
+
 bool ReadSoundEvent(const OrderedJson& entry, const std::string& key, MonsterSoundEvent& event, ModelIssues& issues)
 {
-    if (!entry.is_object() || !entry.contains(Keys::Animations) || !entry.contains(Keys::Sounds))
+    if (!entry.is_object() || entry.contains(Keys::Animations) == entry.contains(Keys::On) ||
+        !entry.contains(Keys::Sounds))
     {
-        issues.Fatal(key, "must be an object with animations and sounds");
+        issues.Fatal(key, "must be an object with animations or on (not both) and sounds");
         return false;
     }
     const std::string prefix = key + ".";
-    if (!ReadAnimationList(entry[Keys::Animations], prefix + Keys::Animations, event.animations, issues))
+    if (!ReadEventWhen(entry, prefix, event, issues))
     {
-        return false;
-    }
-    if (event.animations.empty())
-    {
-        issues.Fatal(prefix + Keys::Animations, "must name one animation or more");
         return false;
     }
     if (const auto frames = entry.find(Keys::Frames); frames != entry.end())
@@ -684,14 +780,18 @@ bool ReadSoundEvent(const OrderedJson& entry, const std::string& key, MonsterSou
         }
         event.frames = range;
     }
-    if (const auto armed = entry.find(Keys::DeathEffectArmed); armed != entry.end())
+    if (!ReadEventFlag(entry, Keys::DeathEffectArmed, prefix, event.deathEffectArmed, issues) ||
+        !ReadEventSubType(entry, Keys::SubType, prefix, event.subType, issues) ||
+        !ReadEventSubType(entry, Keys::NotSubType, prefix, event.notSubType, issues) ||
+        !ReadEventFlag(entry, Keys::HeardAnywhere, prefix, event.heardAnywhere, issues) ||
+        !ReadEventFlag(entry, Keys::AtMonster, prefix, event.atMonster, issues))
     {
-        if (!armed->is_boolean())
-        {
-            issues.Fatal(prefix + Keys::DeathEffectArmed, "must be true or false");
-            return false;
-        }
-        event.deathEffectArmed = armed->get<bool>();
+        return false;
+    }
+    if (event.subType && event.notSubType)
+    {
+        issues.Fatal(prefix + Keys::NotSubType, "cannot be used with subType");
+        return false;
     }
     if (const auto chance = entry.find(Keys::Chance); chance != entry.end())
     {
@@ -715,9 +815,9 @@ bool ReadSoundEvent(const OrderedJson& entry, const std::string& key, MonsterSou
     {
         return false;
     }
-    if (event.pick && event.sounds.size() != PickSounds)
+    if (event.pick && event.sounds.size() > PickSounds)
     {
-        issues.Fatal(prefix + Keys::Sounds, "must be two sounds with pick");
+        issues.Fatal(prefix + Keys::Sounds, "must be one or two sounds with pick");
         return false;
     }
     Items::Json::WarnAboutUnknownKeys(entry, SoundEventKeys, prefix,
@@ -1056,6 +1156,16 @@ OrderedJson WriteAnimationList(const std::vector<int>& animations)
     return json;
 }
 
+OrderedJson WriteMomentList(const std::vector<MonsterSoundMoment>& moments)
+{
+    OrderedJson json = OrderedJson::array();
+    for (const MonsterSoundMoment moment : moments)
+    {
+        json.push_back(std::string(GetMonsterSoundMomentName(moment)));
+    }
+    return json;
+}
+
 void WriteLoad(const MonsterModelLoad& load, OrderedJson& json)
 {
     json[Keys::File] = load.file;
@@ -1170,7 +1280,14 @@ OrderedJson WriteSoundDraw(MonsterSoundDraw draw)
 OrderedJson WriteSoundEvent(const MonsterSoundEvent& event)
 {
     OrderedJson json = OrderedJson::object();
-    json[Keys::Animations] = WriteAnimationList(event.animations);
+    if (!event.animations.empty())
+    {
+        json[Keys::Animations] = WriteAnimationList(event.animations);
+    }
+    else
+    {
+        json[Keys::On] = WriteMomentList(event.moments);
+    }
     if (event.frames)
     {
         json[Keys::Frames] = OrderedJson::array({WriteFloat(event.frames->first), WriteFloat(event.frames->second)});
@@ -1178,6 +1295,22 @@ OrderedJson WriteSoundEvent(const MonsterSoundEvent& event)
     if (event.deathEffectArmed)
     {
         json[Keys::DeathEffectArmed] = true;
+    }
+    if (event.subType)
+    {
+        json[Keys::SubType] = *event.subType;
+    }
+    if (event.notSubType)
+    {
+        json[Keys::NotSubType] = *event.notSubType;
+    }
+    if (event.heardAnywhere)
+    {
+        json[Keys::HeardAnywhere] = true;
+    }
+    if (event.atMonster)
+    {
+        json[Keys::AtMonster] = true;
     }
     if (event.chance)
     {
