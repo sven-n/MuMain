@@ -219,16 +219,22 @@ to `MuError.log`:
 Maps are the numbers the server sends (`mapTextureFolders`, `soundEventMaps`,
 a part's `maps`, and a monster's map variants): Devil Square 1–4 is 9 and
 Devil Square 5–7 is 32, although the client loads both as Devil Square (9).
+A list may also name one stage of a map: `{"map": 9, "stage": 2}` is Devil
+Square 2. OpenMU sends the stage with the map (byte 10 of `MapChanged`, to
+the extended client); a number names all of its stages, and with another
+server every stage is 0.
 
 ### The map picker
 
 The monster tools pick maps in one picker: a button that names the chosen
 maps opens a list of the maps a server sends, each with its server number
-and the `Data/World<n>` folder it loads. The rounds of an event are one row
-under the event's name: Devil Square 1–4 and 5–7, Blood Castle 1–8, Chaos
-Castle 1–7, Kalima 1–7, Illusion Temple 1–6, Doppelganger 1–4, Empire
-Guardian 1–4 and Karutan 1–2; its box picks all rounds, its arrow shows them
-one by one. A list that has all rounds of an event names the event.
+and the `Data/World<n>` folder it loads. The levels of an event are one row
+under the event's name: Devil Square 1–7, Blood Castle 1–8, Chaos Castle
+1–7, Kalima 1–7, Illusion Temple 1–6, Doppelganger 1–4, Empire Guardian 1–4
+and Karutan 1–2; its box picks all levels, its arrow shows them one by one.
+Most levels are maps of their own; Devil Square's are the stages 1–4 of map
+9 and 5–7 of map 32, and a map whose every stage is picked is written as its
+number. A list that has all levels of an event names the event.
 
 A sound without an `id` gets a number of its own when it is first loaded,
 after the `SOUND_*` list; the same file keeps the same number for the
@@ -347,9 +353,10 @@ Fire Golem is Devil Square 5's boss and plays the generic pattern there):
 ]
 ```
 
-`maps` are one or more maps by the server's numbers (see
-[Models](#model-fields): Devil Square 5–7 is 32). A map in two variants of a
-monster is a fatal problem, and a variant without `attacks` changes nothing
+`maps` are one or more maps by the server's numbers or stages of them (see
+[Models](#model-fields): Devil Square 5–7 is 32, `{"map": 9, "stage": 2}` is
+Devil Square 2). A map or stage in two variants of a monster is a fatal
+problem, and a variant without `attacks` changes nothing
 (a warning). A monster without `attacks` of its own plays the variant's on
 its maps and the generic pattern elsewhere. Later setup fields of the
 monsters design (D62) join the variants.

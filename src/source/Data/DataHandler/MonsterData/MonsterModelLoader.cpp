@@ -80,9 +80,10 @@ void OpenTextures(int slot, const std::vector<std::string>& folders)
 const std::vector<std::string>& FoldersOnMap(const MonsterModelDefinition& model)
 {
     const int map = gMapManager.GetServerMap();
+    const int stage = gMapManager.GetServerStage();
     for (const MonsterModelMapFolders& entry : model.mapTextureFolders)
     {
-        if (std::find(entry.maps.begin(), entry.maps.end(), map) != entry.maps.end())
+        if (Data::Maps::Names(entry.maps, map, stage))
         {
             return entry.folders;
         }
@@ -360,7 +361,7 @@ std::vector<int> Reopen(int slot)
         if (!part.maps.empty())
         {
             const bool onThisMap =
-                std::find(part.maps.begin(), part.maps.end(), gMapManager.GetServerMap()) != part.maps.end();
+                Data::Maps::Names(part.maps, gMapManager.GetServerMap(), gMapManager.GetServerStage());
             const BMD& partModel = ::Models[*partSlot];
             if (!onThisMap || (partModel.NumActions <= 0 && partModel.NumMeshs <= 0))
             {
@@ -374,14 +375,14 @@ std::vector<int> Reopen(int slot)
 }
 #endif
 
-void OpenMapParts(int map)
+void OpenMapParts(int map, int stage)
 {
     for (const MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
     {
         for (const MonsterModelPart& part : model->parts)
         {
             const std::optional<int> slot = PartSlot(part);
-            if (slot && std::find(part.maps.begin(), part.maps.end(), map) != part.maps.end())
+            if (slot && Data::Maps::Names(part.maps, map, stage))
             {
                 OpenPart(part, *slot);
             }

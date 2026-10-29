@@ -926,7 +926,14 @@ typedef struct {
     BYTE         PositionX;
     BYTE         PositionY;
     BYTE         Angle;
+    // OpenMU's discriminator of the map for the extended client: the stage of
+    // Devil Square (1 to 7); 0 or missing from other servers.
+    BYTE MapDiscriminator;
 } PRECEIVE_TELEPORT_POSITION, * LPPRECEIVE_TELEPORT_POSITION;
+
+// The stage OpenMU sends the extended client after the map (monsters design,
+// D67); 0 for a packet too short to have one.
+int GetTeleportStage(const PRECEIVE_TELEPORT_POSITION& packet);
 
 //receive damage
 typedef struct {

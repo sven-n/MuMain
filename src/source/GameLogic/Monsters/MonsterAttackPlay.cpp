@@ -53,7 +53,7 @@ const Data::Monsters::MonsterAttacks* FindAttacks(const CHARACTER& character)
         return nullptr;
     }
     const std::optional<Data::Monsters::MonsterAttacks>& attacks =
-        Data::Monsters::GetAttacksOnMap(*monster, gMapManager.GetServerMap());
+        Data::Monsters::GetAttacksOnMap(*monster, gMapManager.GetServerMap(), gMapManager.GetServerStage());
     return attacks ? &*attacks : nullptr;
 }
 } // namespace

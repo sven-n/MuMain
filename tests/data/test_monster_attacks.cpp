@@ -307,12 +307,12 @@ TEST_CASE("Monster attacks: a map variant's attacks replace the monster's on its
     golem.attacks->skills = {{50, MONSTER01_ATTACK1}};
     golem.attacks->otherwise = {MONSTER01_ATTACK2};
     Data::Monsters::MonsterMapVariant devilSquare;
-    devilSquare.maps = {32};
+    devilSquare.maps = {{32}};
     devilSquare.attacks.emplace();
     devilSquare.attacks->otherwiseGeneric = true;
     // A variant without attacks changes nothing.
     Data::Monsters::MonsterMapVariant empty;
-    empty.maps = {WD_9DEVILSQUARE};
+    empty.maps = {{WD_9DEVILSQUARE}};
     golem.mapVariants = {devilSquare, empty};
 
     CHECK(&Data::Monsters::GetAttacksOnMap(golem, 32) == &golem.mapVariants[0].attacks);
@@ -326,6 +326,29 @@ TEST_CASE("Monster attacks: a map variant's attacks replace the monster's on its
     CHECK_FALSE(Data::Monsters::GetAttacksOnMap(variantOnly, WD_31HUNTING_GROUND).has_value());
 }
 
+TEST_CASE("Monster attacks: a map variant names a stage of a map, a map without a stage all of them (D67) "
+          "[data][monsters]")
+{
+    MonsterDefinition golem;
+    golem.number = 291;
+    golem.attacks.emplace();
+    golem.attacks->otherwise = {MONSTER01_ATTACK2};
+    Data::Monsters::MonsterMapVariant stage2;
+    stage2.maps = {{WD_9DEVILSQUARE, 2}};
+    stage2.attacks.emplace();
+    stage2.attacks->otherwiseGeneric = true;
+    golem.mapVariants = {stage2};
+
+    CHECK(&Data::Monsters::GetAttacksOnMap(golem, WD_9DEVILSQUARE, 2) == &golem.mapVariants[0].attacks);
+    CHECK(&Data::Monsters::GetAttacksOnMap(golem, WD_9DEVILSQUARE, 1) == &golem.attacks);
+    CHECK(&Data::Monsters::GetAttacksOnMap(golem, WD_9DEVILSQUARE) == &golem.attacks);
+    CHECK(&Data::Monsters::GetAttacksOnMap(golem, 32, 2) == &golem.attacks);
+
+    golem.mapVariants[0].maps = {{32}};
+    CHECK(&Data::Monsters::GetAttacksOnMap(golem, 32, 6) == &golem.mapVariants[0].attacks);
+    CHECK(&Data::Monsters::GetAttacksOnMap(golem, 32) == &golem.mapVariants[0].attacks);
+}
+
 TEST_CASE("Monster attacks: map variants read and write, their maps on one line [data][monsters]")
 {
     const ReadResult result =
@@ -335,12 +358,34 @@ TEST_CASE("Monster attacks: map variants read and write, their maps on one line 
     REQUIRE(result.monsters.size() == 1);
     const MonsterDefinition& golem = result.monsters[0];
     REQUIRE(golem.mapVariants.size() == 1);
-    CHECK(golem.mapVariants[0].maps == std::vector<int>{WD_9DEVILSQUARE, 32});
+    CHECK(golem.mapVariants[0].maps == std::vector<Data::Maps::MapRef>{{WD_9DEVILSQUARE}, {32}});
     REQUIRE(golem.mapVariants[0].attacks);
     CHECK(golem.mapVariants[0].attacks->otherwiseGeneric);
 
     const std::string text = Data::Monsters::WriteMonstersJson(result.monsters);
     CHECK(text.find(R"("maps": [9, 32])") != std::string::npos);
+    std::vector<MonsterDefinition> read;
+    std::vector<ItemDataIssue> issues;
+    Data::Monsters::ReadMonstersJson(text, "Monsters.json", read, issues);
+    CHECK(issues.empty());
+    REQUIRE(read.size() == 1);
+    CHECK(read[0] == golem);
+}
+
+TEST_CASE("Monster attacks: a stage in a map variant's maps reads and writes as {map, stage} (D67) [data][monsters]")
+{
+    const ReadResult result = ReadMonsterWith(R"("attacks": { "otherwise": "attack2" }, )"
+                                              R"("mapVariants": [ { "maps": [32, {"stage": 2, "map": 9}], )"
+                                              R"("attacks": { "otherwise": "generic" } } ])");
+    CHECK(result.issues.empty());
+    REQUIRE(result.monsters.size() == 1);
+    const MonsterDefinition& golem = result.monsters[0];
+    REQUIRE(golem.mapVariants.size() == 1);
+    CHECK(golem.mapVariants[0].maps == std::vector<Data::Maps::MapRef>{{WD_9DEVILSQUARE, 2}, {32}});
+
+    const std::string text = Data::Monsters::WriteMonstersJson(result.monsters);
+    INFO(text);
+    CHECK(text.find(R"("maps": [{"map": 9, "stage": 2}, 32])") != std::string::npos);
     std::vector<MonsterDefinition> read;
     std::vector<ItemDataIssue> issues;
     Data::Monsters::ReadMonstersJson(text, "Monsters.json", read, issues);
@@ -360,11 +405,22 @@ TEST_CASE("Monster attacks: wrong map variants are fatal, one without attacks a 
     for (const WrongValue& wrong : std::vector<WrongValue>{
              {R"({})", "monster 291 mapVariants", "must be a list of map variants"},
              {R"([3])", "monster 291 mapVariants[0]", "must be an object"},
-             {R"([{ "attacks": {} }])", "monster 291 mapVariants[0].maps", "one or more map numbers"},
-             {R"([{ "maps": [], "attacks": {} }])", "monster 291 mapVariants[0].maps", "one or more map numbers"},
-             {R"([{ "maps": [256], "attacks": {} }])", "monster 291 mapVariants[0].maps", "from 0 to 255"},
+             {R"([{ "attacks": {} }])", "monster 291 mapVariants[0].maps", "one or more maps"},
+             {R"([{ "maps": [], "attacks": {} }])", "monster 291 mapVariants[0].maps", "one or more maps"},
+             {R"([{ "maps": 9, "attacks": {} }])", "monster 291 mapVariants[0].maps", "a list of maps"},
+             {R"([{ "maps": [256], "attacks": {} }])", "monster 291 mapVariants[0].maps[0]", "from 0 to 255"},
+             {R"([{ "maps": [{"map": 9}], "attacks": {} }])", "monster 291 mapVariants[0].maps[0]",
+              "\"stage\": 1 to 255"},
+             {R"([{ "maps": [9, {"map": 9, "stage": 0}], "attacks": {} }])", "monster 291 mapVariants[0].maps[1]",
+              "\"stage\": 1 to 255"},
+             {R"([{ "maps": [{"map": 9, "stage": 2, "round": 1}], "attacks": {} }])",
+              "monster 291 mapVariants[0].maps[0]", "\"stage\": 1 to 255"},
              {R"([{ "maps": [32], "attacks": {} }, { "maps": [9, 32], "attacks": {} }])",
-              "monster 291 mapVariants[1].maps", "names map 32, which an earlier map variant names"},
+              "monster 291 mapVariants[1].maps", "names map 32, which an earlier map variant names (map 32)"},
+             {R"([{ "maps": [9], "attacks": {} }, { "maps": [{"map": 9, "stage": 2}], "attacks": {} }])",
+              "monster 291 mapVariants[1].maps", "names map 9 stage 2, which an earlier map variant names (map 9)"},
+             {R"([{ "maps": [{"map": 9, "stage": 2}], "attacks": {} }, { "maps": [9], "attacks": {} }])",
+              "monster 291 mapVariants[1].maps", "names map 9, which an earlier map variant names (map 9 stage 2)"},
              {R"([{ "maps": [32], "attacks": { "otherwise": "jump" } }])",
               "monster 291 mapVariants[0].attacks.otherwise", "must be an animation"},
          })

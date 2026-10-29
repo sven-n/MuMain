@@ -46,8 +46,8 @@ void LoadSound(const MonsterModelSound& sound);
 std::vector<int> Reopen(int slot);
 #endif
 
-// Opens the part models that the entries list for the world (the Totem
-// Golem's pieces in Elbeland, the Kundun parts in Kalima); CMapManager::Load
-// calls it. They are never closed, as before.
-void OpenMapParts(int world);
+// Opens the part models that the entries list for the server map and stage
+// (the Totem Golem's pieces in Elbeland, the Kundun parts in Kalima);
+// CMapManager::Load calls it. They are never closed, as before.
+void OpenMapParts(int map, int stage);
 } // namespace Data::Monsters::ModelLoader

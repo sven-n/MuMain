@@ -298,7 +298,7 @@ TEST_CASE("The Monster Model and Monster Preview windows draw a model entry with
     attack.pick = Data::Monsters::MonsterSoundDraw::Rand;
     attack.sounds = {"Data/Sound/mHound1.wav", "SOUND_THUNDERS01"};
     model.soundEvents = {walk, attack};
-    model.soundEventMaps = {69, 70};
+    model.soundEventMaps = {{69}, {70}};
     const std::array models = {model};
     g_MonsterModelDatabase.Build(models);
     TestImGuiContext context;

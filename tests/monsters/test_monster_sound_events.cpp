@@ -110,7 +110,7 @@ TEST_CASE("Monster sounds: the events' maps are the server's, Devil Square 5-7 i
     {
         if (Data::Monsters::FindMonsterModelReference(model.slot) == MODEL_RAYMOND)
         {
-            model.soundEventMaps = {32};
+            model.soundEventMaps = {{32}};
         }
     }
     g_MonsterModelDatabase.Build(changed);
@@ -120,6 +120,22 @@ TEST_CASE("Monster sounds: the events' maps are the server's, Devil Square 5-7 i
     CHECK(scope.Play(MODEL_RAYMOND, MONSTER01_ATTACK1) == Sounds({SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01}));
     gMapManager.SetServerMap(WD_9DEVILSQUARE);
     CHECK(scope.Play(MODEL_RAYMOND, MONSTER01_ATTACK1).empty());
+
+    // A stage of Devil Square, which the server sends with the map.
+    for (Data::Monsters::MonsterModelDefinition& model : changed)
+    {
+        if (Data::Monsters::FindMonsterModelReference(model.slot) == MODEL_RAYMOND)
+        {
+            model.soundEventMaps = {{WD_9DEVILSQUARE, 2}};
+        }
+    }
+    g_MonsterModelDatabase.Build(changed);
+    gMapManager.SetServerStage(2);
+    gMapManager.SetServerMap(WD_9DEVILSQUARE);
+    CHECK(scope.Play(MODEL_RAYMOND, MONSTER01_ATTACK1) == Sounds({SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01}));
+    gMapManager.SetServerStage(1);
+    CHECK(scope.Play(MODEL_RAYMOND, MONSTER01_ATTACK1).empty());
+    gMapManager.SetServerStage(0);
     g_MonsterModelDatabase.Build(models);
 }
 

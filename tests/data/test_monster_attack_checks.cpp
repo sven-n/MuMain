@@ -233,7 +233,7 @@ TEST_CASE("Monster attack checks: a map variant's attacks, under the variant's f
     MonsterDefinition iceWalker =
         Monster(MONSTER_ICE_WALKER, "MONSTER_MODEL_ICE_WALKER", Attacks({{29, MONSTER01_ATTACK2}}, MONSTER01_ATTACK1));
     Data::Monsters::MonsterMapVariant hatchery;
-    hatchery.maps = {WD_58ICECITY_BOSS};
+    hatchery.maps = {{WD_58ICECITY_BOSS}};
     hatchery.attacks = Attacks({{0, MONSTER01_ATTACK2}}, MONSTER01_ATTACK1);
     iceWalker.mapVariants = {hatchery};
     const std::array monsters = {iceWalker};

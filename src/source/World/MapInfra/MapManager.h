@@ -100,6 +100,11 @@ public:
     // WorldActive, but 32 in Devil Square 5-7. Where WorldActive was set alone
     // (the tests, the photo viewer), WorldActive.
     int GetServerMap() const;
+    // The stage the server sent with the map (OpenMU's discriminator, monsters
+    // design, D67): the stage of Devil Square, 1 to 7; 0 when it sent none.
+    // Where WorldActive was set alone, 0.
+    void SetServerStage(int stage);
+    int GetServerStage() const;
     // The world the client loads for a server map.
     static int GetLoadedWorld(int serverMap);
     // The number n of the Data/World<n> and Data/Object<n> folders a server map
@@ -112,6 +117,7 @@ public:
 
 private:
     int m_serverMap = -1;
+    int m_serverStage = 0;
     // WorldActive when SetServerMap ran.
     int m_serverMapWorld = -1;
 };

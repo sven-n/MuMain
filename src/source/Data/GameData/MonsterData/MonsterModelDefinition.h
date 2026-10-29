@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Data/GameData/MapData/MapRef.h"
+
 #include <array>
 #include <optional>
 #include <string>
@@ -98,7 +100,7 @@ struct MonsterSoundEvent
 // instead of its own.
 struct MonsterModelMapFolders
 {
-    std::vector<int> maps;
+    std::vector<Data::Maps::MapRef> maps;
     std::vector<std::string> folders;
 
     bool operator==(const MonsterModelMapFolders&) const = default;
@@ -151,7 +153,7 @@ struct MonsterModelPart
     MonsterModelLoad load;
     // Loaded when one of these maps (server map numbers) loads, not with the
     // model.
-    std::vector<int> maps;
+    std::vector<Data::Maps::MapRef> maps;
 
     bool operator==(const MonsterModelPart&) const = default;
 };
@@ -193,7 +195,7 @@ struct MonsterModelDefinition
     std::vector<MonsterSoundEvent> soundEvents;
     // The maps (server map numbers) the sound events play on; empty: every
     // map.
-    std::vector<int> soundEventMaps;
+    std::vector<Data::Maps::MapRef> soundEventMaps;
     std::vector<MonsterModelBitmap> bitmaps;
     std::vector<MonsterModelPart> parts;
     MonsterModelBody body;

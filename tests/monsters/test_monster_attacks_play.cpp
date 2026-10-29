@@ -233,7 +233,7 @@ TEST_CASE("Monster attacks: a map variant plays on its maps, the monster's attac
                      monster.attacks->otherwise = {MONSTER01_ATTACK1};
                      monster.attacks->otherwiseRandom.reset();
                      Data::Monsters::MonsterMapVariant kalima2;
-                     kalima2.maps = {WD_24HELLAS + 1};
+                     kalima2.maps = {{WD_24HELLAS + 1}};
                      kalima2.attacks.emplace();
                      kalima2.attacks->otherwise = {MONSTER01_ATTACK2};
                      monster.mapVariants = {kalima2};
@@ -250,7 +250,7 @@ TEST_CASE("Monster attacks: a map variant plays on its maps, the monster's attac
                  [](Data::Monsters::MonsterDefinition& monster)
                  {
                      Data::Monsters::MonsterMapVariant devilSquare5To7;
-                     devilSquare5To7.maps = {32};
+                     devilSquare5To7.maps = {{32}};
                      devilSquare5To7.attacks.emplace();
                      devilSquare5To7.attacks->otherwise = {MONSTER01_ATTACK2};
                      monster.mapVariants = {devilSquare5To7};
@@ -259,6 +259,29 @@ TEST_CASE("Monster attacks: a map variant plays on its maps, the monster's attac
     CHARACTER& elf = scope.Create(MONSTER_DARK_ELF);
     CHECK(NormalAttack(elf) == MONSTER01_ATTACK2);
     gMapManager.SetServerMap(WD_9DEVILSQUARE);
+    CHECK(NormalAttack(elf) == MONSTER01_ATTACK1);
+}
+
+TEST_CASE("Monster attacks: a map variant of a stage plays in that stage of Devil Square only (D67) "
+          "[monsters][attacks]")
+{
+    AttackScope scope(WD_9DEVILSQUARE);
+    scope.Change(MONSTER_DARK_ELF,
+                 [](Data::Monsters::MonsterDefinition& monster)
+                 {
+                     Data::Monsters::MonsterMapVariant stage2;
+                     stage2.maps = {{WD_9DEVILSQUARE, 2}};
+                     stage2.attacks.emplace();
+                     stage2.attacks->otherwise = {MONSTER01_ATTACK2};
+                     monster.mapVariants = {stage2};
+                 });
+    gMapManager.SetServerStage(2);
+    gMapManager.SetServerMap(WD_9DEVILSQUARE);
+    CHARACTER& elf = scope.Create(MONSTER_DARK_ELF);
+    CHECK(NormalAttack(elf) == MONSTER01_ATTACK2);
+    gMapManager.SetServerStage(3);
+    CHECK(NormalAttack(elf) == MONSTER01_ATTACK1);
+    gMapManager.SetServerStage(0);
     CHECK(NormalAttack(elf) == MONSTER01_ATTACK1);
 }
 

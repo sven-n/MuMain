@@ -794,7 +794,7 @@ void CMapManager::Load() // OK
         LoadWaveFile(SOUND_GREAT_SHIELD, L"Data\\Sound\\eGreatShield.wav", 1);
     }
 
-    Data::Monsters::ModelLoader::OpenMapParts(GetServerMap());
+    Data::Monsters::ModelLoader::OpenMapParts(GetServerMap(), GetServerStage());
 
     if (this->WorldActive != WD_7ATLANSE)
     {
@@ -955,6 +955,16 @@ void CMapManager::SetServerMap(int serverMap)
 int CMapManager::GetServerMap() const
 {
     return m_serverMapWorld == WorldActive ? m_serverMap : WorldActive;
+}
+
+void CMapManager::SetServerStage(int stage)
+{
+    m_serverStage = stage;
+}
+
+int CMapManager::GetServerStage() const
+{
+    return m_serverMapWorld == WorldActive ? m_serverStage : 0;
 }
 
 int CMapManager::GetLoadedWorld(int serverMap)

@@ -1131,6 +1131,8 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     CharacterAttribute->MaxAttackSpeed = Data->MaxAttackSpeed;
     CharacterMachine->Gold = Data->Gold;
 
+    // Entering the world names no stage of the map.
+    gMapManager.SetServerStage(0);
     gMapManager.WorldActive = Data->Map;
     gMapManager.LoadWorld(gMapManager.WorldActive);
 
@@ -1376,6 +1378,8 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
         }
     }
 
+    // A revival names no stage of the map.
+    gMapManager.SetServerStage(0);
     if (gMapManager.WorldActive != Data->Map)
     {
         int OldWorld = gMapManager.WorldActive;
@@ -2126,11 +2130,21 @@ void ReceiveMovePosition(const BYTE* ReceiveBuffer)
 
 extern int EnableEvent;
 
+// C3 1C 0F MapChanged: the map number's low byte at 6, the discriminator at 10.
+static_assert(offsetof(PRECEIVE_TELEPORT_POSITION, Map) == 6);
+static_assert(offsetof(PRECEIVE_TELEPORT_POSITION, MapDiscriminator) == 10);
+
+int GetTeleportStage(const PRECEIVE_TELEPORT_POSITION& packet)
+{
+    return packet.Header.Size > offsetof(PRECEIVE_TELEPORT_POSITION, MapDiscriminator) ? packet.MapDiscriminator : 0;
+}
+
 BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
     UI::Inventory::RestorePickedItem();
 
     auto Data = (LPPRECEIVE_TELEPORT_POSITION)ReceiveBuffer;
+    gMapManager.SetServerStage(GetTeleportStage(*Data));
     Hero->PositionX = Data->PositionX;
     Hero->PositionY = Data->PositionY;
 

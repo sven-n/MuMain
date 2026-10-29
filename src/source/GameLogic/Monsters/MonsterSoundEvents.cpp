@@ -96,8 +96,8 @@ bool Play(OBJECT& object)
     {
         return true;
     }
-    const std::vector<int>& maps = model->soundEventMaps;
-    if (!maps.empty() && std::find(maps.begin(), maps.end(), gMapManager.GetServerMap()) == maps.end())
+    const std::vector<Data::Maps::MapRef>& maps = model->soundEventMaps;
+    if (!maps.empty() && !Data::Maps::Names(maps, gMapManager.GetServerMap(), gMapManager.GetServerStage()))
     {
         return true;
     }

@@ -2,15 +2,13 @@
 
 #include "MonsterDefinition.h"
 
-#include <algorithm>
-
 namespace Data::Monsters
 {
-const std::optional<MonsterAttacks>& GetAttacksOnMap(const MonsterDefinition& monster, int map)
+const std::optional<MonsterAttacks>& GetAttacksOnMap(const MonsterDefinition& monster, int map, int stage)
 {
     for (const MonsterMapVariant& variant : monster.mapVariants)
     {
-        if (variant.attacks && std::find(variant.maps.begin(), variant.maps.end(), map) != variant.maps.end())
+        if (variant.attacks && Data::Maps::Names(variant.maps, map, stage))
         {
             return variant.attacks;
         }

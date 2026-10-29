@@ -37,8 +37,6 @@ constexpr const char* SoundAtMonsterKey = "soundAtMonster";
 constexpr const char* NoAnimationName = "none";
 // `otherwise`'s value for the generic pattern (Q-MN69).
 constexpr const char* GenericPatternName = "generic";
-// The map numbers the server sends (a BYTE).
-constexpr long long MaxServerMap = 255;
 // The skill numbers the packets carry (a WORD; 65535 is "no skill").
 constexpr long long MaxSkillNumber = 65534;
 
@@ -354,28 +352,33 @@ bool ReadAttacks(const OrderedJson& json, const std::string& field, int number, 
     return valid;
 }
 
-// The maps of a map variant: one or more server map numbers.
-bool ReadVariantMaps(const OrderedJson& variant, const std::string& field, int number, std::vector<int>& maps,
-                     IssueList& issues)
+// The maps of a map variant: one or more server maps or stages (D67).
+bool ReadVariantMaps(const OrderedJson& variant, const std::string& field, int number,
+                     std::vector<Data::Maps::MapRef>& maps, IssueList& issues)
 {
+    const std::string mapsField = field + "." + MapsKey;
     const auto value = variant.find(MapsKey);
-    bool valid = value != variant.end() && value->is_array() && !value->empty();
-    for (size_t index = 0; valid && index < value->size(); ++index)
+    if (value == variant.end() || (value->is_array() && value->empty()))
     {
-        long long map = -1;
-        valid = (*value)[index].is_number_integer() && Items::Json::ReadWholeNumber((*value)[index], map) && map >= 0 &&
-                map <= MaxServerMap;
-        maps.push_back(static_cast<int>(map));
-    }
-    if (!valid)
-    {
-        issues.Fatal(field + "." + MapsKey,
-                     "must be a list of one or more map numbers from 0 to " + std::to_string(MaxServerMap), number);
+        issues.Fatal(mapsField, "must be a list of one or more maps", number);
         return false;
     }
-    std::sort(maps.begin(), maps.end());
-    maps.erase(std::unique(maps.begin(), maps.end()), maps.end());
-    return true;
+    return Data::Maps::ReadMapRefs(*value, mapsField, maps,
+                                   [&](const std::string& problemField, const std::string& message)
+                                   { issues.Fatal(problemField, message, number); });
+}
+
+// "map 9", "map 9 stage 2".
+std::string DescribeMapRef(const Data::Maps::MapRef& ref)
+{
+    return "map " + std::to_string(ref.map) + (ref.stage != 0 ? " stage " + std::to_string(ref.stage) : "");
+}
+
+// Whether two entries of map lists name a map and stage both do: a map
+// without a stage names all of its stages.
+bool Overlap(const Data::Maps::MapRef& first, const Data::Maps::MapRef& second)
+{
+    return first.map == second.map && (first.stage == 0 || second.stage == 0 || first.stage == second.stage);
 }
 
 // What the monster does differently on some maps (D62); a map in two
@@ -394,7 +397,7 @@ bool ReadMapVariants(const OrderedJson& json, int number, std::vector<MonsterMap
         return false;
     }
     bool valid = true;
-    std::set<int> named;
+    std::vector<Data::Maps::MapRef> named;
     for (size_t index = 0; index < value->size(); ++index)
     {
         const OrderedJson& entry = (*value)[index];
@@ -407,15 +410,20 @@ bool ReadMapVariants(const OrderedJson& json, int number, std::vector<MonsterMap
         }
         MonsterMapVariant variant;
         bool entryValid = ReadVariantMaps(entry, key, number, variant.maps, issues);
-        for (const int map : variant.maps)
+        for (const Data::Maps::MapRef& ref : variant.maps)
         {
-            if (!named.insert(map).second)
+            const auto earlier = std::find_if(named.begin(), named.end(),
+                                              [&](const Data::Maps::MapRef& other) { return Overlap(ref, other); });
+            if (earlier != named.end())
             {
                 issues.Fatal(key + "." + MapsKey,
-                             "names map " + std::to_string(map) + ", which an earlier map variant names", number);
+                             "names " + DescribeMapRef(ref) + ", which an earlier map variant names (" +
+                                 DescribeMapRef(*earlier) + ")",
+                             number);
                 entryValid = false;
             }
         }
+        named.insert(named.end(), variant.maps.begin(), variant.maps.end());
         entryValid = ReadAttacks(entry, key + "." + AttacksKey, number, variant.attacks, issues) && entryValid;
         if (entryValid && !variant.attacks)
         {
@@ -521,7 +529,7 @@ OrderedJson WriteMonster(const MonsterDefinition& monster)
         for (const MonsterMapVariant& variant : monster.mapVariants)
         {
             OrderedJson entry = OrderedJson::object();
-            entry[MapsKey] = variant.maps;
+            entry[MapsKey] = Data::Maps::WriteMapRefs(variant.maps);
             if (variant.attacks)
             {
                 entry[AttacksKey] = WriteAttacks(*variant.attacks);

@@ -369,6 +369,14 @@ void ReadLoad(const OrderedJson& json, MonsterModelLoad& load, ModelIssues& issu
     }
 }
 
+// A list of maps: server map numbers and stages (D67).
+bool ReadMaps(const OrderedJson& json, const std::string& key, std::vector<Data::Maps::MapRef>& maps,
+              ModelIssues& issues)
+{
+    return Data::Maps::ReadMapRefs(json, key, maps, [&](const std::string& field, const std::string& message)
+                                   { issues.Fatal(field, message); });
+}
+
 void ReadMapFolders(const OrderedJson& json, std::vector<MonsterModelMapFolders>& mapFolders, ModelIssues& issues)
 {
     if (!json.is_array())
@@ -386,8 +394,7 @@ void ReadMapFolders(const OrderedJson& json, std::vector<MonsterModelMapFolders>
             return;
         }
         MonsterModelMapFolders folders;
-        if (!ReadWholeList(entry[Keys::Maps], key + "." + Keys::Maps, 0, std::numeric_limits<int>::max(), folders.maps,
-                           issues) ||
+        if (!ReadMaps(entry[Keys::Maps], key + "." + Keys::Maps, folders.maps, issues) ||
             !ReadFolders(entry[Keys::Folders], key + "." + Keys::Folders, folders.folders, issues))
         {
             return;
@@ -806,7 +813,7 @@ void ReadParts(const OrderedJson& json, std::vector<MonsterModelPart>& parts, Mo
         ReadLoad(entry, part.load, issues);
         if (const auto maps = entry.find(Keys::Maps); maps != entry.end())
         {
-            ReadWholeList(*maps, key + "." + Keys::Maps, 0, std::numeric_limits<int>::max(), part.maps, issues);
+            ReadMaps(*maps, key + "." + Keys::Maps, part.maps, issues);
         }
         Items::Json::WarnAboutUnknownKeys(entry, PartKeys, key + ".",
                                           [&](const std::string& unknown, const std::string& message)
@@ -917,8 +924,7 @@ void ReadModelFields(const OrderedJson& json, MonsterModelDefinition& model, Mod
     }
     if (const auto maps = json.find(Keys::SoundEventMaps); maps != json.end())
     {
-        ReadWholeList(*maps, Keys::SoundEventMaps, 0, std::numeric_limits<int>::max(), model.soundEventMaps, issues);
-        std::sort(model.soundEventMaps.begin(), model.soundEventMaps.end());
+        ReadMaps(*maps, Keys::SoundEventMaps, model.soundEventMaps, issues);
     }
     if (const auto bitmaps = json.find(Keys::Bitmaps); bitmaps != json.end())
     {
@@ -1082,7 +1088,7 @@ OrderedJson WritePart(const MonsterModelPart& part)
     WriteAnimations(part.load, json);
     if (!part.maps.empty())
     {
-        json[Keys::Maps] = part.maps;
+        json[Keys::Maps] = Data::Maps::WriteMapRefs(part.maps);
     }
     return json;
 }
@@ -1181,7 +1187,7 @@ void WriteSoundFields(const MonsterModelDefinition& model, OrderedJson& json)
     }
     if (!model.soundEventMaps.empty())
     {
-        json[Keys::SoundEventMaps] = model.soundEventMaps;
+        json[Keys::SoundEventMaps] = Data::Maps::WriteMapRefs(model.soundEventMaps);
     }
 }
 
@@ -1196,7 +1202,7 @@ OrderedJson WriteModel(const MonsterModelDefinition& model)
         for (const MonsterModelMapFolders& entry : model.mapTextureFolders)
         {
             OrderedJson folder = OrderedJson::object();
-            folder[Keys::Maps] = entry.maps;
+            folder[Keys::Maps] = Data::Maps::WriteMapRefs(entry.maps);
             folder[Keys::Folders] = entry.folders;
             folders.push_back(std::move(folder));
         }

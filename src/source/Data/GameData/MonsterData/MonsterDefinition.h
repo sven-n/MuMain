@@ -2,6 +2,7 @@
 
 #include "Core/Globals/_define.h"
 #include "Data/GameData/Common/LocalizedString.h"
+#include "Data/GameData/MapData/MapRef.h"
 #include "Data/GameData/MonsterData/MonsterAttacks.h"
 #include "Data/GameData/MonsterData/MonsterKind.h"
 
@@ -19,19 +20,20 @@ constexpr int MonsterNumberCount = MAX_MONSTER;
 // name is cut, counted in UTF-16 units.
 constexpr int MaxMonsterNameLength = MAX_MONSTER_NAME;
 
-// What the client knows about one monster number (monsters design, D45).
 // What a monster does differently on some maps (monsters design, D62): on
 // its maps, a field the variant has replaces the entry's (Q-MN68). The
 // attacks PR brings `attacks`; the setup fields follow in their PR.
 struct MonsterMapVariant
 {
-    // The maps, by the numbers the server sends (D67): sorted, at least one.
-    std::vector<int> maps;
+    // The maps, by the numbers the server sends and the stages of Devil
+    // Square (D67): sorted, at least one.
+    std::vector<Data::Maps::MapRef> maps;
     std::optional<MonsterAttacks> attacks;
 
     bool operator==(const MonsterMapVariant&) const = default;
 };
 
+// What the client knows about one monster number (monsters design, D45).
 struct MonsterDefinition
 {
     int number = 0;
@@ -52,7 +54,8 @@ struct MonsterDefinition
     bool operator==(const MonsterDefinition& other) const = default;
 };
 
-// The attacks the monster plays on a map (a server map number): those of the
-// map variant that names the map and has attacks, else the entry's own.
-const std::optional<MonsterAttacks>& GetAttacksOnMap(const MonsterDefinition& monster, int map);
+// The attacks the monster plays on a map (a server map number and stage):
+// those of the map variant that names the map and has attacks, else the
+// entry's own.
+const std::optional<MonsterAttacks>& GetAttacksOnMap(const MonsterDefinition& monster, int map, int stage = 0);
 } // namespace Data::Monsters

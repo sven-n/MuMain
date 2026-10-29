@@ -11,24 +11,46 @@
 #include "imgui_internal.h"
 
 #include <algorithm>
+#include <set>
 #include <utility>
 
 namespace MuEditor::MapPicker
 {
 namespace
 {
+using Data::Maps::MapRef;
+
 // Pixel height before the editor UI scale; the picker scrolls beyond it.
 constexpr float MaxPickerHeight = 420.0f;
+// Devil Square 5-7: the server's map number; the client loads it as 9.
+constexpr int DevilSquare5To7 = 32;
 
-// The maps a server sends, by the server's numbers; the rounds of an event
-// as one row. The scenes of the login and character screens are left out.
+Member StageMember(int map, int stage)
+{
+    return {MapRef{map, stage}, std::to_string(stage)};
+}
+
+// The levels of an event that are maps of their own, labelled 1, 2, ...
+std::vector<Member> Numbered(std::initializer_list<int> maps)
+{
+    std::vector<Member> members;
+    int level = 1;
+    for (const int map : maps)
+    {
+        members.push_back({MapRef{map, 0}, std::to_string(level++)});
+    }
+    return members;
+}
+
+// The maps a server sends, by the server's numbers; the levels of an event as
+// one row. The scenes of the login and character screens are left out.
 std::vector<Row> MakeRows()
 {
     std::vector<Row> rows;
-    const auto single = [&](int map) { rows.push_back({map, {{map, ""}}}); };
-    const auto rounds = [&](std::vector<Member> members)
+    const auto single = [&](int map) { rows.push_back({map, {{MapRef{map, 0}, ""}}}); };
+    const auto levels = [&](std::vector<Member> members)
     {
-        const int first = members.front().map;
+        const int first = members.front().ref.map;
         rows.push_back({first, std::move(members)});
     };
     for (const int map :
@@ -36,55 +58,35 @@ std::vector<Row> MakeRows()
     {
         single(map);
     }
-    rounds({{WD_9DEVILSQUARE, "1-4"}, {32, "5-7"}});
+    // The stages OpenMU sends with the map (its discriminators).
+    levels({StageMember(WD_9DEVILSQUARE, 1), StageMember(WD_9DEVILSQUARE, 2), StageMember(WD_9DEVILSQUARE, 3),
+            StageMember(WD_9DEVILSQUARE, 4), StageMember(DevilSquare5To7, 5), StageMember(DevilSquare5To7, 6),
+            StageMember(DevilSquare5To7, 7)});
     single(WD_10HEAVEN);
-    rounds({{WD_11BLOODCASTLE1, "1"},
-            {WD_11BLOODCASTLE1 + 1, "2"},
-            {WD_11BLOODCASTLE1 + 2, "3"},
-            {WD_11BLOODCASTLE1 + 3, "4"},
-            {WD_11BLOODCASTLE1 + 4, "5"},
-            {WD_11BLOODCASTLE1 + 5, "6"},
-            {WD_11BLOODCASTLE1 + 6, "7"},
-            {WD_52BLOODCASTLE_MASTER_LEVEL, "8"}});
-    rounds({{WD_18CHAOS_CASTLE, "1"},
-            {WD_18CHAOS_CASTLE + 1, "2"},
-            {WD_18CHAOS_CASTLE + 2, "3"},
-            {WD_18CHAOS_CASTLE + 3, "4"},
-            {WD_18CHAOS_CASTLE + 4, "5"},
-            {WD_18CHAOS_CASTLE + 5, "6"},
-            {WD_53CAOSCASTLE_MASTER_LEVEL, "7"}});
-    rounds({{WD_24HELLAS, "1"},
-            {WD_24HELLAS + 1, "2"},
-            {WD_24HELLAS + 2, "3"},
-            {WD_24HELLAS + 3, "4"},
-            {WD_24HELLAS + 4, "5"},
-            {WD_24HELLAS + 5, "6"},
-            {WD_24HELLAS_7, "7"}});
+    levels(
+        Numbered({WD_11BLOODCASTLE1, WD_11BLOODCASTLE1 + 1, WD_11BLOODCASTLE1 + 2, WD_11BLOODCASTLE1 + 3,
+                  WD_11BLOODCASTLE1 + 4, WD_11BLOODCASTLE1 + 5, WD_11BLOODCASTLE1 + 6, WD_52BLOODCASTLE_MASTER_LEVEL}));
+    levels(Numbered({WD_18CHAOS_CASTLE, WD_18CHAOS_CASTLE + 1, WD_18CHAOS_CASTLE + 2, WD_18CHAOS_CASTLE + 3,
+                     WD_18CHAOS_CASTLE + 4, WD_18CHAOS_CASTLE + 5, WD_53CAOSCASTLE_MASTER_LEVEL}));
+    levels(Numbered({WD_24HELLAS, WD_24HELLAS + 1, WD_24HELLAS + 2, WD_24HELLAS + 3, WD_24HELLAS + 4, WD_24HELLAS + 5,
+                     WD_24HELLAS_7}));
     for (const int map :
          {WD_30BATTLECASTLE, WD_31HUNTING_GROUND, WD_33AIDA, WD_34CRYWOLF_1ST, WD_37KANTURU_1ST, WD_38KANTURU_2ND,
           WD_39KANTURU_3RD, WD_40AREA_FOR_GM, WD_41CHANGEUP3RD_1ST, WD_42CHANGEUP3RD_2ND})
     {
         single(map);
     }
-    rounds({{WD_45CURSEDTEMPLE_LV1, "1"},
-            {WD_45CURSEDTEMPLE_LV2, "2"},
-            {WD_45CURSEDTEMPLE_LV3, "3"},
-            {WD_45CURSEDTEMPLE_LV4, "4"},
-            {WD_45CURSEDTEMPLE_LV5, "5"},
-            {WD_45CURSEDTEMPLE_LV6, "6"}});
+    levels(Numbered({WD_45CURSEDTEMPLE_LV1, WD_45CURSEDTEMPLE_LV2, WD_45CURSEDTEMPLE_LV3, WD_45CURSEDTEMPLE_LV4,
+                     WD_45CURSEDTEMPLE_LV5, WD_45CURSEDTEMPLE_LV6}));
     for (const int map : {WD_51HOME_6TH_CHAR, WD_56MAP_SWAMP_OF_QUIET, WD_57ICECITY, WD_58ICECITY_BOSS, WD_62SANTA_TOWN,
                           WD_63PK_FIELD, WD_64DUELARENA})
     {
         single(map);
     }
-    rounds(
-        {{WD_65DOPPLEGANGER1, "1"}, {WD_66DOPPLEGANGER2, "2"}, {WD_67DOPPLEGANGER3, "3"}, {WD_68DOPPLEGANGER4, "4"}});
-    rounds({{WD_69EMPIREGUARDIAN1, "1"},
-            {WD_70EMPIREGUARDIAN2, "2"},
-            {WD_71EMPIREGUARDIAN3, "3"},
-            {WD_72EMPIREGUARDIAN4, "4"}});
+    levels(Numbered({WD_65DOPPLEGANGER1, WD_66DOPPLEGANGER2, WD_67DOPPLEGANGER3, WD_68DOPPLEGANGER4}));
+    levels(Numbered({WD_69EMPIREGUARDIAN1, WD_70EMPIREGUARDIAN2, WD_71EMPIREGUARDIAN3, WD_72EMPIREGUARDIAN4}));
     single(WD_79UNITEDMARKETPLACE);
-    rounds({{WD_80KARUTAN1, "1"}, {WD_81KARUTAN2, "2"}});
+    levels(Numbered({WD_80KARUTAN1, WD_81KARUTAN2}));
     return rows;
 }
 
@@ -94,7 +96,7 @@ const Row* FindRow(int map)
     {
         for (const Member& member : row.members)
         {
-            if (member.map == map)
+            if (member.ref.map == map)
             {
                 return &row;
             }
@@ -108,15 +110,15 @@ std::string RowName(const Row& row)
     return Core::Text::ToUtf8(gMapManager.GetMapName(row.nameMap));
 }
 
-bool Contains(const std::vector<int>& maps, int map)
+bool Contains(const std::vector<MapRef>& maps, const MapRef& ref)
 {
-    return std::find(maps.begin(), maps.end(), map) != maps.end();
+    return std::find(maps.begin(), maps.end(), ref) != maps.end();
 }
 
-size_t CountChosen(const Row& row, const std::vector<int>& maps)
+size_t CountChosen(const Row& row, const std::vector<MapRef>& maps)
 {
     return static_cast<size_t>(std::count_if(row.members.begin(), row.members.end(),
-                                             [&](const Member& member) { return Contains(maps, member.map); }));
+                                             [&](const Member& member) { return IsChosen(maps, member); }));
 }
 
 // "11-17, 52": runs of three or more numbers as a range.
@@ -147,7 +149,24 @@ std::string NumberList(std::vector<int> numbers)
     return text;
 }
 
-bool RenderRow(const Row& row, std::vector<int>& maps)
+bool IsKnownStage(const MapRef& ref)
+{
+    const std::vector<int> stages = StagesOf(ref.map);
+    return std::find(stages.begin(), stages.end(), ref.stage) != stages.end();
+}
+
+// "server 11; World12", "server 9 stage 2; World10".
+std::string MemberInfo(const Member& member)
+{
+    std::string text = "server " + std::to_string(member.ref.map);
+    if (member.ref.stage != 0)
+    {
+        text += " stage " + std::to_string(member.ref.stage);
+    }
+    return text + "; World" + std::to_string(gMapManager.GetFilesFolder(member.ref.map));
+}
+
+bool RenderRow(const Row& row, std::vector<MapRef>& maps)
 {
     bool changed = false;
     const std::string name = RowName(row);
@@ -168,7 +187,7 @@ bool RenderRow(const Row& row, std::vector<int>& maps)
     {
         ImGui::SetNextItemOpen(true, ImGuiCond_Appearing);
     }
-    const bool open = ImGui::TreeNodeEx("##Rounds", ImGuiTreeNodeFlags_NoTreePushOnOpen);
+    const bool open = ImGui::TreeNodeEx("##Levels", ImGuiTreeNodeFlags_NoTreePushOnOpen);
     ImGui::SameLine();
     bool all = chosen == row.members.size();
     ImGui::PushItemFlag(ImGuiItemFlags_MixedValue, chosen > 0 && !all);
@@ -187,15 +206,15 @@ bool RenderRow(const Row& row, std::vector<int>& maps)
     ImGui::Indent();
     for (const Member& member : row.members)
     {
-        ImGui::PushID(member.map);
-        bool on = Contains(maps, member.map);
-        if (ImGui::Checkbox(member.round.c_str(), &on))
+        ImGui::PushID(member.ref.map * (Data::Maps::MaxStage + 1) + member.ref.stage);
+        bool on = IsChosen(maps, member);
+        if (ImGui::Checkbox(member.label.c_str(), &on))
         {
             SetMaps(maps, {member}, on);
             changed = true;
         }
         ImGui::SameLine();
-        ImGui::TextDisabled("%s", InfoOf({member.map, {member}}).c_str());
+        ImGui::TextDisabled("%s", MemberInfo(member).c_str());
         ImGui::PopID();
     }
     ImGui::Unindent();
@@ -209,39 +228,69 @@ const std::vector<Row>& GetRows()
     return rows;
 }
 
-std::string NameOf(int map)
+std::vector<int> StagesOf(int map)
 {
-    const Row* row = FindRow(map);
-    if (row == nullptr)
+    std::vector<int> stages;
+    if (const Row* row = FindRow(map))
     {
-        return "map " + std::to_string(map);
+        for (const Member& member : row->members)
+        {
+            if (member.ref.map == map && member.ref.stage != 0)
+            {
+                stages.push_back(member.ref.stage);
+            }
+        }
     }
-    if (row->members.size() == 1)
-    {
-        return RowName(*row);
-    }
-    const auto member = std::find_if(row->members.begin(), row->members.end(),
-                                     [map](const Member& candidate) { return candidate.map == map; });
-    return RowName(*row) + " " + member->round;
+    return stages;
 }
 
-std::string Describe(const std::vector<int>& maps, const char* whenEmpty)
+std::string NameOf(const MapRef& ref)
+{
+    const Row* row = FindRow(ref.map);
+    std::string name;
+    if (row == nullptr)
+    {
+        name = "map " + std::to_string(ref.map);
+    }
+    else if (IsKnownStage(ref))
+    {
+        return RowName(*row) + " " + std::to_string(ref.stage);
+    }
+    else if (const std::vector<int> stages = StagesOf(ref.map); !stages.empty())
+    {
+        name = RowName(*row) + " " + NumberList(stages);
+    }
+    else if (row->members.size() == 1)
+    {
+        name = RowName(*row);
+    }
+    else
+    {
+        const auto member = std::find_if(row->members.begin(), row->members.end(),
+                                         [&](const Member& candidate) { return candidate.ref.map == ref.map; });
+        name = RowName(*row) + " " + member->label;
+    }
+    // A stage the picker does not know, from hand-written data.
+    return ref.stage != 0 ? name + " stage " + std::to_string(ref.stage) : name;
+}
+
+std::string Describe(const std::vector<MapRef>& maps, const char* whenEmpty)
 {
     if (maps.empty())
     {
         return whenEmpty;
     }
-    std::vector<int> sorted = maps;
+    std::vector<MapRef> sorted = maps;
     std::sort(sorted.begin(), sorted.end());
     std::string text;
     std::vector<const Row*> wholeRows;
-    for (const int map : sorted)
+    for (const MapRef& ref : sorted)
     {
-        const Row* row = FindRow(map);
+        const Row* row = FindRow(ref.map);
         std::string part;
         if (row != nullptr && row->members.size() > 1 && CountChosen(*row, sorted) == row->members.size())
         {
-            // All rounds chosen: the map's name once.
+            // All levels chosen: the event's name once.
             if (std::find(wholeRows.begin(), wholeRows.end(), row) != wholeRows.end())
             {
                 continue;
@@ -251,7 +300,7 @@ std::string Describe(const std::vector<int>& maps, const char* whenEmpty)
         }
         else
         {
-            part = NameOf(map);
+            part = NameOf(ref);
         }
         text += (text.empty() ? "" : ", ") + part;
     }
@@ -261,40 +310,100 @@ std::string Describe(const std::vector<int>& maps, const char* whenEmpty)
 std::string InfoOf(const Row& row)
 {
     std::vector<int> servers;
-    std::vector<int> folders;
+    std::set<int> folders;
     for (const Member& member : row.members)
     {
-        servers.push_back(member.map);
-        folders.push_back(gMapManager.GetFilesFolder(member.map));
+        if (std::find(servers.begin(), servers.end(), member.ref.map) == servers.end())
+        {
+            servers.push_back(member.ref.map);
+        }
+        folders.insert(gMapManager.GetFilesFolder(member.ref.map));
     }
-    std::sort(folders.begin(), folders.end());
-    folders.erase(std::unique(folders.begin(), folders.end()), folders.end());
+    std::string server;
+    if (StagesOf(servers.front()).empty())
+    {
+        server = NumberList(servers);
+    }
+    else
+    {
+        // "9 stages 1-4, 32 stages 5-7".
+        for (const int map : servers)
+        {
+            server += (server.empty() ? "" : ", ") + std::to_string(map) + " stages " + NumberList(StagesOf(map));
+        }
+    }
     std::string world;
     for (const int folder : folders)
     {
         world += (world.empty() ? "World" : ", World") + std::to_string(folder);
     }
-    return "server " + NumberList(servers) + "; " + world;
+    return "server " + server + "; " + world;
 }
 
-void SetMaps(std::vector<int>& maps, const std::vector<Member>& members, bool on)
+bool IsChosen(const std::vector<MapRef>& maps, const Member& member)
+{
+    if (member.ref.stage == 0)
+    {
+        return Contains(maps, member.ref);
+    }
+    return Data::Maps::Names(maps, member.ref.map, member.ref.stage);
+}
+
+void SetMaps(std::vector<MapRef>& maps, const std::vector<Member>& members, bool on)
 {
     for (const Member& member : members)
     {
-        const bool chosen = Contains(maps, member.map);
-        if (on && !chosen)
+        const int map = member.ref.map;
+        const MapRef whole{map, 0};
+        if (on && !IsChosen(maps, member))
         {
-            maps.push_back(member.map);
+            maps.push_back(member.ref);
         }
-        else if (!on && chosen)
+        else if (!on && member.ref.stage == 0)
         {
-            maps.erase(std::remove(maps.begin(), maps.end(), member.map), maps.end());
+            maps.erase(std::remove_if(maps.begin(), maps.end(), [&](const MapRef& ref) { return ref.map == map; }),
+                       maps.end());
+        }
+        else if (!on && IsChosen(maps, member))
+        {
+            // The whole map gives way to its other stages.
+            if (Contains(maps, whole))
+            {
+                maps.erase(std::remove(maps.begin(), maps.end(), whole), maps.end());
+                for (const int stage : StagesOf(map))
+                {
+                    maps.push_back(MapRef{map, stage});
+                }
+            }
+            maps.erase(std::remove(maps.begin(), maps.end(), member.ref), maps.end());
+        }
+    }
+    // A map whose every stage is chosen is named without a stage.
+    std::set<int> stagedMaps;
+    for (const MapRef& ref : maps)
+    {
+        if (ref.stage != 0)
+        {
+            stagedMaps.insert(ref.map);
+        }
+    }
+    for (const int map : stagedMaps)
+    {
+        const std::vector<int> stages = StagesOf(map);
+        const bool every = !stages.empty() && std::all_of(stages.begin(), stages.end(), [&](int stage)
+                                                          { return Contains(maps, MapRef{map, stage}); });
+        if (every)
+        {
+            maps.erase(std::remove_if(maps.begin(), maps.end(), [&](const MapRef& ref) { return ref.map == map; }),
+                       maps.end());
+            maps.push_back(MapRef{map, 0});
         }
     }
     std::sort(maps.begin(), maps.end());
+    maps.erase(std::unique(maps.begin(), maps.end()), maps.end());
 }
 
-bool Render(const char* id, std::vector<int>& maps, const char* whenEmpty)
+bool Render(const char* id, std::vector<MapRef>& maps, const char* whenEmpty)
 {
     bool changed = false;
     ImGui::PushID(id);
