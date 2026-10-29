@@ -614,8 +614,9 @@ TEST_CASE("Update from server fills the client's entry without a name [data][ite
     sphere4.group = 12;
     sphere4.number = 73;
     sphere4.names = Data::LocalizedString::Parse("Sphere (4)");
-    sphere4.width = 1;
-    sphere4.height = 1;
+    // A size the client's entry does not have (it is 1x1).
+    sphere4.width = 2;
+    sphere4.height = 2;
     sphere4.statProfile = std::string(StatProfileNames::Default);
     sides.file.items.push_back(sphere4);
     const std::string url = "http://localhost:8080/api/items/exchange";
@@ -639,8 +640,8 @@ TEST_CASE("Update from server fills the client's entry without a name [data][ite
     REQUIRE(g_MuItemSyncUI.Apply());
     const ItemDefinition& entry = g_ItemDatabase.GetAllSlots()[sphere4Type];
     CHECK(entry.entryWithoutName);
-    CHECK(entry.width == 1);
-    CHECK(entry.height == 1);
+    CHECK(entry.width == 2);
+    CHECK(entry.height == 2);
     CHECK(g_ItemDatabase.Find(sphere4Type) == nullptr);
 
     // Its name makes it the item.

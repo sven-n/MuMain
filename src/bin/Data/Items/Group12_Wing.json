@@ -2143,10 +2143,14 @@
       }
     },
     {
-      "number": 73
+      "number": 73,
+      "width": 1,
+      "height": 1
     },
     {
-      "number": 74
+      "number": 74,
+      "width": 1,
+      "height": 1
     },
     {
       "number": 100,
@@ -2723,6 +2727,8 @@
           "color": "violet"
         }
       ],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -2742,6 +2748,8 @@
           "color": "violet"
         }
       ],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -2761,6 +2769,8 @@
           "color": "violet"
         }
       ],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -2780,6 +2790,8 @@
           "color": "violet"
         }
       ],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -2799,6 +2811,8 @@
           "color": "violet"
         }
       ],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -2818,6 +2832,8 @@
           "color": "violet"
         }
       ],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -2837,6 +2853,8 @@
           "color": "violet"
         }
       ],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -2856,6 +2874,8 @@
           "color": "violet"
         }
       ],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -2875,6 +2895,8 @@
           "color": "violet"
         }
       ],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -2894,6 +2916,8 @@
           "color": "violet"
         }
       ],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -2913,6 +2937,8 @@
           "color": "violet"
         }
       ],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
@@ -2932,6 +2958,8 @@
           "color": "violet"
         }
       ],
+      "width": 1,
+      "height": 1,
       "slot": "mainHand"
     },
     {
