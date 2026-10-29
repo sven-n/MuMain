@@ -61,14 +61,14 @@ TEST_CASE("Item model specular rejects invalid values and keeps none [data][item
     {
         CAPTURE(fields);
         const ReadResult result = ReadModel(fields);
-        CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Error, "material.specular"));
+        CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "material.specular"));
         CHECK(result.models.empty());
     }
 }
 
 TEST_CASE("Item model material must be an object and warns about unknown keys [data][items][material]")
 {
-    CHECK(HasIssue(ReadModel(R"("material": 0.6)").issues, ItemDataIssueSeverity::Error, "material"));
+    CHECK(HasIssue(ReadModel(R"("material": 0.6)").issues, ItemDataIssueSeverity::Fatal, "material"));
 
     const ReadResult result = ReadModel(R"("material": {"specular": 0.4, "roughness": 1})");
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "material.roughness"));

@@ -84,6 +84,9 @@ if(MU_ENABLE_SHADER_COMPILATION)
             "mode=ON\nGLSLANG_EXE=${GLSLANG_EXE}\nSPIRV_CROSS_EXE=${SPIRV_CROSS_EXE}\nDXC_EXE=${DXC_EXE}\n"
         NEWLINE_STYLE UNIX)
 
+    # Shared code the shaders #include; a change rebuilds every shader.
+    file(GLOB MU_SHADER_INCLUDES CONFIGURE_DEPENDS "${MU_SHADER_SOURCE_DIR}/*.hlsli")
+
     function(mu_add_shader shader_name stage)
         if(stage STREQUAL "vert")
             set(dxil_profile vs_6_0)
@@ -101,7 +104,7 @@ if(MU_ENABLE_SHADER_COMPILATION)
         add_custom_command(
             OUTPUT "${spv}"
             COMMAND "${GLSLANG_EXE}" -V -D -S "${stage}" -e main -o "${spv}" "${src}"
-            DEPENDS "${src}" "${MU_SHADER_COMPILATION_STAMP}" "${GLSLANG_EXE}"
+            DEPENDS "${src}" ${MU_SHADER_INCLUDES} "${MU_SHADER_COMPILATION_STAMP}" "${GLSLANG_EXE}"
             COMMENT "HLSL to SPIR-V: ${shader_name}.${stage}.hlsl"
             VERBATIM
         )
@@ -116,7 +119,7 @@ if(MU_ENABLE_SHADER_COMPILATION)
             OUTPUT "${dxil}"
             COMMAND "${DXC_EXE}" -T "${dxil_profile}" -E main
                 -D MU_D3D12_RAW_STORAGE_BUFFER=1 -Fo "${dxil}" "${src}"
-            DEPENDS "${src}" "${MU_SHADER_COMPILATION_STAMP}" "${DXC_EXE}"
+            DEPENDS "${src}" ${MU_SHADER_INCLUDES} "${MU_SHADER_COMPILATION_STAMP}" "${DXC_EXE}"
             COMMENT "HLSL to DXIL: ${shader_name}.${stage}.hlsl"
             VERBATIM
         )

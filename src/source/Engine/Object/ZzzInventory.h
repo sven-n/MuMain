@@ -1,6 +1,10 @@
 #ifndef __ZZZINVENTORY_H__
 #define __ZZZINVENTORY_H__
 
+#include <optional>
+#include <string>
+#include <vector>
+
 enum _COLUMN_TYPE
 {
     _COLUMN_TYPE_LEVEL = 0,
@@ -82,10 +86,46 @@ extern int AllRepairGold;
 //////////////////////////////////////////////////////////////////////////
 // text 관련
 //////////////////////////////////////////////////////////////////////////
-extern wchar_t TextList[50][100];
-extern int TextListColor[50];
-extern int TextBold[50];
-extern SIZE Size[50];
+// The rows an item's description may write into a tooltip, on top of the original client's 50: the description
+// gets rows of its own, so it never takes the room the rest of the tooltip needs.
+constexpr int MaxItemDescriptionRows = 32;
+constexpr int MaxTextListRows = 50 + MaxItemDescriptionRows;
+
+extern wchar_t TextList[MaxTextListRows][100];
+extern int TextListColor[MaxTextListRows];
+extern int TextBold[MaxTextListRows];
+extern SIZE Size[MaxTextListRows];
+
+namespace Data::Items
+{
+struct ItemDefinition;
+}
+struct ItemTooltipValues;
+
+// The server's pet information that a Dark Lord pet's tooltip asks for: the Dark Horse's when it is pointed at as the
+// equipped helper, the Dark Raven's when it is pointed at in the left hand; nothing elsewhere. `inventype` is the
+// tooltip's storage.
+struct PetInfoRequest
+{
+    PetType pet;
+    StorageType storage;
+    BYTE slot;
+};
+std::optional<PetInfoRequest> GetPetInfoRequest(int itemType, int pointedIndex, int inventype);
+
+// How wide a text is in the tooltip's text units.
+using ItemTooltipTextMeasure = int (*)(const wchar_t* text, size_t length);
+// Writes the item data's description in the UI's language, with its placeholders filled in for the item (`values`,
+// and the stat file's tables at `level`), into TextList, TextListColor and TextBold from TextNum on: the lines of that
+// level whose conditions hold (a line may be a shared text of the tooltip file), each wrapped to the tooltip's width
+// and at its line breaks, the pieces in the line's color (its first color rule that holds) and style, a blank line or
+// piece as the tooltip's own blank rows. At
+// most `rowsLeft` rows, which it lowers by the rows it wrote: a tooltip's description, both its parts together, has
+// MaxItemDescriptionRows. `afterOptions` picks the lines drawn after the item's options ("after": "options") or
+// the others.
+void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, int level,
+                               const ItemTooltipValues& values, bool afterOptions, int& rowsLeft,
+                               ItemTooltipTextMeasure measure);
 
 ///////////////////////////////////////////////////////////////////////////////
 // party
@@ -123,7 +163,6 @@ extern int  RepairEnable;
 extern int AskYesOrNo;
 extern char OkYesOrNo;
 
-extern int  SommonTable[];
 extern int  StorageGoldFlag;
 extern ITEM* SrcInventory;
 extern int  SrcInventoryIndex;
@@ -183,13 +222,59 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
 void RenderItem3DWithHover(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags, int ancientDiscriminator, bool hovered);
 void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancientDiscriminator, vec3_t Target, int Select, bool PickUp);
 bool GetAttackDamage(int* iMinDamage, int* iMaxDamage);
-void GetItemName(int iType, int iLevel, wchar_t* Text);
+// The item's name in the item names' language (the UI's, or English with "Translate item names" off), as windows,
+// messages and ground labels write it: the text of the first of its
+// name lines whose levels and conditions hold (the item data's nameLines), else its name with " +level" above +0.
+// Without `item`, one of the type at the level, whose durability and options are 0.
+std::wstring GetItemNameText(int type, int level, const ITEM* item = nullptr);
+// Writes GetItemNameText into a buffer of `textSize` characters, cut short to fit.
+void GetItemName(int iType, int iLevel, wchar_t* Text, size_t textSize);
+template <size_t N> void GetItemName(int iType, int iLevel, wchar_t (&Text)[N])
+{
+    GetItemName(iType, iLevel, Text, N);
+}
+std::wstring GetItemName(int iType, int iLevel);
 std::wstring GetItemDisplayName(ITEM* pItem);
 void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana);
 // The item's information and repair tooltips, anchored in window pixels: their layout runs in the
 // screen's 640x480 stretch, the space the original computed it in, whichever window asks.
 void RenderItemInfoAtPx(float x, float y, ITEM* ip, bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);
+// One line of an item's information tooltip as RenderItemInfoAtPx builds it: its text ("\n" for a blank line), its
+// TEXT_COLOR_* and whether it is bold.
+struct ItemTooltipLine
+{
+    std::wstring text;
+    int color = 0;
+    bool bold = false;
+};
+// How the tooltip measures a description piece for wrapping: the game's font (g_pRenderText), unless a test sets
+// a measure of its own, which needs no font; nullptr puts the font back.
+void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure);
+// The lines of `ip`'s information tooltip, built as RenderItemInfoAtPx builds them but not drawn; none when it shows
+// no tooltip or the pet manager draws its own (the Dark Lord's pets).
+std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inventype = 0,
+                                                   bool bItemTextListBoxUse = false);
 void RenderRepairInfoAtPx(float x, float y, ITEM* ip, bool Sell);
+// What BuildRepairInfoText built: the count of lines, and what a click on the item does in repair mode.
+struct RepairInfoText
+{
+    // 0 when the item shows no repair tooltip.
+    int lineCount = 0;
+    // RepairEnable for the drawn tooltip: 2 a click repairs the item, 1 it has nothing to repair; none: as it was.
+    std::optional<int> repairEnable;
+};
+// Fills TextList, TextListColor and TextBold with the repair tooltip's lines for the item, as RenderRepairInfoAtPx
+// shows them; leaves RepairEnable to the caller that draws them.
+RepairInfoText BuildRepairInfoText(ITEM* ip);
+// A drop's name on the ground (Alt, or the pointer over it): its text, colors and whether its font is bold.
+struct GroundItemLabel
+{
+    std::wstring text;
+    DWORD textColor;
+    DWORD backgroundColor;
+    bool bold;
+};
+GroundItemLabel DescribeGroundItemLabel(OBJECT* o, ITEM* ip);
 void RenderSkillInfo(int sx, int sy, int Type, int SkillNum = 0, int iRenderPoint = STRP_NONE);
 void RequireClass(ITEM_ATTRIBUTE* p);
 bool IsRequireClassRenderItem(const short sType);

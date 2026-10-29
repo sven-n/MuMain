@@ -213,7 +213,12 @@
         "es": "Rayo",
         "pt": "Dardo"
       },
-      "tags": ["ammunition"],
+      "tags": ["ammunition", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@numberOfItems"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "offHand",
@@ -434,7 +439,12 @@
         "es": "Flecha",
         "pt": "Flecha"
       },
-      "tags": ["ammunition"],
+      "tags": ["ammunition", "noDurabilityLine"],
+      "description": [
+        {
+          "text": "@numberOfItems"
+        }
+      ],
       "width": 1,
       "height": 1,
       "slot": "mainHand",
@@ -511,6 +521,21 @@
         "pt": "Besta divina do arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
+      "nameLines": [
+        {
+          "text": {
+            "en": "{name}"
+          },
+          "color": "purple",
+          "levels": [0, 0]
+        },
+        {
+          "text": {
+            "en": "{name} +{level}"
+          },
+          "color": "purple"
+        }
+      ],
       "width": 2,
       "height": 3,
       "slot": "mainHand",
@@ -703,35 +728,6 @@
       },
       "classRequirements": {
         "fairyElf": 2
-      }
-    },
-    {
-      "number": 27,
-      "name": {
-        "en": "Silver Bow-J",
-        "de": "Silberbogen-J",
-        "es": "Arco Plateado-J",
-        "pt": "Arco de prata-J"
-      },
-      "width": 2,
-      "height": 4,
-      "slot": "offHand",
-      "weaponKind": "bow",
-      "statProfile": "weapon",
-      "twoHanded": true,
-      "skill": 24,
-      "level": 56,
-      "durability": 48,
-      "damageMin": 59,
-      "damageMax": 71,
-      "attackSpeed": 45,
-      "attackType": 2,
-      "requirements": {
-        "strength": 30,
-        "dexterity": 100
-      },
-      "classRequirements": {
-        "fairyElf": 1
       }
     }
   ]

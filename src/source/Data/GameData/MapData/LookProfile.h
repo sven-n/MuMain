@@ -134,7 +134,7 @@ constexpr const char* LookProfileFile = "Data/Render/Look.json";
 
 // Reads the profile of the file into `data`. One error makes the whole file
 // unusable: `data` is then empty (every value built-in) and `issues` has
-// errors (Items::HasErrors).
+// errors (Items::HasFatal).
 void ReadLookProfileJson(std::string_view text, const std::string& source, LookProfileData& data,
                          std::vector<Items::ItemDataIssue>& issues);
 
@@ -145,6 +145,6 @@ struct LookProfileLoadResult
 };
 
 // Reads the file. A missing file gives the built-in values with a warning; an
-// unreadable or invalid one gives them with errors.
+// unreadable or invalid one gives them with fatal problems.
 LookProfileLoadResult LoadLookProfileFile(const std::filesystem::path& file);
 } // namespace Data::Maps

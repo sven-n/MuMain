@@ -4,6 +4,7 @@
 
 #include "ClientDataScope.h"
 #include "ItemStatProfilesScope.h"
+#include "LevelBasisScrollProfile.h"
 #include "TestFiles.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
@@ -188,10 +189,10 @@ TEST_CASE("The shipped item stat file loads without problems and is in the writt
     CHECK(WriteItemStatsJson(result.file) == TestFiles::ReadWholeFile(ClientDirectory / GetItemStatsFile()));
 }
 
-// The bmd import and the item editor keep a profile its data gives; the shipped data follows
-// the same rule, so nothing changes when an item is saved again. The Horn of Fenrir is no
-// helper: its level requirement does not grow, so it names the default.
-TEST_CASE("Every shipped item names the stat profile its data gives [data][items]")
+// The bmd import and the item editor keep a profile the profile rules give; the shipped data
+// follows the same rule, so nothing changes when an item is saved again. The Horn of Fenrir is
+// no helper: its level requirement does not grow, so it names the default.
+TEST_CASE("Every shipped item names the stat profile the profile rules give [data][items]")
 {
     ShippedItemAttributes items;
     int itemsWithProfile = 0;
@@ -203,11 +204,108 @@ TEST_CASE("Every shipped item names the stat profile its data gives [data][items
         }
         CAPTURE(g_ItemDatabase.GetLogName(MakeItemType(definition.group, definition.number)));
         const bool hornOfFenrir = MakeItemType(definition.group, definition.number) == ITEM_HORN_OF_FENRIR;
-        CHECK(definition.statProfile == (hornOfFenrir ? "default" : DeriveStatProfile(definition)));
+        CHECK(definition.statProfile ==
+              (hornOfFenrir ? "default" : DeriveStatProfile(g_ItemDatabase.GetStatProfiles(), definition)));
         itemsWithProfile += definition.statProfile.empty() || hornOfFenrir ? 0 : 1;
     }
-    CHECK(DeriveStatProfile(*g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)) == "helper");
-    CHECK(itemsWithProfile == 604);
+    CHECK(DeriveStatProfile(g_ItemDatabase.GetStatProfiles(), *g_ItemDatabase.Find(ITEM_HORN_OF_FENRIR)) == "helper");
+    CHECK(itemsWithProfile == 578);
+}
+
+TEST_CASE("The shipped profile rules give each kind of item its profile [data][items]")
+{
+    ShippedItemAttributes items;
+    const ItemStatProfiles& profiles = g_ItemDatabase.GetStatProfiles();
+    const auto make = [](int group, int number)
+    {
+        ItemDefinition definition;
+        definition.group = group;
+        definition.number = number;
+        return definition;
+    };
+
+    ItemDefinition sceptre = make(2, 8);
+    sceptre.weaponKind = WeaponKind::Mace;
+    CHECK(DeriveStatProfile(profiles, sceptre) == "weapon");
+    sceptre.tags.Set(ItemTag::Sceptre);
+    CHECK(DeriveStatProfile(profiles, sceptre) == "sceptre");
+
+    ItemDefinition shield = make(6, 0);
+    shield.slot = ItemSlot::OffHand;
+    shield.weaponKind = WeaponKind::Shield;
+    CHECK(DeriveStatProfile(profiles, shield) == "shield");
+
+    ItemDefinition wing = make(12, 0);
+    wing.slot = ItemSlot::Wings;
+    const std::pair<WingTier, const char*> tiers[] = {{WingTier::None, ""},
+                                                      {WingTier::Small, "smallWing"},
+                                                      {WingTier::First, "firstTierWing"},
+                                                      {WingTier::Second, "secondTierWing"},
+                                                      {WingTier::Third, "thirdTierWing"}};
+    for (const auto& [tier, profile] : tiers)
+    {
+        wing.wingTier = tier;
+        CHECK(DeriveStatProfile(profiles, wing) == profile);
+    }
+    wing.wingTier = WingTier::Second;
+    wing.tags.Set(ItemTag::Cape);
+    CHECK(DeriveStatProfile(profiles, wing) == "secondTierCape");
+    // A wing tier counts only on the wings slot.
+    wing.slot = ItemSlot::Helm;
+    CHECK(DeriveStatProfile(profiles, wing) == "armor");
+
+    ItemDefinition kris = make(0, 0);
+    kris.slot = ItemSlot::MainHand;
+    kris.weaponKind = WeaponKind::Sword;
+    CHECK(DeriveStatProfile(profiles, kris) == "weapon");
+
+    ItemDefinition book = make(5, 21);
+    book.weaponKind = WeaponKind::Book;
+    book.tags.Set(ItemTag::SummonerBook);
+    CHECK(DeriveStatProfile(profiles, book) == "book");
+
+    ItemDefinition bolt = make(4, 7);
+    bolt.tags.Set(ItemTag::Ammunition);
+    CHECK(DeriveStatProfile(profiles, bolt).empty());
+
+    ItemDefinition ring = make(13, 8);
+    ring.slot = ItemSlot::Ring;
+    CHECK(DeriveStatProfile(profiles, ring).empty());
+    ring.requirements.level = 20;
+    CHECK(DeriveStatProfile(profiles, ring) == "helper");
+
+    ItemDefinition scroll = make(15, 0);
+    CHECK(DeriveStatProfile(profiles, scroll).empty());
+    scroll.requirements.energy = 100;
+    CHECK(DeriveStatProfile(profiles, scroll) == "scroll");
+}
+
+// The shipped profile rules give the profiles that the code before them gave; how many
+// items each rule reaches pins them.
+TEST_CASE("The items each shipped profile rule gives its profile [data][items]")
+{
+    ShippedItemAttributes items;
+    const ItemStatProfiles& profiles = g_ItemDatabase.GetStatProfiles();
+    const std::vector<int> expected = {2, 10, 3, 22, 113, 327, 6, 4, 2, 5, 7, 0, 12, 36, 32};
+    REQUIRE(profiles.GetRules().size() == expected.size());
+    std::vector<int> counts(expected.size());
+    int withoutRule = 0;
+    for (const ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        const int rule = profiles.FindRule(definition);
+        if (rule == NoStatProfileRule)
+        {
+            ++withoutRule;
+            continue;
+        }
+        ++counts[static_cast<size_t>(rule)];
+    }
+    CHECK(counts == expected);
+    CHECK(withoutRule == 330);
 }
 
 // The fixed excellent bonus of the three chaos weapons is item data.
@@ -308,21 +406,83 @@ TEST_CASE("Item requirements come from the item's stat profile [data][items]")
     CHECK(stats(ITEM_BOOK_OF_SAHAMUTT, 15, 0, 0, 12).requireStrength ==
           ComputeItem(ITEM_BOOK_OF_SAHAMUTT, 15, 0, 0, 12).RequireStrength);
 
-    // Scrolls: energy from the level requirement, the level requirement + 4 per level.
+    // Scrolls: the energy as stored, the level requirement + 4 per level.
     const int wizardryEnhance = MakeItemType(15, 28);
     CHECK(stats(wizardryEnhance, 5).requireEnergy == 1058);
     CHECK(stats(wizardryEnhance, 5).requireLevel == 240);
 
-    // A level requirement given by level is the one the energy comes from.
+    // The "levelRequirement" basis, which no shipped profile uses any more: the energy comes
+    // from the level requirement, also one given by level.
+    const LevelBasisScrollProfile levelBasis(ClientDirectory);
+    constexpr int energyWeight = 118;
     ItemDefinition givenByLevel = *g_ItemDatabase.Find(wizardryEnhance);
     RequirementByLevel levels{};
     levels.fill(100);
     givenByLevel.requirements.level = 0;
+    givenByLevel.requirements.energy = energyWeight;
     givenByLevel.requirementsByLevel.Set(ItemRequirement::Level, levels);
     g_ItemDatabase.Set(givenByLevel);
     items[wizardryEnhance].RequireLevel = 0;
+    items[wizardryEnhance].RequireEnergy = energyWeight;
     CHECK(stats(wizardryEnhance, 5).requireLevel == 100);
-    CHECK(stats(wizardryEnhance, 5).requireEnergy == 20 + items[wizardryEnhance].RequireEnergy * 100 * 4 / 100);
+    CHECK(stats(wizardryEnhance, 5).requireEnergy == 20 + energyWeight * 100 * 4 / 100);
+}
+
+// The item editor computes an item it has not stored from its definition: for every
+// shipped item that gives what the game computes from the item database.
+TEST_CASE("Item stats from an item's definition are those from the item database [data][items]")
+{
+    ShippedItemAttributes items;
+    const ItemStatProfiles& profiles = g_ItemDatabase.GetStatProfiles();
+    int compared = 0;
+    for (const ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        const int itemType = MakeItemType(definition.group, definition.number);
+        ITEM_ATTRIBUTE attribute{};
+        ToItemAttribute(definition, attribute);
+        const int profileIndex = profiles.Find(definition.statProfile);
+        const ItemStatProfile& profile = profiles.Get(
+            profileIndex == ItemStatProfiles::UnknownProfile ? ItemStatProfiles::DefaultProfile : profileIndex);
+        const GameLogic::Items::ItemStatSources sources{attribute, &definition, profile,
+                                                        definition.slot == ItemSlot::Wings};
+        for (int level = 0; level < ItemLevelCount; ++level)
+        {
+            for (const BYTE excellentFlags : {BYTE{0}, BYTE{0x01}})
+            {
+                for (const BYTE ancientDiscriminator : {BYTE{0}, BYTE{1}})
+                {
+                    for (const BYTE optionLevel : {BYTE{0}, BYTE{4}})
+                    {
+                        const GameLogic::Items::ItemStatInput input{itemType, level, excellentFlags,
+                                                                    ancientDiscriminator, optionLevel};
+                        const GameLogic::Items::ItemStatValues fromDatabase =
+                            GameLogic::Items::ComputeItemStats(items[itemType], input);
+                        const GameLogic::Items::ItemStatValues fromDefinition =
+                            GameLogic::Items::ComputeItemStats(sources, input);
+                        INFO("(" << definition.group << "," << definition.number << ") +" << level);
+                        REQUIRE(fromDefinition.damageMin == fromDatabase.damageMin);
+                        REQUIRE(fromDefinition.damageMax == fromDatabase.damageMax);
+                        REQUIRE(fromDefinition.magicPower == fromDatabase.magicPower);
+                        REQUIRE(fromDefinition.blockRate == fromDatabase.blockRate);
+                        REQUIRE(fromDefinition.defense == fromDatabase.defense);
+                        REQUIRE(fromDefinition.magicDefense == fromDatabase.magicDefense);
+                        REQUIRE(fromDefinition.requireLevel == fromDatabase.requireLevel);
+                        REQUIRE(fromDefinition.requireStrength == fromDatabase.requireStrength);
+                        REQUIRE(fromDefinition.requireDexterity == fromDatabase.requireDexterity);
+                        REQUIRE(fromDefinition.requireEnergy == fromDatabase.requireEnergy);
+                        REQUIRE(fromDefinition.requireVitality == fromDatabase.requireVitality);
+                        REQUIRE(fromDefinition.requireLeadership == fromDatabase.requireLeadership);
+                    }
+                }
+            }
+        }
+        ++compared;
+    }
+    CHECK(compared > 900);
 }
 
 // The items whose level requirement excellent options do not raise are item data: the
@@ -531,7 +691,7 @@ TEST_CASE("Wing defense adds up above +9, from 5 for the third tier wings [data]
     CHECK(ComputeItem(ITEM_CAPE_OF_LORD, 15).Defense == 72);
 }
 
-TEST_CASE("Magic power and defense rate past 255 are not wrapped around [data][items]")
+TEST_CASE("Magic power passes 255 and defense rate stops there [data][items]")
 {
     ShippedItemAttributes items;
     // Values the editor can give an item; no shipped item gets this high.
@@ -542,6 +702,10 @@ TEST_CASE("Magic power and defense rate past 255 are not wrapped around [data][i
 
     // 200 + 67 (excellent) + 66 (+15) = 333, halved, + 30.
     CHECK(ComputeItem(ITEM_LEGENDARY_STAFF, 15, 0x01).MagicPower == 196);
+    // A later staff: 345 + 66 (excellent: 345 * 25 / 140 + 5) + 66 (+15) = 477, halved, + 30.
+    items[ITEM_LEGENDARY_STAFF].MagicPower = 345;
+    items[ITEM_LEGENDARY_STAFF].Level = 140;
+    CHECK(ComputeItem(ITEM_LEGENDARY_STAFF, 15, 0x01).MagicPower == 268);
     // 170 + 47 (excellent) + 66 (+15) = 283.
     CHECK(ComputeItem(DragonShieldType, 15, 0x01).SuccessfulBlocking == 255);
 
@@ -559,7 +723,7 @@ TEST_CASE("Item stats and requirements stop at 65535 [data][items]")
 {
     ShippedItemAttributes items;
     ItemStatsLoadResult stats = LoadItemStatsFile(ClientDirectory / GetItemStatsFile());
-    REQUIRE_FALSE(HasErrors(stats.issues));
+    REQUIRE_FALSE(HasFatal(stats.issues));
     WrittenStatSection& damage = stats.file.defaults[static_cast<size_t>(ItemStat::Damage)];
     damage.excellent.values.times = 65535;
     damage.ancient.values = {65535, 65535, 1, true};
@@ -765,12 +929,75 @@ TEST_CASE("The item help window builds its content again only when what it shows
     CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
     help.HeroCharacter().Class = CLASS_WIZARD;
 
+    // Another language changes the texts and the item names. Back in English
+    // the names were taken again; the content then stays until something changes.
     I18N::SetLocale("pt");
     CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
     I18N::SetLocale("en");
-    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) == shown);
+    const auto backInEnglish = GetItemHelpContentKey(ITEM_BONE_BLADE);
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) == backInEnglish);
 
     // An item editor change, which stores the item in the item database.
     g_ItemDatabase.Set(*g_ItemDatabase.Find(ITEM_BONE_BLADE));
-    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != shown);
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != backInEnglish);
+
+    // Translated item names turned on or off: only the item names change language.
+    const auto namesInEnglish = GetItemHelpContentKey(ITEM_BONE_BLADE);
+    g_ItemDatabase.SetDisplayLocale("pt");
+    CHECK(GetItemHelpContentKey(ITEM_BONE_BLADE) != namesInEnglish);
+    g_ItemDatabase.SetDisplayLocale("en");
+}
+
+// Scrolls and orbs keep their stat requirements as the values the game asks for (their profiles
+// keep the base value), as OpenMU stores them. These are the values the drop level formula gave
+// them before; +0 is the only level they have.
+TEST_CASE("Scrolls and orbs ask for their requirements as stored [data][items]")
+{
+    struct StoredRequirements
+    {
+        int group;
+        int number;
+        int strength;
+        int dexterity;
+        int energy;
+        int vitality;
+        int leadership;
+    };
+    constexpr StoredRequirements expected[] = {
+        {12, 8, 0, 0, 52, 0, 0},     {12, 9, 0, 0, 72, 0, 0},     {12, 10, 0, 0, 92, 0, 0},
+        {12, 16, 596, 0, 0, 0, 0},   {12, 18, 0, 646, 0, 0, 0},   {12, 21, 0, 0, 79, 0, 0},
+        {12, 22, 0, 0, 153, 0, 400}, {12, 23, 0, 0, 102, 0, 300}, {12, 24, 0, 0, 126, 0, 340},
+        {12, 35, 0, 0, 150, 0, 70},  {12, 46, 0, 0, 168, 0, 0},   {12, 48, 0, 0, 84, 0, 0},
+        {15, 0, 0, 0, 140, 0, 0},    {15, 1, 0, 0, 104, 0, 0},    {15, 2, 0, 0, 72, 0, 0},
+        {15, 3, 0, 0, 40, 0, 0},     {15, 4, 0, 0, 160, 0, 0},    {15, 5, 0, 0, 88, 0, 0},
+        {15, 6, 0, 0, 120, 0, 0},    {15, 7, 0, 0, 180, 0, 0},    {15, 8, 0, 0, 220, 0, 0},
+        {15, 9, 0, 0, 260, 0, 0},    {15, 10, 0, 0, 56, 0, 0},    {15, 11, 0, 0, 345, 0, 0},
+        {15, 12, 0, 0, 500, 0, 0},   {15, 13, 0, 0, 724, 0, 0},   {15, 14, 0, 0, 644, 0, 0},
+        {15, 15, 0, 0, 408, 0, 0},   {15, 16, 0, 0, 953, 0, 0},   {15, 17, 0, 0, 849, 0, 0},
+        {15, 18, 0, 0, 1052, 0, 0},  {15, 19, 0, 0, 245, 0, 0},   {15, 20, 0, 0, 150, 0, 0},
+        {15, 21, 0, 0, 823, 0, 0},   {15, 22, 0, 0, 375, 0, 0},   {15, 23, 0, 0, 620, 0, 0},
+        {15, 24, 0, 0, 180, 0, 0},   {15, 26, 0, 0, 663, 0, 0},   {15, 27, 0, 0, 912, 0, 0},
+        {15, 28, 0, 0, 1058, 0, 0},  {15, 29, 0, 0, 1058, 0, 0},  {15, 34, 0, 0, 404, 0, 0},
+        {15, 35, 0, 0, 132, 0, 0},   {15, 36, 0, 0, 80, 0, 0},
+    };
+    ShippedItemAttributes items;
+    for (const StoredRequirements& row : expected)
+    {
+        CAPTURE(row.group);
+        CAPTURE(row.number);
+        const int itemType = MakeItemType(row.group, row.number);
+        const ItemDefinition* item = g_ItemDatabase.Find(itemType);
+        REQUIRE(item != nullptr);
+        CHECK(item->requirements.strength == row.strength);
+        CHECK(item->requirements.dexterity == row.dexterity);
+        CHECK(item->requirements.energy == row.energy);
+        CHECK(item->requirements.vitality == row.vitality);
+        CHECK(item->requirements.leadership == row.leadership);
+        const auto values = GameLogic::Items::ComputeItemStats(items[itemType], {itemType, 0, 0, 0, 0});
+        CHECK(values.requireStrength == row.strength);
+        CHECK(values.requireDexterity == row.dexterity);
+        CHECK(values.requireEnergy == row.energy);
+        CHECK(values.requireVitality == row.vitality);
+        CHECK(values.requireLeadership == row.leadership);
+    }
 }

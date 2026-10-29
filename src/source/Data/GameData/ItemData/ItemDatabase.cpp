@@ -46,6 +46,11 @@ void ItemDatabase::Build(std::span<const ItemDefinition> definitions)
 
 void ItemDatabase::SetDisplayLocale(std::string_view locale)
 {
+    if (m_displayLocale == locale)
+    {
+        return;
+    }
+    ++m_nameVersion;
     m_displayLocale = std::string(locale);
     for (ItemDefinition& definition : m_definitions)
     {
@@ -90,6 +95,19 @@ void ItemDatabase::Set(const ItemDefinition& definition)
     // Stats are kept even without names, so an item whose name is cleared
     // and typed again in the editor keeps its values.
     Store(MakeItemType(definition.group, definition.number), definition);
+    CountExistingItems();
+    BuildItemTypesByTag();
+}
+
+void ItemDatabase::SetMany(std::span<const ItemDefinition> definitions)
+{
+    for (const ItemDefinition& definition : definitions)
+    {
+        if (IsValidItemId(definition.group, definition.number))
+        {
+            Store(MakeItemType(definition.group, definition.number), definition);
+        }
+    }
     CountExistingItems();
     BuildItemTypesByTag();
 }
@@ -165,6 +183,7 @@ void ItemDatabase::UpdateDisplayName(ItemDefinition& definition) const
 void ItemDatabase::Store(int itemType, ItemDefinition definition)
 {
     ++m_version;
+    ++m_nameVersion;
     definition.group = GetItemGroup(itemType);
     definition.number = GetItemNumber(itemType);
     UpdateDisplayName(definition);

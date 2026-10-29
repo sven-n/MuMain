@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <iterator>
 #include <span>
 
 // How much of a bone palette a skinned draw uploads. The skinning shaders range-check every bone
@@ -9,12 +10,27 @@
 namespace Render
 {
 
-// One past the highest bone the vertices index (position or normal); 0 when they index none.
+// One past the highest bone the shader uses; 0 when the vertices index none.
 template <typename Vertex> [[nodiscard]] std::uint32_t BonesIndexed(std::span<const Vertex> vertices)
 {
     std::int32_t highest = -1;
     for (const Vertex& vertex : vertices)
     {
+        // Match the shader: the first weight selects weighted skinning, not the legacy BMD fields.
+        if constexpr (requires { vertex.weights; })
+        {
+            if (vertex.weights[0] != 0u)
+            {
+                for (std::size_t influence = 0; influence < std::size(vertex.weights); ++influence)
+                {
+                    if (vertex.weights[influence] > 0u)
+                    {
+                        highest = std::max(highest, static_cast<std::int32_t>(vertex.joints[influence]));
+                    }
+                }
+                continue;
+            }
+        }
         highest = std::max({highest, vertex.positionBoneIndex, vertex.normalBoneIndex});
     }
     return static_cast<std::uint32_t>(highest + 1);

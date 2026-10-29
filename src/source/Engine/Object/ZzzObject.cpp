@@ -11,6 +11,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Core/Utilities/FrameProfiler.h"
+#include <array>
 #include <optional>
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -42,6 +43,8 @@
 #include "UI/Core/WindowSystem.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraProjection.h"
+#include "Render/Models/Gltf/SkinnedModel.h"
+#include "Render/Models/ModelLod.h"
 #include "Camera/OrbitalCamera.h"
 #include "Engine/Object/CullingConstants.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -2693,8 +2696,87 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
     }
 }
 
+namespace
+{
+// The screen height of a model file's rest bounds around `o`, as a fraction of the window's height.
+float ModelScreenHeight(const Render::Models::Gltf::SkinnedModel& model, const OBJECT& o)
+{
+    float rotation[3][4];
+    AngleMatrix(o.Angle, rotation);
+    std::array<float, 8> rows{};
+    bool allInFront = true;
+    for (int corner = 0; corner < 8; ++corner)
+    {
+        const vec3_t local = {(corner & 1 ? model.restBoundsMax[0] : model.restBoundsMin[0]) * o.Scale,
+                              (corner & 2 ? model.restBoundsMax[1] : model.restBoundsMin[1]) * o.Scale,
+                              (corner & 4 ? model.restBoundsMax[2] : model.restBoundsMin[2]) * o.Scale};
+        vec3_t world;
+        VectorRotate(local, rotation, world);
+        VectorAdd(world, o.Position, world);
+        float x = 0.f;
+        allInFront = allInFront && CameraProjection::WorldToWindowPixel(g_Camera, world, &x, &rows[corner]);
+    }
+    return Render::Models::ScreenHeightFraction(rows, allInFront, static_cast<float>(WindowHeight));
+}
+
+// Draws a model file's LOD for one object: picks it by screen height (with
+// the object's previous LOD for hysteresis) and sets it on the shared model
+// for the draw only.
+class ModelLodScope
+{
+public:
+    explicit ModelLodScope(OBJECT& o) : model_(Models[o.Type])
+    {
+        const auto* skinned = Render::Models::Gltf::SkinnedModelOf(model_);
+        if (!skinned || skinned->LodCount() < 2)
+        {
+            return;
+        }
+        o.ModelLod = static_cast<unsigned char>(Render::Models::SelectLod(ModelScreenHeight(*skinned, o), o.ModelLod,
+                                                                          skinned->lodSettings, skinned->LodCount()));
+        model_.ActiveLod = o.ModelLod;
+    }
+    ~ModelLodScope()
+    {
+        model_.ActiveLod = 0;
+    }
+    ModelLodScope(const ModelLodScope&) = delete;
+    ModelLodScope& operator=(const ModelLodScope&) = delete;
+
+private:
+    BMD& model_;
+};
+
+// Puts the LOD an object was drawn with (ModelLodScope, earlier in the frame)
+// back on its model for a later pass of the object, its planar shadow: the
+// shadow is cast by the mesh on screen. Models without LODs are left alone.
+class DrawnModelLodScope
+{
+public:
+    DrawnModelLodScope(BMD& model, const OBJECT& o, int type) : model_(model), previous_(model.ActiveLod)
+    {
+        const auto* skinned = Render::Models::Gltf::SkinnedModelOf(model_);
+        if (type == o.Type && skinned && skinned->LodCount() >= 2)
+        {
+            model_.ActiveLod = o.ModelLod;
+        }
+    }
+    ~DrawnModelLodScope()
+    {
+        model_.ActiveLod = previous_;
+    }
+    DrawnModelLodScope(const DrawnModelLodScope&) = delete;
+    DrawnModelLodScope& operator=(const DrawnModelLodScope&) = delete;
+
+private:
+    BMD& model_;
+    int previous_;
+};
+} // namespace
+
 void RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 {
+    const ModelLodScope lod(*o);
     // Split only for map objects; characters' parts come through here too.
     const bool mapObject = FrameProfiler::CurrentPass() == FrameProfiler::Pass::Objects;
     {
@@ -5449,6 +5531,16 @@ void ItemAngle(OBJECT* o)
     }
 }
 
+namespace
+{
+// The level a ground item's model is drawn at: a Weapon of Archangel's level picks its model (CreateItemDrop), not an
+// upgrade, so the model is drawn at +0.
+int DrawnItemLevel(const ITEM& item)
+{
+    return item.Type == ITEM_WEAPON_OF_ARCHANGEL ? 0 : item.Level;
+}
+} // namespace
+
 void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool isFreshDrop)
 {
     int Type = params.Group * MAX_ITEM_INDEX + params.Number;
@@ -5538,19 +5630,18 @@ void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool
     }
     else if (Type == (int)(ITEM_WEAPON_OF_ARCHANGEL))
     {
+        // The level tells the three weapons apart: the item keeps it (its name), the model is drawn at +0
+        // (DrawnItemLevel).
         switch (n->Level)
         {
         case 0:
             o->Type = MODEL_DIVINE_STAFF_OF_ARCHANGEL;
-            n->Level = 0;
             break;
         case 1:
             o->Type = MODEL_DIVINE_SWORD_OF_ARCHANGEL;
-            n->Level = 0;
             break;
         case 2:
             o->Type = MODEL_DIVINE_CB_OF_ARCHANGEL;
-            n->Level = 0;
             break;
         }
     }
@@ -5723,9 +5814,9 @@ static void HandleItemFalling(OBJECT* o)
 // Helper: Handle item on ground (set angle and camera rotation)
 static void HandleItemOnGround(OBJECT* o)
 {
-    o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
-    if (o->Type >= MODEL_SWORD && o->Type < MODEL_STAFF + MAX_ITEM_INDEX)
-        o->Position[2] += 40.f;
+    o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]) + Render::Items::Display::DroppedItemHeight;
+    if (Render::Items::Display::IsLiftedOnGround(o->Type))
+        o->Position[2] += Render::Items::Display::DroppedWeaponLift;
 
     // Set default item angle
     ItemAngle(o);
@@ -5754,9 +5845,10 @@ void MoveItems()
             o->Gravity -= 6.f * FPS_ANIMATION_FACTOR;
 
             // Calculate ground height
-            float groundHeight = RequestTerrainHeight(o->Position[0], o->Position[1]) + 30.f;
-            if (o->Type >= MODEL_SWORD && o->Type < MODEL_STAFF + MAX_ITEM_INDEX)
-                groundHeight += 40.f;
+            float groundHeight =
+                RequestTerrainHeight(o->Position[0], o->Position[1]) + Render::Items::Display::DroppedItemHeight;
+            if (Render::Items::Display::IsLiftedOnGround(o->Type))
+                groundHeight += Render::Items::Display::DroppedWeaponLift;
 
             // Check if item is on ground or still falling
             if (o->Position[2] <= groundHeight)
@@ -5862,7 +5954,7 @@ void RenderItems()
 
             if (o->Visible)
             {
-                const int drawnModel = Render::Items::Display::GetDrawnModel(o->Type, Items[i].Item.Level);
+                const int drawnModel = Render::Items::Display::GetDrawnModel(o->Type, DrawnItemLevel(Items[i].Item));
                 // Armor is animated on the character skeleton.
                 BMD* b =
                     &Models[Render::Items::Display::IsDrawnOnCharacterSkeleton(drawnModel) ? MODEL_PLAYER : drawnModel];
@@ -5900,7 +5992,8 @@ void RenderItems()
                     o->Position[2] = GetWaterTerrain(o->Position[0], o->Position[1]) + 180;
                 }
 
-                RenderPartObject(o, o->Type, NULL, Light, o->Alpha, Items[i].Item.Level, Items[i].Item.ExcellentFlags, Items[i].Item.AncientDiscriminator, true, true, true);
+                RenderPartObject(o, o->Type, NULL, Light, o->Alpha, DrawnItemLevel(Items[i].Item),
+                                 Items[i].Item.ExcellentFlags, Items[i].Item.AncientDiscriminator, true, true, true);
                 VectorCopy(vBackup, o->Position);
 
 #ifdef _EDITOR
@@ -6831,6 +6924,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                     iHiddenMesh = 0;
                 }
 
+                const DrawnModelLodScope lod(*b, *o, Type);
                 b->RenderBodyShadow(o->BlendMesh, iHiddenMesh);
             }
         }

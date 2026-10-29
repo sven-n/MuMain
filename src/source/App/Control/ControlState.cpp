@@ -28,6 +28,8 @@
 #include "json.hpp"
 
 #include <cmath>
+#include <cstdio>
+#include <optional>
 #include <utility>
 
 // The quest dialog's page, text and answers (Scenes/SceneCore.cpp).
@@ -135,23 +137,6 @@ json TradeState()
     trade["my_confirm_wait"] = g_pTrade->GetMyTradeWait();
     trade["partner_confirmed"] = g_pTrade->IsYourConfirmed();
     return trade;
-}
-
-std::string_view ObjectKindName(int objectKind)
-{
-    switch (objectKind)
-    {
-    case KIND_PLAYER:
-        return "player";
-    case KIND_MONSTER:
-        return "monster";
-    case KIND_NPC:
-        return "npc";
-    case KIND_PET:
-        return "pet";
-    default:
-        return "unknown";
-    }
 }
 
 json EquipmentArray()
@@ -476,6 +461,27 @@ json ObjectPixel(const OBJECT& object)
     pixel["y"] = std::round(y);
     return pixel;
 }
+
+// A color the render text takes (red in the low byte, then green, blue, alpha) as `#rrggbb`.
+std::string HexColor(DWORD color)
+{
+    char text[8];
+    std::snprintf(text, sizeof(text), "#%02x%02x%02x", static_cast<unsigned>(color & 0xFF),
+                  static_cast<unsigned>((color >> 8) & 0xFF), static_cast<unsigned>((color >> 16) & 0xFF));
+    return text;
+}
+
+// The name a drop shows on the ground, while Alt shows every drop's name or the pointer is over it.
+json GroundLabel(ITEM_t& drop)
+{
+    const GroundItemLabel label = DescribeGroundItemLabel(&drop.Object, &drop.Item);
+    json described;
+    described["text"] = Core::Text::ToUtf8(label.text.c_str());
+    described["color"] = HexColor(label.textColor);
+    described["background"] = HexColor(label.backgroundColor);
+    described["bold"] = label.bold;
+    return described;
+}
 } // namespace
 
 namespace App::Control
@@ -563,6 +569,8 @@ json NearbyArray()
         json described;
         described["id"] = character.Key;
         described["kind"] = ObjectKindName(character.Object.Kind);
+        const std::optional<int> monster = MonsterNumberOf(character);
+        described["monster"] = monster ? json(*monster) : json(nullptr);
         described["name"] = Core::Text::ToUtf8(character.ID);
         described["position"] = json::array({character.PositionX, character.PositionY});
         described["alive"] = character.Dead <= 0;
@@ -597,6 +605,8 @@ json NearbyArray()
         described["name"] = ItemName(drop.Item);
         const std::pair<int, int> tile = App::Control::DropTile(index);
         described["position"] = json::array({tile.first, tile.second});
+        described["label"] = GroundLabel(Items[index]);
+        described["pixel"] = ObjectPixel(drop.Object);
         nearby.push_back(std::move(described));
     }
 

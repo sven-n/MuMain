@@ -72,6 +72,14 @@ public:
     std::wstring GetUILocale() const { return m_uiLocale; }
     void SetUILocale(const std::wstring& locale);
 
+    // Whether item names are shown in the UI language (GetUILocale); off keeps them English
+    // while the rest of the UI stays translated.
+    bool GetTranslateItemNames() const
+    {
+        return m_translateItemNames;
+    }
+    void SetTranslateItemNames(bool translate);
+
     // UI font family name (GDI face name). Empty = platform default.
     std::wstring GetFontSelection() const { return m_fontSelection; }
     void SetFontSelection(const std::wstring& font);
@@ -159,6 +167,14 @@ public:
     int GetFpsCap() const { return m_fpsCap; }
     void SetFpsCap(int fps);
 
+    // Active texture pack (a folder in Data/TexturePacks), empty for the original textures. The
+    // loader reads it once at startup, so a change takes effect after a restart.
+    std::wstring GetTexturePack() const
+    {
+        return m_texturePack;
+    }
+    void SetTexturePack(const std::wstring& pack);
+
     // GPU backend override -- "default"/"vulkan"/"direct3d12"/"metal". Manual config.ini edit
     // only, same as GetSortParticleDraws() above: no setter, no in-game options-window exposure.
     std::wstring GetRenderBackend() const { return m_renderBackend; }
@@ -200,6 +216,7 @@ private:
     int m_serverPort;
 
     std::wstring m_uiLocale;
+    bool m_translateItemNames;
     std::wstring m_fontSelection;
     std::wstring m_rmlTheme;
     int m_uiScalePercent;
@@ -223,6 +240,7 @@ private:
     bool m_disableWingShadow;
     bool m_disableBodyShadows;
     int m_fpsCap;
+    std::wstring m_texturePack;
 
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const;
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);

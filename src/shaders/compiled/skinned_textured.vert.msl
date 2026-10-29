@@ -34,6 +34,8 @@ struct main0_out
     float4 _entryPointOutput_lightDirectionAndSpecular [[user(locn6)]];
     float4 _entryPointOutput_worldPositionAndDynamicLights [[user(locn7)]];
     float3 _entryPointOutput_worldNormal [[user(locn8)]];
+    float4 _entryPointOutput_tangent [[user(locn9)]];
+    float4 _entryPointOutput_worldTangentAndNormalMapScale [[user(locn10)]];
     float4 gl_Position [[position]];
     float gl_ClipDistance [[clip_distance]] [1];
     float gl_ClipDistance_0 [[user(clip0)]];
@@ -49,153 +51,145 @@ struct main0_in
     int input_normalBoneIndex [[attribute(5)]];
 };
 
-vertex main0_out main0(main0_in in [[stage_in]], constant Skinning& _121 [[buffer(0)]], const device boneRows& boneRows_1 [[buffer(1)]])
+vertex main0_out main0(main0_in in [[stage_in]], constant Skinning& _131 [[buffer(0)]], const device boneRows& boneRows_1 [[buffer(1)]])
 {
     main0_out out = {};
-    float4 _682 = in.input_color;
-    float3 _1521;
+    float3 _1557;
     do
     {
-        if ((in.input_positionBoneIndex < 0) || (in.input_positionBoneIndex >= int(_121.palette.y)))
+        if ((in.input_positionBoneIndex < 0) || (in.input_positionBoneIndex >= int(_131.palette.y)))
         {
-            _1521 = in.input_pos;
+            _1557 = in.input_pos;
             break;
         }
-        uint _956 = _121.palette.x + (uint(in.input_positionBoneIndex) * 3u);
-        uint _961 = _956 + 1u;
-        uint _965 = _956 + 2u;
-        float3 _1519;
-        if (_121.boneScaleAndRestPoseScale.x == 1.0)
+        uint _1094 = _131.palette.x + (uint(in.input_positionBoneIndex) * 3u);
+        uint _1099 = _1094 + 1u;
+        uint _1103 = _1094 + 2u;
+        float4 _999 = boneRows_1._data[_1094];
+        float4 _1000 = boneRows_1._data[_1099];
+        float4 _1001 = boneRows_1._data[_1103];
+        float3 _1555;
+        if (_131.boneScaleAndRestPoseScale.x == 1.0)
         {
-            float4 _984 = float4(in.input_pos * ((_121.boneScaleAndRestPoseScale.y != 0.0) ? _121.boneScaleAndRestPoseScale.y : 1.0), 1.0);
-            _1519 = float3(dot(boneRows_1._data[_956], _984), dot(boneRows_1._data[_961], _984), dot(boneRows_1._data[_965], _984));
+            float4 _1046 = float4(in.input_pos * ((_131.boneScaleAndRestPoseScale.y != 0.0) ? _131.boneScaleAndRestPoseScale.y : 1.0), 1.0);
+            _1555 = float3(dot(boneRows_1._data[_1094], _1046), dot(boneRows_1._data[_1099], _1046), dot(boneRows_1._data[_1103], _1046));
         }
         else
         {
-            _1519 = (float3(dot(boneRows_1._data[_956].xyz, in.input_pos), dot(boneRows_1._data[_961].xyz, in.input_pos), dot(boneRows_1._data[_965].xyz, in.input_pos)) * _121.boneScaleAndRestPoseScale.x) + float3(boneRows_1._data[_956].w, boneRows_1._data[_961].w, boneRows_1._data[_965].w);
+            _1555 = (float3(dot(boneRows_1._data[_1094].xyz, in.input_pos), dot(boneRows_1._data[_1099].xyz, in.input_pos), dot(boneRows_1._data[_1103].xyz, in.input_pos)) * _131.boneScaleAndRestPoseScale.x) + float3(_999.w, _1000.w, _1001.w);
         }
-        float3 _1520;
-        if (_121.palette.z != 0u)
+        float3 _1556;
+        if (_131.palette.z != 0u)
         {
-            _1520 = _121.bodyOriginAndScale.xyz + (_1519 * _121.bodyOriginAndScale.w);
+            _1556 = _131.bodyOriginAndScale.xyz + (_1555 * _131.bodyOriginAndScale.w);
         }
         else
         {
-            _1520 = _1519;
+            _1556 = _1555;
         }
-        _1521 = _1520;
+        _1557 = _1556;
         break;
     } while(false);
-    float3 _1522;
+    float3 _1558;
     do
     {
-        if ((in.input_normalBoneIndex < 0) || (in.input_normalBoneIndex >= int(_121.palette.y)))
+        if ((in.input_normalBoneIndex < 0) || (in.input_normalBoneIndex >= int(_131.palette.y)))
         {
-            _1522 = in.input_normal;
+            _1558 = in.input_normal;
             break;
         }
-        uint _1060 = _121.palette.x + (uint(in.input_normalBoneIndex) * 3u);
-        _1522 = float3(dot(boneRows_1._data[_1060].xyz, in.input_normal), dot(boneRows_1._data[_1060 + 1u].xyz, in.input_normal), dot(boneRows_1._data[_1060 + 2u].xyz, in.input_normal));
+        uint _1172 = _131.palette.x + (uint(in.input_normalBoneIndex) * 3u);
+        _1558 = float3(dot(boneRows_1._data[_1172].xyz, in.input_normal), dot(boneRows_1._data[_1172 + 1u].xyz, in.input_normal), dot(boneRows_1._data[_1172 + 2u].xyz, in.input_normal));
         break;
     } while(false);
-    float4 _787 = _121.mvp * float4(_1521, 1.0);
-    float2 _1523;
+    float4 _838 = _131.mvp * float4(_1557, 1.0);
+    float4 _1468 = _838;
+    float3 _812 = _1558;
+    float2 _1559;
     do
     {
-        if (_121.textureCoordinateMode.x == 1u)
+        float2 _1189 = _131.chromeParameters.zw;
+        if (_131.textureCoordinateMode.x == 1u)
         {
-            _1523 = float2((_1522.z * 0.5) + _121.chromeParameters.x, (_1522.y * 0.5) + (_121.chromeParameters.x * 2.0));
+            _1559 = float2((_812.z * 0.5) + _131.chromeParameters.x, (_812.y * 0.5) + (_131.chromeParameters.x * 2.0));
             break;
         }
-        if (_121.textureCoordinateMode.x == 2u)
+        if (_131.textureCoordinateMode.x == 2u)
         {
-            _1523 = float2(((_1522.z + _1522.x) * 0.800000011920928955078125) + (_121.chromeParameters.y * 2.0), (_1522.y + _1522.x) + (_121.chromeParameters.y * 3.0));
+            _1559 = float2(((_812.z + _812.x) * 0.800000011920928955078125) + (_131.chromeParameters.y * 2.0), (_812.y + _812.x) + (_131.chromeParameters.y * 3.0));
             break;
         }
-        if (_121.textureCoordinateMode.x == 3u)
+        if (_131.textureCoordinateMode.x == 3u)
         {
-            float _1156 = dot(_1522, float3(0.0, -0.100000001490116119384765625, -0.800000011920928955078125));
-            _1523 = float2(_1156, 1.0 - _1156);
+            float _1256 = dot(_1558, float3(0.0, -0.100000001490116119384765625, -0.800000011920928955078125));
+            _1559 = float2(_1256, 1.0 - _1256);
             break;
         }
-        if ((_121.textureCoordinateMode.x == 4u) || (_121.textureCoordinateMode.x == 5u))
+        if ((_131.textureCoordinateMode.x == 4u) || (_131.textureCoordinateMode.x == 5u))
         {
-            float _1173 = dot(_1522, float3(_121.chromeParameters.zw, 1.0));
-            _1523 = float2((_1173 + (_1522.y * ((_121.textureCoordinateMode.x == 4u) ? 0.5 : 3.0))) + (_121.chromeParameters.w * ((_121.textureCoordinateMode.x == 4u) ? 3.0 : 5.0)), ((1.0 - _1173) - (_1522.z * ((_121.textureCoordinateMode.x == 4u) ? 0.5 : 2.5))) - (_121.chromeParameters.x * ((_121.textureCoordinateMode.x == 4u) ? 3.0 : 1.0))) + _121.textureCoordinateParameters.xy;
+            float _1273 = dot(_1558, float3(_131.chromeParameters.zw, 1.0));
+            _1559 = float2((_1273 + (_812.y * ((_131.textureCoordinateMode.x == 4u) ? 0.5 : 3.0))) + (_1189.y * ((_131.textureCoordinateMode.x == 4u) ? 3.0 : 5.0)), ((1.0 - _1273) - (_812.z * ((_131.textureCoordinateMode.x == 4u) ? 0.5 : 2.5))) - (_131.chromeParameters.x * ((_131.textureCoordinateMode.x == 4u) ? 3.0 : 1.0))) + _131.textureCoordinateParameters.xy;
             break;
         }
-        if (_121.textureCoordinateMode.x == 6u)
+        if (_131.textureCoordinateMode.x == 6u)
         {
-            _1523 = float2(((_1522.z + _1522.x) * 0.800000011920928955078125) + (_121.chromeParameters.y * 2.0));
+            _1559 = float2(((_812.z + _812.x) * 0.800000011920928955078125) + (_131.chromeParameters.y * 2.0));
             break;
         }
-        if (_121.textureCoordinateMode.x == 7u)
+        if (_131.textureCoordinateMode.x == 7u)
         {
-            _1523 = float2(((_1522.z + _1522.x) * 0.800000011920928955078125) + _121.textureCoordinateParameters.z);
+            _1559 = float2(((_812.z + _812.x) * 0.800000011920928955078125) + _131.textureCoordinateParameters.z);
             break;
         }
-        if (_121.textureCoordinateMode.x == 8u)
+        if (_131.textureCoordinateMode.x == 8u)
         {
-            _1523 = (_1522.xy * in.input_uv) + _121.textureCoordinateParameters.xy;
+            _1559 = (_1558.xy * in.input_uv) + _131.textureCoordinateParameters.xy;
             break;
         }
-        if (_121.textureCoordinateMode.x == 9u)
+        if (_131.textureCoordinateMode.x == 9u)
         {
-            _1523 = float2((_1522.z * 0.5) + 0.20000000298023223876953125, (_1522.y * 0.5) + 0.5);
+            _1559 = float2((_812.z * 0.5) + 0.20000000298023223876953125, (_812.y * 0.5) + 0.5);
             break;
         }
-        _1523 = in.input_uv;
+        _1559 = in.input_uv;
         break;
     } while(false);
-    float4 _1524;
-    if (_121.palette.w == 1u)
+    float4 _1470 = in.input_color;
+    if (_131.palette.w == 1u)
     {
-        float _808 = fast::max((dot(_1522, _121.lightDirection.xyz) * 0.800000011920928955078125) + 0.4000000059604644775390625, 0.20000000298023223876953125);
-        float3 _816 = fast::clamp(_682.xyz * _808, float3(0.0), float3(1.0));
-        float4 _1500 = _682;
-        _1500.x = _816.x;
-        _1500.y = _816.y;
-        _1500.z = _816.z;
-        float4 _1525;
-        if ((_121.lightDirection.w > 0.0) && (_121.lightDirection.w < 1.0))
+        float _859 = fast::max((dot(_1558, _131.lightDirection.xyz) * 0.800000011920928955078125) + 0.4000000059604644775390625, 0.20000000298023223876953125);
+        float4 _861 = _1470;
+        float3 _867 = fast::clamp(_861.xyz * _859, float3(0.0), float3(1.0));
+        _1470.x = _867.x;
+        _1470.y = _867.y;
+        _1470.z = _867.z;
+        if ((_131.lightDirection.w > 0.0) && (_131.lightDirection.w < 1.0))
         {
-            float3 _831 = _682.xyz * _808;
-            float _1284 = _831.x;
-            float _1303 = 1.0 - _121.lightDirection.w;
-            float _1288 = _831.y;
-            float _1326 = 1.0 - _121.lightDirection.w;
-            float _1292 = _831.z;
-            float _1349 = 1.0 - _121.lightDirection.w;
-            float3 _1298 = fast::clamp(float3((_1284 > _121.lightDirection.w) ? (_121.lightDirection.w + (_1303 * (1.0 - exp((-fast::max(_1284 - _121.lightDirection.w, 0.0)) / _1303)))) : _1284, (_1288 > _121.lightDirection.w) ? (_121.lightDirection.w + (_1326 * (1.0 - exp((-fast::max(_1288 - _121.lightDirection.w, 0.0)) / _1326)))) : _1288, (_1292 > _121.lightDirection.w) ? (_121.lightDirection.w + (_1349 * (1.0 - exp((-fast::max(_1292 - _121.lightDirection.w, 0.0)) / _1349)))) : _1292), float3(0.0), float3(1.0));
-            float4 _1509 = _1500;
-            _1509.x = _1298.x;
-            _1509.y = _1298.y;
-            _1509.z = _1298.z;
-            _1525 = _1509;
+            float3 _815 = in.input_color.xyz * _859;
+            float _1403 = 1.0 - _131.lightDirection.w;
+            float _1426 = 1.0 - _131.lightDirection.w;
+            float _1449 = 1.0 - _131.lightDirection.w;
+            float3 _1398 = fast::clamp(float3((_815.x > _131.lightDirection.w) ? (_131.lightDirection.w + (_1403 * (1.0 - exp((-fast::max(_815.x - _131.lightDirection.w, 0.0)) / _1403)))) : _815.x, (_815.y > _131.lightDirection.w) ? (_131.lightDirection.w + (_1426 * (1.0 - exp((-fast::max(_815.y - _131.lightDirection.w, 0.0)) / _1426)))) : _815.y, (_815.z > _131.lightDirection.w) ? (_131.lightDirection.w + (_1449 * (1.0 - exp((-fast::max(_815.z - _131.lightDirection.w, 0.0)) / _1449)))) : _815.z), float3(0.0), float3(1.0));
+            _1470.x = _1398.x;
+            _1470.y = _1398.y;
+            _1470.z = _1398.z;
         }
-        else
-        {
-            _1525 = _1500;
-        }
-        _1524 = _1525;
     }
-    else
-    {
-        _1524 = _682;
-    }
-    float _851 = _121.fogParameters.y - _121.fogParameters.x;
-    float4 _891 = float4(_1521, 1.0);
-    out.gl_Position = _787;
-    out._entryPointOutput_uv = _1523;
-    out._entryPointOutput_color = _1524;
-    out._entryPointOutput_fogFactor = (_851 > 0.001000000047497451305389404296875) ? fast::clamp((_121.fogParameters.y - abs(_787.w)) / _851, 0.0, 1.0) : 1.0;
-    out._entryPointOutput_eyeDepth = abs(_787.w);
-    out._entryPointOutput_normal = _1522;
-    out._entryPointOutput_viewVector = _121.eyePositionAndSpecular.xyz - _1521;
-    out._entryPointOutput_lightDirectionAndSpecular = float4(_121.lightDirection.xyz, _121.eyePositionAndSpecular.w);
-    out._entryPointOutput_worldPositionAndDynamicLights = float4(dot(_121.vertexToWorldRows[0], _891), dot(_121.vertexToWorldRows[1], _891), dot(_121.vertexToWorldRows[2], _891), float(_121.palette.w == 3u));
-    out._entryPointOutput_worldNormal = float3(dot(_121.vertexToWorldRows[0].xyz, _1522), dot(_121.vertexToWorldRows[1].xyz, _1522), dot(_121.vertexToWorldRows[2].xyz, _1522));
-    out.gl_ClipDistance[0] = _787.w - 1.0;
+    float _902 = _131.fogParameters.y - _131.fogParameters.x;
+    float4 _942 = float4(_1557, 1.0);
+    out.gl_Position = _838;
+    out._entryPointOutput_uv = _1559;
+    out._entryPointOutput_color = _1470;
+    out._entryPointOutput_fogFactor = (_902 > 0.001000000047497451305389404296875) ? fast::clamp((_131.fogParameters.y - abs(_1468.w)) / _902, 0.0, 1.0) : 1.0;
+    out._entryPointOutput_eyeDepth = abs(_1468.w);
+    out._entryPointOutput_normal = _1558;
+    out._entryPointOutput_viewVector = _131.eyePositionAndSpecular.xyz - _1557;
+    out._entryPointOutput_lightDirectionAndSpecular = float4(_131.lightDirection.xyz, _131.eyePositionAndSpecular.w);
+    out._entryPointOutput_worldPositionAndDynamicLights = float4(dot(_131.vertexToWorldRows[0], _942), dot(_131.vertexToWorldRows[1], _942), dot(_131.vertexToWorldRows[2], _942), float(_131.palette.w == 3u));
+    out._entryPointOutput_worldNormal = float3(dot(_131.vertexToWorldRows[0].xyz, _1558), dot(_131.vertexToWorldRows[1].xyz, _1558), dot(_131.vertexToWorldRows[2].xyz, _1558));
+    out._entryPointOutput_tangent = float4(0.0);
+    out._entryPointOutput_worldTangentAndNormalMapScale = float4(0.0);
+    out.gl_ClipDistance[0] = _1468.w - 1.0;
     out.gl_ClipDistance_0 = out.gl_ClipDistance[0];
     return out;
 }

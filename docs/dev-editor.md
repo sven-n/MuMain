@@ -36,13 +36,25 @@ the game window; **Close Editor** is on the right of the editor window's menu
 bar.
 
 The editor opens in a window of its own, beside the game window where the
-screen has room (else over its right side), and stays in front of the game.
-Its **Windows** menu opens the tool windows: Item, Skill, Dev and Map Editor,
-the Effect Browser and the console. They open as tabs docked in the editor
-window, the console along the bottom. Drag a tab out to float a tool window
-anywhere, over the game window too, or onto another window to dock it there;
-**Windows > Reset Layout** docks them all back. The layout and the windows'
-places are kept between sessions (`imgui.ini` in the game folder).
+screen has room (else over its right side), and stays in front of the game. Its
+**Windows** menu opens the tool windows: Item, Monster
+([monster-data.md](monster-data.md)), Data Checks ([below](#data-checks)), Server List
+([server-list.md](server-list.md)), Skill, Dev and Map Editor, the Effect
+Browser and the console. They open as tabs docked in the editor window, the
+console along the bottom. Drag a tab out to float a tool window anywhere, over
+the game window too, or onto another window to dock it there; **Windows > Reset
+Layout** docks them all back. The layout and the windows' places are kept
+between sessions (`imgui.ini` in the game folder).
+
+The editor window's bar has the **Windows** menu, **Undo** and **Redo**, the UI
+scale and the language. Undo and Redo act on the tool used last: after a click
+into the Server List window on its changes, after a click into a monster tool
+on monster edits, after a click into an item tool on item edits. While the
+tool used last is closed (for the monster tools: all of them), they act on
+item edits. A window of tool windows floating outside the editor window has the
+same bar once, on the tab shown at its top left when several are docked in it,
+so it can be worked with from another monitor; its **Windows > Fullscreen**
+switches that window to full screen.
 
 The editor window, and a tool window floating outside the game window, are
 ordinary windows of the system, with its title bar, buttons and window
@@ -50,7 +62,13 @@ snapping. Closing the editor window closes the editor. A floating tool window
 keeps its tab under the title bar: drag the tab, not the title bar, to dock it
 again. **Windows > Fullscreen** switches the editor window to full screen and
 back; **F11** does the same for whichever of the editor's windows has the
-keyboard (in the game window F11 stays the game's camera reset).
+keyboard (in the game window F11 stays the game's camera reset). Back from
+full screen, a window returns to the place it had before. While a window is
+full screen its places are not saved, so a session that ends then (killed, a
+crash) keeps the window's place from before. On Windows a window whose saved
+place covers its whole monitor (the title bar above the screen, from a
+session before this was so) opens and returns in the monitor's usable area
+instead; elsewhere the window manager keeps the title bar on the screen.
 
 - **Windows:** minimize, maximize and close, and a taskbar button for each
   editor window. Dragging or resizing an editor window by its title bar or
@@ -73,7 +91,38 @@ window instead.
 The editor is rendered with ImGui and consumes input over the game
 (see `MuInputBlockerCore.cpp` for the input-routing logic). Keys go to the
 window that has the keyboard: while one of the editor's own windows has it,
-the game gets none of them (F12 still closes the editor from there).
+the game gets none of them (F12 still closes the editor from there). An
+editor window inside the game window (full screen) takes the keyboard with a
+click and gives it back with a click into the game.
+
+While the editor has the keyboard, the arrow keys (and PageUp, PageDown,
+Home and End) move through its lists and tables, and the row they move onto
+is selected as a click would select it; Ctrl with an arrow only moves the
+cursor. In the Map Editor's thumbnail grids they move in both directions.
+
+### Data Checks
+
+**Windows > Data Checks** lists the problems of all game data in one table:
+the items, the monsters and the monster models as their Save would write
+them now, and the glTF model file table, the server list, the effect
+catalogue and the looks (the look profile and the light moods) as the game
+reads their files at start.
+
+Problems have three levels, the same in every area: **fatal** (the data
+cannot be used: Save refuses it, and the game does not start with it; only
+the looks start anyway, with the built-in look values and the Classic
+light),
+**error** (something it names is missing, e.g. an item or a model file: the
+game runs without it, Save keeps it) and **warning** (it works, but is worth
+knowing). The worst come first. The boxes above the table show or hide each
+level, with its count, and each area. **Check all** checks again; a change in
+the item or monster tools does not, and a note says when the data changed
+since the last check.
+
+A click on a problem selects what it is about and opens its tool: the item
+or monster tool of its field, Item Formulas for the item stat file, the
+Server List, the Effect Browser, or the Dev Editor for the looks. An arrow
+key onto a problem only selects it.
 
 ---
 

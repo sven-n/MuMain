@@ -16,6 +16,10 @@
 #include <algorithm>
 #include <cstring>
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "../MuEditor/UI/ItemTools/ItemToolWindow.h"
+#include "MuEditorToolWindows.h"
+#include "ToolGroups.h"
+#include "UndoTarget.h"
 
 // Layout of the Open Editor strip over the game while the editor is closed. The
 // pixel sizes are multiplied by the editor UI scale so the strip grows with it
@@ -39,13 +43,11 @@ CMuEditorUI& CMuEditorUI::GetInstance()
     return instance;
 }
 
-void CMuEditorUI::Render(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor,
-                         bool& showMapEditor, bool& showEffectBrowser, bool& showItemTranslations, bool& showConsole)
+void CMuEditorUI::Render(bool& editorEnabled, MuEditor::ToolWindows& windows)
 {
     if (editorEnabled)
     {
-        RenderEditorWindow(editorEnabled, showItemEditor, showSkillEditor, showDevEditor, showMapEditor,
-                           showEffectBrowser, showItemTranslations, showConsole);
+        RenderEditorWindow(editorEnabled, windows);
     }
     else
     {
@@ -142,9 +144,7 @@ void CMuEditorUI::RenderToolbarOpen(bool& editorEnabled)
     ImGui::PopStyleColor(2);
 }
 
-void CMuEditorUI::RenderEditorWindow(bool& editorEnabled, bool& showItemEditor, bool& showSkillEditor,
-                                     bool& showDevEditor, bool& showMapEditor, bool& showEffectBrowser,
-                                     bool& showItemTranslations, bool& showConsole)
+void CMuEditorUI::RenderEditorWindow(bool& editorEnabled, MuEditor::ToolWindows& windows)
 {
     // Only for its first appearance: no window and no imgui.ini entry yet.
     if (ImGui::FindWindowByName(EDITOR_WINDOW_NAME) == nullptr)
@@ -178,11 +178,7 @@ void CMuEditorUI::RenderEditorWindow(bool& editorEnabled, bool& showItemEditor, 
     }
     if (ImGui::BeginMenuBar())
     {
-        RenderWindowsMenu(showItemEditor, showSkillEditor, showDevEditor, showMapEditor, showEffectBrowser,
-                          showItemTranslations, showConsole,
-                          MuEditor::PlatformWindows::WindowOf(ImGui::GetWindowViewport()));
-        RenderUIScale();
-        RenderLanguageSelector();
+        RenderBar(windows);
         RenderCloseButton(editorEnabled);
         ImGui::EndMenuBar();
     }
@@ -197,32 +193,63 @@ void CMuEditorUI::RenderEditorWindow(bool& editorEnabled, bool& showItemEditor, 
     }
 }
 
-void CMuEditorUI::RenderWindowsMenu(bool& showItemEditor, bool& showSkillEditor, bool& showDevEditor,
-                                    bool& showMapEditor, bool& showEffectBrowser, bool& showItemTranslations,
-                                    bool& showConsole, SDL_Window* editorOsWindow)
+void CMuEditorUI::RenderToolWindowBar()
+{
+    if (ImGui::BeginMenuBar())
+    {
+        RenderBar(g_MuEditorCore.GetToolWindows());
+        ImGui::EndMenuBar();
+    }
+}
+
+void CMuEditorUI::RenderBar(MuEditor::ToolWindows& windows)
+{
+    RenderWindowsMenu(windows, MuEditor::PlatformWindows::WindowOf(ImGui::GetWindowViewport()));
+    MuEditor::UndoTargets::RenderBarButtons(MuEditor::Items::ToolWindow::GetUndoTarget());
+    RenderUIScale();
+    RenderLanguageSelector();
+}
+
+void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* osWindow)
 {
     if (!ImGui::BeginMenu("Windows"))
     {
         return;
     }
-    ImGui::MenuItem("Item Editor", nullptr, &showItemEditor);
-    ImGui::MenuItem("Skill Editor", nullptr, &showSkillEditor);
-    ImGui::MenuItem("Dev Editor", nullptr, &showDevEditor);
-    ImGui::MenuItem("Map Editor", nullptr, &showMapEditor);
-    ImGui::MenuItem("Effect Browser", nullptr, &showEffectBrowser);
-    ImGui::MenuItem("Item Translations", nullptr, &showItemTranslations);
-    ImGui::MenuItem("Console", nullptr, &showConsole);
+    // The item tools, which share one selected item, and the monster tools.
+    RenderToolGroupMenu(MuEditor::GetItemTools(), windows);
+    RenderToolGroupMenu(MuEditor::GetMonsterTools(), windows);
+    ImGui::MenuItem(I18N::Editor::DataChecks, nullptr, &windows.dataChecks);
+    ImGui::MenuItem(I18N::Editor::ServerList, nullptr, &windows.serverList);
+    ImGui::MenuItem("Skill Editor", nullptr, &windows.skillEditor);
+    ImGui::MenuItem("Dev Editor", nullptr, &windows.devEditor);
+    ImGui::MenuItem("Map Editor", nullptr, &windows.mapEditor);
+    ImGui::MenuItem("Effect Browser", nullptr, &windows.effectBrowser);
+    ImGui::MenuItem("Console", nullptr, &windows.console);
     ImGui::Separator();
     if (ImGui::MenuItem("Reset Layout"))
     {
         m_bResetLayout = true;
     }
-    // The editor window full screen (F11 in any of the editor's own windows);
-    // not while it is inside the game window.
-    if (ImGui::MenuItem("Fullscreen", "F11", MuEditor::PlatformWindows::IsFullscreen(editorOsWindow),
-                        editorOsWindow != nullptr))
+    // The window the menu is in full screen (F11 in any of the editor's own
+    // windows); not while it is inside the game window.
+    if (ImGui::MenuItem("Fullscreen", "F11", MuEditor::PlatformWindows::IsFullscreen(osWindow), osWindow != nullptr))
     {
-        MuEditor::PlatformWindows::ToggleFullscreen(editorOsWindow);
+        MuEditor::PlatformWindows::ToggleFullscreen(osWindow);
+    }
+    ImGui::EndMenu();
+}
+
+void CMuEditorUI::RenderToolGroupMenu(const MuEditor::ToolGroup& group, MuEditor::ToolWindows& windows)
+{
+    if (!ImGui::BeginMenu(*group.menuTitle))
+    {
+        return;
+    }
+    ImGui::MenuItem(*group.browser.label, nullptr, &(windows.*(group.browser.open)));
+    for (const MuEditor::ToolWindowEntry& tool : group.tools)
+    {
+        ImGui::MenuItem(*tool.label, nullptr, &(windows.*(tool.open)));
     }
     ImGui::EndMenu();
 }

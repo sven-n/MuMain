@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -983,16 +984,7 @@ bool M31HuntingGround::SetCurrentActionHuntingGroundMonster(CHARACTER* pCharacte
     switch (pCharacter->MonsterIndex)
     {
     case MONSTER_FIRE_GOLEM:
-        if (pCharacter->Skill == AT_SKILL_BOSS)
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-        }
-        else
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-        }
-
-        return true;
+        return GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
     }
 
     return false;

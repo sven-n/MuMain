@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-using Data::Items::HasErrors;
+using Data::Items::HasFatal;
 using Data::Items::ItemDataIssue;
 using Data::Maps::BuiltInLookValues;
 using Data::Maps::LookProfileData;
@@ -56,7 +56,7 @@ bool Mentions(const std::vector<ItemDataIssue>& issues, const std::string& text)
 // A rejected file leaves no partial profile: every world gets the built-in values.
 void CheckBuiltInEverywhere(const ReadResult& result)
 {
-    CHECK(HasErrors(result.issues));
+    CHECK(HasFatal(result.issues));
     CHECK(result.data == LookProfileData{});
     CHECK(result.data.ForWorld(Lorencia) == BuiltInLookValues());
     CHECK(result.data.ForWorld(Dungeon) == BuiltInLookValues());
@@ -215,7 +215,7 @@ TEST_CASE("a missing look profile file gives the built-in values [data][look]")
     const Data::Maps::LookProfileLoadResult missing =
         Data::Maps::LoadLookProfileFile(std::filesystem::temp_directory_path() / "mu_no_such_look_profile.json");
 
-    CHECK_FALSE(HasErrors(missing.issues));
+    CHECK_FALSE(HasFatal(missing.issues));
     CHECK_MESSAGE(Mentions(missing.issues, "not found"), Messages(missing.issues));
     CHECK(missing.data.ForWorld(Lorencia) == BuiltInLookValues());
 }
@@ -227,7 +227,7 @@ TEST_CASE("a look profile file whose existence cannot be checked is an error, no
     const std::filesystem::path file = std::filesystem::temp_directory_path() / (std::string(300, 'x') + ".json");
     const Data::Maps::LookProfileLoadResult loaded = Data::Maps::LoadLookProfileFile(file);
 
-    CHECK(HasErrors(loaded.issues));
+    CHECK(HasFatal(loaded.issues));
     CHECK_MESSAGE(Mentions(loaded.issues, "could not be read"), Messages(loaded.issues));
     CHECK_FALSE(Mentions(loaded.issues, "not found"));
     CHECK(loaded.data.ForWorld(Lorencia) == BuiltInLookValues());

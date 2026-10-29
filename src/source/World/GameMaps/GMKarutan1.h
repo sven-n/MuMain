@@ -56,7 +56,6 @@ public:
 
     // Sound
     // 몬스터 사운드
-    virtual bool PlayMonsterSound(OBJECT* o);
 #endif // ASG_ADD_KARUTAN_MONSTERS
     // 오브젝트 사운드
     virtual void PlayObjectSound(OBJECT* o);

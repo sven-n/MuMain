@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -1605,35 +1606,9 @@ bool M33Aida::SetCurrentActionAidaMonster(CHARACTER* pCharacter, OBJECT* pObject
     case MONSTER_BLOODY_DEATH_RIDER:
         return CheckMonsterSkill(pCharacter, pObject);
     case MONSTER_BLOODY_GOLEM:
-    {
-        if (pCharacter->MonsterSkill == ATMON_SKILL_EX_BLOODYGOLUEM_ATTACKSKILL)
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-            pCharacter->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-            pCharacter->MonsterSkill = -1;
-        }
-        return true;
-    }
-        return true;
+        return GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
     case MONSTER_BLOODY_WITCH_QUEEN:
-    {
-        if (pCharacter->MonsterSkill == ATMON_SKILL_EX_BLOODYWITCHQUEEN_ATTACKSKILL)
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-            pCharacter->MonsterSkill = -1;
-        }
-        else
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-            pCharacter->MonsterSkill = -1;
-        }
-        return true;
-    }
-        return true;
+        return GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
     }
     return false;
 }

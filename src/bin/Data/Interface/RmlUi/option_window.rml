@@ -438,6 +438,12 @@
 				</div>
 			</div>
 		</div>
+		<div class="option-row option-checkbox-row option-sub-row" data-event-click="option_toggle_translate_item_names">
+			<span class="option-row-label">{{translate_item_names_label}}</span>
+			<div class="checkbox-box" data-class-checked="translate_item_names">
+				<div class="checkbox-tick"></div>
+			</div>
+		</div>
 		<div class="option-row option-select-row">
 			<span class="option-row-label">{{font_row_label}}</span>
 			<div class="option-dropdown">
@@ -457,6 +463,18 @@
 					<div class="option-dropdown-option" data-for="label : theme_labels"
 					     data-class-selected="it_index == theme_index"
 					     data-event-click="option_dropdown_option_click(2, it_index)">{{label}}</div>
+				</div>
+			</div>
+		</div>
+		<!-- Texture pack -- the hint says where packs come from and that a change needs a restart. -->
+		<div class="option-row option-select-row option-row-tipped" data-attr-data-hint="texture_pack_tooltip">
+			<span class="option-row-label">{{texture_pack_row_label}}</span>
+			<div class="option-dropdown">
+				<div class="option-dropdown-value" data-event-click="option_toggle_dropdown(8)">{{texture_pack_value_label}}</div>
+				<div class="option-dropdown-list" data-class-hidden="open_dropdown != 8">
+					<div class="option-dropdown-option" data-for="label : texture_pack_labels"
+					     data-class-selected="it_index == texture_pack_index"
+					     data-event-click="option_dropdown_option_click(8, it_index)">{{label}}</div>
 				</div>
 			</div>
 		</div>

@@ -6,9 +6,11 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
-#include "Data/GameData/ItemData/ItemFieldMetadata.h"
 #include "Data/GameData/ItemData/ItemNames.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
+#include "../MuEditor/UI/ItemTools/ItemEdits.h"
+#include "../MuEditor/UI/ItemTools/ItemHeldByCharacter.h"
+#include "Data/GameData/ItemData/ItemType.h"
 #include "I18N/All.h"
 #include "imgui.h"
 #include <string>
@@ -16,114 +18,6 @@
 #include "../Console/MuEditorConsoleUI.h"
 
 extern std::wstring g_strSelectedML;
-
-// ===== HELPER FUNCTIONS =====
-
-void CItemEditorActions::ConvertItemName(char* outBuffer, size_t bufferSize, const wchar_t* name)
-{
-    WideCharToMultiByte(CP_UTF8, 0, name, -1, outBuffer, (int)bufferSize, NULL, NULL);
-}
-
-std::string CItemEditorActions::GetFieldValueAsString(const ITEM_ATTRIBUTE& item, const ItemFieldDescriptor& desc)
-{
-    std::stringstream ss;
-
-    // Get pointer to the field using offset
-    const BYTE* itemPtr = reinterpret_cast<const BYTE*>(&item);
-    const void* fieldPtr = itemPtr + desc.offset;
-
-    switch (desc.type)
-    {
-    case EItemFieldType::Bool:
-        ss << (*reinterpret_cast<const bool*>(fieldPtr) ? 1 : 0);
-        break;
-
-    case EItemFieldType::Byte:
-        ss << (int)*reinterpret_cast<const BYTE*>(fieldPtr);
-        break;
-
-    case EItemFieldType::Word:
-        ss << *reinterpret_cast<const WORD*>(fieldPtr);
-        break;
-
-    case EItemFieldType::Int:
-        ss << *reinterpret_cast<const int*>(fieldPtr);
-        break;
-
-    case EItemFieldType::WCharArray:
-    {
-        char buffer[256];
-        ConvertItemName(buffer, sizeof(buffer), reinterpret_cast<const wchar_t*>(fieldPtr));
-        ss << buffer;
-        break;
-    }
-    }
-
-    return ss.str();
-}
-
-// ===== EXPORT FUNCTIONS =====
-
-std::string CItemEditorActions::GetCSVHeader()
-{
-    std::stringstream ss;
-    const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
-
-    ss << "Index";
-    for (int i = 0; i < fieldCount; ++i)
-    {
-        ss << "," << GetFieldDisplayName(fields[i]);
-    }
-
-    return ss.str();
-}
-
-std::string CItemEditorActions::ExportItemToReadable(int itemIndex, ITEM_ATTRIBUTE& item)
-{
-    std::stringstream ss;
-    const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
-
-    ss << "Row " << itemIndex << "\n";
-    ss << "Index = " << itemIndex;
-
-    for (int i = 0; i < fieldCount; ++i)
-    {
-        ss << ", " << GetFieldDisplayName(fields[i]) << " = ";
-        ss << GetFieldValueAsString(item, fields[i]);
-    }
-
-    return ss.str();
-}
-
-std::string CItemEditorActions::ExportItemToCSV(int itemIndex, ITEM_ATTRIBUTE& item)
-{
-    std::stringstream ss;
-    const ItemFieldDescriptor* fields = GetFieldDescriptors(); const int fieldCount = GetFieldCount();
-
-    ss << itemIndex;
-
-    for (int i = 0; i < fieldCount; ++i)
-    {
-        ss << ",";
-
-        // Quote strings for CSV
-        if (fields[i].type == EItemFieldType::WCharArray)
-        {
-            ss << "\"" << GetFieldValueAsString(item, fields[i]) << "\"";
-        }
-        else
-        {
-            ss << GetFieldValueAsString(item, fields[i]);
-        }
-    }
-
-    return ss.str();
-}
-
-std::string CItemEditorActions::ExportItemCombined(int itemIndex, ITEM_ATTRIBUTE& item)
-{
-    return ExportItemToReadable(itemIndex, item) + "\n" + ExportItemToCSV(itemIndex, item);
-}
 
 // ===== BUTTON RENDERING =====
 
@@ -141,11 +35,12 @@ void CItemEditorActions::RenderSaveButton()
         {
         case Data::Items::ItemDataSaveResult::Saved:
             g_MuEditorConsoleUI.LogEditor("Items saved to " + Data::Items::GetItemDataDirectory().string());
+            g_ItemEdits.GetHistory().MarkSaved();
             LogMissingItemNames();
             ImGui::OpenPopup("Save Success");
             break;
         case Data::Items::ItemDataSaveResult::InvalidData:
-            g_MuEditorConsoleUI.LogEditor(I18N::Editor::ItemDataHasErrors);
+            g_MuEditorConsoleUI.LogEditor(I18N::Editor::ItemDataHasFatalProblems);
             ImGui::OpenPopup("Save Failed");
             break;
         case Data::Items::ItemDataSaveResult::WriteFailed:
@@ -165,9 +60,14 @@ bool CItemEditorActions::RenderImportBmdButton()
         return false;
     }
 
+    std::vector<Data::Items::ItemDefinition> held;
+    for (const int itemType : MuEditor::Items::FindHeldItemTypes())
+    {
+        held.push_back(g_ItemDatabase.GetAllSlots()[itemType]);
+    }
     const Data::Items::ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
     LogIssues(result.issues);
-    if (Data::Items::HasErrors(result.issues))
+    if (Data::Items::HasFatal(result.issues))
     {
         g_MuEditorConsoleUI.LogEditor(I18N::Editor::FailedToImportItemsFromBmd);
         ImGui::OpenPopup("Import Bmd Failed");
@@ -175,8 +75,42 @@ bool CItemEditorActions::RenderImportBmdButton()
     }
 
     LogImportResult(result);
+    KeepHeldItemShapes(held);
+    // The imported items replace all items: no step before them can be undone.
+    g_ItemEdits.GetHistory().Clear();
     ImGui::OpenPopup("Import Bmd Success");
     return true;
+}
+
+void CItemEditorActions::KeepHeldItemShapes(const std::vector<Data::Items::ItemDefinition>& before)
+{
+    std::vector<Data::Items::ItemDefinition> kept;
+    for (const Data::Items::ItemDefinition& old : before)
+    {
+        // A type held without data has no size or slot to keep (its
+        // ItemAttribute row is empty, so it takes no grid cells).
+        if (!old.Exists())
+        {
+            continue;
+        }
+        const Data::Items::ItemDefinition* imported = g_ItemDatabase.Find(old.group, old.number);
+        if (imported != nullptr && imported->width == old.width && imported->height == old.height &&
+            imported->slot == old.slot)
+        {
+            continue;
+        }
+        Data::Items::ItemDefinition item = imported != nullptr ? *imported : old;
+        item.width = old.width;
+        item.height = old.height;
+        item.slot = old.slot;
+        kept.push_back(std::move(item));
+        g_MuEditorConsoleUI.LogEditor(g_ItemDatabase.GetLogName(Data::Items::MakeItemType(old.group, old.number)) +
+                                      ": " + I18N::Editor::KeptItsSizeAndSlotItIsWornOrInAnItemWindow);
+    }
+    if (!kept.empty())
+    {
+        g_ItemDataHandler.RestoreItems(kept);
+    }
 }
 
 void CItemEditorActions::RenderExportBmdButton()
@@ -203,7 +137,7 @@ void CItemEditorActions::RenderExportBmdButton()
 
 void CItemEditorActions::LogMissingItemNames()
 {
-    // English never misses a name: an item without one has errors.
+    // English never misses a name: an item without one has fatal problems.
     for (const Data::Items::ItemNameCount& count :
          Data::Items::CountItemNames(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales()))
     {
@@ -211,10 +145,10 @@ void CItemEditorActions::LogMissingItemNames()
         {
             continue;
         }
-        g_MuEditorConsoleUI.LogEditor(I18N::Format(I18N::Editor::ItemNamesMissing,
-                                                   {I18N::GetLanguageDisplayName(count.locale.c_str()),
-                                                    std::to_string(count.missing),
-                                                    std::to_string(count.named + count.missing)}));
+        g_MuEditorConsoleUI.LogEditor(
+            I18N::Format(I18N::Editor::ItemNamesMissing,
+                         {I18N::GetLanguageDisplayName(count.locale.c_str()), std::to_string(count.missing),
+                          std::to_string(count.named + count.missing)}));
     }
 }
 
@@ -243,7 +177,8 @@ void CItemEditorActions::LogImportResult(const Data::Items::ItemBmdImportResult&
 
     for (const Data::Items::ItemBmdRepair& repair : result.repairs)
     {
-        const std::string source = repair.fromLocale.empty() ? "no language had it, set to the default" : "taken from " + repair.fromLocale;
+        const std::string source =
+            repair.fromLocale.empty() ? "no language had it, set to the default" : "taken from " + repair.fromLocale;
         g_MuEditorConsoleUI.LogEditor("Repaired item (" + std::to_string(repair.group) + "," +
                                       std::to_string(repair.number) + ") " + repair.field + ": " +
                                       std::to_string(repair.oldValue) + " -> " + std::to_string(repair.newValue) +
@@ -253,9 +188,10 @@ void CItemEditorActions::LogImportResult(const Data::Items::ItemBmdImportResult&
     g_MuEditorConsoleUI.LogEditor(std::to_string(result.keptEnglishNameCount) +
                                   " items the English file lacks kept their current English name");
     LogIssues(result.validationIssues);
-    if (Data::Items::HasErrors(result.validationIssues))
+    if (Data::Items::HasFatal(result.validationIssues))
     {
-        g_MuEditorConsoleUI.LogEditor("Fix the errors above before saving; Save refuses data with errors.");
+        g_MuEditorConsoleUI.LogEditor(
+            "Fix the fatal problems above before saving; Save refuses data with fatal problems.");
     }
 }
 
@@ -269,14 +205,25 @@ void CItemEditorActions::RenderExportS6E3Button()
         wchar_t fileName[256];
         swprintf_s(fileName, _countof(fileName), L"Data\\Local\\%ls\\Item_S6E3.bmd", g_strSelectedML.c_str());
 
-        if (g_ItemDataHandler.ExportAsS6E3(fileName))
+        std::string problems;
+        std::string notes;
+        if (g_ItemDataHandler.ExportAsS6E3(fileName, problems, notes))
         {
-            std::string filename_str = "Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_S6E3.bmd";
+            std::string filename_str =
+                "Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_S6E3.bmd";
+            if (!notes.empty())
+            {
+                g_MuEditorConsoleUI.LogEditor(notes);
+            }
             g_MuEditorConsoleUI.LogEditor("Exported items as S6E3 legacy format: " + filename_str);
             ImGui::OpenPopup("Export S6E3 Success");
         }
         else
         {
+            if (!problems.empty())
+            {
+                g_MuEditorConsoleUI.LogEditor(problems);
+            }
             g_MuEditorConsoleUI.LogEditor(I18N::Editor::FailedToExportAsS6E3Format);
             ImGui::OpenPopup("Export S6E3 Failed");
         }
@@ -297,7 +244,8 @@ void CItemEditorActions::RenderExportCSVButton()
 
         if (g_ItemDataHandler.ExportToCsv(csvFileName))
         {
-            std::string filename_str = "Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_export.csv";
+            std::string filename_str =
+                "Item_" + std::string(g_strSelectedML.begin(), g_strSelectedML.end()) + "_export.csv";
             g_MuEditorConsoleUI.LogEditor("Exported items as CSV: " + filename_str);
             ImGui::OpenPopup("Export CSV Success");
         }

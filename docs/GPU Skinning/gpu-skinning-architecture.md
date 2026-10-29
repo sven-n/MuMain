@@ -6,7 +6,8 @@ The active implementation spans:
 - `Render/Renderer/MuRenderer.h`;
 - `Render/Renderer/MuRendererSDLGpu.cpp`;
 - `Render/Terrain/TerrainHeightGrid.h`, for body shadows;
-- `src/shaders/skinned_textured.vert.hlsl` and `skinned_shadow.vert.hlsl`.
+- `src/shaders/skinned_textured.vert.hlsl`, `skinned_weighted.vert.hlsl`, and their
+  shadow variants `skinned_shadow.vert.hlsl` and `skinned_weighted_shadow.vert.hlsl`.
 
 It ports upstream GPU-skinning behavior into SDL GPU without restoring the
 upstream `BoneUBO`, RHI, or OpenGL shader classes.
@@ -35,6 +36,12 @@ uses the established CPU-skinned path.
 - source UV: two floats;
 - position bone index;
 - normal bone index.
+
+That is 40 bytes. A glTF model's vertex (`SkinnedWeightedVertex3D`, 56 bytes)
+adds four joints, their weights and a tangent, and is drawn by its own
+pipelines with `skinned_weighted.vert.hlsl`, so BMD vertices do not carry them.
+Both shaders share their code through `skinned_vertex.hlsli`. The mesh cache
+holds both sizes, in 8-byte units.
 
 The colour is one packed ABGR value per draw, read as a per-instance attribute
 from vertex buffer slot 1. A mesh without a scrolling texture is cached on the
@@ -142,6 +149,11 @@ and uploads its vertices on the CPU every frame.
   the stream with one `RenderCachedSkinnedShadow()` call, using the skinning
   parameters `EnsureCpuVertices()` would apply at that moment. The streams are
   tracked outside `BMD`, and `BMD::Release()` frees them.
+- **glTF models.** `BMD::RenderWeightedMeshShadow()` draws each mesh's shadow
+  from the mesh its body draw caches, at the LOD being drawn, with
+  `skinned_weighted_shadow.vert.hlsl` and the weighted palette. Both shadow
+  shaders share `skinned_shadow.hlsli`. A mesh the GPU cannot draw gets its
+  CPU shadow, alone.
 - **Terrain heights.** The shader reads a `Render::TerrainHeightGrid`: every
   cell's height, then one `TW_HEIGHT` bit per cell. `RequestTerrainHeight()`
   uses the same sampler over the raw map arrays, so both sides follow one set of
@@ -151,7 +163,7 @@ and uploads its vertices on the CPU every frame.
 - **Bindings.** The draw binds the bone rows at vertex storage slot 0 and the
   grid at slot 1. Vertex uniform slot 1 carries the body origin, the shear, the
   height of `TW_HEIGHT` cells, and whether the scene has terrain at all.
-- **Pipelines.** Shadow pipelines use the active blend mode with depth writes
+- **Pipelines.** Shadow pipelines, one pair per vertex layout, use the active blend mode with depth writes
   off, the state the CPU shadow draws in, with depth testing on or off. Both
   sets are optional and are skipped when the shader does not load.
 
@@ -178,5 +190,5 @@ consumer. CPU materialization remains authoritative for:
 - `tests/render/test_terrain_height_grid.cpp` compares the shadow grid with
   `RequestTerrainHeight()`'s lookup at the map edges and at random points.
 - `cmake/ValidateShaderReflection.cmake` and `ValidateDxilReflection.cmake`
-  check the SPIR-V, MSL, and DXIL bindings of both skinned shaders against the
+  check the SPIR-V, MSL, and DXIL bindings of the skinned shaders against the
   renderer's shader metadata.

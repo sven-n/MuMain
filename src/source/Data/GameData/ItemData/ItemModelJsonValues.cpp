@@ -42,7 +42,7 @@ const OrderedJson* FindObject(const OrderedJson& json, const char* key, const Re
     }
     if (!field->is_object())
     {
-        report(ItemDataIssueSeverity::Error, key, "must be an object");
+        report(ItemDataIssueSeverity::Fatal, key, "must be an object");
         return nullptr;
     }
     return &*field;

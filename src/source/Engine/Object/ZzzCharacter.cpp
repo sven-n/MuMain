@@ -48,6 +48,13 @@
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelDatabase.h"
+#include "Engine/Object/MonsterModelBody.h"
+#include "Engine/Object/MonsterSlotSound.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
+#include "GameLogic/Monsters/MonsterSoundEvents.h"
+#include "GameLogic/Monsters/MonsterNames.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -61,6 +68,25 @@ namespace
     // Character selection screen: generous axis-aligned pick box dimensions.
     constexpr float CHARSCENE_PICK_MIN_HEIGHT = 300.0f;
     constexpr float CHARSCENE_PICK_HALF_WIDTH = 72.0f;
+
+    // Plays the sound of the model's sound slot (0 to 4), of the second set
+    // for a monster with SubType 9; a slot without a sound plays nothing.
+    void PlaySlotSound(OBJECT* o, int slot)
+    {
+        const int played = Engine::Object::MonsterSlotSound::SlotFor(slot, o->SubType);
+        if (const std::optional<ESound> sound = Engine::Object::MonsterSlotSound::Find(Models[o->Type], played))
+        {
+            PlayBuffer(*sound, o);
+        }
+    }
+
+    // Whether the slot that PlaySlotSound plays for the monster has a sound:
+    // for SubType 9, the second set's slot.
+    bool HasSlotSound(const OBJECT* o, int slot)
+    {
+        const int played = Engine::Object::MonsterSlotSound::SlotFor(slot, o->SubType);
+        return Engine::Object::MonsterSlotSound::Find(Models[o->Type], played).has_value();
+    }
 }
 
 void BuildCharacterScenePickOBB(const OBJECT* o, OBB_t& outOBB)
@@ -135,7 +161,6 @@ namespace
 CHARACTER* CharactersClient;
 CHARACTER CharacterView;
 CHARACTER* Hero;
-Script_Skill MonsterSkill[MODEL_MONSTER_END];
 extern CKanturuDirection KanturuDirection;
 float g_fBoneSave[10][3][4];
 static  wchar_t    vec_list[35] =
@@ -214,29 +239,10 @@ void FallingMonster(CHARACTER* c, OBJECT* o)
     o->Position[2] -= o->Gravity;
 }
 
-BOOL PlayMonsterSoundGlobal(OBJECT* pObject);
-
-BOOL PlayMonsterSound(OBJECT* pObject)
+// The sounds of the model's sound events (monsters design, MN7).
+void PlayMonsterSound(OBJECT* pObject)
 {
-    if (PlayMonsterSoundGlobal(pObject))
-    {
-        return TRUE;
-    }
-    if (SEASON3B::GMNewTown::IsCurrentMap())
-    {
-        SEASON3B::GMNewTown::PlayMonsterSound(pObject);
-        return TRUE;
-    }
-    if (SEASON3C::GMSwampOfQuiet::IsCurrentMap())
-    {
-        SEASON3C::GMSwampOfQuiet::PlayMonsterSound(pObject);
-        return TRUE;
-    }
-    if (TheMapProcess().PlayMonsterSound(pObject) == true)
-    {
-        return TRUE;
-    }
-    return FALSE;
+    GameLogic::Monsters::SoundEvents::Play(*pObject);
 }
 
 void SetPlayerStop(CHARACTER* c)
@@ -433,15 +439,9 @@ void SetPlayerStop(CHARACTER* c)
     {
         if (o->Type != MODEL_PLAYER || (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
         {
-            if (Models[o->Type].Sounds[0] != -1)
+            if (HasSlotSound(o, 0))
             {
-                int offset = 0;
-                if (o->SubType == 9)
-                {
-                    offset = 5;
-                }
-
-                PlayBuffer(static_cast<ESound>(SOUND_MONSTER + offset + Models[o->Type].Sounds[rand() % 2]), o);
+                PlaySlotSound(o, rand() % 2);
             }
         }
         else if (c->Helper.Type == MODEL_HORN_OF_FENRIR)
@@ -794,14 +794,9 @@ void SetPlayerWalk(CHARACTER* c)
         {
             if (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3)
                 PlayBuffer(SOUND_BONE1, o);
-            if (Models[o->Type].Sounds[0] != -1)
+            if (HasSlotSound(o, 0))
             {
-                int offset = 0;
-                if (o->SubType == 9)
-                {
-                    offset = 5;
-                }
-                PlayBuffer(static_cast<ESound>(SOUND_MONSTER + offset + Models[o->Type].Sounds[rand() % 2]), o);
+                PlaySlotSound(o, rand() % 2);
             }
         }
     }
@@ -1225,30 +1220,26 @@ void SetPlayerAttack(CHARACTER* c)
 
     else if (o->Type == 39)
     {
+        // The traps' attacks play their sounds (Q-MN28); their effects stay code.
+        GameLogic::Monsters::Attacks::Play(*c, *o);
         CreateEffect(MODEL_SAW, o->Position, o->Angle, o->Light);
-        PlayBuffer(SOUND_TRAP01, o);
     }
     else if (o->Type == 40)
     {
-        SetAction(&c->Object, 1);
-        PlayBuffer(SOUND_TRAP01, o);
+        GameLogic::Monsters::Attacks::Play(*c, *o);
     }
     else if (o->Type == 51)
     {
+        GameLogic::Monsters::Attacks::Play(*c, *o);
         CreateEffect(BITMAP_FIRE + 1, o->Position, o->Angle, o->Light);
-        PlayBuffer(SOUND_FLAME);
     }
     else
     {
         if (o->Type == MODEL_BALI)
         {
-            int Action = rand() % 8;
-            if (Action > 2)
-                SetAction(&c->Object, MONSTER01_ATTACK1 + rand() % 2);
-            else if (Action > 0)
-                SetAction(&c->Object, MONSTER01_ATTACK3);
-            else
-                SetAction(&c->Object, MONSTER01_ATTACK4);
+            // Bali's draw (its attacks' otherwiseRandom "bali"); no handler
+            // answers for it.
+            GameLogic::Monsters::Attacks::Play(*c, *o);
         }
         else
         {
@@ -1289,14 +1280,9 @@ void SetPlayerAttack(CHARACTER* c)
             {
                 if (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3)
                     PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + rand() % 2), o);
-                if (Models[o->Type].Sounds[2] != -1)
+                if (HasSlotSound(o, 2))
                 {
-                    int offset = 0;
-                    if (o->SubType == 9)
-                    {
-                        offset = 5;
-                    }
-                    PlayBuffer(static_cast<ESound>(SOUND_MONSTER + offset + Models[o->Type].Sounds[2 + rand() % 2]), o);
+                    PlaySlotSound(o, 2 + rand() % 2);
                 }
             }
             else
@@ -1400,7 +1386,15 @@ void SetPlayerShock(CHARACTER* c, int Hit)
         else
         {
             if (o->CurrentAction<MONSTER01_ATTACK1 || o->CurrentAction>MONSTER01_ATTACK2)
+            {
+                const int interrupted = o->CurrentAction;
                 SetAction(&c->Object, MONSTER01_SHOCK);
+                // The shock ends an attack 3 to 5 or appear before its end (P4).
+                if (o->CurrentAction != interrupted && GameLogic::Monsters::Attacks::IsAttackAnimation(interrupted))
+                {
+                    GameLogic::Monsters::Attacks::OnAttackEnded(*c);
+                }
+            }
             //c->Movement = false;
         }
         if (c->Object.AnimationFrame == 0.f)
@@ -1411,14 +1405,9 @@ void SetPlayerShock(CHARACTER* c, int Hit)
             {
                 if (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3)
                     PlayBuffer(SOUND_BONE1, o);
-                else if (o->Type != MODEL_ASSASSIN && Models[o->Type].Sounds[2] != -1)
+                else if (o->Type != MODEL_ASSASSIN && HasSlotSound(o, 2))
                 {
-                    int offset = 0;
-                    if (o->SubType == 9)
-                    {
-                        offset = 5;
-                    }
-                    PlayBuffer(static_cast<ESound>(SOUND_MONSTER + offset + Models[o->Type].Sounds[2 + rand() % 2]), o);
+                    PlaySlotSound(o, 2 + rand() % 2);
                 }
             }
             else
@@ -1546,14 +1535,9 @@ void SetPlayerDie(CHARACTER* c)
         {
             if (o->Type != MODEL_PLAYER || (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
             {
-                if (Models[o->Type].Sounds[4] != -1)
+                if (HasSlotSound(o, 4))
                 {
-                    int offset = 0;
-                    if (o->SubType == 9)
-                    {
-                        offset = 5;
-                    }
-                    PlayBuffer(static_cast<ESound>(SOUND_MONSTER + offset + Models[o->Type].Sounds[4]), o);
+                    PlaySlotSound(o, 4);
                 }
             }
             else
@@ -2420,69 +2404,10 @@ bool CheckMonsterSkill(CHARACTER* pCharacter, OBJECT* pObject)
     if (pCharacter->MonsterIndex == MONSTER_MAYA)
     {
         M39Kanturu3rd::MayaSceneMayaAction(pCharacter->MonsterSkill);
+        GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
         return true;
     }
-
-    int iCheckAttackAni = -1;
-
-    for (int i = 0; i < MAX_MONSTERSKILL_NUM; i++)
-    {
-        if (MonsterSkill[pCharacter->MonsterIndex].Skill_Num[i] == pCharacter->MonsterSkill)
-        {
-            iCheckAttackAni = i;
-            break;
-        }
-        else
-        {
-            iCheckAttackAni = -1;
-        }
-    }
-
-    switch (iCheckAttackAni)
-    {
-    case 0:
-        SetAction(pObject, MONSTER01_ATTACK1);
-        break;
-    case 1:
-        SetAction(pObject, MONSTER01_ATTACK2);
-        break;
-    case 2:
-        SetAction(pObject, MONSTER01_ATTACK3);
-        break;
-    case 3:
-        SetAction(pObject, MONSTER01_ATTACK4);
-        break;
-    case 4:
-        SetAction(pObject, MONSTER01_ATTACK5);
-        break;
-    case 5:
-        SetAction(pObject, MONSTER01_ATTACK5);
-        break;
-    case 6:
-        SetAction(pObject, MONSTER01_ATTACK5);
-        break;
-    case 7:
-        SetAction(pObject, MONSTER01_ATTACK5);
-        break;
-    case 8:
-        SetAction(pObject, MONSTER01_ATTACK5);
-        break;
-    case 9:
-        SetAction(pObject, MONSTER01_ATTACK5);
-        break;
-    }
-
-    pCharacter->MonsterSkill = -1;
-
-    if (iCheckAttackAni < 0)
-    {
-        SetAction(pObject, MONSTER01_ATTACK1);
-    }
-
-    if (iCheckAttackAni > 4)
-        return false;
-
-    return true;
+    return GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
 }
 
 bool CharacterAnimation(CHARACTER* c, OBJECT* o)
@@ -3529,11 +3454,14 @@ void EtcStopAnimationSetting(CHARACTER* c, OBJECT* o)
                     }
                     return;
                 }
-                else if (o->CurrentAction == MONSTER01_STOP2 || o->CurrentAction == MONSTER01_SHOCK
-                    || o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2
-                    || o->CurrentAction == MONSTER01_ATTACK3 || o->CurrentAction == MONSTER01_ATTACK4
-                    || o->CurrentAction == MONSTER01_ATTACK5
-                    )
+                if (GameLogic::Monsters::Attacks::IsAttackAnimation(o->CurrentAction))
+                {
+                    GameLogic::Monsters::Attacks::OnAttackEnded(*c);
+                }
+                if (o->CurrentAction == MONSTER01_STOP2 || o->CurrentAction == MONSTER01_SHOCK ||
+                    o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2 ||
+                    o->CurrentAction == MONSTER01_ATTACK3 || o->CurrentAction == MONSTER01_ATTACK4 ||
+                    o->CurrentAction == MONSTER01_ATTACK5)
                 {
                     SetAction(o, MONSTER01_STOP1);
                 }
@@ -6185,8 +6113,9 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
         case MODEL_ELITE_YETI:
             if (rand_fps_check(4))
             {
+                // The breath: bone 22 of both BMDs, by name for model files.
                 Vector(0.f, 0.f, 0.f, p);
-                b->TransformPosition(o->BoneTransform[22], p, Position, true);
+                b->TransformPosition(o->BoneTransform[b->FindBoneOrRoot("Box03")], p, Position, true);
                 CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light);
             }
             break;
@@ -11573,18 +11502,13 @@ void ClearCharacters(int Key)
     {
         CHARACTER* c = &CharactersClient[i];
         OBJECT* o = &c->Object;
+        if (c->Key != Key)
+            DeleteCharacterCompanions(c);
         if (o->Live && c->Key != Key)
         {
             o->Live = false;
 
             BoneManager::UnregisterBone(c);
-
-            for (int j = 0; j < MAX_MOUNTS; j++)
-            {
-                OBJECT* b = &Mounts[j];
-                if (b->Live && b->Owner == o)
-                    b->Live = false;
-            }
         }
 
         DeletePet(c);
@@ -11605,12 +11529,7 @@ void DeleteCharacter(int Key)
 
             BoneManager::UnregisterBone(c);
 
-            for (int j = 0; j < MAX_MOUNTS; j++)
-            {
-                OBJECT* b = &Mounts[j];
-                if (b->Live && b->Owner == o)
-                    b->Live = false;
-            }
+            DeleteCharacterCompanions(c);
             DeletePet(c);
             DeleteCloth(c, o);
             DeleteParts(c);
@@ -11625,12 +11544,7 @@ void DeleteCharacter(CHARACTER* c, OBJECT* o)
 
     BoneManager::UnregisterBone(c);
 
-    for (int j = 0; j < MAX_MOUNTS; j++)
-    {
-        OBJECT* b = &Mounts[j];
-        if (b->Live && b->Owner == o)
-            b->Live = false;
-    }
+    DeleteCharacterCompanions(c);
 
     DeletePet(c);
     DeleteCloth(c, o);
@@ -11717,6 +11631,13 @@ void ReleaseCharacters(void)
     DeleteParts(&CharacterView);
 
     BoneManager::UnregisterAll();
+}
+
+void DeleteCharacterCompanions(CHARACTER* c)
+{
+    DeleteMount(&c->Object);
+    if (g_petProcess)
+        g_petProcess->DeletePet(c, -1, true);
 }
 
 void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation)
@@ -11854,110 +11775,19 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     Vector(0.f, 0.f, 0.f, c->Light);
     Vector(0.f, 0.f, 0.f, o->Light);
     Vector(-60.f, -60.f, 0.f, o->BoundingBoxMin);
-    switch (Type)
+    if (Type == MODEL_PLAYER)
     {
-    case MODEL_PLAYER:
         Vector(40.f, 40.f, 120.f, o->BoundingBoxMax);
-        break;
-    case MODEL_CHAOS_CASTLE_KNIGHT:
-    case MODEL_CHAOS_CASTLE_ELF:
-    case MODEL_CHAOS_CASTLE_WIZARD:
-        Vector(40.f, 40.f, 120.f, o->BoundingBoxMax);
-        break;
-    case MODEL_BUDGE_DRAGON:
-    case MODEL_LARVA:
-    case MODEL_SPIDER:
-    case MODEL_CHAIN_SCORPION:
-    case MODEL_GOBLIN:
-    case MODEL_WORM:
-        Vector(50.f, 50.f, 80.f, o->BoundingBoxMax);
-        break;
-    case MODEL_GORGON:
-    case MODEL_DRAGON_:
-    case MODEL_TITAN:
-    case MODEL_TANTALLOS:
-    case MODEL_BEAM_KNIGHT:
-        Vector(70.f, 70.f, 250.f, o->BoundingBoxMax);
-        break;
-    case MODEL_HYDRA:
-        Vector(100.f, 100.f, 150.f, o->BoundingBoxMax);
-        break;
-    case MODEL_CASTLE_GATE:
-        Vector(-120.f, -120.f, 0.f, o->BoundingBoxMin);
-        Vector(100.f, 100.f, 300.f, o->BoundingBoxMax);
-        break;
-    case MODEL_STATUE_OF_SAINT:
-        Vector(-90.f, -50.f, 0.f, o->BoundingBoxMin);
-        Vector(90.f, 50.f, 200.f, o->BoundingBoxMax);
-        break;
-    case MODEL_SELUPAN:
-        Vector(-150.f, -150.f, 0.f, o->BoundingBoxMin);
-        Vector(150.f, 150.f, 400.f, o->BoundingBoxMax);
-        break;
-    case MODEL_SPIDER_EGGS_1:
-    case MODEL_SPIDER_EGGS_2:
-    case MODEL_SPIDER_EGGS_3:
-        Vector(-100.f, -100.f, 0.f, o->BoundingBoxMin);
-        Vector(100.f, 100.f, 200.f, o->BoundingBoxMax);
-        break;
-    case MODEL_LITTLESANTA:
-    case MODEL_LITTLESANTA + 1:
-    case MODEL_LITTLESANTA + 2:
-    case MODEL_LITTLESANTA + 3:
-    case MODEL_LITTLESANTA + 4:
-    case MODEL_LITTLESANTA + 5:
-    case MODEL_LITTLESANTA + 6:
-    case MODEL_LITTLESANTA + 7:
-    {
-        Vector(-160.f, -60.f, -20.f, o->BoundingBoxMin);
-        Vector(10.f, 80.f, 50.f, o->BoundingBoxMax);
     }
-    break;
-    case MODEL_ZOMBIE_FIGHTER:
+    else
     {
-        Vector(-100.f, -70.f, 0.f, o->BoundingBoxMin);
-        Vector(100.f, 70.f, 150.f, o->BoundingBoxMax);
-    }
-    break;
-    case MODEL_GLADIATOR:
-    {
-        Vector(-100.f, -100.f, 50.f, o->BoundingBoxMin);
-        Vector(100.f, 100.f, 150.f, o->BoundingBoxMax);
-    }
-    break;
-    case MODEL_SLAUGHTERER:
-    {
-        Vector(-100.f, -100.f, 0.f, o->BoundingBoxMin);
-        Vector(100.f, 100.f, 180.f, o->BoundingBoxMax);
-    }
-    break;
-    case MODEL_BLOOD_ASSASSIN:
-    {
-        Vector(-80.f, -80.f, 0.f, o->BoundingBoxMin);
-        Vector(80.f, 80.f, 130.f, o->BoundingBoxMax);
-    }
-    break;
-    case MODEL_CRUEL_BLOOD_ASSASSIN:
-    {
-        Vector(-80.f, -80.f, 0.f, o->BoundingBoxMin);
-        Vector(80.f, 80.f, 130.f, o->BoundingBoxMax);
-    }
-    break;
-    case MODEL_LAVA_GIANT:
-    {
-        Vector(-100.f, -80.f, 50.f, o->BoundingBoxMin);
-        Vector(100.f, 70.f, 280.f, o->BoundingBoxMax);
-    }
-    break;
-    case MODEL_BURNING_LAVA_GIANT:
-    {
-        Vector(-100.f, -80.f, 50.f, o->BoundingBoxMin);
-        Vector(100.f, 70.f, 280.f, o->BoundingBoxMax);
-    }
-    break;
-    default:
         Vector(50.f, 50.f, 150.f, o->BoundingBoxMax);
-        break;
+    }
+    // A model of the model list has its box and weapon bones there.
+    const Data::Monsters::MonsterModelDefinition* modelEntry = g_MonsterModelDatabase.Find(Type);
+    if (modelEntry != nullptr)
+    {
+        Engine::Object::MonsterBody::ApplyBoundingBox(*o, modelEntry->body);
     }
 
     if (o->BoneTransform != NULL)
@@ -11996,143 +11826,15 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
 
     o->BlendMesh = -1;
     o->BlendMeshLight = 1.f;
-    switch (Type)
+    // Castle Gate 1 counts the hits it takes from 0, also without an entry.
+    battleCastle::ResetCastleGateAttackCount(c, Type);
+    if (modelEntry != nullptr)
     {
-    case MODEL_CHAOS_CASTLE_KNIGHT:
-    case MODEL_CHAOS_CASTLE_ELF:
-    case MODEL_CHAOS_CASTLE_WIZARD:
-        c->Weapon[0].LinkBone = 33;
-        c->Weapon[1].LinkBone = 42;
-        break;
-    case MODEL_RED_SKELETON_KNIGHT:
-        c->Weapon[0].LinkBone = 30;
-        c->Weapon[1].LinkBone = 39;
-        break;
-    case MODEL_DARK_SKULL_SOLDIER:
-        c->Weapon[0].LinkBone = 33;
-        c->Weapon[1].LinkBone = 20;
-        break;
-    case MODEL_STATUE_OF_SAINT:
-        c->Weapon[0].LinkBone = 1;
-        c->Weapon[1].LinkBone = 1;
-        break;
-    case MODEL_DARK_PHEONIX_SHIELD:
-        c->Weapon[0].LinkBone = 27;
-        c->Weapon[1].LinkBone = 18;
-        break;
-    case MODEL_CRUST:
-        c->Weapon[0].LinkBone = 36;
-        c->Weapon[1].LinkBone = 45;
-        break;
-    case MODEL_PHANTOM_KNIGHT:
-        c->Weapon[0].LinkBone = 30;
-        c->Weapon[1].LinkBone = 39;
-        break;
-    case MODEL_ORC_ARCHER:
-        c->Weapon[0].LinkBone = 39;
-        c->Weapon[1].LinkBone = 39;
-        break;
-    case MODEL_ORC:
-        c->Weapon[0].LinkBone = 27;
-        c->Weapon[1].LinkBone = 38;
-        break;
-    case MODEL_CURSED_KING:
-        c->Weapon[0].LinkBone = 32;
-        c->Weapon[1].LinkBone = 43;
-        break;
-    case MODEL_BEAM_KNIGHT:
-        c->Weapon[0].LinkBone = 55;
-        c->Weapon[1].LinkBone = 70;
-        break;
-    case MODEL_TANTALLOS:
-        c->Weapon[0].LinkBone = 43;
-        break;
-    case MODEL_GOLDEN_WHEEL:
-        c->Weapon[0].LinkBone = 23;
-        break;
-    case MODEL_LIZARD:
-        c->Weapon[0].LinkBone = 52;
-        c->Weapon[1].LinkBone = 65;
-        break;
-    case MODEL_VALKYRIE:
-        c->Weapon[0].LinkBone = 30;
-        c->Weapon[1].LinkBone = 39;
-        break;
-    case MODEL_VEPAR:
-        c->Weapon[0].LinkBone = 30;
-        c->Weapon[1].LinkBone = 39;
-        break;
-    case MODEL_DEVIL:
-        c->Weapon[0].LinkBone = 16;
-        c->Weapon[1].LinkBone = 25;
-        break;
-    case MODEL_DEATH_KNIGHT:
-        c->Weapon[0].LinkBone = 30;
-        c->Weapon[1].LinkBone = 39;
-        break;
-    case MODEL_BALROG:
-        c->Weapon[0].LinkBone = 17;
-        c->Weapon[1].LinkBone = 28;
-        break;
-    case MODEL_AGON:
-        c->Weapon[0].LinkBone = 39;
-        c->Weapon[1].LinkBone = 30;
-        break;
-    case MODEL_HUNTER:
-        c->Weapon[0].LinkBone = 25;
-        c->Weapon[1].LinkBone = 16;
-        break;
-    case MODEL_BEETLE_MONSTER:
-        c->Weapon[0].LinkBone = 24;
-        c->Weapon[1].LinkBone = 19;
-        break;
-    case MODEL_GOBLIN:
-        c->Weapon[0].LinkBone = 31;
-        c->Weapon[1].LinkBone = 22;
-        break;
-    case MODEL_ICE_QUEEN:
-        c->Weapon[0].LinkBone = 26;
-        c->Weapon[1].LinkBone = 35;
-        break;
-    case MODEL_HOMMERD:
-    case MODEL_GORGON:
-        c->Weapon[0].LinkBone = 30;
-        c->Weapon[1].LinkBone = 39;
-        break;
-    case MODEL_DARK_KNIGHT:
-        c->Weapon[0].LinkBone = 26;
-        c->Weapon[1].LinkBone = 36;
-        break;
-    case MODEL_BULL_FIGHTER:
-    case MODEL_DEATH_COW:
-        c->Weapon[0].LinkBone = 42;
-        c->Weapon[1].LinkBone = 33;
-        break;
-    case MODEL_CYCLOPS:
-    case MODEL_LICH:
-    case MODEL_GIANT:
-        c->Weapon[0].LinkBone = 41;
-        c->Weapon[1].LinkBone = 32;
-        break;
-    case MODEL_HOUND:
-        c->Weapon[0].LinkBone = 19;
-        c->Weapon[1].LinkBone = 14;
-        break;
-    case MODEL_HELL_SPIDER:
-        c->Weapon[0].LinkBone = 29;
-        c->Weapon[1].LinkBone = 38;
-        break;
-    case MODEL_SOLDIER:
-        c->Weapon[0].LinkBone = 20;
-        c->Weapon[1].LinkBone = 33;
-        break;
-    default:
-        if (SettingHellasMonsterLinkBone(c, Type)) return;
-        if (battleCastle::SettingBattleCastleMonsterLinkBone(c, Type)) return;
-        c->Weapon[0].LinkBone = 33;
-        c->Weapon[1].LinkBone = 42;
-        break;
+        Engine::Object::MonsterBody::ApplyLinkBones(*c, modelEntry->body);
+        return;
     }
+    c->Weapon[0].LinkBone = 33;
+    c->Weapon[1].LinkBone = 42;
 }
 
 CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation)
@@ -12143,6 +11845,7 @@ CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned 
         OBJECT* o = &c->Object;
         if (o->Live && c->Key == Key)
         {
+            DeleteCharacterCompanions(c);
             CreateCharacterPointer(c, Type, PositionX, PositionY, Rotation);
             g_CharacterClearBuff(o);
             return c;
@@ -12159,6 +11862,7 @@ CHARACTER* CreateCharacter(int Key, int Type, unsigned char PositionX, unsigned 
             DeletePet(c);
             DeleteCloth(c, o);
             DeleteParts(c);
+            DeleteCharacterCompanions(c);
             CreateCharacterPointer(c, Type, PositionX, PositionY, Rotation);
             g_CharacterClearBuff(o);
             c->Key = Key;
@@ -12878,6 +12582,53 @@ void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter, OBJECT*
     SetCharacterScale(c);
 }
 
+namespace
+{
+int ReadBodyEquipmentExtended(CHARACTER* c, BYTE* Equipment)
+{
+    constexpr int BytesPerBodyPart = 3;
+    constexpr int BodyEquipmentLength = (MAX_BODYPART - 1) * BytesPerBodyPart;
+    // A transformed body stays intact, but its bytes still precede wings and helper.
+    if (c->Change)
+        return BodyEquipmentLength;
+
+    int offset = 0;
+    short bodyParts[] = {0, MODEL_BODY_HELM, MODEL_BODY_ARMOR, MODEL_BODY_PANTS, MODEL_BODY_GLOVES, MODEL_BODY_BOOTS};
+    for (int i = 1; i < MAX_BODYPART; i++)
+    {
+        c->BodyPart[i].Type = bodyParts[i] + c->SkinIndex;
+        c->BodyPart[i].ExcellentFlags = 0;
+        c->BodyPart[i].AncientDiscriminator = 0;
+        c->BodyPart[i].Level = 0;
+
+        if (Equipment[offset] != 0xFF && Equipment[offset + 1] != 0xFF)
+        {
+            short number = MAKEWORD(Equipment[offset + 1], Equipment[offset] & 0xF);
+            BYTE group = (Equipment[offset] & 0xF0) >> 4;
+            BYTE glowLevel = (Equipment[offset + 2] & 0xF0) >> 4;
+            bool isAncient = Equipment[offset + 2] & 0x04;
+            bool isExcellent = Equipment[offset + 2] & 0x08;
+
+            if (number > MAX_ITEM_INDEX)
+            {
+                // not supported
+            }
+            else
+            {
+                c->BodyPart[i].Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(group, number));
+                c->BodyPart[i].Level = LevelConvert(glowLevel);
+                c->BodyPart[i].ExcellentFlags = isExcellent;
+                c->BodyPart[i].AncientDiscriminator = isAncient;
+            }
+        }
+
+        offset += BytesPerBodyPart;
+    }
+
+    return BodyEquipmentLength;
+}
+} // namespace
+
 void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCharacter, OBJECT* pHelper)
 {
     CHARACTER* c;
@@ -12929,43 +12680,7 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
     }
 
     DeleteParts(c);
-    if (c->Change)
-    {
-        // todo: is this the correct place to return?
-        return;
-    }
-
-    short bodyParts[] = { 0, MODEL_BODY_HELM, MODEL_BODY_ARMOR, MODEL_BODY_PANTS, MODEL_BODY_GLOVES, MODEL_BODY_BOOTS};
-    for (int i = 1; i < MAX_BODYPART; i++)
-    {
-        c->BodyPart[i].Type = bodyParts[i] + c->SkinIndex;
-        c->BodyPart[i].ExcellentFlags = 0;
-        c->BodyPart[i].AncientDiscriminator = 0;
-        c->BodyPart[i].Level = 0;
-
-        if (Equipment[offset] != 0xFF && Equipment[offset + 1] != 0xFF)
-        {
-            short number = MAKEWORD(Equipment[offset + 1], Equipment[offset] & 0xF);
-            BYTE group = (Equipment[offset] & 0xF0) >> 4;
-            BYTE glowLevel = (Equipment[offset + 2] & 0xF0) >> 4;
-            bool isAncient = Equipment[offset + 2] & 0x04;
-            bool isExcellent = Equipment[offset + 2] & 0x08;
-
-            if (number > MAX_ITEM_INDEX)
-            {
-                // not supported
-            }
-            else
-            {
-                c->BodyPart[i].Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(group, number));
-                c->BodyPart[i].Level = LevelConvert(glowLevel);
-                c->BodyPart[i].ExcellentFlags = isExcellent;
-                c->BodyPart[i].AncientDiscriminator = isAncient;
-            }
-        }
-
-        offset += 3;
-    }
+    offset += ReadBodyEquipmentExtended(c, Equipment + offset);
 
     // Wings:
     {
@@ -12989,6 +12704,15 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
         offset += 2;
     }
 
+    if (pHelper == nullptr)
+    {
+        DeleteCharacterCompanions(c);
+    }
+    else
+    {
+        pHelper->Live = false;
+    }
+
     // Helper:
     int HelperVariant = 0;
     {
@@ -13005,16 +12729,6 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
         }
 
         // offset += 2;
-    }
-
-    if (pHelper == nullptr)
-    {
-        DeleteMount(o);
-        ThePetProcess().DeletePet(c, Data::Items::ToItemType(c->Helper.Type), true);
-    }
-    else
-    {
-        pHelper->Live = false;
     }
 
     switch (c->Helper.Type)
@@ -13069,131 +12783,20 @@ void ReadEquipmentExtended(int Key, BYTE flags, BYTE* Equipment, CHARACTER* pCha
         break;
     }
 
-    c->EtcPart = 0;
+    // A transformed Blood Castle carrier keeps the quest-item marker.
+    if (!c->Change || c->EtcPart > 3)
+        c->EtcPart = 0;
     if ((flags & 0x20) > 0)
     {
         c->EtcPart = PARTS_LION;
     }
 
-    ChangeChaosCastleUnit(c);
+    if (!c->Change)
+        ChangeChaosCastleUnit(c);
     SetCharacterScale(c);
 }
 
 extern int HeroIndex;
-
-namespace
-{
-    bool IsForcedNpcMonsterType(EMonsterType type)
-    {
-        const int rawType = static_cast<int>(type);
-        switch (rawType)
-        {
-        case 367:
-        case 371:
-        case 375:
-        case 376:
-        case 377:
-        case 379:
-        case 380:
-        case 381:
-        case 382:
-        case 383:
-        case 384:
-        case 385:
-        case 406:
-        case 407:
-        case 408:
-        case 414:
-        case 415:
-        case 416:
-        case 417:
-        case 450:
-        case 452:
-        case 453:
-        case 464:
-        case 465:
-        case 467:
-        case 468:
-        case 469:
-        case 470:
-        case 471:
-        case 472:
-        case 473:
-        case 474:
-        case 475:
-        case 478:
-        case 479:
-        case 492:
-        case 522:
-        case 540:
-        case 541:
-        case 542:
-        case 543:
-        case 544:
-        case 545:
-        case 546:
-        case 547:
-        case 577:
-        case 578:
-        case 579:
-        case static_cast<int>(MONSTER_WANDERING_MERCHANT_ZYRO):
-            return true;
-        default:
-            return false;
-        }
-    }
-
-    int DetermineMonsterObjectKind(EMonsterType type)
-    {
-        const int rawType = static_cast<int>(type);
-
-        // Special hard overrides first.
-        if (rawType == 451)
-        {
-            return KIND_TMP;
-        }
-
-        // Exception range that must stay monster even though values are > 200.
-        if (rawType >= 480 && rawType <= 491)
-        {
-            return KIND_MONSTER;
-        }
-
-        // Explicit NPC overrides.
-        if (rawType == 368 || rawType == 369 || rawType == 370 || IsForcedNpcMonsterType(type))
-        {
-            return KIND_NPC;
-        }
-
-        // Legacy fallback classifier.
-        if (rawType == 200)
-        {
-            return KIND_MONSTER;
-        }
-        if (rawType >= 260)
-        {
-            return KIND_MONSTER;
-        }
-        if (rawType > 200)
-        {
-            return KIND_NPC;
-        }
-        if (rawType >= 150)
-        {
-            return KIND_MONSTER;
-        }
-        if (rawType > 110)
-        {
-            return KIND_MONSTER;
-        }
-        if (rawType >= 100)
-        {
-            return KIND_TRAP;
-        }
-
-        return KIND_MONSTER;
-    }
-}
 
 void Setting_Monster(CHARACTER* c, EMonsterType Type, int PositionX, int PositionY)
 {
@@ -13212,19 +12815,12 @@ void Setting_Monster(CHARACTER* c, EMonsterType Type, int PositionX, int Positio
     if (c != NULL)
     {
         o = &c->Object;
-        for (int i = 0; i < MAX_MONSTER; i++)
-        {
-            if (Type == MonsterScript[i].Type)
-            {
-                wcscpy_s(c->ID, MAX_MONSTER_NAME + 1, MonsterScript[i].Name);
-                break;
-            }
-        }
+        GameLogic::Monsters::Names::WriteShownName(*c, Type);
 
         c->MonsterIndex = Type;
         c->Object.ExtState = 0;
         c->TargetCharacter = HeroIndex;
-        o->Kind = DetermineMonsterObjectKind(Type);
+        o->Kind = Data::Monsters::GetMonsterObjectKind(Type);
     }
 }
 
@@ -13680,11 +13276,6 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         {
             c->Object.Scale = 0.8f;
         }
-        Models[c->Object.Type].Meshs[0].NoneBlendMesh = true;
-        Models[c->Object.Type].Meshs[1].NoneBlendMesh = false;
-        Models[c->Object.Type].Meshs[2].NoneBlendMesh = false;
-        Models[c->Object.Type].Meshs[3].NoneBlendMesh = true;
-        Models[c->Object.Type].Meshs[4].NoneBlendMesh = true;
         break;
     case MONSTER_DARK_PHOENIX:
     {
@@ -13693,7 +13284,6 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c = CreateCharacter(Key, MODEL_DARK_PHEONIX_SHIELD, PositionX, PositionY);
         c->NotRotateOnMagicHit = true;
         c->Object.Scale = 1.0f;
-        Models[MODEL_DARK_PHEONIX_SHIELD].StreamMesh = 0;
     }
     break;
     case MONSTER_ORC_ARCHER:
@@ -14559,10 +14149,6 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.LifeTime = 100;
         c->Object.Scale = 0.8f;
         c->Object.m_fEdgeScale = 1.1f;
-        for (int i = 0; i < 6; i++)
-        {
-            Models[MODEL_GAMBLE_NPC_MOSS].Actions[i].PlaySpeed = 0.33f;
-        }
         break;
     case MONSTER_HANZO_THE_BLACKSMITH:
         OpenNpc(MODEL_SMITH);
@@ -14788,11 +14374,6 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         wcscpy(c->ID, L"Lucky Item NPC");
         c->Object.Scale = 0.95f;
         c->Object.m_fEdgeScale = 1.2f;
-        Models[MODEL_LUCKYITEM_NPC].Actions[0].PlaySpeed = 0.45f;
-        Models[MODEL_LUCKYITEM_NPC].Actions[1].PlaySpeed = 0.5f;
-
-        //	Models[MODEL_LUCKYITEM_NPC].Actions[0].PlaySpeed = 50.0f;
-        //	Models[MODEL_LUCKYITEM_NPC].Actions[1].PlaySpeed = 50.0f;
         break;
     case MONSTER_SEED_MASTER:
         OpenNpc(MODEL_SEED_MASTER);
@@ -14862,20 +14443,6 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c = CreateCharacter(Key, _Model_NpcIndex, PositionX, PositionY);
 
         c->Object.Scale = 0.43f;
-
-        for (int i = 0; i < 5; i++)
-        {
-            if (i < 2 || i == 4)
-            {
-                //xmassanta_stand_1~2 || xmassanta_idle3
-                Models[_Model_NpcIndex].Actions[i].PlaySpeed = 0.4f;
-            }
-            else// if(i >= 2 && i < 4)
-            {
-                //xmassanta_idle1~2
-                Models[_Model_NpcIndex].Actions[i].PlaySpeed = 0.5f;
-            }
-        }
         wcscpy(c->ID, L"little santa");
     }
     break;
@@ -14901,11 +14468,6 @@ CHARACTER* CreateMonster(EMonsterType Type, int PositionX, int PositionY, int Ke
         c->Object.LifeTime = 100;
         c->Object.Scale = 0.8f;
         c->Object.m_fEdgeScale = 1.1f;
-
-        for (int i = 0; i < 6; i++)
-        {
-            Models[MODEL_GAMBLE_NPC_MOSS].Actions[i].PlaySpeed = 0.33f;
-        }
     }
     break;
     case MONSTER_GOLDEN_RABBIT:
@@ -15143,17 +14705,17 @@ CHARACTER* CreateHellGate(char* ID, int Key, EMonsterType Index, int x, int y, i
 {
     CHARACTER* portal = CreateMonster(Index, x, y, Key);
     portal->Level = Index - 152 + 1;
-    wchar_t portalText[100];
-    wchar_t name[sizeof portal->ID];
 
-    CMultiLanguage::ConvertFromUtf8(name, ID);
+    // The packet's name holds MAX_USERNAME_SIZE bytes, without a terminator when it is full.
+    wchar_t ownerName[MAX_USERNAME_SIZE + 1]{};
+    CMultiLanguage::ConvertFromUtf8(ownerName, ID, MAX_USERNAME_SIZE);
 
-    mu_swprintf(portalText, portal->ID, name);
+    // The gate shows its owner: "Magic stone of <owner>".
+    // _TRUNCATE: swprintf_s would abort the MSVC client on a long name.
+    _snwprintf_s(portal->ID, std::size(portal->ID), _TRUNCATE, I18N::Game::MagicStoneOfOwner, ownerName);
 
     if (portal->Level == 7)
         portal->Object.SubType = 1;
-
-    memcpy(portal->ID, portalText, sizeof portalText);
 
     if (CreateFlag)
     {
@@ -15163,110 +14725,6 @@ CHARACTER* CreateHellGate(char* ID, int Key, EMonsterType Index, int x, int y, i
         CreateJoint(BITMAP_JOINT_THUNDER + 1, portal->Object.Position, portal->Object.Position, portal->Object.Angle, 1, NULL, 60.f + rand() % 10);
     }
     return portal;
-}
-
-BOOL PlayMonsterSoundGlobal(OBJECT* pObject)
-{
-    float fDis_x, fDis_y;
-    fDis_x = pObject->Position[0] - Hero->Object.Position[0];
-    fDis_y = pObject->Position[1] - Hero->Object.Position[1];
-    float fDistance = sqrtf(fDis_x * fDis_x + fDis_y * fDis_y);
-
-    if (fDistance > 500.0f) return true;
-
-    switch (pObject->Type)
-    {
-    case MODEL_CURSED_SANTA:
-        if (pObject->CurrentAction == MONSTER01_STOP1)
-        {
-            // 			if (rand_fps_check(10))
-            {
-                if (rand_fps_check(2))
-                    PlayBuffer(SOUND_XMAS_SANTA_IDLE_1);
-                else
-                    PlayBuffer(SOUND_XMAS_SANTA_IDLE_2);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_WALK)
-        {
-            //if (rand_fps_check(10))
-            {
-                if (rand_fps_check(2))
-                    PlayBuffer(SOUND_XMAS_SANTA_WALK_1);
-                else
-                    PlayBuffer(SOUND_XMAS_SANTA_WALK_2);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_XMAS_SANTA_ATTACK_1);
-        }
-        else if (pObject->CurrentAction == MONSTER01_SHOCK)
-        {
-            if (rand_fps_check(2))
-                PlayBuffer(SOUND_XMAS_SANTA_DAMAGE_1);
-            else
-                PlayBuffer(SOUND_XMAS_SANTA_DAMAGE_2);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_XMAS_SANTA_DEATH_1);
-        }
-        return TRUE;
-
-    case MODEL_XMAS2008_SNOWMAN:
-        if (pObject->CurrentAction == MONSTER01_WALK)
-        {
-            PlayBuffer(SOUND_XMAS_SNOWMAN_WALK_1);
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1)
-        {
-            PlayBuffer(SOUND_XMAS_SNOWMAN_ATTACK_1);
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            PlayBuffer(SOUND_XMAS_SNOWMAN_ATTACK_2);
-        }
-        else if (pObject->CurrentAction == MONSTER01_SHOCK)
-        {
-            PlayBuffer(SOUND_XMAS_SNOWMAN_DAMAGE_1);
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            if (pObject->LifeTime == 100)
-            {
-                PlayBuffer(SOUND_XMAS_SNOWMAN_DEATH_1);
-            }
-        }
-        return TRUE;
-    case MODEL_DUEL_NPC_TITUS:
-        if (pObject->CurrentAction == MONSTER01_STOP1)
-        {
-            PlayBuffer(SOUND_DUEL_NPC_IDLE_1);
-        }
-        return TRUE;
-    case MODEL_DOPPELGANGER_NPC_LUGARD:
-        if (pObject->CurrentAction == MONSTER01_STOP1)
-        {
-            if (rand_fps_check(2))
-                PlayBuffer(SOUND_DOPPELGANGER_LUGARD_BREATH);
-        }
-        return TRUE;
-    case MODEL_DOPPELGANGER_NPC_BOX:
-        if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_DOPPELGANGER_JEWELBOX_OPEN);
-        }
-        return TRUE;
-    case MODEL_DOPPELGANGER_NPC_GOLDENBOX:
-        if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            PlayBuffer(SOUND_DOPPELGANGER_JEWELBOX_OPEN);
-        }
-        return TRUE;
-    }
-
-    return FALSE;
 }
 
 bool IsBackItem(CHARACTER* c, int iType)

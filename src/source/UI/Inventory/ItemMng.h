@@ -45,6 +45,10 @@ struct ItemCreationParams
 
 ItemCreationParams ParseItemData(std::span<const BYTE> itemData);
 
+// Makes `item` the item the parameters describe, with its stats (SetItemAttributes); its Key and reference count are
+// left 0 (the item manager gives them).
+void FillItemFromParameters(ITEM& item, const ItemCreationParams& parameters);
+
 namespace mu::ui::window
 {
     class CItemMng
@@ -71,6 +75,11 @@ namespace mu::ui::window
         void DeleteAllItems();
 
         bool IsEmpty();
+#ifdef _EDITOR
+        // Whether a window shows an item of that type (an item grid or the
+        // cursor): the item tools keep its size and slot then.
+        bool HasItemOfType(int itemType) const;
+#endif
 
         void Update();
 

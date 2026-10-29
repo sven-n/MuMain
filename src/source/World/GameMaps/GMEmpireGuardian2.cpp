@@ -1,6 +1,7 @@
 ﻿// GMEmpireGuardian2.cpp: implementation of the GMEmpireGuardian2 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -1039,108 +1040,21 @@ bool GMEmpireGuardian2::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             c->MonsterSkill = -1;
             return true;
         }
-
-        switch (c->MonsterSkill)
-        {
-        case 60:
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case 61:
-        {
-            SetAction(o, MONSTER01_ATTACK3);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case ATMON_SKILL_EMPIREGUARDIAN_BERSERKER:
-        {
-            SetAction(o, MONSTER01_APEAR);
-            c->MonsterSkill = -1;
-
+        // The Berserker skill starts the boss's rage, also when its entry has
+        // no attacks.
+        if (c->MonsterSkill == ATMON_SKILL_EMPIREGUARDIAN_BERSERKER)
             m_bCurrentIsRage_Bermont = true;
-        }
-        break;
-        default:
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        break;
-        }
+        return GameLogic::Monsters::Attacks::Play(*c, *o);
     }
-        return true;
     case MONSTER_ATICLES_HEAD:
-    {
-        switch (c->MonsterSkill)
-        {
-        case 47:
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        break;
-        case 50:
-        {
-            SetAction(o, MONSTER01_APEAR);
-            c->MonsterSkill = -1;
-        }
-        break;
-        default:
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        break;
-        }
-    }
-        return true;
+        return GameLogic::Monsters::Attacks::Play(*c, *o);
     case MONSTER_DARK_GHOST:
-    {
-        switch (c->MonsterSkill)
-        {
-        case 51:
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-        }
-        break;
-        case 52:
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-        }
-        break;
-        default:
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        break;
-        }
-    }
+        return GameLogic::Monsters::Attacks::Play(*c, *o);
     case MONSTER_DEFENDER:
-    {
-    }
+        // Empire Guardian 1 answers for it first.
         return true;
     case MONSTER_FORSAKER:
-    {
-        switch (c->MonsterSkill)
-        {
-        case 46:
-        {
-            SetAction(o, MONSTER01_ATTACK2);
-            c->MonsterSkill = -1;
-        }
-        break;
-        default:
-        {
-            SetAction(o, MONSTER01_ATTACK1);
-            c->MonsterSkill = -1;
-        }
-        break;
-        }
-    }
-        return true;
+        return GameLogic::Monsters::Attacks::Play(*c, *o);
     }
     return false;
 }
@@ -1188,147 +1102,6 @@ bool GMEmpireGuardian2::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
     }
         return true;
     }
-    return false;
-}
-
-bool GMEmpireGuardian2::PlayMonsterSound(OBJECT* o)
-{
-    if (gMapManager.IsEmpireGuardian2() == false)
-        return false;
-
-    if (true == g_EmpireGuardian1.PlayMonsterSound(o))
-    {
-        return true;
-    }
-
-    float fDis_x, fDis_y;
-    fDis_x = o->Position[0] - Hero->Object.Position[0];
-    fDis_y = o->Position[1] - Hero->Object.Position[1];
-    float fDistance = sqrtf(fDis_x * fDis_x + fDis_y * fDis_y);
-
-    if (fDistance > 500.0f)
-        return true;
-
-    switch (o->Type)
-    {
-    case MODEL_HAMMERIZE:
-    {
-        switch (o->CurrentAction)
-        {
-        case MONSTER01_WALK:
-        {
-            if (rand_fps_check(2))
-            {
-                PlayBuffer(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01);
-            }
-            else
-            {
-                PlayBuffer(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02);
-            }
-        }
-        break;
-        case MONSTER01_ATTACK1:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK01);
-        }
-        break;
-        case MONSTER01_ATTACK2:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK02);
-        }
-        break;
-        case MONSTER01_ATTACK3:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK01);
-        }
-        break;
-        case MONSTER01_APEAR:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE);
-        }
-        break;
-        case MONSTER01_DIE:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH);
-        }
-        break;
-        }
-    }
-        return true;
-    case MODEL_ATICLES_HEAD:
-    {
-        switch (o->CurrentAction)
-        {
-        case MONSTER01_WALK:
-        {
-            if (rand_fps_check(2))
-            {
-                PlayBuffer(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01);
-            }
-            else
-            {
-                PlayBuffer(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02);
-            }
-        }
-        break;
-        case MONSTER01_ATTACK1:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03);
-        }
-        break;
-        case MONSTER01_ATTACK2:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03);
-        }
-        break;
-        case MONSTER01_ATTACK3:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03);
-        }
-        break;
-        case MONSTER01_DIE:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH);
-        }
-        break;
-        }
-    }
-        return true;
-    case MODEL_DARK_GHOST:
-    {
-        switch (o->CurrentAction)
-        {
-        case MONSTER01_WALK:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE);
-        }
-        break;
-        case MONSTER01_ATTACK1:
-        {
-            PlayBuffer(SOUND_METEORITE01);
-            PlayBuffer(SOUND_EXPLOTION01);
-        }
-        break;
-        case MONSTER01_ATTACK2:
-        {
-            PlayBuffer(SOUND_3RD_CHANGE_UP_BG_FIREPILLAR);
-        }
-        break;
-        case MONSTER01_ATTACK3:
-        {
-            PlayBuffer(SOUND_EXPLOTION01);
-        }
-        break;
-        case MONSTER01_DIE:
-        {
-            PlayBuffer(SOUND_EMPIREGUARDIAN_GRANDWIZARD_DEATH);
-        }
-        break;
-        }
-    }
-        return true;
-    }
-
     return false;
 }
 

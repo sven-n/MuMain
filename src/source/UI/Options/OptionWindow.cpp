@@ -3,8 +3,10 @@
 #include "UI/Options/OptionWindow.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlPointer.h"
+#include "Render/Textures/TexturePack.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Audio/DSPlaySound.h"
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Render/Look/LookPresetSetting.h"
@@ -142,9 +144,9 @@ int UI::Options::FindClosestUIScaleIndex(int percent)
 
 // I18N locale codes paired with each language's display name in that language, held as wide
 // strings so the label vector can be rebuilt without per-frame conversions.
+// clang-format off
 static const struct { const char* code; const wchar_t* label; } s_Languages[] = {
     { "en",    L"English" },
-    // Non-ASCII names use universal-character-name escapes for charset-safe MSVC compilation.
     { "de",    L"Deutsch" },
     { "es",    L"Español" },                                                  // Español
     { "id",    L"Bahasa Indonesia" },
@@ -154,8 +156,10 @@ static const struct { const char* code; const wchar_t* label; } s_Languages[] = 
     { "ru",    L"Русский" },                   // Русский
     { "tl",    L"Tagalog" },
     { "uk",    L"Українська" }, // Українська
+    { "zh-CN", L"简体中文" },
     { "zh-TW", L"繁體中文" },                                      // 繁體中文
 };
+// clang-format on
 static const int s_NumLanguages = sizeof(s_Languages) / sizeof(s_Languages[0]);
 
 // UI font families offered by the font row. `name` is the GameConfig font family value; empty =
@@ -175,6 +179,7 @@ static const FontOption s_Fonts[] = {
     {L"Liberation Sans", L"Liberation Sans"},
     {L"DejaVu Sans", L"DejaVu Sans"},
     {L"Noto Sans TC", L"Noto Sans TC"},
+    {L"Noto Sans SC", L"Noto Sans SC"},
 };
 static const int s_NumFonts = sizeof(s_Fonts) / sizeof(s_Fonts[0]);
 
@@ -306,6 +311,7 @@ mu::ui::window::COptionWindow::COptionWindow()
     m_iResolutionIndex = 0;
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
     m_iLanguageIndex = FindCurrentLanguageIndex();
+    m_bTranslateItemNames = GameConfig::GetInstance().GetTranslateItemNames();
     m_iFontIndex = FindCurrentFontIndex();
 
     m_iActiveTab = 0;
@@ -321,6 +327,7 @@ mu::ui::window::COptionWindow::COptionWindow()
     m_bDisableBodyShadows = GameConfig::GetInstance().GetDisableBodyShadows();
 
     m_iThemeIndex = -1;
+    m_iTexturePackIndex = 0;
     m_iUIScaleIndex = FindCurrentUIScaleIndex();
 }
 
@@ -339,6 +346,7 @@ bool mu::ui::window::COptionWindow::Create(CManager* pNewUIMng)
     InitResolutionCombo();
     InitLanguageCombo();
     InitFontCombo();
+    RefreshTexturePackChoices();
 
     BuildRmlUi();
 
@@ -395,6 +403,8 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("language_index", &model.languageIndex);
     c.Bind("language_row_label", &model.languageRowLabel);
     c.Bind("language_value_label", &model.languageValueLabel);
+    c.Bind("translate_item_names", &model.translateItemNames);
+    c.Bind("translate_item_names_label", &model.translateItemNamesLabel);
     c.Bind("font_labels", &model.fontLabels);
     c.Bind("font_index", &model.fontIndex);
     c.Bind("font_row_label", &model.fontRowLabel);
@@ -488,6 +498,11 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("ui_scale_row_label", &model.uiScaleRowLabel);
     c.Bind("ui_scale_value_label", &model.uiScaleValueLabel);
     c.Bind("ui_scale_tooltip", &model.uiScaleTooltip);
+    c.Bind("texture_pack_labels", &model.texturePackLabels);
+    c.Bind("texture_pack_index", &model.texturePackIndex);
+    c.Bind("texture_pack_row_label", &model.texturePackRowLabel);
+    c.Bind("texture_pack_value_label", &model.texturePackValueLabel);
+    c.Bind("texture_pack_tooltip", &model.texturePackTooltip);
 
     c.BindEventCallback("option_click_close",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
@@ -509,6 +524,9 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleRenderAllEffects(); });
     c.BindEventCallback("option_toggle_windowed_mode",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleWindowedMode(); });
+    c.BindEventCallback("option_toggle_translate_item_names",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { RmlToggleTranslateItemNames(); });
 
     c.BindEventCallback("option_gauge",
         [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList& args)
@@ -763,6 +781,7 @@ void mu::ui::window::COptionWindow::OpenningProcess()
     // exposed through, so opening this window always reflects the current live truth.
     InitResolutionCombo();
     m_iLanguageIndex = FindCurrentLanguageIndex();
+    m_bTranslateItemNames = GameConfig::GetInstance().GetTranslateItemNames();
     m_iFontIndex = FindCurrentFontIndex();
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
 
@@ -778,6 +797,7 @@ void mu::ui::window::COptionWindow::OpenningProcess()
 
     RefreshThemeChoices();
     m_iUIScaleIndex = FindCurrentUIScaleIndex();
+    RefreshTexturePackChoices();
 }
 
 void mu::ui::window::COptionWindow::ClosingProcess()
@@ -817,7 +837,7 @@ void mu::ui::window::COptionWindow::SyncImpliedEffectRows(OptionRmlModel& model)
 
 void mu::ui::window::COptionWindow::RmlToggleDropdown(int dropdownId)
 {
-    if (dropdownId < 0 || dropdownId > 7)
+    if (dropdownId < 0 || dropdownId >= DropdownCount)
         return;
     // Toggle: clicking the currently-open one's own value box closes it; clicking any other
     // (including a different dropdown's) overwrites m_iOpenDropdown, which closes whatever else
@@ -832,29 +852,32 @@ void mu::ui::window::COptionWindow::RmlDropdownOptionClick(int dropdownId, int o
 {
     switch (dropdownId)
     {
-    case 0:
+    case DropdownResolution:
         RmlResolutionChanged(optionIndex);
         break;
-    case 1:
+    case DropdownFpsCap:
         RmlFpsCapChanged(optionIndex);
         break;
-    case 2:
+    case DropdownTheme:
         RmlThemeChanged(optionIndex);
         break;
-    case 3:
+    case DropdownLanguage:
         RmlLanguageChanged(optionIndex);
         break;
-    case 4:
+    case DropdownFont:
         RmlFontChanged(optionIndex);
         break;
-    case 5:
+    case DropdownUIScale:
         RmlUIScaleChanged(optionIndex);
         break;
-    case 6:
+    case DropdownAntialiasing:
         RmlAntialiasingChanged(optionIndex);
         break;
-    case 7:
+    case DropdownAnisotropy:
         RmlAnisotropyChanged(optionIndex);
+        break;
+    case DropdownTexturePack:
+        RmlTexturePackChanged(optionIndex);
         break;
     default:
         break;
@@ -960,6 +983,14 @@ void mu::ui::window::COptionWindow::RmlLanguageChanged(int index)
         return;
     m_iLanguageIndex = index;
     ApplyLanguage();
+}
+
+void mu::ui::window::COptionWindow::RmlToggleTranslateItemNames()
+{
+    m_bTranslateItemNames = !m_bTranslateItemNames;
+    GameConfig::GetInstance().SetTranslateItemNames(m_bTranslateItemNames);
+    GameConfig::GetInstance().Save();
+    g_ItemDataHandler.SetTranslateItemNames(m_bTranslateItemNames);
 }
 
 void mu::ui::window::COptionWindow::RmlFontChanged(int index)
@@ -1274,6 +1305,23 @@ void mu::ui::window::COptionWindow::RmlAnisotropyChanged(int index)
     MuSetAnisotropyPreference(s_AnisotropyValues[index]);
 }
 
+void mu::ui::window::COptionWindow::RmlTexturePackChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= static_cast<int>(m_texturePackNames.size()))
+        return;
+    m_iTexturePackIndex = index;
+    // Compared with the saved name, not the shown index: a saved pack that is no longer installed
+    // shows as Original, and choosing Original has to clear it.
+    const std::wstring& chosen = m_texturePackNames[index];
+    if (chosen == GameConfig::GetInstance().GetTexturePack())
+        return;
+    GameConfig::GetInstance().SetTexturePack(chosen);
+    GameConfig::GetInstance().Save();
+}
+
 void mu::ui::window::COptionWindow::RmlToggleShowFpsCounter()
 {
     // No member/persistence -- SetShowFpsCounter() also clears ShowDebugInfo internally
@@ -1512,6 +1560,38 @@ int mu::ui::window::COptionWindow::FindCurrentFpsCapIndex()
     return s_NumFpsCapValues - 1;  // "Uncapped" -- last entry, matches CfgDefaultFpsCap (-1)
 }
 
+void mu::ui::window::COptionWindow::RefreshTexturePackChoices()
+{
+    m_texturePackNames = Render::Textures::TexturePack::ListInstalledPacks();
+    m_texturePackNames.insert(m_texturePackNames.begin(), std::wstring());
+    m_iTexturePackIndex = FindCurrentTexturePackIndex();
+
+    // Pack names are folder names, so they only change here. The first entry is the localized
+    // "Original", which SyncRmlModel() keeps following a live language switch.
+    auto& model = m_RmlView.GetModel();
+    model.texturePackLabels.clear();
+    model.texturePackLabels.reserve(m_texturePackNames.size());
+    model.texturePackLabels.push_back(StringUtils::WideToNarrow(I18N::Game::OriginalTextures));
+    for (size_t i = 1; i < m_texturePackNames.size(); ++i)
+        model.texturePackLabels.push_back(StringUtils::WideToNarrow(m_texturePackNames[i].c_str()));
+    m_RmlView.MarkDirty("texture_pack_labels");
+}
+
+// Folder names compare in any case, as the loader opens them. A saved pack that is no longer
+// installed shows as the original textures, which is what the loader falls back to.
+int mu::ui::window::COptionWindow::FindCurrentTexturePackIndex()
+{
+    const std::wstring current = GameConfig::GetInstance().GetTexturePack();
+    if (current.empty())
+        return 0;
+    const auto found =
+        std::find_if(m_texturePackNames.begin() + 1, m_texturePackNames.end(), [&current](const std::wstring& name)
+                     { return Render::Textures::TexturePack::SameName(name, current); });
+    if (found == m_texturePackNames.end())
+        return 0;
+    return static_cast<int>(found - m_texturePackNames.begin());
+}
+
 int mu::ui::window::COptionWindow::FindCurrentThemeIndex()
 {
     const std::string& active = UI::RmlBridge::GetActiveThemeName();
@@ -1587,6 +1667,16 @@ void mu::ui::window::COptionWindow::ApplyWindowModeToggle()
     GameConfig::GetInstance().Save();
 }
 
+void mu::ui::window::COptionWindow::SyncLabel(Rml::String& field, const char* fieldName, const wchar_t* text)
+{
+    const Rml::String narrow = StringUtils::WideToNarrow(text);
+    if (field != narrow)
+    {
+        field = narrow;
+        m_RmlView.MarkDirty(fieldName);
+    }
+}
+
 void mu::ui::window::COptionWindow::SyncRmlModel()
 {
     if (!m_RmlView.Document())
@@ -1607,15 +1697,6 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     // Re-fetched every sync, not just once at BuildRmlUi() time -- native re-rendered every one of
     // these from the live I18N::Game::* pointer every frame, so a language switch made from this
     // very window relabels it immediately rather than only on next reopen.
-    const auto syncLabel = [this](Rml::String& field, const char* fieldName, const wchar_t* text)
-    {
-        const Rml::String narrow = StringUtils::WideToNarrow(text);
-        if (field != narrow)
-        {
-            field = narrow;
-            m_RmlView.MarkDirty(fieldName);
-        }
-    };
     // .option-dropdown's own closed-state box shows this instead of a {{}} array-index expression
     // -- see model.resolutionValueLabel's own comment (OptionWindow.h) for why.
     const auto syncDropdownValue = [this](Rml::String& field, const char* fieldName,
@@ -1629,50 +1710,51 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
             m_RmlView.MarkDirty(fieldName);
         }
     };
-    syncLabel(model.title, "title", I18N::Game::Option385);
-    syncLabel(model.closeLabel, "close_label", I18N::Game::Close);
-    syncLabel(model.tabGameplayLabel, "tab_gameplay_label", I18N::Game::Gameplay);
-    syncLabel(model.tabAudioLabel, "tab_audio_label", I18N::Game::Audio);
-    syncLabel(model.tabDisplayLabel, "tab_display_label", I18N::Game::Display);
-    syncLabel(model.tabGraphicsLabel, "tab_graphics_label", I18N::Game::Graphics);
-    syncLabel(model.tabInterfaceLabel, "tab_interface_label", I18N::Game::Interface);
-    syncLabel(model.sectionQualityLabel, "section_quality_label", I18N::Game::Quality);
-    syncLabel(model.sectionEffectsLabel, "section_effects_label", I18N::Game::Effects);
-    syncLabel(model.sectionShadowsLabel, "section_shadows_label", I18N::Game::Shadows);
-    syncLabel(model.autoAttackLabel, "auto_attack_label", I18N::Game::AutomaticAttack);
-    syncLabel(model.whisperSoundLabel, "whisper_sound_label", I18N::Game::BeepSoundForWhispering);
-    syncLabel(model.slideHelpLabel, "slide_help_label", I18N::Game::SlideHelp);
-    syncLabel(model.renderAllEffectsLabel, "render_all_effects_label", I18N::Game::RenderFullEffects);
-    syncLabel(model.windowedModeLabel, "windowed_mode_label", I18N::Game::WindowedMode);
-    syncLabel(model.soundVolumeLabel, "sound_volume_label", I18N::Game::SoundVolume);
-    syncLabel(model.musicVolumeLabel, "music_volume_label", I18N::Game::MusicVolume);
-    syncLabel(model.renderLevelLabel, "render_level_label", I18N::Game::EffectLimitation);
-    syncLabel(model.resolutionRowLabel, "resolution_row_label", I18N::Game::Resolution);
-    syncLabel(model.languageRowLabel, "language_row_label", I18N::Game::Language);
-    syncLabel(model.fontRowLabel, "font_row_label", I18N::Game::Font);
-    syncLabel(model.vsyncLabel, "vsync_label", I18N::Game::VSync);
-    syncLabel(model.fpsCapRowLabel, "fps_cap_row_label", I18N::Game::FPSLimit);
-    syncLabel(model.disableEffectsLabel, "disable_effects_label", I18N::Game::DisableEffects);
-    syncLabel(model.disableParticlesLabel, "disable_particles_label", I18N::Game::DisableParticles);
-    syncLabel(model.disableSkillEffectModelsLabel, "disable_skill_effect_models_label",
+    SyncLabel(model.title, "title", I18N::Game::Option385);
+    SyncLabel(model.closeLabel, "close_label", I18N::Game::Close);
+    SyncLabel(model.tabGameplayLabel, "tab_gameplay_label", I18N::Game::Gameplay);
+    SyncLabel(model.tabAudioLabel, "tab_audio_label", I18N::Game::Audio);
+    SyncLabel(model.tabDisplayLabel, "tab_display_label", I18N::Game::Display);
+    SyncLabel(model.tabGraphicsLabel, "tab_graphics_label", I18N::Game::Graphics);
+    SyncLabel(model.tabInterfaceLabel, "tab_interface_label", I18N::Game::Interface);
+    SyncLabel(model.sectionQualityLabel, "section_quality_label", I18N::Game::Quality);
+    SyncLabel(model.sectionEffectsLabel, "section_effects_label", I18N::Game::Effects);
+    SyncLabel(model.sectionShadowsLabel, "section_shadows_label", I18N::Game::Shadows);
+    SyncLabel(model.autoAttackLabel, "auto_attack_label", I18N::Game::AutomaticAttack);
+    SyncLabel(model.whisperSoundLabel, "whisper_sound_label", I18N::Game::BeepSoundForWhispering);
+    SyncLabel(model.slideHelpLabel, "slide_help_label", I18N::Game::SlideHelp);
+    SyncLabel(model.renderAllEffectsLabel, "render_all_effects_label", I18N::Game::RenderFullEffects);
+    SyncLabel(model.windowedModeLabel, "windowed_mode_label", I18N::Game::WindowedMode);
+    SyncLabel(model.soundVolumeLabel, "sound_volume_label", I18N::Game::SoundVolume);
+    SyncLabel(model.musicVolumeLabel, "music_volume_label", I18N::Game::MusicVolume);
+    SyncLabel(model.renderLevelLabel, "render_level_label", I18N::Game::EffectLimitation);
+    SyncLabel(model.resolutionRowLabel, "resolution_row_label", I18N::Game::Resolution);
+    SyncLabel(model.languageRowLabel, "language_row_label", I18N::Game::Language);
+    SyncLabel(model.translateItemNamesLabel, "translate_item_names_label", I18N::Game::TranslateItemNames);
+    SyncLabel(model.fontRowLabel, "font_row_label", I18N::Game::Font);
+    SyncLabel(model.vsyncLabel, "vsync_label", I18N::Game::VSync);
+    SyncLabel(model.fpsCapRowLabel, "fps_cap_row_label", I18N::Game::FPSLimit);
+    SyncLabel(model.disableEffectsLabel, "disable_effects_label", I18N::Game::DisableEffects);
+    SyncLabel(model.disableParticlesLabel, "disable_particles_label", I18N::Game::DisableParticles);
+    SyncLabel(model.disableSkillEffectModelsLabel, "disable_skill_effect_models_label",
               I18N::Game::DisableSkillEffectModels);
-    syncLabel(model.disableBoidsLabel, "disable_boids_label", I18N::Game::DisableAmbientWildlife);
-    syncLabel(model.disableWingShadowLabel, "disable_wing_shadow_label", I18N::Game::DisableWingShadow);
-    syncLabel(model.disableBodyShadowsLabel, "disable_body_shadows_label", I18N::Game::DisableShadows);
-    syncLabel(model.enhancedGraphicsLabel, "enhanced_graphics_label", I18N::Game::EnhancedGraphics);
-    syncLabel(model.lookLightingLabel, "look_lighting_label", I18N::Game::EnhancedLighting);
-    syncLabel(model.lookDynamicLightsLabel, "look_dynamic_lights_label", I18N::Game::DynamicLights);
-    syncLabel(model.lookLightMoodLabel, "look_light_mood_label", I18N::Game::LightMood);
-    syncLabel(model.lookPostProcessingLabel, "look_post_processing_label", I18N::Game::BloomAndColourGrading);
-    syncLabel(model.antialiasingRowLabel, "antialiasing_row_label", I18N::Game::AntiAliasing);
-    syncLabel(model.antialiasingTooltip, "antialiasing_tooltip", I18N::Game::AntiAliasingTooltip);
-    syncLabel(model.anisotropyRowLabel, "anisotropy_row_label", I18N::Game::AnisotropicFiltering);
-    syncLabel(model.anisotropyTooltip, "anisotropy_tooltip", I18N::Game::AnisotropicFilteringTooltip);
-    syncLabel(model.showFpsCounterLabel, "show_fps_counter_label", I18N::Game::ShowFPSCounter);
-    syncLabel(model.showDebugInfoLabel, "show_debug_info_label", I18N::Game::ShowDebugInfo);
-    syncLabel(model.themeRowLabel, "theme_row_label", I18N::Game::UITheme);
-    syncLabel(model.uiScaleRowLabel, "ui_scale_row_label", I18N::Game::UIScale);
-    syncLabel(model.uiScaleTooltip, "ui_scale_tooltip", I18N::Game::UIScaleTooltip);
+    SyncLabel(model.disableBoidsLabel, "disable_boids_label", I18N::Game::DisableAmbientWildlife);
+    SyncLabel(model.disableWingShadowLabel, "disable_wing_shadow_label", I18N::Game::DisableWingShadow);
+    SyncLabel(model.disableBodyShadowsLabel, "disable_body_shadows_label", I18N::Game::DisableShadows);
+    SyncLabel(model.enhancedGraphicsLabel, "enhanced_graphics_label", I18N::Game::EnhancedGraphics);
+    SyncLabel(model.lookLightingLabel, "look_lighting_label", I18N::Game::EnhancedLighting);
+    SyncLabel(model.lookDynamicLightsLabel, "look_dynamic_lights_label", I18N::Game::DynamicLights);
+    SyncLabel(model.lookLightMoodLabel, "look_light_mood_label", I18N::Game::LightMood);
+    SyncLabel(model.lookPostProcessingLabel, "look_post_processing_label", I18N::Game::BloomAndColourGrading);
+    SyncLabel(model.antialiasingRowLabel, "antialiasing_row_label", I18N::Game::AntiAliasing);
+    SyncLabel(model.antialiasingTooltip, "antialiasing_tooltip", I18N::Game::AntiAliasingTooltip);
+    SyncLabel(model.anisotropyRowLabel, "anisotropy_row_label", I18N::Game::AnisotropicFiltering);
+    SyncLabel(model.anisotropyTooltip, "anisotropy_tooltip", I18N::Game::AnisotropicFilteringTooltip);
+    SyncLabel(model.showFpsCounterLabel, "show_fps_counter_label", I18N::Game::ShowFPSCounter);
+    SyncLabel(model.showDebugInfoLabel, "show_debug_info_label", I18N::Game::ShowDebugInfo);
+    SyncLabel(model.themeRowLabel, "theme_row_label", I18N::Game::UITheme);
+    SyncLabel(model.uiScaleRowLabel, "ui_scale_row_label", I18N::Game::UIScale);
+    SyncLabel(model.uiScaleTooltip, "ui_scale_tooltip", I18N::Game::UIScaleTooltip);
 
     // positioned/root_x/root_y stay at their model defaults (false/0/0, see OptionRmlModel's own
     // comment): window_shell's `.center-both` CSS places the window, a drag moves it.
@@ -1708,6 +1790,11 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     }
     if (model.languageIndex != m_iLanguageIndex) { model.languageIndex = m_iLanguageIndex; m_RmlView.MarkDirty("language_index"); }
     syncDropdownValue(model.languageValueLabel, "language_value_label", model.languageLabels, model.languageIndex);
+    if (model.translateItemNames != m_bTranslateItemNames)
+    {
+        model.translateItemNames = m_bTranslateItemNames;
+        m_RmlView.MarkDirty("translate_item_names");
+    }
 
     // Rebuilt every sync (not just once) so the localized "Default" entry follows a live language
     // switch, same as native's own GetFontLabels().
@@ -1828,4 +1915,18 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         m_RmlView.MarkDirty("ui_scale_index");
     }
     syncDropdownValue(model.uiScaleValueLabel, "ui_scale_value_label", model.uiScaleLabels, model.uiScaleIndex);
+
+    // The pack labels are built in RefreshTexturePackChoices(); only the localized "Original"
+    // entry can change here.
+    SyncLabel(model.texturePackRowLabel, "texture_pack_row_label", I18N::Game::TexturePack);
+    SyncLabel(model.texturePackTooltip, "texture_pack_tooltip", I18N::Game::TexturePackTooltip);
+    if (!model.texturePackLabels.empty())
+        SyncLabel(model.texturePackLabels.front(), "texture_pack_labels", I18N::Game::OriginalTextures);
+    if (model.texturePackIndex != m_iTexturePackIndex)
+    {
+        model.texturePackIndex = m_iTexturePackIndex;
+        m_RmlView.MarkDirty("texture_pack_index");
+    }
+    syncDropdownValue(model.texturePackValueLabel, "texture_pack_value_label", model.texturePackLabels,
+                      model.texturePackIndex);
 }

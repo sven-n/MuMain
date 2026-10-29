@@ -4,6 +4,8 @@
 
 #include "stdafx.h"
 
+#include "../MuEditor/UI/Common/MuEditorToolWindows.h"
+
 struct SDL_Window;
 struct SDL_GPUCommandBuffer;
 struct SDL_GPURenderPass;
@@ -31,15 +33,15 @@ public:
     void RenderDrawData(SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* renderPass);
 
     bool IsEnabled() const { return m_bEditorMode; }
-    void SetEnabled(bool enabled) { m_bEditorMode = enabled; }
-    void ToggleEditor() { m_bEditorMode = !m_bEditorMode; }
+    void SetEnabled(bool enabled)
+    {
+        m_bEditorMode = enabled;
+        m_bKeyboardOnEditorInGameWindow = false;
+    }
+    void ToggleEditor() { SetEnabled(!m_bEditorMode); }
 
-    bool IsShowingItemEditor() const { return m_bShowItemEditor; }
-    void ShowItemEditor() { m_bShowItemEditor = true; }
-    bool IsShowingSkillEditor() const { return m_bShowSkillEditor; }
-    bool IsShowingDevEditor() const { return m_bShowDevEditor; }
-    bool IsShowingMapEditor() const { return m_bShowMapEditor; }
-    bool IsShowingConsole() const { return m_bShowConsole; }
+    // Which tool windows are open.
+    MuEditor::ToolWindows& GetToolWindows() { return m_windows; }
     bool IsHoveringUI() const { return m_bHoveringUI; }
     void SetHoveringUI(bool hovering) { m_bHoveringUI = hovering; }
 
@@ -54,6 +56,9 @@ public:
     // windows instead of the game window: what is pressed there is not the
     // game's.
     bool IsKeyboardInEditorWindow() const;
+    // Whether the keyboard is the editor's: one of its own windows has it, or
+    // one of its windows in the game window was clicked last.
+    bool IsKeyboardWithEditor() const;
     // As found at the start of the frame (Update).
     bool IsMouseInEditorWindow() const
     {
@@ -76,10 +81,16 @@ private:
     void ApplyUIScale();
     void LogVideoDriver() const;
     void SelectWindowMode();
+    // The arrow keys move through the editor's lists only while the keyboard
+    // is the editor's (IsKeyboardWithEditor).
+    void UpdateKeyboardNavigation();
     void BlockGameInputOverOpenButton();
     void BlockGameInputOverEditor();
     void UpdateCursorVisibility();
     void ToggleFullscreenOnF11();
+    void ReopenChangedItemModels();
+    void RenderItemTools();
+    void RenderMonsterTools();
     bool IsEditorWindow(SDL_Window* window) const;
     bool FindMouseInEditorWindow() const;
 
@@ -87,13 +98,7 @@ private:
     bool m_bInitialized;
     bool m_bFrameStarted;
     bool m_bDrawDataReady;
-    bool m_bShowItemEditor;
-    bool m_bShowSkillEditor;
-    bool m_bShowDevEditor;
-    bool m_bShowMapEditor;
-    bool m_bShowEffectBrowser;
-    bool m_bShowItemTranslations;
-    bool m_bShowConsole;
+    MuEditor::ToolWindows m_windows;
     bool m_bHoveringUI;
     bool m_bPreviousFrameHoveringUI;  // Store previous frame's hover state for input blocking
 
@@ -102,6 +107,9 @@ private:
     // The mouse buttons whose press the editor took (SDL_BUTTON_MASK bits), so
     // that their releases stay with it too.
     unsigned int m_claimedButtons = 0;
+    // A click on an editor window inside the game window gives it the keyboard,
+    // a click into the game gives it back.
+    bool m_bKeyboardOnEditorInGameWindow = false;
     // The window the game draws into; any other window of ours is the editor's.
     SDL_Window* m_pGameWindow = nullptr;
     // Render() ended a frame whose own windows are not updated and drawn yet.

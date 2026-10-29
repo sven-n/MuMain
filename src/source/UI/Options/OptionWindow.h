@@ -76,6 +76,23 @@ namespace mu::ui::window
         bool GetRenderAllEffects();
 
     private:
+        // The custom dropdowns, by the number option_window.rml (both themes) passes to
+        // option_toggle_dropdown(N) and option_dropdown_option_click(N, ...) and compares
+        // open_dropdown with.
+        enum DropdownId : int
+        {
+            DropdownResolution = 0,
+            DropdownFpsCap = 1,
+            DropdownTheme = 2,
+            DropdownLanguage = 3,
+            DropdownFont = 4,
+            DropdownUIScale = 5,
+            DropdownAntialiasing = 6,
+            DropdownAnisotropy = 7,
+            DropdownTexturePack = 8,
+            DropdownCount
+        };
+
         void InitResolutionCombo();
         void InitLanguageCombo();
         void InitFontCombo();
@@ -97,6 +114,11 @@ namespace mu::ui::window
 
         void RefreshThemeChoices();
         int FindCurrentThemeIndex();
+
+        // Interface tab's Texture pack row -- lists the folders in Data/TexturePacks, re-read each
+        // time the window opens, so a pack copied in while the game runs shows up.
+        void RefreshTexturePackChoices();
+        int FindCurrentTexturePackIndex();
 
         // Interface/UI tab's UI Scale row -- indexes UI::Options::UIScalePercentChoices() against
         // GameConfig::GetUIScalePercent().
@@ -121,9 +143,8 @@ namespace mu::ui::window
         // polled. RmlClickSelectTab first, matching MyQuestInfoWindow's own tab-callback ordering.
         void RmlClickSelectTab(int nTab);
         // Custom-dropdown mechanism (option_window.rml's own .option-dropdown family; RmlUi's
-        // native <select> isn't used here) -- dropdownId is 0=resolution,1=fpsCap,2=theme,
-        // 3=language,4=font,5=uiScale,6=antialiasing,7=anisotropy, matching model.openDropdown's
-        // own comment (OptionWindow.h).
+        // native <select> isn't used here) -- dropdownId is a DropdownId, matching
+        // model.openDropdown's own comment (OptionWindow.h).
         // RmlDropdownOptionClick dispatches to RmlResolutionChanged()/RmlFpsCapChanged()/etc. per
         // dropdownId.
         void RmlToggleDropdown(int dropdownId);
@@ -143,6 +164,8 @@ namespace mu::ui::window
         void RmlGaugeEvent(Rml::Event& event, int gauge);
         void RmlResolutionChanged(int index);
         void RmlLanguageChanged(int index);
+        // The checkbox under the language: item names in the UI language, or English.
+        void RmlToggleTranslateItemNames();
         void RmlFontChanged(int index);
         // Graphics tab -- DXP-23's per-system effect-cost toggles (MainScene.h), promoted from
         // console-only ($effects ...) diagnostics to a persisted, in-game-options setting.
@@ -186,6 +209,8 @@ namespace mu::ui::window
         void RmlToggleShowDebugInfo();
         void RmlThemeChanged(int index);
         void RmlUIScaleChanged(int index);
+        // Saves the choice only: the texture loader reads the pack at startup.
+        void RmlTexturePackChanged(int index);
         void RmlClickClose();
 
         // One tuning slider (UI::Options::TuningRow) as the RmlUi model binds it.
@@ -235,8 +260,7 @@ namespace mu::ui::window
             // Which custom dropdown (.option-dropdown) is currently open, -1 = none. A single
             // field rather than one bool per dropdown gives exclusivity for free -- opening one
             // overwrites whichever other id was here, no separate "close the others" step needed.
-            // 0=resolution, 1=fpsCap, 2=theme, 3=language, 4=font, 5=uiScale, 6=antialiasing,
-            // 7=anisotropy (RmlToggleDropdown()/
+            // A DropdownId (RmlToggleDropdown()/
             // RmlDropdownOptionClick()'s own ids). Replaces RmlUi's native <select>/<option>
             // (WidgetDropDown) entirely -- see option_window.rml's own history for why: that
             // widget's own generated selectbox/selectvalue/selectarrow sub-elements need CSS this
@@ -277,6 +301,8 @@ namespace mu::ui::window
             int languageIndex = 0;
             Rml::String languageRowLabel;
             Rml::String languageValueLabel;
+            bool translateItemNames = true;
+            Rml::String translateItemNamesLabel;
             std::vector<Rml::String> fontLabels;
             int fontIndex = 0;
             Rml::String fontRowLabel;
@@ -370,9 +396,17 @@ namespace mu::ui::window
             // hover, purely in RCSS, the same `:hover` mechanism main_frame.rcss's own gauge
             // tooltips use).
             Rml::String uiScaleTooltip;
+            std::vector<Rml::String> texturePackLabels;
+            int texturePackIndex = 0;
+            Rml::String texturePackRowLabel;
+            Rml::String texturePackValueLabel;
+            // The row's hint: where packs come from and that a change needs a restart.
+            Rml::String texturePackTooltip;
         };
         void BindRmlModel(Rml::DataModelConstructor& c, OptionRmlModel& model);
         void SyncImpliedEffectRows(OptionRmlModel& model);
+        // The model's copy of a UI text, marked dirty when the text changed.
+        void SyncLabel(Rml::String& field, const char* fieldName, const wchar_t* text);
         void SyncTuningModel(OptionRmlModel& model);
         void OnRmlBuilt();
         UI::RmlBridge::ThemedView<OptionRmlModel> m_RmlView{"option_window",
@@ -400,6 +434,7 @@ namespace mu::ui::window
         int m_iResolutionIndex;
         bool m_bWindowedMode;
         int m_iLanguageIndex;
+        bool m_bTranslateItemNames;
         int m_iFontIndex;
 
         std::vector<UI::Options::DisplayResolution> m_resolutions;
@@ -438,6 +473,10 @@ namespace mu::ui::window
         // GameConfig backing).
         int m_iThemeIndex;
         std::vector<std::string> m_themeNames;
+        // Interface tab's Texture pack row -- m_texturePackNames[0] is the original textures (an
+        // empty name, as stored in GameConfig), the rest the installed packs.
+        std::vector<std::wstring> m_texturePackNames;
+        int m_iTexturePackIndex;
         // Indexes UI::Options::UIScalePercentChoices(); seeded from GameConfig::GetUIScalePercent()
         // (and re-seeded in OpenningProcess(), so a scale set from outside this window -- e.g. a
         // hand-edited config.ini -- shows up on the next open).

@@ -44,8 +44,6 @@
 #include <string>
 
 extern int TextNum;
-extern wchar_t TextList[50][100];
-extern int  TextListColor[50];
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

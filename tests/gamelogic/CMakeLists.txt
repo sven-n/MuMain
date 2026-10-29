@@ -7,6 +7,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_bird_landing
+    SOURCES
+        test_bird_landing.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_head_movement
     SOURCES
         test_head_movement.cpp
@@ -47,4 +55,12 @@ mu_add_test(
         test_personal_shop_currency.cpp
     LINK_LIBS
         MuClient
+)
+
+mu_add_test(
+    NAME test_helper_attack_rotation
+    SOURCES
+        test_helper_attack_rotation.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
 )

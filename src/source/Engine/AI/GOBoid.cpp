@@ -12,6 +12,7 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
+#include "Engine/AI/BirdLanding.h"
 #include "Engine/AI/BoidSteering.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzOpenData.h"
@@ -31,6 +32,10 @@ static  const   BYTE    BOID_FLY = 0;
 static  const   BYTE    BOID_DOWN = 1;
 static  const   BYTE    BOID_GROUND = 2;
 static  const   BYTE    BOID_UP = 3;
+
+// Actions of the bird and crow models.
+static const int BIRD_ACTION_FLY = 0;
+static const int BIRD_ACTION_GROUND = 1;
 
 void DeleteMount(OBJECT* Owner)
 {
@@ -967,6 +972,28 @@ void MoveButterFly(OBJECT* o)
     o->Position[2] += (float)(rand() % 15 - 7) * 0.3f;
 }
 
+static void LandBird(OBJECT* o, float height)
+{
+    o->Position[2] = height;
+    o->AI = BOID_GROUND;
+    SetAction(o, BIRD_ACTION_GROUND);
+}
+
+static void TakeOffBird(OBJECT* o)
+{
+    o->AI = BOID_UP;
+    o->Velocity = 1.1f;
+    o->Direction[2] = 20.f;
+    SetAction(o, BIRD_ACTION_FLY);
+}
+
+// A hero in a monster form (a Transformation Ring) has that monster's model and actions.
+static bool HeroStandsStill()
+{
+    const OBJECT& hero = Hero->Object;
+    return Engine::AI::BirdLanding::IsHeroStill(hero.CurrentAction, hero.Type == MODEL_PLAYER);
+}
+
 void MoveBird(OBJECT* o)
 {
     if (o->AI == BOID_FLY)
@@ -995,20 +1022,25 @@ void MoveBird(OBJECT* o)
         float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
         if (o->Position[2] < Height)
         {
-            o->AI = BOID_UP;
-            o->Velocity = 1.1f;
-            o->Direction[2] = 20.f;
-            o->CurrentAction = 0;
+            // Land and stay until the hero moves or a random take-off (BOID_GROUND below). Where a bird
+            // cannot sit, or while the hero moves, it bounces back up and keeps flapping.
+            const int Index =
+                TERRAIN_INDEX_REPEAT((int)(o->Position[0] / TERRAIN_SCALE), (int)(o->Position[1] / TERRAIN_SCALE));
+            if (Engine::AI::BirdLanding::CanLandOn(TerrainWall[Index]) && HeroStandsStill())
+            {
+                LandBird(o, Height);
+            }
+            else
+            {
+                TakeOffBird(o);
+            }
         }
     }
     if (o->AI == BOID_GROUND)
     {
-        if (Hero->Object.CurrentAction >= PLAYER_WALK_MALE || rand_fps_check(256))
+        if (!HeroStandsStill() || rand_fps_check(256))
         {
-            o->AI = BOID_UP;
-            o->Velocity = 1.1f;
-            o->Direction[2] = 20.f;
-            o->CurrentAction = 0;
+            TakeOffBird(o);
         }
     }
     if (o->AI == BOID_UP)
@@ -1191,27 +1223,29 @@ void MoveBoidGroup(OBJECT* o, int index)
         o->Direction[0] = o->Position[0] + 3.f * p[0];
         o->Direction[1] = o->Position[1] + 3.f * p[1];
 
-        float dx = o->Position[0] - Hero->Object.Position[0];
-        float dy = o->Position[1] - Hero->Object.Position[1];
-        float Range = sqrtf(dx * dx + dy * dy);
-        float FlyDistance = 1500.f;
-        if (o->Type == MODEL_DRAGON_)
+        if (o->Type != MODEL_DRAGON_ && o->Type != MODEL_BAHAMUT && gMapManager.WorldActive != WD_51HOME_6TH_CHAR &&
+            rand_fps_check(512))
         {
-            FlyDistance = 4000.f;
+            o->Live = false;
         }
-        else if (o->Type == MODEL_BAHAMUT)
-        {
-            FlyDistance = 3000.f;
-        }
-        else if (gMapManager.WorldActive == WD_51HOME_6TH_CHAR
-            );
-        else
-        {
-            if (rand_fps_check(512))
-                o->Live = false;
-        }
-            if (Range >= FlyDistance)
-                o->Live = false;
+    }
+
+    // A grounded boid (a landed bird) skips the flight above, but still goes away when the hero leaves it behind.
+    float dx = o->Position[0] - Hero->Object.Position[0];
+    float dy = o->Position[1] - Hero->Object.Position[1];
+    float Range = sqrtf(dx * dx + dy * dy);
+    float FlyDistance = 1500.f;
+    if (o->Type == MODEL_DRAGON_)
+    {
+        FlyDistance = 4000.f;
+    }
+    else if (o->Type == MODEL_BAHAMUT)
+    {
+        FlyDistance = 3000.f;
+    }
+    if (Range >= FlyDistance)
+    {
+        o->Live = false;
     }
 }
 

@@ -12,10 +12,12 @@
 #include "FramePixelReadback.h"
 #include "SceneLighting.h"
 
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <span>
 #include <string_view>
+#include <vector>
 
 // Forward declaration of SDL_GPUDevice so IMuRenderer::GetDevice()
 // can be declared without pulling SDL3 headers into every TU that includes MuRenderer.h.
@@ -107,7 +109,8 @@ struct Vertex3D
     std::uint32_t color; // packed ABGR
 };
 
-// Rest-pose model vertex for GPU bone skinning. The colour is per draw, not per vertex.
+// Rest-pose model vertex for GPU bone skinning (BMD models): it follows one bone for its
+// position and one for its normal. The colour is per draw, not per vertex.
 struct SkinnedVertex3D
 {
     float x, y, z;
@@ -116,6 +119,26 @@ struct SkinnedVertex3D
     std::int32_t positionBoneIndex;
     std::int32_t normalBoneIndex;
 };
+
+// SkinnedVertex3D with weights (glTF models), drawn with its own pipelines so that BMD
+// vertices stay small. A vertex with weights is in bind space and blends up to four palette
+// joints by weight (unorm, summing to 255, the largest first); one without follows its bones.
+// tangent: the bind-space tangent of a vertex under a normal map, snorm16 xyz and
+// w = +-32767 for the handedness; all 0 otherwise.
+struct SkinnedWeightedVertex3D
+{
+    float x, y, z;
+    float nx, ny, nz;
+    float u, v;
+    std::int32_t positionBoneIndex;
+    std::int32_t normalBoneIndex;
+    std::uint8_t joints[4];
+    std::uint8_t weights[4];
+    std::int16_t tangent[4];
+};
+static_assert(sizeof(SkinnedVertex3D) == 40 && sizeof(SkinnedWeightedVertex3D) == 56);
+static_assert(offsetof(SkinnedWeightedVertex3D, normalBoneIndex) == offsetof(SkinnedVertex3D, normalBoneIndex),
+              "both skinned pipelines read the leading fields at the same offsets");
 
 enum class SkinningTextureCoordinates : std::uint32_t
 {
@@ -154,6 +177,10 @@ struct SkinningParameters
     bool lightEnabled = false;
     // Enhanced lighting only: Blinn-Phong strength declared by the item model; 0 = no highlight.
     float specularStrength = 0.0f;
+    // Enhanced lighting only: the tangent-space normal map of the draw (a texture id) and its
+    // glTF scale; a scale of 0 (or no map) lights with the unperturbed normal. Classic ignores it.
+    std::uint32_t normalTextureId = 0;
+    float normalMapScale = 0.0f;
 };
 
 // Where a body shadow lands, as CalcShadowPosition() puts it there.
@@ -205,6 +232,20 @@ struct RendererStats
 // IMuRenderer: Pure abstract rendering interface.
 // Game code obtains the active backend via GetRenderer() (see below).
 // ---------------------------------------------------------------------------
+// The corners of indexed triangles, in index order: out[i] = vertices[indices[i]]
+// (out holds indices.size() vertices). An indexed draw and the draw of these
+// corners rasterise the same triangles in the same order.
+template <typename Vertex>
+void ExpandIndexedCorners(std::span<const Vertex> vertices, std::span<const std::uint16_t> indices,
+                          std::vector<Vertex>& out)
+{
+    out.resize(indices.size());
+    for (std::size_t i = 0; i < indices.size(); ++i)
+    {
+        out[i] = vertices[indices[i]];
+    }
+}
+
 class IMuRenderer
 {
 public:
@@ -230,6 +271,28 @@ public:
         (void)parameters;
         return false;
     }
+    [[nodiscard]] virtual bool RenderWeightedSkinnedTriangles(std::span<const SkinnedWeightedVertex3D> vertices,
+                                                              std::uint32_t color, std::uint32_t textureId,
+                                                              const SkinningParameters& parameters)
+    {
+        (void)vertices;
+        (void)color;
+        (void)textureId;
+        (void)parameters;
+        return false;
+    }
+
+    // RenderTriangles of the triangles `indices` makes of `vertices` (three
+    // indices per triangle, in draw order). A backend without index buffers
+    // keeps this default: the corners (ExpandIndexedCorners) through
+    // RenderTriangles.
+    virtual void RenderIndexedTriangles(std::span<const Vertex3D> vertices, std::span<const std::uint16_t> indices,
+                                        std::uint32_t textureId)
+    {
+        static thread_local std::vector<Vertex3D> corners;
+        ExpandIndexedCorners(vertices, indices, corners);
+        RenderTriangles(corners, textureId);
+    }
 
     // Rest-pose triangles kept on the GPU under `mesh`, so a draw no longer uploads them. The data
     // must not change while cached; ReleaseSkinnedMesh before it is freed. Releasing is safe at any
@@ -240,6 +303,13 @@ public:
         return false;
     }
     [[nodiscard]] virtual bool CacheSkinnedMesh(const void* mesh, std::span<const SkinnedVertex3D> vertices)
+    {
+        (void)mesh;
+        (void)vertices;
+        return false;
+    }
+    [[nodiscard]] virtual bool CacheWeightedSkinnedMesh(const void* mesh,
+                                                        std::span<const SkinnedWeightedVertex3D> vertices)
     {
         (void)mesh;
         (void)vertices;
@@ -388,6 +458,10 @@ public:
         return false;
     }
 
+    // Waits until the window can take another frame (the GPU has finished an
+    // earlier one). The game loop calls it before reading input, so with VSync
+    // the loop waits there and not in BeginFrame, after the input was read.
+    virtual void WaitForSwapchain() {}
     // Per-frame lifecycle. Called from the MuMain.cpp game loop.
     virtual void BeginFrame() {}
     virtual void EndFrame() {}

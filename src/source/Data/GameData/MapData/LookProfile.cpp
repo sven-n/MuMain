@@ -64,7 +64,7 @@ class IssueList
 public:
     IssueList(const std::string& source, std::vector<ItemDataIssue>& issues) : m_source(source), m_issues(issues) {}
 
-    void Error(const std::string& field, const std::string& message)
+    void Fatal(const std::string& field, const std::string& message)
     {
         Items::Json::AddFileIssue(m_issues, m_source, ItemDataIssue::NoItem, field, message);
     }
@@ -97,13 +97,13 @@ bool ReadValue(const LookValueInfo& info, const OrderedJson& json, const std::st
 {
     if (!json.is_number() || !std::isfinite(json.get<double>()))
     {
-        issues.Error(field, "must be a number");
+        issues.Fatal(field, "must be a number");
         return false;
     }
     const double value = json.get<double>();
     if (!IsInRange(info, value))
     {
-        issues.Error(field, "is " + FormatNumber(value) + ", must be from " + FormatNumber(info.min) + " to " +
+        issues.Fatal(field, "is " + FormatNumber(value) + ", must be from " + FormatNumber(info.min) + " to " +
                                 FormatNumber(info.max));
         return false;
     }
@@ -126,7 +126,7 @@ bool ReadOverrides(const OrderedJson& json, const std::string& object, std::init
         const std::optional<LookValue> lookValue = FindLookValue(key);
         if (!lookValue)
         {
-            issues.Error(Field(object, key), "is not a look value");
+            issues.Fatal(Field(object, key), "is not a look value");
             valid = false;
             continue;
         }
@@ -142,7 +142,7 @@ bool CheckRootKeys(const OrderedJson& root, IssueList& issues)
     {
         if (key != Items::Json::Keys::FormatVersion && key != DefaultKey && key != MapsKey)
         {
-            issues.Error(key, "unknown field");
+            issues.Fatal(key, "unknown field");
             valid = false;
         }
     }
@@ -158,7 +158,7 @@ bool ReadDefault(const OrderedJson& root, LookOverrides& overrides, IssueList& i
     }
     if (!json->is_object())
     {
-        issues.Error(DefaultKey, "must be an object of look values");
+        issues.Fatal(DefaultKey, "must be an object of look values");
         return false;
     }
     return ReadOverrides(*json, DefaultKey, {}, overrides, issues);
@@ -171,7 +171,7 @@ bool ReadWorld(const OrderedJson& json, const std::string& object, int& world, I
     if (field == json.end() || !field->is_number_integer() || !Items::Json::ReadWholeNumber(*field, number) ||
         number < 0 || number > MaxLookProfileWorld)
     {
-        issues.Error(Field(object, WorldKey),
+        issues.Fatal(Field(object, WorldKey),
                      "missing or not a whole number from 0 to " + std::to_string(MaxLookProfileWorld));
         return false;
     }
@@ -184,7 +184,7 @@ bool ReadMap(const OrderedJson& json, size_t index, std::set<int>& worlds, LookP
     const std::string entry = std::string(MapsKey) + "[" + std::to_string(index) + "]";
     if (!json.is_object())
     {
-        issues.Error(entry, "must be an object with a world and its values");
+        issues.Fatal(entry, "must be an object with a world and its values");
         return false;
     }
     MapLookOverrides map;
@@ -195,13 +195,13 @@ bool ReadMap(const OrderedJson& json, size_t index, std::set<int>& worlds, LookP
     const std::string object = std::string(MapsKey) + "[world " + std::to_string(map.world) + "]";
     if (!worlds.insert(map.world).second)
     {
-        issues.Error(object, "is in the list more than once");
+        issues.Fatal(object, "is in the list more than once");
         return false;
     }
     const auto name = json.find(NameKey);
     if (name != json.end() && !name->is_string())
     {
-        issues.Error(Field(object, NameKey), "must be text");
+        issues.Fatal(Field(object, NameKey), "must be text");
         return false;
     }
     if (!ReadOverrides(json, object, {WorldKey, NameKey}, map.overrides, issues))
@@ -221,7 +221,7 @@ bool ReadMaps(const OrderedJson& root, LookProfileData& data, IssueList& issues)
     }
     if (!list->is_array())
     {
-        issues.Error(MapsKey, "must be a list of map entries");
+        issues.Fatal(MapsKey, "must be a list of map entries");
         return false;
     }
     bool valid = true;
@@ -326,7 +326,7 @@ LookProfileLoadResult LoadLookProfileFile(const std::filesystem::path& file)
     const std::optional<std::string> text = Items::Json::ReadTextFile(file);
     if (!text)
     {
-        IssueList(source, result.issues).Error("", "could not be read");
+        IssueList(source, result.issues).Fatal("", "could not be read");
         return result;
     }
     ReadLookProfileJson(*text, source, result.data, result.issues);

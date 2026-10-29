@@ -39,6 +39,9 @@ mu_add_test(
     NAME skinned_bone_palette_tests
     SOURCES
         test_skinned_bone_palette.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
 )
 
 mu_add_test(
@@ -66,6 +69,7 @@ mu_add_test(
     SOURCES
         test_texture_filtering.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TextureFiltering.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/AssetPath.cpp
 )
 
 mu_add_test(
@@ -107,6 +111,16 @@ mu_add_test(
         test_terrain_height_grid.cpp
 )
 
+# The decryption of version 14 BMD models, round-tripped against an encryption built the way the files are.
+mu_add_test(
+    NAME bmd_modulus_cipher_tests
+    SOURCES
+        test_bmd_modulus_cipher.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Models/BmdModulusCipher.cpp
+    LINK_LIBS
+        MuCryptopp
+)
+
 # The OZT reader of CGlobalBitmap::OpenTga, without the renderer. It also reads
 # the OZT files shipped in src/bin/Data.
 mu_add_test(
@@ -127,6 +141,18 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/UpscaleMarker.cpp
 )
 
+# The texture packs whose files CGlobalBitmap reads before those in Data.
+mu_add_test(
+    NAME texture_pack_tests
+    SOURCES
+        test_texture_pack.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TexturePack.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TexturePackFiles.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/AssetPath.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Sprites/GlobalBitmapPath.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/PathResolve.cpp
+)
+
 mu_add_test(
     NAME sdl_gpu_validation_tests
     SOURCES
@@ -143,6 +169,41 @@ mu_add_test(
     NAME gpu_skinning_path_tests
     SOURCES
         test_gpu_skinning_path.cpp
+)
+
+# The playback rule: the plan per case, and BMD::Animation against MU's pose
+# code on a synthetic skeleton. BMD::Animation comes with the client globals
+# of Winmain.cpp.
+mu_add_test(
+    NAME animation_sampling_tests
+    SOURCES
+        test_animation_sampling.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Models/AnimationSampling.cpp
+)
+
+mu_add_test(
+    NAME animation_playback_rule_tests
+    SOURCES
+        test_animation_playback_rule.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+# Monster models read from glTF binaries (Render/Models/Gltf): the Elite Yeti,
+# Bull Fighter and Bali exported from their BMDs (data/Monster{14,01,33}.glb)
+# against the BMDs themselves.
+mu_add_test(
+    NAME glb_model_tests
+    SOURCES
+        test_glb_model.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(glb_model_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_TEST_GLB_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data"
 )
 
 mu_add_test(

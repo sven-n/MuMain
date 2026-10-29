@@ -2,6 +2,7 @@
 
 #include "Data/GameData/ItemData/ItemDefinition.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
+#include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/ItemType.h"
 
 #include <array>
@@ -28,8 +29,9 @@ public:
     // definitions with invalid ids are skipped (validation reports them).
     void Build(std::span<const ItemDefinition> definitions);
 
-    // Fills ItemDefinition::name from the names for this UI locale, falling
-    // back to English.
+    // Fills ItemDefinition::name from the names in the item name language:
+    // the UI language, or English while translated item names are off. A
+    // missing translation falls back to English.
     void SetDisplayLocale(std::string_view locale);
     const std::string& GetDisplayLocale() const
     {
@@ -97,6 +99,19 @@ public:
         return m_statProfiles;
     }
 
+    // The shared texts and layouts of the item tooltips (Data/Items/Tooltips/Tooltip.json). A version change, as the
+    // items' and the stat file's: what the tooltips made of them (their compiled texts) is made again.
+    void SetTooltipFile(ItemTooltipFile file)
+    {
+        ++m_version;
+        m_tooltipFile = std::move(file);
+    }
+
+    const ItemTooltipFile& GetTooltipFile() const
+    {
+        return m_tooltipFile;
+    }
+
     // The item's stat profile laid over the default; the default for empty
     // slots and invalid ids.
     const ItemStatProfile& GetStatProfile(int itemType) const
@@ -135,16 +150,29 @@ public:
 
     int GetExistingItemCount() const { return m_existingItemCount; }
 
-    // Counts the changes of the items; views taken from them (e.g. the item
-    // names the editor lists) take them again when it changes.
+    // Counts the changes of the items, the stat file and the tooltip file;
+    // views taken from them (e.g. the item names the editor lists, the
+    // tooltips' compiled texts) take them again when it changes.
     int GetVersion() const
     {
         return m_version;
     }
 
+    // Counts the changes of the item names shown: a stored item or another
+    // language of the names (SetDisplayLocale). Views that keep item names
+    // take them again when it changes. Unlike GetVersion, a language change
+    // leaves the item tools' open edits alone.
+    int GetNameVersion() const
+    {
+        return m_nameVersion;
+    }
+
     // Item editor changes. Set replaces the item at the definition's
     // (group, number); an item without names counts as not existing.
     void Set(const ItemDefinition& definition);
+    // Like Set for each definition, with the counts and tag lists built once
+    // at the end (a change to many items at once).
+    void SetMany(std::span<const ItemDefinition> definitions);
     // Swaps two slots and updates the ids of the moved items.
     void Swap(int firstItemType, int secondItemType);
 
@@ -183,6 +211,7 @@ private:
     std::vector<ItemDefinition> m_definitions;
     std::vector<RuleData> m_ruleData;
     ItemStatProfiles m_statProfiles;
+    ItemTooltipFile m_tooltipFile;
     // GetItemTypesWithTag's lists, one per tag.
     std::array<std::vector<int>, static_cast<size_t>(ItemTag::Count)> m_itemTypesByTag;
     // GetItemTypesWithTagInUseOrder's lists, one per tag.
@@ -190,6 +219,7 @@ private:
     std::string m_displayLocale{LocalizedString::NeutralLocale};
     int m_existingItemCount = 0;
     int m_version = 0;
+    int m_nameVersion = 0;
 };
 } // namespace Data::Items
 

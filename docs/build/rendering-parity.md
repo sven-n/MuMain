@@ -70,29 +70,32 @@ Release builds resolve every text role from files beside the executable:
 | Bold | Selected family bold file |
 | Big bold | Selected family bold file |
 | Fixed | `fonts/Cousine-Regular.ttf` |
-| Missing glyph fallbacks | `fonts/DejaVuSans*.ttf`, `fonts/NotoSansTC-*.otf`, `fonts/NanumGothic-Regular.ttf` |
+| Missing glyph fallbacks | `fonts/DejaVuSans*.ttf`, `fonts/NotoSansTC-*.otf`, `fonts/NanumGothic-Regular.ttf`, `fonts/NotoSansSC-*.otf` |
 
-Selectable families are DejaVu Sans, Liberation Sans and Noto Sans TC. Empty
+Selectable families are DejaVu Sans, Liberation Sans, Noto Sans TC and Noto Sans SC. Empty
 or unknown configuration selects DejaVu Sans. SDL_ttf, Windows GDI, and the
 non-Windows GDI shim use the same registry.
 
-SDL_ttf attaches three fallbacks to every role at startup, tried in this order:
+SDL_ttf attaches four fallbacks to every role at startup, tried in this order:
 
 1. DejaVu Sans: Latin, Greek and Cyrillic letters the selected family or
    Cousine lack.
 2. Noto Sans TC: Traditional Chinese (`zh-TW`), kana and CJK punctuation.
    Bold roles use its bold file.
 3. Nanum Gothic: Hangul. Bold roles use SDL_ttf's synthetic bold style.
+4. Noto Sans SC: Simplified Chinese characters missing from the earlier faces.
+   Bold roles use its bold file.
 
 A fallback that is the role's own font file is skipped. This keeps the
 selected family for the text it covers and draws the rest instead of
 missing-glyph boxes. A test checks that every character of every translation
 has a glyph with each selectable family. Japanese (`ja`) is the known
-exception: some Japanese kanji forms need Noto Sans JP, and Simplified Chinese
-would need Noto Sans SC.
+exception: some Japanese kanji forms need Noto Sans JP. Select Noto Sans SC
+for Simplified Chinese regional glyph forms; other families try Noto Sans TC
+first for shared Chinese characters.
 
 Characters from a fallback font sit on the same baseline as the rest of the
-line. With Noto Sans TC as the UI font, text is drawn at the height DejaVu
+line. With Noto Sans TC or Noto Sans SC as the UI font, text is drawn at the height DejaVu
 Sans text would have, so it does not sit lower in its boxes.
 
 Missing or corrupt packaged roles abort Release renderer startup. Windows also

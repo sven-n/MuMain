@@ -36,7 +36,7 @@ constexpr std::array<const char*, 4> CreateVectorKeys = {"position", "angle", "d
 constexpr const char* CreateSubTypesKey = "subTypes";
 
 // Reads the "create" object `json`; the issues name the fields as
-// "<objectKey>.<field>". Values with errors stay unset.
+// "<objectKey>.<field>". Values with fatal problems stay unset.
 EffectCreateParams ReadEffectCreateParams(const Items::Json::OrderedJson& json, const std::string& objectKey,
                                           const Items::ModelJson::ReportIssue& report);
 

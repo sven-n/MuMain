@@ -1,9 +1,12 @@
 #ifndef __ZZZBMD_H__
 #define __ZZZBMD_H__
 
+#include <array>
 #include <vector>
 #include <cstdint>
 #include <memory>
+#include <string>
+#include <string_view>
 #include "Render/Sprites/TextureScript.h"
 
 extern const float (*g_pActiveBoneTransform)[3][4];
@@ -229,6 +232,17 @@ public:
     // one that opened it and those that share it): the last of them to let go
     // frees the data. Empty while the data is this slot's alone.
     std::shared_ptr<const void> m_sharedDataUsers;
+    // Set when the bones and meshes come from a glTF binary
+    // (Render::Models::Gltf::LoadGlbIntoBmd): its Render::Models::Gltf::SkinnedModel
+    // (clips, skin, joints), read through Render::Models::Gltf::SkinnedModelOf.
+    // The actions stay the BMD's. Type-erased because declaring namespace
+    // Render::Models in this header would hide the global Models[] from code
+    // inside namespace Render.
+    std::shared_ptr<const void> GltfModel;
+    // The LOD of a model from a glTF binary that GPU-skinned draws use (0: the
+    // BMD's meshes); set per object around its draw (RenderObject) and 0
+    // otherwise. Draws on the CPU path keep LOD 0.
+    int ActiveLod = 0;
 
     float (*m_pCurrentBoneTransform)[3][4]; // Active bone matrix palette stored during Transform()
     bool m_LastTranslate;       // Set by Transform(): true=Translate mode (BodyOrigin/BodyScale shift world pos),
@@ -299,6 +313,14 @@ public:
     // while the data is its own alone, 0 without data.
     long GetDataUserCount() const;
     void CreateBoundingBox();
+
+    // The index of the bone named `name` (exactly Bone_t::Name), -1 when the
+    // model has none. Looked up once per model and name: the answer is cached
+    // until the model's bones change.
+    int FindBone(std::string_view name) const;
+    // FindBone, or the root bone 0 when the model has no bone of that name;
+    // the first miss of a name per model logs one line.
+    int FindBoneOrRoot(std::string_view name) const;
 
     bool PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsigned short* PriorAction, float Speed, vec3_t Origin, vec3_t Angle);
     // BoneMatrixCapacity: element count of the caller's BoneTransform buffer. The DXP-24 stale-slot
@@ -394,6 +416,19 @@ public:
     void RenderBodyTranslate(int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int HiddenMesh = -1, int Texture = -1);
     void RenderBodyShadow(int blendMesh = -1, int hiddenMesh = -1, int startMeshNumber = -1,
         int endMeshNumber = -1, void* pClothes = nullptr, int clothesCount = 0, float alpha = 1.f);
+    // Moves a skinned position onto the ground for the planar shadow (with `context`).
+    using ShadowProjection = void (*)(float position[3], const void* context);
+    // The planar shadow of model file mesh `mesh` (BMD::GltfModel) at the LOD
+    // being drawn (ActiveLod; the LODs share the skin): `vertices` gets its
+    // vertices, each skinned once (LOD 0: the VertexTransform of
+    // EnsureCpuVertices; a coarser LOD: its own vertices with the same
+    // arithmetic) and projected once; `indices` its triangles' corners in
+    // triangle order, as indices into `vertices`. Both are replaced; both empty
+    // for a mesh the LOD does not draw. With a pure `project` the corners equal
+    // those of projecting every corner, as AddMeshShadowTriangles does for a BMD.
+    void ProjectWeightedShadowMesh(int mesh, ShadowProjection project, const void* context,
+                                   std::vector<std::array<float, 3>>& vertices,
+                                   std::vector<std::uint32_t>& indices) const;
 
     void SetBodyLight(vec3_t right) { VectorCopy(right, BodyLight); }
 
@@ -413,6 +448,19 @@ private:
     BMD(const BMD& b);
 
     void ClaimSkinStamp() const;
+    // A name FindBone looked up: its bone (-1: none) and whether FindBoneOrRoot logged the miss.
+    struct BoneLookupEntry
+    {
+        std::string name;
+        int index = -1;
+        bool missLogged = false;
+    };
+    BoneLookupEntry& LookupBone(std::string_view name) const;
+
+    // FindBone's cache, valid for the bones it was made from.
+    mutable const Bone_t* m_boneLookupBones = nullptr;
+    mutable short m_boneLookupBoneCount = 0;
+    mutable std::vector<BoneLookupEntry> m_boneLookup;
     // The shadow streams the renderer keeps for the meshes of this slot.
     void ReleaseShadowStreams();
 
@@ -420,9 +468,17 @@ private:
         std::uint32_t color) const;
     void AddMeshShadowTriangles(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx, float sy,
         std::uint32_t color) const;
+    // AddMeshShadowTriangles of a model file: the meshes' shadows
+    // (ProjectWeightedShadowMesh) drawn indexed, in mesh and triangle order.
+    void AddWeightedMeshShadowTriangles(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx, float sy,
+                                        std::uint32_t color) const;
     // The same shadow from a cached rest-pose stream skinned on the GPU; false leaves it to the CPU.
     [[nodiscard]] bool RenderGpuMeshShadow(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx,
         float sy, std::uint32_t color) const;
+    // A model file's shadow, each mesh from the mesh its body draw caches on the GPU; a mesh the GPU cannot
+    // draw gets its CPU shadow (AddWeightedMeshShadowTriangles).
+    void RenderWeightedMeshShadow(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx, float sy,
+                                  std::uint32_t color) const;
 };
 
 extern BMD* Models;

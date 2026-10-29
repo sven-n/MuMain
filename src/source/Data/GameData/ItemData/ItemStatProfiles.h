@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Data/GameData/ItemData/ItemStatTerms.h"
+#include "Data/GameData/ItemData/StatProfileRule.h"
 
 #include <array>
 #include <optional>
@@ -16,24 +17,12 @@ namespace Data::Items
 {
 struct ItemStatFile;
 
-// The profiles the item data gives an item (DeriveStatProfile); the stat file
-// must have those its items name. Default names the default, which an item file
-// writes for an item that keeps it although its data gives a profile.
+// The one profile name of the formats: "default" names the default, in an item
+// file for an item that keeps it although its data gives a profile, and in a
+// profile rule; no profile may be called so. The other names are data.
 namespace StatProfileNames
 {
 constexpr const char* Default = "default";
-constexpr const char* Weapon = "weapon";
-constexpr const char* Armor = "armor";
-constexpr const char* Shield = "shield";
-constexpr const char* Sceptre = "sceptre";
-constexpr const char* Book = "book";
-constexpr const char* Helper = "helper";
-constexpr const char* Scroll = "scroll";
-constexpr const char* SmallWing = "smallWing";
-constexpr const char* FirstTierWing = "firstTierWing";
-constexpr const char* SecondTierWing = "secondTierWing";
-constexpr const char* SecondTierCape = "secondTierCape";
-constexpr const char* ThirdTierWing = "thirdTierWing";
 } // namespace StatProfileNames
 
 // The terms of one stat with the profile laid over the default.
@@ -96,7 +85,22 @@ public:
     // The names of the file's profiles, without the default.
     std::vector<std::string> GetProfileNames() const;
 
+    // The first profile rule `item` matches, or NoStatProfileRule.
+    int FindRule(const ItemDefinition& item) const;
+    // The profile a rule names: "" for the default, also for "default" and a
+    // name the file does not have.
+    const std::string& GetRuleProfile(int rule) const;
+    const std::vector<StatProfileRule>& GetRules() const
+    {
+        return m_rules;
+    }
+
     int GetLevelBonus(const StatTerms& terms, int level) const;
+    // The level bonus table of that name, or nullptr: what a description's placeholder names.
+    const LevelBonusTable* FindTable(std::string_view name) const;
+    std::vector<std::string> GetTableNames() const;
+    // Whether the default or a profile gives a stat that table; the others are only for descriptions.
+    bool IsTableUsedByStats(std::string_view name) const;
     int GetExcellentDropLevelBonus() const
     {
         return m_excellentDropLevelBonus;
@@ -108,8 +112,11 @@ public:
 
 private:
     std::vector<LevelBonusTable> m_tables;
+    std::vector<bool> m_tableUsedByStats;
     std::vector<std::string> m_names;
     std::vector<ItemStatProfile> m_profiles;
+    std::vector<StatProfileRule> m_rules;
+    std::vector<std::string> m_ruleProfiles;
     int m_excellentDropLevelBonus = 0;
     int m_ancientDropLevelBonus = 0;
 };
