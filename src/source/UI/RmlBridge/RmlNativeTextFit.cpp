@@ -25,6 +25,10 @@ namespace
 {
 const Rml::String kNativeFitClass = "native-fit";
 const Rml::String kTextFitClass = "text-fit";
+// How far a fitted text may still overrun its box: glyph advances round to whole pixels.
+constexpr float kOverflowTolerancePx = 1.f;
+// The smallest raster size `text-fit` searches down to (`native-fit` keeps the role's minimum).
+constexpr float kSmallestTextFitPx = 1.f;
 
 // What an element was last fitted for; unchanged inputs skip the measurement.
 struct FitState
@@ -135,16 +139,16 @@ bool FitElement(Rml::Element* element, bool textFit)
     const float measuredWidth = MeasureTextWidth(element, nativePx, textFit);
     float fittedPx = UI::Scaling::FitTextPixelSizeToWidth(
         nativePx, measuredWidth, boxWidth,
-        textFit ? 1.f : UI::Scaling::MinimumTextPixelSize(UI::Scaling::FontRole::Normal));
-    if (textFit && measuredWidth > boxWidth + 1.f)
+        textFit ? kSmallestTextFitPx : UI::Scaling::MinimumTextPixelSize(UI::Scaling::FontRole::Normal));
+    if (textFit && measuredWidth > boxWidth + kOverflowTolerancePx)
     {
-        float lowerPx = 1.f;
+        float lowerPx = kSmallestTextFitPx;
         float upperPx = std::ceil(nativePx);
         // Search actual raster sizes: fixed spacing and hinting do not scale with glyph width.
         while (lowerPx + 1.f < upperPx)
         {
             const float candidatePx = std::floor((lowerPx + upperPx) * 0.5f);
-            if (MeasureTextWidth(element, candidatePx, true) <= boxWidth + 1.f)
+            if (MeasureTextWidth(element, candidatePx, true) <= boxWidth + kOverflowTolerancePx)
                 lowerPx = candidatePx;
             else
                 upperPx = candidatePx;
