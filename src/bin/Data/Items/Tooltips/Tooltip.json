@@ -631,7 +631,6 @@
     },
     "devilSquareInvitationIngredient": {
       "en": "It is used to combine items for a Devil Square Invitation",
-      "zh-CN": "用于合成恶魔广场入场券",
       "de": "Wird verwendet, um Gegenstände zu einer Einladung für Devil Square zu kombinieren",
       "es": "Se utiliza para combinar elementos para una invitación de Devil Square.",
       "id": "Ini digunakan untuk menggabungkan item untuk Undangan Kotak Setan",
@@ -641,11 +640,11 @@
       "ru": "Используется для объединения предметов для приглашения на площадь Дьявола.",
       "tl": "Ito ay ginagamit upang pagsamahin ang mga item para sa isang Devil Square Invitation",
       "uk": "Він використовується для комбінування предметів для запрошення Devil Square",
+      "zh-CN": "用于合成恶魔广场入场券",
       "zh-TW": "它用於組合惡魔廣場邀請函的項目"
     },
     "reinforcementJewel": {
       "en": "Jewel for item reinforcement",
-      "zh-CN": "用于强化道具的宝石",
       "de": "Juwel zur Gegenstandsverstärkung",
       "es": "Joya para refuerzo de artículos.",
       "id": "Permata untuk penguatan item",
@@ -655,11 +654,11 @@
       "ru": "Самоцвет для усиления предмета",
       "tl": "Hiyas para sa pagpapatibay ng item",
       "uk": "Коштовність для посилення предметів",
+      "zh-CN": "用于强化道具的宝石",
       "zh-TW": "強化物品的寶石"
     },
     "grantPowerToReinforcedItem": {
       "en": "Grant actual power to reinforced item.",
-      "zh-CN": "用于提升道具的再生属性",
       "de": "Verleiht einem verstärkten Gegenstand echte Kraft.",
       "es": "Otorga poder real al elemento reforzado.",
       "id": "Berikan kekuatan sebenarnya pada item yang diperkuat.",
@@ -669,6 +668,7 @@
       "ru": "Предоставьте реальную силу усиленному предмету.",
       "tl": "Bigyan ng aktwal na kapangyarihan ang reinforced item.",
       "uk": "Надати фактичну силу посиленому предмету.",
+      "zh-CN": "用于提升道具的再生属性",
       "zh-TW": "賦予強化物品實際力量。"
     },
     "contactCsTeam": {

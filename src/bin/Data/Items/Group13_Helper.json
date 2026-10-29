@@ -2449,7 +2449,6 @@
         {
           "text": {
             "en": "I.D. of Kantur Chief Scientist. You can enter the Refinery Tower.",
-            "zh-CN": "坎特鲁研究员出入证。可进入提炼之塔。",
             "de": "Ausweis des Chefwissenschaftlers von Kantur. Sie können den Raffinerieturm betreten.",
             "es": "IDENTIFICACIÓN. del científico jefe de Kantur. Puedes ingresar a la Torre de la Refinería.",
             "id": "PENGENAL. dari Kepala Ilmuwan Kantur. Anda bisa memasuki Menara Kilang.",
@@ -2459,6 +2458,7 @@
             "ru": "ИДЕНТИФИКАТОР. главного научного сотрудника Кантура. Вы можете войти в Башню нефтеперерабатывающего завода.",
             "tl": "I.D. ng Kantur Chief Scientist. Maaari kang pumasok sa Refinery Tower.",
             "uk": "І.Д. головного наукового співробітника Кантур. Ви можете увійти до вежі нафтопереробного заводу.",
+            "zh-CN": "坎特鲁研究员出入证。可进入提炼之塔。",
             "zh-TW": "ID。坎圖爾首席科學家。您可以進入煉油塔。"
           }
         }
