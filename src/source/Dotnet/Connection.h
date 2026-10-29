@@ -95,11 +95,13 @@ private:
     PacketFunctions_ConnectServer* _connectServer = {};
     PacketFunctions_ClientToServer* _gameServer = {};
 
-    std::atomic<int32_t> _handle{0}; // a .NET thread sets it to 0 when the connection closes
+    // Atomic: the disconnect callback clears it on a thread-pool thread while the game reads it.
+    std::atomic<int32_t> _handle = 0;
     int32_t _id = 0;
     void (*_packetHandler)(int32_t, const BYTE*, int32_t);
     bool _firstPacketLogged = false;
 
+    void Unregister();
     void OnDisconnected();
     void OnPacketReceived(const BYTE* data, const int32_t length);
 
