@@ -150,3 +150,19 @@ TEST_CASE("text-fit resolves relative letter spacing at the fitted size without 
         }
     }
 }
+
+TEST_CASE("text-fit measures collapsed spaces and nested inline text as RmlUi lays them out [ui][text-fit]")
+{
+    TextFitFixture fixture;
+    const auto fittedSize = [&fixture](const char* value)
+    {
+        auto* document = fixture.LoadText("modern", "text-fit", "Liberation Sans", value);
+        UI::RmlBridge::FitNativeTextToBoxes(fixture.context);
+        return FontSize(document);
+    };
+
+    const float plain = fittedSize("MMMMMMMMMM MMMMMMMMMM");
+    REQUIRE(plain < 40.f);
+    CHECK(fittedSize("  MMMMMMMMMM     MMMMMMMMMM  ") == doctest::Approx(plain));
+    CHECK(fittedSize("MMMMMMMMMM <span>MMMMMMMMMM</span>") == doctest::Approx(plain));
+}

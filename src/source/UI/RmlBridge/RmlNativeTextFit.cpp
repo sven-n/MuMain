@@ -49,15 +49,54 @@ std::unordered_map<Rml::Element*, FitState>& FitStates()
     return states;
 }
 
-size_t HashText(Rml::Element* element)
+// Appends the element's text and that of its shown inline children, in document order.
+void AppendText(Rml::Element* element, Rml::String& text)
 {
-    size_t hash = 0;
     for (int i = 0; i < element->GetNumChildren(); ++i)
     {
-        if (const auto* text = dynamic_cast<const Rml::ElementText*>(element->GetChild(i)))
-            hash = hash * 31 + std::hash<std::string_view>{}(text->GetText());
+        Rml::Element* child = element->GetChild(i);
+        if (const auto* textChild = dynamic_cast<const Rml::ElementText*>(child))
+            text += textChild->GetText();
+        else if (child->GetComputedValues().display() != Rml::Style::Display::None)
+            AppendText(child, text);
     }
-    return hash;
+}
+
+bool IsCollapsibleSpace(char character)
+{
+    return character == ' ' || character == '\t' || character == '\n' || character == '\r' || character == '\f';
+}
+
+// The text as RmlUi lays it out on one line: under white-space normal and nowrap a run of spaces is
+// one space and the line drops its leading and trailing spaces.
+Rml::String LaidOutText(Rml::Element* element)
+{
+    Rml::String raw;
+    AppendText(element, raw);
+    const auto whiteSpace = element->GetComputedValues().white_space();
+    if (whiteSpace != Rml::Style::WhiteSpace::Normal && whiteSpace != Rml::Style::WhiteSpace::Nowrap)
+        return raw;
+
+    Rml::String text;
+    bool pendingSpace = false;
+    for (const char character : raw)
+    {
+        if (IsCollapsibleSpace(character))
+        {
+            pendingSpace = !text.empty();
+            continue;
+        }
+        if (pendingSpace)
+            text += ' ';
+        pendingSpace = false;
+        text += character;
+    }
+    return text;
+}
+
+size_t HashText(Rml::Element* element)
+{
+    return std::hash<std::string_view>{}(LaidOutText(element));
 }
 
 size_t HashTypography(Rml::Element* element)
@@ -77,14 +116,11 @@ size_t HashTypography(Rml::Element* element)
     return hash;
 }
 
+// Nested inline text is measured in the element's own face; a nested element with another font
+// is not measured in its own.
 Rml::String TextForMeasurement(Rml::Element* element, Rml::Style::TextTransform transform)
 {
-    Rml::String text;
-    for (int i = 0; i < element->GetNumChildren(); ++i)
-    {
-        if (const auto* child = dynamic_cast<const Rml::ElementText*>(element->GetChild(i)))
-            text += child->GetText();
-    }
+    Rml::String text = LaidOutText(element);
     if (transform == Rml::Style::TextTransform::Uppercase || transform == Rml::Style::TextTransform::Lowercase)
     {
         for (char& character : text)
