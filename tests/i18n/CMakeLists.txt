@@ -6,6 +6,7 @@ mu_add_test(
     NAME legacy_text_ids_tests
     SOURCES
         test_legacy_text_character.cpp
+        test_legacy_text_network.cpp
         test_legacy_text_items.cpp
         test_legacy_text_ui.cpp
         test_legacy_text_dialog.cpp

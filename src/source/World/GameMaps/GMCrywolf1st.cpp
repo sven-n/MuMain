@@ -23,7 +23,52 @@
 extern void MonsterMoveSandSmoke(OBJECT* o);
 extern void MonsterDieSandSmoke(OBJECT* o);
 
-extern bool LogOut;
+namespace
+{
+// The ready-state notice board: four pages of four lines, turned every ten seconds, starting one
+// page before the first (kNoticeFirstPage) until the page timer first turns it.
+constexpr int kNoticePageCount = 4;
+constexpr int kNoticeLinesPerPage = 4;
+constexpr int kNoticeFirstPage = -1;
+
+const wchar_t* const kNoNoticeText = L"";
+
+// One line of the notice board; a format string ("10%% ...") is printed before it is shown.
+struct NoticeLine
+{
+    const wchar_t* const* text;
+    bool isFormat;
+};
+
+// The board's lines, page by page from kNoticeFirstPage; that page shows the guardian contract
+// messages, as the original did.
+const NoticeLine kNoticeLines[(kNoticePageCount - kNoticeFirstPage) * kNoticeLinesPerPage] = {
+    {&I18N::Game::YouHaveBeenRegisteredToBeAGuardianToProtectTheWolf, false},
+    {&I18N::Game::YourRoleAsAGuardianWillBeCancelledWhenYouWarp, false},
+    {&I18N::Game::YouHaveBeenDisqualifiedToBeAGuardian, false},
+    {&I18N::Game::ContractCanTBeMadeWhenYouAreOnAMount, false},
+
+    {&I18N::Game::MissionPoint1DefendTheWolfStatue, false},
+    {&I18N::Game::MakeAContractWithTheAltarToProtectTheWolfStatue, false},
+    {&I18N::Game::OnlyTheElfCanBeAGuardianToGivePowerToTheWolfStatue, false},
+    {&I18N::Game::YouHaveToProtectElvesWhenTheContractIsBeingMade, false},
+
+    {&I18N::Game::MissionPoint2DefeatBalgass, false},
+    {&I18N::Game::FortressOfCrywolfWillNotBeSafeUnlessBalgassIsDefeated, false},
+    {&I18N::Game::BalgassCanOnlyShowUpFor5MinutesAroundTheFortressOfCrywolf, false},
+    {&I18N::Game::DefeatBalgassWithinTheGivenTime, false},
+
+    {&I18N::Game::SuccessReparation, false},
+    {&I18N::Game::_10MonsterStrengthDecreaseMaintainDuringTheEvent, true},
+    {&I18N::Game::_5DecreaseInCastleAndArenaInvitationCombineRate, true},
+    {&I18N::Game::AboveReparationIsValidTillTheNextCrywolfBattle, false},
+
+    {&I18N::Game::FailurePenalty, false},
+    {&I18N::Game::DeleteAllTheNPCWithinCrywolf, false},
+    {&kNoNoticeText, false},
+    {&I18N::Game::AbovePenaltyIsValidTillTheNextCrywolfBattle, false},
+};
+} // namespace
 
 BYTE m_AltarState[5] = { 2,2,2,2,2 };
 
@@ -235,21 +280,30 @@ bool M34CryWolf1st::AdvanceNoticeTexts(std::wstring (&texts)[4])
         if (iNextNotice >= 4)
             iNextNotice = 0;
     }
-    const int iTemp = 4 * iNextNotice;
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i < kNoticeLinesPerPage; i++)
     {
-        const int nText = 1957 + i + iTemp;
-        if (1966 == nText || 1967 == nText)
-        {
-            // These two are format strings ("10%% ..."): printed, like the original did.
-            wchar_t szText[256];
-            mu_swprintf(szText, I18N::Game::Lookup(nText));
-            texts[i] = szText;
-        }
-        else
-            texts[i] = I18N::Game::Lookup(nText);
+        texts[i] = NoticeText(iNextNotice, i);
     }
     return true;
+}
+
+std::wstring M34CryWolf1st::NoticeText(int page, int line)
+{
+    if (page < kNoticeFirstPage || page >= kNoticePageCount || line < 0 || line >= kNoticeLinesPerPage)
+    {
+        return {};
+    }
+
+    const NoticeLine& notice = kNoticeLines[(page - kNoticeFirstPage) * kNoticeLinesPerPage + line];
+    if (!notice.isFormat)
+    {
+        return *notice.text;
+    }
+
+    // A format string ("10%% ..."): printed, like the original did.
+    wchar_t szText[256];
+    mu_swprintf(szText, *notice.text);
+    return szText;
 }
 
 void M34CryWolf1st::RenderNoticesCryWolf()
@@ -2175,28 +2229,6 @@ void M34CryWolf1st::Check_AltarState(int Num, int State)
     if (M34CryWolf1st::Get_State_Only_Elf() == false || M34CryWolf1st::IsCyrWolf1st() == false)
         return;
     m_AltarState[Num - 1] = State;
-}
-
-void M34CryWolf1st::Set_Message_Box(int Str, int Num, int Key, int ObjNum)
-{
-    if (M34CryWolf1st::Get_State_Only_Elf() == false || M34CryWolf1st::IsCyrWolf1st() == false || LogOut)
-        return;
-
-    if (Str == 56)
-    {
-        BYTE State = (m_AltarState[ObjNum] & 0x0f);
-        mu_swprintf(Box_String[Num], I18N::Game::Lookup(1950 + Str), State);
-    }
-    else
-        wcscpy(Box_String[Num], I18N::Game::Lookup(1950 + Str));
-    if (Str == 56 || Str == 57)
-        Message_Box = 1;
-    else
-        Message_Box = 2;
-    if (Num == 0)
-        Box_String[Num + 1][0] = 0;
-
-    BackUp_Key = Key;
 }
 
 void M34CryWolf1st::Set_Val_Hp(int State)

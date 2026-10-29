@@ -16,7 +16,14 @@
 
 using namespace SEASON4A;
 
-
+namespace
+{
+// The socket option categories' names (a seed's element), in category order from SOC_IMPROVE_ATTACK.
+const wchar_t* const* const kSocketCategoryNames[MAX_SOCKET_OPTION_CATEGORY - SOC_IMPROVE_ATTACK] = {
+    &I18N::Game::Fire,      &I18N::Game::Water, &I18N::Game::Ice,    &I18N::Game::Wind,
+    &I18N::Game::Lightning, &I18N::Game::Earth, &I18N::Game::Unique,
+};
+} // namespace
 
 CSocketItemMgr g_SocketItemMgr;
 
@@ -80,6 +87,15 @@ int CSocketItemMgr::GetSocketCategory(int iSeedID)
 
     SOCKET_OPTION_INFO* pInfo = &m_SocketOptionInfo[SOT_SOCKET_ITEM_OPTIONS][iSeedID];
     return pInfo->m_iOptionCategory;
+}
+
+const wchar_t* CSocketItemMgr::GetSocketCategoryName(int iCategory)
+{
+    if (iCategory < SOC_IMPROVE_ATTACK || iCategory >= MAX_SOCKET_OPTION_CATEGORY)
+    {
+        return L"";
+    }
+    return *kSocketCategoryNames[iCategory - SOC_IMPROVE_ATTACK];
 }
 
 int CSocketItemMgr::GetSeedShpereSeedID(const ITEM* pItem)
@@ -215,7 +231,8 @@ void CSocketItemMgr::CreateSocketOptionText(wchar_t* pszOptionText, int iSeedID,
 
     CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, fOptionValue);
 
-    mu_swprintf(pszOptionText, L"%ls(%ls %ls)", I18N::Game::Lookup(2640 + pInfo->m_iOptionCategory - 1), pInfo->m_szOptionName, szOptionValueText);
+    mu_swprintf(pszOptionText, L"%ls(%ls %ls)", GetSocketCategoryName(pInfo->m_iOptionCategory), pInfo->m_szOptionName,
+                szOptionValueText);
 }
 
 extern int SkipNum;
@@ -286,7 +303,7 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
     if (GameLogic::Items::IsSocketSeed(pItem))
     {
         int iCategoryIndex = pItem->Type - (ITEM_SEED_FIRE) + 1;
-        mu_swprintf(TextList[iTextNum], I18N::Game::ElementS, I18N::Game::Lookup(2640 + iCategoryIndex - 1));
+        mu_swprintf(TextList[iTextNum], I18N::Game::ElementS, GetSocketCategoryName(iCategoryIndex));
         TextListColor[iTextNum] = TEXT_COLOR_WHITE;
         TextBold[iTextNum] = false;
         ++iTextNum;
@@ -333,7 +350,7 @@ int CSocketItemMgr::AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextN
     else if (GameLogic::Items::IsSocketSeedSphere(pItem))
     {
         int iCategoryIndex = (pItem->Type - (ITEM_SEED_SPHERE_FIRE_1)) % 6 + 1;
-        mu_swprintf(TextList[iTextNum], I18N::Game::ElementS, I18N::Game::Lookup(2640 + iCategoryIndex - 1));
+        mu_swprintf(TextList[iTextNum], I18N::Game::ElementS, GetSocketCategoryName(iCategoryIndex));
         TextListColor[iTextNum] = TEXT_COLOR_WHITE;
         TextBold[iTextNum] = false;
         ++iTextNum;

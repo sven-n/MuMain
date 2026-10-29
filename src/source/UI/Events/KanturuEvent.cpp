@@ -33,6 +33,13 @@
 
 namespace
 {
+// The entry answers' texts, from POPUP_NONE to POPUP_NOT_MUNSTONE.
+const wchar_t* const* const kEntryResultTexts[mu::ui::window::CKanturu2ndEnterNpc::POPUP_NOT_MUNSTONE + 1] = {
+    &I18N::Game::FailedToEnter,
+    &I18N::Game::_15PlayersHaveAlreadyEnteredYouCanNoLongerEnter,
+    &I18N::Game::MoonstonePendantAuthenticationHasFailed,
+};
+
 // RenderText() shrinks a text wider than its box to fit it: the size it drew `text` at.
 float KanturuTextPxInBox(UI::Scaling::FontRole role, const wchar_t* text, float boxWidth)
 {
@@ -220,10 +227,19 @@ void mu::ui::window::CKanturu2ndEnterNpc::CreateMessageBox(MSGBOX_TYPE result)
     }
     else
     {
-        wcscpy(strMessage, I18N::Game::Lookup(2170 + static_cast<int>(result)));
+        wcscpy(strMessage, EntryResultText(result));
     }
 
     mu::ui::window::CreateOkMessageBox(strMessage);
+}
+
+const wchar_t* mu::ui::window::CKanturu2ndEnterNpc::EntryResultText(int result)
+{
+    if (result < POPUP_NONE || result > POPUP_NOT_MUNSTONE)
+    {
+        return L"";
+    }
+    return *kEntryResultTexts[result];
 }
 
 void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(UI::Kanturu::Stage stage, UI::Kanturu::Detail detail, bool canEnter,

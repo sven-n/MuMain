@@ -137,6 +137,9 @@ namespace SEASON4A
         BOOL IsSocketItem(const OBJECT* pObject);
         int GetSeedShpereSeedID(const ITEM* pItem);
         int GetSocketCategory(int iSeedID);
+        // The name of socket option category `iCategory` (SOC_IMPROVE_ATTACK to SOC_UNIQUE_OPTION,
+        // also a seed's element); empty for any other number.
+        static const wchar_t* GetSocketCategoryName(int iCategory);
 
         int AttachToolTipForSocketItem(const ITEM* pItem, int iTextNum);
         int AttachToolTipForSeedSphereItem(const ITEM* pItem, int iTextNum);

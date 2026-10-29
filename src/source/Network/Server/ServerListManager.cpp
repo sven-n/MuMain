@@ -178,18 +178,18 @@ void CServerListManager::InsertServer(CServerGroup* pServerGroup, int iConnectIn
     pServerInfo->m_iPercent = iServerPercent;
     pServerInfo->m_byNonPvP = pServerGroup->m_abyNonPvpServer[pServerInfo->m_iIndex - 1];
 
-    int iTextIndex;
+    const wchar_t* loadText;
     if (iServerPercent >= 128)
     {
-        iTextIndex = 560;
+        loadText = I18N::Game::NowPreparing;
     }
     else if (iServerPercent >= 100)
     {
-        iTextIndex = 561;
+        loadText = I18N::Game::Full;
     }
     else
     {
-        iTextIndex = 562;
+        loadText = I18N::Game::Connect;
     }
 
     // The suffix is ASCII, so each char is its wchar_t.
@@ -197,7 +197,7 @@ void CServerListManager::InsertServer(CServerGroup* pServerGroup, int iConnectIn
         Data::ServerList::GetChannelSuffix(static_cast<Data::ServerList::ChannelType>(pServerInfo->m_byNonPvP));
     const std::wstring wideSuffix(suffix.begin(), suffix.end());
     mu_swprintf(pServerInfo->m_bName, L"%ls-%d%ls %ls", pServerGroup->m_szName, pServerInfo->m_iIndex,
-                wideSuffix.c_str(), I18N::Game::Lookup(iTextIndex));
+                wideSuffix.c_str(), loadText);
 
     pServerGroup->InsertServerInfo(pServerInfo);
 }

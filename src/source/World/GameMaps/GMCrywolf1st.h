@@ -27,6 +27,9 @@ namespace M34CryWolf1st {		//. 크라이울프 점령지
     // The ready-state notice's four lines (the page turns every ten seconds); false outside the
     // ready state. Advances the page timer, so call it once per frame.
     bool AdvanceNoticeTexts(std::wstring (&texts)[4]);
+    // Line `line` (0 to 3) of notice page `page` (-1, the page before the first turn, to 3) as
+    // AdvanceNoticeTexts shows it; empty for any other page or line.
+    std::wstring NoticeText(int page, int line);
     void CryWolfMVPInit();
     int IsCryWolf1stMVPStart();
     bool IsCryWolf1stMVPStatePeace();
@@ -37,7 +40,6 @@ namespace M34CryWolf1st {		//. 크라이울프 점령지
     void DoTankerFireFixStartPosition(int SourceX, int SourceY, int PositionX, int PositionY);
 
     void Check_AltarState(int Num, int State);
-    void Set_Message_Box(int Str, int Num, int Key, int ObjNum = -1);
     void Set_Val_Hp(int State);
     void Set_BossMonster(int Val_Hp, int Dl_Num);
     void SetTime(BYTE byHour, BYTE byMinute);

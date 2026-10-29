@@ -64,6 +64,16 @@ namespace
     // their hover regions are disjoint, so one shared owner token is enough.
     const int kSkillHoverTooltipOwner = 0;
 
+    // The temple skills' descriptions, from AT_SKILL_CURSED_TEMPLE_PRODECTION to
+    // AT_SKILL_CURSED_TEMPLE_SUBLIMATION.
+    const wchar_t* const* const
+        kSkillDescriptions[AT_SKILL_CURSED_TEMPLE_SUBLIMATION - AT_SKILL_CURSED_TEMPLE_PRODECTION + 1] = {
+            &I18N::Game::AbsorbDamageWithTheProtectionShield,
+            &I18N::Game::MobilityDisabled,
+            &I18N::Game::RelocateToTheCharacterThatCarriesTheSacredItem,
+            &I18N::Game::ShieldGageReducedOf50,
+    };
+
     //#ifdef _DEBUG
     const float posX[7] =
     {
@@ -564,6 +574,15 @@ bool mu::ui::window::CCursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, D
     return false;
 }
 
+const wchar_t* mu::ui::window::CCursedTempleSystem::SkillDescription(int skill)
+{
+    if (skill < AT_SKILL_CURSED_TEMPLE_PRODECTION || skill > AT_SKILL_CURSED_TEMPLE_SUBLIMATION)
+    {
+        return L"";
+    }
+    return *kSkillDescriptions[skill - AT_SKILL_CURSED_TEMPLE_PRODECTION];
+}
+
 bool mu::ui::window::CCursedTempleSystem::CheckHeroSkillType(int operatortype)
 {
     if (operatortype == 0)
@@ -836,8 +855,7 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill()
         mu_swprintf(TextList[TextNum], L"\n");
         TextNum++;
 
-        mu_swprintf(TextList[TextNum], L"%ls",
-                    I18N::Game::Lookup(2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)));
+        mu_swprintf(TextList[TextNum], L"%ls", SkillDescription(CursedTempleCurSkillType));
         TextListColor[TextNum] = TEXT_COLOR_DARKBLUE;
         TextNum++;
 
