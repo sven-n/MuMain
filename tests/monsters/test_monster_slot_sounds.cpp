@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <iterator>
+#include <memory>
 
 using Engine::Object::MonsterSlotSound::Find;
 using Engine::Object::MonsterSlotSound::NoSound;
@@ -84,6 +85,19 @@ TEST_CASE("Monster models: a model without sound slots has no sound in any slot 
     // kept 0, the Bull Fighter's first sound.
     scope.Run([] { OpenNpc(MODEL_SMITH); });
     for (const int sound : scope.ReadSlot(MODEL_SMITH).sounds)
+    {
+        CHECK(sound == NoSound);
+    }
+}
+
+TEST_CASE("Monster models: a model no entry opens has no sound in any slot, as the skeletons' player model (P9) "
+          "[monsters][sounds]")
+{
+    // The Skeleton monsters are the player model with a skeleton SubType,
+    // and the game played the player model's slots for them, which nothing
+    // set.
+    const auto model = std::make_unique<BMD>();
+    for (const short sound : model->Sounds)
     {
         CHECK(sound == NoSound);
     }

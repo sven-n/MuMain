@@ -284,6 +284,12 @@ public:
         iBillType = -1;
         bOffLight = false;
         m_bCompletedAlloc = false;
+        // No sound slot has a sound until a Models.json entry sets them: the
+        // player model the skeletons use has none (P9).
+        for (short& sound : Sounds)
+        {
+            sound = -1;
+        }
     }
 
     ~BMD();
