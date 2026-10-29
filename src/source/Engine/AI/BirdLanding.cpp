@@ -3,7 +3,9 @@
 
 namespace Engine::AI::BirdLanding
 {
-bool IsHeroStill(int heroAction)
+namespace
+{
+bool IsPlayerModelStill(int heroAction)
 {
     // The basic stop poses come before the walks in the action list.
     if (heroAction >= PLAYER_SET && heroAction < PLAYER_WALK_MALE)
@@ -36,6 +38,19 @@ bool IsHeroStill(int heroAction)
     default:
         return false;
     }
+}
+
+// A monster form has the monster's actions, whose numbers overlap the player's (MONSTER01_WALK is
+// PLAYER_STOP_FEMALE), so it needs its own list.
+bool IsMonsterFormStill(int heroAction)
+{
+    return heroAction == MONSTER01_STOP1 || heroAction == MONSTER01_STOP2;
+}
+} // namespace
+
+bool IsHeroStill(int heroAction, bool playerModel)
+{
+    return playerModel ? IsPlayerModelStill(heroAction) : IsMonsterFormStill(heroAction);
 }
 
 bool CanLandOn(unsigned int terrainWallFlags)

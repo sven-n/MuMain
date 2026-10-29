@@ -987,6 +987,13 @@ static void TakeOffBird(OBJECT* o)
     SetAction(o, BIRD_ACTION_FLY);
 }
 
+// A hero in a monster form (a Transformation Ring) has that monster's model and actions.
+static bool HeroStandsStill()
+{
+    const OBJECT& hero = Hero->Object;
+    return Engine::AI::BirdLanding::IsHeroStill(hero.CurrentAction, hero.Type == MODEL_PLAYER);
+}
+
 void MoveBird(OBJECT* o)
 {
     if (o->AI == BOID_FLY)
@@ -1031,7 +1038,7 @@ void MoveBird(OBJECT* o)
     }
     if (o->AI == BOID_GROUND)
     {
-        if (!Engine::AI::BirdLanding::IsHeroStill(Hero->Object.CurrentAction) || rand_fps_check(256))
+        if (!HeroStandsStill() || rand_fps_check(256))
         {
             TakeOffBird(o);
         }
