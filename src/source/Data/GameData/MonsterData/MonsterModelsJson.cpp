@@ -67,6 +67,11 @@ constexpr const char* Chance = "chance";
 constexpr const char* OneIn = "oneIn";
 constexpr const char* Draw = "draw";
 constexpr const char* Pick = "pick";
+// The names of the map lists before maps were the server's numbers (monsters
+// design, D67); a file that has them is refused with the new name.
+constexpr const char* OldWorldTextureFolders = "worldTextureFolders";
+constexpr const char* OldWorlds = "worlds";
+constexpr const char* OldSoundEventWorlds = "soundEventWorlds";
 } // namespace Keys
 
 constexpr const char* LinearFilter = "linear";
@@ -74,17 +79,29 @@ constexpr const char* NearestFilter = "nearest";
 constexpr const char* RepeatWrap = "repeat";
 constexpr const char* ClampWrap = "clamp";
 
-const KeySet ModelKeys{Keys::Slot,           Keys::File,
-                       Keys::TextureFolders, Keys::MapTextureFolders,
-                       Keys::TextureNames,   Keys::Animations,
-                       Keys::HoldLastFrame,  Keys::HeadBone,
-                       Keys::StreamMesh,     Keys::NoneBlendMeshes,
-                       Keys::Sounds,         Keys::SoundSlots,
-                       Keys::Bitmaps,        Keys::Parts,
-                       Keys::BoundingBox,    Keys::LinkBones,
-                       Keys::SoundEvents,    Keys::SoundEventMaps};
+// With the renamed keys: RefuseRenamedKeys reports them, they are not unknown.
+const KeySet ModelKeys{Keys::Slot,
+                       Keys::File,
+                       Keys::TextureFolders,
+                       Keys::MapTextureFolders,
+                       Keys::TextureNames,
+                       Keys::Animations,
+                       Keys::HoldLastFrame,
+                       Keys::HeadBone,
+                       Keys::StreamMesh,
+                       Keys::NoneBlendMeshes,
+                       Keys::Sounds,
+                       Keys::SoundSlots,
+                       Keys::Bitmaps,
+                       Keys::Parts,
+                       Keys::BoundingBox,
+                       Keys::LinkBones,
+                       Keys::SoundEvents,
+                       Keys::SoundEventMaps,
+                       Keys::OldWorldTextureFolders,
+                       Keys::OldSoundEventWorlds};
 const KeySet PartKeys{Keys::Slot,       Keys::Effect,        Keys::File, Keys::TextureFolders,
-                      Keys::Animations, Keys::HoldLastFrame, Keys::Maps};
+                      Keys::Animations, Keys::HoldLastFrame, Keys::Maps, Keys::OldWorlds};
 const KeySet SoundKeys{Keys::File, Keys::Id, Keys::Channels, Keys::Spatial};
 const KeySet SoundSlotKeys{Keys::Idle, Keys::Attack, Keys::Die, Keys::SecondSet};
 const KeySet SecondSetKeys{Keys::Idle, Keys::Attack, Keys::Die};
@@ -781,6 +798,22 @@ void ReadBitmaps(const OrderedJson& json, std::vector<MonsterModelBitmap>& bitma
     }
 }
 
+// A key renamed when maps became the server's numbers is fatal with its new
+// name: as an unknown key it would only warn, and its maps would be lost (a
+// part without maps opens with its model on every map).
+void RefuseRenamedKeys(const OrderedJson& json, std::initializer_list<std::pair<const char*, const char*>> renamed,
+                       const std::string& prefix, ModelIssues& issues)
+{
+    for (const auto& [oldKey, newKey] : renamed)
+    {
+        if (json.contains(oldKey))
+        {
+            issues.Fatal(prefix + oldKey,
+                         std::string("was renamed to ") + newKey + ", with the map numbers the server sends");
+        }
+    }
+}
+
 void ReadParts(const OrderedJson& json, std::vector<MonsterModelPart>& parts, ModelIssues& issues)
 {
     if (!json.is_array())
@@ -811,6 +844,7 @@ void ReadParts(const OrderedJson& json, std::vector<MonsterModelPart>& parts, Mo
             return;
         }
         ReadLoad(entry, part.load, issues);
+        RefuseRenamedKeys(entry, {{Keys::OldWorlds, Keys::Maps}}, key + ".", issues);
         if (const auto maps = entry.find(Keys::Maps); maps != entry.end())
         {
             ReadMaps(*maps, key + "." + Keys::Maps, part.maps, issues);
@@ -895,6 +929,10 @@ void ReadOptionalWhole(const OrderedJson& json, const char* key, long long low, 
 void ReadModelFields(const OrderedJson& json, MonsterModelDefinition& model, ModelIssues& issues)
 {
     ReadLoad(json, model.load, issues);
+    RefuseRenamedKeys(
+        json,
+        {{Keys::OldWorldTextureFolders, Keys::MapTextureFolders}, {Keys::OldSoundEventWorlds, Keys::SoundEventMaps}},
+        "", issues);
     if (const auto folders = json.find(Keys::MapTextureFolders); folders != json.end())
     {
         ReadMapFolders(*folders, model.mapTextureFolders, issues);

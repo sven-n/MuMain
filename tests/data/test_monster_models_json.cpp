@@ -360,6 +360,33 @@ TEST_CASE("Monster models: unknown fields are warnings and are ignored [data][mo
                         "unknown"));
 }
 
+TEST_CASE("Monster models: the map lists' old names are fatal with their new names (D67) [data][monsters]")
+{
+    struct Case
+    {
+        std::string fields;
+        std::string field;
+        std::string newName;
+    };
+    const std::vector<Case> cases = {
+        {R"("worldTextureFolders": [{"worlds": [18], "folders": ["NPC"]}])",
+         "model MONSTER_MODEL_HOUND worldTextureFolders", "mapTextureFolders"},
+        {R"("soundEventWorlds": [56])", "model MONSTER_MODEL_HOUND soundEventWorlds", "soundEventMaps"},
+        {R"("parts": [{"effect": "x", "file": "Data/Monster/p.bmd", "textureFolders": ["Monster"], "worlds": [24]}])",
+         "model MONSTER_MODEL_HOUND parts[0].worlds", "maps"},
+    };
+    for (const Case& test : cases)
+    {
+        const ReadResult read = Read(ModelsFile(Model("MONSTER_MODEL_HOUND", test.fields)));
+        INFO(test.fields);
+        INFO(Messages(read.issues));
+        CHECK(read.models.empty());
+        CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Fatal, test.field, "renamed to " + test.newName));
+        // Not also an unknown key.
+        CHECK(read.issues.size() == 1);
+    }
+}
+
 TEST_CASE("Monster models: the slots of the monster and NPC ranges have names [data][monsters]")
 {
     CHECK(Data::Monsters::FindMonsterModelSlot("MONSTER_MODEL_HOUND") == MODEL_HOUND);

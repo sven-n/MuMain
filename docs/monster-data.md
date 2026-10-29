@@ -222,7 +222,8 @@ Devil Square 5–7 is 32, although the client loads both as Devil Square (9).
 A list may also name one stage of a map: `{"map": 9, "stage": 2}` is Devil
 Square 2. OpenMU sends the stage with the map (byte 10 of `MapChanged`, to
 the extended client); a number names all of its stages, and with another
-server every stage is 0.
+server every stage is 0. The lists' older names (`worldTextureFolders`,
+`worlds`, `soundEventWorlds`) are fatal problems that name the new ones.
 
 ### The map picker
 
