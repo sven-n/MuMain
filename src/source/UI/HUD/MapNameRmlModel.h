@@ -6,9 +6,13 @@ namespace UI::MapName
 {
 struct MapNameRmlModel
 {
-    // Placement and size belong to the theme; C++ supplies the fade and current artwork.
+    // Placement and decoration belong to the theme; the name is plain UTF-8 text.
     float alpha = 1.f;
-    Rml::String imageSource;  // the map's name image as CGlobalBitmap loaded it
+    Rml::String mapName;
+    Rml::String language;     // the game's locale ("ja"): a theme can draw a language in its own face
+    bool icon = false;        // the map's icon between the swirls
+    Rml::String iconSource;   // Data/Interface/MapNameOrnament/<image>
+    Rml::String iconStyle;    // where the icon sits on the banner
     bool strife = false;      // a Gens battle map: the strife banner above the name
     Rml::String strifeSource; // MapNameAddStrife
 };

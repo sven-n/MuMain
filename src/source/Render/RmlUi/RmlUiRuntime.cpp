@@ -108,9 +108,17 @@ void LoadBundledFonts()
     Rml::LoadFontFace("fonts/DejaVuSans.ttf");
     Rml::LoadFontFace("fonts/DejaVuSans-Bold.ttf");
 
+    // Japanese map names name this face (the themes' font-map-name-ja); as a fallback behind the
+    // Chinese faces it would mix Chinese and Japanese forms in one name.
+    Rml::LoadFontFace("fonts/NotoSansJP-Regular.otf");
+
     // The native fixed-width face (kBundledFixedFont, BundledFonts.h), for text the original drew
     // with g_hFixFont -- the character list's server messages (server_msg.rcss).
     Rml::LoadFontFace("fonts/Cousine-Regular.ttf");
+
+    // The map banner's lettering ("MU Map Name", italic only), generated from the original
+    // client's map-name images by tools/MapNameFont. The themes name it as font-map-name.
+    Rml::LoadFontFace("fonts/MuMapName-Italic.otf");
 }
 } // namespace
 

@@ -116,6 +116,9 @@
     <value>Reserva: Trabalho</value>
     <comment>legacy_id=28,29</comment>
   </data>
+  <data name="Unknown map" xml:space="preserve">
+    <value>Mapa desconhecido</value>
+  </data>
   <data name="Lorencia" xml:space="preserve">
     <value>Lorência</value>
     <comment>legacy_id=30</comment>
@@ -7561,7 +7564,7 @@
     <comment>legacy_id=2177</comment>
   </data>
   <data name="Kanturu3" xml:space="preserve">
-    <value>Kanturu3</value>
+    <value>Ruínas de Kanturu</value>
     <comment>legacy_id=2178</comment>
   </data>
   <data name="Refinery Tower" xml:space="preserve">

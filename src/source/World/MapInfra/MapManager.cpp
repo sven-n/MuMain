@@ -1474,142 +1474,108 @@ bool CMapManager::InBattleCastle(int iMap)
     return (iMap == WD_30BATTLECASTLE) ? true : false;
 }
 
+namespace
+{
+constexpr int SecondDevilSquareMapId = 32;
+
+const wchar_t* EventMapName(CMapManager& maps, int mapId)
+{
+    if (maps.InBloodCastle(mapId))
+        return I18N::Game::BloodCastle;
+    if (maps.InChaosCastle(mapId))
+        return I18N::Game::ChaosCastle;
+    if (maps.InHellas(mapId))
+        return maps.InHiddenHellas(mapId) ? I18N::Game::LostKalima : I18N::Game::Kalima;
+    if (mapId >= WD_45CURSEDTEMPLE_LV1 && mapId <= WD_45CURSEDTEMPLE_LV6)
+        return I18N::Game::IllusionTemple;
+    if (mapId >= WD_65DOPPLEGANGER1 && mapId <= WD_68DOPPLEGANGER4)
+        return I18N::Game::Doppelganger;
+    if (mapId >= WD_69EMPIREGUARDIAN1 && mapId <= WD_72EMPIREGUARDIAN4)
+        return I18N::Game::Varka;
+    return nullptr;
+}
+} // namespace
+
 const wchar_t* CMapManager::GetMapName(int iMap)
 {
-    if (iMap == WD_34CRYWOLF_1ST)
-    {
-        return(I18N::Game::CrywolfFortress);
-    }
-    else if (iMap == WD_33AIDA)
-    {
-        return(I18N::Game::Aida);
-    }
-    else if (iMap == WD_37KANTURU_1ST)
-    {
-        return(I18N::Game::Kanturu);
-    }
-    else if (iMap == WD_38KANTURU_2ND)
-    {
-        return(I18N::Game::Kanturu3);
-    }
-    else if (iMap == WD_39KANTURU_3RD)
-    {
-        return(I18N::Game::RefineryTower);
-    }
-    else if (iMap == WD_40AREA_FOR_GM)
-    {
-        return(I18N::Game::GMSummonZone);
-    }
-    else if (iMap == WD_51HOME_6TH_CHAR)
-    {
-        return(I18N::Game::Elveland);
-    }
-    else if (iMap == WD_57ICECITY)
-    {
-        return(I18N::Game::LaCleon);
-    }
-    else if (iMap == WD_58ICECITY_BOSS)
-    {
-        return(I18N::Game::Hatchery);
-    }
+    const auto* name = FindMapName(iMap);
+    return name != nullptr ? name : I18N::Game::UnknownMap;
+}
 
-    if (gMapManager.InBattleCastle(iMap) == true)
+const wchar_t* CMapManager::FindMapName(int iMap)
+{
+    // The event predicates reserve -1 for WorldActive; a name lookup uses only its argument.
+    if (iMap < 0)
+        return nullptr;
+    if (const auto* eventName = EventMapName(*this, iMap))
+        return eventName;
+
+    switch (iMap)
     {
-        return (I18N::Game::ValleyOfLoren);
-    }
-    if (iMap == WD_31HUNTING_GROUND)
-    {
-        return (I18N::Game::LandOfTrials);
-    }
-    if (InChaosCastle(iMap) == true)
-    {
-        return (I18N::Game::ChaosCastle);
-    }
-    if (InHellas(iMap) == true)
-    {
-        if (InHiddenHellas(iMap) == true)
-            return (I18N::Game::LostKalima);
-        return (I18N::Game::Kalima);
-    }
-    if (InBloodCastle(iMap) == true)
-    {
-        return (I18N::Game::BloodCastle);
-    }
-    if (iMap == WD_10HEAVEN)
-    {
-        return (I18N::Game::Lookup(55 + iMap - WD_10HEAVEN));
-    }
-    if (iMap == 32)
-    {
-        return (I18N::Game::DevilSquare);
-    }
-    if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasBarrackMap())
+    case WD_0LORENCIA:
+        return I18N::Game::Lorencia;
+    case WD_1DUNGEON:
+        return I18N::Game::Dungeon;
+    case WD_2DEVIAS:
+        return I18N::Game::Devias;
+    case WD_3NORIA:
+        return I18N::Game::Noria;
+    case WD_4LOSTTOWER:
+        return I18N::Game::LostTower;
+    case WD_5UNKNOWN:
+        return I18N::Game::APlaceOfExile;
+    case WD_6STADIUM:
+        return I18N::Game::Arena;
+    case WD_7ATLANSE:
+        return I18N::Game::Atlans;
+    case WD_8TARKAN:
+        return I18N::Game::Tarkan;
+    case WD_9DEVILSQUARE:
+    case SecondDevilSquareMapId:
+        return I18N::Game::DevilSquare;
+    case WD_10HEAVEN:
+        return I18N::Game::Icarus;
+    case WD_30BATTLECASTLE:
+        return I18N::Game::ValleyOfLoren;
+    case WD_31HUNTING_GROUND:
+        return I18N::Game::LandOfTrials;
+    case WD_33AIDA:
+        return I18N::Game::Aida;
+    case WD_34CRYWOLF_1ST:
+    case WD_35CRYWOLF_2ND:
+        return I18N::Game::CrywolfFortress;
+    case WD_37KANTURU_1ST:
+        return I18N::Game::Kanturu;
+    case WD_38KANTURU_2ND:
+        return I18N::Game::Kanturu3;
+    case WD_39KANTURU_3RD:
+        return I18N::Game::RefineryTower;
+    case WD_40AREA_FOR_GM:
+        return I18N::Game::GMSummonZone;
+    case WD_41CHANGEUP3RD_1ST:
         return I18N::Game::BalgassBarrack;
-    else if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasRefugeMap())
+    case WD_42CHANGEUP3RD_2ND:
         return I18N::Game::BalgassRestingPlace;
-    if (this->IsCursedTemple())
-    {
-        return (I18N::Game::IllusionTemple);
+    case WD_51HOME_6TH_CHAR:
+        return I18N::Game::Elveland;
+    case WD_56MAP_SWAMP_OF_QUIET:
+        return I18N::Game::SwampOfPeace;
+    case WD_57ICECITY:
+        return I18N::Game::LaCleon;
+    case WD_58ICECITY_BOSS:
+        return I18N::Game::Hatchery;
+    case WD_62SANTA_TOWN:
+        return I18N::Game::SantaSVillage;
+    case WD_63PK_FIELD:
+        return I18N::Game::Vulcanus;
+    case WD_64DUELARENA:
+        return I18N::Game::Colosseum;
+    case WD_79UNITEDMARKETPLACE:
+        return I18N::Game::LorenMarket;
+    case WD_80KARUTAN1:
+    case WD_81KARUTAN2:
+        return I18N::Game::Karutan;
+    default:
+        return nullptr;
     }
-    if (iMap == WD_51HOME_6TH_CHAR)
-    {
-        return (I18N::Game::Elveland);
-    }
-    if (iMap == WD_56MAP_SWAMP_OF_QUIET)
-    {
-        return (I18N::Game::SwampOfPeace);
-    }
-    if (iMap == WD_62SANTA_TOWN)
-    {
-        return (I18N::Game::SantaSVillage);
-    }
-    if (iMap == WD_64DUELARENA)
-    {
-        return (I18N::Game::Colosseum);
-    }
-    if (iMap == WD_63PK_FIELD)
-    {
-        return (I18N::Game::Vulcanus);
-    }
-    if (iMap == WD_65DOPPLEGANGER1)
-    {
-        return (I18N::Game::Doppelganger);
-    }
-    if (iMap == WD_66DOPPLEGANGER2)
-    {
-        return (I18N::Game::Doppelganger);
-    }
-    if (iMap == WD_67DOPPLEGANGER3)
-    {
-        return (I18N::Game::Doppelganger);
-    }
-    if (iMap == WD_68DOPPLEGANGER4)
-    {
-        return (I18N::Game::Doppelganger);
-    }
-    if (iMap == WD_69EMPIREGUARDIAN1)
-    {
-        return (I18N::Game::Varka);
-    }
-    if (iMap == WD_70EMPIREGUARDIAN2)
-    {
-        return (I18N::Game::Varka);
-    }
-    if (iMap == WD_71EMPIREGUARDIAN3)
-    {
-        return (I18N::Game::Varka);
-    }
-    if (iMap == WD_72EMPIREGUARDIAN4)
-    {
-        return (I18N::Game::Varka);
-    }
-    if (iMap == WD_79UNITEDMARKETPLACE)
-    {
-        return (I18N::Game::LorenMarket);
-    }
-    if (iMap == WD_80KARUTAN1 || iMap == WD_81KARUTAN2)
-    {
-        return (I18N::Game::Karutan);
-    }
-    return (I18N::Game::Lookup(30 + iMap));
 }

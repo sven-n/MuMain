@@ -17,6 +17,22 @@ add_test(
 )
 
 mu_add_test(
+    NAME map_name_tests
+    SOURCES
+        test_map_name.cpp
+        test_map_name_ornament.cpp
+        test_text_fit.cpp
+        RmlLayoutFixture.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient Freetype::Freetype
+)
+target_compile_definitions(map_name_tests PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+    MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin"
+)
+
+mu_add_test(
     NAME rml_image_crop_tests
     SOURCES test_rml_image_crop.cpp
     LINK_LIBS RmlUi::Core

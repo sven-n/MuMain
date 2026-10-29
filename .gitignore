@@ -38,6 +38,10 @@ build-linux/
 # Bundled UI fonts (curated, shipped with the client) are source-controlled.
 !**/bin/fonts/
 !**/bin/fonts/**
+# The map banner's ornament (OZT and its layout), cut out of the map-name images by
+# tools/MapNameFont/ornament.py.
+!src/bin/Data/Interface/MapNameOrnament/
+!src/bin/Data/Interface/MapNameOrnament/**
 # RmlUi UI content (RML/RCSS documents and themes) is authored source, not build output.
 !src/bin/Data/
 !src/bin/Data/Interface/

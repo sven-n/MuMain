@@ -543,3 +543,95 @@ TEST_CASE("an empty legacy child preserves real theme resources and layout [ui][
         }
     }
 }
+
+TEST_CASE("map-name font tokens preserve normal families and inherited fallback [ui][map-name]")
+{
+    Fixture fixture;
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf"));
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/DejaVuSans.ttf"));
+    const auto parent = fixture.Theme("parent");
+    const auto child = fixture.Theme("child");
+    fixture.Write(child / "theme.ini", "[Theme]\nBase=parent\n");
+    fixture.Write(parent / "tokens.ini", "[Tokens]\nfont-map-name=Liberation Sans\n");
+    fixture.Write(child / "tokens.ini", "[Tokens]\nfont-map-name=DejaVu Sans\n");
+    const auto resolve = [&](const char* token)
+    { return UI::RmlBridge::ResolveThemeFontToken(UI::RmlBridge::ThemeInheritance(child), token); };
+    CHECK(resolve("font-map-name") == std::optional<std::string>("DejaVu Sans"));
+    CHECK(resolve("font-map-name-style") == std::optional<std::string>("normal"));
+
+    fixture.Write(parent / "tokens.ini", "[Tokens]\nfont-map-name=DejaVu Sans\n");
+    fixture.Write(child / "tokens.ini", "[Tokens]\nfont-map-name=Unavailable Test Family\n");
+    CHECK(resolve("font-map-name") == std::optional<std::string>("DejaVu Sans"));
+    CHECK(resolve("font-map-name-style") == std::optional<std::string>("normal"));
+
+    fixture.Write(parent / "tokens.ini", "[Tokens]\nfont-map-name=Unavailable Parent Family\n");
+    CHECK(resolve("font-map-name") == std::optional<std::string>("Liberation Sans"));
+    CHECK(resolve("font-map-name-style") == std::optional<std::string>("normal"));
+}
+
+TEST_CASE("font style tokens stay paired with the resolved family and use supported faces [ui][rml-theme]")
+{
+    Fixture fixture;
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf"));
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf", "Liberation Sans",
+                              Rml::Style::FontStyle::Italic, Rml::Style::FontWeight::Normal));
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/DejaVuSans.ttf"));
+    const auto parent = fixture.Theme("parent");
+    const auto child = fixture.Theme("child");
+    fixture.Write(parent / "tokens.ini",
+                  "[Tokens]\nfont-callout=Liberation Sans\nfont-callout-style=italic\nfont-title=DejaVu Sans\n");
+    fixture.Write(child / "theme.ini", "[Theme]\nBase=parent\n");
+    fixture.Write(child / "tokens.ini", "[Tokens]\nfont-callout=DejaVu Sans\nfont-callout-style=italic\n");
+    const UI::RmlBridge::ThemeInheritance theme(child);
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-callout") == std::optional<std::string>("DejaVu Sans"));
+    // DejaVu has no italic face, so its requested style falls back to regular.
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-callout-style") == std::optional<std::string>("normal"));
+
+    fixture.Write(child / "tokens.ini", "[Tokens]\nfont-callout=Unavailable Child Family\n");
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-callout") == std::optional<std::string>("Liberation Sans"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-callout-style") == std::optional<std::string>("italic"));
+}
+
+TEST_CASE("unpaired theme families require a regular font face [ui][rml-theme]")
+{
+    Fixture fixture;
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf", "Liberation Sans",
+                              Rml::Style::FontStyle::Italic, Rml::Style::FontWeight::Normal));
+    fixture.Write(fixture.Theme("child") / "tokens.ini",
+                  "[Tokens]\nfont-body=Liberation Sans\nfont-title=Liberation Sans\n");
+    const UI::RmlBridge::ThemeInheritance theme(fixture.Theme("child"));
+    CHECK_FALSE(UI::RmlBridge::ResolveThemeFontToken(theme, "font-body"));
+    CHECK_FALSE(UI::RmlBridge::ResolveThemeFontToken(theme, "font-title"));
+}
+
+TEST_CASE("a missing map-name font falls back to the token the theme names, in that token's style [ui][map-name]")
+{
+    Fixture fixture;
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf"));
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf", "Liberation Sans",
+                              Rml::Style::FontStyle::Italic, Rml::Style::FontWeight::Normal));
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/DejaVuSans.ttf"));
+    fixture.Write(fixture.Theme("child") / "tokens.ini",
+                  "[Tokens]\nfont-map-name-fallback=font-title\nfont-title=DejaVu Sans\nfont-title-style=italic\n");
+    const UI::RmlBridge::ThemeInheritance theme(fixture.Theme("child"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name") == std::optional<std::string>("DejaVu Sans"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name-style") == std::optional<std::string>("normal"));
+    UI::RmlBridge::SetSelectedFontFamily("Liberation Sans");
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name") ==
+          UI::RmlBridge::ResolveThemeFontToken(theme, "font-title"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name-style") ==
+          UI::RmlBridge::ResolveThemeFontToken(theme, "font-title-style"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-map-name-style") == std::optional<std::string>("italic"));
+}
+
+TEST_CASE("font fallback tokens that name each other end at the bundled face [ui][rml-theme]")
+{
+    Fixture fixture;
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/LiberationSans-Regular.ttf"));
+    fixture.Write(fixture.Theme("child") / "tokens.ini",
+                  "[Tokens]\nfont-a=Unavailable A\nfont-a-fallback=font-b\nfont-b=Unavailable B\n"
+                  "font-b-fallback=font-a\n");
+    const UI::RmlBridge::ThemeInheritance theme(fixture.Theme("child"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-a") == std::optional<std::string>("Liberation Sans"));
+    CHECK(UI::RmlBridge::ResolveThemeFontToken(theme, "font-a-style") == std::optional<std::string>("normal"));
+}
