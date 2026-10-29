@@ -1243,8 +1243,6 @@ void SetPlayerAttack(CHARACTER* c)
         battleCastle::SetGuardAttackState(o);
         if (M39Kanturu3rd::SetCurrentActionKanturu3rdMonster(c, o) == true)
             Success = false;
-        if (SEASON3B::GMNewTown::SetCurrentActionMonster(c, o) == true)
-            Success = false;
         if (TheMapProcess().SetCurrentActionMonster(c, o) == true)
             Success = false;
 

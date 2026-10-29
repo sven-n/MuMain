@@ -1108,11 +1108,3 @@ bool GMNewTown::AttackEffectMonster(CHARACTER* pCharacter, OBJECT* pObject, BMD*
     return false;
 }
 
-bool GMNewTown::SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObject)
-{
-    if (!IsCurrentMap())
-        return false;
-
-    return false;
-}
-

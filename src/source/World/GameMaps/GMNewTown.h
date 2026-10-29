@@ -32,7 +32,6 @@ namespace SEASON3B
         static bool RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
 
         static bool AttackEffectMonster(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
-        static bool SetCurrentActionMonster(CHARACTER* pCharacter, OBJECT* pObject);
 
         static void PlayObjectSound(OBJECT* pObject);
 
