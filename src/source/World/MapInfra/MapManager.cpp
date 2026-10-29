@@ -974,7 +974,7 @@ int CMapManager::GetServerStage() const
 
 int CMapManager::GetLoadedWorld(int serverMap)
 {
-    return serverMap == 32 ? WD_9DEVILSQUARE : serverMap;
+    return serverMap == SecondDevilSquareMapId ? WD_9DEVILSQUARE : serverMap;
 }
 
 int CMapManager::GetFilesFolder(int serverMap)
@@ -1494,8 +1494,6 @@ bool CMapManager::InBattleCastle(int iMap)
 
 namespace
 {
-constexpr int SecondDevilSquareMapId = 32;
-
 const wchar_t* EventMapName(CMapManager& maps, int mapId)
 {
     if (maps.InBloodCastle(mapId))

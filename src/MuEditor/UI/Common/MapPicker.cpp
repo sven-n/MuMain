@@ -22,8 +22,6 @@ using Data::Maps::MapRef;
 
 // Pixel height before the editor UI scale; the picker scrolls beyond it.
 constexpr float MaxPickerHeight = 420.0f;
-// Devil Square 5-7: the server's map number; the client loads it as 9.
-constexpr int DevilSquare5To7 = 32;
 
 Member StageMember(int map, int stage)
 {
@@ -60,8 +58,8 @@ std::vector<Row> MakeRows()
     }
     // The stages OpenMU sends with the map (its discriminators).
     levels({StageMember(WD_9DEVILSQUARE, 1), StageMember(WD_9DEVILSQUARE, 2), StageMember(WD_9DEVILSQUARE, 3),
-            StageMember(WD_9DEVILSQUARE, 4), StageMember(DevilSquare5To7, 5), StageMember(DevilSquare5To7, 6),
-            StageMember(DevilSquare5To7, 7)});
+            StageMember(WD_9DEVILSQUARE, 4), StageMember(SecondDevilSquareMapId, 5),
+            StageMember(SecondDevilSquareMapId, 6), StageMember(SecondDevilSquareMapId, 7)});
     single(WD_10HEAVEN);
     levels(
         Numbered({WD_11BLOODCASTLE1, WD_11BLOODCASTLE1 + 1, WD_11BLOODCASTLE1 + 2, WD_11BLOODCASTLE1 + 3,

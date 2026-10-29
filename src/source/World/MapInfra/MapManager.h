@@ -69,6 +69,10 @@ enum ENUM_WORLD
     NUM_WD
 };
 
+// Devil Square 5-7: a map number the server sends that is no world of its
+// own; the client loads it as Devil Square (WD_9DEVILSQUARE).
+constexpr int SecondDevilSquareMapId = 32;
+
 class CMapManager
 {
 public:
