@@ -516,8 +516,7 @@ TEST_CASE("Monster sounds: a monster plays the sound events of its model when it
     const int die = SoundOf(bull, "Data/Sound/mBullDie.wav");
     scope.TakePlayedSounds();
 
-    // Set to stand, one time in 16 an idle sound (walking plays the same
-    // events, but needs the hero's equipment).
+    // Set to stand and walking, one time in 16 an idle sound.
     const float savedFps = FPS_ANIMATION_FACTOR;
     FPS_ANIMATION_FACTOR = 1.0f;
     std::srand(1);
@@ -526,10 +525,21 @@ TEST_CASE("Monster sounds: a monster plays the sound events of its model when it
     {
         SetPlayerStop(&bull);
     }
-    FPS_ANIMATION_FACTOR = savedFps;
     const std::vector<int> stood = scope.TakePlayedSounds();
     CHECK(CountOf(stood, {idle1, idle2}) > 0);
     CHECK(CountOf(stood, {idle1, idle2}) == static_cast<long long>(stood.size()));
+    // Outside a safe zone a walk reads the hero's equipment, which the test
+    // does not have.
+    bull.SafeZone = true;
+    for (int i = 0; i < 200; ++i)
+    {
+        SetPlayerWalk(&bull);
+    }
+    bull.SafeZone = false;
+    FPS_ANIMATION_FACTOR = savedFps;
+    const std::vector<int> walked = scope.TakePlayedSounds();
+    CHECK(CountOf(walked, {idle1, idle2}) > 0);
+    CHECK(CountOf(walked, {idle1, idle2}) == static_cast<long long>(walked.size()));
 
     Attack(bull, NoMonsterSkill);
     CHECK(CountOf(scope.TakePlayedSounds(), {attack1, attack2}) == 1);
@@ -541,4 +551,17 @@ TEST_CASE("Monster sounds: a monster plays the sound events of its model when it
 
     SetPlayerDie(&bull);
     CHECK(CountOf(scope.TakePlayedSounds(), {die}) == 1);
+
+    // In Chaos Castle the death sound plays too, before the explosion
+    // (Q-MN77).
+    bull.Dead = 0;
+    bull.Object.CurrentAction = MONSTER01_STOP1;
+    bull.Object.AnimationFrame = 0.0f;
+    gMapManager.WorldActive = WD_18CHAOS_CASTLE;
+    SetPlayerDie(&bull);
+    gMapManager.WorldActive = WD_0LORENCIA;
+    const std::vector<int> castle = scope.TakePlayedSounds();
+    REQUIRE(castle.size() == 2);
+    CHECK(castle[0] == die);
+    CHECK(CountOf({castle[1]}, {SOUND_CHAOS_MOB_BOOM01, SOUND_CHAOS_MOB_BOOM02}) == 1);
 }
