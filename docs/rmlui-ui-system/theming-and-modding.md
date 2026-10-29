@@ -166,19 +166,22 @@ The map banner uses MU Map Name, a font bundled in `fonts/MuMapName-Italic.otf` 
 from the original client's map-name images (`tools/MapNameFont`), so any name in Latin, Polish
 or Cyrillic is written in the original lettering. It is italic only, at normal weight. The banner
 uses the bundled Noto fallback faces for Chinese and Japanese; Noto Sans JP supplies Japanese
-characters missing from the TC subset, including 帯, 廃 and 闘 in map names. A theme
-whose `font-map-name`
-family isn't available gets the theme's title font, including the player's selected title
-font. Liberation Sans is the final fallback if no title face is available. An unavailable
-RmlUi document leaves the banner hidden; there is no bitmap fallback.
+characters missing from the TC subset, including 帯, 廃 and 闘 in map names. When the
+`font-map-name` family isn't available, the banner uses the token named by
+`font-map-name-fallback` (the bundled themes name `font-title`, so it gets the title font,
+including the player's selected title font) in that token's style. Liberation Sans is the final
+fallback if no face is available. An unavailable RmlUi document leaves the banner hidden; there is
+no bitmap fallback.
 
 Change the family with `font-map-name` in the theme's `tokens.ini`, keeping the paired
-`font-family` and `font-style` token references in `map_name.rcss`. The matching style is
-detected automatically; set `font-map-name-style=normal` or `italic` in `tokens.ini` to
-prefer a face. A theme can name a locally installed font such as Monotype Corsiva after loading
-its file in `theme.ini`'s `[Fonts]` section (see Optional system fonts). If that style is unavailable, an available style is used so the
-name remains visible. The same paired `<font-token>-style` convention works for other
-theme font tokens. Other UI fonts retain their existing selection settings.
+`font-family` and `font-style` token references in `map_name.rcss`. `font-map-name-style=italic`
+names the face to prefer; a family token with a `-style` setting may resolve to an italic-only
+family, while a token without one needs a regular face. A theme can name a locally installed font
+such as Monotype Corsiva after loading its file in `theme.ini`'s `[Fonts]` section (see Optional
+system fonts). If the named style is unavailable, an available style is used so the name remains
+visible. The same `<font-token>-style` and `<font-token>-fallback` settings work for other theme
+font tokens; a fallback chain stops after a few steps. Other UI fonts retain their existing
+selection settings.
 
 ## Switching themes without relaunching
 
