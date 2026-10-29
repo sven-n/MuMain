@@ -2695,6 +2695,8 @@ TEST_CASE("A number that is not free names what takes it [data][items][editor]")
     CHECK(sphere4.model == "Data/Item/s30_sphere_body04.bmd");
     CHECK(MuEditor::Items::GetEntryLabel(sphere4Type) == "Entry without a name (12,73)");
     CHECK(MuEditor::Items::GetEntryLabel(KrisType) == "Kris (0,0)");
+    CHECK(std::string(MuEditor::Items::GetNumberWithoutItemLabel(sphere4Type)) == "Entry without a name");
+    CHECK(std::string(MuEditor::Items::GetNumberWithoutItemLabel(MakeItemType(0, 100))) == "No item at this number");
     // The editor was built from these sources, which name it.
     CHECK(sphere4.codeName == "ITEM_SPHERE_4");
 

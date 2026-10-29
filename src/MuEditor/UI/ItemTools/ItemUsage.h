@@ -71,6 +71,10 @@ ItemNumberHolder FindItemNumberHolder(int itemType);
 // The item's log name, "Kris (0,0)", or "Entry without a name (12,73)" in the UI
 // language for an entry without a name.
 std::string GetEntryLabel(int itemType);
+
+// How the item tools name a number without an item, in the UI language: "Entry without a
+// name" for an entry without a name, else "No item at this number".
+const char* GetNumberWithoutItemLabel(int itemType);
 } // namespace MuEditor::Items
 
 #endif // _EDITOR

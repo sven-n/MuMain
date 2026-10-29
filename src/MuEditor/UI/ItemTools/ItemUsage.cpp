@@ -130,6 +130,12 @@ std::string GetEntryLabel(int itemType)
     return std::string(I18N::Editor::EntryWithoutAName) + " (" + std::to_string(Data::Items::GetItemGroup(itemType)) +
            "," + std::to_string(Data::Items::GetItemNumber(itemType)) + ")";
 }
+
+const char* GetNumberWithoutItemLabel(int itemType)
+{
+    return g_ItemDatabase.FindEntry(itemType) != nullptr ? I18N::Editor::EntryWithoutAName
+                                                         : I18N::Editor::NoItemAtThisNumber;
+}
 } // namespace MuEditor::Items
 
 #endif // _EDITOR
