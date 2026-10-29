@@ -16,6 +16,7 @@
 
 #include <cmath>
 #include <functional>
+#include <optional>
 #include <string_view>
 #include <unordered_map>
 
@@ -118,33 +119,77 @@ float MeasureTextWidth(Rml::Element* element, float nativePx, bool textFit)
         fonts->GetStringWidth(face, TextForMeasurement(element, values.text_transform()), shaping));
 }
 
-// Returns whether the element's font-size changed.
-bool FitElement(Rml::Element* element, bool textFit)
+// What a fit needs to know about an element, and the font-size scale it had before.
+struct FitInputs
+{
+    size_t textHash = 0;
+    float boxWidth = 0.f;
+    float nativePx = 0.f;
+    size_t typographyHash = 0;
+    float previousScale = 1.f;
+};
+
+// The element's fit inputs, or nothing when it has no box yet or nothing changed since its last fit.
+std::optional<FitInputs> ChangedFitInputs(Rml::Element* element, bool textFit)
 {
     const Rml::Element* parent = element->GetParentNode();
     const float boxWidth = element->GetBox().GetSize(Rml::BoxArea::Content).x;
     if (parent == nullptr || boxWidth <= 0.f)
-        return false;
+        return std::nullopt;
 
-    const float nativePx = parent->GetComputedValues().font_size();
-    const size_t textHash = HashText(element);
-    const size_t typographyHash = textFit ? HashTypography(element) : 0;
-    FitState& state = FitStates()[element];
+    FitInputs inputs{HashText(element), boxWidth, parent->GetComputedValues().font_size(),
+                     textFit ? HashTypography(element) : 0};
+    const FitState& state = FitStates()[element];
     const bool sameElement = state.element.get() == element;
-    if (sameElement && state.textHash == textHash && state.boxWidth == boxWidth && state.nativePx == nativePx &&
-        state.typographyHash == typographyHash && state.textFit == textFit)
+    if (sameElement && state.textHash == inputs.textHash && state.boxWidth == boxWidth &&
+        state.nativePx == inputs.nativePx && state.typographyHash == inputs.typographyHash && state.textFit == textFit)
+        return std::nullopt;
+    inputs.previousScale = sameElement ? state.scale : 1.f;
+    return inputs;
+}
+
+// native-fit: one proportional step, as the original's RenderText() did, not below the role's minimum.
+bool FitNativeElement(Rml::Element* element)
+{
+    const auto inputs = ChangedFitInputs(element, false);
+    if (!inputs)
         return false;
 
-    const float previousScale = sameElement ? state.scale : 1.f;
-    const float measuredWidth = MeasureTextWidth(element, nativePx, textFit);
-    float fittedPx = UI::Scaling::FitTextPixelSizeToWidth(
-        nativePx, measuredWidth, boxWidth,
-        textFit ? kSmallestTextFitPx : UI::Scaling::MinimumTextPixelSize(UI::Scaling::FontRole::Normal));
-    if (textFit && measuredWidth > boxWidth + kOverflowTolerancePx)
+    const float fittedPx = UI::Scaling::FitTextPixelSizeToWidth(
+        inputs->nativePx, MeasureTextWidth(element, inputs->nativePx, false), inputs->boxWidth,
+        UI::Scaling::MinimumTextPixelSize(UI::Scaling::FontRole::Normal));
+    const float scale = inputs->nativePx > 0.f ? fittedPx / inputs->nativePx : 1.f;
+    FitStates()[element] = {
+        element->GetObserverPtr(), inputs->textHash, inputs->boxWidth, inputs->nativePx, scale, 0, false};
+    if (scale >= 1.f)
+    {
+        if (inputs->previousScale >= 1.f)
+            return false;
+        element->RemoveProperty(Rml::PropertyId::FontSize);
+        return true;
+    }
+    if (scale == inputs->previousScale)
+        return false;
+    element->SetProperty(Rml::PropertyId::FontSize, Rml::Property(scale, Rml::Unit::EM));
+    return true;
+}
+
+// text-fit: the largest whole raster size whose text fits, found by search, since fixed spacing and
+// hinting do not scale with the glyph width.
+bool FitTextElement(Rml::Element* element)
+{
+    const auto inputs = ChangedFitInputs(element, true);
+    if (!inputs)
+        return false;
+
+    const float nativePx = inputs->nativePx;
+    const float boxWidth = inputs->boxWidth;
+    const float measuredWidth = MeasureTextWidth(element, nativePx, true);
+    float fittedPx = UI::Scaling::FitTextPixelSizeToWidth(nativePx, measuredWidth, boxWidth, kSmallestTextFitPx);
+    if (measuredWidth > boxWidth + kOverflowTolerancePx)
     {
         float lowerPx = kSmallestTextFitPx;
         float upperPx = std::ceil(nativePx);
-        // Search actual raster sizes: fixed spacing and hinting do not scale with glyph width.
         while (lowerPx + 1.f < upperPx)
         {
             const float candidatePx = std::floor((lowerPx + upperPx) * 0.5f);
@@ -156,28 +201,20 @@ bool FitElement(Rml::Element* element, bool textFit)
         fittedPx = std::min(lowerPx, nativePx);
     }
     const float scale = nativePx > 0.f ? fittedPx / nativePx : 1.f;
-    if (textFit)
-    {
-        if (scale >= 1.f)
-            element->RemoveProperty(Rml::PropertyId::FontSize);
-        else
-            element->SetProperty(Rml::PropertyId::FontSize, Rml::Property(scale, Rml::Unit::EM));
-        element->GetOwnerDocument()->UpdateDocument();
-        state = {element->GetObserverPtr(), textHash, boxWidth, nativePx, scale, HashTypography(element), textFit};
-        return scale != previousScale;
-    }
-    state = {element->GetObserverPtr(), textHash, boxWidth, nativePx, scale, typographyHash, textFit};
     if (scale >= 1.f)
-    {
-        if (previousScale >= 1.f)
-            return false;
         element->RemoveProperty(Rml::PropertyId::FontSize);
-        return true;
-    }
-    if (scale == previousScale)
-        return false;
-    element->SetProperty(Rml::PropertyId::FontSize, Rml::Property(scale, Rml::Unit::EM));
-    return true;
+    else
+        element->SetProperty(Rml::PropertyId::FontSize, Rml::Property(scale, Rml::Unit::EM));
+    element->GetOwnerDocument()->UpdateDocument();
+    FitStates()[element] = {
+        element->GetObserverPtr(), inputs->textHash, boxWidth, nativePx, scale, HashTypography(element), true};
+    return scale != inputs->previousScale;
+}
+
+// Returns whether the element's font-size changed.
+bool FitElement(Rml::Element* element, bool textFit)
+{
+    return textFit ? FitTextElement(element) : FitNativeElement(element);
 }
 
 // Returns whether any font-size under `element` changed; skips hidden subtrees.
