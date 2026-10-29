@@ -30,16 +30,14 @@ Filename convention: `<Group>.<locale>.resx`.
   optional and fall back to `en` at runtime for any key they don't supply.
 
 A `.resx` file contains `<data name="...">` entries. The `name` attribute is
-the **key** (free text), the inner `<value>` is the translated string, and an
-optional `<comment>legacy_id=N[,N,...]</comment>` carries integer IDs that the
-old `GlobalText[N]` call sites still need for lookups by index.
+the **key** (free text) and the inner `<value>` is the translated string. An
+optional `<comment>` is a note for translators; the generator ignores it.
 
 Example (`src/Localization/Game.en.resx`):
 
 ```xml
 <data name="Beep sound for whispering" xml:space="preserve">
   <value>Beep sound for whispering</value>
-  <comment>legacy_id=387</comment>
 </data>
 <data name="Sound volume" xml:space="preserve">
   <value>Sound volume</value>
@@ -51,7 +49,6 @@ The matching German file uses the same `name=` keys with translated `<value>`s:
 ```xml
 <data name="Beep sound for whispering" xml:space="preserve">
   <value>Piepton zum Flüstern</value>
-  <comment>legacy_id=387</comment>
 </data>
 <data name="Sound volume" xml:space="preserve">
   <value>Soundlautstärke</value>
@@ -117,18 +114,24 @@ If you need to know the exact identifier before building, look at
 `Generated/I18N/<Group>.h` after one build, or follow the rule above. Two keys
 that slug to the same identifier are a build error from the loader.
 
-### Lookup by legacy integer ID
+### Texts chosen by a number
 
-Code paths that historically used `GlobalText[N]` keep working through a
-binary-search lookup:
+Some texts are still chosen by a number that comes from outside the code: a
+server packet's message number, or a recipe's name in `mix.bmd`. The code
+turns that number into a key where it arrives, with a table of slots, and
+shows no text for a number outside the table:
 
 ```cpp
-mu_swprintf_s(buf, L"(%ls)", I18N::Game::Lookup(guildTextIndex));
+// Network/Server/ServerMessageTexts.cpp: the Rena hints, by message number.
+const wchar_t* const* const kRenaLines[] = {
+    &I18N::Game::AreYouThrowingRenaOnThe,
+    &I18N::Game::RyanTheMaidOfTheBar,
+    &I18N::Game::RenaIsATypeOfCoin,
+};
 ```
 
-`Lookup(int)` is generated only for groups that have at least one entry with
-a `legacy_id=` comment, and it's `static_assert`-checked to be strictly sorted
-so duplicate IDs fail the build (`Generated/I18N/<Group>.cpp`).
+Store the slot (`&I18N::Game::X`) and read it when the text is shown, so a
+language switch reaches it.
 
 ### Format / placeholder substitution
 
@@ -236,8 +239,6 @@ automatically without needing their own observer.
 - Active locale entirely absent -> `SetLocale` resolves it to the default
   locale silently.
 - Unknown locale code -> default locale.
-- Lookup by legacy ID that doesn't exist in the group -> returns an empty
-  string. The generator's static_assert prevents duplicate IDs from compiling.
 
 There's no per-key "key name shown in red" debug mode today; missing keys
 just fall back. If you want a hard-fail mode for new development, the
@@ -465,7 +466,7 @@ The password-saving warning wraps within the dialog in both themes. Server
 names are preserved; untranslated connection and subscription errors use English.
 
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
-resource keys, legacy IDs, formatting arguments and command tokens unchanged.
+resource keys, formatting arguments and command tokens unchanged.
 Missing translations intentionally use the existing English fallback.
 
 ## Monster and NPC names

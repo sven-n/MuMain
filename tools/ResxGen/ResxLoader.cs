@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 namespace MuMain.Tools.ResxGen;
@@ -7,11 +6,6 @@ internal sealed class ResxLoadException : Exception
 {
     public ResxLoadException(string message) : base(message) { }
 }
-
-/// Raw entry read off a single .resx data element. The Value is what goes
-/// into the C++ string table; LegacyIds are optional integer IDs harvested
-/// from a `<comment>legacy_id=N,N,...</comment>` sidecar.
-internal sealed record ResxRawEntry(string Value, IReadOnlyList<int> LegacyIds);
 
 internal static class ResxLoader
 {
@@ -28,16 +22,8 @@ internal static class ResxLoader
     /// Element inside <data> holding the localized text.
     private const string ResxValueElement = "value";
 
-    /// Element inside <data> holding optional metadata.
-    private const string ResxCommentElement = "comment";
-
     /// Attribute on <data> holding the key.
     private const string ResxNameAttribute = "name";
-
-    /// Matches `legacy_id=12,34,56` (whitespace tolerant) inside a comment.
-    private static readonly Regex LegacyIdRegex = new(
-        @"legacy_id\s*=\s*([0-9]+(?:\s*,\s*[0-9]+)*)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public static IReadOnlyList<ResourceGroup> LoadGroups(string inputDir)
     {
@@ -51,9 +37,9 @@ internal static class ResxLoader
         return result;
     }
 
-    private static SortedDictionary<string, Dictionary<string, Dictionary<string, ResxRawEntry>>> ScanInputDir(string inputDir)
+    private static SortedDictionary<string, Dictionary<string, Dictionary<string, string>>> ScanInputDir(string inputDir)
     {
-        var byGroup = new SortedDictionary<string, Dictionary<string, Dictionary<string, ResxRawEntry>>>(StringComparer.Ordinal);
+        var byGroup = new SortedDictionary<string, Dictionary<string, Dictionary<string, string>>>(StringComparer.Ordinal);
 
         foreach (var path in Directory.EnumerateFiles(inputDir, "*.resx", SearchOption.TopDirectoryOnly))
         {
@@ -65,7 +51,7 @@ internal static class ResxLoader
 
             if (!byGroup.TryGetValue(group, out var perLocale))
             {
-                perLocale = new Dictionary<string, Dictionary<string, ResxRawEntry>>(StringComparer.Ordinal);
+                perLocale = new Dictionary<string, Dictionary<string, string>>(StringComparer.Ordinal);
                 byGroup[group] = perLocale;
             }
 
@@ -92,7 +78,7 @@ internal static class ResxLoader
 
     private static ResourceGroup BuildGroup(
         string groupName,
-        Dictionary<string, Dictionary<string, ResxRawEntry>> perLocale)
+        Dictionary<string, Dictionary<string, string>> perLocale)
     {
         if (!perLocale.TryGetValue(DefaultLocale, out var defaultEntries))
         {
@@ -122,14 +108,13 @@ internal static class ResxLoader
 
     private static IReadOnlyList<ResourceEntry> BuildEntries(
         string groupName,
-        Dictionary<string, ResxRawEntry> defaultEntries,
-        Dictionary<string, Dictionary<string, ResxRawEntry>> perLocale)
+        Dictionary<string, string> defaultEntries,
+        Dictionary<string, Dictionary<string, string>> perLocale)
     {
         var entries = new List<ResourceEntry>(defaultEntries.Count);
         var idToKey = new Dictionary<string, string>(StringComparer.Ordinal);
-        var legacyIdToKey = new Dictionary<int, string>();
 
-        foreach (var (key, defaultRaw) in defaultEntries)
+        foreach (var key in defaultEntries.Keys)
         {
             var identifier = SafeIdentifier(groupName, key);
             if (identifier.Length == 0)
@@ -142,41 +127,20 @@ internal static class ResxLoader
                 continue;
             }
             EnsureNoIdentifierCollision(groupName, idToKey, identifier, key);
-            EnsureNoLegacyIdCollision(groupName, legacyIdToKey, defaultRaw.LegacyIds, key);
 
             var translations = new Dictionary<string, string>(StringComparer.Ordinal);
             foreach (var (locale, entriesForLocale) in perLocale)
             {
-                if (entriesForLocale.TryGetValue(key, out var raw))
+                if (entriesForLocale.TryGetValue(key, out var value))
                 {
-                    translations[locale] = raw.Value;
+                    translations[locale] = value;
                 }
             }
 
-            entries.Add(new ResourceEntry(key, identifier, translations, defaultRaw.LegacyIds));
+            entries.Add(new ResourceEntry(key, identifier, translations));
         }
 
         return entries;
-    }
-
-    private static void EnsureNoLegacyIdCollision(
-        string groupName,
-        Dictionary<int, string> legacyIdToKey,
-        IReadOnlyList<int> legacyIds,
-        string key)
-    {
-        foreach (var legacyId in legacyIds)
-        {
-            if (legacyIdToKey.TryGetValue(legacyId, out var firstKey))
-            {
-                throw new ResxLoadException(
-                    $"Group '{groupName}': legacy_id={legacyId} is assigned to both " +
-                    $"'{firstKey}' and '{key}'. Each legacy_id must be unique within a " +
-                    "group because I18N::<Group>::Lookup(int) does a binary search that " +
-                    "assumes unique sorted IDs.");
-            }
-            legacyIdToKey[legacyId] = key;
-        }
     }
 
     private static string SafeIdentifier(string groupName, string key)
@@ -208,8 +172,8 @@ internal static class ResxLoader
 
     private static void WarnForKeysMissingFromDefault(
         string groupName,
-        Dictionary<string, Dictionary<string, ResxRawEntry>> perLocale,
-        Dictionary<string, ResxRawEntry> defaultEntries)
+        Dictionary<string, Dictionary<string, string>> perLocale,
+        Dictionary<string, string> defaultEntries)
     {
         var defaultKeys = new HashSet<string>(defaultEntries.Keys, StringComparer.Ordinal);
         foreach (var (locale, entries) in perLocale)
@@ -222,10 +186,10 @@ internal static class ResxLoader
         }
     }
 
-    private static Dictionary<string, ResxRawEntry> ReadResx(string path)
+    private static Dictionary<string, string> ReadResx(string path)
     {
         var doc = XDocument.Load(path);
-        var result = new Dictionary<string, ResxRawEntry>(StringComparer.Ordinal);
+        var result = new Dictionary<string, string>(StringComparer.Ordinal);
 
         if (doc.Root is null) return result;
 
@@ -235,26 +199,10 @@ internal static class ResxLoader
             if (string.IsNullOrEmpty(name)) continue;
             if (name.StartsWith(ResxMetadataKeyPrefix, StringComparison.Ordinal)) continue;
 
-            var value = data.Element(ResxValueElement)?.Value ?? string.Empty;
-            var comment = data.Element(ResxCommentElement)?.Value;
-            var legacyIds = ParseLegacyIds(comment);
-
-            result[name] = new ResxRawEntry(value, legacyIds);
+            result[name] = data.Element(ResxValueElement)?.Value ?? string.Empty;
         }
 
         return result;
     }
 
-    private static IReadOnlyList<int> ParseLegacyIds(string? comment)
-    {
-        if (string.IsNullOrEmpty(comment)) return Array.Empty<int>();
-        var match = LegacyIdRegex.Match(comment);
-        if (!match.Success) return Array.Empty<int>();
-        var list = new List<int>();
-        foreach (var part in match.Groups[1].Value.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-        {
-            if (int.TryParse(part, out var id)) list.Add(id);
-        }
-        return list;
-    }
 }
