@@ -98,25 +98,60 @@ Rml::String TextForMeasurement(Rml::Element* element, Rml::Style::TextTransform 
     return text;
 }
 
-// Update relative spacing through RmlUi itself when probing a text-fit font size.
-float MeasureTextWidth(Rml::Element* element, float nativePx, bool textFit)
+// The width of the element's text drawn at `fontPx` with `letterSpacingPx`.
+float TextWidthAt(Rml::Element* element, float fontPx, float letterSpacingPx)
 {
-    if (textFit)
-    {
-        element->SetProperty(Rml::PropertyId::FontSize, Rml::Property(nativePx, Rml::Unit::PX));
-        element->GetOwnerDocument()->UpdateDocument();
-    }
     const auto& values = element->GetComputedValues();
     Rml::FontEngineInterface* fonts = Rml::GetFontEngineInterface();
     const Rml::FontFaceHandle face = fonts->GetFontFaceHandle(values.font_family(), values.font_style(),
-                                                              values.font_weight(), static_cast<int>(nativePx));
+                                                              values.font_weight(), static_cast<int>(fontPx));
     if (face == 0)
         return 0.f;
 
     const Rml::TextShapingContext shaping{values.language(), values.direction(), values.font_kerning(),
-                                          values.letter_spacing()};
+                                          letterSpacingPx};
     return static_cast<float>(
         fonts->GetStringWidth(face, TextForMeasurement(element, values.text_transform()), shaping));
+}
+
+// The width of the element's text at `fontPx` with its current letter spacing.
+float MeasureTextWidth(Rml::Element* element, float fontPx)
+{
+    return TextWidthAt(element, fontPx, element->GetComputedValues().letter_spacing());
+}
+
+// Letter spacing as a function of the font size. RmlUi resolves an em length, also inside calc(),
+// against the element's own font size, so each probed size has its own spacing.
+struct LetterSpacingModel
+{
+    float fixedPx = 0.f;
+    float perEm = 0.f;
+
+    float At(float fontPx) const
+    {
+        return fixedPx + perEm * fontPx;
+    }
+};
+
+// Reads the model from the element's current spacing. Only a calc() mixing em and fixed lengths needs
+// a second sample, taken with one layout at another size.
+LetterSpacingModel ReadLetterSpacing(Rml::Element* element)
+{
+    const float currentPx = element->GetComputedValues().font_size();
+    const float currentSpacing = element->GetComputedValues().letter_spacing();
+    const Rml::Property* property = element->GetProperty(Rml::PropertyId::LetterSpacing);
+    if (property == nullptr || property->unit == Rml::Unit::KEYWORD)
+        return {};
+    if (property->unit == Rml::Unit::EM)
+        return {0.f, property->Get<float>()};
+    if (property->unit != Rml::Unit::CALCULATION || currentPx <= 0.f)
+        return {currentSpacing, 0.f};
+
+    const float otherPx = currentPx * 2.f;
+    element->SetProperty(Rml::PropertyId::FontSize, Rml::Property(otherPx, Rml::Unit::PX));
+    element->GetOwnerDocument()->UpdateDocument();
+    const float perEm = (element->GetComputedValues().letter_spacing() - currentSpacing) / currentPx;
+    return {currentSpacing - perEm * currentPx, perEm};
 }
 
 // What a fit needs to know about an element, and the font-size scale it had before.
@@ -156,7 +191,7 @@ bool FitNativeElement(Rml::Element* element)
         return false;
 
     const float fittedPx = UI::Scaling::FitTextPixelSizeToWidth(
-        inputs->nativePx, MeasureTextWidth(element, inputs->nativePx, false), inputs->boxWidth,
+        inputs->nativePx, MeasureTextWidth(element, inputs->nativePx), inputs->boxWidth,
         UI::Scaling::MinimumTextPixelSize(UI::Scaling::FontRole::Normal));
     const float scale = inputs->nativePx > 0.f ? fittedPx / inputs->nativePx : 1.f;
     FitStates()[element] = {
@@ -184,7 +219,9 @@ bool FitTextElement(Rml::Element* element)
 
     const float nativePx = inputs->nativePx;
     const float boxWidth = inputs->boxWidth;
-    const float measuredWidth = MeasureTextWidth(element, nativePx, true);
+    const LetterSpacingModel spacing = ReadLetterSpacing(element);
+    const auto widthAt = [&](float fontPx) { return TextWidthAt(element, fontPx, spacing.At(fontPx)); };
+    const float measuredWidth = widthAt(nativePx);
     float fittedPx = UI::Scaling::FitTextPixelSizeToWidth(nativePx, measuredWidth, boxWidth, kSmallestTextFitPx);
     if (measuredWidth > boxWidth + kOverflowTolerancePx)
     {
@@ -193,19 +230,30 @@ bool FitTextElement(Rml::Element* element)
         while (lowerPx + 1.f < upperPx)
         {
             const float candidatePx = std::floor((lowerPx + upperPx) * 0.5f);
-            if (MeasureTextWidth(element, candidatePx, true) <= boxWidth + kOverflowTolerancePx)
+            if (widthAt(candidatePx) <= boxWidth + kOverflowTolerancePx)
                 lowerPx = candidatePx;
             else
                 upperPx = candidatePx;
         }
         fittedPx = std::min(lowerPx, nativePx);
     }
+    const auto applySize = [&](float fontPx)
+    {
+        if (fontPx >= nativePx)
+            element->RemoveProperty(Rml::PropertyId::FontSize);
+        else
+            element->SetProperty(Rml::PropertyId::FontSize, Rml::Property(fontPx / nativePx, Rml::Unit::EM));
+        element->GetOwnerDocument()->UpdateDocument();
+    };
+    applySize(fittedPx);
+    // The model's spacing can round differently from RmlUi's own; check the size RmlUi laid out.
+    while (fittedPx > kSmallestTextFitPx &&
+           MeasureTextWidth(element, element->GetComputedValues().font_size()) > boxWidth + kOverflowTolerancePx)
+    {
+        fittedPx = std::max(kSmallestTextFitPx, std::floor(fittedPx) - 1.f);
+        applySize(fittedPx);
+    }
     const float scale = nativePx > 0.f ? fittedPx / nativePx : 1.f;
-    if (scale >= 1.f)
-        element->RemoveProperty(Rml::PropertyId::FontSize);
-    else
-        element->SetProperty(Rml::PropertyId::FontSize, Rml::Property(scale, Rml::Unit::EM));
-    element->GetOwnerDocument()->UpdateDocument();
     FitStates()[element] = {
         element->GetObserverPtr(), inputs->textHash, boxWidth, nativePx, scale, HashTypography(element), true};
     return scale != inputs->previousScale;
