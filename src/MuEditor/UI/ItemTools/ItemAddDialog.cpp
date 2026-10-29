@@ -9,7 +9,6 @@
 #include "ItemGroupNames.h"
 #include "ItemSelection.h"
 #include "ItemTextInput.h"
-#include "ItemUsageView.h"
 
 #include "../MuEditor/UI/ItemEditor/ItemListModel.h"
 #include "Data/GameData/Common/LocalizedString.h"
@@ -101,6 +100,7 @@ void CItemAddDialog::OpenAdd(int templateItemType)
     m_width = 1;
     m_height = 1;
     m_slot = Data::Items::ItemSlot::None;
+    m_numberHolder = {};
     m_open = true;
     ImGui::OpenPopup(PopupId);
 }
@@ -119,6 +119,7 @@ void CItemAddDialog::OpenDuplicate(int sourceItemType)
     m_number = GetNextFreeItemNumber(m_group, Data::Items::GetItemNumber(sourceItemType));
     m_name = source->names.GetNeutral();
     m_shareModel = true;
+    m_numberHolder = {};
     m_open = true;
     ImGui::OpenPopup(PopupId);
 }
@@ -181,7 +182,7 @@ void CItemAddDialog::RenderNumber()
     if (!Data::Items::IsFreeItemType(itemType))
     {
         ImGui::TextColored(NotFreeColor, "%s", I18N::Editor::ThisNumberIsNotFree);
-        UsageView::RenderNumberHolder(itemType);
+        m_numberHolder.Render(itemType);
     }
 }
 

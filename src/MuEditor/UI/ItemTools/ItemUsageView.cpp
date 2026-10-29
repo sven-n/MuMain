@@ -81,9 +81,8 @@ void RenderUsesAtNumber(const ItemUsage& usage)
                               I18N::Editor::TheSourcesWereNotFoundCodeThatNamesTheItemIsNotKnown);
 }
 
-void RenderNumberHolder(int itemType)
+void RenderNumberHolder(const ItemNumberHolder& holder, const ItemUsage& usage)
 {
-    const ItemNumberHolder holder = FindItemNumberHolder(itemType);
     if (!holder.item.empty())
     {
         ImGui::BulletText("%s", I18N::Format(I18N::Editor::TakenByTheItem0, {holder.item}).c_str());
@@ -111,7 +110,6 @@ void RenderNumberHolder(int itemType)
     }
     ImGui::BulletText("%s", holder.entryWithoutName ? I18N::Editor::TheItemBrowserListsItAsEntryWithoutAName
                                                     : I18N::Editor::TheItemBrowserListsItAsNoItemAtThisNumber);
-    const ItemUsage usage = FindItemUsage(itemType);
     RenderGameData(usage);
     // The move dialog lists the code of the moved item too.
     ImGui::PushID("NumberHolder");

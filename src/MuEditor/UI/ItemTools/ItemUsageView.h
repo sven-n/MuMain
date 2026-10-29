@@ -16,8 +16,10 @@ void RenderUsesAtNumber(const ItemUsage& usage);
 // What takes a number that is not free, below "This number is not free" of
 // the add, duplicate and move dialogs: the item on it, or the entry without a
 // name or model entry without an item with what the code calls the number, how
-// the Item Browser lists it and what uses the number. Nothing for a free number.
-void RenderNumberHolder(int itemType);
+// the Item Browser lists it and what uses the number (`usage`, FindItemUsage of
+// the number; not read for an item). Nothing for a free number. The dialogs
+// draw it with CItemNumberHolderView, which finds both once per number.
+void RenderNumberHolder(const ItemNumberHolder& holder, const ItemUsage& usage);
 } // namespace MuEditor::Items::UsageView
 
 #endif // _EDITOR

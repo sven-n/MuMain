@@ -2,6 +2,8 @@
 
 #ifdef _EDITOR
 
+#include "ItemNumberHolderView.h"
+
 #include "Data/GameData/ItemData/ItemDefinition.h"
 
 #include <string>
@@ -48,6 +50,7 @@ private:
     int m_height = 1;
     Data::Items::ItemSlot m_slot = Data::Items::ItemSlot::None;
     bool m_shareModel = true;
+    CItemNumberHolderView m_numberHolder;
 };
 } // namespace MuEditor::Items
 

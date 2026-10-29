@@ -39,6 +39,7 @@ void CItemMoveDialog::Open(int itemType)
     m_group = Data::Items::GetItemGroup(itemType);
     m_number = GetNextFreeItemNumber(m_group, Data::Items::GetItemNumber(itemType));
     m_usage = FindItemUsage(itemType);
+    m_numberHolder = {};
     m_open = true;
     ImGui::OpenPopup(PopupId);
 }
@@ -73,7 +74,7 @@ void CItemMoveDialog::Render()
     if (!free)
     {
         ImGui::TextColored(NotFreeColor, "%s", I18N::Editor::ThisNumberIsNotFree);
-        UsageView::RenderNumberHolder(target);
+        m_numberHolder.Render(target);
     }
     ImGui::Separator();
     if (m_usage.GoesWithItem())
