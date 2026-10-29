@@ -242,6 +242,13 @@ TEST_CASE("Monster Preview: Play plays the model's sound events or its slot soun
     const auto number = [bullModel](const char* name)
     { return Data::Monsters::ModelLoader::FindSoundNumber(*bullModel, name).value_or(-1); };
     CHECK((bull[0].id == number("SOUND_MONSTER_BULLATTACK1") || bull[0].id == number("Data/Sound/mBullAttack2.wav")));
+    // The shock plays the hit moment's events, the death the death moment's.
+    g_MuMonsterPreviewUI.PlayAttack(MODEL_BULL_FIGHTER, MONSTER01_SHOCK, std::nullopt);
+    const std::vector<PlayedSound> hit = load.TakePlayedSounds();
+    REQUIRE(hit.size() == 1);
+    CHECK((hit[0].id == number("SOUND_MONSTER_BULLATTACK1") || hit[0].id == number("Data/Sound/mBullAttack2.wav")));
+    g_MuMonsterPreviewUI.PlayAttack(MODEL_BULL_FIGHTER, MONSTER01_DIE, std::nullopt);
+    CHECK(load.TakePlayedSounds() == Sounds({number("Data/Sound/mBullDie.wav")}));
 }
 
 // An attack Play started stands the model when it ends, as SetPlayerStop
