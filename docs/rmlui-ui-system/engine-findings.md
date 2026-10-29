@@ -104,6 +104,15 @@ implementation findings, not general policy; recheck them when updating the engi
   `ninepatch(...)` remains the appropriate choice for stretchable frames. Visual GPU filtering
   and seams still need in-game verification.
 
+- **Images clamp at their edges; only tiling geometry repeats.** The SDL_GPU backend draws
+  geometry whose texture coordinates stay inside 0..1 with a clamping sampler, and only geometry
+  that tiles a whole file image (coordinates past 1) with the repeating one. At a quad's outer
+  pixels linear filtering reaches past the edge texel; with a repeating sampler a sprite whose
+  own edge is transparent pulled in the texture's opposite edge and showed a faint dark line
+  (the MU Helper bar, the character window's frame pieces and stat boxes). A sprite *inside* a
+  sheet still mixes in the neighbouring texels at its edges, whatever the sampler: keep a
+  transparent or matching row between sprites that are drawn magnified.
+
 - **Fractional `letter-spacing` accumulates before rounding.** The default font backend formerly
   truncated each character's spacing to an integer, making subpixel values ineffective. This
   fork keeps floating-point advances for measurement and mesh generation, rounding the final
