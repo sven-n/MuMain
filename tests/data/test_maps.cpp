@@ -14,25 +14,33 @@
 
 namespace
 {
-// The hero's map, for the life of the scope.
+// The hero's map, for the life of the scope: the world, and the server map
+// and stage a test sets go back to what they were. A server map left behind
+// would name a world set alone later (32 for world 9).
 class HeroMapScope
 {
 public:
-    explicit HeroMapScope(int world) : m_previous(gMapManager.WorldActive)
+    explicit HeroMapScope(int world)
+        : m_previousWorld(gMapManager.WorldActive), m_previousServerMap(gMapManager.GetServerMap()),
+          m_previousStage(gMapManager.GetServerStage())
     {
         gMapManager.WorldActive = world;
     }
 
     ~HeroMapScope()
     {
-        gMapManager.WorldActive = m_previous;
+        gMapManager.SetServerMap(m_previousServerMap);
+        gMapManager.SetServerStage(m_previousStage);
+        gMapManager.WorldActive = m_previousWorld;
     }
 
     HeroMapScope(const HeroMapScope&) = delete;
     HeroMapScope& operator=(const HeroMapScope&) = delete;
 
 private:
-    int m_previous;
+    int m_previousWorld;
+    int m_previousServerMap;
+    int m_previousStage;
 };
 
 std::wstring NameOf(int map)
@@ -91,6 +99,19 @@ TEST_CASE("Maps: a move loads the world only for another server map, also betwee
     gMapManager.SetServerMap(WD_3NORIA);
     CHECK(gMapManager.IsServerMapLoaded(WD_3NORIA));
     CHECK_FALSE(gMapManager.IsServerMapLoaded(WD_9DEVILSQUARE));
+}
+
+TEST_CASE("Maps: a test's hero map leaves no server map or stage behind [maps]")
+{
+    {
+        const HeroMapScope hero(WD_0LORENCIA);
+        gMapManager.SetServerStage(6);
+        gMapManager.SetServerMap(SecondDevilSquareMapId);
+    }
+    // World 9 set alone is Devil Square 1-4, not the 32 of the scope before.
+    const HeroMapScope hero(WD_9DEVILSQUARE);
+    CHECK(gMapManager.GetServerMap() == WD_9DEVILSQUARE);
+    CHECK(gMapManager.GetServerStage() == 0);
 }
 
 TEST_CASE("Maps: the stage the server sends with the map, none where WorldActive was set alone (D67) [maps]")
