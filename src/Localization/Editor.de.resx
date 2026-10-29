@@ -2920,4 +2920,7 @@
   <data name="From the server" xml:space="preserve">
     <value>Vom Server</value>
   </data>
+  <data name="Not saved yet: the changes are only in the editor" xml:space="preserve">
+    <value>Noch nicht gespeichert: Die Änderungen sind nur im Editor, bis Sie die Gegenstände speichern.</value>
+  </data>
 </root>

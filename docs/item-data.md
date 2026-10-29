@@ -1376,7 +1376,9 @@ phase 7; see the
   take: a name in a language the file lacks, or one the client's UI does
   not show, is not compared (no language is removed).
 - After applying, the window compares again: what was applied no longer
-  differs and leaves the list. A green line above says what was applied;
+  differs and leaves the list. Apply changes the editor's items only: until
+  they are saved, the window says so (and its title has a `*`) next to its
+  own **Save Items**. A green line above says what was applied;
   what was not checked stays listed and unchecked. An import is refused
   when an item it would add, resize, give another slot or remove is worn or
   in an item window by then (compare again).

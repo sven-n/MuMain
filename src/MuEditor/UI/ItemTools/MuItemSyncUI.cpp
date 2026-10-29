@@ -4,6 +4,7 @@
 
 #include "MuItemSyncUI.h"
 
+#include "ItemEdits.h"
 #include "ItemHeldByCharacter.h"
 #include "ItemSelection.h"
 #include "ItemSyncApply.h"
@@ -15,6 +16,8 @@
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/Core/SecretStore.h"
 #include "../MuEditor/UI/Common/KeyboardSelection.h"
+#include "../MuEditor/UI/ItemEditor/ItemEditorActions.h"
+#include "../MuEditor/UI/ItemEditor/ItemEditorPopups.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
@@ -336,7 +339,13 @@ CMuItemSyncUI& CMuItemSyncUI::GetInstance()
 
 void CMuItemSyncUI::Render(bool* open)
 {
-    if (ToolWindow::Begin(I18N::Editor::ItemSync, MuEditor::WindowIds::ItemSync, open))
+    // A mark in the title while there are changes that are not saved, as the Item Browser has.
+    std::string title = I18N::Editor::ItemSync;
+    if (g_ItemEdits.GetHistory().IsModifiedSinceSave())
+    {
+        title += " *";
+    }
+    if (ToolWindow::Begin(title.c_str(), MuEditor::WindowIds::ItemSync, open))
     {
         if (!m_knownLoaded)
         {
@@ -350,6 +359,7 @@ void CMuItemSyncUI::Render(bool* open)
         }
         TakeChosenFile();
         TakeServerDownload();
+        RenderUnsaved();
         RenderButtons();
         RenderServer();
         RenderExportResult();
@@ -958,6 +968,23 @@ bool CMuItemSyncUI::WriteExport()
         Compare(ToPath(m_comparedPath));
     }
     return true;
+}
+
+// Apply changes the editor's items only: while they differ from the saved ones, Save Items is
+// at hand here too.
+void CMuItemSyncUI::RenderUnsaved()
+{
+    if (!g_ItemEdits.GetHistory().IsModifiedSinceSave())
+    {
+        return;
+    }
+    CItemEditorActions::RenderSaveButton();
+    CItemEditorPopups::RenderAll();
+    ImGui::SameLine();
+    ImGui::PushTextWrapPos(0.0f);
+    ImGui::TextColored(WarningColor, "%s", I18N::Editor::NotSavedYetTheChangesAreOnlyInTheEditor);
+    ImGui::PopTextWrapPos();
+    ImGui::Separator();
 }
 
 // The heading of the incoming values: the server's after Update from server, else the file's.

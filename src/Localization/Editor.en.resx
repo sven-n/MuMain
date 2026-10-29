@@ -2941,4 +2941,7 @@
   <data name="From the server" xml:space="preserve">
     <value>From the server</value>
   </data>
+  <data name="Not saved yet: the changes are only in the editor" xml:space="preserve">
+    <value>Not saved yet: the changes are only in the editor until you save the items.</value>
+  </data>
 </root>
