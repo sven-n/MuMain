@@ -78,26 +78,6 @@ ImGuiDockNode* FirstLeaf(ImGuiDockNode* node)
     return node;
 }
 
-// The dock node a window is in; for a window that is closed or not open yet
-// this session, the one imgui.ini keeps for it. nullptr while it floats.
-ImGuiDockNode* FindDockNode(const char* windowId)
-{
-    ImGuiID dockId = 0;
-    if (const ImGuiWindow* window = ImGui::FindWindowByName(windowId))
-    {
-        if (window->DockNode != nullptr)
-        {
-            return window->DockNode;
-        }
-        dockId = window->DockId;
-    }
-    else if (const ImGuiWindowSettings* settings = ImGui::FindWindowSettingsByID(ImHashStr(windowId)))
-    {
-        dockId = settings->DockId;
-    }
-    return dockId != 0 ? ImGui::DockBuilderGetNode(dockId) : nullptr;
-}
-
 // The dock node a window is docked in or has its place in (imgui.ini): 0 for
 // a floating one, nullopt for one that has no place yet.
 std::optional<ImGuiID> PlacedDockId(const char* windowId)
@@ -111,6 +91,14 @@ std::optional<ImGuiID> PlacedDockId(const char* windowId)
         return settings->DockId;
     }
     return std::nullopt;
+}
+
+// The dock node a window is in; for a window that is closed or not open yet
+// this session, the one imgui.ini keeps for it. nullptr while it floats.
+ImGuiDockNode* FindDockNode(const char* windowId)
+{
+    const ImGuiID dockId = PlacedDockId(windowId).value_or(0);
+    return dockId != 0 ? ImGui::DockBuilderGetNode(dockId) : nullptr;
 }
 
 // ShowBeside, before the dock space's windows of this frame.
