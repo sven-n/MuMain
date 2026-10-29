@@ -10,6 +10,7 @@
 
 #include <array>
 #include <cstring>
+#include <span>
 #include <string>
 
 namespace
@@ -132,17 +133,38 @@ TEST_CASE("Maps: the stage the server sends with the map, none where WorldActive
     gMapManager.SetServerStage(0);
 }
 
-TEST_CASE("Maps: MapChanged carries the stage at byte 10, a shorter packet none (D67) [maps][network]")
+TEST_CASE("Maps: MapChangedExtended carries the stage at 15, the 15-byte MapChanged none (D67) [maps][network]")
 {
     // OpenMU's C3 1C 0F to the extended client in Devil Square 2: map 9 at
     // 130/90, stage 2.
-    const std::array<BYTE, 15> packet = {0xC3, 15, 0x1C, 0x0F, 1, 0, 9, 130, 90, 1, 2, 0, 0, 0, 0};
+    const std::array<BYTE, 16> extended = {0xC3, 16, 0x1C, 0x0F, 1, 0, 9, 130, 90, 1, 0, 0, 0, 0, 0, 2};
     PRECEIVE_TELEPORT_POSITION teleport{};
-    std::memcpy(&teleport, packet.data(), sizeof(teleport));
+    static_assert(sizeof(teleport) == extended.size());
+    std::memcpy(&teleport, extended.data(), sizeof(teleport));
     CHECK(teleport.Map == WD_9DEVILSQUARE);
     CHECK(GetTeleportStage(teleport) == 2);
-    teleport.Header.Size = 10;
+
+    // The original MapChanged, whose bytes 10 to 14 aren't initialized,
+    // followed by a byte of the next packet in the receive buffer.
+    const std::array<BYTE, 16> original = {0xC3, 15, 0x1C, 0x0F, 1, 0, 9, 130, 90, 1, 2, 7, 7, 7, 7, 2};
+    std::memcpy(&teleport, original.data(), sizeof(teleport));
+    CHECK(teleport.Map == WD_9DEVILSQUARE);
     CHECK(GetTeleportStage(teleport) == 0);
+}
+
+TEST_CASE("Maps: CharacterInformationExtended carries the stage at 92, a 92-byte packet none (D67) [maps][network]")
+{
+    // OpenMU's C3 F3 03 to the extended client which logs in again in Devil
+    // Square 2 (93 bytes, the stage last), and a byte of the next packet in
+    // the receive buffer.
+    std::array<BYTE, 94> buffer{0xC3, 93, 0xF3, 0x03};
+    buffer[92] = 2;
+    buffer[93] = 7;
+    CHECK(GetJoinMapServerStage(std::span<const BYTE>(buffer.data(), 93)) == 2);
+
+    // The 92-byte packet of a server which doesn't send the stage.
+    buffer[1] = 92;
+    CHECK(GetJoinMapServerStage(std::span<const BYTE>(buffer.data(), 92)) == 0);
 }
 
 TEST_CASE("Maps: a map's files folder, one for all rounds of an event (D67) [maps]")

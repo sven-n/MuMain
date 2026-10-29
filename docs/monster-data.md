@@ -220,8 +220,10 @@ Maps are the numbers the server sends (`mapTextureFolders`, `soundEventMaps`,
 a part's `maps`, and a monster's map variants): Devil Square 1–4 is 9 and
 Devil Square 5–7 is 32, although the client loads both as Devil Square (9).
 A list may also name one stage of a map: `{"map": 9, "stage": 2}` is Devil
-Square 2. OpenMU sends the stage with the map (byte 10 of `MapChanged`, to
-the extended client); a number names all of its stages, and with another
+Square 2. OpenMU sends the extended client the stage with the map
+(`MapChangedExtended`) and when it enters the world
+(`CharacterInformationExtended`, so a character which logs in again in Devil
+Square keeps its stage); a number names all of its stages, and with another
 server every stage is 0. The lists' older names (`worldTextureFolders`,
 `worlds`, `soundEventWorlds`) are fatal problems that name the new ones.
 
