@@ -2611,59 +2611,32 @@
   <data name="Clear skill after attack" xml:space="preserve">
     <value>after its own attack: when it ends, or another attack or a hit stops it (afterAttack)</value>
   </data>
-  <data name="Reader Hellas" xml:space="preserve">
-    <value>the Hellas handler, on any map</value>
-  </data>
   <data name="Reader Battle Castle guards" xml:space="preserve">
-    <value>the Battle Castle handler, by the guards' models, on any map</value>
-  </data>
-  <data name="Reader Hunting Ground" xml:space="preserve">
-    <value>the Hunting Ground handler, on its map</value>
-  </data>
-  <data name="Reader Aida" xml:space="preserve">
-    <value>the Aida handler, on Aida</value>
-  </data>
-  <data name="Reader Crywolf and Devil Square" xml:space="preserve">
-    <value>the Crywolf handler, on Crywolf and in Devil Square</value>
-  </data>
-  <data name="Reader Kanturu 1st" xml:space="preserve">
-    <value>the Kanturu 1st handler, on Kanturu 1st</value>
-  </data>
-  <data name="Reader Kanturu 2nd and 3rd" xml:space="preserve">
-    <value>the Kanturu 2nd handler, on Kanturu 2nd and 3rd</value>
+    <value>the Battle Castle guards' attack state (AI), by their models, on any map</value>
   </data>
   <data name="Reader Kanturu 3rd" xml:space="preserve">
-    <value>the Kanturu 3rd handler, on Kanturu 3rd</value>
-  </data>
-  <data name="Reader Balgass barracks" xml:space="preserve">
-    <value>the Balgass barracks handler, in the barracks and the refuge</value>
-  </data>
-  <data name="Reader Illusion Temple" xml:space="preserve">
-    <value>the Illusion Temple handler, in Illusion Temple</value>
-  </data>
-  <data name="Reader Swamp of Quiet" xml:space="preserve">
-    <value>the Swamp of Quiet handler, by the models, on its map</value>
+    <value>Maya's scene, on Kanturu 3rd</value>
   </data>
   <data name="Reader Raklion" xml:space="preserve">
-    <value>the Raklion handler, on Raklion and its boss map</value>
+    <value>Selupan's height, sounds and effects, on Raklion and its boss map</value>
   </data>
   <data name="Reader Empire Guardian" xml:space="preserve">
-    <value>the Empire Guardian handler, on the four Empire Guardian maps</value>
+    <value>the bosses' rage (the Berserker skill starts it, appear plays in it), on the four Empire Guardian maps</value>
   </data>
   <data name="Reader Empire Guardian 2" xml:space="preserve">
-    <value>the Empire Guardian 2 handler, on its map</value>
+    <value>the boss's rage, on Empire Guardian 2</value>
   </data>
   <data name="Reader Empire Guardian 3" xml:space="preserve">
-    <value>the Empire Guardian 3 handler, on its map</value>
+    <value>the boss's rage, on Empire Guardian 3</value>
   </data>
   <data name="Reader Empire Guardian 4" xml:space="preserve">
-    <value>the Empire Guardian 4 handler, on its map</value>
+    <value>the bosses' rage, on Empire Guardian 4</value>
   </data>
   <data name="Reader traps" xml:space="preserve">
-    <value>SetPlayerAttack, by the trap models; their effects and sounds stay code</value>
+    <value>the traps' effects, by the trap models</value>
   </data>
-  <data name="Reader Bali" xml:space="preserve">
-    <value>SetPlayerAttack, by Bali's model</value>
+  <data name="Map code that also runs" xml:space="preserve">
+    <value>Map code that also runs:</value>
   </data>
   <data name="Player shaped monsters choose a player attack" xml:space="preserve">
     <value>A player-shaped monster chooses a player attack from its equipment; attacks do not apply to it.</value>
@@ -2685,12 +2658,6 @@
   </data>
   <data name="Remove the attacks" xml:space="preserve">
     <value>Remove the attacks</value>
-  </data>
-  <data name="No code reads these attacks." xml:space="preserve">
-    <value>No handler reads these attacks: they do nothing until code reads them.</value>
-  </data>
-  <data name="Read by" xml:space="preserve">
-    <value>Read by:</value>
   </data>
   <data name="Monster skills note" xml:space="preserve">
     <value>The monster skill of packet 0x69; the game plays an attack for skills 1 to 77.</value>

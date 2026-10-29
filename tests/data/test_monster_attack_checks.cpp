@@ -97,10 +97,11 @@ bool HasMessage(const std::vector<ItemDataIssue>& issues, int number, const std:
 }
 } // namespace
 
-TEST_CASE("Monster attack checks: attacks that no handler reads, and those of a player-shaped monster "
-          "[editor][monsters]")
+TEST_CASE("Monster attack checks: the attacks of a player-shaped monster; any other plays them on every map "
+          "(Q-MN64) [editor][monsters]")
 {
     const std::array monsters = {
+        // Attacks play on every map: no handler has to answer for the Budge Dragon.
         Monster(MONSTER_BUDGE_DRAGON, "MONSTER_MODEL_BUDGE_DRAGON", Attacks({}, MONSTER01_ATTACK1)),
         Monster(MONSTER_DEATH_CENTURION_1, "player", Attacks({}, MONSTER01_ATTACK1)),
         // Ice Walker's own attacks: nothing to say.
@@ -111,10 +112,8 @@ TEST_CASE("Monster attack checks: attacks that no handler reads, and those of a 
 
     const std::vector<ItemDataIssue> issues = Check(monsters);
 
-    REQUIRE(issues.size() == 2);
-    CHECK(Messages(issues, MONSTER_BUDGE_DRAGON) ==
-          std::vector<std::string>{"no handler answers for this number and model on any map: the attacks do "
-                                   "nothing, and the monster plays attack1, attack2, attack2"});
+    REQUIRE(issues.size() == 1);
+    CHECK(Messages(issues, MONSTER_BUDGE_DRAGON).empty());
     CHECK(HasMessage(issues, MONSTER_DEATH_CENTURION_1, "the player's shape"));
     for (const ItemDataIssue& issue : issues)
     {
@@ -268,7 +267,6 @@ TEST_CASE("Monster attack checks: the shipped lists' attacks [editor][monsters]"
     for (const ItemDataIssue& issue : issues)
     {
         INFO(issue.number << ": " << issue.message);
-        CHECK(issue.message.find("no handler answers") == std::string::npos);
         CHECK(issue.message.find("packet 0x69") == std::string::npos);
         if (issue.message.find(" is 0:") != std::string::npos)
         {

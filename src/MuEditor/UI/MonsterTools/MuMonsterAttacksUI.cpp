@@ -104,28 +104,10 @@ const char* ReaderLabel(AttackReaders::Reader reader)
     using AttackReaders::Reader;
     switch (reader)
     {
-    case Reader::Hellas:
-        return I18N::Editor::ReaderHellas;
     case Reader::BattleCastleGuards:
         return I18N::Editor::ReaderBattleCastleGuards;
-    case Reader::HuntingGround:
-        return I18N::Editor::ReaderHuntingGround;
-    case Reader::Aida:
-        return I18N::Editor::ReaderAida;
-    case Reader::CrywolfAndDevilSquare:
-        return I18N::Editor::ReaderCrywolfAndDevilSquare;
-    case Reader::Kanturu1st:
-        return I18N::Editor::ReaderKanturu1st;
-    case Reader::Kanturu2ndAnd3rd:
-        return I18N::Editor::ReaderKanturu2ndAnd3rd;
     case Reader::Kanturu3rd:
         return I18N::Editor::ReaderKanturu3rd;
-    case Reader::BalgassBarracks:
-        return I18N::Editor::ReaderBalgassBarracks;
-    case Reader::IllusionTemple:
-        return I18N::Editor::ReaderIllusionTemple;
-    case Reader::SwampOfQuiet:
-        return I18N::Editor::ReaderSwampOfQuiet;
     case Reader::Raklion:
         return I18N::Editor::ReaderRaklion;
     case Reader::EmpireGuardian:
@@ -138,8 +120,6 @@ const char* ReaderLabel(AttackReaders::Reader reader)
         return I18N::Editor::ReaderEmpireGuardian4;
     case Reader::Traps:
         return I18N::Editor::ReaderTraps;
-    case Reader::Bali:
-        return I18N::Editor::ReaderBali;
     }
     return "";
 }
@@ -356,13 +336,13 @@ void MuMonsterAttacksUI::RenderVariantMaps(MonsterDefinition& monster)
 
 void MuMonsterAttacksUI::RenderReaders(const MonsterDefinition& monster, int modelSlot)
 {
+    // The attacks play on every map; this is the code that runs with them.
     const std::vector<AttackReaders::Reader> readers = AttackReaders::FindReaders(monster.number, modelSlot);
     if (readers.empty())
     {
-        RenderWarning(I18N::Editor::NoCodeReadsTheseAttacks);
         return;
     }
-    ImGui::TextUnformatted(I18N::Editor::ReadBy);
+    ImGui::TextUnformatted(I18N::Editor::MapCodeThatAlsoRuns);
     for (const AttackReaders::Reader reader : readers)
     {
         ImGui::BulletText("%s", ReaderLabel(reader));

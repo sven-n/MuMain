@@ -1182,12 +1182,6 @@ bool GMEmpireGuardian3::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             m_bCurrentIsRage_Kato = true;
         return GameLogic::Monsters::Attacks::Play(*c, *o);
     }
-    case MONSTER_HEAD_MOUNTER:
-        return GameLogic::Monsters::Attacks::Play(*c, *o);
-    case MONSTER_FORSAKER:
-        return GameLogic::Monsters::Attacks::Play(*c, *o);
-    case MONSTER_BANSHEE:
-        return GameLogic::Monsters::Attacks::Play(*c, *o);
     }
     return false;
 }

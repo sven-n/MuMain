@@ -47,7 +47,8 @@ namespace   battleCastle
     void ResetCastleGateAttackCount(CHARACTER* c, int Type);
     bool    StopBattleCastleMonster(CHARACTER* c, OBJECT* o);
     bool    MoveBattleCastleMonster(CHARACTER* c, OBJECT* o);
-    bool    SetCurrentAction_BattleCastleMonster(CHARACTER* c, OBJECT* o);
+    // A guard that attacks takes its attack state; its animation is data.
+    void SetGuardAttackState(OBJECT* o);
     bool    AttackEffect_BattleCastleMonster(CHARACTER* c, OBJECT* o, BMD* b);
     bool    MoveBattleCastleMonsterVisual(OBJECT* o, BMD* b);
     bool    RenderBattleCastleMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);

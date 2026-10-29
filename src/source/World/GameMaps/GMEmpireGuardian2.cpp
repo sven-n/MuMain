@@ -1046,15 +1046,6 @@ bool GMEmpireGuardian2::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
             m_bCurrentIsRage_Bermont = true;
         return GameLogic::Monsters::Attacks::Play(*c, *o);
     }
-    case MONSTER_ATICLES_HEAD:
-        return GameLogic::Monsters::Attacks::Play(*c, *o);
-    case MONSTER_DARK_GHOST:
-        return GameLogic::Monsters::Attacks::Play(*c, *o);
-    case MONSTER_DEFENDER:
-        // Empire Guardian 1 answers for it first.
-        return true;
-    case MONSTER_FORSAKER:
-        return GameLogic::Monsters::Attacks::Play(*c, *o);
     }
     return false;
 }

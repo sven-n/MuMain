@@ -1,5 +1,4 @@
 ﻿#include "stdafx.h"
-#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -1587,28 +1586,6 @@ bool M33Aida::AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BM
         }
     }
         return true;
-    }
-    return false;
-}
-
-bool M33Aida::SetCurrentActionAidaMonster(CHARACTER* pCharacter, OBJECT* pObject)
-{
-    if (!IsInAida())
-        return false;
-
-    switch (pCharacter->MonsterIndex)
-    {
-    case MONSTER_WITCH_QUEEN:
-    case MONSTER_BLUE_GOLEM:
-    case MONSTER_HELL_MAINE:
-        return CheckMonsterSkill(pCharacter, pObject);
-    case MONSTER_BLOODY_ORC:
-    case MONSTER_BLOODY_DEATH_RIDER:
-        return CheckMonsterSkill(pCharacter, pObject);
-    case MONSTER_BLOODY_GOLEM:
-        return GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
-    case MONSTER_BLOODY_WITCH_QUEEN:
-        return GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
     }
     return false;
 }

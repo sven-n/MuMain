@@ -42,7 +42,6 @@ void    RenderDestroy_Def(OBJECT* o, BMD* b);
 CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, int Key);
 
 
-bool    SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o);
 bool    AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* to, BMD* b);
 void    MonsterMoveWaterSmoke(OBJECT* o);
 void    MonsterDieWaterSmoke(OBJECT* o);

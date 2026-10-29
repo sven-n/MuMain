@@ -5,7 +5,6 @@
 #include "MonsterAttackChecks.h"
 
 #include "MonsterAnimationFacts.h"
-#include "MonsterAttackReaders.h"
 #include "MonsterModelValues.h"
 
 #include "Core/Globals/_define.h"
@@ -207,12 +206,6 @@ void CheckMonster(const MonsterDefinition& monster, const MonsterAttacks& attack
     {
         problems.Add("the monster has the player's shape: it chooses a player attack from its equipment, and "
                      "its attacks do nothing");
-        return;
-    }
-    if (AttackReaders::FindReaders(monster.number, slot).empty())
-    {
-        problems.Add("no handler answers for this number and model on any map: the attacks do nothing, and the "
-                     "monster plays attack1, attack2, attack2");
         return;
     }
     CheckMonsterSkills(attacks, problems);

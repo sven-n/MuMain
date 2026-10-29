@@ -138,25 +138,6 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
     return pCharacter;
 }
 
-bool M38Kanturu2nd::Set_CurrentAction_Kanturu2nd_Monster(CHARACTER* c, OBJECT* o)
-{
-    if (Is_Kanturu2nd_3rd() == false)
-        return false;
-
-    switch (c->MonsterIndex)
-    {
-    case MONSTER_PERSONA:
-    case MONSTER_TWIN_TALE:
-    case MONSTER_DREADFEAR:
-    {
-        return CheckMonsterSkill(c, o);
-    }
-    break;
-    }
-
-    return false;
-}
-
 bool M38Kanturu2nd::AttackEffect_Kanturu2nd_Monster(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)

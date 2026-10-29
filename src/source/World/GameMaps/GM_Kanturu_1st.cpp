@@ -2,7 +2,6 @@
 // File: GM_kanturu_1st.cpp
 //*****************************************************************************
 #include "stdafx.h"
-#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
@@ -579,29 +578,6 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
     }
 
     return pCharacter;
-}
-
-bool M37Kanturu1st::SetCurrentActionKanturu1stMonster(CHARACTER* c, OBJECT* o)
-{
-    if (!IsKanturu1st())
-        return false;
-
-    switch (c->MonsterIndex)
-    {
-    case MONSTER_BERSERKER:
-    case MONSTER_GIGANTIS:
-    case MONSTER_GENOCIDER:
-    case MONSTER_SPLINTER_WOLF:
-    case MONSTER_IRON_RIDER:
-    case MONSTER_GIGANTIS_WARRIOR:
-    case MONSTER_KENTAUROS:
-    case MONSTER_BERSERKER_WARRIOR:
-    case MONSTER_KENTAUROS_WARRIOR:
-    case MONSTER_GENOCIDER_WARRIOR:
-        return GameLogic::Monsters::Attacks::Play(*c, *o);
-    }
-
-    return false;
 }
 
 bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* b)

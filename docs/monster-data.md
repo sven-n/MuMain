@@ -373,22 +373,25 @@ Playing an attack (`SetPlayerAttack`) for a monster:
 1. A player-shaped monster (model `player`) plays a player attack chosen
    from its equipment; its `attacks` do nothing.
 2. The traps (`mapObject 39`, `40` and `51`) play their `attacks` and their
-   effects and sounds; Bali plays its `attacks` (its draw).
-3. Else the map handlers are asked in a row, each for the monsters and maps
-   it knows: Hellas (any map), the Battle Castle guards (by model, any map),
-   the Hunting Ground, Aida, Crywolf and Devil Square, Kanturu 1st, 2nd and
-   3rd, the Balgass barracks and refuge, Illusion Temple, the Swamp of Quiet
-   (by model), Raklion, and Empire Guardian 1 to 4. A handler that answers
-   for the monster plays its `attacks` and keeps what its code adds: the
-   guards' AI, Maya's scene, Selupan's height, sounds and effects, and the
-   rage of the Empire Guardian bosses (in a rage a boss plays appear).
-4. If none answered, the generic pattern plays: attack 1, attack 2, attack 2
-   by a count of the character (`SwordCount`: attack 1 when it divides by 3;
-   each attack and spell adds 1 to it, the pattern 1 more).
+   effects.
+3. Else the map code that is no choice of animation runs: the Battle Castle
+   guards take their attack state (by model), Maya plays her scene in
+   Kanturu 3rd, Selupan his height, sounds and effects in Raklion, and the
+   Empire Guardian bosses their rage (the Berserker skill starts it; in a
+   rage a boss plays appear). Maya, Selupan and the bosses play their
+   `attacks` there.
+4. Else the monster plays its `attacks`, or its map variant's on the
+   variant's maps, on every map.
+5. A monster without `attacks` plays the generic pattern: attack 1,
+   attack 2, attack 2 by a count of the character (`SwordCount`: attack 1
+   when it divides by 3; each attack and spell adds 1 to it, the pattern 1
+   more).
 
-So `attacks` work where a handler answers for the monster: the Monster
-Attacks tool says which one, and Data Checks lists the attacks no handler
-reads (a monster moved to another model loses a model-keyed handler).
+Before the attacks PR, map handlers chose the animation for numbers they
+listed, each on its maps; on other maps those monsters played the generic
+pattern. Where the server places them, they play the same now: the Fire
+Golem is Devil Square 5's boss and keeps the generic pattern there by a map
+variant, and Erkanne stands still in Loren Market by hers.
 
 The game counts only attack 1 and attack 2 as attacks: a hit plays shock
 over any other animation, and only they have a hit frame. After appear, only
@@ -532,7 +535,8 @@ item tools.
   factors** plays them (**As a transformed player** too). The preview is
   only in the editor's window.
 - **Monster Attacks**: the [attacks](#attacks) of the selected monster, and
-  the handlers that read them, with their maps (or that none does). **Add
+  the map code that runs with them (the guards' state, Maya's scene,
+  Selupan, the Empire Guardian bosses' rage, the traps' effects). **Add
   attacks** gives a monster without them attacks that play attack 1;
   **Remove the attacks** gives it the generic pattern again. **Map** shows
   **All maps** or one of the monster's [map variants](#map-variants), named
@@ -559,7 +563,7 @@ item tools.
   name in a language the game has no UI texts for (warnings), and the checks
   of the model list's load (a model or part file that is not in the client
   folder is a warning), and the checks of the attacks (warnings): attacks
-  that no handler reads or of a player-shaped monster, a monster skill that
+  of a player-shaped monster, a monster skill that
   0x69 plays no attack for, and each animation the attacks can play that the
   open model lacks, whose speed is 0, after which the model does not go back
   to stop1, or that is not attack 1 or 2 (see [Attacks](#attacks)). With the

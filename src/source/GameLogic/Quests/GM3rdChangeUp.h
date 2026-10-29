@@ -38,7 +38,6 @@ namespace SEASON3A
         void PlayBGM();
 
         CHARACTER* CreateBalgasBarrackMonster(int iType, int PosX, int PosY, int Key);
-        bool SetCurrentActionBalgasBarrackMonster(CHARACTER* c, OBJECT* o);
         bool AttackEffectBalgasBarrackMonster(CHARACTER* c, OBJECT* o, BMD* b);
         bool MoveBalgasBarrackMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
         void MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);

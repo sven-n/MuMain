@@ -33,7 +33,6 @@ namespace SEASON3A
         CHARACTER* CreateCharacters(EMonsterType iType, int iPosX, int iPosY, int iKey);
 
     public:
-        bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
         bool AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b);
         void PlayBGM();
         void ResetCursedTemple();

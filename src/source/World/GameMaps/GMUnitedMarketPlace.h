@@ -27,7 +27,6 @@ public:
     virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
     virtual bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
     virtual bool AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b);
-    virtual bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
     bool MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
 
 public:

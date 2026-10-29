@@ -262,6 +262,38 @@ TEST_CASE("Monster attacks: a map variant plays on its maps, the monster's attac
     CHECK(NormalAttack(elf) == MONSTER01_ATTACK1);
 }
 
+TEST_CASE("Monster attacks: the shipped map variants keep the Fire Golem's Devil Square pattern and Erkanne still in "
+          "the market (Q-MN64) [monsters][attacks]")
+{
+    AttackScope scope(WD_31HUNTING_GROUND);
+    CHARACTER& golem = scope.Create(MONSTER_FIRE_GOLEM);
+    golem.SwordCount = 0;
+    CHECK(NormalAttack(golem) == MONSTER01_ATTACK2);
+    // In Devil Square 5-7 it is round 5's boss and plays the generic pattern.
+    gMapManager.SetServerMap(32);
+    golem.SwordCount = 0;
+    for (const int expected : {MONSTER01_ATTACK1, MONSTER01_ATTACK2, MONSTER01_ATTACK2, MONSTER01_ATTACK1})
+    {
+        CHECK(NormalAttack(golem) == expected);
+    }
+
+    gMapManager.SetServerMap(WD_79UNITEDMARKETPLACE);
+    CHARACTER& erkanne = scope.Create(MONSTER_LUCAS);
+    CHECK(Attack(erkanne, NoMonsterSkill) == MONSTER01_WALK);
+    CHECK(Attack(erkanne, 62) == MONSTER01_WALK);
+    CHECK(erkanne.MonsterSkill == 62);
+}
+
+TEST_CASE("Monster attacks: a Battle Castle guard takes its attack state, its attacks play as data (Q-MN64) "
+          "[monsters][attacks]")
+{
+    AttackScope scope(WD_30BATTLECASTLE);
+    CHARACTER& archer = scope.Create(MONSTER_BATTLE_GUARD1);
+    archer.Object.AI = 0;
+    CHECK(Attack(archer, NoMonsterSkill) == MONSTER01_SHOCK);
+    CHECK(archer.Object.AI != 0);
+}
+
 TEST_CASE("Monster attacks: \"generic\" plays as a monster without attacks, at any count (Q-MN69) "
           "[monsters][attacks]")
 {
