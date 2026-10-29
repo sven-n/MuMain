@@ -41,7 +41,11 @@ void Play(int number)
 
 void PlayEvents(const Data::Monsters::MonsterModelDefinition& model, int animation, float frame)
 {
-    GameLogic::Monsters::SoundEvents::PlayEvents(model, animation, frame, true, [](int number) { Play(number); });
+    GameLogic::Monsters::SoundEvents::Situation situation;
+    situation.animation = animation;
+    situation.frame = frame;
+    situation.deathEffectArmed = true;
+    GameLogic::Monsters::SoundEvents::PlayEvents(model, situation, [](int number, bool) { Play(number); });
 }
 
 void RenderVolume()
