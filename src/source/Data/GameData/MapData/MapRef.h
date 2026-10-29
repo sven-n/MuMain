@@ -30,6 +30,10 @@ struct MapRef
 // without a stage names every stage of its map.
 bool Names(std::span<const MapRef> maps, int serverMap, int stage);
 
+// Whether two entries of map lists both name a map and stage: an entry without
+// a stage names all of its map's stages (a map in two map variants).
+bool Overlaps(const MapRef& first, const MapRef& second);
+
 // Reads a list of maps, sorted and without repeats; false, with the problems
 // sent to `fail(field, message)`, when an entry is not a map.
 bool ReadMapRefs(const Items::Json::OrderedJson& json, const std::string& field, std::vector<MapRef>& maps,

@@ -374,13 +374,6 @@ std::string DescribeMapRef(const Data::Maps::MapRef& ref)
     return "map " + std::to_string(ref.map) + (ref.stage != 0 ? " stage " + std::to_string(ref.stage) : "");
 }
 
-// Whether two entries of map lists name a map and stage both do: a map
-// without a stage names all of its stages.
-bool Overlap(const Data::Maps::MapRef& first, const Data::Maps::MapRef& second)
-{
-    return first.map == second.map && (first.stage == 0 || second.stage == 0 || first.stage == second.stage);
-}
-
 // What the monster does differently on some maps (D62); a map in two
 // variants contradicts itself.
 bool ReadMapVariants(const OrderedJson& json, int number, std::vector<MonsterMapVariant>& variants, IssueList& issues)
@@ -412,8 +405,8 @@ bool ReadMapVariants(const OrderedJson& json, int number, std::vector<MonsterMap
         bool entryValid = ReadVariantMaps(entry, key, number, variant.maps, issues);
         for (const Data::Maps::MapRef& ref : variant.maps)
         {
-            const auto earlier = std::find_if(named.begin(), named.end(),
-                                              [&](const Data::Maps::MapRef& other) { return Overlap(ref, other); });
+            const auto earlier = std::find_if(named.begin(), named.end(), [&](const Data::Maps::MapRef& other)
+                                              { return Data::Maps::Overlaps(ref, other); });
             if (earlier != named.end())
             {
                 issues.Fatal(key + "." + MapsKey,

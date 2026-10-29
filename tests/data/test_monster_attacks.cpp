@@ -6,6 +6,7 @@
 // skill plays, and how the list holds them.
 
 #include "Core/Globals/_define.h"
+#include "Data/GameData/MapData/MapRef.h"
 #include "Data/GameData/MonsterData/MonsterAttacks.h"
 #include "Data/GameData/MonsterData/MonstersJson.h"
 #include "World/MapInfra/MapManager.h"
@@ -324,6 +325,19 @@ TEST_CASE("Monster attacks: a map variant's attacks replace the monster's on its
     variantOnly.attacks.reset();
     CHECK(Data::Monsters::GetAttacksOnMap(variantOnly, 32).has_value());
     CHECK_FALSE(Data::Monsters::GetAttacksOnMap(variantOnly, WD_31HUNTING_GROUND).has_value());
+}
+
+TEST_CASE("Maps: two map list entries overlap on a shared map and stage, a map without a stage on all (D67) "
+          "[data][maps]")
+{
+    using Data::Maps::MapRef;
+    using Data::Maps::Overlaps;
+    CHECK(Overlaps(MapRef{WD_9DEVILSQUARE}, MapRef{WD_9DEVILSQUARE}));
+    CHECK(Overlaps(MapRef{WD_9DEVILSQUARE}, MapRef{WD_9DEVILSQUARE, 2}));
+    CHECK(Overlaps(MapRef{WD_9DEVILSQUARE, 2}, MapRef{WD_9DEVILSQUARE}));
+    CHECK(Overlaps(MapRef{WD_9DEVILSQUARE, 2}, MapRef{WD_9DEVILSQUARE, 2}));
+    CHECK_FALSE(Overlaps(MapRef{WD_9DEVILSQUARE, 2}, MapRef{WD_9DEVILSQUARE, 3}));
+    CHECK_FALSE(Overlaps(MapRef{WD_9DEVILSQUARE}, MapRef{32}));
 }
 
 TEST_CASE("Monster attacks: a map variant names a stage of a map, a map without a stage all of them (D67) "

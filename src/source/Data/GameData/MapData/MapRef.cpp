@@ -50,6 +50,11 @@ bool Names(std::span<const MapRef> maps, int serverMap, int stage)
                        { return ref.map == serverMap && (ref.stage == 0 || ref.stage == stage); });
 }
 
+bool Overlaps(const MapRef& first, const MapRef& second)
+{
+    return first.map == second.map && (first.stage == 0 || second.stage == 0 || first.stage == second.stage);
+}
+
 bool ReadMapRefs(const OrderedJson& json, const std::string& field, std::vector<MapRef>& maps,
                  const std::function<void(const std::string&, const std::string&)>& fail)
 {
