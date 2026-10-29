@@ -2380,20 +2380,11 @@
   <data name="As the file has it" xml:space="preserve">
     <value>as the file has it</value>
   </data>
-  <data name="Attack sound 1" xml:space="preserve">
-    <value>Attack sound 1</value>
-  </data>
-  <data name="Attack sound 2" xml:space="preserve">
-    <value>Attack sound 2</value>
-  </data>
   <data name="Bounding box max" xml:space="preserve">
     <value>Bounding box max</value>
   </data>
   <data name="Bounding box min" xml:space="preserve">
     <value>Bounding box min</value>
-  </data>
-  <data name="Die sound" xml:space="preserve">
-    <value>Die sound</value>
   </data>
   <data name="Fixed bitmaps" xml:space="preserve">
     <value>Bitmaps in fixed slots</value>
@@ -2418,12 +2409,6 @@
   </data>
   <data name="Holds last frame" xml:space="preserve">
     <value>Holds last frame</value>
-  </data>
-  <data name="Idle sound 1" xml:space="preserve">
-    <value>Idle sound 1</value>
-  </data>
-  <data name="Idle sound 2" xml:space="preserve">
-    <value>Idle sound 2</value>
   </data>
   <data name="In game" xml:space="preserve">
     <value>In game</value>
@@ -2457,9 +2442,6 @@
   </data>
   <data name="No monster is selected" xml:space="preserve">
     <value>No monster is selected</value>
-  </data>
-  <data name="No sound" xml:space="preserve">
-    <value>(no sound)</value>
   </data>
   <data name="Not in the client folder" xml:space="preserve">
     <value>not in the client folder</value>
@@ -2515,9 +2497,6 @@
   <data name="Sound id" xml:space="preserve">
     <value>Id</value>
   </data>
-  <data name="Sound slots note" xml:space="preserve">
-    <value>The sounds the game plays when the model stands, walks, attacks, is hit and dies; of a pair it picks one at random.</value>
-  </data>
   <data name="Sounds" xml:space="preserve">
     <value>Sounds</value>
   </data>
@@ -2545,9 +2524,6 @@
   <data name="Step what hold of {0}" xml:space="preserve">
     <value>holds the last frame of {0}</value>
   </data>
-  <data name="Step what sound slots" xml:space="preserve">
-    <value>sound slots</value>
-  </data>
   <data name="Step what speed of {0}" xml:space="preserve">
     <value>speed of {0}</value>
   </data>
@@ -2568,9 +2544,6 @@
   </data>
   <data name="The file is not in the client folder; the model has no body." xml:space="preserve">
     <value>The file is not in the client folder; the model has no body.</value>
-  </data>
-  <data name="The model has a second sound set for SubType 9." xml:space="preserve">
-    <value>The model has a second sound set, which monsters with SubType 9 play (five numbers further); it is edited in the file.</value>
   </data>
   <data name="The model is not open; it shows when it is." xml:space="preserve">
     <value>The model is not open (its file may be missing); it shows once the game opens it.</value>
@@ -2744,7 +2717,7 @@
     <value>Sound events</value>
   </data>
   <data name="Sound events note" xml:space="preserve">
-    <value>Sounds the game plays on top of the slots for a character in one of an event's animations: when an attack starts, when it is hit or dies, at each step and at the end of each idle loop, within 500 units of the hero. An event plays sounds of this model.</value>
+    <value>Sounds the game plays for a character of this model: in an event's animations (when an attack starts, when it is hit or dies, at each step and at the end of each idle loop, within 500 units of the hero), or at its moments, whatever the animation. An event plays sounds of this model.</value>
   </data>
   <data name="Sound event frames" xml:space="preserve">
     <value>Frames</value>

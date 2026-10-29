@@ -13,7 +13,7 @@
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
-#include "Engine/Object/MonsterSlotSound.h"
+#include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Models/ZzzBMD.h"
@@ -26,7 +26,10 @@
 #include <algorithm>
 #include <array>
 #include <cstdlib>
+#include <initializer_list>
 #include <iterator>
+#include <optional>
+#include <string>
 #include <vector>
 
 // The end of a monster's animation (MoveCharacter calls it).
@@ -483,58 +486,38 @@ TEST_CASE("Monster attacks: Castle Gate 1 counts its hits from 0 when it is set 
 
 namespace
 {
-// The model's sound slots, put back at the end of the scope.
-class SlotSoundsScope
+// The number of a sound the model's sound events name.
+int SoundOf(const CHARACTER& character, const std::string& name)
 {
-public:
-    explicit SlotSoundsScope(BMD& model) : m_model(model), m_saved(std::to_array(model.Sounds)) {}
+    const Data::Monsters::MonsterModelDefinition* model = g_MonsterModelDatabase.Find(character.Object.Type);
+    REQUIRE(model != nullptr);
+    const std::optional<int> number = Data::Monsters::ModelLoader::FindSoundNumber(*model, name);
+    REQUIRE(number);
+    return *number;
+}
 
-    ~SlotSoundsScope()
-    {
-        std::copy(m_saved.begin(), m_saved.end(), std::begin(m_model.Sounds));
-    }
-
-    SlotSoundsScope(const SlotSoundsScope&) = delete;
-    SlotSoundsScope& operator=(const SlotSoundsScope&) = delete;
-
-private:
-    BMD& m_model;
-    std::array<short, MAX_MONSTER_SOUND> m_saved;
-};
-
-// How often the slot's sound is among the ids.
-long long CountSlotSound(const std::vector<int>& ids, short sound)
+// How many of the ids are one of the sounds.
+long long CountOf(const std::vector<int>& ids, std::initializer_list<int> sounds)
 {
-    return std::count(ids.begin(), ids.end(), static_cast<int>(SOUND_MONSTER) + sound);
+    return std::count_if(ids.begin(), ids.end(),
+                         [&](int id) { return std::find(sounds.begin(), sounds.end(), id) != sounds.end(); });
 }
 } // namespace
 
-TEST_CASE("Monster sounds: a monster with SubType 9 plays its second set's slot sounds, also where its first set "
-          "has none (P9) [monsters][sounds]")
+TEST_CASE("Monster sounds: a monster plays the sound events of its model when it is set to stand, attacks, is hit "
+          "and dies (MNS) [monsters][sounds]")
 {
-    using Engine::Object::MonsterSlotSound::NoSound;
     AttackScope scope(WD_0LORENCIA);
     CHARACTER& bull = scope.Create(MONSTER_BULL_FIGHTER);
-    bull.Object.SubType = Engine::Object::MonsterSlotSound::SecondSetSubType;
-    BMD& model = Models[bull.Object.Type];
-    const SlotSoundsScope slots(model);
-    const short idle = model.Sounds[0];
-    const short attack = model.Sounds[2];
-    const short die = model.Sounds[4];
-    REQUIRE(idle != NoSound);
-    REQUIRE(attack != NoSound);
-    REQUIRE(die != NoSound);
-    // Only the second set names sounds, the same one for both slots of a pair.
-    std::fill(std::begin(model.Sounds), std::end(model.Sounds), NoSound);
-    model.Sounds[5] = idle;
-    model.Sounds[6] = idle;
-    model.Sounds[7] = attack;
-    model.Sounds[8] = attack;
-    model.Sounds[9] = die;
+    const int idle1 = SoundOf(bull, "Data/Sound/mBull1.wav");
+    const int idle2 = SoundOf(bull, "Data/Sound/mBull2.wav");
+    const int attack1 = SoundOf(bull, "SOUND_MONSTER_BULLATTACK1");
+    const int attack2 = SoundOf(bull, "Data/Sound/mBullAttack2.wav");
+    const int die = SoundOf(bull, "Data/Sound/mBullDie.wav");
     scope.TakePlayedSounds();
 
-    // Standing plays an idle sound now and then (walking checks the same
-    // slot, but needs the hero's equipment).
+    // Set to stand, one time in 16 an idle sound (walking plays the same
+    // events, but needs the hero's equipment).
     const float savedFps = FPS_ANIMATION_FACTOR;
     FPS_ANIMATION_FACTOR = 1.0f;
     std::srand(1);
@@ -544,16 +527,18 @@ TEST_CASE("Monster sounds: a monster with SubType 9 plays its second set's slot 
         SetPlayerStop(&bull);
     }
     FPS_ANIMATION_FACTOR = savedFps;
-    CHECK(CountSlotSound(scope.TakePlayedSounds(), idle) > 0);
+    const std::vector<int> stood = scope.TakePlayedSounds();
+    CHECK(CountOf(stood, {idle1, idle2}) > 0);
+    CHECK(CountOf(stood, {idle1, idle2}) == static_cast<long long>(stood.size()));
 
     Attack(bull, NoMonsterSkill);
-    CHECK(CountSlotSound(scope.TakePlayedSounds(), attack) == 1);
+    CHECK(CountOf(scope.TakePlayedSounds(), {attack1, attack2}) == 1);
 
     bull.Object.CurrentAction = MONSTER01_STOP1;
     bull.Object.AnimationFrame = 0.0f;
     SetPlayerShock(&bull, 1);
-    CHECK(CountSlotSound(scope.TakePlayedSounds(), attack) == 1);
+    CHECK(CountOf(scope.TakePlayedSounds(), {attack1, attack2}) == 1);
 
     SetPlayerDie(&bull);
-    CHECK(CountSlotSound(scope.TakePlayedSounds(), die) == 1);
+    CHECK(CountOf(scope.TakePlayedSounds(), {die}) == 1);
 }

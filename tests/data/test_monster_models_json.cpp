@@ -81,10 +81,6 @@ MonsterModelDefinition FullModel()
     model.noneBlendMeshes = {0, 3};
     model.sounds = {{"Data/Sound/mDarkKnight1.wav", "SOUND_MONSTER_DARKKNIGHT1", 2, true},
                     {"Data/Sound/mDarkKnightDie.wav", "", 1, false}};
-    Data::Monsters::MonsterSoundSlots slots;
-    slots.first = {"SOUND_MONSTER_DARKKNIGHT1", "SOUND_MONSTER_DARKKNIGHT1", "", "", "Data/Sound/mDarkKnightDie.wav"};
-    slots.second = Data::Monsters::MonsterSoundSlotSet{"a", "b", "c", "d", "e"};
-    model.soundSlots = slots;
     Data::Monsters::MonsterSoundEvent walk;
     walk.animations = {MONSTER01_WALK};
     walk.frames = std::pair<float, float>{7.0f, 8.0f};
@@ -153,9 +149,10 @@ TEST_CASE("Monster models: the writer sorts by slot and puts short values on one
     hound.load.speeds = {{MONSTER01_WALK, 0.7f}};
     hound.headBone = 5;
     hound.sounds = {{"Data/Sound/mHound1.wav", "SOUND_MONSTER_HOUND1", 2, true}};
-    Data::Monsters::MonsterSoundSlots slots;
-    slots.first = {"SOUND_MONSTER_HOUND1", "SOUND_MONSTER_HOUND1", "", "", ""};
-    hound.soundSlots = slots;
+    Data::Monsters::MonsterSoundEvent idle;
+    idle.moments = {Data::Monsters::MonsterSoundMoment::Stand};
+    idle.sounds = {"SOUND_MONSTER_HOUND1"};
+    hound.soundEvents = {idle};
     MonsterModelDefinition smith;
     smith.slot = "MODEL_SMITH";
     smith.load.file = "Data/NPC/Smith01.bmd";
@@ -163,7 +160,7 @@ TEST_CASE("Monster models: the writer sorts by slot and puts short values on one
 
     const std::string text = Data::Monsters::WriteMonsterModelsJson(std::vector<MonsterModelDefinition>{smith, hound});
     CHECK(text == R"({
-  "formatVersion": 1,
+  "formatVersion": 2,
   "models": [
     {
       "slot": "MONSTER_MODEL_HOUND",
@@ -174,11 +171,9 @@ TEST_CASE("Monster models: the writer sorts by slot and puts short values on one
       "sounds": [
         {"file": "Data/Sound/mHound1.wav", "id": "SOUND_MONSTER_HOUND1", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["SOUND_MONSTER_HOUND1", "SOUND_MONSTER_HOUND1"],
-        "attack": [null, null],
-        "die": null
-      }
+      "soundEvents": [
+        {"on": ["stand"], "sounds": ["SOUND_MONSTER_HOUND1"]}
+      ]
     },
     {
       "slot": "MODEL_SMITH",
@@ -330,8 +325,9 @@ TEST_CASE("Monster models: wrong values are errors that name the model and the f
          "more than once"},
         {Model("MONSTER_MODEL_HOUND", R"("sounds": [{"file": "Data/Sound/a.wav", "channels": 5}])"),
          "model MONSTER_MODEL_HOUND sounds[0].channels", "1 to 4"},
-        {Model("MONSTER_MODEL_HOUND", R"("soundSlots": {"idle": ["a"], "attack": [null, null], "die": null})"),
-         "model MONSTER_MODEL_HOUND soundSlots.idle", "two sounds"},
+        // Format 2 has no sound slots (monsters design, MNS).
+        {Model("MONSTER_MODEL_HOUND", R"("soundSlots": {"idle": ["a", "b"], "attack": [null, null], "die": null})"),
+         "model MONSTER_MODEL_HOUND soundSlots", "sound events at moments (on)"},
         {Model("MONSTER_MODEL_HOUND", R"("textureNames": {"0": "a_name_that_is_longer_than_thirty_one.jpg"})"),
          "model MONSTER_MODEL_HOUND textureNames.0", "at most 31"},
         {Model("MONSTER_MODEL_HOUND", R"("bitmaps": [{"file": "Monster/a.jpg", "slot": "X", "wrap": "mirror"}])"),

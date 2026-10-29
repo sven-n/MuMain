@@ -1,5 +1,5 @@
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "models": [
     {
       "slot": "MONSTER_MODEL_BULL_FIGHTER",
@@ -13,11 +13,11 @@
         {"file": "Data/Sound/mBullAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mBullDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mBull1.wav", "Data/Sound/mBull2.wav"],
-        "attack": ["SOUND_MONSTER_BULLATTACK1", "Data/Sound/mBullAttack2.wav"],
-        "die": "Data/Sound/mBullDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBull1.wav", "Data/Sound/mBull2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_BULLATTACK1", "Data/Sound/mBullAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBullDie.wav"]}
+      ],
       "linkBones": [42, 33]
     },
     {
@@ -32,11 +32,11 @@
         {"file": "Data/Sound/mHoundAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mHoundDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mHound1.wav", "Data/Sound/mHound2.wav"],
-        "attack": ["Data/Sound/mHoundAttack1.wav", "Data/Sound/mHoundAttack2.wav"],
-        "die": "Data/Sound/mHoundDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHound1.wav", "Data/Sound/mHound2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mHoundAttack1.wav", "Data/Sound/mHoundAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mHoundDie.wav"]}
+      ],
       "linkBones": [19, 14]
     },
     {
@@ -50,11 +50,11 @@
         {"file": "Data/Sound/mBudgeAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mBudgeDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mBudge1.wav", "Data/Sound/mBudgeAttack1.wav"],
-        "attack": ["Data/Sound/mBudgeAttack1.wav", "Data/Sound/mBudgeAttack1.wav"],
-        "die": "Data/Sound/mBudgeDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBudge1.wav", "Data/Sound/mBudgeAttack1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mBudgeAttack1.wav", "Data/Sound/mBudgeAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBudgeDie.wav"]}
+      ],
       "boundingBox": {"max": [50, 50, 80]}
     },
     {
@@ -70,11 +70,11 @@
         {"file": "Data/Sound/mDarkKnightAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mDarkKnightDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mDarkKnight1.wav", "Data/Sound/mDarkKnight2.wav"],
-        "attack": ["Data/Sound/mDarkKnightAttack1.wav", "Data/Sound/mDarkKnightAttack2.wav"],
-        "die": "Data/Sound/mDarkKnightDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mDarkKnight1.wav", "Data/Sound/mDarkKnight2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mDarkKnightAttack1.wav", "Data/Sound/mDarkKnightAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mDarkKnightDie.wav"]}
+      ],
       "linkBones": [26, 36]
     },
     {
@@ -89,11 +89,11 @@
         {"file": "Data/Sound/mWizardAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mWizardDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mWizard1.wav", "Data/Sound/mWizard2.wav"],
-        "attack": ["Data/Sound/mWizardAttack1.wav", "Data/Sound/mWizardAttack2.wav"],
-        "die": "Data/Sound/mWizardDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mWizard1.wav", "Data/Sound/mWizard2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mWizardAttack1.wav", "Data/Sound/mWizardAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mWizardDie.wav"]}
+      ],
       "linkBones": [41, 32]
     },
     {
@@ -109,11 +109,11 @@
         {"file": "Data/Sound/mGiantAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mGiantDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mGiant1.wav", "Data/Sound/mGiant2.wav"],
-        "attack": ["Data/Sound/mGiantAttack1.wav", "Data/Sound/mGiantAttack2.wav"],
-        "die": "Data/Sound/mGiantDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mGiant1.wav", "Data/Sound/mGiant2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mGiantAttack1.wav", "Data/Sound/mGiantAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mGiantDie.wav"]}
+      ],
       "linkBones": [41, 32]
     },
     {
@@ -125,11 +125,11 @@
         {"file": "Data/Sound/mLarva1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mLarva2.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mLarva1.wav", "Data/Sound/mLarva2.wav"],
-        "attack": ["Data/Sound/mLarva1.wav", "Data/Sound/mLarva2.wav"],
-        "die": "Data/Sound/mLarva2.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mLarva1.wav", "Data/Sound/mLarva2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mLarva1.wav", "Data/Sound/mLarva2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mLarva2.wav"]}
+      ],
       "boundingBox": {"max": [50, 50, 80]}
     },
     {
@@ -144,11 +144,11 @@
         {"file": "Data/Sound/mGhostAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mGhostDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mGhost1.wav", "Data/Sound/mGhost2.wav"],
-        "attack": ["Data/Sound/mGhostAttack1.wav", "Data/Sound/mGhostAttack2.wav"],
-        "die": "Data/Sound/mGhostDie.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mGhost1.wav", "Data/Sound/mGhost2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mGhostAttack1.wav", "Data/Sound/mGhostAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mGhostDie.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_HELL_SPIDER",
@@ -161,11 +161,11 @@
         {"file": "Data/Sound/mHellSpiderAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mHellSpiderDie.wav", "id": "SOUND_MONSTER_HELLSPIDERDIE", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mHellSpider1.wav", "Data/Sound/mHellSpiderAttack1.wav"],
-        "attack": ["Data/Sound/mHellSpiderAttack1.wav", "Data/Sound/mHellSpiderAttack1.wav"],
-        "die": "SOUND_MONSTER_HELLSPIDERDIE"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHellSpider1.wav", "Data/Sound/mHellSpiderAttack1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mHellSpiderAttack1.wav", "Data/Sound/mHellSpiderAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_HELLSPIDERDIE"]}
+      ],
       "linkBones": [29, 38]
     },
     {
@@ -176,11 +176,11 @@
       "sounds": [
         {"file": "Data/Sound/mSpider1.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mSpider1.wav", "Data/Sound/mSpider1.wav"],
-        "attack": ["Data/Sound/mSpider1.wav", "Data/Sound/mSpider1.wav"],
-        "die": "Data/Sound/mSpider1.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mSpider1.wav", "Data/Sound/mSpider1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mSpider1.wav", "Data/Sound/mSpider1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mSpider1.wav"]}
+      ],
       "boundingBox": {"max": [50, 50, 80]}
     },
     {
@@ -196,11 +196,11 @@
         {"file": "Data/Sound/mOgreAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mOgreDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mOgre1.wav", "Data/Sound/mOgre2.wav"],
-        "attack": ["Data/Sound/mOgreAttack1.wav", "Data/Sound/mOgreAttack2.wav"],
-        "die": "Data/Sound/mOgreDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mOgre1.wav", "Data/Sound/mOgre2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mOgreAttack1.wav", "Data/Sound/mOgreAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mOgreDie.wav"]}
+      ],
       "linkBones": [41, 32]
     },
     {
@@ -215,11 +215,11 @@
         {"file": "Data/Sound/mGorgonAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mGorgonDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mGorgon1.wav", "Data/Sound/mGorgon2.wav"],
-        "attack": ["Data/Sound/mGorgonAttack1.wav", "Data/Sound/mGorgonAttack2.wav"],
-        "die": "Data/Sound/mGorgonDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mGorgon1.wav", "Data/Sound/mGorgon2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mGorgonAttack1.wav", "Data/Sound/mGorgonAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mGorgonDie.wav"]}
+      ],
       "boundingBox": {"max": [70, 70, 250]},
       "linkBones": [30, 39]
     },
@@ -235,11 +235,11 @@
         {"file": "Data/Sound/mYetiAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mYetiDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti1.wav"],
-        "attack": ["Data/Sound/mYetiAttack1.wav", "Data/Sound/mYetiAttack1.wav"],
-        "die": "Data/Sound/mYetiDie.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mYetiAttack1.wav", "Data/Sound/mYetiAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mYetiDie.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_ELITE_YETI",
@@ -253,11 +253,11 @@
         {"file": "Data/Sound/mYetiAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mYetiDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti2.wav"],
-        "attack": ["Data/Sound/mYetiAttack1.wav", "Data/Sound/mYetiAttack1.wav"],
-        "die": "Data/Sound/mYetiDie.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mYetiAttack1.wav", "Data/Sound/mYetiAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mYetiDie.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_ASSASSIN",
@@ -271,11 +271,10 @@
         {"file": "Data/Sound/mAssassinAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mAssassinDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": [null, null],
-        "attack": ["Data/Sound/mAssassinAttack1.wav", "Data/Sound/mAssassinAttack2.wav"],
-        "die": "Data/Sound/mAssassinDie.wav"
-      }
+      "soundEvents": [
+        {"on": ["attack"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mAssassinAttack1.wav", "Data/Sound/mAssassinAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mAssassinDie.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_ICE_MONSTER",
@@ -287,11 +286,11 @@
         {"file": "Data/Sound/mIceMonster2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mIceMonsterDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mIceMonster1.wav", "Data/Sound/mIceMonster2.wav"],
-        "attack": ["Data/Sound/mIceMonster1.wav", "Data/Sound/mIceMonster1.wav"],
-        "die": "Data/Sound/mIceMonsterDie.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mIceMonster1.wav", "Data/Sound/mIceMonster2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mIceMonster1.wav", "Data/Sound/mIceMonster1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mIceMonsterDie.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_HOMMERD",
@@ -303,11 +302,11 @@
         {"file": "Data/Sound/mHomordAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mHomordDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mHomord1.wav", "Data/Sound/mHomord2.wav"],
-        "attack": ["Data/Sound/mHomordAttack1.wav", "Data/Sound/mHomordAttack1.wav"],
-        "die": "Data/Sound/mHomordDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHomord1.wav", "Data/Sound/mHomord2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mHomordAttack1.wav", "Data/Sound/mHomordAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mHomordDie.wav"]}
+      ],
       "linkBones": [30, 39]
     },
     {
@@ -320,11 +319,11 @@
         {"file": "Data/Sound/mWorm2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mWormDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mWorm1.wav", "Data/Sound/mWorm1.wav"],
-        "attack": ["Data/Sound/mWormDie.wav", "Data/Sound/mWormDie.wav"],
-        "die": "Data/Sound/mWormDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mWorm1.wav", "Data/Sound/mWorm1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mWormDie.wav", "Data/Sound/mWormDie.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mWormDie.wav"]}
+      ],
       "boundingBox": {"max": [50, 50, 80]}
     },
     {
@@ -339,11 +338,11 @@
         {"file": "Data/Sound/mIceQueenAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mIceQueenDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mIceQueen1.wav", "Data/Sound/mIceQueen2.wav"],
-        "attack": ["Data/Sound/mIceQueenAttack1.wav", "Data/Sound/mIceQueenAttack2.wav"],
-        "die": "Data/Sound/mIceQueenDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mIceQueen1.wav", "Data/Sound/mIceQueen2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mIceQueenAttack1.wav", "Data/Sound/mIceQueenAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mIceQueenDie.wav"]}
+      ],
       "linkBones": [26, 35]
     },
     {
@@ -359,11 +358,11 @@
         {"file": "Data/Sound/mGoblinAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mGoblinDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mGoblin1.wav", "Data/Sound/mGoblin2.wav"],
-        "attack": ["Data/Sound/mGoblinAttack1.wav", "Data/Sound/mGoblinAttack2.wav"],
-        "die": "Data/Sound/mGoblinDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mGoblin1.wav", "Data/Sound/mGoblin2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mGoblinAttack1.wav", "Data/Sound/mGoblinAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mGoblinDie.wav"]}
+      ],
       "boundingBox": {"max": [50, 50, 80]},
       "linkBones": [31, 22]
     },
@@ -379,11 +378,11 @@
         {"file": "Data/Sound/mScorpionAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mScorpionDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mScorpion1.wav", "Data/Sound/mScorpion2.wav"],
-        "attack": ["Data/Sound/mScorpionAttack1.wav", "Data/Sound/mScorpionAttack2.wav"],
-        "die": "Data/Sound/mScorpionDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mScorpion1.wav", "Data/Sound/mScorpion2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mScorpionAttack1.wav", "Data/Sound/mScorpionAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mScorpionDie.wav"]}
+      ],
       "boundingBox": {"max": [50, 50, 80]}
     },
     {
@@ -397,11 +396,11 @@
         {"file": "Data/Sound/mBeetleAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mBeetleDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mBeetle1.wav", "Data/Sound/mBeetle1.wav"],
-        "attack": ["Data/Sound/mBeetleAttack1.wav", "Data/Sound/mBeetleAttack1.wav"],
-        "die": "Data/Sound/mBeetleDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBeetle1.wav", "Data/Sound/mBeetle1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mBeetleAttack1.wav", "Data/Sound/mBeetleAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBeetleDie.wav"]}
+      ],
       "linkBones": [24, 19]
     },
     {
@@ -416,11 +415,11 @@
         {"file": "Data/Sound/mHunterAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mHunterDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mHunter1.wav", "Data/Sound/mHunter2.wav"],
-        "attack": ["Data/Sound/mHunterAttack1.wav", "Data/Sound/mHunterAttack2.wav"],
-        "die": "Data/Sound/mHunterDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHunter1.wav", "Data/Sound/mHunter2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mHunterAttack1.wav", "Data/Sound/mHunterAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mHunterDie.wav"]}
+      ],
       "linkBones": [25, 16]
     },
     {
@@ -435,11 +434,11 @@
         {"file": "Data/Sound/mWoodMonAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mWoodMonDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mWoodMon1.wav", "Data/Sound/mWoodMon2.wav"],
-        "attack": ["Data/Sound/mWoodMonAttack1.wav", "Data/Sound/mWoodMonAttack2.wav"],
-        "die": "Data/Sound/mWoodMonDie.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mWoodMon1.wav", "Data/Sound/mWoodMon2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mWoodMonAttack1.wav", "Data/Sound/mWoodMonAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mWoodMonDie.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_AGON",
@@ -453,11 +452,11 @@
         {"file": "Data/Sound/mArgonAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mArgonDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mArgon1.wav", "Data/Sound/mArgon2.wav"],
-        "attack": ["Data/Sound/mArgonAttack1.wav", "Data/Sound/mArgonAttack2.wav"],
-        "die": "Data/Sound/mArgonDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mArgon1.wav", "Data/Sound/mArgon2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mArgonAttack1.wav", "Data/Sound/mArgonAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mArgonDie.wav"]}
+      ],
       "linkBones": [39, 30]
     },
     {
@@ -473,11 +472,11 @@
         {"file": "Data/Sound/mGolemAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mGolemDie.wav", "id": "SOUND_MONSTER_GOLEMDIE", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mGolem1.wav", "Data/Sound/mGolem2.wav"],
-        "attack": ["Data/Sound/mGolemAttack1.wav", "Data/Sound/mGolemAttack2.wav"],
-        "die": "SOUND_MONSTER_GOLEMDIE"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mGolem1.wav", "Data/Sound/mGolem2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mGolemAttack1.wav", "Data/Sound/mGolemAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_GOLEMDIE"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_DEVIL",
@@ -489,11 +488,11 @@
         {"file": "Data/Sound/mSatanAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mYetiDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti1.wav"],
-        "attack": ["Data/Sound/mSatanAttack1.wav", "Data/Sound/mSatanAttack1.wav"],
-        "die": "Data/Sound/mYetiDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mSatanAttack1.wav", "Data/Sound/mSatanAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mYetiDie.wav"]}
+      ],
       "linkBones": [16, 25]
     },
     {
@@ -509,11 +508,11 @@
         {"file": "Data/Sound/mGorgonAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mBalrogDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mBalrog1.wav", "Data/Sound/mBalrog2.wav"],
-        "attack": ["Data/Sound/mWizardAttack2.wav", "Data/Sound/mGorgonAttack2.wav"],
-        "die": "Data/Sound/mBalrogDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBalrog1.wav", "Data/Sound/mBalrog2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mWizardAttack2.wav", "Data/Sound/mGorgonAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBalrogDie.wav"]}
+      ],
       "linkBones": [17, 28]
     },
     {
@@ -529,11 +528,11 @@
         {"file": "Data/Sound/mShadowAttack2.wav", "id": "SOUND_MONSTER_SHADOWATTACK2", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mShadowDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mShadow1.wav", "Data/Sound/mShadow2.wav"],
-        "attack": ["Data/Sound/mShadowAttack1.wav", "SOUND_MONSTER_SHADOWATTACK2"],
-        "die": "Data/Sound/mShadowDie.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mShadow1.wav", "Data/Sound/mShadow2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mShadowAttack1.wav", "SOUND_MONSTER_SHADOWATTACK2"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mShadowDie.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_DEATH_KNIGHT",
@@ -547,11 +546,11 @@
         {"file": "Data/Sound/mDarkKnightAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mDarkKnightDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mDarkKnight1.wav", "Data/Sound/mDarkKnight2.wav"],
-        "attack": ["Data/Sound/mDarkKnightAttack1.wav", "Data/Sound/mDarkKnightAttack2.wav"],
-        "die": "Data/Sound/mDarkKnightDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mDarkKnight1.wav", "Data/Sound/mDarkKnight2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mDarkKnightAttack1.wav", "Data/Sound/mDarkKnightAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mDarkKnightDie.wav"]}
+      ],
       "linkBones": [30, 39]
     },
     {
@@ -566,11 +565,11 @@
         {"file": "Data/Sound/mBullAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mBullDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mBull1.wav", "Data/Sound/mBull2.wav"],
-        "attack": ["SOUND_MONSTER_BULLATTACK1", "Data/Sound/mBullAttack2.wav"],
-        "die": "Data/Sound/mBullDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBull1.wav", "Data/Sound/mBull2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_BULLATTACK1", "Data/Sound/mBullAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBullDie.wav"]}
+      ],
       "linkBones": [42, 33]
     },
     {
@@ -584,11 +583,11 @@
         {"file": "Data/Sound/mBullAttack1.wav", "id": "SOUND_MONSTER_BULLATTACK1", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mYetiDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti1.wav"],
-        "attack": ["SOUND_MONSTER_BULLATTACK1", "SOUND_MONSTER_BULLATTACK1"],
-        "die": "Data/Sound/mYetiDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_BULLATTACK1", "SOUND_MONSTER_BULLATTACK1"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mYetiDie.wav"]}
+      ],
       "boundingBox": {"max": [70, 70, 250]}
     },
     {
@@ -603,11 +602,11 @@
         {"file": "Data/Sound/mBaliAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mBaliAttack2.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mBali1.wav", "Data/Sound/mBali2.wav"],
-        "attack": ["Data/Sound/mBaliAttack1.wav", "Data/Sound/mBaliAttack2.wav"],
-        "die": "Data/Sound/mBali2.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBali1.wav", "Data/Sound/mBali2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mBaliAttack1.wav", "Data/Sound/mBaliAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBali2.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_BAHAMUT",
@@ -617,11 +616,11 @@
         {"file": "Data/Sound/mBahamut1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mYeti1.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mBahamut1.wav", "Data/Sound/mBahamut1.wav"],
-        "attack": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti1.wav"],
-        "die": "Data/Sound/mBahamut1.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBahamut1.wav", "Data/Sound/mBahamut1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBahamut1.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_VEPAR",
@@ -634,11 +633,11 @@
         {"file": "Data/Sound/mBepar2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mBalrog1.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mBepar1.wav", "Data/Sound/mBepar2.wav"],
-        "attack": ["SOUND_MONSTER_GOLEMDIE", "SOUND_MONSTER_GOLEMDIE"],
-        "die": "Data/Sound/mBepar2.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBepar1.wav", "Data/Sound/mBepar2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_GOLEMDIE", "SOUND_MONSTER_GOLEMDIE"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBepar2.wav"]}
+      ],
       "linkBones": [30, 39]
     },
     {
@@ -651,11 +650,11 @@
         {"file": "Data/Sound/mBaliAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mValkyrieDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mValkyrie1.wav", "Data/Sound/mValkyrie1.wav"],
-        "attack": ["Data/Sound/mBaliAttack2.wav", "Data/Sound/mBaliAttack2.wav"],
-        "die": "Data/Sound/mValkyrieDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mValkyrie1.wav", "Data/Sound/mValkyrie1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mBaliAttack2.wav", "Data/Sound/mBaliAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mValkyrieDie.wav"]}
+      ],
       "linkBones": [30, 39]
     },
     {
@@ -668,11 +667,11 @@
         {"file": "Data/Sound/mLizardKing2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mGorgonDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"],
-        "attack": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"],
-        "die": "Data/Sound/mGorgonDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mGorgonDie.wav"]}
+      ],
       "linkBones": [52, 65]
     },
     {
@@ -684,11 +683,11 @@
         {"file": "Data/Sound/mHydra1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mHydraAttack1.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mHydra1.wav", "Data/Sound/mHydra1.wav"],
-        "attack": ["Data/Sound/mHydraAttack1.wav", "Data/Sound/mHydraAttack1.wav"],
-        "die": "Data/Sound/mHydra1.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHydra1.wav", "Data/Sound/mHydra1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mHydraAttack1.wav", "Data/Sound/mHydraAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mHydra1.wav"]}
+      ],
       "boundingBox": {"max": [100, 100, 150]}
     },
     {
@@ -710,11 +709,11 @@
         {"file": "Data/Sound/mDarkKnightAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mDarkKnightDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mDarkKnight1.wav", "Data/Sound/mDarkKnight2.wav"],
-        "attack": ["Data/Sound/mDarkKnightAttack1.wav", "Data/Sound/mDarkKnightAttack2.wav"],
-        "die": "Data/Sound/mDarkKnightDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mDarkKnight1.wav", "Data/Sound/mDarkKnight2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mDarkKnightAttack1.wav", "Data/Sound/mDarkKnightAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mDarkKnightDie.wav"]}
+      ],
       "boundingBox": {"max": [70, 70, 250]}
     },
     {
@@ -728,11 +727,11 @@
         {"file": "Data/Sound/mLizardKing2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mGorgonDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"],
-        "attack": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"],
-        "die": "Data/Sound/mGorgonDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mGorgonDie.wav"]}
+      ],
       "linkBones": [20, 33]
     },
     {
@@ -745,11 +744,11 @@
         {"file": "Data/Sound/iron1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/iron_attack1.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/iron1.wav", "Data/Sound/iron1.wav"],
-        "attack": ["Data/Sound/iron_attack1.wav", "Data/Sound/iron_attack1.wav"],
-        "die": "Data/Sound/iron_attack1.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/iron1.wav", "Data/Sound/iron1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/iron_attack1.wav", "Data/Sound/iron_attack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/iron_attack1.wav"]}
+      ],
       "linkBones": [23]
     },
     {
@@ -765,11 +764,11 @@
         {"file": "Data/Sound/jaikan_attack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/jaikan_die.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/jaikan1.wav", "Data/Sound/jaikan2.wav"],
-        "attack": ["Data/Sound/jaikan_attack1.wav", "Data/Sound/jaikan_attack2.wav"],
-        "die": "Data/Sound/jaikan_die.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/jaikan1.wav", "Data/Sound/jaikan2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/jaikan_attack1.wav", "Data/Sound/jaikan_attack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/jaikan_die.wav"]}
+      ],
       "bitmaps": [
         {"file": "Monster/bv01_2.jpg", "slot": "BITMAP_MONSTER_SKIN", "filter": "linear", "wrap": "repeat"},
         {"file": "Monster/bv02_2.jpg", "slot": "BITMAP_MONSTER_SKIN+1", "filter": "linear", "wrap": "repeat"}
@@ -788,11 +787,11 @@
         {"file": "Data/Sound/blood_attack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/blood_die.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/blood1.wav", "Data/Sound/blood1.wav"],
-        "attack": ["Data/Sound/blood_attack1.wav", "Data/Sound/blood_attack2.wav"],
-        "die": "Data/Sound/blood_die.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/blood1.wav", "Data/Sound/blood1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/blood_attack1.wav", "Data/Sound/blood_attack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/blood_die.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_BEAM_KNIGHT",
@@ -805,11 +804,11 @@
         {"file": "Data/Sound/death_attack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/death_die.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["SOUND_MONSTER_DEATH1", "SOUND_MONSTER_DEATH1"],
-        "attack": ["Data/Sound/death_attack1.wav", "Data/Sound/death_attack1.wav"],
-        "die": "Data/Sound/death_die.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_MONSTER_DEATH1", "SOUND_MONSTER_DEATH1"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/death_attack1.wav", "Data/Sound/death_attack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/death_die.wav"]}
+      ],
       "boundingBox": {"max": [70, 70, 250]},
       "linkBones": [55, 70]
     },
@@ -823,11 +822,11 @@
         {"file": "Data/Sound/mutant2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mutant_attack1.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mutant1.wav", "Data/Sound/mutant2.wav"],
-        "attack": ["Data/Sound/mutant_attack1.wav", "Data/Sound/mutant_attack1.wav"],
-        "die": "Data/Sound/mutant_attack1.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mutant1.wav", "Data/Sound/mutant2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mutant_attack1.wav", "Data/Sound/mutant_attack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mutant_attack1.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_ORC_ARCHER",
@@ -838,11 +837,10 @@
         {"file": "Data/Sound/mOrcArcherAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mBullDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": [null, null],
-        "attack": ["Data/Sound/mOrcArcherAttack1.wav", "Data/Sound/mOrcArcherAttack1.wav"],
-        "die": "Data/Sound/mBullDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mOrcArcherAttack1.wav", "Data/Sound/mOrcArcherAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBullDie.wav"]}
+      ],
       "linkBones": [39, 39]
     },
     {
@@ -855,11 +853,11 @@
         {"file": "Data/Sound/mBullDie.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mOrcCapAttack1.wav", "id": "SOUND_MONSTER_ORCCAPATTACK1", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mHunter2.wav", "Data/Sound/mHunter2.wav"],
-        "attack": ["SOUND_MONSTER_ORCCAPATTACK1", "SOUND_MONSTER_ORCCAPATTACK1"],
-        "die": "Data/Sound/mBullDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHunter2.wav", "Data/Sound/mHunter2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_ORCCAPATTACK1", "SOUND_MONSTER_ORCCAPATTACK1"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBullDie.wav"]}
+      ],
       "linkBones": [27, 38]
     },
     {
@@ -872,11 +870,10 @@
         {"file": "Data/Sound/mCursedKing2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mCursedKingDie1.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mCursedKing1.wav", "Data/Sound/mCursedKing2.wav"],
-        "attack": [null, null],
-        "die": "Data/Sound/mCursedKingDie1.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mCursedKing1.wav", "Data/Sound/mCursedKing2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mCursedKingDie1.wav"]}
+      ],
       "linkBones": [32, 43]
     },
     {
@@ -889,11 +886,11 @@
         {"file": "Data/Sound/mMoltAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mMoltDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mMolt1.wav", "Data/Sound/mMolt1.wav"],
-        "attack": ["Data/Sound/mMoltAttack1.wav", "Data/Sound/mMoltAttack1.wav"],
-        "die": "Data/Sound/mMoltDie.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mMolt1.wav", "Data/Sound/mMolt1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mMoltAttack1.wav", "Data/Sound/mMoltAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mMoltDie.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_ALQUAMOS",
@@ -904,11 +901,11 @@
         {"file": "Data/Sound/mAlquamosAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mAlquamosDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mAlquamosAttack1.wav", "Data/Sound/mAlquamosAttack1.wav"],
-        "attack": ["Data/Sound/mAlquamosAttack1.wav", "Data/Sound/mAlquamosAttack1.wav"],
-        "die": "Data/Sound/mAlquamosDie.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mAlquamosAttack1.wav", "Data/Sound/mAlquamosAttack1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mAlquamosAttack1.wav", "Data/Sound/mAlquamosAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mAlquamosDie.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_QUEEN_RAINER",
@@ -920,11 +917,11 @@
         {"file": "Data/Sound/mRainnerAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mRainnerDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mRainner1.wav", null],
-        "attack": ["Data/Sound/mRainnerAttack1.wav", "Data/Sound/mRainnerAttack1.wav"],
-        "die": "Data/Sound/mRainnerDie.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mRainner1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mRainnerAttack1.wav", "Data/Sound/mRainnerAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mRainnerDie.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_CRUST",
@@ -936,11 +933,11 @@
         {"file": "Data/Sound/mMegaCrustAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mMegaCrustDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mMegaCrust1.wav", "Data/Sound/mMegaCrust1.wav"],
-        "attack": ["Data/Sound/mMegaCrustAttack1.wav", "Data/Sound/mMegaCrustAttack1.wav"],
-        "die": "Data/Sound/mMegaCrustDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mMegaCrust1.wav", "Data/Sound/mMegaCrust1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mMegaCrustAttack1.wav", "Data/Sound/mMegaCrustAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mMegaCrustDie.wav"]}
+      ],
       "linkBones": [36, 45]
     },
     {
@@ -953,11 +950,11 @@
         {"file": "Data/Sound/mPhantomAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mPhantomDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mPhantom1.wav", "Data/Sound/mPhantom1.wav"],
-        "attack": ["Data/Sound/mPhantomAttack1.wav", "Data/Sound/mPhantomAttack1.wav"],
-        "die": "Data/Sound/mPhantomDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mPhantom1.wav", "Data/Sound/mPhantom1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mPhantomAttack1.wav", "Data/Sound/mPhantomAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mPhantomDie.wav"]}
+      ],
       "linkBones": [30, 39]
     },
     {
@@ -971,11 +968,11 @@
         {"file": "Data/Sound/mDrakanAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mDrakanDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mDrakan1.wav", "Data/Sound/mDrakan1.wav"],
-        "attack": ["Data/Sound/mDrakanAttack1.wav", "Data/Sound/mDrakanAttack1.wav"],
-        "die": "Data/Sound/mDrakanDie.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mDrakan1.wav", "Data/Sound/mDrakan1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mDrakanAttack1.wav", "Data/Sound/mDrakanAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mDrakanDie.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_DARK_PHOENIX_SHIELD",
@@ -988,11 +985,10 @@
         {"file": "Data/Sound/mPhoenix2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mPhoenixAttack1.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mPhoenix1.wav", "Data/Sound/mPhoenix2.wav"],
-        "attack": ["Data/Sound/mPhoenixAttack1.wav", "Data/Sound/mPhoenixAttack1.wav"],
-        "die": null
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mPhoenix1.wav", "Data/Sound/mPhoenix2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mPhoenixAttack1.wav", "Data/Sound/mPhoenixAttack1.wav"]}
+      ],
       "linkBones": [27, 18]
     },
     {
@@ -1010,11 +1006,11 @@
         {"file": "Data/Sound/mRedSkullDie.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mRedSkullAttack.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mRedSkull.wav", null],
-        "attack": ["Data/Sound/mRedSkullAttack.wav", null],
-        "die": "Data/Sound/mRedSkullDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mRedSkull.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mRedSkullAttack.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mRedSkullDie.wav"]}
+      ],
       "linkBones": [30, 39]
     },
     {
@@ -1025,11 +1021,11 @@
         {"file": "Data/Sound/mHunter2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mGhaintOrgerDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mHunter2.wav", null],
-        "attack": ["SOUND_MONSTER_BLACKSKULLATTACK", null],
-        "die": "Data/Sound/mGhaintOrgerDie.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHunter2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_BLACKSKULLATTACK"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mGhaintOrgerDie.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
@@ -1041,11 +1037,11 @@
         {"file": "Data/Sound/mBlackSkullDie.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mBlackSkullAttack.wav", "id": "SOUND_MONSTER_BLACKSKULLATTACK", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mHunter2.wav", null],
-        "attack": ["SOUND_MONSTER_BLACKSKULLATTACK", null],
-        "die": "Data/Sound/mBlackSkullDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHunter2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_BLACKSKULLATTACK"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBlackSkullDie.wav"]}
+      ],
       "linkBones": [33, 20]
     },
     {
@@ -1069,11 +1065,10 @@
         {"file": "Data/Sound/mMagicSkull.wav", "id": "SOUND_MONSTER_MAGICSKULL1", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mMagicSkull.wav", "id": "SOUND_MONSTER_MAGICSKULL2", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["SOUND_MONSTER_MAGICSKULL1", null],
-        "attack": [null, null],
-        "die": "SOUND_MONSTER_MAGICSKULL2"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_MONSTER_MAGICSKULL1"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_MAGICSKULL2"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_DEATH_ANGEL",
@@ -1085,11 +1080,11 @@
         {"file": "Data/Sound/mDAngelAttack.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mDAngelDeath.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mDAngelIdle.wav", "Data/Sound/mDAngelIdle.wav"],
-        "attack": ["Data/Sound/mDAngelAttack.wav", "Data/Sound/mDAngelAttack.wav"],
-        "die": "Data/Sound/mDAngelDeath.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mDAngelIdle.wav", "Data/Sound/mDAngelIdle.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mDAngelAttack.wav", "Data/Sound/mDAngelAttack.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mDAngelDeath.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_ILLUSION_OF_KUNDUN",
@@ -1101,11 +1096,10 @@
         {"file": "Data/Sound/mKundunAttack1.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mKundunAttack2.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mKundunIdle.wav", "Data/Sound/mKundunIdle.wav"],
-        "attack": ["Data/Sound/mKundunAttack1.wav", "Data/Sound/mKundunAttack2.wav"],
-        "die": null
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mKundunIdle.wav", "Data/Sound/mKundunIdle.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mKundunAttack1.wav", "Data/Sound/mKundunAttack2.wav"]}
+      ],
       "parts": [
         {
           "effect": "kundunPart1",
@@ -1190,11 +1184,11 @@
         {"file": "Data/Sound/mBSoldierAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mBSoldierDeath.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mBSoldierIdle1.wav", "Data/Sound/mBSoldierIdle2.wav"],
-        "attack": ["Data/Sound/mBSoldierAttack1.wav", "Data/Sound/mBSoldierAttack2.wav"],
-        "die": "Data/Sound/mBSoldierDeath.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBSoldierIdle1.wav", "Data/Sound/mBSoldierIdle2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mBSoldierAttack1.wav", "Data/Sound/mBSoldierAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBSoldierDeath.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_AEGIS",
@@ -1207,11 +1201,11 @@
         {"file": "Data/Sound/mEsisAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mEsisDeath.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mEsisIdle.wav", "Data/Sound/mEsisIdle.wav"],
-        "attack": ["Data/Sound/mEsisAttack1.wav", "Data/Sound/mEsisAttack2.wav"],
-        "die": "Data/Sound/mEsisDeath.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mEsisIdle.wav", "Data/Sound/mEsisIdle.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mEsisAttack1.wav", "Data/Sound/mEsisAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mEsisDeath.wav"]}
+      ],
       "linkBones": [13, 14]
     },
     {
@@ -1231,16 +1225,14 @@
         {"file": "Data/Sound/mLsAttack2.wav", "id": "SOUND_MONSTER_LSATTACK2", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mLsDeath.wav", "id": "SOUND_MONSTER_LSDEATH", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["SOUND_MONSTER_DSIDLE1", "SOUND_MONSTER_DSIDLE2"],
-        "attack": ["SOUND_MONSTER_DSATTACK1", "SOUND_MONSTER_DSATTACK2"],
-        "die": "SOUND_MONSTER_DSDEATH",
-        "secondSet": {
-          "idle": ["SOUND_MONSTER_LSIDLE1", "SOUND_MONSTER_LSIDLE2"],
-          "attack": ["SOUND_MONSTER_LSATTACK1", "SOUND_MONSTER_LSATTACK2"],
-          "die": "SOUND_MONSTER_LSDEATH"
-        }
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "notSubType": 9, "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_MONSTER_DSIDLE1", "SOUND_MONSTER_DSIDLE2"]},
+        {"on": ["attack", "hit"], "notSubType": 9, "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_DSATTACK1", "SOUND_MONSTER_DSATTACK2"]},
+        {"on": ["death"], "notSubType": 9, "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_DSDEATH"]},
+        {"on": ["stand", "walk"], "subType": 9, "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_MONSTER_LSIDLE1", "SOUND_MONSTER_LSIDLE2"]},
+        {"on": ["attack", "hit"], "subType": 9, "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_LSATTACK1", "SOUND_MONSTER_LSATTACK2"]},
+        {"on": ["death"], "subType": 9, "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_LSDEATH"]}
+      ],
       "linkBones": [56, 42]
     },
     {
@@ -1254,11 +1246,11 @@
         {"file": "Data/Sound/mNecronAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mNecronDeath.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mNecronIdle1.wav", "Data/Sound/mNecronIdle2.wav"],
-        "attack": ["Data/Sound/mNecronAttack1.wav", "Data/Sound/mNecronAttack2.wav"],
-        "die": "Data/Sound/mNecronDeath.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mNecronIdle1.wav", "Data/Sound/mNecronIdle2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mNecronAttack1.wav", "Data/Sound/mNecronAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mNecronDeath.wav"]}
+      ],
       "linkBones": [60, 60]
     },
     {
@@ -1278,16 +1270,14 @@
         {"file": "Data/Sound/mLvAttack2.wav", "id": "SOUND_MONSTER_LVATTACK2", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mLvDeath.wav", "id": "SOUND_MONSTER_LVDEATH", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["SOUND_MONSTER_SVIDLE1", "SOUND_MONSTER_SVIDLE2"],
-        "attack": ["SOUND_MONSTER_SVATTACK1", "SOUND_MONSTER_SVATTACK2"],
-        "die": "SOUND_MONSTER_SVDEATH",
-        "secondSet": {
-          "idle": ["SOUND_MONSTER_LVIDLE1", "SOUND_MONSTER_LVIDLE2"],
-          "attack": ["SOUND_MONSTER_LVATTACK1", "SOUND_MONSTER_LVATTACK2"],
-          "die": "SOUND_MONSTER_LVDEATH"
-        }
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "notSubType": 9, "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_MONSTER_SVIDLE1", "SOUND_MONSTER_SVIDLE2"]},
+        {"on": ["attack", "hit"], "notSubType": 9, "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_SVATTACK1", "SOUND_MONSTER_SVATTACK2"]},
+        {"on": ["death"], "notSubType": 9, "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_SVDEATH"]},
+        {"on": ["stand", "walk"], "subType": 9, "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_MONSTER_LVIDLE1", "SOUND_MONSTER_LVIDLE2"]},
+        {"on": ["attack", "hit"], "subType": 9, "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_LVATTACK1", "SOUND_MONSTER_LVATTACK2"]},
+        {"on": ["death"], "subType": 9, "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_LVDEATH"]}
+      ],
       "linkBones": [41, 51]
     },
     {
@@ -1302,11 +1292,9 @@
       "sounds": [
         {"file": "Data/Sound/mOrcCapAttack1.wav", "id": "SOUND_MONSTER_ORCCAPATTACK1", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": [null, null],
-        "attack": ["SOUND_MONSTER_ORCCAPATTACK1", "SOUND_MONSTER_ORCCAPATTACK1"],
-        "die": null
-      },
+      "soundEvents": [
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_ORCCAPATTACK1", "SOUND_MONSTER_ORCCAPATTACK1"]}
+      ],
       "boundingBox": {"max": [40, 40, 120]}
     },
     {
@@ -1321,11 +1309,9 @@
       "sounds": [
         {"file": "Data/Sound/mOrcCapAttack1.wav", "id": "SOUND_MONSTER_ORCCAPATTACK1", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": [null, null],
-        "attack": ["SOUND_MONSTER_ORCCAPATTACK1", "SOUND_MONSTER_ORCCAPATTACK1"],
-        "die": null
-      },
+      "soundEvents": [
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_ORCCAPATTACK1", "SOUND_MONSTER_ORCCAPATTACK1"]}
+      ],
       "boundingBox": {"max": [40, 40, 120]}
     },
     {
@@ -1340,11 +1326,9 @@
       "sounds": [
         {"file": "Data/Sound/mOrcArcherAttack1.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": [null, null],
-        "attack": ["Data/Sound/mOrcArcherAttack1.wav", "Data/Sound/mOrcArcherAttack1.wav"],
-        "die": null
-      },
+      "soundEvents": [
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mOrcArcherAttack1.wav", "Data/Sound/mOrcArcherAttack1.wav"]}
+      ],
       "boundingBox": {"max": [40, 40, 120]}
     },
     {
@@ -1354,11 +1338,9 @@
       "sounds": [
         {"file": "Data/Sound/BattleCastle/oCDoorDis.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": [null, null],
-        "attack": [null, null],
-        "die": "Data/Sound/BattleCastle/oCDoorDis.wav"
-      },
+      "soundEvents": [
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/BattleCastle/oCDoorDis.wav"]}
+      ],
       "boundingBox": {"min": [-140, -140, 0], "max": [140, 140, 300]},
       "linkBones": []
     },
@@ -1378,11 +1360,10 @@
         {"file": "Data/Sound/BattleCastle/mBowMercAttack.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/BattleCastle/mBowMercDeath.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": [null, null],
-        "attack": ["Data/Sound/BattleCastle/mBowMercAttack.wav", "Data/Sound/BattleCastle/mBowMercAttack.wav"],
-        "die": "Data/Sound/BattleCastle/mBowMercDeath.wav"
-      }
+      "soundEvents": [
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/BattleCastle/mBowMercAttack.wav", "Data/Sound/BattleCastle/mBowMercAttack.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/BattleCastle/mBowMercDeath.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_BATTLE_GUARD2",
@@ -1392,11 +1373,10 @@
         {"file": "Data/Sound/BattleCastle/mSpearMercAttack.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/BattleCastle/mSpearMercDeath.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": [null, null],
-        "attack": ["Data/Sound/BattleCastle/mSpearMercAttack.wav", "Data/Sound/BattleCastle/mSpearMercAttack.wav"],
-        "die": "Data/Sound/BattleCastle/mSpearMercDeath.wav"
-      }
+      "soundEvents": [
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/BattleCastle/mSpearMercAttack.wav", "Data/Sound/BattleCastle/mSpearMercAttack.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/BattleCastle/mSpearMercDeath.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_GOLDEN_GOBLIN",
@@ -1437,12 +1417,7 @@
       "slot": "MONSTER_MODEL_LIFE_STONE",
       "file": "Data/Monster/Monster87.bmd",
       "textureFolders": ["Monster"],
-      "animations": {"stop1": 0.05, "stop2": 0.05, "walk": 0.1},
-      "soundSlots": {
-        "idle": [null, null],
-        "attack": [null, null],
-        "die": null
-      }
+      "animations": {"stop1": 0.05, "stop2": 0.05, "walk": 0.1}
     },
     {
       "slot": "MONSTER_MODEL_EROHIM",
@@ -2355,11 +2330,11 @@
         {"file": "Data/Sound/mGoblinAttack2.wav", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mGoblinDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mGoblin1.wav", "Data/Sound/mGoblin2.wav"],
-        "attack": ["Data/Sound/mGoblinAttack1.wav", "Data/Sound/mGoblinAttack2.wav"],
-        "die": "Data/Sound/mGoblinDie.wav"
-      }
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mGoblin1.wav", "Data/Sound/mGoblin2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mGoblinAttack1.wav", "Data/Sound/mGoblinAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mGoblinDie.wav"]}
+      ]
     },
     {
       "slot": "MONSTER_MODEL_ZOMBIE_FIGHTER",

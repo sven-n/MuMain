@@ -1,9 +1,10 @@
 #include "stdafx.h"
 
-// The sounds a model's sound events play are loaded where they play (monsters
-// design, MN7): by the game at start (OpenSounds), by the load of each map the
-// events play on, or by the model itself, which loads the sounds its entry
-// lists when it opens.
+// The sounds a model's sound events of animations play are loaded where they
+// play (monsters design, MN7): by the game at start (OpenSounds), by the load
+// of each map the events play on, or by the model itself, which loads the
+// sounds its entry lists when it opens. The events at moments, which were the
+// sound slots, play a sound any model loads (test_monster_model_files.cpp).
 
 #include "MonsterModelRecorder.h"
 
@@ -76,9 +77,12 @@ TEST_CASE("Monster sounds: the sounds of the sound events are loaded on the maps
         MonsterRecorder::LoadScope scope(WD_0LORENCIA);
         for (const Data::Monsters::MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
         {
-            if (!model->soundEvents.empty())
+            Data::Monsters::MonsterModelDefinition ofAnimations = *model;
+            std::erase_if(ofAnimations.soundEvents,
+                          [](const Data::Monsters::MonsterSoundEvent& event) { return event.animations.empty(); });
+            if (!ofAnimations.soundEvents.empty())
             {
-                models.push_back(*model);
+                models.push_back(std::move(ofAnimations));
             }
         }
         startup = LoadedIds(scope.Run([] { OpenSounds(); }));

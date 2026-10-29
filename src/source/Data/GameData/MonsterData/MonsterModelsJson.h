@@ -10,7 +10,7 @@
 
 // The model list of the monster area (Data/Monsters/Models.json):
 //
-//   { "formatVersion": 1,
+//   { "formatVersion": 2,
 //     "models": [
 //       {
 //         "slot": "MONSTER_MODEL_BUDGE_DRAGON",
@@ -21,7 +21,9 @@
 //         "sounds": [
 //           {"file": "Data/Sound/mBudge1.wav", "channels": 2, "spatial": true}
 //         ],
-//         "soundSlots": {"idle": ["Data/Sound/mBudge1.wav", ...], "attack": [...], "die": ...}
+//         "soundEvents": [
+//           {"on": ["stand", "walk"], ..., "sounds": ["Data/Sound/mBudge1.wav", ...]}, ...
+//         ]
 //       } ] }
 //
 // docs/monster-data.md "Models" describes the fields. The reader checks the
@@ -29,7 +31,7 @@
 // types, bitmap slots) exist is checked when the models are loaded.
 namespace Data::Monsters
 {
-constexpr int MonsterModelsFormatVersion = 1;
+constexpr int MonsterModelsFormatVersion = 2;
 
 // Reads the models of the text into `models`, in their order. A model with an
 // error is left out; a slot that is there twice is an error.

@@ -31,28 +31,12 @@ struct MonsterModelSound
     bool operator==(const MonsterModelSound&) const = default;
 };
 
-// The name a sound slot or a sound event names the model's sound by: its id,
-// or its file when it has none.
+// The name a sound event names the model's sound by: its id, or its file
+// when it has none.
 inline const std::string& SoundNameOf(const MonsterModelSound& sound)
 {
     return sound.id.empty() ? sound.file : sound.id;
 }
-
-// The sound slots of the model: the game plays one of the two idle sounds
-// while it stands or walks, one of the two attack sounds when it attacks or
-// is hit, and the die sound. A slot names a sound by its id, or by its file
-// when the sound has no id; an empty slot plays nothing.
-constexpr int SoundSlotSetSize = 5;
-using MonsterSoundSlotSet = std::array<std::string, SoundSlotSetSize>;
-struct MonsterSoundSlots
-{
-    MonsterSoundSlotSet first;
-    // What a monster with SubType 9 plays (the Hellas monsters): the game
-    // plays the first set's sound numbers + 5, which the second set names.
-    std::optional<MonsterSoundSlotSet> second;
-
-    bool operator==(const MonsterSoundSlots&) const = default;
-};
 
 // How a sound event draws: rand_fps_check as the original client did, whose
 // chance depends on the frame rate when it is drawn once per step, attack,
@@ -217,8 +201,6 @@ struct MonsterModelDefinition
     // Meshes drawn without blending.
     std::vector<int> noneBlendMeshes;
     std::vector<MonsterModelSound> sounds;
-    // nullopt: no slot has a sound (the loader sets them all to -1).
-    std::optional<MonsterSoundSlots> soundSlots;
     // In order: one call can play several, and their draws come in this
     // order.
     std::vector<MonsterSoundEvent> soundEvents;

@@ -2359,20 +2359,11 @@
   <data name="As the file has it" xml:space="preserve">
     <value>wie in der Datei</value>
   </data>
-  <data name="Attack sound 1" xml:space="preserve">
-    <value>Angriffsgeräusch 1</value>
-  </data>
-  <data name="Attack sound 2" xml:space="preserve">
-    <value>Angriffsgeräusch 2</value>
-  </data>
   <data name="Bounding box max" xml:space="preserve">
     <value>Begrenzungsbox max</value>
   </data>
   <data name="Bounding box min" xml:space="preserve">
     <value>Begrenzungsbox min</value>
-  </data>
-  <data name="Die sound" xml:space="preserve">
-    <value>Todesgeräusch</value>
   </data>
   <data name="Fixed bitmaps" xml:space="preserve">
     <value>Bitmaps in festen Plätzen</value>
@@ -2397,12 +2388,6 @@
   </data>
   <data name="Holds last frame" xml:space="preserve">
     <value>Hält letztes Bild</value>
-  </data>
-  <data name="Idle sound 1" xml:space="preserve">
-    <value>Ruhegeräusch 1</value>
-  </data>
-  <data name="Idle sound 2" xml:space="preserve">
-    <value>Ruhegeräusch 2</value>
   </data>
   <data name="In game" xml:space="preserve">
     <value>Im Spiel</value>
@@ -2436,9 +2421,6 @@
   </data>
   <data name="No monster is selected" xml:space="preserve">
     <value>Kein Monster ausgewählt</value>
-  </data>
-  <data name="No sound" xml:space="preserve">
-    <value>(kein Geräusch)</value>
   </data>
   <data name="Not in the client folder" xml:space="preserve">
     <value>nicht im Client-Ordner</value>
@@ -2494,9 +2476,6 @@
   <data name="Sound id" xml:space="preserve">
     <value>Id</value>
   </data>
-  <data name="Sound slots note" xml:space="preserve">
-    <value>Die Geräusche, die das Spiel spielt, wenn das Modell steht, geht, angreift, getroffen wird und stirbt; von einem Paar wählt es eines zufällig.</value>
-  </data>
   <data name="Sounds" xml:space="preserve">
     <value>Geräusche</value>
   </data>
@@ -2524,9 +2503,6 @@
   <data name="Step what hold of {0}" xml:space="preserve">
     <value>hält das letzte Bild von {0}</value>
   </data>
-  <data name="Step what sound slots" xml:space="preserve">
-    <value>Geräuschplätze</value>
-  </data>
   <data name="Step what speed of {0}" xml:space="preserve">
     <value>Geschwindigkeit von {0}</value>
   </data>
@@ -2547,9 +2523,6 @@
   </data>
   <data name="The file is not in the client folder; the model has no body." xml:space="preserve">
     <value>Die Datei ist nicht im Client-Ordner; das Modell hat keinen Körper.</value>
-  </data>
-  <data name="The model has a second sound set for SubType 9." xml:space="preserve">
-    <value>Das Modell hat einen zweiten Geräuschsatz, den Monster mit SubType 9 spielen (fünf Nummern weiter); er wird in der Datei bearbeitet.</value>
   </data>
   <data name="The model is not open; it shows when it is." xml:space="preserve">
     <value>Das Modell ist nicht geöffnet (vielleicht fehlt seine Datei); es erscheint, sobald das Spiel es öffnet.</value>
@@ -2723,7 +2696,7 @@
     <value>Geräuschereignisse</value>
   </data>
   <data name="Sound events note" xml:space="preserve">
-    <value>Geräusche, die das Spiel zusätzlich zu den Slots für eine Figur in einer der Animationen eines Ereignisses spielt: wenn ein Angriff beginnt, wenn sie getroffen wird oder stirbt, bei jedem Schritt und am Ende jeder Ruheschleife, bis 500 Einheiten vom Helden entfernt. Ein Ereignis spielt Geräusche dieses Modells.</value>
+    <value>Geräusche, die das Spiel für eine Figur dieses Modells spielt: in den Animationen eines Ereignisses (wenn ein Angriff beginnt, wenn sie getroffen wird oder stirbt, bei jedem Schritt und am Ende jeder Ruheschleife, bis 500 Einheiten vom Helden entfernt) oder zu seinen Momenten, welche Animation auch läuft. Ein Ereignis spielt Geräusche dieses Modells.</value>
   </data>
   <data name="Sound event frames" xml:space="preserve">
     <value>Bilder</value>

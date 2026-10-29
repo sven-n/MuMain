@@ -22,7 +22,6 @@
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
-#include "Engine/Object/MonsterSlotSound.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "I18N/All.h"
 #include "Render/Models/ZzzBMD.h"
@@ -56,10 +55,6 @@ constexpr float FrameWidth = 260.0f;
 constexpr float TurnDegreesPerFrame = 0.6f;
 // The end of an animation that holds its last frame (BMD::PlayAnimation).
 constexpr float HeldFrameMargin = 0.01f;
-// The sound slots (BMD::Sounds): idle 0 and 1, attack 2 and 3, die 4.
-constexpr int IdleSlot = 0;
-constexpr int AttackSlot = 2;
-constexpr int DieSlot = 4;
 constexpr ImU32 ImpactColor = IM_COL32(255, 90, 60, 255);
 constexpr float MarkerThickness = 2.0f;
 
@@ -71,27 +66,27 @@ int PlayedFrames(const Action_t& action)
     return action.LockPositions ? action.NumAnimationKeys - 1 : action.NumAnimationKeys;
 }
 
-// The sound slot the game plays when the animation starts, or nullopt:
-// SetPlayerStop and SetPlayerWalk an idle sound (at random while it plays),
-// SetPlayerAttack and SetPlayerShock an attack sound, SetPlayerDie the die
-// sound. Of a pair the game picks one at random.
-std::optional<int> SoundSlotOf(int animation)
+// The moment of the game whose sound events the preview plays when the
+// animation starts, or nullopt: SetPlayerStop sets stop1, SetPlayerAttack
+// an attack, SetPlayerShock the shock and SetPlayerDie the death (a walk's
+// play frame by frame, in Advance).
+std::optional<Data::Monsters::MonsterSoundMoment> MomentOf(int animation)
 {
     switch (animation)
     {
     case MONSTER01_STOP1:
     case MONSTER01_STOP2:
-    case MONSTER01_WALK:
-        return IdleSlot + std::rand() % 2;
+        return Data::Monsters::MonsterSoundMoment::Stand;
     case MONSTER01_ATTACK1:
     case MONSTER01_ATTACK2:
     case MONSTER01_ATTACK3:
     case MONSTER01_ATTACK4:
     case MONSTER01_ATTACK5:
+        return Data::Monsters::MonsterSoundMoment::Attack;
     case MONSTER01_SHOCK:
-        return AttackSlot + std::rand() % 2;
+        return Data::Monsters::MonsterSoundMoment::Hit;
     case MONSTER01_DIE:
-        return DieSlot;
+        return Data::Monsters::MonsterSoundMoment::Death;
     default:
         return std::nullopt;
     }
@@ -285,7 +280,7 @@ float MuMonsterPreviewUI::SpeedFactor(int slot) const
 }
 
 // As BMD::PlayAnimation plays it: an animation that holds its last frame stops
-// there, the others start again, and the game plays the slot's sound when the
+// there, the others start again, and the game plays the sound events when the
 // animation starts.
 void MuMonsterPreviewUI::Advance(int slot, const MonsterModelDefinition& values)
 {
@@ -294,10 +289,12 @@ void MuMonsterPreviewUI::Advance(int slot, const MonsterModelDefinition& values)
     {
         return;
     }
-    // SetPlayerWalk plays a walk's sound events every frame.
+    // SetPlayerWalk plays a walk's sound events every frame, then those of
+    // the walk moment.
     if (m_sounds && m_animation == MONSTER01_WALK)
     {
         SoundPreview::PlayEvents(values, m_animation, m_frame);
+        SoundPreview::PlayMoment(values, Data::Monsters::MonsterSoundMoment::Walk);
     }
     const float speed = std::max(ModelValues::GetSpeed(values, slot, m_animation), 0.0f) * SpeedFactor(slot);
     m_frame += speed * FPS_ANIMATION_FACTOR;
@@ -352,8 +349,8 @@ void MuMonsterPreviewUI::PlayAttack(int slot, int animation, std::optional<int> 
 }
 
 // The animation from the start, with its sounds: the sound events of its start
-// (a walk's play frame by frame, in Advance), then the slot's, as the game
-// plays them (PlayMonsterSound first).
+// (a walk's play frame by frame, in Advance), then those of its moment, as
+// the game plays them (PlayMonsterSound first).
 void MuMonsterPreviewUI::Restart(int slot)
 {
     m_frame = 0.0f;
@@ -366,12 +363,10 @@ void MuMonsterPreviewUI::Restart(int slot)
     {
         SoundPreview::PlayEvents(*values, m_animation, m_frame);
     }
-    if (const std::optional<int> soundSlot = SoundSlotOf(m_animation))
+    const std::optional<Data::Monsters::MonsterSoundMoment> moment = MomentOf(m_animation);
+    if (values != nullptr && moment)
     {
-        if (const std::optional<ESound> sound = Engine::Object::MonsterSlotSound::Find(Models[slot], *soundSlot))
-        {
-            SoundPreview::Play(*sound);
-        }
+        SoundPreview::PlayMoment(*values, *moment);
     }
 }
 

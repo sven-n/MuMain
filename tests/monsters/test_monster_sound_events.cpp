@@ -1,9 +1,9 @@
 #include "stdafx.h"
 
-// The sound events of the model entries (monsters design, MN7): the sounds
-// the game plays for a character on top of its sound slots, by animation,
-// frame, death effect and map, within 500 units of the hero; and the traps'
-// attack sounds.
+// The sound events of the model entries (monsters design, MN7, MNS): the
+// sounds the game plays for a character by animation, frame, death effect and
+// map, within 500 units of the hero, and at moments, which the sound slots
+// became; and the traps' attack sounds.
 
 #include "MonsterCreationScope.h"
 #include "MonsterModelRecorder.h"
@@ -12,10 +12,13 @@
 #include "Core/Globals/_define.h"
 #include "Core/Globals/_enum.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
+#include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterSoundMoments.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/ZzzOpenData.h"
 #include "Core/Utilities/Random.h"
 #include "GameLogic/Monsters/MonsterSoundEvents.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -23,14 +26,17 @@
 #include "World/MapInfra/w_MapProcess.h"
 
 #ifdef _EDITOR
-#include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "UI/MonsterTools/MuMonsterPreviewUI.h"
 #endif
 
 #include <doctest.h>
 
+#include <algorithm>
 #include <array>
+#include <cstdint>
 #include <cstdlib>
+#include <optional>
+#include <string>
 #include <vector>
 
 using MonsterRecorder::PlayedSound;
@@ -226,12 +232,16 @@ TEST_CASE("Monster Preview: Play plays the model's sound events or its slot soun
     g_MuMonsterPreviewUI.PlayAttack(MODEL_XMAS2008_SNOWMAN, MONSTER01_DIE, std::nullopt);
     CHECK(load.TakePlayedSounds() == Sounds({SOUND_XMAS_SNOWMAN_DEATH_1}));
 
-    // The Bull Fighter has sound slots: one of its two attack sounds.
+    // The Bull Fighter's attack sounds are an event at the attack moment: one
+    // of its two.
     g_MuMonsterPreviewUI.PlayAttack(MODEL_BULL_FIGHTER, MONSTER01_ATTACK1, std::nullopt);
     const std::vector<PlayedSound> bull = load.TakePlayedSounds();
     REQUIRE(bull.size() == 1);
-    CHECK((bull[0].id == SOUND_MONSTER + Models[MODEL_BULL_FIGHTER].Sounds[2] ||
-           bull[0].id == SOUND_MONSTER + Models[MODEL_BULL_FIGHTER].Sounds[3]));
+    const Data::Monsters::MonsterModelDefinition* bullModel = g_MonsterModelDatabase.Find(MODEL_BULL_FIGHTER);
+    REQUIRE(bullModel != nullptr);
+    const auto number = [bullModel](const char* name)
+    { return Data::Monsters::ModelLoader::FindSoundNumber(*bullModel, name).value_or(-1); };
+    CHECK((bull[0].id == number("SOUND_MONSTER_BULLATTACK1") || bull[0].id == number("Data/Sound/mBullAttack2.wav")));
 }
 
 // An attack Play started stands the model when it ends, as SetPlayerStop
@@ -272,9 +282,11 @@ TEST_CASE("Monster sounds: a model without sound events plays none of them [mons
 {
     SoundScope scope(WD_0LORENCIA);
     OBJECT object;
-    object.Type = MODEL_BULL_FIGHTER;
+    // The Life Stone's sound slots were all empty.
+    object.Type = MODEL_LIFE_STONE;
     object.CurrentAction = MONSTER01_ATTACK1;
     CHECK_FALSE(GameLogic::Monsters::SoundEvents::Play(object));
+    CHECK_FALSE(GameLogic::Monsters::SoundEvents::PlayMoment(object, Data::Monsters::MonsterSoundMoment::Attack));
     CHECK(scope.Creation().Load().TakePlayedSounds().empty());
 }
 
@@ -414,6 +426,124 @@ TEST_CASE("Monster sounds: PlayMoment plays a character's events at the characte
     CHECK(GameLogic::Monsters::SoundEvents::PlayMoment(object, MonsterSoundMoment::Attack));
     CHECK(scope.Creation().Load().TakePlayedSounds().empty());
     g_MonsterModelDatabase.Build(models);
+}
+
+namespace
+{
+// The number of a sound the model's sound events name.
+int SoundOf(const Data::Monsters::MonsterModelDefinition& model, const char* name)
+{
+    const std::optional<int> number = Data::Monsters::ModelLoader::FindSoundNumber(model, name);
+    REQUIRE(number);
+    return *number;
+}
+
+const Data::Monsters::MonsterModelDefinition& ModelOf(int slot)
+{
+    const Data::Monsters::MonsterModelDefinition* model = g_MonsterModelDatabase.Find(slot);
+    REQUIRE(model != nullptr);
+    return *model;
+}
+
+// How many of `tries` draws, each from its own seed, play a sound.
+int PlayedOf(const Data::Monsters::MonsterModelDefinition& model, const Situation& situation, int tries)
+{
+    const float frameFactor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 1.0f;
+    int played = 0;
+    for (int seed = 1; seed <= tries; ++seed)
+    {
+        std::srand(static_cast<unsigned int>(seed));
+        Random::Seed(static_cast<std::uint32_t>(seed));
+        played += PlayIn(model, situation).empty() ? 0 : 1;
+    }
+    FPS_ANIMATION_FACTOR = frameFactor;
+    return played;
+}
+} // namespace
+
+TEST_CASE("Monster sounds: the sound slots became events at moments, the second set for SubType 9 (MNS) "
+          "[monsters][sounds]")
+{
+    SoundScope scope(WD_0LORENCIA);
+
+    // Rogue Centurion and Death Centurion share a model; the Hellas creator
+    // gives Death Centurion SubType 9, which plays the second set.
+    const Data::Monsters::MonsterModelDefinition& centurion = ModelOf(MODEL_DEATH_CENTURION);
+    Situation death = At(MonsterSoundMoment::Death);
+    CHECK(PlayIn(centurion, death) == Played{{SOUND_MONSTER_DSDEATH, true}});
+    death.subType = 9;
+    CHECK(PlayIn(centurion, death) == Played{{SOUND_MONSTER_LSDEATH, true}});
+    // Heard anywhere, as the slots were.
+    death.heard = false;
+    CHECK(PlayIn(centurion, death) == Played{{SOUND_MONSTER_LSDEATH, true}});
+
+    // The Bull Fighter: one of its attack sounds when it attacks or is hit.
+    const Data::Monsters::MonsterModelDefinition& bull = ModelOf(MODEL_BULL_FIGHTER);
+    const int attack1 = SoundOf(bull, "SOUND_MONSTER_BULLATTACK1");
+    const int attack2 = SoundOf(bull, "Data/Sound/mBullAttack2.wav");
+    for (const MonsterSoundMoment moment : {MonsterSoundMoment::Attack, MonsterSoundMoment::Hit})
+    {
+        const Played played = PlayIn(bull, At(moment, MONSTER01_STOP2));
+        REQUIRE(played.size() == 1);
+        CHECK((played[0].first == attack1 || played[0].first == attack2));
+    }
+    CHECK(PlayIn(bull, At(MonsterSoundMoment::Death)) == Played{{SoundOf(bull, "Data/Sound/mBullDie.wav"), true}});
+    // Its idle sounds when it is set to stand and walks, one time in 16.
+    const int stood = PlayedOf(bull, At(MonsterSoundMoment::Stand), 64);
+    CHECK(stood > 0);
+    CHECK(stood < 32);
+    CHECK(PlayedOf(bull, At(MonsterSoundMoment::Walk), 64) > 0);
+
+    // The Assassin's slots played nothing when it was hit, the Balrog's none
+    // while it walks (its bone sound comes first).
+    CHECK(PlayIn(ModelOf(MODEL_ASSASSIN), At(MonsterSoundMoment::Hit)).empty());
+    CHECK(PlayIn(ModelOf(MODEL_ASSASSIN), At(MonsterSoundMoment::Attack)).size() == 1);
+    CHECK(PlayedOf(ModelOf(MODEL_BALROG), At(MonsterSoundMoment::Walk), 64) == 0);
+    CHECK(PlayedOf(ModelOf(MODEL_BALROG), At(MonsterSoundMoment::Stand), 64) > 0);
+
+    // A pair whose second slot was empty: the first sound one time in two.
+    const Data::Monsters::MonsterModelDefinition& rainer = ModelOf(MODEL_QUEEN_RAINER);
+    const int attacks = PlayedOf(rainer, At(MonsterSoundMoment::Attack), 64);
+    CHECK(attacks == 64);
+    const int idles = PlayedOf(rainer, At(MonsterSoundMoment::Stand), 640);
+    CHECK(idles > 0);
+    CHECK(idles < PlayedOf(bull, At(MonsterSoundMoment::Stand), 640));
+}
+
+TEST_CASE("Monster sounds: the Dragon's events at moments play the sounds it loads (P9) [monsters][sounds]")
+{
+    MonsterRecorder::LoadScope scope(0);
+    const MonsterRecorder::LoadChanges changes = scope.Run([] { OpenMonsterModel(MONSTER_MODEL_DRAGON); });
+    const Data::Monsters::MonsterModelDefinition& dragon = ModelOf(MODEL_DRAGON_);
+    size_t named = 0;
+    // The idle, attack and die sounds; the original slots named numbers that
+    // nothing loads.
+    for (const Data::Monsters::MonsterSoundEvent& event : dragon.soundEvents)
+    {
+        for (const std::string& sound : event.sounds)
+        {
+            INFO("sound " << sound);
+            const int number = SoundOf(dragon, sound.c_str());
+            CHECK(std::any_of(changes.sounds.begin(), changes.sounds.end(), [&](const MonsterRecorder::SoundEvent& load)
+                              { return !load.release && load.id == number; }));
+            ++named;
+        }
+    }
+    CHECK(named == 5);
+}
+
+TEST_CASE("Monster sounds: a skeleton, of the player model, plays no sound event at a moment (P9) [monsters][sounds]")
+{
+    SoundScope scope(WD_0LORENCIA);
+    OBJECT object;
+    object.Type = MODEL_PLAYER;
+    object.SubType = MODEL_SKELETON1;
+    for (const MonsterSoundMoment moment : Data::Monsters::AllMonsterSoundMoments)
+    {
+        CHECK_FALSE(GameLogic::Monsters::SoundEvents::PlayMoment(object, moment));
+    }
+    CHECK(scope.Creation().Load().TakePlayedSounds().empty());
 }
 
 TEST_CASE("Monster sounds: the traps' attacks play their sounds, the Iron Stick's at the trap [monsters][sounds]")

@@ -5,6 +5,7 @@
 namespace Data::Monsters
 {
 struct MonsterModelDefinition;
+enum class MonsterSoundMoment;
 }
 
 // The monster tools' previews of sounds (the Play buttons of Monster Model,
@@ -24,6 +25,10 @@ void Play(int number);
 // volume, as the game plays them, on any map and at any distance, with the
 // death effect counted as armed: every sound the animation can play (Q-MN74).
 void PlayEvents(const Data::Monsters::MonsterModelDefinition& model, int animation, float frame);
+
+// The model's sound events at `moment` at the preview volume, as the game
+// plays them, on any map and at any distance (Q-MN76).
+void PlayMoment(const Data::Monsters::MonsterModelDefinition& model, Data::Monsters::MonsterSoundMoment moment);
 
 // The preview volume's slider, with a note on what it is.
 void RenderVolume();
