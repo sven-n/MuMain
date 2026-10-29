@@ -98,9 +98,6 @@ ImGuiDockNode* FindDockNode(const char* windowId)
     return dockId != 0 ? ImGui::DockBuilderGetNode(dockId) : nullptr;
 }
 
-// Beside the item browser: the node next to the browser's, so the browser
-// stays in view. In a layout from before the item tools the console is the
-// browser's neighbour (the tools were above it): then the browser's own node.
 // The dock node a window is docked in or has its place in (imgui.ini): 0 for
 // a floating one, nullopt for one that has no place yet.
 std::optional<ImGuiID> PlacedDockId(const char* windowId)
@@ -141,6 +138,9 @@ void ApplyShowBeside()
     }
 }
 
+// Beside the item browser: the node next to the browser's, so the browser
+// stays in view. In a layout from before the item tools the console is the
+// browser's neighbour (the tools were above it): then the browser's own node.
 ImGuiDockNode* BesideBrowser(ImGuiDockNode* browser)
 {
     if (browser == nullptr || browser->ParentNode == nullptr)
