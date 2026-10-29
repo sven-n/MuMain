@@ -13,6 +13,7 @@
 
 #include "../MuEditor/Config/MuEditorConfig.h"
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/Core/SecretStore.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
@@ -47,6 +48,7 @@ constexpr float ItemListHeight = 260.0f;
 constexpr float ItemListBorders = 4.0f;
 constexpr float FieldListHeight = 220.0f;
 constexpr float PopupTextWidth = 480.0f;
+constexpr float ApiKeyWidth = 320.0f;
 constexpr const char* NoValue = "-";
 constexpr const char* ExchangeFileName = "ItemExchange.json";
 // The name of the checkbox column: a header takes the ID of its label under PushID(column), so
@@ -272,11 +274,11 @@ std::string DescribeServerProblem(const ServerDownload& download)
     case ServerUpdateProblem::InsecureUrl:
         return I18N::Editor::TheAdminPanelAddressMustBeHttps;
     case ServerUpdateProblem::NoKey:
-        return I18N::Format(I18N::Editor::SetTheEnvironmentVariable0ToAnApiKey, {OpenMUApiKeyVariable});
+        return I18N::Format(I18N::Editor::EnterAnApiKeyOfTheAdminPanel0, {OpenMUApiKeyVariable});
     case ServerUpdateProblem::NoConnection:
         return I18N::Format(I18N::Editor::TheAdminPanelCouldNotBeReached0, {download.detail});
     case ServerUpdateProblem::KeyRefused:
-        return I18N::Format(I18N::Editor::TheAdminPanelRefusesTheApiKey0, {OpenMUApiKeyVariable});
+        return I18N::Editor::TheAdminPanelDoesNotKnowTheApiKey;
     case ServerUpdateProblem::NotAllowed:
         return I18N::Editor::TheApiKeyMayNotDownloadTheItems;
     case ServerUpdateProblem::NoEndpoint:
@@ -441,6 +443,81 @@ void CMuItemSyncUI::OpenFileDialog(FileAction action)
     }
 }
 
+void CMuItemSyncUI::LoadServerSettings()
+{
+    if (m_adminPanelUrlLoaded)
+    {
+        return;
+    }
+    m_adminPanelUrl = g_MuEditorConfig.GetOpenMUAdminPanelUrl();
+    m_adminPanelUrlLoaded = true;
+    LoadApiKey();
+}
+
+// The key the store keeps for the address, else the field's text, else MU_OPENMU_API_KEY.
+void CMuItemSyncUI::LoadApiKey()
+{
+    m_apiKeyMessage.clear();
+    const std::optional<std::string> remembered =
+        m_adminPanelUrl.empty() ? std::nullopt : MuEditor::SecretStore::Read(GetApiKeySecretName(m_adminPanelUrl));
+    m_rememberApiKey = remembered.has_value();
+    if (remembered)
+    {
+        m_apiKey = *remembered;
+    }
+    else if (m_apiKey.empty())
+    {
+        m_apiKey = ReadOpenMUApiKey();
+    }
+}
+
+// Remember on: the store keeps the key for the address; off (or no key): it forgets it.
+void CMuItemSyncUI::StoreApiKey()
+{
+    m_apiKeyMessage.clear();
+    if (m_adminPanelUrl.empty())
+    {
+        return;
+    }
+    const std::string name = GetApiKeySecretName(m_adminPanelUrl);
+    const bool done = m_rememberApiKey && !m_apiKey.empty() ? MuEditor::SecretStore::Write(name, m_apiKey)
+                                                            : MuEditor::SecretStore::Remove(name);
+    if (!done)
+    {
+        m_apiKeyMessage =
+            I18N::Format(I18N::Editor::TheKeyCouldNotBeStoredIn0, {MuEditor::SecretStore::GetStoreName()});
+    }
+}
+
+void CMuItemSyncUI::RenderApiKey()
+{
+    ImGui::SetNextItemWidth(Scaled(ApiKeyWidth));
+    InputString(I18N::Editor::ApiKey, m_apiKey, ImGuiInputTextFlags_Password);
+    if (ImGui::IsItemDeactivatedAfterEdit() && m_rememberApiKey)
+    {
+        StoreApiKey();
+    }
+    ImGui::SameLine();
+    const bool available = MuEditor::SecretStore::IsAvailable();
+    ImGui::BeginDisabled(!available);
+    if (ImGui::Checkbox(I18N::Editor::Remember, &m_rememberApiKey))
+    {
+        StoreApiKey();
+    }
+    ImGui::EndDisabled();
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    {
+        ImGui::SetTooltip("%s", available ? I18N::Format(I18N::Editor::KeepsTheKeyForThisAddressIn0,
+                                                         {MuEditor::SecretStore::GetStoreName()})
+                                                .c_str()
+                                          : I18N::Editor::ThisBuildCannotKeepTheKey);
+    }
+    if (!m_apiKeyMessage.empty())
+    {
+        ImGui::TextColored(ErrorColor, "%s", m_apiKeyMessage.c_str());
+    }
+}
+
 bool CMuItemSyncUI::UpdateFromServer()
 {
     m_serverMessage.clear();
@@ -448,14 +525,10 @@ bool CMuItemSyncUI::UpdateFromServer()
     {
         return false;
     }
-    if (!m_adminPanelUrlLoaded)
-    {
-        m_adminPanelUrl = g_MuEditorConfig.GetOpenMUAdminPanelUrl();
-        m_adminPanelUrlLoaded = true;
-    }
+    LoadServerSettings();
     ServerDownload refused;
     const std::optional<std::string> url = GetExchangeUrl(m_adminPanelUrl, refused.problem);
-    const std::string apiKey = url ? ReadOpenMUApiKey() : std::string();
+    const std::string apiKey = url ? m_apiKey : std::string();
     if (url && apiKey.empty())
     {
         refused.problem = ServerUpdateProblem::NoKey;
@@ -493,11 +566,7 @@ void CMuItemSyncUI::TakeServerDownload()
 
 void CMuItemSyncUI::RenderServer()
 {
-    if (!m_adminPanelUrlLoaded)
-    {
-        m_adminPanelUrl = g_MuEditorConfig.GetOpenMUAdminPanelUrl();
-        m_adminPanelUrlLoaded = true;
-    }
+    LoadServerSettings();
     const bool downloading = m_download.IsRunning();
     ImGui::BeginDisabled(downloading);
     if (ImGui::Button(I18N::Editor::UpdateFromServer))
@@ -511,7 +580,9 @@ void CMuItemSyncUI::RenderServer()
     {
         g_MuEditorConfig.SetOpenMUAdminPanelUrl(m_adminPanelUrl);
         g_MuEditorConfig.Save();
+        LoadApiKey();
     }
+    RenderApiKey();
     ImGui::EndDisabled();
     ImGui::PushTextWrapPos(0.0f);
     if (downloading)

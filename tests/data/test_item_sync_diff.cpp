@@ -6,6 +6,7 @@
 
 #include "ClientDataScope.h"
 
+#include "Core/SecretStore.h"
 #include "UI/ItemTools/ItemEdits.h"
 #include "UI/ItemTools/ItemSyncDiff.h"
 #include "UI/ItemTools/ItemSyncServer.h"
@@ -656,6 +657,35 @@ TEST_CASE("Update from server fills the client's entry without a name [data][ite
     REQUIRE(g_ItemEdits.Undo());
     CHECK(g_ItemDatabase.GetAllSlots()[sphere4Type] == before);
     g_ItemEdits.GetHistory().Clear();
+}
+
+TEST_CASE("The API key is kept per admin panel address [data][items][editor]")
+{
+    CHECK(GetApiKeySecretName(" https://admin.example.org/ ") == "OpenMU API key https://admin.example.org");
+    CHECK(GetApiKeySecretName("http://localhost:8080") == "OpenMU API key http://localhost:8080");
+}
+
+// A secret of its own goes into the system's key store and out again. A build without a store,
+// or a store that refuses (a locked keychain on a build machine), has nothing to test.
+TEST_CASE("The key store keeps, replaces and removes a secret [data][items][editor]")
+{
+    if (!MuEditor::SecretStore::IsAvailable())
+    {
+        MESSAGE("this build has no key store");
+        return;
+    }
+    const std::string name = "test " + std::to_string(std::random_device{}());
+    if (!MuEditor::SecretStore::Write(name, "first key"))
+    {
+        MESSAGE("the key store refuses secrets here");
+        return;
+    }
+    CHECK(MuEditor::SecretStore::Read(name) == std::optional<std::string>("first key"));
+    CHECK(MuEditor::SecretStore::Write(name, "second key"));
+    CHECK(MuEditor::SecretStore::Read(name) == std::optional<std::string>("second key"));
+    CHECK(MuEditor::SecretStore::Remove(name));
+    CHECK_FALSE(MuEditor::SecretStore::Read(name).has_value());
+    CHECK(MuEditor::SecretStore::Remove(name));
 }
 
 TEST_CASE("Update from server needs an address and an API key [data][items][editor]")

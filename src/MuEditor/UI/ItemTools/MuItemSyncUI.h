@@ -217,6 +217,15 @@ private:
     // download and its address, and why the last one has no file.
     std::string m_adminPanelUrl;
     bool m_adminPanelUrlLoaded = false;
+    // The API key field; Remember keeps it in the system's key store for the address.
+    std::string m_apiKey;
+    bool m_rememberApiKey = false;
+    // Why the key store did not take the key; empty when it did.
+    std::string m_apiKeyMessage;
+    void LoadServerSettings();
+    void LoadApiKey();
+    void StoreApiKey();
+    void RenderApiKey();
     MuEditor::Items::CItemSyncDownload m_download;
     std::string m_downloadUrl;
     std::string m_serverMessage;

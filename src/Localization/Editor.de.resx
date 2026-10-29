@@ -2834,7 +2834,7 @@
     <value>{0} wird heruntergeladen ...</value>
   </data>
   <data name="What Update from server does" xml:space="preserve">
-    <value>Vom Server aktualisieren lädt die Items eines OpenMU-Servers aus seinem Admin-Panel herunter und listet wie Import auf, worin sie sich von denen des Clients unterscheiden. Der API-Schlüssel kommt aus der Umgebungsvariable {0}.</value>
+    <value>Vom Server aktualisieren lädt die Items eines OpenMU-Servers aus seinem Admin-Panel herunter und listet wie Import auf, worin sie sich von denen des Clients unterscheiden. Geben Sie einen API-Schlüssel des Admin-Panels ein; Merken behält ihn für die Adresse im Schlüsselspeicher des Systems. Ohne einen füllt die Umgebungsvariable {0} das Feld.</value>
   </data>
   <data name="Enter the address of the OpenMU admin panel" xml:space="preserve">
     <value>Geben Sie die Adresse des OpenMU-Admin-Panels ein, z. B. https://admin.example.org oder http://localhost:8080.</value>
@@ -2842,14 +2842,8 @@
   <data name="The admin panel address must be https" xml:space="preserve">
     <value>Die Adresse des Admin-Panels muss mit https:// beginnen; http:// geht nur für diesen Computer (localhost, 127.0.0.1, [::1]).</value>
   </data>
-  <data name="Set the environment variable {0} to an api key" xml:space="preserve">
-    <value>Setzen Sie die Umgebungsvariable {0} auf einen API-Schlüssel des Admin-Panels (seine Seite API-Schlüssel; die Rolle Viewer genügt) und starten Sie den Editor neu.</value>
-  </data>
   <data name="The admin panel could not be reached ({0})" xml:space="preserve">
     <value>Das Admin-Panel ist nicht erreichbar ({0}).</value>
-  </data>
-  <data name="The admin panel refuses the api key ({0})" xml:space="preserve">
-    <value>Das Admin-Panel kennt den API-Schlüssel nicht (401). Prüfen Sie {0}.</value>
   </data>
   <data name="The api key may not download the items" xml:space="preserve">
     <value>Der API-Schlüssel darf die Items nicht herunterladen (403): Er braucht die Rolle Viewer, und das Admin-Panel braucht einen Benutzer.</value>
@@ -2892,5 +2886,35 @@
   </data>
   <data name="It removes 0 items from the client" xml:space="preserve">
     <value>Es entfernt {0} Gegenstände aus dem Client, mit ihren Modellen. Rückgängig holt sie zurück.</value>
+  </data>
+  <data name="Api key" xml:space="preserve">
+    <value>API-Schlüssel</value>
+  </data>
+  <data name="Remember" xml:space="preserve">
+    <value>Merken</value>
+  </data>
+  <data name="Keeps the key for this address in {0}" xml:space="preserve">
+    <value>Behält den Schlüssel für diese Adresse in {0}, nicht in einer Datei.</value>
+  </data>
+  <data name="This build cannot keep the key" xml:space="preserve">
+    <value>Dieser Build kann den Schlüssel nicht behalten: libsecret (der Systemschlüsselbund) wurde beim Bauen von MuEditor nicht gefunden. Der Schlüssel bleibt, bis der Editor schließt.</value>
+  </data>
+  <data name="The key could not be stored in {0}" xml:space="preserve">
+    <value>Der Schlüssel konnte nicht in {0} gespeichert werden.</value>
+  </data>
+  <data name="the Windows Credential Manager" xml:space="preserve">
+    <value>der Windows-Anmeldeinformationsverwaltung</value>
+  </data>
+  <data name="the macOS Keychain" xml:space="preserve">
+    <value>dem macOS-Schlüsselbund</value>
+  </data>
+  <data name="the system keyring" xml:space="preserve">
+    <value>dem Systemschlüsselbund</value>
+  </data>
+  <data name="Enter an api key of the admin panel {0}" xml:space="preserve">
+    <value>Geben Sie einen API-Schlüssel des Admin-Panels ein (seine Seite API-Schlüssel; die Rolle Viewer genügt), oder setzen Sie die Umgebungsvariable {0} vor dem Start des Editors.</value>
+  </data>
+  <data name="The admin panel does not know the api key" xml:space="preserve">
+    <value>Das Admin-Panel kennt den API-Schlüssel nicht (401).</value>
   </data>
 </root>

@@ -182,6 +182,16 @@ std::string ReadOpenMUApiKey()
     return key != nullptr ? std::string(Trim(key)) : std::string();
 }
 
+std::string GetApiKeySecretName(std::string_view adminPanelUrl)
+{
+    std::string_view url = Trim(adminPanelUrl);
+    while (!url.empty() && url.back() == '/')
+    {
+        url.remove_suffix(1);
+    }
+    return "OpenMU API key " + std::string(url);
+}
+
 CItemSyncDownload::~CItemSyncDownload()
 {
     Cancel();

@@ -1343,10 +1343,14 @@ phase 7; see the
   is kept in `MuEditor/MuEditor.ini`, `[OpenMU] AdminPanelUrl`). The address
   must be https; plain http only works for this computer (`localhost`,
   `127.0.0.1`, `[::1]`). The editor asks for
-  `<address>/api/items/exchange` with the API key of the environment
-  variable `MU_OPENMU_API_KEY`: create a key on the admin panel's API keys
-  page (the Viewer role is enough) and set the variable before starting the
-  editor. The key is never written to a file or a log. The download runs in
+  `<address>/api/items/exchange` with the API key in the **API key** field:
+  create a key on the admin panel's API keys page (the Viewer role is
+  enough). **Remember** keeps it for that address in the system's key store
+  (the Windows Credential Manager, the macOS Keychain, or the Linux keyring
+  when MuEditor was built with libsecret), so the field has it again at the
+  next start; unchecking it removes it there. Without a remembered key, the
+  environment variable `MU_OPENMU_API_KEY` fills the field. The key is never
+  written to a file or a log. The download runs in
   the background and can be cancelled; the window says why one failed (no
   address, no key, the server cannot be reached, 401 unknown key, 403 the
   key lacks the Viewer role or the admin panel has no user yet, 404 an

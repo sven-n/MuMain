@@ -12,8 +12,9 @@
 
 // Update from server of the Item Sync window (phase 7 step 4): downloads OpenMU's item exchange
 // file from its admin panel, GET <admin panel URL>/api/items/exchange with the API key in the
-// X-Api-Key header. The key comes from the environment variable MU_OPENMU_API_KEY; it is never
-// written to a file or a log. The download runs on a thread of its own and can be cancelled.
+// X-Api-Key header. The key is typed into the window, or comes from the environment variable
+// MU_OPENMU_API_KEY; Remember keeps it in the system's key store (SecretStore), never in a file
+// or a log. The download runs on a thread of its own and can be cancelled.
 namespace MuEditor::Items
 {
 // The environment variable with the API key of the admin panel (the Viewer role is enough).
@@ -55,6 +56,9 @@ ServerUpdateProblem ProblemOfStatus(long status);
 
 // The API key from MU_OPENMU_API_KEY; empty when it is not set.
 std::string ReadOpenMUApiKey();
+// The name the key store keeps the API key of the admin panel at `adminPanelUrl` under: one key
+// per address ("OpenMU API key https://admin.example.org").
+std::string GetApiKeySecretName(std::string_view adminPanelUrl);
 
 struct ServerDownload
 {
