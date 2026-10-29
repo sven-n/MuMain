@@ -55,11 +55,6 @@ bool IsWingMixCharmModel(int modelType)
     return IsWingMixCharmType(Data::Items::ToItemType(modelType));
 }
 
-bool IsSealType(int itemType)
-{
-    return itemType == ITEM_SEAL_OF_ASCENSION || itemType == ITEM_SEAL_OF_WEALTH || itemType == ITEM_SEAL_OF_SUSTENANCE;
-}
-
 bool IsDevilSquareItemType(int itemType)
 {
     return itemType == ITEM_DEVILS_EYE || itemType == ITEM_DEVILS_KEY || itemType == ITEM_DEVILS_INVITATION;
@@ -78,11 +73,6 @@ bool IsResetFruitType(int itemType)
 bool IsResetFruit(const ITEM* pItem)
 {
     return IsResetFruitType(pItem->Type);
-}
-
-bool IsHealingOrDivinitySealType(int itemType)
-{
-    return itemType == ITEM_SEAL_OF_HEALING || itemType == ITEM_SEAL_OF_DIVINITY;
 }
 
 bool IsEventTicketType(int itemType)
@@ -111,11 +101,6 @@ bool IsChocolateBoxType(int itemType)
 {
     return itemType == ITEM_PINK_CHOCOLATE_BOX || itemType == ITEM_RED_CHOCOLATE_BOX ||
            itemType == ITEM_BLUE_CHOCOLATE_BOX;
-}
-
-bool IsRibbonBoxType(int itemType)
-{
-    return itemType == ITEM_RED_RIBBON_BOX || itemType == ITEM_GREEN_RIBBON_BOX || itemType == ITEM_BLUE_RIBBON_BOX;
 }
 
 bool IsSecromiconQuestItem(const ITEM* pItem)

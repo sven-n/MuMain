@@ -495,73 +495,6 @@ bool IsCanTrade()
 int TextNum = 0;
 int SkipNum = 0;
 
-bool IsRequireClassRenderItem(const short sType)
-{
-    if (
-        sType == ITEM_WEAPON_OF_ARCHANGEL
-        || sType == ITEM_ARMOR_OF_GUARDSMAN
-        || sType == ITEM_GEM_OF_SECRET
-        || (sType >= ITEM_PACKED_JEWEL_OF_BLESS && sType <= ITEM_PACKED_JEWEL_OF_SOUL)
-        || GameLogic::Items::IsSealType(sType)
-        || sType == ITEM_TRANSFORMATION_RING
-        || (sType >= ITEM_ELITE_TRANSFER_SKELETON_RING && sType <= ITEM_GAME_MASTER_TRANSFORMATION_RING)
-        || sType == ITEM_HORN_OF_FENRIR
-        || sType == ITEM_JEWEL_OF_CHAOS
-        || GameLogic::Items::IsRibbonBoxType(sType)
-        )
-    {
-        return false;
-    }
-
-    if (GameLogic::Items::IsSealType(sType)
-        || GameLogic::Items::IsEventTicketType(sType)
-        || GameLogic::Items::IsDoppelgangerOrVarkaTicketType(sType)
-        || (sType == ITEM_CHAOS_CARD)
-        || (sType >= ITEM_RARE_ITEM_TICKET_1 && sType <= ITEM_RARE_ITEM_TICKET_5)
-        || (sType == ITEM_TALISMAN_OF_LUCK)
-        || GameLogic::Items::IsElitePotionType(sType)
-        || GameLogic::Items::IsBuffScrollType(sType)
-        || GameLogic::Items::IsWingMixCharmType(sType)
-        || (sType == ITEM_SEAL_OF_MOBILITY)
-        || GameLogic::Items::IsResetFruitType(sType)
-        || GameLogic::Items::IsElixirType(sType)
-        || (sType == ITEM_INDULGENCE)
-        || (sType == ITEM_ILLUSION_TEMPLE_TICKET)
-        || (sType == ITEM_SUMMONER_CHARACTER_CARD)
-        || (sType == ITEM_MEDIUM_ELITE_HEALING_POTION)
-        || (sType >= ITEM_CHAOS_CARD_GOLD && sType <= ITEM_CHAOS_CARD_RARE)
-        || (sType == ITEM_CHAOS_CARD_MINI)
-        || GameLogic::Items::IsHealingOrDivinitySealType(sType)
-        || GameLogic::Items::IsBattleOrStrengthScrollType(sType)
-        || (sType == ITEM_TALISMAN_OF_CHAOS_ASSEMBLY)
-        || (GameLogic::Items::IsDemonOrSpiritOfGuardianType(sType))
-        || (sType == ITEM_PET_RUDOLF)
-        || (sType == ITEM_SNOWMAN_TRANSFORMATION_RING)
-        || (sType == ITEM_PANDA_TRANSFORMATION_RING)
-        || (sType == ITEM_SKELETON_TRANSFORMATION_RING)
-        || (sType == ITEM_TALISMAN_OF_RESURRECTION)
-        || (sType == ITEM_TALISMAN_OF_MOBILITY)
-        || GameLogic::Items::IsGambleItemType(sType)
-        || (sType == ITEM_PET_PANDA)
-        || (sType == ITEM_PET_UNICORN)
-        || sType == ITEM_TALISMAN_OF_GUARDIAN
-        || sType == ITEM_TALISMAN_OF_ITEM_PROTECTION
-        || sType == ITEM_MASTER_SEAL_OF_ASCENSION
-        || sType == ITEM_MASTER_SEAL_OF_WEALTH
-        || sType == ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE
-        || (sType >= ITEM_RARE_ITEM_TICKET_7 && sType <= ITEM_RARE_ITEM_TICKET_12)
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || g_pMyInventory->IsInvenItem(sType)
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || (sType == ITEM_ELITE_SD_POTION)
-        )
-    {
-        return false;
-    }
-
-    return true;
-}
-
 void RequireClass(ITEM_ATTRIBUTE* pItem)
 {
     if (pItem == NULL)
@@ -1955,7 +1888,7 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
 
     WriteItemTooltipLayoutLines(*ip, Level, values, Data::Items::TooltipSection::Description);
 
-    if (IsRequireClassRenderItem(ip->Type))
+    if (!g_ItemDatabase.HasTag(ip->Type, Data::Items::ItemTag::NoClassLines))
     {
         RequireClass(p);
     }

@@ -695,7 +695,7 @@
         "es": "Joya de Caos",
         "pt": "Joia do caos"
       },
-      "tags": ["jewel", "valuable"],
+      "tags": ["jewel", "valuable", "noClassLines"],
       "description": [
         {
           "text": {
@@ -907,6 +907,7 @@
         "es": "gema del secreto",
         "pt": "gema do segredo"
       },
+      "tags": ["noClassLines"],
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -926,7 +927,7 @@
         "es": "Fardo de Joyas de Bendición",
         "pt": "Lote de Joias da bênção"
       },
-      "tags": ["valuable"],
+      "tags": ["valuable", "noClassLines"],
       "description": [
         {
           "text": {
@@ -975,7 +976,7 @@
         "es": "Fardo de Joyas de Alma",
         "pt": "Lote de Joias da alma"
       },
-      "tags": ["valuable"],
+      "tags": ["valuable", "noClassLines"],
       "description": [
         {
           "text": {
@@ -1024,6 +1025,7 @@
         "es": "caja de moño rojo",
         "pt": "caixa de fita vermelha"
       },
+      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@throwForZenOrItems",
@@ -1056,6 +1058,7 @@
         "es": "caja de moño verde",
         "pt": "caixa de fita verde"
       },
+      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@throwForZenOrItems",
@@ -1088,6 +1091,7 @@
         "es": "caja de moño azul",
         "pt": "caixa de fita azul"
       },
+      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@throwForZenOrItems",

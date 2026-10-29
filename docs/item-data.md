@@ -190,6 +190,7 @@ can have several tags; the file lists them in the order below.
 | `noLevelRequirement` | The tooltip shows no level requirement, though the item has one (Loch's Feather) |
 | `noDurabilityLine` | The tooltip shows no standard durability line, though the item has a durability: it shows none, or its description has its own (a pet's "Life", a stack's "Number of items", a ticket's "usable … times") |
 | `noBlankAfterOptions` | The tooltip leaves out the blank line after the options, so the item's lines drawn there follow the options directly (the Pet Skeleton, the Invitation to Santa Village) |
+| `noClassLines` | The tooltip shows no class lines ("Can be equipped by …") and not the blank line before them: seals, talismans, tickets, scrolls, elixirs, cash shop potions, pets, transformation rings and the bundles of jewels |
 
 Wings need no tag: an item is a wing when its `slot` is `wings`.
 
@@ -282,7 +283,7 @@ of a layout go between them:
 |---|---|
 | `name` | Everything up to the item's name, and the name |
 | `description` | The item's own texts: the code's texts for particular items, the item's [description](#fields) |
-| `classes` | The classes that can use the item, and the boots' and gloves' texts from +5 |
+| `classes` | The classes that can use the item (not for items with the tag `noClassLines`), and the boots' and gloves' texts from +5 |
 | `options` | The excellent, set, socket, Jewel of Harmony and other options, to the end of the tooltip |
 
 Each layout has the four sections once each, in this order: it starts with

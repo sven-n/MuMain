@@ -128,8 +128,6 @@ namespace GameLogic::Items
     bool IsWingMixCharmModel(int modelType);
     bool IsResetFruit(const ITEM* pItem);
     bool IsResetFruitType(int itemType);
-    bool IsSealType(int itemType);
-    bool IsHealingOrDivinitySealType(int itemType);
     bool IsEventTicket(const ITEM* pItem);
     bool IsEventTicketType(int itemType);
     bool IsDoppelgangerOrVarkaTicket(const ITEM* pItem);
@@ -137,7 +135,6 @@ namespace GameLogic::Items
     bool IsDevilSquareItem(const ITEM* pItem);
     bool IsDevilSquareItemType(int itemType);
     bool IsChocolateBoxType(int itemType);
-    bool IsRibbonBoxType(int itemType);
     bool IsSecromiconQuestItem(const ITEM* pItem);
     bool IsSummonerStickModel(int modelType);
 }
