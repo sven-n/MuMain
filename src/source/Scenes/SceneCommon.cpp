@@ -50,7 +50,6 @@ bool& EnableMainRender = g_sceneInit.LegacyRefEnableMainRender();
 #include "App/Platform/Windows/Local.h"
 #include "I18N/All.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
-#include "GameLogic/Items/CComGem.h"
 #include "UI/Core/SceneUICoordinator.h"
 
 // External variable declarations (defined in ZzzScene.cpp or other files)
@@ -59,7 +58,6 @@ extern wchar_t AbuseNameFilter[][20];
 extern int AbuseFilterNumber;
 extern int AbuseNameFilterNumber;
 extern wchar_t InputText[12][256];
-extern int InputGold;
 extern int AskYesOrNo;
 extern ITEM PickItem;
 extern ITEM TargetItem;
@@ -67,18 +65,12 @@ extern int ErrorMessage;
 extern bool MouseLButtonPush;
 extern int MouseUpdateTime;
 extern int MouseUpdateTimeMax;
-extern SKILL_ATTRIBUTE* SkillAttribute;
 extern bool g_bEnterPressed;
 
 // External variables from ZzzScene.cpp
 extern int g_iMessageTextStart;
 extern char g_cMessageTextCurrNum;
 extern char g_cMessageTextNum;
-extern int g_iNumLineMessageBoxCustom;
-extern wchar_t g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
-extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
-extern int g_iCustomMessageBoxButton_Cancel[NUM_PAR_BUTTON_CMB];
-extern int g_iCancelSkillTarget;
 extern bool g_bTimeCheck;
 extern int g_iBackupTime;
 extern EGameScene SceneFlag;
@@ -194,214 +186,6 @@ void RenderInfomation()
     // Winmain.cpp's SetPostRmlUiCallback registration, which fires after RmlUi's own render
     // pass -- RmlUi always renders after this point in the frame, so drawing the cursor here
     // (before it) let an opaque RmlUi panel visually cover it.
-}
-
-/**
- * @brief Handles item use confirmation dialogs (fruits, consumables).
- */
-static void SetupItemUseStateMessage(int num, int index, int message)
-{
-    wchar_t Name[50] = { 0, };
-    if (TargetItem.Type == ITEM_FRUITS)
-    {
-        switch (TargetItem.Level)
-        {
-        case 0:swprintf_s(Name, 50, L"%ls", I18N::Game::ENG); break;
-        case 1:swprintf_s(Name, 50, L"%ls", I18N::Game::STA); break;
-        case 2:swprintf_s(Name, 50, L"%ls", I18N::Game::AGI); break;
-        case 3:swprintf_s(Name, 50, L"%ls", I18N::Game::STR); break;
-        case 4:swprintf_s(Name, 50, L"%ls", I18N::Game::Command); break;
-        }
-    }
-
-    if (message == MESSAGE_USE_STATE2)
-        swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, I18N::Game::FruitCaption, Name);
-    else
-        swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, L"( %ls )", Name);
-
-    num++;
-    for (int i = 1; i < num; ++i)
-    {
-        swprintf_s(g_lpszMessageBoxCustom[i], MAX_LENGTH_CMB, I18N::Game::Lookup(index));
-    }
-    g_iNumLineMessageBoxCustom = num;
-}
-
-/**
- * @brief Handles personal shop price confirmation dialog.
- */
-static void SetupPersonalShopWarningMessage(int num, int index)
-{
-    wchar_t szGold[256];
-    ConvertGold(InputGold, szGold);
-    swprintf_s(g_lpszMessageBoxCustom[0], MAX_LENGTH_CMB, I18N::Game::Lookup(index), szGold);
-
-    for (int i = 1; i < num; ++i)
-    {
-        swprintf_s(g_lpszMessageBoxCustom[i], MAX_LENGTH_CMB, I18N::Game::Lookup(index + i));
-    }
-    g_iNumLineMessageBoxCustom = num;
-}
-
-/**
- * @brief Handles Chaos Castle entry confirmation with text wrapping.
- */
-static void SetupChaosCastleCheckMessage(int num, int index)
-{
-    g_iNumLineMessageBoxCustom = 0;
-    for (int i = 0; i < num; ++i)
-    {
-        g_iNumLineMessageBoxCustom += SeparateTextIntoLines(I18N::Game::Lookup(index + i),
-            g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], NUM_LINE_CMB, MAX_LENGTH_CMB);
-    }
-}
-
-/**
- * @brief Handles gem combination/integration confirmation dialog.
- */
-static void SetupGemIntegrationMessage()
-{
-    wchar_t tBuf[MAX_GLOBAL_TEXT_STRING];
-    wchar_t tLines[2][30];
-    for (int t = 0; t < 2; ++t) memset(tLines[t], 0, 20);
-    g_iNumLineMessageBoxCustom = 0;
-
-    if (COMGEM::isComMode())
-    {
-        if (COMGEM::m_cGemType == 0)
-            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfBless, COMGEM::m_cCount);
-        else
-            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfSoul, COMGEM::m_cCount);
-
-        g_iNumLineMessageBoxCustom += SeparateTextIntoLines(tBuf,
-            tLines[g_iNumLineMessageBoxCustom], 2, 30);
-
-        for (int t = 0; t < 2; ++t)
-            wcscpy_s(g_lpszMessageBoxCustom[t], MAX_LENGTH_CMB, tLines[t]);
-
-        swprintf_s(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], MAX_LENGTH_CMB,
-            I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
-        ++g_iNumLineMessageBoxCustom;
-    }
-    else
-    {
-        int t_GemLevel = COMGEM::GetUnMixGemLevel() + 1;
-        if (COMGEM::m_cGemType == 0)
-            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, I18N::Game::AreYouSureToDisbandSD, I18N::Game::JewelOfBless, t_GemLevel);
-        else
-            swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, I18N::Game::AreYouSureToDisbandSD, I18N::Game::JewelOfSoul, t_GemLevel);
-
-        g_iNumLineMessageBoxCustom += SeparateTextIntoLines(tBuf,
-            tLines[g_iNumLineMessageBoxCustom], 2, 30);
-
-        for (int t = 0; t < 2; ++t)
-            wcscpy_s(g_lpszMessageBoxCustom[t], MAX_LENGTH_CMB, tLines[t]);
-
-        swprintf_s(g_lpszMessageBoxCustom[g_iNumLineMessageBoxCustom], MAX_LENGTH_CMB,
-            I18N::Game::DissolvingCostDZen, COMGEM::m_iValue);
-        ++g_iNumLineMessageBoxCustom;
-    }
-}
-
-/**
- * @brief Handles skill cancellation confirmation dialog.
- */
-static void SetupCancelSkillMessage(int index)
-{
-    wchar_t tBuf[MAX_GLOBAL_TEXT_STRING];
-    swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, I18N::Game::CancelSkillQuestion, SkillAttribute[index].Name);
-    g_iNumLineMessageBoxCustom = SeparateTextIntoLines(tBuf, g_lpszMessageBoxCustom[0], 2, MAX_LENGTH_CMB);
-    g_iCancelSkillTarget = index;
-}
-
-/**
- * @brief Handles generic message box with simple text lines.
- */
-static void SetupGenericMessage(int num, int index)
-{
-    for (int i = 0; i < num; ++i)
-    {
-        wcscpy_s(g_lpszMessageBoxCustom[i], MAX_LENGTH_CMB, I18N::Game::Lookup(index + i));
-    }
-    g_iNumLineMessageBoxCustom = num;
-}
-
-/**
- * @brief Configures button layout based on message type.
- */
-static void ConfigureMessageBoxButtons(int message)
-{
-    ZeroMemory(g_iCustomMessageBoxButton, NUM_BUTTON_CMB * NUM_PAR_BUTTON_CMB * sizeof(int));
-
-    int iOkButton[5] = { 1,  21, 90, 70, 21 };
-    int iCancelButton[5] = { 3, 120, 90, 70, 21 };
-
-    if (message == MESSAGE_USE_STATE2)
-    {
-        iOkButton[1] = 22;
-        iOkButton[2] = 92;
-        iOkButton[3] = 49;
-        iOkButton[4] = 16;
-
-        iCancelButton[1] = 82;
-        iCancelButton[2] = 92;
-        iCancelButton[3] = 49;
-        iCancelButton[4] = 16;
-
-        g_iCustomMessageBoxButton_Cancel[0] = 5;
-        g_iCustomMessageBoxButton_Cancel[1] = 142;
-        g_iCustomMessageBoxButton_Cancel[2] = 92;
-        g_iCustomMessageBoxButton_Cancel[3] = 49;
-        g_iCustomMessageBoxButton_Cancel[4] = 16;
-    }
-
-    if (message == MESSAGE_CHAOS_CASTLE_CHECK)
-    {
-        iOkButton[2] = 120;
-        iCancelButton[2] = 120;
-    }
-
-    memcpy(g_iCustomMessageBoxButton[0], iOkButton, 5 * sizeof(int));
-    memcpy(g_iCustomMessageBoxButton[1], iCancelButton, 5 * sizeof(int));
-}
-
-/**
- * @brief Displays a custom message box with OK/Cancel buttons based on message type.
- * @param num Number of text lines
- * @param index Text index in GlobalText array
- * @param message Message type (MESSAGE_USE_STATE, MESSAGE_PERSONALSHOP_WARNING, etc.)
- * @return Always returns TRUE
- */
-BOOL ShowCheckBox(int num, int index, int message)
-{
-    if (message == MESSAGE_USE_STATE || message == MESSAGE_USE_STATE2)
-    {
-        SetupItemUseStateMessage(num, index, message);
-    }
-    else if (message == MESSAGE_PERSONALSHOP_WARNING)
-    {
-        SetupPersonalShopWarningMessage(num, index);
-    }
-    else if (message == MESSAGE_CHAOS_CASTLE_CHECK)
-    {
-        SetupChaosCastleCheckMessage(num, index);
-    }
-    else if (message == MESSAGE_GEM_INTEGRATION3)
-    {
-        SetupGemIntegrationMessage();
-    }
-    else if (message == MESSAGE_CANCEL_SKILL)
-    {
-        SetupCancelSkillMessage(index);
-    }
-    else
-    {
-        SetupGenericMessage(num, index);
-    }
-
-    ConfigureMessageBoxButtons(message);
-
-    return true;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
