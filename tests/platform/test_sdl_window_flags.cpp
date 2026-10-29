@@ -3,11 +3,12 @@
 
 #include "Core/Platform/sdl3/SDLWindowFlags.h"
 
-TEST_CASE("SDL windows always request high pixel density [platform][sdl]")
+TEST_CASE("SDL windows request a 1x drawable on every platform [platform][sdl]")
 {
     const SDL_WindowFlags flags = Core::Platform::BuildSDLWindowFlags(false, false);
 
-    CHECK((flags & SDL_WINDOW_HIGH_PIXEL_DENSITY) != 0);
+    // Asking for a higher density breaks the 2D pipeline above density 1 (#869).
+    CHECK((flags & SDL_WINDOW_HIGH_PIXEL_DENSITY) == 0);
 }
 
 TEST_CASE("SDL window flags preserve fullscreen and resizable requests [platform][sdl]")
