@@ -127,13 +127,14 @@ const MapIcon* MapNameOrnament::FindIcon(int map) const
 
 const MapNameOrnament& GetMapNameOrnament()
 {
-    static const MapNameOrnament ornament = []
+    static MapNameOrnament ornament;
+    static bool valid = false;
+    if (!valid)
     {
-        MapNameOrnament read;
-        if (!read.Read(ReadFileText(LayoutFile), ReadFileText(MapIconsFile)))
+        valid = ornament.Read(ReadFileText(LayoutFile), ReadFileText(MapIconsFile));
+        if (!valid)
             g_ErrorReport.Write(L"> [MapName] the ornament files in %hs are not valid.\r\n", OrnamentDirectory);
-        return read;
-    }();
+    }
     return ornament;
 }
 } // namespace UI::MapName

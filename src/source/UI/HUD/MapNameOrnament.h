@@ -36,6 +36,7 @@ private:
     std::unordered_map<int, MapIcon> m_Icons;
 };
 
-// The ornament of OrnamentDirectory, read on first use.
+// The ornament of OrnamentDirectory, read on first use. A read that fails is tried again on the
+// next call (the next map change), so a passing problem does not hide the icons until restart.
 const MapNameOrnament& GetMapNameOrnament();
 } // namespace UI::MapName
