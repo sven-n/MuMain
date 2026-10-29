@@ -2717,7 +2717,7 @@
     <value>Eines von zwei</value>
   </data>
   <data name="Sound event pick note" xml:space="preserve">
-    <value>Spielt das erste von zwei Geräuschen, wenn eine Ziehung von eins zu zwei gelingt, sonst das zweite; braucht zwei Geräusche.</value>
+    <value>Spielt das erste Geräusch, wenn eine Ziehung von eins zu zwei gelingt, sonst das zweite, oder mit einem Geräusch keines.</value>
   </data>
   <data name="Sound draw rand" xml:space="preserve">
     <value>zufällig (rand)</value>
@@ -2733,6 +2733,42 @@
   </data>
   <data name="Sound event every map" xml:space="preserve">
     <value>jede Karte</value>
+  </data>
+  <data name="Sound event when" xml:space="preserve">
+    <value>Wann</value>
+  </data>
+  <data name="Sound event when note" xml:space="preserve">
+    <value>Animationen: das Ereignis spielt in ihnen, wenn ein Angriff, Treffer oder Tod beginnt, bei jedem Schritt eines Gangs und am Ende jeder Schleife von stop1 und stop2. Momente: wo das Spiel sie spielt, welche Animation auch läuft: attack und hit, wenn sie beginnen, death, wenn er beginnt (auch in Chaos Castle), stand, wenn das Monster zum Stehen gesetzt wird (ein Gang endet, der Server hält es an), walk bei jedem Schritt. Ein Ereignis nennt Animationen oder Momente.</value>
+  </data>
+  <data name="Sound event on" xml:space="preserve">
+    <value>bei</value>
+  </data>
+  <data name="Sound event moments" xml:space="preserve">
+    <value>Momente</value>
+  </data>
+  <data name="Sound event any SubType" xml:space="preserve">
+    <value>jeder</value>
+  </data>
+  <data name="Sound event only SubType" xml:space="preserve">
+    <value>nur</value>
+  </data>
+  <data name="Sound event not SubType" xml:space="preserve">
+    <value>nicht</value>
+  </data>
+  <data name="Sound event SubType note" xml:space="preserve">
+    <value>Der SubType, den der Erzeugungscode einem Monster gibt. Death Centurion und Illusion of Kundun haben 9 und spielen den zweiten Satz der Geräusche ihres Modells: die Ereignisse ihrer Modelle sagen nur 9 oder nicht 9.</value>
+  </data>
+  <data name="Sound event heard anywhere" xml:space="preserve">
+    <value>Überall</value>
+  </data>
+  <data name="Sound event heard anywhere note" xml:space="preserve">
+    <value>In jeder Entfernung vom Helden und auf jeder Karte zu hören; sonst bis 500 Einheiten und auf den Karten unten.</value>
+  </data>
+  <data name="Sound event at the monster" xml:space="preserve">
+    <value>Am Monster</value>
+  </data>
+  <data name="Sound event at the monster note" xml:space="preserve">
+    <value>Am Monster gespielt: ein Geräusch, das noch läuft, wird nicht neu gestartet.</value>
   </data>
   <data name="Add a sound event" xml:space="preserve">
     <value>Geräuschereignis hinzufügen</value>

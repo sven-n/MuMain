@@ -2738,7 +2738,7 @@
     <value>One of two</value>
   </data>
   <data name="Sound event pick note" xml:space="preserve">
-    <value>Plays the first of two sounds when a draw of one in two comes up, else the second; needs two sounds.</value>
+    <value>Plays the first sound when a draw of one in two comes up, else the second, or none with one sound.</value>
   </data>
   <data name="Sound draw rand" xml:space="preserve">
     <value>random (rand)</value>
@@ -2754,6 +2754,42 @@
   </data>
   <data name="Sound event every map" xml:space="preserve">
     <value>every map</value>
+  </data>
+  <data name="Sound event when" xml:space="preserve">
+    <value>When</value>
+  </data>
+  <data name="Sound event when note" xml:space="preserve">
+    <value>Animations: the event plays in them, when an attack, hit or death starts, at each step of a walk and at the end of each loop of stop1 and stop2. Moments: where the game plays them, whatever the animation: attack and hit when they start, death when it starts (also in Chaos Castle), stand when the monster is set to stand (a walk ends, the server stops it), walk at each step. An event names animations or moments.</value>
+  </data>
+  <data name="Sound event on" xml:space="preserve">
+    <value>on</value>
+  </data>
+  <data name="Sound event moments" xml:space="preserve">
+    <value>Moments</value>
+  </data>
+  <data name="Sound event any SubType" xml:space="preserve">
+    <value>any</value>
+  </data>
+  <data name="Sound event only SubType" xml:space="preserve">
+    <value>only</value>
+  </data>
+  <data name="Sound event not SubType" xml:space="preserve">
+    <value>not</value>
+  </data>
+  <data name="Sound event SubType note" xml:space="preserve">
+    <value>The SubType a monster's creator code gives it. Death Centurion and Illusion of Kundun have 9 and play the second set of their model's sounds: their models' events say only 9 or not 9.</value>
+  </data>
+  <data name="Sound event heard anywhere" xml:space="preserve">
+    <value>Anywhere</value>
+  </data>
+  <data name="Sound event heard anywhere note" xml:space="preserve">
+    <value>Heard at any distance from the hero and on every map; else within 500 units and on the maps below.</value>
+  </data>
+  <data name="Sound event at the monster" xml:space="preserve">
+    <value>At monster</value>
+  </data>
+  <data name="Sound event at the monster note" xml:space="preserve">
+    <value>Played at the monster: a sound that still plays is not started again.</value>
   </data>
   <data name="Add a sound event" xml:space="preserve">
     <value>Add a sound event</value>

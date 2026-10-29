@@ -11,6 +11,7 @@
 #include "../MuEditor/UI/Common/MapPicker.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
+#include "Data/GameData/MonsterData/MonsterSoundMoments.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "I18N/All.h"
 #include "Render/Models/ZzzBMD.h"
@@ -30,9 +31,12 @@ using Data::Monsters::MonsterModelSound;
 using Data::Monsters::MonsterSoundChance;
 using Data::Monsters::MonsterSoundDraw;
 using Data::Monsters::MonsterSoundEvent;
+using Data::Monsters::MonsterSoundMoment;
 
 // Pixel widths before the editor UI scale.
-constexpr float AnimationsWidth = 150.0f;
+constexpr float WhenWidth = 170.0f;
+constexpr float SubTypeWidth = 70.0f;
+constexpr float SubTypeValueWidth = 50.0f;
 constexpr float FrameWidth = 50.0f;
 constexpr float OneInWidth = 70.0f;
 constexpr float DrawWidth = 140.0f;
@@ -45,6 +49,10 @@ constexpr size_t PickSounds = 2;
 constexpr int NewChance = 2;
 // A new frame range is this many frames long.
 constexpr float NewFrames = 1.0f;
+// A new SubType condition names the second set's SubType.
+constexpr int NewSubType = 9;
+// OBJECT::SubType is a short.
+constexpr int MaxSubType = 32767;
 
 std::string AnimationsText(const std::vector<int>& animations)
 {
@@ -54,6 +62,39 @@ std::string AnimationsText(const std::vector<int>& animations)
         text += (text.empty() ? "" : ", ") + Data::Monsters::GetMonsterAnimationName(animation);
     }
     return text;
+}
+
+const char* SubTypeLabel(SubTypeCondition condition)
+{
+    switch (condition)
+    {
+    case SubTypeCondition::Only:
+        return I18N::Editor::SoundEventOnlySubType;
+    case SubTypeCondition::Not:
+        return I18N::Editor::SoundEventNotSubType;
+    case SubTypeCondition::Any:
+        break;
+    }
+    return I18N::Editor::SoundEventAnySubType;
+}
+
+// Takes the value out of the sorted list, or puts it in; false for the last
+// one.
+template <typename T> bool Toggle(std::vector<T>& values, T value)
+{
+    const auto found = std::find(values.begin(), values.end(), value);
+    if (found == values.end())
+    {
+        values.push_back(value);
+        std::sort(values.begin(), values.end());
+        return true;
+    }
+    if (values.size() == 1)
+    {
+        return false;
+    }
+    values.erase(found);
+    return true;
 }
 
 const char* DrawLabel(MonsterSoundDraw draw)
@@ -141,15 +182,17 @@ public:
     {
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
-        RenderAnimations(event);
+        RenderWhen(event);
         ImGui::TableNextColumn();
         RenderFrames(event);
         ImGui::TableNextColumn();
-        m_draft.AfterChange(ImGui::Checkbox("##Armed", &event.deathEffectArmed), m_label);
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::SetTooltip("%s", I18N::Editor::SoundEventDeathEffectNote);
-        }
+        RenderFlag("##Armed", event.deathEffectArmed, I18N::Editor::SoundEventDeathEffectNote);
+        ImGui::TableNextColumn();
+        RenderSubType(event);
+        ImGui::TableNextColumn();
+        RenderFlag("##Anywhere", event.heardAnywhere, I18N::Editor::SoundEventHeardAnywhereNote);
+        ImGui::TableNextColumn();
+        RenderFlag("##AtMonster", event.atMonster, I18N::Editor::SoundEventAtTheMonsterNote);
         ImGui::TableNextColumn();
         RenderChance(event);
         ImGui::TableNextColumn();
@@ -166,36 +209,95 @@ public:
     }
 
 private:
-    void RenderAnimations(MonsterSoundEvent& event)
+    // The moments, then the animations; picking one of the other kind makes
+    // the event one of it.
+    void RenderWhen(MonsterSoundEvent& event)
     {
-        ImGui::SetNextItemWidth(AnimationsWidth * m_scale);
-        if (!ImGui::BeginCombo("##Animations", AnimationsText(event.animations).c_str()))
+        ImGui::SetNextItemWidth(WhenWidth * m_scale);
+        const bool open = ImGui::BeginCombo("##When", WhenText(event).c_str());
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("%s", I18N::Editor::SoundEventWhenNote);
+        }
+        if (!open)
         {
             return;
         }
+        ImGui::TextDisabled("%s", I18N::Editor::SoundEventMoments);
+        for (const MonsterSoundMoment moment : Data::Monsters::AllMonsterSoundMoments)
+        {
+            const bool chosen = std::find(event.moments.begin(), event.moments.end(), moment) != event.moments.end();
+            const std::string name(Data::Monsters::GetMonsterSoundMomentName(moment));
+            ImGui::PushID(name.c_str());
+            // An event plays at one moment at least.
+            ImGui::BeginDisabled(chosen && event.moments.size() == 1);
+            if (ImGui::Selectable(name.c_str(), chosen, ImGuiSelectableFlags_DontClosePopups))
+            {
+                m_draft.AfterChange(ToggleMoment(event, moment), m_label);
+            }
+            ImGui::EndDisabled();
+            ImGui::PopID();
+        }
+        ImGui::Separator();
+        ImGui::TextDisabled("%s", I18N::Editor::Animations);
         for (const int animation : OfferedAnimations(m_slot, m_modelOpen))
         {
-            auto found = std::find(event.animations.begin(), event.animations.end(), animation);
-            const bool chosen = found != event.animations.end();
+            const bool chosen =
+                std::find(event.animations.begin(), event.animations.end(), animation) != event.animations.end();
             const std::string name = Data::Monsters::GetMonsterAnimationName(animation);
+            ImGui::PushID(animation);
             // An event plays in one animation at least.
             ImGui::BeginDisabled(chosen && event.animations.size() == 1);
             if (ImGui::Selectable(name.c_str(), chosen, ImGuiSelectableFlags_DontClosePopups))
             {
-                if (chosen)
-                {
-                    event.animations.erase(found);
-                }
-                else
-                {
-                    event.animations.push_back(animation);
-                    std::sort(event.animations.begin(), event.animations.end());
-                }
-                m_draft.AfterChange(true, m_label);
+                m_draft.AfterChange(ToggleAnimation(event, animation), m_label);
             }
             ImGui::EndDisabled();
+            ImGui::PopID();
         }
         ImGui::EndCombo();
+    }
+
+    void RenderFlag(const char* id, bool& value, const char* note)
+    {
+        m_draft.AfterChange(ImGui::Checkbox(id, &value), m_label);
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("%s", note);
+        }
+    }
+
+    void RenderSubType(MonsterSoundEvent& event)
+    {
+        const SubTypeCondition current = GetSubTypeCondition(event);
+        ImGui::SetNextItemWidth(SubTypeWidth * m_scale);
+        if (ImGui::BeginCombo("##SubType", SubTypeLabel(current)))
+        {
+            for (const SubTypeCondition condition :
+                 {SubTypeCondition::Any, SubTypeCondition::Only, SubTypeCondition::Not})
+            {
+                if (ImGui::Selectable(SubTypeLabel(condition), condition == current) && condition != current)
+                {
+                    SetSubTypeCondition(event, condition);
+                    m_draft.AfterChange(true, m_label);
+                }
+            }
+            ImGui::EndCombo();
+        }
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("%s", I18N::Editor::SoundEventSubTypeNote);
+        }
+        std::optional<int>& value = event.subType ? event.subType : event.notSubType;
+        if (!value)
+        {
+            return;
+        }
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(SubTypeValueWidth * m_scale);
+        ImGui::InputInt("##SubTypeValue", &*value, 0);
+        *value = std::clamp(*value, 0, MaxSubType);
+        m_draft.AfterField(m_label);
     }
 
     void RenderFrames(MonsterSoundEvent& event)
@@ -286,8 +388,8 @@ private:
 
     void RenderPick(MonsterSoundEvent& event)
     {
-        // A pick chooses one of two sounds.
-        ImGui::BeginDisabled(event.sounds.size() != PickSounds);
+        // A pick chooses one of two sounds, or one sound or none.
+        ImGui::BeginDisabled(event.sounds.empty() || event.sounds.size() > PickSounds);
         bool pick = event.pick.has_value();
         if (ImGui::Checkbox("##Pick", &pick))
         {
@@ -336,17 +438,13 @@ private:
         if (removed)
         {
             event.sounds.erase(event.sounds.begin() + static_cast<std::ptrdiff_t>(*removed));
-            if (event.sounds.size() != PickSounds)
-            {
-                event.pick.reset();
-            }
             m_draft.AfterChange(true, m_label);
         }
         std::string added;
         if (SoundCombo("##AddSound", m_model, added, SoundWidth * m_scale))
         {
             event.sounds.push_back(added);
-            if (event.sounds.size() != PickSounds)
+            if (event.sounds.size() > PickSounds)
             {
                 event.pick.reset();
             }
@@ -377,6 +475,67 @@ void RenderMaps(MonsterModelDefinition& model, ModelDraft& draft)
 }
 } // namespace
 
+std::string WhenText(const MonsterSoundEvent& event)
+{
+    if (event.moments.empty())
+    {
+        return AnimationsText(event.animations);
+    }
+    std::string text = I18N::Editor::SoundEventOn;
+    for (size_t index = 0; index < event.moments.size(); ++index)
+    {
+        text +=
+            (index == 0 ? " " : ", ") + std::string(Data::Monsters::GetMonsterSoundMomentName(event.moments[index]));
+    }
+    return text;
+}
+
+bool ToggleMoment(MonsterSoundEvent& event, MonsterSoundMoment moment)
+{
+    if (!event.animations.empty())
+    {
+        event.animations.clear();
+        event.moments = {moment};
+        return true;
+    }
+    return Toggle(event.moments, moment);
+}
+
+bool ToggleAnimation(MonsterSoundEvent& event, int animation)
+{
+    if (!event.moments.empty())
+    {
+        event.moments.clear();
+        event.animations = {animation};
+        return true;
+    }
+    return Toggle(event.animations, animation);
+}
+
+SubTypeCondition GetSubTypeCondition(const MonsterSoundEvent& event)
+{
+    if (event.subType)
+    {
+        return SubTypeCondition::Only;
+    }
+    return event.notSubType ? SubTypeCondition::Not : SubTypeCondition::Any;
+}
+
+void SetSubTypeCondition(MonsterSoundEvent& event, SubTypeCondition condition)
+{
+    const int value = event.subType.value_or(event.notSubType.value_or(NewSubType));
+    event.subType.reset();
+    event.notSubType.reset();
+    if (condition == SubTypeCondition::Only)
+    {
+        event.subType = value;
+    }
+    else if (condition == SubTypeCondition::Not)
+    {
+        event.notSubType = value;
+    }
+}
+
 void Render(MonsterModelDefinition& model, int slot, bool modelOpen, ModelDraft& draft)
 {
     ImGui::PushTextWrapPos(0.0f);
@@ -386,11 +545,14 @@ void Render(MonsterModelDefinition& model, int slot, bool modelOpen, ModelDraft&
     {
         constexpr ImGuiTableFlags flags =
             ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit;
-        if (ImGui::BeginTable("##SoundEvents", 7, flags))
+        if (ImGui::BeginTable("##SoundEvents", 10, flags))
         {
-            ImGui::TableSetupColumn(I18N::Editor::Animations);
+            ImGui::TableSetupColumn(I18N::Editor::SoundEventWhen);
             ImGui::TableSetupColumn(I18N::Editor::SoundEventFrames);
             ImGui::TableSetupColumn(I18N::Editor::SoundEventDeathEffect);
+            ImGui::TableSetupColumn(I18N::Editor::SubType);
+            ImGui::TableSetupColumn(I18N::Editor::SoundEventHeardAnywhere);
+            ImGui::TableSetupColumn(I18N::Editor::SoundEventAtTheMonster);
             ImGui::TableSetupColumn(I18N::Editor::SoundEventChance);
             ImGui::TableSetupColumn(I18N::Editor::SoundEventPick);
             ImGui::TableSetupColumn(I18N::Editor::Sounds);
