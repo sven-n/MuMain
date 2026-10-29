@@ -11311,19 +11311,12 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     break;
     default:
     {
-        if (RenderHellasMonsterVisual(c, o, b)) break;
         if (battleCastle::RenderBattleCastleMonsterVisual(c, o, b)) break;
         if (M31HuntingGround::RenderHuntingGroundMonsterVisual(c, o, b)) break;
         if (M34CryingWolf2nd::RenderCryingWolf2ndMonsterVisual(c, o, b)) break;
         if (M34CryWolf1st::RenderCryWolf1stMonsterVisual(c, o, b)) break;
-        if (M33Aida::RenderAidaMonsterVisual(c, o, b)) break;
         if (M37Kanturu1st::RenderKanturu1stMonsterVisual(c, o, b)) break;
         if (M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(c, o, b)) break;
-        if (M39Kanturu3rd::RenderKanturu3rdMonsterVisual(c, o, b)) break;
-        if (SEASON3A::CGM3rdChangeUp::Instance().RenderBalgasBarrackMonsterVisual(c, o, b))	break;
-        if (g_CursedTemple->RenderMonsterVisual(c, o, b)) break;
-        if (SEASON3B::GMNewTown::RenderMonsterVisual(c, o, b)) break;
-        if (SEASON3C::GMSwampOfQuiet::RenderMonsterVisual(c, o, b)) break;
         if (TheMapProcess().RenderMonsterVisual(c, o, b) == true) break;
     }
     }
@@ -11399,6 +11392,21 @@ void UpdateCharacterEffects()
         b->BodyScale = o->Scale;
         b->CurrentAction = o->CurrentAction;
         VectorCopy(o->Position, b->BodyOrigin);
+        // Same order and stop-on-claim as RenderCharacter's chain.
+        if (UpdateHellasMonsterEffects(c, o, b))
+            continue;
+        if (M33Aida::UpdateAidaMonsterEffects(c, o, b))
+            continue;
+        if (M39Kanturu3rd::UpdateKanturu3rdMonsterEffects(c, o, b))
+            continue;
+        if (SEASON3A::CGM3rdChangeUp::Instance().UpdateBalgasBarrackMonsterEffects(c, o, b))
+            continue;
+        if (g_CursedTemple->UpdateMonsterEffects(c, o, b))
+            continue;
+        if (SEASON3B::GMNewTown::UpdateMonsterEffects(c, o, b))
+            continue;
+        if (SEASON3C::GMSwampOfQuiet::UpdateMonsterEffects(c, o, b))
+            continue;
         TheMapProcess().UpdateMonsterEffects(c, o, b);
     }
 }

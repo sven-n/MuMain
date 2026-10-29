@@ -719,7 +719,7 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
     }
 }
 
-bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
+bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
 {
     switch (pObject->Type)
     {
