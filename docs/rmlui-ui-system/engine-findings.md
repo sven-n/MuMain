@@ -383,6 +383,10 @@ size. At pixel density above 1, these spaces may differ. `ContentScaleFromMetric
 scale correction from display scale divided by pixel density; this does not by itself prove
 correct rendering and input on every high-density display.
 
+The SDL window does not request `SDL_WINDOW_HIGH_PIXEL_DENSITY`, so the pixel density stays 1 and
+both spaces agree. Without it macOS runs at 1x on a Retina display; a density above 1 can still
+reach the window on Wayland, where the compositor owns the scale.
+
 Previous OS-scale validation is not evidence of validation with `SDL_GetWindowPixelDensity() > 1`.
 Check layout, pointer alignment, render targets and fonts on such hardware when changing this
 integration. Headless tests simulate content-scale values and cannot validate physical display
