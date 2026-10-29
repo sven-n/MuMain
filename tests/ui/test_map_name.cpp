@@ -172,6 +172,16 @@ void CheckShine(Rml::Element& shine, Rml::Element& text)
     CHECK(mask->ToString().find("linear-gradient") != Rml::String::npos);
 }
 
+// Where the name's glyphs stand: the baseline of its one line, in drawn pixels.
+float DrawnBaseline(Rml::Element& text)
+{
+    Rml::Vector2f position, size;
+    REQUIRE(UI::RmlBridge::DrawnBox(text, Rml::BoxArea::Content, position, size));
+    REQUIRE(text.GetFontFaceHandle() != 0);
+    const auto& metrics = Rml::GetFontEngineInterface()->GetFontMetrics(text.GetFontFaceHandle());
+    return position.y + (text.GetLineHeight() - (metrics.ascent + metrics.descent)) * 0.5f + metrics.ascent;
+}
+
 void CheckBounds(Rml::Element& child, Rml::Element& parent)
 {
     Rml::Vector2f position, size, parentPosition, parentSize;
@@ -365,6 +375,8 @@ TEST_CASE("map-name text uses final-size rasters without deformation across them
                                            {2560, 1440},
                                            {3440, 1440},
                                            {3840, 2160}})
+            {
+                float fullSizeBaseline = 0.f; // Lorencia's, the first name: it is never shrunk
                 for (const char* name :
                      {"Lorencia", "Balgass' Resting Place", "The Extremely Long Forgotten Refinery Tower",
                       "Żółć Привет", "冰風谷", "AnExceptionallyLongUnbrokenMapNameForWrapping"})
@@ -407,6 +419,10 @@ TEST_CASE("map-name text uses final-size rasters without deformation across them
                         CHECK(textSize.x <= document->GetElementById("name_room")->GetOffsetWidth() + PixelTolerance);
                         CHECK(textPosition.x + textSize.x / 2.f == doctest::Approx(viewport.x / 2.f).epsilon(0.002));
                         CHECK(textPosition.y + textSize.y <= position.y + size.y);
+                        // A shrunk name stays on the full-size baseline instead of sinking toward the swirls.
+                        if (std::string_view(name) == "Lorencia")
+                            fullSizeBaseline = DrawnBaseline(*text);
+                        CHECK(std::abs(DrawnBaseline(*text) - fullSizeBaseline) <= PixelTolerance);
                         if (warning)
                         {
                             Rml::Vector2f warningPosition, warningSize;
@@ -433,6 +449,7 @@ TEST_CASE("map-name text uses final-size rasters without deformation across them
                         REQUIRE(document->GetElementById("name_shine") != nullptr);
                         CheckShine(*document->GetElementById("name_shine"), *text);
                     }
+            }
     }
 }
 

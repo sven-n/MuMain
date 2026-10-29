@@ -10,8 +10,10 @@ body { pointer-events: none; }
     position: absolute; left: 0; right: 0; top: -2dp; height: 50dp;
     font-family: token(font-map-name); font-size: 50dp; font-weight: normal; font-style: token(font-map-name-style);
 }
-.name-layer { position: absolute; left: 0; right: 0; bottom: 0; }
-.text-fit { display: block; width: 100%; line-height: 1; text-align: center; white-space: nowrap; }
+/* The layer's own line, at the room's full font size, holds the baseline: a name text-fit shrinks
+   sits on the same baseline as the others instead of dropping toward the swirls. */
+.name-layer { position: absolute; left: 0; right: 0; bottom: 0; line-height: 1; }
+.text-fit { display: inline-block; width: 100%; line-height: 1; text-align: center; white-space: nowrap; }
 /* A single thin screen-pixel edge preserves contrast without a blurred halo. */
 #name { color: #8e8b86; font-effect: outline(2px #100f0e); }
 /* em keeps the silver gradient aligned when the shared fitter reduces the font size. */
