@@ -2938,4 +2938,7 @@
   <data name="The admin panel does not know the api key" xml:space="preserve">
     <value>The admin panel does not know the API key (401).</value>
   </data>
+  <data name="From the server" xml:space="preserve">
+    <value>From the server</value>
+  </data>
 </root>

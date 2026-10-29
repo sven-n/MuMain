@@ -172,6 +172,7 @@ private:
     std::string m_comparedPath;
     // The diff is of a file from the server: its text, which Apply compares again.
     bool m_fromServer = false;
+    const char* FromTheSource() const;
     std::string m_serverText;
     // The file an import compares with the client, or file B of a comparison of two files.
     Data::Items::ItemExchangeFile m_file;

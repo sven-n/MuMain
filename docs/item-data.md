@@ -1445,10 +1445,11 @@ number, fields with their default value left out, LF line endings.
   one is removed only when it is checked (Removed), by its own box or
   Check all. The box of an
   added or removed item
-  checks the whole item, the box of a changed one all its fields. A click on a row shows its fields (and selects the item in the
+  checks the whole item, the box of a changed one all its fields. A click
+  on a row, or the arrow keys, show its fields (and select the item in the
   item tools): each field (`width`, `requirements.strength`, `name.de`,
-  `tags.ammunition`, …) with its value now and the file's, and a box of its
-  own.
+  `tags.ammunition`, …) with its value now and the file's (*From the
+  server* after Update from server), and a box of its own.
 - The **Formulas** list has the drop level bonus, each table, each term of
   the default and of each profile (`default.damage.table`,
   `profiles.scroll.requirements.energy`, …) and a profile only one side

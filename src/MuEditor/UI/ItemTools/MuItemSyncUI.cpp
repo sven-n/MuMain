@@ -14,6 +14,7 @@
 #include "../MuEditor/Config/MuEditorConfig.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/Core/SecretStore.h"
+#include "../MuEditor/UI/Common/KeyboardSelection.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
@@ -959,6 +960,12 @@ bool CMuItemSyncUI::WriteExport()
     return true;
 }
 
+// The heading of the incoming values: the server's after Update from server, else the file's.
+const char* CMuItemSyncUI::FromTheSource() const
+{
+    return m_fromServer ? I18N::Editor::FromTheServer : I18N::Editor::FromTheFile;
+}
+
 void CMuItemSyncUI::SetAllChecked(bool checked)
 {
     SetAllRowsChecked(*m_diff, checked);
@@ -1233,8 +1240,10 @@ void CMuItemSyncUI::RenderItemTable(const char* id, const std::vector<int>& rows
                 {
                     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
                 }
+                // The arrow keys move through the rows and show their fields as a click does.
                 if (ImGui::Selectable(ItemLabel(row, m_comparingFiles).c_str(), m_shownItem == index,
-                                      ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap))
+                                      ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap |
+                                          MuEditor::KeyboardSelection::RowFlags))
                 {
                     m_shownItem = index;
                     const int itemType = Data::Items::MakeItemType(row.group, row.number);
@@ -1332,9 +1341,7 @@ void CMuItemSyncUI::RenderItemFields(SyncItem& row)
     {
         ImGui::TableSetupColumn(checkable ? I18N::Editor::Now : I18N::Editor::FileA);
     }
-    ImGui::TableSetupColumn(removed     ? I18N::Editor::FileA
-                            : checkable ? I18N::Editor::FromTheFile
-                                        : I18N::Editor::FileB);
+    ImGui::TableSetupColumn(removed ? I18N::Editor::FileA : checkable ? FromTheSource() : I18N::Editor::FileB);
     if (changed)
     {
         ImGui::TableSetupColumn(I18N::Editor::Note);
@@ -1435,7 +1442,7 @@ void CMuItemSyncUI::RenderFormulas()
     }
     ImGui::TableSetupColumn(I18N::Editor::Entry, ImGuiTableColumnFlags_WidthFixed, Scaled(FieldColumnWidth));
     ImGui::TableSetupColumn(checkable ? I18N::Editor::Now : I18N::Editor::FileA);
-    ImGui::TableSetupColumn(checkable ? I18N::Editor::FromTheFile : I18N::Editor::FileB);
+    ImGui::TableSetupColumn(checkable ? FromTheSource() : I18N::Editor::FileB);
     ImGui::TableSetupColumn(I18N::Editor::Known, ImGuiTableColumnFlags_WidthFixed, Scaled(KnownColumnWidth));
     ImGui::TableHeadersRow();
     for (size_t index = 0; index < m_diff->formulas.size(); ++index)
