@@ -97,8 +97,6 @@ void LoadBundledFonts()
     // boxes, as the native text renderer drew it. Noto Sans TC goes first so Traditional Chinese
     // keeps its own glyphs and punctuation, as in the native text renderer's fallback order.
     LoadChineseFont(kNotoSansTcFont);
-    // The TC subset lacks Japanese forms used by map names, including 帯, 廃 and 闘.
-    Rml::LoadFontFace("fonts/NotoSansJP-Regular.otf", true);
     Rml::LoadFontFace("fonts/NanumGothic-Regular.ttf", true);
     LoadChineseFont(kNotoSansScFont);
 
@@ -109,6 +107,10 @@ void LoadBundledFonts()
     // NanumGothic mostly don't have, but DejaVu Sans does.
     Rml::LoadFontFace("fonts/DejaVuSans.ttf");
     Rml::LoadFontFace("fonts/DejaVuSans-Bold.ttf");
+
+    // Japanese map names name this face (the themes' font-map-name-ja); as a fallback behind the
+    // Chinese faces it would mix Chinese and Japanese forms in one name.
+    Rml::LoadFontFace("fonts/NotoSansJP-Regular.otf");
 
     // The native fixed-width face (kBundledFixedFont, BundledFonts.h), for text the original drew
     // with g_hFixFont -- the character list's server messages (server_msg.rcss).

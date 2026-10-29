@@ -14,6 +14,9 @@ body { pointer-events: none; }
    sits on the same baseline as the others instead of dropping toward the swirls. */
 .name-layer { position: absolute; left: 0; right: 0; bottom: 0; line-height: 1; }
 .text-fit { display: inline-block; width: 100%; line-height: 1; text-align: center; white-space: nowrap; }
+/* Japanese names in the Japanese face: drawn from the fallback faces, they would mix the Chinese and
+   Japanese forms of the same characters. The layer's line keeps the baseline. */
+#name_room.lang-ja .text-fit { font-family: token(font-map-name-ja); font-style: token(font-map-name-ja-style); }
 /* A single thin screen-pixel edge preserves contrast without a blurred halo. */
 #name { color: #8e8b86; font-effect: outline(2px #100f0e); }
 /* em keeps the silver gradient aligned when the shared fitter reduces the font size. */

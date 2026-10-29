@@ -42,6 +42,7 @@ void CUIMapName::RefreshName()
     const auto* name = gMapManager.FindMapName(gMapManager.WorldActive);
     SyncField(m_RmlView.Binder(), &MapNameRmlModel::mapName, "map_name",
               name != nullptr ? StringUtils::WideToNarrow(name) : Rml::String());
+    SyncField(m_RmlView.Binder(), &MapNameRmlModel::language, "language", Rml::String(I18N::GetCurrentLocale()));
 }
 
 void CUIMapName::RefreshIcon()
@@ -154,6 +155,7 @@ void CUIMapName::BindRmlModel(Rml::DataModelConstructor& c, UI::MapName::MapName
 {
     c.Bind("alpha", &model.alpha);
     c.Bind("map_name", &model.mapName);
+    c.Bind("language", &model.language);
     c.Bind("icon", &model.icon);
     c.Bind("icon_source", &model.iconSource);
     c.Bind("icon_style", &model.iconStyle);

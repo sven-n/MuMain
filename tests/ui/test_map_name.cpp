@@ -97,7 +97,7 @@ public:
         UI::RmlBridge::ClearThemeFontCache();
         UI::RmlBridge::SetContextResolver([this](std::string_view) { return context; });
         REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/NotoSansTC-Regular.otf", true));
-        REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/NotoSansJP-Regular.otf", true));
+        REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/NotoSansJP-Regular.otf"));
         I18N::SetLocale("en");
         g_ServerListManager->m_byNonPvP = 0;
     }
@@ -578,7 +578,7 @@ TEST_CASE("map-name bundled file is the italic MU Map Name face at normal weight
     CHECK(face(Rml::Style::FontStyle::Normal) == 0);
 }
 
-TEST_CASE("map-name Japanese fallback covers every named map [ui][map-name]")
+TEST_CASE("map-name Japanese face covers every Japanese map name [ui][map-name]")
 {
     MapNameFixture fixture;
     I18N::SetLocale("ja");
@@ -600,5 +600,43 @@ TEST_CASE("map-name Japanese fallback covers every named map [ui][map-name]")
             CAPTURE(static_cast<unsigned>(*character));
             CHECK(FT_Get_Char_Index(face.get(), *character) != 0);
         }
+    }
+}
+
+TEST_CASE("Japanese map names use the Japanese face on the full-size baseline [ui][map-name]")
+{
+    MapNameFixture fixture;
+    REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/MuMapName-Italic.otf"));
+    MapNameProbe banner;
+    banner.Init();
+    gMapManager.WorldActive = WD_0LORENCIA;
+    const auto show = [&](const char* locale)
+    {
+        I18N::SetLocale(locale);
+        banner.ShowMapName();
+        banner.Render();
+        fixture.Refresh();
+        UI::RmlBridge::FitNativeTextToBoxes(fixture.context);
+        fixture.Refresh();
+        Rml::Element* text = banner.Document()->GetElementById("name_text");
+        REQUIRE(text != nullptr);
+        return text;
+    };
+    for (const char* theme : {"legacy", "modern"})
+    {
+        CAPTURE(theme);
+        UI::RmlBridge::SetActiveThemeName(theme);
+        UI::RmlBridge::ReloadAllThemedDocuments();
+        Rml::Element* text = show("en");
+        CHECK(text->GetComputedValues().font_family() == "mu map name");
+        const float baseline = DrawnBaseline(*text);
+
+        text = show("ja");
+        CHECK(text->GetComputedValues().font_family() == "noto sans jp");
+        CHECK(text->GetComputedValues().font_style() == Rml::Style::FontStyle::Normal);
+        CHECK(std::abs(DrawnBaseline(*text) - baseline) <= PixelTolerance);
+
+        text = show("zh-TW");
+        CHECK(text->GetComputedValues().font_family() == "mu map name");
     }
 }
