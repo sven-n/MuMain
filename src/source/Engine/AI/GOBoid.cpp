@@ -34,8 +34,8 @@ static  const   BYTE    BOID_GROUND = 2;
 static  const   BYTE    BOID_UP = 3;
 
 // Actions of the bird and crow models.
-static  const   int     BIRD_ACTION_FLY = 0;
-static  const   int     BIRD_ACTION_GROUND = 1;
+static const int BIRD_ACTION_FLY = 0;
+static const int BIRD_ACTION_GROUND = 1;
 
 void DeleteMount(OBJECT* Owner)
 {
@@ -1017,7 +1017,8 @@ void MoveBird(OBJECT* o)
         {
             // Land and stay until the hero moves or a random take-off (BOID_GROUND below); where a bird
             // cannot sit, it bounces back up.
-            const int Index = TERRAIN_INDEX_REPEAT((int)(o->Position[0] / TERRAIN_SCALE), (int)(o->Position[1] / TERRAIN_SCALE));
+            const int Index =
+                TERRAIN_INDEX_REPEAT((int)(o->Position[0] / TERRAIN_SCALE), (int)(o->Position[1] / TERRAIN_SCALE));
             if (Engine::AI::BirdLanding::CanLandOn(TerrainWall[Index]))
             {
                 LandBird(o, Height);
@@ -1215,8 +1216,8 @@ void MoveBoidGroup(OBJECT* o, int index)
         o->Direction[0] = o->Position[0] + 3.f * p[0];
         o->Direction[1] = o->Position[1] + 3.f * p[1];
 
-        if (o->Type != MODEL_DRAGON_ && o->Type != MODEL_BAHAMUT && gMapManager.WorldActive != WD_51HOME_6TH_CHAR
-            && rand_fps_check(512))
+        if (o->Type != MODEL_DRAGON_ && o->Type != MODEL_BAHAMUT && gMapManager.WorldActive != WD_51HOME_6TH_CHAR &&
+            rand_fps_check(512))
         {
             o->Live = false;
         }
