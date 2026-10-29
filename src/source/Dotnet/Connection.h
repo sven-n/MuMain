@@ -7,6 +7,7 @@
 // Story: 3.2.1 - char16_t Encoding at .NET Interop Boundary
 
 #include <coreclr_delegates.h>
+#include <atomic>
 #include <filesystem>
 
 #include "Core/Platform/PlatformLibrary.h"
@@ -94,10 +95,12 @@ private:
     PacketFunctions_ConnectServer* _connectServer = {};
     PacketFunctions_ClientToServer* _gameServer = {};
 
-    int32_t _handle;
+    // Atomic: the disconnect callback clears it on a thread-pool thread while the game reads it.
+    std::atomic<int32_t> _handle = 0;
     void (*_packetHandler)(int32_t, const BYTE*, int32_t);
     bool _firstPacketLogged = false;
 
+    void Unregister();
     void OnDisconnected();
     void OnPacketReceived(const BYTE* data, const int32_t length);
 
@@ -112,7 +115,7 @@ public:
 
     int32_t GetHandle() const
     {
-        return _handle;
+        return _handle.load();
     }
 
     PacketFunctions_ChatServer* ToChatServer() const

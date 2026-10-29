@@ -29,6 +29,15 @@ mu_add_test(
         MuClient
 )
 
+find_package(Threads REQUIRED)
+mu_add_test(
+    NAME test_handle_registry
+    SOURCES
+        test_handle_registry.cpp
+    LINK_LIBS
+        Threads::Threads
+)
+
 # Control socket tests only exist in builds that enable it. Without it, the
 # control_socket_leak test proves that none of its sources were compiled into
 # the client (same mechanics as tests/editor's editor_leak).
