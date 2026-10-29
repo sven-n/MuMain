@@ -16,8 +16,9 @@ namespace MuEditor::Monsters
 // monster's model in a view with the item preview's camera (the mouse turns
 // it, the middle button moves the picture, the wheel zooms). Any animation of
 // the model plays, pauses and goes frame by frame; the speeds are the Monster
-// Model tool's, also while one is being dragged; the model's slot sounds play
-// when their animation starts; the impact frame of attacks 1 and 2 and the
+// Model tool's, also while one is being dragged; the model's slot sounds and
+// sound events play as the game plays them, on any map (Q-MN74); the impact
+// frame of attacks 1 and 2 and the
 // animation that follows are marked, and the speed factors the game adds can
 // be played too; Monster Attacks' Play plays an attack once (Q-MN73). Only in
 // the editor's window (Q-MN17).
@@ -35,7 +36,7 @@ public:
     }
 
     // The Monster Attacks tool's Play: the attack animation once from the
-    // start with the slot's attack sound and `sound` (the attacks' own), then
+    // start with the model's attack sounds and `sound` (the attacks' own), then
     // the model stands as the game's does. Nothing while the model of `slot`
     // is not open or lacks the animation.
     void PlayAttack(int slot, int animation, std::optional<int> sound);

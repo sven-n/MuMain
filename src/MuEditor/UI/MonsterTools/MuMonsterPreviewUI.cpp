@@ -294,6 +294,11 @@ void MuMonsterPreviewUI::Advance(int slot, const MonsterModelDefinition& values)
     {
         return;
     }
+    // SetPlayerWalk plays a walk's sound events every frame.
+    if (m_sounds && m_animation == MONSTER01_WALK)
+    {
+        SoundPreview::PlayEvents(values, m_animation, m_frame);
+    }
     const float speed = std::max(ModelValues::GetSpeed(values, slot, m_animation), 0.0f) * SpeedFactor(slot);
     m_frame += speed * FPS_ANIMATION_FACTOR;
     if (ModelValues::HoldsLastFrame(values, slot, m_animation))
@@ -334,13 +339,20 @@ void MuMonsterPreviewUI::PlayAttack(int slot, int animation, std::optional<int> 
     }
 }
 
-// The animation from the start, with its sound.
+// The animation from the start, with its sounds: the sound events of its start
+// (a walk's play frame by frame, in Advance), then the slot's, as the game
+// plays them (PlayMonsterSound first).
 void MuMonsterPreviewUI::Restart(int slot)
 {
     m_frame = 0.0f;
     if (!m_sounds)
     {
         return;
+    }
+    const MonsterModelDefinition* values = ValuesOf(slot);
+    if (values != nullptr && m_animation != MONSTER01_WALK)
+    {
+        SoundPreview::PlayEvents(*values, m_animation, m_frame);
     }
     if (const std::optional<int> soundSlot = SoundSlotOf(m_animation))
     {
