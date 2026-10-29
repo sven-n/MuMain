@@ -469,11 +469,11 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     switch (o->SubType)
                     {
                     case 55:
-                        UpdateJointTargetPosition(o, o->Target->EyeLeft);
-                        break; // left
+                        UpdateJointTargetPosition(o, o->Target->SetTrailLeft);
+                        break;
                     case 56:
-                        UpdateJointTargetPosition(o, o->Target->EyeRight);
-                        break; // rifht
+                        UpdateJointTargetPosition(o, o->Target->SetTrailRight);
+                        break;
                     }
                 }
                 break;
@@ -3176,10 +3176,10 @@ void MoveJoint(JOINT* o, int iIndex)
                 UpdateJointTargetPosition(o, o->Target->EyeRight3);
                 break;
             case 55:
-                UpdateJointTargetPosition(o, o->Target->EyeLeft);
+                UpdateJointTargetPosition(o, o->Target->SetTrailLeft);
                 break;
             case 56:
-                UpdateJointTargetPosition(o, o->Target->EyeRight);
+                UpdateJointTargetPosition(o, o->Target->SetTrailRight);
                 break;
             case 57:
                 Models[o->Target->Type].Animation(BoneTransform, o->Target->AnimationFrame,

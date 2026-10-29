@@ -26,6 +26,8 @@ void CreateBlood(OBJECT* o);
 
 int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* Owner, float Rotation = 0.f,
                  int SubType = 0);
+// Whether the sprite was created inside a bloom exclusion.
+bool IsSpriteBloomExcluded(int sprite);
 void RenderSprites(BYTE byRenderOneMore = 0);
 void CheckSprites();
 

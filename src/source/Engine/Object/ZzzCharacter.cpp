@@ -11401,7 +11401,7 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
                     vec3_t vColor;
                     Vector(13.0f, 10.0f, 3.0f, p);
                     b->TransformPosition(o->BoneTransform[20], p, Position, true);
-                    VectorCopy(Position, o->EyeLeft);
+                    VectorCopy(Position, o->SetTrailLeft);
 
                     Vector(0.09f, 0.09f, 0.8f, vColor);
                     // Sprites draw every frame; the trail joint spawns at the reference rate.
@@ -11418,7 +11418,7 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
                     // right
                     Vector(13.0f, 10.0f, -3.0f, p);
                     b->TransformPosition(o->BoneTransform[20], p, Position, true);
-                    VectorCopy(Position, o->EyeRight);
+                    VectorCopy(Position, o->SetTrailRight);
 
                     Vector(0.09f, 0.09f, 0.8f, vColor);
                     if (spawnTrails)

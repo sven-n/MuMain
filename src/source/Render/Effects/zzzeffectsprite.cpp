@@ -52,7 +52,7 @@ std::array<bool, MAX_SPRITES> s_spriteBloomExcluded{};
 
 int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* Owner, float Rotation, int SubType)
 {
-    if (!g_pOption->GetRenderAllEffects())
+    if (g_pOption && !g_pOption->GetRenderAllEffects())
     {
         return false;
     }
@@ -77,6 +77,11 @@ int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* O
         }
     }
     return false;
+}
+
+bool IsSpriteBloomExcluded(int sprite)
+{
+    return s_spriteBloomExcluded[sprite];
 }
 
 void RenderSprite(OBJECT* o, OBJECT* Owner)

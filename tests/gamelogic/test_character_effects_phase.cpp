@@ -11,8 +11,8 @@
 
 namespace
 {
-// A Cursed Temple statue that dies this frame: its effects shake the camera, on any map.
-struct DyingStatueScope
+// One drawn character of the given model, alone in the client's character list.
+struct CharacterScope
 {
     std::unique_ptr<BMD[]> models{new BMD[MAX_MODELS]};
     std::unique_ptr<CHARACTER[]> characters{new CHARACTER[MAX_CHARACTERS_CLIENT]{}};
@@ -23,27 +23,25 @@ struct DyingStatueScope
     MapProcessPtr previousMapProcess = g_MapProcess;
     float previousEarthQuake = EarthQuake;
 
-    DyingStatueScope()
+    explicit CharacterScope(int type)
     {
         Models = models.get();
         CharactersClient = characters.get();
         Hero = nullptr;
         g_MapProcess = MapProcess::Make();
-        Models[MODEL_CURSEDTEMPLE_STATUE].NumActions = 1;
+        Models[type].NumActions = 1;
 
-        OBJECT& o = statue().Object;
+        OBJECT& o = character().Object;
         o.Live = true;
         o.Visible = true;
-        o.Type = MODEL_CURSEDTEMPLE_STATUE;
-        o.CurrentAction = MONSTER01_DIE;
-        o.PKKey = 0;
+        o.Type = type;
         o.Scale = 1.f;
         o.BoneTransform = bones.get();
     }
 
-    ~DyingStatueScope()
+    ~CharacterScope()
     {
-        statue().Object.BoneTransform = nullptr;
+        character().Object.BoneTransform = nullptr;
         EarthQuake = previousEarthQuake;
         g_MapProcess = previousMapProcess;
         Hero = previousHero;
@@ -51,9 +49,19 @@ struct DyingStatueScope
         Models = previousModels;
     }
 
-    CHARACTER& statue()
+    CHARACTER& character()
     {
         return characters[1];
+    }
+};
+
+// A Cursed Temple statue that dies this frame: its effects shake the camera, on any map.
+struct DyingStatueScope : CharacterScope
+{
+    DyingStatueScope() : CharacterScope(MODEL_CURSEDTEMPLE_STATUE)
+    {
+        character().Object.CurrentAction = MONSTER01_DIE;
+        character().Object.PKKey = 0;
     }
 };
 } // namespace
@@ -66,7 +74,7 @@ TEST_CASE("A camera shake the monster effects request reaches the camera after t
 
     UpdateCharacterEffects();
 
-    CHECK(scope.statue().Object.PKKey == 1); // its death effects ran
+    CHECK(scope.character().Object.PKKey == 1); // its death effects ran
     CHECK(EarthQuake == sampled);            // the camera of this frame still sees last frame's shake
 
     ApplyCharacterEffectsEarthQuake();
@@ -82,7 +90,7 @@ TEST_CASE("A camera shake the monster effects request reaches the camera after t
 TEST_CASE("No camera shake is handed over when no monster effect requests one [gamelogic]")
 {
     DyingStatueScope scope;
-    scope.statue().Object.Live = false;
+    scope.character().Object.Live = false;
     EarthQuake = -0.4f;
 
     UpdateCharacterEffects();
@@ -107,4 +115,31 @@ TEST_CASE("An effect does not keep the visibility of the effect that had its slo
     CHECK_FALSE(Effects[0].Visible);
 
     Effects[0].Live = false;
+}
+
+TEST_CASE("The sprites of the monster effects stay out of the bloom, as when they were drawn [effects]")
+{
+    for (int i = 0; i < MAX_SPRITES; ++i)
+        Sprites[i].Live = false;
+
+    vec3_t position{1000.f, 1000.f, 0.f};
+    vec3_t light{1.f, 1.f, 1.f};
+    const int outside = CreateSprite(BITMAP_LIGHT, position, 1.f, light, nullptr);
+    REQUIRE(Sprites[outside].Live);
+    CHECK_FALSE(IsSpriteBloomExcluded(outside));
+    Sprites[outside].Live = false;
+
+    CharacterScope scope(MODEL_CRUST); // its eyes are two sprites
+    UpdateCharacterEffects();
+
+    int created = 0;
+    for (int i = 0; i < MAX_SPRITES; ++i)
+    {
+        if (!Sprites[i].Live)
+            continue;
+        ++created;
+        CHECK(IsSpriteBloomExcluded(i));
+        Sprites[i].Live = false;
+    }
+    CHECK(created == 2);
 }
