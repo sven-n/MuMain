@@ -537,7 +537,10 @@ item tools.
   frame by frame. The speeds are those of Monster Model, also while one is
   being dragged there. The model's slot sounds play when their animation
   starts (an idle sound for stop and walk, an attack sound for attacks and
-  shock, the die sound). The hit frame of attacks 1 and 2 is marked on the
+  shock, the die sound), and its [sound events](#sound-events) as the game
+  plays them: when the animation starts, at each loop of stop1 and stop2,
+  and frame by frame in a walk; on any map and at any distance, with the
+  death effect counted as armed. The hit frame of attacks 1 and 2 is marked on the
   slider, and the line under it says what the game adds. **The game's speed
   factors** plays them (**As a transformed player** too). The preview is
   only in the editor's window.
@@ -554,8 +557,8 @@ item tools.
   (monster skills, player skills) has a row per skill with its animation,
   **Play** and **Remove**, and a number field with **Add**; a monster skill
   that 0x69 plays no attack for is marked. **Play** plays the animation once
-  in Monster Preview (and opens it), with the model's attack sound and the
-  attacks' sound, then the model stands; skill effects do not play. A
+  in Monster Preview (and opens it), with the model's attack sounds (its
+  slot or its sound events) and the attacks' sound, then the model stands; skill effects do not play. A
   Monster Preview that is a tab beside Monster Attacks moves to the right
   half of their place, so both show. **Any other attack** is an animation, a
   rotation (its animations in turn, with **Remove** and **Add an
