@@ -2911,4 +2911,7 @@
   <data name="Copies the list as a Markdown table" xml:space="preserve">
     <value>Copies the list as a Markdown table (group, number and English name of each item), e.g. for an issue on GitHub.</value>
   </data>
+  <data name="It removes 0 items from the client" xml:space="preserve">
+    <value>It removes {0} items from the client, with their models. Undo brings them back.</value>
+  </data>
 </root>

@@ -652,10 +652,7 @@ void SetAllRowsChecked(ItemSyncDiff& diff, bool checked)
 {
     for (SyncItem& row : diff.items)
     {
-        if (!checked || !IsOnlyInClient(row))
-        {
-            SetRowChecked(row, checked);
-        }
+        SetRowChecked(row, checked);
     }
     for (SyncFormula& row : diff.formulas)
     {

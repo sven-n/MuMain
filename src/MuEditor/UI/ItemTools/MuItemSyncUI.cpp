@@ -1449,6 +1449,12 @@ void CMuItemSyncUI::RenderApplyPopup()
                                         {m_comparedPath, std::to_string(changes.added), std::to_string(changes.changed),
                                          std::to_string(changes.removed), std::to_string(changes.formulaEntries)})
                                .c_str());
+    if (changes.removed > 0)
+    {
+        ImGui::TextColored(
+            WarningColor, "%s",
+            I18N::Format(I18N::Editor::ItRemoves0ItemsFromTheClient, {std::to_string(changes.removed)}).c_str());
+    }
     ImGui::TextDisabled("%s", I18N::Editor::WhatTheImportLeaves);
     ImGui::PopTextWrapPos();
     ImGui::BeginDisabled(GetApplyBlocker() != ApplyBlocker::None);

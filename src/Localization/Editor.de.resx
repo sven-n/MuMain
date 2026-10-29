@@ -2890,4 +2890,7 @@
   <data name="Copies the list as a Markdown table" xml:space="preserve">
     <value>Kopiert die Liste als Markdown-Tabelle (Gruppe, Nummer und englischer Name jedes Items), z. B. für ein Issue auf GitHub.</value>
   </data>
+  <data name="It removes 0 items from the client" xml:space="preserve">
+    <value>Es entfernt {0} Gegenstände aus dem Client, mit ihren Modellen. Rückgängig holt sie zurück.</value>
+  </data>
 </root>

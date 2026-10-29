@@ -113,13 +113,13 @@ ItemSyncDiff BuildItemSyncDiff(const Data::Items::ItemExchangeFile& client, cons
 
 // Whether the row is an item only the client has. Import and Update from server list these
 // rows in a section of their own: the file does not change them, and each one is removed only
-// when its own box is checked.
+// when it is checked (its own box or Check all).
 bool IsOnlyInClient(const SyncItem& row);
 // Checks or unchecks a row's box: a New or Removed item as a whole, the fields of a Changed one.
 // Locked items and fields stay unchecked.
 void SetRowChecked(SyncItem& row, bool checked);
-// Check all and Check none: every row and formula entry. Check all leaves the items only the
-// client has as they are; Check none unchecks them too.
+// Check all and Check none: every row and formula entry, also the items only the client has
+// (the confirmation of the import says how many it removes; Undo brings them back).
 void SetAllRowsChecked(ItemSyncDiff& diff, bool checked);
 // The rows as a Markdown table, to paste into an issue or a chat, in English whatever the
 // editor's language: `title`, an empty line, then a table of each item's group, number and name.

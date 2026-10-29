@@ -1438,7 +1438,8 @@ number, fields with their default value left out, LF line endings.
   client (Added, Changed). The items only the client has are listed apart,
   folded: "Only in the client (219), not on the server" (or "not in the
   file"). The file leaves them as they are, and the summary says so; each
-  one is removed only when its own box is checked (Removed). The box of an
+  one is removed only when it is checked (Removed), by its own box or
+  Check all. The box of an
   added or removed item
   checks the whole item, the box of a changed one all its fields. A click on a row shows its fields (and selects the item in the
   item tools): each field (`width`, `requirements.strength`, `name.de`,
@@ -1455,8 +1456,9 @@ number, fields with their default value left out, LF line endings.
   item your character wears or an item window shows (they stay; such an
   item is not removed either, nor added when the client has no data for it
   yet), and a drop level above 255, which OpenMU keeps in a byte.
-- **Check all** takes every row but the items only the client has;
-  **Check none** takes every row. **A field in all items** checks or
+- **Check all** and **Check none** take every row, also the items only
+  the client has; the confirmation of the import says how many items it
+  removes, and Undo brings them back with their models. **A field in all items** checks or
   unchecks one field in every changed item.
 - **Copy as Markdown** on a list's header copies the list (also a folded
   one) as a Markdown table in English: each item's group, number and name,

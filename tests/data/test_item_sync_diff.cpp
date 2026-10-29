@@ -511,9 +511,9 @@ TEST_CASE("A file with a field list changes only those fields and adds no item [
                                { return MakeItemType(item.group, item.number) == MakeItemType(0, 200); }));
 }
 
-// Import and Update from server list an item only the client has apart from the others: Check all
-// leaves it unchecked, so it is removed only when its own box is checked; Check none unchecks it.
-TEST_CASE("Check all leaves the items only the client has unchecked [data][items][editor]")
+// Import and Update from server list an item only the client has apart from the others, unchecked;
+// Check all checks it too (Undo takes back an import), Check none unchecks it.
+TEST_CASE("Check all checks the items only the client has too [data][items][editor]")
 {
     Sides sides;
     ++sides.FileItem(KrisType).width;
@@ -536,12 +536,12 @@ TEST_CASE("Check all leaves the items only the client has unchecked [data][items
     CHECK_FALSE(kris.fields[0].checked);
     SetAllRowsChecked(diff, true);
     CHECK(kris.fields[0].checked);
-    CHECK_FALSE(shortSword.checked);
-
-    SetRowChecked(shortSword, true);
     CHECK(shortSword.checked);
+
     SetAllRowsChecked(diff, false);
     CHECK_FALSE(shortSword.checked);
+    SetRowChecked(shortSword, true);
+    CHECK(shortSword.checked);
 }
 
 TEST_CASE("Copy as Markdown writes the rows as a table [data][items][editor]")
