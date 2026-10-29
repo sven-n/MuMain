@@ -2069,6 +2069,39 @@ TEST_CASE("A bmd import moves the models of moved items back [data][items][edito
           TestFiles::ReadWholeFile(DataDirectory / "Items" / "Models" / swordFile));
 }
 
+TEST_CASE("A bmd import puts a moved entry without a name back with its model [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope models;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+    // Sphere 4 moves to a free number; the bmd files have no item at either number.
+    const int sphere4Type = MakeItemType(12, 73);
+    const int movedType = MakeItemType(12, GetNextFreeItemNumber(12, 75));
+    REQUIRE(g_ItemDatabase.GetAllSlots()[sphere4Type].entryWithoutName);
+    REQUIRE(g_ItemModelDatabase.Find(sphere4Type) != nullptr);
+    const std::string sphere4ModelFile = g_ItemModelDatabase.Find(sphere4Type)->file;
+    REQUIRE(g_ItemDataHandler.MoveItem(sphere4Type, movedType));
+    REQUIRE(g_ItemModelDatabase.Find(sphere4Type) == nullptr);
+
+    const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
+    REQUIRE_FALSE(HasFatal(result.issues));
+    CHECK(g_ItemDatabase.GetAllSlots()[sphere4Type].entryWithoutName);
+    REQUIRE(g_ItemModelDatabase.Find(sphere4Type) != nullptr);
+    CHECK(g_ItemModelDatabase.Find(sphere4Type)->file == sphere4ModelFile);
+    CHECK(IsFreeItemType(movedType));
+    std::vector<ItemDataIssue> issues;
+    ValidateModelsHaveItemEntries(g_ItemDatabase.GetAllSlots(), g_ItemModelDatabase.GetAllSlots(), issues);
+    CHECK(issues.empty());
+}
+
 // The names of a language whose item.bmd is missing stay as they are, like
 // the names of the languages that have none (German).
 // Export as bmd writes the weights the original client grows into the requirements the client

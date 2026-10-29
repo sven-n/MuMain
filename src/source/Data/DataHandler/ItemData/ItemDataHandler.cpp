@@ -113,9 +113,28 @@ ItemStatFile InWriterOrder(ItemStatFile file)
     return file;
 }
 
+// The item type before the moves since the start (each one swaps two item types), where the
+// bmd files have it.
+int TypeBeforeMoves(int itemType, std::span<const std::pair<int, int>> moves)
+{
+    for (auto move = moves.rbegin(); move != moves.rend(); ++move)
+    {
+        if (itemType == move->first)
+        {
+            itemType = move->second;
+        }
+        else if (itemType == move->second)
+        {
+            itemType = move->first;
+        }
+    }
+    return itemType;
+}
+
 // The bmd files have no entries without a name: the import keeps the ones at numbers it
-// brings no item to, so the numbers the client uses stay in the item files.
-void KeepEntriesWithoutName(std::vector<ItemDefinition>& items)
+// brings no item to, so the numbers the client uses stay in the item files. A moved entry
+// goes back to its old number, as its model does.
+void KeepEntriesWithoutName(std::vector<ItemDefinition>& items, std::span<const std::pair<int, int>> moves)
 {
     std::set<int> imported;
     for (const ItemDefinition& item : items)
@@ -124,10 +143,15 @@ void KeepEntriesWithoutName(std::vector<ItemDefinition>& items)
     }
     for (const ItemDefinition& slot : g_ItemDatabase.GetAllSlots())
     {
-        if (slot.entryWithoutName && !imported.contains(MakeItemType(slot.group, slot.number)))
+        const int itemType = TypeBeforeMoves(MakeItemType(slot.group, slot.number), moves);
+        if (!slot.entryWithoutName || imported.contains(itemType))
         {
-            items.push_back(slot);
+            continue;
         }
+        ItemDefinition entry = slot;
+        entry.group = GetItemGroup(itemType);
+        entry.number = GetItemNumber(itemType);
+        items.push_back(std::move(entry));
     }
 }
 #endif
@@ -756,7 +780,7 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     // The entries without a name stay as they are: they are not from the bmd files, so they
     // are not among the imported items.
     std::vector<ItemDefinition> items = result.items;
-    KeepEntriesWithoutName(items);
+    KeepEntriesWithoutName(items, m_modelMoves);
     g_ItemDatabase.Build(items);
     FillItemAttributes();
     // The bmd files have the items at their old numbers; their models go back
