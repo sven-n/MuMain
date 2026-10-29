@@ -1147,6 +1147,19 @@ TEST_CASE("Item data errors stop loading [data][items]")
     CHECK(errorMessage.find("Group00_Sword.json") != std::string::npos);
 }
 
+TEST_CASE("An empty item name stops loading [data][items]")
+{
+    // Unlike an entry without a name, which has no name key at all.
+    TemporaryClientFolder folder;
+    folder.WriteItemFile("Group00_Sword.json",
+                         R"({"formatVersion": 1, "group": 0, "items": [{"number": 0, "name": ""}]})");
+    ClientDataScope client(folder.Directory());
+
+    std::string errorMessage;
+    CHECK_FALSE(g_ItemDataHandler.Load(errorMessage));
+    CHECK(errorMessage.find("the English name is missing") != std::string::npos);
+}
+
 TEST_CASE("A description placeholder that names no table stops loading [data][items]")
 {
     TemporaryClientFolder folder;

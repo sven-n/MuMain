@@ -65,7 +65,9 @@ The file name is only a convention; the group comes from the file content.
   a name (`{ "number": 73 }`) is a number the client uses without an
   item there: Sphere 4 and 5 (12,73 and 12,74) have their models and code
   names them, but there is no item for them yet. The game treats such a
-  number as empty, and only its number is checked. Every number with a
+  number as empty, and only its number is checked. It has no `name` key
+  at all: an empty name (`"name": ""`) is an item without its English
+  name and stops the start. Every number with a
   model entry has an entry here, an item or one without a name; a model
   entry without one is an error in **Data Checks** (the game runs, and a
   save is not refused). An entry

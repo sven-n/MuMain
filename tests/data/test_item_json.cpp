@@ -149,6 +149,23 @@ TEST_CASE("An item file entry without a name is kept through read and write [dat
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "number"));
 }
 
+TEST_CASE("An empty item name is not an entry without a name [data][items]")
+{
+    for (const std::string name : {R"("")", "{}", R"({"en": ""})"})
+    {
+        INFO(name);
+        const ReadResult result = Read(GroupFile(0, R"({"number": 3, "name": )" + name + "}"));
+        REQUIRE(result.items.size() == 1);
+        CHECK_FALSE(result.items.front().entryWithoutName);
+        CHECK_FALSE(result.items.front().HasEntry());
+
+        // The English name is missing, as for any item.
+        std::vector<ItemDataIssue> issues;
+        ValidateItems(result.items, issues);
+        CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "name"));
+    }
+}
+
 TEST_CASE("Item JSON only writes items of the requested group [data][items]")
 {
     ItemDefinition otherGroup = MakeKris();

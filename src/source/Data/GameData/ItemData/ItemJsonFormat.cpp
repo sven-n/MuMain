@@ -1015,7 +1015,8 @@ void ReadItemGroupJson(std::string_view text, const std::string& source, std::ve
         ItemReader reader(source, group, issues, false);
         if (reader.Read(json, definition))
         {
-            definition.entryWithoutName = !definition.Exists();
+            // Only without the name key: an empty name is still an item without its English name.
+            definition.entryWithoutName = !json.contains(Keys::Name);
             items.push_back(std::move(definition));
         }
     }
