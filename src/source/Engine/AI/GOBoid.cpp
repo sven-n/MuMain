@@ -1022,11 +1022,11 @@ void MoveBird(OBJECT* o)
         float Height = RequestTerrainHeight(o->Position[0], o->Position[1]);
         if (o->Position[2] < Height)
         {
-            // Land and stay until the hero moves or a random take-off (BOID_GROUND below); where a bird
-            // cannot sit, it bounces back up.
+            // Land and stay until the hero moves or a random take-off (BOID_GROUND below). Where a bird
+            // cannot sit, or while the hero moves, it bounces back up and keeps flapping.
             const int Index =
                 TERRAIN_INDEX_REPEAT((int)(o->Position[0] / TERRAIN_SCALE), (int)(o->Position[1] / TERRAIN_SCALE));
-            if (Engine::AI::BirdLanding::CanLandOn(TerrainWall[Index]))
+            if (Engine::AI::BirdLanding::CanLandOn(TerrainWall[Index]) && HeroStandsStill())
             {
                 LandBird(o, Height);
             }
