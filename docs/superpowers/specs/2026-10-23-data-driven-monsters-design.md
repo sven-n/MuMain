@@ -805,7 +805,7 @@ Focused tools that share one monster selection (`MonsterSelection`, like
 | **Monster Setup** | Model (from the model list), scale, outline (with "computed"), skin, meshes, render tier, the merchants' part models, the other setup fields, NPC rules. The equipment (weapons, armor, wings and helpers as items, with item pickers) gets a tab of its own, **Monster Equipment** (Q-MN33). Says when a model change switches the attack path (`player` and monster models attack differently). From PR 3: sections for map and state variants, spawn effects (▶ per row), facing, appear, the number's "Appears on" maps, NPC rules as talk blocks, hooks (Show code); each field grey when shared by the monster's numbers, yellow when the number's own ("make it this number's own" / "back to shared"); "at once" / "next spawn" badges and the Respawn button (D55); the "Unknown monsters" settings (D64). |
 | **Monster Attacks** | The skill → animation tables, `otherwise` (one animation, a rotation or `generic`) or `otherwiseRandom`, `clearSkill`; a Map row with the entry's map variants and the grouped map picker (Q-MN65, D67); **Play** on each skill row and **Play next attack** for any other attack, in Monster Preview with the attack sounds (Q-MN73); whether each skill reaches the lookup directly or only on the next 0x18; the skills OpenMU sends (after MN6). Read-only with a note for player-shaped monsters. A player skill opens the skill tools once SK1 exists. |
 | **Monster Model** | The model entry: file picker over every folder the monster and NPC models use (`Data/Monster`, `Data/NPC` with subfolders, `Object35`, `Item/xmas`, the part model folders, in their on-disk spelling); texture folders; animation speeds and "hold last frame" with an animation picker, and the speed factors code applies on top (transformed ×1.5, Illusion of Kundun die ×4, Erohim die ½); sounds with play buttons; the slot range and what depends on it; users of the model: monsters, ambient boids, map objects, effects (D26). From PR 3: named bones (names the code reads are locked, bones editable; Q-MN37) and parts such as Gayion's five flying swords (Q-MN45). |
-| **Monster Preview** | The selected monster in a preview, with the item model preview's camera (orbit, pan, zoom) and a character path in the preview scene (weapons, body parts, skin). Animation preview: pick any animation of the model; play, pause and a frame slider; speed edits in Monster Model show at once; the model's sounds play at their moment (idle, attack, die), its sound events too, on any map (Q-MN74); the return to idle after an attack and the impact frame of attack 1 and 2 are marked; the speed factors the game adds on top (transformed ×1.5, Illusion of Kundun die ×4, Erohim die ½) are shown as "in game". Player-shaped monsters show their equipment once MN4c moved it into data; a **Show equipment** checkbox turns the weapons, gear and skin on and off (Q-MN33). Only in the editor's window: there is no view of the previewed monster in the world (Q-MN17). From PR 3 (Q-MN40): the game's part drawing for equipment (no shadow, no mount; a line says when the monster rides a mount), the spawn and appear effects created by the game's own code (Replay spawn, Replay appear), Map and State pickers for the variants, a "Pointed at" tick box and a light setting. |
+| **Monster Preview** | The selected monster in a preview, with the item model preview's camera (orbit, pan, zoom) and a character path in the preview scene (weapons, body parts, skin). Animation preview: pick any animation of the model; play, pause and a frame slider; speed edits in Monster Model show at once; the model's sound events play at their moments and animations, on any map (Q-MN74, Q-MN76); the return to idle after an attack and the impact frame of attack 1 and 2 are marked; the speed factors the game adds on top (transformed ×1.5, Illusion of Kundun die ×4, Erohim die ½) are shown as "in game". Player-shaped monsters show their equipment once MN4c moved it into data; a **Show equipment** checkbox turns the weapons, gear and skin on and off (Q-MN33). Only in the editor's window: there is no view of the previewed monster in the world (Q-MN17). From PR 3 (Q-MN40): the game's part drawing for equipment (no shadow, no mount; a line says when the monster rides a mount), the spawn and appear effects created by the game's own code (Replay spawn, Replay appear), Map and State pickers for the variants, a "Pointed at" tick box and a light setting. |
 | **Monster Translations** | Names × languages (the generic grid, D56); from PR 3 also the talk texts (D66). |
 | **Monster Checks** | Replaced by the editor-wide **Data Checks** window (D65), where the monster area keeps these checks: missing model files (case-resolved), animations a model does not have or with speed 0, the animation warnings of section 6, a kind against OpenMU's `ObjectKind` (allowed pairs; 0x1F numbers and summons are players in game), a monster of kind "monster" on an NPC-range model, unused models (counting non-monster users), item types that no longer exist, names over 64 units, no free model slots. |
 | **Look editor** (MN8) | The roadmap's shared look editor for the looks of the selected monster. |
@@ -891,7 +891,7 @@ own inside its PR, with its comparison before the old code goes (D50).
 | 2 | MN3, MN2, MN7 | Models and attacks | merged (sven-n/MuMain#866) | about 12,000–15,000, plus `Models.json` |
 | Data Checks | – | Three problem levels and one checks window for all editor tools (D65); this document's answers to Q-MN35–Q-MN63 first | after PR 2 | – |
 | Attacks | MN2b | Attack data decides on every map, rotations, map variants of attacks, maps by server number and Devil Square's stages, Play in Monster Attacks, Monster Preview plays the sound events (Q-MN62, Q-MN64–Q-MN74; OpenMU: Mosch0512/OpenMU#7) | after Data Checks | – |
-| Sounds | MNS | One sound list: the sound slots become sound events (Q-MN75) | after Attacks | – |
+| Sounds | MNS | One sound list: the sound slots become sound events that play at moments (Q-MN75–Q-MN77) | after Attacks | – |
 | 3a | MNG | One monster, several numbers (D61) | after Sounds | – |
 | 3b | MN4 | Setup at spawn | after 3a | – |
 | 3c | MN5 | NPC rules | after 3b | – |
@@ -901,8 +901,8 @@ own inside its PR, with its comparison before the old code goes (D50).
 
 PR 3 was planned as one PR for MN4 and MN5. With the answers of Q-MN35 to
 Q-MN63 it grew by the grouping, the variants, the new editor sections and the
-checks, so it runs as five PRs in a row (Q-MN63): each goes into `main` after
-the one before is merged.
+checks, so it runs as five PRs in a row (Q-MN63), six with the sounds PR
+(Q-MN75): each goes into `main` after the one before is merged.
 
 For comparison: the Server List window (sven-n/MuMain#845) added about 3,100
 lines, items 3c (sven-n/MuMain#801) 4,300, the item tools (sven-n/MuMain#831)
@@ -917,7 +917,7 @@ model entries.
 | MN1 | Monster list, names and kind | MN0 | `Data/Monsters/Monsters.json` with number, names and kind; the accessor and table of section 1; `MonsterScript` and its name searches go, and `getMonsterName`, `Setting_Monster` and the kind lookup read the table; the txt files and `MapCharacters.bmd` go; the Kalima gate format becomes a UI text after the P12 fix. Editor: generic parts (D56), `MonsterSelection`, Monster Browser, Monster Translations, Monster Checks (first checks). Control socket numbers (D59), `docs/monster-data.md`, `.gitignore` and `.gitattributes`. P7, P8, P12, P16. |
 | MN2 | Attack animations | MN1, MN.P | `attacks` in the monster entries (D48); `MonsterSkill.bmd` goes; the animation choices of the handlers and the generic pattern read data; their gates and logic stay. Monster recorder, attack part. Editor: Monster Attacks. P3–P6, P11, P18. |
 | MN2b | Attacks decide by data | MN2 | Every number with `attacks` plays them on every map; the handlers' number lists and map checks for the animation go; `otherwise` may be a rotation or `generic`; map variants of attacks; the client keeps the server map and the stage OpenMU sends, and every map list in data names server maps and stages (`maps`), with one grouped map picker; Play buttons in Monster Attacks; Monster Preview plays the sound events too (Q-MN62, Q-MN64–Q-MN74). Attack recorder before and after. |
-| MNS | One sound list | MN7, MN2b | The sound slots of 74 models become sound events (Q-MN75): an idle, an attack and a die event each, with what slots do and events did not (heard at any distance and on every map, the monster as `PlayBuffer`'s object, the second set for `SubType` 9); `Models.json` format 2; `PlaySlotSound`, `HasSlotSound` and the monsters' `BMD::Sounds` go; Monster Model's slot rows go. Monster recorder, sound part, before and after. |
+| MNS | One sound list | MN7, MN2b | The sound slots of 74 models become sound events (Q-MN75) that play at moments, where the slots play today (Q-MN76): idle on `stand` and `walk`, attack on `attack` and `hit`, die on `death`, which plays in Chaos Castle too (Q-MN77). Events get what slots do and events did not: heard at any distance and on every map, the monster as `PlayBuffer`'s object, a `SubType` condition for the second set (SubType 9), a pick with one sound (the empty second slot). `Models.json` format 2; `PlaySlotSound`, `HasSlotSound` and the monsters' `BMD::Sounds` go; Monster Model's slot rows go, its sound events get the moments and conditions. Monster recorder, sound part, before and after. |
 | MNG | One monster, several numbers | MN2b | D61: the grouped format (merge and difference), the one-time conversion (36 monsters with 160 numbers) with its comparison, `maps` per number from OpenMU's Season 6 placements (410 numbers), the Browser tree and its number actions, shared and own values in every monster tool. The 12 copies of P26 keep their rotation as their own value. |
 | MN3 | Models | MN1, MN.P | `Data/Monsters/Models.json` with what `OpenMonsterModel`, `OpenNpc`, the creators' model constants and the slot-dependent code in `CreateCharacterPointer` (with the Hellas and Battle Castle hooks) set; part models by FX1 name; sounds with ids. `model` is filled for every monster for the tools; the creators still choose the model until MN4, and the recorder checks both agree. Monster recorder, model part. Editor: Monster Model, Monster Preview. P1, P9. |
 | MN4 | Setup at spawn | MN3, MN.P, MNG | The values of `CreateMonster` and the creators into the monster entries (D62, D63); the creators keep only logic, as hooks (D49); the post-creation changes of the packet handlers as Q-MN38 decided; `CDirection::SummonCreateMonster` takes the model from the monster table. Three parts in PR 3b: **MN4a** the core switch, **MN4b** the map creators, **MN4c** player-shaped monsters and NPCs and the merchants' part models, with the item tools learning monster references (D60). Monster recorder, creation part. Then the removal commits and one fix commit each: the bug look instead of the Bull Fighter (D64), P2, P13, P14, P27, Gayion's swords as parts, Maya without the Bull Fighter model, Molt once per map (Q-MN45). Editor: Monster Setup, Monster Equipment, the Preview additions. P2, P13–P15, P17, P24, P27. |
@@ -991,20 +991,33 @@ phase.
   hook stays code.
 
 **MNS One sound list.**
-- The sound slots of 74 models become sound events, in today's order: idle
-  (stop1, stop2 and walk, with the draws `SetPlayerStop` and `SetPlayerWalk`
-  make), attack (attack 1 to 5 and shock; the Assassin's shock plays none)
-  and die (Chaos Castle's death sound stays code).
-- Events get what the slots do and events did not: no 500-unit cut-off and
-  no map limit for the converted ones, the monster as `PlayBuffer`'s object,
-  and a `SubType` condition for the second set (SubType 9).
+- The sound slots of 74 models become sound events, in today's order. The
+  slots play at moments of the game, not with animations (Q-MN76), so the
+  events get `on` moments next to `animations`:
+  - `stand`: `SetPlayerStop`, when the monster is set to stand (a walk
+    ends, the server stops it); `walk`: each `SetPlayerWalk` (not for the
+    Balrog, which plays its bone sound there). Both with the draw the game
+    makes, one in 16 by `rand_fps_check`.
+  - `attack`: `SetPlayerAttack` at frame 0; `hit`: `SetPlayerShock` at
+    frame 0 (the Assassin's event has no `hit`, as its slot played none);
+    `death`: `SetPlayerDie` at frame 0, on every map: Chaos Castle's
+    explosion stays code and plays too (Q-MN77).
+  - Whatever the animation: an attack whose data plays stop2, shock or no
+    animation sounds as today.
+- Events get what the slots do and events did not: `heardAnywhere` (no
+  500-unit cut-off, no map list), `atMonster` (the monster as
+  `PlayBuffer`'s object, which does not start a sound again while it plays),
+  `subType` and `notSubType` for the second set (SubType 9: Death Centurion
+  and Illusion of Kundun), and a `pick` with one sound for a pair whose
+  second slot is empty (one in two, the sound or none).
 - One conversion; `Models.json` format 2, whose reader refuses
   `soundSlots`. `PlaySlotSound`, `HasSlotSound` and the monsters'
   `BMD::Sounds` go.
-- The monster recorder's sound part runs on every model, animation, frame,
-  `SubType` and map before and after: the same sounds in the same order.
-- Monster Model: the slot rows go, Sound events shows the converted
-  events.
+- The monster recorder's sound part runs on every monster, moment,
+  animation, frame, `SubType`, map and distance before and after: the same
+  sounds in the same order, except a die sound in Chaos Castle (Q-MN77).
+- Monster Model: the slot rows go; Sound events shows the converted events
+  with their moments and conditions.
 
 **MN4 Setup at spawn.**
 - The values of each creator body into the monster entry; bodies that only set
@@ -1132,6 +1145,8 @@ groups:
 | Q-MN73 | Can Monster Attacks play what it edits? *(2026-10-29)* | In the attacks PR: **Play** on each skill row plays its animation once in Monster Preview (beside Monster Attacks, not a tab over it) with the model's attack sound and the attacks' sound; **Play next attack** plays what the next other attack plays: the rotation in turn, the generic pattern and the draws as the game counts them, with **From the start**. Skill effects come with the skill tools. |
 | Q-MN74 | Monster Preview plays the sound slots but not the sound events, so Play is silent for the 29 monsters with attacks whose attack sound is an event (Elbeland, Kanturu, Empire Guardian and others). Play them? *(2026-10-29)* | Yes, in the attacks PR: the sound events code gets one function that the game and the preview call. The preview plays a model's events as `PlayMonsterSound` does: when an animation starts, at each loop of stop1 and stop2, and frame by frame in a walk; on any map and at any distance, with the death effect counted as armed. The data and the game stay as they are. |
 | Q-MN75 | Sound slots and sound events do the same job in two shapes (no model has both). One shape? *(2026-10-29)* | Yes: the slots become sound events, in a PR of its own right after the attacks PR (MNS, before 3a). Not chosen: keeping both, and sounds under each animation (the attack sounds copied six times and the speed format changed, with the same comparison). |
+| Q-MN76 | The sound slots play at moments of the game, not with animations: when an attack starts, when the monster is hit, when it dies, when it is set to stand (a walk ends, the server stops it) and at each walk step, whatever the animation. The sound events play with their animations (a stop event at the end of each stop loop). How do the converted events say when they play? *(2026-10-29)* | Moments: a sound event names `on` moments (`attack`, `hit`, `death`, `stand`, `walk`) instead of animations and plays where the slots play today, whatever the animation; any event may use them. Not chosen: animations, which would move the idle sound of a standing monster to the end of each stop loop, leave attacks that play stop2 or no animation silent and play die sounds in Chaos Castle. |
+| Q-MN77 | A slot's die sound does not play in Chaos Castle (the explosion plays instead); die-animation events do. Where does the death moment play? *(2026-10-29)* | Everywhere, Chaos Castle included; the explosion stays code and plays too. No monster with a die sound dies in Chaos Castle today (its knight, elf and wizard have none), so the game sounds the same; a die sound given to them later plays with the explosion. Not chosen: a map list per event that keeps today's rule as data, and keeping the rule in code. |
 
 ## Open questions
 
