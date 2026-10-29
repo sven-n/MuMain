@@ -14,6 +14,7 @@ MusicVolume=5
 [CONNECTION SETTINGS]
 ServerIP=localhost
 ServerPort=44406
+ChatServerPort=45980
 [UI]
 Locale=en
 TranslateItemNames=1

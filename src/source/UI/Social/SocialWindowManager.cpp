@@ -30,6 +30,7 @@
 #include "I18N/All.h"
 #include "Render/Text/CUIRenderText.h"
 #include "Render/Text/TextWrap.h"
+#include "Data/GameConfig/GameConfig.h"
 #include "Core/Input/ImeInput.h"
 
 
@@ -991,7 +992,8 @@ void CUIChatWindow::ConnectToChatServer(const wchar_t* pszIP, DWORD dwRoomNumber
 {
     m_dwRoomNumber = dwRoomNumber;
 
-    _connection = new Connection(MU_C16(pszIP), 55980, true, &HandlePacketS);
+    const int32_t chatServerPort = GameConfig::GetInstance().GetChatServerPort();
+    _connection = new Connection(MU_C16(pszIP), chatServerPort, true, &HandlePacketS);
 
     if (!_connection->IsConnected())
     {

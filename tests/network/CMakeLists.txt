@@ -4,6 +4,10 @@ mu_add_test(
         test_server_config_validation.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Data/GameConfig/GameConfigValidation.cpp
 )
+# The chat server port test compares the shipped config.ini template with the default.
+target_compile_definitions(test_server_config_validation PRIVATE
+    MU_CONFIG_TEMPLATE="${CMAKE_SOURCE_DIR}/src/bin/config.ini.template"
+)
 
 mu_add_test(
     NAME test_byte_order

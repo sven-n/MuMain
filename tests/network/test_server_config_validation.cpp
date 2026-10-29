@@ -10,8 +10,10 @@
 // Run: ctest --test-dir build -R "3.4.2"
 
 #include "doctest.h"
+#include <fstream>
 #include <string>
 
+#include "Data/GameConfig/GameConfigConstants.h"
 #include "Data/GameConfig/GameConfigValidation.h"
 
 // =============================================================================
@@ -182,4 +184,38 @@ TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values [netw
         // THEN: the value is preserved
         REQUIRE(result == L"localhost");
     }
+}
+
+// =============================================================================
+// Chat server port: a chat room ticket carries only the chat server's address
+// =============================================================================
+
+TEST_CASE("Chat server port defaults to OpenMU's chat server [network][server-config]")
+{
+    // OpenMU moved its chat server from 55980 to 45980 in v0.9.11.
+    CHECK(CfgDefaults::CfgDefaultChatServerPort == 45980);
+    CHECK(GameConfigValidation::ValidateServerPort(0, CfgDefaults::CfgDefaultChatServerPort) == 45980);
+
+    // Older OpenMU versions and the original servers stay reachable through the setting.
+    CHECK(GameConfigValidation::ValidateServerPort(55980, CfgDefaults::CfgDefaultChatServerPort) == 55980);
+}
+
+TEST_CASE("config.ini template sets the default chat server port [network][server-config]")
+{
+    std::ifstream config(MU_CONFIG_TEMPLATE);
+    REQUIRE(config.is_open());
+
+    const std::string key = "ChatServerPort=";
+    std::string value;
+    for (std::string line; std::getline(config, line);)
+    {
+        if (line.rfind(key, 0) == 0)
+        {
+            // A Windows checkout has CRLF line endings.
+            value = line.substr(key.size(), line.find_last_not_of("\r") + 1 - key.size());
+            break;
+        }
+    }
+
+    CHECK(value == std::to_string(CfgDefaults::CfgDefaultChatServerPort));
 }

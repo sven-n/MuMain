@@ -33,6 +33,8 @@ namespace CfgKeys
     // Connection
     inline constexpr wchar_t CfgKeyServerIP[]   = L"ServerIP";
     inline constexpr wchar_t CfgKeyServerPort[] = L"ServerPort";
+    // The server sends only the chat server's address for a chat room, so the client keeps the port.
+    inline constexpr wchar_t CfgKeyChatServerPort[] = L"ChatServerPort";
 
     // UI
     inline constexpr wchar_t CfgKeyUILocale[] = L"Locale";
@@ -108,6 +110,8 @@ namespace CfgDefaults
 
     inline constexpr wchar_t CfgDefaultServerIP[] = L"localhost";
     inline constexpr int CfgDefaultServerPort = 44406;
+    // OpenMU's chat server port since v0.9.11; v0.9.10 and older (and the original servers) use 55980.
+    inline constexpr int CfgDefaultChatServerPort = 45980;
 
     inline constexpr int CfgDefaultZoom = 1735;  // OrbitalCamera DEFAULT_RADIUS — matches Default-cam camera-to-Hero distance
 
