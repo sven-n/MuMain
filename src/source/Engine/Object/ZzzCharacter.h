@@ -23,6 +23,8 @@ bool IsCharacterDrawn(CHARACTER* c);
 // The effects, sounds and state changes of the characters drawn this frame, after every Move* of the frame: their
 // bones are final, and what they spawn is drawn this frame.
 void UpdateCharacterEffects();
+// Hands the camera a shake UpdateCharacterEffects requested last frame; call before the frame's damping.
+void ApplyCharacterEffectsEarthQuake();
 
 /**
  * @brief Builds a generous axis-aligned pick box for the character selection screen.

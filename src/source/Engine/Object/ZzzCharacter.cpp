@@ -11400,7 +11400,13 @@ bool IsCharacterDrawn(CHARACTER* c)
            !g_isCharacterBuff(o, eBuff_CrywolfNPCHide) && Models[o->Type].NumActions != 0;
 }
 
-void UpdateCharacterEffects()
+namespace
+{
+// A shake these effects request reaches the camera after its next damping, as when they ran while drawing.
+bool s_hasEarthQuakeRequest = false;
+float s_earthQuakeRequest = 0.f;
+
+void UpdateDrawnCharacterEffects()
 {
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
     {
@@ -11444,6 +11450,29 @@ void UpdateCharacterEffects()
             continue;
         TheMapProcess().UpdateMonsterEffects(c, o, b);
     }
+}
+} // namespace
+
+void ApplyCharacterEffectsEarthQuake()
+{
+    if (s_hasEarthQuakeRequest)
+    {
+        EarthQuake = s_earthQuakeRequest;
+        s_hasEarthQuakeRequest = false;
+    }
+}
+
+void UpdateCharacterEffects()
+{
+    const float sampledEarthQuake = EarthQuake;
+    {
+        // Their sprites are drawn with the characters, outside the bloom like them.
+        const mu::ScopedBloomExclusion classicCharacters;
+        UpdateDrawnCharacterEffects();
+    }
+    s_hasEarthQuakeRequest = EarthQuake != sampledEarthQuake;
+    s_earthQuakeRequest = EarthQuake;
+    EarthQuake = sampledEarthQuake;
 }
 
 void RenderCharactersClient()
