@@ -34,6 +34,10 @@ public:
         return m_lastPlayed;
     }
 
+    // When the tool shows the monster next, it shows its attacks of all maps
+    // (nullopt) or of the map variant at `variant` (Data Checks' problems).
+    void ShowMapVariant(int monster, std::optional<int> variant);
+
 private:
     using MonsterDraft = Items::ItemEditDraft<Data::Monsters::MonsterDefinition>;
 

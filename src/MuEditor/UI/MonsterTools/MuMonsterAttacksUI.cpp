@@ -274,6 +274,13 @@ void MuMonsterAttacksUI::RenderAttacks(MonsterDefinition& monster, int modelSlot
     ImGui::PopID();
 }
 
+void MuMonsterAttacksUI::ShowMapVariant(int monster, std::optional<int> variant)
+{
+    // RenderAttacks shows all maps for an index the monster does not have.
+    m_variantMonster = monster;
+    m_variant = variant.value_or(AllMaps);
+}
+
 std::optional<MonsterAttacks>& MuMonsterAttacksUI::ShownAttacks(MonsterDefinition& monster) const
 {
     if (m_variant == AllMaps)

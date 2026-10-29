@@ -275,9 +275,21 @@ TEST_CASE("Monster Attacks: a map variant is added with the monster's attacks, e
     CHECK(stored().mapVariants[0].attacks->otherwiseGeneric);
     CHECK(stored().attacks == budge.attacks);
 
+    // Data Checks shows the attacks a problem is about: all maps, then the
+    // variant again.
+    g_MuMonsterAttacksUI.ShowMapVariant(2, std::nullopt);
+    render();
+    click(AttacksItemId(2, AllMaps, I18N::Editor::ADraw));
+    CHECK(stored().attacks->otherwiseRandom.has_value());
+    CHECK_FALSE(stored().mapVariants[0].attacks->otherwiseRandom.has_value());
+    g_MuMonsterAttacksUI.ShowMapVariant(2, 0);
+    render();
+    click(AttacksItemId(2, 0, I18N::Editor::ADraw));
+    CHECK(stored().mapVariants[0].attacks->otherwiseRandom.has_value());
+
     click(AttacksItemId(2, 0, I18N::Editor::RemoveTheMapVariant));
     CHECK(stored().mapVariants.empty());
-    CHECK(stored().attacks == budge.attacks);
+    CHECK(stored().attacks->otherwiseRandom.has_value());
     g_MonsterSelection.Select(MonsterSelection::NoMonster);
 }
 
