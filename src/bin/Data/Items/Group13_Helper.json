@@ -1600,19 +1600,7 @@
           "levels": [1, 2]
         },
         {
-          "text": {
-            "en": "Cannot be sold.",
-            "de": "Kann nicht verkauft werden.",
-            "es": "No se puede vender.",
-            "id": "Tidak bisa dijual.",
-            "ja": "売却不可",
-            "pl": "Nie można sprzedać.",
-            "pt": "Não pode ser vendido.",
-            "ru": "Не подлежит продаже.",
-            "tl": "Hindi maaaring ibenta.",
-            "uk": "Не можна продати.",
-            "zh-TW": "不能出售。"
-          },
+          "text": "@cannotBeSold",
           "color": "red",
           "levels": [1, 2]
         },

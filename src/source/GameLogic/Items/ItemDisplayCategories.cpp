@@ -113,19 +113,9 @@ bool IsChocolateBoxType(int itemType)
            itemType == ITEM_BLUE_CHOCOLATE_BOX;
 }
 
-bool IsChocolateBox(const ITEM* pItem)
-{
-    return IsChocolateBoxType(pItem->Type);
-}
-
 bool IsRibbonBoxType(int itemType)
 {
     return itemType == ITEM_RED_RIBBON_BOX || itemType == ITEM_GREEN_RIBBON_BOX || itemType == ITEM_BLUE_RIBBON_BOX;
-}
-
-bool IsRibbonBox(const ITEM* pItem)
-{
-    return IsRibbonBoxType(pItem->Type);
 }
 
 bool IsSecromiconQuestItem(const ITEM* pItem)

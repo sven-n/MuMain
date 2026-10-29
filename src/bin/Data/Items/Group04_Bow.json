@@ -217,6 +217,29 @@
       "description": [
         {
           "text": "@numberOfItems"
+        },
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:ammunitionDamageIncrease"},
+          "color": "blue",
+          "levels": [1, 15]
+        },
+        {
+          "text": {
+            "en": "Additional Dmg +1",
+            "de": "Zusätzlicher Schaden +1",
+            "es": "Daño adicional +1",
+            "id": "Dmg Tambahan +1",
+            "ja": "追加攻撃力 +1",
+            "pl": "Dodatkowe obrażenia +1",
+            "pt": "Dano Adicional +1",
+            "ru": "Дополнительный урон +1",
+            "tl": "Karagdagang Dmg +1",
+            "uk": "Додатковий Dmg +1",
+            "zh-TW": "附加傷害+1"
+          },
+          "color": "blue",
+          "levels": [1, 15]
         }
       ],
       "width": 1,
@@ -443,6 +466,29 @@
       "description": [
         {
           "text": "@numberOfItems"
+        },
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:ammunitionDamageIncrease"},
+          "color": "blue",
+          "levels": [1, 15]
+        },
+        {
+          "text": {
+            "en": "Additional Dmg +1",
+            "de": "Zusätzlicher Schaden +1",
+            "es": "Daño adicional +1",
+            "id": "Dmg Tambahan +1",
+            "ja": "追加攻撃力 +1",
+            "pl": "Dodatkowe obrażenia +1",
+            "pt": "Dano Adicional +1",
+            "ru": "Дополнительный урон +1",
+            "tl": "Karagdagang Dmg +1",
+            "uk": "Додатковий Dmg +1",
+            "zh-TW": "附加傷害+1"
+          },
+          "color": "blue",
+          "levels": [1, 15]
         }
       ],
       "width": 1,

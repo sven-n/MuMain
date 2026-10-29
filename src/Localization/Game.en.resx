@@ -301,15 +301,6 @@
   <data name="Box of Heaven" xml:space="preserve">
     <value>Box of Heaven</value>
   </data>
-  <data name="When you drop it on the ground," xml:space="preserve">
-    <value>When you drop it on the ground,</value>
-  </data>
-  <data name="[Rena/Zen/Jewel/Item]" xml:space="preserve">
-    <value>[Rena/Zen/Jewel/Item]</value>
-  </data>
-  <data name="you will get one of the above items." xml:space="preserve">
-    <value>you will get one of the above items.</value>
-  </data>
   <data name="Box of Kundun" xml:space="preserve">
     <value>Box of Kundun</value>
   </data>
@@ -1880,9 +1871,6 @@
   </data>
   <data name="Pwned by the Filter!" xml:space="preserve">
     <value>Pwned by the Filter!</value>
-  </data>
-  <data name="Throw it and you may receive some Zen or items" xml:space="preserve">
-    <value>Throw it and you may receive some Zen or items</value>
   </data>
   <data name="Absorb 30%% of damage" xml:space="preserve">
     <value>Absorb 30%% of damage</value>
@@ -4755,12 +4743,6 @@
   <data name="be upon you." xml:space="preserve">
     <value>be upon you.</value>
   </data>
-  <data name="Free entrance to Kalima" xml:space="preserve">
-    <value>Free entrance to Kalima</value>
-  </data>
-  <data name="Increase stamina" xml:space="preserve">
-    <value>Increase stamina</value>
-  </data>
   <data name="You can't delete the character that belongs to the guild" xml:space="preserve">
     <value>You can't delete the character that belongs to the guild</value>
   </data>
@@ -5211,12 +5193,6 @@
   <data name="Can't be dismantled." xml:space="preserve">
     <value>Can't be dismantled.</value>
   </data>
-  <data name="%d %s is combined" xml:space="preserve">
-    <value>%d %s is combined</value>
-  </data>
-  <data name="Can be used after dismantling" xml:space="preserve">
-    <value>Can be used after dismantling</value>
-  </data>
   <data name="Current no. of possible dismantling: %d" xml:space="preserve">
     <value>Current no. of possible dismantling: %d</value>
   </data>
@@ -5636,9 +5612,6 @@
   </data>
   <data name="All NPCs in Crywolf have been deleted." xml:space="preserve">
     <value>All NPCs in Crywolf have been deleted.</value>
-  </data>
-  <data name="Drop it to receive the gift." xml:space="preserve">
-    <value>Drop it to receive the gift.</value>
   </data>
   <data name="Would you like to receive the item?" xml:space="preserve">
     <value>Would you like to receive the item?</value>
@@ -6092,15 +6065,6 @@
   </data>
   <data name="the forehead" xml:space="preserve">
     <value>the forehead</value>
-  </data>
-  <data name="Attack Speed increase +%d" xml:space="preserve">
-    <value>Attack Speed increase +%d</value>
-  </data>
-  <data name="Attack Power increase +%d" xml:space="preserve">
-    <value>Attack Power increase +%d</value>
-  </data>
-  <data name="Defense Power increase +%d" xml:space="preserve">
-    <value>Defense Power increase +%d</value>
   </data>
   <data name="Blessing of Jack O'Lantern" xml:space="preserve">
     <value>Blessing of Jack O'Lantern</value>
