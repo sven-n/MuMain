@@ -13,7 +13,7 @@
 #include "HandleRegistry.h"
 #include "Core/Utilities/Log/MuLogger.h"
 
-// Full definitions required: Connection.cpp allocates these types (new PacketFunctions_*()).
+// Full definitions required: Connection.cpp allocates and frees these types (unique_ptr members).
 // Connection.h uses only forward declarations to avoid include-order failures in TUs
 // that pull it in transitively through WSclient.h.
 #include "PacketFunctions_ChatServer.h"
@@ -219,10 +219,9 @@ Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
 
     if (IsConnected())
     {
-        // cppcheck-suppress [noCopyConstructor, noOperatorEq]
-        _chatServer = new PacketFunctions_ChatServer();
-        _connectServer = new PacketFunctions_ConnectServer();
-        _gameServer = new PacketFunctions_ClientToServer();
+        _chatServer = std::make_unique<PacketFunctions_ChatServer>();
+        _connectServer = std::make_unique<PacketFunctions_ConnectServer>();
+        _gameServer = std::make_unique<PacketFunctions_ClientToServer>();
 
         _chatServer->SetHandle(handle);
         _connectServer->SetHandle(handle);
@@ -244,10 +243,6 @@ Connection::~Connection()
     // the disconnect callback the managed side sends later finds no connection.
     Unregister();
     Close();
-
-    SAFE_DELETE(_chatServer);
-    SAFE_DELETE(_connectServer);
-    SAFE_DELETE(_gameServer);
 }
 
 bool Connection::IsConnected()
