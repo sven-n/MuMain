@@ -32,6 +32,7 @@
 #include "imgui_internal.h"
 
 #include <array>
+#include <optional>
 #include <vector>
 
 using Data::Monsters::MonsterDefinition;
@@ -156,6 +157,21 @@ TEST_CASE("The Monster Attacks window draws attacks without ImGui errors and sto
     CHECK_FALSE(g_MonsterEdits.GetHistory().CanUndo());
 }
 
+// The id of an item of Monster Attacks' map row (`variant` nullopt) or of the
+// attacks shown for a map row choice (all maps or a variant's index).
+constexpr int AllMaps = -1;
+ImGuiID AttacksItemId(int number, std::optional<int> variant, const char* label)
+{
+    const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::MonsterAttacks);
+    REQUIRE(window != nullptr);
+    ImGuiID scope = ImGui::GetIDWithSeed(number, window->ID);
+    if (variant)
+    {
+        scope = ImGui::GetIDWithSeed(*variant, scope);
+    }
+    return ImGui::GetIDWithSeed(label, nullptr, scope);
+}
+
 // Monster Attacks' choices for any other attack, clicked one after another.
 TEST_CASE("Monster Attacks: any other attack plays an animation, a rotation, the generic pattern or a draw (Q-MN69) "
           "[editor][monsters]")
@@ -177,12 +193,11 @@ TEST_CASE("Monster Attacks: any other attack plays an animation, a rotation, the
         ImGui::Render();
         CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
     };
-    // As a click: pressed in the next frame, drawn as it is after that.
+    // As a click on the attacks of all maps: pressed in the next frame, drawn
+    // as it is after that.
     const auto click = [&](const char* label)
     {
-        const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::MonsterAttacks);
-        REQUIRE(window != nullptr);
-        ImGui::ActivateItemByID(ImGui::GetIDWithSeed(label, nullptr, ImGui::GetIDWithSeed(2, window->ID)));
+        ImGui::ActivateItemByID(AttacksItemId(2, AllMaps, label));
         render();
         render();
     };
@@ -202,6 +217,54 @@ TEST_CASE("Monster Attacks: any other attack plays an animation, a rotation, the
     CHECK_FALSE(stored().otherwiseRandom);
     CHECK_FALSE(stored().otherwiseGeneric);
     CHECK(stored().otherwise == std::vector<int>{MONSTER01_ATTACK2});
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+}
+
+// Monster Attacks' map row: a map variant starts with the monster's attacks,
+// its attacks are edited apart, and it goes as a whole.
+TEST_CASE("Monster Attacks: a map variant is added with the monster's attacks, edited apart and removed (Q-MN65) "
+          "[editor][monsters]")
+{
+    MonsterDefinition budge = Monster(2, "Budge Dragon");
+    budge.model = "MONSTER_MODEL_BUDGE_DRAGON";
+    budge.attacks.emplace();
+    budge.attacks->otherwise = {MONSTER01_ATTACK2};
+    const std::array monsters = {budge};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(2);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterAttacksUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(2); };
+    render();
+
+    click(AttacksItemId(2, std::nullopt, I18N::Editor::AddAMapVariant));
+    REQUIRE(stored().mapVariants.size() == 1);
+    CHECK(stored().mapVariants[0].maps.empty());
+    CHECK(stored().mapVariants[0].attacks == budge.attacks);
+
+    // The new variant is shown: its own attacks change.
+    click(AttacksItemId(2, 0, I18N::Editor::TheGenericPattern));
+    REQUIRE(stored().mapVariants[0].attacks);
+    CHECK(stored().mapVariants[0].attacks->otherwiseGeneric);
+    CHECK(stored().attacks == budge.attacks);
+
+    click(AttacksItemId(2, 0, I18N::Editor::RemoveTheMapVariant));
+    CHECK(stored().mapVariants.empty());
+    CHECK(stored().attacks == budge.attacks);
     g_MonsterSelection.Select(MonsterSelection::NoMonster);
 }
 

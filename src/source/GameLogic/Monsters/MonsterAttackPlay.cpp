@@ -6,10 +6,12 @@
 #include "Core/Globals/_define.h"
 #include "Data/GameData/MonsterData/MonsterAttacks.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterDefinition.h"
 #include "Data/GameData/MonsterData/MonsterSoundIds.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "World/MapInfra/MapManager.h"
 
 #include <cstdlib>
 
@@ -42,10 +44,17 @@ int Draw(Data::Monsters::MonsterAttackRandom random)
 // The monster whose skill packet starts the attack being chosen.
 const CHARACTER* g_skillAttacker = nullptr;
 
+// The attacks of the monster's entry, or of its map variant on this map.
 const Data::Monsters::MonsterAttacks* FindAttacks(const CHARACTER& character)
 {
     const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(character.MonsterIndex);
-    return monster != nullptr && monster->attacks ? &*monster->attacks : nullptr;
+    if (monster == nullptr)
+    {
+        return nullptr;
+    }
+    const std::optional<Data::Monsters::MonsterAttacks>& attacks =
+        Data::Monsters::GetAttacksOnMap(*monster, gMapManager.GetServerMap());
+    return attacks ? &*attacks : nullptr;
 }
 } // namespace
 

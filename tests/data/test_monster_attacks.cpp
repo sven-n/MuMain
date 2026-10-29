@@ -8,6 +8,7 @@
 #include "Core/Globals/_define.h"
 #include "Data/GameData/MonsterData/MonsterAttacks.h"
 #include "Data/GameData/MonsterData/MonstersJson.h"
+#include "World/MapInfra/MapManager.h"
 
 #include <algorithm>
 #include <string>
@@ -280,4 +281,104 @@ TEST_CASE("Monster attacks: an unknown field is a warning [data][monsters]")
     REQUIRE(result.issues.size() == 1);
     REQUIRE(result.monsters.size() == 1);
     CHECK(result.monsters[0].attacks->otherwise == std::vector<int>{MONSTER01_SHOCK});
+}
+
+namespace
+{
+// A monster entry with these fields after its kind.
+ReadResult ReadMonsterWith(const std::string& fields)
+{
+    ReadResult result;
+    Data::Monsters::ReadMonstersJson(
+        R"({ "formatVersion": 1, "monsters": [ { "number": 291, "name": "Fire Golem", "kind": "monster", )" + fields +
+            " } ] }",
+        "Monsters.json", result.monsters, result.issues);
+    return result;
+}
+} // namespace
+
+TEST_CASE("Monster attacks: a map variant's attacks replace the monster's on its maps (Q-MN65, Q-MN68) "
+          "[data][monsters]")
+{
+    MonsterDefinition golem;
+    golem.number = 291;
+    golem.names.Set("en", "Fire Golem");
+    golem.attacks.emplace();
+    golem.attacks->skills = {{50, MONSTER01_ATTACK1}};
+    golem.attacks->otherwise = {MONSTER01_ATTACK2};
+    Data::Monsters::MonsterMapVariant devilSquare;
+    devilSquare.maps = {32};
+    devilSquare.attacks.emplace();
+    devilSquare.attacks->otherwiseGeneric = true;
+    // A variant without attacks changes nothing.
+    Data::Monsters::MonsterMapVariant empty;
+    empty.maps = {WD_9DEVILSQUARE};
+    golem.mapVariants = {devilSquare, empty};
+
+    CHECK(&Data::Monsters::GetAttacksOnMap(golem, 32) == &golem.mapVariants[0].attacks);
+    CHECK(&Data::Monsters::GetAttacksOnMap(golem, WD_9DEVILSQUARE) == &golem.attacks);
+    CHECK(&Data::Monsters::GetAttacksOnMap(golem, WD_31HUNTING_GROUND) == &golem.attacks);
+
+    // Without attacks of its own, the monster has attacks on the variant's maps only.
+    MonsterDefinition variantOnly = golem;
+    variantOnly.attacks.reset();
+    CHECK(Data::Monsters::GetAttacksOnMap(variantOnly, 32).has_value());
+    CHECK_FALSE(Data::Monsters::GetAttacksOnMap(variantOnly, WD_31HUNTING_GROUND).has_value());
+}
+
+TEST_CASE("Monster attacks: map variants read and write, their maps on one line [data][monsters]")
+{
+    const ReadResult result =
+        ReadMonsterWith(R"("attacks": { "skills": {"50": "attack1"}, "otherwise": "attack2" }, )"
+                        R"("mapVariants": [ { "maps": [32, 9], "attacks": { "otherwise": "generic" } } ])");
+    CHECK(result.issues.empty());
+    REQUIRE(result.monsters.size() == 1);
+    const MonsterDefinition& golem = result.monsters[0];
+    REQUIRE(golem.mapVariants.size() == 1);
+    CHECK(golem.mapVariants[0].maps == std::vector<int>{WD_9DEVILSQUARE, 32});
+    REQUIRE(golem.mapVariants[0].attacks);
+    CHECK(golem.mapVariants[0].attacks->otherwiseGeneric);
+
+    const std::string text = Data::Monsters::WriteMonstersJson(result.monsters);
+    CHECK(text.find(R"("maps": [9, 32])") != std::string::npos);
+    std::vector<MonsterDefinition> read;
+    std::vector<ItemDataIssue> issues;
+    Data::Monsters::ReadMonstersJson(text, "Monsters.json", read, issues);
+    CHECK(issues.empty());
+    REQUIRE(read.size() == 1);
+    CHECK(read[0] == golem);
+}
+
+TEST_CASE("Monster attacks: wrong map variants are fatal, one without attacks a warning [data][monsters]")
+{
+    struct WrongValue
+    {
+        const char* variants;
+        const char* field;
+        const char* message;
+    };
+    for (const WrongValue& wrong : std::vector<WrongValue>{
+             {R"({})", "monster 291 mapVariants", "must be a list of map variants"},
+             {R"([3])", "monster 291 mapVariants[0]", "must be an object"},
+             {R"([{ "attacks": {} }])", "monster 291 mapVariants[0].maps", "one or more map numbers"},
+             {R"([{ "maps": [], "attacks": {} }])", "monster 291 mapVariants[0].maps", "one or more map numbers"},
+             {R"([{ "maps": [256], "attacks": {} }])", "monster 291 mapVariants[0].maps", "from 0 to 255"},
+             {R"([{ "maps": [32], "attacks": {} }, { "maps": [9, 32], "attacks": {} }])",
+              "monster 291 mapVariants[1].maps", "names map 32, which an earlier map variant names"},
+             {R"([{ "maps": [32], "attacks": { "otherwise": "jump" } }])",
+              "monster 291 mapVariants[0].attacks.otherwise", "must be an animation"},
+         })
+    {
+        INFO(wrong.variants);
+        const ReadResult result = ReadMonsterWith(std::string(R"("mapVariants": )") + wrong.variants);
+        CHECK(HasFatal(result.issues));
+        CHECK(HasIssueAbout(result.issues, wrong.field, wrong.message));
+        CHECK(result.monsters.empty());
+    }
+
+    const ReadResult nothing = ReadMonsterWith(R"("mapVariants": [ { "maps": [32] } ])");
+    CHECK_FALSE(HasFatal(nothing.issues));
+    CHECK(HasIssueAbout(nothing.issues, "monster 291 mapVariants[0]", "changes nothing"));
+    REQUIRE(nothing.monsters.size() == 1);
+    CHECK(nothing.monsters[0].mapVariants.size() == 1);
 }

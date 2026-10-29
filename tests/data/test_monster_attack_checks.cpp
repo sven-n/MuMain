@@ -14,6 +14,7 @@
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "UI/MonsterTools/MonsterAttackChecks.h"
 #include "UI/MonsterTools/MonsterCheckTargets.h"
+#include "World/MapInfra/MapManager.h"
 
 #include <array>
 #include <filesystem>
@@ -226,6 +227,24 @@ TEST_CASE("Monster attack checks: each animation of a rotation, and the generic 
     CHECK(HasMessage(issues, MONSTER_ICE_WALKER, "attack3 (8) is played by any other attack: the game counts only"));
     CHECK(Messages(issues, MONSTER_ICE_GIANT).size() == 1);
     CHECK(HasMessage(issues, MONSTER_ICE_GIANT, "attack2 (4) is played by the generic pattern, whose speed"));
+}
+
+TEST_CASE("Monster attack checks: a map variant's attacks, under the variant's field (Q-MN65) [editor][monsters]")
+{
+    MonsterDefinition iceWalker =
+        Monster(MONSTER_ICE_WALKER, "MONSTER_MODEL_ICE_WALKER", Attacks({{29, MONSTER01_ATTACK2}}, MONSTER01_ATTACK1));
+    Data::Monsters::MonsterMapVariant hatchery;
+    hatchery.maps = {WD_58ICECITY_BOSS};
+    hatchery.attacks = Attacks({{0, MONSTER01_ATTACK2}}, MONSTER01_ATTACK1);
+    iceWalker.mapVariants = {hatchery};
+    const std::array monsters = {iceWalker};
+
+    const std::vector<ItemDataIssue> issues = Check(monsters);
+
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].field == "monster 454 mapVariants[0].attacks");
+    CHECK(issues[0].message.find("monster skill 0: packet 0x69 plays no attack") != std::string::npos);
+    CHECK(GetToolForField(issues[0].field) == MonsterTool::Attacks);
 }
 
 // What Data Checks shows for the shipped lists while no model is open

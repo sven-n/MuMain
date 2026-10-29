@@ -2704,6 +2704,30 @@
   <data name="Add an animation" xml:space="preserve">
     <value>Animation hinzufügen</value>
   </data>
+  <data name="Map" xml:space="preserve">
+    <value>Karte</value>
+  </data>
+  <data name="All maps" xml:space="preserve">
+    <value>Alle Karten</value>
+  </data>
+  <data name="Add a map variant" xml:space="preserve">
+    <value>Kartenvariante hinzufügen</value>
+  </data>
+  <data name="Plays on" xml:space="preserve">
+    <value>Gilt auf</value>
+  </data>
+  <data name="No map yet" xml:space="preserve">
+    <value>noch keine Karte</value>
+  </data>
+  <data name="Pick the maps of the variant; until then Save refuses the monsters." xml:space="preserve">
+    <value>Wähle die Karten der Variante; bis dahin speichert Speichern die Monster nicht.</value>
+  </data>
+  <data name="On its maps the variant attacks instead of the monster." xml:space="preserve">
+    <value>Auf ihren Karten ersetzen die Angriffe der Variante die des Monsters.</value>
+  </data>
+  <data name="Remove the map variant" xml:space="preserve">
+    <value>Kartenvariante entfernen</value>
+  </data>
   <data name="Clear the monster skill" xml:space="preserve">
     <value>Monsterskill löschen</value>
   </data>

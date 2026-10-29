@@ -20,6 +20,8 @@ constexpr char AfterNumber = ' ';
 constexpr std::string_view KeyEnds = ".[";
 constexpr std::string_view NameKey = "name";
 constexpr std::string_view AttacksKey = "attacks";
+// The map variants hold attacks only yet (monsters design, Q-MN65).
+constexpr std::string_view MapVariantsKey = "mapVariants";
 
 const ToolWindowEntry* FindTool(const char* windowId)
 {
@@ -57,7 +59,7 @@ MonsterTool GetToolForField(std::string_view field)
     {
         return MonsterTool::Translations;
     }
-    return key == AttacksKey ? MonsterTool::Attacks : MonsterTool::Browser;
+    return key == AttacksKey || key == MapVariantsKey ? MonsterTool::Attacks : MonsterTool::Browser;
 }
 
 const ToolWindowEntry& GetToolWindow(MonsterTool tool)

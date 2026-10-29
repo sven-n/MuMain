@@ -7,6 +7,7 @@
 
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace Data::Monsters
 {
@@ -19,6 +20,18 @@ constexpr int MonsterNumberCount = MAX_MONSTER;
 constexpr int MaxMonsterNameLength = MAX_MONSTER_NAME;
 
 // What the client knows about one monster number (monsters design, D45).
+// What a monster does differently on some maps (monsters design, D62): on
+// its maps, a field the variant has replaces the entry's (Q-MN68). The
+// attacks PR brings `attacks`; the setup fields follow in their PR.
+struct MonsterMapVariant
+{
+    // The maps, by the numbers the server sends (D67): sorted, at least one.
+    std::vector<int> maps;
+    std::optional<MonsterAttacks> attacks;
+
+    bool operator==(const MonsterMapVariant&) const = default;
+};
+
 struct MonsterDefinition
 {
     int number = 0;
@@ -33,7 +46,13 @@ struct MonsterDefinition
     // Which animation each skill plays (D48); without them the code decides
     // (the generic attack 1, attack 2, attack 2 pattern).
     std::optional<MonsterAttacks> attacks;
+    // What the monster does differently on some maps; no map is in two.
+    std::vector<MonsterMapVariant> mapVariants;
 
     bool operator==(const MonsterDefinition& other) const = default;
 };
+
+// The attacks the monster plays on a map (a server map number): those of the
+// map variant that names the map and has attacks, else the entry's own.
+const std::optional<MonsterAttacks>& GetAttacksOnMap(const MonsterDefinition& monster, int map);
 } // namespace Data::Monsters

@@ -2725,6 +2725,30 @@
   <data name="Add an animation" xml:space="preserve">
     <value>Add an animation</value>
   </data>
+  <data name="Map" xml:space="preserve">
+    <value>Map</value>
+  </data>
+  <data name="All maps" xml:space="preserve">
+    <value>All maps</value>
+  </data>
+  <data name="Add a map variant" xml:space="preserve">
+    <value>Add a map variant</value>
+  </data>
+  <data name="Plays on" xml:space="preserve">
+    <value>Plays on</value>
+  </data>
+  <data name="No map yet" xml:space="preserve">
+    <value>no map yet</value>
+  </data>
+  <data name="Pick the maps of the variant; until then Save refuses the monsters." xml:space="preserve">
+    <value>Pick the maps of the variant; until then Save refuses the monsters.</value>
+  </data>
+  <data name="On its maps the variant attacks instead of the monster." xml:space="preserve">
+    <value>On its maps the variant's attacks replace the monster's.</value>
+  </data>
+  <data name="Remove the map variant" xml:space="preserve">
+    <value>Remove the map variant</value>
+  </data>
   <data name="Clear the monster skill" xml:space="preserve">
     <value>Clear the monster skill</value>
   </data>

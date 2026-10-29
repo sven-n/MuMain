@@ -149,6 +149,9 @@ TEST_CASE("Monster checks: the attacks go to Monster Attacks [editor][monsters]"
     CHECK(GetToolForField("monster 459 attacks.monsterSkills") == MonsterTool::Attacks);
     CHECK(GetToolForField("attacks") == MonsterTool::Attacks);
     CHECK(GetToolForField("monster 459 attackSpeed") == MonsterTool::Browser);
+    // The map variants hold attacks only yet (Q-MN65).
+    CHECK(GetToolForField("monster 291 mapVariants[0].maps") == MonsterTool::Attacks);
+    CHECK(GetToolForField("monster 291 mapVariants[1].attacks.otherwise") == MonsterTool::Attacks);
 }
 
 TEST_CASE("Monster checks: RunMonsters finds the name problems of the table and sends them to Monster Translations "

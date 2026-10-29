@@ -39,11 +39,13 @@ struct MonsterProblems
     const MonsterDefinition& monster;
     std::vector<ItemDataIssue>& issues;
     std::string source;
+    // The attacks' field: "monster 459 attacks", "monster 291 mapVariants[0].attacks".
+    std::string field;
 
     void Add(const std::string& message) const
     {
-        issues.push_back({ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, monster.number,
-                          "monster " + std::to_string(monster.number) + " attacks", message});
+        issues.push_back(
+            {ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, monster.number, field, message});
     }
 };
 
@@ -197,10 +199,9 @@ void CheckAnimation(int slot, int animation, const AnimationUses& uses, const Mo
     }
 }
 
-void CheckMonster(const MonsterDefinition& monster, const OpenAnimationCount& openAnimationCount,
-                  const MonsterProblems& problems)
+void CheckMonster(const MonsterDefinition& monster, const MonsterAttacks& attacks,
+                  const OpenAnimationCount& openAnimationCount, const MonsterProblems& problems)
 {
-    const MonsterAttacks& attacks = *monster.attacks;
     const int slot = Data::Monsters::FindMonsterModelReference(monster.model).value_or(-1);
     if (slot == MODEL_PLAYER)
     {
@@ -241,11 +242,26 @@ void Validate(std::vector<ItemDataIssue>& issues, const OpenAnimationCount& open
     for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
     {
         const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
-        if (monster == nullptr || !monster->attacks)
+        if (monster == nullptr)
         {
             continue;
         }
-        CheckMonster(*monster, openAnimationCount, MonsterProblems{*monster, issues, source});
+        const std::string field = "monster " + std::to_string(number) + " ";
+        if (monster->attacks)
+        {
+            CheckMonster(*monster, *monster->attacks, openAnimationCount,
+                         MonsterProblems{*monster, issues, source, field + "attacks"});
+        }
+        for (size_t index = 0; index < monster->mapVariants.size(); ++index)
+        {
+            const std::optional<MonsterAttacks>& attacks = monster->mapVariants[index].attacks;
+            if (attacks)
+            {
+                CheckMonster(*monster, *attacks, openAnimationCount,
+                             MonsterProblems{*monster, issues, source,
+                                             field + "mapVariants[" + std::to_string(index) + "].attacks"});
+            }
+        }
     }
 }
 } // namespace MuEditor::Monsters::AttackChecks

@@ -335,6 +335,25 @@ attack 1, … : each monster counts its own from its creation, and a skill
 entry that plays does not move it on. `"otherwise": "generic"` plays the
 generic pattern (below) with the count it uses.
 
+### Map variants
+
+What a monster does differently on some maps is a map variant of its entry.
+On the variant's maps its `attacks` replace the monster's, as a whole (the
+Fire Golem is Devil Square 5's boss and plays the generic pattern there):
+
+```json
+"mapVariants": [
+  { "maps": [32], "attacks": { "otherwise": "generic" } }
+]
+```
+
+`maps` are one or more maps by the server's numbers (see
+[Models](#model-fields): Devil Square 5–7 is 32). A map in two variants of a
+monster is a fatal problem, and a variant without `attacks` changes nothing
+(a warning). A monster without `attacks` of its own plays the variant's on
+its maps and the generic pattern elsewhere. Later setup fields of the
+monsters design (D62) join the variants.
+
 ### When the game plays an attack
 
 What the server sends:
@@ -515,7 +534,12 @@ item tools.
 - **Monster Attacks**: the [attacks](#attacks) of the selected monster, and
   the handlers that read them, with their maps (or that none does). **Add
   attacks** gives a monster without them attacks that play attack 1;
-  **Remove the attacks** gives it the generic pattern again. Each table
+  **Remove the attacks** gives it the generic pattern again. **Map** shows
+  **All maps** or one of the monster's [map variants](#map-variants), named
+  by their maps; **Add a map variant** adds one with the monster's attacks,
+  whose maps **Plays on** picks in the [map picker](#the-map-picker) (Save
+  refuses a variant without maps); the tables then edit the variant's
+  attacks, and **Remove the map variant** removes it. Each table
   (monster skills, player skills) has a row per skill with its animation and
   **Remove**, and a number field with **Add**; a monster skill that 0x69
   plays no attack for is marked. **Any other attack** is an animation, a

@@ -12,6 +12,7 @@
 #include "MonsterToolWindow.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/UI/Common/MapPicker.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "Core/Globals/_define.h"
 #include "Core/Globals/_enum.h"
@@ -232,14 +233,34 @@ void MuMonsterAttacksUI::RenderAttacks(MonsterDefinition& monster, int modelSlot
         ShownModel::OpenWhenShown(modelSlot);
     }
     const std::string label = StepLabel::Attacks(monster);
-    if (!monster.attacks)
+    if (m_variantMonster != monster.number)
     {
-        RenderNote(I18N::Editor::TheMonsterHasNoAttacksItPlaysTheGenericPattern);
+        m_variantMonster = monster.number;
+        m_variant = AllMaps;
+    }
+    if (m_variant >= static_cast<int>(monster.mapVariants.size()))
+    {
+        m_variant = AllMaps;
+    }
+    RenderMapRow(monster);
+    ImGui::PushID(m_variant);
+    if (m_variant != AllMaps)
+    {
+        RenderVariantMaps(monster);
+    }
+    std::optional<MonsterAttacks>& attacks = ShownAttacks(monster);
+    if (!attacks)
+    {
+        if (m_variant == AllMaps)
+        {
+            RenderNote(I18N::Editor::TheMonsterHasNoAttacksItPlaysTheGenericPattern);
+        }
         if (ImGui::Button(I18N::Editor::AddAttacks))
         {
-            monster.attacks.emplace();
+            attacks.emplace();
             m_draft.AfterChange(true, label);
         }
+        ImGui::PopID();
         return;
     }
     RenderReaders(monster, modelSlot);
@@ -261,10 +282,75 @@ void MuMonsterAttacksUI::RenderAttacks(MonsterDefinition& monster, int modelSlot
         RenderSound(monster);
     }
     ImGui::Separator();
-    if (ImGui::Button(I18N::Editor::RemoveTheAttacks))
+    // A map variant has only attacks yet: it goes as a whole.
+    if (m_variant == AllMaps && ImGui::Button(I18N::Editor::RemoveTheAttacks))
     {
-        monster.attacks.reset();
+        attacks.reset();
         m_draft.AfterChange(true, label);
+    }
+    ImGui::PopID();
+}
+
+std::optional<MonsterAttacks>& MuMonsterAttacksUI::ShownAttacks(MonsterDefinition& monster) const
+{
+    if (m_variant == AllMaps)
+    {
+        return monster.attacks;
+    }
+    return monster.mapVariants[static_cast<size_t>(m_variant)].attacks;
+}
+
+void MuMonsterAttacksUI::RenderMapRow(MonsterDefinition& monster)
+{
+    ImGui::TextUnformatted(I18N::Editor::Map);
+    ImGui::SameLine();
+    if (ImGui::RadioButton(I18N::Editor::AllMaps, m_variant == AllMaps))
+    {
+        m_variant = AllMaps;
+    }
+    for (size_t index = 0; index < monster.mapVariants.size(); ++index)
+    {
+        ImGui::SameLine();
+        const std::string name = MapPicker::Describe(monster.mapVariants[index].maps, I18N::Editor::NoMapYet) +
+                                 "##Variant" + std::to_string(index);
+        if (ImGui::RadioButton(name.c_str(), m_variant == static_cast<int>(index)))
+        {
+            m_variant = static_cast<int>(index);
+        }
+    }
+    ImGui::SameLine();
+    if (ImGui::SmallButton(I18N::Editor::AddAMapVariant))
+    {
+        // It starts as the attacks of all maps, on the maps picked next.
+        Data::Monsters::MonsterMapVariant variant;
+        variant.attacks = monster.attacks ? *monster.attacks : MonsterAttacks{};
+        monster.mapVariants.push_back(std::move(variant));
+        m_variant = static_cast<int>(monster.mapVariants.size()) - 1;
+        m_draft.AfterChange(true, StepLabel::Attacks(monster));
+    }
+}
+
+void MuMonsterAttacksUI::RenderVariantMaps(MonsterDefinition& monster)
+{
+    Data::Monsters::MonsterMapVariant& variant = monster.mapVariants[static_cast<size_t>(m_variant)];
+    RenderNote(I18N::Editor::OnItsMapsTheVariantAttacksInsteadOfTheMonster);
+    ImGui::TextUnformatted(I18N::Editor::PlaysOn);
+    ImGui::SameLine();
+    if (MapPicker::Render("VariantMaps", variant.maps, I18N::Editor::NoMapYet))
+    {
+        m_draft.AfterChange(true, StepLabel::Attacks(monster));
+    }
+    ImGui::SameLine();
+    if (ImGui::SmallButton(I18N::Editor::RemoveTheMapVariant))
+    {
+        monster.mapVariants.erase(monster.mapVariants.begin() + m_variant);
+        m_variant = AllMaps;
+        m_draft.AfterChange(true, StepLabel::Attacks(monster));
+        return;
+    }
+    if (variant.maps.empty())
+    {
+        RenderWarning(I18N::Editor::PickTheMapsOfTheVariantUntilThenSaveRefusesTheMonsters);
     }
 }
 
@@ -286,7 +372,7 @@ void MuMonsterAttacksUI::RenderReaders(const MonsterDefinition& monster, int mod
 void MuMonsterAttacksUI::RenderEntries(MonsterDefinition& monster, int modelSlot, bool monsterSkills)
 {
     std::vector<Data::Monsters::MonsterAttackEntry>& entries =
-        monsterSkills ? monster.attacks->monsterSkills : monster.attacks->skills;
+        monsterSkills ? ShownAttacks(monster)->monsterSkills : ShownAttacks(monster)->skills;
     RenderNote(monsterSkills ? I18N::Editor::MonsterSkillsNote : I18N::Editor::PlayerSkillsNote);
     const std::string label = StepLabel::Attacks(monster);
     std::optional<size_t> removed;
@@ -338,7 +424,7 @@ void MuMonsterAttacksUI::RenderEntries(MonsterDefinition& monster, int modelSlot
 
 void MuMonsterAttacksUI::RenderOtherwise(MonsterDefinition& monster, int modelSlot)
 {
-    MonsterAttacks& attacks = *monster.attacks;
+    MonsterAttacks& attacks = *ShownAttacks(monster);
     const std::string label = StepLabel::Attacks(monster);
     const bool animations = !attacks.otherwiseRandom && !attacks.otherwiseGeneric;
     const bool rotation = animations && Data::Monsters::IsRotation(attacks);
@@ -400,7 +486,7 @@ void MuMonsterAttacksUI::RenderOtherwise(MonsterDefinition& monster, int modelSl
 
 void MuMonsterAttacksUI::RenderRotation(MonsterDefinition& monster, int modelSlot)
 {
-    std::vector<int>& rotation = monster.attacks->otherwise;
+    std::vector<int>& rotation = ShownAttacks(monster)->otherwise;
     const std::string label = StepLabel::Attacks(monster);
     ImGui::Indent();
     RenderNote(I18N::Editor::PlayedInTurnCountedForEachMonsterFromItsCreation);
@@ -439,7 +525,7 @@ void MuMonsterAttacksUI::RenderRotation(MonsterDefinition& monster, int modelSlo
 
 void MuMonsterAttacksUI::RenderClearSkill(MonsterDefinition& monster)
 {
-    MonsterAttacks& attacks = *monster.attacks;
+    MonsterAttacks& attacks = *ShownAttacks(monster);
     ImGui::SetNextItemWidth(ComboWidth * 2.0f * g_MuEditorCore.GetUIScale());
     if (ImGui::BeginCombo(I18N::Editor::ClearTheMonsterSkill, ClearLabel(attacks.clearSkill)))
     {
@@ -457,10 +543,11 @@ void MuMonsterAttacksUI::RenderClearSkill(MonsterDefinition& monster)
 
 void MuMonsterAttacksUI::RenderSound(MonsterDefinition& monster)
 {
-    MonsterAttacks& attacks = *monster.attacks;
-    if (m_soundMonster != monster.number)
+    MonsterAttacks& attacks = *ShownAttacks(monster);
+    if (m_soundMonster != monster.number || m_soundVariant != m_variant)
     {
         m_soundMonster = monster.number;
+        m_soundVariant = m_variant;
         m_soundTextUnknown = false;
     }
     RenderNote(I18N::Editor::AttackSoundNote);

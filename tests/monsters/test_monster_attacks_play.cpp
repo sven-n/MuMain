@@ -87,13 +87,20 @@ public:
     // life of the scope.
     void SetAttacks(int number, const std::optional<Data::Monsters::MonsterAttacks>& attacks)
     {
+        Change(number, [&](Data::Monsters::MonsterDefinition& monster) { monster.attacks = attacks; });
+    }
+
+    // The monster list with the monster's entry changed, for the life of the
+    // scope.
+    template <typename Edit> void Change(int number, Edit edit)
+    {
         std::vector<Data::Monsters::MonsterDefinition> changed = m_monsters;
         const auto monster =
             std::find_if(changed.begin(), changed.end(),
                          [number](const Data::Monsters::MonsterDefinition& entry) { return entry.number == number; });
         REQUIRE(monster != changed.end());
         REQUIRE(monster->attacks.has_value());
-        monster->attacks = attacks;
+        edit(*monster);
         g_MonsterDatabase.Build(changed, "en");
     }
 
@@ -214,6 +221,45 @@ TEST_CASE("Monster attacks: a rotation plays in turn, counted for each monster f
     REQUIRE(&second == &first);
     CHECK(NormalAttack(second) == MONSTER01_ATTACK2);
     CHECK(NormalAttack(second) == MONSTER01_ATTACK1);
+}
+
+TEST_CASE("Monster attacks: a map variant plays on its maps, the monster's attacks elsewhere (Q-MN65) "
+          "[monsters][attacks]")
+{
+    AttackScope scope(WD_24HELLAS);
+    scope.Change(MONSTER_DEATH_CENTURION_1,
+                 [](Data::Monsters::MonsterDefinition& monster)
+                 {
+                     monster.attacks->otherwise = {MONSTER01_ATTACK1};
+                     monster.attacks->otherwiseRandom.reset();
+                     Data::Monsters::MonsterMapVariant kalima2;
+                     kalima2.maps = {WD_24HELLAS + 1};
+                     kalima2.attacks.emplace();
+                     kalima2.attacks->otherwise = {MONSTER01_ATTACK2};
+                     monster.mapVariants = {kalima2};
+                 });
+    CHARACTER& centurion = scope.Create(MONSTER_DEATH_CENTURION_1);
+    gMapManager.SetServerMap(WD_24HELLAS + 1);
+    CHECK(NormalAttack(centurion) == MONSTER01_ATTACK2);
+    gMapManager.SetServerMap(WD_24HELLAS);
+    CHECK(NormalAttack(centurion) == MONSTER01_ATTACK1);
+
+    // Devil Square 5-7 is the server's map 32, which the client loads as
+    // world 9 (D67).
+    scope.Change(MONSTER_DARK_ELF,
+                 [](Data::Monsters::MonsterDefinition& monster)
+                 {
+                     Data::Monsters::MonsterMapVariant devilSquare5To7;
+                     devilSquare5To7.maps = {32};
+                     devilSquare5To7.attacks.emplace();
+                     devilSquare5To7.attacks->otherwise = {MONSTER01_ATTACK2};
+                     monster.mapVariants = {devilSquare5To7};
+                 });
+    gMapManager.SetServerMap(32);
+    CHARACTER& elf = scope.Create(MONSTER_DARK_ELF);
+    CHECK(NormalAttack(elf) == MONSTER01_ATTACK2);
+    gMapManager.SetServerMap(WD_9DEVILSQUARE);
+    CHECK(NormalAttack(elf) == MONSTER01_ATTACK1);
 }
 
 TEST_CASE("Monster attacks: \"generic\" plays as a monster without attacks, at any count (Q-MN69) "
