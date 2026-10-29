@@ -8410,6 +8410,185 @@ void RenderEye(OBJECT* o, int Left, int Right, float fSize = 1.0f)
     VectorCopy(Position, o->EyeLeft);
 }
 
+namespace
+{
+// Returns whether o's type has its own effects, which keeps the map hooks off it.
+bool UpdateMonsterTypeEffects(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    vec3_t p, Position, Light;
+    float Luminosity;
+
+    switch (o->Type)
+    {
+    case MODEL_BULL_FIGHTER:
+    case MODEL_DEATH_COW:
+        if ((o->Type == MODEL_BULL_FIGHTER && c->Level == 1) || (o->Type == MODEL_DEATH_COW))
+            RenderEye(o, 22, 23);
+        break;
+    case MODEL_CRUST:
+        RenderEye(o, 26, 27, 2.0f);
+        break;
+    case MODEL_HYDRA:
+        RenderLight(o, BITMAP_LIGHTNING + 1, 1.f, 63, 0.f, 0.f, 20.f);
+        RenderLight(o, BITMAP_SHINY + 2, 4.f, 63, 0.f, 0.f, 20.f);
+        break;
+    case MODEL_VEPAR:
+        RenderLight(o, BITMAP_LIGHTNING + 1, 0.5f, 30, 0.f, 0.f, -5.f);
+        RenderLight(o, BITMAP_LIGHTNING + 1, 0.5f, 39, 0.f, 0.f, -5.f);
+        RenderLight(o, BITMAP_SPARK, 4.f, 30, 0.f, 0.f, -5.f);
+        RenderLight(o, BITMAP_SPARK, 4.f, 39, 0.f, 0.f, -5.f);
+        RenderLight(o, BITMAP_SHINY + 2, 2.f, 30, 0.f, 0.f, -5.f);
+        RenderLight(o, BITMAP_SHINY + 2, 2.f, 39, 0.f, 0.f, -5.f);
+        break;
+    case MODEL_LIZARD:
+        RenderEye(o, 42, 43);
+        RenderLight(o, BITMAP_SPARK, 2.f, 26, 0.f, 0.f, 0.f);
+        RenderLight(o, BITMAP_SPARK, 2.f, 31, 0.f, 0.f, 0.f);
+        RenderLight(o, BITMAP_SPARK, 2.f, 36, 0.f, 0.f, 0.f);
+        RenderLight(o, BITMAP_SPARK, 2.f, 41, 0.f, 0.f, 0.f);
+        RenderLight(o, BITMAP_SHINY + 2, 1.f, 26, 0.f, 0.f, 0.f);
+        RenderLight(o, BITMAP_SHINY + 2, 1.f, 31, 0.f, 0.f, 0.f);
+        RenderLight(o, BITMAP_SHINY + 2, 1.f, 36, 0.f, 0.f, 0.f);
+        RenderLight(o, BITMAP_SHINY + 2, 1.f, 41, 0.f, 0.f, 0.f);
+        break;
+    case MODEL_BAHAMUT:
+        RenderLight(o, BITMAP_SPARK, 4.f, 9, 0.f, 0.f, 5.f);
+        RenderLight(o, BITMAP_SHINY + 2, 3.f, 9, 0.f, 0.f, 5.f);
+        break;
+    case MODEL_MIX_NPC:
+        RenderLight(o, BITMAP_LIGHT, 1.5f, 32, 0.f, 0.f, 0.f);
+        break;
+    case MODEL_NPC_SEVINA:
+        RenderLight(o, BITMAP_LIGHT, 2.5f, 6, 0.f, 0.f, 0.f);
+        break;
+    case MODEL_NPC_DEVILSQUARE:
+    {
+        Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
+
+        float Scale = 0.3f;
+        Vector(Luminosity, Luminosity, Luminosity, Light);
+
+        Vector(3.5f, -12.f, 10.f, p);
+        b->TransformPosition(o->BoneTransform[20], p, Position, 1);
+        CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale, Light, o, (WorldTime / 50.0f));
+        CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale, Light, o, ((-WorldTime) / 50.0f));
+
+        if (rand_fps_check(30))
+        {
+            p[0] = Position[0] + rand() % 100 - 50;
+            p[1] = Position[1] + rand() % 100 - 50;
+            p[2] = Position[2] + rand() % 100 - 50;
+
+            CreateJoint(BITMAP_JOINT_ENERGY, p, Position, o->Angle, 6, NULL, 20.f);
+        }
+    }
+    break;
+    case MODEL_NPC_CASTEL_GATE:
+    {
+        vec3_t vPos, vRelative;
+        float fLumi, fScale;
+
+        fLumi = (sinf(WorldTime * 0.002f) + 2.0f) * 0.5f;
+        Vector(fLumi * 1.0f, fLumi * 0.5f, fLumi * 0.3f, Light);
+        fScale = fLumi / 2.0f;
+
+        Vector(4.0f, 3.0f, -4.0f, vRelative);
+        b->TransformPosition(o->BoneTransform[2], vRelative, vPos, true);
+
+        CreateSprite(BITMAP_LIGHT, vPos, fScale, Light, o);
+        CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, vPos, fScale, Light, o);
+
+        Vector(5.0f, 3.0f, 2.0f, vRelative);
+        b->TransformPosition(o->BoneTransform[4], vRelative, vPos, true);
+
+        CreateSprite(BITMAP_LIGHT, vPos, fScale, Light, o);
+        CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, vPos, fScale, Light, o);
+
+        if (rand_fps_check(4))
+        {
+            Vector(-20.0f, 10.0f, 0.0f, vRelative);
+            b->TransformPosition(o->BoneTransform[3], vRelative, vPos, true);
+
+            vec3_t Angle;
+            VectorCopy(o->Angle, Angle);
+            Angle[0] += 120.0f;
+            Angle[2] -= 60.0f;
+
+            Vector(1.0f, 1.0f, 1.0f, Light);
+
+            CreateParticle(BITMAP_FLAME, vPos, Angle, Light, 10, o->Scale / 2);
+        }
+    }
+    break;
+    case MODEL_SHADOW:
+        Vector(0.f, 0.f, 0.f, p);
+        Luminosity = 1.f;
+        if (c->Level == 0)
+        {
+            Vector(Luminosity * 1.f, Luminosity * 1.f, Luminosity * 1.f, Light);
+        }
+        else
+        {
+            Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.f, Light);
+            Vector(Luminosity * 0.2f, Luminosity * 0.7f, Luminosity * 0.1f, Light);
+        }
+
+        for (int i = 0; i < b->NumBones; i++)
+        {
+            if (!b->Bones[i].Dummy)
+            {
+                if ((i >= 15 && i <= 20) || (i >= 27 && i <= 32))
+                {
+                }
+                else
+                {
+                    b->TransformPosition(o->BoneTransform[i], p, Position, true);
+                    if (c->Level == 0)
+                        CreateSprite(BITMAP_SHINY + 1, Position, 2.5f, Light, o, 0.f, 1);
+                    else
+                        CreateSprite(BITMAP_MAGIC + 1, Position, 0.8f, Light, o, 0.f);
+                    if (rand_fps_check(4) && o->CurrentAction >= MONSTER01_ATTACK1 &&
+                        o->CurrentAction <= MONSTER01_ATTACK2)
+                    {
+                        CreateParticle(BITMAP_ENERGY, Position, o->Angle, Light);
+                    }
+                    // CreateParticle(BITMAP_SMOKE,Position,o->Angle,Light,1);
+                }
+            }
+        }
+        break;
+    case MODEL_SEED_MASTER:
+    {
+        float fLumi, fScale;
+        fScale = 2.0f;
+        b->TransformByObjectBone(Position, o, 39);
+
+        fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.3f + 0.4f;
+        Vector(fLumi * 0.5f, fLumi * 0.5f, fLumi * 0.5f, Light);
+        CreateSprite(BITMAP_FLARE, Position, fScale, Light, o);
+    }
+    break;
+    case MODEL_SEED_INVESTIGATOR:
+    {
+        float fLumi, fScale;
+        fScale = 1.0f;
+        for (int i = 69; i <= 70; ++i)
+        {
+            b->TransformByObjectBone(Position, o, i);
+
+            fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.3f + 0.4f;
+            Vector(fLumi * 0.5f, fLumi * 0.5f, fLumi * 0.5f, Light);
+            CreateSprite(BITMAP_FLARE_BLUE, Position, fScale, Light, o);
+        }
+    }
+    break;
+    default:
+        return false;
+    }
+    return true;
+}
+} // namespace
+
 void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 {
     if (g_isCharacterBuff(o, eBuff_CrywolfNPCHide))
@@ -11146,178 +11325,22 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             }
         }
         break;
-    case MODEL_BULL_FIGHTER:
-    case MODEL_DEATH_COW:
-        if ((o->Type == MODEL_BULL_FIGHTER && c->Level == 1) || (o->Type == MODEL_DEATH_COW))
-            RenderEye(o, 22, 23);
-        break;
-    case MODEL_CRUST:
-        RenderEye(o, 26, 27, 2.0f);
-        break;
-    case MODEL_HYDRA:
-        RenderLight(o, BITMAP_LIGHTNING + 1, 1.f, 63, 0.f, 0.f, 20.f);
-        RenderLight(o, BITMAP_SHINY + 2, 4.f, 63, 0.f, 0.f, 20.f);
-        break;
-    case MODEL_VEPAR:
-        RenderLight(o, BITMAP_LIGHTNING + 1, 0.5f, 30, 0.f, 0.f, -5.f);
-        RenderLight(o, BITMAP_LIGHTNING + 1, 0.5f, 39, 0.f, 0.f, -5.f);
-        RenderLight(o, BITMAP_SPARK, 4.f, 30, 0.f, 0.f, -5.f);
-        RenderLight(o, BITMAP_SPARK, 4.f, 39, 0.f, 0.f, -5.f);
-        RenderLight(o, BITMAP_SHINY + 2, 2.f, 30, 0.f, 0.f, -5.f);
-        RenderLight(o, BITMAP_SHINY + 2, 2.f, 39, 0.f, 0.f, -5.f);
-        break;
-    case MODEL_LIZARD:
-        RenderEye(o, 42, 43);
-        RenderLight(o, BITMAP_SPARK, 2.f, 26, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SPARK, 2.f, 31, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SPARK, 2.f, 36, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SPARK, 2.f, 41, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SHINY + 2, 1.f, 26, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SHINY + 2, 1.f, 31, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SHINY + 2, 1.f, 36, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SHINY + 2, 1.f, 41, 0.f, 0.f, 0.f);
-        break;
-    case MODEL_BAHAMUT:
-        RenderLight(o, BITMAP_SPARK, 4.f, 9, 0.f, 0.f, 5.f);
-        RenderLight(o, BITMAP_SHINY + 2, 3.f, 9, 0.f, 0.f, 5.f);
-        break;
-    case MODEL_MIX_NPC:
-        RenderLight(o, BITMAP_LIGHT, 1.5f, 32, 0.f, 0.f, 0.f);
-        break;
-    case MODEL_NPC_SEVINA:
-        RenderLight(o, BITMAP_LIGHT, 2.5f, 6, 0.f, 0.f, 0.f);
-        break;
-    case MODEL_NPC_DEVILSQUARE:
-    {
-        Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
-
-        float Scale = 0.3f;
-        Vector(Luminosity, Luminosity, Luminosity, Light);
-
-        Vector(3.5f, -12.f, 10.f, p);
-        b->TransformPosition(o->BoneTransform[20], p, Position, 1);
-        CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale, Light, o, (WorldTime / 50.0f));
-        CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale, Light, o, ((-WorldTime) / 50.0f));
-
-        if (rand_fps_check(30))
-        {
-            p[0] = Position[0] + rand() % 100 - 50;
-            p[1] = Position[1] + rand() % 100 - 50;
-            p[2] = Position[2] + rand() % 100 - 50;
-
-            CreateJoint(BITMAP_JOINT_ENERGY, p, Position, o->Angle, 6, NULL, 20.f);
-        }
-    }
-    break;
-    case MODEL_NPC_CASTEL_GATE:
-    {
-        vec3_t vPos, vRelative;
-        float fLumi, fScale;
-
-        fLumi = (sinf(WorldTime * 0.002f) + 2.0f) * 0.5f;
-        Vector(fLumi * 1.0f, fLumi * 0.5f, fLumi * 0.3f, Light);
-        fScale = fLumi / 2.0f;
-
-        Vector(4.0f, 3.0f, -4.0f, vRelative);
-        b->TransformPosition(o->BoneTransform[2], vRelative, vPos, true);
-
-        CreateSprite(BITMAP_LIGHT, vPos, fScale, Light, o);
-        CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, vPos, fScale, Light, o);
-
-        Vector(5.0f, 3.0f, 2.0f, vRelative);
-        b->TransformPosition(o->BoneTransform[4], vRelative, vPos, true);
-
-        CreateSprite(BITMAP_LIGHT, vPos, fScale, Light, o);
-        CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, vPos, fScale, Light, o);
-
-        if (rand_fps_check(4))
-        {
-            Vector(-20.0f, 10.0f, 0.0f, vRelative);
-            b->TransformPosition(
-                o->BoneTransform[3], vRelative, vPos, true);
-
-            vec3_t Angle;
-            VectorCopy(o->Angle, Angle);
-            Angle[0] += 120.0f;
-            Angle[2] -= 60.0f;
-
-            Vector(1.0f, 1.0f, 1.0f, Light);
-
-            CreateParticle(
-                BITMAP_FLAME, vPos, Angle, Light, 10, o->Scale / 2);
-        }
-    }
-    break;
-    case MODEL_SHADOW:
-        Vector(0.f, 0.f, 0.f, p);
-        Luminosity = 1.f;
-        if (c->Level == 0)
-        {
-            Vector(Luminosity * 1.f, Luminosity * 1.f, Luminosity * 1.f, Light);
-        }
-        else
-        {
-            Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.f, Light);
-            Vector(Luminosity * 0.2f, Luminosity * 0.7f, Luminosity * 0.1f, Light);
-        }
-
-        for (int i = 0; i < b->NumBones; i++)
-        {
-            if (!b->Bones[i].Dummy)
-            {
-                if ((i >= 15 && i <= 20) || (i >= 27 && i <= 32))
-                {
-                }
-                else
-                {
-                    b->TransformPosition(o->BoneTransform[i], p, Position, true);
-                    if (c->Level == 0)
-                        CreateSprite(BITMAP_SHINY + 1, Position, 2.5f, Light, o, 0.f, 1);
-                    else
-                        CreateSprite(BITMAP_MAGIC + 1, Position, 0.8f, Light, o, 0.f);
-                    if (rand_fps_check(4) && o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2)
-                    {
-                        CreateParticle(BITMAP_ENERGY, Position, o->Angle, Light);
-                    }
-                    //CreateParticle(BITMAP_SMOKE,Position,o->Angle,Light,1);
-                }
-            }
-        }
-        break;
-    case MODEL_SEED_MASTER:
-    {
-        float fLumi, fScale;
-        fScale = 2.0f;
-        b->TransformByObjectBone(Position, o, 39);
-
-        fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.3f + 0.4f;
-        Vector(fLumi * 0.5f, fLumi * 0.5f, fLumi * 0.5f, Light);
-        CreateSprite(BITMAP_FLARE, Position, fScale, Light, o);
-    }
-    break;
-    case MODEL_SEED_INVESTIGATOR:
-    {
-        float fLumi, fScale;
-        fScale = 1.0f;
-        for (int i = 69; i <= 70; ++i)
-        {
-            b->TransformByObjectBone(Position, o, i);
-
-            fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.3f + 0.4f;
-            Vector(fLumi * 0.5f, fLumi * 0.5f, fLumi * 0.5f, Light);
-            CreateSprite(BITMAP_FLARE_BLUE, Position, fScale, Light, o);
-        }
-    }
-    break;
     default:
     {
-        if (battleCastle::RenderBattleCastleMonsterVisual(c, o, b)) break;
-        if (M31HuntingGround::RenderHuntingGroundMonsterVisual(c, o, b)) break;
-        if (M34CryingWolf2nd::RenderCryingWolf2ndMonsterVisual(c, o, b)) break;
-        if (M34CryWolf1st::RenderCryWolf1stMonsterVisual(c, o, b)) break;
-        if (M37Kanturu1st::RenderKanturu1stMonsterVisual(c, o, b)) break;
-        if (M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(c, o, b)) break;
-        if (TheMapProcess().RenderMonsterVisual(c, o, b) == true) break;
+        if (battleCastle::RenderBattleCastleMonsterVisual(c, o, b))
+            break;
+        if (M31HuntingGround::RenderHuntingGroundMonsterVisual(c, o, b))
+            break;
+        if (M34CryingWolf2nd::RenderCryingWolf2ndMonsterVisual(c, o, b))
+            break;
+        if (M34CryWolf1st::RenderCryWolf1stMonsterVisual(c, o, b))
+            break;
+        if (M37Kanturu1st::RenderKanturu1stMonsterVisual(c, o, b))
+            break;
+        if (M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(c, o, b))
+            break;
+        if (TheMapProcess().RenderMonsterVisual(c, o, b) == true)
+            break;
     }
     }
 
@@ -11392,6 +11415,8 @@ void UpdateCharacterEffects()
         b->BodyScale = o->Scale;
         b->CurrentAction = o->CurrentAction;
         VectorCopy(o->Position, b->BodyOrigin);
+        if (UpdateMonsterTypeEffects(c, o, b))
+            continue;
         // Same order and stop-on-claim as RenderCharacter's chain.
         if (UpdateHellasMonsterEffects(c, o, b))
             continue;
