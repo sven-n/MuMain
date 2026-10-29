@@ -20,5 +20,8 @@ namespace UI::RmlBridge
 // Fits every opted-in element of the context's visible documents to its box. Call after the
 // context's Update() (layout done); an element is measured again only when its text, box width,
 // inherited font size changes (also typography for text-fit). A changed document is laid out again before drawing.
+// text-fit elements are followed from their creation, so the pass does not walk every document: the
+// class must be set in markup or before the element's first frame. native-fit walks the documents
+// of themes declaring NativeTextSize.
 void FitNativeTextToBoxes(Rml::Context* context);
 } // namespace UI::RmlBridge

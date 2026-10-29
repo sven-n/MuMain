@@ -166,3 +166,21 @@ TEST_CASE("text-fit measures collapsed spaces and nested inline text as RmlUi la
     CHECK(fittedSize("  MMMMMMMMMM     MMMMMMMMMM  ") == doctest::Approx(plain));
     CHECK(fittedSize("MMMMMMMMMM <span>MMMMMMMMMM</span>") == doctest::Approx(plain));
 }
+
+TEST_CASE("text-fit fits an element created after the first pass [ui][text-fit]")
+{
+    TextFitFixture fixture;
+    auto* document = fixture.LoadText("modern", "text-fit", "Liberation Sans", "A");
+    UI::RmlBridge::FitNativeTextToBoxes(fixture.context);
+
+    Rml::ElementPtr added = document->CreateElement("span");
+    added->SetId("added");
+    added->SetClass("text-fit", true);
+    added->AppendChild(document->CreateTextNode("AnExceptionallyLongMapName"));
+    Rml::Element* addedElement = document->GetElementById("box")->AppendChild(std::move(added));
+    fixture.Refresh();
+    UI::RmlBridge::FitNativeTextToBoxes(fixture.context);
+
+    CHECK(addedElement->GetComputedValues().font_size() < 40.f);
+    CHECK(TextWidth(addedElement) <= addedElement->GetBox().GetSize(Rml::BoxArea::Content).x + 1.f);
+}

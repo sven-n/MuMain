@@ -10,6 +10,7 @@
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/ElementText.h>
 #include <RmlUi/Core/FontEngineInterface.h>
+#include <RmlUi/Core/Plugin.h>
 #include <RmlUi/Core/Property.h>
 #include <RmlUi/Core/TextShapingContext.h>
 #include <RmlUi/Core/Utilities.h>
@@ -19,6 +20,8 @@
 #include <optional>
 #include <string_view>
 #include <unordered_map>
+#include <unordered_set>
+#include <vector>
 
 namespace UI::RmlBridge
 {
@@ -295,24 +298,103 @@ bool FitTextElement(Rml::Element* element)
     return scale != inputs->previousScale;
 }
 
-// Returns whether the element's font-size changed.
-bool FitElement(Rml::Element* element, bool textFit)
-{
-    return textFit ? FitTextElement(element) : FitNativeElement(element);
-}
-
-// Returns whether any font-size under `element` changed; skips hidden subtrees.
-bool FitSubtree(Rml::Element* element, bool allowNativeFit)
+// Returns whether any native-fit font-size under `element` changed; skips hidden subtrees. A
+// text-fit element is fitted from the tracker instead, also when it carries both classes.
+bool FitNativeSubtree(Rml::Element* element)
 {
     if (element->GetComputedValues().display() == Rml::Style::Display::None)
         return false;
 
-    const bool textFit = element->IsClassSet(kTextFitClass);
-    const bool nativeFit = allowNativeFit && element->IsClassSet(kNativeFitClass);
-    bool changed = (textFit || nativeFit) && FitElement(element, textFit);
+    bool changed =
+        element->IsClassSet(kNativeFitClass) && !element->IsClassSet(kTextFitClass) && FitNativeElement(element);
     for (int i = 0; i < element->GetNumChildren(); ++i)
-        changed |= FitSubtree(element->GetChild(i), allowNativeFit);
+        changed |= FitNativeSubtree(element->GetChild(i));
     return changed;
+}
+
+void CollectTextFit(Rml::Element* element, std::unordered_set<Rml::Element*>& found)
+{
+    if (element->IsClassSet(kTextFitClass))
+        found.insert(element);
+    for (int i = 0; i < element->GetNumChildren(); ++i)
+        CollectTextFit(element->GetChild(i), found);
+}
+
+// Keeps the text-fit elements, so the per-frame pass visits them and not every element of every
+// document. RmlUi sets an element's classes after creating it, so a new element waits until the
+// next pass checks its class; a class added later than its first frame is not seen.
+class TextFitTracker final : public Rml::Plugin
+{
+public:
+    // The current text-fit elements. The first call after Rml::Initialise() walks the existing
+    // documents once and starts following element creation.
+    std::vector<Rml::Element*> Elements()
+    {
+        if (!m_Following)
+            Follow();
+        for (const auto& created : m_Created)
+        {
+            if (created && created->IsClassSet(kTextFitClass))
+                m_TextFit.insert(created.get());
+        }
+        m_Created.clear();
+        return {m_TextFit.begin(), m_TextFit.end()};
+    }
+
+    int GetEventClasses() override
+    {
+        return EVT_BASIC | EVT_ELEMENT;
+    }
+    void OnElementCreate(Rml::Element* element) override
+    {
+        m_Created.push_back(element->GetObserverPtr());
+    }
+    void OnElementDestroy(Rml::Element* element) override
+    {
+        m_TextFit.erase(element);
+    }
+    void OnShutdown() override
+    {
+        m_Created.clear();
+        m_TextFit.clear();
+        m_Following = false;
+    }
+
+private:
+    void Follow()
+    {
+        m_Following = true;
+        m_TextFit.clear();
+        for (int i = 0; i < Rml::GetNumContexts(); ++i)
+        {
+            Rml::Context* context = Rml::GetContext(i);
+            for (int j = 0; j < context->GetNumDocuments(); ++j)
+                CollectTextFit(context->GetDocument(j), m_TextFit);
+        }
+        Rml::RegisterPlugin(this);
+    }
+
+    std::vector<Rml::ObserverPtr<Rml::Element>> m_Created;
+    std::unordered_set<Rml::Element*> m_TextFit;
+    bool m_Following = false;
+};
+
+// Never destroyed: Rml::Shutdown() may still notify it at exit.
+TextFitTracker& Tracker()
+{
+    static auto* tracker = new TextFitTracker();
+    return *tracker;
+}
+
+// Whether the element and all its ancestors take part in layout.
+bool IsDisplayed(Rml::Element* element)
+{
+    for (; element != nullptr; element = element->GetParentNode())
+    {
+        if (element->GetComputedValues().display() == Rml::Style::Display::None)
+            return false;
+    }
+    return true;
 }
 
 void ForgetRemovedElements()
@@ -326,14 +408,28 @@ void FitNativeTextToBoxes(Rml::Context* context)
     if (!context)
         return;
 
-    const bool allowNativeFit = ThemeUsesNativeTextSize();
-
-    for (int i = 0; i < context->GetNumDocuments(); ++i)
+    std::unordered_set<Rml::ElementDocument*> changed;
+    for (Rml::Element* element : Tracker().Elements())
     {
-        Rml::ElementDocument* document = context->GetDocument(i);
-        if (document->IsVisible() && FitSubtree(document, allowNativeFit))
-            document->UpdateDocument();
+        Rml::ElementDocument* document = element->GetOwnerDocument();
+        if (element->GetContext() != context || document == nullptr || !document->IsVisible() ||
+            !element->IsClassSet(kTextFitClass) || !IsDisplayed(element))
+            continue;
+        if (FitTextElement(element))
+            changed.insert(document);
     }
+
+    if (ThemeUsesNativeTextSize())
+    {
+        for (int i = 0; i < context->GetNumDocuments(); ++i)
+        {
+            Rml::ElementDocument* document = context->GetDocument(i);
+            if (document->IsVisible() && FitNativeSubtree(document))
+                changed.insert(document);
+        }
+    }
+    for (Rml::ElementDocument* document : changed)
+        document->UpdateDocument();
     ForgetRemovedElements();
 }
 } // namespace UI::RmlBridge
