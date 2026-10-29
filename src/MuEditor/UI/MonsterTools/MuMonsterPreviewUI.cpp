@@ -303,7 +303,14 @@ void MuMonsterPreviewUI::Advance(int slot, const MonsterModelDefinition& values)
     m_frame += speed * FPS_ANIMATION_FACTOR;
     if (ModelValues::HoldsLastFrame(values, slot, m_animation))
     {
+        // BMD::PlayAnimation ends a held animation when it reaches its last
+        // frame, so an attack that holds it ends there too.
+        const bool ended = m_frame >= static_cast<float>(action.NumAnimationKeys);
         m_frame = std::min(m_frame, static_cast<float>(action.NumAnimationKeys) - HeldFrameMargin);
+        if (m_once && ended)
+        {
+            StandAfterAttack(slot);
+        }
         return;
     }
     const int played = PlayedFrames(action);
@@ -311,15 +318,20 @@ void MuMonsterPreviewUI::Advance(int slot, const MonsterModelDefinition& values)
     {
         if (m_once)
         {
-            // SetPlayerStop after the attack.
-            m_once = false;
-            m_animation = MONSTER01_STOP1;
-            Restart(slot);
+            StandAfterAttack(slot);
             return;
         }
         m_frame = std::fmod(m_frame, static_cast<float>(played));
         Restart(slot);
     }
+}
+
+// SetPlayerStop after the attack Play started.
+void MuMonsterPreviewUI::StandAfterAttack(int slot)
+{
+    m_once = false;
+    m_animation = MONSTER01_STOP1;
+    Restart(slot);
 }
 
 void MuMonsterPreviewUI::PlayAttack(int slot, int animation, std::optional<int> sound)

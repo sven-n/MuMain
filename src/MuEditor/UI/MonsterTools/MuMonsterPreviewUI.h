@@ -51,6 +51,11 @@ public:
         return m_playing;
     }
 
+    // One frame of the animation shown, as Render plays it while it plays:
+    // a held animation stops at its last frame, others start again, and an
+    // attack Play started ends with the model standing.
+    void Advance(int slot, const Data::Monsters::MonsterModelDefinition& values);
+
 private:
     MuMonsterPreviewUI() = default;
 
@@ -58,7 +63,7 @@ private:
     void RenderControls(int slot, const Data::Monsters::MonsterModelDefinition& values);
     void RenderFrameSlider(int slot, int keys);
     void RenderView(int slot, const Data::Monsters::MonsterModelDefinition& values);
-    void Advance(int slot, const Data::Monsters::MonsterModelDefinition& values);
+    void StandAfterAttack(int slot);
     void Restart(int slot);
     float SpeedFactor(int slot) const;
 

@@ -229,6 +229,39 @@ TEST_CASE("Monster Preview: Play plays the model's sound events or its slot soun
     CHECK((bull[0].id == SOUND_MONSTER + Models[MODEL_BULL_FIGHTER].Sounds[2] ||
            bull[0].id == SOUND_MONSTER + Models[MODEL_BULL_FIGHTER].Sounds[3]));
 }
+
+// An attack Play started stands the model when it ends, as SetPlayerStop
+// after an attack: also one that holds its last frame, which the game ends
+// there (BMD::PlayAnimation).
+TEST_CASE("Monster Preview: an attack Play started ends with the model standing, also one that holds its last "
+          "frame [monsters][editor]")
+{
+    SoundScope scope(WD_0LORENCIA);
+    MonsterRecorder::LoadScope& load = scope.Creation().Load();
+    Data::Monsters::ModelLoader::Open(MODEL_RAYMOND);
+    REQUIRE(Data::Monsters::ModelLoader::IsOpen(MODEL_RAYMOND));
+    const Data::Monsters::MonsterModelDefinition* model = g_MonsterModelDatabase.Find(MODEL_RAYMOND);
+    REQUIRE(model != nullptr);
+    // More frames than any attack has at its speed, each a reference frame.
+    constexpr int MaxFrames = 10000;
+    const float frameFactor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 1.0f;
+    for (const bool held : {false, true})
+    {
+        INFO("holds its last frame: " << held);
+        Data::Monsters::MonsterModelDefinition values = *model;
+        values.load.holdLastFrame = held ? std::vector<int>{MONSTER01_ATTACK1} : std::vector<int>{};
+        g_MuMonsterPreviewUI.PlayAttack(MODEL_RAYMOND, MONSTER01_ATTACK1, std::nullopt);
+        REQUIRE(g_MuMonsterPreviewUI.GetAnimation() == MONSTER01_ATTACK1);
+        for (int frame = 0; frame < MaxFrames && g_MuMonsterPreviewUI.GetAnimation() == MONSTER01_ATTACK1; ++frame)
+        {
+            g_MuMonsterPreviewUI.Advance(MODEL_RAYMOND, values);
+        }
+        CHECK(g_MuMonsterPreviewUI.GetAnimation() == MONSTER01_STOP1);
+    }
+    FPS_ANIMATION_FACTOR = frameFactor;
+    load.TakePlayedSounds();
+}
 #endif // _EDITOR
 
 TEST_CASE("Monster sounds: a model without sound events plays none of them [monsters][sounds]")
