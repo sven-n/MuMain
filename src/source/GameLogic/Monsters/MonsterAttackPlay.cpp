@@ -52,19 +52,7 @@ bool Play(CHARACTER& character, OBJECT& object)
     }
     const Data::Monsters::MonsterAttackChoice choice = Data::Monsters::ChooseMonsterAttack(
         *attacks, character.MonsterSkill, character.Skill, character.AttackRotation);
-    int animation = choice.animation;
-    if (choice.random)
-    {
-        animation = DrawAttack(*choice.random);
-    }
-    else if (choice.generic)
-    {
-        animation = NextGenericAttack(character);
-    }
-    if (choice.advancesRotation)
-    {
-        character.AttackRotation = (character.AttackRotation + 1) % static_cast<int>(attacks->otherwise.size());
-    }
+    const int animation = ResolveAttackAnimation(*attacks, choice, character.SwordCount, character.AttackRotation);
     if (animation != Data::Monsters::NoAttackAnimation)
     {
         SetAction(&object, animation);
@@ -129,6 +117,25 @@ int NextGenericAttack(std::uint8_t& swordCount)
 {
     const int animation = swordCount % 3 == 0 ? MONSTER01_ATTACK1 : MONSTER01_ATTACK2;
     swordCount++;
+    return animation;
+}
+
+int ResolveAttackAnimation(const Data::Monsters::MonsterAttacks& attacks,
+                           const Data::Monsters::MonsterAttackChoice& choice, std::uint8_t& swordCount, int& rotation)
+{
+    int animation = choice.animation;
+    if (choice.random)
+    {
+        animation = DrawAttack(*choice.random);
+    }
+    else if (choice.generic)
+    {
+        animation = NextGenericAttack(swordCount);
+    }
+    if (choice.advancesRotation)
+    {
+        rotation = (rotation + 1) % static_cast<int>(attacks.otherwise.size());
+    }
     return animation;
 }
 
