@@ -125,6 +125,8 @@ void CreateJointFpsChecked(int Type, vec3_t Position, vec3_t TargetPosition, vec
                            OBJECT* Target = NULL, float Scale = 10.f, short PK = -1, WORD SkillIndex = 0,
                            WORD SkillSerialNum = 0, int iChaIndex = -1, const float* vColor = NULL,
                            short int sTargetIndex = -1);
+// Whether the character carries its weapons on its back instead of in hand.
+bool AreWeaponsOnBack(const CHARACTER* c, const OBJECT* o);
 bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate);
 bool IsBackItem(CHARACTER* c, int iType);
 

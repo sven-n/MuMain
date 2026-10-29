@@ -9135,24 +9135,10 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             }
             else
             {
-                c->Object.Alpha -= 0.07f * FPS_ANIMATION_FACTOR;
                 float fAlpha = c->Object.Alpha;
                 if (fAlpha < 0) fAlpha = 0;
 
                 Vector(1.0f * fAlpha, 0.3f * fAlpha, 0.1f * fAlpha, c->Light);
-
-                // 			vec3_t vLight;
-                vec3_t vPos;
-                BMD* b = &Models[o->Type];
-
-                //Vector(0.5f, 0.5f, 0.5f, vLight);
-
-                int iNumBones = Models[o->Type].NumBones;
-                if (rand_fps_check(1))
-                {
-                    Models[o->Type].TransformByObjectBone(vPos, o, rand() % iNumBones);
-                    CreateParticle(BITMAP_TWINTAIL_WATER, vPos, o->Angle, c->Light, 2, 0.5f);
-                }
             }
         c->Object.BlendMesh = -1;
 
@@ -9289,22 +9275,12 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
         if (!g_isCharacterBuff(o, eBuff_Cloaking))
         {
-            vec3_t vLight, vPos;
-            Vector(0.4f, 0.6f, 0.8f, vLight);
-            VectorCopy(o->Position, vPos);
-            vPos[2] += 100.f;
-            CreateSprite(BITMAP_LIGHT, vPos, 6.0f, vLight, o, 0.5f);
-
-            float fLumi;
-            fLumi = sinf(WorldTime * 0.05f) * 0.4f + 0.9f;
-            Vector(fLumi * 0.3f, fLumi * 0.5f, fLumi * 0.8f, vLight);
-            CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, o);
-
+            vec3_t vLight;
             Vector(0.3f, 0.2f, 1.f, vLight);
             RenderAurora(BITMAP_MAGIC + 1, RENDER_BRIGHT, o->Position[0], o->Position[1], 2.5f, 2.5f, vLight);
 
             Vector(1.0f, 1.0f, 1.f, vLight);
-            fLumi = sinf(WorldTime * 0.0015f) * 0.3f + 0.5f;
+            const float fLumi = sinf(WorldTime * 0.0015f) * 0.3f + 0.5f;
             EnableAlphaBlend();
             Vector(fLumi * vLight[0], fLumi * vLight[1], fLumi * vLight[2], vLight);
             RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.5f, 1.5f, vLight, WorldTime * 0.01f);
@@ -9877,47 +9853,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
     if (!Bind)
     {
-        if (!g_isCharacterBuff(o, eBuff_Cloaking))
-        {
-            constexpr float CritDamageEffectInterval = 1200.0f;
-            if (g_isCharacterBuff(o, eBuff_AddCriticalDamage) && o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && (c->LastCritDamageEffect < WorldTime - CritDamageEffectInterval))
-            {
-                c->LastCritDamageEffect = WorldTime;
-                bool    renderSkillWave = (rand() % 20) ? true : false;
-                short   weaponType = -1;
-                Vector(0.f, 0.f, 0.f, p);
-                Vector(1.f, 0.6f, 0.3f, Light);
-                if (c->Weapon[0].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS)//&& ( c->Weapon[0].Type<MODEL_SHIELD || c->Weapon[0].Type>=MODEL_SHIELD+MAX_ITEM_INDEX ) )
-                {
-                    b->TransformPosition(o->BoneTransform[c->Weapon[0].LinkBone], p, Position, true);
-                    if (c->Weapon[0].Type >= MODEL_BOW && c->Weapon[0].Type < MODEL_BOW + MAX_ITEM_INDEX)
-                    {
-                        weaponType = 1;
-                    }
-                    CreateEffect(BITMAP_FLARE_FORCE, Position, o->Angle, o->Light, 1, o, weaponType, c->Weapon[0].LinkBone);
-                    if (renderSkillWave == false)
-                    {
-                        CreateEffect(MODEL_DARKLORD_SKILL, Position, o->Angle, Light, 0);
-                    }
-                }
-                if (c->Weapon[1].Type != -1 && c->Weapon[1].Type != MODEL_BOLT && (c->Weapon[1].Type < MODEL_SHIELD || c->Weapon[1].Type >= MODEL_SHIELD + MAX_ITEM_INDEX))
-                {
-                    b->TransformPosition(o->BoneTransform[c->Weapon[1].LinkBone], p, Position, true);
-                    if (c->Weapon[1].Type >= MODEL_BOW && c->Weapon[1].Type < MODEL_BOW + MAX_ITEM_INDEX)
-                    {
-                        weaponType = 1;
-                    }
-                    CreateEffect(BITMAP_FLARE_FORCE, Position, o->Angle, o->Light, 1, o, weaponType, c->Weapon[1].LinkBone);
-                    if (renderSkillWave == false)
-                    {
-                        CreateEffect(MODEL_DARKLORD_SKILL, Position, o->Angle, Light, 1);
-                    }
-                }
-
-                PlayBuffer(SOUND_CRITICAL, o);
-            }
-        }
-
         c->PostMoveProcess_Process();
 
         for (int i = 0; i < 2; i++)
@@ -10370,13 +10305,101 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     }
 
     giPetManager::RenderPet(c);
+}
 
-    if (gCharacterManager.GetBaseClass(c->Class) == CLASS_SUMMONER)
+namespace
+{
+// The effects RenderCharacter used to spawn while drawing these characters' bodies.
+void UpdateCharacterBodyEffects(CHARACTER* c, OBJECT* o)
+{
+    // The Doppelganger's death fade, drawn with the alpha it leaves.
+    if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM &&
+        o->Type != MODEL_DARK_PHEONIX_SHIELD && gMapManager.WorldActive != WD_65DOPPLEGANGER1 &&
+        o->CurrentAction == PLAYER_DIE1)
     {
-        PART_t* w = &c->Weapon[1];
-        g_SummonSystem.MoveEquipEffect(c, w->Type, w->Level, w->ExcellentFlags);
+        c->Object.Alpha -= 0.07f * FPS_ANIMATION_FACTOR;
+        const float fAlpha = c->Object.Alpha < 0 ? 0.f : c->Object.Alpha;
+        vec3_t vLight, vPos;
+        Vector(1.0f * fAlpha, 0.3f * fAlpha, 0.1f * fAlpha, vLight);
+
+        int iNumBones = Models[o->Type].NumBones;
+        if (rand_fps_check(1))
+        {
+            Models[o->Type].TransformByObjectBone(vPos, o, rand() % iNumBones);
+            CreateParticle(BITMAP_TWINTAIL_WATER, vPos, o->Angle, vLight, 2, 0.5f);
+        }
+    }
+
+    if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_GM_CHARACTER &&
+        !g_isCharacterBuff(o, eBuff_Cloaking))
+    {
+        vec3_t vLight, vPos;
+        Vector(0.4f, 0.6f, 0.8f, vLight);
+        VectorCopy(o->Position, vPos);
+        vPos[2] += 100.f;
+        CreateSprite(BITMAP_LIGHT, vPos, 6.0f, vLight, o, 0.5f);
+
+        float fLumi;
+        fLumi = sinf(WorldTime * 0.05f) * 0.4f + 0.9f;
+        Vector(fLumi * 0.3f, fLumi * 0.5f, fLumi * 0.8f, vLight);
+        CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, o);
     }
 }
+} // namespace
+
+namespace
+{
+// The crit damage burst at the weapons in hand, which RenderCharacter used to spawn while drawing them.
+void UpdateHeldWeaponEffects(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    if (AreWeaponsOnBack(c, o))
+        return;
+
+    vec3_t p, Position, Light;
+    if (!g_isCharacterBuff(o, eBuff_Cloaking))
+    {
+        constexpr float CritDamageEffectInterval = 1200.0f;
+        if (g_isCharacterBuff(o, eBuff_AddCriticalDamage) && o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER &&
+            (c->LastCritDamageEffect < WorldTime - CritDamageEffectInterval))
+        {
+            c->LastCritDamageEffect = WorldTime;
+            bool renderSkillWave = (rand() % 20) ? true : false;
+            short weaponType = -1;
+            Vector(0.f, 0.f, 0.f, p);
+            Vector(1.f, 0.6f, 0.3f, Light);
+            if (c->Weapon[0].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS)
+            {
+                b->TransformPosition(o->BoneTransform[c->Weapon[0].LinkBone], p, Position, true);
+                if (c->Weapon[0].Type >= MODEL_BOW && c->Weapon[0].Type < MODEL_BOW + MAX_ITEM_INDEX)
+                {
+                    weaponType = 1;
+                }
+                CreateEffect(BITMAP_FLARE_FORCE, Position, o->Angle, o->Light, 1, o, weaponType, c->Weapon[0].LinkBone);
+                if (renderSkillWave == false)
+                {
+                    CreateEffect(MODEL_DARKLORD_SKILL, Position, o->Angle, Light, 0);
+                }
+            }
+            if (c->Weapon[1].Type != -1 && c->Weapon[1].Type != MODEL_BOLT &&
+                (c->Weapon[1].Type < MODEL_SHIELD || c->Weapon[1].Type >= MODEL_SHIELD + MAX_ITEM_INDEX))
+            {
+                b->TransformPosition(o->BoneTransform[c->Weapon[1].LinkBone], p, Position, true);
+                if (c->Weapon[1].Type >= MODEL_BOW && c->Weapon[1].Type < MODEL_BOW + MAX_ITEM_INDEX)
+                {
+                    weaponType = 1;
+                }
+                CreateEffect(BITMAP_FLARE_FORCE, Position, o->Angle, o->Light, 1, o, weaponType, c->Weapon[1].LinkBone);
+                if (renderSkillWave == false)
+                {
+                    CreateEffect(MODEL_DARKLORD_SKILL, Position, o->Angle, Light, 1);
+                }
+            }
+
+            PlayBuffer(SOUND_CRITICAL, o);
+        }
+    }
+}
+} // namespace
 
 namespace
 {
@@ -11472,6 +11495,13 @@ void UpdateDrawnCharacterEffects()
         b->CurrentAction = o->CurrentAction;
         VectorCopy(o->Position, b->BodyOrigin);
         UpdateMonsterBodyEffects(c, o, b);
+        UpdateCharacterBodyEffects(c, o);
+        UpdateHeldWeaponEffects(c, o, b);
+        if (gCharacterManager.GetBaseClass(c->Class) == CLASS_SUMMONER)
+        {
+            PART_t* w = &c->Weapon[1];
+            g_SummonSystem.MoveEquipEffect(c, w->Type, w->Level, w->ExcellentFlags);
+        }
         UpdateEventCharacterEffects(o);
         if (UpdateCharacterTypeEffects(c, o, b))
             continue;
@@ -14842,7 +14872,7 @@ bool IsBackItem(CHARACTER* c, int iType)
     return false;
 }
 
-bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
+bool AreWeaponsOnBack(const CHARACTER* c, const OBJECT* o)
 {
     bool bBindBack = false;
 
@@ -14869,6 +14899,12 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
     {
         bBindBack = false;
     }
+    return bBindBack;
+}
+
+bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
+{
+    const bool bBindBack = AreWeaponsOnBack(c, o);
 
     if (o->Type == MODEL_PLAYER)
     {
