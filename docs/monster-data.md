@@ -157,7 +157,7 @@ to `MuError.log`:
 
 ```json
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "models": [
     {
       "slot": "MONSTER_MODEL_BULL_FIGHTER",
@@ -169,11 +169,11 @@ to `MuError.log`:
         {"file": "Data/Sound/mBullAttack1.wav", "id": "SOUND_MONSTER_BULLATTACK1", "channels": 2, "spatial": true},
         {"file": "Data/Sound/mBullDie.wav", "channels": 2, "spatial": true}
       ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mBull1.wav", "Data/Sound/mBull1.wav"],
-        "attack": ["SOUND_MONSTER_BULLATTACK1", null],
-        "die": "Data/Sound/mBullDie.wav"
-      },
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBull1.wav", "Data/Sound/mBull1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_BULLATTACK1"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBullDie.wav"]}
+      ],
       "linkBones": [42, 33]
     }
   ]
@@ -208,8 +208,7 @@ to `MuError.log`:
 | `streamMesh` | The mesh drawn as a stream; without it as the file has it |
 | `noneBlendMeshes` | Meshes drawn without blending |
 | `sounds` | The sounds the model loads: `file`, `channels` (how many can play at once), `spatial` (3D, louder near the hero), and `id` for a sound that keeps its `SOUND_*` number, see below |
-| `soundSlots` | What the game plays when a character of the model stands or walks (`idle`, two), attacks or is hit (`attack`, two) and dies (`die`); of a pair it picks one at random. A slot names a sound of the model (its `id`, or its `file` when it has none) or any `SOUND_*` number; `null` is no sound. `secondSet` has the sounds a monster with SubType 9 (the big Hellas monsters) plays instead of the first set. Without `soundSlots` no slot has a sound |
-| `soundEvents` | Sounds the game plays on top of the slots, see [Sound events](#sound-events) |
+| `soundEvents` | The sounds the game plays for a character of the model, in animations or at moments, see [Sound events](#sound-events) |
 | `soundEventMaps` | The maps the sound events play on; without it every map |
 | `bitmaps` | Bitmaps loaded into fixed bitmap slots that the model's code draws with: `file` below `Data/`, `slot` (`BITMAP_MONSTER_SKIN`), `filter` (`linear` or `nearest`), `wrap` (`repeat` or `clamp`) |
 | `parts` | Models loaded with it: `slot` (an NPC slot) or `effect` (an effect type of the effect catalogue), `file`, `textureFolders`, `animations`, `holdLastFrame` (no range defaults), and `maps` for parts loaded with a map instead (the Kundun parts in Kalima, the Totem Golem's in Elbeland) |
@@ -242,25 +241,43 @@ number. A list that has all levels of an event names the event.
 A sound without an `id` gets a number of its own when it is first loaded,
 after the `SOUND_*` list; the same file keeps the same number for the
 session. A sound keeps its `SOUND_*` number (`id`) when code plays it by that
-name, or when a slot of another model names it: a slot plays the sound of its
-number, whichever model loaded it (the Giant Ogre's attack plays the Dark
-Skull Soldier's `SOUND_MONSTER_BLACKSKULLATTACK` in Kalima). Some slots name
-numbers that no model loads, as in the original client; they play nothing (a
-test lists them).
+name, or when an event of another model names it: an event plays the sound of
+its number, whichever model loaded it (the Giant Ogre's attack plays the Dark
+Skull Soldier's `SOUND_MONSTER_BLACKSKULLATTACK` in Kalima). Some events that
+were sound slots name numbers that no model loads, as in the original client;
+they play nothing (a test lists them).
+
+Format 2 has no `soundSlots`: the sound slots of format 1 (an idle, an attack
+and a die sound, and a second set for SubType 9) became sound events at
+moments, and a file that still has them is refused.
 
 ### Sound events
 
-`soundEvents` are sounds the game plays for a character of the model while it
-is in one of the event's animations, when it starts an attack, is hit or
-dies, at each step of a walk and at the end of each loop of stop1 and stop2,
-and only within 500 units of the hero (the Empire Guardian bosses' steps):
+`soundEvents` are sounds the game plays for a character of the model. An
+event names when: `animations`, played while the character is in one of
+them, when it starts an attack, is hit or dies, at each step of a walk and at
+the end of each loop of stop1 and stop2 (the Empire Guardian bosses' steps);
+or `on` moments, played where the game reaches them, whatever the
+animation:
+
+| Moment | Where the game plays it |
+|---|---|
+| `attack` | An attack starts (SetPlayerAttack), whatever animation the attack plays |
+| `hit` | The character is hit (SetPlayerShock) |
+| `death` | The character dies (SetPlayerDie), also in Chaos Castle, next to its explosion |
+| `stand` | The character is set to stand: a walk ends, the server stops it (SetPlayerStop) |
+| `walk` | Each step of a walk (SetPlayerWalk) |
+
+An event is heard only within 500 units of the hero and on the
+`soundEventMaps`, unless it is `heardAnywhere`:
 
 ```json
 "soundEvents": [
   {"animations": ["walk"], "frames": [7, 8], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01"]},
   {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_RAKLION_ICEGIANT_MOVE"]},
   {"animations": ["stop1"], "pick": "rand", "sounds": ["SOUND_XMAS_SANTA_IDLE_1", "SOUND_XMAS_SANTA_IDLE_2"]},
-  {"animations": ["die"], "deathEffectArmed": true, "sounds": ["SOUND_XMAS_SNOWMAN_DEATH_1"]}
+  {"animations": ["die"], "deathEffectArmed": true, "sounds": ["SOUND_XMAS_SNOWMAN_DEATH_1"]},
+  {"on": ["death"], "subType": 9, "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_LSDEATH"]}
 ],
 "soundEventMaps": [69, 70, 71, 72]
 ```
@@ -268,11 +285,15 @@ and only within 500 units of the hero (the Empire Guardian bosses' steps):
 | Field | Meaning |
 |---|---|
 | `animations` | The animations it plays in |
+| `on` | The moments it plays at, instead of animations |
 | `frames` | Only while the animation's frame is from the first number to below the second |
 | `deathEffectArmed` | Only while the character's death effect is armed |
+| `subType`, `notSubType` | Only for a character with this SubType, or with another one: the Death Centurion and Illusion of Kundun have SubType 9 and play the second set of their model's sounds |
+| `heardAnywhere` | Heard at any distance from the hero and on every map |
+| `atMonster` | Played with the character as the sound's object: a sound that still plays is not started again |
 | `chance` | Plays with a chance of one in `oneIn`, drawn as `draw` says: `rand` (`rand() % oneIn == 0`) or `randFps` (the original client's `rand_fps_check`, whose chance depends on the frame rate) |
-| `pick` | Plays the first of the two sounds when a draw of one in two comes up, else the second (`rand` or `randFps`) |
-| `sounds` | The sounds, played together (one of the two with `pick`), each named as a slot names it |
+| `pick` | Plays the first sound when a draw of one in two comes up, else the second, or none with one sound (`rand` or `randFps`) |
+| `sounds` | The sounds, played together (one of them with `pick`), each a sound of the model (its `id`, or its `file` when it has none) or any `SOUND_*` number |
 
 One call can play several events, in their order; their draws come in that
 order too.
@@ -444,8 +465,9 @@ to `MuError.log`. Fatal problems are:
 In the model list, fatal problems (they stop the start with "Monster data
 error" too, naming the model list) are a
 value of the wrong form (each names the model and the field), a slot that is
-no model slot of the two ranges or is there twice, a sound slot that names no
-sound of the model and no `SOUND_*` number, a sound `id`, bitmap slot or
+no model slot of the two ranges or is there twice, a sound event that names
+no sound of the model and no `SOUND_*` number, `soundSlots` (format 1), a
+sound `id`, bitmap slot or
 part slot that does not exist, and a part `effect` that is not an effect
 type. Unknown fields and a model or part file that is not in the client
 folder are warnings; the shipped list has one, Molt's file.
@@ -517,11 +539,13 @@ item tools.
     **Default** gives back the range's), whether it holds its last frame, and
     what the game adds in game (a speed factor, the next animation, the hit
     frame).
-  - **Sounds**: the model's sounds, each with **Play**, and the five sound
-    slots, each set to a sound of the model or to no sound.
-  - **Sound events**: a row per [sound event](#sound-events): its
-    animations (one or more), frames, whether the death effect must be armed,
-    a chance of one in n, a pick of one of two sounds, and its sounds, picked
+  - **Sounds**: the model's sounds, each with **Play**.
+  - **Sound events**: a row per [sound event](#sound-events): **When**, its
+    moments or animations (one or more; picking one of the other kind makes
+    the event one of it), frames, whether the death effect must be armed, its
+    **SubType** (any, only n, not n), whether it is heard **Anywhere** and
+    played **At monster**, a chance of one in n, a pick of one of two sounds
+    (or of one sound and none), and its sounds, picked
     from the model's own; **Play** plays them, **Remove** removes the event.
     **Add a sound event** adds one for attack1 with the model's first sound
     (a model without sounds cannot have events). **Maps** picks the maps the
@@ -538,12 +562,12 @@ item tools.
   the picture, the wheel zooms, a double click puts it back. Pick any
   animation; **Play**, **Pause**, **From the start**, and a frame slider to go
   frame by frame. The speeds are those of Monster Model, also while one is
-  being dragged there. The model's slot sounds play when their animation
-  starts (an idle sound for stop and walk, an attack sound for attacks and
-  shock, the die sound), and its [sound events](#sound-events) as the game
-  plays them: when the animation starts, at each loop of stop1 and stop2,
-  and frame by frame in a walk; on any map and at any distance, with the
-  death effect counted as armed. The hit frame of attacks 1 and 2 is marked on the
+  being dragged there. The model's [sound events](#sound-events) play as the
+  game plays them: those of the animation when it starts, at each loop of
+  stop1 and stop2 and frame by frame in a walk, then those of its moment
+  (stand for stop1 and stop2, attack for the attacks, hit for the shock,
+  death, and walk at each frame of a walk); on any map and at any distance,
+  with the death effect counted as armed and SubType 0. The hit frame of attacks 1 and 2 is marked on the
   slider, and the line under it says what the game adds. **The game's speed
   factors** plays them (**As a transformed player** too). The preview is
   only in the editor's window.
@@ -561,7 +585,7 @@ item tools.
   **Play** and **Remove**, and a number field with **Add**; a monster skill
   that 0x69 plays no attack for is marked. **Play** plays the animation once
   in Monster Preview (and opens it), with the model's attack sounds (its
-  slot or its sound events) and the attacks' sound, then the model stands; skill effects do not play. A
+  sound events) and the attacks' sound, then the model stands; skill effects do not play. A
   Monster Preview that is a tab beside Monster Attacks moves to the right
   half of their place, so both show. **Any other attack** is an animation, a
   rotation (its animations in turn, with **Remove** and **Add an
@@ -612,7 +636,7 @@ How changes work:
   NPCs that appear after it. After Remove, the ones on screen keep their name
   and kind until they appear again.
 - A name or a speed is stored when you leave its field after a change, a
-  kind, a file, a folder, a held last frame or a sound slot right away. A
+  kind, a file, a folder, a held last frame or a sound event right away. A
   changed model is opened again before the next frame, with its textures and
   sounds, and the characters of the model keep playing (an animation it no
   longer has goes back to the first). Each is one step of **Undo** and **Redo** (in the editor's bar, see
