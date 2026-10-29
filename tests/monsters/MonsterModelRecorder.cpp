@@ -27,8 +27,6 @@
 #include <stdexcept>
 #include <string>
 
-static_assert(MonsterRecorder::SoundSlotCount == MAX_MONSTER_SOUND);
-
 namespace MonsterRecorder
 {
 namespace
@@ -146,7 +144,6 @@ ModelSlotState ReadSlotState(int slot)
     state.numActions = model.NumActions;
     state.boneHead = model.BoneHead;
     state.streamMesh = model.StreamMesh;
-    std::copy(std::begin(model.Sounds), std::end(model.Sounds), state.sounds.begin());
     if (!IsLoaded(model))
         return state;
 
@@ -185,8 +182,6 @@ void AddSlot(Record& record, int slot, const ModelSlotState& state)
     }
     add("boneHead", std::to_string(state.boneHead));
     add("streamMesh", std::to_string(state.streamMesh));
-    for (size_t i = 0; i < state.sounds.size(); ++i)
-        add("sound " + std::to_string(i), std::to_string(state.sounds[i]));
     for (size_t i = 0; i < state.textures.size(); ++i)
     {
         const std::string texture = "texture " + std::to_string(i) + ".";

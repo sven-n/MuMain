@@ -48,6 +48,14 @@ void PlayEvents(const Data::Monsters::MonsterModelDefinition& model, int animati
     GameLogic::Monsters::SoundEvents::PlayEvents(model, situation, [](int number, bool) { Play(number); });
 }
 
+void PlayMoment(const Data::Monsters::MonsterModelDefinition& model, Data::Monsters::MonsterSoundMoment moment)
+{
+    GameLogic::Monsters::SoundEvents::Situation situation;
+    situation.moment = moment;
+    situation.deathEffectArmed = true;
+    GameLogic::Monsters::SoundEvents::PlayEvents(model, situation, [](int number, bool) { Play(number); });
+}
+
 void RenderVolume()
 {
     int percent = static_cast<int>(std::lround(g_volume * FullPercent));

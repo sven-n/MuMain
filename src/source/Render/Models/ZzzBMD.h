@@ -56,8 +56,6 @@ void SetActiveBoneTransform(const float (*ptr)[3][4]);
 #define RNDEXT_OIL          2
 #define RNDEXT_RISE			4
 
-#define MAX_MONSTER_SOUND   10
-
 typedef struct
 {
     vec3_t Position;
@@ -224,7 +222,6 @@ public:
     unsigned short PriorAction;
     float         CurrentAnimation;
     short         CurrentAnimationFrame;
-    short         Sounds[MAX_MONSTER_SOUND];
     int           renderCount;
     float		  fTransformedSize;
 
@@ -293,12 +290,6 @@ public:
         iBillType = -1;
         bOffLight = false;
         m_bCompletedAlloc = false;
-        // No sound slot has a sound until a Models.json entry sets them: the
-        // player model the skeletons use has none (P9).
-        for (short& sound : Sounds)
-        {
-            sound = -1;
-        }
     }
 
     ~BMD();

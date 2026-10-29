@@ -225,14 +225,14 @@ TEST_CASE("Monster models: the shipped models' textures are in their folders [da
     }
 }
 
-TEST_CASE("Monster models: a SOUND_ id that a sound slot names is loaded by a model of the shipped list "
-          "[data][monsters]")
+TEST_CASE("Monster models: a SOUND_ id that a sound event at moments names is loaded by a model of the shipped "
+          "list [data][monsters]")
 {
-    // A slot plays the sound of its number, whichever model loaded it: the
-    // Giant Ogre's attack plays the Dark Skull Soldier's attack sound in
-    // Kalima, Vepar's the Stone Golem's death sound. A number that no model
-    // loads plays nothing; the slots that named one in the original client
-    // name their models' sounds now (P9, Q-MN20).
+    // The events that were sound slots (MNS) play the sound of its number,
+    // whichever model loaded it: the Giant Ogre's attack plays the Dark Skull
+    // Soldier's attack sound in Kalima, Vepar's the Stone Golem's death sound.
+    // A number that no model loads plays nothing; the slots that named one in
+    // the original client name their models' sounds (P9, Q-MN20).
     const Data::Monsters::MonsterModelsLoadResult result = LoadShipped();
     std::set<std::string> loaded;
     for (const MonsterModelDefinition& model : result.models)
@@ -248,14 +248,13 @@ TEST_CASE("Monster models: a SOUND_ id that a sound slot names is loaded by a mo
     std::set<std::string> notLoaded;
     for (const MonsterModelDefinition& model : result.models)
     {
-        if (!model.soundSlots)
+        std::vector<std::string> values;
+        for (const Data::Monsters::MonsterSoundEvent& event : model.soundEvents)
         {
-            continue;
-        }
-        std::vector<std::string> values(model.soundSlots->first.begin(), model.soundSlots->first.end());
-        if (model.soundSlots->second)
-        {
-            values.insert(values.end(), model.soundSlots->second->begin(), model.soundSlots->second->end());
+            if (!event.moments.empty())
+            {
+                values.insert(values.end(), event.sounds.begin(), event.sounds.end());
+            }
         }
         for (const std::string& value : values)
         {
@@ -270,7 +269,7 @@ TEST_CASE("Monster models: a SOUND_ id that a sound slot names is loaded by a mo
     {
         listed += id + " ";
     }
-    INFO("named by slots, loaded by no model: " << listed);
+    INFO("named by events at moments, loaded by no model: " << listed);
     CHECK(notLoaded.empty());
 }
 

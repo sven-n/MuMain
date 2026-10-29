@@ -12,7 +12,6 @@
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterSoundIds.h"
-#include "Engine/Object/MonsterSlotSound.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "World/MapInfra/MapManager.h"
@@ -172,37 +171,6 @@ void LoadSounds(const MonsterModelDefinition& model)
     }
 }
 
-// The sound slot value of a sound the slot names: its number from
-// SOUND_MONSTER on; -1 for no sound.
-short SlotValue(const MonsterModelDefinition& model, const std::string& value)
-{
-    if (value.empty())
-    {
-        return -1;
-    }
-    const std::optional<int> number = FindSoundNumber(model, value);
-    return number ? static_cast<short>(*number - SOUND_MONSTER) : -1;
-}
-
-// The entry's sound slots. Without slots in the entry, every slot has no
-// sound: a slot keeps no 0, which is the Bull Fighter's first sound
-// (SOUND_MONSTER), so a model without slots played it where it was loaded
-// (P9).
-void SetSoundSlots(BMD& target, const MonsterModelDefinition& model)
-{
-    std::fill(std::begin(target.Sounds), std::end(target.Sounds), Engine::Object::MonsterSlotSound::NoSound);
-    if (!model.soundSlots)
-    {
-        return;
-    }
-    for (size_t i = 0; i < SoundSlotSetSize; ++i)
-    {
-        target.Sounds[i] = SlotValue(model, model.soundSlots->first[i]);
-        target.Sounds[SoundSlotSetSize + i] =
-            model.soundSlots->second ? SlotValue(model, (*model.soundSlots->second)[i]) : -1;
-    }
-}
-
 void SetMeshValues(BMD& target, const MonsterModelDefinition& model)
 {
     if (model.headBone)
@@ -248,11 +216,10 @@ bool Open(int slot)
     // A model whose file is missing has no body, and the game keeps running
     // (P1): AccessModel logs the file, and Data Checks lists it.
     OpenFile(slot, model->load.file);
-    // A monster model without meshes gets nothing more, and its sound slots
-    // stay without sounds; an NPC model still loads its sounds.
+    // A monster model without meshes gets nothing more, its sounds are not
+    // loaded; an NPC model still loads its sounds.
     if (monsterRange && target.NumMeshs == 0)
     {
-        std::fill(std::begin(target.Sounds), std::end(target.Sounds), Engine::Object::MonsterSlotSound::NoSound);
         return true;
     }
     // A monster model the model file table names is drawn from its glTF binary (with the BMD's actions);
@@ -283,7 +250,6 @@ bool Open(int slot)
         target.BoneHead = target.FindBoneOrRoot(headBoneName);
     }
     LoadSounds(*model);
-    SetSoundSlots(target, *model);
     LoadBitmaps(*model);
     return true;
 }

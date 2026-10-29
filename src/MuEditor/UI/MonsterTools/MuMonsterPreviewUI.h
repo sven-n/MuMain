@@ -16,8 +16,9 @@ namespace MuEditor::Monsters
 // monster's model in a view with the item preview's camera (the mouse turns
 // it, the middle button moves the picture, the wheel zooms). Any animation of
 // the model plays, pauses and goes frame by frame; the speeds are the Monster
-// Model tool's, also while one is being dragged; the model's slot sounds and
-// sound events play as the game plays them, on any map (Q-MN74); the impact
+// Model tool's, also while one is being dragged; the model's sound events
+// play at their animations and moments as the game plays them, on any map
+// (Q-MN74, Q-MN76); the impact
 // frame of attacks 1 and 2 and the
 // animation that follows are marked, and the speed factors the game adds can
 // be played too; Monster Attacks' Play plays an attack once (Q-MN73). Only in

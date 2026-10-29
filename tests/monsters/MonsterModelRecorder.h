@@ -27,9 +27,6 @@ struct RecordedValue
 };
 using Record = std::vector<RecordedValue>;
 
-// The sound slots of a model (MAX_MONSTER_SOUND).
-constexpr int SoundSlotCount = 10;
-
 // One LoadWaveFile, or a release of a sound, in the order they came.
 struct SoundEvent
 {
@@ -69,7 +66,6 @@ struct ModelSlotState
     std::vector<Action> actions;
     int boneHead = 0;
     int streamMesh = 0;
-    std::array<int, SoundSlotCount> sounds{};
     struct Texture
     {
         std::string name;

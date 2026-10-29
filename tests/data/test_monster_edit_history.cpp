@@ -111,6 +111,15 @@ MonsterModelDefinition Hound()
     return Model("MONSTER_MODEL_HOUND", "Data/Monster/Monster02.bmd");
 }
 
+// A sound event that names no sound of the model and no SOUND_ id.
+Data::Monsters::MonsterSoundEvent WrongSoundEvent()
+{
+    Data::Monsters::MonsterSoundEvent event;
+    event.moments = {Data::Monsters::MonsterSoundMoment::Death};
+    event.sounds = {"Data/Sound/mNobody.wav"};
+    return event;
+}
+
 MonsterEditEntry Step(const std::string& label, int number, std::optional<MonsterDefinition> before,
                       std::optional<MonsterDefinition> after)
 {
@@ -445,11 +454,10 @@ TEST_CASE("The monster edits refuse a model that the model list cannot hold [edi
     // A slot without an entry, and no slot.
     CHECK_FALSE(g_MonsterEdits.SetModel("File", Model("MONSTER_MODEL_BULL_FIGHTER", "Data/Monster/Monster01.bmd"), 0));
     CHECK_FALSE(g_MonsterEdits.SetModel("File", Model("MONSTER_MODEL_NOBODY", "Data/Monster/Monster01.bmd"), 0));
-    // A sound slot that names no sound of the model and no SOUND_ id.
-    MonsterModelDefinition wrongSlot = Hound();
-    wrongSlot.soundSlots.emplace();
-    wrongSlot.soundSlots->first[0] = "Data/Sound/mNobody.wav";
-    CHECK_FALSE(g_MonsterEdits.SetModel("Sound", wrongSlot, 2));
+    // A sound event that names no sound of the model and no SOUND_ id.
+    MonsterModelDefinition wrongSound = Hound();
+    wrongSound.soundEvents = {WrongSoundEvent()};
+    CHECK_FALSE(g_MonsterEdits.SetModel("Sound", wrongSound, 2));
     // What the file cannot hold: a model without a texture folder.
     MonsterModelDefinition noFolder = Hound();
     noFolder.load.textureFolders.clear();
@@ -498,11 +506,10 @@ TEST_CASE("Saving the monster edits writes neither file when one has errors [edi
     std::vector<Data::Items::ItemDataIssue> issues;
     REQUIRE(g_MonsterEdits.AddMonster("Add", Monster(3, "Larva")));
     // A model the model list cannot hold, put in past the edits' checks: a
-    // sound slot that names no sound of the model and no SOUND_ id.
-    MonsterModelDefinition wrongSlot = Hound();
-    wrongSlot.soundSlots.emplace();
-    wrongSlot.soundSlots->first[0] = "Data/Sound/mNobody.wav";
-    const std::array models = {wrongSlot};
+    // sound event that names no sound of the model and no SOUND_ id.
+    MonsterModelDefinition wrongSound = Hound();
+    wrongSound.soundEvents = {WrongSoundEvent()};
+    const std::array models = {wrongSound};
     g_MonsterModelDatabase.Build(models);
 
     CHECK_FALSE(g_MonsterEdits.Save(issues));

@@ -48,10 +48,6 @@ constexpr const char* Id = "id";
 constexpr const char* Channels = "channels";
 constexpr const char* Spatial = "spatial";
 constexpr const char* SoundSlots = "soundSlots";
-constexpr const char* Idle = "idle";
-constexpr const char* Attack = "attack";
-constexpr const char* Die = "die";
-constexpr const char* SecondSet = "secondSet";
 constexpr const char* Bitmaps = "bitmaps";
 constexpr const char* Filter = "filter";
 constexpr const char* Wrap = "wrap";
@@ -109,8 +105,6 @@ const KeySet ModelKeys{Keys::Slot,
 const KeySet PartKeys{Keys::Slot,       Keys::Effect,        Keys::File, Keys::TextureFolders,
                       Keys::Animations, Keys::HoldLastFrame, Keys::Maps, Keys::OldWorlds};
 const KeySet SoundKeys{Keys::File, Keys::Id, Keys::Channels, Keys::Spatial};
-const KeySet SoundSlotKeys{Keys::Idle, Keys::Attack, Keys::Die, Keys::SecondSet};
-const KeySet SecondSetKeys{Keys::Idle, Keys::Attack, Keys::Die};
 const KeySet BitmapKeys{Keys::File, Keys::Slot, Keys::Filter, Keys::Wrap};
 const KeySet MapFolderKeys{Keys::Maps, Keys::Folders};
 const KeySet BoxKeys{Keys::Min, Keys::Max};
@@ -134,10 +128,6 @@ constexpr size_t MaxTextureNameLength = 31;
 constexpr int MaxMeshIndex = 49;
 constexpr int MaxSoundChannels = 4;
 constexpr int MaxLinkBones = 2;
-// The idle, attack and die slots in a slot set.
-constexpr size_t IdleSlot = 0;
-constexpr size_t AttackSlot = 2;
-constexpr size_t DieSlot = 4;
 
 // The problems of one model: each names the model's slot.
 class ModelIssues
@@ -548,68 +538,6 @@ void ReadSounds(const OrderedJson& json, std::vector<MonsterModelSound>& sounds,
                                           { issues.Warning(unknown, message); });
         sounds.push_back(std::move(sound));
     }
-}
-
-// A slot names a sound, or is null for no sound.
-bool ReadSlotValue(const OrderedJson& json, const std::string& key, std::string& value, ModelIssues& issues)
-{
-    if (json.is_null())
-    {
-        value.clear();
-        return true;
-    }
-    return ReadText(json, key, value, issues);
-}
-
-bool ReadSlotPair(const OrderedJson& json, const std::string& key, MonsterSoundSlotSet& slots, size_t first,
-                  ModelIssues& issues)
-{
-    if (!json.is_array() || json.size() != 2)
-    {
-        issues.Fatal(key, "must be a list of two sounds");
-        return false;
-    }
-    return ReadSlotValue(json[0], key + "[0]", slots[first], issues) &&
-           ReadSlotValue(json[1], key + "[1]", slots[first + 1], issues);
-}
-
-bool ReadSlotSet(const OrderedJson& json, const std::string& key, const KeySet& keys, MonsterSoundSlotSet& slots,
-                 ModelIssues& issues)
-{
-    if (!json.is_object() || !json.contains(Keys::Idle) || !json.contains(Keys::Attack) || !json.contains(Keys::Die))
-    {
-        issues.Fatal(key, "must be an object with idle, attack and die");
-        return false;
-    }
-    const std::string prefix = key + ".";
-    if (!ReadSlotPair(json[Keys::Idle], prefix + Keys::Idle, slots, IdleSlot, issues) ||
-        !ReadSlotPair(json[Keys::Attack], prefix + Keys::Attack, slots, AttackSlot, issues) ||
-        !ReadSlotValue(json[Keys::Die], prefix + Keys::Die, slots[DieSlot], issues))
-    {
-        return false;
-    }
-    Items::Json::WarnAboutUnknownKeys(json, keys, prefix, [&](const std::string& unknown, const std::string& message)
-                                      { issues.Warning(unknown, message); });
-    return true;
-}
-
-void ReadSoundSlots(const OrderedJson& json, std::optional<MonsterSoundSlots>& soundSlots, ModelIssues& issues)
-{
-    MonsterSoundSlots slots;
-    if (!ReadSlotSet(json, Keys::SoundSlots, SoundSlotKeys, slots.first, issues))
-    {
-        return;
-    }
-    if (const auto second = json.find(Keys::SecondSet); second != json.end())
-    {
-        MonsterSoundSlotSet set;
-        if (!ReadSlotSet(*second, std::string(Keys::SoundSlots) + "." + Keys::SecondSet, SecondSetKeys, set, issues))
-        {
-            return;
-        }
-        slots.second = std::move(set);
-    }
-    soundSlots = std::move(slots);
 }
 
 std::optional<MonsterSoundDraw> FindSoundDraw(const OrderedJson& json)
@@ -1052,9 +980,11 @@ void ReadModelFields(const OrderedJson& json, MonsterModelDefinition& model, Mod
     {
         ReadSounds(*sounds, model.sounds, issues);
     }
-    if (const auto slots = json.find(Keys::SoundSlots); slots != json.end())
+    // Format 2 has no sound slots: their sounds are sound events at moments
+    // (monsters design, Q-MN75, Q-MN76).
+    if (json.contains(Keys::SoundSlots))
     {
-        ReadSoundSlots(*slots, model.soundSlots, issues);
+        issues.Fatal(Keys::SoundSlots, "is gone since format 2: the slots' sounds are sound events at moments (on)");
     }
     if (const auto events = json.find(Keys::SoundEvents); events != json.end())
     {
@@ -1182,20 +1112,6 @@ void WriteAnimations(const MonsterModelLoad& load, OrderedJson& json)
     {
         json[Keys::HoldLastFrame] = WriteAnimationList(*load.holdLastFrame);
     }
-}
-
-OrderedJson WriteSlotValue(const std::string& value)
-{
-    return value.empty() ? OrderedJson(nullptr) : OrderedJson(value);
-}
-
-OrderedJson WriteSlotSet(const MonsterSoundSlotSet& slots)
-{
-    OrderedJson json = OrderedJson::object();
-    json[Keys::Idle] = OrderedJson::array({WriteSlotValue(slots[IdleSlot]), WriteSlotValue(slots[IdleSlot + 1])});
-    json[Keys::Attack] = OrderedJson::array({WriteSlotValue(slots[AttackSlot]), WriteSlotValue(slots[AttackSlot + 1])});
-    json[Keys::Die] = WriteSlotValue(slots[DieSlot]);
-    return json;
 }
 
 OrderedJson WriteSound(const MonsterModelSound& sound)
@@ -1338,15 +1254,6 @@ void WriteSoundFields(const MonsterModelDefinition& model, OrderedJson& json)
         }
         json[Keys::Sounds] = std::move(sounds);
     }
-    if (model.soundSlots)
-    {
-        OrderedJson slots = WriteSlotSet(model.soundSlots->first);
-        if (model.soundSlots->second)
-        {
-            slots[Keys::SecondSet] = WriteSlotSet(*model.soundSlots->second);
-        }
-        json[Keys::SoundSlots] = std::move(slots);
-    }
     if (!model.soundEvents.empty())
     {
         OrderedJson events = OrderedJson::array();
@@ -1429,7 +1336,7 @@ std::string FormatText(std::string text)
 {
     using namespace Items::Json;
     for (const char* key : {Keys::TextureFolders, Keys::HoldLastFrame, Keys::NoneBlendMeshes, Keys::Maps, Keys::Folders,
-                            Keys::Idle, Keys::Attack, Keys::LinkBones, Keys::SoundEventMaps})
+                            Keys::LinkBones, Keys::SoundEventMaps})
     {
         text = PutListsOnOneLine(text, key);
     }

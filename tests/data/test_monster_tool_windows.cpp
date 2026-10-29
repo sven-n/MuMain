@@ -468,8 +468,13 @@ TEST_CASE("The Monster Model and Monster Preview windows draw a model entry with
     model.load.textureFolders = {"Monster"};
     model.load.speeds = {{2, 0.34f}};
     model.sounds = {{"Data/Sound/mHound1.wav", "", 2, true}, {"Data/Sound/mHound2.wav", "", 2, true}};
-    model.soundSlots.emplace();
-    model.soundSlots->first = {"Data/Sound/mHound1.wav", "Data/Sound/mHound2.wav", "", "", ""};
+    Data::Monsters::MonsterSoundEvent idle;
+    idle.moments = {Data::Monsters::MonsterSoundMoment::Stand, Data::Monsters::MonsterSoundMoment::Walk};
+    idle.heardAnywhere = true;
+    idle.atMonster = true;
+    idle.chance = Data::Monsters::MonsterSoundChance{16, Data::Monsters::MonsterSoundDraw::RandFps};
+    idle.pick = Data::Monsters::MonsterSoundDraw::Rand;
+    idle.sounds = {"Data/Sound/mHound1.wav", "Data/Sound/mHound2.wav"};
     Data::Monsters::MonsterSoundEvent walk;
     walk.animations = {MONSTER01_WALK};
     walk.frames = std::pair<float, float>{1.0f, 2.0f};
@@ -479,7 +484,7 @@ TEST_CASE("The Monster Model and Monster Preview windows draw a model entry with
     attack.animations = {MONSTER01_ATTACK1, MONSTER01_ATTACK2};
     attack.pick = Data::Monsters::MonsterSoundDraw::Rand;
     attack.sounds = {"Data/Sound/mHound1.wav", "SOUND_THUNDERS01"};
-    model.soundEvents = {walk, attack};
+    model.soundEvents = {idle, walk, attack};
     model.soundEventMaps = {{69}, {70}};
     const std::array models = {model};
     g_MonsterModelDatabase.Build(models);

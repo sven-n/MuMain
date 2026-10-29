@@ -44,22 +44,6 @@ bool NamesSoundOfModel(const MonsterModelDefinition& model, const std::string& v
                        [&](const MonsterModelSound& sound) { return SoundNameOf(sound) == value; });
 }
 
-void ValidateSlotSet(const MonsterModelDefinition& model, const MonsterSoundSlotSet& slots, const std::string& key,
-                     ModelProblems& problems)
-{
-    for (size_t i = 0; i < slots.size(); ++i)
-    {
-        const std::string& value = slots[i];
-        if (value.empty() || NamesSoundOfModel(model, value) || FindMonsterSoundId(value))
-        {
-            continue;
-        }
-        problems.Add(ItemDataIssueSeverity::Fatal, key + "[" + std::to_string(i) + "]",
-                     "\"" + value +
-                         "\" is no sound of the model (its id, or its file when it has none) and no SOUND_ id");
-    }
-}
-
 void ValidateSounds(const MonsterModelDefinition& model, ModelProblems& problems)
 {
     for (size_t i = 0; i < model.sounds.size(); ++i)
@@ -69,14 +53,6 @@ void ValidateSounds(const MonsterModelDefinition& model, ModelProblems& problems
         {
             problems.Add(ItemDataIssueSeverity::Fatal, "sounds[" + std::to_string(i) + "].id",
                          "\"" + id + "\" is not a SOUND_ id that code plays a model sound by");
-        }
-    }
-    if (model.soundSlots)
-    {
-        ValidateSlotSet(model, model.soundSlots->first, "soundSlots", problems);
-        if (model.soundSlots->second)
-        {
-            ValidateSlotSet(model, *model.soundSlots->second, "soundSlots.secondSet", problems);
         }
     }
     for (size_t event = 0; event < model.soundEvents.size(); ++event)
