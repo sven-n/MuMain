@@ -11,7 +11,7 @@ namespace Data::Items
 // needs an entry, but a file may still lack it).
 inline bool IsFreeItemType(int itemType)
 {
-    return IsValidItemType(itemType) && !g_ItemDatabase.GetAllSlots()[itemType].HasEntry() &&
+    return IsValidItemType(itemType) && g_ItemDatabase.FindEntry(itemType) == nullptr &&
            g_ItemModelDatabase.Find(itemType) == nullptr;
 }
 } // namespace Data::Items

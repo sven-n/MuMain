@@ -107,7 +107,7 @@ ItemNumberHolder FindItemNumberHolder(int itemType)
         holder.item = g_ItemDatabase.GetLogName(itemType);
         return holder;
     }
-    holder.entryWithoutName = g_ItemDatabase.GetAllSlots()[itemType].HasEntry();
+    holder.entryWithoutName = g_ItemDatabase.FindEntry(itemType) != nullptr;
     const Data::Items::ItemModelDefinition* model = g_ItemModelDatabase.Find(itemType);
     if (model == nullptr && !holder.entryWithoutName)
     {
@@ -123,8 +123,7 @@ ItemNumberHolder FindItemNumberHolder(int itemType)
 
 std::string GetEntryLabel(int itemType)
 {
-    if (!Data::Items::IsValidItemType(itemType) || g_ItemDatabase.Find(itemType) != nullptr ||
-        !g_ItemDatabase.GetAllSlots()[itemType].HasEntry())
+    if (g_ItemDatabase.Find(itemType) != nullptr || g_ItemDatabase.FindEntry(itemType) == nullptr)
     {
         return g_ItemDatabase.GetLogName(itemType);
     }

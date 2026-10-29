@@ -162,7 +162,7 @@ void GiveModelsAnEntry()
     std::vector<ItemDefinition> entries;
     for (int itemType = 0; itemType < MAX_ITEM; ++itemType)
     {
-        if (g_ItemModelDatabase.Find(itemType) == nullptr || g_ItemDatabase.GetAllSlots()[itemType].HasEntry())
+        if (g_ItemModelDatabase.Find(itemType) == nullptr || g_ItemDatabase.FindEntry(itemType) != nullptr)
         {
             continue;
         }
@@ -443,7 +443,7 @@ bool CItemDataHandler::AddItem(const ItemDefinition& definition, const ItemModel
 bool CItemDataHandler::RemoveItem(int itemType)
 {
     // An entry without a name goes as an item does.
-    if (!IsValidItemType(itemType) || !g_ItemDatabase.GetAllSlots()[itemType].HasEntry())
+    if (g_ItemDatabase.FindEntry(itemType) == nullptr)
     {
         return false;
     }
@@ -463,8 +463,7 @@ bool CItemDataHandler::RemoveItem(int itemType)
 
 bool CItemDataHandler::MoveItem(int fromItemType, int toItemType)
 {
-    if (!IsValidItemType(fromItemType) || !g_ItemDatabase.GetAllSlots()[fromItemType].HasEntry() ||
-        !IsFreeItemType(toItemType))
+    if (g_ItemDatabase.FindEntry(fromItemType) == nullptr || !IsFreeItemType(toItemType))
     {
         return false;
     }

@@ -31,7 +31,7 @@ constexpr ImVec4 NotFreeColor{1.0f, 0.4f, 0.4f, 1.0f};
 
 void CItemMoveDialog::Open(int itemType)
 {
-    if (!Data::Items::IsValidItemType(itemType) || !g_ItemDatabase.GetAllSlots()[itemType].HasEntry())
+    if (g_ItemDatabase.FindEntry(itemType) == nullptr)
     {
         return;
     }

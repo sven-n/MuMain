@@ -37,11 +37,8 @@ constexpr float NameWidth = 260.0f;
 // An item, or an entry without a name: its English name makes it an item.
 std::optional<ItemDefinition> LoadItem(int itemType)
 {
-    if (!Data::Items::IsValidItemType(itemType) || !g_ItemDatabase.GetAllSlots()[itemType].HasEntry())
-    {
-        return std::nullopt;
-    }
-    return g_ItemDatabase.GetAllSlots()[itemType];
+    const ItemDefinition* entry = g_ItemDatabase.FindEntry(itemType);
+    return entry != nullptr ? std::optional<ItemDefinition>(*entry) : std::nullopt;
 }
 
 // What refuses the English name the draft changed: empty, or with the

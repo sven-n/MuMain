@@ -24,7 +24,7 @@ constexpr ImVec4 RemoveColor{0.7f, 0.2f, 0.2f, 1.0f};
 
 void CItemRemoveDialog::Open(int itemType)
 {
-    if (!Data::Items::IsValidItemType(itemType) || !g_ItemDatabase.GetAllSlots()[itemType].HasEntry())
+    if (g_ItemDatabase.FindEntry(itemType) == nullptr)
     {
         return;
     }

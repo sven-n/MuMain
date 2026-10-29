@@ -210,8 +210,7 @@ void CMuItemBrowserUI::RenderItemActions(int selectedItemType)
 {
     const bool hasItem = g_ItemDatabase.Find(selectedItemType) != nullptr;
     // An entry without a name moves and goes as an item does; there is nothing to duplicate.
-    const bool hasEntry =
-        Data::Items::IsValidItemType(selectedItemType) && g_ItemDatabase.GetAllSlots()[selectedItemType].HasEntry();
+    const bool hasEntry = g_ItemDatabase.FindEntry(selectedItemType) != nullptr;
     if (ImGui::Button(I18N::Editor::AddItem))
     {
         m_addDialog.OpenAdd(selectedItemType);
