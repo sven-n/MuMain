@@ -11395,7 +11395,17 @@ void UpdateCharacterEffects()
         // Same order and stop-on-claim as RenderCharacter's chain.
         if (UpdateHellasMonsterEffects(c, o, b))
             continue;
+        if (battleCastle::UpdateBattleCastleMonsterEffects(c, o, b))
+            continue;
+        if (M31HuntingGround::UpdateHuntingGroundMonsterEffects(c, o, b))
+            continue;
+        if (M34CryWolf1st::UpdateCryWolf1stMonsterEffects(c, o, b))
+            continue;
         if (M33Aida::UpdateAidaMonsterEffects(c, o, b))
+            continue;
+        if (M37Kanturu1st::UpdateKanturu1stMonsterEffects(c, o, b))
+            continue;
+        if (M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(c, o, b))
             continue;
         if (M39Kanturu3rd::UpdateKanturu3rdMonsterEffects(c, o, b))
             continue;

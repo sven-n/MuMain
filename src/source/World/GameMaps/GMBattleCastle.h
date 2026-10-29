@@ -51,6 +51,7 @@ namespace   battleCastle
     void SetGuardAttackState(OBJECT* o);
     bool    AttackEffect_BattleCastleMonster(CHARACTER* c, OBJECT* o, BMD* b);
     bool    MoveBattleCastleMonsterVisual(OBJECT* o, BMD* b);
+    bool UpdateBattleCastleMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
     bool    RenderBattleCastleMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
     bool    RenderBattleCastleMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate, int Select);
     bool    RenderBattleCastleMonsterObjectMesh(OBJECT* o, BMD* b);

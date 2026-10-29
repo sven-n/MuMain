@@ -25,6 +25,7 @@ namespace M38Kanturu2nd
     bool	Move_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);		// 몬스터 효과 업데이트
     void	Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b);		// 몬스터 무기의 잔상 처리
     bool	Render_Kanturu2nd_MonsterObjectMesh(OBJECT* o, BMD* b, int ExtraMon);	// 몬스터 오브젝트 렌더링
+    bool Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
     bool	Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);	// 몬스터 효과 렌더링
 
     // 칸투루내부 맵 관련

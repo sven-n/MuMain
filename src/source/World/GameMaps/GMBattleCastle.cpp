@@ -1811,7 +1811,7 @@ namespace battleCastle
         return false;
     }
 
-    bool    RenderBattleCastleMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+    bool UpdateBattleCastleMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
     {
         if (gMapManager.InBattleCastle() == false) return false;
 
@@ -1822,25 +1822,10 @@ namespace battleCastle
         case MODEL_CASTLE_GATE1:
             break;
 
-        case MODEL_GUARDIAN_STATUE:
-            if (IsBattleCastleStart())
-            {
-                Vector(0.3f, 0.2f, 0.f, Light);
-                RenderAurora(BITMAP_MAGIC + 1, RENDER_BRIGHT, o->Position[0], o->Position[1], 9.f, 9.f, Light);
-            }
-            else
-            {
-                RenderAurora(BITMAP_MAGIC + 1, RENDER_DARK, o->Position[0], o->Position[1], 5.5f, 5.5f, o->Light);
-            }
-            return true;
-
         case MODEL_LIFE_STONE:
             if (o->m_byBuildTime >= 5)
             {
                 o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.3 + 0.3f;
-
-                Vector(0.3f, 0.2f, 0.f, Light);
-                RenderAurora(BITMAP_MAGIC + 1, RENDER_BRIGHT, o->Position[0], o->Position[1], 9.f, 9.f, Light);
             }
             else
             {
@@ -1868,8 +1853,6 @@ namespace battleCastle
 
                 b->TransformPosition(o->BoneTransform[2], p, Position, true);
                 CreateSprite(BITMAP_LIGHT, Position, 4.f, Light, NULL);
-
-                RenderAurora(BITMAP_MAGIC + 1, RENDER_DARK, o->Position[0], o->Position[1], 5.5f, 5.5f, o->Light);
             }
             else
             {
@@ -1890,6 +1873,46 @@ namespace battleCastle
                 c->m_bIsSelected = false;
             }
             o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.3f + 0.5f;
+            return true;
+        }
+
+        return false;
+    }
+
+    bool RenderBattleCastleMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+    {
+        if (gMapManager.InBattleCastle() == false)
+            return false;
+
+        vec3_t Light;
+
+        switch (o->Type)
+        {
+        case MODEL_GUARDIAN_STATUE:
+            if (IsBattleCastleStart())
+            {
+                Vector(0.3f, 0.2f, 0.f, Light);
+                RenderAurora(BITMAP_MAGIC + 1, RENDER_BRIGHT, o->Position[0], o->Position[1], 9.f, 9.f, Light);
+            }
+            else
+            {
+                RenderAurora(BITMAP_MAGIC + 1, RENDER_DARK, o->Position[0], o->Position[1], 5.5f, 5.5f, o->Light);
+            }
+            return true;
+
+        case MODEL_LIFE_STONE:
+            if (o->m_byBuildTime >= 5)
+            {
+                Vector(0.3f, 0.2f, 0.f, Light);
+                RenderAurora(BITMAP_MAGIC + 1, RENDER_BRIGHT, o->Position[0], o->Position[1], 9.f, 9.f, Light);
+            }
+            return true;
+
+        case MODEL_CANON_TOWER:
+            if (IsBattleCastleStart())
+            {
+                RenderAurora(BITMAP_MAGIC + 1, RENDER_DARK, o->Position[0], o->Position[1], 5.5f, 5.5f, o->Light);
+            }
             return true;
         }
 
