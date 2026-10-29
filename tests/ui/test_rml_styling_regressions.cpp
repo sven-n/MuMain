@@ -103,3 +103,23 @@ TEST_CASE("chat fill respects theme insets independently of modal backdrop style
         document->Close();
     }
 }
+
+TEST_CASE("the legacy HUD's menu art reaches the cash shop button [ui][styling]")
+{
+    // The button row starts 1dp into #buttons; art that ended where #buttons starts left the world
+    // showing through that 1dp.
+    UI::Tests::RmlLayoutFixture fixture;
+    fixture.Configure({1024, 768}, 100);
+    auto* document = fixture.Load("legacy", "main_frame");
+    REQUIRE(document);
+    fixture.Refresh();
+    auto* art = document->GetElementById("frame_right");
+    auto* button = document->GetElementById("btn_cshop");
+    REQUIRE(art);
+    REQUIRE(button);
+    const float artRight =
+        art->GetAbsoluteOffset(Rml::BoxArea::Border).x + art->GetBox().GetSize(Rml::BoxArea::Border).x;
+    const float buttonLeft = button->GetAbsoluteOffset(Rml::BoxArea::Border).x;
+    CHECK(artRight >= buttonLeft - 0.01f);
+    document->Close();
+}
