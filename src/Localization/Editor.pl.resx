@@ -925,4 +925,1867 @@
   <data name="Preview not its model" xml:space="preserve">
     <value>Slot tej mapy zawiera inny obiekt, nie model tego efektu (zobacz Zasób).</value>
   </data>
+  <data name="Item Translations" xml:space="preserve">
+    <value>Tłumaczenia przedmiotów</value>
+  </data>
+  <data name="Missing in" xml:space="preserve">
+    <value>Brak w:</value>
+  </data>
+  <data name="All items" xml:space="preserve">
+    <value>Wszystkie przedmioty</value>
+  </data>
+  <data name="Count missing" xml:space="preserve">
+    <value>Brak: {0}</value>
+  </data>
+  <data name="Same as English" xml:space="preserve">
+    <value>Tak jak po angielsku</value>
+  </data>
+  <data name="Remove translation" xml:space="preserve">
+    <value>Usuń tłumaczenie</value>
+  </data>
+  <data name="The English name cannot be empty" xml:space="preserve">
+    <value>Nazwa angielska nie może być pusta.</value>
+  </data>
+  <data name="Item names cannot contain the separator" xml:space="preserve">
+    <value>Nazwa przedmiotu nie może zawierać „||”.</value>
+  </data>
+  <data name="Name or number" xml:space="preserve">
+    <value>Nazwa lub numer</value>
+  </data>
+  <data name="Items" xml:space="preserve">
+    <value>Przedmioty</value>
+  </data>
+  <data name="Item names missing" xml:space="preserve">
+    <value>Nazwy przedmiotów ({0}): brak {1} z {2}</value>
+  </data>
+  <data name="A buff" xml:space="preserve">
+    <value>Buff</value>
+  </data>
+  <data name="A pet" xml:space="preserve">
+    <value>Zwierzak</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Dodaj</value>
+  </data>
+  <data name="Add item" xml:space="preserve">
+    <value>Dodaj przedmiot</value>
+  </data>
+  <data name="All groups" xml:space="preserve">
+    <value>Wszystkie grupy</value>
+  </data>
+  <data name="All rules" xml:space="preserve">
+    <value>Wszystkie reguły</value>
+  </data>
+  <data name="All tags" xml:space="preserve">
+    <value>Wszystkie tagi</value>
+  </data>
+  <data name="An add option" xml:space="preserve">
+    <value>Opcja dodatkowa</value>
+  </data>
+  <data name="An ancient set" xml:space="preserve">
+    <value>Zestaw starożytny</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Anuluj</value>
+  </data>
+  <data name="Clear filters" xml:space="preserve">
+    <value>Wyczyść filtry</value>
+  </data>
+  <data name="Copy the selected item" xml:space="preserve">
+    <value>Kopiuj zaznaczony przedmiot</value>
+  </data>
+  <data name="Droppable" xml:space="preserve">
+    <value>Można upuścić</value>
+  </data>
+  <data name="Droppable while rented" xml:space="preserve">
+    <value>Można upuścić, gdy wypożyczony</value>
+  </data>
+  <data name="Duplicate" xml:space="preserve">
+    <value>Duplikuj</value>
+  </data>
+  <data name="Duplicate item" xml:space="preserve">
+    <value>Duplikuj przedmiot</value>
+  </data>
+  <data name="English name" xml:space="preserve">
+    <value>Nazwa angielska</value>
+  </data>
+  <data name="Group" xml:space="preserve">
+    <value>Grupa</value>
+  </data>
+  <data name="Item Browser" xml:space="preserve">
+    <value>Przeglądarka przedmiotów</value>
+  </data>
+  <data name="Its model entry" xml:space="preserve">
+    <value>Jego wpis modelu</value>
+  </data>
+  <data name="Its model file becomes a shared model that both items use" xml:space="preserve">
+    <value>Jego plik modelu staje się modelem współdzielonym, którego używają oba przedmioty</value>
+  </data>
+  <data name="Missing a name in {0}" xml:space="preserve">
+    <value>Brak nazwy w: {0}</value>
+  </data>
+  <data name="Models without an item" xml:space="preserve">
+    <value>Modele bez przedmiotu</value>
+  </data>
+  <data name="Move item" xml:space="preserve">
+    <value>Przenieś przedmiot</value>
+  </data>
+  <data name="Named in code ({0} lines)" xml:space="preserve">
+    <value>Nazwany w kodzie (linie: {0})</value>
+  </data>
+  <data name="Next free" xml:space="preserve">
+    <value>Następny wolny</value>
+  </data>
+  <data name="No item at this number" xml:space="preserve">
+    <value>Brak przedmiotu o tym numerze</value>
+  </data>
+  <data name="Not: {0}" xml:space="preserve">
+    <value>Nie: {0}</value>
+  </data>
+  <data name="Nothing uses the item" xml:space="preserve">
+    <value>Nic nie używa tego przedmiotu</value>
+  </data>
+  <data name="Redo" xml:space="preserve">
+    <value>Ponów</value>
+  </data>
+  <data name="Remove" xml:space="preserve">
+    <value>Usuń</value>
+  </data>
+  <data name="Remove item" xml:space="preserve">
+    <value>Usuń przedmiot</value>
+  </data>
+  <data name="Repairable" xml:space="preserve">
+    <value>Można naprawić</value>
+  </data>
+  <data name="Sellable" xml:space="preserve">
+    <value>Można sprzedać</value>
+  </data>
+  <data name="Sellable in a personal shop" xml:space="preserve">
+    <value>Można sprzedać w sklepie osobistym</value>
+  </data>
+  <data name="Sellable in a personal shop while rented" xml:space="preserve">
+    <value>Można sprzedać w sklepie osobistym, gdy wypożyczony</value>
+  </data>
+  <data name="Sellable when the rental expired" xml:space="preserve">
+    <value>Można sprzedać po wygaśnięciu wypożyczenia</value>
+  </data>
+  <data name="Share the model" xml:space="preserve">
+    <value>Współdziel model</value>
+  </data>
+  <data name="Shared model {0} (also used by {1} items)" xml:space="preserve">
+    <value>Model współdzielony {0} (używa go też przedmiotów: {1})</value>
+  </data>
+  <data name="Storable" xml:space="preserve">
+    <value>Można przechowywać</value>
+  </data>
+  <data name="Tags" xml:space="preserve">
+    <value>Tagi</value>
+  </data>
+  <data name="The item and its model entry are removed." xml:space="preserve">
+    <value>Przedmiot i jego wpis modelu zostaną usunięte.</value>
+  </data>
+  <data name="The items changed since this step; it is not undone." xml:space="preserve">
+    <value>Przedmioty zmieniły się od tego kroku; nie zostanie on cofnięty.</value>
+  </data>
+  <data name="The new item has no model yet." xml:space="preserve">
+    <value>Nowy przedmiot nie ma jeszcze modelu.</value>
+  </data>
+  <data name="The sources were not found: code that names the item is not known." xml:space="preserve">
+    <value>Nie znaleziono źródeł: kod, który nazywa ten przedmiot, jest nieznany.</value>
+  </data>
+  <data name="This number is not free" xml:space="preserve">
+    <value>Ten numer nie jest wolny</value>
+  </data>
+  <data name="Tradable" xml:space="preserve">
+    <value>Można handlować</value>
+  </data>
+  <data name="Undo" xml:space="preserve">
+    <value>Cofnij</value>
+  </data>
+  <data name="Uses the shared model {0} too" xml:space="preserve">
+    <value>Używa też modelu współdzielonego {0}</value>
+  </data>
+  <data name="What uses it stays at its number:" xml:space="preserve">
+    <value>To, co go używa, zostaje przy jego numerze:</value>
+  </data>
+  <data name="What uses it stays at its old number:" xml:space="preserve">
+    <value>To, co go używa, zostaje przy jego starym numerze:</value>
+  </data>
+  <data name="Without a model" xml:space="preserve">
+    <value>Bez modelu</value>
+  </data>
+  <data name="Item Basics" xml:space="preserve">
+    <value>Podstawy przedmiotu</value>
+  </data>
+  <data name="Item Requirements" xml:space="preserve">
+    <value>Wymagania przedmiotu</value>
+  </data>
+  <data name="Size and kind" xml:space="preserve">
+    <value>Rozmiar i rodzaj</value>
+  </data>
+  <data name="Wing tier" xml:space="preserve">
+    <value>Poziom skrzydeł</value>
+  </data>
+  <data name="Weapon kind" xml:space="preserve">
+    <value>Rodzaj broni</value>
+  </data>
+  <data name="Potion priority" xml:space="preserve">
+    <value>Priorytet mikstury</value>
+  </data>
+  <data name="Stats" xml:space="preserve">
+    <value>Statystyki</value>
+  </data>
+  <data name="Excellent bonus" xml:space="preserve">
+    <value>Premia doskonała</value>
+  </data>
+  <data name="Prices and profile" xml:space="preserve">
+    <value>Ceny i profil</value>
+  </data>
+  <data name="Stat profile" xml:space="preserve">
+    <value>Profil statystyk</value>
+  </data>
+  <data name="None" xml:space="preserve">
+    <value>Brak</value>
+  </data>
+  <data name="The profiles are in the item stat file; the number is how many items use one." xml:space="preserve">
+    <value>Profile są w pliku statystyk przedmiotów; liczba mówi, ile przedmiotów go używa.</value>
+  </data>
+  <data name="Resistances" xml:space="preserve">
+    <value>Odporności</value>
+  </data>
+  <data name="Requirements" xml:space="preserve">
+    <value>Wymagania</value>
+  </data>
+  <data name="By item level" xml:space="preserve">
+    <value>Według poziomu przedmiotu</value>
+  </data>
+  <data name="Classes" xml:space="preserve">
+    <value>Klasy</value>
+  </data>
+  <data name="A class with 0 cannot use the item; otherwise it needs that class step." xml:space="preserve">
+    <value>Klasa z 0 nie może używać przedmiotu; w przeciwnym razie potrzebuje tego stopnia klasy.</value>
+  </data>
+  <data name="Excellent options raise the level requirement" xml:space="preserve">
+    <value>Opcje doskonałe podnoszą wymagany poziom</value>
+  </data>
+  <data name="Item Model" xml:space="preserve">
+    <value>Model przedmiotu</value>
+  </data>
+  <data name="Find a model file" xml:space="preserve">
+    <value>Znajdź plik modelu</value>
+  </data>
+  <data name="The shared model {0} opens this file" xml:space="preserve">
+    <value>Model współdzielony {0} otwiera ten plik</value>
+  </data>
+  <data name="Use it" xml:space="preserve">
+    <value>Użyj go</value>
+  </data>
+  <data name="Other items name this file too ({0}); a shared model would open it once." xml:space="preserve">
+    <value>Inne przedmioty też wskazują ten plik ({0}); model współdzielony otworzyłby go raz.</value>
+  </data>
+  <data name="Use a shared model" xml:space="preserve">
+    <value>Użyj modelu współdzielonego</value>
+  </data>
+  <data name="The shared model {0} does not exist" xml:space="preserve">
+    <value>Model współdzielony {0} nie istnieje</value>
+  </data>
+  <data name="Apply to the shared model" xml:space="preserve">
+    <value>Zastosuj do modelu współdzielonego</value>
+  </data>
+  <data name="Revert" xml:space="preserve">
+    <value>Przywróć</value>
+  </data>
+  <data name="Make a copy for this item" xml:space="preserve">
+    <value>Utwórz kopię dla tego przedmiotu</value>
+  </data>
+  <data name="Shared model name" xml:space="preserve">
+    <value>Nazwa modelu współdzielonego</value>
+  </data>
+  <data name="Texture folders" xml:space="preserve">
+    <value>Foldery tekstur</value>
+  </data>
+  <data name="None-blend meshes" xml:space="preserve">
+    <value>Siatki bez mieszania</value>
+  </data>
+  <data name="Change a shared model" xml:space="preserve">
+    <value>Zmień model współdzielony</value>
+  </data>
+  <data name="The change reaches these {0} items:" xml:space="preserve">
+    <value>Zmiana obejmie te przedmioty ({0}):</value>
+  </data>
+  <data name="A name of letters and digits that no other shared model has" xml:space="preserve">
+    <value>Nazwa z liter i cyfr, której nie ma żaden inny model współdzielony</value>
+  </data>
+  <data name="Add a folder" xml:space="preserve">
+    <value>Dodaj folder</value>
+  </data>
+  <data name="Glows like other levels" xml:space="preserve">
+    <value>Świeci jak inne poziomy</value>
+  </data>
+  <data name="In the inventory" xml:space="preserve">
+    <value>W ekwipunku</value>
+  </data>
+  <data name="Anchor" xml:space="preserve">
+    <value>Punkt zaczepienia</value>
+  </data>
+  <data name="Offset" xml:space="preserve">
+    <value>Przesunięcie</value>
+  </data>
+  <data name="Rotation" xml:space="preserve">
+    <value>Obrót</value>
+  </data>
+  <data name="Scale" xml:space="preserve">
+    <value>Skala</value>
+  </data>
+  <data name="Body height" xml:space="preserve">
+    <value>Wysokość ciała</value>
+  </data>
+  <data name="On the ground" xml:space="preserve">
+    <value>Na ziemi</value>
+  </data>
+  <data name="Own scale" xml:space="preserve">
+    <value>Własna skala</value>
+  </data>
+  <data name="Worn as cloth" xml:space="preserve">
+    <value>Noszony jako ubranie</value>
+  </data>
+  <data name="Specular" xml:space="preserve">
+    <value>Odblask</value>
+  </data>
+  <data name="Glow color" xml:space="preserve">
+    <value>Kolor poświaty</value>
+  </data>
+  <data name="Glow meshes" xml:space="preserve">
+    <value>Siatki poświaty</value>
+  </data>
+  <data name="All meshes but this one" xml:space="preserve">
+    <value>Wszystkie siatki oprócz tej</value>
+  </data>
+  <data name="Shine color" xml:space="preserve">
+    <value>Kolor połysku</value>
+  </data>
+  <data name="Shine white" xml:space="preserve">
+    <value>Biały połysk</value>
+  </data>
+  <data name="Shine meshes" xml:space="preserve">
+    <value>Siatki połysku</value>
+  </data>
+  <data name="Ancient color" xml:space="preserve">
+    <value>Kolor starożytny</value>
+  </data>
+  <data name="Excellent glow" xml:space="preserve">
+    <value>Poświata doskonała</value>
+  </data>
+  <data name="Excellent mesh" xml:space="preserve">
+    <value>Siatka doskonała</value>
+  </data>
+  <data name="Excellent mesh without skin" xml:space="preserve">
+    <value>Siatka doskonała bez skóry</value>
+  </data>
+  <data name="The looks are drawing code; this picks which one the item uses." xml:space="preserve">
+    <value>Wygląd to kod rysowania; tu wybierasz, którego używa przedmiot.</value>
+  </data>
+  <data name="Remove the model entry" xml:space="preserve">
+    <value>Usuń wpis modelu</value>
+  </data>
+  <data name="Item Checks" xml:space="preserve">
+    <value>Kontrola przedmiotów</value>
+  </data>
+  <data name="Check" xml:space="preserve">
+    <value>Sprawdź</value>
+  </data>
+  <data name="Errors: {0}" xml:space="preserve">
+    <value>Błędy: {0}</value>
+  </data>
+  <data name="Warnings: {0}" xml:space="preserve">
+    <value>Ostrzeżenia: {0}</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Błąd</value>
+  </data>
+  <data name="Warning" xml:space="preserve">
+    <value>Ostrzeżenie</value>
+  </data>
+  <data name="Item" xml:space="preserve">
+    <value>Przedmiot</value>
+  </data>
+  <data name="Message" xml:space="preserve">
+    <value>Komunikat</value>
+  </data>
+  <data name="No errors or warnings" xml:space="preserve">
+    <value>Brak błędów i ostrzeżeń</value>
+  </data>
+  <data name="The items changed since the last check; check again." xml:space="preserve">
+    <value>Przedmioty zmieniły się od ostatniej kontroli; sprawdź ponownie.</value>
+  </data>
+  <data name="Save Items refuses data with errors and saves data with warnings." xml:space="preserve">
+    <value>Zapisz przedmioty odrzuca dane z błędami, a dane z ostrzeżeniami zapisuje.</value>
+  </data>
+  <data name="Click a problem of an item to select the item and open the tool of its field." xml:space="preserve">
+    <value>Kliknij problem przedmiotu, aby zaznaczyć przedmiot i otworzyć narzędzie jego pola.</value>
+  </data>
+  <data name="Item Rules" xml:space="preserve">
+    <value>Reguły przedmiotów</value>
+  </data>
+  <data name="Selected items: {0}" xml:space="preserve">
+    <value>Zaznaczone przedmioty: {0}</value>
+  </data>
+  <data name="Select several rows with Ctrl+click or Shift+click." xml:space="preserve">
+    <value>Zaznacz kilka wierszy przez Ctrl+klik lub Shift+klik.</value>
+  </data>
+  <data name="Allow for the selected items" xml:space="preserve">
+    <value>Zezwól dla zaznaczonych przedmiotów</value>
+  </data>
+  <data name="Forbid for the selected items" xml:space="preserve">
+    <value>Zabroń dla zaznaczonych przedmiotów</value>
+  </data>
+  <data name="Allow for {0} items: {1}" xml:space="preserve">
+    <value>Zezwól dla przedmiotów ({0}): {1}</value>
+  </data>
+  <data name="Forbid for {0} items: {1}" xml:space="preserve">
+    <value>Zabroń dla przedmiotów ({0}): {1}</value>
+  </data>
+  <data name="Exceptions by item level, durability or GM status are in the code." xml:space="preserve">
+    <value>Wyjątki według poziomu przedmiotu, wytrzymałości lub statusu GM są w kodzie.</value>
+  </data>
+  <data name="Item Categories" xml:space="preserve">
+    <value>Kategorie przedmiotów</value>
+  </data>
+  <data name="The selected item's tags:" xml:space="preserve">
+    <value>Tagi zaznaczonego przedmiotu:</value>
+  </data>
+  <data name="The selected item has no tags." xml:space="preserve">
+    <value>Zaznaczony przedmiot nie ma tagów.</value>
+  </data>
+  <data name="Add the selected item" xml:space="preserve">
+    <value>Dodaj zaznaczony przedmiot</value>
+  </data>
+  <data name="The selected item already has this tag." xml:space="preserve">
+    <value>Zaznaczony przedmiot ma już ten tag.</value>
+  </data>
+  <data name="No item has this tag." xml:space="preserve">
+    <value>Żaden przedmiot nie ma tego tagu.</value>
+  </data>
+  <data name="Add the tag {0}" xml:space="preserve">
+    <value>Dodaj tag {0}</value>
+  </data>
+  <data name="Remove the tag {0}" xml:space="preserve">
+    <value>Usuń tag {0}</value>
+  </data>
+  <data name="New tags need code that uses them (ItemTag in ItemTagSet.h)." xml:space="preserve">
+    <value>Nowe tagi wymagają kodu, który ich używa (ItemTag w ItemTagSet.h).</value>
+  </data>
+  <data name="The item is worn or in an item window: its size and slot stay as they are." xml:space="preserve">
+    <value>Przedmiot jest założony lub leży w oknie przedmiotów: jego rozmiar i slot zostają bez zmian.</value>
+  </data>
+  <data name="The item is worn or in an item window: it is not moved or removed." xml:space="preserve">
+    <value>Przedmiot jest założony lub leży w oknie przedmiotów: nie zostanie przeniesiony ani usunięty.</value>
+  </data>
+  <data name="kept its size and slot: it is worn or in an item window." xml:space="preserve">
+    <value>zachował rozmiar i slot: jest założony lub leży w oknie przedmiotów.</value>
+  </data>
+  <data name="Not done: the step would change an item that is worn or in an item window." xml:space="preserve">
+    <value>Nie wykonano: krok zmieniłby przedmiot, który jest założony lub leży w oknie przedmiotów.</value>
+  </data>
+  <data name="No item uses these shared models: {0}" xml:space="preserve">
+    <value>Żaden przedmiot nie używa tych modeli współdzielonych: {0}</value>
+  </data>
+  <data name="Remove them" xml:space="preserve">
+    <value>Usuń je</value>
+  </data>
+  <data name="Remove unused shared models" xml:space="preserve">
+    <value>Usuń nieużywane modele współdzielone</value>
+  </data>
+  <data name="Moves with it:" xml:space="preserve">
+    <value>Przenoszone razem z nim:</value>
+  </data>
+  <data name="Removed with it:" xml:space="preserve">
+    <value>Usuwane razem z nim:</value>
+  </data>
+  <data name="Select the item and show the Item Browser" xml:space="preserve">
+    <value>Zaznacz przedmiot i pokaż Przeglądarkę przedmiotów</value>
+  </data>
+  <data name="Requirements by item level" xml:space="preserve">
+    <value>Wymagania według poziomu przedmiotu</value>
+  </data>
+  <data name="Option level" xml:space="preserve">
+    <value>Poziom opcji</value>
+  </data>
+  <data name="Given by level" xml:space="preserve">
+    <value>Podane według poziomu</value>
+  </data>
+  <data name="The item has no requirements." xml:space="preserve">
+    <value>Przedmiot nie ma wymagań.</value>
+  </data>
+  <data name="Starts at what a normal item needs at each level and replaces the formula." xml:space="preserve">
+    <value>Zaczyna od tego, czego zwykły przedmiot potrzebuje na każdym poziomie, i zastępuje wzór.</value>
+  </data>
+  <data name="Excellent and ancient items get no higher requirement from it." xml:space="preserve">
+    <value>Przedmioty doskonałe i starożytne nie dostają przez to wyższego wymagania.</value>
+  </data>
+  <data name="Drawn by code" xml:space="preserve">
+    <value>Rysowany przez kod</value>
+  </data>
+  <data name="The game chooses these models by code; they are not edited here." xml:space="preserve">
+    <value>Gra wybiera te modele w kodzie; nie edytuje się ich tutaj.</value>
+  </data>
+  <data name="Not drawn" xml:space="preserve">
+    <value>Nie rysowany</value>
+  </data>
+  <data name="The model of {0}" xml:space="preserve">
+    <value>Model: {0}</value>
+  </data>
+  <data name="drawn small" xml:space="preserve">
+    <value>rysowany pomniejszony</value>
+  </data>
+  <data name="Excellent options still raise it, if they raise the level requirement." xml:space="preserve">
+    <value>Opcje doskonałe nadal go podnoszą, jeśli podnoszą wymagany poziom.</value>
+  </data>
+  <data name="The option level still adds to it." xml:space="preserve">
+    <value>Poziom opcji nadal się do niego dodaje.</value>
+  </data>
+  <data name="New glow color" xml:space="preserve">
+    <value>Nowy kolor poświaty</value>
+  </data>
+  <data name="A name of letters and digits that no other glow color has" xml:space="preserve">
+    <value>Nazwa z liter i cyfr, której nie ma żaden inny kolor poświaty</value>
+  </data>
+  <data name="Glow Colors" xml:space="preserve">
+    <value>Kolory poświaty</value>
+  </data>
+  <data name="The item models name these colors; the model tool picks an item's colors." xml:space="preserve">
+    <value>Modele przedmiotów wskazują te kolory; narzędzie modelu wybiera kolory przedmiotu.</value>
+  </data>
+  <data name="Pick a color in the list." xml:space="preserve">
+    <value>Wybierz kolor z listy.</value>
+  </data>
+  <data name="Apply to the glow color" xml:space="preserve">
+    <value>Zastosuj do koloru poświaty</value>
+  </data>
+  <data name="Change a glow color" xml:space="preserve">
+    <value>Zmień kolor poświaty</value>
+  </data>
+  <data name="Remove a glow color" xml:space="preserve">
+    <value>Usuń kolor poświaty</value>
+  </data>
+  <data name="A default color: items without colors of their own glow with it." xml:space="preserve">
+    <value>Kolor domyślny: przedmioty bez własnych kolorów świecą nim.</value>
+  </data>
+  <data name="Used by {0} items:" xml:space="preserve">
+    <value>Używany przez przedmioty ({0}):</value>
+  </data>
+  <data name="No item uses these glow colors: {0}" xml:space="preserve">
+    <value>Żaden przedmiot nie używa tych kolorów poświaty: {0}</value>
+  </data>
+  <data name="Remove unused glow colors" xml:space="preserve">
+    <value>Usuń nieużywane kolory poświaty</value>
+  </data>
+  <data name="Stats by item level" xml:space="preserve">
+    <value>Statystyki według poziomu przedmiotu</value>
+  </data>
+  <data name="The item has no damage, magic power, defense or block rate." xml:space="preserve">
+    <value>Przedmiot nie ma obrażeń, mocy magicznej, obrony ani współczynnika bloku.</value>
+  </data>
+  <data name="By the rules: {0}" xml:space="preserve">
+    <value>Według reguł: {0}</value>
+  </data>
+  <data name="Given by rule {0}" xml:space="preserve">
+    <value>Podane przez regułę {0}</value>
+  </data>
+  <data name="No rule matches: the default" xml:space="preserve">
+    <value>Żadna reguła nie pasuje: domyślny</value>
+  </data>
+  <data name="Picked for the item; the rules give {0}" xml:space="preserve">
+    <value>Wybrany dla przedmiotu; reguły dają {0}</value>
+  </data>
+  <data name="Weight" xml:space="preserve">
+    <value>Waga</value>
+  </data>
+  <data name="Weights {0} to {1} give {2}" xml:space="preserve">
+    <value>Wagi od {0} do {1} dają {2}</value>
+  </data>
+  <data name="Only weight {0} gives {1}" xml:space="preserve">
+    <value>Tylko waga {0} daje {1}</value>
+  </data>
+  <data name="No weight gives {0}" xml:space="preserve">
+    <value>Żadna waga nie daje {0}</value>
+  </data>
+  <data name="Weight 0: the item has no such requirement" xml:space="preserve">
+    <value>Waga 0: przedmiot nie ma takiego wymagania</value>
+  </data>
+  <data name="Pick a weight" xml:space="preserve">
+    <value>Wybierz wagę</value>
+  </data>
+  <data name="The weights {0} to {1} all give {2} at +0." xml:space="preserve">
+    <value>Wagi od {0} do {1} dają wszystkie {2} na +0.</value>
+  </data>
+  <data name="They differ at higher item levels and for excellent items." xml:space="preserve">
+    <value>Różnią się na wyższych poziomach przedmiotu i dla przedmiotów doskonałych.</value>
+  </data>
+  <data name="Excellent +0" xml:space="preserve">
+    <value>Doskonały +0</value>
+  </data>
+  <data name="Excellent +15" xml:space="preserve">
+    <value>Doskonały +15</value>
+  </data>
+  <data name="{0} (current)" xml:space="preserve">
+    <value>{0} (obecna)</value>
+  </data>
+  <data name="Take this weight" xml:space="preserve">
+    <value>Weź tę wagę</value>
+  </data>
+  <data name="No weight gives {0} at +0. The nearest values:" xml:space="preserve">
+    <value>Żadna waga nie daje {0} na +0. Najbliższe wartości:</value>
+  </data>
+  <data name="{0} (weight {1})" xml:space="preserve">
+    <value>{0} (waga {1})</value>
+  </data>
+  <data name="{0} (weights {1} to {2})" xml:space="preserve">
+    <value>{0} (wagi od {1} do {2})</value>
+  </data>
+  <data name="What a normal item needs at +0" xml:space="preserve">
+    <value>Czego zwykły przedmiot potrzebuje na +0 bez poziomu opcji, tak jak pokazuje to okno /&lt;nazwa przedmiotu&gt; w grze. Wpisana wartość ustawia wagę, która ją daje; gdy daje ją kilka, wybierasz jedną.</value>
+  </data>
+  <data name="What the weight is" xml:space="preserve">
+    <value>Wartość bazowa, którą przyjmuje wzór z pliku statystyk przedmiotów. Wagi obok dają tę samą wartość na +0 i różnią się na wyższych poziomach przedmiotu i dla przedmiotów doskonałych.</value>
+  </data>
+  <data name="The weights that give this +0 value" xml:space="preserve">
+    <value>Wagi, które dają tę wartość na +0, z tym, co każda daje na +15 i dla przedmiotów doskonałych.</value>
+  </data>
+  <data name="Formula weighted requirement" xml:space="preserve">
+    <value>{0} + {1} × ({2} + {3} × poziom przedmiotu) × {4} / 100</value>
+  </data>
+  <data name="Formula requirement from the level requirement" xml:space="preserve">
+    <value>{0} + {1} × {2} × {3} / 100 na każdym poziomie przedmiotu ({2}: wymagany poziom)</value>
+  </data>
+  <data name="Formula requirement from the level requirement by level" xml:space="preserve">
+    <value>{0} + {1} × wymagany poziom × {2} / 100 (wymagany poziom podany na każdym poziomie przedmiotu)</value>
+  </data>
+  <data name="Formula without a level requirement" xml:space="preserve">
+    <value>{0} (bez wymaganego poziomu: z poziomu dropu)</value>
+  </data>
+  <data name="Formula kept as is" xml:space="preserve">
+    <value>{0}, bez zmian</value>
+  </data>
+  <data name="Formula none" xml:space="preserve">
+    <value>brak</value>
+  </data>
+  <data name="Formula none with weight 0" xml:space="preserve">
+    <value>brak (waga 0); z wagą: {0}</value>
+  </data>
+  <data name="Formula weight" xml:space="preserve">
+    <value>waga</value>
+  </data>
+  <data name="Formula given by item level" xml:space="preserve">
+    <value>podane według poziomu przedmiotu: {0}</value>
+  </data>
+  <data name="Formula value at item levels" xml:space="preserve">
+    <value>{0} (od +{1} do +{2})</value>
+  </data>
+  <data name="Formula value at one item level" xml:space="preserve">
+    <value>{0} (+{1})</value>
+  </data>
+  <data name="Formula level growth" xml:space="preserve">
+    <value>{0} + {1} × poziom przedmiotu</value>
+  </data>
+  <data name="Formula the same at every item level" xml:space="preserve">
+    <value>{0} na każdym poziomie przedmiotu</value>
+  </data>
+  <data name="Formula excellent plus" xml:space="preserve">
+    <value>doskonały +{0}</value>
+  </data>
+  <data name="Formula excellent options do not raise it" xml:space="preserve">
+    <value>opcje doskonałe go nie podnoszą</value>
+  </data>
+  <data name="Formula wing options do not raise it" xml:space="preserve">
+    <value>opcje doskonałe skrzydeł to opcje skrzydeł i go nie podnoszą</value>
+  </data>
+  <data name="Formula per option level" xml:space="preserve">
+    <value>+ {0} × poziom opcji</value>
+  </data>
+  <data name="Formula no level bonus" xml:space="preserve">
+    <value>{0}, bez premii za poziom</value>
+  </data>
+  <data name="Formula excellent part" xml:space="preserve">
+    <value>doskonały +{0} ({1})</value>
+  </data>
+  <data name="Formula excellent part only when ancient" xml:space="preserve">
+    <value>doskonały +{0} ({1}) tylko gdy starożytny: opcje doskonałe skrzydeł to opcje skrzydeł</value>
+  </data>
+  <data name="Formula no excellent part" xml:space="preserve">
+    <value>bez części doskonałej</value>
+  </data>
+  <data name="Formula no excellent part at drop level 0" xml:space="preserve">
+    <value>bez części doskonałej (poziom dropu 0)</value>
+  </data>
+  <data name="Formula ancient part" xml:space="preserve">
+    <value>starożytny +{0} ({1})</value>
+  </data>
+  <data name="Formula ancient part with the level bonus" xml:space="preserve">
+    <value>starożytny +({0})</value>
+  </data>
+  <data name="Formula no ancient part" xml:space="preserve">
+    <value>bez części starożytnej</value>
+  </data>
+  <data name="Formula halved" xml:space="preserve">
+    <value>({0}) / 2 + {1} × poziom przedmiotu</value>
+  </data>
+  <data name="Formula at most" xml:space="preserve">
+    <value>{0}, najwyżej {1}</value>
+  </data>
+  <data name="Formula source item field" xml:space="preserve">
+    <value>przedmiot: {0}</value>
+  </data>
+  <data name="Formula drop level bonus" xml:space="preserve">
+    <value>Przedmioty doskonałe liczą {0} poziomów dropu więcej, starożytne bez opcji doskonałych {1} [dropLevelBonus].</value>
+  </data>
+  <data name="Item Formulas" xml:space="preserve">
+    <value>Wzory przedmiotów</value>
+  </data>
+  <data name="Damage" xml:space="preserve">
+    <value>Obrażenia</value>
+  </data>
+  <data name="Profiles" xml:space="preserve">
+    <value>Profile</value>
+  </data>
+  <data name="Tables" xml:space="preserve">
+    <value>Tabele</value>
+  </data>
+  <data name="New stat profile" xml:space="preserve">
+    <value>Nowy profil statystyk</value>
+  </data>
+  <data name="New level bonus table" xml:space="preserve">
+    <value>Nowa tabela premii za poziom</value>
+  </data>
+  <data name="Copy a stat profile" xml:space="preserve">
+    <value>Kopiuj profil statystyk</value>
+  </data>
+  <data name="Rename a stat profile" xml:space="preserve">
+    <value>Zmień nazwę profilu statystyk</value>
+  </data>
+  <data name="Remove a stat profile" xml:space="preserve">
+    <value>Usuń profil statystyk</value>
+  </data>
+  <data name="Copy a level bonus table" xml:space="preserve">
+    <value>Kopiuj tabelę premii za poziom</value>
+  </data>
+  <data name="Rename a level bonus table" xml:space="preserve">
+    <value>Zmień nazwę tabeli premii za poziom</value>
+  </data>
+  <data name="Remove a level bonus table" xml:space="preserve">
+    <value>Usuń tabelę premii za poziom</value>
+  </data>
+  <data name="Remove unused stat profiles" xml:space="preserve">
+    <value>Usuń nieużywane profile statystyk</value>
+  </data>
+  <data name="Remove unused level bonus tables" xml:space="preserve">
+    <value>Usuń nieużywane tabele premii za poziom</value>
+  </data>
+  <data name="Drop level bonus ({0}, {1})" xml:space="preserve">
+    <value>Premia poziomu dropu ({0}, {1})</value>
+  </data>
+  <data name="Drop level bonus" xml:space="preserve">
+    <value>Premia poziomu dropu</value>
+  </data>
+  <data name="Default ({0})" xml:space="preserve">
+    <value>Domyślny ({0})</value>
+  </data>
+  <data name="Used by {0} items and {1} rules" xml:space="preserve">
+    <value>Używany przez przedmioty: {0} i reguły: {1}</value>
+  </data>
+  <data name="Named by {0} stats and {1} item descriptions" xml:space="preserve">
+    <value>Wskazywany przez statystyki: {0} i opisy przedmiotów: {1}</value>
+  </data>
+  <data name="Item descriptions that name it" xml:space="preserve">
+    <value>Opisy przedmiotów, które go wskazują</value>
+  </data>
+  <data name="Pick an entry in the list." xml:space="preserve">
+    <value>Wybierz wpis z listy.</value>
+  </data>
+  <data name="Apply to the formulas" xml:space="preserve">
+    <value>Zastosuj do wzorów</value>
+  </data>
+  <data name="Change the item formulas" xml:space="preserve">
+    <value>Zmień wzory przedmiotów</value>
+  </data>
+  <data name="Not applied" xml:space="preserve">
+    <value>Nie zastosowano</value>
+  </data>
+  <data name="No item or rule uses these profiles: {0}" xml:space="preserve">
+    <value>Żaden przedmiot ani reguła nie używa tych profili: {0}</value>
+  </data>
+  <data name="No stat or item description uses these tables: {0}" xml:space="preserve">
+    <value>Żadna statystyka ani opis przedmiotu nie używa tych tabel: {0}</value>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>Zmień nazwę</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Kopiuj</value>
+  </data>
+  <data name="Caption" xml:space="preserve">
+    <value>Podpis</value>
+  </data>
+  <data name="Bonus at each item level" xml:space="preserve">
+    <value>Premia na każdym poziomie przedmiotu</value>
+  </data>
+  <data name="Added per level" xml:space="preserve">
+    <value>Dodawane na poziom</value>
+  </data>
+  <data name="Removed only while no item and no rule uses it." xml:space="preserve">
+    <value>Można usunąć tylko, gdy nie używa go żaden przedmiot ani reguła.</value>
+  </data>
+  <data name="Removed only while no stat and no item description names it." xml:space="preserve">
+    <value>Można usunąć tylko, gdy nie wskazuje go żadna statystyka ani opis przedmiotu.</value>
+  </data>
+  <data name="Override" xml:space="preserve">
+    <value>Nadpisz</value>
+  </data>
+  <data name="Reset to default" xml:space="preserve">
+    <value>Przywróć domyślne</value>
+  </data>
+  <data name="Inherited: {0}" xml:space="preserve">
+    <value>Dziedziczone: {0}</value>
+  </data>
+  <data name="Values" xml:space="preserve">
+    <value>Wartości</value>
+  </data>
+  <data name="Times" xml:space="preserve">
+    <value>Razy</value>
+  </data>
+  <data name="Plus" xml:space="preserve">
+    <value>Plus</value>
+  </data>
+  <data name="Drop level divisor" xml:space="preserve">
+    <value>Dzielnik poziomu dropu</value>
+  </data>
+  <data name="After the level bonus" xml:space="preserve">
+    <value>Po premii za poziom</value>
+  </data>
+  <data name="Level bonus table" xml:space="preserve">
+    <value>Tabela premii za poziom</value>
+  </data>
+  <data name="Excellent part" xml:space="preserve">
+    <value>Część doskonała</value>
+  </data>
+  <data name="Ancient part" xml:space="preserve">
+    <value>Część starożytna</value>
+  </data>
+  <data name="Per level after halving" xml:space="preserve">
+    <value>Na poziom po podzieleniu na pół</value>
+  </data>
+  <data name="Level requirement per item level" xml:space="preserve">
+    <value>Wymagany poziom na poziom przedmiotu</value>
+  </data>
+  <data name="Level added for excellent options" xml:space="preserve">
+    <value>Poziom dodawany za opcje doskonałe</value>
+  </data>
+  <data name="Strength per option level" xml:space="preserve">
+    <value>Siła na poziom opcji</value>
+  </data>
+  <data name="Base value" xml:space="preserve">
+    <value>Wartość bazowa</value>
+  </data>
+  <data name="Weight formula" xml:space="preserve">
+    <value>Wzór wagi</value>
+  </data>
+  <data name="From the level requirement" xml:space="preserve">
+    <value>Z wymaganego poziomu</value>
+  </data>
+  <data name="Level weight" xml:space="preserve">
+    <value>Waga poziomu</value>
+  </data>
+  <data name="Percent" xml:space="preserve">
+    <value>Procent</value>
+  </data>
+  <data name="Times {0}, plus {1}" xml:space="preserve">
+    <value>Razy {0}, plus {1}</value>
+  </data>
+  <data name="Drop level divided by {0}" xml:space="preserve">
+    <value>Poziom dropu podzielony przez {0}</value>
+  </data>
+  <data name="Plus {0}, level weight {1}, percent {2}" xml:space="preserve">
+    <value>Plus {0}, waga poziomu {1}, procent {2}</value>
+  </data>
+  <data name="The server keeps its own formulas" xml:space="preserve">
+    <value>Serwer (OpenMU) trzyma własne wzory, dopóki nie zostaną zsynchronizowane: to, co sprawdza i liczy, może się różnić od wyników tych wzorów.</value>
+  </data>
+  <data name="Items keep their values until made again" xml:space="preserve">
+    <value>Przedmioty, które Twoja postać już ma, zachowują swoje wartości, dopóki nie zostaną utworzone ponownie (np. po ponownym zalogowaniu).</value>
+  </data>
+  <data name="What the drop level bonus is" xml:space="preserve">
+    <value>Dodawane do poziomu dropu przedmiotów z opcjami doskonałymi przy ich wymaganiach, a przedmiotów starożytnych przy starożytnej części ich statystyk oraz, bez opcji doskonałych, przy ich wymaganiach.</value>
+  </data>
+  <data name="The default writes every term" xml:space="preserve">
+    <value>Domyślny zapisuje każdy składnik; profil zaczyna od niego i zapisuje tylko to, co się różni.</value>
+  </data>
+  <data name="A profile writes only what differs from the default" xml:space="preserve">
+    <value>Profil zapisuje tylko to, co różni się od domyślnego: Nadpisz bierze składnik do profilu, Przywróć domyślne znowu go usuwa.</value>
+  </data>
+  <data name="Added for every level, also above +15" xml:space="preserve">
+    <value>Dodawane na każdy poziom przedmiotu, także powyżej +15, gdzie zostaje wartość +15 z listy.</value>
+  </data>
+  <data name="A free name of letters and digits" xml:space="preserve">
+    <value>Nazwa z liter i cyfr, której nie ma żaden inny profil ani tabela tego rodzaju (nie „default”).</value>
+  </data>
+  <data name="Profile rules" xml:space="preserve">
+    <value>Reguły profili</value>
+  </data>
+  <data name="Profile rules ({0})" xml:space="preserve">
+    <value>Reguły profili ({0})</value>
+  </data>
+  <data name="Conditions" xml:space="preserve">
+    <value>Warunki</value>
+  </data>
+  <data name="Every item" xml:space="preserve">
+    <value>Każdy przedmiot</value>
+  </data>
+  <data name="New rule" xml:space="preserve">
+    <value>Nowa reguła</value>
+  </data>
+  <data name="Move up" xml:space="preserve">
+    <value>Przesuń w górę</value>
+  </data>
+  <data name="Move down" xml:space="preserve">
+    <value>Przesuń w dół</value>
+  </data>
+  <data name="Remove the rule" xml:space="preserve">
+    <value>Usuń regułę</value>
+  </data>
+  <data name="Rule {0}" xml:space="preserve">
+    <value>Reguła {0}</value>
+  </data>
+  <data name="Base requirement above 0" xml:space="preserve">
+    <value>Wymaganie bazowe powyżej 0</value>
+  </data>
+  <data name="Matches {0} items" xml:space="preserve">
+    <value>Pasujące przedmioty: {0}</value>
+  </data>
+  <data name="How the profile rules work" xml:space="preserve">
+    <value>Pierwsza reguła, której warunki przedmiot spełnia, nadaje mu profil statystyk (przedmiot spełnia warunek, gdy ma jedną z jego wartości); przedmiot, który nie spełnia żadnej, ma domyślny. Profil wybrany dla przedmiotu (Podstawy przedmiotu) zostaje. Zaznaczona reguła to reguła zaznaczonego przedmiotu.</value>
+  </data>
+  <data name="Formula level requirement or drop level" xml:space="preserve">
+    <value>{0}; tam, gdzie wymagany poziom wynosi 0: {1}</value>
+  </data>
+  <data name="Formula excellent plus where it is above 0" xml:space="preserve">
+    <value>doskonały +{0} tam, gdzie jest powyżej 0</value>
+  </data>
+  <data name="By the group: {0}" xml:space="preserve">
+    <value>Według grupy: {0}</value>
+  </data>
+  <data name="Apply or revert the changes first." xml:space="preserve">
+    <value>Najpierw zastosuj lub cofnij zmiany.</value>
+  </data>
+  <data name="Server List" xml:space="preserve">
+    <value>Lista serwerów</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Zapisz</value>
+  </data>
+  <data name="Reads {0} again; unsaved changes are lost." xml:space="preserve">
+    <value>Ponownie wczytuje {0}; niezapisane zmiany przepadną.</value>
+  </data>
+  <data name="Unsaved changes" xml:space="preserve">
+    <value>Niezapisane zmiany</value>
+  </data>
+  <data name="Saved to {0}" xml:space="preserve">
+    <value>Zapisano do {0}</value>
+  </data>
+  <data name="Not saved, see the problems below." xml:space="preserve">
+    <value>Nie zapisano, zobacz problemy poniżej.</value>
+  </data>
+  <data name="Problems in {0}:" xml:space="preserve">
+    <value>Problemy w {0}:</value>
+  </data>
+  <data name="New Group" xml:space="preserve">
+    <value>Nowa grupa</value>
+  </data>
+  <data name="Group ID" xml:space="preserve">
+    <value>ID grupy</value>
+  </data>
+  <data name="Servers {0} to {1}" xml:space="preserve">
+    <value>Serwery od {0} do {1}</value>
+  </data>
+  <data name="Another group has the ID {0}." xml:space="preserve">
+    <value>Inna grupa ma ID {0}.</value>
+  </data>
+  <data name="A group needs a name." xml:space="preserve">
+    <value>Grupa potrzebuje nazwy.</value>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>Opis</value>
+  </data>
+  <data name="Description note" xml:space="preserve">
+    <value>Wyświetlany pod kanałami, gdy grupa jest zaznaczona.</value>
+  </data>
+  <data name="Test server" xml:space="preserve">
+    <value>Serwer testowy</value>
+  </data>
+  <data name="Test server note" xml:space="preserve">
+    <value>Ekran logowania pokazuje tylko pierwszą grupę serwerów testowych, na jej miejscu na liście.</value>
+  </data>
+  <data name="Channel" xml:space="preserve">
+    <value>Kanał</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Typ</value>
+  </data>
+  <data name="On the login screen" xml:space="preserve">
+    <value>Na ekranie logowania</value>
+  </data>
+  <data name="Connect server" xml:space="preserve">
+    <value>Connect Server</value>
+  </data>
+  <data name="Normal" xml:space="preserve">
+    <value>Normalny</value>
+  </data>
+  <data name="Non-PvP" xml:space="preserve">
+    <value>Non-PvP</value>
+  </data>
+  <data name="Gold PvP" xml:space="preserve">
+    <value>Gold PvP</value>
+  </data>
+  <data name="Gold" xml:space="preserve">
+    <value>Gold</value>
+  </data>
+  <data name="Sent, {0}% load" xml:space="preserve">
+    <value>Wysłany, obciążenie {0}%</value>
+  </data>
+  <data name="Groups the list does not have" xml:space="preserve">
+    <value>Connect Server wysłał serwery z grup, których nie ma na liście; ekran logowania ich nie pokazuje:</value>
+  </data>
+  <data name="Group {0}: servers {1}" xml:space="preserve">
+    <value>Grupa {0}: serwery {1}</value>
+  </data>
+  <data name="Pick a group in the list." xml:space="preserve">
+    <value>Wybierz grupę z listy.</value>
+  </data>
+  <data name="Server list order note" xml:space="preserve">
+    <value>Kolejność na liście to kolejność przycisków na ekranie logowania, który od razu pokazuje każdą zmianę. Zapisz zapisuje {0}.</value>
+  </data>
+  <data name="Save off after read errors" xml:space="preserve">
+    <value>Plik miał błędy przy wczytywaniu, więc lista zawiera tylko grupy, które udało się wczytać. Zapisz jest wyłączone, dopóki plik nie zostanie poprawiony, a Przywróć wczyta go ponownie; zapis usunąłby z pliku pozostałe grupy.</value>
+  </data>
+  <data name="Step add" xml:space="preserve">
+    <value>Dodaj {0}</value>
+  </data>
+  <data name="Step remove" xml:space="preserve">
+    <value>Usuń {0}</value>
+  </data>
+  <data name="Step move" xml:space="preserve">
+    <value>Przenieś {0}</value>
+  </data>
+  <data name="Step name" xml:space="preserve">
+    <value>{0}: nazwa</value>
+  </data>
+  <data name="Step ID" xml:space="preserve">
+    <value>{0}: ID</value>
+  </data>
+  <data name="Step description" xml:space="preserve">
+    <value>{0}: opis</value>
+  </data>
+  <data name="Step test server" xml:space="preserve">
+    <value>{0}: serwer testowy</value>
+  </data>
+  <data name="Step channel" xml:space="preserve">
+    <value>{0}: kanał {1}</value>
+  </data>
+  <data name="Monster Browser" xml:space="preserve">
+    <value>Przeglądarka potworów</value>
+  </data>
+  <data name="Monster Translations" xml:space="preserve">
+    <value>Tłumaczenia potworów</value>
+  </data>
+  <data name="Monster Checks" xml:space="preserve">
+    <value>Kontrola potworów</value>
+  </data>
+  <data name="The monsters changed since this step; it is not undone." xml:space="preserve">
+    <value>Potwory zmieniły się od tego kroku; nie zostanie on cofnięty.</value>
+  </data>
+  <data name="Save Monsters" xml:space="preserve">
+    <value>Zapisz potwory</value>
+  </data>
+  <data name="Add monster" xml:space="preserve">
+    <value>Dodaj potwora</value>
+  </data>
+  <data name="Copy monster" xml:space="preserve">
+    <value>Kopiuj potwora</value>
+  </data>
+  <data name="Remove monster" xml:space="preserve">
+    <value>Usuń potwora</value>
+  </data>
+  <data name="All kinds" xml:space="preserve">
+    <value>Wszystkie rodzaje</value>
+  </data>
+  <data name="All monsters" xml:space="preserve">
+    <value>Wszystkie potwory</value>
+  </data>
+  <data name="Kind monster" xml:space="preserve">
+    <value>Potwór</value>
+  </data>
+  <data name="Kind NPC" xml:space="preserve">
+    <value>NPC</value>
+  </data>
+  <data name="Kind trap" xml:space="preserve">
+    <value>Pułapka</value>
+  </data>
+  <data name="Kind other" xml:space="preserve">
+    <value>Inne</value>
+  </data>
+  <data name="Step kind" xml:space="preserve">
+    <value>{0}: rodzaj</value>
+  </data>
+  <data name="Copy monster note" xml:space="preserve">
+    <value>Kopia {0} tylko z nazwą angielską, bez tłumaczeń.</value>
+  </data>
+  <data name="The monster entry is removed." xml:space="preserve">
+    <value>Wpis potwora zostanie usunięty.</value>
+  </data>
+  <data name="Monster without entry in game" xml:space="preserve">
+    <value>Bez wpisu potwór o tym numerze, który się pojawi, dostaje nazwę z kodu (często starą koreańską) albo żadną, a rodzaj określa stary numer: {0}. Okna questów nazywają go „()”.</value>
+  </data>
+  <data name="Removed monster in game" xml:space="preserve">
+    <value>Potwory i NPC o tym numerze, które są w grze, zachowują nazwę i rodzaj, dopóki nie pojawią się ponownie.</value>
+  </data>
+  <data name="Kind change in game" xml:space="preserve">
+    <value>Potwory i NPC o tym numerze, które są w grze, zachowują rodzaj, dopóki nie pojawią się ponownie.</value>
+  </data>
+  <data name="Nothing uses the monster" xml:space="preserve">
+    <value>Nic nie używa tego potwora</value>
+  </data>
+  <data name="The sources were not found: code that names the monster is not known." xml:space="preserve">
+    <value>Nie znaleziono źródeł: kod, który nazywa tego potwora, jest nieznany.</value>
+  </data>
+  <data name="Monster code references limit" xml:space="preserve">
+    <value>Nie znaleziono: kod, który używa numeru w inny sposób, np. etykieta case, argument funkcji albo zmienna, której nazwa nie kończy się na MonsterIndex.</value>
+  </data>
+  <data name="NPC of the quests {0}" xml:space="preserve">
+    <value>NPC questów: {0}</value>
+  </data>
+  <data name="Killed in the quests {0}" xml:space="preserve">
+    <value>Do zabicia w questach: {0}</value>
+  </data>
+  <data name="Dialogues of the quest system {0}" xml:space="preserve">
+    <value>Stany dialogu systemu questów: {0}</value>
+  </data>
+  <data name="Monster names cannot contain the separator" xml:space="preserve">
+    <value>Nazwa potwora nie może zawierać „||”.</value>
+  </data>
+  <data name="Select the monster and show the Monster Browser" xml:space="preserve">
+    <value>Zaznacz potwora i pokaż Przeglądarkę potworów</value>
+  </data>
+  <data name="Step monster name" xml:space="preserve">
+    <value>{0}: nazwa ({1})</value>
+  </data>
+  <data name="Import names from NpcName txt" xml:space="preserve">
+    <value>Importuj nazwy z NpcName txt</value>
+  </data>
+  <data name="Export as NpcName txt" xml:space="preserve">
+    <value>Eksportuj jako NpcName txt</value>
+  </data>
+  <data name="Import NpcName txt note" xml:space="preserve">
+    <value>Wczytuje {0} i ustawia nazwy potworów, które mają wpis; Cofnij wycofuje cały import naraz. Bramy Kalimy (152-158) i numery bez wpisu są pomijane. Pusta nazwa usuwa tłumaczenie; nazwa angielska nigdy nie jest czyszczona. Nazwa równa angielskiej pozostaje brakująca tam, gdzie potwór nie ma własnej nazwy w danym języku, bo Eksport zapisuje tam nazwę angielską.</value>
+  </data>
+  <data name="Export NpcName txt note" xml:space="preserve">
+    <value>Zapisuje nazwy wszystkich potworów do {0}, po angielsku tam, gdzie język nie ma własnej nazwy. Plik, który się zmienia, najpierw dostaje kopię zapasową.</value>
+  </data>
+  <data name="NpcName import line" xml:space="preserve">
+    <value>{0}: wczytane nazwy {1}, zmienione {2}, pominięte {3}, obcięte {4}</value>
+  </data>
+  <data name="NpcName export line" xml:space="preserve">
+    <value>{0}: zapisane nazwy {1}, w tym po angielsku {2}</value>
+  </data>
+  <data name="NpcName export unchanged" xml:space="preserve">
+    <value>{0}: ma już te nazwy; nie zapisano</value>
+  </data>
+  <data name="Monster names imported" xml:space="preserve">
+    <value>Zaimportowano nazwy, zmienione: {0}. Zobacz konsolę.</value>
+  </data>
+  <data name="Monster names exported" xml:space="preserve">
+    <value>Wyeksportowano nazwy do {0}. Zobacz konsolę.</value>
+  </data>
+  <data name="Monster names not exported" xml:space="preserve">
+    <value>Nie wszystkie pliki zostały zapisane. Zobacz konsolę.</value>
+  </data>
+  <data name="Monster" xml:space="preserve">
+    <value>Potwór</value>
+  </data>
+  <data name="The monsters changed since the last check; check again." xml:space="preserve">
+    <value>Potwory zmieniły się od ostatniej kontroli; sprawdź ponownie.</value>
+  </data>
+  <data name="Save Monsters refuses data with errors and saves data with warnings." xml:space="preserve">
+    <value>Zapisz potwory odrzuca dane z błędami, a dane z ostrzeżeniami zapisuje.</value>
+  </data>
+  <data name="Monster checks click note" xml:space="preserve">
+    <value>Kliknij problem potwora, aby zaznaczyć potwora i otworzyć narzędzie jego pola.</value>
+  </data>
+  <data name="Item Sync" xml:space="preserve">
+    <value>Synchronizacja przedmiotów</value>
+  </data>
+  <data name="Import..." xml:space="preserve">
+    <value>Importuj…</value>
+  </data>
+  <data name="Export..." xml:space="preserve">
+    <value>Eksportuj…</value>
+  </data>
+  <data name="Exchange file" xml:space="preserve">
+    <value>Plik wymiany</value>
+  </data>
+  <data name="Compare again" xml:space="preserve">
+    <value>Porównaj ponownie</value>
+  </data>
+  <data name="What Import and Export do" xml:space="preserve">
+    <value>Import pokazuje, czym plik różni się od przedmiotów i wzorów klienta, tylko to, co się różni (to, co jest takie samo po obu stronach, jest pomijane), i przejmuje zaznaczone wartości do klienta. Eksport zapisuje przedmioty i wzory klienta do pliku.</value>
+  </data>
+  <data name="Import from {0}" xml:space="preserve">
+    <value>Importuj z {0}</value>
+  </data>
+  <data name="From OpenMU, server {0}" xml:space="preserve">
+    <value>Z OpenMU, serwer {0}</value>
+  </data>
+  <data name="The diff counts" xml:space="preserve">
+    <value>Przedmioty: dodane {0}, zmienione {1}, usunięte {2}; wpisy wzorów: {3}</value>
+  </data>
+  <data name="Check all" xml:space="preserve">
+    <value>Zaznacz wszystkie</value>
+  </data>
+  <data name="Check none" xml:space="preserve">
+    <value>Odznacz wszystkie</value>
+  </data>
+  <data name="A field in all items" xml:space="preserve">
+    <value>Pole we wszystkich przedmiotach</value>
+  </data>
+  <data name="Check them" xml:space="preserve">
+    <value>Zaznacz je</value>
+  </data>
+  <data name="Uncheck them" xml:space="preserve">
+    <value>Odznacz je</value>
+  </data>
+  <data name="Changed" xml:space="preserve">
+    <value>Zmienione</value>
+  </data>
+  <data name="Removed" xml:space="preserve">
+    <value>Usunięte</value>
+  </data>
+  <data name="Fields" xml:space="preserve">
+    <value>Pola</value>
+  </data>
+  <data name="Now" xml:space="preserve">
+    <value>Teraz</value>
+  </data>
+  <data name="From the file" xml:space="preserve">
+    <value>Z pliku</value>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Uwaga</value>
+  </data>
+  <data name="Entry" xml:space="preserve">
+    <value>Wpis</value>
+  </data>
+  <data name="Known" xml:space="preserve">
+    <value>Znana</value>
+  </data>
+  <data name="What a known difference is" xml:space="preserve">
+    <value>Znana różnica: celowo różni się między klientem a serwerem, więc zostaje odznaczona. Zapisana w Data/Items/Sync/KnownDifferences.json.</value>
+  </data>
+  <data name="OpenMU keeps the drop level in a byte (at most 255)" xml:space="preserve">
+    <value>OpenMU trzyma poziom dropu w bajcie (najwyżej 255)</value>
+  </data>
+  <data name="It has no model yet" xml:space="preserve">
+    <value>Nie ma jeszcze modelu</value>
+  </data>
+  <data name="Its profile rules give {0}, the file {1}" xml:space="preserve">
+    <value>Reguły profili dają {0}, plik {1}: może brakować poziomu skrzydeł lub tagu</value>
+  </data>
+  <data name="Apply the checked changes" xml:space="preserve">
+    <value>Zastosuj zaznaczone zmiany</value>
+  </data>
+  <data name="Import items" xml:space="preserve">
+    <value>Importuj przedmioty</value>
+  </data>
+  <data name="The checks refuse the change" xml:space="preserve">
+    <value>Kontrola odrzuca zmianę; wiersze przedmiotów z błędami zostały odznaczone, a gdy błąd mają wzory, wszystkie wiersze wzorów:</value>
+  </data>
+  <data name="Fields of {0}" xml:space="preserve">
+    <value>Pola {0}</value>
+  </data>
+  <data name="Item exchange files" xml:space="preserve">
+    <value>Pliki wymiany przedmiotów</value>
+  </data>
+  <data name="The client data changed since the comparison" xml:space="preserve">
+    <value>Dane klienta zmieniły się od porównania: porównaj ponownie.</value>
+  </data>
+  <data name="It is in the file more than once" xml:space="preserve">
+    <value>Jest w pliku więcej niż raz: zostaje taki, jak w kliencie</value>
+  </data>
+  <data name="How to see differences" xml:space="preserve">
+    <value>Aby zobaczyć różnice, zmień przedmiot w edytorze lub w pliku albo wybierz inny plik, a potem porównaj ponownie.</value>
+  </data>
+  <data name="The file matches the client" xml:space="preserve">
+    <value>Plik zgadza się z klientem: nic się nie różni.</value>
+  </data>
+  <data name="The file matches the client in all items" xml:space="preserve">
+    <value>Plik zgadza się z klientem we wszystkich przedmiotach; nie ma wzorów do porównania.</value>
+  </data>
+  <data name="Items that differ ({0} of {1})" xml:space="preserve">
+    <value>Przedmioty, które się różnią ({0} z {1})</value>
+  </data>
+  <data name="Formula entries that differ ({0} of {1})" xml:space="preserve">
+    <value>Wpisy wzorów, które się różnią ({0} z {1})</value>
+  </data>
+  <data name="Items: all {0} are the same" xml:space="preserve">
+    <value>Przedmioty: wszystkie ({0}) są takie same w kliencie i w pliku.</value>
+  </data>
+  <data name="Formula entries: all {0} are the same" xml:space="preserve">
+    <value>Wpisy wzorów: wszystkie ({0}) są takie same w kliencie i w pliku.</value>
+  </data>
+  <data name="Formulas: not compared, the file has none" xml:space="preserve">
+    <value>Wzory: nie porównano, plik ich nie ma. Wzory klienta zostają bez zmian.</value>
+  </data>
+  <data name="Applied: {0} items and {1} formula entries" xml:space="preserve">
+    <value>Zastosowano jako jeden krok historii cofania: przedmioty: {0}, wpisy wzorów: {1}. To, co zastosowano, już się nie różni.</value>
+  </data>
+  <data name="Still listed below: the rows that were not checked" xml:space="preserve">
+    <value>Nadal na liście poniżej, odznaczone: to, czego nie zaznaczono lub nie da się zastosować.</value>
+  </data>
+  <data name="After applying, the window compares again" xml:space="preserve">
+    <value>Po zastosowaniu okno porównuje ponownie: to, co zastosowano, już się nie różni i znika z listy.</value>
+  </data>
+  <data name="Nothing is checked" xml:space="preserve">
+    <value>Nic nie jest zaznaczone.</value>
+  </data>
+  <data name="The path is not the compared file" xml:space="preserve">
+    <value>Ścieżka w polu nie wskazuje porównanego pliku: porównaj ponownie.</value>
+  </data>
+  <data name="The item is worn or in an item window, it is not added" xml:space="preserve">
+    <value>Przedmiot jest założony lub leży w oknie przedmiotów: dopóki tak jest, nie zostanie dodany.</value>
+  </data>
+  <data name="Added" xml:space="preserve">
+    <value>Dodane</value>
+  </data>
+  <data name="In the client" xml:space="preserve">
+    <value>W kliencie</value>
+  </data>
+  <data name="Apply" xml:space="preserve">
+    <value>Zastosuj</value>
+  </data>
+  <data name="Replace" xml:space="preserve">
+    <value>Zastąp</value>
+  </data>
+  <data name="Apply the import" xml:space="preserve">
+    <value>Zastosuj import</value>
+  </data>
+  <data name="The import changes" xml:space="preserve">
+    <value>Zmienia przedmioty i wzory klienta zaznaczonymi wierszami z {0}: przedmioty dodane {1}, zmienione {2}, usunięte {3}; zmienione wpisy wzorów: {4}.</value>
+  </data>
+  <data name="What the import leaves" xml:space="preserve">
+    <value>Wszystko, co nie jest zaznaczone lub nie jest na liście, zostaje bez zmian. Cofnij wycofuje cały import.</value>
+  </data>
+  <data name="Replace the exchange file" xml:space="preserve">
+    <value>Zastąp plik wymiany</value>
+  </data>
+  <data name="The export changes" xml:space="preserve">
+    <value>{0} dostaje przedmioty i wzory klienta: przedmioty dodane {1}, zmienione {2}, usunięte {3}; zmienione wpisy wzorów: {4}.</value>
+  </data>
+  <data name="The export changes, the formulas are added" xml:space="preserve">
+    <value>{0} dostaje przedmioty i wzory klienta: przedmioty dodane {1}, zmienione {2}, usunięte {3}; wzory zostaną dodane.</value>
+  </data>
+  <data name="The file cannot be read, replace it" xml:space="preserve">
+    <value>Nie da się wczytać {0} jako pliku wymiany przedmiotów. Zastąpić go przedmiotami i wzorami klienta?</value>
+  </data>
+  <data name="The file already has the client data" xml:space="preserve">
+    <value>{0} ma już przedmioty i wzory klienta: nie ma czego zapisać.</value>
+  </data>
+  <data name="The export could not be written" xml:space="preserve">
+    <value>Nie udało się zapisać eksportu:</value>
+  </data>
+  <data name="Exported {0} items to {1}" xml:space="preserve">
+    <value>Wyeksportowano przedmioty ({0}) i wszystkie wzory do {1}.</value>
+  </data>
+  <data name="Compare two files" xml:space="preserve">
+    <value>Porównaj dwa pliki</value>
+  </data>
+  <data name="What comparing files does" xml:space="preserve">
+    <value>Porównuje dwa pliki wymiany, np. eksport klienta z eksportem serwera: co zmienia się z pliku A na plik B, w każdym języku. Nic nie jest stosowane; różnicę można oznaczyć jako znaną.</value>
+  </data>
+  <data name="File A" xml:space="preserve">
+    <value>Plik A</value>
+  </data>
+  <data name="File B" xml:space="preserve">
+    <value>Plik B</value>
+  </data>
+  <data name="Pick..." xml:space="preserve">
+    <value>Wybierz…</value>
+  </data>
+  <data name="Swap" xml:space="preserve">
+    <value>Zamień</value>
+  </data>
+  <data name="Compare the files" xml:space="preserve">
+    <value>Porównaj pliki</value>
+  </data>
+  <data name="File A: {0}" xml:space="preserve">
+    <value>Plik A: {0}</value>
+  </data>
+  <data name="File B: {0}" xml:space="preserve">
+    <value>Plik B: {0}</value>
+  </data>
+  <data name="The files match" xml:space="preserve">
+    <value>Pliki mają te same przedmioty i wzory.</value>
+  </data>
+  <data name="The files match in all items" xml:space="preserve">
+    <value>Pliki mają te same przedmioty; wzorów nie porównano, jeden z plików ich nie ma.</value>
+  </data>
+  <data name="The file diff counts" xml:space="preserve">
+    <value>Z pliku A na plik B: przedmioty dodane {0}, zmienione {1}, usunięte {2}; wpisy wzorów: {3}</value>
+  </data>
+  <data name="From A to B" xml:space="preserve">
+    <value>Z A na B</value>
+  </data>
+  <data name="Items: all {0} are the same in both files" xml:space="preserve">
+    <value>Przedmioty: wszystkie ({0}) są takie same w obu plikach.</value>
+  </data>
+  <data name="Formula entries: all {0} are the same in both files" xml:space="preserve">
+    <value>Wpisy wzorów: wszystkie ({0}) są takie same w obu plikach.</value>
+  </data>
+  <data name="Formulas: not compared, a file has none" xml:space="preserve">
+    <value>Wzory: nie porównano, jeden z plików ich nie ma.</value>
+  </data>
+  <data name="It is in file A more than once" xml:space="preserve">
+    <value>Jest w pliku A więcej niż raz, więc nie jest porównywany.</value>
+  </data>
+  <data name="It is in file B more than once" xml:space="preserve">
+    <value>Jest w pliku B więcej niż raz, więc nie jest porównywany.</value>
+  </data>
+  <data name="And {0} more" xml:space="preserve">
+    <value>i jeszcze {0}</value>
+  </data>
+  <data name="Animation" xml:space="preserve">
+    <value>Animacja</value>
+  </data>
+  <data name="Animations" xml:space="preserve">
+    <value>Animacje</value>
+  </data>
+  <data name="As a transformed player" xml:space="preserve">
+    <value>Jako przemieniony gracz</value>
+  </data>
+  <data name="As the file has it" xml:space="preserve">
+    <value>tak jak w pliku</value>
+  </data>
+  <data name="Attack sound 1" xml:space="preserve">
+    <value>Dźwięk ataku 1</value>
+  </data>
+  <data name="Attack sound 2" xml:space="preserve">
+    <value>Dźwięk ataku 2</value>
+  </data>
+  <data name="Bounding box max" xml:space="preserve">
+    <value>Obszar ograniczający max</value>
+  </data>
+  <data name="Bounding box min" xml:space="preserve">
+    <value>Obszar ograniczający min</value>
+  </data>
+  <data name="Die sound" xml:space="preserve">
+    <value>Dźwięk śmierci</value>
+  </data>
+  <data name="Fixed bitmaps" xml:space="preserve">
+    <value>Bitmapy w stałych slotach</value>
+  </data>
+  <data name="Frame" xml:space="preserve">
+    <value>Klatka</value>
+  </data>
+  <data name="From the start" xml:space="preserve">
+    <value>Od początku</value>
+  </data>
+  <data name="Game speed factors" xml:space="preserve">
+    <value>Współczynniki prędkości gry</value>
+  </data>
+  <data name="Head bone" xml:space="preserve">
+    <value>Kość głowy</value>
+  </data>
+  <data name="Hit at frame {0}" xml:space="preserve">
+    <value>trafienie w klatce {0}</value>
+  </data>
+  <data name="Holds its last frame" xml:space="preserve">
+    <value>zatrzymuje się na ostatniej klatce</value>
+  </data>
+  <data name="Holds last frame" xml:space="preserve">
+    <value>Zatrzymuje ostatnią klatkę</value>
+  </data>
+  <data name="Idle sound 1" xml:space="preserve">
+    <value>Dźwięk bezczynności 1</value>
+  </data>
+  <data name="Idle sound 2" xml:space="preserve">
+    <value>Dźwięk bezczynności 2</value>
+  </data>
+  <data name="In game" xml:space="preserve">
+    <value>W grze</value>
+  </data>
+  <data name="In game: {0}" xml:space="preserve">
+    <value>w grze: {0}</value>
+  </data>
+  <data name="Meshes without blending" xml:space="preserve">
+    <value>Siatki bez mieszania</value>
+  </data>
+  <data name="Monster Model" xml:space="preserve">
+    <value>Model potwora</value>
+  </data>
+  <data name="Monster Preview" xml:space="preserve">
+    <value>Podgląd potwora</value>
+  </data>
+  <data name="Monster range" xml:space="preserve">
+    <value>zakres potworów</value>
+  </data>
+  <data name="Monster range note" xml:space="preserve">
+    <value>Kod zakresu potworów: model umiera z kałużą krwi i pozostaje martwy, po stop2, szoku i atakach wraca do stop1, trafienie ataków 1 i 2 zadaje w klatce 5 i jest zwalniany przy zmianie mapy.</value>
+  </data>
+  <data name="Monsters with the model" xml:space="preserve">
+    <value>Potwory z tym modelem:</value>
+  </data>
+  <data name="More of the model entry" xml:space="preserve">
+    <value>Więcej z wpisu modelu</value>
+  </data>
+  <data name="No monster at this number" xml:space="preserve">
+    <value>Brak potwora o tym numerze</value>
+  </data>
+  <data name="No monster is selected" xml:space="preserve">
+    <value>Nie zaznaczono potwora</value>
+  </data>
+  <data name="No sound" xml:space="preserve">
+    <value>(brak dźwięku)</value>
+  </data>
+  <data name="Not in the client folder" xml:space="preserve">
+    <value>nie ma w folderze klienta</value>
+  </data>
+  <data name="Npc range" xml:space="preserve">
+    <value>zakres NPC</value>
+  </data>
+  <data name="Npc range note" xml:space="preserve">
+    <value>Kod zakresu NPC: bez kałuży krwi i bez klatki uderzenia; niektóre NPC wybierają następną animację w kodzie.</value>
+  </data>
+  <data name="Number of its file" xml:space="preserve">
+    <value>numer swojego pliku</value>
+  </data>
+  <data name="Part models" xml:space="preserve">
+    <value>Modele części</value>
+  </data>
+  <data name="Play animation" xml:space="preserve">
+    <value>Odtwórz</value>
+  </data>
+  <data name="Play this sound" xml:space="preserve">
+    <value>Odtwórz</value>
+  </data>
+  <data name="Play the sounds" xml:space="preserve">
+    <value>Odtwarzaj dźwięki</value>
+  </data>
+  <data name="Range default" xml:space="preserve">
+    <value>domyślne dla zakresu</value>
+  </data>
+  <data name="Search model files" xml:space="preserve">
+    <value>Szukaj plików modeli</value>
+  </data>
+  <data name="Sound channels" xml:space="preserve">
+    <value>Kanały</value>
+  </data>
+  <data name="Sound file" xml:space="preserve">
+    <value>Plik</value>
+  </data>
+  <data name="Sound id" xml:space="preserve">
+    <value>Id</value>
+  </data>
+  <data name="Sound slots note" xml:space="preserve">
+    <value>Dźwięki, które gra odtwarza, gdy model stoi, chodzi, atakuje, zostaje trafiony i umiera; z pary wybiera jeden losowo.</value>
+  </data>
+  <data name="Sounds" xml:space="preserve">
+    <value>Dźwięki</value>
+  </data>
+  <data name="Speed" xml:space="preserve">
+    <value>Prędkość</value>
+  </data>
+  <data name="Speed {0}" xml:space="preserve">
+    <value>×{0}</value>
+  </data>
+  <data name="Speed {0} after frame 6" xml:space="preserve">
+    <value>×{0} po klatce 6</value>
+  </data>
+  <data name="Speed {0} per frame" xml:space="preserve">
+    <value>Prędkość: {0} klatek na klatkę gry</value>
+  </data>
+  <data name="Speed {0} when transformed" xml:space="preserve">
+    <value>×{0} dla przemienionego gracza</value>
+  </data>
+  <data name="Step model" xml:space="preserve">
+    <value>{0}: {1}</value>
+  </data>
+  <data name="Step what file" xml:space="preserve">
+    <value>plik</value>
+  </data>
+  <data name="Step what hold of {0}" xml:space="preserve">
+    <value>zatrzymuje ostatnią klatkę {0}</value>
+  </data>
+  <data name="Step what sound slots" xml:space="preserve">
+    <value>sloty dźwięków</value>
+  </data>
+  <data name="Step what speed of {0}" xml:space="preserve">
+    <value>prędkość {0}</value>
+  </data>
+  <data name="Step what texture folders" xml:space="preserve">
+    <value>foldery tekstur</value>
+  </data>
+  <data name="Stream mesh" xml:space="preserve">
+    <value>Siatka strumienia</value>
+  </data>
+  <data name="Texture folders note" xml:space="preserve">
+    <value>Przeszukiwane w tej kolejności, w Data/.</value>
+  </data>
+  <data name="Texture folders on maps" xml:space="preserve">
+    <value>Foldery tekstur na mapach</value>
+  </data>
+  <data name="Texture names by mesh" xml:space="preserve">
+    <value>Nazwy tekstur według siatki</value>
+  </data>
+  <data name="The file is not in the client folder; the model has no body." xml:space="preserve">
+    <value>Pliku nie ma w folderze klienta; model nie ma ciała.</value>
+  </data>
+  <data name="The model has a second sound set for SubType 9." xml:space="preserve">
+    <value>Model ma drugi zestaw dźwięków, który odtwarzają potwory z SubType 9 (pięć numerów dalej); edytuje się go w pliku.</value>
+  </data>
+  <data name="The model is not open; it shows when it is." xml:space="preserve">
+    <value>Model nie jest otwarty (może brakować jego pliku); pokaże się, gdy gra go otworzy.</value>
+  </data>
+  <data name="The model is not open; its animations show when it is." xml:space="preserve">
+    <value>Model nie jest otwarty (może brakować jego pliku); jego animacje pokażą się, gdy gra go otworzy.</value>
+  </data>
+  <data name="The model loads no sounds." xml:space="preserve">
+    <value>Model nie wczytuje żadnych dźwięków.</value>
+  </data>
+  <data name="The monster appears with {0}, which is not in the model list." xml:space="preserve">
+    <value>Potwór pojawia się z {0}, którego nie ma na liście modeli.</value>
+  </data>
+  <data name="The monster names no model." xml:space="preserve">
+    <value>Potwór nie wskazuje żadnego modelu.</value>
+  </data>
+  <data name="Then {0}" xml:space="preserve">
+    <value>potem {0}</value>
+  </data>
+  <data name="These values are edited in the file." xml:space="preserve">
+    <value>Te wartości edytuje się w Data/Monsters/Models.json.</value>
+  </data>
+  <data name="Weapon bones" xml:space="preserve">
+    <value>Kości broni</value>
+  </data>
+  <data name="Monster Attacks" xml:space="preserve">
+    <value>Ataki potworów</value>
+  </data>
+  <data name="No animation" xml:space="preserve">
+    <value>(brak)</value>
+  </data>
+  <data name="Random attack 1 or 2" xml:space="preserve">
+    <value>atak 1 lub 2 losowo (rand)</value>
+  </data>
+  <data name="Random attack 1 or 2 by frame rate" xml:space="preserve">
+    <value>atak 1 lub 2, z szansą zależną od liczby klatek (randFps)</value>
+  </data>
+  <data name="Random Balis draw" xml:space="preserve">
+    <value>losowanie ataku 1 do 4 Balego (bali)</value>
+  </data>
+  <data name="Clear skill never" xml:space="preserve">
+    <value>nigdy (never)</value>
+  </data>
+  <data name="Clear skill on match" xml:space="preserve">
+    <value>gdy wskazał go wpis (onMatch)</value>
+  </data>
+  <data name="Clear skill on no match" xml:space="preserve">
+    <value>gdy nie wskazał go żaden wpis (onNoMatch)</value>
+  </data>
+  <data name="Clear skill always" xml:space="preserve">
+    <value>zawsze, od razu (always)</value>
+  </data>
+  <data name="Clear skill after attack" xml:space="preserve">
+    <value>po własnym ataku: gdy się skończy albo przerwie go inny atak lub trafienie (afterAttack)</value>
+  </data>
+  <data name="Reader Hellas" xml:space="preserve">
+    <value>obsługa Hellas, na każdej mapie</value>
+  </data>
+  <data name="Reader Battle Castle guards" xml:space="preserve">
+    <value>obsługa Battle Castle, według modeli strażników, na każdej mapie</value>
+  </data>
+  <data name="Reader Hunting Ground" xml:space="preserve">
+    <value>obsługa Hunting Ground, na jej mapie</value>
+  </data>
+  <data name="Reader Aida" xml:space="preserve">
+    <value>obsługa Aida, na Aida</value>
+  </data>
+  <data name="Reader Crywolf and Devil Square" xml:space="preserve">
+    <value>obsługa Crywolf, na Crywolf i w Devil Square</value>
+  </data>
+  <data name="Reader Kanturu 1st" xml:space="preserve">
+    <value>obsługa Kanturu 1st, na Kanturu 1st</value>
+  </data>
+  <data name="Reader Kanturu 2nd and 3rd" xml:space="preserve">
+    <value>obsługa Kanturu 2nd, na Kanturu 2nd i 3rd</value>
+  </data>
+  <data name="Reader Kanturu 3rd" xml:space="preserve">
+    <value>obsługa Kanturu 3rd, na Kanturu 3rd</value>
+  </data>
+  <data name="Reader Balgass barracks" xml:space="preserve">
+    <value>obsługa Balgass Barracks, w Barracks i w Refuge</value>
+  </data>
+  <data name="Reader Illusion Temple" xml:space="preserve">
+    <value>obsługa Illusion Temple, w Illusion Temple</value>
+  </data>
+  <data name="Reader Swamp of Quiet" xml:space="preserve">
+    <value>obsługa Swamp of Quiet, według modeli, na jej mapie</value>
+  </data>
+  <data name="Reader Raklion" xml:space="preserve">
+    <value>obsługa Raklion, na Raklion i mapie jego bossa</value>
+  </data>
+  <data name="Reader Empire Guardian" xml:space="preserve">
+    <value>obsługa Empire Guardian, na czterech mapach Empire Guardian</value>
+  </data>
+  <data name="Reader Empire Guardian 2" xml:space="preserve">
+    <value>obsługa Empire Guardian 2, na jej mapie</value>
+  </data>
+  <data name="Reader Empire Guardian 3" xml:space="preserve">
+    <value>obsługa Empire Guardian 3, na jej mapie</value>
+  </data>
+  <data name="Reader Empire Guardian 4" xml:space="preserve">
+    <value>obsługa Empire Guardian 4, na jej mapie</value>
+  </data>
+  <data name="Reader traps" xml:space="preserve">
+    <value>SetPlayerAttack, według modeli pułapek; ich efekty i dźwięki zostają w kodzie</value>
+  </data>
+  <data name="Reader Bali" xml:space="preserve">
+    <value>SetPlayerAttack, według modelu Balego</value>
+  </data>
+  <data name="Player shaped monsters choose a player attack" xml:space="preserve">
+    <value>Potwór w kształcie gracza wybiera atak gracza ze swojego wyposażenia; ataki go nie dotyczą.</value>
+  </data>
+  <data name="The monster has no attacks; it plays the generic pattern." xml:space="preserve">
+    <value>Potwór nie ma ataków: odtwarza atak 1, atak 2, atak 2 (wzorzec ogólny).</value>
+  </data>
+  <data name="Add attacks" xml:space="preserve">
+    <value>Dodaj ataki</value>
+  </data>
+  <data name="Monster skills" xml:space="preserve">
+    <value>Umiejętności potworów (0x69)</value>
+  </data>
+  <data name="Player skills" xml:space="preserve">
+    <value>Umiejętności graczy (0x19, 0x1E)</value>
+  </data>
+  <data name="Any other attack" xml:space="preserve">
+    <value>Każdy inny atak</value>
+  </data>
+  <data name="Remove the attacks" xml:space="preserve">
+    <value>Usuń ataki</value>
+  </data>
+  <data name="No code reads these attacks." xml:space="preserve">
+    <value>Żadna obsługa nie czyta tych ataków: nic nie robią, dopóki kod ich nie odczyta.</value>
+  </data>
+  <data name="Read by" xml:space="preserve">
+    <value>Czytane przez:</value>
+  </data>
+  <data name="Monster skills note" xml:space="preserve">
+    <value>Umiejętność potwora z pakietu 0x69; gra odtwarza atak dla umiejętności od 1 do 77.</value>
+  </data>
+  <data name="Player skills note" xml:space="preserve">
+    <value>Umiejętność gracza z pakietów 0x19 i 0x1E: 0x1E odtwarza atak od razu; po 0x19 większość umiejętności odtwarza się przy następnym zwykłym ataku (0x18), który czyta zapamiętaną umiejętność.</value>
+  </data>
+  <data name="The game does not play an attack for this skill." xml:space="preserve">
+    <value>pakiet 0x69 nie odtwarza ataku dla tej umiejętności</value>
+  </data>
+  <data name="Add monster skill" xml:space="preserve">
+    <value>Dodaj</value>
+  </data>
+  <data name="Add player skill" xml:space="preserve">
+    <value>Dodaj</value>
+  </data>
+  <data name="An animation" xml:space="preserve">
+    <value>Animacja</value>
+  </data>
+  <data name="A draw" xml:space="preserve">
+    <value>Losowanie</value>
+  </data>
+  <data name="Clear the monster skill" xml:space="preserve">
+    <value>Wyczyść umiejętność potwora</value>
+  </data>
+  <data name="Step attacks" xml:space="preserve">
+    <value>{0}: ataki</value>
+  </data>
+  <data name="Sound events" xml:space="preserve">
+    <value>Zdarzenia dźwiękowe</value>
+  </data>
+  <data name="Sound events note" xml:space="preserve">
+    <value>Dźwięki, które gra odtwarza oprócz slotów dla postaci w jednej z animacji zdarzenia: gdy zaczyna się atak, gdy postać zostaje trafiona lub umiera, przy każdym kroku i na końcu każdej pętli bezczynności, w promieniu 500 jednostek od bohatera. Zdarzenie odtwarza dźwięki tego modelu.</value>
+  </data>
+  <data name="Sound event frames" xml:space="preserve">
+    <value>Klatki</value>
+  </data>
+  <data name="Sound event death effect" xml:space="preserve">
+    <value>Efekt śmierci</value>
+  </data>
+  <data name="Sound event death effect note" xml:space="preserve">
+    <value>Tylko gdy efekt śmierci postaci jest uzbrojony (śmierć Bałwana).</value>
+  </data>
+  <data name="Sound event chance" xml:space="preserve">
+    <value>Szansa</value>
+  </data>
+  <data name="Sound event one in" xml:space="preserve">
+    <value>1 na</value>
+  </data>
+  <data name="Sound event pick" xml:space="preserve">
+    <value>Jeden z dwóch</value>
+  </data>
+  <data name="Sound event pick note" xml:space="preserve">
+    <value>Odtwarza pierwszy z dwóch dźwięków, gdy wypadnie losowanie jeden na dwa, w przeciwnym razie drugi; wymaga dwóch dźwięków.</value>
+  </data>
+  <data name="Sound draw rand" xml:space="preserve">
+    <value>losowo (rand)</value>
+  </data>
+  <data name="Sound draw rand fps" xml:space="preserve">
+    <value>według liczby klatek (randFps)</value>
+  </data>
+  <data name="Sound event add sound" xml:space="preserve">
+    <value>Dodaj dźwięk</value>
+  </data>
+  <data name="Sound event maps" xml:space="preserve">
+    <value>Mapy:</value>
+  </data>
+  <data name="Sound event every map" xml:space="preserve">
+    <value>każda mapa</value>
+  </data>
+  <data name="Add a sound event" xml:space="preserve">
+    <value>Dodaj zdarzenie dźwiękowe</value>
+  </data>
+  <data name="Sound event needs a sound of the model" xml:space="preserve">
+    <value>Zdarzenie odtwarza dźwięki tego modelu, a model nie wczytuje żadnych.</value>
+  </data>
+  <data name="Step what sound events" xml:space="preserve">
+    <value>zdarzenia dźwiękowe</value>
+  </data>
+  <data name="Attack sound" xml:space="preserve">
+    <value>Dźwięk ataków</value>
+  </data>
+  <data name="Attack sound note" xml:space="preserve">
+    <value>Identyfikator SOUND_, który ataki odtwarzają za każdym razem (pułapki); puste: brak.</value>
+  </data>
+  <data name="Attack sound at monster" xml:space="preserve">
+    <value>Przy potworze (3D)</value>
+  </data>
+  <data name="Attack sound unknown" xml:space="preserve">
+    <value>to nie jest identyfikator SOUND_, który mogą wskazać dane potworów</value>
+  </data>
+  <data name="Monster model player note" xml:space="preserve">
+    <value>Potwór w kształcie gracza: gra rysuje go jako postać gracza, z modelem gracza, animacjami i przedmiotami, które daje mu kod, niektóre z własną skórą (ciała szkieletów). Jego wygląd nadal pochodzi z kodu; lista modeli zawiera modele potworów i NPC.</value>
+  </data>
+  <data name="Monster model map object note" xml:space="preserve">
+    <value>Potwór pojawia się jako obiekt {0} swojej mapy (pułapka): mapa wczytuje ten model, nie lista modeli.</value>
+  </data>
+  <data name="Monster model other area note" xml:space="preserve">
+    <value>Potwór pojawia się z {0}, modelem innego obszaru (bramy Kalimy, piłka): lista modeli zawiera modele potworów i NPC.</value>
+  </data>
+  <data name="Preview volume" xml:space="preserve">
+    <value>Głośność podglądu</value>
+  </data>
+  <data name="Preview volume note" xml:space="preserve">
+    <value>Głośność podglądów dźwięków w narzędziach potworów (Odtwórz, dźwięki podglądu). Głośność dźwięku w grze zostaje bez zmian i nie jest zapisywana.</value>
+  </data>
 </root>

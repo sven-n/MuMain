@@ -8,6 +8,7 @@
         "en": "Skull Staff",
         "de": "Schädelstab",
         "es": "Báculo Calavera",
+        "pl": "Kostur czaszki",
         "pt": "Bastão da caveira"
       },
       "width": 1,
@@ -37,6 +38,7 @@
         "en": "Angelic Staff",
         "de": "Engelsstab",
         "es": "Báculo Angelical",
+        "pl": "Anielski kostur",
         "pt": "Bastão angelical"
       },
       "width": 2,
@@ -66,6 +68,7 @@
         "en": "Serpent Staff",
         "de": "Schlangenstab",
         "es": "Báculo Serpiente",
+        "pl": "Wężowy kostur",
         "pt": "Bastão da serpente"
       },
       "width": 2,
@@ -95,6 +98,7 @@
         "en": "Thunder Staff",
         "de": "Donnerstab",
         "es": "Báculo Trueno",
+        "pl": "Kostur gromu",
         "pt": "Bastão do trovão"
       },
       "width": 2,
@@ -125,6 +129,7 @@
         "en": "Gorgon Staff",
         "de": "Gorgonenstab",
         "es": "Báculo Gorgon",
+        "pl": "Kostur Gorgony",
         "pt": "Bastão da górgone"
       },
       "width": 2,
@@ -154,6 +159,7 @@
         "en": "Legendary Staff",
         "de": "Legendärer Stab",
         "es": "Báculo Legendario",
+        "pl": "Legendarny kostur",
         "pt": "Bastão lendário"
       },
       "width": 1,
@@ -182,6 +188,7 @@
         "en": "Staff of Resurrection",
         "de": "Stab der Auferstehung",
         "es": "Báculo de la Resurrección",
+        "pl": "Kostur Wskrzeszenia",
         "pt": "Bastão da ressurreição"
       },
       "width": 1,
@@ -211,6 +218,7 @@
         "en": "Chaos Lighting Staff",
         "de": "Chaos-Blitzstab",
         "es": "Báculo Relámpago de Caos",
+        "pl": "Kostur Błyskawic Chaosu",
         "pt": "Bastão do relâmpago do caos"
       },
       "width": 2,
@@ -241,6 +249,7 @@
         "en": "Staff of Destruction",
         "de": "Stab der Zerstörung",
         "es": "Báculo de la Destrucción",
+        "pl": "Kostur Zniszczenia",
         "pt": "Bastão da destruição"
       },
       "width": 2,
@@ -271,6 +280,7 @@
         "en": "Dragon Soul Staff",
         "de": "Drachenseelenstab",
         "es": "Báculo Alma de Dragón",
+        "pl": "Kostur Smoczej Duszy",
         "pt": "Bastão da alma do dragão"
       },
       "width": 1,
@@ -299,6 +309,7 @@
         "en": "Divine Staff of Archangel",
         "de": "Göttlicher Stab des Erzengels",
         "es": "Báculo Divino de Arcángel",
+        "pl": "Boski Kostur Archanioła",
         "pt": "Bastão divino do arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],
@@ -343,6 +354,7 @@
         "en": "Staff of Kundun",
         "de": "Stab von Kundun",
         "es": "Báculo de Kundun",
+        "pl": "Kostur Kunduna",
         "pt": "Bastão de Kundun"
       },
       "width": 1,
@@ -371,6 +383,7 @@
         "en": "Grand Viper Staff",
         "de": "Großvipernstab",
         "es": "Gran Báculo Víbora",
+        "pl": "Kostur Wielkiej Żmii",
         "pt": "Grande bastão da víbora"
       },
       "width": 1,
@@ -400,6 +413,7 @@
         "en": "Platina Staff",
         "de": "Platinstab",
         "es": "Báculo Platina",
+        "pl": "Platynowy kostur",
         "pt": "Bastão de platina"
       },
       "width": 1,
@@ -427,6 +441,7 @@
         "en": "Mystery Stick",
         "de": "Mysterienstock",
         "es": "Vara del Misterio",
+        "pl": "Różdżka tajemnic",
         "pt": "Cajado misterioso"
       },
       "width": 1,
@@ -454,6 +469,7 @@
         "en": "Violent Wind Stick",
         "de": "Sturmwindstock",
         "es": "Vara Viento Violento",
+        "pl": "Różdżka Gwałtownego Wiatru",
         "pt": "Cajado do vento violento"
       },
       "width": 1,
@@ -481,6 +497,7 @@
         "en": "Red Wing Stick",
         "de": "Rotschwingenstock",
         "es": "Vara Ala Roja",
+        "pl": "Różdżka Czerwonego Skrzydła",
         "pt": "Cajado da asa vermelha"
       },
       "width": 1,
@@ -508,6 +525,7 @@
         "en": "Ancient Stick",
         "de": "Uralter Stock",
         "es": "Vara Antigua",
+        "pl": "Pradawna różdżka",
         "pt": "Cajado ancestral"
       },
       "width": 1,
@@ -535,6 +553,7 @@
         "en": "Demonic Stick",
         "de": "Dämonischer Stock",
         "es": "Vara Demoníaca",
+        "pl": "Demoniczna różdżka",
         "pt": "Cajado demoníaco"
       },
       "width": 1,
@@ -562,6 +581,7 @@
         "en": "Storm Blitz Stick",
         "de": "Sturmblitzstock",
         "es": "Vara Ráfaga Tormentosa",
+        "pl": "Różdżka Burzowego Błysku",
         "pt": "Caj. Relâmpago de Tempestade"
       },
       "width": 1,
@@ -591,6 +611,7 @@
         "en": "Eternal Wing Stick",
         "de": "Ewigschwingenstock",
         "es": "Vara Ala Eterna",
+        "pl": "Różdżka Wiecznego Skrzydła",
         "pt": "Cajado da asa eterna"
       },
       "width": 1,
@@ -619,6 +640,7 @@
         "en": "Book of Samut",
         "de": "Buch von Samut",
         "es": "Libro de Samut",
+        "pl": "Księga Samuta",
         "pt": "Livro de Samut"
       },
       "tags": ["summonerBook"],
@@ -646,6 +668,7 @@
         "en": "Book of Neil",
         "de": "Buch von Neil",
         "es": "Libro de Neil",
+        "pl": "Księga Neila",
         "pt": "Livro de Neil"
       },
       "tags": ["summonerBook"],
@@ -673,6 +696,7 @@
         "en": "Book of Lagle",
         "de": "Buch von Lagle",
         "es": "Libro de Lagle",
+        "pl": "Księga Lagle’a",
         "pt": "Livro de Lagle"
       },
       "tags": ["summonerBook"],
@@ -700,6 +724,7 @@
         "en": "Deadly Staff",
         "de": "Todesstab",
         "es": "Báculo Mortal",
+        "pl": "Śmiercionośny kostur",
         "pt": "Bastão letal"
       },
       "width": 1,
@@ -729,6 +754,7 @@
         "en": "Inberial Staff",
         "de": "Kaiserlicher Stab",
         "es": "Báculo Inberial",
+        "pl": "Imperialny kostur",
         "pt": "Bastão inberial"
       },
       "width": 1,
@@ -757,6 +783,7 @@
         "en": "Chromatic Staff",
         "de": "Chromatischer Stab",
         "es": "Báculo Cromático",
+        "pl": "Chromatyczny kostur",
         "pt": "Bastão cromático"
       },
       "width": 1,
@@ -785,6 +812,7 @@
         "en": "Raven Stick",
         "de": "Rabenstock",
         "es": "Vara Cuervo",
+        "pl": "Różdżka Kruka",
         "pt": "Cajado do corvo"
       },
       "width": 1,
@@ -812,6 +840,7 @@
         "en": "Divine Stick of the Archangel",
         "de": "Göttlicher Stock des Erzengels",
         "es": "Bastón Divino de Arcángel",
+        "pl": "Boska Różdżka Archanioła",
         "pt": "Bastão Divino do Arcanjo"
       },
       "tags": ["divineArchangelWeapon", "valuable"],

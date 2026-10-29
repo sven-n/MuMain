@@ -8,6 +8,7 @@
         "en": "Bronze Armor",
         "de": "Bronzerüstung",
         "es": "Armadura de Bronce",
+        "pl": "Brązowa zbroja",
         "pt": "Armadura de bronze"
       },
       "width": 2,
@@ -34,6 +35,7 @@
         "en": "Dragon Armor",
         "de": "Drachenrüstung",
         "es": "Armadura Dragón",
+        "pl": "Smocza zbroja",
         "pt": "Armadura do dragão"
       },
       "width": 2,
@@ -59,6 +61,7 @@
         "en": "Pad Armor",
         "de": "Polsterrüstung",
         "es": "Armadura Rellena",
+        "pl": "Pikowana zbroja",
         "pt": "Armadura acolchoada"
       },
       "width": 2,
@@ -83,6 +86,7 @@
         "en": "Legendary Armor",
         "de": "Legendäre Rüstung",
         "es": "Armadura Legendaria",
+        "pl": "Legendarna zbroja",
         "pt": "Armadura lendária"
       },
       "width": 2,
@@ -107,6 +111,7 @@
         "en": "Bone Armor",
         "de": "Knochenrüstung",
         "es": "Armadura de Hueso",
+        "pl": "Kościana zbroja",
         "pt": "Armadura de osso"
       },
       "width": 2,
@@ -131,6 +136,7 @@
         "en": "Leather Armor",
         "de": "Lederrüstung",
         "es": "Armadura de Cuero",
+        "pl": "Skórzana zbroja",
         "pt": "Armadura de couro"
       },
       "width": 2,
@@ -157,6 +163,7 @@
         "en": "Scale Armor",
         "de": "Schuppenrüstung",
         "es": "Armadura de Escamas",
+        "pl": "Łuskowa zbroja",
         "pt": "Armadura de escamas"
       },
       "width": 2,
@@ -183,6 +190,7 @@
         "en": "Sphinx Armor",
         "de": "Sphinxrüstung",
         "es": "Armadura Esfinge",
+        "pl": "Zbroja Sfinksa",
         "pt": "Armadura da esfinge"
       },
       "width": 2,
@@ -207,6 +215,7 @@
         "en": "Brass Armor",
         "de": "Messingrüstung",
         "es": "Armadura de Metal",
+        "pl": "Mosiężna zbroja",
         "pt": "Armadura de latão"
       },
       "width": 2,
@@ -233,6 +242,7 @@
         "en": "Plate Armor",
         "de": "Plattenrüstung",
         "es": "Armadura de Plata",
+        "pl": "Płytowa zbroja",
         "pt": "Armadura de placa"
       },
       "width": 2,
@@ -258,6 +268,7 @@
         "en": "Vine Armor",
         "de": "Rankenrüstung",
         "es": "Armadura Vid",
+        "pl": "Zbroja z pnączy",
         "pt": "Armadura da vinha"
       },
       "width": 2,
@@ -282,6 +293,7 @@
         "en": "Silk Armor",
         "de": "Seidenrüstung",
         "es": "Armadura de Seda",
+        "pl": "Jedwabna zbroja",
         "pt": "Armadura de seda"
       },
       "width": 2,
@@ -306,6 +318,7 @@
         "en": "Wind Armor",
         "de": "Windrüstung",
         "es": "Armadura Viento",
+        "pl": "Zbroja Wiatru",
         "pt": "Armadura do vento"
       },
       "width": 2,
@@ -330,6 +343,7 @@
         "en": "Spirit Armor",
         "de": "Geisterrüstung",
         "es": "Armadura Espíritu",
+        "pl": "Zbroja Ducha",
         "pt": "Armadura do espírito"
       },
       "width": 2,
@@ -354,6 +368,7 @@
         "en": "Guardian Armor",
         "de": "Wächterrüstung",
         "es": "Armadura Guardián",
+        "pl": "Zbroja Strażnika",
         "pt": "Armadura do guardião"
       },
       "width": 2,
@@ -378,6 +393,7 @@
         "en": "Storm Crow Armor",
         "de": "Sturmkrähenrüstung",
         "es": "Armadura Cuervo de Tormenta",
+        "pl": "Zbroja Burzowej Wrony",
         "pt": "Arm. do Corvo da Tempestade"
       },
       "width": 2,
@@ -402,6 +418,7 @@
         "en": "Black Dragon Armor",
         "de": "Schwarzdrachenrüstung",
         "es": "Armadura Dragón Negro",
+        "pl": "Zbroja Czarnego Smoka",
         "pt": "Armadura do dragão negro"
       },
       "width": 2,
@@ -426,6 +443,7 @@
         "en": "Dark Phoenix Armor",
         "de": "Dunkelphönixrüstung",
         "es": "Armadura Fénix Oscuro",
+        "pl": "Zbroja Mrocznego Feniksa",
         "pt": "Armadura da fênix negra"
       },
       "width": 2,
@@ -450,6 +468,7 @@
         "en": "Grand Soul Armor",
         "de": "Großseelenrüstung",
         "es": "Armadura Gran Alma",
+        "pl": "Zbroja Wielkiej Duszy",
         "pt": "Armadura da grande alma"
       },
       "width": 2,
@@ -474,6 +493,7 @@
         "en": "Divine Armor",
         "de": "Göttliche Rüstung",
         "es": "Armadura Divina",
+        "pl": "Boska zbroja",
         "pt": "Armadura divina"
       },
       "width": 2,
@@ -498,6 +518,7 @@
         "en": "Thunder Hawk Armor",
         "de": "Donnerfalkenrüstung",
         "es": "Armadura Halcón de Trueno",
+        "pl": "Zbroja Gromowego Jastrzębia",
         "pt": "Armadura de Thunder Hawk"
       },
       "width": 2,
@@ -522,6 +543,7 @@
         "en": "Great Dragon Armor",
         "de": "Großartige Drachenrüstung",
         "es": "Armadura Gran Dragón",
+        "pl": "Zbroja Wielkiego Smoka",
         "pt": "Armadura do grande dragão"
       },
       "width": 2,
@@ -546,6 +568,7 @@
         "en": "Dark Soul Armor",
         "de": "Dunkelseelenrüstung",
         "es": "Armadura Gran Oscura",
+        "pl": "Zbroja Mrocznej Duszy",
         "pt": "Armadura da alma negra"
       },
       "width": 2,
@@ -570,6 +593,7 @@
         "en": "Hurricane Armor",
         "de": "Orkanrüstung",
         "es": "Armadura Huracán",
+        "pl": "Zbroja Huraganu",
         "pt": "Armadura do furacão"
       },
       "width": 2,
@@ -594,6 +618,7 @@
         "en": "Red Sprit Armor",
         "de": "Rotgeisterrüstung",
         "es": "Armadura Espíritu Rojo",
+        "pl": "Zbroja Czerwonego Ducha",
         "pt": "Armadura do espírito vermelho"
       },
       "width": 2,
@@ -618,6 +643,7 @@
         "en": "Light Plate Armor",
         "de": "Leichtplattenrüstung",
         "es": "Armadura Plata de Luz",
+        "pl": "Lekka zbroja płytowa",
         "pt": "Armadura de placa leve"
       },
       "width": 2,
@@ -642,6 +668,7 @@
         "en": "Adamantine Armor",
         "de": "Adamantrüstung",
         "es": "Armadura Adamantina",
+        "pl": "Adamantytowa zbroja",
         "pt": "Armadura de adamantina"
       },
       "width": 2,
@@ -666,6 +693,7 @@
         "en": "Dark Steel Armor",
         "de": "Dunkelstahlrüstung",
         "es": "Armadura Acero Oscuro",
+        "pl": "Zbroja z mrocznej stali",
         "pt": "Armadura de aço negro"
       },
       "width": 2,
@@ -690,6 +718,7 @@
         "en": "Dark Master Armor",
         "de": "Dunkelmeisterrüstung",
         "es": "Armadura Amo Oscuro",
+        "pl": "Zbroja Mrocznego Mistrza",
         "pt": "Armadura do Mestre negro"
       },
       "width": 2,
@@ -714,6 +743,7 @@
         "en": "Dragon Knight Armor",
         "de": "Drachenritterrüstung",
         "es": "Armadura Caballero Dragón",
+        "pl": "Zbroja Smoczego Rycerza",
         "pt": "Armadura do cavaleiro dragão"
       },
       "width": 2,
@@ -739,6 +769,7 @@
         "en": "Venom Mist Armor",
         "de": "Giftnebelrüstung",
         "es": "Armadura Bruma de Veneno",
+        "pl": "Zbroja Jadowitej Mgły",
         "pt": "Armadura da névoa de veneno"
       },
       "width": 2,
@@ -764,6 +795,7 @@
         "en": "Sylphid Ray Armor",
         "de": "Sylphenstrahlrüstung",
         "es": "Armadura Rayo de Sílfide",
+        "pl": "Zbroja Sylphid Ray",
         "pt": "Armadura do raio silfídico"
       },
       "width": 2,
@@ -789,6 +821,7 @@
         "en": "Volcano Armor",
         "de": "Vulkanrüstung",
         "es": "Armadura Volcán",
+        "pl": "Zbroja Wulkanu",
         "pt": "Armadura do vulcão"
       },
       "width": 2,
@@ -814,6 +847,7 @@
         "en": "Sunlight Armor",
         "de": "Sonnenlichtrüstung",
         "es": "Armadura Luz Solar",
+        "pl": "Zbroja Słońca",
         "pt": "Armadura da luz do sol"
       },
       "width": 2,
@@ -839,6 +873,7 @@
         "en": "Ashcrow Armor",
         "de": "Aschkrähenrüstung",
         "es": "Armadura Cuervo Ceniza",
+        "pl": "Zbroja Ashcrow",
         "pt": "Armadura de Ashcrow"
       },
       "width": 2,
@@ -862,6 +897,7 @@
         "en": "Eclipse Armor",
         "de": "Finsternisrüstung",
         "es": "Armadura Eclipse",
+        "pl": "Zbroja Zaćmienia",
         "pt": "Armadura do eclipse"
       },
       "width": 2,
@@ -885,6 +921,7 @@
         "en": "Iris Armor",
         "de": "Iris-Rüstung",
         "es": "Armadura Iris",
+        "pl": "Zbroja Iris",
         "pt": "Armadura de Iris"
       },
       "width": 2,
@@ -908,6 +945,7 @@
         "en": "Valiant Armor",
         "de": "Kühne Rüstung",
         "es": "Armadura Valiente",
+        "pl": "Waleczna zbroja",
         "pt": "Armadura do valor"
       },
       "width": 2,
@@ -931,6 +969,7 @@
         "en": "Glorious Armor",
         "de": "Glorreiche Rüstung",
         "es": "Armadura Gloriosa",
+        "pl": "Chwalebna zbroja",
         "pt": "Armadura gloriosa"
       },
       "width": 2,
@@ -954,6 +993,7 @@
         "en": "Violent Wind Armor",
         "de": "Sturmwindrüstung",
         "es": "Armadura Viento Violento",
+        "pl": "Zbroja Gwałtownego Wiatru",
         "pt": "Armadura do vento violento"
       },
       "width": 2,
@@ -977,6 +1017,7 @@
         "en": "Red Wing Armor",
         "de": "Rotschwingenrüstung",
         "es": "Armadura Ala Roja",
+        "pl": "Zbroja Czerwonego Skrzydła",
         "pt": "Armadura da asa vermelha"
       },
       "width": 2,
@@ -1001,6 +1042,7 @@
         "en": "Ancient Armor",
         "de": "Uralte Rüstung",
         "es": "Armadura Antigua",
+        "pl": "Pradawna zbroja",
         "pt": "Armadura antiga"
       },
       "width": 2,
@@ -1025,6 +1067,7 @@
         "en": "Demonic Armor",
         "de": "Dämonische Rüstung",
         "es": "Armadura Demoníaca",
+        "pl": "Demoniczna zbroja",
         "pt": "Armadura demoníaca"
       },
       "width": 2,
@@ -1048,6 +1091,7 @@
         "en": "Storm Blitz Armor",
         "de": "Sturmblitzrüstung",
         "es": "Armadura Ráfaga Tormentosa",
+        "pl": "Zbroja Burzowego Błysku",
         "pt": "Arm. Relâmpago de Tempestade"
       },
       "width": 2,
@@ -1073,6 +1117,7 @@
         "en": "Eternal Wing Armor",
         "de": "Ewigschwingenrüstung",
         "es": "Armadura Ala Eterna",
+        "pl": "Zbroja Wiecznego Skrzydła",
         "pt": "Armadura da asa eterna"
       },
       "width": 2,
@@ -1098,6 +1143,7 @@
         "en": "Titan  Armor",
         "de": "Titanenrüstung",
         "es": "Armadura Titán",
+        "pl": "Zbroja Tytana",
         "pt": "Armadura do titã"
       },
       "width": 2,
@@ -1122,6 +1168,7 @@
         "en": "Brave Armor",
         "de": "Tapfere Rüstung",
         "es": "Armadura Valerosa",
+        "pl": "Zbroja Śmiałka",
         "pt": "Armadura da coragem"
       },
       "width": 2,
@@ -1146,6 +1193,7 @@
         "en": "Phantom  Armor",
         "de": "Phantom-Rüstung",
         "es": "Armadura Fantasma",
+        "pl": "Zbroja Widma",
         "pt": "Armadura do fantasma"
       },
       "width": 2,
@@ -1170,6 +1218,7 @@
         "en": "Destroy Armor",
         "de": "Zerstörerrüstung",
         "es": "Armadura Destructora",
+        "pl": "Zbroja Zniszczenia",
         "pt": "Armadura da destruição"
       },
       "width": 2,
@@ -1195,6 +1244,7 @@
         "en": "Seraphim Armor",
         "de": "Seraphim-Rüstung",
         "es": "Armadura Serafín",
+        "pl": "Zbroja Serafina",
         "pt": "Armadura do serafim"
       },
       "width": 2,
@@ -1219,6 +1269,7 @@
         "en": "Faith Armor",
         "de": "Glaubensrüstung",
         "es": "Armadura de Fe",
+        "pl": "Zbroja Wiary",
         "pt": "Armadura da fé"
       },
       "width": 2,
@@ -1244,6 +1295,7 @@
         "en": "Royal Armor",
         "de": "Königliche Rüstung",
         "es": "Armadura Real",
+        "pl": "Królewska zbroja",
         "pt": "Armadura real"
       },
       "width": 2,
@@ -1268,6 +1320,7 @@
         "en": "Hades Armor",
         "de": "Hades-Rüstung",
         "es": "Armadura Hades",
+        "pl": "Zbroja Hadesa",
         "pt": "Armadura de Hades"
       },
       "width": 2,
@@ -1293,6 +1346,7 @@
         "en": "Sacred Fire Armor",
         "de": "Heiligfeuerrüstung",
         "es": "Armadura de Fuego Sagrado",
+        "pl": "Zbroja Świętego Ognia",
         "pt": "Armadura de Fogo Sagrado"
       },
       "width": 2,
@@ -1317,6 +1371,7 @@
         "en": "Storm Jahad Armor",
         "de": "Sturm-Jahad-Rüstung",
         "es": "Armadura de Tormenta Zahard",
+        "pl": "Zbroja Storm Jahad",
         "pt": "Armadura de Tempestade Zahard"
       },
       "width": 2,
@@ -1340,6 +1395,7 @@
         "en": "Piercing Groove Armor",
         "de": "Durchbohrerrüstung",
         "es": "Armadura de Tallo Perforador",
+        "pl": "Zbroja Piercing Groove",
         "pt": "Armadura de Entalhe Perfurante"
       },
       "width": 2,
@@ -1363,6 +1419,7 @@
         "en": "Scale Armor",
         "de": "Schuppenrüstung",
         "es": "Armadura de Escamas",
+        "pl": "Łuskowa zbroja",
         "pt": "Armadura de escama"
       },
       "tags": ["luckyItem"],
@@ -1396,6 +1453,7 @@
         "en": "Silk Armor",
         "de": "Seidenrüstung",
         "es": "Armadura de Seda",
+        "pl": "Jedwabna zbroja",
         "pt": "Armadura de seda"
       },
       "tags": ["luckyItem"],
@@ -1426,6 +1484,7 @@
         "en": "Sphinx Armor",
         "de": "Sphinxrüstung",
         "es": "Armadura Esfinge",
+        "pl": "Zbroja Sfinksa",
         "pt": "Armadura de Esfinge"
       },
       "tags": ["luckyItem"],
@@ -1457,6 +1516,7 @@
         "en": "Violent Wind Armor",
         "de": "Sturmwindrüstung",
         "es": "Armadura Viento Violento",
+        "pl": "Zbroja Gwałtownego Wiatru",
         "pt": "Armadura do vento violento"
       },
       "tags": ["luckyItem"],
@@ -1487,6 +1547,7 @@
         "en": "Adamantine Armor",
         "de": "Adamantrüstung",
         "es": "Armadura Adamantina",
+        "pl": "Adamantytowa zbroja",
         "pt": "Armadura de adamantina"
       },
       "tags": ["luckyItem"],
@@ -1517,6 +1578,7 @@
         "en": "Dragon Armor",
         "de": "Drachenrüstung",
         "es": "Armadura Dragón",
+        "pl": "Smocza zbroja",
         "pt": "Armadura de Dragão"
       },
       "tags": ["luckyItem"],
@@ -1548,6 +1610,7 @@
         "en": "Guardian Armor",
         "de": "Wächterrüstung",
         "es": "Armadura Guardián",
+        "pl": "Zbroja Strażnika",
         "pt": "Armadura de Guardião"
       },
       "tags": ["luckyItem"],
@@ -1578,6 +1641,7 @@
         "en": "Legendary Armor",
         "de": "Legendäre Rüstung",
         "es": "Armadura Legendaria",
+        "pl": "Legendarna zbroja",
         "pt": "Armadura Lendária"
       },
       "tags": ["luckyItem"],
@@ -1609,6 +1673,7 @@
         "en": "Red Wing Armor",
         "de": "Rotschwingenrüstung",
         "es": "Armadura Ala Roja",
+        "pl": "Zbroja Czerwonego Skrzydła",
         "pt": "Armadura da asa vermelha"
       },
       "tags": ["luckyItem"],
@@ -1639,6 +1704,7 @@
         "en": "Atlans Armor",
         "de": "Atlans-Rüstung",
         "es": "Armadura Cuervo de Tormenta",
+        "pl": "Zbroja Atlans",
         "pt": "Armadura do corvo da tempestade"
       },
       "tags": ["luckyItem"],
@@ -1669,6 +1735,7 @@
         "en": "Storm Jahad Armor",
         "de": "Sturm-Jahad-Rüstung",
         "es": "Armadura de Tormenta Zahard",
+        "pl": "Zbroja Storm Jahad",
         "pt": "Armadura de Tempestade Zahard"
       },
       "tags": ["luckyItem"],
@@ -1699,6 +1766,7 @@
         "en": "Phoenix Soul Armor",
         "de": "Phönixseelenrüstung",
         "es": "Armadura de Alma de Fénix",
+        "pl": "Zbroja Duszy Feniksa",
         "pt": "Armadura de Alma de Fênix"
       },
       "width": 2,
