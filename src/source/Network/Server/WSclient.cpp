@@ -1380,7 +1380,7 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
 
     // A revival names no stage of the map.
     gMapManager.SetServerStage(0);
-    if (gMapManager.WorldActive != Data->Map)
+    if (!gMapManager.IsServerMapLoaded(Data->Map))
     {
         int OldWorld = gMapManager.WorldActive;
 
@@ -2190,7 +2190,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         ClearItems();
         ClearCharacters(HeroKey);
         RemoveAllShopTitleExceptHero();
-        if (gMapManager.WorldActive != Data->Map)
+        if (!gMapManager.IsServerMapLoaded(Data->Map))
         {
             int OldWorld = gMapManager.WorldActive;
 

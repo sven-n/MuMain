@@ -77,6 +77,22 @@ TEST_CASE("Maps: the server's map number stays, Devil Square 5-7 loads as Devil 
     CHECK(gMapManager.GetServerMap() == WD_0LORENCIA);
 }
 
+TEST_CASE("Maps: a move loads the world only for another server map, also between Devil Square 1-4 and 5-7 (D67) "
+          "[maps]")
+{
+    const HeroMapScope hero(WD_0LORENCIA);
+    gMapManager.SetServerMap(32);
+    CHECK(gMapManager.IsServerMapLoaded(32));
+    // World 9 is loaded, but the server's map 9 is Devil Square 1-4.
+    CHECK_FALSE(gMapManager.IsServerMapLoaded(WD_9DEVILSQUARE));
+    gMapManager.SetServerMap(WD_9DEVILSQUARE);
+    CHECK(gMapManager.IsServerMapLoaded(WD_9DEVILSQUARE));
+    CHECK_FALSE(gMapManager.IsServerMapLoaded(32));
+    gMapManager.SetServerMap(WD_3NORIA);
+    CHECK(gMapManager.IsServerMapLoaded(WD_3NORIA));
+    CHECK_FALSE(gMapManager.IsServerMapLoaded(WD_9DEVILSQUARE));
+}
+
 TEST_CASE("Maps: the stage the server sends with the map, none where WorldActive was set alone (D67) [maps]")
 {
     const HeroMapScope hero(WD_0LORENCIA);

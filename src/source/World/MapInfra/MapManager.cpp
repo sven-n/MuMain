@@ -957,6 +957,11 @@ int CMapManager::GetServerMap() const
     return m_serverMapWorld == WorldActive ? m_serverMap : WorldActive;
 }
 
+bool CMapManager::IsServerMapLoaded(int serverMap) const
+{
+    return GetServerMap() == serverMap;
+}
+
 void CMapManager::SetServerStage(int stage)
 {
     m_serverStage = stage;
