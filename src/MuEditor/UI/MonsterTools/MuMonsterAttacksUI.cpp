@@ -434,7 +434,12 @@ void MuMonsterAttacksUI::RenderOtherwise(MonsterDefinition& monster, int modelSl
     {
         attacks.otherwiseRandom.reset();
         attacks.otherwiseGeneric = false;
-        attacks.otherwise.resize(2, attacks.otherwise.front());
+        // A rotation kept from before the generic pattern or a draw stays
+        // whole; one animation becomes two.
+        if (attacks.otherwise.size() < 2)
+        {
+            attacks.otherwise.resize(2, attacks.otherwise.front());
+        }
         m_draft.AfterChange(true, label);
     }
     if (rotation)

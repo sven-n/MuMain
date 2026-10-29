@@ -219,6 +219,10 @@ TEST_CASE("Monster Attacks: any other attack plays an animation, a rotation, the
     CHECK(stored().otherwise == std::vector<int>{MONSTER01_ATTACK2, MONSTER01_ATTACK2, MONSTER01_ATTACK2});
     click(I18N::Editor::TheGenericPattern);
     CHECK(stored().otherwiseGeneric);
+    // Back to the rotation: all three turns are still there.
+    click(I18N::Editor::ARotation);
+    CHECK_FALSE(stored().otherwiseGeneric);
+    CHECK(stored().otherwise == std::vector<int>{MONSTER01_ATTACK2, MONSTER01_ATTACK2, MONSTER01_ATTACK2});
     click(I18N::Editor::ADraw);
     CHECK_FALSE(stored().otherwiseGeneric);
     CHECK(stored().otherwiseRandom == Data::Monsters::MonsterAttackRandom::Rand);
