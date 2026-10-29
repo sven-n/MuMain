@@ -2704,6 +2704,9 @@
   <data name="Pick the maps of the variant; until then Save refuses the monsters." xml:space="preserve">
     <value>Wähle die Karten der Variante; bis dahin speichert Speichern die Monster nicht.</value>
   </data>
+  <data name="Variant maps in another variant" xml:space="preserve">
+    <value>{0}: eine andere Variante nennt das auch; solange zwei Varianten eine Karte nennen, speichert Speichern die Monster nicht.</value>
+  </data>
   <data name="On its maps the variant attacks instead of the monster." xml:space="preserve">
     <value>Auf ihren Karten ersetzen die Angriffe der Variante die des Monsters.</value>
   </data>

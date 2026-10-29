@@ -2725,6 +2725,9 @@
   <data name="Pick the maps of the variant; until then Save refuses the monsters." xml:space="preserve">
     <value>Pick the maps of the variant; until then Save refuses the monsters.</value>
   </data>
+  <data name="Variant maps in another variant" xml:space="preserve">
+    <value>{0}: another variant names this too; while two variants name a map, Save refuses the monsters.</value>
+  </data>
   <data name="On its maps the variant attacks instead of the monster." xml:space="preserve">
     <value>On its maps the variant's attacks replace the monster's.</value>
   </data>

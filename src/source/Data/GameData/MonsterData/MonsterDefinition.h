@@ -58,4 +58,9 @@ struct MonsterDefinition
 // those of the map variant that names the map and has attacks, else the
 // entry's own.
 const std::optional<MonsterAttacks>& GetAttacksOnMap(const MonsterDefinition& monster, int map, int stage = 0);
+
+// The maps and stages of the map variant at `variant` that another variant of
+// the monster names too (Data::Maps::Overlaps); a map in two variants is
+// fatal (Q-MN65).
+std::vector<Data::Maps::MapRef> FindMapsOfOtherVariants(const MonsterDefinition& monster, size_t variant);
 } // namespace Data::Monsters

@@ -335,6 +335,13 @@ void MuMonsterAttacksUI::RenderVariantMaps(MonsterDefinition& monster)
     {
         RenderWarning(I18N::Editor::PickTheMapsOfTheVariantUntilThenSaveRefusesTheMonsters);
     }
+    const std::vector<Data::Maps::MapRef> shared =
+        Data::Monsters::FindMapsOfOtherVariants(monster, static_cast<size_t>(m_variant));
+    if (!shared.empty())
+    {
+        RenderWarning(
+            I18N::Format(I18N::Editor::VariantMapsInAnotherVariant, {MapPicker::Describe(shared, "")}).c_str());
+    }
 }
 
 void MuMonsterAttacksUI::RenderReaders(const MonsterDefinition& monster, int modelSlot)

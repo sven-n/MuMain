@@ -340,6 +340,21 @@ TEST_CASE("Maps: two map list entries overlap on a shared map and stage, a map w
     CHECK_FALSE(Overlaps(MapRef{WD_9DEVILSQUARE}, MapRef{32}));
 }
 
+TEST_CASE("Monster attacks: the maps of a map variant that another variant names too, stages included (Q-MN65) "
+          "[data][monsters]")
+{
+    using Data::Maps::MapRef;
+    MonsterDefinition golem;
+    golem.number = 291;
+    golem.mapVariants.resize(3);
+    golem.mapVariants[0].maps = {{WD_9DEVILSQUARE}, {32}};
+    golem.mapVariants[1].maps = {{WD_9DEVILSQUARE, 2}, {WD_31HUNTING_GROUND}};
+    golem.mapVariants[2].maps = {{WD_0LORENCIA}};
+    CHECK(Data::Monsters::FindMapsOfOtherVariants(golem, 0) == std::vector<MapRef>{{WD_9DEVILSQUARE}});
+    CHECK(Data::Monsters::FindMapsOfOtherVariants(golem, 1) == std::vector<MapRef>{{WD_9DEVILSQUARE, 2}});
+    CHECK(Data::Monsters::FindMapsOfOtherVariants(golem, 2).empty());
+}
+
 TEST_CASE("Monster attacks: a map variant names a stage of a map, a map without a stage all of them (D67) "
           "[data][monsters]")
 {
