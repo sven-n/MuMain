@@ -46,9 +46,9 @@ std::optional<ItemDefinition> LoadItem(int itemType)
 // import) and an entry without a name can still be edited.
 const char* RefuseEnglishName(const ItemDefinition& item)
 {
-    const ItemDefinition& stored = g_ItemDatabase.GetAllSlots()[Data::Items::MakeItemType(item.group, item.number)];
+    const ItemDefinition* stored = g_ItemDatabase.FindEntry(item.group, item.number);
     const std::string& english = item.names.GetNeutral();
-    if (stored.names.GetNeutral() == english)
+    if (stored != nullptr && stored->names.GetNeutral() == english)
     {
         return nullptr;
     }
