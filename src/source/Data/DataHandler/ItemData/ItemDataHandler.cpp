@@ -736,7 +736,6 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
     result.keptEnglishNameCount = KeepCurrentEnglishNames(result.items);
     KeepMissingNamesMissing(result.items, result.importedLocales);
     KeepFieldsNotInBmd(result.items, result.importedLocales);
-    KeepEntriesWithoutName(result.items);
     // With its stat profile known, a requirement the item keeps as a value takes the value the
     // bmd file's weight gave in the original client.
     for (ItemDefinition& item : result.items)
@@ -754,7 +753,11 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
                       GetItemStatsFile().generic_string(), result.validationIssues);
     ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.validationIssues);
 
-    g_ItemDatabase.Build(result.items);
+    // The entries without a name stay as they are: they are not from the bmd files, so they
+    // are not among the imported items.
+    std::vector<ItemDefinition> items = result.items;
+    KeepEntriesWithoutName(items);
+    g_ItemDatabase.Build(items);
     FillItemAttributes();
     // The bmd files have the items at their old numbers; their models go back
     // there too.

@@ -2163,6 +2163,43 @@ TEST_CASE("Exporting the items as bmd and importing them again gives the same da
     }
 }
 
+TEST_CASE("A bmd import keeps the entries without a name as they are and does not count them [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+    // An entry without a name with the Healing Orb's profile and requirements: values, which the
+    // import must not take for the weights of a bmd file.
+    const ItemDefinition* healingOrb = g_ItemDatabase.Find(12, 8);
+    REQUIRE(healingOrb != nullptr);
+    REQUIRE(HasRequirementWeightsInBmd(g_ItemDatabase.GetStatProfiles(), *healingOrb));
+    const int entryType = MakeItemType(12, 20);
+    ItemDefinition entry = g_ItemDatabase.GetAllSlots()[entryType];
+    REQUIRE(entry.entryWithoutName);
+    entry.statProfile = healingOrb->statProfile.empty()
+                            ? DeriveStatProfile(g_ItemDatabase.GetStatProfiles(), *healingOrb)
+                            : healingOrb->statProfile;
+    entry.level = healingOrb->level;
+    entry.requirements = healingOrb->requirements;
+    g_ItemDataHandler.RestoreItems(std::span<const ItemDefinition>(&entry, 1));
+    REQUIRE(HasRequirementWeightsInBmd(g_ItemDatabase.GetStatProfiles(), entry));
+
+    const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
+    REQUIRE_FALSE(HasFatal(result.issues));
+    CHECK(g_ItemDatabase.GetAllSlots()[entryType] == entry);
+    // The imported items are the ones of the bmd files.
+    CHECK(std::ranges::none_of(result.items, [](const ItemDefinition& item) { return item.entryWithoutName; }));
+    CHECK(static_cast<int>(result.items.size()) == g_ItemDatabase.GetExistingItemCount());
+}
+
 // Export as bmd writes a missing name as the English one; the import must not
 // turn it into a name that is the same in that language.
 TEST_CASE("A bmd round trip keeps missing names missing and names that are the same [data][items][editor]")
