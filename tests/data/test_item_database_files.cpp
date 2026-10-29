@@ -1386,7 +1386,7 @@ TEST_CASE("A file that cannot be replaced is a write failure and leaves no tempo
 TEST_CASE("Every number with a model has an entry in the item files [data][items]")
 {
     const ItemDataLoadResult items = LoadItemDataDirectory(DataDirectory / "Items");
-    REQUIRE_FALSE(HasErrors(items.issues));
+    REQUIRE_FALSE(HasFatal(items.issues));
     const ItemModelDataLoadResult models = LoadItemModelDataDirectory(DataDirectory / "Items" / "Models");
     std::vector<ItemDataIssue> issues;
     ValidateModelsHaveItemEntries(items.items, models.models, issues);

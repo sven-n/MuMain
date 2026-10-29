@@ -146,7 +146,7 @@ TEST_CASE("An item file entry without a name is kept through read and write [dat
     CHECK(issues.empty());
     ItemDefinition twice = entry;
     ValidateItems(std::vector<ItemDefinition>{entry, twice}, issues);
-    CHECK(HasIssue(issues, ItemDataIssueSeverity::Error, "number"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "number"));
 }
 
 TEST_CASE("Item JSON only writes items of the requested group [data][items]")
