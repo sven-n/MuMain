@@ -23,6 +23,7 @@
 #include "UI/MonsterTools/MonsterAttackPreview.h"
 #include "UI/MonsterTools/MonsterEdits.h"
 #include "UI/MonsterTools/MonsterSelection.h"
+#include "UI/MonsterTools/MonsterSoundEventsEditor.h"
 #include "UI/MonsterTools/MonsterToolWindow.h"
 #include "UI/MonsterTools/MuMonsterAttacksUI.h"
 #include "UI/MonsterTools/MuMonsterBrowserUI.h"
@@ -671,6 +672,57 @@ TEST_CASE("The bar's undo target is the tool worked in last while it is open [ed
 
     g_MuEditorCore.GetToolWindows().monsterTranslations = true;
     CHECK(&MuEditor::UndoTargets::GetCurrent(items) == &monsters);
+}
+
+TEST_CASE("Monster Model: a sound event plays at moments or in animations, one of the other kind switches it (Q-MN76) "
+          "[editor][monsters]")
+{
+    using Data::Monsters::MonsterSoundMoment;
+    using namespace MuEditor::Monsters::SoundEventsEditor;
+    Data::Monsters::MonsterSoundEvent event;
+    event.animations = {MONSTER01_ATTACK1};
+    CHECK(WhenText(event) == "attack1");
+
+    // A moment makes an event of animations one of the moment.
+    CHECK(ToggleMoment(event, MonsterSoundMoment::Hit));
+    CHECK(event.animations.empty());
+    CHECK(event.moments == std::vector{MonsterSoundMoment::Hit});
+    CHECK(ToggleMoment(event, MonsterSoundMoment::Attack));
+    CHECK(event.moments == std::vector{MonsterSoundMoment::Attack, MonsterSoundMoment::Hit});
+    CHECK(WhenText(event) == "on attack, hit");
+    CHECK(ToggleMoment(event, MonsterSoundMoment::Hit));
+    CHECK(event.moments == std::vector{MonsterSoundMoment::Attack});
+    // The last moment stays.
+    CHECK_FALSE(ToggleMoment(event, MonsterSoundMoment::Attack));
+    CHECK(event.moments == std::vector{MonsterSoundMoment::Attack});
+
+    // An animation makes it one of animations again.
+    CHECK(ToggleAnimation(event, MONSTER01_DIE));
+    CHECK(event.moments.empty());
+    CHECK(event.animations == std::vector{static_cast<int>(MONSTER01_DIE)});
+    CHECK_FALSE(ToggleAnimation(event, MONSTER01_DIE));
+}
+
+TEST_CASE("Monster Model: a sound event's SubType condition keeps its number, a new one names 9 (Q-MN76) "
+          "[editor][monsters]")
+{
+    using namespace MuEditor::Monsters::SoundEventsEditor;
+    Data::Monsters::MonsterSoundEvent event;
+    CHECK(GetSubTypeCondition(event) == SubTypeCondition::Any);
+
+    SetSubTypeCondition(event, SubTypeCondition::Not);
+    CHECK(GetSubTypeCondition(event) == SubTypeCondition::Not);
+    CHECK(event.notSubType == 9);
+    CHECK_FALSE(event.subType);
+
+    event.notSubType = 5;
+    SetSubTypeCondition(event, SubTypeCondition::Only);
+    CHECK(event.subType == 5);
+    CHECK_FALSE(event.notSubType);
+
+    SetSubTypeCondition(event, SubTypeCondition::Any);
+    CHECK_FALSE(event.subType);
+    CHECK_FALSE(event.notSubType);
 }
 
 #endif // _EDITOR
