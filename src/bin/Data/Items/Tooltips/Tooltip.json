@@ -640,6 +640,7 @@
       "ru": "Используется для объединения предметов для приглашения на площадь Дьявола.",
       "tl": "Ito ay ginagamit upang pagsamahin ang mga item para sa isang Devil Square Invitation",
       "uk": "Він використовується для комбінування предметів для запрошення Devil Square",
+      "zh-CN": "用于合成恶魔广场入场券",
       "zh-TW": "它用於組合惡魔廣場邀請函的項目"
     },
     "reinforcementJewel": {
@@ -653,6 +654,7 @@
       "ru": "Самоцвет для усиления предмета",
       "tl": "Hiyas para sa pagpapatibay ng item",
       "uk": "Коштовність для посилення предметів",
+      "zh-CN": "用于强化道具的宝石",
       "zh-TW": "強化物品的寶石"
     },
     "grantPowerToReinforcedItem": {
@@ -666,6 +668,7 @@
       "ru": "Предоставьте реальную силу усиленному предмету.",
       "tl": "Bigyan ng aktwal na kapangyarihan ang reinforced item.",
       "uk": "Надати фактичну силу посиленому предмету.",
+      "zh-CN": "用于提升道具的再生属性",
       "zh-TW": "賦予強化物品實際力量。"
     },
     "contactCsTeam": {

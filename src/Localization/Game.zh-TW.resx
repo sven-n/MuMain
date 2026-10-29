@@ -116,6 +116,9 @@
     <value>儲備：工作</value>
     <comment>legacy_id=28,29</comment>
   </data>
+  <data name="Unknown map" xml:space="preserve">
+    <value>未知地圖</value>
+  </data>
   <data name="Lorencia" xml:space="preserve">
     <value>洛倫西亞</value>
     <comment>legacy_id=30</comment>
@@ -7561,7 +7564,7 @@
     <comment>legacy_id=2177</comment>
   </data>
   <data name="Kanturu3" xml:space="preserve">
-    <value>坎圖魯3</value>
+    <value>坎圖魯遺跡</value>
     <comment>legacy_id=2178</comment>
   </data>
   <data name="Refinery Tower" xml:space="preserve">

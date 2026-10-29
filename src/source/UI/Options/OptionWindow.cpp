@@ -144,9 +144,9 @@ int UI::Options::FindClosestUIScaleIndex(int percent)
 
 // I18N locale codes paired with each language's display name in that language, held as wide
 // strings so the label vector can be rebuilt without per-frame conversions.
+// clang-format off
 static const struct { const char* code; const wchar_t* label; } s_Languages[] = {
     { "en",    L"English" },
-    // Non-ASCII names use universal-character-name escapes for charset-safe MSVC compilation.
     { "de",    L"Deutsch" },
     { "es",    L"Español" },                                                  // Español
     { "id",    L"Bahasa Indonesia" },
@@ -156,8 +156,10 @@ static const struct { const char* code; const wchar_t* label; } s_Languages[] = 
     { "ru",    L"Русский" },                   // Русский
     { "tl",    L"Tagalog" },
     { "uk",    L"Українська" }, // Українська
+    { "zh-CN", L"简体中文" },
     { "zh-TW", L"繁體中文" },                                      // 繁體中文
 };
+// clang-format on
 static const int s_NumLanguages = sizeof(s_Languages) / sizeof(s_Languages[0]);
 
 // UI font families offered by the font row. `name` is the GameConfig font family value; empty =
@@ -177,6 +179,7 @@ static const FontOption s_Fonts[] = {
     {L"Liberation Sans", L"Liberation Sans"},
     {L"DejaVu Sans", L"DejaVu Sans"},
     {L"Noto Sans TC", L"Noto Sans TC"},
+    {L"Noto Sans SC", L"Noto Sans SC"},
 };
 static const int s_NumFonts = sizeof(s_Fonts) / sizeof(s_Fonts[0]);
 

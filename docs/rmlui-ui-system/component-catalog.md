@@ -120,6 +120,11 @@ only under the `NativeTextSize` capability and requires physical-pixel text geom
 See [`RmlNativeTextFit.h`](../../src/source/UI/RmlBridge/RmlNativeTextFit.h) and
 `generic_menu_dialog.rml`. This is distinct from marquee or wrapping.
 
+Use `.text-fit` for explicit shrink-to-fit in either theme, including the map-name banner.
+It uses the inherited font size as its maximum and reduces that size without transforming glyphs.
+Give the element a bounded width, direct text children and `white-space: nowrap`; physical-pixel
+layout keeps the fitted glyphs sharp.
+
 ## Scrolling pane
 
 **Style contract:** `.scroll-pane` in both themes' `base.rcss`. RmlUi scrolls document content

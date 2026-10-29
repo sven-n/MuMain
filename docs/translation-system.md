@@ -396,7 +396,7 @@ the item tools' Undo and Redo.
 ### Translating items into a language the game already has
 
 The game's UI languages are `en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`,
-`tl`, `uk` and `zh-TW`. Items currently have German (`de`), Portuguese (`pt`)
+`tl`, `uk`, `zh-CN` and `zh-TW`. Items currently have German (`de`), Portuguese (`pt`)
 and Spanish (`es`) names. To translate items into another of these languages,
 add names with that code (by hand or in the Item Translations window); nothing else is
 needed. The names show as soon as a player picks that language.
@@ -424,6 +424,43 @@ also check the files in `src/bin/Data/Items` without starting the game:
 ```bash
 ctest --test-dir <build folder> --build-config Debug -R items --output-on-failure
 ```
+
+## Simplified Chinese (`zh-CN`)
+
+Simplified Chinese is being added incrementally. The first batch translates the
+Options window, including its graphics tuning labels and help text. Shared
+labels also appear translated wherever other screens use the same resource key.
+Other game text, NPC dialogue and editor text fall back to English until their
+translations are added. Item names and server messages are separate data.
+This batch also translates 12 existing item tooltip texts required for every
+UI language by the item data tests; shared texts cover 15 items.
+
+Use official Chinese terminology as a reference, check item IDs and version-specific
+behavior, and preserve the current English meaning and placeholders. Do not import
+a newer client's rules merely to match its wording.
+
+Rebuild the client, then select **简体中文** in the Options language dropdown.
+Select **Noto Sans SC** in the font dropdown to use Simplified Chinese glyph
+forms. The regular and bold faces are bundled under `fonts/` and provide
+missing-glyph fallback for other font choices; no system font install is needed.
+These fonts come from Noto CJK's `Sans/SubsetOTF/SC` distribution and are shipped
+with their SIL Open Font License in `fonts/NotoSansSC-LICENSE`.
+
+Alternatively, set the executable directory's `config.ini`:
+
+```ini
+[UI]
+Locale=zh-CN
+```
+
+After rebuilding, check the Options tabs and graphics tuning in both themes:
+Chinese glyphs should render without boxes, and labels and help should fit at
+75% and 150% UI scale. Switch back to English and restart to check that the
+language choice is retained.
+
+Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
+resource keys, legacy IDs, formatting arguments and command tokens unchanged.
+Missing translations intentionally use the existing English fallback.
 
 ## Monster and NPC names
 
