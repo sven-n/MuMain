@@ -61,10 +61,21 @@ The file name is only a convention; the group comes from the file content.
 - Items are sorted by number and the fields always come in the same order,
   so saving unchanged data gives the same file.
 - Files are UTF-8 with LF line endings.
+- **The item files list every number the client uses.** An entry without
+  a name (`{ "number": 73 }`) is a number the client uses without an
+  item there: Sphere 4 and 5 (12,73 and 12,74) have their models and code
+  names them, but there is no item for them yet. The game treats such a
+  number as empty, and only its number is checked. Every number with a
+  model entry has an entry here, an item or one without a name; a model
+  entry without one is an error in **Data Checks** (the game runs, and a
+  save is not refused). An entry
+  without a name becomes an item when it gets an English name (Item
+  Basics, or an import that brings the name).
 
 ### Names and translations
 
-`name` holds the item's names by language: `en` (English, required) first,
+`name` holds the item's names by language: `en` (English, required for an
+item) first,
 then the translations sorted by language code. The codes are the same as
 for the UI texts (`de`, `pt`, `es`, …). A plain text (`"name": "Kris"`) is
 read as the English name only; saving writes the object form.
@@ -960,8 +971,9 @@ letter or `..`), `\` in a path, display or glow values of the wrong kind
 `textureFolders` or `noneBlendMeshes`, a `model` that is not in
 `SharedModels.json`, or a shared model defined twice stop the start with
 a message; unknown fields and a shared model that no item uses are
-warnings. The automated tests also check that every model file and
-texture folder exists, that every texture of a model is in one of its
+warnings. The automated tests also check that every number with a model
+has an entry in the item files, that every model file and texture folder
+exists, that every texture of a model is in one of its
 texture folders, that every texture is a `.jpg` or `.tga` texture, and
 that every model file that several items use is a shared model.
 
@@ -1046,9 +1058,11 @@ shows it in the others.
   `group,number` or the item type) and filters: group, tag, a rule flag
   that is off, items without a model, numbers that have a model but no
   item, items without a name in a language. *All items* lists everything
-  that is at a number: the numbers that have a model but no item (Sphere 4
-  and 5) are among the items, as *No item at this number*; a filter of
-  the items (tag, rule flag, missing model or name) leaves them out. An
+  that is at a number: the entries without a name (Sphere 4 and 5) are
+  among the items, as *Entry without a name*, and so is a model entry
+  without an item entry (only in files the checks report), as *No item at
+  this number*; a filter of the items (tag, rule flag, missing model or
+  name) leaves them out. An
   item whose name another item has too shows in grey what tells them
   apart, in the list and above
   each tool: the tags it has that not all its namesakes have (the lucky
@@ -1058,10 +1072,11 @@ shows it in the others.
   UI language. It has **Save Items**,
   **Import from bmd**, **Export as bmd**, **Export as S6E3** and
   **Export as CSV**, and:
-  - **Add item**: a group, a free number (one with neither an item nor a
-    model entry), the English name, and either the selected item's values
-    or a size and slot of its own (no slot to start with, for an item that
-    cannot be worn; an item that can be worn starts usable by every class).
+  - **Add item**: a group, a free number (one with neither an entry in the
+    item files nor a model entry), the English name, and either the
+    selected item's values or a size and slot of its own (no slot to start
+    with, for an item that cannot be worn; an item that can be worn starts
+    usable by every class).
     Its model is linked in **Item Model**.
   - **Duplicate item**: a copy with its model. A model file of its own
     becomes a shared model that both items use, so it is opened once.
@@ -1069,10 +1084,14 @@ shows it in the others.
     model the game has opened), so the item keeps its looks.
   - **Remove item**: the item and its model entry.
 
+  An entry without a name moves and is removed as an item is; there is
+  nothing to duplicate.
+
   Below a number that is not free, the add, duplicate and move dialogs say
-  what takes it: the item on it, or a model entry without an item (Sphere 4
-  and 5 have only their models), with what the code calls the number, how
-  the Item Browser lists it and what uses the number.
+  what takes it: the item on it, an entry without a name (Sphere 4 and 5:
+  their models, but no item yet) or a model entry without an item entry,
+  with what the code calls the number, how the Item Browser lists it and
+  what uses the number.
 
   Moving and removing first list what goes with the item (its tags, its
   model entry and the shared model it names) and what uses it by its
@@ -1096,7 +1115,8 @@ shows it in the others.
   the vault, a trade, a shop): an item grid frees the cells by the size an
   item has when it is taken out. Such an item is not moved or removed
   either, an undo step that would change it is refused, and Import from bmd
-  keeps its size and slot.
+  keeps its size and slot. An entry without a name is edited here too; its
+  English name makes it an item.
 - **Item Requirements**: the stat profile, as in Item Basics, then the level
   and stat requirements. A stat requirement whose profile gives it a formula
   shows its value at +0 (what a normal item needs without an option level,
@@ -1470,7 +1490,9 @@ only item data. The import is there to bring in your own old item files.
   come from the files: the original ones have no defense for the Cape of
   Lord (the client set its 15 in code until phase 3c), so it then has none.
   The imported items are at their bmd numbers, so the models of items you
-  moved since the start go back to their old numbers too.
+  moved since the start go back to their old numbers too. The entries
+  without a name stay where the import brings no item (the bmd format has
+  none).
   Save afterwards to keep the result. The console lists what the import had to fix (see below) and any
   problem the imported data still has; Save refuses it until those are
   fixed.
