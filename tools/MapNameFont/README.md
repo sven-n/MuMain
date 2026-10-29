@@ -14,6 +14,10 @@ python -m venv .venv
 .venv/Scripts/python tools/MapNameFont/generate.py --data "<MU client>/Data" --out src/bin/fonts/MuMapName-Italic.otf --preview out/mapfont-preview
 ```
 
+The packages are pinned to the versions that built the shipped font: with them the generator
+writes the same font again (only the `head` table's creation time differs), so a one-glyph fix
+gives a diff of that glyph. Raise them on purpose, together with a regenerated font.
+
 `--data` is the client's `Data` folder; only `Local/Eng/ImgsMapName` is read. `--preview` writes a
 page with every glyph, map names in several languages and each original image beside the same
 name in the font (serve the folder with `python -m http.server`, or open `index.html`).
