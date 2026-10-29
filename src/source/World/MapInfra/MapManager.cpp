@@ -992,7 +992,7 @@ int CMapManager::GetFilesFolder(int serverMap)
     {
         return WD_18CHAOS_CASTLE + 1;
     }
-    if (world >= WD_45CURSEDTEMPLE_LV1 && world <= WD_45CURSEDTEMPLE_LV6)
+    if (IsCursedTemple(world))
     {
         return WD_45CURSEDTEMPLE_LV1 + 2;
     }
@@ -1440,9 +1440,13 @@ bool CMapManager::IsPKField()
     return (this->WorldActive == WD_63PK_FIELD) ? true : false;
 }
 
-bool CMapManager::IsCursedTemple()
+bool CMapManager::IsCursedTemple(int iMap)
 {
-    return (this->WorldActive >= WD_45CURSEDTEMPLE_LV1 && this->WorldActive <= WD_45CURSEDTEMPLE_LV6) ? true : false;
+    if (iMap == -1)
+    {
+        iMap = this->WorldActive;
+    }
+    return iMap >= WD_45CURSEDTEMPLE_LV1 && iMap <= WD_45CURSEDTEMPLE_LV6;
 }
 
 bool CMapManager::IsEmpireGuardian1()
@@ -1502,7 +1506,7 @@ const wchar_t* EventMapName(CMapManager& maps, int mapId)
         return I18N::Game::ChaosCastle;
     if (maps.InHellas(mapId))
         return maps.InHiddenHellas(mapId) ? I18N::Game::LostKalima : I18N::Game::Kalima;
-    if (mapId >= WD_45CURSEDTEMPLE_LV1 && mapId <= WD_45CURSEDTEMPLE_LV6)
+    if (maps.IsCursedTemple(mapId))
         return I18N::Game::IllusionTemple;
     if (mapId >= WD_65DOPPLEGANGER1 && mapId <= WD_68DOPPLEGANGER4)
         return I18N::Game::Doppelganger;

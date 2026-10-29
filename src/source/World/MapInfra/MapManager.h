@@ -87,7 +87,7 @@ public:
     bool InHellas(int iMap = -1);
     bool InHiddenHellas(int iMap = -1);
     bool IsPKField();
-    bool IsCursedTemple();
+    bool IsCursedTemple(int iMap = -1);
     bool IsEmpireGuardian1();
     bool IsEmpireGuardian2();
     bool IsEmpireGuardian3();
