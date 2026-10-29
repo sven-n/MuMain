@@ -38,7 +38,7 @@ std::set<int> LoadedIds(const MonsterRecorder::LoadChanges& changes)
 
 std::vector<int> WorldsOf(const Data::Monsters::MonsterModelDefinition& model)
 {
-    return model.soundEventWorlds.empty() ? std::vector<int>{WD_0LORENCIA} : model.soundEventWorlds;
+    return model.soundEventMaps.empty() ? std::vector<int>{WD_0LORENCIA} : model.soundEventMaps;
 }
 
 // The numbers of the sounds the model's entry lists, which it loads when it

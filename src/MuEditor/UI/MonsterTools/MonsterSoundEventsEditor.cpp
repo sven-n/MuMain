@@ -60,12 +60,12 @@ std::string AnimationsText(const std::vector<int>& animations)
     return text;
 }
 
-std::string MapsText(const std::vector<int>& worlds)
+std::string MapsText(const std::vector<int>& maps)
 {
     std::string text;
-    for (const int world : worlds)
+    for (const int map : maps)
     {
-        text += (text.empty() ? "" : ", ") + std::to_string(world);
+        text += (text.empty() ? "" : ", ") + std::to_string(map);
     }
     return text;
 }
@@ -77,7 +77,7 @@ std::optional<std::vector<int>> ParseMaps(const std::string& text)
     std::string spaced = text;
     std::replace(spaced.begin(), spaced.end(), ',', ' ');
     std::istringstream stream(spaced);
-    std::set<int> worlds;
+    std::set<int> maps;
     std::string word;
     while (stream >> word)
     {
@@ -86,9 +86,9 @@ std::optional<std::vector<int>> ParseMaps(const std::string& text)
         {
             return std::nullopt;
         }
-        worlds.insert(std::stoi(word));
+        maps.insert(std::stoi(word));
     }
-    return std::vector<int>(worlds.begin(), worlds.end());
+    return std::vector<int>(maps.begin(), maps.end());
 }
 
 const char* DrawLabel(MonsterSoundDraw draw)
@@ -410,15 +410,15 @@ void RenderMaps(MonsterModelDefinition& model, ModelDraft& draft, std::string& m
     const bool active = ImGui::IsItemActive();
     if (ImGui::IsItemDeactivatedAfterEdit())
     {
-        if (const std::optional<std::vector<int>> worlds = ParseMaps(mapsText))
+        if (const std::optional<std::vector<int>> maps = ParseMaps(mapsText))
         {
-            model.soundEventWorlds = *worlds;
+            model.soundEventMaps = *maps;
             draft.AfterChange(true, StepLabel::Model(model.slot, I18N::Editor::StepWhatSoundEvents));
         }
     }
     if (!active)
     {
-        mapsText = MapsText(model.soundEventWorlds);
+        mapsText = MapsText(model.soundEventMaps);
     }
 }
 } // namespace

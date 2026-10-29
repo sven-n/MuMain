@@ -74,7 +74,7 @@ MonsterModelDefinition FullModel()
     model.load.textureFolders = {"Monster", "NPC/LuckyItem"};
     model.load.speeds = {{MONSTER01_STOP2, 0.2f * 1.2f}, {MONSTER01_WALK, 0.7f}, {12, 0.5f}};
     model.load.holdLastFrame = std::vector<int>{MONSTER01_STOP2, MONSTER01_DIE};
-    model.worldTextureFolders = {{{18, 53}, {"NPC"}}};
+    model.mapTextureFolders = {{{18, 53}, {"NPC"}}};
     model.textureNames = {{0, "xmassanta1.jpg"}};
     model.headBone = 16;
     model.streamMesh = 1;
@@ -99,7 +99,7 @@ MonsterModelDefinition FullModel()
     die.deathEffectArmed = true;
     die.sounds = {"Data/Sound/mDarkKnightDie.wav", "SOUND_MONSTER_DARKKNIGHT1"};
     model.soundEvents = {walk, breath, die};
-    model.soundEventWorlds = {69, 70};
+    model.soundEventMaps = {69, 70};
     model.bitmaps = {{"Monster/bv01_2.jpg", "BITMAP_MONSTER_SKIN", true, true}, {"Monster/iui02.tga", "BITMAP_ROBE+3"}};
     Data::Monsters::MonsterModelPart part;
     part.effect = "totemGolemPart1";
@@ -107,7 +107,7 @@ MonsterModelDefinition FullModel()
     part.load.textureFolders = {"Monster"};
     part.load.speeds = {{0, 0.13f}};
     part.load.holdLastFrame = std::vector<int>{};
-    part.worlds = {51};
+    part.maps = {51};
     Data::Monsters::MonsterModelPart clothes;
     clothes.slot = "MODEL_MERCHANT_FEMALE_HEAD+1";
     clothes.load.file = "Data/NPC/FemaleHead02.bmd";
@@ -194,14 +194,14 @@ TEST_CASE("Monster models: each sound event is written on a line of its own [dat
     attack.pick = Data::Monsters::MonsterSoundDraw::Rand;
     attack.sounds = {"SOUND_KARUTAN_ORCUS_ATTACK1", "SOUND_KARUTAN_ORCUS_ATTACK2"};
     model.soundEvents = {walk, attack};
-    model.soundEventWorlds = {80, 81};
+    model.soundEventMaps = {80, 81};
 
     const std::string text = Data::Monsters::WriteMonsterModelsJson(std::vector<MonsterModelDefinition>{model});
     CHECK(text.find(R"(      "soundEvents": [
         {"animations": ["walk"], "frames": [1, 2.5], "sounds": ["SOUND_KARUTAN_ORCUS_MOVE1"]},
         {"animations": ["attack1", "attack2"], "chance": {"oneIn": 3, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KARUTAN_ORCUS_ATTACK1", "SOUND_KARUTAN_ORCUS_ATTACK2"]}
       ],
-      "soundEventWorlds": [80, 81])") != std::string::npos);
+      "soundEventMaps": [80, 81])") != std::string::npos);
     INFO(text);
     const ReadResult read = Read(text);
     INFO(Messages(read.issues));
@@ -310,8 +310,8 @@ TEST_CASE("Monster models: wrong values are errors that name the model and the f
         {Model("MONSTER_MODEL_HOUND",
                R"("soundEvents": [{"animations": ["die"], "deathEffectArmed": 1, "sounds": ["a"]}])"),
          "model MONSTER_MODEL_HOUND soundEvents[0].deathEffectArmed", "true or false"},
-        {Model("MONSTER_MODEL_HOUND", R"("soundEventWorlds": [69, -1])"),
-         "model MONSTER_MODEL_HOUND soundEventWorlds[1]", "whole number"},
+        {Model("MONSTER_MODEL_HOUND", R"("soundEventMaps": [69, -1])"), "model MONSTER_MODEL_HOUND soundEventMaps[1]",
+         "whole number"},
     };
     for (const Case& test : cases)
     {

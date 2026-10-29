@@ -77,13 +77,14 @@ void OpenTextures(int slot, const std::vector<std::string>& folders)
 }
 
 // The texture folders of the map that is loaded.
-const std::vector<std::string>& FoldersOnWorld(const MonsterModelDefinition& model)
+const std::vector<std::string>& FoldersOnMap(const MonsterModelDefinition& model)
 {
-    for (const MonsterModelWorldFolders& world : model.worldTextureFolders)
+    const int map = gMapManager.GetServerMap();
+    for (const MonsterModelMapFolders& entry : model.mapTextureFolders)
     {
-        if (std::find(world.worlds.begin(), world.worlds.end(), gMapManager.WorldActive) != world.worlds.end())
+        if (std::find(entry.maps.begin(), entry.maps.end(), map) != entry.maps.end())
         {
-            return world.folders;
+            return entry.folders;
         }
     }
     return model.load.textureFolders;
@@ -155,7 +156,7 @@ void OpenParts(const MonsterModelDefinition& model)
     {
         const std::optional<int> slot = PartSlot(part);
         // Parts of a map are opened with the map.
-        if (slot && part.worlds.empty())
+        if (slot && part.maps.empty())
         {
             OpenPart(part, *slot);
         }
@@ -266,12 +267,12 @@ bool Open(int slot)
     const bool fromModelFile = monsterRange && Data::Models::ApplyModelFile(target, slot, modelFiles);
     if (fromModelFile)
     {
-        Data::Models::OpenModelFileTextures(slot, LoaderFolders(FoldersOnWorld(*model)), modelFiles);
+        Data::Models::OpenModelFileTextures(slot, LoaderFolders(FoldersOnMap(*model)), modelFiles);
     }
     else
     {
         ApplyTextureNames(target, model->textureNames);
-        OpenTextures(slot, FoldersOnWorld(*model));
+        OpenTextures(slot, FoldersOnMap(*model));
     }
     OpenParts(*model);
     ApplyAnimations(target, model->load, monsterRange ? Defaults::MonsterRange : Defaults::NpcRange);
@@ -356,10 +357,10 @@ std::vector<int> Reopen(int slot)
             continue;
         }
         // The map's parts that the loaded map opened; Open opened the others.
-        if (!part.worlds.empty())
+        if (!part.maps.empty())
         {
             const bool onThisMap =
-                std::find(part.worlds.begin(), part.worlds.end(), gMapManager.WorldActive) != part.worlds.end();
+                std::find(part.maps.begin(), part.maps.end(), gMapManager.GetServerMap()) != part.maps.end();
             const BMD& partModel = ::Models[*partSlot];
             if (!onThisMap || (partModel.NumActions <= 0 && partModel.NumMeshs <= 0))
             {
@@ -373,14 +374,14 @@ std::vector<int> Reopen(int slot)
 }
 #endif
 
-void OpenMapParts(int world)
+void OpenMapParts(int map)
 {
     for (const MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
     {
         for (const MonsterModelPart& part : model->parts)
         {
             const std::optional<int> slot = PartSlot(part);
-            if (slot && std::find(part.worlds.begin(), part.worlds.end(), world) != part.worlds.end())
+            if (slot && std::find(part.maps.begin(), part.maps.end(), map) != part.maps.end())
             {
                 OpenPart(part, *slot);
             }

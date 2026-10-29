@@ -200,7 +200,7 @@ to `MuError.log`:
 | `slot` | The model slot, see above |
 | `file` | The `.bmd` file |
 | `textureFolders` | The folders below `Data/` its textures are searched in, in this order; at least one |
-| `worldTextureFolders` | Other folders on some maps: `[{"worlds": [18, 19], "folders": ["NPC"]}]` (the Chaos Castle knights) |
+| `mapTextureFolders` | Other folders on some maps: `[{"maps": [18, 19], "folders": ["NPC"]}]` (the Chaos Castle knights) |
 | `textureNames` | A texture name that replaces the file's, by mesh: `{"0": "xmassanta1.jpg"}` (the Little Santas share one file) |
 | `animations` | The speeds that differ from the range's defaults, in frames per game frame, by animation: `stop1`, `stop2`, `walk`, `attack1`, `attack2`, `shock`, `die`, `appear`, `attack3`, `attack4`, `run`, `attack5`, then the number (`"12"`). The monster range plays stop1 at 0.25, stop2 at 0.2, walk at 0.34, attack1 and attack2 at 0.33, shock at 0.5, die at 0.55 and the others at 0; the NPC range plays all at 0.25 |
 | `holdLastFrame` | The animations that stop at their last frame instead of starting again. Without it: die in the monster range, none in the NPC range |
@@ -210,11 +210,15 @@ to `MuError.log`:
 | `sounds` | The sounds the model loads: `file`, `channels` (how many can play at once), `spatial` (3D, louder near the hero), and `id` for a sound that keeps its `SOUND_*` number, see below |
 | `soundSlots` | What the game plays when a character of the model stands or walks (`idle`, two), attacks or is hit (`attack`, two) and dies (`die`); of a pair it picks one at random. A slot names a sound of the model (its `id`, or its `file` when it has none) or any `SOUND_*` number; `null` is no sound. `secondSet` has the sounds a monster with SubType 9 (the big Hellas monsters) plays instead of the first set. Without `soundSlots` no slot has a sound |
 | `soundEvents` | Sounds the game plays on top of the slots, see [Sound events](#sound-events) |
-| `soundEventWorlds` | The maps the sound events play on; without it every map |
+| `soundEventMaps` | The maps the sound events play on; without it every map |
 | `bitmaps` | Bitmaps loaded into fixed bitmap slots that the model's code draws with: `file` below `Data/`, `slot` (`BITMAP_MONSTER_SKIN`), `filter` (`linear` or `nearest`), `wrap` (`repeat` or `clamp`) |
-| `parts` | Models loaded with it: `slot` (an NPC slot) or `effect` (an effect type of the effect catalogue), `file`, `textureFolders`, `animations`, `holdLastFrame` (no range defaults), and `worlds` for parts loaded with a map instead (the Kundun parts in Kalima, the Totem Golem's in Elbeland) |
+| `parts` | Models loaded with it: `slot` (an NPC slot) or `effect` (an effect type of the effect catalogue), `file`, `textureFolders`, `animations`, `holdLastFrame` (no range defaults), and `maps` for parts loaded with a map instead (the Kundun parts in Kalima, the Totem Golem's in Elbeland) |
 | `boundingBox` | `min` and `max` of a character's box; without one -60, -60, 0 to 50, 50, 150 |
 | `linkBones` | The bones the weapons hang on, right then left; without it 33 and 42. One bone sets the right hand's only |
+
+Maps are the numbers the server sends (`mapTextureFolders`, `soundEventMaps`,
+a part's `maps`, and a monster's map variants): Devil Square 1–4 is 9 and
+Devil Square 5–7 is 32, although the client loads both as Devil Square (9).
 
 A sound without an `id` gets a number of its own when it is first loaded,
 after the `SOUND_*` list; the same file keeps the same number for the
@@ -239,7 +243,7 @@ and only within 500 units of the hero (the Empire Guardian bosses' steps):
   {"animations": ["stop1"], "pick": "rand", "sounds": ["SOUND_XMAS_SANTA_IDLE_1", "SOUND_XMAS_SANTA_IDLE_2"]},
   {"animations": ["die"], "deathEffectArmed": true, "sounds": ["SOUND_XMAS_SNOWMAN_DEATH_1"]}
 ],
-"soundEventWorlds": [69, 70, 71, 72]
+"soundEventMaps": [69, 70, 71, 72]
 ```
 
 | Field | Meaning |

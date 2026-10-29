@@ -525,7 +525,7 @@ void MuMonsterModelUI::RenderMore(const MonsterModelDefinition& model)
     line(I18N::Editor::PartModels, std::to_string(model.parts.size()));
     line(I18N::Editor::FixedBitmaps, std::to_string(model.bitmaps.size()));
     line(I18N::Editor::TextureNamesByMesh, std::to_string(model.textureNames.size()));
-    line(I18N::Editor::TextureFoldersOnMaps, std::to_string(model.worldTextureFolders.size()));
+    line(I18N::Editor::TextureFoldersOnMaps, std::to_string(model.mapTextureFolders.size()));
     const auto vector = [](const std::optional<std::array<float, 3>>& value)
     {
         if (!value)

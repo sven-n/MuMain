@@ -13,6 +13,8 @@
 #include "Core/Globals/_enum.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Core/Utilities/Random.h"
 #include "GameLogic/Monsters/MonsterSoundEvents.h"
@@ -93,6 +95,32 @@ TEST_CASE("Monster sounds: an event plays in its animations on its maps, near th
     // Raymond's events are those of the four Empire Guardian maps.
     gMapManager.WorldActive = WD_0LORENCIA;
     CHECK(scope.Play(MODEL_RAYMOND, MONSTER01_ATTACK1).empty());
+}
+
+TEST_CASE("Monster sounds: the events' maps are the server's, Devil Square 5-7 is 32 (D67) [monsters][sounds]")
+{
+    SoundScope scope(WD_69EMPIREGUARDIAN1);
+    std::vector<Data::Monsters::MonsterModelDefinition> models;
+    for (const Data::Monsters::MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
+    {
+        models.push_back(*model);
+    }
+    std::vector<Data::Monsters::MonsterModelDefinition> changed = models;
+    for (Data::Monsters::MonsterModelDefinition& model : changed)
+    {
+        if (Data::Monsters::FindMonsterModelReference(model.slot) == MODEL_RAYMOND)
+        {
+            model.soundEventMaps = {32};
+        }
+    }
+    g_MonsterModelDatabase.Build(changed);
+
+    gMapManager.SetServerMap(32);
+    CHECK(gMapManager.WorldActive == WD_9DEVILSQUARE);
+    CHECK(scope.Play(MODEL_RAYMOND, MONSTER01_ATTACK1) == Sounds({SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01}));
+    gMapManager.SetServerMap(WD_9DEVILSQUARE);
+    CHECK(scope.Play(MODEL_RAYMOND, MONSTER01_ATTACK1).empty());
+    g_MonsterModelDatabase.Build(models);
 }
 
 TEST_CASE("Monster sounds: an event with frames plays only within them [monsters][sounds]")

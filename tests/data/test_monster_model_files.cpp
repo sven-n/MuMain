@@ -96,9 +96,9 @@ bool IsSpelledAsOnDisk(const std::string& path)
 std::vector<std::string> AllFolders(const MonsterModelDefinition& model)
 {
     std::vector<std::string> folders = model.load.textureFolders;
-    for (const auto& world : model.worldTextureFolders)
+    for (const auto& entry : model.mapTextureFolders)
     {
-        folders.insert(folders.end(), world.folders.begin(), world.folders.end());
+        folders.insert(folders.end(), entry.folders.begin(), entry.folders.end());
     }
     return folders;
 }

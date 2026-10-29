@@ -794,7 +794,7 @@ void CMapManager::Load() // OK
         LoadWaveFile(SOUND_GREAT_SHIELD, L"Data\\Sound\\eGreatShield.wav", 1);
     }
 
-    Data::Monsters::ModelLoader::OpenMapParts(this->WorldActive);
+    Data::Monsters::ModelLoader::OpenMapParts(GetServerMap());
 
     if (this->WorldActive != WD_7ATLANSE)
     {
