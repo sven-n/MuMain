@@ -142,7 +142,9 @@ void CheckTextEffects(Rml::Element& text)
     CHECK(dimensions == Rml::Vector2i(14, 14));
 }
 
-void CheckSharpText(Rml::Element& text)
+// The width of the name's glyphs as drawn. The text-fit span always spans the room, so its own box
+// says nothing about whether the name fits.
+float GlyphRunWidth(Rml::Element& text)
 {
     auto* node = rmlui_dynamic_cast<Rml::ElementText*>(text.GetFirstChild());
     REQUIRE(node != nullptr);
@@ -150,8 +152,12 @@ void CheckSharpText(Rml::Element& text)
     const Rml::TextShapingContext shaping{values.language(), values.direction(), values.font_kerning(),
                                           values.letter_spacing()};
     REQUIRE(text.GetFontFaceHandle() != 0);
-    const int width = Rml::GetFontEngineInterface()->GetStringWidth(text.GetFontFaceHandle(), node->GetText(), shaping);
-    CHECK(width <= text.GetOffsetWidth() + PixelTolerance);
+    return static_cast<float>(
+        Rml::GetFontEngineInterface()->GetStringWidth(text.GetFontFaceHandle(), node->GetText(), shaping));
+}
+
+void CheckSharpText(Rml::Element& text)
+{
     Rml::Vector2f position, size;
     REQUIRE(UI::RmlBridge::DrawnBox(text, Rml::BoxArea::Border, position, size));
     const auto layout = text.GetBox().GetSize(Rml::BoxArea::Border);
@@ -416,7 +422,8 @@ TEST_CASE("map-name text uses final-size rasters without deformation across them
                         // Fitting changes the raster font size; the drawn glyph geometry stays at 1:1.
                         Rml::Vector2f textPosition, textSize;
                         REQUIRE(UI::RmlBridge::DrawnBox(*text, Rml::BoxArea::Border, textPosition, textSize));
-                        CHECK(textSize.x <= document->GetElementById("name_room")->GetOffsetWidth() + PixelTolerance);
+                        CHECK(GlyphRunWidth(*text) <=
+                              document->GetElementById("name_room")->GetOffsetWidth() + PixelTolerance);
                         CHECK(textPosition.x + textSize.x / 2.f == doctest::Approx(viewport.x / 2.f).epsilon(0.002));
                         CHECK(textPosition.y + textSize.y <= position.y + size.y);
                         // A shrunk name stays on the full-size baseline instead of sinking toward the swirls.
@@ -483,15 +490,13 @@ TEST_CASE("map-name fitting follows same-name typography and room changes [ui][m
     CheckSharpText(*text);
     Rml::Vector2f position, size;
     REQUIRE(UI::RmlBridge::DrawnBox(*text, Rml::BoxArea::Border, position, size));
-    CHECK(size.x <=
-          room->GetOffsetWidth() * UI::RmlBridge::DrawnScale(*document->GetElementById("banner")) + PixelTolerance);
+    CHECK(GlyphRunWidth(*text) <= room->GetOffsetWidth() + PixelTolerance);
     REQUIRE(room->SetProperty("right", "40px"));
     fixture.Refresh();
     UI::RmlBridge::FitNativeTextToBoxes(fixture.context);
     fixture.context->Render(); // RmlUi resolves transform matrices when drawing.
     REQUIRE(UI::RmlBridge::DrawnBox(*text, Rml::BoxArea::Border, position, size));
-    CHECK(size.x <=
-          room->GetOffsetWidth() * UI::RmlBridge::DrawnScale(*document->GetElementById("banner")) + PixelTolerance);
+    CHECK(GlyphRunWidth(*text) <= room->GetOffsetWidth() + PixelTolerance);
     banner.SetText("A");
     fixture.Refresh();
     UI::RmlBridge::FitNativeTextToBoxes(fixture.context);
