@@ -27,6 +27,18 @@ namespace
 const std::filesystem::path ClientFolder = std::filesystem::path(MU_TEST_DATA_DIR).parent_path();
 const std::filesystem::path PlayerFolder = std::filesystem::path(MU_TEST_DATA_DIR) / "Player";
 
+struct BodyAssets
+{
+    const char* name;
+    const wchar_t* modelFolder;
+    bool prepared;
+};
+
+constexpr std::array<BodyAssets, 2> AssetSets{{
+    {"original S6", L"Data\\Player\\", false},
+    {"updated", L"Data\\Player\\Updated\\", true},
+}};
+
 // The role fixture below retains the original Dark Knight model.
 constexpr int BodyClass = CLASS_KNIGHT;
 struct BodyFamily
@@ -134,13 +146,13 @@ std::wstring ModelPrefix(const BodyFamily& family, const BodyPart& part)
     return std::wstring(part.file) + (family.stage == 0 ? L"" : std::to_wstring(family.stage + 1));
 }
 
-void OpenBodyParts(const BodyFamily& family)
+void OpenBodyParts(const BodyFamily& family, const BodyAssets& assets)
 {
     for (const BodyPart& part : BodyParts)
     {
         INFO("family ", std::string(family.suffix), " part ", Core::Text::ToUtf8(part.file));
         const std::wstring prefix = ModelPrefix(family, part);
-        REQUIRE(gLoadData.AccessModel(ModelSlot(family, part), L"Data\\Player\\", prefix.c_str(), family.baseClass + 1));
+        REQUIRE(gLoadData.AccessModel(ModelSlot(family, part), assets.modelFolder, prefix.c_str(), family.baseClass + 1));
     }
 }
 
@@ -148,13 +160,6 @@ std::string MeshTextureName(const BMD& model, int mesh)
 {
     const char* name = model.Textures[mesh].FileName;
     return std::string(name, strnlen(name, sizeof(model.Textures[mesh].FileName)));
-}
-
-bool IsPrepared(const BodyFamily& family)
-{
-    const std::string name = MeshTextureName(Models[ModelSlot(family, BodyParts[0])], 0);
-    REQUIRE((name == family.stockTexture || name == family.preparedTexture));
-    return name == family.preparedTexture;
 }
 
 bool IsHairMesh(const BodyFamily& family, const BodyPart& part, int mesh)
@@ -327,9 +332,8 @@ const BITMAP_t* MeshBitmap(const BMD& model, int mesh)
     REQUIRE(bitmap != nullptr);
     return bitmap;
 }
-} // namespace
 
-TEST_CASE("All 13 body families load 65 parts through native slots and fit the player rig [data][player]")
+void CheckBodyCompatibility(const BodyAssets& assets)
 {
     TestModelSlots slots;
     ClientFolderScope folder(ClientFolder);
@@ -340,8 +344,8 @@ TEST_CASE("All 13 body families load 65 parts through native slots and fit the p
     for (const BodyFamily& family : Families)
     {
         INFO("family ", std::string(family.suffix));
-        OpenBodyParts(family);
-        const bool prepared = IsPrepared(family);
+        OpenBodyParts(family, assets);
+        const bool prepared = assets.prepared;
         for (const BodyPart& part : BodyParts)
         {
             INFO("part ", Core::Text::ToUtf8(part.file));
@@ -366,10 +370,10 @@ TEST_CASE("All 13 body families load 65 parts through native slots and fit the p
     }
     CHECK(parts == 65);
     CHECK(meshes == 67);
-    MESSAGE("rig totals families=", Families.size(), " parts=", parts, " meshes=", meshes);
+    MESSAGE("rig assets=", std::string(assets.name), " totals families=", Families.size(), " parts=", parts, " meshes=", meshes);
 }
 
-TEST_CASE("All 65 body parts skin to finite positions with the retained player palette [data][player]")
+void CheckBodySkinning(const BodyAssets& assets)
 {
     TestModelSlots slots;
     ClientFolderScope folder(ClientFolder);
@@ -379,7 +383,7 @@ TEST_CASE("All 65 body parts skin to finite positions with the retained player p
     for (const BodyFamily& family : Families)
     {
         INFO("family ", std::string(family.suffix));
-        OpenBodyParts(family);
+        OpenBodyParts(family, assets);
         auto poses = Poses;
         if (family.baseClass == CLASS_ELF)
         {
@@ -411,10 +415,10 @@ TEST_CASE("All 65 body parts skin to finite positions with the retained player p
         }
     }
     CHECK(skinnedParts == 65 * Poses.size());
-    MESSAGE("skin totals families=", Families.size(), " parts=65 poses=", Poses.size(), " part_poses=", skinnedParts);
+    MESSAGE("skin assets=", std::string(assets.name), " totals families=", Families.size(), " parts=65 poses=", Poses.size(), " part_poses=", skinnedParts);
 }
 
-TEST_CASE("All body mesh textures decode with native roles and shared Dark Lord hair caching [data][player]")
+void CheckBodyTextures(const BodyAssets& assets)
 {
     TestModelSlots slots;
     ClientFolderScope folder(ClientFolder);
@@ -430,12 +434,13 @@ TEST_CASE("All body mesh textures decode with native roles and shared Dark Lord 
     for (const BodyFamily& family : Families)
     {
         INFO("family ", std::string(family.suffix));
-        OpenBodyParts(family);
-        const bool prepared = IsPrepared(family);
+        OpenBodyParts(family, assets);
+        const bool prepared = assets.prepared;
         for (const BodyPart& part : BodyParts)
         {
             const int slot = ModelSlot(family, part);
             INFO("part ", Core::Text::ToUtf8(part.file));
+            // OpenPlayerTextures uses the shared Player texture folder for both model sets.
             gLoadData.OpenTexture(slot, L"Player\\");
             const BMD& model = Models[slot];
             for (int m = 0; m < model.NumMeshs; ++m)
@@ -481,8 +486,43 @@ TEST_CASE("All body mesh textures decode with native roles and shared Dark Lord 
     CHECK(parts == 65);
     CHECK(references == 67);
     CHECK(dependencies.size() == 14);
-    MESSAGE("texture totals families=", Families.size(), " parts=", parts, " references=", references,
+    MESSAGE("texture assets=", std::string(assets.name), " totals families=", Families.size(), " parts=", parts, " references=", references,
             " dependencies=", dependencies.size(), " GPU uploads skipped");
+}
+
+} // namespace
+
+TEST_CASE("All 13 body families load 65 parts through native slots and fit the player rig [data][player]")
+{
+    for (const BodyAssets& assets : AssetSets)
+    {
+        SUBCASE(assets.name)
+        {
+            CheckBodyCompatibility(assets);
+        }
+    }
+}
+
+TEST_CASE("All 65 body parts skin to finite positions with the retained player palette [data][player]")
+{
+    for (const BodyAssets& assets : AssetSets)
+    {
+        SUBCASE(assets.name)
+        {
+            CheckBodySkinning(assets);
+        }
+    }
+}
+
+TEST_CASE("All body mesh textures decode with native roles and shared Dark Lord hair caching [data][player]")
+{
+    for (const BodyAssets& assets : AssetSets)
+    {
+        SUBCASE(assets.name)
+        {
+            CheckBodyTextures(assets);
+        }
+    }
 }
 
 namespace
