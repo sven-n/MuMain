@@ -5726,6 +5726,18 @@ void MoveEffect(OBJECT* o, int iIndex)
     else
     switch (o->Type)
     {
+    case BATTLE_CASTLE_WALL1:
+    case BATTLE_CASTLE_WALL2:
+    case BATTLE_CASTLE_WALL3:
+    case BATTLE_CASTLE_WALL4:
+        // Its two-tick life can end before a draw stamps it, so the debris bursts once, here.
+        if (o->SubType != 0 && o->HiddenMesh != -2)
+        {
+            o->HiddenMesh = -2;
+            SkinObjectMeshes(o, &Models[o->Type], false);
+            Models[o->Type].RenderMeshEffect(0, MODEL_WALL_PART1);
+        }
+        break;
 
 
 

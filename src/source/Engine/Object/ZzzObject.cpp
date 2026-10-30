@@ -1329,12 +1329,8 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     }
                                                     else if (o->Type == MODEL_FLY_BIG_STONE1)
                                                     {
-                                                        if (o->HiddenMesh == 99 && o->Visible)
-                                                        {
-                                                            o->HiddenMesh = -2;
-                                                            b->RenderMeshEffect(0, MODEL_BIG_STONE_PART1);
-                                                        }
-                                                        else
+                                                        // Landing, it shows only the debris UpdateRenderObjectEffects spawns.
+                                                        if (o->HiddenMesh != 99 || !o->Visible)
                                                         {
                                                             Vector(1.f, 1.f, 1.f, b->BodyLight);
                                                             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -1347,12 +1343,8 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     }
                                                     else if (o->Type == MODEL_FLY_BIG_STONE2)
                                                     {
-                                                        if (o->HiddenMesh == 99 && o->Visible)
-                                                        {
-                                                            o->HiddenMesh = -2;
-                                                            b->RenderMeshEffect(0, MODEL_BIG_STONE_PART2);
-                                                        }
-                                                        else
+                                                        // Landing, it shows only the debris UpdateRenderObjectEffects spawns.
+                                                        if (o->HiddenMesh != 99 || !o->Visible)
                                                         {
                                                             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                         }
@@ -2119,6 +2111,15 @@ void UpdateRenderObjectEffects(OBJECT* o)
             PlayBuffer(SOUND_HIT_GATE2);
             SkinObjectMeshes(o, b, true);
             b->RenderMeshEffect(0, MODEL_GATE);
+        }
+        break;
+    case MODEL_FLY_BIG_STONE1:
+    case MODEL_FLY_BIG_STONE2:
+        if (o->HiddenMesh == 99 && o->Visible)
+        {
+            o->HiddenMesh = -2;
+            SkinObjectMeshes(o, b, false);
+            b->RenderMeshEffect(0, o->Type == MODEL_FLY_BIG_STONE1 ? MODEL_BIG_STONE_PART1 : MODEL_BIG_STONE_PART2);
         }
         break;
     case MODEL_VALKYRIE:

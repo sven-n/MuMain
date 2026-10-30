@@ -385,3 +385,54 @@ TEST_CASE("A dying castle gate crumbles from its own posed mesh in the update [e
     model.NumMeshs = 0;
     FPS_ANIMATION_FACTOR = previousFrameFactor;
 }
+
+TEST_CASE("A wall's debris effect bursts before its two ticks of life run out, drawn or not [effects]")
+{
+    CharacterScope scope(BATTLE_CASTLE_WALL1);
+    const float previousFrameFactor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 1.f; // 25 FPS: the effect lives two moves
+    Vertex_t vertices[3]{};
+    Triangle_t triangles[10]{};
+    for (Triangle_t& triangle : triangles)
+    {
+        triangle.Polygon = 3;
+        for (short k = 0; k < 3; ++k)
+            triangle.VertexIndex[k] = k;
+    }
+    Mesh_t mesh;
+    mesh.NumVertices = 3;
+    mesh.Vertices = vertices;
+    mesh.NumTriangles = 10; // 30 one-in-three chances
+    mesh.Triangles = triangles;
+    BMD& model = Models[BATTLE_CASTLE_WALL1];
+    model.NumActions = 0; // no keys to pose: the scratch bones stay as they are
+    model.NumMeshs = 1;
+    model.Meshs = &mesh;
+    FenrirScope::ClearSpawns();
+
+    vec3_t position{1000.f, 2000.f, 0.f};
+    vec3_t angle{0.f, 0.f, 0.f};
+    vec3_t light{1.f, 1.f, 1.f};
+    CreateEffect(BATTLE_CASTLE_WALL1, position, angle, light, 1);
+    OBJECT& wall = Effects[0];
+    REQUIRE(wall.Type == BATTLE_CASTLE_WALL1);
+    wall.LifeTime = 2.f;
+
+    int debris = 0;
+    for (int move = 0; move < 2; ++move)
+    {
+        MoveEffects();
+        for (int i = 1; i < MAX_EFFECTS; ++i)
+        {
+            if (Effects[i].Live && (Effects[i].Type == MODEL_WALL_PART1 || Effects[i].Type == MODEL_WALL_PART1 + 1))
+                ++debris;
+            Effects[i].Live = false;
+        }
+    }
+    CHECK_FALSE(wall.Live);
+    CHECK(debris > 0);
+
+    model.Meshs = nullptr;
+    model.NumMeshs = 0;
+    FPS_ANIMATION_FACTOR = previousFrameFactor;
+}

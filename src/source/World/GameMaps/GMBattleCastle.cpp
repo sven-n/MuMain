@@ -1254,13 +1254,10 @@ namespace battleCastle
         }
         else if (o->Type >= BATTLE_CASTLE_WALL1 && o->Type <= BATTLE_CASTLE_WALL4)
         {
+            // A wall's debris effect (SubType 1) shows only the debris its first move spawns.
             if (o->SubType == 0)
             {
                 b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            }
-            else
-            {
-                b->RenderMeshEffect(0, MODEL_WALL_PART1);
             }
             return true;
         }
