@@ -8,6 +8,7 @@ from pathlib import Path
 
 ROOT = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[1]
 CI_WORKFLOW = ROOT / ".github/workflows/ci.yml"
+FORK_CI_WORKFLOW = ROOT / ".github/workflows/fork-ci.yml"
 DATA_WORKFLOW = ROOT / ".github/workflows/data-assets.yml"
 MINGW_WORKFLOW = ROOT / ".github/workflows/windows-build.yml"
 LINUX_WORKFLOW = ROOT / ".github/workflows/linux-build.yml"
@@ -454,16 +455,23 @@ for required in (
 ):
     check(required in linux_validation, f"Linux validation missing {required}")
 
-linux_ci_packages = apt_packages(step(linux_job, "build-linux", "Install build tools"))
-check(linux_ci_packages, "Linux CI must install its packages with apt-get install -y")
 linux_guide_packages = apt_packages(LINUX_GUIDE.read_text(encoding="utf-8"))
-for package in sorted(linux_ci_packages - linux_guide_packages - CI_ONLY_LINUX_PACKAGES.keys()):
-    errors.append(
-        f"Linux CI installs {package}, but docs/build/linux/console.md doesn't list it; "
-        "add it to the guide, or to CI_ONLY_LINUX_PACKAGES with the reason"
-    )
-for package in sorted(CI_ONLY_LINUX_PACKAGES.keys() - linux_ci_packages):
-    errors.append(f"CI_ONLY_LINUX_PACKAGES lists {package}, which Linux CI no longer installs")
+linux_ci_jobs = [("ci.yml", linux_job, "build-linux")]
+fork_ci = read_optional(FORK_CI_WORKFLOW)
+if fork_ci:
+    linux_ci_jobs.append(("fork-ci.yml", job(fork_ci, "linux-editor"), "linux-editor"))
+all_linux_ci_packages = set()
+for workflow_name, ci_job, job_name in linux_ci_jobs:
+    ci_packages = apt_packages(step(ci_job, job_name, "Install build tools"))
+    check(ci_packages, f"{workflow_name} {job_name} must install its packages with apt-get install -y")
+    all_linux_ci_packages |= ci_packages
+    for package in sorted(ci_packages - linux_guide_packages - CI_ONLY_LINUX_PACKAGES.keys()):
+        errors.append(
+            f"{workflow_name} {job_name} installs {package}, but docs/build/linux/console.md "
+            "doesn't list it; add it to the guide, or to CI_ONLY_LINUX_PACKAGES with the reason"
+        )
+for package in sorted(CI_ONLY_LINUX_PACKAGES.keys() - all_linux_ci_packages):
+    errors.append(f"CI_ONLY_LINUX_PACKAGES lists {package}, which no Linux CI job installs")
 
 macos_configure = step(macos_job, "build-macos", "Configure CMake")
 for required in (
