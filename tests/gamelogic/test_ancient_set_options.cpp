@@ -31,17 +31,29 @@ ITEM_SET_OPTION EmptySet()
     return set;
 }
 
-// SKILL_ATTRIBUTE::MasteryType of the ice skills.
+// SKILL_ATTRIBUTE::MasteryType of the skills of an element.
 constexpr std::uint8_t IceMastery = 0;
+constexpr std::uint8_t PoisonMastery = 1;
+constexpr std::uint8_t LightningMastery = 2;
+constexpr std::uint8_t WindMastery = 5;
+constexpr std::uint8_t WaterMastery = 6;
+
+// The option list `setOptions` gives a wearer of base class `firstClass` with `itemCount` of the
+// set's four items.
+SET_SEARCH_RESULT_OPT WornSet(const ITEM_SET_OPTION& setOptions, std::uint8_t itemCount, int firstClass,
+                              int secondClass)
+{
+    SET_SEARCH_RESULT_OPT worn{};
+    worn.CompleteSetItemCount = 4;
+    worn.ItemCount = itemCount;
+    CSItemOption::AddSetOptions(worn, setOptions, firstClass, secondClass);
+    return worn;
+}
 
 // The ice skill bonus `setOptions` gives a wearer of base class `firstClass` with all four items.
 int IceSkillBonus(const ITEM_SET_OPTION& setOptions, int firstClass, int secondClass)
 {
-    SET_SEARCH_RESULT_OPT worn{};
-    worn.CompleteSetItemCount = 4;
-    worn.ItemCount = 4;
-    CSItemOption::AddSetOptions(worn, setOptions, firstClass, secondClass);
-    return CSItemOption::GetMasteryBonus(worn, IceMastery);
+    return CSItemOption::GetMasteryBonus(WornSet(setOptions, 4, firstClass, secondClass), IceMastery);
 }
 
 struct TableLine
@@ -138,4 +150,48 @@ TEST_CASE("A mastery set option counts only for the class the set names [gamelog
     set.byRequireClass[CLASS_WIZARD] = 2; // Soul Masters only
     CHECK(IceSkillBonus(set, CLASS_WIZARD, 0) == 0);
     CHECK(IceSkillBonus(set, CLASS_WIZARD, 1) == 20);
+}
+
+TEST_CASE("A set's options leave out 24 to 28 [gamelogic][items][sets]")
+{
+    ITEM_SET_OPTION set = EmptySet();
+    set.byRequireClass[CLASS_WIZARD] = 1;
+    set.byStandardOption[0][0] = 0; // Increase strength
+    set.byStandardOptionValue[0][0] = 10;
+    set.byStandardOption[1][0] = 24;
+    set.byStandardOptionValue[1][0] = 2;
+    set.byStandardOption[2][0] = 28;
+    set.byStandardOptionValue[2][0] = 3;
+    set.byFullOption[0] = 26;
+    set.byFullOptionValue[0] = 4;
+
+    const SET_SEARCH_RESULT_OPT worn = WornSet(set, 4, CLASS_WIZARD, 0);
+
+    REQUIRE(worn.SetOptionCount == 1);
+    CHECK(worn.SetOption[0].OptionNumber == 0);
+    CHECK(worn.SetOption[0].Value == 10);
+    CHECK(worn.SetOption[0].IsActive);
+}
+
+TEST_CASE("Each mastery set option raises its own element's skills [gamelogic][items][sets]")
+{
+    ITEM_SET_OPTION set = EmptySet();
+    set.byRequireClass[CLASS_WIZARD] = 1;
+    set.byFullOption[0] = MASTERY_OPTION; // ice
+    set.byFullOptionValue[0] = 5;
+    set.byFullOption[1] = MASTERY_OPTION + 2; // lightning
+    set.byFullOptionValue[1] = 7;
+    set.byFullOption[2] = MASTERY_OPTION + 6; // water
+    set.byFullOptionValue[2] = 9;
+
+    const SET_SEARCH_RESULT_OPT complete = WornSet(set, 4, CLASS_WIZARD, 0);
+    CHECK(CSItemOption::GetMasteryBonus(complete, IceMastery) == 5);
+    CHECK(CSItemOption::GetMasteryBonus(complete, LightningMastery) == 7);
+    CHECK(CSItemOption::GetMasteryBonus(complete, WaterMastery) == 9);
+    CHECK(CSItemOption::GetMasteryBonus(complete, PoisonMastery) == 0);
+    CHECK(CSItemOption::GetMasteryBonus(complete, WindMastery) == 0);
+
+    // Full options need the complete set.
+    const SET_SEARCH_RESULT_OPT threeOfFour = WornSet(set, 3, CLASS_WIZARD, 0);
+    CHECK(CSItemOption::GetMasteryBonus(threeOfFour, IceMastery) == 0);
 }
