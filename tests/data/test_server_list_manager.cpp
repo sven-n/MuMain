@@ -149,6 +149,25 @@ TEST_CASE("ServerListManager: a group without a non-PvP channel shows the PvP no
     CHECK(groups[0]->m_bPvPServer);
 }
 
+TEST_CASE("ServerListManager: the selected server's title names its channel type")
+{
+    I18N::SetLocale("en");
+    TestServerListManager manager;
+    wchar_t name[] = L"Valhalla";
+    const auto titleFor = [&](BYTE channelType)
+    {
+        manager.SetSelectServerInfo(name, 3, channelType);
+        return manager.GetSelectServerTitle();
+    };
+
+    CHECK(titleFor(static_cast<BYTE>(ChannelType::Normal)) == L"[Valhalla-3 Server]");
+    CHECK(titleFor(static_cast<BYTE>(ChannelType::NonPvp)) == L"[Valhalla-3(Non-PvP) Server]");
+    CHECK(titleFor(static_cast<BYTE>(ChannelType::GoldPvp)) == L"[Valhalla-3(Gold PvP) Server]");
+    CHECK(titleFor(static_cast<BYTE>(ChannelType::Gold)) == L"[Valhalla-3(Gold) Server]");
+    // A type the list doesn't know is titled like a normal channel.
+    CHECK(titleFor(7) == L"[Valhalla-3 Server]");
+}
+
 TEST_CASE("ServerListManager: description and test server reach the group")
 {
     ServerGroup test = Group(9, "Test");

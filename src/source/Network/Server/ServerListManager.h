@@ -49,6 +49,9 @@ public:
     int GetSelectServerIndex();
     BYTE GetNonPVPInfo();
     bool IsNonPvP();
+    // The selected server as the login and character info windows title it, with its channel
+    // type: "[Valhalla-1(Gold) Server]".
+    std::wstring GetSelectServerTitle();
     void SetTotalServer(int iTotalServer);
     int GetTotalServer();
 

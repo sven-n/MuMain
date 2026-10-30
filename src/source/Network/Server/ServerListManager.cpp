@@ -26,6 +26,7 @@ CServerListManager::CServerListManager()
     m_iTotalServer = 0;
     m_szSelectServerName[0] = '\0';
     m_iSelectServerIndex = -1;
+    m_byNonPvP = static_cast<BYTE>(Data::ServerList::ChannelType::Normal);
 }
 
 CServerListManager::~CServerListManager()
@@ -268,6 +269,20 @@ BYTE CServerListManager::GetNonPVPInfo()
 bool CServerListManager::IsNonPvP()
 {
     return bool(NonPvpBit & GetNonPVPInfo());
+}
+
+std::wstring CServerListManager::GetSelectServerTitle()
+{
+    // Indexed by the channel type (Data::ServerList::ChannelType), as in the original client.
+    const wchar_t* const titleFormats[Data::ServerList::ChannelTypeCount] = {
+        I18N::Game::SDServer, I18N::Game::SDNonPvPServer, I18N::Game::SDGoldPvPServer, I18N::Game::SDGoldServer};
+    const BYTE channelType = GetNonPVPInfo();
+    const wchar_t* format =
+        channelType < Data::ServerList::ChannelTypeCount ? titleFormats[channelType] : titleFormats[0];
+
+    wchar_t title[MAX_TEXT_LENGTH] = {};
+    mu_swprintf_s(title, format, GetSelectServerName(), GetSelectServerIndex());
+    return title;
 }
 
 void CServerListManager::SetTotalServer(int iTotalServer)
