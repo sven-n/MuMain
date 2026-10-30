@@ -665,6 +665,56 @@ TEST_CASE("The item names of windows and ground labels come from the name lines 
     CHECK(GetItemNameText(-1, 0).empty());
 }
 
+// The item cases moved into the data with their translations: a lost language or a broken placeholder shows here, as
+// the tooltip snapshot is English.
+TEST_CASE("The item cases' lines are in the UI's language [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    SetItemTooltipTextMeasure(&FixedWidthMeasure);
+    const std::string uiLocale = I18N::GetCurrentLocale();
+    I18N::SetLocale("de");
+
+    const auto lines = [](int group, int number, int level)
+    {
+        ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(group, number);
+        params.Level = static_cast<BYTE>(level);
+        std::vector<std::wstring> texts;
+        for (const ItemTooltipLine& line : Engine::Items::TooltipSnapshot::TooltipOfParameters(params))
+        {
+            texts.push_back(line.text);
+        }
+        return texts;
+    };
+    const auto has = [](const std::vector<std::wstring>& texts, const std::wstring& text)
+    { return std::find(texts.begin(), texts.end(), text) != texts.end(); };
+
+    const std::vector<std::wstring> bundle = lines(12, 30, 0);
+    const std::vector<std::wstring> arrows = lines(4, 15, 1);
+    const std::vector<std::wstring> boxOfLuck = lines(14, 11, 14);
+    const std::vector<std::wstring> jackOLantern = lines(14, 46, 0);
+
+    I18N::SetLocale(uiLocale.c_str());
+    SetItemTooltipTextMeasure(nullptr);
+
+    CHECK(has(bundle, L"10 Juwel des Segens kombiniert"));
+    CHECK(has(bundle, L"Kann nach dem Zerlegen verwendet werden"));
+    CHECK(has(arrows, L"Erhöht den Schaden um 3%"));
+    CHECK(has(arrows, L"Zusätzlicher Schaden +1"));
+    CHECK(has(boxOfLuck, L"Freier Eintritt nach Kalima"));
+    CHECK(has(boxOfLuck, L"Kann nicht verkauft werden."));
+    CHECK(std::any_of(jackOLantern.begin(), jackOLantern.end(),
+                      [](const std::wstring& text)
+                      {
+                          return text.starts_with(L"Angriffsgeschwindigkeit +") &&
+                                 text.find(L'{') == std::wstring::npos;
+                      }));
+}
+
 // The option lines are the lines the full item has and the plain one doesn't (luck, skill, the option, the excellent
 // options); an item's restriction drawn after its options comes after the last of them.
 TEST_CASE("A transformation ring's restriction comes after its option lines [data][items][tooltip]")
