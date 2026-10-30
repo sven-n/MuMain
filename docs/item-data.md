@@ -724,6 +724,41 @@ a profile no item names is a warning.
 
 ---
 
+## Ancient set options
+
+What an ancient set gives is not in the item files: `Data/Local/ItemSetType.bmd`
+says which items belong to which set, and
+`Data/Local/<Eng|Por|Spn>/ItemSetOption_<Eng|Por|Spn>.bmd` holds each set's
+name and options. A set has standard options (the first counts from two of its
+items worn, each further one from one more item), up to two ext options (from
+two items) and up to five full options (with the complete set). An option is a
+number and a value:
+
+| Number | Option |
+|---|---|
+| 0 to 23 | Strength, agility, energy, stamina, command; min and max damage; wizardry damage; damage; attack success rate; defense; max life, mana and AG; AG recovery; critical damage rate and critical damage; excellent damage rate and excellent damage; skill damage; double damage rate; ignore the enemy's defense; defense with a shield; damage with a two-handed weapon |
+| 24 to 28 | Not supported. In the original client these were class bonuses that grew with a stat; no set uses them, in the shipped data or in OpenMU. A set that has one gets nothing for it and shows no line |
+| 29 to 35 | Damage of one element's skills (the skill's mastery type): 29 ice, 30 poison, 31 lightning, 32 fire, 33 earth, 34 wind, 35 water |
+
+The element options (29 to 35) count only for a class the set names in its
+class requirement: 1 for the class as it is, 2 only once it has its second
+class (Soul Master, Blade Knight, Muse Elf, Bloody Summoner), as in the
+original client. A set that names no class gives them to nobody. The client
+adds them to the skill damage it shows; OpenMU has no such option, so the
+server's damage does not include them.
+
+Typing a set's name after `/` in the chat shows the set's options with their
+values: standard options blue, ext options green, full options yellow.
+Capitals and the apostrophe (`'` or the typographic `’` some names use) don't
+matter, and the trailing `s` is optional: `/Warrior`, `/warrior`, `/Warriors`
+and `/Warrior's` all show the set "Warrior's". When a text fits two sets, the
+set whose name it is (apart from capitals and the apostrophe's form) wins, then
+the set with the lower number; an item named like the text (`/<item name>`)
+opens before any set. No two shipped sets, and no set and item, fit the same
+text. The original client needed the exact name.
+
+---
+
 ## Loading and errors
 
 At startup all `*.json` files in `Data/Items` and `Stats/ItemStats.json` are

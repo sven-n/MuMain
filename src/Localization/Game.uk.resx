@@ -2629,21 +2629,6 @@
   <data name="Ignore enemies defensive skill %d%%" xml:space="preserve">
     <value>Ігнорувати навички захисту ворогів %d%%</value>
   </data>
-  <data name="%s Increase damage strength/%d" xml:space="preserve">
-    <value>%s Збільшити силу шкоди/%d</value>
-  </data>
-  <data name="%s Increase damage agility/%d" xml:space="preserve">
-    <value>%s Збільшення спритності шкоди/%d</value>
-  </data>
-  <data name="%s Increase defensive skill agility/%d" xml:space="preserve">
-    <value>%s Підвищення спритності захисних навичок/%d</value>
-  </data>
-  <data name="%s Increase defensive skill stamina/%d" xml:space="preserve">
-    <value>%s Підвищити витривалість захисних навичок/%d</value>
-  </data>
-  <data name="%s Increase Wizardry energy/%d" xml:space="preserve">
-    <value>%s Збільшення енергії чарівництва/%d</value>
-  </data>
   <data name="Ice attribute skill increase damage +%d" xml:space="preserve">
     <value>Навичка льоду збільшує шкоду +%d</value>
   </data>

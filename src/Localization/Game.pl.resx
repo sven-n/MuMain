@@ -2925,21 +2925,6 @@
   <data name="Ignore enemies defensive skill %d%%" xml:space="preserve">
     <value>Ignoruje %d%% obrony wrogów</value>
   </data>
-  <data name="%s Increase damage strength/%d" xml:space="preserve">
-    <value>%s Zwiększa obrażenia (siła/%d)</value>
-  </data>
-  <data name="%s Increase damage agility/%d" xml:space="preserve">
-    <value>%s Zwiększa obrażenia (zwinność/%d)</value>
-  </data>
-  <data name="%s Increase defensive skill agility/%d" xml:space="preserve">
-    <value>%s Zwiększa obronę (zwinność/%d)</value>
-  </data>
-  <data name="%s Increase defensive skill stamina/%d" xml:space="preserve">
-    <value>%s Zwiększa obronę (wytrzymałość/%d)</value>
-  </data>
-  <data name="%s Increase Wizardry energy/%d" xml:space="preserve">
-    <value>%s Zwiększa obrażenia magiczne (energia/%d)</value>
-  </data>
   <data name="Ice attribute skill increase damage +%d" xml:space="preserve">
     <value>Zwiększenie obrażeń umiejętności atrybutu lodu +%d</value>
   </data>

@@ -2629,21 +2629,6 @@
   <data name="Ignore enemies defensive skill %d%%" xml:space="preserve">
     <value>Игнорировать защитный навык врагов %d%%</value>
   </data>
-  <data name="%s Increase damage strength/%d" xml:space="preserve">
-    <value>%s Увеличить силу урона/%d</value>
-  </data>
-  <data name="%s Increase damage agility/%d" xml:space="preserve">
-    <value>%s Увеличение ловкости при нанесении урона/%d</value>
-  </data>
-  <data name="%s Increase defensive skill agility/%d" xml:space="preserve">
-    <value>%s Увеличить ловкость защитных навыков/%d</value>
-  </data>
-  <data name="%s Increase defensive skill stamina/%d" xml:space="preserve">
-    <value>%s Увеличить выносливость защитных навыков/%d</value>
-  </data>
-  <data name="%s Increase Wizardry energy/%d" xml:space="preserve">
-    <value>%s Увеличить энергию волшебства/%d</value>
-  </data>
   <data name="Ice attribute skill increase damage +%d" xml:space="preserve">
     <value>Навык ледяного атрибута увеличивает урон +%d</value>
   </data>
