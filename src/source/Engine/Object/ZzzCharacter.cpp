@@ -6550,63 +6550,26 @@ void RenderBrightEffect(BMD* b, int Bitmap, int Link, float Scale, vec3_t Light,
 
 OBJECT g_ItemObject[ITEM_ETC + MAX_ITEM_INDEX];
 
-void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1, bool Link, bool Translate, int RenderType, bool bRightHandItem)
+namespace
 {
-    OBJECT* o = &c->Object;
-    BMD* b = &Models[Type];
+// Where a linked part hangs on its character: the parent of its root bone, its origin and angle, its scale, and the
+// offset an unlinked part hangs at. Reads only the character's pose and state.
+struct LinkPlacement
+{
+    float parent[3][4]{};
+    vec3_t origin{};
+    vec3_t angle{};
+    vec3_t position{};
+    float scale = 1.f;
+};
 
-    if (o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
-    {
-        if (Type >= MODEL_WING && Type <= MODEL_WINGS_OF_DARKNESS) return; // 1st and 2nd Wings
-        else if (Type >= MODEL_WING_OF_STORM && Type <= MODEL_WING_OF_DIMENSION) // 3rd Wings
-            return;
-        else if (MODEL_SMALL_CAPE_OF_LORD >= Type && Type <= MODEL_LITTLE_WARRIORS_CLOAK) return; // Small Wings and Capes
-        else if (Type >= MODEL_CAPE_OF_FIGHTER && Type <= MODEL_CAPE_OF_OVERRULE) return; // Capes
-    }
-
-    if (GameLogic::Items::IsSummonerBookModel(Type))
-    {
-        return;
-    }
-
-    if (g_isCharacterBuff(o, eBuff_Cloaking))
-        return;
-
-    //CopyShadowAngle(f,b);
-    b->ContrastEnable = o->ContrastEnable;
-    b->BodyScale = o->Scale;
-    b->CurrentAction = f->CurrentAction;
-    b->BodyHeight = 0.f;
-
-    OBJECT* Object = &g_ItemObject[Type];
-
-    Object->Type = Type;
-    ItemObjectAttribute(Object);
-    Object->EnableShadow = o->EnableShadow;
-    Object->m_bRenderShadow = o->m_bRenderShadow;
-    Object->m_bySkillCount = o->m_bySkillCount;
-    b->LightEnable = Object->LightEnable;
-    b->LightEnable = false;
-
-    g_CharacterCopyBuff(Object, o);
-
-    switch (Type)
-    {
-    case MODEL_WING_OF_RUIN:
-        f->PlaySpeed = 0.15f;
-        break;
-    }
-
-    if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
-    {
-        if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
-            RenderType = RENDER_DOPPELGANGER | RENDER_TEXTURE;
-        else
-            RenderType = RENDER_DOPPELGANGER | RENDER_BRIGHT | RENDER_TEXTURE;
-    }
-
-    OBB_t OBB;
-    vec3_t p, Position;
+LinkPlacement PlaceLinkedPart(float x, float y, float z, const CHARACTER* c, const PART_t* f, int Type, bool Link,
+                              bool bRightHandItem)
+{
+    const OBJECT* o = &c->Object;
+    LinkPlacement placement;
+    placement.scale = o->Scale;
+    vec3_t p;
 
     if (Link)
     {
@@ -6849,7 +6812,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         {
             Matrix[1][3] += 10.0f;
             Matrix[2][3] += 25.0f;
-            b->BodyScale = 0.9f;
+            placement.scale = 0.9f;
         }
 
         if (bRightHandItem == false && !(Type >= MODEL_SHIELD && Type < MODEL_SHIELD + MAX_ITEM_INDEX) && Type != MODEL_ARROW_VIPER_BOW)
@@ -6871,29 +6834,97 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
             R_ConcatTransforms(Matrix, mNewRot, Matrix);
         }
 
-        R_ConcatTransforms(o->BoneTransform[f->LinkBone], Matrix, ParentMatrix);
-        VectorCopy(c->Object.Position, b->BodyOrigin);
-        Vector(0.f, 0.f, 0.f, Object->Angle);
+        R_ConcatTransforms(o->BoneTransform[f->LinkBone], Matrix, placement.parent);
+        VectorCopy(c->Object.Position, placement.origin);
     }
     else
     {
         Vector(x, y, z, p);
-        BMD* Owner = &Models[o->Type];
-        Owner->RotationPosition(o->BoneTransform[f->LinkBone], p, Position);
-        VectorAdd(c->Object.Position, Position, b->BodyOrigin);
-        Vector(0.f, 0.f, 0.f, Object->Angle);
-        // For unlinked items (e.g. Wings), explicitly populate main-thread ParentMatrix
-        // with the character's link bone transform to prevent uninitialized thread_local garbage.
-        for (int r = 0; r < 3; ++r)
-            for (int c = 0; c < 4; ++c)
-                ParentMatrix[r][c] = o->BoneTransform[f->LinkBone][r][c];
+        // As BMD::RotationPosition, with the character model's scale.
+        VectorRotate(p, o->BoneTransform[f->LinkBone], placement.position);
+        VectorScale(placement.position, Models[o->Type].BodyScale, placement.position);
+        VectorAdd(c->Object.Position, placement.position, placement.origin);
+        std::memcpy(placement.parent, o->BoneTransform[f->LinkBone], sizeof(placement.parent));
     }
     if (Type == MODEL_BOSS_HEAD)
     {
-        VectorAdd(b->BodyOrigin, BossHeadPosition, b->BodyOrigin);
-        b->BoneHead = 0;
-        Vector(0.f, 0.f, WorldTime, Object->Angle);
+        VectorAdd(placement.origin, BossHeadPosition, placement.origin);
+        Vector(0.f, 0.f, WorldTime, placement.angle);
     }
+    return placement;
+}
+} // namespace
+
+void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1, bool Link,
+                      bool Translate, int RenderType, bool bRightHandItem)
+{
+    OBJECT* o = &c->Object;
+    BMD* b = &Models[Type];
+
+    if (o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
+    {
+        if (Type >= MODEL_WING && Type <= MODEL_WINGS_OF_DARKNESS)
+            return;                                                              // 1st and 2nd Wings
+        else if (Type >= MODEL_WING_OF_STORM && Type <= MODEL_WING_OF_DIMENSION) // 3rd Wings
+            return;
+        else if (MODEL_SMALL_CAPE_OF_LORD >= Type && Type <= MODEL_LITTLE_WARRIORS_CLOAK)
+            return; // Small Wings and Capes
+        else if (Type >= MODEL_CAPE_OF_FIGHTER && Type <= MODEL_CAPE_OF_OVERRULE)
+            return; // Capes
+    }
+
+    if (GameLogic::Items::IsSummonerBookModel(Type))
+    {
+        return;
+    }
+
+    if (g_isCharacterBuff(o, eBuff_Cloaking))
+        return;
+
+    // CopyShadowAngle(f,b);
+    b->ContrastEnable = o->ContrastEnable;
+    b->BodyScale = o->Scale;
+    b->CurrentAction = f->CurrentAction;
+    b->BodyHeight = 0.f;
+
+    OBJECT* Object = &g_ItemObject[Type];
+
+    Object->Type = Type;
+    ItemObjectAttribute(Object);
+    Object->EnableShadow = o->EnableShadow;
+    Object->m_bRenderShadow = o->m_bRenderShadow;
+    Object->m_bySkillCount = o->m_bySkillCount;
+    b->LightEnable = Object->LightEnable;
+    b->LightEnable = false;
+
+    g_CharacterCopyBuff(Object, o);
+
+    switch (Type)
+    {
+    case MODEL_WING_OF_RUIN:
+        f->PlaySpeed = 0.15f;
+        break;
+    }
+
+    if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
+    {
+        if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
+            RenderType = RENDER_DOPPELGANGER | RENDER_TEXTURE;
+        else
+            RenderType = RENDER_DOPPELGANGER | RENDER_BRIGHT | RENDER_TEXTURE;
+    }
+
+    OBB_t OBB;
+    vec3_t p, Position;
+
+    const LinkPlacement placement = PlaceLinkedPart(x, y, z, c, f, Type, Link, bRightHandItem);
+    std::memcpy(ParentMatrix, placement.parent, sizeof(placement.parent));
+    VectorCopy(placement.origin, b->BodyOrigin);
+    VectorCopy(placement.angle, Object->Angle);
+    VectorCopy(placement.position, Position);
+    b->BodyScale = placement.scale;
+    if (Type == MODEL_BOSS_HEAD)
+        b->BoneHead = 0;
 
     if ((c->Skill == AT_SKILL_PENETRATION || c->Skill == AT_SKILL_PENETRATION_STR) &&
         ((o->Type == MODEL_PLAYER && Engine::Object::IsAttackAction(o->CurrentAction))))
