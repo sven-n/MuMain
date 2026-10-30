@@ -42,6 +42,7 @@
 #include "GameLogic/Items/TransformationRing.h"
 #include "Render/Items/ItemDisplay.h"
 #include <chrono>
+#include <cstring>
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "GameLogic/Items/ItemNameParts.h"
@@ -3797,6 +3798,12 @@ bool IsStrifeMap(int nMapIndex)
 
 unsigned int MarkColor[16];
 
+// Writes one 32-bit pixel of a texture buffer, byte by byte: the buffer has no alignment for an unsigned int.
+static void WriteMarkPixel(BYTE* pixel, unsigned int color)
+{
+    std::memcpy(pixel, &color, sizeof(color));
+}
+
 void CreateGuildMark(int nMarkIndex, bool blend)
 {
     // Callers pass Hero->GuildMarkIndex straight through, which is -1 while the
@@ -3881,7 +3888,7 @@ void CreateGuildMark(int nMarkIndex, bool blend)
     {
         for (int j = 0; j < Width; j++)
         {
-            *((unsigned int*)(Buffer)) = MarkColor[MarkBuffer[0]];
+            WriteMarkPixel(Buffer, MarkColor[MarkBuffer[0]]);
             Buffer += 4;
             MarkBuffer++;
         }
@@ -3990,18 +3997,18 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
         {
             if (j >= (Width / 2 - 16) && j < (Width / 2 + 16) && i >= (Height / 2 - 16) && i < (Height / 2 + 16))
             {
-                *((unsigned int*)(Buffer + offset)) = MarkColor[MarkBuffer[offset2]];
+                WriteMarkPixel(Buffer + offset, MarkColor[MarkBuffer[offset2]]);
                 offset2++;
             }
             else if (j<3 || j>(Width - 4) || i<10 || i>(Height - 10))
             {
-                *((unsigned int*)(Buffer + offset)) = (255u << 24) + (0u << 16) +
-                                                      ((unsigned int)(50 + i / 100.f * 160) << 8) +
-                                                      (unsigned int)(50 + i / 100.f * 255);
+                WriteMarkPixel(Buffer + offset, (255u << 24) + (0u << 16) +
+                                                    (static_cast<unsigned int>(50 + i / 100.f * 160) << 8) +
+                                                    static_cast<unsigned int>(50 + i / 100.f * 255));
             }
             else
             {
-                *((unsigned int*)(Buffer + offset)) = (255u << 24) + (i << 16) + (i << 8) + (i);
+                WriteMarkPixel(Buffer + offset, (255u << 24) + (i << 16) + (i << 8) + (i));
             }
             offset += 4;
         }
