@@ -330,3 +330,58 @@ TEST_CASE("A Fenrir's body thunder starts on the Fenrir's own pose, not on the s
     }
     CHECK(onPose > 0);
 }
+
+TEST_CASE("A dying castle gate crumbles from its own posed mesh in the update [effects]")
+{
+    CharacterScope scope(MODEL_CASTLE_GATE);
+    const float previousFrameFactor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 1.f; // every frame-checked spawn gets its chance
+    Vertex_t vertices[3]{};
+    Triangle_t triangle{};
+    triangle.Polygon = 3;
+    for (short k = 0; k < 3; ++k)
+        triangle.VertexIndex[k] = k;
+    Mesh_t mesh;
+    mesh.NumVertices = 3;
+    mesh.Vertices = vertices;
+    mesh.NumTriangles = 1;
+    mesh.Triangles = &triangle;
+    BMD& model = Models[MODEL_CASTLE_GATE];
+    model.NumMeshs = 1;
+    model.Meshs = &mesh;
+
+    OBJECT& gate = scope.character().Object;
+    for (int axis = 0; axis < 3; ++axis)
+        gate.BoneTransform[0][axis][axis] = 1.f;
+    gate.BoneTransform[0][0][3] = 100.f; // every vertex sits 100 along x in model space
+    Vector(1000.f, 2000.f, 0.f, gate.Position);
+    gate.Alpha = 1.f;
+    gate.HiddenMesh = -1;
+    gate.EnableBoneMatrix = true;
+    gate.CurrentAction = MONSTER01_DIE;
+    FenrirScope::ClearSpawns();
+
+    int debris = 0;
+    for (int frame = 0; frame < 60; ++frame)
+    {
+        gate.Live = true;
+        UpdateRenderObjectEffects(&gate);
+        CHECK_FALSE(gate.Live);
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+        {
+            const OBJECT& piece = Effects[i];
+            if (!piece.Live || (piece.Type != MODEL_GATE && piece.Type != MODEL_GATE + 1))
+                continue;
+            // The vertex, placed where the gate's draw puts it (60 behind its position).
+            CHECK(piece.Position[0] == doctest::Approx(1100.f));
+            CHECK(piece.Position[1] == doctest::Approx(2060.f));
+            ++debris;
+        }
+        FenrirScope::ClearSpawns();
+    }
+    CHECK(debris > 0);
+
+    model.Meshs = nullptr;
+    model.NumMeshs = 0;
+    FPS_ANIMATION_FACTOR = previousFrameFactor;
+}

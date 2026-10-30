@@ -1290,19 +1290,8 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     }
                                                     else if (o->Type == MODEL_STATUE_OF_SAINT)
                                                     {
-                                                        if (o->CurrentAction == MONSTER01_DIE ||
-                                                            (WorldTime - o->InitialSceneTime) < 1000
-                                                            )
-                                                        {
-                                                            if (o->CurrentAction == MONSTER01_DIE)
-                                                            {
-                                                                o->Live = false;
-                                                            }
-
-                                                            PlayBuffer(SOUND_HIT_GATE2);
-                                                            b->RenderMeshEffect(0, MODEL_STONE_COFFIN);
-                                                        }
-                                                        else
+                                                        // Dying or appearing, it shows only the debris UpdateRenderObjectEffects spawns.
+                                                        if (o->CurrentAction != MONSTER01_DIE && (WorldTime - o->InitialSceneTime) >= 1000)
                                                         {
                                                             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                             Vector(1.f, 1.f, 1.f, b->BodyLight);
@@ -1313,10 +1302,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     }
                                                     else if (o->Type == MODEL_CASTLE_GATE && o->CurrentAction == MONSTER01_DIE)
                                                     {
-                                                        o->Live = false;
-
-                                                        PlayBuffer(SOUND_HIT_GATE2);
-                                                        b->RenderMeshEffect(0, MODEL_GATE);
+                                                        // Shows only the debris UpdateRenderObjectEffects spawns.
                                                     }
                                                     else if (o->Type == MODEL_STONE_COFFIN || o->Type == MODEL_STONE_COFFIN + 1)
                                                     {
@@ -2071,6 +2057,15 @@ static vec34_t* EffectWorldPose(OBJECT* o, BMD* b, float frame)
     return bones;
 }
 
+void SkinObjectMeshes(OBJECT* o, BMD* b, bool Translate)
+{
+    PlaceObjectModel(o, b);
+    vec34_t* bones = o->EnableBoneMatrix ? o->BoneTransform : EffectWorldPose(o, b, EffectFrame(o));
+    // The object's own OBB belongs to its draw.
+    OBB_t obb;
+    b->TransformCheap(bones, o->BoundingBoxMin, o->BoundingBoxMax, &obb, Translate);
+}
+
 void UpdateRenderObjectEffects(OBJECT* o)
 {
     BMD* b = &Models[o->Type];
@@ -2098,8 +2093,34 @@ void UpdateRenderObjectEffects(OBJECT* o)
         return;
     }
 
+    UpdateHellasObjectMeshEffects(o, b);
+    battleCastle::UpdateBattleCastleObjectMeshEffects(o, b);
+
     switch (o->Type)
     {
+    case MODEL_STATUE_OF_SAINT:
+        if (o->CurrentAction == MONSTER01_DIE || (WorldTime - o->InitialSceneTime) < 1000)
+        {
+            if (o->CurrentAction == MONSTER01_DIE)
+            {
+                o->Live = false;
+            }
+
+            PlayBuffer(SOUND_HIT_GATE2);
+            SkinObjectMeshes(o, b, true);
+            b->RenderMeshEffect(0, MODEL_STONE_COFFIN);
+        }
+        break;
+    case MODEL_CASTLE_GATE:
+        if (o->CurrentAction == MONSTER01_DIE)
+        {
+            o->Live = false;
+
+            PlayBuffer(SOUND_HIT_GATE2);
+            SkinObjectMeshes(o, b, true);
+            b->RenderMeshEffect(0, MODEL_GATE);
+        }
+        break;
     case MODEL_VALKYRIE:
     case MODEL_ICE_MONSTER:
     case MODEL_ALQUAMOS:

@@ -11,6 +11,7 @@
 #include "Scenes/SceneCore.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/ZzzAI.h"
+#include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Physics/PhysicsManager.h"
@@ -752,12 +753,13 @@ void SetActionDestroy_Def(OBJECT* o)
     }
 }
 
-void RenderDestroy_Def(OBJECT* o, BMD* b)
+static void UpdateDestroy_Def(OBJECT* o, BMD* b)
 {
     if (o->Type != MODEL_PLAYER)
     {
         if (o->AI == ACTION_DESTROY_WIZ_DEF)
         {
+            SkinObjectMeshes(o, b, true);
             b->RenderMeshEffect(6, MODEL_STONE_COFFIN, 1);
             o->AI = 0;
 
@@ -765,11 +767,35 @@ void RenderDestroy_Def(OBJECT* o, BMD* b)
         }
         else if (o->AI == ACTION_DESTROY_DEF)
         {
+            SkinObjectMeshes(o, b, true);
             b->RenderMeshEffect(6, MODEL_STONE_COFFIN, 2);
             o->AI = 0;
 
             PlayBuffer(SOUND_HIT_CRISTAL);
         }
+    }
+}
+
+void UpdateHellasObjectMeshEffects(OBJECT* o, BMD* b)
+{
+    switch (o->Type)
+    {
+    case MODEL_DEATH_ANGEL:
+    case MODEL_BLOOD_SOLDIER:
+    case MODEL_AEGIS:
+    case MODEL_DEATH_CENTURION:
+    case MODEL_NECRON:
+    case MODEL_SHRIKER:
+        if (o->CurrentAction == MONSTER01_DIE && o->Alpha < 0.5f)
+        {
+            SkinObjectMeshes(o, b, true);
+            b->RenderMeshEffect(0, BITMAP_BUBBLE);
+        }
+        if ((o->Type == MODEL_DEATH_CENTURION && o->SubType == 9) || o->Type == MODEL_SHRIKER)
+        {
+            UpdateDestroy_Def(o, b);
+        }
+        break;
     }
 }
 
@@ -1864,13 +1890,6 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
     bool    success = false;
     if (o->Type == MODEL_DEATH_ANGEL)
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->Alpha < 0.5f)
-            {
-                b->RenderMeshEffect(0, BITMAP_BUBBLE);
-            }
-        }
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(0, RENDER_METAL | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
         success = true;
@@ -1985,13 +2004,6 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
     }
     else if (o->Type == MODEL_BLOOD_SOLDIER)
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->Alpha < 0.5f)
-            {
-                b->RenderMeshEffect(0, BITMAP_BUBBLE);
-            }
-        }
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         Vector(0.5f, 0.1f, 0.0f, b->BodyLight);
         b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -1999,13 +2011,6 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
     }
     else if (o->Type == MODEL_AEGIS)
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->Alpha < 0.5f)
-            {
-                b->RenderMeshEffect(0, BITMAP_BUBBLE);
-            }
-        }
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         Vector(0.25f, 0.2f, 0.1f, b->BodyLight);
         b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -2014,13 +2019,6 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
     }
     else if (o->Type == MODEL_DEATH_CENTURION)
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->Alpha < 0.5f)
-            {
-                b->RenderMeshEffect(0, BITMAP_BUBBLE);
-            }
-        }
         if (o->SubType == 9)
         {
             Vector(0.3f, 0.1f, 0.1f, b->BodyLight);
@@ -2046,22 +2044,10 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         }
         b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-        if (o->SubType == 9)
-        {
-            RenderDestroy_Def(o, b);
-        }
         success = true;
     }
     else if (o->Type == MODEL_NECRON)
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->Alpha < 0.5f)
-            {
-                b->RenderMeshEffect(0, BITMAP_BUBBLE);
-            }
-        }
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
 
         float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.7f;
@@ -2071,13 +2057,6 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
     }
     else if (o->Type == MODEL_SHRIKER)
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->Alpha < 0.5f)
-            {
-                b->RenderMeshEffect(0, BITMAP_BUBBLE);
-            }
-        }
         b->BeginRender(1.f);
         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -2116,8 +2095,6 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         o->BlendMeshLight = sinf(WorldTime * 0.002f) * 0.1f + 0.05f;
         b->RenderMesh(6, RENDER_TEXTURE, o->Alpha, 6, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->EndRender();
-
-        RenderDestroy_Def(o, b);
         success = true;
     }
     if (success)

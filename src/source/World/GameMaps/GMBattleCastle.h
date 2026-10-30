@@ -54,6 +54,8 @@ namespace   battleCastle
     bool UpdateBattleCastleMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
     bool    RenderBattleCastleMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
     bool    RenderBattleCastleMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate, int Select);
+    // The vertex spawns and state changes of RenderBattleCastleObjectMesh, for an object the last frame drew.
+    void UpdateBattleCastleObjectMeshEffects(OBJECT* o, BMD* b);
     bool    RenderBattleCastleMonsterObjectMesh(OBJECT* o, BMD* b);
     void    RenderMonsterHitEffect(OBJECT* o);
 }

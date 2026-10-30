@@ -38,7 +38,8 @@ void    CreateMonsterSkill_Poison(OBJECT* o, int AttackTime, BYTE time);
 void    CreateMonsterSkill_Summon(OBJECT* o, int AttackTime, BYTE time);
 
 void    SetActionDestroy_Def(OBJECT* o);
-void    RenderDestroy_Def(OBJECT* o, BMD* b);
+// The vertex spawns and state changes of RenderHellasMonsterObjectMesh, for a character the last frame drew.
+void UpdateHellasObjectMeshEffects(OBJECT* o, BMD* b);
 CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, int Key);
 
 

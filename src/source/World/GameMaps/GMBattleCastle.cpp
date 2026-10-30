@@ -14,6 +14,7 @@
 #include "Scenes/SceneCore.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/ZzzAI.h"
+#include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "Character/CSParts.h"
@@ -1924,6 +1925,41 @@ namespace battleCastle
         return false;
     }
 
+    void UpdateBattleCastleObjectMeshEffects(OBJECT* o, BMD* b)
+    {
+        if (gMapManager.InBattleCastle() == false) return;
+
+        switch (o->Type)
+        {
+        case MODEL_CASTLE_GATE1:
+            if (o->CurrentAction == MONSTER01_DIE)
+            {
+                o->Live = false;
+                PlayBuffer(SOUND_HIT_GATE2);
+                SkinObjectMeshes(o, b, true);
+                b->RenderMeshEffect(0, MODEL_GATE_PART1);
+            }
+            break;
+
+        case MODEL_GUARDIAN_STATUE:
+            if (IsBattleCastleStart())
+            {
+                if (o->CurrentAction != MONSTER01_DIE)
+                    o->HiddenMesh = -1;
+
+                if (o->CurrentAction == MONSTER01_DIE)
+                {
+                    o->Live = false;
+
+                    PlayBuffer(SOUND_BC_GUARD_STONE_DIS);
+                    SkinObjectMeshes(o, b, true);
+                    b->RenderMeshEffect(0, MODEL_STONE_COFFIN);
+                }
+            }
+            break;
+        }
+    }
+
     bool    RenderBattleCastleMonsterObjectMesh(OBJECT* o, BMD* b)
     {
         if (gMapManager.InBattleCastle() == false) return false;
@@ -1977,40 +2013,23 @@ namespace battleCastle
             break;
 
         case MODEL_CASTLE_GATE1:
-            if (o->CurrentAction == MONSTER01_DIE)
-            {
-                o->Live = false;
-                PlayBuffer(SOUND_HIT_GATE2);
-                b->RenderMeshEffect(0, MODEL_GATE_PART1);
-            }
-            else
+            // Dying, it shows only the debris UpdateBattleCastleObjectMeshEffects spawns.
+            if (o->CurrentAction != MONSTER01_DIE)
             {
                 b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
             }
             break;
 
         case MODEL_GUARDIAN_STATUE:
-            if (IsBattleCastleStart())
+            // Dying, it shows only the debris UpdateBattleCastleObjectMeshEffects spawns.
+            if (IsBattleCastleStart() && o->CurrentAction != MONSTER01_DIE)
             {
-                if (o->CurrentAction != MONSTER01_DIE)
-                    o->HiddenMesh = -1;
-
-                if (o->CurrentAction == MONSTER01_DIE)
-                {
-                    o->Live = false;
-
-                    PlayBuffer(SOUND_BC_GUARD_STONE_DIS);
-                    b->RenderMeshEffect(0, MODEL_STONE_COFFIN);
-                }
-                else
-                {
-                    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                    Vector(0.3f, 0.3f, 0.3f, b->BodyLight);
-                    b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
-                    Vector(0.2f, 0.2f, 0.5f, b->BodyLight);
-                    b->RenderBody(RENDER_BRIGHT | RENDER_METAL, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
-                    Vector(1.f, 1.f, 1.f, b->BodyLight);
-                }
+                b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                Vector(0.3f, 0.3f, 0.3f, b->BodyLight);
+                b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
+                Vector(0.2f, 0.2f, 0.5f, b->BodyLight);
+                b->RenderBody(RENDER_BRIGHT | RENDER_METAL, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
+                Vector(1.f, 1.f, 1.f, b->BodyLight);
             }
             success = true;
             break;

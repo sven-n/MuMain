@@ -10029,8 +10029,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     {
         if (battleCastle::RenderBattleCastleMonsterVisual(c, o, b))
             break;
-        if (M31HuntingGround::RenderHuntingGroundMonsterVisual(c, o, b))
-            break;
         if (M34CryingWolf2nd::RenderCryingWolf2ndMonsterVisual(c, o, b))
             break;
         if (M34CryWolf1st::RenderCryWolf1stMonsterVisual(c, o, b))

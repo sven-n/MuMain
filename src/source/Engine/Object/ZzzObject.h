@@ -31,6 +31,9 @@ void UpdateObjectEffects();
 void UpdateRenderObjectEffects(OBJECT* o);
 // Places an object's model where its draw poses and draws it.
 void PlaceObjectModel(const OBJECT* o, BMD* b);
+// Skins an object's meshes as its draw would, for BMD::RenderMeshEffect's spawns: characters pass Translate true
+// (their own model-space pose), effects false (their world pose).
+void SkinObjectMeshes(OBJECT* o, BMD* b, bool Translate);
 void NextGradeObjectRender(CHARACTER* c);
 void RenderObject_AfterImage(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0,
