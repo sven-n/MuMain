@@ -7,6 +7,7 @@
 #include <array>
 #include <cstdint>
 #include <map>
+#include <span>
 
 struct tagITEM;
 typedef struct tagITEM ITEM;
@@ -186,7 +187,14 @@ public:
     int     RenderSetOptionListInItem(const ITEM* ip, int TextNum, bool bIsEquippedItem = false);
 
     void    ClearOptionHelper(void) { m_byRenderOptionList = 0; }
+    // Opens the option table of the set a chat text "/<set name>" names (see FindSetByName).
     void    CheckRenderOptionHelper(const wchar_t* FilterName);
+    // The index in `sets` of the set `typed` (the chat text after the /) names, -1 for none.
+    // Capitals and the apostrophe (' or the typographic U+2019) don't matter, and the trailing s is
+    // optional: "warrior", "Warriors" and "Warrior's" name "Warrior's". A set whose name is typed
+    // as it is wins over one that only matches without its apostrophe or s; among equal matches the
+    // first set wins.
+    static int FindSetByName(const wchar_t* typed, std::span<const ITEM_SET_OPTION> sets);
     // The set's option table, written to the TextList globals without drawing (CSetItemExplanation
     // draws it through RmlUi); returns the line count, 0 for none.
     int BuildOptionHelperTextList();

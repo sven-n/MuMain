@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <cwchar>
+#include <initializer_list>
 #include <string>
 #include <vector>
 
@@ -29,6 +30,26 @@ ITEM_SET_OPTION EmptySet()
     set.byExtOption.fill(NoOption);
     set.byFullOption.fill(NoOption);
     return set;
+}
+
+// Sets with options, one per name, for the /<set name> lookup.
+std::vector<ITEM_SET_OPTION> NamedSets(std::initializer_list<const wchar_t*> names)
+{
+    std::vector<ITEM_SET_OPTION> sets;
+    for (const wchar_t* name : names)
+    {
+        ITEM_SET_OPTION set = EmptySet();
+        std::wcscpy(set.strSetName, name);
+        sets.push_back(set);
+    }
+    return sets;
+}
+
+// The name of the set `typed` finds among `sets`, "-" for none.
+std::wstring FoundSet(const wchar_t* typed, const std::vector<ITEM_SET_OPTION>& sets)
+{
+    const int index = CSItemOption::FindSetByName(typed, sets);
+    return index < 0 ? std::wstring(L"-") : std::wstring(sets[index].strSetName);
 }
 
 // SKILL_ATTRIBUTE::MasteryType of the skills of an element.
@@ -169,6 +190,45 @@ TEST_CASE("A mastery set option counts only for the class the set names [gamelog
     set.byRequireClass[CLASS_WIZARD] = 2; // Soul Masters only
     CHECK(IceSkillBonus(set, CLASS_WIZARD, 0) == 0);
     CHECK(IceSkillBonus(set, CLASS_WIZARD, 1) == 20);
+}
+
+TEST_CASE("/<set name> finds a set however its name is typed [gamelogic][items][sets]")
+{
+    const auto sets = NamedSets({L"Warrior's", L"Chrono\u2019s", L"Enis", L"Hyperion's"});
+
+    CHECK(FoundSet(L"Warrior's", sets) == L"Warrior's");
+    CHECK(FoundSet(L"Warrior", sets) == L"Warrior's");
+    CHECK(FoundSet(L"warrior", sets) == L"Warrior's");
+    CHECK(FoundSet(L"Warriors", sets) == L"Warrior's");
+    CHECK(FoundSet(L"WARRIOR'S", sets) == L"Warrior's");
+    CHECK(FoundSet(L"Warrior\u2019s", sets) == L"Warrior's");
+    CHECK(FoundSet(L"Chrono's", sets) == L"Chrono\u2019s");
+    CHECK(FoundSet(L"chronos", sets) == L"Chrono\u2019s");
+    CHECK(FoundSet(L"Enis", sets) == L"Enis");
+
+    CHECK(FoundSet(L"Warr", sets) == L"-");
+    CHECK(FoundSet(L"Warrior's set", sets) == L"-");
+    CHECK(FoundSet(L"Warriorss", sets) == L"-");
+    CHECK(FoundSet(L"Hyon", sets) == L"-");
+    CHECK(FoundSet(L"", sets) == L"-");
+    CHECK(FoundSet(L"'s", sets) == L"-");
+
+    auto unused = NamedSets({L"Warrior's"});
+    unused[0].byOptionCount = 255; // the set data's mark for an unused set
+    CHECK(FoundSet(L"Warrior", unused) == L"-");
+}
+
+TEST_CASE("/<set name> prefers the name typed as it is, then the first set [gamelogic][items][sets]")
+{
+    // "Ares's" and "Ares" both accept "aress"; "ares" and "Ares's" name one of them as it is.
+    const auto sets = NamedSets({L"Ares's", L"Ares"});
+    CHECK(FoundSet(L"aress", sets) == L"Ares's");
+    CHECK(FoundSet(L"ares", sets) == L"Ares");
+    CHECK(FoundSet(L"Ares's", sets) == L"Ares's");
+
+    const auto reversed = NamedSets({L"Ares", L"Ares's"});
+    CHECK(FoundSet(L"aress", reversed) == L"Ares");
+    CHECK(FoundSet(L"Ares's", reversed) == L"Ares's");
 }
 
 TEST_CASE("A set's options leave out 24 to 28 [gamelogic][items][sets]")

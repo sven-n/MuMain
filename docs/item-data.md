@@ -747,9 +747,15 @@ original client. A set that names no class gives them to nobody. The client
 adds them to the skill damage it shows; OpenMU has no such option, so the
 server's damage does not include them.
 
-Typing a set's name after `/` in the chat (e.g. `/Warrior`) shows the set's
-options with their values: standard options blue, ext options green, full
-options yellow.
+Typing a set's name after `/` in the chat shows the set's options with their
+values: standard options blue, ext options green, full options yellow.
+Capitals and the apostrophe (`'` or the typographic `’` some names use) don't
+matter, and the trailing `s` is optional: `/Warrior`, `/warrior`, `/Warriors`
+and `/Warrior's` all show the set "Warrior's". When a text fits two sets, the
+set whose name it is (apart from capitals and the apostrophe's form) wins, then
+the set with the lower number; an item named like the text (`/<item name>`)
+opens before any set. No two shipped sets, and no set and item, fit the same
+text. The original client needed the exact name.
 
 ---
 

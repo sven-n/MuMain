@@ -24,9 +24,11 @@
 #include <cstdio>
 #include <cstring>
 #include <cwchar>
+#include <cwctype>
 #include <memory>
 #include <iterator>
 #include <string>
+#include <string_view>
 #include <vector>
 
 
@@ -957,34 +959,113 @@ bool CSItemOption::BuildSetOptionTooltipModel(UI::Inventory::Tooltip::Model& out
     return true;
 }
 
-void CSItemOption::CheckRenderOptionHelper(const wchar_t* FilterName)
+namespace
 {
-    wchar_t Name[256];
+// Some English set names write their possessive with the typographic apostrophe U+2019 (Chrono, Semeden).
+constexpr wchar_t kTypographicApostrophe = L'\u2019';
+constexpr std::wstring_view kPossessiveSuffix = L"'s";
 
-    if (FilterName[0] != '/') return;
-
-    const auto Length1 = wcslen(FilterName);
-    for (int i = 0; i < MAX_SET_OPTION; ++i)
+// `text` in lower case, with U+2019 as '.
+std::wstring FoldSetName(std::wstring_view text)
+{
+    std::wstring folded;
+    folded.reserve(text.size());
+    for (const wchar_t c : text)
     {
-        ITEM_SET_OPTION& setOption = m_ItemSetOption[i];
-        if (setOption.byOptionCount < 255)
+        folded.push_back(c == kTypographicApostrophe ? L'\'' : static_cast<wchar_t>(std::towlower(c)));
+    }
+    return folded;
+}
+
+// `folded` without its apostrophes.
+std::wstring WithoutApostrophes(std::wstring_view folded)
+{
+    std::wstring result;
+    result.reserve(folded.size());
+    for (const wchar_t c : folded)
+    {
+        if (c != L'\'')
         {
-            mu_swprintf(Name, L"/%ls", setOption.strSetName);
-
-            const auto Length2 = wcslen(Name);
-
-            m_byRenderOptionList = 0;
-            if (wcsncmp(FilterName, Name, Length1) == 0 && wcsncmp(FilterName, Name, Length2) == 0)
-            {
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_ITEM_EXPLANATION);
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_HELP);
-                g_pNewUISystem->Show(mu::ui::window::INTERFACE_SETITEM_EXPLANATION);
-
-                m_byRenderOptionList = static_cast<std::uint8_t>(i + 1);
-                return;
-            }
+            result.push_back(c);
         }
     }
+    return result;
+}
+
+enum class SetNameMatch
+{
+    None,
+    // The name as it is, apart from capitals and the apostrophe's form.
+    Exact,
+    // Also without the apostrophe, with or without the name's trailing s.
+    Loose,
+};
+
+SetNameMatch MatchSetName(std::wstring_view typed, std::wstring_view setName)
+{
+    const std::wstring typedFolded = FoldSetName(typed);
+    if (typedFolded.empty())
+    {
+        return SetNameMatch::None;
+    }
+
+    const std::wstring nameFolded = FoldSetName(setName);
+    if (typedFolded == nameFolded)
+    {
+        return SetNameMatch::Exact;
+    }
+
+    std::wstring_view nameBase = nameFolded;
+    if (nameBase.size() > kPossessiveSuffix.size() && nameBase.ends_with(kPossessiveSuffix))
+    {
+        nameBase.remove_suffix(kPossessiveSuffix.size());
+    }
+    const std::wstring typedLoose = WithoutApostrophes(typedFolded);
+    const std::wstring baseLoose = WithoutApostrophes(nameBase);
+    return (typedLoose == baseLoose || typedLoose == baseLoose + L's') ? SetNameMatch::Loose : SetNameMatch::None;
+}
+} // namespace
+
+int CSItemOption::FindSetByName(const wchar_t* typed, std::span<const ITEM_SET_OPTION> sets)
+{
+    int looseMatch = -1;
+    for (int i = 0; i < static_cast<int>(sets.size()); ++i)
+    {
+        if (sets[i].byOptionCount >= 255)
+        {
+            continue;
+        }
+
+        const SetNameMatch match = MatchSetName(typed, sets[i].strSetName);
+        if (match == SetNameMatch::Exact)
+        {
+            return i;
+        }
+        if (match == SetNameMatch::Loose && looseMatch < 0)
+        {
+            looseMatch = i;
+        }
+    }
+    return looseMatch;
+}
+
+void CSItemOption::CheckRenderOptionHelper(const wchar_t* FilterName)
+{
+    if (FilterName[0] != '/')
+        return;
+
+    m_byRenderOptionList = 0;
+    const int setIndex = FindSetByName(FilterName + 1, m_ItemSetOption);
+    if (setIndex < 0)
+    {
+        return;
+    }
+
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_ITEM_EXPLANATION);
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_HELP);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_SETITEM_EXPLANATION);
+
+    m_byRenderOptionList = static_cast<std::uint8_t>(setIndex + 1);
 }
 
 int CSItemOption::RenderSetOptionListInItem(const ITEM* ip, int TextNum, bool bIsEquippedItem)
