@@ -326,6 +326,7 @@ void NewMoveLogInScene()
         UpdateCharacterEffects();
         UpdateObjectEffects();
         UpdateMountEffects();
+        UpdateEffectModelEffects();
     }
 
     // ESC menu toggle is handled by CSceneUICoordinator::Update()

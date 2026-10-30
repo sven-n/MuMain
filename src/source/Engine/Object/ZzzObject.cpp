@@ -730,14 +730,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
             }
             else if (o->Type == MODEL_CURSEDTEMPLE_HOLYITEM)
             {
-                vec3_t Light;
-                float fLuminosity = (float)sinf((WorldTime) * 0.0002f) * 0.002f;
-                Vector(0.9f, 0.4f, 0.4f, Light);
-                CreateSprite(BITMAP_LIGHT, o->Position, 3.f, Light, o, 0.0f, 0);	// flare01.jpg
-                Vector(0.9f, 0.6f, 0.6f, Light);
-                CreateSprite(BITMAP_POUNDING_BALL, o->Position, 0.9f + fLuminosity, Light, NULL, (WorldTime / 10.0f));
-                CreateParticleFpsChecked(BITMAP_POUNDING_BALL, o->Position, o->Angle, Light, 2, 0.1f, o);
-
                 b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 0);
                 b->RenderMesh(0, RENDER_TEXTURE, 0.7f, 0, o->BlendMeshLight * 3.f, o->BlendMeshTexCoordU, -WorldTime * 0.004f);
             }
@@ -1476,19 +1468,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     {
                                                         Vector(1.f, 0.6f, 0.3f, b->BodyLight);
                                                         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-                                                        vec3_t Light, p;
-
-                                                        Vector(0.f, 0.f, 0.f, p);
-                                                        b->TransformPosition(BoneTransform[2], p, o->EyeLeft, false);
-                                                        b->TransformPosition(BoneTransform[3], p, o->EyeRight, false);
-
-                                                        Vector(1.f, 0.f, 0.f, Light);
-                                                        CreateSprite(BITMAP_LIGHT, o->EyeLeft, 1.f, Light, o);
-                                                        CreateSprite(BITMAP_LIGHT, o->EyeRight, 1.f, Light, o);
-                                                        Vector(0.5f, 0.5f, 0.5f, Light);
-                                                        CreateSprite(BITMAP_SHINY + 1, o->EyeLeft, 0.5f, Light, o, (float)(rand() % 360));
-                                                        CreateSprite(BITMAP_SHINY + 1, o->EyeRight, 0.5f, Light, o, (float)(rand() % 360));
                                                     }
                                                     else if (o->Type == MODEL_WAVES)
                                                     {
@@ -1531,31 +1510,12 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     }
                                                     else if (o->Type == MODEL_ARROW_AUTOLOAD)
                                                     {
-                                                        vec3_t Light, p1, p2;
                                                         VectorCopy(o->Light, b->BodyLight);
-                                                        Vector(0.f, 0.f, 0.f, p1);
-                                                        Vector(1.0f, 0.8f, 0.3f, Light);
                                                         b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-                                                        if (o->LifeTime > 15)
-                                                        {
-                                                            b->TransformPosition(BoneTransform[1], p1, p2);
-                                                            CreateParticleFpsChecked(BITMAP_LIGHT + 1, p2, o->Angle, Light, 5, 0.6f);
-                                                            b->TransformPosition(BoneTransform[3], p1, p2);
-                                                            CreateParticleFpsChecked(BITMAP_LIGHT + 1, p2, o->Angle, Light, 5, 0.8f);
-                                                        }
                                                     }
                                                     else if (o->Type == MODEL_INFINITY_ARROW)
                                                     {
-                                                        vec3_t p1, p2;
-                                                        Vector(0.f, 0.f, 0.f, p1);
-
-                                                        for (int idx = 1; idx <= 9; ++idx)
-                                                        {
-                                                            if (idx == 5) continue;
-                                                            b->TransformPosition(BoneTransform[idx], p1, p2);
-                                                            CreateJointFpsChecked(BITMAP_FLARE + 1, p2, o->Position, o->Angle, 16, o, 20.f);
-                                                        }
+                                                        // Only its joints show; the update spawns them.
                                                     }
                                                     else if (o->Type >= MODEL_INFINITY_ARROW && o->Type <= MODEL_INFINITY_ARROW4)
                                                     {
@@ -1664,43 +1624,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                         }
                                                         Vector(1.0f, 0.0f, 0.0f, b->BodyLight);
                                                         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, o->Alpha, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, -1);
-
-                                                        vec3_t  vPos, vRelative, vLight;
-                                                        Vector(0.0f, 0.0f, 0.0f, vRelative);
-                                                        Vector(1.0f, 0.0f, 0.0f, vLight);
-                                                        for (int i = 51; i <= 59; ++i)
-                                                        {
-                                                            b->TransformPosition(BoneTransform[i], vRelative, vPos, false);
-                                                            CreateSprite(BITMAP_LIGHT, vPos, 1.0f, vLight, o);
-                                                        }
-
-                                                        float Start_Frame = 0.f;
-                                                        float End_Frame = 10.0f;
-                                                        if (o->AnimationFrame >= Start_Frame && o->AnimationFrame <= End_Frame && o->CurrentAction == 0)
-                                                        {
-                                                            vec3_t  Light;
-                                                            Vector(1.0f, 0.0f, 0.0f, Light);
-
-                                                            vec3_t StartPos, StartRelative;
-                                                            vec3_t EndPos, EndRelative;
-
-                                                            float fActionSpeed = o->Velocity * static_cast<float>(FPS_ANIMATION_FACTOR);
-                                                            float fSpeedPerFrame = fActionSpeed / 10.f;
-                                                            float fAnimationFrame = o->AnimationFrame - fActionSpeed;
-                                                            for (int i = 0; i < 10; i++)
-                                                            {
-                                                                b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
-
-                                                                Vector(0.f, 0.f, 0.f, StartRelative);
-                                                                Vector(0.f, 0.f, 0.f, EndRelative);
-
-                                                                b->TransformPosition(BoneTransform[51], StartRelative, StartPos, false);
-                                                                b->TransformPosition(BoneTransform[59], EndRelative, EndPos, false);
-                                                                CreateObjectBlur(o, StartPos, EndPos, Light, 2);
-
-                                                                fAnimationFrame += fSpeedPerFrame;
-                                                            }
-                                                        }
                                                     }
                                                     else if (o->Type >= MODEL_SUMMONER_SUMMON_NEIL_NIFE1 && o->Type <= MODEL_SUMMONER_SUMMON_NEIL_NIFE3)
                                                     {
@@ -1801,11 +1724,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 {
                     o->BlendMesh = 0;
                     Vector(0.7f, 0.4f, 0.9f, b->BodyLight);
-
-                    if (o->LifeTime <= 20)
-                    {
-                        o->BlendMeshLight *= pow(0.86f, FPS_ANIMATION_FACTOR);
-                    }
                     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
                 else if (o->Type == MODEL_ARROWSRE06)
@@ -1813,10 +1731,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     o->BlendMesh = 0;
                     VectorCopy(o->Light, b->BodyLight);
                     //Vector(0.7f, 0.2f, 0.9f, b->BodyLight);
-                    if (o->LifeTime <= 10)
-                    {
-                        o->BlendMeshLight *= pow(0.8f, FPS_ANIMATION_FACTOR);
-                    }
                     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
                 else if (o->Type == MODEL_XMAS2008_SNOWMAN_NPC)
@@ -2152,18 +2066,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 {
                     b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight);
                 }
-                if (o->Type == MODEL_ARROW_DRILL)
-                {
-                    vec3_t Position, p, Light;
-
-                    Vector(1.f, 0.6f, 0.4f, Light);
-                    Vector(0.f, 0.f, 0.f, p);
-                    b->TransformPosition(BoneTransform[1], p, Position);
-                    CreateSprite(BITMAP_SHINY + 1, Position, (float)(sinf(WorldTime * 0.002f) * 0.3f + 1.3f), Light, o, (float)(rand() % 360));
-                    CreateSprite(BITMAP_LIGHT, Position, 1.5f, Light, o, 90.f);
-                    CreateSprite(BITMAP_SHINY + 1, Position, (float)(sinf(WorldTime * 0.002f) * 0.3f + 1.3f), Light, o, (float)(rand() % 360));
-                    CreateParticleFpsChecked(BITMAP_SPARK, Position, o->Angle, Light);
-                }
                 if (o->Type == MODEL_ARROW_TANKER_HIT || o->Type == MODEL_ARROW_TANKER)
                 {
                     b->BodyLight[0] = 1.0f;
@@ -2171,29 +2073,27 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     b->BodyLight[2] = 1.0f;
 
                     b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, -2, 1.f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-                    vec3_t p1, p2;
-                    BMD* b = &Models[o->Type];
-
-                    Vector(1.0f, 1.0f, 1.0f, o->Light);
-                    Vector(0.0f, 1.5f, 0.0f, p1);
-                    b->TransformPosition(BoneTransform[2], p1, p2);
-                    CreateParticleFpsChecked(BITMAP_FIRE + 1, o->Position, o->Angle, o->Light, 8, o->Scale - 0.4f, o);
-                    CreateParticleFpsChecked(BITMAP_FIRE + 1, o->Position, o->Angle, o->Light, 8, o->Scale - 0.4f, o);
-                    CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 38, o->Scale, o);
-                    Vector(1.0f, 0.4f, 0.0f, o->Light);
-                    CreateParticleFpsChecked(BITMAP_FIRE + 1, o->Position, o->Angle, o->Light, 9, o->Scale - 0.4f, o);
-
-                    for (int i = 0; i < 10; i++)
-                    {
-                        Vector(1.0f - (i * 0.1f), 0.4f - (i * 0.04f), 0.0f, o->Light);
-                        Vector(15.0f * i, 1.5f, 0.0f, p1);
-                        b->TransformPosition(BoneTransform[1], p1, p2);
-                        CreateSprite(BITMAP_SPARK + 1, p2, 3.0f + (i * 0.9f), o->Light, o);
-                    }
                 }
             }
     }
+}
+
+// The frame an effect's draw poses it at: none while its owner is stunned or asleep (Calc_RenderObject).
+static float EffectFrame(const OBJECT* o)
+{
+    if (o->Owner != nullptr &&
+        (g_isCharacterBuff(o->Owner, eDeBuff_Stun) || g_isCharacterBuff(o->Owner, eDeBuff_Sleep)))
+        return 0.f;
+    return o->AnimationFrame;
+}
+
+// An effect's world pose at a frame, as its draw animates it, in scratch bones: effects keep no bones of their own,
+// because the move handlers read an owner's BoneTransform as a character's.
+static vec34_t* EffectWorldPose(OBJECT* o, BMD* b, float frame)
+{
+    static vec34_t bones[MAX_BONES];
+    b->Animation(bones, frame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, true);
+    return bones;
 }
 
 void UpdateRenderObjectEffects(OBJECT* o)
@@ -2714,6 +2614,154 @@ void UpdateRenderObjectEffects(OBJECT* o)
             Vector(0.0f, 0.0f, 0.0f, vPos);
             b->TransformPosition(bones()[feet[i]], vPos, vPosition, false);
             CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+        }
+        break;
+    }
+    case MODEL_CURSEDTEMPLE_HOLYITEM:
+    {
+        vec3_t Light;
+        float fLuminosity = (float)sinf((WorldTime) * 0.0002f) * 0.002f;
+        Vector(0.9f, 0.4f, 0.4f, Light);
+        CreateSprite(BITMAP_LIGHT, o->Position, 3.f, Light, o, 0.0f, 0);
+        Vector(0.9f, 0.6f, 0.6f, Light);
+        CreateSprite(BITMAP_POUNDING_BALL, o->Position, 0.9f + fLuminosity, Light, NULL, (WorldTime / 10.0f));
+        CreateParticleFpsChecked(BITMAP_POUNDING_BALL, o->Position, o->Angle, Light, 2, 0.1f, o);
+        break;
+    }
+    case MODEL_SKULL:
+    {
+        vec34_t* bones = EffectWorldPose(o, b, EffectFrame(o));
+        vec3_t Light, p;
+
+        Vector(0.f, 0.f, 0.f, p);
+        b->TransformPosition(bones[2], p, o->EyeLeft, false);
+        b->TransformPosition(bones[3], p, o->EyeRight, false);
+
+        Vector(1.f, 0.f, 0.f, Light);
+        CreateSprite(BITMAP_LIGHT, o->EyeLeft, 1.f, Light, o);
+        CreateSprite(BITMAP_LIGHT, o->EyeRight, 1.f, Light, o);
+        Vector(0.5f, 0.5f, 0.5f, Light);
+        CreateSprite(BITMAP_SHINY + 1, o->EyeLeft, 0.5f, Light, o, (float)(rand() % 360));
+        CreateSprite(BITMAP_SHINY + 1, o->EyeRight, 0.5f, Light, o, (float)(rand() % 360));
+        break;
+    }
+    case MODEL_ARROW_AUTOLOAD:
+        if (o->SubType == 1 && o->LifeTime > 15)
+        {
+            vec34_t* bones = EffectWorldPose(o, b, EffectFrame(o));
+            vec3_t Light, p1, p2;
+            Vector(0.f, 0.f, 0.f, p1);
+            Vector(1.0f, 0.8f, 0.3f, Light);
+            b->TransformPosition(bones[1], p1, p2);
+            CreateParticleFpsChecked(BITMAP_LIGHT + 1, p2, o->Angle, Light, 5, 0.6f);
+            b->TransformPosition(bones[3], p1, p2);
+            CreateParticleFpsChecked(BITMAP_LIGHT + 1, p2, o->Angle, Light, 5, 0.8f);
+        }
+        break;
+    case MODEL_INFINITY_ARROW:
+        if (o->SubType == 1)
+        {
+            vec34_t* bones = EffectWorldPose(o, b, EffectFrame(o));
+            vec3_t p1, p2;
+            Vector(0.f, 0.f, 0.f, p1);
+
+            for (int idx = 1; idx <= 9; ++idx)
+            {
+                if (idx == 5)
+                    continue;
+                b->TransformPosition(bones[idx], p1, p2);
+                CreateJointFpsChecked(BITMAP_FLARE + 1, p2, o->Position, o->Angle, 16, o, 20.f);
+            }
+        }
+        break;
+    case MODEL_SUMMONER_SUMMON_NEIL:
+    {
+        vec34_t* bones = EffectWorldPose(o, b, EffectFrame(o));
+        vec3_t vPos, vRelative, vLight;
+        Vector(0.0f, 0.0f, 0.0f, vRelative);
+        Vector(1.0f, 0.0f, 0.0f, vLight);
+        for (int i = 51; i <= 59; ++i)
+        {
+            b->TransformPosition(bones[i], vRelative, vPos, false);
+            CreateSprite(BITMAP_LIGHT, vPos, 1.0f, vLight, o);
+        }
+
+        float Start_Frame = 0.f;
+        float End_Frame = 10.0f;
+        if (o->AnimationFrame >= Start_Frame && o->AnimationFrame <= End_Frame && o->CurrentAction == 0)
+        {
+            vec3_t Light;
+            Vector(1.0f, 0.0f, 0.0f, Light);
+
+            vec3_t StartPos, StartRelative;
+            vec3_t EndPos, EndRelative;
+
+            float fActionSpeed = o->Velocity * static_cast<float>(FPS_ANIMATION_FACTOR);
+            float fSpeedPerFrame = fActionSpeed / 10.f;
+            float fAnimationFrame = o->AnimationFrame - fActionSpeed;
+            for (int i = 0; i < 10; i++)
+            {
+                bones = EffectWorldPose(o, b, fAnimationFrame);
+
+                Vector(0.f, 0.f, 0.f, StartRelative);
+                Vector(0.f, 0.f, 0.f, EndRelative);
+
+                b->TransformPosition(bones[51], StartRelative, StartPos, false);
+                b->TransformPosition(bones[59], EndRelative, EndPos, false);
+                CreateObjectBlur(o, StartPos, EndPos, Light, 2);
+
+                fAnimationFrame += fSpeedPerFrame;
+            }
+        }
+        break;
+    }
+    case MODEL_SWELL_OF_MAGICPOWER:
+        if (o->LifeTime <= 20)
+        {
+            o->BlendMeshLight *= pow(0.86f, FPS_ANIMATION_FACTOR);
+        }
+        break;
+    case MODEL_ARROWSRE06:
+        if (o->LifeTime <= 10)
+        {
+            o->BlendMeshLight *= pow(0.8f, FPS_ANIMATION_FACTOR);
+        }
+        break;
+    case MODEL_ARROW_DRILL:
+    {
+        vec34_t* bones = EffectWorldPose(o, b, EffectFrame(o));
+        vec3_t Position, p, Light;
+
+        Vector(1.f, 0.6f, 0.4f, Light);
+        Vector(0.f, 0.f, 0.f, p);
+        b->TransformPosition(bones[1], p, Position);
+        CreateSprite(BITMAP_SHINY + 1, Position, (float)(sinf(WorldTime * 0.002f) * 0.3f + 1.3f), Light, o,
+                     (float)(rand() % 360));
+        CreateSprite(BITMAP_LIGHT, Position, 1.5f, Light, o, 90.f);
+        CreateSprite(BITMAP_SHINY + 1, Position, (float)(sinf(WorldTime * 0.002f) * 0.3f + 1.3f), Light, o,
+                     (float)(rand() % 360));
+        CreateParticleFpsChecked(BITMAP_SPARK, Position, o->Angle, Light);
+        break;
+    }
+    case MODEL_ARROW_TANKER_HIT:
+    case MODEL_ARROW_TANKER:
+    {
+        vec34_t* bones = EffectWorldPose(o, b, EffectFrame(o));
+        vec3_t p1, p2;
+
+        Vector(1.0f, 1.0f, 1.0f, o->Light);
+        CreateParticleFpsChecked(BITMAP_FIRE + 1, o->Position, o->Angle, o->Light, 8, o->Scale - 0.4f, o);
+        CreateParticleFpsChecked(BITMAP_FIRE + 1, o->Position, o->Angle, o->Light, 8, o->Scale - 0.4f, o);
+        CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 38, o->Scale, o);
+        Vector(1.0f, 0.4f, 0.0f, o->Light);
+        CreateParticleFpsChecked(BITMAP_FIRE + 1, o->Position, o->Angle, o->Light, 9, o->Scale - 0.4f, o);
+
+        for (int i = 0; i < 10; i++)
+        {
+            Vector(1.0f - (i * 0.1f), 0.4f - (i * 0.04f), 0.0f, o->Light);
+            Vector(15.0f * i, 1.5f, 0.0f, p1);
+            b->TransformPosition(bones[1], p1, p2);
+            CreateSprite(BITMAP_SPARK + 1, p2, 3.0f + (i * 0.9f), o->Light, o);
         }
         break;
     }

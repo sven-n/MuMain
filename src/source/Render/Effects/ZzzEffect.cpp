@@ -7732,8 +7732,13 @@ void RenderSkillSpear(OBJECT* o)
     RenderPartObject(o, MODEL_SPEARSKILL, NULL, Light, 1.0f, 0, 0, 0, true, true, true, false, RENDER_BRIGHT | RENDER_TEXTURE);
 }
 
+static unsigned int s_effectDrawFrame = 0;
+
 void RenderEffects(bool bRenderBlendMesh)
 {
+    // The blend-mesh pass draws later in the same frame.
+    if (!bRenderBlendMesh)
+        ++s_effectDrawFrame;
     int iEffectSize = MAX_EFFECTS + g_SkillEffects.GetSize();
 
     for (int i = 0; i < iEffectSize; ++i)
@@ -7762,6 +7767,7 @@ void RenderEffects(bool bRenderBlendMesh)
 
             if (o->Visible)
             {
+                o->DrawnFrame = s_effectDrawFrame;
                 if (bRenderBlendMesh)
                 {
                     if (o->BlendMesh == -1 || o->BlendMesh < -2) continue;
@@ -8688,6 +8694,25 @@ void RenderEffects(bool bRenderBlendMesh)
                 }
             }
         }
+    }
+}
+
+void UpdateEffectModelEffects()
+{
+    // Spawns once per drawn frame, for the effects that frame drew, as when their draw spawned them.
+    static unsigned int updatedFrame = 0;
+    if (updatedFrame == s_effectDrawFrame)
+        return;
+    updatedFrame = s_effectDrawFrame;
+
+    const int iEffectSize = MAX_EFFECTS + g_SkillEffects.GetSize();
+    for (int i = 0; i < iEffectSize; ++i)
+    {
+        OBJECT* o = i < MAX_EFFECTS ? &Effects[i] : g_SkillEffects.GetEffect(i - MAX_EFFECTS);
+        if (!o->Live || o->DrawnFrame != s_effectDrawFrame || o->Type >= MAX_MODELS)
+            continue;
+        PlaceObjectModel(o, &Models[o->Type]);
+        UpdateRenderObjectEffects(o);
     }
 }
 
