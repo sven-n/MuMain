@@ -115,7 +115,8 @@
 #bar_mp .gauge-num { left: 9dp; }
 #bar_ag .gauge-num { left: -10dp; top: 30dp; }
 
-/* The hero's coordinates in the box at the left end, centred at x 24 and 48, y 462. */
+/* The hero's coordinates in the box at the left end (x 8 to 57), at y 462: centred in it at x 21 and
+   44 (0.97's 24 and 48 leave the pair right of the box's middle). */
 #coords { left: 0dp; top: 30dp; width: 72dp; height: 9dp; }
 .coord {
 	position: absolute;
@@ -130,8 +131,8 @@
 	white-space: nowrap;
 	pointer-events: none;
 }
-#coord_x { left: 9dp; }
-#coord_y { left: 33dp; }
+#coord_x { left: 6dp; }
+#coord_y { left: 29dp; }
 
 /* Party, Character and Inventory (24x24 at x 348, 379 and 410, y 452) and Guild (52x18 at 582,
    459). The buttons are part of the bar's art; an open window shows the button pressed. */
