@@ -3798,7 +3798,8 @@ bool IsStrifeMap(int nMapIndex)
 
 unsigned int MarkColor[16];
 
-// Writes one 32-bit pixel of a texture buffer, byte by byte: the buffer has no alignment for an unsigned int.
+// Writes one 32-bit pixel into a texture's byte buffer. It copies the bytes: writing through the buffer cast to an
+// unsigned int* would treat the bytes as another type (type punning).
 static void WriteMarkPixel(BYTE* pixel, unsigned int color)
 {
     std::memcpy(pixel, &color, sizeof(color));
