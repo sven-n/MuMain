@@ -278,8 +278,9 @@ target_compile_definitions(MuClient PUBLIC GLM_FORCE_DEPTH_ZERO_TO_ONE)
 target_link_libraries(MuClient PUBLIC SDL3::SDL3 glm::glm spdlog::spdlog)
 find_package(OpenSSL REQUIRED COMPONENTS Crypto)
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND MU_LINK_SDL_PLATFORM_BACKENDS)
-  # SDL also dlopen()s libvulkan.so.1; the same option makes it a DT_NEEDED entry of Main
-  # (linked below, also under --as-needed) so the loader resolves through the RUNPATH.
+  # SDL dlopen()s libvulkan.so.1 even with this option. Linking the loader into Main (below)
+  # records its directory in Main's RUNPATH, which that dlopen() searches, and makes it a
+  # DT_NEEDED entry: a missing loader then stops Main at start-up, and ldd lists it.
   find_package(Vulkan REQUIRED)
 endif()
 target_link_libraries(MuClient PUBLIC OpenSSL::Crypto)
@@ -420,8 +421,11 @@ target_compile_features(Main PUBLIC cxx_std_20)
 target_link_libraries(Main PRIVATE MuClient::MuClient)
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND MU_LINK_SDL_PLATFORM_BACKENDS)
   # Main never calls Vulkan itself, so a linker running with --as-needed (GCC's default on Ubuntu
-  # and Debian) drops a plain Vulkan::Vulkan. MuNoAsNeeded keeps it as a DT_NEEDED entry, wrapped
-  # the way CMake wraps its own WHOLE_ARCHIVE feature for GNU ld.
+  # and Debian) drops a plain Vulkan::Vulkan from DT_NEEDED; the RUNPATH stays either way.
+  # MuNoAsNeeded keeps the entry by wrapping the library in --push-state,--no-as-needed and
+  # --pop-state, so the linker must support --push-state (GNU ld and gold do). Link
+  # Vulkan::Vulkan into Main only through this feature: CMake stops with an error when the same
+  # item comes both with and without it.
   set(CMAKE_LINK_LIBRARY_USING_MuNoAsNeeded
     "LINKER:--push-state,--no-as-needed" "<LINK_ITEM>" "LINKER:--pop-state")
   set(CMAKE_LINK_LIBRARY_USING_MuNoAsNeeded_SUPPORTED TRUE)
