@@ -498,8 +498,8 @@ jobs:
           sudo apt-get install -y \
             cmake ninja-build gcc g++ \
             libgl1-mesa-dev libglu1-mesa-dev \
-            libx11-dev libxext-dev libxrandr-dev libxinerama-dev \
-            libxcursor-dev libxi-dev libxss-dev libxtst-dev libxxf86vm-dev \
+            libx11-dev libxext-dev libxrandr-dev \
+            libxcursor-dev libxi-dev libxss-dev libxtst-dev \
             libwayland-dev libxkbcommon-dev wayland-protocols \
             libasound2-dev libpulse-dev \
             libssl-dev libcurl4-openssl-dev libturbojpeg0-dev libcrypto++-dev \

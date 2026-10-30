@@ -55,6 +55,21 @@ public:
 
     const ItemDefinition* Find(int group, int number) const;
 
+    // Like Find, but also an entry without a name: what the item file has at
+    // the number (ItemDefinition::HasEntry). The game uses Find.
+    const ItemDefinition* FindEntry(int itemType) const
+    {
+        if (!IsValidItemType(itemType))
+        {
+            return nullptr;
+        }
+
+        const ItemDefinition& definition = m_definitions[itemType];
+        return definition.HasEntry() ? &definition : nullptr;
+    }
+
+    const ItemDefinition* FindEntry(int group, int number) const;
+
     // Fast checks for the rule code. They read a small table next to the
     // definitions. Invalid ids and empty slots have no tags, slot, wing tier
     // or weapon kind, and allow no action: an item the client does not know

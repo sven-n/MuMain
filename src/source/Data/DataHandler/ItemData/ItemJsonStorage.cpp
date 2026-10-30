@@ -146,20 +146,21 @@ ItemDataSaveResult WriteChangedFiles(std::span<const FileToSave> files, std::vec
     return success ? ItemDataSaveResult::Saved : ItemDataSaveResult::WriteFailed;
 }
 
-std::vector<ItemDefinition> GetExistingItems(std::span<const ItemDefinition> items)
+// The items and the entries without a name: what the item files have.
+std::vector<ItemDefinition> GetItemEntries(std::span<const ItemDefinition> items)
 {
-    std::vector<ItemDefinition> existingItems;
-    std::copy_if(items.begin(), items.end(), std::back_inserter(existingItems),
-                 [](const ItemDefinition& definition) { return definition.Exists(); });
-    return existingItems;
+    std::vector<ItemDefinition> entries;
+    std::copy_if(items.begin(), items.end(), std::back_inserter(entries),
+                 [](const ItemDefinition& definition) { return definition.HasEntry(); });
+    return entries;
 }
 
-void AddItemGroupFiles(const std::filesystem::path& directory, std::span<const ItemDefinition> existingItems,
+void AddItemGroupFiles(const std::filesystem::path& directory, std::span<const ItemDefinition> entries,
                        std::vector<FileToSave>& files)
 {
     for (int group = 0; group < MAX_ITEM_TYPE; ++group)
     {
-        files.push_back({directory / GetItemGroupFileName(group), WriteItemGroupJson(group, existingItems)});
+        files.push_back({directory / GetItemGroupFileName(group), WriteItemGroupJson(group, entries)});
     }
 }
 
@@ -326,8 +327,9 @@ ItemDataSaveResult SaveItemAndModelDataDirectories(const std::filesystem::path& 
                                                    std::span<const ItemDefinition> items, const ItemModelSave& models,
                                                    std::vector<ItemDataIssue>& issues)
 {
-    ValidateItems(GetExistingItems(items), issues);
+    ValidateItems(GetItemEntries(items), issues);
     ValidateExistingItemModels(models.models, issues);
+    ValidateModelsHaveItemEntries(items, models.models, issues);
     if (HasFatal(issues))
     {
         return ItemDataSaveResult::InvalidData;
@@ -340,7 +342,7 @@ ItemDataSaveResult WriteItemAndModelDataDirectories(const std::filesystem::path&
                                                     std::vector<ItemDataIssue>& issues)
 {
     std::vector<FileToSave> files;
-    AddItemGroupFiles(itemDirectory, GetExistingItems(items), files);
+    AddItemGroupFiles(itemDirectory, GetItemEntries(items), files);
     AddItemModelFiles(models, files);
     return WriteChangedFiles(files, issues);
 }

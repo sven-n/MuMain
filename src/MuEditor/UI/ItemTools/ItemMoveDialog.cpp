@@ -31,7 +31,7 @@ constexpr ImVec4 NotFreeColor{1.0f, 0.4f, 0.4f, 1.0f};
 
 void CItemMoveDialog::Open(int itemType)
 {
-    if (g_ItemDatabase.Find(itemType) == nullptr)
+    if (g_ItemDatabase.FindEntry(itemType) == nullptr)
     {
         return;
     }
@@ -39,6 +39,7 @@ void CItemMoveDialog::Open(int itemType)
     m_group = Data::Items::GetItemGroup(itemType);
     m_number = GetNextFreeItemNumber(m_group, Data::Items::GetItemNumber(itemType));
     m_usage = FindItemUsage(itemType);
+    m_numberHolder = {};
     m_open = true;
     ImGui::OpenPopup(PopupId);
 }
@@ -51,7 +52,7 @@ void CItemMoveDialog::Render()
     {
         return;
     }
-    ImGui::TextUnformatted(g_ItemDatabase.GetLogName(m_itemType).c_str());
+    ImGui::TextUnformatted(GetEntryLabel(m_itemType).c_str());
     ImGui::SetNextItemWidth(FieldWidth);
     if (ImGui::BeginCombo(I18N::Editor::Group, GetItemGroupLabel(m_group).c_str()))
     {
@@ -73,6 +74,7 @@ void CItemMoveDialog::Render()
     if (!free)
     {
         ImGui::TextColored(NotFreeColor, "%s", I18N::Editor::ThisNumberIsNotFree);
+        m_numberHolder.Render(target);
     }
     ImGui::Separator();
     if (m_usage.GoesWithItem())

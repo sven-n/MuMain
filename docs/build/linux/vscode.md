@@ -1,7 +1,7 @@
 # Linux - VS Code
 
 Build the native Linux client with the CMake Tools extension. For the
-prerequisites (GL, SDL, turbojpeg, the .NET SDK) and shared concepts, see
+prerequisites (system packages and the .NET SDK) and shared concepts, see
 [linux/console.md](console.md).
 
 ## Setup

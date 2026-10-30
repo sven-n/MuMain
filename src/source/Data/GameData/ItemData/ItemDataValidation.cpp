@@ -334,6 +334,11 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
             issues.push_back({ItemDataIssueSeverity::Fatal, "", definition.group, definition.number, "number",
                               "the item is defined more than once"});
         }
+        // The game does not know an entry without a name; its values are checked once it has one.
+        if (definition.entryWithoutName && !definition.Exists())
+        {
+            continue;
+        }
 
         ValidateName(definition, issues);
         ValidateDescription(definition, issues);
@@ -891,6 +896,29 @@ void ValidateItemModels(std::span<const ItemModelDefinition> models, std::vector
         {
             issues.push_back({ItemDataIssueSeverity::Fatal, "", model.group, model.number, "number",
                               "the model is defined more than once"});
+        }
+    }
+}
+
+void ValidateModelsHaveItemEntries(std::span<const ItemDefinition> items, std::span<const ItemModelDefinition> models,
+                                   std::vector<ItemDataIssue>& issues)
+{
+    std::set<int> entries;
+    for (const ItemDefinition& item : items)
+    {
+        if (item.HasEntry() && IsValidItemId(item.group, item.number))
+        {
+            entries.insert(MakeItemType(item.group, item.number));
+        }
+    }
+    for (const ItemModelDefinition& model : models)
+    {
+        if (model.Exists() && IsValidItemId(model.group, model.number) &&
+            !entries.contains(MakeItemType(model.group, model.number)))
+        {
+            issues.push_back({ItemDataIssueSeverity::Error, "", model.group, model.number, "number",
+                              "has a model but no entry in the item file; add {\"number\": " +
+                                  std::to_string(model.number) + "} there"});
         }
     }
 }

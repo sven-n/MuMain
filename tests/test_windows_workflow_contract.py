@@ -8,6 +8,7 @@ from pathlib import Path
 
 ROOT = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[1]
 CI_WORKFLOW = ROOT / ".github/workflows/ci.yml"
+FORK_CI_WORKFLOW = ROOT / ".github/workflows/fork-ci.yml"
 DATA_WORKFLOW = ROOT / ".github/workflows/data-assets.yml"
 MINGW_WORKFLOW = ROOT / ".github/workflows/windows-build.yml"
 LINUX_WORKFLOW = ROOT / ".github/workflows/linux-build.yml"
@@ -22,6 +23,7 @@ SRC_CMAKE = ROOT / "src/CMakeLists.txt"
 SOURCE_ROOT = ROOT / "src/source"
 NETWORK_TEST_CMAKE = ROOT / "tests/network/CMakeLists.txt"
 BUILD_GUIDE = ROOT / "docs/build/README.md"
+LINUX_GUIDE = ROOT / "docs/build/linux/console.md"
 README = ROOT / "README.md"
 CHAT_COMMAND_CATALOG_HEADER = ROOT / "src/source/GameLogic/Commands/ChatCommandCatalog.h"
 CHAT_COMMAND_CATALOG_SOURCE = ROOT / "src/source/GameLogic/Commands/ChatCommandCatalog.cpp"
@@ -96,6 +98,12 @@ EXPECTED_WINDOWS_OS_DLLS = {
     "wtsapi32.dll",
 }
 
+# Packages the Linux CI job installs that the Linux guide leaves out, and why.
+CI_ONLY_LINUX_PACKAGES = {
+    "gcc": "the guide installs build-essential",
+    "g++": "the guide installs build-essential",
+}
+
 EXPECTED_RELEASE_ASSETS = [
     {
         "path": "MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
@@ -153,6 +161,17 @@ def manifest(block, assignment):
     return re.findall(r'^\s*["\']([^"\']+)["\']\s*$', match.group(1), re.M)
 
 
+def apt_packages(text):
+    # Every package of every "apt-get install -y" command, including its "\" continuation
+    # lines. The command ends at a shell operator or a comment; an inline `command` in
+    # prose ends at its closing backtick.
+    packages = set()
+    for arguments in re.findall(r"apt-get install -y((?:[^\n`]*\\\n)*[^\n`]*)", text):
+        command = re.split(r"&&|\|\||[;|#]", arguments.replace("\\\n", " "), maxsplit=1)[0]
+        packages.update(word for word in command.split() if not word.startswith("-"))
+    return packages
+
+
 ci = read_optional(CI_WORKFLOW)
 data_workflow = read_optional(DATA_WORKFLOW)
 release_config = json.loads(RELEASE_CONFIG.read_text(encoding="utf-8"))
@@ -183,6 +202,21 @@ check(
     )
     is not None,
     "MuClient MSVC builds must compile UTF-8 sources and reject invalid bytes",
+)
+
+# No CI job builds with MU_LINK_SDL_PLATFORM_BACKENDS=ON, so its Vulkan link is checked here.
+check(
+    '"LINKER:--push-state,--no-as-needed" "<LINK_ITEM>" "LINKER:--pop-state"' in src_cmake,
+    "MuNoAsNeeded must keep its library under --no-as-needed between --push-state and --pop-state",
+)
+src_cmake_code = "\n".join(
+    line for line in src_cmake.splitlines() if not line.lstrip().startswith("#")
+)
+check(
+    src_cmake_code.count("Vulkan::Vulkan") == 1
+    and "$<LINK_LIBRARY:MuNoAsNeeded,Vulkan::Vulkan>" in src_cmake_code,
+    "Vulkan::Vulkan must be linked once, through $<LINK_LIBRARY:MuNoAsNeeded,...>: a plain link "
+    "loses its DT_NEEDED entry under --as-needed, and CMake refuses a mix of both",
 )
 
 configure_presets = {
@@ -435,6 +469,25 @@ for required in (
     '"$runtime_directory/shaders"',
 ):
     check(required in linux_validation, f"Linux validation missing {required}")
+
+linux_guide_packages = apt_packages(LINUX_GUIDE.read_text(encoding="utf-8"))
+linux_ci_jobs = [("ci.yml", linux_job, "build-linux")]
+fork_ci = read_optional(FORK_CI_WORKFLOW)
+if fork_ci:
+    linux_ci_jobs.append(("fork-ci.yml", job(fork_ci, "linux-editor"), "linux-editor"))
+all_linux_ci_packages = set()
+for workflow_name, ci_job, job_name in linux_ci_jobs:
+    ci_packages = apt_packages(step(ci_job, job_name, "Install build tools"))
+    check(ci_packages, f"{workflow_name} {job_name} must install its packages with apt-get install -y")
+    all_linux_ci_packages |= ci_packages
+    for package in sorted(ci_packages - linux_guide_packages - CI_ONLY_LINUX_PACKAGES.keys()):
+        errors.append(
+            f"{workflow_name} {job_name} installs {package}, but "
+            f"{LINUX_GUIDE.relative_to(ROOT).as_posix()} doesn't list it; add it to the guide, "
+            "or to CI_ONLY_LINUX_PACKAGES with the reason"
+        )
+for package in sorted(CI_ONLY_LINUX_PACKAGES.keys() - all_linux_ci_packages):
+    errors.append(f"CI_ONLY_LINUX_PACKAGES lists {package}, which no Linux CI job installs")
 
 macos_configure = step(macos_job, "build-macos", "Configure CMake")
 for required in (
@@ -693,6 +746,7 @@ for toolchain_path in MINGW_TOOLCHAINS:
     )
 
 if errors:
-    raise SystemExit("Windows workflow contract failed:\n- " + "\n- ".join(errors))
+    # The checks cover the Windows, Linux and macOS jobs and the Linux guide, not only Windows.
+    raise SystemExit("Workflow contract failed:\n- " + "\n- ".join(errors))
 
-print("Windows workflow contract: OK")
+print("Workflow contract: OK")

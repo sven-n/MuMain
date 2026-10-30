@@ -43,6 +43,7 @@
 #include "UI/Common/MuEditorLayout.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/ItemEditor/ItemEditorActions.h"
+#include "UI/ItemEditor/ItemListModel.h"
 #include "UI/ItemTools/GlowColorDialog.h"
 #include "UI/ItemTools/ItemAddDialog.h"
 #include "UI/ItemTools/ItemEdits.h"
@@ -1136,12 +1137,27 @@ TEST_CASE("Item names stay English while translated item names are off, also aft
 TEST_CASE("Item data errors stop loading [data][items]")
 {
     TemporaryClientFolder folder;
-    folder.WriteItemFile("Group00_Sword.json", R"({"formatVersion": 1, "group": 0, "items": [{"number": 0}]})");
+    // An entry without a name is fine; a name that is not a text is not.
+    folder.WriteItemFile("Group00_Sword.json",
+                         R"({"formatVersion": 1, "group": 0, "items": [{"number": 0, "name": 5}]})");
     ClientDataScope client(folder.Directory());
 
     std::string errorMessage;
     CHECK_FALSE(g_ItemDataHandler.Load(errorMessage));
     CHECK(errorMessage.find("Group00_Sword.json") != std::string::npos);
+}
+
+TEST_CASE("An empty item name stops loading [data][items]")
+{
+    // Unlike an entry without a name, which has no name key at all.
+    TemporaryClientFolder folder;
+    folder.WriteItemFile("Group00_Sword.json",
+                         R"({"formatVersion": 1, "group": 0, "items": [{"number": 0, "name": ""}]})");
+    ClientDataScope client(folder.Directory());
+
+    std::string errorMessage;
+    CHECK_FALSE(g_ItemDataHandler.Load(errorMessage));
+    CHECK(errorMessage.find("the English name is missing") != std::string::npos);
 }
 
 TEST_CASE("A description placeholder that names no table stops loading [data][items]")
@@ -1380,6 +1396,29 @@ TEST_CASE("A file that cannot be replaced is a write failure and leaves no tempo
     CHECK_FALSE(std::filesystem::exists(swordFile.string() + ".tmp"));
 }
 
+TEST_CASE("Every number with a model has an entry in the item files [data][items]")
+{
+    const ItemDataLoadResult items = LoadItemDataDirectory(DataDirectory / "Items");
+    REQUIRE_FALSE(HasFatal(items.issues));
+    const ItemModelDataLoadResult models = LoadItemModelDataDirectory(DataDirectory / "Items" / "Models");
+    std::vector<ItemDataIssue> issues;
+    ValidateModelsHaveItemEntries(items.items, models.models, issues);
+    for (const ItemDataIssue& issue : issues)
+    {
+        INFO(issue.group << "," << issue.number << ": " << issue.message);
+        CHECK(false);
+    }
+
+    // Sphere 4 and 5: the client draws them and code names them, but has no item there yet.
+    for (const int number : {73, 74})
+    {
+        const auto entry = std::ranges::find_if(items.items, [number](const ItemDefinition& item)
+                                                { return item.group == 12 && item.number == number; });
+        REQUIRE(entry != items.items.end());
+        CHECK(entry->entryWithoutName);
+    }
+}
+
 // The items and their models are saved together: when one of the files
 // cannot be written, none is replaced, so a moved item never loses its model
 // on disk.
@@ -1394,12 +1433,12 @@ TEST_CASE("A save that cannot write all its files replaces none of them [data][i
     TemporaryClientFolder folder;
     folder.CopyShippedItems();
     const std::filesystem::path itemDirectory = folder.Directory() / GetItemDataDirectory();
-    // Kris moves to a free number, so its group file changes.
+    // Kris's price changes, so its group file changes.
     std::vector<ItemDefinition> items = shipped.items;
     const auto kris = std::find_if(items.begin(), items.end(), [](const ItemDefinition& item)
                                    { return MakeItemType(item.group, item.number) == KrisType; });
     REQUIRE(kris != items.end());
-    kris->number = 100;
+    kris->buyPrice += 1;
     // A file where the model folder should be: no model file can be written.
     const std::filesystem::path blockedModels = folder.Directory() / "blocked";
     std::ofstream(blockedModels) << "not a folder";
@@ -2030,6 +2069,81 @@ TEST_CASE("A bmd import moves the models of moved items back [data][items][edito
           TestFiles::ReadWholeFile(DataDirectory / "Items" / "Models" / swordFile));
 }
 
+TEST_CASE("A bmd import puts a moved entry without a name back with its model [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope models;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+    // Sphere 4 moves to a free number; the bmd files have no item at either number.
+    const int sphere4Type = MakeItemType(12, 73);
+    const int movedType = MakeItemType(12, GetNextFreeItemNumber(12, 75));
+    REQUIRE(g_ItemDatabase.GetAllSlots()[sphere4Type].entryWithoutName);
+    REQUIRE(g_ItemModelDatabase.Find(sphere4Type) != nullptr);
+    const std::string sphere4ModelFile = g_ItemModelDatabase.Find(sphere4Type)->file;
+    REQUIRE(g_ItemDataHandler.MoveItem(sphere4Type, movedType));
+    REQUIRE(g_ItemModelDatabase.Find(sphere4Type) == nullptr);
+
+    const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
+    REQUIRE_FALSE(HasFatal(result.issues));
+    CHECK(g_ItemDatabase.GetAllSlots()[sphere4Type].entryWithoutName);
+    REQUIRE(g_ItemModelDatabase.Find(sphere4Type) != nullptr);
+    CHECK(g_ItemModelDatabase.Find(sphere4Type)->file == sphere4ModelFile);
+    CHECK(IsFreeItemType(movedType));
+    std::vector<ItemDataIssue> issues;
+    ValidateModelsHaveItemEntries(g_ItemDatabase.GetAllSlots(), g_ItemModelDatabase.GetAllSlots(), issues);
+    CHECK(issues.empty());
+}
+
+TEST_CASE("After a bmd import every number with a model has an entry [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope models;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE_MESSAGE(g_ItemDataHandler.LoadModels(errorMessage), errorMessage);
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+    // Items the bmd files do not have: Sphere 4 named since the start, and an item added with a model.
+    const int sphere4Type = MakeItemType(12, 73);
+    ItemDefinition sphere4 = g_ItemDatabase.GetAllSlots()[sphere4Type];
+    sphere4.names = Data::LocalizedString::Parse("Sphere 4");
+    g_ItemDataHandler.SetItem(sphere4);
+    REQUIRE(g_ItemDatabase.Find(sphere4Type) != nullptr);
+    const int addedType = MakeItemType(0, 100);
+    REQUIRE(IsFreeItemType(addedType));
+    ItemDefinition added;
+    added.group = 0;
+    added.number = 100;
+    added.names = Data::LocalizedString::Parse("Added Sword");
+    REQUIRE(g_ItemModelDatabase.Find(KrisType) != nullptr);
+    REQUIRE(g_ItemDataHandler.AddItem(added, g_ItemModelDatabase.Find(KrisType)));
+
+    const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
+    REQUIRE_FALSE(HasFatal(result.issues));
+    for (const int itemType : {sphere4Type, addedType})
+    {
+        CAPTURE(itemType);
+        CHECK(g_ItemDatabase.Find(itemType) == nullptr);
+        CHECK(g_ItemDatabase.GetAllSlots()[itemType].entryWithoutName);
+        CHECK(g_ItemModelDatabase.Find(itemType) != nullptr);
+    }
+    std::vector<ItemDataIssue> issues;
+    ValidateModelsHaveItemEntries(g_ItemDatabase.GetAllSlots(), g_ItemModelDatabase.GetAllSlots(), issues);
+    CHECK(issues.empty());
+}
+
 // The names of a language whose item.bmd is missing stay as they are, like
 // the names of the languages that have none (German).
 // Export as bmd writes the weights the original client grows into the requirements the client
@@ -2122,6 +2236,43 @@ TEST_CASE("Exporting the items as bmd and importing them again gives the same da
         CHECK(WriteItemGroupJson(group, g_ItemDatabase.GetAllSlots()) ==
               TestFiles::ReadWholeFile(DataDirectory / "Items" / GetItemGroupFileName(group)));
     }
+}
+
+TEST_CASE("A bmd import keeps the entries without a name as they are and does not count them [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    std::string changeLog;
+    REQUIRE(g_ItemDataHandler.ExportAsBmd(changeLog));
+    // An entry without a name with the Healing Orb's profile and requirements: values, which the
+    // import must not take for the weights of a bmd file.
+    const ItemDefinition* healingOrb = g_ItemDatabase.Find(12, 8);
+    REQUIRE(healingOrb != nullptr);
+    REQUIRE(HasRequirementWeightsInBmd(g_ItemDatabase.GetStatProfiles(), *healingOrb));
+    const int entryType = MakeItemType(12, 20);
+    ItemDefinition entry = g_ItemDatabase.GetAllSlots()[entryType];
+    REQUIRE(entry.entryWithoutName);
+    entry.statProfile = healingOrb->statProfile.empty()
+                            ? DeriveStatProfile(g_ItemDatabase.GetStatProfiles(), *healingOrb)
+                            : healingOrb->statProfile;
+    entry.level = healingOrb->level;
+    entry.requirements = healingOrb->requirements;
+    g_ItemDataHandler.RestoreItems(std::span<const ItemDefinition>(&entry, 1));
+    REQUIRE(HasRequirementWeightsInBmd(g_ItemDatabase.GetStatProfiles(), entry));
+
+    const ItemBmdImportResult result = g_ItemDataHandler.ImportFromBmd();
+    REQUIRE_FALSE(HasFatal(result.issues));
+    CHECK(g_ItemDatabase.GetAllSlots()[entryType] == entry);
+    // The imported items are the ones of the bmd files.
+    CHECK(std::ranges::none_of(result.items, [](const ItemDefinition& item) { return item.entryWithoutName; }));
+    CHECK(static_cast<int>(result.items.size()) == g_ItemDatabase.GetExistingItemCount());
 }
 
 // Export as bmd writes a missing name as the English one; the import must not
@@ -2517,6 +2668,73 @@ TEST_CASE("The usage of an item lists its tags, its model and the code that name
     const MuEditor::Items::ItemUsage nothing = MuEditor::Items::FindItemUsage(MakeItemType(0, 100));
     CHECK_FALSE(nothing.hasModel);
     CHECK(nothing.tags.empty());
+}
+
+TEST_CASE("A number that is not free names what takes it [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+
+    const MuEditor::Items::ItemNumberHolder kris = MuEditor::Items::FindItemNumberHolder(KrisType);
+    CHECK(kris.item == "Kris (0,0)");
+    CHECK(kris.model.empty());
+
+    // Sphere 4 has its entry without a name and its model, but no item yet.
+    const int sphere4Type = MakeItemType(12, 73);
+    REQUIRE_FALSE(IsFreeItemType(sphere4Type));
+    const MuEditor::Items::ItemNumberHolder sphere4 = MuEditor::Items::FindItemNumberHolder(sphere4Type);
+    CHECK(sphere4.item.empty());
+    CHECK(sphere4.entryWithoutName);
+    CHECK(sphere4.model == "Data/Item/s30_sphere_body04.bmd");
+    CHECK(MuEditor::Items::GetEntryLabel(sphere4Type) == "Entry without a name (12,73)");
+    CHECK(MuEditor::Items::GetEntryLabel(KrisType) == "Kris (0,0)");
+    CHECK(std::string(MuEditor::Items::GetNumberWithoutItemLabel(sphere4Type)) == "Entry without a name");
+    CHECK(std::string(MuEditor::Items::GetNumberWithoutItemLabel(MakeItemType(0, 100))) == "No item at this number");
+    // The editor was built from these sources, which name it.
+    CHECK(sphere4.codeName == "ITEM_SPHERE_4");
+
+    const MuEditor::Items::ItemNumberHolder freeNumber = MuEditor::Items::FindItemNumberHolder(MakeItemType(0, 100));
+    CHECK(freeNumber.item.empty());
+    CHECK_FALSE(freeNumber.entryWithoutName);
+    CHECK(freeNumber.model.empty());
+    CHECK(freeNumber.codeName.empty());
+}
+
+TEST_CASE("An entry without a name moves and goes as an item does [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    folder.CopyShippedGlowColors();
+    ClientDataScope client(folder.Directory());
+    ItemModelDatabaseScope restoreModels;
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    REQUIRE(g_ItemDataHandler.LoadModels(errorMessage));
+    g_ItemEdits.GetHistory().Clear();
+    const int sphere4Type = MakeItemType(12, 73);
+    const int freeType = MakeItemType(12, GetNextFreeItemNumber(12, 75));
+    REQUIRE(IsFreeItemType(freeType));
+
+    REQUIRE(g_ItemEdits.MoveItem("Move", sphere4Type, freeType));
+    CHECK(IsFreeItemType(sphere4Type));
+    CHECK(g_ItemDatabase.GetAllSlots()[freeType].entryWithoutName);
+    CHECK(g_ItemModelDatabase.Find(freeType) != nullptr);
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(g_ItemDatabase.GetAllSlots()[sphere4Type].entryWithoutName);
+
+    REQUIRE(g_ItemEdits.RemoveItem("Remove", sphere4Type));
+    CHECK(IsFreeItemType(sphere4Type));
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(g_ItemDatabase.GetAllSlots()[sphere4Type].entryWithoutName);
+    CHECK(g_ItemModelDatabase.Find(sphere4Type) != nullptr);
+    g_ItemEdits.GetHistory().Clear();
 }
 
 namespace

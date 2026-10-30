@@ -2,6 +2,7 @@
 
 #ifdef _EDITOR
 
+#include "ItemNumberHolderView.h"
 #include "ItemUsage.h"
 
 namespace MuEditor::Items
@@ -21,6 +22,7 @@ private:
     int m_group = 0;
     int m_number = 0;
     ItemUsage m_usage;
+    CItemNumberHolderView m_numberHolder;
 };
 } // namespace MuEditor::Items
 

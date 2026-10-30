@@ -262,6 +262,9 @@ struct ItemDefinition
 {
     int group = 0;
     int number = 0;
+    // An entry of the item file without a name: the client uses the number (it has a model,
+    // code names it), but the game does not know an item there (Exists). Never set with a name.
+    bool entryWithoutName = false;
 
     // All names of the item, English first. Logs always use the English
     // name (names.GetNeutral()), never a translation.
@@ -350,9 +353,16 @@ struct ItemDefinition
     // Sellable to an NPC once the rental time ran out, even when sellable is false.
     bool sellableWhenRentalExpired = false;
 
+    // An item the game knows: it has a name.
     bool Exists() const
     {
         return !names.IsEmpty();
+    }
+
+    // The item file has the number: an item, or an entry without a name.
+    bool HasEntry() const
+    {
+        return entryWithoutName || Exists();
     }
 
     bool IsAllowed(ItemAction action) const

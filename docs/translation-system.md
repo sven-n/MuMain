@@ -427,13 +427,15 @@ ctest --test-dir <build folder> --build-config Debug -R items --output-on-failur
 
 ## Simplified Chinese (`zh-CN`)
 
-Simplified Chinese is being added incrementally. The first batch translates the
-Options window, including its graphics tuning labels and help text. Shared
-labels also appear translated wherever other screens use the same resource key.
-Other game text, NPC dialogue and editor text fall back to English until their
-translations are added. Item names and server messages are separate data.
-This batch also translates 12 existing item tooltip texts required for every
-UI language by the item data tests; shared texts cover 15 items.
+Simplified Chinese is being added incrementally. Translated screens include the
+Options window and its graphics tuning labels and help text, and the system menu
+at character selection and in game (Esc). The login window also translates account
+and password fields, remember-account/password controls, the password-saving
+confirmation, server titles, login progress and common account errors.
+Shared labels such as OK, Cancel and Close also appear translated wherever other
+screens use the same resource keys, including other dialogs and windows.
+Untranslated text falls back to English. Item names and server messages are
+separate data; translated item tooltips are also available.
 
 Use official Chinese terminology as a reference, check item IDs and version-specific
 behavior, and preserve the current English meaning and placeholders. Do not import
@@ -453,10 +455,14 @@ Alternatively, set the executable directory's `config.ini`:
 Locale=zh-CN
 ```
 
-After rebuilding, check the Options tabs and graphics tuning in both themes:
+After rebuilding, check the Options tabs and graphics tuning, and open the
+system menu at character selection and with Esc in game, in both themes.
 Chinese glyphs should render without boxes, and labels and help should fit at
 75% and 150% UI scale. Switch back to English and restart to check that the
 language choice is retained.
+
+The password-saving warning wraps within the dialog in both themes. Server
+names are preserved; untranslated connection and subscription errors use English.
 
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
 resource keys, legacy IDs, formatting arguments and command tokens unchanged.

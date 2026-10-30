@@ -2995,4 +2995,28 @@
   <data name="Step what cue {0}" xml:space="preserve">
     <value>Marke {0}</value>
   </data>
+  <data name="Taken by the item {0}" xml:space="preserve">
+    <value>Belegt vom Gegenstand {0}</value>
+  </data>
+  <data name="Taken by a model without an item {0}" xml:space="preserve">
+    <value>Belegt von einem Modell ohne Gegenstand: {0}</value>
+  </data>
+  <data name="The code calls it {0}" xml:space="preserve">
+    <value>Im Code heißt es {0}</value>
+  </data>
+  <data name="The Item Browser lists it as No item at this number" xml:space="preserve">
+    <value>Die Gegenstandsliste zeigt es als „Kein Gegenstand unter dieser Nummer“</value>
+  </data>
+  <data name="Entry without a name" xml:space="preserve">
+    <value>Eintrag ohne Namen</value>
+  </data>
+  <data name="Taken by an entry without a name" xml:space="preserve">
+    <value>Belegt von einem Eintrag ohne Namen</value>
+  </data>
+  <data name="Its model {0}" xml:space="preserve">
+    <value>Sein Modell: {0}</value>
+  </data>
+  <data name="The Item Browser lists it as Entry without a name" xml:space="preserve">
+    <value>Die Gegenstandsliste zeigt es als „Eintrag ohne Namen“</value>
+  </data>
 </root>

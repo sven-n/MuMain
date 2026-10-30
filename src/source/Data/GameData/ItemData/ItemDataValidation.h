@@ -19,7 +19,8 @@ namespace Data::Items
 // the required English name, and names that fit the LocalizedString format.
 // Also the description texts: the English text, the language codes, the
 // braces in every language, and the English text's placeholders in each
-// translation. Appends the problems to `issues`.
+// translation. An entry without a name is only checked for its id. Appends
+// the problems to `issues`.
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues);
 
 // A translation of an item name or a description text in a language the game
@@ -30,6 +31,11 @@ void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const 
 
 // Checks that no item has more than one model. Appends the problems to `issues`.
 void ValidateItemModels(std::span<const ItemModelDefinition> models, std::vector<ItemDataIssue>& issues);
+
+// The item files list every number the client uses: a model entry without an item entry (an
+// item or an entry without a name) at its number is an error.
+void ValidateModelsHaveItemEntries(std::span<const ItemDefinition> items, std::span<const ItemModelDefinition> models,
+                                   std::vector<ItemDataIssue>& issues);
 
 // The stat profiles of the items that exist against the item stat file
 // (`statFile` names it in messages): a profile the file does not have is an
