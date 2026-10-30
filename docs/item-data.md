@@ -190,7 +190,7 @@ can have several tags; the file lists them in the order below.
 | `noLevelRequirement` | The tooltip shows no level requirement, though the item has one (Loch's Feather) |
 | `noDurabilityLine` | The tooltip shows no standard durability line, though the item has a durability: it shows none, or its description has its own (a pet's "Life", a stack's "Number of items", a ticket's "usable … times") |
 | `noBlankAfterOptions` | The tooltip leaves out the blank line after the options, so the item's lines drawn there follow the options directly (the Pet Skeleton, the Invitation to Santa Village) |
-| `noClassLines` | The tooltip shows no class lines ("Can be equipped by …") and not the blank line before them: seals, talismans, tickets, scrolls, elixirs, cash shop potions, pets, transformation rings and the bundles of jewels |
+| `noClassLines` | The tooltip shows no class lines ("Can be equipped by …") and not the blank line before them: seals, talismans, tickets, scrolls, elixirs, cash shop potions, pets, transformation rings and the bundles of jewels. Every item with `elitePotion`, `buffScroll`, `elixir`, `gambleItem`, `battleOrStrengthScroll` or `guardianPet` has it; one without it is a warning |
 
 Wings need no tag: an item is a wing when its `slot` is `wings`.
 

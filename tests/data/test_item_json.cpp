@@ -346,6 +346,26 @@ TEST_CASE("Item name language codes must be codes [data][items]")
     CHECK_FALSE(HasFatal(issues));
 }
 
+TEST_CASE("An item of a kind without class lines warns when it lacks noClassLines [data][items]")
+{
+    ItemDefinition elixir = MakeKris();
+    elixir.tags.Set(ItemTag::Elixir);
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{elixir}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "tags"));
+    CHECK_FALSE(HasFatal(issues));
+
+    elixir.tags.Set(ItemTag::NoClassLines);
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{elixir}, issues);
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "tags"));
+
+    // Any other item may show its class lines.
+    issues.clear();
+    ValidateItems(std::vector<ItemDefinition>{MakeKris()}, issues);
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "tags"));
+}
+
 TEST_CASE("Item tags, wing tier, potion priority and rule flags are kept through write and read [data][items]")
 {
     ItemDefinition wing = MakeKris();
