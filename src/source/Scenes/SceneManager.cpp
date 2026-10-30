@@ -45,6 +45,7 @@ FrameTimingState g_frameTiming;
 #include "Render/Renderer/RenderUtils.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Physics/PhysicsManager.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "Core/Time/Timer.h"
 #include "Core/Input/Input.h"
 #include "UI/Core/SceneUICoordinator.h"
@@ -474,6 +475,7 @@ static void HandleScreenshotCapture()
  */
 static void UpdateActiveScene()
 {
+    ClearSprites();
     switch (SceneFlag)
     {
     case LOG_IN_SCENE:

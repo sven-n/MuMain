@@ -48,7 +48,16 @@ namespace
 // glows and eye lights - are drawn inside one, so post-processing leaves the
 // character's Classic look alone.
 std::array<bool, MAX_SPRITES> s_spriteBloomExcluded{};
+// Sprites a RenderSprites pass already drew this frame; a later pass in the same frame draws only newer ones.
+std::array<bool, MAX_SPRITES> s_spriteDrawn{};
 } // namespace
+
+void ClearSprites()
+{
+    for (OBJECT& sprite : Sprites)
+        sprite.Live = false;
+    s_spriteDrawn.fill(false);
+}
 
 int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* Owner, float Rotation, int SubType)
 {
@@ -67,6 +76,7 @@ int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* O
             o->SubType = SubType;
             o->Owner = Owner;
             s_spriteBloomExcluded[i] = mu::GetRenderer().IsBloomExcluded();
+            s_spriteDrawn[i] = false;
             o->AnimationFrame = 1.f;
             o->Scale = Scale;
             o->Angle[2] = Rotation;
@@ -86,8 +96,7 @@ bool IsSpriteBloomExcluded(int sprite)
 
 void RenderSprite(OBJECT* o, OBJECT* Owner)
 {
-    o->AnimationFrame = UpdateAnimationFrame(o->AnimationFrame, o->Visible);
-    float Scale = o->AnimationFrame * o->Scale;
+    float Scale = UpdateAnimationFrame(o->AnimationFrame, o->Visible) * o->Scale;
 
     BITMAP_t* pBitmap = Bitmaps.GetTexture(o->Type);
     float Width = pBitmap->Width * Scale;
@@ -174,12 +183,12 @@ void RenderSprites(BYTE byRenderOneMore)
         {
             if (o->Position[2] <= 300.f)
             {
-                o->Live = false;
+                s_spriteDrawn[i] = true;
                 continue;
             }
         }
 
-        if (o->Live)
+        if (o->Live && !s_spriteDrawn[i])
         {
             if (o->Type == BITMAP_FORMATION_MARK)
             {
@@ -212,7 +221,7 @@ void RenderSprites(BYTE byRenderOneMore)
 
             if (byRenderOneMore == 0 || byRenderOneMore == 2)
             {
-                o->Live = false;
+                s_spriteDrawn[i] = true;
             }
         }
     }

@@ -28,6 +28,8 @@ int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* O
                  int SubType = 0);
 // Whether the sprite was created inside a bloom exclusion.
 bool IsSpriteBloomExcluded(int sprite);
+// Sprites are drawn for one frame: the update clears last frame's before anything spawns new ones.
+void ClearSprites();
 void RenderSprites(BYTE byRenderOneMore = 0);
 void CheckSprites();
 
