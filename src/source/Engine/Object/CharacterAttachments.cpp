@@ -14,6 +14,8 @@ struct CharacterSlots
     // A deque keeps slots in place as later ones are added.
     std::deque<Engine::Object::Attachments::Slot> slots;
     std::size_t next = 0;
+    unsigned int weaponsFrame = 0;
+    bool weaponsInHands = false;
 };
 
 std::array<CharacterSlots, MAX_CHARACTERS_CLIENT> s_characters;
@@ -87,6 +89,37 @@ float (*Bones(Slot& slot))[3][4]
 bool WasAdvanced(const Slot& slot)
 {
     return slot.part != nullptr && slot.sameAsLast && slot.advancedFor + 1 == s_drawFrame;
+}
+
+void RecordWeaponsHeld(const CHARACTER* c, bool inHands)
+{
+    if (CharacterSlots* character = SlotsOf(c))
+    {
+        character->weaponsFrame = s_drawFrame;
+        character->weaponsInHands = inHands;
+    }
+}
+
+std::optional<bool> WeaponsHeldInLastDraw(const CHARACTER* c)
+{
+    const CharacterSlots* character = SlotsOf(c);
+    if (character == nullptr || character->weaponsFrame != s_drawFrame)
+        return std::nullopt;
+    return character->weaponsInHands;
+}
+
+vec34_t* LastBonesOf(const CHARACTER* c, const _PART_t* part)
+{
+    CharacterSlots* character = SlotsOf(c);
+    if (character == nullptr)
+        return nullptr;
+    for (std::size_t i = 0; i < character->next; ++i)
+    {
+        Slot& slot = character->slots[i];
+        if (slot.part == part && slot.drawnFrame == s_drawFrame && slot.bones)
+            return slot.bones.get();
+    }
+    return nullptr;
 }
 
 void ForEachToAdvance(const CHARACTER* c, const std::function<void(Slot&)>& advance)

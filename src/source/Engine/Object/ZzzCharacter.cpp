@@ -6854,6 +6854,8 @@ LinkPlacement PlaceLinkedPart(float x, float y, float z, const CHARACTER* c, BYT
     }
     return placement;
 }
+bool DrawsHeldWeapon(CHARACTER* c, int hand);
+
 // The shared item object of a part type, set up from the character the part is drawn on.
 OBJECT* ItemObjectFor(CHARACTER* c, int Type)
 {
@@ -9961,7 +9963,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         } // if( !g_isCharacterBuff(o, eBuff_Cloaking) )
     } //if ( bCloak )
 
-    float Luminosity = (float)(rand() % 30 + 70) * 0.01f;
     if (c->PK >= PVP_MURDERER2)
     {
         Vector(1.f, 0.1f, 0.1f, c->Light);
@@ -10002,428 +10003,18 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     bool Bind = false;
     Bind = RenderCharacterBackItem(c, o, Translate);
 
+    Engine::Object::Attachments::RecordWeaponsHeld(c, !Bind);
     if (!Bind)
     {
-        c->PostMoveProcess_Process();
-
         for (int i = 0; i < 2; i++)
         {
-            if (i == 0)
-            {
-                if (o->CurrentAction == PLAYER_ATTACK_SKILL_FURY_STRIKE && o->AnimationFrame <= 4.f)
-                {
-                    continue;
-                }
-
-                if (true == c->PostMoveProcess_IsProcessing())
-                {
-                    c->Skill = 0;
-
-                    continue;
-                }
-            }
-
+            if (!DrawsHeldWeapon(c, i))
+                continue;
             PART_t* w = &c->Weapon[i];
-            if (w->Type != -1 && !GameLogic::Items::IsAmmunitionModel(w->Type) && w->Type != MODEL_DARK_RAVEN_ITEM)
-            {
-                if (o->CurrentAction == PLAYER_ATTACK_BOW || o->CurrentAction == PLAYER_ATTACK_CROSSBOW || o->CurrentAction == PLAYER_ATTACK_FLY_BOW || o->CurrentAction == PLAYER_ATTACK_FLY_CROSSBOW)
-                {
-                    if (w->Type == MODEL_STINGER_BOW)
-                    {
-                        w->CurrentAction = 1;
-                    }
-                    else
-                    {
-                        w->CurrentAction = 0;
-                    }
-                    w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_BOW].PlaySpeed;
-                }
-                else if (w->Type == MODEL_FLAIL)
-                {
-                    if (o->CurrentAction >= PLAYER_ATTACK_SWORD_RIGHT1 && o->CurrentAction <= PLAYER_ATTACK_SWORD_RIGHT2)
-                    {
-                        w->CurrentAction = 2;
-                        w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SWORD_RIGHT1].PlaySpeed;
-                    }
-                    else
-                    {
-                        w->CurrentAction = 1;
-                        w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed;
-                    }
-                }
-                else if (w->Type == MODEL_CRYSTAL_SWORD)
-                {
-                    w->CurrentAction = 0;
-                    w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed * 2.f;
-                }
-                else if (w->Type == MODEL_STAFF_OF_RESURRECTION)
-                {
-                    w->CurrentAction = 0;
-                    w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed * 15.f;
-                }
-                else if (w->Type == MODEL_PHOENIX_SOUL_STAR) {
-                    if (w->AnimationFrame < 2.f) {
-                        w->CurrentAction = 0;
-                        w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_RAGEFIGHTER].PlaySpeed * 1.5f;
-                        PlayBuffer(SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02);
-                    }
-                    else
-                    {
-                        w->AnimationFrame = 2.f;
-                    }
-                }
-                else if (w->Type >= MODEL_SWORD && w->Type < MODEL_SWORD + MAX_ITEM_INDEX)
-                {
-                    w->CurrentAction = 0;
-                    w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed;
-                }
-                else if (w->Type == MODEL_STINGER_BOW)
-                {
-                    w->CurrentAction = 0;
-                    w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed;
-                }
-                else if ((w->Type == MODEL_FROST_MACE) || (w->Type == MODEL_ABSOLUTE_SCEPTER))
-                {
-                    w->CurrentAction = 0;
-                    w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed;
-                }
-                else if (w->Type == MODEL_RAVEN_STICK)
-                {
-                    w->CurrentAction = 0;
-                    w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed;
-                }
-                else
-                {
-                    w->CurrentAction = 0;
-                    w->PlaySpeed = 0.f;
-                    w->AnimationFrame = 0.001f;
-                    w->PriorAnimationFrame = 0.f;
-                }
-
-                vec34_t* weaponBones = BoneTransform;
-                if (g_CMonkSystem.IsSwordformGloves(w->Type))
-                    g_CMonkSystem.RenderSwordformGloves(c, w->Type, i, o->Alpha, Translate, Select);
-                else
-                    weaponBones =
-                        RenderLinkObject(0.f, 0.f, 0.f, c, w, w->Type, w->Level, w->ExcellentFlags, false, Translate);
-
-                if (w->Level >= 7)
-                {
-                    Vector(Luminosity * 0.5f, Luminosity * 0.4f, Luminosity * 0.3f, Light);
-                }
-                else if (w->Level >= 5)
-                {
-                    Vector(Luminosity * 0.3f, Luminosity * 0.3f, Luminosity * 0.5f, Light);
-                }
-                else if (w->Level >= 3)
-                {
-                    Vector(Luminosity * 0.5f, Luminosity * 0.3f, Luminosity * 0.3f, Light);
-                }
-                else
-                {
-                    Vector(Luminosity * 0.3f, Luminosity * 0.3f, Luminosity * 0.3f, Light);
-                }
-                float Scale;
-                if (c->PK < PVP_MURDERER2 && c->Level != 4)
-                {
-                    bool Success = true;
-
-                    switch (w->Type)
-                    {
-                    case MODEL_SWORD_OF_ASSASSIN:
-                    case MODEL_BLADE:
-                    case MODEL_DOUBLE_BLADE:
-                        Vector(0.f, -110.f, 5.f, Position);
-                        break;
-                    case MODEL_SERPENT_SWORD:
-                    case MODEL_SWORD_OF_SALAMANDER:
-                        Vector(0.f, -110.f, -5.f, Position);
-                        break;
-                    case MODEL_FALCHION:
-                    case MODEL_LIGHT_SABER:
-                        Vector(0.f, -110.f, 0.f, Position);
-                        break;
-                    case MODEL_LIGHTING_SWORD:
-                    case MODEL_LEGENDARY_SWORD:
-                        Vector(0.f, -150.f, 0.f, Position);
-                        break;
-                    case MODEL_HELIACAL_SWORD:
-                        Vector(Luminosity, Luminosity, Luminosity, Light);
-                        Vector(0.f, -160.f, 0.f, Position);
-                        break;
-                    case MODEL_DARK_BREAKER:
-                        Success = false;
-                        Scale = sinf(WorldTime * 0.004f) * 10.f + 20.f;
-                        {
-                            vec3_t  pos1, pos2;
-
-                            Vector(0.f, -20.f, -40.f, Position);
-                            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, pos1, true);
-                            Vector(0.f, -160.f, -10.f, Position);
-                            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, pos2, true);
-                            CreateJoint(BITMAP_FLARE + 1, pos1, pos2, o->Angle, 4, o, Scale);
-
-                            Vector(0.f, -10.f, 28.f, Position);
-                            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, pos1, true);
-                            Vector(0.f, -145.f, 18.f, Position);
-                            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, pos2, true);
-                            CreateJoint(BITMAP_FLARE + 1, pos1, pos2, o->Angle, 4, o, Scale);
-                        }
-                        break;
-
-                    case MODEL_THUNDER_BLADE:
-                    {
-                        Success = false;
-
-                        Vector(0.f, -20.f, 15.f, Position);
-                        Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
-
-                        Scale = sinf(WorldTime * 0.004f) * 0.3f + 0.3f;
-                        Vector(Scale * 0.2f, Scale * 0.2f, Scale * 1.f, Light);
-                        CreateSprite(BITMAP_SHINY + 1, p, Scale + 1.f, Light, o, 0);
-
-                        Vector(0.f, -133.f, 7.f, Position);
-                        Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, Position, true);
-
-                        Scale = (Scale * 20.f) + 20.f;
-                        CreateJoint(BITMAP_JOINT_THUNDER, p, Position, o->Angle, 10, NULL, Scale);
-                        CreateJoint(BITMAP_JOINT_THUNDER, p, Position, o->Angle, 10, NULL, Scale);
-                        CreateJoint(BITMAP_JOINT_THUNDER, p, Position, o->Angle, 10, NULL, Scale);
-                    }
-                    break;
-                    case MODEL_DRAGON_SOUL_STAFF:
-                        Success = false;
-                        Vector(0.f, -120.f, 5.f, Position);
-                        Vector(Luminosity * 0.6f, Luminosity * 0.6f, Luminosity * 2.f, Light);
-                        Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
-                        CreateSprite(BITMAP_SHINY + 1, p, 1.5f, Light, o);
-                        CreateSprite(BITMAP_LIGHT, p, Luminosity + 1.f, Light, o);
-
-                        Vector(0.f, 100.f, 10.f, Position);
-                        Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
-                        CreateSprite(BITMAP_LIGHT, p, Luminosity + 1.f, Light, o);
-                        break;
-                    case MODEL_GORGON_STAFF:
-                        Success = false;
-                        Vector(0.f, -90.f, 0.f, Position);
-                        Vector(Luminosity * 0.4f, Luminosity * 0.8f, Luminosity * 0.6f, Light);
-                        Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
-                        CreateSprite(BITMAP_SHINY + 1, p, 2.f, Light, o);
-                        break;
-                    case MODEL_LEGENDARY_SHIELD:
-                        Success = false;
-                        Vector(20.f, 0.f, 0.f, Position);
-                        Vector(Luminosity * 0.4f, Luminosity * 0.6f, Luminosity * 1.5f, Light);
-                        Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
-                        CreateSprite(BITMAP_SHINY + 1, p, 1.5f, Light, o);
-                        break;
-                    case MODEL_LEGENDARY_STAFF:
-                        Success = false;
-                        Vector(0.f, -145.f, 0.f, Position);
-                        Vector(Luminosity * 0.4f, Luminosity * 0.6f, Luminosity * 1.f, Light);
-                        Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
-                        CreateSprite(BITMAP_SHINY + 1, p, 1.5f, Light, o);
-                        CreateSprite(BITMAP_LIGHTNING + 1, p, 0.3f, Light, o);
-                        break;
-                    case MODEL_CHAOS_LIGHTNING_STAFF:
-                        Success = false;
-                        Vector(Luminosity * 0.4f, Luminosity * 0.6f, Luminosity * 1.f, Light);
-                        RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 27, 2.f, Light, o);
-
-                        for (int j = 28; j <= 37; j++)
-                        {
-                            RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, 1.5f, Light, o);
-                        }
-                        break;
-                    case MODEL_STAFF_OF_RESURRECTION:
-                        Success = false;
-                        Vector(0.f, -145.f, 0.f, Position);
-                        Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
-                        Vector(Luminosity * 1.f, Luminosity * 0.6f, Luminosity * 0.4f, Light);
-                        CreateSprite(BITMAP_SPARK, p, 3.f, Light, o);
-                        CreateSprite(BITMAP_SHINY + 2, p, 1.5f, Light, o);
-
-                        for (int j = 0; j < 4; j++)
-                        {
-                            Vector((float)(rand() % 20 - 10), (float)(rand() % 20 - 10 - 90.f), (float)(rand() % 20 - 10), Position);
-                            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
-                            if (rand_fps_check(1))
-                            {
-                                CreateParticle(BITMAP_SPARK, p, o->Angle, Light, 1);
-                            }
-                        }
-                        Vector(Luminosity * 1.f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-
-                        for (int j = 0; j < 10; j++)
-                        {
-                            if (rand() % 4 < 3)
-                            {
-                                Vector(0.f, -j * 20 + 60.f, 0.f, Position);
-                                Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
-                                CreateSprite(BITMAP_LIGHT, p, 1.f, Light, o);
-                            }
-                        }
-                        break;
-                    case MODEL_VIOLENT_WIND_STICK:
-                        Success = false;
-                        Vector(Luminosity * 0.2f, Luminosity * 0.3f, Luminosity * 1.4f, Light);
-                        Vector(0.f, 0.f, 0.f, Position);
-                        b->TransformPosition(weaponBones[1], Position, p, true);
-                        CreateSprite(BITMAP_SHINY + 1, p, 1.f, Light, o, -(int)WorldTime * 0.1f);
-                        b->TransformPosition(weaponBones[2], Position, p, true);
-                        CreateSprite(BITMAP_SHINY + 1, p, 0.5f, Light, o, (int)WorldTime * 0.1f);
-                        break;
-                    case MODEL_RED_WING_STICK:
-                        Success = false;
-                        Vector(Luminosity * 1.0f, Luminosity * 0.3f, Luminosity * 0.4f, Light);
-                        Vector(0.f, 0.f, 0.f, Position);
-                        b->TransformPosition(weaponBones[1], Position, p, true);
-                        CreateSprite(BITMAP_SHINY + 1, p, 1.f, Light, o, -(int)WorldTime * 0.1f);
-                        CreateSprite(BITMAP_SHINY + 1, p, 1.f, Light, o, -(int)WorldTime * 0.13f);
-                        break;
-                    case MODEL_ANCIENT_STICK:
-                        Success = false;
-                        Scale = absf(sinf(WorldTime * 0.002f)) * 0.2f;
-                        Luminosity = absf(sinf(WorldTime * 0.002f)) * 0.4f;
-                        Vector(0.5f + Luminosity, 0.2f + Luminosity, 0.9f + Luminosity, Light);
-
-                        for (int j = 1; j <= 4; ++j)
-                            RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
-                        break;
-                    case MODEL_DEMONIC_STICK:
-                        Success = false;
-                        Scale = absf(sinf(WorldTime * 0.002f)) * 0.2f;
-                        Luminosity = absf(sinf(WorldTime * 0.002f)) * 0.4f;
-                        Vector(0.5f + Luminosity, 0.2f + Luminosity, 0.9f + Luminosity, Light);
-
-                        for (int j = 1; j <= 2; ++j)
-                        {
-                            RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, j, Scale + 1.0f, Light, o);
-                            RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
-                        }
-                        Vector(0.8f + Luminosity, 0.6f + Luminosity, 0.3f + Luminosity, Light);
-                        RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, 3, Scale + 1.0f, Light, o);
-                        break;
-                    case MODEL_STORM_BLITZ_STICK:
-                        Success = false;
-                        Scale = absf(sinf(WorldTime * 0.002f)) * 0.2f;
-                        Luminosity = absf(sinf(WorldTime * 0.002f)) * 0.4f;
-                        Vector(0.5f + Luminosity, 0.2f + Luminosity, 0.9f + Luminosity, Light);
-
-                        for (int j = 2; j <= 3; ++j)
-                            RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
-
-                        Vector(0.8f + Luminosity, 0.6f + Luminosity, 0.3f + Luminosity, Light);
-                        RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 2, 2, Scale + 1.0f, Light, o);
-                        break;
-                    case MODEL_ETERNAL_WING_STICK:
-                        Success = false;
-                        Vector(1.0f, 0.2f, 0.1f, Light);
-                        Vector(0.f, 0.f, 0.f, Position);
-                        b->TransformPosition(weaponBones[2], Position, p, true);
-                        CreateSprite(BITMAP_EVENT_CLOUD, p, 0.25f, Light, o, -(int)WorldTime * 0.1f);
-                        CreateSprite(BITMAP_EVENT_CLOUD, p, 0.25f, Light, o, -(int)WorldTime * 0.2f);
-                        Vector(1.0f, 0.4f, 0.3f, Light);
-                        RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 2, 1.0f, Light, o);
-                        Vector(1.0f, 0.2f, 0.0f, Light);
-                        if (rand_fps_check(1))
-                        {
-                            CreateParticle(BITMAP_SPARK + 1, p, o->Angle, Light, 16, 1.0f);
-                            CreateParticle(BITMAP_SPARK + 1, p, o->Angle, Light, 23, 1.0f);
-                        }
-
-#ifdef ASG_ADD_ETERNALWING_STICK_EFFECT
-                        if (rand_fps_check(20))
-                            CreateParticle(BITMAP_SPARK + 1, p, o->Angle, Light, 20, 1.0f);
-                        Vector(1.0f, 0.0f, 0.0f, Light);
-                        RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, 2, 3.0f, Light, o);
-#endif	// ASG_ADD_ETERNALWING_STICK_EFFECT
-                        break;
-                    case MODEL_SAINT_CROSSBOW:
-                        Success = false;
-                        Vector(Luminosity * 0.4f, Luminosity * 0.6f, Luminosity * 1.f, Light);
-
-                        for (int j = 0; j < 6; j++)
-                        {
-                            Vector(0.f, -10.f, -j * 20.f, Position);
-                            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
-                            CreateSprite(BITMAP_LIGHT, p, 2.f, Light, o);
-                        }
-                        break;
-                    case MODEL_CRYSTAL_SWORD:
-                        Success = false;
-                        Vector(Luminosity * 1.f, Luminosity * 0.6f, Luminosity * 0.4f, Light);
-
-                        for (int j = 0; j < 8; j++)
-                        {
-                            if (rand() % 4 < 3)
-                            {
-                                Vector(0.f, -j * 20 - 30.f, 0.f, Position);
-                                Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
-                                CreateSprite(BITMAP_LIGHT, p, 1.f, Light, o);
-                            }
-                        }
-                        break;
-                    case MODEL_CHAOS_DRAGON_AXE:
-                        Success = false;
-                        Vector(0.f, -84.f, 0.f, Position);
-                        Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
-                        Scale = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
-                        Vector(Scale * 1.f, Scale * 0.2f, Scale * 0.1f, Light);
-                        CreateSprite(BITMAP_SHINY + 1, p, Scale + 1.5f, Light, o);
-
-                        for (int j = 0; j < 5; j++)
-                        {
-                            Vector(0.f, -j * 20.f - 10.f, 0.f, Position);
-                            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
-                            CreateSprite(BITMAP_SHINY + 1, p, 1.f, Light, o);
-                        }
-                        Vector(Scale * 0.5f, Scale * 0.1f, Scale * 0.05f, Light);
-                        RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 2, 1.f, Light, o);
-                        RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 6, 1.f, Light, o);
-                        break;
-                    case MODEL_BLUEWING_CROSSBOW:
-                    case MODEL_AQUAGOLD_CROSSBOW:
-                        Success = false;
-                        if (w->Type == MODEL_BLUEWING_CROSSBOW)
-                        {
-                            Vector(Luminosity * 0.2f, Luminosity * 0.4f, Luminosity * 0.6f, Light);
-                        }
-                        else
-                        {
-                            Vector(Luminosity * 0.6f, Luminosity * 0.4f, Luminosity * 0.2f, Light);
-                        }
-
-                        for (int j = 0; j < 6; j++)
-                        {
-                            Vector(0.f, -20.f, (float)(-j * 20), Position);
-                            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
-                            CreateSprite(BITMAP_LIGHT, p, 2.f, Light, o);
-                        }
-                        break;
-                    default:
-                        Success = false;
-                    }
-                    if (Success)
-                    {
-                        Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
-                        CreateSprite(BITMAP_LIGHT, p, 1.4f, Light, o);
-                    }
-                }
-            }
-        }
-    }
-
-    else {
-        for (int i = 0; i < 2; i++) {
-            if (c->Weapon[i].Type == MODEL_PHOENIX_SOUL_STAR) {
-                if (c->Weapon[i].AnimationFrame != 0.f);
-                PlayBuffer(SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02);
-                c->Weapon[i].CurrentAction = 0;
-                c->Weapon[i].AnimationFrame = 0;
-                c->Weapon[i].PriorAnimationFrame = 0;
-                c->Weapon[i].PlaySpeed = 0;
-            }
+            if (g_CMonkSystem.IsSwordformGloves(w->Type))
+                g_CMonkSystem.RenderSwordformGloves(c, w->Type, i, o->Alpha, Translate, Select);
+            else
+                RenderLinkObject(0.f, 0.f, 0.f, c, w, w->Type, w->Level, w->ExcellentFlags, false, Translate);
         }
     }
 
@@ -11647,6 +11238,461 @@ void RefreshCharacterPoses()
     }
 }
 
+// Whether RenderCharacter draws the weapon of this hand: a real weapon, and not the first one during the start of
+// a fury strike or while a post-move process runs.
+bool DrawsHeldWeapon(CHARACTER* c, int hand)
+{
+    OBJECT* o = &c->Object;
+    if (hand == 0 && ((o->CurrentAction == PLAYER_ATTACK_SKILL_FURY_STRIKE && o->AnimationFrame <= 4.f) ||
+                      c->PostMoveProcess_IsProcessing()))
+        return false;
+    const PART_t* w = &c->Weapon[hand];
+    return w->Type != -1 && !GameLogic::Items::IsAmmunitionModel(w->Type) && w->Type != MODEL_DARK_RAVEN_ITEM;
+}
+
+// The weapons' animation settings for the frame, before they advance: in the hands, or reset on the back.
+void PrepareHeldWeapons(CHARACTER* c)
+{
+    const std::optional<bool> inHands = Engine::Object::Attachments::WeaponsHeldInLastDraw(c);
+    if (!inHands)
+        return;
+    OBJECT* o = &c->Object;
+    if (!*inHands)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            if (c->Weapon[i].Type == MODEL_PHOENIX_SOUL_STAR)
+            {
+                if (c->Weapon[i].AnimationFrame != 0.f)
+                    ;
+                PlayBuffer(SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02);
+                c->Weapon[i].CurrentAction = 0;
+                c->Weapon[i].AnimationFrame = 0;
+                c->Weapon[i].PriorAnimationFrame = 0;
+                c->Weapon[i].PlaySpeed = 0;
+            }
+        }
+        return;
+    }
+
+    c->PostMoveProcess_Process();
+    if (!(o->CurrentAction == PLAYER_ATTACK_SKILL_FURY_STRIKE && o->AnimationFrame <= 4.f) &&
+        c->PostMoveProcess_IsProcessing())
+        c->Skill = 0;
+    for (int i = 0; i < 2; i++)
+    {
+        if (!DrawsHeldWeapon(c, i))
+            continue;
+        PART_t* w = &c->Weapon[i];
+        if (o->CurrentAction == PLAYER_ATTACK_BOW || o->CurrentAction == PLAYER_ATTACK_CROSSBOW ||
+            o->CurrentAction == PLAYER_ATTACK_FLY_BOW || o->CurrentAction == PLAYER_ATTACK_FLY_CROSSBOW)
+        {
+            if (w->Type == MODEL_STINGER_BOW)
+            {
+                w->CurrentAction = 1;
+            }
+            else
+            {
+                w->CurrentAction = 0;
+            }
+            w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_BOW].PlaySpeed;
+        }
+        else if (w->Type == MODEL_FLAIL)
+        {
+            if (o->CurrentAction >= PLAYER_ATTACK_SWORD_RIGHT1 && o->CurrentAction <= PLAYER_ATTACK_SWORD_RIGHT2)
+            {
+                w->CurrentAction = 2;
+                w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_ATTACK_SWORD_RIGHT1].PlaySpeed;
+            }
+            else
+            {
+                w->CurrentAction = 1;
+                w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed;
+            }
+        }
+        else if (w->Type == MODEL_CRYSTAL_SWORD)
+        {
+            w->CurrentAction = 0;
+            w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed * 2.f;
+        }
+        else if (w->Type == MODEL_STAFF_OF_RESURRECTION)
+        {
+            w->CurrentAction = 0;
+            w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed * 15.f;
+        }
+        else if (w->Type == MODEL_PHOENIX_SOUL_STAR)
+        {
+            if (w->AnimationFrame < 2.f)
+            {
+                w->CurrentAction = 0;
+                w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_RAGEFIGHTER].PlaySpeed * 1.5f;
+                PlayBuffer(SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02);
+            }
+            else
+            {
+                w->AnimationFrame = 2.f;
+            }
+        }
+        else if (w->Type >= MODEL_SWORD && w->Type < MODEL_SWORD + MAX_ITEM_INDEX)
+        {
+            w->CurrentAction = 0;
+            w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed;
+        }
+        else if (w->Type == MODEL_STINGER_BOW)
+        {
+            w->CurrentAction = 0;
+            w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed;
+        }
+        else if ((w->Type == MODEL_FROST_MACE) || (w->Type == MODEL_ABSOLUTE_SCEPTER))
+        {
+            w->CurrentAction = 0;
+            w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed;
+        }
+        else if (w->Type == MODEL_RAVEN_STICK)
+        {
+            w->CurrentAction = 0;
+            w->PlaySpeed = Models[MODEL_PLAYER].Actions[PLAYER_STOP_MALE].PlaySpeed;
+        }
+        else
+        {
+            w->CurrentAction = 0;
+            w->PlaySpeed = 0.f;
+            w->AnimationFrame = 0.001f;
+            w->PriorAnimationFrame = 0.f;
+        }
+    }
+}
+
+// A held weapon's glow, from its pose and the character's bones.
+void SpawnHeldWeaponGlow(CHARACTER* c, PART_t* w, vec34_t* weaponBones, float Luminosity)
+{
+    OBJECT* o = &c->Object;
+    BMD* b = &Models[o->Type];
+    vec3_t p, Position, Light;
+
+    if (w->Level >= 7)
+    {
+        Vector(Luminosity * 0.5f, Luminosity * 0.4f, Luminosity * 0.3f, Light);
+    }
+    else if (w->Level >= 5)
+    {
+        Vector(Luminosity * 0.3f, Luminosity * 0.3f, Luminosity * 0.5f, Light);
+    }
+    else if (w->Level >= 3)
+    {
+        Vector(Luminosity * 0.5f, Luminosity * 0.3f, Luminosity * 0.3f, Light);
+    }
+    else
+    {
+        Vector(Luminosity * 0.3f, Luminosity * 0.3f, Luminosity * 0.3f, Light);
+    }
+    float Scale;
+    if (c->PK < PVP_MURDERER2 && c->Level != 4)
+    {
+        bool Success = true;
+
+        switch (w->Type)
+        {
+        case MODEL_SWORD_OF_ASSASSIN:
+        case MODEL_BLADE:
+        case MODEL_DOUBLE_BLADE:
+            Vector(0.f, -110.f, 5.f, Position);
+            break;
+        case MODEL_SERPENT_SWORD:
+        case MODEL_SWORD_OF_SALAMANDER:
+            Vector(0.f, -110.f, -5.f, Position);
+            break;
+        case MODEL_FALCHION:
+        case MODEL_LIGHT_SABER:
+            Vector(0.f, -110.f, 0.f, Position);
+            break;
+        case MODEL_LIGHTING_SWORD:
+        case MODEL_LEGENDARY_SWORD:
+            Vector(0.f, -150.f, 0.f, Position);
+            break;
+        case MODEL_HELIACAL_SWORD:
+            Vector(Luminosity, Luminosity, Luminosity, Light);
+            Vector(0.f, -160.f, 0.f, Position);
+            break;
+        case MODEL_DARK_BREAKER:
+            Success = false;
+            Scale = sinf(WorldTime * 0.004f) * 10.f + 20.f;
+            {
+                vec3_t pos1, pos2;
+
+                Vector(0.f, -20.f, -40.f, Position);
+                Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, pos1, true);
+                Vector(0.f, -160.f, -10.f, Position);
+                Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, pos2, true);
+                CreateJoint(BITMAP_FLARE + 1, pos1, pos2, o->Angle, 4, o, Scale);
+
+                Vector(0.f, -10.f, 28.f, Position);
+                Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, pos1, true);
+                Vector(0.f, -145.f, 18.f, Position);
+                Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, pos2, true);
+                CreateJoint(BITMAP_FLARE + 1, pos1, pos2, o->Angle, 4, o, Scale);
+            }
+            break;
+
+        case MODEL_THUNDER_BLADE:
+        {
+            Success = false;
+
+            Vector(0.f, -20.f, 15.f, Position);
+            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
+
+            Scale = sinf(WorldTime * 0.004f) * 0.3f + 0.3f;
+            Vector(Scale * 0.2f, Scale * 0.2f, Scale * 1.f, Light);
+            CreateSprite(BITMAP_SHINY + 1, p, Scale + 1.f, Light, o, 0);
+
+            Vector(0.f, -133.f, 7.f, Position);
+            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, Position, true);
+
+            Scale = (Scale * 20.f) + 20.f;
+            CreateJoint(BITMAP_JOINT_THUNDER, p, Position, o->Angle, 10, NULL, Scale);
+            CreateJoint(BITMAP_JOINT_THUNDER, p, Position, o->Angle, 10, NULL, Scale);
+            CreateJoint(BITMAP_JOINT_THUNDER, p, Position, o->Angle, 10, NULL, Scale);
+        }
+        break;
+        case MODEL_DRAGON_SOUL_STAFF:
+            Success = false;
+            Vector(0.f, -120.f, 5.f, Position);
+            Vector(Luminosity * 0.6f, Luminosity * 0.6f, Luminosity * 2.f, Light);
+            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
+            CreateSprite(BITMAP_SHINY + 1, p, 1.5f, Light, o);
+            CreateSprite(BITMAP_LIGHT, p, Luminosity + 1.f, Light, o);
+
+            Vector(0.f, 100.f, 10.f, Position);
+            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
+            CreateSprite(BITMAP_LIGHT, p, Luminosity + 1.f, Light, o);
+            break;
+        case MODEL_GORGON_STAFF:
+            Success = false;
+            Vector(0.f, -90.f, 0.f, Position);
+            Vector(Luminosity * 0.4f, Luminosity * 0.8f, Luminosity * 0.6f, Light);
+            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
+            CreateSprite(BITMAP_SHINY + 1, p, 2.f, Light, o);
+            break;
+        case MODEL_LEGENDARY_SHIELD:
+            Success = false;
+            Vector(20.f, 0.f, 0.f, Position);
+            Vector(Luminosity * 0.4f, Luminosity * 0.6f, Luminosity * 1.5f, Light);
+            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
+            CreateSprite(BITMAP_SHINY + 1, p, 1.5f, Light, o);
+            break;
+        case MODEL_LEGENDARY_STAFF:
+            Success = false;
+            Vector(0.f, -145.f, 0.f, Position);
+            Vector(Luminosity * 0.4f, Luminosity * 0.6f, Luminosity * 1.f, Light);
+            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
+            CreateSprite(BITMAP_SHINY + 1, p, 1.5f, Light, o);
+            CreateSprite(BITMAP_LIGHTNING + 1, p, 0.3f, Light, o);
+            break;
+        case MODEL_CHAOS_LIGHTNING_STAFF:
+            Success = false;
+            Vector(Luminosity * 0.4f, Luminosity * 0.6f, Luminosity * 1.f, Light);
+            RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 27, 2.f, Light, o);
+
+            for (int j = 28; j <= 37; j++)
+            {
+                RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, 1.5f, Light, o);
+            }
+            break;
+        case MODEL_STAFF_OF_RESURRECTION:
+            Success = false;
+            Vector(0.f, -145.f, 0.f, Position);
+            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
+            Vector(Luminosity * 1.f, Luminosity * 0.6f, Luminosity * 0.4f, Light);
+            CreateSprite(BITMAP_SPARK, p, 3.f, Light, o);
+            CreateSprite(BITMAP_SHINY + 2, p, 1.5f, Light, o);
+
+            for (int j = 0; j < 4; j++)
+            {
+                Vector((float)(rand() % 20 - 10), (float)(rand() % 20 - 10 - 90.f), (float)(rand() % 20 - 10),
+                       Position);
+                Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
+                if (rand_fps_check(1))
+                {
+                    CreateParticle(BITMAP_SPARK, p, o->Angle, Light, 1);
+                }
+            }
+            Vector(Luminosity * 1.f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+
+            for (int j = 0; j < 10; j++)
+            {
+                if (rand() % 4 < 3)
+                {
+                    Vector(0.f, -j * 20 + 60.f, 0.f, Position);
+                    Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
+                    CreateSprite(BITMAP_LIGHT, p, 1.f, Light, o);
+                }
+            }
+            break;
+        case MODEL_VIOLENT_WIND_STICK:
+            Success = false;
+            Vector(Luminosity * 0.2f, Luminosity * 0.3f, Luminosity * 1.4f, Light);
+            Vector(0.f, 0.f, 0.f, Position);
+            b->TransformPosition(weaponBones[1], Position, p, true);
+            CreateSprite(BITMAP_SHINY + 1, p, 1.f, Light, o, -(int)WorldTime * 0.1f);
+            b->TransformPosition(weaponBones[2], Position, p, true);
+            CreateSprite(BITMAP_SHINY + 1, p, 0.5f, Light, o, (int)WorldTime * 0.1f);
+            break;
+        case MODEL_RED_WING_STICK:
+            Success = false;
+            Vector(Luminosity * 1.0f, Luminosity * 0.3f, Luminosity * 0.4f, Light);
+            Vector(0.f, 0.f, 0.f, Position);
+            b->TransformPosition(weaponBones[1], Position, p, true);
+            CreateSprite(BITMAP_SHINY + 1, p, 1.f, Light, o, -(int)WorldTime * 0.1f);
+            CreateSprite(BITMAP_SHINY + 1, p, 1.f, Light, o, -(int)WorldTime * 0.13f);
+            break;
+        case MODEL_ANCIENT_STICK:
+            Success = false;
+            Scale = absf(sinf(WorldTime * 0.002f)) * 0.2f;
+            Luminosity = absf(sinf(WorldTime * 0.002f)) * 0.4f;
+            Vector(0.5f + Luminosity, 0.2f + Luminosity, 0.9f + Luminosity, Light);
+
+            for (int j = 1; j <= 4; ++j)
+                RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
+            break;
+        case MODEL_DEMONIC_STICK:
+            Success = false;
+            Scale = absf(sinf(WorldTime * 0.002f)) * 0.2f;
+            Luminosity = absf(sinf(WorldTime * 0.002f)) * 0.4f;
+            Vector(0.5f + Luminosity, 0.2f + Luminosity, 0.9f + Luminosity, Light);
+
+            for (int j = 1; j <= 2; ++j)
+            {
+                RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, j, Scale + 1.0f, Light, o);
+                RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
+            }
+            Vector(0.8f + Luminosity, 0.6f + Luminosity, 0.3f + Luminosity, Light);
+            RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, 3, Scale + 1.0f, Light, o);
+            break;
+        case MODEL_STORM_BLITZ_STICK:
+            Success = false;
+            Scale = absf(sinf(WorldTime * 0.002f)) * 0.2f;
+            Luminosity = absf(sinf(WorldTime * 0.002f)) * 0.4f;
+            Vector(0.5f + Luminosity, 0.2f + Luminosity, 0.9f + Luminosity, Light);
+
+            for (int j = 2; j <= 3; ++j)
+                RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
+
+            Vector(0.8f + Luminosity, 0.6f + Luminosity, 0.3f + Luminosity, Light);
+            RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 2, 2, Scale + 1.0f, Light, o);
+            break;
+        case MODEL_ETERNAL_WING_STICK:
+            Success = false;
+            Vector(1.0f, 0.2f, 0.1f, Light);
+            Vector(0.f, 0.f, 0.f, Position);
+            b->TransformPosition(weaponBones[2], Position, p, true);
+            CreateSprite(BITMAP_EVENT_CLOUD, p, 0.25f, Light, o, -(int)WorldTime * 0.1f);
+            CreateSprite(BITMAP_EVENT_CLOUD, p, 0.25f, Light, o, -(int)WorldTime * 0.2f);
+            Vector(1.0f, 0.4f, 0.3f, Light);
+            RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 2, 1.0f, Light, o);
+            Vector(1.0f, 0.2f, 0.0f, Light);
+            if (rand_fps_check(1))
+            {
+                CreateParticle(BITMAP_SPARK + 1, p, o->Angle, Light, 16, 1.0f);
+                CreateParticle(BITMAP_SPARK + 1, p, o->Angle, Light, 23, 1.0f);
+            }
+
+#ifdef ASG_ADD_ETERNALWING_STICK_EFFECT
+            if (rand_fps_check(20))
+                CreateParticle(BITMAP_SPARK + 1, p, o->Angle, Light, 20, 1.0f);
+            Vector(1.0f, 0.0f, 0.0f, Light);
+            RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, 2, 3.0f, Light, o);
+#endif // ASG_ADD_ETERNALWING_STICK_EFFECT
+            break;
+        case MODEL_SAINT_CROSSBOW:
+            Success = false;
+            Vector(Luminosity * 0.4f, Luminosity * 0.6f, Luminosity * 1.f, Light);
+
+            for (int j = 0; j < 6; j++)
+            {
+                Vector(0.f, -10.f, -j * 20.f, Position);
+                Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
+                CreateSprite(BITMAP_LIGHT, p, 2.f, Light, o);
+            }
+            break;
+        case MODEL_CRYSTAL_SWORD:
+            Success = false;
+            Vector(Luminosity * 1.f, Luminosity * 0.6f, Luminosity * 0.4f, Light);
+
+            for (int j = 0; j < 8; j++)
+            {
+                if (rand() % 4 < 3)
+                {
+                    Vector(0.f, -j * 20 - 30.f, 0.f, Position);
+                    Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
+                    CreateSprite(BITMAP_LIGHT, p, 1.f, Light, o);
+                }
+            }
+            break;
+        case MODEL_CHAOS_DRAGON_AXE:
+            Success = false;
+            Vector(0.f, -84.f, 0.f, Position);
+            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
+            Scale = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
+            Vector(Scale * 1.f, Scale * 0.2f, Scale * 0.1f, Light);
+            CreateSprite(BITMAP_SHINY + 1, p, Scale + 1.5f, Light, o);
+
+            for (int j = 0; j < 5; j++)
+            {
+                Vector(0.f, -j * 20.f - 10.f, 0.f, Position);
+                Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
+                CreateSprite(BITMAP_SHINY + 1, p, 1.f, Light, o);
+            }
+            Vector(Scale * 0.5f, Scale * 0.1f, Scale * 0.05f, Light);
+            RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 2, 1.f, Light, o);
+            RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 6, 1.f, Light, o);
+            break;
+        case MODEL_BLUEWING_CROSSBOW:
+        case MODEL_AQUAGOLD_CROSSBOW:
+            Success = false;
+            if (w->Type == MODEL_BLUEWING_CROSSBOW)
+            {
+                Vector(Luminosity * 0.2f, Luminosity * 0.4f, Luminosity * 0.6f, Light);
+            }
+            else
+            {
+                Vector(Luminosity * 0.6f, Luminosity * 0.4f, Luminosity * 0.2f, Light);
+            }
+
+            for (int j = 0; j < 6; j++)
+            {
+                Vector(0.f, -20.f, (float)(-j * 20), Position);
+                Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
+                CreateSprite(BITMAP_LIGHT, p, 2.f, Light, o);
+            }
+            break;
+        default:
+            Success = false;
+        }
+        if (Success)
+        {
+            Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], Position, p, true);
+            CreateSprite(BITMAP_LIGHT, p, 1.4f, Light, o);
+        }
+    }
+}
+
+void SpawnHeldWeaponGlows(CHARACTER* c)
+{
+    if (Engine::Object::Attachments::WeaponsHeldInLastDraw(c) != true)
+        return;
+    const float Luminosity = (float)(rand() % 30 + 70) * 0.01f;
+    for (int i = 0; i < 2; i++)
+    {
+        if (!DrawsHeldWeapon(c, i))
+            continue;
+        PART_t* w = &c->Weapon[i];
+        if (g_CMonkSystem.IsSwordformGloves(w->Type))
+            continue;
+        if (vec34_t* weaponBones = Engine::Object::Attachments::LastBonesOf(c, w))
+            SpawnHeldWeaponGlow(c, w, weaponBones, Luminosity);
+    }
+}
+
 // Advances and poses the parts the character's last draw attached, once per draw.
 void UpdateAttachedParts(CHARACTER* c)
 {
@@ -11688,7 +11734,9 @@ void UpdateDrawnCharacterEffects()
         b->BodyScale = o->Scale;
         b->CurrentAction = o->CurrentAction;
         VectorCopy(o->Position, b->BodyOrigin);
+        PrepareHeldWeapons(c);
         UpdateAttachedParts(c);
+        SpawnHeldWeaponGlows(c);
         UpdateMonsterBodyEffects(c, o, b);
         UpdateCharacterBodyEffects(c, o);
         UpdateHeldWeaponEffects(c, o, b);

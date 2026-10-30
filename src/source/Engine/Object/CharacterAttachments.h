@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <memory>
+#include <optional>
 
 class CHARACTER;
 struct _PART_t;
@@ -65,6 +66,12 @@ Slot* Record(CHARACTER* c, _PART_t* part, int type, float x, float y, float z, i
 float (*Bones(Slot& slot))[3][4];
 // Whether the update since the last draw already advanced and posed this slot's part; the draw then reuses it.
 bool WasAdvanced(const Slot& slot);
+// Records whether this draw drew the character's weapons in its hands or on its back.
+void RecordWeaponsHeld(const CHARACTER* c, bool inHands);
+// Whether the character's last draw held its weapons in its hands; nullopt when that draw did not get to them.
+std::optional<bool> WeaponsHeldInLastDraw(const CHARACTER* c);
+// The bones the character's last draw posed this part of it into, or nullptr.
+vec34_t* LastBonesOf(const CHARACTER* c, const _PART_t* part);
 // The slots of the character's last draw, for the update to advance once per draw; marks each one it hands out.
 void ForEachToAdvance(const CHARACTER* c, const std::function<void(Slot&)>& advance);
 } // namespace Engine::Object::Attachments
