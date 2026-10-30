@@ -2934,21 +2934,6 @@
   <data name="Ignore enemies defensive skill %d%%" xml:space="preserve">
     <value>Ignore enemies defensive skill %d%%</value>
   </data>
-  <data name="%s Increase damage strength/%d" xml:space="preserve">
-    <value>%s Increase damage strength/%d</value>
-  </data>
-  <data name="%s Increase damage agility/%d" xml:space="preserve">
-    <value>%s Increase damage agility/%d</value>
-  </data>
-  <data name="%s Increase defensive skill agility/%d" xml:space="preserve">
-    <value>%s Increase defensive skill agility/%d</value>
-  </data>
-  <data name="%s Increase defensive skill stamina/%d" xml:space="preserve">
-    <value>%s Increase defensive skill stamina/%d</value>
-  </data>
-  <data name="%s Increase Wizardry energy/%d" xml:space="preserve">
-    <value>%s Increase Wizardry energy/%d</value>
-  </data>
   <data name="Ice attribute skill increase damage +%d" xml:space="preserve">
     <value>Ice attribute skill increase damage +%d</value>
   </data>

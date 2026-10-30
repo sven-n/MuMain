@@ -2629,21 +2629,6 @@
   <data name="Ignore enemies defensive skill %d%%" xml:space="preserve">
     <value>Ignorar habilidade defensiva dos inimigos %d%%</value>
   </data>
-  <data name="%s Increase damage strength/%d" xml:space="preserve">
-    <value>%s Aumenta a força do dano/%d</value>
-  </data>
-  <data name="%s Increase damage agility/%d" xml:space="preserve">
-    <value>%s Aumenta a agilidade de dano/%d</value>
-  </data>
-  <data name="%s Increase defensive skill agility/%d" xml:space="preserve">
-    <value>%s Aumenta a agilidade das habilidades defensivas/%d</value>
-  </data>
-  <data name="%s Increase defensive skill stamina/%d" xml:space="preserve">
-    <value>%s Aumenta a resistência das habilidades defensivas/%d</value>
-  </data>
-  <data name="%s Increase Wizardry energy/%d" xml:space="preserve">
-    <value>%s Aumenta energia de magia/%d</value>
-  </data>
   <data name="Ice attribute skill increase damage +%d" xml:space="preserve">
     <value>Habilidade de atributo de gelo aumenta dano +%d</value>
   </data>

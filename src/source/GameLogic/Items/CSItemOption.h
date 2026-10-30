@@ -12,7 +12,8 @@ struct tagITEM;
 typedef struct tagITEM ITEM;
 
 constexpr std::uint8_t MAX_SET_OPTION = 64; // Maximum number of possible ancient sets
-constexpr std::uint8_t MASTERY_OPTION = 24; // A mastery option increases a specific skill
+// The first mastery option; the mastery options increase the damage of one element's skills.
+constexpr std::uint8_t MASTERY_OPTION = 29;
 
 // Each item can be part of up to 2 ancient sets. The following are their identifier.
 constexpr std::uint8_t EXT_A_SET_OPTION = 1;
@@ -69,7 +70,6 @@ struct SET_OPTION
     bool IsActive;
     bool IsFullOption;
     bool IsExtOption;
-    bool FulfillsClassRequirement; // If the option requires a specific class and the character fulfills that. //m_bySetOptionList[x][1]
     std::uint8_t OptionNumber; // m_bySetOptionList[x][0]
     int Value; //m_iSetOptionListValue
 };
@@ -110,8 +110,9 @@ private:
     MAP_EQUIPPEDSETITEMNAME	            m_mapEquippedSetItemName;
     MAP_EQUIPPEDSETITEMNAME::iterator   m_iterESIN;
 
-    static bool isClassRequirementFulfilled(const ITEM_SET_OPTION& setOptions, int firstClass, int secondClass);
-    static void TryAddSetOption(std::uint8_t option, int value, int optionIndex, SET_SEARCH_RESULT_OPT& set, const ITEM_SET_OPTION& setOptions, bool isThisSetComplete, bool isFullOption, bool isExtOption, bool fulfillsClassRequirement, int firstClass, int secondClass);
+    static void TryAddSetOption(std::uint8_t option, int value, int optionIndex, SET_SEARCH_RESULT_OPT& set,
+                                const ITEM_SET_OPTION& setOptions, bool isThisSetComplete, bool isFullOption,
+                                bool isExtOption, int firstClass, int secondClass);
 
     static bool getExplainText(wchar_t* text, std::uint8_t option, int value);
     static std::uint8_t RenderSetOptionList(const SET_SEARCH_RESULT_OPT& set, std::uint8_t textIndex, bool bIsEquippedItem, bool bShowInactive);
@@ -147,7 +148,6 @@ public:
 
     void	PlusSpecial(std::uint16_t* Value, int Special) const;
     void	PlusSpecialPercent(std::uint16_t* Value, int Special) const;
-    void	PlusSpecialLevel(std::uint16_t* Value, std::uint16_t SrcValue, int Special) const;
     void    PlusMastery(int* Value, std::uint8_t MasteryType) const;
 
     
@@ -157,7 +157,7 @@ public:
     static int     RenderDefaultOptionText(const ITEM* ip, int TextNum);
 
     // The format a set option's value is described with (`option` counts from
-    // AT_SET_OPTION_IMPROVE_STRENGTH); nullptr for a number that is no set option.
+    // AT_SET_OPTION_IMPROVE_STRENGTH); nullptr for a number that is no supported set option.
     static const wchar_t* GetSetOptionFormat(std::uint8_t option);
 
     static bool    IsNonWeaponSkillOrIsSkillEquipped(ActionSkillType skill);

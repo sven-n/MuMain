@@ -2629,21 +2629,6 @@
   <data name="Ignore enemies defensive skill %d%%" xml:space="preserve">
     <value>Abaikan keterampilan pertahanan musuh %d%%</value>
   </data>
-  <data name="%s Increase damage strength/%d" xml:space="preserve">
-    <value>%s Meningkatkan kekuatan kerusakan/%d</value>
-  </data>
-  <data name="%s Increase damage agility/%d" xml:space="preserve">
-    <value>%s Meningkatkan kelincahan kerusakan/%d</value>
-  </data>
-  <data name="%s Increase defensive skill agility/%d" xml:space="preserve">
-    <value>%s Meningkatkan kelincahan skill bertahan/%d</value>
-  </data>
-  <data name="%s Increase defensive skill stamina/%d" xml:space="preserve">
-    <value>%s Meningkatkan stamina skill bertahan/%d</value>
-  </data>
-  <data name="%s Increase Wizardry energy/%d" xml:space="preserve">
-    <value>%s Meningkatkan energi sihir/%d</value>
-  </data>
   <data name="Ice attribute skill increase damage +%d" xml:space="preserve">
     <value>Skill atribut es meningkatkan damage +%d</value>
   </data>

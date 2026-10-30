@@ -2629,21 +2629,6 @@
   <data name="Ignore enemies defensive skill %d%%" xml:space="preserve">
     <value>Huwag pansinin ang kasanayan sa pagtatanggol ng mga kaaway %d%%</value>
   </data>
-  <data name="%s Increase damage strength/%d" xml:space="preserve">
-    <value>%s Dagdagan ang lakas ng pinsala/%d</value>
-  </data>
-  <data name="%s Increase damage agility/%d" xml:space="preserve">
-    <value>%s Dagdagan ang liksi ng pinsala/%d</value>
-  </data>
-  <data name="%s Increase defensive skill agility/%d" xml:space="preserve">
-    <value>%s Dagdagan ang defensive na kasanayan liksi/%d</value>
-  </data>
-  <data name="%s Increase defensive skill stamina/%d" xml:space="preserve">
-    <value>%s Taasan ang tibay ng kasanayan sa pagtatanggol/%d</value>
-  </data>
-  <data name="%s Increase Wizardry energy/%d" xml:space="preserve">
-    <value>%s Taasan ang Wizardry energy/%d</value>
-  </data>
   <data name="Ice attribute skill increase damage +%d" xml:space="preserve">
     <value>Ang kakayahan ng katangian ng yelo ay nagpapataas ng pinsala +%d</value>
   </data>

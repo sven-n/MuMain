@@ -64,12 +64,13 @@ const wchar_t* const* const kSetOptionFormats[] = {
     &I18N::Game::IgnoreEnemiesDefensiveSkillD,
     &I18N::Game::IncreaseDefensiveSkillWhenUsingShieldWeaponsD,
     &I18N::Game::IncreaseDamageWhenUsingTwoHandedWeaponsD,
-    // AT_SET_OPTION_IMPROVE_ATTACK_2 to AT_SET_OPTION_WATER_MASTERY
-    &I18N::Game::SIncreaseDamageStrengthD,
-    &I18N::Game::SIncreaseDamageAgilityD,
-    &I18N::Game::SIncreaseDefensiveSkillAgilityD,
-    &I18N::Game::SIncreaseDefensiveSkillStaminaD,
-    &I18N::Game::SIncreaseWizardryEnergyD,
+    // 24 to 28 are not supported (see AT_SET_OPTION_ICE_MASTERY)
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    nullptr,
+    // AT_SET_OPTION_ICE_MASTERY to AT_SET_OPTION_WATER_MASTERY
     &I18N::Game::IceAttributeSkillIncreaseDamageD,
     &I18N::Game::PoisonAttributeSkillIncreaseDamageD,
     &I18N::Game::LightningAttributeSkillIncreaseDamageD,
@@ -79,6 +80,8 @@ const wchar_t* const* const kSetOptionFormats[] = {
     &I18N::Game::WaterAttributeSkillIncreaseDamageD,
 };
 static_assert(std::ssize(kSetOptionFormats) == SET_OPTION_COUNT, "one description per set option");
+static_assert(MASTERY_OPTION == AT_SET_OPTION_ICE_MASTERY - AT_SET_OPTION_IMPROVE_STRENGTH,
+              "the mastery options start at MASTERY_OPTION");
 
 using FilePtr = std::unique_ptr<FILE, decltype(&std::fclose)>;
 
@@ -321,39 +324,20 @@ void CSItemOption::checkItemType(SET_SEARCH_RESULT* optionList, const int iType,
     }
 }
 
-
-bool CSItemOption::isClassRequirementFulfilled(const ITEM_SET_OPTION& setOptions, const int firstClass, int secondClass)
+void CSItemOption::TryAddSetOption(std::uint8_t option, int value, int optionIndex, SET_SEARCH_RESULT_OPT& set,
+                                   const ITEM_SET_OPTION& setOptions, bool isThisSetComplete, bool isFullOption,
+                                   bool isExtOption, int firstClass, int secondClass)
 {
-    bool RequireClass = false;
-    for (int i = CLASS_WIZARD; i <= CLASS_RAGEFIGHTER; i++)
-    {
-        if (setOptions.byRequireClass[i] == 1 && firstClass == i)
-        {
-            RequireClass = true;
-        }
-
-        if (setOptions.byRequireClass[i] == 2 && firstClass == i && secondClass)
-        {
-            RequireClass = true;
-        }
-    }
-
-    return RequireClass;
-}
-
-void CSItemOption::TryAddSetOption(std::uint8_t option, int value, int optionIndex, SET_SEARCH_RESULT_OPT& set, const ITEM_SET_OPTION& setOptions, bool isThisSetComplete, bool isFullOption, bool isExtOption, bool fulfillsClassRequirement, int firstClass, int secondClass)
-{
-    if (option == EMPTY_OPTION
-        || value == 0
-        || (option >= MASTERY_OPTION 
-            && (setOptions.byRequireClass[firstClass] && secondClass >= setOptions.byRequireClass[firstClass] - 1)))
+    // An empty slot or an option the client doesn't support (no description) adds nothing.
+    if (GetSetOptionFormat(option) == nullptr || value == 0 ||
+        (option >= MASTERY_OPTION &&
+         (setOptions.byRequireClass[firstClass] && secondClass >= setOptions.byRequireClass[firstClass] - 1)))
     {
         return;
     }
 
     const auto setOption = &set.SetOption[set.SetOptionCount];
     setOption->OptionNumber = option;
-    setOption->FulfillsClassRequirement = fulfillsClassRequirement;
     setOption->Value = value;
     setOption->IsActive = isThisSetComplete || optionIndex < set.ItemCount - 1;
     setOption->IsFullOption = isFullOption;
@@ -402,24 +386,26 @@ void CSItemOption::calcSetOptionList(const SET_SEARCH_RESULT* optionList)
             isThisSetComplete = true;
         }
 
-        const auto requireClass = isClassRequirementFulfilled(setOptions, firstClass, secondClass);
         const auto standardOptionCount = std::min<int>(set.CompleteSetItemCount - 1, MAX_ITEM_SET_STANDARD_OPTION_COUNT);
         for (int o = 0; o < standardOptionCount; ++o)
         {
             for (int n = 0; n < MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT; ++n)
             {
-                TryAddSetOption(setOptions.byStandardOption[o][n], setOptions.byStandardOptionValue[o][n], o, set, setOptions, isThisSetComplete, false, false, requireClass, firstClass, secondClass);
+                TryAddSetOption(setOptions.byStandardOption[o][n], setOptions.byStandardOptionValue[o][n], o, set,
+                                setOptions, isThisSetComplete, false, false, firstClass, secondClass);
             }
         }
 
         for (int o = 0; o < MAX_ITEM_SET_EXT_OPTION_COUNT; ++o)
         {
-            TryAddSetOption(setOptions.byExtOption[o], setOptions.byExtOptionValue[o], 0, set, setOptions, isThisSetComplete, false, true, requireClass, firstClass, secondClass);
+            TryAddSetOption(setOptions.byExtOption[o], setOptions.byExtOptionValue[o], 0, set, setOptions,
+                            isThisSetComplete, false, true, firstClass, secondClass);
         }
 
         for (int o = 0; o < MAX_ITEM_SET_FULL_OPTION_COUNT; ++o)
         {
-            TryAddSetOption(setOptions.byFullOption[o], setOptions.byFullOptionValue[o], 255, set, setOptions, isThisSetComplete, true, false, requireClass, firstClass, secondClass);
+            TryAddSetOption(setOptions.byFullOption[o], setOptions.byFullOptionValue[o], 255, set, setOptions,
+                            isThisSetComplete, true, false, firstClass, secondClass);
         }
     }
 }
@@ -431,7 +417,8 @@ const wchar_t* CSItemOption::GetSetOptionFormat(std::uint8_t option)
         return nullptr;
     }
 
-    return *kSetOptionFormats[option];
+    const wchar_t* const* format = kSetOptionFormats[option];
+    return format != nullptr ? *format : nullptr;
 }
 
 bool CSItemOption::getExplainText(wchar_t* text, std::uint8_t option, int value)
@@ -488,35 +475,6 @@ void CSItemOption::PlusSpecialPercent(std::uint16_t* Value, int Special) const
     }
 }
 
-void CSItemOption::PlusSpecialLevel(std::uint16_t* Value, std::uint16_t SrcValue, int Special) const
-{
-    Special -= AT_SET_OPTION_IMPROVE_STRENGTH;
-    int optionValue = 0;
-    int count = 0;
-
-    for (int i = 0; i < m_SetSearchResultCount; i++)
-    {
-        const auto& set = m_SetSearchResult[i];
-        for (int j = 0; j < set.SetOptionCount; j++)
-        {
-            const auto& option = set.SetOption[j];
-            if (option.IsActive
-                && option.OptionNumber == Special
-                && option.Value != 0)
-            {
-                optionValue += option.Value;
-                count++;
-            }
-        }
-    }
-
-    if (optionValue)
-    {
-        optionValue = SrcValue * optionValue / 100;
-        *Value += (optionValue * count);
-    }
-}
-
 void CSItemOption::PlusMastery(int* Value, std::uint8_t MasteryType) const
 {
     int optionValue = 0;
@@ -527,10 +485,8 @@ void CSItemOption::PlusMastery(int* Value, std::uint8_t MasteryType) const
         for (int j = 0; j < set.SetOptionCount; j++)
         {
             const auto& option = set.SetOption[j];
-            if (option.IsActive
-                && option.OptionNumber >= MASTERY_OPTION
-                && (option.OptionNumber - MASTERY_OPTION - 5) == MasteryType
-                && option.Value != 0)
+            if (option.IsActive && option.OptionNumber >= MASTERY_OPTION &&
+                (option.OptionNumber - MASTERY_OPTION) == MasteryType && option.Value != 0)
             {
                 optionValue += option.Value;
             }
@@ -1053,11 +1009,6 @@ std::uint8_t  CSItemOption::RenderSetOptionList(const SET_SEARCH_RESULT_OPT& set
             if (!bIsEquippedItem || !option.IsActive)
             {
                 TextListColor[textIndex] = TEXT_COLOR_GRAY;
-            }
-            else if (option.OptionNumber >= AT_SET_OPTION_IMPROVE_ATTACK_1 && !option.FulfillsClassRequirement)
-            {
-                // Mastery
-                TextListColor[textIndex] = TEXT_COLOR_RED;
             }
             else
             {

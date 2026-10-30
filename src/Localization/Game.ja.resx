@@ -2539,21 +2539,6 @@
   <data name="Ignore enemies defensive skill %d%%" xml:space="preserve">
     <value>敵の防御力無視 %d%%</value>
   </data>
-  <data name="%s Increase damage strength/%d" xml:space="preserve">
-    <value>%s 攻撃力増加 力/%d</value>
-  </data>
-  <data name="%s Increase damage agility/%d" xml:space="preserve">
-    <value>%s 攻撃力増加 敏捷性/%d</value>
-  </data>
-  <data name="%s Increase defensive skill agility/%d" xml:space="preserve">
-    <value>%s 防御力増加 敏捷性/%d</value>
-  </data>
-  <data name="%s Increase defensive skill stamina/%d" xml:space="preserve">
-    <value>%s 防御力増加 体力/%d</value>
-  </data>
-  <data name="%s Increase Wizardry energy/%d" xml:space="preserve">
-    <value>%s 魔力増加 エナジー/%d</value>
-  </data>
   <data name="Ice attribute skill increase damage +%d" xml:space="preserve">
     <value>氷属性スキル攻撃力増加 +%d</value>
   </data>
