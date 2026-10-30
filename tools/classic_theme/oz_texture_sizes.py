@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """List the real pixel size of MU's .OZJ/.OZT textures.
 
-The engine pads every texture to a power of two when it loads it, so a theme that uses an image
-whose size is not a power of two needs an @spritesheet with the real size (see
-docs/rmlui-ui-system/theming-and-modding.md). This prints that size for every texture in a folder.
+RmlUi loads a texture at its original size, but the files don't say it anywhere a theme author
+can read: this prints the real size of every texture in a folder, to write the theme's
+@spritesheet rects with (see docs/rmlui-ui-system/theming-and-modding.md).
 
 .OZJ is a JPEG behind a 24-byte header; .OZT is a TGA behind a 4-byte header.
 
