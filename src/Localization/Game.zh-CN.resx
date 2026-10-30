@@ -6,39 +6,30 @@
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <data name="OK" xml:space="preserve">
     <value>确定</value>
-    <comment>legacy_id=228,337,2811</comment>
   </data>
   <data name="Cancel" xml:space="preserve">
     <value>取消</value>
-    <comment>legacy_id=229,384,3114</comment>
   </data>
   <data name="close" xml:space="preserve">
     <value>关闭</value>
-    <comment>legacy_id=241</comment>
   </data>
   <data name="Exit Game" xml:space="preserve">
     <value>退出游戏</value>
-    <comment>legacy_id=381</comment>
   </data>
   <data name="Select Server" xml:space="preserve">
     <value>选择服务器</value>
-    <comment>legacy_id=382</comment>
   </data>
   <data name="Switch Character" xml:space="preserve">
     <value>切换角色</value>
-    <comment>legacy_id=383</comment>
   </data>
   <data name="Option385" xml:space="preserve">
     <value>选项</value>
-    <comment>legacy_id=385,2343</comment>
   </data>
   <data name="Automatic Attack" xml:space="preserve">
     <value>自动攻击</value>
-    <comment>legacy_id=386</comment>
   </data>
   <data name="Beep sound for whispering" xml:space="preserve">
     <value>密语提示音</value>
-    <comment>legacy_id=387</comment>
   </data>
   <data name="Sound volume" xml:space="preserve">
     <value>音效音量</value>
@@ -336,39 +327,30 @@
   </data>
   <data name="Close388" xml:space="preserve">
     <value>关闭</value>
-    <comment>legacy_id=388,1002</comment>
   </data>
   <data name="Enter your account" xml:space="preserve">
     <value>请输入账号</value>
-    <comment>legacy_id=403</comment>
   </data>
   <data name="Enter your password" xml:space="preserve">
     <value>请输入密码</value>
-    <comment>legacy_id=404</comment>
   </data>
   <data name="Password is incorrect" xml:space="preserve">
     <value>密码错误</value>
-    <comment>legacy_id=407,445</comment>
   </data>
   <data name="Your account is invalid" xml:space="preserve">
     <value>账号无效</value>
-    <comment>legacy_id=414</comment>
   </data>
   <data name="Your account is already connected" xml:space="preserve">
     <value>该账号已登录</value>
-    <comment>legacy_id=415</comment>
   </data>
   <data name="This account is blocked" xml:space="preserve">
     <value>该账号已被封停</value>
-    <comment>legacy_id=417</comment>
   </data>
   <data name="Account" xml:space="preserve">
     <value>账号</value>
-    <comment>legacy_id=450</comment>
   </data>
   <data name="Password" xml:space="preserve">
     <value>密码</value>
-    <comment>legacy_id=451</comment>
   </data>
   <data name="LoginRememberUsername" xml:space="preserve">
     <value>记住账号</value>
@@ -392,35 +374,27 @@
   </data>
   <data name="[%s-%d(Non-PvP) Server]" xml:space="preserve">
     <value>[%s-%d（非 PvP）服务器]</value>
-    <comment>legacy_id=460</comment>
   </data>
   <data name="[%s-%d Server]" xml:space="preserve">
     <value>[%s-%d 服务器]</value>
-    <comment>legacy_id=461</comment>
   </data>
   <data name="Please wait" xml:space="preserve">
     <value>请稍候</value>
-    <comment>legacy_id=471,473</comment>
   </data>
   <data name="Verifying your account" xml:space="preserve">
     <value>正在验证账号</value>
-    <comment>legacy_id=472</comment>
   </data>
   <data name="Exit game after closing the Chaos interface." xml:space="preserve">
     <value>请先关闭合成界面，再进行此操作。</value>
-    <comment>legacy_id=592</comment>
   </data>
   <data name="Slide Help" xml:space="preserve">
     <value>滚动帮助提示</value>
-    <comment>legacy_id=919</comment>
   </data>
   <data name="+Effect limitation" xml:space="preserve">
     <value>+效果限制</value>
-    <comment>legacy_id=1840</comment>
   </data>
   <data name="System Menu" xml:space="preserve">
     <value>系统菜单</value>
-    <comment>legacy_id=3450</comment>
   </data>
   <data name="Font" xml:space="preserve">
     <value>字体</value>

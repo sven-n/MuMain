@@ -38,17 +38,35 @@
 
 namespace
 {
-    constexpr std::array<int, MAX_CLASS> kClassButtonTextIds{
-        20, 21, 22, 23, 24, 1687, 3150
-    };
-
     constexpr std::size_t kMinCharacterNameLength = 4;
 
-    constexpr int kSummonerDescriptionTextId = 1690;
-    constexpr int kRageFighterDescriptionTextId = 3152;
-    constexpr int kDefaultDescriptionBase = 1705;
+    // A class's name, indexed by CLASS_*.
+    const wchar_t* const* const kJobNames[] = {
+        &I18N::Game::DarkWizard, &I18N::Game::DarkKnight, &I18N::Game::Elf,        &I18N::Game::MagicGladiator,
+        &I18N::Game::DarkLord,   &I18N::Game::Summoner,   &I18N::Game::RageFighter};
 
-    constexpr int kStatLabelBaseId = 1701;
+    // A class's description, indexed by CLASS_*.
+    const wchar_t* const* const kJobDescriptions[] = {
+        &I18N::Game::KingdomOfWizardsDescendantOfArka,      &I18N::Game::KingdomOfKnightsDescendantOfLorencia,
+        &I18N::Game::KingdomOfElvesDescendantsOfNoria,      &I18N::Game::ComplexCharacterThatHasACharacteristics,
+        &I18N::Game::CharismaticCharacterThatCanCommandThe, &I18N::Game::StrongMentalityAndExcellentInsightCreates,
+        &I18N::Game::LegitimateBearersOfTheKarutanRoyal};
+    static_assert(std::size(kJobNames) == MAX_CLASS, "one name per creatable class");
+    static_assert(std::size(kJobDescriptions) == MAX_CLASS, "one description per creatable class");
+
+    // A class's name (its job button and, while selected, the description title) in the current
+    // language; `classType` is one of the MAX_CLASS creatable classes.
+    const wchar_t* GetJobName(CLASS_TYPE classType)
+    {
+        return *kJobNames[classType];
+    }
+
+    // A creatable class's description in the current language.
+    const wchar_t* GetJobDescription(CLASS_TYPE classType)
+    {
+        return *kJobDescriptions[classType];
+    }
+
     constexpr int kStatLineSpacing = 17;
     constexpr int kStatYOffset = 10;
     constexpr int kStatValueOffset = 54;
@@ -56,7 +74,6 @@ namespace
     constexpr int kDarkLordStatHeight = 96;
     constexpr int kDefaultStatHeight = 80;
     constexpr const wchar_t* kDarkLordLeadershipStatValue = L"25";
-    constexpr int kDarkLordLeadershipTextId = 1738;
 
     // Indexed by CLASS_*; each theme's char_make.rcss places the button matching [job=<key>].
     constexpr const char* kJobKeys[MAX_CLASS] = {
@@ -115,15 +132,6 @@ namespace
         default:
             return { false, 0.0f, 0.0f, 0.0f, 6.0f, 0.0f, 0.0f };
         }
-    }
-
-    constexpr int ResolveDescriptionTextId(CLASS_TYPE selectedClass)
-    {
-        if (selectedClass == CLASS_SUMMONER)
-            return kSummonerDescriptionTextId;
-        if (selectedClass == CLASS_RAGEFIGHTER)
-            return kRageFighterDescriptionTextId;
-        return kDefaultDescriptionBase + selectedClass;
     }
 
     // Character-name length cap, the same limit the native CUITextInputBox was configured with
@@ -336,12 +344,8 @@ void CCharMakeWin::UpdateDisplay()
     const bool isDarkLord = (m_nSelJob == CLASS_DARK_LORD);
     m_asprBack[CMW_SPR_STAT].SetSize(0, isDarkLord ? kDarkLordStatHeight : kDefaultStatHeight, Y);
 
-    const int descriptionTextId = ResolveDescriptionTextId(m_nSelJob);
-    m_nDescLine = ::SeparateTextIntoLines(
-        I18N::Game::Lookup(descriptionTextId),
-        m_aszJobDesc[0],
-        CMW_DESC_LINE_MAX,
-        CMW_DESC_ROW_MAX);
+    m_nDescLine =
+        ::SeparateTextIntoLines(GetJobDescription(m_nSelJob), m_aszJobDesc[0], CMW_DESC_LINE_MAX, CMW_DESC_ROW_MAX);
 
     SelectCreateCharacter();
 }
@@ -463,7 +467,7 @@ void CCharMakeWin::SyncRmlModel()
         if (entry.checked != checked) { entry.checked = checked; jobsDirty = true; }
         if (entry.disabled != disabled) { entry.disabled = disabled; jobsDirty = true; }
 
-        const std::string label = StringUtils::WideToNarrow(I18N::Game::Lookup(kClassButtonTextIds[classIndex]));
+        const std::string label = StringUtils::WideToNarrow(GetJobName(static_cast<CLASS_TYPE>(classIndex)));
         if (entry.label != label) { entry.label = label; jobsDirty = true; }
     }
     if (jobsDirty)
@@ -485,11 +489,11 @@ void CCharMakeWin::SyncRmlModel()
             m_RmlView.MarkDirty(boundName);
         }
     };
-    syncLabel(&CharMakeRmlModel::statLabel0, "stat_label0", I18N::Game::Lookup(kStatLabelBaseId + 0));
-    syncLabel(&CharMakeRmlModel::statLabel1, "stat_label1", I18N::Game::Lookup(kStatLabelBaseId + 1));
-    syncLabel(&CharMakeRmlModel::statLabel2, "stat_label2", I18N::Game::Lookup(kStatLabelBaseId + 2));
-    syncLabel(&CharMakeRmlModel::statLabel3, "stat_label3", I18N::Game::Lookup(kStatLabelBaseId + 3));
-    syncLabel(&CharMakeRmlModel::statLabel4, "stat_label4", I18N::Game::Lookup(kDarkLordLeadershipTextId));
+    syncLabel(&CharMakeRmlModel::statLabel0, "stat_label0", I18N::Game::Strength);
+    syncLabel(&CharMakeRmlModel::statLabel1, "stat_label1", I18N::Game::Agility);
+    syncLabel(&CharMakeRmlModel::statLabel2, "stat_label2", I18N::Game::Vitality);
+    syncLabel(&CharMakeRmlModel::statLabel3, "stat_label3", I18N::Game::Energy);
+    syncLabel(&CharMakeRmlModel::statLabel4, "stat_label4", I18N::Game::Command);
 
     const auto& stats = kClassStatTable[static_cast<std::size_t>(m_nSelJob)];
     syncLabel(&CharMakeRmlModel::statValue0, "stat_value0", stats.values[0]);
@@ -502,7 +506,7 @@ void CCharMakeWin::SyncRmlModel()
 
     // Same I18N lookup table used to build jobs[i].label (see the loop above) -- the selected
     // class's own name, for the modern theme's description-panel title (legacy hides it).
-    syncLabel(&CharMakeRmlModel::descTitle, "desc_title", I18N::Game::Lookup(kClassButtonTextIds[m_nSelJob]));
+    syncLabel(&CharMakeRmlModel::descTitle, "desc_title", GetJobName(m_nSelJob));
     syncLabel(&CharMakeRmlModel::descLine1, "desc_line1", m_nDescLine > 0 ? m_aszJobDesc[0] : L"");
     syncLabel(&CharMakeRmlModel::descLine2, "desc_line2", m_nDescLine > 1 ? m_aszJobDesc[1] : L"");
 

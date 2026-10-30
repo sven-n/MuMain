@@ -156,6 +156,10 @@ public:
     static bool    GetDefaultOptionText(const ITEM* ip, wchar_t* Text);
     static int     RenderDefaultOptionText(const ITEM* ip, int TextNum);
 
+    // The format a set option's value is described with (`option` counts from
+    // AT_SET_OPTION_IMPROVE_STRENGTH); nullptr for a number that is no set option.
+    static const wchar_t* GetSetOptionFormat(std::uint8_t option);
+
     static bool    IsNonWeaponSkillOrIsSkillEquipped(ActionSkillType skill);
     void	CheckItemSetOptions(void);
     void	MoveSetOptionList(const int StartX, const int StartY);

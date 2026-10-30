@@ -241,7 +241,7 @@ protected:
     int m_iLastFriendWindowTabIndex;
 
     BOOL m_bServerEnable;
-    int m_iFriendMainWindowTitleNumber;
+    const wchar_t* const* m_pFriendMainWindowTitle;
 };
 
 // The friend family's open chat rooms, pending chat requests and new-chat and new-mail alerts. Once

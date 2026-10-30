@@ -12,9 +12,98 @@
 #include "GameLogic/Items/ItemCategories.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 
+#include <algorithm>
+#include <iterator>
+
 using namespace SEASON3A;
 
 CMixRecipeMgr g_MixRecipeMgr;
+
+namespace
+{
+struct MixRecipeText
+{
+    int textId;
+    const wchar_t* const* text;
+};
+
+// The text numbers mix.bmd stores in its recipes' names, descriptions and advice, sorted by number.
+constexpr MixRecipeText kMixRecipeTexts[] = {
+    {588, &I18N::Game::InCaseYouFailOn},
+    {589, &I18N::Game::PleaseNoteThat},
+    {590, &I18N::Game::TheLevelOfItemsDecreases},
+    {600, &I18N::Game::ItemLevelsMustBeIdenticalToCombineItemsAreOfTheSameLevel},
+    {603, &I18N::Game::CreateATicketOfDevilSquare},
+    {604, &I18N::Game::Create10Item},
+    {605, &I18N::Game::Create11Item},
+    {606, &I18N::Game::DuringCreationOf1015Items},
+    {607, &I18N::Game::NoticeThatThereIsAPossibility},
+    {608, &I18N::Game::ThatYouMayLoseTheItems},
+    {610, &I18N::Game::NoticeThatWhenYouFailToCombineTheItems},
+    {611, &I18N::Game::YouCanLoseTheItems},
+    {612, &I18N::Game::CreateDinorant},
+    {613, &I18N::Game::CreateFruit},
+    {614, &I18N::Game::CreateWings},
+    {615, &I18N::Game::CreateCloakOfInvisibility},
+    {665, &I18N::Game::_12ItemCreation},
+    {666, &I18N::Game::_13ItemCreation},
+    {736, &I18N::Game::ChaosWeaponCombination},
+    {1172, &I18N::Game::CreateCloakItem},
+    {1187, &I18N::Game::DarkHorse},
+    {1212, &I18N::Game::Resurrection},
+    {1214, &I18N::Game::DarkRaven},
+    {1412, &I18N::Game::Create},
+    {1413, &I18N::Game::PotionOfBless},
+    {1414, &I18N::Game::PotionOfSoul},
+    {1415, &I18N::Game::LifeStone},
+    {1550, &I18N::Game::Improve},
+    {1640, &I18N::Game::Store1640},
+    {1666, &I18N::Game::CondorSFeather},
+    {1667, &I18N::Game::_3rdWing},
+    {1863, &I18N::Game::Destroy},
+    {1864, &I18N::Game::Protect},
+    {1921, &I18N::Game::FragmentOfHorn},
+    {1922, &I18N::Game::BrokenHorn},
+    {1923, &I18N::Game::FenrirSHorn},
+    {2038, &I18N::Game::SDPotion},
+    {2061, &I18N::Game::Refine},
+    {2062, &I18N::Game::Restore},
+    {2194, &I18N::Game::Add380ItemOption},
+    {2203, &I18N::Game::RefineGemstone},
+    {2222, &I18N::Game::ItemWillDisappearWhenFailed},
+    {2261, &I18N::Game::YouCanAchieveSpecialItemsWithCombinations},
+    {2263, &I18N::Game::ItemsExceptChaosCard},
+    {2265, &I18N::Game::ChaosCardCombination},
+    {2267, &I18N::Game::CanTExecuteCombination},
+    {2336, &I18N::Game::EquipmentItem},
+    {2396, &I18N::Game::ScrollOfBlood},
+    {2560, &I18N::Game::CherryBlossomsBranchesAssembly},
+    {2664, &I18N::Game::SeedExtraction},
+    {2665, &I18N::Game::SeedSphereAssembly},
+    {2669, &I18N::Game::SeedSphereApplication},
+    {2670, &I18N::Game::SeedSphereDestruction},
+    {2791, &I18N::Game::CompleteSecromicon},
+    {2881, &I18N::Game::GoldenBox},
+    {2882, &I18N::Game::SilverBox},
+    {3086, &I18N::Game::_14ItemCreation},
+    {3087, &I18N::Game::_15ItemCreation},
+};
+// GetMixRecipeText searches the table with std::lower_bound.
+static_assert(std::adjacent_find(std::begin(kMixRecipeTexts), std::end(kMixRecipeTexts),
+                                 [](const MixRecipeText& left, const MixRecipeText& right)
+                                 { return left.textId >= right.textId; }) == std::end(kMixRecipeTexts),
+              "kMixRecipeTexts is sorted by number, each number once");
+} // namespace
+
+const wchar_t* SEASON3A::GetMixRecipeText(int textId)
+{
+    const auto* const end = std::end(kMixRecipeTexts);
+    const auto* const found = std::lower_bound(std::begin(kMixRecipeTexts), end, textId,
+                                               [](const MixRecipeText& entry, int id) { return entry.textId < id; });
+    if (found == end || found->textId != textId)
+        return L"";
+    return *found->text;
+}
 
 void CMixRecipeMgr::LoadData()
 {
@@ -608,12 +697,13 @@ BOOL CMixRecipes::GetRecipeName(MIX_RECIPE* pRecipe, wchar_t* pszNameOut, int iN
         if (iNameLine == 1)
         {
             if (pRecipe->m_iMixName[1] == 0)
-                mu_swprintf(pszNameOut, L"%ls", I18N::Game::Lookup(pRecipe->m_iMixName[0]));
+                mu_swprintf(pszNameOut, L"%ls", GetMixRecipeText(pRecipe->m_iMixName[0]));
             else if (pRecipe->m_iMixName[2] == 0)
-                mu_swprintf(pszNameOut, L"%ls %ls", I18N::Game::Lookup(pRecipe->m_iMixName[0]), I18N::Game::Lookup(pRecipe->m_iMixName[1]));
+                mu_swprintf(pszNameOut, L"%ls %ls", GetMixRecipeText(pRecipe->m_iMixName[0]),
+                            GetMixRecipeText(pRecipe->m_iMixName[1]));
             else
-                mu_swprintf(pszNameOut, L"%ls %ls %ls", I18N::Game::Lookup(pRecipe->m_iMixName[0]),
-                    I18N::Game::Lookup(pRecipe->m_iMixName[1]), I18N::Game::Lookup(pRecipe->m_iMixName[2]));
+                mu_swprintf(pszNameOut, L"%ls %ls %ls", GetMixRecipeText(pRecipe->m_iMixName[0]),
+                            GetMixRecipeText(pRecipe->m_iMixName[1]), GetMixRecipeText(pRecipe->m_iMixName[2]));
             return TRUE;
         }
         return FALSE;
@@ -625,7 +715,7 @@ BOOL CMixRecipes::GetCurRecipeDesc(wchar_t* pszDescOut, int iDescLine)
     if (iDescLine > 3 || iDescLine < 1) return FALSE;
     if (GetCurRecipe() == NULL) return FALSE;
     if (GetCurRecipe()->m_iMixDesc[iDescLine - 1] > 0)
-        wcscpy(pszDescOut, I18N::Game::Lookup(GetCurRecipe()->m_iMixDesc[iDescLine - 1]));
+        wcscpy(pszDescOut, GetMixRecipeText(GetCurRecipe()->m_iMixDesc[iDescLine - 1]));
     else
         return FALSE;
     return TRUE;
@@ -642,7 +732,7 @@ BOOL CMixRecipes::GetRecipeAdvice(wchar_t* pszAdviceOut, int iAdivceLine)
     if (iAdivceLine > 3 || iAdivceLine < 1) return FALSE;
 
     if (GetMostSimilarRecipe()->m_iMixAdvice[iAdivceLine - 1] > 0)
-        wcscpy(pszAdviceOut, I18N::Game::Lookup(GetMostSimilarRecipe()->m_iMixAdvice[iAdivceLine - 1]));
+        wcscpy(pszAdviceOut, GetMixRecipeText(GetMostSimilarRecipe()->m_iMixAdvice[iAdivceLine - 1]));
     else
         return FALSE;
     return TRUE;

@@ -493,6 +493,32 @@ void FormatRewardText(SRequestRewardText& line, const SQuestReward& reward)
 #endif // ASG_ADD_GENS_SYSTEM
     }
 }
+
+// The format of an event map request line (QUEST_REQUEST_EVENT_MAP_*); empty for any other request type.
+const wchar_t* GetEventMapRequestFormat(DWORD dwRequestType)
+{
+    switch (dwRequestType)
+    {
+    case QUEST_REQUEST_EVENT_MAP_MON_KILL:
+        return I18N::Game::ChaosCastleLvLuGuardsmanXLuLu;
+    case QUEST_REQUEST_EVENT_MAP_BLOOD_GATE:
+        return I18N::Game::BloodCastleLvLuGateDestructionXLuLu;
+    case QUEST_REQUEST_EVENT_MAP_USER_KILL:
+        return I18N::Game::ChaosCastleLvLuPlayerXLuLu;
+    case QUEST_REQUEST_EVENT_MAP_DEVIL_POINT:
+        return I18N::Game::DevilSquareLvLuPointXLuLu;
+    case QUEST_REQUEST_EVENT_MAP_CLEAR_BLOOD:
+        return I18N::Game::BloodCastleLvLuCleared;
+    case QUEST_REQUEST_EVENT_MAP_CLEAR_CHAOS:
+        return I18N::Game::ChaosCastleLvLuCleared;
+    case QUEST_REQUEST_EVENT_MAP_CLEAR_DEVIL:
+        return I18N::Game::DevilSquareLvLuCleared;
+    case QUEST_REQUEST_EVENT_MAP_CLEAR_ILLUSION:
+        return I18N::Game::IllusionTempleLvLuCleared;
+    default:
+        return L"";
+    }
+}
 } // namespace
 
 bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, DWORD dwQuestIndex)
@@ -713,29 +739,13 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             else
                 aDest[nLine].m_eKind = RRTK_REQUIREMENT;
 
-            int nTextIndex = 0;
-            switch (pRequestInfo->m_dwType)
-            {
-            case QUEST_REQUEST_EVENT_MAP_MON_KILL:
-                nTextIndex = 3074;
-                break;
-            case QUEST_REQUEST_EVENT_MAP_BLOOD_GATE:
-                nTextIndex = 3077;
-                break;
-            case QUEST_REQUEST_EVENT_MAP_USER_KILL:
-                nTextIndex = 3075;
-                break;
-            case QUEST_REQUEST_EVENT_MAP_DEVIL_POINT:
-                nTextIndex = 3079;
-                break;
-            }
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
             DWORD curValue = MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue);
 #else	// ASG_ADD_TIME_LIMIT_QUEST
             DWORD curValue = MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue);
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
-            FormatRequestRewardText(aDest[nLine], I18N::Game::Lookup(nTextIndex), pRequestInfo->m_wIndex, curValue,
-                                    pRequestInfo->m_dwValue);
+            FormatRequestRewardText(aDest[nLine], GetEventMapRequestFormat(pRequestInfo->m_dwType),
+                                    pRequestInfo->m_wIndex, curValue, pRequestInfo->m_dwValue);
         }
         break;
 
@@ -756,23 +766,8 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             else
                 aDest[nLine].m_eKind = RRTK_REQUIREMENT;
 
-            int nTextIndex = 0;
-            switch (pRequestInfo->m_dwType)
-            {
-            case QUEST_REQUEST_EVENT_MAP_CLEAR_BLOOD:
-                nTextIndex = 3078;
-                break;
-            case QUEST_REQUEST_EVENT_MAP_CLEAR_CHAOS:
-                nTextIndex = 3076;
-                break;
-            case QUEST_REQUEST_EVENT_MAP_CLEAR_DEVIL:
-                nTextIndex = 3080;
-                break;
-            case QUEST_REQUEST_EVENT_MAP_CLEAR_ILLUSION:
-                nTextIndex = 3081;
-                break;
-            }
-            FormatRequestRewardText(aDest[nLine], I18N::Game::Lookup(nTextIndex), pRequestInfo->m_wIndex);
+            FormatRequestRewardText(aDest[nLine], GetEventMapRequestFormat(pRequestInfo->m_dwType),
+                                    pRequestInfo->m_wIndex);
         }
         break;
         }

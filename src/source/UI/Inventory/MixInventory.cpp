@@ -57,6 +57,13 @@ float TextFitScale(Rml::Element* probe, const wchar_t* text, float boxWidth, flo
         probeUnitsPerLayoutUnit;
     return width <= boxWidth ? 1.f : std::max(boxWidth / width, minimumFit);
 }
+
+// The castle senior mix's description, in row order.
+const wchar_t* const* const kCastleSeniorDescription[] = {
+    &I18N::Game::BraveOne,        &I18N::Game::NowYouHaveBecome, &I18N::Game::ALordOfTheCastle,
+    &I18N::Game::MayTheBlessings, &I18N::Game::OfTheGuardian,    &I18N::Game::BeUponYou,
+};
+constexpr int kCastleSeniorDescriptionRows = static_cast<int>(std::size(kCastleSeniorDescription));
 } // namespace
 
 CMixInventory::CMixInventory()
@@ -768,9 +775,8 @@ void CMixInventory::SyncMixContentModel()
     switch (mixType)
     {
     case SEASON3A::MIXTYPE_CASTLE_SENIOR:
-        for (int i = 0; i < 6; ++i)
-            describeAt(true, I18N::Game::Lookup(1644 + i), "dim", i,
-                       false);
+        for (int i = 0; i < kCastleSeniorDescriptionRows; ++i)
+            describeAt(true, *kCastleSeniorDescription[i], "dim", i, false);
         break;
     case SEASON3A::MIXTYPE_OSBOURNE:
         describe(I18N::Game::RefineTheItemToCreate, white, 0);
@@ -961,18 +967,19 @@ bool CMixInventory::Mix()
         wchar_t strText[256];
         if (g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1] == 0)
         {
-            mu_swprintf(strText, L"%ls", I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]));
+            mu_swprintf(strText, L"%ls", SEASON3A::GetMixRecipeText(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]));
         }
         else if (g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2] == 0)
         {
-            mu_swprintf(strText, L"%ls %ls", I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]),
-                I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]));
+            mu_swprintf(strText, L"%ls %ls", SEASON3A::GetMixRecipeText(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]),
+                        SEASON3A::GetMixRecipeText(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]));
         }
         else
         {
-            mu_swprintf(strText, L"%ls %ls %ls", I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]),
-                I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]),
-                I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2]));
+            mu_swprintf(strText, L"%ls %ls %ls",
+                        SEASON3A::GetMixRecipeText(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]),
+                        SEASON3A::GetMixRecipeText(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]),
+                        SEASON3A::GetMixRecipeText(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2]));
         }
 
         mu::ui::window::GenericDialogConfig cfg;

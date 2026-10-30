@@ -34,6 +34,14 @@ namespace
 // Frames the confirm button waits after my offer changed, so the partner can
 // see the change before I confirm.
 constexpr int MyTradeWaitAfterChange = 150;
+
+// The warning before confirming a trade whose items changed, in line order.
+const wchar_t* const* const kTradeAlertLines[] = {
+    &I18N::Game::TheLevelsAndOptionsOfSomeItems,
+    &I18N::Game::HaveBeenChangedInTrade,
+    &I18N::Game::PleaseCheckWhetherTheItemIs,
+    &I18N::Game::TheSameItemThatYouWantToTrade,
+};
 } // namespace
 
 CTrade::CTrade()
@@ -177,8 +185,8 @@ void CTrade::BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model)
                 // 4 lines (3 warning + 1 red in the native layout) collapse to bold here.
                 mu::ui::window::GenericDialogConfig cfg;
                 cfg.showCancel = true;
-                for (int i = 0; i < 4; ++i)
-                    cfg.lines.push_back({ I18N::Game::Lookup(371 + i), true });
+                for (const wchar_t* const* line : kTradeAlertLines)
+                    cfg.lines.push_back({*line, true});
                 cfg.onPrimary = [this] { AlertTrade(); };
                 mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             }

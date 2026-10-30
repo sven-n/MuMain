@@ -36,17 +36,31 @@ extern wchar_t g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
 
 // Computed fresh per call rather than cached in a member -- SyncRmlModel() builds both the
 // empty-quest and job-change messages in the same pass, so a shared buffer would let one stomp the other.
-std::vector<mu::ui::window::CMyQuestInfoWindow::TextLine> mu::ui::window::CMyQuestInfoWindow::BuildTextLines(
-    int nGlobalTextIndex, int nPixelWidth)
+std::vector<mu::ui::window::CMyQuestInfoWindow::TextLine>
+mu::ui::window::CMyQuestInfoWindow::BuildTextLines(const wchar_t* text, int nPixelWidth)
 {
     wchar_t aszMsg[2][64] = {};
-    const int nLine = ::DivideStringByPixel(&aszMsg[0][0], 2, 64, I18N::Game::Lookup(nGlobalTextIndex), nPixelWidth);
+    const int nLine = ::DivideStringByPixel(&aszMsg[0][0], 2, 64, text, nPixelWidth);
 
     std::vector<TextLine> lines;
     for (int i = 0; i < nLine; ++i)
         lines.push_back({ StringUtils::WideToNarrow(aszMsg[i]) });
     return lines;
 }
+
+namespace
+{
+// The job change tab's quest state line, by CSQuest::getCurrQuestState().
+const wchar_t* GetJobChangeStateText(BYTE byState)
+{
+    if (byState == QUEST_ING)
+        return I18N::Game::QuestInProgress;
+    if (byState == QUEST_END)
+        return I18N::Game::QuestCompleted;
+    // Any other state (QUEST_NONE/QUEST_NO/QUEST_ERROR) reads as unfinished, matching the original.
+    return I18N::Game::QuestUnfinished;
+}
+} // namespace
 
 mu::ui::window::CMyQuestInfoWindow::CMyQuestInfoWindow()
 {
@@ -479,7 +493,7 @@ void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
     // with whichever font size was active last, so it breaks the line at some window sizes only.
     model.emptyQuestLines.clear();
     if (bEmpty)
-        model.emptyQuestLines.push_back({StringUtils::WideToNarrow(I18N::Game::Lookup(2825))});
+        model.emptyQuestLines.push_back({StringUtils::WideToNarrow(I18N::Game::ThereAreNoActiveQuests)});
     m_RmlView.MarkDirty("empty_quest_lines");
 
     model.quests.clear();
@@ -519,14 +533,7 @@ void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
     if (m_eTabBtnIndex == TAB_JOB_CHANGE)
     {
         const BYTE byState = g_csQuest.getCurrQuestState();
-        int nStateTextIndex = 930;
-        if (byState == QUEST_ING)
-            nStateTextIndex = 931;
-        else if (byState == QUEST_END)
-            nStateTextIndex = 932;
-        // Any other state (QUEST_NONE/QUEST_NO/QUEST_ERROR) falls through to 930, matching the original.
-
-        model.jobChangeStateLines = BuildTextLines(nStateTextIndex, 140);
+        model.jobChangeStateLines = BuildTextLines(GetJobChangeStateText(byState), 140);
         m_RmlView.MarkDirty("jobchange_state_lines");
     }
 

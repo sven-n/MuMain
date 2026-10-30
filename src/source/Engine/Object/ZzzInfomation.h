@@ -3,9 +3,6 @@
 
 #pragma once
 
-
-void SaveTextFile(wchar_t* FileName);
-
 extern wchar_t AbuseFilter[MAX_FILTERS][20];
 extern wchar_t AbuseNameFilter[MAX_NAMEFILTERS][20];
 extern int AbuseFilterNumber;

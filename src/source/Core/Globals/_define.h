@@ -300,7 +300,6 @@ enum struct STORAGE_TYPE
 
 #define CHAR_DEL_LIMIT_LV	300
 
-#define MAX_TEXTS               3000
 #define MAX_GLOBAL_TEXT_STRING	300
 #define MAX_FILTERS 1000
 

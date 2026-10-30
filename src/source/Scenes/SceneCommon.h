@@ -124,7 +124,6 @@ void SetEffectVolumeLevel(int level);
 
 // Rendering utilities
 void RenderInfomation();
-BOOL ShowCheckBox(int num, int index, int message);
 
 // Time utilities
 bool GetTimeCheck(int DelayTime);

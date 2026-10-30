@@ -64,6 +64,29 @@ namespace
     // their hover regions are disjoint, so one shared owner token is enough.
     const int kSkillHoverTooltipOwner = 0;
 
+    // The temple skills' descriptions, from AT_SKILL_CURSED_TEMPLE_PRODECTION to
+    // AT_SKILL_CURSED_TEMPLE_SUBLIMATION.
+    const wchar_t* const* const kSkillDescriptions[] = {
+        &I18N::Game::AbsorbDamageWithTheProtectionShield,
+        &I18N::Game::MobilityDisabled,
+        &I18N::Game::RelocateToTheCharacterThatCarriesTheSacredItem,
+        &I18N::Game::ShieldGageReducedOf50,
+    };
+    static_assert(std::size(kSkillDescriptions) ==
+                      AT_SKILL_CURSED_TEMPLE_SUBLIMATION - AT_SKILL_CURSED_TEMPLE_PRODECTION + 1,
+                  "one description per temple skill");
+
+    // The skill panel's description of temple skill `skill` (AT_SKILL_CURSED_TEMPLE_PRODECTION to
+    // AT_SKILL_CURSED_TEMPLE_SUBLIMATION); empty for any other skill.
+    const wchar_t* SkillDescription(int skill)
+    {
+        if (skill < AT_SKILL_CURSED_TEMPLE_PRODECTION || skill > AT_SKILL_CURSED_TEMPLE_SUBLIMATION)
+        {
+            return L"";
+        }
+        return *kSkillDescriptions[skill - AT_SKILL_CURSED_TEMPLE_PRODECTION];
+    }
+
     //#ifdef _DEBUG
     const float posX[7] =
     {
@@ -836,8 +859,7 @@ void mu::ui::window::CCursedTempleSystem::SyncSkill()
         mu_swprintf(TextList[TextNum], L"\n");
         TextNum++;
 
-        mu_swprintf(TextList[TextNum], L"%ls",
-                    I18N::Game::Lookup(2379 + (CursedTempleCurSkillType - AT_SKILL_CURSED_TEMPLE_PRODECTION)));
+        mu_swprintf(TextList[TextNum], L"%ls", SkillDescription(CursedTempleCurSkillType));
         TextListColor[TextNum] = TEXT_COLOR_DARKBLUE;
         TextNum++;
 

@@ -3992,12 +3992,6 @@ enum eGEMTYPE
     eGEMTYPE_END = 10,
     eGEMTYPE_END_ALL = 20,
 };
-enum eGEMINDEXTYPE
-{
-    eGEM_NAME,
-    eGEM_INDEX,
-    eGEM_END
-};
 
 enum _GEMTYPE
 {

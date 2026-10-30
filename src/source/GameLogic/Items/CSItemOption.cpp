@@ -33,6 +33,52 @@
 namespace
 {
 constexpr std::uint8_t EMPTY_OPTION = 0xFF;
+constexpr int SET_OPTION_COUNT = AT_SET_OPTION_WATER_MASTERY - AT_SET_OPTION_IMPROVE_STRENGTH + 1;
+
+// The format each set option's value is described with, in AT_SET_OPTION order from
+// AT_SET_OPTION_IMPROVE_STRENGTH, so a set option's number is its index.
+const wchar_t* const* const kSetOptionFormats[] = {
+    // AT_SET_OPTION_IMPROVE_STRENGTH to AT_SET_OPTION_IMPROVE_MAGIC_POWER
+    &I18N::Game::IncreaseStrengthD,
+    &I18N::Game::IncreaseAgilityD,
+    &I18N::Game::IncreaseEnergyD,
+    &I18N::Game::IncreaseStaminaD,
+    &I18N::Game::IncreaseCommandD,
+    &I18N::Game::IncreaseMinDamageD,
+    &I18N::Game::IncreaseMaxDamageD,
+    &I18N::Game::IncreaseWizardryDmgD,
+    // AT_SET_OPTION_IMPROVE_DAMAGE to AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE
+    &I18N::Game::IncreaseDamageD957,
+    &I18N::Game::IncreaseDamageSuccessRateD,
+    &I18N::Game::IncreaseDefensiveSkillD,
+    &I18N::Game::IncreaseMaxLifeD,
+    &I18N::Game::IncreaseMaxManaD,
+    &I18N::Game::IncreaseMaxAGD,
+    &I18N::Game::IncreaseAGIncreaseRateD,
+    &I18N::Game::IncreaseCriticalDamageRateD,
+    &I18N::Game::IncreaseCriticalDamageD,
+    &I18N::Game::IncreaseExcellentDamageRateD,
+    &I18N::Game::IncreaseExcellentDamageD,
+    &I18N::Game::IncreaseSkillAttackingRateD,
+    &I18N::Game::DoubleDamageRateD,
+    &I18N::Game::IgnoreEnemiesDefensiveSkillD,
+    &I18N::Game::IncreaseDefensiveSkillWhenUsingShieldWeaponsD,
+    &I18N::Game::IncreaseDamageWhenUsingTwoHandedWeaponsD,
+    // AT_SET_OPTION_IMPROVE_ATTACK_2 to AT_SET_OPTION_WATER_MASTERY
+    &I18N::Game::SIncreaseDamageStrengthD,
+    &I18N::Game::SIncreaseDamageAgilityD,
+    &I18N::Game::SIncreaseDefensiveSkillAgilityD,
+    &I18N::Game::SIncreaseDefensiveSkillStaminaD,
+    &I18N::Game::SIncreaseWizardryEnergyD,
+    &I18N::Game::IceAttributeSkillIncreaseDamageD,
+    &I18N::Game::PoisonAttributeSkillIncreaseDamageD,
+    &I18N::Game::LightningAttributeSkillIncreaseDamageD,
+    &I18N::Game::FireAttributeSkillIncreaseDamageD,
+    &I18N::Game::EarthAttributeSkillIncreaseDamageD,
+    &I18N::Game::WindAttributeSkillIncreaseDamageD,
+    &I18N::Game::WaterAttributeSkillIncreaseDamageD,
+};
+static_assert(std::ssize(kSetOptionFormats) == SET_OPTION_COUNT, "one description per set option");
 
 using FilePtr = std::unique_ptr<FILE, decltype(&std::fclose)>;
 
@@ -378,76 +424,26 @@ void CSItemOption::calcSetOptionList(const SET_SEARCH_RESULT* optionList)
     }
 }
 
+const wchar_t* CSItemOption::GetSetOptionFormat(std::uint8_t option)
+{
+    if (option == EMPTY_OPTION || option >= SET_OPTION_COUNT)
+    {
+        return nullptr;
+    }
+
+    return *kSetOptionFormats[option];
+}
+
 bool CSItemOption::getExplainText(wchar_t* text, std::uint8_t option, int value)
 {
-    if (option == EMPTY_OPTION)
+    const wchar_t* format = GetSetOptionFormat(option);
+    if (format == nullptr)
     {
         return false;
     }
 
-    switch (option + AT_SET_OPTION_IMPROVE_STRENGTH)
-    {
-    case AT_SET_OPTION_IMPROVE_MAGIC_POWER:
-        mu_swprintf(text, I18N::Game::IncreaseWizardryDmgD, value);
-        return true;
-
-    case AT_SET_OPTION_IMPROVE_STRENGTH:
-    case AT_SET_OPTION_IMPROVE_DEXTERITY:
-    case AT_SET_OPTION_IMPROVE_ENERGY:
-    case AT_SET_OPTION_IMPROVE_VITALITY:
-    case AT_SET_OPTION_IMPROVE_CHARISMA:
-    case AT_SET_OPTION_IMPROVE_ATTACK_MIN:
-    case AT_SET_OPTION_IMPROVE_ATTACK_MAX:
-        mu_swprintf(text, I18N::Game::Lookup(950 + option), value);
-        return true;
-
-    case AT_SET_OPTION_IMPROVE_DAMAGE:
-    case AT_SET_OPTION_IMPROVE_ATTACKING_PERCENT:
-    case AT_SET_OPTION_IMPROVE_DEFENCE:
-    case AT_SET_OPTION_IMPROVE_MAX_LIFE:
-    case AT_SET_OPTION_IMPROVE_MAX_MANA:
-    case AT_SET_OPTION_IMPROVE_MAX_AG:
-    case AT_SET_OPTION_IMPROVE_ADD_AG:
-    case AT_SET_OPTION_IMPROVE_CRITICAL_DAMAGE_PERCENT:
-    case AT_SET_OPTION_IMPROVE_CRITICAL_DAMAGE:
-    case AT_SET_OPTION_IMPROVE_EXCELLENT_DAMAGE_PERCENT:
-    case AT_SET_OPTION_IMPROVE_EXCELLENT_DAMAGE:
-    case AT_SET_OPTION_IMPROVE_SKILL_ATTACK:
-    case AT_SET_OPTION_DOUBLE_DAMAGE:
-        mu_swprintf(text, I18N::Game::Lookup(949 + option), value);
-        return true;
-
-    case AT_SET_OPTION_DISABLE_DEFENCE:
-        mu_swprintf(text, I18N::Game::IgnoreEnemiesDefensiveSkillD, value);
-        return true;
-
-    case AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE:
-        mu_swprintf(text, I18N::Game::IncreaseDamageWhenUsingTwoHandedWeaponsD, value);
-        return true;
-
-    case AT_SET_OPTION_IMPROVE_SHIELD_DEFENCE:
-        mu_swprintf(text, I18N::Game::IncreaseDefensiveSkillWhenUsingShieldWeaponsD, value);
-        return true;
-
-    case AT_SET_OPTION_IMPROVE_ATTACK_1:
-    case AT_SET_OPTION_IMPROVE_ATTACK_2:
-    case AT_SET_OPTION_IMPROVE_MAGIC:
-        //	case AT_SET_OPTION_IMPROVE_DEFENCE_1:
-        //	case AT_SET_OPTION_IMPROVE_DEFENCE_2:
-    case AT_SET_OPTION_IMPROVE_DEFENCE_3:
-    case AT_SET_OPTION_IMPROVE_DEFENCE_4:
-    case AT_SET_OPTION_FIRE_MASTERY:
-    case AT_SET_OPTION_ICE_MASTERY:
-    case AT_SET_OPTION_THUNDER_MASTERY:
-    case AT_SET_OPTION_POSION_MASTERY:
-    case AT_SET_OPTION_WATER_MASTERY:
-    case AT_SET_OPTION_WIND_MASTERY:
-    case AT_SET_OPTION_EARTH_MASTERY:
-        mu_swprintf(text, I18N::Game::Lookup(971 + (option + AT_SET_OPTION_IMPROVE_STRENGTH - AT_SET_OPTION_IMPROVE_ATTACK_2)), value);
-        return true;
-    default:
-        return false;
-    }
+    mu_swprintf(text, format, value);
+    return true;
 }
 
 int CSItemOption::AggregateOptionValue(int optionNumber) const

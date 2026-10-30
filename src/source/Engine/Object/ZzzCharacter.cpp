@@ -55,6 +55,7 @@
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "GameLogic/Monsters/MonsterSoundEvents.h"
 #include "GameLogic/Monsters/MonsterNames.h"
+#include "GameLogic/NPCs/PlayerNpcChat.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -3334,30 +3335,13 @@ void PlayerNpcStopAnimationSetting(CHARACTER* c, OBJECT* o)
             SetAction(&c->Object, PLAYER_UNKNOWN1);
         }
 
-        int TextIndex = 0;
-        if (gMapManager.WorldActive == WD_2DEVIAS)
+        const bool actionChanged = o->CurrentAction != o->PriorAction;
+        if (const wchar_t* line = GameLogic::Npcs::PlayerNpcChat::LineAtStop(gMapManager.WorldActive, actionChanged))
         {
-            int iTextIndices[] = { 904, 905 };
-            int iNumTextIndices = 2;
-
-            static int s_iTextIndex = iTextIndices[0];
-            if (o->CurrentAction != o->PriorAction)
-                s_iTextIndex = iTextIndices[rand() % iNumTextIndices];
-            TextIndex = s_iTextIndex;
+            wchar_t szText[512];
+            mu_swprintf(szText, line);
+            UI::Chat::CreateChat(c->ID, szText, c);
         }
-        else if (gMapManager.WorldActive == WD_0LORENCIA)
-        {
-            int iTextIndices[] = { 823 };
-            int iNumTextIndices = 1;
-            static int s_iTextIndex = iTextIndices[0];
-            if (o->CurrentAction != o->PriorAction)
-                s_iTextIndex = iTextIndices[rand() % iNumTextIndices];
-            TextIndex = s_iTextIndex;
-        }
-
-        wchar_t szText[512];
-        mu_swprintf(szText, I18N::Game::Lookup(TextIndex));
-        UI::Chat::CreateChat(c->ID, szText, c);
     }
 }
 

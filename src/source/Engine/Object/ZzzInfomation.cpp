@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInfomation.h"
-#include "I18N/All.h"
 
 #include <codecvt>
 #include <sstream>
@@ -43,22 +42,6 @@ CHARACTER_ATTRIBUTE* CharacterAttribute = NULL;
 static  int     g_iWorldStateTime = 0;
 static  DWORD   g_dwWorldStateBack = 0;
 #endif// STATE_LIMIT_TIME
-
-void SaveTextFile(wchar_t* FileName)
-{
-    FILE* fp = _wfopen(FileName, L"wb");
-
-    int Size = MAX_GLOBAL_TEXT_STRING;
-    BYTE* Buffer = new BYTE[Size];
-    for (int i = 0; i < MAX_TEXTS; i++)
-    {
-        memcpy(Buffer, I18N::Game::Lookup(i), Size);
-        BuxConvert(Buffer, Size);
-        fwrite(Buffer, Size, 1, fp);
-    }
-    delete[] Buffer;
-    fclose(fp);
-}
 
 wchar_t AbuseFilter[MAX_FILTERS][20];
 wchar_t AbuseNameFilter[MAX_NAMEFILTERS][20];
