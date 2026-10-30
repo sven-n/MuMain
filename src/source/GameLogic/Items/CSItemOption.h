@@ -150,7 +150,15 @@ public:
     void	PlusSpecialPercent(std::uint16_t* Value, int Special) const;
     void    PlusMastery(int* Value, std::uint8_t MasteryType) const;
 
-    
+    // Adds the options of `setOptions` to `set`: its standard options, ext options and full options,
+    // each marked active once enough of the set's items are worn (set.ItemCount of
+    // set.CompleteSetItemCount; the full options need the complete set). `firstClass` is the
+    // wearer's base class, `secondClass` whether it has reached its second class.
+    static void AddSetOptions(SET_SEARCH_RESULT_OPT& set, const ITEM_SET_OPTION& setOptions, int firstClass,
+                              int secondClass);
+    // What the active mastery options of `set` add to the damage of a skill of mastery type
+    // `masteryType` (SKILL_ATTRIBUTE::MasteryType, the skill's element).
+    static int GetMasteryBonus(const SET_SEARCH_RESULT_OPT& set, std::uint8_t masteryType);
 
     static int     GetDefaultOptionValue(ITEM* ip, std::uint16_t* Value);
     static bool    GetDefaultOptionText(const ITEM* ip, wchar_t* Text);

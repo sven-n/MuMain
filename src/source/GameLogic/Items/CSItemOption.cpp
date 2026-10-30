@@ -377,36 +377,40 @@ void CSItemOption::calcSetOptionList(const SET_SEARCH_RESULT* optionList)
     for (int i = 0; i < m_SetSearchResultCount; ++i)
     {
         auto& set = m_SetSearchResult[i];
-
-        const ITEM_SET_OPTION& setOptions = m_ItemSetOption[set.SetNumber];
-        bool isThisSetComplete = false;
         if (set.CompleteSetItemCount <= set.ItemCount)
         {
             Hero->ExtendState = 1;
-            isThisSetComplete = true;
         }
 
-        const auto standardOptionCount = std::min<int>(set.CompleteSetItemCount - 1, MAX_ITEM_SET_STANDARD_OPTION_COUNT);
-        for (int o = 0; o < standardOptionCount; ++o)
-        {
-            for (int n = 0; n < MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT; ++n)
-            {
-                TryAddSetOption(setOptions.byStandardOption[o][n], setOptions.byStandardOptionValue[o][n], o, set,
-                                setOptions, isThisSetComplete, false, false, firstClass, secondClass);
-            }
-        }
+        AddSetOptions(set, m_ItemSetOption[set.SetNumber], firstClass, secondClass);
+    }
+}
 
-        for (int o = 0; o < MAX_ITEM_SET_EXT_OPTION_COUNT; ++o)
-        {
-            TryAddSetOption(setOptions.byExtOption[o], setOptions.byExtOptionValue[o], 0, set, setOptions,
-                            isThisSetComplete, false, true, firstClass, secondClass);
-        }
+void CSItemOption::AddSetOptions(SET_SEARCH_RESULT_OPT& set, const ITEM_SET_OPTION& setOptions, int firstClass,
+                                 int secondClass)
+{
+    const bool isThisSetComplete = set.CompleteSetItemCount <= set.ItemCount;
 
-        for (int o = 0; o < MAX_ITEM_SET_FULL_OPTION_COUNT; ++o)
+    const auto standardOptionCount = std::min<int>(set.CompleteSetItemCount - 1, MAX_ITEM_SET_STANDARD_OPTION_COUNT);
+    for (int o = 0; o < standardOptionCount; ++o)
+    {
+        for (int n = 0; n < MAX_ITEM_SET_STANDARD_OPTION_PER_ITEM_COUNT; ++n)
         {
-            TryAddSetOption(setOptions.byFullOption[o], setOptions.byFullOptionValue[o], 255, set, setOptions,
-                            isThisSetComplete, true, false, firstClass, secondClass);
+            TryAddSetOption(setOptions.byStandardOption[o][n], setOptions.byStandardOptionValue[o][n], o, set,
+                            setOptions, isThisSetComplete, false, false, firstClass, secondClass);
         }
+    }
+
+    for (int o = 0; o < MAX_ITEM_SET_EXT_OPTION_COUNT; ++o)
+    {
+        TryAddSetOption(setOptions.byExtOption[o], setOptions.byExtOptionValue[o], 0, set, setOptions,
+                        isThisSetComplete, false, true, firstClass, secondClass);
+    }
+
+    for (int o = 0; o < MAX_ITEM_SET_FULL_OPTION_COUNT; ++o)
+    {
+        TryAddSetOption(setOptions.byFullOption[o], setOptions.byFullOptionValue[o], 255, set, setOptions,
+                        isThisSetComplete, true, false, firstClass, secondClass);
     }
 }
 
@@ -481,22 +485,28 @@ void CSItemOption::PlusMastery(int* Value, std::uint8_t MasteryType) const
 
     for (int i = 0; i < m_SetSearchResultCount; i++)
     {
-        const auto& set = m_SetSearchResult[i];
-        for (int j = 0; j < set.SetOptionCount; j++)
-        {
-            const auto& option = set.SetOption[j];
-            if (option.IsActive && option.OptionNumber >= MASTERY_OPTION &&
-                (option.OptionNumber - MASTERY_OPTION) == MasteryType && option.Value != 0)
-            {
-                optionValue += option.Value;
-            }
-        }
+        optionValue += GetMasteryBonus(m_SetSearchResult[i], MasteryType);
     }
 
     if (optionValue)
     {
         *Value += optionValue;
     }
+}
+
+int CSItemOption::GetMasteryBonus(const SET_SEARCH_RESULT_OPT& set, std::uint8_t masteryType)
+{
+    int bonus = 0;
+    for (int j = 0; j < set.SetOptionCount; j++)
+    {
+        const auto& option = set.SetOption[j];
+        if (option.IsActive && option.OptionNumber >= MASTERY_OPTION &&
+            (option.OptionNumber - MASTERY_OPTION) == masteryType && option.Value != 0)
+        {
+            bonus += option.Value;
+        }
+    }
+    return bonus;
 }
 
 int CSItemOption::GetDefaultOptionValue(ITEM* ip, std::uint16_t* Value)
