@@ -164,12 +164,12 @@ def manifest(block, assignment):
 
 def apt_packages(text):
     # Every package of every "apt-get install -y" command, including its "\" continuation
-    # lines; an inline `command` in prose ends at its closing backtick.
+    # lines. The command ends at a shell operator or a comment; an inline `command` in
+    # prose ends at its closing backtick.
     packages = set()
     for arguments in re.findall(r"apt-get install -y((?:[^\n`]*\\\n)*[^\n`]*)", text):
-        packages.update(
-            word for word in arguments.split() if word != "\\" and not word.startswith("-")
-        )
+        command = re.split(r"&&|\|\||[;|#]", arguments.replace("\\\n", " "), maxsplit=1)[0]
+        packages.update(word for word in command.split() if not word.startswith("-"))
     return packages
 
 
