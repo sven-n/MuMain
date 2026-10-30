@@ -2,6 +2,7 @@
 
 #include "Core/Math/ZzzMathLib.h"
 
+#include <functional>
 #include <memory>
 
 class CHARACTER;
@@ -11,6 +12,19 @@ struct _PART_t;
 // RenderLinkObject call in draw order, each with the part's own pose.
 namespace Engine::Object::Attachments
 {
+// The animation state and placement a slot's bones were posed with.
+struct Posed
+{
+    float animationFrame = 0.f;
+    float priorAnimationFrame = 0.f;
+    unsigned short priorAction = 0;
+    unsigned short action = 0;
+    float parent[3][4]{};
+    vec3_t origin{};
+    vec3_t angle{};
+    float scale = 0.f;
+};
+
 struct Slot
 {
     // The RenderLinkObject call this slot is.
@@ -24,10 +38,18 @@ struct Slot
     bool translate = false;
     int renderType = 0;
     bool rightHandItem = false;
+    unsigned char linkBone = 0;
+    // The character's scale during the call; some draws change it around one part.
+    float ownerScale = 1.f;
     // The character's part, or nullptr for a part the draw built for this call only.
     _PART_t* part = nullptr;
     unsigned int drawnFrame = 0;
+    // The previous draw recorded the same attachment in this slot.
+    bool sameAsLast = false;
 
+    // The draw an update advanced and posed the part for (its animation step for the next draw), and how.
+    unsigned int advancedFor = 0;
+    Posed posed;
     std::unique_ptr<vec34_t[]> bones;
 };
 
@@ -38,7 +60,11 @@ void BeginCharacter(const CHARACTER* c);
 // The next slot of the character, recorded with this draw; nullptr for a character outside CharactersClient, which
 // keeps drawing its parts with the shared bones.
 Slot* Record(CHARACTER* c, _PART_t* part, int type, float x, float y, float z, int level, int option1, bool link,
-             bool translate, int renderType, bool rightHandItem);
+             bool translate, int renderType, bool rightHandItem, unsigned char linkBone, float ownerScale);
 // The slot's own bones, MAX_BONES long.
 float (*Bones(Slot& slot))[3][4];
+// Whether the update since the last draw already advanced and posed this slot's part; the draw then reuses it.
+bool WasAdvanced(const Slot& slot);
+// The slots of the character's last draw, for the update to advance once per draw; marks each one it hands out.
+void ForEachToAdvance(const CHARACTER* c, const std::function<void(Slot&)>& advance);
 } // namespace Engine::Object::Attachments

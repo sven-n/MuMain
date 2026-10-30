@@ -155,9 +155,9 @@ TEST_CASE("A client character's drawn parts get a slot each, in draw order, with
     Attachments::BeginFrame();
     Attachments::BeginCharacter(c);
     Attachments::Slot* weapon =
-        Attachments::Record(c, &c->Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 3, 0, false, true, 0, false);
+        Attachments::Record(c, &c->Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 3, 0, false, true, 0, false, 33, 1.f);
     Attachments::Slot* copy =
-        Attachments::Record(c, &temporary, MODEL_SWORD, 0.f, 0.f, 15.f, 3, 0, true, true, 0, true);
+        Attachments::Record(c, &temporary, MODEL_SWORD, 0.f, 0.f, 15.f, 3, 0, true, true, 0, true, 33, 1.f);
     REQUIRE(weapon != nullptr);
     REQUIRE(copy != nullptr);
     CHECK(weapon != copy);
@@ -171,10 +171,43 @@ TEST_CASE("A client character's drawn parts get a slot each, in draw order, with
     Attachments::BeginFrame();
     Attachments::BeginCharacter(c);
     Attachments::Slot* again =
-        Attachments::Record(c, &c->Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 3, 0, false, true, 0, false);
+        Attachments::Record(c, &c->Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 3, 0, false, true, 0, false, 33, 1.f);
     CHECK(Attachments::Bones(*again) == bones);
 
     CHARACTER preview;
-    CHECK(Attachments::Record(&preview, &preview.Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 0, 0, false, true, 0, false) ==
-          nullptr);
+    CHECK(Attachments::Record(&preview, &preview.Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 0, 0, false, true, 0, false, 33,
+                              1.f) == nullptr);
+}
+
+TEST_CASE("The update advances each part of the last draw once, and the next draw reuses it [effects]")
+{
+    namespace Attachments = Engine::Object::Attachments;
+    CharacterScope scope(MODEL_PLAYER);
+    CHARACTER* c = &scope.character();
+    PART_t temporary;
+    const auto record = [c](PART_t* part, float z)
+    { return Attachments::Record(c, part, MODEL_SWORD, 0.f, 0.f, z, 0, 0, false, true, 0, false, 33, 1.f); };
+    const auto advance = [c]
+    {
+        int advanced = 0;
+        Attachments::ForEachToAdvance(c, [&advanced](Attachments::Slot&) { ++advanced; });
+        return advanced;
+    };
+
+    Attachments::BeginFrame();
+    Attachments::BeginCharacter(c);
+    record(&c->Weapon[0], 0.f);
+    record(&temporary, 0.f);
+    CHECK(advance() == 1); // a part built for one call has no animation state to advance
+    CHECK(advance() == 0); // once per draw
+
+    Attachments::BeginFrame();
+    Attachments::BeginCharacter(c);
+    CHECK(Attachments::WasAdvanced(*record(&c->Weapon[0], 0.f)));
+
+    // The next draw attaches something else in that slot: it advances the part itself.
+    CHECK(advance() == 1);
+    Attachments::BeginFrame();
+    Attachments::BeginCharacter(c);
+    CHECK_FALSE(Attachments::WasAdvanced(*record(&c->Weapon[0], 15.f)));
 }

@@ -6564,12 +6564,12 @@ struct LinkPlacement
     float scale = 1.f;
 };
 
-LinkPlacement PlaceLinkedPart(float x, float y, float z, const CHARACTER* c, const PART_t* f, int Type, bool Link,
-                              bool bRightHandItem)
+LinkPlacement PlaceLinkedPart(float x, float y, float z, const CHARACTER* c, BYTE linkBone, float ownerScale, int Type,
+                              bool Link, bool bRightHandItem)
 {
     const OBJECT* o = &c->Object;
     LinkPlacement placement;
-    placement.scale = o->Scale;
+    placement.scale = ownerScale;
     vec3_t p;
 
     if (Link)
@@ -6835,17 +6835,17 @@ LinkPlacement PlaceLinkedPart(float x, float y, float z, const CHARACTER* c, con
             R_ConcatTransforms(Matrix, mNewRot, Matrix);
         }
 
-        R_ConcatTransforms(o->BoneTransform[f->LinkBone], Matrix, placement.parent);
+        R_ConcatTransforms(o->BoneTransform[linkBone], Matrix, placement.parent);
         VectorCopy(c->Object.Position, placement.origin);
     }
     else
     {
         Vector(x, y, z, p);
         // As BMD::RotationPosition, with the character model's scale.
-        VectorRotate(p, o->BoneTransform[f->LinkBone], placement.position);
+        VectorRotate(p, o->BoneTransform[linkBone], placement.position);
         VectorScale(placement.position, Models[o->Type].BodyScale, placement.position);
         VectorAdd(c->Object.Position, placement.position, placement.origin);
-        std::memcpy(placement.parent, o->BoneTransform[f->LinkBone], sizeof(placement.parent));
+        std::memcpy(placement.parent, o->BoneTransform[linkBone], sizeof(placement.parent));
     }
     if (Type == MODEL_BOSS_HEAD)
     {
@@ -6853,6 +6853,86 @@ LinkPlacement PlaceLinkedPart(float x, float y, float z, const CHARACTER* c, con
         Vector(0.f, 0.f, WorldTime, placement.angle);
     }
     return placement;
+}
+// The action a linked part plays: Wings of Darkness fold in a safe zone.
+unsigned short LinkedPartAction(const CHARACTER* c, const PART_t* f)
+{
+    if ((f->Type >= MODEL_WINGS_OF_DARKNESS && f->Type <= MODEL_WINGS_OF_DARKNESS) && c->SafeZone)
+        return 1;
+    return f->CurrentAction;
+}
+
+// A linked part's animation step: its speed and frame overrides, then PlayAnimation.
+void AdvanceLinkedPart(CHARACTER* c, PART_t* f, int Type, bool Link)
+{
+    OBJECT* o = &c->Object;
+    BMD* b = &Models[Type];
+
+    switch (Type)
+    {
+    case MODEL_WING_OF_RUIN:
+        f->PlaySpeed = 0.15f;
+        break;
+    }
+
+    if ((c->Skill == AT_SKILL_PENETRATION || c->Skill == AT_SKILL_PENETRATION_STR) &&
+        ((o->Type == MODEL_PLAYER && Engine::Object::IsAttackAction(o->CurrentAction))))
+    {
+        if (o->AnimationFrame >= 5.f && o->AnimationFrame <= 10.f)
+        {
+            f->PriorAnimationFrame = 2.f;
+            f->AnimationFrame = 3.2f;
+        }
+    }
+    b->CurrentAction = LinkedPartAction(c, f);
+    if (!Link || (Type < MODEL_BOW || Type >= MODEL_BOW + MAX_ITEM_INDEX) || Type == MODEL_STINGER_BOW)
+    {
+        if (!g_isCharacterBuff(o, eDeBuff_Stun) && !g_isCharacterBuff(o, eDeBuff_Sleep))
+        {
+            vec3_t unused{};
+            b->PlayAnimation(&f->AnimationFrame, &f->PriorAnimationFrame, &f->PriorAction, f->PlaySpeed, unused,
+                             unused);
+        }
+    }
+}
+
+// The part's current animation state, at this placement.
+Engine::Object::Attachments::Posed PosedAt(const PART_t* f, unsigned short action, const LinkPlacement& placement)
+{
+    Engine::Object::Attachments::Posed posed;
+    posed.animationFrame = f->AnimationFrame;
+    posed.priorAnimationFrame = f->PriorAnimationFrame;
+    posed.priorAction = f->PriorAction;
+    posed.action = action;
+    std::memcpy(posed.parent, placement.parent, sizeof(posed.parent));
+    VectorCopy(placement.origin, posed.origin);
+    VectorCopy(placement.angle, posed.angle);
+    posed.scale = placement.scale;
+    return posed;
+}
+
+bool IsPlacedAt(const Engine::Object::Attachments::Posed& posed, const LinkPlacement& placement)
+{
+    return std::memcmp(posed.parent, placement.parent, sizeof(posed.parent)) == 0 &&
+           std::memcmp(posed.origin, placement.origin, sizeof(vec3_t)) == 0 &&
+           std::memcmp(posed.angle, placement.angle, sizeof(vec3_t)) == 0 && posed.scale == placement.scale;
+}
+
+// Poses a linked part into bones.
+void PoseLinkedPart(const CHARACTER* c, int Type, bool Link, const Engine::Object::Attachments::Posed& posed,
+                    vec34_t* bones)
+{
+    BMD* b = &Models[Type];
+    b->BodyHeight = 0.f;
+    b->CurrentAction = posed.action;
+    if (Type == MODEL_BOSS_HEAD)
+        b->BoneHead = 0;
+    vec3_t angle;
+    VectorCopy(posed.angle, angle);
+    b->Animation(bones, posed.animationFrame, posed.priorAnimationFrame, posed.priorAction, angle, angle, true, true,
+                 posed.parent);
+    if (g_CMonkSystem.IsRagefighterCommonWeapon(c->Class, Type) && !Link && Type == MODEL_FLAIL)
+        b->InterpolationTrans(bones[0], bones[2], 0.9f);
 }
 } // namespace
 
@@ -6884,7 +6964,7 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
 
     // A client character's part gets its own pose; other characters' parts use the shared bones, as before.
     Engine::Object::Attachments::Slot* slot = Engine::Object::Attachments::Record(
-        c, f, Type, x, y, z, Level, Option1, Link, Translate, RenderType, bRightHandItem);
+        c, f, Type, x, y, z, Level, Option1, Link, Translate, RenderType, bRightHandItem, f->LinkBone, o->Scale);
     vec34_t* bones = slot != nullptr ? Engine::Object::Attachments::Bones(*slot) : BoneTransform;
 
     // CopyShadowAngle(f,b);
@@ -6905,13 +6985,6 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
 
     g_CharacterCopyBuff(Object, o);
 
-    switch (Type)
-    {
-    case MODEL_WING_OF_RUIN:
-        f->PlaySpeed = 0.15f;
-        break;
-    }
-
     if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
     {
         if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
@@ -6923,7 +6996,7 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     OBB_t OBB;
     vec3_t p, Position;
 
-    const LinkPlacement placement = PlaceLinkedPart(x, y, z, c, f, Type, Link, bRightHandItem);
+    const LinkPlacement placement = PlaceLinkedPart(x, y, z, c, f->LinkBone, o->Scale, Type, Link, bRightHandItem);
     std::memcpy(ParentMatrix, placement.parent, sizeof(placement.parent));
     VectorCopy(placement.origin, b->BodyOrigin);
     VectorCopy(placement.angle, Object->Angle);
@@ -6932,26 +7005,11 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     if (Type == MODEL_BOSS_HEAD)
         b->BoneHead = 0;
 
-    if ((c->Skill == AT_SKILL_PENETRATION || c->Skill == AT_SKILL_PENETRATION_STR) &&
-        ((o->Type == MODEL_PLAYER && Engine::Object::IsAttackAction(o->CurrentAction))))
-    {
-        if (o->AnimationFrame >= 5.f && o->AnimationFrame <= 10.f)
-        {
-            f->PriorAnimationFrame = 2.f;
-            f->AnimationFrame = 3.2f;
-        }
-    }
-    if ((f->Type >= MODEL_WINGS_OF_DARKNESS && f->Type <= MODEL_WINGS_OF_DARKNESS) && c->SafeZone)
-    {
-        b->CurrentAction = 1;
-    }
-    if (!Link || (Type < MODEL_BOW || Type >= MODEL_BOW + MAX_ITEM_INDEX) || Type == MODEL_STINGER_BOW)
-    {
-        if (!g_isCharacterBuff(o, eDeBuff_Stun) && !g_isCharacterBuff(o, eDeBuff_Sleep))
-        {
-            b->PlayAnimation(&f->AnimationFrame, &f->PriorAnimationFrame, &f->PriorAction, f->PlaySpeed, Position, Object->Angle);
-        }
-    }
+    // The update advanced and posed a client character's part since the last draw; other parts advance here.
+    const bool advanced = slot != nullptr && Engine::Object::Attachments::WasAdvanced(*slot);
+    if (!advanced)
+        AdvanceLinkedPart(c, f, Type, Link);
+    b->CurrentAction = LinkedPartAction(c, f);
 
     VectorCopy(b->BodyOrigin, Object->Position);
 
@@ -6963,13 +7021,24 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     const float (*savedActiveBones)[3][4] = g_pActiveBoneTransform;
 
     vec3_t Temp;
-    b->Animation(bones, f->AnimationFrame, f->PriorAnimationFrame, f->PriorAction, Object->Angle, Object->Angle, true,
-                 true, ParentMatrix);
+    if (!advanced || !IsPlacedAt(slot->posed, placement))
+    {
+        // A part whose parent moved since the update keeps the update's animation step.
+        Engine::Object::Attachments::Posed posed = PosedAt(f, b->CurrentAction, placement);
+        if (advanced)
+        {
+            posed.animationFrame = slot->posed.animationFrame;
+            posed.priorAnimationFrame = slot->posed.priorAnimationFrame;
+            posed.priorAction = slot->posed.priorAction;
+            posed.action = slot->posed.action;
+        }
+        PoseLinkedPart(c, Type, Link, posed, bones);
+        if (slot != nullptr)
+            slot->posed = posed;
+    }
     if (g_CMonkSystem.IsRagefighterCommonWeapon(c->Class, Type) && !Link)
     {
         float _KnightScale = 0.9f;
-        if (Type == MODEL_FLAIL)
-            b->InterpolationTrans(bones[0], bones[2], _KnightScale);
         b->Transform(bones, Temp, Temp, &OBB, Translate, _KnightScale);
     }
     else
@@ -11553,6 +11622,22 @@ void RefreshCharacterPoses()
     }
 }
 
+// Advances and poses the parts the character's last draw attached, once per draw.
+void UpdateAttachedParts(CHARACTER* c)
+{
+    Engine::Object::Attachments::ForEachToAdvance(
+        c,
+        [c](Engine::Object::Attachments::Slot& slot)
+        {
+            PART_t* f = slot.part;
+            const LinkPlacement placement = PlaceLinkedPart(slot.x, slot.y, slot.z, c, slot.linkBone, slot.ownerScale,
+                                                            slot.type, slot.link, slot.rightHandItem);
+            AdvanceLinkedPart(c, f, slot.type, slot.link);
+            slot.posed = PosedAt(f, LinkedPartAction(c, f), placement);
+            PoseLinkedPart(c, slot.type, slot.link, slot.posed, Engine::Object::Attachments::Bones(slot));
+        });
+}
+
 void UpdateDrawnCharacterEffects()
 {
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
@@ -11568,6 +11653,7 @@ void UpdateDrawnCharacterEffects()
         b->BodyScale = o->Scale;
         b->CurrentAction = o->CurrentAction;
         VectorCopy(o->Position, b->BodyOrigin);
+        UpdateAttachedParts(c);
         UpdateMonsterBodyEffects(c, o, b);
         UpdateCharacterBodyEffects(c, o);
         UpdateHeldWeaponEffects(c, o, b);
