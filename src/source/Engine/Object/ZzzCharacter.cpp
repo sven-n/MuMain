@@ -24,6 +24,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/AnimationTaskPool.h"
+#include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/PlayerActionState.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -6540,11 +6541,11 @@ void RenderGuild(OBJECT* o, int Type, vec3_t vPos)
     DisableCullFace();
 }
 
-void RenderBrightEffect(BMD* b, int Bitmap, int Link, float Scale, vec3_t Light, OBJECT* o)
+void RenderBrightEffect(BMD* b, vec34_t* bones, int Bitmap, int Link, float Scale, vec3_t Light, OBJECT* o)
 {
     vec3_t p, Position;
     Vector(0.f, 0.f, 0.f, p);
-    b->TransformPosition(BoneTransform[Link], p, Position, true);
+    b->TransformPosition(bones[Link], p, Position, true);
     CreateSprite(Bitmap, Position, Scale, Light, o);
 }
 
@@ -6855,8 +6856,8 @@ LinkPlacement PlaceLinkedPart(float x, float y, float z, const CHARACTER* c, con
 }
 } // namespace
 
-void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1, bool Link,
-                      bool Translate, int RenderType, bool bRightHandItem)
+vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1,
+                          bool Link, bool Translate, int RenderType, bool bRightHandItem)
 {
     OBJECT* o = &c->Object;
     BMD* b = &Models[Type];
@@ -6864,22 +6865,27 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     if (o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
     {
         if (Type >= MODEL_WING && Type <= MODEL_WINGS_OF_DARKNESS)
-            return;                                                              // 1st and 2nd Wings
+            return BoneTransform;                                                // 1st and 2nd Wings
         else if (Type >= MODEL_WING_OF_STORM && Type <= MODEL_WING_OF_DIMENSION) // 3rd Wings
-            return;
+            return BoneTransform;
         else if (MODEL_SMALL_CAPE_OF_LORD >= Type && Type <= MODEL_LITTLE_WARRIORS_CLOAK)
-            return; // Small Wings and Capes
+            return BoneTransform; // Small Wings and Capes
         else if (Type >= MODEL_CAPE_OF_FIGHTER && Type <= MODEL_CAPE_OF_OVERRULE)
-            return; // Capes
+            return BoneTransform; // Capes
     }
 
     if (GameLogic::Items::IsSummonerBookModel(Type))
     {
-        return;
+        return BoneTransform;
     }
 
     if (g_isCharacterBuff(o, eBuff_Cloaking))
-        return;
+        return BoneTransform;
+
+    // A client character's part gets its own pose; other characters' parts use the shared bones, as before.
+    Engine::Object::Attachments::Slot* slot = Engine::Object::Attachments::Record(
+        c, f, Type, x, y, z, Level, Option1, Link, Translate, RenderType, bRightHandItem);
+    vec34_t* bones = slot != nullptr ? Engine::Object::Attachments::Bones(*slot) : BoneTransform;
 
     // CopyShadowAngle(f,b);
     b->ContrastEnable = o->ContrastEnable;
@@ -6950,23 +6956,24 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     VectorCopy(b->BodyOrigin, Object->Position);
 
     // Save the caller's active bone transform pointer. Animation() and Transform() on the
-    // linked item's BMD will overwrite g_pActiveBoneTransform with BoneTransform (the local
-    // stack array used for this linked item). Restoring it afterwards prevents the caller's
+    // linked item's BMD will overwrite g_pActiveBoneTransform with the bones the part is posed
+    // into. Restoring it afterwards prevents the caller's
     // subsequent GPU skinning draws (characters, world objects) from reading stale/dangling data.
     // This fixes Elf and Dark Lord rendering corruption in the character selection screen.
     const float (*savedActiveBones)[3][4] = g_pActiveBoneTransform;
 
     vec3_t Temp;
-    b->Animation(BoneTransform, f->AnimationFrame, f->PriorAnimationFrame, f->PriorAction, Object->Angle, Object->Angle, true, true, ParentMatrix);
+    b->Animation(bones, f->AnimationFrame, f->PriorAnimationFrame, f->PriorAction, Object->Angle, Object->Angle, true,
+                 true, ParentMatrix);
     if (g_CMonkSystem.IsRagefighterCommonWeapon(c->Class, Type) && !Link)
     {
         float _KnightScale = 0.9f;
         if (Type == MODEL_FLAIL)
-            b->InterpolationTrans(BoneTransform[0], BoneTransform[2], _KnightScale);
-        b->Transform(BoneTransform, Temp, Temp, &OBB, Translate, _KnightScale);
+            b->InterpolationTrans(bones[0], bones[2], _KnightScale);
+        b->Transform(bones, Temp, Temp, &OBB, Translate, _KnightScale);
     }
     else
-        b->Transform(BoneTransform, Temp, Temp, &OBB, Translate);
+        b->Transform(bones, Temp, Temp, &OBB, Translate);
 
     if (Type != MODEL_CAPE_OF_LORD // Cape of Lord
         && Type != MODEL_CAPE_OF_FIGHTER // Cape of Fighter
@@ -6978,18 +6985,30 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     }
 
     // Restore the caller's active bone transform — the linked item render above overwrote
-    // g_pActiveBoneTransform with the linked item's local BoneTransform stack array.
+    // g_pActiveBoneTransform with the part's bones.
     // Without this restore, world objects and terrain rendered afterward use the wrong (now
     // dangling) bone pointer, causing GPU skinning corruption (visible as spikes / missing meshes).
     // Goes through SetActiveBoneTransform() (not a raw assignment) so BoneUBO's upload-dedup
     // cache also sees this as a change — the restored pointer may be the same address the
-    // linked item's stack-local BoneTransform just occupied, but with stale/different content.
+    // part's bones just occupied, but with stale/different content.
     SetActiveBoneTransform(savedActiveBones);
 
     if (Object->EnableShadow)
     {
-        return;
+        return bones;
     }
+
+    // The item effects also reach the part's bones through its item object (TransformByObjectBone).
+    struct ItemBones
+    {
+        OBJECT* object;
+        vec34_t* previous;
+        ~ItemBones()
+        {
+            object->BoneTransform = previous;
+        }
+    } const itemBones{Object, Object->BoneTransform};
+    Object->BoneTransform = bones;
 
     float Luminosity;
     vec3_t Light;
@@ -7005,23 +7024,23 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
             Vector(Luminosity * 0.6f, Luminosity * 1.f, Luminosity * 0.8f, Light);
 
             for (int i = 13; i <= 18; i++)
-                RenderBrightEffect(b, BITMAP_SHINY + 1, i, 1.f, Light, o);
+                RenderBrightEffect(b, bones, BITMAP_SHINY + 1, i, 1.f, Light, o);
         }
         else if (Type == MODEL_CELESTIAL_BOW)
         {
             Vector(Luminosity * 0.5f, Luminosity * 0.5f, Luminosity * 0.8f, Light);
 
             for (int i = 13; i <= 18; i++)
-                RenderBrightEffect(b, BITMAP_SHINY + 1, i, 1.f, Light, o);
+                RenderBrightEffect(b, bones, BITMAP_SHINY + 1, i, 1.f, Light, o);
 
             for (int i = 5; i <= 8; i++)
-                RenderBrightEffect(b, BITMAP_SHINY + 1, i, 1.f, Light, o);
+                RenderBrightEffect(b, bones, BITMAP_SHINY + 1, i, 1.f, Light, o);
         }
         else
         {
             Vector(Luminosity * 1.f, Luminosity * 0.6f, Luminosity * 0.2f, Light);
-            RenderBrightEffect(b, BITMAP_SHINY + 1, 2, 1.f, Light, o);
-            RenderBrightEffect(b, BITMAP_SHINY + 1, 6, 1.f, Light, o);
+            RenderBrightEffect(b, bones, BITMAP_SHINY + 1, 2, 1.f, Light, o);
+            RenderBrightEffect(b, bones, BITMAP_SHINY + 1, 6, 1.f, Light, o);
         }
         break;
     case MODEL_DIVINE_STAFF_OF_ARCHANGEL:
@@ -7032,7 +7051,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
             vec3_t Light2;
             Vector(0.4f, 0.4f, 0.4f, Light2);
             Vector(i * 30.f - 180.f, -40.f, 0.f, p);
-            b->TransformPosition(BoneTransform[0], p, Position, true);
+            b->TransformPosition(bones[0], p, Position, true);
 
             if (rand() % 3 == 0)
             {
@@ -7047,22 +7066,22 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Vector(0.f, 0.f, 0.f, p);
         if (rand_fps_check(2))
         {
-            b->TransformPosition(BoneTransform[4], p, Position, true);
+            b->TransformPosition(bones[4], p, Position, true);
             CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 11, 0.8f);
 
-            b->TransformPosition(BoneTransform[12], p, Position, true);
+            b->TransformPosition(bones[12], p, Position, true);
             CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 11, 0.8f);
         }
         Vector(0.5f, 0.5f, 0.1f, Light);
-        b->TransformPosition(BoneTransform[7], p, Position, true);
+        b->TransformPosition(bones[7], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 2.0f, Light, o);
 
-        b->TransformPosition(BoneTransform[15], p, Position, true);
+        b->TransformPosition(bones[15], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 2.0f, Light, o);
 
         Vector(20.f, 0.f, 0.f, p);
         Vector(1.0f, 1.0f, 0.4f, Light);
-        b->TransformPosition(BoneTransform[0], p, Position, true);
+        b->TransformPosition(bones[0], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 0.8f, Light, o);
         CreateSprite(BITMAP_LIGHT, Position, 1.3f, Light, o);
         CreateSprite(BITMAP_LIGHT, Position, 2.0f, Light, o);
@@ -7075,20 +7094,20 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         float fRendomPos = (float)(rand() % 60) / 20.0f - 1.5f;
         float fRendomScale = (float)(rand() % 10) / 20.0f + 1.4f;
         Vector(0.f, -100.f + fRendomPos, fRendomPos, p);
-        b->TransformPosition(BoneTransform[0], p, Position, true);
+        b->TransformPosition(bones[0], p, Position, true);
         CreateSprite(BITMAP_SHINY + 1, Position, fRendomScale, Light, o);
         CreateSprite(BITMAP_SHINY + 1, Position, fRendomScale - 0.3f, Light, o, 20.0f);
 
         fRendomPos = (float)(rand() % 60) / 20.0f - 1.5f;
         fRendomScale = (float)(rand() % 10) / 20.0f + 1.0f;
         Vector(0.f, -100.f + fRendomPos, fRendomPos, p);
-        b->TransformPosition(BoneTransform[0], p, Position, true);
+        b->TransformPosition(bones[0], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, fRendomScale + 0.3f, Light, o);
 
         fRendomPos = (float)(rand() % 40) / 20.0f - 1.0f;
         fRendomScale = (float)(rand() % 8) / 20.0f + 0.4f;
         Vector(0.f, 100.f + fRendomPos, fRendomPos, p);
-        b->TransformPosition(BoneTransform[0], p, Position, true);
+        b->TransformPosition(bones[0], p, Position, true);
         CreateSprite(BITMAP_SHINY + 1, Position, fRendomScale, Light, o);
         CreateSprite(BITMAP_SHINY + 1, Position, fRendomScale - 0.2f, Light, o, 90.0f);
     }
@@ -7099,11 +7118,11 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Vector(fLight, fLight - 0.5f, fLight - 0.5f, Light);
 
         Vector(5.f, -22.f, -10.f, p);
-        b->TransformPosition(BoneTransform[0], p, Position, true);
+        b->TransformPosition(bones[0], p, Position, true);
         CreateSprite(BITMAP_LIGHT + 1, Position, 0.75f, Light, o);
 
         Vector(-5.f, -22.f, -10.f, p);
-        b->TransformPosition(BoneTransform[0], p, Position, true);
+        b->TransformPosition(bones[0], p, Position, true);
         CreateSprite(BITMAP_LIGHT + 1, Position, 0.75f, Light, o);
     }
     break;
@@ -7119,24 +7138,24 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Vector(0.2f, 0.2f, fLight, Light);
 
         Vector(0.f, fRendomPos, fRendomPos, p);
-        b->TransformPosition(BoneTransform[4], p, Position, true);
+        b->TransformPosition(bones[4], p, Position, true);
         CreateSprite(BITMAP_SHINY + 1, Position, fRendomScale, Light, o, fRotation);
         CreateSprite(BITMAP_SHINY + 1, Position, fRendomScale - 0.4f, Light, o, 90.f + fRotation2);
         Vector(0.0f, 0.0f, 0.0f, p);
         CreateSprite(BITMAP_LIGHT, Position, 2.3f, Light, o);
 
         Vector(30.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[4], p, Position, true);
+        b->TransformPosition(bones[4], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 2.0f, Light, o);
 
         Vector(0.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[6], p, Position, true);
+        b->TransformPosition(bones[6], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 2.0f, Light, o);
 
-        b->TransformPosition(BoneTransform[7], p, Position, true);
+        b->TransformPosition(bones[7], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 2.0f, Light, o);
 
-        b->TransformPosition(BoneTransform[8], p, Position, true);
+        b->TransformPosition(bones[8], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 1.0f, Light, o);
     }
     break;
@@ -7146,7 +7165,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         float fRendomPos = (float)(rand() % 60) / 20.0f - 1.5f;
         float fRendomScale = (float)(rand() % 15) / 20.0f + 1.8f;
         Vector(0.f, -170.f + fRendomPos, 0.f + fRendomPos, p);
-        b->TransformPosition(BoneTransform[0], p, Position, true);
+        b->TransformPosition(bones[0], p, Position, true);
         CreateSprite(BITMAP_SPARK + 1, Position, fRendomScale, Light, o);
 
         VectorCopy(Position, o->EyeLeft);
@@ -7173,17 +7192,17 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
 
         Vector(fLight - 0.1f, 0.1f, fLight - 0.1f, Light);
         Vector(0.f, 10.0f, 0.0f, p);
-        b->TransformPosition(BoneTransform[2], p, Position, true);
+        b->TransformPosition(bones[2], p, Position, true);
         CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, o, fRotation);
         CreateSprite(BITMAP_SHINY + 1, Position, 1.2f, Light, o, 90.0f + fRotation);
 
         Vector(-40.f, -10.0f, 0.0f, p);
-        b->TransformPosition(BoneTransform[1], p, Position, true);
+        b->TransformPosition(bones[1], p, Position, true);
         CreateSprite(BITMAP_SHINY + 1, Position, 1.0f, Light, o, fRotation);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.7f, Light, o, 90.0f + fRotation);
 
         Vector(-160.f, -5.0f, 0.0f, p);
-        b->TransformPosition(BoneTransform[1], p, Position, true);
+        b->TransformPosition(bones[1], p, Position, true);
         CreateSprite(BITMAP_SHINY + 1, Position, 1.2f, Light, o, fRotation);
         CreateSprite(BITMAP_SHINY + 1, Position, 1.0f, Light, o, 90.0f + fRotation);
     }
@@ -7194,28 +7213,28 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Vector(0.6f, 0.6f, 0.6f, Light);
 
         Vector(0.f, 0.f, 3.f, p);
-        b->TransformPosition(BoneTransform[2], p, Position, true);
+        b->TransformPosition(bones[2], p, Position, true);
         CreateSprite(BITMAP_LIGHT + 1, Position, 0.45f, Light, o);
 
         Vector(0.f, 0.f, -3.f, p);
-        b->TransformPosition(BoneTransform[2], p, Position, true);
+        b->TransformPosition(bones[2], p, Position, true);
         CreateSprite(BITMAP_LIGHT + 1, Position, 0.45f, Light, o);
 
         Vector(0.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[2], p, Position, true);
+        b->TransformPosition(bones[2], p, Position, true);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.7f, Light, o);
 
         float fScale = 0.5f + (float)(rand() % 100) / 180;
         float fRotation = (WorldTime * 0.0006f) * 360.0f;
         Vector(0.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[2], p, Position, true);
+        b->TransformPosition(bones[2], p, Position, true);
         CreateSprite(BITMAP_SHINY + 1, Position, fScale, Light, o, fRotation);
 
         // Flare01.jpg
         float fLight = (float)sinf((WorldTime) * 0.4f) * 0.25f + 0.6f;
         Vector(fLight, fLight, fLight, Light);
         Vector(0.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[2], p, Position, true);
+        b->TransformPosition(bones[2], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 3.f, Light, o, 0.f);
     }
     break;
@@ -7227,7 +7246,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
 
         Vector(1.0f, 0.1f, 0.0f, Light);
         Vector(0.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[1], p, Position, true);
+        b->TransformPosition(bones[1], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 1.0f, Light, o);	// flare01.jpg
 
         fScale = (float)(rand() % 30) / 60.0f + 0.2f;
@@ -7246,7 +7265,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         else
             fPosition += 1.5f;
         Vector(0.f, fPosition, 0.f, p);
-        b->TransformPosition(BoneTransform[iRandom], p, Position, true);
+        b->TransformPosition(bones[iRandom], p, Position, true);
         CreateSprite(BITMAP_WATERFALL_4, Position, 0.7f, Light, o);
         Vector(0.1f, 0.1f, 0.1f, Light);
         CreateSprite(BITMAP_WATERFALL_2, Position, 0.3f, Light, o);
@@ -7257,7 +7276,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Vector(0.f, 0.f, 0.f, p);
         for (int i = 0; i < 5; ++i)
         {
-            b->TransformPosition(BoneTransform[2 + i], p, Position, true);
+            b->TransformPosition(bones[2 + i], p, Position, true);
             CreateSprite(BITMAP_LIGHT, Position, 1.1f, Light, o);
         }
 
@@ -7267,7 +7286,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
             {
                 Vector(1.f, 1.f, 1.f, Light);
                 Vector(0.f, 0.f, 0.f, p);
-                b->TransformPosition(BoneTransform[6], p, Position, true);
+                b->TransformPosition(bones[6], p, Position, true);
                 Position[0] += rand() % 30 - 15.f;
                 Position[1] += rand() % 30 - 15.f;
                 Position[2] += 20.f;
@@ -7292,19 +7311,19 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Vector(0.f, 0.f, 0.f, p);
 
         Vector(0.8f + Luminosity, 0.5f + Luminosity, 0.1f + Luminosity, Light);
-        b->TransformPosition(BoneTransform[1], p, Position, true);
+        b->TransformPosition(bones[1], p, Position, true);
         CreateSprite(BITMAP_SHINY + 1, Position, fScale, Light, o);
 
         Vector(0.7f, 0.5f, 0.3f, Light);
-        b->TransformPosition(BoneTransform[1], p, Position, true);
+        b->TransformPosition(bones[1], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 3.f, Light, o);
 
         Vector(0.8f, 0.6f, 0.4f, Light);
-        b->TransformPosition(BoneTransform[2], p, Position, true);
+        b->TransformPosition(bones[2], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 1.5f, Light, o);
 
         Vector(0.8f, 0.6f, 0.4f, Light);
-        b->TransformPosition(BoneTransform[3], p, Position, true);
+        b->TransformPosition(bones[3], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 1.2f, Light, o);
     }
     break;
@@ -7314,29 +7333,29 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         fLight = (float)sinf((WorldTime) * 0.4f) * 0.25f;
         Vector(0.0f, 0.7f, 0.0f, Light);
         Vector(0.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[10], p, Position, true);
+        b->TransformPosition(bones[10], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 1.2f, Light, o);
 
-        b->TransformPosition(BoneTransform[28], p, Position, true);
+        b->TransformPosition(bones[28], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 1.2f, Light, o);
 
-        b->TransformPosition(BoneTransform[34], p, Position, true);
+        b->TransformPosition(bones[34], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 1.2f, Light, o);
 
-        b->TransformPosition(BoneTransform[16], p, Position, true);
+        b->TransformPosition(bones[16], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 1.2f, Light, o);
 
         Vector(0.f, 0.f, 0.f, p);
         Vector(0.3f, 0.9f, 0.2f, Light);
         if (rand_fps_check(2))
         {
-            b->TransformPosition(BoneTransform[10], p, Position, true);
+            b->TransformPosition(bones[10], p, Position, true);
             CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 14, 0.05f);
-            b->TransformPosition(BoneTransform[28], p, Position, true);
+            b->TransformPosition(bones[28], p, Position, true);
             CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 14, 0.05f);
-            b->TransformPosition(BoneTransform[34], p, Position, true);
+            b->TransformPosition(bones[34], p, Position, true);
             CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 14, 0.05f);
-            b->TransformPosition(BoneTransform[16], p, Position, true);
+            b->TransformPosition(bones[16], p, Position, true);
             CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 14, 0.05f);
         }
     }
@@ -7350,28 +7369,28 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         // flare01
         Vector(0.7f, 0.7f, 0.7f, Light);
         fScale = (float)(rand() % 10) / 500.0f;
-        b->TransformPosition(BoneTransform[9], p, Position, true);
+        b->TransformPosition(bones[9], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 0.3f + fScale, Light, o);
         //			Vector(0.1f, 0.5f, 0.1f, Light);
         //			CreateSprite(BITMAP_LIGHT, Position, 1.5f, Light, o);
 
         Vector(0.2f, 0.6f + fLight, 0.2f, Light);
         fScale = (float)(rand() % 10) / 500.0f;
-        b->TransformPosition(BoneTransform[9], p, Position, true);
+        b->TransformPosition(bones[9], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 4.0f + fScale, Light, o);
 
         // shiny02
         Vector(0.4f, 0.5f + fLight, 0.4f, Light);
         fScale = (float)(rand() % 30) / 60.0f;
         fRotation = (WorldTime * 0.0004f) * 360.0f;
-        b->TransformPosition(BoneTransform[9], p, Position, true);
+        b->TransformPosition(bones[9], p, Position, true);
         CreateSprite(BITMAP_SHINY + 1, Position, 1.2f + fScale, Light, o, -fRotation);
 
         // magic_ground1
         Vector(0.6f, 1.f, 0.6f, Light);
         fScale = (float)(rand() % 10) / 500.0f;
         fRotation = (WorldTime * 0.0006f) * 360.0f;
-        b->TransformPosition(BoneTransform[9], p, Position, true);
+        b->TransformPosition(bones[9], p, Position, true);
         CreateSprite(BITMAP_MAGIC, Position, 0.25f + fScale, Light, o, fRotation);
 
         // 5, 6, 7, 8 flare01 , 10, 11, 12, 13
@@ -7380,31 +7399,31 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         for (int i = 0; i < 4; ++i)
         {
             Vector(0.1f, 0.8f, 0.1f, Light);
-            b->TransformPosition(BoneTransform[5 + i], p, Position, true);
+            b->TransformPosition(bones[5 + i], p, Position, true);
             CreateSprite(BITMAP_LIGHT, Position, 0.2f, Light, o);
             Vector(0.5f, 0.5f, 0.5f, Light);
-            b->TransformPosition(BoneTransform[10 + i], p, Position, true);
+            b->TransformPosition(bones[10 + i], p, Position, true);
             CreateSprite(BITMAP_LIGHT, Position, 0.3f, Light, o);
         }
 
         Vector(0.1f, 0.8f, 0.1f, Light);
-        b->TransformPosition(BoneTransform[4], p, Position, true);
+        b->TransformPosition(bones[4], p, Position, true);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.6f + fScale, Light, o, fRotation);
 
         Vector(0.6f, 1.f, 0.6f, Light);
         fScale = (float)(rand() % 10) / 500.0f;
         fRotation = (WorldTime * 0.0006f) * 360.0f;
-        b->TransformPosition(BoneTransform[2], p, Position, true);
+        b->TransformPosition(bones[2], p, Position, true);
         CreateSprite(BITMAP_MAGIC, Position, 0.15f + fScale, Light, o, fRotation);
         Vector(0.8f, 0.8f, 0.8f, Light);
-        b->TransformPosition(BoneTransform[2], p, Position, true);
+        b->TransformPosition(bones[2], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 0.7f + fScale, Light, o, -fRotation);
         Vector(0.1f, 1.0f, 0.1f, Light);
-        b->TransformPosition(BoneTransform[2], p, Position, true);
+        b->TransformPosition(bones[2], p, Position, true);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f + fScale, Light, o, fRotation);
 
         Vector(0.2f, 0.6f + fLight, 0.2f, Light);
-        b->TransformPosition(BoneTransform[2], p, Position, true);
+        b->TransformPosition(bones[2], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 2.0f + fScale, Light, o);
     }
     break;
@@ -7416,21 +7435,21 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Vector(Luminosity * 0.f, Luminosity * 0.5f, Luminosity * 1.f, Light);
 
         auto Rotation = (float)(rand() % 360);
-        b->TransformPosition(BoneTransform[5], p, Position, true);
+        b->TransformPosition(bones[5], p, Position, true);
         Vector(Luminosity * 0.f, Luminosity * 0.5f, Luminosity * 1.f, Light);
         CreateSprite(BITMAP_LIGHT, Position, 1.f, Light, o);
         Vector(0.5f, 0.5f, 0.5f, Light);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, Rotation);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 360.f - Rotation);
 
-        b->TransformPosition(BoneTransform[6], p, Position, true);
+        b->TransformPosition(bones[6], p, Position, true);
         Vector(Luminosity * 0.f, Luminosity * 0.5f, Luminosity * 1.f, Light);
         CreateSprite(BITMAP_LIGHT, Position, 1.f, Light, o);
         Vector(0.5f, 0.5f, 0.5f, Light);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, Rotation);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 360.f - Rotation);
 
-        b->TransformPosition(BoneTransform[8], p, Position, true);
+        b->TransformPosition(bones[8], p, Position, true);
         Vector(Luminosity * 0.f, Luminosity * 0.5f, Luminosity * 1.f, Light);
         CreateSprite(BITMAP_LIGHT, Position, 2.f, Light, o);
         Vector(0.5f, 0.5f, 0.5f, Light);
@@ -7445,7 +7464,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
 
         Vector(0.f, 0.f, 0.f, p);
 
-        b->TransformPosition(BoneTransform[1], p, Position, true);
+        b->TransformPosition(bones[1], p, Position, true);
         Vector(Luminosity * 0.f, Luminosity * 0.5f, Luminosity * 1.f, Light);
         CreateSprite(BITMAP_LIGHT, Position, 2.f, Light, o);
         Vector(0.5f, 0.5f, 0.5f, Light);
@@ -7462,7 +7481,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         {
             vec3_t Light2;
             Vector(0.4f, 0.4f, 0.4f, Light2);
-            b->TransformPosition(BoneTransform[i + 2], p, Position, true);
+            b->TransformPosition(bones[i + 2], p, Position, true);
 
             if (rand() % 3 == 0)
             {
@@ -7479,8 +7498,8 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
 
             Vector(0.f, 0.f, 0.f, p);
             Vector(-90.f, (float)(rand() % 360), o->Angle[2] - 45, angle);
-            b->TransformPosition(BoneTransform[3], p, pos, true);
-            b->TransformPosition(BoneTransform[2], p, Position, true);
+            b->TransformPosition(bones[3], p, pos, true);
+            b->TransformPosition(bones[2], p, Position, true);
 
             VectorSubtract(pos, Position, delta);
         }
@@ -7493,7 +7512,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
                     vec3_t Light2;
                     Vector ( 0.4f, 0.4f, 0.4f, Light2 );
                     Vector(0.f,i*30.f-10.f,0.f,p);
-                    b->TransformPosition(BoneTransform[0],p,Position,true);
+                    b->TransformPosition(bones[0],p,Position,true);
 
                     if ( rand() % 3 == 0 )
                     {
@@ -7509,7 +7528,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         for (int i = 1; i < 6; ++i)
         {
             Vector(Luminosity * 0.5f, Luminosity * 0.5f, Luminosity * 0.8f, Light);
-            b->TransformPosition(BoneTransform[i], p, Position, true);
+            b->TransformPosition(bones[i], p, Position, true);
 
             CreateSprite(BITMAP_SHINY + 1, Position, 1.f, Light, o);
 
@@ -7526,7 +7545,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Vector(Luminosity * 0.6f, Luminosity * 0.6f, Luminosity * 2.f, Light);
 
         Vector(15.f, -15.f, 0.f, p);
-        b->TransformPosition(BoneTransform[1], p, Position, true);
+        b->TransformPosition(bones[1], p, Position, true);
         CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, o);
         CreateSprite(BITMAP_LIGHT, Position, Luminosity + 1.5f, Light, o);
         break;
@@ -7534,7 +7553,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Vector(Luminosity * 1.f, Luminosity * 0.9f, Luminosity * 0.f, Light);
 
         Vector(0.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[1], p, Position, true);
+        b->TransformPosition(bones[1], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 2.f, Light, o);
 
         Vector(0.5f, 0.5f, 0.5f, Light);
@@ -7545,10 +7564,10 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         float Scale = sinf(WorldTime * 0.001f) + 1.f;
         Vector(Luminosity * 0.2f, Luminosity * 0.1f, Luminosity * 3.f, Light);
         Vector(-15.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[1], p, Position, true);
+        b->TransformPosition(bones[1], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, Scale, Light, o);
         Vector(10.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[1], p, Position, true);
+        b->TransformPosition(bones[1], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, Scale, Light, o);
 
         Scale = sinf(WorldTime * 0.01f) * 360;
@@ -7565,7 +7584,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
             Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
             Vector(Luminosity * 0.6f, Luminosity * 0.8f, Luminosity * 1.f, Light);
             Vector(-10.f, 0.f, 0.f, p);
-            b->TransformPosition(BoneTransform[i + 1], p, Position, true);
+            b->TransformPosition(bones[i + 1], p, Position, true);
             CreateSprite(BITMAP_LIGHT, Position, /*Luminosity**/1.f, Light, o);
 
             if (i == 3)
@@ -7582,14 +7601,14 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Vector(Luminosity * 1.f, Luminosity * 0.8f, Luminosity * 0.6f, Light);
         Vector(0.f, 0.f, 0.f, p);
 
-        b->TransformPosition(BoneTransform[2], p, Position, true);
+        b->TransformPosition(bones[2], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 1.5f, Light, o);
         CreateSprite(BITMAP_SHINY + 1, Position, Luminosity * 0.5f, Light, o);
 
         Vector(Luminosity * -10.f, 0.f, 0.f, p);
         Vector(0.6f, 0.8f, 1.f, Light);
         Luminosity = rand() % 360;
-        b->TransformPosition(BoneTransform[1], p, Position, true);
+        b->TransformPosition(bones[1], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 0.7f, Light, o);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, Luminosity);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.4f, Light, o, 360 - Luminosity);
@@ -7599,13 +7618,13 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     {
         Vector(1.f, 0.6f, 0.3f, Light);
         Vector(0.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[1], p, Position, true);
+        b->TransformPosition(bones[1], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 1.3f, Light, o);
 
         for (int i = 0; i < 3; ++i)
         {
             Vector(i * 15.f - 10.f, 0.f, 0.f, p);
-            b->TransformPosition(BoneTransform[2], p, Position, true);
+            b->TransformPosition(bones[2], p, Position, true);
             CreateSprite(BITMAP_LIGHT, Position, 1.3f, Light, o);
             CreateSprite(BITMAP_SHINY + 1, Position, 0.4f, Light, o, rand() % 360);
         }
@@ -7617,7 +7636,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Vector(0.f, 0.f, 0.f, p);
         vec3_t Light2;
         Vector(0.4f, 0.4f, 0.4f, Light2);
-        b->TransformPosition(BoneTransform[0], p, Position, true);
+        b->TransformPosition(bones[0], p, Position, true);
         if (rand() % 3 == 0)
         {
             CreateSprite(BITMAP_SHINY + 1, Position, 0.6f, Light2, o, (float)(rand() % 360));
@@ -7629,7 +7648,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     {
         for (int i = 0; i < 2; i++) {
             Vector(0.f, 0.f, 0.f, p);
-            b->TransformPosition(BoneTransform[i + 1], p, Position, true);
+            b->TransformPosition(bones[i + 1], p, Position, true);
             Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
             Vector(Luminosity * 0.43f, Luminosity * 0.14f, Luminosity * 0.6f, Light);
             CreateSprite(BITMAP_LIGHT, Position, Luminosity * 0.9f, Light, o);
@@ -7643,9 +7662,9 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         float Scale = sinf(WorldTime * 0.001f) + 1.f;
         Vector(Luminosity * 3.f, Luminosity, Luminosity, Light);
         Vector(0.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[6], p, Position, true);
+        b->TransformPosition(bones[6], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, Scale * 0.8f, Light, o);
-        b->TransformPosition(BoneTransform[2], p, Position, true);
+        b->TransformPosition(bones[2], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, Scale * 0.8f, Light, o);
 
         float Rotation = sinf(WorldTime * 0.01f) * 360;
@@ -7654,7 +7673,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         if (!c->SafeZone)
         {
             Vector(10.f, 0.f, 0.f, p);
-            b->TransformPosition(BoneTransform[9], p, Position, true);
+            b->TransformPosition(bones[9], p, Position, true);
             CreateSprite(BITMAP_LIGHT, Position, Scale * 0.8f, Light, o);
             Vector(Luminosity * 3.0f, Luminosity, Luminosity, Light);
             CreateSprite(BITMAP_SHINY + 1, Position, 0.8f, Light, o, 360 - Rotation);
@@ -7670,7 +7689,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
             {
                 Vector(1.f, 1.f, 1.f, Light);
                 Vector(0.f, 0.f, 0.f, p);
-                b->TransformPosition(BoneTransform[1], p, Position, true);
+                b->TransformPosition(bones[1], p, Position, true);
                 Position[0] += rand() % 30 - 15.f;
                 Position[1] += rand() % 30 - 15.f;
                 Position[2] += 20.f;
@@ -7691,7 +7710,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
 
         for (int i = 1; i < 9; i++)
         {
-            b->TransformPosition(BoneTransform[i], p, Position, true);
+            b->TransformPosition(bones[i], p, Position, true);
             CreateSprite(BITMAP_LIGHT, Position, 1.3f, Light, o);
         }
         break;
@@ -7765,7 +7784,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         float fRendomScale = (float)((rand() % 15) / 30.0f) + 0.5f;
         Vector(0.f, 0.f, 0.f, Position);
         Vector(0.1f, 0.4f, 0.9f, Light);
-        b->TransformPosition(BoneTransform[8], Position, p, true);		// Zx01
+        b->TransformPosition(bones[8], Position, p, true); // Zx01
         CreateSprite(BITMAP_FLARE_BLUE, p, 0.4f, o->Light, o);
         CreateSprite(BITMAP_SHINY + 6, p, fRendomScale, Light, o);
 
@@ -7779,29 +7798,29 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
             //CreateEffect(MODEL_EFFECT_TRACE, p, o->Angle, vColor, 0, NULL, -1, 0, 0, 0, 25.f);
         }
 
-        b->TransformPosition(BoneTransform[9], Position, p, true);		// Zx02
+        b->TransformPosition(bones[9], Position, p, true); // Zx02
         CreateSprite(BITMAP_FLARE_BLUE, p, 0.4f, o->Light, o);
         CreateSprite(BITMAP_SHINY + 6, p, fRendomScale, Light, o);
-        b->TransformPosition(BoneTransform[10], Position, p, true);		// Zx03
+        b->TransformPosition(bones[10], Position, p, true); // Zx03
         CreateSprite(BITMAP_FLARE_BLUE, p, 0.4f, o->Light, o);
         CreateSprite(BITMAP_SHINY + 6, p, 0.4f, Light, o);
-        b->TransformPosition(BoneTransform[11], Position, p, true);		// Zx04
+        b->TransformPosition(bones[11], Position, p, true); // Zx04
         CreateSprite(BITMAP_FLARE_BLUE, p, 0.4f, o->Light, o);
         CreateSprite(BITMAP_SHINY + 6, p, 0.4f, Light, o);
 
         // 칼주변
         Vector(0.0f, 0.3f, 0.7f, Light);
-        b->TransformPosition(BoneTransform[2], Position, p, true);		// rx01
+        b->TransformPosition(bones[2], Position, p, true); // rx01
         CreateSprite(BITMAP_LIGHTMARKS, p, 1.0f, Light, o);
-        b->TransformPosition(BoneTransform[3], Position, p, true);		// rx02
+        b->TransformPosition(bones[3], Position, p, true); // rx02
         CreateSprite(BITMAP_LIGHTMARKS, p, 0.8f, Light, o);
-        b->TransformPosition(BoneTransform[4], Position, p, true);		// rx03
+        b->TransformPosition(bones[4], Position, p, true); // rx03
         CreateSprite(BITMAP_LIGHTMARKS, p, 0.6f, Light, o);
-        b->TransformPosition(BoneTransform[5], Position, p, true);		// rx04
+        b->TransformPosition(bones[5], Position, p, true); // rx04
         CreateSprite(BITMAP_LIGHTMARKS, p, 0.4f, Light, o);
-        b->TransformPosition(BoneTransform[6], Position, p, true);		// Zx05
+        b->TransformPosition(bones[6], Position, p, true); // Zx05
         CreateSprite(BITMAP_LIGHTMARKS, p, 0.2f, Light, o);
-        b->TransformPosition(BoneTransform[7], Position, p, true);		// Zx06
+        b->TransformPosition(bones[7], Position, p, true); // Zx06
         CreateSprite(BITMAP_LIGHTMARKS, p, 0.1f, Light, o);
     }break;
     case MODEL_FROST_MACE:
@@ -7966,17 +7985,17 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     {
         Vector(0.f, 0.f, 0.f, Position);
         Vector(0.8f, 0.3f, 0.1f, Light);
-        b->TransformPosition(BoneTransform[4], Position, p, true);		// Rx01
+        b->TransformPosition(bones[4], Position, p, true); // Rx01
         CreateSprite(BITMAP_LIGHT, p, 0.8f, Light, o);
-        b->TransformPosition(BoneTransform[5], Position, p, true);		// Rx02
+        b->TransformPosition(bones[5], Position, p, true); // Rx02
         CreateSprite(BITMAP_LIGHT, p, 0.4f, Light, o);
-        b->TransformPosition(BoneTransform[6], Position, p, true);		// Zx02
+        b->TransformPosition(bones[6], Position, p, true); // Zx02
         CreateSprite(BITMAP_LIGHT, p, 0.8f, Light, o);
-        b->TransformPosition(BoneTransform[7], Position, p, true);		// Zx03
+        b->TransformPosition(bones[7], Position, p, true); // Zx03
         CreateSprite(BITMAP_LIGHT, p, 0.8f, Light, o);
-        b->TransformPosition(BoneTransform[8], Position, p, true);		// Zx04
+        b->TransformPosition(bones[8], Position, p, true); // Zx04
         CreateSprite(BITMAP_LIGHT, p, 2.0f, Light, o);
-        b->TransformPosition(BoneTransform[9], Position, p, true);		// Zx05
+        b->TransformPosition(bones[9], Position, p, true); // Zx05
         CreateSprite(BITMAP_LIGHT, p, 0.8f, Light, o);
 
         float fLumi = absf((sinf(WorldTime * 0.001f))) * 0.8f + 0.2f;
@@ -7984,10 +8003,10 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Vector(fLumi * 0.8f, fLumi * 0.1f, fLumi * 0.3f, vDLight);
         float fRendomScale = (float)(rand() % 10) / 20.0f + 0.8f;		// (0.5~1.25)
         Vector(0.8f, 0.2f, 0.4f, Light);
-        b->TransformPosition(BoneTransform[2], Position, p, true);		// Red01
+        b->TransformPosition(bones[2], Position, p, true); // Red01
         CreateSprite(BITMAP_LIGHT, p, 2.0f, vDLight, o);
         CreateSprite(BITMAP_SHINY + 6, p, fRendomScale, Light, o);
-        b->TransformPosition(BoneTransform[3], Position, p, true);		// Red02
+        b->TransformPosition(bones[3], Position, p, true); // Red02
         CreateSprite(BITMAP_LIGHT, p, 2.0f, vDLight, o);
         CreateSprite(BITMAP_SHINY + 6, p, fRendomScale, Light, o);
 
@@ -8003,16 +8022,16 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     {
         Vector(0.f, 0.f, 0.f, Position);
         Vector(0.3f, 0.3f, 0.9f, Light);
-        b->TransformPosition(BoneTransform[2], Position, p, true);		// Zx01
+        b->TransformPosition(bones[2], Position, p, true); // Zx01
         CreateSprite(BITMAP_LIGHT, p, 2.f, Light, o);
         CreateSprite(BITMAP_LIGHT, p, 2.f, Light, o);
-        b->TransformPosition(BoneTransform[3], Position, p, true);		// Zx02
+        b->TransformPosition(bones[3], Position, p, true); // Zx02
         CreateSprite(BITMAP_LIGHT, p, 2.5f, Light, o);
         CreateSprite(BITMAP_LIGHT, p, 2.5f, Light, o);
-        b->TransformPosition(BoneTransform[4], Position, p, true);		// Zx03
+        b->TransformPosition(bones[4], Position, p, true); // Zx03
         CreateSprite(BITMAP_LIGHT, p, 3.f, Light, o);
         Vector(0.7f, 0.1f, 0.2f, Light);
-        b->TransformPosition(BoneTransform[5], Position, p, true);		// Zx04
+        b->TransformPosition(bones[5], Position, p, true); // Zx04
         CreateSprite(BITMAP_LIGHT, p, 2.f, Light, o);
         Vector(0.9f, 0.3f, 0.5f, Light);
         CreateSprite(BITMAP_SHINY + 6, p, 0.8f, Light, o);
@@ -8136,23 +8155,23 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Vector(0.f, 0.f, 0.f, Position);
         float fLumi = fabs(sinf(WorldTime * 0.001f)) + 0.1f;
         Vector(0.8f * fLumi, 0.3f * fLumi, 0.8f * fLumi, Light);
-        b->TransformPosition(BoneTransform[1], Position, p, true);		// b01
+        b->TransformPosition(bones[1], Position, p, true); // b01
         CreateSprite(BITMAP_LIGHT, p, 1.5f, Light, o);
-        b->TransformPosition(BoneTransform[2], Position, p, true);		// Zx01
+        b->TransformPosition(bones[2], Position, p, true); // Zx01
         CreateSprite(BITMAP_LIGHT, p, 1.5f, Light, o);
-        b->TransformPosition(BoneTransform[3], Position, p, true);		// Zx05
+        b->TransformPosition(bones[3], Position, p, true); // Zx05
         CreateSprite(BITMAP_LIGHT, p, 1.5f, Light, o);
-        b->TransformPosition(BoneTransform[4], Position, p, true);		// Zx04
+        b->TransformPosition(bones[4], Position, p, true); // Zx04
         CreateSprite(BITMAP_LIGHT, p, 1.5f, Light, o);
-        b->TransformPosition(BoneTransform[5], Position, p, true);		// Object04
+        b->TransformPosition(bones[5], Position, p, true); // Object04
         CreateSprite(BITMAP_LIGHT, p, 1.5f, Light, o);
-        b->TransformPosition(BoneTransform[6], Position, p, true);		// Object05
+        b->TransformPosition(bones[6], Position, p, true); // Object05
         CreateSprite(BITMAP_LIGHT, p, 1.5f, Light, o);
-        b->TransformPosition(BoneTransform[7], Position, p, true);		// Zx02
+        b->TransformPosition(bones[7], Position, p, true); // Zx02
         CreateSprite(BITMAP_LIGHT, p, 1.5f, Light, o);
-        b->TransformPosition(BoneTransform[8], Position, p, true);		// Object01
+        b->TransformPosition(bones[8], Position, p, true); // Object01
         CreateSprite(BITMAP_LIGHT, p, 1.5f, Light, o);
-        b->TransformPosition(BoneTransform[9], Position, p, true);		// Object03
+        b->TransformPosition(bones[9], Position, p, true); // Object03
         CreateSprite(BITMAP_LIGHT, p, 1.5f, Light, o);
     }break;
     case MODEL_CROSS_SHIELD:
@@ -8357,12 +8376,12 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         Vector(0.f, 0.f, 0.f, p);
         for (int i = 0; i < 8; ++i)
         {
-            b->TransformPosition(BoneTransform[3 + i], p, Position, true);
+            b->TransformPosition(bones[3 + i], p, Position, true);
             CreateSprite(BITMAP_LIGHT_MARKS, Position, fSize + 0.3f, vLight, Object, rand() % 360);
         }
         for (int i = 0; i < 8; ++i)
         {
-            b->TransformPosition(BoneTransform[13 + i], p, Position, true);
+            b->TransformPosition(bones[13 + i], p, Position, true);
             CreateSprite(BITMAP_LIGHT_MARKS, Position, fSize + 0.3f, vLight, Object, rand() % 360);
         }
         break;
@@ -8413,6 +8432,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
             break;
         }
     }
+    return bones;
 }
 
 void RenderLight(OBJECT* o, int Texture, float Scale, int Bone, float x, float y, float z)
@@ -8631,6 +8651,7 @@ bool UpdateCharacterTypeEffects(CHARACTER* c, OBJECT* o, BMD* b)
 
 void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 {
+    Engine::Object::Attachments::BeginCharacter(c);
     if (g_isCharacterBuff(o, eBuff_CrywolfNPCHide))
     {
         return;
@@ -9985,10 +10006,12 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     w->PriorAnimationFrame = 0.f;
                 }
 
+                vec34_t* weaponBones = BoneTransform;
                 if (g_CMonkSystem.IsSwordformGloves(w->Type))
                     g_CMonkSystem.RenderSwordformGloves(c, w->Type, i, o->Alpha, Translate, Select);
                 else
-                    RenderLinkObject(0.f, 0.f, 0.f, c, w, w->Type, w->Level, w->ExcellentFlags, false, Translate);
+                    weaponBones =
+                        RenderLinkObject(0.f, 0.f, 0.f, c, w, w->Type, w->Level, w->ExcellentFlags, false, Translate);
 
                 if (w->Level >= 7)
                 {
@@ -10111,11 +10134,11 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     case MODEL_CHAOS_LIGHTNING_STAFF:
                         Success = false;
                         Vector(Luminosity * 0.4f, Luminosity * 0.6f, Luminosity * 1.f, Light);
-                        RenderBrightEffect(b, BITMAP_SHINY + 1, 27, 2.f, Light, o);
+                        RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 27, 2.f, Light, o);
 
                         for (int j = 28; j <= 37; j++)
                         {
-                            RenderBrightEffect(b, BITMAP_LIGHT, j, 1.5f, Light, o);
+                            RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, 1.5f, Light, o);
                         }
                         break;
                     case MODEL_STAFF_OF_RESURRECTION:
@@ -10151,16 +10174,16 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         Success = false;
                         Vector(Luminosity * 0.2f, Luminosity * 0.3f, Luminosity * 1.4f, Light);
                         Vector(0.f, 0.f, 0.f, Position);
-                        b->TransformPosition(BoneTransform[1], Position, p, true);
+                        b->TransformPosition(weaponBones[1], Position, p, true);
                         CreateSprite(BITMAP_SHINY + 1, p, 1.f, Light, o, -(int)WorldTime * 0.1f);
-                        b->TransformPosition(BoneTransform[2], Position, p, true);
+                        b->TransformPosition(weaponBones[2], Position, p, true);
                         CreateSprite(BITMAP_SHINY + 1, p, 0.5f, Light, o, (int)WorldTime * 0.1f);
                         break;
                     case MODEL_RED_WING_STICK:
                         Success = false;
                         Vector(Luminosity * 1.0f, Luminosity * 0.3f, Luminosity * 0.4f, Light);
                         Vector(0.f, 0.f, 0.f, Position);
-                        b->TransformPosition(BoneTransform[1], Position, p, true);
+                        b->TransformPosition(weaponBones[1], Position, p, true);
                         CreateSprite(BITMAP_SHINY + 1, p, 1.f, Light, o, -(int)WorldTime * 0.1f);
                         CreateSprite(BITMAP_SHINY + 1, p, 1.f, Light, o, -(int)WorldTime * 0.13f);
                         break;
@@ -10171,7 +10194,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         Vector(0.5f + Luminosity, 0.2f + Luminosity, 0.9f + Luminosity, Light);
 
                         for (int j = 1; j <= 4; ++j)
-                            RenderBrightEffect(b, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
+                            RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
                         break;
                     case MODEL_DEMONIC_STICK:
                         Success = false;
@@ -10181,11 +10204,11 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
                         for (int j = 1; j <= 2; ++j)
                         {
-                            RenderBrightEffect(b, BITMAP_SHINY + 1, j, Scale + 1.0f, Light, o);
-                            RenderBrightEffect(b, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
+                            RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, j, Scale + 1.0f, Light, o);
+                            RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
                         }
                         Vector(0.8f + Luminosity, 0.6f + Luminosity, 0.3f + Luminosity, Light);
-                        RenderBrightEffect(b, BITMAP_LIGHT, 3, Scale + 1.0f, Light, o);
+                        RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, 3, Scale + 1.0f, Light, o);
                         break;
                     case MODEL_STORM_BLITZ_STICK:
                         Success = false;
@@ -10194,20 +10217,20 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         Vector(0.5f + Luminosity, 0.2f + Luminosity, 0.9f + Luminosity, Light);
 
                         for (int j = 2; j <= 3; ++j)
-                            RenderBrightEffect(b, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
+                            RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
 
                         Vector(0.8f + Luminosity, 0.6f + Luminosity, 0.3f + Luminosity, Light);
-                        RenderBrightEffect(b, BITMAP_SHINY + 2, 2, Scale + 1.0f, Light, o);
+                        RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 2, 2, Scale + 1.0f, Light, o);
                         break;
                     case MODEL_ETERNAL_WING_STICK:
                         Success = false;
                         Vector(1.0f, 0.2f, 0.1f, Light);
                         Vector(0.f, 0.f, 0.f, Position);
-                        b->TransformPosition(BoneTransform[2], Position, p, true);
+                        b->TransformPosition(weaponBones[2], Position, p, true);
                         CreateSprite(BITMAP_EVENT_CLOUD, p, 0.25f, Light, o, -(int)WorldTime * 0.1f);
                         CreateSprite(BITMAP_EVENT_CLOUD, p, 0.25f, Light, o, -(int)WorldTime * 0.2f);
                         Vector(1.0f, 0.4f, 0.3f, Light);
-                        RenderBrightEffect(b, BITMAP_SHINY + 1, 2, 1.0f, Light, o);
+                        RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 2, 1.0f, Light, o);
                         Vector(1.0f, 0.2f, 0.0f, Light);
                         if (rand_fps_check(1))
                         {
@@ -10219,7 +10242,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         if (rand_fps_check(20))
                             CreateParticle(BITMAP_SPARK + 1, p, o->Angle, Light, 20, 1.0f);
                         Vector(1.0f, 0.0f, 0.0f, Light);
-                        RenderBrightEffect(b, BITMAP_LIGHT, 2, 3.0f, Light, o);
+                        RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, 2, 3.0f, Light, o);
 #endif	// ASG_ADD_ETERNALWING_STICK_EFFECT
                         break;
                     case MODEL_SAINT_CROSSBOW:
@@ -10262,8 +10285,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                             CreateSprite(BITMAP_SHINY + 1, p, 1.f, Light, o);
                         }
                         Vector(Scale * 0.5f, Scale * 0.1f, Scale * 0.05f, Light);
-                        RenderBrightEffect(b, BITMAP_SHINY + 1, 2, 1.f, Light, o);
-                        RenderBrightEffect(b, BITMAP_SHINY + 1, 6, 1.f, Light, o);
+                        RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 2, 1.f, Light, o);
+                        RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 6, 1.f, Light, o);
                         break;
                     case MODEL_BLUEWING_CROSSBOW:
                     case MODEL_AQUAGOLD_CROSSBOW:
@@ -11616,6 +11639,7 @@ void RenderCharactersClient()
 #endif
 
     WaitCharactersAnimation();
+    Engine::Object::Attachments::BeginFrame();
 
     // Characters keep their Classic look with post-processing on: their bodies,
     // equipment, wings and glow parts never feed the bloom.

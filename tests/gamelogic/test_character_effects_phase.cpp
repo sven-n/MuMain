@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "doctest.h"
 
+#include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -142,4 +143,38 @@ TEST_CASE("The sprites of the monster effects stay out of the bloom, as when the
         Sprites[i].Live = false;
     }
     CHECK(created == 2);
+}
+
+TEST_CASE("A client character's drawn parts get a slot each, in draw order, with their own bones [effects]")
+{
+    namespace Attachments = Engine::Object::Attachments;
+    CharacterScope scope(MODEL_PLAYER);
+    CHARACTER* c = &scope.character();
+    PART_t temporary;
+
+    Attachments::BeginFrame();
+    Attachments::BeginCharacter(c);
+    Attachments::Slot* weapon =
+        Attachments::Record(c, &c->Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 3, 0, false, true, 0, false);
+    Attachments::Slot* copy =
+        Attachments::Record(c, &temporary, MODEL_SWORD, 0.f, 0.f, 15.f, 3, 0, true, true, 0, true);
+    REQUIRE(weapon != nullptr);
+    REQUIRE(copy != nullptr);
+    CHECK(weapon != copy);
+    CHECK(weapon->part == &c->Weapon[0]);
+    CHECK(copy->part == nullptr);
+    CHECK(copy->z == 15.f);
+    CHECK(Attachments::Bones(*weapon) != Attachments::Bones(*copy));
+
+    // The next frame's draw of the same character reuses the slots in the same order.
+    float (*bones)[3][4] = Attachments::Bones(*weapon);
+    Attachments::BeginFrame();
+    Attachments::BeginCharacter(c);
+    Attachments::Slot* again =
+        Attachments::Record(c, &c->Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 3, 0, false, true, 0, false);
+    CHECK(Attachments::Bones(*again) == bones);
+
+    CHARACTER preview;
+    CHECK(Attachments::Record(&preview, &preview.Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 0, 0, false, true, 0, false) ==
+          nullptr);
 }

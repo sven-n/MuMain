@@ -6847,9 +6847,9 @@ void NextGradeObjectRender(CHARACTER* c)
             case 15: // +15
             {
                 w->LinkBone = bornIndex[m];
-                RenderLinkObject(0.f, 0.f, 0.f, c, w, gradeType[m], 0, 0, true, true);
+                vec34_t* bones = RenderLinkObject(0.f, 0.f, 0.f, c, w, gradeType[m], 0, 0, true, true);
 
-                b->TransformByBoneMatrix(vPos, BoneTransform[0], o->Position);
+                b->TransformByBoneMatrix(vPos, bones[0], o->Position);
 
                 fLight2 = absf(sinf(WorldTime * 0.01f));
                 Vector(0.2f * fLight2, 0.4f * fLight2, 1.0f * fLight2, vLight);
