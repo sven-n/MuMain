@@ -45,11 +45,14 @@ body {
 	display: block;
 }
 
-/* The original's left-docked warp list, sitting on the HUD. */
+/* The original's left-docked warp list, standing on the HUD's left dragon (45 units over the bar),
+   which the HUD draws over the windows: capped to the room above it, the list is drawn at the
+   scale that fits (WindowPlacement's FitRegions). */
 .dock-left {
 	left: 0;
 	right: 0;
-	bottom: 0;
+	bottom: calc(45px * var(--hud-scale));
+	max-height: calc(100% - 45px * var(--hud-scale));
 	display: flex;
 	flex-direction: row;
 	align-items: flex-start;
@@ -96,10 +99,11 @@ body {
 .event-hud .slot[data-window="doppelganger_frame"] { left: calc(413px * var(--hud-scale)); top: calc(293px * var(--hud-scale)); }
 .event-hud .slot[data-window="duel_watch_users"] { left: calc(583px * var(--hud-scale)); top: calc(429px * var(--hud-scale)); }
 
-/* Where a free window (the friend list) first opens: the bottom-right corner above the HUD. */
+/* Where a free window (the friend list) first opens: the bottom-right corner above the HUD, raised
+   clear of the right dragon (45 units over the bar), which the HUD draws over the windows. */
 .free-bottom-right {
 	right: 0;
-	bottom: 0;
+	bottom: calc(45px * var(--hud-scale));
 }
 
 /* The original's centred NPC panels: a 640x480 stage in the screen's centre (1dp is one of its

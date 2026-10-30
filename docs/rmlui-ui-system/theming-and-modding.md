@@ -124,12 +124,12 @@ letters, digits, `_` and `-` and are normalized to lowercase. Missing ancestors,
 and inheritance cycles make a theme unavailable for selection.
 
 `[Stacking]` moves one of the theme's documents in the stacking order, when its layout makes two
-documents overlap the other way round. The classic theme puts its HUD under the windows
-(`main_frame.rml=1.95`; the lowest window is 2.0), so a window docked or dragged over the bar's
-ends covers the dragons there, as in 0.97, and its chat input over the windows and under the
-tooltips (`chat_input.rml=10.65`; tooltips are 10.69). The depths are the original windows' layer
-depths, listed in `UI/RmlBridge/RmlStackingOrder.cpp`; a document the theme does not list keeps
-its own.
+documents overlap the other way round. The classic theme puts its chat input over the windows,
+the HUD and the command windows, and under the settings window and the tooltips
+(`chat_input.rml=10.66`; the command windows are 10.65, settings 10.67, tooltips 10.69). Avoid a
+depth another document already has: documents at the same depth are ordered by focus. The depths
+are the original windows' layer depths, listed in `UI/RmlBridge/RmlStackingOrder.cpp`; a document
+the theme does not list keeps its own.
 
 1. Create `src/bin/Data/Interface/RmlUi/themes/<your-theme-name>/`.
 2. Declare `Base=legacy` or `Base=modern` in `[Theme]`, or supply your own complete stylesheets.

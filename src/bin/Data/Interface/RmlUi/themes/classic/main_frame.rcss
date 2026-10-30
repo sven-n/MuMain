@@ -49,15 +49,14 @@
 }
 
 /* The bar and its dragons (0.97: bar at y 432, dragons 108x45 at x 0 and 532, y 387). The bar
-   takes the pointer so clicks on it don't reach the world; the dragons don't. A window docked on a
-   side covers that side's dragon, as in 0.97: the theme stacks the HUD under the windows
-   (theme.ini [Stacking]).
-   On a wide screen the bar is centred and the windows dock at the screen's edge, so a docked
-   window would cover only part of the right dragon. The right dragon therefore hides whole while
-   the windows docked on the right (--world-right, the uncovered world's right edge in screen
-   pixels) reach past the bar's right end (50vw + 320dp: the bar is centred and one px here is
-   one screen px): its width is 108dp, minus that overlap magnified a thousand times, clamped to
-   0..108dp, i.e. all or nothing. The left side has no docked windows. */
+   takes the pointer so clicks on it don't reach the world; the dragons don't. 0.97 drew its
+   windows over the dragons; here the HUD stays over the windows, as in legacy, so the skill list
+   above the bar stays reachable beside a docked window. The right dragon hides instead while the
+   windows docked on the right reach over the bar's right end: while the uncovered world's right
+   edge (--world-right, screen pixels) is left of it (50vw + 320dp: the bar is centred and one px
+   here is one screen px). Its width is 108dp, minus that overlap magnified a thousand times,
+   clamped to 0..108dp, i.e. all or nothing. The windows that open near the left dragon (the move
+   list) and over the right one (the friend list) stand above them (workspace.rcss). */
 #hud_strip { left: 0dp; top: 0dp; width: 640dp; height: 48dp; pointer-events: auto; }
 .frame-art { position: absolute; top: 0dp; height: 48dp; pointer-events: none; }
 #frame_left   { left: 0dp;   width: 256dp; decorator: image(classic-hud-bar-left); }

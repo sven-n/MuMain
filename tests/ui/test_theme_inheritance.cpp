@@ -111,7 +111,13 @@ TEST_CASE("the classic theme stacks its chat input over the HUD and under the to
     const auto input = ThemedStackingDepth(classic, "chat_input.rml");
     REQUIRE(input);
     CHECK(*input > *StackingDepthForDocument("main_frame.rml"));
+    // Over the command windows it can overlap, never at their depth (equal depths order by focus).
+    CHECK(*input > *StackingDepthForDocument("command_window.rml"));
+    CHECK(*input > *StackingDepthForDocument("chat_command.rml"));
+    CHECK(*input < *StackingDepthForDocument("option_window.rml"));
     CHECK(*input < *StackingDepthForDocument("tooltip.rml"));
+    // The HUD keeps its own depth, over the windows, so the skill list beside them stays reachable.
+    CHECK(ThemedStackingDepth(classic, "main_frame.rml") == StackingDepthForDocument("main_frame.rml"));
 
     const ThemeInheritance legacy(std::filesystem::path(MU_RMLUI_DIR) / "themes/legacy");
     REQUIRE(legacy.IsValid());
