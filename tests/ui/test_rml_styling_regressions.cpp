@@ -7,6 +7,7 @@
 #include <RmlUi/Core/Mesh.h>
 #include <RmlUi/Core/TextShapingContext.h>
 #include <algorithm>
+#include <cmath>
 
 namespace
 {
@@ -23,6 +24,20 @@ Rml::DecoratorTiled::Tile AtlasTile(Rml::DecoratorTiled::TileFitMode mode)
     tile.align[1] = {Rml::Style::LengthPercentage::Percentage, 0.f};
     return tile;
 }
+
+// The area the mesh's triangles cover: the surface's area when its quads neither leave gaps nor overlap.
+float CoveredArea(const Rml::Mesh& mesh)
+{
+    float area = 0.f;
+    for (size_t i = 0; i + 2 < mesh.indices.size(); i += 3)
+    {
+        const Rml::Vector2f a = mesh.vertices[mesh.indices[i]].position;
+        const Rml::Vector2f b = mesh.vertices[mesh.indices[i + 1]].position;
+        const Rml::Vector2f c = mesh.vertices[mesh.indices[i + 2]].position;
+        area += std::abs((b.x - a.x) * (c.y - a.y) - (c.x - a.x) * (b.y - a.y)) * 0.5f;
+    }
+    return area;
+}
 }
 
 TEST_CASE("atlas repetition clips partial tiles without sampling adjacent sprites [ui][styling]")
@@ -31,34 +46,37 @@ TEST_CASE("atlas repetition clips partial tiles without sampling adjacent sprite
     auto* document = fixture.LoadMarkup(R"(<rml><body><div id="panel"></div></body></rml>)");
     REQUIRE(document);
     auto* panel = document->GetElementById("panel");
+    // Half a texel of the 8 x 6 sprite spanning 0.25..0.5 of the texture: no sample comes closer to its edge.
+    const float halfTexelX = 0.5f * 0.25f / 8.f;
+    const float halfTexelY = 0.5f * 0.25f / 6.f;
     for (auto mode : {Rml::DecoratorTiled::REPEAT, Rml::DecoratorTiled::REPEAT_X, Rml::DecoratorTiled::REPEAT_Y})
     {
         CAPTURE(mode);
         Rml::Mesh mesh;
         auto tile = AtlasTile(mode);
         tile.GenerateGeometry(mesh, panel->GetComputedValues(), {}, {19.f, 14.f}, {8.f, 6.f});
-        const size_t quads = mode == Rml::DecoratorTiled::REPEAT ? 9 : 3;
-        CHECK(mesh.vertices.size() == quads * 4);
-        CHECK(mesh.indices.size() == quads * 6);
+        const float width = mode == Rml::DecoratorTiled::REPEAT_Y ? 8.f : 19.f;
+        const float height = mode == Rml::DecoratorTiled::REPEAT_X ? 6.f : 14.f;
+        CHECK(CoveredArea(mesh) == doctest::Approx(width * height));
         for (const auto& vertex : mesh.vertices)
         {
             CHECK(vertex.position.x >= 0.f);
             CHECK(vertex.position.x <= 19.f);
             CHECK(vertex.position.y >= 0.f);
             CHECK(vertex.position.y <= 14.f);
-            CHECK(vertex.tex_coord.x >= 0.25f);
-            CHECK(vertex.tex_coord.x <= 0.5f);
-            CHECK(vertex.tex_coord.y >= 0.25f);
-            CHECK(vertex.tex_coord.y <= 0.5f);
+            CHECK(vertex.tex_coord.x >= 0.25f + halfTexelX - 1e-5f);
+            CHECK(vertex.tex_coord.x <= 0.5f - halfTexelX + 1e-5f);
+            CHECK(vertex.tex_coord.y >= 0.25f + halfTexelY - 1e-5f);
+            CHECK(vertex.tex_coord.y <= 0.5f - halfTexelY + 1e-5f);
         }
-        CHECK(mesh.vertices.back().position.y == (mode == Rml::DecoratorTiled::REPEAT_X ? 6.f : 14.f));
+        CHECK(mesh.vertices.back().position.y == height);
     }
 }
 
-TEST_CASE("a sheet sprite never samples the next sprite at its edge inside the sheet [ui][styling]")
+TEST_CASE("a sheet sprite stays half a texel inside its sprite at every edge [ui][styling]")
 {
     // The cash shop's zone tab: the upper 76 x 23 sprite of a 76 x 46 sheet, drawn at 1.6x. Its bottom edge lies on
-    // the next sprite; its other edges are the texture border, which the renderer clamps.
+    // the next sprite, the others on the texture border.
     UI::Tests::RmlLayoutFixture fixture;
     auto* document = fixture.LoadMarkup(R"(<rml><body><div id="panel"></div></body></rml>)");
     REQUIRE(document);
@@ -73,25 +91,23 @@ TEST_CASE("a sheet sprite never samples the next sprite at its edge inside the s
     Rml::Mesh mesh;
     tile.GenerateGeometry(mesh, panel->GetComputedValues(), {}, {121.6f, 36.8f}, {121.6f, 36.8f});
 
-    // The sprite and a band along its bottom edge; nothing splits it across.
-    CHECK(mesh.vertices.size() == 8);
+    // A band half a texel wide along every edge, the sprite mapped as one quad would be in between.
+    CHECK(mesh.vertices.size() == 16);
+    float width = 0.f;
     float height = 0.f;
     for (const auto& vertex : mesh.vertices)
+    {
+        width = std::max(width, vertex.position.x);
         height = std::max(height, vertex.position.y);
-    const float lastRowCentre = 22.5f / 46.f;
+    }
     for (const auto& vertex : mesh.vertices)
     {
+        CAPTURE(vertex.position.x);
         CAPTURE(vertex.position.y);
-        // Mapped as one quad would be, but never past the last row's centre.
-        CHECK(vertex.tex_coord.y == doctest::Approx(std::min(vertex.position.y / height * 0.5f, lastRowCentre)));
-        CHECK((vertex.tex_coord.x == 0.f || vertex.tex_coord.x == 1.f));
+        CHECK(vertex.tex_coord.x == doctest::Approx(std::clamp(vertex.position.x / width, 0.5f / 76.f, 75.5f / 76.f)));
+        CHECK(vertex.tex_coord.y ==
+              doctest::Approx(std::clamp(vertex.position.y / height * 0.5f, 0.5f / 46.f, 22.5f / 46.f)));
     }
-
-    // A sprite without an edge inside a sheet stays one quad.
-    Rml::Mesh whole;
-    tile.tile_data.texcoords[1] = {1.f, 1.f};
-    tile.GenerateGeometry(whole, panel->GetComputedValues(), {}, {121.6f, 36.8f}, {121.6f, 36.8f});
-    CHECK(whole.vertices.size() == 4);
     document->Close();
 }
 
