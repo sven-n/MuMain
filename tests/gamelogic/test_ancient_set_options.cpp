@@ -56,6 +56,25 @@ int IceSkillBonus(const ITEM_SET_OPTION& setOptions, int firstClass, int secondC
     return CSItemOption::GetMasteryBonus(WornSet(setOptions, 4, firstClass, secondClass), IceMastery);
 }
 
+// The game texts in English for the scope, then the language before it again.
+class EnglishTextsScope
+{
+public:
+    EnglishTextsScope() : m_previous(I18N::GetCurrentLocale())
+    {
+        I18N::SetLocale("en");
+    }
+    ~EnglishTextsScope()
+    {
+        I18N::SetLocale(m_previous.c_str());
+    }
+    EnglishTextsScope(const EnglishTextsScope&) = delete;
+    EnglishTextsScope& operator=(const EnglishTextsScope&) = delete;
+
+private:
+    std::string m_previous;
+};
+
 struct TableLine
 {
     std::wstring text;
@@ -106,7 +125,7 @@ TEST_CASE("Set options 24 to 28 have no description, the others keep theirs [gam
 
 TEST_CASE("The /SetName table shows each set option with its own value [gamelogic][items][sets]")
 {
-    I18N::SetLocale("en");
+    EnglishTextsScope english;
 
     ITEM_SET_OPTION set = EmptySet();
     set.byStandardOption[0][0] = 0; // Increase strength
