@@ -6,6 +6,7 @@
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
 
 #include <string>
+#include <vector>
 
 // The sound events of a model entry in the Monster Model tool (monsters
 // design, MN7, Q-MN76): a row per event with when it plays (animations or
@@ -43,6 +44,11 @@ SubTypeCondition GetSubTypeCondition(const Data::Monsters::MonsterSoundEvent& ev
 // Keeps the event's SubType value when it had one, else names 9 (the second
 // set of the Death Centurion and Shriker models).
 void SetSubTypeCondition(Data::Monsters::MonsterSoundEvent& event, SubTypeCondition condition);
+
+// The sounds Play plays for the event, without its chance: all of them, or
+// with a pick the `draw`th (0 or 1, drawn at random), the only one when it has
+// one sound.
+std::vector<std::string> PreviewSounds(const Data::Monsters::MonsterSoundEvent& event, int draw);
 
 // `slot` is the model's slot, `modelOpen` whether the game has it open (its
 // animations are offered then; else the named ones).

@@ -9,6 +9,7 @@
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MapPicker.h"
+#include "Core/Utilities/Random.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Data/GameData/MonsterData/MonsterSoundMoments.h"
@@ -113,11 +114,11 @@ std::vector<int> OfferedAnimations(int slot, bool modelOpen)
     return animations;
 }
 
-// Plays the event's sounds at the preview volume; a sound of a model that is
-// not open is loaded as the model loads it.
+// Plays the event's sounds at the preview volume, one of a pick's at random;
+// a sound of a model that is not open is loaded as the model loads it.
 void PlayEvent(const MonsterModelDefinition& model, const MonsterSoundEvent& event, bool modelOpen)
 {
-    for (const std::string& name : event.sounds)
+    for (const std::string& name : PreviewSounds(event, Random::RangeInt(0, 1)))
     {
         const std::optional<int> number = Data::Monsters::ModelLoader::FindSoundNumber(model, name);
         if (!number)
@@ -132,11 +133,6 @@ void PlayEvent(const MonsterModelDefinition& model, const MonsterSoundEvent& eve
             Data::Monsters::ModelLoader::LoadSound(*sound);
         }
         SoundPreview::Play(*number);
-        if (event.pick)
-        {
-            // A pick plays one of them: the first is heard.
-            break;
-        }
     }
 }
 
@@ -534,6 +530,16 @@ void SetSubTypeCondition(MonsterSoundEvent& event, SubTypeCondition condition)
     {
         event.notSubType = value;
     }
+}
+
+std::vector<std::string> PreviewSounds(const MonsterSoundEvent& event, int draw)
+{
+    if (!event.pick || event.sounds.empty())
+    {
+        return event.sounds;
+    }
+    const size_t index = static_cast<size_t>(draw) < event.sounds.size() ? static_cast<size_t>(draw) : 0;
+    return {event.sounds[index]};
 }
 
 void Render(MonsterModelDefinition& model, int slot, bool modelOpen, ModelDraft& draft)

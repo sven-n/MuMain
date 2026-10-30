@@ -35,6 +35,7 @@
 
 #include <array>
 #include <optional>
+#include <string>
 #include <vector>
 
 using Data::Monsters::MonsterDefinition;
@@ -723,6 +724,24 @@ TEST_CASE("Monster Model: a sound event's SubType condition keeps its number, a 
     SetSubTypeCondition(event, SubTypeCondition::Any);
     CHECK_FALSE(event.subType);
     CHECK_FALSE(event.notSubType);
+}
+
+TEST_CASE("Monster Model: Play plays all of an event's sounds, or one of a pick's by the draw [editor][monsters]")
+{
+    using namespace MuEditor::Monsters::SoundEventsEditor;
+    using Sounds = std::vector<std::string>;
+    Data::Monsters::MonsterSoundEvent event;
+    event.sounds = {"SOUND_MONSTER_DSIDLE1", "SOUND_MONSTER_DSIDLE2"};
+    // Without a pick the game plays them together, whatever the draw.
+    CHECK(PreviewSounds(event, 1) == event.sounds);
+
+    event.pick = Data::Monsters::MonsterSoundDraw::Rand;
+    CHECK(PreviewSounds(event, 0) == Sounds{"SOUND_MONSTER_DSIDLE1"});
+    CHECK(PreviewSounds(event, 1) == Sounds{"SOUND_MONSTER_DSIDLE2"});
+
+    // A pick of one sound: the game plays it one time in two, Play each time.
+    event.sounds = {"SOUND_MONSTER_DSIDLE1"};
+    CHECK(PreviewSounds(event, 1) == Sounds{"SOUND_MONSTER_DSIDLE1"});
 }
 
 #endif // _EDITOR
