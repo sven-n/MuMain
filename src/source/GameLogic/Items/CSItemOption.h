@@ -182,6 +182,8 @@ public:
     // The set's option table, written to the TextList globals without drawing (CSetItemExplanation
     // draws it through RmlUi); returns the line count, 0 for none.
     int BuildOptionHelperTextList();
+    // The option table of `setOption`, as BuildOptionHelperTextList() writes it; returns the line count.
+    static int BuildSetOptionTextList(const ITEM_SET_OPTION& setOption);
 
     bool IsAncientSetEquipped() const { return m_SetSearchResultCount > 0; }
 

@@ -3,9 +3,54 @@
 
 #include "GameLogic/Items/CSItemOption.h"
 
+#include "Engine/Object/ZzzInventory.h"
 #include "I18N/All.h"
 
 #include <cstdint>
+#include <cwchar>
+#include <string>
+#include <vector>
+
+namespace
+{
+constexpr std::uint8_t NoOption = 0xFF;
+
+// A set with every option slot empty, the way the set data marks an empty slot.
+ITEM_SET_OPTION EmptySet()
+{
+    ITEM_SET_OPTION set{};
+    std::wcscpy(set.strSetName, L"Test");
+    set.bySetItemCount = 4;
+    set.byOptionCount = 4;
+    for (auto& options : set.byStandardOption)
+    {
+        options.fill(NoOption);
+    }
+    set.byExtOption.fill(NoOption);
+    set.byFullOption.fill(NoOption);
+    return set;
+}
+
+struct TableLine
+{
+    std::wstring text;
+    int color;
+};
+
+// The table's lines with text, leaving out its empty spacing lines.
+std::vector<TableLine> TextLines(int lineCount)
+{
+    std::vector<TableLine> lines;
+    for (int i = 0; i < lineCount; ++i)
+    {
+        if (TextList[i][0] != L'\0' && TextList[i][0] != L'\n')
+        {
+            lines.push_back({TextList[i], TextListColor[i]});
+        }
+    }
+    return lines;
+}
+} // namespace
 
 TEST_CASE("Set options 24 to 28 have no description, the others keep theirs [gamelogic][items][sets]")
 {
@@ -32,4 +77,33 @@ TEST_CASE("Set options 24 to 28 have no description, the others keep theirs [gam
     CHECK(CSItemOption::GetSetOptionFormat(35) == I18N::Game::WaterAttributeSkillIncreaseDamageD);
     CHECK(CSItemOption::GetSetOptionFormat(36) == nullptr);
     CHECK(CSItemOption::GetSetOptionFormat(0xFF) == nullptr);
+}
+
+TEST_CASE("The /SetName table shows each set option with its own value [gamelogic][items][sets]")
+{
+    I18N::SetLocale("en");
+
+    ITEM_SET_OPTION set = EmptySet();
+    set.byStandardOption[0][0] = 0; // Increase strength
+    set.byStandardOptionValue[0][0] = 10;
+    set.byStandardOption[1][0] = 24; // not supported: no line
+    set.byStandardOptionValue[1][0] = 2;
+    set.byExtOption[0] = 15; // Increase critical damage rate
+    set.byExtOptionValue[0] = 5;
+    set.byFullOption[0] = 17; // Increase excellent damage rate
+    set.byFullOptionValue[0] = 7;
+    set.byFullOption[1] = 3; // Increase stamina
+    set.byFullOptionValue[1] = 25;
+
+    const auto lines = TextLines(CSItemOption::BuildSetOptionTextList(set));
+
+    REQUIRE(lines.size() == 5); // the set's name line, then one line per supported option
+    CHECK(lines[1].text == L"Increase strength +10");
+    CHECK(lines[1].color == TEXT_COLOR_BLUE);
+    CHECK(lines[2].text == L"Increase critical damage rate 5%");
+    CHECK(lines[2].color == TEXT_COLOR_GREEN);
+    CHECK(lines[3].text == L"Increase excellent damage rate 7%");
+    CHECK(lines[3].color == TEXT_COLOR_YELLOW);
+    CHECK(lines[4].text == L"Increase stamina +25");
+    CHECK(lines[4].color == TEXT_COLOR_YELLOW);
 }
