@@ -83,6 +83,15 @@ static_assert(std::ssize(kSetOptionFormats) == SET_OPTION_COUNT, "one descriptio
 static_assert(MASTERY_OPTION == AT_SET_OPTION_ICE_MASTERY - AT_SET_OPTION_IMPROVE_STRENGTH,
               "the mastery options start at MASTERY_OPTION");
 
+// Whether a wearer of base class `firstClass` gets the set's class-bound options (the mastery
+// options), like in the original client: the set's byRequireClass names the class, 1 for the class
+// as it is, 2 only once it has its second class (`secondClass`).
+bool FulfillsClassRequirement(const ITEM_SET_OPTION& setOptions, int firstClass, int secondClass)
+{
+    const int requirement = setOptions.byRequireClass[firstClass];
+    return requirement != 0 && secondClass >= requirement - 1;
+}
+
 using FilePtr = std::unique_ptr<FILE, decltype(&std::fclose)>;
 
 FilePtr OpenBinaryFile(const wchar_t* filename)
@@ -328,10 +337,10 @@ void CSItemOption::TryAddSetOption(std::uint8_t option, int value, int optionInd
                                    const ITEM_SET_OPTION& setOptions, bool isThisSetComplete, bool isFullOption,
                                    bool isExtOption, int firstClass, int secondClass)
 {
-    // An empty slot or an option the client doesn't support (no description) adds nothing.
+    // An empty slot or an option the client doesn't support (no description) adds nothing, and a
+    // mastery option only counts for the class the set names.
     if (GetSetOptionFormat(option) == nullptr || value == 0 ||
-        (option >= MASTERY_OPTION &&
-         (setOptions.byRequireClass[firstClass] && secondClass >= setOptions.byRequireClass[firstClass] - 1)))
+        (option >= MASTERY_OPTION && !FulfillsClassRequirement(setOptions, firstClass, secondClass)))
     {
         return;
     }

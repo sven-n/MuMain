@@ -31,6 +31,19 @@ ITEM_SET_OPTION EmptySet()
     return set;
 }
 
+// SKILL_ATTRIBUTE::MasteryType of the ice skills.
+constexpr std::uint8_t IceMastery = 0;
+
+// The ice skill bonus `setOptions` gives a wearer of base class `firstClass` with all four items.
+int IceSkillBonus(const ITEM_SET_OPTION& setOptions, int firstClass, int secondClass)
+{
+    SET_SEARCH_RESULT_OPT worn{};
+    worn.CompleteSetItemCount = 4;
+    worn.ItemCount = 4;
+    CSItemOption::AddSetOptions(worn, setOptions, firstClass, secondClass);
+    return CSItemOption::GetMasteryBonus(worn, IceMastery);
+}
+
 struct TableLine
 {
     std::wstring text;
@@ -106,4 +119,23 @@ TEST_CASE("The /SetName table shows each set option with its own value [gamelogi
     CHECK(lines[3].color == TEXT_COLOR_YELLOW);
     CHECK(lines[4].text == L"Increase stamina +25");
     CHECK(lines[4].color == TEXT_COLOR_YELLOW);
+}
+
+TEST_CASE("A mastery set option counts only for the class the set names [gamelogic][items][sets]")
+{
+    ITEM_SET_OPTION set = EmptySet();
+    set.byFullOption[0] = MASTERY_OPTION; // Ice attribute skill increase damage
+    set.byFullOptionValue[0] = 20;
+
+    // A set that names no class gives it to nobody, as in the original client.
+    CHECK(IceSkillBonus(set, CLASS_WIZARD, 0) == 0);
+
+    set.byRequireClass[CLASS_WIZARD] = 1; // Dark Wizards
+    CHECK(IceSkillBonus(set, CLASS_WIZARD, 0) == 20);
+    CHECK(IceSkillBonus(set, CLASS_WIZARD, 1) == 20);
+    CHECK(IceSkillBonus(set, CLASS_KNIGHT, 0) == 0);
+
+    set.byRequireClass[CLASS_WIZARD] = 2; // Soul Masters only
+    CHECK(IceSkillBonus(set, CLASS_WIZARD, 0) == 0);
+    CHECK(IceSkillBonus(set, CLASS_WIZARD, 1) == 20);
 }
