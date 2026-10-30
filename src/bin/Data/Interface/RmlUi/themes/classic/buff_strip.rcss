@@ -1,3 +1,0 @@
-/* Classic (0.97): no buff icons -- 0.97 showed buffs only as their effects on the character. */
-
-#strip_slot, #panel { display: none; }
