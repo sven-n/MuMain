@@ -281,6 +281,20 @@
 .mh-btn-igs:hover, .mh-btn-setting:hover { filter: brightness(1.3); }
 .mh-btn-setting:active, .mh-btn-igs:active { margin-top: 1px; }
 
+/* The labels keep 3 units off each end, where the plate's rivets are; the buttons on the right
+   (Setting, Add, Delete) are 44 wide from x 130 and the footer's two 60 wide, where the window has
+   the room (legacy's 38 / 52 put a longer label over the rivets). Class and id, to beat
+   mu_helper_config.rcss's id rules. */
+.mh-btn-label { box-sizing: border-box; padding: 0 calc(3px * var(--root-scale)); }
+.mh-btn-setting#btn_potion_setting, .mh-btn-setting#btn_skill2_setting, .mh-btn-setting#btn_skill3_setting,
+.mh-btn-setting#btn_add_item, .mh-btn-setting#btn_delete_item { left: 130px; width: 44px; }
+.mh-btn-label#btn_potion_setting_label, .mh-btn-label#btn_skill2_setting_label, .mh-btn-label#btn_skill3_setting_label,
+.mh-btn-label#btn_add_item_label, .mh-btn-label#btn_delete_item_label { left: 130px; width: calc(44px * var(--root-scale)); }
+.mh-btn-igs#btn_init { left: 52px; width: 60px; }
+.mh-btn-igs#btn_save { left: 116px; width: 60px; }
+.mh-btn-label#btn_init_label { left: 52px; width: calc(60px * var(--root-scale)); }
+.mh-btn-label#btn_save_label { left: 116px; width: calc(60px * var(--root-scale)); }
+
 /* Fields: black, edged in the window line colour, with the window's text colour. */
 .mh-number-plate, .mh-string-plate { decorator: none; box-sizing: border-box; border: 1px rgb(146, 134, 121); background-color: rgb(0, 0, 0); }
 .mh-field { color: rgb(230, 220, 200); }
