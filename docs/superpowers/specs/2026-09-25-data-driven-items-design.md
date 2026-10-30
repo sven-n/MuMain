@@ -49,7 +49,7 @@ share with items) is planned in the
 | D12 | Id ranges | No reserved number ranges for custom items, and no range checks (`type >= X && type <= Y`) in new code; everything an item "is" comes from its data. OpenMU must keep supporting the original Season 6 client **and** this client (see section 7). |
 | D13 | Other item files | `ItemAddOption`, `SocketItem`, `Mix`, `pet` and set options are decided later, when we know more. |
 | D14 | Item options | The item file only holds **links** to the option groups an item can have (Luck, additional option, excellent, wing, harmony, guardian, socket, …). The option definitions (values, chances, levels) live in their own files. Related data stays together in one file, e.g. an option definition with all its levels and values. |
-| D15 | Tooltips | Tooltips become data-driven with JSON data, converted from `ItemTooltip*` / `ItemLevelTooltip` (see "Unused item files in the repo"). Phase 8, after the item phases; moved earlier if the item changes turn out to need it. The tooltip bmd files stayed in the repo until then; they were removed once the item data held the tooltips and the names by level (#815). **Update (2026-10-22, #815):** an item's own tooltip texts (its `description` lines) live in its item file, with their translations, as client-only fields that the OpenMU exchange leaves out (D22). Texts and layouts that many items share get a tooltip file of their own. |
+| D15 | Tooltips | Tooltips become data-driven with JSON data, converted from `ItemTooltip*` / `ItemLevelTooltip` (see "Unused item files in the repo"). Phase 8, after the item phases; moved earlier if the item changes turn out to need it. The tooltip bmd files stayed in the repo until then; they were removed once the item data held the tooltips and the names by level (#815). **Update (2026-10-22, #815):** an item's own tooltip texts (its `description` lines) live in its item file, with their translations, as client-only fields that the OpenMU exchange leaves out (D22). Texts and layouts that many items share get a tooltip file of their own. **Status (2026-10-29):** steps 1–5 of #815 are merged (#813–#836, and #863 resolves the names when the data loads); phase 8 lists what is left. |
 | D16 | Unused item bmd copies | Removed on this branch; the game only loads `Item_<lang>.bmd`. |
 | D17 | Translations in phase 2 | Item names moved into phase 2, because the per-language bmd files were the only place the Portuguese and Spanish names existed. Names are `LocalizedString`s imported from all three files; the UI locale (the same setting as the `.resx` texts) picks the shown name, also when it changes at runtime. On disk, each item's `name` is an object of names by language (`{"en": "Blade", "es": "Espada", "pt": "Lâmina"}`, English first) in the item files; separate translation files were tried and dropped as extra maintenance. Phase 5 keeps only the translation tooling. |
 | D18 | Repairing the legacy data | The bmd import recovers names that ran past the 30-byte name field and takes the fields they overwrote from a language whose name did not reach them (defaults when none has them). Names that are not UTF-8 are read as Windows-1252. The changes are listed in the phase 2 PR and in `docs/item-data.md`. |
@@ -98,8 +98,9 @@ field meanings (especially the style and header words) are guesses.
 
 This is exactly the data a data-driven tooltip needs (which lines, which
 texts, which values, per item and item level), and it comes with names in
-three languages. The files are kept as the input for data-driven tooltips
-(D15).
+three languages. They were the input for data-driven tooltips (D15): #815
+moved their texts and names into the items' `description` and `nameLines`
+and into `Data/Items/Tooltips/Tooltip.json`.
 
 Extra item bmd copies that no code loaded (`Data/Local/Item.bmd`,
 `Eng/item.bmd`, `Eng/item_eng_old.bmd`, `Eng/item_eng_orig.bmd`,
@@ -635,7 +636,7 @@ in both repos (as separate PRs, one per repo).
 | 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9) on the rules of D26, including add/remove items and picking the looks of an item from lists. Takes over phase 5's item list. Done. |
 | 7 | Item sync, client side | Client | MuMain | 2, 6 | The exchange file of items and item formulas; MuEditor's Export, Import (step 1) and Update from server (step 4), the imports with a diff (section 6). The client-only fields of the item files (tags at first, `description`) are left out. |
 | B | Item sync, server side | Server | OpenMU | 7 (file format) | The item formulas as data (step 2), the read-only export endpoint (step 3) and the import page (step 5), as steps of phase 7 (section 6). |
-| 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. In steps (#815): an item's own texts go into its item file (`description`, D15), shared texts and layouts into a tooltip file. |
+| 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. In steps (#815): an item's own texts go into its item file (`description`, D15), shared texts and layouts into a tooltip file. Steps 1–5 done (#813–#836, #863). Left: the item cases and the class line list still in code, the ground label colours, and the tooltip editor (#815 step 6); see the phase details. |
 | 9 | Item option definitions | Both | MuMain + C | 2 | Option groups in their own JSON files matching OpenMU's `ItemOptionDefinition`; exchange file and editor. |
 | 10 | Item sets | Both | MuMain + C | 2 | Item sets in JSON matching OpenMU's `ItemSetGroup`; exchange file and editor; based on the `item-set-editor` branch. Moved earlier if needed. |
 | C | Option and set sync, server side | Server | OpenMU | 9, 10 | Admin panel import/export for the option definition and item set exchange files. |
@@ -1261,12 +1262,36 @@ server with original clients (after phases 6 and B).
       new items take their server-only values from a template item.
 
    **B (OpenMU):** steps 2, 3 and 5.
-8. **Data-driven tooltips** (D15): convert `ItemTooltip_<lang>`,
-   `ItemTooltipText_<lang>` and `ItemLevelTooltip_<lang>` into JSON (line
-   texts as `LocalizedString`, like item names), and let `RenderItemInfo()`
-   build tooltips from that data instead of hardcoded lines. Adds a tooltip
-   editor to MuEditor. The tooltip bmd files are deleted afterwards.
-   Moved earlier if the item phases need it.
+8. **Data-driven tooltips** (D15), in steps (#815). Done in steps 1–5
+   (#813–#836):
+   - an item's own lines are its `description`, its names by level its
+     `nameLines`, with their translations;
+   - the stat, durability and requirement lines are the `default` layout of
+     `Data/Items/Tooltips/Tooltip.json`, with shared texts, built-in values
+     and conditions;
+   - `BuildItemTooltipText()` builds the tooltip from that data, and a
+     snapshot test checks every item's tooltip;
+   - the tooltip bmd files are deleted (#836), and #863 resolves the
+     placeholder and condition names when the data loads.
+
+   `docs/item-data.md` describes the data (Tooltip layouts, Descriptions,
+   Name lines). Left:
+   - **Item cases still in code** whose lines the data can already hold:
+     the ribbon and chocolate boxes, the Pumpkin of Luck and the
+     Jack O'Lanterns (`{addOptionValue1}`), the Box of Luck's texts by level,
+     the jewel bundles' "… is combined" lines (`{bundleCount}`), and the
+     arrows' and bolts' damage line.
+   - **The class line list** (`IsRequireClassRenderItem`: the items whose
+     tooltip has no class lines), as an item tag.
+   - **Ground label colours** (`BuildGroundItemLabelDescriptor`): the names
+     come from `nameLines` (#834), the colours are still chosen per item.
+   - **The tooltip editor** in MuEditor (#815 step 6, designed as four PRs).
+
+   Lines that need the game stay code: the reset fruits' points, the saved
+   revive and portal places, the Sign of Dimensions' count, the socket
+   seeds, the Armor of Guardsman's Chaos Castle table, the Lost Map and
+   Symbol of Kundun, and the Horn of Fenrir. The option sections come with
+   phases 9 and 10.
 9. **Item option definitions** (D14): the option groups items link to
    (Luck, additional option, excellent, wing, harmony, guardian, socket, …)
    get their own JSON files, matching OpenMU's `ItemOptionDefinition`, with
@@ -1349,8 +1374,8 @@ server with original clients (after phases 6 and B).
 
     **Level variants** become items of their own at the same time: items
     that are a different item at each item level (Box of Luck +13 = Heart
-    of Dark Lord, Rena +1–3, Wizard's Ring +1–3, …; see `ItemLevelTooltip`
-    and `GetItemName`) get their own entries with their own names, flags
+    of Dark Lord, Rena +1–3, Wizard's Ring +1–3, …; their names by level
+    are their `nameLines`) get their own entries with their own names, flags
     and tooltips. Their legacy id is then (group, number, level): the
     Season 6 serializer sends the old item with that level, and requests
     from original clients are mapped back. Until then the rule code checks
@@ -1470,7 +1495,7 @@ types and model slots (4d2). 239 identify an item by its model slot
 | Kind | Places | Moved by | Not moved yet |
 |---|---:|---|---|
 | Character animation by item | 67 | SK2 (cast animations) | Stances by weapon, normal attacks, conditions on the mount |
-| UI and tooltips | 65 | 8, 12 | Ground label colours, the repair info, bonuses shown in the character window |
+| UI and tooltips | 65 | 8, 12 | Ground label colours, the tooltip's class line list and item cases (phase 8), bonuses shown in the character window |
 | Item use | 58 | 12 (level variants), 11 (pet) | `TryConsumeItem`, `ItemValue`, stack sizes, hotkeys, requirement exceptions |
 | Item lists | 42 | 3 (the data exists), 8, 9 | Call sites outside the phase 3 files (3b) |
 | Mounts, pets, helpers | 41 | 11 (`pet.bmd`) | The spawned model, ride height, camera, HUD |
@@ -1581,7 +1606,8 @@ types and model slots (4d2). 239 identify an item by its model slot
   exchange.
 - **Smaller kinds:** weapon kind for stances (10), ground height and light
   (8, extends 4b), names and colours outside `RenderItemInfo` (8, widens
-  phase 8), ground label colours (7), transformation ring rules (6; their
+  phase 8; the names moved with #834), ground label colours (7),
+  transformation ring rules (6; their
   looks go to MN), mix values and packed jewels (6, phase 11), ids that
   encode a value such as the socket element (5), effects whose mesh is an
   item's model slot (4, FX1).
