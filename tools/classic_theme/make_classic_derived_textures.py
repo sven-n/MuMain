@@ -8,8 +8,8 @@ theme ships the result instead, drawn unscaled:
   Message_box2_230.ozj  the same stretched to 230: the in-game message box's edges.
   Message_box1_60x5.ozj Message_box1 (213x40) stretched to 60 and stacked 5 times: the Season 2
                         Chaos Goblin menu's stone (213x300).
-  Message_box1_40x6.ozj Message_box1 (213x40) stacked 6 times, unscaled: the Season 2 trainer's
-                        and Lahap's stones (213x200 and 213x240, cut from it).
+  Message_box1_40x7.ozj Message_box1 (213x40) stacked 7 times, unscaled: the Season 2 trainer's
+                        and Lahap's stones (213x200, 213x240 and 213x280, cut from it).
   Message_box1_440x300.ozj  Message_box1 widened to 440 for the settings window: its 5-texel sides
                         kept at their width, the stone between them stretched in proportion, in
                         rows down to 300.
@@ -112,10 +112,10 @@ def main():
         stack.paste(strip, (0, i * strip.height))
     write_ozj("Message_box1_60x5.ozj", prefix, stack)
 
-    rows = Image.new("RGB", (stone.width, stone.height * 6))
-    for i in range(6):
+    rows = Image.new("RGB", (stone.width, stone.height * 7))
+    for i in range(7):
         rows.paste(stone, (0, i * stone.height))
-    write_ozj("Message_box1_40x6.ozj", prefix, rows)
+    write_ozj("Message_box1_40x7.ozj", prefix, rows)
 
     write_ozj("Message_box1_440x300.ozj", prefix, widen_box_part(stone, 440, 300))
     prefix, edge = read_ozj("Message_box2.ozj")

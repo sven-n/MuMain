@@ -402,7 +402,8 @@ already loaded. Referencing a player's installed font does not package it with t
 inherits `legacy` and restyles the login box, server list, character select and creation, HUD,
 inventory, character, party, NPC shop, storage, trade, Chaos Machine, guild, event entries,
 message boxes, confirmations, the Esc menus, the command window (D) and chat. The NPC menus that
-share the Esc menu's document keep legacy's look, as 0.97 has none of them. Where the Season 1 and
+share the Esc menu's document take the Season 2 client's boxes, or the trainer's box where no
+classic client has the menu. Where the Season 1 and
 2 clients, which kept the classic interface, add a part for something MuMain has, the theme draws
 it as they did instead of hiding it: on the HUD the SD column and the command window and friend
 buttons, in the character window the quest and pet buttons, in the inventory the personal shop

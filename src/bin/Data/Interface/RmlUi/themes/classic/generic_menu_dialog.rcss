@@ -6,11 +6,12 @@
    is redrawn additively in (0.8, 0.6, 0.4) and each label is centred in white at y + 5. The rules
    are at the end of this file, scoped to #panel.system-menu.
 
-   The Chaos Goblin's menu (kind "chaos-mix"), the trainer's (npc-menu, trainer-recover; the other
-   npc-menu menus take the trainer's box) and Lahap's (gem-integration) take the Season 2 client's
-   boxes (scoped to their kinds, at the end of this file). The other NPC menus (elpis, elpis-about,
-   reset-points, delgardo, cherry-blossom, and the menus without a kind) keep the S6 look: no
-   classic client has them. This file replaces themes/legacy/generic_menu_dialog.rcss whole, so
+   The Chaos Goblin's menu (kind "chaos-mix"), the trainer's (npc-menu, trainer-recover), Lahap's
+   (gem-integration, gem-integration-jewel, gem-integration-amount) and Elpis's (elpis,
+   elpis-about) take the Season 2 client's boxes (scoped to their kinds, at the end of this file).
+   The NPC menus no classic client has (the other npc-menu menus, reset-points, delgardo,
+   cherry-blossom) take the trainer's box, and the personal shop's currency menu (menu id
+   "personal-shop-price-type", no kind) the same parts in the flowing layout. This file replaces themes/legacy/generic_menu_dialog.rcss whole, so
    every rule below that is not scoped to the system menu is legacy's, verbatim; the four legacy
    rules the system menu drops are marked where they stood. The shell's frame sprites and header
    come from legacy's window_shell.rml/.rcss and are hidden here for the system menu only.
@@ -252,6 +253,7 @@
 #panel[data-kind="reset-points"], #panel[data-kind="delgardo"] { height: 222dp; }
 #panel[data-kind="elpis"], #panel[data-kind="elpis-about"] { height: 297dp; }
 #panel[data-kind="chaos-mix"] { height: 312dp; }
+#panel[data-kind="gem-integration-jewel"], #panel[data-kind="gem-integration-amount"] { top: 100dp; height: 267dp; }
 
 /* Where the box's RenderTexts() drew the lines: the first one's text top less half the line gap
    (the glyphs, 9 tall, centre in their line box), one advance apart. */
@@ -303,6 +305,37 @@
 #panel[data-kind="elpis"] .gmd-button-cell:nth-child(2), #panel[data-kind="elpis-about"] .gmd-button-cell:nth-child(2) { top: 175dp; }
 #panel[data-kind="elpis"] .gmd-button-cell:nth-child(3), #panel[data-kind="elpis-about"] .gmd-button-cell:nth-child(3) { top: 205dp; }
 #panel[data-kind="reset-points"] .gmd-button-cell:nth-child(1) { top: 105dp; }
+
+/* CGemIntegrationUnityMsgBox, which showed the jewels and then, in the same box, the amounts:
+   untitled, its lines centred from the top as the flow sets them, the buttons from 50 below the
+   top edge (30 in the content box). The jewels two per row, MSGBOX_BTN_EMPTY_SMALL_WIDTH + 20 (84)
+   wide at x 20 and 124 (4 and 108 here), 34 apart; the amounts one per row, 128 wide at x 50,
+   39 apart. Close 20 above the bottom edge, as in every native box. */
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(-n+10),
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(-n+3) {
+	position: absolute;
+	width: auto;
+	margin: 0;
+}
+#panel[data-kind="gem-integration-jewel"] .gmd-btn.cols-2 { width: 84dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(odd) { left: 4dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(even) { left: 108dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(1),
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(2) { top: 30dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(3),
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(4) { top: 64dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(5),
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(6) { top: 98dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(7),
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(8) { top: 132dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(9),
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(10) { top: 166dp; }
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(-n+3) { left: 34dp; }
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(1) { top: 30dp; }
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(2) { top: 69dp; }
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(3) { top: 108dp; }
+/* The Close cell (the 11th, compact) keeps the native-frame rule's left: 0. */
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell.compact { left: 0; }
 
 /* CChaosMixMenuMsgBox: each recipe's lines 15 apart from their own top (40, 125, 210, less half
    the line gap), one line each as native draws them (a wrapped line would run into the button),
@@ -468,8 +501,8 @@
    120 (Delgado's three lines end above them), 90 (the reset's one) or 60, 90 and 120 (the cherry
    blossom's three).
    Positions below are from the box's top-left (213, 90). The stone is the derived
-   Message_box1_40x6 (six rows, unscaled), cut to the rows the box shows. */
-@spritesheet classic-tr-stone-sheet { src: ../../../Classic/Message_box1_40x6.jpg; classic-tr-stone: 0px 5px 213px 195px; classic-lh-stone: 0px 0px 213px 240px; }
+   Message_box1_40x7 (seven rows, unscaled), cut to the rows the box shows. */
+@spritesheet classic-tr-stone-sheet { src: ../../../Classic/Message_box1_40x7.jpg; classic-tr-stone: 0px 5px 213px 195px; classic-lh-stone: 0px 0px 213px 240px; classic-lj-stone: 0px 0px 213px 280px; }
 @spritesheet classic-tr-plate-sheet { src: ../../../Classic/Message_box.jpg; classic-tr-plate: 0px 0px 213px 64px; }
 @spritesheet classic-tr-exit-sheet  { src: ../../../Classic/Exit_01.jpg; classic-tr-exit: 0px 0px 24px 24px; }
 @spritesheet classic-tr-exit2-sheet { src: ../../../Classic/Exit_02.jpg; classic-tr-exit-pressed: 0px 0px 24px 24px; }
@@ -616,6 +649,135 @@
 }
 #panel[data-kind="gem-integration"] .gmd-btn.compact:hover,
 #panel[data-kind="gem-integration"] .gmd-btn.compact:active { image-color: #ffffff; decorator: image(classic-tr-plate fill); }
+
+/* Lahap's jewel and amount menus (kinds "gem-integration-jewel" and "gem-integration-amount"): the
+   Season 2 client's message box 0xa2 (RE\mains2: drawn in 006a9ad0), which shows both in one box,
+   in the 640x480 frame:
+   - the box: Message_box2 (213x5) at (213, 120), seven Message_box1 rows from y 125, and
+     Message_box2 again at y 405 -- 213x290;
+   - its lines (texts 1804 and 1805) white, left-aligned at x 238, their text tops at 150 and 160
+     (the title as on Lahap's first box, centred at 15);
+   - the jewels on Message_box plates squashed to 80x25, two to a row at x 235 and 325 (Season 2
+     has only Bless and Soul, MuMain ten jewels: five rows, 30 apart from y 185), tinted 0.5 grey
+     and white under the mouse, their labels white, (200, 240, 255) under the mouse;
+   - the amounts on plates squashed to 170x35 at x 235, 45 apart (from y 225, under the jewels;
+     MuMain shows them on their own, from the jewels' row, y 185), tinted 0.7 grey and white under
+     the mouse, their labels (200, 240, 255), centred (bold in Season 2, whose labels are shorter;
+     MuMain's don't fit the plate in bold);
+   - Close: a plate squashed to 81x25 at (279, 365), as on Lahap's first box.
+   Positions below are from the box's top-left (213, 120). */
+#panel[data-kind="gem-integration-jewel"], #panel[data-kind="gem-integration-amount"] {
+	top: 120dp;
+	width: 213dp;
+	height: 290dp;
+	margin-left: -106.5dp;
+}
+#panel[data-kind="gem-integration-jewel"] .window-shell-sprite-back, #panel[data-kind="gem-integration-amount"] .window-shell-sprite-back,
+#panel[data-kind="gem-integration-jewel"] .window-shell-header-rail, #panel[data-kind="gem-integration-amount"] .window-shell-header-rail { decorator: none; }
+#panel[data-kind="gem-integration-jewel"] .window-shell-sprite-top, #panel[data-kind="gem-integration-amount"] .window-shell-sprite-top { height: 5dp; decorator: image(classic-cm-edge); }
+#panel[data-kind="gem-integration-jewel"] .window-shell-sprite-middle, #panel[data-kind="gem-integration-amount"] .window-shell-sprite-middle { top: 5dp; bottom: 5dp; decorator: image(classic-lj-stone fill); }
+#panel[data-kind="gem-integration-jewel"] .window-shell-sprite-bottom, #panel[data-kind="gem-integration-amount"] .window-shell-sprite-bottom { height: 5dp; decorator: image(classic-cm-edge); }
+#panel[data-kind="gem-integration-jewel"].native-frame .window-shell-content,
+#panel[data-kind="gem-integration-amount"].native-frame .window-shell-content { top: 0; bottom: 0; left: 0; right: 0; }
+
+/* The title centred at 15; the line under it left-aligned at 25, at 30. */
+#panel[data-kind="gem-integration-jewel"] .gmd-lines, #panel[data-kind="gem-integration-amount"] .gmd-lines {
+	position: absolute;
+	left: 0;
+	right: 0;
+	width: auto;
+	top: 14.5dp;
+	line-height: 10dp;
+}
+#panel[data-kind="gem-integration-jewel"] .gmd-lines .gmd-line, #panel[data-kind="gem-integration-amount"] .gmd-lines .gmd-line { margin-bottom: 0; padding-left: 25dp; text-align: left; white-space: nowrap; }
+#panel[data-kind="gem-integration-jewel"] .gmd-lines .gmd-line:first-child, #panel[data-kind="gem-integration-amount"] .gmd-lines .gmd-line:first-child { margin-bottom: 5dp; padding-left: 0; text-align: center; }
+
+/* The jewels: 80x25 at 22 and 112, rows at 65, 95, 125, 155 and 185. A long name wraps onto two
+   10-unit lines inside the plate. */
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(odd) { left: 22dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(even) { left: 112dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(1),
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(2) { top: 65dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(3),
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(4) { top: 95dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(5),
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(6) { top: 125dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(7),
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(8) { top: 155dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(9),
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(10) { top: 185dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-btn.cols-2,
+#panel[data-kind="gem-integration-jewel"] .gmd-btn.cols-2:hover,
+#panel[data-kind="gem-integration-jewel"] .gmd-btn.cols-2:active {
+	width: 80dp;
+	height: 25dp;
+	image-color: rgb(128, 128, 128);
+	decorator: image(classic-tr-plate fill);
+}
+#panel[data-kind="gem-integration-jewel"] .gmd-btn.cols-2:hover,
+#panel[data-kind="gem-integration-jewel"] .gmd-btn.cols-2:active { image-color: #ffffff; }
+#panel[data-kind="gem-integration-jewel"] .gmd-btn.cols-2 .gmd-btn-label { line-height: 10dp; color: #ffffff; }
+#panel[data-kind="gem-integration-jewel"] .gmd-btn.cols-2:hover .gmd-btn-label { color: rgb(200, 240, 255); }
+
+/* The amounts: 170x35 at 22, rows at 65, 110 and 155. */
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(-n+3) { left: 22dp; }
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(1) { top: 65dp; }
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(2) { top: 110dp; }
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(3) { top: 155dp; }
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(-n+3) .gmd-btn,
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(-n+3) .gmd-btn:hover,
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(-n+3) .gmd-btn:active {
+	width: 170dp;
+	height: 35dp;
+	line-height: 33dp;
+	image-color: rgb(179, 179, 179);
+	decorator: image(classic-tr-plate fill);
+}
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(-n+3) .gmd-btn:hover,
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(-n+3) .gmd-btn:active { image-color: #ffffff; }
+#panel[data-kind="gem-integration-amount"] .gmd-btn-label { color: rgb(200, 240, 255); }
+
+/* Close: 81x25 at (66, 245). */
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell.compact,
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell.compact { left: 66dp; right: auto; top: 245dp; bottom: auto; width: 81dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-btn.compact, #panel[data-kind="gem-integration-amount"] .gmd-btn.compact,
+#panel[data-kind="gem-integration-jewel"] .gmd-btn.compact:hover, #panel[data-kind="gem-integration-amount"] .gmd-btn.compact:hover,
+#panel[data-kind="gem-integration-jewel"] .gmd-btn.compact:active, #panel[data-kind="gem-integration-amount"] .gmd-btn.compact:active {
+	width: 81dp;
+	height: 25dp;
+	line-height: 25dp;
+	image-color: rgb(204, 204, 204);
+	decorator: image(classic-tr-plate fill);
+}
+#panel[data-kind="gem-integration-jewel"] .gmd-btn.compact:hover, #panel[data-kind="gem-integration-amount"] .gmd-btn.compact:hover,
+#panel[data-kind="gem-integration-jewel"] .gmd-btn.compact:active, #panel[data-kind="gem-integration-amount"] .gmd-btn.compact:active { image-color: #ffffff; }
+#panel[data-kind="gem-integration-jewel"] .gmd-btn.compact .gmd-btn-label,
+#panel[data-kind="gem-integration-amount"] .gmd-btn.compact .gmd-btn-label { font-weight: bold; color: rgb(200, 240, 255); }
+
+/* The personal shop's currency menu (menu id "personal-shop-price-type"): no classic client has
+   it, and no native box drew it, so it keeps the flowing layout and takes the classic box's
+   parts, as the menus the trainer's box stands in for: the stone between the two edges, the
+   title in orange, the currencies on the trainer's plates (120x22, gold labels). */
+#panel[data-id="personal-shop-price-type"] .window-shell-sprite-back,
+#panel[data-id="personal-shop-price-type"] .window-shell-header-rail { decorator: none; }
+#panel[data-id="personal-shop-price-type"] .window-shell-sprite-top { height: 5dp; decorator: image(classic-cm-edge); }
+#panel[data-id="personal-shop-price-type"] .window-shell-sprite-middle { top: 5dp; bottom: 5dp; decorator: image(classic-lj-stone fill); }
+#panel[data-id="personal-shop-price-type"] .window-shell-sprite-bottom { height: 5dp; decorator: image(classic-cm-edge); }
+#panel[data-id="personal-shop-price-type"] .window-shell-header-title { color: #ff8000; }
+#panel[data-id="personal-shop-price-type"] .gmd-btn,
+#panel[data-id="personal-shop-price-type"] .gmd-btn:hover,
+#panel[data-id="personal-shop-price-type"] .gmd-btn:active {
+	width: 120dp;
+	height: 22dp;
+	line-height: 22dp;
+	margin: 3dp 0;
+	image-color: rgb(204, 204, 204);
+	decorator: image(classic-tr-plate fill);
+}
+#panel[data-id="personal-shop-price-type"] .gmd-btn:hover,
+#panel[data-id="personal-shop-price-type"] .gmd-btn:active { image-color: #ffffff; }
+#panel[data-id="personal-shop-price-type"] .gmd-btn-label { color: rgb(223, 191, 103); }
+#panel[data-id="personal-shop-price-type"] .gmd-btn:hover .gmd-btn-label { font-weight: bold; }
 
 /* Elpis (kinds "elpis" and "elpis-about"): the Season 2 client's window (RE\mains2: built in
    006d3959, drawn in the method that calls 006d3f52, buttons placed in 006d3b05), in the 640x480
