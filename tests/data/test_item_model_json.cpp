@@ -265,6 +265,27 @@ TEST_CASE("Item model validation finds items with two models [data][items]")
     CHECK(issues[0].number == 4);
 }
 
+TEST_CASE("A model needs an entry in the item file at its number [data][items]")
+{
+    const std::vector<ItemModelDefinition> models{MakeDarkHorse()};
+    std::vector<ItemDataIssue> issues;
+
+    ValidateModelsHaveItemEntries(std::vector<ItemDefinition>{}, models, issues);
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].group == 13);
+    CHECK(issues[0].number == 4);
+
+    // An entry without a name is enough.
+    ItemDefinition entry;
+    entry.group = 13;
+    entry.number = 4;
+    entry.entryWithoutName = true;
+    issues.clear();
+    ValidateModelsHaveItemEntries(std::vector<ItemDefinition>{entry}, models, issues);
+    CHECK(issues.empty());
+}
+
 TEST_CASE("The item model database finds models by item type [data][items]")
 {
     ItemModelDefinition invalid = MakeDarkHorse();

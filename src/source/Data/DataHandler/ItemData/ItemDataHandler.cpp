@@ -24,6 +24,7 @@
 #include <iterator>
 #include <chrono>
 #include <memory>
+#include <set>
 
 #ifdef _EDITOR
 #include "Data/DataHandler/CommonDataSaver.h"
@@ -110,6 +111,71 @@ ItemStatFile InWriterOrder(ItemStatFile file)
     std::ranges::stable_sort(file.tables, byName);
     std::ranges::stable_sort(file.profiles, byName);
     return file;
+}
+
+// The item type before the moves since the start (each one swaps two item types), where the
+// bmd files have it.
+int TypeBeforeMoves(int itemType, std::span<const std::pair<int, int>> moves)
+{
+    for (auto move = moves.rbegin(); move != moves.rend(); ++move)
+    {
+        if (itemType == move->first)
+        {
+            itemType = move->second;
+        }
+        else if (itemType == move->second)
+        {
+            itemType = move->first;
+        }
+    }
+    return itemType;
+}
+
+// The bmd files have no entries without a name: the import keeps the ones at numbers it
+// brings no item to, so the numbers the client uses stay in the item files. A moved entry
+// goes back to its old number, as its model does.
+void KeepEntriesWithoutName(std::vector<ItemDefinition>& items, std::span<const std::pair<int, int>> moves)
+{
+    std::set<int> imported;
+    for (const ItemDefinition& item : items)
+    {
+        imported.insert(MakeItemType(item.group, item.number));
+    }
+    for (const ItemDefinition& slot : g_ItemDatabase.GetAllSlots())
+    {
+        const int itemType = TypeBeforeMoves(MakeItemType(slot.group, slot.number), moves);
+        if (!slot.entryWithoutName || imported.contains(itemType))
+        {
+            continue;
+        }
+        ItemDefinition entry = slot;
+        entry.group = GetItemGroup(itemType);
+        entry.number = GetItemNumber(itemType);
+        items.push_back(std::move(entry));
+    }
+}
+
+// Every number with a model keeps an entry: where the bmd files have no item for a model (an
+// item added or named since the start), its number gets an entry without a name.
+void GiveModelsAnEntry()
+{
+    std::vector<ItemDefinition> entries;
+    for (int itemType = 0; itemType < MAX_ITEM; ++itemType)
+    {
+        if (g_ItemModelDatabase.Find(itemType) == nullptr || g_ItemDatabase.FindEntry(itemType) != nullptr)
+        {
+            continue;
+        }
+        ItemDefinition entry;
+        entry.group = GetItemGroup(itemType);
+        entry.number = GetItemNumber(itemType);
+        entry.entryWithoutName = true;
+        entries.push_back(std::move(entry));
+    }
+    if (!entries.empty())
+    {
+        g_ItemDatabase.SetMany(entries);
+    }
 }
 #endif
 } // namespace
@@ -376,7 +442,8 @@ bool CItemDataHandler::AddItem(const ItemDefinition& definition, const ItemModel
 
 bool CItemDataHandler::RemoveItem(int itemType)
 {
-    if (g_ItemDatabase.Find(itemType) == nullptr)
+    // An entry without a name goes as an item does.
+    if (g_ItemDatabase.FindEntry(itemType) == nullptr)
     {
         return false;
     }
@@ -396,7 +463,7 @@ bool CItemDataHandler::RemoveItem(int itemType)
 
 bool CItemDataHandler::MoveItem(int fromItemType, int toItemType)
 {
-    if (g_ItemDatabase.Find(fromItemType) == nullptr || !IsFreeItemType(toItemType))
+    if (g_ItemDatabase.FindEntry(fromItemType) == nullptr || !IsFreeItemType(toItemType))
     {
         return false;
     }
@@ -640,7 +707,7 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
                       GetItemStatsFile().generic_string(), issues);
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     std::vector<ItemDefinition> items;
-    std::ranges::copy_if(g_ItemDatabase.GetAllSlots(), std::back_inserter(items), &ItemDefinition::Exists);
+    std::ranges::copy_if(g_ItemDatabase.GetAllSlots(), std::back_inserter(items), &ItemDefinition::HasEntry);
     ValidateItems(items, issues);
     // The file as Load read it was checked then.
     if (m_statFileChanged)
@@ -651,6 +718,7 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     std::vector<ItemModelDefinition> models;
     std::ranges::copy_if(g_ItemModelDatabase.GetAllSlots(), std::back_inserter(models), &ItemModelDefinition::Exists);
     ValidateItemModels(models, issues);
+    ValidateModelsHaveItemEntries(g_ItemDatabase.GetAllSlots(), models, issues);
     std::vector<ItemModelDefinition> sharedUsers = models;
     ApplySharedItemModels(sharedUsers, g_ItemModelDatabase.GetSharedModels(), SharedItemModelsFileName, issues);
     // Without a color list (no models loaded) every color would be missing.
@@ -731,11 +799,16 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
                       GetItemStatsFile().generic_string(), result.validationIssues);
     ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.validationIssues);
 
-    g_ItemDatabase.Build(result.items);
+    // The entries without a name stay as they are: they are not from the bmd files, so they
+    // are not among the imported items.
+    std::vector<ItemDefinition> items = result.items;
+    KeepEntriesWithoutName(items, m_modelMoves);
+    g_ItemDatabase.Build(items);
     FillItemAttributes();
     // The bmd files have the items at their old numbers; their models go back
     // there too.
     TakeBackModelMoves();
+    GiveModelsAnEntry();
     return result;
 }
 

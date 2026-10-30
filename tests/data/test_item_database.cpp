@@ -318,6 +318,34 @@ TEST_CASE("Item database finds existing items only [data][items]")
     CHECK(database.Find(MAX_ITEM_TYPE, 0) == nullptr);
 }
 
+TEST_CASE("The game does not know an item file entry without a name [data][items]")
+{
+    ItemDefinition entry;
+    entry.group = SwordGroup;
+    entry.number = 1;
+    entry.entryWithoutName = true;
+    const std::vector<ItemDefinition> items = {MakeItem(SwordGroup, 0, "Kris"), entry};
+
+    ItemDatabase database;
+    database.Build(items);
+
+    const int itemType = MakeItemType(SwordGroup, 1);
+    CHECK(database.GetExistingItemCount() == 1);
+    CHECK(database.Find(itemType) == nullptr);
+    CHECK_FALSE(database.IsAllowed(itemType, ItemAction::Trade));
+    const ItemDefinition& slot = database.GetAllSlots()[itemType];
+    CHECK(slot.HasEntry());
+    CHECK_FALSE(slot.Exists());
+
+    // A name makes the entry an item.
+    ItemDefinition named = slot;
+    named.names = Data::LocalizedString::Parse("Short Sword");
+    database.Set(named);
+    REQUIRE(database.Find(itemType) != nullptr);
+    CHECK_FALSE(database.Find(itemType)->entryWithoutName);
+    CHECK(database.GetExistingItemCount() == 2);
+}
+
 TEST_CASE("Item names follow the display locale with English fallback [data][items]")
 {
     const std::vector<ItemDefinition> items = {

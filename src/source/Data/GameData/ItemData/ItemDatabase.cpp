@@ -68,6 +68,16 @@ const ItemDefinition* ItemDatabase::Find(int group, int number) const
     return Find(MakeItemType(group, number));
 }
 
+const ItemDefinition* ItemDatabase::FindEntry(int group, int number) const
+{
+    if (!IsValidItemId(group, number))
+    {
+        return nullptr;
+    }
+
+    return FindEntry(MakeItemType(group, number));
+}
+
 std::string ItemDatabase::GetLogName(int itemType) const
 {
     if (!IsValidItemType(itemType))
@@ -186,6 +196,11 @@ void ItemDatabase::Store(int itemType, ItemDefinition definition)
     ++m_nameVersion;
     definition.group = GetItemGroup(itemType);
     definition.number = GetItemNumber(itemType);
+    // A name makes the entry an item.
+    if (definition.Exists())
+    {
+        definition.entryWithoutName = false;
+    }
     UpdateDisplayName(definition);
 
     RuleData ruleData;

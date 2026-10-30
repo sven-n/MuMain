@@ -157,7 +157,7 @@ bool ItemEditHistory::IsAsLeft(const ItemEditEntry& entry, bool undoing) const
             const int occupied = undoing ? step.otherItemType : step.itemType;
             const int empty = undoing ? step.itemType : step.otherItemType;
             if (m_hooks.readSlot(occupied) != (undoing ? step.after : step.before) ||
-                m_hooks.readSlot(empty).item.Exists())
+                m_hooks.readSlot(empty).item.HasEntry())
             {
                 return false;
             }

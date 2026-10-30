@@ -24,7 +24,7 @@ constexpr ImVec4 RemoveColor{0.7f, 0.2f, 0.2f, 1.0f};
 
 void CItemRemoveDialog::Open(int itemType)
 {
-    if (g_ItemDatabase.Find(itemType) == nullptr)
+    if (g_ItemDatabase.FindEntry(itemType) == nullptr)
     {
         return;
     }
@@ -42,7 +42,7 @@ void CItemRemoveDialog::Render()
     {
         return;
     }
-    ImGui::TextUnformatted(g_ItemDatabase.GetLogName(m_itemType).c_str());
+    ImGui::TextUnformatted(GetEntryLabel(m_itemType).c_str());
     ImGui::TextUnformatted(I18N::Editor::TheItemAndItsModelEntryAreRemoved);
     ImGui::Separator();
     if (m_usage.GoesWithItem())

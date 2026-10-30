@@ -80,6 +80,43 @@ void RenderUsesAtNumber(const ItemUsage& usage)
     CodeReferenceList::Render(usage.codeKnown, usage.code,
                               I18N::Editor::TheSourcesWereNotFoundCodeThatNamesTheItemIsNotKnown);
 }
+
+void RenderNumberHolder(const ItemNumberHolder& holder, const ItemUsage& usage)
+{
+    if (!holder.item.empty())
+    {
+        ImGui::BulletText("%s", I18N::Format(I18N::Editor::TakenByTheItem0, {holder.item}).c_str());
+        return;
+    }
+    if (holder.entryWithoutName)
+    {
+        ImGui::BulletText("%s", I18N::Editor::TakenByAnEntryWithoutAName);
+        if (!holder.model.empty())
+        {
+            ImGui::BulletText("%s", I18N::Format(I18N::Editor::ItsModel0, {holder.model}).c_str());
+        }
+    }
+    else if (holder.model.empty())
+    {
+        return;
+    }
+    else
+    {
+        ImGui::BulletText("%s", I18N::Format(I18N::Editor::TakenByAModelWithoutAnItem0, {holder.model}).c_str());
+    }
+    if (!holder.codeName.empty())
+    {
+        ImGui::BulletText("%s", I18N::Format(I18N::Editor::TheCodeCallsIt0, {std::string(holder.codeName)}).c_str());
+    }
+    ImGui::BulletText("%s", holder.entryWithoutName ? I18N::Editor::TheItemBrowserListsItAsEntryWithoutAName
+                                                    : I18N::Editor::TheItemBrowserListsItAsNoItemAtThisNumber);
+    RenderGameData(usage);
+    // The move dialog lists the code of the moved item too.
+    ImGui::PushID("NumberHolder");
+    CodeReferenceList::Render(usage.codeKnown, usage.code,
+                              I18N::Editor::TheSourcesWereNotFoundCodeThatNamesTheItemIsNotKnown);
+    ImGui::PopID();
+}
 } // namespace MuEditor::Items::UsageView
 
 #endif // _EDITOR
