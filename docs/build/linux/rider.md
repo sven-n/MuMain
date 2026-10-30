@@ -11,7 +11,7 @@ client and a C# library:
   the `.csproj` to edit, refactor, or debug the managed networking code. Rider
   is the most comfortable editor for that part.
 
-For the system prerequisites (GL, SDL, turbojpeg, the .NET SDK) and how to run,
+For the prerequisites (system packages and the .NET SDK) and how to run,
 see [linux/console.md](console.md).
 
 > Note: the C# library is normally built by the CMake build via Native AOT, not
