@@ -643,6 +643,10 @@
   <data name="Create" xml:space="preserve">
     <value>创建</value>
   </data>
+  <data name="Purchasing price: %s(%s)" xml:space="preserve">
+    <value>购买价格：%s（%s）</value>
+    <comment>legacy_id=1620</comment>
+  </data>
   <data name="You can't delete the character that belongs to the guild" xml:space="preserve">
     <value>无法删除已加入战盟的角色。</value>
   </data>
