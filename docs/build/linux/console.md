@@ -93,7 +93,7 @@ enabled); point your editor's clangd at it with
 `--compile-commands-dir=out/build/linux-x64-mueditor`. Configuring is enough for
 indexing — you do not have to build that tree.
 
-If the packaged runtime has no global library path for SDL's video backends or the Vulkan loader (the client stops with `SDL video init failed` and an SDL error such as `wayland not available`), install `libvulkan-dev` and configure with `-DMU_LINK_SDL_PLATFORM_BACKENDS=ON`: SDL then links those libraries at build time and `Main` records their `RUNPATH`.
+If the packaged runtime has no global library path for SDL's video backends or the Vulkan loader (the client stops with `SDL video init failed` and an SDL error such as `wayland not available`), install the Vulkan loader's development files (`sudo apt-get install -y libvulkan-dev`) and configure with `-DMU_LINK_SDL_PLATFORM_BACKENDS=ON`: SDL then links those libraries at build time and `Main` records their `RUNPATH`.
 
 ## Run
 
