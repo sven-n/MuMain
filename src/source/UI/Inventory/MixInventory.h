@@ -157,10 +157,6 @@ namespace mu::ui::window
 
         float GetLayerDepth();	//. 3.4f
 
-        // The castle senior mix's description, one text per row; empty outside its rows.
-        static constexpr int CASTLE_SENIOR_DESCRIPTION_ROWS = 6;
-        static const wchar_t* GetCastleSeniorDescription(int row);
-
         CInventoryCtrl* GetInventoryCtrl() const;
 
 

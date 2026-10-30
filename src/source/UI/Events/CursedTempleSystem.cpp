@@ -76,6 +76,17 @@ namespace
                       AT_SKILL_CURSED_TEMPLE_SUBLIMATION - AT_SKILL_CURSED_TEMPLE_PRODECTION + 1,
                   "one description per temple skill");
 
+    // The skill panel's description of temple skill `skill` (AT_SKILL_CURSED_TEMPLE_PRODECTION to
+    // AT_SKILL_CURSED_TEMPLE_SUBLIMATION); empty for any other skill.
+    const wchar_t* SkillDescription(int skill)
+    {
+        if (skill < AT_SKILL_CURSED_TEMPLE_PRODECTION || skill > AT_SKILL_CURSED_TEMPLE_SUBLIMATION)
+        {
+            return L"";
+        }
+        return *kSkillDescriptions[skill - AT_SKILL_CURSED_TEMPLE_PRODECTION];
+    }
+
     //#ifdef _DEBUG
     const float posX[7] =
     {
@@ -574,15 +585,6 @@ bool mu::ui::window::CCursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, D
 
     SocketClient->ToGameServer()->SendTalkToNpcRequest(npckey);
     return false;
-}
-
-const wchar_t* mu::ui::window::CCursedTempleSystem::SkillDescription(int skill)
-{
-    if (skill < AT_SKILL_CURSED_TEMPLE_PRODECTION || skill > AT_SKILL_CURSED_TEMPLE_SUBLIMATION)
-    {
-        return L"";
-    }
-    return *kSkillDescriptions[skill - AT_SKILL_CURSED_TEMPLE_PRODECTION];
 }
 
 bool mu::ui::window::CCursedTempleSystem::CheckHeroSkillType(int operatortype)

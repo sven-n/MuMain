@@ -70,6 +70,37 @@ static_assert(std::size(kDoppelgangerCountdownFormats) ==
                   TYPE_MATCH_DOPPELGANGER_CLOSE - TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE + 1,
               "one format per Doppelganger countdown type");
 
+// The countdown line's format for countdown type `matchType`, a MATCH_TYPE or the server's Blood
+// Castle "Congratulations" (the number after TYPE_MATCH_CASTLE_END); empty for any other number.
+const wchar_t* GetMatchCountdownFormat(int matchType)
+{
+    if (matchType >= TYPE_MATCH_DEVIL_ENTER_START && matchType <= TYPE_MATCH_DEVIL_CLOSE)
+    {
+        return *kDevilSquareCountdownFormats[matchType - TYPE_MATCH_DEVIL_ENTER_START];
+    }
+    if (matchType >= TYPE_MATCH_CASTLE_ENTER_CLOSE && matchType <= TYPE_MATCH_CASTLE_END)
+    {
+        return *kBloodCastleCountdownFormats[matchType - TYPE_MATCH_CASTLE_ENTER_CLOSE];
+    }
+    if (matchType == kMatchCastleCongratulations)
+    {
+        return I18N::Game::Congratulations;
+    }
+    if (matchType >= TYPE_MATCH_CHAOS_ENTER_START && matchType <= TYPE_MATCH_CHAOS_END)
+    {
+        return *kChaosCastleCountdownFormats[matchType - TYPE_MATCH_CHAOS_ENTER_START];
+    }
+    if (matchType >= TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE && matchType <= TYPE_MATCH_CURSEDTEMPLE_GAME_START)
+    {
+        return *kCursedTempleCountdownFormats[matchType - TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE];
+    }
+    if (matchType >= TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE && matchType <= TYPE_MATCH_DOPPELGANGER_CLOSE)
+    {
+        return *kDoppelgangerCountdownFormats[matchType - TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE];
+    }
+    return L"";
+}
+
 template <std::size_t N>
 void ClearWideBuffer(wchar_t (&buffer)[N])
 {
@@ -159,35 +190,6 @@ std::wstring CSBaseMatch::CountdownText(void)
     }
 
     return lpszStr;
-}
-
-const wchar_t* GetMatchCountdownFormat(int matchType)
-{
-    if (matchType >= TYPE_MATCH_DEVIL_ENTER_START && matchType <= TYPE_MATCH_DEVIL_CLOSE)
-    {
-        return *kDevilSquareCountdownFormats[matchType - TYPE_MATCH_DEVIL_ENTER_START];
-    }
-    if (matchType >= TYPE_MATCH_CASTLE_ENTER_CLOSE && matchType <= TYPE_MATCH_CASTLE_END)
-    {
-        return *kBloodCastleCountdownFormats[matchType - TYPE_MATCH_CASTLE_ENTER_CLOSE];
-    }
-    if (matchType == kMatchCastleCongratulations)
-    {
-        return I18N::Game::Congratulations;
-    }
-    if (matchType >= TYPE_MATCH_CHAOS_ENTER_START && matchType <= TYPE_MATCH_CHAOS_END)
-    {
-        return *kChaosCastleCountdownFormats[matchType - TYPE_MATCH_CHAOS_ENTER_START];
-    }
-    if (matchType >= TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE && matchType <= TYPE_MATCH_CURSEDTEMPLE_GAME_START)
-    {
-        return *kCursedTempleCountdownFormats[matchType - TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE];
-    }
-    if (matchType >= TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE && matchType <= TYPE_MATCH_DOPPELGANGER_CLOSE)
-    {
-        return *kDoppelgangerCountdownFormats[matchType - TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE];
-    }
-    return L"";
 }
 
 void CSDevilSquareMatch::SetMatchResult(const int iNumDevilRank, const int iMyRank, const MatchResult* pMatchResult, const int Success)

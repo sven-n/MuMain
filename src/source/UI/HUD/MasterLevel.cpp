@@ -26,6 +26,13 @@
 #include "UI/Tooltip/LegacyTextListTooltip.h"
 #include <RmlUi/Core/ElementDocument.h>
 
+// The class name and, per category column, the format of the points spent in that column.
+struct MasterTreeHeaderTexts
+{
+    const wchar_t* const* className;
+    const wchar_t* const* categoryPoints[MAX_MASTER_SKILL_CATEGORY];
+};
+
 namespace
 {
     _MASTER_SKILLTREE_DATA m_stMasterSkillTreeData[MAX_MASTER_SKILL_DATA];
@@ -60,6 +67,41 @@ namespace
         &I18N::Game::DimensionMaster, {&I18N::Game::GuardianD, &I18N::Game::ChaosD, &I18N::Game::HonorD}};
     const MasterTreeHeaderTexts kRageFighterHeaderTexts = {
         &I18N::Game::FistMaster, {&I18N::Game::WillpowerD, &I18N::Game::DeterminationD, &I18N::Game::DestructionD}};
+
+    // Null for a class without a master skill tree.
+    const MasterTreeHeaderTexts* GetHeaderTexts(CLASS_TYPE Class)
+    {
+        switch (Class)
+        {
+        case CLASS_WIZARD:
+        case CLASS_SOULMASTER:
+        case CLASS_GRANDMASTER:
+            return &kWizardHeaderTexts;
+        case CLASS_KNIGHT:
+        case CLASS_BLADEKNIGHT:
+        case CLASS_BLADEMASTER:
+            return &kKnightHeaderTexts;
+        case CLASS_ELF:
+        case CLASS_MUSEELF:
+        case CLASS_HIGHELF:
+            return &kElfHeaderTexts;
+        case CLASS_DARK:
+        case CLASS_DUELMASTER:
+            return &kDarkHeaderTexts;
+        case CLASS_DARK_LORD:
+        case CLASS_LORDEMPEROR:
+            return &kDarkLordHeaderTexts;
+        case CLASS_SUMMONER:
+        case CLASS_BLOODYSUMMONER:
+        case CLASS_DIMENSIONMASTER:
+            return &kSummonerHeaderTexts;
+        case CLASS_RAGEFIGHTER:
+        case CLASS_TEMPLENIGHT:
+            return &kRageFighterHeaderTexts;
+        default:
+            return nullptr;
+        }
+    }
 
     template <typename Model>
     void SyncString(RmlModelBinder<Model>& binder, Rml::String Model::* field, const char* name, Rml::String value)
@@ -302,40 +344,6 @@ void mu::ui::window::CMasterLevel::SetMasterType(CLASS_TYPE Class)
         return;
 
     this->HeaderTexts = headerTexts;
-}
-
-const MasterTreeHeaderTexts* mu::ui::window::CMasterLevel::GetHeaderTexts(CLASS_TYPE Class)
-{
-    switch (Class)
-    {
-    case CLASS_WIZARD:
-    case CLASS_SOULMASTER:
-    case CLASS_GRANDMASTER:
-        return &kWizardHeaderTexts;
-    case CLASS_KNIGHT:
-    case CLASS_BLADEKNIGHT:
-    case CLASS_BLADEMASTER:
-        return &kKnightHeaderTexts;
-    case CLASS_ELF:
-    case CLASS_MUSEELF:
-    case CLASS_HIGHELF:
-        return &kElfHeaderTexts;
-    case CLASS_DARK:
-    case CLASS_DUELMASTER:
-        return &kDarkHeaderTexts;
-    case CLASS_DARK_LORD:
-    case CLASS_LORDEMPEROR:
-        return &kDarkLordHeaderTexts;
-    case CLASS_SUMMONER:
-    case CLASS_BLOODYSUMMONER:
-    case CLASS_DIMENSIONMASTER:
-        return &kSummonerHeaderTexts;
-    case CLASS_RAGEFIGHTER:
-    case CLASS_TEMPLENIGHT:
-        return &kRageFighterHeaderTexts;
-    default:
-        return nullptr;
-    }
 }
 
 void mu::ui::window::CMasterLevel::SetMasterSkillTreeData()

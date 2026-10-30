@@ -47,6 +47,17 @@ namespace
                                      { return left.status >= right.status; }) == std::end(kGuildStatusTexts),
                   "kGuildStatusTexts is sorted by status, each status once");
 
+    // The guild rank shown in the balloon for a character's GuildStatus, in the current language;
+    // nullptr for a status that is no rank.
+    const wchar_t* GetGuildStatusText(std::uint8_t guildStatus)
+    {
+        const auto it =
+            std::lower_bound(std::begin(kGuildStatusTexts), std::end(kGuildStatusTexts), guildStatus,
+                             [](const GuildStatusText& entry, std::uint8_t status) { return entry.status < status; });
+
+        return (it != std::end(kGuildStatusTexts) && it->status == guildStatus) ? *it->text : nullptr;
+    }
+
     BalloonNameStatus ResolveNameStatus(std::uint8_t controlCode)
     {
         if (controlCode & CTLCODE_01BLOCKCHAR)
@@ -114,15 +125,6 @@ void CCharInfoBalloon::Render()
         UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
     CSprite::SetPosition(static_cast<int>(UI::Scaling::SizeX(screen, static_cast<float>(nPosX))),
                          static_cast<int>(UI::Scaling::SizeY(screen, static_cast<float>(nPosY))));
-}
-
-const wchar_t* CCharInfoBalloon::GetGuildStatusText(std::uint8_t guildStatus)
-{
-    const auto it =
-        std::lower_bound(std::begin(kGuildStatusTexts), std::end(kGuildStatusTexts), guildStatus,
-                         [](const GuildStatusText& entry, std::uint8_t status) { return entry.status < status; });
-
-    return (it != std::end(kGuildStatusTexts) && it->status == guildStatus) ? *it->text : nullptr;
 }
 
 void CCharInfoBalloon::SetInfo()

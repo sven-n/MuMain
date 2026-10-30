@@ -61,9 +61,6 @@ public:
     bool IsEnterRequest();
     void SetEnterRequest(bool bValue);
     void CreateMessageBox(MSGBOX_TYPE result);
-    // The entry answer's text for the results CreateMessageBox has no check of its own for
-    // (POPUP_NONE to POPUP_NOT_MUNSTONE); empty for any other number.
-    static const wchar_t* EntryResultText(int result);
 
     void ReceiveKanturu3rdInfo(UI::Kanturu::Stage stage, UI::Kanturu::Detail detail, bool canEnter,
                                   BYTE userCount, int remainingSeconds);

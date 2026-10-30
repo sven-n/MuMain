@@ -56,8 +56,4 @@ struct BuildOptions
 
 void BuildModel(const BuildOptions& options, Model& outModel);
 
-// The blue tag naming a skill's mastery type (SKILL_ATTRIBUTE::MasteryType, the skill's element);
-// empty for a type that has none.
-const wchar_t* MasteryTypeText(uint8_t masteryType);
-
 }  // namespace UI::Skills::Tooltip

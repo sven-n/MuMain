@@ -25,6 +25,17 @@ const wchar_t* const* const kSocketCategoryNames[] = {
 };
 static_assert(std::size(kSocketCategoryNames) == MAX_SOCKET_OPTION_CATEGORY - SOC_IMPROVE_ATTACK,
               "one name per socket option category");
+
+// The name of socket option category `iCategory` (SOC_IMPROVE_ATTACK to SOC_UNIQUE_OPTION, also a
+// seed's element); empty for any other number.
+const wchar_t* GetSocketCategoryName(int iCategory)
+{
+    if (iCategory < SOC_IMPROVE_ATTACK || iCategory >= MAX_SOCKET_OPTION_CATEGORY)
+    {
+        return L"";
+    }
+    return *kSocketCategoryNames[iCategory - SOC_IMPROVE_ATTACK];
+}
 } // namespace
 
 CSocketItemMgr g_SocketItemMgr;
@@ -89,15 +100,6 @@ int CSocketItemMgr::GetSocketCategory(int iSeedID)
 
     SOCKET_OPTION_INFO* pInfo = &m_SocketOptionInfo[SOT_SOCKET_ITEM_OPTIONS][iSeedID];
     return pInfo->m_iOptionCategory;
-}
-
-const wchar_t* CSocketItemMgr::GetSocketCategoryName(int iCategory)
-{
-    if (iCategory < SOC_IMPROVE_ATTACK || iCategory >= MAX_SOCKET_OPTION_CATEGORY)
-    {
-        return L"";
-    }
-    return *kSocketCategoryNames[iCategory - SOC_IMPROVE_ATTACK];
 }
 
 int CSocketItemMgr::GetSeedShpereSeedID(const ITEM* pItem)

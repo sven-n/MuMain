@@ -49,8 +49,6 @@ public:
     void OpenningProcess();
     void ClosingProcess();
 
-    // The row's label (MenuEntry); empty for a value outside the menu.
-    static const wchar_t* GetMenuLabel(int entry);
 
 private:
     void BuildRmlUi();

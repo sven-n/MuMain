@@ -54,6 +54,19 @@ namespace
     static_assert(std::size(kJobNames) == MAX_CLASS, "one name per creatable class");
     static_assert(std::size(kJobDescriptions) == MAX_CLASS, "one description per creatable class");
 
+    // A class's name (its job button and, while selected, the description title) in the current
+    // language; `classType` is one of the MAX_CLASS creatable classes.
+    const wchar_t* GetJobName(CLASS_TYPE classType)
+    {
+        return *kJobNames[classType];
+    }
+
+    // A creatable class's description in the current language.
+    const wchar_t* GetJobDescription(CLASS_TYPE classType)
+    {
+        return *kJobDescriptions[classType];
+    }
+
     constexpr int kStatLineSpacing = 17;
     constexpr int kStatYOffset = 10;
     constexpr int kStatValueOffset = 54;
@@ -311,16 +324,6 @@ void CCharMakeWin::Show(bool bShow)
         if (bShow) { SyncRmlModel(); m_RmlView.Document()->Show(); }
         else       m_RmlView.Document()->Hide();
     }
-}
-
-const wchar_t* CCharMakeWin::GetJobName(CLASS_TYPE classType)
-{
-    return *kJobNames[classType];
-}
-
-const wchar_t* CCharMakeWin::GetJobDescription(CLASS_TYPE classType)
-{
-    return *kJobDescriptions[classType];
 }
 
 void CCharMakeWin::UpdateDisplay()

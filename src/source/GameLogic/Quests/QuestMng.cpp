@@ -493,9 +493,9 @@ void FormatRewardText(SRequestRewardText& line, const SQuestReward& reward)
 #endif // ASG_ADD_GENS_SYSTEM
     }
 }
-} // namespace
 
-const wchar_t* CQuestMng::GetEventMapRequestFormat(DWORD dwRequestType)
+// The format of an event map request line (QUEST_REQUEST_EVENT_MAP_*); empty for any other request type.
+const wchar_t* GetEventMapRequestFormat(DWORD dwRequestType)
 {
     switch (dwRequestType)
     {
@@ -519,6 +519,7 @@ const wchar_t* CQuestMng::GetEventMapRequestFormat(DWORD dwRequestType)
         return L"";
     }
 }
+} // namespace
 
 bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, DWORD dwQuestIndex)
 {

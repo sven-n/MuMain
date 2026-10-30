@@ -55,6 +55,17 @@ namespace
     };
     static_assert(std::size(kPetCommandNames) == PET_CMD_END, "one name per pet command");
 
+    // The name of pet command `command` (a PET_COMMAND); empty for any other number.
+    const wchar_t* GetPetCommandName(int command)
+    {
+        if (command < PET_CMD_DEFAULT || command >= PET_CMD_END)
+        {
+            return L"";
+        }
+
+        return *kPetCommandNames[command];
+    }
+
     std::wstring SanitizeWideStringFormat(const wchar_t* format)
     {
         if (format == nullptr)
@@ -348,16 +359,6 @@ static std::uint8_t g_tabBar = 0;
         {
             petSystem->SetAttack(Key, attackType);
         }
-    }
-
-    const wchar_t* GetPetCommandName(int command)
-    {
-        if (command < PET_CMD_DEFAULT || command >= PET_CMD_END)
-        {
-            return L"";
-        }
-
-        return *kPetCommandNames[command];
     }
 
     bool BuildPetCmdTooltipModel(int Type, UI::Skills::Tooltip::Model& outModel)

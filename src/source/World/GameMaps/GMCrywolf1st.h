@@ -27,9 +27,6 @@ namespace M34CryWolf1st {		//. 크라이울프 점령지
     // The ready-state notice's four lines (the page turns every ten seconds); false outside the
     // ready state. Advances the page timer, so call it once per frame.
     bool AdvanceNoticeTexts(std::wstring (&texts)[4]);
-    // Line `line` (0 to 3) of notice page `page` (-1, the page before the first turn, to 3) as
-    // AdvanceNoticeTexts shows it; empty for any other page or line.
-    std::wstring NoticeText(int page, int line);
     void CryWolfMVPInit();
     int IsCryWolf1stMVPStart();
     bool IsCryWolf1stMVPStatePeace();

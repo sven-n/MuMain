@@ -13,10 +13,6 @@
 
 using MatchClock = std::chrono::steady_clock;
 
-// The countdown line's format for countdown type `matchType`, a MATCH_TYPE or the server's Blood
-// Castle "Congratulations" (the number after TYPE_MATCH_CASTLE_END); empty for any other number.
-const wchar_t* GetMatchCountdownFormat(int matchType);
-
 // One text of an event's result box, in its font (or the one left set) and colour. A box width
 // and height shrink it like the original's RenderText(x, y, text, boxWidth, boxHeight).
 struct MatchResultCell

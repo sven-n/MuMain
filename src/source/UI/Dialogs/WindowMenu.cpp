@@ -37,13 +37,6 @@ void SyncFloat(RmlModelBinder<Model>& binder, float Model::* field, const char* 
 }
 } // namespace
 
-const wchar_t* mu::ui::window::CWindowMenu::GetMenuLabel(int entry)
-{
-    if (entry < 0 || entry >= MENU_MAX_INDEX)
-        return L"";
-    return *kMenuLabels[entry];
-}
-
 mu::ui::window::CWindowMenu::CWindowMenu()
 {
     m_pNewUIMng = NULL;
@@ -185,7 +178,7 @@ void mu::ui::window::CWindowMenu::BindRmlModel(Rml::DataModelConstructor& c, Win
 
     model.rows.clear();
     for (int i = 0; i < MENU_MAX_INDEX; ++i)
-        model.rows.push_back({StringUtils::WideToNarrow(GetMenuLabel(i)), i});
+        model.rows.push_back({StringUtils::WideToNarrow(*kMenuLabels[i]), i});
 }
 
 void mu::ui::window::CWindowMenu::BuildRmlUi()

@@ -42,15 +42,7 @@ const wchar_t* const* const kTradeAlertLines[] = {
     &I18N::Game::PleaseCheckWhetherTheItemIs,
     &I18N::Game::TheSameItemThatYouWantToTrade,
 };
-static_assert(std::size(kTradeAlertLines) == CTrade::TRADE_ALERT_LINES, "one text per warning line");
 } // namespace
-
-const wchar_t* CTrade::GetTradeAlertLine(int line)
-{
-    if (line < 0 || line >= TRADE_ALERT_LINES)
-        return L"";
-    return *kTradeAlertLines[line];
-}
 
 CTrade::CTrade()
 {
@@ -193,8 +185,8 @@ void CTrade::BindRmlModel(Rml::DataModelConstructor& c, TradeRmlModel& model)
                 // 4 lines (3 warning + 1 red in the native layout) collapse to bold here.
                 mu::ui::window::GenericDialogConfig cfg;
                 cfg.showCancel = true;
-                for (int i = 0; i < TRADE_ALERT_LINES; ++i)
-                    cfg.lines.push_back({GetTradeAlertLine(i), true});
+                for (const wchar_t* const* line : kTradeAlertLines)
+                    cfg.lines.push_back({*line, true});
                 cfg.onPrimary = [this] { AlertTrade(); };
                 mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             }

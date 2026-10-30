@@ -14,8 +14,6 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 
-#include <cstdint>
-
 // RmlUi migration: this class stays a CSprite purely for its geometry (GetWidth/GetHeight, the
 // anchor-offset semantics CSprite::Create's trailing args establish) -- Render() no longer draws
 // anything itself. It still does the per-frame CameraProjection::WorldToScreen() + SetPosition()
@@ -52,10 +50,6 @@ public:
     void Render();
 
     void SetInfo();
-
-    // The guild rank shown in the balloon for a character's GuildStatus, in the current language;
-    // nullptr for a status that is no rank.
-    static const wchar_t* GetGuildStatusText(std::uint8_t guildStatus);
 
     // Read-only accessors for CCharInfoBalloonMng::SyncRmlModel() -- the cached text/status fields
     // SetInfo() computes, unchanged in shape from before, just no longer consumed by a direct

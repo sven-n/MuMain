@@ -80,9 +80,6 @@ public:
     bool CheckInventoryHolyItem(CHARACTER* c);
     bool CheckTalkProgressNpc(DWORD npcindex, DWORD npckey);
     bool CheckHeroSkillType(int operatortype = 0);
-    // The skill panel's description of temple skill `skill` (AT_SKILL_CURSED_TEMPLE_PRODECTION to
-    // AT_SKILL_CURSED_TEMPLE_SUBLIMATION); empty for any other skill.
-    static const wchar_t* SkillDescription(int skill);
     bool CheckDragonRender();
     bool IsCursedTempleSkillKey(DWORD selectcharacterindex);
 

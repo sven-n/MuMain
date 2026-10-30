@@ -562,6 +562,15 @@ void EmitBottomBanners(Model& m, const BuildOptions& options, int skillType)
     EndSection(m, before);
 }
 
+// The blue tag naming a skill's mastery type (SKILL_ATTRIBUTE::MasteryType, the skill's element);
+// empty for a type that has none.
+const wchar_t* MasteryTypeText(uint8_t masteryType)
+{
+    if (static_cast<size_t>(masteryType) >= std::size(kMasteryTypeTexts))
+        return L"";
+    return *kMasteryTypeTexts[masteryType];
+}
+
 void EmitBlueTags(Model& m, int skillType)
 {
     const int before = m.count;
@@ -582,13 +591,6 @@ void EmitBlueTags(Model& m, int skillType)
 }
 
 }  // namespace
-
-const wchar_t* MasteryTypeText(uint8_t masteryType)
-{
-    if (static_cast<size_t>(masteryType) >= std::size(kMasteryTypeTexts))
-        return L"";
-    return *kMasteryTypeTexts[masteryType];
-}
 
 void BuildModel(const BuildOptions& options, Model& outModel)
 {

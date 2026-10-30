@@ -46,14 +46,15 @@ const wchar_t* const* const kButtonHints[] = {
     &I18N::Game::ChatDisplayOnOffF2, &I18N::Game::ChatWindowBackgroundOnOffF5,
     &I18N::Game::SizeAdjustmentF4,   &I18N::Game::TransparencyAdjustment,
 };
-} // namespace
 
-const wchar_t* mu::ui::window::CChatInputBox::GetButtonHint(size_t index)
+// The hint of a button in the button row (ChatInputRmlModel::buttonHints order); empty past the row.
+const wchar_t* GetButtonHint(size_t index)
 {
     if (index >= std::size(kButtonHints))
         return L"";
     return *kButtonHints[index];
 }
+} // namespace
 
 mu::ui::window::CChatInputBox::CChatInputBox()
 {

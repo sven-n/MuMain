@@ -48,7 +48,10 @@ mu::ui::window::CMyQuestInfoWindow::BuildTextLines(const wchar_t* text, int nPix
     return lines;
 }
 
-const wchar_t* mu::ui::window::CMyQuestInfoWindow::GetJobChangeStateText(BYTE byState)
+namespace
+{
+// The job change tab's quest state line, by CSQuest::getCurrQuestState().
+const wchar_t* GetJobChangeStateText(BYTE byState)
 {
     if (byState == QUEST_ING)
         return I18N::Game::QuestInProgress;
@@ -57,6 +60,7 @@ const wchar_t* mu::ui::window::CMyQuestInfoWindow::GetJobChangeStateText(BYTE by
     // Any other state (QUEST_NONE/QUEST_NO/QUEST_ERROR) reads as unfinished, matching the original.
     return I18N::Game::QuestUnfinished;
 }
+} // namespace
 
 mu::ui::window::CMyQuestInfoWindow::CMyQuestInfoWindow()
 {

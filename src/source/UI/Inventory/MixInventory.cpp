@@ -63,16 +63,8 @@ const wchar_t* const* const kCastleSeniorDescription[] = {
     &I18N::Game::BraveOne,        &I18N::Game::NowYouHaveBecome, &I18N::Game::ALordOfTheCastle,
     &I18N::Game::MayTheBlessings, &I18N::Game::OfTheGuardian,    &I18N::Game::BeUponYou,
 };
-static_assert(std::size(kCastleSeniorDescription) == CMixInventory::CASTLE_SENIOR_DESCRIPTION_ROWS,
-              "one text per description row");
+constexpr int kCastleSeniorDescriptionRows = static_cast<int>(std::size(kCastleSeniorDescription));
 } // namespace
-
-const wchar_t* CMixInventory::GetCastleSeniorDescription(int row)
-{
-    if (row < 0 || row >= CASTLE_SENIOR_DESCRIPTION_ROWS)
-        return L"";
-    return *kCastleSeniorDescription[row];
-}
 
 CMixInventory::CMixInventory()
 {
@@ -783,8 +775,8 @@ void CMixInventory::SyncMixContentModel()
     switch (mixType)
     {
     case SEASON3A::MIXTYPE_CASTLE_SENIOR:
-        for (int i = 0; i < CASTLE_SENIOR_DESCRIPTION_ROWS; ++i)
-            describeAt(true, GetCastleSeniorDescription(i), "dim", i, false);
+        for (int i = 0; i < kCastleSeniorDescriptionRows; ++i)
+            describeAt(true, *kCastleSeniorDescription[i], "dim", i, false);
         break;
     case SEASON3A::MIXTYPE_OSBOURNE:
         describe(I18N::Game::RefineTheItemToCreate, white, 0);

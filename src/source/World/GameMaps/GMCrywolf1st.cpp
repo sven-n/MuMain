@@ -70,6 +70,27 @@ const NoticeLine kNoticeLines[] = {
 };
 static_assert(std::size(kNoticeLines) == (kNoticePageCount - kNoticeFirstPage) * kNoticeLinesPerPage,
               "four lines on each notice page");
+
+// Line `line` (0 to 3) of notice page `page` (-1, the page before the first turn, to 3) as
+// AdvanceNoticeTexts shows it; empty for any other page or line.
+std::wstring NoticeText(int page, int line)
+{
+    if (page < kNoticeFirstPage || page >= kNoticePageCount || line < 0 || line >= kNoticeLinesPerPage)
+    {
+        return {};
+    }
+
+    const NoticeLine& notice = kNoticeLines[(page - kNoticeFirstPage) * kNoticeLinesPerPage + line];
+    if (!notice.isFormat)
+    {
+        return *notice.text;
+    }
+
+    // A format string ("10%% ..."): printed, like the original did.
+    wchar_t szText[256];
+    mu_swprintf(szText, *notice.text);
+    return szText;
+}
 } // namespace
 
 BYTE m_AltarState[5] = { 2,2,2,2,2 };
@@ -287,25 +308,6 @@ bool M34CryWolf1st::AdvanceNoticeTexts(std::wstring (&texts)[4])
         texts[i] = NoticeText(iNextNotice, i);
     }
     return true;
-}
-
-std::wstring M34CryWolf1st::NoticeText(int page, int line)
-{
-    if (page < kNoticeFirstPage || page >= kNoticePageCount || line < 0 || line >= kNoticeLinesPerPage)
-    {
-        return {};
-    }
-
-    const NoticeLine& notice = kNoticeLines[(page - kNoticeFirstPage) * kNoticeLinesPerPage + line];
-    if (!notice.isFormat)
-    {
-        return *notice.text;
-    }
-
-    // A format string ("10%% ..."): printed, like the original did.
-    wchar_t szText[256];
-    mu_swprintf(szText, *notice.text);
-    return szText;
 }
 
 void M34CryWolf1st::RenderNoticesCryWolf()

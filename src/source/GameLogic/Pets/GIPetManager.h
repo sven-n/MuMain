@@ -39,9 +39,6 @@ namespace giPetManager
     void    SetPetCommand(CHARACTER* c, int Key, std::uint8_t Cmd);
     void    SetAttack(CHARACTER* c, int Key, int attackType);
 
-    // The name of pet command `command` (a PET_COMMAND); empty for any other number.
-    const wchar_t* GetPetCommandName(int command);
-
     // The Dark Lord's pet-command tooltip content, with no drawing -- lets
     // UI::Skills::Tooltip::BuildModelForSlot() (SkillTooltip.cpp) fold it into the same RmlUi-
     // bindable Model the regular skill tooltip uses. Returns false for a Type outside the

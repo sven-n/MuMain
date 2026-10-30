@@ -26,13 +26,6 @@ const wchar_t* const* const kQuickCommandLabels[] = {
 constexpr int kQuickCommandCount = static_cast<int>(std::size(kQuickCommandLabels));
 } // namespace
 
-const wchar_t* mu::ui::window::CQuickCommandWindow::GetCommandLabel(int index)
-{
-    if (index < 0 || index >= kQuickCommandCount)
-        return L"";
-    return *kQuickCommandLabels[index];
-}
-
 // cppcheck-suppress uninitMemberVar
 mu::ui::window::CQuickCommandWindow::CQuickCommandWindow()
 {
@@ -189,7 +182,7 @@ void mu::ui::window::CQuickCommandWindow::BindRmlModel(Rml::DataModelConstructor
 
     model.rows.clear();
     for (int i = 0; i < kQuickCommandCount; ++i)
-        model.rows.push_back({StringUtils::WideToNarrow(GetCommandLabel(i))});
+        model.rows.push_back({StringUtils::WideToNarrow(*kQuickCommandLabels[i])});
 }
 
 void mu::ui::window::CQuickCommandWindow::BuildRmlUi()
