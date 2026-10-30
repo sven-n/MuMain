@@ -4,6 +4,7 @@
 
 #include <vector>
 #include "Core/Math/ZzzMathLib.h"
+#include "Engine/Object/ObjectPose.h"
 #include "GameLogic/Buffs/w_Buff.h"
 
 class	CInterpolateContainer
@@ -220,6 +221,7 @@ public:
 public:
     vec34_t	 	  Matrix;
     vec34_t* BoneTransform;
+    Engine::Object::PoseInputs Pose;
 
 public:
     OBB_t		  OBB;

@@ -67,7 +67,9 @@ constexpr std::array<float, 3> SecondLight{0.35f, 0.55f, 0.65f};
     F(AlphaTarget) F(Alpha) F(LastHorseWaveEffect) F(PKKey) F(Light) F(Direction) F(m_vPosSword) F(StartPosition)    \
     F(BoundingBoxMin) F(BoundingBoxMax) F(m_vDownAngle) F(m_vDeadPosition) F(Position) F(Angle) F(HeadAngle)         \
     F(HeadTargetAngle) F(EyeLeft) F(EyeRight) F(EyeLeft2) F(EyeRight2) F(EyeLeft3) F(EyeRight3) F(SetTrailLeft) F(SetTrailRight) F(Matrix)            \
-    F(BoneTransform) F(OBB.StartPos) F(OBB.XAxis) F(OBB.YAxis) F(OBB.ZAxis) F(Owner) F(Prior) F(Next) F(m_BuffMap)   \
+    F(BoneTransform) F(Pose.Type) F(Pose.CurrentAction) F(Pose.PriorAction) F(Pose.AnimationFrame)                   \
+    F(Pose.PriorAnimationFrame) F(Pose.Angle) F(Pose.HeadAngle)                                                      \
+    F(OBB.StartPos) F(OBB.XAxis) F(OBB.YAxis) F(OBB.ZAxis) F(Owner) F(Prior) F(Next) F(m_BuffMap)                    \
     F(m_sTargetIndex) F(m_bpcroom) F(m_v3PrePos1) F(m_v3PrePos2) F(m_Interpolates)
 
 #define RECORDER_PARTICLE_FIELDS(F)                                                                                  \
@@ -88,7 +90,7 @@ constexpr std::array<float, 3> SecondLight{0.35f, 0.55f, 0.65f};
 // Windows build without iterator debugging (OBJECT holds a std::map and
 // std::vectors, whose size depends on it).
 #if defined(_MSC_VER) && defined(_WIN64) && defined(_ITERATOR_DEBUG_LEVEL) && _ITERATOR_DEBUG_LEVEL == 0
-static_assert(sizeof(OBJECT) == 704, "OBJECT changed: update RECORDER_OBJECT_FIELDS");
+static_assert(sizeof(OBJECT) == 744, "OBJECT changed: update RECORDER_OBJECT_FIELDS");
 static_assert(sizeof(PARTICLE) == 136, "PARTICLE changed: update RECORDER_PARTICLE_FIELDS");
 static_assert(sizeof(JOINT) == 9800, "JOINT changed: update RECORDER_JOINT_FIELDS");
 #endif

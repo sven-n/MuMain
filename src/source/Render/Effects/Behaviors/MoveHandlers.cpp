@@ -7524,12 +7524,14 @@ namespace Render::Effects::Behaviors
                 {
                     vec3_t vAngle;
 
+                    // Placed at this effect, so not the owner's own bones that its draw reuses.
+                    static vec34_t ownerBones[MAX_BONES];
                     BMD* characterBMD = &Models[o->Owner->Type];
                     VectorCopy(o->Position, characterBMD->BodyOrigin);
 
-                    characterBMD->Animation(o->Owner->BoneTransform, o->Owner->AnimationFrame,
-                        o->Owner->PriorAnimationFrame, o->Owner->PriorAction, o->Owner->Angle, o->Owner->HeadAngle);
-                    characterBMD->TransformPosition(o->Owner->BoneTransform[20], vRelativePos, vtaWorldPos, false);
+                    characterBMD->Animation(ownerBones, o->Owner->AnimationFrame, o->Owner->PriorAnimationFrame,
+                                            o->Owner->PriorAction, o->Owner->Angle, o->Owner->HeadAngle);
+                    characterBMD->TransformPosition(ownerBones[20], vRelativePos, vtaWorldPos, false);
 
                     if (rand_fps_check(2)) {
                         vtaWorldPos[0] += rand() % 40 + 10;
@@ -7556,9 +7558,9 @@ namespace Render::Effects::Behaviors
                     Vector(1.f, 0.6f, 0.8f, vLight2);
                     CreateParticleFpsChecked(BITMAP_SHOCK_WAVE, vtaWorldPos, vAngle, vLight2, 4, 0.005f);
 
-                    characterBMD->Animation(o->Owner->BoneTransform, o->Owner->AnimationFrame,
-                        o->Owner->PriorAnimationFrame, o->Owner->PriorAction, o->Owner->Angle, o->Owner->HeadAngle);
-                    characterBMD->TransformPosition(o->Owner->BoneTransform[20], vRelativePos, vtaWorldPos, false);
+                    characterBMD->Animation(ownerBones, o->Owner->AnimationFrame, o->Owner->PriorAnimationFrame,
+                                            o->Owner->PriorAction, o->Owner->Angle, o->Owner->HeadAngle);
+                    characterBMD->TransformPosition(ownerBones[20], vRelativePos, vtaWorldPos, false);
 
                     vtaWorldPos[2] += 70;
                     Vector(1.f, 0.3f, 0.6f, vLight2);

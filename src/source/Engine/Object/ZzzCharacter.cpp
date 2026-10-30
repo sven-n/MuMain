@@ -6438,9 +6438,9 @@ void AnimateCharacterBones(OBJECT* o)
     BMD* model = &Models[o->Type];
     if (model->NumBones <= 0) return;
 
-    // Model space, as render builds them: the model's BodyOrigin and BodyScale belong to whichever object set them last.
-    model->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
-                     o->HeadAngle, false, false, nullptr, o->CurrentAction);
+    // Model space: the model's BodyOrigin and BodyScale belong to whichever object set them last.
+    if (!Engine::Object::Pose::IsCurrent(o))
+        Engine::Object::Pose::Build(o, model);
     o->EnableBoneMatrix = true;
 }
 
@@ -6461,17 +6461,21 @@ bool IsClientCharacterObject(const OBJECT* o)
 }
 } // namespace
 
-bool BeginPrepassBoneCheck(const OBJECT* o, int numBones)
+void CheckCharacterPose(const OBJECT* o, BMD* model, bool reused)
 {
-    if (!g_PrepassBoneCheck.enabled || !o->EnableBoneMatrix || numBones > MAX_BONES || !IsClientCharacterObject(o))
-        return false;
-    memcpy(PrepassBones, o->BoneTransform, sizeof(float) * 12 * numBones);
-    return true;
-}
-
-void EndPrepassBoneCheck(const OBJECT* o, int numBones)
-{
-    RecordPrepassBones(PrepassBones, o->BoneTransform, numBones, o->Type == MODEL_PLAYER);
+    if (!g_PrepassBoneCheck.enabled || model->NumBones > MAX_BONES || !IsClientCharacterObject(o))
+        return;
+    if (!reused)
+    {
+        ++g_PrepassBoneCheck.rebuilt;
+        return;
+    }
+    vec3_t angle, headAngle;
+    VectorCopy(o->Angle, angle);
+    VectorCopy(o->HeadAngle, headAngle);
+    model->Animation(PrepassBones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, angle, headAngle, false,
+                     false, nullptr, o->CurrentAction);
+    RecordPrepassBones(PrepassBones, o->BoneTransform, model->NumBones, o->Type == MODEL_PLAYER);
 }
 
 void RecordPrepassBones(const float (*prepass)[3][4], const float (*rendered)[3][4], int numBones, bool player)
@@ -11479,6 +11483,20 @@ namespace
 bool s_hasEarthQuakeRequest = false;
 float s_earthQuakeRequest = 0.f;
 
+// Rebuilds the poses whose state the update changed after the animation pre-pass, so drawing reuses them.
+void RefreshCharacterPoses()
+{
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
+    {
+        OBJECT* o = &CharactersClient[i].Object;
+        if (!o->EnableBoneMatrix || Engine::Object::Pose::IsCurrent(o))
+            continue;
+        BMD* b = &Models[o->Type];
+        b->BodyHeight = 0.f;
+        Engine::Object::Pose::Build(o, b);
+    }
+}
+
 void UpdateDrawnCharacterEffects()
 {
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
@@ -11546,6 +11564,7 @@ void ApplyCharacterEffectsEarthQuake()
 
 void UpdateCharacterEffects()
 {
+    RefreshCharacterPoses();
     const float sampledEarthQuake = EarthQuake;
     {
         // Their sprites are drawn with the characters, outside the bloom like them.
@@ -11925,6 +11944,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
         o->BoneTransform = NULL;
     }
     o->BoneTransform = new vec34_t[MAX_BONES];
+    Engine::Object::Pose::Invalidate(o);
 
     for (int i = 0; i < 2; i++)
     {
