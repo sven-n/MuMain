@@ -204,6 +204,21 @@ check(
     "MuClient MSVC builds must compile UTF-8 sources and reject invalid bytes",
 )
 
+# No CI job builds with MU_LINK_SDL_PLATFORM_BACKENDS=ON, so its Vulkan link is checked here.
+check(
+    '"LINKER:--push-state,--no-as-needed" "<LINK_ITEM>" "LINKER:--pop-state"' in src_cmake,
+    "MuNoAsNeeded must keep its library under --no-as-needed between --push-state and --pop-state",
+)
+src_cmake_code = "\n".join(
+    line for line in src_cmake.splitlines() if not line.lstrip().startswith("#")
+)
+check(
+    src_cmake_code.count("Vulkan::Vulkan") == 1
+    and "$<LINK_LIBRARY:MuNoAsNeeded,Vulkan::Vulkan>" in src_cmake_code,
+    "Vulkan::Vulkan must be linked once, through $<LINK_LIBRARY:MuNoAsNeeded,...>: a plain link "
+    "loses its DT_NEEDED entry under --as-needed, and CMake refuses a mix of both",
+)
+
 configure_presets = {
     preset["name"]: preset for preset in cmake_presets["configurePresets"]
 }
