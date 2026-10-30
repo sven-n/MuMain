@@ -129,7 +129,9 @@ the HUD and the command windows, and under the settings window and the tooltips
 (`chat_input.rml=10.66`; the command windows are 10.65, settings 10.67, tooltips 10.69). Avoid a
 depth another document already has: documents at the same depth are ordered by focus. The depths
 are the original windows' layer depths, listed in `UI/RmlBridge/RmlStackingOrder.cpp`; a document
-the theme does not list keeps its own.
+the theme does not list keeps its own. For a document shown in every scene (`option_window.rml`),
+the entry applies in the main scene only: outside it the document takes its depth for the other
+scenes from that table.
 
 1. Create `src/bin/Data/Interface/RmlUi/themes/<your-theme-name>/`.
 2. Declare `Base=legacy` or `Base=modern` in `[Theme]`, or supply your own complete stylesheets.

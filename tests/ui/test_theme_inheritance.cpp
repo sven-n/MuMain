@@ -91,16 +91,18 @@ TEST_CASE("inherited images resolve container files but keep logical extensions 
 TEST_CASE("a theme restacks documents through [Stacking], inherited like any setting [ui][rml-theme]")
 {
     ThemeFiles files;
-    files.Write("base/theme.ini", "[Stacking]\nchat_input.rml=10.65\nchat_log.rml=over\n");
+    files.Write("base/theme.ini", "[Stacking]\nchat_input.rml=10.65\nchat_log.rml=over\nmain_frame_top.rml=nan\ntooltip.rml=inf\n");
     files.Write("child/theme.ini", "[Theme]\nBase=base\n");
     const ThemeInheritance theme(files.root / "child");
     REQUIRE(theme.IsValid());
     const auto input = ThemedStackingDepth(theme, "chat_input.rml");
     REQUIRE(input);
     CHECK(*input == doctest::Approx(10.65f));
-    // Not listed, or not a number: the stacking table's depth.
+    // Not listed, not a number, or not finite: the stacking table's depth.
     CHECK(ThemedStackingDepth(theme, "main_frame.rml") == StackingDepthForDocument("main_frame.rml"));
     CHECK(ThemedStackingDepth(theme, "chat_log.rml") == StackingDepthForDocument("chat_log.rml"));
+    CHECK(ThemedStackingDepth(theme, "main_frame_top.rml") == StackingDepthForDocument("main_frame_top.rml"));
+    CHECK(ThemedStackingDepth(theme, "tooltip.rml") == StackingDepthForDocument("tooltip.rml"));
     CHECK_FALSE(ThemedStackingDepth(theme, "no_such_document.rml"));
 }
 

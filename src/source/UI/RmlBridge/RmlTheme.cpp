@@ -15,9 +15,11 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
+#include <memory>
 #include <sstream>
 #include <utility>
 #include <vector>
@@ -79,6 +81,22 @@ namespace UI::RmlBridge
             return usesNativeTextSize;
         }
 
+        // The active theme's chain, for its [Stacking] entries: read once per theme, not on every
+        // document load. Built on first use and dropped by SetActiveThemeName().
+        std::unique_ptr<ThemeInheritance>& ActiveThemeInheritanceStorage()
+        {
+            static std::unique_ptr<ThemeInheritance> theme;
+            return theme;
+        }
+
+        const ThemeInheritance& ActiveThemeInheritance()
+        {
+            auto& theme = ActiveThemeInheritanceStorage();
+            if (!theme)
+                theme = std::make_unique<ThemeInheritance>(std::filesystem::path("Data/Interface/RmlUi/themes") / ActiveThemeNameStorage());
+            return *theme;
+        }
+
     }
 
     const std::string& GetActiveThemeName()
@@ -113,6 +131,7 @@ namespace UI::RmlBridge
     {
         ActiveThemeNameStorage() = ToLower(themeName);
         UsesNativeTextSizeStorage() = ComputeUsesNativeTextSize(ActiveThemeNameStorage());
+        ActiveThemeInheritanceStorage().reset();
 
         // Both themes deliberately reuse the same <template name="..."> for a shared concept
         // (e.g. "window_shell_bg") in their own themes/<theme>/ copy. Rml::TemplateCache caches a
@@ -283,7 +302,7 @@ namespace UI::RmlBridge
 
         char* end = nullptr;
         const float depth = std::strtof(setting->value.c_str(), &end);
-        if (end == setting->value.c_str() || *end != '\0')
+        if (end == setting->value.c_str() || *end != '\0' || !std::isfinite(depth))
         {
             g_ErrorReport.Write(L"> [RmlTheme] Bad [Stacking] depth '%hs' for '%hs'.\r\n", setting->value.c_str(),
                                 std::string(documentName).c_str());
@@ -296,8 +315,7 @@ namespace UI::RmlBridge
     {
         std::optional<float> ActiveThemeStackingDepth(const std::string& documentName)
         {
-            const ThemeInheritance theme(std::filesystem::path("Data/Interface/RmlUi/themes") / GetActiveThemeName());
-            return ThemedStackingDepth(theme, documentName);
+            return ThemedStackingDepth(ActiveThemeInheritance(), documentName);
         }
     } // namespace
 
