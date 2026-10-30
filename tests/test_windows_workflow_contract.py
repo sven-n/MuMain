@@ -467,8 +467,9 @@ for workflow_name, ci_job, job_name in linux_ci_jobs:
     all_linux_ci_packages |= ci_packages
     for package in sorted(ci_packages - linux_guide_packages - CI_ONLY_LINUX_PACKAGES.keys()):
         errors.append(
-            f"{workflow_name} {job_name} installs {package}, but docs/build/linux/console.md "
-            "doesn't list it; add it to the guide, or to CI_ONLY_LINUX_PACKAGES with the reason"
+            f"{workflow_name} {job_name} installs {package}, but "
+            f"{LINUX_GUIDE.relative_to(ROOT).as_posix()} doesn't list it; add it to the guide, "
+            "or to CI_ONLY_LINUX_PACKAGES with the reason"
         )
 for package in sorted(CI_ONLY_LINUX_PACKAGES.keys() - all_linux_ci_packages):
     errors.append(f"CI_ONLY_LINUX_PACKAGES lists {package}, which no Linux CI job installs")
