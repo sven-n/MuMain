@@ -161,6 +161,6 @@ They run natively (no emulation). With `ENABLE_EDITOR=OFF` this includes the
 `editor_leak` guard, which fails the build if any `src/MuEditor/` source was
 compiled into the non-editor client.
 
-Without `glslang-tools` and `spirv-cross`, CTest leaves out
-`checked_in_shader_reflection_validation`, `staged_shader_reflection_validation`
-and `shader_reflection_validation`.
+Without `spirv-cross`, CTest leaves out `checked_in_shader_reflection_validation`,
+`staged_shader_reflection_validation` and `shader_reflection_validation`; without
+`glslang-tools`, only `shader_reflection_validation`.
