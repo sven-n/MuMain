@@ -7,7 +7,9 @@
 // Story: 3.2.1 - char16_t Encoding at .NET Interop Boundary
 
 #include <coreclr_delegates.h>
+#include <atomic>
 #include <filesystem>
+#include <memory>
 
 #include "Core/Platform/PlatformLibrary.h"
 
@@ -90,14 +92,16 @@ private:
     static void OnPacketReceivedS(int32_t handle, int32_t size, BYTE* data);
     static void OnDisconnectedS(int32_t handle);
 
-    PacketFunctions_ChatServer* _chatServer = {};
-    PacketFunctions_ConnectServer* _connectServer = {};
-    PacketFunctions_ClientToServer* _gameServer = {};
+    std::unique_ptr<PacketFunctions_ChatServer> _chatServer;
+    std::unique_ptr<PacketFunctions_ConnectServer> _connectServer;
+    std::unique_ptr<PacketFunctions_ClientToServer> _gameServer;
 
-    int32_t _handle;
+    // Atomic: the disconnect callback clears it on a thread-pool thread while the game reads it.
+    std::atomic<int32_t> _handle = 0;
     void (*_packetHandler)(int32_t, const BYTE*, int32_t);
     bool _firstPacketLogged = false;
 
+    void Unregister();
     void OnDisconnected();
     void OnPacketReceived(const BYTE* data, const int32_t length);
 
@@ -106,25 +110,29 @@ public:
                void (*packetHandler)(int32_t, const BYTE*, int32_t));
     ~Connection();
 
+    // The handle is registered for this object; a copy would unregister it when destroyed.
+    Connection(const Connection&) = delete;
+    Connection& operator=(const Connection&) = delete;
+
     bool IsConnected();
     void Send(const BYTE* data, const int32_t length);
     void Close();
 
     int32_t GetHandle() const
     {
-        return _handle;
+        return _handle.load();
     }
 
     PacketFunctions_ChatServer* ToChatServer() const
     {
-        return _chatServer;
+        return _chatServer.get();
     }
     PacketFunctions_ConnectServer* ToConnectServer() const
     {
-        return _connectServer;
+        return _connectServer.get();
     }
     PacketFunctions_ClientToServer* ToGameServer() const
     {
-        return _gameServer;
+        return _gameServer.get();
     }
 };

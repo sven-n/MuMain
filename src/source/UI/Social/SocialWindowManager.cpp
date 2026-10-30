@@ -981,10 +981,17 @@ void CUIChatWindow::HandlePacketS(int32_t handle, const BYTE* ReceiveBuffer, int
     // find() was dereferenced unguarded. The Connection registers this callback from its own
     // constructor, before ConnectToChatServer() below records the handle, so a packet arriving in
     // that window read end() -- and so did one arriving for a room already closed.
-    const auto found = ConnectionHandleToWindowUuid.find(handle);
-    if (found == ConnectionHandleToWindowUuid.end() || found->second == 0)
+    DWORD windowUiid = 0;
+    {
+        const std::lock_guard lock(ConnectionHandleToWindowUuidMutex);
+        const auto found = ConnectionHandleToWindowUuid.find(handle);
+        if (found != ConnectionHandleToWindowUuid.end())
+            windowUiid = found->second;
+    }
+
+    if (windowUiid == 0)
         return;
-    TranslateChattingProtocol(found->second, ReceiveBuffer, Size);
+    TranslateChattingProtocol(windowUiid, ReceiveBuffer, Size);
 }
 
 void CUIChatWindow::ConnectToChatServer(const wchar_t* pszIP, DWORD dwRoomNumber, DWORD dwTicket)
@@ -999,7 +1006,10 @@ void CUIChatWindow::ConnectToChatServer(const wchar_t* pszIP, DWORD dwRoomNumber
         return;
     }
 
-    ConnectionHandleToWindowUuid[_connection->GetHandle()] = this->GetUIID();
+    {
+        const std::lock_guard lock(ConnectionHandleToWindowUuidMutex);
+        ConnectionHandleToWindowUuid[_connection->GetHandle()] = this->GetUIID();
+    }
     _connection->ToChatServer()->SendAuthenticateExt(dwRoomNumber, dwTicket);
 }
 
@@ -1014,8 +1024,13 @@ void CUIChatWindow::DisconnectToChatServer()
         }
 
         // Before the connection goes: this entry used to outlive the window, so a late packet on
-        // the handle still resolved to the UIID of a window that no longer exists.
-        ConnectionHandleToWindowUuid.erase(_connection->GetHandle());
+        // the handle still resolved to the UIID of a window that no longer exists. Erase by window,
+        // not by GetHandle(): the handle reads 0 once the server has closed the connection.
+        {
+            const std::lock_guard lock(ConnectionHandleToWindowUuidMutex);
+            std::erase_if(ConnectionHandleToWindowUuid,
+                          [uiid = GetUIID()](const auto& entry) { return entry.second == uiid; });
+        }
 
         delete _connection;
         _connection = nullptr;
