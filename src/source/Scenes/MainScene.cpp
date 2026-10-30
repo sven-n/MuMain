@@ -314,8 +314,11 @@ static void UpdateGameEntities()
         MoveParticles();
     }
     MovePointers();
-    UpdateCharacterEffects();
-    UpdateObjectEffects();
+    {
+        FRAME_PROFILE(UpdateEffects);
+        UpdateCharacterEffects();
+        UpdateObjectEffects();
+    }
 
     g_Direction.CheckDirection();
 

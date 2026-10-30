@@ -54,6 +54,10 @@ struct PrepassBoneCheck
     int mismatched = 0;
     // Draws that animated the character again: its state changed after the update built the pose.
     int rebuilt = 0;
+    // Draws of a client character's own part: reusing the update's animation step, or advancing it themselves
+    // (an attachment's first frame; steadily rising when update and draw disagree).
+    int partsReused = 0;
+    int partsAdvancedInDraw = 0;
     float maxDelta = 0.f;
 };
 extern PrepassBoneCheck g_PrepassBoneCheck;

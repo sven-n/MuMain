@@ -7018,6 +7018,10 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
 
     // The update advanced and posed a client character's part since the last draw; other parts advance here.
     const bool advanced = slot != nullptr && Engine::Object::Attachments::WasAdvanced(*slot);
+#ifdef MU_ENABLE_CONTROL_SOCKET
+    if (g_PrepassBoneCheck.enabled && slot != nullptr && slot->part != nullptr)
+        ++(advanced ? g_PrepassBoneCheck.partsReused : g_PrepassBoneCheck.partsAdvancedInDraw);
+#endif
     if (!advanced)
         AdvanceLinkedPart(c, f, Type, Link);
     b->CurrentAction = LinkedPartAction(c, f);
