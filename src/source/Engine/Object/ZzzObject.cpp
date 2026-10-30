@@ -473,6 +473,38 @@ static void RenderLostTowerFireBlock(BMD* b, OBJECT* o, int streamMesh)
     b->StreamMesh = -1;
 }
 
+// The light colour of a Little Santa, by its type.
+static void LittleSantaLight(int type, vec3_t light)
+{
+    switch (type)
+    {
+    case MODEL_LITTLESANTA:
+        Vector(0.5f, 0.5f, 0.0f, light);
+        break;
+    case MODEL_LITTLESANTA + 1:
+        Vector(0.3f, 0.8f, 0.4f, light);
+        break;
+    case MODEL_LITTLESANTA + 2:
+        Vector(0.8f, 0.1f, 0.1f, light);
+        break;
+    case MODEL_LITTLESANTA + 3:
+        Vector(0.3f, 0.3f, 0.8f, light);
+        break;
+    case MODEL_LITTLESANTA + 4:
+    case MODEL_LITTLESANTA + 5:
+        Vector(0.9f, 0.9f, 0.9f, light);
+        break;
+    case MODEL_LITTLESANTA + 6:
+        Vector(0.8f, 0.4f, 0.0f, light);
+        break;
+    case MODEL_LITTLESANTA + 7:
+        Vector(0.9f, 0.5f, 0.7f, light);
+        break;
+    default:
+        break;
+    }
+}
+
 void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 {
     BMD* b = &Models[o->Type];
@@ -1148,14 +1180,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     Vector(0.3f, 0.5f, 1.f, b->BodyLight);
                 }
 
-                if (o->Type == MODEL_VALKYRIE || o->Type == MODEL_ICE_MONSTER || o->Type == MODEL_ALQUAMOS || o->Type == MODEL_QUEEN_RAINER)
-                {
-                    if (o->Alpha == 1.0f && o->BlendMeshLight == 0.05f)
-                    {
-                        o->BlendMeshLight = 1.0f;
-                    }
-                }
-
                 if (RenderHellasObjectMesh(o, b)) {}
                 else
                     if (battleCastle::RenderBattleCastleObjectMesh(o, b)) {}
@@ -1178,39 +1202,12 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                     if (o->Type == MODEL_KALIMA_SHOP)
                                     {
                                         Vector(1.f, 1.f, 1.f, b->BodyLight);
-                                        float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.6f;
                                         b->BeginRender(o->Alpha);
                                         b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                                         b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                                         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                                         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                                         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                                        vec3_t Position, Light, p, Angle;
-                                        Vector(0.4f, 0.2f, 0.4f, Light);
-                                        Vector(30.f, 40.f, 0.f, p);
-                                        b->TransformPosition(o->BoneTransform[3], p, Position);
-
-                                        VectorAdd(Position, o->Position, Position);
-                                        CreateSprite(BITMAP_LIGHT, Position, Luminosity + 3.5f, Light, o, 50.f);
-
-                                        Vector(0.f, 0.f, 0.f, p);
-                                        b->TransformPosition(o->BoneTransform[21], p, Position);
-                                        VectorAdd(Position, o->Position, Position);
-                                        CreateSprite(BITMAP_LIGHT, Position, Luminosity + 3.5f, Light, o, 50.f);
-
-                                        Vector(0.f, 0.f, 0.f, Angle);
-                                        Vector(1.f, 1.f, 1.f, Light);
-                                        VectorCopy(o->Position, Position);
-                                        Position[0] += 40.f;
-                                        Position[1] += 30.f;
-                                        Position[2] -= 90.f;
-                                        CreateParticleFpsChecked(BITMAP_SMOKE, Position, Angle, Light, 11, 0.4f);
-
-                                        VectorCopy(o->Position, Position);
-                                        Position[0] -= 40.f;
-                                        Position[1] -= 30.f;
-                                        Position[2] -= 90.f;
-                                        CreateParticleFpsChecked(BITMAP_SMOKE, Position, Angle, Light, 11, 0.4f);
                                         b->EndRender();
                                     }
                                     else
@@ -1876,46 +1873,8 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 }
                 else if (o->Type == MODEL_XMAS2008_SNOWMAN)
                 {
-                    if (o->CurrentAction == MONSTER01_DIE)
+                    if (o->CurrentAction != MONSTER01_DIE)
                     {
-                        if ((int)o->LifeTime == 100)
-                        {
-                            o->LifeTime = 90;
-                            o->m_bRenderShadow = false;
-
-                            vec3_t vRelativePos, vWorldPos, Light;
-                            Vector(1.0f, 1.0f, 1.0f, Light);
-                            Vector(0.f, 0.f, 0.f, vRelativePos);
-
-                            b->TransformPosition(o->BoneTransform[7], vRelativePos, vWorldPos, true);
-                            CreateEffect(MODEL_XMAS2008_SNOWMAN_HEAD, vWorldPos, o->Angle, Light, 0, o, 0, 0);
-
-                            CreateEffect(MODEL_XMAS2008_SNOWMAN_BODY, o->Position, o->Angle, Light, 0, o, 0, 0);
-                        }
-                    }
-                    else
-                    {
-                        vec3_t vRelativePos, vWorldPos, Light;
-                        Vector(0.f, 0.f, 0.f, vRelativePos);
-                        Vector(0.8f, 0.8f, 0.9f, Light);
-
-                        b->TransformPosition(o->BoneTransform[7], vRelativePos, vWorldPos, true);
-                        CreateSprite(BITMAP_LIGHT, vWorldPos, 6.0f, Light, o);
-                        CreateSprite(BITMAP_LIGHT, vWorldPos, 4.0f, Light, o);
-
-                        b->TransformPosition(o->BoneTransform[34], vRelativePos, vWorldPos, true);
-                        CreateParticleFpsChecked(BITMAP_SHINY, vWorldPos, o->Angle, Light, 7);
-                        Vector(1.0f, 0.8f, 0.2f, Light);
-                        CreateSprite(BITMAP_LIGHT, vWorldPos, 2.0f, Light, o);
-
-                        if (o->CurrentAction == MONSTER01_WALK)
-                        {
-                            vRelativePos[0] = o->Position[0] + sinf(((rand() % 360) * 6.12)) * 40.0f;
-                            vRelativePos[1] = o->Position[1] + sinf(((rand() % 360) * 6.12)) * 40.0f;
-                            vRelativePos[2] = o->Position[2];
-                            CreateParticleFpsChecked(BITMAP_SMOKE, vRelativePos, o->Angle, o->Light);
-                        }
-
                         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                         b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -1960,19 +1919,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 }
                 else if (o->Type == MODEL_XMAS2008_SNOWMAN_NPC)
                 {
-                    vec3_t vRelativePos, vWorldPos, Light;
-                    Vector(0.f, 0.f, 0.f, vRelativePos);
-                    Vector(0.8f, 0.8f, 0.9f, Light);
-
-                    b->TransformPosition(o->BoneTransform[7], vRelativePos, vWorldPos, true);
-                    CreateSprite(BITMAP_LIGHT, vWorldPos, 6.0f, Light, o);
-                    CreateSprite(BITMAP_LIGHT, vWorldPos, 4.0f, Light, o);
-
-                    b->TransformPosition(o->BoneTransform[34], vRelativePos, vWorldPos, true);
-                    CreateParticleFpsChecked(BITMAP_SHINY, vWorldPos, o->Angle, Light, 7);
-                    Vector(1.0f, 0.8f, 0.2f, Light);
-                    CreateSprite(BITMAP_LIGHT, vWorldPos, 2.0f, Light, o);
-
                     b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                     b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                     b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -1981,214 +1927,43 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 else if (o->Type == MODEL_XMAS2008_SANTA_NPC)
                 {
                     vec3_t vRelativePos, vWorldPos, Light;
-                    Vector(0.f, 0.f, 0.f, vRelativePos);
-
-                    b->TransformPosition(o->BoneTransform[4], vRelativePos, vWorldPos, true);
-                    Vector(1.0f, 0.8f, 0.2f, Light);
-                    CreateSprite(BITMAP_LIGHT, vWorldPos, 8.0f, Light, o);
-
-                    b->TransformPosition(o->BoneTransform[13], vRelativePos, vWorldPos, true);
+                    Vector(0.f, 17.f, 0.f, vRelativePos);
                     Vector(1.0f, 0.4f, 0.0f, Light);
-                    CreateSprite(BITMAP_LIGHT, vWorldPos, 5.0f, Light, o);
-
-                    b->TransformPosition(o->BoneTransform[38], vRelativePos, vWorldPos, true);
-                    Vector(1.0f, 0.8f, 0.2f, Light);
-                    CreateSprite(BITMAP_LIGHT, vWorldPos, 2.0f, Light, o);
-
-                    vRelativePos[1] = 17.0f;
                     b->TransformPosition(o->BoneTransform[53], vRelativePos, vWorldPos, true);
-                    Vector(1.0f, 0.4f, 0.0f, Light);
                     RenderAurora(BITMAP_LIGHTMARKS, RENDER_BRIGHT, vWorldPos[0], vWorldPos[1], 2.0f, 2.0f, Light);
-
                     b->TransformPosition(o->BoneTransform[58], vRelativePos, vWorldPos, true);
-                    Vector(1.0f, 0.4f, 0.0f, Light);
                     RenderAurora(BITMAP_LIGHTMARKS, RENDER_BRIGHT, vWorldPos[0], vWorldPos[1], 2.0f, 2.0f, Light);
-
-                    Vector(0.f, 0.f, 0.f, vRelativePos);
-                    int temp[11] = { 39, 41, 43, 44, 46, 49, 40, 42, 45, 47, 48 };
-                    float fCos1 = cosf(WorldTime * 0.002f);
-                    float fCos2 = sinf(WorldTime * 0.002f);
-                    float fSize = 0.0f;
-                    for (int i = 0; i < 11; i++)
-                    {
-                        b->TransformPosition(o->BoneTransform[temp[i]], vRelativePos, vWorldPos, true);
-
-                        if (i < 6)
-                        {
-                            Vector(1.0f, 0.9f, 0.3f, Light);
-                            fSize = 0.7f * fCos1;
-                        }
-                        else
-                        {
-                            Vector(1.0f, 0.5f, 0.5f, Light);
-                            fSize = 0.7f * fCos2;
-                        }
-                        CreateSprite(BITMAP_LIGHT, vWorldPos, fSize, Light, o);
-                    }
-
-                    float fScale = 0.0f;
-                    switch (o->CurrentAction)
-                    {
-                    case 1:
-                        vRelativePos[0] = 20 + (rand() % 500 - 250) * 0.1f;
-                        vRelativePos[1] = (rand() % 300 - 150) * 0.1f;
-                        b->TransformPosition(o->BoneTransform[16], vRelativePos, vWorldPos, true);
-
-                        Vector((rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, Light);
-                        fScale = (rand() % 5 + 5) * 0.1f;
-                        CreateParticleFpsChecked(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 13, fScale, o);
-                        CreateParticleFpsChecked(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 13, fScale, o);
-                        CreateParticleFpsChecked(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 13, fScale, o);
-                        CreateParticleFpsChecked(BITMAP_SHINY, vWorldPos, o->Angle, Light, 7);
-
-                        Vector(1.0f, 0.8f, 0.2f, Light);
-                        Vector(0.f, 0.f, 0.f, vRelativePos);
-                        b->TransformPosition(o->BoneTransform[16], vRelativePos, vWorldPos, true);
-                        CreateSprite(BITMAP_LIGHT, vWorldPos, 2.5f, Light, o);
-                        break;
-                    case 2:
-                        Vector(150.0f, 0.0f, 0.0f, vRelativePos);
-                        b->TransformPosition(o->BoneTransform[6], vRelativePos, vWorldPos, true);
-                        Vector(0.8f, 0.8f, 0.9f, Light);
-
-                        if (o->AnimationFrame < 1) o->AI = 0;
-                        if (o->AI == 0 && o->AnimationFrame > 1)
-                        {
-                            o->AI = 1;
-                            CreateSprite(BITMAP_LIGHT, vWorldPos, 0.5f, Light, o);
-                            CreateSprite(BITMAP_DS_SHOCK, vWorldPos, 0.15f, Light, o);
-                            CreateEffectFpsChecked(BITMAP_FIRECRACKER0002, vWorldPos, o->Angle, Light, o->Skill);
-                        }
-                        break;
-                    }
 
                     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
                 else if (o->Type == MODEL_CURSED_SANTA)
                 {
-                    if (o->CurrentAction == MONSTER01_DIE)
+                    if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame >= 13)
                     {
-                        vec3_t vLight;
-                        Vector(1.0 * o->Alpha, 0.8 * o->Alpha, 0.5 * o->Alpha, vLight);
-                        vec3_t vPosition;
-                        Vector(o->Position[0], o->Position[1], o->Position[2] + 200, vPosition);
+                        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_GOOD_SANTA);
+                        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_GOOD_SANTA_BAGGAGE);
+                        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                    }
+                    else if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame >= 9)
+                    {
+                        float fFade = (13.0f - o->AnimationFrame) / (13.0f - 9.0f);
+                        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_GOOD_SANTA);
+                        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_GOOD_SANTA_BAGGAGE);
+                        b->RenderMesh(2, RENDER_TEXTURE, 1.0f - fFade, o->BlendMesh, o->BlendMeshLight,
+                                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
 
-                        if (o->AnimationFrame >= 13)//11
-                        {
-                            o->Angle[2] = 45;
-                            if (o->AI != 0)
-                            {
-                                o->AI -= 1;
-                                vec3_t vPos, Position;
-                                Vector(o->Position[0], o->Position[1], o->Position[2] + 250, vPos);
-
-                                vec3_t vLight;
-                                Vector(0.7f, 0.3f, 0.0f, vLight);
-                                for (int i = 0; i < 30; i++)
-                                {
-                                    CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 27);
-                                }
-
-                                for (int i = 0; i < 20; i++)
-                                {
-                                    CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 28);
-                                }
-
-                                Vector(vPos[0] + (rand() % 100 - 50), vPos[1] + (rand() % 100 - 50),
-                                    vPos[2], Position);
-                                CreateSprite(BITMAP_DS_SHOCK, Position, rand() % 10 * 0.1f + 1.5f, o->Light, o);
-
-                                for (int i = 0; i < 60; i++)
-                                {
-                                    Vector(0.3f + (rand() % 700) * 0.001f, 0.3f + (rand() % 700) * 0.001f, 0.3f + (rand() % 700) * 0.001f, vLight);
-                                    CreateParticleFpsChecked(BITMAP_SHINY, vPos, o->Angle, vLight, 9);
-                                }
-
-                                vPos[2] += 50;
-
-                                for (int i = 0; i < 3; ++i)
-                                {
-                                    CreateEffectFpsChecked(MODEL_HALLOWEEN_CANDY_STAR, vPos, o->Angle, vLight, 1);
-                                    CreateEffectFpsChecked(rand() % 4 + MODEL_XMAS_EVENT_BOX, vPos, o->Angle, vLight, 0, o);
-                                    CreateEffectFpsChecked(rand() % 4 + MODEL_XMAS_EVENT_BOX, vPos, o->Angle, vLight, 0, o);
-                                }
-                            }
-
-                            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_GOOD_SANTA);
-                            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_GOOD_SANTA_BAGGAGE);
-                            b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-                            CreateSprite(BITMAP_LIGHT, vPosition, 5.5f, vLight, o);
-                        }
-                        else if (o->AnimationFrame >= 9)//9
-                        {
-                            o->AI = 3;
-                            o->Alpha = 1.0f;
-
-                            o->Angle[2] += 40.0f;
-
-                            float fFade = (13.0f - o->AnimationFrame) / (13.0f - 9.0f);
-                            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_GOOD_SANTA);
-                            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_GOOD_SANTA_BAGGAGE);
-                            b->RenderMesh(2, RENDER_TEXTURE, 1.0f - fFade, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-                            b->RenderMesh(0, RENDER_TEXTURE, fFade, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                            b->RenderMesh(1, RENDER_TEXTURE, fFade, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-                            CreateSprite(BITMAP_LIGHT, vPosition, 5.5f, vLight, o);
-
-                            if (o->WeaponLevel == 0)
-                            {
-                                o->WeaponLevel = 1;
-                                o->Position[0] = o->StartPosition[0] + (rand() % 20 + 20) * 0.1f;
-                                o->Position[1] = o->StartPosition[1] + (rand() % 20 + 20) * 0.1f;
-                            }
-                            else
-                            {
-                                o->WeaponLevel = 0;
-                                o->Position[0] = o->StartPosition[0] - (rand() % 20 + 20) * 0.1f;
-                                o->Position[1] = o->StartPosition[1] - (rand() % 20 + 20) * 0.1f;
-                            }
-                        }
-                        else
-                        {
-                            if (o->AI == 4 && o->AnimationFrame >= 3)
-                            {
-                                vec3_t Angle = { 0.0f, 0.0f, 0.0f };
-                                vec3_t Position;
-                                for (int i = 0; i < 36; ++i)
-                                {
-                                    Vector(0.f, 0.f, (float)(rand() % 360), Angle);
-                                    Position[0] = o->Position[0] + rand() % 200 - 100;
-                                    Position[1] = o->Position[1] + rand() % 200 - 100;
-                                    Position[2] = o->Position[2];
-
-                                    CreateJoint(BITMAP_FLARE, Position, Position, Angle, 2, NULL, 40);
-                                }
-                                o->AI = 3;
-                            }
-                            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-                            if (o->WeaponLevel == 0)
-                            {
-                                o->WeaponLevel = 1;
-                                o->Position[0] = o->StartPosition[0] + (rand() % 40 + 40) * 0.1f;
-                                o->Position[1] = o->StartPosition[1] + (rand() % 40 + 40) * 0.1f;
-                            }
-                            else
-                            {
-                                o->WeaponLevel = 0;
-                                o->Position[0] = o->StartPosition[0] - (rand() % 40 + 40) * 0.1f;
-                                o->Position[1] = o->StartPosition[1] - (rand() % 40 + 40) * 0.1f;
-                            }
-                        }
+                        b->RenderMesh(0, RENDER_TEXTURE, fFade, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                      o->BlendMeshTexCoordV, o->HiddenMesh);
+                        b->RenderMesh(1, RENDER_TEXTURE, fFade, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                      o->BlendMeshTexCoordV, o->HiddenMesh);
                     }
                     else
                     {
-                        VectorCopy(o->Position, o->StartPosition);
-                        o->WeaponLevel = 0;
-                        o->AI = 4;
                         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                     }
@@ -2196,53 +1971,10 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 else if (o->Type >= MODEL_LITTLESANTA && o->Type <= MODEL_LITTLESANTA_END)
                 {
                     float fLumi = (sinf(WorldTime * 0.004f) + 1.2f) * 0.5f + 0.1f;
-                    auto Rotation = (float)((int)(WorldTime * 0.1f) % 360);
-                    vec3_t vWorldPos, vLight;
-
-                    switch (o->Type)
-                    {
-                    case MODEL_LITTLESANTA:
-                        Vector(0.5f, 0.5f, 0.0f, vLight);
-                        break;
-                    case MODEL_LITTLESANTA + 1:
-                        Vector(0.3f, 0.8f, 0.4f, vLight);
-                        break;
-                    case MODEL_LITTLESANTA + 2:
-                        Vector(0.8f, 0.1f, 0.1f, vLight);
-                        break;
-                    case MODEL_LITTLESANTA + 3:
-                        Vector(0.3f, 0.3f, 0.8f, vLight);
-                        break;
-                    case MODEL_LITTLESANTA + 4:
-                        Vector(0.9f, 0.9f, 0.9f, vLight);
-                        break;
-                    case MODEL_LITTLESANTA + 5:
-                        Vector(0.9f, 0.9f, 0.9f, vLight);
-                        break;
-                    case MODEL_LITTLESANTA + 6:
-                        Vector(0.8f, 0.4f, 0.0f, vLight);
-                        break;
-                    case MODEL_LITTLESANTA + 7:
-                        Vector(0.9f, 0.5f, 0.7f, vLight);
-                        break;
-                    default:
-                        break;
-                    }
-                    b->TransformByObjectBone(vWorldPos, o, 17);
-                    CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, 0.7f, vLight, o, Rotation);	//scale 0.7
-                    CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, 1.3f, vLight, o, Rotation);	//scale 1.3
-
-                    b->TransformByObjectBone(vWorldPos, o, 20);
-                    CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, 0.7f, vLight, o, Rotation);	//scale 0.7
-                    CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, 1.3f, vLight, o, Rotation);	//scale 1.3
-
+                    vec3_t vLight;
+                    LittleSantaLight(o->Type, vLight);
                     RenderAurora(BITMAP_LIGHTMARKS, RENDER_BRIGHT, o->Position[0], o->Position[1], 2.0f + fLumi, 2.0f + fLumi, vLight);
                     RenderAurora(BITMAP_LIGHTMARKS, RENDER_BRIGHT, o->Position[0], o->Position[1], 0.5f + fLumi, 0.5 + fLumi, vLight);
-
-                    if (rand() % 50 <= 5)
-                    {
-                        CreateParticle(BITMAP_LIGHT + 3, o->Position, o->Angle, vLight, 0, 1.0f);
-                    }
 
                     b->RenderBody(RENDER_TEXTURE, 0.9f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                     Vector(b->BodyLight[0] * 0.5f, b->BodyLight[0] * 0.5f, b->BodyLight[0] * 0.5f, b->BodyLight);
@@ -2255,46 +1987,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                     b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                     b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU, WorldTime * 0.0001f);
-
-                    int iBones[] = { 9, 45, 23, 11 };
-                    vec3_t vLight, vPos, vRelative;
-                    Vector(1.0f, 1.0f, 1.0f, vLight);
-                    vec3_t vLightFire;
-                    Vector(1.0f, 0.2f, 0.0f, vLightFire);
-                    for (int i = 0; i < 4; ++i)
-                    {
-                        float fScale = 1.0f;
-                        if (i == 0)
-                        {
-                            b->TransformByObjectBone(vPos, o, iBones[i]);
-                            CreateSprite(BITMAP_LIGHT, vPos, 3.0f, vLightFire, o);
-
-                            fScale = 0.8f;
-                            Vector((rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, vRelative);
-                            b->TransformByObjectBone(vPos, o, iBones[i], vRelative);
-                        }
-                        else
-                        {
-                            b->TransformByObjectBone(vPos, o, iBones[i]);
-                            CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLightFire, o);
-
-                            fScale = 0.6f;
-                            Vector((rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, vRelative);
-                            b->TransformByObjectBone(vPos, o, iBones[i], vRelative);
-                        }
-                        switch (rand() % 3)
-                        {
-                        case 0:
-                            CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 3, fScale);
-                            break;
-                        case 1:
-                            CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 7, fScale);
-                            break;
-                        case 2:
-                            CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vPos, o->Angle, vLight, 3, fScale);
-                            break;
-                        }
-                    }
                 }
 #ifdef ASG_ADD_TIME_LIMIT_QUEST_NPC
                 else if (o->Type == MODEL_GAMBLE_NPC_MOSS || o->Type == MODEL_TIME_LIMIT_QUEST_NPC_ZAIRO)
@@ -2302,17 +1994,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 else if (o->Type == MODEL_GAMBLE_NPC_MOSS)
 #endif	// ASG_ADD_TIME_LIMIT_QUEST_NPC
                 {
-                    vec3_t vRelativePos, vWorldPos, Light;
-                    Vector(0.f, 0.f, 0.f, vRelativePos);
-                    Vector(0.8f, 0.8f, 0.8f, Light);
-                    b->TransformPosition(o->BoneTransform[41], vRelativePos, vWorldPos, true);
-                    CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vWorldPos, o->Angle, Light, 1, 0.6f, o);
-                    CreateParticleFpsChecked(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 6, 0.6f, o);
-
-                    Vector(0.5f, 0.5f, 0.5f, Light);
-                    b->TransformPosition(o->BoneTransform[55], vRelativePos, vWorldPos, true);
-                    CreateSprite(BITMAP_LIGHT, vWorldPos, 2.0f, Light, o);
-
                     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
                 else if (o->Type == MODEL_DOPPELGANGER_NPC_LUGARD)
@@ -2329,14 +2010,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 }
                 else if (o->Type == MODEL_DOPPELGANGER_NPC_BOX || o->Type == MODEL_DOPPELGANGER_NPC_GOLDENBOX)
                 {
-                    if (o->CurrentAction == MONSTER01_DIE)
-                    {
-                        o->Alpha = (10 - o->AnimationFrame) * 0.1f;
-
-                        if (o->AnimationFrame > 9)
-                            o->AnimationFrame = 9;
-                    }
-
                     if (o->Type == MODEL_DOPPELGANGER_NPC_BOX)
                     {
                         b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
@@ -2349,52 +2022,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                         b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                         b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME7, 0.5f, 1, 0.3f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                     }
-
-                    if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 1 && o->AnimationFrame < 9)
-                    {
-                        vec3_t vPos, vLight;
-                        for (int i = 0; i < 1; ++i)
-                        {
-                            vPos[0] = o->Position[0] + rand() % 120 - 60;
-                            vPos[1] = o->Position[1] + rand() % 120 - 60;
-                            vPos[2] = o->Position[2];
-                            Vector(0.3f, 0.3f, 0.3f, vLight);
-                            CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight, 54, 2.0f);
-                            Vector(0.3f, 0.3f, 0.3f, vLight);
-                            CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight, 66, 2.0f, o);
-                        }
-
-                        if (rand_fps_check(2))
-                        {
-                            vPos[0] = o->Position[0] + rand() % 80 - 40;
-                            vPos[1] = o->Position[1] + rand() % 80 - 40;
-                            vPos[2] = o->Position[2] + rand() % 50 + 10;
-                            Vector(0.2f, 0.5f, 1.0f, vLight);
-                            CreateParticle(BITMAP_PIN_LIGHT, vPos, o->Angle, vLight, 2, 1.0f, o);
-                            vPos[2] = o->Position[2] + rand() % 50 + 10;
-                            Vector(1.0f, 0.8f, 0.5f, vLight);
-                            CreateParticle(BITMAP_PIN_LIGHT, vPos, o->Angle, vLight, 3, 0.2f, o);
-                        }
-
-                        Vector(0.9f, 0.7f, 0.0f, vLight);
-                        CreateParticleFpsChecked(BITMAP_SHINY, vPos, o->Angle, vLight, 3, 0.5f, o);
-                        CreateParticleFpsChecked(BITMAP_SHINY, vPos, o->Angle, vLight, 3, 0.5f, o);
-
-                        vPos[0] = o->Position[0];
-                        vPos[1] = o->Position[1];
-                        if (o->Type == MODEL_DOPPELGANGER_NPC_GOLDENBOX)
-                            vPos[2] = o->Position[2] + 80;
-                        else
-                            vPos[2] = o->Position[2] + 50;
-                        Vector(1.0f, 1.0f, 1.0f, vLight);
-                        float fRot = (WorldTime * 0.0006f) * 360.0f;
-                        CreateSprite(BITMAP_DS_EFFECT, vPos, 2.5f, vLight, o, fRot);
-                        Vector(0.9f, 0.7f, 0.0f, vLight);
-                        CreateSprite(BITMAP_SHINY + 5, vPos, 0.8f, vLight, o, -fRot);
-                        float fLight = (sinf(WorldTime * 0.01f) + 1.0f) * 0.5f * 0.9f + 0.1f;
-                        Vector(1.0f * fLight, 1.0f * fLight, 1.0f * fLight, vLight);
-                        CreateSprite(BITMAP_FLARE, vPos, 1.5f, vLight, o);
-                    }
                 }
                 else if (o->Type == MODEL_DOPPELGANGER_SLIME_CHIP)
                 {
@@ -2405,7 +2032,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     if (o->CurrentAction == MONSTER01_DIE)
                     {
                         Vector(1.0f, 0.6f, 0.9f, b->BodyLight);
-                        o->m_bRenderShadow = false;
                         b->RenderBody(RENDER_TEXTURE, o->Alpha, -2, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                         b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                     }
@@ -2452,34 +2078,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 }
                 else if (o->Type == MODEL_UNITEDMARKETPLACE_JULIA)
                 {
-                    vec3_t vRelativePos, vWorldPos, Light;
-                    Vector(0.f, 0.f, 0.f, vRelativePos);
-                    float fScale = 0.0f;
-
-                    if (o->CurrentAction == 0 && rand_fps_check(5))
-                    {
-                        Vector(0.f, 0.f, 0.f, vWorldPos);
-                        Vector((rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, Light);
-                        fScale = (rand() % 5 + 5) * 0.1f;
-                        Vector(0.f, 0.f, 0.f, vRelativePos);
-                        vRelativePos[0] = -5 + (rand() % 1000 - 500) * 0.01f;
-                        vRelativePos[1] = (rand() % 300 - 150) * 0.01f;
-                        b->TransformPosition(o->BoneTransform[127], vRelativePos, vWorldPos, true);
-                        CreateParticle(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 13, fScale, o);
-                        CreateParticle(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 12, fScale * 0.1f, o);
-                    }
-
-                    Vector(0.f, 0.f, 0.f, vRelativePos);
-                    Vector(0.f, 0.f, 0.f, vWorldPos);
-                    Vector(1.0f, 1.0f, 1.0f, Light);
-                    b->TransformPosition(o->BoneTransform[71], vRelativePos, vWorldPos, true);
-                    CreateSprite(BITMAP_LIGHT, vWorldPos, 3.0f, Light, o);
-
-                    vec3_t	vLight;
-                    float fLight = (sinf(WorldTime * 0.001f) + 1.0f) * 0.5f * 0.9f + 0.4f;
-                    Vector(1.0f * fLight, 1.0f * fLight, 1.0f * fLight, vLight);
-                    CreateSprite(BITMAP_FLARE, vWorldPos, 1.5f, vLight, o);
-
                     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
                 else if (o->Type == MODEL_TERSIA)
@@ -2693,6 +2291,477 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     }
                 }
             }
+    }
+}
+
+void UpdateRenderObjectEffects(OBJECT* o)
+{
+    BMD* b = &Models[o->Type];
+    // Where Draw_RenderObject reaches the per-type cases; Calc_RenderObject draws nothing below this alpha.
+    if ((EditFlag == EDIT_NONE && o->HiddenMesh == -2) || o->RenderType == RENDER_DARK || o->Alpha < 0.01f)
+        return;
+
+    if (o->Type >= MODEL_LITTLESANTA && o->Type <= MODEL_LITTLESANTA_END)
+    {
+        auto Rotation = (float)((int)(WorldTime * 0.1f) % 360);
+        vec3_t vWorldPos, vLight;
+        LittleSantaLight(o->Type, vLight);
+        b->TransformByObjectBone(vWorldPos, o, 17);
+        CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, 0.7f, vLight, o, Rotation);
+        CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, 1.3f, vLight, o, Rotation);
+
+        b->TransformByObjectBone(vWorldPos, o, 20);
+        CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, 0.7f, vLight, o, Rotation);
+        CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, 1.3f, vLight, o, Rotation);
+
+        if (rand() % 50 <= 5)
+        {
+            CreateParticle(BITMAP_LIGHT + 3, o->Position, o->Angle, vLight, 0, 1.0f);
+        }
+        return;
+    }
+
+    switch (o->Type)
+    {
+    case MODEL_VALKYRIE:
+    case MODEL_ICE_MONSTER:
+    case MODEL_ALQUAMOS:
+    case MODEL_QUEEN_RAINER:
+        if (o->Alpha == 1.0f && o->BlendMeshLight == 0.05f)
+        {
+            o->BlendMeshLight = 1.0f;
+        }
+        break;
+    case MODEL_KALIMA_SHOP:
+    {
+        float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.6f;
+        vec3_t Position, Light, p, Angle;
+        Vector(0.4f, 0.2f, 0.4f, Light);
+        Vector(30.f, 40.f, 0.f, p);
+        b->TransformPosition(o->BoneTransform[3], p, Position);
+
+        VectorAdd(Position, o->Position, Position);
+        CreateSprite(BITMAP_LIGHT, Position, Luminosity + 3.5f, Light, o, 50.f);
+
+        Vector(0.f, 0.f, 0.f, p);
+        b->TransformPosition(o->BoneTransform[21], p, Position);
+        VectorAdd(Position, o->Position, Position);
+        CreateSprite(BITMAP_LIGHT, Position, Luminosity + 3.5f, Light, o, 50.f);
+
+        Vector(0.f, 0.f, 0.f, Angle);
+        Vector(1.f, 1.f, 1.f, Light);
+        VectorCopy(o->Position, Position);
+        Position[0] += 40.f;
+        Position[1] += 30.f;
+        Position[2] -= 90.f;
+        CreateParticleFpsChecked(BITMAP_SMOKE, Position, Angle, Light, 11, 0.4f);
+
+        VectorCopy(o->Position, Position);
+        Position[0] -= 40.f;
+        Position[1] -= 30.f;
+        Position[2] -= 90.f;
+        CreateParticleFpsChecked(BITMAP_SMOKE, Position, Angle, Light, 11, 0.4f);
+        break;
+    }
+    case MODEL_XMAS2008_SNOWMAN:
+        if (o->CurrentAction == MONSTER01_DIE)
+        {
+            if ((int)o->LifeTime == 100)
+            {
+                o->LifeTime = 90;
+                o->m_bRenderShadow = false;
+
+                vec3_t vRelativePos, vWorldPos, Light;
+                Vector(1.0f, 1.0f, 1.0f, Light);
+                Vector(0.f, 0.f, 0.f, vRelativePos);
+
+                b->TransformPosition(o->BoneTransform[7], vRelativePos, vWorldPos, true);
+                CreateEffect(MODEL_XMAS2008_SNOWMAN_HEAD, vWorldPos, o->Angle, Light, 0, o, 0, 0);
+
+                CreateEffect(MODEL_XMAS2008_SNOWMAN_BODY, o->Position, o->Angle, Light, 0, o, 0, 0);
+            }
+        }
+        else
+        {
+            vec3_t vRelativePos, vWorldPos, Light;
+            Vector(0.f, 0.f, 0.f, vRelativePos);
+            Vector(0.8f, 0.8f, 0.9f, Light);
+
+            b->TransformPosition(o->BoneTransform[7], vRelativePos, vWorldPos, true);
+            CreateSprite(BITMAP_LIGHT, vWorldPos, 6.0f, Light, o);
+            CreateSprite(BITMAP_LIGHT, vWorldPos, 4.0f, Light, o);
+
+            b->TransformPosition(o->BoneTransform[34], vRelativePos, vWorldPos, true);
+            CreateParticleFpsChecked(BITMAP_SHINY, vWorldPos, o->Angle, Light, 7);
+            Vector(1.0f, 0.8f, 0.2f, Light);
+            CreateSprite(BITMAP_LIGHT, vWorldPos, 2.0f, Light, o);
+
+            if (o->CurrentAction == MONSTER01_WALK)
+            {
+                vRelativePos[0] = o->Position[0] + sinf(((rand() % 360) * 6.12)) * 40.0f;
+                vRelativePos[1] = o->Position[1] + sinf(((rand() % 360) * 6.12)) * 40.0f;
+                vRelativePos[2] = o->Position[2];
+                CreateParticleFpsChecked(BITMAP_SMOKE, vRelativePos, o->Angle, o->Light);
+            }
+        }
+        break;
+    case MODEL_XMAS2008_SNOWMAN_NPC:
+    {
+        vec3_t vRelativePos, vWorldPos, Light;
+        Vector(0.f, 0.f, 0.f, vRelativePos);
+        Vector(0.8f, 0.8f, 0.9f, Light);
+
+        b->TransformPosition(o->BoneTransform[7], vRelativePos, vWorldPos, true);
+        CreateSprite(BITMAP_LIGHT, vWorldPos, 6.0f, Light, o);
+        CreateSprite(BITMAP_LIGHT, vWorldPos, 4.0f, Light, o);
+
+        b->TransformPosition(o->BoneTransform[34], vRelativePos, vWorldPos, true);
+        CreateParticleFpsChecked(BITMAP_SHINY, vWorldPos, o->Angle, Light, 7);
+        Vector(1.0f, 0.8f, 0.2f, Light);
+        CreateSprite(BITMAP_LIGHT, vWorldPos, 2.0f, Light, o);
+        break;
+    }
+    case MODEL_XMAS2008_SANTA_NPC:
+    {
+        vec3_t vRelativePos, vWorldPos, Light;
+        Vector(0.f, 0.f, 0.f, vRelativePos);
+
+        b->TransformPosition(o->BoneTransform[4], vRelativePos, vWorldPos, true);
+        Vector(1.0f, 0.8f, 0.2f, Light);
+        CreateSprite(BITMAP_LIGHT, vWorldPos, 8.0f, Light, o);
+
+        b->TransformPosition(o->BoneTransform[13], vRelativePos, vWorldPos, true);
+        Vector(1.0f, 0.4f, 0.0f, Light);
+        CreateSprite(BITMAP_LIGHT, vWorldPos, 5.0f, Light, o);
+
+        b->TransformPosition(o->BoneTransform[38], vRelativePos, vWorldPos, true);
+        Vector(1.0f, 0.8f, 0.2f, Light);
+        CreateSprite(BITMAP_LIGHT, vWorldPos, 2.0f, Light, o);
+
+        int temp[11] = {39, 41, 43, 44, 46, 49, 40, 42, 45, 47, 48};
+        float fCos1 = cosf(WorldTime * 0.002f);
+        float fCos2 = sinf(WorldTime * 0.002f);
+        float fSize = 0.0f;
+        for (int i = 0; i < 11; i++)
+        {
+            b->TransformPosition(o->BoneTransform[temp[i]], vRelativePos, vWorldPos, true);
+
+            if (i < 6)
+            {
+                Vector(1.0f, 0.9f, 0.3f, Light);
+                fSize = 0.7f * fCos1;
+            }
+            else
+            {
+                Vector(1.0f, 0.5f, 0.5f, Light);
+                fSize = 0.7f * fCos2;
+            }
+            CreateSprite(BITMAP_LIGHT, vWorldPos, fSize, Light, o);
+        }
+
+        float fScale = 0.0f;
+        switch (o->CurrentAction)
+        {
+        case 1:
+            vRelativePos[0] = 20 + (rand() % 500 - 250) * 0.1f;
+            vRelativePos[1] = (rand() % 300 - 150) * 0.1f;
+            b->TransformPosition(o->BoneTransform[16], vRelativePos, vWorldPos, true);
+
+            Vector((rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, Light);
+            fScale = (rand() % 5 + 5) * 0.1f;
+            CreateParticleFpsChecked(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 13, fScale, o);
+            CreateParticleFpsChecked(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 13, fScale, o);
+            CreateParticleFpsChecked(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 13, fScale, o);
+            CreateParticleFpsChecked(BITMAP_SHINY, vWorldPos, o->Angle, Light, 7);
+
+            Vector(1.0f, 0.8f, 0.2f, Light);
+            Vector(0.f, 0.f, 0.f, vRelativePos);
+            b->TransformPosition(o->BoneTransform[16], vRelativePos, vWorldPos, true);
+            CreateSprite(BITMAP_LIGHT, vWorldPos, 2.5f, Light, o);
+            break;
+        case 2:
+            Vector(150.0f, 0.0f, 0.0f, vRelativePos);
+            b->TransformPosition(o->BoneTransform[6], vRelativePos, vWorldPos, true);
+            Vector(0.8f, 0.8f, 0.9f, Light);
+
+            if (o->AnimationFrame < 1)
+                o->AI = 0;
+            if (o->AI == 0 && o->AnimationFrame > 1)
+            {
+                o->AI = 1;
+                CreateSprite(BITMAP_LIGHT, vWorldPos, 0.5f, Light, o);
+                CreateSprite(BITMAP_DS_SHOCK, vWorldPos, 0.15f, Light, o);
+                CreateEffectFpsChecked(BITMAP_FIRECRACKER0002, vWorldPos, o->Angle, Light, o->Skill);
+            }
+            break;
+        }
+        break;
+    }
+    case MODEL_CURSED_SANTA:
+        if (o->CurrentAction == MONSTER01_DIE)
+        {
+            vec3_t vLight;
+            Vector(1.0 * o->Alpha, 0.8 * o->Alpha, 0.5 * o->Alpha, vLight);
+            vec3_t vPosition;
+            Vector(o->Position[0], o->Position[1], o->Position[2] + 200, vPosition);
+
+            if (o->AnimationFrame >= 13)
+            {
+                o->Angle[2] = 45;
+                if (o->AI != 0)
+                {
+                    o->AI -= 1;
+                    vec3_t vPos, Position;
+                    Vector(o->Position[0], o->Position[1], o->Position[2] + 250, vPos);
+
+                    vec3_t vLight;
+                    Vector(0.7f, 0.3f, 0.0f, vLight);
+                    for (int i = 0; i < 30; i++)
+                    {
+                        CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 27);
+                    }
+
+                    for (int i = 0; i < 20; i++)
+                    {
+                        CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 28);
+                    }
+
+                    Vector(vPos[0] + (rand() % 100 - 50), vPos[1] + (rand() % 100 - 50), vPos[2], Position);
+                    CreateSprite(BITMAP_DS_SHOCK, Position, rand() % 10 * 0.1f + 1.5f, o->Light, o);
+
+                    for (int i = 0; i < 60; i++)
+                    {
+                        Vector(0.3f + (rand() % 700) * 0.001f, 0.3f + (rand() % 700) * 0.001f,
+                               0.3f + (rand() % 700) * 0.001f, vLight);
+                        CreateParticleFpsChecked(BITMAP_SHINY, vPos, o->Angle, vLight, 9);
+                    }
+
+                    vPos[2] += 50;
+
+                    for (int i = 0; i < 3; ++i)
+                    {
+                        CreateEffectFpsChecked(MODEL_HALLOWEEN_CANDY_STAR, vPos, o->Angle, vLight, 1);
+                        CreateEffectFpsChecked(rand() % 4 + MODEL_XMAS_EVENT_BOX, vPos, o->Angle, vLight, 0, o);
+                        CreateEffectFpsChecked(rand() % 4 + MODEL_XMAS_EVENT_BOX, vPos, o->Angle, vLight, 0, o);
+                    }
+                }
+
+                CreateSprite(BITMAP_LIGHT, vPosition, 5.5f, vLight, o);
+            }
+            else if (o->AnimationFrame >= 9)
+            {
+                o->AI = 3;
+                o->Alpha = 1.0f;
+
+                o->Angle[2] += 40.0f;
+
+                CreateSprite(BITMAP_LIGHT, vPosition, 5.5f, vLight, o);
+
+                if (o->WeaponLevel == 0)
+                {
+                    o->WeaponLevel = 1;
+                    o->Position[0] = o->StartPosition[0] + (rand() % 20 + 20) * 0.1f;
+                    o->Position[1] = o->StartPosition[1] + (rand() % 20 + 20) * 0.1f;
+                }
+                else
+                {
+                    o->WeaponLevel = 0;
+                    o->Position[0] = o->StartPosition[0] - (rand() % 20 + 20) * 0.1f;
+                    o->Position[1] = o->StartPosition[1] - (rand() % 20 + 20) * 0.1f;
+                }
+            }
+            else
+            {
+                if (o->AI == 4 && o->AnimationFrame >= 3)
+                {
+                    vec3_t Angle = {0.0f, 0.0f, 0.0f};
+                    vec3_t Position;
+                    for (int i = 0; i < 36; ++i)
+                    {
+                        Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+                        Position[0] = o->Position[0] + rand() % 200 - 100;
+                        Position[1] = o->Position[1] + rand() % 200 - 100;
+                        Position[2] = o->Position[2];
+
+                        CreateJoint(BITMAP_FLARE, Position, Position, Angle, 2, NULL, 40);
+                    }
+                    o->AI = 3;
+                }
+
+                if (o->WeaponLevel == 0)
+                {
+                    o->WeaponLevel = 1;
+                    o->Position[0] = o->StartPosition[0] + (rand() % 40 + 40) * 0.1f;
+                    o->Position[1] = o->StartPosition[1] + (rand() % 40 + 40) * 0.1f;
+                }
+                else
+                {
+                    o->WeaponLevel = 0;
+                    o->Position[0] = o->StartPosition[0] - (rand() % 40 + 40) * 0.1f;
+                    o->Position[1] = o->StartPosition[1] - (rand() % 40 + 40) * 0.1f;
+                }
+            }
+        }
+        else
+        {
+            VectorCopy(o->Position, o->StartPosition);
+            o->WeaponLevel = 0;
+            o->AI = 4;
+        }
+        break;
+    case MODEL_DUEL_NPC_TITUS:
+    {
+        int iBones[] = {9, 45, 23, 11};
+        vec3_t vLight, vPos, vRelative;
+        Vector(1.0f, 1.0f, 1.0f, vLight);
+        vec3_t vLightFire;
+        Vector(1.0f, 0.2f, 0.0f, vLightFire);
+        for (int i = 0; i < 4; ++i)
+        {
+            float fScale = 1.0f;
+            if (i == 0)
+            {
+                b->TransformByObjectBone(vPos, o, iBones[i]);
+                CreateSprite(BITMAP_LIGHT, vPos, 3.0f, vLightFire, o);
+
+                fScale = 0.8f;
+                Vector((rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, vRelative);
+                b->TransformByObjectBone(vPos, o, iBones[i], vRelative);
+            }
+            else
+            {
+                b->TransformByObjectBone(vPos, o, iBones[i]);
+                CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLightFire, o);
+
+                fScale = 0.6f;
+                Vector((rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, vRelative);
+                b->TransformByObjectBone(vPos, o, iBones[i], vRelative);
+            }
+            switch (rand() % 3)
+            {
+            case 0:
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 3, fScale);
+                break;
+            case 1:
+                CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, o->Angle, vLight, 7, fScale);
+                break;
+            case 2:
+                CreateParticleFpsChecked(BITMAP_FIRE_HIK3, vPos, o->Angle, vLight, 3, fScale);
+                break;
+            }
+        }
+        break;
+    }
+    case MODEL_GAMBLE_NPC_MOSS:
+#ifdef ASG_ADD_TIME_LIMIT_QUEST_NPC
+    case MODEL_TIME_LIMIT_QUEST_NPC_ZAIRO:
+#endif // ASG_ADD_TIME_LIMIT_QUEST_NPC
+    {
+        vec3_t vRelativePos, vWorldPos, Light;
+        Vector(0.f, 0.f, 0.f, vRelativePos);
+        Vector(0.8f, 0.8f, 0.8f, Light);
+        b->TransformPosition(o->BoneTransform[41], vRelativePos, vWorldPos, true);
+        CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vWorldPos, o->Angle, Light, 1, 0.6f, o);
+        CreateParticleFpsChecked(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 6, 0.6f, o);
+
+        Vector(0.5f, 0.5f, 0.5f, Light);
+        b->TransformPosition(o->BoneTransform[55], vRelativePos, vWorldPos, true);
+        CreateSprite(BITMAP_LIGHT, vWorldPos, 2.0f, Light, o);
+        break;
+    }
+    case MODEL_DOPPELGANGER_NPC_BOX:
+    case MODEL_DOPPELGANGER_NPC_GOLDENBOX:
+        if (o->CurrentAction == MONSTER01_DIE)
+        {
+            o->Alpha = (10 - o->AnimationFrame) * 0.1f;
+
+            if (o->AnimationFrame > 9)
+                o->AnimationFrame = 9;
+        }
+
+        if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 1 && o->AnimationFrame < 9)
+        {
+            vec3_t vPos, vLight;
+            for (int i = 0; i < 1; ++i)
+            {
+                vPos[0] = o->Position[0] + rand() % 120 - 60;
+                vPos[1] = o->Position[1] + rand() % 120 - 60;
+                vPos[2] = o->Position[2];
+                Vector(0.3f, 0.3f, 0.3f, vLight);
+                CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight, 54, 2.0f);
+                Vector(0.3f, 0.3f, 0.3f, vLight);
+                CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight, 66, 2.0f, o);
+            }
+
+            if (rand_fps_check(2))
+            {
+                vPos[0] = o->Position[0] + rand() % 80 - 40;
+                vPos[1] = o->Position[1] + rand() % 80 - 40;
+                vPos[2] = o->Position[2] + rand() % 50 + 10;
+                Vector(0.2f, 0.5f, 1.0f, vLight);
+                CreateParticle(BITMAP_PIN_LIGHT, vPos, o->Angle, vLight, 2, 1.0f, o);
+                vPos[2] = o->Position[2] + rand() % 50 + 10;
+                Vector(1.0f, 0.8f, 0.5f, vLight);
+                CreateParticle(BITMAP_PIN_LIGHT, vPos, o->Angle, vLight, 3, 0.2f, o);
+            }
+
+            Vector(0.9f, 0.7f, 0.0f, vLight);
+            CreateParticleFpsChecked(BITMAP_SHINY, vPos, o->Angle, vLight, 3, 0.5f, o);
+            CreateParticleFpsChecked(BITMAP_SHINY, vPos, o->Angle, vLight, 3, 0.5f, o);
+
+            vPos[0] = o->Position[0];
+            vPos[1] = o->Position[1];
+            if (o->Type == MODEL_DOPPELGANGER_NPC_GOLDENBOX)
+                vPos[2] = o->Position[2] + 80;
+            else
+                vPos[2] = o->Position[2] + 50;
+            Vector(1.0f, 1.0f, 1.0f, vLight);
+            float fRot = (WorldTime * 0.0006f) * 360.0f;
+            CreateSprite(BITMAP_DS_EFFECT, vPos, 2.5f, vLight, o, fRot);
+            Vector(0.9f, 0.7f, 0.0f, vLight);
+            CreateSprite(BITMAP_SHINY + 5, vPos, 0.8f, vLight, o, -fRot);
+            float fLight = (sinf(WorldTime * 0.01f) + 1.0f) * 0.5f * 0.9f + 0.1f;
+            Vector(1.0f * fLight, 1.0f * fLight, 1.0f * fLight, vLight);
+            CreateSprite(BITMAP_FLARE, vPos, 1.5f, vLight, o);
+        }
+        break;
+    case MODEL_FIRE_FLAME_GHOST:
+        if (o->CurrentAction == MONSTER01_DIE)
+            o->m_bRenderShadow = false;
+        break;
+    case MODEL_UNITEDMARKETPLACE_JULIA:
+    {
+        vec3_t vRelativePos, vWorldPos, Light;
+        Vector(0.f, 0.f, 0.f, vRelativePos);
+        float fScale = 0.0f;
+
+        if (o->CurrentAction == 0 && rand_fps_check(5))
+        {
+            Vector(0.f, 0.f, 0.f, vWorldPos);
+            Vector((rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, Light);
+            fScale = (rand() % 5 + 5) * 0.1f;
+            Vector(0.f, 0.f, 0.f, vRelativePos);
+            vRelativePos[0] = -5 + (rand() % 1000 - 500) * 0.01f;
+            vRelativePos[1] = (rand() % 300 - 150) * 0.01f;
+            b->TransformPosition(o->BoneTransform[127], vRelativePos, vWorldPos, true);
+            CreateParticle(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 13, fScale, o);
+            CreateParticle(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 12, fScale * 0.1f, o);
+        }
+
+        Vector(0.f, 0.f, 0.f, vRelativePos);
+        Vector(0.f, 0.f, 0.f, vWorldPos);
+        Vector(1.0f, 1.0f, 1.0f, Light);
+        b->TransformPosition(o->BoneTransform[71], vRelativePos, vWorldPos, true);
+        CreateSprite(BITMAP_LIGHT, vWorldPos, 3.0f, Light, o);
+
+        vec3_t vLight;
+        float fLight = (sinf(WorldTime * 0.001f) + 1.0f) * 0.5f * 0.9f + 0.4f;
+        Vector(1.0f * fLight, 1.0f * fLight, 1.0f * fLight, vLight);
+        CreateSprite(BITMAP_FLARE, vWorldPos, 1.5f, vLight, o);
+        break;
+    }
+    default:
+        break;
     }
 }
 

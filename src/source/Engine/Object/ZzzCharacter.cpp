@@ -11751,6 +11751,7 @@ void UpdateDrawnCharacterEffects()
             g_SummonSystem.MoveEquipEffect(c, w->Type, w->Level, w->ExcellentFlags);
         }
         UpdateEventCharacterEffects(o);
+        UpdateRenderObjectEffects(o);
         if (UpdateCharacterTypeEffects(c, o, b))
             continue;
         // Same order and stop-on-claim as RenderCharacter's chain.

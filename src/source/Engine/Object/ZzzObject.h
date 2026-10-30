@@ -26,6 +26,9 @@ void RenderObject(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMo
 void RenderObjects();
 // Spawns the effects of the map objects the last RenderObjects drew; call once per update, after the objects moved.
 void UpdateObjectEffects();
+// The effects and state changes of a character's body draw (Draw_RenderObject), for a character the last frame
+// drew; its bones are the pose the update built.
+void UpdateRenderObjectEffects(OBJECT* o);
 void NextGradeObjectRender(CHARACTER* c);
 void RenderObject_AfterImage(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0,
