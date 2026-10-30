@@ -34,10 +34,21 @@ namespace
 {
 constexpr std::uint8_t EMPTY_OPTION = 0xFF;
 constexpr int SET_OPTION_COUNT = AT_SET_OPTION_WATER_MASTERY - AT_SET_OPTION_IMPROVE_STRENGTH + 1;
+// The first set option after AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE: 24 to 28 are not supported.
+constexpr int FIRST_UNSUPPORTED_SET_OPTION =
+    AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE - AT_SET_OPTION_IMPROVE_STRENGTH + 1;
+
+// Whether the client applies set option `option` (counted from AT_SET_OPTION_IMPROVE_STRENGTH): 0 to
+// 23 and the mastery options; 24 to 28 (class bonuses that grew with a stat) are not supported.
+constexpr bool IsSupportedSetOption(int option)
+{
+    return (option >= 0 && option < FIRST_UNSUPPORTED_SET_OPTION) ||
+           (option >= MASTERY_OPTION && option < SET_OPTION_COUNT);
+}
 
 // The format each set option's value is described with, in AT_SET_OPTION order from
 // AT_SET_OPTION_IMPROVE_STRENGTH, so a set option's number is its index.
-const wchar_t* const* const kSetOptionFormats[] = {
+constexpr const wchar_t* const* kSetOptionFormats[] = {
     // AT_SET_OPTION_IMPROVE_STRENGTH to AT_SET_OPTION_IMPROVE_MAGIC_POWER
     &I18N::Game::IncreaseStrengthD,
     &I18N::Game::IncreaseAgilityD,
@@ -79,7 +90,20 @@ const wchar_t* const* const kSetOptionFormats[] = {
     &I18N::Game::WindAttributeSkillIncreaseDamageD,
     &I18N::Game::WaterAttributeSkillIncreaseDamageD,
 };
-static_assert(std::ssize(kSetOptionFormats) == SET_OPTION_COUNT, "one description per set option");
+static_assert(std::ssize(kSetOptionFormats) == SET_OPTION_COUNT, "one slot per set option");
+
+constexpr bool DescribesExactlyTheSupportedSetOptions()
+{
+    for (int option = 0; option < SET_OPTION_COUNT; ++option)
+    {
+        if ((kSetOptionFormats[option] != nullptr) != IsSupportedSetOption(option))
+        {
+            return false;
+        }
+    }
+    return true;
+}
+static_assert(DescribesExactlyTheSupportedSetOptions(), "a description for each supported set option, none for others");
 static_assert(MASTERY_OPTION == AT_SET_OPTION_ICE_MASTERY - AT_SET_OPTION_IMPROVE_STRENGTH,
               "the mastery options start at MASTERY_OPTION");
 
@@ -337,9 +361,9 @@ void CSItemOption::TryAddSetOption(std::uint8_t option, int value, int optionInd
                                    const ITEM_SET_OPTION& setOptions, bool isThisSetComplete, bool isFullOption,
                                    bool isExtOption, int firstClass, int secondClass)
 {
-    // An empty slot or an option the client doesn't support (no description) adds nothing, and a
+    // An empty slot (EMPTY_OPTION) or an option the client doesn't support adds nothing, and a
     // mastery option only counts for the class the set names.
-    if (GetSetOptionFormat(option) == nullptr || value == 0 ||
+    if (!IsSupportedSetOption(option) || value == 0 ||
         (option >= MASTERY_OPTION && !FulfillsClassRequirement(setOptions, firstClass, secondClass)))
     {
         return;
@@ -425,13 +449,12 @@ void CSItemOption::AddSetOptions(SET_SEARCH_RESULT_OPT& set, const ITEM_SET_OPTI
 
 const wchar_t* CSItemOption::GetSetOptionFormat(std::uint8_t option)
 {
-    if (option == EMPTY_OPTION || option >= SET_OPTION_COUNT)
+    if (!IsSupportedSetOption(option))
     {
         return nullptr;
     }
 
-    const wchar_t* const* format = kSetOptionFormats[option];
-    return format != nullptr ? *format : nullptr;
+    return *kSetOptionFormats[option];
 }
 
 bool CSItemOption::getExplainText(wchar_t* text, std::uint8_t option, int value)
