@@ -101,8 +101,6 @@ EXPECTED_WINDOWS_OS_DLLS = {
 CI_ONLY_LINUX_PACKAGES = {
     "gcc": "the guide installs build-essential",
     "g++": "the guide installs build-essential",
-    "libxinerama-dev": "SDL3 has no Xinerama support",
-    "libxxf86vm-dev": "SDL3 has no XVidMode support",
 }
 
 EXPECTED_RELEASE_ASSETS = [
