@@ -105,6 +105,8 @@ body {
 	width: calc(74 * var(--px));
 	height: calc(79 * var(--px));
 }
+/* Hidden until C++ has drawn its first frame into it (legacy's rule). */
+#preview.awaiting-frame { visibility: hidden; }
 
 .char-make-name-field {
 	position: absolute;
