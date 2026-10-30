@@ -12,6 +12,7 @@
       "ru": "Прочность: [{durability}/{maxDurability}]",
       "tl": "Katatagan: [{durability}/{maxDurability}]",
       "uk": "Довговічність: [{durability}/{maxDurability}]",
+      "zh-CN": "耐久：[{durability}/{maxDurability}]",
       "zh-TW": "耐久性：[{durability}/{maxDurability}]"
     },
     "numberOfItems": {
@@ -25,6 +26,7 @@
       "ru": "Количество предметов: {durability}",
       "tl": "Bilang ng mga item: {durability}",
       "uk": "Кількість позицій: {durability}",
+      "zh-CN": "数量：{durability}",
       "zh-TW": "商品數量：{durability}"
     },
     "life": {
@@ -38,6 +40,7 @@
       "ru": "Жизнь: {durability}",
       "tl": "Buhay: {durability}",
       "uk": "Життя: {durability}",
+      "zh-CN": "生命：{durability}",
       "zh-TW": "壽命：{durability}"
     },
     "usableTimes": {
@@ -51,6 +54,7 @@
       "ru": "можно использовать {durability} раз",
       "tl": "magagamit nang {durability} beses",
       "uk": "можна використовувати {durability} разів",
+      "zh-CN": "可使用 {durability} 次",
       "zh-TW": "可使用{durability}次"
     },
     "oneHandedDamage": {
@@ -64,6 +68,7 @@
       "ru": "Урон одной рукой: {damageMin} ~ {damageMax}",
       "tl": "Pinsala ng Isang Kamay: {damageMin} ~ {damageMax}",
       "uk": "Пошкодження однією рукою: {damageMin} ~ {damageMax}",
+      "zh-CN": "单手攻击力：{damageMin} ~ {damageMax}",
       "zh-TW": "單手傷害: {damageMin} ~ {damageMax}"
     },
     "twoHandedDamage": {
@@ -77,6 +82,7 @@
       "ru": "Двуручный урон: {damageMin} ~ {damageMax}",
       "tl": "Pinsala ng Dalawang Kamay: {damageMin} ~ {damageMax}",
       "uk": "Пошкодження двома руками: {damageMin} ~ {damageMax}",
+      "zh-CN": "双手攻击力：{damageMin} ~ {damageMax}",
       "zh-TW": "雙手傷害: {damageMin} ~ {damageMax}"
     },
     "wizardryDamage": {
@@ -90,6 +96,7 @@
       "ru": "Волшебный урон: {damageMin} ~ {damageMax}",
       "tl": "Pinsala ng Wizardry: {damageMin} ~ {damageMax}",
       "uk": "Пошкодження магії: {damageMin} ~ {damageMax}",
+      "zh-CN": "魔法攻击力：{damageMin} ~ {damageMax}",
       "zh-TW": "魔法傷害: {damageMin} ~ {damageMax}"
     },
     "defense": {
@@ -103,6 +110,7 @@
       "ru": "Защита: {defense}",
       "tl": "Depensa: {defense}",
       "uk": "Захист: {defense}",
+      "zh-CN": "防御力：{defense}",
       "zh-TW": "防禦：{defense}"
     },
     "magicDefense": {
@@ -116,6 +124,7 @@
       "ru": "Сопротивление заклинаниям: {magicDefense}",
       "tl": "Paglaban sa spell: {magicDefense}",
       "uk": "Стійкість до заклинань: {magicDefense}",
+      "zh-CN": "魔法抵抗力：{magicDefense}",
       "zh-TW": "法術抗力：{magicDefense}"
     },
     "blockRate": {
@@ -129,6 +138,7 @@
       "ru": "Уровень защиты: {blockRate}",
       "tl": "Rate ng depensa: {blockRate}",
       "uk": "Швидкість захисту: {blockRate}",
+      "zh-CN": "防御率：{blockRate}",
       "zh-TW": "防禦率：{blockRate}"
     },
     "attackSpeed": {
@@ -142,6 +152,7 @@
       "ru": "Скорость атаки: {attackSpeed}",
       "tl": "Bilis ng pag-atake: {attackSpeed}",
       "uk": "Швидкість атаки: {attackSpeed}",
+      "zh-CN": "攻击速度：{attackSpeed}",
       "zh-TW": "攻擊速度：{attackSpeed}"
     },
     "walkSpeed": {
@@ -155,6 +166,7 @@
       "ru": "Скорость движения: {walkSpeed}",
       "tl": "Bilis ng paggalaw: {walkSpeed}",
       "uk": "Швидкість руху: {walkSpeed}",
+      "zh-CN": "移动速度：{walkSpeed}",
       "zh-TW": "移動速度：{walkSpeed}"
     },
     "iceResistance": {
@@ -168,6 +180,7 @@
       "ru": "Лед Сопротивление: {iceResistance}",
       "tl": "yelo Paglaban: {iceResistance}",
       "uk": "лід Опір: {iceResistance}",
+      "zh-CN": "冰属性抵抗力：{iceResistance}",
       "zh-TW": "冰 電阻：{iceResistance}"
     },
     "poisonResistance": {
@@ -181,6 +194,7 @@
       "ru": "Яд Сопротивление: {poisonResistance}",
       "tl": "lason Paglaban: {poisonResistance}",
       "uk": "Отрута Опір: {poisonResistance}",
+      "zh-CN": "毒属性抵抗力：{poisonResistance}",
       "zh-TW": "毒 電阻：{poisonResistance}"
     },
     "lightningResistance": {
@@ -194,6 +208,7 @@
       "ru": "Молния Сопротивление: {lightningResistance}",
       "tl": "Kidlat Paglaban: {lightningResistance}",
       "uk": "Блискавка Опір: {lightningResistance}",
+      "zh-CN": "电属性抵抗力：{lightningResistance}",
       "zh-TW": "閃電 電阻：{lightningResistance}"
     },
     "fireResistance": {
@@ -207,6 +222,7 @@
       "ru": "Огонь Сопротивление: {fireResistance}",
       "tl": "Sunog Paglaban: {fireResistance}",
       "uk": "Вогонь Опір: {fireResistance}",
+      "zh-CN": "火属性抵抗力：{fireResistance}",
       "zh-TW": "火 電阻：{fireResistance}"
     },
     "earthResistance": {
@@ -220,6 +236,7 @@
       "ru": "Земля Сопротивление: {earthResistance}",
       "tl": "Lupa Paglaban: {earthResistance}",
       "uk": "земля Опір: {earthResistance}",
+      "zh-CN": "土属性抵抗力：{earthResistance}",
       "zh-TW": "地球 電阻：{earthResistance}"
     },
     "windResistance": {
@@ -233,6 +250,7 @@
       "ru": "Ветер Сопротивление: {windResistance}",
       "tl": "Hangin Paglaban: {windResistance}",
       "uk": "Вітер Опір: {windResistance}",
+      "zh-CN": "风属性抵抗力：{windResistance}",
       "zh-TW": "風 電阻：{windResistance}"
     },
     "waterResistance": {
@@ -246,6 +264,7 @@
       "ru": "Вода Сопротивление: {waterResistance}",
       "tl": "Tubig Paglaban: {waterResistance}",
       "uk": "вода Опір: {waterResistance}",
+      "zh-CN": "水属性抵抗力：{waterResistance}",
       "zh-TW": "水 電阻：{waterResistance}"
     },
     "requiredLevel": {
@@ -259,6 +278,7 @@
       "ru": "Минимальный уровень: {requiredLevel}.",
       "tl": "Pinakamababang Antas na Kinakailangan: {requiredLevel}",
       "uk": "Вимоги до мінімального рівня: {requiredLevel}",
+      "zh-CN": "需求等级：{requiredLevel}",
       "zh-TW": "最低等級要求：{requiredLevel}"
     },
     "requiredStrength": {
@@ -272,6 +292,7 @@
       "ru": "Требование к прочности: {requiredStrength}",
       "tl": "Kinakailangan ng Lakas: {requiredStrength}",
       "uk": "Вимоги до міцності: {requiredStrength}",
+      "zh-CN": "需求力量：{requiredStrength}",
       "zh-TW": "強度要求：{requiredStrength}"
     },
     "requiredDexterity": {
@@ -285,6 +306,7 @@
       "ru": "Требование к ловкости: {requiredDexterity}",
       "tl": "Kinakailangan sa Liksi: {requiredDexterity}",
       "uk": "Вимоги до спритності: {requiredDexterity}",
+      "zh-CN": "需求敏捷：{requiredDexterity}",
       "zh-TW": "敏捷性需求：{requiredDexterity}"
     },
     "requiredVitality": {
@@ -298,6 +320,7 @@
       "ru": "Требование к выносливости: {requiredVitality}",
       "tl": "Kinakailangan ng Stamina: {requiredVitality}",
       "uk": "Вимоги до витривалості: {requiredVitality}",
+      "zh-CN": "需求体力：{requiredVitality}",
       "zh-TW": "體力需求：{requiredVitality}"
     },
     "requiredEnergy": {
@@ -311,6 +334,7 @@
       "ru": "Требование к энергии: {requiredEnergy}",
       "tl": "Kinakailangan ng Enerhiya: {requiredEnergy}",
       "uk": "Потреба в енергії: {requiredEnergy}",
+      "zh-CN": "需求智力：{requiredEnergy}",
       "zh-TW": "能量需求：{requiredEnergy}"
     },
     "requiredLeadership": {
@@ -324,6 +348,7 @@
       "ru": "Требование к харизме: {requiredLeadership}",
       "tl": "Kinakailangan ng Charisma: {requiredLeadership}",
       "uk": "Вимоги до харизми: {requiredLeadership}",
+      "zh-CN": "需求统率：{requiredLeadership}",
       "zh-TW": "魅力要求：{requiredLeadership}"
     },
     "lacking": {
@@ -337,6 +362,7 @@
       "ru": "(отсутствует {missing})",
       "tl": "(kulang {missing})",
       "uk": "(без {missing})",
+      "zh-CN": "（还差 {missing}）",
       "zh-TW": "（缺 {missing}）"
     },
     "wizardryDamageIncrease": {
@@ -350,6 +376,7 @@
       "ru": "Волшебный урон {magicPower}% увеличивается",
       "tl": "Wizardry Dmg {magicPower}% tumaas",
       "uk": "Wizardry Dmg {magicPower}% зростання",
+      "zh-CN": "魔力提高 {magicPower}%",
       "zh-TW": "魔法傷害 {magicPower}% 上漲"
     },
     "curseDamageIncrease": {
@@ -363,6 +390,7 @@
       "ru": "Приращение заклинания проклятия {magicPower}%",
       "tl": "Pagtaas ng Curse Spell {magicPower}%",
       "uk": "Приріст заклинань прокляття {magicPower}%",
+      "zh-CN": "诅咒提高 {magicPower}%",
       "zh-TW": "詛咒法術增量 {magicPower}%"
     },
     "petAttackIncrease": {
@@ -376,6 +404,7 @@
       "ru": "Увеличение атаки питомца на {magicPower}%",
       "tl": "Dagdagan ang pag-atake ng alagang hayop bilang {magicPower}%",
       "uk": "Збільшити атаку домашніх тварин як {magicPower}%",
+      "zh-CN": "宠物攻击力提高 {magicPower}%",
       "zh-TW": "寵物攻擊力增加為 {magicPower}%"
     },
     "damageIncrease": {
@@ -389,6 +418,7 @@
       "ru": "Увеличение урона на {percent}%",
       "tl": "Dagdagan ang Pinsala nang {percent}%",
       "uk": "Збільшення шкоди на {percent}%",
+      "zh-CN": "伤害提高 {percent}%",
       "zh-TW": "增加 {percent}% 傷害"
     },
     "damageAbsorb": {
@@ -402,6 +432,7 @@
       "ru": "Поглощение {percent}% урона",
       "tl": "Isipsip ang {percent}% ng Pinsala",
       "uk": "Поглинання {percent}% шкоди",
+      "zh-CN": "伤害吸收 {percent}%",
       "zh-TW": "吸收{percent}%傷害"
     },
     "increaseSpeed": {
@@ -415,6 +446,7 @@
       "ru": "Увеличить скорость",
       "tl": "Dagdagan ang bilis",
       "uk": "Збільште швидкість",
+      "zh-CN": "移动速度提高",
       "zh-TW": "提高速度"
     },
     "invisibilityCloakIngredient": {
@@ -441,6 +473,7 @@
       "ru": "Оставшееся время показано",
       "tl": "Ang natitirang oras ay ipinapakita",
       "uk": "Показано час, що залишився",
+      "zh-CN": "右键点击",
       "zh-TW": "顯示剩餘時間"
     },
     "whenYouRightClick": {
@@ -454,6 +487,7 @@
       "ru": "когда вы щелкаете правой кнопкой мыши.",
       "tl": "kapag nag-right click ka sa iyong mouse.",
       "uk": "коли ви клацаєте правою кнопкою миші.",
+      "zh-CN": "可查看剩余时间。",
       "zh-TW": "當您右鍵單擊滑鼠時。"
     },
     "piecesOfTwenty": {
@@ -471,6 +505,7 @@
       "ru": "Невозможно восстановить",
       "tl": "Hindi Maaayos",
       "uk": "Неможливо відремонтувати",
+      "zh-CN": "无法修理",
       "zh-TW": "無法修復"
     },
     "increasesExperience": {
@@ -734,6 +769,7 @@
       "ru": "Невозможно сохранить в хранилище.",
       "tl": "Hindi maiimbak sa vault.",
       "uk": "Не можна зберігати в сховищі.",
+      "zh-CN": "无法存入仓库。",
       "zh-TW": "無法儲存在保管庫中。"
     },
     "cannotBeTraded": {
@@ -747,6 +783,7 @@
       "ru": "Нельзя торговать.",
       "tl": "Hindi maaaring ipagpalit.",
       "uk": "Не можна торгувати.",
+      "zh-CN": "无法交易。",
       "zh-TW": "無法交易。"
     },
     "masterLevelEXPCannotBeAchievedDuringTheItemUsage": {

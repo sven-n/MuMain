@@ -473,6 +473,13 @@ Character names require at least four characters. Fruit names, attribute names
 and descriptions are translated; enable **Translate item names** to display the
 translated item names.
 
+The inventory and expanded inventory controls, common item-use restrictions,
+selling confirmations and repair prices are translated. Equipment tooltips show
+Chinese damage, defense, durability, resistance and requirement labels, including
+missing attribute amounts. These shared tooltips also appear in shops and other
+item windows. Item names still depend on **Translate item names** and the item's
+available name translations.
+
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
 resource keys, formatting arguments and command tokens unchanged.
 Missing translations intentionally use the existing English fallback.
