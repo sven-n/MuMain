@@ -15,6 +15,17 @@ namespace MuEditor::Monsters::ShownModel
 // or a slot without an entry.
 std::optional<int> FindSlot(const Data::Monsters::MonsterDefinition& monster);
 
+// The look the tools show of a monster with random variants (Q-MN83): -1 for
+// the entry's model, else the index of the variant whose model is shown. It
+// goes back to the entry when another monster is selected or the variant is
+// gone.
+int GetShownVariant(const Data::Monsters::MonsterDefinition& monster);
+void SetShownVariant(int number, int variant);
+
+// The slot of the look shown (FindSlot for the entry's look, else the shown
+// variant's model), with the same conditions as FindSlot.
+std::optional<int> FindShownSlot(const Data::Monsters::MonsterDefinition& monster);
+
 // The tools show the animations of an open model: a model the game does not
 // have open (no monster of it appeared on this map) is opened between frames
 // (MonsterDataHandler::OpenModelForTools). Called each frame the slot is

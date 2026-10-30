@@ -4,8 +4,10 @@
 
 #include "MonsterSoundEventsEditor.h"
 
+#include "MonsterEdits.h"
 #include "MonsterSoundPreview.h"
 #include "MonsterStepLabel.h"
+#include "MuMonsterPreviewUI.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MapPicker.h"
@@ -19,6 +21,7 @@
 #include "imgui.h"
 
 #include <algorithm>
+#include <cstdio>
 #include <optional>
 #include <string>
 #include <vector>
@@ -27,17 +30,18 @@ namespace MuEditor::Monsters::SoundEventsEditor
 {
 namespace
 {
+using Data::Monsters::MonsterModelCue;
 using Data::Monsters::MonsterModelDefinition;
-using Data::Monsters::MonsterModelSound;
+using Data::Monsters::MonsterSound;
 using Data::Monsters::MonsterSoundChance;
 using Data::Monsters::MonsterSoundDraw;
 using Data::Monsters::MonsterSoundEvent;
 using Data::Monsters::MonsterSoundMoment;
+using Data::Monsters::MonsterSoundSet;
 
 // Pixel widths before the editor UI scale.
 constexpr float WhenWidth = 170.0f;
-constexpr float SubTypeWidth = 70.0f;
-constexpr float SubTypeValueWidth = 50.0f;
+constexpr float CueAnimationWidth = 90.0f;
 constexpr float FrameWidth = 50.0f;
 constexpr float OneInWidth = 70.0f;
 constexpr float DrawWidth = 140.0f;
@@ -48,12 +52,22 @@ constexpr int MaxOneIn = 100000;
 constexpr size_t PickSounds = 2;
 // A new chance is one in this.
 constexpr int NewChance = 2;
-// A new frame range is this many frames long.
-constexpr float NewFrames = 1.0f;
-// A new SubType condition names the second set's SubType.
-constexpr int NewSubType = 9;
-// OBJECT::SubType is a short.
-constexpr int MaxSubType = 32767;
+// A new cue is this many frames long; a cue at least this.
+constexpr float NewCueFrames = 1.0f;
+constexpr float MinCueFrames = 0.1f;
+constexpr ImU32 FocusColor = IM_COL32(90, 140, 60, 110);
+constexpr ImVec4 MissingCueColor = ImVec4(1.0f, 0.45f, 0.4f, 1.0f);
+
+// The removal that waits for the question whether the cue goes too.
+struct PendingRemoval
+{
+    std::string set;
+    size_t event = 0;
+    std::vector<std::string> cues;
+    int slot = -1;
+};
+std::optional<PendingRemoval> g_pendingRemoval;
+constexpr const char* RemoveCuePopup = "##RemoveTheCue";
 
 std::string AnimationsText(const std::vector<int>& animations)
 {
@@ -65,29 +79,18 @@ std::string AnimationsText(const std::vector<int>& animations)
     return text;
 }
 
-const char* SubTypeLabel(SubTypeCondition condition)
-{
-    switch (condition)
-    {
-    case SubTypeCondition::Only:
-        return I18N::Editor::SoundEventOnlySubType;
-    case SubTypeCondition::Not:
-        return I18N::Editor::SoundEventNotSubType;
-    case SubTypeCondition::Any:
-        break;
-    }
-    return I18N::Editor::SoundEventAnySubType;
-}
-
-// Takes the value out of the sorted list, or puts it in; false for the last
-// one.
-template <typename T> bool Toggle(std::vector<T>& values, T value)
+// Takes the value out of the list, or puts it in (sorted when `sorted`);
+// false for the last one.
+template <typename T> bool Toggle(std::vector<T>& values, const T& value, bool sorted = true)
 {
     const auto found = std::find(values.begin(), values.end(), value);
     if (found == values.end())
     {
         values.push_back(value);
-        std::sort(values.begin(), values.end());
+        if (sorted)
+        {
+            std::sort(values.begin(), values.end());
+        }
         return true;
     }
     if (values.size() == 1)
@@ -103,9 +106,10 @@ const char* DrawLabel(MonsterSoundDraw draw)
     return draw == MonsterSoundDraw::Rand ? I18N::Editor::SoundDrawRand : I18N::Editor::SoundDrawRandFps;
 }
 
-std::vector<int> OfferedAnimations(int slot, bool modelOpen)
+std::vector<int> OfferedAnimations(const Context& context)
 {
-    const int count = modelOpen && Models != nullptr ? Models[slot].NumActions : NamedAnimations;
+    const int count =
+        context.modelOpen && Models != nullptr && context.slot >= 0 ? Models[context.slot].NumActions : NamedAnimations;
     std::vector<int> animations;
     for (int animation = 0; animation < count; ++animation)
     {
@@ -114,38 +118,43 @@ std::vector<int> OfferedAnimations(int slot, bool modelOpen)
     return animations;
 }
 
-// Plays the event's sounds at the preview volume, one of a pick's at random;
-// a sound of a model that is not open is loaded as the model loads it.
-void PlayEvent(const MonsterModelDefinition& model, const MonsterSoundEvent& event, bool modelOpen)
+MonsterModelCue* FindCue(MonsterModelDefinition* model, const std::string& name)
+{
+    if (model == nullptr)
+    {
+        return nullptr;
+    }
+    const auto found = std::find_if(model->cues.begin(), model->cues.end(),
+                                    [&](const MonsterModelCue& cue) { return cue.name == name; });
+    return found != model->cues.end() ? &*found : nullptr;
+}
+
+std::string FrameText(float frame)
+{
+    char text[32];
+    std::snprintf(text, sizeof(text), "%.2f", static_cast<double>(frame));
+    return text;
+}
+
+// Plays the event's sounds at the preview volume, one of a pick's at random.
+void PlayEvent(const MonsterSoundSet& set, const MonsterSoundEvent& event)
 {
     for (const std::string& name : PreviewSounds(event, Random::RangeInt(0, 1)))
     {
-        const std::optional<int> number = Data::Monsters::ModelLoader::FindSoundNumber(model, name);
-        if (!number)
-        {
-            continue;
-        }
-        const auto sound =
-            std::find_if(model.sounds.begin(), model.sounds.end(), [&](const MonsterModelSound& candidate)
-                         { return Data::Monsters::SoundNameOf(candidate) == name; });
-        if (!modelOpen && sound != model.sounds.end())
-        {
-            Data::Monsters::ModelLoader::LoadSound(*sound);
-        }
-        SoundPreview::Play(*number);
+        SoundPreview::PlaySoundOfSet(set, name);
     }
 }
 
-// A combo of the model's sounds, with the current one also when the model
-// does not load it; true when another was picked.
-bool SoundCombo(const char* id, const MonsterModelDefinition& model, std::string& value, float width)
+// A combo of the set's sounds, with the current one also when the set does
+// not have it; true when another was picked.
+bool SoundCombo(const char* id, const MonsterSoundSet& set, std::string& value, float width)
 {
     bool picked = false;
     ImGui::SetNextItemWidth(width);
     if (ImGui::BeginCombo(id, value.c_str()))
     {
         bool listed = false;
-        for (const MonsterModelSound& sound : model.sounds)
+        for (const MonsterSound& sound : set.sounds)
         {
             const std::string& name = Data::Monsters::SoundNameOf(sound);
             listed = listed || name == value;
@@ -167,24 +176,22 @@ bool SoundCombo(const char* id, const MonsterModelDefinition& model, std::string
 class EventRow
 {
 public:
-    EventRow(MonsterModelDefinition& model, int slot, bool modelOpen, ModelDraft& draft)
-        : m_model(model), m_slot(slot), m_modelOpen(modelOpen), m_draft(draft),
-          m_label(StepLabel::Model(model.slot, I18N::Editor::StepWhatSoundEvents)), m_scale(g_MuEditorCore.GetUIScale())
+    EventRow(MonsterSoundSet& set, SetDraft& draft, const Context& context)
+        : m_set(set), m_draft(draft), m_context(context),
+          m_label(StepLabel::SoundSet(set.name, I18N::Editor::StepWhatSoundEvents)),
+          m_scale(g_MuEditorCore.GetUIScale())
     {
     }
 
     // Draws the row; true when the event is to be removed.
     bool Render(MonsterSoundEvent& event)
     {
-        ImGui::TableNextRow();
         ImGui::TableNextColumn();
         RenderWhen(event);
         ImGui::TableNextColumn();
-        RenderFrames(event);
+        RenderCueFrames(event);
         ImGui::TableNextColumn();
         RenderFlag("##Armed", event.deathEffectArmed, I18N::Editor::SoundEventDeathEffectNote);
-        ImGui::TableNextColumn();
-        RenderSubType(event);
         ImGui::TableNextColumn();
         RenderFlag("##Anywhere", event.heardAnywhere, I18N::Editor::SoundEventHeardAnywhereNote);
         ImGui::TableNextColumn();
@@ -198,15 +205,15 @@ public:
         ImGui::TableNextColumn();
         if (ImGui::SmallButton(I18N::Editor::PlayThisSound))
         {
-            PlayEvent(m_model, event, m_modelOpen);
+            PlayEvent(m_set, event);
         }
         ImGui::SameLine();
         return ImGui::SmallButton(I18N::Editor::Remove);
     }
 
 private:
-    // The moments, then the animations; picking one of the other kind makes
-    // the event one of it.
+    // The moments, the animations, then the model's cues; picking one of
+    // another kind makes the event one of it.
     void RenderWhen(MonsterSoundEvent& event)
     {
         ImGui::SetNextItemWidth(WhenWidth * m_scale);
@@ -236,7 +243,7 @@ private:
         }
         ImGui::Separator();
         ImGui::TextDisabled("%s", I18N::Editor::Animations);
-        for (const int animation : OfferedAnimations(m_slot, m_modelOpen))
+        for (const int animation : OfferedAnimations(m_context))
         {
             const bool chosen =
                 std::find(event.animations.begin(), event.animations.end(), animation) != event.animations.end();
@@ -251,7 +258,119 @@ private:
             ImGui::EndDisabled();
             ImGui::PopID();
         }
+        RenderCueChoices(event);
         ImGui::EndCombo();
+    }
+
+    void RenderCueChoices(MonsterSoundEvent& event)
+    {
+        if (m_context.model == nullptr)
+        {
+            return;
+        }
+        ImGui::Separator();
+        ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::SoundEventCuesOf0, {m_context.model->slot}).c_str());
+        for (const MonsterModelCue& cue : m_context.model->cues)
+        {
+            const bool chosen = std::find(event.cues.begin(), event.cues.end(), cue.name) != event.cues.end();
+            ImGui::PushID(cue.name.c_str());
+            ImGui::BeginDisabled(chosen && event.cues.size() == 1);
+            if (ImGui::Selectable(cue.name.c_str(), chosen, ImGuiSelectableFlags_DontClosePopups))
+            {
+                m_draft.AfterChange(ToggleCue(event, cue.name), m_label);
+            }
+            ImGui::EndDisabled();
+            ImGui::PopID();
+        }
+        // A cue at the frame the preview shows (Q-MN82).
+        const int animation = g_MuMonsterPreviewUI.GetAnimation();
+        const float frame = g_MuMonsterPreviewUI.GetFrame();
+        const std::string label = I18N::Format(I18N::Editor::SoundEventNewCueAt01,
+                                               {Data::Monsters::GetMonsterAnimationName(animation), FrameText(frame)});
+        if (ImGui::Selectable(label.c_str()))
+        {
+            const MonsterModelCue cue = MakeCue(*m_context.model, animation, frame);
+            const std::string step =
+                StepLabel::Model(m_context.model->slot, I18N::Format(I18N::Editor::StepWhatCue0, {cue.name}));
+            g_MonsterEdits.BeginGroup(step);
+            m_context.model->cues.push_back(cue);
+            m_context.modelDraft->StoreNow(step);
+            event.animations.clear();
+            event.moments.clear();
+            event.cues = {cue.name};
+            m_draft.StoreNow(step);
+            g_MonsterEdits.EndGroup();
+        }
+    }
+
+    // On a cue's event: the cue's animation and frames, which are the model's
+    // and change for every monster of it (Q-MN81).
+    void RenderCueFrames(MonsterSoundEvent& event)
+    {
+        for (const std::string& name : event.cues)
+        {
+            ImGui::PushID(name.c_str());
+            MonsterModelCue* cue = FindCue(m_context.model, name);
+            if (cue == nullptr)
+            {
+                ImGui::TextColored(MissingCueColor, "%s", I18N::Format(I18N::Editor::SoundEventNoCue0, {name}).c_str());
+                ImGui::PopID();
+                continue;
+            }
+            const std::string label =
+                StepLabel::Model(m_context.model->slot, I18N::Format(I18N::Editor::StepWhatCue0, {cue->name}));
+            ImGui::TextUnformatted(cue->name.c_str());
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(CueAnimationWidth * m_scale);
+            if (ImGui::BeginCombo("##CueAnimation", Data::Monsters::GetMonsterAnimationName(cue->animation).c_str()))
+            {
+                for (const int animation : OfferedAnimations(m_context))
+                {
+                    const std::string animationName = Data::Monsters::GetMonsterAnimationName(animation);
+                    if (ImGui::Selectable(animationName.c_str(), animation == cue->animation) &&
+                        animation != cue->animation)
+                    {
+                        cue->animation = animation;
+                        m_context.modelDraft->AfterChange(true, label);
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            auto& [from, to] = cue->frames;
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(FrameWidth * m_scale);
+            // The inputs keep the cue at least 0.1 frames long.
+            if (ImGui::InputFloat("##From", &from, 0.0f, 0.0f, "%.2f"))
+            {
+                from = std::max(from, 0.0f);
+                to = std::max(to, from + MinCueFrames);
+            }
+            m_context.modelDraft->AfterField(label);
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(FrameWidth * m_scale);
+            if (ImGui::InputFloat("##To", &to, 0.0f, 0.0f, "%.2f"))
+            {
+                to = std::max(to, from + MinCueFrames);
+            }
+            m_context.modelDraft->AfterField(label);
+            ImGui::SameLine();
+            if (ImGui::SmallButton(I18N::Editor::UseThePreviewFrame))
+            {
+                const float length = to - from;
+                cue->animation = g_MuMonsterPreviewUI.GetAnimation();
+                from = g_MuMonsterPreviewUI.GetFrame();
+                to = from + length;
+                m_context.modelDraft->AfterChange(true, label);
+            }
+            if (ImGui::IsItemHovered())
+            {
+                ImGui::SetTooltip("%s", I18N::Editor::UseThePreviewFrameNote);
+            }
+            ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::SoundEventCueOf01,
+                                                   {m_context.model->slot, std::to_string(m_context.modelMonsters)})
+                                          .c_str());
+            ImGui::PopID();
+        }
     }
 
     void RenderFlag(const char* id, bool& value, const char* note)
@@ -261,78 +380,6 @@ private:
         {
             ImGui::SetTooltip("%s", note);
         }
-    }
-
-    void RenderSubType(MonsterSoundEvent& event)
-    {
-        const SubTypeCondition current = GetSubTypeCondition(event);
-        ImGui::SetNextItemWidth(SubTypeWidth * m_scale);
-        if (ImGui::BeginCombo("##SubType", SubTypeLabel(current)))
-        {
-            for (const SubTypeCondition condition :
-                 {SubTypeCondition::Any, SubTypeCondition::Only, SubTypeCondition::Not})
-            {
-                if (ImGui::Selectable(SubTypeLabel(condition), condition == current) && condition != current)
-                {
-                    SetSubTypeCondition(event, condition);
-                    m_draft.AfterChange(true, m_label);
-                }
-            }
-            ImGui::EndCombo();
-        }
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::SetTooltip("%s", I18N::Editor::SoundEventSubTypeNote);
-        }
-        std::optional<int>& value = event.subType ? event.subType : event.notSubType;
-        if (!value)
-        {
-            return;
-        }
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(SubTypeValueWidth * m_scale);
-        ImGui::InputInt("##SubTypeValue", &*value, 0);
-        *value = std::clamp(*value, 0, MaxSubType);
-        m_draft.AfterField(m_label);
-    }
-
-    void RenderFrames(MonsterSoundEvent& event)
-    {
-        bool limited = event.frames.has_value();
-        if (ImGui::Checkbox("##Frames", &limited))
-        {
-            if (limited)
-            {
-                event.frames = std::pair<float, float>{0.0f, NewFrames};
-            }
-            else
-            {
-                event.frames.reset();
-            }
-            m_draft.AfterChange(true, m_label);
-        }
-        if (!event.frames)
-        {
-            return;
-        }
-        auto& [from, to] = *event.frames;
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(FrameWidth * m_scale);
-        // The inputs keep the range at least 0.1 wide, but only when one is
-        // edited: a narrower range of the file stays as it is.
-        if (ImGui::InputFloat("##From", &from, 0.0f, 0.0f, "%.1f"))
-        {
-            from = std::max(from, 0.0f);
-            to = std::max(to, from + 0.1f);
-        }
-        m_draft.AfterField(m_label);
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(FrameWidth * m_scale);
-        if (ImGui::InputFloat("##To", &to, 0.0f, 0.0f, "%.1f"))
-        {
-            to = std::max(to, from + 0.1f);
-        }
-        m_draft.AfterField(m_label);
     }
 
     void RenderChance(MonsterSoundEvent& event)
@@ -417,7 +464,7 @@ private:
         for (size_t index = 0; index < event.sounds.size(); ++index)
         {
             ImGui::PushID(static_cast<int>(index));
-            if (SoundCombo("##Sound", m_model, event.sounds[index], SoundWidth * m_scale))
+            if (SoundCombo("##Sound", m_set, event.sounds[index], SoundWidth * m_scale))
             {
                 m_draft.AfterChange(true, m_label);
             }
@@ -437,7 +484,7 @@ private:
             m_draft.AfterChange(true, m_label);
         }
         std::string added;
-        if (SoundCombo("##AddSound", m_model, added, SoundWidth * m_scale))
+        if (SoundCombo("##AddSound", m_set, added, SoundWidth * m_scale))
         {
             event.sounds.push_back(added);
             if (event.sounds.size() > PickSounds)
@@ -452,27 +499,113 @@ private:
         }
     }
 
-    MonsterModelDefinition& m_model;
-    int m_slot;
-    bool m_modelOpen;
-    ModelDraft& m_draft;
+    MonsterSoundSet& m_set;
+    SetDraft& m_draft;
+    const Context& m_context;
     std::string m_label;
     float m_scale;
 };
 
-void RenderMaps(MonsterModelDefinition& model, ModelDraft& draft)
+void RenderMaps(MonsterSoundSet& set, SetDraft& draft)
 {
     ImGui::TextUnformatted(I18N::Editor::SoundEventMaps);
     ImGui::SameLine();
-    if (MapPicker::Render("SoundEventMaps", model.soundEventMaps, I18N::Editor::SoundEventEveryMap))
+    if (MapPicker::Render("SoundEventMaps", set.maps, I18N::Editor::SoundEventEveryMap))
     {
-        draft.AfterChange(true, StepLabel::Model(model.slot, I18N::Editor::StepWhatSoundEvents));
+        draft.AfterChange(true, StepLabel::SoundSet(set.name, I18N::Editor::StepWhatSoundEvents));
     }
+}
+
+// The cues of the event that no other event plays on with the model.
+std::vector<std::string> CuesOnlyThisEventUses(const MonsterSoundSet& set, size_t index, int slot)
+{
+    std::vector<std::string> alone;
+    for (const std::string& cue : set.soundEvents[index].cues)
+    {
+        if (!IsCueUsed(slot, cue, set.name, index))
+        {
+            alone.push_back(cue);
+        }
+    }
+    return alone;
+}
+
+void RemoveEvent(MonsterSoundSet& set, size_t index, SetDraft& draft)
+{
+    set.soundEvents.erase(set.soundEvents.begin() + static_cast<std::ptrdiff_t>(index));
+    draft.AfterChange(true, StepLabel::SoundSet(set.name, I18N::Editor::StepWhatSoundEvents));
+}
+
+// The question of Q-MN82: removing a cue's last event asks whether the cue
+// goes too.
+void RenderRemoveCuePopup(MonsterSoundSet& set, SetDraft& draft, const Context& context)
+{
+    if (g_pendingRemoval && !ImGui::IsPopupOpen(RemoveCuePopup))
+    {
+        ImGui::OpenPopup(RemoveCuePopup);
+    }
+    if (!ImGui::BeginPopup(RemoveCuePopup))
+    {
+        return;
+    }
+    const bool valid = g_pendingRemoval && g_pendingRemoval->set == set.name &&
+                       g_pendingRemoval->event < set.soundEvents.size() && context.model != nullptr &&
+                       g_pendingRemoval->slot == context.slot;
+    if (!valid)
+    {
+        g_pendingRemoval.reset();
+        ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+        return;
+    }
+    std::string cues;
+    for (const std::string& cue : g_pendingRemoval->cues)
+    {
+        cues += (cues.empty() ? "" : ", ") + cue;
+    }
+    ImGui::TextUnformatted(I18N::Editor::RemoveTheCue);
+    ImGui::Separator();
+    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 30.0f);
+    ImGui::TextUnformatted(I18N::Format(I18N::Editor::RemoveTheCueQuestion01, {cues, context.model->slot}).c_str());
+    ImGui::PopTextWrapPos();
+    if (ImGui::Button(I18N::Editor::RemoveTheCueToo))
+    {
+        const std::string step = StepLabel::SoundSet(set.name, I18N::Editor::StepWhatSoundEvents);
+        g_MonsterEdits.BeginGroup(step);
+        std::erase_if(context.model->cues,
+                      [&](const MonsterModelCue& cue)
+                      {
+                          return std::find(g_pendingRemoval->cues.begin(), g_pendingRemoval->cues.end(), cue.name) !=
+                                 g_pendingRemoval->cues.end();
+                      });
+        context.modelDraft->StoreNow(step);
+        RemoveEvent(set, g_pendingRemoval->event, draft);
+        g_MonsterEdits.EndGroup();
+        g_pendingRemoval.reset();
+        ImGui::CloseCurrentPopup();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(I18N::Editor::KeepTheCue))
+    {
+        RemoveEvent(set, g_pendingRemoval->event, draft);
+        g_pendingRemoval.reset();
+        ImGui::CloseCurrentPopup();
+    }
+    ImGui::EndPopup();
 }
 } // namespace
 
 std::string WhenText(const MonsterSoundEvent& event)
 {
+    if (!event.cues.empty())
+    {
+        std::string text = I18N::Editor::SoundEventCue;
+        for (size_t index = 0; index < event.cues.size(); ++index)
+        {
+            text += (index == 0 ? " " : ", ") + event.cues[index];
+        }
+        return text;
+    }
     if (event.moments.empty())
     {
         return AnimationsText(event.animations);
@@ -488,9 +621,10 @@ std::string WhenText(const MonsterSoundEvent& event)
 
 bool ToggleMoment(MonsterSoundEvent& event, MonsterSoundMoment moment)
 {
-    if (!event.animations.empty())
+    if (event.moments.empty())
     {
         event.animations.clear();
+        event.cues.clear();
         event.moments = {moment};
         return true;
     }
@@ -499,37 +633,26 @@ bool ToggleMoment(MonsterSoundEvent& event, MonsterSoundMoment moment)
 
 bool ToggleAnimation(MonsterSoundEvent& event, int animation)
 {
-    if (!event.moments.empty())
+    if (event.animations.empty())
     {
         event.moments.clear();
+        event.cues.clear();
         event.animations = {animation};
         return true;
     }
     return Toggle(event.animations, animation);
 }
 
-SubTypeCondition GetSubTypeCondition(const MonsterSoundEvent& event)
+bool ToggleCue(MonsterSoundEvent& event, const std::string& cue)
 {
-    if (event.subType)
+    if (event.cues.empty())
     {
-        return SubTypeCondition::Only;
+        event.moments.clear();
+        event.animations.clear();
+        event.cues = {cue};
+        return true;
     }
-    return event.notSubType ? SubTypeCondition::Not : SubTypeCondition::Any;
-}
-
-void SetSubTypeCondition(MonsterSoundEvent& event, SubTypeCondition condition)
-{
-    const int value = event.subType.value_or(event.notSubType.value_or(NewSubType));
-    event.subType.reset();
-    event.notSubType.reset();
-    if (condition == SubTypeCondition::Only)
-    {
-        event.subType = value;
-    }
-    else if (condition == SubTypeCondition::Not)
-    {
-        event.notSubType = value;
-    }
+    return Toggle(event.cues, cue, false);
 }
 
 std::vector<std::string> PreviewSounds(const MonsterSoundEvent& event, int draw)
@@ -542,21 +665,53 @@ std::vector<std::string> PreviewSounds(const MonsterSoundEvent& event, int draw)
     return {event.sounds[index]};
 }
 
-void Render(MonsterModelDefinition& model, int slot, bool modelOpen, ModelDraft& draft)
+MonsterModelCue MakeCue(const MonsterModelDefinition& model, int animation, float frame)
+{
+    MonsterModelCue cue;
+    cue.animation = animation;
+    cue.frames = {frame, frame + NewCueFrames};
+    const std::string base = Data::Monsters::GetMonsterAnimationName(animation) + " " + FrameText(frame);
+    cue.name = base;
+    for (int number = 2; std::any_of(model.cues.begin(), model.cues.end(),
+                                     [&](const MonsterModelCue& other) { return other.name == cue.name; });
+         ++number)
+    {
+        cue.name = base + " (" + std::to_string(number) + ")";
+    }
+    return cue;
+}
+
+bool IsCueUsed(int slot, const std::string& cue, const std::string& exceptSet, size_t except)
+{
+    for (const MonsterSoundSet* set : Data::Monsters::ModelLoader::FindSoundSetsOfSlot(slot))
+    {
+        for (size_t index = 0; index < set->soundEvents.size(); ++index)
+        {
+            const std::vector<std::string>& cues = set->soundEvents[index].cues;
+            const bool skipped = set->name == exceptSet && index == except;
+            if (!skipped && std::find(cues.begin(), cues.end(), cue) != cues.end())
+            {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+void Render(MonsterSoundSet& set, SetDraft& draft, const Context& context)
 {
     ImGui::PushTextWrapPos(0.0f);
     ImGui::TextDisabled("%s", I18N::Editor::SoundEventsNote);
     ImGui::PopTextWrapPos();
-    if (!model.soundEvents.empty())
+    if (!set.soundEvents.empty())
     {
         constexpr ImGuiTableFlags flags =
             ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit;
-        if (ImGui::BeginTable("##SoundEvents", 10, flags))
+        if (ImGui::BeginTable("##SoundEvents", 9, flags))
         {
             ImGui::TableSetupColumn(I18N::Editor::SoundEventWhen);
             ImGui::TableSetupColumn(I18N::Editor::SoundEventFrames);
             ImGui::TableSetupColumn(I18N::Editor::SoundEventDeathEffect);
-            ImGui::TableSetupColumn(I18N::Editor::SubType);
             ImGui::TableSetupColumn(I18N::Editor::SoundEventHeardAnywhere);
             ImGui::TableSetupColumn(I18N::Editor::SoundEventAtTheMonster);
             ImGui::TableSetupColumn(I18N::Editor::SoundEventChance);
@@ -564,12 +719,18 @@ void Render(MonsterModelDefinition& model, int slot, bool modelOpen, ModelDraft&
             ImGui::TableSetupColumn(I18N::Editor::Sounds);
             ImGui::TableSetupColumn("##Buttons");
             ImGui::TableHeadersRow();
-            EventRow row(model, slot, modelOpen, draft);
+            EventRow row(set, draft, context);
             std::optional<size_t> removed;
-            for (size_t index = 0; index < model.soundEvents.size(); ++index)
+            for (size_t index = 0; index < set.soundEvents.size(); ++index)
             {
                 ImGui::PushID(static_cast<int>(index));
-                if (row.Render(model.soundEvents[index]))
+                ImGui::TableNextRow();
+                if (context.focusedEvent == index)
+                {
+                    ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, FocusColor);
+                    ImGui::SetScrollHereY();
+                }
+                if (row.Render(set.soundEvents[index]))
                 {
                     removed = index;
                 }
@@ -578,27 +739,37 @@ void Render(MonsterModelDefinition& model, int slot, bool modelOpen, ModelDraft&
             ImGui::EndTable();
             if (removed)
             {
-                model.soundEvents.erase(model.soundEvents.begin() + static_cast<std::ptrdiff_t>(*removed));
-                draft.AfterChange(true, StepLabel::Model(model.slot, I18N::Editor::StepWhatSoundEvents));
+                std::vector<std::string> alone = context.model != nullptr
+                                                     ? CuesOnlyThisEventUses(set, *removed, context.slot)
+                                                     : std::vector<std::string>();
+                if (alone.empty())
+                {
+                    RemoveEvent(set, *removed, draft);
+                }
+                else
+                {
+                    g_pendingRemoval = PendingRemoval{set.name, *removed, std::move(alone), context.slot};
+                }
             }
         }
     }
-    // An event plays the model's own sounds.
-    ImGui::BeginDisabled(model.sounds.empty());
+    RenderRemoveCuePopup(set, draft, context);
+    // An event plays the set's own sounds.
+    ImGui::BeginDisabled(set.sounds.empty());
     if (ImGui::Button(I18N::Editor::AddASoundEvent))
     {
         MonsterSoundEvent event;
         event.animations = {MONSTER01_ATTACK1};
-        event.sounds = {Data::Monsters::SoundNameOf(model.sounds.front())};
-        model.soundEvents.push_back(event);
-        draft.AfterChange(true, StepLabel::Model(model.slot, I18N::Editor::StepWhatSoundEvents));
+        event.sounds = {Data::Monsters::SoundNameOf(set.sounds.front())};
+        set.soundEvents.push_back(event);
+        draft.AfterChange(true, StepLabel::SoundSet(set.name, I18N::Editor::StepWhatSoundEvents));
     }
     ImGui::EndDisabled();
-    if (model.sounds.empty() && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    if (set.sounds.empty() && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
     {
         ImGui::SetTooltip("%s", I18N::Editor::SoundEventNeedsASoundOfTheModel);
     }
-    RenderMaps(model, draft);
+    RenderMaps(set, draft);
 }
 } // namespace MuEditor::Monsters::SoundEventsEditor
 

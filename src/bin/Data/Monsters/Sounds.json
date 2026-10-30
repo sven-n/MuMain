@@ -1,0 +1,1966 @@
+{
+  "formatVersion": 1,
+  "soundSets": [
+    {
+      "name": "Aegis",
+      "sounds": [
+        {"file": "Data/Sound/mEsisIdle.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mEsisAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mEsisAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mEsisDeath.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mEsisIdle.wav", "Data/Sound/mEsisIdle.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mEsisAttack1.wav", "Data/Sound/mEsisAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mEsisDeath.wav"]}
+      ]
+    },
+    {
+      "name": "Agon",
+      "sounds": [
+        {"file": "Data/Sound/mArgon1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mArgon2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mArgonAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mArgonAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mArgonDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mArgon1.wav", "Data/Sound/mArgon2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mArgonAttack1.wav", "Data/Sound/mArgonAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mArgonDie.wav"]}
+      ]
+    },
+    {
+      "name": "Alquamos",
+      "sounds": [
+        {"file": "Data/Sound/mAlquamosAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mAlquamosDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mAlquamosAttack1.wav", "Data/Sound/mAlquamosAttack1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mAlquamosAttack1.wav", "Data/Sound/mAlquamosAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mAlquamosDie.wav"]}
+      ]
+    },
+    {
+      "name": "Archer",
+      "sounds": [
+        {"file": "Data/Sound/BattleCastle/mBowMercAttack.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/BattleCastle/mBowMercDeath.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/BattleCastle/mBowMercAttack.wav", "Data/Sound/BattleCastle/mBowMercAttack.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/BattleCastle/mBowMercDeath.wav"]}
+      ]
+    },
+    {
+      "name": "Ash Slaughterer",
+      "sounds": [
+        {"file": "Data/Sound/w64/AshesButcher_attack.wav", "id": "SOUND_PKFIELD_ASHESBUTCHER_ATTACK", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/AshesButcher_damage01.wav", "id": "SOUND_PKFIELD_ASHESBUTCHER_DAMAGE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/AshesButcher_damage02.wav", "id": "SOUND_PKFIELD_ASHESBUTCHER_DAMAGE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/AshesButcher_death.wav", "id": "SOUND_PKFIELD_ASHESBUTCHER_DEATH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/AshesButcher_move01.wav", "id": "SOUND_PKFIELD_ASHESBUTCHER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/AshesButcher_move02.wav", "id": "SOUND_PKFIELD_ASHESBUTCHER_MOVE02", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_PKFIELD_ASHESBUTCHER_ATTACK"]},
+        {"animations": ["shock"], "sounds": ["SOUND_PKFIELD_ASHESBUTCHER_DAMAGE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_PKFIELD_ASHESBUTCHER_MOVE01"]},
+        {"animations": ["die"], "sounds": ["SOUND_PKFIELD_ASHESBUTCHER_DEATH"]}
+      ],
+      "maps": [63]
+    },
+    {
+      "name": "Assassin",
+      "sounds": [
+        {"file": "Data/Sound/mAssassinAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mAssassinAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mAssassinDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["attack"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mAssassinAttack1.wav", "Data/Sound/mAssassinAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mAssassinDie.wav"]}
+      ]
+    },
+    {
+      "name": "Bahamut",
+      "sounds": [
+        {"file": "Data/Sound/mBahamut1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mYeti1.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBahamut1.wav", "Data/Sound/mBahamut1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBahamut1.wav"]}
+      ]
+    },
+    {
+      "name": "Bali",
+      "sounds": [
+        {"file": "Data/Sound/mBali1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBali2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBaliAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBaliAttack2.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBali1.wav", "Data/Sound/mBali2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mBaliAttack1.wav", "Data/Sound/mBaliAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBali2.wav"]}
+      ]
+    },
+    {
+      "name": "Balrog",
+      "sounds": [
+        {"file": "Data/Sound/mBalrog1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBalrog2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mWizardAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGorgonAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBalrogDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBalrog1.wav", "Data/Sound/mBalrog2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mWizardAttack2.wav", "Data/Sound/mGorgonAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBalrogDie.wav"]}
+      ]
+    },
+    {
+      "name": "Beam Knight",
+      "sounds": [
+        {"file": "Data/Sound/death1.wav", "id": "SOUND_MONSTER_DEATH1", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/death_attack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/death_die.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_MONSTER_DEATH1", "SOUND_MONSTER_DEATH1"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/death_attack1.wav", "Data/Sound/death_attack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/death_die.wav"]}
+      ]
+    },
+    {
+      "name": "Beetle Monster",
+      "sounds": [
+        {"file": "Data/Sound/mBeetle1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBeetleAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBeetleDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBeetle1.wav", "Data/Sound/mBeetle1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mBeetleAttack1.wav", "Data/Sound/mBeetleAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBeetleDie.wav"]}
+      ]
+    },
+    {
+      "name": "Blaze Napin",
+      "sounds": [
+        {"file": "Data/Sound/w57/Naipin-Blaze.wav", "id": "SOUND_SWAMPOFQUIET_BLAZE_NAIPIN_BREATH01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/Naipin-Attack.wav", "id": "SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/Naipin-Death.wav", "id": "SOUND_SWAMPOFQUIET_NAIPIN_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_BLAZE_NAIPIN_BREATH01"]},
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01"]},
+        {"animations": ["die"], "sounds": ["SOUND_SWAMPOFQUIET_NAIPIN_DEATH01"]}
+      ],
+      "maps": [56]
+    },
+    {
+      "name": "Blood Assassin",
+      "sounds": [
+        {"file": "Data/Sound/w64/BloodAssassin_attack.wav", "id": "SOUND_PKFIELD_BLOODASSASSIN_ATTACK", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BloodAssassin_damage01.wav", "id": "SOUND_PKFIELD_BLOODASSASSIN_DAMAGE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BloodAssassin_damage02.wav", "id": "SOUND_PKFIELD_BLOODASSASSIN_DAMAGE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BloodAssassin_death.wav", "id": "SOUND_PKFIELD_BLOODASSASSIN_DEDTH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BloodAssassin_move01.wav", "id": "SOUND_PKFIELD_BLOODASSASSIN_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BloodAssassin_move02.wav", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_ATTACK"]},
+        {"animations": ["shock"], "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_DAMAGE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_MOVE01"]},
+        {"animations": ["die"], "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_DEDTH"]}
+      ],
+      "maps": [63]
+    },
+    {
+      "name": "Blood Soldier",
+      "sounds": [
+        {"file": "Data/Sound/mBSoldierIdle1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBSoldierIdle2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBSoldierAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBSoldierAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBSoldierDeath.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBSoldierIdle1.wav", "Data/Sound/mBSoldierIdle2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mBSoldierAttack1.wav", "Data/Sound/mBSoldierAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBSoldierDeath.wav"]}
+      ]
+    },
+    {
+      "name": "Bloody wolf",
+      "sounds": [
+        {"file": "Data/Sound/blood1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/blood_attack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/blood_attack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/blood_die.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/blood1.wav", "Data/Sound/blood1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/blood_attack1.wav", "Data/Sound/blood_attack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/blood_die.wav"]}
+      ]
+    },
+    {
+      "name": "Bone Scorpion",
+      "sounds": [
+        {"file": "Data/Sound/Karutan/BoneScorpion_attack.wav", "id": "SOUND_KARUTAN_BONESCORPION_ATTACK", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/BoneScorpion_death.wav", "id": "SOUND_KARUTAN_BONESCORPION_DEATH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/BoneScorpion_hit.wav", "id": "SOUND_KARUTAN_BONESCORPION_HIT", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_KARUTAN_BONESCORPION_ATTACK"]},
+        {"animations": ["die"], "sounds": ["SOUND_KARUTAN_BONESCORPION_DEATH"]},
+        {"animations": ["shock"], "sounds": ["SOUND_KARUTAN_BONESCORPION_HIT"]}
+      ],
+      "maps": [80, 81]
+    },
+    {
+      "name": "Budge Dragon",
+      "sounds": [
+        {"file": "Data/Sound/mBudge1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBudgeAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBudgeDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBudge1.wav", "Data/Sound/mBudgeAttack1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mBudgeAttack1.wav", "Data/Sound/mBudgeAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBudgeDie.wav"]}
+      ]
+    },
+    {
+      "name": "Bull Fighter",
+      "sounds": [
+        {"file": "Data/Sound/mBull1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBull2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBullAttack1.wav", "id": "SOUND_MONSTER_BULLATTACK1", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBullAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBullDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBull1.wav", "Data/Sound/mBull2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_BULLATTACK1", "Data/Sound/mBullAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBullDie.wav"]}
+      ]
+    },
+    {
+      "name": "Burning Lava Giant",
+      "sounds": [
+        {"file": "Data/Sound/w64/BurningLavaGolem_attack01.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BurningLavaGolem_attack02.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BurningLavaGolem_damage01.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_DAMAGE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BurningLavaGolem_death.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_DEATH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BurningLavaGolem_move01.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE01", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK01"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK02"]},
+        {"animations": ["shock"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_DAMAGE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE01"]},
+        {"animations": ["die"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_DEATH"]}
+      ],
+      "maps": [63]
+    },
+    {
+      "name": "Captain Grizzly",
+      "sounds": [
+        {"file": "Data/Sound/w52/SE_Mon_beastwooleader_move01.wav", "id": "SOUND_ELBELAND_BEASTWOOLEADER_MOVE01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_beastwooleader_attack01.wav", "id": "SOUND_ELBELAND_BEASTWOOLEADER_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_beastwoo_death01.wav", "id": "SOUND_ELBELAND_BEASTWOO_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_ELBELAND_BEASTWOOLEADER_MOVE01"]},
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_ELBELAND_BEASTWOOLEADER_ATTACK01"]},
+        {"animations": ["die"], "sounds": ["SOUND_ELBELAND_BEASTWOO_DEATH01"]}
+      ],
+      "maps": [51, 73, 74]
+    },
+    {
+      "name": "Castle Gate",
+      "sounds": [
+        {"file": "Data/Sound/BattleCastle/oCDoorDis.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/BattleCastle/oCDoorDis.wav"]}
+      ]
+    },
+    {
+      "name": "Cavalry Captain",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/CavalryLeader_move01.wav", "id": "SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CavalryLeader_move02.wav", "id": "SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CavalryLeader_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CavalryLeader_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w58w59/GiantMammoth_death.wav", "id": "SOUND_RAKLION_GIANT_MAMUD_DEATH", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"cues": ["step 2"], "sounds": ["SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE01"]},
+        {"cues": ["step 1"], "sounds": ["SOUND_EMPIREGUARDIAN_CAVALRYLEADER_MOVE02"]},
+        {"animations": ["attack1", "attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK01"]},
+        {"animations": ["attack2", "attack4"], "sounds": ["SOUND_EMPIREGUARDIAN_CAVALRYLEADER_ATTACK02"]},
+        {"animations": ["die"], "sounds": ["SOUND_RAKLION_GIANT_MAMUD_DEATH"]}
+      ],
+      "maps": [71]
+    },
+    {
+      "name": "Chain Scorpion",
+      "sounds": [
+        {"file": "Data/Sound/mScorpion1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mScorpion2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mScorpionAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mScorpionAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mScorpionDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mScorpion1.wav", "Data/Sound/mScorpion2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mScorpionAttack1.wav", "Data/Sound/mScorpionAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mScorpionDie.wav"]}
+      ]
+    },
+    {
+      "name": "Chaos Castle",
+      "sounds": [
+        {"file": "Data/Sound/mOrcCapAttack1.wav", "id": "SOUND_MONSTER_ORCCAPATTACK1", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_ORCCAPATTACK1", "SOUND_MONSTER_ORCCAPATTACK1"]}
+      ]
+    },
+    {
+      "name": "Chaos Castle Wizard",
+      "sounds": [
+        {"file": "Data/Sound/mOrcArcherAttack1.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mOrcArcherAttack1.wav", "Data/Sound/mOrcArcherAttack1.wav"]}
+      ]
+    },
+    {
+      "name": "Chaos Goblin",
+      "sounds": [
+        {"file": "Data/Sound/nMix.wav", "id": "SOUND_NPC_MIX", "channels": 1, "spatial": false}
+      ]
+    },
+    {
+      "name": "Combat Instructor",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack3.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_death.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"cues": ["step 2"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01"]},
+        {"cues": ["step 1"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02"]},
+        {"animations": ["attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03"]},
+        {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH"]}
+      ],
+      "maps": [69, 70, 71, 72]
+    },
+    {
+      "name": "Condra",
+      "sounds": [
+        {"file": "Data/Sound/Karutan/Condra_move1.wav", "id": "SOUND_KARUTAN_CONDRA_MOVE1", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Condra_move2.wav", "id": "SOUND_KARUTAN_CONDRA_MOVE2", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Condra_attack.wav", "id": "SOUND_KARUTAN_CONDRA_ATTACK", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Condra_death.wav", "id": "SOUND_KARUTAN_CONDRA_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"cues": ["step 1"], "sounds": ["SOUND_KARUTAN_CONDRA_MOVE1"]},
+        {"cues": ["step 2"], "sounds": ["SOUND_KARUTAN_CONDRA_MOVE2"]},
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_KARUTAN_CONDRA_ATTACK"]},
+        {"animations": ["die"], "sounds": ["SOUND_KARUTAN_CONDRA_DEATH"]}
+      ],
+      "maps": [80, 81]
+    },
+    {
+      "name": "Coolutin",
+      "sounds": [
+        {"file": "Data/Sound/w58w59/Coolertin_attack.wav", "id": "SOUND_RAKLION_COOLERTIN_ATTACK", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/Coolertin_move.wav", "id": "SOUND_RAKLION_COOLERTIN_MOVE", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/mHellSpiderDie.wav", "id": "SOUND_MONSTER_HELLSPIDERDIE", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_COOLERTIN_ATTACK"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_RAKLION_COOLERTIN_MOVE"]},
+        {"animations": ["die"], "sounds": ["SOUND_MONSTER_HELLSPIDERDIE"]}
+      ],
+      "maps": [57, 58]
+    },
+    {
+      "name": "Cruel Blood Assassin",
+      "sounds": [
+        {"file": "Data/Sound/w64/BloodAssassin_attack.wav", "id": "SOUND_PKFIELD_BLOODASSASSIN_ATTACK", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BloodAssassin_damage01.wav", "id": "SOUND_PKFIELD_BLOODASSASSIN_DAMAGE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BloodAssassin_death.wav", "id": "SOUND_PKFIELD_BLOODASSASSIN_DEDTH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BloodAssassin_move01.wav", "id": "SOUND_PKFIELD_BLOODASSASSIN_MOVE01", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_ATTACK"]},
+        {"animations": ["shock"], "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_DAMAGE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_MOVE01"]},
+        {"animations": ["die"], "sounds": ["SOUND_PKFIELD_BLOODASSASSIN_DEDTH"]}
+      ],
+      "maps": [63]
+    },
+    {
+      "name": "Crypos",
+      "sounds": [
+        {"file": "Data/Sound/Karutan/Crypos_move1.wav", "id": "SOUND_KARUTAN_CRYPOS_MOVE1", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Crypos_move2.wav", "id": "SOUND_KARUTAN_CRYPOS_MOVE2", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Crypos_attack_1.wav", "id": "SOUND_KARUTAN_CRYPOS_ATTACK1", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Crypos_attack_2.wav", "id": "SOUND_KARUTAN_CRYPOS_ATTACK2", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Crypta_death.wav", "id": "SOUND_KARUTAN_CRYPTA_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"cues": ["step 1"], "sounds": ["SOUND_KARUTAN_CRYPOS_MOVE1"]},
+        {"cues": ["step 2"], "sounds": ["SOUND_KARUTAN_CRYPOS_MOVE2"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_KARUTAN_CRYPOS_ATTACK1"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_KARUTAN_CRYPOS_ATTACK2"]},
+        {"animations": ["die"], "sounds": ["SOUND_KARUTAN_CRYPTA_DEATH"]}
+      ],
+      "maps": [80, 81]
+    },
+    {
+      "name": "Crypta",
+      "sounds": [
+        {"file": "Data/Sound/Karutan/Crypta_move1.wav", "id": "SOUND_KARUTAN_CRYPTA_MOVE1", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Crypta_move2.wav", "id": "SOUND_KARUTAN_CRYPTA_MOVE2", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Crypta_attack.wav", "id": "SOUND_KARUTAN_CRYPTA_ATTACK", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Crypta_death.wav", "id": "SOUND_KARUTAN_CRYPTA_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"cues": ["step 1"], "sounds": ["SOUND_KARUTAN_CRYPTA_MOVE1"]},
+        {"cues": ["step 2"], "sounds": ["SOUND_KARUTAN_CRYPTA_MOVE2"]},
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_KARUTAN_CRYPTA_ATTACK"]},
+        {"animations": ["die"], "sounds": ["SOUND_KARUTAN_CRYPTA_DEATH"]}
+      ],
+      "maps": [80, 81]
+    },
+    {
+      "name": "Cursed Lich",
+      "sounds": [
+        {"file": "Data/Sound/w52/SE_Mon_curserich_move01.wav", "id": "SOUND_ELBELAND_CURSERICH_MOVE01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_curserich_attack01.wav", "id": "SOUND_ELBELAND_CURSERICH_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_curserich_death01.wav", "id": "SOUND_ELBELAND_CURSERICH_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_ELBELAND_CURSERICH_MOVE01"]},
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_ELBELAND_CURSERICH_ATTACK01"]},
+        {"animations": ["die"], "sounds": ["SOUND_ELBELAND_CURSERICH_DEATH01"]}
+      ],
+      "maps": [51, 73, 74]
+    },
+    {
+      "name": "Cursed Santa",
+      "sounds": [
+        {"file": "Data/Sound/xmas/DarkSanta_Idle01.wav", "id": "SOUND_XMAS_SANTA_IDLE_1", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/xmas/DarkSanta_Idle02.wav", "id": "SOUND_XMAS_SANTA_IDLE_2", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/xmas/DarkSanta_Walk01.wav", "id": "SOUND_XMAS_SANTA_WALK_1", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/xmas/DarkSanta_Walk02.wav", "id": "SOUND_XMAS_SANTA_WALK_2", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/xmas/DarkSanta_Attack01.wav", "id": "SOUND_XMAS_SANTA_ATTACK_1", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/xmas/DarkSanta_Damage01.wav", "id": "SOUND_XMAS_SANTA_DAMAGE_1", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/xmas/DarkSanta_Damage02.wav", "id": "SOUND_XMAS_SANTA_DAMAGE_2", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/xmas/DarkSanta_Death01.wav", "id": "SOUND_XMAS_SANTA_DEATH_1", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["stop1"], "pick": "rand", "sounds": ["SOUND_XMAS_SANTA_IDLE_1", "SOUND_XMAS_SANTA_IDLE_2"]},
+        {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_XMAS_SANTA_WALK_1", "SOUND_XMAS_SANTA_WALK_2"]},
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_XMAS_SANTA_ATTACK_1"]},
+        {"animations": ["shock"], "pick": "rand", "sounds": ["SOUND_XMAS_SANTA_DAMAGE_1", "SOUND_XMAS_SANTA_DAMAGE_2"]},
+        {"animations": ["die"], "sounds": ["SOUND_XMAS_SANTA_DEATH_1"]}
+      ]
+    },
+    {
+      "name": "Cursed king",
+      "sounds": [
+        {"file": "Data/Sound/mCursedKing1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mCursedKing2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mCursedKingDie1.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mCursedKing1.wav", "Data/Sound/mCursedKing2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mCursedKingDie1.wav"]}
+      ]
+    },
+    {
+      "name": "Cyclops",
+      "sounds": [
+        {"file": "Data/Sound/mOgre1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mOgre2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mOgreAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mOgreAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mOgreDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mOgre1.wav", "Data/Sound/mOgre2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mOgreAttack1.wav", "Data/Sound/mOgreAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mOgreDie.wav"]}
+      ]
+    },
+    {
+      "name": "Dark Coolutin",
+      "sounds": [
+        {"file": "Data/Sound/mHellSpiderDie.wav", "id": "SOUND_MONSTER_HELLSPIDERDIE", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/w58w59/Coolertin_attack.wav", "id": "SOUND_RAKLION_COOLERTIN_ATTACK", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/Coolertin_move.wav", "id": "SOUND_RAKLION_COOLERTIN_MOVE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_COOLERTIN_ATTACK"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_RAKLION_COOLERTIN_MOVE"]},
+        {"animations": ["die"], "sounds": ["SOUND_MONSTER_HELLSPIDERDIE"]}
+      ],
+      "maps": [57, 58]
+    },
+    {
+      "name": "Dark Giant",
+      "sounds": [
+        {"file": "Data/Sound/w58w59/IceGiant_death.wav", "id": "SOUND_RAKLION_ICEGIANT_DEATH", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/IceGiant_move.wav", "id": "SOUND_RAKLION_ICEGIANT_MOVE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_RAKLION_ICEGIANT_MOVE"]},
+        {"animations": ["die"], "sounds": ["SOUND_RAKLION_ICEGIANT_DEATH"]}
+      ],
+      "maps": [57, 58]
+    },
+    {
+      "name": "Dark Iron Knight",
+      "sounds": [
+        {"file": "Data/Sound/death1.wav", "id": "SOUND_MONSTER_DEATH1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/IronKnight_attack.wav", "id": "SOUND_RAKLION_IRON_KNIGHT_ATTACK", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/IronKnight_move.wav", "id": "SOUND_RAKLION_IRON_KNIGHT_MOVE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_IRON_KNIGHT_ATTACK"]},
+        {"animations": ["stop1", "stop2", "walk"], "sounds": ["SOUND_RAKLION_IRON_KNIGHT_MOVE"]},
+        {"animations": ["die"], "sounds": ["SOUND_MONSTER_DEATH1"]}
+      ],
+      "maps": [57, 58]
+    },
+    {
+      "name": "Dark Knight",
+      "sounds": [
+        {"file": "Data/Sound/mDarkKnight1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mDarkKnight2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mDarkKnightAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mDarkKnightAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mDarkKnightDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mDarkKnight1.wav", "Data/Sound/mDarkKnight2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mDarkKnightAttack1.wav", "Data/Sound/mDarkKnightAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mDarkKnightDie.wav"]}
+      ]
+    },
+    {
+      "name": "Dark Mammoth",
+      "sounds": [
+        {"file": "Data/Sound/w58w59/GiantMammoth_attack.wav", "id": "SOUND_RAKLION_GIANT_MAMUD_ATTACK", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/GiantMammoth_death.wav", "id": "SOUND_RAKLION_GIANT_MAMUD_DEATH", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/GiantMammoth_move.wav", "id": "SOUND_RAKLION_GIANT_MAMUD_MOVE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_GIANT_MAMUD_ATTACK"]},
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_RAKLION_GIANT_MAMUD_MOVE"]},
+        {"animations": ["die"], "sounds": ["SOUND_RAKLION_GIANT_MAMUD_DEATH"]}
+      ],
+      "maps": [57, 58]
+    },
+    {
+      "name": "Dark Skull Soldier",
+      "sounds": [
+        {"file": "Data/Sound/mBullDie.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mHunter2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBlackSkullDie.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBlackSkullAttack.wav", "id": "SOUND_MONSTER_BLACKSKULLATTACK", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHunter2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_BLACKSKULLATTACK"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBlackSkullDie.wav"]}
+      ]
+    },
+    {
+      "name": "Death Angel",
+      "sounds": [
+        {"file": "Data/Sound/mDAngelIdle.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mDAngelAttack.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mDAngelDeath.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mDAngelIdle.wav", "Data/Sound/mDAngelIdle.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mDAngelAttack.wav", "Data/Sound/mDAngelAttack.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mDAngelDeath.wav"]}
+      ]
+    },
+    {
+      "name": "Death Centurion",
+      "sounds": [
+        {"file": "Data/Sound/mLsIdle1.wav", "id": "SOUND_MONSTER_LSIDLE1", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mLsIdle2.wav", "id": "SOUND_MONSTER_LSIDLE2", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mLsAttack1.wav", "id": "SOUND_MONSTER_LSATTACK1", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mLsAttack2.wav", "id": "SOUND_MONSTER_LSATTACK2", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mLsDeath.wav", "id": "SOUND_MONSTER_LSDEATH", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_MONSTER_LSIDLE1", "SOUND_MONSTER_LSIDLE2"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_LSATTACK1", "SOUND_MONSTER_LSATTACK2"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_LSDEATH"]}
+      ]
+    },
+    {
+      "name": "Destler",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/1Deasuler_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/1Deasuler_attack3.wav", "id": "SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK03", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_rage.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_death.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"cues": ["step 2"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01"]},
+        {"cues": ["step 1"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK02"]},
+        {"animations": ["attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_1CORP_DEASULER_MONSTER_ATTACK03"]},
+        {"animations": ["appear"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE"]},
+        {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH"]}
+      ],
+      "maps": [69, 70, 71, 72]
+    },
+    {
+      "name": "Devil",
+      "sounds": [
+        {"file": "Data/Sound/mYeti1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mSatanAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mYetiDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mSatanAttack1.wav", "Data/Sound/mSatanAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mYetiDie.wav"]}
+      ]
+    },
+    {
+      "name": "Doorkeeper Titus",
+      "sounds": [
+        {"file": "Data/Sound/w64/GatekeeperTitus.wav", "id": "SOUND_DUEL_NPC_IDLE_1", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["stop1"], "sounds": ["SOUND_DUEL_NPC_IDLE_1"]}
+      ]
+    },
+    {
+      "name": "Doppelganger",
+      "sounds": [
+        {"file": "Data/Sound/Doppelganger/Doppelganger_attack.wav", "id": "SOUND_DOPPELGANGER_SLIME_ATTACK", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Doppelganger/Doppelganger_death.wav", "id": "SOUND_DOPPELGANGER_SLIME_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["appear"], "sounds": ["SOUND_DOPPELGANGER_SLIME_ATTACK"]},
+        {"animations": ["die"], "sounds": ["SOUND_DOPPELGANGER_SLIME_DEATH"]}
+      ],
+      "maps": [65, 66, 67, 68]
+    },
+    {
+      "name": "Drakan",
+      "sounds": [
+        {"file": "Data/Sound/mDrakan1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mDrakanAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mDrakanDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mDrakan1.wav", "Data/Sound/mDrakan1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mDrakanAttack1.wav", "Data/Sound/mDrakanAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mDrakanDie.wav"]}
+      ]
+    },
+    {
+      "name": "Elf Lala",
+      "sounds": [
+        {"file": "Data/Sound/nHarp.wav", "id": "SOUND_NPC_HARP", "channels": 1, "spatial": false}
+      ]
+    },
+    {
+      "name": "Elite Ogre",
+      "sounds": [
+        {"file": "Data/Sound/mHunter2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBullDie.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mOrcCapAttack1.wav", "id": "SOUND_MONSTER_ORCCAPATTACK1", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHunter2.wav", "Data/Sound/mHunter2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_ORCCAPATTACK1", "SOUND_MONSTER_ORCCAPATTACK1"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBullDie.wav"]}
+      ]
+    },
+    {
+      "name": "Elite Yeti",
+      "sounds": [
+        {"file": "Data/Sound/mYeti1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mYeti2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mYetiAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mYetiDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mYetiAttack1.wav", "Data/Sound/mYetiAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mYetiDie.wav"]}
+      ]
+    },
+    {
+      "name": "Erkanne",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_attack3.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Ercanne_attack3.wav", "id": "SOUND_EMPIREGUARDIAN_ERCANNE_MONSTER_ATTACK03", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Raymond_rage.wav", "id": "SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_death.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03"]},
+        {"animations": ["attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_ERCANNE_MONSTER_ATTACK03"]},
+        {"animations": ["appear"], "sounds": ["SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE"]},
+        {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH"]}
+      ],
+      "maps": [69, 70, 71, 72]
+    },
+    {
+      "name": "Forest Monster",
+      "sounds": [
+        {"file": "Data/Sound/mWoodMon1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mWoodMon2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mWoodMonAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mWoodMonAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mWoodMonDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mWoodMon1.wav", "Data/Sound/mWoodMon2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mWoodMonAttack1.wav", "Data/Sound/mWoodMonAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mWoodMonDie.wav"]}
+      ]
+    },
+    {
+      "name": "Furious Slaughterer",
+      "sounds": [
+        {"file": "Data/Sound/Doppelganger/Angerbutcher_attack.wav", "id": "SOUND_DOPPELGANGER_RED_BUGBEAR_ATTACK", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Doppelganger/Angerbutcher_death.wav", "id": "SOUND_DOPPELGANGER_RED_BUGBEAR_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_DOPPELGANGER_RED_BUGBEAR_ATTACK"]},
+        {"animations": ["die"], "sounds": ["SOUND_DOPPELGANGER_RED_BUGBEAR_DEATH"]}
+      ],
+      "maps": [65, 66, 67, 68]
+    },
+    {
+      "name": "Gaion Kharein",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/GaionKalein_move.wav", "id": "SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/GrandWizard_death.wav", "id": "SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_DEATH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/GaionKalein_rage.wav", "id": "SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_RAGE", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "sounds": ["SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE"]},
+        {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_DEATH"]},
+        {"animations": ["appear"], "sounds": ["SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_RAGE"]}
+      ],
+      "maps": [72]
+    },
+    {
+      "name": "Galia",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/3Cato_move.wav", "id": "SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/4Gallia_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_4CORP_GALLIA_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_rage.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/2Vermont_death.wav", "id": "SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "sounds": ["SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01"]},
+        {"animations": ["attack2", "attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_4CORP_GALLIA_ATTACK02"]},
+        {"animations": ["appear"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE"]},
+        {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH"]}
+      ],
+      "maps": [69, 70, 71, 72]
+    },
+    {
+      "name": "Gatekeeper",
+      "sounds": [
+        {"file": "Data/Sound/BattleCastle/mSpearMercAttack.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/BattleCastle/mSpearMercDeath.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/BattleCastle/mSpearMercAttack.wav", "Data/Sound/BattleCastle/mSpearMercAttack.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/BattleCastle/mSpearMercDeath.wav"]}
+      ]
+    },
+    {
+      "name": "Ghost",
+      "sounds": [
+        {"file": "Data/Sound/mGhost1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGhost2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGhostAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGhostAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGhostDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mGhost1.wav", "Data/Sound/mGhost2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mGhostAttack1.wav", "Data/Sound/mGhostAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mGhostDie.wav"]}
+      ]
+    },
+    {
+      "name": "Ghost Napin",
+      "sounds": [
+        {"file": "Data/Sound/w57/Naipin-Ghost.wav", "id": "SOUND_SWAMPOFQUIET_GHOST_NAIPIN_BREATH01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/Naipin-Attack.wav", "id": "SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/Naipin-Death.wav", "id": "SOUND_SWAMPOFQUIET_NAIPIN_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_GHOST_NAIPIN_BREATH01"]},
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01"]},
+        {"animations": ["die"], "sounds": ["SOUND_SWAMPOFQUIET_NAIPIN_DEATH01"]}
+      ],
+      "maps": [56]
+    },
+    {
+      "name": "Giant",
+      "sounds": [
+        {"file": "Data/Sound/mGiant1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGiant2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGiantAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGiantAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGiantDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mGiant1.wav", "Data/Sound/mGiant2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mGiantAttack1.wav", "Data/Sound/mGiantAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mGiantDie.wav"]}
+      ]
+    },
+    {
+      "name": "Giant Mammoth",
+      "sounds": [
+        {"file": "Data/Sound/w58w59/GiantMammoth_move.wav", "id": "SOUND_RAKLION_GIANT_MAMUD_MOVE", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/GiantMammoth_attack.wav", "id": "SOUND_RAKLION_GIANT_MAMUD_ATTACK", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/GiantMammoth_death.wav", "id": "SOUND_RAKLION_GIANT_MAMUD_DEATH", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_GIANT_MAMUD_ATTACK"]},
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_RAKLION_GIANT_MAMUD_MOVE"]},
+        {"animations": ["die"], "sounds": ["SOUND_RAKLION_GIANT_MAMUD_DEATH"]}
+      ],
+      "maps": [57, 58]
+    },
+    {
+      "name": "Giant Ogre",
+      "sounds": [
+        {"file": "Data/Sound/mHunter2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGhaintOrgerDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHunter2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_BLACKSKULLATTACK"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mGhaintOrgerDie.wav"]}
+      ]
+    },
+    {
+      "name": "Goblin",
+      "sounds": [
+        {"file": "Data/Sound/mGoblin1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGoblin2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGoblinAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGoblinAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGoblinDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mGoblin1.wav", "Data/Sound/mGoblin2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mGoblinAttack1.wav", "Data/Sound/mGoblinAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mGoblinDie.wav"]}
+      ]
+    },
+    {
+      "name": "Gollock",
+      "sounds": [
+        {"file": "Data/Sound/Karutan/Goloch_move1.wav", "id": "SOUND_KARUTAN_GOLOCH_MOVE1", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Goloch_move2.wav", "id": "SOUND_KARUTAN_GOLOCH_MOVE2", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Goloch_attack.wav", "id": "SOUND_KARUTAN_GOLOCH_ATTACK", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Goloch_death.wav", "id": "SOUND_KARUTAN_GOLOCH_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"cues": ["step 1"], "sounds": ["SOUND_KARUTAN_GOLOCH_MOVE1"]},
+        {"cues": ["step 2"], "sounds": ["SOUND_KARUTAN_GOLOCH_MOVE2"]},
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_KARUTAN_GOLOCH_ATTACK"]},
+        {"animations": ["die"], "sounds": ["SOUND_KARUTAN_GOLOCH_DEATH"]}
+      ],
+      "maps": [80, 81]
+    },
+    {
+      "name": "Gorgon",
+      "sounds": [
+        {"file": "Data/Sound/mGorgon1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGorgon2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGorgonAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGorgonAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGorgonDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mGorgon1.wav", "Data/Sound/mGorgon2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mGorgonAttack1.wav", "Data/Sound/mGorgonAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mGorgonDie.wav"]}
+      ]
+    },
+    {
+      "name": "Grand Wizard",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/GaionKalein_move.wav", "id": "SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/GrandWizard_death.wav", "id": "SOUND_EMPIREGUARDIAN_GRANDWIZARD_DEATH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w42/firepillar.wav", "id": "SOUND_3RD_CHANGE_UP_BG_FIREPILLAR", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "sounds": ["SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_METEORITE01", "SOUND_EXPLOTION01"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_3RD_CHANGE_UP_BG_FIREPILLAR"]},
+        {"animations": ["attack3"], "sounds": ["SOUND_EXPLOTION01"]},
+        {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_GRANDWIZARD_DEATH"]}
+      ],
+      "maps": [70]
+    },
+    {
+      "name": "Grizzly",
+      "sounds": [
+        {"file": "Data/Sound/w52/SE_Mon_beastwoo_move01.wav", "id": "SOUND_ELBELAND_BEASTWOO_MOVE01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_beastwoo_attack01.wav", "id": "SOUND_ELBELAND_BEASTWOO_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_beastwoo_death01.wav", "id": "SOUND_ELBELAND_BEASTWOO_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_ELBELAND_BEASTWOO_MOVE01"]},
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_ELBELAND_BEASTWOO_ATTACK01"]},
+        {"animations": ["die"], "sounds": ["SOUND_ELBELAND_BEASTWOO_DEATH01"]}
+      ],
+      "maps": [51, 73, 74]
+    },
+    {
+      "name": "Hanzo the Blacksmith",
+      "sounds": [
+        {"file": "Data/Sound/nBlackSmith.wav", "id": "SOUND_NPC_BLACK_SMITH", "channels": 1, "spatial": false}
+      ]
+    },
+    {
+      "name": "Hell Spider",
+      "sounds": [
+        {"file": "Data/Sound/mHellSpider1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mHellSpiderAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mHellSpiderDie.wav", "id": "SOUND_MONSTER_HELLSPIDERDIE", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHellSpider1.wav", "Data/Sound/mHellSpiderAttack1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mHellSpiderAttack1.wav", "Data/Sound/mHellSpiderAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_HELLSPIDERDIE"]}
+      ]
+    },
+    {
+      "name": "Hideous Rabbit",
+      "sounds": [
+        {"file": "Data/Sound/w52/SE_Mon_rabbitugly_breath01.wav", "id": "SOUND_ELBELAND_RABBITUGLY_BREATH01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_rabbitugly_attack01.wav", "id": "SOUND_ELBELAND_RABBITUGLY_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_rabbitugly_death01.wav", "id": "SOUND_ELBELAND_RABBITUGLY_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_ELBELAND_RABBITUGLY_BREATH01"]},
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_ELBELAND_RABBITUGLY_ATTACK01"]},
+        {"animations": ["die"], "sounds": ["SOUND_ELBELAND_RABBITUGLY_DEATH01"]}
+      ],
+      "maps": [51, 73, 74]
+    },
+    {
+      "name": "Hommerd",
+      "sounds": [
+        {"file": "Data/Sound/mHomord1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mHomord2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mHomordAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mHomordDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHomord1.wav", "Data/Sound/mHomord2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mHomordAttack1.wav", "Data/Sound/mHomordAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mHomordDie.wav"]}
+      ]
+    },
+    {
+      "name": "Hound",
+      "sounds": [
+        {"file": "Data/Sound/mHound1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mHound2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mHoundAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mHoundAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mHoundDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHound1.wav", "Data/Sound/mHound2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mHoundAttack1.wav", "Data/Sound/mHoundAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mHoundDie.wav"]}
+      ]
+    },
+    {
+      "name": "Hunter",
+      "sounds": [
+        {"file": "Data/Sound/mHunter1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mHunter2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mHunterAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mHunterAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mHunterDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHunter1.wav", "Data/Sound/mHunter2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mHunterAttack1.wav", "Data/Sound/mHunterAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mHunterDie.wav"]}
+      ]
+    },
+    {
+      "name": "Hydra",
+      "sounds": [
+        {"file": "Data/Sound/mHydra1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mHydraAttack1.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHydra1.wav", "Data/Sound/mHydra1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mHydraAttack1.wav", "Data/Sound/mHydraAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mHydra1.wav"]}
+      ]
+    },
+    {
+      "name": "Ice Giant",
+      "sounds": [
+        {"file": "Data/Sound/w58w59/IceGiant_move.wav", "id": "SOUND_RAKLION_ICEGIANT_MOVE", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/IceGiant_death.wav", "id": "SOUND_RAKLION_ICEGIANT_DEATH", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_RAKLION_ICEGIANT_MOVE"]},
+        {"animations": ["die"], "sounds": ["SOUND_RAKLION_ICEGIANT_DEATH"]}
+      ],
+      "maps": [57, 58]
+    },
+    {
+      "name": "Ice Monster",
+      "sounds": [
+        {"file": "Data/Sound/mIceMonster1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mIceMonster2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mIceMonsterDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mIceMonster1.wav", "Data/Sound/mIceMonster2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mIceMonster1.wav", "Data/Sound/mIceMonster1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mIceMonsterDie.wav"]}
+      ]
+    },
+    {
+      "name": "Ice Queen",
+      "sounds": [
+        {"file": "Data/Sound/mIceQueen1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mIceQueen2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mIceQueenAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mIceQueenAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mIceQueenDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mIceQueen1.wav", "Data/Sound/mIceQueen2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mIceQueenAttack1.wav", "Data/Sound/mIceQueenAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mIceQueenDie.wav"]}
+      ]
+    },
+    {
+      "name": "Ice Walker",
+      "sounds": [
+        {"file": "Data/Sound/w52/SE_Mon_wolfhuman_death01.wav", "id": "SOUND_ELBELAND_WOLFHUMAN_DEATH01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/IceWalker_attack.wav", "id": "SOUND_RAKLION_ICEWALKER_ATTACK", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/IceWalker_move.wav", "id": "SOUND_RAKLION_ICEWALKER_MOVE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_ICEWALKER_ATTACK"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_RAKLION_ICEWALKER_MOVE"]},
+        {"animations": ["die"], "sounds": ["SOUND_ELBELAND_WOLFHUMAN_DEATH01"]}
+      ],
+      "maps": [57, 58, 65, 66, 67, 68]
+    },
+    {
+      "name": "Illusion of Kundun",
+      "sounds": [
+        {"file": "Data/Sound/mLvIdle1.wav", "id": "SOUND_MONSTER_LVIDLE1", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mLvIdle2.wav", "id": "SOUND_MONSTER_LVIDLE2", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mLvAttack1.wav", "id": "SOUND_MONSTER_LVATTACK1", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mLvAttack2.wav", "id": "SOUND_MONSTER_LVATTACK2", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mLvDeath.wav", "id": "SOUND_MONSTER_LVDEATH", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_MONSTER_LVIDLE1", "SOUND_MONSTER_LVIDLE2"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_LVATTACK1", "SOUND_MONSTER_LVATTACK2"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_LVDEATH"]}
+      ]
+    },
+    {
+      "name": "Interim Reward Chest",
+      "sounds": [
+        {"file": "Data/Sound/Doppelganger/treasurebox_open.wav", "id": "SOUND_DOPPELGANGER_JEWELBOX_OPEN", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["die"], "sounds": ["SOUND_DOPPELGANGER_JEWELBOX_OPEN"]}
+      ]
+    },
+    {
+      "name": "Iron Knight",
+      "sounds": [
+        {"file": "Data/Sound/w58w59/IronKnight_move.wav", "id": "SOUND_RAKLION_IRON_KNIGHT_MOVE", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/IronKnight_attack.wav", "id": "SOUND_RAKLION_IRON_KNIGHT_ATTACK", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/death1.wav", "id": "SOUND_MONSTER_DEATH1", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_IRON_KNIGHT_ATTACK"]},
+        {"animations": ["stop1", "stop2", "walk"], "sounds": ["SOUND_RAKLION_IRON_KNIGHT_MOVE"]},
+        {"animations": ["die"], "sounds": ["SOUND_MONSTER_DEATH1"]}
+      ],
+      "maps": [57, 58]
+    },
+    {
+      "name": "Iron Wheel",
+      "sounds": [
+        {"file": "Data/Sound/iron1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/iron_attack1.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/iron1.wav", "Data/Sound/iron1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/iron_attack1.wav", "Data/Sound/iron_attack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/iron_attack1.wav"]}
+      ]
+    },
+    {
+      "name": "Jerint",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_attack3.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_death.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_rage.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_BLOODATTACK"]},
+        {"animations": ["attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK03", "SOUND_SKILL_BLOWOFDESTRUCTION"]},
+        {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH"]},
+        {"animations": ["appear"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE"]}
+      ],
+      "maps": [72]
+    },
+    {
+      "name": "Kato",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/3Cato_move.wav", "id": "SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/3Cato_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_3CORP_CATO_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Raymond_rage.wav", "id": "SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/2Vermont_death.wav", "id": "SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "sounds": ["SOUND_EMPIREGUARDIAN_3CORP_CATO_MOVE"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01"]},
+        {"animations": ["attack2", "attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_3CORP_CATO_ATTACK02"]},
+        {"animations": ["appear"], "sounds": ["SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE"]},
+        {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH"]}
+      ],
+      "maps": [71]
+    },
+    {
+      "name": "Knight Commander",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack3.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_death.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03"]},
+        {"animations": ["attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK03"]},
+        {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH"]}
+      ],
+      "maps": [70]
+    },
+    {
+      "name": "Kundun",
+      "sounds": [
+        {"file": "Data/Sound/mKundunIdle.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mKundunAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mKundunAttack2.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mKundunIdle.wav", "Data/Sound/mKundunIdle.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mKundunAttack1.wav", "Data/Sound/mKundunAttack2.wav"]}
+      ]
+    },
+    {
+      "name": "LIch",
+      "sounds": [
+        {"file": "Data/Sound/mWizard1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mWizard2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mWizardAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mWizardAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mWizardDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mWizard1.wav", "Data/Sound/mWizard2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mWizardAttack1.wav", "Data/Sound/mWizardAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mWizardDie.wav"]}
+      ]
+    },
+    {
+      "name": "Larva",
+      "sounds": [
+        {"file": "Data/Sound/mLarva1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mLarva2.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mLarva1.wav", "Data/Sound/mLarva2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mLarva1.wav", "Data/Sound/mLarva2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mLarva2.wav"]}
+      ]
+    },
+    {
+      "name": "Lizard King",
+      "sounds": [
+        {"file": "Data/Sound/mLizardKing1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mLizardKing2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGorgonDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mLizardKing1.wav", "Data/Sound/mLizardKing2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mGorgonDie.wav"]}
+      ]
+    },
+    {
+      "name": "Lugard",
+      "sounds": [
+        {"file": "Data/Sound/Doppelganger/Lugard.wav", "id": "SOUND_DOPPELGANGER_LUGARD_BREATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["stop1"], "chance": {"oneIn": 2, "draw": "rand"}, "sounds": ["SOUND_DOPPELGANGER_LUGARD_BREATH"]}
+      ]
+    },
+    {
+      "name": "Magic Skeleton",
+      "sounds": [
+        {"file": "Data/Sound/mMagicSkull.wav", "id": "SOUND_MONSTER_MAGICSKULL1", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mMagicSkull.wav", "id": "SOUND_MONSTER_MAGICSKULL2", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_MONSTER_MAGICSKULL1"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_MAGICSKULL2"]}
+      ]
+    },
+    {
+      "name": "Master Assassin",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/GaionKalein_move.wav", "id": "SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/AssassinMaster_Death.wav", "id": "SOUND_EMPIREGUARDIAN_ASSASSINMASTER_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "sounds": ["SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01"]},
+        {"animations": ["attack2", "attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02"]},
+        {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_ASSASSINMASTER_DEATH"]}
+      ],
+      "maps": [71]
+    },
+    {
+      "name": "Medic",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Priest_stay.wav", "id": "SOUND_EMPIREGUARDIAN_PRIEST_STOP", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w58w59/Selupan_cure.wav", "id": "SOUND_RAKLION_SERUFAN_CURE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["stop1", "stop2"], "sounds": ["SOUND_EMPIREGUARDIAN_PRIEST_STOP"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_THUNDERS01"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_RAKLION_SERUFAN_CURE"]},
+        {"animations": ["die"], "sounds": ["SOUND_DARKLORD_DEAD"]}
+      ],
+      "maps": [69, 70, 71, 72]
+    },
+    {
+      "name": "Mega Crust",
+      "sounds": [
+        {"file": "Data/Sound/mMegaCrust1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mMegaCrustAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mMegaCrustDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mMegaCrust1.wav", "Data/Sound/mMegaCrust1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mMegaCrustAttack1.wav", "Data/Sound/mMegaCrustAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mMegaCrustDie.wav"]}
+      ]
+    },
+    {
+      "name": "Molt",
+      "sounds": [
+        {"file": "Data/Sound/mMolt1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mMoltAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mMoltDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mMolt1.wav", "Data/Sound/mMolt1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mMoltAttack1.wav", "Data/Sound/mMoltAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mMoltDie.wav"]}
+      ]
+    },
+    {
+      "name": "Mutant",
+      "sounds": [
+        {"file": "Data/Sound/mutant1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mutant2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mutant_attack1.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mutant1.wav", "Data/Sound/mutant2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mutant_attack1.wav", "Data/Sound/mutant_attack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mutant_attack1.wav"]}
+      ]
+    },
+    {
+      "name": "Narcondra",
+      "sounds": [
+        {"file": "Data/Sound/Karutan/Condra_move1.wav", "id": "SOUND_KARUTAN_CONDRA_MOVE1", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Condra_move2.wav", "id": "SOUND_KARUTAN_CONDRA_MOVE2", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/NarCondra_attack.wav", "id": "SOUND_KARUTAN_NARCONDRA_ATTACK", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Condra_death.wav", "id": "SOUND_KARUTAN_CONDRA_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"cues": ["step 1"], "sounds": ["SOUND_KARUTAN_CONDRA_MOVE1"]},
+        {"cues": ["step 2"], "sounds": ["SOUND_KARUTAN_CONDRA_MOVE2"]},
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_KARUTAN_NARCONDRA_ATTACK"]},
+        {"animations": ["die"], "sounds": ["SOUND_KARUTAN_CONDRA_DEATH"]}
+      ],
+      "maps": [80, 81]
+    },
+    {
+      "name": "Necron",
+      "sounds": [
+        {"file": "Data/Sound/mNecronIdle1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mNecronIdle2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mNecronAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mNecronAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mNecronDeath.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mNecronIdle1.wav", "Data/Sound/mNecronIdle2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mNecronAttack1.wav", "Data/Sound/mNecronAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mNecronDeath.wav"]}
+      ]
+    },
+    {
+      "name": "Ogre archer",
+      "sounds": [
+        {"file": "Data/Sound/mOrcArcherAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBullDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mOrcArcherAttack1.wav", "Data/Sound/mOrcArcherAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBullDie.wav"]}
+      ]
+    },
+    {
+      "name": "Orcus",
+      "sounds": [
+        {"file": "Data/Sound/Karutan/Orcus_move1.wav", "id": "SOUND_KARUTAN_ORCUS_MOVE1", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Orcus_move2.wav", "id": "SOUND_KARUTAN_ORCUS_MOVE2", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Orcus_attack_1.wav", "id": "SOUND_KARUTAN_ORCUS_ATTACK1", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Orcus_attack_2.wav", "id": "SOUND_KARUTAN_ORCUS_ATTACK2", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/Orcus_death.wav", "id": "SOUND_KARUTAN_ORCUS_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"cues": ["step 1"], "sounds": ["SOUND_KARUTAN_ORCUS_MOVE1"]},
+        {"cues": ["step 2"], "sounds": ["SOUND_KARUTAN_ORCUS_MOVE2"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_KARUTAN_ORCUS_ATTACK1"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_KARUTAN_ORCUS_ATTACK2"]},
+        {"animations": ["die"], "sounds": ["SOUND_KARUTAN_ORCUS_DEATH"]}
+      ],
+      "maps": [80, 81]
+    },
+    {
+      "name": "Phantom Knight",
+      "sounds": [
+        {"file": "Data/Sound/mPhantom1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mPhantomAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mPhantomDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mPhantom1.wav", "Data/Sound/mPhantom1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mPhantomAttack1.wav", "Data/Sound/mPhantomAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mPhantomDie.wav"]}
+      ]
+    },
+    {
+      "name": "Phoenix of Darkness",
+      "sounds": [
+        {"file": "Data/Sound/mPhoenix1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mPhoenix2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mPhoenixAttack1.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mPhoenix1.wav", "Data/Sound/mPhoenix2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mPhoenixAttack1.wav", "Data/Sound/mPhoenixAttack1.wav"]}
+      ]
+    },
+    {
+      "name": "Polluted Butterfly",
+      "sounds": [
+        {"file": "Data/Sound/w52/SE_Mon_butterflypollution_move01.wav", "id": "SOUND_ELBELAND_BUTTERFLYPOLLUTION_MOVE01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_butterflypollution_death01.wav", "id": "SOUND_ELBELAND_BUTTERFLYPOLLUTION_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_ELBELAND_BUTTERFLYPOLLUTION_MOVE01"]},
+        {"animations": ["die"], "sounds": ["SOUND_ELBELAND_BUTTERFLYPOLLUTION_DEATH01"]}
+      ],
+      "maps": [51, 73, 74]
+    },
+    {
+      "name": "Quartermaster",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/QuaterMaster_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_QUATERMASTER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_death.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"cues": ["step 2"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01"]},
+        {"cues": ["step 1"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01"]},
+        {"animations": ["attack2", "attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_QUATERMASTER_ATTACK02"]},
+        {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH"]}
+      ],
+      "maps": [69, 70, 71, 72]
+    },
+    {
+      "name": "Queen Rainier",
+      "sounds": [
+        {"file": "Data/Sound/mRainner1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mRainnerAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mRainnerDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mRainner1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mRainnerAttack1.wav", "Data/Sound/mRainnerAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mRainnerDie.wav"]}
+      ]
+    },
+    {
+      "name": "Raymond",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Raymond_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Raymond_rage.wav", "id": "SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_death.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"cues": ["step 2"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01"]},
+        {"cues": ["step 1"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_ATTACK02"]},
+        {"animations": ["attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_ATTACK02"]},
+        {"animations": ["appear"], "sounds": ["SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE"]},
+        {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_DEATH"]}
+      ],
+      "maps": [69, 70, 71, 72]
+    },
+    {
+      "name": "Red Dragon",
+      "sounds": [
+        {"file": "Data/Sound/mYeti1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBullAttack1.wav", "id": "SOUND_MONSTER_BULLATTACK1", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mYetiDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_BULLATTACK1", "SOUND_MONSTER_BULLATTACK1"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mYetiDie.wav"]}
+      ]
+    },
+    {
+      "name": "Red Skeleton Knight",
+      "sounds": [
+        {"file": "Data/Sound/mRedSkull.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mRedSkullDie.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mRedSkullAttack.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mRedSkull.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mRedSkullAttack.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mRedSkullDie.wav"]}
+      ]
+    },
+    {
+      "name": "Resurrected Gladiator",
+      "sounds": [
+        {"file": "Data/Sound/w64/RaisedGladiator_attack.wav", "id": "SOUND_PKFIELD_RAISEDGLADIATOR_ATTACK", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/RaisedGladiator_damage01.wav", "id": "SOUND_PKFIELD_RAISEDGLADIATOR_DAMAGE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/RaisedGladiator_damage02.wav", "id": "SOUND_PKFIELD_RAISEDGLADIATOR_DAMAGE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/RaisedGladiator_death.wav", "id": "SOUND_PKFIELD_RAISEDGLADIATOR_DEATH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/RaisedGladiator_move01.wav", "id": "SOUND_PKFIELD_RAISEDGLADIATOR_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/RaisedGladiator_move02.wav", "id": "SOUND_PKFIELD_RAISEDGLADIATOR_MOVE02", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_PKFIELD_RAISEDGLADIATOR_ATTACK"]},
+        {"animations": ["shock"], "sounds": ["SOUND_PKFIELD_RAISEDGLADIATOR_DAMAGE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_PKFIELD_RAISEDGLADIATOR_MOVE01"]},
+        {"animations": ["die"], "sounds": ["SOUND_PKFIELD_RAISEDGLADIATOR_DEATH"]}
+      ],
+      "maps": [63]
+    },
+    {
+      "name": "Rogue Centurion",
+      "sounds": [
+        {"file": "Data/Sound/mDsIdle1.wav", "id": "SOUND_MONSTER_DSIDLE1", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mDsIdle2.wav", "id": "SOUND_MONSTER_DSIDLE2", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mDsAttack1.wav", "id": "SOUND_MONSTER_DSATTACK1", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mDsAttack2.wav", "id": "SOUND_MONSTER_DSATTACK2", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mDsDeath.wav", "id": "SOUND_MONSTER_DSDEATH", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_MONSTER_DSIDLE1", "SOUND_MONSTER_DSIDLE2"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_DSATTACK1", "SOUND_MONSTER_DSATTACK2"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_DSDEATH"]}
+      ]
+    },
+    {
+      "name": "Ruthless Lava Giant",
+      "sounds": [
+        {"file": "Data/Sound/w64/BurningLavaGolem_attack01.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BurningLavaGolem_attack02.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BurningLavaGolem_damage01.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_DAMAGE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BurningLavaGolem_damage02.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_DAMAGE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BurningLavaGolem_death.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_DEATH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BurningLavaGolem_move01.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/BurningLavaGolem_move02.wav", "id": "SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE02", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK01"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_ATTACK02"]},
+        {"animations": ["shock"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_DAMAGE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_MOVE01"]},
+        {"animations": ["die"], "sounds": ["SOUND_PKFIELD_BURNINGLAVAGOLEM_DEATH"]}
+      ],
+      "maps": [63]
+    },
+    {
+      "name": "Sapi Queen",
+      "sounds": [
+        {"file": "Data/Sound/w57/Sapi-Death.wav", "id": "SOUND_SWAMPOFQUIET_SAPI_DEATH01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/Sapi-Attack.wav", "id": "SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01"]},
+        {"animations": ["die"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_DEATH01"]}
+      ],
+      "maps": [56]
+    },
+    {
+      "name": "Sapi-Tres",
+      "sounds": [
+        {"file": "Data/Sound/w57/Sapi-Attack1.wav", "id": "SOUND_SWAMPOFQUIET_SAPI_TRES_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/Sapi-Death.wav", "id": "SOUND_SWAMPOFQUIET_SAPI_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_TRES_ATTACK01"]},
+        {"animations": ["die"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_DEATH01"]}
+      ],
+      "maps": [56]
+    },
+    {
+      "name": "Sapi-Unus",
+      "sounds": [
+        {"file": "Data/Sound/w57/Sapi-Attack.wav", "id": "SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/Sapi-Death.wav", "id": "SOUND_SWAMPOFQUIET_SAPI_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_UNUS_ATTACK01"]},
+        {"animations": ["die"], "chance": {"oneIn": 3, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_SAPI_DEATH01"]}
+      ],
+      "maps": [56]
+    },
+    {
+      "name": "Schriker",
+      "sounds": [
+        {"file": "Data/Sound/mSvIdle1.wav", "id": "SOUND_MONSTER_SVIDLE1", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mSvIdle2.wav", "id": "SOUND_MONSTER_SVIDLE2", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mSvAttack1.wav", "id": "SOUND_MONSTER_SVATTACK1", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mSvAttack2.wav", "id": "SOUND_MONSTER_SVATTACK2", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mSvDeath.wav", "id": "SOUND_MONSTER_SVDEATH", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_MONSTER_SVIDLE1", "SOUND_MONSTER_SVIDLE2"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_SVATTACK1", "SOUND_MONSTER_SVATTACK2"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_SVDEATH"]}
+      ]
+    },
+    {
+      "name": "Selupan",
+      "sounds": [
+        {"file": "Data/Sound/w58w59/Selupan_attack1.wav", "id": "SOUND_RAKLION_SERUFAN_ATTACK1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/Selupan_attack2.wav", "id": "SOUND_RAKLION_SERUFAN_ATTACK2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/Selupan_cure.wav", "id": "SOUND_RAKLION_SERUFAN_CURE", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/Selupan_rage.wav", "id": "SOUND_RAKLION_SERUFAN_RAGE", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/Selupan_word1.wav", "id": "SOUND_RAKLION_SERUFAN_WORD1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/Selupan_word2.wav", "id": "SOUND_RAKLION_SERUFAN_WORD2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/Selupan_word3.wav", "id": "SOUND_RAKLION_SERUFAN_WORD3", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w58w59/Selupan_word4.wav", "id": "SOUND_RAKLION_SERUFAN_WORD4", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_RAKLION_SERUFAN_ATTACK1"]},
+        {"animations": ["attack3"], "sounds": ["SOUND_RAKLION_SERUFAN_ATTACK2"]},
+        {"animations": ["die"], "sounds": ["SOUND_RAKLION_SERUFAN_WORD2"]}
+      ],
+      "maps": [57, 58]
+    },
+    {
+      "name": "Shadow",
+      "sounds": [
+        {"file": "Data/Sound/mShadow1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mShadow2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mShadowAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mShadowAttack2.wav", "id": "SOUND_MONSTER_SHADOWATTACK2", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mShadowDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mShadow1.wav", "Data/Sound/mShadow2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mShadowAttack1.wav", "SOUND_MONSTER_SHADOWATTACK2"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mShadowDie.wav"]}
+      ]
+    },
+    {
+      "name": "Shadow Knight",
+      "sounds": [
+        {"file": "Data/Sound/w57/ShadowKnight-Attack.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_KNIGHT_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/Shadow-Death.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_SWAMPOFQUIET_SHADOW_KNIGHT_ATTACK01"]},
+        {"animations": ["die"], "sounds": ["SOUND_SWAMPOFQUIET_SHADOW_DEATH01"]}
+      ],
+      "maps": [56]
+    },
+    {
+      "name": "Shadow Look",
+      "sounds": [
+        {"file": "Data/Sound/w57/ShadowRook-Attack.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_ROOK_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/Shadow-Death.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_SWAMPOFQUIET_SHADOW_ROOK_ATTACK01"]},
+        {"animations": ["die"], "sounds": ["SOUND_SWAMPOFQUIET_SHADOW_DEATH01"]}
+      ],
+      "maps": [56]
+    },
+    {
+      "name": "Shadow Master",
+      "sounds": [
+        {"file": "Data/Sound/w57/Shadow-Death.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_DEATH01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/ShadowRook-Attack.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_ROOK_ATTACK01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_SWAMPOFQUIET_SHADOW_ROOK_ATTACK01"]},
+        {"animations": ["die"], "sounds": ["SOUND_SWAMPOFQUIET_SHADOW_DEATH01"]}
+      ],
+      "maps": [56]
+    },
+    {
+      "name": "Shadow Pawn",
+      "sounds": [
+        {"file": "Data/Sound/w57/ShadowPawn-Attack.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_PAWN_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/Shadow-Death.wav", "id": "SOUND_SWAMPOFQUIET_SHADOW_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_SWAMPOFQUIET_SHADOW_PAWN_ATTACK01"]},
+        {"animations": ["die"], "sounds": ["SOUND_SWAMPOFQUIET_SHADOW_DEATH01"]}
+      ],
+      "maps": [56]
+    },
+    {
+      "name": "Shield Bearer",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/CombatMaster_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/GrandWizard_death.wav", "id": "SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"cues": ["step 2"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01"]},
+        {"cues": ["step 1"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK01"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_EMPIREGUARDIAN_COMBATMASTER_ATTACK02"]},
+        {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_DEFENDER_ATTACK02"]}
+      ],
+      "maps": [69, 70, 71, 72]
+    },
+    {
+      "name": "Slaughterer",
+      "sounds": [
+        {"file": "Data/Sound/Doppelganger/Butcher_attack.wav", "id": "SOUND_DOPPELGANGER_BUGBEAR_ATTACK", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Doppelganger/Butcher_death.wav", "id": "SOUND_DOPPELGANGER_BUGBEAR_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_DOPPELGANGER_BUGBEAR_ATTACK"]},
+        {"animations": ["die"], "sounds": ["SOUND_DOPPELGANGER_BUGBEAR_DEATH"]}
+      ],
+      "maps": [65, 66, 67, 68]
+    },
+    {
+      "name": "Spider",
+      "sounds": [
+        {"file": "Data/Sound/mSpider1.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mSpider1.wav", "Data/Sound/mSpider1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mSpider1.wav", "Data/Sound/mSpider1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mSpider1.wav"]}
+      ]
+    },
+    {
+      "name": "Stone Golem",
+      "sounds": [
+        {"file": "Data/Sound/mGolem1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGolem2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGolemAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGolemAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mGolemDie.wav", "id": "SOUND_MONSTER_GOLEMDIE", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mGolem1.wav", "Data/Sound/mGolem2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mGolemAttack1.wav", "Data/Sound/mGolemAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_GOLEMDIE"]}
+      ]
+    },
+    {
+      "name": "Strange Rabbit",
+      "sounds": [
+        {"file": "Data/Sound/w52/SE_Mon_rabbitstrange_attack01.wav", "id": "SOUND_ELBELAND_RABBITSTRANGE_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_rabbitstrange_death01.wav", "id": "SOUND_ELBELAND_RABBITSTRANGE_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_ELBELAND_RABBITSTRANGE_ATTACK01"]},
+        {"animations": ["die"], "sounds": ["SOUND_ELBELAND_RABBITSTRANGE_DEATH01"]}
+      ],
+      "maps": [51, 73, 74]
+    },
+    {
+      "name": "Tantalos",
+      "sounds": [
+        {"file": "Data/Sound/jaikan1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/jaikan2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/jaikan_attack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/jaikan_attack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/jaikan_die.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/jaikan1.wav", "Data/Sound/jaikan2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/jaikan_attack1.wav", "Data/Sound/jaikan_attack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/jaikan_die.wav"]}
+      ]
+    },
+    {
+      "name": "Thunder Napin",
+      "sounds": [
+        {"file": "Data/Sound/w57/Naipin-Thunder.wav", "id": "SOUND_SWAMPOFQUIET_THUNDER_NAIPIN_BREATH01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/Naipin-Attack.wav", "id": "SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w57/Naipin-Death.wav", "id": "SOUND_SWAMPOFQUIET_NAIPIN_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_SWAMPOFQUIET_THUNDER_NAIPIN_BREATH01"]},
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_SWAMPOFQUIET_NAIPIN_ATTACK01"]},
+        {"animations": ["die"], "sounds": ["SOUND_SWAMPOFQUIET_NAIPIN_DEATH01"]}
+      ],
+      "maps": [56]
+    },
+    {
+      "name": "Totem Golem",
+      "sounds": [
+        {"file": "Data/Sound/w52/SE_Mon_totemgolem_move01.wav", "id": "SOUND_ELBELAND_TOTEMGOLEM_MOVE01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_totemgolem_move02.wav", "id": "SOUND_ELBELAND_TOTEMGOLEM_MOVE02", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_totemgolem_attack01.wav", "id": "SOUND_ELBELAND_TOTEMGOLEM_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_totemgolem_attack02.wav", "id": "SOUND_ELBELAND_TOTEMGOLEM_ATTACK02", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_totemgolem_death01.wav", "id": "SOUND_ELBELAND_TOTEMGOLEM_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_ELBELAND_TOTEMGOLEM_MOVE01", "SOUND_ELBELAND_TOTEMGOLEM_MOVE02"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_ELBELAND_TOTEMGOLEM_ATTACK01"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_ELBELAND_TOTEMGOLEM_ATTACK02"]},
+        {"animations": ["die"], "sounds": ["SOUND_ELBELAND_TOTEMGOLEM_DEATH01"]}
+      ],
+      "maps": [51, 73, 74]
+    },
+    {
+      "name": "Transformed Snowman",
+      "sounds": [
+        {"file": "Data/Sound/xmas/SnowMan_Walk01.wav", "id": "SOUND_XMAS_SNOWMAN_WALK_1", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/xmas/SnowMan_Attack01.wav", "id": "SOUND_XMAS_SNOWMAN_ATTACK_1", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/xmas/SnowMan_Attack02.wav", "id": "SOUND_XMAS_SNOWMAN_ATTACK_2", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/xmas/SnowMan_Damage01.wav", "id": "SOUND_XMAS_SNOWMAN_DAMAGE_1", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/xmas/SnowMan_Death01.wav", "id": "SOUND_XMAS_SNOWMAN_DEATH_1", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "sounds": ["SOUND_XMAS_SNOWMAN_WALK_1"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_XMAS_SNOWMAN_ATTACK_1"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_XMAS_SNOWMAN_ATTACK_2"]},
+        {"animations": ["shock"], "sounds": ["SOUND_XMAS_SNOWMAN_DAMAGE_1"]},
+        {"animations": ["die"], "deathEffectArmed": true, "sounds": ["SOUND_XMAS_SNOWMAN_DEATH_1"]}
+      ]
+    },
+    {
+      "name": "Valkyrie",
+      "sounds": [
+        {"file": "Data/Sound/mValkyrie1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBaliAttack2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mValkyrieDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mValkyrie1.wav", "Data/Sound/mValkyrie1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mBaliAttack2.wav", "Data/Sound/mBaliAttack2.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mValkyrieDie.wav"]}
+      ]
+    },
+    {
+      "name": "Venomous Chain Scorpion",
+      "sounds": [
+        {"file": "Data/Sound/Karutan/ToxyChainScorpion_attack.wav", "id": "SOUND_KARUTAN_TCSCORPION_ATTACK", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/ToxyChainScorpion_death.wav", "id": "SOUND_KARUTAN_TCSCORPION_DEATH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/Karutan/ToxyChainScorpion_hit.wav", "id": "SOUND_KARUTAN_TCSCORPION_HIT", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_KARUTAN_TCSCORPION_ATTACK"]},
+        {"animations": ["die"], "sounds": ["SOUND_KARUTAN_TCSCORPION_DEATH"]},
+        {"animations": ["shock"], "sounds": ["SOUND_KARUTAN_TCSCORPION_HIT"]}
+      ],
+      "maps": [80, 81]
+    },
+    {
+      "name": "Vepar",
+      "sounds": [
+        {"file": "Data/Sound/mBepar1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBepar2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBalrog1.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBepar1.wav", "Data/Sound/mBepar2.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_GOLEMDIE", "SOUND_MONSTER_GOLEMDIE"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBepar2.wav"]}
+      ]
+    },
+    {
+      "name": "Vermont",
+      "sounds": [
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move01.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_move02.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/2Vermont_attack1.wav", "id": "SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/2Vermont_attack2.wav", "id": "SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/Jelint_rage.wav", "id": "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w69w70w71w72/2Vermont_death.wav", "id": "SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["walk"], "pick": "rand", "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01", "SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE02"]},
+        {"animations": ["attack1"], "sounds": ["SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK01"]},
+        {"animations": ["attack2"], "sounds": ["SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK02"]},
+        {"animations": ["attack3"], "sounds": ["SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_ATTACK01"]},
+        {"animations": ["appear"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_RAGE"]},
+        {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH"]}
+      ],
+      "maps": [70]
+    },
+    {
+      "name": "Werewolf",
+      "sounds": [
+        {"file": "Data/Sound/w52/SE_Mon_wolfhuman_move02.wav", "id": "SOUND_ELBELAND_WOLFHUMAN_MOVE02", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_wolfhuman_attack01.wav", "id": "SOUND_ELBELAND_WOLFHUMAN_ATTACK01", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w52/SE_Mon_wolfhuman_death01.wav", "id": "SOUND_ELBELAND_WOLFHUMAN_DEATH01", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["stop1", "stop2", "walk"], "chance": {"oneIn": 30, "draw": "rand"}, "sounds": ["SOUND_ELBELAND_WOLFHUMAN_MOVE02"]},
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_ELBELAND_WOLFHUMAN_ATTACK01"]},
+        {"animations": ["die"], "sounds": ["SOUND_ELBELAND_WOLFHUMAN_DEATH01"]}
+      ],
+      "maps": [51, 73, 74]
+    },
+    {
+      "name": "Worm",
+      "sounds": [
+        {"file": "Data/Sound/mWorm1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mWorm2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mWormDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mWorm1.wav", "Data/Sound/mWorm1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mWormDie.wav", "Data/Sound/mWormDie.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mWormDie.wav"]}
+      ]
+    },
+    {
+      "name": "Yeti",
+      "sounds": [
+        {"file": "Data/Sound/mYeti1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mYeti2.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mYetiAttack1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mYetiDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mYeti1.wav", "Data/Sound/mYeti1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["Data/Sound/mYetiAttack1.wav", "Data/Sound/mYetiAttack1.wav"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mYetiDie.wav"]}
+      ]
+    },
+    {
+      "name": "Zombie Fighter",
+      "sounds": [
+        {"file": "Data/Sound/w64/ZombieWarrior_attack.wav", "id": "SOUND_PKFIELD_ZOMBIEWARRIOR_ATTACK", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/ZombieWarrior_damage01.wav", "id": "SOUND_PKFIELD_ZOMBIEWARRIOR_DAMAGE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/ZombieWarrior_damage02.wav", "id": "SOUND_PKFIELD_ZOMBIEWARRIOR_DAMAGE02", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/ZombieWarrior_death.wav", "id": "SOUND_PKFIELD_ZOMBIEWARRIOR_DEATH", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/ZombieWarrior_move01.wav", "id": "SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE01", "channels": 4, "spatial": false},
+        {"file": "Data/Sound/w64/ZombieWarrior_move02.wav", "id": "SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE02", "channels": 4, "spatial": false}
+      ],
+      "soundEvents": [
+        {"animations": ["attack1", "attack2"], "sounds": ["SOUND_PKFIELD_ZOMBIEWARRIOR_ATTACK"]},
+        {"animations": ["shock"], "sounds": ["SOUND_PKFIELD_ZOMBIEWARRIOR_DAMAGE01"]},
+        {"animations": ["walk"], "chance": {"oneIn": 20, "draw": "rand"}, "sounds": ["SOUND_PKFIELD_ZOMBIEWARRIOR_MOVE01"]},
+        {"animations": ["die"], "sounds": ["SOUND_PKFIELD_ZOMBIEWARRIOR_DEATH"]}
+      ],
+      "maps": [63]
+    }
+  ]
+}

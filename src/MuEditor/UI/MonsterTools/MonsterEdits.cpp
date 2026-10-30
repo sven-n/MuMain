@@ -12,6 +12,8 @@
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterModelsJson.h"
 #include "Data/GameData/MonsterData/MonsterModelValidation.h"
+#include "Data/GameData/MonsterData/MonsterSoundValidation.h"
+#include "Data/GameData/MonsterData/MonsterSoundsJson.h"
 
 #include <algorithm>
 #include <span>
@@ -26,6 +28,8 @@ using Data::Monsters::MonsterDefinition;
 using Data::Monsters::MonsterModelDefinition;
 using Data::Monsters::MonsterModelSnapshot;
 using Data::Monsters::MonsterSnapshot;
+using Data::Monsters::MonsterSoundSet;
+using Data::Monsters::MonsterSoundSetSnapshot;
 
 // What the monster list's checks refuse to save: a name with the separator
 // or a language code that is not one.
@@ -59,6 +63,20 @@ bool CanStoreModel(const MonsterModelDefinition& model)
     Data::Monsters::ValidateMonsterModelNames(readBack, "", issues);
     return !Data::Items::HasFatal(issues);
 }
+// Whether the sound sets' save would take the set, as CanStoreModel.
+bool CanStoreSoundSet(const MonsterSoundSet& set)
+{
+    if (set.name.empty())
+    {
+        return false;
+    }
+    const std::string text = Data::Monsters::WriteMonsterSoundsJson(std::span<const MonsterSoundSet>(&set, 1));
+    std::vector<MonsterSoundSet> readBack;
+    std::vector<Data::Items::ItemDataIssue> issues;
+    Data::Monsters::ReadMonsterSoundsJson(text, "", readBack, issues);
+    Data::Monsters::ValidateMonsterSoundSetNames(readBack, "", issues);
+    return !Data::Items::HasFatal(issues);
+}
 } // namespace
 
 MonsterEdits& MonsterEdits::GetInstance()
@@ -71,8 +89,10 @@ MonsterEdits::MonsterEdits()
     : m_history({[](int number) { return g_MonsterDataHandler.ReadMonster(number); },
                  [](std::span<const MonsterSnapshot> snapshots) { g_MonsterDataHandler.RestoreMonsters(snapshots); },
                  [](int slot) { return g_MonsterDataHandler.ReadModel(slot); },
-                 [](std::span<const MonsterModelSnapshot> snapshots)
-                 { g_MonsterDataHandler.RestoreModels(snapshots); }})
+                 [](std::span<const MonsterModelSnapshot> snapshots) { g_MonsterDataHandler.RestoreModels(snapshots); },
+                 [](const std::string& name) { return g_MonsterDataHandler.ReadSoundSet(name); },
+                 [](std::span<const MonsterSoundSetSnapshot> snapshots)
+                 { g_MonsterDataHandler.RestoreSoundSets(snapshots); }})
 {
 }
 
@@ -132,6 +152,91 @@ bool MonsterEdits::SetModel(std::string label, const MonsterModelDefinition& mod
     return true;
 }
 
+bool MonsterEdits::SetSoundSet(std::string label, const MonsterSoundSet& set, int monster)
+{
+    if (!CanStoreSoundSet(set))
+    {
+        return false;
+    }
+    ChangeSoundSet(std::move(label), set.name, set, monster);
+    return true;
+}
+
+bool MonsterEdits::RemoveSoundSet(std::string label, const std::string& name, int monster)
+{
+    if (!g_MonsterDataHandler.ReadSoundSet(name))
+    {
+        return false;
+    }
+    ChangeSoundSet(std::move(label), name, std::nullopt, monster);
+    return true;
+}
+
+bool MonsterEdits::RenameSoundSet(std::string label, const std::string& from, const std::string& to, int monster)
+{
+    std::optional<MonsterSoundSet> set = g_MonsterDataHandler.ReadSoundSet(from);
+    if (!set || to.empty() || to == from || g_MonsterDataHandler.ReadSoundSet(to))
+    {
+        return false;
+    }
+    set->name = to;
+    if (!CanStoreSoundSet(*set))
+    {
+        return false;
+    }
+    const bool grouped = m_group.has_value();
+    BeginGroup(label);
+    ChangeSoundSet(label, from, std::nullopt, monster);
+    ChangeSoundSet(label, to, set, monster);
+    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    {
+        std::optional<MonsterDefinition> named = g_MonsterDataHandler.ReadMonster(number);
+        if (!named)
+        {
+            continue;
+        }
+        bool changed = false;
+        if (named->soundSet == from)
+        {
+            named->soundSet = to;
+            changed = true;
+        }
+        for (Data::Monsters::MonsterRandomVariant& variant : named->randomVariants)
+        {
+            if (variant.soundSet == from)
+            {
+                variant.soundSet = to;
+                changed = true;
+            }
+        }
+        if (changed)
+        {
+            Change(label, number, named);
+        }
+    }
+    if (!grouped)
+    {
+        EndGroup();
+    }
+    return true;
+}
+
+void MonsterEdits::ChangeSoundSet(std::string label, const std::string& name,
+                                  const std::optional<MonsterSoundSet>& after, int monster)
+{
+    std::optional<MonsterSoundSet> before = g_MonsterDataHandler.ReadSoundSet(name);
+    if (after == before)
+    {
+        return;
+    }
+    const MonsterSoundSetSnapshot snapshot{name, after};
+    g_MonsterDataHandler.RestoreSoundSets(std::span<const MonsterSoundSetSnapshot>(&snapshot, 1));
+    // What the table stored, as the undo compares it.
+    MonsterEditEntry entry{std::move(label), {}, {}, {}};
+    entry.soundSets.push_back({name, std::move(before), g_MonsterDataHandler.ReadSoundSet(name), monster});
+    Record(std::move(entry));
+}
+
 void MonsterEdits::ChangeModel(std::string label, int slot, const std::optional<MonsterModelDefinition>& after,
                                int monster)
 {
@@ -143,7 +248,7 @@ void MonsterEdits::ChangeModel(std::string label, int slot, const std::optional<
     const MonsterModelSnapshot snapshot{slot, after};
     g_MonsterDataHandler.RestoreModels(std::span<const MonsterModelSnapshot>(&snapshot, 1));
     // What the table stored, as the undo compares it.
-    MonsterEditEntry entry{std::move(label), {}, {}};
+    MonsterEditEntry entry{std::move(label), {}, {}, {}};
     entry.models.push_back({slot, std::move(before), g_MonsterDataHandler.ReadModel(slot), monster});
     Record(std::move(entry));
 }
@@ -165,7 +270,7 @@ void MonsterEdits::BeginGroup(std::string label)
 {
     if (!m_group)
     {
-        m_group = MonsterEditEntry{std::move(label), {}};
+        m_group = MonsterEditEntry{std::move(label), {}, {}, {}};
     }
 }
 
@@ -206,6 +311,18 @@ void MonsterEdits::Record(MonsterEditEntry entry)
         if (same == m_group->models.end())
         {
             m_group->models.push_back(std::move(step));
+        }
+        else
+        {
+            same->after = std::move(step.after);
+        }
+    }
+    for (MonsterSoundSetEditStep& step : entry.soundSets)
+    {
+        const auto same = std::ranges::find(m_group->soundSets, step.name, &MonsterSoundSetEditStep::name);
+        if (same == m_group->soundSets.end())
+        {
+            m_group->soundSets.push_back(std::move(step));
         }
         else
         {

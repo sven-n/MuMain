@@ -50,7 +50,6 @@ TEST_CASE("Monster attacks: the shipped attacks play only animations that their 
         });
     std::vector<Data::Items::ItemDataIssue> issues;
     MuEditor::Monsters::AttackChecks::Validate(issues);
-    g_MonsterDatabase.Build({}, "en");
 
     CHECK(opened == static_cast<int>(slots.size()));
     for (const Data::Items::ItemDataIssue& issue : issues)

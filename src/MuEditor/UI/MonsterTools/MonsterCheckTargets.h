@@ -16,6 +16,7 @@ enum class MonsterTool
     Browser,
     Translations,
     Attacks,
+    Sounds,
 };
 
 // The field without the monster the monster list's problems name first:
@@ -26,14 +27,19 @@ std::string_view GetMonsterField(std::string_view field);
 // A name ("name", "name.de") goes to Monster Translations, which has the names
 // in all languages; the attacks ("attacks", "attacks.skills") go to Monster
 // Attacks; the kind, the number, an unknown key and a problem without a field
-// go to the Monster Browser. Takes the field with or without the monster in
-// front.
+// go to the Monster Browser; the sound set and the random variants
+// ("soundSet", "randomVariants[0].soundSet") go to Monster Sounds. Takes the
+// field with or without the monster in front.
 MonsterTool GetToolForField(std::string_view field);
 
 // The map variant a field of the attacks names: 0 for "monster 291
 // mapVariants[0].attacks.otherwise"; nullopt for the attacks of all maps
 // ("monster 291 attacks") and any other field.
 std::optional<int> GetMapVariantOfField(std::string_view field);
+
+// The set a problem of a sound set names: "Raymond" of "sound set Raymond
+// soundEvents[0].cues"; nullopt for any other field.
+std::optional<std::string_view> GetSoundSetOfField(std::string_view field);
 
 // The window of a monster tool: its "###" id and its flag among the editor's
 // open tool windows.

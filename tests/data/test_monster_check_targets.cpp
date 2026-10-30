@@ -155,6 +155,24 @@ TEST_CASE("Monster checks: the tools of the targets are the monster tools' windo
     CHECK(GetToolWindow(MonsterTool::Translations).open == &MuEditor::ToolWindows::monsterTranslations);
     CHECK(std::string_view(GetToolWindow(MonsterTool::Attacks).windowId) == MuEditor::WindowIds::MonsterAttacks);
     CHECK(GetToolWindow(MonsterTool::Attacks).open == &MuEditor::ToolWindows::monsterAttacks);
+    CHECK(std::string_view(GetToolWindow(MonsterTool::Sounds).windowId) == MuEditor::WindowIds::MonsterSounds);
+    CHECK(GetToolWindow(MonsterTool::Sounds).open == &MuEditor::ToolWindows::monsterSounds);
+}
+
+TEST_CASE("Monster checks: the sound sets and the monsters' sound fields go to Monster Sounds (Q-MN78) "
+          "[editor][monsters]")
+{
+    using MuEditor::Monsters::GetSoundSetOfField;
+    CHECK(GetToolForField("monster 5 soundSet") == MonsterTool::Sounds);
+    CHECK(GetToolForField("monster 163 randomVariants[0].soundSet") == MonsterTool::Sounds);
+    CHECK(GetToolForField("monster 163 randomVariants[0].model") == MonsterTool::Sounds);
+    CHECK(GetToolForField("sound set Raymond soundEvents[0].cues") == MonsterTool::Sounds);
+    // A set's name may have spaces; its field has none.
+    CHECK(GetSoundSetOfField("sound set Chaos Castle Wizard soundEvents[0].sounds[1]") == "Chaos Castle Wizard");
+    CHECK(GetSoundSetOfField("sound set Raymond name") == "Raymond");
+    CHECK_FALSE(GetSoundSetOfField("monster 5 soundSet"));
+    CHECK_FALSE(GetSoundSetOfField("sound set Raymond"));
+    CHECK_FALSE(GetSoundSetOfField("model MONSTER_MODEL_HOUND cues[0]"));
 }
 
 TEST_CASE("Monster checks: the attacks go to Monster Attacks [editor][monsters]")

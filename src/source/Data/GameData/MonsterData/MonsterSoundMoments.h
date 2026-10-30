@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Data/GameData/MonsterData/MonsterModelDefinition.h"
+#include "Data/GameData/MonsterData/MonsterSoundSet.h"
 
 #include <array>
 #include <optional>
 #include <string_view>
 
 // The moments of the game a sound event plays at (monsters design, Q-MN76)
-// and the names the model data gives them.
+// and the names the sound data gives them.
 namespace Data::Monsters
 {
 // In the order the data and the editor list them.

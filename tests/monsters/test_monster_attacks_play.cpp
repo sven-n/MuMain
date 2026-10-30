@@ -16,6 +16,7 @@
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
+#include "GameLogic/Monsters/MonsterSoundEvents.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/MapInfra/MapManager.h"
@@ -486,12 +487,12 @@ TEST_CASE("Monster attacks: Castle Gate 1 counts its hits from 0 when it is set 
 
 namespace
 {
-// The number of a sound the model's sound events name.
+// The number of a sound the sound events of the character's set name.
 int SoundOf(const CHARACTER& character, const std::string& name)
 {
-    const Data::Monsters::MonsterModelDefinition* model = g_MonsterModelDatabase.Find(character.Object.Type);
-    REQUIRE(model != nullptr);
-    const std::optional<int> number = Data::Monsters::ModelLoader::FindSoundNumber(*model, name);
+    const Data::Monsters::MonsterSoundSet* set = GameLogic::Monsters::SoundEvents::FindSoundSet(character);
+    REQUIRE(set != nullptr);
+    const std::optional<int> number = Data::Monsters::ModelLoader::FindSoundNumber(*set, name);
     REQUIRE(number);
     return *number;
 }
@@ -504,8 +505,8 @@ long long CountOf(const std::vector<int>& ids, std::initializer_list<int> sounds
 }
 } // namespace
 
-TEST_CASE("Monster sounds: a monster plays the sound events of its model when it is set to stand, attacks, is hit "
-          "and dies (MNS) [monsters][sounds]")
+TEST_CASE("Monster sounds: a monster plays the sound events of its set when it is set to stand, attacks, is hit "
+          "and dies (MNS, Q-MN78) [monsters][sounds]")
 {
     AttackScope scope(WD_0LORENCIA);
     CHARACTER& bull = scope.Create(MONSTER_BULL_FIGHTER);

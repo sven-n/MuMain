@@ -41,6 +41,8 @@ private:
 std::unique_ptr<DataChecks::DataCheckArea> CreateMonsterCheckArea();
 // The model list.
 std::unique_ptr<DataChecks::DataCheckArea> CreateMonsterModelCheckArea();
+// The sound sets and what the monsters, models and sets name of each other.
+std::unique_ptr<DataChecks::DataCheckArea> CreateMonsterSoundCheckArea();
 } // namespace MuEditor::Monsters
 
 #endif // _EDITOR

@@ -42,6 +42,16 @@ std::string Model(const std::string& slot, const std::string& what)
 {
     return I18N::Format(I18N::Editor::StepModel, {slot, what});
 }
+
+std::string SoundSetOf(const Data::Monsters::MonsterDefinition& monster)
+{
+    return I18N::Format(I18N::Editor::StepMonsterSoundSet, {LogName(monster)});
+}
+
+std::string SoundSet(const std::string& name, const std::string& what)
+{
+    return I18N::Format(I18N::Editor::StepSoundSet, {name, what});
+}
 } // namespace MuEditor::Monsters::StepLabel
 
 #endif // _EDITOR

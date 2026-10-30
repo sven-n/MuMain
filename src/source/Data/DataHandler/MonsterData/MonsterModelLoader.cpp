@@ -9,9 +9,11 @@
 #include "Data/DataHandler/ModelData/ModelFileDataHandler.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterSoundIds.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "World/MapInfra/MapManager.h"
@@ -163,11 +165,16 @@ void OpenParts(const MonsterModelDefinition& model)
     }
 }
 
-void LoadSounds(const MonsterModelDefinition& model)
+// The sounds of the sets the slot's monsters use, in the order of the sets
+// and their files.
+void LoadSounds(int slot)
 {
-    for (const MonsterModelSound& sound : model.sounds)
+    for (const MonsterSoundSet* set : FindSoundSetsOfSlot(slot))
     {
-        LoadSound(sound);
+        for (const MonsterSound& sound : set->sounds)
+        {
+            LoadSound(sound);
+        }
     }
 }
 
@@ -249,14 +256,47 @@ bool Open(int slot)
     {
         target.BoneHead = target.FindBoneOrRoot(headBoneName);
     }
-    LoadSounds(*model);
+    LoadSounds(slot);
     LoadBitmaps(*model);
     return true;
 }
 
-std::optional<int> FindSoundNumber(const MonsterModelDefinition& model, const std::string& value)
+std::vector<const MonsterSoundSet*> FindSoundSetsOfSlot(int slot)
 {
-    for (const MonsterModelSound& sound : model.sounds)
+    std::vector<const MonsterSoundSet*> sets;
+    const auto add = [&](const std::string& name)
+    {
+        const MonsterSoundSet* set = name.empty() ? nullptr : g_MonsterSoundSetDatabase.Find(name);
+        if (set != nullptr && std::find(sets.begin(), sets.end(), set) == sets.end())
+        {
+            sets.push_back(set);
+        }
+    };
+    for (int number = 0; number < MonsterNumberCount; ++number)
+    {
+        const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
+        if (monster == nullptr)
+        {
+            continue;
+        }
+        if (FindMonsterModelReference(monster->model) == slot)
+        {
+            add(monster->soundSet);
+        }
+        for (const MonsterRandomVariant& variant : monster->randomVariants)
+        {
+            if (FindMonsterModelReference(variant.model) == slot)
+            {
+                add(GetSoundSetWithModel(*monster, slot));
+            }
+        }
+    }
+    return sets;
+}
+
+std::optional<int> FindSoundNumber(const MonsterSoundSet& set, const std::string& value)
+{
+    for (const MonsterSound& sound : set.sounds)
     {
         if (SoundNameOf(sound) == value)
         {
@@ -266,7 +306,7 @@ std::optional<int> FindSoundNumber(const MonsterModelDefinition& model, const st
     return FindMonsterSoundId(value);
 }
 
-int SoundNumber(const MonsterModelSound& sound)
+int SoundNumber(const MonsterSound& sound)
 {
     if (!sound.id.empty())
     {
@@ -278,7 +318,7 @@ int SoundNumber(const MonsterModelSound& sound)
     return static_cast<int>(Audio::SoundNumbers::ForFile(ToLoaderPath(sound.file)));
 }
 
-void LoadSound(const MonsterModelSound& sound)
+void LoadSound(const MonsterSound& sound)
 {
     const ESound number = static_cast<ESound>(SoundNumber(sound));
     const std::wstring file = ToLoaderPath(sound.file);
@@ -299,6 +339,24 @@ bool IsOpen(int slot)
 }
 
 #ifdef _EDITOR
+void LoadSoundsOfOpenModels()
+{
+    for (const MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
+    {
+        const std::optional<int> slot = FindMonsterModelSlot(model->slot);
+        if (!slot || !IsOpen(*slot))
+        {
+            continue;
+        }
+        // As Open: a monster model without meshes loads no sounds.
+        if (IsMonsterRangeSlot(*slot) && ::Models[*slot].NumMeshs == 0)
+        {
+            continue;
+        }
+        LoadSounds(*slot);
+    }
+}
+
 std::vector<int> Reopen(int slot)
 {
     std::vector<int> reopened;
