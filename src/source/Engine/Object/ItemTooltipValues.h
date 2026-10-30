@@ -68,6 +68,15 @@ struct ItemTooltipValues
     bool timed = false;
     // The item has options to show (SpecialNum > 0: its skill, luck, additional and excellent options).
     bool hasOptions = false;
+    // An item that can have sockets (CSocketItemMgr::IsSocketItem).
+    bool socketItem = false;
+    // Wings or a cape of the second or third tier (its data's wingTier).
+    bool upperTierWings = false;
+    // The item has its skill, luck or an additional option (an option level above 0); excellent options don't count.
+    bool skillLuckOrOption = false;
+    // The item's ancient discriminator names one of its sets, so its name starts with the set's (GetSetItemName);
+    // `ancient` is any discriminator.
+    bool setItem = false;
     // The hero's level.
     int heroLevel = 0;
     // The item's name as its data has it, which {name} writes only for a line showing it, its level + 1, and its

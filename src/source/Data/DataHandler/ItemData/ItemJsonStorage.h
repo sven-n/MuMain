@@ -3,6 +3,7 @@
 #include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
+#include "Data/GameData/ItemData/ItemGroundLabels.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
@@ -77,6 +78,18 @@ struct ItemTooltipLoadResult
 std::filesystem::path GetItemTooltipFile();
 
 ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file);
+
+struct GroundLabelsLoadResult
+{
+    GroundLabelFile file;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Tooltips/GroundLabels.json, relative to the client folder: the looks of the item names on the ground, see
+// ItemGroundLabels.h. Next to the tooltip file.
+std::filesystem::path GetGroundLabelsFile();
+
+GroundLabelsLoadResult LoadGroundLabelsFile(const std::filesystem::path& file);
 
 struct GlowColorsLoadResult
 {

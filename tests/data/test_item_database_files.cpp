@@ -263,6 +263,22 @@ TEST_CASE("The shipped descriptions' placeholders and shared texts are known [da
     }
 }
 
+TEST_CASE("The shipped ground labels load without problems and are written as they are read [data][items]")
+{
+    const std::filesystem::path file = DataDirectory / "Items" / "Tooltips" / GroundLabelsFileName;
+    const GroundLabelsLoadResult labels = LoadGroundLabelsFile(file);
+    std::vector<ItemDataIssue> issues = labels.issues;
+    // Every style the items and the standard rules name is in the file, and every style of the file is used.
+    ValidateGroundLabels(LoadItemDataDirectory(DataDirectory / "Items").items, labels.file, GroundLabelsFileName,
+                         issues);
+    for (const ItemDataIssue& issue : issues)
+    {
+        INFO(issue.ToString());
+        CHECK(false);
+    }
+    CHECK(WriteGroundLabelsJson(labels.file) == TestFiles::ReadWholeFile(file));
+}
+
 // The shipped tooltip file, read once.
 const ItemTooltipFile& ShippedTooltips()
 {

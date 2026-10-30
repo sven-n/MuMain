@@ -11,6 +11,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CComGem.h"
+#include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "GameLogic/Items/ItemCategories.h"
 #include "I18N/All.h"
@@ -190,6 +191,13 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
     ComputeRequirements(item, values);
     values.excellent = item.ExcellentFlags > 0;
     values.ancient = item.AncientDiscriminator > 0;
+    values.socketItem = g_SocketItemMgr.IsSocketItem(&item);
+    const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(item.Type);
+    values.upperTierWings = definition != nullptr && (definition->wingTier == Data::Items::WingTier::Second ||
+                                                      definition->wingTier == Data::Items::WingTier::Third);
+    values.skillLuckOrOption = item.HasSkill || item.HasLuck || item.OptionLevel > 0;
+    wchar_t setName[64]{};
+    values.setItem = g_csItemOption.GetSetItemName(setName, item.Type, item.AncientDiscriminator);
     return values;
 }
 
@@ -339,6 +347,14 @@ bool GetItemTooltipState(const ItemTooltipValues& values, Data::Items::TooltipSt
         return values.timed;
     case TooltipState::HasOptions:
         return values.hasOptions;
+    case TooltipState::SocketItem:
+        return values.socketItem;
+    case TooltipState::UpperTierWings:
+        return values.upperTierWings;
+    case TooltipState::SkillLuckOrOption:
+        return values.skillLuckOrOption;
+    case TooltipState::SetItem:
+        return values.setItem;
     case TooltipState::Count:
         break;
     }

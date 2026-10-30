@@ -12,6 +12,7 @@
 #include "Data/DataHandler/SkillData/SkillDataHandler.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ItemTooltipSnapshot.h"
@@ -767,6 +768,99 @@ TEST_CASE("The item cases' lines are in the UI's language [data][items][tooltip]
                           return text.starts_with(L"Angriffsgeschwindigkeit +") &&
                                  text.find(L'{') == std::wstring::npos;
                       }));
+}
+
+TEST_CASE("A ground label takes its look from the item's own style or else the standard rules [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+
+    // The item at `level`, dropped and drawn with `modelType` (its own model when left out), as CreateItemDrop does.
+    const auto at = [](int group, int number, int level)
+    {
+        ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(group, number);
+        params.Level = static_cast<BYTE>(level);
+        return params;
+    };
+    const auto label = [](const ItemCreationParams& params, int modelType = -1)
+    {
+        ITEM item;
+        FillItemFromParameters(item, params);
+        OBJECT object{};
+        object.Type = modelType >= 0 ? modelType : Data::Items::ToModelSlot(item.Type);
+        return DescribeGroundItemLabel(&object, &item);
+    };
+    const auto rgb = [](DWORD red, DWORD green, DWORD blue) { return red + (green << 8) + (blue << 16) + 0xFF000000u; };
+    const DWORD black = rgb(0, 0, 0);
+
+    // An item's own style: a ticket, a jewel in bold.
+    const GroundItemLabel ticket = label(at(13, 46, 0));
+    CHECK(ticket.text == L"Devil Square Ticket");
+    CHECK(ticket.textColor == rgb(0xe5, 0x87, 0x21));
+    CHECK(ticket.backgroundColor == black);
+    CHECK_FALSE(ticket.bold);
+    const GroundItemLabel bless = label(at(14, 13, 0));
+    CHECK(bless.textColor == rgb(0xff, 0xcc, 0x19));
+    CHECK(bless.bold);
+    // Only at its levels: the Pink Chocolate Box is pink at +0 and +1 (drawn as an event model at +1), white above.
+    CHECK(label(at(14, 32, 1), MODEL_EVENT + 21).textColor == rgb(0xff, 0x4c, 0xff));
+    CHECK(label(at(14, 32, 2)).textColor == rgb(0xff, 0xff, 0xff));
+    // An own style has no options after the name.
+    ItemCreationParams luckyTicket = at(13, 46, 0);
+    luckyTicket.WithLuck = true;
+    CHECK(label(luckyTicket).text == L"Devil Square Ticket");
+
+    // The standard rules: by level, ...
+    CHECK(label(at(0, 0, 0)).textColor == rgb(0xb2, 0xb2, 0xb2));
+    CHECK(label(at(0, 0, 3)).textColor == rgb(0xff, 0x7f, 0x33));
+    CHECK(label(at(0, 0, 9)).textColor == rgb(0xff, 0xcc, 0x19));
+    // ... blue with an option below +7, the options after the name, ...
+    ItemCreationParams luckyKris = at(0, 0, 3);
+    luckyKris.WithLuck = true;
+    const GroundItemLabel lucky = label(luckyKris);
+    CHECK(lucky.textColor == rgb(0x66, 0xb2, 0xff));
+    CHECK(lucky.text == std::wstring(L"Kris +3") + I18N::Game::Luck);
+    // ... green when excellent, also first-tier wings, but not the second-tier wings, ...
+    const auto excellent = [&](int group, int number)
+    {
+        ItemCreationParams params = at(group, number, 0);
+        params.HasExcellentOption = true;
+        params.ExcellentFlags = 1;
+        return label(params).textColor;
+    };
+    CHECK(excellent(0, 0) == rgb(0x19, 0xff, 0x7f));
+    CHECK(excellent(12, 0) == rgb(0x19, 0xff, 0x7f));
+    CHECK(excellent(12, 3) == rgb(0xb2, 0xb2, 0xb2));
+    // ... a set item green on blue and bold after its set's name, but not an item whose discriminator names no set.
+    ItemCreationParams rapier = at(0, 2, 0);
+    rapier.IsAncient = true;
+    rapier.AncientDiscriminator = 1;
+    const GroundItemLabel setItem = label(rapier);
+    CHECK(setItem.text == L"Ceto's Rapier");
+    CHECK(setItem.textColor == rgb(0, 0xff, 0));
+    CHECK(setItem.backgroundColor == rgb(0x3c, 0x3c, 0xc8));
+    CHECK(setItem.bold);
+    ItemCreationParams kris = at(0, 0, 0);
+    kris.IsAncient = true;
+    kris.AncientDiscriminator = 1;
+    CHECK(label(kris).textColor == rgb(0xb2, 0xb2, 0xb2));
+    // A tag is the drawn model's item's: the Weapon of Archangel at +0 is drawn as the divine staff.
+    CHECK(label(at(13, 19, 0), MODEL_DIVINE_STAFF_OF_ARCHANGEL).textColor == rgb(0xff, 0x19, 0xff));
+    CHECK(label(at(13, 19, 3)).textColor == rgb(0xff, 0x7f, 0x33));
+
+    // Zen shows its amount, its level.
+    ITEM zen;
+    FillItemFromParameters(zen, at(14, 15, 0));
+    zen.Level = 123456;
+    OBJECT zenObject{};
+    zenObject.Type = MODEL_ZEN;
+    const GroundItemLabel zenLabel = DescribeGroundItemLabel(&zenObject, &zen);
+    CHECK(zenLabel.text == L"Zen 123456");
+    CHECK(zenLabel.textColor == rgb(0xff, 0xcc, 0x19));
 }
 
 // The option lines are the lines the full item has and the plain one doesn't (luck, skill, the option, the excellent

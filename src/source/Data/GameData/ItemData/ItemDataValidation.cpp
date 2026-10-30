@@ -862,6 +862,64 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
     }
 }
 
+void ValidateGroundLabels(std::span<const ItemDefinition> items, const GroundLabelFile& labels,
+                          const std::string& labelFile, std::vector<ItemDataIssue>& issues)
+{
+    std::vector<std::string> styleNames;
+    for (const GroundLabelStyle& style : labels.styles)
+    {
+        styleNames.push_back(style.name);
+    }
+    std::set<std::string, std::less<>> used;
+    const auto unknown = [&](const std::string& name)
+    {
+        const std::string suggestion = SuggestPlaceholder(name, styleNames);
+        return "\"" + name + "\" is not a style of " + labelFile +
+               (suggestion.empty() ? "" : "; did you mean \"" + suggestion + "\"?");
+    };
+    for (size_t index = 0; index < labels.standard.size(); ++index)
+    {
+        const std::string& style = labels.standard[index].style;
+        used.insert(style);
+        if (labels.FindStyle(style) == nullptr)
+        {
+            issues.push_back({ItemDataIssueSeverity::Fatal, labelFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                              "standard[" + std::to_string(index) + "].style", unknown(style)});
+        }
+    }
+    for (const ItemDefinition& definition : items)
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        for (size_t index = 0; index < definition.groundLabels.size(); ++index)
+        {
+            const ItemGroundLabel& label = definition.groundLabels[index];
+            const std::string field = "groundLabels[" + std::to_string(index) + "]";
+            used.insert(label.style);
+            if (labels.FindStyle(label.style) == nullptr)
+            {
+                issues.push_back({ItemDataIssueSeverity::Fatal, "", definition.group, definition.number, field,
+                                  unknown(label.style)});
+            }
+            if (index > 0 && !definition.groundLabels[index - 1].hasLevels)
+            {
+                issues.push_back({ItemDataIssueSeverity::Warning, "", definition.group, definition.number, field,
+                                  "comes after a rule for every level, so it is never used"});
+            }
+        }
+    }
+    for (const std::string& name : styleNames)
+    {
+        if (!used.contains(name))
+        {
+            issues.push_back({ItemDataIssueSeverity::Warning, labelFile, ItemDataIssue::NoItem, ItemDataIssue::NoItem,
+                              "styles." + name, "neither a standard rule nor an item uses this style"});
+        }
+    }
+}
+
 void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const char* const> uiLocales,
                          std::vector<ItemDataIssue>& issues)
 {

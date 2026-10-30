@@ -2612,246 +2612,12 @@ bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
 }
 
 
-void SetTextColor(float r, float g, float b)
-{
-    g_pRenderText->SetTextColor(r * 255, g * 255, b * 255, 255);
-}
-
-void SetYellowTextColor()
-{
-    SetTextColor(1.f, 0.8f, 0.1f);
-}
-
-void SetGrayTextColor()
-{
-    SetTextColor(0.7f, 0.7f, 0.7f);
-}
-
-void SetOrangeTextColor()
-{
-    SetTextColor(0.9f, 0.53f, 0.13f);
-}
-
-void SetJewelTextColor()
-{
-    g_pRenderText->SetFont(g_hFontBold);
-    SetYellowTextColor();
-}
-
-std::unordered_set<int> boldTextItems = {
-    MODEL_JEWEL_OF_BLESS,
-    MODEL_JEWEL_OF_SOUL,
-    MODEL_JEWEL_OF_LIFE,
-    MODEL_JEWEL_OF_CHAOS,
-    MODEL_JEWEL_OF_CREATION,
-    MODEL_JEWEL_OF_GUARDIAN,
-    MODEL_LOCHS_FEATHER,
-    MODEL_GEMSTONE,
-    MODEL_JEWEL_OF_HARMONY,
-    MODEL_LOWER_REFINE_STONE,
-    MODEL_HIGHER_REFINE_STONE,
-    MODEL_COMPILED_CELE,
-    MODEL_COMPILED_SOUL,
-    MODEL_DEVILS_EYE,
-    MODEL_DEVILS_KEY,
-    MODEL_DEVILS_INVITATION,
-};
-
-std::unordered_set<int> whiteTextItems = {
-    MODEL_SCROLL_OF_CHAOTIC_DISEIER,
-    MODEL_SCROLL_OF_FIRE_SCREAM,
-};
-
-std::unordered_set<int> yellowTextItems = {
-    
-    MODEL_ZEN,
-    MODEL_JEWEL_OF_BLESS,
-    MODEL_JEWEL_OF_SOUL,
-    MODEL_JEWEL_OF_LIFE,
-    MODEL_JEWEL_OF_CHAOS,
-    MODEL_JEWEL_OF_CREATION,
-    MODEL_JEWEL_OF_GUARDIAN,
-    MODEL_LOCHS_FEATHER,
-    MODEL_GEMSTONE,
-    MODEL_JEWEL_OF_HARMONY,
-    MODEL_LOWER_REFINE_STONE,
-    MODEL_HIGHER_REFINE_STONE,
-    MODEL_COMPILED_CELE,
-    MODEL_COMPILED_SOUL,
-    MODEL_DEVILS_EYE,
-    MODEL_DEVILS_KEY,
-    MODEL_DEVILS_INVITATION,
-    MODEL_BOX_OF_LUCK,
-    MODEL_FRUITS,
-    MODEL_SPIRIT,
-    MODEL_EVENT + 16,
-    MODEL_EVENT + 5,
-    MODEL_OLD_SCROLL,
-    MODEL_ILLUSION_SORCERER_COVENANT,
-    MODEL_SCROLL_OF_BLOOD,
-    MODEL_CURSED_CASTLE_WATER,
-    MODEL_EVENT + 11,
-    MODEL_EVENT + 12,
-    MODEL_EVENT + 13,
-    MODEL_EVENT + 14,
-    MODEL_EVENT + 15,
-    MODEL_SUSPICIOUS_SCRAP_OF_PAPER,
-    MODEL_GAIONS_ORDER,
-    MODEL_FIRST_SECROMICON_FRAGMENT,
-    MODEL_SECOND_SECROMICON_FRAGMENT,
-    MODEL_THIRD_SECROMICON_FRAGMENT,
-    MODEL_FOURTH_SECROMICON_FRAGMENT,
-    MODEL_FIFTH_SECROMICON_FRAGMENT,
-    MODEL_SIXTH_SECROMICON_FRAGMENT,
-    MODEL_COMPLETE_SECROMICON,
-    MODEL_POTION + 100,
-    MODEL_POTION + 111,
-    MODEL_SILVER_KEY,
-    MODEL_GOLD_KEY,
-    MODEL_GOBLIN_GOLD_COIN,
-    MODEL_SEALED_GOLDEN_BOX,
-    MODEL_SEALED_SILVER_BOX,
-    MODEL_GOLDEN_BOX,
-    MODEL_SILVER_BOX,
-    MODEL_PACKAGE_BOX_A,
-    MODEL_PACKAGE_BOX_B,
-    MODEL_PACKAGE_BOX_C,
-    MODEL_PACKAGE_BOX_D,
-    MODEL_PACKAGE_BOX_E,
-    MODEL_PACKAGE_BOX_F,
-    MODEL_MASTER_SKILL_RESET,
-    MODEL_STAT_ADJUSTMENT,
-    MODEL_CHARACTER_RELOCATION_SERVICE,
-    MODEL_CHARACTER_RENAME_SERVICE,
-    MODEL_SERVER_RELOCATION_SERVICE,
-    MODEL_PREMIUM_PACKAGE,
-    MODEL_30_DAY_PASS,
-    MODEL_90_DAY_PASS,
-    MODEL_30_DAY_PASS_POINTS,
-    MODEL_90_DAY_PASS_POINTS,
-    MODEL_3_HOUR_PASS,
-    MODEL_5_HOUR_PASS,
-    MODEL_10_HOUR_PASS,
-    MODEL_HELPER + 91,
-    MODEL_MAGIC_GLADIATOR_CHARACTER_CARD,
-    MODEL_DARK_LORD_CHARACTER_CARD,
-    MODEL_HELPER + 99,
-    MODEL_SAPPHIRE_RING,
-    MODEL_RUBY_RING,
-    MODEL_TOPAZ_RING,
-    MODEL_AMETHYST_RING,
-    MODEL_RUBY_NECKLACE,
-    MODEL_EMERALD_NECKLACE,
-    MODEL_SAPPHIRE_NECKLACE,
-    MODEL_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE,
-    MODEL_WING + 25,
-    MODEL_LOST_MAP,
-    MODEL_SYMBOL_OF_KUNDUN,
-};
-
-std::unordered_set<int> orangeTextItems = {
-    MODEL_CHERRY_BLOSSOM_PLAYBOX,
-    MODEL_CHERRY_BLOSSOM_WINE,
-    MODEL_CHERRY_BLOSSOM_RICE_CAKE,
-    MODEL_CHERRY_BLOSSOM_FLOWER_PETAL,
-    MODEL_GOLDEN_CHERRY_BLOSSOM_BRANCH,
-    MODEL_DEMON,
-    MODEL_SPIRIT_OF_GUARDIAN,
-    MODEL_PET_RUDOLF,
-    MODEL_PET_PANDA,
-    MODEL_PET_UNICORN,
-    MODEL_PET_SKELETON,
-    MODEL_SNOWMAN_TRANSFORMATION_RING,
-    MODEL_PANDA_TRANSFORMATION_RING,
-    MODEL_SKELETON_TRANSFORMATION_RING,
-    MODEL_PUMPKIN_OF_LUCK,
-    MODEL_JACK_OLANTERN_BLESSINGS,
-    MODEL_JACK_OLANTERN_WRATH,
-    MODEL_JACK_OLANTERN_CRY,
-    MODEL_JACK_OLANTERN_FOOD,
-    MODEL_JACK_OLANTERN_DRINK,
-    MODEL_SEAL_OF_ASCENSION,
-    MODEL_SEAL_OF_WEALTH,
-    MODEL_SEAL_OF_SUSTENANCE,
-    MODEL_DEVIL_SQUARE_TICKET,
-    MODEL_BLOOD_CASTLE_TICKET,
-    MODEL_KALIMA_TICKET,
-    MODEL_RESET_FRUIT_STRENGTH,
-    MODEL_RESET_FRUIT_QUICKNESS,
-    MODEL_RESET_FRUIT_HEALTH,
-    MODEL_RESET_FRUIT_ENERGY,
-    MODEL_RESET_FRUIT_CONTROL,
-    MODEL_SEAL_OF_MOBILITY,
-    MODEL_INDULGENCE,
-    MODEL_ILLUSION_TEMPLE_TICKET,
-    MODEL_SEAL_OF_HEALING,
-    MODEL_SEAL_OF_DIVINITY,
-    MODEL_HELPER + 116,
-    MODEL_OPEN_ACCESS_TICKET_TO_DOPPELGANGER,
-    MODEL_OPEN_ACCESS_TICKET_TO_VARKA,
-    MODEL_OPEN_ACCESS_TICKET_TO_VARKA_7,
-    MODEL_HELPER + 128,
-    MODEL_HELPER + 129,
-    MODEL_HELPER + 130,
-    MODEL_HELPER + 131,
-    MODEL_HELPER + 132,
-    MODEL_HELPER + 133,
-    MODEL_HELPER + 134,
-    MODEL_TALISMAN_OF_LUCK,
-    MODEL_CHAOS_CARD,
-    MODEL_RARE_ITEM_TICKET_1,
-    MODEL_RARE_ITEM_TICKET_2,
-    MODEL_RARE_ITEM_TICKET_3,
-    MODEL_RARE_ITEM_TICKET_4,
-    MODEL_RARE_ITEM_TICKET_5,
-    MODEL_ELITE_HEALING_POTION,
-    MODEL_ELITE_MANA_POTION,
-    MODEL_SCROLL_OF_QUICKNESS,
-    MODEL_SCROLL_OF_DEFENSE,
-    MODEL_SCROLL_OF_WRATH,
-    MODEL_SCROLL_OF_WIZARDRY,
-    MODEL_SCROLL_OF_HEALTH,
-    MODEL_SCROLL_OF_MANA,
-    MODEL_ELIXIR_OF_STRENGTH,
-    MODEL_ELIXIR_OF_AGILITY,
-    MODEL_ELIXIR_OF_HEALTH,
-    MODEL_ELIXIR_OF_ENERGY,
-    MODEL_ELIXIR_OF_CONTROL,
-    MODEL_POTION + 83,
-    MODEL_WHITE_CHERRY_BLOSSOM_BRANCH,
-    MODEL_RED_CHERRY_BLOSSOM_BRANCH,
-    MODEL_SUMMONER_CHARACTER_CARD,
-    MODEL_CHAOS_CARD_GOLD,
-    MODEL_CHAOS_CARD_RARE,
-    MODEL_MEDIUM_ELITE_HEALING_POTION,
-    MODEL_CHAOS_CARD_MINI,
-    MODEL_TALISMAN_OF_CHAOS_ASSEMBLY,
-    MODEL_SCROLL_OF_BATTLE,
-    MODEL_SCROLL_OF_STRENGTH,
-    MODEL_POTION + 141,
-    MODEL_POTION + 142,
-    MODEL_POTION + 143,
-    MODEL_POTION + 144,
-    MODEL_RARE_ITEM_TICKET_7,
-    MODEL_RARE_ITEM_TICKET_8,
-    MODEL_RARE_ITEM_TICKET_9,
-    MODEL_RARE_ITEM_TICKET_10,
-    MODEL_RARE_ITEM_TICKET_11,
-    MODEL_RARE_ITEM_TICKET_12,
-    MODEL_SMALL_CAPE_OF_LORD,
-    MODEL_SMALL_WING_OF_CURSE,
-    MODEL_SMALL_WINGS_OF_ELF,
-    MODEL_SMALL_WINGS_OF_HEAVEN,
-    MODEL_SMALL_WINGS_OF_SATAN,
-    MODEL_LITTLE_WARRIORS_CLOAK,
-};
-
 namespace
 {
 struct GroundItemLabelDescriptor
 {
     wchar_t Name[80]{};
-    HFONT Font = g_hFont;
+    bool Bold = false;
     DWORD TextColor = 0xFFFFFFFF;
     DWORD BgColor = 0xFF000000;
 };
@@ -2861,28 +2627,16 @@ DWORD MakeRgba(BYTE red, BYTE green, BYTE blue, BYTE alpha = 255)
     return red + (green << 8) + (blue << 16) + (alpha << 24);
 }
 
-void SetDescriptorTextColor(GroundItemLabelDescriptor& descriptor, float red, float green, float blue)
+// The look of a ground label style (Data/Items/Tooltips/GroundLabels.json); none keeps the label as it is.
+void ApplyGroundLabelStyle(GroundItemLabelDescriptor& descriptor, const Data::Items::GroundLabelStyle* style)
 {
-    descriptor.TextColor = MakeRgba(
-        static_cast<BYTE>(red * 255.f),
-        static_cast<BYTE>(green * 255.f),
-        static_cast<BYTE>(blue * 255.f),
-        255);
-}
-
-void SetDescriptorYellowTextColor(GroundItemLabelDescriptor& descriptor)
-{
-    SetDescriptorTextColor(descriptor, 1.f, 0.8f, 0.1f);
-}
-
-void SetDescriptorGrayTextColor(GroundItemLabelDescriptor& descriptor)
-{
-    SetDescriptorTextColor(descriptor, 0.7f, 0.7f, 0.7f);
-}
-
-void SetDescriptorOrangeTextColor(GroundItemLabelDescriptor& descriptor)
-{
-    SetDescriptorTextColor(descriptor, 0.9f, 0.53f, 0.13f);
+    if (style == nullptr)
+    {
+        return;
+    }
+    descriptor.TextColor = MakeRgba(style->color[0], style->color[1], style->color[2]);
+    descriptor.BgColor = MakeRgba(style->background[0], style->background[1], style->background[2]);
+    descriptor.Bold = style->bold;
 }
 
 template <size_t BufferSize, typename... Args>
@@ -2909,228 +2663,85 @@ void AppendGroundItemLabelText(wchar_t(&buffer)[BufferSize], const wchar_t* form
     _snwprintf_s(buffer + currentLength, BufferSize - currentLength, _TRUNCATE, format, args...);
 }
 
+// The label's look comes from the ground label styles (D68): the item's own rule for its level ("groundLabels" in its
+// item file), else the first standard rule whose conditions hold. Only a label of the standard rules shows the set's
+// name in front and the options after the name.
 void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescriptor& descriptor)
 {
-    auto ItemLevel = ip->Level;
-    auto ItemOption = ip->ExcellentFlags;
-
-    descriptor.Font = g_hFont;
+    descriptor.Bold = false;
     descriptor.TextColor = MakeRgba(255, 255, 255, 255);
     descriptor.BgColor = MakeRgba(0, 0, 0, 255);
 
-    // The item's name (its name lines), as windows and messages write it; Zen shows its amount. A ground item keeps its
-    // item type and level when it is drawn as an event model (MODEL_EVENT + N).
+    // The item's name (its name lines), as windows and messages write it; Zen shows its amount, which is its level. A
+    // ground item keeps its item type and level when it is drawn as an event model (MODEL_EVENT + N).
     if (o->Type == MODEL_ZEN)
     {
-        FormatGroundItemLabelText(descriptor.Name, L"%ls %d", ItemAttribute[ITEM_ZEN].Name, ItemLevel);
+        FormatGroundItemLabelText(descriptor.Name, L"%ls %d", ItemAttribute[ITEM_ZEN].Name, ip->Level);
     }
     else
     {
-        CopyGroundItemLabelText(descriptor.Name, GetItemNameText(ip->Type, ItemLevel, ip).c_str());
+        CopyGroundItemLabelText(descriptor.Name, GetItemNameText(ip->Type, ip->Level, ip).c_str());
     }
 
-    if (boldTextItems.count(o->Type) > 0)
+    const Data::Items::GroundLabelFile& labels = g_ItemDatabase.GetGroundLabels();
+    if (const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(ip->Type))
     {
-        descriptor.Font = g_hFontBold;
-    }
-
-    if (whiteTextItems.count(o->Type) > 0)
-    {
-        SetDescriptorTextColor(descriptor, 1.f, 1.f, 1.f);
-    }
-    else if (yellowTextItems.count(o->Type) > 0)
-    {
-        SetDescriptorYellowTextColor(descriptor);
-    }
-    else if (orangeTextItems.count(o->Type) > 0)
-    {
-        SetDescriptorOrangeTextColor(descriptor);
-    }
-    if (o->Type == MODEL_ORB_OF_SUMMONING)
-    {
-        SetDescriptorGrayTextColor(descriptor);
-    }
-    else if (COMGEM::NOGEM != COMGEM::Check_Jewel_Com(o->Type, true))
-    {
-        descriptor.Font = g_hFontBold;
-        SetDescriptorYellowTextColor(descriptor);
-    }
-    else if ((o->Type == MODEL_BOX_OF_LUCK && ItemLevel == 7) || o->Type == MODEL_POTION + 12 ||
-             o->Type == MODEL_FRUITS || o->Type == MODEL_SPIRIT ||
-             (o->Type >= MODEL_EVENT + 4 && o->Type <= MODEL_EVENT + 5) ||
-             (o->Type >= MODEL_EVENT + 7 && o->Type <= MODEL_EVENT + 16) || o->Type == MODEL_EVENT + 18 ||
-             o->Type == MODEL_TRANSFORMATION_RING || o->Type == MODEL_SIEGE_POTION ||
-             o->Type == MODEL_CONTRACT_SUMMON || o->Type == MODEL_LIFE_STONE_ITEM)
-    {
-        // White, the label's color.
-    }
-    else if (o->Type == MODEL_EVENT + 6)
-    {
-        if (ItemLevel == 13)
+        for (const Data::Items::ItemGroundLabel& label : definition->groundLabels)
         {
-            SetDescriptorYellowTextColor(descriptor);
-        }
-    }
-    else if (o->Type == MODEL_RED_RIBBON_BOX)
-    {
-        SetDescriptorTextColor(descriptor, 1.f, 0.3f, 0.3f);
-    }
-    else if (o->Type == MODEL_GREEN_RIBBON_BOX)
-    {
-        SetDescriptorTextColor(descriptor, 0.3f, 1.0f, 0.3f);
-    }
-    else if (o->Type == MODEL_BLUE_RIBBON_BOX)
-    {
-        SetDescriptorTextColor(descriptor, 0.3f, 0.3f, 1.f);
-    }
-    else if (o->Type == MODEL_PINK_CHOCOLATE_BOX)
-    {
-        if (ItemLevel == 0)
-        {
-            SetDescriptorTextColor(descriptor, 1.f, 0.3f, 1.f);
-        }
-        else if (ItemLevel == 1)
-        {
-            SetDescriptorTextColor(descriptor, 1.f, 0.3f, 1.f);
-        }
-    }
-    else if (o->Type == MODEL_RED_CHOCOLATE_BOX)
-    {
-        if (ItemLevel == 0)
-        {
-            SetDescriptorTextColor(descriptor, 1.0f, 0.3f, 0.3f);
-        }
-        else if (ItemLevel == 1)
-        {
-            SetDescriptorTextColor(descriptor, 1.0f, 0.3f, 0.3f);
-        }
-    }
-    else if (o->Type == MODEL_BLUE_CHOCOLATE_BOX)
-    {
-        if (ItemLevel == 0)
-        {
-            SetDescriptorTextColor(descriptor, 0.3f, 0.3f, 1.f);
-        }
-        else if (ItemLevel == 1)
-        {
-            SetDescriptorTextColor(descriptor, 0.3f, 0.3f, 1.f);
-        }
-    }
-    else if (o->Type == MODEL_EVENT + 21)
-    {
-        SetDescriptorTextColor(descriptor, 1.f, 0.3f, 1.f);
-    }
-    else if (o->Type == MODEL_EVENT + 22)
-    {
-        SetDescriptorTextColor(descriptor, 1.0f, 0.3f, 0.3f);
-    }
-    else if (o->Type == MODEL_EVENT + 23)
-    {
-        SetDescriptorTextColor(descriptor, 0.3f, 0.3f, 1.f);
-    }
-    else if (o->Type == MODEL_RENA && ItemLevel == 3)
-    {
-        SetDescriptorYellowTextColor(descriptor);
-    }
-    else if (GameLogic::Items::IsSocketSeedOrSphereModel(o->Type))
-    {
-        SetDescriptorTextColor(descriptor, 0.7f, 0.4f, 1.0f);
-    }
-    else if (o->Type == MODEL_INVITATION_TO_SANTA_VILLAGE)
-    {
-        SetDescriptorTextColor(descriptor, 0.6f, 0.4f, 1.0f);
-    }
-    else if (GameLogic::Items::IsWingMixCharmModel(o->Type))
-    {
-        SetDescriptorOrangeTextColor(descriptor);
-    }
-    else if (Data::Items::IsItemModelSlot(o->Type) &&
-             (whiteTextItems.count(o->Type) > 0 || yellowTextItems.count(o->Type) > 0 ||
-              orangeTextItems.count(o->Type) > 0))
-    {
-        // Color was already set by Block 1 (white/yellow/orange). No override needed.
-    }
-    else
-    {
-        if (GameLogic::Items::IsDivineArchangelWeaponModel(o->Type))
-        {
-            SetDescriptorTextColor(descriptor, 1.f, 0.1f, 1.f);
-        }
-        else if (g_SocketItemMgr.IsSocketItem(o))
-        {
-            SetDescriptorTextColor(descriptor, 0.7f, 0.4f, 1.0f);
-        }
-        else if ((ItemOption & 63) > 0 && (o->Type < MODEL_WINGS_OF_SPIRITS || o->Type > MODEL_WINGS_OF_DARKNESS) && o->Type != MODEL_CAPE_OF_LORD
-            && (o->Type < MODEL_WING_OF_STORM || o->Type > MODEL_CAPE_OF_EMPEROR)
-            && (o->Type < MODEL_WINGS_OF_DESPAIR || o->Type > MODEL_WING_OF_DIMENSION)
-            && !(o->Type >= MODEL_CAPE_OF_FIGHTER && o->Type <= MODEL_CAPE_OF_OVERRULE))
-        {
-            SetDescriptorTextColor(descriptor, 0.1f, 1.f, 0.5f);
-        }
-        else if (ItemLevel >= 7)
-        {
-            SetDescriptorYellowTextColor(descriptor);
-        }
-        else if (ip->HasSkill || ip->HasLuck || ip->OptionLevel > 0)
-        {
-            SetDescriptorTextColor(descriptor, 0.4f, 0.7f, 1.f);
-        }
-        else if (ItemLevel == 0)
-        {
-            SetDescriptorGrayTextColor(descriptor);
-        }
-        else if (ItemLevel < 3)
-        {
-            SetDescriptorTextColor(descriptor, 0.9f, 0.9f, 0.9f);
-        }
-        else if (ItemLevel < 5)
-        {
-            SetDescriptorTextColor(descriptor, 1.f, 0.5f, 0.2f);
-        }
-        else if (ItemLevel < 7)
-        {
-            SetDescriptorTextColor(descriptor, 0.4f, 0.7f, 1.f);
-        }
-
-        wchar_t SetName[64]{};
-        if (g_csItemOption.GetSetItemName(SetName, Data::Items::ToItemType(o->Type), ip->AncientDiscriminator))
-        {
-            SetDescriptorTextColor(descriptor, 0.f, 1.f, 0.f);
-            descriptor.Font = g_hFontBold;
-            descriptor.TextColor = MakeRgba(0, 255, 0, 255);
-            descriptor.BgColor = MakeRgba(60, 60, 200, 255);
-
-            wchar_t formattedName[_countof(descriptor.Name)]{};
-            FormatGroundItemLabelText(formattedName, L"%ls%ls", SetName, descriptor.Name);
-            CopyGroundItemLabelText(descriptor.Name, formattedName);
-        }
-
-        if (ip->HasSkill)
-        {
-            if (o->Type != MODEL_HORN_OF_DINORANT)
+            if (label.HoldsAt(ip->Level))
             {
-                AppendGroundItemLabelText(descriptor.Name, L"%ls", I18N::Game::Skill);
-            }
-            else
-            {
-                AppendGroundItemLabelText(descriptor.Name, L"%ls", L" +");
-                AppendGroundItemLabelText(descriptor.Name, L"%ls", I18N::Game::KnightSpecificSkill);
+                ApplyGroundLabelStyle(descriptor, labels.FindStyle(label.style));
+                return;
             }
         }
-        if (ip->OptionLevel > 0)
+    }
+
+    // A tag is the drawn model's item's: the Weapon of Archangel at +0 to +2 is drawn as a divine archangel weapon and
+    // labelled as one.
+    const int drawnType = Data::Items::IsItemModelSlot(o->Type) ? Data::Items::ToItemType(o->Type) : ip->Type;
+    const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(*ip);
+    for (const Data::Items::GroundLabelRule& rule : labels.standard)
+    {
+        if (Engine::Items::TooltipValues::AreTooltipConditionsMet(rule.when, drawnType, ip->Level, values))
         {
-            AppendGroundItemLabelText(descriptor.Name, L"%ls", I18N::Game::Option);
+            ApplyGroundLabelStyle(descriptor, labels.FindStyle(rule.style));
+            break;
         }
-        if (ip->HasLuck)
+    }
+
+    wchar_t SetName[64]{};
+    if (g_csItemOption.GetSetItemName(SetName, Data::Items::ToItemType(o->Type), ip->AncientDiscriminator))
+    {
+        wchar_t formattedName[_countof(descriptor.Name)]{};
+        FormatGroundItemLabelText(formattedName, L"%ls%ls", SetName, descriptor.Name);
+        CopyGroundItemLabelText(descriptor.Name, formattedName);
+    }
+
+    if (ip->HasSkill)
+    {
+        if (o->Type != MODEL_HORN_OF_DINORANT)
         {
-            AppendGroundItemLabelText(descriptor.Name, L"%ls", I18N::Game::Luck);
+            AppendGroundItemLabelText(descriptor.Name, L"%ls", I18N::Game::Skill);
         }
+        else
+        {
+            AppendGroundItemLabelText(descriptor.Name, L"%ls", L" +");
+            AppendGroundItemLabelText(descriptor.Name, L"%ls", I18N::Game::KnightSpecificSkill);
+        }
+    }
+    if (ip->OptionLevel > 0)
+    {
+        AppendGroundItemLabelText(descriptor.Name, L"%ls", I18N::Game::Option);
+    }
+    if (ip->HasLuck)
+    {
+        AppendGroundItemLabelText(descriptor.Name, L"%ls", I18N::Game::Luck);
     }
 }
 
 void ApplyGroundItemLabelDescriptor(const GroundItemLabelDescriptor& descriptor)
 {
-    g_pRenderText->SetFont(descriptor.Font);
+    g_pRenderText->SetFont(descriptor.Bold ? g_hFontBold : g_hFont);
     g_pRenderText->SetTextColor(descriptor.TextColor);
     g_pRenderText->SetBgColor(descriptor.BgColor);
 }
@@ -3141,7 +2752,7 @@ GroundItemLabel DescribeGroundItemLabel(OBJECT* o, ITEM* ip)
 {
     GroundItemLabelDescriptor descriptor;
     BuildGroundItemLabelDescriptor(o, ip, descriptor);
-    return {descriptor.Name, descriptor.TextColor, descriptor.BgColor, descriptor.Font == g_hFontBold};
+    return {descriptor.Name, descriptor.TextColor, descriptor.BgColor, descriptor.Bold};
 }
 
 void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)

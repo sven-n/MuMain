@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Data/GameData/ItemData/ItemDefinition.h"
+#include "Data/GameData/ItemData/ItemGroundLabels.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/ItemType.h"
@@ -127,6 +128,18 @@ public:
         return m_tooltipFile;
     }
 
+    // The ground label styles and standard rules (Data/Items/Tooltips/GroundLabels.json).
+    void SetGroundLabels(GroundLabelFile file)
+    {
+        ++m_version;
+        m_groundLabels = std::move(file);
+    }
+
+    const GroundLabelFile& GetGroundLabels() const
+    {
+        return m_groundLabels;
+    }
+
     // The item's stat profile laid over the default; the default for empty
     // slots and invalid ids.
     const ItemStatProfile& GetStatProfile(int itemType) const
@@ -227,6 +240,7 @@ private:
     std::vector<RuleData> m_ruleData;
     ItemStatProfiles m_statProfiles;
     ItemTooltipFile m_tooltipFile;
+    GroundLabelFile m_groundLabels;
     // GetItemTypesWithTag's lists, one per tag.
     std::array<std::vector<int>, static_cast<size_t>(ItemTag::Count)> m_itemTypesByTag;
     // GetItemTypesWithTagInUseOrder's lists, one per tag.

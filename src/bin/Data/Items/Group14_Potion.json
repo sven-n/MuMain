@@ -302,6 +302,7 @@
           "levels": [1, 1]
         }
       ],
+      "groundLabels": [{"style": "white"}],
       "width": 1,
       "height": 1,
       "sellValue": 30,
@@ -347,6 +348,7 @@
           "levels": [1, 1]
         }
       ],
+      "groundLabels": [{"style": "white", "levels": [1, 1]}],
       "width": 1,
       "height": 2,
       "level": 15,
@@ -724,6 +726,7 @@
           "levels": [15, 15]
         }
       ],
+      "groundLabels": [{"style": "white", "levels": [1, 1]}, {"style": "white", "levels": [3, 3]}, {"style": "white", "levels": [5, 6]}, {"style": "white", "levels": [8, 12]}, {"style": "eventItem"}],
       "width": 1,
       "height": 1,
       "sellable": false,
@@ -805,6 +808,7 @@
           "levels": [2, 2]
         }
       ],
+      "groundLabels": [{"style": "white"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -841,6 +845,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -879,6 +884,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 30,
@@ -893,6 +899,7 @@
         "es": "Zen",
         "pt": "Zen"
       },
+      "groundLabels": [{"style": "zen"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -929,6 +936,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 72,
@@ -952,6 +960,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "devilSquareEntry"}],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -975,6 +984,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "devilSquareEntry"}],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1001,6 +1011,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "devilSquareEntry"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -1143,6 +1154,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "eventItem", "levels": [1, 3]}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1182,6 +1194,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 78,
@@ -1238,6 +1251,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "questItem", "levels": [1, 1]}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -1297,6 +1311,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "questItem", "levels": [1, 1]}],
       "width": 1,
       "height": 2,
       "tradable": false,
@@ -1407,6 +1422,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -1432,6 +1448,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -1468,6 +1485,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "sellValue": 75,
@@ -1516,6 +1534,7 @@
           "levels": [1, 1]
         }
       ],
+      "groundLabels": [{"style": "giftBoxPink", "levels": [0, 1]}, {"style": "white"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -1563,6 +1582,7 @@
           "levels": [1, 1]
         }
       ],
+      "groundLabels": [{"style": "giftBoxRed", "levels": [0, 1]}, {"style": "white"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -1610,6 +1630,7 @@
           "levels": [1, 1]
         }
       ],
+      "groundLabels": [{"style": "giftBoxBlue", "levels": [0, 1]}, {"style": "white"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -1778,6 +1799,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -1806,6 +1828,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -1834,6 +1857,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -1862,6 +1886,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -1889,6 +1914,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "halloween"}],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -1931,6 +1957,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "halloween"}],
       "width": 1,
       "height": 2,
       "repairable": false
@@ -1972,6 +1999,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "halloween"}],
       "width": 1,
       "height": 2,
       "repairable": false
@@ -2013,6 +2041,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "halloween"}],
       "width": 1,
       "height": 2,
       "repairable": false
@@ -2054,6 +2083,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "halloween"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -2095,6 +2125,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "halloween"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -2196,6 +2227,7 @@
           "when": ["durability"]
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2219,6 +2251,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2278,6 +2311,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2301,6 +2335,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2324,6 +2359,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2347,6 +2383,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2370,6 +2407,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2422,6 +2460,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2598,6 +2637,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2637,6 +2677,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -2676,6 +2717,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -2715,6 +2757,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -2754,6 +2797,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -2793,6 +2837,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -2832,6 +2877,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -2871,6 +2917,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -2927,6 +2974,7 @@
           "text": "@available"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 2,
       "tradable": false,
@@ -2983,6 +3031,7 @@
           "text": "@available"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 2,
       "tradable": false,
@@ -3039,6 +3088,7 @@
           "text": "@available"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 2,
       "tradable": false,
@@ -3095,6 +3145,7 @@
           "text": "@available"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 2,
       "tradable": false,
@@ -3166,6 +3217,7 @@
           "text": "@available"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 2,
       "tradable": false,
@@ -3188,6 +3240,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -3206,6 +3259,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cherryBlossom"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -3242,6 +3296,7 @@
           "color": "purple"
         }
       ],
+      "groundLabels": [{"style": "cherryBlossom"}],
       "width": 1,
       "height": 2,
       "repairable": false
@@ -3278,6 +3333,7 @@
           "color": "purple"
         }
       ],
+      "groundLabels": [{"style": "cherryBlossom"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -3314,6 +3370,7 @@
           "color": "purple"
         }
       ],
+      "groundLabels": [{"style": "cherryBlossom"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -3336,6 +3393,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cherryBlossom"}],
       "width": 1,
       "height": 2,
       "repairable": false
@@ -3358,6 +3416,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cherryBlossom"}],
       "width": 1,
       "height": 2,
       "repairable": false
@@ -3380,6 +3439,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cherryBlossom"}],
       "width": 1,
       "height": 2,
       "repairable": false
@@ -3393,6 +3453,7 @@
         "pt": "Cartão do Pers. Invocador"
       },
       "tags": ["cashShop", "noClassLines"],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3416,6 +3477,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3439,6 +3501,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3478,6 +3541,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3501,6 +3565,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3568,6 +3633,7 @@
           "color": "purple"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3607,6 +3673,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -3646,6 +3713,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 2,
       "height": 2,
       "tradable": false,
@@ -3702,6 +3770,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "eventItem"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -3745,6 +3814,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 1,
       "height": 1,
       "level": 32,
@@ -3813,6 +3883,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -3838,6 +3909,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -3863,6 +3935,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -3888,6 +3961,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -3913,6 +3987,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -3938,6 +4013,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -3963,6 +4039,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -4015,6 +4092,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -4082,6 +4160,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -4112,6 +4191,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "eventItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4147,6 +4227,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "eventItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4165,6 +4246,7 @@
         "pt": "Reinic. de Habilidade Mestre"
       },
       "tags": ["cashShop"],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4182,6 +4264,7 @@
         "pt": "Ajuste de atributos"
       },
       "tags": ["cashShop"],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4199,6 +4282,7 @@
         "pt": "Serviço Nova Local. de Pers."
       },
       "tags": ["cashShop"],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4216,6 +4300,7 @@
         "pt": "Serviço Novo Nome do Pers."
       },
       "tags": ["cashShop"],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4233,6 +4318,7 @@
         "pt": "Serviço Nova Local. de Serv."
       },
       "tags": ["cashShop"],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4250,6 +4336,7 @@
         "pt": "Pacote Premium"
       },
       "tags": ["cashShop"],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4284,6 +4371,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "eventItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4318,6 +4406,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "eventItem"}],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -4349,6 +4438,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "eventItem"}],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -4368,6 +4458,7 @@
           "text": "@mayTurnIntoRareItem"
         }
       ],
+      "groundLabels": [{"style": "eventItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4390,6 +4481,7 @@
           "text": "@mayTurnIntoRareItem"
         }
       ],
+      "groundLabels": [{"style": "eventItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4419,6 +4511,7 @@
         "pt": "Passe de 30 dias"
       },
       "tags": ["cashShop"],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4436,6 +4529,7 @@
         "pt": "Passe de 90 dias"
       },
       "tags": ["cashShop"],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4453,6 +4547,7 @@
         "pt": "Passe de 30 dias - Pontos"
       },
       "tags": ["cashShop"],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4470,6 +4565,7 @@
         "pt": "Passe de 90 dias - Pontos"
       },
       "tags": ["cashShop"],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4487,6 +4583,7 @@
         "pt": "Passe de 3 horas"
       },
       "tags": ["cashShop"],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4504,6 +4601,7 @@
         "pt": "Passe de 5 horas"
       },
       "tags": ["cashShop"],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4521,6 +4619,7 @@
         "pt": "Passe de 10 horas"
       },
       "tags": ["cashShop"],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4582,6 +4681,7 @@
           "text": "@boxOfVariousItems"
         }
       ],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4604,6 +4704,7 @@
           "text": "@boxOfVariousItems"
         }
       ],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4626,6 +4727,7 @@
           "text": "@boxOfVariousItems"
         }
       ],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4648,6 +4750,7 @@
           "text": "@boxOfVariousItems"
         }
       ],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4670,6 +4773,7 @@
           "text": "@boxOfVariousItems"
         }
       ],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4692,6 +4796,7 @@
           "text": "@boxOfVariousItems"
         }
       ],
+      "groundLabels": [{"style": "cashShopService"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4757,6 +4862,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewelryCase"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -4779,6 +4885,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewelryCase"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -4801,6 +4908,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewelryCase"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -4823,6 +4931,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewelryCase"}],
       "width": 1,
       "height": 1,
       "repairable": false
@@ -4842,6 +4951,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4865,6 +4975,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4888,6 +4999,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4911,6 +5023,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4934,6 +5047,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4957,6 +5071,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 1,
       "tradable": false,
