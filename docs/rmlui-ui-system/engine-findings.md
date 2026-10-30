@@ -104,6 +104,20 @@ implementation findings, not general policy; recheck them when updating the engi
   `ninepatch(...)` remains the appropriate choice for stretchable frames. Visual GPU filtering
   and seams still need in-game verification.
 
+- **Images stay half a texel inside their sprite; only tiling axes repeat.** At a quad's outer
+  pixels linear filtering reaches half a texel past the edge texel. With the repeating sampler
+  the SDL_GPU backend used for everything, a sprite whose own edge is transparent pulled in the
+  texture's opposite edge (a faint dark line around the MU Helper bar, the character window's
+  frame pieces and stat boxes), and a sprite inside a sheet mixed in the next sprite whatever the
+  sampler (the line under the cash shop's unselected zone tabs and under stacked button states).
+  Now the decorators (`image()`, `tiled-*`, `ninepatch()`, repeated sprites) and `<img>` hold
+  their texture coordinates half a texel inside their sprite, or the whole image, on every side:
+  a band along each edge samples the edge texel's centre, the rest is mapped as before, so no
+  pixel moves at any scale and the geometry no longer depends on the sampler (`TexCoordClamp.h`).
+  An axis whose coordinates run past the sprite tiles it and is left alone, and the backend
+  repeats only along the axes a mesh tiles: `image(file repeat-x)` wraps across and clamps its
+  top and bottom. A sprite spanning its whole texture repeats by wrapping, so it shows no seams.
+
 - **Fractional `letter-spacing` accumulates before rounding.** The default font backend formerly
   truncated each character's spacing to an integer, making subpixel values ineffective. This
   fork keeps floating-point advances for measurement and mesh generation, rounding the final
