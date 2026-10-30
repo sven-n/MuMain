@@ -367,14 +367,6 @@
     <value>禪</value>
     <comment>legacy_id=100,224,1246,3523</comment>
   </data>
-  <data name="Heart" xml:space="preserve">
-    <value>心</value>
-    <comment>legacy_id=101</comment>
-  </data>
-  <data name="Jewel" xml:space="preserve">
-    <value>寶石</value>
-    <comment>legacy_id=102</comment>
-  </data>
   <data name="Transformation Ring" xml:space="preserve">
     <value>變身戒指</value>
     <comment>legacy_id=103</comment>
@@ -386,10 +378,6 @@
   <data name="Star of Sacred Birth" xml:space="preserve">
     <value>神聖誕生之星</value>
     <comment>legacy_id=105</comment>
-  </data>
-  <data name="Firecracker" xml:space="preserve">
-    <value>鞭炮</value>
-    <comment>legacy_id=106</comment>
   </data>
   <data name="Heart of love" xml:space="preserve">
     <value>愛的心</value>
@@ -2918,10 +2906,6 @@
   <data name="Absolute Weapon of Archangel" xml:space="preserve">
     <value>大天使的絕對武器</value>
     <comment>legacy_id=809</comment>
-  </data>
-  <data name="Stone" xml:space="preserve">
-    <value>結石</value>
-    <comment>legacy_id=810,2064</comment>
   </data>
   <data name="Absolute Staff of Archangel" xml:space="preserve">
     <value>大天使的絕對法杖</value>
