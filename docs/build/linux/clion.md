@@ -1,7 +1,7 @@
 # Linux - CLion
 
 CLion builds the native Linux client with its bundled CMake and your system
-GCC/Clang. For the prerequisites (GL, SDL, turbojpeg, the .NET SDK) and the
+GCC/Clang. For the prerequisites (system packages and the .NET SDK) and the
 shared concepts, see [linux/console.md](console.md).
 
 ## Setup
