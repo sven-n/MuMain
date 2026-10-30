@@ -218,6 +218,41 @@ public:
 private:
     std::string m_previous;
 };
+
+// The UI's language for the scope; the language before it comes back also when the test stops early.
+class UiLocaleScope
+{
+public:
+    explicit UiLocaleScope(const char* locale) : m_previous(I18N::GetCurrentLocale())
+    {
+        I18N::SetLocale(locale);
+    }
+    ~UiLocaleScope()
+    {
+        I18N::SetLocale(m_previous.c_str());
+    }
+    UiLocaleScope(const UiLocaleScope&) = delete;
+    UiLocaleScope& operator=(const UiLocaleScope&) = delete;
+
+private:
+    std::string m_previous;
+};
+
+// A test's measure of description text for the scope; afterwards the game's font measures it again.
+class TextMeasureScope
+{
+public:
+    explicit TextMeasureScope(ItemTooltipTextMeasure measure)
+    {
+        SetItemTooltipTextMeasure(measure);
+    }
+    ~TextMeasureScope()
+    {
+        SetItemTooltipTextMeasure(nullptr);
+    }
+    TextMeasureScope(const TextMeasureScope&) = delete;
+    TextMeasureScope& operator=(const TextMeasureScope&) = delete;
+};
 } // namespace
 
 // Every item's tooltip at every level 0 to 15, in the eleven variants of WriteItemTooltipSnapshot (plain, full, ancient,
@@ -698,9 +733,8 @@ TEST_CASE("The item cases' lines are in the UI's language [data][items][tooltip]
     TooltipDataScope data;
     TooltipHeroScope hero;
     MakeBladeMaster(hero.Hero());
-    SetItemTooltipTextMeasure(&FixedWidthMeasure);
-    const std::string uiLocale = I18N::GetCurrentLocale();
-    I18N::SetLocale("de");
+    TextMeasureScope measure(&FixedWidthMeasure);
+    UiLocaleScope german("de");
 
     const auto lines = [](int group, int number, int level)
     {
@@ -720,9 +754,6 @@ TEST_CASE("The item cases' lines are in the UI's language [data][items][tooltip]
     const std::vector<std::wstring> arrows = lines(4, 15, 1);
     const std::vector<std::wstring> boxOfLuck = lines(14, 11, 14);
     const std::vector<std::wstring> jackOLantern = lines(14, 46, 0);
-
-    I18N::SetLocale(uiLocale.c_str());
-    SetItemTooltipTextMeasure(nullptr);
 
     CHECK(has(bundle, L"10 Juwel des Segens kombiniert"));
     CHECK(has(bundle, L"Kann nach dem Zerlegen verwendet werden"));
