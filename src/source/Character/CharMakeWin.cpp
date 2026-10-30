@@ -41,16 +41,18 @@ namespace
     constexpr std::size_t kMinCharacterNameLength = 4;
 
     // A class's name, indexed by CLASS_*.
-    const std::array<const wchar_t* const*, MAX_CLASS> kJobNames{
+    const wchar_t* const* const kJobNames[] = {
         &I18N::Game::DarkWizard, &I18N::Game::DarkKnight, &I18N::Game::Elf,        &I18N::Game::MagicGladiator,
         &I18N::Game::DarkLord,   &I18N::Game::Summoner,   &I18N::Game::RageFighter};
 
     // A class's description, indexed by CLASS_*.
-    const std::array<const wchar_t* const*, MAX_CLASS> kJobDescriptions{
+    const wchar_t* const* const kJobDescriptions[] = {
         &I18N::Game::KingdomOfWizardsDescendantOfArka,      &I18N::Game::KingdomOfKnightsDescendantOfLorencia,
         &I18N::Game::KingdomOfElvesDescendantsOfNoria,      &I18N::Game::ComplexCharacterThatHasACharacteristics,
         &I18N::Game::CharismaticCharacterThatCanCommandThe, &I18N::Game::StrongMentalityAndExcellentInsightCreates,
         &I18N::Game::LegitimateBearersOfTheKarutanRoyal};
+    static_assert(std::size(kJobNames) == MAX_CLASS, "one name per creatable class");
+    static_assert(std::size(kJobDescriptions) == MAX_CLASS, "one description per creatable class");
 
     constexpr int kStatLineSpacing = 17;
     constexpr int kStatYOffset = 10;

@@ -37,13 +37,10 @@ namespace
         const wchar_t* const* text;
     };
 
-    const std::array<GuildStatusText, 5> kGuildStatusTexts{{
-        {0, &I18N::Game::Members},
-        {32, &I18N::Game::BattleM},
-        {64, &I18N::Game::AssistM},
-        {128, &I18N::Game::Master},
-        {255, &I18N::Game::Commoner},
-    }};
+    const GuildStatusText kGuildStatusTexts[] = {
+        {0, &I18N::Game::Members},  {32, &I18N::Game::BattleM},   {64, &I18N::Game::AssistM},
+        {128, &I18N::Game::Master}, {255, &I18N::Game::Commoner},
+    };
 
     // Shown for a guild status missing from kGuildStatusTexts (OpenMU sends only those five); the
     // client has always shown the font name's text there.
@@ -121,10 +118,10 @@ void CCharInfoBalloon::Render()
 const wchar_t* CCharInfoBalloon::GetGuildStatusText(std::uint8_t guildStatus)
 {
     const auto it =
-        std::lower_bound(kGuildStatusTexts.begin(), kGuildStatusTexts.end(), guildStatus,
+        std::lower_bound(std::begin(kGuildStatusTexts), std::end(kGuildStatusTexts), guildStatus,
                          [](const GuildStatusText& entry, std::uint8_t status) { return entry.status < status; });
 
-    return (it != kGuildStatusTexts.end() && it->status == guildStatus) ? *it->text : *kUnknownGuildStatusText;
+    return (it != std::end(kGuildStatusTexts) && it->status == guildStatus) ? *it->text : *kUnknownGuildStatusText;
 }
 
 void CCharInfoBalloon::SetInfo()

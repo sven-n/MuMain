@@ -47,12 +47,13 @@ namespace
     constexpr int kTooltipLineLimit = 50;
 
     // The pet command names, in PET_COMMAND order.
-    const wchar_t* const* const kPetCommandNames[PET_CMD_END] = {
+    const wchar_t* const* const kPetCommandNames[] = {
         &I18N::Game::BasicAction,
         &I18N::Game::RandomAutomaticAttack,
         &I18N::Game::AttackWithOwner,
         &I18N::Game::AttackTarget,
     };
+    static_assert(std::size(kPetCommandNames) == PET_CMD_END, "one name per pet command");
 
     std::wstring SanitizeWideStringFormat(const wchar_t* format)
     {

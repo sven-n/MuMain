@@ -42,7 +42,7 @@ struct NoticeLine
 
 // The board's lines, page by page from kNoticeFirstPage; that page shows the guardian contract
 // messages, as the original did.
-const NoticeLine kNoticeLines[(kNoticePageCount - kNoticeFirstPage) * kNoticeLinesPerPage] = {
+const NoticeLine kNoticeLines[] = {
     {&I18N::Game::YouHaveBeenRegisteredToBeAGuardianToProtectTheWolf, false},
     {&I18N::Game::YourRoleAsAGuardianWillBeCancelledWhenYouWarp, false},
     {&I18N::Game::YouHaveBeenDisqualifiedToBeAGuardian, false},
@@ -68,6 +68,8 @@ const NoticeLine kNoticeLines[(kNoticePageCount - kNoticeFirstPage) * kNoticeLin
     {&kNoNoticeText, false},
     {&I18N::Game::AbovePenaltyIsValidTillTheNextCrywolfBattle, false},
 };
+static_assert(std::size(kNoticeLines) == (kNoticePageCount - kNoticeFirstPage) * kNoticeLinesPerPage,
+              "four lines on each notice page");
 } // namespace
 
 BYTE m_AltarState[5] = { 2,2,2,2,2 };

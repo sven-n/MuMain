@@ -30,35 +30,45 @@ constexpr std::chrono::seconds kMatchCountdownDuration{30};
 constexpr int kMatchCastleCongratulations = TYPE_MATCH_CASTLE_END + 1;
 
 // Each event's countdown lines, in MATCH_TYPE order from its first countdown type.
-const wchar_t* const* const kDevilSquareCountdownFormats[TYPE_MATCH_DEVIL_CLOSE - TYPE_MATCH_DEVIL_ENTER_START + 1] = {
+const wchar_t* const* const kDevilSquareCountdownFormats[] = {
     &I18N::Game::YouWillEnterDevilSquareDSecondsFromNow,
     &I18N::Game::TheGateOfDevilSquareWillCloseDownInDSeconds,
     &I18N::Game::TheGateOfDevilSquareIsClosingDownDSecondsRemaining,
 };
-const wchar_t* const* const kBloodCastleCountdownFormats[TYPE_MATCH_CASTLE_END - TYPE_MATCH_CASTLE_ENTER_CLOSE + 1] = {
+const wchar_t* const* const kBloodCastleCountdownFormats[] = {
     &I18N::Game::SClosingInDSeconds,
     &I18N::Game::SInfiltrationInDSeconds,
     &I18N::Game::SEventEndsInDSeconds,
     &I18N::Game::SEventShutsDownInDSeconds,
 };
-const wchar_t* const* const kChaosCastleCountdownFormats[TYPE_MATCH_CHAOS_END - TYPE_MATCH_CHAOS_ENTER_START + 1] = {
+const wchar_t* const* const kChaosCastleCountdownFormats[] = {
     &I18N::Game::SClosingInDSeconds,
     &I18N::Game::SPenetrationInDSeconds,
     &I18N::Game::SEventEndsInDSeconds,
     &I18N::Game::SEventShutsDownInDSeconds,
 };
-const wchar_t* const* const
-    kCursedTempleCountdownFormats[TYPE_MATCH_CURSEDTEMPLE_GAME_START - TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE + 1] = {
-        &I18N::Game::AdvanceToTheTempleAfterDSeconds,
-        &I18N::Game::BattleBeginsInDSeconds,
+const wchar_t* const* const kCursedTempleCountdownFormats[] = {
+    &I18N::Game::AdvanceToTheTempleAfterDSeconds,
+    &I18N::Game::BattleBeginsInDSeconds,
 };
-const wchar_t* const* const
-    kDoppelgangerCountdownFormats[TYPE_MATCH_DOPPELGANGER_CLOSE - TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE + 1] = {
-        &I18N::Game::EntranceToDoppelgangerWillCloseInDSeconds,
-        &I18N::Game::DoppelgangerWillBeginInDSeconds,
-        &I18N::Game::DSecondsLeftToEliminateIceWalker,
-        &I18N::Game::DSecondsLeftUntilTheEndOfDoppelganger,
+const wchar_t* const* const kDoppelgangerCountdownFormats[] = {
+    &I18N::Game::EntranceToDoppelgangerWillCloseInDSeconds,
+    &I18N::Game::DoppelgangerWillBeginInDSeconds,
+    &I18N::Game::DSecondsLeftToEliminateIceWalker,
+    &I18N::Game::DSecondsLeftUntilTheEndOfDoppelganger,
 };
+static_assert(std::size(kDevilSquareCountdownFormats) == TYPE_MATCH_DEVIL_CLOSE - TYPE_MATCH_DEVIL_ENTER_START + 1,
+              "one format per Devil Square countdown type");
+static_assert(std::size(kBloodCastleCountdownFormats) == TYPE_MATCH_CASTLE_END - TYPE_MATCH_CASTLE_ENTER_CLOSE + 1,
+              "one format per Blood Castle countdown type");
+static_assert(std::size(kChaosCastleCountdownFormats) == TYPE_MATCH_CHAOS_END - TYPE_MATCH_CHAOS_ENTER_START + 1,
+              "one format per Chaos Castle countdown type");
+static_assert(std::size(kCursedTempleCountdownFormats) ==
+                  TYPE_MATCH_CURSEDTEMPLE_GAME_START - TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE + 1,
+              "one format per Illusion Temple countdown type");
+static_assert(std::size(kDoppelgangerCountdownFormats) ==
+                  TYPE_MATCH_DOPPELGANGER_CLOSE - TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE + 1,
+              "one format per Doppelganger countdown type");
 
 template <std::size_t N>
 void ClearWideBuffer(wchar_t (&buffer)[N])

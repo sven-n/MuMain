@@ -20,10 +20,10 @@ using namespace mu::ui::window;
 namespace
 {
 // The five actions, top to bottom: trade, buy, party, follow, duel.
-constexpr int kQuickCommandCount = 5;
-const wchar_t* const* const kQuickCommandLabels[kQuickCommandCount] = {
+const wchar_t* const* const kQuickCommandLabels[] = {
     &I18N::Game::Trade, &I18N::Game::Buy1124, &I18N::Game::Party, &I18N::Game::Follow, &I18N::Game::Duel,
 };
+constexpr int kQuickCommandCount = static_cast<int>(std::size(kQuickCommandLabels));
 } // namespace
 
 const wchar_t* mu::ui::window::CQuickCommandWindow::GetCommandLabel(int index)

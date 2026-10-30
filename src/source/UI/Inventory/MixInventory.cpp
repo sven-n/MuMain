@@ -59,10 +59,12 @@ float TextFitScale(Rml::Element* probe, const wchar_t* text, float boxWidth, flo
 }
 
 // The castle senior mix's description, in row order.
-const wchar_t* const* const kCastleSeniorDescription[CMixInventory::CASTLE_SENIOR_DESCRIPTION_ROWS] = {
+const wchar_t* const* const kCastleSeniorDescription[] = {
     &I18N::Game::BraveOne,        &I18N::Game::NowYouHaveBecome, &I18N::Game::ALordOfTheCastle,
     &I18N::Game::MayTheBlessings, &I18N::Game::OfTheGuardian,    &I18N::Game::BeUponYou,
 };
+static_assert(std::size(kCastleSeniorDescription) == CMixInventory::CASTLE_SENIOR_DESCRIPTION_ROWS,
+              "one text per description row");
 } // namespace
 
 const wchar_t* CMixInventory::GetCastleSeniorDescription(int row)

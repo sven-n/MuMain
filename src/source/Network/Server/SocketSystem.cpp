@@ -19,10 +19,12 @@ using namespace SEASON4A;
 namespace
 {
 // The socket option categories' names (a seed's element), in category order from SOC_IMPROVE_ATTACK.
-const wchar_t* const* const kSocketCategoryNames[MAX_SOCKET_OPTION_CATEGORY - SOC_IMPROVE_ATTACK] = {
+const wchar_t* const* const kSocketCategoryNames[] = {
     &I18N::Game::Fire,      &I18N::Game::Water, &I18N::Game::Ice,    &I18N::Game::Wind,
     &I18N::Game::Lightning, &I18N::Game::Earth, &I18N::Game::Unique,
 };
+static_assert(std::size(kSocketCategoryNames) == MAX_SOCKET_OPTION_CATEGORY - SOC_IMPROVE_ATTACK,
+              "one name per socket option category");
 } // namespace
 
 CSocketItemMgr g_SocketItemMgr;

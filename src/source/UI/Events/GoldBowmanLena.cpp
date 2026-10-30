@@ -21,19 +21,19 @@ constexpr float kExitWidth = 36.f;
 constexpr float kExitHeight = 29.f;
 
 // The event notes above the counts, top to bottom.
-constexpr int kIntroNoteCount = 3;
-const wchar_t* const* const kIntroNotes[kIntroNoteCount] = {
+const wchar_t* const* const kIntroNotes[] = {
     &I18N::Game::October28November112010,
     &I18N::Game::RegisterTheSignInGame,
     &I18N::Game::VisitOurHomepage,
 };
+constexpr int kIntroNoteCount = static_cast<int>(std::size(kIntroNotes));
 
 // The closing notes below the counts, top to bottom.
-constexpr int kClosingNoteCount = 2;
-const wchar_t* const* const kClosingNotes[kClosingNoteCount] = {
+const wchar_t* const* const kClosingNotes[] = {
     &I18N::Game::ToBeAbleToJoin,
     &I18N::Game::TheEvent,
 };
+constexpr int kClosingNoteCount = static_cast<int>(std::size(kClosingNotes));
 
 // The original printed its notes through mu_swprintf() as formats.
 std::wstring Formatted(const wchar_t* format)

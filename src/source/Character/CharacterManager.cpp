@@ -23,7 +23,7 @@ namespace
     const wchar_t* const* const kDefaultClassText = &I18N::Game::ErrorCode;
     constexpr int kMasterExperienceUnlockLevel = 400;
 
-    const std::array<ClassTextEntry, 18> kClassTextEntries{{
+    const ClassTextEntry kClassTextEntries[] = {
         {CLASS_WIZARD, &I18N::Game::DarkWizard},
         {CLASS_SOULMASTER, &I18N::Game::SoulMaster},
         {CLASS_GRANDMASTER, &I18N::Game::GrandMaster},
@@ -42,7 +42,7 @@ namespace
         {CLASS_DIMENSIONMASTER, &I18N::Game::DimensionMaster},
         {CLASS_RAGEFIGHTER, &I18N::Game::RageFighter},
         {CLASS_TEMPLENIGHT, &I18N::Game::FistMaster},
-    }};
+    };
 }
 
 CCharacterManager gCharacterManager;
@@ -170,9 +170,10 @@ bool CCharacterManager::IsMasterExperienceActive(const CLASS_TYPE byClass, const
 
 const wchar_t* CCharacterManager::GetCharacterClassText(const CLASS_TYPE byCharacterClass)
 {
-    const auto it = std::find_if(kClassTextEntries.begin(), kClassTextEntries.end(),
-        [byCharacterClass](const ClassTextEntry& entry) { return entry.type == byCharacterClass; });
-    return (it != kClassTextEntries.end()) ? *it->text : *kDefaultClassText;
+    const auto it =
+        std::find_if(std::begin(kClassTextEntries), std::end(kClassTextEntries),
+                     [byCharacterClass](const ClassTextEntry& entry) { return entry.type == byCharacterClass; });
+    return (it != std::end(kClassTextEntries)) ? *it->text : *kDefaultClassText;
 }
 
 CLASS_SKIN_INDEX CCharacterManager::GetSkinModelIndex(const CLASS_TYPE byClass)

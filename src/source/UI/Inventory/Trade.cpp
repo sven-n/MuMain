@@ -36,12 +36,13 @@ namespace
 constexpr int MyTradeWaitAfterChange = 150;
 
 // The warning before confirming a trade whose items changed, in line order.
-const wchar_t* const* const kTradeAlertLines[CTrade::TRADE_ALERT_LINES] = {
+const wchar_t* const* const kTradeAlertLines[] = {
     &I18N::Game::TheLevelsAndOptionsOfSomeItems,
     &I18N::Game::HaveBeenChangedInTrade,
     &I18N::Game::PleaseCheckWhetherTheItemIs,
     &I18N::Game::TheSameItemThatYouWantToTrade,
 };
+static_assert(std::size(kTradeAlertLines) == CTrade::TRADE_ALERT_LINES, "one text per warning line");
 } // namespace
 
 const wchar_t* CTrade::GetTradeAlertLine(int line)

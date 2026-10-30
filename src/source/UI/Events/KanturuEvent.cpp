@@ -34,11 +34,13 @@
 namespace
 {
 // The entry answers' texts, from POPUP_NONE to POPUP_NOT_MUNSTONE.
-const wchar_t* const* const kEntryResultTexts[mu::ui::window::CKanturu2ndEnterNpc::POPUP_NOT_MUNSTONE + 1] = {
+const wchar_t* const* const kEntryResultTexts[] = {
     &I18N::Game::FailedToEnter,
     &I18N::Game::_15PlayersHaveAlreadyEnteredYouCanNoLongerEnter,
     &I18N::Game::MoonstonePendantAuthenticationHasFailed,
 };
+static_assert(std::size(kEntryResultTexts) == mu::ui::window::CKanturu2ndEnterNpc::POPUP_NOT_MUNSTONE + 1,
+              "one text per entry result from POPUP_NONE to POPUP_NOT_MUNSTONE");
 
 // RenderText() shrinks a text wider than its box to fit it: the size it drew `text` at.
 float KanturuTextPxInBox(UI::Scaling::FontRole role, const wchar_t* text, float boxWidth)

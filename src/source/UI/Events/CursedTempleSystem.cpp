@@ -66,13 +66,15 @@ namespace
 
     // The temple skills' descriptions, from AT_SKILL_CURSED_TEMPLE_PRODECTION to
     // AT_SKILL_CURSED_TEMPLE_SUBLIMATION.
-    const wchar_t* const* const
-        kSkillDescriptions[AT_SKILL_CURSED_TEMPLE_SUBLIMATION - AT_SKILL_CURSED_TEMPLE_PRODECTION + 1] = {
-            &I18N::Game::AbsorbDamageWithTheProtectionShield,
-            &I18N::Game::MobilityDisabled,
-            &I18N::Game::RelocateToTheCharacterThatCarriesTheSacredItem,
-            &I18N::Game::ShieldGageReducedOf50,
+    const wchar_t* const* const kSkillDescriptions[] = {
+        &I18N::Game::AbsorbDamageWithTheProtectionShield,
+        &I18N::Game::MobilityDisabled,
+        &I18N::Game::RelocateToTheCharacterThatCarriesTheSacredItem,
+        &I18N::Game::ShieldGageReducedOf50,
     };
+    static_assert(std::size(kSkillDescriptions) ==
+                      AT_SKILL_CURSED_TEMPLE_SUBLIMATION - AT_SKILL_CURSED_TEMPLE_PRODECTION + 1,
+                  "one description per temple skill");
 
     //#ifdef _DEBUG
     const float posX[7] =

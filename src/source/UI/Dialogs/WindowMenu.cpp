@@ -20,10 +20,11 @@ using namespace mu::ui::window;
 namespace
 {
 // The row labels, top to bottom (CWindowMenu::MenuEntry order).
-const wchar_t* const* const kMenuLabels[CWindowMenu::MENU_MAX_INDEX] = {
+const wchar_t* const* const kMenuLabels[] = {
     &I18N::Game::SystemEsc, &I18N::Game::HelpF1, &I18N::Game::GuildG,
     &I18N::Game::MoveM,     &I18N::Game::MapTab, &I18N::Game::GensInfoB,
 };
+static_assert(std::size(kMenuLabels) == CWindowMenu::MENU_MAX_INDEX, "one label per menu row");
 
 template <typename Model>
 void SyncFloat(RmlModelBinder<Model>& binder, float Model::* field, const char* name, float value)
