@@ -2,6 +2,8 @@
 
 #include "MonsterDefinition.h"
 
+#include "Data/GameData/MonsterData/MonsterModelSlots.h"
+
 #include <algorithm>
 
 namespace Data::Monsters
@@ -16,6 +18,18 @@ const std::optional<MonsterAttacks>& GetAttacksOnMap(const MonsterDefinition& mo
         }
     }
     return monster.attacks;
+}
+
+const std::string& GetSoundSetWithModel(const MonsterDefinition& monster, int slot)
+{
+    for (const MonsterRandomVariant& variant : monster.randomVariants)
+    {
+        if (variant.soundSet && FindMonsterModelReference(variant.model) == slot)
+        {
+            return *variant.soundSet;
+        }
+    }
+    return monster.soundSet;
 }
 
 std::vector<Data::Maps::MapRef> FindMapsOfOtherVariants(const MonsterDefinition& monster, size_t variant)

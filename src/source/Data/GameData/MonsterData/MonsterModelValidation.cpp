@@ -6,7 +6,6 @@
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterModelsJson.h"
-#include "Data/GameData/MonsterData/MonsterSoundIds.h"
 
 #include <algorithm>
 #include <filesystem>
@@ -37,40 +36,6 @@ private:
     const std::string& m_slot;
     std::vector<ItemDataIssue>& m_issues;
 };
-
-bool NamesSoundOfModel(const MonsterModelDefinition& model, const std::string& value)
-{
-    return std::any_of(model.sounds.begin(), model.sounds.end(),
-                       [&](const MonsterModelSound& sound) { return SoundNameOf(sound) == value; });
-}
-
-void ValidateSounds(const MonsterModelDefinition& model, ModelProblems& problems)
-{
-    for (size_t i = 0; i < model.sounds.size(); ++i)
-    {
-        const std::string& id = model.sounds[i].id;
-        if (!id.empty() && !FindMonsterSoundId(id))
-        {
-            problems.Add(ItemDataIssueSeverity::Fatal, "sounds[" + std::to_string(i) + "].id",
-                         "\"" + id + "\" is not a SOUND_ id that code plays a model sound by");
-        }
-    }
-    for (size_t event = 0; event < model.soundEvents.size(); ++event)
-    {
-        const std::vector<std::string>& sounds = model.soundEvents[event].sounds;
-        for (size_t i = 0; i < sounds.size(); ++i)
-        {
-            if (NamesSoundOfModel(model, sounds[i]) || FindMonsterSoundId(sounds[i]))
-            {
-                continue;
-            }
-            problems.Add(ItemDataIssueSeverity::Fatal,
-                         "soundEvents[" + std::to_string(event) + "].sounds[" + std::to_string(i) + "]",
-                         "\"" + sounds[i] +
-                             "\" is no sound of the model (its id, or its file when it has none) and no SOUND_ id");
-        }
-    }
-}
 
 void ValidateParts(const MonsterModelDefinition& model, ModelProblems& problems)
 {
@@ -115,7 +80,6 @@ void ValidateMonsterModelNames(std::span<const MonsterModelDefinition> models, c
     for (const MonsterModelDefinition& model : models)
     {
         ModelProblems problems(source, model.slot, issues);
-        ValidateSounds(model, problems);
         for (size_t i = 0; i < model.bitmaps.size(); ++i)
         {
             if (!FindMonsterModelBitmapSlot(model.bitmaps[i].slot))

@@ -216,17 +216,20 @@ void CollectTextureError(const std::string& message)
     TextureErrors().push_back(message);
 }
 
-// The model table as the game loads it at startup: the effect catalogue
-// first, whose effect types the model list names. Once per test binary; the
-// table stays loaded.
+// The tables as the game loads them at startup: the effect catalogue first,
+// whose effect types the model list names, the monster list, the model list,
+// and the sound sets the monsters name, whose sounds a model loads (Q-MN78).
+// Once per test binary; the tables stay loaded (a test that builds its own
+// monster table puts the shipped one back).
 void LoadModelTable()
 {
     static bool loaded = false;
     if (loaded)
         return;
     std::string error;
-    if (!Data::Effects::LoadEffectTypes(error) || !g_MonsterDataHandler.LoadModels(error))
-        throw std::runtime_error("the model table does not load: " + error);
+    if (!Data::Effects::LoadEffectTypes(error) || !g_MonsterDataHandler.Load(error) ||
+        !g_MonsterDataHandler.LoadModels(error) || !g_MonsterDataHandler.LoadSounds(error))
+        throw std::runtime_error("the monster tables do not load: " + error);
     loaded = true;
 }
 

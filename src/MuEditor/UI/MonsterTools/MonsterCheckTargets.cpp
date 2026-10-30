@@ -24,6 +24,11 @@ constexpr std::string_view NameKey = "name";
 constexpr std::string_view AttacksKey = "attacks";
 // The map variants hold attacks only yet (monsters design, Q-MN65).
 constexpr std::string_view MapVariantsKey = "mapVariants";
+constexpr std::string_view SoundSetKey = "soundSet";
+constexpr std::string_view RandomVariantsKey = "randomVariants";
+// How the sound sets' problems name a field (MonsterSoundSetField): "sound
+// set <name> <key>"; a key has no space.
+constexpr std::string_view SoundSetPrefix = "sound set ";
 constexpr char IndexStart = '[';
 constexpr char IndexEnd = ']';
 
@@ -63,7 +68,26 @@ MonsterTool GetToolForField(std::string_view field)
     {
         return MonsterTool::Translations;
     }
+    if (key == SoundSetKey || key == RandomVariantsKey || GetSoundSetOfField(field))
+    {
+        return MonsterTool::Sounds;
+    }
     return key == AttacksKey || key == MapVariantsKey ? MonsterTool::Attacks : MonsterTool::Browser;
+}
+
+std::optional<std::string_view> GetSoundSetOfField(std::string_view field)
+{
+    if (!field.starts_with(SoundSetPrefix))
+    {
+        return std::nullopt;
+    }
+    const std::string_view rest = field.substr(SoundSetPrefix.size());
+    const size_t keyStart = rest.rfind(' ');
+    if (keyStart == std::string_view::npos || keyStart == 0)
+    {
+        return std::nullopt;
+    }
+    return rest.substr(0, keyStart);
 }
 
 std::optional<int> GetMapVariantOfField(std::string_view field)
@@ -94,6 +118,10 @@ const ToolWindowEntry& GetToolWindow(MonsterTool tool)
     else if (tool == MonsterTool::Attacks)
     {
         entry = FindTool(WindowIds::MonsterAttacks);
+    }
+    else if (tool == MonsterTool::Sounds)
+    {
+        entry = FindTool(WindowIds::MonsterSounds);
     }
     return entry != nullptr ? *entry : GetMonsterTools().browser;
 }

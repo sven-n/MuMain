@@ -9,17 +9,15 @@
 #include "MonsterModelValues.h"
 #include "MonsterSelection.h"
 #include "MonsterShownModel.h"
-#include "MonsterSoundEventsEditor.h"
-#include "MonsterSoundPreview.h"
 #include "MonsterStepLabel.h"
 #include "MonsterToolWindow.h"
+#include "MuMonsterSoundsUI.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/ItemTools/ItemModelFiles.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
-#include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
@@ -44,7 +42,6 @@ namespace
 {
 using Data::Monsters::MonsterDefinition;
 using Data::Monsters::MonsterModelDefinition;
-using Data::Monsters::MonsterModelSound;
 
 // Pixel sizes before the editor UI scale.
 constexpr float SearchWidth = 220.0f;
@@ -84,17 +81,6 @@ std::vector<std::string> ListedFiles()
     return files;
 }
 
-// Plays the sound at the preview volume. A model that is not open has not
-// loaded it: it is loaded as the model loads it.
-void PlaySoundOf(const MonsterModelSound& sound, bool modelOpen)
-{
-    if (!modelOpen)
-    {
-        Data::Monsters::ModelLoader::LoadSound(sound);
-    }
-    SoundPreview::Play(Data::Monsters::ModelLoader::SoundNumber(sound));
-}
-
 } // namespace
 
 const MonsterModelDefinition* MuMonsterModelUI::GetShownDraft(int slot) const
@@ -126,7 +112,7 @@ void MuMonsterModelUI::Render(bool* open)
     {
         const int number = g_MonsterSelection.GetNumber();
         const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
-        const std::optional<int> slot = monster != nullptr ? ShownModel::FindSlot(*monster) : std::nullopt;
+        const std::optional<int> slot = monster != nullptr ? ShownModel::FindShownSlot(*monster) : std::nullopt;
         MonsterModelDefinition* model = m_draft.Begin(slot.value_or(-1), ToolWindow::GetDataVersion());
         ShownModel::RenderSelectedMonster(number, monster);
         if (monster != nullptr && (!slot || model == nullptr))
@@ -170,12 +156,11 @@ void MuMonsterModelUI::RenderModel(MonsterModelDefinition& model, int slot)
     }
     if (ImGui::CollapsingHeader(I18N::Editor::Sounds, ImGuiTreeNodeFlags_DefaultOpen))
     {
-        SoundPreview::RenderVolume();
-        RenderSounds(model, slot);
+        RenderSounds(slot);
     }
-    if (ImGui::CollapsingHeader(I18N::Editor::SoundEvents, ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::CollapsingHeader(I18N::Editor::Cues, ImGuiTreeNodeFlags_DefaultOpen))
     {
-        SoundEventsEditor::Render(model, slot, ShownModel::IsOpen(slot), m_draft);
+        RenderCues(model);
     }
     if (ImGui::CollapsingHeader(I18N::Editor::MoreOfTheModelEntry))
     {
@@ -399,51 +384,48 @@ void MuMonsterModelUI::RenderAnimations(MonsterModelDefinition& model, int slot)
     ImGui::EndTable();
 }
 
-void MuMonsterModelUI::RenderSounds(const MonsterModelDefinition& model, int slot)
+// The sounds are the monster's sound set's (Q-MN78): the set the selected
+// monster plays with this model, and where it is edited.
+void MuMonsterModelUI::RenderSounds(int slot)
 {
-    if (model.sounds.empty())
+    const MonsterDefinition* monster = g_MonsterDatabase.Find(g_MonsterSelection.GetNumber());
+    const std::string set = monster != nullptr ? Data::Monsters::GetSoundSetWithModel(*monster, slot) : std::string();
+    ImGui::PushTextWrapPos(0.0f);
+    ImGui::TextDisabled("%s", I18N::Editor::ModelSoundsNote);
+    ImGui::PopTextWrapPos();
+    if (set.empty())
     {
-        ImGui::TextDisabled("%s", I18N::Editor::TheModelLoadsNoSounds);
+        ImGui::TextDisabled("%s", I18N::Editor::TheMonsterNamesNoSoundSet);
         return;
     }
-    constexpr ImGuiTableFlags flags =
-        ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit;
-    if (!ImGui::BeginTable("##Sounds", 4, flags))
+    ImGui::TextUnformatted(I18N::Format(I18N::Editor::TheMonsterPlays0, {set}).c_str());
+    ImGui::SameLine();
+    if (ImGui::SmallButton(I18N::Editor::OpenInMonsterSounds))
     {
+        g_MuMonsterSoundsUI.ShowEvent(set, std::nullopt);
+    }
+}
+
+// The cues, which sound events play on (Q-MN79); their frames are edited on
+// the events in Monster Sounds (Q-MN81).
+void MuMonsterModelUI::RenderCues(const MonsterModelDefinition& model)
+{
+    ImGui::PushTextWrapPos(0.0f);
+    ImGui::TextDisabled("%s", I18N::Editor::CuesNote);
+    ImGui::PopTextWrapPos();
+    if (model.cues.empty())
+    {
+        ImGui::TextDisabled("%s", I18N::Editor::TheModelHasNoCues);
         return;
     }
-    ImGui::TableSetupColumn("##Play");
-    ImGui::TableSetupColumn(I18N::Editor::SoundFile);
-    ImGui::TableSetupColumn(I18N::Editor::SoundId);
-    ImGui::TableSetupColumn(I18N::Editor::SoundChannels);
-    ImGui::TableHeadersRow();
-    const bool modelOpen = ShownModel::IsOpen(slot);
-    for (size_t index = 0; index < model.sounds.size(); ++index)
+    for (const Data::Monsters::MonsterModelCue& cue : model.cues)
     {
-        const MonsterModelSound& sound = model.sounds[index];
-        ImGui::PushID(static_cast<int>(index));
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        if (ImGui::SmallButton(I18N::Editor::PlayThisSound))
-        {
-            PlaySoundOf(sound, modelOpen);
-        }
-        ImGui::TableNextColumn();
-        ImGui::TextUnformatted(sound.file.c_str());
-        ImGui::TableNextColumn();
-        if (sound.id.empty())
-        {
-            ImGui::TextDisabled("%s", I18N::Editor::NumberOfItsFile);
-        }
-        else
-        {
-            ImGui::TextUnformatted(sound.id.c_str());
-        }
-        ImGui::TableNextColumn();
-        ImGui::Text("%d%s", sound.channels, sound.spatial ? ", 3D" : "");
-        ImGui::PopID();
+        char frames[64];
+        std::snprintf(frames, sizeof(frames), "%.2f - %.2f", static_cast<double>(cue.frames.first),
+                      static_cast<double>(cue.frames.second));
+        ImGui::BulletText("%s: %s %s", cue.name.c_str(), Data::Monsters::GetMonsterAnimationName(cue.animation).c_str(),
+                          frames);
     }
-    ImGui::EndTable();
 }
 
 void MuMonsterModelUI::RenderMore(const MonsterModelDefinition& model)

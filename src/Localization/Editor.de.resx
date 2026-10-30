@@ -2696,7 +2696,7 @@
     <value>Geräuschereignisse</value>
   </data>
   <data name="Sound events note" xml:space="preserve">
-    <value>Geräusche, die das Spiel für eine Figur dieses Modells spielt: in den Animationen eines Ereignisses (wenn ein Angriff beginnt, wenn sie getroffen wird oder stirbt, bei jedem Schritt und am Ende jeder Ruheschleife, bis 500 Einheiten vom Helden entfernt) oder zu seinen Momenten, welche Animation auch läuft. Ein Ereignis spielt Geräusche dieses Modells.</value>
+    <value>Geräusche, die das Spiel für die Monster dieses Sets spielt: in den Animationen eines Ereignisses (wenn ein Angriff beginnt, wenn es getroffen wird oder stirbt, bei jedem Schritt und am Ende jeder Ruheschleife, bis 500 Einheiten vom Helden entfernt), an seinen Marken des Monstermodells oder zu seinen Momenten, welche Animation auch läuft. Ein Ereignis spielt Geräusche dieses Sets.</value>
   </data>
   <data name="Sound event frames" xml:space="preserve">
     <value>Bilder</value>
@@ -2738,7 +2738,7 @@
     <value>Wann</value>
   </data>
   <data name="Sound event when note" xml:space="preserve">
-    <value>Animationen: das Ereignis spielt in ihnen, wenn ein Angriff, Treffer oder Tod beginnt, bei jedem Schritt eines Gangs und am Ende jeder Schleife von stop1 und stop2. Momente: wo das Spiel sie spielt, welche Animation auch läuft: attack und hit, wenn sie beginnen, death, wenn er beginnt (auch in Chaos Castle), stand, wenn das Monster zum Stehen gesetzt wird (ein Gang endet, der Server hält es an), walk bei jedem Schritt. Ein Ereignis nennt Animationen oder Momente.</value>
+    <value>Animationen: das Ereignis spielt in ihnen, wenn ein Angriff, Treffer oder Tod beginnt, bei jedem Schritt eines Gangs und am Ende jeder Schleife von stop1 und stop2. Marken: in den Bildern einer Marke des Monstermodells. Momente: wo das Spiel sie spielt, welche Animation auch läuft: attack und hit, wenn sie beginnen, death, wenn er beginnt (auch in Chaos Castle), stand, wenn das Monster zum Stehen gesetzt wird (ein Gang endet, der Server hält es an), walk bei jedem Schritt. Ein Ereignis nennt Animationen, Marken oder Momente.</value>
   </data>
   <data name="Sound event on" xml:space="preserve">
     <value>bei</value>
@@ -2774,7 +2774,7 @@
     <value>Geräuschereignis hinzufügen</value>
   </data>
   <data name="Sound event needs a sound of the model" xml:space="preserve">
-    <value>Ein Ereignis spielt Geräusche dieses Modells, und es lädt keine.</value>
+    <value>Ein Ereignis spielt Geräusche dieses Sets, und es hat keine.</value>
   </data>
   <data name="Step what sound events" xml:space="preserve">
     <value>Geräuschereignisse</value>
@@ -2805,5 +2805,194 @@
   </data>
   <data name="Preview volume note" xml:space="preserve">
     <value>Die Lautstärke der Geräuschvorschauen der Monster-Werkzeuge (Abspielen, die Geräusche der Vorschau). Die Geräuschlautstärke des Spiels bleibt, wie sie ist, und dies wird nicht gespeichert.</value>
+  </data>
+  <data name="Monster Sounds" xml:space="preserve">
+    <value>Monster-Geräusche</value>
+  </data>
+  <data name="Monster sound sets" xml:space="preserve">
+    <value>Monster-Geräuschsets</value>
+  </data>
+  <data name="Sound set" xml:space="preserve">
+    <value>Geräuschset</value>
+  </data>
+  <data name="No sound set" xml:space="preserve">
+    <value>keins</value>
+  </data>
+  <data name="No sound set is shown" xml:space="preserve">
+    <value>Wähle ein Geräuschset in der Liste oder füge eins hinzu.</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Öffnen</value>
+  </data>
+  <data name="Open in Monster Sounds" xml:space="preserve">
+    <value>In Monster-Geräusche öffnen</value>
+  </data>
+  <data name="Random variants" xml:space="preserve">
+    <value>Zufallsvarianten</value>
+  </data>
+  <data name="Random variants note" xml:space="preserve">
+    <value>Die Aussehen, die das Spiel zieht, wenn das Monster erscheint (Chaos Castle: die Elfe oder der Zauberer). Ein Aussehen spielt sein eigenes Geräuschset oder das des Eintrags. Der Code zieht das Aussehen, bis der Aufbau in Daten wandert (MN4).</value>
+  </data>
+  <data name="Random variant note" xml:space="preserve">
+    <value>das Spiel zieht eins, wenn das Monster erscheint</value>
+  </data>
+  <data name="Variant" xml:space="preserve">
+    <value>Variante</value>
+  </data>
+  <data name="Variant {0}" xml:space="preserve">
+    <value>Variante {0}</value>
+  </data>
+  <data name="Model" xml:space="preserve">
+    <value>Modell</value>
+  </data>
+  <data name="The entry" xml:space="preserve">
+    <value>der Eintrag</value>
+  </data>
+  <data name="The entry set" xml:space="preserve">
+    <value>die des Eintrags</value>
+  </data>
+  <data name="Add a sound set" xml:space="preserve">
+    <value>Geräuschset hinzufügen</value>
+  </data>
+  <data name="New sound set" xml:space="preserve">
+    <value>Neues Geräuschset</value>
+  </data>
+  <data name="Sound set copy of {0}" xml:space="preserve">
+    <value>{0} (Kopie)</value>
+  </data>
+  <data name="Sound set in use note" xml:space="preserve">
+    <value>Monster spielen das Set: gib ihnen zuerst ein anderes Set.</value>
+  </data>
+  <data name="Sound set name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Played by" xml:space="preserve">
+    <value>Gespielt von:</value>
+  </data>
+  <data name="No monster plays the set" xml:space="preserve">
+    <value>keinem Monster</value>
+  </data>
+  <data name="Sound files {0}" xml:space="preserve">
+    <value>Geräuschdateien ({0})</value>
+  </data>
+  <data name="The set has no sounds" xml:space="preserve">
+    <value>Das Set hat keine Geräuschdateien.</value>
+  </data>
+  <data name="Sound file in use note" xml:space="preserve">
+    <value>Ein Ereignis des Sets spielt sie: entferne das Geräusch zuerst aus dem Ereignis.</value>
+  </data>
+  <data name="Sound id hint" xml:space="preserve">
+    <value>SOUND_-Id (optional)</value>
+  </data>
+  <data name="Sound file missing" xml:space="preserve">
+    <value>Gib eine Datei unter Data/Sound ein.</value>
+  </data>
+  <data name="Sound file twice" xml:space="preserve">
+    <value>Das Set hat diese Datei schon.</value>
+  </data>
+  <data name="Sound file not in client folder" xml:space="preserve">
+    <value>Die Datei ist nicht im Client-Ordner: das Geräusch spielt nichts.</value>
+  </data>
+  <data name="Add a file" xml:space="preserve">
+    <value>Datei hinzufügen</value>
+  </data>
+  <data name="Cues" xml:space="preserve">
+    <value>Marken</value>
+  </data>
+  <data name="Cues note" xml:space="preserve">
+    <value>Punkte in den Animationen des Modells, an denen Geräuschereignisse spielen, etwa wo im Gang ein Fuß aufsetzt. Ihre Bilder werden an den Ereignissen in Monster-Geräusche bearbeitet; Monster-Vorschau markiert sie.</value>
+  </data>
+  <data name="The model has no cues" xml:space="preserve">
+    <value>Das Modell hat keine Marken.</value>
+  </data>
+  <data name="Model sounds note" xml:space="preserve">
+    <value>Die Geräusche stehen im Geräuschset, das das Monster nennt (Sounds.json), nicht im Modell: Monster mit einem Modell können verschieden klingen.</value>
+  </data>
+  <data name="The monster names no sound set" xml:space="preserve">
+    <value>Das gewählte Monster nennt kein Geräuschset.</value>
+  </data>
+  <data name="The monster plays {0}" xml:space="preserve">
+    <value>Das gewählte Monster spielt das Set {0}.</value>
+  </data>
+  <data name="Sound event cue" xml:space="preserve">
+    <value>Marke</value>
+  </data>
+  <data name="Sound event cues of {0}" xml:space="preserve">
+    <value>Marken von {0}</value>
+  </data>
+  <data name="Sound event new cue at {0} {1}" xml:space="preserve">
+    <value>Neue Marke am Bild der Vorschau ({0} {1})</value>
+  </data>
+  <data name="Sound event no cue {0}" xml:space="preserve">
+    <value>Das Modell hat keine Marke "{0}": das Ereignis spielt für dieses Monster nicht.</value>
+  </data>
+  <data name="Sound event cue of {0} {1}" xml:space="preserve">
+    <value>Marke von {0}: eine Änderung erreicht seine {1} Monster</value>
+  </data>
+  <data name="Use the preview frame" xml:space="preserve">
+    <value>Bild der Vorschau nehmen</value>
+  </data>
+  <data name="Use the preview frame note" xml:space="preserve">
+    <value>Die Marke beginnt am Bild, das Monster-Vorschau zeigt, in deren Animation, und behält ihre Länge.</value>
+  </data>
+  <data name="Remove the cue" xml:space="preserve">
+    <value>Marke entfernen</value>
+  </data>
+  <data name="Remove the cue question {0} {1}" xml:space="preserve">
+    <value>Kein anderes Geräuschereignis spielt an der Marke {0} von {1}. Die Marke auch aus dem Modell entfernen?</value>
+  </data>
+  <data name="Remove the cue too" xml:space="preserve">
+    <value>Marke auch entfernen</value>
+  </data>
+  <data name="Keep the cue" xml:space="preserve">
+    <value>Marke behalten</value>
+  </data>
+  <data name="Add a sound at this frame" xml:space="preserve">
+    <value>Geräusch an diesem Bild hinzufügen</value>
+  </data>
+  <data name="Add a sound needs a set" xml:space="preserve">
+    <value>Das Monster nennt für dieses Aussehen kein Geräuschset: gib ihm eins in Monster-Geräusche.</value>
+  </data>
+  <data name="Add a sound needs a file" xml:space="preserve">
+    <value>Das Geräuschset hat noch keine Geräuschdateien: füge eine in Monster-Geräusche hinzu.</value>
+  </data>
+  <data name="Cue name" xml:space="preserve">
+    <value>Marke</value>
+  </data>
+  <data name="Cue name taken" xml:space="preserve">
+    <value>Das Modell hat eine Marke mit diesem Namen.</value>
+  </data>
+  <data name="Cue of the model {0}" xml:space="preserve">
+    <value>eine Marke von {0}, für alle seine Monster</value>
+  </data>
+  <data name="In the sound set {0}" xml:space="preserve">
+    <value>Ein Ereignis im Geräuschset {0}</value>
+  </data>
+  <data name="Cue tag {0} {1} {2} {3}" xml:space="preserve">
+    <value>{0}: Bilder {1} bis {2}, spielt {3}</value>
+  </data>
+  <data name="Cue plays nothing" xml:space="preserve">
+    <value>nichts in diesem Set</value>
+  </data>
+  <data name="Step sound set" xml:space="preserve">
+    <value>{0} (Geräuschset): {1}</value>
+  </data>
+  <data name="Step monster sound set" xml:space="preserve">
+    <value>{0}: Geräuschset</value>
+  </data>
+  <data name="Step what add" xml:space="preserve">
+    <value>hinzufügen</value>
+  </data>
+  <data name="Step what remove" xml:space="preserve">
+    <value>entfernen</value>
+  </data>
+  <data name="Step what name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Step what sound files" xml:space="preserve">
+    <value>Geräuschdateien</value>
+  </data>
+  <data name="Step what cue {0}" xml:space="preserve">
+    <value>Marke {0}</value>
   </data>
 </root>

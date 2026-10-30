@@ -14,8 +14,10 @@
 #include "Core/Globals/_enum.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterModelJsonStorage.h"
+#include "Data/DataHandler/MonsterData/MonsterSoundJsonStorage.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 
 #include <array>
 #include <filesystem>
@@ -111,7 +113,7 @@ MonsterModelDefinition Hound()
     return Model("MONSTER_MODEL_HOUND", "Data/Monster/Monster02.bmd");
 }
 
-// A sound event that names no sound of the model and no SOUND_ id.
+// A sound event that names no sound of the set and no SOUND_ id.
 Data::Monsters::MonsterSoundEvent WrongSoundEvent()
 {
     Data::Monsters::MonsterSoundEvent event;
@@ -145,6 +147,7 @@ void BuildMonsters()
     g_MonsterDatabase.Build(monsters, "en");
     const std::array models = {Hound()};
     g_MonsterModelDatabase.Build(models);
+    g_MonsterSoundSetDatabase.Build({});
     g_MonsterEdits.GetHistory().Clear();
     g_MonsterEdits.GetHistory().MarkSaved();
 }
@@ -454,16 +457,93 @@ TEST_CASE("The monster edits refuse a model that the model list cannot hold [edi
     // A slot without an entry, and no slot.
     CHECK_FALSE(g_MonsterEdits.SetModel("File", Model("MONSTER_MODEL_BULL_FIGHTER", "Data/Monster/Monster01.bmd"), 0));
     CHECK_FALSE(g_MonsterEdits.SetModel("File", Model("MONSTER_MODEL_NOBODY", "Data/Monster/Monster01.bmd"), 0));
-    // A sound event that names no sound of the model and no SOUND_ id.
-    MonsterModelDefinition wrongSound = Hound();
-    wrongSound.soundEvents = {WrongSoundEvent()};
-    CHECK_FALSE(g_MonsterEdits.SetModel("Sound", wrongSound, 2));
+    // Two cues of one name.
+    MonsterModelDefinition twoCues = Hound();
+    twoCues.cues = {{"step", 2, {1.0f, 2.0f}}, {"step", 2, {7.0f, 8.0f}}};
+    CHECK_FALSE(g_MonsterEdits.SetModel("Cues", twoCues, 2));
     // What the file cannot hold: a model without a texture folder.
     MonsterModelDefinition noFolder = Hound();
     noFolder.load.textureFolders.clear();
     CHECK_FALSE(g_MonsterEdits.SetModel("Folders", noFolder, 2));
 
     CHECK(g_MonsterModelDatabase.GetVersion() == version);
+    CHECK_FALSE(g_MonsterEdits.GetHistory().CanUndo());
+}
+
+TEST_CASE("The monster edits add, change, rename and remove sound sets, each one undo step (Q-MN78) "
+          "[editor][monsters]")
+{
+    BuildMonsters();
+    Data::Monsters::MonsterSoundSet larva;
+    larva.name = "Larva";
+    larva.sounds = {{"Data/Sound/mLarva1.wav", "", 2, true}};
+    REQUIRE(g_MonsterEdits.SetSoundSet("Add", larva, 2));
+    CHECK(g_MonsterDataHandler.ReadSoundSet("Larva") == larva);
+
+    // The monster names the set; a rename gives it the new name in the same step.
+    std::optional<MonsterDefinition> budge = g_MonsterDataHandler.ReadMonster(2);
+    REQUIRE(budge);
+    budge->soundSet = "Larva";
+    REQUIRE(g_MonsterEdits.SetMonster("Set", *budge));
+    REQUIRE(g_MonsterEdits.RenameSoundSet("Name", "Larva", "Larva Cave", 2));
+    CHECK_FALSE(g_MonsterDataHandler.ReadSoundSet("Larva"));
+    CHECK(g_MonsterDataHandler.ReadSoundSet("Larva Cave"));
+    CHECK(g_MonsterDataHandler.ReadMonster(2)->soundSet == "Larva Cave");
+    CHECK(g_MonsterEdits.GetHistory().GetUndoLabel() == "Name");
+
+    REQUIRE(g_MonsterEdits.Undo());
+    CHECK(g_MonsterDataHandler.ReadSoundSet("Larva") == larva);
+    CHECK_FALSE(g_MonsterDataHandler.ReadSoundSet("Larva Cave"));
+    CHECK(g_MonsterDataHandler.ReadMonster(2)->soundSet == "Larva");
+    CHECK(g_MonsterSelection.GetNumber() == 2);
+
+    // A name that another set has, an empty one and a set that is not there.
+    larva.name = "Other";
+    REQUIRE(g_MonsterEdits.SetSoundSet("Add", larva, 2));
+    CHECK_FALSE(g_MonsterEdits.RenameSoundSet("Name", "Larva", "Other", 2));
+    CHECK_FALSE(g_MonsterEdits.RenameSoundSet("Name", "Larva", "", 2));
+    CHECK_FALSE(g_MonsterEdits.RenameSoundSet("Name", "Nobody", "New", 2));
+
+    g_MonsterDataHandler.ReopenChangedModels();
+    CHECK_FALSE(g_MonsterDataHandler.HasModelsToReopen());
+    REQUIRE(g_MonsterEdits.RemoveSoundSet("Remove", "Other", 2));
+    CHECK_FALSE(g_MonsterDataHandler.ReadSoundSet("Other"));
+    CHECK_FALSE(g_MonsterEdits.RemoveSoundSet("Remove", "Other", 2));
+    REQUIRE(g_MonsterEdits.Undo());
+    CHECK(g_MonsterDataHandler.ReadSoundSet("Other"));
+    // A sound set change loads its sounds for the open models between frames.
+    CHECK(g_MonsterDataHandler.HasModelsToReopen());
+    g_MonsterDataHandler.ReopenChangedModels();
+}
+
+TEST_CASE("Undo refuses a sound set step when the set changed past the history [editor][monsters]")
+{
+    BuildMonsters();
+    Data::Monsters::MonsterSoundSet larva;
+    larva.name = "Larva";
+    REQUIRE(g_MonsterEdits.SetSoundSet("Add", larva, 2));
+    // The set changes without a step.
+    larva.sounds = {{"Data/Sound/mLarva1.wav", "", 2, true}};
+    const std::array changed = {larva};
+    g_MonsterSoundSetDatabase.Build(changed);
+
+    CHECK_FALSE(g_MonsterEdits.Undo());
+    CHECK(g_MonsterEdits.GetHistory().GetLastRefusal() ==
+          MuEditor::Monsters::MonsterEditHistory::Refusal::MonstersChanged);
+    CHECK(g_MonsterDataHandler.ReadSoundSet("Larva") == larva);
+}
+
+TEST_CASE("The monster edits refuse a sound set the sound sets cannot hold [editor][monsters]")
+{
+    BuildMonsters();
+    const int version = g_MonsterSoundSetDatabase.GetVersion();
+    Data::Monsters::MonsterSoundSet wrongSound;
+    wrongSound.name = "Larva";
+    wrongSound.soundEvents = {WrongSoundEvent()};
+    CHECK_FALSE(g_MonsterEdits.SetSoundSet("Sound", wrongSound, 2));
+    Data::Monsters::MonsterSoundSet noName;
+    CHECK_FALSE(g_MonsterEdits.SetSoundSet("Name", noName, 2));
+    CHECK(g_MonsterSoundSetDatabase.GetVersion() == version);
     CHECK_FALSE(g_MonsterEdits.GetHistory().CanUndo());
 }
 
@@ -485,6 +565,11 @@ TEST_CASE("Saving the monster edits writes the model list too, a revert reads it
     const Data::Monsters::MonsterModelsLoadResult saved =
         Data::Monsters::LoadMonsterModelsFile(folder.Path() / Data::Monsters::GetMonsterModelsFile());
     CHECK(saved.models == std::vector{faster});
+    // And the sound sets, with none.
+    const Data::Monsters::MonsterSoundsLoadResult sounds =
+        Data::Monsters::LoadMonsterSoundsFile(folder.Path() / Data::Monsters::GetMonsterSoundsFile());
+    CHECK_FALSE(Data::Items::HasFatal(sounds.issues));
+    CHECK(sounds.sets.empty());
     CHECK_FALSE(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
 
     MonsterModelDefinition slower = Hound();
@@ -505,19 +590,21 @@ TEST_CASE("Saving the monster edits writes neither file when one has errors [edi
     BuildMonsters();
     std::vector<Data::Items::ItemDataIssue> issues;
     REQUIRE(g_MonsterEdits.AddMonster("Add", Monster(3, "Larva")));
-    // A model the model list cannot hold, put in past the edits' checks: a
-    // sound event that names no sound of the model and no SOUND_ id.
-    MonsterModelDefinition wrongSound = Hound();
+    // A set the sound sets cannot hold, put in past the edits' checks: a
+    // sound event that names no sound of the set and no SOUND_ id.
+    Data::Monsters::MonsterSoundSet wrongSound;
+    wrongSound.name = "Larva";
     wrongSound.soundEvents = {WrongSoundEvent()};
-    const std::array models = {wrongSound};
-    g_MonsterModelDatabase.Build(models);
+    const std::array sets = {wrongSound};
+    g_MonsterSoundSetDatabase.Build(sets);
 
     CHECK_FALSE(g_MonsterEdits.Save(issues));
 
     CHECK(Data::Items::HasFatal(issues));
-    // Before, the monster list was written and the model list was not.
+    // No file: the monster list and the model list would be written alone.
     CHECK_FALSE(std::filesystem::exists(folder.MonstersFile()));
     CHECK_FALSE(std::filesystem::exists(folder.Path() / Data::Monsters::GetMonsterModelsFile()));
+    CHECK_FALSE(std::filesystem::exists(folder.Path() / Data::Monsters::GetMonsterSoundsFile()));
     CHECK(g_MonsterEdits.GetHistory().IsModifiedSinceSave());
 }
 

@@ -5,23 +5,30 @@
 #include "MuMonsterPreviewUI.h"
 
 #include "MonsterAnimationFacts.h"
+#include "MonsterEdits.h"
 #include "MonsterModelValues.h"
 #include "MonsterSelection.h"
 #include "MonsterShownModel.h"
+#include "MonsterSoundEventsEditor.h"
 #include "MonsterSoundPreview.h"
+#include "MonsterStepLabel.h"
 #include "MonsterToolWindow.h"
 #include "MuMonsterModelUI.h"
+#include "MuMonsterSoundsUI.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewInput.h"
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewSubject.h"
+#include "../MuEditor/UI/ItemTools/ItemTextInput.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Audio/DSPlaySound.h"
 #include "Core/Globals/_define.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "I18N/All.h"
 #include "Render/Models/ZzzBMD.h"
@@ -42,7 +49,9 @@ namespace MuEditor::Monsters
 namespace
 {
 using Data::Monsters::MonsterDefinition;
+using Data::Monsters::MonsterModelCue;
 using Data::Monsters::MonsterModelDefinition;
+using Data::Monsters::MonsterSoundSet;
 
 // The view's height to its width, and its height before the editor UI scale.
 constexpr float ViewAspect = 0.75f;
@@ -56,7 +65,10 @@ constexpr float TurnDegreesPerFrame = 0.6f;
 // The end of an animation that holds its last frame (BMD::PlayAnimation).
 constexpr float HeldFrameMargin = 0.01f;
 constexpr ImU32 ImpactColor = IM_COL32(255, 90, 60, 255);
+constexpr ImU32 CueColor = IM_COL32(159, 213, 159, 255);
 constexpr float MarkerThickness = 2.0f;
+constexpr float CueFrameWidth = 70.0f;
+constexpr const char* AddSoundPopup = "##AddASoundAtThisFrame";
 
 // The frames the animation plays through before it starts again: one less
 // for an animation that ends where it starts (LockPositions), as
@@ -92,15 +104,59 @@ std::optional<Data::Monsters::MonsterSoundMoment> MomentOf(int animation)
     }
 }
 
-// The values the preview plays: the Monster Model tool's, with an edit that
-// is not stored yet, else the model list's.
+// The values the preview plays: the Monster Model tool's, or the Monster
+// Sounds tool's (a cue's frames), with an edit that is not stored yet, else
+// the model list's.
 const MonsterModelDefinition* ValuesOf(int slot)
 {
     if (const MonsterModelDefinition* draft = g_MuMonsterModelUI.GetShownDraft(slot))
     {
         return draft;
     }
+    if (const MonsterModelDefinition* draft = g_MuMonsterSoundsUI.GetShownModelDraft(slot))
+    {
+        return draft;
+    }
     return g_MonsterModelDatabase.Find(slot);
+}
+
+std::string FrameText(float frame)
+{
+    char text[32];
+    std::snprintf(text, sizeof(text), "%.2f", static_cast<double>(frame));
+    return text;
+}
+
+// What the cue's events play, for its tag: "Jelint_move01.wav (set Raymond)".
+std::string CueSounds(const MonsterSoundSet& set, const std::string& cue)
+{
+    std::string sounds;
+    for (const Data::Monsters::MonsterSoundEvent& event : set.soundEvents)
+    {
+        if (std::find(event.cues.begin(), event.cues.end(), cue) == event.cues.end())
+        {
+            continue;
+        }
+        for (const std::string& sound : event.sounds)
+        {
+            sounds += (sounds.empty() ? "" : ", ") + sound;
+        }
+    }
+    return sounds;
+}
+
+// The first event of the set on the cue.
+std::optional<size_t> FirstEventOn(const MonsterSoundSet& set, const std::string& cue)
+{
+    for (size_t index = 0; index < set.soundEvents.size(); ++index)
+    {
+        const std::vector<std::string>& cues = set.soundEvents[index].cues;
+        if (std::find(cues.begin(), cues.end(), cue) != cues.end())
+        {
+            return index;
+        }
+    }
+    return std::nullopt;
 }
 
 std::string AnimationLabel(int animation)
@@ -121,8 +177,12 @@ void MuMonsterPreviewUI::Render(bool* open)
     {
         const int number = g_MonsterSelection.GetNumber();
         const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
-        const std::optional<int> slot = monster != nullptr ? ShownModel::FindSlot(*monster) : std::nullopt;
         ShownModel::RenderSelectedMonster(number, monster);
+        if (monster != nullptr && !monster->randomVariants.empty())
+        {
+            RenderVariants(*monster);
+        }
+        const std::optional<int> slot = monster != nullptr ? ShownModel::FindShownSlot(*monster) : std::nullopt;
         if (monster != nullptr && !slot)
         {
             ShownModel::RenderWhyNoModel(*monster);
@@ -135,6 +195,66 @@ void MuMonsterPreviewUI::Render(bool* open)
         }
     }
     ToolWindow::End();
+}
+
+// The looks of a monster with random variants (Q-MN83): the model shown and
+// the set it plays.
+void MuMonsterPreviewUI::RenderVariants(const MonsterDefinition& monster)
+{
+    const int shown = ShownModel::GetShownVariant(monster);
+    ImGui::TextUnformatted(I18N::Editor::Variant);
+    ImGui::SameLine();
+    if (ImGui::RadioButton(I18N::Editor::TheEntry, shown < 0))
+    {
+        ShownModel::SetShownVariant(monster.number, -1);
+    }
+    for (size_t index = 0; index < monster.randomVariants.size(); ++index)
+    {
+        ImGui::SameLine();
+        ImGui::PushID(static_cast<int>(index));
+        const std::string label = I18N::Format(I18N::Editor::Variant0, {std::to_string(index + 1)});
+        if (ImGui::RadioButton(label.c_str(), shown == static_cast<int>(index)))
+        {
+            ShownModel::SetShownVariant(monster.number, static_cast<int>(index));
+        }
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("%s", monster.randomVariants[index].model.c_str());
+        }
+        ImGui::PopID();
+    }
+    ImGui::SameLine();
+    ImGui::TextDisabled("%s", I18N::Editor::RandomVariantNote);
+}
+
+const MonsterSoundSet* MuMonsterPreviewUI::ShownSet(int slot) const
+{
+    const MonsterDefinition* monster = g_MonsterDatabase.Find(g_MonsterSelection.GetNumber());
+    if (monster == nullptr)
+    {
+        return nullptr;
+    }
+    const std::string& name = Data::Monsters::GetSoundSetWithModel(*monster, slot);
+    return name.empty() ? nullptr : g_MonsterSoundSetDatabase.Find(name);
+}
+
+void MuMonsterPreviewUI::PlaySounds(int slot, int animation, float frame,
+                                    std::optional<Data::Monsters::MonsterSoundMoment> moment)
+{
+    const MonsterSoundSet* set = ShownSet(slot);
+    const MonsterModelDefinition* values = ValuesOf(slot);
+    if (set == nullptr || values == nullptr)
+    {
+        return;
+    }
+    if (animation >= 0)
+    {
+        SoundPreview::PlayEvents(*set, values->cues, animation, frame);
+    }
+    if (moment)
+    {
+        SoundPreview::PlayMoment(*set, *moment);
+    }
 }
 
 void MuMonsterPreviewUI::RenderPreview(int slot)
@@ -201,6 +321,10 @@ void MuMonsterPreviewUI::RenderControls(int slot, const MonsterModelDefinition& 
         Restart(slot);
     }
     RenderFrameSlider(slot, model.Actions[m_animation].NumAnimationKeys);
+    ImGui::SameLine();
+    RenderAddSound(slot);
+    RenderCueTags(slot, model.Actions[m_animation].NumAnimationKeys,
+                  std::max(static_cast<float>(model.Actions[m_animation].NumAnimationKeys) - HeldFrameMargin, 0.0f));
 
     const float speed = ModelValues::GetSpeed(values, slot, m_animation);
     ImGui::Text("%s", I18N::Format(I18N::Editor::Speed0PerFrame, {std::to_string(speed)}).c_str());
@@ -258,6 +382,151 @@ void MuMonsterPreviewUI::RenderFrameSlider(int slot, int keys)
     }
 }
 
+// The cues of the shown animation as tags under the frame slider (Q-MN80):
+// hovered, a tag says its frames and what it plays; clicked, Monster Sounds
+// shows its event.
+void MuMonsterPreviewUI::RenderCueTags(int slot, int keys, float last)
+{
+    const MonsterModelDefinition* values = ValuesOf(slot);
+    if (values == nullptr || keys <= 0 || last <= 0.0f)
+    {
+        return;
+    }
+    const MonsterSoundSet* set = ShownSet(slot);
+    const float scale = g_MuEditorCore.GetUIScale();
+    const float sliderWidth = FrameWidth * scale;
+    const float grab = ImGui::GetStyle().GrabMinSize;
+    const ImVec2 start = ImGui::GetCursorScreenPos();
+    bool any = false;
+    for (const MonsterModelCue& cue : values->cues)
+    {
+        if (cue.animation != m_animation)
+        {
+            continue;
+        }
+        any = true;
+        const float x = start.x + grab * 0.5f + (sliderWidth - grab) * std::min(cue.frames.first / last, 1.0f);
+        const ImVec2 size = ImGui::CalcTextSize(cue.name.c_str());
+        ImGui::SetCursorScreenPos(ImVec2(x - size.x * 0.5f, start.y));
+        ImGui::PushID(cue.name.c_str());
+        ImGui::PushStyleColor(ImGuiCol_Text, CueColor);
+        const bool clicked = ImGui::SmallButton(cue.name.c_str());
+        ImGui::PopStyleColor();
+        if (ImGui::IsItemHovered())
+        {
+            const std::string sounds = set != nullptr ? CueSounds(*set, cue.name) : std::string();
+            ImGui::SetTooltip("%s", I18N::Format(I18N::Editor::CueTag0123,
+                                                 {cue.name, FrameText(cue.frames.first), FrameText(cue.frames.second),
+                                                  sounds.empty() ? std::string(I18N::Editor::CuePlaysNothing)
+                                                                 : sounds + " (" + set->name + ")"})
+                                        .c_str());
+        }
+        if (clicked && set != nullptr)
+        {
+            g_MuMonsterSoundsUI.ShowEvent(set->name, FirstEventOn(*set, cue.name));
+        }
+        ImGui::PopID();
+        // The marker on the slider above.
+        ImGui::GetWindowDrawList()->AddLine(ImVec2(x, start.y - ImGui::GetFrameHeightWithSpacing()),
+                                            ImVec2(x, start.y - ImGui::GetStyle().ItemSpacing.y), CueColor,
+                                            MarkerThickness);
+    }
+    ImGui::SetCursorScreenPos(start);
+    if (any)
+    {
+        ImGui::Dummy(ImVec2(sliderWidth, ImGui::GetFrameHeight()));
+    }
+}
+
+// Add a sound at this frame (Q-MN82): a cue at the paused frame and an event
+// on it in the monster's set, then Monster Sounds shows the event to pick its
+// sound.
+void MuMonsterPreviewUI::RenderAddSound(int slot)
+{
+    const MonsterSoundSet* set = ShownSet(slot);
+    const MonsterModelDefinition* values = ValuesOf(slot);
+    const bool possible = set != nullptr && !set->sounds.empty() && values != nullptr;
+    ImGui::BeginDisabled(!possible);
+    if (ImGui::SmallButton(I18N::Editor::AddASoundAtThisFrame) && possible)
+    {
+        m_playing = false;
+        m_newCue = MuEditor::Monsters::SoundEventsEditor::MakeCue(*values, m_animation, m_frame);
+        ImGui::OpenPopup(AddSoundPopup);
+    }
+    ImGui::EndDisabled();
+    if (!possible && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    {
+        ImGui::SetTooltip("%s", set == nullptr ? I18N::Editor::AddASoundNeedsASet : I18N::Editor::AddASoundNeedsAFile);
+    }
+    RenderAddSoundPopup(slot);
+}
+
+void MuMonsterPreviewUI::RenderAddSoundPopup(int slot)
+{
+    if (!ImGui::BeginPopup(AddSoundPopup))
+    {
+        return;
+    }
+    const MonsterSoundSet* set = ShownSet(slot);
+    const std::optional<MonsterModelDefinition> model = g_MonsterDataHandler.ReadModel(slot);
+    if (set == nullptr || set->sounds.empty() || !model)
+    {
+        ImGui::CloseCurrentPopup();
+        ImGui::EndPopup();
+        return;
+    }
+    const float scale = g_MuEditorCore.GetUIScale();
+    ImGui::TextUnformatted(I18N::Editor::AddASoundAtThisFrame);
+    ImGui::Separator();
+    ImGui::TextUnformatted(I18N::Editor::CueName);
+    ImGui::SameLine();
+    Items::InputString("##CueName", m_newCue.name);
+    ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::CueOfTheModel0, {model->slot}).c_str());
+    ImGui::TextUnformatted(Data::Monsters::GetMonsterAnimationName(m_newCue.animation).c_str());
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(CueFrameWidth * scale);
+    ImGui::InputFloat("##From", &m_newCue.frames.first, 0.0f, 0.0f, "%.2f");
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(CueFrameWidth * scale);
+    ImGui::InputFloat("##To", &m_newCue.frames.second, 0.0f, 0.0f, "%.2f");
+    m_newCue.frames.first = std::max(m_newCue.frames.first, 0.0f);
+    m_newCue.frames.second = std::max(m_newCue.frames.second, m_newCue.frames.first + 0.1f);
+    ImGui::TextUnformatted(I18N::Format(I18N::Editor::InTheSoundSet0, {set->name}).c_str());
+    const bool taken = std::any_of(model->cues.begin(), model->cues.end(),
+                                   [&](const MonsterModelCue& cue) { return cue.name == m_newCue.name; });
+    ImGui::BeginDisabled(m_newCue.name.empty() || taken);
+    if (ImGui::Button(I18N::Editor::Add))
+    {
+        const std::string label =
+            StepLabel::Model(model->slot, I18N::Format(I18N::Editor::StepWhatCue0, {m_newCue.name}));
+        MonsterModelDefinition changedModel = *model;
+        changedModel.cues.push_back(m_newCue);
+        MonsterSoundSet changedSet = *set;
+        Data::Monsters::MonsterSoundEvent event;
+        event.cues = {m_newCue.name};
+        event.sounds = {Data::Monsters::SoundNameOf(set->sounds.front())};
+        changedSet.soundEvents.push_back(event);
+        const int monster = g_MonsterSelection.GetNumber();
+        g_MonsterEdits.BeginGroup(label);
+        g_MonsterEdits.SetModel(label, changedModel, monster);
+        g_MonsterEdits.SetSoundSet(label, changedSet, monster);
+        g_MonsterEdits.EndGroup();
+        g_MuMonsterSoundsUI.ShowEvent(changedSet.name, changedSet.soundEvents.size() - 1);
+        ImGui::CloseCurrentPopup();
+    }
+    ImGui::EndDisabled();
+    if (taken && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::CueNameTaken);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(I18N::Editor::Cancel))
+    {
+        ImGui::CloseCurrentPopup();
+    }
+    ImGui::EndPopup();
+}
+
 float MuMonsterPreviewUI::SpeedFactor(int slot) const
 {
     if (!m_gameFactors)
@@ -293,8 +562,7 @@ void MuMonsterPreviewUI::Advance(int slot, const MonsterModelDefinition& values)
     // the walk moment.
     if (m_sounds && m_animation == MONSTER01_WALK)
     {
-        SoundPreview::PlayEvents(values, m_animation, m_frame);
-        SoundPreview::PlayMoment(values, Data::Monsters::MonsterSoundMoment::Walk);
+        PlaySounds(slot, m_animation, m_frame, Data::Monsters::MonsterSoundMoment::Walk);
     }
     const float speed = std::max(ModelValues::GetSpeed(values, slot, m_animation), 0.0f) * SpeedFactor(slot);
     m_frame += speed * FPS_ANIMATION_FACTOR;
@@ -358,16 +626,7 @@ void MuMonsterPreviewUI::Restart(int slot)
     {
         return;
     }
-    const MonsterModelDefinition* values = ValuesOf(slot);
-    if (values != nullptr && m_animation != MONSTER01_WALK)
-    {
-        SoundPreview::PlayEvents(*values, m_animation, m_frame);
-    }
-    const std::optional<Data::Monsters::MonsterSoundMoment> moment = MomentOf(m_animation);
-    if (values != nullptr && moment)
-    {
-        SoundPreview::PlayMoment(*values, *moment);
-    }
+    PlaySounds(slot, m_animation != MONSTER01_WALK ? m_animation : -1, m_frame, MomentOf(m_animation));
 }
 
 void MuMonsterPreviewUI::RenderView(int slot, const MonsterModelDefinition& values)

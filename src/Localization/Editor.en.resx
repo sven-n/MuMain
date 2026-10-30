@@ -2717,7 +2717,7 @@
     <value>Sound events</value>
   </data>
   <data name="Sound events note" xml:space="preserve">
-    <value>Sounds the game plays for a character of this model: in an event's animations (when an attack starts, when it is hit or dies, at each step and at the end of each idle loop, within 500 units of the hero), or at its moments, whatever the animation. An event plays sounds of this model.</value>
+    <value>Sounds the game plays for the monsters of this set: in an event's animations (when an attack starts, when it is hit or dies, at each step and at the end of each idle loop, within 500 units of the hero), on its cues of the monster's model, or at its moments, whatever the animation. An event plays sounds of this set.</value>
   </data>
   <data name="Sound event frames" xml:space="preserve">
     <value>Frames</value>
@@ -2759,7 +2759,7 @@
     <value>When</value>
   </data>
   <data name="Sound event when note" xml:space="preserve">
-    <value>Animations: the event plays in them, when an attack, hit or death starts, at each step of a walk and at the end of each loop of stop1 and stop2. Moments: where the game plays them, whatever the animation: attack and hit when they start, death when it starts (also in Chaos Castle), stand when the monster is set to stand (a walk ends, the server stops it), walk at each step. An event names animations or moments.</value>
+    <value>Animations: the event plays in them, when an attack, hit or death starts, at each step of a walk and at the end of each loop of stop1 and stop2. Cues: in the frames of a cue of the monster's model. Moments: where the game plays them, whatever the animation: attack and hit when they start, death when it starts (also in Chaos Castle), stand when the monster is set to stand (a walk ends, the server stops it), walk at each step. An event names animations, cues or moments.</value>
   </data>
   <data name="Sound event on" xml:space="preserve">
     <value>on</value>
@@ -2795,7 +2795,7 @@
     <value>Add a sound event</value>
   </data>
   <data name="Sound event needs a sound of the model" xml:space="preserve">
-    <value>An event plays sounds of this model, and it loads none.</value>
+    <value>An event plays sounds of this set, and it has none.</value>
   </data>
   <data name="Step what sound events" xml:space="preserve">
     <value>sound events</value>
@@ -2826,5 +2826,194 @@
   </data>
   <data name="Preview volume note" xml:space="preserve">
     <value>The volume of the monster tools' sound previews (Play, the preview's sounds). The game's sound volume stays as it is, and this is not saved.</value>
+  </data>
+  <data name="Monster Sounds" xml:space="preserve">
+    <value>Monster Sounds</value>
+  </data>
+  <data name="Monster sound sets" xml:space="preserve">
+    <value>Monster sound sets</value>
+  </data>
+  <data name="Sound set" xml:space="preserve">
+    <value>Sound set</value>
+  </data>
+  <data name="No sound set" xml:space="preserve">
+    <value>none</value>
+  </data>
+  <data name="No sound set is shown" xml:space="preserve">
+    <value>Pick a sound set in the list, or add one.</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Open</value>
+  </data>
+  <data name="Open in Monster Sounds" xml:space="preserve">
+    <value>Open in Monster Sounds</value>
+  </data>
+  <data name="Random variants" xml:space="preserve">
+    <value>Random variants</value>
+  </data>
+  <data name="Random variants note" xml:space="preserve">
+    <value>The looks the game draws when the monster appears (Chaos Castle: the elf or the wizard). A look plays its own sound set, or the entry's. The code draws the look until the setup moves into data (MN4).</value>
+  </data>
+  <data name="Random variant note" xml:space="preserve">
+    <value>the game draws one when the monster appears</value>
+  </data>
+  <data name="Variant" xml:space="preserve">
+    <value>Variant</value>
+  </data>
+  <data name="Variant {0}" xml:space="preserve">
+    <value>variant {0}</value>
+  </data>
+  <data name="Model" xml:space="preserve">
+    <value>Model</value>
+  </data>
+  <data name="The entry" xml:space="preserve">
+    <value>the entry</value>
+  </data>
+  <data name="The entry set" xml:space="preserve">
+    <value>the entry's</value>
+  </data>
+  <data name="Add a sound set" xml:space="preserve">
+    <value>Add a sound set</value>
+  </data>
+  <data name="New sound set" xml:space="preserve">
+    <value>New sound set</value>
+  </data>
+  <data name="Sound set copy of {0}" xml:space="preserve">
+    <value>{0} (copy)</value>
+  </data>
+  <data name="Sound set in use note" xml:space="preserve">
+    <value>Monsters play the set: give them another set first.</value>
+  </data>
+  <data name="Sound set name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Played by" xml:space="preserve">
+    <value>Played by:</value>
+  </data>
+  <data name="No monster plays the set" xml:space="preserve">
+    <value>no monster</value>
+  </data>
+  <data name="Sound files {0}" xml:space="preserve">
+    <value>Sound files ({0})</value>
+  </data>
+  <data name="The set has no sounds" xml:space="preserve">
+    <value>The set has no sound files.</value>
+  </data>
+  <data name="Sound file in use note" xml:space="preserve">
+    <value>An event of the set plays it: remove the sound from the event first.</value>
+  </data>
+  <data name="Sound id hint" xml:space="preserve">
+    <value>SOUND_ id (optional)</value>
+  </data>
+  <data name="Sound file missing" xml:space="preserve">
+    <value>Enter a file below Data/Sound.</value>
+  </data>
+  <data name="Sound file twice" xml:space="preserve">
+    <value>The set has this file already.</value>
+  </data>
+  <data name="Sound file not in client folder" xml:space="preserve">
+    <value>The file is not in the client folder: the sound plays nothing.</value>
+  </data>
+  <data name="Add a file" xml:space="preserve">
+    <value>Add a file</value>
+  </data>
+  <data name="Cues" xml:space="preserve">
+    <value>Cues</value>
+  </data>
+  <data name="Cues note" xml:space="preserve">
+    <value>Points of the model's animations that sound events play on, such as where a foot lands in the walk. Their frames are edited on the events in Monster Sounds; Monster Preview marks them.</value>
+  </data>
+  <data name="The model has no cues" xml:space="preserve">
+    <value>The model has no cues.</value>
+  </data>
+  <data name="Model sounds note" xml:space="preserve">
+    <value>The sounds are in the sound set the monster names (Sounds.json), not in the model: monsters with one model can sound different.</value>
+  </data>
+  <data name="The monster names no sound set" xml:space="preserve">
+    <value>The selected monster names no sound set.</value>
+  </data>
+  <data name="The monster plays {0}" xml:space="preserve">
+    <value>The selected monster plays the set {0}.</value>
+  </data>
+  <data name="Sound event cue" xml:space="preserve">
+    <value>cue</value>
+  </data>
+  <data name="Sound event cues of {0}" xml:space="preserve">
+    <value>Cues of {0}</value>
+  </data>
+  <data name="Sound event new cue at {0} {1}" xml:space="preserve">
+    <value>New cue at the preview's frame ({0} {1})</value>
+  </data>
+  <data name="Sound event no cue {0}" xml:space="preserve">
+    <value>The model has no cue "{0}": the event does not play for this monster.</value>
+  </data>
+  <data name="Sound event cue of {0} {1}" xml:space="preserve">
+    <value>cue of {0}: a change reaches its {1} monsters</value>
+  </data>
+  <data name="Use the preview frame" xml:space="preserve">
+    <value>Use the preview's frame</value>
+  </data>
+  <data name="Use the preview frame note" xml:space="preserve">
+    <value>The cue starts at the frame Monster Preview shows, in its animation, and keeps its length.</value>
+  </data>
+  <data name="Remove the cue" xml:space="preserve">
+    <value>Remove the cue</value>
+  </data>
+  <data name="Remove the cue question {0} {1}" xml:space="preserve">
+    <value>No other sound event plays on the cue {0} of {1}. Remove the cue from the model too?</value>
+  </data>
+  <data name="Remove the cue too" xml:space="preserve">
+    <value>Remove the cue too</value>
+  </data>
+  <data name="Keep the cue" xml:space="preserve">
+    <value>Keep the cue</value>
+  </data>
+  <data name="Add a sound at this frame" xml:space="preserve">
+    <value>Add a sound at this frame</value>
+  </data>
+  <data name="Add a sound needs a set" xml:space="preserve">
+    <value>The monster names no sound set for this look: give it one in Monster Sounds.</value>
+  </data>
+  <data name="Add a sound needs a file" xml:space="preserve">
+    <value>The sound set has no sound files yet: add one in Monster Sounds.</value>
+  </data>
+  <data name="Cue name" xml:space="preserve">
+    <value>Cue</value>
+  </data>
+  <data name="Cue name taken" xml:space="preserve">
+    <value>The model has a cue of this name.</value>
+  </data>
+  <data name="Cue of the model {0}" xml:space="preserve">
+    <value>a cue of {0}, for all its monsters</value>
+  </data>
+  <data name="In the sound set {0}" xml:space="preserve">
+    <value>An event in the sound set {0}</value>
+  </data>
+  <data name="Cue tag {0} {1} {2} {3}" xml:space="preserve">
+    <value>{0}: frames {1} to {2}, plays {3}</value>
+  </data>
+  <data name="Cue plays nothing" xml:space="preserve">
+    <value>nothing in this set</value>
+  </data>
+  <data name="Step sound set" xml:space="preserve">
+    <value>{0} (sound set): {1}</value>
+  </data>
+  <data name="Step monster sound set" xml:space="preserve">
+    <value>{0}: sound set</value>
+  </data>
+  <data name="Step what add" xml:space="preserve">
+    <value>add</value>
+  </data>
+  <data name="Step what remove" xml:space="preserve">
+    <value>remove</value>
+  </data>
+  <data name="Step what name" xml:space="preserve">
+    <value>name</value>
+  </data>
+  <data name="Step what sound files" xml:space="preserve">
+    <value>sound files</value>
+  </data>
+  <data name="Step what cue {0}" xml:space="preserve">
+    <value>cue {0}</value>
   </data>
 </root>

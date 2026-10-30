@@ -18,17 +18,15 @@
 //         "textureFolders": ["Monster"],
 //         "animations": {"walk": 0.7},
 //         "headBone": 7,
-//         "sounds": [
-//           {"file": "Data/Sound/mBudge1.wav", "channels": 2, "spatial": true}
-//         ],
-//         "soundEvents": [
-//           {"on": ["stand", "walk"], ..., "sounds": ["Data/Sound/mBudge1.wav", ...]}, ...
+//         "cues": [
+//           {"name": "step 1", "animation": "walk", "frames": [1, 2]}
 //         ]
 //       } ] }
 //
-// docs/monster-data.md "Models" describes the fields. The reader checks the
-// form of the values; whether the names in them (slots, sound ids, effect
-// types, bitmap slots) exist is checked when the models are loaded.
+// docs/monster-data.md "Models" describes the fields; the sounds are in the
+// sound sets of Sounds.json (MonsterSoundsJson.h). The reader checks the form
+// of the values; whether the names in them (slots, effect types, bitmap
+// slots) exist is checked when the models are loaded.
 namespace Data::Monsters
 {
 constexpr int MonsterModelsFormatVersion = 2;
