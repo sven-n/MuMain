@@ -59,6 +59,10 @@ share with items) is planned in the
 | D24 | Render effects | The effect code stays code, but which item uses which effect moves into the model data: the glow as values (color names from a glow color list, `Data/Effects/GlowColors.json`, which has the colors of the old `PartObjectColor*` palettes; the meshes it is drawn on; the level it glows like), a render style (`RenderPartObjectBody` recipes; identical recipes share one name) and an item effect (the item branches of `RenderPartObjectEffect`). Effects that depend on the item level (+7 glow, excellent, ancient) stay generic code, and the entries for monsters and NPCs stay in code. The named looks are code for now; D25 moves what they are made of into data. |
 | D25 | Looks in data | Items keep naming their looks; what a named look is made of moves from code into data (phase 13). Skills, monsters and NPCs use the same look format, so the decision lives in the [roadmap](2026-09-29-data-driven-content-roadmap-design.md). |
 | D26 | Shared definitions | Defined once with a name and referenced by it; editors show where a definition is used and warn with that list before a shared definition changes. The decision lives in the [roadmap](2026-09-29-data-driven-content-roadmap-design.md). |
+| D68 | Ground labels | The name above an item on the ground takes its colour, background and bold from a **label style**, a named look in `Data/Items/GroundLabels.json` (D26). An item picks its styles with `groundLabels` in its item file, next to `nameLines`: the first entry whose `levels` hold. It is a client-only field that the exchange leaves out (D22). Items without one use the file's **standard rules**, today's level ladder as data: the first rule whose `when` holds gives the style, with the tooltip's conditions. The first styles are named by role (`ticket`, `seal`, `jewel`, `giftBoxRed`, …) and keep today's looks. The text stays code: the name line, Zen's amount, the set name and " +Skill +Option +Luck". Italic waits until the fonts have it. |
+| D69 | Colors window | MuEditor has one **Colors** window with a tab per use: glow colours (D24), ground label styles (D68) and tooltip colour groups. Each tab keeps its own list, because the values differ: a glow tints a model, a label style is a text look, and a tooltip colour group names one of the 14 theme colours the RmlUi themes draw. One panel in code serves every tab, with D26's "used by" and the list before a change. Windows ▸ Colors opens it, and so do the group entries (Items ▸ Glow Colors, Items ▸ Ground Label Styles) on their own tab. |
+| D70 | Conditions in the editor | Conditions are picked, not typed. Each one is a chip from a menu by kind (level, state, value, tag, class), with a description for each entry. The lists come from the loader's own, so the editor can't write a name the loader refuses. A **saved condition** is a combination under a name, in `Data/Items/Conditions.json`, used as `"@name"` in any `when`. It can't use another saved condition. New states, values and tags still need code. The same picker serves label rules and tooltip lines (#815 step 6). |
+| D71 | Item Tooltip | One item tool, **Item Tooltip**, shows how the selected item is presented: its ground label with D68's rules, and from #815 step 6a on its full tooltip. The preview has item controls (level, options, excellent, ancient, sockets, expired) and hero controls (class, level, stats). It draws the built lines in the editor, each with where it comes from (name line, description line, layout line, code). Next to them, the game's own tooltip box shows the previewed item in the legacy or modern theme. |
 | D21 | New item groups | *To discuss again when we reach phase 12.* Items may move into new groups (e.g. 16 = jewels, 17 = orbs) for the new client, while original Season 6 clients keep the old ids. Moved items keep their original id as a legacy id; OpenMU's Season 6 item serializer sends the legacy id, a serializer for the new client sends the new id. Planned after phases 3, 4 and OpenMU PR A, when little code depends on group numbers any more. |
 
 ## Current state
@@ -608,6 +612,8 @@ table:
 | **Rules** | Flags as a matrix (items × tradable, droppable, storable, sellable, …) for bulk editing. |
 | **Categories** | Tag-centered view: pick a tag, see and change its items. |
 | **Model and visuals** | Model file picker for `Data\Item\*.bmd` with 3D preview, texture folder, inventory and ground display values, cloth flag, and glow, render style and effects chosen from lists (D24), each with the list of the other items that use the same look. |
+| **Colors** (D69) | One window for the named colours, a tab each: glow colours, ground label styles and their standard rules, tooltip colour groups. Each entry shows the items that use it. |
+| **Item Tooltip** (D71) | The selected item's ground label and its label rules; from #815 step 6 on, its full tooltip preview and then its tooltip lines. |
 | **Look editor** (phase 13) | The shared look editor of the [roadmap](2026-09-29-data-driven-content-roadmap-design.md), opened for the looks of the selected item: its building blocks with a live preview, bone picking, the items that use a look and the warning before a shared look changes. |
 | **Item Translations** | Items × languages grid (every UI language, English first), the missing names counted per language, a filter for them, "same as English" for names that do not change. Built in phase 5, before the other tools. |
 | **Item Sync** (phase 7) | Export, Import and Update from server of the exchange file; Import and Update from server with a diff checked by hand (section 6). |
@@ -636,7 +642,7 @@ in both repos (as separate PRs, one per repo).
 | 6 | Editors | Client | MuMain | 2–5 | Focused MuEditor tools (section 9) on the rules of D26, including add/remove items and picking the looks of an item from lists. Takes over phase 5's item list. Done. |
 | 7 | Item sync, client side | Client | MuMain | 2, 6 | The exchange file of items and item formulas; MuEditor's Export, Import (step 1) and Update from server (step 4), the imports with a diff (section 6). The client-only fields of the item files (tags at first, `description`) are left out. |
 | B | Item sync, server side | Server | OpenMU | 7 (file format) | The item formulas as data (step 2), the read-only export endpoint (step 3) and the import page (step 5), as steps of phase 7 (section 6). |
-| 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. In steps (#815): an item's own texts go into its item file (`description`, D15), shared texts and layouts into a tooltip file. Steps 1–5 done (#813–#836, #863). Left: the item cases and the class line list still in code, the ground label colours, and the tooltip editor (#815 step 6); see the phase details. |
+| 8 | Data-driven tooltips | Client | MuMain | 2, 5 | Tooltip JSON converted from the `ItemTooltip*` files; `RenderItemInfo()` reads data; tooltip editor. Moved earlier if needed. In steps (#815): an item's own texts go into its item file (`description`, D15), shared texts and layouts into a tooltip file. Steps 1–5 done (#813–#836, #863). Left: the item cases and the class line list still in code, the ground label colours (D68–D71, six PRs), and the tooltip editor (#815 step 6); see the phase details. |
 | 9 | Item option definitions | Both | MuMain + C | 2 | Option groups in their own JSON files matching OpenMU's `ItemOptionDefinition`; exchange file and editor. |
 | 10 | Item sets | Both | MuMain + C | 2 | Item sets in JSON matching OpenMU's `ItemSetGroup`; exchange file and editor; based on the `item-set-editor` branch. Moved earlier if needed. |
 | C | Option and set sync, server side | Server | OpenMU | 9, 10 | Admin panel import/export for the option definition and item set exchange files. |
@@ -1284,8 +1290,38 @@ server with original clients (after phases 6 and B).
    - **The class line list** (`IsRequireClassRenderItem`: the items whose
      tooltip has no class lines), as an item tag.
    - **Ground label colours** (`BuildGroundItemLabelDescriptor`): the names
-     come from `nameLines` (#834), the colours are still chosen per item.
+     come from `nameLines` (#834), the colours are still chosen per item, from
+     four model lists and about 20 single-item rules. With D68–D71, in six
+     PRs:
+     1. **The data move**, with no visible change. `GroundLabels.json` holds
+        the styles and the standard rules. `groundLabels` goes on the about
+        200 items with a style of their own, with `levels` for the level
+        variants. Four new states: `socketItem`, `upperTierWings` (from
+        `wingTier`: the second- and third-tier wings and capes, the wings
+        that never turn green), `divineArchangel` and `skillLuckOrOption`.
+        The label then reads these instead of the lists. It is compared with
+        main for every item at +0 to +15, in six option variants and 11
+        languages: text, colours, background and bold. Two looks stay as
+        they are although they don't match their kind: the Chaos Castle
+        ticket is yellow beside the orange tickets, and the Summoner
+        Character Card is orange beside the yellow character cards.
+     2. **The Colors window** (D69), with the glow colour tool as its Glow
+        tab on the shared panel.
+     3. **Ground labels in MuEditor**: the Ground labels tab, and Item Tooltip
+        (D71) with the item controls, the label preview and an item's label
+        rules.
+     4. **The full tooltip preview**, #815 step 6a (D71).
+     5. **The standard rules and the condition picker** (D70), with saved
+        conditions.
+     6. **Tooltip colour groups**: `"colorGroups"` in `Tooltip.json`, each a
+        name for one of the 14 theme colours, usable by any tooltip line;
+        the Colors window's third tab.
+
+     Italic label styles follow once the fonts have italic: italic fonts on
+     Windows, and a slant in the Linux and macOS text code.
    - **The tooltip editor** in MuEditor (#815 step 6, designed as four PRs).
+     Its read-only preview (6a) comes with the ground labels (D71), and its
+     conditions are picked (D70).
 
    Lines that need the game stay code: the reset fruits' points, the saved
    revive and portal places, the Sign of Dimensions' count, the socket
@@ -1495,7 +1531,7 @@ types and model slots (4d2). 239 identify an item by its model slot
 | Kind | Places | Moved by | Not moved yet |
 |---|---:|---|---|
 | Character animation by item | 67 | SK2 (cast animations) | Stances by weapon, normal attacks, conditions on the mount |
-| UI and tooltips | 65 | 8, 12 | Ground label colours, the tooltip's class line list and item cases (phase 8), bonuses shown in the character window |
+| UI and tooltips | 65 | 8, 12 | Ground label colours (D68), the tooltip's class line list and item cases (phase 8), bonuses shown in the character window |
 | Item use | 58 | 12 (level variants), 11 (pet) | `TryConsumeItem`, `ItemValue`, stack sizes, hotkeys, requirement exceptions |
 | Item lists | 42 | 3 (the data exists), 8, 9 | Call sites outside the phase 3 files (3b) |
 | Mounts, pets, helpers | 41 | 11 (`pet.bmd`) | The spawned model, ride height, camera, HUD |
