@@ -32,6 +32,11 @@ PACKET_MAPPING = [
     ("CharacterCreationSuccessful",   "PRECEIVE_CREATE_CHARACTER"),
     ("CharacterInformationExtended",  "PRECEIVE_JOIN_MAP_SERVER_EXTENDED"),
     ("RespawnAfterDeathExtended",     "PRECEIVE_REVIVAL_EXTENDED"),
+    # The cash shop structs had `long` fields, 8 bytes on 64-bit Linux and macOS.
+    ("CashShopItemBuyResult",         "PMSG_CASHSHOP_BUYITEM_ANS"),
+    ("CashShopItemGiftResult",        "PMSG_CASHSHOP_GIFTSEND_ANS"),
+    ("CashShopStorageItem",           "PMSG_CASHSHOP_STORAGELIST"),
+    ("CashShopGiftStorageItem",       "PMSG_CASHSHOP_GIFTSTORAGELIST"),
 ]
 
 
