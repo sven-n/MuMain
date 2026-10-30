@@ -233,6 +233,7 @@
 #panel[data-kind="reset-points"], #panel[data-kind="delgardo"] { height: 222dp; }
 #panel[data-kind="elpis"], #panel[data-kind="elpis-about"] { height: 297dp; }
 #panel[data-kind="chaos-mix"] { height: 312dp; }
+#panel[data-kind="gem-integration-jewel"], #panel[data-kind="gem-integration-amount"] { top: 100dp; height: 267dp; }
 
 /* Where the box's RenderTexts() drew the lines: the first one's text top less half the line gap
    (the glyphs, 9 tall, centre in their line box), one advance apart. */
@@ -284,6 +285,37 @@
 #panel[data-kind="elpis"] .gmd-button-cell:nth-child(2), #panel[data-kind="elpis-about"] .gmd-button-cell:nth-child(2) { top: 175dp; }
 #panel[data-kind="elpis"] .gmd-button-cell:nth-child(3), #panel[data-kind="elpis-about"] .gmd-button-cell:nth-child(3) { top: 205dp; }
 #panel[data-kind="reset-points"] .gmd-button-cell:nth-child(1) { top: 105dp; }
+
+/* CGemIntegrationUnityMsgBox, which showed the jewels and then, in the same box, the amounts:
+   untitled, its lines centred from the top as the flow sets them, the buttons from 50 below the
+   top edge (30 in the content box). The jewels two per row, MSGBOX_BTN_EMPTY_SMALL_WIDTH + 20 (84)
+   wide at x 20 and 124 (4 and 108 here), 34 apart; the amounts one per row, 128 wide at x 50,
+   39 apart. Close 20 above the bottom edge, as in every native box. */
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(-n+10),
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(-n+3) {
+	position: absolute;
+	width: auto;
+	margin: 0;
+}
+#panel[data-kind="gem-integration-jewel"] .gmd-btn.cols-2 { width: 84dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(odd) { left: 4dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(even) { left: 108dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(1),
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(2) { top: 30dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(3),
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(4) { top: 64dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(5),
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(6) { top: 98dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(7),
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(8) { top: 132dp; }
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(9),
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell:nth-child(10) { top: 166dp; }
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(-n+3) { left: 34dp; }
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(1) { top: 30dp; }
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(2) { top: 69dp; }
+#panel[data-kind="gem-integration-amount"] .gmd-button-cell:nth-child(3) { top: 108dp; }
+/* The Close cell (the 11th, compact) keeps the native-frame rule's left: 0. */
+#panel[data-kind="gem-integration-jewel"] .gmd-button-cell.compact { left: 0; }
 
 /* CChaosMixMenuMsgBox: each recipe's lines 15 apart from their own top (40, 125, 210, less half
    the line gap), one line each as native draws them (a wrapped line would run into the button),

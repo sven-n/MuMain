@@ -81,6 +81,10 @@ namespace mu::ui::window
         // its RenderTexts() and buttons drew), by name: "chaos-mix", "npc-menu", ... A theme may
         // lay the menu out like that box, by kind (legacy does); empty = not described / flow.
         std::string kind;
+        // Which menu this is, by name ("trainer", "seed-master", "personal-shop-price-type", ...):
+        // for a theme to target one menu (data-id on the body). Unlike `kind`, it changes nothing
+        // in the layout, so it also names menus no native box drew. Every caller sets it.
+        std::string id;
         // The in-game system menu (native CSystemMenuMsgBox): a theme may lay it out like native.
         bool systemMenu = false;
 
@@ -159,6 +163,7 @@ namespace mu::ui::window
             Rml::String closeLabel;
             bool highlightTitle = false;
             Rml::String kind;      // GenericMenuConfig::kind
+            Rml::String id;        // GenericMenuConfig::id
             float canvasTop = 0.f; // UI::RmlBridge::DialogCanvasTop, in dp
             Rml::String title;
             std::vector<LineEntry> lines;
