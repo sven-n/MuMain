@@ -775,27 +775,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight);
                     b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight);
                     b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight);
-
-                    vec3_t vPos, vRelativePos, vLight;
-                    Vector(0.f, 0.f, 0.f, vPos);
-                    Vector(6.f, 5.f, 2.f, vRelativePos);
-                    Vector(1.f, 1.f, 1.f, vLight);
-                    float fLumi = sinf(WorldTime * 0.001f) * 0.5f + 0.5f;
-                    b->TransformPosition(BoneTransform[22], vRelativePos, vPos);
-                    Vector(1.f, 0.5f, 0.5f, vLight);
-                    CreateSprite(BITMAP_SHINY + 1, vPos, 1.5f + fLumi / 2.f, vLight, NULL);
-                    Vector(6.f, -5.f, 2.f, vRelativePos);
-                    b->TransformPosition(BoneTransform[23], vRelativePos, vPos);
-                    Vector(1.f, 0.5f, 0.5f, vLight);
-                    CreateSprite(BITMAP_SHINY + 1, vPos, 1.5f + fLumi / 2.f, vLight, NULL);
-
-                    if (rand_fps_check(5))
-                    {
-                        Vector(0.f, 0.f, 0.f, vRelativePos);
-                        b->TransformPosition(BoneTransform[20], vRelativePos, vPos);
-                        Vector(1.f, 1.f, 1.f, vLight);
-                        CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight);
-                    }
                 }
                 else if (o->Type == 67)
                 {
@@ -1027,9 +1006,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 VectorCopy(o->Position, Position);
                 Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
                 VectorCopy(Position, b->BodyOrigin);
-                o->HiddenMesh = 2;
-                b->RenderBodyShadow(o->BlendMesh, o->HiddenMesh);
-                o->HiddenMesh = -1;
+                b->RenderBodyShadow(o->BlendMesh, 2);
             }
             else if (gMapManager.WorldActive == WD_3NORIA && o->Type == MODEL_WARP3)
             {
@@ -1047,8 +1024,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 b->BodyLight[1] = 1.0f;
                 b->BodyLight[2] = 1.0f;
 
-                o->Alpha = 1.0f;
-                o->BlendMeshLight = 1.0f;
                 b->StreamMesh = 0;
                 b->RenderMesh(0, RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                 b->StreamMesh = -1;
@@ -3066,6 +3041,42 @@ void UpdateObjectVisual(OBJECT* o)
     float Scale;
     float Rotation;
     Vector(0.f, 0.f, 0.f, p);
+
+    // The state and spawns of Draw_RenderObject's map-object cases, for an object it draws.
+    if ((EditFlag != EDIT_NONE || o->HiddenMesh != -2) && o->RenderType != RENDER_DARK && o->Alpha >= 0.01f)
+    {
+        if (gMapManager.IsCursedTemple() && o->Type == 62)
+        {
+            vec3_t vPos, vRelativePos, vLight;
+            Vector(0.f, 0.f, 0.f, vPos);
+            Vector(6.f, 5.f, 2.f, vRelativePos);
+            float fLumi = sinf(WorldTime * 0.001f) * 0.5f + 0.5f;
+            b->TransformPosition(bones()[22], vRelativePos, vPos);
+            Vector(1.f, 0.5f, 0.5f, vLight);
+            CreateSprite(BITMAP_SHINY + 1, vPos, 1.5f + fLumi / 2.f, vLight, NULL);
+            Vector(6.f, -5.f, 2.f, vRelativePos);
+            b->TransformPosition(bones()[23], vRelativePos, vPos);
+            Vector(1.f, 0.5f, 0.5f, vLight);
+            CreateSprite(BITMAP_SHINY + 1, vPos, 1.5f + fLumi / 2.f, vLight, NULL);
+
+            if (rand_fps_check(5))
+            {
+                Vector(0.f, 0.f, 0.f, vRelativePos);
+                b->TransformPosition(bones()[20], vRelativePos, vPos);
+                Vector(1.f, 1.f, 1.f, vLight);
+                CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight);
+            }
+        }
+        else if (gMapManager.InBloodCastle() && (o->Type == 28 || o->Type == 29))
+        {
+            o->HiddenMesh = -1;
+        }
+        else if (gMapManager.WorldActive == WD_55LOGINSCENE && o->Type == 90)
+        {
+            o->Alpha = 1.0f;
+            o->BlendMeshLight = 1.0f;
+        }
+    }
 
     switch (gMapManager.WorldActive)
     {
