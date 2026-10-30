@@ -111,15 +111,15 @@ TEST_CASE("A character's pose stays current until its animation state changes [d
     static float bones[MAX_BONES][3][4];
     OBJECT o;
     PlaceCharacter(o, 100.f, 1.f, bones);
-    CHECK_FALSE(Engine::Object::Pose::IsCurrent(&o));
+    CHECK_FALSE(Engine::Object::Pose::IsCurrent(&o, &model, false));
     AnimateCharacterBones(&o);
-    CHECK(Engine::Object::Pose::IsCurrent(&o));
+    CHECK(Engine::Object::Pose::IsCurrent(&o, &model, false));
 
     const auto changed = [&](auto change)
     {
         OBJECT copy = o;
         change(copy);
-        return !Engine::Object::Pose::IsCurrent(&copy);
+        return !Engine::Object::Pose::IsCurrent(&copy, &model, false);
     };
     CHECK(changed([](OBJECT& c) { c.Type = MODEL_PLAYER + 1; }));
     CHECK(changed([](OBJECT& c) { c.CurrentAction = 2; }));
@@ -130,7 +130,7 @@ TEST_CASE("A character's pose stays current until its animation state changes [d
     CHECK(changed([](OBJECT& c) { c.HeadAngle[0] += 1.f; }));
 
     Engine::Object::Pose::Invalidate(&o);
-    CHECK_FALSE(Engine::Object::Pose::IsCurrent(&o));
+    CHECK_FALSE(Engine::Object::Pose::IsCurrent(&o, &model, false));
 }
 
 TEST_CASE("A draw reuses the pose the update built, and animates it after a change [data][animation]")
@@ -158,7 +158,7 @@ TEST_CASE("A draw reuses the pose the update built, and animates it after a chan
     model.Animation(fresh, o.AnimationFrame, o.PriorAnimationFrame, o.PriorAction, o.Angle, o.HeadAngle, false, false,
                     nullptr, o.CurrentAction);
     CHECK(std::memcmp(bones, fresh, sizeof(float) * 12 * model.NumBones) == 0);
-    CHECK(Engine::Object::Pose::IsCurrent(&o));
+    CHECK(Engine::Object::Pose::IsCurrent(&o, &model, false));
 }
 
 TEST_CASE("The pre-pass leaves a current pose alone [data][animation]")
@@ -179,6 +179,44 @@ TEST_CASE("The pre-pass leaves a current pose alone [data][animation]")
     o.AnimationFrame += 0.5f;
     AnimateCharacterBones(&o);
     CHECK(bones[0][0][3] != 12345.f);
+}
+
+TEST_CASE("A map object gets its own world-space pose when its effects read it [data][animation]")
+{
+    TestModelSlots slots;
+    BMD& model = Models[MODEL_PLAYER];
+    const std::wstring folder = PlayerFolder.wstring() + L"/";
+    REQUIRE(model.Open2(folder.c_str(), L"player.bmd"));
+
+    static float fresh[MAX_BONES][3][4];
+    OBJECT o;
+    PlaceCharacter(o, 100.f, 1.f, nullptr);
+    VectorCopy(o.Position, model.BodyOrigin);
+    model.BodyScale = 1.5f;
+    model.BodyHeight = 0.f;
+
+    float (*bones)[3][4] = Engine::Object::Pose::World(&o, &model);
+    REQUIRE(bones != nullptr);
+    CHECK(o.OwnsBoneTransform);
+    CHECK(o.EnableBoneMatrix);
+    model.Animation(fresh, o.AnimationFrame, o.PriorAnimationFrame, o.PriorAction, o.Angle, o.HeadAngle, false, true,
+                    nullptr, o.CurrentAction);
+    CHECK(std::memcmp(bones, fresh, sizeof(float) * 12 * model.NumBones) == 0);
+
+    bones[0][0][3] = 12345.f;
+    Engine::Object::Pose::World(&o, &model);
+    CHECK(bones[0][0][3] == 12345.f);
+
+    // The placement is part of a world-space pose.
+    model.BodyOrigin[0] += 100.f;
+    Engine::Object::Pose::World(&o, &model);
+    CHECK(bones[0][0][3] != 12345.f);
+    CHECK_FALSE(Engine::Object::Pose::IsCurrent(&o, &model, false));
+
+    Engine::Object::Pose::Release(&o);
+    CHECK(o.BoneTransform == nullptr);
+    CHECK_FALSE(o.OwnsBoneTransform);
+    CHECK_FALSE(o.EnableBoneMatrix);
 }
 
 #ifdef MU_ENABLE_CONTROL_SOCKET

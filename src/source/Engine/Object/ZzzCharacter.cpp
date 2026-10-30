@@ -6439,7 +6439,7 @@ void AnimateCharacterBones(OBJECT* o)
     if (model->NumBones <= 0) return;
 
     // Model space: the model's BodyOrigin and BodyScale belong to whichever object set them last.
-    if (!Engine::Object::Pose::IsCurrent(o))
+    if (!Engine::Object::Pose::IsCurrent(o, model, false))
         Engine::Object::Pose::Build(o, model);
     o->EnableBoneMatrix = true;
 }
@@ -6474,7 +6474,7 @@ void CheckCharacterPose(const OBJECT* o, BMD* model, bool reused)
     VectorCopy(o->Angle, angle);
     VectorCopy(o->HeadAngle, headAngle);
     model->Animation(PrepassBones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, angle, headAngle, false,
-                     false, nullptr, o->CurrentAction);
+                     o->Pose.World, nullptr, o->CurrentAction);
     RecordPrepassBones(PrepassBones, o->BoneTransform, model->NumBones, o->Type == MODEL_PLAYER);
 }
 
@@ -11490,11 +11490,12 @@ void RefreshCharacterPoses()
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
     {
         OBJECT* o = &CharactersClient[i].Object;
-        if (!o->EnableBoneMatrix || Engine::Object::Pose::IsCurrent(o))
+        if (!o->EnableBoneMatrix)
             continue;
         BMD* b = &Models[o->Type];
         b->BodyHeight = 0.f;
-        Engine::Object::Pose::Build(o, b);
+        if (!Engine::Object::Pose::IsCurrent(o, b, false))
+            Engine::Object::Pose::Build(o, b);
     }
 }
 

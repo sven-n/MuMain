@@ -271,8 +271,8 @@ void BodyLight(OBJECT* o, BMD* b)
 
 extern float BoneScale;
 
-// An object with its own bones keeps the model-space pose the update built; a draw animates it again only when its
-// state changed since. Other objects are animated into the shared bones for each draw.
+// An object with its own bones keeps the pose the update built; a draw animates it again only when its state
+// changed since. Other objects are animated into the shared bones for each draw.
 static void AnimateObjectBones(OBJECT* o, BMD* b, bool Translate)
 {
     if (!o->EnableBoneMatrix)
@@ -281,37 +281,23 @@ static void AnimateObjectBones(OBJECT* o, BMD* b, bool Translate)
                      false, !Translate);
         return;
     }
-    const bool reused = Translate && Engine::Object::Pose::IsCurrent(o);
+    const bool world = !Translate;
+    const bool reused = Engine::Object::Pose::IsCurrent(o, b, world);
     if (!reused)
     {
         b->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
-                     o->HeadAngle, false, !Translate);
-        if (Translate)
-            Engine::Object::Pose::Record(o);
-        else
-            Engine::Object::Pose::Invalidate(o);
+                     o->HeadAngle, false, world);
+        Engine::Object::Pose::Record(o, b, world);
     }
 #ifdef MU_ENABLE_CONTROL_SOCKET
     CheckCharacterPose(o, b, reused);
 #endif
 }
 
-bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
+// Where an object's model stands when it is posed and drawn.
+static void PlaceObjectModel(const OBJECT* o, BMD* b)
 {
-    if (gMapManager.InChaosCastle() == true && Hero->Object.m_bActionStart == true)
-    {
-        o->Alpha -= 0.15f * FPS_ANIMATION_FACTOR;
-    }
-
-    if (o->Alpha < 0.01f)
-    {
-        return false;
-    }
-
-    BMD* b = &Models[o->Type];
     b->BodyHeight = 0.f;
-    b->ContrastEnable = o->ContrastEnable;
-    BodyLight(o, b);
     b->BodyScale = o->Scale;
     b->CurrentAction = o->CurrentAction;
     VectorCopy(o->Position, b->BodyOrigin);
@@ -332,6 +318,24 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
         Position[1] += 120.f;
         VectorCopy(Position, b->BodyOrigin);
     }
+}
+
+bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
+{
+    if (gMapManager.InChaosCastle() == true && Hero->Object.m_bActionStart == true)
+    {
+        o->Alpha -= 0.15f * FPS_ANIMATION_FACTOR;
+    }
+
+    if (o->Alpha < 0.01f)
+    {
+        return false;
+    }
+
+    BMD* b = &Models[o->Type];
+    b->ContrastEnable = o->ContrastEnable;
+    BodyLight(o, b);
+    PlaceObjectModel(o, b);
 
     if (o->Owner != NULL)
     {
@@ -2865,9 +2869,110 @@ void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate, 
     RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
 }
 
+// Counts RenderObjects calls; each object the draw handled carries the count it was drawn in.
+static unsigned int s_objectDrawFrame = 0;
+
 void RenderObjectVisual(OBJECT* o)
 {
+    o->DrawnFrame = s_objectDrawFrame;
     BMD* b = &Models[o->Type];
+
+    switch (gMapManager.WorldActive)
+    {
+    // Their effects spawn in UpdateObjectVisual.
+    case WD_0LORENCIA:
+    case WD_3NORIA:
+    case WD_4LOSTTOWER:
+    case WD_6STADIUM:
+    case WD_8TARKAN:
+    case WD_9DEVILSQUARE:
+    case WD_10HEAVEN:
+    case WD_11BLOODCASTLE1:
+    case WD_11BLOODCASTLE1 + 1:
+    case WD_11BLOODCASTLE1 + 2:
+    case WD_11BLOODCASTLE1 + 3:
+    case WD_11BLOODCASTLE1 + 4:
+    case WD_11BLOODCASTLE1 + 5:
+    case WD_11BLOODCASTLE1 + 6:
+    case WD_52BLOODCASTLE_MASTER_LEVEL:
+#if !defined(DEVIAS_XMAS_EVENT2007) && !defined(DEVIAS_XMAS_EVENT)
+    case WD_2DEVIAS:
+#endif
+        break;
+#if defined(DEVIAS_XMAS_EVENT2007) || defined(DEVIAS_XMAS_EVENT)
+    case WD_2DEVIAS:
+        switch (o->Type)
+        {
+#ifdef DEVIAS_XMAS_EVENT2007
+        case 110:
+        {
+            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            Vector(1.f, 1.0f, 1.f, b->BodyLight);
+            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        }
+        break;
+#endif // DEVIAS_XMAS_EVENT2007
+#ifdef DEVIAS_XMAS_EVENT
+        case 105:
+        {
+            Vector(1.f, 1.0f, 1.f, b->BodyLight);
+            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        }
+        break;
+        case 106:
+        {
+            Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
+            b->RenderMesh(3, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME8);
+        }
+        break;
+#endif // DEVIAS_XMAS_EVENT
+        }
+        break;
+#endif
+    default:
+        if (RenderChaosCastleVisual(o, b))
+            return;
+        if (RenderHellasVisual(o, b))
+            return;
+        if (battleCastle::RenderBattleCastleVisual(o, b))
+            return;
+        if (M31HuntingGround::RenderHuntingGroundObjectVisual(o, b))
+            return;
+        if (M34CryingWolf2nd::RenderCryingWolf2ndObjectVisual(o, b))
+            return;
+        if (M33Aida::RenderAidaObjectVisual(o, b))
+            return;
+        if (M34CryWolf1st::RenderCryWolf1stObjectVisual(o, b))
+            return;
+        if (M37Kanturu1st::RenderKanturu1stObjectVisual(o, b))
+            return;
+        if (M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(o, b))
+            return;
+        if (M39Kanturu3rd::RenderKanturu3rdObjectVisual(o, b))
+            return;
+        if (SEASON3A::CGM3rdChangeUp::Instance().RenderObjectVisual(o, b))
+            return;
+        if (g_CursedTemple->RenderObjectVisual(o, b))
+            return;
+        if (SEASON3B::GMNewTown::RenderObjectVisual(o, b))
+            return;
+        if (SEASON3C::GMSwampOfQuiet::RenderObjectVisual(o, b))
+            return;
+        if (TheMapProcess().RenderObjectVisual(o, b) == true)
+            return;
+    }
+}
+
+void UpdateObjectVisual(OBJECT* o)
+{
+    BMD* b = &Models[o->Type];
+    const auto bones = [o, b] { return Engine::Object::Pose::World(o, b); };
     vec3_t p, Position;
     vec3_t Light;
     float Luminosity = (float)(rand() % 30 + 70) * 0.01f;
@@ -2887,23 +2992,23 @@ void RenderObjectVisual(OBJECT* o)
             if (rand_fps_check(2))
             {
                 Vector((float)(rand() % 32 - 16), -20.f, (float)(rand() % 32 - 16), p);
-                b->TransformPosition(BoneTransform[1], p, Position);
+                b->TransformPosition(bones()[1], p, Position);
                 CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light);
                 Vector((float)(rand() % 32 - 16), -80.f, (float)(rand() % 32 - 16), p);
-                b->TransformPosition(BoneTransform[4], p, Position);
+                b->TransformPosition(bones()[4], p, Position);
                 CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light);
             }
             break;
         case MODEL_MERCHANT_ANIMAL01:
             Scale = Luminosity * 5.f;
             Vector(Luminosity * 0.6f, Luminosity * 0.3f, Luminosity * 0.1f, Light);
-            b->TransformPosition(BoneTransform[48], Position, p);
+            b->TransformPosition(bones()[48], Position, p);
             CreateSprite(BITMAP_LIGHT, p, Scale, Light, o);
-            b->TransformPosition(BoneTransform[57], Position, p);
+            b->TransformPosition(bones()[57], Position, p);
             CreateSprite(BITMAP_LIGHT, p, Scale, Light, o);
-            /*b->TransformPosition(BoneTransform[51],Position,p);
+            /*b->TransformPosition(bones()[51],Position,p);
             CreateSprite(BITMAP_LIGHT,p,Scale,Light,o);
-            b->TransformPosition(BoneTransform[54],Position,p);
+            b->TransformPosition(bones()[54],Position,p);
             CreateSprite(BITMAP_LIGHT,p,Scale,Light,o);*/
             break;
         }
@@ -2915,7 +3020,7 @@ void RenderObjectVisual(OBJECT* o)
             Vector(Luminosity * 1.f, Luminosity * 1.f, Luminosity * 1.f, Light);
             Rotation = (float)((int)(WorldTime * 0.1f) % 360);
             Vector(0.f, 0.f, 150.f, p);
-            b->TransformPosition(BoneTransform[0], p, Position);
+            b->TransformPosition(bones()[0], p, Position);
             CreateSprite(BITMAP_LIGHTNING + 1, Position, 2.5f, Light, o, Rotation);
             CreateSprite(BITMAP_LIGHTNING + 1, Position, 2.5f, Light, o, -Rotation);
             break;
@@ -2927,30 +3032,6 @@ void RenderObjectVisual(OBJECT* o)
                     SetAction(o, 0);
             }
             break;
-#ifdef DEVIAS_XMAS_EVENT2007
-        case 110:
-        {
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            Vector(1.f, 1.0f, 1.f, b->BodyLight);
-            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        }
-        break;
-#endif	// DEVIAS_XMAS_EVENT2007
-#ifdef DEVIAS_XMAS_EVENT
-        case 105:
-        {
-            Vector(1.f, 1.0f, 1.f, b->BodyLight);
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        }
-        break;
-        case 106:
-        {
-            Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
-            b->RenderMesh(3, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME8);
-        }
-        break;
-#endif //DEVIAS_XMAS_EVENT
         }
         break;
     case WD_3NORIA:
@@ -2958,38 +3039,38 @@ void RenderObjectVisual(OBJECT* o)
         {
         case 9:
             Vector(Luminosity * 0.4f, Luminosity * 0.7f, Luminosity * 1.f, Light);
-            b->TransformPosition(BoneTransform[1], p, Position);
+            b->TransformPosition(bones()[1], p, Position);
             CreateSprite(BITMAP_LIGHT, Position, 1.5f, Light, o);
             break;
         case 35:
             Vector(Luminosity * 0.4f, Luminosity * 0.7f, Luminosity * 1.f, Light);
-            b->TransformPosition(BoneTransform[3], p, Position);
+            b->TransformPosition(bones()[3], p, Position);
             CreateSprite(BITMAP_LIGHT, Position, 1.5f, Light, o);
             break;
         case 1:
             Vector(Luminosity * 0.4f, Luminosity * 0.7f, Luminosity * 1.f, Light);
-            b->TransformPosition(BoneTransform[2], p, Position);
+            b->TransformPosition(bones()[2], p, Position);
             CreateSprite(BITMAP_LIGHT, Position, 0.5f, Light, o);
-            b->TransformPosition(BoneTransform[4], p, Position);
+            b->TransformPosition(bones()[4], p, Position);
             CreateSprite(BITMAP_LIGHT, Position, 0.5f, Light, o);
-            b->TransformPosition(BoneTransform[6], p, Position);
+            b->TransformPosition(bones()[6], p, Position);
             CreateSprite(BITMAP_LIGHT, Position, 0.5f, Light, o);
             break;
         case 17:
             Vector(Luminosity * 0.4f, Luminosity * 0.7f, Luminosity * 1.f, Light);
-            b->TransformPosition(BoneTransform[4], p, Position);
+            b->TransformPosition(bones()[4], p, Position);
             CreateSprite(BITMAP_LIGHT, Position, 1.f, Light, o);
-            b->TransformPosition(BoneTransform[7], p, Position);
+            b->TransformPosition(bones()[7], p, Position);
             CreateSprite(BITMAP_LIGHT, Position, 1.f, Light, o);
-            b->TransformPosition(BoneTransform[10], p, Position);
+            b->TransformPosition(bones()[10], p, Position);
             CreateSprite(BITMAP_LIGHT, Position, 1.f, Light, o);
-            b->TransformPosition(BoneTransform[13], p, Position);
+            b->TransformPosition(bones()[13], p, Position);
             CreateSprite(BITMAP_LIGHT, Position, 1.f, Light, o);
             break;
         case 39:
             Vector(Luminosity * 0.4f, Luminosity * 0.8f, Luminosity * 1.f, Light);
             Rotation = (float)((int)(WorldTime * 0.1f) % 360);
-            b->TransformPosition(BoneTransform[57], p, Position);
+            b->TransformPosition(bones()[57], p, Position);
             CreateSprite(BITMAP_LIGHTNING + 1, Position, 1.f, Light, o, Rotation);
             CreateSprite(BITMAP_LIGHTNING + 1, Position, 1.f, Light, o, -Rotation);
 
@@ -2997,7 +3078,7 @@ void RenderObjectVisual(OBJECT* o)
 
             for (int i = 61; i <= 65; i++)
             {
-                b->TransformPosition(BoneTransform[i], p, Position);
+                b->TransformPosition(bones()[i], p, Position);
                 CreateSprite(BITMAP_LIGHT, Position, 1.f, Light, o);
                 if (rand_fps_check(32))
                 {
@@ -3005,7 +3086,7 @@ void RenderObjectVisual(OBJECT* o)
                     CreateParticle(BITMAP_SHINY, Position, o->Angle, Light, 1);
                 }
             }
-            b->TransformPosition(BoneTransform[58], p, Position);
+            b->TransformPosition(bones()[58], p, Position);
             if (rand_fps_check(8))
             {
                 vec3_t Angle;
@@ -3036,13 +3117,13 @@ void RenderObjectVisual(OBJECT* o)
                 Vector(Luminosity * 0.4f, Luminosity * 0.8f, Luminosity * 1.f, Light);
             }
             Rotation = (float)((int)(WorldTime * 0.1f) % 360);
-            b->TransformPosition(BoneTransform[15], p, Position);
+            b->TransformPosition(bones()[15], p, Position);
             CreateSprite(Bitmap, Position, 0.3f, Light, o, Rotation);
             CreateSprite(Bitmap, Position, 0.3f, Light, o, -Rotation);
-            b->TransformPosition(BoneTransform[19], p, Position);
+            b->TransformPosition(bones()[19], p, Position);
             CreateSprite(Bitmap, Position, 0.3f, Light, o, Rotation);
             CreateSprite(Bitmap, Position, 0.3f, Light, o, -Rotation);
-            b->TransformPosition(BoneTransform[21], p, Position);
+            b->TransformPosition(bones()[21], p, Position);
             CreateSprite(Bitmap, Position, 1.5f, Light, o, Rotation);
             CreateSprite(Bitmap, Position, 1.5f, Light, o, -Rotation);
             break;
@@ -3078,7 +3159,7 @@ void RenderObjectVisual(OBJECT* o)
         case 9:
             Scale = Luminosity * 5.f;
             Vector(Luminosity * 0.6f, Luminosity * 0.3f, Luminosity * 0.1f, Light);
-            b->TransformPosition(BoneTransform[1], Position, p);
+            b->TransformPosition(bones()[1], Position, p);
             CreateSprite(BITMAP_LIGHT, p, Scale, Light, o);
             break;
         }
@@ -3102,7 +3183,7 @@ void RenderObjectVisual(OBJECT* o)
 
             Scale = Luminosity * 1.5f;
             Vector(Luminosity / 1.7f, Luminosity, Luminosity, Light);
-            b->TransformPosition(BoneTransform[2], p, Position);
+            b->TransformPosition(bones()[2], p, Position);
             CreateSprite(BITMAP_IMPACT, Position, Scale, Light, o);
             break;
 
@@ -3111,7 +3192,7 @@ void RenderObjectVisual(OBJECT* o)
 
             Scale = Luminosity * 1.5f;
             Vector(Luminosity, Luminosity * 0.32f, Luminosity * 0.32f, Light);
-            b->TransformPosition(BoneTransform[2], p, Position);
+            b->TransformPosition(bones()[2], p, Position);
             CreateSprite(BITMAP_IMPACT, Position, Scale, Light, o);
             break;
 
@@ -3165,16 +3246,16 @@ void RenderObjectVisual(OBJECT* o)
             Vector(-15.f, 0.f, 0.f, p);
             if (rand_fps_check(4))
             {
-                b->TransformPosition(BoneTransform[23], p, Position);
+                b->TransformPosition(bones()[23], p, Position);
                 CreateParticle(BITMAP_RAIN_CIRCLE + 1, Position, o->Angle, Light);
             }
             if (rand_fps_check(4))
             {
-                b->TransformPosition(BoneTransform[31], p, Position);
+                b->TransformPosition(bones()[31], p, Position);
                 CreateParticle(BITMAP_RAIN_CIRCLE + 1, Position, o->Angle, Light);
             }
             Vector(-15.f, 0.f, 0.f, p);
-            b->TransformPosition(BoneTransform[23], p, Position);
+            b->TransformPosition(bones()[23], p, Position);
             CreateParticleFpsChecked(BITMAP_RAIN_CIRCLE + 1, Position, o->Angle, Light);
             break;
         }
@@ -3263,7 +3344,7 @@ void RenderObjectVisual(OBJECT* o)
         case    10:
         {
             Vector(0.f, 0.f, 0.f, p);
-            b->TransformPosition(BoneTransform[3], p, Position);
+            b->TransformPosition(bones()[3], p, Position);
 
             Vector(1.f, 1.f, 1.f, Light);
             CreateParticleFpsChecked(BITMAP_LIGHT, Position, o->Angle, Light, 0, 1.f);
@@ -3304,7 +3385,7 @@ void RenderObjectVisual(OBJECT* o)
             for (int i = 0; i < 7; ++i)
             {
                 Vector(0.f, 0.f, 2.f, p);
-                b->TransformPosition(BoneTransform[indexLight[i]], p, Position);
+                b->TransformPosition(bones()[indexLight[i]], p, Position);
                 CreateSprite(BITMAP_LIGHT, Position, 0.5f, Light, o);
             }
         }
@@ -3313,7 +3394,7 @@ void RenderObjectVisual(OBJECT* o)
             Luminosity = sinf(WorldTime * 0.001f) * 0.3f + 0.7f;
             Vector(Luminosity, Luminosity, Luminosity, Light);
             Vector(0.f, 0.f, 0.f, p);
-            b->TransformPosition(BoneTransform[3], p, Position);
+            b->TransformPosition(bones()[3], p, Position);
             CreateSprite(BITMAP_FLARE, Position, Luminosity + 0.5f, Light, o);
             break;
         case 37:
@@ -3364,21 +3445,27 @@ void RenderObjectVisual(OBJECT* o)
         }
     }
     default:
-        if (RenderChaosCastleVisual(o, b))							return;
-        if (RenderHellasVisual(o, b))								return;
-        if (battleCastle::RenderBattleCastleVisual(o, b))		return;
-        if (M31HuntingGround::RenderHuntingGroundObjectVisual(o, b))	return;
-        if (M34CryingWolf2nd::RenderCryingWolf2ndObjectVisual(o, b))	return;
-        if (M33Aida::RenderAidaObjectVisual(o, b))						return;
-        if (M34CryWolf1st::RenderCryWolf1stObjectVisual(o, b))			return;
-        if (M37Kanturu1st::RenderKanturu1stObjectVisual(o, b))			return;
-        if (M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(o, b))			return;
-        if (M39Kanturu3rd::RenderKanturu3rdObjectVisual(o, b))			return;
-        if (SEASON3A::CGM3rdChangeUp::Instance().RenderObjectVisual(o, b)) return;
-        if (g_CursedTemple->RenderObjectVisual(o, b))				return;
-        if (SEASON3B::GMNewTown::RenderObjectVisual(o, b))			return;
-        if (SEASON3C::GMSwampOfQuiet::RenderObjectVisual(o, b))		return;
-        if (TheMapProcess().RenderObjectVisual(o, b) == true)		return;
+        break;
+    }
+}
+
+void UpdateObjectEffects()
+{
+    // Spawns once per drawn frame, for the objects that frame drew, as when the draw spawned them.
+    static unsigned int updatedFrame = 0;
+    if (updatedFrame == s_objectDrawFrame)
+        return;
+    updatedFrame = s_objectDrawFrame;
+
+    for (OBJECT_BLOCK& ob : ObjectBlock)
+    {
+        for (OBJECT* o = ob.Head; o != nullptr; o = o->Next)
+        {
+            if (o->DrawnFrame != s_objectDrawFrame)
+                continue;
+            PlaceObjectModel(o, &Models[o->Type]);
+            UpdateObjectVisual(o);
+        }
     }
 }
 
@@ -3407,6 +3494,7 @@ float g_MapEditorPlacementPreviewScale = 1.0f;
 
 void RenderObjects()
 {
+    ++s_objectDrawFrame;
 #ifdef _EDITOR
     s_bShowItemCullSphere = DevEditor_ShouldShowItemCullSphere();
     s_bShowItemPickBoxes = DevEditor_ShouldShowItemPickBoxes();
@@ -5015,6 +5103,7 @@ void DeleteObject(OBJECT* o, OBJECT_BLOCK* ob)
                 ob->Tail = NULL;
             }
         }
+        Engine::Object::Pose::Release(o);
         SAFE_DELETE(o);
     }
 }

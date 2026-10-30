@@ -24,6 +24,8 @@ OBJECT* CollisionDetectObjects(OBJECT* PickObject);
 
 void RenderObject(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderObjects();
+// Spawns the effects of the map objects the last RenderObjects drew; call once per update, after the objects moved.
+void UpdateObjectEffects();
 void NextGradeObjectRender(CHARACTER* c);
 void RenderObject_AfterImage(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0,
