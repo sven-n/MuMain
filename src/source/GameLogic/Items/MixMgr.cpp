@@ -28,7 +28,7 @@ struct MixRecipeText
 };
 
 // The text numbers mix.bmd stores in its recipes' names, descriptions and advice, sorted by number.
-const MixRecipeText kMixRecipeTexts[] = {
+constexpr MixRecipeText kMixRecipeTexts[] = {
     {588, &I18N::Game::InCaseYouFailOn},
     {589, &I18N::Game::PleaseNoteThat},
     {590, &I18N::Game::TheLevelOfItemsDecreases},
@@ -88,6 +88,11 @@ const MixRecipeText kMixRecipeTexts[] = {
     {3086, &I18N::Game::_14ItemCreation},
     {3087, &I18N::Game::_15ItemCreation},
 };
+// GetMixRecipeText searches the table with std::lower_bound.
+static_assert(std::adjacent_find(std::begin(kMixRecipeTexts), std::end(kMixRecipeTexts),
+                                 [](const MixRecipeText& left, const MixRecipeText& right)
+                                 { return left.textId >= right.textId; }) == std::end(kMixRecipeTexts),
+              "kMixRecipeTexts is sorted by number, each number once");
 } // namespace
 
 const wchar_t* SEASON3A::GetMixRecipeText(int textId)

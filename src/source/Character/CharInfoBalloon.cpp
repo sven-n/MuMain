@@ -37,10 +37,15 @@ namespace
         const wchar_t* const* text;
     };
 
-    const GuildStatusText kGuildStatusTexts[] = {
+    constexpr GuildStatusText kGuildStatusTexts[] = {
         {0, &I18N::Game::Members},  {32, &I18N::Game::BattleM},   {64, &I18N::Game::AssistM},
         {128, &I18N::Game::Master}, {255, &I18N::Game::Commoner},
     };
+    // GetGuildStatusText searches the table with std::lower_bound.
+    static_assert(std::adjacent_find(std::begin(kGuildStatusTexts), std::end(kGuildStatusTexts),
+                                     [](const GuildStatusText& left, const GuildStatusText& right)
+                                     { return left.status >= right.status; }) == std::end(kGuildStatusTexts),
+                  "kGuildStatusTexts is sorted by status, each status once");
 
     // Shown for a guild status missing from kGuildStatusTexts (OpenMU sends only those five); the
     // client has always shown the font name's text there.
