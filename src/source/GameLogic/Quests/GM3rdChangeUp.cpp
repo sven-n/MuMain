@@ -104,7 +104,7 @@ bool SEASON3A::CGM3rdChangeUp::MoveObject(OBJECT* pObject)
     return true;
 }
 
-bool SEASON3A::CGM3rdChangeUp::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
+bool SEASON3A::CGM3rdChangeUp::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
 {
     if (!(IsBalgasBarrackMap() || IsBalgasRefugeMap()))
         return false;

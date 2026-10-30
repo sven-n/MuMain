@@ -20,6 +20,7 @@ public:
 public:
     bool CreateObject(OBJECT* o);
     bool MoveObject(OBJECT* o);
+    bool UpdateObjectEffects(OBJECT* o, BMD* b);
     bool RenderObjectVisual(OBJECT* o, BMD* b);
     bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
     void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);

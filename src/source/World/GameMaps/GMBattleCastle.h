@@ -39,7 +39,7 @@ namespace   battleCastle
     bool    MoveBattleCastleObject(OBJECT* o, int& object, int& visibleObject);
     bool    CreateBattleCastleObject(OBJECT* o);
     bool    MoveBattleCastleVisual(OBJECT* o);
-    bool    RenderBattleCastleVisual(OBJECT* o, BMD* b);
+    bool UpdateBattleCastleObjectEffects(OBJECT* o, BMD* b);
     bool    RenderBattleCastleObjectMesh(OBJECT* o, BMD* b);
     void    MoveFlyBigStone(OBJECT* o);
     CHARACTER* CreateBattleCastleMonster(EMonsterType Type, int PositionX, int PositionY, int Key);

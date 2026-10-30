@@ -381,7 +381,7 @@ bool CreateChaosCastleObject(OBJECT* o)
     return true;
 }
 
-bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
+bool UpdateChaosCastleObjectEffects(OBJECT* o, BMD* b)
 {
     if (gMapManager.InChaosCastle() == false)
         return false;
@@ -534,7 +534,7 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
         if (o->PKKey && o->HiddenMesh != -2)
         {
             Vector(0.f, 0.f, 0.f, p);
-            b->TransformPosition(BoneTransform[1], p, Position);
+            b->TransformPosition(Engine::Object::Pose::World(o, b)[1], p, Position);
             if ((int)o->LifeTime == 10)
             {
                 CreateJoint(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 2, NULL,

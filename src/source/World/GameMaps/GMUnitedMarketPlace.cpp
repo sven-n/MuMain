@@ -233,7 +233,7 @@ bool GMUnitedMarketPlace::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
+bool GMUnitedMarketPlace::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     if (IsUnitedMarketPlace() == false)
         return false;
@@ -251,7 +251,7 @@ bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
         {
             vec3_t vLightPosition, vRelativePos;
             Vector(0.0f, 0.0f, 0.0f, vRelativePos);
-            b->TransformPosition(BoneTransform[i], vRelativePos, vLightPosition, false);
+            b->TransformPosition(Engine::Object::Pose::World(o, b)[i], vRelativePos, vLightPosition, false);
 
             float fLumi = (sinf(WorldTime * 0.002f) + 1.0f) * 0.2f + 0.6f;
             vec3_t vLightFire;
@@ -265,7 +265,7 @@ bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
     {
         vec3_t vLightPosition, vRelativePos;
         Vector(0.0f, 0.0f, 0.0f, vRelativePos);
-        b->TransformPosition(BoneTransform[2], vRelativePos, vLightPosition, false);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[2], vRelativePos, vLightPosition, false);
 
         float fLumi = (sinf(WorldTime * 0.039f) + 1.0f) * 0.2f + 0.6f;
         vec3_t vLightFire;

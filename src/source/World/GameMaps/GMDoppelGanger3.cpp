@@ -313,7 +313,7 @@ bool CGMDoppelGanger3::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool CGMDoppelGanger3::RenderObjectVisual(OBJECT* o, BMD* b)
+bool CGMDoppelGanger3::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {

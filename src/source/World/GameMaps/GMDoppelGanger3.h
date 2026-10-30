@@ -16,7 +16,7 @@ public: // Object
     // 오브젝트 프로세서
     virtual bool MoveObject(OBJECT* o);
     // 오브젝트 이펙트
-    virtual bool RenderObjectVisual(OBJECT* o, BMD* b);
+    virtual bool UpdateObjectEffects(OBJECT* o, BMD* b);
     // 오브젝트 랜더
     virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
     // 맵 관련 오브젝트 이펙트

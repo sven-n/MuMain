@@ -127,7 +127,7 @@ void GMSwampOfQuiet::PlayObjectSound(OBJECT* pObject)
     // 	}
 }
 
-bool GMSwampOfQuiet::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
+bool GMSwampOfQuiet::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
 {
     if (!IsCurrentMap())
         return false;

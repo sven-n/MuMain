@@ -195,7 +195,7 @@ bool M39Kanturu3rd::MoveKanturu3rdObject(OBJECT* o)
     return true;
 }
 
-bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
+bool M39Kanturu3rd::UpdateKanturu3rdObjectEffects(OBJECT* o, BMD* b)
 {
     if (!IsInKanturu3rd())
         return false;
@@ -231,7 +231,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
         {
             Vector(0.08f, 0.08f, 0.08f, Light);
             Vector(rand() % 20 - 30.0f, rand() % 20 - 30.0f, 0.0f, p);
-            b->TransformPosition(BoneTransform[34], p, Pos, false);
+            b->TransformPosition(Engine::Object::Pose::World(o, b)[34], p, Pos, false);
             if (o->AnimationFrame >= 5.0f && o->AnimationFrame < 12.5f)
                 CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 43, 1.5f);
         }
@@ -265,7 +265,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectVisual(OBJECT* o, BMD* b)
         Vector(fLumi * 0.3f, fLumi * 0.5f, fLumi * 1.0f, Light);
         vec3_t vPos;
         Vector(-1.0f, 0.0f, 0.0f, vPos);
-        b->TransformPosition(BoneTransform[1], vPos, Position, false);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[1], vPos, Position, false);
         CreateSprite(BITMAP_LIGHT, Position, fLumi / 2.4, Light, o);
         CreateSprite(BITMAP_SHINY + 1, Position, fLumi / 2.4, Light, o, (float)((int)(WorldTime / 2) % 360));
         CreateSprite(BITMAP_SHINY + 1, Position, fLumi / 2.4, Light, o, (float)((int)(WorldTime / 4) % 360));

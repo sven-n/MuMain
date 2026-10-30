@@ -2936,33 +2936,10 @@ void RenderObjectVisual(OBJECT* o)
         break;
 #endif
     default:
-        if (RenderChaosCastleVisual(o, b))
-            return;
-        if (RenderHellasVisual(o, b))
-            return;
-        if (battleCastle::RenderBattleCastleVisual(o, b))
-            return;
-        if (M31HuntingGround::RenderHuntingGroundObjectVisual(o, b))
-            return;
-        if (M34CryingWolf2nd::RenderCryingWolf2ndObjectVisual(o, b))
-            return;
+        // The other per-map hooks spawn in UpdateObjectVisual; these draw.
         if (M33Aida::RenderAidaObjectVisual(o, b))
             return;
-        if (M34CryWolf1st::RenderCryWolf1stObjectVisual(o, b))
-            return;
         if (M37Kanturu1st::RenderKanturu1stObjectVisual(o, b))
-            return;
-        if (M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(o, b))
-            return;
-        if (M39Kanturu3rd::RenderKanturu3rdObjectVisual(o, b))
-            return;
-        if (SEASON3A::CGM3rdChangeUp::Instance().RenderObjectVisual(o, b))
-            return;
-        if (g_CursedTemple->RenderObjectVisual(o, b))
-            return;
-        if (SEASON3B::GMNewTown::RenderObjectVisual(o, b))
-            return;
-        if (SEASON3C::GMSwampOfQuiet::RenderObjectVisual(o, b))
             return;
         if (TheMapProcess().RenderObjectVisual(o, b) == true)
             return;
@@ -3445,7 +3422,37 @@ void UpdateObjectVisual(OBJECT* o)
         }
     }
     default:
-        break;
+        // Same order and stop-on-claim as RenderObjectVisual's chain.
+        if (UpdateChaosCastleObjectEffects(o, b))
+            return;
+        if (UpdateHellasObjectEffects(o, b))
+            return;
+        if (battleCastle::UpdateBattleCastleObjectEffects(o, b))
+            return;
+        if (M31HuntingGround::UpdateHuntingGroundObjectEffects(o, b))
+            return;
+        if (M34CryingWolf2nd::UpdateCryingWolf2ndObjectEffects(o, b))
+            return;
+        if (M33Aida::UpdateAidaObjectEffects(o, b))
+            return;
+        if (M34CryWolf1st::UpdateCryWolf1stObjectEffects(o, b))
+            return;
+        if (M37Kanturu1st::UpdateKanturu1stObjectEffects(o, b))
+            return;
+        if (M38Kanturu2nd::Update_Kanturu2nd_ObjectEffects(o, b))
+            return;
+        if (M39Kanturu3rd::UpdateKanturu3rdObjectEffects(o, b))
+            return;
+        if (SEASON3A::CGM3rdChangeUp::Instance().UpdateObjectEffects(o, b))
+            return;
+        if (g_CursedTemple->UpdateObjectEffects(o, b))
+            return;
+        if (SEASON3B::GMNewTown::UpdateObjectEffects(o, b))
+            return;
+        if (SEASON3C::GMSwampOfQuiet::UpdateObjectEffects(o, b))
+            return;
+        if (TheMapProcess().UpdateObjectEffects(o, b))
+            return;
     }
 }
 

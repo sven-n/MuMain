@@ -138,7 +138,7 @@ bool CGMSantaTown::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool CGMSantaTown::RenderObjectVisual(OBJECT* o, BMD* b)
+bool CGMSantaTown::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {

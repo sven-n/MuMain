@@ -8,6 +8,7 @@ namespace M33Aida {
     //. 오브젝트
     bool CreateAidaObject(OBJECT* pObject);
     bool MoveAidaObject(OBJECT* pObject);
+    bool UpdateAidaObjectEffects(OBJECT* pObject, BMD* pModel);
     bool RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel);
     bool RenderAidaObjectMesh(OBJECT* pObject, BMD* pModel, bool ExtraMon = 0);
 

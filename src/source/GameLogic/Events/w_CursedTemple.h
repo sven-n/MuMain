@@ -45,7 +45,7 @@ namespace SEASON3A
 
     public:
         bool RenderObject_AfterCharacter(OBJECT* o, BMD* b);
-        bool RenderObjectVisual(OBJECT* o, BMD* b);
+        bool UpdateObjectEffects(OBJECT* o, BMD* b);
         bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
         bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
         void UpdateTempleSystemMsg(int _Value);

@@ -1131,7 +1131,7 @@ namespace battleCastle
         return true;
     }
 
-    bool RenderBattleCastleVisual(OBJECT* o, BMD* b)
+    bool UpdateBattleCastleObjectEffects(OBJECT* o, BMD* b)
     {
         if (gMapManager.InBattleCastle() == false) return false;
 

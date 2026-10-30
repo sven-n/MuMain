@@ -344,7 +344,7 @@ bool CGMDoppelGanger4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
+bool CGMDoppelGanger4::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     if (IsDoppelGanger4() == false)
         return false;
@@ -424,7 +424,7 @@ bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
         return true;
     case 70:
         Vector(0.0f, 0.0f, 0.0f, p);
-        b->TransformPosition(BoneTransform[6], p, Position, false);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[6], p, Position, false);
         Luminosity = (float)sinf(WorldTime * 0.002f) + 1.8f;
         Vector(0.8f, 0.4f, 0.2f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, Luminosity * 7.0f, Light, o);
@@ -445,39 +445,23 @@ bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
         if (rand_fps_check(3))
             CreateParticle(BITMAP_WATERFALL_2, o->Position, o->Angle, Light, 1, o->Scale);
         return true;
-    case 85:
-        b->BeginRender(o->Alpha);
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(3, RENDER_CHROME | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
-        b->EndRender();
-        return true;
     case 92:
     {
         vec3_t EndRelative, StartPos, EndPos;
         Vector(0.f, 0.f, 0.f, EndRelative);
-        b->TransformPosition(BoneTransform[1], EndRelative, StartPos, false);
-        b->TransformPosition(BoneTransform[2], EndRelative, EndPos, false);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[1], EndRelative, StartPos, false);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[2], EndRelative, EndPos, false);
         if (rand() % 30 == 1)
             CreateJointFpsChecked(BITMAP_JOINT_THUNDER, StartPos, EndPos, o->Angle, 8, NULL, 50.f);
     }
     return true;
-    case 96:
-        b->StreamMesh = 0;
-        mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.0f);
-        b->RenderMesh(
-            0, RENDER_TEXTURE, 1.0f, o->BlendMesh,
-            o->BlendMeshLight, o->BlendMeshTexCoordU,
-            -(int)WorldTime % 20000 * 0.00005f);
-        mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.25f);
-        b->StreamMesh = -1;
-        return true;
     case 98:
     {
         if (rand_fps_check(3))
         {
             vec3_t vPos;
             Vector(0.0f, 0.0f, 0.0f, vPos);
-            b->TransformPosition(BoneTransform[1], vPos, Position, false);
+            b->TransformPosition(Engine::Object::Pose::World(o, b)[1], vPos, Position, false);
             Vector(0.5f, 0.6f, 0.1f, Light);
             CreateParticle(BITMAP_TWINTAIL_WATER, Position, o->Angle, Light, 2);
         }
@@ -489,7 +473,7 @@ bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
         vec3_t vPos;
         Vector(0.0f, 0.0f, 0.0f, vPos);
         Vector(fLumi, fLumi, fLumi, Light);
-        b->TransformPosition(BoneTransform[4], vPos, Position, false);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[4], vPos, Position, false);
         CreateParticle(BITMAP_ENERGY, Position, o->Angle, Light, 0, 1.5f);
         CreateSprite(BITMAP_SPARK + 1, Position, 10.0f, Light, o);
         vec3_t StartPos, EndPos;
@@ -532,10 +516,38 @@ bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
         Vector(fLumi * 0.6f, fLumi * 1.0f, fLumi * 0.8f, Light);
         vec3_t vPos;
         Vector(0.0f, 0.0f, 0.0f, vPos);
-        b->TransformPosition(BoneTransform[1], vPos, Position, false);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[1], vPos, Position, false);
         CreateSprite(BITMAP_LIGHT, Position, 1.1f, Light, o);
     }
     return true;
+    }
+
+    return false;
+}
+
+bool CGMDoppelGanger4::RenderObjectVisual(OBJECT* o, BMD* b)
+{
+    if (IsDoppelGanger4() == false)
+        return false;
+
+    switch (o->Type)
+    {
+    case 85:
+        b->BeginRender(o->Alpha);
+        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(3, RENDER_CHROME | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, BITMAP_CHROME);
+        b->EndRender();
+        return true;
+    case 96:
+        b->StreamMesh = 0;
+        mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.0f);
+        b->RenderMesh(0, RENDER_TEXTURE, 1.0f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      -(int)WorldTime % 20000 * 0.00005f);
+        mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.25f);
+        b->StreamMesh = -1;
+        return true;
     }
 
     return false;

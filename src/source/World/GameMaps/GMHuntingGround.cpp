@@ -116,7 +116,7 @@ bool M31HuntingGround::MoveHuntingGroundObject(OBJECT* pObject)
     return true;
 }
 
-bool M31HuntingGround::RenderHuntingGroundObjectVisual(OBJECT* pObject, BMD* pModel)
+bool M31HuntingGround::UpdateHuntingGroundObjectEffects(OBJECT* pObject, BMD* pModel)
 {
     if (!IsInHuntingGround())
         return false;
@@ -143,7 +143,7 @@ bool M31HuntingGround::RenderHuntingGroundObjectVisual(OBJECT* pObject, BMD* pMo
     {
         vec3_t Relative, Position;
         Vector(0.f, -10.f, 0.f, Relative);
-        pModel->TransformPosition(BoneTransform[3], Relative, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[3], Relative, Position, false);
 
         Vector(1.f, 0.f, 0.f, Light);
         float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
