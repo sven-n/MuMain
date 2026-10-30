@@ -429,7 +429,9 @@ ctest --test-dir <build folder> --build-config Debug -R items --output-on-failur
 
 Simplified Chinese is being added incrementally. Translated screens include the
 Options window and its graphics tuning labels and help text, and the system menu
-at character selection and in game (Esc).
+at character selection and in game (Esc). The login window also translates account
+and password fields, remember-account/password controls, the password-saving
+confirmation, server titles, login progress and common account errors.
 Shared labels such as OK, Cancel and Close also appear translated wherever other
 screens use the same resource keys, including other dialogs and windows.
 Untranslated text falls back to English. Item names and server messages are
@@ -458,6 +460,9 @@ system menu at character selection and with Esc in game, in both themes.
 Chinese glyphs should render without boxes, and labels and help should fit at
 75% and 150% UI scale. Switch back to English and restart to check that the
 language choice is retained.
+
+The password-saving warning wraps within the dialog in both themes. Server
+names are preserved; untranslated connection and subscription errors use English.
 
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
 resource keys, legacy IDs, formatting arguments and command tokens unchanged.

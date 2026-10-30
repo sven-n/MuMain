@@ -338,6 +338,74 @@
     <value>关闭</value>
     <comment>legacy_id=388,1002</comment>
   </data>
+  <data name="Enter your account" xml:space="preserve">
+    <value>请输入账号</value>
+    <comment>legacy_id=403</comment>
+  </data>
+  <data name="Enter your password" xml:space="preserve">
+    <value>请输入密码</value>
+    <comment>legacy_id=404</comment>
+  </data>
+  <data name="Password is incorrect" xml:space="preserve">
+    <value>密码错误</value>
+    <comment>legacy_id=407,445</comment>
+  </data>
+  <data name="Your account is invalid" xml:space="preserve">
+    <value>账号无效</value>
+    <comment>legacy_id=414</comment>
+  </data>
+  <data name="Your account is already connected" xml:space="preserve">
+    <value>该账号已登录</value>
+    <comment>legacy_id=415</comment>
+  </data>
+  <data name="This account is blocked" xml:space="preserve">
+    <value>该账号已被封停</value>
+    <comment>legacy_id=417</comment>
+  </data>
+  <data name="Account" xml:space="preserve">
+    <value>账号</value>
+    <comment>legacy_id=450</comment>
+  </data>
+  <data name="Password" xml:space="preserve">
+    <value>密码</value>
+    <comment>legacy_id=451</comment>
+  </data>
+  <data name="LoginRememberUsername" xml:space="preserve">
+    <value>记住账号</value>
+    <comment>Login screen: remember-username checkbox label.</comment>
+  </data>
+  <data name="LoginRememberPassword" xml:space="preserve">
+    <value>记住密码</value>
+    <comment>Login screen: remember-password checkbox label.</comment>
+  </data>
+  <data name="LoginTrustWarning" xml:space="preserve">
+    <value>仅在可信任的电脑上保存密码。</value>
+    <comment>Login screen: warning under the remember-password checkbox.</comment>
+  </data>
+  <data name="LoginSavePasswordWarningTitle" xml:space="preserve">
+    <value>安全提示</value>
+    <comment>Remember-password confirmation dialog: header.</comment>
+  </data>
+  <data name="LoginSavePasswordWarningBody" xml:space="preserve">
+    <value>保存密码后，任何使用这台电脑的人都可以登录你的账号。请仅在可信任的电脑上保存密码。是否保存密码？</value>
+    <comment>Remember-password confirmation dialog: body.</comment>
+  </data>
+  <data name="[%s-%d(Non-PvP) Server]" xml:space="preserve">
+    <value>[%s-%d（非 PvP）服务器]</value>
+    <comment>legacy_id=460</comment>
+  </data>
+  <data name="[%s-%d Server]" xml:space="preserve">
+    <value>[%s-%d 服务器]</value>
+    <comment>legacy_id=461</comment>
+  </data>
+  <data name="Please wait" xml:space="preserve">
+    <value>请稍候</value>
+    <comment>legacy_id=471,473</comment>
+  </data>
+  <data name="Verifying your account" xml:space="preserve">
+    <value>正在验证账号</value>
+    <comment>legacy_id=472</comment>
+  </data>
   <data name="Exit game after closing the Chaos interface." xml:space="preserve">
     <value>请先关闭合成界面，再进行此操作。</value>
     <comment>legacy_id=592</comment>
