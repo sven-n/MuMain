@@ -6854,6 +6854,23 @@ LinkPlacement PlaceLinkedPart(float x, float y, float z, const CHARACTER* c, BYT
     }
     return placement;
 }
+// The shared item object of a part type, set up from the character the part is drawn on.
+OBJECT* ItemObjectFor(CHARACTER* c, int Type)
+{
+    OBJECT* o = &c->Object;
+    OBJECT* Object = &g_ItemObject[Type];
+    Object->Type = Type;
+    ItemObjectAttribute(Object);
+    Object->EnableShadow = o->EnableShadow;
+    Object->m_bRenderShadow = o->m_bRenderShadow;
+    Object->m_bySkillCount = o->m_bySkillCount;
+    g_CharacterCopyBuff(Object, o);
+    return Object;
+}
+
+// The sprites, particles, joints and Eye* anchors a linked part spawns and sets from its pose; b is placed for it.
+void SpawnLinkedPartEffects(CHARACTER* c, int Type, OBJECT* Object, vec34_t* bones, const vec3_t position);
+
 // The action a linked part plays: Wings of Darkness fold in a safe zone.
 unsigned short LinkedPartAction(const CHARACTER* c, const PART_t* f)
 {
@@ -6973,17 +6990,9 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     b->CurrentAction = f->CurrentAction;
     b->BodyHeight = 0.f;
 
-    OBJECT* Object = &g_ItemObject[Type];
-
-    Object->Type = Type;
-    ItemObjectAttribute(Object);
-    Object->EnableShadow = o->EnableShadow;
-    Object->m_bRenderShadow = o->m_bRenderShadow;
-    Object->m_bySkillCount = o->m_bySkillCount;
+    OBJECT* Object = ItemObjectFor(c, Type);
     b->LightEnable = Object->LightEnable;
     b->LightEnable = false;
-
-    g_CharacterCopyBuff(Object, o);
 
     if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
     {
@@ -7066,6 +7075,68 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     {
         return bones;
     }
+
+    // The update spawns the effects of a part it advanced; the draw spawns the others'.
+    if (!advanced)
+        SpawnLinkedPartEffects(c, Type, Object, bones, Position);
+
+    if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE &&
+        !g_Direction.m_CKanturu.IsMayaScene() && !IsWingShadowDisabledDebug())
+    {
+        switch (Type) // 날개인지 검사
+        {
+        case MODEL_WINGS_OF_ELF:    // Wings of Elf
+        case MODEL_WINGS_OF_HEAVEN: // Wings of Heaven
+        case MODEL_WINGS_OF_SATAN:  // Wings of Satan
+        case MODEL_WING_OF_CURSE:   // Wing of Curse
+
+        case MODEL_WINGS_OF_SPIRITS:  // Wings of Spirits
+        case MODEL_WINGS_OF_SOUL:     // Wings of Soul
+        case MODEL_WINGS_OF_DRAGON:   // Wings of Dragon
+        case MODEL_WINGS_OF_DARKNESS: // Wings of Darkness
+        case MODEL_WINGS_OF_DESPAIR:  // Wings of Despair
+
+        case MODEL_WING_OF_STORM:     // Wing of Storm
+        case MODEL_WING_OF_ETERNAL:   // Wing of Eternal
+        case MODEL_WING_OF_ILLUSION:  // Wing of Illusion
+        case MODEL_WING_OF_RUIN:      // Wing of Ruin
+        case MODEL_WING_OF_DIMENSION: // Wing of Dimension
+
+        case MODEL_SMALL_WING_OF_CURSE:   // Small Wing of Curse
+        case MODEL_SMALL_WINGS_OF_ELF:    // Small Wings of Elf
+        case MODEL_SMALL_WINGS_OF_HEAVEN: // Small Wings of Heaven
+        case MODEL_SMALL_WINGS_OF_SATAN:  // Small Wings of Satan
+            b->RenderBodyShadow();
+            break;
+
+        case MODEL_CAPE_OF_LORD:          // Cape of Lord
+        case MODEL_CAPE_OF_FIGHTER:       // Cape of Fighter
+        case MODEL_CAPE_OF_EMPEROR:       // Cape of Emperor
+        case MODEL_CAPE_OF_OVERRULE:      // Cape of Overrule
+        case MODEL_SMALL_CAPE_OF_LORD:    // Small Cape of Lord
+        case MODEL_LITTLE_WARRIORS_CLOAK: // Little Warrior's Cloak
+            b->RenderBodyShadow(-1, -1, -1, -1, o->m_pCloth, o->m_byNumCloth);
+            break;
+        default:
+            if (o->m_pCloth)
+            {
+                b->RenderBodyShadow(-1, -1, -1, -1, o->m_pCloth, o->m_byNumCloth);
+            }
+            break;
+        }
+    }
+    return bones;
+}
+
+namespace
+{
+void SpawnLinkedPartEffects(CHARACTER* c, int Type, OBJECT* Object, vec34_t* bones, const vec3_t position)
+{
+    OBJECT* o = &c->Object;
+    BMD* b = &Models[Type];
+    vec3_t p{};
+    vec3_t Position;
+    VectorCopy(position, Position);
 
     // The item effects also reach the part's bones through its item object (TransformByObjectBone).
     struct ItemBones
@@ -8455,54 +8526,8 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
         }
         break;
     }
-
-    if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE &&
-        !g_Direction.m_CKanturu.IsMayaScene() && !IsWingShadowDisabledDebug())
-    {
-        switch (Type)        // 날개인지 검사
-        {
-        case MODEL_WINGS_OF_ELF:        // Wings of Elf
-        case MODEL_WINGS_OF_HEAVEN:        // Wings of Heaven
-        case MODEL_WINGS_OF_SATAN:        // Wings of Satan
-        case MODEL_WING_OF_CURSE:       // Wing of Curse
-
-        case MODEL_WINGS_OF_SPIRITS:        // Wings of Spirits
-        case MODEL_WINGS_OF_SOUL:        // Wings of Soul
-        case MODEL_WINGS_OF_DRAGON:        // Wings of Dragon
-        case MODEL_WINGS_OF_DARKNESS:        // Wings of Darkness
-        case MODEL_WINGS_OF_DESPAIR:        // Wings of Despair
-        
-        case MODEL_WING_OF_STORM:        // Wing of Storm
-        case MODEL_WING_OF_ETERNAL:        // Wing of Eternal
-        case MODEL_WING_OF_ILLUSION:        // Wing of Illusion
-        case MODEL_WING_OF_RUIN:        // Wing of Ruin
-        case MODEL_WING_OF_DIMENSION:        // Wing of Dimension
-
-        case MODEL_SMALL_WING_OF_CURSE:        // Small Wing of Curse
-        case MODEL_SMALL_WINGS_OF_ELF:        // Small Wings of Elf
-        case MODEL_SMALL_WINGS_OF_HEAVEN:        // Small Wings of Heaven
-        case MODEL_SMALL_WINGS_OF_SATAN:        // Small Wings of Satan
-            b->RenderBodyShadow();
-            break;
-            
-        case MODEL_CAPE_OF_LORD:    // Cape of Lord
-        case MODEL_CAPE_OF_FIGHTER:      // Cape of Fighter
-        case MODEL_CAPE_OF_EMPEROR:        // Cape of Emperor
-        case MODEL_CAPE_OF_OVERRULE:        // Cape of Overrule
-        case MODEL_SMALL_CAPE_OF_LORD:        // Small Cape of Lord
-        case MODEL_LITTLE_WARRIORS_CLOAK:        // Little Warrior's Cloak
-            b->RenderBodyShadow(-1, -1, -1, -1, o->m_pCloth, o->m_byNumCloth);
-            break;
-        default:
-            if (o->m_pCloth)
-            {
-                b->RenderBodyShadow(-1, -1, -1, -1, o->m_pCloth, o->m_byNumCloth);
-            }
-            break;
-        }
-    }
-    return bones;
 }
+} // namespace
 
 void RenderLight(OBJECT* o, int Texture, float Scale, int Bone, float x, float y, float z)
 {
@@ -11635,6 +11660,16 @@ void UpdateAttachedParts(CHARACTER* c)
             AdvanceLinkedPart(c, f, slot.type, slot.link);
             slot.posed = PosedAt(f, LinkedPartAction(c, f), placement);
             PoseLinkedPart(c, slot.type, slot.link, slot.posed, Engine::Object::Attachments::Bones(slot));
+
+            BMD* b = &Models[slot.type];
+            VectorCopy(placement.origin, b->BodyOrigin);
+            b->BodyScale = placement.scale;
+            OBJECT* Object = ItemObjectFor(c, slot.type);
+            VectorCopy(placement.angle, Object->Angle);
+            VectorCopy(placement.origin, Object->Position);
+            if (!Object->EnableShadow)
+                SpawnLinkedPartEffects(c, slot.type, Object, Engine::Object::Attachments::Bones(slot),
+                                       placement.position);
         });
 }
 
