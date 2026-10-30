@@ -35,18 +35,6 @@ Summoner/Rage Fighter bodies, masks, animations, class IDs and attachment rules 
 Fully armored characters still use their existing armor art. The setting is independent of
 Classic/Enhanced graphics and texture packs.
 
-## Validation
-
-Focused `player_model_selector_tests` cover the default and saved choices, exactly 13 selected
-body-family paths, unchanged excluded paths and native loading from both packaged model sets.
-Existing native body tests cover the retained skeleton, mesh/index/UV bounds, palette skinning
-and texture roles. CPU tests skip GPU uploads; they do not replace native appearance checks.
-
-```sh
-cmake --build out/build/linux-x64 --config Release --target player_model_selector_tests
-ctest --test-dir out/build/linux-x64 -C Release -R '\[player-selector\]' --output-on-failure
-```
-
 ## Attribution
 
 Original and improved models and textures belong to **Webzen**. Attribution does not transfer
