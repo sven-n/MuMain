@@ -22,6 +22,7 @@ SRC_CMAKE = ROOT / "src/CMakeLists.txt"
 SOURCE_ROOT = ROOT / "src/source"
 NETWORK_TEST_CMAKE = ROOT / "tests/network/CMakeLists.txt"
 BUILD_GUIDE = ROOT / "docs/build/README.md"
+LINUX_GUIDE = ROOT / "docs/build/linux/console.md"
 README = ROOT / "README.md"
 CHAT_COMMAND_CATALOG_HEADER = ROOT / "src/source/GameLogic/Commands/ChatCommandCatalog.h"
 CHAT_COMMAND_CATALOG_SOURCE = ROOT / "src/source/GameLogic/Commands/ChatCommandCatalog.cpp"
@@ -96,6 +97,14 @@ EXPECTED_WINDOWS_OS_DLLS = {
     "wtsapi32.dll",
 }
 
+# Packages the Linux CI job installs that the Linux guide leaves out, and why.
+CI_ONLY_LINUX_PACKAGES = {
+    "gcc": "the guide installs build-essential",
+    "g++": "the guide installs build-essential",
+    "libxinerama-dev": "SDL3 has no Xinerama support",
+    "libxxf86vm-dev": "SDL3 has no XVidMode support",
+}
+
 EXPECTED_RELEASE_ASSETS = [
     {
         "path": "MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
@@ -151,6 +160,17 @@ def manifest(block, assignment):
     if not match:
         return []
     return re.findall(r'^\s*["\']([^"\']+)["\']\s*$', match.group(1), re.M)
+
+
+def apt_packages(text):
+    # Every package of every "apt-get install -y" command, including its "\" continuation
+    # lines; an inline `command` in prose ends at its closing backtick.
+    packages = set()
+    for arguments in re.findall(r"apt-get install -y((?:[^\n`]*\\\n)*[^\n`]*)", text):
+        packages.update(
+            word for word in arguments.split() if word != "\\" and not word.startswith("-")
+        )
+    return packages
 
 
 ci = read_optional(CI_WORKFLOW)
@@ -435,6 +455,17 @@ for required in (
     '"$runtime_directory/shaders"',
 ):
     check(required in linux_validation, f"Linux validation missing {required}")
+
+linux_ci_packages = apt_packages(step(linux_job, "build-linux", "Install build tools"))
+check(linux_ci_packages, "Linux CI must install its packages with apt-get install -y")
+linux_guide_packages = apt_packages(LINUX_GUIDE.read_text(encoding="utf-8"))
+for package in sorted(linux_ci_packages - linux_guide_packages - CI_ONLY_LINUX_PACKAGES.keys()):
+    errors.append(
+        f"Linux CI installs {package}, but docs/build/linux/console.md doesn't list it; "
+        "add it to the guide, or to CI_ONLY_LINUX_PACKAGES with the reason"
+    )
+for package in sorted(CI_ONLY_LINUX_PACKAGES.keys() - linux_ci_packages):
+    errors.append(f"CI_ONLY_LINUX_PACKAGES lists {package}, which Linux CI no longer installs")
 
 macos_configure = step(macos_job, "build-macos", "Configure CMake")
 for required in (
