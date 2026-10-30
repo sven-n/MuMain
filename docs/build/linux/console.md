@@ -23,7 +23,8 @@ sudo apt-get install -y \
 # Crypto++ (the ciphers of version 14 models)
 sudo apt-get install -y libcrypto++-dev
 
-# OpenSSL (the saved login) and libcurl (the in-game shop downloads)
+# OpenSSL (the saved login) and libcurl (the in-game shop downloads).
+# An installed libcurl4-gnutls-dev works too: then leave out libcurl4-openssl-dev.
 sudo apt-get install -y libssl-dev libcurl4-openssl-dev
 
 # SDL3 build dependencies (X11 + Wayland + audio)
