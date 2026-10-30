@@ -426,13 +426,8 @@ void mu::ui::window::CCharacterInfoWindow::BuildSubjectTexts()
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::classNameText, "classname_text",
               StringUtils::WideToNarrow(strClassName));
 
-    wchar_t strServerName[MAX_TEXT_LENGTH];
-    const wchar_t* apszGlobalText[4]
-        = { I18N::Game::SDServer, I18N::Game::SDNonPvPServer, I18N::Game::SDGoldPvPServer, I18N::Game::SDGoldServer };
-    mu_swprintf(strServerName, apszGlobalText[g_ServerListManager->GetNonPVPInfo()],
-        g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::serverNameText, "servername_text",
-              StringUtils::WideToNarrow(strServerName));
+              StringUtils::WideToNarrow(g_ServerListManager->GetSelectServerTitle().c_str()));
 
     const float fAlpha = sinf(WorldTime * 0.001f) + 1.f;
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::classNameOpacity, "classname_opacity",
