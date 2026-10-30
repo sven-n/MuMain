@@ -12,7 +12,7 @@
 	<!-- Classic (0.97) fork of ../../main_frame.rml: the same parts, ids, data-model and
 	     events, plus what the 0.97 bar has and the S6 one does not -- the two dragons over the bar's
 	     ends, the Party and Guild buttons, the coordinates box and the chat's buttons (bound by
-	     UI/HUD/MainFrameExtras.cpp); the skill list's cells are laid
+	     CMainFrameWindow, UI/HUD/MainFrameWindow.cpp); the skill list's cells are laid
 	     out by the stylesheet in one row, as 0.97 shows them. Keep the rest in sync with
 	     upstream (tools/check_rml_rcss_drift.py). -->
 	<!-- CMainFrameWindow's HUD, shared by every theme. #hud_layout is the one unit the workspace
@@ -72,7 +72,7 @@
 	<!-- The original's bottom button row. A theme that puts these buttons elsewhere hides it (the
 	     modern theme's are in main_frame_top.rml). -->
 	<div id="buttons" class="hud-part">
-		<!-- The Season 1 client's command window button, in the bar's top-left box (MainFrameExtras). -->
+		<!-- The Season 1 client's command window button, in the bar's top-left box. -->
 		<div id="btn_command" class="frame-btn" data-class-open="command_open" data-event-click="mainframe_command_click" data-attr-data-hint="command_tooltip"></div>
 		<div id="btn_party" class="frame-btn" data-class-open="party_open" data-event-click="mainframe_party_click" data-attr-data-hint="party_tooltip"></div>
 		<div id="btn_guild" class="frame-btn" data-class-open="guild_open" data-event-click="mainframe_guild_click" data-attr-data-hint="guild_tooltip"></div>

@@ -416,8 +416,8 @@ What changes for the player, besides the look:
 
 The HUD model also exposes what the classic bar shows and the S6 bar does not: `party_open` /
 `guild_open` / `command_open` with `mainframe_party_click` / `mainframe_guild_click` /
-`mainframe_command_click` (the command window under the D key's rules) and their tooltips, and
-`coord_x` / `coord_y`.
+`mainframe_command_click` (the windows under the P, G and D keys' rules, `CHotKey`) and their
+tooltips, and `coord_x` / `coord_y`.
 
 The character creation model has `job_previous` / `job_next`: the enabled class before and after
 the selected one, or -1, for a theme that steps through the classes with arrows

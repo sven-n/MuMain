@@ -38,7 +38,6 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlWorkspaceParticipant.h"
-#include "UI/HUD/MainFrameExtras.h"
 #include "UI/Placement/WindowPlacement.h"
 #include "UI/RmlBridge/RmlTooltip.h"
 #include "Core/Utilities/StringUtils.h"
@@ -152,6 +151,14 @@ void mu::ui::window::CMainFrameWindow::BindRmlModel(Rml::DataModelConstructor& c
     c.Bind("myinven_tooltip", &model.myInvenTooltip);
     c.Bind("friend_tooltip", &model.friendTooltip);
     c.Bind("window_tooltip", &model.windowTooltip);
+    c.Bind("party_open", &model.partyOpen);
+    c.Bind("guild_open", &model.guildOpen);
+    c.Bind("command_open", &model.commandOpen);
+    c.Bind("party_tooltip", &model.partyTooltip);
+    c.Bind("guild_tooltip", &model.guildTooltip);
+    c.Bind("command_tooltip", &model.commandTooltip);
+    c.Bind("coord_x", &model.coordX);
+    c.Bind("coord_y", &model.coordY);
 
     c.Bind("chainfo_alert", &model.chaInfoAlert);
     c.Bind("friend_alert", &model.friendAlert);
@@ -279,7 +286,12 @@ void mu::ui::window::CMainFrameWindow::BindRmlModel(Rml::DataModelConstructor& c
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickFriend(); });
     c.BindEventCallback("mainframe_window_click",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickWindow(); });
-    UI::Hud::MainFrameExtras::BindModel(c);
+    c.BindEventCallback("mainframe_party_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickParty(); });
+    c.BindEventCallback("mainframe_guild_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickGuild(); });
+    c.BindEventCallback("mainframe_command_click",
+        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCommand(); });
 }
 
 void mu::ui::window::CMainFrameWindow::OnRmlReloaded()
@@ -407,6 +419,26 @@ bool mu::ui::window::CMainFrameWindow::Update()
         g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_WINDOW_MENU);
         PlayBuffer(SOUND_CLICK01);
     }
+    // These open windows that hide the inventory (HideAllGroupA()), which cancels a trade and
+    // closes storage, shops and the Chaos Machine, so they follow the P, G and D keys' rules.
+    if (m_bRmlPartyClicked)
+    {
+        m_bRmlPartyClicked = false;
+        if (g_pNewUIHotKey->CanToggleWindowByButton())
+            g_pNewUIHotKey->TogglePartyWindow();
+    }
+    if (m_bRmlGuildClicked)
+    {
+        m_bRmlGuildClicked = false;
+        if (g_pNewUIHotKey->CanToggleWindowByButton())
+            g_pNewUIHotKey->ToggleGuildWindow();
+    }
+    if (m_bRmlCommandClicked)
+    {
+        m_bRmlCommandClicked = false;
+        if (g_pNewUIHotKey->CanToggleWindowByButton())
+            g_pNewUIHotKey->ToggleCommandWindow();
+    }
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
     if (m_bRmlCShopClicked)
     {
@@ -489,7 +521,6 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
     };
 
     m_ItemHotKey.SyncSlotIcons(m_RmlView.Document());
-    UI::Hud::MainFrameExtras::SyncModel();
 
     // HP/MP -- legacy RenderLifeMana(). fLife/fMana there are the EMPTY fraction; store filled.
     DWORD wLifeMax, wLife, wManaMax, wMana;
@@ -643,6 +674,19 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
     syncWide(&MainFrameRmlModel::myInvenTooltip, "myinven_tooltip", I18N::Game::InventoryIV);
     syncWide(&MainFrameRmlModel::friendTooltip, "friend_tooltip", I18N::Game::FriendF);
     syncWide(&MainFrameRmlModel::windowTooltip, "window_tooltip", I18N::Game::MenuU);
+    syncWide(&MainFrameRmlModel::partyTooltip, "party_tooltip", I18N::Game::PartyP);
+    syncWide(&MainFrameRmlModel::guildTooltip, "guild_tooltip", I18N::Game::GuildG);
+    syncWide(&MainFrameRmlModel::commandTooltip, "command_tooltip", I18N::Game::CommandD);
+    syncBool(&MainFrameRmlModel::partyOpen, "party_open", g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PARTY));
+    syncBool(&MainFrameRmlModel::guildOpen, "guild_open", g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GUILDINFO));
+    syncBool(&MainFrameRmlModel::commandOpen, "command_open", g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND));
+    if (Hero != nullptr && (Hero->PositionX != m_iCoordHeroX || Hero->PositionY != m_iCoordHeroY))
+    {
+        m_iCoordHeroX = Hero->PositionX;
+        m_iCoordHeroY = Hero->PositionY;
+        syncText(&MainFrameRmlModel::coordX, "coord_x", std::to_string(m_iCoordHeroX));
+        syncText(&MainFrameRmlModel::coordY, "coord_y", std::to_string(m_iCoordHeroY));
+    }
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
     syncWide(&MainFrameRmlModel::cShopTooltip, "cshop_tooltip", I18N::Game::MUItemShopX);
 #endif //defined PBG_ADD_INGAMESHOP_UI_MAINFRAME

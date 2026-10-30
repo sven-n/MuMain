@@ -32,6 +32,15 @@ namespace mu::ui::window
         bool CanUpdateKeyEvent();
         bool CanUpdateKeyEventRelatedMyInventory();
 
+        // The P, G and D keys' windows, shared with the HUD buttons that open the same windows.
+        // CanToggleWindowByButton() is the keys' rules for a click: no window while the hero is
+        // dead, watching a duel, or has a window open that works with the inventory (trade,
+        // storage, shops, mixing) or that takes the keys (NPC windows).
+        bool CanToggleWindowByButton();
+        void TogglePartyWindow();
+        void ToggleGuildWindow();
+        void ToggleCommandWindow();
+
         void SetStateGameOver(bool bGameOver);	// 게임오버중인 상태
         bool IsStateGameOver();
 
@@ -39,6 +48,7 @@ namespace mu::ui::window
 
     private:
         void ResetMouseRButton();
+        bool IsKeyTakingWindowVisible();
     };
 }
 

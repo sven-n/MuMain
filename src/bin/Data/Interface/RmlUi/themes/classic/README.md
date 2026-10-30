@@ -23,7 +23,7 @@ The interface of the original 0.97 client, drawn with its own art.
   original drew a texture additively (its black ground vanishing), a copy with that as alpha
   (`Progress_add`, `s1/DuelWindow_add`). All built by
   `tools/classic_theme/make_classic_derived_textures.py`.
-- **C++**: the HUD's extra parts are bound by `UI/HUD/MainFrameExtras`.
+- **C++**: the HUD's extra parts are fields of `CMainFrameWindow`'s model (`UI/HUD/MainFrameWindow`).
 
 Comments in each stylesheet name the 0.97 client function it follows (its address in `main.exe`)
 and the positions in the original 640x480 frame. A window 0.97 does not have follows the Season 1
