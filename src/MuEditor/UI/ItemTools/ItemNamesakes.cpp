@@ -18,20 +18,14 @@ namespace
 using Data::Items::ItemDefinition;
 using Data::Items::ItemTag;
 
-// A tag that only leaves a tooltip line out says nothing about what the item is.
-bool OnlyLeavesOutTooltipLines(ItemTag tag)
-{
-    return tag == ItemTag::NoLevelRequirement || tag == ItemTag::NoDurabilityLine ||
-           tag == ItemTag::NoBlankAfterOptions || tag == ItemTag::NoClassLines;
-}
-
-// The tags of the item that not every one of `namesakes` has.
+// The tags of the item that not every one of `namesakes` has; a tag that only leaves a tooltip line out says nothing
+// about what the item is.
 std::string DistinguishingTags(const ItemDefinition& item, const std::vector<int>& namesakes)
 {
     std::string text;
     for (const auto& tag : Data::Items::GetEnumNames(ItemTag{}))
     {
-        if (!item.tags.Has(tag.value) || OnlyLeavesOutTooltipLines(tag.value))
+        if (!item.tags.Has(tag.value) || Data::Items::IsTooltipOnlyTag(tag.value))
         {
             continue;
         }
