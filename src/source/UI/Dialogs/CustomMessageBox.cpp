@@ -1146,7 +1146,8 @@ void mu::ui::window::ShowGemIntegrationMixDialog()
             wchar_t strText[256] = { 0, };
             mu::ui::window::GenericDialogConfig confirmCfg;
             confirmCfg.showCancel = true;
-            mu_swprintf(strText, COMGEM::GetJewelName(COMGEM::m_cGemType), I18N::Game::JewelOfSoul, COMGEM::m_cCount);
+            mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, COMGEM::GetJewelName(COMGEM::m_cGemType),
+                        COMGEM::m_cCount);
             confirmCfg.lines.push_back({ strText, true });
             mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
             confirmCfg.lines.push_back({ strText, true });
