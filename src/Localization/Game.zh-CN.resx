@@ -337,7 +337,7 @@
     <comment>legacy_id=388,1002</comment>
   </data>
   <data name="Exit game after closing the Chaos interface." xml:space="preserve">
-    <value>请先关闭玛雅合成界面，再退出游戏。</value>
+    <value>请先关闭合成界面，再进行此操作。</value>
     <comment>legacy_id=592</comment>
   </data>
   <data name="System Menu" xml:space="preserve">
