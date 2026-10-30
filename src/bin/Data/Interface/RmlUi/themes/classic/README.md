@@ -23,6 +23,8 @@ The interface of the original 0.97 client, drawn with its own art.
   original drew a texture additively (its black ground vanishing), a copy with that as alpha
   (`Progress_add`, `s1/DuelWindow_add`). All built by
   `tools/classic_theme/make_classic_derived_textures.py`.
+- **Redrawn textures**: `Level_box_large` is `Level_box` redrawn 145 wide for MuMain's longer
+  level line (it adds the resets).
 - **C++**: the HUD's extra parts are fields of `CMainFrameWindow`'s model (`UI/HUD/MainFrameWindow`).
 
 Comments in each stylesheet name the 0.97 client function it follows (its address in `main.exe`)
