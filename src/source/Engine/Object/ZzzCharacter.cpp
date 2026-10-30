@@ -55,6 +55,7 @@
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "GameLogic/Monsters/MonsterSoundEvents.h"
 #include "GameLogic/Monsters/MonsterNames.h"
+#include "GameLogic/NPCs/PlayerNpcChat.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -3303,26 +3304,6 @@ void OnlyNpcChatProcess(CHARACTER* c, OBJECT* o)
     }
 }
 
-namespace
-{
-const wchar_t* const* const kDeviasPlayerNpcChatTexts[] = {
-    &I18N::Game::RegisterTheLuckyNumberOnThe100WinningCard,
-    &I18N::Game::PleaseCheckOutTheAnnouncementOn,
-};
-const wchar_t* const* const kLorenciaPlayerNpcChatTexts[] = {
-    &I18N::Game::CollectingStonesPleaseGiveMeStonesThatYouVeAcquired,
-};
-} // namespace
-
-std::span<const wchar_t* const* const> GetPlayerNpcChatTexts(int world)
-{
-    if (world == WD_2DEVIAS)
-        return kDeviasPlayerNpcChatTexts;
-    if (world == WD_0LORENCIA)
-        return kLorenciaPlayerNpcChatTexts;
-    return {};
-}
-
 void PlayerNpcStopAnimationSetting(CHARACTER* c, OBJECT* o)
 {
     int action = rand() % 100;
@@ -3354,30 +3335,11 @@ void PlayerNpcStopAnimationSetting(CHARACTER* c, OBJECT* o)
             SetAction(&c->Object, PLAYER_UNKNOWN1);
         }
 
-        // These NPCs stand only in Lorencia and Devias; in another world they say nothing.
-        const wchar_t* const* text = nullptr;
-        if (gMapManager.WorldActive == WD_2DEVIAS)
-        {
-            const auto texts = GetPlayerNpcChatTexts(WD_2DEVIAS);
-
-            static const wchar_t* const* s_text = texts[0];
-            if (o->CurrentAction != o->PriorAction)
-                s_text = texts[rand() % texts.size()];
-            text = s_text;
-        }
-        else if (gMapManager.WorldActive == WD_0LORENCIA)
-        {
-            const auto texts = GetPlayerNpcChatTexts(WD_0LORENCIA);
-            static const wchar_t* const* s_text = texts[0];
-            if (o->CurrentAction != o->PriorAction)
-                s_text = texts[rand() % texts.size()];
-            text = s_text;
-        }
-
-        if (text != nullptr)
+        const bool actionChanged = o->CurrentAction != o->PriorAction;
+        if (const wchar_t* line = GameLogic::Npcs::PlayerNpcChat::LineAtStop(gMapManager.WorldActive, actionChanged))
         {
             wchar_t szText[512];
-            mu_swprintf(szText, *text);
+            mu_swprintf(szText, line);
             UI::Chat::CreateChat(c->ID, szText, c);
         }
     }
