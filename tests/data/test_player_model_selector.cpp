@@ -73,7 +73,8 @@ TEST_CASE("S6 selector changes exactly 13 body family directories [player-select
 
 TEST_CASE("both packaged player model choices open through native loader [player-selector]")
 {
-    ConfigScope config;
+    // This case needs only the selector argument, not config.ini. CTest can run it
+    // alongside the save/reload case, which is the sole writer of that file.
     const auto previous = std::filesystem::current_path();
     struct RestoreFolder
     {
@@ -87,10 +88,9 @@ TEST_CASE("both packaged player model choices open through native loader [player
     for (bool useOriginal : {true, false})
     {
         TestModelSlots slots;
-        config.config.SetUseS6PlayerModels(useOriginal);
         const int slot = MODEL_BODY_HELM + static_cast<int>(CLASS_KNIGHT);
         REQUIRE(gLoadData.AccessModel(
-            slot, Engine::Object::PlayerBodyModelDirectory(CLASS_KNIGHT, config.config.GetUseS6PlayerModels()),
+            slot, Engine::Object::PlayerBodyModelDirectory(CLASS_KNIGHT, useOriginal),
             L"HelmClass", CLASS_KNIGHT + 1));
         REQUIRE(Models[slot].NumMeshs > 0);
         CHECK(std::string(Models[slot].Textures[0].FileName) ==
