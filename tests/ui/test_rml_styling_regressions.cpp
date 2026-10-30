@@ -6,6 +6,7 @@
 #include <RmlUi/Core/FontEngineInterface.h>
 #include <RmlUi/Core/Mesh.h>
 #include <RmlUi/Core/TextShapingContext.h>
+#include <algorithm>
 
 namespace
 {
@@ -52,6 +53,46 @@ TEST_CASE("atlas repetition clips partial tiles without sampling adjacent sprite
         }
         CHECK(mesh.vertices.back().position.y == (mode == Rml::DecoratorTiled::REPEAT_X ? 6.f : 14.f));
     }
+}
+
+TEST_CASE("a sheet sprite never samples the next sprite at its edge inside the sheet [ui][styling]")
+{
+    // The cash shop's zone tab: the upper 76 x 23 sprite of a 76 x 46 sheet, drawn at 1.6x. Its bottom edge lies on
+    // the next sprite; its other edges are the texture border, which the renderer clamps.
+    UI::Tests::RmlLayoutFixture fixture;
+    auto* document = fixture.LoadMarkup(R"(<rml><body><div id="panel"></div></body></rml>)");
+    REQUIRE(document);
+    auto* panel = document->GetElementById("panel");
+    Rml::DecoratorTiled::Tile tile;
+    tile.fit_mode = Rml::DecoratorTiled::FILL;
+    tile.size = {76.f, 23.f};
+    tile.tile_data_calculated = true;
+    tile.tile_data.size = tile.size;
+    tile.tile_data.texcoords[0] = {0.f, 0.f};
+    tile.tile_data.texcoords[1] = {1.f, 0.5f};
+    Rml::Mesh mesh;
+    tile.GenerateGeometry(mesh, panel->GetComputedValues(), {}, {121.6f, 36.8f}, {121.6f, 36.8f});
+
+    // The sprite and a band along its bottom edge; nothing splits it across.
+    CHECK(mesh.vertices.size() == 8);
+    float height = 0.f;
+    for (const auto& vertex : mesh.vertices)
+        height = std::max(height, vertex.position.y);
+    const float lastRowCentre = 22.5f / 46.f;
+    for (const auto& vertex : mesh.vertices)
+    {
+        CAPTURE(vertex.position.y);
+        // Mapped as one quad would be, but never past the last row's centre.
+        CHECK(vertex.tex_coord.y == doctest::Approx(std::min(vertex.position.y / height * 0.5f, lastRowCentre)));
+        CHECK((vertex.tex_coord.x == 0.f || vertex.tex_coord.x == 1.f));
+    }
+
+    // A sprite without an edge inside a sheet stays one quad.
+    Rml::Mesh whole;
+    tile.tile_data.texcoords[1] = {1.f, 1.f};
+    tile.GenerateGeometry(whole, panel->GetComputedValues(), {}, {121.6f, 36.8f}, {121.6f, 36.8f});
+    CHECK(whole.vertices.size() == 4);
+    document->Close();
 }
 
 TEST_CASE("fractional letter spacing accumulates consistently in measurement and drawing [ui][styling]")

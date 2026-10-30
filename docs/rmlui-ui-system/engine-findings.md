@@ -110,8 +110,11 @@ implementation findings, not general policy; recheck them when updating the engi
   pixels linear filtering reaches past the edge texel; with a repeating sampler a sprite whose
   own edge is transparent pulled in the texture's opposite edge and showed a faint dark line
   (the MU Helper bar, the character window's frame pieces and stat boxes). A sprite *inside* a
-  sheet still mixes in the neighbouring texels at its edges, whatever the sampler: keep a
-  transparent or matching row between sprites that are drawn magnified.
+  sheet mixed in the next sprite's texels at its edges the same way, whatever the sampler (the
+  line under the cash shop's unselected zone tabs and under stacked button states). The tiled
+  decorators (`image()`, `tiled-*`) now draw such a sprite with a band half a texel wide along
+  each edge that lies inside its sheet, sampled at the edge texel's centre, and the rest mapped
+  as before, so nothing moves at any scale. `ninepatch()` and `<img sprite>` do not do this yet.
 
 - **Fractional `letter-spacing` accumulates before rounding.** The default font backend formerly
   truncated each character's spacing to an integer, making subpixel values ineffective. This
