@@ -731,6 +731,7 @@ for toolchain_path in MINGW_TOOLCHAINS:
     )
 
 if errors:
-    raise SystemExit("Windows workflow contract failed:\n- " + "\n- ".join(errors))
+    # The checks cover the Windows, Linux and macOS jobs and the Linux guide, not only Windows.
+    raise SystemExit("Workflow contract failed:\n- " + "\n- ".join(errors))
 
-print("Windows workflow contract: OK")
+print("Workflow contract: OK")
