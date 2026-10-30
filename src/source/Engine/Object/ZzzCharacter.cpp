@@ -3312,9 +3312,6 @@ const wchar_t* const* const kDeviasPlayerNpcChatTexts[] = {
 const wchar_t* const* const kLorenciaPlayerNpcChatTexts[] = {
     &I18N::Game::CollectingStonesPleaseGiveMeStonesThatYouVeAcquired,
 };
-// Said in a world without lines of its own (none: these NPCs stand only in Lorencia and Devias); the
-// client has always shown the font name's text there.
-const wchar_t* const* const kDefaultPlayerNpcChatText = &I18N::Game::Gulim;
 } // namespace
 
 std::span<const wchar_t* const* const> GetPlayerNpcChatTexts(int world)
@@ -3357,7 +3354,8 @@ void PlayerNpcStopAnimationSetting(CHARACTER* c, OBJECT* o)
             SetAction(&c->Object, PLAYER_UNKNOWN1);
         }
 
-        const wchar_t* const* text = kDefaultPlayerNpcChatText;
+        // These NPCs stand only in Lorencia and Devias; in another world they say nothing.
+        const wchar_t* const* text = nullptr;
         if (gMapManager.WorldActive == WD_2DEVIAS)
         {
             const auto texts = GetPlayerNpcChatTexts(WD_2DEVIAS);
@@ -3376,9 +3374,12 @@ void PlayerNpcStopAnimationSetting(CHARACTER* c, OBJECT* o)
             text = s_text;
         }
 
-        wchar_t szText[512];
-        mu_swprintf(szText, *text);
-        UI::Chat::CreateChat(c->ID, szText, c);
+        if (text != nullptr)
+        {
+            wchar_t szText[512];
+            mu_swprintf(szText, *text);
+            UI::Chat::CreateChat(c->ID, szText, c);
+        }
     }
 }
 

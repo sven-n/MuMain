@@ -53,7 +53,8 @@ public:
 
     void SetInfo();
 
-    // The guild rank shown in the balloon for a character's GuildStatus, in the current language.
+    // The guild rank shown in the balloon for a character's GuildStatus, in the current language;
+    // nullptr for a status that is no rank.
     static const wchar_t* GetGuildStatusText(std::uint8_t guildStatus);
 
     // Read-only accessors for CCharInfoBalloonMng::SyncRmlModel() -- the cached text/status fields

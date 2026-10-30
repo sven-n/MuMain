@@ -47,10 +47,6 @@ namespace
                                      { return left.status >= right.status; }) == std::end(kGuildStatusTexts),
                   "kGuildStatusTexts is sorted by status, each status once");
 
-    // Shown for a guild status missing from kGuildStatusTexts (OpenMU sends only those five); the
-    // client has always shown the font name's text there.
-    const wchar_t* const* const kUnknownGuildStatusText = &I18N::Game::Gulim;
-
     BalloonNameStatus ResolveNameStatus(std::uint8_t controlCode)
     {
         if (controlCode & CTLCODE_01BLOCKCHAR)
@@ -126,7 +122,7 @@ const wchar_t* CCharInfoBalloon::GetGuildStatusText(std::uint8_t guildStatus)
         std::lower_bound(std::begin(kGuildStatusTexts), std::end(kGuildStatusTexts), guildStatus,
                          [](const GuildStatusText& entry, std::uint8_t status) { return entry.status < status; });
 
-    return (it != std::end(kGuildStatusTexts) && it->status == guildStatus) ? *it->text : *kUnknownGuildStatusText;
+    return (it != std::end(kGuildStatusTexts) && it->status == guildStatus) ? *it->text : nullptr;
 }
 
 void CCharInfoBalloon::SetInfo()
@@ -146,7 +142,12 @@ void CCharInfoBalloon::SetInfo()
 
     CopyWideString(m_szName, m_pCharInfo->ID);
 
-    mu_swprintf_s(m_szGuild, L"(%ls)", GetGuildStatusText(m_pCharInfo->GuildStatus));
+    // A guild status without a rank text (OpenMU sends only the five ranks) shows no rank.
+    const wchar_t* guildStatusText = GetGuildStatusText(m_pCharInfo->GuildStatus);
+    if (guildStatusText != nullptr)
+        mu_swprintf_s(m_szGuild, L"(%ls)", guildStatusText);
+    else
+        m_szGuild[0] = L'\0';
     mu_swprintf_s(m_szClass, L"%ls %d",
         gCharacterManager.GetCharacterClassText(m_pCharInfo->Class),
         m_pCharInfo->Level);
