@@ -88,9 +88,18 @@ namespace mu::ui::window
         void RmlClickMyInven() { m_bRmlMyInvenClicked = true; }
         void RmlClickFriend() { m_bRmlFriendClicked = true; }
         void RmlClickWindow() { m_bRmlWindowClicked = true; }
-        void RmlClickParty() { m_bRmlPartyClicked = true; }
-        void RmlClickGuild() { m_bRmlGuildClicked = true; }
-        void RmlClickCommand() { m_bRmlCommandClicked = true; }
+        void RmlClickParty()
+        {
+            m_bRmlPartyClicked = true;
+        }
+        void RmlClickGuild()
+        {
+            m_bRmlGuildClicked = true;
+        }
+        void RmlClickCommand()
+        {
+            m_bRmlCommandClicked = true;
+        }
 
     private:
         void SyncRmlModel();

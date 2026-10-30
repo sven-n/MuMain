@@ -93,10 +93,10 @@ namespace UI::RmlBridge
         {
             auto& theme = ActiveThemeInheritanceStorage();
             if (!theme)
-                theme = std::make_unique<ThemeInheritance>(std::filesystem::path("Data/Interface/RmlUi/themes") / ActiveThemeNameStorage());
+                theme = std::make_unique<ThemeInheritance>(std::filesystem::path("Data/Interface/RmlUi/themes") /
+                                                           ActiveThemeNameStorage());
             return *theme;
         }
-
     }
 
     const std::string& GetActiveThemeName()
@@ -313,10 +313,10 @@ namespace UI::RmlBridge
 
     namespace
     {
-        std::optional<float> ActiveThemeStackingDepth(const std::string& documentName)
-        {
-            return ThemedStackingDepth(ActiveThemeInheritance(), documentName);
-        }
+    std::optional<float> ActiveThemeStackingDepth(const std::string& documentName)
+    {
+        return ThemedStackingDepth(ActiveThemeInheritance(), documentName);
+    }
     } // namespace
 
     void ApplyStackingDepth(Rml::ElementDocument* document, const std::string& documentName)

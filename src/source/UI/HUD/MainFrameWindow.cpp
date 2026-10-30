@@ -287,11 +287,11 @@ void mu::ui::window::CMainFrameWindow::BindRmlModel(Rml::DataModelConstructor& c
     c.BindEventCallback("mainframe_window_click",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickWindow(); });
     c.BindEventCallback("mainframe_party_click",
-        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickParty(); });
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickParty(); });
     c.BindEventCallback("mainframe_guild_click",
-        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickGuild(); });
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickGuild(); });
     c.BindEventCallback("mainframe_command_click",
-        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCommand(); });
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCommand(); });
 }
 
 void mu::ui::window::CMainFrameWindow::OnRmlReloaded()
@@ -678,8 +678,10 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
     syncWide(&MainFrameRmlModel::guildTooltip, "guild_tooltip", I18N::Game::GuildG);
     syncWide(&MainFrameRmlModel::commandTooltip, "command_tooltip", I18N::Game::CommandD);
     syncBool(&MainFrameRmlModel::partyOpen, "party_open", g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PARTY));
-    syncBool(&MainFrameRmlModel::guildOpen, "guild_open", g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GUILDINFO));
-    syncBool(&MainFrameRmlModel::commandOpen, "command_open", g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND));
+    syncBool(&MainFrameRmlModel::guildOpen, "guild_open",
+             g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GUILDINFO));
+    syncBool(&MainFrameRmlModel::commandOpen, "command_open",
+             g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND));
     if (Hero != nullptr && (Hero->PositionX != m_iCoordHeroX || Hero->PositionY != m_iCoordHeroY))
     {
         m_iCoordHeroX = Hero->PositionX;

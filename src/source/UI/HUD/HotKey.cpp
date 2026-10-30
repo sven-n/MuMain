@@ -393,9 +393,8 @@ bool mu::ui::window::CHotKey::CanUpdateKeyEventRelatedMyInventory()
 bool mu::ui::window::CHotKey::CanToggleWindowByButton()
 {
     // UpdateKeyEvent()'s gates, but a text field being edited doesn't stop a click.
-    if (m_bStateGameOver
-        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MINI_MAP)
-        || g_isCharacterBuff((&Hero->Object), eBuff_DuelWatch))
+    if (m_bStateGameOver || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MINI_MAP) ||
+        g_isCharacterBuff((&Hero->Object), eBuff_DuelWatch))
     {
         return false;
     }
@@ -426,7 +425,8 @@ void mu::ui::window::CHotKey::ToggleCommandWindow()
     if (::IsStrifeMap(gMapManager.WorldActive))
     {
         if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::TheCommandWindowCannotBeActivatedInBattleZone) == FALSE)
-            g_pSystemLogBox->AddText(I18N::Game::TheCommandWindowCannotBeActivatedInBattleZone, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::TheCommandWindowCannotBeActivatedInBattleZone,
+                                     mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
     else
     {
