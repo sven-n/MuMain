@@ -3528,33 +3528,35 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     vec3_t vPos;
                     Vector(0.0f, 0.0f, 0.0f, vPos);
                     BMD* p_b = &Models[o->Owner->Type];
+                    // The Fenrir's own world pose, which its update builds before creating this.
+                    vec34_t* ownerBones = o->Owner->BoneTransform != nullptr ? o->Owner->BoneTransform : BoneTransform;
                     int irandom = rand() % 30;
 
                     if (irandom >= 1 && irandom <= 2)
                     {
-                        p_b->TransformPosition(BoneTransform[10], vPos, o->Position, false);
+                        p_b->TransformPosition(ownerBones[10], vPos, o->Position, false);
                     }
                     else if (irandom == 3)
                     {
                         o->Scale -= 0.2f;
-                        p_b->TransformPosition(BoneTransform[14], vPos, o->Position, false);
+                        p_b->TransformPosition(ownerBones[14], vPos, o->Position, false);
                     }
                     else if (irandom >= 4 && irandom <= 5)
                     {
-                        p_b->TransformPosition(BoneTransform[2], vPos, o->Position, false);
+                        p_b->TransformPosition(ownerBones[2], vPos, o->Position, false);
                     }
                     else if (irandom >= 6 && irandom <= 7)
                     {
                         o->Scale -= 0.2f;
                         if (rand() % 2 == 0)
-                            p_b->TransformPosition(BoneTransform[50], vPos, o->Position, false);
+                            p_b->TransformPosition(ownerBones[50], vPos, o->Position, false);
                         else
-                            p_b->TransformPosition(BoneTransform[51], vPos, o->Position, false);
+                            p_b->TransformPosition(ownerBones[51], vPos, o->Position, false);
                     }
                     else if (irandom == 8)
                     {
                         o->Scale -= 0.2f;
-                        p_b->TransformPosition(BoneTransform[53], vPos, o->Position, false);
+                        p_b->TransformPosition(ownerBones[53], vPos, o->Position, false);
                     }
                     else if (irandom >= 9 && irandom <= 10)
                     {

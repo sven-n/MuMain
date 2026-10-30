@@ -1,13 +1,16 @@
 #include "stdafx.h"
 #include "doctest.h"
 
+#include "Engine/AI/GOBoid.h"
 #include "Engine/Object/CharacterAttachments.h"
+#include "Engine/Object/ObjectPose.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Models/ZzzBMD.h"
 #include "World/MapInfra/w_MapProcess.h"
 
+#include <cstring>
 #include <memory>
 
 namespace
@@ -57,6 +60,69 @@ struct CharacterScope
 };
 
 // A Cursed Temple statue that dies this frame: its effects shake the camera, on any map.
+// A red Fenrir under a rider, its own world pose already built: every bone sits at `poseAt`, every bone of the
+// shared array at `sharedAt`.
+struct FenrirScope
+{
+    static constexpr float poseAt = 500.f;
+    static constexpr float sharedAt = -90000.f;
+    std::unique_ptr<BMD[]> models{new BMD[MAX_MODELS]};
+    std::unique_ptr<vec34_t[]> bones{new vec34_t[MAX_BONES]{}};
+    std::unique_ptr<vec34_t[]> savedShared{new vec34_t[MAX_BONES]};
+    BMD* previousModels = Models;
+    float previousFrameFactor = FPS_ANIMATION_FACTOR;
+    OBJECT rider;
+    OBJECT mount;
+
+    FenrirScope()
+    {
+        Models = models.get();
+        Models[MODEL_FENRIR_RED].NumActions = 1;
+        FPS_ANIMATION_FACTOR = 1.f; // one reference frame per update: every frame-checked spawn runs
+        std::memcpy(savedShared.get(), BoneTransform, sizeof(vec34_t) * MAX_BONES);
+        for (int i = 0; i < MAX_BONES; ++i)
+        {
+            for (int axis = 0; axis < 3; ++axis)
+            {
+                bones[i][axis][axis] = 1.f;
+                bones[i][axis][3] = poseAt;
+                BoneTransform[i][axis][3] = sharedAt;
+            }
+        }
+
+        rider.Live = true;
+        rider.Type = MODEL_PLAYER;
+        mount.Live = true;
+        mount.Type = MODEL_FENRIR_RED;
+        mount.Owner = &rider;
+        mount.Alpha = 1.f;
+        mount.Scale = 1.f;
+        mount.HiddenMesh = -1;
+        mount.BoneTransform = bones.get();
+        mount.EnableBoneMatrix = true;
+        PlaceObjectModel(&mount, &Models[mount.Type]);
+        Engine::Object::Pose::Record(&mount, &Models[mount.Type], true);
+        ClearSpawns();
+    }
+
+    ~FenrirScope()
+    {
+        ClearSpawns();
+        mount.BoneTransform = nullptr;
+        std::memcpy(BoneTransform, savedShared.get(), sizeof(vec34_t) * MAX_BONES);
+        FPS_ANIMATION_FACTOR = previousFrameFactor;
+        Models = previousModels;
+    }
+
+    static void ClearSpawns()
+    {
+        for (int i = 0; i < MAX_SPRITES; ++i)
+            Sprites[i].Live = false;
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+            Effects[i].Live = false;
+    }
+};
+
 struct DyingStatueScope : CharacterScope
 {
     DyingStatueScope() : CharacterScope(MODEL_CURSEDTEMPLE_STATUE)
@@ -210,4 +276,57 @@ TEST_CASE("The update advances each part of the last draw once, and the next dra
     Attachments::BeginFrame();
     Attachments::BeginCharacter(c);
     CHECK_FALSE(Attachments::WasAdvanced(*record(&c->Weapon[0], 15.f)));
+}
+
+TEST_CASE("A cloaked rider's Fenrir spawns none of its effects, as its outline draw spawned none [effects]")
+{
+    FenrirScope scope;
+    OBJECT* rider = &scope.rider;
+    g_CharacterRegisterBuff(rider, eBuff_Cloaking);
+
+    UpdateDrawnMountEffects(&scope.mount);
+
+    for (int i = 0; i < MAX_SPRITES; ++i)
+        CHECK_FALSE(Sprites[i].Live);
+    for (int i = 0; i < MAX_EFFECTS; ++i)
+        CHECK_FALSE(Effects[i].Live);
+}
+
+TEST_CASE("A Fenrir's sprites stay out of the bloom, as when its draw spawned them [effects]")
+{
+    FenrirScope scope;
+
+    UpdateDrawnMountEffects(&scope.mount);
+
+    int created = 0;
+    for (int i = 0; i < MAX_SPRITES; ++i)
+    {
+        if (!Sprites[i].Live)
+            continue;
+        ++created;
+        CHECK(IsSpriteBloomExcluded(i));
+    }
+    CHECK(created >= 6); // its eye and chest lights
+}
+
+TEST_CASE("A Fenrir's body thunder starts on the Fenrir's own pose, not on the shared bones [effects]")
+{
+    FenrirScope scope;
+
+    int onPose = 0;
+    for (int frame = 0; frame < 40; ++frame)
+    {
+        UpdateDrawnMountEffects(&scope.mount);
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+        {
+            const OBJECT& thunder = Effects[i];
+            if (!thunder.Live || thunder.Type != MODEL_FENRIR_THUNDER || thunder.SubType != 0)
+                continue;
+            CHECK(thunder.Position[0] > FenrirScope::sharedAt / 2.f);
+            if (thunder.Position[0] == FenrirScope::poseAt && thunder.Position[2] == FenrirScope::poseAt)
+                ++onPose;
+        }
+        FenrirScope::ClearSpawns();
+    }
+    CHECK(onPose > 0);
 }

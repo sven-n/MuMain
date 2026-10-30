@@ -29,6 +29,8 @@ void UpdateObjectEffects();
 // The effects and state changes of a character's body draw (Draw_RenderObject), for a character the last frame
 // drew; its bones are the pose the update built.
 void UpdateRenderObjectEffects(OBJECT* o);
+// Places an object's model where its draw poses and draws it.
+void PlaceObjectModel(const OBJECT* o, BMD* b);
 void NextGradeObjectRender(CHARACTER* c);
 void RenderObject_AfterImage(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0,

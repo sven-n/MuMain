@@ -295,7 +295,7 @@ static void AnimateObjectBones(OBJECT* o, BMD* b, bool Translate)
 }
 
 // Where an object's model stands when it is posed and drawn.
-static void PlaceObjectModel(const OBJECT* o, BMD* b)
+void PlaceObjectModel(const OBJECT* o, BMD* b)
 {
     b->BodyHeight = 0.f;
     b->BodyScale = o->Scale;
@@ -863,7 +863,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
             {
                 if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
                 {
-                    o->Alpha = 0.7f;
                     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
                 else
@@ -895,9 +894,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
             }
             else if (o->Type == MODEL_FENRIR_BLACK || o->Type == MODEL_FENRIR_BLUE || o->Type == MODEL_FENRIR_RED || o->Type == MODEL_FENRIR_GOLD)
             {
-                vec3_t vLight, vPos, vPosition;
-                float fLuminosity = (float)sinf((WorldTime) * 0.002f) * 0.2f;
-
                 b->BeginRender(1.f);
 
                 b->BodyLight[0] = 1.0f;
@@ -911,14 +907,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                     b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                     b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-
-                    if (o->CurrentAction == FENRIR_ATTACK_SKILL)
-                    {
-                        Vector(1.0f, 0.0f, 0.0f, vLight);
-                        Vector((float)(rand() % 10 - 10) * 0.5f, 0.f, (float)(rand() % 40 - 20) * 0.5f, vPos);
-                        b->TransformPosition(BoneTransform[14], vPos, vPosition, false);
-                        CreateParticleFpsChecked(BITMAP_SPARK + 1, vPosition, o->Angle, vLight, 15, 0.7f + (fLuminosity * 0.05f));
-                    }
 
                     b->StreamMesh = -1;
                 }
@@ -939,11 +927,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                         b->BodyLight[2] = 1.0f;
 
                         b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-
-                        Vector(1.0f, 0.0f, 0.0f, vLight);
-                        Vector((float)(rand() % 10 - 10) * 0.5f, 0.f, (float)(rand() % 40 - 20) * 0.5f, vPos);
-                        b->TransformPosition(BoneTransform[14], vPos, vPosition, false);	// 턱
-                        CreateParticleFpsChecked(BITMAP_SPARK + 1, vPosition, o->Angle, vLight, 15, 0.7f + (fLuminosity * 0.05f));
                     }
                     b->StreamMesh = -1;
                 }
@@ -957,87 +940,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                         EnableAlphaTest();
 
                         b->RenderBodyShadow();
-                    }
-                }
-
-                Vector(0.9f + fLuminosity, 0.2f + (fLuminosity * 0.5f), 0.1f + (fLuminosity * 0.5f), vLight);
-                Vector(50.f, 2.f, 11.f, vPos);
-                b->TransformPosition(BoneTransform[11], vPos, vPosition, false);
-                CreateSprite(BITMAP_LIGHT, vPosition, 0.5f + (fLuminosity * 0.1f), vLight, o);
-                CreateSprite(BITMAP_LIGHT, vPosition, 0.5f + (fLuminosity * 0.1f), vLight, o);
-                Vector(50.f, 2.f, -11.f, vPos);
-                b->TransformPosition(BoneTransform[11], vPos, vPosition, false);
-                CreateSprite(BITMAP_LIGHT, vPosition, 0.5f + (fLuminosity * 0.1f), vLight, o);
-                CreateSprite(BITMAP_LIGHT, vPosition, 0.5f + (fLuminosity * 0.1f), vLight, o);
-
-                Vector(1.0f, 0.3f, 0.2f, vLight);
-                Vector(40.f, 15.f, 0.f, vPos);
-                b->TransformPosition(BoneTransform[13], vPos, vPosition, false);
-                CreateSprite(BITMAP_LIGHT, vPosition, 1.5f, vLight, o);
-                CreateSprite(BITMAP_LIGHT, vPosition, 1.0f, vLight, o);
-
-                int iSubType = 0;
-                if (o->Type == MODEL_FENRIR_RED)
-                {
-                    Vector(0.8f, 0.0f, 0.0f, vLight);
-                    iSubType = 1;
-                }
-                else if (o->Type == MODEL_FENRIR_BLUE)
-                {
-                    Vector(0.1f, 0.1f, 0.8f, vLight);
-                    iSubType = 2;
-                }
-                else if (o->Type == MODEL_FENRIR_GOLD)
-                {
-                    Vector(0.8f, 0.8f, 0.1f, vLight);
-                    iSubType = 4;
-                }
-                else
-                {
-                    Vector(1.0f, 1.0f, 0.2f, vLight);
-                    iSubType = 3;
-                }
-                CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 0, o);
-                CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 0, o);
-
-                Vector(1.0f, 1.0f, 1.0f, vLight);
-                if (o->CurrentAction == FENRIR_WALK)
-                {
-                    if (o->AnimationFrame >= 0.0f && o->AnimationFrame <= 1.5f)
-                    {
-                        Vector(0.0f, 0.0f, 0.0f, vPos);
-                        b->TransformPosition(BoneTransform[22], vPos, vPosition, false);
-                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
-                        Vector(0.0f, 0.0f, 0.0f, vPos);
-                        b->TransformPosition(BoneTransform[28], vPos, vPosition, false);
-                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
-                        Vector(0.0f, 0.0f, 0.0f, vPos);
-                        b->TransformPosition(BoneTransform[36], vPos, vPosition, false);
-                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
-                        Vector(0.0f, 0.0f, 0.0f, vPos);
-                        b->TransformPosition(BoneTransform[44], vPos, vPosition, false);
-                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
-                    }
-                }
-                else if (o->CurrentAction == FENRIR_RUN)
-                {
-                    if (o->AnimationFrame > 1.f && o->AnimationFrame <= 1.4f)
-                    {
-                        Vector(0.0f, 0.0f, 0.0f, vPos);
-                        b->TransformPosition(BoneTransform[22], vPos, vPosition, false);
-                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
-                        Vector(0.0f, 0.0f, 0.0f, vPos);
-                        b->TransformPosition(BoneTransform[28], vPos, vPosition, false);
-                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
-                    }
-                    else if (o->AnimationFrame > 4.8f && o->AnimationFrame <= 5.2f)
-                    {
-                        Vector(0.0f, 0.0f, 0.0f, vPos);
-                        b->TransformPosition(BoneTransform[36], vPos, vPosition, false);
-                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
-                        Vector(0.0f, 0.0f, 0.0f, vPos);
-                        b->TransformPosition(BoneTransform[44], vPos, vPosition, false);
-                        CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
                     }
                 }
             }
@@ -2725,6 +2627,96 @@ void UpdateRenderObjectEffects(OBJECT* o)
             CreateSprite(BITMAP_FLARE, vPos, 1.5f, vLight, o);
         }
         break;
+    case MODEL_DARK_HORSE:
+        if (o->SubType == 1 && gMapManager.WorldActive == WD_65DOPPLEGANGER1)
+            o->Alpha = 0.7f;
+        break;
+    case MODEL_FENRIR_BLACK:
+    case MODEL_FENRIR_BLUE:
+    case MODEL_FENRIR_RED:
+    case MODEL_FENRIR_GOLD:
+    {
+        const auto bones = [o, b] { return Engine::Object::Pose::World(o, b); };
+        vec3_t vLight, vPos, vPosition;
+        float fLuminosity = (float)sinf((WorldTime) * 0.002f) * 0.2f;
+
+        if (o->CurrentAction == FENRIR_ATTACK_SKILL)
+        {
+            Vector(1.0f, 0.0f, 0.0f, vLight);
+            Vector((float)(rand() % 10 - 10) * 0.5f, 0.f, (float)(rand() % 40 - 20) * 0.5f, vPos);
+            b->TransformPosition(bones()[14], vPos, vPosition, false);
+            CreateParticleFpsChecked(BITMAP_SPARK + 1, vPosition, o->Angle, vLight, 15, 0.7f + (fLuminosity * 0.05f));
+        }
+
+        Vector(0.9f + fLuminosity, 0.2f + (fLuminosity * 0.5f), 0.1f + (fLuminosity * 0.5f), vLight);
+        Vector(50.f, 2.f, 11.f, vPos);
+        b->TransformPosition(bones()[11], vPos, vPosition, false);
+        CreateSprite(BITMAP_LIGHT, vPosition, 0.5f + (fLuminosity * 0.1f), vLight, o);
+        CreateSprite(BITMAP_LIGHT, vPosition, 0.5f + (fLuminosity * 0.1f), vLight, o);
+        Vector(50.f, 2.f, -11.f, vPos);
+        b->TransformPosition(bones()[11], vPos, vPosition, false);
+        CreateSprite(BITMAP_LIGHT, vPosition, 0.5f + (fLuminosity * 0.1f), vLight, o);
+        CreateSprite(BITMAP_LIGHT, vPosition, 0.5f + (fLuminosity * 0.1f), vLight, o);
+
+        Vector(1.0f, 0.3f, 0.2f, vLight);
+        Vector(40.f, 15.f, 0.f, vPos);
+        b->TransformPosition(bones()[13], vPos, vPosition, false);
+        CreateSprite(BITMAP_LIGHT, vPosition, 1.5f, vLight, o);
+        CreateSprite(BITMAP_LIGHT, vPosition, 1.0f, vLight, o);
+
+        int iSubType = 0;
+        if (o->Type == MODEL_FENRIR_RED)
+        {
+            Vector(0.8f, 0.0f, 0.0f, vLight);
+            iSubType = 1;
+        }
+        else if (o->Type == MODEL_FENRIR_BLUE)
+        {
+            Vector(0.1f, 0.1f, 0.8f, vLight);
+            iSubType = 2;
+        }
+        else if (o->Type == MODEL_FENRIR_GOLD)
+        {
+            Vector(0.8f, 0.8f, 0.1f, vLight);
+            iSubType = 4;
+        }
+        else
+        {
+            Vector(1.0f, 1.0f, 0.2f, vLight);
+            iSubType = 3;
+        }
+        CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 0, o);
+        CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, o->Position, o->Angle, vLight, 0, o);
+
+        // The feet that touch the ground in this frame of the walk or run.
+        int feet[4] = {};
+        int count = 0;
+        if (o->CurrentAction == FENRIR_WALK && o->AnimationFrame >= 0.0f && o->AnimationFrame <= 1.5f)
+        {
+            feet[count++] = 22;
+            feet[count++] = 28;
+            feet[count++] = 36;
+            feet[count++] = 44;
+        }
+        else if (o->CurrentAction == FENRIR_RUN && o->AnimationFrame > 1.f && o->AnimationFrame <= 1.4f)
+        {
+            feet[count++] = 22;
+            feet[count++] = 28;
+        }
+        else if (o->CurrentAction == FENRIR_RUN && o->AnimationFrame > 4.8f && o->AnimationFrame <= 5.2f)
+        {
+            feet[count++] = 36;
+            feet[count++] = 44;
+        }
+        Vector(1.0f, 1.0f, 1.0f, vLight);
+        for (int i = 0; i < count; ++i)
+        {
+            Vector(0.0f, 0.0f, 0.0f, vPos);
+            b->TransformPosition(bones()[feet[i]], vPos, vPosition, false);
+            CreateEffectFpsChecked(MODEL_FENRIR_FOOT_THUNDER, vPosition, o->Angle, vLight, iSubType, o);
+        }
+        break;
+    }
     case MODEL_FIRE_FLAME_GHOST:
         if (o->CurrentAction == MONSTER01_DIE)
             o->m_bRenderShadow = false;
