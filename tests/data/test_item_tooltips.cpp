@@ -538,6 +538,29 @@ TEST_CASE("An item's add option values come from its add option [data][items][to
     CHECK_FALSE(duration->empty());
 }
 
+// A bundle holds ten jewels per level step; every other item holds none, a single jewel and any equipment too.
+TEST_CASE("Only a bundle has a bundle count [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeNewDarkWizard(hero.Hero());
+
+    const auto bundleCount = [](int group, int number, int level)
+    {
+        ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(group, number);
+        params.Level = static_cast<BYTE>(level);
+        ITEM item;
+        FillItemFromParameters(item, params);
+        return Engine::Items::TooltipValues::ComputeItemTooltipValues(item).bundleCount;
+    };
+    CHECK(bundleCount(12, 30, 2) == 30); // Bundle of Jewel of Bless +2
+    CHECK(bundleCount(14, 13, 0) == 0);  // Jewel of Bless
+    CHECK(bundleCount(0, 0, 3) == 0);    // Kris +3
+}
+
 TEST_CASE("An item's duration text follows the UI's language [data][items][tooltip]")
 {
     ClientDataScope client(ClientDirectory);
