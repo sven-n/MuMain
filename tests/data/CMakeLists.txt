@@ -63,6 +63,8 @@ mu_add_test(
         test_data_checks_window.cpp
         test_issue_table.cpp
         test_legacy_monster_kind.cpp
+        test_map_picker.cpp
+        test_maps.cpp
         test_monster_attack_checks.cpp
         test_monster_attack_readers.cpp
         test_monster_attacks.cpp

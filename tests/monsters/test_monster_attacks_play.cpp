@@ -80,13 +80,27 @@ public:
     // life of the scope.
     void RemoveAttacks(int number)
     {
+        SetAttacks(number, std::nullopt);
+    }
+
+    // The monster list with these attacks in the monster's entry, for the
+    // life of the scope.
+    void SetAttacks(int number, const std::optional<Data::Monsters::MonsterAttacks>& attacks)
+    {
+        Change(number, [&](Data::Monsters::MonsterDefinition& monster) { monster.attacks = attacks; });
+    }
+
+    // The monster list with the monster's entry changed, for the life of the
+    // scope.
+    template <typename Edit> void Change(int number, Edit edit)
+    {
         std::vector<Data::Monsters::MonsterDefinition> changed = m_monsters;
         const auto monster =
             std::find_if(changed.begin(), changed.end(),
                          [number](const Data::Monsters::MonsterDefinition& entry) { return entry.number == number; });
         REQUIRE(monster != changed.end());
         REQUIRE(monster->attacks.has_value());
-        monster->attacks.reset();
+        edit(*monster);
         g_MonsterDatabase.Build(changed, "en");
     }
 
@@ -182,6 +196,146 @@ TEST_CASE("Monster attacks: the Kanturu 1st warriors play attack 2 for their ski
             character.SwordCount = count;
             CHECK(Attack(character, NoMonsterSkill) == MONSTER01_ATTACK1);
         }
+    }
+}
+
+TEST_CASE("Monster attacks: a rotation plays in turn, counted for each monster from its creation (Q-MN69) "
+          "[monsters][attacks]")
+{
+    AttackScope scope(WD_37KANTURU_1ST);
+    Data::Monsters::MonsterAttacks rotation;
+    rotation.otherwise = {MONSTER01_ATTACK2, MONSTER01_ATTACK1, MONSTER01_ATTACK1};
+    scope.SetAttacks(MONSTER_BERSERKER, rotation);
+    CHARACTER& first = scope.Create(MONSTER_BERSERKER);
+    const std::array<int, 4> expected = {MONSTER01_ATTACK2, MONSTER01_ATTACK1, MONSTER01_ATTACK1, MONSTER01_ATTACK2};
+    for (size_t turn = 0; turn < expected.size(); ++turn)
+    {
+        INFO("turn " << turn);
+        // The generic pattern's count does not move the rotation.
+        first.SwordCount = static_cast<BYTE>(turn * 5 + 1);
+        CHECK(NormalAttack(first) == expected[turn]);
+    }
+
+    // A monster created in the same slot starts its rotation again.
+    CHARACTER& second = scope.Create(MONSTER_BERSERKER);
+    REQUIRE(&second == &first);
+    CHECK(NormalAttack(second) == MONSTER01_ATTACK2);
+    CHECK(NormalAttack(second) == MONSTER01_ATTACK1);
+}
+
+TEST_CASE("Monster attacks: a map variant plays on its maps, the monster's attacks elsewhere (Q-MN65) "
+          "[monsters][attacks]")
+{
+    AttackScope scope(WD_24HELLAS);
+    scope.Change(MONSTER_DEATH_CENTURION_1,
+                 [](Data::Monsters::MonsterDefinition& monster)
+                 {
+                     monster.attacks->otherwise = {MONSTER01_ATTACK1};
+                     monster.attacks->otherwiseRandom.reset();
+                     Data::Monsters::MonsterMapVariant kalima2;
+                     kalima2.maps = {{WD_24HELLAS + 1}};
+                     kalima2.attacks.emplace();
+                     kalima2.attacks->otherwise = {MONSTER01_ATTACK2};
+                     monster.mapVariants = {kalima2};
+                 });
+    CHARACTER& centurion = scope.Create(MONSTER_DEATH_CENTURION_1);
+    gMapManager.SetServerMap(WD_24HELLAS + 1);
+    CHECK(NormalAttack(centurion) == MONSTER01_ATTACK2);
+    gMapManager.SetServerMap(WD_24HELLAS);
+    CHECK(NormalAttack(centurion) == MONSTER01_ATTACK1);
+
+    // Devil Square 5-7 is the server's map 32, which the client loads as
+    // world 9 (D67).
+    scope.Change(MONSTER_DARK_ELF,
+                 [](Data::Monsters::MonsterDefinition& monster)
+                 {
+                     Data::Monsters::MonsterMapVariant devilSquare5To7;
+                     devilSquare5To7.maps = {{32}};
+                     devilSquare5To7.attacks.emplace();
+                     devilSquare5To7.attacks->otherwise = {MONSTER01_ATTACK2};
+                     monster.mapVariants = {devilSquare5To7};
+                 });
+    gMapManager.SetServerMap(32);
+    CHARACTER& elf = scope.Create(MONSTER_DARK_ELF);
+    CHECK(NormalAttack(elf) == MONSTER01_ATTACK2);
+    gMapManager.SetServerMap(WD_9DEVILSQUARE);
+    CHECK(NormalAttack(elf) == MONSTER01_ATTACK1);
+}
+
+TEST_CASE("Monster attacks: a map variant of a stage plays in that stage of Devil Square only (D67) "
+          "[monsters][attacks]")
+{
+    AttackScope scope(WD_9DEVILSQUARE);
+    scope.Change(MONSTER_DARK_ELF,
+                 [](Data::Monsters::MonsterDefinition& monster)
+                 {
+                     Data::Monsters::MonsterMapVariant stage2;
+                     stage2.maps = {{WD_9DEVILSQUARE, 2}};
+                     stage2.attacks.emplace();
+                     stage2.attacks->otherwise = {MONSTER01_ATTACK2};
+                     monster.mapVariants = {stage2};
+                 });
+    gMapManager.SetServerStage(2);
+    gMapManager.SetServerMap(WD_9DEVILSQUARE);
+    CHARACTER& elf = scope.Create(MONSTER_DARK_ELF);
+    CHECK(NormalAttack(elf) == MONSTER01_ATTACK2);
+    gMapManager.SetServerStage(3);
+    CHECK(NormalAttack(elf) == MONSTER01_ATTACK1);
+    gMapManager.SetServerStage(0);
+    CHECK(NormalAttack(elf) == MONSTER01_ATTACK1);
+}
+
+TEST_CASE("Monster attacks: the shipped map variants keep the Fire Golem's Devil Square pattern and Erkanne still in "
+          "the market (Q-MN64) [monsters][attacks]")
+{
+    AttackScope scope(WD_31HUNTING_GROUND);
+    CHARACTER& golem = scope.Create(MONSTER_FIRE_GOLEM);
+    golem.SwordCount = 0;
+    CHECK(NormalAttack(golem) == MONSTER01_ATTACK2);
+    // In Devil Square 5-7 it is round 5's boss and plays the generic pattern.
+    gMapManager.SetServerMap(32);
+    golem.SwordCount = 0;
+    for (const int expected : {MONSTER01_ATTACK1, MONSTER01_ATTACK2, MONSTER01_ATTACK2, MONSTER01_ATTACK1})
+    {
+        CHECK(NormalAttack(golem) == expected);
+    }
+
+    gMapManager.SetServerMap(WD_79UNITEDMARKETPLACE);
+    CHARACTER& erkanne = scope.Create(MONSTER_LUCAS);
+    CHECK(Attack(erkanne, NoMonsterSkill) == MONSTER01_WALK);
+    CHECK(Attack(erkanne, 62) == MONSTER01_WALK);
+    CHECK(erkanne.MonsterSkill == 62);
+}
+
+TEST_CASE("Monster attacks: a Battle Castle guard takes its attack state, its attacks play as data (Q-MN64) "
+          "[monsters][attacks]")
+{
+    AttackScope scope(WD_30BATTLECASTLE);
+    CHARACTER& archer = scope.Create(MONSTER_BATTLE_GUARD1);
+    archer.Object.AI = 0;
+    CHECK(Attack(archer, NoMonsterSkill) == MONSTER01_SHOCK);
+    CHECK(archer.Object.AI != 0);
+}
+
+TEST_CASE("Monster attacks: \"generic\" plays as a monster without attacks, at any count (Q-MN69) "
+          "[monsters][attacks]")
+{
+    AttackScope scope(WD_37KANTURU_1ST);
+    CHARACTER& character = scope.Create(MONSTER_BERSERKER);
+    for (int count = 0; count < 256; count += 7)
+    {
+        INFO("SwordCount " << count);
+        scope.RemoveAttacks(MONSTER_BERSERKER);
+        character.SwordCount = static_cast<BYTE>(count);
+        const int without = NormalAttack(character);
+        const BYTE countWithout = character.SwordCount;
+
+        Data::Monsters::MonsterAttacks generic;
+        generic.otherwiseGeneric = true;
+        scope.SetAttacks(MONSTER_BERSERKER, generic);
+        character.SwordCount = static_cast<BYTE>(count);
+        CHECK(NormalAttack(character) == without);
+        CHECK(character.SwordCount == countWithout);
     }
 }
 

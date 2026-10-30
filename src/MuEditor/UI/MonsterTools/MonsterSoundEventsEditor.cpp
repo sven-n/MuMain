@@ -8,7 +8,7 @@
 #include "MonsterStepLabel.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
-#include "../MuEditor/UI/ItemTools/ItemTextInput.h"
+#include "../MuEditor/UI/Common/MapPicker.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -17,10 +17,7 @@
 #include "imgui.h"
 
 #include <algorithm>
-#include <cctype>
 #include <optional>
-#include <set>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -40,7 +37,6 @@ constexpr float FrameWidth = 50.0f;
 constexpr float OneInWidth = 70.0f;
 constexpr float DrawWidth = 140.0f;
 constexpr float SoundWidth = 260.0f;
-constexpr float MapsWidth = 220.0f;
 // The animations offered while the model is not open: up to attack 5.
 constexpr int NamedAnimations = MONSTER01_ATTACK5 + 1;
 constexpr int MaxOneIn = 100000;
@@ -58,37 +54,6 @@ std::string AnimationsText(const std::vector<int>& animations)
         text += (text.empty() ? "" : ", ") + Data::Monsters::GetMonsterAnimationName(animation);
     }
     return text;
-}
-
-std::string MapsText(const std::vector<int>& worlds)
-{
-    std::string text;
-    for (const int world : worlds)
-    {
-        text += (text.empty() ? "" : ", ") + std::to_string(world);
-    }
-    return text;
-}
-
-// The map numbers of the text; nullopt for a text that is not a list of
-// whole numbers (separated by commas or spaces).
-std::optional<std::vector<int>> ParseMaps(const std::string& text)
-{
-    std::string spaced = text;
-    std::replace(spaced.begin(), spaced.end(), ',', ' ');
-    std::istringstream stream(spaced);
-    std::set<int> worlds;
-    std::string word;
-    while (stream >> word)
-    {
-        if (!std::all_of(word.begin(), word.end(), [](unsigned char c) { return std::isdigit(c) != 0; }) ||
-            word.size() > 4)
-        {
-            return std::nullopt;
-        }
-        worlds.insert(std::stoi(word));
-    }
-    return std::vector<int>(worlds.begin(), worlds.end());
 }
 
 const char* DrawLabel(MonsterSoundDraw draw)
@@ -401,29 +366,18 @@ private:
     float m_scale;
 };
 
-void RenderMaps(MonsterModelDefinition& model, ModelDraft& draft, std::string& mapsText)
+void RenderMaps(MonsterModelDefinition& model, ModelDraft& draft)
 {
     ImGui::TextUnformatted(I18N::Editor::SoundEventMaps);
     ImGui::SameLine();
-    ImGui::SetNextItemWidth(MapsWidth * g_MuEditorCore.GetUIScale());
-    Items::InputStringWithHint("##Maps", I18N::Editor::SoundEventEveryMap, mapsText);
-    const bool active = ImGui::IsItemActive();
-    if (ImGui::IsItemDeactivatedAfterEdit())
+    if (MapPicker::Render("SoundEventMaps", model.soundEventMaps, I18N::Editor::SoundEventEveryMap))
     {
-        if (const std::optional<std::vector<int>> worlds = ParseMaps(mapsText))
-        {
-            model.soundEventWorlds = *worlds;
-            draft.AfterChange(true, StepLabel::Model(model.slot, I18N::Editor::StepWhatSoundEvents));
-        }
-    }
-    if (!active)
-    {
-        mapsText = MapsText(model.soundEventWorlds);
+        draft.AfterChange(true, StepLabel::Model(model.slot, I18N::Editor::StepWhatSoundEvents));
     }
 }
 } // namespace
 
-void Render(MonsterModelDefinition& model, int slot, bool modelOpen, ModelDraft& draft, std::string& mapsText)
+void Render(MonsterModelDefinition& model, int slot, bool modelOpen, ModelDraft& draft)
 {
     ImGui::PushTextWrapPos(0.0f);
     ImGui::TextDisabled("%s", I18N::Editor::SoundEventsNote);
@@ -476,7 +430,7 @@ void Render(MonsterModelDefinition& model, int slot, bool modelOpen, ModelDraft&
     {
         ImGui::SetTooltip("%s", I18N::Editor::SoundEventNeedsASoundOfTheModel);
     }
-    RenderMaps(model, draft, mapsText);
+    RenderMaps(model, draft);
 }
 } // namespace MuEditor::Monsters::SoundEventsEditor
 

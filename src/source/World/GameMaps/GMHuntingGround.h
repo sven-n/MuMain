@@ -22,7 +22,6 @@ namespace M31HuntingGround {		//. 공성 사냥터
     bool RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
 
     bool AttackEffectHuntingGroundMonster(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
-    bool SetCurrentActionHuntingGroundMonster(CHARACTER* pCharacter, OBJECT* pObject);
 
     //. 화면 처리
     bool CreateMist(PARTICLE* pParticleObj);

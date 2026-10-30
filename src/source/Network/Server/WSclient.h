@@ -407,6 +407,12 @@ typedef struct
 } PRECEIVE_JOIN_MAP_SERVER_EXTENDED, * LPPRECEIVE_JOIN_MAP_SERVER_EXTENDED;
 #pragma pack(pop)
 
+// The stage OpenMU sends the extended client when it enters the world: the
+// discriminator of the map (monsters design, D67), one byte after the struct,
+// so that a character which lost its connection in Devil Square rejoins its
+// stage. 0 for a packet too short to have one.
+int GetJoinMapServerStage(std::span<const BYTE> packet);
+
 #pragma pack(push, 1)
 typedef struct
 {
@@ -926,7 +932,16 @@ typedef struct {
     BYTE         PositionX;
     BYTE         PositionY;
     BYTE         Angle;
+    BYTE Unused[5];
+    // Only in OpenMU's MapChangedExtended to the extended client, one byte
+    // longer than MapChanged: the discriminator of the map, the stage of Devil
+    // Square (1 to 7).
+    BYTE MapDiscriminator;
 } PRECEIVE_TELEPORT_POSITION, * LPPRECEIVE_TELEPORT_POSITION;
+
+// The stage OpenMU sends the extended client with the map (monsters design,
+// D67); 0 for a packet too short to have one.
+int GetTeleportStage(const PRECEIVE_TELEPORT_POSITION& packet);
 
 //receive damage
 typedef struct {

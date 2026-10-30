@@ -2458,6 +2458,21 @@
   <data name="Play animation" xml:space="preserve">
     <value>Abspielen</value>
   </data>
+  <data name="Play" xml:space="preserve">
+    <value>Abspielen</value>
+  </data>
+  <data name="Play next attack" xml:space="preserve">
+    <value>Nächsten Angriff abspielen</value>
+  </data>
+  <data name="Play next attack note" xml:space="preserve">
+    <value>Die Animation des nächsten Angriffs, den kein Skill-Eintrag spielt, gezählt wie das Spiel für ein Monster ab seiner Erstellung zählt.</value>
+  </data>
+  <data name="Played {0}" xml:space="preserve">
+    <value>Gespielt: {0}</value>
+  </data>
+  <data name="Plays it once in the Monster Preview, with the attack sounds." xml:space="preserve">
+    <value>Spielt sie einmal in der Monstervorschau, mit den Angriffsgeräuschen.</value>
+  </data>
   <data name="Play this sound" xml:space="preserve">
     <value>Abspielen</value>
   </data>
@@ -2590,59 +2605,32 @@
   <data name="Clear skill after attack" xml:space="preserve">
     <value>nach seinem eigenen Angriff: wenn er endet oder ein anderer Angriff oder ein Treffer ihn abbricht (afterAttack)</value>
   </data>
-  <data name="Reader Hellas" xml:space="preserve">
-    <value>der Hellas-Handler, auf jeder Karte</value>
-  </data>
   <data name="Reader Battle Castle guards" xml:space="preserve">
-    <value>der Battle-Castle-Handler, nach den Modellen der Wachen, auf jeder Karte</value>
-  </data>
-  <data name="Reader Hunting Ground" xml:space="preserve">
-    <value>der Hunting-Ground-Handler, auf seiner Karte</value>
-  </data>
-  <data name="Reader Aida" xml:space="preserve">
-    <value>der Aida-Handler, in Aida</value>
-  </data>
-  <data name="Reader Crywolf and Devil Square" xml:space="preserve">
-    <value>der Crywolf-Handler, in Crywolf und im Devil Square</value>
-  </data>
-  <data name="Reader Kanturu 1st" xml:space="preserve">
-    <value>der Kanturu-1-Handler, in Kanturu 1</value>
-  </data>
-  <data name="Reader Kanturu 2nd and 3rd" xml:space="preserve">
-    <value>der Kanturu-2-Handler, in Kanturu 2 und 3</value>
+    <value>der Angriffszustand (KI) der Battle-Castle-Wachen, nach ihren Modellen, auf jeder Karte</value>
   </data>
   <data name="Reader Kanturu 3rd" xml:space="preserve">
-    <value>der Kanturu-3-Handler, in Kanturu 3</value>
-  </data>
-  <data name="Reader Balgass barracks" xml:space="preserve">
-    <value>der Handler der Balgass-Kaserne, in der Kaserne und der Zuflucht</value>
-  </data>
-  <data name="Reader Illusion Temple" xml:space="preserve">
-    <value>der Illusion-Temple-Handler, im Illusion Temple</value>
-  </data>
-  <data name="Reader Swamp of Quiet" xml:space="preserve">
-    <value>der Handler des Swamp of Quiet, nach den Modellen, auf seiner Karte</value>
+    <value>Mayas Szene, in Kanturu 3</value>
   </data>
   <data name="Reader Raklion" xml:space="preserve">
-    <value>der Raklion-Handler, in Raklion und auf seiner Bosskarte</value>
+    <value>Selupans Höhe, Geräusche und Effekte, in Raklion und auf seiner Bosskarte</value>
   </data>
   <data name="Reader Empire Guardian" xml:space="preserve">
-    <value>der Empire-Guardian-Handler, auf den vier Empire-Guardian-Karten</value>
+    <value>die Wut der Bosse (die Berserker-Fertigkeit startet sie, in ihr spielt appear), auf den vier Empire-Guardian-Karten</value>
   </data>
   <data name="Reader Empire Guardian 2" xml:space="preserve">
-    <value>der Handler von Empire Guardian 2, auf seiner Karte</value>
+    <value>die Wut des Bosses, in Empire Guardian 2</value>
   </data>
   <data name="Reader Empire Guardian 3" xml:space="preserve">
-    <value>der Handler von Empire Guardian 3, auf seiner Karte</value>
+    <value>die Wut des Bosses, in Empire Guardian 3</value>
   </data>
   <data name="Reader Empire Guardian 4" xml:space="preserve">
-    <value>der Handler von Empire Guardian 4, auf seiner Karte</value>
+    <value>die Wut der Bosse, in Empire Guardian 4</value>
   </data>
   <data name="Reader traps" xml:space="preserve">
-    <value>SetPlayerAttack, nach den Fallenmodellen; ihre Effekte und Geräusche bleiben Code</value>
+    <value>die Effekte der Fallen, nach den Fallenmodellen</value>
   </data>
-  <data name="Reader Bali" xml:space="preserve">
-    <value>SetPlayerAttack, nach Balis Modell</value>
+  <data name="Map code that also runs" xml:space="preserve">
+    <value>Kartencode, der dazu läuft:</value>
   </data>
   <data name="Player shaped monsters choose a player attack" xml:space="preserve">
     <value>Ein Monster in Spielergestalt wählt einen Spielerangriff nach seiner Ausrüstung; Angriffe gelten für es nicht.</value>
@@ -2665,12 +2653,6 @@
   <data name="Remove the attacks" xml:space="preserve">
     <value>Angriffe entfernen</value>
   </data>
-  <data name="No code reads these attacks." xml:space="preserve">
-    <value>Kein Handler liest diese Angriffe: Sie bewirken nichts, bis Code sie liest.</value>
-  </data>
-  <data name="Read by" xml:space="preserve">
-    <value>Gelesen von:</value>
-  </data>
   <data name="Monster skills note" xml:space="preserve">
     <value>Der Monsterskill von Paket 0x69; das Spiel spielt einen Angriff für die Skills 1 bis 77.</value>
   </data>
@@ -2691,6 +2673,45 @@
   </data>
   <data name="A draw" xml:space="preserve">
     <value>Eine Ziehung</value>
+  </data>
+  <data name="A rotation" xml:space="preserve">
+    <value>Eine Rotation</value>
+  </data>
+  <data name="The generic pattern" xml:space="preserve">
+    <value>Das allgemeine Muster (Angriff 1, Angriff 2, Angriff 2)</value>
+  </data>
+  <data name="Played in turn, counted for each monster from its creation." xml:space="preserve">
+    <value>Der Reihe nach gespielt, gezählt für jedes Monster ab seiner Erstellung.</value>
+  </data>
+  <data name="Add an animation" xml:space="preserve">
+    <value>Animation hinzufügen</value>
+  </data>
+  <data name="Map" xml:space="preserve">
+    <value>Karte</value>
+  </data>
+  <data name="All maps" xml:space="preserve">
+    <value>Alle Karten</value>
+  </data>
+  <data name="Add a map variant" xml:space="preserve">
+    <value>Kartenvariante hinzufügen</value>
+  </data>
+  <data name="Plays on" xml:space="preserve">
+    <value>Gilt auf</value>
+  </data>
+  <data name="No map yet" xml:space="preserve">
+    <value>noch keine Karte</value>
+  </data>
+  <data name="Pick the maps of the variant; until then Save refuses the monsters." xml:space="preserve">
+    <value>Wähle die Karten der Variante; bis dahin speichert Speichern die Monster nicht.</value>
+  </data>
+  <data name="Variant maps in another variant" xml:space="preserve">
+    <value>{0}: eine andere Variante nennt das auch; solange zwei Varianten eine Karte nennen, speichert Speichern die Monster nicht.</value>
+  </data>
+  <data name="On its maps the variant attacks instead of the monster." xml:space="preserve">
+    <value>Auf ihren Karten ersetzen die Angriffe der Variante die des Monsters.</value>
+  </data>
+  <data name="Remove the map variant" xml:space="preserve">
+    <value>Kartenvariante entfernen</value>
   </data>
   <data name="Clear the monster skill" xml:space="preserve">
     <value>Monsterskill löschen</value>

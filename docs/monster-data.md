@@ -200,7 +200,7 @@ to `MuError.log`:
 | `slot` | The model slot, see above |
 | `file` | The `.bmd` file |
 | `textureFolders` | The folders below `Data/` its textures are searched in, in this order; at least one |
-| `worldTextureFolders` | Other folders on some maps: `[{"worlds": [18, 19], "folders": ["NPC"]}]` (the Chaos Castle knights) |
+| `mapTextureFolders` | Other folders on some maps: `[{"maps": [18, 19], "folders": ["NPC"]}]` (the Chaos Castle knights) |
 | `textureNames` | A texture name that replaces the file's, by mesh: `{"0": "xmassanta1.jpg"}` (the Little Santas share one file) |
 | `animations` | The speeds that differ from the range's defaults, in frames per game frame, by animation: `stop1`, `stop2`, `walk`, `attack1`, `attack2`, `shock`, `die`, `appear`, `attack3`, `attack4`, `run`, `attack5`, then the number (`"12"`). The monster range plays stop1 at 0.25, stop2 at 0.2, walk at 0.34, attack1 and attack2 at 0.33, shock at 0.5, die at 0.55 and the others at 0; the NPC range plays all at 0.25 |
 | `holdLastFrame` | The animations that stop at their last frame instead of starting again. Without it: die in the monster range, none in the NPC range |
@@ -210,11 +210,34 @@ to `MuError.log`:
 | `sounds` | The sounds the model loads: `file`, `channels` (how many can play at once), `spatial` (3D, louder near the hero), and `id` for a sound that keeps its `SOUND_*` number, see below |
 | `soundSlots` | What the game plays when a character of the model stands or walks (`idle`, two), attacks or is hit (`attack`, two) and dies (`die`); of a pair it picks one at random. A slot names a sound of the model (its `id`, or its `file` when it has none) or any `SOUND_*` number; `null` is no sound. `secondSet` has the sounds a monster with SubType 9 (the big Hellas monsters) plays instead of the first set. Without `soundSlots` no slot has a sound |
 | `soundEvents` | Sounds the game plays on top of the slots, see [Sound events](#sound-events) |
-| `soundEventWorlds` | The maps the sound events play on; without it every map |
+| `soundEventMaps` | The maps the sound events play on; without it every map |
 | `bitmaps` | Bitmaps loaded into fixed bitmap slots that the model's code draws with: `file` below `Data/`, `slot` (`BITMAP_MONSTER_SKIN`), `filter` (`linear` or `nearest`), `wrap` (`repeat` or `clamp`) |
-| `parts` | Models loaded with it: `slot` (an NPC slot) or `effect` (an effect type of the effect catalogue), `file`, `textureFolders`, `animations`, `holdLastFrame` (no range defaults), and `worlds` for parts loaded with a map instead (the Kundun parts in Kalima, the Totem Golem's in Elbeland) |
+| `parts` | Models loaded with it: `slot` (an NPC slot) or `effect` (an effect type of the effect catalogue), `file`, `textureFolders`, `animations`, `holdLastFrame` (no range defaults), and `maps` for parts loaded with a map instead (the Kundun parts in Kalima, the Totem Golem's in Elbeland) |
 | `boundingBox` | `min` and `max` of a character's box; without one -60, -60, 0 to 50, 50, 150 |
 | `linkBones` | The bones the weapons hang on, right then left; without it 33 and 42. One bone sets the right hand's only |
+
+Maps are the numbers the server sends (`mapTextureFolders`, `soundEventMaps`,
+a part's `maps`, and a monster's map variants): Devil Square 1–4 is 9 and
+Devil Square 5–7 is 32, although the client loads both as Devil Square (9).
+A list may also name one stage of a map: `{"map": 9, "stage": 2}` is Devil
+Square 2. OpenMU sends the extended client the stage with the map
+(`MapChangedExtended`) and when it enters the world
+(`CharacterInformationExtended`, so a character which logs in again in Devil
+Square keeps its stage); a number names all of its stages, and with another
+server every stage is 0. The lists' older names (`worldTextureFolders`,
+`worlds`, `soundEventWorlds`) are fatal problems that name the new ones.
+
+### The map picker
+
+The monster tools pick maps in one picker: a button that names the chosen
+maps opens a list of the maps a server sends, each with its server number
+and the `Data/World<n>` folder it loads. The levels of an event are one row
+under the event's name: Devil Square 1–7, Blood Castle 1–8, Chaos Castle
+1–7, Kalima 1–7, Illusion Temple 1–6, Doppelganger 1–4, Empire Guardian 1–4
+and Karutan 1–2; its box picks all levels, its arrow shows them one by one.
+Most levels are maps of their own; Devil Square's are the stages 1–4 of map
+9 and 5–7 of map 32, and a map whose every stage is picked is written as its
+number. A list that has all levels of an event names the event.
 
 A sound without an `id` gets a number of its own when it is first loaded,
 after the `SOUND_*` list; the same file keeps the same number for the
@@ -239,7 +262,7 @@ and only within 500 units of the hero (the Empire Guardian bosses' steps):
   {"animations": ["stop1"], "pick": "rand", "sounds": ["SOUND_XMAS_SANTA_IDLE_1", "SOUND_XMAS_SANTA_IDLE_2"]},
   {"animations": ["die"], "deathEffectArmed": true, "sounds": ["SOUND_XMAS_SNOWMAN_DEATH_1"]}
 ],
-"soundEventWorlds": [69, 70, 71, 72]
+"soundEventMaps": [69, 70, 71, 72]
 ```
 
 | Field | Meaning |
@@ -305,7 +328,7 @@ skill it attacks with (Selupan's):
 |---|---|
 | `monsterSkills` | The monster skills (packet 0x69) and the animation each plays |
 | `skills` | The player skills (packets 0x19 and 0x1E) and the animation each plays |
-| `otherwise` | What any other skill, a stale skill or a normal attack plays; `attack1` when left out |
+| `otherwise` | What any other skill, a stale skill or a normal attack plays: one animation, a list of two or more played in turn (a rotation), or `generic` (the generic pattern, as a monster without attacks plays it); `attack1` when left out |
 | `otherwiseRandom` | In place of `otherwise`, a draw of the original client: `rand` (attack 1 or 2, half and half), `randFps` (attack 1 or 2 with a chance that depends on the frame rate) or `bali` (Bali's draw of attack 1 to 4) |
 | `clearSkill` | When the monster skill is cleared: `never` (when left out), `onMatch` (an entry named it), `onNoMatch` (no entry named it), `always` (right after the animation was chosen) or `afterAttack` (the skill plays only the attack its packet starts and stays while that attack plays; it is cleared when the animation ends, when a hit's shock ends attack 3 to 5 or appear early, at once when the entry plays `none`, and by any other attack, which is a normal one also while the skill's attack plays) |
 | `sound` | A `SOUND_*` sound the attacks play each time they play (the traps') |
@@ -315,6 +338,31 @@ An animation is a name of the model's animations (`attack1` to `attack5`,
 `appear`, `shock`, `stop2`, …) or `none`: the animation that plays goes on.
 The monster skill's entry comes first, then the player skill's, else
 `otherwise`. The player skill is never cleared.
+
+A rotation, `"otherwise": ["attack1", "attack3"]`, plays attack 1, attack 3,
+attack 1, … : each monster counts its own from its creation, and a skill
+entry that plays does not move it on. `"otherwise": "generic"` plays the
+generic pattern (below) with the count it uses.
+
+### Map variants
+
+What a monster does differently on some maps is a map variant of its entry.
+On the variant's maps its `attacks` replace the monster's, as a whole (the
+Fire Golem is Devil Square 5's boss and plays the generic pattern there):
+
+```json
+"mapVariants": [
+  { "maps": [32], "attacks": { "otherwise": "generic" } }
+]
+```
+
+`maps` are one or more maps by the server's numbers or stages of them (see
+[Models](#model-fields): Devil Square 5–7 is 32, `{"map": 9, "stage": 2}` is
+Devil Square 2). A map or stage in two variants of a monster is a fatal
+problem, and a variant without `attacks` changes nothing
+(a warning). A monster without `attacks` of its own plays the variant's on
+its maps and the generic pattern elsewhere. Later setup fields of the
+monsters design (D62) join the variants.
 
 ### When the game plays an attack
 
@@ -335,21 +383,25 @@ Playing an attack (`SetPlayerAttack`) for a monster:
 1. A player-shaped monster (model `player`) plays a player attack chosen
    from its equipment; its `attacks` do nothing.
 2. The traps (`mapObject 39`, `40` and `51`) play their `attacks` and their
-   effects and sounds; Bali plays its `attacks` (its draw).
-3. Else the map handlers are asked in a row, each for the monsters and maps
-   it knows: Hellas (any map), the Battle Castle guards (by model, any map),
-   the Hunting Ground, Aida, Crywolf and Devil Square, Kanturu 1st, 2nd and
-   3rd, the Balgass barracks and refuge, Illusion Temple, the Swamp of Quiet
-   (by model), Raklion, and Empire Guardian 1 to 4. A handler that answers
-   for the monster plays its `attacks` and keeps what its code adds: the
-   guards' AI, Maya's scene, Selupan's height, sounds and effects, and the
-   rage of the Empire Guardian bosses (in a rage a boss plays appear).
-4. If none answered, the generic pattern plays: attack 1, attack 2, attack 2
-   by a count of the character.
+   effects.
+3. Else the map code that is no choice of animation runs: the Battle Castle
+   guards take their attack state (by model), Maya plays her scene in
+   Kanturu 3rd, Selupan his height, sounds and effects in Raklion, and the
+   Empire Guardian bosses their rage (the Berserker skill starts it; in a
+   rage a boss plays appear). Maya, Selupan and the bosses play their
+   `attacks` there.
+4. Else the monster plays its `attacks`, or its map variant's on the
+   variant's maps, on every map.
+5. A monster without `attacks` plays the generic pattern: attack 1,
+   attack 2, attack 2 by a count of the character (`SwordCount`: attack 1
+   when it divides by 3; each attack and spell adds 1 to it, the pattern 1
+   more).
 
-So `attacks` work where a handler answers for the monster: the Monster
-Attacks tool says which one, and Data Checks lists the attacks no handler
-reads (a monster moved to another model loses a model-keyed handler).
+Before the attacks PR, map handlers chose the animation for numbers they
+listed, each on its maps; on other maps those monsters played the generic
+pattern. Where the server places them, they play the same now: the Fire
+Golem is Devil Square 5's boss and keeps the generic pattern there by a map
+variant, and Erkanne stands still in Loren Market by hers.
 
 The game counts only attack 1 and attack 2 as attacks: a hit plays shock
 over any other animation, and only they have a hit frame. After appear, only
@@ -472,8 +524,8 @@ item tools.
     a chance of one in n, a pick of one of two sounds, and its sounds, picked
     from the model's own; **Play** plays them, **Remove** removes the event.
     **Add a sound event** adds one for attack1 with the model's first sound
-    (a model without sounds cannot have events). **Maps** lists the maps the
-    events play on (empty: every map).
+    (a model without sounds cannot have events). **Maps** picks the maps the
+    events play on in the [map picker](#the-map-picker) (none: every map).
   - **More of the model entry**: the values the tool shows but does not edit
     (head bone, stream mesh, part models, bitmaps, box, weapon bones); they
     are edited in the file.
@@ -488,18 +540,36 @@ item tools.
   frame by frame. The speeds are those of Monster Model, also while one is
   being dragged there. The model's slot sounds play when their animation
   starts (an idle sound for stop and walk, an attack sound for attacks and
-  shock, the die sound). The hit frame of attacks 1 and 2 is marked on the
+  shock, the die sound), and its [sound events](#sound-events) as the game
+  plays them: when the animation starts, at each loop of stop1 and stop2,
+  and frame by frame in a walk; on any map and at any distance, with the
+  death effect counted as armed. The hit frame of attacks 1 and 2 is marked on the
   slider, and the line under it says what the game adds. **The game's speed
   factors** plays them (**As a transformed player** too). The preview is
   only in the editor's window.
 - **Monster Attacks**: the [attacks](#attacks) of the selected monster, and
-  the handlers that read them, with their maps (or that none does). **Add
+  the map code that runs with them (the guards' state, Maya's scene,
+  Selupan, the Empire Guardian bosses' rage, the traps' effects). **Add
   attacks** gives a monster without them attacks that play attack 1;
-  **Remove the attacks** gives it the generic pattern again. Each table
-  (monster skills, player skills) has a row per skill with its animation and
-  **Remove**, and a number field with **Add**; a monster skill that 0x69
-  plays no attack for is marked. **Any other attack** is an animation or a
-  draw, and **Clear the monster skill** says when the skill is cleared.
+  **Remove the attacks** gives it the generic pattern again. **Map** shows
+  **All maps** or one of the monster's [map variants](#map-variants), named
+  by their maps; **Add a map variant** adds one with the monster's attacks,
+  whose maps **Plays on** picks in the [map picker](#the-map-picker) (Save
+  refuses a variant without maps); the tables then edit the variant's
+  attacks, and **Remove the map variant** removes it. Each table
+  (monster skills, player skills) has a row per skill with its animation,
+  **Play** and **Remove**, and a number field with **Add**; a monster skill
+  that 0x69 plays no attack for is marked. **Play** plays the animation once
+  in Monster Preview (and opens it), with the model's attack sounds (its
+  slot or its sound events) and the attacks' sound, then the model stands; skill effects do not play. A
+  Monster Preview that is a tab beside Monster Attacks moves to the right
+  half of their place, so both show. **Any other attack** is an animation, a
+  rotation (its animations in turn, with **Remove** and **Add an
+  animation**), the generic pattern or a draw, and **Clear the monster skill** says when the skill is cleared.
+  **Play next attack** plays what the monster's next such attack plays and
+  says which: the rotation in turn, the generic pattern and the draws as the
+  game counts them for one monster from its creation; **From the start**
+  starts the counts again.
   **Sound of the attacks** is a `SOUND_*` id they play each time (the traps'),
   **At the monster (3D)** plays it there; a name the monster data does not
   know is not stored, and the field says so. The
@@ -514,7 +584,7 @@ item tools.
   name in a language the game has no UI texts for (warnings), and the checks
   of the model list's load (a model or part file that is not in the client
   folder is a warning), and the checks of the attacks (warnings): attacks
-  that no handler reads or of a player-shaped monster, a monster skill that
+  of a player-shaped monster, a monster skill that
   0x69 plays no attack for, and each animation the attacks can play that the
   open model lacks, whose speed is 0, after which the model does not go back
   to stop1, or that is not attack 1 or 2 (see [Attacks](#attacks)). With the

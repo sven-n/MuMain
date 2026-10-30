@@ -1,5 +1,4 @@
 ﻿#include "stdafx.h"
-#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -976,20 +975,6 @@ bool M31HuntingGround::AttackEffectHuntingGroundMonster(CHARACTER* pCharacter, O
     }
     return false;
 }
-bool M31HuntingGround::SetCurrentActionHuntingGroundMonster(CHARACTER* pCharacter, OBJECT* pObject)
-{
-    if (!IsInHuntingGround())
-        return false;
-
-    switch (pCharacter->MonsterIndex)
-    {
-    case MONSTER_FIRE_GOLEM:
-        return GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
-    }
-
-    return false;
-}
-
 bool M31HuntingGround::CreateMist(PARTICLE* pParticleObj)
 {
     if (!IsInHuntingGround())

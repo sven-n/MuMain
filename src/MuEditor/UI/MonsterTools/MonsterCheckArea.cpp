@@ -7,6 +7,7 @@
 #include "MonsterCheckTargets.h"
 #include "MonsterChecks.h"
 #include "MonsterSelection.h"
+#include "MuMonsterAttacksUI.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
@@ -70,11 +71,17 @@ void MonsterCheckArea::Open(const ItemDataIssue& issue, bool clicked)
         return;
     }
     g_MonsterSelection.Select(issue.number);
+    const MonsterTool toolForField = GetToolForField(issue.field);
+    if (toolForField == MonsterTool::Attacks)
+    {
+        // The attacks the problem is about: of all maps or of a map variant.
+        g_MuMonsterAttacksUI.ShowMapVariant(issue.number, GetMapVariantOfField(issue.field));
+    }
     if (!clicked)
     {
         return;
     }
-    const ToolWindowEntry& tool = GetToolWindow(GetToolForField(issue.field));
+    const ToolWindowEntry& tool = GetToolWindow(toolForField);
     g_MuEditorCore.GetToolWindows().*tool.open = true;
     ImGui::SetWindowFocus(tool.windowId);
 }

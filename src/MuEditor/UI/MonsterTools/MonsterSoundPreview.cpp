@@ -6,6 +6,7 @@
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "Audio/DSPlaySound.h"
+#include "GameLogic/Monsters/MonsterSoundEvents.h"
 #include "I18N/All.h"
 #include "imgui.h"
 
@@ -36,6 +37,11 @@ void SetVolume(float volume)
 void Play(int number)
 {
     PlayBufferAtLevel(static_cast<ESound>(number), g_volume);
+}
+
+void PlayEvents(const Data::Monsters::MonsterModelDefinition& model, int animation, float frame)
+{
+    GameLogic::Monsters::SoundEvents::PlayEvents(model, animation, frame, true, [](int number) { Play(number); });
 }
 
 void RenderVolume()

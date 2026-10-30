@@ -1086,6 +1086,16 @@ void LogSafeCastSizeMismatch(const char* packet_type, std::size_t received, std:
                           static_cast<unsigned>(expected));
 }
 
+// C3 F3 03 CharacterInformationExtended: OpenMU appends the discriminator at
+// 92, so the packet is 93 bytes.
+static_assert(sizeof(PRECEIVE_JOIN_MAP_SERVER_EXTENDED) == 92);
+
+int GetJoinMapServerStage(std::span<const BYTE> packet)
+{
+    constexpr std::size_t StageIndex = sizeof(PRECEIVE_JOIN_MAP_SERVER_EXTENDED);
+    return packet.size() > StageIndex ? packet[StageIndex] : 0;
+}
+
 BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
 {
     MouseLButton = false;
@@ -1131,6 +1141,8 @@ BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
     CharacterAttribute->MaxAttackSpeed = Data->MaxAttackSpeed;
     CharacterMachine->Gold = Data->Gold;
 
+    // Before LoadWorld, which loads the stage's map parts.
+    gMapManager.SetServerStage(GetJoinMapServerStage(ReceiveBuffer));
     gMapManager.WorldActive = Data->Map;
     gMapManager.LoadWorld(gMapManager.WorldActive);
 
@@ -1376,7 +1388,9 @@ void ReceiveRevival(const BYTE* ReceiveBuffer)
         }
     }
 
-    if (gMapManager.WorldActive != Data->Map)
+    // A revival names no stage of the map.
+    gMapManager.SetServerStage(0);
+    if (!gMapManager.IsServerMapLoaded(Data->Map))
     {
         int OldWorld = gMapManager.WorldActive;
 
@@ -2126,11 +2140,22 @@ void ReceiveMovePosition(const BYTE* ReceiveBuffer)
 
 extern int EnableEvent;
 
+// C3 1C 0F MapChanged: the map number's low byte at 6. MapChangedExtended
+// appends the discriminator at 15, so the packet is 16 bytes.
+static_assert(offsetof(PRECEIVE_TELEPORT_POSITION, Map) == 6);
+static_assert(offsetof(PRECEIVE_TELEPORT_POSITION, MapDiscriminator) == 15);
+
+int GetTeleportStage(const PRECEIVE_TELEPORT_POSITION& packet)
+{
+    return packet.Header.Size > offsetof(PRECEIVE_TELEPORT_POSITION, MapDiscriminator) ? packet.MapDiscriminator : 0;
+}
+
 BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
     UI::Inventory::RestorePickedItem();
 
     auto Data = (LPPRECEIVE_TELEPORT_POSITION)ReceiveBuffer;
+    gMapManager.SetServerStage(GetTeleportStage(*Data));
     Hero->PositionX = Data->PositionX;
     Hero->PositionY = Data->PositionY;
 
@@ -2176,7 +2201,7 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         ClearItems();
         ClearCharacters(HeroKey);
         RemoveAllShopTitleExceptHero();
-        if (gMapManager.WorldActive != Data->Map)
+        if (!gMapManager.IsServerMapLoaded(Data->Map))
         {
             int OldWorld = gMapManager.WorldActive;
 

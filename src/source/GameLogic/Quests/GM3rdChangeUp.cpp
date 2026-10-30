@@ -452,22 +452,6 @@ CHARACTER* SEASON3A::CGM3rdChangeUp::CreateBalgasBarrackMonster(int iType, int P
     return c;
 }
 
-bool SEASON3A::CGM3rdChangeUp::SetCurrentActionBalgasBarrackMonster(CHARACTER* c, OBJECT* o)
-{
-    if (!(IsBalgasBarrackMap() || IsBalgasRefugeMap()))
-        return false;
-
-    switch (c->MonsterIndex)
-    {
-    case MONSTER_BALRAM_TRAINEE_SOLDIER:
-    case MONSTER_DEATH_SPIRIT_TRAINEE_SOLDIER:
-    case MONSTER_SORAM_TRAINEE_SOLDIER:
-    case MONSTER_DARK_ELF_TRAINEE_SOLDIER:
-        return CheckMonsterSkill(c, o);
-    }
-    return false;
-}
-
 bool SEASON3A::CGM3rdChangeUp::AttackEffectBalgasBarrackMonster(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (!(IsBalgasBarrackMap() || IsBalgasRefugeMap()))

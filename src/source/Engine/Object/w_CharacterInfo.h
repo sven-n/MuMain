@@ -155,6 +155,9 @@ public:
     float        Dead; // Number of reference frames after death
     WORD		Skill;
     BYTE        SwordCount;
+    // The attacks a monster's rotation (its attacks' `otherwise`, Q-MN69)
+    // played since the monster was created.
+    int AttackRotation;
     BYTE		byExtensionSkill;
     WORD		m_byDieType;
     BYTE        TargetX;

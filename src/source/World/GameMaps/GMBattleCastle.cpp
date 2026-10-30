@@ -3,7 +3,6 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Network/Server/WSclient.h"
 #include "UI/Core/UIManager.h"
 #include "Audio/DSPlaySound.h"
@@ -1671,19 +1670,12 @@ namespace battleCastle
         return false;
     }
 
-    bool SetCurrentAction_BattleCastleMonster(CHARACTER* c, OBJECT* o)
+    void SetGuardAttackState(OBJECT* o)
     {
-        switch (o->Type)
+        if (o->Type == MODEL_BATTLE_GUARD1 || o->Type == MODEL_BATTLE_GUARD2)
         {
-        case 11:
-            break;
-
-        case MODEL_BATTLE_GUARD1:
-        case MODEL_BATTLE_GUARD2:
             o->AI = GUARD_ATTACK;
-            return GameLogic::Monsters::Attacks::Play(*c, *o);
         }
-        return false;
     }
 
     bool AttackEffect_BattleCastleMonster(CHARACTER* c, OBJECT* o, BMD* b)

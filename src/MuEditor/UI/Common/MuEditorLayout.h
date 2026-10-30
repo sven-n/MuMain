@@ -49,6 +49,13 @@ void DockBesideItemTools(const char* windowId);
 // browser, else where its fallback group docks. The browser of a group with a
 // fallback docks beside the fallback's browser first.
 void DockInGroup(const char* windowId, const ToolGroup& group);
+
+// For a tool that shows what another one does (Monster Attacks' Play in
+// Monster Preview): at the next dock space, `windowId` goes beside `besideId`
+// when it is, or would open as, a tab of the same dock node, where one hides
+// the other: the node splits and `windowId` takes its right half. In another
+// node its tab comes to the front; floating it stays where it is.
+void ShowBeside(const char* windowId, const char* besideId);
 } // namespace MuEditor::Layout
 
 #endif // _EDITOR

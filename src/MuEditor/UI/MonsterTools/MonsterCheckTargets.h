@@ -4,6 +4,7 @@
 
 #include "../MuEditor/UI/Common/ToolGroups.h"
 
+#include <optional>
 #include <string_view>
 
 // Where Data Checks sends a problem: the monster tool that edits the field
@@ -28,6 +29,11 @@ std::string_view GetMonsterField(std::string_view field);
 // go to the Monster Browser. Takes the field with or without the monster in
 // front.
 MonsterTool GetToolForField(std::string_view field);
+
+// The map variant a field of the attacks names: 0 for "monster 291
+// mapVariants[0].attacks.otherwise"; nullopt for the attacks of all maps
+// ("monster 291 attacks") and any other field.
+std::optional<int> GetMapVariantOfField(std::string_view field);
 
 // The window of a monster tool: its "###" id and its flag among the editor's
 // open tool windows.

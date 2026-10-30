@@ -52,7 +52,6 @@ private:
     MonsterModelFiles m_files;
     std::string m_fileSearch;
     std::string m_newFolder;
-    std::string m_soundEventMaps;
     // The draft (m_draft's value, which lives until its next Begin), the slot
     // and the frame it was shown in.
     const Data::Monsters::MonsterModelDefinition* m_shownDraft = nullptr;

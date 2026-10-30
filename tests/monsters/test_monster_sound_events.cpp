@@ -13,12 +13,19 @@
 #include "Core/Globals/_enum.h"
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelDatabase.h"
+#include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Core/Utilities/Random.h"
 #include "GameLogic/Monsters/MonsterSoundEvents.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/w_MapProcess.h"
+
+#ifdef _EDITOR
+#include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
+#include "UI/MonsterTools/MuMonsterPreviewUI.h"
+#endif
 
 #include <doctest.h>
 
@@ -95,6 +102,48 @@ TEST_CASE("Monster sounds: an event plays in its animations on its maps, near th
     CHECK(scope.Play(MODEL_RAYMOND, MONSTER01_ATTACK1).empty());
 }
 
+TEST_CASE("Monster sounds: the events' maps are the server's, Devil Square 5-7 is 32 (D67) [monsters][sounds]")
+{
+    SoundScope scope(WD_69EMPIREGUARDIAN1);
+    std::vector<Data::Monsters::MonsterModelDefinition> models;
+    for (const Data::Monsters::MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
+    {
+        models.push_back(*model);
+    }
+    std::vector<Data::Monsters::MonsterModelDefinition> changed = models;
+    for (Data::Monsters::MonsterModelDefinition& model : changed)
+    {
+        if (Data::Monsters::FindMonsterModelReference(model.slot) == MODEL_RAYMOND)
+        {
+            model.soundEventMaps = {{32}};
+        }
+    }
+    g_MonsterModelDatabase.Build(changed);
+
+    gMapManager.SetServerMap(32);
+    CHECK(gMapManager.WorldActive == WD_9DEVILSQUARE);
+    CHECK(scope.Play(MODEL_RAYMOND, MONSTER01_ATTACK1) == Sounds({SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01}));
+    gMapManager.SetServerMap(WD_9DEVILSQUARE);
+    CHECK(scope.Play(MODEL_RAYMOND, MONSTER01_ATTACK1).empty());
+
+    // A stage of Devil Square, which the server sends with the map.
+    for (Data::Monsters::MonsterModelDefinition& model : changed)
+    {
+        if (Data::Monsters::FindMonsterModelReference(model.slot) == MODEL_RAYMOND)
+        {
+            model.soundEventMaps = {{WD_9DEVILSQUARE, 2}};
+        }
+    }
+    g_MonsterModelDatabase.Build(changed);
+    gMapManager.SetServerStage(2);
+    gMapManager.SetServerMap(WD_9DEVILSQUARE);
+    CHECK(scope.Play(MODEL_RAYMOND, MONSTER01_ATTACK1) == Sounds({SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01}));
+    gMapManager.SetServerStage(1);
+    CHECK(scope.Play(MODEL_RAYMOND, MONSTER01_ATTACK1).empty());
+    gMapManager.SetServerStage(0);
+    g_MonsterModelDatabase.Build(models);
+}
+
 TEST_CASE("Monster sounds: an event with frames plays only within them [monsters][sounds]")
 {
     SoundScope scope(WD_69EMPIREGUARDIAN1);
@@ -116,6 +165,104 @@ TEST_CASE("Monster sounds: an event plays its sounds together, and one may need 
     CHECK(scope.Play(MODEL_XMAS2008_SNOWMAN, MONSTER01_DIE, 0.0f, 100) == Sounds({SOUND_XMAS_SNOWMAN_DEATH_1}));
     CHECK(scope.Play(MODEL_XMAS2008_SNOWMAN, MONSTER01_DIE, 0.0f, 0).empty());
 }
+
+// Monster Preview's events: the game's, without the map and the hero.
+TEST_CASE("Monster sounds: PlayEvents plays a model's events on any map and at any distance (Q-MN74) "
+          "[monsters][sounds]")
+{
+    SoundScope scope(WD_0LORENCIA);
+    std::vector<int> played;
+    const auto play = [&played](int slot, int animation, float frame, bool deathEffectArmed)
+    {
+        played.clear();
+        const Data::Monsters::MonsterModelDefinition* model = g_MonsterModelDatabase.Find(slot);
+        REQUIRE(model != nullptr);
+        GameLogic::Monsters::SoundEvents::PlayEvents(*model, animation, frame, deathEffectArmed,
+                                                     [&played](int sound) { played.push_back(sound); });
+        return played;
+    };
+
+    // Raymond's events are those of the Empire Guardian maps; this is Lorencia.
+    CHECK(play(MODEL_RAYMOND, MONSTER01_ATTACK1, 0.0f, false) ==
+          std::vector<int>{SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01});
+    CHECK(play(MODEL_RAYMOND, MONSTER01_WALK, 7.5f, false) ==
+          std::vector<int>{SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01});
+    CHECK(play(MODEL_RAYMOND, MONSTER01_WALK, 3.0f, false).empty());
+    CHECK(play(MODEL_XMAS2008_SNOWMAN, MONSTER01_DIE, 0.0f, true) == std::vector<int>{SOUND_XMAS_SNOWMAN_DEATH_1});
+    CHECK(play(MODEL_XMAS2008_SNOWMAN, MONSTER01_DIE, 0.0f, false).empty());
+    // The sounds went to `play`, not to the game.
+    CHECK(scope.Creation().Load().TakePlayedSounds().empty());
+}
+
+#ifdef _EDITOR
+// Monster Attacks' Play in Monster Preview: the attack sounds of the model,
+// sound events or slots, on a map the events do not name.
+TEST_CASE("Monster Preview: Play plays the model's sound events or its slot sound of the attack (Q-MN74) "
+          "[monsters][sounds][editor]")
+{
+    SoundScope scope(WD_0LORENCIA);
+    MonsterRecorder::LoadScope& load = scope.Creation().Load();
+    const std::array<int, 4> slots{MODEL_RAYMOND, MODEL_TOTEM_GOLEM, MODEL_XMAS2008_SNOWMAN, MODEL_BULL_FIGHTER};
+    for (const int slot : slots)
+    {
+        Data::Monsters::ModelLoader::Open(slot);
+        REQUIRE(Data::Monsters::ModelLoader::IsOpen(slot));
+    }
+    load.TakePlayedSounds();
+
+    g_MuMonsterPreviewUI.PlayAttack(MODEL_RAYMOND, MONSTER01_ATTACK1, std::nullopt);
+    CHECK(load.TakePlayedSounds() == Sounds({SOUND_EMPIREGUARDIAN_JERINT_MONSTER_ATTACK01}));
+    g_MuMonsterPreviewUI.PlayAttack(MODEL_RAYMOND, MONSTER01_APEAR, std::nullopt);
+    CHECK(load.TakePlayedSounds() == Sounds({SOUND_EMPIREGUARDIAN_RAYMOND_MONSTER_RAGE}));
+    // A walk's events play frame by frame, not when it starts: the Totem
+    // Golem's at every frame.
+    g_MuMonsterPreviewUI.PlayAttack(MODEL_TOTEM_GOLEM, MONSTER01_WALK, std::nullopt);
+    CHECK(load.TakePlayedSounds().empty());
+    // The Snowman's death sound needs its death effect, which counts as armed.
+    g_MuMonsterPreviewUI.PlayAttack(MODEL_XMAS2008_SNOWMAN, MONSTER01_DIE, std::nullopt);
+    CHECK(load.TakePlayedSounds() == Sounds({SOUND_XMAS_SNOWMAN_DEATH_1}));
+
+    // The Bull Fighter has sound slots: one of its two attack sounds.
+    g_MuMonsterPreviewUI.PlayAttack(MODEL_BULL_FIGHTER, MONSTER01_ATTACK1, std::nullopt);
+    const std::vector<PlayedSound> bull = load.TakePlayedSounds();
+    REQUIRE(bull.size() == 1);
+    CHECK((bull[0].id == SOUND_MONSTER + Models[MODEL_BULL_FIGHTER].Sounds[2] ||
+           bull[0].id == SOUND_MONSTER + Models[MODEL_BULL_FIGHTER].Sounds[3]));
+}
+
+// An attack Play started stands the model when it ends, as SetPlayerStop
+// after an attack: also one that holds its last frame, which the game ends
+// there (BMD::PlayAnimation).
+TEST_CASE("Monster Preview: an attack Play started ends with the model standing, also one that holds its last "
+          "frame [monsters][editor]")
+{
+    SoundScope scope(WD_0LORENCIA);
+    MonsterRecorder::LoadScope& load = scope.Creation().Load();
+    Data::Monsters::ModelLoader::Open(MODEL_RAYMOND);
+    REQUIRE(Data::Monsters::ModelLoader::IsOpen(MODEL_RAYMOND));
+    const Data::Monsters::MonsterModelDefinition* model = g_MonsterModelDatabase.Find(MODEL_RAYMOND);
+    REQUIRE(model != nullptr);
+    // More frames than any attack has at its speed, each a reference frame.
+    constexpr int MaxFrames = 10000;
+    const float frameFactor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 1.0f;
+    for (const bool held : {false, true})
+    {
+        INFO("holds its last frame: " << held);
+        Data::Monsters::MonsterModelDefinition values = *model;
+        values.load.holdLastFrame = held ? std::vector<int>{MONSTER01_ATTACK1} : std::vector<int>{};
+        g_MuMonsterPreviewUI.PlayAttack(MODEL_RAYMOND, MONSTER01_ATTACK1, std::nullopt);
+        REQUIRE(g_MuMonsterPreviewUI.GetAnimation() == MONSTER01_ATTACK1);
+        for (int frame = 0; frame < MaxFrames && g_MuMonsterPreviewUI.GetAnimation() == MONSTER01_ATTACK1; ++frame)
+        {
+            g_MuMonsterPreviewUI.Advance(MODEL_RAYMOND, values);
+        }
+        CHECK(g_MuMonsterPreviewUI.GetAnimation() == MONSTER01_STOP1);
+    }
+    FPS_ANIMATION_FACTOR = frameFactor;
+    load.TakePlayedSounds();
+}
+#endif // _EDITOR
 
 TEST_CASE("Monster sounds: a model without sound events plays none of them [monsters][sounds]")
 {

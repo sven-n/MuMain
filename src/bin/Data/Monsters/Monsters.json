@@ -1812,7 +1812,16 @@
         "skills": {"50": "attack1"},
         "otherwise": "attack2",
         "clearSkill": "never"
-      }
+      },
+      "mapVariants": [
+        {
+          "maps": [32],
+          "attacks": {
+            "otherwise": "generic",
+            "clearSkill": "never"
+          }
+        }
+      ]
     },
     {
       "number": 292,
@@ -3187,7 +3196,16 @@
         "monsterSkills": {"59": "appear", "62": "attack2", "63": "attack3"},
         "otherwise": "attack1",
         "clearSkill": "always"
-      }
+      },
+      "mapVariants": [
+        {
+          "maps": [79],
+          "attacks": {
+            "otherwise": "none",
+            "clearSkill": "never"
+          }
+        }
+      ]
     },
     {
       "number": 508,

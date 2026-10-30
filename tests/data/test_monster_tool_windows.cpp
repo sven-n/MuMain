@@ -13,12 +13,14 @@
 #include "Data/GameData/MonsterData/MonsterAttacks.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
+#include "I18N/All.h"
 #include "UI/Common/MuEditorLayout.h"
 #include "UI/Common/MuEditorToolWindows.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/Common/ToolGroups.h"
 #include "UI/Common/UndoTarget.h"
 #include "UI/ItemTools/ItemToolWindow.h"
+#include "UI/MonsterTools/MonsterAttackPreview.h"
 #include "UI/MonsterTools/MonsterEdits.h"
 #include "UI/MonsterTools/MonsterSelection.h"
 #include "UI/MonsterTools/MonsterToolWindow.h"
@@ -31,6 +33,8 @@
 #include "imgui_internal.h"
 
 #include <array>
+#include <optional>
+#include <vector>
 
 using Data::Monsters::MonsterDefinition;
 using MuEditor::Monsters::MonsterSelection;
@@ -115,7 +119,7 @@ TEST_CASE("The Monster Attacks window draws attacks without ImGui errors and sto
     selupan.attacks->monsterSkills = {
         {34, MONSTER01_ATTACK2}, {41, Data::Monsters::NoAttackAnimation}, {90, MONSTER01_APEAR}};
     selupan.attacks->skills = {{12, MONSTER01_ATTACK3}};
-    selupan.attacks->otherwise = MONSTER01_ATTACK4;
+    selupan.attacks->otherwise = {MONSTER01_ATTACK4};
     selupan.attacks->clearSkill = Data::Monsters::MonsterSkillClear::AfterAttack;
     MonsterDefinition bali = Monster(MONSTER_BALI, "Bali");
     bali.model = "MONSTER_MODEL_BALI";
@@ -154,6 +158,298 @@ TEST_CASE("The Monster Attacks window draws attacks without ImGui errors and sto
     CHECK_FALSE(g_MonsterEdits.GetHistory().CanUndo());
 }
 
+// The id of an item of Monster Attacks' map row (`variant` nullopt) or of the
+// attacks shown for a map row choice (all maps or a variant's index).
+constexpr int AllMaps = -1;
+ImGuiID AttacksItemId(int number, std::optional<int> variant, const char* label)
+{
+    const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::MonsterAttacks);
+    REQUIRE(window != nullptr);
+    ImGuiID scope = ImGui::GetIDWithSeed(number, window->ID);
+    if (variant)
+    {
+        scope = ImGui::GetIDWithSeed(*variant, scope);
+    }
+    return ImGui::GetIDWithSeed(label, nullptr, scope);
+}
+
+// The id of an item in a row of Monster Attacks' monster skills (`list`
+// "MonsterSkills") or player skills ("Skills").
+ImGuiID AttacksRowItemId(int number, int variant, const char* list, int row, const char* label)
+{
+    const ImGuiID rows = AttacksItemId(number, variant, list);
+    return ImGui::GetIDWithSeed(label, nullptr, ImGui::GetIDWithSeed(row, rows));
+}
+
+// Monster Attacks' choices for any other attack, clicked one after another.
+TEST_CASE("Monster Attacks: any other attack plays an animation, a rotation, the generic pattern or a draw (Q-MN69) "
+          "[editor][monsters]")
+{
+    MonsterDefinition budge = Monster(2, "Budge Dragon");
+    budge.model = "MONSTER_MODEL_BUDGE_DRAGON";
+    budge.attacks.emplace();
+    budge.attacks->otherwise = {MONSTER01_ATTACK2};
+    const std::array monsters = {budge};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(2);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterAttacksUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    // As a click on the attacks of all maps: pressed in the next frame, drawn
+    // as it is after that.
+    const auto click = [&](const char* label)
+    {
+        ImGui::ActivateItemByID(AttacksItemId(2, AllMaps, label));
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(2)->attacks; };
+    render();
+
+    click(I18N::Editor::ARotation);
+    CHECK(stored().otherwise == std::vector<int>{MONSTER01_ATTACK2, MONSTER01_ATTACK2});
+    click(I18N::Editor::AddAnAnimation);
+    CHECK(stored().otherwise == std::vector<int>{MONSTER01_ATTACK2, MONSTER01_ATTACK2, MONSTER01_ATTACK2});
+    click(I18N::Editor::TheGenericPattern);
+    CHECK(stored().otherwiseGeneric);
+    // Back to the rotation: all three turns are still there.
+    click(I18N::Editor::ARotation);
+    CHECK_FALSE(stored().otherwiseGeneric);
+    CHECK(stored().otherwise == std::vector<int>{MONSTER01_ATTACK2, MONSTER01_ATTACK2, MONSTER01_ATTACK2});
+    click(I18N::Editor::ADraw);
+    CHECK_FALSE(stored().otherwiseGeneric);
+    CHECK(stored().otherwiseRandom == Data::Monsters::MonsterAttackRandom::Rand);
+    click(I18N::Editor::AnAnimation);
+    CHECK_FALSE(stored().otherwiseRandom);
+    CHECK_FALSE(stored().otherwiseGeneric);
+    CHECK(stored().otherwise == std::vector<int>{MONSTER01_ATTACK2});
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+}
+
+// Monster Attacks' map row: a map variant starts with the monster's attacks,
+// its attacks are edited apart, and it goes as a whole.
+TEST_CASE("Monster Attacks: a map variant is added with the monster's attacks, edited apart and removed (Q-MN65) "
+          "[editor][monsters]")
+{
+    MonsterDefinition budge = Monster(2, "Budge Dragon");
+    budge.model = "MONSTER_MODEL_BUDGE_DRAGON";
+    budge.attacks.emplace();
+    budge.attacks->otherwise = {MONSTER01_ATTACK2};
+    const std::array monsters = {budge};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(2);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterAttacksUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(2); };
+    render();
+
+    click(AttacksItemId(2, std::nullopt, I18N::Editor::AddAMapVariant));
+    REQUIRE(stored().mapVariants.size() == 1);
+    CHECK(stored().mapVariants[0].maps.empty());
+    CHECK(stored().mapVariants[0].attacks == budge.attacks);
+
+    // The new variant is shown: its own attacks change.
+    click(AttacksItemId(2, 0, I18N::Editor::TheGenericPattern));
+    REQUIRE(stored().mapVariants[0].attacks);
+    CHECK(stored().mapVariants[0].attacks->otherwiseGeneric);
+    CHECK(stored().attacks == budge.attacks);
+
+    // Data Checks shows the attacks a problem is about: all maps, then the
+    // variant again.
+    g_MuMonsterAttacksUI.ShowMapVariant(2, std::nullopt);
+    render();
+    click(AttacksItemId(2, AllMaps, I18N::Editor::ADraw));
+    CHECK(stored().attacks->otherwiseRandom.has_value());
+    CHECK_FALSE(stored().mapVariants[0].attacks->otherwiseRandom.has_value());
+    g_MuMonsterAttacksUI.ShowMapVariant(2, 0);
+    render();
+    click(AttacksItemId(2, 0, I18N::Editor::ADraw));
+    CHECK(stored().mapVariants[0].attacks->otherwiseRandom.has_value());
+
+    click(AttacksItemId(2, 0, I18N::Editor::RemoveTheMapVariant));
+    CHECK(stored().mapVariants.empty());
+    CHECK(stored().attacks->otherwiseRandom.has_value());
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+}
+
+// The first rows of the monster skills and of the player skills are items of
+// their own: before, they had one id, and the second row's Remove did nothing.
+TEST_CASE("Monster Attacks: a player skill row is removed while the monster skills have a row too [editor][monsters]")
+{
+    MonsterDefinition budge = Monster(2, "Budge Dragon");
+    budge.model = "MONSTER_MODEL_BUDGE_DRAGON";
+    budge.attacks.emplace();
+    budge.attacks->monsterSkills = {{34, MONSTER01_ATTACK2}};
+    budge.attacks->skills = {{12, MONSTER01_ATTACK3}};
+    const std::array monsters = {budge};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    TestImGuiContext context;
+    g_MonsterSelection.Select(2);
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterAttacksUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    const auto stored = [] { return *g_MonsterDatabase.Find(2)->attacks; };
+    render();
+
+    click(AttacksRowItemId(2, AllMaps, "Skills", 0, I18N::Editor::Remove));
+    CHECK(stored().skills.empty());
+    CHECK(stored().monsterSkills == budge.attacks->monsterSkills);
+    click(AttacksRowItemId(2, AllMaps, "MonsterSkills", 0, I18N::Editor::Remove));
+    CHECK(stored().monsterSkills.empty());
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+}
+
+TEST_CASE("Monster Attacks: Play next attack plays a rotation in turn and the generic pattern as the game counts "
+          "(D48) [editor][monsters]")
+{
+    using MuEditor::Monsters::AttackPreview::Counts;
+    using MuEditor::Monsters::AttackPreview::NextOtherwise;
+    Data::Monsters::MonsterAttacks attacks;
+    attacks.otherwise = {MONSTER01_ATTACK2, MONSTER01_ATTACK1, MONSTER01_ATTACK3};
+    // Skill entries are no other attacks.
+    attacks.monsterSkills = {{0, MONSTER01_ATTACK4}};
+    attacks.skills = {{0, MONSTER01_ATTACK5}};
+    Counts counts;
+    for (const int expected : {MONSTER01_ATTACK2, MONSTER01_ATTACK1, MONSTER01_ATTACK3, MONSTER01_ATTACK2})
+    {
+        CHECK(NextOtherwise(attacks, counts) == expected);
+    }
+    CHECK(counts.rotation == 1);
+
+    // SetPlayerAttack counts each attack, the pattern its own: attack 1, 2, 2
+    // as the Fire Golem plays in Devil Square.
+    attacks.otherwiseGeneric = true;
+    counts = {};
+    for (const int expected :
+         {MONSTER01_ATTACK1, MONSTER01_ATTACK2, MONSTER01_ATTACK2, MONSTER01_ATTACK1, MONSTER01_ATTACK2})
+    {
+        CHECK(NextOtherwise(attacks, counts) == expected);
+    }
+    CHECK(counts.swordCount == 10);
+    CHECK(counts.rotation == 0);
+
+    // A draw picks one of its animations.
+    attacks.otherwiseGeneric = false;
+    attacks.otherwiseRandom = Data::Monsters::MonsterAttackRandom::Bali;
+    for (int draw = 0; draw < 20; ++draw)
+    {
+        const int animation = NextOtherwise(attacks, counts);
+        CHECK(animation >= MONSTER01_ATTACK1);
+        CHECK(animation <= MONSTER01_ATTACK4);
+    }
+    attacks.otherwiseRandom.reset();
+    attacks.otherwise = {Data::Monsters::NoAttackAnimation};
+    CHECK(NextOtherwise(attacks, counts) == Data::Monsters::NoAttackAnimation);
+}
+
+// The test binary opens no models: Play opens the Monster Preview, which says
+// so, beside Monster Attacks; Play next attack says what it played.
+TEST_CASE("Monster Attacks: Play opens the Monster Preview beside it, Play next attack goes through the rotation and "
+          "starts again (D48) [editor][monsters]")
+{
+    const ToolWindowsScope windows;
+    MonsterDefinition hound = Monster(3, "Hound");
+    hound.model = "MONSTER_MODEL_HOUND";
+    hound.attacks.emplace();
+    hound.attacks->skills = {{12, MONSTER01_ATTACK3}, {13, Data::Monsters::NoAttackAnimation}};
+    hound.attacks->otherwise = {MONSTER01_ATTACK2, MONSTER01_ATTACK1};
+    const std::array monsters = {hound};
+    g_MonsterDatabase.Build(monsters, "en");
+    g_MonsterEdits.GetHistory().Clear();
+    Data::Monsters::MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_HOUND";
+    model.load.file = "Data/Monster/Monster02.bmd";
+    const std::array models = {model};
+    g_MonsterModelDatabase.Build(models);
+    TestImGuiContext context;
+    g_MonsterSelection.Select(3);
+    // In the editor window's first layout, as the editor draws it.
+    const auto render = []
+    {
+        ImGui::NewFrame();
+        BeginEditorWindow();
+        MuEditor::Layout::SubmitDockSpace(false);
+        ImGui::End();
+        bool open = true;
+        if (g_MuEditorCore.GetToolWindows().monsterPreview)
+        {
+            g_MuMonsterPreviewUI.Render(&open);
+        }
+        g_MuMonsterAttacksUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](ImGuiID id)
+    {
+        ImGui::ActivateItemByID(id);
+        render();
+        render();
+    };
+    render();
+    click(AttacksItemId(3, AllMaps, I18N::Editor::FromTheStart));
+    CHECK_FALSE(g_MuMonsterAttacksUI.GetLastPlayed());
+
+    // No animation, nothing to play.
+    click(AttacksRowItemId(3, AllMaps, "Skills", 1, I18N::Editor::Play));
+    CHECK_FALSE(g_MuEditorCore.GetToolWindows().monsterPreview);
+    click(AttacksRowItemId(3, AllMaps, "Skills", 0, I18N::Editor::Play));
+    CHECK(g_MuEditorCore.GetToolWindows().monsterPreview);
+    // In the first layout both are tabs of one node: the preview goes beside,
+    // shown from its second frame.
+    render();
+    CHECK(DockIdOf(WindowIds::MonsterPreview) != DockIdOf(WindowIds::MonsterAttacks));
+    CHECK_FALSE(ImGui::FindWindowByName(WindowIds::MonsterAttacks)->Hidden);
+    CHECK_FALSE(ImGui::FindWindowByName(WindowIds::MonsterPreview)->Hidden);
+
+    for (const int expected : {MONSTER01_ATTACK2, MONSTER01_ATTACK1, MONSTER01_ATTACK2})
+    {
+        click(AttacksItemId(3, AllMaps, I18N::Editor::PlayNextAttack));
+        CHECK(g_MuMonsterAttacksUI.GetLastPlayed() == expected);
+    }
+    click(AttacksItemId(3, AllMaps, I18N::Editor::FromTheStart));
+    CHECK_FALSE(g_MuMonsterAttacksUI.GetLastPlayed());
+    click(AttacksItemId(3, AllMaps, I18N::Editor::PlayNextAttack));
+    CHECK(g_MuMonsterAttacksUI.GetLastPlayed() == MONSTER01_ATTACK2);
+
+    // Playing stores nothing.
+    CHECK_FALSE(g_MonsterEdits.GetHistory().CanUndo());
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterModelDatabase.Build({});
+}
+
 // The model tools with a monster whose model has an entry with sounds and
 // sound slots, one whose model is outside the model list, and one without a
 // model. The test binary opens no models: the animations and the preview
@@ -184,7 +480,7 @@ TEST_CASE("The Monster Model and Monster Preview windows draw a model entry with
     attack.pick = Data::Monsters::MonsterSoundDraw::Rand;
     attack.sounds = {"Data/Sound/mHound1.wav", "SOUND_THUNDERS01"};
     model.soundEvents = {walk, attack};
-    model.soundEventWorlds = {69, 70};
+    model.soundEventMaps = {{69}, {70}};
     const std::array models = {model};
     g_MonsterModelDatabase.Build(models);
     TestImGuiContext context;

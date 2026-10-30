@@ -1,4 +1,5 @@
 ﻿#include "stdafx.h"
+#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -1480,15 +1481,14 @@ bool M39Kanturu3rd::SetCurrentActionKanturu3rdMonster(CHARACTER* c, OBJECT* o)
     if (!IsInKanturu3rd())
         return false;
 
-    switch (c->MonsterIndex)
+    // Maya's scene reads her skill before her attacks play (monsters design,
+    // Q-MN64); the other monsters' attacks play as anywhere.
+    if (c->MonsterIndex == MONSTER_MAYA)
     {
-    case MONSTER_NIGHTMARE:
-    case MONSTER_MAYA_HAND_LEFT:
-    case MONSTER_MAYA_HAND_RIGHT:
-    case MONSTER_MAYA:
-        return CheckMonsterSkill(c, o);
+        MayaSceneMayaAction(c->MonsterSkill);
+        GameLogic::Monsters::Attacks::Play(*c, *o);
+        return true;
     }
-
     return false;
 }
 

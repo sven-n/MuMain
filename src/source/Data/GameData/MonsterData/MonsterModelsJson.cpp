@@ -33,8 +33,8 @@ constexpr const char* Slot = "slot";
 constexpr const char* Effect = "effect";
 constexpr const char* File = "file";
 constexpr const char* TextureFolders = "textureFolders";
-constexpr const char* WorldTextureFolders = "worldTextureFolders";
-constexpr const char* Worlds = "worlds";
+constexpr const char* MapTextureFolders = "mapTextureFolders";
+constexpr const char* Maps = "maps";
 constexpr const char* Folders = "folders";
 constexpr const char* TextureNames = "textureNames";
 constexpr const char* Animations = "animations";
@@ -60,13 +60,18 @@ constexpr const char* Min = "min";
 constexpr const char* Max = "max";
 constexpr const char* LinkBones = "linkBones";
 constexpr const char* SoundEvents = "soundEvents";
-constexpr const char* SoundEventWorlds = "soundEventWorlds";
+constexpr const char* SoundEventMaps = "soundEventMaps";
 constexpr const char* Frames = "frames";
 constexpr const char* DeathEffectArmed = "deathEffectArmed";
 constexpr const char* Chance = "chance";
 constexpr const char* OneIn = "oneIn";
 constexpr const char* Draw = "draw";
 constexpr const char* Pick = "pick";
+// The names of the map lists before maps were the server's numbers (monsters
+// design, D67); a file that has them is refused with the new name.
+constexpr const char* OldWorldTextureFolders = "worldTextureFolders";
+constexpr const char* OldWorlds = "worlds";
+constexpr const char* OldSoundEventWorlds = "soundEventWorlds";
 } // namespace Keys
 
 constexpr const char* LinearFilter = "linear";
@@ -74,22 +79,34 @@ constexpr const char* NearestFilter = "nearest";
 constexpr const char* RepeatWrap = "repeat";
 constexpr const char* ClampWrap = "clamp";
 
-const KeySet ModelKeys{Keys::Slot,           Keys::File,
-                       Keys::TextureFolders, Keys::WorldTextureFolders,
-                       Keys::TextureNames,   Keys::Animations,
-                       Keys::HoldLastFrame,  Keys::HeadBone,
-                       Keys::StreamMesh,     Keys::NoneBlendMeshes,
-                       Keys::Sounds,         Keys::SoundSlots,
-                       Keys::Bitmaps,        Keys::Parts,
-                       Keys::BoundingBox,    Keys::LinkBones,
-                       Keys::SoundEvents,    Keys::SoundEventWorlds};
-const KeySet PartKeys{Keys::Slot,       Keys::Effect,        Keys::File,  Keys::TextureFolders,
-                      Keys::Animations, Keys::HoldLastFrame, Keys::Worlds};
+// With the renamed keys: RefuseRenamedKeys reports them, they are not unknown.
+const KeySet ModelKeys{Keys::Slot,
+                       Keys::File,
+                       Keys::TextureFolders,
+                       Keys::MapTextureFolders,
+                       Keys::TextureNames,
+                       Keys::Animations,
+                       Keys::HoldLastFrame,
+                       Keys::HeadBone,
+                       Keys::StreamMesh,
+                       Keys::NoneBlendMeshes,
+                       Keys::Sounds,
+                       Keys::SoundSlots,
+                       Keys::Bitmaps,
+                       Keys::Parts,
+                       Keys::BoundingBox,
+                       Keys::LinkBones,
+                       Keys::SoundEvents,
+                       Keys::SoundEventMaps,
+                       Keys::OldWorldTextureFolders,
+                       Keys::OldSoundEventWorlds};
+const KeySet PartKeys{Keys::Slot,       Keys::Effect,        Keys::File, Keys::TextureFolders,
+                      Keys::Animations, Keys::HoldLastFrame, Keys::Maps, Keys::OldWorlds};
 const KeySet SoundKeys{Keys::File, Keys::Id, Keys::Channels, Keys::Spatial};
 const KeySet SoundSlotKeys{Keys::Idle, Keys::Attack, Keys::Die, Keys::SecondSet};
 const KeySet SecondSetKeys{Keys::Idle, Keys::Attack, Keys::Die};
 const KeySet BitmapKeys{Keys::File, Keys::Slot, Keys::Filter, Keys::Wrap};
-const KeySet WorldFolderKeys{Keys::Worlds, Keys::Folders};
+const KeySet MapFolderKeys{Keys::Maps, Keys::Folders};
 const KeySet BoxKeys{Keys::Min, Keys::Max};
 const KeySet SoundEventKeys{Keys::Animations, Keys::Frames, Keys::DeathEffectArmed,
                             Keys::Chance,     Keys::Pick,   Keys::Sounds};
@@ -369,33 +386,40 @@ void ReadLoad(const OrderedJson& json, MonsterModelLoad& load, ModelIssues& issu
     }
 }
 
-void ReadWorldFolders(const OrderedJson& json, std::vector<MonsterModelWorldFolders>& worldFolders, ModelIssues& issues)
+// A list of maps: server map numbers and stages (D67).
+bool ReadMaps(const OrderedJson& json, const std::string& key, std::vector<Data::Maps::MapRef>& maps,
+              ModelIssues& issues)
+{
+    return Data::Maps::ReadMapRefs(json, key, maps, [&](const std::string& field, const std::string& message)
+                                   { issues.Fatal(field, message); });
+}
+
+void ReadMapFolders(const OrderedJson& json, std::vector<MonsterModelMapFolders>& mapFolders, ModelIssues& issues)
 {
     if (!json.is_array())
     {
-        issues.Fatal(Keys::WorldTextureFolders, "must be a list");
+        issues.Fatal(Keys::MapTextureFolders, "must be a list");
         return;
     }
     for (size_t i = 0; i < json.size(); ++i)
     {
-        const std::string key = std::string(Keys::WorldTextureFolders) + "[" + std::to_string(i) + "]";
+        const std::string key = std::string(Keys::MapTextureFolders) + "[" + std::to_string(i) + "]";
         const OrderedJson& entry = json[i];
-        if (!entry.is_object() || !entry.contains(Keys::Worlds) || !entry.contains(Keys::Folders))
+        if (!entry.is_object() || !entry.contains(Keys::Maps) || !entry.contains(Keys::Folders))
         {
-            issues.Fatal(key, "must be an object with worlds and folders");
+            issues.Fatal(key, "must be an object with maps and folders");
             return;
         }
-        MonsterModelWorldFolders folders;
-        if (!ReadWholeList(entry[Keys::Worlds], key + "." + Keys::Worlds, 0, std::numeric_limits<int>::max(),
-                           folders.worlds, issues) ||
+        MonsterModelMapFolders folders;
+        if (!ReadMaps(entry[Keys::Maps], key + "." + Keys::Maps, folders.maps, issues) ||
             !ReadFolders(entry[Keys::Folders], key + "." + Keys::Folders, folders.folders, issues))
         {
             return;
         }
-        Items::Json::WarnAboutUnknownKeys(entry, WorldFolderKeys, key + ".",
+        Items::Json::WarnAboutUnknownKeys(entry, MapFolderKeys, key + ".",
                                           [&](const std::string& unknown, const std::string& message)
                                           { issues.Warning(unknown, message); });
-        worldFolders.push_back(std::move(folders));
+        mapFolders.push_back(std::move(folders));
     }
 }
 
@@ -774,6 +798,22 @@ void ReadBitmaps(const OrderedJson& json, std::vector<MonsterModelBitmap>& bitma
     }
 }
 
+// A key renamed when maps became the server's numbers is fatal with its new
+// name: as an unknown key it would only warn, and its maps would be lost (a
+// part without maps opens with its model on every map).
+void RefuseRenamedKeys(const OrderedJson& json, std::initializer_list<std::pair<const char*, const char*>> renamed,
+                       const std::string& prefix, ModelIssues& issues)
+{
+    for (const auto& [oldKey, newKey] : renamed)
+    {
+        if (json.contains(oldKey))
+        {
+            issues.Fatal(prefix + oldKey,
+                         std::string("was renamed to ") + newKey + ", with the map numbers the server sends");
+        }
+    }
+}
+
 void ReadParts(const OrderedJson& json, std::vector<MonsterModelPart>& parts, ModelIssues& issues)
 {
     if (!json.is_array())
@@ -804,9 +844,10 @@ void ReadParts(const OrderedJson& json, std::vector<MonsterModelPart>& parts, Mo
             return;
         }
         ReadLoad(entry, part.load, issues);
-        if (const auto worlds = entry.find(Keys::Worlds); worlds != entry.end())
+        RefuseRenamedKeys(entry, {{Keys::OldWorlds, Keys::Maps}}, key + ".", issues);
+        if (const auto maps = entry.find(Keys::Maps); maps != entry.end())
         {
-            ReadWholeList(*worlds, key + "." + Keys::Worlds, 0, std::numeric_limits<int>::max(), part.worlds, issues);
+            ReadMaps(*maps, key + "." + Keys::Maps, part.maps, issues);
         }
         Items::Json::WarnAboutUnknownKeys(entry, PartKeys, key + ".",
                                           [&](const std::string& unknown, const std::string& message)
@@ -888,9 +929,13 @@ void ReadOptionalWhole(const OrderedJson& json, const char* key, long long low, 
 void ReadModelFields(const OrderedJson& json, MonsterModelDefinition& model, ModelIssues& issues)
 {
     ReadLoad(json, model.load, issues);
-    if (const auto folders = json.find(Keys::WorldTextureFolders); folders != json.end())
+    RefuseRenamedKeys(
+        json,
+        {{Keys::OldWorldTextureFolders, Keys::MapTextureFolders}, {Keys::OldSoundEventWorlds, Keys::SoundEventMaps}},
+        "", issues);
+    if (const auto folders = json.find(Keys::MapTextureFolders); folders != json.end())
     {
-        ReadWorldFolders(*folders, model.worldTextureFolders, issues);
+        ReadMapFolders(*folders, model.mapTextureFolders, issues);
     }
     if (const auto names = json.find(Keys::TextureNames); names != json.end())
     {
@@ -915,11 +960,9 @@ void ReadModelFields(const OrderedJson& json, MonsterModelDefinition& model, Mod
     {
         ReadSoundEvents(*events, model.soundEvents, issues);
     }
-    if (const auto worlds = json.find(Keys::SoundEventWorlds); worlds != json.end())
+    if (const auto maps = json.find(Keys::SoundEventMaps); maps != json.end())
     {
-        ReadWholeList(*worlds, Keys::SoundEventWorlds, 0, std::numeric_limits<int>::max(), model.soundEventWorlds,
-                      issues);
-        std::sort(model.soundEventWorlds.begin(), model.soundEventWorlds.end());
+        ReadMaps(*maps, Keys::SoundEventMaps, model.soundEventMaps, issues);
     }
     if (const auto bitmaps = json.find(Keys::Bitmaps); bitmaps != json.end())
     {
@@ -1081,9 +1124,9 @@ OrderedJson WritePart(const MonsterModelPart& part)
     }
     WriteLoad(part.load, json);
     WriteAnimations(part.load, json);
-    if (!part.worlds.empty())
+    if (!part.maps.empty())
     {
-        json[Keys::Worlds] = part.worlds;
+        json[Keys::Maps] = Data::Maps::WriteMapRefs(part.maps);
     }
     return json;
 }
@@ -1180,9 +1223,9 @@ void WriteSoundFields(const MonsterModelDefinition& model, OrderedJson& json)
         }
         json[Keys::SoundEvents] = std::move(events);
     }
-    if (!model.soundEventWorlds.empty())
+    if (!model.soundEventMaps.empty())
     {
-        json[Keys::SoundEventWorlds] = model.soundEventWorlds;
+        json[Keys::SoundEventMaps] = Data::Maps::WriteMapRefs(model.soundEventMaps);
     }
 }
 
@@ -1191,17 +1234,17 @@ OrderedJson WriteModel(const MonsterModelDefinition& model)
     OrderedJson json = OrderedJson::object();
     json[Keys::Slot] = model.slot;
     WriteLoad(model.load, json);
-    if (!model.worldTextureFolders.empty())
+    if (!model.mapTextureFolders.empty())
     {
         OrderedJson folders = OrderedJson::array();
-        for (const MonsterModelWorldFolders& entry : model.worldTextureFolders)
+        for (const MonsterModelMapFolders& entry : model.mapTextureFolders)
         {
             OrderedJson folder = OrderedJson::object();
-            folder[Keys::Worlds] = entry.worlds;
+            folder[Keys::Maps] = Data::Maps::WriteMapRefs(entry.maps);
             folder[Keys::Folders] = entry.folders;
             folders.push_back(std::move(folder));
         }
-        json[Keys::WorldTextureFolders] = std::move(folders);
+        json[Keys::MapTextureFolders] = std::move(folders);
     }
     if (!model.textureNames.empty())
     {
@@ -1252,8 +1295,8 @@ OrderedJson WriteModel(const MonsterModelDefinition& model)
 std::string FormatText(std::string text)
 {
     using namespace Items::Json;
-    for (const char* key : {Keys::TextureFolders, Keys::HoldLastFrame, Keys::NoneBlendMeshes, Keys::Worlds,
-                            Keys::Folders, Keys::Idle, Keys::Attack, Keys::LinkBones, Keys::SoundEventWorlds})
+    for (const char* key : {Keys::TextureFolders, Keys::HoldLastFrame, Keys::NoneBlendMeshes, Keys::Maps, Keys::Folders,
+                            Keys::Idle, Keys::Attack, Keys::LinkBones, Keys::SoundEventMaps})
     {
         text = PutListsOnOneLine(text, key);
     }
@@ -1261,7 +1304,7 @@ std::string FormatText(std::string text)
     {
         text = PutObjectsOnOneLine(text, key);
     }
-    for (const char* key : {Keys::Sounds, Keys::Bitmaps, Keys::WorldTextureFolders, Keys::SoundEvents})
+    for (const char* key : {Keys::Sounds, Keys::Bitmaps, Keys::MapTextureFolders, Keys::SoundEvents})
     {
         text = PutListEntriesOnOneLine(text, key);
     }

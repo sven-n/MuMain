@@ -26,6 +26,7 @@ using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
 using Data::Monsters::MonsterDefinition;
 using Data::Monsters::MonsterKind;
+using MuEditor::Monsters::GetMapVariantOfField;
 using MuEditor::Monsters::GetMonsterField;
 using MuEditor::Monsters::GetToolForField;
 using MuEditor::Monsters::MonsterTool;
@@ -68,6 +69,19 @@ const ItemDataIssue* FindField(const std::vector<ItemDataIssue>& issues, std::st
     return found != issues.end() ? &*found : nullptr;
 }
 } // namespace
+
+TEST_CASE("Monster checks: a problem of a map variant's attacks names the variant Monster Attacks shows (Q-MN65) "
+          "[editor][monsters]")
+{
+    CHECK(GetMapVariantOfField("monster 291 mapVariants[0].attacks") == 0);
+    CHECK(GetMapVariantOfField("monster 291 mapVariants[12].attacks.otherwise") == 12);
+    CHECK(GetMapVariantOfField("mapVariants[1].maps") == 1);
+    CHECK_FALSE(GetMapVariantOfField("monster 291 attacks").has_value());
+    CHECK_FALSE(GetMapVariantOfField("monster 291 mapVariants").has_value());
+    CHECK_FALSE(GetMapVariantOfField("monster 291 mapVariants[x]").has_value());
+    CHECK_FALSE(GetMapVariantOfField("monster 291 mapVariants[3").has_value());
+    CHECK_FALSE(GetMapVariantOfField("monster 291 name").has_value());
+}
 
 TEST_CASE("Monster checks: a name opens Monster Translations, every other field the browser [editor][monsters]")
 {
@@ -149,6 +163,9 @@ TEST_CASE("Monster checks: the attacks go to Monster Attacks [editor][monsters]"
     CHECK(GetToolForField("monster 459 attacks.monsterSkills") == MonsterTool::Attacks);
     CHECK(GetToolForField("attacks") == MonsterTool::Attacks);
     CHECK(GetToolForField("monster 459 attackSpeed") == MonsterTool::Browser);
+    // The map variants hold attacks only yet (Q-MN65).
+    CHECK(GetToolForField("monster 291 mapVariants[0].maps") == MonsterTool::Attacks);
+    CHECK(GetToolForField("monster 291 mapVariants[1].attacks.otherwise") == MonsterTool::Attacks);
 }
 
 TEST_CASE("Monster checks: RunMonsters finds the name problems of the table and sends them to Monster Translations "

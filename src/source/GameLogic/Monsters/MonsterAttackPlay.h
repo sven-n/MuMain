@@ -1,5 +1,9 @@
 #pragma once
 
+#include "Data/GameData/MonsterData/MonsterAttacks.h"
+
+#include <cstdint>
+
 class CHARACTER;
 class OBJECT;
 
@@ -19,6 +23,24 @@ void OnAttackEnded(CHARACTER& character);
 
 // True for the animations an attack plays: attack 1 to 5 and appear.
 bool IsAttackAnimation(int animation);
+
+// The generic pattern's next animation, for a monster without attacks or
+// whose attacks say "generic": attack 1 when CHARACTER::SwordCount % 3 is 0,
+// else attack 2; the count goes on by one.
+int NextGenericAttack(CHARACTER& character);
+// The same on a count of its own.
+int NextGenericAttack(std::uint8_t& swordCount);
+
+// The animation a draw picks, with rand() and rand_fps_check() as the old
+// code's draws.
+int DrawAttack(Data::Monsters::MonsterAttackRandom random);
+
+// The animation `choice` plays, as Play plays it, and the counts it moves:
+// the draw's pick, the generic pattern's next one (`swordCount` goes on), the
+// rotation's turn (`rotation` goes on, CHARACTER::AttackRotation), else its
+// animation. Play and the editor's Play next attack share it.
+int ResolveAttackAnimation(const Data::Monsters::MonsterAttacks& attacks,
+                           const Data::Monsters::MonsterAttackChoice& choice, std::uint8_t& swordCount, int& rotation);
 
 // The attack that a monster skill packet (0x69, ReceiveMonsterSkill) starts,
 // for the life of the scope. Attacks that clear the skill after the attack

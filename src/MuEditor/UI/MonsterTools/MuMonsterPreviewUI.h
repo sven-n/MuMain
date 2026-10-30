@@ -8,16 +8,20 @@
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewTarget.h"
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
 
+#include <optional>
+
 namespace MuEditor::Monsters
 {
 // The Monster Preview tool (monsters design, section 9): the selected
 // monster's model in a view with the item preview's camera (the mouse turns
 // it, the middle button moves the picture, the wheel zooms). Any animation of
 // the model plays, pauses and goes frame by frame; the speeds are the Monster
-// Model tool's, also while one is being dragged; the model's slot sounds play
-// when their animation starts; the impact frame of attacks 1 and 2 and the
+// Model tool's, also while one is being dragged; the model's slot sounds and
+// sound events play as the game plays them, on any map (Q-MN74); the impact
+// frame of attacks 1 and 2 and the
 // animation that follows are marked, and the speed factors the game adds can
-// be played too. Only in the editor's window (Q-MN17).
+// be played too; Monster Attacks' Play plays an attack once (Q-MN73). Only in
+// the editor's window (Q-MN17).
 class MuMonsterPreviewUI
 {
 public:
@@ -31,6 +35,27 @@ public:
         m_target.BeforeFrame();
     }
 
+    // The Monster Attacks tool's Play: the attack animation once from the
+    // start with the model's attack sounds and `sound` (the attacks' own), then
+    // the model stands as the game's does. Nothing while the model of `slot`
+    // is not open or lacks the animation.
+    void PlayAttack(int slot, int animation, std::optional<int> sound);
+
+    // The animation shown, and whether it plays.
+    int GetAnimation() const
+    {
+        return m_animation;
+    }
+    bool IsPlaying() const
+    {
+        return m_playing;
+    }
+
+    // One frame of the animation shown, as Render plays it while it plays:
+    // a held animation stops at its last frame, others start again, and an
+    // attack Play started ends with the model standing.
+    void Advance(int slot, const Data::Monsters::MonsterModelDefinition& values);
+
 private:
     MuMonsterPreviewUI() = default;
 
@@ -38,7 +63,7 @@ private:
     void RenderControls(int slot, const Data::Monsters::MonsterModelDefinition& values);
     void RenderFrameSlider(int slot, int keys);
     void RenderView(int slot, const Data::Monsters::MonsterModelDefinition& values);
-    void Advance(int slot, const Data::Monsters::MonsterModelDefinition& values);
+    void StandAfterAttack(int slot);
     void Restart(int slot);
     float SpeedFactor(int slot) const;
 
@@ -52,6 +77,8 @@ private:
     float m_frame = 0.0f;
     float m_turnDegrees = 0.0f;
     bool m_playing = true;
+    // An attack Play started: the model stands when it ends.
+    bool m_once = false;
     bool m_turn = false;
     bool m_sounds = true;
     bool m_gameFactors = true;

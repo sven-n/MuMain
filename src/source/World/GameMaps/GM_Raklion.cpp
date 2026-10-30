@@ -2313,26 +2313,12 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
     if (IsIceCity() == false)
         return false;
 
-    switch (c->MonsterIndex)
+    // Selupan's height, sounds and effects go with his attacks; the other
+    // monsters' attacks play as anywhere (monsters design, Q-MN64).
+    if (c->MonsterIndex == MONSTER_SELUPAN)
     {
-    case MONSTER_ICE_WALKER:
-    case MONSTER_GIANT_MAMMOTH:
-    case MONSTER_ICE_GIANT:
-    case MONSTER_COOLUTIN:
-    case MONSTER_IRON_KNIGHT:
-    case MONSTER_DARK_MAMMOTH:
-    case MONSTER_DARK_GIANT:
-    case MONSTER_DARK_IRON_KNIGHT:
-    case MONSTER_DARK_COOLUTIN:
-        return GameLogic::Monsters::Attacks::Play(*c, *o);
-    case MONSTER_SELUPAN:
         return SetBossMonsterAction(c, o);
-    case MONSTER_SPIDER_EGGS_1:
-    case MONSTER_SPIDER_EGGS_2:
-    case MONSTER_SPIDER_EGGS_3:
-        return false;
     }
-
     return false;
 }
 

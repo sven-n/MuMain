@@ -2,7 +2,6 @@
 //  GMHellas.cpp
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -925,51 +924,6 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
     }
 
     return c;
-}
-
-bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
-{
-    switch (c->MonsterIndex)
-    {
-    case MONSTER_DEATH_CENTURION_1:
-    case MONSTER_DEATH_CENTURION_2:
-    case MONSTER_DEATH_CENTURION_3:
-    case MONSTER_DEATH_CENTURION_4:
-    case MONSTER_DEATH_CENTURION_5:
-    case MONSTER_DEATH_CENTURION_6:
-    case MONSTER_AEGIS_1:
-    case MONSTER_AEGIS_2:
-    case MONSTER_AEGIS_3:
-    case MONSTER_AEGIS_4:
-    case MONSTER_AEGIS_5:
-    case MONSTER_AEGIS_6:
-    case MONSTER_ROGUE_CENTURION_1:
-    case MONSTER_ROGUE_CENTURION_2:
-    case MONSTER_ROGUE_CENTURION_3:
-    case MONSTER_ROGUE_CENTURION_4:
-    case MONSTER_ROGUE_CENTURION_5:
-    case MONSTER_ROGUE_CENTURION_6:
-    case MONSTER_NECRON_1:
-    case MONSTER_NECRON_2:
-    case MONSTER_NECRON_3:
-    case MONSTER_NECRON_4:
-    case MONSTER_NECRON_5:
-    case MONSTER_NECRON_6:
-    case MONSTER_SCHRIKER_1:
-    case MONSTER_SCHRIKER_2:
-    case MONSTER_SCHRIKER_3:
-    case MONSTER_SCHRIKER_4:
-    case MONSTER_SCHRIKER_5:
-    case MONSTER_SCHRIKER_6:
-    case MONSTER_ILLUSION_OF_KUNDUN_1:
-    case MONSTER_ILLUSION_OF_KUNDUN_2:
-    case MONSTER_ILLUSION_OF_KUNDUN_3:
-    case MONSTER_ILLUSION_OF_KUNDUN_4:
-    case MONSTER_ILLUSION_OF_KUNDUN_5:
-    case MONSTER_ILLUSION_OF_KUNDUN_7:
-        return GameLogic::Monsters::Attacks::Play(*c, *o);
-    }
-    return false;
 }
 
 bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* to, BMD* b)

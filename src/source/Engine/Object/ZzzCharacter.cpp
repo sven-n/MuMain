@@ -1235,39 +1235,25 @@ void SetPlayerAttack(CHARACTER* c)
     }
     else
     {
-        if (o->Type == MODEL_BALI)
+        bool Success = true;
+
+        // The map code that is no choice of animation (monsters design,
+        // Q-MN64): the guards' AI, Maya's scene, Selupan and the Empire
+        // Guardian bosses' rage; the last three play the attacks themselves.
+        battleCastle::SetGuardAttackState(o);
+        if (M39Kanturu3rd::SetCurrentActionKanturu3rdMonster(c, o) == true)
+            Success = false;
+        if (TheMapProcess().SetCurrentActionMonster(c, o) == true)
+            Success = false;
+
+        // The monster's attacks, on every map; a map variant says where they
+        // differ.
+        if (Success && GameLogic::Monsters::Attacks::Play(*c, *o))
+            Success = false;
+
+        if (Success)
         {
-            // Bali's draw (its attacks' otherwiseRandom "bali"); no handler
-            // answers for it.
-            GameLogic::Monsters::Attacks::Play(*c, *o);
-        }
-        else
-        {
-            bool Success = true;
-
-            if (SetCurrentAction_HellasMonster(c, o) == true) Success = false;
-            if (battleCastle::SetCurrentAction_BattleCastleMonster(c, o) == true) Success = false;
-            if (M31HuntingGround::SetCurrentActionHuntingGroundMonster(c, o) == true) Success = false;
-            if (M33Aida::SetCurrentActionAidaMonster(c, o) == true) Success = false;
-            if (M34CryWolf1st::SetCurrentActionCrywolfMonster(c, o) == true) Success = false;
-            if (M37Kanturu1st::SetCurrentActionKanturu1stMonster(c, o) == true) Success = false;
-            if (M38Kanturu2nd::Set_CurrentAction_Kanturu2nd_Monster(c, o) == true) Success = false;
-            if (M39Kanturu3rd::SetCurrentActionKanturu3rdMonster(c, o) == true) Success = false;
-            if (SEASON3A::CGM3rdChangeUp::Instance().SetCurrentActionBalgasBarrackMonster(c, o))	Success = false;
-            if (g_CursedTemple->SetCurrentActionMonster(c, o) == true) Success = false;
-            if (SEASON3B::GMNewTown::SetCurrentActionMonster(c, o) == true) Success = false;
-            if (SEASON3C::GMSwampOfQuiet::SetCurrentActionMonster(c, o) == true) Success = false;
-
-            if (TheMapProcess().SetCurrentActionMonster(c, o) == true) Success = false;
-
-            if (Success)
-            {
-                if (c->SwordCount % 3 == 0)
-                    SetAction(&c->Object, MONSTER01_ATTACK1);
-                else
-                    SetAction(&c->Object, MONSTER01_ATTACK2);
-                c->SwordCount++;
-            }
+            SetAction(&c->Object, GameLogic::Monsters::Attacks::NextGenericAttack(*c));
         }
     }
     if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE);
@@ -1330,11 +1316,7 @@ void SetPlayerMagic(CHARACTER* c)
     }
     else
     {
-        if (c->SwordCount % 3 == 0)
-            SetAction(&c->Object, MONSTER01_ATTACK1);
-        else
-            SetAction(&c->Object, MONSTER01_ATTACK2);
-        c->SwordCount++;
+        SetAction(&c->Object, GameLogic::Monsters::Attacks::NextGenericAttack(*c));
     }
 }
 
@@ -2397,17 +2379,6 @@ void AttackEffect(CHARACTER* c)
         {
         }
     }
-}
-
-bool CheckMonsterSkill(CHARACTER* pCharacter, OBJECT* pObject)
-{
-    if (pCharacter->MonsterIndex == MONSTER_MAYA)
-    {
-        M39Kanturu3rd::MayaSceneMayaAction(pCharacter->MonsterSkill);
-        GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
-        return true;
-    }
-    return GameLogic::Monsters::Attacks::Play(*pCharacter, *pObject);
 }
 
 bool CharacterAnimation(CHARACTER* c, OBJECT* o)
@@ -11673,6 +11644,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     o->EnableBoneMatrix = true;
     o->EnableShadow = false;
     c->Dead = 0;
+    c->AttackRotation = 0;
     c->Blood = false;
     c->GuildTeam = 0;
     c->Run = 0;

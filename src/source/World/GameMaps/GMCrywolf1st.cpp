@@ -2214,24 +2214,6 @@ bool M34CryWolf1st::Get_AltarState_State(int Num)
         return false;
 }
 
-bool M34CryWolf1st::SetCurrentActionCrywolfMonster(CHARACTER* c, OBJECT* o)
-{
-    if (!IsCyrWolf1st() && !(gMapManager.InDevilSquare()))
-        return false;
-
-    switch (c->MonsterIndex)
-    {
-    case MONSTER_DARK_ELF:
-    case MONSTER_DARKELF:
-    case MONSTER_BALRAM:
-    case MONSTER_DEATH_SPIRIT:
-    case MONSTER_SORAM:
-    case MONSTER_BALGASS:
-        return CheckMonsterSkill(c, o);
-    }
-    return false;
-}
-
 void M34CryWolf1st::Set_MyRank(BYTE MyRank, int GettingExp)
 {
     Rank = MyRank;

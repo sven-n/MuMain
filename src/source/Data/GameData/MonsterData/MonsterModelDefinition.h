@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Data/GameData/MapData/MapRef.h"
+
 #include <array>
 #include <optional>
 #include <string>
@@ -94,13 +96,14 @@ struct MonsterSoundEvent
     bool operator==(const MonsterSoundEvent&) const = default;
 };
 
-// Texture folders that the model uses on some maps instead of its own.
-struct MonsterModelWorldFolders
+// Texture folders that the model uses on some maps (server map numbers)
+// instead of its own.
+struct MonsterModelMapFolders
 {
-    std::vector<int> worlds;
+    std::vector<Data::Maps::MapRef> maps;
     std::vector<std::string> folders;
 
-    bool operator==(const MonsterModelWorldFolders&) const = default;
+    bool operator==(const MonsterModelMapFolders&) const = default;
 };
 
 // A bitmap the model loads into a fixed bitmap slot, which its drawing code
@@ -148,8 +151,9 @@ struct MonsterModelPart
     std::string slot;
     std::string effect;
     MonsterModelLoad load;
-    // Loaded when one of these maps loads, not with the model.
-    std::vector<int> worlds;
+    // Loaded when one of these maps (server map numbers) loads, not with the
+    // model.
+    std::vector<Data::Maps::MapRef> maps;
 
     bool operator==(const MonsterModelPart&) const = default;
 };
@@ -177,7 +181,7 @@ struct MonsterModelDefinition
     // A texture name that replaces the file's, by mesh (the Little Santas
     // share one file and have one texture each).
     std::vector<std::pair<int, std::string>> textureNames;
-    std::vector<MonsterModelWorldFolders> worldTextureFolders;
+    std::vector<MonsterModelMapFolders> mapTextureFolders;
     // nullopt: as the file has it.
     std::optional<int> headBone;
     std::optional<int> streamMesh;
@@ -189,8 +193,9 @@ struct MonsterModelDefinition
     // In order: one call can play several, and their draws come in this
     // order.
     std::vector<MonsterSoundEvent> soundEvents;
-    // The maps the sound events play on; empty: every map.
-    std::vector<int> soundEventWorlds;
+    // The maps (server map numbers) the sound events play on; empty: every
+    // map.
+    std::vector<Data::Maps::MapRef> soundEventMaps;
     std::vector<MonsterModelBitmap> bitmaps;
     std::vector<MonsterModelPart> parts;
     MonsterModelBody body;

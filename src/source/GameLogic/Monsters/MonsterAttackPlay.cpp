@@ -6,10 +6,12 @@
 #include "Core/Globals/_define.h"
 #include "Data/GameData/MonsterData/MonsterAttacks.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
+#include "Data/GameData/MonsterData/MonsterDefinition.h"
 #include "Data/GameData/MonsterData/MonsterSoundIds.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "World/MapInfra/MapManager.h"
 
 #include <cstdlib>
 
@@ -17,35 +19,20 @@ namespace GameLogic::Monsters::Attacks
 {
 namespace
 {
-// The old code's draws, which call rand() and rand_fps_check() as it did.
-int Draw(Data::Monsters::MonsterAttackRandom random)
-{
-    switch (random)
-    {
-    case Data::Monsters::MonsterAttackRandom::Rand:
-        return MONSTER01_ATTACK1 + std::rand() % 2;
-    case Data::Monsters::MonsterAttackRandom::RandFps:
-        return rand_fps_check(2) ? MONSTER01_ATTACK1 : MONSTER01_ATTACK2;
-    case Data::Monsters::MonsterAttackRandom::Bali:
-    {
-        const int action = std::rand() % 8;
-        if (action > 2)
-        {
-            return MONSTER01_ATTACK1 + std::rand() % 2;
-        }
-        return action > 0 ? MONSTER01_ATTACK3 : MONSTER01_ATTACK4;
-    }
-    }
-    return MONSTER01_ATTACK1;
-}
-
 // The monster whose skill packet starts the attack being chosen.
 const CHARACTER* g_skillAttacker = nullptr;
 
+// The attacks of the monster's entry, or of its map variant on this map.
 const Data::Monsters::MonsterAttacks* FindAttacks(const CHARACTER& character)
 {
     const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(character.MonsterIndex);
-    return monster != nullptr && monster->attacks ? &*monster->attacks : nullptr;
+    if (monster == nullptr)
+    {
+        return nullptr;
+    }
+    const std::optional<Data::Monsters::MonsterAttacks>& attacks =
+        Data::Monsters::GetAttacksOnMap(*monster, gMapManager.GetServerMap(), gMapManager.GetServerStage());
+    return attacks ? &*attacks : nullptr;
 }
 } // namespace
 
@@ -63,9 +50,9 @@ bool Play(CHARACTER& character, OBJECT& object)
         // with its sounds and effects (P4).
         character.MonsterSkill = -1;
     }
-    const Data::Monsters::MonsterAttackChoice choice =
-        Data::Monsters::ChooseMonsterAttack(*attacks, character.MonsterSkill, character.Skill);
-    const int animation = choice.random ? Draw(*choice.random) : choice.animation;
+    const Data::Monsters::MonsterAttackChoice choice = Data::Monsters::ChooseMonsterAttack(
+        *attacks, character.MonsterSkill, character.Skill, character.AttackRotation);
+    const int animation = ResolveAttackAnimation(*attacks, choice, character.SwordCount, character.AttackRotation);
     if (animation != Data::Monsters::NoAttackAnimation)
     {
         SetAction(&object, animation);
@@ -119,5 +106,58 @@ bool IsAttackAnimation(int animation)
     default:
         return false;
     }
+}
+
+int NextGenericAttack(CHARACTER& character)
+{
+    return NextGenericAttack(character.SwordCount);
+}
+
+int NextGenericAttack(std::uint8_t& swordCount)
+{
+    const int animation = swordCount % 3 == 0 ? MONSTER01_ATTACK1 : MONSTER01_ATTACK2;
+    swordCount++;
+    return animation;
+}
+
+int ResolveAttackAnimation(const Data::Monsters::MonsterAttacks& attacks,
+                           const Data::Monsters::MonsterAttackChoice& choice, std::uint8_t& swordCount, int& rotation)
+{
+    int animation = choice.animation;
+    if (choice.random)
+    {
+        animation = DrawAttack(*choice.random);
+    }
+    else if (choice.generic)
+    {
+        animation = NextGenericAttack(swordCount);
+    }
+    if (choice.advancesRotation)
+    {
+        rotation = (rotation + 1) % static_cast<int>(attacks.otherwise.size());
+    }
+    return animation;
+}
+
+// The old code's draws, which call rand() and rand_fps_check() as it did.
+int DrawAttack(Data::Monsters::MonsterAttackRandom random)
+{
+    switch (random)
+    {
+    case Data::Monsters::MonsterAttackRandom::Rand:
+        return MONSTER01_ATTACK1 + std::rand() % 2;
+    case Data::Monsters::MonsterAttackRandom::RandFps:
+        return rand_fps_check(2) ? MONSTER01_ATTACK1 : MONSTER01_ATTACK2;
+    case Data::Monsters::MonsterAttackRandom::Bali:
+    {
+        const int action = std::rand() % 8;
+        if (action > 2)
+        {
+            return MONSTER01_ATTACK1 + std::rand() % 2;
+        }
+        return action > 0 ? MONSTER01_ATTACK3 : MONSTER01_ATTACK4;
+    }
+    }
+    return MONSTER01_ATTACK1;
 }
 } // namespace GameLogic::Monsters::Attacks

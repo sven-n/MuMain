@@ -435,33 +435,6 @@ void GMUnitedMarketPlace::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon
 
 void GMUnitedMarketPlace::RenderFrontSideVisual() {}
 
-bool GMUnitedMarketPlace::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
-{
-    if (IsUnitedMarketPlace() == false)
-    {
-        return false;
-    }
-
-    switch (c->MonsterIndex)
-    {
-    case MONSTER_LUCAS:
-    {
-        // 			switch(c->MonsterSkill)
-        // 			{
-        // 			default:
-        // 				{
-        // 					SetAction(o, MONSTER01_ATTACK1);
-        // 					c->MonsterSkill = -1;
-        // 				}
-        // 				break;
-        // 			}
-    }
-        return true;
-    }
-
-    return false;
-}
-
 bool GMUnitedMarketPlace::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (IsUnitedMarketPlace() == false)

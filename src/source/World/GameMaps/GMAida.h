@@ -20,7 +20,6 @@ namespace M33Aida {
     bool RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
 
     bool AttackEffectAidaMonster(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
-    bool SetCurrentActionAidaMonster(CHARACTER* pCharacter, OBJECT* pObject);
 
     //. 화면 처리
     bool CreateMist(PARTICLE* pParticleObj);

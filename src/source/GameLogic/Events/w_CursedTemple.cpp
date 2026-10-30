@@ -132,25 +132,6 @@ bool CursedTemple::IsPartyMember(DWORD selectcharacterindex)
     return false;
 }
 
-bool CursedTemple::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
-{
-    if (!gMapManager.IsCursedTemple())
-        return false;
-
-    switch (c->MonsterIndex)
-    {
-    case MONSTER_ILLUSION_SORCERER_SPIRIT1_POISON:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT2_POISON:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT3_POISON:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT4_POISON:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT5_POISON:
-    case MONSTER_ILLUSION_SORCERER_SPIRIT6_POISON:
-        return CheckMonsterSkill(c, o);
-    }
-
-    return false;
-}
-
 CHARACTER* CursedTemple::CreateCharacters(EMonsterType iType, int iPosX, int iPosY, int iKey)
 {
     CHARACTER* pCharacter = NULL;

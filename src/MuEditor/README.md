@@ -67,7 +67,7 @@ each step ("Budge Dragon (2): kind").
 - **MuMonsterBrowserUI** - The monster list with search and filters (MonsterBrowserList, MonsterListModel), Save and Revert (MonsterFileActions), the kind combo of each row (MonsterKindField), and the add, copy and remove dialogs (MonsterAddDialog, MonsterRemoveDialog) with what uses a number: the quest data (MonsterDataUsers) and the source lines (MonsterCodeReferences, MonsterCodeLine, MonsterCodeReferenceIndex)
 - **MuMonsterModelUI** - The model entry of the selected monster's model: file (MonsterModelFiles), texture folders, animation speeds and held last frames (MonsterModelValues), sounds, sound slots and sound events (MonsterSoundEventsEditor), and what the game's code adds (MonsterAnimationFacts); the model is opened for the tools when shown (MonsterShownModel)
 - **MuMonsterPreviewUI** - The selected monster's model in a preview with the item preview's camera: any animation with play, pause and a frame slider, the slot sounds, the hit frame and the game's speed factors (MonsterPreviewScene, with the effect preview's pose, PreviewModelPose)
-- **MuMonsterAttacksUI** - The attacks of the selected monster: the animation each monster skill and player skill plays, what any other attack plays (or a draw), when the monster skill is cleared, their sound, and the handlers that read them (MonsterAttackReaders)
+- **MuMonsterAttacksUI** - The attacks of the selected monster, on all maps or in one of its map variants: the animation each monster skill and player skill plays, what any other attack plays (an animation, a rotation, the generic pattern or a draw), when the monster skill is cleared, their sound, and the handlers that read them (MonsterAttackReaders)
 - **MuMonsterTranslationsUI** - Monster names as a grid of numbers and languages (the shared names grid, with MonsterNameRows as its rows), and the import and export of the old NpcName txt files (MonsterNpcNameFiles)
 - **MonsterCheckArea** - The monsters and the monster models in Data Checks: the checks of a save and of the attacks, each leading to its monster and field (MonsterChecks, MonsterAttackChecks, MonsterCheckTargets)
 - **MonsterToolWindow** - What every monster tool window shares: the monster tools' frame, and the monster edit history as the editor bar's undo target while a monster tool is open
@@ -82,6 +82,7 @@ The problems of all game data in one window:
 ### Shared Tool Parts (UI/Common)
 Parts the item tools and the monster tools both use:
 - **NamesGrid.h/cpp**, **NamesGridRows.h** - The names x languages grid of Item Translations and Monster Translations; the rows say what is listed and how a name is stored
+- **MapPicker.h/cpp** - The one way the tools pick maps: the server's map numbers, the rounds of an event (Devil Square, Blood Castle, Kalima, ...) under one name, each with its server number and world folder (docs/monster-data.md)
 - **TextSearch.h/cpp** - The search of the editor's lists (a part of a name, A to Z in either case, or a whole number)
 - **CodeTokenLine.h/cpp**, **CodeRanges.h/cpp**, **CodeReference.h**, **CodeReferenceList.h/cpp** - Reading the sources for the lines that name an item or a monster, and their list in the remove dialogs
 

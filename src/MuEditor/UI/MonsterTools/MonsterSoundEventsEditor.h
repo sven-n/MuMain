@@ -16,10 +16,8 @@ namespace MuEditor::Monsters::SoundEventsEditor
 using ModelDraft = Items::ItemEditDraft<Data::Monsters::MonsterModelDefinition>;
 
 // `slot` is the model's slot, `modelOpen` whether the game has it open (its
-// animations are offered then; else the named ones). `mapsText` keeps the
-// text of the maps field while it is edited.
-void Render(Data::Monsters::MonsterModelDefinition& model, int slot, bool modelOpen, ModelDraft& draft,
-            std::string& mapsText);
+// animations are offered then; else the named ones).
+void Render(Data::Monsters::MonsterModelDefinition& model, int slot, bool modelOpen, ModelDraft& draft);
 } // namespace MuEditor::Monsters::SoundEventsEditor
 
 #endif // _EDITOR
