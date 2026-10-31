@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "ReconnectManager.h"
 
-#include "Core/Platform/WinSock.h"  // GetAddrInfoW + BSD-socket shims for the reachability probe
-
 #include <cmath>
 #include <cwchar>
 
@@ -25,8 +23,6 @@ namespace
     constexpr double LOGIN_TIMEOUT_MS = 10000.0;    // login -> character list
     constexpr double RETRY_INTERVAL_MS = 5000.0;    // gap between re-login retries
     constexpr int STEP_COUNT = 4;                   // progress-bar steps
-
-    const uintptr_t NO_PROBE = static_cast<uintptr_t>(~0ull);  // == INVALID_SOCKET
 }
 
 extern double WorldTime;
@@ -206,7 +202,7 @@ void ReconnectManager::UpdateProbing()
         return;
     }
 
-    if (m_probeSocket == NO_PROBE)
+    if (!m_probe.IsRunning())
     {
         if (ElapsedMs() >= PROBE_INTERVAL_MS)
         {
@@ -220,96 +216,27 @@ void ReconnectManager::UpdateProbing()
 
 void ReconnectManager::StartProbe()
 {
-    static bool s_wsaInitialised = false;
-    if (!s_wsaInitialised)
+    // The cached address works both as an IPv4 literal and as a host name.
+    if (!m_probe.Start(m_serverIp, m_serverPort, WorldTime, PROBE_TIMEOUT_MS))
     {
-        WSADATA wsaData;
-        WSAStartup(MAKEWORD(2, 2), &wsaData);
-        s_wsaInitialised = true;
+        EnterPhase(Phase::Probing); // can't probe right now; try again later
     }
-
-    const SOCKET probe = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if (probe == INVALID_SOCKET)
-    {
-        EnterPhase(Phase::Probing);  // reset the interval timer and retry later
-        return;
-    }
-
-    // Resolve the cached address - works for both an IPv4 literal and a hostname.
-    addrinfoW hints = {};
-    hints.ai_family = AF_INET;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_protocol = IPPROTO_TCP;
-
-    addrinfoW* resolved = nullptr;
-    if (GetAddrInfoW(m_serverIp, nullptr, &hints, &resolved) != 0 || resolved == nullptr)
-    {
-        closesocket(probe);
-        EnterPhase(Phase::Probing);  // unresolvable right now; try again later
-        return;
-    }
-
-    sockaddr_in addr = *reinterpret_cast<sockaddr_in*>(resolved->ai_addr);
-    addr.sin_port = htons(m_serverPort);
-    FreeAddrInfoW(resolved);
-
-    u_long nonBlocking = 1;
-    ioctlsocket(probe, FIONBIO, &nonBlocking);
-
-    connect(probe, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));  // WSAEWOULDBLOCK expected
-
-    m_probeSocket = static_cast<uintptr_t>(probe);
-    m_probeStartTime = WorldTime;
 }
 
 void ReconnectManager::PollProbe()
 {
-    const SOCKET probe = static_cast<SOCKET>(m_probeSocket);
-
-    fd_set writeSet;
-    fd_set errorSet;
-    FD_ZERO(&writeSet);
-    FD_ZERO(&errorSet);
-    FD_SET(probe, &writeSet);
-    FD_SET(probe, &errorSet);
-
-    timeval immediate = {};
-    // POSIX needs nfds = highest fd + 1; Windows ignores the first argument.
-    select(static_cast<int>(probe + 1), nullptr, &writeSet, &errorSet, &immediate);
-
-    if (FD_ISSET(probe, &writeSet))
+    switch (m_probe.Poll(WorldTime))
     {
-        int soError = 0;
-        socklen_t len = sizeof(soError);
-        getsockopt(probe, SOL_SOCKET, SO_ERROR, reinterpret_cast<char*>(&soError), &len);
-        CloseProbe();
-
-        if (soError == 0)
-        {
-            // Server is up - defer to Begin() (called by the main loop each
-            // frame) to tear down and re-login between frames.
-            m_beginPending = true;
-        }
-        else
-        {
-            EnterPhase(Phase::Probing);
-        }
+    case ReachabilityProbe::Result::Pending:
         return;
-    }
-
-    if (FD_ISSET(probe, &errorSet) || (WorldTime - m_probeStartTime) > PROBE_TIMEOUT_MS)
-    {
-        CloseProbe();
+    case ReachabilityProbe::Result::Reachable:
+        // Server is up - defer to Begin() (called by the main loop each
+        // frame) to tear down and re-login between frames.
+        m_beginPending = true;
+        return;
+    case ReachabilityProbe::Result::Unreachable:
         EnterPhase(Phase::Probing);
-    }
-}
-
-void ReconnectManager::CloseProbe()
-{
-    if (m_probeSocket != NO_PROBE)
-    {
-        closesocket(static_cast<SOCKET>(m_probeSocket));
-        m_probeSocket = NO_PROBE;
+        return;
     }
 }
 
@@ -466,7 +393,7 @@ void ReconnectManager::Abort()
     m_cancelRequested = false;
     m_abortAfterTeardown = false;
     m_phase = Phase::Idle;
-    CloseProbe();
+    m_probe.Stop();
 
     // Begin() already released the in-game data, so this only needs to land on a
     // usable login screen and reconnect to the server for a manual login. It
@@ -519,7 +446,7 @@ int ReconnectManager::GetCountdownSeconds() const
 {
     // Seconds until the next attempt, for the dialog's "retrying in N" text.
     double interval = 0.0;
-    if (m_phase == Phase::Probing && m_probeSocket == NO_PROBE)
+    if (m_phase == Phase::Probing && !m_probe.IsRunning())
     {
         interval = PROBE_INTERVAL_MS;
     }

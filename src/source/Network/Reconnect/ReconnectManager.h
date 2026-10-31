@@ -3,6 +3,7 @@
 #include <cstdint>
 
 #include "Core/Globals/_define.h"  // MAX_USERNAME_SIZE, MAX_PASSWORD_SIZE
+#include "Network/Reconnect/ReachabilityProbe.h"
 
 // Drives automatic reconnection after an in-game disconnect (issue #338).
 //
@@ -74,7 +75,6 @@ private:
     // Background TCP reachability probe (keeps the game rendered while waiting).
     void StartProbe();
     void PollProbe();
-    void CloseProbe();
 
     bool m_active = false;
     bool m_beginPending = false;       // RequestBegin posted, Begin not yet run
@@ -85,9 +85,7 @@ private:
     Phase m_phase = Phase::Idle;
     double m_phaseStartTime = 0.0;
 
-    // Background probe socket (uintptr_t holds a winsock SOCKET; ~0 = none).
-    uintptr_t m_probeSocket = static_cast<uintptr_t>(~0ull);
-    double m_probeStartTime = 0.0;
+    ReachabilityProbe m_probe; // background check whether the server is back
 
     wchar_t m_serverIp[256] = {};  // IPv4 literal or hostname
     unsigned short m_serverPort = 0;

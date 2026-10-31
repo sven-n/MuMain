@@ -38,6 +38,14 @@ mu_add_test(
         MuClient
 )
 
+mu_add_test(
+    NAME test_reachability_probe
+    SOURCES
+        test_reachability_probe.cpp
+    LINK_LIBS
+        MuClient
+)
+
 # Control socket tests only exist in builds that enable it. Without it, the
 # control_socket_leak test proves that none of its sources were compiled into
 # the client (same mechanics as tests/editor's editor_leak).
