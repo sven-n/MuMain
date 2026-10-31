@@ -146,10 +146,12 @@ void UpdateParts(CHARACTER* c)
     if (c->m_pTempParts != nullptr)
     {
         static_cast<CSIPartsMDL*>(c->m_pTempParts)->IUpdate(c);
+        UpdateDrawnObjectHold(static_cast<CSIPartsMDL*>(c->m_pTempParts)->GetObject());
     }
     if (c->m_pParts != nullptr)
     {
         static_cast<CSIPartsMDL*>(c->m_pParts)->IUpdate(c);
+        UpdateDrawnObjectHold(static_cast<CSIPartsMDL*>(c->m_pParts)->GetObject());
     }
 }
 

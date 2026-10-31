@@ -320,13 +320,20 @@ void PlaceObjectModel(const OBJECT* o, BMD* b)
     }
 }
 
-bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
+void UpdateDrawnObjectHold(OBJECT* o)
 {
     if (gMapManager.InChaosCastle() == true && Hero->Object.m_bActionStart == true)
     {
         o->Alpha -= 0.15f * FPS_ANIMATION_FACTOR;
     }
+    if (o->Owner != NULL && (g_isCharacterBuff(o->Owner, eDeBuff_Stun) || g_isCharacterBuff(o->Owner, eDeBuff_Sleep)))
+    {
+        o->AnimationFrame = 0.f;
+    }
+}
 
+bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
+{
     if (o->Alpha < 0.01f)
     {
         return false;
@@ -336,14 +343,6 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
     b->ContrastEnable = o->ContrastEnable;
     BodyLight(o, b);
     PlaceObjectModel(o, b);
-
-    if (o->Owner != NULL)
-    {
-        if (g_isCharacterBuff(o->Owner, eDeBuff_Stun) || g_isCharacterBuff(o->Owner, eDeBuff_Sleep))
-        {
-            o->AnimationFrame = 0.f;
-        }
-    }
 
     AnimateObjectBones(o, b, Translate);
 
@@ -428,11 +427,6 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 
 bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select)
 {
-    if (gMapManager.InChaosCastle() == true && Hero->Object.m_bActionStart)
-    {
-        o->Alpha -= 0.15f * FPS_ANIMATION_FACTOR;
-    }
-
     if (o->Alpha < 0.01f) return false;
 
     BMD* b = &Models[o->Type];
@@ -3626,6 +3620,7 @@ void UpdateObjectEffects()
         {
             if (o->DrawnFrame != s_objectDrawFrame)
                 continue;
+            UpdateDrawnObjectHold(o);
             PlaceObjectModel(o, &Models[o->Type]);
             UpdateObjectVisual(o);
         }
@@ -7166,6 +7161,16 @@ void SpawnPartObjectEffect(BMD* b, OBJECT* o, int Type, vec34_t* bones)
     CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
 }
 
+void RefreshStunSkull(OBJECT* o, vec3_t Light)
+{
+    // RenderPartObjectEffect shows the stun's tint only without cloak, poison or Blow of Destruction.
+    if (g_isCharacterBuff(o, eBuff_Cloaking) || g_isCharacterBuff(o, eDeBuff_Poison) ||
+        g_isCharacterBuff(o, eDeBuff_BlowOfDestruction) || !g_isCharacterBuff(o, eDeBuff_Stun))
+        return;
+    DeleteEffect(BITMAP_SKULL, o, 5);
+    CreateEffect(BITMAP_SKULL, o->Position, o->Angle, Light, 5, o);
+}
+
 extern float g_Luminosity;
 
 void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int ItemLevel, int ExcellentFlags,
@@ -7266,8 +7271,6 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         }
         else if (g_isCharacterBuff(o, eDeBuff_Stun))
         {
-            DeleteEffect(BITMAP_SKULL, o, 5);
-            CreateEffect(BITMAP_SKULL, o->Position, o->Angle, Light, 5, o);
             Vector(Luminosity * 0.f, Luminosity * 0.f, Luminosity * 1.0f, b->BodyLight);
             RenderPartObjectBody(b, o, Type, Alpha, RenderType);
         }

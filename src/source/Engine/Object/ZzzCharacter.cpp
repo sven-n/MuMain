@@ -7159,6 +7159,9 @@ void SpawnLinkedPartEffects(CHARACTER* c, int Type, OBJECT* Object, vec34_t* bon
     } const itemBones{Object, Object->BoneTransform};
     Object->BoneTransform = bones;
     SpawnPartObjectEffect(b, Object, Type, bones);
+    if (Type != MODEL_CAPE_OF_LORD && Type != MODEL_CAPE_OF_FIGHTER && Type != MODEL_WING + 130 &&
+        Type != MODEL_WING + 135)
+        RefreshStunSkull(Object, c->Light);
 
     float Luminosity;
     vec3_t Light;
@@ -9330,14 +9333,18 @@ void UpdatePlayerBodyParts(CHARACTER* c)
     }
     if (DrawsPlayerBodyParts(c, o))
     {
+        bool drawsAPart = false;
         for (int i = MAX_BODYPART - 1; i >= 0; i--)
         {
             PART_t* p = &c->BodyPart[i];
             if (p->Type != -1)
             {
                 StepPartCloth(o, p, p->Type, p->Level, true);
+                drawsAPart = true;
             }
         }
+        if (drawsAPart)
+            RefreshStunSkull(o, c->Light);
     }
 }
 
@@ -11988,6 +11995,11 @@ void ApplyCharacterEffectsEarthQuake()
 
 void UpdateCharacterEffects()
 {
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
+    {
+        if (IsCharacterDrawn(&CharactersClient[i]))
+            UpdateDrawnObjectHold(&CharactersClient[i].Object);
+    }
     RefreshCharacterPoses();
     const float sampledEarthQuake = EarthQuake;
     {

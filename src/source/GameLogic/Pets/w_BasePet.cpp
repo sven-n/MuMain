@@ -149,6 +149,7 @@ void PetObject::Update(bool bForceRender)
     if (m_obj->Visible)
     {
         const mu::ScopedBloomExclusion classicPets;
+        UpdateDrawnObjectHold(m_obj);
         PlaceObjectModel(m_obj, &Models[m_obj->Type]);
         CreateEffect(tick, bForceRender);
     }

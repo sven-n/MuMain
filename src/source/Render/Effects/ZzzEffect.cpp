@@ -8722,6 +8722,7 @@ void UpdateEffectModelEffects()
             b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity / 6.f,
                              o->Position, o->Angle);
         }
+        UpdateDrawnObjectHold(o);
         PlaceObjectModel(o, &Models[o->Type]);
         UpdateRenderObjectEffects(o);
     }

@@ -764,6 +764,7 @@ void UpdateMountEffects()
 
 void UpdateDrawnMountEffects(OBJECT* o)
 {
+    UpdateDrawnObjectHold(o);
     // Like their draws, the mounts' sprites stay out of the bloom.
     const mu::ScopedBloomExclusion classicMounts;
     if (o->Type == MODEL_HELPER)

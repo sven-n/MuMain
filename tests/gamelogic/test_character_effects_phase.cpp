@@ -633,3 +633,48 @@ TEST_CASE("A helper's light comes from the mount update, even under a cloaked ri
     UpdateDrawnMountEffects(&scope.mount);
     CHECK(liveSprites() == 1);
 }
+
+TEST_CASE("A stunned or sleeping owner holds a drawn object at its first frame, as its draw did [effects]")
+{
+    OBJECT rider;
+    OBJECT* owner = &rider;
+    OBJECT mount;
+    mount.Owner = owner;
+    mount.Alpha = 1.f;
+    mount.AnimationFrame = 3.5f;
+
+    UpdateDrawnObjectHold(&mount);
+    CHECK(mount.AnimationFrame == 3.5f);
+    CHECK(mount.Alpha == 1.f);
+
+    g_CharacterRegisterBuff(owner, eDeBuff_Sleep);
+    UpdateDrawnObjectHold(&mount);
+    CHECK(mount.AnimationFrame == 0.f);
+}
+
+TEST_CASE("The stun skull is refreshed for a stunned object, and not while its stun tint is hidden by cloak [effects]")
+{
+    FenrirScope scope;
+    OBJECT* stunned = &scope.rider;
+    vec3_t light{1.f, 1.f, 1.f};
+    auto skulls = []
+    {
+        int live = 0;
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+            live += (Effects[i].Live && Effects[i].Type == BITMAP_SKULL && Effects[i].SubType == 5) ? 1 : 0;
+        return live;
+    };
+
+    RefreshStunSkull(stunned, light);
+    CHECK(skulls() == 0);
+
+    g_CharacterRegisterBuff(stunned, eDeBuff_Stun);
+    RefreshStunSkull(stunned, light);
+    RefreshStunSkull(stunned, light);
+    CHECK(skulls() == 1);
+
+    FenrirScope::ClearSpawns();
+    g_CharacterRegisterBuff(stunned, eBuff_Cloaking);
+    RefreshStunSkull(stunned, light);
+    CHECK(skulls() == 0);
+}
