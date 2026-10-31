@@ -53,6 +53,14 @@ constexpr float GroupListWidth = 220.0f;
 constexpr float IdFieldWidth = 120.0f;
 constexpr float TextFieldWidth = 320.0f;
 constexpr float VipComboWidth = 140.0f;
+// The ID fields and the language list, which hold a little more than a group ID.
+constexpr float WideIdFieldWidth = IdFieldWidth * 1.5f;
+// The PvP list of a button color rule: "Any", "On" or "Off".
+constexpr float PvpComboWidth = VipComboWidth * 0.6f;
+// Where the channel list of the remove VIP type question wraps.
+constexpr float PopupWrapWidth = TextFieldWidth * 1.5f;
+// The height of the list of the list's own colors.
+constexpr float ColorListHeight = 110.0f;
 constexpr int ChannelTableColumns = 5;
 constexpr int PreviewTableColumns = 3 + Data::ServerList::ChannelNamePlaceCount;
 constexpr ImVec4 ErrorColor{1.0f, 0.4f, 0.4f, 1.0f};
@@ -264,7 +272,7 @@ bool PickRuleVip(const ServerListData& list, ButtonColorRule& rule)
 
 bool PickRulePvp(ButtonColorRule& rule)
 {
-    ImGui::SetNextItemWidth(VipComboWidth * 0.6f * g_MuEditorCore.GetUIScale());
+    ImGui::SetNextItemWidth(PvpComboWidth * g_MuEditorCore.GetUIScale());
     if (!ImGui::BeginCombo("##RulePvp", GetRulePvpLabel(rule.pvp)))
     {
         return false;
@@ -997,7 +1005,7 @@ bool CMuServerListUI::RenderChannelNamesTab()
     ImGui::SameLine();
     if (ImGui::BeginChild("##Names", ImVec2(0.0f, 0.0f), ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
     {
-        ImGui::SetNextItemWidth(IdFieldWidth * 1.5f * scale);
+        ImGui::SetNextItemWidth(WideIdFieldWidth * scale);
         if (ImGui::BeginCombo(I18N::Editor::Language, I18N::GetLanguageDisplayName(m_textLocale.c_str())))
         {
             for (const char* locale : I18N::GetAvailableLocales())
@@ -1124,7 +1132,7 @@ bool CMuServerListUI::RenderRemoveVipTypePopup()
             {
                 list += (list.empty() ? "" : ", ") + channel;
             }
-            ImGui::PushTextWrapPos(TextFieldWidth * 1.5f * g_MuEditorCore.GetUIScale());
+            ImGui::PushTextWrapPos(PopupWrapWidth * g_MuEditorCore.GetUIScale());
             ImGui::TextUnformatted(list.c_str());
             ImGui::PopTextWrapPos();
         }
@@ -1185,7 +1193,7 @@ bool CMuServerListUI::RenderSelectedVipType()
     {
         m_vipTypeIdDraft = vipTypes[index].id;
     }
-    ImGui::SetNextItemWidth(IdFieldWidth * 1.5f * scale);
+    ImGui::SetNextItemWidth(WideIdFieldWidth * scale);
     if (MuEditor::Items::InputString(I18N::Editor::VIPTypeID, m_vipTypeIdDraft))
     {
         const std::string before = vipTypes[index].id;
@@ -1314,7 +1322,8 @@ bool CMuServerListUI::RenderCustomColors()
     const float scale = g_MuEditorCore.GetUIScale();
     bool changed = false;
     ImGui::BeginGroup();
-    if (ImGui::BeginChild("##CustomColors", ImVec2(GroupListWidth * scale, 110.0f * scale), ImGuiChildFlags_Borders))
+    if (ImGui::BeginChild("##CustomColors", ImVec2(GroupListWidth * scale, ColorListHeight * scale),
+                          ImGuiChildFlags_Borders))
     {
         const ServerListData& list = m_edits.GetList();
         const std::string_view theme = GetGameTheme();
@@ -1457,7 +1466,7 @@ bool CMuServerListUI::RenderSelectedCustomColor()
     {
         m_colorIdDraft = colors[index].id;
     }
-    ImGui::SetNextItemWidth(IdFieldWidth * 1.5f * scale);
+    ImGui::SetNextItemWidth(WideIdFieldWidth * scale);
     if (MuEditor::Items::InputString(I18N::Editor::VIPTypeID, m_colorIdDraft))
     {
         const std::string before = colors[index].id;
