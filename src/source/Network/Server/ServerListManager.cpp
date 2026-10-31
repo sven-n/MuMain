@@ -212,15 +212,10 @@ std::wstring CServerListManager::GetServerButtonText(const CServerGroup& group, 
         m_serverList, Data::ServerList::ChannelNamePlace::Button, server.m_channel, values, GetGameLocale()));
 }
 
-Data::ServerList::ThemeColor CServerListManager::GetServerButtonColor(const CServerInfo& server) const
+Data::ServerList::ButtonColor CServerListManager::GetServerButtonColor(const CServerInfo& server,
+                                                                       std::string_view theme) const
 {
-    const Data::ServerList::VipType* vipType =
-        server.m_channel.vip.empty() ? nullptr : m_serverList.FindVipType(server.m_channel.vip);
-    if (vipType != nullptr)
-    {
-        return vipType->themeColor;
-    }
-    return server.m_channel.pvp ? Data::ServerList::ThemeColor::Gray : Data::ServerList::ThemeColor::Default;
+    return Data::ServerList::GetButtonColor(m_serverList, server.m_channel, theme);
 }
 
 int CServerListManager::GetServerGroupSize()

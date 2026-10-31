@@ -89,6 +89,8 @@ private:
         bool colorGray = false;
         bool colorOrange = false;
         bool colorSilver = false;
+        // A color of the server list's own ("#FF5A5A"), set as the text color; empty for a theme color.
+        Rml::String colorStyle;
         // No "checked"/selected state here -- clicking a server row connects immediately.
     };
     struct ServerSelRmlModel

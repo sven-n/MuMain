@@ -4,9 +4,11 @@
 #pragma once
 #include "ServerGroup.h"
 
+#include "Data/GameData/ServerListData/ButtonColors.h"
 #include "Data/GameData/ServerListData/ServerListGroup.h"
 
 #include <string>
+#include <string_view>
 #include <vector>
 
 // A group of Data/Local/ServerList.json, with its place in the list.
@@ -55,8 +57,8 @@ public:
     std::wstring GetSelectServerTitle(Data::ServerList::ChannelNamePlace place, const wchar_t* character = L"");
     // A channel's button on the login screen, with its load: "Valhalla-1 (Gold Non-PvP) Connect".
     std::wstring GetServerButtonText(const CServerGroup& group, const CServerInfo& server) const;
-    // Its color there: its VIP type's, else gray with PvP on and the default with PvP off.
-    Data::ServerList::ThemeColor GetServerButtonColor(const CServerInfo& server) const;
+    // Its color there in the theme folder `theme`, by the list's button color rules.
+    Data::ServerList::ButtonColor GetServerButtonColor(const CServerInfo& server, std::string_view theme) const;
     void SetTotalServer(int iTotalServer);
     int GetTotalServer();
 

@@ -5,14 +5,16 @@
 
 #include <array>
 #include <cstdint>
+#include <functional>
+#include <map>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
 
 namespace Data::ServerList
 {
-// The button color of a channel on the login screen. Each theme (legacy,
-// modern) draws its own shade of it.
+// A button color every theme (legacy, modern, ...) draws in a shade of its own.
 enum class ThemeColor : std::uint8_t
 {
     Default,
@@ -23,8 +25,7 @@ enum class ThemeColor : std::uint8_t
 
 inline constexpr int ThemeColorCount = 4;
 
-// A VIP type of channels (Gold, Silver, ...): its name in the channel names and
-// its button color.
+// A VIP type of channels (Gold, Silver, ...): its name in the channel names.
 struct VipType
 {
     // What a channel names the type by ("gold"): letters and digits, starting
@@ -32,7 +33,6 @@ struct VipType
     std::string id;
     // {vip} in the templates.
     LocalizedString name;
-    ThemeColor themeColor = ThemeColor::Default;
 
     bool operator==(const VipType&) const = default;
 };
@@ -45,6 +45,54 @@ struct ChannelSettings
     std::string vip;
 
     bool operator==(const ChannelSettings&) const = default;
+};
+
+// A button color of the list's own, with a shade for each theme.
+struct CustomColor
+{
+    // What rules name it by ("goldRed"): letters and digits, starting with a
+    // lowercase letter, and none of the theme colors' names.
+    std::string id;
+    // What the editor calls it.
+    std::string name;
+    // "#RRGGBB" by theme folder ("legacy", "modern"); a theme without one draws its default color.
+    std::map<std::string, std::string, std::less<>> shades;
+
+    bool operator==(const CustomColor&) const = default;
+};
+
+// The VIP types a button color rule fits.
+enum class RuleVip : std::uint8_t
+{
+    // Every channel.
+    Any,
+    // A channel with a VIP type, whichever.
+    AnyVipType,
+    // A channel without one.
+    NoVipType,
+    // A channel with the rule's VIP type.
+    VipType,
+};
+
+// Colors the buttons of the channels it fits. Of the rules that fit a channel,
+// the most specific one colors it (docs/server-list.md).
+struct ButtonColorRule
+{
+    RuleVip vipMatch = RuleVip::Any;
+    // The VIP type's id, with RuleVip::VipType.
+    std::string vip;
+    // PvP on or off; nothing for either.
+    std::optional<bool> pvp;
+    // A theme color's name ("orange") or a CustomColor's id.
+    std::string color = "default";
+
+    // Whether it fits the same channels as `other`: the same VIP type and PvP.
+    bool FitsAsMuchAs(const ButtonColorRule& other) const
+    {
+        return vipMatch == other.vipMatch && (vipMatch != RuleVip::VipType || vip == other.vip) && pvp == other.pvp;
+    }
+
+    bool operator==(const ButtonColorRule&) const = default;
 };
 
 // The places that show a channel's name; each has a template of its own.
@@ -128,12 +176,18 @@ struct ServerListData
 {
     // In the order the editor lists them.
     std::vector<VipType> vipTypes;
+    // In the order the editor lists them.
+    std::vector<CustomColor> colors;
+    // Their order does not matter.
+    std::vector<ButtonColorRule> buttonColors;
     ChannelNames names = GetDefaultChannelNames();
     // In the order of their buttons.
     std::vector<ServerGroup> groups;
 
     // The VIP type with the id, or nullptr.
     const VipType* FindVipType(std::string_view id) const;
+    // The color of the list's own with the id, or nullptr.
+    const CustomColor* FindCustomColor(std::string_view id) const;
 
     bool operator==(const ServerListData&) const = default;
 };

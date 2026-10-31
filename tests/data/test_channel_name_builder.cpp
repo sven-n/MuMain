@@ -2,8 +2,10 @@
 
 #include "doctest.h"
 
+#include "Data/GameData/ServerListData/ButtonColors.h"
 #include "Data/GameData/ServerListData/ChannelNameBuilder.h"
 
+#include <optional>
 #include <string>
 
 using Data::ServerList::BuildChannelName;
@@ -165,4 +167,76 @@ TEST_CASE("ChannelNameBuilder: theme color names")
         CHECK(Data::ServerList::FindThemeColor(Data::ServerList::GetThemeColorName(color)) == color);
     }
     CHECK_FALSE(Data::ServerList::FindThemeColor("Orange").has_value());
+}
+
+namespace
+{
+Data::ServerList::ButtonColorRule Rule(Data::ServerList::RuleVip vipMatch, const std::string& vip,
+                                       std::optional<bool> pvp, const std::string& color)
+{
+    Data::ServerList::ButtonColorRule rule;
+    rule.vipMatch = vipMatch;
+    rule.vip = vip;
+    rule.pvp = pvp;
+    rule.color = color;
+    return rule;
+}
+} // namespace
+
+TEST_CASE("ButtonColors: of the rules that fit, the most specific one colors the button")
+{
+    using Data::ServerList::RuleVip;
+    ServerListData list = GoldList();
+    Data::ServerList::VipType silver;
+    silver.id = "silver";
+    silver.name.Set("en", "Silver");
+    list.vipTypes.push_back(silver);
+    // In an order that would give other colors if the first fitting rule won.
+    list.buttonColors = {Rule(RuleVip::Any, "", std::nullopt, "gray"), Rule(RuleVip::Any, "", false, "default"),
+                         Rule(RuleVip::AnyVipType, "", std::nullopt, "silver"),
+                         Rule(RuleVip::VipType, "gold", std::nullopt, "orange"),
+                         Rule(RuleVip::VipType, "gold", false, "red")};
+    const auto color = [&](bool pvp, const std::string& vip)
+    {
+        const Data::ServerList::ButtonColorRule* rule = Data::ServerList::FindButtonColorRule(list, Channel(pvp, vip));
+        return rule != nullptr ? rule->color : std::string("none");
+    };
+
+    CHECK(color(false, "gold") == "red");
+    CHECK(color(true, "gold") == "orange");
+    // Any VIP type beats a rule for PvP only.
+    CHECK(color(false, "silver") == "silver");
+    CHECK(color(false, "") == "default");
+    CHECK(color(true, "") == "gray");
+
+    list.buttonColors.clear();
+    CHECK(color(true, "gold") == "none");
+    CHECK(Data::ServerList::GetButtonColor(list, Channel(true, "gold"), "legacy") == Data::ServerList::ButtonColor{});
+}
+
+TEST_CASE("ButtonColors: a color of the list's own has a shade per theme")
+{
+    using Data::ServerList::RuleVip;
+    ServerListData list = GoldList();
+    Data::ServerList::CustomColor red;
+    red.id = "goldRed";
+    red.shades = {{"legacy", "#FF5A5A"}, {"modern", "#C0564E"}};
+    list.colors.push_back(red);
+    list.buttonColors = {Rule(RuleVip::VipType, "gold", std::nullopt, "goldRed"),
+                         Rule(RuleVip::NoVipType, "", std::nullopt, "orange")};
+
+    CHECK(Data::ServerList::GetButtonColor(list, Channel(true, "gold"), "legacy").shade == "#FF5A5A");
+    CHECK(Data::ServerList::GetButtonColor(list, Channel(true, "gold"), "modern").shade == "#C0564E");
+    // A theme without a shade of it draws its default color.
+    CHECK(Data::ServerList::GetButtonColor(list, Channel(true, "gold"), "dark") == Data::ServerList::ButtonColor{});
+    CHECK(Data::ServerList::GetButtonColor(list, Channel(true, ""), "dark").theme ==
+          Data::ServerList::ThemeColor::Orange);
+
+    CHECK(Data::ServerList::IsShade("#00ff7F"));
+    CHECK_FALSE(Data::ServerList::IsShade("00FF7F"));
+    CHECK_FALSE(Data::ServerList::IsShade("#00FF7"));
+    CHECK_FALSE(Data::ServerList::IsShade("#00FF7G"));
+    CHECK(Data::ServerList::IsKnownColor(list, "silver"));
+    CHECK(Data::ServerList::IsKnownColor(list, "goldRed"));
+    CHECK_FALSE(Data::ServerList::IsKnownColor(list, "purple"));
 }

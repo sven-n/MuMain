@@ -18,7 +18,7 @@
 			<!-- Right column: servers in the currently-selected group; hidden until a group is
 			     picked (replaces the old flyout with a plain second column). -->
 			<div id="server_col" data-class-hidden="!server_list_visible">
-				<div class="server-option-btn server-row" data-for="s : servers" data-class-gray="s.color_gray" data-class-orange="s.color_orange" data-class-silver="s.color_silver"
+				<div class="server-option-btn server-row" data-for="s : servers" data-class-gray="s.color_gray" data-class-orange="s.color_orange" data-class-silver="s.color_silver" data-style-color="s.color_style"
 				     data-event-click="serversel_select_server(s.index)"><div class="button-label">{{s.label}}</div>
 					<div class="server-gauge-slot"><div class="server-gauge-fill" data-style-width="s.load_fraction * 100 + '%'"
 					     data-class-tier-low="s.load_fraction < 0.5" data-class-tier-high="s.load_fraction >= 0.8"></div></div>

@@ -54,11 +54,21 @@ std::string DescribeVipTypeChange(const VipType& before, const VipType& after)
     {
         return I18N::Format(I18N::Editor::StepID, {name});
     }
+    return I18N::Format(I18N::Editor::StepName, {name});
+}
+
+std::string DescribeColorChange(const Data::ServerList::CustomColor& before, const Data::ServerList::CustomColor& after)
+{
+    const std::string& name = before.name.empty() ? (after.name.empty() ? before.id : after.name) : before.name;
+    if (before.id != after.id)
+    {
+        return I18N::Format(I18N::Editor::StepID, {name});
+    }
     if (before.name != after.name)
     {
         return I18N::Format(I18N::Editor::StepName, {name});
     }
-    return I18N::Format(I18N::Editor::StepThemeColor, {name});
+    return I18N::Format(I18N::Editor::StepShade, {name});
 }
 
 // The first text that differs, or nothing.
@@ -115,6 +125,31 @@ std::string MoveVipType(const std::string& name)
     return I18N::Format(I18N::Editor::StepMoveVIPType, {name});
 }
 
+std::string AddColor(const std::string& name)
+{
+    return I18N::Format(I18N::Editor::StepAddColor, {name});
+}
+
+std::string RemoveColor(const std::string& name)
+{
+    return I18N::Format(I18N::Editor::StepRemoveColor, {name});
+}
+
+std::string MoveColor(const std::string& name)
+{
+    return I18N::Format(I18N::Editor::StepMoveColor, {name});
+}
+
+std::string AddButtonColorRule()
+{
+    return I18N::Editor::StepAddButtonColorRule;
+}
+
+std::string RemoveButtonColorRule()
+{
+    return I18N::Editor::StepRemoveButtonColorRule;
+}
+
 std::string DescribeFieldChange(const Data::ServerList::ServerListData& before,
                                 const Data::ServerList::ServerListData& after)
 {
@@ -132,6 +167,22 @@ std::string DescribeFieldChange(const Data::ServerList::ServerListData& before,
         if (before.vipTypes[index] != after.vipTypes[index])
         {
             return DescribeVipTypeChange(before.vipTypes[index], after.vipTypes[index]);
+        }
+    }
+    const size_t colors = std::min(before.colors.size(), after.colors.size());
+    for (size_t index = 0; index < colors; ++index)
+    {
+        if (before.colors[index] != after.colors[index])
+        {
+            return DescribeColorChange(before.colors[index], after.colors[index]);
+        }
+    }
+    const size_t rules = std::min(before.buttonColors.size(), after.buttonColors.size());
+    for (size_t index = 0; index < rules; ++index)
+    {
+        if (before.buttonColors[index] != after.buttonColors[index])
+        {
+            return I18N::Format(I18N::Editor::StepButtonColorRule, {std::to_string(index + 1)});
         }
     }
     std::string names = DescribeNamesChange(before.names, after.names);

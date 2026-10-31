@@ -16,6 +16,11 @@ std::string Move(const std::string& groupName);
 std::string AddVipType(const std::string& name);
 std::string RemoveVipType(const std::string& name);
 std::string MoveVipType(const std::string& name);
+std::string AddColor(const std::string& name);
+std::string RemoveColor(const std::string& name);
+std::string MoveColor(const std::string& name);
+std::string AddButtonColorRule();
+std::string RemoveButtonColorRule();
 // A change of fields, by the first group, VIP type or text that differs; a
 // group or VIP type is named as it was before.
 std::string DescribeFieldChange(const Data::ServerList::ServerListData& before,
