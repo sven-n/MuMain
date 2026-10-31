@@ -25,12 +25,13 @@ data, and each move is compared with the old code before the old code goes.
 ## Scope
 
 - **In:** the item render styles (`renderStyle`, 140 names in
-  `ItemRenderStyles.cpp`) as data where they fit; layers per mesh; the mesh
-  list; the look editor.
-- **To decide (Q-L1):** the item effects (`itemEffect`, `ItemEffects.cpp`)
-  that place sprites, particles and lightning on bones. D25 includes them.
+  `ItemRenderStyles.cpp`) and the item effects (`itemEffect`, 25 names in
+  `ItemEffects.cpp`), all of them, in three steps (L7); layers per mesh; the
+  mesh list; the look editor; FX1.7c, the live preview of effects in an
+  editor view, which the look editor needs for things on bones.
 - **Later:** monster and NPC looks (MN8) use the same format (D25: one look
-  format for all areas); effect behavior as data is FX2.
+  format for all areas); effect behavior as data is FX2, which the looks
+  don't need: they create the existing effects with their FX1 names.
 
 ## Decisions
 
@@ -44,6 +45,7 @@ Made while reviewing sven-n/MuMain#915, 2026-11-01.
 | L4 | Mesh list | The Item Model window lists the model's meshes under Model file. |
 | L5 | No render style per mesh | A style draws the whole model, so a mesh gets layers, not a style of its own. |
 | L6 | This document | Deleted by its last task, after its lasting content has moved into the docs. |
+| L7 | Building blocks (Q-L1, 2026-11-01) | All of D25's blocks for the item looks, in three steps. **Step 1:** draw passes (texture, chrome, metal, glow, dark; pulse, scrolling, light, tint) and conditions (doppelganger, inventory and ground, item level, which item). **Step 2:** FX1.7c, the live preview of effects in an editor view, with its own short design first (see the possible follow-up ideas). **Step 3:** things on bones (sprites, particles, lightning; chances per frame), named as FX1 decided for phase 13 (`{ "joint": "jointThunder", "subType": 14, "fromBone": 3, "toBone": 4 }`, SubType a number, D30), shown live in the look editor. |
 
 ## Current state
 
@@ -62,6 +64,28 @@ Made while reviewing sven-n/MuMain#915, 2026-11-01.
     this to chrome under the texture where the texture has holes.
 - The level glow and shine (+3 to +15) are chrome-type passes, drawn after
   the look (`ZzzObject.cpp:7036` and on).
+
+### What the looks are made of
+
+Sorted by a script that reads each look's function and the helpers it calls,
+so a few can be off:
+
+| | Draw passes only | Plus light, pulse or scrolling | Plus conditions | Creates effects |
+|---|---|---|---|---|
+| Render styles (140, from 112 functions) | 37 | 74 | 26 | 3 |
+| Item effects (25) | – | 11 | 5 (item level) | 9 |
+
+- The conditions the script recognized: the drawing's render type (not for
+  doppelgangers, or only in a monster's hands: 7), only without the skin, in
+  the inventory and on the ground (10), and which item (6); a style can have
+  several. The other conditional styles test other values; the survey of
+  Q-L5 reads each one.
+- Things placed on bones, e.g. the Wings of Darkness (`ApplyWingsOfDarkness`):
+  lightning between bones 22–18 and 30–26 by chance each frame, and a pulsing
+  blue flare on each of those bones.
+- Step 1 of L7 is meant for those 137 styles and 16 item effects (Q-L5
+  checks that each one fits), step 3 for the other 3 styles (`pumpkinOfLuck`,
+  `cursedCastleWater`, `helperNpcPlate`) and 9 item effects.
 
 ### Control per mesh today
 
@@ -104,9 +128,10 @@ Written from the answers to the open questions.
 Answered one by one, each with the current state, every option with an
 example, and a recommendation.
 
+Answered: Q-L1 (2026-11-01, L7).
+
 | Q | Question |
 |---|---|
-| Q-L1 | The building blocks of the first version: draw passes only (chrome, metal, glow, a texture of its own, scrolling, pulsing), or also things placed on bones (D25). |
 | Q-L2 | The fields of a layer: meshes, texture, color or tint, alpha, order (under where the texture has holes, or over), scrolling, pulse, conditions (item level, doppelganger). |
 | Q-L3 | Where looks live: named looks in `Data/Effects/` that model entries name (D25, D26), layers inside the model entry, or a named look with meshes chosen per item. |
 | Q-L4 | How `renderStyle` and the new looks relate while the styles move (same names, one style at a time). |
@@ -119,9 +144,14 @@ example, and a recommendation.
 
 ## Tasks
 
-1. [ ] Write this design: answer the open questions one by one (in progress).
-2. [ ] The pull requests from Q-L10 (filled in once it is answered).
-3. [ ] Move what stays true into `docs/item-data.md` (and `docs/effect-data.md`
-   for the look format), and point the roadmap (row "Items 13") and the
-   items design (phase 13) at those docs.
-4. [ ] Delete this document.
+1. [ ] Write this design: answer the open questions one by one (in progress;
+   Q-L1 done).
+2. [ ] Step 1 of L7: draw passes and conditions (the pull requests from
+   Q-L10).
+3. [ ] Step 2 of L7: FX1.7c, its short design, then the live preview.
+4. [ ] Step 3 of L7: things on bones.
+5. [ ] Move what stays true into `docs/item-data.md` and `docs/effect-data.md`
+   (the look format, the live preview), point the roadmap (row "Items 13"),
+   the items design (phase 13) and the possible follow-up ideas (FX1.7c) at
+   those docs.
+6. [ ] Delete this document.
