@@ -188,8 +188,10 @@ TEST_CASE("the legacy HUD's menu art reaches the cash shop button [ui][styling]"
 
 TEST_CASE("the event entry level art covers its whole band in every theme [ui][styling]")
 {
-    // The band is an auto-height flex box that grows to its minimum height. An absolute art child
-    // sized itself against the box's height before that growth and painted only a strip.
+    // The band is an auto-height flex box that grows to its minimum height, and its art an absolute
+    // child (classic: a block band). RmlUi used to size such a child against the flex box's height
+    // from before that growth (FlexContainer::Close kept its pre-layout box), so the art covered only
+    // the band's padding: a strip above the label.
     struct Entry
     {
         const char* theme;

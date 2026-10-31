@@ -40,22 +40,28 @@
     line-height: 1.1;
 }
 .entry-btn {
-    /* The label centres on the band when the band's minimum height is the taller. The band paints
-       its own box, so .entry-btn-art is hidden: an absolute child of this auto-height flex box
-       sizes against the box's height before the flex layout grew it (engine-findings.md) and
-       covered only a strip. */
+    /* The label centres on the band when the band's minimum height is the taller. */
     display: flex;
     flex-direction: column;
     justify-content: center;
+    position: relative;
     box-sizing: border-box;
     min-height: calc(29px * var(--root-scale));
     padding: calc(6px * var(--root-scale)) calc(4px * var(--root-scale));
     pointer-events: auto;
 }
 .entry-btn + .entry-btn { margin-top: calc(4px * var(--root-scale)); }
-.entry-btn-art { display: none; }
+.entry-btn-art {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+}
 .entry-label {
     display: block;
+    position: relative;
     text-align: center;
     white-space: normal;
     word-break: break-word;
@@ -72,14 +78,14 @@
 
 #title { color: token(text-warm); }
 .entry-line { color: token(text-primary); }
-.entry-btn {
+.entry-btn-art {
     background-color: token(surface-recessed);
     border: 1px token(border-frame);
     border-radius: token(radius-sm)px;
 }
-.entry-btn.enabled { background-color: token(surface-raised); }
-.entry-btn.enabled:hover { border-color: token(accent-steel-hover); }
-.entry-btn.enabled:active { background-color: token(surface-recessed); }
+.entry-btn.enabled .entry-btn-art { background-color: token(surface-raised); }
+.entry-btn.enabled:hover .entry-btn-art { border-color: token(accent-steel-hover); }
+.entry-btn.enabled:active .entry-btn-art { background-color: token(surface-recessed); }
 .entry-label { color: token(text-muted); }
 .entry-btn.enabled .entry-label { color: token(text-primary); }
 

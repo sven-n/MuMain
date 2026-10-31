@@ -48,22 +48,28 @@
     line-height: 1.1;
 }
 .entry-btn {
-    /* The label centres on the band when the band's minimum height is the taller. The band paints
-       its own art, so .entry-btn-art is hidden: an absolute child of this auto-height flex box
-       sizes against the box's height before the flex layout grew it (engine-findings.md) and
-       covered only a strip. The classic theme keeps a block band and paints that element. */
+    /* The label centres on the band when the band's minimum height is the taller. */
     display: flex;
     flex-direction: column;
     justify-content: center;
+    position: relative;
     box-sizing: border-box;
     min-height: calc(29px * var(--root-scale));
     padding: calc(6px * var(--root-scale)) calc(4px * var(--root-scale));
     pointer-events: auto;
 }
 .entry-btn + .entry-btn { margin-top: calc(4px * var(--root-scale)); }
-.entry-btn-art { display: none; }
+.entry-btn-art {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    pointer-events: none;
+}
 .entry-label {
     display: block;
+    position: relative;
     text-align: center;
     white-space: normal;
     word-break: break-word;
@@ -79,9 +85,9 @@
 }
 
 #title, .entry-line { color: #ffffff; }
-.entry-btn { decorator: image(entry-btn-up); }
-.entry-btn.enabled:hover { decorator: image(entry-btn-over); }
-.entry-btn.enabled:active { decorator: image(entry-btn-down); }
+.entry-btn-art { decorator: image(entry-btn-up); }
+.entry-btn.enabled:hover .entry-btn-art { decorator: image(entry-btn-over); }
+.entry-btn.enabled:active .entry-btn-art { decorator: image(entry-btn-down); }
 .entry-label { color: #969696; }
 .entry-btn.enabled .entry-label { color: #ffffff; }
 
