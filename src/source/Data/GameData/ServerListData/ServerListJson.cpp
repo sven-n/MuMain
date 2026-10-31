@@ -2,6 +2,7 @@
 
 #include "ServerListJson.h"
 
+#include "ButtonColors.h"
 #include "ChannelNameBuilder.h"
 #include "Core/Text/Utf8.h"
 #include "Data/DataHandler/TextFile.h"
@@ -32,7 +33,10 @@ constexpr const char* TestServerKey = "testServer";
 constexpr const char* ChannelsKey = "channels";
 constexpr const char* PvpKey = "pvp";
 constexpr const char* VipKey = "vip";
-constexpr const char* ThemeColorKey = "themeColor";
+constexpr const char* ColorsKey = "colors";
+constexpr const char* ButtonColorsKey = "buttonColors";
+constexpr const char* ShadesKey = "shades";
+constexpr const char* ColorKey = "color";
 constexpr const char* NonPvpKey = "nonPvp";
 
 class IssueList
@@ -239,23 +243,176 @@ std::optional<VipType> ReadVipType(const OrderedJson& json, const std::string& f
         valid = false;
     }
 
-    const auto color = json.find(ThemeColorKey);
-    if (color != json.end())
+    Items::Json::WarnAboutUnknownKeys(json, {IdKey, NameKey}, field + ".", WarnUnknown(issues));
+    return valid ? std::optional<VipType>(std::move(vipType)) : std::nullopt;
+}
+
+std::optional<CustomColor> ReadCustomColor(const OrderedJson& json, const std::string& field, IssueList& issues)
+{
+    if (!json.is_object())
     {
-        const std::optional<ThemeColor> found =
-            color->is_string() ? FindThemeColor(color->get<std::string>()) : std::nullopt;
-        if (found)
+        issues.Fatal(field, "must be an object");
+        return std::nullopt;
+    }
+    CustomColor color;
+    bool valid = true;
+    const auto id = json.find(IdKey);
+    if (id == json.end() || !id->is_string() || !IsVipTypeId(id->get<std::string>()))
+    {
+        issues.Fatal(Field(field, IdKey), "missing, or not letters and digits starting with a lowercase letter");
+        valid = false;
+    }
+    else if (FindThemeColor(id->get<std::string>()))
+    {
+        issues.Fatal(Field(field, IdKey), "\"" + id->get<std::string>() + "\" is the name of a theme color");
+        valid = false;
+    }
+    else
+    {
+        color.id = id->get<std::string>();
+    }
+    valid = ReadText(json, field, NameKey, MaxVipTypeNameLength, color.name, issues) && valid;
+
+    const auto shades = json.find(ShadesKey);
+    if (shades != json.end() && !shades->is_object())
+    {
+        issues.Fatal(Field(field, ShadesKey), R"(must be an object of shades by theme, e.g. {"legacy": "#FF5A5A"})");
+        valid = false;
+    }
+    else if (shades != json.end())
+    {
+        for (const auto& [theme, shade] : shades->items())
         {
-            vipType.themeColor = *found;
-        }
-        else
-        {
-            issues.Warning(Field(field, ThemeColorKey),
-                           "not a theme color (default, gray, orange or silver); the default color is used");
+            if (!shade.is_string() || !IsShade(shade.get<std::string>()))
+            {
+                issues.Error(Field(Field(field, ShadesKey), theme.c_str()),
+                             "not a color like #FF5A5A; the theme draws its default color");
+                continue;
+            }
+            color.shades.emplace(theme, shade.get<std::string>());
         }
     }
-    Items::Json::WarnAboutUnknownKeys(json, {IdKey, NameKey, ThemeColorKey}, field + ".", WarnUnknown(issues));
-    return valid ? std::optional<VipType>(std::move(vipType)) : std::nullopt;
+    Items::Json::WarnAboutUnknownKeys(json, {IdKey, NameKey, ShadesKey}, field + ".", WarnUnknown(issues));
+    return valid ? std::optional<CustomColor>(std::move(color)) : std::nullopt;
+}
+
+void ReadCustomColors(const OrderedJson& root, std::vector<CustomColor>& colors, IssueList& issues)
+{
+    const auto entries = root.find(ColorsKey);
+    if (entries == root.end())
+    {
+        return;
+    }
+    if (!entries->is_array())
+    {
+        issues.Fatal(ColorsKey, "must be a list of colors");
+        return;
+    }
+    std::set<std::string, std::less<>> ids;
+    for (size_t index = 0; index < entries->size(); ++index)
+    {
+        const std::string field = ListField(ColorsKey, index);
+        std::optional<CustomColor> color = ReadCustomColor((*entries)[index], field, issues);
+        if (!color)
+        {
+            continue;
+        }
+        if (!ids.insert(color->id).second)
+        {
+            issues.Fatal(Field(field, IdKey), "\"" + color->id + "\" is the id of more than one color");
+            continue;
+        }
+        colors.push_back(std::move(*color));
+    }
+}
+
+// A rule with a problem in what it fits is not used: it would color other channels.
+std::optional<ButtonColorRule> ReadButtonColorRule(const OrderedJson& json, const std::string& field,
+                                                   const ServerListData& list, IssueList& issues)
+{
+    if (!json.is_object())
+    {
+        issues.Error(field, "must be an object; the rule is not used");
+        return std::nullopt;
+    }
+    ButtonColorRule rule;
+    const auto vip = json.find(VipKey);
+    if (vip != json.end() && vip->is_boolean())
+    {
+        rule.vipMatch = vip->get<bool>() ? RuleVip::AnyVipType : RuleVip::NoVipType;
+    }
+    else if (vip != json.end() && vip->is_string())
+    {
+        if (list.FindVipType(vip->get<std::string>()) == nullptr)
+        {
+            issues.Error(Field(field, VipKey),
+                         "\"" + vip->get<std::string>() + "\" is not the id of a VIP type; the rule is not used");
+            return std::nullopt;
+        }
+        rule.vipMatch = RuleVip::VipType;
+        rule.vip = vip->get<std::string>();
+    }
+    else if (vip != json.end())
+    {
+        issues.Error(Field(field, VipKey), "must be the id of a VIP type, true or false; the rule is not used");
+        return std::nullopt;
+    }
+
+    const auto pvp = json.find(PvpKey);
+    if (pvp != json.end() && !pvp->is_boolean())
+    {
+        issues.Error(Field(field, PvpKey), "must be true or false; the rule is not used");
+        return std::nullopt;
+    }
+    if (pvp != json.end())
+    {
+        rule.pvp = pvp->get<bool>();
+    }
+
+    const auto color = json.find(ColorKey);
+    if (color != json.end() && color->is_string() && IsKnownColor(list, color->get<std::string>()))
+    {
+        rule.color = color->get<std::string>();
+    }
+    else
+    {
+        issues.Warning(
+            Field(field, ColorKey),
+            "not a theme color (default, gray, orange, silver) or one of the colors; the default color is used");
+    }
+    Items::Json::WarnAboutUnknownKeys(json, {VipKey, PvpKey, ColorKey}, field + ".", WarnUnknown(issues));
+    return rule;
+}
+
+void ReadButtonColorRules(const OrderedJson& root, ServerListData& list, IssueList& issues)
+{
+    const auto entries = root.find(ButtonColorsKey);
+    if (entries == root.end())
+    {
+        return;
+    }
+    if (!entries->is_array())
+    {
+        issues.Fatal(ButtonColorsKey, "must be a list of button color rules");
+        return;
+    }
+    for (size_t index = 0; index < entries->size(); ++index)
+    {
+        const std::string field = ListField(ButtonColorsKey, index);
+        std::optional<ButtonColorRule> rule = ReadButtonColorRule((*entries)[index], field, list, issues);
+        if (!rule)
+        {
+            continue;
+        }
+        const auto same = std::find_if(list.buttonColors.begin(), list.buttonColors.end(),
+                                       [&rule](const ButtonColorRule& other) { return rule->FitsAsMuchAs(other); });
+        if (same != list.buttonColors.end())
+        {
+            issues.Error(field, "fits the same channels as an earlier rule; it is not used");
+            continue;
+        }
+        list.buttonColors.push_back(std::move(*rule));
+    }
 }
 
 void ReadVipTypes(const OrderedJson& root, std::vector<VipType>& vipTypes, IssueList& issues)
@@ -533,10 +690,46 @@ OrderedJson WriteVipType(const VipType& vipType)
     OrderedJson json = OrderedJson::object();
     json[IdKey] = vipType.id;
     json[NameKey] = Items::Json::WriteLocalizedString(vipType.name);
-    if (vipType.themeColor != ThemeColor::Default)
+    return json;
+}
+
+OrderedJson WriteCustomColor(const CustomColor& color)
+{
+    OrderedJson json = OrderedJson::object();
+    json[IdKey] = color.id;
+    json[NameKey] = color.name;
+    OrderedJson shades = OrderedJson::object();
+    for (const auto& [theme, shade] : color.shades)
     {
-        json[ThemeColorKey] = GetThemeColorName(vipType.themeColor);
+        shades[theme] = shade;
     }
+    json[ShadesKey] = std::move(shades);
+    return json;
+}
+
+OrderedJson WriteButtonColorRule(const ButtonColorRule& rule)
+{
+    OrderedJson json = OrderedJson::object();
+    switch (rule.vipMatch)
+    {
+    case RuleVip::AnyVipType:
+        json[VipKey] = true;
+        break;
+    case RuleVip::NoVipType:
+        json[VipKey] = false;
+        break;
+    case RuleVip::VipType:
+        json[VipKey] = rule.vip;
+        break;
+    case RuleVip::Any:
+    default:
+        break;
+    }
+    if (rule.pvp)
+    {
+        json[PvpKey] = *rule.pvp;
+    }
+    json[ColorKey] = rule.color;
     return json;
 }
 
@@ -625,10 +818,13 @@ void ReadServerListJson(std::string_view text, const std::string& source, Server
     {
         return;
     }
-    Items::Json::WarnAboutUnknownKeys(root, {Items::Json::Keys::FormatVersion, VipTypesKey, NamesKey, GroupsKey}, "",
-                                      WarnUnknown(issueList));
-    // Before the groups: their channels name the VIP types.
+    Items::Json::WarnAboutUnknownKeys(
+        root, {Items::Json::Keys::FormatVersion, VipTypesKey, ColorsKey, ButtonColorsKey, NamesKey, GroupsKey}, "",
+        WarnUnknown(issueList));
+    // Before the rules and groups: they name the VIP types and colors.
     ReadVipTypes(root, list.vipTypes, issueList);
+    ReadCustomColors(root, list.colors, issueList);
+    ReadButtonColorRules(root, list, issueList);
     ReadNames(root, list.names, issueList);
     ReadGroups(root, list, issueList);
     WarnAboutMoreTestServers(list.groups, issueList);
@@ -661,6 +857,16 @@ std::string WriteServerListJson(const ServerListData& list)
     {
         vipTypes.push_back(WriteVipType(vipType));
     }
+    OrderedJson colors = OrderedJson::array();
+    for (const CustomColor& color : list.colors)
+    {
+        colors.push_back(WriteCustomColor(color));
+    }
+    OrderedJson rules = OrderedJson::array();
+    for (const ButtonColorRule& rule : list.buttonColors)
+    {
+        rules.push_back(WriteButtonColorRule(rule));
+    }
     OrderedJson groups = OrderedJson::array();
     for (const ServerGroup& group : list.groups)
     {
@@ -669,12 +875,17 @@ std::string WriteServerListJson(const ServerListData& list)
     OrderedJson root = OrderedJson::object();
     root[Items::Json::Keys::FormatVersion] = ServerListFormatVersion;
     root[VipTypesKey] = std::move(vipTypes);
+    root[ColorsKey] = std::move(colors);
+    root[ButtonColorsKey] = std::move(rules);
     root[NamesKey] = WriteNames(list.names);
     root[GroupsKey] = std::move(groups);
     std::string text = root.dump(Items::Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
     text = Items::Json::PutObjectsOnOneLine(text, ChannelsKey);
     // A VIP type's names, by language, on the line of its name.
     text = Items::Json::PutObjectsOnOneLine(text, NameKey);
+    text = Items::Json::PutObjectsOnOneLine(text, ShadesKey);
+    // Each rule on a line of its own.
+    text = Items::Json::PutListEntriesOnOneLine(text, ButtonColorsKey);
     return text + "\n";
 }
 

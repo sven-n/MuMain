@@ -2035,9 +2035,6 @@
   <data name="A VIP type needs a name." xml:space="preserve">
     <value>A VIP type needs a name.</value>
   </data>
-  <data name="Theme color" xml:space="preserve">
-    <value>Theme color</value>
-  </data>
   <data name="Gray" xml:space="preserve">
     <value>Gray</value>
   </data>
@@ -2046,9 +2043,6 @@
   </data>
   <data name="Silver" xml:space="preserve">
     <value>Silver</value>
-  </data>
-  <data name="Theme color note" xml:space="preserve">
-    <value>The button color on the login screen. Each theme (legacy, modern) draws its own shade of it; channels without a VIP type are gray with PvP on.</value>
   </data>
   <data name="Remove VIP type {0}?" xml:space="preserve">
     <value>Remove VIP type {0}?</value>
@@ -2098,11 +2092,77 @@
   <data name="Step move VIP type" xml:space="preserve">
     <value>Move VIP type {0}</value>
   </data>
-  <data name="Step theme color" xml:space="preserve">
-    <value>{0}: theme color</value>
-  </data>
   <data name="Step text" xml:space="preserve">
     <value>Text: {0}</value>
+  </data>
+  <data name="Button colors" xml:space="preserve">
+    <value>Button colors</value>
+  </data>
+  <data name="Button colors note" xml:space="preserve">
+    <value>Of the rules that fit a channel, the most specific one colors its button: one with a VIP type beats one for any VIP type or none, which beats one without, and one with PvP beats one without. The order of the rules does not matter.</value>
+  </data>
+  <data name="Any VIP type" xml:space="preserve">
+    <value>Any VIP type</value>
+  </data>
+  <data name="On" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="Add rule" xml:space="preserve">
+    <value>Add rule</value>
+  </data>
+  <data name="Another rule fits the same channels." xml:space="preserve">
+    <value>Another rule fits the same channels.</value>
+  </data>
+  <data name="Every VIP type and PvP setting has a rule." xml:space="preserve">
+    <value>Every VIP type and PvP setting has a rule.</value>
+  </data>
+  <data name="Colors" xml:space="preserve">
+    <value>Colors</value>
+  </data>
+  <data name="Colors note" xml:space="preserve">
+    <value>Your own button colors, with a shade for each theme; a theme without one draws its default color. A button in an own color keeps it on hover.</value>
+  </data>
+  <data name="New color" xml:space="preserve">
+    <value>New color</value>
+  </data>
+  <data name="Color ID note" xml:space="preserve">
+    <value>What the rules name the color by: letters and digits, starting with a lowercase letter, none of the theme colors' names (default, gray, orange, silver). A new ID is given to the rules with the color too.</value>
+  </data>
+  <data name="Not a free color ID" xml:space="preserve">
+    <value>Not a free color ID: letters and digits, starting with a lowercase letter, not a theme color's name or another color's.</value>
+  </data>
+  <data name="Remove color {0}?" xml:space="preserve">
+    <value>Remove color {0}?</value>
+  </data>
+  <data name="Color used note" xml:space="preserve">
+    <value>{0} rules have this color; they then have the default color.</value>
+  </data>
+  <data name="Step add color" xml:space="preserve">
+    <value>Add color {0}</value>
+  </data>
+  <data name="Step remove color" xml:space="preserve">
+    <value>Remove color {0}</value>
+  </data>
+  <data name="Step move color" xml:space="preserve">
+    <value>Move color {0}</value>
+  </data>
+  <data name="Step shade" xml:space="preserve">
+    <value>{0}: shade</value>
+  </data>
+  <data name="Step add button color rule" xml:space="preserve">
+    <value>Add button color rule</value>
+  </data>
+  <data name="Step remove button color rule" xml:space="preserve">
+    <value>Remove button color rule</value>
+  </data>
+  <data name="Step button color rule" xml:space="preserve">
+    <value>Button color rule {0}</value>
   </data>
   <data name="Monster Browser" xml:space="preserve">
     <value>Monster Browser</value>

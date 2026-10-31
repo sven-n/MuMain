@@ -3,9 +3,13 @@
   "vipTypes": [
     {
       "id": "gold",
-      "name": {"en": "Gold", "es": "Oro", "id": "Emas", "ja": "ゴールド", "pt": "Ouro", "ru": "Золотой", "uk": "Золотий", "zh-TW": "黃金"},
-      "themeColor": "orange"
+      "name": {"en": "Gold", "es": "Oro", "id": "Emas", "ja": "ゴールド", "pt": "Ouro", "ru": "Золотой", "uk": "Золотий", "zh-TW": "黃金"}
     }
+  ],
+  "colors": [],
+  "buttonColors": [
+    {"vip": "gold", "color": "orange"},
+    {"vip": false, "pvp": true, "color": "gray"}
   ],
   "names": {
     "pvp": {

@@ -6,6 +6,8 @@
 
 #include "ServerListStepLabel.h"
 
+#include "Data/GameData/ServerListData/ChannelNameBuilder.h"
+
 #include <algorithm>
 #include <utility>
 
@@ -196,6 +198,8 @@ void ServerListEdits::RemoveVipType(size_t index)
             }
         }
     }
+    std::erase_if(m_list.buttonColors, [&vipType](const ButtonColorRule& rule)
+                  { return rule.vipMatch == Data::ServerList::RuleVip::VipType && rule.vip == vipType.id; });
     m_list.vipTypes.erase(m_list.vipTypes.begin() + static_cast<std::ptrdiff_t>(index));
 }
 
@@ -239,6 +243,13 @@ bool ServerListEdits::ChangeVipTypeId(size_t index, const std::string& id)
             }
         }
     }
+    for (ButtonColorRule& rule : m_list.buttonColors)
+    {
+        if (rule.vipMatch == Data::ServerList::RuleVip::VipType && rule.vip == vipType.id)
+        {
+            rule.vip = id;
+        }
+    }
     vipType.id = id;
     return true;
 }
@@ -246,6 +257,150 @@ bool ServerListEdits::ChangeVipTypeId(size_t index, const std::string& id)
 bool ServerListEdits::IsVipTypeIdUsed(std::string_view id) const
 {
     return m_list.FindVipType(id) != nullptr;
+}
+
+size_t ServerListEdits::AddColor(const std::string& name)
+{
+    const std::string base = Data::ServerList::MakeVipTypeId(name);
+    std::string id = base;
+    for (int number = 2; !IsColorIdFree(id); ++number)
+    {
+        id = base + std::to_string(number);
+    }
+    CustomColor color;
+    color.id = std::move(id);
+    color.name = name;
+    m_list.colors.push_back(std::move(color));
+    m_pendingLabel = StepLabel::AddColor(name);
+    return m_list.colors.size() - 1;
+}
+
+void ServerListEdits::RemoveColor(size_t index)
+{
+    if (index >= m_list.colors.size())
+    {
+        return;
+    }
+    const CustomColor& color = m_list.colors[index];
+    m_pendingLabel = StepLabel::RemoveColor(color.name);
+    for (ButtonColorRule& rule : m_list.buttonColors)
+    {
+        if (rule.color == color.id)
+        {
+            rule.color = Data::ServerList::GetThemeColorName(Data::ServerList::ThemeColor::Default);
+        }
+    }
+    m_list.colors.erase(m_list.colors.begin() + static_cast<std::ptrdiff_t>(index));
+}
+
+bool ServerListEdits::MoveColor(size_t index, int direction)
+{
+    if (index >= m_list.colors.size())
+    {
+        return false;
+    }
+    const std::string name = m_list.colors[index].name;
+    if (!MoveEntry(m_list.colors, index, direction))
+    {
+        return false;
+    }
+    m_pendingLabel = StepLabel::MoveColor(name);
+    return true;
+}
+
+bool ServerListEdits::ChangeColorId(size_t index, const std::string& id)
+{
+    if (index >= m_list.colors.size())
+    {
+        return false;
+    }
+    CustomColor& color = m_list.colors[index];
+    if (id == color.id)
+    {
+        return true;
+    }
+    if (!IsColorIdFree(id))
+    {
+        return false;
+    }
+    for (ButtonColorRule& rule : m_list.buttonColors)
+    {
+        if (rule.color == color.id)
+        {
+            rule.color = id;
+        }
+    }
+    color.id = id;
+    return true;
+}
+
+bool ServerListEdits::IsColorIdFree(std::string_view id) const
+{
+    return Data::ServerList::IsVipTypeId(id) && !Data::ServerList::FindThemeColor(id) &&
+           m_list.FindCustomColor(id) == nullptr;
+}
+
+size_t ServerListEdits::CountRulesWithColor(std::string_view id) const
+{
+    return static_cast<size_t>(std::count_if(m_list.buttonColors.begin(), m_list.buttonColors.end(),
+                                             [id](const ButtonColorRule& rule) { return rule.color == id; }));
+}
+
+std::optional<size_t> ServerListEdits::AddButtonColorRule()
+{
+    using Data::ServerList::RuleVip;
+    // Any channel first, then none, any VIP type and each type; each with either PvP, on and off.
+    std::vector<ButtonColorRule> candidates;
+    const auto addFor = [&candidates](RuleVip vipMatch, const std::string& vip)
+    {
+        for (const std::optional<bool> pvp :
+             {std::optional<bool>{}, std::optional<bool>{true}, std::optional<bool>{false}})
+        {
+            ButtonColorRule rule;
+            rule.vipMatch = vipMatch;
+            rule.vip = vip;
+            rule.pvp = pvp;
+            candidates.push_back(rule);
+        }
+    };
+    addFor(RuleVip::Any, {});
+    addFor(RuleVip::NoVipType, {});
+    addFor(RuleVip::AnyVipType, {});
+    for (const VipType& vipType : m_list.vipTypes)
+    {
+        addFor(RuleVip::VipType, vipType.id);
+    }
+    for (ButtonColorRule& rule : candidates)
+    {
+        if (!HasRuleLike(rule, std::nullopt))
+        {
+            m_list.buttonColors.push_back(std::move(rule));
+            m_pendingLabel = StepLabel::AddButtonColorRule();
+            return m_list.buttonColors.size() - 1;
+        }
+    }
+    return std::nullopt;
+}
+
+void ServerListEdits::RemoveButtonColorRule(size_t index)
+{
+    if (index < m_list.buttonColors.size())
+    {
+        m_pendingLabel = StepLabel::RemoveButtonColorRule();
+        m_list.buttonColors.erase(m_list.buttonColors.begin() + static_cast<std::ptrdiff_t>(index));
+    }
+}
+
+bool ServerListEdits::HasRuleLike(const ButtonColorRule& rule, std::optional<size_t> index) const
+{
+    for (size_t other = 0; other < m_list.buttonColors.size(); ++other)
+    {
+        if (other != index && m_list.buttonColors[other].FitsAsMuchAs(rule))
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 std::vector<std::string> ServerListEdits::FindChannelsWithVipType(std::string_view id) const

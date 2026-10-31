@@ -6,7 +6,8 @@
 #include "Network/Server/ServerListManager.h"
 
 #include <string>
-#include <tuple>
+#include <optional>
+#include <utility>
 #include <vector>
 
 using Data::ServerList::ChannelNamePlace;
@@ -39,15 +40,32 @@ ServerGroup Group(int id, const std::string& name)
 ServerListData List(std::vector<ServerGroup> groups)
 {
     ServerListData list;
-    for (const auto& [id, name, color] :
-         {std::tuple{"gold", "Gold", ThemeColor::Orange}, std::tuple{"silver", "Silver", ThemeColor::Silver}})
+    for (const auto& [id, name] : {std::pair{"gold", "Gold"}, std::pair{"silver", "Silver"}})
     {
         Data::ServerList::VipType vipType;
         vipType.id = id;
         vipType.name.Set("en", name);
-        vipType.themeColor = color;
         list.vipTypes.push_back(vipType);
     }
+    // Gold orange, Silver silver, no VIP type with PvP on gray; Gold with PvP off in a red of its own.
+    Data::ServerList::CustomColor red;
+    red.id = "goldRed";
+    red.shades = {{"legacy", "#FF5A5A"}};
+    list.colors.push_back(red);
+    const auto rule = [&list](Data::ServerList::RuleVip vipMatch, const std::string& vip, std::optional<bool> pvp,
+                              const std::string& color)
+    {
+        Data::ServerList::ButtonColorRule added;
+        added.vipMatch = vipMatch;
+        added.vip = vip;
+        added.pvp = pvp;
+        added.color = color;
+        list.buttonColors.push_back(added);
+    };
+    rule(Data::ServerList::RuleVip::VipType, "gold", std::nullopt, "orange");
+    rule(Data::ServerList::RuleVip::VipType, "gold", false, "goldRed");
+    rule(Data::ServerList::RuleVip::VipType, "silver", std::nullopt, "silver");
+    rule(Data::ServerList::RuleVip::NoVipType, "", true, "gray");
     list.groups = std::move(groups);
     return list;
 }
@@ -164,10 +182,15 @@ TEST_CASE("ServerListManager: the channel settings reach the channels, their but
     CHECK(manager.GetServerButtonText(group, server(4)) == ButtonText(L"Valhalla-5 (Silver PvP)"));
     CHECK(manager.GetServerButtonText(group, server(5)) == ButtonText(L"Valhalla-20 (Gold Non-PvP)"));
 
-    CHECK(manager.GetServerButtonColor(server(0)) == ThemeColor::Orange);
-    CHECK(manager.GetServerButtonColor(server(2)) == ThemeColor::Default);
-    CHECK(manager.GetServerButtonColor(server(3)) == ThemeColor::Gray);
-    CHECK(manager.GetServerButtonColor(server(4)) == ThemeColor::Silver);
+    const auto color = [&](int index, std::string_view theme)
+    { return manager.GetServerButtonColor(server(index), theme); };
+    // Gold with PvP off has its own red in the legacy theme; the modern theme has no shade of it.
+    CHECK(color(0, "legacy").shade == "#FF5A5A");
+    CHECK(color(0, "modern") == Data::ServerList::ButtonColor{});
+    CHECK(color(1, "legacy").theme == ThemeColor::Orange);
+    CHECK(color(2, "legacy") == Data::ServerList::ButtonColor{});
+    CHECK(color(3, "legacy").theme == ThemeColor::Gray);
+    CHECK(color(4, "modern").theme == ThemeColor::Silver);
 }
 
 TEST_CASE("ServerListManager: the button names the server's load")

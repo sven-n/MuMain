@@ -76,6 +76,12 @@ private:
     bool RenderVipTypeButtons();
     bool RenderSelectedVipType();
     bool RenderTexts();
+    bool RenderButtonColorRules();
+    bool RenderCustomColors();
+    bool RenderCustomColorButtons();
+    bool RenderSelectedCustomColor();
+    // Asks before a color that rules have is removed.
+    bool RenderRemoveColorPopup();
     void RenderPreview();
     // One text in the language picked on the tab, the English one as its hint.
     bool RenderLocalizedField(const char* label, Data::LocalizedString& text, size_t maxUnits);
@@ -85,6 +91,7 @@ private:
     void ShowInGame();
     void Select(int index);
     void SelectVipType(int index);
+    void SelectColor(int index);
 
     MuEditor::ServerList::ServerListEdits m_edits;
     bool m_loaded = false;
@@ -100,6 +107,18 @@ private:
     bool m_vipTypeIdActive = false;
     // The VIP type the remove popup asks about, or -1.
     int m_removeVipType = -1;
+    int m_selectedColor = -1;
+    // As m_vipTypeIdDraft, for the selected color.
+    std::string m_colorIdDraft;
+    bool m_colorIdActive = false;
+    // The color the remove popup asks about, or -1.
+    int m_removeColor = -1;
+    // The rule whose last change was refused (another rule fits the same channels), or -1.
+    int m_refusedRule = -1;
+    // Add rule found every VIP type and PvP setting with a rule.
+    bool m_allRulesTaken = false;
+    // The theme folders a color gets a shade for (UI::RmlBridge::DiscoverAvailableThemes).
+    std::vector<std::string> m_themes;
     // The language the Channel names tab shows and edits the texts in.
     std::string m_textLocale = "en";
     // What the last read or save found, and what it said.

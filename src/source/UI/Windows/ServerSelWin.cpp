@@ -68,6 +68,7 @@ void CServerSelWin::BindRmlModel(Rml::DataModelConstructor& c, ServerSelRmlModel
     server.RegisterMember("color_gray", &ServerEntry::colorGray);
     server.RegisterMember("color_orange", &ServerEntry::colorOrange);
     server.RegisterMember("color_silver", &ServerEntry::colorSilver);
+    server.RegisterMember("color_style", &ServerEntry::colorStyle);
     c.RegisterArray<std::vector<ServerEntry>>();
 
     c.Bind("groups", &model.groups);
@@ -183,10 +184,12 @@ void CServerSelWin::UpdateDisplay()
                 g_ServerListManager->GetServerButtonText(*m_pSelectServerGroup, *pServerInfo).c_str());
             entry.index = nServerIndex;
             entry.loadFraction = static_cast<float>(pServerInfo->m_iPercent) / 100.0f;
-            const Data::ServerList::ThemeColor color = g_ServerListManager->GetServerButtonColor(*pServerInfo);
-            entry.colorGray = color == Data::ServerList::ThemeColor::Gray;
-            entry.colorOrange = color == Data::ServerList::ThemeColor::Orange;
-            entry.colorSilver = color == Data::ServerList::ThemeColor::Silver;
+            const Data::ServerList::ButtonColor color =
+                g_ServerListManager->GetServerButtonColor(*pServerInfo, UI::RmlBridge::GetActiveThemeName());
+            entry.colorGray = color.theme == Data::ServerList::ThemeColor::Gray;
+            entry.colorOrange = color.theme == Data::ServerList::ThemeColor::Orange;
+            entry.colorSilver = color.theme == Data::ServerList::ThemeColor::Silver;
+            entry.colorStyle = color.shade;
             model.servers.push_back(entry);
 
             ++nServerIndex;

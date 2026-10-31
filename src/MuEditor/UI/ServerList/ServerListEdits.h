@@ -12,6 +12,8 @@
 
 namespace MuEditor::ServerList
 {
+using Data::ServerList::ButtonColorRule;
+using Data::ServerList::CustomColor;
 using Data::ServerList::ServerGroup;
 using Data::ServerList::ServerListData;
 using Data::ServerList::VipType;
@@ -94,16 +96,37 @@ public:
     // Adds a VIP type with the English name `name` at the end, its id made from
     // the name (one no other type has). Returns its index.
     size_t AddVipType(const std::string& name);
-    // The channels with the type then have none.
+    // The channels with the type then have none; the button color rules for it go.
     void RemoveVipType(size_t index);
     // Moves the type one place up (-1) or down (+1); false at the end of the list.
     bool MoveVipType(size_t index, int direction);
-    // Gives the type the id; the channels with the old one get it too. False
-    // (and nothing changed) when it is no VIP type id or another type has it.
+    // Gives the type the id; the channels and rules with the old one get it too.
+    // False (and nothing changed) when it is no VIP type id or another type has it.
     bool ChangeVipTypeId(size_t index, const std::string& id);
     bool IsVipTypeIdUsed(std::string_view id) const;
     // The channels with the type, as "Valhalla-1".
     std::vector<std::string> FindChannelsWithVipType(std::string_view id) const;
+
+    // Adds a color named `name` at the end, its id made from the name (one no
+    // other color or theme color has), with no shades. Returns its index.
+    size_t AddColor(const std::string& name);
+    // The rules with the color then have the default color.
+    void RemoveColor(size_t index);
+    bool MoveColor(size_t index, int direction);
+    // Gives the color the id; the rules with the old one get it too. False (and
+    // nothing changed) when it is no color id or another color has it.
+    bool ChangeColorId(size_t index, const std::string& id);
+    // Whether `id` would be a free id for a color: a color id no other color has.
+    bool IsColorIdFree(std::string_view id) const;
+    // How many rules have the color.
+    size_t CountRulesWithColor(std::string_view id) const;
+
+    // Adds a rule with the default color for the first VIP type and PvP setting
+    // no rule has yet (any channel first). Nothing when every one has a rule.
+    std::optional<size_t> AddButtonColorRule();
+    void RemoveButtonColorRule(size_t index);
+    // Whether another rule than the one at `index` fits the same channels as `rule`.
+    bool HasRuleLike(const Data::ServerList::ButtonColorRule& rule, std::optional<size_t> index) const;
 
 private:
     // The list on the other side of a step, and what the step did.

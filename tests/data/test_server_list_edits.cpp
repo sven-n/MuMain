@@ -7,7 +7,9 @@
 #include "I18N/All.h"
 #include "UI/ServerList/ServerListEdits.h"
 
+#include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 using Data::ServerList::ChannelSettings;
@@ -348,9 +350,6 @@ TEST_CASE("ServerListEdits: VIP types move and their changes are named")
     CHECK_FALSE(edits.MoveVipType(0, -1));
     CHECK_FALSE(edits.MoveVipType(1, 1));
 
-    edits.EditList().vipTypes[1].themeColor = Data::ServerList::ThemeColor::Orange;
-    CHECK(edits.GetUndoLabel() == "Gold: theme color");
-    edits.Commit();
     edits.EditList().vipTypes[1].name.Set("es", "Oro");
     CHECK(edits.GetUndoLabel() == "Gold: name");
     edits.Commit();
@@ -360,6 +359,90 @@ TEST_CASE("ServerListEdits: VIP types move and their changes are named")
     edits.EditList().names.nonPvp.Set("de", "Nicht-PvP");
     CHECK(edits.GetUndoLabel() == "Text: Non-PvP text");
     CHECK(edits.HasUnsavedChanges());
+}
+
+TEST_CASE("ServerListEdits: a new color gets an id no other color or theme color has")
+{
+    ServerListEdits edits = ThreeGroups();
+
+    CHECK(edits.AddColor("Gold red") == 0);
+    CHECK(edits.AddColor("Gold red") == 1);
+    CHECK(edits.AddColor("Orange") == 2);
+
+    const std::vector<MuEditor::ServerList::CustomColor>& colors = edits.GetList().colors;
+    CHECK(colors[0].id == "goldRed");
+    CHECK(colors[0].name == "Gold red");
+    CHECK(colors[1].id == "goldRed2");
+    CHECK(colors[2].id == "orange2");
+    CHECK_FALSE(edits.IsColorIdFree("gray"));
+    CHECK_FALSE(edits.IsColorIdFree("goldRed"));
+    CHECK(edits.IsColorIdFree("blue"));
+}
+
+TEST_CASE("ServerListEdits: rules follow their colors and VIP types")
+{
+    I18N::SetLocale("en");
+    ServerListEdits edits = ThreeGroups();
+    edits.AddVipType("Gold");
+    edits.AddColor("Red");
+    REQUIRE(edits.AddButtonColorRule() == size_t{0});
+    edits.Commit();
+    edits.EditList().buttonColors[0].vipMatch = Data::ServerList::RuleVip::VipType;
+    edits.EditList().buttonColors[0].vip = "gold";
+    edits.EditList().buttonColors[0].color = "red";
+    edits.Commit();
+    CHECK(edits.GetUndoLabel() == "Button color rule 1");
+
+    CHECK(edits.ChangeColorId(0, "crimson"));
+    CHECK(edits.GetList().buttonColors[0].color == "crimson");
+    CHECK_FALSE(edits.ChangeColorId(0, "silver"));
+    CHECK(edits.ChangeVipTypeId(0, "golden"));
+    CHECK(edits.GetList().buttonColors[0].vip == "golden");
+    edits.Commit();
+
+    CHECK(edits.CountRulesWithColor("crimson") == 1);
+    edits.RemoveColor(0);
+    edits.Commit();
+    CHECK(edits.GetUndoLabel() == "Remove color Red");
+    CHECK(edits.GetList().buttonColors[0].color == "default");
+
+    edits.RemoveVipType(0);
+    edits.Commit();
+    CHECK(edits.GetList().buttonColors.empty());
+    edits.Undo();
+    CHECK(edits.GetList().buttonColors.size() == 1);
+}
+
+TEST_CASE("ServerListEdits: a new rule fits channels no rule fits yet")
+{
+    I18N::SetLocale("en");
+    ServerListEdits edits = ThreeGroups();
+    using Data::ServerList::RuleVip;
+
+    // Any channel first: either PvP, then on, then off; then no VIP type, then any VIP type.
+    for (const auto& [vipMatch, pvp] :
+         {std::pair{RuleVip::Any, std::optional<bool>{}}, std::pair{RuleVip::Any, std::optional<bool>{true}},
+          std::pair{RuleVip::Any, std::optional<bool>{false}}, std::pair{RuleVip::NoVipType, std::optional<bool>{}}})
+    {
+        const std::optional<size_t> added = edits.AddButtonColorRule();
+        REQUIRE(added.has_value());
+        CHECK(edits.GetList().buttonColors[*added].vipMatch == vipMatch);
+        CHECK(edits.GetList().buttonColors[*added].pvp == pvp);
+    }
+    edits.Commit();
+    CHECK(edits.GetUndoLabel() == "Add button color rule");
+    CHECK(edits.HasRuleLike(edits.GetList().buttonColors[0], std::nullopt));
+    CHECK_FALSE(edits.HasRuleLike(edits.GetList().buttonColors[0], size_t{0}));
+
+    // Without VIP types there are 9 settings: any, none and any VIP type, each with either PvP, on and off.
+    while (edits.AddButtonColorRule())
+    {
+    }
+    CHECK(edits.GetList().buttonColors.size() == 9);
+    edits.RemoveButtonColorRule(0);
+    edits.Commit();
+    CHECK(edits.GetUndoLabel() == "Remove button color rule");
+    CHECK(edits.GetList().buttonColors.size() == 8);
 }
 
 #endif // _EDITOR

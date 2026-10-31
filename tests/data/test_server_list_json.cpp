@@ -19,9 +19,9 @@ using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
 using Data::ServerList::ChannelNamePlace;
 using Data::ServerList::ChannelSettings;
+using Data::ServerList::RuleVip;
 using Data::ServerList::ServerGroup;
 using Data::ServerList::ServerListData;
-using Data::ServerList::ThemeColor;
 
 namespace
 {
@@ -94,8 +94,16 @@ ChannelSettings Channel(bool pvp, const std::string& vip)
 const std::string ValidFile = R"({
   "formatVersion": 2,
   "vipTypes": [
-    {"id": "gold", "name": {"en": "Gold", "es": "Oro"}, "themeColor": "orange"},
+    {"id": "gold", "name": {"en": "Gold", "es": "Oro"}},
     {"id": "silver", "name": "Silver"}
+  ],
+  "colors": [
+    {"id": "goldRed", "name": "Gold red", "shades": {"legacy": "#FF5A5A", "modern": "#C0564E"}}
+  ],
+  "buttonColors": [
+    {"vip": "gold", "pvp": false, "color": "goldRed"},
+    {"vip": true, "color": "silver"},
+    {"vip": false, "pvp": true, "color": "gray"}
   ],
   "names": {
     "nonPvp": {"en": "Non-PvP", "de": "Nicht-PvP"},
@@ -118,9 +126,23 @@ TEST_CASE("ServerListJson: reads the groups, VIP types and texts in their order"
     CHECK(read.list.vipTypes[0].id == "gold");
     CHECK(read.list.vipTypes[0].name.Get("en") == "Gold");
     CHECK(read.list.vipTypes[0].name.Get("es") == "Oro");
-    CHECK(read.list.vipTypes[0].themeColor == ThemeColor::Orange);
     CHECK(read.list.vipTypes[1].id == "silver");
-    CHECK(read.list.vipTypes[1].themeColor == ThemeColor::Default);
+
+    REQUIRE(read.list.colors.size() == 1);
+    CHECK(read.list.colors[0].id == "goldRed");
+    CHECK(read.list.colors[0].name == "Gold red");
+    CHECK(read.list.colors[0].shades.at("legacy") == "#FF5A5A");
+    CHECK(read.list.colors[0].shades.at("modern") == "#C0564E");
+
+    REQUIRE(read.list.buttonColors.size() == 3);
+    CHECK(read.list.buttonColors[0].vipMatch == RuleVip::VipType);
+    CHECK(read.list.buttonColors[0].vip == "gold");
+    CHECK(read.list.buttonColors[0].pvp == false);
+    CHECK(read.list.buttonColors[0].color == "goldRed");
+    CHECK(read.list.buttonColors[1].vipMatch == RuleVip::AnyVipType);
+    CHECK_FALSE(read.list.buttonColors[1].pvp.has_value());
+    CHECK(read.list.buttonColors[2].vipMatch == RuleVip::NoVipType);
+    CHECK(read.list.buttonColors[2].pvp == true);
 
     CHECK(read.list.names.nonPvp.Get("de") == "Nicht-PvP");
     CHECK(read.list.names.Template(ChannelNamePlace::Login).Get("es") == "[{name}-{channel} {pvp} {vip}]");
@@ -162,7 +184,9 @@ TEST_CASE("ServerListJson: writes what it reads")
     CHECK(written.find("\"20\"") == std::string::npos);
     CHECK(written.find("\"description\": \"\"") == std::string::npos);
     CHECK(written.find("\"testServer\": false") == std::string::npos);
-    CHECK(written.find("\"pvp\": true") == std::string::npos);
+    // Each rule on a line of its own, a color's shades on the line of the color.
+    CHECK(written.find("\n    {\"vip\": \"gold\", \"pvp\": false, \"color\": \"goldRed\"},\n") != std::string::npos);
+    CHECK(written.find(R"("shades": {"legacy": "#FF5A5A", "modern": "#C0564E"})") != std::string::npos);
     // The channels of a group are on one line, and a VIP type's names on the line of its name.
     CHECK(
         written.find(
@@ -298,14 +322,79 @@ TEST_CASE("ServerListJson: a VIP type needs an id used once and an English name"
     CHECK(HasIssueAbout(notAList.issues, "vipTypes", "a list of VIP types"));
 }
 
-TEST_CASE("ServerListJson: an unknown theme color is the default color")
+// The file with the VIP type gold, these colors and these rules, and no group.
+std::string ColorsFile(const std::string& colors, const std::string& rules)
 {
-    const ReadResult read = Read(VipTypesFile(R"({"id": "gold", "name": "Gold", "themeColor": "purple"})"));
+    return R"({ "formatVersion": 2, "vipTypes": [ {"id": "gold", "name": "Gold"} ], "colors": [ )" + colors +
+           R"( ], "buttonColors": [ )" + rules + R"( ], "groups": [] })";
+}
+
+TEST_CASE("ServerListJson: a color needs an id that is no theme color's and is used once")
+{
+    const ReadResult noId = Read(ColorsFile(R"({"name": "Red"})", ""));
+    CHECK(HasIssueAbout(noId.issues, "colors[0].id", "missing", ItemDataIssueSeverity::Fatal));
+
+    const ReadResult themeName = Read(ColorsFile(R"({"id": "orange"})", ""));
+    CHECK(HasIssueAbout(themeName.issues, "colors[0].id", "the name of a theme color", ItemDataIssueSeverity::Fatal));
+
+    const ReadResult twice = Read(ColorsFile(R"({"id": "red"}, {"id": "red"})", ""));
+    CHECK(HasIssueAbout(twice.issues, "colors[1].id", "more than one color", ItemDataIssueSeverity::Fatal));
+
+    const ReadResult notAList = Read(R"({ "formatVersion": 2, "colors": {}, "groups": [] })");
+    CHECK(HasIssueAbout(notAList.issues, "colors", "a list of colors", ItemDataIssueSeverity::Fatal));
+}
+
+TEST_CASE("ServerListJson: a shade that is not #RRGGBB is not used")
+{
+    const ReadResult read =
+        Read(ColorsFile(R"({"id": "red", "shades": {"legacy": "#FF0000", "modern": "red", "dark": "#12345"}})", ""));
 
     CHECK_FALSE(HasFatal(read.issues));
-    CHECK(HasIssueAbout(read.issues, "vipTypes[0].themeColor", "not a theme color", ItemDataIssueSeverity::Warning));
-    REQUIRE(read.list.vipTypes.size() == 1);
-    CHECK(read.list.vipTypes[0].themeColor == ThemeColor::Default);
+    CHECK(HasIssueAbout(read.issues, "colors[0].shades.modern", "not a color like #FF5A5A",
+                        ItemDataIssueSeverity::Error));
+    CHECK(HasIssueAbout(read.issues, "colors[0].shades.dark", "", ItemDataIssueSeverity::Error));
+    REQUIRE(read.list.colors.size() == 1);
+    CHECK(read.list.colors[0].shades.size() == 1);
+    CHECK(read.list.colors[0].shades.at("legacy") == "#FF0000");
+}
+
+TEST_CASE("ServerListJson: a rule that would color other channels is not used")
+{
+    const ReadResult unknownVip = Read(ColorsFile("", R"({"vip": "silver", "color": "gray"})"));
+    CHECK(HasIssueAbout(unknownVip.issues, "buttonColors[0].vip", "\"silver\" is not the id of a VIP type",
+                        ItemDataIssueSeverity::Error));
+    CHECK(unknownVip.list.buttonColors.empty());
+
+    const ReadResult badVip = Read(ColorsFile("", R"({"vip": 1, "color": "gray"})"));
+    CHECK(HasIssueAbout(badVip.issues, "buttonColors[0].vip", "true or false", ItemDataIssueSeverity::Error));
+
+    const ReadResult badPvp = Read(ColorsFile("", R"({"pvp": "on", "color": "gray"})"));
+    CHECK(HasIssueAbout(badPvp.issues, "buttonColors[0].pvp", "true or false", ItemDataIssueSeverity::Error));
+    CHECK(badPvp.list.buttonColors.empty());
+
+    const ReadResult same =
+        Read(ColorsFile("", R"({"vip": "gold", "color": "orange"}, {"vip": "gold", "color": "gray"})"));
+    CHECK(HasIssueAbout(same.issues, "buttonColors[1]", "the same channels as an earlier rule",
+                        ItemDataIssueSeverity::Error));
+    REQUIRE(same.list.buttonColors.size() == 1);
+    CHECK(same.list.buttonColors[0].color == "orange");
+
+    const ReadResult notAList = Read(R"({ "formatVersion": 2, "buttonColors": {}, "groups": [] })");
+    CHECK(HasIssueAbout(notAList.issues, "buttonColors", "a list of button color rules", ItemDataIssueSeverity::Fatal));
+}
+
+TEST_CASE("ServerListJson: a rule's unknown color is the default color")
+{
+    const ReadResult read =
+        Read(ColorsFile(R"({"id": "red"})", R"({"vip": "gold", "color": "purple"}, {"pvp": true}, {"color": "red"})"));
+
+    CHECK_FALSE(HasFatal(read.issues));
+    CHECK(HasIssueAbout(read.issues, "buttonColors[0].color", "not a theme color", ItemDataIssueSeverity::Warning));
+    CHECK(HasIssueAbout(read.issues, "buttonColors[1].color", "not a theme color", ItemDataIssueSeverity::Warning));
+    REQUIRE(read.list.buttonColors.size() == 3);
+    CHECK(read.list.buttonColors[0].color == "default");
+    CHECK(read.list.buttonColors[1].color == "default");
+    CHECK(read.list.buttonColors[2].color == "red");
 }
 
 TEST_CASE("ServerListJson: a text without its English one has the built-in English text")
@@ -479,7 +568,12 @@ TEST_CASE("ServerListJson: the shipped file reads without problems and is writte
         CHECK(group.channels[8] == Channel(true, ""));
     }
     REQUIRE(loaded.list.vipTypes.size() == 1);
-    CHECK(loaded.list.vipTypes[0].themeColor == ThemeColor::Orange);
+    // Gold channels orange, channels without a VIP type gray with PvP on.
+    REQUIRE(loaded.list.buttonColors.size() == 2);
+    CHECK(loaded.list.buttonColors[0].vip == "gold");
+    CHECK(loaded.list.buttonColors[0].color == "orange");
+    CHECK(loaded.list.buttonColors[1].vipMatch == RuleVip::NoVipType);
+    CHECK(loaded.list.buttonColors[1].color == "gray");
 
     const std::optional<std::string> text = Data::Items::Json::ReadTextFile(file);
     REQUIRE(text.has_value());
