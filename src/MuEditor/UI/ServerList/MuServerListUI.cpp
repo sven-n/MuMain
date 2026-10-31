@@ -22,6 +22,7 @@
 #include "Scenes/SceneCore.h"
 #include "ServerListStepLabel.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/ThemeInheritance.h"
 #include "UI/Windows/ServerSelWin.h"
 #include "imgui.h"
 
@@ -29,6 +30,7 @@
 #include <array>
 #include <cstdio>
 #include <cstring>
+#include <filesystem>
 #include <map>
 #include <optional>
 #include <span>
@@ -59,7 +61,10 @@ constexpr const char* PreviewCharacter = "Hero";
 // The theme folders the preview shows the button colors in.
 constexpr std::string_view LegacyTheme = "legacy";
 constexpr std::string_view ModernTheme = "modern";
-constexpr std::string_view ClassicTheme = "classic";
+// Where the theme folders are, relative to the client folder.
+constexpr const char* ThemesFolder = "Data/Interface/RmlUi/themes";
+// The swatch of a theme color whose token a theme does not have.
+constexpr ImVec4 MissingShadeSwatch{1.0f, 1.0f, 1.0f, 1.0f};
 
 std::string_view GetEditorLocale()
 {
@@ -95,22 +100,6 @@ ImVec4 FromRgb(unsigned int rgb)
             static_cast<float>(rgb & 0xFF) / 255.0f, 1.0f};
 }
 
-// The shade a theme draws a theme color in (themes/<theme>/base.rcss), for the
-// swatches; the legacy one for a theme that is neither.
-ImVec4 GetThemeColorSwatch(ThemeColor color, std::string_view theme)
-{
-    // In the order of ThemeColor.
-    constexpr std::array<unsigned int, Data::ServerList::ThemeColorCount> Legacy = {0xFFFF79, 0xE2E2E2, 0xFFB400,
-                                                                                    0xB9C6D3};
-    constexpr std::array<unsigned int, Data::ServerList::ThemeColorCount> Modern = {0xC49A3C, 0x6A6A63, 0xC99A3E,
-                                                                                    0x9EA7B0};
-    // Classic (built on legacy) recolors the server buttons in its server_select.rcss; silver stays legacy's.
-    constexpr std::array<unsigned int, Data::ServerList::ThemeColorCount> Classic = {0xFFFFB3, 0xFFFFFF, 0xFFB27F,
-                                                                                     0xB9C6D3};
-    const auto& shades = theme == ModernTheme ? Modern : (theme == ClassicTheme ? Classic : Legacy);
-    return FromRgb(shades[static_cast<size_t>(color)]);
-}
-
 // "#RRGGBB" as a color; nothing for any other text.
 std::optional<ImVec4> ParseShade(std::string_view shade)
 {
@@ -119,6 +108,38 @@ std::optional<ImVec4> ParseShade(std::string_view shade)
         return std::nullopt;
     }
     return FromRgb(static_cast<unsigned int>(std::stoul(std::string(shade.substr(1)), nullptr, 16)));
+}
+
+using ThemeShades = std::array<ImVec4, Data::ServerList::ThemeColorCount>;
+
+// The theme colors' shades by theme folder, read once from the themes' tokens.ini.
+std::map<std::string, ThemeShades, std::less<>>& ThemeShadeCache()
+{
+    static std::map<std::string, ThemeShades, std::less<>> cache;
+    return cache;
+}
+
+// The shade a theme draws a theme color in: the token the server select screen's stylesheets
+// use (Data::ServerList::GetThemeColorToken), from the theme's tokens.ini or its ancestors'.
+ImVec4 GetThemeColorSwatch(ThemeColor color, std::string_view theme)
+{
+    auto& cache = ThemeShadeCache();
+    auto found = cache.find(theme);
+    if (found == cache.end())
+    {
+        const UI::RmlBridge::ThemeInheritance inheritance(std::filesystem::u8path(ThemesFolder) /
+                                                          std::filesystem::u8path(std::string(theme)));
+        ThemeShades shades{};
+        for (int value = 0; value < Data::ServerList::ThemeColorCount; ++value)
+        {
+            const auto setting =
+                inheritance.GetSetting("Tokens", Data::ServerList::GetThemeColorToken(static_cast<ThemeColor>(value)));
+            shades[static_cast<size_t>(value)] =
+                (setting ? ParseShade(setting->value) : std::nullopt).value_or(MissingShadeSwatch);
+        }
+        found = cache.emplace(std::string(theme), shades).first;
+    }
+    return found->second[static_cast<size_t>(color)];
 }
 
 std::string FormatShade(const float rgb[3])
@@ -599,6 +620,8 @@ void CMuServerListUI::LoadFile()
     SelectColor(colors == 0 ? -1 : std::clamp(m_selectedColor, 0, colors - 1));
     m_refusedRule = -1;
     m_themes = UI::RmlBridge::DiscoverAvailableThemes();
+    // A theme's tokens.ini may have changed since; its shades are read again.
+    ThemeShadeCache().clear();
     ShowInGame();
 }
 

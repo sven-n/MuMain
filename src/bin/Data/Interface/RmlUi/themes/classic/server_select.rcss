@@ -94,16 +94,16 @@ body {
 	pointer-events: auto;
 	decorator: image(classic-server-box);
 	filter: brightness(0.8);
-	color: #ffffb3;
+	color: token(server-button);
 }
 .server-row:hover {
 	filter: brightness(1.0);
 }
 .server-row.gray {
-	color: #ffffff;
+	color: token(server-button-gray);
 }
 .server-row.orange {
-	color: #ffb27f;
+	color: token(server-button-orange);
 }
 
 /* base.rcss gives the server list's buttons (.server-group-btn / .server-option-btn) the legacy
@@ -115,9 +115,10 @@ body {
 }
 .group-btn, .group-btn:hover, .group-btn:active,
 .group-btn.checked, .group-btn.checked:hover, .group-btn.checked:active { color: #ffffff; }
-.server-row:hover, .server-row:active { color: #ffffb3; }
-.server-row.gray:hover, .server-row.gray:active { color: #ffffff; }
-.server-row.orange:hover, .server-row.orange:active { color: #ffb27f; }
+.server-row:hover, .server-row:active { color: token(server-button); }
+.server-row.gray:hover, .server-row.gray:active { color: token(server-button-gray); }
+.server-row.orange:hover, .server-row.orange:active { color: token(server-button-orange); }
+.server-row.silver:hover, .server-row.silver:active { color: token(server-button-silver); }
 
 .server-gauge-slot {
 	position: absolute;

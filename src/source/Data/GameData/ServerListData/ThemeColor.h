@@ -20,4 +20,7 @@ inline constexpr int ThemeColorCount = 4;
 // The name of a theme color in the file ("orange"), and back.
 const char* GetThemeColorName(ThemeColor color);
 std::optional<ThemeColor> FindThemeColor(std::string_view name);
+// The token in a theme's tokens.ini that holds the color's shade ("server-button-orange"), as
+// the server select screen's stylesheets use it.
+const char* GetThemeColorToken(ThemeColor color);
 } // namespace Data::ServerList
