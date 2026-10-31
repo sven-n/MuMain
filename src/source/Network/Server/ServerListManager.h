@@ -7,6 +7,7 @@
 #include "Data/GameData/ServerListData/ButtonColors.h"
 #include "Data/GameData/ServerListData/ServerListData.h"
 
+#include <array>
 #include <cstddef>
 #include <map>
 #include <string>
@@ -49,6 +50,9 @@ public:
     // "[Valhalla-1 (Gold Non-PvP)]". `character` fills {character} (the
     // screenshot message).
     std::wstring GetSelectServerTitle(Data::ServerList::ChannelNamePlace place, const wchar_t* character = L"");
+    // The same at `place`, in UTF-8, for the windows that show it every frame (login, character
+    // info): built again only when the list, the selected channel or the game's language changed.
+    const std::string& GetSelectServerTitleUtf8(Data::ServerList::ChannelNamePlace place);
     // A channel's button on the login screen, with its load: "Valhalla-1 (Gold Non-PvP) Connect".
     std::wstring GetServerButtonText(const CServerGroup& group, const CServerInfo& server) const;
     // Its color there in the theme folder `theme`, by the list's button color rules.
@@ -99,6 +103,16 @@ protected:
     Data::ServerList::ServerListData m_serverList;
     // The index of each group of m_serverList by its ID.
     std::map<int, size_t> m_groupIndexById;
+    // A title of GetSelectServerTitleUtf8, as it was built.
+    struct CachedTitle
+    {
+        int version = -1;
+        std::string locale;
+        std::string text;
+    };
+    std::array<CachedTitle, Data::ServerList::ChannelNamePlaceCount> m_titles;
+    // Changes with the list and the selected channel: a cached title older than it is built again.
+    int m_titleVersion = 0;
 #ifdef _EDITOR
     std::vector<ReceivedServer> m_receivedServers;
     int m_receivedServersVersion = 0;

@@ -470,8 +470,9 @@ void CLoginWin::SyncRmlModel()
         m_RmlView.MarkDirty("save_password_checked");
     }
 
-    const std::string serverNameUtf8 = StringUtils::WideToNarrow(
-        g_ServerListManager->GetSelectServerTitle(Data::ServerList::ChannelNamePlace::Login).c_str());
+    // Every frame: the cached title, copied only when it changed.
+    const std::string& serverNameUtf8 =
+        g_ServerListManager->GetSelectServerTitleUtf8(Data::ServerList::ChannelNamePlace::Login);
     if (m_RmlView.GetModel().serverName != serverNameUtf8)
     {
         m_RmlView.GetModel().serverName = serverNameUtf8;
