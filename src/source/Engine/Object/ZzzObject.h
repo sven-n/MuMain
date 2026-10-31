@@ -37,6 +37,8 @@ void SkinObjectMeshes(OBJECT* o, BMD* b, bool Translate);
 // The spawns, state and cloth of a player transformation's draw (RenderPartObjectBody), for a character the last
 // frame drew; its bones are the character's pose.
 void UpdateTransformSkinEffects(OBJECT* o);
+// Creates, steps and drops a body part's cloth as one RenderPartObject call with that part did; the draw renders it.
+void StepPartCloth(OBJECT* o, PART_t* p, int Type, int ItemLevel, bool Translate);
 void NextGradeObjectRender(CHARACTER* c);
 void RenderObject_AfterImage(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0,

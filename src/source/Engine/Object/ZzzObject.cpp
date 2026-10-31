@@ -7488,6 +7488,96 @@ void RenderPartObjectEdgeLight(BMD* b, OBJECT* o, int Flag, bool Translate, floa
     RenderPartObjectEdge(b, o, Flag, Translate, Scale);
 }
 
+// Which cloth a body part's model carries: 0 for none.
+static int PartClothKind(int Type)
+{
+    switch (Type)
+    {
+    case MODEL_GRAND_SOUL_PANTS:
+        return 1;
+    case MODEL_DIVINE_PANTS:
+        return 2;
+    case MODEL_DARK_SOUL_PANTS:
+        return 3;
+    }
+    return 0;
+}
+
+void StepPartCloth(OBJECT* o, PART_t* p, int Type, int ItemLevel, bool Translate)
+{
+    Type = Render::Items::Display::GetDrawnModel(Type, ItemLevel);
+    if (p)
+    {
+        const int iCloth = PartClothKind(Type);
+        if (iCloth == 0 && !p->m_pCloth[0])
+            return;
+
+        // The cloth pins to the part's skinned vertices, which the part's draw skins first.
+        BMD* b = &Models[Type];
+        b->BodyScale = o->Scale;
+        VectorCopy(o->Position, b->BodyOrigin);
+        OBB_t obb;
+        b->TransformCheap(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &obb, Translate);
+
+        if (!p->m_pCloth[0] && iCloth > 0)
+        {
+            int iCount = 1;
+            CPhysicsClothMesh* pCloth[2] = { NULL, NULL };
+            switch (iCloth)
+            {
+            case 1:
+                if (!CPhysicsClothMesh::CanCreate(Type, 2, 5, 8))
+                    break;
+                pCloth[0] = new CPhysicsClothMesh;
+                pCloth[0]->Create(o, 2, 17, 0.0f, 9.0f, 7.0f, 5, 8, 45.0f, 85.0f, BITMAP_PANTS_G_SOUL, BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER, Type);
+                pCloth[0]->AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
+                break;
+            case 2:
+                if (!CPhysicsClothMesh::CanCreate(Type, 3))
+                    break;
+                iCount = 1;
+                pCloth[0] = new CPhysicsClothMesh;
+                pCloth[0]->Create(o, 3, 2, PCT_OPT_CORRECTEDFORCE | PCT_HEAVY, Type);
+                pCloth[0]->AddCollisionSphere(0.0f, 0.0f, -15.0f, 22.0f, 2);
+                pCloth[0]->AddCollisionSphere(0.0f, 0.0f, -27.0f, 23.0f, 2);
+                pCloth[0]->AddCollisionSphere(0.0f, 0.0f, -40.0f, 24.0f, 2);
+                pCloth[0]->AddCollisionSphere(0.0f, 0.0f, -54.0f, 25.0f, 2);
+                pCloth[0]->AddCollisionSphere(0.0f, 0.0f, -69.0f, 26.0f, 2);
+                break;
+            case 3:
+                if (!CPhysicsClothMesh::CanCreate(Type, 2, 7, 5))
+                    break;
+                pCloth[0] = new CPhysicsClothMesh;
+                pCloth[0]->Create(o, 2, 17, 0.0f, 9.0f, 7.0f, 7, 5, 50.0f, 100.0f, b->IndexTexture[b->Meshs[2].Texture], b->IndexTexture[b->Meshs[2].Texture], PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER, Type);
+                pCloth[0]->AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
+                break;
+            }
+            p->m_byNumCloth = iCount;
+            p->m_pCloth[0] = (void*)pCloth[0];
+            p->m_pCloth[1] = (void*)pCloth[1];
+        }
+
+        if (p->m_pCloth[0])
+        {
+            if (iCloth > 0)
+            {
+                for (int i = 0; i < p->m_byNumCloth; ++i)
+                {
+                    auto* pCloth = (CPhysicsCloth*)p->m_pCloth[i];
+                    if (!pCloth->Move2(0.005f, 5))
+                    {
+                        DeleteCloth(NULL, o, p);
+                    }
+                }
+            }
+            else if (iCloth == 0)
+            {
+                DeleteCloth(NULL, o, p);
+            }
+        }
+    }
+}
+
 void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, int ItemLevel, int ExcellentFlags, int ancientDiscriminator, bool GlobalTransform, bool HideSkin, bool Translate, int Select, int RenderType)
 {
     if (Alpha <= 0.01f)
@@ -7562,83 +7652,11 @@ void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, 
         b->Transform(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, Translate);
     }
 
-    if (p)
+    if (p && p->m_pCloth[0] && PartClothKind(Type) > 0)
     {
-        int iCloth = 0;
-        switch (Type)
+        for (int i = 0; i < p->m_byNumCloth; ++i)
         {
-        case MODEL_GRAND_SOUL_PANTS:
-            iCloth = 1;
-            break;
-
-        case MODEL_DIVINE_PANTS:
-            iCloth = 2;
-            break;
-
-        case MODEL_DARK_SOUL_PANTS:
-            iCloth = 3;
-            break;
-        }
-
-        if (!p->m_pCloth[0] && iCloth > 0)
-        {
-            int iCount = 1;
-            CPhysicsClothMesh* pCloth[2] = { NULL, NULL };
-            switch (iCloth)
-            {
-            case 1:
-                if (!CPhysicsClothMesh::CanCreate(Type, 2, 5, 8))
-                    break;
-                pCloth[0] = new CPhysicsClothMesh;
-                pCloth[0]->Create(o, 2, 17, 0.0f, 9.0f, 7.0f, 5, 8, 45.0f, 85.0f, BITMAP_PANTS_G_SOUL, BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER, Type);
-                pCloth[0]->AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
-                break;
-            case 2:
-                if (!CPhysicsClothMesh::CanCreate(Type, 3))
-                    break;
-                iCount = 1;
-                pCloth[0] = new CPhysicsClothMesh;
-                pCloth[0]->Create(o, 3, 2, PCT_OPT_CORRECTEDFORCE | PCT_HEAVY, Type);
-                pCloth[0]->AddCollisionSphere(0.0f, 0.0f, -15.0f, 22.0f, 2);
-                pCloth[0]->AddCollisionSphere(0.0f, 0.0f, -27.0f, 23.0f, 2);
-                pCloth[0]->AddCollisionSphere(0.0f, 0.0f, -40.0f, 24.0f, 2);
-                pCloth[0]->AddCollisionSphere(0.0f, 0.0f, -54.0f, 25.0f, 2);
-                pCloth[0]->AddCollisionSphere(0.0f, 0.0f, -69.0f, 26.0f, 2);
-                break;
-            case 3:
-                if (!CPhysicsClothMesh::CanCreate(Type, 2, 7, 5))
-                    break;
-                pCloth[0] = new CPhysicsClothMesh;
-                pCloth[0]->Create(o, 2, 17, 0.0f, 9.0f, 7.0f, 7, 5, 50.0f, 100.0f, b->IndexTexture[b->Meshs[2].Texture], b->IndexTexture[b->Meshs[2].Texture], PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER, Type);
-                pCloth[0]->AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
-                break;
-            }
-            p->m_byNumCloth = iCount;
-            p->m_pCloth[0] = (void*)pCloth[0];
-            p->m_pCloth[1] = (void*)pCloth[1];
-        }
-
-        if (p->m_pCloth[0])
-        {
-            if (iCloth > 0)
-            {
-                for (int i = 0; i < p->m_byNumCloth; ++i)
-                {
-                    auto* pCloth = (CPhysicsCloth*)p->m_pCloth[i];
-                    if (!pCloth->Move2(0.005f, 5))
-                    {
-                        DeleteCloth(NULL, o, p);
-                    }
-                    else
-                    {
-                        pCloth->Render();
-                    }
-                }
-            }
-            else if (iCloth == 0)
-            {
-                DeleteCloth(NULL, o, p);
-            }
+            ((CPhysicsCloth*)p->m_pCloth[i])->Render();
         }
     }
 

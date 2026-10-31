@@ -9199,6 +9199,76 @@ bool UpdateTransformCharacterState(CHARACTER* c)
     return true;
 }
 
+// Whether RenderCharacter draws a player's body parts into the shadow pass.
+bool DrawsPlayerBodyShadow(CHARACTER* c, OBJECT* o)
+{
+    return gMapManager.WorldActive != WD_10HEAVEN && o->Type == MODEL_PLAYER
+        && (!(MODEL_HORN_OF_UNIRIA <= c->Helper.Type && c->Helper.Type <= MODEL_HORN_OF_DINORANT) || c->SafeZone)
+        && gMapManager.InHellas() == false;
+}
+
+// Whether RenderCharacter's transformation chain reaches the player's own body parts.
+bool DrawsPlayerBodyParts(CHARACTER* c, OBJECT* o)
+{
+    const int sub = o->SubType;
+    if (o->Kind == KIND_NPC && gMapManager.WorldActive == WD_0LORENCIA && o->Type == MODEL_PLAYER
+        && sub >= MODEL_SKELETON1 && sub <= MODEL_SKELETON3)
+        return false;
+    if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER
+        && (sub == MODEL_SKELETON_PCBANG || sub == MODEL_HALLOWEEN || sub == MODEL_CURSEDTEMPLE_ALLIED_PLAYER
+            || sub == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER || sub == MODEL_PANDA || sub == MODEL_SKELETON_CHANGED
+            || sub == MODEL_XMAS_EVENT_CHANGE_GIRL || sub == MODEL_GM_CHARACTER
+            || (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER && sub == MODEL_SKELETON1)))
+        return false;
+    if (o->Type == MODEL_PLAYER
+        && (sub == MODEL_XMAS_EVENT_CHA_SSANTA || sub == MODEL_XMAS_EVENT_CHA_SNOWMAN || sub == MODEL_XMAS_EVENT_CHA_DEER
+            || (sub >= MODEL_SKELETON1 && sub <= MODEL_SKELETON3)))
+        return false;
+    if (c->Change)
+        return false;
+#ifndef GUILD_WAR_EVENT
+    if (o->Kind == KIND_PLAYER && gMapManager.InChaosCastle() == true)
+        return false;
+#endif
+    return o->Alpha > 0.01f;
+}
+
+// The shadow pass's corpse clamp and each part cloth step the player's draw passes took.
+void UpdatePlayerBodyParts(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+    if (o->Alpha >= 0.5f && c->HideShadow == false && DrawsPlayerBodyShadow(c, o))
+    {
+        if (gMapManager.InBloodCastle() && o->m_bActionStart && c->Dead > 0)
+        {
+            float height = RequestTerrainHeight(o->Position[0], o->Position[1]);
+            if (height < o->Position[2])
+            {
+                o->Position[2] = height;
+            }
+        }
+        for (int i = MAX_BODYPART - 1; i >= 0; i--)
+        {
+            PART_t* p = &c->BodyPart[i];
+            if (p->Type != -1)
+            {
+                StepPartCloth(o, p, p->Type, 0, true);
+            }
+        }
+    }
+    if (DrawsPlayerBodyParts(c, o))
+    {
+        for (int i = MAX_BODYPART - 1; i >= 0; i--)
+        {
+            PART_t* p = &c->BodyPart[i];
+            if (p->Type != -1)
+            {
+                StepPartCloth(o, p, p->Type, p->Level, true);
+            }
+        }
+    }
+}
+
 // Creates, simulates and drops a character's cloth, under the conditions its draw renders it.
 void UpdateCharacterCloth(CHARACTER* c)
 {
@@ -9355,18 +9425,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
     if (o->Alpha >= 0.5f && c->HideShadow == false)
     {
-        if (gMapManager.WorldActive != WD_10HEAVEN && (o->Type == MODEL_PLAYER) && (!(MODEL_HORN_OF_UNIRIA <= c->Helper.Type && c->Helper.Type <= MODEL_HORN_OF_DINORANT) || c->SafeZone)
-            && gMapManager.InHellas() == false
-            )
+        if (DrawsPlayerBodyShadow(c, o))
         {
-            if (gMapManager.InBloodCastle() && o->m_bActionStart && c->Dead > 0)
-            {
-                float height = RequestTerrainHeight(o->Position[0], o->Position[1]);
-                if (height < o->Position[2])
-                {
-                    o->Position[2] = height;
-                }
-            }
             o->EnableShadow = true;
             for (int i = MAX_BODYPART - 1; i >= 0; i--)
             {
@@ -9998,6 +10058,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         {
             UpdateParts(c);
         }
+        UpdatePlayerBodyParts(c);
     }
     if (cloak.shown && !g_isCharacterBuff(o, eBuff_Cloaking) && o->m_pCloth)
     {
@@ -11799,6 +11860,7 @@ void UpdateDrawnCharacterEffects()
         {
             UpdateParts(c);
         }
+        UpdatePlayerBodyParts(c);
         if (UpdateCharacterTypeEffects(c, o, b))
             continue;
         // Same order and stop-on-claim as RenderCharacter's chain.
