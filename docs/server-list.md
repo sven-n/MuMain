@@ -212,8 +212,8 @@ problem; the second is not used.
 The theme colors are drawn by each theme in its own shade, hover too. A color
 of your own has an `id` (letters and digits, starting with a lowercase letter,
 not one of the theme colors), a `name` the editor shows, and a shade
-(`#RRGGBB`) per theme folder (`legacy`, `modern`, ...); a theme it has no shade
-for draws the theme's default color. A button in your own color keeps it on
+(`#RRGGBB`) per theme folder (`legacy`, `modern`, ...; capitals do not matter);
+a theme it has no shade for draws the theme's default color. A button in your own color keeps it on
 hover; the button's frame still changes.
 
 ### Problems
