@@ -6,7 +6,6 @@
 
 #include "Data/GameData/ServerListData/ServerListGroup.h"
 
-#include <span>
 #include <string>
 #include <vector>
 
@@ -36,22 +35,28 @@ public:
     // Reads Data/Local/ServerList.json. False when it has fatal problems; they are in
     // errorMessage then, for the player.
     bool LoadServerListScript(std::string& errorMessage);
-    // The groups the login screen names the servers with, in their order.
-    void SetServerGroups(std::span<const Data::ServerList::ServerGroup> groups);
+    // The list the login screen names the servers with: the groups in their
+    // order, the VIP types and the texts.
+    void SetServerList(const Data::ServerList::ServerListData& list);
     void SetFirst();
     bool GetNext(OUT CServerGroup*& pServerGroup);
     CServerGroup* GetServerGroupByBtnPos(int iBtnPos);
 
     int GetServerGroupSize();
 
-    void SetSelectServerInfo(wchar_t* pszName, int iIndex, BYTE byNonPvP);
+    void SetSelectServerInfo(const wchar_t* pszName, int iIndex, const Data::ServerList::ChannelSettings& channel);
     wchar_t* GetSelectServerName();
     int GetSelectServerIndex();
-    BYTE GetNonPVPInfo();
+    // Whether the selected channel has PvP off.
     bool IsNonPvP();
-    // The selected server as the login and character info windows title it, with its channel
-    // type: "[Valhalla-1(Gold) Server]".
-    std::wstring GetSelectServerTitle();
+    // The selected channel as `place` names it, in the game's language:
+    // "[Valhalla-1 (Gold Non-PvP)]". `character` fills {character} (the
+    // screenshot message).
+    std::wstring GetSelectServerTitle(Data::ServerList::ChannelNamePlace place, const wchar_t* character = L"");
+    // A channel's button on the login screen, with its load: "Valhalla-1 (Gold Non-PvP) Connect".
+    std::wstring GetServerButtonText(const CServerGroup& group, const CServerInfo& server) const;
+    // Its color there: its VIP type's, else gray with PvP on and the default with PvP off.
+    Data::ServerList::ThemeColor GetServerButtonColor(const CServerInfo& server) const;
     void SetTotalServer(int iTotalServer);
     int GetTotalServer();
 
@@ -74,7 +79,7 @@ public:
         return m_receivedServersVersion;
     }
     // Builds the groups of the last list the connect server sent again, with
-    // the groups SetServerGroups set since.
+    // the groups SetServerList set since.
     void RebuildServerGroups();
 #endif
 
@@ -90,9 +95,12 @@ public:
     int m_iTotalServer;
     wchar_t m_szSelectServerName[MAX_TEXT_LENGTH];
     int m_iSelectServerIndex;
-    BYTE m_byNonPvP;
+    Data::ServerList::ChannelSettings m_selectChannel;
 
 protected:
+    // The VIP types and texts the channels are named with; its groups by ID in
+    // m_mapServerListScript.
+    Data::ServerList::ServerListData m_serverList;
     ServerListScriptMap m_mapServerListScript;
 #ifdef _EDITOR
     std::vector<ReceivedServer> m_receivedServers;

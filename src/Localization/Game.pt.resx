@@ -1249,12 +1249,6 @@
   <data name="%s: Screenshot Saved" xml:space="preserve">
     <value>%s: Captura de tela salva</value>
   </data>
-  <data name="[%s-%d(Non-PvP) Server]" xml:space="preserve">
-    <value>[Servidor %s-%d (não PvP)]</value>
-  </data>
-  <data name="[%s-%d Server]" xml:space="preserve">
-    <value>[Servidor %s-%d]</value>
-  </data>
   <data name="1)After moving your account into the divided server," xml:space="preserve">
     <value>1)Depois de mover sua conta para o servidor dividido,</value>
   </data>
@@ -7551,12 +7545,6 @@
   </data>
   <data name="Please repurchase after expiration." xml:space="preserve">
     <value>Por favor, recompre após a expiração.</value>
-  </data>
-  <data name="[%s-%d(Gold PvP) Server]" xml:space="preserve">
-    <value>[Servidor %s-%d (PvP Ouro)]</value>
-  </data>
-  <data name="[%s-%d(Gold) Server]" xml:space="preserve">
-    <value>[Servidor %s-%d (Ouro)]</value>
   </data>
   <data name="Maximum HP increase +%d" xml:space="preserve">
     <value>Aumento máximo de HP +%d</value>

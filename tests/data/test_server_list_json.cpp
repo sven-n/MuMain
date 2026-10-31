@@ -7,6 +7,7 @@
 #include "Data/GameData/ServerListData/ServerListJson.h"
 
 #include <algorithm>
+#include <array>
 #include <filesystem>
 #include <fstream>
 #include <optional>
@@ -16,21 +17,24 @@
 using Data::Items::HasFatal;
 using Data::Items::ItemDataIssue;
 using Data::Items::ItemDataIssueSeverity;
-using Data::ServerList::ChannelType;
+using Data::ServerList::ChannelNamePlace;
+using Data::ServerList::ChannelSettings;
 using Data::ServerList::ServerGroup;
+using Data::ServerList::ServerListData;
+using Data::ServerList::ThemeColor;
 
 namespace
 {
 struct ReadResult
 {
-    std::vector<ServerGroup> groups;
+    ServerListData list;
     std::vector<ItemDataIssue> issues;
 };
 
 ReadResult Read(const std::string& text)
 {
     ReadResult result;
-    Data::ServerList::ReadServerListJson(text, "ServerList.json", result.groups, result.issues);
+    Data::ServerList::ReadServerListJson(text, "ServerList.json", result.list, result.issues);
     return result;
 }
 
@@ -44,10 +48,15 @@ std::string Messages(const std::vector<ItemDataIssue>& issues)
     return text;
 }
 
-bool HasIssueAbout(const std::vector<ItemDataIssue>& issues, const std::string& field, const std::string& message)
+bool HasIssueAbout(const std::vector<ItemDataIssue>& issues, const std::string& field, const std::string& message,
+                   std::optional<ItemDataIssueSeverity> severity = std::nullopt)
 {
-    return std::any_of(issues.begin(), issues.end(), [&](const ItemDataIssue& issue)
-                       { return issue.field == field && issue.message.find(message) != std::string::npos; });
+    return std::any_of(issues.begin(), issues.end(),
+                       [&](const ItemDataIssue& issue)
+                       {
+                           return issue.field == field && issue.message.find(message) != std::string::npos &&
+                                  (!severity || issue.severity == *severity);
+                       });
 }
 
 bool HasWarnings(const std::vector<ItemDataIssue>& issues)
@@ -59,76 +68,133 @@ bool HasWarnings(const std::vector<ItemDataIssue>& issues)
 // One group with nothing else around it.
 std::string GroupFile(const std::string& group)
 {
-    return R"({ "formatVersion": 1, "groups": [ )" + group + " ] }";
+    return R"({ "formatVersion": 2, "vipTypes": [ {"id": "gold", "name": "Gold"} ], "groups": [ )" + group + " ] }";
+}
+
+// The file with these VIP types and no group.
+std::string VipTypesFile(const std::string& vipTypes)
+{
+    return R"({ "formatVersion": 2, "vipTypes": [ )" + vipTypes + R"( ], "groups": [] })";
+}
+
+// The file with these texts and no group.
+std::string NamesFile(const std::string& names)
+{
+    return R"({ "formatVersion": 2, "names": )" + names + R"(, "groups": [] })";
+}
+
+ChannelSettings Channel(bool pvp, const std::string& vip)
+{
+    ChannelSettings channel;
+    channel.pvp = pvp;
+    channel.vip = vip;
+    return channel;
 }
 
 const std::string ValidFile = R"({
-  "formatVersion": 1,
+  "formatVersion": 2,
+  "vipTypes": [
+    {"id": "gold", "name": {"en": "Gold", "es": "Oro"}, "themeColor": "orange"},
+    {"id": "silver", "name": "Silver"}
+  ],
+  "names": {
+    "nonPvp": {"en": "Non-PvP", "de": "Nicht-PvP"},
+    "login": {"en": "[{name}-{channel} {vip} {pvp}]", "es": "[{name}-{channel} {pvp} {vip}]"}
+  },
   "groups": [
-    { "id": 0, "name": "Valhalla", "channels": {"1": "gold", "5": "goldPvp", "6": "nonPvp", "20": "normal"} },
+    { "id": 0, "name": "Valhalla",
+      "channels": {"1": {"vip": "gold", "pvp": false}, "5": {"vip": "gold"}, "6": {"pvp": false}, "7": {"vip": "silver"}, "20": {}} },
     { "id": 3, "name": "Kanturu", "description": "No PvP here", "testServer": true }
   ]
 })";
 } // namespace
 
-TEST_CASE("ServerListJson: reads the groups in their order")
+TEST_CASE("ServerListJson: reads the groups, VIP types and texts in their order")
 {
     const ReadResult read = Read(ValidFile);
 
     CHECK_MESSAGE(read.issues.empty(), Messages(read.issues));
-    REQUIRE(read.groups.size() == 2);
+    REQUIRE(read.list.vipTypes.size() == 2);
+    CHECK(read.list.vipTypes[0].id == "gold");
+    CHECK(read.list.vipTypes[0].name.Get("en") == "Gold");
+    CHECK(read.list.vipTypes[0].name.Get("es") == "Oro");
+    CHECK(read.list.vipTypes[0].themeColor == ThemeColor::Orange);
+    CHECK(read.list.vipTypes[1].id == "silver");
+    CHECK(read.list.vipTypes[1].themeColor == ThemeColor::Default);
 
-    const ServerGroup& valhalla = read.groups[0];
+    CHECK(read.list.names.nonPvp.Get("de") == "Nicht-PvP");
+    CHECK(read.list.names.Template(ChannelNamePlace::Login).Get("es") == "[{name}-{channel} {pvp} {vip}]");
+    // Texts the file leaves out are the built-in ones.
+    const Data::ServerList::ChannelNames builtIn = Data::ServerList::GetDefaultChannelNames();
+    CHECK(read.list.names.pvp == builtIn.pvp);
+    CHECK(read.list.names.Template(ChannelNamePlace::Button) == builtIn.Template(ChannelNamePlace::Button));
+
+    REQUIRE(read.list.groups.size() == 2);
+    const ServerGroup& valhalla = read.list.groups[0];
     CHECK(valhalla.id == 0);
     CHECK(valhalla.name == "Valhalla");
     CHECK(valhalla.description.empty());
     CHECK_FALSE(valhalla.testServer);
-    CHECK(valhalla.channels[0] == ChannelType::Gold);
-    CHECK(valhalla.channels[1] == ChannelType::Normal);
-    CHECK(valhalla.channels[4] == ChannelType::GoldPvp);
-    CHECK(valhalla.channels[5] == ChannelType::NonPvp);
-    CHECK(valhalla.channels[19] == ChannelType::Normal);
+    CHECK(valhalla.channels[0] == Channel(false, "gold"));
+    CHECK(valhalla.channels[1] == Channel(true, ""));
+    CHECK(valhalla.channels[4] == Channel(true, "gold"));
+    CHECK(valhalla.channels[5] == Channel(false, ""));
+    CHECK(valhalla.channels[6] == Channel(true, "silver"));
+    CHECK(valhalla.channels[19] == Channel(true, ""));
 
-    const ServerGroup& kanturu = read.groups[1];
+    const ServerGroup& kanturu = read.list.groups[1];
     CHECK(kanturu.id == 3);
     CHECK(kanturu.description == "No PvP here");
     CHECK(kanturu.testServer);
     CHECK(std::all_of(kanturu.channels.begin(), kanturu.channels.end(),
-                      [](ChannelType type) { return type == ChannelType::Normal; }));
+                      [](const ChannelSettings& channel) { return channel == ChannelSettings{}; }));
 }
 
 TEST_CASE("ServerListJson: writes what it reads")
 {
     const ReadResult read = Read(ValidFile);
-    const std::string written = Data::ServerList::WriteServerListJson(read.groups);
+    const std::string written = Data::ServerList::WriteServerListJson(read.list);
     const ReadResult readBack = Read(written);
 
     CHECK_MESSAGE(readBack.issues.empty(), Messages(readBack.issues));
-    CHECK(readBack.groups == read.groups);
-    // Normal channels and empty or false fields are left out.
+    CHECK(readBack.list == read.list);
+    // Channels with PvP on and no VIP type, and empty or false fields are left out.
     CHECK(written.find("\"20\"") == std::string::npos);
     CHECK(written.find("\"description\": \"\"") == std::string::npos);
     CHECK(written.find("\"testServer\": false") == std::string::npos);
-    // The channels of a group are on one line.
-    CHECK(written.find(R"("channels": {"1": "gold", "5": "goldPvp", "6": "nonPvp"})") != std::string::npos);
+    CHECK(written.find("\"pvp\": true") == std::string::npos);
+    // The channels of a group are on one line, and a VIP type's names on the line of its name.
+    CHECK(
+        written.find(
+            R"("channels": {"1": {"vip": "gold", "pvp": false}, "5": {"vip": "gold"}, "6": {"pvp": false}, "7": {"vip": "silver"}})") !=
+        std::string::npos);
+    CHECK(written.find(R"("name": {"en": "Gold", "es": "Oro"})") != std::string::npos);
+    // Every text is written, the built-in ones too.
+    CHECK(written.find(R"("screenshot": {)") != std::string::npos);
 }
 
 TEST_CASE("ServerListJson: an empty list is a valid file")
 {
-    const ReadResult read = Read(R"({ "formatVersion": 1, "groups": [] })");
+    const ReadResult read = Read(R"({ "formatVersion": 2, "groups": [] })");
 
     CHECK(read.issues.empty());
-    CHECK(read.groups.empty());
-    CHECK(Data::ServerList::WriteServerListJson(read.groups) == "{\n  \"formatVersion\": 1,\n  \"groups\": []\n}\n");
+    CHECK(read.list.groups.empty());
+    CHECK(read.list.vipTypes.empty());
+    CHECK(read.list == ServerListData{});
+    CHECK(Read(Data::ServerList::WriteServerListJson(read.list)).list == read.list);
 }
 
-TEST_CASE("ServerListJson: the file needs its version and a list of groups")
+TEST_CASE("ServerListJson: the file needs version 2 and a list of groups")
 {
     CHECK(HasFatal(Read("not json").issues));
     CHECK(HasFatal(Read(R"({ "groups": [] })").issues));
-    CHECK(HasFatal(Read(R"({ "formatVersion": 2, "groups": [] })").issues));
+    CHECK(HasFatal(Read(R"({ "formatVersion": 3, "groups": [] })").issues));
 
-    const ReadResult noList = Read(R"({ "formatVersion": 1, "groups": {} })");
+    const ReadResult version1 = Read(R"({ "formatVersion": 1, "groups": [ { "id": 0, "name": "A" } ] })");
+    CHECK(HasIssueAbout(version1.issues, "formatVersion", "version 1 is not read", ItemDataIssueSeverity::Fatal));
+    CHECK(version1.list.groups.empty());
+
+    const ReadResult noList = Read(R"({ "formatVersion": 2, "groups": {} })");
     CHECK(HasIssueAbout(noList.issues, "groups", "not a list"));
 }
 
@@ -136,7 +202,7 @@ TEST_CASE("ServerListJson: a group needs an id and a name")
 {
     const ReadResult noId = Read(GroupFile(R"({ "name": "Valhalla" })"));
     CHECK(HasIssueAbout(noId.issues, "groups[0].id", "missing"));
-    CHECK(noId.groups.empty());
+    CHECK(noId.list.groups.empty());
 
     const ReadResult badId = Read(GroupFile(R"({ "id": 3277, "name": "Valhalla" })"));
     CHECK(HasIssueAbout(badId.issues, "groups[0].id", "from 0 to 3276"));
@@ -156,30 +222,153 @@ TEST_CASE("ServerListJson: a group needs an id and a name")
 
 TEST_CASE("ServerListJson: a group id is in the list once")
 {
-    const ReadResult read = Read(R"({ "formatVersion": 1, "groups": [
+    const ReadResult read = Read(R"({ "formatVersion": 2, "groups": [
         { "id": 1, "name": "Helheim" }, { "id": 1, "name": "Midgard" } ] })");
 
     CHECK(HasIssueAbout(read.issues, "groups[1].id", "more than once"));
-    REQUIRE(read.groups.size() == 1);
-    CHECK(read.groups[0].name == "Helheim");
+    REQUIRE(read.list.groups.size() == 1);
+    CHECK(read.list.groups[0].name == "Helheim");
 }
 
-TEST_CASE("ServerListJson: channels are numbered 1 to 20 and have a known type")
+TEST_CASE("ServerListJson: channels are numbered 1 to 20 and are objects of PvP and a VIP type")
 {
-    const ReadResult zero = Read(GroupFile(R"({ "id": 0, "name": "A", "channels": {"0": "gold"} })"));
+    const ReadResult zero = Read(GroupFile(R"({ "id": 0, "name": "A", "channels": {"0": {}} })"));
     CHECK(HasIssueAbout(zero.issues, "groups[0].channels.0", "1 to 20"));
 
-    const ReadResult tooHigh = Read(GroupFile(R"({ "id": 0, "name": "A", "channels": {"21": "gold"} })"));
+    const ReadResult tooHigh = Read(GroupFile(R"({ "id": 0, "name": "A", "channels": {"21": {}} })"));
     CHECK(HasIssueAbout(tooHigh.issues, "groups[0].channels.21", "1 to 20"));
 
-    const ReadResult notANumber = Read(GroupFile(R"({ "id": 0, "name": "A", "channels": {"1a": "gold"} })"));
+    const ReadResult notANumber = Read(GroupFile(R"({ "id": 0, "name": "A", "channels": {"1a": {}} })"));
     CHECK(HasFatal(notANumber.issues));
 
-    const ReadResult unknownType = Read(GroupFile(R"({ "id": 0, "name": "A", "channels": {"1": "silver"} })"));
-    CHECK(HasIssueAbout(unknownType.issues, "groups[0].channels.1", "normal, nonPvp, goldPvp or gold"));
+    // A version 1 type name.
+    const ReadResult typeName = Read(GroupFile(R"({ "id": 0, "name": "A", "channels": {"1": "gold"} })"));
+    CHECK(HasIssueAbout(typeName.issues, "groups[0].channels.1", R"(must be an object with "pvp" and "vip")"));
+
+    const ReadResult pvpNotABool = Read(GroupFile(R"({ "id": 0, "name": "A", "channels": {"1": {"pvp": 0}} })"));
+    CHECK(HasIssueAbout(pvpNotABool.issues, "groups[0].channels.1.pvp", "true or false"));
+
+    const ReadResult vipNotAText = Read(GroupFile(R"({ "id": 0, "name": "A", "channels": {"1": {"vip": 1}} })"));
+    CHECK(HasIssueAbout(vipNotAText.issues, "groups[0].channels.1.vip", "the id of a VIP type"));
 
     const ReadResult notAnObject = Read(GroupFile(R"({ "id": 0, "name": "A", "channels": ["gold"] })"));
     CHECK(HasIssueAbout(notAnObject.issues, "groups[0].channels", "object"));
+}
+
+TEST_CASE("ServerListJson: a channel with a VIP type the list does not have has none")
+{
+    const ReadResult read =
+        Read(GroupFile(R"({ "id": 0, "name": "A", "channels": {"1": {"vip": "silver", "pvp": false}} })"));
+
+    CHECK_FALSE(HasFatal(read.issues));
+    CHECK(HasIssueAbout(read.issues, "groups[0].channels.1.vip", "\"silver\" is not the id of a VIP type",
+                        ItemDataIssueSeverity::Error));
+    REQUIRE(read.list.groups.size() == 1);
+    CHECK(read.list.groups[0].channels[0] == Channel(false, ""));
+}
+
+TEST_CASE("ServerListJson: a VIP type needs an id used once and an English name")
+{
+    const ReadResult noId = Read(VipTypesFile(R"({"name": "Gold"})"));
+    CHECK(HasIssueAbout(noId.issues, "vipTypes[0].id", "missing", ItemDataIssueSeverity::Fatal));
+    CHECK(noId.list.vipTypes.empty());
+
+    for (const char* id : {R"("Gold")", R"("2gold")", R"("gold plus")", R"("")", "5"})
+    {
+        CAPTURE(id);
+        const ReadResult badId = Read(VipTypesFile(std::string(R"({"id": )") + id + R"(, "name": "Gold"})"));
+        CHECK(HasIssueAbout(badId.issues, "vipTypes[0].id", "lowercase letter", ItemDataIssueSeverity::Fatal));
+    }
+
+    const ReadResult twice = Read(VipTypesFile(R"({"id": "gold", "name": "Gold"}, {"id": "gold", "name": "Golden"})"));
+    CHECK(HasIssueAbout(twice.issues, "vipTypes[1].id", "more than one VIP type", ItemDataIssueSeverity::Fatal));
+    REQUIRE(twice.list.vipTypes.size() == 1);
+    CHECK(twice.list.vipTypes[0].name.GetNeutral() == "Gold");
+
+    const ReadResult noName = Read(VipTypesFile(R"({"id": "gold"})"));
+    CHECK(HasIssueAbout(noName.issues, "vipTypes[0].name", "missing", ItemDataIssueSeverity::Fatal));
+
+    const ReadResult noEnglish = Read(VipTypesFile(R"({"id": "gold", "name": {"es": "Oro"}})"));
+    CHECK(HasIssueAbout(noEnglish.issues, "vipTypes[0].name", "English name is missing", ItemDataIssueSeverity::Fatal));
+
+    const ReadResult notAnObject = Read(VipTypesFile("5"));
+    CHECK(HasIssueAbout(notAnObject.issues, "vipTypes[0]", "must be an object"));
+
+    const ReadResult notAList = Read(R"({ "formatVersion": 2, "vipTypes": {}, "groups": [] })");
+    CHECK(HasIssueAbout(notAList.issues, "vipTypes", "a list of VIP types"));
+}
+
+TEST_CASE("ServerListJson: an unknown theme color is the default color")
+{
+    const ReadResult read = Read(VipTypesFile(R"({"id": "gold", "name": "Gold", "themeColor": "purple"})"));
+
+    CHECK_FALSE(HasFatal(read.issues));
+    CHECK(HasIssueAbout(read.issues, "vipTypes[0].themeColor", "not a theme color", ItemDataIssueSeverity::Warning));
+    REQUIRE(read.list.vipTypes.size() == 1);
+    CHECK(read.list.vipTypes[0].themeColor == ThemeColor::Default);
+}
+
+TEST_CASE("ServerListJson: a text without its English one has the built-in English text")
+{
+    const ReadResult read = Read(NamesFile(R"({"nonPvp": {"es": "no PvP"}, "pvp": ""})"));
+
+    CHECK_MESSAGE(read.issues.empty(), Messages(read.issues));
+    CHECK(read.list.names.nonPvp.GetNeutral() == "Non-PvP");
+    CHECK(read.list.names.nonPvp.Get("es") == "no PvP");
+    // An English text given empty stays empty.
+    CHECK(read.list.names.pvp.GetNeutral().empty());
+}
+
+TEST_CASE("ServerListJson: a template shows what it cannot fill as written, an error")
+{
+    const ReadResult unknown = Read(NamesFile(R"({"login": {"en": "[{name} {load}]", "es": "[{vipName}]"}})"));
+    CHECK_FALSE(HasFatal(unknown.issues));
+    CHECK(HasIssueAbout(unknown.issues, "names.login.en", "{load} is not a placeholder of the login template",
+                        ItemDataIssueSeverity::Error));
+    CHECK(HasIssueAbout(unknown.issues, "names.login.es", "{vipName}", ItemDataIssueSeverity::Error));
+    CHECK(unknown.list.names.Template(ChannelNamePlace::Login).GetNeutral() == "[{name} {load}]");
+
+    // The button has {load}, the screenshot message {character}.
+    const ReadResult known = Read(NamesFile(R"({"button": "{name} {load}", "screenshot": "{name} / {character}"})"));
+    CHECK_MESSAGE(known.issues.empty(), Messages(known.issues));
+
+    const ReadResult braces = Read(NamesFile(R"({"characterInfo": "[{name"})"));
+    CHECK(HasIssueAbout(braces.issues, "names.characterInfo.en", "", ItemDataIssueSeverity::Error));
+}
+
+TEST_CASE("ServerListJson: texts need language codes and are cut when too long")
+{
+    const ReadResult badLocale = Read(NamesFile(R"({"pvp": {"en": "PvP", "e s": "x"}})"));
+    CHECK(HasIssueAbout(badLocale.issues, "names.pvp.e s", "not a language code", ItemDataIssueSeverity::Fatal));
+
+    const std::string longText(300, 'x');
+    const ReadResult tooLong =
+        Read(NamesFile(R"({"pvp": {"en": ")" + longText + R"(", "de": ")" + longText + R"("}})"));
+    CHECK_FALSE(HasFatal(tooLong.issues));
+    CHECK(HasIssueAbout(tooLong.issues, "names.pvp.en", "longer than 254 characters"));
+    CHECK(HasIssueAbout(tooLong.issues, "names.pvp.de", "longer than 254 characters"));
+    CHECK(tooLong.list.names.pvp.GetNeutral().size() == 254);
+    CHECK(tooLong.list.names.pvp.Get("de").size() == 254);
+
+    const ReadResult longVipName = Read(VipTypesFile(R"({"id": "gold", "name": ")" + std::string(40, 'g') + R"("})"));
+    CHECK(HasIssueAbout(longVipName.issues, "vipTypes[0].name.en", "longer than 32 characters"));
+    REQUIRE(longVipName.list.vipTypes.size() == 1);
+    CHECK(longVipName.list.vipTypes[0].name.GetNeutral() == std::string(32, 'g'));
+
+    const ReadResult notAnObject = Read(NamesFile("[]"));
+    CHECK(HasIssueAbout(notAnObject.issues, "names", "an object of texts"));
+}
+
+TEST_CASE("ServerListJson: a translation in a language the game does not have is a warning")
+{
+    const ReadResult read = Read(ValidFile);
+    std::vector<ItemDataIssue> issues;
+    const std::array<const char*, 2> locales = {"en", "es"};
+    Data::ServerList::ValidateServerListLocales(read.list, locales, "ServerList.json", issues);
+
+    CHECK(HasIssueAbout(issues, "names.nonPvp.de", "no language \"de\"", ItemDataIssueSeverity::Warning));
+    CHECK_FALSE(HasIssueAbout(issues, "vipTypes[0].name.es", ""));
+    CHECK(issues.size() == 1);
 }
 
 TEST_CASE("ServerListJson: a name or description that is too long is cut")
@@ -192,9 +381,9 @@ TEST_CASE("ServerListJson: a name or description that is too long is cut")
     CHECK_FALSE(HasFatal(read.issues));
     CHECK(HasIssueAbout(read.issues, "groups[0].name", "longer than 32 characters"));
     CHECK(HasIssueAbout(read.issues, "groups[0].description", "longer than 254 characters"));
-    REQUIRE(read.groups.size() == 1);
-    CHECK(read.groups[0].name == std::string(32, 'x'));
-    CHECK(read.groups[0].description.size() == 254);
+    REQUIRE(read.list.groups.size() == 1);
+    CHECK(read.list.groups[0].name == std::string(32, 'x'));
+    CHECK(read.list.groups[0].description.size() == 254);
 }
 
 TEST_CASE("ServerListJson: names are counted in UTF-16 units, not bytes")
@@ -207,8 +396,8 @@ TEST_CASE("ServerListJson: names are counted in UTF-16 units, not bytes")
     }
     const ReadResult read = Read(GroupFile(R"({ "id": 0, "name": ")" + name + R"(" })"));
 
-    REQUIRE(read.groups.size() == 1);
-    CHECK(read.groups[0].name == name.substr(0, 64));
+    REQUIRE(read.list.groups.size() == 1);
+    CHECK(read.list.groups[0].name == name.substr(0, 64));
 }
 
 TEST_CASE("ServerListJson: an emoji counts as two UTF-16 units")
@@ -220,14 +409,14 @@ TEST_CASE("ServerListJson: an emoji counts as two UTF-16 units")
         emojis += emoji;
     }
     const ReadResult onlyEmoji = Read(GroupFile(R"({ "id": 0, "name": ")" + emojis + R"(" })"));
-    REQUIRE(onlyEmoji.groups.size() == 1);
-    CHECK(onlyEmoji.groups[0].name == emojis.substr(0, 16 * emoji.size()));
+    REQUIRE(onlyEmoji.list.groups.size() == 1);
+    CHECK(onlyEmoji.list.groups[0].name == emojis.substr(0, 16 * emoji.size()));
 
     // 31 letters and an emoji are 33 units: the emoji goes, whole.
     const std::string mixed = std::string(31, 'x') + emoji;
     const ReadResult cut = Read(GroupFile(R"({ "id": 0, "name": ")" + mixed + R"(" })"));
-    REQUIRE(cut.groups.size() == 1);
-    CHECK(cut.groups[0].name == std::string(31, 'x'));
+    REQUIRE(cut.list.groups.size() == 1);
+    CHECK(cut.list.groups[0].name == std::string(31, 'x'));
     CHECK(HasIssueAbout(cut.issues, "groups[0].name", "an emoji counts as two"));
 
     // 30 letters and an emoji are exactly 32.
@@ -238,16 +427,22 @@ TEST_CASE("ServerListJson: an emoji counts as two UTF-16 units")
 
 TEST_CASE("ServerListJson: unknown fields and a second test server are warnings")
 {
-    const ReadResult read = Read(R"({ "formatVersion": 1, "color": "red", "groups": [
-        { "id": 0, "name": "A", "testServer": true, "order": 3 },
+    const ReadResult read = Read(R"({ "formatVersion": 2, "color": "red",
+        "vipTypes": [ {"id": "gold", "name": "Gold", "level": 2} ],
+        "names": { "title": "x" },
+        "groups": [
+        { "id": 0, "name": "A", "testServer": true, "order": 3, "channels": {"1": {"vip": "gold", "gold": true}} },
         { "id": 1, "name": "B", "testServer": true } ] })");
 
     CHECK_FALSE(HasFatal(read.issues));
     CHECK(HasWarnings(read.issues));
     CHECK(HasIssueAbout(read.issues, "color", "unknown field"));
+    CHECK(HasIssueAbout(read.issues, "vipTypes[0].level", "unknown field"));
+    CHECK(HasIssueAbout(read.issues, "names.title", "unknown field"));
     CHECK(HasIssueAbout(read.issues, "groups[0].order", "unknown field"));
+    CHECK(HasIssueAbout(read.issues, "groups[0].channels.1.gold", "unknown field"));
     CHECK(HasIssueAbout(read.issues, "testServer", "only the first test server group"));
-    CHECK(read.groups.size() == 2);
+    CHECK(read.list.groups.size() == 2);
 }
 
 TEST_CASE("ServerListJson: wrong types are errors")
@@ -258,31 +453,37 @@ TEST_CASE("ServerListJson: wrong types are errors")
     CHECK(HasIssueAbout(Read(GroupFile(R"({ "id": "0", "name": "A" })")).issues, "groups[0].id", "whole number"));
 }
 
-TEST_CASE("ServerListJson: channel type names")
-{
-    for (const ChannelType type : {ChannelType::Normal, ChannelType::NonPvp, ChannelType::GoldPvp, ChannelType::Gold})
-    {
-        CHECK(Data::ServerList::FindChannelType(Data::ServerList::GetChannelTypeName(type)) == type);
-    }
-    CHECK_FALSE(Data::ServerList::FindChannelType("Gold").has_value());
-}
-
 TEST_CASE("ServerListJson: the shipped file reads without problems and is written as the editor writes it")
 {
     // MU_TEST_DATA_DIR is the client folder's Data; the file name starts with it.
     const std::filesystem::path file =
         std::filesystem::path(MU_TEST_DATA_DIR).parent_path() / Data::ServerList::ServerListFile;
-    const Data::ServerList::ServerListLoadResult loaded = Data::ServerList::LoadServerListFile(file);
+    const std::array<const char*, 12> gameLocales = {"en", "de", "es", "id", "ja",    "pl",
+                                                     "pt", "ru", "tl", "uk", "zh-CN", "zh-TW"};
+    const Data::ServerList::ServerListLoadResult loaded = Data::ServerList::LoadServerListFile(file, gameLocales);
 
     CHECK_MESSAGE(loaded.issues.empty(), Messages(loaded.issues));
-    REQUIRE(loaded.groups.size() == 3);
-    CHECK(loaded.groups[0].name == "Valhalla");
-    CHECK(loaded.groups[1].name == "Helheim");
-    CHECK(loaded.groups[2].name == "Midgard");
+    REQUIRE(loaded.list.groups.size() == 3);
+    CHECK(loaded.list.groups[0].name == "Valhalla");
+    CHECK(loaded.list.groups[1].name == "Helheim");
+    CHECK(loaded.list.groups[2].name == "Midgard");
+    // Channels 1 to 4 Gold with PvP off, 5 Gold with PvP, 6 to 8 PvP off, the rest PvP.
+    for (const ServerGroup& group : loaded.list.groups)
+    {
+        CAPTURE(group.name);
+        CHECK(group.channels[0] == Channel(false, "gold"));
+        CHECK(group.channels[3] == Channel(false, "gold"));
+        CHECK(group.channels[4] == Channel(true, "gold"));
+        CHECK(group.channels[5] == Channel(false, ""));
+        CHECK(group.channels[7] == Channel(false, ""));
+        CHECK(group.channels[8] == Channel(true, ""));
+    }
+    REQUIRE(loaded.list.vipTypes.size() == 1);
+    CHECK(loaded.list.vipTypes[0].themeColor == ThemeColor::Orange);
 
     const std::optional<std::string> text = Data::Items::Json::ReadTextFile(file);
     REQUIRE(text.has_value());
-    CHECK(Data::ServerList::WriteServerListJson(loaded.groups) == *text);
+    CHECK(Data::ServerList::WriteServerListJson(loaded.list) == *text);
 }
 
 TEST_CASE("ServerListJson: a missing file is an error")
@@ -291,7 +492,7 @@ TEST_CASE("ServerListJson: a missing file is an error")
         Data::ServerList::LoadServerListFile("does/not/exist/ServerList.json");
 
     CHECK(HasIssueAbout(loaded.issues, "", "could not be read"));
-    CHECK(loaded.groups.empty());
+    CHECK(loaded.list.groups.empty());
 }
 
 TEST_CASE("ServerListJson: save writes the file and refuses a list with errors")
@@ -302,21 +503,23 @@ TEST_CASE("ServerListJson: save writes the file and refuses a list with errors")
     const ReadResult read = Read(ValidFile);
 
     std::vector<ItemDataIssue> issues;
-    REQUIRE(Data::ServerList::SaveServerListFile(file, read.groups, issues));
+    REQUIRE(Data::ServerList::SaveServerListFile(file, read.list, issues));
     CHECK(issues.empty());
     const Data::ServerList::ServerListLoadResult saved = Data::ServerList::LoadServerListFile(file);
     CHECK(saved.issues.empty());
-    CHECK(saved.groups == read.groups);
+    CHECK(saved.list == read.list);
 
-    std::vector<ServerGroup> broken = read.groups;
-    broken[1].name.clear();
-    broken.push_back(read.groups[0]);
+    ServerListData broken = read.list;
+    broken.groups[1].name.clear();
+    broken.groups.push_back(read.list.groups[0]);
+    broken.vipTypes.push_back(read.list.vipTypes[0]);
     std::vector<ItemDataIssue> refused;
     CHECK_FALSE(Data::ServerList::SaveServerListFile(file, broken, refused));
     CHECK(HasIssueAbout(refused, "groups[1].name", "missing or empty"));
     CHECK(HasIssueAbout(refused, "groups[2].id", "more than once"));
+    CHECK(HasIssueAbout(refused, "vipTypes[2].id", "more than one VIP type"));
     // The file stays as it was.
-    CHECK(Data::ServerList::LoadServerListFile(file).groups == read.groups);
+    CHECK(Data::ServerList::LoadServerListFile(file).list == read.list);
     CHECK_FALSE(std::filesystem::exists(file.string() + ".tmp"));
 
     std::filesystem::remove_all(folder);
@@ -327,14 +530,14 @@ TEST_CASE("ServerListJson: a save that cannot write or replace the file names it
     const std::filesystem::path folder = std::filesystem::temp_directory_path() / "mu_server_list_blocked_test";
     std::filesystem::remove_all(folder);
     std::filesystem::create_directories(folder);
-    const std::vector<ServerGroup> groups = Read(ValidFile).groups;
+    const ServerListData list = Read(ValidFile).list;
 
     // A file where the Local folder should be: nothing can be written there.
     const std::filesystem::path blocked = folder / "Local";
     std::ofstream(blocked) << "not a folder";
     const std::filesystem::path unwritable = blocked / "ServerList.json";
     std::vector<ItemDataIssue> issues;
-    CHECK_FALSE(Data::ServerList::SaveServerListFile(unwritable, groups, issues));
+    CHECK_FALSE(Data::ServerList::SaveServerListFile(unwritable, list, issues));
     REQUIRE(issues.size() == 1);
     CHECK(issues[0].source == unwritable.generic_string());
     CHECK(issues[0].message == "could not be written");
@@ -344,7 +547,7 @@ TEST_CASE("ServerListJson: a save that cannot write or replace the file names it
     const std::filesystem::path irreplaceable = folder / "ServerList.json";
     std::filesystem::create_directories(irreplaceable / "inside");
     issues.clear();
-    CHECK_FALSE(Data::ServerList::SaveServerListFile(irreplaceable, groups, issues));
+    CHECK_FALSE(Data::ServerList::SaveServerListFile(irreplaceable, list, issues));
     REQUIRE(issues.size() == 1);
     CHECK(issues[0].source == irreplaceable.generic_string());
     CHECK(issues[0].message.starts_with("could not be replaced: "));

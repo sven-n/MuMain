@@ -180,6 +180,7 @@ order (`({pvp} {vip})`).
 |------------------------------------------------------|---------|--------------------------------------|
 | `formatVersion` is not 2                             | fatal   | stops                                |
 | A VIP type without an id, or an id used twice        | fatal   | stops                                |
+| A VIP type without an English name                   | fatal   | stops                                |
 | A channel's `vip` is not the id of a VIP type        | error   | the channel has no VIP type          |
 | An unknown `themeColor`                              | warning | the theme's default color            |
 | An unknown placeholder in a template                 | error   | shows it as written                  |
@@ -199,7 +200,9 @@ gives the channel and, when the connect server sent it, its load.
 **Channel names** shows the VIP types on the left, with their color, and on the
 right:
 
-- the selected VIP type: its id, its name and its theme color;
+- the selected VIP type: its ID, its name and its theme color. A new type gets
+  an ID made from its name (New VIP type is `newVipType`); a changed ID goes to
+  the channels with the type too;
 - the texts: a **Language** list, then the PvP and Non-PvP texts and the four
   templates in that language. A field left empty uses the English text, which
   it shows greyed. A note lists the placeholders each template can use;
@@ -217,7 +220,7 @@ For both tabs:
   that ID.
 - **Save** writes `Data/Local/ServerList.json` in the folder the game runs
   from. It refuses a list with fatal problems (a group without a name, an ID
-  used twice, a VIP type without an id) and lists them. When the file itself
+  used twice, a VIP type without an English name) and lists them. When the file itself
   had fatal problems as it was read (changed by hand while the game ran), the
   window has only what could be read: Save stays off then, so it cannot remove
   the rest, until the file is fixed and **Revert** reads it again.

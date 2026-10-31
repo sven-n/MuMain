@@ -1,41 +1,87 @@
 #pragma once
 
 #include "Core/Globals/_define.h"
+#include "Data/GameData/Common/LocalizedString.h"
 
 #include <array>
 #include <cstdint>
 #include <string>
+#include <string_view>
+#include <vector>
 
 namespace Data::ServerList
 {
-// What the login screen writes after a channel's number, and its color there.
-// The values are the ones the client always had: bit 0 is "no PvP", bit 1 "gold".
-enum class ChannelType : std::uint8_t
+// The button color of a channel on the login screen. Each theme (legacy,
+// modern) draws its own shade of it.
+enum class ThemeColor : std::uint8_t
 {
-    Normal = 0,  // "Valhalla-1", gray
-    NonPvp = 1,  // "Valhalla-1(Non-PVP)"
-    GoldPvp = 2, // "Valhalla-1(Gold PVP)", orange
-    Gold = 3,    // "Valhalla-1(Gold)", orange
+    Default,
+    Gray,
+    Orange,
+    Silver,
 };
 
-inline constexpr int ChannelTypeCount = 4;
+inline constexpr int ThemeColorCount = 4;
 
-// What the login screen writes after "<group name>-<channel>" for the type.
-constexpr const char* GetChannelSuffix(ChannelType type)
+// A VIP type of channels (Gold, Silver, ...): its name in the channel names and
+// its button color.
+struct VipType
 {
-    switch (type)
+    // What a channel names the type by ("gold"): letters and digits, starting
+    // with a lowercase letter.
+    std::string id;
+    // {vip} in the templates.
+    LocalizedString name;
+    ThemeColor themeColor = ThemeColor::Default;
+
+    bool operator==(const VipType&) const = default;
+};
+
+// What a channel is: PvP on or off, and a VIP type or none.
+struct ChannelSettings
+{
+    bool pvp = true;
+    // The id of a VipType; empty for none.
+    std::string vip;
+
+    bool operator==(const ChannelSettings&) const = default;
+};
+
+// The places that show a channel's name; each has a template of its own.
+enum class ChannelNamePlace : std::uint8_t
+{
+    // The channel's button on the login screen.
+    Button,
+    // The login window's title.
+    Login,
+    // The character info window's title.
+    CharacterInfo,
+    // What the chat message about a saved screenshot ends with.
+    Screenshot,
+};
+
+inline constexpr int ChannelNamePlaceCount = 4;
+
+// The texts that name a channel, each with its translations.
+struct ChannelNames
+{
+    // {pvp} on a channel with PvP on, and with PvP off.
+    LocalizedString pvp;
+    LocalizedString nonPvp;
+    // By ChannelNamePlace.
+    std::array<LocalizedString, ChannelNamePlaceCount> templates;
+
+    LocalizedString& Template(ChannelNamePlace place)
     {
-    case ChannelType::NonPvp:
-        return "(Non-PVP)";
-    case ChannelType::GoldPvp:
-        return "(Gold PVP)";
-    case ChannelType::Gold:
-        return "(Gold)";
-    case ChannelType::Normal:
-    default:
-        return "";
+        return templates[static_cast<size_t>(place)];
     }
-}
+    const LocalizedString& Template(ChannelNamePlace place) const
+    {
+        return templates[static_cast<size_t>(place)];
+    }
+
+    bool operator==(const ChannelNames&) const = default;
+};
 
 // A server sends its ID; the group is ID / MAX_SERVER_PER_GROUP and the
 // channel ID % MAX_SERVER_PER_GROUP + 1.
@@ -48,6 +94,10 @@ inline constexpr int MaxServerGroupId = 0xFFFF / MAX_SERVER_PER_GROUP;
 // buttons on the login screen.
 inline constexpr int MaxServerGroupNameLength = 32;
 inline constexpr int MaxServerGroupDescriptionLength = MAX_TEXT_LENGTH - 1;
+// A VIP type's name, as a group's.
+inline constexpr int MaxVipTypeNameLength = MaxServerGroupNameLength;
+// A template, or the PvP and Non-PvP text, in UTF-16 units.
+inline constexpr int MaxChannelNameTextLength = MAX_TEXT_LENGTH - 1;
 
 // One group of game servers on the login screen: its button, and the name
 // its channels get.
@@ -60,8 +110,31 @@ struct ServerGroup
     // place in the list.
     bool testServer = false;
     // Index: channel number - 1.
-    std::array<ChannelType, MaxChannelsPerGroup> channels{};
+    std::array<ChannelSettings, MaxChannelsPerGroup> channels{};
 
     bool operator==(const ServerGroup&) const = default;
+};
+
+// The built-in English texts: what the texts a file leaves out are.
+ChannelNames GetDefaultChannelNames();
+
+// A VIP type id: letters and digits, starting with a lowercase letter ("gold", "goldPlus").
+bool IsVipTypeId(std::string_view id);
+// An id made from a name: "Gold Plus" is "goldPlus"; "vip" when the name has no letter to start with.
+std::string MakeVipTypeId(std::string_view name);
+
+// All that Data/Local/ServerList.json holds.
+struct ServerListData
+{
+    // In the order the editor lists them.
+    std::vector<VipType> vipTypes;
+    ChannelNames names = GetDefaultChannelNames();
+    // In the order of their buttons.
+    std::vector<ServerGroup> groups;
+
+    // The VIP type with the id, or nullptr.
+    const VipType* FindVipType(std::string_view id) const;
+
+    bool operator==(const ServerListData&) const = default;
 };
 } // namespace Data::ServerList

@@ -372,12 +372,6 @@
     <value>保存密码后，任何使用这台电脑的人都可以登录你的账号。请仅在可信任的电脑上保存密码。是否保存密码？</value>
     <comment>Remember-password confirmation dialog: body.</comment>
   </data>
-  <data name="[%s-%d(Non-PvP) Server]" xml:space="preserve">
-    <value>[%s-%d（非 PvP）服务器]</value>
-  </data>
-  <data name="[%s-%d Server]" xml:space="preserve">
-    <value>[%s-%d 服务器]</value>
-  </data>
   <data name="Please wait" xml:space="preserve">
     <value>请稍候</value>
   </data>

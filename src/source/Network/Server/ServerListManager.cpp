@@ -8,8 +8,10 @@
 
 #include "Core/Text/Utf8.h"
 #include "Data/DataHandler/DataIssueReport.h"
+#include "Data/GameData/ServerListData/ChannelNameBuilder.h"
 #include "Data/GameData/ServerListData/ServerListJson.h"
 
+#include <algorithm>
 #include <filesystem>
 #include <memory>
 #include <string_view>
@@ -17,8 +19,26 @@
 namespace
 {
 constexpr const char* ServerListName = "server list";
-// The bit of a channel type that turns PvP off.
-constexpr BYTE NonPvpBit = 0x01;
+
+// What a channel's button says about the server's load.
+const wchar_t* GetLoadText(int percent)
+{
+    if (percent >= 128)
+    {
+        return I18N::Game::NowPreparing;
+    }
+    if (percent >= 100)
+    {
+        return I18N::Game::Full;
+    }
+    return I18N::Game::Connect;
+}
+
+std::string_view GetGameLocale()
+{
+    const char* locale = I18N::GetCurrentLocale();
+    return locale != nullptr ? std::string_view(locale) : Data::LocalizedString::NeutralLocale;
+}
 } // namespace
 
 CServerListManager::CServerListManager()
@@ -26,7 +46,6 @@ CServerListManager::CServerListManager()
     m_iTotalServer = 0;
     m_szSelectServerName[0] = '\0';
     m_iSelectServerIndex = -1;
-    m_byNonPvP = static_cast<BYTE>(Data::ServerList::ChannelType::Normal);
 }
 
 CServerListManager::~CServerListManager()
@@ -59,22 +78,24 @@ void CServerListManager::Release()
 bool CServerListManager::LoadServerListScript(std::string& errorMessage)
 {
     const std::filesystem::path file = Data::ServerList::ServerListFile;
-    Data::ServerList::ServerListLoadResult result = Data::ServerList::LoadServerListFile(file);
+    Data::ServerList::ServerListLoadResult result =
+        Data::ServerList::LoadServerListFile(file, I18N::GetAvailableLocales());
     Data::LogDataIssues("Server list:", result.issues);
     if (Data::Items::HasFatal(result.issues))
     {
         errorMessage = Data::DescribeFatalIssues(ServerListName, file, result.issues);
         return false;
     }
-    SetServerGroups(result.groups);
+    SetServerList(result.list);
     return true;
 }
 
-void CServerListManager::SetServerGroups(std::span<const Data::ServerList::ServerGroup> groups)
+void CServerListManager::SetServerList(const Data::ServerList::ServerListData& list)
 {
+    m_serverList = list;
     m_mapServerListScript.clear();
     int sequence = 0;
-    for (const Data::ServerList::ServerGroup& group : groups)
+    for (const Data::ServerList::ServerGroup& group : list.groups)
     {
         m_mapServerListScript[group.id] = {group, ++sequence};
     }
@@ -159,13 +180,10 @@ bool CServerListManager::MakeServerGroup(IN int iServerGroupIndex, OUT CServerGr
     pServerGroup->m_iSequence = pServerGroupInfo->sequence;
     pServerGroup->m_iWidthPos = group.testServer ? CServerGroup::SBP_CENTER : CServerGroup::SBP_LEFT;
     pServerGroup->m_iServerIndex = iServerGroupIndex;
-    pServerGroup->m_bPvPServer = true;
-    for (int i = 0; i < MAX_SERVER_PER_GROUP; ++i)
-    {
-        pServerGroup->m_abyNonPvpServer[i] = static_cast<BYTE>(group.channels[i]);
-        if (NonPvpBit & pServerGroup->m_abyNonPvpServer[i])
-            pServerGroup->m_bPvPServer = false;
-    }
+    pServerGroup->m_channels = group.channels;
+    pServerGroup->m_bPvPServer =
+        std::all_of(group.channels.begin(), group.channels.end(),
+                    [](const Data::ServerList::ChannelSettings& channel) { return channel.pvp; });
 
     return true;
 }
@@ -177,30 +195,32 @@ void CServerListManager::InsertServer(CServerGroup* pServerGroup, int iConnectIn
     pServerInfo->m_iIndex = (iConnectIndex % MAX_SERVER_PER_GROUP) + 1;
     pServerInfo->m_iConnectIndex = iConnectIndex;
     pServerInfo->m_iPercent = iServerPercent;
-    pServerInfo->m_byNonPvP = pServerGroup->m_abyNonPvpServer[pServerInfo->m_iIndex - 1];
-
-    const wchar_t* loadText;
-    if (iServerPercent >= 128)
-    {
-        loadText = I18N::Game::NowPreparing;
-    }
-    else if (iServerPercent >= 100)
-    {
-        loadText = I18N::Game::Full;
-    }
-    else
-    {
-        loadText = I18N::Game::Connect;
-    }
-
-    // The suffix is ASCII, so each char is its wchar_t.
-    const std::string_view suffix =
-        Data::ServerList::GetChannelSuffix(static_cast<Data::ServerList::ChannelType>(pServerInfo->m_byNonPvP));
-    const std::wstring wideSuffix(suffix.begin(), suffix.end());
-    mu_swprintf(pServerInfo->m_bName, L"%ls-%d%ls %ls", pServerGroup->m_szName, pServerInfo->m_iIndex,
-                wideSuffix.c_str(), loadText);
+    pServerInfo->m_channel = pServerGroup->m_channels[pServerInfo->m_iIndex - 1];
 
     pServerGroup->InsertServerInfo(pServerInfo);
+}
+
+std::wstring CServerListManager::GetServerButtonText(const CServerGroup& group, const CServerInfo& server) const
+{
+    const std::string name = Core::Text::ToUtf8(group.m_szName);
+    const std::string load = Core::Text::ToUtf8(GetLoadText(server.m_iPercent));
+    Data::ServerList::ChannelNameValues values;
+    values.name = name;
+    values.channel = server.m_iIndex;
+    values.load = load;
+    return Core::Text::FromUtf8(Data::ServerList::BuildChannelName(
+        m_serverList, Data::ServerList::ChannelNamePlace::Button, server.m_channel, values, GetGameLocale()));
+}
+
+Data::ServerList::ThemeColor CServerListManager::GetServerButtonColor(const CServerInfo& server) const
+{
+    const Data::ServerList::VipType* vipType =
+        server.m_channel.vip.empty() ? nullptr : m_serverList.FindVipType(server.m_channel.vip);
+    if (vipType != nullptr)
+    {
+        return vipType->themeColor;
+    }
+    return server.m_channel.pvp ? Data::ServerList::ThemeColor::Gray : Data::ServerList::ThemeColor::Default;
 }
 
 int CServerListManager::GetServerGroupSize()
@@ -244,11 +264,12 @@ CServerGroup* CServerListManager::GetServerGroupByBtnPos(int iBtnPos)
     return NULL;
 }
 
-void CServerListManager::SetSelectServerInfo(wchar_t* pszName, int iIndex, BYTE byNonPvP)
+void CServerListManager::SetSelectServerInfo(const wchar_t* pszName, int iIndex,
+                                             const Data::ServerList::ChannelSettings& channel)
 {
-    wcscpy(m_szSelectServerName, pszName);
+    wcsncpy_s(m_szSelectServerName, pszName, _TRUNCATE);
     m_iSelectServerIndex = iIndex;
-    m_byNonPvP = byNonPvP;
+    m_selectChannel = channel;
 }
 
 wchar_t* CServerListManager::GetSelectServerName()
@@ -261,28 +282,22 @@ int CServerListManager::GetSelectServerIndex()
     return m_iSelectServerIndex;
 }
 
-BYTE CServerListManager::GetNonPVPInfo()
-{
-    return m_byNonPvP;
-}
-
 bool CServerListManager::IsNonPvP()
 {
-    return bool(NonPvpBit & GetNonPVPInfo());
+    return !m_selectChannel.pvp;
 }
 
-std::wstring CServerListManager::GetSelectServerTitle()
+std::wstring CServerListManager::GetSelectServerTitle(Data::ServerList::ChannelNamePlace place,
+                                                      const wchar_t* character)
 {
-    // Indexed by the channel type (Data::ServerList::ChannelType), as in the original client.
-    const wchar_t* const titleFormats[Data::ServerList::ChannelTypeCount] = {
-        I18N::Game::SDServer, I18N::Game::SDNonPvPServer, I18N::Game::SDGoldPvPServer, I18N::Game::SDGoldServer};
-    const BYTE channelType = GetNonPVPInfo();
-    const wchar_t* format =
-        channelType < Data::ServerList::ChannelTypeCount ? titleFormats[channelType] : titleFormats[0];
-
-    wchar_t title[MAX_TEXT_LENGTH] = {};
-    mu_swprintf_s(title, format, GetSelectServerName(), GetSelectServerIndex());
-    return title;
+    const std::string name = Core::Text::ToUtf8(GetSelectServerName());
+    const std::string characterName = Core::Text::ToUtf8(character);
+    Data::ServerList::ChannelNameValues values;
+    values.name = name;
+    values.channel = GetSelectServerIndex();
+    values.character = characterName;
+    return Core::Text::FromUtf8(
+        Data::ServerList::BuildChannelName(m_serverList, place, m_selectChannel, values, GetGameLocale()));
 }
 
 void CServerListManager::SetTotalServer(int iTotalServer)

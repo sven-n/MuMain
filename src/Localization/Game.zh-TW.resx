@@ -1249,12 +1249,6 @@
   <data name="%s: Screenshot Saved" xml:space="preserve">
     <value>%s：螢幕截圖已儲存</value>
   </data>
-  <data name="[%s-%d(Non-PvP) Server]" xml:space="preserve">
-    <value>[%s-%d(非PvP)伺服器]</value>
-  </data>
-  <data name="[%s-%d Server]" xml:space="preserve">
-    <value>[%s-%d伺服器]</value>
-  </data>
   <data name="1)After moving your account into the divided server," xml:space="preserve">
     <value>1)將您的帳戶移至分服後，</value>
   </data>
@@ -7551,12 +7545,6 @@
   </data>
   <data name="Please repurchase after expiration." xml:space="preserve">
     <value>過期後請重新購買。</value>
-  </data>
-  <data name="[%s-%d(Gold PvP) Server]" xml:space="preserve">
-    <value>[%s-%d(黃金PvP)伺服器]</value>
-  </data>
-  <data name="[%s-%d(Gold) Server]" xml:space="preserve">
-    <value>[%s-%d(金牌)伺服器]</value>
   </data>
   <data name="Maximum HP increase +%d" xml:space="preserve">
     <value>最大HP增加+%d</value>
