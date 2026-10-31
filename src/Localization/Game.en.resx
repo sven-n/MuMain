@@ -1291,6 +1291,12 @@
   <data name="UI Scale Tooltip" xml:space="preserve">
     <value>Multiplier on top of the automatic fit to the window size</value>
   </data>
+  <data name="S6 player models" xml:space="preserve">
+    <value>S6 player models</value>
+  </data>
+  <data name="S6 Player Models Tooltip" xml:space="preserve">
+    <value>On: original S6 models. Off: improved models. Restart the game to apply.</value>
+  </data>
   <data name="Texture Pack" xml:space="preserve">
     <value>Texture Pack</value>
   </data>
