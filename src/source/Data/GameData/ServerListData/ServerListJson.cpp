@@ -86,6 +86,14 @@ auto WarnUnknown(IssueList& issues)
     return [&issues](const std::string& unknown, const std::string& message) { issues.Warning(unknown, message); };
 }
 
+std::string ToLowerAscii(std::string text)
+{
+    std::transform(
+        text.begin(), text.end(), text.begin(), [](char character)
+        { return character >= 'A' && character <= 'Z' ? static_cast<char>(character - 'A' + 'a') : character; });
+    return text;
+}
+
 std::string CutWarning(size_t maxUnits)
 {
     return "longer than " + std::to_string(maxUnits) + " characters (an emoji counts as two), cut";
@@ -282,15 +290,19 @@ std::optional<CustomColor> ReadCustomColor(const OrderedJson& json, const std::s
     }
     else if (shades != json.end())
     {
-        for (const auto& [theme, shade] : shades->items())
+        for (const auto& [key, shade] : shades->items())
         {
+            const std::string shadeField = Field(Field(field, ShadesKey), key.c_str());
             if (!shade.is_string() || !IsShade(shade.get<std::string>()))
             {
-                issues.Error(Field(Field(field, ShadesKey), theme.c_str()),
-                             "not a color like #FF5A5A; the theme draws its default color");
+                issues.Error(shadeField, "not a color like #FF5A5A; the theme draws its default color");
                 continue;
             }
-            color.shades.emplace(theme, shade.get<std::string>());
+            // The game names its themes in lowercase (UI::RmlBridge::GetActiveThemeName).
+            if (!color.shades.emplace(ToLowerAscii(key), shade.get<std::string>()).second)
+            {
+                issues.Warning(shadeField, "the theme has a shade already; the first one is used");
+            }
         }
     }
     Items::Json::WarnAboutUnknownKeys(json, {IdKey, NameKey, ShadesKey}, field + ".", WarnUnknown(issues));

@@ -358,6 +358,19 @@ TEST_CASE("ServerListJson: a shade that is not #RRGGBB is not used")
     CHECK(read.list.colors[0].shades.at("legacy") == "#FF0000");
 }
 
+TEST_CASE("ServerListJson: a shade's theme is the theme folder in lowercase")
+{
+    const ReadResult read = Read(
+        ColorsFile(R"({"id": "red", "shades": {"Legacy": "#FF0000", "MODERN": "#AA0000", "modern": "#110000"}})", ""));
+
+    CHECK_FALSE(HasFatal(read.issues));
+    CHECK(HasIssueAbout(read.issues, "colors[0].shades.modern", "has a shade already", ItemDataIssueSeverity::Warning));
+    REQUIRE(read.list.colors.size() == 1);
+    CHECK(read.list.colors[0].shades.size() == 2);
+    CHECK(read.list.colors[0].shades.at("legacy") == "#FF0000");
+    CHECK(read.list.colors[0].shades.at("modern") == "#AA0000");
+}
+
 TEST_CASE("ServerListJson: a rule that would color other channels is not used")
 {
     const ReadResult unknownVip = Read(ColorsFile("", R"({"vip": "silver", "color": "gray"})"));
