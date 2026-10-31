@@ -315,6 +315,23 @@ TEST_SUITE("Login scene reconnect")
         CHECK(screen.resumed == 0); // the player picks a server and logs in again
     }
 
+    TEST_CASE("three failed logins go back to the server list")
+    {
+        // The game server closes the login after the third wrong password, maybe
+        // only after the player answered its message.
+        DroppedScreen screen;
+        screen.link.connected = true;
+
+        screen.reconnect.ReturnToServerList();
+        CHECK(screen.link.probes == std::vector{LoginServer::Connect});
+        screen.ServerComesBack();
+        CHECK(screen.link.connects == std::vector{LoginServer::Connect});
+
+        screen.reconnect.OnGreeting(LoginServer::Connect);
+        CHECK_FALSE(screen.reconnect.IsReconnecting());
+        CHECK(screen.link.failures == 0);
+    }
+
     TEST_CASE("Reconnect does nothing while no failure is shown")
     {
         DroppedScreen screen;

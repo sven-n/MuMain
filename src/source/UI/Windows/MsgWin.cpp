@@ -456,8 +456,12 @@ void CMsgWin::ManageOKClick()
     case MESSAGE_SERVER_LOST:
         ::PostMessage(g_hWnd, WM_CLOSE, 0, 0);
         break;
-    case MESSAGE_VERSION:
     case RECEIVE_LOG_IN_FAIL_ERROR:
+        // The game server closes the connection after the third wrong password: back to
+        // the server list, not quietly over a new connection to the same server.
+        LoginSceneReconnect::Instance().ReturnToServerList();
+        break;
+    case MESSAGE_VERSION:
     case MESSAGE_INPUT_ID:
     case RECEIVE_LOG_IN_FAIL_ID:
     case RECEIVE_LOG_IN_FAIL_ID_CONNECTED:

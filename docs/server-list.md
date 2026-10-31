@@ -92,6 +92,10 @@ click that needs the server (a group, a channel, the credits, OK in the login
 window) connects again first and then carries on. The login window does the
 same when its game server went away, e.g. because it was restarted.
 
+After the third wrong password the game server closes the connection on
+purpose. OK on its message goes back to the server list instead of logging in
+again over a new connection to the same server.
+
 Only when the server can't be reached does the message "You are disconnected
 from the server." appear, with **Reconnect** (back to the server list, which
 shows the servers that are up) and **Exit**. The original client showed this

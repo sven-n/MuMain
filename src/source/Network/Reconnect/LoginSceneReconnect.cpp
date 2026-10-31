@@ -108,6 +108,11 @@ void LoginSceneReconnect::OnGreeting(LoginServer server, bool carryOn)
     }
 }
 
+void LoginSceneReconnect::ReturnToServerList()
+{
+    Begin(LoginServer::Connect, nullptr);
+}
+
 void LoginSceneReconnect::Update()
 {
     switch (m_phase)
