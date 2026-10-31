@@ -481,3 +481,32 @@ TEST_CASE("A drawn caped monster's cloth is made and simulated by the update, no
     CHECK(((CPhysicsCloth*)o.m_pCloth)[0].GetOwner() == &o);
     DeleteCloth(&c, &o);
 }
+
+TEST_CASE("A GM's transformation spawns its lights from the update, and none while cloaked [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    OBJECT& o = scope.character().Object;
+    o.Kind = KIND_PLAYER;
+    o.SubType = MODEL_GM_CHARACTER;
+    o.Alpha = 1.f;
+    o.HiddenMesh = -1;
+    auto liveSprites = []
+    {
+        int live = 0;
+        for (int i = 0; i < MAX_SPRITES; ++i)
+            live += Sprites[i].Live ? 1 : 0;
+        return live;
+    };
+    FenrirScope::ClearSpawns();
+
+    UpdateTransformSkinEffects(&o);
+    CHECK(o.HiddenMesh == 2);
+    CHECK(liveSprites() == 8);
+
+    FenrirScope::ClearSpawns();
+    OBJECT* gm = &o;
+    g_CharacterRegisterBuff(gm, eBuff_Cloaking);
+    UpdateTransformSkinEffects(gm);
+    CHECK(liveSprites() == 0);
+    g_CharacterClearBuff(gm);
+}

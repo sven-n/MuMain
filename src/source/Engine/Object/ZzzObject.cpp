@@ -6357,47 +6357,55 @@ static void RenderModelWithoutStyle(BMD* b, OBJECT* o, int Type, float Alpha, in
     }
 }
 
-void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
+// Draws the cloth UpdateTransformSkinEffects simulates.
+static void RenderTransformSkinCloth(OBJECT* o)
 {
-    if (Type == MODEL_ANGEL && b->NumMeshs)
+    if (auto* pCloth = (CPhysicsCloth*)o->m_pCloth)
     {
-        b->RenderBody(RENDER_TEXTURE, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        if (RenderType & RENDER_CHROME)
+        for (int k = 0; k < o->m_byNumCloth; ++k)
         {
-            Vector(0.75f, 0.55f, 0.5f, b->BodyLight);
-            b->RenderMesh(0, RENDER_CHROME4 | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            Vector(1.f, 1.f, 1.f, b->BodyLight);
-            b->RenderMesh(0, RENDER_CHROME | RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            pCloth[k].Render();
         }
     }
-    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_PCBANG)
-    {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        vec3_t Light;
-        VectorCopy(b->BodyLight, Light);
-        Vector(0.9f, 0.8f, 1.0f, b->BodyLight);
-        b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_FENRIR_THUNDER);
-        b->RenderBody(RENDER_BRIGHT | RENDER_METAL, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_FENRIR_THUNDER);
-        VectorCopy(Light, b->BodyLight);
-    }
-    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER)
-    {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 1);
+}
 
+// Simulates a transformation's cloth; its draw renders it.
+static void SimulateTransformSkinCloth(OBJECT* o)
+{
+    auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
+    float Flag = 0.005f;
+    if (o->SubType != MODEL_HALLOWEEN && (g_isCharacterBuff(o, eDeBuff_Stun) || g_isCharacterBuff(o, eDeBuff_Sleep)))
+    {
+        Flag = 0.0f;
+    }
+    for (int k = 0; k < o->m_byNumCloth; ++k)
+    {
+        if (pCloth[k].Move2(Flag, 5) == FALSE)
+        {
+            DeleteCloth(NULL, o);
+        }
+    }
+}
+
+void UpdateTransformSkinEffects(OBJECT* o)
+{
+    // Where RenderPartObject reaches RenderPartObjectBody's transformation branches: a player's body pass, not cloaked.
+    if (o->Kind != KIND_PLAYER || o->Type != MODEL_PLAYER || o->Alpha <= 0.01f || g_isCharacterBuff(o, eBuff_Cloaking))
+        return;
+
+    switch (o->SubType)
+    {
+    case MODEL_CURSEDTEMPLE_ALLIED_PLAYER:
+    case MODEL_CURSEDTEMPLE_ILLUSION_PLAYER:
+    {
+        BMD* b = &Models[o->SubType];
+        b->BodyScale = o->Scale;
+        VectorCopy(o->Position, b->BodyOrigin);
         if (g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint) || g_isCharacterBuff(o, eBuff_CursedTempleProdection))
         {
             vec3_t vRelativePos, vtaWorldPos, Light;
             Vector(0.4f, 0.4f, 0.8f, Light);
             Vector(0.f, 0.f, 0.f, vRelativePos);
-
-            if (g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint))
-            {
-                float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
-                b->RenderMesh(1, RENDER_TEXTURE, 0.4f + Luminosity, 0, o->BlendMeshLight * Luminosity, -WorldTime * 0.0005f, WorldTime * 0.0005f);
-            }
 
             int boneindex[15] = { 1, 2, 17, 18, 19, 20, 44, 25, 27, 34, 37, 3, 5, 10, 12 };
 
@@ -6408,102 +6416,40 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
             }
         }
 
-        if (o->m_pCloth == NULL)
+        if (o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER)
         {
-            int iTex = BITMAP_CURSEDTEMPLE_ALLIED_PHYSICSCLOTH;
-            auto* pCloth = new CPhysicsCloth[1];
-            pCloth[0].Create(o, 19, 0.0f, 8.0f, 0.0f, 10, 10, 140.0f, 140.0f, iTex, iTex, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
-            o->m_pCloth = (void*)pCloth;
-            o->m_byNumCloth = 1;
-        }
-        auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
-        if (pCloth)
-        {
-            float Flag = 0.005f;
-
-            if (g_isCharacterBuff(o, eDeBuff_Stun) || g_isCharacterBuff(o, eDeBuff_Sleep))
+            if (o->m_pCloth == NULL)
             {
-                Flag = 0.0f;
-            }
-
-            for (int k = 0; k < o->m_byNumCloth; ++k)
-            {
-                if (pCloth[k].Move2(Flag, 5) == FALSE)
-                {
-                    DeleteCloth(NULL, o);
-                }
-                else
-                {
-                    pCloth[k].Render();
-                }
+                int iTex = BITMAP_CURSEDTEMPLE_ALLIED_PHYSICSCLOTH;
+                auto* pCloth = new CPhysicsCloth[1];
+                pCloth[0].Create(o, 19, 0.0f, 8.0f, 0.0f, 10, 10, 140.0f, 140.0f, iTex, iTex, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
+                o->m_pCloth = (void*)pCloth;
+                o->m_byNumCloth = 1;
             }
         }
+        else
+        {
+            if (o->m_pCloth == NULL)
+            {
+                int iTex = BITMAP_CURSEDTEMPLE_ILLUSION_PHYSICSCLOTH;
+                auto* pCloth = new CPhysicsCloth[2];
+                pCloth[0].Create(o, 20, -4.0f, 5.0f, 0.0f, 10, 20, 17.0f, 100.0f, iTex, iTex, PCT_SHAPE_HALLOWEEN | PCT_ELASTIC_HALLOWEEN | PCT_MASK_ALPHA);
+                o->m_pCloth = (void*)pCloth;
+                o->m_byNumCloth = 1;
+            }
+        }
+        SimulateTransformSkinCloth(o);
     }
-    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
+    break;
+    case MODEL_HALLOWEEN:
     {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 2);
-
-        if (g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint) || g_isCharacterBuff(o, eBuff_CursedTempleProdection))
-        {
-            vec3_t vRelativePos, vtaWorldPos, Light;
-            Vector(0.4f, 0.4f, 0.8f, Light);
-            Vector(0.f, 0.f, 0.f, vRelativePos);
-
-            if (g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint))
-            {
-                float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
-                b->RenderMesh(2, RENDER_TEXTURE, 0.4f + Luminosity, 0, o->BlendMeshLight * Luminosity, -WorldTime * 0.0005f, WorldTime * 0.0005f);
-            }
-
-            int boneindex[15] = { 1, 2, 17, 18, 19, 20, 44, 25, 27, 34, 37, 3, 5, 10, 12 };
-
-            for (int j = 0; j < 15; ++j)
-            {
-                b->TransformPosition(o->BoneTransform[boneindex[j]], vRelativePos, vtaWorldPos, true);
-                CreateSprite(BITMAP_LIGHT, vtaWorldPos, 1.3f, Light, o);
-            }
-        }
-
-        if (o->m_pCloth == NULL)
-        {
-            int iTex = BITMAP_CURSEDTEMPLE_ILLUSION_PHYSICSCLOTH;
-            auto* pCloth = new CPhysicsCloth[2];
-            pCloth[0].Create(o, 20, -4.0f, 5.0f, 0.0f, 10, 20, 17.0f, 100.0f, iTex, iTex, PCT_SHAPE_HALLOWEEN | PCT_ELASTIC_HALLOWEEN | PCT_MASK_ALPHA);
-            o->m_pCloth = (void*)pCloth;
-            o->m_byNumCloth = 1;
-        }
-        auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
-        if (pCloth)
-        {
-            float Flag = 0.005f;
-
-            if (g_isCharacterBuff(o, eDeBuff_Stun) || g_isCharacterBuff(o, eDeBuff_Sleep))
-            {
-                Flag = 0.0f;
-            }
-
-            for (int k = 0; k < o->m_byNumCloth; ++k)
-            {
-                if (pCloth[k].Move2(Flag, 5) == FALSE)
-                {
-                    DeleteCloth(NULL, o);
-                }
-                else
-                {
-                    pCloth[k].Render();
-                }
-            }
-        }
-    }
-    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_HALLOWEEN)
-    {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-
+        BMD* b = &Models[o->SubType];
+        b->BodyScale = o->Scale;
+        VectorCopy(o->Position, b->BodyOrigin);
         vec3_t vLight;
         Vector(1.f, 1.f, 1.f, vLight);
         vec3_t vPos, vRelativePos;
         Vector(6.f, 6.f, 0.f, vRelativePos);
-        VectorCopy(o->Position, b->BodyOrigin);
         b->TransformPosition(o->BoneTransform[20], vRelativePos, vPos, true);
         vPos[2] += 36.f;
         if (rand_fps_check(2))
@@ -6563,22 +6509,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
                 SendRequestAction(*o, PLAYER_SHOCK);
                 o->m_iAnimation = 0;
             }
-
-            float fStageG, fStageB;
-            fStageG = 0.8f - ((o->m_iAnimation / 40.f) * 0.8f);
-            if (fStageG < 0.2f)
-            {
-                fStageG = 0.2f;
-            }
-            fStageB = 0.8f - ((o->m_iAnimation / 40.f) * 0.9f);
-            if (fStageB < 0.1f)
-            {
-                fStageB = 0.1f;
-            }
-            VectorCopy(b->BodyLight, vLight);
-            Vector(1.f, fStageG, fStageB, b->BodyLight);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            VectorCopy(vLight, b->BodyLight);
         }
         else if (o->CurrentAction == PLAYER_JACK_2)
         {
@@ -6613,22 +6543,6 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
                 SendRequestAction(*o, PLAYER_SHOCK);
                 o->m_iAnimation = 0;
             }
-
-            float fStageG, fStageB;
-            fStageG = 0.8f - ((o->m_iAnimation / 40.f) * 0.8f);
-            if (fStageG < 0.2f)
-            {
-                fStageG = 0.2f;
-            }
-            fStageB = 0.8f - ((o->m_iAnimation / 40.f) * 0.9f);
-            if (fStageB < 0.1f)
-            {
-                fStageB = 0.1f;
-            }
-            VectorCopy(b->BodyLight, vLight);
-            Vector(1.f, fStageG, fStageB, b->BodyLight);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            VectorCopy(vLight, b->BodyLight);
         }
 
         if (o->m_pCloth == NULL)
@@ -6639,20 +6553,10 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
             o->m_pCloth = (void*)pCloth;
             o->m_byNumCloth = 1;
         }
-        auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
-        if (pCloth)
-        {
-            if (pCloth[0].Move2(0.005f, 5) == FALSE)
-            {
-                DeleteCloth(NULL, o);
-            }
-            else
-            {
-                pCloth[0].Render();
-            }
-        }
+        SimulateTransformSkinCloth(o);
     }
-    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_PANDA)
+    break;
+    case MODEL_PANDA:
     {
         vec3_t Light;
         vec3_t vPos;
@@ -6663,24 +6567,12 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
             CreateEffect(MODEL_ARROWSRE06, vPos, o->Angle, Light, 2, o, 0, 0, 0, 0, 1.f);
             CreateEffect(MODEL_ARROWSRE06, vPos, o->Angle, Light, 2, o, 1, 0, 0, 0, 1.f);
         }
-
-        float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PANDABODY_R);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-        int iAnimationFrame = (int)o->AnimationFrame;
-        static int iPriorAnimationFrame = 0;
-        iPriorAnimationFrame = iAnimationFrame;
     }
-    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL)
+    break;
+    case MODEL_XMAS_EVENT_CHANGE_GIRL:
     {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-
-        int iAnimationFrame = (int)o->AnimationFrame;
         static int iPriorAnimationFrame = 0;
+        int iAnimationFrame = (int)o->AnimationFrame;
 
         if (o->CurrentAction == PLAYER_SANTA_1)
         {
@@ -6735,20 +6627,13 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
 
         iPriorAnimationFrame = iAnimationFrame;
     }
-    else if (o->SubType == MODEL_XMAS_EVENT_CHA_DEER)
-    {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BLOOD + 1);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BLOOD + 1);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BLOOD + 1);
-    }
-    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_GM_CHARACTER)
+    break;
+    case MODEL_GM_CHARACTER:
     {
         o->HiddenMesh = 2;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-
+        BMD* b = &Models[o->SubType];
+        b->BodyScale = o->Scale;
+        VectorCopy(o->Position, b->BodyOrigin);
         vec3_t vRelativePos, vPos, vLight, vLight2;
         float fLight;
         fLight = sinf(WorldTime * 0.08f) * 0.2f + 0.2f;
@@ -6774,6 +6659,110 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         b->TransformPosition(o->BoneTransform[12], vRelativePos, vPos, true);
         CreateSprite(BITMAP_SHINY + 1, vPos, 0.9f, vLight, o, -WorldTime * 0.08f);
         CreateSprite(BITMAP_LIGHT + 3, vPos, 0.8f, vLight2, o, WorldTime * 0.3f);
+    }
+    break;
+    }
+}
+
+void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
+{
+    if (Type == MODEL_ANGEL && b->NumMeshs)
+    {
+        b->RenderBody(RENDER_TEXTURE, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        if (RenderType & RENDER_CHROME)
+        {
+            Vector(0.75f, 0.55f, 0.5f, b->BodyLight);
+            b->RenderMesh(0, RENDER_CHROME4 | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            Vector(1.f, 1.f, 1.f, b->BodyLight);
+            b->RenderMesh(0, RENDER_CHROME | RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        }
+    }
+    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_PCBANG)
+    {
+        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        vec3_t Light;
+        VectorCopy(b->BodyLight, Light);
+        Vector(0.9f, 0.8f, 1.0f, b->BodyLight);
+        b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_FENRIR_THUNDER);
+        b->RenderBody(RENDER_BRIGHT | RENDER_METAL, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_FENRIR_THUNDER);
+        VectorCopy(Light, b->BodyLight);
+    }
+    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER)
+    {
+        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 1);
+
+        if (g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint))
+        {
+            float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
+            b->RenderMesh(1, RENDER_TEXTURE, 0.4f + Luminosity, 0, o->BlendMeshLight * Luminosity, -WorldTime * 0.0005f, WorldTime * 0.0005f);
+        }
+        RenderTransformSkinCloth(o);
+    }
+    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
+    {
+        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 2);
+
+        if (g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint))
+        {
+            float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
+            b->RenderMesh(2, RENDER_TEXTURE, 0.4f + Luminosity, 0, o->BlendMeshLight * Luminosity, -WorldTime * 0.0005f, WorldTime * 0.0005f);
+        }
+        RenderTransformSkinCloth(o);
+    }
+    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_HALLOWEEN)
+    {
+        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+
+        if (o->CurrentAction == PLAYER_JACK_1 || o->CurrentAction == PLAYER_JACK_2)
+        {
+            // The pumpkin reddens as the update counts its swings.
+            float fStageG, fStageB;
+            fStageG = 0.8f - ((o->m_iAnimation / 40.f) * 0.8f);
+            if (fStageG < 0.2f)
+            {
+                fStageG = 0.2f;
+            }
+            fStageB = 0.8f - ((o->m_iAnimation / 40.f) * 0.9f);
+            if (fStageB < 0.1f)
+            {
+                fStageB = 0.1f;
+            }
+            vec3_t vLight;
+            VectorCopy(b->BodyLight, vLight);
+            Vector(1.f, fStageG, fStageB, b->BodyLight);
+            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            VectorCopy(vLight, b->BodyLight);
+        }
+        RenderTransformSkinCloth(o);
+    }
+    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_PANDA)
+    {
+        float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
+        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PANDABODY_R);
+        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+    }
+    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL)
+    {
+        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+    }
+    else if (o->SubType == MODEL_XMAS_EVENT_CHA_DEER)
+    {
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
+        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BLOOD + 1);
+        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BLOOD + 1);
+        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BLOOD + 1);
+    }
+    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_GM_CHARACTER)
+    {
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
     }
     else
     {

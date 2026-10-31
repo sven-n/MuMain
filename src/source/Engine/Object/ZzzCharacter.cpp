@@ -9145,6 +9145,50 @@ void UpdateCloakCloth(CHARACTER* c, OBJECT* o)
     }
 }
 
+// The state the start of a transformation's draw kept: Christmas companions follow their owner and leave on time, and
+// a finished transformation animation stops the player. False when the character was deleted.
+bool UpdateTransformCharacterState(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+    if (o->Type == MODEL_PLAYER
+        && (o->SubType == MODEL_XMAS_EVENT_CHA_SSANTA
+            || o->SubType == MODEL_XMAS_EVENT_CHA_SNOWMAN
+            || o->SubType == MODEL_XMAS_EVENT_CHA_DEER))
+    {
+        OBJECT* pOwner = o->Owner;
+
+        if (pOwner->Live == false)
+        {
+            o->Live = false;
+        }
+
+        VectorCopy(pOwner->Position, o->Position);
+        VectorCopy(pOwner->Angle, o->Angle);
+        o->PriorAction = pOwner->PriorAction;
+        o->PriorAnimationFrame = pOwner->PriorAnimationFrame;
+        o->CurrentAction = pOwner->CurrentAction;
+        o->AnimationFrame = pOwner->AnimationFrame;
+
+        if (GetMillisecondsTimestamp() - o->m_dwTime >= XMAS_EVENT_TIME.count())
+        {
+            DeleteCharacter(c, o);
+            return false;
+        }
+    }
+    else if (o->Type == MODEL_PLAYER && o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL
+        || o->Type == MODEL_PLAYER && o->SubType == MODEL_PANDA
+        || o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_CHANGED
+        )
+    {
+        if (o->m_iAnimation >= 1)
+        {
+            o->m_iAnimation = 0;
+            SetPlayerStop(c);
+        }
+    }
+    return true;
+}
+
 // Creates, simulates and drops a character's cloth, under the conditions its draw renders it.
 void UpdateCharacterCloth(CHARACTER* c)
 {
@@ -9294,42 +9338,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         else
             byRender = CHARACTER_RENDER_OBJ;
         break;
-    }
-
-    if (o->Type == MODEL_PLAYER
-        && (o->SubType == MODEL_XMAS_EVENT_CHA_SSANTA
-            || o->SubType == MODEL_XMAS_EVENT_CHA_SNOWMAN
-            || o->SubType == MODEL_XMAS_EVENT_CHA_DEER))
-    {
-        OBJECT* pOwner = o->Owner;
-
-        if (pOwner->Live == false)
-        {
-            o->Live = false;
-        }
-
-        VectorCopy(pOwner->Position, o->Position);
-        VectorCopy(pOwner->Angle, o->Angle);
-        o->PriorAction = pOwner->PriorAction;
-        o->PriorAnimationFrame = pOwner->PriorAnimationFrame;
-        o->CurrentAction = pOwner->CurrentAction;
-        o->AnimationFrame = pOwner->AnimationFrame;
-
-        if (GetMillisecondsTimestamp() - o->m_dwTime >= XMAS_EVENT_TIME.count())
-        {
-            DeleteCharacter(c, o);
-        }
-    }
-    else if (o->Type == MODEL_PLAYER && o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL
-        || o->Type == MODEL_PLAYER && o->SubType == MODEL_PANDA
-        || o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_CHANGED
-        )
-    {
-        if (o->m_iAnimation >= 1)
-        {
-            o->m_iAnimation = 0;
-            SetPlayerStop(c);
-        }
     }
 
     if (byRender == CHARACTER_ANIMATION)
@@ -9996,10 +10004,11 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         }
     }
 
-    // A preview outside the client's characters gets no update; its draw simulates its cloth.
+    // A preview outside the client's characters gets no update; its draw simulates its cloth and transformation.
     if (!IsClientCharacterObject(o))
     {
         UpdateCharacterCloth(c);
+        UpdateTransformSkinEffects(o);
     }
     if (cloak.shown && !g_isCharacterBuff(o, eBuff_Cloaking) && o->m_pCloth)
     {
@@ -11771,7 +11780,7 @@ void UpdateDrawnCharacterEffects()
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
     {
         CHARACTER* c = &CharactersClient[i];
-        if (!IsCharacterDrawn(c))
+        if (!IsCharacterDrawn(c) || !UpdateTransformCharacterState(c))
             continue;
 
         OBJECT* o = &c->Object;
@@ -11796,6 +11805,7 @@ void UpdateDrawnCharacterEffects()
         UpdateRenderObjectEffects(o);
         giPetManager::UpdatePetEffects(c);
         UpdateCharacterCloth(c);
+        UpdateTransformSkinEffects(o);
         if (UpdateCharacterTypeEffects(c, o, b))
             continue;
         // Same order and stop-on-claim as RenderCharacter's chain.
