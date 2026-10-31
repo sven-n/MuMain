@@ -32,7 +32,8 @@ public:
     void ShowEvent(const std::string& set, std::optional<size_t> event);
 
     // The model of the shown look with a cue edit that is not stored yet, for
-    // Monster Preview's tags; nullptr when the tool shows no draft of the slot.
+    // Monster Preview's tags; nullptr when the tool showed no draft of the
+    // slot in this frame or the one before (Monster Preview draws first).
     const Data::Monsters::MonsterModelDefinition* GetShownModelDraft(int slot) const;
 
 private:

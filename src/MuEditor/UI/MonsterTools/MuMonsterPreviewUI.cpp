@@ -104,16 +104,11 @@ std::optional<Data::Monsters::MonsterSoundMoment> MomentOf(int animation)
     }
 }
 
-// The values the preview plays: the Monster Model tool's, or the Monster
-// Sounds tool's (a cue's frames), with an edit that is not stored yet, else
-// the model list's.
+// The values the preview plays: the Monster Model tool's, with an edit that
+// is not stored yet, else the model list's. The cues are GetCues'.
 const MonsterModelDefinition* ValuesOf(int slot)
 {
     if (const MonsterModelDefinition* draft = g_MuMonsterModelUI.GetShownDraft(slot))
-    {
-        return draft;
-    }
-    if (const MonsterModelDefinition* draft = g_MuMonsterSoundsUI.GetShownModelDraft(slot))
     {
         return draft;
     }
@@ -238,18 +233,27 @@ const MonsterSoundSet* MuMonsterPreviewUI::ShownSet(int slot) const
     return name.empty() ? nullptr : g_MonsterSoundSetDatabase.Find(name);
 }
 
+std::span<const MonsterModelCue> MuMonsterPreviewUI::GetCues(int slot) const
+{
+    if (const MonsterModelDefinition* draft = g_MuMonsterSoundsUI.GetShownModelDraft(slot))
+    {
+        return draft->cues;
+    }
+    const MonsterModelDefinition* values = ValuesOf(slot);
+    return values != nullptr ? std::span<const MonsterModelCue>(values->cues) : std::span<const MonsterModelCue>();
+}
+
 void MuMonsterPreviewUI::PlaySounds(int slot, int animation, float frame,
                                     std::optional<Data::Monsters::MonsterSoundMoment> moment)
 {
     const MonsterSoundSet* set = ShownSet(slot);
-    const MonsterModelDefinition* values = ValuesOf(slot);
-    if (set == nullptr || values == nullptr)
+    if (set == nullptr || ValuesOf(slot) == nullptr)
     {
         return;
     }
     if (animation >= 0)
     {
-        SoundPreview::PlayEvents(*set, values->cues, animation, frame);
+        SoundPreview::PlayEvents(*set, GetCues(slot), animation, frame);
     }
     if (moment)
     {
@@ -387,8 +391,8 @@ void MuMonsterPreviewUI::RenderFrameSlider(int slot, int keys)
 // shows its event.
 void MuMonsterPreviewUI::RenderCueTags(int slot, int keys, float last)
 {
-    const MonsterModelDefinition* values = ValuesOf(slot);
-    if (values == nullptr || keys <= 0 || last <= 0.0f)
+    const std::span<const MonsterModelCue> cues = GetCues(slot);
+    if (cues.empty() || keys <= 0 || last <= 0.0f)
     {
         return;
     }
@@ -398,7 +402,7 @@ void MuMonsterPreviewUI::RenderCueTags(int slot, int keys, float last)
     const float grab = ImGui::GetStyle().GrabMinSize;
     const ImVec2 start = ImGui::GetCursorScreenPos();
     bool any = false;
-    for (const MonsterModelCue& cue : values->cues)
+    for (const MonsterModelCue& cue : cues)
     {
         if (cue.animation != m_animation)
         {

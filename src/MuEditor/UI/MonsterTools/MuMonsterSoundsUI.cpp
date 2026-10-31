@@ -134,8 +134,9 @@ void MuMonsterSoundsUI::ShowEvent(const std::string& set, std::optional<size_t> 
 
 const MonsterModelDefinition* MuMonsterSoundsUI::GetShownModelDraft(int slot) const
 {
-    // Only the draft of this frame: a hidden window keeps an old one.
-    if (slot != m_shownSlot || m_shownFrame != ImGui::GetFrameCount())
+    // The draft of this frame or of the one before: Monster Preview draws
+    // before the tool in a frame. A window hidden longer keeps an old one.
+    if (slot != m_shownSlot || m_shownFrame < ImGui::GetFrameCount() - 1)
     {
         return nullptr;
     }

@@ -38,7 +38,9 @@
 
 #include <array>
 #include <optional>
+#include <span>
 #include <string>
+#include <utility>
 #include <vector>
 
 using Data::Monsters::MonsterDefinition;
@@ -542,7 +544,8 @@ TEST_CASE("The Monster Model, Monster Preview and Monster Sounds windows draw wi
     g_MonsterSoundSetDatabase.Build({});
 }
 
-TEST_CASE("Monster Sounds gives Monster Preview the model it edits only in the frame it showed it [editor][monsters]")
+TEST_CASE("Monster Sounds gives Monster Preview the model it edits in the frame it showed it and the next, as "
+          "Monster Preview draws first (Q-MN81) [editor][monsters]")
 {
     MonsterDefinition hound = Monster(3, "Hound");
     hound.model = "MONSTER_MODEL_HOUND";
@@ -566,12 +569,54 @@ TEST_CASE("Monster Sounds gives Monster Preview the model it edits only in the f
     CHECK(shown->cues == model.cues);
     CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_BULL_FIGHTER) == nullptr);
     ImGui::Render();
-    // A frame without the window: its draft is old.
+    // The next frame, before the window draws again: Monster Preview draws
+    // first and marks the draft's cues.
+    ImGui::NewFrame();
+    REQUIRE(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) == shown);
+    CHECK(g_MuMonsterPreviewUI.GetCues(MODEL_HOUND).size() == 1);
+    ImGui::Render();
+    // A frame later without the window: its draft is old.
     ImGui::NewFrame();
     CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) == nullptr);
     ImGui::Render();
     g_MonsterSelection.Select(MonsterSelection::NoMonster);
     g_MonsterModelDatabase.Build({});
+}
+
+TEST_CASE("Monster Preview marks the cues of Monster Sounds' draft, also while Monster Model shows the model "
+          "(Q-MN81) [editor][monsters]")
+{
+    MonsterDefinition hound = Monster(3, "Hound");
+    hound.model = "MONSTER_MODEL_HOUND";
+    const std::array monsters = {hound};
+    g_MonsterDatabase.Build(monsters, "en");
+    Data::Monsters::MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_HOUND";
+    model.load.file = "Data/Monster/Monster02.bmd";
+    model.load.textureFolders = {"Monster"};
+    model.cues = {{"step 1", MONSTER01_WALK, {1.0f, 2.0f}}};
+    const std::array models = {model};
+    g_MonsterModelDatabase.Build(models);
+    TestImGuiContext context;
+    g_MonsterSelection.Select(3);
+
+    ImGui::NewFrame();
+    bool open = true;
+    g_MuMonsterModelUI.Render(&open);
+    g_MuMonsterSoundsUI.Render(&open);
+    // A cue frame typed in Monster Sounds and not stored yet, as its field
+    // leaves the draft while it is edited.
+    auto* draft =
+        const_cast<Data::Monsters::MonsterModelDefinition*>(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND));
+    REQUIRE(draft != nullptr);
+    draft->cues[0].frames = {4.5f, 5.5f};
+    const std::span<const Data::Monsters::MonsterModelCue> cues = g_MuMonsterPreviewUI.GetCues(MODEL_HOUND);
+    REQUIRE(cues.size() == 1);
+    CHECK(cues[0].frames == std::pair(4.5f, 5.5f));
+    ImGui::Render();
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterModelDatabase.Build({});
+    g_MonsterDatabase.Build({}, "en");
 }
 
 TEST_CASE("The shown look of a monster with random variants is the entry's until a variant is picked (Q-MN83) "
