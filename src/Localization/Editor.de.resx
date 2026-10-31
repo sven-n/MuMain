@@ -3022,4 +3022,7 @@
   <data name="Cue frames need a monster of the set" xml:space="preserve">
     <value>Wähle ein Monster, das das Set spielt, um die Marke zu bearbeiten.</value>
   </data>
+  <data name="Sound id unknown" xml:space="preserve">
+    <value>Die Id ist keine SOUND_-Id, mit der der Code ein Monstergeräusch spielt; lass sie leer für ein Geräusch, das nach seiner Datei heißt.</value>
+  </data>
 </root>

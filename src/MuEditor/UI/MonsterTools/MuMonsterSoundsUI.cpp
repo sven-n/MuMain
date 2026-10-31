@@ -21,6 +21,7 @@
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterModelValidation.h"
+#include "Data/GameData/MonsterData/MonsterSoundIds.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "I18N/All.h"
 #include "imgui.h"
@@ -90,6 +91,27 @@ int CountMonstersWithModel(int slot)
     return count;
 }
 } // namespace
+
+std::string FindNewSoundProblem(const MonsterSoundSet& set, const MonsterSound& sound)
+{
+    if (sound.file.empty())
+    {
+        return I18N::Editor::SoundFileMissing;
+    }
+    if (std::string problem = Data::Paths::FindPathProblem(sound.file); !problem.empty())
+    {
+        return problem;
+    }
+    if (NamesFile(set, sound.file))
+    {
+        return I18N::Editor::SoundFileTwice;
+    }
+    if (!sound.id.empty() && !Data::Monsters::FindMonsterSoundId(sound.id))
+    {
+        return I18N::Editor::SoundIdUnknown;
+    }
+    return {};
+}
 
 MuMonsterSoundsUI& MuMonsterSoundsUI::GetInstance()
 {
@@ -587,26 +609,29 @@ void MuMonsterSoundsUI::RenderAddFile(MonsterSoundSet& set)
     ImGui::SameLine();
     ImGui::Checkbox("3D", &m_newSpatial);
     ImGui::SameLine();
-    const std::string problem =
-        m_newFile.empty() ? std::string(I18N::Editor::SoundFileMissing) : Data::Paths::FindPathProblem(m_newFile);
-    const bool twice = NamesFile(set, m_newFile);
-    ImGui::BeginDisabled(!problem.empty() || twice);
+    MonsterSound sound;
+    sound.file = m_newFile;
+    sound.id = m_newId;
+    sound.channels = m_newChannels;
+    sound.spatial = m_newSpatial;
+    const std::string problem = FindNewSoundProblem(set, sound);
+    ImGui::BeginDisabled(!problem.empty());
     if (ImGui::Button(I18N::Editor::AddAFile))
     {
-        MonsterSound sound;
-        sound.file = m_newFile;
-        sound.id = m_newId;
-        sound.channels = m_newChannels;
-        sound.spatial = m_newSpatial;
         set.sounds.push_back(sound);
         m_setDraft.AfterChange(true, StepLabel::SoundSet(set.name, I18N::Editor::StepWhatSoundFiles));
-        m_newFile.clear();
-        m_newId.clear();
+        // The fields stay for another try when the set was not stored.
+        const MonsterSoundSet* stored = g_MonsterSoundSetDatabase.Find(set.name);
+        if (stored != nullptr && NamesFile(*stored, sound.file))
+        {
+            m_newFile.clear();
+            m_newId.clear();
+        }
     }
     ImGui::EndDisabled();
-    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) && (!problem.empty() || twice))
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled) && !problem.empty())
     {
-        ImGui::SetTooltip("%s", twice ? I18N::Editor::SoundFileTwice : problem.c_str());
+        ImGui::SetTooltip("%s", problem.c_str());
     }
     if (!m_newFile.empty() && problem.empty() && !Data::Monsters::IsInClientFolder(m_newFile))
     {
