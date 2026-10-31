@@ -487,8 +487,7 @@ void MuMonsterPreviewUI::RenderAddSoundPopup(int slot)
     ImGui::SameLine();
     ImGui::SetNextItemWidth(CueFrameWidth * scale);
     ImGui::InputFloat("##To", &m_newCue.frames.second, 0.0f, 0.0f, "%.2f");
-    m_newCue.frames.first = std::max(m_newCue.frames.first, 0.0f);
-    m_newCue.frames.second = std::max(m_newCue.frames.second, m_newCue.frames.first + 0.1f);
+    SoundEventsEditor::KeepCueFrames(m_newCue.frames);
     ImGui::TextUnformatted(I18N::Format(I18N::Editor::InTheSoundSet0, {set->name}).c_str());
     const bool taken = std::any_of(model->cues.begin(), model->cues.end(),
                                    [&](const MonsterModelCue& cue) { return cue.name == m_newCue.name; });

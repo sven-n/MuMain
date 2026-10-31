@@ -341,18 +341,16 @@ private:
             auto& [from, to] = cue->frames;
             ImGui::SameLine();
             ImGui::SetNextItemWidth(FrameWidth * m_scale);
-            // The inputs keep the cue at least 0.1 frames long.
             if (ImGui::InputFloat("##From", &from, 0.0f, 0.0f, "%.2f"))
             {
-                from = std::max(from, 0.0f);
-                to = std::max(to, from + MinCueFrames);
+                KeepCueFrames(cue->frames);
             }
             m_context.modelDraft->AfterField(label);
             ImGui::SameLine();
             ImGui::SetNextItemWidth(FrameWidth * m_scale);
             if (ImGui::InputFloat("##To", &to, 0.0f, 0.0f, "%.2f"))
             {
-                to = std::max(to, from + MinCueFrames);
+                KeepCueFrames(cue->frames);
             }
             m_context.modelDraft->AfterField(label);
             ImGui::SameLine();
@@ -605,6 +603,12 @@ SetDraft MakeSetDraft(SetDraft::Load load, SetDraft::Store store)
 ModelDraft MakeModelDraft(ModelDraft::Load load, ModelDraft::Store store)
 {
     return ModelDraft(std::move(load), std::move(store), Items::ReloadAfterStore::NextFrame);
+}
+
+void KeepCueFrames(std::pair<float, float>& frames)
+{
+    frames.first = std::max(frames.first, 0.0f);
+    frames.second = std::max(frames.second, frames.first + MinCueFrames);
 }
 
 std::string FrameText(float frame)
