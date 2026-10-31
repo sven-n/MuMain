@@ -9186,6 +9186,16 @@ bool UpdateTransformCharacterState(CHARACTER* c)
             SetPlayerStop(c);
         }
     }
+
+    // The Christmas girl wears an earring; its draw made it.
+    if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL
+        && c->m_pTempParts == NULL)
+    {
+        c->m_pTempParts = (CSIPartsMDL*)new CSParts(MODEL_XMAS_EVENT_EARRING, 20);
+        OBJECT* pObj = ((CSIPartsMDL*)c->m_pTempParts)->GetObject();
+        pObj->Velocity = 0.25f;
+        pObj->Owner = &c->Object;
+    }
     return true;
 }
 
@@ -9742,18 +9752,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
         if (o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL)
         {
-            if (c->m_pTempParts == NULL)
-            {
-                c->m_pTempParts = (CSIPartsMDL*)new CSParts(MODEL_XMAS_EVENT_EARRING, 20);
-                auto* pParts = (CSIPartsMDL*)c->m_pTempParts;
-                OBJECT* pObj = pParts->GetObject();
-                pObj->Velocity = 0.25f;
-                pObj->Owner = &c->Object;
-            }
-            else
-            {
-                RenderParts(c);
-            }
+            RenderParts(c);
         }
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_PCBANG)
@@ -9784,21 +9783,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     {
         RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
 
-        if (c->m_pTempParts == NULL)
-        {
-            c->m_pTempParts = (CSIPartsMDL*)new CSParts(MODEL_XMAS_EVENT_EARRING, 20);
-            auto* pParts = (CSIPartsMDL*)c->m_pTempParts;
-            OBJECT* pObj = pParts->GetObject();
-            pObj->Velocity = 0.25f;
-            pObj->Owner = &c->Object;
-        }
-        else
-        {
-            auto* pParts = (CSIPartsMDL*)c->m_pTempParts;
-            OBJECT* pObj = pParts->GetObject();
-
-            RenderParts(c);
-        }
+        RenderParts(c);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_GM_CHARACTER)
     {
@@ -10004,11 +9989,15 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         }
     }
 
-    // A preview outside the client's characters gets no update; its draw simulates its cloth and transformation.
+    // A preview outside the client's characters gets no update; its draw runs its cloth, transformation and parts.
     if (!IsClientCharacterObject(o))
     {
         UpdateCharacterCloth(c);
         UpdateTransformSkinEffects(o);
+        if (o->Type == MODEL_PLAYER)
+        {
+            UpdateParts(c);
+        }
     }
     if (cloak.shown && !g_isCharacterBuff(o, eBuff_Cloaking) && o->m_pCloth)
     {
@@ -11806,6 +11795,10 @@ void UpdateDrawnCharacterEffects()
         giPetManager::UpdatePetEffects(c);
         UpdateCharacterCloth(c);
         UpdateTransformSkinEffects(o);
+        if (o->Type == MODEL_PLAYER)
+        {
+            UpdateParts(c);
+        }
         if (UpdateCharacterTypeEffects(c, o, b))
             continue;
         // Same order and stop-on-claim as RenderCharacter's chain.
@@ -15340,7 +15333,6 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             }
         }
 
-        CreatePartsFactory(c);
         RenderParts(c);
 
         if (gMapManager.InChaosCastle() == false)

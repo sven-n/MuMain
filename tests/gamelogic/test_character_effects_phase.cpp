@@ -2,6 +2,7 @@
 #include "doctest.h"
 
 #include "Engine/AI/GOBoid.h"
+#include "Character/CSParts.h"
 #include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/ObjectPose.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -509,4 +510,27 @@ TEST_CASE("A GM's transformation spawns its lights from the update, and none whi
     UpdateTransformSkinEffects(gm);
     CHECK(liveSprites() == 0);
     g_CharacterClearBuff(gm);
+}
+
+TEST_CASE("A character's mark spawns its sprite in the update, and its draw spawns none [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    CHARACTER& c = scope.character();
+    c.m_pParts = new CSParts2D(BITMAP_LIGHT, 0, 0);
+    auto liveSprites = []
+    {
+        int live = 0;
+        for (int i = 0; i < MAX_SPRITES; ++i)
+            live += Sprites[i].Live ? 1 : 0;
+        return live;
+    };
+    FenrirScope::ClearSpawns();
+
+    RenderParts(&c);
+    CHECK(liveSprites() == 0);
+    UpdateParts(&c);
+    CHECK(liveSprites() == 1);
+
+    DeleteParts(&c);
+    FenrirScope::ClearSpawns();
 }
