@@ -388,6 +388,38 @@ TEST_CASE("Monster sounds: the links between monsters, models and sets are check
     CHECK(lostIssue->source == "Monsters.json");
 }
 
+TEST_CASE("Monster sounds: a random variant without a set of its own plays the entry's on its model, whose cues "
+          "are checked too (Q-MN83) [data][monsters]")
+{
+    MonsterModelDefinition elfModel;
+    elfModel.slot = "MONSTER_MODEL_CHAOSCASTLE_ELF";
+    elfModel.cues = {{"step 1", MONSTER01_WALK, {1.0f, 2.0f}}};
+    MonsterModelDefinition wizardModel;
+    wizardModel.slot = "MONSTER_MODEL_CHAOSCASTLE_WIZARD";
+    const std::vector<MonsterModelDefinition> models = {elfModel, wizardModel};
+    MonsterDefinition elf = Monster(163, "MONSTER_MODEL_CHAOSCASTLE_ELF", "Chaos Castle");
+    elf.randomVariants = {{"MONSTER_MODEL_CHAOSCASTLE_WIZARD", std::nullopt}};
+    std::vector<MonsterSoundSet> sets = {SetOf("Chaos Castle", {OnCue("step 1")})};
+    std::vector<ItemDataIssue> issues;
+
+    Data::Monsters::ValidateMonsterSoundLinks(std::vector<MonsterDefinition>{elf}, models, sets, "Monsters.json",
+                                              "Sounds.json", issues);
+
+    INFO(Messages(issues));
+    CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "sound set Chaos Castle soundEvents[0].cues",
+                        "the model of monster 163 has no cue \"step 1\""));
+    CHECK(issues.size() == 1);
+
+    // With a set of its own, the wizard's look plays that one.
+    elf.randomVariants[0].soundSet = "Chaos Castle Wizard";
+    sets.push_back(SetOf("Chaos Castle Wizard"));
+    issues.clear();
+    Data::Monsters::ValidateMonsterSoundLinks(std::vector<MonsterDefinition>{elf}, models, sets, "Monsters.json",
+                                              "Sounds.json", issues);
+    INFO(Messages(issues));
+    CHECK(issues.empty());
+}
+
 TEST_CASE("Monster sounds: the code draws the looks of the ranged Chaos Castle soldiers only (Q-MN83) "
           "[data][monsters]")
 {
