@@ -2153,7 +2153,7 @@
     <value>From OpenMU, server {0}</value>
   </data>
   <data name="The diff counts" xml:space="preserve">
-    <value>{0} added, {1} changed, {2} removed items; {3} formula entries</value>
+    <value>{0} added, {1} changed items; {2} formula entries</value>
   </data>
   <data name="Check all" xml:space="preserve">
     <value>Check all</value>
@@ -2841,5 +2841,107 @@
   </data>
   <data name="The Item Browser lists it as Entry without a name" xml:space="preserve">
     <value>The Item Browser lists it as "Entry without a name"</value>
+  </data>
+  <data name="Update from server" xml:space="preserve">
+    <value>Update from server</value>
+  </data>
+  <data name="Admin panel address" xml:space="preserve">
+    <value>Admin panel address</value>
+  </data>
+  <data name="Update from {0}" xml:space="preserve">
+    <value>Update from {0}</value>
+  </data>
+  <data name="Downloading {0}" xml:space="preserve">
+    <value>Downloading {0} ...</value>
+  </data>
+  <data name="What Update from server does" xml:space="preserve">
+    <value>Update from server downloads the items of an OpenMU server from its admin panel and lists how they differ from the client's, as Import does. Enter an API key of the admin panel; Remember keeps it for the address in the system's key store. Without one, the environment variable {0} fills the field.</value>
+  </data>
+  <data name="Enter the address of the OpenMU admin panel" xml:space="preserve">
+    <value>Enter the address of the OpenMU admin panel, e.g. https://admin.example.org or http://localhost:8080.</value>
+  </data>
+  <data name="The admin panel address must be https" xml:space="preserve">
+    <value>The admin panel's address must start with https://; http:// only works for this computer (localhost, 127.0.0.1, [::1]).</value>
+  </data>
+  <data name="The admin panel could not be reached ({0})" xml:space="preserve">
+    <value>The admin panel could not be reached ({0}).</value>
+  </data>
+  <data name="The api key may not download the items" xml:space="preserve">
+    <value>The API key may not download the items (403): it needs the Viewer role, and the admin panel needs a user.</value>
+  </data>
+  <data name="The admin panel has no item exchange" xml:space="preserve">
+    <value>The admin panel has no item exchange file (404): it needs a newer OpenMU.</value>
+  </data>
+  <data name="Too many requests, try again in a minute" xml:space="preserve">
+    <value>Too many requests (429): try again in a minute.</value>
+  </data>
+  <data name="The admin panel answered with http status {0}" xml:space="preserve">
+    <value>The admin panel answered with HTTP status {0}.</value>
+  </data>
+  <data name="The update was cancelled" xml:space="preserve">
+    <value>The update was cancelled.</value>
+  </data>
+  <data name="The file does not carry all fields of an item, it is not added" xml:space="preserve">
+    <value>The file does not carry all of an item's fields: it is not added.</value>
+  </data>
+  <data name="Every item of the file matches the client" xml:space="preserve">
+    <value>Every item the file has matches the client.</value>
+  </data>
+  <data name="Items only in the client {0} stay unless checked" xml:space="preserve">
+    <value>{0} items are only in the client: they stay as they are unless you check them in their list below.</value>
+  </data>
+  <data name="Only in the client ({0}), not on the server" xml:space="preserve">
+    <value>Only in the client ({0}), not on the server</value>
+  </data>
+  <data name="Only in the client ({0}), not in the file" xml:space="preserve">
+    <value>Only in the client ({0}), not in the file</value>
+  </data>
+  <data name="Copy as Markdown" xml:space="preserve">
+    <value>Copy as Markdown</value>
+  </data>
+  <data name="Copied {0} rows" xml:space="preserve">
+    <value>Copied {0} rows</value>
+  </data>
+  <data name="Copies the list as a Markdown table" xml:space="preserve">
+    <value>Copies the list as a Markdown table (group, number and English name of each item), e.g. for an issue on GitHub.</value>
+  </data>
+  <data name="It removes 0 items from the client" xml:space="preserve">
+    <value>It removes {0} items from the client, with their models. Undo brings them back.</value>
+  </data>
+  <data name="Api key" xml:space="preserve">
+    <value>API key</value>
+  </data>
+  <data name="Remember" xml:space="preserve">
+    <value>Remember</value>
+  </data>
+  <data name="Keeps the key for this address in {0}" xml:space="preserve">
+    <value>Keeps the key for this address in {0}, not in a file.</value>
+  </data>
+  <data name="This build cannot keep the key" xml:space="preserve">
+    <value>This build cannot keep the key: libsecret (the system keyring) was not found when MuEditor was built. The key stays until the editor closes.</value>
+  </data>
+  <data name="The key could not be stored in {0}" xml:space="preserve">
+    <value>The key could not be stored in {0}.</value>
+  </data>
+  <data name="the Windows Credential Manager" xml:space="preserve">
+    <value>the Windows Credential Manager</value>
+  </data>
+  <data name="the macOS Keychain" xml:space="preserve">
+    <value>the macOS Keychain</value>
+  </data>
+  <data name="the system keyring" xml:space="preserve">
+    <value>the system keyring</value>
+  </data>
+  <data name="Enter an api key of the admin panel {0}" xml:space="preserve">
+    <value>Enter an API key of the admin panel (its API keys page; the Viewer role is enough), or set the environment variable {0} before starting the editor.</value>
+  </data>
+  <data name="The admin panel does not know the api key" xml:space="preserve">
+    <value>The admin panel does not know the API key (401).</value>
+  </data>
+  <data name="From the server" xml:space="preserve">
+    <value>From the server</value>
+  </data>
+  <data name="Not saved yet: the changes are only in the editor" xml:space="preserve">
+    <value>Not saved yet: the changes are only in the editor until you save the items.</value>
   </data>
 </root>

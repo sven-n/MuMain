@@ -71,6 +71,13 @@ void CMuEditorConfig::Load()
             {
                 m_skillEditorColumnVisibility[key] = (value == "1" || value == "true");
             }
+            else if (currentSection == "OpenMU")
+            {
+                if (key == "AdminPanelUrl")
+                {
+                    m_openMUAdminPanelUrl = value;
+                }
+            }
         }
     }
 
@@ -101,6 +108,11 @@ void CMuEditorConfig::Save()
         file << col.first << "=" << (col.second ? "1" : "0") << "\n";
     }
 
+    // [OpenMU]: the server of the Item Sync window's Update from server. Its API key is not
+    // kept here (MU_OPENMU_API_KEY).
+    file << "\n[OpenMU]\n";
+    file << "AdminPanelUrl=" << m_openMUAdminPanelUrl << "\n";
+
     file.close();
 }
 
@@ -112,6 +124,16 @@ std::string CMuEditorConfig::GetLanguage() const
 void CMuEditorConfig::SetLanguage(const std::string& language)
 {
     m_language = language;
+}
+
+const std::string& CMuEditorConfig::GetOpenMUAdminPanelUrl() const
+{
+    return m_openMUAdminPanelUrl;
+}
+
+void CMuEditorConfig::SetOpenMUAdminPanelUrl(const std::string& url)
+{
+    m_openMUAdminPanelUrl = url;
 }
 
 #endif // _EDITOR

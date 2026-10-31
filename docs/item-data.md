@@ -1353,8 +1353,8 @@ values until they are made again.
 
 Item Sync exchanges the items and the item formulas with an OpenMU server
 through a file, the *item exchange file*. The server stays authoritative:
-the client never writes to it. (OpenMU's export and import of the file, and
-Update from server, which downloads it, are later steps of phase 7; see the
+the client never writes to it. (OpenMU's import page is a later step of
+phase 7; see the
 [design](superpowers/specs/2026-09-25-data-driven-items-design.md).)
 
 - **Import…** opens a file and lists how it differs from the client's
@@ -1373,6 +1373,25 @@ Update from server, which downloads it, are later steps of phase 7; see the
   change"), or that it cannot be read as an exchange file; a file that has
   the client's data already is left as it is. The written file says
   `"source": "MuMain"`.
+- **Update from server** downloads the server's file from its admin panel
+  and goes on as Import (the summary says "Update from …"). Enter the admin
+  panel's address next to the button (e.g. `https://admin.example.org`; it
+  is kept in `MuEditor/MuEditor.ini`, `[OpenMU] AdminPanelUrl`). The address
+  must be https; plain http only works for this computer (`localhost`,
+  `127.0.0.1`, `[::1]`). The editor asks for
+  `<address>/api/items/exchange` with the API key in the **API key** field:
+  create a key on the admin panel's API keys page (the Viewer role is
+  enough). **Remember** keeps it for that address in the system's key store
+  (the Windows Credential Manager, the macOS Keychain, or the Linux keyring
+  when MuEditor was built with libsecret), so the field has it again at the
+  next start; unchecking it removes it there. Without a remembered key, the
+  environment variable `MU_OPENMU_API_KEY` fills the field. The key is never
+  written to a file or a log. The download runs in
+  the background and can be cancelled; the window says why one failed (no
+  address, no key, the server cannot be reached, 401 unknown key, 403 the
+  key lacks the Viewer role or the admin panel has no user yet, 404 an
+  OpenMU without the file, 429 too many requests). After Apply, the window
+  compares the downloaded file again without downloading it again.
 - **Compare two files** (folded under the path field) compares two exchange
   files, e.g. a client export with a server export, without the client's
   data: pick file A and file B (**Swap** swaps them), then **Compare the
@@ -1393,7 +1412,9 @@ Update from server, which downloads it, are later steps of phase 7; see the
   take: a name in a language the file lacks, or one the client's UI does
   not show, is not compared (no language is removed).
 - After applying, the window compares again: what was applied no longer
-  differs and leaves the list. A green line above says what was applied;
+  differs and leaves the list. Apply changes the editor's items only: until
+  they are saved, the window says so (and its title has a `*`) next to its
+  own **Save Items**. A green line above says what was applied;
   what was not checked stays listed and unchecked. An import is refused
   when an item it would add, resize, give another slot or remove is worn or
   in an item window by then (compare again).
@@ -1428,6 +1449,14 @@ number, fields with their default value left out, LF line endings.
   names the server's installation.
 - Only `season6` data is exchanged; a file of another `gameVersion` is
   refused, as is a `formatVersion` the client does not know.
+- `fields` (format version 2) lists the item fields the file carries, by
+  their keys (`"fields": ["width", "height"]`). OpenMU's export adds its
+  fields one at a time, so it names the ones it has. Only these fields are
+  compared and taken; the client keeps its values of the others, and a file
+  that does not list `name` has items without one. A file without `fields`
+  carries every field; the client's own export writes it so, as version 1.
+  An editor that only reads version 1 refuses a file with the list, instead
+  of reading the fields it lacks as their defaults.
 - `formulas` is the [item stat file](#item-stats-by-level) without its
   `formatVersion` and its profile rules, which stay with the client.
 - `items` has the fields both sides have, with the keys and meanings of the
@@ -1448,11 +1477,17 @@ number, fields with their default value left out, LF line endings.
 **The diff of an import**:
 
 - The **Items** list says for each item what the import does to it in the
-  client (Added, Changed, Removed). The box of an added or removed item
-  checks the whole item, the box of a changed one all its fields. A click on a row shows its fields (and selects the item in the
+  client (Added, Changed). The items only the client has are listed apart,
+  folded: "Only in the client (219), not on the server" (or "not in the
+  file"). The file leaves them as they are, and the summary says so; each
+  one is removed only when it is checked (Removed), by its own box or
+  Check all. The box of an
+  added or removed item
+  checks the whole item, the box of a changed one all its fields. A click
+  on a row, or the arrow keys, show its fields (and select the item in the
   item tools): each field (`width`, `requirements.strength`, `name.de`,
-  `tags.ammunition`, …) with its value now and the file's, and a box of its
-  own.
+  `tags.ammunition`, …) with its value now and the file's (*From the
+  server* after Update from server), and a box of its own.
 - The **Formulas** list has the drop level bonus, each table, each term of
   the default and of each profile (`default.damage.table`,
   `profiles.scroll.requirements.energy`, …) and a profile only one side
@@ -1464,13 +1499,26 @@ number, fields with their default value left out, LF line endings.
   item your character wears or an item window shows (they stay; such an
   item is not removed either, nor added when the client has no data for it
   yet), and a drop level above 255, which OpenMU keeps in a byte.
-- **Check all** and **Check none** take every row; **A field in all items**
-  checks or unchecks one field in every changed item.
+- **Check all** and **Check none** take every row, also the items only
+  the client has; the confirmation of the import says how many items it
+  removes, and Undo brings them back with their models. **A field in all items** checks or
+  unchecks one field in every changed item.
+- **Copy as Markdown** on a list's header copies the list (also a folded
+  one) as a Markdown table in English: each item's group, number and name,
+  for the items that differ also the change and the number of fields. Paste
+  it into an issue, e.g. one asking OpenMU for the items it lacks.
 - **Names**: only the client's UI languages are taken from the file; a
   language the file lacks stays as it is, and no language is removed.
 - **Stat profile**: a file's profile that the item's profile rules give
   leaves the item following its rules; another one becomes a pick (see
   Item Basics).
+- An item only a file with a `fields` list has is a locked row: the file
+  lacks some of its fields, so it is not added.
+- **The client's entries without a name** count where the file has an item
+  at their number: the row changes the entry with the fields the file
+  carries (Changed), and it stays an entry without a name until the file
+  gives it a name. Where the file has no item either, neither side has
+  one: there is no row. The export leaves them out.
 - **Added items** get the client-only fields at their defaults; the
   two-handed flag follows the rule of the shipped items (groups 0 to 5, a
   hand slot, two cells wide or more) and the weapon kind follows the group,

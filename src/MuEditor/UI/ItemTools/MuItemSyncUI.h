@@ -4,6 +4,7 @@
 
 #include "ItemSyncApply.h"
 #include "ItemSyncDiff.h"
+#include "ItemSyncServer.h"
 #include "ItemUsage.h"
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
@@ -24,7 +25,8 @@
 // formulas into a file without a diff (OpenMU's import page shows one); a file that is there is
 // replaced after a confirmation that says what changes in it. Compare two files lists, read-only,
 // what changes from one exchange file to another (e.g. a client export and a server export); its
-// rows can be marked as known differences too.
+// rows can be marked as known differences too. Update from server downloads OpenMU's file from its
+// admin panel (ItemSyncServer.h) and goes on as Import.
 class CMuItemSyncUI
 {
 public:
@@ -37,6 +39,17 @@ public:
     // Compares two exchange files (Compare the files): what changes from `a` to `b`, in every
     // language, read-only.
     void CompareFiles(const std::filesystem::path& a, const std::filesystem::path& b);
+    // Update from server: starts the download from the admin panel's address in the settings;
+    // its answer is compared in a later frame. False with a message when it cannot start.
+    bool UpdateFromServer();
+    // Compares the client's data with a file `url` sent, as Update from server does with the
+    // downloaded one; Apply compares it again afterwards without downloading it again.
+    void CompareServerFile(const std::string& text, const std::string& url);
+    // What the last Update from server did not get, or empty.
+    const std::string& GetServerMessage() const
+    {
+        return m_serverMessage;
+    }
     bool IsComparingFiles() const
     {
         return m_comparingFiles;
@@ -113,9 +126,21 @@ public:
     }
 
 private:
+    // A list of the diff's items: the ones that differ, and in an import the ones only the client
+    // has (in a section of their own).
+    enum class ItemList : uint8_t
+    {
+        None,
+        Differ,
+        OnlyInClient,
+    };
+
     CMuItemSyncUI() = default;
 
     void TakeChosenFile();
+    void TakeServerDownload();
+    void RenderServer();
+    void CompareText(const std::optional<std::string>& text, const std::string& name);
     void SetAllChecked(bool checked);
     void OpenFileDialog(FileAction action);
     void RenderButtons();
@@ -124,6 +149,12 @@ private:
     void RenderSummary();
     void RenderFieldToggle();
     void RenderItems();
+    // The list's header with its Copy as Markdown button (on the header, so a folded list can be
+    // copied too); true while the list is open.
+    bool RenderItemListHeader(ItemList list, const std::string& header, const std::vector<int>& rows);
+    // The table of the diff's items at `rows`, and the fields of the shown one when it is there.
+    void RenderItemTable(const char* id, const std::vector<int>& rows);
+    void CopyItemList(ItemList list, const std::vector<int>& rows);
     void RenderItemFields(MuEditor::Items::SyncItem& row);
     void RenderFormulas();
     void RenderApply();
@@ -135,9 +166,15 @@ private:
     void SetKnownFormula(const std::string& entry, bool known);
     void SaveKnownDifferences();
 
-    // The path field, and the file the diff is of: Apply uses that one.
+    // The path field, and the file the diff is of: Apply uses that one. From the server, the
+    // address of its file.
     std::string m_path;
     std::string m_comparedPath;
+    // The diff is of a file from the server: its text, which Apply compares again.
+    bool m_fromServer = false;
+    const char* FromTheSource() const;
+    void RenderUnsaved();
+    std::string m_serverText;
     // The file an import compares with the client, or file B of a comparison of two files.
     Data::Items::ItemExchangeFile m_file;
     // A comparison of two files is shown instead of an import: its path fields, the files it is
@@ -157,6 +194,9 @@ private:
     // import removes it.
     int m_shownItem = -1;
     MuEditor::Items::ItemUsage m_shownUsage;
+    // The list Copy as Markdown copied last for this diff, which its button says, and how many rows.
+    ItemList m_copiedList = ItemList::None;
+    int m_copiedRows = 0;
     // The fields of the changed items, for "A field in all items" (built with the diff), and the
     // one picked there.
     std::vector<std::string> m_toggleFields;
@@ -174,6 +214,23 @@ private:
     std::optional<MuEditor::Items::ItemSyncExportPreview> m_pendingExport;
     std::string m_exportResult;
     bool m_exportFailed = false;
+
+    // Update from server: the address field (MuEditor.ini's [OpenMU] AdminPanelUrl), the running
+    // download and its address, and why the last one has no file.
+    std::string m_adminPanelUrl;
+    bool m_adminPanelUrlLoaded = false;
+    // The API key field; Remember keeps it in the system's key store for the address.
+    std::string m_apiKey;
+    bool m_rememberApiKey = false;
+    // Why the key store did not take the key; empty when it did.
+    std::string m_apiKeyMessage;
+    void LoadServerSettings();
+    void LoadApiKey();
+    void StoreApiKey();
+    void RenderApiKey();
+    MuEditor::Items::CItemSyncDownload m_download;
+    std::string m_downloadUrl;
+    std::string m_serverMessage;
 
     // The file dialogs answer on their own thread: the path waits here, with the action of the
     // dialog that chose it.
