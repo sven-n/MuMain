@@ -36,6 +36,15 @@ public:
         static_cast<void>(level);
         return PlaySound(buffer, nullptr, false);
     }
+    // Plays a sound effect on the next of its channels when that channel has
+    // ended, and leaves it alone while it plays, as DirectSound's Play did on
+    // a playing buffer (maps design, D-MP3): a sound asked for every frame
+    // runs as up to as many copies as it has channels, each to its end. A
+    // backend without it plays the sound as PlaySound does.
+    [[nodiscard]] virtual bool PlaySoundOnFreeChannel(ESound buffer)
+    {
+        return PlaySound(buffer, nullptr, false);
+    }
     virtual void StopSound(ESound buffer, bool resetPosition) = 0;
     virtual void AllStopSound() = 0;
     virtual void ReleaseSound(ESound buffer) = 0;

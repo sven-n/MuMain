@@ -102,6 +102,89 @@ TEST_CASE("an active one-channel sound is not restarted [audio][ambient]")
     ma_audio_buffer_uninit(&audioBuffer);
 }
 
+// A map object's sound is asked for every frame while the object is drawn
+// (maps design, D-MP3): as DirectSound did, the channels start in turn, a
+// playing one is left alone, and one that has ended starts again.
+TEST_CASE("a sound on a free channel leaves its playing channels alone and starts an ended one [audio][ambient]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+
+    ma_engine_config engineConfig = ma_engine_config_init();
+    engineConfig.noDevice = MA_TRUE;
+    engineConfig.channels = 1;
+    engineConfig.sampleRate = 48000;
+    REQUIRE(ma_engine_init(&engineConfig, &backend->m_engine) == MA_SUCCESS);
+    backend->m_initialized = true;
+
+    constexpr ma_uint64 sourceFrameCount = 1024;
+    constexpr int Channels = 3;
+    std::array<float, sourceFrameCount> sourceFrames{};
+    sourceFrames.fill(0.25f);
+    std::array<ma_audio_buffer, Channels> audioBuffers{};
+    constexpr ESound soundId = SOUND_CLICK01;
+    const int soundIndex = static_cast<int>(soundId);
+    for (int channel = 0; channel < Channels; ++channel)
+    {
+        ma_audio_buffer_config bufferConfig =
+            ma_audio_buffer_config_init(ma_format_f32, 1, sourceFrameCount, sourceFrames.data(), nullptr);
+        REQUIRE(ma_audio_buffer_init(&bufferConfig, &audioBuffers[channel]) == MA_SUCCESS);
+        REQUIRE(ma_sound_init_from_data_source(&backend->m_engine,
+                                               reinterpret_cast<ma_data_source*>(&audioBuffers[channel]), 0, nullptr,
+                                               &backend->m_sounds[soundIndex][channel]) == MA_SUCCESS);
+    }
+    backend->m_soundLoaded[soundIndex] = true;
+    backend->m_loadedChannels[soundIndex] = Channels;
+    backend->m_activeChannel[soundIndex] = 0;
+    const auto cursor = [&](int channel)
+    {
+        ma_uint64 frames = 0;
+        REQUIRE(ma_sound_get_cursor_in_pcm_frames(&backend->m_sounds[soundIndex][channel], &frames) == MA_SUCCESS);
+        return frames;
+    };
+    const auto mix = [&](ma_uint64 frames)
+    {
+        std::array<float, 256> mixed{};
+        for (ma_uint64 done = 0; done < frames; done += mixed.size())
+        {
+            ma_uint64 read = 0;
+            REQUIRE(ma_engine_read_pcm_frames(&backend->m_engine, mixed.data(), mixed.size(), &read) == MA_SUCCESS);
+        }
+    };
+
+    // Three frames start the three channels in turn.
+    for (int frame = 0; frame < Channels; ++frame)
+    {
+        REQUIRE(backend->PlaySoundOnFreeChannel(soundId));
+    }
+    for (int channel = 0; channel < Channels; ++channel)
+    {
+        CHECK(ma_sound_is_playing(&backend->m_sounds[soundIndex][channel]));
+    }
+    mix(256);
+    const ma_uint64 before = cursor(0);
+    REQUIRE(before > 0);
+
+    // The next frames find every channel playing: nothing starts over.
+    for (int frame = 0; frame < Channels; ++frame)
+    {
+        REQUIRE(backend->PlaySoundOnFreeChannel(soundId));
+    }
+    CHECK(cursor(0) == before);
+
+    // Once the copies have ended, the next ask starts a channel again.
+    mix(sourceFrameCount + 256);
+    REQUIRE_FALSE(ma_sound_is_playing(&backend->m_sounds[soundIndex][0]));
+    REQUIRE(backend->PlaySoundOnFreeChannel(soundId));
+    CHECK(ma_sound_is_playing(&backend->m_sounds[soundIndex][0]));
+    CHECK(cursor(0) == 0);
+
+    backend->Shutdown();
+    for (ma_audio_buffer& audioBuffer : audioBuffers)
+    {
+        ma_audio_buffer_uninit(&audioBuffer);
+    }
+}
+
 // The editor's sound previews have their own level: they are heard while the
 // game's effect volume is 0.
 TEST_CASE("a sound played at a level ignores the effect volume [audio][volume]")

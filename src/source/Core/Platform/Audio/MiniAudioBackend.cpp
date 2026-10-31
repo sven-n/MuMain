@@ -283,6 +283,37 @@ bool MiniAudioBackend::PlaySoundAtLevel(ESound buffer, float level)
     return StartSound(buffer, nullptr, false, std::clamp(level, 0.0f, 1.0f));
 }
 
+bool MiniAudioBackend::PlaySoundOnFreeChannel(ESound buffer)
+{
+    if (!m_initialized)
+    {
+        return false;
+    }
+    const int bufIdx = static_cast<int>(buffer);
+    if (!HasSlot(bufIdx) || !m_soundLoaded[bufIdx])
+    {
+        return false;
+    }
+
+    // Round the channels as DirectSound did; a channel that still plays keeps
+    // playing (DirectSound's Play on a playing buffer did nothing).
+    const int ch = m_activeChannel[bufIdx];
+    m_activeChannel[bufIdx] = (ch + 1) % m_loadedChannels[bufIdx];
+    ma_sound* pSound = &m_sounds[bufIdx][ch];
+    if (ma_sound_is_playing(pSound))
+    {
+        return true;
+    }
+
+    // The channel has ended or never played: from the start, once, at the
+    // effect volume.
+    ma_sound_seek_to_pcm_frame(pSound, 0);
+    ma_sound_set_looping(pSound, MA_FALSE);
+    ma_sound_set_volume(pSound, m_sfxVolume);
+    ma_sound_start(pSound);
+    return true;
+}
+
 bool MiniAudioBackend::StartSound(ESound buffer, const void* pObject, bool looped, float volume)
 {
     if (!m_initialized)

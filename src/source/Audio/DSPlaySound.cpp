@@ -112,6 +112,19 @@ HRESULT PlayBufferAtLevel(ESound bufferId, float level)
     return E_FAIL;
 }
 
+HRESULT PlayBufferOnFreeChannel(ESound bufferId)
+{
+#ifdef _EDITOR
+    if (Audio::EditorMute::IsMuted())
+        return S_FALSE;
+#endif
+    if (g_platformAudio != nullptr)
+    {
+        return g_platformAudio->PlaySoundOnFreeChannel(bufferId) ? S_OK : E_FAIL;
+    }
+    return E_FAIL;
+}
+
 VOID StopBuffer(ESound bufferId, BOOL resetPosition)
 {
     if (g_platformAudio != nullptr)
