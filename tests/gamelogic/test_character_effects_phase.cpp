@@ -611,3 +611,25 @@ TEST_CASE(
     crystal.BoneTransform = nullptr;
     gMapManager.WorldActive = previousWorld;
 }
+
+TEST_CASE("A helper's light comes from the mount update, even under a cloaked rider, as its draw spawned it [effects]")
+{
+    FenrirScope scope;
+    scope.mount.Type = MODEL_HELPER;
+    auto liveSprites = []
+    {
+        int live = 0;
+        for (int i = 0; i < MAX_SPRITES; ++i)
+            live += Sprites[i].Live ? 1 : 0;
+        return live;
+    };
+
+    UpdateDrawnMountEffects(&scope.mount);
+    CHECK(liveSprites() == 1);
+
+    FenrirScope::ClearSpawns();
+    OBJECT* rider = &scope.rider;
+    g_CharacterRegisterBuff(rider, eBuff_Cloaking);
+    UpdateDrawnMountEffects(&scope.mount);
+    CHECK(liveSprites() == 1);
+}

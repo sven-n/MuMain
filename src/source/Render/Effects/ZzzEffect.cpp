@@ -7808,9 +7808,7 @@ void RenderEffects(bool bRenderBlendMesh)
                 case MODEL_MULTI_SHOT2:
                 case MODEL_MULTI_SHOT3:
                 {
-                    BMD* b = &Models[o->Type];
-                    Vector(1.f, 1.f, 1.f, b->BodyLight);
-                    b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity / 6.f, o->Position, o->Angle);
+                    Vector(1.f, 1.f, 1.f, Models[o->Type].BodyLight);
                     RenderObject(o);
                 }
                 break;
@@ -8607,9 +8605,6 @@ void RenderEffects(bool bRenderBlendMesh)
                 break;
                 case MODEL_DRAGON_LOWER_DUMMY:
                 {
-                    BMD* b = &Models[o->Type];
-                    b->CurrentAction = o->CurrentAction;
-                    b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity / 6.f, o->Position, o->Angle);
                     RenderObject(o);
                 }
                 break;
@@ -8718,6 +8713,15 @@ void UpdateEffectModelEffects()
         OBJECT* o = i < MAX_EFFECTS ? &Effects[i] : g_SkillEffects.GetEffect(i - MAX_EFFECTS);
         if (!o->Live || o->DrawnFrame != s_effectDrawFrame || o->Type >= MAX_MODELS)
             continue;
+        if (o->Type == MODEL_MULTI_SHOT1 || o->Type == MODEL_MULTI_SHOT2 || o->Type == MODEL_MULTI_SHOT3 ||
+            o->Type == MODEL_DRAGON_LOWER_DUMMY)
+        {
+            // The extra, slower animation step their draw gave them.
+            BMD* b = &Models[o->Type];
+            b->CurrentAction = o->CurrentAction;
+            b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity / 6.f,
+                             o->Position, o->Angle);
+        }
         PlaceObjectModel(o, &Models[o->Type]);
         UpdateRenderObjectEffects(o);
     }

@@ -14,6 +14,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/AI/BirdLanding.h"
 #include "Engine/AI/BoidSteering.h"
+#include "Engine/Object/ObjectPose.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "GameLogic/Events/CSChaosCastle.h"
@@ -179,6 +180,12 @@ bool MoveMount(OBJECT* o, bool bForceRender)
         vec3_t  Light, Position;
         vec3_t  TargetPosition;
         BMD* b = &Models[o->Type];
+        // The mount's own world pose, for the spawns below; the shared bones hold whatever was posed last.
+        const auto bones = [o, b]
+        {
+            PlaceObjectModel(o, b);
+            return Engine::Object::Pose::World(o, b);
+        };
 
         VectorCopy(o->Owner->Position, TargetPosition);
         switch (o->Type)
@@ -288,13 +295,13 @@ bool MoveMount(OBJECT* o, bool bForceRender)
 
                     if (o->AnimationFrame > 1.f && o->AnimationFrame < 1.2f)
                     {
-                        b->TransformPosition(BoneTransform[22], p, Position);	// R Hand
+                        b->TransformPosition(bones()[22], p, Position); // R Hand
                         Position[0] += 40.f;
                         bWave = true;
                     }
                     else if (o->AnimationFrame > 4.8f && o->AnimationFrame <= 5.0f)
                     {
-                        b->TransformPosition(BoneTransform[44], p, Position);	// R Foot
+                        b->TransformPosition(bones()[44], p, Position); // R Foot
                         Position[0] += 40.f;
                         Position[2] += 700.f;
                         bWave = true;
@@ -362,22 +369,22 @@ bool MoveMount(OBJECT* o, bool bForceRender)
 
                     if (o->AnimationFrame > 1.f && o->AnimationFrame < 1.2f)
                     {
-                        b->TransformPosition(BoneTransform[19], p, Position);
+                        b->TransformPosition(bones()[19], p, Position);
                         bWave = true;
                     }
                     else if (o->AnimationFrame > 1.1f && o->AnimationFrame < 1.4f)
                     {
-                        b->TransformPosition(BoneTransform[25], p, Position);
+                        b->TransformPosition(bones()[25], p, Position);
                         bWave = true;
                     }
                     else if (o->AnimationFrame > 1.3f && o->AnimationFrame < 1.6f)
                     {
-                        b->TransformPosition(BoneTransform[32], p, Position);
+                        b->TransformPosition(bones()[32], p, Position);
                         bWave = true;
                     }
                     else if (o->AnimationFrame > 1.5f && o->AnimationFrame <= 1.8f)
                     {
-                        b->TransformPosition(BoneTransform[38], p, Position);
+                        b->TransformPosition(bones()[38], p, Position);
                         bWave = true;
                     }
 
@@ -445,7 +452,7 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                     if (rand_fps_check(3))
                     {
                         vec3_t p = { 50.f, -4.f, 0.f };
-                        b->TransformPosition(BoneTransform[27], p, Position);
+                        b->TransformPosition(bones()[27], p, Position);
 
                         if (gMapManager.WorldActive == WD_7ATLANSE || gMapManager.WorldActive == WD_67DOPPLEGANGER3)
                         {
@@ -466,14 +473,14 @@ bool MoveMount(OBJECT* o, bool bForceRender)
                 Vector(60.f, 0.f, 0.f, Pos1);
                 Vector(0.f, 0.f, 0.f, Pos2);
                 Vector(1.f, 1.f, 1.f, Light);
-                b->TransformPosition(BoneTransform[9], Pos1, p);
-                b->TransformPosition(BoneTransform[9], Pos2, p2);
+                b->TransformPosition(bones()[9], Pos1, p);
+                b->TransformPosition(bones()[9], Pos2, p2);
                 CreateBlur(Hero, p, p2, Light, 0);
             }
 
             if (o->CurrentAction == 3)
             {
-                RenderDarkHorseSkill(o, b);
+                UpdateDarkHorseSkill(o, b);
             }
 
             if (o->Owner->ExtState == 1)
@@ -718,16 +725,6 @@ bool RenderMount(OBJECT* o, bool bForceRender)
             // A preview mount outside Mounts gets no update; its draw spawns its effects.
             if (bForceRender)
                 UpdateDrawnMountEffects(o);
-
-            vec3_t Light;
-            float  Luminosity = (float)(rand() % 30 + 70) * 0.01f;
-            switch (o->Type)
-            {
-            case MODEL_HELPER:
-                Vector(Luminosity * 0.5f, Luminosity * 0.8f, Luminosity * 0.6f, Light);
-                CreateSprite(BITMAP_LIGHT, o->Position, 1.f, Light, o);
-                break;
-            }
         }
     }
     return TRUE;
@@ -767,18 +764,25 @@ void UpdateMountEffects()
 
 void UpdateDrawnMountEffects(OBJECT* o)
 {
+    // Like their draws, the mounts' sprites stay out of the bloom.
+    const mu::ScopedBloomExclusion classicMounts;
+    if (o->Type == MODEL_HELPER)
+    {
+        vec3_t Light;
+        const float Luminosity = (float)(rand() % 30 + 70) * 0.01f;
+        Vector(Luminosity * 0.5f, Luminosity * 0.8f, Luminosity * 0.6f, Light);
+        CreateSprite(BITMAP_LIGHT, o->Position, 1.f, Light, o);
+    }
     // A cloaked rider's mount draws only as a faint outline (Draw_RenderObject's ExtraMon 10), with no effects.
     if (g_isCharacterBuff(o->Owner, eBuff_Cloaking))
         return;
-    // Like their draws, the mounts' sprites stay out of the bloom.
-    const mu::ScopedBloomExclusion classicMounts;
     PlaceObjectModel(o, &Models[o->Type]);
     UpdateRenderObjectEffects(o);
 }
 
 constexpr float HorseEffectInterval = 10 * (1000.f / 25.f); // every 10 frames on a 25fps basis (400 ms)
 
-void RenderDarkHorseSkill(OBJECT* o, BMD* b)
+void UpdateDarkHorseSkill(OBJECT* o, BMD* b)
 {
     if (o == NULL)	return;
     if (b == NULL)	return;
