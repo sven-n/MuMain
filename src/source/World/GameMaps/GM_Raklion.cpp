@@ -2,6 +2,7 @@
 // GM_Raklion.cpp: implementation of the CGM_Raklion class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Engine/Object/ObjectPose.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
@@ -1077,11 +1078,6 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     }
     else if (o->Type == 16)
     {
-        if (o->AnimationFrame >= 19)
-        {
-            SetAction(o, rand() % 2);
-        }
-
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV);
 
@@ -1089,34 +1085,6 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     }
     else if (o->Type == 17)
     {
-        if (o->CurrentAction >= 0 && o->CurrentAction <= 1 && o->AnimationFrame >= 19)
-        {
-            int iAniIndex = rand() % 100;
-
-            if (iAniIndex < 90)
-            {
-                if (iAniIndex % 2 == 0)
-                    SetAction(o, 0);
-                else
-                    SetAction(o, 1);
-            }
-            else
-            {
-                if (iAniIndex % 2 == 0)
-                    SetAction(o, 2);
-                else
-                    SetAction(o, 3);
-            }
-        }
-        else if (o->CurrentAction == 2 && o->AnimationFrame >= 97)
-        {
-            SetAction(o, rand() % 2);
-        }
-        else if (o->CurrentAction == 3 && o->AnimationFrame >= 98)
-        {
-            SetAction(o, rand() % 2);
-        }
-
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV);
 
@@ -1124,65 +1092,6 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     }
     else if (o->Type == 19)
     {
-        if (o->CurrentAction == 0)
-        {
-            vec3_t vRelativePos, vWorldPos, vLight;
-            Vector(0, 0, 0, vRelativePos);
-            Vector(1.f, 1.f, 1.f, vLight);
-
-            if ((o->AnimationFrame >= 2 && o->AnimationFrame <= 5))
-            {
-                for (int i = 0; i < b->NumBones; ++i)
-                {
-                    b->TransformPosition(BoneTransform[i], vRelativePos, vWorldPos, false);
-                    CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
-                }
-            }
-            else if (o->AnimationFrame >= 11 && o->AnimationFrame <= 12)
-            {
-                b->TransformPosition(BoneTransform[6], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
-                b->TransformPosition(BoneTransform[7], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
-                b->TransformPosition(BoneTransform[8], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
-            }
-            else if (o->AnimationFrame >= 13 && o->AnimationFrame <= 14)
-            {
-                b->TransformPosition(BoneTransform[9], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
-                b->TransformPosition(BoneTransform[10], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
-                b->TransformPosition(BoneTransform[11], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
-            }
-            else if (o->AnimationFrame >= 15 && o->AnimationFrame <= 17)
-            {
-                for (int i = 12; i < 20; ++i)
-                {
-                    b->TransformPosition(BoneTransform[i], vRelativePos, vWorldPos, false);
-                    CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
-                }
-            }
-            else if (o->AnimationFrame >= 19.5f)
-            {
-                o->CurrentAction = 1;
-            }
-
-            for (int i = 0; i < b->NumBones; ++i)
-            {
-                b->TransformPosition(BoneTransform[i], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 8, 1.5f);
-            }
-        }
-        else if (o->CurrentAction == 1)
-        {
-            if (rand() % 40 == 30)
-            {
-                o->CurrentAction = 0;
-            }
-        }
-
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV);
 
@@ -1199,108 +1108,10 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
                       o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME8);
 
-        if (o->CurrentAction == 0)
-        {
-            vec3_t vRelativePos, vWorldPos, vLight;
-            Vector(0, 0, 0, vRelativePos);
-            Vector(1.f, 1.f, 1.f, vLight);
-
-            // 머리
-            b->TransformPosition(BoneTransform[5], vRelativePos, vWorldPos, false);
-            CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 8, 2.f);
-
-            if (o->AnimationFrame <= 8)
-            {
-                // 머리
-                b->TransformPosition(BoneTransform[6], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 8, 1.5f);
-                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7, 0.1f);
-            }
-
-            if (o->AnimationFrame >= 12)
-            {
-                // 입가
-                b->TransformPosition(BoneTransform[6], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 8, 2.f);
-                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7, 0.1f);
-            }
-
-            if (o->AnimationFrame <= 15)
-            {
-                // 날개
-                b->TransformPosition(BoneTransform[8], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 9, 2.f);
-                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7, 0.1f);
-
-                b->TransformPosition(BoneTransform[11], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 9, 2.f);
-                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7, 0.1f);
-            }
-
-            if (o->AnimationFrame >= 19)
-            {
-                o->CurrentAction = 1;
-            }
-        }
-        else if (o->CurrentAction == 1)
-        {
-            if (rand() % 40 == 25)
-            {
-                o->CurrentAction = 0;
-            }
-        }
-
         return true;
     }
     else if (o->Type == 21)
     {
-        // 얼음 깨는 에니메이션 동작이고
-        if (o->CurrentAction == 0)
-        {
-            if (o->AnimationFrame >= 4 && o->AnimationFrame <= 8)
-            {
-                vec3_t vRelativePos, vWorldPos, vLight;
-                Vector(0, 0, 0, vRelativePos);
-                Vector(1.f, 1.f, 1.f, vLight);
-                // 입앞 본
-                b->TransformPosition(BoneTransform[7], vRelativePos, vWorldPos, false);
-                // 물 이펙트
-                CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 9, 0.5f);
-                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
-
-                // 7, 16, 17, 21, 22
-                // 연기 이펙트
-                b->TransformPosition(BoneTransform[7], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 1.f);
-                b->TransformPosition(BoneTransform[16], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 0.5f);
-                b->TransformPosition(BoneTransform[17], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 0.7f);
-                b->TransformPosition(BoneTransform[20], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 0.3f);
-                b->TransformPosition(BoneTransform[21], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 0.3f);
-                b->TransformPosition(BoneTransform[22], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 0.5f);
-                b->TransformPosition(BoneTransform[23], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 0.3f);
-                b->TransformPosition(BoneTransform[24], vRelativePos, vWorldPos, false);
-                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 0.3f);
-            }
-
-            if (o->AnimationFrame >= 19.f)
-            {
-                o->CurrentAction = 1;
-            }
-        }
-        else if (o->CurrentAction == 1)
-        {
-            if (rand() % 40 == 19)
-            {
-                o->CurrentAction = 0;
-            }
-        }
-
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV);
 
@@ -1390,12 +1201,6 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     }
     else if (o->Type == 82)
     {
-        if (m_bCanGoBossMap == false)
-        {
-            o->AnimationFrame = 0;
-            o->PriorAnimationFrame = 0;
-        }
-
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV, o->HiddenMesh);
 
@@ -1625,43 +1430,6 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
                 Calc_RenderObject(o, true, false, 0);
                 b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                               o->BlendMeshTexCoordV, o->HiddenMesh);
-
-                vec3_t vPos, vLight;
-                float fLumi = (sinf(WorldTime * 0.004f) + 1.2f) * 0.5f + 0.1f;
-                Vector(0.1f * fLumi, 0.6f * fLumi, 0.7f * fLumi, vLight);
-                if (o->Type == MODEL_SPIDER_EGGS_1)
-                {
-                    b->TransformByObjectBone(vPos, o, 57);
-                    CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
-                    if (rand_fps_check(100))
-                        CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
-                }
-                else if (o->Type == MODEL_SPIDER_EGGS_2)
-                {
-                    b->TransformByObjectBone(vPos, o, 95);
-                    CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
-                    if (rand_fps_check(100))
-                        CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
-                    b->TransformByObjectBone(vPos, o, 115);
-                    CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
-                    if (rand_fps_check(100))
-                        CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
-                }
-                else
-                {
-                    b->TransformByObjectBone(vPos, o, 95);
-                    CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
-                    if (rand_fps_check(100))
-                        CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
-                    b->TransformByObjectBone(vPos, o, 115);
-                    CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
-                    if (rand_fps_check(100))
-                        CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
-                    b->TransformByObjectBone(vPos, o, 173);
-                    CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
-                    if (rand_fps_check(100))
-                        CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
-                }
             }
         }
 
@@ -1744,8 +1512,223 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 
 bool CGM_Raklion::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
+    const auto bones = [o, b] { return Engine::Object::Pose::World(o, b); };
     switch (o->Type)
     {
+    case 16:
+    {
+        if (o->AnimationFrame >= 19)
+        {
+            SetAction(o, rand() % 2);
+        }
+        return true;
+    }
+    case 17:
+    {
+        if (o->CurrentAction >= 0 && o->CurrentAction <= 1 && o->AnimationFrame >= 19)
+        {
+            int iAniIndex = rand() % 100;
+
+            if (iAniIndex < 90)
+            {
+                if (iAniIndex % 2 == 0)
+                    SetAction(o, 0);
+                else
+                    SetAction(o, 1);
+            }
+            else
+            {
+                if (iAniIndex % 2 == 0)
+                    SetAction(o, 2);
+                else
+                    SetAction(o, 3);
+            }
+        }
+        else if (o->CurrentAction == 2 && o->AnimationFrame >= 97)
+        {
+            SetAction(o, rand() % 2);
+        }
+        else if (o->CurrentAction == 3 && o->AnimationFrame >= 98)
+        {
+            SetAction(o, rand() % 2);
+        }
+        return true;
+    }
+    case 19:
+    {
+        if (o->CurrentAction == 0)
+        {
+            vec3_t vRelativePos, vWorldPos, vLight;
+            Vector(0, 0, 0, vRelativePos);
+            Vector(1.f, 1.f, 1.f, vLight);
+
+            if ((o->AnimationFrame >= 2 && o->AnimationFrame <= 5))
+            {
+                for (int i = 0; i < b->NumBones; ++i)
+                {
+                    b->TransformPosition(bones()[i], vRelativePos, vWorldPos, false);
+                    CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
+                }
+            }
+            else if (o->AnimationFrame >= 11 && o->AnimationFrame <= 12)
+            {
+                b->TransformPosition(bones()[6], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
+                b->TransformPosition(bones()[7], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
+                b->TransformPosition(bones()[8], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
+            }
+            else if (o->AnimationFrame >= 13 && o->AnimationFrame <= 14)
+            {
+                b->TransformPosition(bones()[9], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
+                b->TransformPosition(bones()[10], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
+                b->TransformPosition(bones()[11], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
+            }
+            else if (o->AnimationFrame >= 15 && o->AnimationFrame <= 17)
+            {
+                for (int i = 12; i < 20; ++i)
+                {
+                    b->TransformPosition(bones()[i], vRelativePos, vWorldPos, false);
+                    CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
+                }
+            }
+            else if (o->AnimationFrame >= 19.5f)
+            {
+                o->CurrentAction = 1;
+            }
+
+            for (int i = 0; i < b->NumBones; ++i)
+            {
+                b->TransformPosition(bones()[i], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 8, 1.5f);
+            }
+        }
+        else if (o->CurrentAction == 1)
+        {
+            if (rand() % 40 == 30)
+            {
+                o->CurrentAction = 0;
+            }
+        }
+        return true;
+    }
+    case 20:
+    {
+        if (o->CurrentAction == 0)
+        {
+            vec3_t vRelativePos, vWorldPos, vLight;
+            Vector(0, 0, 0, vRelativePos);
+            Vector(1.f, 1.f, 1.f, vLight);
+
+            // 머리
+            b->TransformPosition(bones()[5], vRelativePos, vWorldPos, false);
+            CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 8, 2.f);
+
+            if (o->AnimationFrame <= 8)
+            {
+                // 머리
+                b->TransformPosition(bones()[6], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 8, 1.5f);
+                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7, 0.1f);
+            }
+
+            if (o->AnimationFrame >= 12)
+            {
+                // 입가
+                b->TransformPosition(bones()[6], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 8, 2.f);
+                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7, 0.1f);
+            }
+
+            if (o->AnimationFrame <= 15)
+            {
+                // 날개
+                b->TransformPosition(bones()[8], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 9, 2.f);
+                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7, 0.1f);
+
+                b->TransformPosition(bones()[11], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 9, 2.f);
+                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7, 0.1f);
+            }
+
+            if (o->AnimationFrame >= 19)
+            {
+                o->CurrentAction = 1;
+            }
+        }
+        else if (o->CurrentAction == 1)
+        {
+            if (rand() % 40 == 25)
+            {
+                o->CurrentAction = 0;
+            }
+        }
+        return true;
+    }
+    case 21:
+    {
+        // 얼음 깨는 에니메이션 동작이고
+        if (o->CurrentAction == 0)
+        {
+            if (o->AnimationFrame >= 4 && o->AnimationFrame <= 8)
+            {
+                vec3_t vRelativePos, vWorldPos, vLight;
+                Vector(0, 0, 0, vRelativePos);
+                Vector(1.f, 1.f, 1.f, vLight);
+                // 입앞 본
+                b->TransformPosition(bones()[7], vRelativePos, vWorldPos, false);
+                // 물 이펙트
+                CreateParticle(BITMAP_WATERFALL_3, vWorldPos, o->Angle, vLight, 9, 0.5f);
+                CreateParticle(BITMAP_WATERFALL_5, vWorldPos, o->Angle, vLight, 7);
+
+                // 7, 16, 17, 21, 22
+                // 연기 이펙트
+                b->TransformPosition(bones()[7], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 1.f);
+                b->TransformPosition(bones()[16], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 0.5f);
+                b->TransformPosition(bones()[17], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 0.7f);
+                b->TransformPosition(bones()[20], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 0.3f);
+                b->TransformPosition(bones()[21], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 0.3f);
+                b->TransformPosition(bones()[22], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 0.5f);
+                b->TransformPosition(bones()[23], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 0.3f);
+                b->TransformPosition(bones()[24], vRelativePos, vWorldPos, false);
+                CreateParticle(BITMAP_WATERFALL_2, vWorldPos, o->Angle, vLight, 5, 0.3f);
+            }
+
+            if (o->AnimationFrame >= 19.f)
+            {
+                o->CurrentAction = 1;
+            }
+        }
+        else if (o->CurrentAction == 1)
+        {
+            if (rand() % 40 == 19)
+            {
+                o->CurrentAction = 0;
+            }
+        }
+        return true;
+    }
+    case 82:
+    {
+        if (m_bCanGoBossMap == false)
+        {
+            o->AnimationFrame = 0;
+            o->PriorAnimationFrame = 0;
+        }
+        return true;
+    }
     case 70:
     {
         vec3_t vLight;
@@ -1793,6 +1776,72 @@ bool CGM_Raklion::UpdateObjectEffects(OBJECT* o, BMD* b)
     }
 
     return false;
+}
+
+// The glow and smoke a living spider egg cluster shows on its three eggs, placed as its draw places them.
+static void SpawnSpiderEggLights(OBJECT* o, BMD* b)
+{
+    vec3_t vOriginPos;
+    VectorCopy(o->Position, vOriginPos);
+
+    for (int i = 0; i < 3; ++i)
+    {
+        if (i == 0)
+        {
+            if (o->Type == MODEL_SPIDER_EGGS_1)
+                o->Position[0] += 60;
+            else
+                o->Position[0] += 100;
+        }
+        else if (i == 1)
+        {
+            if (o->Type == MODEL_SPIDER_EGGS_1)
+                o->Position[1] += 60;
+            else
+                o->Position[1] += 100;
+        }
+        else
+        {
+            VectorCopy(vOriginPos, o->Position);
+        }
+
+        vec3_t vPos, vLight;
+        float fLumi = (sinf(WorldTime * 0.004f) + 1.2f) * 0.5f + 0.1f;
+        Vector(0.1f * fLumi, 0.6f * fLumi, 0.7f * fLumi, vLight);
+        if (o->Type == MODEL_SPIDER_EGGS_1)
+        {
+            b->TransformByObjectBone(vPos, o, 57);
+            CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
+            if (rand_fps_check(100))
+                CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
+        }
+        else if (o->Type == MODEL_SPIDER_EGGS_2)
+        {
+            b->TransformByObjectBone(vPos, o, 95);
+            CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
+            if (rand_fps_check(100))
+                CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
+            b->TransformByObjectBone(vPos, o, 115);
+            CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
+            if (rand_fps_check(100))
+                CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
+        }
+        else
+        {
+            b->TransformByObjectBone(vPos, o, 95);
+            CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
+            if (rand_fps_check(100))
+                CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
+            b->TransformByObjectBone(vPos, o, 115);
+            CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
+            if (rand_fps_check(100))
+                CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
+            b->TransformByObjectBone(vPos, o, 173);
+            CreateSprite(BITMAP_LIGHT, vPos, 3.f, vLight, o);
+            if (rand_fps_check(100))
+                CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 33, 1.f);
+        }
+    }
 }
 
 bool CGM_Raklion::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
@@ -2058,6 +2107,8 @@ bool CGM_Raklion::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
     case MODEL_SPIDER_EGGS_2:
     case MODEL_SPIDER_EGGS_3:
     {
+        if (o->CurrentAction != MONSTER01_DIE)
+            SpawnSpiderEggLights(o, b);
         return true;
     }
     break;

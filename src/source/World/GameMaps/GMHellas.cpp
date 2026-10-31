@@ -2,6 +2,7 @@
 //  GMHellas.cpp
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Engine/Object/ObjectPose.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -530,56 +531,16 @@ bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
     {
         Vector(0.3f, 0.3f, 0.3f, b->BodyLight);
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-        float Luminosity = (float)sin(WorldTime * 0.003f) * 0.2f + 0.8f;
-        vec3_t p, Light, Position;
-        Vector(0, 0, 0, p);
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        b->TransformPosition(BoneTransform[3], p, Position, false);
-        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
-
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        b->TransformPosition(BoneTransform[4], p, Position, false);
-        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
-
         return true;
     }
     else if (o->Type == MODEL_CUNDUN_GHOST)
     {
         Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
-        if (o->AnimationFrame > 3 && o->Alpha > 0.2f)
-            o->Alpha -= 0.02f * FPS_ANIMATION_FACTOR;
         b->RenderBody(RENDER_TEXTURE | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         b->RenderBody(RENDER_TEXTURE | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
         Vector(0.0f, 0.0f, 0.0f, b->BodyLight);
         RenderPartObjectEdge(b, o, RENDER_COLOR, true, 0.7f);
 
-        float Luminosity = (float)sin(WorldTime * 0.003f) * 0.2f + 0.8f;
-        vec3_t p, Light, Position;
-
-        Vector(0, 0, 0, p);
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        b->TransformPosition(BoneTransform[8], p, Position, false);
-        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
-
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        b->TransformPosition(BoneTransform[9], p, Position, false);
-        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
-
-        {
-            Vector(2.f, 10.f, 0.f, p);
-            b->TransformPosition(BoneTransform[6], p, Position, false);
-            Vector(1.0f, 0.2f, 0.0f, Light);
-            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17, 3.0f);
-        }
         return true;
     }
     else if (gMapManager.InHellas() == true && (o->Type >= MODEL_WORLD_OBJECT && o->Type < MAX_WORLD_OBJECTS))
@@ -778,8 +739,130 @@ static void UpdateDestroy_Def(OBJECT* o, BMD* b)
 
 void UpdateHellasObjectMeshEffects(OBJECT* o, BMD* b)
 {
+    const auto bones = [o, b] { return Engine::Object::Pose::World(o, b); };
     switch (o->Type)
     {
+    case MODEL_CUNDUN_DRAGON_HEAD:
+    {
+        float Luminosity = (float)sin(WorldTime * 0.003f) * 0.2f + 0.8f;
+        vec3_t p, Light, Position;
+        Vector(0, 0, 0, p);
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        b->TransformPosition(bones()[3], p, Position, false);
+        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
+
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        b->TransformPosition(bones()[4], p, Position, false);
+        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
+    }
+    break;
+    case MODEL_CUNDUN_GHOST:
+    {
+        if (o->AnimationFrame > 3 && o->Alpha > 0.2f)
+            o->Alpha -= 0.02f * FPS_ANIMATION_FACTOR;
+        float Luminosity = (float)sin(WorldTime * 0.003f) * 0.2f + 0.8f;
+        vec3_t p, Light, Position;
+
+        Vector(0, 0, 0, p);
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        b->TransformPosition(bones()[8], p, Position, false);
+        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
+
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        b->TransformPosition(bones()[9], p, Position, false);
+        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
+
+        {
+            Vector(2.f, 10.f, 0.f, p);
+            b->TransformPosition(bones()[6], p, Position, false);
+            Vector(1.0f, 0.2f, 0.0f, Light);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17, 3.0f);
+        }
+    }
+    break;
+    case MODEL_ILLUSION_OF_KUNDUN:
+        if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 14.8f && (int)o->LifeTime == 90)
+        {
+            if (o->LifeTime != 10)
+            {
+                PlayBuffer(SOUND_KUNDUN_SHUDDER);
+            }
+            o->LifeTime = 10;
+            EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
+            if (rand_fps_check(1))
+            {
+                vec3_t p, Position;
+                Vector(39.0f, -7.5f, -0.5, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART8, Position, o->Angle, o->Light, 3, o, -130, 3);
+                Vector(24.0f, -7.5f, 32.5f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART1, Position, o->Angle, o->Light, 3, o, -130, 4);
+                Vector(24.0f, -8.5f, -32.5f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART2, Position, o->Angle, o->Light, 3, o, -130, 5);
+                Vector(-0.5f, 4.0f, 0.5f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART3, Position, o->Angle, o->Light, 2, o, -130, 6);
+                Vector(-2.5f, -22.0f, 54.0f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART4, Position, o->Angle, o->Light, 3, o, -130, 1);
+                Vector(-4.5f, -24.5f, -53, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART5, Position, o->Angle, o->Light, 3, o, -130, 2);
+                Vector(-136.0f, -153.5f, 0, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART6, Position, o->Angle, o->Light, 4, o, -10, 2);
+                Vector(-135.0f, -153.0f, 0.0f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART7, Position, o->Angle, o->Light, 5, o, -130, 2);
+
+                CreateEffect(MODEL_CUNDUN_SKILL, o->Position, o->Angle, o->Light, 2);
+            }
+        }
+        else
+        {
+            if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame >= 8 && o->LifeTime >= 100)
+            {
+                if (o->LifeTime != 90)
+                {
+                    PlayBuffer(SOUND_KUNDUN_DESTROY);
+                }
+                o->LifeTime = 90;
+                if (rand_fps_check(1))
+                {
+                    vec3_t Angle = {0.0f, 0.0f, 0.0f};
+                    int iCount = 86;
+                    for (int i = 0; i < iCount; ++i)
+                    {
+                        Angle[0] = -10.f;
+                        Angle[1] = 0.f;
+                        Angle[2] = i * (10.f + rand() % 10);
+
+                        vec3_t Position;
+                        VectorCopy(o->Position, Position);
+                        Position[2] += 200.f;
+                        CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
+                        CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
+                    }
+                }
+
+                EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
+            }
+            if (o->LifeTime >= 90)
+            {
+                o->Alpha = 1.0f;
+            }
+        }
+        break;
     case MODEL_DEATH_ANGEL:
     case MODEL_BLOOD_SOLDIER:
     case MODEL_AEGIS:
@@ -1896,99 +1979,38 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
     }
     else if (o->Type == MODEL_ILLUSION_OF_KUNDUN)
     {
-        if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 14.8f && (int)o->LifeTime == 90)
+        // UpdateHellasObjectMeshEffects runs its death; it shows until it bursts.
+        if (o->LifeTime >= 90)
         {
-            if (o->LifeTime != 10)
-            {
-                PlayBuffer(SOUND_KUNDUN_SHUDDER);
-            }
-            o->LifeTime = 10;
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
+            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            Vector(0.4f, 0.4f, 0.3f, b->BodyLight);
+            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(3, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(4, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(5, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(6, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
 
-            if (rand_fps_check(1))
+            if (o->CurrentAction == MONSTER01_SHOCK)
             {
-                vec3_t p, Position;
-                Vector(39.0f, -7.5f, -0.5, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART8, Position, o->Angle, o->Light, 3, o, -130, 3);
-                Vector(24.0f, -7.5f, 32.5f, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART1, Position, o->Angle, o->Light, 3, o, -130, 4);
-                Vector(24.0f, -8.5f, -32.5f, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART2, Position, o->Angle, o->Light, 3, o, -130, 5);
-                Vector(-0.5f, 4.0f, 0.5f, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART3, Position, o->Angle, o->Light, 2, o, -130, 6);
-                Vector(-2.5f, -22.0f, 54.0f, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART4, Position, o->Angle, o->Light, 3, o, -130, 1);
-                Vector(-4.5f, -24.5f, -53, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART5, Position, o->Angle, o->Light, 3, o, -130, 2);
-                Vector(-136.0f, -153.5f, 0, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART6, Position, o->Angle, o->Light, 4, o, -10, 2);
-                Vector(-135.0f, -153.0f, 0.0f, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART7, Position, o->Angle, o->Light, 5, o, -130, 2);
-
-                CreateEffect(MODEL_CUNDUN_SKILL, o->Position, o->Angle, o->Light, 2);
-            }
-        }
-        else
-        {
-            if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame >= 8 && o->LifeTime >= 100)
-            {
-                if (o->LifeTime != 90)
+                if ((o->AnimationFrame > 3.5f && o->AnimationFrame < 6.0f) ||
+                    (o->AnimationFrame > 8.0f && o->AnimationFrame < 11.0f))
                 {
-                    PlayBuffer(SOUND_KUNDUN_DESTROY);
-                }
-                o->LifeTime = 90;
-                if (rand_fps_check(1))
-                {
-                    vec3_t Angle = { 0.0f, 0.0f, 0.0f };
-                    int iCount = 86;
-                    for (int i = 0; i < iCount; ++i)
-                    {
-                        Angle[0] = -10.f;
-                        Angle[1] = 0.f;
-                        Angle[2] = i * (10.f + rand() % 10);
-
-                        vec3_t Position;
-                        VectorCopy(o->Position, Position);
-                        Position[2] += 200.f;
-                        CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
-                        CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
-                    }
-                }
-
-                EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
-            }
-
-            if (o->LifeTime >= 90)
-            {
-                o->Alpha = 1.0f;
-                b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                Vector(0.4f, 0.4f, 0.3f, b->BodyLight);
-                b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(3, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(4, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(5, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(6, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-                if (o->CurrentAction == MONSTER01_SHOCK)
-                {
-                    if ((o->AnimationFrame > 3.5f && o->AnimationFrame < 6.0f) ||
-                        (o->AnimationFrame > 8.0f && o->AnimationFrame < 11.0f))
-                    {
-                        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                        b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                    }
+                    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                  o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                    b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                  o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                    b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                  o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                    b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                  o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
             }
         }

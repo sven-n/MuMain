@@ -1,6 +1,7 @@
 ﻿// GMDoppelGanger2.cpp: implementation of the GMDoppelGanger2 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Engine/Object/ObjectPose.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -271,43 +272,6 @@ bool CGMDoppelGanger2::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         VectorCopy(light, b->BodyLight);
         b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.5f, 0, 0.5f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
-        vec3_t vLightFire, Position, vPos;
-        Vector(1.0f, 0.0f, 0.0f, vLightFire);
-        Vector(0.0f, 0.0f, 0.0f, vPos);
-
-        b->TransformPosition(BoneTransform[6], vPos, Position, false);
-        CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
-
-        Vector(0.0f, 0.0f, -350.0f, vPos);
-        b->TransformPosition(BoneTransform[6], vPos, Position, false);
-        CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
-
-        if (o->AnimationFrame >= 35 && o->AnimationFrame <= 37)
-        {
-            o->PKKey = -1;
-        }
-
-        if (o->AnimationFrame >= 1 && o->AnimationFrame <= 2 && o->PKKey != 1)
-        {
-            o->AnimationFrame = 1;
-
-            int test = rand() % 1000;
-            if (test >= 0 && test < 2)
-            {
-                o->PKKey = 1;
-            }
-            else
-            {
-                o->PKKey = -1;
-            }
-        }
-        vec3_t p, Pos, Light;
-        Vector(0.4f, 0.1f, 0.1f, Light);
-        // Vector(rand()%20-30.0f, rand()%20-30.0f, 0.0f, p);
-        Vector(-150.0f, 0.0f, 0.0f, p);
-        b->TransformPosition(BoneTransform[4], p, Pos, false);
-        if (o->AnimationFrame >= 35.0f && o->AnimationFrame < 50.0f)
-            CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 24, o->Scale * 1.5f);
         return true;
     }
     case 68:
@@ -324,24 +288,6 @@ bool CGMDoppelGanger2::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         VectorCopy(light, b->BodyLight);
         b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.5f, 0, 0.5f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
-        vec3_t vLightFire, Position, vPos;
-        Vector(1.0f, 0.0f, 0.0f, vLightFire);
-        Vector(0.0f, 0.0f, 0.0f, vPos);
-
-        b->TransformPosition(BoneTransform[6], vPos, Position, false);
-        CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
-
-        Vector(0.0f, 0.0f, -350.0f, vPos);
-        b->TransformPosition(BoneTransform[6], vPos, Position, false);
-        CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
-
-        vec3_t p, Pos, Light;
-        // Vector(0.08f, 0.08f, 0.08f, Light);
-        Vector(0.3f, 0.1f, 0.1f, Light);
-        Vector(rand() % 20 - 30.0f, rand() % 20 - 30.0f, 0.0f, p);
-        b->TransformPosition(BoneTransform[4], p, Pos, false);
-        if (o->AnimationFrame >= 7.0f && o->AnimationFrame < 13.0f)
-            CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 18, o->Scale * 1.5f);
         return true;
     }
     case 72:
@@ -541,6 +487,71 @@ bool CGMDoppelGanger2::UpdateObjectEffects(OBJECT* o, BMD* b)
             CreateParticle(BITMAP_LIGHT, vPos, o->Angle, Light, 15, o->Scale, o);
         }
         return true;
+    case 67:
+    {
+        const auto bones = [o, b] { return Engine::Object::Pose::World(o, b); };
+        vec3_t vLightFire, Position, vPos;
+        Vector(1.0f, 0.0f, 0.0f, vLightFire);
+        Vector(0.0f, 0.0f, 0.0f, vPos);
+
+        b->TransformPosition(bones()[6], vPos, Position, false);
+        CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
+
+        Vector(0.0f, 0.0f, -350.0f, vPos);
+        b->TransformPosition(bones()[6], vPos, Position, false);
+        CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
+
+        if (o->AnimationFrame >= 35 && o->AnimationFrame <= 37)
+        {
+            o->PKKey = -1;
+        }
+
+        if (o->AnimationFrame >= 1 && o->AnimationFrame <= 2 && o->PKKey != 1)
+        {
+            o->AnimationFrame = 1;
+
+            int test = rand() % 1000;
+            if (test >= 0 && test < 2)
+            {
+                o->PKKey = 1;
+            }
+            else
+            {
+                o->PKKey = -1;
+            }
+        }
+        vec3_t p, Pos, Light;
+        Vector(0.4f, 0.1f, 0.1f, Light);
+        // Vector(rand()%20-30.0f, rand()%20-30.0f, 0.0f, p);
+        Vector(-150.0f, 0.0f, 0.0f, p);
+        b->TransformPosition(bones()[4], p, Pos, false);
+        if (o->AnimationFrame >= 35.0f && o->AnimationFrame < 50.0f)
+            CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 24, o->Scale * 1.5f);
+        return true;
+    }
+    case 68:
+    {
+        const auto bones = [o, b] { return Engine::Object::Pose::World(o, b); };
+        vec3_t vLightFire, Position, vPos;
+        Vector(1.0f, 0.0f, 0.0f, vLightFire);
+        Vector(0.0f, 0.0f, 0.0f, vPos);
+
+        b->TransformPosition(bones()[6], vPos, Position, false);
+        CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
+
+        Vector(0.0f, 0.0f, -350.0f, vPos);
+        b->TransformPosition(bones()[6], vPos, Position, false);
+        CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
+
+        vec3_t p, Pos, Light;
+        // Vector(0.08f, 0.08f, 0.08f, Light);
+        Vector(0.3f, 0.1f, 0.1f, Light);
+        Vector(rand() % 20 - 30.0f, rand() % 20 - 30.0f, 0.0f, p);
+        b->TransformPosition(bones()[4], p, Pos, false);
+        if (o->AnimationFrame >= 7.0f && o->AnimationFrame < 13.0f)
+            CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 18, o->Scale * 1.5f);
+        return true;
+    }
     }
 
     return false;
