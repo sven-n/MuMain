@@ -54,6 +54,17 @@ mu_add_test(
         MuClient
 )
 
+# The game's side of that reconnect reads the login scene's windows, which need
+# the client globals of Winmain.cpp.
+mu_add_test(
+    NAME test_game_login_scene_link
+    SOURCES
+        test_game_login_scene_link.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
 # Control socket tests only exist in builds that enable it. Without it, the
 # control_socket_leak test proves that none of its sources were compiled into
 # the client (same mechanics as tests/editor's editor_leak).
