@@ -589,6 +589,42 @@ TEST_CASE("Monster Sounds gives Monster Preview the model it edits in the frame 
     g_MonsterSoundSetDatabase.Build({});
 }
 
+TEST_CASE("Monster Model: a cue that no sound event of the model's monsters plays on can be removed "
+          "[editor][monsters]")
+{
+    MonsterDefinition hound = Monster(3, "Hound");
+    hound.model = "MONSTER_MODEL_HOUND";
+    hound.soundSet = "Hound";
+    // A set that no monster of the model plays, on the second cue.
+    MonsterDefinition other = Monster(4, "Budge Dragon");
+    other.model = "MONSTER_MODEL_BUDGE_DRAGON";
+    other.soundSet = "Budge Dragon";
+    const std::array monsters = {hound, other};
+    g_MonsterDatabase.Build(monsters, "en");
+    std::vector<Data::Monsters::MonsterSoundSet> sets(2);
+    sets[0].name = "Hound";
+    sets[0].soundEvents.resize(1);
+    sets[0].soundEvents[0].cues = {"step 1"};
+    sets[1].name = "Budge Dragon";
+    sets[1].soundEvents.resize(1);
+    sets[1].soundEvents[0].cues = {"walk 4.50"};
+    g_MonsterSoundSetDatabase.Build(sets);
+    Data::Monsters::MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_HOUND";
+    model.cues = {{"step 1", MONSTER01_WALK, {1.0f, 2.0f}},
+                  {"walk 4.50", MONSTER01_WALK, {4.5f, 5.5f}},
+                  {"step 2", MONSTER01_WALK, {7.0f, 8.0f}}};
+
+    CHECK(MuEditor::Monsters::SoundEventsEditor::FindUnusedCues(model, MODEL_HOUND) ==
+          std::vector<std::string>{"walk 4.50", "step 2"});
+    sets[0].soundEvents[0].cues = {"step 2", "step 1"};
+    g_MonsterSoundSetDatabase.Build(sets);
+    CHECK(MuEditor::Monsters::SoundEventsEditor::FindUnusedCues(model, MODEL_HOUND) ==
+          std::vector<std::string>{"walk 4.50"});
+    g_MonsterSoundSetDatabase.Build({});
+    g_MonsterDatabase.Build({}, "en");
+}
+
 TEST_CASE("Monster Sounds: Add a file says why it cannot add a sound, also for an id that is not a SOUND_ id "
           "[editor][monsters]")
 {
