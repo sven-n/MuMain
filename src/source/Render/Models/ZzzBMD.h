@@ -41,6 +41,8 @@ void SetActiveBoneTransform(const float (*ptr)[3][4]);
 #define RENDER_CHROME6      0x00010000
 #define RENDER_CHROME7      0x00020000
 #define RENDER_DOPPELGANGER 0x00040000
+// Drawn on the faces turned away from the camera too.
+#define RENDER_TWOSIDED 0x00080000
 #define RENDER_WAVE_EXT		0x10000000
 #define RENDER_BYSCRIPT		0x80000000
 #define RNDEXT_WAVE			1
