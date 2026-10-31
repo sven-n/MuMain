@@ -152,6 +152,10 @@ void CCharSelMainWin::Create()
 
 void CCharSelMainWin::BindRmlModel(Rml::DataModelConstructor& c, CharSelMainRmlModel& model)
 {
+    c.Bind("create_label", &model.createLabel);
+    c.Bind("menu_label", &model.menuLabel);
+    c.Bind("connect_label", &model.connectLabel);
+    c.Bind("delete_label", &model.deleteLabel);
     c.Bind("create_disabled", &model.createDisabled);
     c.Bind("connect_disabled", &model.connectDisabled);
     c.Bind("delete_disabled", &model.deleteDisabled);
@@ -343,6 +347,11 @@ void CCharSelMainWin::SyncRmlModel()
     syncBool(&CharSelMainRmlModel::deleteDisabled, "delete_disabled", !m_bDeleteEnabled);
     syncBool(&CharSelMainRmlModel::accountBlockHidden, "account_block_hidden", !m_bAccountBlockItem);
 
+    SyncRmlLabels();
+}
+
+void CCharSelMainWin::SyncRmlLabels()
+{
     auto syncLabel = [this](Rml::String CharSelMainRmlModel::* field, const char* boundName, const wchar_t* text)
     {
         const std::string utf8 = StringUtils::WideToNarrow(text);
@@ -352,6 +361,10 @@ void CCharSelMainWin::SyncRmlModel()
             m_RmlView.MarkDirty(boundName);
         }
     };
+    syncLabel(&CharSelMainRmlModel::createLabel, "create_label", I18N::Game::Create);
+    syncLabel(&CharSelMainRmlModel::menuLabel, "menu_label", I18N::Game::Menu);
+    syncLabel(&CharSelMainRmlModel::connectLabel, "connect_label", I18N::Game::Connect);
+    syncLabel(&CharSelMainRmlModel::deleteLabel, "delete_label", I18N::Game::Delete);
     syncLabel(&CharSelMainRmlModel::accountBlockLine1, "account_block_line1", I18N::Game::ThisAccountIsItemBlocked);
     syncLabel(&CharSelMainRmlModel::accountBlockLine2, "account_block_line2", I18N::Game::PleaseCheckOnHttpMuonlineWebzenComSite);
 }

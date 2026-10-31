@@ -432,7 +432,9 @@ Simplified Chinese is being added incrementally. Translated screens include the
 Options window and its graphics tuning labels and help text, and the system menu
 at character selection and in game (Esc). The login window also translates account
 and password fields, remember-account/password controls, the password-saving
-confirmation, server titles, login progress and common account errors.
+confirmation, server titles, login progress and common account errors. Character
+selection, creation and deletion include class and advancement names, class
+descriptions, base attributes, guild roles, controls and validation messages.
 Shared labels such as OK, Cancel and Close also appear translated wherever other
 screens use the same resource keys, including other dialogs and windows.
 Untranslated text falls back to English. Item names and server messages are
@@ -464,6 +466,12 @@ language choice is retained.
 
 The password-saving warning wraps within the dialog in both themes. Server
 names are preserved; untranslated connection and subscription errors use English.
+
+Character-selection captions, creation headings and class descriptions follow
+the selected language. Class descriptions also refresh while the window is open.
+Character names require at least four characters. Fruit names, attribute names
+and descriptions are translated; enable **Translate item names** to display the
+translated item names.
 
 Add future translations to `Game.zh-CN.resx` by screen or feature. Keep English
 resource keys, formatting arguments and command tokens unchanged.
