@@ -15,6 +15,7 @@
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ServerListData/ButtonColors.h"
 #include "Data/GameData/ServerListData/ChannelNameBuilder.h"
+#include "Data/GameData/ServerListData/ServerListIds.h"
 #include "Data/GameData/ServerListData/ServerListJson.h"
 #include "I18N/All.h"
 #include "Network/Server/ServerListManager.h"
@@ -1159,7 +1160,7 @@ bool CMuServerListUI::RenderSelectedVipType()
     CommitWhenFieldLeft();
     if (m_vipTypeIdDraft != vipTypes[index].id)
     {
-        RenderError(Data::ServerList::IsVipTypeId(m_vipTypeIdDraft)
+        RenderError(Data::ServerList::IsListId(m_vipTypeIdDraft)
                         ? I18N::Format(I18N::Editor::AnotherVIPTypeHasTheID0, {m_vipTypeIdDraft}).c_str()
                         : I18N::Editor::NotAVIPTypeID);
     }

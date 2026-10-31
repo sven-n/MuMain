@@ -28,8 +28,7 @@ inline constexpr int ThemeColorCount = 4;
 // A VIP type of channels (Gold, Silver, ...): its name in the channel names.
 struct VipType
 {
-    // What a channel names the type by ("gold"): letters and digits, starting
-    // with a lowercase letter.
+    // What a channel names the type by ("gold"; IsListId).
     std::string id;
     // {vip} in the templates.
     LocalizedString name;
@@ -50,8 +49,7 @@ struct ChannelSettings
 // A button color of the list's own, with a shade for each theme.
 struct CustomColor
 {
-    // What rules name it by ("goldRed"): letters and digits, starting with a
-    // lowercase letter, and none of the theme colors' names.
+    // What rules name it by ("goldRed"; IsListId), none of the theme colors' names.
     std::string id;
     // What the editor calls it.
     std::string name;
@@ -165,11 +163,6 @@ struct ServerGroup
 
 // The built-in English texts: what the texts a file leaves out are.
 ChannelNames GetDefaultChannelNames();
-
-// A VIP type id: letters and digits, starting with a lowercase letter ("gold", "goldPlus").
-bool IsVipTypeId(std::string_view id);
-// An id made from a name: "Gold Plus" is "goldPlus"; "vip" when the name has no letter to start with.
-std::string MakeVipTypeId(std::string_view name);
 
 // All that Data/Local/ServerList.json holds.
 struct ServerListData

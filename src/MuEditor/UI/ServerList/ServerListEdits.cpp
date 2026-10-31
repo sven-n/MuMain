@@ -7,6 +7,7 @@
 #include "ServerListStepLabel.h"
 
 #include "Data/GameData/ServerListData/ChannelNameBuilder.h"
+#include "Data/GameData/ServerListData/ServerListIds.h"
 
 #include <algorithm>
 #include <utility>
@@ -15,6 +16,10 @@ namespace MuEditor::ServerList
 {
 namespace
 {
+// The ids of a new VIP type or color whose name has no letter to start one with.
+constexpr std::string_view VipTypeIdFallback = "vip";
+constexpr std::string_view ColorIdFallback = "color";
+
 // Moves the entry one place up (-1) or down (+1); false at the end of the list.
 template <typename TEntry> bool MoveEntry(std::vector<TEntry>& entries, size_t index, int direction)
 {
@@ -166,7 +171,7 @@ std::optional<int> ServerListEdits::FindFreeId() const
 
 size_t ServerListEdits::AddVipType(const std::string& name)
 {
-    const std::string base = Data::ServerList::MakeVipTypeId(name);
+    const std::string base = Data::ServerList::MakeListId(name, VipTypeIdFallback);
     std::string id = base;
     for (int number = 2; IsVipTypeIdUsed(id); ++number)
     {
@@ -220,7 +225,7 @@ bool ServerListEdits::MoveVipType(size_t index, int direction)
 
 bool ServerListEdits::ChangeVipTypeId(size_t index, const std::string& id)
 {
-    if (index >= m_list.vipTypes.size() || !Data::ServerList::IsVipTypeId(id))
+    if (index >= m_list.vipTypes.size() || !Data::ServerList::IsListId(id))
     {
         return false;
     }
@@ -261,7 +266,7 @@ bool ServerListEdits::IsVipTypeIdUsed(std::string_view id) const
 
 size_t ServerListEdits::AddColor(const std::string& name)
 {
-    const std::string base = Data::ServerList::MakeVipTypeId(name);
+    const std::string base = Data::ServerList::MakeListId(name, ColorIdFallback);
     std::string id = base;
     for (int number = 2; !IsColorIdFree(id); ++number)
     {
@@ -336,7 +341,7 @@ bool ServerListEdits::ChangeColorId(size_t index, const std::string& id)
 
 bool ServerListEdits::IsColorIdFree(std::string_view id) const
 {
-    return Data::ServerList::IsVipTypeId(id) && !Data::ServerList::FindThemeColor(id) &&
+    return Data::ServerList::IsListId(id) && !Data::ServerList::FindThemeColor(id) &&
            m_list.FindCustomColor(id) == nullptr;
 }
 
