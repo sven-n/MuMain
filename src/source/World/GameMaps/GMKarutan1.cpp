@@ -67,6 +67,9 @@ bool CGMKarutan1::UpdateObjectEffects(OBJECT* o, BMD* b)
     {
     case 66:
     {
+        if (o->AnimationFrame >= 19)
+            SetAction(o, rand_fps_check(10) ? 1 : 0);
+
         vec3_t vPos, vRelativePos, vLight0;
         Vector(0.f, 0.f, 0.f, vPos);
         float flumi = absf(sinf(WorldTime * 0.0004)) * 0.4f; //+0.1f;
@@ -180,10 +183,6 @@ bool CGMKarutan1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         o->m_bRenderAfterCharacter = true;
         return true;
     case 66:
-        if (o->AnimationFrame >= 19)
-        {
-            SetAction(o, rand_fps_check(10) ? 1 : 0);
-        }
         o->m_bRenderAfterCharacter = true;
         return true;
 

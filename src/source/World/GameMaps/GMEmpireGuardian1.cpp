@@ -1449,28 +1449,6 @@ bool GMEmpireGuardian1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV);
         b->StreamMesh = -1;
-
-        vec3_t vRelativePos, vWorldPos, Light, Angle;
-        Vector(0, 0, 0, vRelativePos);
-        Vector(1.f, 1.f, 1.f, Light);
-        Vector(0.f, 0.f, 0.f, Angle);
-        b->TransformPosition(BoneTransform[9], vRelativePos, vWorldPos, false);
-
-        if (0.0f < o->AnimationFrame && o->AnimationFrame < 0.4f)
-        {
-            if (o->SubType == 100)
-            {
-                CreateEffect(MODEL_PROJECTILE, vWorldPos, Angle, Light, 0, o);
-                o->SubType = 101;
-            }
-        }
-        else if (7.0f < o->AnimationFrame && o->AnimationFrame < 7.5f)
-        {
-            if (o->SubType == 101)
-            {
-                o->SubType = 100;
-            }
-        }
     }
         return true;
 
@@ -1493,28 +1471,6 @@ bool GMEmpireGuardian1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV);
         b->StreamMesh = -1;
-
-        vec3_t vRelativePos, vWorldPos, Light, Angle;
-        Vector(0, 0, 0, vRelativePos);
-        Vector(1.f, 1.f, 1.f, Light);
-        Vector(0.f, 0.f, 0.f, Angle);
-        b->TransformPosition(BoneTransform[9], vRelativePos, vWorldPos, false);
-
-        if (0.0f < o->AnimationFrame && o->AnimationFrame < 0.4f)
-        {
-            if (o->SubType == 100)
-            {
-                CreateEffect(MODEL_PROJECTILE, vWorldPos, Angle, Light, 0, o);
-                o->SubType = 101;
-            }
-        }
-        else if (7.0f < o->AnimationFrame && o->AnimationFrame < 7.5f)
-        {
-            if (o->SubType == 101)
-            {
-                o->SubType = 100;
-            }
-        }
     }
         return true;
 
@@ -1564,6 +1520,31 @@ bool GMEmpireGuardian1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
+void GMEmpireGuardian1::UpdateProjectileLauncher(OBJECT* o, BMD* b)
+{
+    vec3_t vRelativePos, vWorldPos, Light, Angle;
+    Vector(0, 0, 0, vRelativePos);
+    Vector(1.f, 1.f, 1.f, Light);
+    Vector(0.f, 0.f, 0.f, Angle);
+    b->TransformPosition(Engine::Object::Pose::World(o, b)[9], vRelativePos, vWorldPos, false);
+
+    if (0.0f < o->AnimationFrame && o->AnimationFrame < 0.4f)
+    {
+        if (o->SubType == 100)
+        {
+            CreateEffect(MODEL_PROJECTILE, vWorldPos, Angle, Light, 0, o);
+            o->SubType = 101;
+        }
+    }
+    else if (7.0f < o->AnimationFrame && o->AnimationFrame < 7.5f)
+    {
+        if (o->SubType == 101)
+        {
+            o->SubType = 100;
+        }
+    }
+}
+
 bool GMEmpireGuardian1::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     if (gMapManager.IsEmpireGuardian1() == false)
@@ -1575,6 +1556,10 @@ bool GMEmpireGuardian1::UpdateObjectEffects(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
+    case 115:
+    case 117:
+        UpdateProjectileLauncher(o, b);
+        return true;
     case 12:
     {
         vec3_t vPos, vRelativePos, vLight1, vLight2;

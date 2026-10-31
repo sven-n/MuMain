@@ -1482,24 +1482,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     {
                                                         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                         b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, -WorldTime * 0.0002f, o->BlendMeshTexCoordV, BITMAP_CHROME);
-                                                        vec3_t vPos, vRelativePos, vLight;
-                                                        Vector(1.f, 1.f, 1.f, vLight);
-                                                        Vector(18.f, 0.f, 6.f, vRelativePos);
-                                                        b->TransformPosition(BoneTransform[0], vRelativePos, vPos, true);
-                                                        float fLumi = (sinf(WorldTime * 0.004f) + 1.0f) * 0.05f;
-                                                        Vector(0.8f + fLumi, 0.8f + fLumi, 0.3f + fLumi, o->Light);
-                                                        CreateSprite(BITMAP_LIGHT, vPos, 0.4f, o->Light, o, 0.5f);
-                                                        if (rand_fps_check(15))
-                                                        {
-                                                            CreateParticle(BITMAP_SHINY, vPos, o->Angle, vLight, 5, 0.5f);
-                                                        }
-                                                        Vector(-18.f, 0.f, 6.f, vRelativePos);
-                                                        b->TransformPosition(BoneTransform[0], vRelativePos, vPos, true);
-                                                        CreateSprite(BITMAP_LIGHT, vPos, 0.4f, o->Light, o, 0.5f);
-                                                        if (rand_fps_check(15))
-                                                        {
-                                                            CreateParticle(BITMAP_SHINY, vPos, o->Angle, vLight, 5, 0.5f);
-                                                        }
                                                     }
                                                     else if (o->Type == MODEL_XMAS_EVENT_ICEHEART)
                                                     {
@@ -7128,7 +7110,7 @@ static bool IsSparkingEventModel(const OBJECT* o)
 
 bool PartObjectSpawns(const OBJECT* o, int Type)
 {
-    return Render::Items::ItemEffects::Spawns(Type) || IsSparkingEventModel(o);
+    return Render::Items::ItemEffects::Spawns(Type) || Render::Items::Styles::Spawns(Type) || IsSparkingEventModel(o);
 }
 
 void SpawnPartObjectEffect(BMD* b, OBJECT* o, int Type, vec34_t* bones)
@@ -7136,6 +7118,11 @@ void SpawnPartObjectEffect(BMD* b, OBJECT* o, int Type, vec34_t* bones)
     if (Render::Items::ItemEffects::Spawns(Type))
     {
         Render::Items::ItemEffects::Spawn(b, o, Type, bones);
+        return;
+    }
+    if (Render::Items::Styles::Spawns(Type))
+    {
+        Render::Items::Styles::Spawn(b, o, Type, bones);
         return;
     }
     if (!IsSparkingEventModel(o))

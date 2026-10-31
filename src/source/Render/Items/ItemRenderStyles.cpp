@@ -235,18 +235,21 @@ bool RenderPumpkinOfLuck(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTyp
                   o->BlendMeshTexCoordV, o->HiddenMesh);
     b->RenderMesh(1, RENDER_DARK | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, -WorldTime * 0.0002f,
                   o->BlendMeshTexCoordV, BITMAP_CHROME);
+    return true;
+}
 
+void SpawnPumpkinOfLuck(BMD* b, OBJECT* o, vec34_t* bones)
+{
     vec3_t vPos, vRelativePos;
     Vector(0.f, 0.f, 0.f, vRelativePos);
-    b->TransformPosition(BoneTransform[8], vRelativePos, vPos, true);
+    b->TransformPosition(bones[8], vRelativePos, vPos, true);
     float fLumi = (sinf(WorldTime * 0.004f) + 1.0f) * 0.05f;
     Vector(0.8f + fLumi, 0.8f + fLumi, 0.3f + fLumi, o->Light);
     CreateSprite(BITMAP_LIGHT, vPos, 1.5f, o->Light, o, 0.5f);
-    b->TransformPosition(BoneTransform[10], vRelativePos, vPos, true);
+    b->TransformPosition(bones[10], vRelativePos, vPos, true);
     CreateSprite(BITMAP_LIGHT, vPos, 0.5f, o->Light, o, 0.5f);
-    b->TransformPosition(BoneTransform[11], vRelativePos, vPos, true);
+    b->TransformPosition(bones[11], vRelativePos, vPos, true);
     CreateSprite(BITMAP_LIGHT, vPos, 0.5f, o->Light, o, 0.5f);
-    return true;
 }
 
 bool RenderSkillParchment(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
@@ -536,25 +539,23 @@ bool RenderScrollOfBlood(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTyp
 
 bool RenderCursedCastleWater(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
 {
-    float fLumi = (sinf(WorldTime * 0.001f) + 1.5f) * 0.25f;
-
-    float PlaySpeed = 0.f;
-    PlaySpeed = b->Actions[b->CurrentAction].PlaySpeed;
-
-    b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, 2.f / 7.f, o->Position, o->Angle);
     b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight * 1.5f, o->BlendMeshTexCoordU,
                   o->BlendMeshTexCoordV);
     b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight / 4.0f, WorldTime * 0.005f,
                   -WorldTime * 0.005f, 0);
+    return true;
+}
 
+void SpawnCursedCastleWater(BMD* b, OBJECT* o, vec34_t* bones)
+{
     vec3_t Light;
     vec3_t vRelativePos, vWorldPos;
     Vector(0.f, 0.f, 0.f, vRelativePos);
     Vector(1.f, 0.f, 0.0f, Light);
 
-    b->TransformPosition(BoneTransform[1], vRelativePos, vWorldPos, true);
+    b->TransformPosition(bones[1], vRelativePos, vWorldPos, true);
     CreateSprite(BITMAP_LIGHT, vWorldPos, 3.f, Light, o, 0.f);
-    return true;
+    b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, 2.f / 7.f, o->Position, o->Angle);
 }
 
 bool RenderCondorFlame(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
@@ -1886,6 +1887,26 @@ const RenderStyle RenderStyles[] = {
     {"luckyItem", RenderLuckyItem},
 };
 
+using SpawnFunction = void (*)(BMD* b, OBJECT* o, vec34_t* bones);
+
+// The styles whose items spawn lights or animate where they are drawn.
+const struct
+{
+    const char* name;
+    SpawnFunction spawn;
+} StyleSpawns[] = {
+    {"pumpkinOfLuck", SpawnPumpkinOfLuck},
+    {"cursedCastleWater", SpawnCursedCastleWater},
+};
+
+ItemModelTable<SpawnFunction> g_itemSpawns{[](const Data::Items::ItemModelDefinition& model)
+                                           {
+                                               for (const auto& style : StyleSpawns)
+                                                   if (model.renderStyle == style.name)
+                                                       return style.spawn;
+                                               return SpawnFunction{};
+                                           }};
+
 const RenderStyle* FindStyle(std::string_view name)
 {
     const auto found = std::find_if(std::begin(RenderStyles), std::end(RenderStyles),
@@ -1948,6 +1969,17 @@ bool Render(BMD* b, OBJECT* o, int modelType, float alpha, int renderType)
 {
     const RenderStyle* style = g_itemStyles.Find(modelType);
     return style != nullptr && style->Render(b, o, modelType, alpha, renderType);
+}
+
+bool Spawns(int modelType)
+{
+    return g_itemSpawns.Find(modelType) != nullptr;
+}
+
+void Spawn(BMD* b, OBJECT* o, int modelType, float (*bones)[3][4])
+{
+    if (const SpawnFunction spawn = g_itemSpawns.Find(modelType))
+        spawn(b, o, bones);
 }
 
 const ShineBelowPlus3* FindShineBelowPlus3(int modelType)

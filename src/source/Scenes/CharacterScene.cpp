@@ -198,6 +198,8 @@ void CreateCharacterScene()
     g_ErrorReport.Write(L"> Character scene init success.\r\n");
 }
 
+static void UpdateSelectedCharacterEffects();
+
 void NewMoveCharacterScene()
 {
     if (CurrentProtocolState < RECEIVE_CHARACTERS_LIST)
@@ -233,6 +235,7 @@ void NewMoveCharacterScene()
     UpdateObjectEffects();
     UpdateMountEffects();
     UpdateEffectModelEffects();
+    UpdateSelectedCharacterEffects();
 
 #if defined _DEBUG || defined FOR_WORK
     std::wstring lpszTemp = { 0 };
@@ -409,8 +412,18 @@ static void RenderSelectedCharacterEffects()
     RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.8f, 1.8f, vLight, WorldTime * 0.01f);
     RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.2f, 1.2f, vLight, -WorldTime * 0.01f);
     DisableAlphaBlend();
+}
 
-    float Rotation = (int)WorldTime % 3600 / (float)10.f;
+// The selected character's particles and the server's hero name, while the scene draws it.
+static void UpdateSelectedCharacterEffects()
+{
+    if (SelectedHero == -1)
+        return;
+
+    OBJECT* o = &CharactersClient[SelectedHero].Object;
+    if (!o->Live)
+        return;
+
     Vector(0.15f, 0.15f, 0.15f, o->Light);
     CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 4);
     CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 5);

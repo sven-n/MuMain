@@ -1609,7 +1609,7 @@ int WaterTextureNumber = 0;
 
 void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
 {
-    RenderTerrainVisual(xi, yi);
+    NoteDrawnTerrain(xi, yi);
 
     if (TerrainFlag != TERRAIN_MAP_GRASS)
     {

@@ -10249,15 +10249,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     }
     }
 
-    if (SceneFlag == MAIN_SCENE)
-    {
-        if ((o->Kind == KIND_PLAYER && gMapManager.InBloodCastle() == false && gMapManager.InChaosCastle() == false &&
-             gMapManager.InBattleCastle()) == false)
-        {
-            RenderProtectGuildMark(c);
-        }
-    }
-
     giPetManager::RenderPet(c);
 }
 
@@ -11983,6 +11974,9 @@ void UpdateDrawnCharacterEffects()
         UpdatePlayerBodyParts(c);
         if (DrawsNextGradeObjects(c))
             SpawnNextGradeWeaponEffects(c);
+        if (SceneFlag == MAIN_SCENE && (o->Kind == KIND_PLAYER && gMapManager.InBloodCastle() == false &&
+                                        gMapManager.InChaosCastle() == false && gMapManager.InBattleCastle()) == false)
+            SpawnProtectGuildMark(c);
         if (UpdateCharacterTypeEffects(c, o, b))
             continue;
         // Same order and stop-on-claim as RenderCharacter's chain.
@@ -12022,6 +12016,14 @@ void ApplyCharacterEffectsEarthQuake()
         EarthQuake = s_earthQuakeRequest;
         s_hasEarthQuakeRequest = false;
     }
+}
+
+void RequestEarthQuake(float value)
+{
+    if (s_hasEarthQuakeRequest)
+        return;
+    s_hasEarthQuakeRequest = true;
+    s_earthQuakeRequest = value;
 }
 
 void UpdateCharacterEffects()
@@ -12098,7 +12100,7 @@ void RenderCharactersClient()
     }
 }
 
-void RenderProtectGuildMark(CHARACTER* c)
+void SpawnProtectGuildMark(CHARACTER* c)
 {
     if (c->GuildType == GT_ANGEL)
     {

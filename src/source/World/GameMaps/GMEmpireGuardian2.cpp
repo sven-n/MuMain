@@ -552,6 +552,10 @@ bool GMEmpireGuardian2::UpdateObjectEffects(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
+    case 115:
+    case 117:
+        g_EmpireGuardian1.UpdateProjectileLauncher(o, b);
+        return true;
     case 12:
     {
         vec3_t vPos, vRelativePos, vLight1, vLight2;
