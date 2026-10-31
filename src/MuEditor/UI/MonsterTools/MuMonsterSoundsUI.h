@@ -17,8 +17,8 @@ namespace MuEditor::Monsters
 {
 // Why Add a file cannot add the sound to the set, as the text the tool
 // shows; empty when it can: a file that is missing or not a path below the
-// client, a file the set has, or an id that is not a SOUND_ id, which the
-// set's save refuses.
+// client, a file the set has, an id that is not a SOUND_ id, or the name
+// (the id) of another sound of the set, which the set's save refuses.
 std::string FindNewSoundProblem(const Data::Monsters::MonsterSoundSet& set, const Data::Monsters::MonsterSound& sound);
 
 // The Monster Sounds tool (monsters design, Q-MN78 to Q-MN83): the sound set

@@ -3046,4 +3046,7 @@
   <data name="Sound id unknown" xml:space="preserve">
     <value>The id is not a SOUND_ id that code plays a monster sound by; leave it empty for a sound named by its file.</value>
   </data>
+  <data name="Sound name twice" xml:space="preserve">
+    <value>Another sound of the set has this id: an event could not tell the two apart.</value>
+  </data>
 </root>

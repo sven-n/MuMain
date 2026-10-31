@@ -3025,4 +3025,7 @@
   <data name="Sound id unknown" xml:space="preserve">
     <value>Die Id ist keine SOUND_-Id, mit der der Code ein Monstergeräusch spielt; lass sie leer für ein Geräusch, das nach seiner Datei heißt.</value>
   </data>
+  <data name="Sound name twice" xml:space="preserve">
+    <value>Ein anderes Geräusch des Sets hat diese Id: ein Ereignis könnte die beiden nicht unterscheiden.</value>
+  </data>
 </root>

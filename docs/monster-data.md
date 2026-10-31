@@ -518,9 +518,12 @@ type. Unknown fields and a model or part file that is not in the client
 folder are warnings; the shipped list has one, Molt's file.
 
 In the sound sets, fatal problems are a value of the wrong form (each names
-the set and the field), a name that is there twice, a sound event that names
-no sound of the set and no `SOUND_*` number, and a sound `id` that does not
-exist. What the files name of each other is checked last: a monster or a
+the set and the field), a name that is there twice, two sounds of a set with
+one name (the same `id`, or the same `file` without one), a sound event that
+names no sound of the set and no `SOUND_*` number, and a sound `id` that does
+not exist. A `SOUND_*` id that two sets load from different files is an
+error: the game plays one file for the id, the one of the model that opened
+last. What the files name of each other is checked last: a monster or a
 random variant that names a set that is not there, and a random variant
 whose look the code never draws, are errors (the monster plays no sounds
 there, the variant does nothing); an event's cue that the model of a monster

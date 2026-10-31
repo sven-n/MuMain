@@ -212,6 +212,38 @@ TEST_CASE("Monster sounds: an event names a sound of the set or a SOUND_ id [dat
                         "is no sound of the set"));
 }
 
+TEST_CASE("Monster sounds: two sounds of a set with one name are fatal, an id that sets load from different "
+          "files is an error [data][monsters]")
+{
+    MonsterSoundSet first;
+    first.name = "First";
+    first.sounds = {{"Data/Sound/mFirst.wav", "SOUND_THUNDERS01", 2, true},
+                    {"Data/Sound/mOther.wav", "SOUND_THUNDERS01", 2, true},
+                    {"Data/Sound/mSame.wav", "", 2, true},
+                    {"Data/Sound/mSame.wav", "", 2, true}};
+    // The same file in another case: the loader finds it alike.
+    MonsterSoundSet alike;
+    alike.name = "Alike";
+    alike.sounds = {{"data/sound/MFIRST.wav", "SOUND_THUNDERS01", 1, false}};
+    MonsterSoundSet second;
+    second.name = "Second";
+    second.sounds = {{"Data/Sound/mSecond.wav", "SOUND_THUNDERS01", 2, true}};
+    std::vector<ItemDataIssue> issues;
+
+    Data::Monsters::ValidateMonsterSoundSetNames(std::vector<MonsterSoundSet>{first, alike, second}, "Sounds.json",
+                                                 issues);
+
+    INFO(Messages(issues));
+    CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Fatal, "sound set First sounds[1]",
+                        "has the name \"SOUND_THUNDERS01\" of sounds[0]"));
+    CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Fatal, "sound set First sounds[3]",
+                        "has the name \"Data/Sound/mSame.wav\" of sounds[2]"));
+    CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "sound set Second sounds[0].id",
+                        "is Data/Sound/mFirst.wav in the set First"));
+    // The second sound of the first set is already a fatal problem.
+    CHECK(issues.size() == 3);
+}
+
 TEST_CASE("Monster sounds: wrong values are errors that name the set and the field [data][monsters]")
 {
     struct Case
