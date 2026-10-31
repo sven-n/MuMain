@@ -76,6 +76,11 @@ void CloseMessage()
     CSceneUICoordinator::Instance().CloseMsgWin();
 }
 
+bool IsShowingMessage(int messageCode)
+{
+    return g_MsgWin.PendingMessageCode() == messageCode;
+}
+
 void AddServerMessage(std::wstring_view text)
 {
     std::wstring message(text);

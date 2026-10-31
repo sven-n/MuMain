@@ -17,6 +17,8 @@ bool IsWaitingForServer();
 // `messageCode` is one of the scene's popup message ids (MESSAGE_* or RECEIVE_*_FAIL*).
 void ShowMessage(int messageCode);
 void CloseMessage();
+// True while the popup shows this message.
+bool IsShowingMessage(int messageCode);
 void AddServerMessage(std::wstring_view text);
 
 // Refreshes the character list after a character was created.

@@ -101,6 +101,19 @@ void GameLoginSceneLink::ShowFailure()
     UI::LoginScene::ShowMessage(MESSAGE_SERVER_LOST_RECONNECT);
 }
 
+bool GameLoginSceneLink::IsFailureShown() const
+{
+    return UI::LoginScene::IsShowingMessage(MESSAGE_SERVER_LOST_RECONNECT);
+}
+
+void GameLoginSceneLink::HideFailure()
+{
+    if (IsFailureShown())
+    {
+        UI::LoginScene::CloseMessage();
+    }
+}
+
 double GameLoginSceneLink::NowMs() const
 {
     return WorldTime;

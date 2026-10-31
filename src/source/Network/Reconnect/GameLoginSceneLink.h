@@ -16,6 +16,8 @@ public:
     bool Connect(LoginServer server) override;
     void SendServerListRequest() override;
     void ShowFailure() override;
+    bool IsFailureShown() const override;
+    void HideFailure() override;
     double NowMs() const override;
 
 private:

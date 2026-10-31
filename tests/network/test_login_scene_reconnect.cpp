@@ -27,6 +27,7 @@ public:
     bool probeCanStart = true;
     ProbeResult probeResult = ProbeResult::Pending;
     bool connectSucceeds = true;
+    bool failureShown = false;
     double now = 0.0;
 
     std::vector<LoginServer> probes;
@@ -73,6 +74,15 @@ public:
     void ShowFailure() override
     {
         ++failures;
+        failureShown = true;
+    }
+    bool IsFailureShown() const override
+    {
+        return failureShown;
+    }
+    void HideFailure() override
+    {
+        failureShown = false;
     }
     double NowMs() const override
     {
@@ -195,9 +205,53 @@ TEST_SUITE("Login scene reconnect")
 
         screen.reconnect.OnConnectionLost();
         screen.reconnect.Update();
-        CHECK_FALSE(screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume()));
         CHECK(screen.link.failures == 1);
         CHECK(screen.link.probes.size() == 1);
+    }
+
+    TEST_CASE("a step taken past the failure message starts over")
+    {
+        // The message doesn't hold the screen; the server list under it still takes clicks.
+        DroppedScreen screen;
+        int firstPick = 0;
+        screen.reconnect.EnsureConnected(LoginServer::Connect, [&firstPick] { ++firstPick; });
+        screen.link.probeResult = LoginSceneReconnectLink::ProbeResult::Unreachable;
+        screen.reconnect.Update();
+        REQUIRE(screen.link.failureShown);
+
+        screen.link.probeResult = LoginSceneReconnectLink::ProbeResult::Pending;
+        CHECK_FALSE(screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume()));
+        CHECK_FALSE(screen.link.failureShown);
+        CHECK(screen.link.probes.size() == 2);
+        CHECK(screen.reconnect.IsReconnecting());
+
+        screen.ServerComesBack();
+        screen.reconnect.OnGreeting(LoginServer::Connect);
+        CHECK(firstPick == 0);
+        CHECK(screen.resumed == 1);
+    }
+
+    TEST_CASE("a failure message another message replaced doesn't hold the screen")
+    {
+        DroppedScreen screen;
+        screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume());
+        screen.link.probeResult = LoginSceneReconnectLink::ProbeResult::Unreachable;
+        screen.reconnect.Update();
+
+        screen.link.failureShown = false; // e.g. "the server is busy" from a click under it
+        screen.reconnect.Update();
+        screen.reconnect.Retry(); // its button is gone with it
+        CHECK(screen.link.probes.size() == 1);
+
+        // That message is closed too and the screen shows nothing to click.
+        screen.link.awaited = LoginServer::Connect;
+        screen.reconnect.OnConnectionLost();
+        CHECK(screen.link.probes.size() == 2);
+
+        screen.ServerComesBack();
+        screen.reconnect.OnGreeting(LoginServer::Connect);
+        CHECK(screen.resumed == 0); // the pick waiting before the failure is dropped
+        CHECK(screen.link.failures == 1);
     }
 
     TEST_CASE("a check that can't start fails at once")

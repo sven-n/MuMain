@@ -21,6 +21,15 @@ LoginSceneReconnect::LoginSceneReconnect(LoginSceneReconnectLink& link) : m_link
 
 bool LoginSceneReconnect::EnsureConnected(LoginServer server, std::function<void()> resume)
 {
+    if (m_phase == Phase::Failed)
+    {
+        // The failure message doesn't hold the screen: the player went on past it
+        // (the server list under it still takes clicks), so their step starts over.
+        m_link.HideFailure();
+        m_resume = nullptr;
+        EnterPhase(Phase::Idle);
+    }
+
     switch (m_phase)
     {
     case Phase::Idle:
@@ -39,7 +48,7 @@ bool LoginSceneReconnect::EnsureConnected(LoginServer server, std::function<void
         }
         return false;
     case Phase::Failed:
-        return false;
+        break;
     }
     return false;
 }
@@ -119,6 +128,14 @@ void LoginSceneReconnect::Update()
         }
         return;
     case Phase::Failed:
+        // Another message took the failure message's place, or the screen was built
+        // again: nothing answers it any more. The next step, or a screen left waiting,
+        // starts over as after a plain drop.
+        if (!m_link.IsFailureShown())
+        {
+            m_resume = nullptr;
+            EnterPhase(Phase::Idle);
+        }
         return;
     }
 }

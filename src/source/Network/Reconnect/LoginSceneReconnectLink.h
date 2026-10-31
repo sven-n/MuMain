@@ -44,6 +44,9 @@ public:
 
     // Tells the player the server can't be reached and offers to try again or leave.
     virtual void ShowFailure() = 0;
+    // Whether that message is still up; another message can take its place.
+    virtual bool IsFailureShown() const = 0;
+    virtual void HideFailure() = 0;
 
     virtual double NowMs() const = 0;
 };
