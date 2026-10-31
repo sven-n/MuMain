@@ -848,6 +848,10 @@ TEST_CASE("A ground label takes its look from the item's own style or else the s
     kris.IsAncient = true;
     kris.AncientDiscriminator = 1;
     CHECK(label(kris).textColor == rgb(0xb2, 0xb2, 0xb2));
+    // The set name is the item's, also for an item drawn as an event model, whose model names no item.
+    const GroundItemLabel eventModelSetItem = label(rapier, MODEL_EVENT + 5);
+    CHECK(eventModelSetItem.text == L"Ceto's Rapier");
+    CHECK(eventModelSetItem.textColor == rgb(0, 0xff, 0));
     // A tag is the drawn model's item's: the Weapon of Archangel at +0 is drawn as the divine staff.
     CHECK(label(at(13, 19, 0), MODEL_DIVINE_STAFF_OF_ARCHANGEL).textColor == rgb(0xff, 0x19, 0xff));
     CHECK(label(at(13, 19, 3)).textColor == rgb(0xff, 0x7f, 0x33));

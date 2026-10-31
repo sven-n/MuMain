@@ -2709,8 +2709,10 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         }
     }
 
+    // The set is the item's own, as for its name and the setItem state: an item drawn as an event model has no item
+    // type in its model.
     wchar_t SetName[64]{};
-    if (g_csItemOption.GetSetItemName(SetName, Data::Items::ToItemType(o->Type), ip->AncientDiscriminator))
+    if (g_csItemOption.GetSetItemName(SetName, ip->Type, ip->AncientDiscriminator))
     {
         wchar_t formattedName[_countof(descriptor.Name)]{};
         FormatGroundItemLabelText(formattedName, L"%ls%ls", SetName, descriptor.Name);
