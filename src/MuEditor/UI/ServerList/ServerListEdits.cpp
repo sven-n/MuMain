@@ -10,6 +10,7 @@
 #include "Data/GameData/ServerListData/ServerListIds.h"
 
 #include <algorithm>
+#include <array>
 #include <utility>
 
 namespace MuEditor::ServerList
@@ -30,6 +31,17 @@ template <typename TEntry> bool MoveEntry(std::vector<TEntry>& entries, size_t i
     }
     std::swap(entries[index], entries[static_cast<size_t>(target)]);
     return true;
+}
+
+// The colors of the load section: of the bar and of the two texts.
+std::array<std::string*, 5> GetLoadColors(Data::ServerList::LoadSettings& load)
+{
+    return {&load.bar.base, &load.bar.full, &load.bar.empty, &load.full.color, &load.overloaded.color};
+}
+
+std::array<const std::string*, 5> GetLoadColors(const Data::ServerList::LoadSettings& load)
+{
+    return {&load.bar.base, &load.bar.full, &load.bar.empty, &load.full.color, &load.overloaded.color};
 }
 } // namespace
 
@@ -288,11 +300,19 @@ void ServerListEdits::RemoveColor(size_t index)
     }
     const CustomColor& color = m_list.colors[index];
     m_pendingLabel = StepLabel::RemoveColor(color.name);
+    const char* defaultColor = Data::ServerList::GetThemeColorName(Data::ServerList::ThemeColor::Default);
     for (ButtonColorRule& rule : m_list.buttonColors)
     {
         if (rule.color == color.id)
         {
-            rule.color = Data::ServerList::GetThemeColorName(Data::ServerList::ThemeColor::Default);
+            rule.color = defaultColor;
+        }
+    }
+    for (std::string* loadColor : GetLoadColors(m_list.load))
+    {
+        if (*loadColor == color.id)
+        {
+            *loadColor = defaultColor;
         }
     }
     m_list.colors.erase(m_list.colors.begin() + static_cast<std::ptrdiff_t>(index));
@@ -335,6 +355,13 @@ bool ServerListEdits::ChangeColorId(size_t index, const std::string& id)
             rule.color = id;
         }
     }
+    for (std::string* loadColor : GetLoadColors(m_list.load))
+    {
+        if (*loadColor == color.id)
+        {
+            *loadColor = id;
+        }
+    }
     color.id = id;
     return true;
 }
@@ -349,6 +376,13 @@ size_t ServerListEdits::CountRulesWithColor(std::string_view id) const
 {
     return static_cast<size_t>(std::count_if(m_list.buttonColors.begin(), m_list.buttonColors.end(),
                                              [id](const ButtonColorRule& rule) { return rule.color == id; }));
+}
+
+size_t ServerListEdits::CountLoadUsesOfColor(std::string_view id) const
+{
+    const auto colors = GetLoadColors(m_list.load);
+    return static_cast<size_t>(
+        std::count_if(colors.begin(), colors.end(), [id](const std::string* color) { return *color == id; }));
 }
 
 std::optional<size_t> ServerListEdits::AddButtonColorRule()

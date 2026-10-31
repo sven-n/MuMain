@@ -2086,6 +2086,54 @@
   <data name="Preview note" xml:space="preserve">
     <value>Every combination of PvP and VIP type, for channel 1 of the selected group, in the language picked above. The button's {load} is empty, as for a server that can be joined.</value>
   </data>
+  <data name="Load" xml:space="preserve">
+    <value>Load</value>
+  </data>
+  <data name="Load note" xml:space="preserve">
+    <value>How the button of a full server (load 100 % and more) or an overloaded one (128 and more) looks: its {load} text, and the load bar's ten segments of 10 % each, from the base color toward the full color. Default is the theme's own color; for a load text, the button's color.</value>
+  </data>
+  <data name="Load bar" xml:space="preserve">
+    <value>Load bar</value>
+  </data>
+  <data name="Base color" xml:space="preserve">
+    <value>Base</value>
+  </data>
+  <data name="Full color" xml:space="preserve">
+    <value>Full</value>
+  </data>
+  <data name="Unlit color" xml:space="preserve">
+    <value>Unlit</value>
+  </data>
+  <data name="Full server" xml:space="preserve">
+    <value>Full server</value>
+  </data>
+  <data name="Overloaded server" xml:space="preserve">
+    <value>Overloaded server</value>
+  </data>
+  <data name="Full text" xml:space="preserve">
+    <value>Full text</value>
+  </data>
+  <data name="Overloaded text" xml:space="preserve">
+    <value>Overloaded text</value>
+  </data>
+  <data name="Bold" xml:space="preserve">
+    <value>Bold</value>
+  </data>
+  <data name="Italic" xml:space="preserve">
+    <value>Italic</value>
+  </data>
+  <data name="Load preview note" xml:space="preserve">
+    <value>The button at 35 % load, full and overloaded, with its bar in the legacy and modern theme. Bold and italic show only in game.</value>
+  </data>
+  <data name="Load {0}%" xml:space="preserve">
+    <value>{0} % load</value>
+  </data>
+  <data name="Color load used note" xml:space="preserve">
+    <value>The load bar and load texts use it {0} times; they then have the default color.</value>
+  </data>
+  <data name="Step load" xml:space="preserve">
+    <value>Load: {0}</value>
+  </data>
   <data name="Step add VIP type" xml:space="preserve">
     <value>Add VIP type {0}</value>
   </data>

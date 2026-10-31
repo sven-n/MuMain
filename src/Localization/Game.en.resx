@@ -1833,12 +1833,6 @@
   <data name="test" xml:space="preserve">
     <value>test</value>
   </data>
-  <data name="Now preparing" xml:space="preserve">
-    <value>Now preparing</value>
-  </data>
-  <data name="(Full)" xml:space="preserve">
-    <value>(Full)</value>
-  </data>
   <data name="The TEST server is intended for testing," xml:space="preserve">
     <value>The TEST server is intended for testing,</value>
   </data>

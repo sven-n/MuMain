@@ -13,6 +13,11 @@ namespace Rml { class ElementDocument; }
 class CServerGroup;
 class CServerInfo;
 
+namespace Data::ServerList
+{
+struct ButtonColor;
+}
+
 // Pure RmlUi 2D UI: RmlUi owns all of this window's rendering and click handling. Two
 // always-visible columns laid out by server_select.rcss's flexbox rules -- server groups on the
 // left, and the servers within whichever group is selected on the right (empty/hidden until a
@@ -78,19 +83,42 @@ private:
         int btnPos = 0; // CServerGroup::m_iBtnPos -- passed back to RmlClickSelectGroup; 0 is the rare center/"test server" group
         bool checked = false;
     };
+    // One of the load bar's segments (Data::ServerList::GetLoadBarSegments).
+    struct SegmentEntry
+    {
+        // How much of it is lit, as a width ("35%").
+        Rml::String lit;
+        // "#00BD8B".
+        Rml::String color;
+    };
+    // A color of the server list's: one bool per theme color class, since RmlUi's data-class-X
+    // binds a class per boolean, not a name; none set is the default. `style` is a color of the
+    // list's own ("#FF5A5A"), set as the color; empty for a theme color.
+    struct ColorEntry
+    {
+        bool gray = false;
+        bool orange = false;
+        bool silver = false;
+        Rml::String style;
+    };
     struct ServerEntry
     {
+        // The button's text, split at its {load} text (CServerListManager::GetServerButtonParts).
         Rml::String label;
+        Rml::String loadText;
+        Rml::String labelAfter;
         int index = 0; // position within the selected group's server list (CServerGroup::GetServerInfo(i))
-        float loadFraction = 0.f;
-        // One bool per color class since RmlUi's data-class-X binds a class per boolean, not a
-        // name. No flag set is the default (plain .server-row color). From
-        // CServerListManager::GetServerButtonColor.
-        bool colorGray = false;
-        bool colorOrange = false;
-        bool colorSilver = false;
-        // A color of the server list's own ("#FF5A5A"), set as the text color; empty for a theme color.
-        Rml::String colorStyle;
+        // From CServerListManager::GetServerButtonColor.
+        ColorEntry color;
+        // The load text's look (Data::ServerList::LoadText). `loadSlant` slants it where the font
+        // has no italic face.
+        ColorEntry loadColor;
+        bool loadBold = false;
+        bool loadItalic = false;
+        bool loadSlant = false;
+        std::vector<SegmentEntry> segments;
+        // The unlit part of the segments ("#202020"); empty for the theme's own.
+        Rml::String emptyStyle;
         // No "checked"/selected state here -- clicking a server row connects immediately.
     };
     struct ServerSelRmlModel
@@ -107,6 +135,12 @@ private:
 
         Rml::String descriptionText;
     };
+    static ColorEntry MakeColorEntry(const Data::ServerList::ButtonColor& color);
+    // The look of the {load} text, and the load bar, of a server with the load `percent`.
+    static void SetLoadTextLook(ServerEntry& entry, int percent);
+    static void SetLoadBar(ServerEntry& entry, int percent);
+    // The button of one server of the selected group, at `index` in its list.
+    ServerEntry MakeServerEntry(const CServerInfo& serverInfo, int index) const;
     void BindRmlModel(Rml::DataModelConstructor& c, ServerSelRmlModel& model);
     UI::RmlBridge::ThemedView<ServerSelRmlModel> m_RmlView{"server_select",
         [this](Rml::DataModelConstructor& c, ServerSelRmlModel& model) { BindRmlModel(c, model); },

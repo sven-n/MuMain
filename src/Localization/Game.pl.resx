@@ -1824,12 +1824,6 @@
   <data name="test" xml:space="preserve">
     <value>test</value>
   </data>
-  <data name="Now preparing" xml:space="preserve">
-    <value>W przygotowaniu</value>
-  </data>
-  <data name="(Full)" xml:space="preserve">
-    <value>(Pełny)</value>
-  </data>
   <data name="The TEST server is intended for testing," xml:space="preserve">
     <value>Serwer TEST przeznaczony jest do testowania,</value>
   </data>

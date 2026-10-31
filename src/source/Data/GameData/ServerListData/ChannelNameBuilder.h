@@ -23,7 +23,7 @@ struct ChannelNameValues
     int channel = 0;
     std::string_view vip;       // the VIP type's name; empty without one
     std::string_view pvp;       // the PvP or Non-PvP text
-    std::string_view load;      // the server's load ((Full), Now preparing); empty while joinable; Button only
+    std::string_view load;      // the list's load text ((Full), Overloaded); empty while joinable; Button only
     std::string_view character; // the player's character; Screenshot only
 };
 
@@ -40,4 +40,20 @@ std::string FillChannelName(std::string_view text, ChannelNamePlace place, const
 // not have is none.
 std::string BuildChannelName(const ServerListData& list, ChannelNamePlace place, const ChannelSettings& channel,
                              ChannelNameValues values, std::string_view locale);
+
+// A channel's button text in three parts, so that its {load} text can look different.
+struct ButtonTextParts
+{
+    std::string before;
+    // `values.load`; empty when it is, or the template has no {load}.
+    std::string load;
+    std::string after;
+
+    bool operator==(const ButtonTextParts&) const = default;
+};
+
+// The button's name as BuildChannelName builds it, split at its {load}. A second {load} in the
+// template shows the text without a look of its own.
+ButtonTextParts BuildButtonTextParts(const ServerListData& list, const ChannelSettings& channel,
+                                     ChannelNameValues values, std::string_view locale);
 } // namespace Data::ServerList

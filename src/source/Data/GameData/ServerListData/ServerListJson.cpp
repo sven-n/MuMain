@@ -39,6 +39,18 @@ constexpr const char* ButtonColorsKey = "buttonColors";
 constexpr const char* ShadesKey = "shades";
 constexpr const char* ColorKey = "color";
 constexpr const char* NonPvpKey = "nonPvp";
+constexpr const char* LoadKey = "load";
+constexpr const char* BarKey = "bar";
+constexpr const char* BaseKey = "base";
+constexpr const char* FullKey = "full";
+constexpr const char* EmptyKey = "empty";
+constexpr const char* OverloadedKey = "overloaded";
+constexpr const char* TextKey = "text";
+constexpr const char* BoldKey = "bold";
+constexpr const char* ItalicKey = "italic";
+
+constexpr const char* UnknownColorWarning =
+    "not a theme color (default, gray, orange, silver) or one of the colors; the default color is used";
 
 class IssueList
 {
@@ -389,9 +401,7 @@ std::optional<ButtonColorRule> ReadButtonColorRule(const OrderedJson& json, cons
     }
     else
     {
-        issues.Warning(
-            Field(field, ColorKey),
-            "not a theme color (default, gray, orange, silver) or one of the colors; the default color is used");
+        issues.Warning(Field(field, ColorKey), UnknownColorWarning);
     }
     Items::Json::WarnAboutUnknownKeys(json, {VipKey, PvpKey, ColorKey}, field + ".", WarnUnknown(issues));
     return rule;
@@ -542,6 +552,107 @@ void ReadNames(const OrderedJson& root, ChannelNames& names, IssueList& issues)
         }
     }
     Items::Json::WarnAboutUnknownKeys(*json, known, std::string(NamesKey) + ".", WarnUnknown(issues));
+}
+
+// A color of the load section; one the list does not have is a warning and stays the default.
+void ReadLoadColor(const OrderedJson& json, const std::string& field, const char* key, const ServerListData& list,
+                   std::string& color, IssueList& issues)
+{
+    const auto value = json.find(key);
+    if (value == json.end())
+    {
+        return;
+    }
+    if (value->is_string() && IsKnownColor(list, value->get<std::string>()))
+    {
+        color = value->get<std::string>();
+        return;
+    }
+    issues.Warning(Field(field, key), UnknownColorWarning);
+}
+
+void ReadLoadBar(const OrderedJson& load, const ServerListData& list, LoadBarColors& bar, IssueList& issues)
+{
+    const auto json = load.find(BarKey);
+    if (json == load.end())
+    {
+        return;
+    }
+    const std::string field = Field(LoadKey, BarKey);
+    if (!json->is_object())
+    {
+        issues.Fatal(field, R"(must be an object of colors, e.g. {"base": "default", "full": "loadRed"})");
+        return;
+    }
+    ReadLoadColor(*json, field, BaseKey, list, bar.base, issues);
+    ReadLoadColor(*json, field, FullKey, list, bar.full, issues);
+    ReadLoadColor(*json, field, EmptyKey, list, bar.empty, issues);
+    Items::Json::WarnAboutUnknownKeys(*json, {BaseKey, FullKey, EmptyKey}, field + ".", WarnUnknown(issues));
+}
+
+// The text of a load text; one without an English text keeps the built-in one.
+void ReadLoadTextText(const OrderedJson& json, const std::string& field, const LoadText& builtIn, LoadText& text,
+                      IssueList& issues)
+{
+    const auto value = json.find(TextKey);
+    if (value == json.end())
+    {
+        return;
+    }
+    LocalizedString read;
+    bool hasEnglish = false;
+    if (!ReadLocalizedText(*value, Field(field, TextKey), MaxLoadTextLength, read, hasEnglish, issues))
+    {
+        return;
+    }
+    if (!hasEnglish)
+    {
+        read.Set(LocalizedString::NeutralLocale, builtIn.text.GetNeutral());
+    }
+    text.text = std::move(read);
+}
+
+void ReadLoadText(const OrderedJson& load, const char* key, const ServerListData& list, const LoadText& builtIn,
+                  LoadText& text, IssueList& issues)
+{
+    const auto json = load.find(key);
+    if (json == load.end())
+    {
+        return;
+    }
+    const std::string field = Field(LoadKey, key);
+    if (!json->is_object())
+    {
+        issues.Fatal(field,
+                     R"x(must be an object, e.g. {"text": {"en": "(Full)"}, "color": "loadRed", "bold": true})x");
+        return;
+    }
+    ReadLoadTextText(*json, field, builtIn, text, issues);
+    ReadLoadColor(*json, field, ColorKey, list, text.color, issues);
+    ReadBool(*json, field, BoldKey, text.bold, issues);
+    ReadBool(*json, field, ItalicKey, text.italic, issues);
+    Items::Json::WarnAboutUnknownKeys(*json, {TextKey, ColorKey, BoldKey, ItalicKey}, field + ".", WarnUnknown(issues));
+}
+
+// After the colors: its colors may be the list's.
+void ReadLoad(const OrderedJson& root, ServerListData& list, IssueList& issues)
+{
+    const auto json = root.find(LoadKey);
+    if (json == root.end())
+    {
+        return;
+    }
+    if (!json->is_object())
+    {
+        issues.Fatal(LoadKey, R"(must be an object with "bar", "full" and "overloaded")");
+        return;
+    }
+    const LoadSettings builtIn = GetDefaultLoadSettings();
+    ReadLoadBar(*json, list, list.load.bar, issues);
+    ReadLoadText(*json, FullKey, list, builtIn.full, list.load.full, issues);
+    ReadLoadText(*json, OverloadedKey, list, builtIn.overloaded, list.load.overloaded, issues);
+    Items::Json::WarnAboutUnknownKeys(*json, {BarKey, FullKey, OverloadedKey}, std::string(LoadKey) + ".",
+                                      WarnUnknown(issues));
 }
 
 // "1" to "20"; nothing for anything else.
@@ -759,6 +870,35 @@ OrderedJson WriteNames(const ChannelNames& names)
     return json;
 }
 
+OrderedJson WriteLoadText(const LoadText& text)
+{
+    OrderedJson json = OrderedJson::object();
+    json[TextKey] = Items::Json::WriteLocalizedString(text.text);
+    json[ColorKey] = text.color;
+    if (text.bold)
+    {
+        json[BoldKey] = true;
+    }
+    if (text.italic)
+    {
+        json[ItalicKey] = true;
+    }
+    return json;
+}
+
+OrderedJson WriteLoad(const LoadSettings& load)
+{
+    OrderedJson bar = OrderedJson::object();
+    bar[BaseKey] = load.bar.base;
+    bar[FullKey] = load.bar.full;
+    bar[EmptyKey] = load.bar.empty;
+    OrderedJson json = OrderedJson::object();
+    json[BarKey] = std::move(bar);
+    json[FullKey] = WriteLoadText(load.full);
+    json[OverloadedKey] = WriteLoadText(load.overloaded);
+    return json;
+}
+
 OrderedJson WriteChannels(const ServerGroup& group)
 {
     OrderedJson channels = OrderedJson::object();
@@ -818,6 +958,8 @@ template <typename TVisit> void ForEachText(const ServerListData& list, TVisit&&
         const ChannelNamePlace place = static_cast<ChannelNamePlace>(value);
         visit(Field(NamesKey, GetChannelNamePlaceKey(place)), list.names.Template(place));
     }
+    visit(Field(Field(LoadKey, FullKey), TextKey), list.load.full.text);
+    visit(Field(Field(LoadKey, OverloadedKey), TextKey), list.load.overloaded.text);
 }
 } // namespace
 
@@ -832,13 +974,14 @@ void ReadServerListJson(std::string_view text, const std::string& source, Server
         return;
     }
     Items::Json::WarnAboutUnknownKeys(
-        root, {Items::Json::Keys::FormatVersion, VipTypesKey, ColorsKey, ButtonColorsKey, NamesKey, GroupsKey}, "",
-        WarnUnknown(issueList));
-    // Before the rules and groups: they name the VIP types and colors.
+        root, {Items::Json::Keys::FormatVersion, VipTypesKey, ColorsKey, ButtonColorsKey, NamesKey, LoadKey, GroupsKey},
+        "", WarnUnknown(issueList));
+    // Before the rules, the load section and the groups: they name the VIP types and colors.
     ReadVipTypes(root, list.vipTypes, issueList);
     ReadCustomColors(root, list.colors, issueList);
     ReadButtonColorRules(root, list, issueList);
     ReadNames(root, list.names, issueList);
+    ReadLoad(root, list, issueList);
     ReadGroups(root, list, issueList);
     WarnAboutMoreTestServers(list.groups, issueList);
 }
@@ -891,12 +1034,16 @@ std::string WriteServerListJson(const ServerListData& list)
     root[ColorsKey] = std::move(colors);
     root[ButtonColorsKey] = std::move(rules);
     root[NamesKey] = WriteNames(list.names);
+    root[LoadKey] = WriteLoad(list.load);
     root[GroupsKey] = std::move(groups);
     std::string text = root.dump(Items::Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
     text = Items::Json::PutObjectsOnOneLine(text, ChannelsKey);
     // A VIP type's names, by language, on the line of its name.
     text = Items::Json::PutObjectsOnOneLine(text, NameKey);
     text = Items::Json::PutObjectsOnOneLine(text, ShadesKey);
+    text = Items::Json::PutObjectsOnOneLine(text, BarKey);
+    // A load text's texts, by language, on the line of its text.
+    text = Items::Json::PutObjectsOnOneLine(text, TextKey);
     // Each rule on a line of its own.
     text = Items::Json::PutListEntriesOnOneLine(text, ButtonColorsKey);
     return text + "\n";

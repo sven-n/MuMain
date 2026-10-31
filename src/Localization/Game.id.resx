@@ -1528,12 +1528,6 @@
   <data name="test" xml:space="preserve">
     <value>tes</value>
   </data>
-  <data name="Now preparing" xml:space="preserve">
-    <value>Sekarang bersiap</value>
-  </data>
-  <data name="(Full)" xml:space="preserve">
-    <value>(Penuh)</value>
-  </data>
   <data name="The TEST server is intended for testing," xml:space="preserve">
     <value>Server TEST ditujukan untuk pengujian,</value>
   </data>

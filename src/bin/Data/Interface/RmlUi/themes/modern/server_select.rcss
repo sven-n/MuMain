@@ -77,29 +77,36 @@
 	pointer-events: none;
 }
 
-/* Recessed population track, with tier colors on the fill. */
+/* The {load} text of a full or overloaded server, in the server list's look for it. */
+.server-load.load-gray { color: token(server-button-gray); }
+.server-load.load-orange { color: token(server-button-orange); }
+.server-load.load-silver { color: token(server-button-silver); }
+.server-load.bold { font-weight: bold; }
+.server-load.italic { font-style: italic; }
+/* For a font without an italic face. */
+.server-load.slant {
+	display: inline-block;
+	transform: skewX(-12deg);
+}
+
+/* Population track of ten recessed segments of 10 % each; the server list colors their lit part. */
 .server-gauge-slot {
-	display: block;
+	display: flex;
+	gap: 2px;
 	width: 200px;
 	height: 5px;
 	margin: 4px 0 0 9px;
-	background-color: #050605;
+}
+.server-gauge-segment {
+	flex: 1;
+	height: 100%;
+	background-color: token(server-load-empty);
 	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 199);
 }
-/* Population tier by load_fraction -- medium is the default/untagged case, overridden by
-   .tier-low/.tier-high. Dark-stop hexes have no token of their own; bright stops are the real
-   semantic-success/-warning/-danger tokens. */
 .server-gauge-fill {
 	display: block;
 	height: 100%;
 	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 23);
-	decorator: linear-gradient(to right, #765c22, token(semantic-warning));
-}
-.server-gauge-fill.tier-low {
-	decorator: linear-gradient(to right, #516a3d, token(semantic-success));
-}
-.server-gauge-fill.tier-high {
-	decorator: linear-gradient(to right, #6d1711, token(semantic-danger));
 }
 
 /* Normal block flow below #columns, not position:absolute with a hand-picked top offset. */

@@ -112,16 +112,18 @@ public:
     // Adds a color named `name` at the end, its id made from the name (one no
     // other color or theme color has), with no shades. Returns its index.
     size_t AddColor(const std::string& name);
-    // The rules with the color then have the default color.
+    // The rules, the load bar and the load texts with the color then have the default color.
     void RemoveColor(size_t index);
     bool MoveColor(size_t index, int direction);
-    // Gives the color the id; the rules with the old one get it too. False (and
-    // nothing changed) when it is no color id or another color has it.
+    // Gives the color the id; the rules, the load bar and the load texts with the old one get
+    // it too. False (and nothing changed) when it is no color id or another color has it.
     bool ChangeColorId(size_t index, const std::string& id);
     // Whether `id` would be a free id for a color: a color id no other color has.
     bool IsColorIdFree(std::string_view id) const;
     // How many rules have the color.
     size_t CountRulesWithColor(std::string_view id) const;
+    // How many of the load bar's three colors and the two load texts' colors are the color.
+    size_t CountLoadUsesOfColor(std::string_view id) const;
 
     // Adds a rule with the default color for the first VIP type and PvP setting
     // no rule has yet (any channel first). Nothing when every one has a rule.

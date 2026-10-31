@@ -9,14 +9,17 @@
 #include <string_view>
 #include <vector>
 
-// The server groups of the login screen, the VIP types of their channels and the
-// texts that name a channel (Data/Local/ServerList.json):
+// The server groups of the login screen, the VIP types of their channels, the
+// texts that name a channel and how a server's load shows (Data/Local/ServerList.json):
 //
 //   { "formatVersion": 2,
-//     "vipTypes": [ {"id": "gold", "name": {"en": "Gold", "es": "Oro"}, "themeColor": "orange"} ],
+//     "vipTypes": [ {"id": "gold", "name": {"en": "Gold", "es": "Oro"}} ],
+//     "buttonColors": [ {"vip": "gold", "color": "orange"} ],
 //     "names": { "pvp": {"en": "PvP"}, "nonPvp": {"en": "Non-PvP"},
 //                "button": {"en": "{name}-{channel} ({vip} {pvp}) {load}"},
 //                "login": {"en": "[{name}-{channel} ({vip} {pvp})]"}, ... },
+//     "load": { "bar": {"base": "default", "full": "default"},
+//               "full": {"text": {"en": "(Full)"}, "bold": true}, ... },
 //     "groups": [
 //       { "id": 0, "name": "Valhalla", "channels": {"1": {"vip": "gold", "pvp": false}, "6": {"pvp": false}} },
 //       { "id": 1, "name": "Helheim", "description": "PvP everywhere" },
@@ -26,9 +29,9 @@
 // connect server's servers 0 to 19 are group 0, 20 to 39 group 1. A server the
 // list has no group for is not shown. "channels" gives a channel's settings by
 // its number (server ID % 20 + 1): PvP (on by default) and a VIP type (none by
-// default). "vipTypes", "names", "description" and "testServer" are optional;
-// a text "names" leaves out is the built-in English one. docs/server-list.md
-// has the whole format.
+// default). Everything but "formatVersion", "groups" and a group's "id" and
+// "name" is optional; a text the file leaves out is the built-in English one.
+// docs/server-list.md has the whole format.
 namespace Data::ServerList
 {
 // Version 1 had four fixed channel types; it is not read.

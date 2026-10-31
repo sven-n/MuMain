@@ -6,7 +6,13 @@
       "name": {"en": "Gold", "es": "Oro", "id": "Emas", "ja": "ゴールド", "pt": "Ouro", "ru": "Золотой", "uk": "Золотий", "zh-TW": "黃金"}
     }
   ],
-  "colors": [],
+  "colors": [
+    {
+      "id": "loadRed",
+      "name": "Load red",
+      "shades": {"classic": "#FF4040", "legacy": "#FF5A5A", "modern": "#C0564E"}
+    }
+  ],
   "buttonColors": [
     {"vip": "gold", "color": "orange"},
     {"vip": false, "pvp": true, "color": "gray"}
@@ -50,6 +56,20 @@
     },
     "screenshot": {
       "en": "[{name} / {character}]"
+    }
+  },
+  "load": {
+    "bar": {"base": "default", "full": "default", "empty": "default"},
+    "full": {
+      "text": {"en": "(Full)", "de": "(Voll)", "es": "(Lleno)", "id": "(Penuh)", "ja": "(満員)", "pl": "(Pełny)", "pt": "(Completo)", "ru": "(Полный)", "tl": "(Puno)", "uk": "(Повний)", "zh-CN": "（已满）", "zh-TW": "（已滿）"},
+      "color": "loadRed",
+      "bold": true
+    },
+    "overloaded": {
+      "text": {"en": "Overloaded", "de": "Überlastet", "es": "Sobrecargado", "id": "Kelebihan beban", "ja": "過負荷", "pl": "Przeciążony", "pt": "Sobrecarregado", "ru": "Перегружен", "tl": "Sobrang puno", "uk": "Перевантажений", "zh-CN": "过载", "zh-TW": "過載"},
+      "color": "loadRed",
+      "bold": true,
+      "italic": true
     }
   },
   "groups": [

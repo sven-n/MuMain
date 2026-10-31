@@ -20,9 +20,10 @@
 #include "I18N/All.h"
 #include "Network/Server/ServerListManager.h"
 #include "Scenes/SceneCore.h"
+#include "ServerListColors.h"
+#include "ServerListLoadUI.h"
 #include "ServerListStepLabel.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "UI/RmlBridge/ThemeInheritance.h"
 #include "UI/Windows/ServerSelWin.h"
 #include "imgui.h"
 
@@ -45,6 +46,7 @@ using Data::ServerList::ServerGroup;
 using Data::ServerList::ServerListData;
 using Data::ServerList::ThemeColor;
 using Data::ServerList::VipType;
+using namespace MuEditor::ServerList::Colors;
 
 namespace
 {
@@ -69,10 +71,6 @@ constexpr const char* PreviewCharacter = "Hero";
 // The theme folders the preview shows the button colors in.
 constexpr std::string_view LegacyTheme = "legacy";
 constexpr std::string_view ModernTheme = "modern";
-// Where the theme folders are, relative to the client folder.
-constexpr const char* ThemesFolder = "Data/Interface/RmlUi/themes";
-// The swatch of a theme color whose token a theme does not have.
-constexpr ImVec4 MissingShadeSwatch{1.0f, 1.0f, 1.0f, 1.0f};
 
 std::string_view GetEditorLocale()
 {
@@ -86,70 +84,6 @@ std::string GetVipTypeLabel(const VipType* vipType, std::string_view locale)
     return vipType != nullptr ? vipType->name.Get(locale) : std::string(I18N::Editor::None);
 }
 
-const char* GetThemeColorLabel(ThemeColor color)
-{
-    switch (color)
-    {
-    case ThemeColor::Gray:
-        return I18N::Editor::Gray;
-    case ThemeColor::Orange:
-        return I18N::Editor::Orange;
-    case ThemeColor::Silver:
-        return I18N::Editor::Silver;
-    case ThemeColor::Default:
-    default:
-        return I18N::Editor::Default;
-    }
-}
-
-ImVec4 FromRgb(unsigned int rgb)
-{
-    return {static_cast<float>((rgb >> 16) & 0xFF) / 255.0f, static_cast<float>((rgb >> 8) & 0xFF) / 255.0f,
-            static_cast<float>(rgb & 0xFF) / 255.0f, 1.0f};
-}
-
-// "#RRGGBB" as a color; nothing for any other text.
-std::optional<ImVec4> ParseShade(std::string_view shade)
-{
-    if (!Data::ServerList::IsShade(shade))
-    {
-        return std::nullopt;
-    }
-    return FromRgb(static_cast<unsigned int>(std::stoul(std::string(shade.substr(1)), nullptr, 16)));
-}
-
-using ThemeShades = std::array<ImVec4, Data::ServerList::ThemeColorCount>;
-
-// The theme colors' shades by theme folder, read once from the themes' tokens.ini.
-std::map<std::string, ThemeShades, std::less<>>& ThemeShadeCache()
-{
-    static std::map<std::string, ThemeShades, std::less<>> cache;
-    return cache;
-}
-
-// The shade a theme draws a theme color in: the token the server select screen's stylesheets
-// use (Data::ServerList::GetThemeColorToken), from the theme's tokens.ini or its ancestors'.
-ImVec4 GetThemeColorSwatch(ThemeColor color, std::string_view theme)
-{
-    auto& cache = ThemeShadeCache();
-    auto found = cache.find(theme);
-    if (found == cache.end())
-    {
-        const UI::RmlBridge::ThemeInheritance inheritance(std::filesystem::u8path(ThemesFolder) /
-                                                          std::filesystem::u8path(std::string(theme)));
-        ThemeShades shades{};
-        for (int value = 0; value < Data::ServerList::ThemeColorCount; ++value)
-        {
-            const auto setting =
-                inheritance.GetSetting("Tokens", Data::ServerList::GetThemeColorToken(static_cast<ThemeColor>(value)));
-            shades[static_cast<size_t>(value)] =
-                (setting ? ParseShade(setting->value) : std::nullopt).value_or(MissingShadeSwatch);
-        }
-        found = cache.emplace(std::string(theme), shades).first;
-    }
-    return found->second[static_cast<size_t>(color)];
-}
-
 std::string FormatShade(const float rgb[3])
 {
     char text[8] = {};
@@ -157,53 +91,6 @@ std::string FormatShade(const float rgb[3])
     { return static_cast<unsigned int>(std::clamp(value, 0.0f, 1.0f) * 255.0f + 0.5f); };
     std::snprintf(text, sizeof(text), "#%02X%02X%02X", channel(rgb[0]), channel(rgb[1]), channel(rgb[2]));
     return text;
-}
-
-ImVec4 GetButtonColorSwatch(const Data::ServerList::ButtonColor& color, std::string_view theme)
-{
-    const std::optional<ImVec4> shade = ParseShade(color.shade);
-    return shade ? *shade : GetThemeColorSwatch(color.theme, theme);
-}
-
-void RenderSwatch(const ImVec4& color)
-{
-    const float size = ImGui::GetTextLineHeight();
-    ImGui::ColorButton("##Color", color,
-                       ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoDragDrop,
-                       ImVec2(size, size));
-}
-
-// The theme the game draws in now.
-std::string_view GetGameTheme()
-{
-    return UI::RmlBridge::GetActiveThemeName();
-}
-
-// What the editor calls a color a rule can have: a theme color's label or one of
-// the list's colors (its name, or its id without one).
-std::string GetColorLabel(const ServerListData& list, std::string_view color)
-{
-    if (const std::optional<ThemeColor> themeColor = Data::ServerList::FindThemeColor(color))
-    {
-        return GetThemeColorLabel(*themeColor);
-    }
-    const Data::ServerList::CustomColor* custom = list.FindCustomColor(color);
-    if (custom == nullptr)
-    {
-        return std::string(color);
-    }
-    return custom->name.empty() ? custom->id : custom->name;
-}
-
-// A selectable row with `text` drawn as written. As a Selectable's label, a "##" in a
-// name would start its ImGui ID and hide the rest; `id` tells the rows apart.
-bool SelectableText(const char* id, const std::string& text, bool selected,
-                    ImGuiSelectableFlags flags = ImGuiSelectableFlags_None)
-{
-    const ImVec2 textPosition = ImGui::GetCursorScreenPos();
-    const bool clicked = ImGui::Selectable(id, selected, flags);
-    ImGui::GetWindowDrawList()->AddText(textPosition, ImGui::GetColorU32(ImGuiCol_Text), text.c_str());
-    return clicked;
 }
 
 std::string GetRuleVipLabel(const ServerListData& list, const ButtonColorRule& rule, std::string_view locale)
@@ -296,37 +183,8 @@ bool PickRulePvp(ButtonColorRule& rule)
 bool PickRuleColor(const ServerListData& list, ButtonColorRule& rule)
 {
     const std::string_view theme = GetGameTheme();
-    RenderSwatch(GetButtonColorSwatch(Data::ServerList::ResolveButtonColor(list, rule.color, theme), theme));
-    ImGui::SameLine();
-    ImGui::SetNextItemWidth(VipComboWidth * g_MuEditorCore.GetUIScale());
-    if (!ImGui::BeginCombo("##RuleColor", GetColorLabel(list, rule.color).c_str()))
-    {
-        return false;
-    }
-    bool picked = false;
-    int option = 0;
-    const auto offer = [&](const std::string& color)
-    {
-        ImGui::PushID(option++);
-        RenderSwatch(GetButtonColorSwatch(Data::ServerList::ResolveButtonColor(list, color, theme), theme));
-        ImGui::SameLine();
-        if (SelectableText("##RuleColorOption", GetColorLabel(list, color), color == rule.color) && color != rule.color)
-        {
-            rule.color = color;
-            picked = true;
-        }
-        ImGui::PopID();
-    };
-    for (int value = 0; value < Data::ServerList::ThemeColorCount; ++value)
-    {
-        offer(Data::ServerList::GetThemeColorName(static_cast<ThemeColor>(value)));
-    }
-    for (const Data::ServerList::CustomColor& color : list.colors)
-    {
-        offer(color.id);
-    }
-    ImGui::EndCombo();
-    return picked;
+    return PickColor("##RuleColor", list, rule.color, VipComboWidth, [&list, theme](std::string_view color)
+                     { return GetButtonColorSwatch(Data::ServerList::ResolveButtonColor(list, color, theme), theme); });
 }
 
 // A grey line that wraps at the window's edge.
@@ -629,7 +487,7 @@ void CMuServerListUI::LoadFile()
     m_refusedRule = -1;
     m_themes = UI::RmlBridge::DiscoverAvailableThemes();
     // A theme's tokens.ini may have changed since; its shades are read again.
-    ThemeShadeCache().clear();
+    ForgetThemeTokens();
     ShowInGame();
 }
 
@@ -1024,6 +882,8 @@ bool CMuServerListUI::RenderChannelNamesTab()
         ImGui::Separator();
         changed |= RenderButtonColorRules();
         ImGui::Separator();
+        changed |= MuEditor::ServerList::LoadUI::RenderLoadSettings(m_edits.EditList(), [this] { CommitPending(); });
+        ImGui::Separator();
         changed |= RenderCustomColors();
         ImGui::Separator();
         RenderPreview();
@@ -1232,6 +1092,10 @@ bool CMuServerListUI::RenderTexts()
                                         Data::ServerList::MaxChannelNameTextLength);
         RenderTemplateProblems(text.Get(m_textLocale), place);
     }
+    Data::ServerList::LoadSettings& load = m_edits.EditList().load;
+    changed |= RenderLocalizedField(I18N::Editor::FullText, load.full.text, Data::ServerList::MaxLoadTextLength);
+    changed |=
+        RenderLocalizedField(I18N::Editor::OverloadedText, load.overloaded.text, Data::ServerList::MaxLoadTextLength);
     RenderNote(I18N::Editor::TextsNote);
     return changed;
 }
@@ -1371,7 +1235,7 @@ bool CMuServerListUI::RenderCustomColorButtons()
     if (ImGui::Button(I18N::Editor::Remove))
     {
         const Data::ServerList::CustomColor& color = m_edits.GetList().colors[static_cast<size_t>(m_selectedColor)];
-        if (m_edits.CountRulesWithColor(color.id) == 0)
+        if (m_edits.CountRulesWithColor(color.id) == 0 && m_edits.CountLoadUsesOfColor(color.id) == 0)
         {
             CommitPending();
             m_edits.RemoveColor(static_cast<size_t>(m_selectedColor));
@@ -1427,8 +1291,14 @@ bool CMuServerListUI::RenderRemoveColorPopup()
     bool changed = false;
     if (ImGui::BeginPopupModal(title.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::TextUnformatted(
-            I18N::Format(I18N::Editor::ColorUsedNote, {std::to_string(m_edits.CountRulesWithColor(color.id))}).c_str());
+        if (const size_t rules = m_edits.CountRulesWithColor(color.id); rules > 0)
+        {
+            ImGui::TextUnformatted(I18N::Format(I18N::Editor::ColorUsedNote, {std::to_string(rules)}).c_str());
+        }
+        if (const size_t loadUses = m_edits.CountLoadUsesOfColor(color.id); loadUses > 0)
+        {
+            ImGui::TextUnformatted(I18N::Format(I18N::Editor::ColorLoadUsedNote, {std::to_string(loadUses)}).c_str());
+        }
         if (ImGui::Button(I18N::Editor::Remove))
         {
             CommitPending();
@@ -1615,6 +1485,9 @@ void CMuServerListUI::RenderPreview()
         }
     }
     ImGui::EndTable();
+    const ChannelSettings firstChannel =
+        hasGroup ? groups[static_cast<size_t>(m_selected)].channels.front() : ChannelSettings{};
+    MuEditor::ServerList::LoadUI::RenderLoadPreview(list, firstChannel, groupName, m_textLocale);
 }
 
 void CMuServerListUI::ShowInGame()

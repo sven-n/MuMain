@@ -559,6 +559,82 @@ TEST_CASE("ServerListJson: wrong types are errors")
     CHECK(HasIssueAbout(Read(GroupFile(R"({ "id": "0", "name": "A" })")).issues, "groups[0].id", "whole number"));
 }
 
+// The file with these colors and this load section, and no group.
+std::string LoadFile(const std::string& load)
+{
+    return R"({ "formatVersion": 2,
+        "colors": [ {"id": "loadRed", "name": "Load red", "shades": {"legacy": "#FF5A5A"}} ],
+        "load": )" +
+           load + R"(, "groups": [] })";
+}
+
+TEST_CASE("ServerListJson: the load section gives the bar's colors and the load texts' look")
+{
+    const ReadResult read = Read(LoadFile(R"({
+        "bar": {"base": "default", "full": "loadRed", "empty": "gray"},
+        "full": {"text": {"en": "Full!", "de": "Voll!"}, "color": "loadRed", "bold": true},
+        "overloaded": {"text": "Busy", "italic": true} })"));
+
+    CHECK_MESSAGE(read.issues.empty(), Messages(read.issues));
+    const Data::ServerList::LoadSettings& load = read.list.load;
+    CHECK(load.bar.base == "default");
+    CHECK(load.bar.full == "loadRed");
+    CHECK(load.bar.empty == "gray");
+    CHECK(load.full.text.Get("de") == "Voll!");
+    CHECK(load.full.text.GetNeutral() == "Full!");
+    CHECK(load.full.color == "loadRed");
+    CHECK(load.full.bold);
+    CHECK_FALSE(load.full.italic);
+    CHECK(load.overloaded.text.GetNeutral() == "Busy");
+    CHECK(load.overloaded.color == "default");
+    CHECK(load.overloaded.italic);
+
+    // Written and read again, it is the same.
+    const ReadResult again = Read(Data::ServerList::WriteServerListJson(read.list));
+    CHECK_MESSAGE(again.issues.empty(), Messages(again.issues));
+    CHECK(again.list.load == load);
+}
+
+TEST_CASE("ServerListJson: without a load section, the built-in texts and the theme's bar")
+{
+    const ReadResult read = Read(NamesFile("{}"));
+    CHECK(read.list.load == Data::ServerList::GetDefaultLoadSettings());
+    CHECK(read.list.load.full.text.GetNeutral() == "(Full)");
+    CHECK(read.list.load.overloaded.text.GetNeutral() == "Overloaded");
+}
+
+TEST_CASE("ServerListJson: a load text without English keeps the built-in English one")
+{
+    const ReadResult read = Read(LoadFile(R"x({ "full": {"text": {"de": "(Voll)"}} })x"));
+    CHECK(read.issues.empty());
+    CHECK(read.list.load.full.text.GetNeutral() == "(Full)");
+    CHECK(read.list.load.full.text.Get("de") == "(Voll)");
+}
+
+TEST_CASE("ServerListJson: a color the list does not have is a warning and the default color")
+{
+    const ReadResult read =
+        Read(LoadFile(R"({ "bar": {"base": "nope"}, "overloaded": {"color": 5}, "full": {"size": 2} })"));
+    CHECK_FALSE(HasFatal(read.issues));
+    CHECK(HasIssueAbout(read.issues, "load.bar.base", "not a theme color", ItemDataIssueSeverity::Warning));
+    CHECK(HasIssueAbout(read.issues, "load.overloaded.color", "not a theme color", ItemDataIssueSeverity::Warning));
+    CHECK(HasIssueAbout(read.issues, "load.full.size", "unknown field"));
+    CHECK(read.list.load.bar.base == "default");
+    CHECK(read.list.load.overloaded.color == "default");
+}
+
+TEST_CASE("ServerListJson: a load section of the wrong shape is fatal, a long load text cut")
+{
+    CHECK(HasIssueAbout(Read(LoadFile("[]")).issues, "load", "must be an object"));
+    CHECK(HasIssueAbout(Read(LoadFile(R"({ "bar": "red" })")).issues, "load.bar", "must be an object"));
+    CHECK(HasIssueAbout(Read(LoadFile(R"x({ "full": "(Full)" })x")).issues, "load.full", "must be an object"));
+    CHECK(HasIssueAbout(Read(LoadFile(R"({ "full": {"bold": "yes"} })")).issues, "load.full.bold", "true or false"));
+
+    const ReadResult cut = Read(LoadFile(R"({ "full": {"text": ")" + std::string(40, 'x') + R"("} })"));
+    CHECK(HasIssueAbout(cut.issues, "load.full.text.en", "longer than 32", ItemDataIssueSeverity::Warning));
+    CHECK(cut.list.load.full.text.GetNeutral() == std::string(32, 'x'));
+}
+
 TEST_CASE("ServerListJson: the shipped file reads without problems and is written as the editor writes it")
 {
     // MU_TEST_DATA_DIR is the client folder's Data; the file name starts with it.
@@ -589,6 +665,24 @@ TEST_CASE("ServerListJson: the shipped file reads without problems and is writte
     CHECK(loaded.list.buttonColors[0].color == "orange");
     CHECK(loaded.list.buttonColors[1].vipMatch == RuleVip::NoVipType);
     CHECK(loaded.list.buttonColors[1].color == "gray");
+    // Both load texts bold in the list's red, "Overloaded" also italic, in every language; the
+    // bar in each theme's own colors.
+    const Data::ServerList::LoadSettings& load = loaded.list.load;
+    CHECK(load.bar == Data::ServerList::LoadBarColors{});
+    CHECK(load.full.color == "loadRed");
+    CHECK(load.full.bold);
+    CHECK(load.overloaded.italic);
+    CHECK(load.full.text.GetNeutral() == "(Full)");
+    CHECK(load.overloaded.text.GetNeutral() == "Overloaded");
+    for (const char* locale : GameLocales)
+    {
+        CAPTURE(locale);
+        if (std::string_view(locale) != Data::LocalizedString::NeutralLocale)
+        {
+            CHECK(load.full.text.HasOwn(locale));
+            CHECK(load.overloaded.text.HasOwn(locale));
+        }
+    }
 
     const std::optional<std::string> text = Data::Items::Json::ReadTextFile(file);
     REQUIRE(text.has_value());

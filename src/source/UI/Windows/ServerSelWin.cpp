@@ -17,12 +17,32 @@
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
+#include "Core/Color/Rgb.h"
+#include "Data/GameData/ServerListData/LoadBar.h"
+#include <algorithm>
+#include <array>
 #include <cmath>
+#include <string_view>
 
-// Caps how many groups a server can grow this window's data to.
 namespace
 {
-    constexpr std::size_t kMaxGroups = 20;
+// Caps how many groups a server can grow this window's data to.
+constexpr std::size_t kMaxGroups = 20;
+constexpr float kPercent = 100.0f;
+// The font the server buttons are drawn in (server_select.rcss).
+constexpr const char* kLabelFontToken = "font-body";
+// Languages whose glyphs come from the Chinese and Japanese fonts, which have no italic faces.
+constexpr std::array<std::string_view, 3> kLocalesWithoutItalic = {"zh-CN", "zh-TW", "ja"};
+
+// Whether italic text can be drawn as such; where not, a load text is slanted instead.
+bool CanDrawItalic()
+{
+    const char* locale = I18N::GetCurrentLocale();
+    const std::string_view current = locale != nullptr ? locale : "";
+    if (std::find(kLocalesWithoutItalic.begin(), kLocalesWithoutItalic.end(), current) != kLocalesWithoutItalic.end())
+        return false;
+    return UI::RmlBridge::ActiveThemeFontHasItalic(kLabelFontToken);
+}
 }
 
 CServerSelWin g_ServerSelWin;
@@ -64,14 +84,29 @@ void CServerSelWin::BindRmlModel(Rml::DataModelConstructor& c, ServerSelRmlModel
     group.RegisterMember("checked", &GroupEntry::checked);
     c.RegisterArray<std::vector<GroupEntry>>();
 
+    auto segment = c.RegisterStruct<SegmentEntry>();
+    segment.RegisterMember("lit", &SegmentEntry::lit);
+    segment.RegisterMember("color", &SegmentEntry::color);
+    c.RegisterArray<std::vector<SegmentEntry>>();
+
+    auto color = c.RegisterStruct<ColorEntry>();
+    color.RegisterMember("gray", &ColorEntry::gray);
+    color.RegisterMember("orange", &ColorEntry::orange);
+    color.RegisterMember("silver", &ColorEntry::silver);
+    color.RegisterMember("style", &ColorEntry::style);
+
     auto server = c.RegisterStruct<ServerEntry>();
     server.RegisterMember("label", &ServerEntry::label);
+    server.RegisterMember("load_text", &ServerEntry::loadText);
+    server.RegisterMember("label_after", &ServerEntry::labelAfter);
     server.RegisterMember("index", &ServerEntry::index);
-    server.RegisterMember("load_fraction", &ServerEntry::loadFraction);
-    server.RegisterMember("color_gray", &ServerEntry::colorGray);
-    server.RegisterMember("color_orange", &ServerEntry::colorOrange);
-    server.RegisterMember("color_silver", &ServerEntry::colorSilver);
-    server.RegisterMember("color_style", &ServerEntry::colorStyle);
+    server.RegisterMember("color", &ServerEntry::color);
+    server.RegisterMember("load_color", &ServerEntry::loadColor);
+    server.RegisterMember("load_bold", &ServerEntry::loadBold);
+    server.RegisterMember("load_italic", &ServerEntry::loadItalic);
+    server.RegisterMember("load_slant", &ServerEntry::loadSlant);
+    server.RegisterMember("segments", &ServerEntry::segments);
+    server.RegisterMember("empty_style", &ServerEntry::emptyStyle);
     c.RegisterArray<std::vector<ServerEntry>>();
 
     c.Bind("groups", &model.groups);
@@ -182,19 +217,7 @@ void CServerSelWin::UpdateDisplay()
         int nServerIndex = 0;
         while (m_pSelectServerGroup->GetNext(pServerInfo))
         {
-            ServerEntry entry;
-            entry.label = StringUtils::WideToNarrow(
-                g_ServerListManager->GetServerButtonText(*m_pSelectServerGroup, *pServerInfo).c_str());
-            entry.index = nServerIndex;
-            entry.loadFraction = static_cast<float>(pServerInfo->m_iPercent) / 100.0f;
-            const Data::ServerList::ButtonColor color =
-                g_ServerListManager->GetServerButtonColor(*pServerInfo, UI::RmlBridge::GetActiveThemeName());
-            entry.colorGray = color.theme == Data::ServerList::ThemeColor::Gray;
-            entry.colorOrange = color.theme == Data::ServerList::ThemeColor::Orange;
-            entry.colorSilver = color.theme == Data::ServerList::ThemeColor::Silver;
-            entry.colorStyle = color.shade;
-            model.servers.push_back(entry);
-
+            model.servers.push_back(MakeServerEntry(*pServerInfo, nServerIndex));
             ++nServerIndex;
         }
     }
@@ -206,6 +229,68 @@ void CServerSelWin::UpdateDisplay()
     m_RmlView.MarkDirty("description_text");
 
     SyncRmlModel();
+}
+
+CServerSelWin::ColorEntry CServerSelWin::MakeColorEntry(const Data::ServerList::ButtonColor& color)
+{
+    ColorEntry entry;
+    entry.gray = color.theme == Data::ServerList::ThemeColor::Gray;
+    entry.orange = color.theme == Data::ServerList::ThemeColor::Orange;
+    entry.silver = color.theme == Data::ServerList::ThemeColor::Silver;
+    entry.style = color.shade;
+    return entry;
+}
+
+void CServerSelWin::SetLoadTextLook(ServerEntry& entry, int percent)
+{
+    const Data::ServerList::ServerListData& list = g_ServerListManager->GetServerList();
+    const Data::ServerList::LoadText* look = list.load.Text(Data::ServerList::GetLoadState(percent));
+    if (look == nullptr)
+        return;
+    entry.loadColor =
+        MakeColorEntry(Data::ServerList::ResolveButtonColor(list, look->color, UI::RmlBridge::GetActiveThemeName()));
+    entry.loadBold = look->bold;
+    entry.loadSlant = look->italic && !CanDrawItalic();
+    entry.loadItalic = look->italic && !entry.loadSlant;
+}
+
+void CServerSelWin::SetLoadBar(ServerEntry& entry, int percent)
+{
+    using Data::ServerList::LoadBarPart;
+    const Data::ServerList::ServerListData& list = g_ServerListManager->GetServerList();
+    const std::string& theme = UI::RmlBridge::GetActiveThemeName();
+    const Data::ServerList::ThemeTokenReader readToken = [](const char* token)
+    { return UI::RmlBridge::GetActiveThemeToken(token); };
+
+    const auto base = Data::ServerList::ResolveLoadBarColor(list, LoadBarPart::Base, theme, readToken);
+    const auto full = Data::ServerList::ResolveLoadBarColor(list, LoadBarPart::Full, theme, readToken);
+    const Data::ServerList::LoadBarSegments segments = Data::ServerList::GetLoadBarSegments(
+        base.value_or(Core::Color::Rgb{}), full.value_or(Core::Color::Rgb{}), percent);
+    for (const Data::ServerList::LoadBarSegment& segment : segments)
+    {
+        const long litPercent = std::lround(segment.lit * kPercent);
+        entry.segments.push_back({std::to_string(litPercent) + "%", Core::Color::FormatRgb(segment.color)});
+    }
+    if (Data::ServerList::IsThemeLoadBarColor(list, LoadBarPart::Empty, theme))
+        return;
+    if (const auto empty = Data::ServerList::ResolveLoadBarColor(list, LoadBarPart::Empty, theme, readToken))
+        entry.emptyStyle = Core::Color::FormatRgb(*empty);
+}
+
+CServerSelWin::ServerEntry CServerSelWin::MakeServerEntry(const CServerInfo& serverInfo, int index) const
+{
+    ServerEntry entry;
+    Data::ServerList::ButtonTextParts parts =
+        g_ServerListManager->GetServerButtonParts(*m_pSelectServerGroup, serverInfo);
+    entry.label = std::move(parts.before);
+    entry.loadText = std::move(parts.load);
+    entry.labelAfter = std::move(parts.after);
+    entry.index = index;
+    entry.color =
+        MakeColorEntry(g_ServerListManager->GetServerButtonColor(serverInfo, UI::RmlBridge::GetActiveThemeName()));
+    SetLoadTextLook(entry, serverInfo.m_iPercent);
+    SetLoadBar(entry, serverInfo.m_iPercent);
+    return entry;
 }
 
 void CServerSelWin::SelectGroup(int nBtnPos)
@@ -237,11 +322,13 @@ void CServerSelWin::RmlClickSelectServer(int nServerIndex)
     if (pServerInfo == nullptr)
         return;
 
-    if (pServerInfo->m_iPercent < 100)
+    // A full and an overloaded server say so alike; the original client did nothing for an
+    // overloaded one (then "Now preparing").
+    if (Data::ServerList::GetLoadState(pServerInfo->m_iPercent) == Data::ServerList::LoadState::Open)
     {
         ConnectToServer(pServerInfo);
     }
-    else if (pServerInfo->m_iPercent < 128)
+    else
     {
         CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_SERVER_BUSY);
     }
@@ -306,7 +393,8 @@ bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
     m_pSelectServerGroup = pChosenGroup;
 
     CServerInfo* pServerInfo = m_pSelectServerGroup->GetServerInfo(serverIndex);
-    if (pServerInfo == nullptr || pServerInfo->m_iPercent >= 100)
+    if (pServerInfo == nullptr ||
+        Data::ServerList::GetLoadState(pServerInfo->m_iPercent) != Data::ServerList::LoadState::Open)
     {
         m_iSelectServerBtnIndex = iPreviousBtnIndex;
         UpdateDisplay();

@@ -203,8 +203,25 @@ TEST_CASE("ServerListManager: the button names the server's load only when it ca
     { return manager.GetServerButtonText(*groups[0], *groups[0]->GetServerInfo(index)); };
     // Below 100 the {load} text is empty and takes its space with it.
     CHECK(button(0) == L"Valhalla-1 (PvP)");
-    CHECK(button(1) == std::wstring(L"Valhalla-2 (PvP) ") + I18N::Game::Full);
-    CHECK(button(2) == std::wstring(L"Valhalla-3 (PvP) ") + I18N::Game::NowPreparing);
+    // The list's texts; the built-in ones without a load section.
+    CHECK(button(1) == L"Valhalla-2 (PvP) (Full)");
+    CHECK(button(2) == L"Valhalla-3 (PvP) Overloaded");
+
+    // The parts the login screen styles the load text by, in the game's language.
+    I18N::SetLocale("de");
+    Data::ServerList::ServerListData list = List({Group(0, "Valhalla")});
+    list.load.full.text.Set("de", "(Voll)");
+    TestServerListManager germanManager;
+    germanManager.SetServerList(list);
+    germanManager.InsertServerGroup(ServerId(0, 2), 100);
+    const std::vector<CServerGroup*> german = GroupsInOrder(germanManager);
+    REQUIRE(german.size() == 1);
+    const Data::ServerList::ButtonTextParts parts =
+        germanManager.GetServerButtonParts(*german[0], *german[0]->GetServerInfo(0));
+    CHECK(parts.before == "Valhalla-2 (PvP) ");
+    CHECK(parts.load == "(Voll)");
+    CHECK(parts.after.empty());
+    I18N::SetLocale("en");
 }
 
 TEST_CASE("ServerListManager: a group without a channel with PvP off shows the PvP notice")

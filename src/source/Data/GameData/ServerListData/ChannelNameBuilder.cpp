@@ -28,6 +28,8 @@ constexpr std::array<std::string_view, 5> ScreenshotPlaceholders = {Name, Channe
 // Where an empty value was, until the spaces around it are tidied. A control
 // character no template has.
 constexpr char Gap = '\x01';
+// Where the {load} text goes, until the button's name is split there. Another one.
+constexpr char LoadMark = '\x02';
 
 // The value of a placeholder of `place`, or nothing for one the place does not have.
 std::optional<std::string> FindValue(std::string_view placeholder, ChannelNamePlace place,
@@ -176,5 +178,30 @@ std::string BuildChannelName(const ServerListData& list, ChannelNamePlace place,
     values.vip = vipName;
     values.pvp = pvp;
     return FillChannelName(list.names.Template(place).Get(locale), place, values);
+}
+
+ButtonTextParts BuildButtonTextParts(const ServerListData& list, const ChannelSettings& channel,
+                                     ChannelNameValues values, std::string_view locale)
+{
+    const std::string load(values.load);
+    const std::string mark(1, LoadMark);
+    if (!load.empty())
+    {
+        // Fills like the text would: not empty, so its spaces and brackets stay.
+        values.load = mark;
+    }
+    const std::string name = BuildChannelName(list, ChannelNamePlace::Button, channel, values, locale);
+    const size_t at = load.empty() ? std::string::npos : name.find(LoadMark);
+    if (at == std::string::npos)
+    {
+        return {name, "", ""};
+    }
+    ButtonTextParts parts{name.substr(0, at), load, name.substr(at + 1)};
+    for (size_t more = parts.after.find(LoadMark); more != std::string::npos; more = parts.after.find(LoadMark, more))
+    {
+        parts.after.replace(more, 1, load);
+        more += load.size();
+    }
+    return parts;
 }
 } // namespace Data::ServerList

@@ -93,6 +93,25 @@ std::string DescribeNamesChange(const Data::ServerList::ChannelNames& before,
     }
     return {};
 }
+
+// What of the load section differs first, or nothing.
+std::string DescribeLoadChange(const Data::ServerList::LoadSettings& before,
+                               const Data::ServerList::LoadSettings& after)
+{
+    if (before.bar != after.bar)
+    {
+        return I18N::Format(I18N::Editor::StepLoad, {I18N::Editor::LoadBar});
+    }
+    if (before.full != after.full)
+    {
+        return I18N::Format(I18N::Editor::StepLoad, {I18N::Editor::FullServer});
+    }
+    if (before.overloaded != after.overloaded)
+    {
+        return I18N::Format(I18N::Editor::StepLoad, {I18N::Editor::OverloadedServer});
+    }
+    return {};
+}
 } // namespace
 
 std::string Add(const std::string& groupName)
@@ -187,8 +206,12 @@ std::string DescribeFieldChange(const Data::ServerList::ServerListData& before,
             return I18N::Format(I18N::Editor::StepButtonColorRule, {std::to_string(index + 1)});
         }
     }
-    std::string names = DescribeNamesChange(before.names, after.names);
-    return names.empty() ? std::string(I18N::Editor::ServerList) : names;
+    if (std::string names = DescribeNamesChange(before.names, after.names); !names.empty())
+    {
+        return names;
+    }
+    std::string load = DescribeLoadChange(before.load, after.load);
+    return load.empty() ? std::string(I18N::Editor::ServerList) : load;
 }
 
 const char* GetPlaceLabel(ChannelNamePlace place)

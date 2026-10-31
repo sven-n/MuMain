@@ -120,6 +120,19 @@ body {
 .server-row.orange:hover, .server-row.orange:active { color: token(server-button-orange); }
 .server-row.silver:hover, .server-row.silver:active { color: token(server-button-silver); }
 
+/* The {load} text of a full or overloaded server, in the server list's look for it. */
+.server-load.load-gray { color: token(server-button-gray); }
+.server-load.load-orange { color: token(server-button-orange); }
+.server-load.load-silver { color: token(server-button-silver); }
+.server-load.bold { font-weight: bold; }
+.server-load.italic { font-style: italic; }
+/* For a font without an italic face. */
+.server-load.slant {
+	display: inline-block;
+	transform: skewX(-12deg);
+}
+
+/* 0.97's gauge, now ten segments of 10 % each, which the server list colors. */
 .server-gauge-slot {
 	position: absolute;
 	left: calc(18 * var(--px));
@@ -127,12 +140,17 @@ body {
 	width: calc(98 * var(--px));
 	height: calc(3 * var(--px));
 	margin: 0;
-	background-color: #1a1a1a;
+	display: flex;
+	gap: calc(1 * var(--px));
+}
+.server-gauge-segment {
+	flex: 1;
+	height: 100%;
+	background-color: token(server-load-empty);
 }
 .server-gauge-fill {
 	display: block;
 	height: 100%;
-	decorator: linear-gradient(to right, #00ffff, #ffffff, #ff0000);
 }
 
 /* Test-server warning: two lines in red, left of the list (x=150 of 640). */

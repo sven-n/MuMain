@@ -3,6 +3,7 @@
 #include "Data/GameData/ServerListData/ButtonColorRule.h"
 #include "Data/GameData/ServerListData/ChannelNames.h"
 #include "Data/GameData/ServerListData/CustomColor.h"
+#include "Data/GameData/ServerListData/LoadSettings.h"
 #include "Data/GameData/ServerListData/ServerListGroup.h"
 #include "Data/GameData/ServerListData/VipType.h"
 
@@ -21,6 +22,7 @@ struct ServerListData
     // Their order does not matter.
     std::vector<ButtonColorRule> buttonColors;
     ChannelNames names = GetDefaultChannelNames();
+    LoadSettings load = GetDefaultLoadSettings();
     // In the order of their buttons.
     std::vector<ServerGroup> groups;
 

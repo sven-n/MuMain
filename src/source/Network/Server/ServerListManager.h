@@ -5,6 +5,7 @@
 #include "ServerGroup.h"
 
 #include "Data/GameData/ServerListData/ButtonColors.h"
+#include "Data/GameData/ServerListData/ChannelNameBuilder.h"
 #include "Data/GameData/ServerListData/ServerListData.h"
 
 #include <array>
@@ -53,9 +54,16 @@ public:
     // The same at `place`, in UTF-8, for the windows that show it every frame (login, character
     // info): built again only when the list, the selected channel or the game's language changed.
     const std::string& GetSelectServerTitleUtf8(Data::ServerList::ChannelNamePlace place);
-    // A channel's button on the login screen: "Valhalla-1 (Gold Non-PvP)", with "(Full)" or
-    // "Now preparing" after it when the server cannot be joined.
+    // A channel's button on the login screen, split at its {load} text: "Valhalla-1 (Gold Non-PvP)",
+    // with the list's text for a full or overloaded server ("(Full)") after it.
+    Data::ServerList::ButtonTextParts GetServerButtonParts(const CServerGroup& group, const CServerInfo& server) const;
+    // The same in one text.
     std::wstring GetServerButtonText(const CServerGroup& group, const CServerInfo& server) const;
+    // The groups, VIP types, colors and texts the channels are named with.
+    const Data::ServerList::ServerListData& GetServerList() const
+    {
+        return m_serverList;
+    }
     // Its color there in the theme folder `theme`, by the list's button color rules.
     Data::ServerList::ButtonColor GetServerButtonColor(const CServerInfo& server, std::string_view theme) const;
     void SetTotalServer(int iTotalServer);

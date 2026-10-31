@@ -425,6 +425,48 @@ TEST_CASE("ServerListEdits: rules follow their colors and VIP types")
     CHECK(edits.GetList().buttonColors.size() == 1);
 }
 
+TEST_CASE("ServerListEdits: the load bar and load texts follow their colors")
+{
+    I18N::SetLocale("en");
+    ServerListEdits edits = ThreeGroups();
+    edits.AddColor("Red");
+    edits.Commit();
+    Data::ServerList::LoadSettings& load = edits.EditList().load;
+    load.bar.full = "red";
+    load.overloaded.color = "red";
+    edits.Commit();
+    CHECK(edits.GetUndoLabel() == "Load: Load bar");
+    CHECK(edits.CountLoadUsesOfColor("red") == 2);
+    CHECK(edits.CountRulesWithColor("red") == 0);
+
+    CHECK(edits.ChangeColorId(0, "crimson"));
+    CHECK(edits.GetList().load.bar.full == "crimson");
+    CHECK(edits.GetList().load.overloaded.color == "crimson");
+    edits.Commit();
+
+    edits.RemoveColor(0);
+    edits.Commit();
+    CHECK(edits.GetList().load.bar.full == "default");
+    CHECK(edits.GetList().load.overloaded.color == "default");
+    CHECK(edits.CountLoadUsesOfColor("crimson") == 0);
+    edits.Undo();
+    CHECK(edits.GetList().load.bar.full == "crimson");
+}
+
+TEST_CASE("ServerListEdits: a load text's look and text are steps named after its server")
+{
+    I18N::SetLocale("en");
+    ServerListEdits edits = ThreeGroups();
+    edits.EditList().load.full.bold = true;
+    edits.Commit();
+    CHECK(edits.GetUndoLabel() == "Load: Full server");
+    edits.EditList().load.overloaded.text.Set("de", "Überlastet");
+    edits.Commit();
+    CHECK(edits.GetUndoLabel() == "Load: Overloaded server");
+    edits.Undo();
+    CHECK_FALSE(edits.GetList().load.overloaded.text.HasOwn("de"));
+}
+
 TEST_CASE("ServerListEdits: a new rule fits channels no rule fits yet")
 {
     I18N::SetLocale("en");

@@ -1447,12 +1447,6 @@
   <data name="Muren(Kara2)" xml:space="preserve">
     <value>ソル</value>
   </data>
-  <data name="Now preparing" xml:space="preserve">
-    <value>準備中</value>
-  </data>
-  <data name="(Full)" xml:space="preserve">
-    <value>(Full)</value>
-  </data>
   <data name="The TEST server is intended for testing," xml:space="preserve">
     <value>テストサーバーはテストのためのサーバーですので</value>
   </data>

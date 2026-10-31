@@ -20,20 +20,6 @@ namespace
 {
 constexpr const char* ServerListName = "server list";
 
-// What a channel's button says about the server's load: nothing while it can be joined.
-const wchar_t* GetLoadText(int percent)
-{
-    if (percent >= 128)
-    {
-        return I18N::Game::NowPreparing;
-    }
-    if (percent >= 100)
-    {
-        return I18N::Game::Full;
-    }
-    return L"";
-}
-
 std::string_view GetGameLocale()
 {
     const char* locale = I18N::GetCurrentLocale();
@@ -203,16 +189,27 @@ void CServerListManager::InsertServer(CServerGroup* pServerGroup, int iConnectIn
     pServerGroup->InsertServerInfo(pServerInfo);
 }
 
-std::wstring CServerListManager::GetServerButtonText(const CServerGroup& group, const CServerInfo& server) const
+Data::ServerList::ButtonTextParts CServerListManager::GetServerButtonParts(const CServerGroup& group,
+                                                                           const CServerInfo& server) const
 {
     const std::string name = Core::Text::ToUtf8(group.m_szName);
-    const std::string load = Core::Text::ToUtf8(GetLoadText(server.m_iPercent));
+    const std::string_view locale = GetGameLocale();
+    const Data::ServerList::LoadText* loadText =
+        m_serverList.load.Text(Data::ServerList::GetLoadState(server.m_iPercent));
     Data::ServerList::ChannelNameValues values;
     values.name = name;
     values.channel = server.m_iIndex;
-    values.load = load;
-    return Core::Text::FromUtf8(Data::ServerList::BuildChannelName(
-        m_serverList, Data::ServerList::ChannelNamePlace::Button, server.m_channel, values, GetGameLocale()));
+    if (loadText != nullptr)
+    {
+        values.load = loadText->text.Get(locale);
+    }
+    return Data::ServerList::BuildButtonTextParts(m_serverList, server.m_channel, values, locale);
+}
+
+std::wstring CServerListManager::GetServerButtonText(const CServerGroup& group, const CServerInfo& server) const
+{
+    const Data::ServerList::ButtonTextParts parts = GetServerButtonParts(group, server);
+    return Core::Text::FromUtf8(parts.before + parts.load + parts.after);
 }
 
 Data::ServerList::ButtonColor CServerListManager::GetServerButtonColor(const CServerInfo& server,

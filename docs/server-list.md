@@ -35,9 +35,14 @@ admin panel; to put a server into a second group, give it an ID from 20 to 39.
   | on  | Gold     | `Valhalla-5 (Gold PvP)`     | `[Valhalla-5 (Gold PvP)]`     |
   | off | Gold     | `Valhalla-1 (Gold Non-PvP)` | `[Valhalla-1 (Gold Non-PvP)]` |
 
-  A server that is full gets `(Full)` after its button text, one being
-  prepared `Now preparing`.
-
+- **Load:** the connect server sends each server's load in percent. A *full*
+  server (100 to 127) gets the list's full text after its button text, `(Full)`
+  with the bundled file, an *overloaded* one (128 and more) its overloaded text,
+  `Overloaded`; each in a color, bold and italic of the list's (see
+  [Load](#load)). A click on either says that the server is full.
+- **Load bar:** below the button text, ten segments of 10 % each. A segment is
+  lit as far as the load reaches into it: 35 % lights three and half of the
+  fourth. A full or overloaded server has every segment lit in the full color.
 - **Button color:** set by the button color rules, by VIP type, PvP or both
   (see [Button colors](#button-colors)). With the bundled file Gold channels are
   orange, channels without a VIP type gray with PvP on and the theme's default
@@ -95,6 +100,11 @@ theme), so a long name there can run past its edges.
     "characterInfo": {"en": "[{name}-{channel} ({vip} {pvp})]"},
     "screenshot": {"en": "[{name} / {character}]"}
   },
+  "load": {
+    "bar": {"base": "default", "full": "goldRed", "empty": "default"},
+    "full": {"text": {"en": "(Full)", "de": "(Voll)"}, "color": "goldRed", "bold": true},
+    "overloaded": {"text": {"en": "Overloaded"}, "color": "goldRed", "bold": true, "italic": true}
+  },
   "groups": [
     {
       "id": 0,
@@ -124,9 +134,10 @@ theme), so a long name there can run past its edges.
 |-----------------|--------------------------------------------------------------------------|
 | `formatVersion` | `2`. A version 1 file (the four fixed channel types) is not read: the game stops and names the problem. |
 | `vipTypes`      | Optional; the VIP types, in the order the editor lists them.              |
-| `colors`        | Optional; your own button colors, each with a shade per theme.           |
+| `colors`        | Optional; your own colors, each with a shade per theme, for the buttons and the load. |
 | `buttonColors`  | Optional; the rules that color the channel buttons. Without a fitting rule a button has the theme's default color. |
 | `names`         | Optional; the texts that name a channel (below). A text left out uses the built-in English one. |
+| `load`          | Optional; the load texts and the load bar's colors (see [Load](#load)).   |
 | `groups`        | The groups, in the order of their buttons.                               |
 
 A group:
@@ -158,7 +169,7 @@ emoji count as two characters, as the client stores them on Windows.
 
 ### Texts in several languages
 
-Each text in `names` and each VIP type's `name` holds one text per language
+Each text in `names`, each VIP type's `name` and each load text holds one text per language
 code: `en`, `de`, `es`, `id`, `ja`, `pl`, `pt`, `ru`, `tl`, `uk`, `zh-CN` and
 `zh-TW`. The game uses the text of its language; a language that is missing
 uses `en`, and a text without `en` uses the built-in English one. The bundled
@@ -172,7 +183,7 @@ file carries the translations of all twelve languages.
 | `{channel}`   | The channel number                                               | all           |
 | `{vip}`       | The VIP type's name in the game's language; empty without a VIP type | all       |
 | `{pvp}`       | The `pvp` text with PvP on, the `nonPvp` text with PvP off       | all           |
-| `{load}`      | (Full) or Now preparing (game texts) when the server cannot be joined; empty while it can | `button` |
+| `{load}`      | The load text of a full or overloaded server (see [Load](#load)); empty while the server can be joined | `button` |
 | `{character}` | The name of your character                                       | `screenshot`  |
 
 Empty parts take their spaces with them:
@@ -222,6 +233,43 @@ not one of the theme colors), a `name` the editor shows, and a shade
 a theme it has no shade for draws the theme's default color. A button in your own color keeps it on
 hover; the button's frame still changes.
 
+### Load
+
+`load` has the two load texts and the colors of the load bar:
+
+| Field                  | Meaning                                                                 |
+|------------------------|-------------------------------------------------------------------------|
+| `bar.base`, `bar.full` | The colors the segments are mixed from and toward. `default`: the theme's own. |
+| `bar.empty`            | The unlit part of the segments. `default`: the theme's track.           |
+| `full`, `overloaded`   | `{load}` of a full server (load 100 to 127) and of an overloaded one (128 and more). |
+| `….text`               | One text per language, up to 32 characters; without English, "(Full)" and "Overloaded". |
+| `….color`              | `default`: the button's color. Else a theme color or one of your `colors`. |
+| `….bold`, `….italic`   | Optional; `true` turns it on.                                            |
+
+Each color is a theme color or the `id` of one of your `colors`, as in the
+button color rules. The bar's `default` colors are tokens of the theme's
+`tokens.ini`: `server-load-base`, `server-load-full` and `server-load-empty`.
+The legacy theme mixes from `#00BD8B` to `#E0483E`, the modern theme from its
+success to its danger color (`#8EB06B` to `#A22C1E`), the classic theme from
+`#00FFFF` to `#FF0000`.
+
+The segments: segment *k* (1 to 10) has the base color moved (*k* − 1) × 10 %
+of the way to the full color, so the tenth is at 90 % and the full color
+itself is left for a full server, whose segments are all in it. The colors are
+mixed in OKLCH, a color model in which equal steps look equally far apart: the
+hue goes the shorter way around the color wheel (green to red through yellow
+and orange) and the brightness evenly from one color to the other, so no
+segment looks brighter than both ends. Mixing the red, green and blue parts
+evenly instead would make the middle segments a gray brown.
+
+Italic text is drawn with the italic face of the font: the game bundles those
+of Liberation Sans and DejaVu Sans. Where the font has none (Chinese and
+Japanese, whose characters come from fonts without italic, or a font picked in
+the options without one), the text is slanted instead.
+
+The bundled file shows both load texts bold in a red of its own (`loadRed`),
+"Overloaded" also italic, and keeps each theme's bar.
+
 ### Problems
 
 | Problem                                              | Level   | What the game does                   |
@@ -235,6 +283,8 @@ hover; the button's frame still changes.
 | A rule's `vip` is not the id of a VIP type           | error   | the rule is not used                 |
 | Two rules with the same `vip` and `pvp`              | error   | the second is not used               |
 | A rule's `color` is not a theme color or one of `colors` | warning | the theme's default color        |
+| `load`, its `bar` or a load text is not an object, `bold` or `italic` not `true` or `false` | fatal | stops |
+| A load color is not a theme color or one of `colors` | warning | the default color                    |
 | An unknown placeholder in a template                 | error   | shows it as written                  |
 | An unknown language code                             | warning | the text is not used                 |
 | A text or name that is too long                      | warning | cut                                  |
@@ -254,19 +304,26 @@ gives the channel and, when the connect server sent it, its load.
 - the selected VIP type: its ID and its name. A new type gets
   an ID made from its name (New VIP type is `newVipType`); a changed ID goes to
   the channels with the type too;
-- the texts: a **Language** list, then the PvP and Non-PvP texts and the four
-  templates in that language. A field left empty uses the English text, which
-  it shows greyed. A note lists the placeholders each template can use;
+- the texts: a **Language** list, then the PvP and Non-PvP texts, the four
+  templates and the Full and Overloaded texts in that language. A field left
+  empty uses the English text, which it shows greyed. A note lists the
+  placeholders each template can use;
 - the button color rules: one row per rule with a **VIP** list (any, any VIP
   type, none, or a VIP type), a **PvP** list (any, on, off) and a **Color**
   list. A rule that would repeat another's VIP type and PvP is refused;
+- the load: **Base**, **Full** and **Unlit** color lists for the load bar, and
+  for the full and the overloaded server a **Color** list with **Bold** and
+  **Italic** boxes;
 - your own colors: their list, and for the selected one its ID, name and a
-  shade for each theme. Removing a color that rules use first asks; those
-  rules then have the default color;
+  shade for each theme. Removing a color that rules or the load use first
+  asks; they then have the default color;
 - a preview of every combination (PvP on and off, with no VIP type and with
   each VIP type) in all four places, with the selected group's name and the
   button's color in the legacy and modern theme. The button's `{load}` is
-  empty there, as for a server that can be joined.
+  empty there, as for a server that can be joined. Below it, the button of
+  channel 1 at 35 % load, full and overloaded, with its load text in its color
+  and the load bar in the legacy and modern theme; bold and italic show only
+  in game.
 
 The Groups tab's channel table shows each channel's button text in its color.
 
@@ -312,115 +369,8 @@ were fixed texts by type (461, 460, 3130 and 3131: "[%s-%d Server]",
 Now the two switches are the PvP box and the VIP type, Gold is one VIP type of
 any number, and every text is a template in the file. The original buttons
 also ended in "Connect" for every server that could be joined; now only a full
-server or one being prepared says so.
+or overloaded server says so.
 
-## Plan (removed when everything has landed)
-
-This section is the working plan for the load bar and the load texts in
-sven-n/MuMain#895. It goes once the work is done; the sections above then
-describe what was built.
-
-### Decisions (2026-10-31)
-
-1. A `load` section in `ServerList.json`, edited in MU Editor. A color is a
-   theme color or one of the list's `colors`, as in the button color rules; a
-   list that sets nothing keeps each theme's look.
-2. The load bar has 10 segments of 10 % each. Segment *k* (1 to 10) has the
-   base color mixed (*k* − 1) × 10 % toward the full color, so segment 10 is at
-   90 %.
-3. The colors are mixed in OKLCH: the hue goes the shorter way around the
-   color wheel and the brightness evenly from one color to the other, so no
-   segment is brighter than both ends.
-4. A segment that is only partly reached is lit partly: 35 % is three lit
-   segments and half of the fourth.
-5. A full server (load 100 to 127) has all 10 segments in the full color.
-6. A load of 128 or more is *overloaded*: the same bar as a full server, and
-   the text "Overloaded" instead of "Now preparing".
-7. The two load texts, `full` and `overloaded`, are texts of the list, one per
-   language; "(Full)" and "Now preparing" leave `Game.*.resx`.
-8. A click on an overloaded server says "The server is full", as for a full
-   one (until now it did nothing).
-9. The unlit segments have an optional color of the list; without it each
-   theme keeps its own track color.
-10. Italic is drawn with real italic faces where the font has them (Liberation
-    Sans and DejaVu Sans, bundled), and slanted where it has none.
-11. Everything goes into #895.
-
-### The file
-
-```json
-"load": {
-  "bar": {"base": "default", "full": "default", "empty": "default"},
-  "full": {"text": {"en": "(Full)", "de": "(Voll)"}, "color": "loadRed", "bold": true},
-  "overloaded": {"text": {"en": "Overloaded", "de": "Überlastet"}, "color": "loadRed", "bold": true, "italic": true}
-}
-```
-
-| Field                  | Meaning                                                                 |
-|------------------------|-------------------------------------------------------------------------|
-| `load`                 | Optional; every field in it is optional.                                |
-| `bar.base`, `bar.full` | The colors the segments are mixed from. `default` (or left out): the theme's `server-load-base` and `server-load-full` tokens. |
-| `bar.empty`            | The unlit part of a segment. `default`: the theme's track color (`server-load-empty`). |
-| `full`, `overloaded`   | The `{load}` text of a full and of an overloaded server.                |
-| `….text`               | One text per language, up to 32 characters; English falls back to "(Full)" and "Overloaded". |
-| `….color`              | `default` (or left out): the button's color. Else a theme color or one of `colors`. |
-| `….bold`, `….italic`   | Optional; `true` turns it on. Default `false`.                           |
-
-A color the list does not have is a warning; the default color is used.
-
-### Decided while writing the plan (to confirm)
-
-- **Theme defaults** (`tokens.ini`): legacy `#00BD8B` → `#E0483E` (today's
-  green), modern `#8EB06B` → `#A22C1E` (its success and danger colors), classic
-  `#00FFFF` → `#FF0000` (today's gradient ends); each theme's track stays.
-- **Segment gaps**: 2 pixels in legacy and modern, 1 in classic; the tracks
-  keep their size and place. Modern's segments are flat, keeping its top
-  highlight; its tier gradients go.
-- **The bundled file** sets both texts bold in a red of the list, `loadRed`
-  (legacy `#FF5A5A`, modern `#C0564E`, classic `#FF4040`), "Overloaded" also
-  italic. The bar keeps the theme defaults.
-- **The slant** is `skewX(-12deg)`. It is used when the body font has no
-  italic face, and in Chinese and Japanese, whose glyphs come from fonts
-  without italic.
-- **MU Editor**: the Channel names tab gets a **Load** part below the button
-  color rules: Base, Full and Unlit color lists for the bar, and for Full and
-  Overloaded a Color list with Bold and Italic boxes. The two texts are edited
-  per language with the other texts. The preview gets a row each for 35 %, full
-  and overloaded with the bar in the legacy and modern theme; bold and italic
-  show only in game.
-
-### Bundled texts
-
-| Language | `full`       | `overloaded`    |
-|----------|--------------|-----------------|
-| en       | (Full)       | Overloaded      |
-| de       | (Voll)       | Überlastet      |
-| es       | (Lleno)      | Sobrecargado    |
-| id       | (Penuh)      | Kelebihan beban |
-| ja       | (満員)       | 過負荷          |
-| pl       | (Pełny)      | Przeciążony     |
-| pt       | (Completo)   | Sobrecarregado  |
-| ru       | (Полный)     | Перегружен      |
-| tl       | (Puno)       | Sobrang puno    |
-| uk       | (Повний)     | Перевантажений  |
-| zh-CN    | （已满）     | 过载            |
-| zh-TW    | （已滿）     | 過載            |
-
-"(Full)" keeps today's game texts, except Japanese (English until now),
-Simplified Chinese (none), Traditional Chinese (（滿的）) and Tagalog ((Buo),
-"whole").
-
-### Work
-
-1. **Fonts**: `LiberationSans-Italic.ttf` and `LiberationSans-BoldItalic.ttf`
-   from Liberation Fonts 2.1.5, `DejaVuSans-Oblique.ttf` and
-   `DejaVuSans-BoldOblique.ttf` from DejaVu Fonts 2.37 (the bundled versions),
-   loaded with the others.
-2. **Data**: the `load` section in `ServerListData`, read and written by
-   `ServerListJson.cpp` with its problems; the segment colors and fills
-   (OKLCH mixing) as functions of their own, with tests.
-3. **Game**: the button label in three parts so `{load}` gets its own color,
-   weight and style; the 10 segments in `server_select.rml` and the three
-   themes; the click on an overloaded server; the two game texts removed.
-4. **MU Editor**: the Load part and the preview rows.
-5. **Docs**: this document describes the load bar and texts; this plan goes.
+The original called a load of 128 and more "Now preparing", and a click on such
+a server did nothing; it is "Overloaded" now, and a click says that the server
+is full, as for a full one. Its gauge was one bar as long as the load.
