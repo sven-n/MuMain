@@ -141,7 +141,7 @@ void ComputeRequirements(const ITEM& item, ItemTooltipValues& values)
 
 namespace Engine::Items::TooltipValues
 {
-ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
+ItemTooltipValues ComputeItemTooltipValues(const ITEM& item, TooltipValueScope scope)
 {
     ITEM_ATTRIBUTE* attribute = &ItemAttribute[item.Type];
     ItemTooltipValues values;
@@ -162,33 +162,17 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
     values.heroLevel = CharacterAttribute != nullptr ? CharacterAttribute->Level : 0;
     values.name = attribute->Name;
     values.levelPlusOne = item.Level + 1;
-    values.bundleCount = COMGEM::CalcCompiledCount(&item);
     values.excellentFlags = item.ExcellentFlags & 63;
-    if (g_pItemAddOptioninfo != nullptr)
-    {
-        const ITEM_ADD_OPTION& addOption = g_pItemAddOptioninfo->GetItemAddOtioninfo(item.Type);
-        values.addOptionValue1 = addOption.m_byValue1;
-        values.addOptionValue2 = addOption.m_byValue2;
-        values.addOptionTime = addOption.m_Time;
-    }
-    ComputeDamage(item, values);
-
-    const StrengthenCapability harmony = HarmonyBonus(item, 2);
-    const int defenseBonus = harmony.SI_isSD ? harmony.SI_SD.SI_defense : 0;
-    values.defense = item.Defense + defenseBonus;
-    values.defenseHarmonyBonus = defenseBonus != 0;
     values.magicDefense = item.MagicDefense;
     values.blockRate = item.SuccessfulBlocking;
     values.attackSpeed = attribute->WeaponSpeed;
     values.walkSpeed = attribute->WalkSpeed;
     values.magicPower = item.MagicPower;
     values.durability = item.Durability;
-    values.maxDurability = CalcMaxDurability(&item, attribute, item.Level);
     for (size_t resistance = 0; resistance < values.resistances.size(); ++resistance)
     {
         values.resistances[resistance] = attribute->Resistance[resistance] ? item.Level + 1 : 0;
     }
-    ComputeRequirements(item, values);
     values.excellent = item.ExcellentFlags > 0;
     values.ancient = item.AncientDiscriminator > 0;
     values.socketItem = g_SocketItemMgr.IsSocketItem(&item);
@@ -198,7 +182,122 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item)
     values.skillLuckOrOption = item.HasSkill || item.HasLuck || item.OptionLevel > 0;
     wchar_t setName[64]{};
     values.setItem = g_csItemOption.GetSetItemName(setName, item.Type, item.AncientDiscriminator);
+    if (scope == TooltipValueScope::Basics)
+    {
+        return values;
+    }
+
+    // The stat lines' values (NeedsAllTooltipValues names them).
+    values.bundleCount = COMGEM::CalcCompiledCount(&item);
+    if (g_pItemAddOptioninfo != nullptr)
+    {
+        const ITEM_ADD_OPTION& addOption = g_pItemAddOptioninfo->GetItemAddOtioninfo(item.Type);
+        values.addOptionValue1 = addOption.m_byValue1;
+        values.addOptionValue2 = addOption.m_byValue2;
+        values.addOptionTime = addOption.m_Time;
+    }
+    ComputeDamage(item, values);
+    const StrengthenCapability harmony = HarmonyBonus(item, 2);
+    const int defenseBonus = harmony.SI_isSD ? harmony.SI_SD.SI_defense : 0;
+    values.defense = item.Defense + defenseBonus;
+    values.defenseHarmonyBonus = defenseBonus != 0;
+    values.maxDurability = CalcMaxDurability(&item, attribute, item.Level);
+    ComputeRequirements(item, values);
     return values;
+}
+
+bool NeedsAllTooltipValues(Data::Items::TooltipValue value)
+{
+    using Data::Items::TooltipValue;
+    switch (value)
+    {
+    case TooltipValue::DamageMin:
+    case TooltipValue::DamageMax:
+    case TooltipValue::Defense:
+    case TooltipValue::MaxDurability:
+    case TooltipValue::RequiredLevel:
+    case TooltipValue::RequiredStrength:
+    case TooltipValue::RequiredDexterity:
+    case TooltipValue::RequiredVitality:
+    case TooltipValue::RequiredEnergy:
+    case TooltipValue::RequiredLeadership:
+    case TooltipValue::MissingLevel:
+    case TooltipValue::MissingStrength:
+    case TooltipValue::MissingDexterity:
+    case TooltipValue::MissingVitality:
+    case TooltipValue::MissingEnergy:
+    case TooltipValue::MissingLeadership:
+    case TooltipValue::AddOptionValue1:
+    case TooltipValue::AddOptionValue2:
+    case TooltipValue::AddOptionDuration:
+    case TooltipValue::BundleCount:
+        return true;
+    case TooltipValue::Level:
+    case TooltipValue::MagicDefense:
+    case TooltipValue::BlockRate:
+    case TooltipValue::AttackSpeed:
+    case TooltipValue::WalkSpeed:
+    case TooltipValue::MagicPower:
+    case TooltipValue::Durability:
+    case TooltipValue::IceResistance:
+    case TooltipValue::PoisonResistance:
+    case TooltipValue::LightningResistance:
+    case TooltipValue::FireResistance:
+    case TooltipValue::EarthResistance:
+    case TooltipValue::WindResistance:
+    case TooltipValue::WaterResistance:
+    case TooltipValue::HeroLevel:
+    case TooltipValue::LevelPlusOne:
+    case TooltipValue::Name:
+    case TooltipValue::ExcellentFlags:
+    case TooltipValue::Count:
+        break;
+    }
+    return false;
+}
+
+bool NeedsAllTooltipValues(Data::Items::TooltipState state)
+{
+    using Data::Items::TooltipState;
+    switch (state)
+    {
+    case TooltipState::HasDamage:
+    case TooltipState::DamageHarmonyBonus:
+    case TooltipState::DefenseHarmonyBonus:
+    case TooltipState::StrengthReduced:
+    case TooltipState::DexterityReduced:
+    case TooltipState::StrengthRequired:
+    case TooltipState::DexterityRequired:
+        return true;
+    case TooltipState::SkillBook:
+    case TooltipState::TwoHanded:
+    case TooltipState::Excellent:
+    case TooltipState::Ancient:
+    case TooltipState::Armour:
+    case TooltipState::WizardryWeapon:
+    case TooltipState::HasDurability:
+    case TooltipState::Timed:
+    case TooltipState::HasOptions:
+    case TooltipState::SocketItem:
+    case TooltipState::UpperTierWings:
+    case TooltipState::SkillLuckOrOption:
+    case TooltipState::SetItem:
+    case TooltipState::Count:
+        break;
+    }
+    return false;
+}
+
+bool NeedsAllTooltipValues(std::span<const Data::Items::TooltipCondition> conditions)
+{
+    using Data::Items::TooltipCondition;
+    return std::any_of(
+        conditions.begin(), conditions.end(),
+        [](const TooltipCondition& condition)
+        {
+            return (condition.kind == TooltipCondition::Kind::Value && NeedsAllTooltipValues(condition.value)) ||
+                   (condition.kind == TooltipCondition::Kind::State && NeedsAllTooltipValues(condition.state));
+        });
 }
 
 std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, Data::Items::TooltipValue value)

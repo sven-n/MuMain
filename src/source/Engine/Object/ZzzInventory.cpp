@@ -2699,9 +2699,17 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     // A tag is the drawn model's item's: the Weapon of Archangel at +0 to +2 is drawn as a divine archangel weapon and
     // labelled as one.
     const int drawnType = Data::Items::IsItemModelSlot(o->Type) ? Data::Items::ToItemType(o->Type) : ip->Type;
-    const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(*ip);
+    // The labels are built each frame for every drop: the stat lines' values only once a rule asks for one.
+    using Engine::Items::TooltipValues::TooltipValueScope;
+    ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(*ip, TooltipValueScope::Basics);
+    bool allValues = false;
     for (const Data::Items::GroundLabelRule& rule : labels.standard)
     {
+        if (!allValues && Engine::Items::TooltipValues::NeedsAllTooltipValues(rule.when))
+        {
+            values = Engine::Items::TooltipValues::ComputeItemTooltipValues(*ip);
+            allValues = true;
+        }
         if (Engine::Items::TooltipValues::AreTooltipConditionsMet(rule.when, drawnType, ip->Level, values))
         {
             ApplyGroundLabelStyle(descriptor, labels.FindStyle(rule.style));

@@ -597,6 +597,89 @@ TEST_CASE("Only a bundle has a bundle count [data][items][tooltip]")
     CHECK(bundleCount(0, 0, 3) == 0);    // Kris +3
 }
 
+// The ground labels take the basic values while their rules name none of the stat lines' values: every other value and
+// state is the full computation's, and the left-out ones stay 0.
+TEST_CASE("The basic tooltip values are the full ones but for the stat lines' [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeNewDarkWizard(hero.Hero());
+
+    using namespace Engine::Items::TooltipValues;
+    using Data::Items::TooltipState;
+    using Data::Items::TooltipValue;
+    const auto at = [](int group, int number, int level)
+    {
+        ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(group, number);
+        params.Level = static_cast<BYTE>(level);
+        return params;
+    };
+    ItemCreationParams rapier = at(0, 2, 9); // Ceto's Rapier +9, excellent, with luck
+    rapier.IsAncient = true;
+    rapier.AncientDiscriminator = 1;
+    rapier.HasExcellentOption = true;
+    rapier.ExcellentFlags = 1;
+    rapier.WithLuck = true;
+    ItemCreationParams kris = at(0, 0, 13); // a Jewel of Harmony option lowering the strength requirement
+    kris.HasHarmonyOption = true;
+    kris.HarmonyOptionType = 3;
+    kris.HarmonyOptionLevel = 13;
+    // With the set item and the Kris: a bundle, a seal (its add option), second-tier wings and a skill book.
+    const std::vector<ItemCreationParams> items{rapier, kris, at(12, 30, 2), at(13, 62, 0), at(12, 3, 5), at(15, 0, 0)};
+    for (const ItemCreationParams& params : items)
+    {
+        CAPTURE(params.Group);
+        CAPTURE(params.Number);
+        ITEM item;
+        FillItemFromParameters(item, params);
+        const ItemTooltipValues all = ComputeItemTooltipValues(item);
+        const ItemTooltipValues basics = ComputeItemTooltipValues(item, TooltipValueScope::Basics);
+        for (size_t index = 0; index < static_cast<size_t>(TooltipValue::Count); ++index)
+        {
+            const auto value = static_cast<TooltipValue>(index);
+            const std::string name(Data::Items::GetBuiltInPlaceholderName(value));
+            CAPTURE(name);
+            if (NeedsAllTooltipValues(value))
+            {
+                CHECK(GetItemTooltipValue(basics, value).value_or(0) == 0);
+            }
+            else
+            {
+                CHECK(GetItemTooltipValue(basics, value) == GetItemTooltipValue(all, value));
+            }
+        }
+        CHECK(std::wstring(GetItemTooltipText(basics, TooltipValue::Name)) ==
+              GetItemTooltipText(all, TooltipValue::Name));
+        for (size_t index = 0; index < static_cast<size_t>(TooltipState::Count); ++index)
+        {
+            const auto state = static_cast<TooltipState>(index);
+            CAPTURE(index);
+            if (NeedsAllTooltipValues(state))
+            {
+                CHECK_FALSE(GetItemTooltipState(basics, state));
+            }
+            else
+            {
+                CHECK(GetItemTooltipState(basics, state) == GetItemTooltipState(all, state));
+            }
+        }
+    }
+
+    // Today's standard rules need only the basic values; a rule on a requirement needs them all.
+    for (const Data::Items::GroundLabelRule& rule : g_ItemDatabase.GetGroundLabels().standard)
+    {
+        CAPTURE(rule.style);
+        CHECK_FALSE(NeedsAllTooltipValues(rule.when));
+    }
+    Data::Items::TooltipCondition strength;
+    strength.kind = Data::Items::TooltipCondition::Kind::Value;
+    strength.value = TooltipValue::RequiredStrength;
+    CHECK(NeedsAllTooltipValues(std::vector<Data::Items::TooltipCondition>{strength}));
+}
+
 TEST_CASE("An item's duration text follows the UI's language [data][items][tooltip]")
 {
     ClientDataScope client(ClientDirectory);
