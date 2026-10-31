@@ -1521,9 +1521,6 @@
     <value>Zapisane hasło pozwoli każdemu, kto korzysta z tego komputera, zalogować się na twoje konto. Rób to tylko na komputerze, któremu ufasz. Zapisać hasło?</value>
     <comment>Remember-password confirmation dialog: body.</comment>
   </data>
-  <data name="Connect" xml:space="preserve">
-    <value>Połącz</value>
-  </data>
   <data name="Exit" xml:space="preserve">
     <value>Wyjdź</value>
   </data>

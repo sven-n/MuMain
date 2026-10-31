@@ -25,7 +25,7 @@ public:
     TestServerListManager() = default;
 };
 
-// The load the connect server sends; the login screen shows I18N::Game::Connect for it.
+// The load the connect server sends; the button says nothing about it.
 constexpr int LowLoad = 10;
 
 ServerGroup Group(int id, const std::string& name)
@@ -93,11 +93,6 @@ std::vector<CServerGroup*> GroupsInOrder(CServerListManager& manager)
         groups.push_back(group);
     }
     return groups;
-}
-
-std::wstring ButtonText(const wchar_t* channelName)
-{
-    return std::wstring(channelName) + L" " + I18N::Game::Connect;
 }
 } // namespace
 
@@ -175,12 +170,12 @@ TEST_CASE("ServerListManager: the channel settings reach the channels, their but
     REQUIRE(groups[0]->GetServerSize() == 6);
     const auto server = [&](int index) -> const CServerInfo& { return *groups[0]->GetServerInfo(index); };
     CHECK(server(0).m_channel == valhalla.channels[0]);
-    CHECK(manager.GetServerButtonText(group, server(0)) == ButtonText(L"Valhalla-1 (Gold Non-PvP)"));
-    CHECK(manager.GetServerButtonText(group, server(1)) == ButtonText(L"Valhalla-2 (Gold PvP)"));
-    CHECK(manager.GetServerButtonText(group, server(2)) == ButtonText(L"Valhalla-3 (Non-PvP)"));
-    CHECK(manager.GetServerButtonText(group, server(3)) == ButtonText(L"Valhalla-4 (PvP)"));
-    CHECK(manager.GetServerButtonText(group, server(4)) == ButtonText(L"Valhalla-5 (Silver PvP)"));
-    CHECK(manager.GetServerButtonText(group, server(5)) == ButtonText(L"Valhalla-20 (Gold Non-PvP)"));
+    CHECK(manager.GetServerButtonText(group, server(0)) == L"Valhalla-1 (Gold Non-PvP)");
+    CHECK(manager.GetServerButtonText(group, server(1)) == L"Valhalla-2 (Gold PvP)");
+    CHECK(manager.GetServerButtonText(group, server(2)) == L"Valhalla-3 (Non-PvP)");
+    CHECK(manager.GetServerButtonText(group, server(3)) == L"Valhalla-4 (PvP)");
+    CHECK(manager.GetServerButtonText(group, server(4)) == L"Valhalla-5 (Silver PvP)");
+    CHECK(manager.GetServerButtonText(group, server(5)) == L"Valhalla-20 (Gold Non-PvP)");
 
     const auto color = [&](int index, std::string_view theme)
     { return manager.GetServerButtonColor(server(index), theme); };
@@ -193,20 +188,23 @@ TEST_CASE("ServerListManager: the channel settings reach the channels, their but
     CHECK(color(4, "modern").theme == ThemeColor::Silver);
 }
 
-TEST_CASE("ServerListManager: the button names the server's load")
+TEST_CASE("ServerListManager: the button names the server's load only when it cannot be joined")
 {
     I18N::SetLocale("en");
     TestServerListManager manager;
     manager.SetServerList(List({Group(0, "Valhalla")}));
-    manager.InsertServerGroup(ServerId(0, 1), 100);
-    manager.InsertServerGroup(ServerId(0, 2), 128);
+    manager.InsertServerGroup(ServerId(0, 1), 99);
+    manager.InsertServerGroup(ServerId(0, 2), 100);
+    manager.InsertServerGroup(ServerId(0, 3), 128);
 
     const std::vector<CServerGroup*> groups = GroupsInOrder(manager);
     REQUIRE(groups.size() == 1);
-    CHECK(manager.GetServerButtonText(*groups[0], *groups[0]->GetServerInfo(0)) ==
-          std::wstring(L"Valhalla-1 (PvP) ") + I18N::Game::Full);
-    CHECK(manager.GetServerButtonText(*groups[0], *groups[0]->GetServerInfo(1)) ==
-          std::wstring(L"Valhalla-2 (PvP) ") + I18N::Game::NowPreparing);
+    const auto button = [&](int index)
+    { return manager.GetServerButtonText(*groups[0], *groups[0]->GetServerInfo(index)); };
+    // Below 100 the {load} text is empty and takes its space with it.
+    CHECK(button(0) == L"Valhalla-1 (PvP)");
+    CHECK(button(1) == std::wstring(L"Valhalla-2 (PvP) ") + I18N::Game::Full);
+    CHECK(button(2) == std::wstring(L"Valhalla-3 (PvP) ") + I18N::Game::NowPreparing);
 }
 
 TEST_CASE("ServerListManager: a group without a channel with PvP off shows the PvP notice")
@@ -348,6 +346,6 @@ TEST_CASE("ServerListManager: a rebuild names the servers last sent with the new
     CHECK(groups[0]->GetServerSize() == 1);
     CHECK(std::wstring(groups[1]->m_szName) == L"Asgard");
     REQUIRE(groups[1]->GetServerSize() == 2);
-    CHECK(manager.GetServerButtonText(*groups[1], *groups[1]->GetServerInfo(1)) == ButtonText(L"Asgard-2 (PvP)"));
+    CHECK(manager.GetServerButtonText(*groups[1], *groups[1]->GetServerInfo(1)) == L"Asgard-2 (PvP)");
 }
 #endif

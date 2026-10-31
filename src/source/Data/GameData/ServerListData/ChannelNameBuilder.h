@@ -23,7 +23,7 @@ struct ChannelNameValues
     int channel = 0;
     std::string_view vip;       // the VIP type's name; empty without one
     std::string_view pvp;       // the PvP or Non-PvP text
-    std::string_view load;      // the server's load (Connect, (Full), ...); Button only
+    std::string_view load;      // the server's load ((Full), Now preparing); empty while joinable; Button only
     std::string_view character; // the player's character; Screenshot only
 };
 

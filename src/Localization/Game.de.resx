@@ -1245,9 +1245,6 @@
     <value>Wenn das Passwort gespeichert wird, kann sich jeder, der diesen Computer benutzt, mit Ihrem Konto anmelden. Tun Sie dies nur auf einem PC, dem Sie vertrauen. Passwort speichern?</value>
     <comment>Remember-password confirmation dialog: body.</comment>
   </data>
-  <data name="Connect" xml:space="preserve">
-    <value>Verbinden</value>
-  </data>
   <data name="Exit" xml:space="preserve">
     <value>Beenden</value>
   </data>

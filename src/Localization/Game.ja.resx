@@ -1189,9 +1189,6 @@
   <data name="Password" xml:space="preserve">
     <value>パスワード</value>
   </data>
-  <data name="Connect" xml:space="preserve">
-    <value>接続</value>
-  </data>
   <data name="Exit" xml:space="preserve">
     <value>終了</value>
   </data>

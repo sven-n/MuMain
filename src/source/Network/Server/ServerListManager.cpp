@@ -20,7 +20,7 @@ namespace
 {
 constexpr const char* ServerListName = "server list";
 
-// What a channel's button says about the server's load.
+// What a channel's button says about the server's load: nothing while it can be joined.
 const wchar_t* GetLoadText(int percent)
 {
     if (percent >= 128)
@@ -31,7 +31,7 @@ const wchar_t* GetLoadText(int percent)
     {
         return I18N::Game::Full;
     }
-    return I18N::Game::Connect;
+    return L"";
 }
 
 std::string_view GetGameLocale()

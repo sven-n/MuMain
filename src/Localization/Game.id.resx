@@ -1225,9 +1225,6 @@
   <data name="Password" xml:space="preserve">
     <value>Kata sandi</value>
   </data>
-  <data name="Connect" xml:space="preserve">
-    <value>Menghubungkan</value>
-  </data>
   <data name="Exit" xml:space="preserve">
     <value>KELUAR</value>
   </data>

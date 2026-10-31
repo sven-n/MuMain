@@ -53,7 +53,8 @@ public:
     // The same at `place`, in UTF-8, for the windows that show it every frame (login, character
     // info): built again only when the list, the selected channel or the game's language changed.
     const std::string& GetSelectServerTitleUtf8(Data::ServerList::ChannelNamePlace place);
-    // A channel's button on the login screen, with its load: "Valhalla-1 (Gold Non-PvP) Connect".
+    // A channel's button on the login screen: "Valhalla-1 (Gold Non-PvP)", with "(Full)" or
+    // "Now preparing" after it when the server cannot be joined.
     std::wstring GetServerButtonText(const CServerGroup& group, const CServerInfo& server) const;
     // Its color there in the theme folder `theme`, by the list's button color rules.
     Data::ServerList::ButtonColor GetServerButtonColor(const CServerInfo& server, std::string_view theme) const;

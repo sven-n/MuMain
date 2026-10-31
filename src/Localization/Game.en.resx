@@ -1530,9 +1530,6 @@
     <value>Saving the password lets anyone using this computer log into your account. Only do this on a PC you trust. Save the password?</value>
     <comment>Remember-password confirmation dialog: body.</comment>
   </data>
-  <data name="Connect" xml:space="preserve">
-    <value>Connect</value>
-  </data>
   <data name="Exit" xml:space="preserve">
     <value>Exit</value>
   </data>

@@ -28,12 +28,15 @@ admin panel; to put a server into a second group, give it an ID from 20 to 39.
   type** or none. The channel's name is built from a template (see
   [Templates](#templates)). With the bundled file:
 
-  | PvP | VIP type | Server list button                   | Login window                  |
-  |-----|----------|--------------------------------------|-------------------------------|
-  | on  | none     | `Valhalla-9 (PvP) Connect`           | `[Valhalla-9 (PvP)]`          |
-  | off | none     | `Valhalla-6 (Non-PvP) Connect`       | `[Valhalla-6 (Non-PvP)]`      |
-  | on  | Gold     | `Valhalla-5 (Gold PvP) Connect`      | `[Valhalla-5 (Gold PvP)]`     |
-  | off | Gold     | `Valhalla-1 (Gold Non-PvP) Connect`  | `[Valhalla-1 (Gold Non-PvP)]` |
+  | PvP | VIP type | Server list button          | Login window                  |
+  |-----|----------|-----------------------------|-------------------------------|
+  | on  | none     | `Valhalla-9 (PvP)`          | `[Valhalla-9 (PvP)]`          |
+  | off | none     | `Valhalla-6 (Non-PvP)`      | `[Valhalla-6 (Non-PvP)]`      |
+  | on  | Gold     | `Valhalla-5 (Gold PvP)`     | `[Valhalla-5 (Gold PvP)]`     |
+  | off | Gold     | `Valhalla-1 (Gold Non-PvP)` | `[Valhalla-1 (Gold Non-PvP)]` |
+
+  A server that is full gets `(Full)` after its button text, one being
+  prepared `Now preparing`.
 
 - **Button color:** set by the button color rules, by VIP type, PvP or both
   (see [Button colors](#button-colors)). With the bundled file Gold channels are
@@ -57,7 +60,7 @@ server.
 
 | Place                     | Template        | Example (Valhalla-1, Gold, PvP off)                  |
 |---------------------------|-----------------|------------------------------------------------------|
-| Server list button        | `button`        | `Valhalla-1 (Gold Non-PvP) Connect`                  |
+| Server list button        | `button`        | `Valhalla-1 (Gold Non-PvP)`                          |
 | Login window title        | `login`         | `[Valhalla-1 (Gold Non-PvP)]`                        |
 | Character info title      | `characterInfo` | `[Valhalla-1 (Gold Non-PvP)]`, fading with the class name |
 | Screenshot message (chat) | `screenshot`    | `Screen(10_31-14_02)-0001.jpg: Screenshot Saved [Valhalla / MaxiDK]` |
@@ -169,7 +172,7 @@ file carries the translations of all twelve languages.
 | `{channel}`   | The channel number                                               | all           |
 | `{vip}`       | The VIP type's name in the game's language; empty without a VIP type | all       |
 | `{pvp}`       | The `pvp` text with PvP on, the `nonPvp` text with PvP off       | all           |
-| `{load}`      | Connect, (Full) or Now preparing, by the server's load (game texts) | `button`   |
+| `{load}`      | (Full) or Now preparing (game texts) when the server cannot be joined; empty while it can | `button` |
 | `{character}` | The name of your character                                       | `screenshot`  |
 
 Empty parts take their spaces with them:
@@ -262,8 +265,8 @@ gives the channel and, when the connect server sent it, its load.
   rules then have the default color;
 - a preview of every combination (PvP on and off, with no VIP type and with
   each VIP type) in all four places, with the selected group's name and the
-  button's color in the legacy and modern theme. The button's `{load}` text is
-  a game text, so the preview shows it in the editor's language.
+  button's color in the legacy and modern theme. The button's `{load}` is
+  empty there, as for a server that can be joined.
 
 The Groups tab's channel table shows each channel's button text in its color.
 
@@ -307,4 +310,6 @@ off, bit 1 made the channel gold. The login window and character info titles
 were fixed texts by type (461, 460, 3130 and 3131: "[%s-%d Server]",
 "[%s-%d(Non-PvP) Server]", "[%s-%d(Gold PvP) Server]", "[%s-%d(Gold) Server]").
 Now the two switches are the PvP box and the VIP type, Gold is one VIP type of
-any number, and every text is a template in the file.
+any number, and every text is a template in the file. The original buttons
+also ended in "Connect" for every server that could be joined; now only a full
+server or one being prepared says so.

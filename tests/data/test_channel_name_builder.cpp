@@ -99,9 +99,9 @@ TEST_CASE("ChannelNameBuilder: other text stays as written")
 TEST_CASE("ChannelNameBuilder: each place has its own placeholders")
 {
     ChannelNameValues values = Values("Gold", "PvP");
-    values.load = "Connect";
+    values.load = "(Full)";
     values.character = "Hero";
-    CHECK(FillChannelName("{name}-{channel} {load}", ChannelNamePlace::Button, values) == "Valhalla-1 Connect");
+    CHECK(FillChannelName("{name}-{channel} {load}", ChannelNamePlace::Button, values) == "Valhalla-1 (Full)");
     CHECK(FillChannelName("[{name} / {character}]", ChannelNamePlace::Screenshot, values) == "[Valhalla / Hero]");
     CHECK(FillChannelName("{character}", ChannelNamePlace::Button, values) == "{character}");
     CHECK(FillChannelName("{load}", ChannelNamePlace::CharacterInfo, values) == "{load}");
@@ -128,16 +128,16 @@ TEST_CASE("ChannelNameBuilder: a channel's name in a language")
 TEST_CASE("ChannelNameBuilder: the built-in texts name the four kinds of channel as the docs show")
 {
     const ServerListData list = GoldList();
+    // A server that can be joined: {load} is empty.
     ChannelNameValues values = Values("", "");
-    values.load = "Connect";
     values.character = "MaxiDK";
 
     const auto button = [&](bool pvp, const std::string& vip)
     { return BuildChannelName(list, ChannelNamePlace::Button, Channel(pvp, vip), values, "en"); };
-    CHECK(button(true, "") == "Valhalla-1 (PvP) Connect");
-    CHECK(button(false, "") == "Valhalla-1 (Non-PvP) Connect");
-    CHECK(button(true, "gold") == "Valhalla-1 (Gold PvP) Connect");
-    CHECK(button(false, "gold") == "Valhalla-1 (Gold Non-PvP) Connect");
+    CHECK(button(true, "") == "Valhalla-1 (PvP)");
+    CHECK(button(false, "") == "Valhalla-1 (Non-PvP)");
+    CHECK(button(true, "gold") == "Valhalla-1 (Gold PvP)");
+    CHECK(button(false, "gold") == "Valhalla-1 (Gold Non-PvP)");
 
     CHECK(BuildChannelName(list, ChannelNamePlace::CharacterInfo, Channel(false, "gold"), values, "en") ==
           "[Valhalla-1 (Gold Non-PvP)]");

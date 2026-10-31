@@ -2084,7 +2084,7 @@
     <value>Not a placeholder of this template: {0}</value>
   </data>
   <data name="Preview note" xml:space="preserve">
-    <value>Every combination of PvP and VIP type, for channel 1 of the selected group, in the language picked above. The button's {load} text is a game text and shows in the editor's language.</value>
+    <value>Every combination of PvP and VIP type, for channel 1 of the selected group, in the language picked above. The button's {load} is empty, as for a server that can be joined.</value>
   </data>
   <data name="Step add VIP type" xml:space="preserve">
     <value>Add VIP type {0}</value>

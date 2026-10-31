@@ -1556,11 +1556,10 @@ void CMuServerListUI::RenderPreview()
     const std::vector<ServerGroup>& groups = list.groups;
     const bool hasGroup = m_selected >= 0 && m_selected < static_cast<int>(groups.size());
     const std::string groupName = hasGroup ? groups[static_cast<size_t>(m_selected)].name : std::string("Valhalla");
-    const std::string load = Core::Text::ToUtf8(I18N::Game::Connect);
+    // A server that can be joined: {load} stays empty.
     Data::ServerList::ChannelNameValues values;
     values.name = groupName;
     values.channel = 1;
-    values.load = load;
     values.character = PreviewCharacter;
 
     // No VIP type first, then each one; each with PvP on and off.

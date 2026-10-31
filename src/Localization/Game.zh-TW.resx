@@ -1225,9 +1225,6 @@
   <data name="Password" xml:space="preserve">
     <value>密碼</value>
   </data>
-  <data name="Connect" xml:space="preserve">
-    <value>連接</value>
-  </data>
   <data name="Exit" xml:space="preserve">
     <value>出口</value>
   </data>
