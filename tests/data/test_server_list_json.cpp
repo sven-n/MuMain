@@ -91,6 +91,10 @@ ChannelSettings Channel(bool pvp, const std::string& vip)
     return channel;
 }
 
+// The game's languages.
+constexpr std::array<const char*, 12> GameLocales = {"en", "de", "es", "id", "ja",    "pl",
+                                                     "pt", "ru", "tl", "uk", "zh-CN", "zh-TW"};
+
 const std::string ValidFile = R"({
   "formatVersion": 2,
   "vipTypes": [
@@ -560,9 +564,7 @@ TEST_CASE("ServerListJson: the shipped file reads without problems and is writte
     // MU_TEST_DATA_DIR is the client folder's Data; the file name starts with it.
     const std::filesystem::path file =
         std::filesystem::path(MU_TEST_DATA_DIR).parent_path() / Data::ServerList::ServerListFile;
-    const std::array<const char*, 12> gameLocales = {"en", "de", "es", "id", "ja",    "pl",
-                                                     "pt", "ru", "tl", "uk", "zh-CN", "zh-TW"};
-    const Data::ServerList::ServerListLoadResult loaded = Data::ServerList::LoadServerListFile(file, gameLocales);
+    const Data::ServerList::ServerListLoadResult loaded = Data::ServerList::LoadServerListFile(file, GameLocales);
 
     CHECK_MESSAGE(loaded.issues.empty(), Messages(loaded.issues));
     REQUIRE(loaded.list.groups.size() == 3);
@@ -596,7 +598,7 @@ TEST_CASE("ServerListJson: the shipped file reads without problems and is writte
 TEST_CASE("ServerListJson: a missing file is an error")
 {
     const Data::ServerList::ServerListLoadResult loaded =
-        Data::ServerList::LoadServerListFile("does/not/exist/ServerList.json");
+        Data::ServerList::LoadServerListFile("does/not/exist/ServerList.json", GameLocales);
 
     CHECK(HasIssueAbout(loaded.issues, "", "could not be read"));
     CHECK(loaded.list.groups.empty());
@@ -612,7 +614,7 @@ TEST_CASE("ServerListJson: save writes the file and refuses a list with errors")
     std::vector<ItemDataIssue> issues;
     REQUIRE(Data::ServerList::SaveServerListFile(file, read.list, issues));
     CHECK(issues.empty());
-    const Data::ServerList::ServerListLoadResult saved = Data::ServerList::LoadServerListFile(file);
+    const Data::ServerList::ServerListLoadResult saved = Data::ServerList::LoadServerListFile(file, GameLocales);
     CHECK(saved.issues.empty());
     CHECK(saved.list == read.list);
 
@@ -626,7 +628,7 @@ TEST_CASE("ServerListJson: save writes the file and refuses a list with errors")
     CHECK(HasIssueAbout(refused, "groups[2].id", "more than once"));
     CHECK(HasIssueAbout(refused, "vipTypes[2].id", "more than one VIP type"));
     // The file stays as it was.
-    CHECK(Data::ServerList::LoadServerListFile(file).list == read.list);
+    CHECK(Data::ServerList::LoadServerListFile(file, GameLocales).list == read.list);
     CHECK_FALSE(std::filesystem::exists(file.string() + ".tmp"));
 
     std::filesystem::remove_all(folder);
