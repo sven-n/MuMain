@@ -136,15 +136,17 @@ void ReadRules(const OrderedJson& json, const std::string& source, GroundLabelFi
         Json::WarnAboutUnknownKeys(entry, std::set<std::string, std::less<>>{WhenKey, StyleKey}, field + ".",
                                    [&](const std::string& unknown, const std::string& message)
                                    { AddWarning(issues, source, unknown, message); });
+        // A rule whose conditions can't be read has its error and is left out: it holds nowhere.
+        if (!read)
+        {
+            continue;
+        }
         if (rule.when.empty() && index + 1 < json.size())
         {
             AddWarning(issues, source, field,
                        "has no conditions, so it always holds and the rules after it are never used");
         }
-        if (read)
-        {
-            file.standard.push_back(std::move(rule));
-        }
+        file.standard.push_back(std::move(rule));
     }
 }
 } // namespace

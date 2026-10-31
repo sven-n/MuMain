@@ -180,6 +180,8 @@ TEST_CASE("The ground label file is checked [data][items]")
         REQUIRE(condition != nullptr);
         CHECK(condition->severity == ItemDataIssueSeverity::Fatal);
         CHECK(condition->message.find("excellent") != std::string::npos);
+        // Its conditions couldn't be read: it is not taken for a rule without conditions.
+        CHECK_FALSE(HasIssue(read.issues, ItemDataIssueSeverity::Warning, "standard[0]"));
         CHECK(HasIssue(read.issues, ItemDataIssueSeverity::Fatal, "standard[1]"));
         CHECK(HasIssue(read.issues, ItemDataIssueSeverity::Fatal, "standard[2]"));
     }
