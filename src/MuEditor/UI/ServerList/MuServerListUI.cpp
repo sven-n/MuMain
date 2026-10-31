@@ -58,6 +58,7 @@ constexpr const char* PreviewCharacter = "Hero";
 // The theme folders the preview shows the button colors in.
 constexpr std::string_view LegacyTheme = "legacy";
 constexpr std::string_view ModernTheme = "modern";
+constexpr std::string_view ClassicTheme = "classic";
 
 std::string_view GetEditorLocale()
 {
@@ -102,7 +103,10 @@ ImVec4 GetThemeColorSwatch(ThemeColor color, std::string_view theme)
                                                                                     0xB9C6D3};
     constexpr std::array<unsigned int, Data::ServerList::ThemeColorCount> Modern = {0xC49A3C, 0x6A6A63, 0xC99A3E,
                                                                                     0x9EA7B0};
-    const auto& shades = theme == ModernTheme ? Modern : Legacy;
+    // Classic (built on legacy) recolors the server buttons in its server_select.rcss; silver stays legacy's.
+    constexpr std::array<unsigned int, Data::ServerList::ThemeColorCount> Classic = {0xFFFFB3, 0xFFFFFF, 0xFFB27F,
+                                                                                     0xB9C6D3};
+    const auto& shades = theme == ModernTheme ? Modern : (theme == ClassicTheme ? Classic : Legacy);
     return FromRgb(shades[static_cast<size_t>(color)]);
 }
 
