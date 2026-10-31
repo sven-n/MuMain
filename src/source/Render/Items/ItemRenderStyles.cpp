@@ -79,26 +79,31 @@ bool RenderPlainly(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
     return false;
 }
 
-bool RenderStormCrow(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
+// The Magic Gladiator sets' textures cut holes (the grooves) with their alpha, and a chrome layer shows through
+// them. The chrome is drawn first, solid, in the set's light, and the texture over it in the model's own light.
+// Drawn the other way round (texture, then the chrome added on top), the holes showed whatever was behind the
+// armour (the cloak, the background), so the set looked see-through, and the chrome washed over the whole armour.
+bool RenderChromeUnderTexture(BMD* b, OBJECT* o, float red, float green, float blue)
 {
+    vec3_t Light;
+    VectorCopy(b->BodyLight, Light);
+    Vector(red * Light[0], green * Light[1], blue * Light[2], b->BodyLight);
+    b->RenderBody(RENDER_TEXTURE | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                  o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME + 1);
+    VectorCopy(Light, b->BodyLight);
     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                   o->BlendMeshTexCoordV, o->HiddenMesh);
-    b->RenderBody(RENDER_TEXTURE | RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                  o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME + 1);
     return true;
+}
+
+bool RenderStormCrow(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
+{
+    return RenderChromeUnderTexture(b, o, 1.f, 1.f, 1.f);
 }
 
 bool RenderThunderHawk(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
 {
-    vec3_t Light;
-    VectorCopy(b->BodyLight, Light);
-    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                  o->BlendMeshTexCoordV, o->HiddenMesh);
-    Vector(0.85f * Light[0], 0.85f * Light[1], 1.2f * Light[2], b->BodyLight);
-    b->RenderBody(RENDER_TEXTURE | RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                  o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME + 1);
-    VectorCopy(Light, b->BodyLight);
-    return true;
+    return RenderChromeUnderTexture(b, o, 0.85f, 0.85f, 1.2f);
 }
 
 bool RenderWingsOfDarkness(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
