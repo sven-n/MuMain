@@ -22,6 +22,13 @@ namespace MuEditor::Monsters::SoundEventsEditor
 using SetDraft = Items::ItemEditDraft<Data::Monsters::MonsterSoundSet>;
 using ModelDraft = Items::ItemEditDraft<Data::Monsters::MonsterModelDefinition>;
 
+// The drafts of a sound set and of the model whose cues the rows change: the
+// rows keep the event and the cue they draw while they store a change, so
+// the drafts are taken back from the data at the next frame
+// (ReloadAfterStore::NextFrame).
+SetDraft MakeSetDraft(SetDraft::Load load, SetDraft::Store store);
+ModelDraft MakeModelDraft(ModelDraft::Load load, ModelDraft::Store store);
+
 // The moments, animations or cues the event plays at: "attack1, attack2",
 // "on" and the moments, or "cue" and the cues.
 std::string WhenText(const Data::Monsters::MonsterSoundEvent& event);

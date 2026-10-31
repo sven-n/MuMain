@@ -98,7 +98,7 @@ MuMonsterSoundsUI& MuMonsterSoundsUI::GetInstance()
 }
 
 MuMonsterSoundsUI::MuMonsterSoundsUI()
-    : m_setDraft(
+    : m_setDraft(SoundEventsEditor::MakeSetDraft(
           [this](int id)
           {
               return id >= 0 && static_cast<size_t>(id) < m_idNames.size()
@@ -106,10 +106,11 @@ MuMonsterSoundsUI::MuMonsterSoundsUI()
                          : std::nullopt;
           },
           [](const std::string& label, const MonsterSoundSet& set)
-          { g_MonsterEdits.SetSoundSet(label, set, g_MonsterSelection.GetNumber()); }),
-      m_modelDraft([](int slot) { return g_MonsterDataHandler.ReadModel(slot); },
-                   [](const std::string& label, const MonsterModelDefinition& model)
-                   { g_MonsterEdits.SetModel(label, model, g_MonsterSelection.GetNumber()); })
+          { g_MonsterEdits.SetSoundSet(label, set, g_MonsterSelection.GetNumber()); })),
+      m_modelDraft(
+          SoundEventsEditor::MakeModelDraft([](int slot) { return g_MonsterDataHandler.ReadModel(slot); },
+                                            [](const std::string& label, const MonsterModelDefinition& model)
+                                            { g_MonsterEdits.SetModel(label, model, g_MonsterSelection.GetNumber()); }))
 {
 }
 

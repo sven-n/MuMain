@@ -589,6 +589,68 @@ TEST_CASE("Monster Sounds gives Monster Preview the model it edits in the frame 
     g_MonsterSoundSetDatabase.Build({});
 }
 
+TEST_CASE("Monster Sounds' drafts keep the rows' events and cues for the rest of the frame after a store, and "
+          "take the data back the next frame [editor][monsters]")
+{
+    using namespace MuEditor::Monsters::SoundEventsEditor;
+    TestImGuiContext context;
+    Data::Monsters::MonsterSoundSet storedSet;
+    storedSet.name = "Hound";
+    storedSet.soundEvents.resize(2);
+    int setStores = 0;
+    SetDraft setDraft = MakeSetDraft(
+        [&](int id) { return id == 0 ? std::optional<Data::Monsters::MonsterSoundSet>(storedSet) : std::nullopt; },
+        [&](const std::string&, const Data::Monsters::MonsterSoundSet& set)
+        {
+            storedSet = set;
+            ++setStores;
+        });
+    Data::Monsters::MonsterModelDefinition storedModel;
+    storedModel.slot = "MONSTER_MODEL_HOUND";
+    storedModel.cues = {{"step 1", MONSTER01_WALK, {1.0f, 2.0f}}, {"step 2", MONSTER01_WALK, {7.0f, 8.0f}}};
+    ModelDraft modelDraft = MakeModelDraft(
+        [&](int slot)
+        {
+            return slot == MODEL_HOUND ? std::optional<Data::Monsters::MonsterModelDefinition>(storedModel)
+                                       : std::nullopt;
+        },
+        [&](const std::string&, const Data::Monsters::MonsterModelDefinition& model) { storedModel = model; });
+
+    ImGui::NewFrame();
+    Data::Monsters::MonsterSoundSet* set = setDraft.Begin(0, 1);
+    Data::Monsters::MonsterModelDefinition* model = modelDraft.Begin(MODEL_HOUND, 1);
+    REQUIRE(set != nullptr);
+    REQUIRE(model != nullptr);
+    // A row ticks a box and draws on with its event; a cue row picks an
+    // animation and draws on with its cue.
+    Data::Monsters::MonsterSoundEvent& event = set->soundEvents[1];
+    event.heardAnywhere = true;
+    setDraft.AfterChange(true, "Hound: sound events");
+    Data::Monsters::MonsterModelCue& cue = model->cues[1];
+    cue.animation = MONSTER01_STOP1;
+    modelDraft.AfterChange(true, "Hound: cue step 2");
+    CHECK(setStores == 1);
+    CHECK(storedSet.soundEvents[1].heardAnywhere);
+    CHECK(storedModel.cues[1].animation == MONSTER01_STOP1);
+    REQUIRE(&set->soundEvents[1] == &event);
+    REQUIRE(&model->cues[1] == &cue);
+    CHECK(event.heardAnywhere);
+    CHECK(cue.animation == MONSTER01_STOP1);
+    setDraft.End();
+    modelDraft.End();
+    ImGui::Render();
+
+    // The next frame takes the data back, also what the store changed.
+    storedSet.soundEvents[0].atMonster = true;
+    ImGui::NewFrame();
+    set = setDraft.Begin(0, 1);
+    REQUIRE(set != nullptr);
+    CHECK(set->soundEvents[0].atMonster);
+    CHECK(set->soundEvents[1].heardAnywhere);
+    setDraft.End();
+    ImGui::Render();
+}
+
 TEST_CASE("Monster Sounds edits the cues of the shown look's model only with the set the look plays "
           "[editor][monsters]")
 {

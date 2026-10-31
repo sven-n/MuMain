@@ -24,6 +24,7 @@
 #include <cstdio>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace MuEditor::Monsters::SoundEventsEditor
@@ -604,6 +605,16 @@ void RenderRemoveCuePopup(MonsterSoundSet& set, SetDraft& draft, const Context& 
     ImGui::EndPopup();
 }
 } // namespace
+
+SetDraft MakeSetDraft(SetDraft::Load load, SetDraft::Store store)
+{
+    return SetDraft(std::move(load), std::move(store), Items::ReloadAfterStore::NextFrame);
+}
+
+ModelDraft MakeModelDraft(ModelDraft::Load load, ModelDraft::Store store)
+{
+    return ModelDraft(std::move(load), std::move(store), Items::ReloadAfterStore::NextFrame);
+}
 
 std::string WhenText(const MonsterSoundEvent& event)
 {
