@@ -8,8 +8,6 @@
 #include "UI/Windows/LoginSceneUpdates.h"
 
 extern double WorldTime;
-extern int LogIn;
-extern BOOL g_bGameServerConnected;
 
 namespace
 {
@@ -74,24 +72,8 @@ bool GameLoginSceneLink::Connect(LoginServer server)
 {
     const Address address = AddressOf(server);
 
-    // The server greets a new connection as a fresh login, not as a map server change.
-    LogIn = 0;
-    CurrentProtocolState = REQUEST_JOIN_SERVER;
-
-    // Game server packets (CheckHack's ping, the logout on quit) go out only while a
-    // game server is connected; the connect server doesn't know them.
-    g_bGameServerConnected = FALSE;
     DeleteSocket();
-    if (!CreateSocket(address.host, address.port))
-    {
-        return false;
-    }
-
-    if (server == LoginServer::Game)
-    {
-        g_bGameServerConnected = TRUE;
-    }
-    return true;
+    return ConnectForLogin(address.host, address.port, server == LoginServer::Game) != FALSE;
 }
 
 void GameLoginSceneLink::SendServerListRequest()

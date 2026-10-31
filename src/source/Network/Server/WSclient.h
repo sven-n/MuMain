@@ -3602,6 +3602,10 @@ extern bool SoccerObserver;
 
 BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port);
 void DeleteSocket();
+// Connects for a fresh login: the server greets the new connection as a new client
+// (the connect server with its list, a game server with its join answer), not as a
+// map server change. `isGameServer` says which of the two it is.
+BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port, bool isGameServer);
 
 // Tears the live game session down to a clean login-scene state (matching the
 // in-game logout path). Used by the auto-reconnect flow before it replays login.

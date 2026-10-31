@@ -437,6 +437,23 @@ wchar_t LogInID[MAX_USERNAME_SIZE + 1] = {
     0,
 };
 
+BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port, bool isGameServer)
+{
+    LogIn = 0;
+    CurrentProtocolState = REQUEST_JOIN_SERVER;
+
+    // Game server packets (CheckHack's ping, the logout on quit) go out only while a
+    // game server is connected; the connect server doesn't know them.
+    g_bGameServerConnected = FALSE;
+    if (!CreateSocket(IpAddr, Port))
+    {
+        return FALSE;
+    }
+
+    g_bGameServerConnected = isGameServer ? TRUE : FALSE;
+    return TRUE;
+}
+
 bool First = false;
 int FirstTime = 0;
 
