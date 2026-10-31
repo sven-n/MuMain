@@ -7165,6 +7165,31 @@ void SpawnLinkedPartEffects(CHARACTER* c, int Type, OBJECT* Object, vec34_t* bon
     Luminosity = (float)(rand() % 30 + 70) * 0.005f;
     switch (Type)
     {
+    case MODEL_15GRADE_ARMOR_OBJ_ARMLEFT:
+    case MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT:
+    case MODEL_15GRADE_ARMOR_OBJ_BODYLEFT:
+    case MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT:
+    case MODEL_15GRADE_ARMOR_OBJ_BOOTLEFT:
+    case MODEL_15GRADE_ARMOR_OBJ_BOOTRIGHT:
+    case MODEL_15GRADE_ARMOR_OBJ_HEAD:
+    case MODEL_15GRADE_ARMOR_OBJ_PANTLEFT:
+    case MODEL_15GRADE_ARMOR_OBJ_PANTRIGHT:
+    {
+        // A +15 armor piece's spark sits where the piece is drawn.
+        vec3_t vPos;
+        Models[o->Type].TransformByBoneMatrix(vPos, bones[0], o->Position);
+
+        const float fLight2 = absf(sinf(WorldTime * 0.01f));
+        Vector(0.2f * fLight2, 0.4f * fLight2, 1.0f * fLight2, Light);
+        CreateSprite(BITMAP_MAGIC, vPos, 0.12f, Light, o);
+
+        Vector(0.4f, 0.7f, 1.0f, Light);
+        CreateSprite(BITMAP_SHINY + 5, vPos, 0.4f, Light, o);
+
+        Vector(0.1f, 0.3f, 1.0f, Light);
+        CreateSprite(BITMAP_PIN_LIGHT, vPos, 0.6f, Light, o, 90.0f);
+    }
+    break;
     case MODEL_TIGER_BOW:
     case MODEL_SILVER_BOW:
     case MODEL_CHAOS_NATURE_BOW:
@@ -9248,6 +9273,12 @@ bool DrawsPlayerBodyShadow(CHARACTER* c, OBJECT* o)
            gMapManager.InHellas() == false;
 }
 
+// Whether RenderCharacter shows a character's +15 weapon sparks and armor pieces.
+bool DrawsNextGradeObjects(CHARACTER* c)
+{
+    return !gMapManager.InChaosCastle() && !(gMapManager.IsCursedTemple() && !c->SafeZone);
+}
+
 // Whether RenderCharacter's transformation chain reaches the player's own body parts.
 bool DrawsPlayerBodyParts(CHARACTER* c, OBJECT* o)
 {
@@ -10146,8 +10177,10 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         }
     }
 
-    if (!gMapManager.InChaosCastle() && !(gMapManager.IsCursedTemple() && !c->SafeZone))
+    if (DrawsNextGradeObjects(c))
     {
+        if (!IsClientCharacterObject(o))
+            SpawnNextGradeWeaponEffects(c);
         NextGradeObjectRender(c);
     }
 
@@ -11910,6 +11943,8 @@ void UpdateDrawnCharacterEffects()
             UpdateParts(c);
         }
         UpdatePlayerBodyParts(c);
+        if (DrawsNextGradeObjects(c))
+            SpawnNextGradeWeaponEffects(c);
         if (UpdateCharacterTypeEffects(c, o, b))
             continue;
         // Same order and stop-on-claim as RenderCharacter's chain.

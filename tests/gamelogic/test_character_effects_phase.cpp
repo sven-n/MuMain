@@ -12,6 +12,8 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Models/ZzzBMD.h"
+#include "World/GameMaps/GMNewTown.h"
+#include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/w_MapProcess.h"
 
 #include "../data/ItemModelDatabaseScope.h"
@@ -571,4 +573,41 @@ TEST_CASE("A wing's item effect spawns its lights on the bones it is given, and 
         ++onPose;
     }
     CHECK(onPose == 28); // its lights
+}
+
+TEST_CASE(
+    "A New Town crystal sparks from the update on its own pose, and its after-character draw spawns none [effects]")
+{
+    FenrirScope scope;
+    const int previousWorld = gMapManager.WorldActive;
+    gMapManager.WorldActive = WD_51HOME_6TH_CHAR;
+    OBJECT crystal;
+    crystal.Live = true;
+    crystal.Type = 78;
+    crystal.Scale = 1.f;
+    crystal.BoneTransform = scope.bones.get();
+    crystal.EnableBoneMatrix = true;
+    BMD* b = &Models[crystal.Type];
+    PlaceObjectModel(&crystal, b);
+    Engine::Object::Pose::Record(&crystal, b, true);
+    auto liveSprites = []
+    {
+        int live = 0;
+        for (int i = 0; i < MAX_SPRITES; ++i)
+            live += Sprites[i].Live ? 1 : 0;
+        return live;
+    };
+
+    SEASON3B::GMNewTown::RenderObjectAfterCharacter(&crystal, b);
+    CHECK(liveSprites() == 0);
+    SEASON3B::GMNewTown::UpdateObjectEffects(&crystal, b);
+    CHECK(liveSprites() == 4);
+    for (int i = 0; i < MAX_SPRITES; ++i)
+    {
+        if (Sprites[i].Live)
+            CHECK(Sprites[i].Position[0] == FenrirScope::poseAt);
+    }
+
+    crystal.BoneTransform = nullptr;
+    gMapManager.WorldActive = previousWorld;
 }

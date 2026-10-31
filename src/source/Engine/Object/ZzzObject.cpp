@@ -3615,6 +3615,11 @@ void UpdateObjectEffects()
         return;
     updatedFrame = s_objectDrawFrame;
 
+    // The pulse the Crywolf flares bob with.
+    if (Time_Effect > 40)
+        Time_Effect = 0;
+    Time_Effect += FPS_ANIMATION_FACTOR;
+
     for (OBJECT_BLOCK& ob : ObjectBlock)
     {
         for (OBJECT* o = ob.Head; o != nullptr; o = o->Next)
@@ -3669,10 +3674,6 @@ void RenderObjects()
     {
         range = -10.f;
     }
-
-    if (Time_Effect > 40)
-        Time_Effect = 0;
-    Time_Effect += FPS_ANIMATION_FACTOR;
 
     for (int i = 0; i < 16; i++)
     {
@@ -3933,10 +3934,6 @@ void RenderObjects_AfterCharacter()
     {
         range = -10.f;
     }
-
-    if (Time_Effect > 40)
-        Time_Effect = 0;
-    Time_Effect += FPS_ANIMATION_FACTOR;
 
     for (int i = 0; i < 16; i++)
     {
@@ -6914,7 +6911,7 @@ void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int Re
     Render::Items::Glow::RenderShine(b, o, Type, Alpha, RenderType, Texture);
 }
 
-void NextGradeObjectRender(CHARACTER* c)
+void SpawnNextGradeWeaponEffects(CHARACTER* c)
 {
     int weaponIndex;
     int weaponIndex2;
@@ -6977,7 +6974,12 @@ void NextGradeObjectRender(CHARACTER* c)
         }break;
         }//switch
     } //for
+}
 
+void NextGradeObjectRender(CHARACTER* c)
+{
+    int Level;
+    PART_t* w;
     int bornIndex[2]{}; // left, right;
     int gradeType[2]{}; // left, right;
 
@@ -7034,8 +7036,6 @@ void NextGradeObjectRender(CHARACTER* c)
             break;
         }
 
-        OBJECT* o = &c->Object;
-
         for (int m = 0; m < 2; m++)
         {
             if (gradeType[m] == -1) continue;
@@ -7045,19 +7045,7 @@ void NextGradeObjectRender(CHARACTER* c)
             case 15: // +15
             {
                 w->LinkBone = bornIndex[m];
-                vec34_t* bones = RenderLinkObject(0.f, 0.f, 0.f, c, w, gradeType[m], 0, 0, true, true);
-
-                b->TransformByBoneMatrix(vPos, bones[0], o->Position);
-
-                fLight2 = absf(sinf(WorldTime * 0.01f));
-                Vector(0.2f * fLight2, 0.4f * fLight2, 1.0f * fLight2, vLight);
-                CreateSprite(BITMAP_MAGIC, vPos, 0.12f, vLight, o);
-
-                Vector(0.4f, 0.7f, 1.0f, vLight);
-                CreateSprite(BITMAP_SHINY + 5, vPos, 0.4f, vLight, o);
-
-                Vector(0.1f, 0.3f, 1.0f, vLight);
-                CreateSprite(BITMAP_PIN_LIGHT, vPos, 0.6f, vLight, o, 90.0f);
+                RenderLinkObject(0.f, 0.f, 0.f, c, w, gradeType[m], 0, 0, true, true);
             }break;
             }
         }

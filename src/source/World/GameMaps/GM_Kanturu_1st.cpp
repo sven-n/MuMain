@@ -134,6 +134,18 @@ bool M37Kanturu1st::UpdateKanturu1stObjectEffects(OBJECT* pObject, BMD* pModel)
 
     switch (pObject->Type)
     {
+    case 95:
+    {
+        vec3_t sparkP, sparkPosition, sparkLight;
+        Vector(0.0f, 0.0f, 0.0f, sparkP);
+        Vector(0.1f, 0.1f, 0.3f, sparkLight);
+        for (int i = 0; i <= 9; ++i)
+        {
+            pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[i], sparkP, sparkPosition, false);
+            CreateSprite(BITMAP_SPARK + 1, sparkPosition, 7.5f, sparkLight, pObject);
+        }
+    }
+    break;
     case 37:
     {
         int time = timeGetTime() % 1024;
@@ -374,14 +386,6 @@ void M37Kanturu1st::RenderKanturu1stAfterObjectMesh(OBJECT* o, BMD* b)
             o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
             o->BlendMeshTexCoordV, BITMAP_CHROME);
         b->EndRender();
-        vec3_t Light, p, Position;
-        for (int i = 0; i < 10; ++i)
-        {
-            Vector(0.0f, 0.0f, 0.0f, p);
-            b->TransformPosition(BoneTransform[i], p, Position, false);
-            Vector(0.1f, 0.1f, 0.3f, Light);
-            CreateSprite(BITMAP_SPARK + 1, Position, 7.5f, Light, o);
-        }
     }
     break;
 
