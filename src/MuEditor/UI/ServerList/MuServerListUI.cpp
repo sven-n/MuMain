@@ -166,6 +166,17 @@ std::string GetColorLabel(const ServerListData& list, std::string_view color)
     return custom->name.empty() ? custom->id : custom->name;
 }
 
+// A selectable row with `text` drawn as written. As a Selectable's label, a "##" in a
+// name would start its ImGui ID and hide the rest; `id` tells the rows apart.
+bool SelectableText(const char* id, const std::string& text, bool selected,
+                    ImGuiSelectableFlags flags = ImGuiSelectableFlags_None)
+{
+    const ImVec2 textPosition = ImGui::GetCursorScreenPos();
+    const bool clicked = ImGui::Selectable(id, selected, flags);
+    ImGui::GetWindowDrawList()->AddText(textPosition, ImGui::GetColorU32(ImGuiCol_Text), text.c_str());
+    return clicked;
+}
+
 std::string GetRuleVipLabel(const ServerListData& list, const ButtonColorRule& rule, std::string_view locale)
 {
     switch (rule.vipMatch)
@@ -212,7 +223,7 @@ bool PickRuleVip(const ServerListData& list, ButtonColorRule& rule)
         candidate.vip = vip;
         const bool current = candidate.FitsAsMuchAs(rule);
         ImGui::PushID(option++);
-        if (ImGui::Selectable(label.c_str(), current) && !current)
+        if (SelectableText("##RuleVipOption", label, current) && !current)
         {
             rule = std::move(candidate);
             picked = true;
@@ -270,7 +281,7 @@ bool PickRuleColor(const ServerListData& list, ButtonColorRule& rule)
         ImGui::PushID(option++);
         RenderSwatch(GetButtonColorSwatch(Data::ServerList::ResolveButtonColor(list, color, theme), theme));
         ImGui::SameLine();
-        if (ImGui::Selectable(GetColorLabel(list, color).c_str(), color == rule.color) && color != rule.color)
+        if (SelectableText("##RuleColorOption", GetColorLabel(list, color), color == rule.color) && color != rule.color)
         {
             rule.color = color;
             picked = true;
@@ -343,7 +354,8 @@ std::optional<std::string> PickVipType(const ServerListData& list, const std::st
     {
         const VipType& vipType = list.vipTypes[index];
         ImGui::PushID(static_cast<int>(index));
-        if (ImGui::Selectable(GetVipTypeLabel(&vipType, locale).c_str(), &vipType == current) && &vipType != current)
+        if (SelectableText("##VipOption", GetVipTypeLabel(&vipType, locale), &vipType == current) &&
+            &vipType != current)
         {
             picked = vipType.id;
         }
@@ -752,14 +764,10 @@ bool CMuServerListUI::RenderGroupList()
         ImGui::PushID(index);
         const std::string label = (group.name.empty() ? std::string("?") : group.name) + " (" +
                                   std::to_string(group.id) + ")" + (group.testServer ? " *" : "");
-        // The name is drawn as plain text: as the row's label, a "##" in it
-        // would start the ImGui ID and hide the rest.
-        const ImVec2 textPosition = ImGui::GetCursorScreenPos();
-        if (ImGui::Selectable("##Group", index == m_selected, MuEditor::KeyboardSelection::RowFlags))
+        if (SelectableText("##Group", label, index == m_selected, MuEditor::KeyboardSelection::RowFlags))
         {
             Select(index);
         }
-        ImGui::GetWindowDrawList()->AddText(textPosition, ImGui::GetColorU32(ImGuiCol_Text), label.c_str());
         ImGui::PopID();
     }
     return false;
@@ -1004,13 +1012,10 @@ bool CMuServerListUI::RenderVipTypeList()
         const VipType& vipType = vipTypes[static_cast<size_t>(index)];
         ImGui::PushID(index);
         const std::string label = GetVipTypeLabel(&vipType, locale) + " (" + vipType.id + ")";
-        // Drawn as plain text, as the group names are: a "##" in it would start the ImGui ID.
-        const ImVec2 textPosition = ImGui::GetCursorScreenPos();
-        if (ImGui::Selectable("##VipType", index == m_selectedVipType, MuEditor::KeyboardSelection::RowFlags))
+        if (SelectableText("##VipType", label, index == m_selectedVipType, MuEditor::KeyboardSelection::RowFlags))
         {
             SelectVipType(index);
         }
-        ImGui::GetWindowDrawList()->AddText(textPosition, ImGui::GetColorU32(ImGuiCol_Text), label.c_str());
         ImGui::PopID();
     }
     return false;
@@ -1297,12 +1302,10 @@ bool CMuServerListUI::RenderCustomColors()
             RenderSwatch(GetButtonColorSwatch(Data::ServerList::ResolveButtonColor(list, color.id, theme), theme));
             ImGui::SameLine();
             const std::string label = GetColorLabel(list, color.id) + " (" + color.id + ")";
-            const ImVec2 textPosition = ImGui::GetCursorScreenPos();
-            if (ImGui::Selectable("##CustomColor", index == m_selectedColor, MuEditor::KeyboardSelection::RowFlags))
+            if (SelectableText("##CustomColor", label, index == m_selectedColor, MuEditor::KeyboardSelection::RowFlags))
             {
                 SelectColor(index);
             }
-            ImGui::GetWindowDrawList()->AddText(textPosition, ImGui::GetColorU32(ImGuiCol_Text), label.c_str());
             ImGui::PopID();
         }
     }
