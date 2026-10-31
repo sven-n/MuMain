@@ -34,8 +34,10 @@ admin panel; to put a server into a second group, give it an ID from 20 to 39.
   | on  | Gold     | `Valhalla-5 (Gold PvP) Connect`      | `[Valhalla-5 (Gold PvP)]`     |
   | off | Gold     | `Valhalla-1 (Gold Non-PvP) Connect`  | `[Valhalla-1 (Gold Non-PvP)]` |
 
-- **Button color:** a channel with a VIP type gets that type's theme color; one
-  without gets gray with PvP on and the theme's default color with PvP off.
+- **Button color:** set by the button color rules, by VIP type, PvP or both
+  (see [Button colors](#button-colors)). With the bundled file Gold channels are
+  orange, channels without a VIP type gray with PvP on and the theme's default
+  color with PvP off.
 - **PvP notice:** the warning about crowded PvP servers is shown for a group
   that has no channel with PvP off.
 - **Description:** shown below the channels while the group is selected.
@@ -68,8 +70,17 @@ theme), so a long name there can run past its edges.
 {
   "formatVersion": 2,
   "vipTypes": [
-    {"id": "gold", "name": {"en": "Gold", "es": "Oro"}, "themeColor": "orange"},
-    {"id": "silver", "name": {"en": "Silver"}, "themeColor": "silver"}
+    {"id": "gold", "name": {"en": "Gold", "es": "Oro"}},
+    {"id": "silver", "name": {"en": "Silver"}}
+  ],
+  "colors": [
+    {"id": "goldRed", "name": "Gold red", "shades": {"legacy": "#FF5A5A", "modern": "#C0564E"}}
+  ],
+  "buttonColors": [
+    {"vip": "gold", "pvp": false, "color": "goldRed"},
+    {"vip": "gold", "color": "orange"},
+    {"vip": true, "color": "silver"},
+    {"vip": false, "pvp": true, "color": "gray"}
   ],
   "names": {
     "pvp": {"en": "PvP"},
@@ -108,6 +119,8 @@ theme), so a long name there can run past its edges.
 |-----------------|--------------------------------------------------------------------------|
 | `formatVersion` | `2`. A version 1 file (the four fixed channel types) is not read: the game stops and names the problem. |
 | `vipTypes`      | Optional; the VIP types, in the order the editor lists them.              |
+| `colors`        | Optional; your own button colors, each with a shade per theme.           |
+| `buttonColors`  | Optional; the rules that color the channel buttons. Without a fitting rule a button has the theme's default color. |
 | `names`         | Optional; the texts that name a channel (below). A text left out uses the built-in English one. |
 | `groups`        | The groups, in the order of their buttons.                               |
 
@@ -134,7 +147,6 @@ A VIP type:
 |--------------|-------------------------------------------------------------------------|
 | `id`         | What channels use in `vip`; each id once. Letters and digits, starting with a lowercase letter. |
 | `name`       | `{vip}` in the templates, one text per language; up to 32 characters.   |
-| `themeColor` | The button color: `default`, `gray`, `orange` or `silver`. Each theme (legacy, modern) draws its own shade. |
 
 A name or description that is too long is cut (a warning in the log). Most
 emoji count as two characters, as the client stores them on Windows.
@@ -174,6 +186,34 @@ A placeholder the template does not know (`{vipName}`, or `{load}` outside
 Each language has its own template, so a language can put the words in its own
 order (`({pvp} {vip})`).
 
+### Button colors
+
+Each rule of `buttonColors` says which channels it fits and their color:
+
+| Field   | Meaning                                                                       |
+|---------|-------------------------------------------------------------------------------|
+| `vip`   | Optional; the `id` of a VIP type, `true` for any VIP type, `false` for no VIP type. Left out: any channel. |
+| `pvp`   | Optional; `true` for PvP on, `false` for PvP off. Left out: either.            |
+| `color` | `default`, `gray`, `orange`, `silver` (the theme colors), or the `id` of one of your `colors`. |
+
+When several rules fit a channel, the most specific one colors it, so the
+order of the rules does not matter:
+
+- a rule that names a VIP type beats one for any VIP type or for none, which
+  beats one that leaves `vip` out;
+- with the same `vip`, a rule that gives `pvp` beats one that leaves it out.
+
+So `{"vip": "gold", "pvp": false}` beats `{"vip": "gold"}`, and any rule with
+`vip` beats one with only `pvp`. Two rules with the same `vip` and `pvp` are a
+problem; the second is not used.
+
+The theme colors are drawn by each theme in its own shade, hover too. A color
+of your own has an `id` (letters and digits, starting with a lowercase letter,
+not one of the theme colors), a `name` the editor shows, and a shade
+(`#RRGGBB`) per theme folder (`legacy`, `modern`, ...); a theme it has no shade
+for draws the theme's default color. A button in your own color keeps it on
+hover; the button's frame still changes.
+
 ### Problems
 
 | Problem                                              | Level   | What the game does                   |
@@ -182,7 +222,11 @@ order (`({pvp} {vip})`).
 | A VIP type without an id, or an id used twice        | fatal   | stops                                |
 | A VIP type without an English name                   | fatal   | stops                                |
 | A channel's `vip` is not the id of a VIP type        | error   | the channel has no VIP type          |
-| An unknown `themeColor`                              | warning | the theme's default color            |
+| A color without an id, an id used twice or a theme color's | fatal | stops                         |
+| A color's shade that is not `#RRGGBB`                | error   | the theme's default color there      |
+| A rule's `vip` is not the id of a VIP type           | error   | the rule is not used                 |
+| Two rules with the same `vip` and `pvp`              | error   | the second is not used               |
+| A rule's `color` is not a theme color or one of `colors` | warning | the theme's default color        |
 | An unknown placeholder in a template                 | error   | shows it as written                  |
 | An unknown language code                             | warning | the text is not used                 |
 | A text or name that is too long                      | warning | cut                                  |
@@ -197,23 +241,31 @@ test server mark, and a table of the 20 channels. Each row has a **PvP** box,
 a **VIP** list (none or one of the VIP types), the button text the login screen
 gives the channel and, when the connect server sent it, its load.
 
-**Channel names** shows the VIP types on the left, with their color, and on the
-right:
+**Channel names** shows the VIP types on the left and on the right:
 
-- the selected VIP type: its ID, its name and its theme color. A new type gets
+- the selected VIP type: its ID and its name. A new type gets
   an ID made from its name (New VIP type is `newVipType`); a changed ID goes to
   the channels with the type too;
 - the texts: a **Language** list, then the PvP and Non-PvP texts and the four
   templates in that language. A field left empty uses the English text, which
   it shows greyed. A note lists the placeholders each template can use;
+- the button color rules: one row per rule with a **VIP** list (any, any VIP
+  type, none, or a VIP type), a **PvP** list (any, on, off) and a **Color**
+  list. A rule that would repeat another's VIP type and PvP is refused;
+- your own colors: their list, and for the selected one its ID, name and a
+  shade for each theme. Removing a color that rules use first asks; those
+  rules then have the default color;
 - a preview of every combination (PvP on and off, with no VIP type and with
-  each VIP type) in all four places, with the selected group's name.
+  each VIP type) in all four places, with the selected group's name and the
+  button's color in the legacy and modern theme.
+
+The Groups tab's channel table shows each channel's button text in its color.
 
 For both tabs:
 
 - The login screen shows each change right away, while the window is open.
 - **Add**, **Remove**, **Move up** and **Move down** change the list of groups,
-  or of VIP types. Removing a VIP type that channels use first asks, and lists
+  of VIP types or of colors. Removing a VIP type that channels use first asks, and lists
   the channels; they then have no VIP type.
 - When the connect server sent servers of groups the list does not have, the
   Groups tab lists them with their server IDs; **Add** there adds a group with
@@ -265,8 +317,13 @@ is done; the sections above then describe what was built.
    Commas are not handled; an optional form like `{vip, }` can be added later
    without breaking these templates.
 5. One template per place: `button`, `login`, `characterInfo`, `screenshot`.
-6. A VIP type has a name per language and a theme color from a fixed list.
+6. A VIP type has a name per language. (First: and a theme color; replaced by 8
+   and 9 after trying the build.)
 7. A version 1 file is not read.
+8. Button colors come from rules by VIP type, PvP or both; the most specific
+   fitting rule wins, so their order does not matter.
+9. A color is a theme color or one of your own, with a name and a shade per
+   theme; rules pick colors by name.
 
 ### Decided while writing the plan (to confirm)
 
@@ -281,6 +338,11 @@ is done; the sections above then describe what was built.
   `silver` in both themes.
 - **zh-CN** has no Gold texts yet, so its Gold name falls back to English until
   it is translated.
+- **Colors, decided while writing them:** a rule's `vip` is `true` (any VIP
+  type), `false` (none) or a VIP type's id; a theme without a shade for an own
+  color draws the default color; colors have one name, not one per language
+  (only the editor shows it); the bundled rules keep today's look (Gold orange,
+  no VIP type with PvP on gray).
 
 ### Bundled texts
 
@@ -315,5 +377,9 @@ is done; the sections above then describe what was built.
    above.
 6. **Editor:** the Groups tab's channel table gets the PvP box and VIP list;
    the new Channel names tab; undo steps; Save checks.
-7. **Tests** for each step; this document; then this section is removed and
+7. **Colors (after trying the build):** `colors` and `buttonColors` in the
+   file instead of a VIP type's theme color; the server list draws own colors
+   in the shade of the active theme; the editor's rules and colors sections and
+   colored previews.
+8. **Tests** for each step; this document; then this section is removed and
    #895's title and description describe the whole change.
