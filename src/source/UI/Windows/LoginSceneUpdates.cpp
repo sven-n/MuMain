@@ -10,6 +10,7 @@
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/LoginMainWin.h"
 #include "UI/Windows/LoginWin.h"
+#include "UI/Windows/MsgWin.h"
 #include "UI/Windows/ServerSelWin.h"
 
 #include <cstdlib>
@@ -50,6 +51,19 @@ void ShowLoginWindow()
 void HideLoginWindow()
 {
     g_LoginWin.Show(false);
+}
+
+bool IsWaitingForServer()
+{
+    // The way back to the server list (the login window's Cancel) opens its own connection.
+    if (g_LoginWin.IsReturningToServerList())
+    {
+        return false;
+    }
+
+    const bool offersNextStep =
+        g_ServerSelWin.IsVisible() || g_CreditWin.IsVisible() || g_LoginWin.IsVisible() || g_MsgWin.IsVisible();
+    return !offersNextStep;
 }
 
 void ShowMessage(int messageCode)

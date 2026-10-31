@@ -10,6 +10,10 @@ void ServerListReceived();
 void ShowLoginWindow();
 void HideLoginWindow();
 
+// True while the screen waits for a server's answer and shows nothing to click: after a
+// server was picked, after the login was sent, before the first server list.
+bool IsWaitingForServer();
+
 // `messageCode` is one of the scene's popup message ids (MESSAGE_* or RECEIVE_*_FAIL*).
 void ShowMessage(int messageCode);
 void CloseMessage();

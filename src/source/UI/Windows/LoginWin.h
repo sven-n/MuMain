@@ -50,6 +50,10 @@ public:
         return m_bConnectionReconnectDone.load();
     }
     void ProcessPendingConnectionReconnect();
+    bool IsReturningToServerList() const
+    {
+        return m_bConnectionReconnectInFlight.load();
+    }
 
     // Sends a login without touching the text boxes or the remembered
     // credentials in config.ini. The manual path calls it after validating

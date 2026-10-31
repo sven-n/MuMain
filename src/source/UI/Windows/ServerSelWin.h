@@ -77,7 +77,8 @@ private:
     // Shared by RmlClickSelectServer() and SelectServer(). Returns false (and
     // leaves the window open) without connecting when pServerInfo is null or
     // the server is full/busy -- the caller decides what busy means to it.
-    bool ConnectToServer(CServerInfo* pServerInfo);
+    // `serverIndex` is pServerInfo's position in the selected group (CServerGroup::GetServerInfo).
+    bool ConnectToServer(CServerInfo* pServerInfo, int serverIndex);
 
     struct GroupEntry
     {

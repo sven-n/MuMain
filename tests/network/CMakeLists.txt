@@ -46,6 +46,14 @@ mu_add_test(
         MuClient
 )
 
+mu_add_test(
+    NAME test_login_scene_reconnect
+    SOURCES
+        test_login_scene_reconnect.cpp
+    LINK_LIBS
+        MuClient
+)
+
 # Control socket tests only exist in builds that enable it. Without it, the
 # control_socket_leak test proves that none of its sources were compiled into
 # the client (same mechanics as tests/editor's editor_leak).

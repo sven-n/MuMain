@@ -37,6 +37,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
+#include "Network/Reconnect/LoginSceneReconnect.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
 #include "I18N/All.h"
@@ -394,7 +395,8 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 
         // While auto-reconnecting we probe the server repeatedly; the reconnect
         // dialog already shows the status, so don't stack "server lost" popups.
-        if (!ReconnectManager::Instance().IsActive())
+        // The login screen's reconnect shows its own message when it fails.
+        if (!ReconnectManager::Instance().IsActive() && !LoginSceneReconnect::Instance().IsReconnecting())
         {
             static bool connectErrorDisplayed = false;
             if (!connectErrorDisplayed)
@@ -529,6 +531,7 @@ void ReceiveServerList(const BYTE* ReceiveBuffer)
     }
 
     UI::LoginScene::ServerListReceived();
+    LoginSceneReconnect::Instance().OnGreeting(LoginServer::Connect);
 
     g_ErrorReport.Write(L"Success Receive Server List.\r\n");
 
@@ -585,6 +588,7 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
             }
             HeroKey = ((int)(Data2->NumberH) << 8) + Data2->NumberL;
             CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
+            LoginSceneReconnect::Instance().OnGreeting(LoginServer::Game);
             break;
 
         default:

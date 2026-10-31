@@ -208,6 +208,7 @@ enum
     MESSAGE_PCROOM_EVENT,
     MESSAGE_WHITEANGEL_EVENT,
     MESSAGE_3COLORHARVEST_EVENT,
+    MESSAGE_SERVER_LOST_RECONNECT, // the login screen can't reach the server: Reconnect or Exit
 };
 
 enum ActionSkillType

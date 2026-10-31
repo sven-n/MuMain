@@ -31,6 +31,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Network/Server/WSclient.h"
+#include "Network/Reconnect/LoginSceneReconnect.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 
@@ -39,6 +40,22 @@ namespace
     // Same cap the native password box was given (SetTextLimit(20)). Set on #msgwin_input from C++
     // so it stays one rule rather than a literal duplicated per theme.
     constexpr int kResidentPasswordMaxLength = 20;
+
+    // Messages whose buttons say what they do, where "OK" and "Cancel" wouldn't.
+    bool HasOwnCaptions(int msgCode)
+    {
+        return msgCode == MESSAGE_SERVER_LOST_RECONNECT;
+    }
+
+    const wchar_t* OkLabelFor(int msgCode)
+    {
+        return HasOwnCaptions(msgCode) ? I18N::Game::Reconnect : I18N::Game::OK;
+    }
+
+    const wchar_t* CancelLabelFor(int msgCode)
+    {
+        return HasOwnCaptions(msgCode) ? I18N::Game::Exit : I18N::Game::Cancel;
+    }
 }
 
 CMsgWin g_MsgWin;
@@ -84,6 +101,7 @@ void CMsgWin::BindRmlModel(Rml::DataModelConstructor& c, MsgWinRmlModel& model)
     c.Bind("mode_input", &model.modeInput);
     c.Bind("ok_label", &model.okLabel);
     c.Bind("cancel_label", &model.cancelLabel);
+    c.Bind("own_captions", &model.ownCaptions);
     c.Bind("password_input", &model.residentPassword);
 
     c.BindEventCallback("msgwin_ok_click",
@@ -231,8 +249,9 @@ void CMsgWin::SyncRmlModel()
     syncBool(&MsgWinRmlModel::modeOkOnly, "mode_ok_only", m_eType == MWT_BTN_OK);
     syncBool(&MsgWinRmlModel::modeBoth, "mode_both", m_eType == MWT_BTN_BOTH);
     syncBool(&MsgWinRmlModel::modeInput, "mode_input", m_eType == MWT_STR_INPUT);
-    syncLabel(&MsgWinRmlModel::okLabel, "ok_label", I18N::Game::OK);
-    syncLabel(&MsgWinRmlModel::cancelLabel, "cancel_label", I18N::Game::Cancel);
+    syncBool(&MsgWinRmlModel::ownCaptions, "own_captions", HasOwnCaptions(m_nMsgCode));
+    syncLabel(&MsgWinRmlModel::okLabel, "ok_label", OkLabelFor(m_nMsgCode));
+    syncLabel(&MsgWinRmlModel::cancelLabel, "cancel_label", CancelLabelFor(m_nMsgCode));
 }
 
 void CMsgWin::SetMsg(MSG_WIN_TYPE eType, std::wstring lpszMsg, std::wstring lpszMsg2)
@@ -281,6 +300,10 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         break;
     case MESSAGE_SERVER_LOST:
         lpszMsg = I18N::Game::YouAreDisconnectedFromTheServer;
+        break;
+    case MESSAGE_SERVER_LOST_RECONNECT:
+        lpszMsg = I18N::Game::YouAreDisconnectedFromTheServer;
+        eType = MWT_BTN_BOTH;
         break;
     case MESSAGE_VERSION:
     case RECEIVE_LOG_IN_FAIL_VERSION:
@@ -468,11 +491,19 @@ void CMsgWin::ManageOKClick()
         RequestDeleteCharacter();
         PopUp(MESSAGE_WAIT);
         break;
+    case MESSAGE_SERVER_LOST_RECONNECT:
+        LoginSceneReconnect::Instance().Retry();
+        break;
     }
 }
 
 void CMsgWin::ManageCancelClick()
 {
+    if (m_nMsgCode == MESSAGE_SERVER_LOST_RECONNECT)
+    {
+        ::PostMessage(g_hWnd, WM_CLOSE, 0, 0);
+    }
+
     if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
     {
         m_RmlView.GetModel().residentPassword.clear();

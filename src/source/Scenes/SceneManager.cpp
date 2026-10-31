@@ -53,6 +53,7 @@ FrameTimingState g_frameTiming;
 #include "Core/Input/Input.h"
 #include "UI/Core/SceneUICoordinator.h"
 #include "Network/Server/WSclient.h"
+#include "Network/Reconnect/LoginSceneReconnect.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "UI/Dialogs/ReconnectDialog.h"
 #include "GameLogic/Events/w_CursedTemple.h"
@@ -744,6 +745,19 @@ static void UpdateDiagnostics()
     UI::Diagnostics::Update(summary);
 }
 
+static void UpdateLoginSceneReconnect()
+{
+    LoginSceneReconnect& reconnect = LoginSceneReconnect::Instance();
+    if (SceneFlag == LOG_IN_SCENE)
+    {
+        reconnect.Update();
+    }
+    else
+    {
+        reconnect.Reset();
+    }
+}
+
 /**
  * @brief Checks and handles server connection loss.
  */
@@ -771,6 +785,13 @@ static void CheckServerConnection()
         // the brief re-login phase shows it frozen instead of a black screen.
         UI::Reconnect::CaptureBackground();
         ReconnectManager::Instance().RequestBegin();
+        return;
+    }
+
+    // Nothing is lost before the login: the login screen reconnects when it needs the server.
+    if (SceneFlag == LOG_IN_SCENE)
+    {
+        LoginSceneReconnect::Instance().OnConnectionLost();
         return;
     }
 
@@ -1231,6 +1252,7 @@ void RenderScene(HDC hDC)
     // runs across all scenes because reconnect passes through the login,
     // character and loading scenes on its way back into the game.
     ReconnectManager::Instance().Update();
+    UpdateLoginSceneReconnect();
 
     g_frameTiming.MarkFrameRendered();
 

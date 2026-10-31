@@ -19,6 +19,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Network/Server/WSclient.h"
+#include "Network/Reconnect/LoginSceneReconnect.h"
 #include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
@@ -183,12 +184,12 @@ bool CCreditWin::Render()
 
 void CCreditWin::CloseWin()
 {
-	Show(false);
+    Show(false);
 
-	SocketClient->ToConnectServer()->SendServerListRequest();
+    LoginSceneReconnect::Instance().RequestServerList();
 
-	::StopMp3(MUSIC_MUTHEME);
-	::PlayMp3(MUSIC_MAIN_THEME);
+    ::StopMp3(MUSIC_MUTHEME);
+    ::PlayMp3(MUSIC_MAIN_THEME);
 }
 
 void CCreditWin::Init()

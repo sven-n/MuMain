@@ -7,6 +7,7 @@
 #include "I18N/All.h"
 
 #include "Network/Server/ServerListManager.h"
+#include "Network/Reconnect/LoginSceneReconnect.h"
 #include "Core/Globals/_enum.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -370,7 +371,7 @@ void CServerSelWin::SelectGroup(int nBtnPos)
 
     SyncRmlModel();
 
-    SocketClient->ToConnectServer()->SendServerListRequest();
+    LoginSceneReconnect::Instance().RequestServerList();
 }
 
 void CServerSelWin::RmlClickSelectGroup(int nBtnPos)
@@ -408,7 +409,7 @@ void CServerSelWin::RmlClickSelectServer(int nServerIndex)
     // overloaded one (then "Now preparing").
     if (Data::ServerList::GetLoadState(pServerInfo->m_iPercent) == Data::ServerList::LoadState::Open)
     {
-        ConnectToServer(pServerInfo);
+        ConnectToServer(pServerInfo, nServerIndex);
     }
     else
     {
@@ -416,12 +417,19 @@ void CServerSelWin::RmlClickSelectServer(int nServerIndex)
     }
 }
 
-bool CServerSelWin::ConnectToServer(CServerInfo* pServerInfo)
+bool CServerSelWin::ConnectToServer(CServerInfo* pServerInfo, int serverIndex)
 {
     if (pServerInfo == nullptr || m_pSelectServerGroup == nullptr || RefuseOfflinePreview(*pServerInfo))
         return false;
 
     Show(false);
+
+    // The connect server drops a list left open too long; pick the server again
+    // from the fresh list the reconnect brings.
+    const std::wstring groupName = m_pSelectServerGroup->m_szName;
+    const auto pickAgain = [groupName, serverIndex] { g_ServerSelWin.SelectServer(groupName.c_str(), serverIndex); };
+    if (!LoginSceneReconnect::Instance().EnsureConnected(LoginServer::Connect, pickAgain))
+        return true;
 
     SocketClient->ToConnectServer()->SendConnectionInfoRequest(static_cast<uint16_t>(pServerInfo->m_iConnectIndex));
     g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, mu::ui::window::TYPE_SYSTEM_MESSAGE);
@@ -483,7 +491,7 @@ bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
         return false;
     }
 
-    return ConnectToServer(pServerInfo);
+    return ConnectToServer(pServerInfo, serverIndex);
 }
 
 bool CServerSelWin::UpdateMouseEvent()

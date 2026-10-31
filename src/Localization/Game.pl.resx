@@ -9357,6 +9357,9 @@
   <data name="Retrying in seconds" xml:space="preserve">
     <value>Ponowna próba za %d sekund...</value>
   </data>
+  <data name="Reconnect" xml:space="preserve">
+    <value>Połącz ponownie</value>
+  </data>
   <data name="MixLevelAtLeast" xml:space="preserve">
     <value>+%d lub wyżej</value>
   </data>

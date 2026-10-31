@@ -43,6 +43,16 @@ public:
     void ClearSession();
     bool HasSession() const { return m_hasSession; }
 
+    // The game server the client connected to last (empty, port 0, before the first one).
+    const wchar_t* GetServerIp() const
+    {
+        return m_serverIp;
+    }
+    unsigned short GetServerPort() const
+    {
+        return m_serverPort;
+    }
+
     // Lifecycle.
     void RequestBegin();  // detector asks to start reconnect (begins probing)
     void Begin();         // performs the teardown between frames; the main loop calls it once m_beginPending is set

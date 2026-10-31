@@ -16,6 +16,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Network/Reconnect/LoginSceneReconnect.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Scenes/SceneCore.h"
 #include "I18N/All.h"
@@ -561,6 +562,13 @@ void CLoginWin::SubmitCredentials(const wchar_t* pszUsername, const wchar_t* psz
     // not leave it up, or its text fields keep the keyboard focus and no key
     // reaches the game afterwards. Hiding an already hidden window is a no-op.
     Show(false);
+
+    // The game server may have dropped the idle login screen; log in once it is back.
+    const std::wstring username = pszUsername;
+    const std::wstring password = pszPassword;
+    const auto submitAgain = [username, password] { g_LoginWin.SubmitCredentials(username.c_str(), password.c_str()); };
+    if (!LoginSceneReconnect::Instance().EnsureConnected(LoginServer::Game, submitAgain))
+        return;
 
     g_ConsoleDebug->Write(MCD_NORMAL, L"Login with the following account: %ls", pszUsername);
 
