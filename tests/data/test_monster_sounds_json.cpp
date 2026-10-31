@@ -467,6 +467,25 @@ TEST_CASE("Monster sounds: the set of each look of a monster is found once per c
     g_MonsterDatabase.Build({}, "en");
 }
 
+TEST_CASE("Monster sounds: the monsters of a model are those that appear with it, also as a random variant "
+          "[data][monsters]")
+{
+    namespace Links = Data::Monsters::SoundSetLinks;
+    MonsterDefinition elf = Monster(163, "MONSTER_MODEL_CHAOSCASTLE_ELF", "Elf");
+    elf.randomVariants = {{"MONSTER_MODEL_CHAOSCASTLE_WIZARD", std::nullopt}};
+    std::vector<MonsterDefinition> monsters = {Monster(3, "MONSTER_MODEL_HOUND", "Hound"),
+                                               Monster(5, "MONSTER_MODEL_HOUND", ""), elf};
+    g_MonsterDatabase.Build(monsters, "en");
+    CHECK(Links::CountMonstersWithModel(MODEL_HOUND) == 2);
+    CHECK(Links::CountMonstersWithModel(MODEL_CHAOS_CASTLE_ELF) == 1);
+    CHECK(Links::CountMonstersWithModel(MODEL_CHAOS_CASTLE_WIZARD) == 1);
+    CHECK(Links::CountMonstersWithModel(MODEL_BULL_FIGHTER) == 0);
+    monsters.pop_back();
+    g_MonsterDatabase.Build(monsters, "en");
+    CHECK(Links::CountMonstersWithModel(MODEL_CHAOS_CASTLE_WIZARD) == 0);
+    g_MonsterDatabase.Build({}, "en");
+}
+
 TEST_CASE("Monster sounds: the code draws the looks of the ranged Chaos Castle soldiers only (Q-MN83) "
           "[data][monsters]")
 {

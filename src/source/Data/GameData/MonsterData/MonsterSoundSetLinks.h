@@ -18,4 +18,8 @@ const MonsterSoundSet* FindSet(int number, int slot);
 // The sets the monsters use with the model in `slot`, their own or a random
 // variant's with that model, by monster number, each once.
 std::vector<const MonsterSoundSet*> FindSetsOfSlot(int slot);
+
+// How many monsters appear with the model in `slot`, with their entry's
+// model or a random variant's: those that a change of its cues reaches.
+int CountMonstersWithModel(int slot);
 } // namespace Data::Monsters::SoundSetLinks

@@ -124,4 +124,11 @@ std::vector<const MonsterSoundSet*> FindSetsOfSlot(int slot)
     }
     return sets;
 }
+
+int CountMonstersWithModel(int slot)
+{
+    const Links& links = Current();
+    const auto numbers = links.numbersOfSlot.find(slot);
+    return numbers != links.numbersOfSlot.end() ? static_cast<int>(numbers->second.size()) : 0;
+}
 } // namespace Data::Monsters::SoundSetLinks
