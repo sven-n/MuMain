@@ -8,6 +8,7 @@
 
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 // The sound events of a sound set in the Monster Sounds tool (monsters
@@ -51,6 +52,10 @@ std::vector<std::string> PreviewSounds(const Data::Monsters::MonsterSoundEvent& 
 
 // A frame as the tools show it and name a new cue after it: "4.50".
 std::string FrameText(float frame);
+
+// Keeps frames that a cue's inputs changed at frame 0 or later, the cue at
+// least 0.1 frames long.
+void KeepCueFrames(std::pair<float, float>& frames);
 
 // A cue at `frame` of `animation`, one frame long, named after them ("walk
 // 4.50") unless the model has that name, then with a number added.

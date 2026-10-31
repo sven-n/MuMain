@@ -597,6 +597,25 @@ TEST_CASE("Monster Sounds and Monster Preview show a frame alike, as a new cue i
     CHECK(FrameText(12.126f) == "12.13");
 }
 
+TEST_CASE("Monster Sounds and Monster Preview keep a cue's frames at 0 or later and 0.1 frames long "
+          "[editor][monsters]")
+{
+    using MuEditor::Monsters::SoundEventsEditor::KeepCueFrames;
+    std::pair<float, float> frames{-1.0f, 0.5f};
+    KeepCueFrames(frames);
+    CHECK(frames == std::pair(0.0f, 0.5f));
+    frames = {2.0f, 2.05f};
+    KeepCueFrames(frames);
+    CHECK(frames.first == 2.0f);
+    CHECK(frames.second == doctest::Approx(2.1f));
+    frames = {3.0f, 1.0f};
+    KeepCueFrames(frames);
+    CHECK(frames.second == doctest::Approx(3.1f));
+    frames = {3.0f, 5.0f};
+    KeepCueFrames(frames);
+    CHECK(frames == std::pair(3.0f, 5.0f));
+}
+
 TEST_CASE("Monster Model: a cue that no sound event of the model's monsters plays on can be removed "
           "[editor][monsters]")
 {
