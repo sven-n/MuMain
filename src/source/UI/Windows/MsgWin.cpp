@@ -184,7 +184,10 @@ bool CMsgWin::Update()
             ManageCancelClick();
         }
     }
-    else if (rInput.IsKeyDown(VK_ESCAPE))
+    // An Esc that just closed the system menu (CSceneUICoordinator::Update) was for the
+    // menu: a message that came up under it would take it as its answer too, and Esc is
+    // Exit on the Reconnect / Exit message.
+    else if (rInput.IsKeyDown(VK_ESCAPE) && !CSceneUICoordinator::Instance().WasSysMenuToggledByEscThisFrame())
     {
         if (m_eType == MWT_BTN_OK)
         {
