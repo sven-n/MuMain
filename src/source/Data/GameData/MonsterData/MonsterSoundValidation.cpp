@@ -213,6 +213,11 @@ void ValidateMonsterSoundLinks(std::span<const MonsterDefinition> monsters,
             {
                 use(*variant.soundSet, key + ".soundSet", monster.number, variant.model);
             }
+            else if (byName.contains(monster.soundSet))
+            {
+                // The look plays the entry's set on its own model.
+                users[monster.soundSet].push_back({monster.number, FindMonsterModelReference(variant.model)});
+            }
         }
     }
     for (const MonsterSoundSet& set : sets)

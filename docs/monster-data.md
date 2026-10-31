@@ -527,7 +527,9 @@ last. What the files name of each other is checked last: a monster or a
 random variant that names a set that is not there, and a random variant
 whose look the code never draws, are errors (the monster plays no sounds
 there, the variant does nothing); an event's cue that the model of a monster
-that plays the set lacks, and a set that no monster plays, are warnings.
+that plays the set lacks (also the model of a random variant without a set of
+its own, which plays the entry's), and a set that no monster plays, are
+warnings.
 
 An automated test loads the shipped monster list (it expects only the
 warning about 252), the shipped model list (only Molt's file) and the
