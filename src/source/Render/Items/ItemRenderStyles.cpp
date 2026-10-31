@@ -10,6 +10,7 @@
 #include "Render/Sprites/GlobalBitmap.h"
 
 #include <algorithm>
+#include <optional>
 #include <string_view>
 #include <vector>
 
