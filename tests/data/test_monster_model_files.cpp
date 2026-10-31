@@ -17,7 +17,6 @@
 #include <algorithm>
 #include <cctype>
 #include <filesystem>
-#include <map>
 #include <set>
 #include <string>
 #include <vector>
@@ -225,55 +224,6 @@ TEST_CASE("Monster models: the shipped models' textures are in their folders [da
     }
 }
 
-TEST_CASE("Monster models: a SOUND_ id that a sound slot names is loaded by a model of the shipped list "
-          "[data][monsters]")
-{
-    // A slot plays the sound of its number, whichever model loaded it: the
-    // Giant Ogre's attack plays the Dark Skull Soldier's attack sound in
-    // Kalima, Vepar's the Stone Golem's death sound. A number that no model
-    // loads plays nothing; the slots that named one in the original client
-    // name their models' sounds now (P9, Q-MN20).
-    const Data::Monsters::MonsterModelsLoadResult result = LoadShipped();
-    std::set<std::string> loaded;
-    for (const MonsterModelDefinition& model : result.models)
-    {
-        for (const Data::Monsters::MonsterModelSound& sound : model.sounds)
-        {
-            if (!sound.id.empty())
-            {
-                loaded.insert(sound.id);
-            }
-        }
-    }
-    std::set<std::string> notLoaded;
-    for (const MonsterModelDefinition& model : result.models)
-    {
-        if (!model.soundSlots)
-        {
-            continue;
-        }
-        std::vector<std::string> values(model.soundSlots->first.begin(), model.soundSlots->first.end());
-        if (model.soundSlots->second)
-        {
-            values.insert(values.end(), model.soundSlots->second->begin(), model.soundSlots->second->end());
-        }
-        for (const std::string& value : values)
-        {
-            if (value.starts_with("SOUND_") && !loaded.contains(value))
-            {
-                notLoaded.insert(value);
-            }
-        }
-    }
-    std::string listed;
-    for (const std::string& id : notLoaded)
-    {
-        listed += id + " ";
-    }
-    INFO("named by slots, loaded by no model: " << listed);
-    CHECK(notLoaded.empty());
-}
-
 TEST_CASE("Monster models: the game's load fills the model table [data][monsters]")
 {
     ClientDataScope scope(ClientData.parent_path());
@@ -287,34 +237,3 @@ TEST_CASE("Monster models: the game's load fills the model table [data][monsters
     CHECK(g_MonsterModelDatabase.Find(MODEL_PLAYER) == nullptr);
 }
 
-// A sound that several models list is loaded once (MonsterModelLoader skips
-// one already loaded from the same file): they must list the same file,
-// channels and 3D setting, or the later model loads it again with its own.
-TEST_CASE("Monster model files: models that share a sound id load it alike [data][monsters]")
-{
-    const Data::Monsters::MonsterModelsLoadResult loaded = LoadShipped();
-    REQUIRE_FALSE(Data::Items::HasFatal(loaded.issues));
-    std::map<std::string, std::set<std::string>> loads;
-    for (const MonsterModelDefinition& model : loaded.models)
-    {
-        for (const Data::Monsters::MonsterModelSound& sound : model.sounds)
-        {
-            if (!sound.id.empty())
-            {
-                loads[sound.id].insert(Lower(sound.file) + " channels " + std::to_string(sound.channels) +
-                                       (sound.spatial ? " 3d" : ""));
-            }
-        }
-    }
-    std::vector<std::string> differing;
-    for (const auto& [id, ways] : loads)
-    {
-        if (ways.size() > 1)
-        {
-            differing.push_back(id);
-        }
-    }
-    // As in the original client: the Beam Knight loads death1.wav with two
-    // channels in 3D, the Iron Knight (and its dark twin) with one.
-    CHECK(differing == std::vector<std::string>{"SOUND_MONSTER_DEATH1"});
-}

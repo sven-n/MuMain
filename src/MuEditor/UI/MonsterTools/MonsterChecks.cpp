@@ -22,6 +22,11 @@ void RunModels(std::vector<Data::Items::ItemDataIssue>& issues)
 {
     g_MonsterDataHandler.ValidateModels(issues);
 }
+
+void RunSounds(std::vector<Data::Items::ItemDataIssue>& issues)
+{
+    g_MonsterDataHandler.ValidateSounds(issues);
+}
 } // namespace MuEditor::Monsters::MonsterChecks
 
 #endif // _EDITOR

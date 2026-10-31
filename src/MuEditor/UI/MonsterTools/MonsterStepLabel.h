@@ -23,6 +23,10 @@ std::string Name(const Data::Monsters::MonsterDefinition& monster, const char* l
 std::string Attacks(const Data::Monsters::MonsterDefinition& monster);
 // A change of a model entry: "MONSTER_MODEL_HOUND: speed of walk".
 std::string Model(const std::string& slot, const std::string& what);
+// The sound set a monster names, also its variants': "Hound (1): sound set".
+std::string SoundSetOf(const Data::Monsters::MonsterDefinition& monster);
+// A change of a sound set: "Hound (sound set): sound events".
+std::string SoundSet(const std::string& name, const std::string& what);
 } // namespace MuEditor::Monsters::StepLabel
 
 #endif // _EDITOR

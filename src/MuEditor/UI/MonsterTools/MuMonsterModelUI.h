@@ -14,10 +14,10 @@ namespace MuEditor::Monsters
 {
 // The Monster Model tool (monsters design, section 9): the model entry of the
 // selected monster's model in the model list (Data/Monsters/Models.json): its
-// file, texture folders, animation speeds and held last frames, its sounds,
-// sound slots and sound events (MonsterSoundEventsEditor), and what the
-// game's code does on top of them (the slot's range, the speed factors, the
-// next animation, the impact frame). Each
+// file, texture folders, animation speeds and held last frames, its cues,
+// the monster's sound set (edited in Monster Sounds), and what the game's code
+// does on top of them (the slot's range, the speed factors, the next
+// animation, the impact frame). Each
 // change is an undo step of the monster tools; the game opens the model
 // again between frames, so the change shows at once (D55).
 class MuMonsterModelUI
@@ -44,8 +44,9 @@ private:
     void RenderFilePicker(Data::Monsters::MonsterModelDefinition& model);
     void RenderTextureFolders(Data::Monsters::MonsterModelDefinition& model);
     void RenderAnimations(Data::Monsters::MonsterModelDefinition& model, int slot);
-    void RenderSounds(const Data::Monsters::MonsterModelDefinition& model, int slot);
-    void RenderSoundSlots(Data::Monsters::MonsterModelDefinition& model);
+    void RenderSounds(int slot);
+    // The cues, with Remove for those no sound event plays on.
+    void RenderCues(Data::Monsters::MonsterModelDefinition& model, int slot);
     void RenderMore(const Data::Monsters::MonsterModelDefinition& model);
 
     ModelDraft m_draft;

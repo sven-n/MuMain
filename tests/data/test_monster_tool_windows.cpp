@@ -13,6 +13,7 @@
 #include "Data/GameData/MonsterData/MonsterAttacks.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "I18N/All.h"
 #include "UI/Common/MuEditorLayout.h"
 #include "UI/Common/MuEditorToolWindows.h"
@@ -23,17 +24,23 @@
 #include "UI/MonsterTools/MonsterAttackPreview.h"
 #include "UI/MonsterTools/MonsterEdits.h"
 #include "UI/MonsterTools/MonsterSelection.h"
+#include "UI/MonsterTools/MonsterShownModel.h"
+#include "UI/MonsterTools/MonsterSoundEventsEditor.h"
 #include "UI/MonsterTools/MonsterToolWindow.h"
 #include "UI/MonsterTools/MuMonsterAttacksUI.h"
 #include "UI/MonsterTools/MuMonsterBrowserUI.h"
 #include "UI/MonsterTools/MuMonsterModelUI.h"
 #include "UI/MonsterTools/MuMonsterPreviewUI.h"
+#include "UI/MonsterTools/MuMonsterSoundsUI.h"
 #include "UI/MonsterTools/MuMonsterTranslationsUI.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
 #include <array>
 #include <optional>
+#include <span>
+#include <string>
+#include <utility>
 #include <vector>
 
 using Data::Monsters::MonsterDefinition;
@@ -450,100 +457,422 @@ TEST_CASE("Monster Attacks: Play opens the Monster Preview beside it, Play next 
     g_MonsterModelDatabase.Build({});
 }
 
-// The model tools with a monster whose model has an entry with sounds and
-// sound slots, one whose model is outside the model list, and one without a
-// model. The test binary opens no models: the animations and the preview
-// say that the model is not open.
-TEST_CASE("The Monster Model and Monster Preview windows draw a model entry without ImGui errors [editor][monsters]")
+// The model tools with a monster whose model has an entry with cues and
+// whose sound set has events at moments, in animations and on cues, a monster
+// with a random variant (Q-MN83), one whose model is outside the model list,
+// and one without a model. The test binary opens no models: the animations and
+// the preview say that the model is not open.
+TEST_CASE("The Monster Model, Monster Preview and Monster Sounds windows draw without ImGui errors (Q-MN78) "
+          "[editor][monsters]")
 {
     MonsterDefinition hound = Monster(3, "Hound");
     hound.model = "MONSTER_MODEL_HOUND";
+    hound.soundSet = "Hound";
+    MonsterDefinition elf = Monster(163, "Chaos Castle 2");
+    elf.model = "MONSTER_MODEL_CHAOSCASTLE_ELF";
+    elf.soundSet = "Hound";
+    elf.randomVariants = {{"MONSTER_MODEL_CHAOSCASTLE_WIZARD", std::string("Wizard")}};
     MonsterDefinition player = Monster(4, "Guard");
     player.model = "player";
-    const std::array monsters = {Monster(2, "Budge Dragon"), hound, player};
+    const std::array monsters = {Monster(2, "Budge Dragon"), hound, player, elf};
     g_MonsterDatabase.Build(monsters, "en");
     Data::Monsters::MonsterModelDefinition model;
     model.slot = "MONSTER_MODEL_HOUND";
     model.load.file = "Data/Monster/Monster02.bmd";
     model.load.textureFolders = {"Monster"};
     model.load.speeds = {{2, 0.34f}};
-    model.sounds = {{"Data/Sound/mHound1.wav", "", 2, true}, {"Data/Sound/mHound2.wav", "", 2, true}};
-    model.soundSlots.emplace();
-    model.soundSlots->first = {"Data/Sound/mHound1.wav", "Data/Sound/mHound2.wav", "", "", ""};
-    Data::Monsters::MonsterSoundEvent walk;
-    walk.animations = {MONSTER01_WALK};
-    walk.frames = std::pair<float, float>{1.0f, 2.0f};
-    walk.chance = Data::Monsters::MonsterSoundChance{20, Data::Monsters::MonsterSoundDraw::Rand};
-    walk.sounds = {"Data/Sound/mHound1.wav"};
+    model.cues = {{"step 1", MONSTER01_WALK, {1.0f, 2.0f}}};
+    Data::Monsters::MonsterModelDefinition wizard = model;
+    wizard.slot = "MONSTER_MODEL_CHAOSCASTLE_WIZARD";
+    wizard.cues.clear();
+    Data::Monsters::MonsterSoundSet set;
+    set.name = "Hound";
+    set.sounds = {{"Data/Sound/mHound1.wav", "", 2, true}, {"Data/Sound/mHound2.wav", "", 2, true}};
+    Data::Monsters::MonsterSoundEvent idle;
+    idle.moments = {Data::Monsters::MonsterSoundMoment::Stand, Data::Monsters::MonsterSoundMoment::Walk};
+    idle.heardAnywhere = true;
+    idle.atMonster = true;
+    idle.chance = Data::Monsters::MonsterSoundChance{16, Data::Monsters::MonsterSoundDraw::RandFps};
+    idle.pick = Data::Monsters::MonsterSoundDraw::Rand;
+    idle.sounds = {"Data/Sound/mHound1.wav", "Data/Sound/mHound2.wav"};
+    Data::Monsters::MonsterSoundEvent step;
+    step.cues = {"step 1"};
+    step.chance = Data::Monsters::MonsterSoundChance{20, Data::Monsters::MonsterSoundDraw::Rand};
+    step.sounds = {"Data/Sound/mHound1.wav"};
+    // A cue the elf's model lacks.
+    Data::Monsters::MonsterSoundEvent missing;
+    missing.cues = {"step 9"};
+    missing.sounds = {"Data/Sound/mHound2.wav"};
     Data::Monsters::MonsterSoundEvent attack;
     attack.animations = {MONSTER01_ATTACK1, MONSTER01_ATTACK2};
     attack.pick = Data::Monsters::MonsterSoundDraw::Rand;
     attack.sounds = {"Data/Sound/mHound1.wav", "SOUND_THUNDERS01"};
-    model.soundEvents = {walk, attack};
-    model.soundEventMaps = {{69}, {70}};
-    const std::array models = {model};
+    set.soundEvents = {idle, step, missing, attack};
+    set.maps = {{69}, {70}};
+    Data::Monsters::MonsterSoundSet wizardSet = set;
+    wizardSet.name = "Wizard";
+    const std::array models = {model, wizard};
     g_MonsterModelDatabase.Build(models);
+    const std::array sets = {set, wizardSet};
+    g_MonsterSoundSetDatabase.Build(sets);
     TestImGuiContext context;
 
     constexpr int Frames = 5;
-    for (const int number : {3, 4, 2, MonsterSelection::NoMonster})
+    for (const int number : {3, 163, 4, 2, MonsterSelection::NoMonster})
     {
         g_MonsterSelection.Select(number);
-        for (int frame = 0; frame < Frames; ++frame)
+        for (const int variant : {-1, 0})
         {
-            ImGui::NewFrame();
-            bool open = true;
-            g_MuMonsterModelUI.Render(&open);
-            g_MuMonsterPreviewUI.Render(&open);
-            ImGui::Render();
-            INFO("monster " << number << ", frame " << frame);
-            CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+            MuEditor::Monsters::ShownModel::SetShownVariant(number, variant);
+            for (int frame = 0; frame < Frames; ++frame)
+            {
+                ImGui::NewFrame();
+                bool open = true;
+                g_MuMonsterModelUI.Render(&open);
+                g_MuMonsterPreviewUI.Render(&open);
+                g_MuMonsterSoundsUI.Render(&open);
+                ImGui::Render();
+                INFO("monster " << number << ", variant " << variant << ", frame " << frame);
+                CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+            }
         }
     }
-    // The model tool shows the entry: nothing was stored.
+    // The tools show the entries: nothing was stored.
     CHECK(g_MonsterModelDatabase.Find(MODEL_HOUND)->load.speeds == model.load.speeds);
+    CHECK(*g_MonsterSoundSetDatabase.Find("Hound") == set);
     g_MonsterModelDatabase.Build({});
+    g_MonsterSoundSetDatabase.Build({});
 }
 
-TEST_CASE("The Monster Model window leaves a sound event's frame range under 0.1 as it is until it is edited "
-          "[editor][monsters]")
+TEST_CASE("Monster Sounds gives Monster Preview the model it edits in the frame it showed it and the next, as "
+          "Monster Preview draws first (Q-MN81) [editor][monsters]")
 {
     MonsterDefinition hound = Monster(3, "Hound");
     hound.model = "MONSTER_MODEL_HOUND";
+    hound.soundSet = "Hound";
     const std::array monsters = {hound};
     g_MonsterDatabase.Build(monsters, "en");
     Data::Monsters::MonsterModelDefinition model;
     model.slot = "MONSTER_MODEL_HOUND";
     model.load.file = "Data/Monster/Monster02.bmd";
     model.load.textureFolders = {"Monster"};
-    model.sounds = {{"Data/Sound/mHound1.wav", "", 2, true}};
-    Data::Monsters::MonsterSoundEvent walk;
-    walk.animations = {MONSTER01_WALK};
-    // Narrower than the inputs keep a range they edit; the file allows it.
-    walk.frames = std::pair<float, float>{7.0f, 7.05f};
-    walk.sounds = {"Data/Sound/mHound1.wav"};
-    model.soundEvents = {walk};
+    model.cues = {{"step 1", MONSTER01_WALK, {1.0f, 2.0f}}};
     const std::array models = {model};
     g_MonsterModelDatabase.Build(models);
+    Data::Monsters::MonsterSoundSet set;
+    set.name = "Hound";
+    const std::array sets = {set};
+    g_MonsterSoundSetDatabase.Build(sets);
     TestImGuiContext context;
     g_MonsterSelection.Select(3);
 
-    for (int frame = 0; frame < 3; ++frame)
+    ImGui::NewFrame();
+    bool open = true;
+    g_MuMonsterSoundsUI.Render(&open);
+    const Data::Monsters::MonsterModelDefinition* shown = g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND);
+    REQUIRE(shown != nullptr);
+    CHECK(shown->cues == model.cues);
+    CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_BULL_FIGHTER) == nullptr);
+    ImGui::Render();
+    // The next frame, before the window draws again: Monster Preview draws
+    // first and marks the draft's cues.
+    ImGui::NewFrame();
+    REQUIRE(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) == shown);
+    CHECK(g_MuMonsterPreviewUI.GetCues(MODEL_HOUND).size() == 1);
+    ImGui::Render();
+    // A frame later without the window: its draft is old.
+    ImGui::NewFrame();
+    CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) == nullptr);
+    ImGui::Render();
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterModelDatabase.Build({});
+    g_MonsterSoundSetDatabase.Build({});
+}
+
+TEST_CASE("Monster Sounds and Monster Preview show a frame alike, as a new cue is named [editor][monsters]")
+{
+    using MuEditor::Monsters::SoundEventsEditor::FrameText;
+    CHECK(FrameText(4.5f) == "4.50");
+    CHECK(FrameText(0.0f) == "0.00");
+    CHECK(FrameText(12.126f) == "12.13");
+}
+
+TEST_CASE("Monster Sounds and Monster Preview keep a cue's frames at 0 or later and 0.1 frames long "
+          "[editor][monsters]")
+{
+    using MuEditor::Monsters::SoundEventsEditor::KeepCueFrames;
+    std::pair<float, float> frames{-1.0f, 0.5f};
+    KeepCueFrames(frames);
+    CHECK(frames == std::pair(0.0f, 0.5f));
+    frames = {2.0f, 2.05f};
+    KeepCueFrames(frames);
+    CHECK(frames.first == 2.0f);
+    CHECK(frames.second == doctest::Approx(2.1f));
+    frames = {3.0f, 1.0f};
+    KeepCueFrames(frames);
+    CHECK(frames.second == doctest::Approx(3.1f));
+    frames = {3.0f, 5.0f};
+    KeepCueFrames(frames);
+    CHECK(frames == std::pair(3.0f, 5.0f));
+}
+
+TEST_CASE("Monster Model: a cue that no sound event of the model's monsters plays on can be removed "
+          "[editor][monsters]")
+{
+    MonsterDefinition hound = Monster(3, "Hound");
+    hound.model = "MONSTER_MODEL_HOUND";
+    hound.soundSet = "Hound";
+    // A set that no monster of the model plays, on the second cue.
+    MonsterDefinition other = Monster(4, "Budge Dragon");
+    other.model = "MONSTER_MODEL_BUDGE_DRAGON";
+    other.soundSet = "Budge Dragon";
+    const std::array monsters = {hound, other};
+    g_MonsterDatabase.Build(monsters, "en");
+    std::vector<Data::Monsters::MonsterSoundSet> sets(2);
+    sets[0].name = "Hound";
+    sets[0].soundEvents.resize(1);
+    sets[0].soundEvents[0].cues = {"step 1"};
+    sets[1].name = "Budge Dragon";
+    sets[1].soundEvents.resize(1);
+    sets[1].soundEvents[0].cues = {"walk 4.50"};
+    g_MonsterSoundSetDatabase.Build(sets);
+    Data::Monsters::MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_HOUND";
+    model.cues = {{"step 1", MONSTER01_WALK, {1.0f, 2.0f}},
+                  {"walk 4.50", MONSTER01_WALK, {4.5f, 5.5f}},
+                  {"step 2", MONSTER01_WALK, {7.0f, 8.0f}}};
+
+    CHECK(MuEditor::Monsters::SoundEventsEditor::FindUnusedCues(model, MODEL_HOUND) ==
+          std::vector<std::string>{"walk 4.50", "step 2"});
+    sets[0].soundEvents[0].cues = {"step 2", "step 1"};
+    g_MonsterSoundSetDatabase.Build(sets);
+    CHECK(MuEditor::Monsters::SoundEventsEditor::FindUnusedCues(model, MODEL_HOUND) ==
+          std::vector<std::string>{"walk 4.50"});
+    g_MonsterSoundSetDatabase.Build({});
+    g_MonsterDatabase.Build({}, "en");
+}
+
+TEST_CASE("Monster Sounds: Add a file says why it cannot add a sound, also for an id that is not a SOUND_ id "
+          "[editor][monsters]")
+{
+    using MuEditor::Monsters::FindNewSoundProblem;
+    Data::Monsters::MonsterSoundSet set;
+    set.name = "Hound";
+    set.sounds = {{"Data/Sound/mHound1.wav", "", 2, true}};
+    const auto sound = [](const char* file, const char* id)
+    {
+        Data::Monsters::MonsterSound added;
+        added.file = file;
+        added.id = id;
+        return added;
+    };
+    CHECK(FindNewSoundProblem(set, sound("Data/Sound/mHound2.wav", "")).empty());
+    CHECK(FindNewSoundProblem(set, sound("Data/Sound/mHound2.wav", "SOUND_THUNDERS01")).empty());
+    CHECK(FindNewSoundProblem(set, sound("", "")) == I18N::Editor::SoundFileMissing);
+    CHECK(FindNewSoundProblem(set, sound("../mHound2.wav", "")) != "");
+    CHECK(FindNewSoundProblem(set, sound("Data/Sound/mHound1.wav", "")) == I18N::Editor::SoundFileTwice);
+    CHECK(FindNewSoundProblem(set, sound("Data/Sound/mHound2.wav", "SOUND_HOUND_TYPO")) ==
+          I18N::Editor::SoundIdUnknown);
+    set.sounds.push_back(sound("Data/Sound/mHound3.wav", "SOUND_THUNDERS01"));
+    CHECK(FindNewSoundProblem(set, sound("Data/Sound/mHound4.wav", "SOUND_THUNDERS01")) ==
+          I18N::Editor::SoundNameTwice);
+}
+
+TEST_CASE("Monster Sounds' drafts keep the rows' events and cues for the rest of the frame after a store, and "
+          "take the data back the next frame [editor][monsters]")
+{
+    using namespace MuEditor::Monsters::SoundEventsEditor;
+    TestImGuiContext context;
+    Data::Monsters::MonsterSoundSet storedSet;
+    storedSet.name = "Hound";
+    storedSet.soundEvents.resize(2);
+    int setStores = 0;
+    SetDraft setDraft = MakeSetDraft(
+        [&](int id) { return id == 0 ? std::optional<Data::Monsters::MonsterSoundSet>(storedSet) : std::nullopt; },
+        [&](const std::string&, const Data::Monsters::MonsterSoundSet& set)
+        {
+            storedSet = set;
+            ++setStores;
+        });
+    Data::Monsters::MonsterModelDefinition storedModel;
+    storedModel.slot = "MONSTER_MODEL_HOUND";
+    storedModel.cues = {{"step 1", MONSTER01_WALK, {1.0f, 2.0f}}, {"step 2", MONSTER01_WALK, {7.0f, 8.0f}}};
+    ModelDraft modelDraft = MakeModelDraft(
+        [&](int slot)
+        {
+            return slot == MODEL_HOUND ? std::optional<Data::Monsters::MonsterModelDefinition>(storedModel)
+                                       : std::nullopt;
+        },
+        [&](const std::string&, const Data::Monsters::MonsterModelDefinition& model) { storedModel = model; });
+
+    ImGui::NewFrame();
+    Data::Monsters::MonsterSoundSet* set = setDraft.Begin(0, 1);
+    Data::Monsters::MonsterModelDefinition* model = modelDraft.Begin(MODEL_HOUND, 1);
+    REQUIRE(set != nullptr);
+    REQUIRE(model != nullptr);
+    // A row ticks a box and draws on with its event; a cue row picks an
+    // animation and draws on with its cue.
+    Data::Monsters::MonsterSoundEvent& event = set->soundEvents[1];
+    event.heardAnywhere = true;
+    setDraft.AfterChange(true, "Hound: sound events");
+    Data::Monsters::MonsterModelCue& cue = model->cues[1];
+    cue.animation = MONSTER01_STOP1;
+    modelDraft.AfterChange(true, "Hound: cue step 2");
+    CHECK(setStores == 1);
+    CHECK(storedSet.soundEvents[1].heardAnywhere);
+    CHECK(storedModel.cues[1].animation == MONSTER01_STOP1);
+    REQUIRE(&set->soundEvents[1] == &event);
+    REQUIRE(&model->cues[1] == &cue);
+    CHECK(event.heardAnywhere);
+    CHECK(cue.animation == MONSTER01_STOP1);
+    setDraft.End();
+    modelDraft.End();
+    ImGui::Render();
+
+    // The next frame takes the data back, also what the store changed.
+    storedSet.soundEvents[0].atMonster = true;
+    ImGui::NewFrame();
+    set = setDraft.Begin(0, 1);
+    REQUIRE(set != nullptr);
+    CHECK(set->soundEvents[0].atMonster);
+    CHECK(set->soundEvents[1].heardAnywhere);
+    setDraft.End();
+    ImGui::Render();
+}
+
+TEST_CASE("Monster Sounds edits the cues of the shown look's model only with the set the look plays "
+          "[editor][monsters]")
+{
+    MonsterDefinition hound = Monster(3, "Hound");
+    hound.model = "MONSTER_MODEL_HOUND";
+    hound.soundSet = "Hound";
+    MonsterDefinition elf = Monster(163, "Chaos Castle 2");
+    elf.model = "MONSTER_MODEL_CHAOSCASTLE_ELF";
+    elf.soundSet = "Elf";
+    elf.randomVariants = {{"MONSTER_MODEL_CHAOSCASTLE_WIZARD", std::string("Wizard")}};
+    const std::array monsters = {hound, elf};
+    g_MonsterDatabase.Build(monsters, "en");
+    Data::Monsters::MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_HOUND";
+    model.load.file = "Data/Monster/Monster02.bmd";
+    model.load.textureFolders = {"Monster"};
+    model.cues = {{"step 1", MONSTER01_WALK, {1.0f, 2.0f}}};
+    Data::Monsters::MonsterModelDefinition elfModel = model;
+    elfModel.slot = "MONSTER_MODEL_CHAOSCASTLE_ELF";
+    const std::array models = {model, elfModel};
+    g_MonsterModelDatabase.Build(models);
+    std::vector<Data::Monsters::MonsterSoundSet> sets(3);
+    sets[0].name = "Hound";
+    sets[1].name = "Elf";
+    sets[2].name = "Wizard";
+    g_MonsterSoundSetDatabase.Build(sets);
+    TestImGuiContext context;
+    const auto draw = [&]
     {
         ImGui::NewFrame();
         bool open = true;
-        g_MuMonsterModelUI.Render(&open);
+        g_MuMonsterSoundsUI.Render(&open);
         ImGui::Render();
-        INFO("frame " << frame);
-        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
-        // Before, the draft held [7, 7.1] from the first frame on: the
-        // preview played it, and the next stored change of the model saved it.
-        const Data::Monsters::MonsterModelDefinition* draft = g_MuMonsterModelUI.GetShownDraft(MODEL_HOUND);
-        REQUIRE(draft != nullptr);
-        REQUIRE(draft->soundEvents.size() == 1);
-        CHECK(draft->soundEvents[0].frames == walk.frames);
+    };
+
+    g_MonsterSelection.Select(3);
+    draw();
+    CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) != nullptr);
+    SUBCASE("another monster's set picked in the list")
+    {
+        g_MuMonsterSoundsUI.ShowEvent("Elf", std::nullopt);
+        draw();
+        CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) == nullptr);
+        g_MuMonsterSoundsUI.ShowEvent("Hound", std::nullopt);
+        draw();
+        CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) != nullptr);
+    }
+    SUBCASE("a variant's set opened while the entry's look is shown")
+    {
+        g_MonsterSelection.Select(163);
+        MuEditor::Monsters::ShownModel::SetShownVariant(163, -1);
+        draw();
+        const int elfSlot = MODEL_CHAOS_CASTLE_ELF;
+        CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(elfSlot) != nullptr);
+        g_MuMonsterSoundsUI.ShowEvent("Wizard", std::nullopt);
+        draw();
+        CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(elfSlot) == nullptr);
     }
     g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterModelDatabase.Build({});
+    g_MonsterSoundSetDatabase.Build({});
+    g_MonsterDatabase.Build({}, "en");
+}
+
+TEST_CASE("Monster Preview marks the cues of Monster Sounds' draft, also while Monster Model shows the model "
+          "(Q-MN81) [editor][monsters]")
+{
+    MonsterDefinition hound = Monster(3, "Hound");
+    hound.model = "MONSTER_MODEL_HOUND";
+    hound.soundSet = "Hound";
+    const std::array monsters = {hound};
+    g_MonsterDatabase.Build(monsters, "en");
+    Data::Monsters::MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_HOUND";
+    model.load.file = "Data/Monster/Monster02.bmd";
+    model.load.textureFolders = {"Monster"};
+    model.cues = {{"step 1", MONSTER01_WALK, {1.0f, 2.0f}}};
+    const std::array models = {model};
+    g_MonsterModelDatabase.Build(models);
+    Data::Monsters::MonsterSoundSet set;
+    set.name = "Hound";
+    const std::array sets = {set};
+    g_MonsterSoundSetDatabase.Build(sets);
+    TestImGuiContext context;
+    g_MonsterSelection.Select(3);
+
+    ImGui::NewFrame();
+    bool open = true;
+    g_MuMonsterModelUI.Render(&open);
+    g_MuMonsterSoundsUI.Render(&open);
+    // A cue frame typed in Monster Sounds and not stored yet, as its field
+    // leaves the draft while it is edited.
+    auto* draft =
+        const_cast<Data::Monsters::MonsterModelDefinition*>(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND));
+    REQUIRE(draft != nullptr);
+    draft->cues[0].frames = {4.5f, 5.5f};
+    const std::span<const Data::Monsters::MonsterModelCue> cues = g_MuMonsterPreviewUI.GetCues(MODEL_HOUND);
+    REQUIRE(cues.size() == 1);
+    CHECK(cues[0].frames == std::pair(4.5f, 5.5f));
+    ImGui::Render();
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterModelDatabase.Build({});
+    g_MonsterSoundSetDatabase.Build({});
+    g_MonsterDatabase.Build({}, "en");
+}
+
+TEST_CASE("The shown look of a monster with random variants is the entry's until a variant is picked (Q-MN83) "
+          "[editor][monsters]")
+{
+    MonsterDefinition elf = Monster(163, "Chaos Castle 2");
+    elf.model = "MONSTER_MODEL_CHAOSCASTLE_ELF";
+    elf.randomVariants = {{"MONSTER_MODEL_CHAOSCASTLE_WIZARD", std::nullopt}};
+    Data::Monsters::MonsterModelDefinition elfModel;
+    elfModel.slot = "MONSTER_MODEL_CHAOSCASTLE_ELF";
+    Data::Monsters::MonsterModelDefinition wizard;
+    wizard.slot = "MONSTER_MODEL_CHAOSCASTLE_WIZARD";
+    const std::array models = {elfModel, wizard};
+    g_MonsterModelDatabase.Build(models);
+    using namespace MuEditor::Monsters::ShownModel;
+
+    SetShownVariant(-1, -1);
+    CHECK(GetShownVariant(elf) == -1);
+    CHECK(FindShownSlot(elf) == MODEL_CHAOS_CASTLE_ELF);
+    SetShownVariant(163, 0);
+    CHECK(GetShownVariant(elf) == 0);
+    CHECK(FindShownSlot(elf) == MODEL_CHAOS_CASTLE_WIZARD);
+    // Another monster, or a variant that is gone: the entry's look.
+    MonsterDefinition other = elf;
+    other.number = 165;
+    CHECK(GetShownVariant(other) == -1);
+    SetShownVariant(163, 3);
+    CHECK(FindShownSlot(elf) == MODEL_CHAOS_CASTLE_ELF);
+    SetShownVariant(-1, -1);
     g_MonsterModelDatabase.Build({});
 }
 
@@ -666,6 +995,96 @@ TEST_CASE("The bar's undo target is the tool worked in last while it is open [ed
 
     g_MuEditorCore.GetToolWindows().monsterTranslations = true;
     CHECK(&MuEditor::UndoTargets::GetCurrent(items) == &monsters);
+}
+
+TEST_CASE("Monster Sounds: a sound event plays at moments or in animations, one of the other kind switches it (Q-MN76) "
+          "[editor][monsters]")
+{
+    using Data::Monsters::MonsterSoundMoment;
+    using namespace MuEditor::Monsters::SoundEventsEditor;
+    Data::Monsters::MonsterSoundEvent event;
+    event.animations = {MONSTER01_ATTACK1};
+    CHECK(WhenText(event) == "attack1");
+
+    // A moment makes an event of animations one of the moment.
+    CHECK(ToggleMoment(event, MonsterSoundMoment::Hit));
+    CHECK(event.animations.empty());
+    CHECK(event.moments == std::vector{MonsterSoundMoment::Hit});
+    CHECK(ToggleMoment(event, MonsterSoundMoment::Attack));
+    CHECK(event.moments == std::vector{MonsterSoundMoment::Attack, MonsterSoundMoment::Hit});
+    CHECK(WhenText(event) == "on attack, hit");
+    CHECK(ToggleMoment(event, MonsterSoundMoment::Hit));
+    CHECK(event.moments == std::vector{MonsterSoundMoment::Attack});
+    // The last moment stays.
+    CHECK_FALSE(ToggleMoment(event, MonsterSoundMoment::Attack));
+    CHECK(event.moments == std::vector{MonsterSoundMoment::Attack});
+
+    // An animation makes it one of animations again.
+    CHECK(ToggleAnimation(event, MONSTER01_DIE));
+    CHECK(event.moments.empty());
+    CHECK(event.animations == std::vector{static_cast<int>(MONSTER01_DIE)});
+    CHECK_FALSE(ToggleAnimation(event, MONSTER01_DIE));
+}
+
+TEST_CASE("Monster Sounds: a sound event plays on cues of the model, one of another kind switches it (Q-MN79) "
+          "[editor][monsters]")
+{
+    using Data::Monsters::MonsterSoundMoment;
+    using namespace MuEditor::Monsters::SoundEventsEditor;
+    Data::Monsters::MonsterSoundEvent event;
+    event.moments = {MonsterSoundMoment::Walk};
+    CHECK(ToggleCue(event, "step 2"));
+    CHECK(event.moments.empty());
+    CHECK(event.cues == std::vector<std::string>{"step 2"});
+    // Cues keep the order they were picked in.
+    CHECK(ToggleCue(event, "step 1"));
+    CHECK(event.cues == std::vector<std::string>{"step 2", "step 1"});
+    CHECK(WhenText(event) == "cue step 2, step 1");
+    CHECK(ToggleCue(event, "step 2"));
+    CHECK_FALSE(ToggleCue(event, "step 1"));
+    CHECK(event.cues == std::vector<std::string>{"step 1"});
+    // An animation or a moment makes it one of them again.
+    CHECK(ToggleAnimation(event, MONSTER01_WALK));
+    CHECK(event.cues.empty());
+    CHECK(ToggleCue(event, "step 1"));
+    CHECK(event.animations.empty());
+    CHECK(ToggleMoment(event, MonsterSoundMoment::Death));
+    CHECK(event.cues.empty());
+}
+
+TEST_CASE("Monster Sounds: a new cue is one frame at the preview's frame, named after it once (Q-MN82) "
+          "[editor][monsters]")
+{
+    using namespace MuEditor::Monsters::SoundEventsEditor;
+    Data::Monsters::MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_RAYMOND";
+    const Data::Monsters::MonsterModelCue first = MakeCue(model, MONSTER01_WALK, 4.5f);
+    CHECK(first.name == "walk 4.50");
+    CHECK(first.animation == MONSTER01_WALK);
+    CHECK(first.frames == std::pair<float, float>{4.5f, 5.5f});
+    model.cues = {first};
+    CHECK(MakeCue(model, MONSTER01_WALK, 4.5f).name == "walk 4.50 (2)");
+    model.cues.push_back(MakeCue(model, MONSTER01_WALK, 4.5f));
+    CHECK(MakeCue(model, MONSTER01_WALK, 4.5f).name == "walk 4.50 (3)");
+    CHECK(MakeCue(model, MONSTER01_ATTACK1, 0.0f).name == "attack1 0.00");
+}
+
+TEST_CASE("Monster Sounds: Play plays all of an event's sounds, or one of a pick's by the draw [editor][monsters]")
+{
+    using namespace MuEditor::Monsters::SoundEventsEditor;
+    using Sounds = std::vector<std::string>;
+    Data::Monsters::MonsterSoundEvent event;
+    event.sounds = {"SOUND_MONSTER_DSIDLE1", "SOUND_MONSTER_DSIDLE2"};
+    // Without a pick the game plays them together, whatever the draw.
+    CHECK(PreviewSounds(event, 1) == event.sounds);
+
+    event.pick = Data::Monsters::MonsterSoundDraw::Rand;
+    CHECK(PreviewSounds(event, 0) == Sounds{"SOUND_MONSTER_DSIDLE1"});
+    CHECK(PreviewSounds(event, 1) == Sounds{"SOUND_MONSTER_DSIDLE2"});
+
+    // A pick of one sound: the game plays it one time in two, Play each time.
+    event.sounds = {"SOUND_MONSTER_DSIDLE1"};
+    CHECK(PreviewSounds(event, 1) == Sounds{"SOUND_MONSTER_DSIDLE1"});
 }
 
 #endif // _EDITOR

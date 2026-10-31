@@ -6,9 +6,13 @@
 
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewCamera.h"
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewTarget.h"
+#include "Data/GameData/MonsterData/MonsterDefinition.h"
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
+#include "Data/GameData/MonsterData/MonsterSoundSet.h"
 
 #include <optional>
+#include <span>
+#include <string>
 
 namespace MuEditor::Monsters
 {
@@ -16,12 +20,15 @@ namespace MuEditor::Monsters
 // monster's model in a view with the item preview's camera (the mouse turns
 // it, the middle button moves the picture, the wheel zooms). Any animation of
 // the model plays, pauses and goes frame by frame; the speeds are the Monster
-// Model tool's, also while one is being dragged; the model's slot sounds and
-// sound events play as the game plays them, on any map (Q-MN74); the impact
-// frame of attacks 1 and 2 and the
-// animation that follows are marked, and the speed factors the game adds can
-// be played too; Monster Attacks' Play plays an attack once (Q-MN73). Only in
-// the editor's window (Q-MN17).
+// Model tool's, also while one is being dragged; the sound events of the
+// monster's set play at their animations, cues and moments as the game plays
+// them, on any map (Q-MN74, Q-MN76, Q-MN78); the impact frame of attacks 1 and
+// 2, the animation that follows and the model's cues are marked (a cue's tag
+// opens its event in Monster Sounds, Q-MN80); Add a sound at this frame adds a
+// cue and its event (Q-MN82); a monster with random variants shows each look
+// (Q-MN83); the speed factors the game adds can be played too; Monster
+// Attacks' Play plays an attack once (Q-MN73). Only in the editor's window
+// (Q-MN17).
 class MuMonsterPreviewUI
 {
 public:
@@ -41,15 +48,24 @@ public:
     // is not open or lacks the animation.
     void PlayAttack(int slot, int animation, std::optional<int> sound);
 
-    // The animation shown, and whether it plays.
+    // The animation shown, its frame, and whether it plays.
     int GetAnimation() const
     {
         return m_animation;
+    }
+    float GetFrame() const
+    {
+        return m_frame;
     }
     bool IsPlaying() const
     {
         return m_playing;
     }
+    // The cues the preview marks and plays for the model in `slot`: those of
+    // Monster Sounds' draft, which edits only the cues, with an edit that is
+    // not stored yet, also while Monster Model shows a draft of the model
+    // (Q-MN81); else those of the values it plays.
+    std::span<const Data::Monsters::MonsterModelCue> GetCues(int slot) const;
 
     // One frame of the animation shown, as Render plays it while it plays:
     // a held animation stops at its last frame, others start again, and an
@@ -59,7 +75,17 @@ public:
 private:
     MuMonsterPreviewUI() = default;
 
+    void RenderVariants(const Data::Monsters::MonsterDefinition& monster);
     void RenderPreview(int slot);
+    void RenderCueTags(int slot, int keys, float last);
+    void RenderAddSound(int slot);
+    void RenderAddSoundPopup(int slot);
+    // The set the shown monster plays with the model in `slot`; nullptr for
+    // none.
+    const Data::Monsters::MonsterSoundSet* ShownSet(int slot) const;
+    // The sound events of the animation at the frame, then those of the
+    // moment, as the game plays them.
+    void PlaySounds(int slot, int animation, float frame, std::optional<Data::Monsters::MonsterSoundMoment> moment);
     void RenderControls(int slot, const Data::Monsters::MonsterModelDefinition& values);
     void RenderFrameSlider(int slot, int keys);
     void RenderView(int slot, const Data::Monsters::MonsterModelDefinition& values);
@@ -83,6 +109,8 @@ private:
     bool m_sounds = true;
     bool m_gameFactors = true;
     bool m_transformed = false;
+    // Add a sound at this frame: the cue it adds.
+    Data::Monsters::MonsterModelCue m_newCue;
 };
 } // namespace MuEditor::Monsters
 

@@ -24,8 +24,9 @@ Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-mon
 
 | File | What |
 |---|---|
-| `Monsters.json` | The monsters and NPCs: number, names, kind, model and attacks |
+| `Monsters.json` | The monsters and NPCs: number, names, kind, model, sound set and attacks |
 | `Models.json` | The monster and NPC models, see [Models](#models) |
+| `Sounds.json` | The sound sets the monsters play, see [Sounds](#sounds) |
 
 ```json
 {
@@ -35,7 +36,8 @@ Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-mon
       "number": 2,
       "name": {"en": "Budge Dragon", "es": "Dragón Escurridizo", "pt": "Dragão Lento"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BUDGE_DRAGON"
+      "model": "MONSTER_MODEL_BUDGE_DRAGON",
+      "soundSet": "Budge Dragon"
     },
     {
       "number": 251,
@@ -51,7 +53,7 @@ Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-mon
   sends when a monster or NPC appears (packet 0x13 has 10 bits for it). Each
   number has at most one entry.
 - Every entry has `number`, `name` and `kind`; `model` may be left out (every
-  shipped entry has it), and so may `attacks`.
+  shipped entry has it), and so may `soundSet`, `attacks` and the variants.
 - Monsters are sorted by number and the fields always come in the same
   order, so saving unchanged data gives the same file (a test checks that
   the shipped file is written this way).
@@ -66,7 +68,9 @@ Design and plans: [monsters design](superpowers/specs/2026-10-23-data-driven-mon
 | `name` | The names by language, see [Names and translations](#names-and-translations) |
 | `kind` | `monster`, `npc`, `trap` or `other`: what the game does with it, see [Kinds](#kinds) |
 | `model` | The model it appears with: a slot of the model list (`MONSTER_MODEL_HOUND`, `MODEL_SMITH`), `player` (a player-shaped monster: the player model with class and items), `MODEL_WARCRAFT` or `MODEL_BALL` (models of other areas: the Kalima gates, the soccer ball), or `mapObject <number>` (a map object, a trap). The code still chooses the model; the field says which one, for the tools |
+| `soundSet` | The [sound set](#sounds) it plays; left out: none |
 | `attacks` | Which animation the monster plays for the skill it attacks with, see [Attacks](#attacks); left out: attack 1, attack 2, attack 2 |
+| `randomVariants` | Other looks the game draws when the monster appears, each with its `model` and what it changes: `[{"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}]`. The code still draws the look (the ranged Chaos Castle soldiers 163, 165 … 427 appear as the elf or the wizard); the variant whose model it drew applies, and its `soundSet` (left out: the entry's) is what that look plays. Only the looks the code draws are taken; Data Checks names any other |
 
 ### Names and translations
 
@@ -157,24 +161,23 @@ to `MuError.log`:
 
 ```json
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "models": [
     {
       "slot": "MONSTER_MODEL_BULL_FIGHTER",
       "file": "Data/Monster/Monster01.bmd",
       "textureFolders": ["Monster"],
       "headBone": 20,
-      "sounds": [
-        {"file": "Data/Sound/mBull1.wav", "channels": 2, "spatial": true},
-        {"file": "Data/Sound/mBullAttack1.wav", "id": "SOUND_MONSTER_BULLATTACK1", "channels": 2, "spatial": true},
-        {"file": "Data/Sound/mBullDie.wav", "channels": 2, "spatial": true}
-      ],
-      "soundSlots": {
-        "idle": ["Data/Sound/mBull1.wav", "Data/Sound/mBull1.wav"],
-        "attack": ["SOUND_MONSTER_BULLATTACK1", null],
-        "die": "Data/Sound/mBullDie.wav"
-      },
       "linkBones": [42, 33]
+    },
+    {
+      "slot": "MONSTER_MODEL_RAYMOND",
+      "file": "Data/Monster/Monster167.bmd",
+      "textureFolders": ["Monster"],
+      "cues": [
+        {"name": "step 1", "animation": "walk", "frames": [1, 2]},
+        {"name": "step 2", "animation": "walk", "frames": [7, 8]}
+      ]
     }
   ]
 }
@@ -207,17 +210,14 @@ to `MuError.log`:
 | `headBone` | The bone the head turns with; without it as the file has it |
 | `streamMesh` | The mesh drawn as a stream; without it as the file has it |
 | `noneBlendMeshes` | Meshes drawn without blending |
-| `sounds` | The sounds the model loads: `file`, `channels` (how many can play at once), `spatial` (3D, louder near the hero), and `id` for a sound that keeps its `SOUND_*` number, see below |
-| `soundSlots` | What the game plays when a character of the model stands or walks (`idle`, two), attacks or is hit (`attack`, two) and dies (`die`); of a pair it picks one at random. A slot names a sound of the model (its `id`, or its `file` when it has none) or any `SOUND_*` number; `null` is no sound. `secondSet` has the sounds a monster with SubType 9 (the big Hellas monsters) plays instead of the first set. Without `soundSlots` no slot has a sound |
-| `soundEvents` | Sounds the game plays on top of the slots, see [Sound events](#sound-events) |
-| `soundEventMaps` | The maps the sound events play on; without it every map |
+| `cues` | Named points of its animations that [sound events](#sound-events) play on: `name` (unique in the model), `animation`, and `frames`, from the first to below the second (the game checks the frame each game frame): where Raymond's feet land in the walk |
 | `bitmaps` | Bitmaps loaded into fixed bitmap slots that the model's code draws with: `file` below `Data/`, `slot` (`BITMAP_MONSTER_SKIN`), `filter` (`linear` or `nearest`), `wrap` (`repeat` or `clamp`) |
 | `parts` | Models loaded with it: `slot` (an NPC slot) or `effect` (an effect type of the effect catalogue), `file`, `textureFolders`, `animations`, `holdLastFrame` (no range defaults), and `maps` for parts loaded with a map instead (the Kundun parts in Kalima, the Totem Golem's in Elbeland) |
 | `boundingBox` | `min` and `max` of a character's box; without one -60, -60, 0 to 50, 50, 150 |
 | `linkBones` | The bones the weapons hang on, right then left; without it 33 and 42. One bone sets the right hand's only |
 
-Maps are the numbers the server sends (`mapTextureFolders`, `soundEventMaps`,
-a part's `maps`, and a monster's map variants): Devil Square 1–4 is 9 and
+Maps are the numbers the server sends (`mapTextureFolders`, a sound set's
+`maps`, a part's `maps`, and a monster's map variants): Devil Square 1–4 is 9 and
 Devil Square 5–7 is 32, although the client loads both as Devil Square (9).
 A list may also name one stage of a map: `{"map": 9, "stage": 2}` is Devil
 Square 2. OpenMU sends the extended client the stage with the map
@@ -225,7 +225,7 @@ Square 2. OpenMU sends the extended client the stage with the map
 (`CharacterInformationExtended`, so a character which logs in again in Devil
 Square keeps its stage); a number names all of its stages, and with another
 server every stage is 0. The lists' older names (`worldTextureFolders`,
-`worlds`, `soundEventWorlds`) are fatal problems that name the new ones.
+`worlds`) are fatal problems that name the new ones.
 
 ### The map picker
 
@@ -239,57 +239,9 @@ Most levels are maps of their own; Devil Square's are the stages 1–4 of map
 9 and 5–7 of map 32, and a map whose every stage is picked is written as its
 number. A list that has all levels of an event names the event.
 
-A sound without an `id` gets a number of its own when it is first loaded,
-after the `SOUND_*` list; the same file keeps the same number for the
-session. A sound keeps its `SOUND_*` number (`id`) when code plays it by that
-name, or when a slot of another model names it: a slot plays the sound of its
-number, whichever model loaded it (the Giant Ogre's attack plays the Dark
-Skull Soldier's `SOUND_MONSTER_BLACKSKULLATTACK` in Kalima). Some slots name
-numbers that no model loads, as in the original client; they play nothing (a
-test lists them).
-
-### Sound events
-
-`soundEvents` are sounds the game plays for a character of the model while it
-is in one of the event's animations, when it starts an attack, is hit or
-dies, at each step of a walk and at the end of each loop of stop1 and stop2,
-and only within 500 units of the hero (the Empire Guardian bosses' steps):
-
-```json
-"soundEvents": [
-  {"animations": ["walk"], "frames": [7, 8], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01"]},
-  {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_RAKLION_ICEGIANT_MOVE"]},
-  {"animations": ["stop1"], "pick": "rand", "sounds": ["SOUND_XMAS_SANTA_IDLE_1", "SOUND_XMAS_SANTA_IDLE_2"]},
-  {"animations": ["die"], "deathEffectArmed": true, "sounds": ["SOUND_XMAS_SNOWMAN_DEATH_1"]}
-],
-"soundEventMaps": [69, 70, 71, 72]
-```
-
-| Field | Meaning |
-|---|---|
-| `animations` | The animations it plays in |
-| `frames` | Only while the animation's frame is from the first number to below the second |
-| `deathEffectArmed` | Only while the character's death effect is armed |
-| `chance` | Plays with a chance of one in `oneIn`, drawn as `draw` says: `rand` (`rand() % oneIn == 0`) or `randFps` (the original client's `rand_fps_check`, whose chance depends on the frame rate) |
-| `pick` | Plays the first of the two sounds when a draw of one in two comes up, else the second (`rand` or `randFps`) |
-| `sounds` | The sounds, played together (one of the two with `pick`), each named as a slot names it |
-
-One call can play several events, in their order; their draws come in that
-order too.
-
-A model loads the sounds its events play, like its other sounds, when the
-first monster of it appears (the Empire Guardian monsters' too; the map
-loads only its ambient sounds). A sound that another model or the map
-already loaded from the same file, with the same channels and 3D setting,
-is not loaded again, so models that share a sound list it alike (a test
-checks both).
-
-Not all monster sounds are data yet: the monsters of Aida, Crywolf, Kanturu,
-the Hunting Ground, the Balgass barracks, Illusion Temple and a few others
-(among them 340 to 365, 386 to 403 and 409 to 412) play their sounds from
-their map's per-frame drawing code, and their maps load them; Monster Model
-shows no sounds for their models. They move into sound events with the
-monsters' looks (design, MN8).
+A model has no sounds: they are in the [sound sets](#sounds) of its
+monsters. `sounds`, `soundEvents`, `soundEventMaps` and the `soundSlots` of
+format 1 in a model are fatal problems that say so.
 
 ### What the code adds
 
@@ -310,6 +262,120 @@ A model whose file is missing has no body: the monster appears without one
 and the game keeps running; the file is logged and listed by Data Checks.
 Molt's `Data/Monster/Monster50.bmd` is missing, here and in the original
 client (OpenMU has no monster 68).
+
+## Sounds
+
+`Sounds.json` has the sound sets: what monsters play, each set named and
+named by the monsters that play it (`soundSet`, and a random variant's). A
+set holds its sound files, its sound events and the maps they play on.
+Monsters with one model can play different sets (the Rogue and the Death
+Centurion), and monsters of different models can play one (the Goblin and
+the Evil Goblin).
+
+```json
+{
+  "formatVersion": 1,
+  "soundSets": [
+    {
+      "name": "Bull Fighter",
+      "sounds": [
+        {"file": "Data/Sound/mBull1.wav", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBullAttack1.wav", "id": "SOUND_MONSTER_BULLATTACK1", "channels": 2, "spatial": true},
+        {"file": "Data/Sound/mBullDie.wav", "channels": 2, "spatial": true}
+      ],
+      "soundEvents": [
+        {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mBull1.wav", "Data/Sound/mBull1.wav"]},
+        {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_BULLATTACK1"]},
+        {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mBullDie.wav"]}
+      ]
+    }
+  ]
+}
+```
+
+| Field | Meaning |
+|---|---|
+| `name` | The set's name, unique; monsters name it |
+| `sounds` | The sound files: `file`, `channels` (how many can play at once), `spatial` (3D, louder near the hero), and `id` for a sound that keeps its `SOUND_*` number, see below |
+| `soundEvents` | The sounds the game plays for a monster of the set, in animations, on cues of its model or at moments, see [Sound events](#sound-events) |
+| `maps` | The maps the sound events play on; without it every map |
+
+Sets are sorted by name and written in one way, as the other files; a test
+checks that the shipped file is written this way.
+
+A model loads the sounds of the sets its monsters play with it (their own,
+and a random variant's with that model) when it opens, that is when the
+first monster of it appears; the map loads only its ambient sounds. A sound
+that another set or the map already loaded from the same file, with the same
+channels and 3D setting, is not loaded again, so sets that share a sound
+list it alike (a test checks both).
+
+A sound without an `id` gets a number of its own when it is first loaded,
+after the `SOUND_*` list; the same file keeps the same number for the
+session. A sound keeps its `SOUND_*` number (`id`) when code plays it by that
+name, or when an event of another set names it: an event plays the sound of
+its number, whichever set loaded it (the Giant Ogre's attack plays the Dark
+Skull Soldier's `SOUND_MONSTER_BLACKSKULLATTACK` in Kalima). Some events that
+were sound slots name numbers that no set loads, as in the original client;
+they play nothing (a test lists them).
+
+### Sound events
+
+`soundEvents` are sounds the game plays for a monster of the set. An event
+names when: `animations`, played while the character is in one of them, when
+it starts an attack, is hit or dies, at each step of a walk and at the end of
+each loop of stop1 and stop2; `cues`, played while the character is in the
+frames of one of the named [cues](#model-fields) of its model (the Empire
+Guardian and Karutan monsters' steps); or `on` moments, played where the
+game reaches them, whatever the animation:
+
+| Moment | Where the game plays it |
+|---|---|
+| `attack` | An attack starts (SetPlayerAttack), whatever animation the attack plays |
+| `hit` | The character is hit (SetPlayerShock) |
+| `death` | The character dies (SetPlayerDie), also in Chaos Castle, next to its explosion |
+| `stand` | The character is set to stand: a walk ends, the server stops it (SetPlayerStop) |
+| `walk` | Each step of a walk (SetPlayerWalk) |
+
+An event is heard only within 500 units of the hero and on the set's `maps`,
+unless it is `heardAnywhere`:
+
+```json
+"soundEvents": [
+  {"cues": ["step 2"], "sounds": ["SOUND_EMPIREGUARDIAN_JERINT_MONSTER_MOVE01"]},
+  {"animations": ["walk"], "chance": {"oneIn": 100, "draw": "rand"}, "sounds": ["SOUND_RAKLION_ICEGIANT_MOVE"]},
+  {"animations": ["stop1"], "pick": "rand", "sounds": ["SOUND_XMAS_SANTA_IDLE_1", "SOUND_XMAS_SANTA_IDLE_2"]},
+  {"animations": ["die"], "deathEffectArmed": true, "sounds": ["SOUND_XMAS_SNOWMAN_DEATH_1"]},
+  {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["SOUND_MONSTER_LSDEATH"]}
+],
+"maps": [69, 70, 71, 72]
+```
+
+| Field | Meaning |
+|---|---|
+| `animations` | The animations it plays in |
+| `cues` | The cues of the monster's model it plays on, instead of animations; a model without the cue plays nothing for it (Data Checks warns) |
+| `on` | The moments it plays at, instead of animations |
+| `deathEffectArmed` | Only while the character's death effect is armed |
+| `heardAnywhere` | Heard at any distance from the hero and on every map |
+| `atMonster` | Played with the character as the sound's object: a sound that still plays is not started again |
+| `chance` | Plays with a chance of one in `oneIn`, drawn as `draw` says: `rand` (`rand() % oneIn == 0`) or `randFps` (the original client's `rand_fps_check`, whose chance depends on the frame rate) |
+| `pick` | Plays the first sound when a draw of one in two comes up, else the second, or none with one sound (`rand` or `randFps`) |
+| `sounds` | The sounds, played together (one of them with `pick`), each a sound of the set (its `id`, or its `file` when it has none) or any `SOUND_*` number |
+
+One call can play several events, in their order; their draws come in that
+order too. A character plays the set its monster names for the model it
+appears with; a player, or a monster shown with a model that is neither its
+own nor one of its random variants', plays none. The `subType`, `notSubType`
+and `frames` of the events before the sound sets are fatal problems that
+name what replaced them: the monsters' own sets, and the cues.
+
+Not all monster sounds are data yet: the monsters of Aida, Crywolf, Kanturu,
+the Hunting Ground, the Balgass barracks, Illusion Temple and a few others
+(among them 340 to 365, 386 to 403 and 409 to 412) play their sounds from
+their map's per-frame drawing code, and their maps load them; they name no
+sound set. They move into sound events with the monsters' looks (design,
+MN8).
 
 ## Attacks
 
@@ -410,8 +476,8 @@ until their next action. Data Checks warns about both.
 
 ## Loading and errors
 
-At startup `Data/Monsters/Monsters.json` is read and checked, and after the
-effect catalogue `Data/Monsters/Models.json`.
+At startup `Data/Monsters/Monsters.json` is read and checked, after the
+effect catalogue `Data/Monsters/Models.json`, then `Data/Monsters/Sounds.json`.
 
 Problems have three levels, the same in every data area and editor tool:
 **fatal** ones make the data unusable, **errors** name something that is
@@ -444,15 +510,31 @@ to `MuError.log`. Fatal problems are:
 In the model list, fatal problems (they stop the start with "Monster data
 error" too, naming the model list) are a
 value of the wrong form (each names the model and the field), a slot that is
-no model slot of the two ranges or is there twice, a sound slot that names no
-sound of the model and no `SOUND_*` number, a sound `id`, bitmap slot or
+no model slot of the two ranges or is there twice, a cue name that is there
+twice, a sound field (`sounds`, `soundSlots`, `soundEvents`,
+`soundEventMaps`), a bitmap slot or
 part slot that does not exist, and a part `effect` that is not an effect
 type. Unknown fields and a model or part file that is not in the client
 folder are warnings; the shipped list has one, Molt's file.
 
+In the sound sets, fatal problems are a value of the wrong form (each names
+the set and the field), a name that is there twice, two sounds of a set with
+one name (the same `id`, or the same `file` without one), a sound event that
+names no sound of the set and no `SOUND_*` number, and a sound `id` that does
+not exist. A `SOUND_*` id that two sets load from different files is an
+error: the game plays one file for the id, the one of the model that opened
+last. What the files name of each other is checked last: a monster or a
+random variant that names a set that is not there, and a random variant
+whose look the code never draws, are errors (the monster plays no sounds
+there, the variant does nothing); an event's cue that the model of a monster
+that plays the set lacks (also the model of a random variant without a set of
+its own, which plays the entry's), and a set that no monster plays, are
+warnings.
+
 An automated test loads the shipped monster list (it expects only the
-warning about 252) and the shipped model list (only Molt's file), so a pull request with broken monster data fails its
-checks. With a test build (`-DBUILD_TESTING=ON`):
+warning about 252), the shipped model list (only Molt's file) and the
+shipped sound sets (no problem, also in what the files name of each other),
+so a pull request with broken monster data fails its checks. With a test build (`-DBUILD_TESTING=ON`):
 
 ```bash
 ctest --test-dir <build folder> --build-config Debug -R monster --output-on-failure
@@ -517,34 +599,65 @@ item tools.
     **Default** gives back the range's), whether it holds its last frame, and
     what the game adds in game (a speed factor, the next animation, the hit
     frame).
-  - **Sounds**: the model's sounds, each with **Play**, and the five sound
-    slots, each set to a sound of the model or to no sound.
-  - **Sound events**: a row per [sound event](#sound-events): its
-    animations (one or more), frames, whether the death effect must be armed,
-    a chance of one in n, a pick of one of two sounds, and its sounds, picked
-    from the model's own; **Play** plays them, **Remove** removes the event.
-    **Add a sound event** adds one for attack1 with the model's first sound
-    (a model without sounds cannot have events). **Maps** picks the maps the
-    events play on in the [map picker](#the-map-picker) (none: every map).
+  - **Sounds**: the sound set the selected monster plays with the model,
+    with **Open in Monster Sounds**.
+  - **Cues**: the model's cues, each with its animation and frames; they are
+    edited on their events in Monster Sounds. **Remove** removes a cue that no
+    sound event of the model's monsters plays on any more.
   - **More of the model entry**: the values the tool shows but does not edit
     (head bone, stream mesh, part models, bitmaps, box, weapon bones); they
     are edited in the file.
 
   A model is shown once the game has it open; the tool opens it when it
   shows it (as if a monster of it had appeared). A monster whose model is
-  outside the model list (`player`, a map object) says so.
+  outside the model list (`player`, a map object) says so. For a monster
+  with random variants it shows the look Monster Preview shows.
+- **Monster Sounds**: the [sound set](#sounds) the selected monster plays,
+  picked from the sets (or none), with **Open**; for a monster with random
+  variants, a row per look with its model and its set (**the entry's**, or
+  another). Beside the list of sets, each with the number of monsters that
+  play it, **Add a sound set**, **Copy** and **Remove** (not a set that
+  monsters play), and the set shown:
+  - its **Name** (a rename gives the monsters that play the set the new
+    name, in the same undo step) and the monsters that play it (a click
+    selects one);
+  - **Sound files**: each with **Play** and **Remove** (not a file an event
+    plays), and a row to add a file with its `SOUND_*` id (optional),
+    channels and 3D;
+  - **Sound events**: a row per [sound event](#sound-events): **When**, its
+    moments, animations or cues of the shown look's model (one or more;
+    picking one of another kind makes the event one of it; **New cue at the
+    preview's frame** adds a cue to the model there), on a cue's event the
+    cue's animation and frames, which change the model's cue for all its
+    monsters, and **Use the preview's frame**, which moves the cue to the
+    frame Monster Preview shows; whether the death effect must be armed,
+    whether it is heard **Anywhere** and played **At monster**, a chance of one
+    in n, a pick of one of two sounds (or of one sound and none), and its
+    sounds, picked from the set's own; **Play** plays them, **Remove** removes
+    the event (when no other event plays on its cue, it asks whether the cue
+    goes too). **Add a sound event** adds one for attack1 with the set's
+    first sound (a set without sounds cannot have events). **Maps** picks the
+    maps the events play on in the [map picker](#the-map-picker) (none:
+    every map).
 - **Monster Preview**: the selected monster's model, turning if you like,
   with the item preview's camera: drag to turn it, the middle button moves
   the picture, the wheel zooms, a double click puts it back. Pick any
   animation; **Play**, **Pause**, **From the start**, and a frame slider to go
   frame by frame. The speeds are those of Monster Model, also while one is
-  being dragged there. The model's slot sounds play when their animation
-  starts (an idle sound for stop and walk, an attack sound for attacks and
-  shock, the die sound), and its [sound events](#sound-events) as the game
-  plays them: when the animation starts, at each loop of stop1 and stop2,
-  and frame by frame in a walk; on any map and at any distance, with the
-  death effect counted as armed. The hit frame of attacks 1 and 2 is marked on the
-  slider, and the line under it says what the game adds. **The game's speed
+  being dragged there. The [sound events](#sound-events) of the monster's set
+  play as the game plays them: those of the animation and its cues when it
+  starts, at each loop of stop1 and stop2 and frame by frame in a walk, then
+  those of its moment (stand for stop1 and stop2, attack for the attacks, hit
+  for the shock, death, and walk at each frame of a walk); on any map and at
+  any distance, with the death effect counted as armed. The hit frame of
+  attacks 1 and 2 is marked on the slider, and the line under it says what
+  the game adds. The model's cues of the animation are tags under the
+  slider: hovering one says its frames and what it plays, a click shows its
+  event in Monster Sounds. **Add a sound at this frame** adds a cue at the
+  frame shown and an event on it to the monster's set (one undo step), then
+  Monster Sounds shows the event to pick its sound. A monster with random
+  variants gets a **Variant** choice: the entry's look or a variant's, with
+  its model and its set. **The game's speed
   factors** plays them (**As a transformed player** too). The preview is
   only in the editor's window.
 - **Monster Attacks**: the [attacks](#attacks) of the selected monster, and
@@ -561,7 +674,7 @@ item tools.
   **Play** and **Remove**, and a number field with **Add**; a monster skill
   that 0x69 plays no attack for is marked. **Play** plays the animation once
   in Monster Preview (and opens it), with the model's attack sounds (its
-  slot or its sound events) and the attacks' sound, then the model stands; skill effects do not play. A
+  sound events) and the attacks' sound, then the model stands; skill effects do not play. A
   Monster Preview that is a tab beside Monster Attacks moves to the right
   half of their place, so both show. **Any other attack** is an animation, a
   rotation (its animations in turn, with **Remove** and **Add an
@@ -612,9 +725,10 @@ How changes work:
   NPCs that appear after it. After Remove, the ones on screen keep their name
   and kind until they appear again.
 - A name or a speed is stored when you leave its field after a change, a
-  kind, a file, a folder, a held last frame or a sound slot right away. A
-  changed model is opened again before the next frame, with its textures and
-  sounds, and the characters of the model keep playing (an animation it no
+  kind, a file, a folder, a held last frame, a sound set or a sound event
+  right away. A changed model is opened again before the next frame, with its
+  textures and sounds (a changed set's sounds load for the open models that
+  use it), and the characters of the model keep playing (an animation it no
   longer has goes back to the first). Each is one step of **Undo** and **Redo** (in the editor's bar, see
   [dev-editor.md](dev-editor.md); also Ctrl+Z and Ctrl+Y while a monster
   tool has the focus and no field is being typed in): the last 256 steps,
@@ -623,19 +737,20 @@ How changes work:
   history did not record; the console says so. The Monster Browser's title
   has a `*` while there are changes that are not saved.
 - **Save Monsters** (in the Monster Browser and Monster Translations) runs
-  the checks and writes `Data/Monsters/Monsters.json` and
-  `Data/Monsters/Models.json` next to the game. With
+  the checks and writes `Data/Monsters/Monsters.json`,
+  `Data/Monsters/Models.json` and `Data/Monsters/Sounds.json` next to the
+  game. With
   fatal problems nothing is written, and the problems are listed under the
   button;
   warnings do not stop it. The new file takes the old one's place only when
   it was written whole.
-- **Revert** reads both files again: the changes since they were saved are
+- **Revert** reads the three files again: the changes since they were saved are
   lost, and so is the undo history. A file with fatal problems is not taken; its
   monsters or models stay as they are and the problems are listed.
 
 The game runs from the build folder, which has a copy of `src/bin/Data`.
-To keep your changes, copy `<build folder>/Data/Monsters/Monsters.json` and
-`Models.json` to `src/bin/Data/Monsters` and commit them.
+To keep your changes, copy `<build folder>/Data/Monsters/Monsters.json`,
+`Models.json` and `Sounds.json` to `src/bin/Data/Monsters` and commit them.
 
 ### Import and export of NpcName txt
 
