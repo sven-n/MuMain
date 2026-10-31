@@ -2,6 +2,7 @@
 #include <doctest.h>
 
 #include "RmlLayoutFixture.h"
+#include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/Scaling/UITransform.h"
 #include "../../src/ThirdParty/RmlUi/Source/Core/DecoratorTiled.h"
@@ -236,6 +237,97 @@ TEST_CASE("the event entry level art covers its whole band in every theme [ui][s
             CHECK(size.y == doctest::Approx(bandSize.y));
         }
         CHECK(painted > 0);
+        fixture.context->UnloadDocument(document);
+        fixture.Refresh();
+    }
+}
+
+namespace
+{
+struct DrawnRect
+{
+    float left = 0.f;
+    float top = 0.f;
+    float right = 0.f;
+    float bottom = 0.f;
+};
+
+DrawnRect Drawn(Rml::Element& element)
+{
+    Rml::Vector2f offset, size;
+    REQUIRE(UI::RmlBridge::DrawnBox(element, Rml::BoxArea::Border, offset, size));
+    return {offset.x, offset.y, offset.x + size.x, offset.y + size.y};
+}
+
+Rml::Element& Required(Rml::ElementDocument& document, const char* selector)
+{
+    Rml::Element* element = document.QuerySelector(selector);
+    CAPTURE(selector);
+    REQUIRE(element != nullptr);
+    return *element;
+}
+} // namespace
+
+TEST_CASE("the legacy character window shows the points to spend between the summary and STR [ui][styling]")
+{
+    // The original drew "Point: N" beside the level (x 110); "Level: N | Resets: N" runs into it.
+    // newui_item_table03(Dw) draws the summary's bottom line on its rows 7-9 of 14.
+    constexpr float BottomLineEndRow = 10.f;
+    constexpr float BottomEdgeRows = 14.f;
+    constexpr float Tolerance = 0.5f;
+    UI::Tests::RmlLayoutFixture fixture;
+    // A display scale above 100% grows the text but not a small window; such windows are only listed
+    // where the screen gives the panel room to grow too.
+    struct Screen
+    {
+        Rml::Vector2i viewport;
+        int percent;
+        float contentScale;
+    };
+    const Screen screens[] = {{{800, 600}, 100, 1.f},    {{1024, 768}, 75, 1.f},    {{1024, 768}, 100, 1.f},
+                              {{1280, 720}, 100, 1.f},   {{1280, 720}, 150, 1.f},   {{1920, 1080}, 100, 1.f},
+                              {{1920, 1080}, 125, 1.f},  {{1920, 1080}, 150, 1.f},  {{2560, 1440}, 100, 1.f},
+                              {{1920, 1080}, 100, 1.5f}, {{2560, 1440}, 100, 1.5f}, {{3840, 2160}, 100, 2.f}};
+    for (const auto& [viewport, percent, contentScale] : screens)
+    {
+        CAPTURE(viewport.x);
+        CAPTURE(viewport.y);
+        CAPTURE(percent);
+        CAPTURE(contentScale);
+        fixture.Configure(viewport, percent, contentScale);
+        auto* document = fixture.Load("legacy", "character_info");
+        REQUIRE(document);
+        UI::RmlBridge::SlotPlacement placement;
+        placement.Set(0.f, 0.f, UI::Scaling::DockRightTransform(viewport.x, viewport.y).scaleX);
+        placement.Apply(document, "panel");
+        const std::string fontSize =
+            std::to_string(UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, viewport.x, viewport.y)) +
+            "px";
+        auto& level = Required(*document, ".level-text");
+        auto& points = Required(*document, ".levelup-point-text");
+        level.SetProperty("font-size", fontSize);
+        points.SetProperty("font-size", fontSize);
+        level.SetInnerRML("Level: 400 | Resets: 65535");
+        points.SetInnerRML("Point: 65535");
+        fixture.Refresh();
+
+        const DrawnRect levelBox = Drawn(level);
+        const DrawnRect pointsBox = Drawn(points);
+        const DrawnRect bottomEdge = Drawn(Required(*document, ".edge-bottom"));
+        const DrawnRect summary = Drawn(Required(*document, ".summary-fill"));
+        const DrawnRect strength = Drawn(Required(*document, ".attr-textbox-str"));
+        const float bottomLine =
+            bottomEdge.top + (bottomEdge.bottom - bottomEdge.top) * BottomLineEndRow / BottomEdgeRows;
+        CHECK(pointsBox.top >= bottomLine - Tolerance);
+        CHECK(pointsBox.bottom <= strength.top + Tolerance);
+        CHECK(pointsBox.right <= summary.right + Tolerance);
+        CHECK((pointsBox.top >= levelBox.bottom || pointsBox.left >= levelBox.right));
+
+        // The rows moved down to make the gap; the Dark Lord's Command row still clears the action row.
+        const DrawnRect command = Drawn(Required(*document, ".attr-textbox-cmd"));
+        const DrawnRect actions = Drawn(Required(*document, ".info-btn-quest"));
+        CHECK(command.bottom <= actions.top);
+
         fixture.context->UnloadDocument(document);
         fixture.Refresh();
     }
