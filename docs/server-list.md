@@ -313,3 +313,114 @@ Now the two switches are the PvP box and the VIP type, Gold is one VIP type of
 any number, and every text is a template in the file. The original buttons
 also ended in "Connect" for every server that could be joined; now only a full
 server or one being prepared says so.
+
+## Plan (removed when everything has landed)
+
+This section is the working plan for the load bar and the load texts in
+sven-n/MuMain#895. It goes once the work is done; the sections above then
+describe what was built.
+
+### Decisions (2026-10-31)
+
+1. A `load` section in `ServerList.json`, edited in MU Editor. A color is a
+   theme color or one of the list's `colors`, as in the button color rules; a
+   list that sets nothing keeps each theme's look.
+2. The load bar has 10 segments of 10 % each. Segment *k* (1 to 10) has the
+   base color mixed (*k* − 1) × 10 % toward the full color, so segment 10 is at
+   90 %.
+3. The colors are mixed in OKLCH: the hue goes the shorter way around the
+   color wheel and the brightness evenly from one color to the other, so no
+   segment is brighter than both ends.
+4. A segment that is only partly reached is lit partly: 35 % is three lit
+   segments and half of the fourth.
+5. A full server (load 100 to 127) has all 10 segments in the full color.
+6. A load of 128 or more is *overloaded*: the same bar as a full server, and
+   the text "Overloaded" instead of "Now preparing".
+7. The two load texts, `full` and `overloaded`, are texts of the list, one per
+   language; "(Full)" and "Now preparing" leave `Game.*.resx`.
+8. A click on an overloaded server says "The server is full", as for a full
+   one (until now it did nothing).
+9. The unlit segments have an optional color of the list; without it each
+   theme keeps its own track color.
+10. Italic is drawn with real italic faces where the font has them (Liberation
+    Sans and DejaVu Sans, bundled), and slanted where it has none.
+11. Everything goes into #895.
+
+### The file
+
+```json
+"load": {
+  "bar": {"base": "default", "full": "default", "empty": "default"},
+  "full": {"text": {"en": "(Full)", "de": "(Voll)"}, "color": "loadRed", "bold": true},
+  "overloaded": {"text": {"en": "Overloaded", "de": "Überlastet"}, "color": "loadRed", "bold": true, "italic": true}
+}
+```
+
+| Field                  | Meaning                                                                 |
+|------------------------|-------------------------------------------------------------------------|
+| `load`                 | Optional; every field in it is optional.                                |
+| `bar.base`, `bar.full` | The colors the segments are mixed from. `default` (or left out): the theme's `server-load-base` and `server-load-full` tokens. |
+| `bar.empty`            | The unlit part of a segment. `default`: the theme's track color (`server-load-empty`). |
+| `full`, `overloaded`   | The `{load}` text of a full and of an overloaded server.                |
+| `….text`               | One text per language, up to 32 characters; English falls back to "(Full)" and "Overloaded". |
+| `….color`              | `default` (or left out): the button's color. Else a theme color or one of `colors`. |
+| `….bold`, `….italic`   | Optional; `true` turns it on. Default `false`.                           |
+
+A color the list does not have is a warning; the default color is used.
+
+### Decided while writing the plan (to confirm)
+
+- **Theme defaults** (`tokens.ini`): legacy `#00BD8B` → `#E0483E` (today's
+  green), modern `#8EB06B` → `#A22C1E` (its success and danger colors), classic
+  `#00FFFF` → `#FF0000` (today's gradient ends); each theme's track stays.
+- **Segment gaps**: 2 pixels in legacy and modern, 1 in classic; the tracks
+  keep their size and place. Modern's segments are flat, keeping its top
+  highlight; its tier gradients go.
+- **The bundled file** sets both texts bold in a red of the list, `loadRed`
+  (legacy `#FF5A5A`, modern `#C0564E`, classic `#FF4040`), "Overloaded" also
+  italic. The bar keeps the theme defaults.
+- **The slant** is `skewX(-12deg)`. It is used when the body font has no
+  italic face, and in Chinese and Japanese, whose glyphs come from fonts
+  without italic.
+- **MU Editor**: the Channel names tab gets a **Load** part below the button
+  color rules: Base, Full and Unlit color lists for the bar, and for Full and
+  Overloaded a Color list with Bold and Italic boxes. The two texts are edited
+  per language with the other texts. The preview gets a row each for 35 %, full
+  and overloaded with the bar in the legacy and modern theme; bold and italic
+  show only in game.
+
+### Bundled texts
+
+| Language | `full`       | `overloaded`    |
+|----------|--------------|-----------------|
+| en       | (Full)       | Overloaded      |
+| de       | (Voll)       | Überlastet      |
+| es       | (Lleno)      | Sobrecargado    |
+| id       | (Penuh)      | Kelebihan beban |
+| ja       | (満員)       | 過負荷          |
+| pl       | (Pełny)      | Przeciążony     |
+| pt       | (Completo)   | Sobrecarregado  |
+| ru       | (Полный)     | Перегружен      |
+| tl       | (Puno)       | Sobrang puno    |
+| uk       | (Повний)     | Перевантажений  |
+| zh-CN    | （已满）     | 过载            |
+| zh-TW    | （已滿）     | 過載            |
+
+"(Full)" keeps today's game texts, except Japanese (English until now),
+Simplified Chinese (none), Traditional Chinese (（滿的）) and Tagalog ((Buo),
+"whole").
+
+### Work
+
+1. **Fonts**: `LiberationSans-Italic.ttf` and `LiberationSans-BoldItalic.ttf`
+   from Liberation Fonts 2.1.5, `DejaVuSans-Oblique.ttf` and
+   `DejaVuSans-BoldOblique.ttf` from DejaVu Fonts 2.37 (the bundled versions),
+   loaded with the others.
+2. **Data**: the `load` section in `ServerListData`, read and written by
+   `ServerListJson.cpp` with its problems; the segment colors and fills
+   (OKLCH mixing) as functions of their own, with tests.
+3. **Game**: the button label in three parts so `{load}` gets its own color,
+   weight and style; the 10 segments in `server_select.rml` and the three
+   themes; the click on an overloaded server; the two game texts removed.
+4. **MU Editor**: the Load part and the preview rows.
+5. **Docs**: this document describes the load bar and texts; this plan goes.
