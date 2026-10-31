@@ -42,6 +42,10 @@ public:
 
     virtual void SendServerListRequest() = 0;
 
+    // Tells the player that the client connects again, since the screen shows nothing
+    // else while it does.
+    virtual void ShowConnecting() = 0;
+
     // Tells the player the server can't be reached and offers to try again or leave.
     virtual void ShowFailure() = 0;
     // Whether that message is still up; another message can take its place.

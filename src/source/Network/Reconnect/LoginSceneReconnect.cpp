@@ -186,6 +186,7 @@ void LoginSceneReconnect::Begin(LoginServer server, std::function<void()> resume
     m_server = server;
     m_resume = std::move(resume);
     mu::log::Get("network")->info("NET: reconnecting the login screen to the {}", NameOf(server));
+    m_link.ShowConnecting();
 
     if (!m_link.StartProbe(server))
     {

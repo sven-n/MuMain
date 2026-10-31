@@ -34,6 +34,7 @@ public:
     std::vector<LoginServer> connects;
     int probeStops = 0;
     int listRequests = 0;
+    int connectingShown = 0;
     int failures = 0;
 
     bool IsConnected() const override
@@ -70,6 +71,10 @@ public:
     void SendServerListRequest() override
     {
         ++listRequests;
+    }
+    void ShowConnecting() override
+    {
+        ++connectingShown;
     }
     void ShowFailure() override
     {
@@ -172,6 +177,18 @@ TEST_SUITE("Login scene reconnect")
         CHECK(screen.resumed == 0);
         CHECK_FALSE(screen.reconnect.IsReconnecting());
         CHECK(screen.link.failures == 0);
+    }
+
+    TEST_CASE("the player is told that the client connects again")
+    {
+        DroppedScreen screen;
+        screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume());
+        CHECK(screen.link.connectingShown == 1);
+
+        screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume()); // a second click
+        screen.ServerComesBack();
+        screen.reconnect.OnGreeting(LoginServer::Connect);
+        CHECK(screen.link.connectingShown == 1);
     }
 
     TEST_CASE("a drop while the player can go on stays quiet")

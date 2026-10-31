@@ -1,10 +1,12 @@
 #include "stdafx.h"
 #include "Network/Reconnect/GameLoginSceneLink.h"
 
+#include "I18N/All.h"
 #include "Network/Reconnect/LoginSceneReconnect.h"
 #include "Network/Reconnect/ReconnectManager.h" // the game server connected to last
 #include "Network/Server/WSclient.h"            // SocketClient, CreateSocket, protocol states
 #include "Scenes/SceneCore.h"                   // szServerIpAddress, g_ServerPort
+#include "UI/Core/WindowSystem.h"               // g_pSystemLogBox
 #include "UI/Windows/LoginSceneUpdates.h"
 
 extern double WorldTime;
@@ -79,6 +81,13 @@ bool GameLoginSceneLink::Connect(LoginServer server)
 void GameLoginSceneLink::SendServerListRequest()
 {
     SocketClient->ToConnectServer()->SendServerListRequest();
+}
+
+void GameLoginSceneLink::ShowConnecting()
+{
+    // The texts a server pick shows while it connects.
+    g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    g_pSystemLogBox->AddText(I18N::Game::PleaseWait, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 }
 
 void GameLoginSceneLink::ShowFailure()

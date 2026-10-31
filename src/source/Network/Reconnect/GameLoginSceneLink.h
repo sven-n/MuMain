@@ -15,6 +15,7 @@ public:
     void StopProbe() override;
     bool Connect(LoginServer server) override;
     void SendServerListRequest() override;
+    void ShowConnecting() override;
     void ShowFailure() override;
     bool IsFailureShown() const override;
     void HideFailure() override;
