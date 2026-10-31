@@ -11,6 +11,7 @@
 #include "Data/GameData/MonsterData/MonsterSoundSet.h"
 
 #include <optional>
+#include <span>
 #include <string>
 
 namespace MuEditor::Monsters
@@ -60,6 +61,11 @@ public:
     {
         return m_playing;
     }
+    // The cues the preview marks and plays for the model in `slot`: those of
+    // Monster Sounds' draft, which edits only the cues, with an edit that is
+    // not stored yet, also while Monster Model shows a draft of the model
+    // (Q-MN81); else those of the values it plays.
+    std::span<const Data::Monsters::MonsterModelCue> GetCues(int slot) const;
 
     // One frame of the animation shown, as Render plays it while it plays:
     // a held animation stops at its last frame, others start again, and an
