@@ -237,6 +237,15 @@ TEST_CASE("Monster models: wrong values are errors that name the model and the f
          "model MONSTER_MODEL_HOUND cues[0].animation", "not an animation"},
         {Model("MONSTER_MODEL_HOUND", R"("cues": [{"name": "step 1", "animation": "walk", "frames": [8, 7]}])"),
          "model MONSTER_MODEL_HOUND cues[0].frames", "first below the second"},
+        // Two numbers that are one float: the cue would never play.
+        {Model("MONSTER_MODEL_HOUND",
+               R"("cues": [{"name": "step 1", "animation": "walk", "frames": [1.00000001, 1.00000002]}])"),
+         "model MONSTER_MODEL_HOUND cues[0].frames", "first below the second"},
+        // A frame past the floats' range.
+        {Model("MONSTER_MODEL_HOUND", R"("cues": [{"name": "step 1", "animation": "walk", "frames": [1, 1e300]}])"),
+         "model MONSTER_MODEL_HOUND cues[0].frames", "first below the second"},
+        {Model("MONSTER_MODEL_HOUND", R"("cues": [{"name": "step 1", "animation": "walk", "frames": [-1, 2]}])"),
+         "model MONSTER_MODEL_HOUND cues[0].frames", "first below the second"},
         {Model(
              "MONSTER_MODEL_HOUND",
              R"("cues": [{"name": "step", "animation": "walk", "frames": [1, 2]}, {"name": "step", "animation": "walk", "frames": [7, 8]}])"),

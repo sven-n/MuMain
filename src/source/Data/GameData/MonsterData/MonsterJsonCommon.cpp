@@ -161,15 +161,25 @@ bool ReadMaps(const OrderedJson& json, const std::string& key, std::vector<Data:
 
 bool ReadFrames(const OrderedJson& json, const std::string& key, std::pair<float, float>& frames, EntryIssues& issues)
 {
-    const auto isFrame = [](const OrderedJson& value)
-    { return value.is_number() && std::isfinite(value.get<double>()) && value.get<double>() >= 0.0; };
-    if (!json.is_array() || json.size() != 2 || !isFrame(json[0]) || !isFrame(json[1]) ||
-        json[0].get<double>() >= json[1].get<double>())
+    // Compared as the game keeps them: two close numbers can be one float,
+    // and a frame past the floats' range would be infinite.
+    const auto frameOf = [](const OrderedJson& value) -> std::optional<float>
+    {
+        if (!value.is_number() || value.get<double>() < 0.0)
+        {
+            return std::nullopt;
+        }
+        const float frame = static_cast<float>(value.get<double>());
+        return std::isfinite(frame) ? std::optional<float>(frame) : std::nullopt;
+    };
+    const std::optional<float> first = json.is_array() && json.size() == 2 ? frameOf(json[0]) : std::nullopt;
+    const std::optional<float> second = json.is_array() && json.size() == 2 ? frameOf(json[1]) : std::nullopt;
+    if (!first || !second || *first >= *second)
     {
         issues.Fatal(key, "must be two frames, the first below the second: [7, 8]");
         return false;
     }
-    frames = {static_cast<float>(json[0].get<double>()), static_cast<float>(json[1].get<double>())};
+    frames = {*first, *second};
     return true;
 }
 
