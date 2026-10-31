@@ -2618,7 +2618,7 @@ void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* o
                     Vector(1.f, 0.8f, 0.2f, Light);
                     if ((j % 22) == 0)
                     {
-                        auto* o = (OBJECT*)obj;
+                        auto* o = static_cast<OBJECT*>(obj);
 
                         angle[0] = -(float)(rand() % 90);
                         angle[1] = 0.f;
@@ -4000,9 +4000,12 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
         // wprintf(L"[Open2] WARNING: Invalid file extension: %.64hs in %.64s\n", Name, ModelPath);
     }
 
-    NumMeshs = *(short*)(data + ptr); ptr += sizeof(short);
-    NumBones = *(short*)(data + ptr); ptr += sizeof(short);
-    NumActions = *(short*)(data + ptr); ptr += sizeof(short);
+    NumMeshs = *reinterpret_cast<short*>(data + ptr);
+    ptr += sizeof(short);
+    NumBones = *reinterpret_cast<short*>(data + ptr);
+    ptr += sizeof(short);
+    NumActions = *reinterpret_cast<short*>(data + ptr);
+    ptr += sizeof(short);
 
     assert(NumBones <= MAX_BONES && "Bones 200");
     //// wprintf(L"[Open2] Model: %.32hs | Meshes: %d | Bones: %d | Actions: %d\n", Name, NumMeshs, NumBones, NumActions);
@@ -4027,11 +4030,16 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
     for (int i = 0; i < NumMeshs; ++i)
     {
         Mesh_t& m = Meshs[i];
-        m.NumVertices = *(short*)(data + ptr); ptr += sizeof(short);
-        m.NumNormals = *(short*)(data + ptr); ptr += sizeof(short);
-        m.NumTexCoords = *(short*)(data + ptr); ptr += sizeof(short);
-        m.NumTriangles = *(short*)(data + ptr); ptr += sizeof(short);
-        m.Texture = *(short*)(data + ptr); ptr += sizeof(short);
+        m.NumVertices = *reinterpret_cast<short*>(data + ptr);
+        ptr += sizeof(short);
+        m.NumNormals = *reinterpret_cast<short*>(data + ptr);
+        ptr += sizeof(short);
+        m.NumTexCoords = *reinterpret_cast<short*>(data + ptr);
+        ptr += sizeof(short);
+        m.NumTriangles = *reinterpret_cast<short*>(data + ptr);
+        ptr += sizeof(short);
+        m.Texture = *reinterpret_cast<short*>(data + ptr);
+        ptr += sizeof(short);
         m.NoneBlendMesh = false;
 
         //// wprintf(L"[Open2] Mesh[%d] V:%d N:%d T:%d Tri:%d Tex:%d\n", i, m.NumVertices, m.NumNormals, m.NumTexCoords, m.NumTriangles, m.Texture);
@@ -4069,8 +4077,10 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
     {
         Action_t& a = Actions[i];
         a.Loop = false;
-        a.NumAnimationKeys = *(short*)(data + ptr); ptr += sizeof(short);
-        a.LockPositions = *(bool*)(data + ptr);  ptr += sizeof(bool);
+        a.NumAnimationKeys = *reinterpret_cast<short*>(data + ptr);
+        ptr += sizeof(short);
+        a.LockPositions = *reinterpret_cast<bool*>(data + ptr);
+        ptr += sizeof(bool);
 
         //// wprintf(L"[Open2] Action[%d] Keys: %d Lock: %d\n", i, a.NumAnimationKeys, a.LockPositions);
 
@@ -4094,7 +4104,8 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
         if (!b.Dummy)
         {
             memcpy(b.Name, data + ptr, 32); ptr += 32;
-            b.Parent = *(short*)(data + ptr); ptr += sizeof(short);
+            b.Parent = *reinterpret_cast<short*>(data + ptr);
+            ptr += sizeof(short);
 
             //// wprintf(L"[Open2] Bone[%d] Name: %.32hs Parent: %d\n", i, b.Name, b.Parent);
 
