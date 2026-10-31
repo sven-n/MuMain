@@ -107,6 +107,14 @@ RmlUi renders through its own vendored SDL_GPU backend
 The submodule points at the fork `nitoygo/RmlUi` (`integration/sdl-gpu-parity`), which carries
 the renderer work upstream doesn't have yet; renderer changes are committed there first, then the
 submodule pin is moved.
+
+For now the pin is an exception: `fa1b5e47`, the head of `mumain-flex-fixes` in `Mosch0512/RmlUi`,
+which merges two layout fixes onto nitoygo's branch (absolute children of a flex container get
+its final box, Mosch0512/RmlUi#1; an empty flex container keeps its min/max size,
+Mosch0512/RmlUi#2). The same fixes are open as nitoygo/RmlUi#2 and nitoygo/RmlUi#3. GitHub serves
+the commit through the nitoygo URL, so `.gitmodules` is unchanged, but nitoygo's branch does not
+contain it: `git submodule update --remote` would drop both fixes, and `mumain-flex-fixes` must
+stay until the pin moves back to a nitoygo commit once those PRs merge.
 `transform`, gradients, `box-shadow` and `backdrop-filter: blur()` render; other filters and
 `mask-image` have limited verification — `engine-findings.md` has the current list. Test a new visual property in isolation rather
 than trusting the parser.

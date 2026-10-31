@@ -56,8 +56,17 @@
    .gmd-btn.cols-2/.server-row's own resized reuse of a fixed-size sprite. Inner rects below are a
    conservative uniform inset (not pixel-verified against the source art, unlike legacy-btn-idle's
    own inner rect) -- revisit if the stretched edges show visible seams/artifacts. Redeclared
-   spritesheets (RmlUi spritesheets are per-document, can't share my_quest_info.rcss's own). */
-@spritesheet option-tab-back-sheet   { src: "../../../Quest_tab01.tga"; option-tab-back:   0px 0px 166px 22px; option-tab-back-inner:   6px 4px 154px 14px; }
+   spritesheets (RmlUi spritesheets are per-document, can't share my_quest_info.rcss's own).
+
+   Each tab paints its own inactive tab: Quest_tab01's first cell (x 0-46), which starts with the
+   black column that separates two tabs, so a row of them is the original strip with a separator
+   between every two tabs. The last tab also takes the strip's closing black column (x 47). The
+   whole 3-tab strip stretched across the row put its two separators across the labels. */
+@spritesheet option-tab-idle-sheet {
+	src: "../../../Quest_tab01.tga";
+	option-tab-idle:      0px 0px 47px 22px; option-tab-idle-inner:      5px 4px 37px 14px;
+	option-tab-idle-last: 0px 0px 48px 22px; option-tab-idle-last-inner: 5px 4px 38px 14px;
+}
 @spritesheet option-tab-active-sheet { src: "../../../Quest_tab02.tga"; option-tab-active: 0px 0px 48px 22px;  option-tab-active-inner: 4px 4px 40px 14px; }
 .option-tab-row {
 	position: absolute;
@@ -66,7 +75,6 @@
 	top: 0;
 	display: flex;
 	height: 22dp;
-	decorator: ninepatch(option-tab-back, option-tab-back-inner);
 }
 /* Sized by their labels (not equal cells): "Gameplay" and "Graphics" need more room than
    "UI", and equal cells cut them off. */
@@ -82,6 +90,10 @@
 	cursor: pointer;
 	pointer-events: auto;
 	color: token(text-muted);
+	decorator: ninepatch(option-tab-idle, option-tab-idle-inner);
+}
+.option-tab-btn:last-child {
+	decorator: ninepatch(option-tab-idle-last, option-tab-idle-last-inner);
 }
 .option-tab-btn:hover {
 	color: token(text-input);
