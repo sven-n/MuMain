@@ -12669,6 +12669,12 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 // (0xD2)(0x01)
+// D2 01 CashShopPointInfo: the view type at 4, then five doubles. The exact sizes of the
+// D2 packets are generated from OpenMU's XML (wire_sizes.generated.h); the handlers cast the
+// buffer, so a field at the wrong offset would be read without any message.
+static_assert(offsetof(PMSG_CASHSHOP_CASHPOINT_ANS, dTotalCash) == 5);
+static_assert(offsetof(PMSG_CASHSHOP_CASHPOINT_ANS, dTotalMileage) == 37);
+
 bool ReceiveIGS_CashPoint(const BYTE* pReceiveBuffer)
 {
     auto Data = (LPPMSG_CASHSHOP_CASHPOINT_ANS)pReceiveBuffer;
@@ -12700,6 +12706,10 @@ bool ReceiveIGS_ShopOpenResult(const BYTE* pReceiveBuffer)
 
     return true;
 }
+
+// D2 03 CashShopItemBuyResult: the result at 4, the left count at 5.
+static_assert(offsetof(PMSG_CASHSHOP_BUYITEM_ANS, byResultCode) == 4);
+static_assert(offsetof(PMSG_CASHSHOP_BUYITEM_ANS, lItemLeftCount) == 5);
 
 // (0xD2)(0x03)
 bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
@@ -12787,6 +12797,10 @@ bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x04)
+// D2 04 CashShopItemGiftResult: the result at 4, the left count at 5, the limited cash at 9.
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSEND_ANS, lItemLeftCount) == 5);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSEND_ANS, dLimitedCash) == 9);
+
 bool ReceiveIGS_SendItemGift(const BYTE* pReceiveBuffer)
 {
     auto Data = (LPPMSG_CASHSHOP_GIFTSEND_ANS)pReceiveBuffer;
@@ -12885,6 +12899,13 @@ bool ReceiveIGS_StorageItemListCount(const BYTE* pReceiveBuffer)
     return true;
 }
 
+// D2 0D CashShopStorageItem: five 32-bit sequences from 4, the cash points at 24 and the item
+// type at 32. AddStorageItem() drops an item whose type isn't 'C' or 'P' without a message.
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, lStorageIndex) == 4);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, lPriceSeq) == 20);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, dCashPoint) == 24);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, chItemType) == 32);
+
 // (0xD2)(0x0D)
 bool ReceiveIGS_StorageItemList(const BYTE* pReceiveBuffer)
 {
@@ -12900,6 +12921,13 @@ bool ReceiveIGS_StorageItemList(const BYTE* pReceiveBuffer)
                                        (char)Data->chItemType });
     return true;
 }
+
+// D2 0E CashShopGiftStorageItem: the storage item's fields, then the sender at 33 and the
+// message at 44.
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, dCashPoint) == 24);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, chItemType) == 32);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, chSendUserName) == 33);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, chMessage) == 44);
 
 // (0xD2)(0x0E)
 bool ReceiveIGS_StorageGiftItemList(const BYTE* pReceiveBuffer)
@@ -13145,6 +13173,11 @@ bool ReceivePeriodItemListCount(const BYTE* pReceiveBuffer)
     auto Data = (LPPMSG_PERIODITEMEX_ITEMCOUNT)pReceiveBuffer;
     return true;
 }
+
+// D2 12 period item list: not in OpenMU's XML, so its size is guarded here. The struct isn't
+// packed; the expire date is at 8.
+static_assert(sizeof(PMSG_PERIODITEMEX_ITEMLIST) == 12);
+static_assert(offsetof(PMSG_PERIODITEMEX_ITEMLIST, lExpireDate) == 8);
 
 bool ReceivePeriodItemList(const BYTE* pReceiveBuffer)
 {

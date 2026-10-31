@@ -16,6 +16,12 @@ decode all trailing fields (e.g. PreviewData). The bug class we are guarding
 against (PR #402) is "client struct grew larger than the wire packet, so
 safe_cast rejects it" -- <= catches that exactly.
 
+Entries marked EXACT emit == instead. That is for structs which decode every
+field and which the handlers read with a raw cast instead of safe_cast: there
+a layout drift isn't a dropped packet but fields read from the wrong offset,
+without any message, and a struct which shrinks moves them as well as one
+which grows.
+
 To add a packet: append to PACKET_MAPPING. There is no naming convention
 linking XML names to C++ struct names, so the mapping must be hand-maintained.
 """
@@ -26,17 +32,26 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
-# XML packet name (without subcode/code prefix) -> client C++ struct name.
-# Seeded with the structs PR #66 covered by hand.
+EXACT = True
+
+# XML packet name (without subcode/code prefix) -> client C++ struct name,
+# optionally followed by EXACT. Seeded with the structs PR #66 covered by hand.
 PACKET_MAPPING = [
-    ("CharacterCreationSuccessful",   "PRECEIVE_CREATE_CHARACTER"),
-    ("CharacterInformationExtended",  "PRECEIVE_JOIN_MAP_SERVER_EXTENDED"),
-    ("RespawnAfterDeathExtended",     "PRECEIVE_REVIVAL_EXTENDED"),
-    # The cash shop structs had `long` fields, 8 bytes on 64-bit Linux and macOS.
-    ("CashShopItemBuyResult",         "PMSG_CASHSHOP_BUYITEM_ANS"),
-    ("CashShopItemGiftResult",        "PMSG_CASHSHOP_GIFTSEND_ANS"),
-    ("CashShopStorageItem",           "PMSG_CASHSHOP_STORAGELIST"),
-    ("CashShopGiftStorageItem",       "PMSG_CASHSHOP_GIFTSTORAGELIST"),
+    ("CharacterCreationSuccessful",      "PRECEIVE_CREATE_CHARACTER"),
+    ("CharacterInformationExtended",     "PRECEIVE_JOIN_MAP_SERVER_EXTENDED"),
+    ("RespawnAfterDeathExtended",        "PRECEIVE_REVIVAL_EXTENDED"),
+    # The cash shop (0xD2) packets the server sends. Read with raw casts: a layout
+    # drift gives wrong fields, not dropped packets.
+    ("CashShopPointInfo",                "PMSG_CASHSHOP_CASHPOINT_ANS",        EXACT),
+    ("CashShopOpenStateResponse",        "PMSG_CASHSHOP_SHOPOPEN_ANS",         EXACT),
+    ("CashShopItemBuyResult",            "PMSG_CASHSHOP_BUYITEM_ANS",          EXACT),
+    ("CashShopItemGiftResult",           "PMSG_CASHSHOP_GIFTSEND_ANS",         EXACT),
+    ("CashShopStorageListResponse",      "PMSG_CASHSHOP_STORAGECOUNT",         EXACT),
+    ("CashShopStorageItem",              "PMSG_CASHSHOP_STORAGELIST",          EXACT),
+    ("CashShopGiftStorageItem",          "PMSG_CASHSHOP_GIFTSTORAGELIST",      EXACT),
+    ("CashShopStorageItemConsumeResult", "PMSG_CASHSHOP_STORAGE_ITEM_USE_ANS", EXACT),
+    ("CashShopScriptVersion",            "PMSG_CASHSHOP_VERSION_UPDATE",       EXACT),
+    ("CashShopBannerVersion",            "PMSG_CASHSHOP_BANNER_UPDATE",        EXACT),
 ]
 
 
@@ -70,7 +85,7 @@ def load_lengths(xml_path: Path) -> dict[str, int]:
 
 
 def emit_header(lengths: dict[str, int], out: Path, source_label: str) -> int:
-    missing = [xml for xml, _ in PACKET_MAPPING if xml not in lengths]
+    missing = [entry[0] for entry in PACKET_MAPPING if entry[0] not in lengths]
     if missing:
         print(f"error: XML packets not found in {source_label}: {missing}",
               file=sys.stderr)
@@ -85,14 +100,17 @@ def emit_header(lengths: dict[str, int], out: Path, source_label: str) -> int:
         "// length declared by OpenMU. Guards against the PR #402 class of bug where a",
         "// dropped #pragma pack(1) silently inflates the client struct above the wire",
         "// size, causing safe_cast to reject every packet (freezes the loading screen).",
+        "// Structs read with a raw cast get an exact size instead (== rather than <=):",
+        "// there a drift reads fields from the wrong offset without any message.",
         "",
         "#pragma once",
         "",
     ]
-    for xml_name, cpp_name in PACKET_MAPPING:
+    for xml_name, cpp_name, *flags in PACKET_MAPPING:
         n = lengths[xml_name]
+        relation = "==" if EXACT in flags else "<="
         lines += [
-            f"static_assert(sizeof({cpp_name}) <= {n},",
+            f"static_assert(sizeof({cpp_name}) {relation} {n},",
             f"              \"wire size drift -- generated from {xml_name} ({n} bytes)\");",
             "",
         ]
