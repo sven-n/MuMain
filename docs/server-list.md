@@ -1,8 +1,9 @@
 # Server List
 
 The server groups on the login screen (Valhalla, Helheim, ...), their channels,
-the VIP types of the channels (Gold, Silver, ...) and the texts that name a
-channel come from `Data/Local/ServerList.json`. It replaced the encrypted
+the VIP types of the channels (Gold, Silver, ...), the texts that name a
+channel and the colors of the channel buttons come from
+`Data/Local/ServerList.json`. It replaced the encrypted
 `Data/Local/ServerList.bmd` of the original client. The game reads it at start;
 with fatal problems in it the game shows them and stops, as it does for broken
 item data. All problems are also written to the log.
@@ -48,8 +49,9 @@ on, the PK field counts as a strife map.
 
 The file only names and colors the channels. Whether PvP is really on is
 decided by the server: on OpenMU, *PvP enabled* in the game server's settings
-in the admin panel. Set both the same way. A VIP type is a name and a color in
-the client; OpenMU does not keep players without VIP out of a server.
+in the admin panel. Set both the same way. A VIP type only names and colors
+channels in the client; OpenMU does not keep players without VIP out of a
+server.
 
 ## Where a channel's name appears
 
@@ -265,23 +267,24 @@ For both tabs:
 
 - The login screen shows each change right away, while the window is open.
 - **Add**, **Remove**, **Move up** and **Move down** change the list of groups,
-  of VIP types or of colors. Removing a VIP type that channels use first asks, and lists
-  the channels; they then have no VIP type, and the button color rules for
-  the type go too.
+  of VIP types or of colors. Removing a VIP type that channels use first asks,
+  and lists the channels; they then have no VIP type, and the button color
+  rules for the type go too.
 - When the connect server sent servers of groups the list does not have, the
   Groups tab lists them with their server IDs; **Add** there adds a group with
   that ID.
 - **Save** writes `Data/Local/ServerList.json` in the folder the game runs
   from. It refuses a list with fatal problems (a group without a name, an ID
-  used twice, a VIP type without an English name) and lists them. When the file itself
-  had fatal problems as it was read (changed by hand while the game ran), the
-  window has only what could be read: Save stays off then, so it cannot remove
-  the rest, until the file is fixed and **Revert** reads it again.
+  used twice, a VIP type without an English name) and lists them. When the
+  file itself had fatal problems as it was read (changed by hand while the
+  game ran), the window has only what could be read: Save stays off then, so
+  it cannot remove the rest, until the file is fixed and **Revert** reads it
+  again.
 - **Revert** reads the file again.
 - **Undo** and **Redo** in the editor bar (or Ctrl+Z and Ctrl+Y in the window)
-  work through the changes of the session. Each change is one step: a group or
-  VIP type added, removed or moved, a box, list or color changed, and what was
-  typed into a field until it is left. The bar's buttons act on the tool used
+  work through the changes of the session. Each change is one step: a group,
+  VIP type, color or rule added, removed or moved, a box, list or shade
+  changed, and what was typed into a field until it is left. The bar's buttons act on the tool used
   last: after a click into the Server List window they undo server list
   changes, after a click into an item tool item edits.
 
@@ -301,86 +304,3 @@ were fixed texts by type (461, 460, 3130 and 3131: "[%s-%d Server]",
 "[%s-%d(Non-PvP) Server]", "[%s-%d(Gold PvP) Server]", "[%s-%d(Gold) Server]").
 Now the two switches are the PvP box and the VIP type, Gold is one VIP type of
 any number, and every text is a template in the file.
-
-## Plan (removed when everything has landed)
-
-This section is the working plan for sven-n/MuMain#895. It goes once the work
-is done; the sections above then describe what was built.
-
-### Decisions (2026-10-31)
-
-1. Everything goes into #895: the login title fix, then this feature, with this
-   document as its spec.
-2. A channel has a PvP box and a VIP type, not one of four fixed types.
-3. The texts live in `ServerList.json`, one text per language, English as
-   fallback, like the texts of `Tooltip.json`.
-4. Templates use placeholders; empty parts drop with their spaces and brackets.
-   Commas are not handled; an optional form like `{vip, }` can be added later
-   without breaking these templates.
-5. One template per place: `button`, `login`, `characterInfo`, `screenshot`.
-6. A VIP type has a name per language. (First: and a theme color; replaced by 8
-   and 9 after trying the build.)
-7. A version 1 file is not read.
-8. Button colors come from rules by VIP type, PvP or both; the most specific
-   fitting rule wins, so their order does not matter.
-9. A color is a theme color or one of your own, with a name and a shade per
-   theme; rules pick colors by name.
-
-### Decided while writing the plan (to confirm)
-
-- **"Server" goes in every language**, not only in English: "Servidor",
-  "Serwer", "サーバー", "Сервер" and the others are left out of the templates too.
-- **Word order per language** follows today's titles: Spanish, Indonesian and
-  Portuguese put PvP first (`(PvP Oro)`), the others the VIP type first.
-- **The screenshot message stays as it is** by default: `[{name} / {character}]`.
-- **Channels without a VIP type** are gray with PvP on and the default color
-  with PvP off, as `normal` and `nonPvp` are today.
-- **The theme colors** are today's `default`, `gray` and `orange`, plus a new
-  `silver` in both themes.
-- **zh-CN** has no Gold texts yet, so its Gold name falls back to English until
-  it is translated.
-- **Colors, decided while writing them:** a rule's `vip` is `true` (any VIP
-  type), `false` (none) or a VIP type's id; a theme without a shade for an own
-  color draws the default color; colors have one name, not one per language
-  (only the editor shows it); the bundled rules keep today's look (Gold orange,
-  no VIP type with PvP on gray).
-
-### Bundled texts
-
-| Language | `pvp` | `nonPvp`  | Gold       | Order          |
-|----------|-------|-----------|------------|----------------|
-| en, tl   | PvP   | Non-PvP   | Gold       | `({vip} {pvp})` |
-| de       | PvP   | Nicht-PvP | Gold       | `({vip} {pvp})` |
-| es       | PvP   | no PvP    | Oro        | `({pvp} {vip})` |
-| id       | PvP   | Non-PvP   | Emas       | `({pvp} {vip})` |
-| ja       | PvP   | Non-PVP   | ゴールド   | `({vip} {pvp})` |
-| pl       | PvP   | nie PvP   | Gold       | `({vip} {pvp})` |
-| pt       | PvP   | não PvP   | Ouro       | `({pvp} {vip})` |
-| ru       | PvP   | не PvP    | Золотой    | `({vip} {pvp})` |
-| uk       | PvP   | не PvP    | Золотий    | `({vip} {pvp})` |
-| zh-CN    | PvP   | 非 PvP    | (English)  | `({vip} {pvp})` |
-| zh-TW    | PvP   | 非PvP     | 黃金       | `({vip}{pvp})`  |
-
-### Work
-
-1. **Data:** the channel settings, VIP types and texts in
-   `ServerListGroup.h`; reading and writing version 2 in `ServerListJson.cpp`,
-   with the problems above; version 1 refused.
-2. **Name builder:** one function that fills a template for a channel, with the
-   empty-part rules, used by every place; its own tests.
-3. **Game:** `ServerListManager` keeps PvP and the VIP type per channel; the
-   server list button, login window, character info window and screenshot
-   message use their templates; button colors from the VIP type; the PvP
-   notice and the move and strife map checks read the PvP box. The four old
-   title texts (`Game.*.resx`) and `GetChannelSuffix` go.
-4. **Themes:** the `silver` button color in the legacy and modern themes.
-5. **Bundled file:** `Data/Local/ServerList.json` as version 2, with the texts
-   above.
-6. **Editor:** the Groups tab's channel table gets the PvP box and VIP list;
-   the new Channel names tab; undo steps; Save checks.
-7. **Colors (after trying the build):** `colors` and `buttonColors` in the
-   file instead of a VIP type's theme color; the server list draws own colors
-   in the shade of the active theme; the editor's rules and colors sections and
-   colored previews.
-8. **Tests** for each step; this document; then this section is removed and
-   #895's title and description describe the whole change.
