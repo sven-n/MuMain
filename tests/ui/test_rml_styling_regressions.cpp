@@ -232,6 +232,41 @@ std::string OptionTabRowMarkup(int tabCount, int active)
            "</div></body></rml>";
 }
 
+std::string ColourText(Rml::Colourb colour)
+{
+    return std::to_string(colour.red) + ',' + std::to_string(colour.green) + ',' + std::to_string(colour.blue) + ',' +
+           std::to_string(colour.alpha);
+}
+
+// What the element paints: its decorator and the colours that tint, edge or fill it.
+std::string PaintText(Rml::Element& element)
+{
+    const auto& computed = element.GetComputedValues();
+    return DecoratorText(element) + '|' + ColourText(computed.image_color()) + '|' +
+           ColourText(computed.border_top_color()) + '|' + ColourText(computed.background_color());
+}
+
+// An enabled band lights its art under the mouse and when pressed; legacy swaps the sprite.
+void CheckEntryArtStates(UI::Tests::RmlLayoutFixture& fixture, const std::string& theme, Rml::Element& band)
+{
+    auto* art = band.QuerySelector(".entry-btn-art");
+    REQUIRE(art);
+    const std::string idle = PaintText(*art);
+    band.SetPseudoClass("hover", true);
+    fixture.Refresh();
+    const std::string hovered = PaintText(*art);
+    band.SetPseudoClass("active", true);
+    fixture.Refresh();
+    const std::string pressed = PaintText(*art);
+    CHECK(hovered != idle);
+    CHECK(pressed != idle);
+    if (theme != "legacy")
+        return;
+    CHECK(idle.find("(entry-btn-up)") != std::string::npos);
+    CHECK(hovered.find("(entry-btn-over)") != std::string::npos);
+    CHECK(pressed.find("(entry-btn-down)") != std::string::npos);
+}
+
 // Lays out the first level band of an event entry window and checks that whatever paints it covers
 // the whole band.
 void CheckEntryArt(UI::Tests::RmlLayoutFixture& fixture, const std::string& theme, const std::string& window,
@@ -270,6 +305,7 @@ void CheckEntryArt(UI::Tests::RmlLayoutFixture& fixture, const std::string& them
         CHECK(size.y == doctest::Approx(bandSize.y));
     }
     CHECK(painted > 0);
+    CheckEntryArtStates(fixture, theme, *band);
     fixture.context->UnloadDocument(document);
     fixture.Refresh();
 }
