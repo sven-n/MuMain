@@ -209,7 +209,10 @@ So `{"vip": "gold", "pvp": false}` beats `{"vip": "gold"}`, and any rule with
 `vip` beats one with only `pvp`. Two rules with the same `vip` and `pvp` are a
 problem; the second is not used.
 
-The theme colors are drawn by each theme in its own shade, hover too. A color
+The theme colors are drawn by each theme in its own shade, hover too: the
+tokens `server-button`, `server-button-gray`, `server-button-orange` and
+`server-button-silver` in the theme's `tokens.ini`, which the editor's swatches
+show as well. A color
 of your own has an `id` (letters and digits, starting with a lowercase letter,
 not one of the theme colors), a `name` the editor shows, and a shade
 (`#RRGGBB`) per theme folder (`legacy`, `modern`, ...; capitals do not matter);

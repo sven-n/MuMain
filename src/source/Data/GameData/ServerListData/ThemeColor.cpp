@@ -11,11 +11,18 @@ namespace
 {
 // In the order of ThemeColor.
 constexpr std::array<const char*, ThemeColorCount> ThemeColorNames = {"default", "gray", "orange", "silver"};
+constexpr std::array<const char*, ThemeColorCount> ThemeColorTokens = {"server-button", "server-button-gray",
+                                                                       "server-button-orange", "server-button-silver"};
 } // namespace
 
 const char* GetThemeColorName(ThemeColor color)
 {
     return ThemeColorNames[static_cast<size_t>(color)];
+}
+
+const char* GetThemeColorToken(ThemeColor color)
+{
+    return ThemeColorTokens[static_cast<size_t>(color)];
 }
 
 std::optional<ThemeColor> FindThemeColor(std::string_view name)

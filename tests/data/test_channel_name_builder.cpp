@@ -5,7 +5,9 @@
 #include "Data/GameData/ServerListData/ButtonColors.h"
 #include "Data/GameData/ServerListData/ChannelNameBuilder.h"
 #include "Data/GameData/ServerListData/ServerListIds.h"
+#include "UI/RmlBridge/ThemeInheritance.h"
 
+#include <filesystem>
 #include <optional>
 #include <string>
 
@@ -213,6 +215,25 @@ TEST_CASE("ButtonColors: of the rules that fit, the most specific one colors the
     list.buttonColors.clear();
     CHECK(color(true, "gold") == "none");
     CHECK(Data::ServerList::GetButtonColor(list, Channel(true, "gold"), "legacy") == Data::ServerList::ButtonColor{});
+}
+
+TEST_CASE("ButtonColors: every bundled theme has a shade for each theme color")
+{
+    // MU_TEST_DATA_DIR is the client folder's Data.
+    for (const char* theme : {"legacy", "modern", "classic"})
+    {
+        const UI::RmlBridge::ThemeInheritance inheritance(std::filesystem::path(MU_TEST_DATA_DIR) / "Interface" /
+                                                          "RmlUi" / "themes" / theme);
+        for (int value = 0; value < Data::ServerList::ThemeColorCount; ++value)
+        {
+            const char* token = Data::ServerList::GetThemeColorToken(static_cast<Data::ServerList::ThemeColor>(value));
+            CAPTURE(theme);
+            CAPTURE(token);
+            const auto setting = inheritance.GetSetting("Tokens", token);
+            REQUIRE(setting.has_value());
+            CHECK(Data::ServerList::IsShade(setting->value));
+        }
+    }
 }
 
 TEST_CASE("ButtonColors: a color of the list's own has a shade per theme")

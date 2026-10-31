@@ -57,7 +57,7 @@
 }
 .server-option-btn {
 	decorator: image(legacy-server-option-idle);
-	color: #ffff79;
+	color: token(server-button);
 }
 .server-option-btn:hover {
 	decorator: image(legacy-server-option-hover);
@@ -68,7 +68,7 @@
 	color: #ffff79;
 }
 .server-option-btn.gray {
-	color: token(text-dim);
+	color: token(server-button-gray);
 }
 .server-option-btn.gray:hover {
 	color: token(text-primary);
@@ -77,7 +77,7 @@
 	color: token(text-dim);
 }
 .server-option-btn.orange {
-	color: #ffb400;
+	color: token(server-button-orange);
 }
 .server-option-btn.orange:hover {
 	color: #ffd927;
@@ -87,7 +87,7 @@
 }
 /* A VIP type with the theme color "silver" (Data/Local/ServerList.json). */
 .server-option-btn.silver {
-	color: #b9c6d3;
+	color: token(server-button-silver);
 }
 .server-option-btn.silver:hover {
 	color: #dde6ef;
