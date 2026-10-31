@@ -272,7 +272,7 @@ std::optional<CustomColor> ReadCustomColor(const OrderedJson& json, const std::s
     {
         color.id = id->get<std::string>();
     }
-    valid = ReadText(json, field, NameKey, MaxVipTypeNameLength, color.name, issues) && valid;
+    valid = ReadText(json, field, NameKey, MaxCustomColorNameLength, color.name, issues) && valid;
 
     const auto shades = json.find(ShadesKey);
     if (shades != json.end() && !shades->is_object())

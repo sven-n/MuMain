@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
-#include "Data/GameData/ServerListData/ServerListGroup.h"
+#include "Data/GameData/ServerListData/ServerListData.h"
 
 #include <filesystem>
 #include <span>

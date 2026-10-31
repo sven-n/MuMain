@@ -5,7 +5,7 @@
 #include "ServerGroup.h"
 
 #include "Data/GameData/ServerListData/ButtonColors.h"
-#include "Data/GameData/ServerListData/ServerListGroup.h"
+#include "Data/GameData/ServerListData/ServerListData.h"
 
 #include <string>
 #include <string_view>

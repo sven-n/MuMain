@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "Data/GameData/ServerListData/ServerListGroup.h"
+#include "Data/GameData/ServerListData/ChannelSettings.h"
 
 class CServerInfo
 {

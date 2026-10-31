@@ -13,8 +13,6 @@ namespace
 {
 // In the order of ChannelNamePlace.
 constexpr std::array<const char*, ChannelNamePlaceCount> PlaceKeys = {"button", "login", "characterInfo", "screenshot"};
-// In the order of ThemeColor.
-constexpr std::array<const char*, ThemeColorCount> ThemeColorNames = {"default", "gray", "orange", "silver"};
 
 constexpr std::string_view Name = "name";
 constexpr std::string_view Channel = "channel";
@@ -137,21 +135,6 @@ std::span<const std::string_view> GetChannelNamePlaceholders(ChannelNamePlace pl
     default:
         return TitlePlaceholders;
     }
-}
-
-const char* GetThemeColorName(ThemeColor color)
-{
-    return ThemeColorNames[static_cast<size_t>(color)];
-}
-
-std::optional<ThemeColor> FindThemeColor(std::string_view name)
-{
-    const auto found = std::find(ThemeColorNames.begin(), ThemeColorNames.end(), name);
-    if (found == ThemeColorNames.end())
-    {
-        return std::nullopt;
-    }
-    return static_cast<ThemeColor>(std::distance(ThemeColorNames.begin(), found));
 }
 
 std::string FillChannelName(std::string_view text, ChannelNamePlace place, const ChannelNameValues& values)

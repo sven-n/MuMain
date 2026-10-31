@@ -1440,7 +1440,7 @@ bool CMuServerListUI::RenderSelectedCustomColor()
     ImGui::SetNextItemWidth(TextFieldWidth * scale);
     if (MuEditor::Items::InputString(I18N::Editor::Name, color.name))
     {
-        Core::Text::CutToUtf16Length(color.name, Data::ServerList::MaxVipTypeNameLength);
+        Core::Text::CutToUtf16Length(color.name, Data::ServerList::MaxCustomColorNameLength);
         changed = true;
     }
     CommitWhenFieldLeft();

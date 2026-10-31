@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Data/GameData/ServerListData/ServerListGroup.h"
+#include "Data/GameData/ServerListData/ServerListData.h"
 
 #include <optional>
 #include <span>
@@ -15,10 +15,6 @@ namespace Data::ServerList
 const char* GetChannelNamePlaceKey(ChannelNamePlace place);
 // The placeholders a place's template can use, without braces ("name", "channel", ...).
 std::span<const std::string_view> GetChannelNamePlaceholders(ChannelNamePlace place);
-
-// The name of a theme color in the file ("orange"), and back.
-const char* GetThemeColorName(ThemeColor color);
-std::optional<ThemeColor> FindThemeColor(std::string_view name);
 
 // What a template's placeholders are filled with.
 struct ChannelNameValues
