@@ -40,6 +40,15 @@ implementation findings, not general policy; recheck them when updating the engi
   atlases use generated named `@spritesheet` rects and one `data-style-decorator` per icon
   (`buff_strip.rcss`, `skill_icons.rcss`).
 
+- **An absolutely-positioned child of an auto-height flex container sizes against the container's
+  height before the flex layout grew it.** `FlexContainer::Close()` (`ContainerBox.cpp`) submits
+  the grown box to the element but keeps its own pre-layout box (content height -1, "auto"), which
+  `LayoutDetails::GetContainingBlock()` hands to the absolute child. A `top: 0; bottom: 0` art layer
+  in a band that grows to its `min-height` therefore paints only the band's padding, minus 1px
+  (the Devil Square and Blood Castle level buttons painted a strip at the band's top). Paint the
+  band itself (legacy's and modern's `event_entry.rcss`), make the band a block (classic's), or
+  give the container a definite height. Checked by `tests/ui/test_rml_styling_regressions.cpp`.
+
 - **`dp` and `px` are not interchangeable in `data-style-*` position bindings.** `dp` is scaled by
   the UI-scale setting (`SetDensityIndependentPixelRatio()`), `px` never is — a `+'px'` binding
   drifts out of step with `dp`-sized siblings at any UI scale other than 100 %. Bind in whichever
