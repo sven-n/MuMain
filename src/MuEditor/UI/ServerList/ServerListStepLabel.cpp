@@ -153,14 +153,8 @@ std::string RemoveButtonColorRule()
 std::string DescribeFieldChange(const Data::ServerList::ServerListData& before,
                                 const Data::ServerList::ServerListData& after)
 {
-    const size_t groups = std::min(before.groups.size(), after.groups.size());
-    for (size_t index = 0; index < groups; ++index)
-    {
-        if (before.groups[index] != after.groups[index])
-        {
-            return DescribeGroupChange(before.groups[index], after.groups[index]);
-        }
-    }
+    // A VIP type's or color's new ID also changes the channels and rules that name it: the
+    // VIP types and colors come first, so the step is named after what was changed.
     const size_t vipTypes = std::min(before.vipTypes.size(), after.vipTypes.size());
     for (size_t index = 0; index < vipTypes; ++index)
     {
@@ -175,6 +169,14 @@ std::string DescribeFieldChange(const Data::ServerList::ServerListData& before,
         if (before.colors[index] != after.colors[index])
         {
             return DescribeColorChange(before.colors[index], after.colors[index]);
+        }
+    }
+    const size_t groups = std::min(before.groups.size(), after.groups.size());
+    for (size_t index = 0; index < groups; ++index)
+    {
+        if (before.groups[index] != after.groups[index])
+        {
+            return DescribeGroupChange(before.groups[index], after.groups[index]);
         }
     }
     const size_t rules = std::min(before.buttonColors.size(), after.buttonColors.size());
