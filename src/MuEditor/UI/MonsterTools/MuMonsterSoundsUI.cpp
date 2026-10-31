@@ -19,10 +19,10 @@
 #include "Data/GameData/Common/DataPaths.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
-#include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterModelValidation.h"
 #include "Data/GameData/MonsterData/MonsterSoundIds.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetLinks.h"
 #include "I18N/All.h"
 #include "imgui.h"
 
@@ -76,20 +76,6 @@ bool IsPlayed(const MonsterSoundSet& set, const MonsterSound& sound)
                        { return std::find(event.sounds.begin(), event.sounds.end(), name) != event.sounds.end(); });
 }
 
-// How many monsters have the model of the slot, for the cue rows.
-int CountMonstersWithModel(int slot)
-{
-    int count = 0;
-    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
-    {
-        const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
-        if (monster != nullptr && Data::Monsters::FindMonsterModelReference(monster->model) == slot)
-        {
-            ++count;
-        }
-    }
-    return count;
-}
 } // namespace
 
 std::string FindNewSoundProblem(const MonsterSoundSet& set, const MonsterSound& sound)
@@ -258,7 +244,7 @@ void MuMonsterSoundsUI::Render(bool* open)
         context.model = model;
         context.modelDraft = &m_modelDraft;
         context.modelOpen = ShownModel::IsOpen(*slot);
-        context.modelMonsters = CountMonstersWithModel(*slot);
+        context.modelMonsters = Data::Monsters::SoundSetLinks::CountMonstersWithModel(*slot);
         context.monster = number;
         m_shownModel = model;
         m_shownSlot = *slot;
