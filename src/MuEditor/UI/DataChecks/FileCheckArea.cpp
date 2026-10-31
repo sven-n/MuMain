@@ -59,7 +59,11 @@ std::unique_ptr<DataCheckArea> CreateServerListCheckArea()
 {
     return std::make_unique<FileCheckArea>(
         &I18N::Editor::ServerList,
-        [] { return Data::ServerList::LoadServerListFile(Data::ServerList::ServerListFile).issues; },
+        []
+        {
+            return Data::ServerList::LoadServerListFile(Data::ServerList::ServerListFile, I18N::GetAvailableLocales())
+                .issues;
+        },
         &ToolWindows::serverList, WindowIds::ServerList);
 }
 

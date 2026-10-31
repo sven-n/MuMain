@@ -44,6 +44,9 @@ void CServerSelWin::Create()
     // does not reopen on the group an earlier visit picked.
     m_iSelectServerBtnIndex = -1;
 
+    // A button in a color of the server list's own has the shade of the theme it was built
+    // in (CServerListManager::GetServerButtonColor): a theme switch builds the buttons again.
+    m_RmlView.SetAfterReload([this] { UpdateDisplay(); });
     m_RmlView.Ensure();
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_SERVER_SELECT, this);
@@ -67,6 +70,8 @@ void CServerSelWin::BindRmlModel(Rml::DataModelConstructor& c, ServerSelRmlModel
     server.RegisterMember("load_fraction", &ServerEntry::loadFraction);
     server.RegisterMember("color_gray", &ServerEntry::colorGray);
     server.RegisterMember("color_orange", &ServerEntry::colorOrange);
+    server.RegisterMember("color_silver", &ServerEntry::colorSilver);
+    server.RegisterMember("color_style", &ServerEntry::colorStyle);
     c.RegisterArray<std::vector<ServerEntry>>();
 
     c.Bind("groups", &model.groups);
@@ -178,12 +183,16 @@ void CServerSelWin::UpdateDisplay()
         while (m_pSelectServerGroup->GetNext(pServerInfo))
         {
             ServerEntry entry;
-            entry.label = StringUtils::WideToNarrow(pServerInfo->m_bName);
+            entry.label = StringUtils::WideToNarrow(
+                g_ServerListManager->GetServerButtonText(*m_pSelectServerGroup, *pServerInfo).c_str());
             entry.index = nServerIndex;
             entry.loadFraction = static_cast<float>(pServerInfo->m_iPercent) / 100.0f;
-            // 0 = gray, 1 = the unflagged default, 2/3 = orange.
-            entry.colorGray = (pServerInfo->m_byNonPvP == 0);
-            entry.colorOrange = (pServerInfo->m_byNonPvP >= 2);
+            const Data::ServerList::ButtonColor color =
+                g_ServerListManager->GetServerButtonColor(*pServerInfo, UI::RmlBridge::GetActiveThemeName());
+            entry.colorGray = color.theme == Data::ServerList::ThemeColor::Gray;
+            entry.colorOrange = color.theme == Data::ServerList::ThemeColor::Orange;
+            entry.colorSilver = color.theme == Data::ServerList::ThemeColor::Silver;
+            entry.colorStyle = color.shade;
             model.servers.push_back(entry);
 
             ++nServerIndex;
@@ -249,7 +258,8 @@ bool CServerSelWin::ConnectToServer(CServerInfo* pServerInfo)
     g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     g_pSystemLogBox->AddText(I18N::Game::PleaseWait, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
-    g_ServerListManager->SetSelectServerInfo(m_pSelectServerGroup->m_szName, pServerInfo->m_iIndex, pServerInfo->m_byNonPvP);
+    g_ServerListManager->SetSelectServerInfo(m_pSelectServerGroup->m_szName, pServerInfo->m_iIndex,
+                                             pServerInfo->m_channel);
 
     return true;
 }

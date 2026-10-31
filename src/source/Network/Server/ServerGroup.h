@@ -5,6 +5,8 @@
 
 #include "ServerInfo.h"
 
+#include <array>
+
 typedef std::list<CServerInfo*> type_listServer;
 
 class CServerGroup
@@ -30,8 +32,10 @@ public:
     int m_iBtnPos;
     int m_iServerIndex;
     int m_iNumServer;
+    // No channel has PvP off: the login screen shows the PvP notice.
     bool m_bPvPServer;
-    BYTE m_abyNonPvpServer[MAX_SERVER_PER_GROUP];
+    // By channel number - 1.
+    std::array<Data::ServerList::ChannelSettings, MAX_SERVER_PER_GROUP> m_channels{};
     wchar_t m_szName[MAX_TEXT_LENGTH];
     wchar_t m_szDescription[MAX_TEXT_LENGTH];
 

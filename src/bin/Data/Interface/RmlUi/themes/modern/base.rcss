@@ -66,19 +66,26 @@ body {
 	box-shadow: inset 2px 0 0 token(accent-gold-hover);
 }
 .server-option-btn {
-	color: token(accent-gold);
+	color: token(server-button);
 }
 .server-option-btn.gray {
-	color: token(semantic-neutral);
+	color: token(server-button-gray);
 }
 .server-option-btn.gray:hover {
 	color: token(text-primary);
 }
 .server-option-btn.orange {
-	color: token(semantic-warning);
+	color: token(server-button-orange);
 }
 .server-option-btn.orange:hover {
 	color: token(accent-gold-hover);
+}
+/* A VIP type with the theme color "silver" (Data/Local/ServerList.json). */
+.server-option-btn.silver {
+	color: token(server-button-silver);
+}
+.server-option-btn.silver:hover {
+	color: #c3cbd3;
 }
 .server-group-btn:active .button-label, .server-option-btn:active .button-label {
 	transform: translateY(1px);

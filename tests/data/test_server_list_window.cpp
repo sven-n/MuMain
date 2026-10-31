@@ -36,17 +36,17 @@ public:
                       ("mu_test_server_list_window_" + std::to_string(std::random_device{}()))),
           m_previousDirectory(std::filesystem::current_path())
     {
-        std::vector<ServerGroup> groups;
+        Data::ServerList::ServerListData list;
         int id = 0;
         for (const char* name : {"Valhalla", "Helheim", "Midgard"})
         {
             ServerGroup group;
             group.id = id++;
             group.name = name;
-            groups.push_back(group);
+            list.groups.push_back(group);
         }
         std::vector<Data::Items::ItemDataIssue> issues;
-        REQUIRE(Data::ServerList::SaveServerListFile(m_directory / Data::ServerList::ServerListFile, groups, issues));
+        REQUIRE(Data::ServerList::SaveServerListFile(m_directory / Data::ServerList::ServerListFile, list, issues));
         std::filesystem::current_path(m_directory);
     }
 
@@ -87,8 +87,15 @@ ImGuiID ToolbarId(const char* label)
     return ImGui::GetIDWithSeed(label, nullptr, ServerListWindow()->ID);
 }
 
-// One of the window's panes: "##Groups" (the list and its buttons) or
-// "##Group" (the selected group). ImGui names a child window
+// A tab of the window ("###ChannelNames"), in its tab bar.
+ImGuiID TabId(const char* tab)
+{
+    const ImGuiID tabBar = ImGui::GetIDWithSeed("##ServerListTabs", nullptr, ServerListWindow()->ID);
+    return ImGui::GetIDWithSeed(tab, nullptr, tabBar);
+}
+
+// One of the window's panes: "##Groups" (the list and its buttons), "##Group"
+// (the selected group), "##VipTypes" or "##Names". ImGui names a child window
 // "<parent>/<name>_<id>".
 const ImGuiWindow* Pane(const char* pane)
 {
@@ -191,6 +198,27 @@ TEST_CASE("Server List window: leaving a text field for another makes what was t
     CHECK(g_MuServerListUI.GetUndoLabel() == "Asgard: description");
     g_MuServerListUI.Undo();
     CHECK(g_MuServerListUI.GetUndoLabel() == "Valhalla: name");
+}
+
+TEST_CASE("Server List window: a VIP type added on the Channel names tab is a step [editor]")
+{
+    I18N::SetLocale("en");
+    ServerListFolder folder;
+    TestImGuiContext context;
+    StartWithValhalla();
+
+    // A tab picked shows from the next frame on.
+    Press(TabId("###ChannelNames"));
+    RenderServerList();
+    Press(PaneId("##VipTypes", I18N::Editor::Add));
+    RenderServerList();
+
+    CHECK(g_MuServerListUI.GetUndoLabel() == "Add VIP type New VIP type");
+    g_MuServerListUI.Undo();
+    CHECK_FALSE(g_MuServerListUI.CanUndo());
+
+    Press(TabId("###Groups"));
+    RenderServerList();
 }
 
 #endif // _EDITOR

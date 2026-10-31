@@ -57,7 +57,7 @@
 }
 .server-option-btn {
 	decorator: image(legacy-server-option-idle);
-	color: #ffff79;
+	color: token(server-button);
 }
 .server-option-btn:hover {
 	decorator: image(legacy-server-option-hover);
@@ -68,7 +68,7 @@
 	color: #ffff79;
 }
 .server-option-btn.gray {
-	color: token(text-dim);
+	color: token(server-button-gray);
 }
 .server-option-btn.gray:hover {
 	color: token(text-primary);
@@ -77,13 +77,20 @@
 	color: token(text-dim);
 }
 .server-option-btn.orange {
-	color: #ffb400;
+	color: token(server-button-orange);
 }
 .server-option-btn.orange:hover {
 	color: #ffd927;
 }
 .server-option-btn.orange:active {
 	color: #ffb400;
+}
+/* A VIP type with the theme color "silver" (Data/Local/ServerList.json). */
+.server-option-btn.silver {
+	color: token(server-button-silver);
+}
+.server-option-btn.silver:hover {
+	color: #dde6ef;
 }
 /* The native press offsets only the label, leaving the frame and population gauge fixed. */
 .server-group-btn:active .button-label, .server-option-btn:active .button-label {

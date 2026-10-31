@@ -2,39 +2,52 @@
 
 #ifdef _EDITOR
 
-#include "Data/GameData/ServerListData/ServerListGroup.h"
+#include "Data/GameData/ServerListData/ServerListData.h"
 
 #include <cstddef>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace MuEditor::ServerList
 {
+using Data::ServerList::ButtonColorRule;
+using Data::ServerList::CustomColor;
 using Data::ServerList::ServerGroup;
+using Data::ServerList::ServerListData;
+using Data::ServerList::VipType;
 
-// The server groups the Server List window changes: what the editor shows,
-// what the file has, and an undo list for this session.
+// The server list the Server List window changes (groups, VIP types and texts):
+// what the editor shows, what the file has, and an undo list for this session.
 class ServerListEdits
 {
 public:
     static constexpr size_t MaxUndoSteps = 256;
 
-    // The groups of the file, just read or saved: nothing to undo, nothing
-    // changed. `complete` is false when the read left groups out (errors).
-    void Reset(std::vector<ServerGroup> groups, bool complete = true);
+    // The list of the file, just read or saved: nothing to undo, nothing
+    // changed. `complete` is false when the read left something out (errors).
+    void Reset(ServerListData list, bool complete = true);
 
+    const ServerListData& GetList() const
+    {
+        return m_list;
+    }
+    // For the window's fields, which change the list in place; Commit makes
+    // what they changed one undo step.
+    ServerListData& EditList()
+    {
+        return m_list;
+    }
     const std::vector<ServerGroup>& GetGroups() const
     {
-        return m_groups;
+        return m_list.groups;
     }
-    // For the window's fields, which change the groups in place; Commit makes
-    // what they changed one undo step.
     std::vector<ServerGroup>& EditGroups()
     {
-        return m_groups;
+        return m_list.groups;
     }
-    // The groups changed since the last step become one undo step.
+    // What changed since the last step becomes one undo step.
     void Commit();
 
     bool CanUndo() const
@@ -52,18 +65,18 @@ public:
     std::string GetUndoLabel() const;
     std::string GetRedoLabel() const;
 
-    // Whether the groups differ from the file.
+    // Whether the list differs from the file.
     bool HasUnsavedChanges() const
     {
-        return m_groups != m_saved;
+        return m_list != m_saved;
     }
-    // The groups are what the file has now.
+    // The list is what the file has now.
     void MarkSaved()
     {
-        m_saved = m_groups;
+        m_saved = m_list;
     }
-    // Whether the groups are all the file has. After a read with fatal problems they
-    // are not, and a save would remove the groups left out from the file.
+    // Whether the list is all the file has. After a read with fatal problems it
+    // is not, and a save would remove what the read left out from the file.
     bool IsComplete() const
     {
         return m_complete;
@@ -80,25 +93,65 @@ public:
     bool IsIdUsed(int id) const;
     std::optional<int> FindFreeId() const;
 
+    // Adds a VIP type with the English name `name` at the end, its id made from
+    // the name (one no other type has). Returns its index.
+    size_t AddVipType(const std::string& name);
+    // The channels with the type then have none; the button color rules for it go.
+    void RemoveVipType(size_t index);
+    // Moves the type one place up (-1) or down (+1); false at the end of the list.
+    bool MoveVipType(size_t index, int direction);
+    // Gives the type the id; the channels and rules with the old one get it too.
+    // False (and nothing changed) when it is no VIP type id or another type has it.
+    bool ChangeVipTypeId(size_t index, const std::string& id);
+    bool IsVipTypeIdUsed(std::string_view id) const;
+    // The channels with the type, as "Valhalla-1".
+    std::vector<std::string> FindChannelsWithVipType(std::string_view id) const;
+    // How many button color rules are for the type.
+    size_t CountRulesForVipType(std::string_view id) const;
+
+    // Adds a color named `name` at the end, its id made from the name (one no
+    // other color or theme color has), with no shades. Returns its index.
+    size_t AddColor(const std::string& name);
+    // The rules with the color then have the default color.
+    void RemoveColor(size_t index);
+    bool MoveColor(size_t index, int direction);
+    // Gives the color the id; the rules with the old one get it too. False (and
+    // nothing changed) when it is no color id or another color has it.
+    bool ChangeColorId(size_t index, const std::string& id);
+    // Whether `id` would be a free id for a color: a color id no other color has.
+    bool IsColorIdFree(std::string_view id) const;
+    // How many rules have the color.
+    size_t CountRulesWithColor(std::string_view id) const;
+
+    // Adds a rule with the default color for the first VIP type and PvP setting
+    // no rule has yet (any channel first). Nothing when every one has a rule.
+    std::optional<size_t> AddButtonColorRule();
+    // The rule AddButtonColorRule would add, with the default color; nothing when every VIP
+    // type and PvP setting has a rule.
+    std::optional<Data::ServerList::ButtonColorRule> FindFreeRule() const;
+    void RemoveButtonColorRule(size_t index);
+    // Whether another rule than the one at `index` fits the same channels as `rule`.
+    bool HasRuleLike(const Data::ServerList::ButtonColorRule& rule, std::optional<size_t> index) const;
+
 private:
-    // The groups on the other side of a step, and what the step did.
+    // The list on the other side of a step, and what the step did.
     struct Step
     {
-        std::vector<ServerGroup> groups;
+        ServerListData list;
         std::string label;
     };
 
-    // What the groups changed since the last step would be called.
+    // What the list changed since the last step would be called.
     std::string GetPendingLabel() const;
 
-    std::vector<ServerGroup> m_groups;
-    // The groups as the last undo step left them.
-    std::vector<ServerGroup> m_committed;
-    std::vector<ServerGroup> m_saved;
+    ServerListData m_list;
+    // The list as the last undo step left it.
+    ServerListData m_committed;
+    ServerListData m_saved;
     std::vector<Step> m_undo;
     std::vector<Step> m_redo;
-    // Set by AddGroup, RemoveGroup and MoveGroup until the next Commit; a
-    // change of fields is described by comparing the groups instead.
+    // Set by the Add, Remove and Move functions until the next Commit; a change
+    // of fields is described by comparing the lists instead.
     std::string m_pendingLabel;
     bool m_complete = true;
 };

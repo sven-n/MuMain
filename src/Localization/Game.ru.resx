@@ -1249,12 +1249,6 @@
   <data name="%s: Screenshot Saved" xml:space="preserve">
     <value>%s: снимок экрана сохранен.</value>
   </data>
-  <data name="[%s-%d(Non-PvP) Server]" xml:space="preserve">
-    <value>[%s-%d (не PvP) сервер]</value>
-  </data>
-  <data name="[%s-%d Server]" xml:space="preserve">
-    <value>[Сервер %s-%d]</value>
-  </data>
   <data name="1)After moving your account into the divided server," xml:space="preserve">
     <value>1)После перемещения вашей учетной записи на разделенный сервер,</value>
   </data>
@@ -7551,12 +7545,6 @@
   </data>
   <data name="Please repurchase after expiration." xml:space="preserve">
     <value>Пожалуйста, сделайте повторную покупку после истечения срока годности.</value>
-  </data>
-  <data name="[%s-%d(Gold PvP) Server]" xml:space="preserve">
-    <value>[%s-%d(Золотой PvP) Сервер]</value>
-  </data>
-  <data name="[%s-%d(Gold) Server]" xml:space="preserve">
-    <value>[%s-%d(Золотой) Сервер]</value>
   </data>
   <data name="Maximum HP increase +%d" xml:space="preserve">
     <value>Максимальное увеличение HP +%d</value>

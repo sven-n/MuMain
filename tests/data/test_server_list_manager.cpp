@@ -6,10 +6,15 @@
 #include "Network/Server/ServerListManager.h"
 
 #include <string>
+#include <optional>
+#include <utility>
 #include <vector>
 
-using Data::ServerList::ChannelType;
+using Data::ServerList::ChannelNamePlace;
+using Data::ServerList::ChannelSettings;
 using Data::ServerList::ServerGroup;
+using Data::ServerList::ServerListData;
+using Data::ServerList::ThemeColor;
 
 namespace
 {
@@ -20,7 +25,7 @@ public:
     TestServerListManager() = default;
 };
 
-// The load the connect server sends; the login screen shows I18N::Game::Connect for it (InsertServer).
+// The load the connect server sends; the login screen shows I18N::Game::Connect for it.
 constexpr int LowLoad = 10;
 
 ServerGroup Group(int id, const std::string& name)
@@ -29,6 +34,48 @@ ServerGroup Group(int id, const std::string& name)
     group.id = id;
     group.name = name;
     return group;
+}
+
+// The groups with the VIP types Gold (orange) and Silver (silver).
+ServerListData List(std::vector<ServerGroup> groups)
+{
+    ServerListData list;
+    for (const auto& [id, name] : {std::pair{"gold", "Gold"}, std::pair{"silver", "Silver"}})
+    {
+        Data::ServerList::VipType vipType;
+        vipType.id = id;
+        vipType.name.Set("en", name);
+        list.vipTypes.push_back(vipType);
+    }
+    // Gold orange, Silver silver, no VIP type with PvP on gray; Gold with PvP off in a red of its own.
+    Data::ServerList::CustomColor red;
+    red.id = "goldRed";
+    red.shades = {{"legacy", "#FF5A5A"}};
+    list.colors.push_back(red);
+    const auto rule = [&list](Data::ServerList::RuleVip vipMatch, const std::string& vip, std::optional<bool> pvp,
+                              const std::string& color)
+    {
+        Data::ServerList::ButtonColorRule added;
+        added.vipMatch = vipMatch;
+        added.vip = vip;
+        added.pvp = pvp;
+        added.color = color;
+        list.buttonColors.push_back(added);
+    };
+    rule(Data::ServerList::RuleVip::VipType, "gold", std::nullopt, "orange");
+    rule(Data::ServerList::RuleVip::VipType, "gold", false, "goldRed");
+    rule(Data::ServerList::RuleVip::VipType, "silver", std::nullopt, "silver");
+    rule(Data::ServerList::RuleVip::NoVipType, "", true, "gray");
+    list.groups = std::move(groups);
+    return list;
+}
+
+ChannelSettings Channel(bool pvp, const std::string& vip)
+{
+    ChannelSettings channel;
+    channel.pvp = pvp;
+    channel.vip = vip;
+    return channel;
 }
 
 int ServerId(int groupId, int channel)
@@ -48,16 +95,16 @@ std::vector<CServerGroup*> GroupsInOrder(CServerListManager& manager)
     return groups;
 }
 
-std::wstring ChannelName(const wchar_t* groupAndChannel)
+std::wstring ButtonText(const wchar_t* channelName)
 {
-    return std::wstring(groupAndChannel) + L" " + I18N::Game::Connect;
+    return std::wstring(channelName) + L" " + I18N::Game::Connect;
 }
 } // namespace
 
 TEST_CASE("ServerListManager: the list order is the order of the groups")
 {
     TestServerListManager manager;
-    manager.SetServerGroups(std::vector<ServerGroup>{Group(2, "Midgard"), Group(0, "Valhalla"), Group(1, "Helheim")});
+    manager.SetServerList(List({Group(2, "Midgard"), Group(0, "Valhalla"), Group(1, "Helheim")}));
     for (const int groupId : {0, 1, 2})
     {
         manager.InsertServerGroup(ServerId(groupId, 1), LowLoad);
@@ -77,7 +124,7 @@ TEST_CASE("ServerListManager: the list order is the order of the groups")
 TEST_CASE("ServerListManager: a server of a group the list does not have is not shown")
 {
     TestServerListManager manager;
-    manager.SetServerGroups(std::vector<ServerGroup>{Group(0, "Valhalla")});
+    manager.SetServerList(List({Group(0, "Valhalla")}));
 
     manager.InsertServerGroup(ServerId(3, 1), LowLoad);
     CHECK(manager.GetServerGroupSize() == 0);
@@ -89,7 +136,7 @@ TEST_CASE("ServerListManager: a server of a group the list does not have is not 
 TEST_CASE("ServerListManager: the servers of a group are its channels")
 {
     TestServerListManager manager;
-    manager.SetServerGroups(std::vector<ServerGroup>{Group(1, "Helheim")});
+    manager.SetServerList(List({Group(1, "Helheim")}));
     manager.InsertServerGroup(ServerId(1, 1), LowLoad);
     manager.InsertServerGroup(ServerId(1, 20), LowLoad);
 
@@ -102,51 +149,148 @@ TEST_CASE("ServerListManager: the servers of a group are its channels")
     CHECK(groups[0]->GetServerInfo(1)->m_iConnectIndex == ServerId(1, 20));
 }
 
-TEST_CASE("ServerListManager: the channel types reach the channels and their names")
+TEST_CASE("ServerListManager: the channel settings reach the channels, their buttons and colors")
 {
+    I18N::SetLocale("en");
     ServerGroup valhalla = Group(0, "Valhalla");
-    valhalla.channels[0] = ChannelType::Gold;
-    valhalla.channels[1] = ChannelType::GoldPvp;
-    valhalla.channels[2] = ChannelType::NonPvp;
-    valhalla.channels[19] = ChannelType::Gold;
+    valhalla.channels[0] = Channel(false, "gold");
+    valhalla.channels[1] = Channel(true, "gold");
+    valhalla.channels[2] = Channel(false, "");
+    valhalla.channels[4] = Channel(true, "silver");
+    valhalla.channels[19] = Channel(false, "gold");
     TestServerListManager manager;
-    manager.SetServerGroups(std::vector<ServerGroup>{valhalla});
-    for (const int channel : {1, 2, 3, 4, 20})
+    manager.SetServerList(List({valhalla}));
+    for (const int channel : {1, 2, 3, 4, 5, 20})
     {
         manager.InsertServerGroup(ServerId(0, channel), LowLoad);
     }
 
     const std::vector<CServerGroup*> groups = GroupsInOrder(manager);
     REQUIRE(groups.size() == 1);
-    CServerGroup* group = groups[0];
-    for (int channel = 0; channel < MAX_SERVER_PER_GROUP; ++channel)
-    {
-        CAPTURE(channel);
-        CHECK(group->m_abyNonPvpServer[channel] == static_cast<BYTE>(valhalla.channels[channel]));
-    }
-    // A group with a non-PvP channel shows no PvP notice.
-    CHECK_FALSE(group->m_bPvPServer);
+    const CServerGroup& group = *groups[0];
+    CHECK(group.m_channels == valhalla.channels);
+    // A group with a channel with PvP off shows no PvP notice.
+    CHECK_FALSE(group.m_bPvPServer);
 
-    REQUIRE(group->GetServerSize() == 5);
-    CHECK(group->GetServerInfo(0)->m_byNonPvP == static_cast<BYTE>(ChannelType::Gold));
-    CHECK(std::wstring(group->GetServerInfo(0)->m_bName) == ChannelName(L"Valhalla-1(Gold)"));
-    CHECK(std::wstring(group->GetServerInfo(1)->m_bName) == ChannelName(L"Valhalla-2(Gold PVP)"));
-    CHECK(std::wstring(group->GetServerInfo(2)->m_bName) == ChannelName(L"Valhalla-3(Non-PVP)"));
-    CHECK(std::wstring(group->GetServerInfo(3)->m_bName) == ChannelName(L"Valhalla-4"));
-    CHECK(std::wstring(group->GetServerInfo(4)->m_bName) == ChannelName(L"Valhalla-20(Gold)"));
+    REQUIRE(groups[0]->GetServerSize() == 6);
+    const auto server = [&](int index) -> const CServerInfo& { return *groups[0]->GetServerInfo(index); };
+    CHECK(server(0).m_channel == valhalla.channels[0]);
+    CHECK(manager.GetServerButtonText(group, server(0)) == ButtonText(L"Valhalla-1 (Gold Non-PvP)"));
+    CHECK(manager.GetServerButtonText(group, server(1)) == ButtonText(L"Valhalla-2 (Gold PvP)"));
+    CHECK(manager.GetServerButtonText(group, server(2)) == ButtonText(L"Valhalla-3 (Non-PvP)"));
+    CHECK(manager.GetServerButtonText(group, server(3)) == ButtonText(L"Valhalla-4 (PvP)"));
+    CHECK(manager.GetServerButtonText(group, server(4)) == ButtonText(L"Valhalla-5 (Silver PvP)"));
+    CHECK(manager.GetServerButtonText(group, server(5)) == ButtonText(L"Valhalla-20 (Gold Non-PvP)"));
+
+    const auto color = [&](int index, std::string_view theme)
+    { return manager.GetServerButtonColor(server(index), theme); };
+    // Gold with PvP off has its own red in the legacy theme; the modern theme has no shade of it.
+    CHECK(color(0, "legacy").shade == "#FF5A5A");
+    CHECK(color(0, "modern") == Data::ServerList::ButtonColor{});
+    CHECK(color(1, "legacy").theme == ThemeColor::Orange);
+    CHECK(color(2, "legacy") == Data::ServerList::ButtonColor{});
+    CHECK(color(3, "legacy").theme == ThemeColor::Gray);
+    CHECK(color(4, "modern").theme == ThemeColor::Silver);
 }
 
-TEST_CASE("ServerListManager: a group without a non-PvP channel shows the PvP notice")
+TEST_CASE("ServerListManager: the button names the server's load")
+{
+    I18N::SetLocale("en");
+    TestServerListManager manager;
+    manager.SetServerList(List({Group(0, "Valhalla")}));
+    manager.InsertServerGroup(ServerId(0, 1), 100);
+    manager.InsertServerGroup(ServerId(0, 2), 128);
+
+    const std::vector<CServerGroup*> groups = GroupsInOrder(manager);
+    REQUIRE(groups.size() == 1);
+    CHECK(manager.GetServerButtonText(*groups[0], *groups[0]->GetServerInfo(0)) ==
+          std::wstring(L"Valhalla-1 (PvP) ") + I18N::Game::Full);
+    CHECK(manager.GetServerButtonText(*groups[0], *groups[0]->GetServerInfo(1)) ==
+          std::wstring(L"Valhalla-2 (PvP) ") + I18N::Game::NowPreparing);
+}
+
+TEST_CASE("ServerListManager: a group without a channel with PvP off shows the PvP notice")
 {
     ServerGroup helheim = Group(1, "Helheim");
-    helheim.channels[0] = ChannelType::GoldPvp;
+    helheim.channels[0] = Channel(true, "gold");
     TestServerListManager manager;
-    manager.SetServerGroups(std::vector<ServerGroup>{helheim});
+    manager.SetServerList(List({helheim}));
     manager.InsertServerGroup(ServerId(1, 1), LowLoad);
 
     const std::vector<CServerGroup*> groups = GroupsInOrder(manager);
     REQUIRE(groups.size() == 1);
     CHECK(groups[0]->m_bPvPServer);
+}
+
+TEST_CASE("ServerListManager: the selected channel's titles name its PvP and VIP type")
+{
+    I18N::SetLocale("en");
+    TestServerListManager manager;
+    manager.SetServerList(List({Group(0, "Valhalla")}));
+    const auto titleFor = [&](const ChannelSettings& channel, ChannelNamePlace place)
+    {
+        manager.SetSelectServerInfo(L"Valhalla", 3, channel);
+        return manager.GetSelectServerTitle(place, L"MaxiDK");
+    };
+
+    CHECK(titleFor(Channel(true, ""), ChannelNamePlace::Login) == L"[Valhalla-3 (PvP)]");
+    CHECK(titleFor(Channel(false, ""), ChannelNamePlace::Login) == L"[Valhalla-3 (Non-PvP)]");
+    CHECK(titleFor(Channel(true, "gold"), ChannelNamePlace::Login) == L"[Valhalla-3 (Gold PvP)]");
+    CHECK(titleFor(Channel(false, "gold"), ChannelNamePlace::Login) == L"[Valhalla-3 (Gold Non-PvP)]");
+    CHECK(titleFor(Channel(false, "gold"), ChannelNamePlace::CharacterInfo) == L"[Valhalla-3 (Gold Non-PvP)]");
+    CHECK(titleFor(Channel(false, "gold"), ChannelNamePlace::Screenshot) == L"[Valhalla / MaxiDK]");
+    // A VIP type the list doesn't have is none.
+    CHECK(titleFor(Channel(true, "bronze"), ChannelNamePlace::Login) == L"[Valhalla-3 (PvP)]");
+
+    manager.SetSelectServerInfo(L"Valhalla", 3, Channel(false, "gold"));
+    CHECK(manager.IsNonPvP());
+    manager.SetSelectServerInfo(L"Valhalla", 3, Channel(true, "gold"));
+    CHECK_FALSE(manager.IsNonPvP());
+}
+
+TEST_CASE("ServerListManager: the UTF-8 title is built again only when something it shows changed")
+{
+    I18N::SetLocale("en");
+    ServerListData list = List({Group(0, "Valhalla")});
+    TestServerListManager manager;
+    manager.SetServerList(list);
+    manager.SetSelectServerInfo(L"Valhalla", 1, Channel(false, "gold"));
+
+    const std::string& title = manager.GetSelectServerTitleUtf8(ChannelNamePlace::Login);
+    CHECK(title == "[Valhalla-1 (Gold Non-PvP)]");
+    // The same string while nothing changed.
+    CHECK(&manager.GetSelectServerTitleUtf8(ChannelNamePlace::Login) == &title);
+
+    manager.SetSelectServerInfo(L"Valhalla", 2, Channel(true, ""));
+    CHECK(manager.GetSelectServerTitleUtf8(ChannelNamePlace::Login) == "[Valhalla-2 (PvP)]");
+
+    list.names.pvp.Set("en", "Open PvP");
+    manager.SetServerList(list);
+    CHECK(manager.GetSelectServerTitleUtf8(ChannelNamePlace::Login) == "[Valhalla-2 (Open PvP)]");
+
+    list.names.pvp.Set("es", "PvP abierto");
+    manager.SetServerList(list);
+    I18N::SetLocale("es");
+    CHECK(manager.GetSelectServerTitleUtf8(ChannelNamePlace::Login) == "[Valhalla-2 (PvP abierto)]");
+    I18N::SetLocale("en");
+    CHECK(manager.GetSelectServerTitleUtf8(ChannelNamePlace::Login) == "[Valhalla-2 (Open PvP)]");
+    CHECK(manager.GetSelectServerTitleUtf8(ChannelNamePlace::CharacterInfo) == "[Valhalla-2 (Open PvP)]");
+}
+
+TEST_CASE("ServerListManager: the titles follow the list's texts in the game's language")
+{
+    ServerListData list = List({Group(0, "Valhalla")});
+    list.vipTypes[0].name.Set("es", "Oro");
+    list.names.nonPvp.Set("es", "no PvP");
+    list.names.Template(ChannelNamePlace::Login).Set("es", "[{name}-{channel} ({pvp} {vip})]");
+    TestServerListManager manager;
+    manager.SetServerList(list);
+    manager.SetSelectServerInfo(L"Valhalla", 1, Channel(false, "gold"));
+
+    I18N::SetLocale("es");
+    CHECK(manager.GetSelectServerTitle(ChannelNamePlace::Login) == L"[Valhalla-1 (no PvP Oro)]");
+    I18N::SetLocale("en");
+    CHECK(manager.GetSelectServerTitle(ChannelNamePlace::Login) == L"[Valhalla-1 (Gold Non-PvP)]");
 }
 
 TEST_CASE("ServerListManager: description and test server reach the group")
@@ -155,7 +299,7 @@ TEST_CASE("ServerListManager: description and test server reach the group")
     test.description = "Only for the team";
     test.testServer = true;
     TestServerListManager manager;
-    manager.SetServerGroups(std::vector<ServerGroup>{Group(0, "Valhalla"), test});
+    manager.SetServerList(List({Group(0, "Valhalla"), test}));
     manager.InsertServerGroup(ServerId(0, 1), LowLoad);
     manager.InsertServerGroup(ServerId(9, 1), LowLoad);
 
@@ -170,8 +314,8 @@ TEST_CASE("ServerListManager: description and test server reach the group")
 TEST_CASE("ServerListManager: new groups replace the old ones")
 {
     TestServerListManager manager;
-    manager.SetServerGroups(std::vector<ServerGroup>{Group(0, "Valhalla"), Group(1, "Helheim")});
-    manager.SetServerGroups(std::vector<ServerGroup>{Group(1, "Asgard")});
+    manager.SetServerList(List({Group(0, "Valhalla"), Group(1, "Helheim")}));
+    manager.SetServerList(List({Group(1, "Asgard")}));
 
     manager.InsertServerGroup(ServerId(0, 1), LowLoad);
     manager.InsertServerGroup(ServerId(1, 1), LowLoad);
@@ -184,15 +328,16 @@ TEST_CASE("ServerListManager: new groups replace the old ones")
 #ifdef _EDITOR
 TEST_CASE("ServerListManager: a rebuild names the servers last sent with the new groups")
 {
+    I18N::SetLocale("en");
     TestServerListManager manager;
-    manager.SetServerGroups(std::vector<ServerGroup>{Group(0, "Valhalla")});
+    manager.SetServerList(List({Group(0, "Valhalla")}));
     manager.SetTotalServer(3);
     manager.InsertServerGroup(ServerId(0, 1), LowLoad);
     manager.InsertServerGroup(ServerId(0, 2), LowLoad);
     manager.InsertServerGroup(ServerId(1, 1), LowLoad);
     REQUIRE(manager.GetReceivedServers().size() == 3);
 
-    manager.SetServerGroups(std::vector<ServerGroup>{Group(1, "Helheim"), Group(0, "Asgard")});
+    manager.SetServerList(List({Group(1, "Helheim"), Group(0, "Asgard")}));
     manager.RebuildServerGroups();
 
     CHECK(manager.GetReceivedServers().size() == 3);
@@ -203,6 +348,6 @@ TEST_CASE("ServerListManager: a rebuild names the servers last sent with the new
     CHECK(groups[0]->GetServerSize() == 1);
     CHECK(std::wstring(groups[1]->m_szName) == L"Asgard");
     REQUIRE(groups[1]->GetServerSize() == 2);
-    CHECK(std::wstring(groups[1]->GetServerInfo(1)->m_bName) == ChannelName(L"Asgard-2"));
+    CHECK(manager.GetServerButtonText(*groups[1], *groups[1]->GetServerInfo(1)) == ButtonText(L"Asgard-2 (PvP)"));
 }
 #endif

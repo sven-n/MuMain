@@ -4,20 +4,16 @@
 #pragma once
 #include "ServerGroup.h"
 
-#include "Data/GameData/ServerListData/ServerListGroup.h"
+#include "Data/GameData/ServerListData/ButtonColors.h"
+#include "Data/GameData/ServerListData/ServerListData.h"
 
-#include <span>
+#include <array>
+#include <cstddef>
+#include <map>
 #include <string>
+#include <string_view>
 #include <vector>
 
-// A group of Data/Local/ServerList.json, with its place in the list.
-struct SServerGroupInfo
-{
-    Data::ServerList::ServerGroup group;
-    int sequence = 0;
-};
-
-typedef std::map<int, SServerGroupInfo> ServerListScriptMap;
 typedef std::map<int, CServerGroup*> type_mapServerGroup;
 
 class CServerListManager
@@ -36,19 +32,31 @@ public:
     // Reads Data/Local/ServerList.json. False when it has fatal problems; they are in
     // errorMessage then, for the player.
     bool LoadServerListScript(std::string& errorMessage);
-    // The groups the login screen names the servers with, in their order.
-    void SetServerGroups(std::span<const Data::ServerList::ServerGroup> groups);
+    // The list the login screen names the servers with: the groups in their
+    // order, the VIP types and the texts.
+    void SetServerList(const Data::ServerList::ServerListData& list);
     void SetFirst();
     bool GetNext(OUT CServerGroup*& pServerGroup);
     CServerGroup* GetServerGroupByBtnPos(int iBtnPos);
 
     int GetServerGroupSize();
 
-    void SetSelectServerInfo(wchar_t* pszName, int iIndex, BYTE byNonPvP);
+    void SetSelectServerInfo(const wchar_t* pszName, int iIndex, const Data::ServerList::ChannelSettings& channel);
     wchar_t* GetSelectServerName();
     int GetSelectServerIndex();
-    BYTE GetNonPVPInfo();
+    // Whether the selected channel has PvP off.
     bool IsNonPvP();
+    // The selected channel as `place` names it, in the game's language:
+    // "[Valhalla-1 (Gold Non-PvP)]". `character` fills {character} (the
+    // screenshot message).
+    std::wstring GetSelectServerTitle(Data::ServerList::ChannelNamePlace place, const wchar_t* character = L"");
+    // The same at `place`, in UTF-8, for the windows that show it every frame (login, character
+    // info): built again only when the list, the selected channel or the game's language changed.
+    const std::string& GetSelectServerTitleUtf8(Data::ServerList::ChannelNamePlace place);
+    // A channel's button on the login screen, with its load: "Valhalla-1 (Gold Non-PvP) Connect".
+    std::wstring GetServerButtonText(const CServerGroup& group, const CServerInfo& server) const;
+    // Its color there in the theme folder `theme`, by the list's button color rules.
+    Data::ServerList::ButtonColor GetServerButtonColor(const CServerInfo& server, std::string_view theme) const;
     void SetTotalServer(int iTotalServer);
     int GetTotalServer();
 
@@ -71,12 +79,13 @@ public:
         return m_receivedServersVersion;
     }
     // Builds the groups of the last list the connect server sent again, with
-    // the groups SetServerGroups set since.
+    // the groups SetServerList set since.
     void RebuildServerGroups();
 #endif
 
 protected:
-    const SServerGroupInfo* GetServerGroupInfoInScript(int iServerGroupIndex);
+    // The list's group with the ID, and its place in the list from 1 (`sequence`); nullptr when the list has none.
+    const Data::ServerList::ServerGroup* FindListGroup(int groupId, int& sequence) const;
     bool MakeServerGroup(IN int iServerGroupIndex, OUT CServerGroup* pServerGroup);
     void InsertServer(CServerGroup* pServerGroup, int iConnectIndex, int iServerPercent);
 
@@ -87,10 +96,23 @@ public:
     int m_iTotalServer;
     wchar_t m_szSelectServerName[MAX_TEXT_LENGTH];
     int m_iSelectServerIndex;
-    BYTE m_byNonPvP;
+    Data::ServerList::ChannelSettings m_selectChannel;
 
 protected:
-    ServerListScriptMap m_mapServerListScript;
+    // The groups, VIP types, colors and texts the channels are named with.
+    Data::ServerList::ServerListData m_serverList;
+    // The index of each group of m_serverList by its ID.
+    std::map<int, size_t> m_groupIndexById;
+    // A title of GetSelectServerTitleUtf8, as it was built.
+    struct CachedTitle
+    {
+        int version = -1;
+        std::string locale;
+        std::string text;
+    };
+    std::array<CachedTitle, Data::ServerList::ChannelNamePlaceCount> m_titles;
+    // Changes with the list and the selected channel: a cached title older than it is built again.
+    int m_titleVersion = 0;
 #ifdef _EDITOR
     std::vector<ReceivedServer> m_receivedServers;
     int m_receivedServersVersion = 0;

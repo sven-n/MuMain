@@ -84,9 +84,13 @@ private:
         int index = 0; // position within the selected group's server list (CServerGroup::GetServerInfo(i))
         float loadFraction = 0.f;
         // One bool per color class since RmlUi's data-class-X binds a class per boolean, not a
-        // name. Neither flag set is the default (plain .server-row color).
+        // name. No flag set is the default (plain .server-row color). From
+        // CServerListManager::GetServerButtonColor.
         bool colorGray = false;
         bool colorOrange = false;
+        bool colorSilver = false;
+        // A color of the server list's own ("#FF5A5A"), set as the text color; empty for a theme color.
+        Rml::String colorStyle;
         // No "checked"/selected state here -- clicking a server row connects immediately.
     };
     struct ServerSelRmlModel
