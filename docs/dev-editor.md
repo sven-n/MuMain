@@ -107,7 +107,9 @@ cursor. In the Map Editor's thumbnail grids they move in both directions.
 the items, the monsters and the monster models as their Save would write
 them now, and the glTF model file table, the server list, the effect
 catalogue and the graphics look (the look profile and the light moods, area
-**Graphics look**) as the game reads their files at start.
+**Graphics look**) as the game reads their files at start, and the map
+object sounds as the Map Editor's Sounds tab has them
+([map-data.md](map-data.md)).
 
 Problems have three levels, the same in every area: **fatal** (the data
 cannot be used: Save refuses it, and the game does not start with it; only
@@ -122,7 +124,8 @@ since the last check.
 
 A click on a problem selects what it is about and opens its tool: the item
 or monster tool of its field, Item Formulas for the item stat file, the
-Server List, the Effect Browser, or the Dev Editor for the graphics look. An arrow
+Server List, the Effect Browser, the Map Editor for the map sounds, or the
+Dev Editor for the graphics look. An arrow
 key onto a problem only selects it.
 
 ---
@@ -219,7 +222,8 @@ Read-only diagnostics:
 
 A tool window of its own (**Windows > Map Editor**, not one of the DevEditor's
 own tabs) that opens an in-client editor for a map's terrain textures, terrain height,
-walkability attributes, and world objects, plus a top-down minimap capture -
+walkability attributes, world objects and their sounds
+([map-data.md](map-data.md)), plus a top-down minimap capture -
 saving back to the game's own on-disk formats. See
 [`src/MuEditor/UI/MapEditor/MAP_EDITOR.md`](../src/MuEditor/UI/MapEditor/MAP_EDITOR.md)
 for the full usage guide (tabs, save targets, and the client/server attribute
