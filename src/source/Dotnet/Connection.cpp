@@ -252,16 +252,15 @@ Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
 
 Connection::~Connection()
 {
-    if (!IsConnected())
+    if (IsConnected())
     {
-        return;
+        if (const auto disconnect = GetDisconnect())
+        {
+            disconnect(_handle);
+        }
     }
 
-    if (const auto disconnect = GetDisconnect())
-    {
-        disconnect(_handle);
-    }
-
+    // A connection the server closed made these too, when it connected.
     SAFE_DELETE(_chatServer);
     SAFE_DELETE(_connectServer);
     SAFE_DELETE(_gameServer);
