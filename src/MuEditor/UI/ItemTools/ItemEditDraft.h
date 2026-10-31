@@ -11,6 +11,18 @@
 
 namespace MuEditor::Items
 {
+// When a stored draft is taken back from the data. Now: at once, so that what
+// the store derived (a weapon kind that follows the classes) is in the draft
+// before the next field is stored. NextFrame: at the next Begin, so that a
+// form that keeps references into the draft's lists while it stores (rows of
+// a list) draws the rest of the frame with them; for a store that derives
+// nothing.
+enum class ReloadAfterStore
+{
+    Now,
+    NextFrame,
+};
+
 // The values of the selected item that a tool form edits. The widgets change
 // the draft; a text or number field is stored (one undo step) when it is left
 // after a change, a checkbox or list right when it changes. While the draft has
@@ -32,7 +44,10 @@ public:
     // edit it refuses, and the draft takes the item back as stored.
     using Store = std::function<void(const std::string& label, const TValue& value)>;
 
-    ItemEditDraft(Load load, Store store) : m_load(std::move(load)), m_store(std::move(store)) {}
+    ItemEditDraft(Load load, Store store, ReloadAfterStore reload = ReloadAfterStore::Now)
+        : m_load(std::move(load)), m_store(std::move(store)), m_reloadAfterStore(reload)
+    {
+    }
 
     // Call once a frame before the form. `dataVersion` changes with the data
     // the values come from. Returns the draft, or nullptr for nothing to edit.
@@ -98,16 +113,19 @@ public:
         }
     }
 
-    // Stores the draft and takes the item back as stored: what the store
-    // derived (a weapon kind that follows the classes) must be in the draft
-    // before the next field is stored, also when that field is already
-    // active. An active field keeps its own text meanwhile.
+    // Stores the draft and takes the item back as stored (ReloadAfterStore):
+    // what the store derived (a weapon kind that follows the classes) must be
+    // in the draft before the next field is stored, also when that field is
+    // already active. An active field keeps its own text meanwhile.
     void StoreNow(const std::string& label)
     {
         if (m_value)
         {
             m_store(label, *m_value);
-            m_value = m_load(m_itemType);
+            if (m_reloadAfterStore == ReloadAfterStore::Now)
+            {
+                m_value = m_load(m_itemType);
+            }
         }
         m_changed = false;
         m_reload = true;
@@ -138,6 +156,7 @@ public:
 private:
     Load m_load;
     Store m_store;
+    ReloadAfterStore m_reloadAfterStore;
     std::optional<TValue> m_value;
     int m_itemType = -1;
     long long m_version = -1;
