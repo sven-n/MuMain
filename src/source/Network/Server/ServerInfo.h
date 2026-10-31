@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Data/GameData/ServerListData/ServerListGroup.h"
+
 class CServerInfo
 {
 public:
@@ -13,6 +15,6 @@ public:
     int m_iIndex;
     int m_iConnectIndex;
     int m_iPercent;
-    BYTE m_byNonPvP;
-    wchar_t m_bName[MAX_TEXT_LENGTH];
+    // PvP and the VIP type, from the server list (CServerListManager::GetServerButtonText names it).
+    Data::ServerList::ChannelSettings m_channel;
 };

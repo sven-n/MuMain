@@ -12,21 +12,31 @@
 #include "../MuEditor/UI/Common/SavedDataFiles.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
 #include "Core/Text/Utf8.h"
+#include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
+#include "Data/GameData/ServerListData/ChannelNameBuilder.h"
 #include "Data/GameData/ServerListData/ServerListJson.h"
 #include "I18N/All.h"
 #include "Network/Server/ServerListManager.h"
 #include "Scenes/SceneCore.h"
+#include "ServerListStepLabel.h"
 #include "UI/Windows/ServerSelWin.h"
 #include "imgui.h"
 
 #include <algorithm>
 #include <array>
+#include <cstring>
 #include <map>
 #include <optional>
+#include <span>
 #include <string>
 
-using Data::ServerList::ChannelType;
+using Data::LocalizedString;
+using Data::ServerList::ChannelNamePlace;
+using Data::ServerList::ChannelSettings;
 using Data::ServerList::ServerGroup;
+using Data::ServerList::ServerListData;
+using Data::ServerList::ThemeColor;
+using Data::ServerList::VipType;
 
 namespace
 {
@@ -34,24 +44,64 @@ namespace
 constexpr float GroupListWidth = 220.0f;
 constexpr float IdFieldWidth = 120.0f;
 constexpr float TextFieldWidth = 320.0f;
-constexpr float TypeComboWidth = 140.0f;
-constexpr int ChannelTableColumns = 4;
+constexpr float VipComboWidth = 140.0f;
+constexpr int ChannelTableColumns = 5;
+constexpr int PreviewTableColumns = 2 + Data::ServerList::ChannelNamePlaceCount;
 constexpr ImVec4 ErrorColor{1.0f, 0.4f, 0.4f, 1.0f};
+// {character} in the preview.
+constexpr const char* PreviewCharacter = "Hero";
 
-const char* GetChannelTypeLabel(ChannelType type)
+std::string_view GetEditorLocale()
 {
-    switch (type)
+    const char* locale = I18N::GetCurrentLocale();
+    return locale != nullptr ? std::string_view(locale) : LocalizedString::NeutralLocale;
+}
+
+// A VIP type's name in `locale`; None for no type.
+std::string GetVipTypeLabel(const VipType* vipType, std::string_view locale)
+{
+    return vipType != nullptr ? vipType->name.Get(locale) : std::string(I18N::Editor::None);
+}
+
+const char* GetThemeColorLabel(ThemeColor color)
+{
+    switch (color)
     {
-    case ChannelType::NonPvp:
-        return I18N::Editor::NonPvP;
-    case ChannelType::GoldPvp:
-        return I18N::Editor::GoldPvP;
-    case ChannelType::Gold:
-        return I18N::Editor::Gold;
-    case ChannelType::Normal:
+    case ThemeColor::Gray:
+        return I18N::Editor::Gray;
+    case ThemeColor::Orange:
+        return I18N::Editor::Orange;
+    case ThemeColor::Silver:
+        return I18N::Editor::Silver;
+    case ThemeColor::Default:
     default:
-        return I18N::Editor::Normal;
+        return I18N::Editor::Default;
     }
+}
+
+// The shade the legacy theme draws (themes/legacy/base.rcss), for the swatches.
+ImVec4 GetThemeColorSwatch(ThemeColor color)
+{
+    switch (color)
+    {
+    case ThemeColor::Gray:
+        return {0xE2 / 255.0f, 0xE2 / 255.0f, 0xE2 / 255.0f, 1.0f};
+    case ThemeColor::Orange:
+        return {0xFF / 255.0f, 0xB4 / 255.0f, 0x00 / 255.0f, 1.0f};
+    case ThemeColor::Silver:
+        return {0xB9 / 255.0f, 0xC6 / 255.0f, 0xD3 / 255.0f, 1.0f};
+    case ThemeColor::Default:
+    default:
+        return {0xFF / 255.0f, 0xFF / 255.0f, 0x79 / 255.0f, 1.0f};
+    }
+}
+
+void RenderSwatch(ThemeColor color)
+{
+    const float size = ImGui::GetTextLineHeight();
+    ImGui::ColorButton("##Color", GetThemeColorSwatch(color),
+                       ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoDragDrop,
+                       ImVec2(size, size));
 }
 
 // A grey line that wraps at the window's edge.
@@ -80,51 +130,78 @@ bool BeginChannelTable()
         return false;
     }
     ImGui::TableSetupColumn(I18N::Editor::Channel);
-    ImGui::TableSetupColumn(I18N::Editor::Type);
+    ImGui::TableSetupColumn(I18N::Editor::PvP);
+    ImGui::TableSetupColumn(I18N::Editor::VIP);
     ImGui::TableSetupColumn(I18N::Editor::OnTheLoginScreen);
     ImGui::TableSetupColumn(I18N::Editor::ConnectServer);
     ImGui::TableHeadersRow();
     return true;
 }
 
-// The type picked in the combo, when it is another one than `type`.
-std::optional<ChannelType> PickChannelType(ChannelType type)
+// The VIP type picked in the combo, when it is another one than `vip`: its id,
+// or empty for none.
+std::optional<std::string> PickVipType(const ServerListData& list, const std::string& vip)
 {
-    ImGui::SetNextItemWidth(TypeComboWidth * g_MuEditorCore.GetUIScale());
-    if (!ImGui::BeginCombo("##Type", GetChannelTypeLabel(type)))
+    ImGui::SetNextItemWidth(VipComboWidth * g_MuEditorCore.GetUIScale());
+    const std::string_view locale = GetEditorLocale();
+    const VipType* current = vip.empty() ? nullptr : list.FindVipType(vip);
+    if (!ImGui::BeginCombo("##Vip", GetVipTypeLabel(current, locale).c_str()))
     {
         return std::nullopt;
     }
-    std::optional<ChannelType> picked;
-    for (int value = 0; value < Data::ServerList::ChannelTypeCount; ++value)
+    std::optional<std::string> picked;
+    if (ImGui::Selectable(I18N::Editor::None, current == nullptr) && current != nullptr)
     {
-        const ChannelType option = static_cast<ChannelType>(value);
-        if (ImGui::Selectable(GetChannelTypeLabel(option), option == type) && option != type)
+        picked = std::string();
+    }
+    for (size_t index = 0; index < list.vipTypes.size(); ++index)
+    {
+        const VipType& vipType = list.vipTypes[index];
+        ImGui::PushID(static_cast<int>(index));
+        if (ImGui::Selectable(GetVipTypeLabel(&vipType, locale).c_str(), &vipType == current) && &vipType != current)
         {
-            picked = option;
+            picked = vipType.id;
         }
+        ImGui::PopID();
     }
     ImGui::EndCombo();
     return picked;
 }
 
-// One channel: its number, type, name on the login screen and the load the
-// connect server sent for it (sentChannels: the group's, or nullptr). Returns
-// the type picked for it; the caller sets it.
-std::optional<ChannelType> RenderChannelRow(const ServerGroup& group, int channel,
-                                            const std::map<int, int>* sentChannels)
+// One channel: its number, PvP box, VIP type, button text on the login screen
+// and the load the connect server sent for it (sentChannels: the group's, or
+// nullptr). Returns its settings when they were changed; the caller sets them.
+std::optional<ChannelSettings> RenderChannelRow(const ServerListData& list, const ServerGroup& group, int channel,
+                                                const std::map<int, int>* sentChannels)
 {
     ImGui::PushID(channel);
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
     ImGui::Text("%d", channel + 1);
 
+    ChannelSettings settings = group.channels[static_cast<size_t>(channel)];
+    bool changed = false;
     ImGui::TableNextColumn();
-    const std::optional<ChannelType> picked = PickChannelType(group.channels[static_cast<size_t>(channel)]);
-    const ChannelType type = picked.value_or(group.channels[static_cast<size_t>(channel)]);
+    bool pvp = settings.pvp;
+    if (ImGui::Checkbox("##PvP", &pvp))
+    {
+        settings.pvp = pvp;
+        changed = true;
+    }
+    ImGui::TableNextColumn();
+    if (std::optional<std::string> picked = PickVipType(list, settings.vip))
+    {
+        settings.vip = std::move(*picked);
+        changed = true;
+    }
 
     ImGui::TableNextColumn();
-    ImGui::TextDisabled("%s-%d%s", group.name.c_str(), channel + 1, Data::ServerList::GetChannelSuffix(type));
+    Data::ServerList::ChannelNameValues values;
+    values.name = group.name;
+    values.channel = channel + 1;
+    const std::string name =
+        Data::ServerList::BuildChannelName(list, ChannelNamePlace::Button, settings, values, GetEditorLocale());
+    ImGui::TextDisabled("%s", name.c_str());
 
     ImGui::TableNextColumn();
     if (sentChannels != nullptr)
@@ -136,7 +213,26 @@ std::optional<ChannelType> RenderChannelRow(const ServerGroup& group, int channe
         }
     }
     ImGui::PopID();
-    return picked;
+    return changed ? std::optional<ChannelSettings>(std::move(settings)) : std::nullopt;
+}
+
+// What a template shows as written: a brace problem, or a placeholder its place does not have.
+void RenderTemplateProblems(std::string_view text, ChannelNamePlace place)
+{
+    const Data::Items::PlaceholderScan scan = Data::Items::ScanPlaceholders(text);
+    if (!scan.error.empty())
+    {
+        RenderError(scan.error.c_str());
+        return;
+    }
+    const std::span<const std::string_view> known = Data::ServerList::GetChannelNamePlaceholders(place);
+    for (const std::string& name : scan.names)
+    {
+        if (std::find(known.begin(), known.end(), name) == known.end())
+        {
+            RenderError(I18N::Format(I18N::Editor::NotAPlaceholderOfThisTemplate0, {"{" + name + "}"}).c_str());
+        }
+    }
 }
 
 CMuServerListUI::SentChannels FindSentChannels()
@@ -185,7 +281,24 @@ void CMuServerListUI::Render(bool* open)
     RenderToolbar();
     RenderStatus();
     ImGui::Separator();
-    const bool changed = RenderPanes();
+    bool changed = false;
+    if (ImGui::BeginTabBar("##ServerListTabs"))
+    {
+        // "###": the tab keeps its ID when the editor's language changes.
+        const std::string groupsTab = std::string(I18N::Editor::Groups) + "###Groups";
+        if (ImGui::BeginTabItem(groupsTab.c_str()))
+        {
+            changed |= RenderPanes();
+            ImGui::EndTabItem();
+        }
+        const std::string namesTab = std::string(I18N::Editor::ChannelNames) + "###ChannelNames";
+        if (ImGui::BeginTabItem(namesTab.c_str()))
+        {
+            changed |= RenderChannelNamesTab();
+            ImGui::EndTabItem();
+        }
+        ImGui::EndTabBar();
+    }
     ImGui::End();
     AfterEdits(changed);
 }
@@ -270,8 +383,8 @@ void CMuServerListUI::CommitWhenFieldLeft()
 void CMuServerListUI::LoadFile()
 {
     Data::ServerList::ServerListLoadResult loaded =
-        Data::ServerList::LoadServerListFile(Data::ServerList::ServerListFile);
-    m_edits.Reset(std::move(loaded.groups), !Data::Items::HasFatal(loaded.issues));
+        Data::ServerList::LoadServerListFile(Data::ServerList::ServerListFile, I18N::GetAvailableLocales());
+    m_edits.Reset(std::move(loaded.list), !Data::Items::HasFatal(loaded.issues));
     m_issues = std::move(loaded.issues);
     m_status.clear();
     m_statusIsError = false;
@@ -280,6 +393,8 @@ void CMuServerListUI::LoadFile()
     m_takenId = -1;
     Select(m_edits.GetGroups().empty() ? -1
                                        : std::clamp(m_selected, 0, static_cast<int>(m_edits.GetGroups().size()) - 1));
+    const int vipTypes = static_cast<int>(m_edits.GetList().vipTypes.size());
+    SelectVipType(vipTypes == 0 ? -1 : std::clamp(m_selectedVipType, 0, vipTypes - 1));
     ShowInGame();
 }
 
@@ -291,7 +406,7 @@ void CMuServerListUI::Save()
     }
     m_edits.Commit();
     m_issues.clear();
-    if (!Data::ServerList::SaveServerListFile(Data::ServerList::ServerListFile, m_edits.GetGroups(), m_issues))
+    if (!Data::ServerList::SaveServerListFile(Data::ServerList::ServerListFile, m_edits.GetList(), m_issues))
     {
         m_status = I18N::Editor::NotSavedSeeTheProblemsBelow;
         m_statusIsError = true;
@@ -376,6 +491,8 @@ void CMuServerListUI::AfterHistoryStep()
     m_uncommitted = false;
     m_takenId = -1;
     Select(std::min(m_selected, static_cast<int>(m_edits.GetGroups().size()) - 1));
+    SelectVipType(std::min(m_selectedVipType, static_cast<int>(m_edits.GetList().vipTypes.size()) - 1));
+    m_removeVipType = -1;
     ShowInGame();
 }
 
@@ -628,10 +745,10 @@ bool CMuServerListUI::RenderChannels(ServerGroup& group)
     bool changed = false;
     for (int channel = 0; channel < Data::ServerList::MaxChannelsPerGroup; ++channel)
     {
-        if (const std::optional<ChannelType> picked = RenderChannelRow(group, channel, sentChannels))
+        if (std::optional<ChannelSettings> picked = RenderChannelRow(m_edits.GetList(), group, channel, sentChannels))
         {
             CommitPending();
-            group.channels[static_cast<size_t>(channel)] = *picked;
+            group.channels[static_cast<size_t>(channel)] = std::move(*picked);
             changed = true;
         }
     }
@@ -639,9 +756,328 @@ bool CMuServerListUI::RenderChannels(ServerGroup& group)
     return changed;
 }
 
+bool CMuServerListUI::RenderChannelNamesTab()
+{
+    const float scale = g_MuEditorCore.GetUIScale();
+    bool changed = false;
+    const ImVec2 listSize(GroupListWidth * scale, 0.0f);
+    if (ImGui::BeginChild("##VipTypes", listSize, ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
+    {
+        ImGui::TextUnformatted(I18N::Editor::VIPTypes);
+        changed |= RenderVipTypeList();
+        changed |= RenderVipTypeButtons();
+    }
+    ImGui::EndChild();
+    ImGui::SameLine();
+    if (ImGui::BeginChild("##Names", ImVec2(0.0f, 0.0f), ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
+    {
+        ImGui::SetNextItemWidth(IdFieldWidth * 1.5f * scale);
+        if (ImGui::BeginCombo(I18N::Editor::Language, I18N::GetLanguageDisplayName(m_textLocale.c_str())))
+        {
+            for (const char* locale : I18N::GetAvailableLocales())
+            {
+                if (ImGui::Selectable(I18N::GetLanguageDisplayName(locale), m_textLocale == locale))
+                {
+                    m_textLocale = locale;
+                }
+            }
+            ImGui::EndCombo();
+        }
+        ImGui::Separator();
+        changed |= RenderSelectedVipType();
+        ImGui::Separator();
+        changed |= RenderTexts();
+        ImGui::Separator();
+        RenderPreview();
+    }
+    ImGui::EndChild();
+    return changed;
+}
+
+bool CMuServerListUI::RenderVipTypeList()
+{
+    const std::vector<VipType>& vipTypes = m_edits.GetList().vipTypes;
+    const std::string_view locale = GetEditorLocale();
+    for (int index = 0; index < static_cast<int>(vipTypes.size()); ++index)
+    {
+        const VipType& vipType = vipTypes[static_cast<size_t>(index)];
+        ImGui::PushID(index);
+        RenderSwatch(vipType.themeColor);
+        ImGui::SameLine();
+        const std::string label = GetVipTypeLabel(&vipType, locale) + " (" + vipType.id + ")";
+        // Drawn as plain text, as the group names are: a "##" in it would start the ImGui ID.
+        const ImVec2 textPosition = ImGui::GetCursorScreenPos();
+        if (ImGui::Selectable("##VipType", index == m_selectedVipType, MuEditor::KeyboardSelection::RowFlags))
+        {
+            SelectVipType(index);
+        }
+        ImGui::GetWindowDrawList()->AddText(textPosition, ImGui::GetColorU32(ImGuiCol_Text), label.c_str());
+        ImGui::PopID();
+    }
+    return false;
+}
+
+bool CMuServerListUI::RenderVipTypeButtons()
+{
+    bool changed = false;
+    if (ImGui::Button(I18N::Editor::Add))
+    {
+        CommitPending();
+        SelectVipType(static_cast<int>(m_edits.AddVipType(I18N::Editor::NewVIPType)));
+        changed = true;
+    }
+    ImGui::SameLine();
+    const int count = static_cast<int>(m_edits.GetList().vipTypes.size());
+    const bool hasSelection = m_selectedVipType >= 0 && m_selectedVipType < count;
+    ImGui::BeginDisabled(!hasSelection);
+    if (ImGui::Button(I18N::Editor::Remove))
+    {
+        const VipType& vipType = m_edits.GetList().vipTypes[static_cast<size_t>(m_selectedVipType)];
+        if (m_edits.FindChannelsWithVipType(vipType.id).empty())
+        {
+            CommitPending();
+            m_edits.RemoveVipType(static_cast<size_t>(m_selectedVipType));
+            SelectVipType(std::min(m_selectedVipType, count - 2));
+            changed = true;
+        }
+        else
+        {
+            m_removeVipType = m_selectedVipType;
+            ImGui::OpenPopup("###RemoveVipType");
+        }
+    }
+    ImGui::EndDisabled();
+    ImGui::BeginDisabled(!hasSelection || m_selectedVipType == 0);
+    if (ImGui::Button(I18N::Editor::MoveUp))
+    {
+        CommitPending();
+        if (m_edits.MoveVipType(static_cast<size_t>(m_selectedVipType), -1))
+        {
+            SelectVipType(m_selectedVipType - 1);
+            changed = true;
+        }
+    }
+    ImGui::EndDisabled();
+    ImGui::SameLine();
+    ImGui::BeginDisabled(!hasSelection || m_selectedVipType + 1 >= count);
+    if (ImGui::Button(I18N::Editor::MoveDown))
+    {
+        CommitPending();
+        if (m_edits.MoveVipType(static_cast<size_t>(m_selectedVipType), 1))
+        {
+            SelectVipType(m_selectedVipType + 1);
+            changed = true;
+        }
+    }
+    ImGui::EndDisabled();
+    // In the ID scope of the Remove button, which opens it.
+    changed |= RenderRemoveVipTypePopup();
+    return changed;
+}
+
+bool CMuServerListUI::RenderRemoveVipTypePopup()
+{
+    const std::vector<VipType>& vipTypes = m_edits.GetList().vipTypes;
+    if (m_removeVipType < 0 || m_removeVipType >= static_cast<int>(vipTypes.size()))
+    {
+        return false;
+    }
+    const VipType& vipType = vipTypes[static_cast<size_t>(m_removeVipType)];
+    const std::string title =
+        I18N::Format(I18N::Editor::RemoveVIPType0, {vipType.name.Get(GetEditorLocale())}) + "###RemoveVipType";
+    bool changed = false;
+    if (ImGui::BeginPopupModal(title.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        const std::vector<std::string> channels = m_edits.FindChannelsWithVipType(vipType.id);
+        ImGui::TextUnformatted(I18N::Format(I18N::Editor::VIPTypeUsedNote, {std::to_string(channels.size())}).c_str());
+        std::string list;
+        for (const std::string& channel : channels)
+        {
+            list += (list.empty() ? "" : ", ") + channel;
+        }
+        ImGui::PushTextWrapPos(TextFieldWidth * 1.5f * g_MuEditorCore.GetUIScale());
+        ImGui::TextUnformatted(list.c_str());
+        ImGui::PopTextWrapPos();
+        if (ImGui::Button(I18N::Editor::Remove))
+        {
+            CommitPending();
+            m_edits.RemoveVipType(static_cast<size_t>(m_removeVipType));
+            SelectVipType(std::min(m_selectedVipType, static_cast<int>(m_edits.GetList().vipTypes.size()) - 1));
+            m_removeVipType = -1;
+            changed = true;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::SameLine();
+        if (ImGui::Button(I18N::Editor::Cancel))
+        {
+            m_removeVipType = -1;
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
+    return changed;
+}
+
+bool CMuServerListUI::RenderLocalizedField(const char* label, LocalizedString& text, size_t maxUnits)
+{
+    const bool english = m_textLocale == LocalizedString::NeutralLocale;
+    std::string value = english ? text.GetNeutral() : text.GetOwn(m_textLocale);
+    ImGui::SetNextItemWidth(TextFieldWidth * g_MuEditorCore.GetUIScale());
+    const bool edited = english ? MuEditor::Items::InputString(label, value)
+                                : MuEditor::Items::InputStringWithHint(label, text.GetNeutral().c_str(), value);
+    if (edited)
+    {
+        Core::Text::CutToUtf16Length(value, maxUnits);
+        text.Set(m_textLocale, std::move(value));
+    }
+    CommitWhenFieldLeft();
+    return edited;
+}
+
+bool CMuServerListUI::RenderSelectedVipType()
+{
+    std::vector<VipType>& vipTypes = m_edits.EditList().vipTypes;
+    if (m_selectedVipType < 0 || m_selectedVipType >= static_cast<int>(vipTypes.size()))
+    {
+        ImGui::TextDisabled("%s", I18N::Editor::PickAVIPTypeInTheList);
+        return false;
+    }
+    const size_t index = static_cast<size_t>(m_selectedVipType);
+    const float scale = g_MuEditorCore.GetUIScale();
+    bool changed = false;
+
+    // The ID changes the type only while it is a free VIP type id; what is typed stays in the field until it is left.
+    if (!m_vipTypeIdActive)
+    {
+        m_vipTypeIdDraft = vipTypes[index].id;
+    }
+    ImGui::SetNextItemWidth(IdFieldWidth * 1.5f * scale);
+    if (MuEditor::Items::InputString(I18N::Editor::VIPTypeID, m_vipTypeIdDraft))
+    {
+        const std::string before = vipTypes[index].id;
+        changed = m_edits.ChangeVipTypeId(index, m_vipTypeIdDraft) && vipTypes[index].id != before;
+    }
+    m_vipTypeIdActive = ImGui::IsItemActive();
+    CommitWhenFieldLeft();
+    if (m_vipTypeIdDraft != vipTypes[index].id)
+    {
+        RenderError(Data::ServerList::IsVipTypeId(m_vipTypeIdDraft)
+                        ? I18N::Format(I18N::Editor::AnotherVIPTypeHasTheID0, {m_vipTypeIdDraft}).c_str()
+                        : I18N::Editor::NotAVIPTypeID);
+    }
+    RenderNote(I18N::Editor::VIPTypeIDNote);
+
+    VipType& vipType = vipTypes[index];
+    changed |= RenderLocalizedField(I18N::Editor::Name, vipType.name, Data::ServerList::MaxVipTypeNameLength);
+    if (vipType.name.GetNeutral().empty())
+    {
+        RenderError(I18N::Editor::AVIPTypeNeedsAName);
+    }
+
+    ImGui::SetNextItemWidth(VipComboWidth * scale);
+    if (ImGui::BeginCombo(I18N::Editor::ThemeColor, GetThemeColorLabel(vipType.themeColor)))
+    {
+        for (int value = 0; value < Data::ServerList::ThemeColorCount; ++value)
+        {
+            const ThemeColor color = static_cast<ThemeColor>(value);
+            ImGui::PushID(value);
+            RenderSwatch(color);
+            ImGui::PopID();
+            ImGui::SameLine();
+            if (ImGui::Selectable(GetThemeColorLabel(color), color == vipType.themeColor) &&
+                color != vipType.themeColor)
+            {
+                CommitPending();
+                vipType.themeColor = color;
+                changed = true;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    RenderNote(I18N::Editor::ThemeColorNote);
+    return changed;
+}
+
+bool CMuServerListUI::RenderTexts()
+{
+    Data::ServerList::ChannelNames& names = m_edits.EditList().names;
+    ImGui::TextUnformatted(I18N::Editor::Texts);
+    bool changed = RenderLocalizedField(I18N::Editor::PvPText, names.pvp, Data::ServerList::MaxChannelNameTextLength);
+    changed |= RenderLocalizedField(I18N::Editor::NonPvPText, names.nonPvp, Data::ServerList::MaxChannelNameTextLength);
+    for (int value = 0; value < Data::ServerList::ChannelNamePlaceCount; ++value)
+    {
+        const ChannelNamePlace place = static_cast<ChannelNamePlace>(value);
+        LocalizedString& text = names.Template(place);
+        changed |= RenderLocalizedField(MuEditor::ServerList::StepLabel::GetPlaceLabel(place), text,
+                                        Data::ServerList::MaxChannelNameTextLength);
+        RenderTemplateProblems(text.Get(m_textLocale), place);
+    }
+    RenderNote(I18N::Editor::TextsNote);
+    return changed;
+}
+
+void CMuServerListUI::RenderPreview()
+{
+    ImGui::TextUnformatted(I18N::Editor::Preview);
+    RenderNote(I18N::Editor::PreviewNote);
+    constexpr ImGuiTableFlags TableFlags =
+        ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit;
+    if (!ImGui::BeginTable("##Preview", PreviewTableColumns, TableFlags))
+    {
+        return;
+    }
+    ImGui::TableSetupColumn(I18N::Editor::PvP);
+    ImGui::TableSetupColumn(I18N::Editor::VIP);
+    for (int value = 0; value < Data::ServerList::ChannelNamePlaceCount; ++value)
+    {
+        ImGui::TableSetupColumn(MuEditor::ServerList::StepLabel::GetPlaceLabel(static_cast<ChannelNamePlace>(value)));
+    }
+    ImGui::TableHeadersRow();
+
+    const ServerListData& list = m_edits.GetList();
+    const std::vector<ServerGroup>& groups = list.groups;
+    const bool hasGroup = m_selected >= 0 && m_selected < static_cast<int>(groups.size());
+    const std::string groupName = hasGroup ? groups[static_cast<size_t>(m_selected)].name : std::string("Valhalla");
+    const std::string load = Core::Text::ToUtf8(I18N::Game::Connect);
+    Data::ServerList::ChannelNameValues values;
+    values.name = groupName;
+    values.channel = 1;
+    values.load = load;
+    values.character = PreviewCharacter;
+
+    // No VIP type first, then each one; each with PvP on and off.
+    std::vector<const VipType*> vipTypes = {nullptr};
+    for (const VipType& vipType : list.vipTypes)
+    {
+        vipTypes.push_back(&vipType);
+    }
+    for (const VipType* vipType : vipTypes)
+    {
+        for (const bool pvp : {true, false})
+        {
+            ChannelSettings channel;
+            channel.pvp = pvp;
+            channel.vip = vipType != nullptr ? vipType->id : std::string();
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted((pvp ? list.names.pvp : list.names.nonPvp).Get(m_textLocale).c_str());
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted(GetVipTypeLabel(vipType, m_textLocale).c_str());
+            for (int value = 0; value < Data::ServerList::ChannelNamePlaceCount; ++value)
+            {
+                ImGui::TableNextColumn();
+                const std::string name = Data::ServerList::BuildChannelName(list, static_cast<ChannelNamePlace>(value),
+                                                                            channel, values, m_textLocale);
+                ImGui::TextUnformatted(name.c_str());
+            }
+        }
+    }
+    ImGui::EndTable();
+}
+
 void CMuServerListUI::ShowInGame()
 {
-    g_ServerListManager->SetServerGroups(m_edits.GetGroups());
+    g_ServerListManager->SetServerList(m_edits.GetList());
     // Only the login screen shows the groups; elsewhere the next list the
     // connect server sends gets the new names.
     if (SceneFlag != LOG_IN_SCENE)
@@ -664,6 +1100,15 @@ void CMuServerListUI::Select(int index)
         m_takenId = -1;
     }
     m_selected = index;
+}
+
+void CMuServerListUI::SelectVipType(int index)
+{
+    if (index != m_selectedVipType)
+    {
+        m_vipTypeIdActive = false;
+    }
+    m_selectedVipType = index;
 }
 
 #endif // _EDITOR

@@ -91,7 +91,7 @@ Parts the item tools and the monster tools both use:
 - **CodeTokenLine.h/cpp**, **CodeRanges.h/cpp**, **CodeReference.h**, **CodeReferenceList.h/cpp** - Reading the sources for the lines that name an item or a monster, and their list in the remove dialogs
 
 ### Server List (UI/ServerList)
-- **MuServerListUI.h/cpp** - The server groups of the login screen (Data/Local/ServerList.json): order, names, test server and channel types, shown on the login screen right away (docs/server-list.md)
+- **MuServerListUI.h/cpp** - The server groups of the login screen (Data/Local/ServerList.json): order, names, test server, the channels' PvP and VIP type, the VIP types and the texts that name a channel, shown on the login screen right away (docs/server-list.md)
 - **ServerListEdits.h/cpp** - The groups being changed, what the file has, and their undo history (the editor bar's Undo and Redo while the window was used last)
 - **ServerListStepLabel.h/cpp** - What each undo step did ("Remove Helheim", "Valhalla: channel 3"), for the tooltips of the editor bar's Undo and Redo
 

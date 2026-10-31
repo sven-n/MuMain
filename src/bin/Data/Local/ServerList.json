@@ -1,20 +1,68 @@
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
+  "vipTypes": [
+    {
+      "id": "gold",
+      "name": {"en": "Gold", "es": "Oro", "id": "Emas", "ja": "ゴールド", "pt": "Ouro", "ru": "Золотой", "uk": "Золотий", "zh-TW": "黃金"},
+      "themeColor": "orange"
+    }
+  ],
+  "names": {
+    "pvp": {
+      "en": "PvP"
+    },
+    "nonPvp": {
+      "en": "Non-PvP",
+      "de": "Nicht-PvP",
+      "es": "no PvP",
+      "ja": "Non-PVP",
+      "pl": "nie PvP",
+      "pt": "não PvP",
+      "ru": "не PvP",
+      "uk": "не PvP",
+      "zh-CN": "非 PvP",
+      "zh-TW": "非PvP"
+    },
+    "button": {
+      "en": "{name}-{channel} ({vip} {pvp}) {load}",
+      "es": "{name}-{channel} ({pvp} {vip}) {load}",
+      "id": "{name}-{channel} ({pvp} {vip}) {load}",
+      "pt": "{name}-{channel} ({pvp} {vip}) {load}",
+      "zh-TW": "{name}-{channel} ({vip}{pvp}) {load}"
+    },
+    "login": {
+      "en": "[{name}-{channel} ({vip} {pvp})]",
+      "es": "[{name}-{channel} ({pvp} {vip})]",
+      "id": "[{name}-{channel} ({pvp} {vip})]",
+      "pt": "[{name}-{channel} ({pvp} {vip})]",
+      "zh-TW": "[{name}-{channel} ({vip}{pvp})]"
+    },
+    "characterInfo": {
+      "en": "[{name}-{channel} ({vip} {pvp})]",
+      "es": "[{name}-{channel} ({pvp} {vip})]",
+      "id": "[{name}-{channel} ({pvp} {vip})]",
+      "pt": "[{name}-{channel} ({pvp} {vip})]",
+      "zh-TW": "[{name}-{channel} ({vip}{pvp})]"
+    },
+    "screenshot": {
+      "en": "[{name} / {character}]"
+    }
+  },
   "groups": [
     {
       "id": 0,
       "name": "Valhalla",
-      "channels": {"1": "gold", "2": "gold", "3": "gold", "4": "gold", "5": "goldPvp", "6": "nonPvp", "7": "nonPvp", "8": "nonPvp"}
+      "channels": {"1": {"vip": "gold", "pvp": false}, "2": {"vip": "gold", "pvp": false}, "3": {"vip": "gold", "pvp": false}, "4": {"vip": "gold", "pvp": false}, "5": {"vip": "gold"}, "6": {"pvp": false}, "7": {"pvp": false}, "8": {"pvp": false}}
     },
     {
       "id": 1,
       "name": "Helheim",
-      "channels": {"1": "gold", "2": "gold", "3": "gold", "4": "gold", "5": "goldPvp", "6": "nonPvp", "7": "nonPvp", "8": "nonPvp"}
+      "channels": {"1": {"vip": "gold", "pvp": false}, "2": {"vip": "gold", "pvp": false}, "3": {"vip": "gold", "pvp": false}, "4": {"vip": "gold", "pvp": false}, "5": {"vip": "gold"}, "6": {"pvp": false}, "7": {"pvp": false}, "8": {"pvp": false}}
     },
     {
       "id": 2,
       "name": "Midgard",
-      "channels": {"1": "gold", "2": "gold", "3": "gold", "4": "gold", "5": "goldPvp", "6": "nonPvp", "7": "nonPvp", "8": "nonPvp"}
+      "channels": {"1": {"vip": "gold", "pvp": false}, "2": {"vip": "gold", "pvp": false}, "3": {"vip": "gold", "pvp": false}, "4": {"vip": "gold", "pvp": false}, "5": {"vip": "gold"}, "6": {"pvp": false}, "7": {"pvp": false}, "8": {"pvp": false}}
     }
   ]
 }

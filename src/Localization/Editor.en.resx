@@ -1951,26 +1951,11 @@
   <data name="Channel" xml:space="preserve">
     <value>Channel</value>
   </data>
-  <data name="Type" xml:space="preserve">
-    <value>Type</value>
-  </data>
   <data name="On the login screen" xml:space="preserve">
     <value>On the login screen</value>
   </data>
   <data name="Connect server" xml:space="preserve">
     <value>Connect server</value>
-  </data>
-  <data name="Normal" xml:space="preserve">
-    <value>Normal</value>
-  </data>
-  <data name="Non-PvP" xml:space="preserve">
-    <value>Non-PvP</value>
-  </data>
-  <data name="Gold PvP" xml:space="preserve">
-    <value>Gold PvP</value>
-  </data>
-  <data name="Gold" xml:space="preserve">
-    <value>Gold</value>
   </data>
   <data name="Sent, {0}% load" xml:space="preserve">
     <value>Sent, {0}% load</value>
@@ -2013,6 +1998,111 @@
   </data>
   <data name="Step channel" xml:space="preserve">
     <value>{0}: channel {1}</value>
+  </data>
+  <data name="Groups" xml:space="preserve">
+    <value>Groups</value>
+  </data>
+  <data name="Channel names" xml:space="preserve">
+    <value>Channel names</value>
+  </data>
+  <data name="PvP" xml:space="preserve">
+    <value>PvP</value>
+  </data>
+  <data name="VIP" xml:space="preserve">
+    <value>VIP</value>
+  </data>
+  <data name="VIP types" xml:space="preserve">
+    <value>VIP types</value>
+  </data>
+  <data name="New VIP type" xml:space="preserve">
+    <value>New VIP type</value>
+  </data>
+  <data name="Pick a VIP type in the list." xml:space="preserve">
+    <value>Pick a VIP type in the list.</value>
+  </data>
+  <data name="VIP type ID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="VIP type ID note" xml:space="preserve">
+    <value>What channels name the type by: letters and digits, starting with a lowercase letter. A new ID is given to the channels with the type too.</value>
+  </data>
+  <data name="Not a VIP type ID" xml:space="preserve">
+    <value>Not a VIP type ID: letters and digits, starting with a lowercase letter.</value>
+  </data>
+  <data name="Another VIP type has the ID {0}." xml:space="preserve">
+    <value>Another VIP type has the ID {0}.</value>
+  </data>
+  <data name="A VIP type needs a name." xml:space="preserve">
+    <value>A VIP type needs a name.</value>
+  </data>
+  <data name="Theme color" xml:space="preserve">
+    <value>Theme color</value>
+  </data>
+  <data name="Gray" xml:space="preserve">
+    <value>Gray</value>
+  </data>
+  <data name="Orange" xml:space="preserve">
+    <value>Orange</value>
+  </data>
+  <data name="Silver" xml:space="preserve">
+    <value>Silver</value>
+  </data>
+  <data name="Theme color note" xml:space="preserve">
+    <value>The button color on the login screen. Each theme (legacy, modern) draws its own shade of it; channels without a VIP type are gray with PvP on.</value>
+  </data>
+  <data name="Remove VIP type {0}?" xml:space="preserve">
+    <value>Remove VIP type {0}?</value>
+  </data>
+  <data name="VIP type used note" xml:space="preserve">
+    <value>{0} channels have this VIP type; they then have none:</value>
+  </data>
+  <data name="Texts" xml:space="preserve">
+    <value>Texts</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="PvP text" xml:space="preserve">
+    <value>PvP text</value>
+  </data>
+  <data name="Non-PvP text" xml:space="preserve">
+    <value>Non-PvP text</value>
+  </data>
+  <data name="Server list button" xml:space="preserve">
+    <value>Server list button</value>
+  </data>
+  <data name="Login window" xml:space="preserve">
+    <value>Login window</value>
+  </data>
+  <data name="Character info" xml:space="preserve">
+    <value>Character info</value>
+  </data>
+  <data name="Screenshot message" xml:space="preserve">
+    <value>Screenshot message</value>
+  </data>
+  <data name="Texts note" xml:space="preserve">
+    <value>A field left empty uses the English text, shown greyed. Each template can use {name}, {channel}, {vip} and {pvp}; the server list button also {load}, the screenshot message also {character}. An empty one goes with one space next to it, and brackets left empty go too.</value>
+  </data>
+  <data name="Not a placeholder of this template: {0}" xml:space="preserve">
+    <value>Not a placeholder of this template: {0}</value>
+  </data>
+  <data name="Preview note" xml:space="preserve">
+    <value>Every combination of PvP and VIP type, for channel 1 of the selected group, in the language picked above.</value>
+  </data>
+  <data name="Step add VIP type" xml:space="preserve">
+    <value>Add VIP type {0}</value>
+  </data>
+  <data name="Step remove VIP type" xml:space="preserve">
+    <value>Remove VIP type {0}</value>
+  </data>
+  <data name="Step move VIP type" xml:space="preserve">
+    <value>Move VIP type {0}</value>
+  </data>
+  <data name="Step theme color" xml:space="preserve">
+    <value>{0}: theme color</value>
+  </data>
+  <data name="Step text" xml:space="preserve">
+    <value>Text: {0}</value>
   </data>
   <data name="Monster Browser" xml:space="preserve">
     <value>Monster Browser</value>

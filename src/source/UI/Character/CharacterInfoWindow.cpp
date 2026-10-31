@@ -426,8 +426,10 @@ void mu::ui::window::CCharacterInfoWindow::BuildSubjectTexts()
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::classNameText, "classname_text",
               StringUtils::WideToNarrow(strClassName));
 
-    SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::serverNameText, "servername_text",
-              StringUtils::WideToNarrow(g_ServerListManager->GetSelectServerTitle().c_str()));
+    SyncField(
+        m_RmlView.Binder(), &CharacterInfoRmlModel::serverNameText, "servername_text",
+        StringUtils::WideToNarrow(
+            g_ServerListManager->GetSelectServerTitle(Data::ServerList::ChannelNamePlace::CharacterInfo).c_str()));
 
     const float fAlpha = sinf(WorldTime * 0.001f) + 1.f;
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::classNameOpacity, "classname_opacity",

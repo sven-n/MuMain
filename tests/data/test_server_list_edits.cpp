@@ -10,8 +10,9 @@
 #include <string>
 #include <vector>
 
-using Data::ServerList::ChannelType;
+using Data::ServerList::ChannelSettings;
 using MuEditor::ServerList::ServerGroup;
+using MuEditor::ServerList::ServerListData;
 using MuEditor::ServerList::ServerListEdits;
 
 namespace
@@ -24,11 +25,26 @@ ServerGroup Group(int id, const std::string& name)
     return group;
 }
 
+ServerListData List(std::vector<ServerGroup> groups)
+{
+    ServerListData list;
+    list.groups = std::move(groups);
+    return list;
+}
+
 ServerListEdits ThreeGroups()
 {
     ServerListEdits edits;
-    edits.Reset({Group(0, "Valhalla"), Group(1, "Helheim"), Group(2, "Midgard")});
+    edits.Reset(List({Group(0, "Valhalla"), Group(1, "Helheim"), Group(2, "Midgard")}));
     return edits;
+}
+
+ChannelSettings Gold()
+{
+    ChannelSettings channel;
+    channel.pvp = false;
+    channel.vip = "gold";
+    return channel;
 }
 
 std::vector<std::string> Names(const ServerListEdits& edits)
@@ -56,7 +72,7 @@ TEST_CASE("ServerListEdits: what changed since the last step is one undo step")
     ServerListEdits edits = ThreeGroups();
     edits.EditGroups()[0].name = "V";
     edits.EditGroups()[0].name = "Val";
-    edits.EditGroups()[0].channels[0] = ChannelType::Gold;
+    edits.EditGroups()[0].channels[0] = Gold();
     edits.Commit();
 
     CHECK(edits.CanUndo());
@@ -64,13 +80,13 @@ TEST_CASE("ServerListEdits: what changed since the last step is one undo step")
 
     edits.Undo();
     CHECK(edits.GetGroups()[0].name == "Valhalla");
-    CHECK(edits.GetGroups()[0].channels[0] == ChannelType::Normal);
+    CHECK(edits.GetGroups()[0].channels[0] == ChannelSettings{});
     CHECK_FALSE(edits.CanUndo());
     CHECK_FALSE(edits.HasUnsavedChanges());
 
     edits.Redo();
     CHECK(edits.GetGroups()[0].name == "Val");
-    CHECK(edits.GetGroups()[0].channels[0] == ChannelType::Gold);
+    CHECK(edits.GetGroups()[0].channels[0] == Gold());
 }
 
 TEST_CASE("ServerListEdits: undo also takes back a change not yet committed")
@@ -144,7 +160,7 @@ TEST_CASE("ServerListEdits: saved groups are not unsaved changes")
 TEST_CASE("ServerListEdits: groups from a read with errors are not complete until a clean read")
 {
     ServerListEdits edits;
-    edits.Reset({Group(0, "Valhalla")}, false);
+    edits.Reset(List({Group(0, "Valhalla")}), false);
     CHECK_FALSE(edits.IsComplete());
 
     edits.EditGroups()[0].name = "Asgard";
@@ -152,14 +168,14 @@ TEST_CASE("ServerListEdits: groups from a read with errors are not complete unti
     edits.MarkSaved();
     CHECK_FALSE(edits.IsComplete());
 
-    edits.Reset({Group(0, "Valhalla"), Group(1, "Helheim")});
+    edits.Reset(List({Group(0, "Valhalla"), Group(1, "Helheim")}));
     CHECK(edits.IsComplete());
 }
 
 TEST_CASE("ServerListEdits: a new group gets the smallest free ID at the end")
 {
     ServerListEdits edits;
-    edits.Reset({Group(0, "A"), Group(2, "B")});
+    edits.Reset(List({Group(0, "A"), Group(2, "B")}));
 
     const std::optional<size_t> added = edits.AddGroup("New");
 
@@ -201,7 +217,7 @@ TEST_CASE("ServerListEdits: each step is named for the editor bar")
     ServerListEdits edits = ThreeGroups();
     CHECK(edits.GetUndoLabel().empty());
 
-    edits.EditGroups()[0].channels[2] = ChannelType::Gold;
+    edits.EditGroups()[0].channels[2] = Gold();
     // Not committed yet (a field being typed in): named all the same.
     CHECK(edits.GetUndoLabel() == "Valhalla: channel 3");
     edits.Commit();
@@ -254,6 +270,96 @@ TEST_CASE("ServerListEdits: IDs in use")
     CHECK(edits.IsIdUsed(1));
     CHECK_FALSE(edits.IsIdUsed(3));
     CHECK(edits.FindFreeId() == 3);
+}
+
+TEST_CASE("ServerListEdits: a new VIP type gets an id from its name that no other type has")
+{
+    ServerListEdits edits = ThreeGroups();
+
+    CHECK(edits.AddVipType("Gold") == 0);
+    CHECK(edits.AddVipType("Gold") == 1);
+    CHECK(edits.AddVipType("Gold Plus") == 2);
+
+    const std::vector<MuEditor::ServerList::VipType>& vipTypes = edits.GetList().vipTypes;
+    REQUIRE(vipTypes.size() == 3);
+    CHECK(vipTypes[0].id == "gold");
+    CHECK(vipTypes[0].name.GetNeutral() == "Gold");
+    CHECK(vipTypes[1].id == "gold2");
+    CHECK(vipTypes[2].id == "goldPlus");
+}
+
+TEST_CASE("ServerListEdits: a removed VIP type leaves its channels without one")
+{
+    I18N::SetLocale("en");
+    ServerListEdits edits = ThreeGroups();
+    edits.AddVipType("Gold");
+    edits.EditGroups()[0].channels[0] = Gold();
+    edits.EditGroups()[2].channels[4] = Gold();
+    edits.Commit();
+
+    CHECK(edits.FindChannelsWithVipType("gold") == std::vector<std::string>{"Valhalla-1", "Midgard-5"});
+    edits.RemoveVipType(0);
+    edits.Commit();
+
+    CHECK(edits.GetList().vipTypes.empty());
+    CHECK(edits.GetGroups()[0].channels[0].vip.empty());
+    // PvP stays as it was.
+    CHECK_FALSE(edits.GetGroups()[0].channels[0].pvp);
+    CHECK(edits.GetUndoLabel() == "Remove VIP type Gold");
+
+    edits.Undo();
+    CHECK(edits.GetGroups()[0].channels[0] == Gold());
+}
+
+TEST_CASE("ServerListEdits: a VIP type's new id goes to its channels too")
+{
+    ServerListEdits edits = ThreeGroups();
+    edits.AddVipType("Gold");
+    edits.AddVipType("Silver");
+    edits.EditGroups()[1].channels[0] = Gold();
+    edits.Commit();
+
+    CHECK(edits.ChangeVipTypeId(0, "golden"));
+    CHECK(edits.GetList().vipTypes[0].id == "golden");
+    CHECK(edits.GetGroups()[1].channels[0].vip == "golden");
+
+    // Not a VIP type id, or one another type has: nothing changes.
+    CHECK_FALSE(edits.ChangeVipTypeId(0, "Golden"));
+    CHECK_FALSE(edits.ChangeVipTypeId(0, "silver"));
+    CHECK_FALSE(edits.ChangeVipTypeId(5, "bronze"));
+    CHECK(edits.GetList().vipTypes[0].id == "golden");
+    CHECK(edits.ChangeVipTypeId(0, "golden"));
+}
+
+TEST_CASE("ServerListEdits: VIP types move and their changes are named")
+{
+    I18N::SetLocale("en");
+    ServerListEdits edits = ThreeGroups();
+    edits.AddVipType("Gold");
+    edits.Commit();
+    CHECK(edits.GetUndoLabel() == "Add VIP type Gold");
+    edits.AddVipType("Silver");
+    edits.Commit();
+
+    CHECK(edits.MoveVipType(1, -1));
+    edits.Commit();
+    CHECK(edits.GetUndoLabel() == "Move VIP type Silver");
+    CHECK(edits.GetList().vipTypes[0].id == "silver");
+    CHECK_FALSE(edits.MoveVipType(0, -1));
+    CHECK_FALSE(edits.MoveVipType(1, 1));
+
+    edits.EditList().vipTypes[1].themeColor = Data::ServerList::ThemeColor::Orange;
+    CHECK(edits.GetUndoLabel() == "Gold: theme color");
+    edits.Commit();
+    edits.EditList().vipTypes[1].name.Set("es", "Oro");
+    CHECK(edits.GetUndoLabel() == "Gold: name");
+    edits.Commit();
+    edits.EditList().names.Template(Data::ServerList::ChannelNamePlace::Login).Set("en", "[{name}]");
+    CHECK(edits.GetUndoLabel() == "Text: Login window");
+    edits.Commit();
+    edits.EditList().names.nonPvp.Set("de", "Nicht-PvP");
+    CHECK(edits.GetUndoLabel() == "Text: Non-PvP text");
+    CHECK(edits.HasUnsavedChanges());
 }
 
 #endif // _EDITOR

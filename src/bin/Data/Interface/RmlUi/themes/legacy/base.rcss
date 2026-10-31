@@ -85,6 +85,13 @@
 .server-option-btn.orange:active {
 	color: #ffb400;
 }
+/* A VIP type with the theme color "silver" (Data/Local/ServerList.json). */
+.server-option-btn.silver {
+	color: #b9c6d3;
+}
+.server-option-btn.silver:hover {
+	color: #dde6ef;
+}
 /* The native press offsets only the label, leaving the frame and population gauge fixed. */
 .server-group-btn:active .button-label, .server-option-btn:active .button-label {
 	transform: translateY(1rem);

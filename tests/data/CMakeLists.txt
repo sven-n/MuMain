@@ -43,6 +43,7 @@ target_compile_definitions(light_mood_data_tests PRIVATE
 mu_add_test(
     NAME server_list_data_tests
     SOURCES
+        test_channel_name_builder.cpp
         test_server_list_edits.cpp
         test_server_list_json.cpp
         test_server_list_manager.cpp

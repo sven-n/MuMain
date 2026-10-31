@@ -80,6 +80,13 @@ body {
 .server-option-btn.orange:hover {
 	color: token(accent-gold-hover);
 }
+/* A VIP type with the theme color "silver" (Data/Local/ServerList.json). */
+.server-option-btn.silver {
+	color: #9ea7b0;
+}
+.server-option-btn.silver:hover {
+	color: #c3cbd3;
+}
 .server-group-btn:active .button-label, .server-option-btn:active .button-label {
 	transform: translateY(1px);
 }

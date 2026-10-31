@@ -1930,26 +1930,11 @@
   <data name="Channel" xml:space="preserve">
     <value>Kanal</value>
   </data>
-  <data name="Type" xml:space="preserve">
-    <value>Art</value>
-  </data>
   <data name="On the login screen" xml:space="preserve">
     <value>Auf dem Anmeldebildschirm</value>
   </data>
   <data name="Connect server" xml:space="preserve">
     <value>Connect-Server</value>
-  </data>
-  <data name="Normal" xml:space="preserve">
-    <value>Normal</value>
-  </data>
-  <data name="Non-PvP" xml:space="preserve">
-    <value>Kein PvP</value>
-  </data>
-  <data name="Gold PvP" xml:space="preserve">
-    <value>Gold-PvP</value>
-  </data>
-  <data name="Gold" xml:space="preserve">
-    <value>Gold</value>
   </data>
   <data name="Sent, {0}% load" xml:space="preserve">
     <value>Gemeldet, {0} % Last</value>

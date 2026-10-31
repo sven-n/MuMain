@@ -1213,12 +1213,6 @@
   <data name="%s: Screenshot Saved" xml:space="preserve">
     <value>%s:画面を保存しました。</value>
   </data>
-  <data name="[%s-%d(Non-PvP) Server]" xml:space="preserve">
-    <value>[%s-%d(Non-PVP)サーバー]</value>
-  </data>
-  <data name="[%s-%d Server]" xml:space="preserve">
-    <value>[%s-%dサーバー]</value>
-  </data>
   <data name="1)After moving your account into the divided server," xml:space="preserve">
     <value>1) 分割サーバーに移動した後は</value>
   </data>
@@ -7293,12 +7287,6 @@
   </data>
   <data name="Please repurchase after expiration." xml:space="preserve">
     <value>使用期間が満了された後、再購入してください。</value>
-  </data>
-  <data name="[%s-%d(Gold PvP) Server]" xml:space="preserve">
-    <value>[%s-%d(ゴールド PvP) サーバー]</value>
-  </data>
-  <data name="[%s-%d(Gold) Server]" xml:space="preserve">
-    <value>[%s-%d(ゴールド) サーバー]</value>
   </data>
   <data name="Maximum HP increase +%d" xml:space="preserve">
     <value>最大 生命 増加 +%d</value>

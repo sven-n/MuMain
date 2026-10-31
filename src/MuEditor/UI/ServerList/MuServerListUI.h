@@ -5,6 +5,7 @@
 #include "ServerListEdits.h"
 
 #include "../MuEditor/UI/Common/UndoTarget.h"
+#include "Data/GameData/Common/LocalizedString.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 
 #include <map>
@@ -12,9 +13,11 @@
 #include <vector>
 
 // The Server List window: the server groups of the login screen
-// (Data/Local/ServerList.json), their names, order and channel types. The login
-// screen shows each change right away; Save writes the file. The editor bar's
-// Undo and Redo act on its changes while it is the tool worked in last.
+// (Data/Local/ServerList.json), their names, order and channels on the Groups
+// tab; the VIP types and the texts that name a channel on the Channel names
+// tab. The login screen shows each change right away; Save writes the file.
+// The editor bar's Undo and Redo act on its changes while it is the tool
+// worked in last.
 class CMuServerListUI final : public MuEditor::UndoTarget
 {
 public:
@@ -67,9 +70,21 @@ private:
     bool RenderGroupId(Data::ServerList::ServerGroup& group);
     bool RenderGroupFields(Data::ServerList::ServerGroup& group);
     bool RenderChannels(Data::ServerList::ServerGroup& group);
-    // The game names the servers of the connect server with the groups now.
+    // The Channel names tab: the VIP types, the texts and a preview.
+    bool RenderChannelNamesTab();
+    bool RenderVipTypeList();
+    bool RenderVipTypeButtons();
+    bool RenderSelectedVipType();
+    bool RenderTexts();
+    void RenderPreview();
+    // One text in the language picked on the tab, the English one as its hint.
+    bool RenderLocalizedField(const char* label, Data::LocalizedString& text, size_t maxUnits);
+    // Asks before a VIP type that channels have is removed.
+    bool RenderRemoveVipTypePopup();
+    // The game names the servers of the connect server with the list now.
     void ShowInGame();
     void Select(int index);
+    void SelectVipType(int index);
 
     MuEditor::ServerList::ServerListEdits m_edits;
     bool m_loaded = false;
@@ -78,6 +93,15 @@ private:
     int m_selected = -1;
     // An ID typed for the selected group that another group has, or -1.
     int m_takenId = -1;
+    int m_selectedVipType = -1;
+    // What is typed into the selected VIP type's ID field; it changes the type
+    // only while it is a free VIP type id.
+    std::string m_vipTypeIdDraft;
+    bool m_vipTypeIdActive = false;
+    // The VIP type the remove popup asks about, or -1.
+    int m_removeVipType = -1;
+    // The language the Channel names tab shows and edits the texts in.
+    std::string m_textLocale = "en";
     // What the last read or save found, and what it said.
     std::vector<Data::Items::ItemDataIssue> m_issues;
     std::string m_status;
