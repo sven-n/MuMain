@@ -283,4 +283,32 @@ TEST_CASE("The styles the items and the standard rules name are in the ground la
                              Source, issues);
         CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "groundLabels[1]"));
     }
+    SUBCASE("an item's rule whose levels the rules before it take is never used, also further down")
+    {
+        const auto neverUsed = [&](std::vector<ItemGroundLabel> rules)
+        {
+            std::vector<ItemDataIssue> issues;
+            ValidateGroundLabels(std::vector<ItemDefinition>{MakeItem(std::move(rules))}, labels, Source, issues);
+            std::vector<std::string> fields;
+            for (const ItemDataIssue& issue : issues)
+            {
+                if (issue.severity == ItemDataIssueSeverity::Warning && issue.field.starts_with("groundLabels"))
+                {
+                    fields.push_back(issue.field);
+                }
+            }
+            return fields;
+        };
+        using Fields = std::vector<std::string>;
+        // Every rule after the one for every level, not only the next.
+        CHECK(neverUsed({{"white"}, {"giftBoxPink", true, 0, 1}, {"giftBoxPink", true, 2, 5}}) ==
+              Fields{"groundLabels[1]", "groundLabels[2]"});
+        // Levels the rules before it take between them.
+        CHECK(neverUsed({{"giftBoxPink", true, 0, 3}, {"white", true, 4, 6}, {"white", true, 2, 5}}) ==
+              Fields{"groundLabels[2]"});
+        // One level of its own is enough.
+        CHECK(neverUsed({{"giftBoxPink", true, 0, 3}, {"white", true, 3, 4}}).empty());
+        // A rule for every level after rules for all 16 levels still holds at Zen's amounts.
+        CHECK(neverUsed({{"giftBoxPink", true, 0, 15}, {"white"}}).empty());
+    }
 }

@@ -488,8 +488,8 @@ background (black when left out) and bold.
 that is not `"#rrggbb"`, a rule or an item naming a style the file doesn't have
 (the message suggests the name meant for a typo), and an unknown condition.
 **Warnings**: a style neither a rule nor an item names, a standard rule after
-one without conditions and an item's rule after one without `levels` (both
-never used).
+one without conditions and an item's rule whose levels the rules before it all
+take, such as every rule after one without `levels` (both never used).
 
 ### Description placeholders
 

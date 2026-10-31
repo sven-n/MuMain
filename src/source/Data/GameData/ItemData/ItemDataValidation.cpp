@@ -887,6 +887,21 @@ void ValidateGroundLabels(std::span<const ItemDefinition> items, const GroundLab
                               "standard[" + std::to_string(index) + "].style", unknown(style)});
         }
     }
+    // An item's rule is never used when the rules before it take every level it holds at. The level after the last
+    // stands for Zen's amounts (its level), which only a rule without levels holds at.
+    const auto neverUsed = [](std::span<const ItemGroundLabel> rules, size_t index)
+    {
+        for (int level = 0; level <= static_cast<int>(ItemLevelCount); ++level)
+        {
+            const auto holds = [level](const ItemGroundLabel& rule) { return rule.HoldsAt(level); };
+            if (holds(rules[index]) &&
+                std::none_of(rules.begin(), rules.begin() + static_cast<std::ptrdiff_t>(index), holds))
+            {
+                return false;
+            }
+        }
+        return true;
+    };
     for (const ItemDefinition& definition : items)
     {
         if (!definition.Exists())
@@ -903,10 +918,10 @@ void ValidateGroundLabels(std::span<const ItemDefinition> items, const GroundLab
                 issues.push_back({ItemDataIssueSeverity::Fatal, "", definition.group, definition.number, field,
                                   unknown(label.style)});
             }
-            if (index > 0 && !definition.groundLabels[index - 1].hasLevels)
+            if (neverUsed(definition.groundLabels, index))
             {
                 issues.push_back({ItemDataIssueSeverity::Warning, "", definition.group, definition.number, field,
-                                  "comes after a rule for every level, so it is never used"});
+                                  "is never used: the rules before it take every level it holds at"});
             }
         }
     }

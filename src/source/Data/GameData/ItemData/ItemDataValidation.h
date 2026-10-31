@@ -66,7 +66,8 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
 
 // The styles the items' ground label rules and the standard rules name, against the ground label file (`labelFile`
 // names it in messages): a style the file does not have is an error, with the nearest name when it looks like a typo.
-// An item's rule after one that holds at every level is never used, and a style nothing names is unused: warnings.
+// An item's rule whose levels the rules before it all take is never used, and a style nothing names is unused:
+// warnings.
 void ValidateGroundLabels(std::span<const ItemDefinition> items, const GroundLabelFile& labels,
                           const std::string& labelFile, std::vector<ItemDataIssue>& issues);
 
