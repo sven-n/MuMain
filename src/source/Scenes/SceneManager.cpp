@@ -19,6 +19,7 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/PlatformInfo.h"
 #include "Core/Text/Utf8.h"
+#include "Core/Text/WideString.h"
 #include "Render/Text/CUIRenderText.h"
 
 //=============================================================================
@@ -246,12 +247,10 @@ static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage
         st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
     mu_swprintf(outMessage, I18N::Game::SScreenshotSaved, outFileName);
 
-    // The server list's screenshot template, " [Valhalla / MaxiDK]", cut to what fits.
-    std::wstring server =
+    // The server list's screenshot template, " [Valhalla / MaxiDK]", as much of it as fits.
+    const std::wstring server =
         L" " + g_ServerListManager->GetSelectServerTitle(Data::ServerList::ChannelNamePlace::Screenshot, Hero->ID);
-    const size_t used = wcsnlen(outMessage, messageSize);
-    server.resize(std::min(server.size(), messageSize - std::min(used + 1, messageSize)));
-    wcscat_s(outMessage, messageSize, server.c_str());
+    Core::Text::AppendWideString(outMessage, messageSize, server.c_str());
 }
 
 /**
