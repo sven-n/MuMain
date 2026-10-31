@@ -233,18 +233,12 @@ std::string OptionTabRowMarkup(int tabCount, int active)
            "</div></body></rml>";
 }
 
-std::string ColourText(Rml::Colourb colour)
-{
-    return std::to_string(colour.red) + ',' + std::to_string(colour.green) + ',' + std::to_string(colour.blue) + ',' +
-           std::to_string(colour.alpha);
-}
-
 // What the element paints: its decorator and the colours that tint, edge or fill it.
 std::string PaintText(Rml::Element& element)
 {
     const auto& computed = element.GetComputedValues();
-    return DecoratorText(element) + '|' + ColourText(computed.image_color()) + '|' +
-           ColourText(computed.border_top_color()) + '|' + ColourText(computed.background_color());
+    return DecoratorText(element) + '|' + Rml::ToString(computed.image_color()) + '|' +
+           Rml::ToString(computed.border_top_color()) + '|' + Rml::ToString(computed.background_color());
 }
 
 // An enabled band lights its art under the mouse and when pressed; legacy swaps the sprite.
