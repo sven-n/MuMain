@@ -67,6 +67,7 @@ float LoginUIScaleRatio()
 
 extern int g_iChatInputType;
 extern int  LogIn;
+extern BOOL g_bGameServerConnected;
 extern wchar_t LogInID[MAX_USERNAME_SIZE + 1];
 extern BYTE Version[SIZE_PROTOCOLVERSION];
 extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
@@ -626,5 +627,6 @@ void CLoginWin::ConnectConnectionServer()
 {
     LogIn = 0;
     CurrentProtocolState = REQUEST_JOIN_SERVER;
+    g_bGameServerConnected = FALSE; // the connect server doesn't know game server packets
     CreateSocket(szServerIpAddress, g_ServerPort);
 }

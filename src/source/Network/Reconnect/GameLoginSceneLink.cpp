@@ -78,6 +78,9 @@ bool GameLoginSceneLink::Connect(LoginServer server)
     LogIn = 0;
     CurrentProtocolState = REQUEST_JOIN_SERVER;
 
+    // Game server packets (CheckHack's ping, the logout on quit) go out only while a
+    // game server is connected; the connect server doesn't know them.
+    g_bGameServerConnected = FALSE;
     DeleteSocket();
     if (!CreateSocket(address.host, address.port))
     {
