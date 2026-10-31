@@ -3049,4 +3049,7 @@
   <data name="Sound name twice" xml:space="preserve">
     <value>Another sound of the set has this id: an event could not tell the two apart.</value>
   </data>
+  <data name="Cue in use note" xml:space="preserve">
+    <value>Sound events play on the cue: move them to another cue or a moment first.</value>
+  </data>
 </root>

@@ -602,7 +602,8 @@ item tools.
   - **Sounds**: the sound set the selected monster plays with the model,
     with **Open in Monster Sounds**.
   - **Cues**: the model's cues, each with its animation and frames; they are
-    edited on their events in Monster Sounds.
+    edited on their events in Monster Sounds. **Remove** removes a cue that no
+    sound event of the model's monsters plays on any more.
   - **More of the model entry**: the values the tool shows but does not edit
     (head bone, stream mesh, part models, bitmaps, box, weapon bones); they
     are edited in the file.

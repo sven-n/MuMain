@@ -45,7 +45,8 @@ private:
     void RenderTextureFolders(Data::Monsters::MonsterModelDefinition& model);
     void RenderAnimations(Data::Monsters::MonsterModelDefinition& model, int slot);
     void RenderSounds(int slot);
-    void RenderCues(const Data::Monsters::MonsterModelDefinition& model);
+    // The cues, with Remove for those no sound event plays on.
+    void RenderCues(Data::Monsters::MonsterModelDefinition& model, int slot);
     void RenderMore(const Data::Monsters::MonsterModelDefinition& model);
 
     ModelDraft m_draft;

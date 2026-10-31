@@ -58,6 +58,10 @@ Data::Monsters::MonsterModelCue MakeCue(const Data::Monsters::MonsterModelDefini
 // names the cue, leaving out the event `except` of the set `exceptSet`.
 bool IsCueUsed(int slot, const std::string& cue, const std::string& exceptSet, size_t except);
 
+// The model's cues that no event of a set that the monsters play with the
+// model in `slot` names, in the model's order: Monster Model removes them.
+std::vector<std::string> FindUnusedCues(const Data::Monsters::MonsterModelDefinition& model, int slot);
+
 // What the event table edits besides the set: the model of the shown
 // monster's look, whose cues the cue rows show and change.
 // The cue rows change the cues of `model` only: the model of the selected

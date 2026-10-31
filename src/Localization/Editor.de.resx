@@ -3028,4 +3028,7 @@
   <data name="Sound name twice" xml:space="preserve">
     <value>Ein anderes Geräusch des Sets hat diese Id: ein Ereignis könnte die beiden nicht unterscheiden.</value>
   </data>
+  <data name="Cue in use note" xml:space="preserve">
+    <value>Geräuschereignisse spielen auf der Marke: lege sie zuerst auf eine andere Marke oder einen Moment.</value>
+  </data>
 </root>

@@ -719,6 +719,27 @@ bool IsCueUsed(int slot, const std::string& cue, const std::string& exceptSet, s
     return false;
 }
 
+std::vector<std::string> FindUnusedCues(const MonsterModelDefinition& model, int slot)
+{
+    std::vector<std::string> used;
+    for (const MonsterSoundSet* set : Data::Monsters::ModelLoader::FindSoundSetsOfSlot(slot))
+    {
+        for (const MonsterSoundEvent& event : set->soundEvents)
+        {
+            used.insert(used.end(), event.cues.begin(), event.cues.end());
+        }
+    }
+    std::vector<std::string> unused;
+    for (const MonsterModelCue& cue : model.cues)
+    {
+        if (std::find(used.begin(), used.end(), cue.name) == used.end())
+        {
+            unused.push_back(cue.name);
+        }
+    }
+    return unused;
+}
+
 void Render(MonsterSoundSet& set, SetDraft& draft, const Context& context)
 {
     ImGui::PushTextWrapPos(0.0f);

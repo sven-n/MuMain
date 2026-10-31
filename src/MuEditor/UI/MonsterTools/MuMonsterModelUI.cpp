@@ -9,6 +9,7 @@
 #include "MonsterModelValues.h"
 #include "MonsterSelection.h"
 #include "MonsterShownModel.h"
+#include "MonsterSoundEventsEditor.h"
 #include "MonsterStepLabel.h"
 #include "MonsterToolWindow.h"
 #include "MuMonsterSoundsUI.h"
@@ -160,7 +161,7 @@ void MuMonsterModelUI::RenderModel(MonsterModelDefinition& model, int slot)
     }
     if (ImGui::CollapsingHeader(I18N::Editor::Cues, ImGuiTreeNodeFlags_DefaultOpen))
     {
-        RenderCues(model);
+        RenderCues(model, slot);
     }
     if (ImGui::CollapsingHeader(I18N::Editor::MoreOfTheModelEntry))
     {
@@ -407,8 +408,9 @@ void MuMonsterModelUI::RenderSounds(int slot)
 }
 
 // The cues, which sound events play on (Q-MN79); their frames are edited on
-// the events in Monster Sounds (Q-MN81).
-void MuMonsterModelUI::RenderCues(const MonsterModelDefinition& model)
+// the events in Monster Sounds (Q-MN81). A cue no event plays on any more
+// (its event moved to a moment or another cue) is removed here.
+void MuMonsterModelUI::RenderCues(MonsterModelDefinition& model, int slot)
 {
     ImGui::PushTextWrapPos(0.0f);
     ImGui::TextDisabled("%s", I18N::Editor::CuesNote);
@@ -418,13 +420,36 @@ void MuMonsterModelUI::RenderCues(const MonsterModelDefinition& model)
         ImGui::TextDisabled("%s", I18N::Editor::TheModelHasNoCues);
         return;
     }
-    for (const Data::Monsters::MonsterModelCue& cue : model.cues)
+    const std::vector<std::string> unused = SoundEventsEditor::FindUnusedCues(model, slot);
+    std::optional<size_t> removed;
+    for (size_t index = 0; index < model.cues.size(); ++index)
     {
+        const Data::Monsters::MonsterModelCue& cue = model.cues[index];
+        ImGui::PushID(static_cast<int>(index));
         char frames[64];
         std::snprintf(frames, sizeof(frames), "%.2f - %.2f", static_cast<double>(cue.frames.first),
                       static_cast<double>(cue.frames.second));
         ImGui::BulletText("%s: %s %s", cue.name.c_str(), Data::Monsters::GetMonsterAnimationName(cue.animation).c_str(),
                           frames);
+        ImGui::SameLine();
+        const bool used = std::find(unused.begin(), unused.end(), cue.name) == unused.end();
+        ImGui::BeginDisabled(used);
+        if (ImGui::SmallButton(I18N::Editor::Remove))
+        {
+            removed = index;
+        }
+        ImGui::EndDisabled();
+        if (used && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+        {
+            ImGui::SetTooltip("%s", I18N::Editor::CueInUseNote);
+        }
+        ImGui::PopID();
+    }
+    if (removed)
+    {
+        const std::string name = model.cues[*removed].name;
+        model.cues.erase(model.cues.begin() + static_cast<std::ptrdiff_t>(*removed));
+        m_draft.AfterChange(true, StepLabelOf(model, I18N::Format(I18N::Editor::StepWhatCue0, {name})));
     }
 }
 
