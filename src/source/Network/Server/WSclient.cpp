@@ -570,6 +570,9 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
     auto Data2 = (LPPRECEIVE_JOIN_SERVER)ReceiveBuffer;
     mu::log::Get("network")->info("NET: Login response result=0x{:02X}", Data2->Result);
 
+    // A login may follow: the server let the client in, and the client is new enough.
+    bool readyForLogin = false;
+
     if (LogIn != 0)
     {
         HeroKey = ((int)(Data2->NumberH) << 8) + Data2->NumberL;
@@ -588,7 +591,6 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
             }
             HeroKey = ((int)(Data2->NumberH) << 8) + Data2->NumberL;
             CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
-            LoginSceneReconnect::Instance().OnGreeting(LoginServer::Game);
             break;
 
         default:
@@ -614,9 +616,19 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
             UI::LoginScene::ShowMessage(MESSAGE_VERSION);
             g_ErrorReport.Write(L"Version dismatch - Join server.\r\n");
         }
+
+        readyForLogin = Data2->Result == 0x01 && actual >= received;
     }
 
     g_GuildCache.Reset();
+
+    // Last, once the join is handled: a login the login screen's reconnect waits to
+    // send goes out only to a server that let the client in, and not while the
+    // client shows that it needs a new version.
+    if (LogIn == 0)
+    {
+        LoginSceneReconnect::Instance().OnGreeting(LoginServer::Game, readyForLogin);
+    }
 
     // #if defined _DEBUG || defined FOR_WORK
     //     if (Data2->Result == 0x01)

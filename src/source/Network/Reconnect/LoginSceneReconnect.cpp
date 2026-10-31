@@ -88,7 +88,7 @@ void LoginSceneReconnect::OnConnectionLost()
     }
 }
 
-void LoginSceneReconnect::OnGreeting(LoginServer server)
+void LoginSceneReconnect::OnGreeting(LoginServer server, bool carryOn)
 {
     if (m_phase != Phase::AwaitingGreeting)
     {
@@ -102,7 +102,7 @@ void LoginSceneReconnect::OnGreeting(LoginServer server)
     // server gets the login window back instead of a list); the step waiting for
     // the other server then has nothing to resume.
     std::function<void()> resume = std::exchange(m_resume, nullptr);
-    if (resume && server == m_server)
+    if (resume && carryOn && server == m_server)
     {
         resume();
     }

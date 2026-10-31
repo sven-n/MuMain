@@ -161,6 +161,19 @@ TEST_SUITE("Login scene reconnect")
         CHECK(screen.resumed == 1);
     }
 
+    TEST_CASE("a join answer that ends the login drops the waiting login")
+    {
+        // The game server refused the client, or wants a newer version.
+        DroppedScreen screen;
+        screen.reconnect.EnsureConnected(LoginServer::Game, screen.CountResume());
+        screen.ServerComesBack();
+
+        screen.reconnect.OnGreeting(LoginServer::Game, false);
+        CHECK(screen.resumed == 0);
+        CHECK_FALSE(screen.reconnect.IsReconnecting());
+        CHECK(screen.link.failures == 0);
+    }
+
     TEST_CASE("a drop while the player can go on stays quiet")
     {
         DroppedScreen screen;

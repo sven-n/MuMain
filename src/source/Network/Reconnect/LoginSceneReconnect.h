@@ -35,8 +35,10 @@ public:
     void OnConnectionLost();
 
     // A server greeted the client: the connect server with its list, the game
-    // server with its join answer.
-    void OnGreeting(LoginServer server);
+    // server with its join answer. `carryOn` is false when that answer ends the
+    // step itself (the game server refused the client, or wants a newer version);
+    // the step waiting for it is dropped then.
+    void OnGreeting(LoginServer server, bool carryOn = true);
 
     void Update(); // per frame while the login scene runs
     void Retry();  // the failure message's Reconnect button
