@@ -262,7 +262,8 @@ gives the channel and, when the connect server sent it, its load.
   rules then have the default color;
 - a preview of every combination (PvP on and off, with no VIP type and with
   each VIP type) in all four places, with the selected group's name and the
-  button's color in the legacy and modern theme.
+  button's color in the legacy and modern theme. The button's `{load}` text is
+  a game text, so the preview shows it in the editor's language.
 
 The Groups tab's channel table shows each channel's button text in its color.
 
