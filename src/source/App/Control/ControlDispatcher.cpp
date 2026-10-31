@@ -42,6 +42,7 @@ const std::vector<CommandEntry>& CommandTable()
         {"console", SceneRequirement::Any, &Commands::Console},
         {"bench", SceneRequirement::Any, &Commands::Bench},
         {"bones", SceneRequirement::World, &Commands::Bones},
+        {"drawspawns", SceneRequirement::World, &Commands::DrawSpawns},
         {"click-ui", SceneRequirement::Any, &Commands::ClickUi},
         {"hover-ui", SceneRequirement::Any, &Commands::HoverUi},
         {"drag-ui", SceneRequirement::Any, &Commands::DragUi},

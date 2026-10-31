@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Input/SyntheticInput.h"
 #include <cstdio>
@@ -1174,7 +1175,10 @@ void MainScene(HDC hDC)
 
     try
     {
-        Success = RenderCurrentScene(hDC);
+        {
+            const Diagnostics::DrawSpawnCheck::DrawScope drawing;
+            Success = RenderCurrentScene(hDC);
+        }
         Scenes::Lighting::SubmitDynamicLights();
 
         LogFrameTiming();

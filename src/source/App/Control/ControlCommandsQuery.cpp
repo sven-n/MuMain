@@ -5,6 +5,7 @@
 #include "App/Control/ControlObjects.h"
 #include "App/Control/ControlState.h"
 #include "Core/Input/SyntheticInput.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Core/Utilities/Benchmark/BenchRecorder.h"
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -459,6 +460,30 @@ std::string Bones(const Request& request, std::unique_ptr<Act>&)
     result["max_delta"] = g_PrepassBoneCheck.maxDelta;
     result["characters"] = g_LastActiveCharacterCount;
     result["parallel"] = g_LastAnimationWasParallel;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+// What the draw spawned or animated since `start`, by the spawn function's callers; the update should own all of it.
+std::string DrawSpawns(const Request& request, std::unique_ptr<Act>&)
+{
+    bool start = false;
+    if (request.Has("start") && !request.GetBool("start", start))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "start must be a boolean");
+    }
+    if (start)
+    {
+        Diagnostics::DrawSpawnCheck::Start();
+    }
+    int draws = 0;
+    json sites = json::array();
+    for (const Diagnostics::DrawSpawnCheck::Site& site : Diagnostics::DrawSpawnCheck::Report(draws))
+    {
+        sites.push_back({{"kind", site.kind}, {"callers", site.callers}, {"count", site.count}});
+    }
+    json result;
+    result["draws"] = draws;
+    result["sites"] = sites;
     return EncodeResult(request.EncodedId(), result.dump());
 }
 

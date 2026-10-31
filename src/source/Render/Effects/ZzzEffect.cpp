@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -148,6 +149,7 @@ void TerminateOwnerEffectObject(int iOwnerObjectType)
 
 bool DeleteEffect(int Type, OBJECT* Owner, int iSubType)
 {
+    Diagnostics::DrawSpawnCheck::Note("delete-effect");
     bool bDelete = false;
     for (int i = 0; i < MAX_EFFECTS; i++)
     {
@@ -335,6 +337,7 @@ void CreateEffectFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Ligh
 
 void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType, OBJECT* Owner, short PKKey, WORD SkillIndex, WORD Skill, WORD SkillSerialNum, float Scale, short int sTargetIndex)
 {
+    Diagnostics::DrawSpawnCheck::Note("effect");
     for (int icntEffect = 0; icntEffect < MAX_EFFECTS; icntEffect++)
     {
         OBJECT* o = &Effects[icntEffect];

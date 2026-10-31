@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Models/BoneManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -58,6 +59,7 @@ int CreateParticleFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Lig
 
 int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType, float Scale, OBJECT* Owner)
 {
+    Diagnostics::DrawSpawnCheck::Note("particle");
     if (!g_pOption->GetRenderAllEffects())
     {
         return false;
