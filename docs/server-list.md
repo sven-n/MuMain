@@ -267,9 +267,9 @@ For both tabs:
 
 - The login screen shows each change right away, while the window is open.
 - **Add**, **Remove**, **Move up** and **Move down** change the list of groups,
-  of VIP types or of colors. Removing a VIP type that channels use first asks,
-  and lists the channels; they then have no VIP type, and the button color
-  rules for the type go too.
+  of VIP types or of colors. Removing a VIP type that channels or button color
+  rules use first asks, and lists the channels and the number of rules; the
+  channels then have no VIP type, and the rules for the type go.
 - When the connect server sent servers of groups the list does not have, the
   Groups tab lists them with their server IDs; **Add** there adds a group with
   that ID.

@@ -408,6 +408,13 @@ bool ServerListEdits::HasRuleLike(const ButtonColorRule& rule, std::optional<siz
     return false;
 }
 
+size_t ServerListEdits::CountRulesForVipType(std::string_view id) const
+{
+    return static_cast<size_t>(
+        std::count_if(m_list.buttonColors.begin(), m_list.buttonColors.end(), [id](const ButtonColorRule& rule)
+                      { return rule.vipMatch == Data::ServerList::RuleVip::VipType && rule.vip == id; }));
+}
+
 std::vector<std::string> ServerListEdits::FindChannelsWithVipType(std::string_view id) const
 {
     std::vector<std::string> channels;

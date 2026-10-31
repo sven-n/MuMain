@@ -300,10 +300,19 @@ TEST_CASE("ServerListEdits: a removed VIP type leaves its channels without one")
     edits.Commit();
 
     CHECK(edits.FindChannelsWithVipType("gold") == std::vector<std::string>{"Valhalla-1", "Midgard-5"});
+    CHECK(edits.CountRulesForVipType("gold") == 0);
+    REQUIRE(edits.AddButtonColorRule().has_value());
+    edits.EditList().buttonColors[0].vipMatch = Data::ServerList::RuleVip::VipType;
+    edits.EditList().buttonColors[0].vip = "gold";
+    edits.Commit();
+    // The window asks before removing a type rules are for, channels or not.
+    CHECK(edits.CountRulesForVipType("gold") == 1);
+    CHECK(edits.CountRulesForVipType("silver") == 0);
     edits.RemoveVipType(0);
     edits.Commit();
 
     CHECK(edits.GetList().vipTypes.empty());
+    CHECK(edits.GetList().buttonColors.empty());
     CHECK(edits.GetGroups()[0].channels[0].vip.empty());
     // PvP stays as it was.
     CHECK_FALSE(edits.GetGroups()[0].channels[0].pvp);

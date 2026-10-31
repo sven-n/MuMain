@@ -106,6 +106,8 @@ public:
     bool IsVipTypeIdUsed(std::string_view id) const;
     // The channels with the type, as "Valhalla-1".
     std::vector<std::string> FindChannelsWithVipType(std::string_view id) const;
+    // How many button color rules are for the type.
+    size_t CountRulesForVipType(std::string_view id) const;
 
     // Adds a color named `name` at the end, its id made from the name (one no
     // other color or theme color has), with no shades. Returns its index.

@@ -2050,6 +2050,9 @@
   <data name="VIP type used note" xml:space="preserve">
     <value>{0} channels have this VIP type; they then have none:</value>
   </data>
+  <data name="VIP type rules note" xml:space="preserve">
+    <value>{0} button color rules are for this VIP type; they go too.</value>
+  </data>
   <data name="Texts" xml:space="preserve">
     <value>Texts</value>
   </data>
