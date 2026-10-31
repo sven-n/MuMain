@@ -83,6 +83,20 @@ The login window and the character info window name the channel picked on the
 server list. The character info window is narrow (190 pixels in the legacy
 theme), so a long name there can run past its edges.
 
+## When a server drops the login screen
+
+OpenMU's connect server closes a connection that sends nothing for a while
+(its *Timeout* in the admin panel, one minute by default), so a server list
+left open runs into it. The login screen doesn't tell the player: the next
+click that needs the server (a group, a channel, the credits, OK in the login
+window) connects again first and then carries on. The login window does the
+same when its game server went away, e.g. because it was restarted.
+
+Only when the server can't be reached does the message "You are disconnected
+from the server." appear, with **Reconnect** (back to the server list, which
+shows the servers that are up) and **Exit**. The original client showed this
+message with an OK button that closed the game.
+
 ## The file
 
 ```json
