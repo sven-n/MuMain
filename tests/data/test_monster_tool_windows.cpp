@@ -610,6 +610,9 @@ TEST_CASE("Monster Sounds: Add a file says why it cannot add a sound, also for a
     CHECK(FindNewSoundProblem(set, sound("Data/Sound/mHound1.wav", "")) == I18N::Editor::SoundFileTwice);
     CHECK(FindNewSoundProblem(set, sound("Data/Sound/mHound2.wav", "SOUND_HOUND_TYPO")) ==
           I18N::Editor::SoundIdUnknown);
+    set.sounds.push_back(sound("Data/Sound/mHound3.wav", "SOUND_THUNDERS01"));
+    CHECK(FindNewSoundProblem(set, sound("Data/Sound/mHound4.wav", "SOUND_THUNDERS01")) ==
+          I18N::Editor::SoundNameTwice);
 }
 
 TEST_CASE("Monster Sounds' drafts keep the rows' events and cues for the rest of the frame after a store, and "

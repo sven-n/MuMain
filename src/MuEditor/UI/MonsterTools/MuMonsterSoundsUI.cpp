@@ -110,6 +110,12 @@ std::string FindNewSoundProblem(const MonsterSoundSet& set, const MonsterSound& 
     {
         return I18N::Editor::SoundIdUnknown;
     }
+    const std::string& name = Data::Monsters::SoundNameOf(sound);
+    if (std::any_of(set.sounds.begin(), set.sounds.end(),
+                    [&](const MonsterSound& other) { return Data::Monsters::SoundNameOf(other) == name; }))
+    {
+        return I18N::Editor::SoundNameTwice;
+    }
     return {};
 }
 

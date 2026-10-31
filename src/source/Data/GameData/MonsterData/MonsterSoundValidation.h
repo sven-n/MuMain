@@ -12,10 +12,12 @@
 
 namespace Data::Monsters
 {
-// Checks the names in the sound sets, which the reader takes as they are;
-// each problem is fatal: a sound id that is not one the list can name
-// (MonsterSoundIds.h), and an event's sound that names no sound of the set
-// and no such id. `source` names the file in the problems.
+// Checks the names in the sound sets, which the reader takes as they are.
+// Fatal: a sound id that is not one the list can name (MonsterSoundIds.h),
+// two sounds of a set with one name (its id, or its file when it has none),
+// and an event's sound that names no sound of the set and no such id. An
+// error: a SOUND_ id that sets load from different files. `source` names the
+// file in the problems.
 void ValidateMonsterSoundSetNames(std::span<const MonsterSoundSet> sets, const std::string& source,
                                   std::vector<Items::ItemDataIssue>& issues);
 

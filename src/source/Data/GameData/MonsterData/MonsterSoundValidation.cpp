@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cctype>
 #include <map>
 #include <optional>
 #include <set>
@@ -45,6 +46,69 @@ std::string MonsterField(int number, const std::string& key)
     return "monster " + std::to_string(number) + " " + key;
 }
 
+// A file as the loader finds it: the client's folders take any case.
+std::string FileKey(const std::string& file)
+{
+    std::string key = file;
+    std::transform(key.begin(), key.end(), key.begin(),
+                   [](unsigned char character) { return static_cast<char>(std::tolower(character)); });
+    return key;
+}
+
+// Two sounds of the set with one name, which events name them by: an event
+// could not tell them apart.
+void ValidateSoundNames(const MonsterSoundSet& set, const std::string& source, std::vector<ItemDataIssue>& issues)
+{
+    for (size_t i = 0; i < set.sounds.size(); ++i)
+    {
+        const std::string& name = SoundNameOf(set.sounds[i]);
+        for (size_t other = 0; other < i; ++other)
+        {
+            if (SoundNameOf(set.sounds[other]) == name)
+            {
+                AddIssue(issues, ItemDataIssueSeverity::Fatal, source, ItemDataIssue::NoItem,
+                         MonsterSoundSetField(set.name, "sounds[" + std::to_string(i) + "]"),
+                         "has the name \"" + name + "\" of sounds[" + std::to_string(other) +
+                             "] (its id, or its file when it has none): an event could not tell them apart");
+                break;
+            }
+        }
+    }
+}
+
+// A SOUND_ id that sets load from different files: the game plays one file
+// for the id, the one of the model that opened last.
+void ValidateSharedIds(std::span<const MonsterSoundSet> sets, const std::string& source,
+                       std::vector<ItemDataIssue>& issues)
+{
+    struct FirstLoad
+    {
+        std::string set;
+        std::string file;
+    };
+    std::map<std::string, FirstLoad, std::less<>> firstLoads;
+    for (const MonsterSoundSet& set : sets)
+    {
+        for (size_t i = 0; i < set.sounds.size(); ++i)
+        {
+            const MonsterSound& sound = set.sounds[i];
+            if (sound.id.empty())
+            {
+                continue;
+            }
+            const auto [first, added] = firstLoads.try_emplace(sound.id, FirstLoad{set.name, sound.file});
+            // Within a set, two sounds with one id are fatal already.
+            if (!added && first->second.set != set.name && FileKey(first->second.file) != FileKey(sound.file))
+            {
+                AddIssue(issues, ItemDataIssueSeverity::Error, source, ItemDataIssue::NoItem,
+                         MonsterSoundSetField(set.name, "sounds[" + std::to_string(i) + "].id"),
+                         "\"" + sound.id + "\" is " + first->second.file + " in the set " + first->second.set +
+                             ": the game plays one file for an id, the one of the model that opened last");
+            }
+        }
+    }
+}
+
 // The sets the monsters play, with each monster and the slot it plays it on.
 struct SetUser
 {
@@ -68,6 +132,7 @@ void ValidateMonsterSoundSetNames(std::span<const MonsterSoundSet> sets, const s
                          "\"" + id + "\" is not a SOUND_ id that code plays a monster sound by");
             }
         }
+        ValidateSoundNames(set, source, issues);
         for (size_t event = 0; event < set.soundEvents.size(); ++event)
         {
             const std::vector<std::string>& sounds = set.soundEvents[event].sounds;
@@ -85,6 +150,7 @@ void ValidateMonsterSoundSetNames(std::span<const MonsterSoundSet> sets, const s
             }
         }
     }
+    ValidateSharedIds(sets, source, issues);
 }
 
 std::span<const std::string_view> GetDrawnLookModels(int number)
