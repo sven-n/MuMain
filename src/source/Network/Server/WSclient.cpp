@@ -13088,7 +13088,7 @@ bool ReceiveIGS_EventItemlistCnt(const BYTE* pReceiveBuffer)
 bool ReceiveIGS_EventItemlist(const BYTE* pReceiveBuffer)
 {
     auto Data = (LPPMSG_CASHSHOP_EVENTITEM_LIST)pReceiveBuffer;
-    g_InGameShopSystem->InsertEventPackage((int*)Data->lPackageSeq);
+    g_InGameShopSystem->InsertEventPackage(Data->lPackageSeq);
     return true;
 }
 
