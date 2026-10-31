@@ -12,7 +12,6 @@
 #include <RmlUi/Core/TextShapingContext.h>
 #include <algorithm>
 #include <cmath>
-#include <vector>
 
 namespace
 {
@@ -186,65 +185,6 @@ TEST_CASE("the legacy HUD's menu art reaches the cash shop button [ui][styling]"
     document->Close();
 }
 
-TEST_CASE("the event entry level art covers its whole band in every theme [ui][styling]")
-{
-    // The band is an auto-height flex box that grows to its minimum height, and its art an absolute
-    // child (classic: a block band). RmlUi used to size such a child against the flex box's height
-    // from before that growth (FlexContainer::Close kept its pre-layout box), so the art covered only
-    // the band's padding: a strip above the label.
-    struct Entry
-    {
-        const char* theme;
-        const char* window;
-        Rml::Vector2i viewport;
-    };
-    std::vector<Entry> entries;
-    for (const char* theme : {"legacy", "modern", "classic"})
-        for (const char* window : {"devil_square_enter", "blood_castle_enter"})
-            for (Rml::Vector2i viewport : {Rml::Vector2i{1024, 768}, Rml::Vector2i{1920, 1080}})
-                entries.push_back({theme, window, viewport});
-
-    UI::Tests::RmlLayoutFixture fixture;
-    for (const auto& [theme, window, viewport] : entries)
-    {
-        CAPTURE(theme);
-        CAPTURE(window);
-        CAPTURE(viewport.x);
-        fixture.Configure(viewport, 100);
-        auto* document = fixture.Load(theme, window);
-        REQUIRE(document);
-        UI::RmlBridge::SlotPlacement placement;
-        placement.Set(0.f, 0.f, UI::Scaling::DockRightTransform(viewport.x, viewport.y).scaleX);
-        placement.Apply(document, "panel");
-        auto* band = document->QuerySelector(".entry-btn");
-        REQUIRE(band);
-        band->SetClass("enabled", true);
-        auto* label = band->QuerySelector(".entry-label");
-        REQUIRE(label);
-        label->SetInnerRML("The 1 Square (15-130 level)");
-        fixture.Refresh();
-        const Rml::Vector2f bandSize = band->GetBox().GetSize(Rml::BoxArea::Border);
-        REQUIRE(bandSize.y > label->GetBox().GetSize(Rml::BoxArea::Border).y);
-        Rml::ElementList painters;
-        band->QuerySelectorAll(painters, "*");
-        painters.push_back(band);
-        int painted = 0;
-        for (auto* painter : painters)
-        {
-            const auto& computed = painter->GetComputedValues();
-            if (!computed.has_decorator() && computed.background_color().alpha == 0)
-                continue;
-            ++painted;
-            const Rml::Vector2f size = painter->GetBox().GetSize(Rml::BoxArea::Border);
-            CHECK(size.x == doctest::Approx(bandSize.x));
-            CHECK(size.y == doctest::Approx(bandSize.y));
-        }
-        CHECK(painted > 0);
-        fixture.context->UnloadDocument(document);
-        fixture.Refresh();
-    }
-}
-
 namespace
 {
 struct DrawnRect
@@ -291,7 +231,62 @@ std::string OptionTabRowMarkup(int tabCount, int active)
            R"("/></head><body><div id="row" class="option-tab-row" style="width: 404dp;">)" + tabs +
            "</div></body></rml>";
 }
+
+// Lays out the first level band of an event entry window and checks that whatever paints it covers
+// the whole band.
+void CheckEntryArt(UI::Tests::RmlLayoutFixture& fixture, const std::string& theme, const std::string& window,
+                   Rml::Vector2i viewport)
+{
+    CAPTURE(theme);
+    CAPTURE(window);
+    CAPTURE(viewport.x);
+    fixture.Configure(viewport, 100);
+    auto* document = fixture.Load(theme, window);
+    REQUIRE(document);
+    UI::RmlBridge::SlotPlacement placement;
+    placement.Set(0.f, 0.f, UI::Scaling::DockRightTransform(viewport.x, viewport.y).scaleX);
+    placement.Apply(document, "panel");
+    auto* band = document->QuerySelector(".entry-btn");
+    REQUIRE(band);
+    band->SetClass("enabled", true);
+    auto* label = band->QuerySelector(".entry-label");
+    REQUIRE(label);
+    label->SetInnerRML("The 1 Square (15-130 level)");
+    fixture.Refresh();
+    const Rml::Vector2f bandSize = band->GetBox().GetSize(Rml::BoxArea::Border);
+    REQUIRE(bandSize.y > label->GetBox().GetSize(Rml::BoxArea::Border).y);
+    Rml::ElementList painters;
+    band->QuerySelectorAll(painters, "*");
+    painters.push_back(band);
+    int painted = 0;
+    for (auto* painter : painters)
+    {
+        const auto& computed = painter->GetComputedValues();
+        if (!computed.has_decorator() && computed.background_color().alpha == 0)
+            continue;
+        ++painted;
+        const Rml::Vector2f size = painter->GetBox().GetSize(Rml::BoxArea::Border);
+        CHECK(size.x == doctest::Approx(bandSize.x));
+        CHECK(size.y == doctest::Approx(bandSize.y));
+    }
+    CHECK(painted > 0);
+    fixture.context->UnloadDocument(document);
+    fixture.Refresh();
+}
 } // namespace
+
+TEST_CASE("the event entry level art covers its whole band in every theme [ui][styling]")
+{
+    // The band is an auto-height flex box that grows to its minimum height, and its art an absolute
+    // child (classic: a block band). RmlUi used to size such a child against the flex box's height
+    // from before that growth (FlexContainer::Close kept its pre-layout box), so the art covered only
+    // the band's padding: a strip above the label.
+    UI::Tests::RmlLayoutFixture fixture;
+    for (const char* theme : {"legacy", "modern", "classic"})
+        for (const char* window : {"devil_square_enter", "blood_castle_enter"})
+            for (Rml::Vector2i viewport : {Rml::Vector2i{1024, 768}, Rml::Vector2i{1920, 1080}})
+                CheckEntryArt(fixture, theme, window, viewport);
+}
 
 TEST_CASE("the legacy character window shows the points to spend between the summary and STR [ui][styling]")
 {
