@@ -589,6 +589,29 @@ TEST_CASE("Monster Sounds gives Monster Preview the model it edits in the frame 
     g_MonsterSoundSetDatabase.Build({});
 }
 
+TEST_CASE("Monster Sounds: Add a file says why it cannot add a sound, also for an id that is not a SOUND_ id "
+          "[editor][monsters]")
+{
+    using MuEditor::Monsters::FindNewSoundProblem;
+    Data::Monsters::MonsterSoundSet set;
+    set.name = "Hound";
+    set.sounds = {{"Data/Sound/mHound1.wav", "", 2, true}};
+    const auto sound = [](const char* file, const char* id)
+    {
+        Data::Monsters::MonsterSound added;
+        added.file = file;
+        added.id = id;
+        return added;
+    };
+    CHECK(FindNewSoundProblem(set, sound("Data/Sound/mHound2.wav", "")).empty());
+    CHECK(FindNewSoundProblem(set, sound("Data/Sound/mHound2.wav", "SOUND_THUNDERS01")).empty());
+    CHECK(FindNewSoundProblem(set, sound("", "")) == I18N::Editor::SoundFileMissing);
+    CHECK(FindNewSoundProblem(set, sound("../mHound2.wav", "")) != "");
+    CHECK(FindNewSoundProblem(set, sound("Data/Sound/mHound1.wav", "")) == I18N::Editor::SoundFileTwice);
+    CHECK(FindNewSoundProblem(set, sound("Data/Sound/mHound2.wav", "SOUND_HOUND_TYPO")) ==
+          I18N::Editor::SoundIdUnknown);
+}
+
 TEST_CASE("Monster Sounds' drafts keep the rows' events and cues for the rest of the frame after a store, and "
           "take the data back the next frame [editor][monsters]")
 {
