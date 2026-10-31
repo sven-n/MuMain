@@ -899,6 +899,7 @@ own inside its PR, with its comparison before the old code goes (D50).
 | 3c | MN5 | NPC rules | after 3b | – |
 | later | MN6 (and MN-B in OpenMU) | OpenMU sync | when items phase 7 has landed | – |
 | later | MN8 | Looks | when items phase 13 exists | – |
+| MP1 | – | Map object sounds: its own area, [maps design](2026-11-01-data-driven-maps-design.md) | before MN9 | – |
 | later | MN9 | Cleanup | last | – |
 
 PR 3 was planned as one PR for MN4 and MN5. With the answers of Q-MN35 to
