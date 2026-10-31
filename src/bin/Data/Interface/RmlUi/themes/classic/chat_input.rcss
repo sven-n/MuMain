@@ -1,0 +1,74 @@
+/* Classic (0.97) chat input: the box 0.97 opened with Enter (004be4f0) -- dialogue1 + dialogue2
+   (133x29 each, drawn 134 wide), 268x29, centred above the bar by the classic workspace.rcss; the message field
+   at (5, 7), 180 wide, and the whisper target at (190, 7), 50 wide (0.97's 191 and 376 in the
+   640x480 frame). 0.97 has no chat-type or filter buttons: party and guild chat took a prefix. */
+
+@spritesheet classic-chat-left-sheet  { src: ../../../Classic/Dialogue1.jpg; classic-chat-left:  0px 0px 133px 29px; }
+@spritesheet classic-chat-right-sheet { src: ../../../Classic/Dialogue2.jpg; classic-chat-right: 0px 0px 133px 29px; }
+
+#panel.workspace-placed { bottom: auto; transform-origin: left top; }
+#panel {
+	position: absolute;
+	left: 50%;
+	bottom: 51dp;
+	margin-left: -134dp;
+	width: 268dp;
+	height: 29dp;
+	font-family: "token(font-body)";
+	font-size: 1rem;
+	/* The bar takes the pointer, so a click on it never walks the character (legacy's rule: the
+	   C++ asks IsPointerOver()). The two halves below take none, so the click lands here. */
+	pointer-events: auto;
+}
+#panel.workspace-placed { margin-left: 0; }
+
+/* The two halves of the box are drawn by the first two (S6) chat-type buttons, the rest hidden. */
+.cib-btn { display: none; }
+#btn_type_0, #btn_type_1 {
+	display: block;
+	position: absolute;
+	top: 0;
+	width: 134dp;
+	height: 29dp;
+	cursor: auto;
+	pointer-events: none;
+}
+#btn_type_0 { left: 0; decorator: image(classic-chat-left); }
+#btn_type_1 { left: 134dp; decorator: image(classic-chat-right); }
+
+.cib-chat-field {
+	position: absolute;
+	left: 5dp;
+	top: 7dp;
+	width: 180dp;
+	height: 14dp;
+	font-size: 11dp;
+	color: rgb(255, 230, 210);
+	background-color: transparent;
+	border: 0 transparent;
+}
+.cib-whisper-field {
+	position: absolute;
+	left: 190dp;
+	top: 7dp;
+	width: 50dp;
+	height: 14dp;
+	font-size: 11dp;
+	color: rgb(200, 200, 200);
+	background-color: transparent;
+	border: 0 transparent;
+}
+.cib-whisper-field:disabled {
+	color: rgba(255, 255, 255, 100);
+	background-color: transparent;
+}
+/* Whispering off: the target dimmed under a red wash, as in legacy. */
+#whisper_block {
+	position: absolute;
+	left: 188dp;
+	top: 5dp;
+	width: 54dp;
+	height: 18dp;
+	background-color: rgba(128, 51, 51, 51);
+	pointer-events: none;
+}

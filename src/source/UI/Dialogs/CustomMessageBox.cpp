@@ -345,6 +345,7 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::SetButtonInfo()
 void mu::ui::window::ShowSystemMenuDialog()
 {
     GenericMenuConfig cfg;
+    cfg.id = "system-menu";
     cfg.kind = "system-menu";
     cfg.systemMenu = true;
 
@@ -649,6 +650,7 @@ void mu::ui::window::ShowChaosMixMenuDialog()
     wchar_t szText[256] = { 0, };
 
     GenericMenuConfig cfg;
+    cfg.id = "chaos-mix";
     // Native CChaosMixMenuMsgBox: lines 15 apart, each recipe's lines above its button.
     cfg.kind = "chaos-mix";
     cfg.title = I18N::Game::SelectMethodOfCombination;
@@ -996,6 +998,7 @@ bool mu::ui::window::CCursedTempleProgressMsgBox::CheckHeroAction()
 void mu::ui::window::ShowCherryBlossomMenuDialog()
 {
     GenericMenuConfig cfg;
+    cfg.id = "cherry-blossom";
     cfg.kind = "cherry-blossom";
 
     cfg.title = getMonsterName(MONSTER_CHERRY_BLOSSOM_SPIRIT);
@@ -1033,6 +1036,7 @@ void mu::ui::window::ShowCherryBlossomMenuDialog()
 void mu::ui::window::ShowGemIntegrationMenuDialog()
 {
     GenericMenuConfig cfg;
+    cfg.id = "gem-integration";
     cfg.kind = "gem-integration";
     cfg.lines.push_back({I18N::Game::JewelCombination, true, RGBA(255, 128, 0, 255)});
     cfg.lines.push_back({ I18N::Game::YouCanCombineOrDissolve, false });
@@ -1086,6 +1090,8 @@ void mu::ui::window::ShowGemIntegrationMenuDialog()
 void mu::ui::window::ShowGemIntegrationJewelDialog()
 {
     GenericMenuConfig cfg;
+    cfg.kind = "gem-integration-jewel";
+    cfg.id = "gem-integration-jewel";
     cfg.lines.push_back({I18N::Game::JewelCombination, true, RGBA(255, 128, 0, 255)});
     cfg.lines.push_back({ I18N::Game::SelectAJewelToCombine, false });
     // 2-column grid instead of `compact` -- some jewel names ("Higher Refining Stone") don't fit
@@ -1120,6 +1126,8 @@ void mu::ui::window::ShowGemIntegrationJewelDialog()
 void mu::ui::window::ShowGemIntegrationMixDialog()
 {
     GenericMenuConfig cfg;
+    cfg.kind = "gem-integration-amount";
+    cfg.id = "gem-integration-amount";
     cfg.lines.push_back({I18N::Game::JewelCombination, true, RGBA(255, 128, 0, 255)});
     cfg.lines.push_back({ I18N::Game::ChooseANumberButtonToCombine, false });
 
@@ -1386,6 +1394,7 @@ bool mu::ui::window::CCursedTempleHolicItemSaveLayout::SetLayout()
 void mu::ui::window::ShowLuckyTradeMenuDialog()
 {
     GenericMenuConfig cfg;
+    cfg.id = "lucky-item";
     cfg.kind = "npc-menu";
     // Hardcoded Korean, no I18N constant -- faithfully carried over from native's own literal.
     cfg.title = L"럭키아이템 교환NPC"; // "LuckyItem Trade NPC"
@@ -1418,6 +1427,7 @@ void mu::ui::window::ShowLuckyTradeMenuDialog()
 void mu::ui::window::ShowTrainerMenuDialog()
 {
     GenericMenuConfig cfg;
+    cfg.id = "trainer";
     cfg.kind = "npc-menu";
     cfg.title = I18N::Game::Trainer;
     cfg.lines.push_back({ I18N::Game::Hi, false });
@@ -1454,6 +1464,7 @@ void mu::ui::window::ShowTrainerMenuDialog()
 void mu::ui::window::ShowTrainerRecoverDialog()
 {
     GenericMenuConfig cfg;
+    cfg.id = "trainer-recover";
     cfg.kind = "trainer-recover";
     cfg.title = I18N::Game::Trainer;
     cfg.lines.push_back({ I18N::Game::SelectThePetToRecoverLife, false });
@@ -1499,6 +1510,7 @@ void mu::ui::window::ShowTrainerRecoverDialog()
 void mu::ui::window::ShowElpisMenuDialog(int iMessageType)
 {
     GenericMenuConfig cfg;
+    cfg.id = "elpis";
     // Native CElpisMsgBox: bold gold text from y+43 (the "about" texts left-aligned), a divider at
     // y+120, buttons at y+145/175/205. Native wraps the about texts 30 in from each side and
     // scrolls them; shown whole here, they wrap 16 in (the frame's inner edge) so they stay above
@@ -1556,6 +1568,7 @@ void mu::ui::window::ShowElpisMenuDialog(int iMessageType)
 void mu::ui::window::ShowSeedMasterMenuDialog()
 {
     GenericMenuConfig cfg;
+    cfg.id = "seed-master";
     cfg.kind = "npc-menu";
     cfg.title = I18N::Game::SeedMaster;
     cfg.lines.push_back({ I18N::Game::ExtractTheSeedOrTheSeedSphere, false });
@@ -1593,6 +1606,7 @@ void mu::ui::window::ShowSeedMasterMenuDialog()
 void mu::ui::window::ShowSeedInvestigatorMenuDialog()
 {
     GenericMenuConfig cfg;
+    cfg.id = "seed-researcher";
     cfg.kind = "npc-menu";
     cfg.title = I18N::Game::SeedResearcher;
     cfg.lines.push_back({ I18N::Game::EitherApplyTheSeedSphere, false });
@@ -1630,6 +1644,7 @@ void mu::ui::window::ShowSeedInvestigatorMenuDialog()
 void mu::ui::window::ShowResetCharacterPointDialog()
 {
     GenericMenuConfig cfg;
+    cfg.id = "reset-points";
     cfg.kind = "reset-points";
     cfg.title = I18N::Game::ReInitializationHelper;
     cfg.lines.push_back({ I18N::Game::ClickOnTheButtonToReinitializeAllStatPoints, false });
@@ -1808,6 +1823,7 @@ bool mu::ui::window::CGuild_ToPerson_PositionLayout::SetLayout()
 void mu::ui::window::ShowDelgardoMainMenuDialog()
 {
     GenericMenuConfig cfg;
+    cfg.id = "delgardo";
     cfg.kind = "delgardo";
     cfg.title = I18N::Game::Delgado;
     cfg.lines.push_back({ I18N::Game::RegisterYourLuckyCoinsOr, false });

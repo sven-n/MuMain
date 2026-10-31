@@ -1,0 +1,125 @@
+/* Classic (0.97) storage (CStorageInventory), from the 0.97 client's 004f3170: Item_Back01 over Item_Back02, the title at
+   the top, the 8x15 grid at (15, 50), the Zen bar (Item_Money) at (50, 353) with "Zen" and the
+   amount, the storage cost line at y 374, and Deposit / Withdraw / Lock (24x24, the second image
+   while pressed) at x 26, 76 and 126, y 390. No expansion (not in 0.97). #panel's left/top/scale
+   come from C++; everything below is the window's own units. */
+
+@spritesheet stor-classic-back1-sheet { src: ../../../Classic/Item_back01.jpg; stor-classic-back1: 0px 0px 190px 256px; }
+@spritesheet stor-classic-back2-sheet { src: ../../../Classic/Item_Back02.jpg; stor-classic-back2: 0px 0px 190px 177px; }
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 433px;
+	font-family: "token(font-body)";
+}
+
+.bg-fill, .bg-top, .bg-left, .bg-right, .bg-bottom { position: absolute; pointer-events: none; }
+.bg-top  { left: 0; top: 0;     width: 190px; height: 256px; decorator: image(stor-classic-back1); }
+.bg-fill { left: 0; top: 256px; width: 190px; height: 177px; decorator: image(stor-classic-back2); }
+.bg-right, .bg-bottom { display: none; }
+/* "Zen" left of the bar, on its dark box (the frame piece 0.97 does not need). */
+.bg-left {
+	left: 20px;
+	top: 355px;
+	width: 22px;
+	height: 13px;
+	background-color: #282828;
+	font-size: 11px;
+	font-weight: bold;
+	decorator: text("Zen" #ffdc96 center center);
+}
+
+#title {
+	position: absolute;
+	/* 0.97: a 120-wide box at x 35, centred. */
+	left: 35px;
+	top: 12px;
+	width: calc(120px * var(--root-scale));
+	text-align: center;
+	color: #dcdcdc;
+	font-weight: bold;
+	font-size: 1em;
+}
+#title.locked { color: rgb(240, 32, 32); }
+
+@spritesheet stor-classic-money-sheet { src: ../../../Classic/Item_money.jpg; stor-classic-money: 0px 0px 113px 18px; }
+#money_bg {
+	position: absolute;
+	left: 50px;
+	top: 353px;
+	width: 113px;
+	height: 18px;
+	decorator: image(stor-classic-money);
+	pointer-events: none;
+}
+#zen_text {
+	position: absolute;
+	right: 32px;
+	top: 356px;
+	color: #ffdc96;
+	font-weight: bold;
+	font-size: 1em;
+	white-space: nowrap;
+	pointer-events: none;
+}
+#zen_text.gold-hundred-thousand { color: #00c918; }
+#zen_text.gold-million { color: #ff9600; }
+#zen_text.gold-ten-million { color: #ff0000; }
+#fee_label {
+	position: absolute;
+	left: 50px;
+	top: 374px;
+	color: #ff0000;
+	background-color: #282828;
+	font-weight: bold;
+	font-size: 1em;
+	white-space: nowrap;
+	pointer-events: none;
+}
+#fee_value {
+	position: absolute;
+	right: 22px;
+	top: 374px;
+	color: #ffdc96;
+	background-color: #282828;
+	font-weight: bold;
+	font-size: 1em;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+@spritesheet stor-classic-money1-sheet { src: ../../../Classic/Money_01.jpg; stor-classic-money-btn: 0px 0px 24px 24px; }
+@spritesheet stor-classic-money2-sheet { src: ../../../Classic/Money_02.jpg; stor-classic-money-btn-pressed: 0px 0px 24px 24px; }
+@spritesheet stor-classic-lock1-sheet { src: ../../../Classic/Lock_01.jpg; stor-classic-lock: 0px 0px 24px 24px; }
+@spritesheet stor-classic-lock2-sheet { src: ../../../Classic/Lock_02.jpg; stor-classic-lock-pressed: 0px 0px 24px 24px; }
+@spritesheet stor-classic-lock3-sheet { src: ../../../Classic/Lock_03.jpg; stor-classic-locked: 0px 0px 24px 24px; }
+@spritesheet stor-classic-lock4-sheet { src: ../../../Classic/Lock_04.jpg; stor-classic-locked-pressed: 0px 0px 24px 24px; }
+
+.stor-btn {
+	position: absolute;
+	top: 390px;
+	width: 24px;
+	height: 24px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.stor-btn.hidden { display: none; }
+.stor-btn-insert { left: 26px;  decorator: image(stor-classic-money-btn); }
+.stor-btn-take   { left: 76px;  decorator: image(stor-classic-money-btn); }
+.stor-btn-insert:active, .stor-btn-take:active { decorator: image(stor-classic-money-btn-pressed); }
+.stor-btn-lock   { left: 126px; decorator: image(stor-classic-lock); }
+.stor-btn-lock:active { decorator: image(stor-classic-lock-pressed); }
+.stor-btn-lock.locked-mode { decorator: image(stor-classic-locked); }
+.stor-btn-lock.locked-mode:active { decorator: image(stor-classic-locked-pressed); }
+.stor-btn-expand { display: none; }
+
+.native-anchor { position: absolute; pointer-events: none; }
+#item_grid, #item_grid_counts { left: 15px; top: 50px; width: calc(8 * var(--item-cell)); height: calc(15 * var(--item-cell)); }
+#item_view { height: 473px; }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. (Legacy's rules, which this copy predated.) */
+#panel.slot-placed { pointer-events: none; }
+#panel { font-size: calc(var(--text-px, 12px) / var(--root-scale)); }

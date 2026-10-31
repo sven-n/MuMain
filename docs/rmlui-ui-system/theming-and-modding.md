@@ -1,8 +1,8 @@
 # Theming & Modding
 
 How to edit and select themes, use shared design tokens, and supply custom assets. The client
-ships `legacy` and `modern`, plus `legacy-inherited-test` for checking inheritance without visual
-overrides. Additional theme folders work without recompilation and can inherit an existing theme.
+ships `legacy`, `modern` and `classic` (the 0.97 interface, below), plus `legacy-inherited-test`
+for checking inheritance without visual overrides. Additional theme folders work without recompilation and can inherit an existing theme.
 A separate user/mod override layer is not implemented.
 
 ## Shared markup and theme-specific structure
@@ -118,10 +118,20 @@ RML, templates, RCSS and theme-local images use the first matching whole file. A
 stylesheet replaces its ancestor's file; rules are not automatically combined. Paths to common
 assets outside the theme folder keep their ordinary meaning.
 
-`[Tokens]`, `[Capabilities]` and `[Fonts]` inherit individual keys. A child value wins, including
+`[Tokens]`, `[Capabilities]`, `[Fonts]` and `[Stacking]` inherit individual keys. A child value wins, including
 `NativeTextSize=0` or an empty font entry. Display names stay specific to the child. Names use
 letters, digits, `_` and `-` and are normalized to lowercase. Missing ancestors, invalid names
 and inheritance cycles make a theme unavailable for selection.
+
+`[Stacking]` moves one of the theme's documents in the stacking order, when its layout makes two
+documents overlap the other way round. The classic theme puts its chat input over the windows,
+the HUD and the command windows, and under the settings window and the tooltips
+(`chat_input.rml=10.66`; the command windows are 10.65, settings 10.67, tooltips 10.69). Avoid a
+depth another document already has: documents at the same depth are ordered by focus. The depths
+are the original windows' layer depths, listed in `UI/RmlBridge/RmlStackingOrder.cpp`; a document
+the theme does not list keeps its own. For a document shown in every scene (`option_window.rml`),
+the entry applies in the main scene only: outside it the document takes its depth for the other
+scenes from that table.
 
 1. Create `src/bin/Data/Interface/RmlUi/themes/<your-theme-name>/`.
 2. Declare `Base=legacy` or `Base=modern` in `[Theme]`, or supply your own complete stylesheets.
@@ -385,6 +395,41 @@ Fonts load before themed documents at startup and on theme selection. RmlUi reta
 families for the session, so a family loaded by an earlier theme remains available. Reselecting
 a theme retries optional files; restart the client to replace a font file whose family is
 already loaded. Referencing a player's installed font does not package it with the theme.
+
+## The classic (0.97) theme
+
+`RmlTheme=classic` gives the interface of the original 0.97 client, drawn with its own art. It
+inherits `legacy` and restyles the login box, server list, character select and creation, HUD,
+inventory, character, party, NPC shop, storage, trade, Chaos Machine, guild, event entries,
+message boxes, confirmations, the Esc menus, the command window (D) and chat. The NPC menus that
+share the Esc menu's document take the Season 2 client's boxes, or the trainer's box where no
+classic client has the menu. Where the Season 1 and
+2 clients, which kept the classic interface, add a part for something MuMain has, the theme draws
+it as they did instead of hiding it: on the HUD the SD column and the command window and friend
+buttons, in the character window the quest and pet buttons, in the inventory the personal shop
+button. A window 0.97 does not have follows those clients, else the closest classic window. The
+art lives outside the RmlUi tree, in `Data/Interface/Classic` and `Data/Logo/Classic`, so its file
+names cannot collide with S6 files of the same name.
+
+What changes for the player, besides the look:
+
+- **Character creation:** the class is chosen with arrows, which step through the classes the
+  client enables.
+- **World:** no map title when entering a map.
+
+The HUD model also exposes what the classic bar shows and the S6 bar does not: `party_open` /
+`guild_open` / `command_open` with `mainframe_party_click` / `mainframe_guild_click` /
+`mainframe_command_click` (the windows under the P, G and D keys' rules, `CHotKey`) and their
+tooltips, and `coord_x` / `coord_y`.
+
+The character creation model has `job_previous` / `job_next`: the enabled class before and after
+the selected one, or -1, for a theme that steps through the classes with arrows
+(`charmake_select_job(job_next)`) instead of a button per class.
+
+The pet / durability HUD (`item_endurance.rml`) marks `#pets` with `.in-party` while the hero is
+in a party, so a theme can keep the pet column clear of the party list. The classic theme also
+places the pet column, the party list and the event HUDs from `--world-left` / `--world-right`, so
+they move aside when windows open, as in 0.97.
 
 ## Coordinates, scaling, and positioning — what a theme actually controls
 

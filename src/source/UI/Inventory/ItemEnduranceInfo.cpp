@@ -17,6 +17,7 @@
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Render/Text/CUIRenderText.h"
+#include "Engine/Object/ZzzInventory.h"
 
 #include <RmlUi/Core/ElementDocument.h>
 
@@ -342,6 +343,7 @@ void mu::ui::window::CItemEnduranceInfo::BindRmlModel(Rml::DataModelConstructor&
     c.Bind("bold_text_px", &model.boldTextPx);
     c.Bind("bold_line_height_px", &model.boldLineHeightPx);
     c.Bind("arrows", &model.arrows);
+    c.Bind("in_party", &model.inParty);
 
     auto pet = c.RegisterStruct<PetFrameEntry>();
     pet.RegisterMember("bar_width", &PetFrameEntry::barWidth);
@@ -401,6 +403,7 @@ void mu::ui::window::CItemEnduranceInfo::SyncLeftColumn()
         arrows = StringUtils::WideToNarrow(szText);
     }
     SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::arrows, "arrows", std::move(arrows));
+    SyncItemEnduranceField(m_RmlView.Binder(), &ItemEnduranceRmlModel::inParty, "in_party", PartyNumber > 0);
 
     std::vector<PetFrameEntry> pets;
     const auto addFrame = [&](const wchar_t* name, int life, int maxLife)

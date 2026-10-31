@@ -141,6 +141,11 @@ target_compile_definitions(rml_stacking_order_tests PRIVATE
 )
 
 mu_add_test(
+    NAME character_class_step_tests
+    SOURCES test_character_class_step.cpp
+)
+
+mu_add_test(
     NAME party_list_layout_tests
     SOURCES
         test_party_list_layout.cpp

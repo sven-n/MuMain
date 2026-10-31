@@ -1,0 +1,76 @@
+/* Classic (0.97) party list beside the right-hand windows, from the 0.97 client's 004ef160: one 50x19 box per member, no gap,
+   dark (0.1 grey at 70%), lighter under the mouse; the health bar 43x4 dark red with up to ten
+   red steps (here one bar, the steps' 40 units); the name in white; a member away in red, a
+   defence buff in blue. No card art. 0.97 has no leader flag or leave button (it leaves from the
+   window); MuMain's are kept, in legacy's art, in the 24 units left of the box: the leave button
+   beside the box, the leader's flag left of it.
+   #panel (77 wide) sits left of the docked windows, like 0.97's list, which followed the edge of
+   the area its open windows left free (004cb520: x 590, 400 or 210); the boxes keep to its right
+   edge, as 0.97 kept them 3 units left of the windows. Placed as legacy places it. */
+
+@spritesheet plist-flag-sheet { src: "../../../newui_party_flag.tga"; plist-flag: 0px 0px 9px 10px; }
+@spritesheet plist-leave-sheet
+{
+	src: "../../../newui_party_x.tga";
+	plist-leave-up: 0px 0px 11px 11px;
+	plist-leave-down: 0px 11px 11px 11px;
+}
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 77px;
+	font-family: "token(font-body)";
+	pointer-events: none;
+	left: calc(var(--world-right, 100%) - 79px * var(--dock-scale, 1));
+	top: max(calc(var(--workspace-top, 0px) + 14px * var(--dock-scale, 1)), calc(var(--workspace-bottom, 100%) - 418px * var(--dock-scale, 1)));
+	transform: scale(var(--dock-scale, 1));
+	--root-scale: var(--dock-scale, 1);
+}
+/* A box takes the pointer: its hover is the skill target, and a click on it never walks. */
+.card { pointer-events: auto; }
+
+.card { display: block; position: relative; width: 50px; height: 19px; margin-left: 24px; }
+
+.card-fill, .card-tint, .card-select { position: absolute; left: 0; top: 0; width: 50px; height: 19px; }
+.card-fill { background-color: rgba(26, 26, 26, 179); }
+.card-tint, .card-select { display: none; }
+.card.selected .card-select { display: block; background-color: rgba(128, 128, 128, 204); }
+.card.absent .card-tint { display: block; background-color: rgba(77, 0, 0, 128); }
+.card.defense .card-tint { display: block; background-color: rgba(51, 51, 255, 51); }
+
+.card-flag { display: none; position: absolute; left: -23px; top: 5px; width: 9px; height: 10px; decorator: image(plist-flag); }
+.card.leader .card-flag { display: block; }
+.card-leave {
+	position: absolute;
+	left: -12px;
+	top: 4px;
+	width: 11px;
+	height: 11px;
+	decorator: image(plist-leave-up);
+	pointer-events: auto;
+}
+.card-leave:active { decorator: image(plist-leave-down); }
+
+.card-name {
+	display: block;
+	position: absolute;
+	left: 3px;
+	top: 1px;
+	white-space: nowrap;
+	color: #ffffff;
+}
+.card.absent .card-name { color: #808080; }
+
+/* The bar's back (.card-back, the S6 card art's element), then the fill: C++ sizes the fill for
+   the S6 69-unit bar, so it is scaled to 0.97's 40. */
+.card-back { position: absolute; left: 3px; top: 12px; width: 43px; height: 4px; background-color: rgb(50, 10, 0); }
+.card-health {
+	position: absolute;
+	left: 4px;
+	top: 13px;
+	height: 2px;
+	background-color: rgb(250, 10, 0);
+	transform: scale(0.58, 1);
+	transform-origin: left top;
+}

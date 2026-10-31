@@ -1,4 +1,7 @@
 <rml>
+<!-- rml-contract-optional-callback: mainframe_party_click: the S6 bar has no Party button; the P key opens the party window -->
+<!-- rml-contract-optional-callback: mainframe_guild_click: the S6 bar has no Guild button; the G key opens the guild window -->
+<!-- rml-contract-optional-callback: mainframe_command_click: the S6 bar has no command window button; the D key opens it -->
 	<!-- bound-geometry: the health/mana/SD/AG gauges, the experience bar and every cooldown wipe are
 	     fractions -->
 <head>

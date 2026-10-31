@@ -1,0 +1,189 @@
+/* Classic (0.97) character information window (C). From the 0.97 client: the name at the top, class and server
+   crossfading under it, the level in the first Level_box, the experience and spare points on dark
+   strips, the four stats each in a Level_box (75x21, every 60 units from y 116) with their derived
+   lines under it, the "+" buttons (level_01) at x 125 while there are points to spend, and the
+   points on a blue box. MuMain's level line is longer than 0.97's (it adds the resets), so its box
+   is a wider Level_box (Level_box_large) and the points' box goes over it; MuMain's fruit line joins the
+   strips. The frame and Close button come from docked_panel_frame.rcss. Text leaves
+   are counter-scaled (base.rcss): a width inside one is the reference width times --root-scale. */
+
+@spritesheet chainfo-classic-box-sheet  { src: ../../../Classic/Level_box.jpg; chainfo-classic-box: 0px 0px 75px 21px; }
+@spritesheet chainfo-classic-level-sheet { src: ../../../Classic/Level_box_large.jpg; chainfo-classic-level-box: 0px 0px 145px 21px; }
+@spritesheet chainfo-classic-plus-sheet { src: ../../../Classic/Level_01.jpg;  chainfo-classic-plus: 0px 0px 24px 24px; }
+@spritesheet chainfo-classic-plus2-sheet { src: ../../../Classic/Level_02.jpg; chainfo-classic-plus-pressed: 0px 0px 24px 24px; }
+
+.frame-top { decorator: image(docked-bg-top-a); }
+
+/* Name (0.97: a 120-wide box at x 35, y 12), class / server under it (x 22, y 22, 150 wide). */
+#name, #classname, #servername {
+	position: absolute;
+	left: 0;
+	width: calc(190px * var(--root-scale));
+	text-align: center;
+	transform-origin: left top;
+	font-weight: bold;
+	pointer-events: none;
+}
+#name { top: 12px; }
+#classname, #servername { top: 24px; color: #ffffff; }
+#name.pk-0 { color: rgb(150, 255, 240); }
+#name.pk-1 { color: rgb(100, 120, 255); }
+#name.pk-2 { color: rgb(140, 180, 255); }
+#name.pk-3 { color: rgb(200, 220, 255); }
+#name.pk-4 { color: rgb(255, 150, 60); }
+#name.pk-5 { color: rgb(255, 80, 30); }
+#name.pk-6 { color: rgb(255, 0, 0); }
+
+/* The S6 summary frame is not in 0.97; its fill becomes the level's Level_box at (13, 56). */
+.summary-corner, .summary-edge { display: none; }
+/* The level's box: Level_box drawn 145 wide (Level_box_large), from x 13 to 158. */
+.summary-fill {
+	position: absolute;
+	left: 13px;
+	top: 56px;
+	width: 145px;
+	height: 21px;
+	decorator: image(chainfo-classic-level-box);
+	pointer-events: none;
+}
+
+.level-text, .levelup-point-text, .exp-text, .point-probability-text, .point-text {
+	display: block;
+	position: absolute;
+	transform-origin: left top;
+	white-space: nowrap;
+	pointer-events: none;
+}
+/* Level at y 60, light grey, centred in its box as 0.97 does; MuMain's text is longer (it adds the
+   resets), so the box is the wider Level_box_large. */
+.level-text { left: 13px; top: 60px; width: calc(145px * var(--root-scale)); text-align: center; color: #e6e6e6; }
+/* Points to spend: black on a blue box, 80 wide, at 0.97's x 95; raised from 0.97's y 50 to 39,
+   above the wider level box. */
+.levelup-point-text {
+	left: 95px;
+	top: 39px;
+	width: calc(80px * var(--root-scale));
+	text-align: center;
+	color: #000000;
+	background-color: #1e6ec8;
+}
+.levelup-point-text.hidden { display: none; }
+/* Experience white from (24, 78), then MuMain's fruit chance and fruit points blue, 12 apart, on
+   half-black strips (0.97: the experience at 80 and the spare points at 95). */
+.exp-text { left: 24px; top: 78px; color: #ffffff; background-color: rgba(0, 0, 0, 128); }
+.point-probability-text { left: 24px; top: 90px; color: #6496ff; background-color: rgba(0, 0, 0, 128); }
+.point-text { left: 24px; top: 102px; color: #6496ff; background-color: rgba(0, 0, 0, 128); }
+
+/* Stats: Strength 116, Agility 176, Vitality 236, Energy 296 (boxes); the name on the left and
+   the value on the right of the box, in 0.97's gold; Command (Dark Lord) below them. */
+.attr-textbox {
+	position: absolute;
+	left: 13px;
+	width: 75px;
+	height: 21px;
+	decorator: image(chainfo-classic-box);
+	pointer-events: none;
+}
+.attr-textbox-str { top: 116px; }
+.attr-textbox-agi { top: 176px; }
+.attr-textbox-vit { top: 236px; }
+.attr-textbox-ene { top: 296px; }
+/* Command, the Dark Lord's fifth stat (shown only while the C++ says so, show_charisma): 0.97 has
+   no Dark Lord; the Season 1 client (005c3a40) draws one more box for class 4, 60 below Energy,
+   at y 356, its text and + button in step with the others. */
+.attr-textbox-cmd { top: 356px; }
+.attr-textbox-cmd.hidden, .stat-btn-cmd.hidden { display: none; }
+
+.attr-label, .attr-value {
+	display: block;
+	position: absolute;
+	transform-origin: left top;
+	white-space: nowrap;
+	font-weight: bold;
+	color: #dfbf67;
+	pointer-events: none;
+}
+.attr-label { left: 17px; }
+/* The value ends 6 inside the box's right end, clear of the art's double edge, as the name
+   starts 4 inside its left end. */
+.attr-value { left: 13px; width: calc(69px * var(--root-scale)); text-align: right; }
+.attr-label-str, .attr-value-str { top: 120px; }
+.attr-label-agi, .attr-value-agi { top: 180px; }
+.attr-label-vit, .attr-value-vit { top: 240px; }
+.attr-label-ene, .attr-value-ene { top: 300px; }
+.attr-label-cmd, .attr-value-cmd { top: 360px; }
+.attr-value.attr-boosted, .attr-label.attr-boosted { color: rgb(100, 150, 255); }
+.attr-value.attr-potion,  .attr-label.attr-potion  { color: rgb(255, 120, 0); }
+.levelup-point-text.hidden, .attr-label.hidden, .attr-value.hidden { display: none; }
+
+/* Derived lines under each stat, white on half-black strips: Strength's from y 140, Agility's from
+   200, Vitality's from 260, Energy's from 320. 0.97 set its one or two lines 15 apart; MuMain lists
+   up to three (attack rate, defence rate) in the 36 between a block's first line and the next box,
+   so the rows are 12: three of them end on that box at any panel scale. The rows follow the panel
+   while the text keeps its native size, so a taller row ran the third line onto the box where the
+   panel is smaller than the text (75% at 800x600). */
+.attr-lines { position: absolute; left: 24px; transform-origin: left top; pointer-events: none; }
+.attr-lines span { display: block; white-space: nowrap; color: #ffffff; background-color: rgba(0, 0, 0, 128); }
+.attr-lines span.boosted { color: rgb(100, 150, 255); }
+.attr-lines span.buffed { color: rgb(255, 0, 240); }
+.attr-lines-str { top: 140px; }
+.attr-lines-agi { top: 200px; }
+.attr-lines-vit { top: 260px; }
+.attr-lines-ene { top: 320px; }
+.attr-lines.attr-lines-str span { height: calc(12px * var(--root-scale)); }
+.attr-lines.attr-lines-agi span { height: calc(12px * var(--root-scale)); }
+.attr-lines.attr-lines-vit span { height: calc(12px * var(--root-scale)); }
+.attr-lines.attr-lines-ene span { height: calc(12px * var(--root-scale)); }
+
+/* "+" (24x24 at x 125, beside each box), the second image while pressed. */
+.stat-btn {
+	position: absolute;
+	left: 125px;
+	width: 24px;
+	height: 24px;
+	decorator: image(chainfo-classic-plus);
+	cursor: pointer;
+	pointer-events: auto;
+}
+.stat-btn:active { decorator: image(chainfo-classic-plus-pressed); }
+.stat-btn-str { top: 115px; }
+.stat-btn-agi { top: 175px; }
+.stat-btn-vit { top: 235px; }
+.stat-btn-ene { top: 295px; }
+.stat-btn-cmd { top: 355px; }
+
+/* The classic clients have no Master Level shortcut (Close shares .info-btn and stays). */
+.info-btn-masterlevel { display: none; }
+
+/* The Season 1 client's pet button (00421e40): pet1 (24x24) at (85, 395), beside Close, while the
+   character window is open; pet2 pressed. It opens the pet window. */
+@spritesheet chainfo-classic-pet-sheet { src: ../../../Classic/s1/pet1.jpg; chainfo-classic-pet: 0px 0px 24px 24px; }
+@spritesheet chainfo-classic-pet2-sheet { src: ../../../Classic/s1/pet2.jpg; chainfo-classic-pet-pressed: 0px 0px 24px 24px; }
+.info-btn-pet {
+	position: absolute;
+	left: 85px;
+	top: 395px;
+	width: 24px;
+	height: 24px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(chainfo-classic-pet);
+}
+.info-btn-pet:active { decorator: image(chainfo-classic-pet-pressed); }
+
+/* The Season 1 client's quest button (00419f90): Quest1 (24x24) at (55, 395), between Close and the
+   pet button; Quest2 pressed. It opens the quest window. */
+@spritesheet chainfo-classic-quest-sheet { src: ../../../Classic/s1/Quest1.jpg; chainfo-classic-quest: 0px 0px 24px 24px; }
+@spritesheet chainfo-classic-quest2-sheet { src: ../../../Classic/s1/Quest2.jpg; chainfo-classic-quest-pressed: 0px 0px 24px 24px; }
+.info-btn-quest {
+	position: absolute;
+	left: 55px;
+	top: 395px;
+	width: 24px;
+	height: 24px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(chainfo-classic-quest);
+}
+.info-btn-quest:active { decorator: image(chainfo-classic-quest-pressed); }
+.btn-exit-label { display: none; }

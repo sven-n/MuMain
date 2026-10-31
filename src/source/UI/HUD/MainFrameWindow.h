@@ -88,6 +88,18 @@ namespace mu::ui::window
         void RmlClickMyInven() { m_bRmlMyInvenClicked = true; }
         void RmlClickFriend() { m_bRmlFriendClicked = true; }
         void RmlClickWindow() { m_bRmlWindowClicked = true; }
+        void RmlClickParty()
+        {
+            m_bRmlPartyClicked = true;
+        }
+        void RmlClickGuild()
+        {
+            m_bRmlGuildClicked = true;
+        }
+        void RmlClickCommand()
+        {
+            m_bRmlCommandClicked = true;
+        }
 
     private:
         void SyncRmlModel();
@@ -131,6 +143,13 @@ namespace mu::ui::window
             // Corner buttons: "Open" mirrors SetBtnState()'s bStateDown; tooltips are static strings pushed once.
             bool cShopOpen = false, chaInfoOpen = false, myInvenOpen = false, friendOpen = false, windowOpen = false;
             Rml::String cShopTooltip, chaInfoTooltip, myInvenTooltip, friendTooltip, windowTooltip;
+
+            // Bar parts the S6 HUD doesn't have, for themes that add them (classic): the Party
+            // and Guild buttons (0.97), the command window button (Season 1 / 2) and the hero's
+            // coordinates.
+            bool partyOpen = false, guildOpen = false, commandOpen = false;
+            Rml::String partyTooltip, guildTooltip, commandTooltip;
+            Rml::String coordX, coordY;
 
             // Alert-blink dots: bound boolean + CSS dot, computed each frame from the same state
             // the legacy blink read.
@@ -188,6 +207,13 @@ namespace mu::ui::window
         bool m_bRmlMyInvenClicked = false;
         bool m_bRmlFriendClicked = false;
         bool m_bRmlWindowClicked = false;
+        bool m_bRmlPartyClicked = false;
+        bool m_bRmlGuildClicked = false;
+        bool m_bRmlCommandClicked = false;
+
+        // The tile coordX/coordY were formatted for, so they're formatted only when the hero moves.
+        int m_iCoordHeroX = -1;
+        int m_iCoordHeroY = -1;
 
     public:
         // Gates the RmlUi doc's Show()/Hide() on IsVisible() && sceneAllowsShow, same as CMuHelperBar/CBuffStrip.

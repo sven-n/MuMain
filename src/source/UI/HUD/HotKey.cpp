@@ -226,14 +226,12 @@ bool mu::ui::window::CHotKey::UpdateKeyEvent()
     }
     else if (mu::ui::window::IsPress('P'))
     {
-        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_PARTY);
-        PlayBuffer(SOUND_CLICK01);
+        TogglePartyWindow();
         return false;
     }
     else if (mu::ui::window::IsPress('G'))
     {
-        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_GUILDINFO);
-        PlayBuffer(SOUND_CLICK01);
+        ToggleGuildWindow();
         return false;
     }
     else if (mu::ui::window::IsPress('A'))
@@ -256,17 +254,7 @@ bool mu::ui::window::CHotKey::UpdateKeyEvent()
     }
     else if (gMapManager.InChaosCastle() == false && mu::ui::window::IsPress('D'))
     {
-        if (::IsStrifeMap(gMapManager.WorldActive))
-        {
-            if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::TheCommandWindowCannotBeActivatedInBattleZone) == FALSE)
-                g_pSystemLogBox->AddText(I18N::Game::TheCommandWindowCannotBeActivatedInBattleZone, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-        }
-        else
-        {
-            g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_COMMAND);
-            PlayBuffer(SOUND_CLICK01);
-        }
-
+        ToggleCommandWindow();
         return false;
     }
     else if (mu::ui::window::IsPress(VK_F1) == true)
@@ -402,6 +390,51 @@ bool mu::ui::window::CHotKey::CanUpdateKeyEventRelatedMyInventory()
     return false;
 }
 
+bool mu::ui::window::CHotKey::CanToggleWindowByButton()
+{
+    // UpdateKeyEvent()'s gates, but a text field being edited doesn't stop a click.
+    if (m_bStateGameOver || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MINI_MAP) ||
+        g_isCharacterBuff((&Hero->Object), eBuff_DuelWatch))
+    {
+        return false;
+    }
+
+    return !CanUpdateKeyEventRelatedMyInventory() && !IsKeyTakingWindowVisible();
+}
+
+void mu::ui::window::CHotKey::TogglePartyWindow()
+{
+    g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_PARTY);
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void mu::ui::window::CHotKey::ToggleGuildWindow()
+{
+    g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_GUILDINFO);
+    PlayBuffer(SOUND_CLICK01);
+}
+
+// Nothing in Chaos Castle, a notice in a battle zone.
+void mu::ui::window::CHotKey::ToggleCommandWindow()
+{
+    if (gMapManager.InChaosCastle())
+    {
+        return;
+    }
+
+    if (::IsStrifeMap(gMapManager.WorldActive))
+    {
+        if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::TheCommandWindowCannotBeActivatedInBattleZone) == FALSE)
+            g_pSystemLogBox->AddText(I18N::Game::TheCommandWindowCannotBeActivatedInBattleZone,
+                                     mu::ui::window::TYPE_SYSTEM_MESSAGE);
+    }
+    else
+    {
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_COMMAND);
+        PlayBuffer(SOUND_CLICK01);
+    }
+}
+
 bool mu::ui::window::CHotKey::CanUpdateKeyEvent()
 {
     // A focused RmlUi <input> is the only "a text field is currently editing" signal left; the
@@ -411,6 +444,11 @@ bool mu::ui::window::CHotKey::CanUpdateKeyEvent()
         return false;
     }
 
+    return !IsKeyTakingWindowVisible();
+}
+
+bool mu::ui::window::CHotKey::IsKeyTakingWindowVisible()
+{
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC)
         || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CATAPULT)
         || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCQUEST)
@@ -436,10 +474,10 @@ bool mu::ui::window::CHotKey::CanUpdateKeyEvent()
         || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA)
         )
     {
-        return false;
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 float mu::ui::window::CHotKey::GetLayerDepth()
