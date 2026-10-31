@@ -213,12 +213,17 @@ void MuMonsterSoundsUI::Render(bool* open)
         RenderMonster(*monster);
     }
     ImGui::Separator();
+    RenderSetList();
+    ImGui::SameLine();
 
-    // The model of the shown look, whose cues the cue rows change.
+    // The model of the shown look, whose cues the cue rows change: only while
+    // the set shown is the one the look plays, so a cue is never changed on
+    // a model the set's monsters do not have.
     const std::optional<int> slot = monster != nullptr ? ShownModel::FindShownSlot(*monster) : std::nullopt;
-    MonsterModelDefinition* model = m_modelDraft.Begin(slot.value_or(-1), ToolWindow::GetDataVersion());
+    const bool setOfLook = slot && Data::Monsters::GetSoundSetWithModel(*monster, *slot) == m_shown;
+    MonsterModelDefinition* model = m_modelDraft.Begin(setOfLook ? *slot : -1, ToolWindow::GetDataVersion());
     SoundEventsEditor::Context context;
-    if (model != nullptr && slot)
+    if (model != nullptr && setOfLook)
     {
         context.slot = *slot;
         context.model = model;
@@ -231,8 +236,6 @@ void MuMonsterSoundsUI::Render(bool* open)
         m_shownFrame = ImGui::GetFrameCount();
     }
 
-    RenderSetList();
-    ImGui::SameLine();
     ImGui::BeginGroup();
     // Begun and ended each frame, also without a set: the draft follows the
     // window being drawn.

@@ -53,6 +53,8 @@ bool IsCueUsed(int slot, const std::string& cue, const std::string& exceptSet, s
 
 // What the event table edits besides the set: the model of the shown
 // monster's look, whose cues the cue rows show and change.
+// The cue rows change the cues of `model` only: the model of the selected
+// monster's shown look while the set shown is the one that look plays.
 struct Context
 {
     // The model's slot and draft; -1 and nullptr when the monster has no

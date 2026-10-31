@@ -307,6 +307,16 @@ private:
     // and change for every monster of it (Q-MN81).
     void RenderCueFrames(MonsterSoundEvent& event)
     {
+        // The cues are those of the selected monster's look, which plays
+        // another set (or none).
+        if (m_context.model == nullptr)
+        {
+            if (!event.cues.empty())
+            {
+                ImGui::TextDisabled("%s", I18N::Editor::CueFramesNeedAMonsterOfTheSet);
+            }
+            return;
+        }
         for (const std::string& name : event.cues)
         {
             ImGui::PushID(name.c_str());

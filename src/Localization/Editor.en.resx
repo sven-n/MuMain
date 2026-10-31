@@ -3523,4 +3523,7 @@
   <data name="Step what cue {0}" xml:space="preserve">
     <value>cue {0}</value>
   </data>
+  <data name="Cue frames need a monster of the set" xml:space="preserve">
+    <value>Select a monster that plays the set to edit the cue.</value>
+  </data>
 </root>
