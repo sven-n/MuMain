@@ -7,9 +7,11 @@
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "Data/DataHandler/EffectData/EffectTypeStorage.h"
+#include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
 #include "Data/DataHandler/ModelData/ModelFileDataHandler.h"
 #include "Data/GameData/MapData/LightMood.h"
 #include "Data/GameData/MapData/LookProfile.h"
+#include "Data/GameData/MapData/MapObjectSoundDatabase.h"
 #include "Data/GameData/ServerListData/ServerListJson.h"
 #include "I18N/All.h"
 #include "Render/Look/LookFileSystem.h"
@@ -79,6 +81,21 @@ std::unique_ptr<DataCheckArea> CreateModelFileCheckArea()
 {
     return std::make_unique<FileCheckArea>(
         &I18N::Editor::ModelFiles, [] { return Data::Models::ReadGameModelFileTable().issues; }, nullptr, nullptr);
+}
+
+std::unique_ptr<DataCheckArea> CreateMapSoundCheckArea()
+{
+    return std::make_unique<FileCheckArea>(
+        &I18N::Editor::MapSounds,
+        []
+        {
+            // The table as the Map Editor has it, read back as the file would be.
+            std::vector<Data::Items::ItemDataIssue> issues;
+            Data::Maps::MakeMapObjectSoundsFileText(Data::Maps::GetMapObjectSoundsFile(),
+                                                    g_MapObjectSoundDatabase.GetAll(), issues);
+            return issues;
+        },
+        &ToolWindows::mapEditor, WindowIds::MapEditor);
 }
 
 std::unique_ptr<DataCheckArea> CreateLookCheckArea()

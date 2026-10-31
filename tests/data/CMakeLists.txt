@@ -37,12 +37,13 @@ target_compile_definitions(light_mood_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
-# The sounds of map objects (Data/Maps/ObjectSounds.json, maps design MP1).
-# The table needs the client globals of Winmain.cpp.
+# The sounds of map objects (Data/Maps/ObjectSounds.json, maps design MP1) and
+# the Map Editor's Sounds tab. The tab needs the client globals of Winmain.cpp.
 mu_add_test(
     NAME map_data_tests
     SOURCES
         test_map_object_sounds.cpp
+        test_map_sounds_tab.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient

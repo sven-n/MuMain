@@ -3427,4 +3427,55 @@
   <data name="Sound event once" xml:space="preserve">
     <value>einmal:</value>
   </data>
+  <data name="Map sounds" xml:space="preserve">
+    <value>Kartengeräusche</value>
+  </data>
+  <data name="Map sounds note" xml:space="preserve">
+    <value>Geräusche, die die Objekte der Karte machen, solange sie gezeichnet werden, gespielt wie im Original-Client. Ein Eintrag nennt seine Karten: Karten mit denselben Objekten teilen ihn.</value>
+  </data>
+  <data name="Map sounds of {0} {1}" xml:space="preserve">
+    <value>Karte: {0} ({1})</value>
+  </data>
+  <data name="Add a sound to an object type" xml:space="preserve">
+    <value>Geräusch zu einem Objekttyp hinzufügen</value>
+  </data>
+  <data name="No object of this map makes a sound" xml:space="preserve">
+    <value>Kein Objekt dieser Karte macht ein Geräusch.</value>
+  </data>
+  <data name="Object types" xml:space="preserve">
+    <value>Objekte</value>
+  </data>
+  <data name="Add an object type" xml:space="preserve">
+    <value>Typ hinzufügen</value>
+  </data>
+  <data name="Pick an object in the world" xml:space="preserve">
+    <value>Objekt in der Welt wählen</value>
+  </data>
+  <data name="Click an object in the world" xml:space="preserve">
+    <value>Klicke ein Objekt in der Welt an...</value>
+  </data>
+  <data name="Object sound plays" xml:space="preserve">
+    <value>Spielt</value>
+  </data>
+  <data name="While in view" xml:space="preserve">
+    <value>solange sichtbar</value>
+  </data>
+  <data name="While in view note" xml:space="preserve">
+    <value>In jedem Bild, in dem ein Objekt des Typs gezeichnet wird, startet ein beendeter Kanal neu und ein spielender bleibt unberührt, in voller Lautstärke auf jede Entfernung.</value>
+  </data>
+  <data name="Object sound maps" xml:space="preserve">
+    <value>Karten</value>
+  </data>
+  <data name="No map" xml:space="preserve">
+    <value>keine Karte</value>
+  </data>
+  <data name="Not saved yet" xml:space="preserve">
+    <value>Noch nicht gespeichert</value>
+  </data>
+  <data name="Not saved {0}" xml:space="preserve">
+    <value>Nicht gespeichert: {0}</value>
+  </data>
+  <data name="Not read again {0}" xml:space="preserve">
+    <value>Nicht neu gelesen: {0}</value>
+  </data>
 </root>
