@@ -7065,6 +7065,9 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
         && Type != MODEL_WING + 135 // Small Cape of Fighter
         )
     {
+        // The item effects read the part's pose from the shared bones, where its draw used to pose it.
+        if (bones != BoneTransform)
+            std::memcpy(BoneTransform, bones, sizeof(vec34_t) * std::min<int>(b->NumBones, MAX_BONES));
         RenderPartObjectEffect(Object, Type, c->Light, o->Alpha, Level, Option1, false, 0, RenderType | ((c->MonsterIndex == MONSTER_METAL_BALROG || c->MonsterIndex == MONSTER_ORC_ARCHER_OF_DOOM) ? (RENDER_EXTRA | RENDER_TEXTURE) : RENDER_TEXTURE));
     }
 
