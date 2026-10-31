@@ -353,6 +353,18 @@ size_t ServerListEdits::CountRulesWithColor(std::string_view id) const
 
 std::optional<size_t> ServerListEdits::AddButtonColorRule()
 {
+    std::optional<ButtonColorRule> rule = FindFreeRule();
+    if (!rule)
+    {
+        return std::nullopt;
+    }
+    m_list.buttonColors.push_back(std::move(*rule));
+    m_pendingLabel = StepLabel::AddButtonColorRule();
+    return m_list.buttonColors.size() - 1;
+}
+
+std::optional<ButtonColorRule> ServerListEdits::FindFreeRule() const
+{
     using Data::ServerList::RuleVip;
     // Any channel first, then none, any VIP type and each type; each with either PvP, on and off.
     std::vector<ButtonColorRule> candidates;
@@ -375,16 +387,9 @@ std::optional<size_t> ServerListEdits::AddButtonColorRule()
     {
         addFor(RuleVip::VipType, vipType.id);
     }
-    for (ButtonColorRule& rule : candidates)
-    {
-        if (!HasRuleLike(rule, std::nullopt))
-        {
-            m_list.buttonColors.push_back(std::move(rule));
-            m_pendingLabel = StepLabel::AddButtonColorRule();
-            return m_list.buttonColors.size() - 1;
-        }
-    }
-    return std::nullopt;
+    const auto free = std::find_if(candidates.begin(), candidates.end(),
+                                   [this](const ButtonColorRule& rule) { return !HasRuleLike(rule, std::nullopt); });
+    return free != candidates.end() ? std::optional<ButtonColorRule>(*free) : std::nullopt;
 }
 
 void ServerListEdits::RemoveButtonColorRule(size_t index)

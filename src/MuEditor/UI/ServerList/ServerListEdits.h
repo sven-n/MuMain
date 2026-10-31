@@ -126,6 +126,9 @@ public:
     // Adds a rule with the default color for the first VIP type and PvP setting
     // no rule has yet (any channel first). Nothing when every one has a rule.
     std::optional<size_t> AddButtonColorRule();
+    // The rule AddButtonColorRule would add, with the default color; nothing when every VIP
+    // type and PvP setting has a rule.
+    std::optional<Data::ServerList::ButtonColorRule> FindFreeRule() const;
     void RemoveButtonColorRule(size_t index);
     // Whether another rule than the one at `index` fits the same channels as `rule`.
     bool HasRuleLike(const Data::ServerList::ButtonColorRule& rule, std::optional<size_t> index) const;

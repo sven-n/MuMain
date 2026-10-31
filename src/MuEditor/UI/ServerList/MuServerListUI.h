@@ -115,8 +115,6 @@ private:
     int m_removeColor = -1;
     // The rule whose last change was refused (another rule fits the same channels), or -1.
     int m_refusedRule = -1;
-    // Add rule found every VIP type and PvP setting with a rule.
-    bool m_allRulesTaken = false;
     // The theme folders a color gets a shade for (UI::RmlBridge::DiscoverAvailableThemes).
     std::vector<std::string> m_themes;
     // The language the Channel names tab shows and edits the texts in.
