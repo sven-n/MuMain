@@ -40,6 +40,9 @@ public:
     void SetFirst();
     bool GetNext(OUT CServerGroup*& pServerGroup);
     CServerGroup* GetServerGroupByBtnPos(int iBtnPos);
+    // The server the connect server knows by this ID (CServerInfo::m_iConnectIndex), and the
+    // group it is in. nullptr (and no group) when the list doesn't have it.
+    CServerInfo* FindServer(int iConnectIndex, CServerGroup*& pServerGroup);
 
     int GetServerGroupSize();
 

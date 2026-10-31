@@ -409,7 +409,7 @@ void CServerSelWin::RmlClickSelectServer(int nServerIndex)
     // overloaded one (then "Now preparing").
     if (Data::ServerList::GetLoadState(pServerInfo->m_iPercent) == Data::ServerList::LoadState::Open)
     {
-        ConnectToServer(pServerInfo, nServerIndex);
+        ConnectToServer(pServerInfo);
     }
     else
     {
@@ -417,17 +417,18 @@ void CServerSelWin::RmlClickSelectServer(int nServerIndex)
     }
 }
 
-bool CServerSelWin::ConnectToServer(CServerInfo* pServerInfo, int serverIndex)
+bool CServerSelWin::ConnectToServer(CServerInfo* pServerInfo)
 {
     if (pServerInfo == nullptr || m_pSelectServerGroup == nullptr || RefuseOfflinePreview(*pServerInfo))
         return false;
 
     Show(false);
 
-    // The connect server drops a list left open too long; pick the server again
-    // from the fresh list the reconnect brings.
-    const std::wstring groupName = m_pSelectServerGroup->m_szName;
-    const auto pickAgain = [groupName, serverIndex] { g_ServerSelWin.SelectServer(groupName.c_str(), serverIndex); };
+    // The connect server drops a list left open too long; pick the same server
+    // again from the fresh list the reconnect brings. By its ID: a server that
+    // went down meanwhile moves the ones after it up in the list.
+    const int connectIndex = pServerInfo->m_iConnectIndex;
+    const auto pickAgain = [connectIndex] { g_ServerSelWin.ResumeServerPick(connectIndex); };
     if (!LoginSceneReconnect::Instance().EnsureConnected(LoginServer::Connect, pickAgain))
         return true;
 
@@ -439,6 +440,29 @@ bool CServerSelWin::ConnectToServer(CServerInfo* pServerInfo, int serverIndex)
                                              pServerInfo->m_iIndex, pServerInfo->m_channel);
 
     return true;
+}
+
+void CServerSelWin::ResumeServerPick(int connectIndex)
+{
+    // The fresh list is up already (UI::LoginScene::ServerListReceived). A server
+    // that left it meanwhile leaves the next pick to the player.
+    CServerGroup* pServerGroup = nullptr;
+    CServerInfo* pServerInfo = g_ServerListManager->FindServer(connectIndex, pServerGroup);
+    if (pServerInfo == nullptr || pServerGroup->m_iBtnPos < 0)
+        return;
+
+    m_iSelectServerBtnIndex = pServerGroup->m_iBtnPos;
+    UpdateDisplay();
+    m_pSelectServerGroup = pServerGroup;
+
+    // A server that filled up meanwhile gets the answer a click on it gets.
+    if (Data::ServerList::GetLoadState(pServerInfo->m_iPercent) != Data::ServerList::LoadState::Open)
+    {
+        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_SERVER_BUSY);
+        return;
+    }
+
+    ConnectToServer(pServerInfo);
 }
 
 bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
@@ -491,7 +515,7 @@ bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
         return false;
     }
 
-    return ConnectToServer(pServerInfo, serverIndex);
+    return ConnectToServer(pServerInfo);
 }
 
 bool CServerSelWin::UpdateMouseEvent()

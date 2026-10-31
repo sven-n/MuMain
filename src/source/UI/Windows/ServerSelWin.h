@@ -77,8 +77,11 @@ private:
     // Shared by RmlClickSelectServer() and SelectServer(). Returns false (and
     // leaves the window open) without connecting when pServerInfo is null or
     // the server is full/busy -- the caller decides what busy means to it.
-    // `serverIndex` is pServerInfo's position in the selected group (CServerGroup::GetServerInfo).
-    bool ConnectToServer(CServerInfo* pServerInfo, int serverIndex);
+    bool ConnectToServer(CServerInfo* pServerInfo);
+
+    // Picks the server with this connect server ID (CServerInfo::m_iConnectIndex) again, once
+    // the login screen reconnected and the fresh list is up.
+    void ResumeServerPick(int connectIndex);
 
     struct GroupEntry
     {

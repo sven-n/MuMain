@@ -329,6 +329,24 @@ CServerGroup* CServerListManager::GetServerGroupByBtnPos(int iBtnPos)
     return NULL;
 }
 
+CServerInfo* CServerListManager::FindServer(int iConnectIndex, CServerGroup*& pServerGroup)
+{
+    for (const auto& entry : m_mapServerGroup)
+    {
+        for (CServerInfo* pServerInfo : entry.second->m_listServerInfo)
+        {
+            if (pServerInfo->m_iConnectIndex == iConnectIndex)
+            {
+                pServerGroup = entry.second;
+                return pServerInfo;
+            }
+        }
+    }
+
+    pServerGroup = nullptr;
+    return nullptr;
+}
+
 void CServerListManager::SetSelectServerInfo(int groupId, const wchar_t* pszName, int iIndex,
                                              const Data::ServerList::ChannelSettings& channel)
 {
