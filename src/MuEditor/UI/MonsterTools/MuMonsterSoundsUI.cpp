@@ -48,7 +48,6 @@ constexpr float IdWidth = 200.0f;
 constexpr float ChannelsWidth = 70.0f;
 // The users a set lists by name; the others are counted.
 constexpr size_t ShownUsers = 6;
-constexpr int MaxSoundChannels = 4;
 
 // A name for a new set, unused.
 std::string FreeName(const std::string& base)
@@ -597,7 +596,7 @@ void MuMonsterSoundsUI::RenderAddFile(MonsterSoundSet& set)
     ImGui::SameLine();
     ImGui::SetNextItemWidth(ChannelsWidth * scale);
     ImGui::InputInt("##NewChannels", &m_newChannels, 1);
-    m_newChannels = std::clamp(m_newChannels, 1, MaxSoundChannels);
+    m_newChannels = std::clamp(m_newChannels, 1, Data::Monsters::MaxSoundChannels);
     ImGui::SameLine();
     ImGui::Checkbox("3D", &m_newSpatial);
     ImGui::SameLine();

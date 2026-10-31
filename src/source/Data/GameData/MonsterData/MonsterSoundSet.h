@@ -2,6 +2,7 @@
 
 #include "Data/GameData/MapData/MapRef.h"
 
+#include <cstddef>
 #include <optional>
 #include <string>
 #include <vector>
@@ -13,6 +14,12 @@ namespace Data::Monsters
 {
 // LoadWaveFile's defaults.
 constexpr int DefaultSoundChannels = 4;
+// The limits of the sound sets, which the reader refuses past and the editor
+// keeps to: the channels of a sound (1 to this), a sound event's chance (one
+// in 1 to this), and the sounds of a pick (one of two, or one or none).
+constexpr int MaxSoundChannels = 4;
+constexpr int MaxSoundChanceOneIn = 100000;
+constexpr std::size_t PickSoundCount = 2;
 
 // One sound file a set loads.
 struct MonsterSound

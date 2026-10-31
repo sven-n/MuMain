@@ -589,6 +589,14 @@ TEST_CASE("Monster Sounds gives Monster Preview the model it edits in the frame 
     g_MonsterSoundSetDatabase.Build({});
 }
 
+TEST_CASE("Monster Sounds and Monster Preview show a frame alike, as a new cue is named [editor][monsters]")
+{
+    using MuEditor::Monsters::SoundEventsEditor::FrameText;
+    CHECK(FrameText(4.5f) == "4.50");
+    CHECK(FrameText(0.0f) == "0.00");
+    CHECK(FrameText(12.126f) == "12.13");
+}
+
 TEST_CASE("Monster Model: a cue that no sound event of the model's monsters plays on can be removed "
           "[editor][monsters]")
 {
