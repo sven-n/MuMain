@@ -86,8 +86,10 @@ theme), so a long name there can run past its edges.
 ## When a server drops the login screen
 
 OpenMU's connect server closes a connection that sends nothing for a while
-(its *Timeout* in the admin panel, one minute by default), so a server list
-left open runs into it. The login screen doesn't tell the player: the next
+(its *Timeout* in the admin panel, one minute by default). An open server list
+asks for a fresh list every 30 seconds, which keeps that connection up and the
+load figures current. When the connection drops anyway (a Timeout below 30
+seconds, a restarted server), the login screen doesn't tell the player: the next
 click that needs the server (a group, a channel, the credits, OK in the login
 window) connects again first and then carries on. The login window does the
 same when its game server went away, e.g. because it was restarted.

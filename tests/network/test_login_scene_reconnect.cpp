@@ -17,13 +17,15 @@
 
 namespace
 {
-constexpr double GreetingTimeoutMs = 10000.0; // LoginSceneReconnect.cpp
+constexpr double GreetingTimeoutMs = 10000.0;   // LoginSceneReconnect.cpp
+constexpr double ServerListRefreshMs = 30000.0; // LoginSceneReconnect.cpp
 
 class FakeLink : public LoginSceneReconnectLink
 {
 public:
     bool connected = false;
     std::optional<LoginServer> awaited;
+    bool serverListShown = false;
     bool probeCanStart = true;
     ProbeResult probeResult = ProbeResult::Pending;
     bool connectSucceeds = true;
@@ -44,6 +46,10 @@ public:
     std::optional<LoginServer> AwaitedServer() const override
     {
         return awaited;
+    }
+    bool IsServerListShown() const override
+    {
+        return serverListShown;
     }
 
     bool StartProbe(LoginServer server) override
@@ -427,6 +433,41 @@ TEST_SUITE("Login scene reconnect")
         screen.ServerComesBack();
         screen.reconnect.OnGreeting(LoginServer::Connect);
         CHECK(screen.link.listRequests == 1);
+    }
+
+    TEST_CASE("an open server list asks for a fresh one before the server drops it")
+    {
+        DroppedScreen screen;
+        screen.link.connected = true;
+        screen.link.serverListShown = true;
+        screen.reconnect.OnGreeting(LoginServer::Connect); // the list arrived
+
+        screen.link.now += ServerListRefreshMs - 1.0;
+        screen.reconnect.Update();
+        CHECK(screen.link.listRequests == 0);
+
+        screen.link.now += 1.0;
+        screen.reconnect.Update();
+        CHECK(screen.link.listRequests == 1);
+        screen.reconnect.Update(); // its answer is on the way
+        CHECK(screen.link.listRequests == 1);
+
+        screen.reconnect.OnGreeting(LoginServer::Connect);
+        screen.link.serverListShown = false; // a server was picked
+        screen.link.now += ServerListRefreshMs;
+        screen.reconnect.Update();
+        CHECK(screen.link.listRequests == 1);
+    }
+
+    TEST_CASE("a dropped server list waits for the player's next step")
+    {
+        DroppedScreen screen;
+        screen.link.serverListShown = true;
+        screen.link.now += ServerListRefreshMs;
+
+        screen.reconnect.Update();
+        CHECK(screen.link.listRequests == 0);
+        CHECK(screen.link.probes.empty());
     }
 
     TEST_CASE("leaving the login scene drops the waiting step")

@@ -8,8 +8,10 @@
 //
 // The connect server closes connections that stay idle (OpenMU: after one minute
 // by default), and a router can cut an idle game-server connection the same way.
-// Nothing is lost before the login, so the client doesn't tell the player. It
-// reconnects when the player next needs the server (picking a server, changing
+// An open server list asks for a fresh one now and then, which keeps its connection
+// up. A drop can still come (a shorter timeout, a server restart). Nothing is lost
+// before the login, so the client doesn't tell the player. It reconnects when the
+// player next needs the server (picking a server, changing
 // the server group, opening the credits, logging in) and then carries out that
 // step. When the screen itself waits for an answer, it reconnects at once. Only
 // when the server can't be reached does the player get a choice: try again from
@@ -61,6 +63,7 @@ private:
     };
 
     void Begin(LoginServer server, std::function<void()> resume);
+    void RefreshServerList();
     void UpdateProbing();
     void Fail();
     void EnterPhase(Phase phase);
@@ -70,5 +73,6 @@ private:
     LoginServer m_server = LoginServer::Connect;
     std::function<void()> m_resume;
     double m_phaseStartMs = 0.0;
+    double m_lastListMs = 0.0; // the last server list asked for or received
     bool m_lossLogged = false;
 };

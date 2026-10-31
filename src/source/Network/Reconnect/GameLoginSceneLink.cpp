@@ -10,6 +10,7 @@
 #include "UI/Windows/LoginSceneUpdates.h"
 
 extern double WorldTime;
+extern BOOL g_bGameServerConnected;
 
 namespace
 {
@@ -38,6 +39,12 @@ std::optional<LoginServer> GameLoginSceneLink::AwaitedServer() const
     }
 
     return CurrentProtocolState == REQUEST_LOG_IN ? LoginServer::Game : LoginServer::Connect;
+}
+
+bool GameLoginSceneLink::IsServerListShown() const
+{
+    // Only the connect server answers a list request.
+    return UI::LoginScene::IsServerListShown() && !g_bGameServerConnected;
 }
 
 bool GameLoginSceneLink::StartProbe(LoginServer server)

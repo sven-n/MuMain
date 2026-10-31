@@ -31,6 +31,9 @@ public:
     // player can go on by themselves.
     virtual std::optional<LoginServer> AwaitedServer() const = 0;
 
+    // The server list is on screen, over a connection to the connect server.
+    virtual bool IsServerListShown() const = 0;
+
     // Checks in the background whether the server accepts connections again. False
     // when no check could be started.
     virtual bool StartProbe(LoginServer server) = 0;

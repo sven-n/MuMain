@@ -11,6 +11,11 @@ namespace
 // server's list, the game server's join answer) before the attempt counts as failed.
 constexpr double GreetingTimeoutMs = 10000.0;
 
+// How often an open server list asks for a fresh one. Well within OpenMU's connect
+// server Timeout (one minute by default), so the list's connection stays up and its
+// load figures current.
+constexpr double ServerListRefreshMs = 30000.0;
+
 const char* NameOf(LoginServer server)
 {
     return server == LoginServer::Game ? "game server" : "connect server";
@@ -57,6 +62,7 @@ void LoginSceneReconnect::RequestServerList()
 {
     if (EnsureConnected(LoginServer::Connect, nullptr))
     {
+        m_lastListMs = m_link.NowMs();
         m_link.SendServerListRequest();
     }
 }
@@ -90,6 +96,11 @@ void LoginSceneReconnect::OnConnectionLost()
 
 void LoginSceneReconnect::OnGreeting(LoginServer server, bool carryOn)
 {
+    if (server == LoginServer::Connect)
+    {
+        m_lastListMs = m_link.NowMs();
+    }
+
     if (m_phase != Phase::AwaitingGreeting)
     {
         return;
@@ -122,6 +133,7 @@ void LoginSceneReconnect::Update()
         {
             m_lossLogged = false; // someone else reconnected (e.g. the login window's Cancel)
         }
+        RefreshServerList();
         return;
     case Phase::Probing:
         UpdateProbing();
@@ -195,6 +207,23 @@ void LoginSceneReconnect::Begin(LoginServer server, std::function<void()> resume
     }
 
     EnterPhase(Phase::Probing);
+}
+
+void LoginSceneReconnect::RefreshServerList()
+{
+    if (!m_link.IsServerListShown() || !m_link.IsConnected())
+    {
+        return;
+    }
+
+    const double now = m_link.NowMs();
+    if (now - m_lastListMs < ServerListRefreshMs)
+    {
+        return;
+    }
+
+    m_lastListMs = now;
+    m_link.SendServerListRequest();
 }
 
 void LoginSceneReconnect::UpdateProbing()

@@ -66,6 +66,11 @@ bool IsWaitingForServer()
     return !offersNextStep;
 }
 
+bool IsServerListShown()
+{
+    return g_ServerSelWin.IsVisible();
+}
+
 void ShowMessage(int messageCode)
 {
     CSceneUICoordinator::Instance().PopUpMsgWin(messageCode);
