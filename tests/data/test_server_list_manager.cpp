@@ -248,6 +248,35 @@ TEST_CASE("ServerListManager: the selected channel's titles name its PvP and VIP
     CHECK_FALSE(manager.IsNonPvP());
 }
 
+TEST_CASE("ServerListManager: the UTF-8 title is built again only when something it shows changed")
+{
+    I18N::SetLocale("en");
+    ServerListData list = List({Group(0, "Valhalla")});
+    TestServerListManager manager;
+    manager.SetServerList(list);
+    manager.SetSelectServerInfo(L"Valhalla", 1, Channel(false, "gold"));
+
+    const std::string& title = manager.GetSelectServerTitleUtf8(ChannelNamePlace::Login);
+    CHECK(title == "[Valhalla-1 (Gold Non-PvP)]");
+    // The same string while nothing changed.
+    CHECK(&manager.GetSelectServerTitleUtf8(ChannelNamePlace::Login) == &title);
+
+    manager.SetSelectServerInfo(L"Valhalla", 2, Channel(true, ""));
+    CHECK(manager.GetSelectServerTitleUtf8(ChannelNamePlace::Login) == "[Valhalla-2 (PvP)]");
+
+    list.names.pvp.Set("en", "Open PvP");
+    manager.SetServerList(list);
+    CHECK(manager.GetSelectServerTitleUtf8(ChannelNamePlace::Login) == "[Valhalla-2 (Open PvP)]");
+
+    list.names.pvp.Set("es", "PvP abierto");
+    manager.SetServerList(list);
+    I18N::SetLocale("es");
+    CHECK(manager.GetSelectServerTitleUtf8(ChannelNamePlace::Login) == "[Valhalla-2 (PvP abierto)]");
+    I18N::SetLocale("en");
+    CHECK(manager.GetSelectServerTitleUtf8(ChannelNamePlace::Login) == "[Valhalla-2 (Open PvP)]");
+    CHECK(manager.GetSelectServerTitleUtf8(ChannelNamePlace::CharacterInfo) == "[Valhalla-2 (Open PvP)]");
+}
+
 TEST_CASE("ServerListManager: the titles follow the list's texts in the game's language")
 {
     ServerListData list = List({Group(0, "Valhalla")});

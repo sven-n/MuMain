@@ -93,6 +93,7 @@ bool CServerListManager::LoadServerListScript(std::string& errorMessage)
 void CServerListManager::SetServerList(const Data::ServerList::ServerListData& list)
 {
     m_serverList = list;
+    ++m_titleVersion;
     m_groupIndexById.clear();
     for (size_t index = 0; index < m_serverList.groups.size(); ++index)
     {
@@ -267,6 +268,20 @@ void CServerListManager::SetSelectServerInfo(const wchar_t* pszName, int iIndex,
     wcsncpy_s(m_szSelectServerName, pszName, _TRUNCATE);
     m_iSelectServerIndex = iIndex;
     m_selectChannel = channel;
+    ++m_titleVersion;
+}
+
+const std::string& CServerListManager::GetSelectServerTitleUtf8(Data::ServerList::ChannelNamePlace place)
+{
+    CachedTitle& title = m_titles[static_cast<size_t>(place)];
+    const std::string_view locale = GetGameLocale();
+    if (title.version != m_titleVersion || title.locale != locale)
+    {
+        title.text = Core::Text::ToUtf8(GetSelectServerTitle(place).c_str());
+        title.locale = locale;
+        title.version = m_titleVersion;
+    }
+    return title.text;
 }
 
 wchar_t* CServerListManager::GetSelectServerName()
