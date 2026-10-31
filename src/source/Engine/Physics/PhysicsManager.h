@@ -228,6 +228,8 @@ protected:
     BOOL PreventFromStretching(void);
 
 public:
+    // A glowing cloth's lights on its simulated vertices; the update spawns them after stepping it.
+    void SpawnLights();
     virtual void Render(vec3_t* pvColor = NULL, int iLevel = 0);
 
 protected:

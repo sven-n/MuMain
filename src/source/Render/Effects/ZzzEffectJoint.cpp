@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include <cfloat>
 #include <cstring>
 #include <SDL3/SDL.h>
@@ -118,6 +119,7 @@ static bool IsTailRunInFrustum(const JOINT* o, int first)
 void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle, int SubType, OBJECT* Target, float Scale, short PKKey,
     WORD SkillIndex, WORD SkillSerialNum, int iChaIndex, const float* vPriorColor, short int sTargetindex)
 {
+    Diagnostics::DrawSpawnCheck::Note("joint");
     for (int i = 0; i < MAX_JOINTS; i++)
     {
         JOINT* o = &Joints[i];
@@ -6958,6 +6960,82 @@ void MoveJoint(JOINT* o, int iIndex)
     }
 }
 
+// The sprites four kinds of trail put on their segments, and the healing trail's fade, which their draw did for each
+// segment it drew; once per frame for the trails the frame draws.
+static void UpdateDrawnJointEffects()
+{
+    if (IsJointsDisabledDebug())
+    {
+        return;
+    }
+    for (int i = 0; i < MAX_JOINTS; i++)
+    {
+        JOINT* o = &Joints[i];
+        if (!o->Live || o->NumTails <= 0 || o->RenderFace == 0)
+            continue;
+        if (o->Type == BITMAP_JOINT_ENERGY && o->SubType == 54 && o->Target->CurrentAction != MONSTER01_ATTACK1)
+            continue;
+        const bool spear = o->Type == MODEL_SPEARSKILL && (o->SubType == 0 || o->SubType == 4 || o->SubType == 9);
+        const bool healing = o->Type == BITMAP_JOINT_HEALING && (o->SubType == 9 || o->SubType == 10);
+        const bool flare = o->Type == BITMAP_FLARE + 1 && (o->SubType == 6 || o->SubType == 8);
+        if (!spear && !healing && !flare)
+            continue;
+
+        for (int j = 0; j < (int)o->NumTails; j++)
+        {
+            if (healing && j == (int)o->NumTails - 1)
+                continue;
+            auto currentTail = o->Tails[j];
+            auto nextTail = o->Tails[j + 1];
+            if (!IsValidTailQuad(currentTail) || !IsValidTailQuad(nextTail))
+                continue;
+
+            vec3_t Position;
+            Vector(0.f, 0.f, 0.f, Position);
+            for (int k = 0; k < 4; ++k)
+            {
+                VectorAdd(currentTail[k], Position, Position);
+            }
+            VectorScale(Position, 0.25f, Position);
+
+            if (spear)
+            {
+                if (j != ((int)o->NumTails / 2))
+                    continue;
+                vec3_t Light;
+                VectorCopy(o->Light, Light);
+                if (o->Target != NULL)
+                {
+                    const float fJointHeight =
+                        (currentTail[0][2] - (o->Target->Position[2] + (o->SubType == 9 ? 180 : 50))) * 0.01f;
+                    if (fJointHeight > 0)
+                    {
+                        Vector(o->Light[0] - fJointHeight, o->Light[1] - fJointHeight, o->Light[2] - fJointHeight,
+                               Light);
+                    }
+                }
+                CreateSprite(BITMAP_FLARE_BLUE, Position, 0.7f, Light, NULL);
+            }
+            else if (healing)
+            {
+                if (o->Target == NULL)
+                    continue;
+                vec3_t Light;
+                const float fJointHeight = (j) * 0.01f;
+                VectorScale(o->Light, powf(0.9978f, FPS_ANIMATION_FACTOR), o->Light);
+                Vector(o->Light[0] - fJointHeight, o->Light[1] - fJointHeight, o->Light[2] - fJointHeight, Light);
+                CreateSprite(BITMAP_FLARE_BLUE, Position, o->SubType == 9 ? 0.5f : 0.7f, Light, NULL);
+            }
+            else if (j == 0)
+            {
+                const bool big = o->SubType == 6;
+                CreateSprite(BITMAP_FLARE_BLUE, Position, big ? 0.5f : 0.3f, o->Light, NULL, (float)(rand() % 360), 3);
+                CreateSprite(BITMAP_SHINY + 1, Position, big ? 1.5f : 1.f, o->Light, NULL, (float)(rand() % 360), 3);
+            }
+        }
+    }
+}
+
 void MoveJoints()
 {
     for (int i = 0; i < MAX_JOINTS; i++)
@@ -6968,6 +7046,7 @@ void MoveJoints()
             MoveJoint(o, i);
         }
     }
+    UpdateDrawnJointEffects();
 }
 
 void RenderJoints(BYTE bRenderOneMore)
@@ -7134,103 +7213,6 @@ void RenderJoints(BYTE bRenderOneMore)
                 }
                 else
                 {
-                    if (o->Type == MODEL_SPEARSKILL && (o->SubType == 0 || o->SubType == 4
-                        || o->SubType == 9
-                        ))
-                    {
-                        float scale = 0.7f;
-                        vec3_t Light;
-                        if (o->Target != NULL)
-                        {
-                            float fJointHeight;
-
-                            if (o->SubType == 9)
-                                fJointHeight = (currentTail[0][2] - (o->Target->Position[2] + 180)) * 0.01f;
-                            else
-                                fJointHeight = (currentTail[0][2] - (o->Target->Position[2] + 50)) * 0.01f;
-
-                            if (fJointHeight > 0)
-                            {
-                                Vector(o->Light[0] - fJointHeight, o->Light[1] - fJointHeight, o->Light[2] - fJointHeight, Light);
-                            }
-                            else
-                            {
-                                VectorCopy(o->Light, Light);
-                            }
-                        }
-                        else
-                        {
-                        }
-
-                        if (j == ((int)o->NumTails / 2))
-                        {
-                            vec3_t  Position;
-
-                            Vector(0.f, 0.f, 0.f, Position);
-                            for (int k = 0; k < 4; ++k)
-                            {
-                                VectorAdd(currentTail[k], Position, Position);
-                            }
-                            VectorScale(Position, 0.25f, Position);
-
-                            CreateSprite(BITMAP_FLARE_BLUE, Position, scale, Light, NULL);
-                        }
-                    }
-                    else if (o->Type == BITMAP_JOINT_HEALING && (o->SubType == 9 || o->SubType == 10))
-                    {
-                        if (o->Target != NULL)
-                        {
-                            float  scale = 0.7f;
-                            vec3_t Light;
-                            float  fJointHeight = (j) * 0.01f;
-                            VectorScale(o->Light, powf(0.9978f, FPS_ANIMATION_FACTOR), o->Light);
-                            Vector(o->Light[0] - fJointHeight, o->Light[1] - fJointHeight, o->Light[2] - fJointHeight, Light);
-
-                            vec3_t  Position;
-
-                            Vector(0.f, 0.f, 0.f, Position);
-                            for (int k = 0; k < 4; ++k)
-                            {
-                                VectorAdd(currentTail[k], Position, Position);
-                            }
-                            VectorScale(Position, 0.25f, Position);
-
-                            if (o->SubType == 9) scale = 0.5f;
-                            CreateSprite(BITMAP_FLARE_BLUE, Position, scale, Light, NULL);
-                        }
-                    }
-                    else if (o->Type == BITMAP_FLARE + 1 && o->SubType == 6)
-                    {
-                        if (j == 0)
-                        {
-                            vec3_t  Position;
-                            Vector(0.f, 0.f, 0.f, Position);
-                            for (int k = 0; k < 4; ++k)
-                            {
-                                VectorAdd(currentTail[k], Position, Position);
-                            }
-                            VectorScale(Position, 0.25f, Position);
-
-                            CreateSprite(BITMAP_FLARE_BLUE, Position, 0.5f, o->Light, NULL, (float)(rand() % 360), 3);
-                            CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, o->Light, NULL, (float)(rand() % 360), 3);
-                        }
-                    }
-                    else if (o->Type == BITMAP_FLARE + 1 && o->SubType == 8)
-                    {
-                        if (j == 0)
-                        {
-                            vec3_t  Position;
-                            Vector(0.f, 0.f, 0.f, Position);
-                            for (int k = 0; k < 4; ++k)
-                            {
-                                VectorAdd(currentTail[k], Position, Position);
-                            }
-                            VectorScale(Position, 0.25f, Position);
-
-                            CreateSprite(BITMAP_FLARE_BLUE, Position, 0.3f, o->Light, NULL, (float)(rand() % 360), 3);
-                            CreateSprite(BITMAP_SHINY + 1, Position, 1.f, o->Light, NULL, (float)(rand() % 360), 3);
-                        }
-                    }
                     std::uint32_t faceColor = PackABGR(o->Light[0], o->Light[1], o->Light[2], 1.f);
                     if (o->Type == BITMAP_JOINT_THUNDER + 1 && o->SubType == 0)
                     {

@@ -27,6 +27,9 @@ std::span<const std::string_view> GetNames();
 // the drawing code then draws the model itself.
 bool Render(BMD* b, OBJECT* o, int modelType, float alpha, int renderType);
 
+// The lights and tint the helper NPCs' plate armor keeps on them, for the update to spawn while it is drawn.
+void SpawnHelperNpcPlateLights(OBJECT* o);
+
 // Draws the glow pass of items +7 and up for the few render styles that glow
 // differently from their "glow" values. False for the others.
 bool RenderGlow(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, int texture);

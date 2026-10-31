@@ -47,6 +47,8 @@
 #include "Camera/ICamera.h"
 #include "Engine/Object/CullingConstants.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "Render/Items/ItemDisplay.h"
+#include "Render/Items/ItemRenderStyles.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
@@ -6988,6 +6990,11 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     Engine::Object::Attachments::Slot* slot = Engine::Object::Attachments::Record(
         c, f, Type, x, y, z, Level, Option1, Link, Translate, RenderType, bRightHandItem, f->LinkBone, o->Scale);
     vec34_t* bones = slot != nullptr ? Engine::Object::Attachments::Bones(*slot) : BoneTransform;
+    if (slot != nullptr)
+        slot->shadow = o->EnableShadow;
+    // A client character's part copied for this call shows its source's pose, which the update already advanced; the
+    // update spawns its effects.
+    const bool copied = slot != nullptr && slot->part == nullptr;
 
     // CopyShadowAngle(f,b);
     b->ContrastEnable = o->ContrastEnable;
@@ -7025,7 +7032,7 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     if (g_PrepassBoneCheck.enabled && slot != nullptr && slot->part != nullptr)
         ++(advanced ? g_PrepassBoneCheck.partsReused : g_PrepassBoneCheck.partsAdvancedInDraw);
 #endif
-    if (!advanced)
+    if (!advanced && !copied)
         AdvanceLinkedPart(c, f, Type, Link);
     b->CurrentAction = LinkedPartAction(c, f);
 
@@ -7085,8 +7092,8 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
         return bones;
     }
 
-    // The update spawns the effects of a part it advanced; the draw spawns the others'.
-    if (!advanced)
+    // The update spawns the effects of a part it advanced or copied; the draw spawns the others'.
+    if (!advanced && !copied)
         SpawnLinkedPartEffects(c, Type, Object, bones, Position);
 
     if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE &&
@@ -9211,6 +9218,10 @@ void UpdateCloakCloth(CHARACTER* c, OBJECT* o)
         {
             DeleteCloth(c, o);
         }
+        else
+        {
+            pCloth[i].SpawnLights();
+        }
     }
 }
 
@@ -9341,6 +9352,10 @@ void UpdatePlayerBodyParts(CHARACTER* c)
             {
                 StepPartCloth(o, p, p->Type, p->Level, true);
                 drawsAPart = true;
+                // The helper NPCs' plate armor style lights them.
+                if (o->m_bpcroom == TRUE &&
+                    Render::Items::Display::GetDrawnModel(p->Type, p->Level) == MODEL_PLATE_ARMOR)
+                    Render::Items::Styles::SpawnHelperNpcPlateLights(o);
             }
         }
         if (drawsAPart)
@@ -11888,6 +11903,19 @@ void SpawnHeldWeaponGlows(CHARACTER* c)
     }
 }
 
+// Spawns the effects of a slot's part, placed and posed for it.
+void SpawnSlotEffects(CHARACTER* c, Engine::Object::Attachments::Slot& slot, const LinkPlacement& placement)
+{
+    BMD* b = &Models[slot.type];
+    VectorCopy(placement.origin, b->BodyOrigin);
+    b->BodyScale = placement.scale;
+    OBJECT* Object = ItemObjectFor(c, slot.type);
+    VectorCopy(placement.angle, Object->Angle);
+    VectorCopy(placement.origin, Object->Position);
+    if (!Object->EnableShadow)
+        SpawnLinkedPartEffects(c, slot.type, Object, Engine::Object::Attachments::Bones(slot), placement.position);
+}
+
 // Advances and poses the parts the character's last draw attached, once per draw.
 void UpdateAttachedParts(CHARACTER* c)
 {
@@ -11901,16 +11929,19 @@ void UpdateAttachedParts(CHARACTER* c)
             AdvanceLinkedPart(c, f, slot.type, slot.link);
             slot.posed = PosedAt(f, LinkedPartAction(c, f), placement);
             PoseLinkedPart(c, slot.type, slot.link, slot.posed, Engine::Object::Attachments::Bones(slot));
-
-            BMD* b = &Models[slot.type];
-            VectorCopy(placement.origin, b->BodyOrigin);
-            b->BodyScale = placement.scale;
-            OBJECT* Object = ItemObjectFor(c, slot.type);
-            VectorCopy(placement.angle, Object->Angle);
-            VectorCopy(placement.origin, Object->Position);
-            if (!Object->EnableShadow)
-                SpawnLinkedPartEffects(c, slot.type, Object, Engine::Object::Attachments::Bones(slot),
-                                       placement.position);
+            SpawnSlotEffects(c, slot, placement);
+        });
+    // A part the draw copies for one call, such as a weapon on the back: posed as drawn, without advancing it.
+    Engine::Object::Attachments::ForEachCopied(
+        c,
+        [c](Engine::Object::Attachments::Slot& slot)
+        {
+            PART_t* f = slot.copy.get();
+            const LinkPlacement placement = PlaceLinkedPart(slot.x, slot.y, slot.z, c, slot.linkBone, slot.ownerScale,
+                                                            slot.type, slot.link, slot.rightHandItem);
+            PoseLinkedPart(c, slot.type, slot.link, PosedAt(f, LinkedPartAction(c, f), placement),
+                           Engine::Object::Attachments::Bones(slot));
+            SpawnSlotEffects(c, slot, placement);
         });
 }
 

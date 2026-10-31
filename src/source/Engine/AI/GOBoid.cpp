@@ -1289,6 +1289,69 @@ void MoveBoidGroup(OBJECT* o, int index)
     }
 }
 
+// The sparks, glows and smoke of the boids the last frame drew, posed as their draw poses them.
+static void UpdateDrawnBoidEffects()
+{
+    for (int i = 0; i < MAX_BOIDS; i++)
+    {
+        OBJECT* o = &Boids[i];
+        if (!o->Live || !o->Visible || o->Type == MODEL_SPEARSKILL)
+            continue;
+        // The draw turns a boid a quarter for its model.
+        o->Angle[2] += 90.f;
+        BMD* b = &Models[o->Type];
+        const auto bones = [o, b]
+        {
+            PlaceObjectModel(o, b);
+            return Engine::Object::Pose::World(o, b);
+        };
+        vec3_t p, Position, Light;
+        switch (o->Type)
+        {
+        case MODEL_DRAGON_:
+            if (EnableEvent != 0)
+            {
+                Vector(0.f, -50.f, 0.f, p);
+                b->TransformPosition(bones()[11], p, Position);
+                Vector(1.f, 0.f, 0.f, Light);
+                CreateSprite(BITMAP_LIGHTNING + 1, Position, 1.f, Light, o);
+                Vector(1.f, 1.f, 1.f, Light);
+                CreateParticleFpsChecked(BITMAP_FIRE, Position, o->Angle, Light);
+            }
+            break;
+
+        case MODEL_BUTTERFLY01:
+        {
+            float Luminosity = (float)(rand() % 32 + 64) * 0.01f;
+
+            Vector(Luminosity * 0.2f, Luminosity * 0.4f, Luminosity * 0.4f, Light);
+            CreateSprite(BITMAP_LIGHT, o->Position, 1.f, Light, o);
+        }
+        break;
+
+        case MODEL_MAP_TORNADO:
+        {
+            CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, o->Light, 18, o->Scale, o);
+        }
+        break;
+
+        case MODEL_CROW:
+            Vector(-5.f, 0.f, 0.f, p);
+            b->TransformPosition(bones()[1], p, Position, true);
+
+            float Luminosity = (float)(rand() % 32 + 128) * 0.01f;
+            Vector(Luminosity * 1.f, Luminosity * 0.2f, 0.f, Light);
+            CreateSprite(BITMAP_LIGHT, Position, 0.1f, Light, o);
+
+            Vector(5.f, 0.f, 0.f, p);
+            b->TransformPosition(bones()[1], p, Position, true);
+            CreateSprite(BITMAP_LIGHT, Position, 0.1f, Light, o);
+            break;
+        }
+        o->Angle[2] -= 90.f;
+    }
+}
+
 void MoveBoids()
 {
     if (!g_pOption->GetRenderAllEffects())
@@ -1597,6 +1660,7 @@ void MoveBoids()
             Alpha(o);
         }
     }
+    UpdateDrawnBoidEffects();
 }
 
 void RenderBoids(bool bAfterCharacter)
@@ -1626,54 +1690,14 @@ void RenderBoids(bool bAfterCharacter)
                 RenderObject(o, true);
 
                 BMD* b = &Models[o->Type];
-                vec3_t p, Position, Light;
-                switch (o->Type)
+                vec3_t Position;
+                if (o->Type == MODEL_DRAGON_ && o->SubType == 1)
                 {
-                case MODEL_DRAGON_:
-                    if (o->SubType == 1)
-                    {
-                        float Bright = 1.0f;
-                        RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_METAL | RENDER_BRIGHT, Bright);
-                        RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT, Bright);
-                    }
-                    if (EnableEvent != 0)
-                    {
-                        Vector(0.f, -50.f, 0.f, p);
-                        b->TransformPosition(BoneTransform[11], p, Position);
-                        Vector(1.f, 0.f, 0.f, Light);
-                        CreateSprite(BITMAP_LIGHTNING + 1, Position, 1.f, Light, o);
-                        Vector(1.f, 1.f, 1.f, Light);
-                        CreateParticleFpsChecked(BITMAP_FIRE, Position, o->Angle, Light);
-                    }
-                    break;
-
-                case MODEL_BUTTERFLY01:
-                {
-                    float  Luminosity = (float)(rand() % 32 + 64) * 0.01f;
-
-                    Vector(Luminosity * 0.2f, Luminosity * 0.4f, Luminosity * 0.4f, Light);
-                    CreateSprite(BITMAP_LIGHT, o->Position, 1.f, Light, o);
-                }
-                break;
-
-                case MODEL_MAP_TORNADO:
-                {
-                    CreateParticleFpsChecked(BITMAP_CLOUD, o->Position, o->Angle, o->Light, 18, o->Scale, o);
-                }
-                break;
-
-                case MODEL_CROW:
-                    Vector(-5.f, 0.f, 0.f, p);
-                    b->TransformPosition(BoneTransform[1], p, Position, true);
-
-                    float Luminosity = (float)(rand() % 32 + 128) * 0.01f;
-                    Vector(Luminosity * 1.f, Luminosity * 0.2f, 0.f, Light);
-                    CreateSprite(BITMAP_LIGHT, Position, 0.1f, Light, o);
-
-                    Vector(5.f, 0.f, 0.f, p);
-                    b->TransformPosition(BoneTransform[1], p, Position, true);
-                    CreateSprite(BITMAP_LIGHT, Position, 0.1f, Light, o);
-                    break;
+                    float Bright = 1.0f;
+                    RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_METAL | RENDER_BRIGHT,
+                                              Bright);
+                    RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT,
+                                              Bright);
                 }
                 if (gMapManager.WorldActive != WD_10HEAVEN)
                 {

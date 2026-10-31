@@ -756,6 +756,33 @@ BOOL CPhysicsCloth::PreventFromStretching(void)
     return (TRUE);
 }
 
+void CPhysicsCloth::SpawnLights()
+{
+    if (!(PCT_MASK_LIGHT & m_dwType))
+    {
+        return;
+    }
+    float Lum = sinf(WorldTime * 0.001f) * 0.1f + 0.4f;
+    float Lum2;
+    vec3_t Light;
+    vec3_t Position;
+    int iOffset = 0;
+    float fScale = 0.f;
+    for (int i = 0; i < m_iNumHor; i++)
+    {
+        for (int j = 0; j < m_iNumVer; j++)
+        {
+            fScale = i * 0.2f + 0.4f;
+            Lum2 = Lum * (m_iNumHor - i) / 5.f;
+
+            Vector(Lum2, Lum2, Lum2, Light);
+            m_pVertices[iOffset].GetPosition(&Position);
+            CreateSprite(BITMAP_LIGHT, Position, fScale, Light, NULL);
+            iOffset++;
+        }
+    }
+}
+
 void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
 {
     auto* pvRenderPos = new vec3_t[m_iNumVertices];
@@ -785,23 +812,6 @@ void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
 
     if (PCT_MASK_LIGHT & m_dwType)
     {
-        float  Lum = sinf(WorldTime * 0.001f) * 0.1f + 0.4f;
-        float  Lum2;
-        vec3_t Light;
-        int    iOffset = 0;
-        float  fScale = 0.f;
-        for (int i = 0; i < m_iNumHor; i++)
-        {
-            for (int j = 0; j < m_iNumVer; j++)
-            {
-                fScale = i * 0.2f + 0.4f;
-                Lum2 = Lum * (m_iNumHor - i) / 5.f;
-
-                Vector(Lum2, Lum2, Lum2, Light);
-                CreateSprite(BITMAP_LIGHT, pvRenderPos[iOffset], fScale, Light, NULL);
-                iOffset++;
-            }
-        }
         EnableAlphaBlend();
     }
 #ifdef RENDER_CLOTH

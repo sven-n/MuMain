@@ -44,6 +44,10 @@ struct Slot
     float ownerScale = 1.f;
     // The character's part, or nullptr for a part the draw built for this call only.
     _PART_t* part = nullptr;
+    // A copy of a part the draw built for this call only (a weapon on the back, a weapon's shadow).
+    std::shared_ptr<_PART_t> copy;
+    // Drawn in the shadow pass.
+    bool shadow = false;
     unsigned int drawnFrame = 0;
     // The previous draw recorded the same attachment in this slot.
     bool sameAsLast = false;
@@ -74,4 +78,6 @@ std::optional<bool> WeaponsHeldInLastDraw(const CHARACTER* c);
 vec34_t* LastBonesOf(const CHARACTER* c, const _PART_t* part);
 // The slots of the character's last draw, for the update to advance once per draw; marks each one it hands out.
 void ForEachToAdvance(const CHARACTER* c, const std::function<void(Slot&)>& advance);
+// The slots of the character's last draw outside its shadow pass that drew a part built for that call only.
+void ForEachCopied(const CHARACTER* c, const std::function<void(Slot&)>& visit);
 } // namespace Engine::Object::Attachments

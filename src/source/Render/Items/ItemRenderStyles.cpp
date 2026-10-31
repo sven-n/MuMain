@@ -1310,22 +1310,6 @@ bool RenderHelperNpcPlate(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     {
         return false;
     }
-    if (Type == MODEL_PLATE_ARMOR)
-    {
-        vec3_t EndRelative, EndPos;
-        Vector(0.f, 0.f, 0.f, EndRelative);
-
-        b->TransformPosition(o->BoneTransform[0], EndRelative, EndPos, true);
-
-        Vector(0.4f, 0.6f, 0.8f, o->Light);
-        CreateSprite(BITMAP_LIGHT, EndPos, 6.0f, o->Light, o, 0.5f);
-
-        float Luminosity;
-        Luminosity = sinf(WorldTime * 0.05f) * 0.4f + 0.9f;
-        Vector(Luminosity * 0.3f, Luminosity * 0.5f, Luminosity * 0.8f, o->Light);
-        CreateSprite(BITMAP_LIGHT, EndPos, 2.0f, o->Light, o);
-    }
-
     vec3_t Light;
     VectorCopy(b->BodyLight, Light);
     Vector(0.9f, 0.7f, 1.0f, b->BodyLight);
@@ -1938,6 +1922,26 @@ std::span<const std::string_view> GetNames()
         return sorted;
     }();
     return names;
+}
+
+void SpawnHelperNpcPlateLights(OBJECT* o)
+{
+    BMD* b = &Models[MODEL_PLATE_ARMOR];
+    b->BodyScale = o->Scale;
+    VectorCopy(o->Position, b->BodyOrigin);
+
+    vec3_t EndRelative, EndPos;
+    Vector(0.f, 0.f, 0.f, EndRelative);
+
+    b->TransformPosition(o->BoneTransform[0], EndRelative, EndPos, true);
+
+    Vector(0.4f, 0.6f, 0.8f, o->Light);
+    CreateSprite(BITMAP_LIGHT, EndPos, 6.0f, o->Light, o, 0.5f);
+
+    float Luminosity;
+    Luminosity = sinf(WorldTime * 0.05f) * 0.4f + 0.9f;
+    Vector(Luminosity * 0.3f, Luminosity * 0.5f, Luminosity * 0.8f, o->Light);
+    CreateSprite(BITMAP_LIGHT, EndPos, 2.0f, o->Light, o);
 }
 
 bool Render(BMD* b, OBJECT* o, int modelType, float alpha, int renderType)
