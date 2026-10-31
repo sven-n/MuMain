@@ -82,6 +82,7 @@ constexpr std::array<EnumName<ItemTag>, static_cast<size_t>(ItemTag::Count)> Ite
     {ItemTag::NoLevelRequirement, "noLevelRequirement"},
     {ItemTag::NoDurabilityLine, "noDurabilityLine"},
     {ItemTag::NoBlankAfterOptions, "noBlankAfterOptions"},
+    {ItemTag::NoClassLines, "noClassLines"},
 }};
 
 constexpr std::array<EnumName<ItemRequirement>, ItemRequirementCount> ItemRequirementNames = {{

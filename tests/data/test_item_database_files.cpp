@@ -3558,7 +3558,8 @@ TEST_CASE("The shared model form follows an undo of meshes typed without spaces 
 }
 
 // Items with the same name: the lucky sets have a tag their namesakes do not,
-// the Seals of Wealth and the seed sphere tiers count up by number.
+// the Seals of Wealth and the seed sphere tiers count up by number (13/44's
+// noClassLines only leaves tooltip lines out, so it does not tell them apart).
 TEST_CASE("The item lists tell items with the same name apart [data][items][editor]")
 {
     ClientDataScope client(ShippedClientDirectory);

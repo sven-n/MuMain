@@ -301,15 +301,6 @@
   <data name="Box of Heaven" xml:space="preserve">
     <value>caja del cielo</value>
   </data>
-  <data name="When you drop it on the ground," xml:space="preserve">
-    <value>Cuando lo dejas caer al suelo,</value>
-  </data>
-  <data name="[Rena/Zen/Jewel/Item]" xml:space="preserve">
-    <value>[Rena/Zen/Joya/Objeto]</value>
-  </data>
-  <data name="you will get one of the above items." xml:space="preserve">
-    <value>Obtendrá uno de los artículos anteriores.</value>
-  </data>
   <data name="Box of Kundun" xml:space="preserve">
     <value>Caja de Kundún</value>
   </data>
@@ -1575,9 +1566,6 @@
   </data>
   <data name="Pwned by the Filter!" xml:space="preserve">
     <value>¡Atrapado por el filtro!</value>
-  </data>
-  <data name="Throw it and you may receive some Zen or items" xml:space="preserve">
-    <value>Tíralo y podrás recibir algo de Zen o artículos.</value>
   </data>
   <data name="Absorb 30%% of damage" xml:space="preserve">
     <value>Absorbe el 30% del daño % of</value>
@@ -4450,12 +4438,6 @@
   <data name="be upon you." xml:space="preserve">
     <value>sea ​​sobre ti.</value>
   </data>
-  <data name="Free entrance to Kalima" xml:space="preserve">
-    <value>Entrada gratuita a Kalima.</value>
-  </data>
-  <data name="Increase stamina" xml:space="preserve">
-    <value>aumentar la resistencia</value>
-  </data>
   <data name="You can't delete the character that belongs to the guild" xml:space="preserve">
     <value>No puedes eliminar el personaje que pertenece al gremio.</value>
   </data>
@@ -4906,12 +4888,6 @@
   <data name="Can't be dismantled." xml:space="preserve">
     <value>No se puede desmantelar.</value>
   </data>
-  <data name="%d %s is combined" xml:space="preserve">
-    <value>%d %s se combina</value>
-  </data>
-  <data name="Can be used after dismantling" xml:space="preserve">
-    <value>Se puede utilizar después del desmontaje.</value>
-  </data>
   <data name="Current no. of possible dismantling: %d" xml:space="preserve">
     <value>Actual no. de posible desmontaje: %d</value>
   </data>
@@ -5331,9 +5307,6 @@
   </data>
   <data name="All NPCs in Crywolf have been deleted." xml:space="preserve">
     <value>Todos los NPC en Crywolf han sido eliminados.</value>
-  </data>
-  <data name="Drop it to receive the gift." xml:space="preserve">
-    <value>Déjalo para recibir el regalo.</value>
   </data>
   <data name="Would you like to receive the item?" xml:space="preserve">
     <value>¿Quieres recibir el artículo?</value>
@@ -5787,15 +5760,6 @@
   </data>
   <data name="the forehead" xml:space="preserve">
     <value>la frente</value>
-  </data>
-  <data name="Attack Speed increase +%d" xml:space="preserve">
-    <value>Aumento de velocidad de ataque +%d</value>
-  </data>
-  <data name="Attack Power increase +%d" xml:space="preserve">
-    <value>Aumento del poder de ataque +%d</value>
-  </data>
-  <data name="Defense Power increase +%d" xml:space="preserve">
-    <value>Aumento del poder de defensa +%d</value>
   </data>
   <data name="Blessing of Jack O'Lantern" xml:space="preserve">
     <value>Bendición de Jack O'Lantern</value>

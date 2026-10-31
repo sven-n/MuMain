@@ -249,9 +249,10 @@ void COMGEM::CalcGen()
 
 int COMGEM::CalcCompiledCount(const ITEM* p)
 {
-    if (CheckOneItem(p) % 2)
-        return (p->Level + 1) * FIRST;
-    return 0;
+    // Only a bundle holds jewels. CheckOneItem can't tell: its NOGEM (-1) is odd like the bundles' kinds.
+    if (!isCompiledGem(p))
+        return 0;
+    return (p->Level + 1) * FIRST;
 }
 
 int COMGEM::CalcItemValue(const ITEM* p)

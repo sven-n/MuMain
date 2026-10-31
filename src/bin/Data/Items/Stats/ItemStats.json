@@ -3,6 +3,12 @@
   "dropLevelBonus": {"excellent": 25, "ancient": 30},
   "tables": [
     {
+      "name": "ammunitionDamageIncrease",
+      "caption": {"en": "Damage Increase in % (Arrows and Bolts)"},
+      "values": 1,
+      "perLevel": 2
+    },
+    {
       "name": "capeDamageAbsorb3rd",
       "caption": {"en": "Damage Absorption in % (3rd Capes)"},
       "values": 24,

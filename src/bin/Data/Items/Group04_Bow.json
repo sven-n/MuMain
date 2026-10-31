@@ -217,6 +217,17 @@
       "description": [
         {
           "text": "@numberOfItems"
+        },
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:ammunitionDamageIncrease"},
+          "color": "blue",
+          "levels": [1, 15]
+        },
+        {
+          "text": "@additionalDamagePlusOne",
+          "color": "blue",
+          "levels": [1, 15]
         }
       ],
       "width": 1,
@@ -443,6 +454,17 @@
       "description": [
         {
           "text": "@numberOfItems"
+        },
+        {
+          "text": "@damageIncrease",
+          "values": {"percent": "table:ammunitionDamageIncrease"},
+          "color": "blue",
+          "levels": [1, 15]
+        },
+        {
+          "text": "@additionalDamagePlusOne",
+          "color": "blue",
+          "levels": [1, 15]
         }
       ],
       "width": 1,

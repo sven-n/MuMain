@@ -218,6 +218,41 @@ public:
 private:
     std::string m_previous;
 };
+
+// The UI's language for the scope; the language before it comes back also when the test stops early.
+class UiLocaleScope
+{
+public:
+    explicit UiLocaleScope(const char* locale) : m_previous(I18N::GetCurrentLocale())
+    {
+        I18N::SetLocale(locale);
+    }
+    ~UiLocaleScope()
+    {
+        I18N::SetLocale(m_previous.c_str());
+    }
+    UiLocaleScope(const UiLocaleScope&) = delete;
+    UiLocaleScope& operator=(const UiLocaleScope&) = delete;
+
+private:
+    std::string m_previous;
+};
+
+// A test's measure of description text for the scope; afterwards the game's font measures it again.
+class TextMeasureScope
+{
+public:
+    explicit TextMeasureScope(ItemTooltipTextMeasure measure)
+    {
+        SetItemTooltipTextMeasure(measure);
+    }
+    ~TextMeasureScope()
+    {
+        SetItemTooltipTextMeasure(nullptr);
+    }
+    TextMeasureScope(const TextMeasureScope&) = delete;
+    TextMeasureScope& operator=(const TextMeasureScope&) = delete;
+};
 } // namespace
 
 // Every item's tooltip at every level 0 to 15, in the eleven variants of WriteItemTooltipSnapshot (plain, full, ancient,
@@ -538,6 +573,29 @@ TEST_CASE("An item's add option values come from its add option [data][items][to
     CHECK_FALSE(duration->empty());
 }
 
+// A bundle holds ten jewels per level step; every other item holds none, a single jewel and any equipment too.
+TEST_CASE("Only a bundle has a bundle count [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeNewDarkWizard(hero.Hero());
+
+    const auto bundleCount = [](int group, int number, int level)
+    {
+        ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(group, number);
+        params.Level = static_cast<BYTE>(level);
+        ITEM item;
+        FillItemFromParameters(item, params);
+        return Engine::Items::TooltipValues::ComputeItemTooltipValues(item).bundleCount;
+    };
+    CHECK(bundleCount(12, 30, 2) == 30); // Bundle of Jewel of Bless +2
+    CHECK(bundleCount(14, 13, 0) == 0);  // Jewel of Bless
+    CHECK(bundleCount(0, 0, 3) == 0);    // Kris +3
+}
+
 TEST_CASE("An item's duration text follows the UI's language [data][items][tooltip]")
 {
     ClientDataScope client(ClientDirectory);
@@ -663,6 +721,52 @@ TEST_CASE("The item names of windows and ground labels come from the name lines 
     GetItemName(ITEM_BOX_OF_LUCK, 4, name);
     CHECK(std::wstring(name) == L"Olive of love");
     CHECK(GetItemNameText(-1, 0).empty());
+}
+
+// The item cases moved into the data with their translations: a lost language or a broken placeholder shows here, as
+// the tooltip snapshot is English.
+TEST_CASE("The item cases' lines are in the UI's language [data][items][tooltip]")
+{
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    TextMeasureScope measure(&FixedWidthMeasure);
+    UiLocaleScope german("de");
+
+    const auto lines = [](int group, int number, int level)
+    {
+        ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(group, number);
+        params.Level = static_cast<BYTE>(level);
+        std::vector<std::wstring> texts;
+        for (const ItemTooltipLine& line : Engine::Items::TooltipSnapshot::TooltipOfParameters(params))
+        {
+            texts.push_back(line.text);
+        }
+        return texts;
+    };
+    const auto has = [](const std::vector<std::wstring>& texts, const std::wstring& text)
+    { return std::find(texts.begin(), texts.end(), text) != texts.end(); };
+
+    const std::vector<std::wstring> bundle = lines(12, 30, 0);
+    const std::vector<std::wstring> arrows = lines(4, 15, 1);
+    const std::vector<std::wstring> boxOfLuck = lines(14, 11, 14);
+    const std::vector<std::wstring> jackOLantern = lines(14, 46, 0);
+
+    CHECK(has(bundle, L"10 Juwel des Segens kombiniert"));
+    CHECK(has(bundle, L"Kann nach dem Zerlegen verwendet werden"));
+    CHECK(has(arrows, L"Erhöht den Schaden um 3%"));
+    CHECK(has(arrows, L"Zusätzlicher Schaden +1"));
+    CHECK(has(boxOfLuck, L"Freier Eintritt nach Kalima"));
+    CHECK(has(boxOfLuck, L"Kann nicht verkauft werden."));
+    CHECK(std::any_of(jackOLantern.begin(), jackOLantern.end(),
+                      [](const std::wstring& text)
+                      {
+                          return text.starts_with(L"Angriffsgeschwindigkeit +") &&
+                                 text.find(L'{') == std::wstring::npos;
+                      }));
 }
 
 // The option lines are the lines the full item has and the plain one doesn't (luck, skill, the option, the excellent

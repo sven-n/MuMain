@@ -190,6 +190,7 @@ can have several tags; the file lists them in the order below.
 | `noLevelRequirement` | The tooltip shows no level requirement, though the item has one (Loch's Feather) |
 | `noDurabilityLine` | The tooltip shows no standard durability line, though the item has a durability: it shows none, or its description has its own (a pet's "Life", a stack's "Number of items", a ticket's "usable … times") |
 | `noBlankAfterOptions` | The tooltip leaves out the blank line after the options, so the item's lines drawn there follow the options directly (the Pet Skeleton, the Invitation to Santa Village) |
+| `noClassLines` | The tooltip shows no class lines ("Can be equipped by …") and not the blank line before them. The original client's list, 99 items: most seals, talismans, tickets, scrolls, elixirs, elite and cash shop potions, chaos cards and reset fruits, the transformation rings and gamble items, five pets (Demon, Spirit of Guardian, Rudolf, Panda, Unicorn), the Bundles of Jewel of Bless and Soul (not the other bundles), the ribbon boxes, the Jewel of Chaos, the Horn of Fenrir, the Weapon of Archangel, the Armor of Guardsman and the Gem of Secret; Item Categories lists them. Every item with `elitePotion`, `buffScroll`, `elixir`, `gambleItem`, `battleOrStrengthScroll` or `guardianPet` has it; one without it is a warning |
 
 Wings need no tag: an item is a wing when its `slot` is `wings`.
 
@@ -282,7 +283,7 @@ of a layout go between them:
 |---|---|
 | `name` | Everything up to the item's name, and the name |
 | `description` | The item's own texts: the code's texts for particular items, the item's [description](#fields) |
-| `classes` | The classes that can use the item, and the boots' and gloves' texts from +5 |
+| `classes` | The classes that can use the item (not for items with the tag `noClassLines`), and the boots' and gloves' texts from +5 |
 | `options` | The excellent, set, socket, Jewel of Harmony and other options, to the end of the tooltip |
 
 Each layout has the four sections once each, in this order: it starts with
