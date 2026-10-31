@@ -3040,4 +3040,7 @@
   <data name="The Item Browser lists it as Entry without a name" xml:space="preserve">
     <value>The Item Browser lists it as "Entry without a name"</value>
   </data>
+  <data name="Cue frames need a monster of the set" xml:space="preserve">
+    <value>Select a monster that plays the set to edit the cue.</value>
+  </data>
 </root>

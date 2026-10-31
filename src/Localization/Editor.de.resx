@@ -3019,4 +3019,7 @@
   <data name="The Item Browser lists it as Entry without a name" xml:space="preserve">
     <value>Die Gegenstandsliste zeigt es als „Eintrag ohne Namen“</value>
   </data>
+  <data name="Cue frames need a monster of the set" xml:space="preserve">
+    <value>Wähle ein Monster, das das Set spielt, um die Marke zu bearbeiten.</value>
+  </data>
 </root>

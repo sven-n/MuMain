@@ -549,6 +549,7 @@ TEST_CASE("Monster Sounds gives Monster Preview the model it edits in the frame 
 {
     MonsterDefinition hound = Monster(3, "Hound");
     hound.model = "MONSTER_MODEL_HOUND";
+    hound.soundSet = "Hound";
     const std::array monsters = {hound};
     g_MonsterDatabase.Build(monsters, "en");
     Data::Monsters::MonsterModelDefinition model;
@@ -558,6 +559,10 @@ TEST_CASE("Monster Sounds gives Monster Preview the model it edits in the frame 
     model.cues = {{"step 1", MONSTER01_WALK, {1.0f, 2.0f}}};
     const std::array models = {model};
     g_MonsterModelDatabase.Build(models);
+    Data::Monsters::MonsterSoundSet set;
+    set.name = "Hound";
+    const std::array sets = {set};
+    g_MonsterSoundSetDatabase.Build(sets);
     TestImGuiContext context;
     g_MonsterSelection.Select(3);
 
@@ -581,6 +586,71 @@ TEST_CASE("Monster Sounds gives Monster Preview the model it edits in the frame 
     ImGui::Render();
     g_MonsterSelection.Select(MonsterSelection::NoMonster);
     g_MonsterModelDatabase.Build({});
+    g_MonsterSoundSetDatabase.Build({});
+}
+
+TEST_CASE("Monster Sounds edits the cues of the shown look's model only with the set the look plays "
+          "[editor][monsters]")
+{
+    MonsterDefinition hound = Monster(3, "Hound");
+    hound.model = "MONSTER_MODEL_HOUND";
+    hound.soundSet = "Hound";
+    MonsterDefinition elf = Monster(163, "Chaos Castle 2");
+    elf.model = "MONSTER_MODEL_CHAOSCASTLE_ELF";
+    elf.soundSet = "Elf";
+    elf.randomVariants = {{"MONSTER_MODEL_CHAOSCASTLE_WIZARD", std::string("Wizard")}};
+    const std::array monsters = {hound, elf};
+    g_MonsterDatabase.Build(monsters, "en");
+    Data::Monsters::MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_HOUND";
+    model.load.file = "Data/Monster/Monster02.bmd";
+    model.load.textureFolders = {"Monster"};
+    model.cues = {{"step 1", MONSTER01_WALK, {1.0f, 2.0f}}};
+    Data::Monsters::MonsterModelDefinition elfModel = model;
+    elfModel.slot = "MONSTER_MODEL_CHAOSCASTLE_ELF";
+    const std::array models = {model, elfModel};
+    g_MonsterModelDatabase.Build(models);
+    std::vector<Data::Monsters::MonsterSoundSet> sets(3);
+    sets[0].name = "Hound";
+    sets[1].name = "Elf";
+    sets[2].name = "Wizard";
+    g_MonsterSoundSetDatabase.Build(sets);
+    TestImGuiContext context;
+    const auto draw = [&]
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterSoundsUI.Render(&open);
+        ImGui::Render();
+    };
+
+    g_MonsterSelection.Select(3);
+    draw();
+    CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) != nullptr);
+    SUBCASE("another monster's set picked in the list")
+    {
+        g_MuMonsterSoundsUI.ShowEvent("Elf", std::nullopt);
+        draw();
+        CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) == nullptr);
+        g_MuMonsterSoundsUI.ShowEvent("Hound", std::nullopt);
+        draw();
+        CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) != nullptr);
+    }
+    SUBCASE("a variant's set opened while the entry's look is shown")
+    {
+        g_MonsterSelection.Select(163);
+        MuEditor::Monsters::ShownModel::SetShownVariant(163, -1);
+        draw();
+        const int elfSlot = MODEL_CHAOS_CASTLE_ELF;
+        CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(elfSlot) != nullptr);
+        g_MuMonsterSoundsUI.ShowEvent("Wizard", std::nullopt);
+        draw();
+        CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(elfSlot) == nullptr);
+    }
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterModelDatabase.Build({});
+    g_MonsterSoundSetDatabase.Build({});
+    g_MonsterDatabase.Build({}, "en");
 }
 
 TEST_CASE("Monster Preview marks the cues of Monster Sounds' draft, also while Monster Model shows the model "
@@ -588,6 +658,7 @@ TEST_CASE("Monster Preview marks the cues of Monster Sounds' draft, also while M
 {
     MonsterDefinition hound = Monster(3, "Hound");
     hound.model = "MONSTER_MODEL_HOUND";
+    hound.soundSet = "Hound";
     const std::array monsters = {hound};
     g_MonsterDatabase.Build(monsters, "en");
     Data::Monsters::MonsterModelDefinition model;
@@ -597,6 +668,10 @@ TEST_CASE("Monster Preview marks the cues of Monster Sounds' draft, also while M
     model.cues = {{"step 1", MONSTER01_WALK, {1.0f, 2.0f}}};
     const std::array models = {model};
     g_MonsterModelDatabase.Build(models);
+    Data::Monsters::MonsterSoundSet set;
+    set.name = "Hound";
+    const std::array sets = {set};
+    g_MonsterSoundSetDatabase.Build(sets);
     TestImGuiContext context;
     g_MonsterSelection.Select(3);
 
@@ -616,6 +691,7 @@ TEST_CASE("Monster Preview marks the cues of Monster Sounds' draft, also while M
     ImGui::Render();
     g_MonsterSelection.Select(MonsterSelection::NoMonster);
     g_MonsterModelDatabase.Build({});
+    g_MonsterSoundSetDatabase.Build({});
     g_MonsterDatabase.Build({}, "en");
 }
 
