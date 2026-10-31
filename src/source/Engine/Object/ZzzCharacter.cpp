@@ -11750,6 +11750,7 @@ void UpdateDrawnCharacterEffects()
         }
         UpdateEventCharacterEffects(o);
         UpdateRenderObjectEffects(o);
+        giPetManager::UpdatePetEffects(c);
         if (UpdateCharacterTypeEffects(c, o, b))
             continue;
         // Same order and stop-on-claim as RenderCharacter's chain.

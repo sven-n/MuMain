@@ -6,6 +6,7 @@
 #include "Engine/Object/ObjectPose.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
+#include "GameLogic/Pets/CSPetSystem.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Models/ZzzBMD.h"
 #include "World/MapInfra/w_MapProcess.h"
@@ -435,4 +436,27 @@ TEST_CASE("A wall's debris effect bursts before its two ticks of life run out, d
     model.Meshs = nullptr;
     model.NumMeshs = 0;
     FPS_ANIMATION_FACTOR = previousFrameFactor;
+}
+
+TEST_CASE("A Dark Spirit the last frame left off screen flies back from the update [effects]")
+{
+    struct Raven : CSPetDarkSpirit
+    {
+        using CSPetDarkSpirit::CSPetDarkSpirit;
+        OBJECT& object()
+        {
+            return m_PetCharacter.Object;
+        }
+    };
+    CharacterScope scope(MODEL_PLAYER);
+    Raven raven(&scope.character());
+    OBJECT& o = raven.object();
+    o.Visible = false;
+    o.AI = PET_ATTACK;
+    o.Velocity = 0.f;
+
+    raven.UpdatePetEffects();
+
+    CHECK(o.AI == PET_FLYING);
+    CHECK(o.Velocity == 3.f);
 }

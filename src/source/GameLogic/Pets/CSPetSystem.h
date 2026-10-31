@@ -37,6 +37,8 @@ public:
     virtual void MovePet(void) = 0;
     virtual void CalcPetInformation(const PET_INFO& Petinfo) = 0;
     virtual void RenderPet(int PetState = 0) = 0;
+    // The effects and state changes of the pet's draw, for a pet the last frame drew.
+    virtual void UpdatePetEffects() = 0;
 
     virtual void Eff_LevelUp(void) = 0;
     virtual void Eff_LevelDown(void) = 0;
@@ -67,6 +69,7 @@ public:
     virtual void MovePet(void);
     virtual void CalcPetInformation(const PET_INFO& Petinfo);
     virtual void RenderPet(int PetState = 0);
+    virtual void UpdatePetEffects();
 
     virtual void Eff_LevelUp(void);
     virtual void Eff_LevelDown(void);
