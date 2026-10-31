@@ -4,6 +4,7 @@
 
 #include "Data/GameData/ServerListData/ButtonColors.h"
 #include "Data/GameData/ServerListData/ChannelNameBuilder.h"
+#include "Data/GameData/ServerListData/ServerListIds.h"
 
 #include <optional>
 #include <string>
@@ -142,21 +143,21 @@ TEST_CASE("ChannelNameBuilder: the built-in texts name the four kinds of channel
           "[Valhalla / MaxiDK]");
 }
 
-TEST_CASE("ChannelNameBuilder: VIP type ids")
+TEST_CASE("ServerListIds: the ids of VIP types and colors")
 {
-    CHECK(Data::ServerList::IsVipTypeId("gold"));
-    CHECK(Data::ServerList::IsVipTypeId("goldPlus2"));
-    CHECK_FALSE(Data::ServerList::IsVipTypeId(""));
-    CHECK_FALSE(Data::ServerList::IsVipTypeId("Gold"));
-    CHECK_FALSE(Data::ServerList::IsVipTypeId("2gold"));
-    CHECK_FALSE(Data::ServerList::IsVipTypeId("gold plus"));
-    CHECK_FALSE(Data::ServerList::IsVipTypeId("g\xC3\xB6ld"));
+    CHECK(Data::ServerList::IsListId("gold"));
+    CHECK(Data::ServerList::IsListId("goldPlus2"));
+    CHECK_FALSE(Data::ServerList::IsListId(""));
+    CHECK_FALSE(Data::ServerList::IsListId("Gold"));
+    CHECK_FALSE(Data::ServerList::IsListId("2gold"));
+    CHECK_FALSE(Data::ServerList::IsListId("gold plus"));
+    CHECK_FALSE(Data::ServerList::IsListId("g\xC3\xB6ld"));
 
-    CHECK(Data::ServerList::MakeVipTypeId("Gold") == "gold");
-    CHECK(Data::ServerList::MakeVipTypeId("Gold Plus") == "goldPlus");
-    CHECK(Data::ServerList::MakeVipTypeId("New VIP type") == "newVipType");
-    CHECK(Data::ServerList::MakeVipTypeId("2 Silver") == "silver");
-    CHECK(Data::ServerList::MakeVipTypeId("\xC3\x96") == "vip");
+    CHECK(Data::ServerList::MakeListId("Gold", "vip") == "gold");
+    CHECK(Data::ServerList::MakeListId("Gold Plus", "vip") == "goldPlus");
+    CHECK(Data::ServerList::MakeListId("New VIP type", "vip") == "newVipType");
+    CHECK(Data::ServerList::MakeListId("2 Silver", "vip") == "silver");
+    CHECK(Data::ServerList::MakeListId("\xC3\x96", "color") == "color");
 }
 
 TEST_CASE("ChannelNameBuilder: theme color names")

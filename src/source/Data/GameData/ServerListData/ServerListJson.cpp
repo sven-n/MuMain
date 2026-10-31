@@ -4,6 +4,7 @@
 
 #include "ButtonColors.h"
 #include "ChannelNameBuilder.h"
+#include "ServerListIds.h"
 #include "Core/Text/Utf8.h"
 #include "Data/DataHandler/TextFile.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
@@ -213,7 +214,7 @@ std::optional<VipType> ReadVipType(const OrderedJson& json, const std::string& f
     VipType vipType;
     bool valid = true;
     const auto id = json.find(IdKey);
-    if (id == json.end() || !id->is_string() || !IsVipTypeId(id->get<std::string>()))
+    if (id == json.end() || !id->is_string() || !IsListId(id->get<std::string>()))
     {
         issues.Fatal(Field(field, IdKey), "missing, or not letters and digits starting with a lowercase letter");
         valid = false;
@@ -257,7 +258,7 @@ std::optional<CustomColor> ReadCustomColor(const OrderedJson& json, const std::s
     CustomColor color;
     bool valid = true;
     const auto id = json.find(IdKey);
-    if (id == json.end() || !id->is_string() || !IsVipTypeId(id->get<std::string>()))
+    if (id == json.end() || !id->is_string() || !IsListId(id->get<std::string>()))
     {
         issues.Fatal(Field(field, IdKey), "missing, or not letters and digits starting with a lowercase letter");
         valid = false;
