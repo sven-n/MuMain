@@ -8,6 +8,7 @@
 #include "../../src/ThirdParty/RmlUi/Source/Core/DecoratorTiled.h"
 #include <RmlUi/Core/FontEngineInterface.h>
 #include <RmlUi/Core/Mesh.h>
+#include <RmlUi/Core/StyleSheetTypes.h>
 #include <RmlUi/Core/TextShapingContext.h>
 #include <algorithm>
 #include <cmath>
@@ -266,6 +267,28 @@ Rml::Element& Required(Rml::ElementDocument& document, const char* selector)
     REQUIRE(element != nullptr);
     return *element;
 }
+
+// The element's decorator as the stylesheet declares it, e.g. "ninepatch(option-tab-idle, ...)".
+std::string DecoratorText(Rml::Element& element)
+{
+    const Rml::Property* property = element.GetProperty(Rml::PropertyId::Decorator);
+    if (property == nullptr || property->unit != Rml::Unit::DECORATOR)
+        return {};
+    const auto decorators = property->Get<Rml::DecoratorsPtr>();
+    return decorators ? decorators->value : std::string{};
+}
+
+// A legacy options tab row of `tabCount` tabs with tab `active` selected, styled by the theme's sheet.
+std::string OptionTabRowMarkup(int tabCount, int active)
+{
+    const auto stylesheet = (std::filesystem::path(MU_RMLUI_DIR) / "themes/legacy/option_window.rcss").generic_string();
+    std::string tabs;
+    for (int tab = 0; tab < tabCount; ++tab)
+        tabs += std::string(R"(<div class="option-tab-btn)") + (tab == active ? " active-tab" : "") + R"(">Tab</div>)";
+    return R"(<rml><head><link type="text/rcss" href=")" + stylesheet +
+           R"("/></head><body><div id="row" class="option-tab-row" style="width: 404dp;">)" + tabs +
+           "</div></body></rml>";
+}
 } // namespace
 
 TEST_CASE("the legacy character window shows the points to spend between the summary and STR [ui][styling]")
@@ -335,32 +358,37 @@ TEST_CASE("the legacy character window shows the points to spend between the sum
 
 TEST_CASE("the legacy options tabs each paint their own tab, so a separator sits between every two [ui][styling]")
 {
-    // One 3-tab strip stretched under the whole row put its two separators across the labels.
-    const auto stylesheet = (std::filesystem::path(MU_RMLUI_DIR) / "themes/legacy/option_window.rcss").generic_string();
+    // One 3-tab strip stretched under the whole row put its two separators across the labels. Each
+    // tab now paints one cell of it; the last also takes the strip's closing column, and the selected
+    // tab keeps its own art wherever it is.
+    constexpr int TabCount = 5;
     UI::Tests::RmlLayoutFixture fixture;
     fixture.Configure({1024, 768}, 100);
-    auto* document = fixture.LoadMarkup(
-        R"(<rml><head><link type="text/rcss" href=")" + stylesheet +
-        R"("/></head><body><div id="row" class="option-tab-row" style="width: 404dp;">)"
-        R"(<div class="option-tab-btn active-tab">Display</div><div class="option-tab-btn">Graphics</div>)"
-        R"(<div class="option-tab-btn">Audio</div><div class="option-tab-btn">Gameplay</div>)"
-        R"(<div class="option-tab-btn">Interface</div></div></body></rml>)");
-    REQUIRE(document);
-    auto* row = document->GetElementById("row");
-    REQUIRE(row);
-    Rml::ElementList tabs;
-    row->QuerySelectorAll(tabs, ".option-tab-btn");
-    REQUIRE(tabs.size() == 5);
-    CHECK_FALSE(row->GetComputedValues().has_decorator());
-    const float rowLeft = row->GetAbsoluteOffset(Rml::BoxArea::Content).x;
-    float edge = rowLeft;
-    for (auto* tab : tabs)
+    for (int active : {0, TabCount - 1})
     {
-        CHECK(tab->GetComputedValues().has_decorator());
-        const float left = tab->GetAbsoluteOffset(Rml::BoxArea::Border).x;
-        CHECK(left == doctest::Approx(edge));
-        edge = left + tab->GetBox().GetSize(Rml::BoxArea::Border).x;
+        CAPTURE(active);
+        auto* document = fixture.LoadMarkup(OptionTabRowMarkup(TabCount, active));
+        REQUIRE(document);
+        auto* row = document->GetElementById("row");
+        REQUIRE(row);
+        Rml::ElementList tabs;
+        row->QuerySelectorAll(tabs, ".option-tab-btn");
+        REQUIRE(tabs.size() == TabCount);
+        CHECK_FALSE(row->GetComputedValues().has_decorator());
+        const float rowLeft = row->GetAbsoluteOffset(Rml::BoxArea::Content).x;
+        float edge = rowLeft;
+        for (int tab = 0; tab < TabCount; ++tab)
+        {
+            CAPTURE(tab);
+            const char* sprite = tab == active         ? "option-tab-active"
+                                 : tab == TabCount - 1 ? "option-tab-idle-last"
+                                                       : "option-tab-idle";
+            CHECK(DecoratorText(*tabs[tab]).find(std::string("(") + sprite + ",") != std::string::npos);
+            const float left = tabs[tab]->GetAbsoluteOffset(Rml::BoxArea::Border).x;
+            CHECK(left == doctest::Approx(edge));
+            edge = left + tabs[tab]->GetBox().GetSize(Rml::BoxArea::Border).x;
+        }
+        CHECK(edge == doctest::Approx(rowLeft + row->GetBox().GetSize(Rml::BoxArea::Content).x));
+        document->Close();
     }
-    CHECK(edge == doctest::Approx(rowLeft + row->GetBox().GetSize(Rml::BoxArea::Content).x));
-    document->Close();
 }
