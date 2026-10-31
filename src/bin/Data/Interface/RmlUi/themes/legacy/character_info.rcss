@@ -92,6 +92,9 @@
 	left: auto;
 	right: 18px;
 	top: calc(117px + var(--points-room) / 2);
+	/* base.rcss's .sharp-text.sharp-middle centring around .counter-scaled's scale, written out: RmlUi
+	   has no separate translate property, and a shared class in the markup would move classic's
+	   points too. The character window test checks that it scales like the other texts. */
 	transform-origin: right center;
 	transform: translateY(-50%) scale(calc(1 / var(--root-scale, 1)));
 	color: #ff8a00;

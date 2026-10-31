@@ -378,6 +378,8 @@ TEST_CASE("the legacy character window shows the points to spend between the sum
         CHECK(pointsBox.top >= bottomLine - Tolerance);
         CHECK(pointsBox.bottom <= strength.top + Tolerance);
         CHECK(pointsBox.right <= summary.right + Tolerance);
+        // Its transform writes base.rcss's counter-scale out; it must still match the other texts'.
+        CHECK(UI::RmlBridge::DrawnScale(points) == doctest::Approx(UI::RmlBridge::DrawnScale(level)));
         CHECK((pointsBox.top >= levelBox.bottom || pointsBox.left >= levelBox.right));
 
         // The rows moved down to make the gap; the Dark Lord's Command row still clears the action row.
