@@ -12,6 +12,7 @@
 #include <RmlUi/Core/TextShapingContext.h>
 #include <algorithm>
 #include <cmath>
+#include <vector>
 
 namespace
 {
@@ -384,6 +385,44 @@ TEST_CASE("the legacy character window shows the points to spend between the sum
         const DrawnRect actions = Drawn(Required(*document, ".info-btn-quest"));
         CHECK(command.bottom <= actions.top);
 
+        fixture.context->UnloadDocument(document);
+        fixture.Refresh();
+    }
+}
+
+TEST_CASE("every legacy attribute row sits the points' room lower than the original [ui][styling]")
+{
+    // Each row's top is the original's plus --points-room. A var() that failed to resolve would leave
+    // a row at its original top or at 0, at some UI scales only, so the small ones are included.
+    constexpr float PointsRoom = 8.f;
+    constexpr size_t RowElements = 24; // 5 text boxes, labels, values and buttons; 4 line blocks
+    UI::Tests::RmlLayoutFixture fixture;
+    const std::pair<Rml::Vector2i, int> screens[] = {
+        {{800, 600}, 100}, {{1024, 768}, 75}, {{1024, 768}, 100}, {{1920, 1080}, 100}};
+    for (const auto& [viewport, percent] : screens)
+    {
+        CAPTURE(viewport.x);
+        CAPTURE(percent);
+        fixture.Configure(viewport, percent);
+        auto* document = fixture.Load("legacy", "character_info");
+        REQUIRE(document);
+        UI::RmlBridge::SlotPlacement placement;
+        placement.Set(0.f, 0.f, UI::Scaling::DockRightTransform(viewport.x, viewport.y).scaleX);
+        placement.Apply(document, "panel");
+        fixture.Refresh();
+        Rml::ElementList rows;
+        document->QuerySelectorAll(rows, ".attr-textbox, .attr-label, .attr-value, .attr-lines, .stat-btn");
+        REQUIRE(rows.size() == RowElements);
+        std::vector<float> tops;
+        for (auto* row : rows)
+            tops.push_back(row->GetAbsoluteOffset(Rml::BoxArea::Border).y);
+        Required(*document, "#panel").SetProperty("--points-room", "0px");
+        fixture.Refresh();
+        for (size_t row = 0; row < rows.size(); ++row)
+        {
+            CAPTURE(rows[row]->GetClassNames());
+            CHECK(tops[row] - rows[row]->GetAbsoluteOffset(Rml::BoxArea::Border).y == doctest::Approx(PointsRoom));
+        }
         fixture.context->UnloadDocument(document);
         fixture.Refresh();
     }
