@@ -324,6 +324,9 @@ TEST_CASE("ServerListEdits: a VIP type's new id goes to its channels too")
     CHECK(edits.ChangeVipTypeId(0, "golden"));
     CHECK(edits.GetList().vipTypes[0].id == "golden");
     CHECK(edits.GetGroups()[1].channels[0].vip == "golden");
+    // Named after the VIP type, not the channel the new ID also reached.
+    I18N::SetLocale("en");
+    CHECK(edits.GetUndoLabel() == "Gold: ID");
 
     // Not a VIP type id, or one another type has: nothing changes.
     CHECK_FALSE(edits.ChangeVipTypeId(0, "Golden"));
