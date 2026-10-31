@@ -641,23 +641,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
         }
         else if (o->Type == MODEL_FRED)
         {
-            MoveEye(o, b, 14, 15, 71, 72, 73, 74);
-
-            if (!o->m_pCloth)
-            {
-                auto* pCloth = new CPhysicsCloth[1];
-                pCloth[0].Create(o, 10, 0.0f, -10.0f, 0.0f, 5, 12, 150.0f, 190.0f, BITMAP_DEASULER_CLOTH, BITMAP_DEASULER_CLOTH, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER);
-                pCloth[0].AddCollisionSphere(50.0f, -140.0f, -20.0f, 30.0f, 2);
-                o->m_pCloth = (void*)pCloth;
-                o->m_byNumCloth = 1;
-            }
-            auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
-            if (!pCloth[0].Move2(0.005f, 5))
-            {
-                CHARACTER* c = &CharactersClient[(int)o->PKKey];
-                DeleteCloth(c, o);
-            }
-            else
+            if (auto* pCloth = (CPhysicsCloth*)o->m_pCloth)
             {
                 pCloth[0].Render();
             }
@@ -2090,6 +2074,23 @@ void UpdateRenderObjectEffects(OBJECT* o)
 
     switch (o->Type)
     {
+    case MODEL_FRED:
+    {
+        MoveEye(o, b, 14, 15, 71, 72, 73, 74);
+        if (!o->m_pCloth)
+        {
+            auto* pCloth = new CPhysicsCloth[1];
+            pCloth[0].Create(o, 10, 0.0f, -10.0f, 0.0f, 5, 12, 150.0f, 190.0f, BITMAP_DEASULER_CLOTH, BITMAP_DEASULER_CLOTH, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER);
+            pCloth[0].AddCollisionSphere(50.0f, -140.0f, -20.0f, 30.0f, 2);
+            o->m_pCloth = (void*)pCloth;
+            o->m_byNumCloth = 1;
+        }
+        if (!((CPhysicsCloth*)o->m_pCloth)[0].Move2(0.005f, 5))
+        {
+            DeleteCloth(&CharactersClient[(int)o->PKKey], o);
+        }
+    }
+    break;
     case MODEL_STATUE_OF_SAINT:
         if (o->CurrentAction == MONSTER01_DIE || (WorldTime - o->InitialSceneTime) < 1000)
         {
