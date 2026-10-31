@@ -49,8 +49,6 @@ constexpr float DrawWidth = 140.0f;
 constexpr float SoundWidth = 260.0f;
 // The animations offered while the model is not open: up to attack 5.
 constexpr int NamedAnimations = MONSTER01_ATTACK5 + 1;
-constexpr int MaxOneIn = 100000;
-constexpr size_t PickSounds = 2;
 // A new chance is one in this.
 constexpr int NewChance = 2;
 // A new cue is this many frames long; a cue at least this.
@@ -128,13 +126,6 @@ MonsterModelCue* FindCue(MonsterModelDefinition* model, const std::string& name)
     const auto found = std::find_if(model->cues.begin(), model->cues.end(),
                                     [&](const MonsterModelCue& cue) { return cue.name == name; });
     return found != model->cues.end() ? &*found : nullptr;
-}
-
-std::string FrameText(float frame)
-{
-    char text[32];
-    std::snprintf(text, sizeof(text), "%.2f", static_cast<double>(frame));
-    return text;
 }
 
 // Plays the event's sounds at the preview volume, one of a pick's at random.
@@ -417,7 +408,7 @@ private:
         ImGui::SameLine();
         ImGui::SetNextItemWidth(OneInWidth * m_scale);
         ImGui::InputInt("##OneIn", &event.chance->oneIn, 0);
-        event.chance->oneIn = std::clamp(event.chance->oneIn, 1, MaxOneIn);
+        event.chance->oneIn = std::clamp(event.chance->oneIn, 1, Data::Monsters::MaxSoundChanceOneIn);
         m_draft.AfterField(m_label);
         ImGui::SameLine();
         RenderDraw("##ChanceDraw", event.chance->draw);
@@ -443,7 +434,7 @@ private:
     void RenderPick(MonsterSoundEvent& event)
     {
         // A pick chooses one of two sounds, or one sound or none.
-        ImGui::BeginDisabled(event.sounds.empty() || event.sounds.size() > PickSounds);
+        ImGui::BeginDisabled(event.sounds.empty() || event.sounds.size() > Data::Monsters::PickSoundCount);
         bool pick = event.pick.has_value();
         if (ImGui::Checkbox("##Pick", &pick))
         {
@@ -498,7 +489,7 @@ private:
         if (SoundCombo("##AddSound", m_set, added, SoundWidth * m_scale))
         {
             event.sounds.push_back(added);
-            if (event.sounds.size() > PickSounds)
+            if (event.sounds.size() > Data::Monsters::PickSoundCount)
             {
                 event.pick.reset();
             }
@@ -614,6 +605,13 @@ SetDraft MakeSetDraft(SetDraft::Load load, SetDraft::Store store)
 ModelDraft MakeModelDraft(ModelDraft::Load load, ModelDraft::Store store)
 {
     return ModelDraft(std::move(load), std::move(store), Items::ReloadAfterStore::NextFrame);
+}
+
+std::string FrameText(float frame)
+{
+    char text[32];
+    std::snprintf(text, sizeof(text), "%.2f", static_cast<double>(frame));
+    return text;
 }
 
 std::string WhenText(const MonsterSoundEvent& event)

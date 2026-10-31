@@ -56,11 +56,6 @@ const KeySet ChanceKeys{Keys::OneIn, Keys::Draw};
 
 constexpr const char* RandFpsDraw = "randFps";
 constexpr const char* RandDraw = "rand";
-// A sound event's chance: one in 1 to this.
-constexpr int MaxOneIn = 100000;
-// A pick chooses one of two sounds, or one sound or none.
-constexpr size_t PickSounds = 2;
-constexpr int MaxSoundChannels = 4;
 
 std::string SetEntry(std::string_view name)
 {
@@ -207,10 +202,10 @@ bool ReadChance(const OrderedJson& json, const std::string& key, MonsterSoundCha
         issues.Fatal(key, "must be an object with oneIn and draw");
         return false;
     }
-    const std::optional<int> oneIn = Json::ReadWholeIn(json[Keys::OneIn], 1, MaxOneIn);
+    const std::optional<int> oneIn = Json::ReadWholeIn(json[Keys::OneIn], 1, MaxSoundChanceOneIn);
     if (!oneIn)
     {
-        issues.Fatal(key + "." + Keys::OneIn, Json::RangeText(1, MaxOneIn));
+        issues.Fatal(key + "." + Keys::OneIn, Json::RangeText(1, MaxSoundChanceOneIn));
         return false;
     }
     chance.oneIn = *oneIn;
@@ -369,7 +364,7 @@ bool ReadSoundEvent(const OrderedJson& entry, const std::string& key, MonsterSou
     {
         return false;
     }
-    if (event.pick && event.sounds.size() > PickSounds)
+    if (event.pick && event.sounds.size() > PickSoundCount)
     {
         issues.Fatal(prefix + Keys::Sounds, "must be one or two sounds with pick");
         return false;

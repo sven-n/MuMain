@@ -247,6 +247,41 @@ TEST_CASE("Monster sounds: two sounds of a set with one name are fatal, an id th
     CHECK(issues.size() == 3);
 }
 
+TEST_CASE("Monster sounds: the reader takes the sound sets' limits, which the editor keeps to, and no more "
+          "[data][monsters]")
+{
+    const auto channels = [](int count)
+    {
+        return Read(
+            SoundsFile(Set(R"("sounds": [{"file": "Data/Sound/a.wav", "channels": )" + std::to_string(count) + "}]")));
+    };
+    CHECK_FALSE(HasFatal(channels(Data::Monsters::MaxSoundChannels).issues));
+    CHECK(HasFatal(channels(Data::Monsters::MaxSoundChannels + 1).issues));
+
+    const auto chance = [](int oneIn)
+    {
+        return Read(SoundsFile(Set(R"("sounds": [{"file": "Data/Sound/a.wav"}], "soundEvents": [{"animations": )"
+                                   R"(["attack1"], "chance": {"oneIn": )" +
+                                   std::to_string(oneIn) + R"(, "draw": "rand"}, "sounds": ["Data/Sound/a.wav"]}])")));
+    };
+    CHECK_FALSE(HasFatal(chance(Data::Monsters::MaxSoundChanceOneIn).issues));
+    CHECK(HasFatal(chance(Data::Monsters::MaxSoundChanceOneIn + 1).issues));
+
+    const auto pick = [](size_t count)
+    {
+        std::string sounds;
+        for (size_t i = 0; i < count; ++i)
+        {
+            sounds += std::string(i == 0 ? "" : ", ") + R"("Data/Sound/a.wav")";
+        }
+        return Read(SoundsFile(Set(R"("sounds": [{"file": "Data/Sound/a.wav"}], "soundEvents": [{"animations": )"
+                                   R"(["attack1"], "pick": "rand", "sounds": [)" +
+                                   sounds + "]}]")));
+    };
+    CHECK_FALSE(HasFatal(pick(Data::Monsters::PickSoundCount).issues));
+    CHECK(HasFatal(pick(Data::Monsters::PickSoundCount + 1).issues));
+}
+
 TEST_CASE("Monster sounds: wrong values are errors that name the set and the field [data][monsters]")
 {
     struct Case

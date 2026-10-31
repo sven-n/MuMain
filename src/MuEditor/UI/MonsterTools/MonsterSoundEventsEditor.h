@@ -49,6 +49,9 @@ bool ToggleCue(Data::Monsters::MonsterSoundEvent& event, const std::string& cue)
 // one sound.
 std::vector<std::string> PreviewSounds(const Data::Monsters::MonsterSoundEvent& event, int draw);
 
+// A frame as the tools show it and name a new cue after it: "4.50".
+std::string FrameText(float frame);
+
 // A cue at `frame` of `animation`, one frame long, named after them ("walk
 // 4.50") unless the model has that name, then with a number added.
 Data::Monsters::MonsterModelCue MakeCue(const Data::Monsters::MonsterModelDefinition& model, int animation,

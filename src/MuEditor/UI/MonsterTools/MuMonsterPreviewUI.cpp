@@ -115,13 +115,6 @@ const MonsterModelDefinition* ValuesOf(int slot)
     return g_MonsterModelDatabase.Find(slot);
 }
 
-std::string FrameText(float frame)
-{
-    char text[32];
-    std::snprintf(text, sizeof(text), "%.2f", static_cast<double>(frame));
-    return text;
-}
-
 // What the cue's events play, for its tag: "Jelint_move01.wav (set Raymond)".
 std::string CueSounds(const MonsterSoundSet& set, const std::string& cue)
 {
@@ -420,7 +413,8 @@ void MuMonsterPreviewUI::RenderCueTags(int slot, int keys, float last)
         {
             const std::string sounds = set != nullptr ? CueSounds(*set, cue.name) : std::string();
             ImGui::SetTooltip("%s", I18N::Format(I18N::Editor::CueTag0123,
-                                                 {cue.name, FrameText(cue.frames.first), FrameText(cue.frames.second),
+                                                 {cue.name, SoundEventsEditor::FrameText(cue.frames.first),
+                                                  SoundEventsEditor::FrameText(cue.frames.second),
                                                   sounds.empty() ? std::string(I18N::Editor::CuePlaysNothing)
                                                                  : sounds + " (" + set->name + ")"})
                                         .c_str());
