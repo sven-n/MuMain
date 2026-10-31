@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Data/GameData/ServerListData/ServerListGroup.h"
+#include "Data/GameData/ServerListData/ServerListData.h"
+#include "Data/GameData/ServerListData/ThemeColor.h"
 
 #include <string>
 #include <string_view>

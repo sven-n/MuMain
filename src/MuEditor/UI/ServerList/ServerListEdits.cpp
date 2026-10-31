@@ -6,7 +6,7 @@
 
 #include "ServerListStepLabel.h"
 
-#include "Data/GameData/ServerListData/ChannelNameBuilder.h"
+#include "Data/GameData/ServerListData/ThemeColor.h"
 #include "Data/GameData/ServerListData/ServerListIds.h"
 
 #include <algorithm>

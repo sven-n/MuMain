@@ -2,8 +2,6 @@
 
 #include "ButtonColors.h"
 
-#include "ChannelNameBuilder.h"
-
 #include <algorithm>
 
 namespace Data::ServerList
