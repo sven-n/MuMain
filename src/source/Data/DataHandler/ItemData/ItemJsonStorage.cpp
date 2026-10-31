@@ -291,6 +291,25 @@ ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file)
     return result;
 }
 
+std::filesystem::path GetGroundLabelsFile()
+{
+    return GetItemDataDirectory() / "Tooltips" / GroundLabelsFileName;
+}
+
+GroundLabelsLoadResult LoadGroundLabelsFile(const std::filesystem::path& file)
+{
+    GroundLabelsLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddFatal(result.issues, source, "could not be read");
+        return result;
+    }
+    ReadGroundLabelsJson(*text, source, result.file, result.issues);
+    return result;
+}
+
 std::filesystem::path GetGlowColorsFile()
 {
     return std::filesystem::path(Effects::GlowColorsFile);

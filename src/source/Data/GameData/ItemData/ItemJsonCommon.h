@@ -176,4 +176,9 @@ std::string PutObjectsOnOneLine(const std::string& text, std::string_view key);
 // Puts each entry of every list of `key`, with the lists and objects in it, on
 // a line of its own, as the profile rules of the item stat file are written.
 std::string PutListEntriesOnOneLine(const std::string& text, std::string_view key);
+
+// The JSON reader keeps only the last of two equal keys, so a name that is in
+// a list of names twice is looked for in the text: the keys that are repeated in
+// the object of the root key `rootKey` ("colors" of the glow colors).
+std::vector<std::string> FindRepeatedKeys(std::string_view text, std::string_view rootKey);
 } // namespace Data::Items::Json

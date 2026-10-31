@@ -240,6 +240,12 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     {
         ValidateDescriptionTexts(result.items, tooltips.file, GetItemTooltipFile().generic_string(), result.issues);
     }
+    GroundLabelsLoadResult groundLabels = LoadGroundLabelsFile(GetGroundLabelsFile());
+    result.issues.insert(result.issues.end(), groundLabels.issues.begin(), groundLabels.issues.end());
+    if (!HasFatal(groundLabels.issues))
+    {
+        ValidateGroundLabels(result.items, groundLabels.file, GetGroundLabelsFile().generic_string(), result.issues);
+    }
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasFatal(result.issues))
     {
@@ -256,6 +262,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     g_ItemDatabase.SetDisplayLocale(ItemNameLocale());
     g_ItemDatabase.SetStatProfiles(std::move(statProfiles));
     g_ItemDatabase.SetTooltipFile(std::move(tooltips.file));
+    g_ItemDatabase.SetGroundLabels(std::move(groundLabels.file));
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
     m_loaded = true;
@@ -705,6 +712,8 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
                              GetItemTooltipFile().generic_string(), issues);
     ValidateTableUses(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(), g_ItemDatabase.GetTooltipFile(),
                       GetItemStatsFile().generic_string(), issues);
+    ValidateGroundLabels(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetGroundLabels(),
+                         GetGroundLabelsFile().generic_string(), issues);
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     std::vector<ItemDefinition> items;
     std::ranges::copy_if(g_ItemDatabase.GetAllSlots(), std::back_inserter(items), &ItemDefinition::HasEntry);
@@ -797,6 +806,8 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
                              result.validationIssues);
     ValidateTableUses(result.items, g_ItemDatabase.GetStatProfiles(), g_ItemDatabase.GetTooltipFile(),
                       GetItemStatsFile().generic_string(), result.validationIssues);
+    ValidateGroundLabels(result.items, g_ItemDatabase.GetGroundLabels(), GetGroundLabelsFile().generic_string(),
+                         result.validationIssues);
     ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.validationIssues);
 
     // The entries without a name stay as they are: they are not from the bmd files, so they
