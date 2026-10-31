@@ -240,3 +240,35 @@ TEST_CASE("the event entry level art covers its whole band in every theme [ui][s
         fixture.Refresh();
     }
 }
+
+TEST_CASE("the legacy options tabs each paint their own tab, so a separator sits between every two [ui][styling]")
+{
+    // One 3-tab strip stretched under the whole row put its two separators across the labels.
+    const auto stylesheet = (std::filesystem::path(MU_RMLUI_DIR) / "themes/legacy/option_window.rcss").generic_string();
+    UI::Tests::RmlLayoutFixture fixture;
+    fixture.Configure({1024, 768}, 100);
+    auto* document = fixture.LoadMarkup(
+        R"(<rml><head><link type="text/rcss" href=")" + stylesheet +
+        R"("/></head><body><div id="row" class="option-tab-row" style="width: 404dp;">)"
+        R"(<div class="option-tab-btn active-tab">Display</div><div class="option-tab-btn">Graphics</div>)"
+        R"(<div class="option-tab-btn">Audio</div><div class="option-tab-btn">Gameplay</div>)"
+        R"(<div class="option-tab-btn">Interface</div></div></body></rml>)");
+    REQUIRE(document);
+    auto* row = document->GetElementById("row");
+    REQUIRE(row);
+    Rml::ElementList tabs;
+    row->QuerySelectorAll(tabs, ".option-tab-btn");
+    REQUIRE(tabs.size() == 5);
+    CHECK_FALSE(row->GetComputedValues().has_decorator());
+    const float rowLeft = row->GetAbsoluteOffset(Rml::BoxArea::Content).x;
+    float edge = rowLeft;
+    for (auto* tab : tabs)
+    {
+        CHECK(tab->GetComputedValues().has_decorator());
+        const float left = tab->GetAbsoluteOffset(Rml::BoxArea::Border).x;
+        CHECK(left == doctest::Approx(edge));
+        edge = left + tab->GetBox().GetSize(Rml::BoxArea::Border).x;
+    }
+    CHECK(edge == doctest::Approx(rowLeft + row->GetBox().GetSize(Rml::BoxArea::Content).x));
+    document->Close();
+}
