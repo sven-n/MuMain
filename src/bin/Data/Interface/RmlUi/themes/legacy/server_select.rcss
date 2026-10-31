@@ -77,6 +77,10 @@
 .button-label {
 	pointer-events: none;
 }
+/* A channel's text sits 2px above the frame's middle, so the load bar below it has room. */
+.server-row .button-label {
+	line-height: 22rem;
+}
 
 /* The {load} text of a full or overloaded server, in the server list's look for it. */
 .server-load.load-gray { color: token(server-button-gray); }
@@ -90,12 +94,13 @@
 	transform: skewX(-12deg);
 }
 
-/* Original gauge footprint: 160x4, inset 16px from the left and 19px from the top, now ten
-   segments of 10 % each; its geometry follows the frame's scene scale. */
+/* Original gauge footprint: 160x4, inset 16px from the left, now ten segments of 10 % each and
+   1px lower than the original's 19px, to keep clear of the text; its geometry follows the
+   frame's scene scale. */
 .server-gauge-slot {
 	position: absolute;
 	left: 16rem;
-	top: 19rem;
+	top: 20rem;
 	width: 160rem;
 	height: 4rem;
 	display: flex;
