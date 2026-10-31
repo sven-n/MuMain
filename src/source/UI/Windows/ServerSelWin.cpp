@@ -44,6 +44,9 @@ void CServerSelWin::Create()
     // does not reopen on the group an earlier visit picked.
     m_iSelectServerBtnIndex = -1;
 
+    // A button in a color of the server list's own has the shade of the theme it was built
+    // in (CServerListManager::GetServerButtonColor): a theme switch builds the buttons again.
+    m_RmlView.SetAfterReload([this] { UpdateDisplay(); });
     m_RmlView.Ensure();
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_SERVER_SELECT, this);
