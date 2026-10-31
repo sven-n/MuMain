@@ -2,6 +2,8 @@
 
 #include <optional>
 
+#include "Network/Reconnect/ReachabilityProbe.h"
+
 // The two servers the login screen talks to: the connect server sends the server
 // list, the chosen game server takes the login.
 enum class LoginServer
@@ -15,12 +17,8 @@ enum class LoginServer
 class LoginSceneReconnectLink
 {
 public:
-    enum class ProbeResult
-    {
-        Pending,
-        Reachable,
-        Unreachable,
-    };
+    // The background check's answer; the game's link runs a ReachabilityProbe.
+    using ProbeResult = ReachabilityProbe::Result;
 
     virtual ~LoginSceneReconnectLink() = default;
 

@@ -60,16 +60,7 @@ bool GameLoginSceneLink::StartProbe(LoginServer server)
 
 LoginSceneReconnectLink::ProbeResult GameLoginSceneLink::PollProbe()
 {
-    switch (m_probe.Poll(WorldTime))
-    {
-    case ReachabilityProbe::Result::Pending:
-        return ProbeResult::Pending;
-    case ReachabilityProbe::Result::Reachable:
-        return ProbeResult::Reachable;
-    case ReachabilityProbe::Result::Unreachable:
-        return ProbeResult::Unreachable;
-    }
-    return ProbeResult::Unreachable;
+    return m_probe.Poll(WorldTime);
 }
 
 void GameLoginSceneLink::StopProbe()
