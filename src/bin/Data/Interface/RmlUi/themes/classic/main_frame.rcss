@@ -1,0 +1,291 @@
+/* Classic HUD: the 640x48 bar at the bottom, the two dragons over its ends (Menu04, the right one
+   mirrored), the life and mana orbs filling from the bottom, the AG column, the experience line and
+   the Party / Character / Inventory / Guild buttons, as the 0.97 client draws them, with what the
+   Season 1 and 2 clients add to it: the command window and friend buttons in the bar's top boxes and
+   the SD column. The bar is 0.97's middle third (Menu02) between Season 2's left third
+   (s2/menu01_new: 0.97's Menu01_new with the command window button's box at the top left and a
+   recess for the SD column at x 73) and Season 1's right third (s1/Menu03_new: 0.97's Menu03_new
+   with the friend button's box at the top right). From the 0.97 client:
+   1dp is one unit of its 640x480 frame, and every part sits at its 0.97 place, x from the bar's
+   left end and y from the bar's top (480 - 48 = 432 in the 0.97 frame). The bar keeps its
+   proportions and stays centred on wide screens; the world shows beside it. */
+
+@spritesheet classic-hud-bar-left-sheet   { src: ../../../Classic/s2/menu01_new.jpg; classic-hud-bar-left: 0px 0px 256px 48px; }
+@spritesheet classic-hud-bar-middle-sheet { src: ../../../Classic/Menu02.jpg;     classic-hud-bar-middle: 0px 0px 128px 48px; }
+@spritesheet classic-hud-bar-right-sheet  { src: ../../../Classic/s1/Menu03_new.jpg; classic-hud-bar-right: 0px 0px 256px 48px; }
+@spritesheet classic-hud-dragon-sheet     { src: ../../../Classic/Menu04.tga;     classic-hud-dragon: 0px 0px 108px 45px; }
+@spritesheet classic-hud-red-sheet        { src: ../../../Classic/Menu_red.jpg;   classic-hud-life: 0px 0px 53px 48px; }
+@spritesheet classic-hud-green-sheet      { src: ../../../Classic/Menu_green.jpg; classic-hud-life-poisoned: 0px 0px 53px 48px; }
+@spritesheet classic-hud-blue-sheet       { src: ../../../Classic/Menu_blue.jpg;  classic-hud-mana: 0px 0px 53px 48px; }
+@spritesheet classic-hud-ag-sheet         { src: ../../../Classic/Menu03_new_ag.jpg; classic-hud-ag: 0px 0px 15px 36px; }
+@spritesheet classic-hud-sd-sheet         { src: ../../../Classic/s2/menu01_new2_sd.jpg; classic-hud-sd: 0px 0px 15px 36px; }
+@spritesheet classic-hud-party-sheet      { src: ../../../Classic/Menu_party.jpg;     classic-hud-party-open: 0px 0px 24px 24px; }
+@spritesheet classic-hud-character-sheet  { src: ../../../Classic/Menu_character.jpg; classic-hud-character-open: 0px 0px 24px 24px; }
+@spritesheet classic-hud-inventory-sheet  { src: ../../../Classic/Menu_inventory.jpg; classic-hud-inventory-open: 0px 0px 24px 24px; }
+@spritesheet classic-hud-guild-sheet      { src: ../../../Classic/Guild.jpg;          classic-hud-guild-open: 0px 0px 52px 18px; }
+@spritesheet classic-hud-command-sheet    { src: ../../../Classic/s1/menu01_new2.jpg; classic-hud-command-open: 0px 0px 53px 19px; }
+@spritesheet classic-hud-friend-sheet     { src: ../../../Classic/s1/win_push.jpg;    classic-hud-friend-open: 0px 0px 52px 18px; }
+@spritesheet classic-hud-letter-sheet     { src: ../../../Classic/s1/win_letter.jpg;  classic-hud-letter: 0px 0px 15px 9px; }
+
+/* What the classic bar does not have: the S6 flat fills, the cash shop and menu buttons (Esc opens
+   the menu), the fourth item hotkey, the five-slot skill row and its
+   highlight, the EXP frame art (the line is drawn on the bar's own art) and the readouts'
+   current/max variant. */
+#gauge_fill_left, #gauge_fill_right, #item_band_fill, #skill_band_fill, #gauge_frame,
+#btn_cshop, #btn_window, .alert-dot, .btn-icon-label,
+#item_slot_3, .slot-hotkey-label,
+#skill_slot_0, #skill_slot_1, #skill_slot_2, #skill_slot_3, #skill_slot_4, #skill_list_highlight,
+.exp-frame, .gauge-num.value-full, .gauge-fill-horizontal {
+	display: none;
+}
+
+#hud_layout { position: absolute; left: 50%; bottom: 0; margin-left: -320dp;
+    width: 640dp; height: 48dp; overflow: visible; pointer-events: none; }
+#hud_layout.workspace-placed { margin-left: 0; bottom: auto; transform-origin: left top; }
+.hud-part {
+	position: absolute;
+	font-family: "token(font-body)";
+	font-size: 9dp;
+}
+
+/* The bar and its dragons (0.97: bar at y 432, dragons 108x45 at x 0 and 532, y 387). The bar
+   takes the pointer so clicks on it don't reach the world; the dragons don't. 0.97 drew its
+   windows over the dragons; here the HUD stays over the windows, as in legacy, so the skill list
+   above the bar stays reachable beside a docked window. The right dragon hides instead while the
+   windows docked on the right reach over the bar's right end: while the uncovered world's right
+   edge (--world-right, screen pixels) is left of it (50vw + 320dp: the bar is centred and one px
+   here is one screen px). Its width is 108dp, minus that overlap magnified a thousand times,
+   clamped to 0..108dp, i.e. all or nothing. The windows that open near the left dragon (the move
+   list) and over the right one (the friend list) stand above them (workspace.rcss). */
+#hud_strip { left: 0dp; top: 0dp; width: 640dp; height: 48dp; pointer-events: auto; }
+.frame-art { position: absolute; top: 0dp; height: 48dp; pointer-events: none; }
+#frame_left   { left: 0dp;   width: 256dp; decorator: image(classic-hud-bar-left); }
+#frame_middle { left: 256dp; width: 128dp; decorator: image(classic-hud-bar-middle); }
+#frame_right  { left: 384dp; width: 256dp; decorator: image(classic-hud-bar-right); }
+#dragon_left  { left: 0dp;   top: -45dp; width: 108dp; height: 45dp; decorator: image(classic-hud-dragon); }
+#dragon_right {
+	left: 532dp;
+	top: -45dp;
+	width: clamp(0dp, calc(108dp + (var(--world-right, 100vw) - 50vw - 320dp) * 1000), 108dp);
+	height: 45dp;
+	decorator: image(classic-hud-dragon flip-horizontal);
+}
+
+/* Life (x 97), mana (x 489) and AG (x 551, 15x36 standing on y 473). Each fills from the bottom:
+   the box is the filled height and the art keeps its size, cropped from the top, as 0.97 moved
+   the quad's top and its texture rows together. The SD column is the Season 2 client's
+   (FUN_005eb880): 15x36 at x 73 standing on y 474, in the bar's recess left of the life orb,
+   filled the same way. */
+#gauges_left  { left: 97dp;  top: 0dp; width: 53dp; height: 48dp; }
+#gauges_right { left: 489dp; top: 0dp; width: 77dp; height: 48dp; }
+.gauge-slot { position: absolute; pointer-events: auto; }
+#bar_hp { left: 0dp;  top: 0dp; width: 53dp; height: 48dp; }
+#bar_mp { left: 0dp;  top: 0dp; width: 53dp; height: 48dp; }
+#bar_ag { left: 62dp; top: 5dp; width: 15dp; height: 36dp; }
+#bar_sd { left: -24dp; top: 6dp; width: 15dp; height: 36dp; }
+.gauge-fill { position: absolute; left: 0; bottom: 0; width: 100%; }
+.gauge-fill-hp { decorator: image(classic-hud-life cover left bottom); }
+.gauge-fill-hp.poisoned { decorator: image(classic-hud-life-poisoned cover left bottom); }
+.gauge-fill-mp { decorator: image(classic-hud-mana cover left bottom); }
+.gauge-fill-ag { decorator: image(classic-hud-ag cover left bottom); }
+.gauge-fill-sd { decorator: image(classic-hud-sd cover left bottom); }
+
+/* The current values, centred under each gauge at y 467 (0.97 drew sprite digits 9x10 from
+   Interface\FontTest; plain bold text here): mana at 540 (528 here, below), AG at 571; the Season 2
+   client's SD at 98 and life at 140 (0.97, without the SD column: life at 100). */
+.gauge-num {
+	position: absolute;
+	z-index: 1;
+	top: 35dp;
+	width: 60dp;
+	font-size: 10dp;
+	line-height: 10dp;
+	text-align: center;
+	color: #ffffff;
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	white-space: nowrap;
+	pointer-events: none;
+}
+#bar_hp .gauge-num { left: 13dp; }
+#bar_sd .gauge-num { left: -5dp; top: 29dp; }
+/* Mana 12 left of 0.97's 540 (at 528, still over the orb): the AG value is centred only 31 to its
+   right, and with five-digit mana and four-digit AG (high-level characters) 0.97's own numbers run
+   into each other. The AG cannot move right (the Guild button starts at 582). */
+#bar_mp .gauge-num { left: 9dp; }
+#bar_ag .gauge-num { left: -10dp; top: 30dp; }
+
+/* The hero's coordinates in the box at the left end (x 8 to 57), at y 462: centred in it at x 21 and
+   44 (0.97's 24 and 48 leave the pair right of the box's middle). */
+#coords { left: 0dp; top: 30dp; width: 72dp; height: 9dp; }
+.coord {
+	position: absolute;
+	top: 0dp;
+	width: 30dp;
+	font-size: 9dp;
+	line-height: 9dp;
+	text-align: center;
+	color: #ffffff;
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	white-space: nowrap;
+	pointer-events: none;
+}
+#coord_x { left: 6dp; }
+#coord_y { left: 29dp; }
+
+/* Party, Character and Inventory (24x24 at x 348, 379 and 410, y 452) and Guild (52x18 at 582,
+   459). The buttons are part of the bar's art; an open window shows the button pressed. */
+#buttons { left: 348dp; top: 20dp; width: 286dp; height: 25dp; }
+.frame-btn { position: absolute; top: 0dp; width: 24dp; height: 24dp; cursor: pointer; pointer-events: auto; }
+#btn_party   { left: 0dp; }
+#btn_chainfo { left: 31dp; }
+#btn_myinven { left: 62dp; }
+#btn_guild   { left: 234dp; top: 7dp; width: 52dp; height: 18dp; }
+#btn_party.open   { decorator: image(classic-hud-party-open); }
+#btn_chainfo.open { decorator: image(classic-hud-character-open); }
+#btn_myinven.open { decorator: image(classic-hud-inventory-open); }
+#btn_guild.open   { decorator: image(classic-hud-guild-open); }
+
+/* The Season 1 client's command window button (Season 2's FUN_0040af9e): the bar's top-left box,
+   53x19 at (6, 435), drawn lit (menu01_new2) while the command window is open, its hint under the
+   mouse. */
+#btn_command      { left: -342dp; top: -17dp; width: 53dp; height: 19dp; }
+#btn_command.open { decorator: image(classic-hud-command-open); }
+
+/* The Season 1 client's friend button (00493930): the bar's top-right box, 52x18 at (582, 435),
+   drawn pressed (win_push) while the friend window is open. A new letter or chat blinks Season 1's
+   letter (win_letter, 15x9) at 33, 5 in it (36, 7 pressed); Season 1 blinks a figure (win_man) for
+   a chat, which the HUD's one alert flag cannot tell apart. */
+#btn_friend { left: 234dp; top: -17dp; width: 52dp; height: 18dp; }
+#btn_friend.open { decorator: image(classic-hud-friend-open); }
+#btn_friend .alert-dot { display: block; position: absolute; left: 33dp; top: 5dp; width: 15dp; height: 9dp; decorator: image(classic-hud-letter); }
+#btn_friend.open .alert-dot { left: 36dp; top: 7dp; }
+#btn_friend .alert-dot.hidden { display: none; }
+
+/* Experience: a 4-unit line at (221, 439), 198 long for one tenth of the level, with the tenth
+   (0-9) at x 425, y 434. The part is the hint area (219-421 x 439-445). */
+#exp { left: 219dp; top: 7dp; width: 202dp; height: 6dp; pointer-events: auto; }
+#exp_track { position: absolute; left: 2dp; top: 0dp; width: 198dp; height: 4dp; }
+#exp_fill { position: absolute; left: 0; top: 0; height: 100%; background-color: #ebcc57; }
+#exp_digit {
+	position: absolute;
+	left: 196dp;
+	top: -5dp;
+	width: 20dp;
+	font-size: 10dp;
+	line-height: 10dp;
+	text-align: center;
+	color: #e8cf99;
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	pointer-events: none;
+}
+
+/* Item hotkeys Q, W, E: the item's 3D icon in a 20x20 box at x 208 + 31i, y 454 (the letters are
+   in the bar's art). */
+#item_slots { left: 208dp; top: 22dp; width: 82dp; height: 20dp; }
+#item_slot_0 { position: absolute; left: 0dp;  top: 0dp; width: 20dp; height: 20dp; }
+#item_slot_1 { position: absolute; left: 31dp; top: 0dp; width: 20dp; height: 20dp; }
+#item_slot_2 { position: absolute; left: 62dp; top: 0dp; width: 20dp; height: 20dp; }
+.item-icon { position: absolute; left: 0; top: 0; width: 20dp; height: 20dp; pointer-events: none; }
+/* The stack count in the bar's oval right of each slot: 0.97 draws it with RenderNumber (005122f0,
+   9x10 digits, 6.3 apart) at x 226 + 31i, y 447 (004be48b), which puts a two- or three-digit
+   count's middle about x 17 from the slot and its digits from y 447 to 457. */
+.item-stack-label {
+	position: absolute;
+	left: 17dp;
+	top: -7dp;
+	transform: translateX(-50%);
+	color: #ffffff;
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	font-size: 11dp;
+	line-height: 10dp;
+	white-space: nowrap;
+	pointer-events: none;
+}
+#item_slot_0, #item_slot_1, #item_slot_2, #current_skill_slot {
+	pointer-events: auto;
+	cursor: pointer;
+}
+
+/* Skills (0.97): the current skill sits in the ring at x 304, y 444 (32x36, tinted (1, 0.9, 0.8));
+   a click opens the list: every learned skill in one row of 32x36 cells centred on x 320 at y 370
+   (each cell takes the pointer down to y 412), the current one tinted like the ring, the rest
+   (0.6, 0.7, 0.8). Each cell carries its hotkey digit centred at x + 4, y + 26. The icons are
+   legacy's (skill_icons.rcss, 20x28, centred in the cell): the classic clients' Skill.jpg has no
+   icon for the skills added later, and 0.97 drew its 32x36 icons with their own stone frame. */
+#skill_slots { left: 304dp; top: 12dp; width: 32dp; height: 36dp; }
+#current_skill_slot { position: absolute; left: 0dp; top: 0dp; width: 32dp; height: 36dp; }
+.skill-icon {
+	position: absolute;
+	left: 6dp;
+	top: 4dp;
+	width: 20dp;
+	height: 28dp;
+	pointer-events: none;
+	image-color: #b3c0cc;
+}
+#current_skill_slot .skill-icon, .skill-cell.selected .skill-icon { image-color: #ffe6cc; }
+.cooldown-wipe {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	background-color: rgba(255, 128, 128, 128);
+	pointer-events: none;
+}
+.skill-hotkey-label {
+	position: absolute;
+	left: -6dp;
+	top: 26dp;
+	width: 20dp;
+	text-align: center;
+	color: #ffffff;
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	font-size: 10dp;
+	line-height: 10dp;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+#skill_list { left: 0dp; top: -62dp; width: 640dp; height: 42dp; }
+#skill_grid {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 640dp;
+	height: 42dp;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	pointer-events: none;
+}
+/* The id rule above outranks base.rcss's .hidden: closing the list needs its own rule. */
+#skill_grid.hidden { display: none; }
+.skill-cell {
+	position: relative;
+	flex: 0 0 auto;
+	width: 32dp;
+	height: 42dp;
+	pointer-events: auto;
+	cursor: pointer;
+}
+.skill-cell .cooldown-wipe { bottom: auto; top: 0; max-height: 36dp; }
+/* The Dark Lord's pet commands (0.97 has no Dark Lord): their own row of the same cells, centred
+   just above the skill row, while the list is open. */
+#pet_skill_row {
+	position: absolute;
+	left: 0;
+	top: -42dp;
+	width: 640dp;
+	height: 42dp;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	pointer-events: none;
+}
+#pet_skill_row.hidden { display: none; }
+

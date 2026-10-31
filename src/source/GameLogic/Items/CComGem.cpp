@@ -249,9 +249,10 @@ void COMGEM::CalcGen()
 
 int COMGEM::CalcCompiledCount(const ITEM* p)
 {
-    if (CheckOneItem(p) % 2)
-        return (p->Level + 1) * FIRST;
-    return 0;
+    // Only a bundle holds jewels. CheckOneItem can't tell: its NOGEM (-1) is odd like the bundles' kinds.
+    if (!isCompiledGem(p))
+        return 0;
+    return (p->Level + 1) * FIRST;
 }
 
 int COMGEM::CalcItemValue(const ITEM* p)
@@ -405,131 +406,41 @@ int COMGEM::Check_Jewel(int _nJewel, int _nType, bool _bModel)
     return NOGEM;
 }
 
-int COMGEM::GetJewelIndex(int _nJewel, int _nType)
+const wchar_t* COMGEM::GetJewelName(int _nJewel)
 {
     switch (_nJewel)
     {
     case eBLESS:
-        if (_nType == eGEM_NAME)
-            return 1806;
-        if (_nType == eGEM_INDEX)
-            return ITEM_JEWEL_OF_BLESS;
-        break;
     case eBLESS_C:
-        if (_nType == eGEM_NAME)
-            return 1806;
-        if (_nType == eGEM_INDEX)
-            return ITEM_ORB_OF_GREATER_FORTITUDE;
-        break;
+        return I18N::Game::JewelOfBless;
     case eSOUL:
-        if (_nType == eGEM_NAME)
-            return 1807;
-        if (_nType == eGEM_INDEX)
-            return ITEM_JEWEL_OF_SOUL;
-        break;
     case eSOUL_C:
-        if (_nType == eGEM_NAME)
-            return 1807;
-        if (_nType == eGEM_INDEX)
-            return ITEM_ORB_OF_IMPALE;
-        break;
+        return I18N::Game::JewelOfSoul;
     case eLIFE:
-        if (_nType == eGEM_NAME)
-            return 3312;
-        if (_nType == eGEM_INDEX)
-            return ITEM_JEWEL_OF_LIFE;
-        break;
     case eLIFE_C:
-        if (_nType == eGEM_NAME)
-            return 3312;
-        if (_nType == eGEM_INDEX)
-            return ITEM_ORB_OF_IMPALE;
-        break;
+        return I18N::Game::JewelOfLife;
     case eCREATE:
-        if (_nType == eGEM_NAME)
-            return 3313;
-        if (_nType == eGEM_INDEX)
-            return ITEM_JEWEL_OF_CREATION;
-        break;
     case eCREATE_C:
-        if (_nType == eGEM_NAME)
-            return 3313;
-        if (_nType == eGEM_INDEX)
-            return ITEM_ORB_OF_IMPALE;
-        break;
+        return I18N::Game::JewelOfCreation;
     case ePROTECT:
-        if (_nType == eGEM_NAME)
-            return 3314;
-        if (_nType == eGEM_INDEX)
-            return ITEM_JEWEL_OF_GUARDIAN;
-        break;
     case ePROTECT_C:
-        if (_nType == eGEM_NAME)
-            return 3314;
-        if (_nType == eGEM_INDEX)
-            return ITEM_ORB_OF_IMPALE;
-        break;
+        return I18N::Game::JewelOfGuardian;
     case eGEMSTONE:
-        if (_nType == eGEM_NAME)
-            return 2081;
-        if (_nType == eGEM_INDEX)
-            return ITEM_GEMSTONE;
-        break;
     case eGEMSTONE_C:
-        if (_nType == eGEM_NAME)
-            return 2081;
-        if (_nType == eGEM_INDEX)
-            return ITEM_ORB_OF_IMPALE;
-        break;
+        return I18N::Game::JewelStone;
     case eHARMONY:
-        if (_nType == eGEM_NAME)
-            return 3315;
-        if (_nType == eGEM_INDEX)
-            return ITEM_JEWEL_OF_HARMONY;
-        break;
     case eHARMONY_C:
-        if (_nType == eGEM_NAME)
-            return 3315;
-        if (_nType == eGEM_INDEX)
-            return ITEM_ORB_OF_IMPALE;
-        break;
+        return I18N::Game::JewelOfHarmony;
     case eCHAOS:
-        if (_nType == eGEM_NAME)
-            return 3316;
-        if (_nType == eGEM_INDEX)
-            return ITEM_JEWEL_OF_CHAOS;
-        break;
     case eCHAOS_C:
-        if (_nType == eGEM_NAME)
-            return 3316;
-        if (_nType == eGEM_INDEX)
-            return ITEM_ORB_OF_IMPALE;
-        break;
+        return I18N::Game::JewelOfChaos;
     case eLOW:
-        if (_nType == eGEM_NAME)
-            return 3317;
-        if (_nType == eGEM_INDEX)
-            return ITEM_LOWER_REFINE_STONE;
-        break;
     case eLOW_C:
-        if (_nType == eGEM_NAME)
-            return 3317;
-        if (_nType == eGEM_INDEX)
-            return ITEM_ORB_OF_IMPALE;
-        break;
+        return I18N::Game::LowerRefiningStone;
     case eUPPER:
-        if (_nType == eGEM_NAME)
-            return 3318;
-        if (_nType == eGEM_INDEX)
-            return ITEM_HIGHER_REFINE_STONE;
-        break;
     case eUPPER_C:
-        if (_nType == eGEM_NAME)
-            return 3318;
-        if (_nType == eGEM_INDEX)
-            return ITEM_ORB_OF_IMPALE;
-        break;
+        return I18N::Game::HigherRefiningStone;
     }
 
-    return -1;
+    return L"";
 }

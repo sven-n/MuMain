@@ -17,33 +17,32 @@ namespace
     struct ClassTextEntry
     {
         CLASS_TYPE type;
-        int textIndex;
+        const wchar_t* const* text;
     };
 
-    constexpr int kDefaultClassTextIndex = 2305;
+    const wchar_t* const* const kDefaultClassText = &I18N::Game::ErrorCode;
     constexpr int kMasterExperienceUnlockLevel = 400;
 
-    constexpr std::array<ClassTextEntry, 18> kClassTextEntries{{
-        { CLASS_WIZARD, 20 },
-        { CLASS_SOULMASTER, 25 },
-        { CLASS_GRANDMASTER, 1669 },
-        { CLASS_KNIGHT, 21 },
-        { CLASS_BLADEKNIGHT, 26 },
-        { CLASS_BLADEMASTER, 1668 },
-        { CLASS_ELF, 22 },
-        { CLASS_MUSEELF, 27 },
-        { CLASS_HIGHELF, 1670 },
-        { CLASS_DARK, 23 },
-        { CLASS_DUELMASTER, 1671 },
-        { CLASS_DARK_LORD, 24 },
-        { CLASS_LORDEMPEROR, 1672 },
-        { CLASS_SUMMONER, 1687 },
-        { CLASS_BLOODYSUMMONER, 1688 },
-        { CLASS_DIMENSIONMASTER, 1689 },
-        { CLASS_RAGEFIGHTER, 3150 },
-        { CLASS_TEMPLENIGHT, 3151 },
-    }};
-
+    const ClassTextEntry kClassTextEntries[] = {
+        {CLASS_WIZARD, &I18N::Game::DarkWizard},
+        {CLASS_SOULMASTER, &I18N::Game::SoulMaster},
+        {CLASS_GRANDMASTER, &I18N::Game::GrandMaster},
+        {CLASS_KNIGHT, &I18N::Game::DarkKnight},
+        {CLASS_BLADEKNIGHT, &I18N::Game::BladeKnight},
+        {CLASS_BLADEMASTER, &I18N::Game::BladeMaster},
+        {CLASS_ELF, &I18N::Game::Elf},
+        {CLASS_MUSEELF, &I18N::Game::MuseElf},
+        {CLASS_HIGHELF, &I18N::Game::HighElf},
+        {CLASS_DARK, &I18N::Game::MagicGladiator},
+        {CLASS_DUELMASTER, &I18N::Game::DualMaster},
+        {CLASS_DARK_LORD, &I18N::Game::DarkLord},
+        {CLASS_LORDEMPEROR, &I18N::Game::LordEmperor},
+        {CLASS_SUMMONER, &I18N::Game::Summoner},
+        {CLASS_BLOODYSUMMONER, &I18N::Game::BloodySummoner},
+        {CLASS_DIMENSIONMASTER, &I18N::Game::DimensionMaster},
+        {CLASS_RAGEFIGHTER, &I18N::Game::RageFighter},
+        {CLASS_TEMPLENIGHT, &I18N::Game::FistMaster},
+    };
 }
 
 CCharacterManager gCharacterManager;
@@ -171,9 +170,10 @@ bool CCharacterManager::IsMasterExperienceActive(const CLASS_TYPE byClass, const
 
 const wchar_t* CCharacterManager::GetCharacterClassText(const CLASS_TYPE byCharacterClass)
 {
-    const auto it = std::find_if(kClassTextEntries.begin(), kClassTextEntries.end(),
-        [byCharacterClass](const ClassTextEntry& entry) { return entry.type == byCharacterClass; });
-    return (it != kClassTextEntries.end()) ? I18N::Game::Lookup(it->textIndex) : I18N::Game::Lookup(kDefaultClassTextIndex);
+    const auto it =
+        std::find_if(std::begin(kClassTextEntries), std::end(kClassTextEntries),
+                     [byCharacterClass](const ClassTextEntry& entry) { return entry.type == byCharacterClass; });
+    return (it != std::end(kClassTextEntries)) ? *it->text : *kDefaultClassText;
 }
 
 CLASS_SKIN_INDEX CCharacterManager::GetSkinModelIndex(const CLASS_TYPE byClass)

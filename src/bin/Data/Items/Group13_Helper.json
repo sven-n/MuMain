@@ -391,7 +391,7 @@
         "es": "Anillo de Transformación",
         "pt": "Anel de Transformação"
       },
-      "tags": ["transformationRing", "noDurabilityLine"],
+      "tags": ["transformationRing", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": {
@@ -1031,7 +1031,7 @@
         "es": "Arma Absoluta de Arcángel",
         "pt": "Arma absoluta do arcanjo"
       },
-      "tags": ["valuable", "noDurabilityLine"],
+      "tags": ["valuable", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": "@questItem"
@@ -1600,19 +1600,7 @@
           "levels": [1, 2]
         },
         {
-          "text": {
-            "en": "Cannot be sold.",
-            "de": "Kann nicht verkauft werden.",
-            "es": "No se puede vender.",
-            "id": "Tidak bisa dijual.",
-            "ja": "売却不可",
-            "pl": "Nie można sprzedać.",
-            "pt": "Não pode ser vendido.",
-            "ru": "Не подлежит продаже.",
-            "tl": "Hindi maaaring ibenta.",
-            "uk": "Не можна продати.",
-            "zh-TW": "不能出售。"
-          },
+          "text": "@cannotBeSold",
           "color": "red",
           "levels": [1, 2]
         },
@@ -1935,6 +1923,7 @@
         "es": "Armadura de Guardia",
         "pt": "Armadura do guarda"
       },
+      "tags": ["noClassLines"],
       "width": 2,
       "height": 2,
       "repairable": false,
@@ -2346,7 +2335,7 @@
         "es": "Cuerno de Fenrir",
         "pt": "Chifre de Fenrir"
       },
-      "tags": ["mount", "hornMount", "flying", "valuable", "noDurabilityLine"],
+      "tags": ["mount", "hornMount", "flying", "valuable", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": "@life",
@@ -2502,7 +2491,7 @@
         "es": "Aro Esqueleto Traslado Élite",
         "pt": "Anel Esqueleto Transf. Acel."
       },
-      "tags": ["transformationRing"],
+      "tags": ["transformationRing", "noClassLines"],
       "description": [
         {
           "text": {
@@ -2578,7 +2567,7 @@
         "es": "Anillo de Jack O'Lantern",
         "pt": "Anel do Jack Olantern"
       },
-      "tags": ["transformationRing"],
+      "tags": ["transformationRing", "noClassLines"],
       "description": [
         {
           "text": "@unableToEquipWithADifferentTransformationRing",
@@ -2614,7 +2603,7 @@
         "es": "Aro de Traslado de Navidad",
         "pt": "Anel do Natal de Transf."
       },
-      "tags": ["transformationRing"],
+      "tags": ["transformationRing", "noClassLines"],
       "description": [
         {
           "text": {
@@ -2709,7 +2698,7 @@
         "es": "Anillo de GM",
         "pt": "Anel de GM"
       },
-      "tags": ["transformationRing"],
+      "tags": ["transformationRing", "noClassLines"],
       "description": [
         {
           "text": {
@@ -2872,7 +2861,7 @@
         "es": "Sello de Ascensión",
         "pt": "Selo da ascensão"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noClassLines"],
       "description": [
         {
           "text": "@increasesExperience",
@@ -2918,7 +2907,7 @@
         "es": "Sello de Riqueza",
         "pt": "Selo da riqueza"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noClassLines"],
       "description": [
         {
           "text": "@increasesExperienceAndDrops",
@@ -2964,7 +2953,7 @@
         "es": "Sello de Sustento",
         "pt": "Selo do sustento"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noClassLines"],
       "description": [
         {
           "text": {
@@ -3018,7 +3007,7 @@
         "es": "Boleto de la Plaza del Diablo",
         "pt": "Bilhete da Praça do Diabo"
       },
-      "tags": ["cashShop", "noDurabilityLine"],
+      "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": {
@@ -3073,7 +3062,7 @@
         "es": "Boleto al Castillo Sangriento",
         "pt": "Bilhete do Castelo de Sangue"
       },
-      "tags": ["cashShop", "noDurabilityLine"],
+      "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": {
@@ -3128,7 +3117,7 @@
         "es": "Boleto de Kalima",
         "pt": "Bilhete de Kalima"
       },
-      "tags": ["cashShop", "noDurabilityLine"],
+      "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": {
@@ -3363,7 +3352,7 @@
         "es": "Reiniciar Fruto de Fuerza",
         "pt": "Reiniciar força da fruta"
       },
-      "tags": ["cashShop", "noDurabilityLine"],
+      "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -3390,7 +3379,7 @@
         "es": "Reiniciar Fruto de Rapidez",
         "pt": "Reiniciar rapidez da fruta"
       },
-      "tags": ["cashShop", "noDurabilityLine"],
+      "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -3417,7 +3406,7 @@
         "es": "Reiniciar Fruto de Salud",
         "pt": "Reiniciar saúde da Fruta"
       },
-      "tags": ["cashShop", "noDurabilityLine"],
+      "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -3444,7 +3433,7 @@
         "es": "Reiniciar Fruto de Energía",
         "pt": "Reiniciar energia da fruta"
       },
-      "tags": ["cashShop", "noDurabilityLine"],
+      "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -3471,7 +3460,7 @@
         "es": "Reiniciar Fruto de Control",
         "pt": "Reiniciar controle da fruta"
       },
-      "tags": ["cashShop", "noDurabilityLine"],
+      "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -3498,7 +3487,7 @@
         "es": "Sello de Movilidad",
         "pt": "Selo da mobilidade"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noClassLines"],
       "description": [
         {
           "text": {
@@ -3542,7 +3531,7 @@
         "es": "Indulgencia",
         "pt": "Indulgência"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noClassLines"],
       "description": [
         {
           "text": {
@@ -3586,7 +3575,7 @@
         "es": "Boleto al Templo de Ilusión",
         "pt": "Bilhete do Templo da Ilusão"
       },
-      "tags": ["cashShop", "noDurabilityLine"],
+      "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": {
@@ -3641,7 +3630,7 @@
         "es": "Sello de Curación",
         "pt": "Selo da cura"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noClassLines"],
       "description": [
         {
           "text": {
@@ -3721,7 +3710,7 @@
         "es": "Sello de Divinidad",
         "pt": "Selo da divindade"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noClassLines"],
       "description": [
         {
           "text": {
@@ -3797,7 +3786,7 @@
         "es": "Demonio",
         "pt": "Demônio"
       },
-      "tags": ["guardianPet", "cashShop", "valuable", "noDurabilityLine"],
+      "tags": ["guardianPet", "cashShop", "valuable", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": {
@@ -3857,7 +3846,7 @@
         "es": "Espír. Guardián",
         "pt": "Espír. Guardião"
       },
-      "tags": ["guardianPet", "cashShop", "valuable", "noDurabilityLine"],
+      "tags": ["guardianPet", "cashShop", "valuable", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": {
@@ -3976,7 +3965,7 @@
         "es": "Mascota Rudolf",
         "pt": "Animal de estimação Rodolfo"
       },
-      "tags": ["noDurabilityLine"],
+      "tags": ["noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": "@collectsSurroundingZen",
@@ -4015,7 +4004,7 @@
         "es": "Aro Mutación Hombre de Nieve",
         "pt": "Anel Transf. Homem da Neve"
       },
-      "tags": ["transformationRing"],
+      "tags": ["transformationRing", "noClassLines"],
       "description": [
         {
           "text": "@unableToEquipWithADifferentTransformationRing",
@@ -4051,7 +4040,7 @@
         "es": "Talismán de Resurrección",
         "pt": "Talismã da ressurreição"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noClassLines"],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -4077,7 +4066,7 @@
         "es": "Talismán de Movilidad",
         "pt": "Talismã da mobilidade"
       },
-      "tags": ["cashShop", "noDurabilityLine"],
+      "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": {
@@ -4156,7 +4145,7 @@
         "es": "Espada/Maza/Jabalina",
         "pt": "Espada/Maça/Lança"
       },
-      "tags": ["gambleItem", "noDurabilityLine"],
+      "tags": ["gambleItem", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": "@itemSkillLuckOptionWillBeRandomlyAdded"
@@ -4185,7 +4174,7 @@
         "es": "Báculo",
         "pt": "Bastão"
       },
-      "tags": ["gambleItem", "noDurabilityLine"],
+      "tags": ["gambleItem", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": "@itemSkillLuckOptionWillBeRandomlyAdded"
@@ -4214,7 +4203,7 @@
         "es": "Arco/Ballesta",
         "pt": "Arco/Besta"
       },
-      "tags": ["gambleItem", "noDurabilityLine"],
+      "tags": ["gambleItem", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": "@itemSkillLuckOptionWillBeRandomlyAdded"
@@ -4243,7 +4232,7 @@
         "es": "Cetro",
         "pt": "Cetro"
       },
-      "tags": ["gambleItem", "noDurabilityLine"],
+      "tags": ["gambleItem", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": "@itemSkillLuckOptionWillBeRandomlyAdded"
@@ -4272,7 +4261,7 @@
         "es": "Vara",
         "pt": "Cajado"
       },
-      "tags": ["gambleItem", "noDurabilityLine"],
+      "tags": ["gambleItem", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": "@itemSkillLuckOptionWillBeRandomlyAdded"
@@ -4301,7 +4290,7 @@
         "es": "Anillo Panda",
         "pt": "Anel do Panda"
       },
-      "tags": ["pandaOrSkeleton", "transformationRing", "valuable"],
+      "tags": ["pandaOrSkeleton", "transformationRing", "valuable", "noClassLines"],
       "description": [
         {
           "text": {
@@ -4397,7 +4386,7 @@
         "es": "Mascota Panda",
         "pt": "Animal de estimação Panda"
       },
-      "tags": ["pandaOrSkeleton", "valuable", "noDurabilityLine"],
+      "tags": ["pandaOrSkeleton", "valuable", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": "@autoCollectsZen",
@@ -4461,7 +4450,7 @@
         "es": "Talismán de Guardián",
         "pt": "Talismã do Guardião"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noClassLines"],
       "description": [
         {
           "text": {
@@ -4537,7 +4526,7 @@
         "es": "Talismán Protección de Ítems",
         "pt": "Talismã de Proteção de Item"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noClassLines"],
       "description": [
         {
           "text": {
@@ -4613,6 +4602,7 @@
         "es": "Talismán de Alas de Satán",
         "pt": "Talismã das Asas de Satã"
       },
+      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@increasesYourLuckToCreateWingOfYourWish"
@@ -4649,6 +4639,7 @@
         "es": "Talismán de Alas de Cielo",
         "pt": "Talismã das Asas do Paraíso"
       },
+      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@increasesYourLuckToCreateWingOfYourWish"
@@ -4685,6 +4676,7 @@
         "es": "Talismán de Alas de Elfo",
         "pt": "Talismã das Asas do Elfo"
       },
+      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@increasesYourLuckToCreateWingOfYourWish"
@@ -4721,6 +4713,7 @@
         "es": "Talismán de Alas de Maldición",
         "pt": "Talismã da Asa da Maldição"
       },
+      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@increasesYourLuckToCreateWingOfYourWish"
@@ -4757,6 +4750,7 @@
         "es": "Talismán de Capa de Emperador",
         "pt": "Talismã da Capa do Imperador"
       },
+      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@increasesYourLuckToCreateWingOfYourWish"
@@ -4793,6 +4787,7 @@
         "es": "Talismán de Alas de Dragón",
         "pt": "Talismã das Asas do Dragão"
       },
+      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@increasesYourLuckToCreateWingOfYourWish"
@@ -4829,6 +4824,7 @@
         "es": "Talismán de Alas del Alma",
         "pt": "Talismã das Asas da Alma"
       },
+      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@increasesYourLuckToCreateWingOfYourWish"
@@ -4865,6 +4861,7 @@
         "es": "Talismán de Alas de Espíritus",
         "pt": "Talismã das Asas dos Esp."
       },
+      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@increasesYourLuckToCreateWingOfYourWish"
@@ -4901,6 +4898,7 @@
         "es": "Talismán Alas de Desolación",
         "pt": "Talismã da Asa do Desespero"
       },
+      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@increasesYourLuckToCreateWingOfYourWish"
@@ -4937,6 +4935,7 @@
         "es": "Talismán de Alas de Oscuridad",
         "pt": "Talismã das Asas da Escuridão"
       },
+      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@increasesYourLuckToCreateWingOfYourWish"
@@ -4973,7 +4972,7 @@
         "es": "Sello Maestro de Ascensión",
         "pt": "Selo Mestre da Ascensão"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noClassLines"],
       "description": [
         {
           "text": "@increasesExperience",
@@ -5014,7 +5013,7 @@
         "es": "Sello Maestro de Riqueza",
         "pt": "Selo Mestre da Riqueza"
       },
-      "tags": ["cashShop"],
+      "tags": ["cashShop", "noClassLines"],
       "description": [
         {
           "text": "@increasesExperienceAndDrops",
@@ -5261,7 +5260,7 @@
         "es": "Unicornio",
         "pt": "Unic. Est."
       },
-      "tags": ["cashShop", "noDurabilityLine"],
+      "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": "@autoCollectsZen",
@@ -5817,7 +5816,7 @@
         "es": "Boleto Abierto; Castillo Caos",
         "pt": "Bilhete Ac. Livre Cast. Caos"
       },
-      "tags": ["cashShop", "noDurabilityLine"],
+      "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": {
@@ -5875,7 +5874,7 @@
         "es": "Aro Mutación de Esqueleto",
         "pt": "Anel Transf. de Esqueleto"
       },
-      "tags": ["pandaOrSkeleton", "transformationRing", "valuable"],
+      "tags": ["pandaOrSkeleton", "transformationRing", "valuable", "noClassLines"],
       "description": [
         {
           "text": {
@@ -6166,7 +6165,7 @@
         "es": "Boleto Acceso a Doppenganger",
         "pt": "Bilhete Ac. Livre Doppeganger"
       },
-      "tags": ["cashShop", "noDurabilityLine"],
+      "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": {
@@ -6217,7 +6216,7 @@
         "es": "Boleto Acceso a Varka",
         "pt": "Bilhete Ac. Livre Varka"
       },
-      "tags": ["cashShop", "noDurabilityLine"],
+      "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": {
@@ -6283,7 +6282,7 @@
         "es": "Boleto Acceso Mapa 7 de Varka",
         "pt": "Bil. Ac. Livre Mapa 7 Varka"
       },
-      "tags": ["cashShop", "noDurabilityLine"],
+      "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
       "description": [
         {
           "text": {

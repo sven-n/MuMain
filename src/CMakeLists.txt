@@ -1258,3 +1258,24 @@ endif()
 if(ENABLE_EDITOR)
   target_link_libraries(MuClient PUBLIC imgui)
 endif()
+
+# MuEditor remembers the OpenMU API key in the system's key store
+# (MuEditor/Core/SecretStore.cpp): the Windows Credential Manager (advapi32,
+# linked above), the macOS Keychain, and the Linux keyring when libsecret is
+# found. Without libsecret the editor keeps the key only while it runs.
+if(ENABLE_EDITOR)
+  if(APPLE)
+    target_link_libraries(MuClient PUBLIC "-framework Security")
+  elseif(UNIX AND NOT ANDROID)
+    find_package(PkgConfig QUIET)
+    if(PkgConfig_FOUND)
+      pkg_check_modules(MU_LIBSECRET QUIET IMPORTED_TARGET libsecret-1)
+    endif()
+    if(MU_LIBSECRET_FOUND)
+      target_link_libraries(MuClient PUBLIC PkgConfig::MU_LIBSECRET)
+      target_compile_definitions(MuClient PRIVATE MU_HAS_LIBSECRET)
+    else()
+      message(STATUS "libsecret-1 not found: MuEditor cannot remember the OpenMU API key")
+    endif()
+  endif()
+endif()

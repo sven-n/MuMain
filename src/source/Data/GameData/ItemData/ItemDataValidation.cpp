@@ -315,6 +315,33 @@ void ValidatePotionPriority(const ItemDefinition& definition, std::vector<ItemDa
                  "potionPriority");
     }
 }
+
+// The kinds the original client named by these tags in its list of items without class lines
+// (IsRequireClassRenderItem); every item of them has the tag noClassLines.
+constexpr ItemTag KindsWithoutClassLines[] = {
+    ItemTag::ElitePotion, ItemTag::BuffScroll, ItemTag::Elixir, ItemTag::GambleItem, ItemTag::BattleOrStrengthScroll,
+    ItemTag::GuardianPet};
+
+// An item of one of those kinds without noClassLines shows class lines in its tooltip, unlike the others: an item
+// added later of a kind that used to get it from the list.
+void ValidateClassLines(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    if (definition.tags.Has(ItemTag::NoClassLines))
+    {
+        return;
+    }
+    for (const ItemTag kind : KindsWithoutClassLines)
+    {
+        if (definition.tags.Has(kind))
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                     std::string("has the tag ") + FindEnumName(kind) +
+                         " but not noClassLines: its tooltip shows class lines, unlike the other items of its kind",
+                     "tags");
+            return;
+        }
+    }
+}
 } // namespace
 
 void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIssue>& issues)
@@ -344,6 +371,7 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         ValidateDescription(definition, issues);
         ValidateSlot(definition, issues);
         ValidatePotionPriority(definition, issues);
+        ValidateClassLines(definition, issues);
         ValidateExcellentBonus(definition, issues);
         ValidateExcellentRaisesLevel(definition, issues);
         ValidateRequirementsByLevel(definition, issues);

@@ -54,13 +54,22 @@ enum class ItemTag : uint8_t
     LuckyItemTicket,
     // Asked for confirmation before selling or dropping
     Valuable,
-    // Tooltip lines the item does not show though its data has the value
+    // Tooltip lines the item does not show though its data has the value (IsTooltipOnlyTag)
     NoLevelRequirement,
     NoDurabilityLine,
     NoBlankAfterOptions,
+    NoClassLines,
 
     Count
 };
+
+// A tag that only leaves a line out of the item's tooltip: it says nothing about what the item is, so the item lists
+// don't tell items of the same name apart by it. A new tag of that group belongs here too.
+constexpr bool IsTooltipOnlyTag(ItemTag tag)
+{
+    return tag == ItemTag::NoLevelRequirement || tag == ItemTag::NoDurabilityLine ||
+           tag == ItemTag::NoBlankAfterOptions || tag == ItemTag::NoClassLines;
+}
 
 class ItemTagSet
 {

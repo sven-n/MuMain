@@ -577,7 +577,7 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 {
     g_iCurrentDialogScript = iDialogIndex;
 
-    const wchar_t* text = I18N::Dialog::Lookup(iDialogIndex);
+    const wchar_t* text = GameLogic::Quests::Dialog::GetText(iDialogIndex);
     g_iNumLineMessageBoxCustom = SeparateTextIntoLines(
         text, g_lpszMessageBoxCustom[0], NUM_LINE_CMB, MAX_LENGTH_CMB);
 
@@ -590,8 +590,7 @@ void CSQuest::ShowDialogText(int iDialogIndex)
 
     for (int i = 0; i < entry.numAnswer; ++i)
     {
-        const wchar_t* answerText = I18N::Dialog::Lookup(
-            GameLogic::Quests::Dialog::DialogAnswerLegacyId(iDialogIndex, i));
+        const wchar_t* answerText = GameLogic::Quests::Dialog::GetAnswerText(iDialogIndex, i);
         mu_swprintf_s(lpszAnswer, std::size(lpszAnswer), L"%d) %ls", i + 1, answerText);
         int iNumLine = SeparateTextIntoLines(lpszAnswer, g_lpszDialogAnswer[i][0], NUM_LINE_DA, MAX_LENGTH_CMB);
         if (iNumLine < NUM_LINE_DA - 1)

@@ -14,7 +14,8 @@
 
      The in-game system menu (is_system_menu) fills the screen instead, like the options screen:
      its own heading and close action, the buttons as a list (generic_menu_dialog.rcss). -->
-<body template="window_shell" data-model="generic_menu_dialog" data-class-system-menu="is_system_menu">
+<body template="window_shell" data-model="generic_menu_dialog" data-class-system-menu="is_system_menu"
+      data-attr-data-id="menu_id">
 	<div class="gmd-sys-header" data-class-hidden="!is_system_menu">
 		<div class="gmd-sys-title">{{system_menu_label}}</div>
 		<div class="gmd-sys-close" data-event-click="gmd_cancel">

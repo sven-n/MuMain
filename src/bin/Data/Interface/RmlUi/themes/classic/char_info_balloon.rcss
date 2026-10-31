@@ -1,0 +1,54 @@
+/* Classic (0.97) labels over the characters: the name above, then "class level", centred on the
+   projected point (the bottom centre of this 118x54 box, which CCharInfoBalloon places 190 units
+   over the feet in the classic scene). From the 0.97 client: no background art; each line on a
+   half-transparent box the size of its text. 0.97 has no guild line; MuMain's is kept above the
+   name, its text shadowed instead of boxed (a character without a guild has an empty line). */
+
+.balloon {
+	position: absolute;
+	width: 118px;
+	height: 54px;
+	pointer-events: none;
+	font-family: "token(font-body)";
+	font-size: 13px;
+}
+.balloon-bg {
+	display: none;
+}
+.balloon-name, .balloon-guild, .balloon-class {
+	position: absolute;
+	left: 59px;
+	transform: translateX(-50%);
+	white-space: nowrap;
+	padding: 0 2px;
+}
+.balloon-guild {
+	top: 18px;
+	color: #ffffff;
+	font-effect: shadow(1px 1px black);
+}
+.balloon-class {
+	top: 54px;
+	color: #ffffff;
+	background-color: rgba(0, 0, 0, 128);
+}
+/* Name colour by control status, as the 0.97 client: normal light blue on black; blocked
+   character on yellow, blocked items on cyan, operator on blue (black text). */
+.balloon-name {
+	top: 35px;
+	font-weight: bold;
+	color: #b4c8ff;
+	background-color: rgba(0, 0, 0, 128);
+}
+.balloon-name.name-blocked-character {
+	color: #000000;
+	background-color: rgba(255, 255, 0, 128);
+}
+.balloon-name.name-blocked-items {
+	color: #000000;
+	background-color: rgba(0, 255, 255, 128);
+}
+.balloon-name.name-operator {
+	color: #000000;
+	background-color: rgba(0, 0, 255, 128);
+}

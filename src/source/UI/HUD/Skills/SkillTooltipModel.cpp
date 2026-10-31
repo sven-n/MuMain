@@ -19,13 +19,12 @@ namespace UI::Skills::Tooltip
 
 namespace
 {
-constexpr int GLOBAL_TEXT_REQUIRED_LEVEL = 76;
-constexpr int GLOBAL_TEXT_REQUIRED_STRENGTH = 73;
-constexpr int GLOBAL_TEXT_REQUIRED_DEXTERITY = 75;
-constexpr int GLOBAL_TEXT_REQUIRED_ENERGY = 77;
-constexpr int GLOBAL_TEXT_REQUIRED_CHARISMA = 698;
-constexpr int GLOBAL_TEXT_NEED_MORE_STAT = 74;
-constexpr int GLOBAL_TEXT_MASTERY_TYPE_BASE = 1080;
+// The mastery type tags, by SKILL_ATTRIBUTE::MasteryType (the skill's element).
+const wchar_t* const* const kMasteryTypeTexts[] = {
+    &I18N::Game::IceAttribute,   &I18N::Game::PoisonAttribute, &I18N::Game::LightningAttribute,
+    &I18N::Game::FireAttribute,  &I18N::Game::EarthAttribute,  &I18N::Game::WindAttribute,
+    &I18N::Game::WaterAttribute,
+};
 
 // Delay is stored in ms; tooltip shows seconds with one decimal. No localized GlobalText entry exists yet.
 constexpr wchar_t kCooldownFormat[] = L"Cooldown: %.1f sec";
@@ -77,28 +76,28 @@ void AddRaw(Model& m, const wchar_t* text, LineColor color, bool bold = false)
     l.isBlank = false;
 }
 
-void AddFormatted(Model& m, int globalTextIdx, LineColor color, int v1)
+void AddFormatted(Model& m, const wchar_t* format, LineColor color, int v1)
 {
     Line& l = NextSlot(m);
-    mu_swprintf(l.text, I18N::Game::Lookup(globalTextIdx), v1);
+    mu_swprintf(l.text, format, v1);
     l.color = color;
     l.isBold = false;
     l.isBlank = false;
 }
 
-void AddFormatted(Model& m, int globalTextIdx, LineColor color, int v1, int v2)
+void AddFormatted(Model& m, const wchar_t* format, LineColor color, int v1, int v2)
 {
     Line& l = NextSlot(m);
-    mu_swprintf(l.text, I18N::Game::Lookup(globalTextIdx), v1, v2);
+    mu_swprintf(l.text, format, v1, v2);
     l.color = color;
     l.isBold = false;
     l.isBlank = false;
 }
 
-void AddFormattedWide(Model& m, int globalTextIdx, LineColor color, const wchar_t* arg)
+void AddFormattedWide(Model& m, const wchar_t* format, LineColor color, const wchar_t* arg)
 {
     Line& l = NextSlot(m);
-    mu_swprintf(l.text, I18N::Game::Lookup(globalTextIdx), arg);
+    mu_swprintf(l.text, format, arg);
     l.color = color;
     l.isBold = false;
     l.isBlank = false;
@@ -106,7 +105,7 @@ void AddFormattedWide(Model& m, int globalTextIdx, LineColor color, const wchar_
 
 // Requirement line: game mode colors red/white vs current value and may add a
 // `(lacking N)` deficit line; editor mode (currentValue < 0) is always white, no deficit.
-void AddRequirementLine(Model& m, int requiredValue, int currentValue, int reqStringIndex)
+void AddRequirementLine(Model& m, int requiredValue, int currentValue, const wchar_t* requirementFormat)
 {
     if (requiredValue <= 0) return;
 
@@ -115,7 +114,7 @@ void AddRequirementLine(Model& m, int requiredValue, int currentValue, int reqSt
 
     {
         Line& l = NextSlot(m);
-        mu_swprintf(l.text, I18N::Game::Lookup(reqStringIndex), requiredValue);
+        mu_swprintf(l.text, requirementFormat, requiredValue);
         l.color = requirementMet ? LineColor::White : LineColor::Red;
         l.isBold = false;
         l.isBlank = false;
@@ -124,7 +123,7 @@ void AddRequirementLine(Model& m, int requiredValue, int currentValue, int reqSt
     if (editorMode || requirementMet) return;
 
     Line& deficit = NextSlot(m);
-    mu_swprintf(deficit.text, I18N::Game::Lookup(GLOBAL_TEXT_NEED_MORE_STAT), requiredValue - currentValue);
+    mu_swprintf(deficit.text, I18N::Game::LackingD, requiredValue - currentValue);
     deficit.color = LineColor::Red;
     deficit.isBold = false;
     deficit.isBlank = false;
@@ -230,9 +229,9 @@ void EmitMagicalDamage(Model& m, int skillType, const DamageContext& ctx)
         int deleteMana = (int)(CharacterAttribute->ManaMax * 0.02f);
         int limitTime  = (int)(60 + (ctx.energy / 40.f));
 
-        AddFormatted(m, 578, LineColor::White, damageShield);
-        AddFormatted(m, 880, LineColor::White, deleteMana);
-        AddFormatted(m, 881, LineColor::White, limitTime);
+        AddFormatted(m, I18N::Game::AbsorbDOfDamage, LineColor::White, damageShield);
+        AddFormatted(m, I18N::Game::ManaDecreaseD, LineColor::White, deleteMana);
+        AddFormatted(m, I18N::Game::DurationDseconds, LineColor::White, limitTime);
         return;
     }
 
@@ -251,12 +250,12 @@ void EmitMagicalDamage(Model& m, int skillType, const DamageContext& ctx)
     {
         int curseMin = 0, curseMax = 0;
         gCharacterManager.GetCurseSkillDamage(s, &curseMin, &curseMax);
-        AddFormatted(m, 1692, LineColor::White, curseMin, curseMax);
+        AddFormatted(m, I18N::Game::CurseSpellDD, LineColor::White, curseMin, curseMax);
         return;
     }
 
-    AddFormatted(m, 170, LineColor::White,
-        ctx.magicMin + ctx.skillAttackPowerRate, ctx.magicMax + ctx.skillAttackPowerRate);
+    AddFormatted(m, I18N::Game::WizardryDmgDD, LineColor::White, ctx.magicMin + ctx.skillAttackPowerRate,
+                 ctx.magicMax + ctx.skillAttackPowerRate);
 }
 
 // Knight/Dark/Elf/Dark Lord/Rage Fighter: physical skill damage.
@@ -323,8 +322,8 @@ void EmitPhysicalDamage(Model& m, int skillType, const DamageContext& ctx)
         AddRaw(m, I18N::Game::CheckTheDetailsInPetInformationWindow, LineColor::DarkRed);
         return;
     default:
-        AddFormatted(m, 879, LineColor::White,
-            ctx.skillMin, ctx.skillMax + ctx.skillAttackPowerRate);
+        AddFormatted(m, I18N::Game::SkillDamageDD, LineColor::White, ctx.skillMin,
+                     ctx.skillMax + ctx.skillAttackPowerRate);
         return;
     }
 }
@@ -350,7 +349,7 @@ void EmitPlasmaStormFenrirDamage(Model& m, int skillType, const DamageContext& c
         minDamage = (ctx.strength / 5) + (ctx.dexterity / 5) + (ctx.vitality / 3) + (ctx.energy / 7) + skillDamageBase;
 
     const int maxDamage = minDamage + 30;
-    AddFormatted(m, 879, LineColor::White, minDamage, maxDamage + ctx.skillAttackPowerRate);
+    AddFormatted(m, I18N::Game::SkillDamageDD, LineColor::White, minDamage, maxDamage + ctx.skillAttackPowerRate);
 }
 
 // Elf buff-value computations (Healing/Defense/Attack/Recover).
@@ -365,11 +364,11 @@ void EmitElfBuffValues(Model& m, int skillType, const DamageContext& ctx)
         int value = (ctx.energy / 5) + 5;
         auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_HEALING_STR].GetSkillValue();
         value += static_cast<int>((value * boostPercent) / 100.0);
-        AddFormatted(m, 171, LineColor::White, value);
+        AddFormatted(m, I18N::Game::HealingD, LineColor::White, value);
         return;
     }
     case AT_SKILL_HEALING:
-        AddFormatted(m, 171, LineColor::White, ctx.energy / 5 + 5);
+        AddFormatted(m, I18N::Game::HealingD, LineColor::White, ctx.energy / 5 + 5);
         return;
     case AT_SKILL_DEFENSE_STR:
     case AT_SKILL_DEFENSE_MASTERY:
@@ -378,11 +377,11 @@ void EmitElfBuffValues(Model& m, int skillType, const DamageContext& ctx)
         auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_DEFENSE_STR].GetSkillValue();
         auto masteryBoostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_DEFENSE_MASTERY].GetSkillValue();
         value += static_cast<int>((value * (boostPercent + masteryBoostPercent)) / 100.0);
-        AddFormatted(m, 172, LineColor::White, value);
+        AddFormatted(m, I18N::Game::DefensiveAbilityIncreaseD, LineColor::White, value);
         return;
     }
     case AT_SKILL_DEFENSE:
-        AddFormatted(m, 172, LineColor::White, ctx.energy / 8 + 2);
+        AddFormatted(m, I18N::Game::DefensiveAbilityIncreaseD, LineColor::White, ctx.energy / 8 + 2);
         return;
     case AT_SKILL_ATTACK_STR:
     case AT_SKILL_ATTACK_MASTERY:
@@ -391,16 +390,17 @@ void EmitElfBuffValues(Model& m, int skillType, const DamageContext& ctx)
         auto boostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_ATTACK_STR].GetSkillValue();
         auto masteryBoostPercent = CharacterAttribute->MasterSkillInfo[AT_SKILL_ATTACK_MASTERY].GetSkillValue();
         value += static_cast<int>((value * (boostPercent + masteryBoostPercent)) / 100.0);
-        AddFormatted(m, 173, LineColor::White, value);
+        AddFormatted(m, I18N::Game::OffensiveAbilityIncreaseD, LineColor::White, value);
         return;
     }
     case AT_SKILL_ATTACK:
-        AddFormatted(m, 173, LineColor::White, ctx.energy / 7 + 3);
+        AddFormatted(m, I18N::Game::OffensiveAbilityIncreaseD, LineColor::White, ctx.energy / 7 + 3);
         return;
     case AT_SKILL_RECOVER:
     {
         int cal = ctx.energy / 4;
-        AddFormatted(m, 1782, LineColor::White, (int)((float)cal + (float)CharacterAttribute->Level));
+        AddFormatted(m, I18N::Game::MaximumSDDRecoveryAmount, LineColor::White,
+                     (int)((float)cal + (float)CharacterAttribute->Level));
         return;
     }
     default:
@@ -426,11 +426,13 @@ void EmitBodyStats(Model& m, int skillType, int iDistance, int iMana, int iSkill
         && skillType != AT_SKILL_EXPANSION_OF_WIZARDRY_STR
         && skillType != AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY)
     {
-        if (iDistance) AddFormatted(m, 174, LineColor::White, iDistance);
+        if (iDistance)
+            AddFormatted(m, I18N::Game::RangeD, LineColor::White, iDistance);
     }
 
-    AddFormatted(m, 175, LineColor::White, iMana);
-    if (iSkillMana > 0) AddFormatted(m, 360, LineColor::White, iSkillMana);
+    AddFormatted(m, I18N::Game::ManaD, LineColor::White, iMana);
+    if (iSkillMana > 0)
+        AddFormatted(m, I18N::Game::AGUseD, LineColor::White, iSkillMana);
 
     if (iDelayMs > 0)
     {
@@ -458,11 +460,11 @@ void EmitRequirements(Model& m, const BuildOptions& options, int skillType)
         curCha = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
     }
 
-    AddRequirementLine(m, SkillAttribute[skillType].Level, curLevel, GLOBAL_TEXT_REQUIRED_LEVEL);
-    AddRequirementLine(m, SkillAttribute[skillType].Strength, curStr, GLOBAL_TEXT_REQUIRED_STRENGTH);
-    AddRequirementLine(m, SkillAttribute[skillType].Dexterity, curDex, GLOBAL_TEXT_REQUIRED_DEXTERITY);
-    AddRequirementLine(m, reqEnergy, curEnergy, GLOBAL_TEXT_REQUIRED_ENERGY);
-    AddRequirementLine(m, SkillAttribute[skillType].Charisma, curCha, GLOBAL_TEXT_REQUIRED_CHARISMA);
+    AddRequirementLine(m, SkillAttribute[skillType].Level, curLevel, I18N::Game::MinimumLevelRequirementD);
+    AddRequirementLine(m, SkillAttribute[skillType].Strength, curStr, I18N::Game::StrengthRequirementD);
+    AddRequirementLine(m, SkillAttribute[skillType].Dexterity, curDex, I18N::Game::AgilityRequirementD);
+    AddRequirementLine(m, reqEnergy, curEnergy, I18N::Game::EnergyRequirementD);
+    AddRequirementLine(m, SkillAttribute[skillType].Charisma, curCha, I18N::Game::CharismaRequirementD);
     EndSection(m, before);
 }
 
@@ -513,13 +515,14 @@ void EmitBottomBanners(Model& m, const BuildOptions& options, int skillType)
     const int SkillUseType = SkillAttribute[skillType].SkillUseType;
     if (SkillUseType == SKILL_USE_TYPE_BRAND)
     {
-        AddFormattedWide(m, 1480, LineColor::DarkRed, SkillAttribute[BrandType].Name);
-        AddFormatted(m, 1481, LineColor::DarkRed, SkillAttribute[BrandType].Damage);
+        AddFormattedWide(m, I18N::Game::ReceiveSkillFromS, LineColor::DarkRed, SkillAttribute[BrandType].Name);
+        AddFormatted(m, I18N::Game::CanOnlyBeUsedForDSeconds, LineColor::DarkRed, SkillAttribute[BrandType].Damage);
     }
     if (SkillUseType == SKILL_USE_TYPE_MASTER)
     {
         AddRaw(m, I18N::Game::ThisIsAMasterSkillInGuildBattleAndCastleSiege, LineColor::DarkRed);
-        AddFormatted(m, 1483, LineColor::DarkRed, SkillAttribute[skillType].KillCount);
+        AddFormatted(m, I18N::Game::CanBeUsedWhenTheDKillCountIsCompleted, LineColor::DarkRed,
+                     SkillAttribute[skillType].KillCount);
     }
 
     // Dark Lord party teleport warning (character-specific).
@@ -559,6 +562,15 @@ void EmitBottomBanners(Model& m, const BuildOptions& options, int skillType)
     EndSection(m, before);
 }
 
+// The blue tag naming a skill's mastery type (SKILL_ATTRIBUTE::MasteryType, the skill's element);
+// empty for a type that has none.
+const wchar_t* MasteryTypeText(uint8_t masteryType)
+{
+    if (static_cast<size_t>(masteryType) >= std::size(kMasteryTypeTexts))
+        return L"";
+    return *kMasteryTypeTexts[masteryType];
+}
+
 void EmitBlueTags(Model& m, int skillType)
 {
     const int before = m.count;
@@ -566,7 +578,7 @@ void EmitBlueTags(Model& m, int skillType)
     const BYTE MasteryType = gSkillManager.GetSkillMasteryType(static_cast<ActionSkillType>(skillType));
     if (MasteryType != 255)
     {
-        AddRaw(m, I18N::Game::Lookup(GLOBAL_TEXT_MASTERY_TYPE_BASE + MasteryType), LineColor::Blue);
+        AddRaw(m, MasteryTypeText(MasteryType), LineColor::Blue);
     }
 
     if (skillType == AT_SKILL_EXPANSION_OF_WIZARDRY

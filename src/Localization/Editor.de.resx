@@ -2132,7 +2132,7 @@
     <value>Von OpenMU, Server {0}</value>
   </data>
   <data name="The diff counts" xml:space="preserve">
-    <value>{0} hinzugefügte, {1} geänderte, {2} entfernte Items; {3} Formeleinträge</value>
+    <value>{0} hinzugefügte, {1} geänderte Items; {2} Formeleinträge</value>
   </data>
   <data name="Check all" xml:space="preserve">
     <value>Alle anhaken</value>
@@ -3030,5 +3030,107 @@
   </data>
   <data name="Cue in use note" xml:space="preserve">
     <value>Geräuschereignisse spielen auf der Marke: lege sie zuerst auf eine andere Marke oder einen Moment.</value>
+  </data>
+  <data name="Update from server" xml:space="preserve">
+    <value>Vom Server aktualisieren</value>
+  </data>
+  <data name="Admin panel address" xml:space="preserve">
+    <value>Adresse des Admin-Panels</value>
+  </data>
+  <data name="Update from {0}" xml:space="preserve">
+    <value>Aktualisierung von {0}</value>
+  </data>
+  <data name="Downloading {0}" xml:space="preserve">
+    <value>{0} wird heruntergeladen ...</value>
+  </data>
+  <data name="What Update from server does" xml:space="preserve">
+    <value>Vom Server aktualisieren lädt die Items eines OpenMU-Servers aus seinem Admin-Panel herunter und listet wie Import auf, worin sie sich von denen des Clients unterscheiden. Geben Sie einen API-Schlüssel des Admin-Panels ein; Merken behält ihn für die Adresse im Schlüsselspeicher des Systems. Ohne einen füllt die Umgebungsvariable {0} das Feld.</value>
+  </data>
+  <data name="Enter the address of the OpenMU admin panel" xml:space="preserve">
+    <value>Geben Sie die Adresse des OpenMU-Admin-Panels ein, z. B. https://admin.example.org oder http://localhost:8080.</value>
+  </data>
+  <data name="The admin panel address must be https" xml:space="preserve">
+    <value>Die Adresse des Admin-Panels muss mit https:// beginnen; http:// geht nur für diesen Computer (localhost, 127.0.0.1, [::1]).</value>
+  </data>
+  <data name="The admin panel could not be reached ({0})" xml:space="preserve">
+    <value>Das Admin-Panel ist nicht erreichbar ({0}).</value>
+  </data>
+  <data name="The api key may not download the items" xml:space="preserve">
+    <value>Der API-Schlüssel darf die Items nicht herunterladen (403): Er braucht die Rolle Viewer, und das Admin-Panel braucht einen Benutzer.</value>
+  </data>
+  <data name="The admin panel has no item exchange" xml:space="preserve">
+    <value>Das Admin-Panel hat keine Item-Austauschdatei (404): Es braucht ein neueres OpenMU.</value>
+  </data>
+  <data name="Too many requests, try again in a minute" xml:space="preserve">
+    <value>Zu viele Anfragen (429): Versuchen Sie es in einer Minute erneut.</value>
+  </data>
+  <data name="The admin panel answered with http status {0}" xml:space="preserve">
+    <value>Das Admin-Panel antwortete mit dem HTTP-Status {0}.</value>
+  </data>
+  <data name="The update was cancelled" xml:space="preserve">
+    <value>Die Aktualisierung wurde abgebrochen.</value>
+  </data>
+  <data name="The file does not carry all fields of an item, it is not added" xml:space="preserve">
+    <value>Die Datei enthält nicht alle Felder eines Items: Es wird nicht hinzugefügt.</value>
+  </data>
+  <data name="Every item of the file matches the client" xml:space="preserve">
+    <value>Jedes Item der Datei stimmt mit dem Client überein.</value>
+  </data>
+  <data name="Items only in the client {0} stay unless checked" xml:space="preserve">
+    <value>{0} Items gibt es nur im Client: Sie bleiben, wie sie sind, solange Sie sie unten in ihrer Liste nicht anhaken.</value>
+  </data>
+  <data name="Only in the client ({0}), not on the server" xml:space="preserve">
+    <value>Nur im Client ({0}), nicht auf dem Server</value>
+  </data>
+  <data name="Only in the client ({0}), not in the file" xml:space="preserve">
+    <value>Nur im Client ({0}), nicht in der Datei</value>
+  </data>
+  <data name="Copy as Markdown" xml:space="preserve">
+    <value>Als Markdown kopieren</value>
+  </data>
+  <data name="Copied {0} rows" xml:space="preserve">
+    <value>{0} Zeilen kopiert</value>
+  </data>
+  <data name="Copies the list as a Markdown table" xml:space="preserve">
+    <value>Kopiert die Liste als Markdown-Tabelle (Gruppe, Nummer und englischer Name jedes Items), z. B. für ein Issue auf GitHub.</value>
+  </data>
+  <data name="It removes 0 items from the client" xml:space="preserve">
+    <value>Es entfernt {0} Gegenstände aus dem Client, mit ihren Modellen. Rückgängig holt sie zurück.</value>
+  </data>
+  <data name="Api key" xml:space="preserve">
+    <value>API-Schlüssel</value>
+  </data>
+  <data name="Remember" xml:space="preserve">
+    <value>Merken</value>
+  </data>
+  <data name="Keeps the key for this address in {0}" xml:space="preserve">
+    <value>Behält den Schlüssel für diese Adresse in {0}, nicht in einer Datei.</value>
+  </data>
+  <data name="This build cannot keep the key" xml:space="preserve">
+    <value>Dieser Build kann den Schlüssel nicht behalten: libsecret (der Systemschlüsselbund) wurde beim Bauen von MuEditor nicht gefunden. Der Schlüssel bleibt, bis der Editor schließt.</value>
+  </data>
+  <data name="The key could not be stored in {0}" xml:space="preserve">
+    <value>Der Schlüssel konnte nicht in {0} gespeichert werden.</value>
+  </data>
+  <data name="the Windows Credential Manager" xml:space="preserve">
+    <value>der Windows-Anmeldeinformationsverwaltung</value>
+  </data>
+  <data name="the macOS Keychain" xml:space="preserve">
+    <value>dem macOS-Schlüsselbund</value>
+  </data>
+  <data name="the system keyring" xml:space="preserve">
+    <value>dem Systemschlüsselbund</value>
+  </data>
+  <data name="Enter an api key of the admin panel {0}" xml:space="preserve">
+    <value>Geben Sie einen API-Schlüssel des Admin-Panels ein (seine Seite API-Schlüssel; die Rolle Viewer genügt), oder setzen Sie die Umgebungsvariable {0} vor dem Start des Editors.</value>
+  </data>
+  <data name="The admin panel does not know the api key" xml:space="preserve">
+    <value>Das Admin-Panel kennt den API-Schlüssel nicht (401).</value>
+  </data>
+  <data name="From the server" xml:space="preserve">
+    <value>Vom Server</value>
+  </data>
+  <data name="Not saved yet: the changes are only in the editor" xml:space="preserve">
+    <value>Noch nicht gespeichert: Die Änderungen sind nur im Editor, bis Sie die Gegenstände speichern.</value>
   </data>
 </root>

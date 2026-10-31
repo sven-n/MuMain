@@ -124,7 +124,7 @@ namespace mu::ui::window
         };
 
         void SyncRmlModel();
-        static std::vector<TextLine> BuildTextLines(int nGlobalTextIndex, int nPixelWidth);
+        static std::vector<TextLine> BuildTextLines(const wchar_t* text, int nPixelWidth);
 
         struct MyQuestInfoRmlModel
         {

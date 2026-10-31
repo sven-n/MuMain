@@ -277,7 +277,6 @@ struct GroundItemLabel
 GroundItemLabel DescribeGroundItemLabel(OBJECT* o, ITEM* ip);
 void RenderSkillInfo(int sx, int sy, int Type, int SkillNum = 0, int iRenderPoint = STRP_NONE);
 void RequireClass(ITEM_ATTRIBUTE* p);
-bool IsRequireClassRenderItem(const short sType);
 unsigned int getGoldColor(DWORD Gold);
 
 bool IsExcellentItem(ITEM* pItem);

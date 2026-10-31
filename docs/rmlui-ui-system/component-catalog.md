@@ -228,7 +228,10 @@ behind one active menu. An enabled button runs its callback and closes; Esc uses
 There is no resolution veto. A callback may enqueue the next menu, as the Gem Integration flow does.
 
 Use configuration for content and supported layout variants. `kind` identifies compatibility
-presentation, while `systemMenu` selects the system-menu presentation. Column support is currently
+presentation (the original box the menu copies, `data-kind`, which also switches the document to
+the native-frame layout), while `systemMenu` selects the system-menu presentation. Every caller
+also sets `id`, which only names the menu (`data-id` on the body) so a theme can target one menu
+without new layout rules; it changes nothing by itself. Column support is currently
 limited to the implemented two-column variant; consult the header before adding another shape.
 Frame structure comes from `window_shell.rml`. References: `generic_menu_dialog.rml`, its themed
 assets, and the menu construction in `CustomMessageBox.cpp`.

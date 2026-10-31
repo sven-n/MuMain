@@ -42,6 +42,7 @@
 #include "GameLogic/Items/TransformationRing.h"
 #include "Render/Items/ItemDisplay.h"
 #include <chrono>
+#include <cstring>
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "GameLogic/Items/ItemNameParts.h"
@@ -494,73 +495,6 @@ bool IsCanTrade()
 
 int TextNum = 0;
 int SkipNum = 0;
-
-bool IsRequireClassRenderItem(const short sType)
-{
-    if (
-        sType == ITEM_WEAPON_OF_ARCHANGEL
-        || sType == ITEM_ARMOR_OF_GUARDSMAN
-        || sType == ITEM_GEM_OF_SECRET
-        || (sType >= ITEM_PACKED_JEWEL_OF_BLESS && sType <= ITEM_PACKED_JEWEL_OF_SOUL)
-        || GameLogic::Items::IsSealType(sType)
-        || sType == ITEM_TRANSFORMATION_RING
-        || (sType >= ITEM_ELITE_TRANSFER_SKELETON_RING && sType <= ITEM_GAME_MASTER_TRANSFORMATION_RING)
-        || sType == ITEM_HORN_OF_FENRIR
-        || sType == ITEM_JEWEL_OF_CHAOS
-        || GameLogic::Items::IsRibbonBoxType(sType)
-        )
-    {
-        return false;
-    }
-
-    if (GameLogic::Items::IsSealType(sType)
-        || GameLogic::Items::IsEventTicketType(sType)
-        || GameLogic::Items::IsDoppelgangerOrVarkaTicketType(sType)
-        || (sType == ITEM_CHAOS_CARD)
-        || (sType >= ITEM_RARE_ITEM_TICKET_1 && sType <= ITEM_RARE_ITEM_TICKET_5)
-        || (sType == ITEM_TALISMAN_OF_LUCK)
-        || GameLogic::Items::IsElitePotionType(sType)
-        || GameLogic::Items::IsBuffScrollType(sType)
-        || GameLogic::Items::IsWingMixCharmType(sType)
-        || (sType == ITEM_SEAL_OF_MOBILITY)
-        || GameLogic::Items::IsResetFruitType(sType)
-        || GameLogic::Items::IsElixirType(sType)
-        || (sType == ITEM_INDULGENCE)
-        || (sType == ITEM_ILLUSION_TEMPLE_TICKET)
-        || (sType == ITEM_SUMMONER_CHARACTER_CARD)
-        || (sType == ITEM_MEDIUM_ELITE_HEALING_POTION)
-        || (sType >= ITEM_CHAOS_CARD_GOLD && sType <= ITEM_CHAOS_CARD_RARE)
-        || (sType == ITEM_CHAOS_CARD_MINI)
-        || GameLogic::Items::IsHealingOrDivinitySealType(sType)
-        || GameLogic::Items::IsBattleOrStrengthScrollType(sType)
-        || (sType == ITEM_TALISMAN_OF_CHAOS_ASSEMBLY)
-        || (GameLogic::Items::IsDemonOrSpiritOfGuardianType(sType))
-        || (sType == ITEM_PET_RUDOLF)
-        || (sType == ITEM_SNOWMAN_TRANSFORMATION_RING)
-        || (sType == ITEM_PANDA_TRANSFORMATION_RING)
-        || (sType == ITEM_SKELETON_TRANSFORMATION_RING)
-        || (sType == ITEM_TALISMAN_OF_RESURRECTION)
-        || (sType == ITEM_TALISMAN_OF_MOBILITY)
-        || GameLogic::Items::IsGambleItemType(sType)
-        || (sType == ITEM_PET_PANDA)
-        || (sType == ITEM_PET_UNICORN)
-        || sType == ITEM_TALISMAN_OF_GUARDIAN
-        || sType == ITEM_TALISMAN_OF_ITEM_PROTECTION
-        || sType == ITEM_MASTER_SEAL_OF_ASCENSION
-        || sType == ITEM_MASTER_SEAL_OF_WEALTH
-        || sType == ITEM_OPEN_ACCESS_TICKET_TO_CHAOS_CASTLE
-        || (sType >= ITEM_RARE_ITEM_TICKET_7 && sType <= ITEM_RARE_ITEM_TICKET_12)
-#ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || g_pMyInventory->IsInvenItem(sType)
-#endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-        || (sType == ITEM_ELITE_SD_POTION)
-        )
-    {
-        return false;
-    }
-
-    return true;
-}
 
 void RequireClass(ITEM_ATTRIBUTE* pItem)
 {
@@ -1886,138 +1820,6 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     }
 
     WriteItemTooltipLayoutLines(*ip, Level, values, Data::Items::TooltipSection::Name);
-    if (GameLogic::Items::IsRibbonBox(ip))
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::ThrowItAndYouMayReceiveSomeZenOrItems);
-        switch (ip->Type)
-        {
-        case ITEM_RED_RIBBON_BOX:
-            TextListColor[TextNum] = TEXT_COLOR_RED;
-            break;
-        case ITEM_GREEN_RIBBON_BOX:
-            TextListColor[TextNum] = TEXT_COLOR_GREEN;
-            break;
-        case ITEM_BLUE_RIBBON_BOX:
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            break;
-        }
-        TextBold[TextNum] = false; TextNum++;
-    }
-    if (ip->Type >= ITEM_PUMPKIN_OF_LUCK && ip->Type <= ITEM_JACK_OLANTERN_DRINK) //Halloween event
-    {
-        wchar_t Text_data[300];
-        ITEM_ADD_OPTION Item_data = g_pItemAddOptioninfo->GetItemAddOtioninfo(ip->Type);
-
-        switch (ip->Type)
-        {
-        case ITEM_PUMPKIN_OF_LUCK:
-            mu_swprintf(TextList[TextNum], I18N::Game::DropItToReceiveTheGift);
-            TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
-            break;
-        case ITEM_JACK_OLANTERN_BLESSINGS:
-            mu_swprintf(Text_data, I18N::Game::AttackSpeedIncreaseD, Item_data.m_byValue1);
-            mu_swprintf(TextList[TextNum], Text_data);
-            TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
-            break;
-        case ITEM_JACK_OLANTERN_WRATH:
-            mu_swprintf(Text_data, I18N::Game::AttackPowerIncreaseD, Item_data.m_byValue1);
-            mu_swprintf(TextList[TextNum], Text_data);
-            TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
-            break;
-        case ITEM_JACK_OLANTERN_CRY:
-            mu_swprintf(Text_data, I18N::Game::DefensePowerIncreaseD, Item_data.m_byValue1);
-            mu_swprintf(TextList[TextNum], Text_data);
-            TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
-            break;
-        case ITEM_JACK_OLANTERN_FOOD:
-            mu_swprintf(Text_data, I18N::Game::IncreaseMaxLifeD, Item_data.m_byValue1);
-            mu_swprintf(TextList[TextNum], Text_data);
-            TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
-            break;
-        case ITEM_JACK_OLANTERN_DRINK:
-            mu_swprintf(Text_data, I18N::Game::IncreaseMaxManaD, Item_data.m_byValue1);
-            mu_swprintf(TextList[TextNum], Text_data);
-            TextListColor[TextNum] = TEXT_COLOR_DARKYELLOW;
-            break;
-        }
-        TextBold[TextNum] = false; TextNum++;
-    }
-    if (GameLogic::Items::IsChocolateBox(ip))
-    {
-        mu_swprintf(TextList[TextNum], I18N::Game::DropItToReceiveTheGift);
-        switch (ip->Type)
-        {
-        case ITEM_PINK_CHOCOLATE_BOX:
-            if (Level == 0)
-                TextListColor[TextNum] = TEXT_COLOR_PURPLE;
-            else
-                if (Level == 1)
-                    TextListColor[TextNum] = TEXT_COLOR_PURPLE;
-            break;
-        case ITEM_RED_CHOCOLATE_BOX:
-            if (Level == 0)
-                TextListColor[TextNum] = TEXT_COLOR_RED;
-            else
-                if (Level == 1)
-                    TextListColor[TextNum] = TEXT_COLOR_RED;
-            break;
-        case ITEM_BLUE_CHOCOLATE_BOX:
-            if (Level == 0)
-                TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            else
-                if (Level == 1)
-                    TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            break;
-        }
-        TextBold[TextNum] = false; TextNum++;
-    }
-    if (ip->Type == ITEM_BOX_OF_LUCK)
-    {
-        if (Level == 7)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::WhenYouDropItOnTheGround);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::RenaZenJewelItem);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::YouWillGetOneOfTheAboveItems);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        }
-        else if (Level == 14)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::FreeEntranceToKalima);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::IncreaseStamina);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        }
-        else
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::ThrowItAndYouMayReceiveSomeZenOrItems);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        }
-        mu_swprintf(TextList[TextNum], I18N::Game::CannotBeSold);
-        TextListColor[TextNum] = TEXT_COLOR_RED;
-        TextBold[TextNum] = false;
-        TextNum++;
-        if (Level == 13)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::CannotStoreInVault);
-            TextListColor[TextNum] = TEXT_COLOR_RED;
-            TextBold[TextNum] = false;
-            TextNum++;
-        }
-    }
-    int tCount = COMGEM::CalcCompiledCount(ip);
-    if (tCount > 0)
-    {
-        int	nJewelIndex = COMGEM::Check_Jewel_Com(ip->Type);
-        if (nJewelIndex != COMGEM::NOGEM)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::DSIsCombined, tCount, I18N::Game::Lookup(COMGEM::GetJewelIndex(nJewelIndex, COMGEM::eGEM_NAME)));
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::CanBeUsedAfterDismantling);
-            TextListColor[TextNum] = TEXT_COLOR_WHITE; TextBold[TextNum] = false; TextNum++;
-        }
-    }
     // The description's rows, for both of its parts (before and after the options) together.
     int descriptionRowsLeft = MaxItemDescriptionRows;
     WriteItemDescription(*ip, Level, values, false, descriptionRowsLeft);
@@ -2085,26 +1887,9 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
         TextNum++;
     }
 
-    if (GameLogic::Items::IsAmmunition(ip))
-    {
-        if (Level >= 1)
-        {
-            int value = Level * 2 + 1;
-
-            mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDOfDamage, value);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            TextBold[TextNum] = false;
-            TextNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::AdditionalDmgD, 1);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            TextBold[TextNum] = false;
-            TextNum++;
-        }
-    }
-
     WriteItemTooltipLayoutLines(*ip, Level, values, Data::Items::TooltipSection::Description);
 
-    if (IsRequireClassRenderItem(ip->Type))
+    if (!g_ItemDatabase.HasTag(ip->Type, Data::Items::ItemTag::NoClassLines))
     {
         RequireClass(p);
     }
@@ -4013,6 +3798,13 @@ bool IsStrifeMap(int nMapIndex)
 
 unsigned int MarkColor[16];
 
+// Writes one 32-bit pixel into a texture's byte buffer. It copies the bytes: writing through the buffer cast to an
+// unsigned int* would treat the bytes as another type (type punning).
+static void WriteMarkPixel(BYTE* pixel, unsigned int color)
+{
+    std::memcpy(pixel, &color, sizeof(color));
+}
+
 void CreateGuildMark(int nMarkIndex, bool blend)
 {
     // Callers pass Hero->GuildMarkIndex straight through, which is -1 while the
@@ -4097,7 +3889,7 @@ void CreateGuildMark(int nMarkIndex, bool blend)
     {
         for (int j = 0; j < Width; j++)
         {
-            *((unsigned int*)(Buffer)) = MarkColor[MarkBuffer[0]];
+            WriteMarkPixel(Buffer, MarkColor[MarkBuffer[0]]);
             Buffer += 4;
             MarkBuffer++;
         }
@@ -4206,18 +3998,18 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
         {
             if (j >= (Width / 2 - 16) && j < (Width / 2 + 16) && i >= (Height / 2 - 16) && i < (Height / 2 + 16))
             {
-                *((unsigned int*)(Buffer + offset)) = MarkColor[MarkBuffer[offset2]];
+                WriteMarkPixel(Buffer + offset, MarkColor[MarkBuffer[offset2]]);
                 offset2++;
             }
             else if (j<3 || j>(Width - 4) || i<10 || i>(Height - 10))
             {
-                *((unsigned int*)(Buffer + offset)) = (255u << 24) + (0u << 16) +
-                                                      ((unsigned int)(50 + i / 100.f * 160) << 8) +
-                                                      (unsigned int)(50 + i / 100.f * 255);
+                WriteMarkPixel(Buffer + offset, (255u << 24) + (0u << 16) +
+                                                    (static_cast<unsigned int>(50 + i / 100.f * 160) << 8) +
+                                                    static_cast<unsigned int>(50 + i / 100.f * 255));
             }
             else
             {
-                *((unsigned int*)(Buffer + offset)) = (255u << 24) + (i << 16) + (i << 8) + (i);
+                WriteMarkPixel(Buffer + offset, (255u << 24) + (i << 16) + (i << 8) + (i));
             }
             offset += 4;
         }

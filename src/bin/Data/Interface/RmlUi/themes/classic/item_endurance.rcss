@@ -1,0 +1,129 @@
+/* Classic (0.97) item endurance HUD (CItemEnduranceInfo). From the 0.97 client:
+   - the pet's (Guardian Angel, Imp, Uniria, Dinorant) life in the top-right corner (004bec00):
+     its name ending at x 625, y 4, and the 0.97 bar at (575, 16) -- a half-black shadow, the dark
+     teal frame 54x6 and the green fill 50x2 for the life;
+   - the arrow / bolt count (004bf540) at the top right, x 550, y 4;
+   - the worn gear's warning icons as legacy draws them (0.97 also flags them top right).
+   The pets' layer is the screen's stretch of the 640x480 frame, as in legacy, so every place below
+   is in the original's units. */
+
+@spritesheet endurance-pet-back-sheet { src: "../../../newui_Pet_Back.tga"; endurance-pet-back: 0px 0px 57px 23px; }
+@spritesheet endurance-boots-sheet { src: "../../../newui_durable_boots.tga"; endurance-boots: 0px 0px 23px 23px; }
+@spritesheet endurance-cap-sheet { src: "../../../newui_durable_cap.tga"; endurance-cap: 0px 0px 23px 23px; }
+@spritesheet endurance-gloves-sheet { src: "../../../newui_durable_gloves.tga"; endurance-gloves: 0px 0px 23px 23px; }
+@spritesheet endurance-lower-sheet { src: "../../../newui_durable_lower.tga"; endurance-lower: 0px 0px 23px 23px; }
+@spritesheet endurance-necklace-sheet { src: "../../../newui_durable_necklace.tga"; endurance-necklace: 0px 0px 23px 23px; }
+@spritesheet endurance-ring-sheet { src: "../../../newui_durable_ring.tga"; endurance-ring: 0px 0px 23px 23px; }
+@spritesheet endurance-shield-sheet { src: "../../../newui_durable_shield.tga"; endurance-shield: 0px 0px 23px 23px; }
+@spritesheet endurance-upper-sheet { src: "../../../newui_durable_upper.tga"; endurance-upper: 0px 0px 23px 23px; }
+@spritesheet endurance-weapon-sheet { src: "../../../newui_durable_weapon.tga"; endurance-weapon: 0px 0px 23px 23px; }
+@spritesheet endurance-wing-sheet { src: "../../../newui_durable_wing.tga"; endurance-wing: 0px 0px 23px 23px; }
+
+body {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+#pets, #icons { position: absolute; width: 0; height: 0; transform-origin: left top; pointer-events: none; }
+#pets {
+	left: 0;
+	top: 0;
+	transform: scale(var(--overlay-scale-x, 1), var(--overlay-scale-y, 1));
+	--root-scale: var(--overlay-scale-x, 1);
+	--root-scale-y: var(--overlay-scale-y, 1);
+}
+/* 0.97 places the pet's life and the arrow count from the right edge of the area its open windows
+   leave free (004cb520: 640, 450 or 260), 50 further left in a party so they stay clear of the
+   party list (004bec00, 004bf540). The column follows --world-right in the frame's units, so the
+   places below stay the ones 0.97 uses with no window open. */
+#pet_column { position: absolute; left: calc(var(--world-right, 640px) / var(--overlay-scale-x, 1) - 640px); top: 0; }
+#pets.in-party #pet_column { left: calc(var(--world-right, 640px) / var(--overlay-scale-x, 1) - 690px); }
+/* The icons on the dock: the column's first cell two dock units clear of the uncovered world's
+   right edge, 140 below the dock's top (the bottom HUD's top less the dock's 432 units). */
+#icons {
+	left: calc(var(--world-right, 100%) - 25px * var(--dock-scale, 1));
+	top: calc(100% - 51px * var(--hud-scale, 1) - 292px * var(--dock-scale, 1));
+	transform: scale(var(--dock-scale, 1));
+}
+
+
+/* The arrow count at (550, 4), white on half black. */
+#arrows_row { position: absolute; left: 550px; top: 4px; height: 11px; white-space: nowrap; pointer-events: none; }
+#arrows {
+	display: inline-block;
+	white-space: nowrap;
+	color: #ffffff;
+	background-color: rgba(0, 0, 0, 128);
+	transform-origin: left top;
+}
+
+/* The pet's bar at (575, 16): the shadow (1, 1 below-right), then the frame and its inside, one
+   dark teal, and the fill C++ sizes to the life (49 of the S6 bar's units), painted flat. */
+.pet { position: absolute; left: 575px; top: 16px; width: 54px; height: 6px; }
+.pet-fill { position: absolute; left: 1px; top: 1px; width: 54px; height: 6px; background-color: rgba(0, 0, 0, 128); }
+.pet-frame { position: absolute; left: 0; top: 0; width: 54px; height: 6px; background-color: rgb(0, 51, 51); }
+.pet-bar { position: absolute; left: 2px; top: 2px; height: 2px; background-color: rgb(0, 200, 50); image-color: rgba(255, 255, 255, 0); }
+
+/* The name ends at x 625, y 4: a box from x 525 to 625, the name right-aligned in it. */
+.pet-name-box { position: absolute; left: -50px; top: -12px; width: 100px; height: 0; }
+.pet-name {
+	position: absolute;
+	right: 0;
+	top: 0;
+	white-space: nowrap;
+	color: #ffffff;
+	background-color: rgba(0, 0, 0, 128);
+	transform-origin: right top;
+}
+
+.text-row { position: absolute; width: 600px; text-align: center; white-space: nowrap; pointer-events: none; }
+
+.icon { position: absolute; width: 23px; height: 23px; }
+.icon-art { position: absolute; left: 0; top: 0; width: 23px; height: 23px; }
+.icon-art--boots { decorator: image(endurance-boots); }
+.icon-art--cap { decorator: image(endurance-cap); }
+.icon-art--gloves { decorator: image(endurance-gloves); }
+.icon-art--lower { decorator: image(endurance-lower); }
+.icon-art--necklace { decorator: image(endurance-necklace); }
+.icon-art--ring { decorator: image(endurance-ring); }
+.icon-art--shield { decorator: image(endurance-shield); }
+.icon-art--upper { decorator: image(endurance-upper); }
+.icon-art--weapon { decorator: image(endurance-weapon); }
+.icon-art--wing { decorator: image(endurance-wing); }
+.icon-tint { position: absolute; top: 0; height: 23px; }
+.icon-tint--half { background-color: rgba(255, 255, 0, 128); }
+.icon-tint--third { background-color: rgba(255, 128, 0, 128); }
+.icon-tint--fifth { background-color: rgba(255, 51, 0, 128); }
+.icon-tint--zero { background-color: rgba(255, 0, 0, 128); }
+
+.durability-tip { display: inline-block; white-space: nowrap; font-weight: bold; background-color: rgba(0, 0, 0, 128); }
+.durability-tip--half { color: rgb(255, 255, 0); }
+.durability-tip--third { color: rgb(255, 168, 0); }
+.durability-tip--fifth { color: rgb(255, 83, 0); }
+.durability-tip--zero { color: rgb(255, 0, 0); }
+
+/* The icon column: two cells per column, filling downwards then leftwards, as the original's own
+   counter stepped them. */
+#icon_column { position: absolute; left: 0; top: 0; }
+.icon.cell-0 { left: 0px; top: 0px; }
+.icon.cell-1 { left: 0px; top: 25px; }
+.icon.cell-2 { left: -25px; top: 0px; }
+.icon.cell-3 { left: -25px; top: 25px; }
+.icon.cell-4 { left: -50px; top: 0px; }
+.icon.cell-5 { left: -50px; top: 25px; }
+.icon.cell-6 { left: -75px; top: 0px; }
+.icon.cell-7 { left: -75px; top: 25px; }
+.icon.cell-8 { left: -100px; top: 0px; }
+.icon.cell-9 { left: -100px; top: 25px; }
+.icon.cell-10 { left: -125px; top: 0px; }
+.icon.cell-11 { left: -125px; top: 25px; }
+
+/* Whole icon, or one half each when both rings warn at once (the original halved 23 to 11). */
+.icon-tint { left: 0; width: 23px; }
+.icon-tint.half-left { left: 0; width: 11px; }
+.icon-tint.half-right { left: 11px; width: 11px; }

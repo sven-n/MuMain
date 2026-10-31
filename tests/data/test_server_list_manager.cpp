@@ -20,9 +20,8 @@ public:
     TestServerListManager() = default;
 };
 
-// The load the connect server sends; the login screen's text for it (InsertServer).
+// The load the connect server sends; the login screen shows I18N::Game::Connect for it (InsertServer).
 constexpr int LowLoad = 10;
-constexpr int LowLoadText = 562;
 
 ServerGroup Group(int id, const std::string& name)
 {
@@ -51,7 +50,7 @@ std::vector<CServerGroup*> GroupsInOrder(CServerListManager& manager)
 
 std::wstring ChannelName(const wchar_t* groupAndChannel)
 {
-    return std::wstring(groupAndChannel) + L" " + I18N::Game::Lookup(LowLoadText);
+    return std::wstring(groupAndChannel) + L" " + I18N::Game::Connect;
 }
 } // namespace
 

@@ -4,7 +4,6 @@
 #include "stdafx.h"
 #include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInfomation.h"
-#include "I18N/All.h"
 
 #include <codecvt>
 #include <sstream>
@@ -43,22 +42,6 @@ CHARACTER_ATTRIBUTE* CharacterAttribute = NULL;
 static  int     g_iWorldStateTime = 0;
 static  DWORD   g_dwWorldStateBack = 0;
 #endif// STATE_LIMIT_TIME
-
-void SaveTextFile(wchar_t* FileName)
-{
-    FILE* fp = _wfopen(FileName, L"wb");
-
-    int Size = MAX_GLOBAL_TEXT_STRING;
-    BYTE* Buffer = new BYTE[Size];
-    for (int i = 0; i < MAX_TEXTS; i++)
-    {
-        memcpy(Buffer, I18N::Game::Lookup(i), Size);
-        BuxConvert(Buffer, Size);
-        fwrite(Buffer, Size, 1, fp);
-    }
-    delete[] Buffer;
-    fclose(fp);
-}
 
 wchar_t AbuseFilter[MAX_FILTERS][20];
 wchar_t AbuseNameFilter[MAX_NAMEFILTERS][20];
@@ -2085,20 +2068,6 @@ void CHARACTER_MACHINE::CalculateDamage()
     Character.AttackDamageMaxLeft += Damage;
     Character.AttackDamageMaxRight += Damage;
 
-    Damage = 0;
-    g_csItemOption.PlusSpecialLevel(&Damage, Dexterity, AT_SET_OPTION_IMPROVE_ATTACK_1);
-    Character.AttackDamageMinRight += Damage;
-    Character.AttackDamageMaxRight += Damage;
-    Character.AttackDamageMinLeft += Damage;
-    Character.AttackDamageMaxLeft += Damage;
-
-    Damage = 0;
-    g_csItemOption.PlusSpecialLevel(&Damage, Strength, AT_SET_OPTION_IMPROVE_ATTACK_2);
-    Character.AttackDamageMinRight += Damage;
-    Character.AttackDamageMaxRight += Damage;
-    Character.AttackDamageMinLeft += Damage;
-    Character.AttackDamageMaxLeft += Damage;
-
     if (GameLogic::Items::IsBowCrossbowOrAmmunition(Right) && GameLogic::Items::IsBowCrossbowOrAmmunition(Left))
     {
         int LLevel = Left->Level;
@@ -2327,13 +2296,6 @@ void CHARACTER_MACHINE::CalculateMagicDamage()
         PlusSpecialPercent(&Character.MagicDamageMin, AT_IMPROVE_MAGIC_PERCENT, LRing, LRing->SpecialValue[0]);
         PlusSpecialPercent(&Character.MagicDamageMax, AT_IMPROVE_MAGIC_PERCENT, LRing, LRing->SpecialValue[0]);
     }
-
-    WORD MagicDamage = 0;
-
-    MagicDamage = 0;
-    g_csItemOption.PlusSpecialLevel(&MagicDamage, Energy, AT_SET_OPTION_IMPROVE_MAGIC);
-    Character.MagicDamageMin += MagicDamage;
-    Character.MagicDamageMax += MagicDamage;
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll4))
     {
@@ -2579,10 +2541,9 @@ void CHARACTER_MACHINE::CalculateSuccessfulBlocking()
 
 void CHARACTER_MACHINE::CalculateDefense()
 {
-    WORD Dexterity, Vitality;
+    WORD Dexterity;
 
     Dexterity = Character.Dexterity + Character.AddDexterity;
-    Vitality = Character.Vitality + Character.AddVitality;
 
     int CharacterClass = gCharacterManager.GetBaseClass(Character.Class);
 
@@ -2688,8 +2649,6 @@ void CHARACTER_MACHINE::CalculateDefense()
     }
 
     g_csItemOption.PlusSpecial(&Character.Defense, AT_SET_OPTION_IMPROVE_DEFENCE);
-    g_csItemOption.PlusSpecialLevel(&Character.Defense, Dexterity, AT_SET_OPTION_IMPROVE_DEFENCE_3);
-    g_csItemOption.PlusSpecialLevel(&Character.Defense, Vitality, AT_SET_OPTION_IMPROVE_DEFENCE_4);
 
     if (GameLogic::Items::IsShieldType(Equipment[EQUIPMENT_WEAPON_LEFT].Type))
     {

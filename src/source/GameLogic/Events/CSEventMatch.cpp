@@ -26,6 +26,81 @@ namespace
 {
 constexpr std::chrono::seconds kMatchCountdownDuration{30};
 
+// The server's Blood Castle "Congratulations" countdown, the number after TYPE_MATCH_CASTLE_END.
+constexpr int kMatchCastleCongratulations = TYPE_MATCH_CASTLE_END + 1;
+
+// Each event's countdown lines, in MATCH_TYPE order from its first countdown type.
+const wchar_t* const* const kDevilSquareCountdownFormats[] = {
+    &I18N::Game::YouWillEnterDevilSquareDSecondsFromNow,
+    &I18N::Game::TheGateOfDevilSquareWillCloseDownInDSeconds,
+    &I18N::Game::TheGateOfDevilSquareIsClosingDownDSecondsRemaining,
+};
+const wchar_t* const* const kBloodCastleCountdownFormats[] = {
+    &I18N::Game::SClosingInDSeconds,
+    &I18N::Game::SInfiltrationInDSeconds,
+    &I18N::Game::SEventEndsInDSeconds,
+    &I18N::Game::SEventShutsDownInDSeconds,
+};
+const wchar_t* const* const kChaosCastleCountdownFormats[] = {
+    &I18N::Game::SClosingInDSeconds,
+    &I18N::Game::SPenetrationInDSeconds,
+    &I18N::Game::SEventEndsInDSeconds,
+    &I18N::Game::SEventShutsDownInDSeconds,
+};
+const wchar_t* const* const kCursedTempleCountdownFormats[] = {
+    &I18N::Game::AdvanceToTheTempleAfterDSeconds,
+    &I18N::Game::BattleBeginsInDSeconds,
+};
+const wchar_t* const* const kDoppelgangerCountdownFormats[] = {
+    &I18N::Game::EntranceToDoppelgangerWillCloseInDSeconds,
+    &I18N::Game::DoppelgangerWillBeginInDSeconds,
+    &I18N::Game::DSecondsLeftToEliminateIceWalker,
+    &I18N::Game::DSecondsLeftUntilTheEndOfDoppelganger,
+};
+static_assert(std::size(kDevilSquareCountdownFormats) == TYPE_MATCH_DEVIL_CLOSE - TYPE_MATCH_DEVIL_ENTER_START + 1,
+              "one format per Devil Square countdown type");
+static_assert(std::size(kBloodCastleCountdownFormats) == TYPE_MATCH_CASTLE_END - TYPE_MATCH_CASTLE_ENTER_CLOSE + 1,
+              "one format per Blood Castle countdown type");
+static_assert(std::size(kChaosCastleCountdownFormats) == TYPE_MATCH_CHAOS_END - TYPE_MATCH_CHAOS_ENTER_START + 1,
+              "one format per Chaos Castle countdown type");
+static_assert(std::size(kCursedTempleCountdownFormats) ==
+                  TYPE_MATCH_CURSEDTEMPLE_GAME_START - TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE + 1,
+              "one format per Illusion Temple countdown type");
+static_assert(std::size(kDoppelgangerCountdownFormats) ==
+                  TYPE_MATCH_DOPPELGANGER_CLOSE - TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE + 1,
+              "one format per Doppelganger countdown type");
+
+// The countdown line's format for countdown type `matchType`, a MATCH_TYPE or the server's Blood
+// Castle "Congratulations" (the number after TYPE_MATCH_CASTLE_END); empty for any other number.
+const wchar_t* GetMatchCountdownFormat(int matchType)
+{
+    if (matchType >= TYPE_MATCH_DEVIL_ENTER_START && matchType <= TYPE_MATCH_DEVIL_CLOSE)
+    {
+        return *kDevilSquareCountdownFormats[matchType - TYPE_MATCH_DEVIL_ENTER_START];
+    }
+    if (matchType >= TYPE_MATCH_CASTLE_ENTER_CLOSE && matchType <= TYPE_MATCH_CASTLE_END)
+    {
+        return *kBloodCastleCountdownFormats[matchType - TYPE_MATCH_CASTLE_ENTER_CLOSE];
+    }
+    if (matchType == kMatchCastleCongratulations)
+    {
+        return I18N::Game::Congratulations;
+    }
+    if (matchType >= TYPE_MATCH_CHAOS_ENTER_START && matchType <= TYPE_MATCH_CHAOS_END)
+    {
+        return *kChaosCastleCountdownFormats[matchType - TYPE_MATCH_CHAOS_ENTER_START];
+    }
+    if (matchType >= TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE && matchType <= TYPE_MATCH_CURSEDTEMPLE_GAME_START)
+    {
+        return *kCursedTempleCountdownFormats[matchType - TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE];
+    }
+    if (matchType >= TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE && matchType <= TYPE_MATCH_DOPPELGANGER_CLOSE)
+    {
+        return *kDoppelgangerCountdownFormats[matchType - TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE];
+    }
+    return L"";
+}
+
 template <std::size_t N>
 void ClearWideBuffer(wchar_t (&buffer)[N])
 {
@@ -100,35 +175,18 @@ std::wstring CSBaseMatch::CountdownText(void)
     const int remainingSeconds = static_cast<int>((kMatchCountdownDuration - elapsedSeconds).count());
     wchar_t lpszStr[256]{0};
 
+    const wchar_t* format = GetMatchCountdownFormat(m_iMatchCountDownType);
     if (m_iMatchCountDownType >= TYPE_MATCH_CASTLE_ENTER_CLOSE && m_iMatchCountDownType <= TYPE_MATCH_CASTLE_END)
     {
-        const int textNum = 824 + m_iMatchCountDownType - TYPE_MATCH_CASTLE_ENTER_CLOSE;
-        WriteWide(lpszStr, I18N::Game::Lookup(textNum), I18N::Game::BloodCastle, remainingSeconds);
+        WriteWide(lpszStr, format, I18N::Game::BloodCastle, remainingSeconds);
     }
     else if (m_iMatchCountDownType >= TYPE_MATCH_CHAOS_ENTER_START && m_iMatchCountDownType <= TYPE_MATCH_CHAOS_END)
     {
-        int textNum = 824 + m_iMatchCountDownType - TYPE_MATCH_CHAOS_ENTER_START;
-        if (textNum == 825)
-        {
-            textNum = 828;
-        }
-        WriteWide(lpszStr, I18N::Game::Lookup(textNum), I18N::Game::ChaosCastle, remainingSeconds);
-    }
-    else if (m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_ENTER_CLOSE
-        || m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_GAME_START)
-    {
-        int textNum = (m_iMatchCountDownType == TYPE_MATCH_CURSEDTEMPLE_GAME_START) ? 2386 : 2384;
-        WriteWide(lpszStr, I18N::Game::Lookup(textNum), remainingSeconds);
-    }
-    else if (m_iMatchCountDownType >= TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE && m_iMatchCountDownType <= TYPE_MATCH_DOPPELGANGER_CLOSE)
-    {
-        const int textNum = 2860 + m_iMatchCountDownType - TYPE_MATCH_DOPPELGANGER_ENTER_CLOSE;
-        WriteWide(lpszStr, I18N::Game::Lookup(textNum), remainingSeconds);
+        WriteWide(lpszStr, format, I18N::Game::ChaosCastle, remainingSeconds);
     }
     else
     {
-        const int textNum = 640 + m_iMatchCountDownType - TYPE_MATCH_DEVIL_ENTER_START;
-        WriteWide(lpszStr, I18N::Game::Lookup(textNum), remainingSeconds);
+        WriteWide(lpszStr, format, remainingSeconds);
     }
 
     return lpszStr;

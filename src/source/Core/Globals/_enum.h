@@ -3619,12 +3619,9 @@ enum OptionType
     AT_SET_OPTION_IMPROVE_SHIELD_DEFENCE,
     AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE,
 
-    AT_SET_OPTION_IMPROVE_ATTACK_2,
-    AT_SET_OPTION_IMPROVE_ATTACK_1,
-    AT_SET_OPTION_IMPROVE_DEFENCE_3,
-    AT_SET_OPTION_IMPROVE_DEFENCE_4,
-    AT_SET_OPTION_IMPROVE_MAGIC,
-    AT_SET_OPTION_ICE_MASTERY,
+    // Set options 24 to 28 (class bonuses that grew with a stat) are not supported: no set
+    // used them. The mastery options keep their numbers, the ones the set data uses.
+    AT_SET_OPTION_ICE_MASTERY = AT_SET_OPTION_TWO_HAND_SWORD_IMPROVE_DAMAGE + 6,
     AT_SET_OPTION_POSION_MASTERY,
     AT_SET_OPTION_THUNDER_MASTERY,
     AT_SET_OPTION_FIRE_MASTERY,
@@ -3991,12 +3988,6 @@ enum eGEMTYPE
 
     eGEMTYPE_END = 10,
     eGEMTYPE_END_ALL = 20,
-};
-enum eGEMINDEXTYPE
-{
-    eGEM_NAME,
-    eGEM_INDEX,
-    eGEM_END
 };
 
 enum _GEMTYPE
