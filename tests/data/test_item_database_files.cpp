@@ -61,7 +61,7 @@
 #include "UI/ItemTools/MuItemCategoriesUI.h"
 #include "UI/DataChecks/MuDataChecksUI.h"
 #include "UI/ItemTools/MuItemFormulasUI.h"
-#include "UI/ItemTools/MuItemGlowColorsUI.h"
+#include "UI/Colors/MuColorsUI.h"
 #include "UI/ItemTools/MuItemModelUI.h"
 #include "UI/ItemTools/MuItemRequirementsUI.h"
 #include "UI/ItemTools/MuItemRulesUI.h"
@@ -2833,7 +2833,7 @@ void RenderItemTools()
     g_MuItemRulesUI.Render(&open);
     g_MuItemCategoriesUI.Render(&open);
     g_MuItemModelUI.Render(&open);
-    g_MuItemGlowColorsUI.Render(&open);
+    g_MuColorsUI.Render(&open);
     g_MuItemSyncUI.Render(&open);
     g_MuItemFormulasUI.Render(&open);
     g_MuDataChecksUI.Render(&open);

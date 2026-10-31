@@ -1453,6 +1453,9 @@
   <data name="A name of letters and digits that no other glow color has" xml:space="preserve">
     <value>Ein Name aus Buchstaben und Ziffern, den keine andere Leuchtfarbe hat</value>
   </data>
+  <data name="Colors" xml:space="preserve">
+    <value>Farben</value>
+  </data>
   <data name="Glow Colors" xml:space="preserve">
     <value>Leuchtfarben</value>
   </data>

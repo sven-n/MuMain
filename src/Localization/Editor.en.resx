@@ -1474,6 +1474,9 @@
   <data name="A name of letters and digits that no other glow color has" xml:space="preserve">
     <value>A name of letters and digits that no other glow color has</value>
   </data>
+  <data name="Colors" xml:space="preserve">
+    <value>Colors</value>
+  </data>
   <data name="Glow Colors" xml:space="preserve">
     <value>Glow Colors</value>
   </data>

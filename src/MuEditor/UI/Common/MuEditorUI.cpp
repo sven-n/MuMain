@@ -219,6 +219,8 @@ void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* 
     // The item tools, which share one selected item, and the monster tools.
     RenderToolGroupMenu(MuEditor::GetItemTools(), windows);
     RenderToolGroupMenu(MuEditor::GetMonsterTools(), windows);
+    // The named colors, a tab per use; the group entries (Items > Glow Colors) open it on their tab.
+    ImGui::MenuItem(I18N::Editor::Colors, nullptr, &windows.colors);
     ImGui::MenuItem(I18N::Editor::DataChecks, nullptr, &windows.dataChecks);
     ImGui::MenuItem(I18N::Editor::ServerList, nullptr, &windows.serverList);
     ImGui::MenuItem("Skill Editor", nullptr, &windows.skillEditor);
@@ -249,7 +251,26 @@ void CMuEditorUI::RenderToolGroupMenu(const MuEditor::ToolGroup& group, MuEditor
     ImGui::MenuItem(*group.browser.label, nullptr, &(windows.*(group.browser.open)));
     for (const MuEditor::ToolWindowEntry& tool : group.tools)
     {
-        ImGui::MenuItem(*tool.label, nullptr, &(windows.*(tool.open)));
+        bool& open = windows.*(tool.open);
+        if (tool.showTab == nullptr)
+        {
+            ImGui::MenuItem(*tool.label, nullptr, &open);
+            continue;
+        }
+        // A tab of a window: checked while the window shows it. A click opens the window on it, or closes the window
+        // that shows it.
+        const bool shown = open && tool.isTabShown();
+        if (ImGui::MenuItem(*tool.label, nullptr, shown))
+        {
+            if (shown)
+            {
+                open = false;
+            }
+            else
+            {
+                tool.showTab();
+            }
+        }
     }
     ImGui::EndMenu();
 }
