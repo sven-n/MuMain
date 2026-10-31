@@ -6,6 +6,7 @@
 #include "Engine/Object/ObjectPose.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Pets/CSPetSystem.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Models/ZzzBMD.h"
@@ -459,4 +460,24 @@ TEST_CASE("A Dark Spirit the last frame left off screen flies back from the upda
 
     CHECK(o.AI == PET_FLYING);
     CHECK(o.Velocity == 3.f);
+}
+
+TEST_CASE("A drawn caped monster's cloth is made and simulated by the update, not by the draw [effects]")
+{
+    CharacterScope scope(MODEL_CRUST);
+    CHARACTER& c = scope.character();
+    OBJECT& o = c.Object;
+    for (int bone = 0; bone < MAX_BONES; ++bone)
+        for (int axis = 0; axis < 3; ++axis)
+            o.BoneTransform[bone][axis][axis] = 1.f;
+    o.Alpha = 1.f;
+    c.MonsterIndex = MONSTER_DEATH_KING;
+    c.GuildMarkIndex = -1;
+
+    UpdateCharacterEffects();
+
+    REQUIRE(o.m_pCloth != nullptr);
+    CHECK(o.m_byNumCloth == 1);
+    CHECK(((CPhysicsCloth*)o.m_pCloth)[0].GetOwner() == &o);
+    DeleteCloth(&c, &o);
 }

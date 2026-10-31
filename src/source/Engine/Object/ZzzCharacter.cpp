@@ -8749,6 +8749,499 @@ bool UpdateCharacterTypeEffects(CHARACTER* c, OBJECT* o, BMD* b)
 }
 } // namespace
 
+namespace
+{
+struct Cloak
+{
+    bool shown = false;
+    vec3_t light = {1.f, 1.f, 1.f};
+};
+
+// Whether a character wears a simulated cape, and its tint; its simulation and its draw both read it.
+Cloak CloakOf(CHARACTER* c, OBJECT* o)
+{
+    Cloak cloak;
+
+    if ((c->Class == CLASS_DARK || gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD
+        || gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER) && o->Type == MODEL_PLAYER)
+    {
+        if (c->Change == false || (c->Change == true && c->Object.Type == MODEL_PLAYER))
+        {
+            cloak.shown = true;
+        }
+    }
+
+    if (c->MonsterIndex == MONSTER_DEATH_KING || c->MonsterIndex == MONSTER_NIGHTMARE)
+    {
+        cloak.shown = true;
+    }
+
+    if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
+    {
+        cloak.shown = false;
+    }
+
+    if (gMapManager.InChaosCastle() == true)
+    {
+        cloak.shown = false;
+    }
+
+    if (c->GuildMarkIndex != -1)
+    {
+        if (EnableSoccer)
+        {
+            if (wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[c->GuildMarkIndex].GuildName) == 0)
+            {
+                cloak.shown = true;
+                if (HeroSoccerTeam == 0)
+                {
+                    Vector(1.f, 0.2f, 0.f, cloak.light);
+                }
+                else
+                {
+                    Vector(0.f, 0.2f, 1.f, cloak.light);
+                }
+            }
+            if (wcscmp(GuildWarName, GuildMark[c->GuildMarkIndex].GuildName) == 0)
+            {
+                cloak.shown = true;
+                if (HeroSoccerTeam == 0)
+                {
+                    Vector(0.f, 0.2f, 1.f, cloak.light);
+                }
+                else
+                {
+                    Vector(1.f, 0.2f, 0.f, cloak.light);
+                }
+            }
+        }
+        if (SoccerObserver)
+        {
+            if (wcscmp(SoccerTeamName[0], GuildMark[c->GuildMarkIndex].GuildName) == 0)
+            {
+                cloak.shown = true;
+                Vector(1.f, 0.2f, 0.f, cloak.light);
+            }
+            if (wcscmp(SoccerTeamName[1], GuildMark[c->GuildMarkIndex].GuildName) == 0)
+            {
+                cloak.shown = true;
+                Vector(0.f, 0.2f, 1.f, cloak.light);
+            }
+        }
+    }
+
+    if (g_DuelMgr.IsDuelEnabled())
+    {
+        if (g_DuelMgr.IsDuelPlayer(c, DUEL_ENEMY, FALSE))
+        {
+            cloak.shown = true;
+            Vector(1.f, 0.2f, 0.f, cloak.light);
+        }
+        else if (g_DuelMgr.IsDuelPlayer(c, DUEL_HERO, FALSE))
+        {
+            cloak.shown = true;
+            Vector(0.f, 0.2f, 1.f, cloak.light);
+        }
+    }
+    return cloak;
+}
+
+// The cape cloths a character's draw leaves out; its simulation skips them too.
+bool IsCloakClothHidden(CHARACTER* c, int i, const vec3_t light)
+{
+    if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD)
+    {
+        if (i == 2 && ((c->Wing.Type != MODEL_CAPE_OF_LORD && c->Wing.Type != MODEL_CAPE_OF_EMPEROR && c->Wing.Type != MODEL_SMALL_CAPE_OF_LORD) && (light[0] == 1.f && light[1] == 1.f && light[2] == 1.f)))
+        {
+            return true;
+        }
+        if ((i >= 0 && i <= 1) && g_ChangeRingMgr->CheckDarkLordHair(c->Object.SubType) == true)
+        {
+            return true;
+        }
+        if (i == 3 && g_ChangeRingMgr->CheckDarkLordHair(c->Object.SubType) == true)
+        {
+            return true;
+        }
+    }
+    if (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
+    {
+        if (i == 0 && ((c->Wing.Type != MODEL_CAPE_OF_FIGHTER
+            && c->Wing.Type != MODEL_CAPE_OF_OVERRULE
+            && c->Wing.Type != MODEL_LITTLE_WARRIORS_CLOAK)
+            && (light[0] == 1.f && light[1] == 1.f && light[2] == 1.f)))
+        {
+            return true;
+        }
+    }
+    if (i == 0 && g_ChangeRingMgr->CheckDarkCloak(c->Class, c->Object.SubType) == true)
+    {
+        return true;
+    }
+
+    if (c->Object.SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || c->Object.SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
+    {
+        return true;
+    }
+    return false;
+}
+
+void UpdateCloakCloth(CHARACTER* c, OBJECT* o)
+{
+    const Cloak cloak = CloakOf(c, o);
+    if (!cloak.shown)
+        return;
+
+    if (!c->Object.m_pCloth)
+    {
+        if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD)
+        {
+            int numCloth = 4;
+            if (c->Wing.Type == MODEL_CAPE_OF_EMPEROR)
+            {
+                numCloth = 6;
+            }
+            else
+            {
+                numCloth = 4;
+            }
+
+            auto* pCloth = new CPhysicsCloth[numCloth];
+
+            pCloth[0].Create(o, 20, 0.0f, 0.0f, 20.0f, 6, 5, 30.0f, 70.0f, BITMAP_ROBE + 6, BITMAP_ROBE + 6, PCT_CURVED | PCT_RUBBER2 | PCT_MASK_LIGHT | PLS_STRICTDISTANCE | PCT_SHORT_SHOULDER | PCT_NORMAL_THICKNESS | PCT_OPT_HAIR);
+            pCloth[0].SetWindMinMax(10, 50);
+            pCloth[0].AddCollisionSphere(-10.f, 20.0f, 20.0f, 27.0f, 17);
+            pCloth[0].AddCollisionSphere(10.f, 20.0f, 20.0f, 27.0f, 17);
+
+            pCloth[1].Create(o, 20, 0.0f, 5.0f, 18.0f, 5, 5, 30.0f, 70.0f, BITMAP_ROBE + 6, BITMAP_ROBE + 6, PCT_CURVED | PCT_RUBBER2 | PCT_MASK_BLEND | PLS_STRICTDISTANCE | PCT_SHORT_SHOULDER | PCT_NORMAL_THICKNESS | PCT_OPT_HAIR);
+            pCloth[1].SetWindMinMax(8, 40);
+            pCloth[1].AddCollisionSphere(-10.f, 20.0f, 20.0f, 27.0f, 17);
+            pCloth[1].AddCollisionSphere(10.f, 20.0f, 20.0f, 27.0f, 17);
+
+            if (c->Wing.Type == MODEL_CAPE_OF_EMPEROR)
+            {
+                pCloth[2].Create(o, 19, 0.0f, 8.0f, 10.0f, 10, 10, 180.0f, 180.0f, BITMAP_ROBE + 9, BITMAP_ROBE + 9, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY | PCT_MASK_ALPHA);
+                pCloth[2].AddCollisionSphere(-10.f, -10.0f, -10.0f, 25.0f, 17);
+                pCloth[2].AddCollisionSphere(10.f, -10.0f, -10.0f, 25.0f, 17);
+                pCloth[2].AddCollisionSphere(-10.f, -10.0f, 20.0f, 27.0f, 17);
+                pCloth[2].AddCollisionSphere(10.f, -10.0f, 20.0f, 27.0f, 17);
+            }
+            else if (c->Wing.Type == MODEL_SMALL_CAPE_OF_LORD)
+            {
+                pCloth[2].Create(o, 19, 0.0f, 8.0f, 10.0f, 10, 10, 100.0f, 100.0f, BITMAP_ROBE + 7, BITMAP_ROBE + 7, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
+                pCloth[2].AddCollisionSphere(-10.f, -10.0f, -10.0f, 25.0f, 17);
+                pCloth[2].AddCollisionSphere(10.f, -10.0f, -10.0f, 25.0f, 17);
+                pCloth[2].AddCollisionSphere(-10.f, -10.0f, 20.0f, 27.0f, 17);
+                pCloth[2].AddCollisionSphere(10.f, -10.0f, 20.0f, 27.0f, 17);
+            }
+            else
+            {
+                //
+                pCloth[2].Create(o, 19, 0.0f, 8.0f, 10.0f, 10, 10, 180.0f, 180.0f, BITMAP_ROBE + 7, BITMAP_ROBE + 7, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
+                pCloth[2].AddCollisionSphere(-10.f, -10.0f, -10.0f, 25.0f, 17);
+                pCloth[2].AddCollisionSphere(10.f, -10.0f, -10.0f, 25.0f, 17);
+                pCloth[2].AddCollisionSphere(-10.f, -10.0f, 20.0f, 27.0f, 17);
+                pCloth[2].AddCollisionSphere(10.f, -10.0f, 20.0f, 27.0f, 17);
+            }
+
+            if (c->Wing.Type == MODEL_CAPE_OF_EMPEROR)
+            {
+                numCloth = 6;
+            }
+            else
+            {
+                numCloth = 3;
+            }
+
+            if (c->BodyPart[BODYPART_ARMOR].Type == static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_DARK_LORD)
+            {
+                pCloth[3].Create(o, 18, 0.0f, 10.0f, -5.0f, 5, 5, 50.0f, 90.0f, BITMAP_DARK_LOAD_SKIRT, BITMAP_DARK_LOAD_SKIRT, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER);
+                pCloth[3].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
+            }
+            else if (c->BodyPart[BODYPART_ARMOR].Type == static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_LORDEMPEROR)
+            {
+                pCloth[3].Create(o, 18, 0.0f, 10.0f, -5.0f, 5, 5, 50.0f, 90.0f, BITMAP_DARKLOAD_SKIRT_3RD, BITMAP_DARKLOAD_SKIRT_3RD, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER);
+                pCloth[3].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
+            }
+
+            if (c->Wing.Type == MODEL_CAPE_OF_EMPEROR)
+            {
+                pCloth[4].Create(o, 19, 30.0f, 15.0f, 10.0f, 2, 5, 12.0f, 200.0f, BITMAP_ROBE + 10, BITMAP_ROBE + 10, PCT_FLAT | PCT_SHAPE_NORMAL | PCT_COTTON | PCT_MASK_ALPHA);
+                pCloth[4].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
+                pCloth[4].AddCollisionSphere(0.f, 0.0f, 0.0f, 35.0f, 17);
+
+                pCloth[5].Create(o, 19, -30.0f, 20.0f, 10.0f, 2, 5, 12.0f, 200.0f, BITMAP_ROBE + 10, BITMAP_ROBE + 10, PCT_FLAT | PCT_SHAPE_NORMAL | PCT_COTTON | PCT_MASK_ALPHA);
+                pCloth[5].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
+                pCloth[5].AddCollisionSphere(0.f, 0.0f, 0.0f, 35.0f, 17);
+            }
+
+            o->m_pCloth = (void*)pCloth;
+            o->m_byNumCloth = numCloth;
+        }
+        else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
+        {
+            int numCloth = (c->Wing.Type == MODEL_CAPE_OF_OVERRULE) ? 3 : 1;
+
+            auto* pCloth = new CPhysicsCloth[numCloth];
+
+            if (c->Wing.Type == MODEL_CAPE_OF_OVERRULE)
+            {
+                pCloth[0].Create(o, 19, 0.0f, 15.0f, 5.0f, 10, 10, 180.0f, 170.0f, BITMAP_MANTOE, BITMAP_MANTOE, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY | PCT_MASK_ALPHA);
+                pCloth[0].AddCollisionSphere(-10.f, -10.0f, -10.0f, 35.0f, 17);
+                pCloth[0].AddCollisionSphere(10.f, -10.0f, -10.0f, 35.0f, 17);
+                pCloth[0].AddCollisionSphere(-10.f, -10.0f, 20.0f, 37.0f, 17);
+                pCloth[0].AddCollisionSphere(10.f, -10.0f, 20.0f, 37.0f, 17);
+            }
+            else if (c->Wing.Type == MODEL_LITTLE_WARRIORS_CLOAK)
+            {
+                pCloth[0].Create(o, 19, 0.0f, 15.0f, 5.0f, 10, 10, 150.0f, 130.0f, BITMAP_NCCAPE, BITMAP_NCCAPE, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY | PCT_MASK_ALPHA);
+                pCloth[0].AddCollisionSphere(-10.f, -10.0f, -10.0f, 35.0f, 17);
+                pCloth[0].AddCollisionSphere(10.f, -10.0f, -10.0f, 35.0f, 17);
+                pCloth[0].AddCollisionSphere(-10.f, -10.0f, 20.0f, 37.0f, 17);
+                pCloth[0].AddCollisionSphere(10.f, -10.0f, 20.0f, 37.0f, 17);
+            }
+            else
+            {
+                pCloth[0].Create(o, 19, 0.0f, 15.0f, 5.0f, 10, 10, 180.0f, 170.0f, BITMAP_NCCAPE, BITMAP_NCCAPE, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY | PCT_MASK_ALPHA);
+                pCloth[0].AddCollisionSphere(-10.f, -10.0f, -10.0f, 35.0f, 17);
+                pCloth[0].AddCollisionSphere(10.f, -10.0f, -10.0f, 35.0f, 17);
+                pCloth[0].AddCollisionSphere(-10.f, -10.0f, 20.0f, 37.0f, 17);
+                pCloth[0].AddCollisionSphere(10.f, -10.0f, 20.0f, 37.0f, 17);
+            }
+
+            if (c->Wing.Type == MODEL_CAPE_OF_OVERRULE)
+            {
+                pCloth[1].Create(o, 19, 25.0f, 15.0f, 2.0f, 2, 5, 12.0f, 180.0f, BITMAP_MANTO01, BITMAP_MANTO01, PCT_FLAT | PCT_SHAPE_NORMAL | PCT_COTTON | PCT_ELASTIC_RAGE_L | PCT_MASK_ALPHA);
+                pCloth[1].AddCollisionSphere(0.0f, -15.0f, -20.0f, 35.0f, 2);
+                pCloth[1].AddCollisionSphere(0.0f, 0.0f, 0.0f, 45.0f, 17);
+
+                pCloth[2].Create(o, 19, -25.0f, 15.0f, 2.0f, 2, 5, 12.0f, 180.0f, BITMAP_MANTO01, BITMAP_MANTO01, PCT_FLAT | PCT_SHAPE_NORMAL | PCT_COTTON | PCT_ELASTIC_RAGE_R | PCT_MASK_ALPHA);
+                pCloth[2].AddCollisionSphere(0.0f, -15.0f, -20.0f, 35.0f, 2);
+                pCloth[2].AddCollisionSphere(0.0f, 0.0f, 0.0f, 50.0f, 17);
+            }
+
+            o->m_pCloth = (void*)pCloth;
+            o->m_byNumCloth = numCloth;
+        }
+        else
+        {
+            auto* pCloth = new CPhysicsCloth[1];
+
+            if (c->MonsterIndex == MONSTER_DEATH_KING)
+            {
+                pCloth[0].Create(o, 19, 0.0f, 10.0f, 0.0f, 10, 10, 55.0f, 140.0f, BITMAP_ROBE + 2, BITMAP_ROBE + 2, PCT_CURVED | PCT_MASK_ALPHA);
+                pCloth[0].AddCollisionSphere(-10.f, -10.0f, -10.0f, 35.0f, 17);
+                pCloth[0].AddCollisionSphere(10.f, -10.0f, -10.0f, 35.0f, 17);
+                pCloth[0].AddCollisionSphere(0.f, -10.0f, -40.0f, 50.0f, 19);
+            }
+            else if (c->MonsterIndex == MONSTER_NIGHTMARE)
+            {
+                pCloth[0].Create(o, 2, 0.0f, 0.0f, 0.0f, 6, 6, 180.0f, 100.0f, BITMAP_NIGHTMARE_ROBE, BITMAP_NIGHTMARE_ROBE, PCT_CYLINDER | PCT_MASK_ALPHA);
+            }
+            else
+            {
+                if (c->Wing.Type == MODEL_WING_OF_RUIN)
+                {
+                    pCloth[0].Create(o, 19, 0.0f, 15.0f, 0.0f, 10, 10, 120.0f, 120.0f, BITMAP_ROBE + 8, BITMAP_ROBE + 8, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY | PCT_MASK_ALPHA);
+                }
+                else
+                {
+                    pCloth[0].Create(o, 19, 0.0f, 10.0f, 0.0f, 10, 10, /*45.0f*/75.0f, 120.0f, BITMAP_ROBE, BITMAP_ROBE + 1, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY);
+                }
+            }
+            o->m_pCloth = (void*)pCloth;
+            o->m_byNumCloth = 1;
+        }
+    }
+    else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD)
+    {
+        if ((c->BodyPart[BODYPART_ARMOR].Type != static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_DARK_LORD
+            && c->BodyPart[BODYPART_ARMOR].Type != static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_LORDEMPEROR
+            ) && o->m_byNumCloth == 4)
+        {
+            if (o && o->m_pCloth)
+            {
+                auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
+                pCloth[3].Destroy();
+
+                o->m_byNumCloth = 3;
+            }
+        }
+        else if (c->BodyPart[BODYPART_ARMOR].Type == static_cast<int>(MODEL_BODY_ARMOR) + CLASS_DARK_LORD && o->m_byNumCloth == 3)
+        {
+            if (o && o->m_pCloth)
+            {
+                auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
+
+                pCloth[3].Create(o, 18, 0.0f, 8.0f, -5.0f, 5, 5, 50.0f, 90.0f, BITMAP_DARK_LOAD_SKIRT, BITMAP_DARK_LOAD_SKIRT, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_CURVED | PCT_SHORT_SHOULDER);
+                pCloth[3].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
+                o->m_byNumCloth = 4;
+            }
+        }
+        else if (c->BodyPart[BODYPART_ARMOR].Type == static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_LORDEMPEROR && o->m_byNumCloth == 3)
+        {
+            if (o && o->m_pCloth)
+            {
+                auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
+
+                pCloth[3].Create(o, 18, 0.0f, 8.0f, -5.0f, 5, 5, 50.0f, 90.0f, BITMAP_DARKLOAD_SKIRT_3RD, BITMAP_DARKLOAD_SKIRT_3RD, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_CURVED | PCT_SHORT_SHOULDER);
+                pCloth[3].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
+                o->m_byNumCloth = 4;
+            }
+        }
+        else if (c->BodyPart[BODYPART_ARMOR].Type != static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_DARK_LORD && o->m_byNumCloth == 6)
+        {
+            if (o && o->m_pCloth)
+            {
+                auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
+                if (pCloth[3].GetOwner() != NULL)
+                    pCloth[3].Destroy();
+            }
+        }
+        else if (c->BodyPart[BODYPART_ARMOR].Type == static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_DARK_LORD && o->m_byNumCloth == 6)
+        {
+            if (o && o->m_pCloth)
+            {
+                auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
+                if (pCloth[3].GetOwner() == NULL)
+                {
+                    pCloth[3].Create(o, 18, 0.0f, 8.0f, -5.0f, 5, 5, 50.0f, 90.0f, BITMAP_DARK_LOAD_SKIRT, BITMAP_DARK_LOAD_SKIRT, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_CURVED | PCT_SHORT_SHOULDER);
+                    pCloth[3].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
+                }
+            }
+        }
+        else if (c->BodyPart[BODYPART_ARMOR].Type == static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_LORDEMPEROR && o->m_byNumCloth == 6)
+        {
+            if (o && o->m_pCloth)
+            {
+                auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
+                if (pCloth[3].GetOwner() == NULL)
+                {
+                    pCloth[3].Create(o, 18, 0.0f, 8.0f, -5.0f, 5, 5, 50.0f, 90.0f, BITMAP_DARKLOAD_SKIRT_3RD, BITMAP_DARKLOAD_SKIRT_3RD, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_CURVED | PCT_SHORT_SHOULDER);
+                    pCloth[3].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
+                }
+            }
+        }
+    }
+
+    if (g_isCharacterBuff(o, eBuff_Cloaking))
+        return;
+
+    auto* pCloth = (CPhysicsCloth*)c->Object.m_pCloth;
+    for (int i = 0; i < o->m_byNumCloth; i++)
+    {
+        if (IsCloakClothHidden(c, i, cloak.light) || pCloth[i].GetOwner() == NULL)
+            continue;
+
+        float Flag = 0.005f;
+        if (g_isCharacterBuff(o, eDeBuff_Stun) || g_isCharacterBuff(o, eDeBuff_Sleep))
+        {
+            Flag = 0.0f;
+        }
+        if (!pCloth[i].Move2(Flag, 5))
+        {
+            DeleteCloth(c, o);
+        }
+    }
+}
+
+// Creates, simulates and drops a character's cloth, under the conditions its draw renders it.
+void UpdateCharacterCloth(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+    PlaceObjectModel(o, &Models[o->Type]);
+
+    const int monster = c->MonsterIndex;
+    if (monster == MONSTER_MAGIC_SKELETON_1 || monster == MONSTER_MAGIC_SKELETON_2 || monster == MONSTER_MAGIC_SKELETON_3
+        || monster == MONSTER_MAGIC_SKELETON_4 || monster == MONSTER_MAGIC_SKELETON_5
+        || monster == MONSTER_MAGIC_SKELETON_6 || monster == MONSTER_MAGIC_SKELETON_7)
+    {
+        if (!o->m_pCloth)
+        {
+            auto* pCloth = new CPhysicsClothMesh[1];
+            pCloth[0].Create(o, 2, 18, PCT_HEAVY);
+            pCloth[0].AddCollisionSphere(0.0f, 0.0f, 0.0f, 50.0f, 18);
+            pCloth[0].AddCollisionSphere(0.0f, -20.0f, 0.0f, 30.0f, 18);
+            o->m_pCloth = (void*)pCloth;
+            o->m_byNumCloth = 1;
+        }
+        if (!((CPhysicsCloth*)o->m_pCloth)[0].Move2(0.005f, 5))
+        {
+            DeleteCloth(c, o);
+        }
+    }
+    else if (c->MonsterIndex == MONSTER_MEGA_CRUST || c->MonsterIndex == MONSTER_ALPHA_CRUST
+             || c->MonsterIndex == MONSTER_OMEGA_WING)
+    {
+        if (!o->m_pCloth)
+        {
+            int iTex = (c->MonsterIndex == MONSTER_MEGA_CRUST) ? BITMAP_ROBE + 3 : BITMAP_ROBE + 5;
+            auto* pCloth = new CPhysicsCloth[1];
+            pCloth[0].Create(o, 19, 0.0f, 10.0f, 0.0f, 5, 15, 30.0f, 300.0f, iTex, iTex, PCT_RUBBER | PCT_MASK_ALPHA);
+            o->m_pCloth = (void*)pCloth;
+            o->m_byNumCloth = 1;
+        }
+        if (!((CPhysicsCloth*)o->m_pCloth)[0].Move2(0.005f, 5))
+        {
+            DeleteCloth(c, o);
+        }
+    }
+    else if (c->MonsterIndex == MONSTER_DARK_PHOENIX)
+    {
+        // Its hair hangs on its second model, which its draw poses into the character's bones before simulating it.
+        static vec34_t secondModelBones[MAX_BONES];
+        vec34_t* ownBones = o->BoneTransform;
+        o->Type++;
+        BMD* b = &Models[o->Type];
+        PlaceObjectModel(o, b);
+        b->Animation(secondModelBones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                     o->HeadAngle, false, false);
+        o->BoneTransform = secondModelBones;
+        if (!o->m_pCloth)
+        {
+            auto* pCloth = new CPhysicsCloth[1];
+            pCloth[0].Create(o, 10, 0.0f, -10.0f, 0.0f, 5, 12, 15.0f, 240.0f, BITMAP_PHO_R_HAIR, BITMAP_PHO_R_HAIR, PCT_RUBBER | PCT_MASK_ALPHA);
+            pCloth[0].AddCollisionSphere(0.0f, 0.0f, 40.0f, 30.0f, 10);
+            o->m_pCloth = (void*)pCloth;
+            o->m_byNumCloth = 1;
+        }
+        if (!((CPhysicsCloth*)o->m_pCloth)[0].Move2(0.005f, 5))
+        {
+            DeleteCloth(c, o);
+        }
+        o->BoneTransform = ownBones;
+        o->Type--;
+        PlaceObjectModel(o, &Models[o->Type]);
+    }
+
+    if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_GM_CHARACTER
+        && !g_isCharacterBuff(o, eBuff_Cloaking))
+    {
+        if (c->Object.m_pCloth == NULL)
+        {
+            int iNumCloth = 2;
+
+            auto* pCloth = new CPhysicsCloth[iNumCloth];
+
+            pCloth[0].Create(o, 20, 0.0f, 5.0f, 10.0f, 6, 5, 30.0f, 70.0f, BITMAP_GM_HAIR_1, BITMAP_GM_HAIR_1, PCT_COTTON | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
+            pCloth[0].SetWindMinMax(10, 20);
+            pCloth[0].AddCollisionSphere(-10.f, 20.0f, 20.0f, 27.0f, 17);
+            pCloth[0].AddCollisionSphere(10.f, 20.0f, 20.0f, 27.0f, 17);
+
+            pCloth[1].Create(o, 20, 0.0f, 5.0f, 25.0f, 4, 4, 30.0f, 40.0f, BITMAP_GM_HAIR_3, BITMAP_GM_HAIR_3, PCT_COTTON | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
+            pCloth[1].SetWindMinMax(8, 15);
+            pCloth[1].AddCollisionSphere(-10.f, 20.0f, 20.0f, 27.0f, 17);
+            pCloth[1].AddCollisionSphere(10.f, 20.0f, 20.0f, 27.0f, 17);
+
+            o->m_pCloth = (void*)pCloth;
+            o->m_byNumCloth = iNumCloth;
+        }
+    }
+
+    UpdateCloakCloth(c, o);
+}
+} // namespace
+
 void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 {
     Engine::Object::Attachments::BeginCharacter(c);
@@ -8782,27 +9275,9 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     {
         BOOL bRender = Calc_RenderObject(o, Translate, Select, 0);
 
-        if (!c->Object.m_pCloth)
+        if (auto* pCloth = (CPhysicsCloth*)c->Object.m_pCloth)
         {
-            auto* pCloth = new CPhysicsClothMesh[1];
-            pCloth[0].Create(&(c->Object), 2, 18, PCT_HEAVY);
-            pCloth[0].AddCollisionSphere(0.0f, 0.0f, 0.0f, 50.0f, 18);
-            pCloth[0].AddCollisionSphere(0.0f, -20.0f, 0.0f, 30.0f, 18);
-            c->Object.m_pCloth = (void*)pCloth;
-            c->Object.m_byNumCloth = 1;
-        }
-        auto* pCloth = (CPhysicsCloth*)c->Object.m_pCloth;
-
-        if (pCloth)
-        {
-            if (!pCloth[0].Move2(0.005f, 5))
-            {
-                DeleteCloth(c, o);
-            }
-            else
-            {
-                pCloth[0].Render();
-            }
+            pCloth[0].Render();
         }
         if (bRender)
         {
@@ -9029,20 +9504,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     }
     else if (c->MonsterIndex == MONSTER_MEGA_CRUST || c->MonsterIndex == MONSTER_ALPHA_CRUST || c->MonsterIndex == MONSTER_OMEGA_WING)
     {
-        if (!c->Object.m_pCloth)
-        {
-            int iTex = (c->MonsterIndex == MONSTER_MEGA_CRUST) ? BITMAP_ROBE + 3 : BITMAP_ROBE + 5;
-            auto* pCloth = new CPhysicsCloth[1];
-            pCloth[0].Create(&(c->Object), 19, 0.0f, 10.0f, 0.0f, 5, 15, 30.0f, 300.0f, iTex, iTex, PCT_RUBBER | PCT_MASK_ALPHA);
-            c->Object.m_pCloth = (void*)pCloth;
-            c->Object.m_byNumCloth = 1;
-        }
-        auto* pCloth = (CPhysicsCloth*)c->Object.m_pCloth;
-        if (!pCloth[0].Move2(0.005f, 5))
-        {
-            DeleteCloth(c, o);
-        }
-        else
+        if (auto* pCloth = (CPhysicsCloth*)c->Object.m_pCloth)
         {
             pCloth[0].Render();
         }
@@ -9078,20 +9540,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         memcpy(g_fBoneSave[0], o->BoneTransform[23], 3 * 4 * sizeof(float));
         memcpy(g_fBoneSave[1], o->BoneTransform[14], 3 * 4 * sizeof(float));
 
-        if (!c->Object.m_pCloth)
-        {
-            auto* pCloth = new CPhysicsCloth[1];
-            pCloth[0].Create(o, 10, 0.0f, -10.0f, 0.0f, 5, 12, 15.0f, 240.0f, BITMAP_PHO_R_HAIR, BITMAP_PHO_R_HAIR, PCT_RUBBER | PCT_MASK_ALPHA);
-            pCloth[0].AddCollisionSphere(0.0f, 0.0f, 40.0f, 30.0f, 10);
-            o->m_pCloth = (void*)pCloth;
-            o->m_byNumCloth = 1;
-        }
-        auto* pCloth = (CPhysicsCloth*)c->Object.m_pCloth;
-        if (!pCloth[0].Move2(0.005f, 5))
-        {
-            DeleteCloth(c, o);
-        }
-        else
+        if (auto* pCloth = (CPhysicsCloth*)c->Object.m_pCloth)
         {
             pCloth[0].Render();
         }
@@ -9166,91 +9615,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         }
     }
 
-    bool bCloak = false;
-
-    if ((c->Class == CLASS_DARK || gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD
-        || gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER) && o->Type == MODEL_PLAYER)
-    {
-        if (c->Change == false || (c->Change == true && c->Object.Type == MODEL_PLAYER))
-        {
-            bCloak = true;
-        }
-    }
-
-    if (c->MonsterIndex == MONSTER_DEATH_KING || c->MonsterIndex == MONSTER_NIGHTMARE)
-    {
-        bCloak = true;
-    }
-
-    if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
-    {
-        bCloak = false;
-    }
-
-    if (gMapManager.InChaosCastle() == true)
-    {
-        bCloak = false;
-    }
-
-    vec3_t CloakLight;
-    Vector(1.f, 1.f, 1.f, CloakLight);
-    if (c->GuildMarkIndex != -1)
-    {
-        if (EnableSoccer)
-        {
-            if (wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[c->GuildMarkIndex].GuildName) == 0)
-            {
-                bCloak = true;
-                if (HeroSoccerTeam == 0)
-                {
-                    Vector(1.f, 0.2f, 0.f, CloakLight);
-                }
-                else
-                {
-                    Vector(0.f, 0.2f, 1.f, CloakLight);
-                }
-            }
-            if (wcscmp(GuildWarName, GuildMark[c->GuildMarkIndex].GuildName) == 0)
-            {
-                bCloak = true;
-                if (HeroSoccerTeam == 0)
-                {
-                    Vector(0.f, 0.2f, 1.f, CloakLight);
-                }
-                else
-                {
-                    Vector(1.f, 0.2f, 0.f, CloakLight);
-                }
-            }
-        }
-        if (SoccerObserver)
-        {
-            if (wcscmp(SoccerTeamName[0], GuildMark[c->GuildMarkIndex].GuildName) == 0)
-            {
-                bCloak = true;
-                Vector(1.f, 0.2f, 0.f, CloakLight);
-            }
-            if (wcscmp(SoccerTeamName[1], GuildMark[c->GuildMarkIndex].GuildName) == 0)
-            {
-                bCloak = true;
-                Vector(0.f, 0.2f, 1.f, CloakLight);
-            }
-        }
-    }
-
-    if (g_DuelMgr.IsDuelEnabled())
-    {
-        if (g_DuelMgr.IsDuelPlayer(c, DUEL_ENEMY, FALSE))
-        {
-            bCloak = true;
-            Vector(1.f, 0.2f, 0.f, CloakLight);
-        }
-        else if (g_DuelMgr.IsDuelPlayer(c, DUEL_HERO, FALSE))
-        {
-            bCloak = true;
-            Vector(0.f, 0.2f, 1.f, CloakLight);
-        }
-    }
+    Cloak cloak = CloakOf(c, o);
 
     if (SceneFlag == CHARACTER_SCENE)
     {
@@ -9445,45 +9810,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.f, 1.f, vLight, -WorldTime * 0.01f);
             //RenderAurora ( BITMAP_GM_AURORA, RENDER_BRIGHT, o->Position[0], o->Position[1], 1.5f, 1.5f, vLight );
 
-            if (c->Object.m_pCloth == NULL)
-            {
-                int iNumCloth = 2;
-
-                auto* pCloth = new CPhysicsCloth[iNumCloth];
-
-                pCloth[0].Create(o, 20, 0.0f, 5.0f, 10.0f, 6, 5, 30.0f, 70.0f, BITMAP_GM_HAIR_1, BITMAP_GM_HAIR_1, PCT_COTTON | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
-                pCloth[0].SetWindMinMax(10, 20);
-                pCloth[0].AddCollisionSphere(-10.f, 20.0f, 20.0f, 27.0f, 17);
-                pCloth[0].AddCollisionSphere(10.f, 20.0f, 20.0f, 27.0f, 17);
-
-                pCloth[1].Create(o, 20, 0.0f, 5.0f, 25.0f, 4, 4, 30.0f, 40.0f, BITMAP_GM_HAIR_3, BITMAP_GM_HAIR_3, PCT_COTTON | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
-                pCloth[1].SetWindMinMax(8, 15);
-                pCloth[1].AddCollisionSphere(-10.f, 20.0f, 20.0f, 27.0f, 17);
-                pCloth[1].AddCollisionSphere(10.f, 20.0f, 20.0f, 27.0f, 17);
-
-                o->m_pCloth = (void*)pCloth;
-                o->m_byNumCloth = iNumCloth;
-            }
-
-            auto* pCloth = (CPhysicsCloth*)c->Object.m_pCloth;
-
-            if (g_isCharacterBuff(o, eBuff_Cloaking))
-            {
-                for (int i = 0; i < o->m_byNumCloth; ++i)
-                {
-                    if (pCloth[i].Move2(0.005f, 5) == false)
-                    {
-                        DeleteCloth(c, o);
-                    }
-                    else
-                    {
-                        vec3_t vLight;
-                        Vector(1.f, 1.f, 1.f, vLight);
-                        pCloth[i].Render(&vLight);
-                    }
-                }
-            }
-
             DisableAlphaBlend();
         }
     }
@@ -9670,303 +9996,21 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         }
     }
 
-    if (bCloak)
+    // A preview outside the client's characters gets no update; its draw simulates its cloth.
+    if (!IsClientCharacterObject(o))
     {
-        if (!c->Object.m_pCloth)
+        UpdateCharacterCloth(c);
+    }
+    if (cloak.shown && !g_isCharacterBuff(o, eBuff_Cloaking) && o->m_pCloth)
+    {
+        auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
+        for (int i = 0; i < o->m_byNumCloth; i++)
         {
-            if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD)
-            {
-                int numCloth = 4;
-                if (c->Wing.Type == MODEL_CAPE_OF_EMPEROR)
-                {
-                    numCloth = 6;
-                }
-                else
-                {
-                    numCloth = 4;
-                }
-
-                auto* pCloth = new CPhysicsCloth[numCloth];
-
-                pCloth[0].Create(o, 20, 0.0f, 0.0f, 20.0f, 6, 5, 30.0f, 70.0f, BITMAP_ROBE + 6, BITMAP_ROBE + 6, PCT_CURVED | PCT_RUBBER2 | PCT_MASK_LIGHT | PLS_STRICTDISTANCE | PCT_SHORT_SHOULDER | PCT_NORMAL_THICKNESS | PCT_OPT_HAIR);
-                pCloth[0].SetWindMinMax(10, 50);
-                pCloth[0].AddCollisionSphere(-10.f, 20.0f, 20.0f, 27.0f, 17);
-                pCloth[0].AddCollisionSphere(10.f, 20.0f, 20.0f, 27.0f, 17);
-
-                pCloth[1].Create(o, 20, 0.0f, 5.0f, 18.0f, 5, 5, 30.0f, 70.0f, BITMAP_ROBE + 6, BITMAP_ROBE + 6, PCT_CURVED | PCT_RUBBER2 | PCT_MASK_BLEND | PLS_STRICTDISTANCE | PCT_SHORT_SHOULDER | PCT_NORMAL_THICKNESS | PCT_OPT_HAIR);
-                pCloth[1].SetWindMinMax(8, 40);
-                pCloth[1].AddCollisionSphere(-10.f, 20.0f, 20.0f, 27.0f, 17);
-                pCloth[1].AddCollisionSphere(10.f, 20.0f, 20.0f, 27.0f, 17);
-
-                if (c->Wing.Type == MODEL_CAPE_OF_EMPEROR)
-                {
-                    pCloth[2].Create(o, 19, 0.0f, 8.0f, 10.0f, 10, 10, 180.0f, 180.0f, BITMAP_ROBE + 9, BITMAP_ROBE + 9, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY | PCT_MASK_ALPHA);
-                    pCloth[2].AddCollisionSphere(-10.f, -10.0f, -10.0f, 25.0f, 17);
-                    pCloth[2].AddCollisionSphere(10.f, -10.0f, -10.0f, 25.0f, 17);
-                    pCloth[2].AddCollisionSphere(-10.f, -10.0f, 20.0f, 27.0f, 17);
-                    pCloth[2].AddCollisionSphere(10.f, -10.0f, 20.0f, 27.0f, 17);
-                }
-                else if (c->Wing.Type == MODEL_SMALL_CAPE_OF_LORD)
-                {
-                    pCloth[2].Create(o, 19, 0.0f, 8.0f, 10.0f, 10, 10, 100.0f, 100.0f, BITMAP_ROBE + 7, BITMAP_ROBE + 7, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
-                    pCloth[2].AddCollisionSphere(-10.f, -10.0f, -10.0f, 25.0f, 17);
-                    pCloth[2].AddCollisionSphere(10.f, -10.0f, -10.0f, 25.0f, 17);
-                    pCloth[2].AddCollisionSphere(-10.f, -10.0f, 20.0f, 27.0f, 17);
-                    pCloth[2].AddCollisionSphere(10.f, -10.0f, 20.0f, 27.0f, 17);
-                }
-                else
-                {
-                    //
-                    pCloth[2].Create(o, 19, 0.0f, 8.0f, 10.0f, 10, 10, 180.0f, 180.0f, BITMAP_ROBE + 7, BITMAP_ROBE + 7, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
-                    pCloth[2].AddCollisionSphere(-10.f, -10.0f, -10.0f, 25.0f, 17);
-                    pCloth[2].AddCollisionSphere(10.f, -10.0f, -10.0f, 25.0f, 17);
-                    pCloth[2].AddCollisionSphere(-10.f, -10.0f, 20.0f, 27.0f, 17);
-                    pCloth[2].AddCollisionSphere(10.f, -10.0f, 20.0f, 27.0f, 17);
-                }
-
-                if (c->Wing.Type == MODEL_CAPE_OF_EMPEROR)
-                {
-                    numCloth = 6;
-                }
-                else
-                {
-                    numCloth = 3;
-                }
-
-                if (c->BodyPart[BODYPART_ARMOR].Type == static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_DARK_LORD)
-                {
-                    pCloth[3].Create(o, 18, 0.0f, 10.0f, -5.0f, 5, 5, 50.0f, 90.0f, BITMAP_DARK_LOAD_SKIRT, BITMAP_DARK_LOAD_SKIRT, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER);
-                    pCloth[3].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
-                }
-                else if (c->BodyPart[BODYPART_ARMOR].Type == static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_LORDEMPEROR)
-                {
-                    pCloth[3].Create(o, 18, 0.0f, 10.0f, -5.0f, 5, 5, 50.0f, 90.0f, BITMAP_DARKLOAD_SKIRT_3RD, BITMAP_DARKLOAD_SKIRT_3RD, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER);
-                    pCloth[3].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
-                }
-
-                if (c->Wing.Type == MODEL_CAPE_OF_EMPEROR)
-                {
-                    pCloth[4].Create(o, 19, 30.0f, 15.0f, 10.0f, 2, 5, 12.0f, 200.0f, BITMAP_ROBE + 10, BITMAP_ROBE + 10, PCT_FLAT | PCT_SHAPE_NORMAL | PCT_COTTON | PCT_MASK_ALPHA);
-                    pCloth[4].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
-                    pCloth[4].AddCollisionSphere(0.f, 0.0f, 0.0f, 35.0f, 17);
-
-                    pCloth[5].Create(o, 19, -30.0f, 20.0f, 10.0f, 2, 5, 12.0f, 200.0f, BITMAP_ROBE + 10, BITMAP_ROBE + 10, PCT_FLAT | PCT_SHAPE_NORMAL | PCT_COTTON | PCT_MASK_ALPHA);
-                    pCloth[5].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
-                    pCloth[5].AddCollisionSphere(0.f, 0.0f, 0.0f, 35.0f, 17);
-                }
-
-                o->m_pCloth = (void*)pCloth;
-                o->m_byNumCloth = numCloth;
-            }
-            else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
-            {
-                int numCloth = (c->Wing.Type == MODEL_CAPE_OF_OVERRULE) ? 3 : 1;
-
-                auto* pCloth = new CPhysicsCloth[numCloth];
-
-                if (c->Wing.Type == MODEL_CAPE_OF_OVERRULE)
-                {
-                    pCloth[0].Create(o, 19, 0.0f, 15.0f, 5.0f, 10, 10, 180.0f, 170.0f, BITMAP_MANTOE, BITMAP_MANTOE, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY | PCT_MASK_ALPHA);
-                    pCloth[0].AddCollisionSphere(-10.f, -10.0f, -10.0f, 35.0f, 17);
-                    pCloth[0].AddCollisionSphere(10.f, -10.0f, -10.0f, 35.0f, 17);
-                    pCloth[0].AddCollisionSphere(-10.f, -10.0f, 20.0f, 37.0f, 17);
-                    pCloth[0].AddCollisionSphere(10.f, -10.0f, 20.0f, 37.0f, 17);
-                }
-                else if (c->Wing.Type == MODEL_LITTLE_WARRIORS_CLOAK)
-                {
-                    pCloth[0].Create(o, 19, 0.0f, 15.0f, 5.0f, 10, 10, 150.0f, 130.0f, BITMAP_NCCAPE, BITMAP_NCCAPE, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY | PCT_MASK_ALPHA);
-                    pCloth[0].AddCollisionSphere(-10.f, -10.0f, -10.0f, 35.0f, 17);
-                    pCloth[0].AddCollisionSphere(10.f, -10.0f, -10.0f, 35.0f, 17);
-                    pCloth[0].AddCollisionSphere(-10.f, -10.0f, 20.0f, 37.0f, 17);
-                    pCloth[0].AddCollisionSphere(10.f, -10.0f, 20.0f, 37.0f, 17);
-                }
-                else
-                {
-                    pCloth[0].Create(o, 19, 0.0f, 15.0f, 5.0f, 10, 10, 180.0f, 170.0f, BITMAP_NCCAPE, BITMAP_NCCAPE, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY | PCT_MASK_ALPHA);
-                    pCloth[0].AddCollisionSphere(-10.f, -10.0f, -10.0f, 35.0f, 17);
-                    pCloth[0].AddCollisionSphere(10.f, -10.0f, -10.0f, 35.0f, 17);
-                    pCloth[0].AddCollisionSphere(-10.f, -10.0f, 20.0f, 37.0f, 17);
-                    pCloth[0].AddCollisionSphere(10.f, -10.0f, 20.0f, 37.0f, 17);
-                }
-
-                if (c->Wing.Type == MODEL_CAPE_OF_OVERRULE)
-                {
-                    pCloth[1].Create(o, 19, 25.0f, 15.0f, 2.0f, 2, 5, 12.0f, 180.0f, BITMAP_MANTO01, BITMAP_MANTO01, PCT_FLAT | PCT_SHAPE_NORMAL | PCT_COTTON | PCT_ELASTIC_RAGE_L | PCT_MASK_ALPHA);
-                    pCloth[1].AddCollisionSphere(0.0f, -15.0f, -20.0f, 35.0f, 2);
-                    pCloth[1].AddCollisionSphere(0.0f, 0.0f, 0.0f, 45.0f, 17);
-
-                    pCloth[2].Create(o, 19, -25.0f, 15.0f, 2.0f, 2, 5, 12.0f, 180.0f, BITMAP_MANTO01, BITMAP_MANTO01, PCT_FLAT | PCT_SHAPE_NORMAL | PCT_COTTON | PCT_ELASTIC_RAGE_R | PCT_MASK_ALPHA);
-                    pCloth[2].AddCollisionSphere(0.0f, -15.0f, -20.0f, 35.0f, 2);
-                    pCloth[2].AddCollisionSphere(0.0f, 0.0f, 0.0f, 50.0f, 17);
-                }
-
-                o->m_pCloth = (void*)pCloth;
-                o->m_byNumCloth = numCloth;
-            }
-            else
-            {
-                auto* pCloth = new CPhysicsCloth[1];
-
-                if (c->MonsterIndex == MONSTER_DEATH_KING)
-                {
-                    pCloth[0].Create(o, 19, 0.0f, 10.0f, 0.0f, 10, 10, 55.0f, 140.0f, BITMAP_ROBE + 2, BITMAP_ROBE + 2, PCT_CURVED | PCT_MASK_ALPHA);
-                    pCloth[0].AddCollisionSphere(-10.f, -10.0f, -10.0f, 35.0f, 17);
-                    pCloth[0].AddCollisionSphere(10.f, -10.0f, -10.0f, 35.0f, 17);
-                    pCloth[0].AddCollisionSphere(0.f, -10.0f, -40.0f, 50.0f, 19);
-                }
-                else if (c->MonsterIndex == MONSTER_NIGHTMARE)
-                {
-                    pCloth[0].Create(o, 2, 0.0f, 0.0f, 0.0f, 6, 6, 180.0f, 100.0f, BITMAP_NIGHTMARE_ROBE, BITMAP_NIGHTMARE_ROBE, PCT_CYLINDER | PCT_MASK_ALPHA);
-                }
-                else
-                {
-                    if (c->Wing.Type == MODEL_WING_OF_RUIN)
-                    {
-                        pCloth[0].Create(o, 19, 0.0f, 15.0f, 0.0f, 10, 10, 120.0f, 120.0f, BITMAP_ROBE + 8, BITMAP_ROBE + 8, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY | PCT_MASK_ALPHA);
-                    }
-                    else
-                    {
-                        pCloth[0].Create(o, 19, 0.0f, 10.0f, 0.0f, 10, 10, /*45.0f*/75.0f, 120.0f, BITMAP_ROBE, BITMAP_ROBE + 1, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_HEAVY);
-                    }
-                }
-                o->m_pCloth = (void*)pCloth;
-                o->m_byNumCloth = 1;
-            }
+            if (IsCloakClothHidden(c, i, cloak.light) || pCloth[i].GetOwner() == NULL)
+                continue;
+            pCloth[i].Render(&cloak.light);
         }
-        else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD)
-        {
-            if ((c->BodyPart[BODYPART_ARMOR].Type != static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_DARK_LORD
-                && c->BodyPart[BODYPART_ARMOR].Type != static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_LORDEMPEROR
-                ) && o->m_byNumCloth == 4)
-            {
-                if (o && o->m_pCloth)
-                {
-                    auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
-                    pCloth[3].Destroy();
-
-                    o->m_byNumCloth = 3;
-                }
-            }
-            else if (c->BodyPart[BODYPART_ARMOR].Type == static_cast<int>(MODEL_BODY_ARMOR) + CLASS_DARK_LORD && o->m_byNumCloth == 3)
-            {
-                if (o && o->m_pCloth)
-                {
-                    auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
-
-                    pCloth[3].Create(o, 18, 0.0f, 8.0f, -5.0f, 5, 5, 50.0f, 90.0f, BITMAP_DARK_LOAD_SKIRT, BITMAP_DARK_LOAD_SKIRT, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_CURVED | PCT_SHORT_SHOULDER);
-                    pCloth[3].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
-                    o->m_byNumCloth = 4;
-                }
-            }
-            else if (c->BodyPart[BODYPART_ARMOR].Type == static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_LORDEMPEROR && o->m_byNumCloth == 3)
-            {
-                if (o && o->m_pCloth)
-                {
-                    auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
-
-                    pCloth[3].Create(o, 18, 0.0f, 8.0f, -5.0f, 5, 5, 50.0f, 90.0f, BITMAP_DARKLOAD_SKIRT_3RD, BITMAP_DARKLOAD_SKIRT_3RD, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_CURVED | PCT_SHORT_SHOULDER);
-                    pCloth[3].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
-                    o->m_byNumCloth = 4;
-                }
-            }
-            else if (c->BodyPart[BODYPART_ARMOR].Type != static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_DARK_LORD && o->m_byNumCloth == 6)
-            {
-                if (o && o->m_pCloth)
-                {
-                    auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
-                    if (pCloth[3].GetOwner() != NULL)
-                        pCloth[3].Destroy();
-                }
-            }
-            else if (c->BodyPart[BODYPART_ARMOR].Type == static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_DARK_LORD && o->m_byNumCloth == 6)
-            {
-                if (o && o->m_pCloth)
-                {
-                    auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
-                    if (pCloth[3].GetOwner() == NULL)
-                    {
-                        pCloth[3].Create(o, 18, 0.0f, 8.0f, -5.0f, 5, 5, 50.0f, 90.0f, BITMAP_DARK_LOAD_SKIRT, BITMAP_DARK_LOAD_SKIRT, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_CURVED | PCT_SHORT_SHOULDER);
-                        pCloth[3].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
-                    }
-                }
-            }
-            else if (c->BodyPart[BODYPART_ARMOR].Type == static_cast<int>(MODEL_BODY_ARMOR) + SKIN_CLASS_LORDEMPEROR && o->m_byNumCloth == 6)
-            {
-                if (o && o->m_pCloth)
-                {
-                    auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
-                    if (pCloth[3].GetOwner() == NULL)
-                    {
-                        pCloth[3].Create(o, 18, 0.0f, 8.0f, -5.0f, 5, 5, 50.0f, 90.0f, BITMAP_DARKLOAD_SKIRT_3RD, BITMAP_DARKLOAD_SKIRT_3RD, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_CURVED | PCT_SHORT_SHOULDER);
-                        pCloth[3].AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
-                    }
-                }
-            }
-        }
-        auto* pCloth = (CPhysicsCloth*)c->Object.m_pCloth;
-
-        if (!g_isCharacterBuff(o, eBuff_Cloaking))
-        {
-            for (int i = 0; i < o->m_byNumCloth; i++)
-            {
-                if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD)
-                {
-                    if (i == 2 && ((c->Wing.Type != MODEL_CAPE_OF_LORD && c->Wing.Type != MODEL_CAPE_OF_EMPEROR && c->Wing.Type != MODEL_SMALL_CAPE_OF_LORD) && (CloakLight[0] == 1.f && CloakLight[1] == 1.f && CloakLight[2] == 1.f)))
-                    {
-                        continue;
-                    }
-                    if ((i >= 0 && i <= 1) && g_ChangeRingMgr->CheckDarkLordHair(c->Object.SubType) == true)
-                    {
-                        continue;
-                    }
-                    if (i == 3 && g_ChangeRingMgr->CheckDarkLordHair(c->Object.SubType) == true)
-                    {
-                        continue;
-                    }
-                }
-                if (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER)
-                {
-                    if (i == 0 && ((c->Wing.Type != MODEL_CAPE_OF_FIGHTER
-                        && c->Wing.Type != MODEL_CAPE_OF_OVERRULE
-                        && c->Wing.Type != MODEL_LITTLE_WARRIORS_CLOAK)
-                        && (CloakLight[0] == 1.f && CloakLight[1] == 1.f && CloakLight[2] == 1.f)))
-                    {
-                        continue;
-                    }
-                }
-                if (i == 0 && g_ChangeRingMgr->CheckDarkCloak(c->Class, c->Object.SubType) == true)
-                {
-                    continue;
-                }
-
-                if (c->Object.SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || c->Object.SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
-                {
-                    continue;
-                }
-
-                float Flag = 0.005f;
-                if (g_isCharacterBuff(o, eDeBuff_Stun)
-                    || g_isCharacterBuff(o, eDeBuff_Sleep))
-                {
-                    Flag = 0.0f;
-                }
-
-                if (pCloth[i].GetOwner() == NULL)
-                {
-                    continue;
-                }
-                else
-                    if (!pCloth[i].Move2(Flag, 5))
-                    {
-                        DeleteCloth(c, o);
-                    }
-                    else
-                    {
-                        pCloth[i].Render(&CloakLight);
-                    }
-            }
-        } // if( !g_isCharacterBuff(o, eBuff_Cloaking) )
-    } //if ( bCloak )
+    }
 
     if (c->PK >= PVP_MURDERER2)
     {
@@ -11751,6 +11795,7 @@ void UpdateDrawnCharacterEffects()
         UpdateEventCharacterEffects(o);
         UpdateRenderObjectEffects(o);
         giPetManager::UpdatePetEffects(c);
+        UpdateCharacterCloth(c);
         if (UpdateCharacterTypeEffects(c, o, b))
             continue;
         // Same order and stop-on-claim as RenderCharacter's chain.
