@@ -7,18 +7,12 @@
 #include "Data/GameData/ServerListData/ButtonColors.h"
 #include "Data/GameData/ServerListData/ServerListData.h"
 
+#include <cstddef>
+#include <map>
 #include <string>
 #include <string_view>
 #include <vector>
 
-// A group of Data/Local/ServerList.json, with its place in the list.
-struct SServerGroupInfo
-{
-    Data::ServerList::ServerGroup group;
-    int sequence = 0;
-};
-
-typedef std::map<int, SServerGroupInfo> ServerListScriptMap;
 typedef std::map<int, CServerGroup*> type_mapServerGroup;
 
 class CServerListManager
@@ -86,7 +80,8 @@ public:
 #endif
 
 protected:
-    const SServerGroupInfo* GetServerGroupInfoInScript(int iServerGroupIndex);
+    // The list's group with the ID, and its place in the list from 1 (`sequence`); nullptr when the list has none.
+    const Data::ServerList::ServerGroup* FindListGroup(int groupId, int& sequence) const;
     bool MakeServerGroup(IN int iServerGroupIndex, OUT CServerGroup* pServerGroup);
     void InsertServer(CServerGroup* pServerGroup, int iConnectIndex, int iServerPercent);
 
@@ -100,10 +95,10 @@ public:
     Data::ServerList::ChannelSettings m_selectChannel;
 
 protected:
-    // The VIP types and texts the channels are named with; its groups by ID in
-    // m_mapServerListScript.
+    // The groups, VIP types, colors and texts the channels are named with.
     Data::ServerList::ServerListData m_serverList;
-    ServerListScriptMap m_mapServerListScript;
+    // The index of each group of m_serverList by its ID.
+    std::map<int, size_t> m_groupIndexById;
 #ifdef _EDITOR
     std::vector<ReceivedServer> m_receivedServers;
     int m_receivedServersVersion = 0;

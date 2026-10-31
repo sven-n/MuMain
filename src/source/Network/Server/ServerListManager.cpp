@@ -93,11 +93,10 @@ bool CServerListManager::LoadServerListScript(std::string& errorMessage)
 void CServerListManager::SetServerList(const Data::ServerList::ServerListData& list)
 {
     m_serverList = list;
-    m_mapServerListScript.clear();
-    int sequence = 0;
-    for (const Data::ServerList::ServerGroup& group : list.groups)
+    m_groupIndexById.clear();
+    for (size_t index = 0; index < m_serverList.groups.size(); ++index)
     {
-        m_mapServerListScript[group.id] = {group, ++sequence};
+        m_groupIndexById[m_serverList.groups[index].id] = index;
     }
 }
 
@@ -115,13 +114,15 @@ void CServerListManager::RebuildServerGroups()
 }
 #endif
 
-const SServerGroupInfo* CServerListManager::GetServerGroupInfoInScript(int iServerGroupIndex)
+const Data::ServerList::ServerGroup* CServerListManager::FindListGroup(int groupId, int& sequence) const
 {
-    ServerListScriptMap::const_iterator iter = m_mapServerListScript.find(iServerGroupIndex);
-    if (iter == m_mapServerListScript.end())
-        return NULL;
-
-    return &(iter->second);
+    const auto found = m_groupIndexById.find(groupId);
+    if (found == m_groupIndexById.end())
+    {
+        return nullptr;
+    }
+    sequence = static_cast<int>(found->second) + 1;
+    return &m_serverList.groups[found->second];
 }
 
 void CServerListManager::InsertServerGroup(int iConnectIndex, int iServerPercent)
@@ -168,16 +169,17 @@ void CServerListManager::InsertServerGroup(int iConnectIndex, int iServerPercent
 
 bool CServerListManager::MakeServerGroup(IN int iServerGroupIndex, OUT CServerGroup* pServerGroup)
 {
-    const SServerGroupInfo* pServerGroupInfo = GetServerGroupInfoInScript(iServerGroupIndex);
-    if (NULL == pServerGroupInfo)
+    int sequence = 0;
+    const Data::ServerList::ServerGroup* listGroup = FindListGroup(iServerGroupIndex, sequence);
+    if (listGroup == nullptr)
         return false;
 
-    const Data::ServerList::ServerGroup& group = pServerGroupInfo->group;
+    const Data::ServerList::ServerGroup& group = *listGroup;
     const std::wstring name = Core::Text::FromUtf8(group.name);
     const std::wstring description = Core::Text::FromUtf8(group.description);
     wcsncpy_s(pServerGroup->m_szName, name.c_str(), _TRUNCATE);
     wcsncpy_s(pServerGroup->m_szDescription, description.c_str(), _TRUNCATE);
-    pServerGroup->m_iSequence = pServerGroupInfo->sequence;
+    pServerGroup->m_iSequence = sequence;
     pServerGroup->m_iWidthPos = group.testServer ? CServerGroup::SBP_CENTER : CServerGroup::SBP_LEFT;
     pServerGroup->m_iServerIndex = iServerGroupIndex;
     pServerGroup->m_channels = group.channels;
