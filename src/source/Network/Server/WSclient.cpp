@@ -1562,7 +1562,7 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x11 [ReceiveMagicList]");
 }
 
-void Receive_Master_SetSkillList(PMSG_MASTER_SKILL_LIST_SEND* lpMsg)
+void Receive_Master_SetSkillList(const PMSG_MASTER_SKILL_LIST_SEND* lpMsg)
 {
     memset(CharacterAttribute->MasterSkillInfo, 0, sizeof(CharacterAttribute->MasterSkillInfo));
 
@@ -1570,8 +1570,9 @@ void Receive_Master_SetSkillList(PMSG_MASTER_SKILL_LIST_SEND* lpMsg)
     skills.reserve(lpMsg->count);
     for (DWORD n = 0; n < lpMsg->count; n++)
     {
-        auto lpInfo = (PMSG_MASTER_SKILL_LIST*)(((BYTE*)lpMsg) + sizeof(PMSG_MASTER_SKILL_LIST_SEND) +
-                                                (sizeof(PMSG_MASTER_SKILL_LIST) * n));
+        const auto* lpInfo = reinterpret_cast<const PMSG_MASTER_SKILL_LIST*>(reinterpret_cast<const BYTE*>(lpMsg) +
+                                                                             sizeof(PMSG_MASTER_SKILL_LIST_SEND) +
+                                                                             (sizeof(PMSG_MASTER_SKILL_LIST) * n));
         skills.push_back({ lpInfo->SkillIndex, lpInfo->SkillLevel, lpInfo->MainValue, lpInfo->NextValue });
     }
     UI::Hud::ReplaceMasterSkills(Hero->Class, skills);
@@ -9265,7 +9266,8 @@ void ReceiveCreateShopTitleViewport(const BYTE* ReceiveBuffer)
 {
     auto Header = (LPPSHOPTITLE_HEADERINFO)ReceiveBuffer;
 
-    auto* pShopTitle = (PSHOPTITLE_DATAINFO*)(ReceiveBuffer + sizeof(PSHOPTITLE_HEADERINFO));
+    const auto* pShopTitle =
+        reinterpret_cast<const PSHOPTITLE_DATAINFO*>(ReceiveBuffer + sizeof(PSHOPTITLE_HEADERINFO));
     for (int i = 0; i < Header->byCount; i++, pShopTitle++)
     {
         int key = MAKEWORD(pShopTitle->byIndexL, pShopTitle->byIndexH);
@@ -10449,13 +10451,14 @@ void ReceiveQuestByItemUseEP(const BYTE* ReceiveBuffer)
 void ReceiveQuestByEtcEPList(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
-    g_QuestMng.SetQuestIndexByEtcList((DWORD*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST)), pData->m_wQuestCount);
+    g_QuestMng.SetQuestIndexByEtcList(reinterpret_cast<const DWORD*>(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST)),
+                                      pData->m_wQuestCount);
 }
 
 void ReceiveQuestByNPCEPList(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
-    auto questIndices = (const std::uint32_t*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST));
+    auto questIndices = reinterpret_cast<const std::uint32_t*>(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST));
     UI::Npc::ShowQuestList({ questIndices, pData->m_wQuestCount });
 }
 
@@ -10515,8 +10518,9 @@ void ReceiveQuestGiveUp(const BYTE* ReceiveBuffer)
 void ReceiveProgressQuestList(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_ANS_QUESTEXP_PROGRESS_LIST)ReceiveBuffer;
-    g_QuestMng.SetCurQuestIndexList((DWORD*)(ReceiveBuffer + sizeof(PMSG_ANS_QUESTEXP_PROGRESS_LIST)),
-                                    int(pData->m_byQuestCount));
+    g_QuestMng.SetCurQuestIndexList(
+        reinterpret_cast<const DWORD*>(ReceiveBuffer + sizeof(PMSG_ANS_QUESTEXP_PROGRESS_LIST)),
+        int(pData->m_byQuestCount));
 }
 
 void ReceiveProgressQuestRequestReward(const BYTE* ReceiveBuffer)
@@ -13521,7 +13525,7 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
             Receive_Master_LevelGetSkill(ReceiveBuffer);
             break;
         case 0x53:
-            Receive_Master_SetSkillList((PMSG_MASTER_SKILL_LIST_SEND*)ReceiveBuffer);
+            Receive_Master_SetSkillList(reinterpret_cast<const PMSG_MASTER_SKILL_LIST_SEND*>(ReceiveBuffer));
             break;
         }
         break;
