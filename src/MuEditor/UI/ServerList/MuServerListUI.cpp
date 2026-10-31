@@ -598,7 +598,6 @@ void CMuServerListUI::LoadFile()
     const int colors = static_cast<int>(m_edits.GetList().colors.size());
     SelectColor(colors == 0 ? -1 : std::clamp(m_selectedColor, 0, colors - 1));
     m_refusedRule = -1;
-    m_allRulesTaken = false;
     m_themes = UI::RmlBridge::DiscoverAvailableThemes();
     ShowInGame();
 }
@@ -701,7 +700,6 @@ void CMuServerListUI::AfterHistoryStep()
     m_removeVipType = -1;
     m_removeColor = -1;
     m_refusedRule = -1;
-    m_allRulesTaken = false;
     ShowInGame();
 }
 
@@ -1267,17 +1265,19 @@ bool CMuServerListUI::RenderButtonColorRules()
         CommitPending();
         m_edits.RemoveButtonColorRule(*remove);
         m_refusedRule = -1;
-        m_allRulesTaken = false;
         changed = true;
     }
+    // Asked each frame: a VIP type added or removed frees or takes settings.
+    const bool anyFree = m_edits.FindFreeRule().has_value();
+    ImGui::BeginDisabled(!anyFree);
     if (ImGui::Button(I18N::Editor::AddRule))
     {
         CommitPending();
-        m_allRulesTaken = !m_edits.AddButtonColorRule().has_value();
+        changed = m_edits.AddButtonColorRule().has_value();
         m_refusedRule = -1;
-        changed = !m_allRulesTaken;
     }
-    if (m_allRulesTaken)
+    ImGui::EndDisabled();
+    if (!anyFree)
     {
         RenderNote(I18N::Editor::EveryVIPTypeAndPvPSettingHasARule);
     }

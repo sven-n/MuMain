@@ -450,7 +450,17 @@ TEST_CASE("ServerListEdits: a new rule fits channels no rule fits yet")
     while (edits.AddButtonColorRule())
     {
     }
+    edits.Commit();
     CHECK(edits.GetList().buttonColors.size() == 9);
+    CHECK_FALSE(edits.FindFreeRule().has_value());
+    // A new VIP type frees its settings at once.
+    edits.AddVipType("Gold");
+    const std::optional<Data::ServerList::ButtonColorRule> free = edits.FindFreeRule();
+    REQUIRE(free.has_value());
+    CHECK(free->vipMatch == RuleVip::VipType);
+    CHECK(free->vip == "gold");
+    edits.Commit();
+    edits.Undo();
     edits.RemoveButtonColorRule(0);
     edits.Commit();
     CHECK(edits.GetUndoLabel() == "Remove button color rule");
