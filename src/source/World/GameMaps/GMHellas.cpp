@@ -479,7 +479,6 @@ bool UpdateHellasObjectEffects(OBJECT* o, BMD* b)
         Vector(1.f, 1.f, 1.f, Light);
         CreateParticleFpsChecked(BITMAP_WATERFALL_5, o->Position, o->Angle, Light, 0);
         o->Scale = 0.5f;
-        PlayBuffer(SOUND_KALIMA_WATER_FALL);
         break;
     case 38:
         Vector(1.f, 1.f, 1.f, Light);
@@ -487,7 +486,6 @@ bool UpdateHellasObjectEffects(OBJECT* o, BMD* b)
         {
             CreateParticle(BITMAP_WATERFALL_1, o->Position, o->Angle, Light, 0);
         }
-        PlayBuffer(SOUND_KALIMA_WATER_FALL);
         o->Scale = 0.5f;
         break;
     case 39:

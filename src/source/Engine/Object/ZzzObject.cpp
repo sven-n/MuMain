@@ -39,6 +39,7 @@
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
+#include "World/MapInfra/MapObjectSounds.h"
 #include "UI/Core/UIManager.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Items/CComGem.h"
@@ -3547,6 +3548,9 @@ void RenderObjectVisual(const OBJECT* o)
 
 void UpdateObjectVisual(OBJECT* o)
 {
+    // The sound of its type, while it is drawn (Data/Maps/ObjectSounds.json).
+    World::MapObjectSounds::OnObjectDrawn(*o);
+
     BMD* b = &Models[o->Type];
     const auto bones = [o, b] { return Engine::Object::Pose::World(o, b); };
     vec3_t p, Position;

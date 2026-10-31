@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include "World/MapInfra/MapManager.h"
+#include "World/MapInfra/MapObjectSounds.h"
 #include "Camera/CameraMove.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Audio/DSPlaySound.h"
@@ -747,7 +748,6 @@ void CMapManager::Load() // OK
         LoadWaveFile(SOUND_KALIMA_AMBIENT, L"Data\\Sound\\aKalima.wav", 1);
         LoadWaveFile(SOUND_KALIMA_AMBIENT2, L"Data\\Sound\\aKalima01.wav", 1);
         LoadWaveFile(SOUND_KALIMA_AMBIENT3, L"Data\\Sound\\aKalima02.wav", 1);
-        LoadWaveFile(SOUND_KALIMA_WATER_FALL, L"Data\\Sound\\aKalimaWaterFall.wav", 3);
         LoadWaveFile(SOUND_KALIMA_FALLING_STONE, L"Data\\Sound\\aKalimaStone.wav", 3);
         LoadWaveFile(SOUND_DEATH_BUBBLE, L"Data\\Sound\\mDeathBubble.wav", 1);
 
@@ -992,6 +992,8 @@ void CMapManager::LoadWorld(int Map)
     g_Direction.m_CKanturu.m_iNightmareState = 0;
 
     this->Load();
+    // The sounds of its objects (Data/Maps/ObjectSounds.json, maps design MP1).
+    World::MapObjectSounds::LoadForMap(GetServerMap(), GetServerStage());
 
     wchar_t FileName[64];
     wchar_t WorldName[32];

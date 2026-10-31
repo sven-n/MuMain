@@ -1,0 +1,6 @@
+{
+  "formatVersion": 1,
+  "objectSounds": [
+    {"maps": [24, 25, 26, 27, 28, 29, 36], "objects": [37, 38], "sound": {"file": "Data/Sound/aKalimaWaterFall.wav", "channels": 3}, "plays": "whileInView"}
+  ]
+}

@@ -1,0 +1,354 @@
+#include "stdafx.h"
+
+#include "doctest.h"
+
+#include "Audio/DSPlaySound.h"
+#include "Audio/SoundNumbers.h"
+#include "Core/Platform/IPlatformAudio.h"
+#include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
+#include "Data/GameData/MapData/MapObjectSoundDatabase.h"
+#include "Data/GameData/MapData/MapObjectSoundsJson.h"
+#include "Engine/Object/w_ObjectInfo.h"
+#include "World/MapInfra/MapObjectSounds.h"
+
+#include <algorithm>
+#include <filesystem>
+#include <fstream>
+#include <string>
+#include <vector>
+
+using Data::Items::HasFatal;
+using Data::Items::ItemDataIssue;
+using Data::Items::ItemDataIssueSeverity;
+using Data::Maps::MapObjectSound;
+
+namespace
+{
+struct ReadResult
+{
+    std::vector<MapObjectSound> sounds;
+    std::vector<ItemDataIssue> issues;
+};
+
+ReadResult Read(const std::string& text)
+{
+    ReadResult result;
+    Data::Maps::ReadMapObjectSoundsJson(text, "ObjectSounds.json", result.sounds, result.issues);
+    return result;
+}
+
+std::string File(const std::string& entries)
+{
+    return R"({ "formatVersion": 1, "objectSounds": [ )" + entries + " ] }";
+}
+
+std::string Messages(const std::vector<ItemDataIssue>& issues)
+{
+    std::string text;
+    for (const ItemDataIssue& issue : issues)
+    {
+        text += issue.ToString() + "\n";
+    }
+    return text;
+}
+
+bool HasIssueAbout(const std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity, const std::string& field,
+                   const std::string& message)
+{
+    return std::any_of(issues.begin(), issues.end(),
+                       [&](const ItemDataIssue& issue)
+                       {
+                           return issue.severity == severity && issue.field == field &&
+                                  issue.message.find(message) != std::string::npos;
+                       });
+}
+
+MapObjectSound Waterfall()
+{
+    MapObjectSound sound;
+    sound.maps = {{24}, {25}, {26}, {27}, {28}, {29}, {36}};
+    sound.objects = {37, 38};
+    sound.file = "Data/Sound/aKalimaWaterFall.wav";
+    sound.channels = 3;
+    return sound;
+}
+
+// An audio backend that notes what loads and what plays on a free channel.
+class RecordingAudio final : public mu::IPlatformAudio
+{
+public:
+    std::vector<std::pair<int, std::wstring>> loads;
+    std::vector<int> freePlays;
+    std::vector<int> plays;
+
+    bool Initialize() override
+    {
+        return true;
+    }
+    void Shutdown() override {}
+    void LoadSound(ESound buffer, const wchar_t* filename, int, bool) override
+    {
+        loads.emplace_back(static_cast<int>(buffer), filename != nullptr ? filename : L"");
+    }
+    bool PlaySound(ESound buffer, const void*, bool) override
+    {
+        plays.push_back(static_cast<int>(buffer));
+        return true;
+    }
+    bool PlaySoundOnFreeChannel(ESound buffer) override
+    {
+        freePlays.push_back(static_cast<int>(buffer));
+        return true;
+    }
+    void StopSound(ESound, bool) override {}
+    void AllStopSound() override {}
+    void ReleaseSound(ESound) override {}
+    void Set3DSoundPosition() override {}
+    void SetVolume(ESound, long) override {}
+    void SetMasterVolume(long) override {}
+    void PlayMusic(const char*, bool) override {}
+    void StopMusic(const char*, bool) override {}
+    bool IsEndMusic() override
+    {
+        return true;
+    }
+    int GetMusicPosition() override
+    {
+        return 0;
+    }
+    void SetBGMVolume(float) override {}
+    void SetSFXVolume(float) override {}
+    float GetBGMVolume() const override
+    {
+        return 0.f;
+    }
+    float GetSFXVolume() const override
+    {
+        return 0.f;
+    }
+};
+
+// The recording backend for one test, and the table as it was.
+class AudioScope
+{
+public:
+    AudioScope() : m_previous(g_platformAudio), m_table(g_MapObjectSoundDatabase.GetAll())
+    {
+        g_platformAudio = &audio;
+        ForgetLoadedSounds();
+    }
+    ~AudioScope()
+    {
+        g_platformAudio = m_previous;
+        ForgetLoadedSounds();
+        g_MapObjectSoundDatabase.Build(m_table);
+    }
+    AudioScope(const AudioScope&) = delete;
+    AudioScope& operator=(const AudioScope&) = delete;
+
+    RecordingAudio audio;
+
+private:
+    mu::IPlatformAudio* m_previous;
+    std::vector<MapObjectSound> m_table;
+};
+} // namespace
+
+TEST_CASE("Map object sounds: entries read back as written, each on its own line (MP1) [data][maps]")
+{
+    MapObjectSound stage = Waterfall();
+    stage.maps = {{9, 2}};
+    stage.objects = {5};
+    stage.channels = 1;
+    const std::vector<MapObjectSound> sounds = {Waterfall(), stage};
+
+    const std::string text = Data::Maps::WriteMapObjectSoundsJson(sounds);
+    const ReadResult read = Read(text);
+
+    INFO(text);
+    INFO(Messages(read.issues));
+    CHECK(read.issues.empty());
+    CHECK(read.sounds == sounds);
+    CHECK(text.find(R"({"maps": [24, 25, 26, 27, 28, 29, 36], "objects": [37, 38], "sound": {"file": )"
+                    R"("Data/Sound/aKalimaWaterFall.wav", "channels": 3}, "plays": "whileInView"})") !=
+          std::string::npos);
+}
+
+TEST_CASE("Map object sounds: a missing plays is while in view, a missing channel count one [data][maps]")
+{
+    const ReadResult read =
+        Read(File(R"({"maps": [24], "objects": [37], "sound": {"file": "Data/Sound/aKalimaWaterFall.wav"}})"));
+    INFO(Messages(read.issues));
+    REQUIRE(read.sounds.size() == 1);
+    CHECK(read.sounds[0].channels == 1);
+    CHECK(read.sounds[0].plays == Data::Maps::MapObjectSoundPlay::WhileInView);
+}
+
+TEST_CASE("Map object sounds: wrong values are fatal and name the entry and field [data][maps]")
+{
+    struct Case
+    {
+        std::string entry;
+        std::string field;
+        std::string message;
+    };
+    const std::string sound = R"("sound": {"file": "Data/Sound/a.wav"})";
+    const std::vector<Case> cases = {
+        {R"("not an object")", "objectSounds[0]", "maps, objects and sound"},
+        {R"({"maps": [24], )" + sound + "}", "objectSounds[0]", "maps, objects and sound"},
+        {R"({"maps": [], "objects": [37], )" + sound + "}", "objectSounds[0].maps", "one map or more"},
+        {R"({"maps": [24], "objects": [], )" + sound + "}", "objectSounds[0].objects", "one object type or more"},
+        {R"({"maps": [24], "objects": [160], )" + sound + "}", "objectSounds[0].objects[0]", "from 0 to 159"},
+        {R"({"maps": [24], "objects": [37, 37], )" + sound + "}", "objectSounds[0].objects", "37 more than once"},
+        {R"({"maps": [24], "objects": [37], "sound": {"channels": 3}})", "objectSounds[0].sound", "with file"},
+        {R"({"maps": [24], "objects": [37], "sound": {"file": "C:/a.wav"}})", "objectSounds[0].sound.file",
+         "relative path"},
+        {R"({"maps": [24], "objects": [37], "sound": {"file": "Data/Sound/a.wav", "channels": 0}})",
+         "objectSounds[0].sound.channels", "from 1 to 4"},
+        {R"({"maps": [24], "objects": [37], "sound": {"file": "Data/Sound/a.wav", "channels": 5}})",
+         "objectSounds[0].sound.channels", "from 1 to 4"},
+        {R"({"maps": [24], "objects": [37], )" + sound + R"(, "plays": "always"})", "objectSounds[0].plays",
+         "whileInView"},
+    };
+    for (const Case& test : cases)
+    {
+        const ReadResult read = Read(File(test.entry));
+        INFO(test.entry);
+        INFO(Messages(read.issues));
+        CHECK(read.sounds.empty());
+        CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Fatal, test.field, test.message));
+    }
+
+    // Unknown fields are warnings; the entry stays.
+    const ReadResult read = Read(R"({ "formatVersion": 1, "extra": 1, "objectSounds": [ {"maps": [24], )"
+                                 R"("objects": [37], "sound": {"file": "Data/Sound/a.wav", "loop": true}, )"
+                                 R"("volume": 1} ] })");
+    INFO(Messages(read.issues));
+    CHECK_FALSE(HasFatal(read.issues));
+    CHECK(read.sounds.size() == 1);
+    CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Warning, "extra", "unknown"));
+    CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Warning, "objectSounds[0].volume", "unknown"));
+    CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Warning, "objectSounds[0].sound.loop", "unknown"));
+}
+
+TEST_CASE("Map object sounds: an object type on a map in two entries is fatal [data][maps]")
+{
+    MapObjectSound first = Waterfall();
+    first.maps = {{24}, {25}};
+    first.objects = {37};
+    MapObjectSound second = Waterfall();
+    second.maps = {{25}};
+    second.objects = {37, 40};
+    MapObjectSound otherMap = Waterfall();
+    otherMap.maps = {{26}};
+    otherMap.objects = {37};
+    std::vector<ItemDataIssue> issues;
+
+    Data::Maps::ValidateMapObjectSounds(std::vector<MapObjectSound>{first, second, otherMap}, "ObjectSounds.json",
+                                        issues);
+
+    INFO(Messages(issues));
+    CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Fatal, "objectSounds[1].objects",
+                        "object 37 on map 25 is in objectSounds[0] too"));
+    CHECK(issues.size() == 1);
+
+    // A whole map and one of its stages overlap; two stages do not.
+    MapObjectSound wholeMap = Waterfall();
+    wholeMap.maps = {{9}};
+    MapObjectSound stageOne = Waterfall();
+    stageOne.maps = {{9, 1}};
+    MapObjectSound stageTwo = Waterfall();
+    stageTwo.maps = {{9, 2}};
+    issues.clear();
+    Data::Maps::ValidateMapObjectSounds(std::vector<MapObjectSound>{stageOne, stageTwo}, "ObjectSounds.json", issues);
+    CHECK(issues.empty());
+    Data::Maps::ValidateMapObjectSounds(std::vector<MapObjectSound>{wholeMap, stageTwo}, "ObjectSounds.json", issues);
+    CHECK(HasFatal(issues));
+}
+
+TEST_CASE("Map object sounds: a file that is not in the client folder is a warning [data][maps]")
+{
+    const std::filesystem::path folder = std::filesystem::temp_directory_path() / "mu-map-object-sounds";
+    std::filesystem::remove_all(folder);
+    std::filesystem::create_directories(folder / "Data" / "Sound");
+    std::ofstream(folder / "Data" / "Sound" / "here.wav") << "RIFF";
+    const std::filesystem::path previous = std::filesystem::current_path();
+    std::filesystem::current_path(folder);
+    MapObjectSound here = Waterfall();
+    here.file = "Data/Sound/here.wav";
+    MapObjectSound missing = Waterfall();
+    missing.file = "Data/Sound/missing.wav";
+    std::vector<ItemDataIssue> issues;
+
+    Data::Maps::ValidateMapObjectSoundFiles(std::vector<MapObjectSound>{here, missing}, "ObjectSounds.json", issues);
+
+    std::filesystem::current_path(previous);
+    std::filesystem::remove_all(folder);
+    INFO(Messages(issues));
+    REQUIRE(issues.size() == 1);
+    CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "objectSounds[1].sound.file", "not in the client"));
+}
+
+TEST_CASE("Map object sounds: the shipped file has the Kalima waterfalls and is written as the writer writes it "
+          "[data][maps]")
+{
+    const std::filesystem::path file = std::filesystem::path(MU_TEST_DATA_DIR) / "Maps" / "ObjectSounds.json";
+    std::ifstream stream(file, std::ios::binary);
+    REQUIRE(stream);
+    const std::string text((std::istreambuf_iterator<char>(stream)), std::istreambuf_iterator<char>());
+    const ReadResult read = Read(text);
+    std::vector<ItemDataIssue> issues = read.issues;
+    Data::Maps::ValidateMapObjectSounds(read.sounds, "ObjectSounds.json", issues);
+
+    INFO(Messages(issues));
+    CHECK(issues.empty());
+    CHECK(read.sounds == std::vector<MapObjectSound>{Waterfall()});
+    std::string unixText = text;
+    std::erase(unixText, '\r');
+    CHECK(unixText == Data::Maps::WriteMapObjectSoundsJson(read.sounds));
+}
+
+TEST_CASE("Map object sounds: a drawn object of an entry's type plays its sound on a free channel on its maps only "
+          "(D-MP3) [data][maps]")
+{
+    AudioScope scope;
+    g_MapObjectSoundDatabase.Build(std::vector<MapObjectSound>{Waterfall()});
+    const ESound number = Audio::SoundNumbers::ForFile(L"Data\\Sound\\aKalimaWaterFall.wav");
+    OBJECT waterfall;
+    waterfall.Type = 37;
+    OBJECT other;
+    other.Type = 36;
+    // Before a map loads, no type has a sound.
+    CHECK_FALSE(World::MapObjectSounds::FindSound(37));
+
+    World::MapObjectSounds::LoadForMap(24, 0);
+    REQUIRE(scope.audio.loads.size() == 1);
+    CHECK(scope.audio.loads[0].first == static_cast<int>(number));
+    CHECK(scope.audio.loads[0].second == L"Data\\Sound\\aKalimaWaterFall.wav");
+    World::MapObjectSounds::OnObjectDrawn(waterfall);
+    World::MapObjectSounds::OnObjectDrawn(waterfall);
+    World::MapObjectSounds::OnObjectDrawn(other);
+    CHECK(scope.audio.freePlays == std::vector<int>{static_cast<int>(number), static_cast<int>(number)});
+    CHECK(scope.audio.plays.empty());
+    CHECK(World::MapObjectSounds::FindSound(38) == number);
+    CHECK_FALSE(World::MapObjectSounds::FindSound(36));
+
+    // Another map: nothing loads or plays.
+    scope.audio.freePlays.clear();
+    World::MapObjectSounds::LoadForMap(2, 0);
+    World::MapObjectSounds::OnObjectDrawn(waterfall);
+    CHECK(scope.audio.freePlays.empty());
+    CHECK_FALSE(World::MapObjectSounds::FindSound(37));
+
+    // A change of the table (the Map Editor) reaches the map shown.
+    World::MapObjectSounds::LoadForMap(24, 0);
+    MapObjectSound edited = Waterfall();
+    edited.objects = {36};
+    g_MapObjectSoundDatabase.Build(std::vector<MapObjectSound>{edited});
+    scope.audio.freePlays.clear();
+    World::MapObjectSounds::OnObjectDrawn(other);
+    CHECK(scope.audio.freePlays == std::vector<int>{static_cast<int>(number)});
+    World::MapObjectSounds::OnObjectDrawn(waterfall);
+    CHECK(scope.audio.freePlays.size() == 1);
+    World::MapObjectSounds::LoadForMap(-1, 0);
+}

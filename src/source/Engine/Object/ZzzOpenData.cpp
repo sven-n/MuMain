@@ -37,6 +37,7 @@
 #include "Data/DataHandler/ItemData/ItemModelLoader.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
+#include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Audio/SoundNumbers.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
@@ -414,6 +415,17 @@ static void OpenMonsterData()
         !g_MonsterDataHandler.LoadSounds(errorMessage))
     {
         StopOnDataError("Monster data error", errorMessage);
+    }
+}
+
+// Loads the sounds of map objects (Data/Maps/ObjectSounds.json); errors stop
+// the game.
+static void OpenMapData()
+{
+    std::string errorMessage;
+    if (!Data::Maps::LoadMapObjectSounds(errorMessage))
+    {
+        StopOnDataError("Map data error", errorMessage);
     }
 }
 
@@ -2139,6 +2151,7 @@ void OpenBasicData(HDC hDC)
     SEASON3B::CMoveCommandData::OpenMoveReqScript(Text);
 
     OpenMonsterData();
+    OpenMapData();
 
     mu_swprintf(Text, L"Data\\Local\\%ls\\Quest_%ls.bmd", g_strSelectedML.c_str(), g_strSelectedML.c_str());
     g_csQuest.OpenQuestScript(Text);

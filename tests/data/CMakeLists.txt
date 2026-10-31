@@ -37,6 +37,20 @@ target_compile_definitions(light_mood_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
+# The sounds of map objects (Data/Maps/ObjectSounds.json, maps design MP1).
+# The table needs the client globals of Winmain.cpp.
+mu_add_test(
+    NAME map_data_tests
+    SOURCES
+        test_map_object_sounds.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(map_data_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
 # The server groups of the login screen (Data/Local/ServerList.json). The
 # window test draws the editor's Server List window, which needs the client
 # globals of Winmain.cpp.
