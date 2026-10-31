@@ -913,10 +913,7 @@ ServerListLoadResult LoadServerListFile(const std::filesystem::path& file, std::
         return result;
     }
     ReadServerListJson(*text, source, result.list, result.issues);
-    if (!uiLocales.empty())
-    {
-        ValidateServerListLocales(result.list, uiLocales, source, result.issues);
-    }
+    ValidateServerListLocales(result.list, uiLocales, source, result.issues);
     return result;
 }
 

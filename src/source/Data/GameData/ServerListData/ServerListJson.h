@@ -58,9 +58,9 @@ struct ServerListLoadResult
     std::vector<Items::ItemDataIssue> issues;
 };
 
-// Reads the file; one that cannot be read is an error. With `uiLocales`, its
-// translations are checked against them (ValidateServerListLocales).
-ServerListLoadResult LoadServerListFile(const std::filesystem::path& file, std::span<const char* const> uiLocales = {});
+// Reads the file; one that cannot be read is an error. Its translations are
+// checked against the game's languages, `uiLocales` (ValidateServerListLocales).
+ServerListLoadResult LoadServerListFile(const std::filesystem::path& file, std::span<const char* const> uiLocales);
 
 // Writes the list to the file when it reads back without fatal problems; the
 // problems found are added to `issues`. The old file stays when the new one
