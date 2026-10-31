@@ -750,7 +750,7 @@ bool RenderHurricane(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
     VectorCopy(b->BodyLight, Light);
     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                   o->BlendMeshTexCoordV, o->HiddenMesh);
-    Vector(Light[0] * 0.3f, Light[1] * 0.8f, Light[1] * 1.f, b->BodyLight);
+    Vector(Light[0] * 0.3f, Light[1] * 0.8f, Light[2] * 1.f, b->BodyLight);
     b->RenderBody(RENDER_TEXTURE | RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
                   o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME + 1);
     VectorCopy(Light, b->BodyLight);
