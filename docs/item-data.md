@@ -487,9 +487,11 @@ background (black when left out) and bold.
 **Errors** when the item data loads: a style without a color or with a color
 that is not `"#rrggbb"`, a rule or an item naming a style the file doesn't have
 (the message suggests the name meant for a typo), and an unknown condition.
-**Warnings**: a style neither a rule nor an item names, a standard rule after
-one without conditions and an item's rule whose levels the rules before it all
-take, such as every rule after one without `levels` (both never used).
+**Warnings**: a style neither a rule nor an item names, a standard rule without
+conditions that isn't the last (the warning is on that rule: it always holds,
+so the rules after it are never used), and an item's rule whose levels the
+rules before it all take, such as every rule after one without `levels` (never
+used).
 
 ### Description placeholders
 
