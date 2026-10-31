@@ -9,11 +9,10 @@
 #include "Data/DataHandler/ModelData/ModelFileDataHandler.h"
 #include "Data/GameData/EffectData/EffectTypeCatalogue.h"
 #include "Data/GameData/MonsterData/MonsterAnimations.h"
-#include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Data/GameData/MonsterData/MonsterSoundIds.h"
-#include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetLinks.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "World/MapInfra/MapManager.h"
@@ -263,35 +262,7 @@ bool Open(int slot)
 
 std::vector<const MonsterSoundSet*> FindSoundSetsOfSlot(int slot)
 {
-    std::vector<const MonsterSoundSet*> sets;
-    const auto add = [&](const std::string& name)
-    {
-        const MonsterSoundSet* set = name.empty() ? nullptr : g_MonsterSoundSetDatabase.Find(name);
-        if (set != nullptr && std::find(sets.begin(), sets.end(), set) == sets.end())
-        {
-            sets.push_back(set);
-        }
-    };
-    for (int number = 0; number < MonsterNumberCount; ++number)
-    {
-        const MonsterDefinition* monster = g_MonsterDatabase.Find(number);
-        if (monster == nullptr)
-        {
-            continue;
-        }
-        if (FindMonsterModelReference(monster->model) == slot)
-        {
-            add(monster->soundSet);
-        }
-        for (const MonsterRandomVariant& variant : monster->randomVariants)
-        {
-            if (FindMonsterModelReference(variant.model) == slot)
-            {
-                add(GetSoundSetWithModel(*monster, slot));
-            }
-        }
-    }
-    return sets;
+    return SoundSetLinks::FindSetsOfSlot(slot);
 }
 
 std::optional<int> FindSoundNumber(const MonsterSoundSet& set, const std::string& value)

@@ -4,7 +4,10 @@
 
 #include "Core/Globals/_define.h"
 #include "Core/Globals/_enum.h"
+#include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetLinks.h"
 #include "Data/GameData/MonsterData/MonsterSoundValidation.h"
 #include "Data/GameData/MonsterData/MonsterSoundsJson.h"
 
@@ -418,6 +421,50 @@ TEST_CASE("Monster sounds: a random variant without a set of its own plays the e
                                               "Sounds.json", issues);
     INFO(Messages(issues));
     CHECK(issues.empty());
+}
+
+TEST_CASE("Monster sounds: the set of each look of a monster is found once per change of the lists (Q-MN78, "
+          "Q-MN83) [data][monsters]")
+{
+    namespace Links = Data::Monsters::SoundSetLinks;
+    MonsterDefinition hound = Monster(3, "MONSTER_MODEL_HOUND", "Hound");
+    MonsterDefinition silent = Monster(5, "MONSTER_MODEL_HOUND", "");
+    MonsterDefinition elf = Monster(163, "MONSTER_MODEL_CHAOSCASTLE_ELF", "Elf");
+    elf.randomVariants = {{"MONSTER_MODEL_CHAOSCASTLE_WIZARD", std::string("Wizard")}};
+    MonsterDefinition elf2 = Monster(165, "MONSTER_MODEL_CHAOSCASTLE_ELF", "Elf");
+    elf2.randomVariants = {{"MONSTER_MODEL_CHAOSCASTLE_WIZARD", std::nullopt}};
+    std::vector<MonsterDefinition> monsters = {hound, silent, elf, elf2};
+    g_MonsterDatabase.Build(monsters, "en");
+    const std::vector<MonsterSoundSet> sets = {SetOf("Hound"), SetOf("Elf"), SetOf("Wizard")};
+    g_MonsterSoundSetDatabase.Build(sets);
+    const MonsterSoundSet* houndSet = g_MonsterSoundSetDatabase.Find("Hound");
+    const MonsterSoundSet* elfSet = g_MonsterSoundSetDatabase.Find("Elf");
+    const MonsterSoundSet* wizardSet = g_MonsterSoundSetDatabase.Find("Wizard");
+
+    CHECK(Links::FindSet(3, MODEL_HOUND) == houndSet);
+    // Another model: none, as for a player whose number is 0 or -1.
+    CHECK(Links::FindSet(3, MODEL_BULL_FIGHTER) == nullptr);
+    CHECK(Links::FindSet(5, MODEL_HOUND) == nullptr);
+    CHECK(Links::FindSet(-1, MODEL_HOUND) == nullptr);
+    CHECK(Links::FindSet(Data::Monsters::MonsterNumberCount, MODEL_HOUND) == nullptr);
+    CHECK(Links::FindSet(163, MODEL_CHAOS_CASTLE_ELF) == elfSet);
+    CHECK(Links::FindSet(163, MODEL_CHAOS_CASTLE_WIZARD) == wizardSet);
+    // A variant without a set of its own plays the entry's.
+    CHECK(Links::FindSet(165, MODEL_CHAOS_CASTLE_WIZARD) == elfSet);
+    CHECK(Links::FindSetsOfSlot(MODEL_CHAOS_CASTLE_WIZARD) == std::vector<const MonsterSoundSet*>{wizardSet, elfSet});
+    CHECK(Links::FindSetsOfSlot(MODEL_CHAOS_CASTLE_ELF) == std::vector<const MonsterSoundSet*>{elfSet});
+    CHECK(Links::FindSetsOfSlot(MODEL_HOUND) == std::vector<const MonsterSoundSet*>{houndSet});
+    CHECK(Links::FindSetsOfSlot(MODEL_BULL_FIGHTER).empty());
+
+    // A changed list is looked up again.
+    monsters[0].soundSet = "Elf";
+    g_MonsterDatabase.Build(monsters, "en");
+    CHECK(Links::FindSet(3, MODEL_HOUND) == elfSet);
+    g_MonsterSoundSetDatabase.Build(std::vector<MonsterSoundSet>{SetOf("Hound")});
+    CHECK(Links::FindSet(3, MODEL_HOUND) == nullptr);
+    CHECK(Links::FindSet(163, MODEL_CHAOS_CASTLE_WIZARD) == nullptr);
+    g_MonsterSoundSetDatabase.Build({});
+    g_MonsterDatabase.Build({}, "en");
 }
 
 TEST_CASE("Monster sounds: the code draws the looks of the ranged Chaos Castle soldiers only (Q-MN83) "
