@@ -1032,7 +1032,8 @@ bool CMuServerListUI::RenderVipTypeButtons()
     if (ImGui::Button(I18N::Editor::Remove))
     {
         const VipType& vipType = m_edits.GetList().vipTypes[static_cast<size_t>(m_selectedVipType)];
-        if (m_edits.FindChannelsWithVipType(vipType.id).empty())
+        // A type no channel and no rule names goes without asking.
+        if (m_edits.FindChannelsWithVipType(vipType.id).empty() && m_edits.CountRulesForVipType(vipType.id) == 0)
         {
             CommitPending();
             m_edits.RemoveVipType(static_cast<size_t>(m_selectedVipType));
@@ -1088,15 +1089,23 @@ bool CMuServerListUI::RenderRemoveVipTypePopup()
     if (ImGui::BeginPopupModal(title.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         const std::vector<std::string> channels = m_edits.FindChannelsWithVipType(vipType.id);
-        ImGui::TextUnformatted(I18N::Format(I18N::Editor::VIPTypeUsedNote, {std::to_string(channels.size())}).c_str());
-        std::string list;
-        for (const std::string& channel : channels)
+        if (!channels.empty())
         {
-            list += (list.empty() ? "" : ", ") + channel;
+            ImGui::TextUnformatted(
+                I18N::Format(I18N::Editor::VIPTypeUsedNote, {std::to_string(channels.size())}).c_str());
+            std::string list;
+            for (const std::string& channel : channels)
+            {
+                list += (list.empty() ? "" : ", ") + channel;
+            }
+            ImGui::PushTextWrapPos(TextFieldWidth * 1.5f * g_MuEditorCore.GetUIScale());
+            ImGui::TextUnformatted(list.c_str());
+            ImGui::PopTextWrapPos();
         }
-        ImGui::PushTextWrapPos(TextFieldWidth * 1.5f * g_MuEditorCore.GetUIScale());
-        ImGui::TextUnformatted(list.c_str());
-        ImGui::PopTextWrapPos();
+        if (const size_t rules = m_edits.CountRulesForVipType(vipType.id); rules > 0)
+        {
+            ImGui::TextUnformatted(I18N::Format(I18N::Editor::VIPTypeRulesNote, {std::to_string(rules)}).c_str());
+        }
         if (ImGui::Button(I18N::Editor::Remove))
         {
             CommitPending();
