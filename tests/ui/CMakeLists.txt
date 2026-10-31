@@ -26,6 +26,22 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient Freetype::Freetype
 )
+
+if(WIN32)
+    mu_add_test(
+        NAME cursed_temple_skill_tests
+        SOURCES
+            test_cursed_temple_skill.cpp
+            RmlLayoutFixture.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        LINK_LIBS MuClient
+    )
+    target_compile_definitions(cursed_temple_skill_tests PRIVATE
+        MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin"
+        MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+        MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+    )
+endif()
 target_compile_definitions(map_name_tests PRIVATE
     MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
     MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"

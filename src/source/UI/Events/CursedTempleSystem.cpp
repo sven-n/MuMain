@@ -50,6 +50,11 @@ using namespace mu::ui::window;
 
 namespace
 {
+bool IsTargetedTempleSkill(int skill)
+{
+    return skill == AT_SKILL_CURSED_TEMPLE_RESTRAINT || skill == AT_SKILL_CURSED_TEMPLE_SUBLIMATION;
+}
+
     const int HolyItemNpc = 380;
     const int AlliedNpc = 381;
     const int IllusionNpc = 382;
@@ -1127,8 +1132,7 @@ void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJ
 
     bool checktile = true;
 
-    if (CursedTempleCurSkillType == AT_SKILL_CURSED_TEMPLE_RESTRAINT
-        || CursedTempleCurSkillType == AT_SKILL_CURSED_TEMPLE_SUBLIMATION)
+    if (IsTargetedTempleSkill(CursedTempleCurSkillType))
     {
         checktile = CheckTile(c, o, Distance);
     }
@@ -1137,9 +1141,14 @@ void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJ
     {
         CHARACTER* tc = NULL;
 
-        if (CursedTempleCurSkillType == AT_SKILL_CURSED_TEMPLE_RESTRAINT
-            || CursedTempleCurSkillType == AT_SKILL_CURSED_TEMPLE_SUBLIMATION)
+        if (IsTargetedTempleSkill(CursedTempleCurSkillType))
         {
+            if (selectcharacterindex >= MAX_CHARACTERS_CLIENT || getTargetCharacterKey(c, selectcharacterindex) == -1)
+            {
+                MouseRButtonPush = false;
+                return;
+            }
+
             for (int i = 0; i < m_CursedTempleMyTeamCount; ++i)
             {
                 if (m_CursedTempleMyTeam[i].userIndex == CharactersClient[selectcharacterindex].Key)
@@ -1147,17 +1156,6 @@ void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJ
                     MouseRButtonPush = false;
                     return;
                 }
-            }
-
-            if (selectcharacterindex == -1)
-            {
-                MouseRButtonPush = false;
-                return;
-            }
-            else if (getTargetCharacterKey(c, selectcharacterindex) == -1)
-            {
-                MouseRButtonPush = false;
-                return;
             }
 
             tc = &CharactersClient[selectcharacterindex];
