@@ -10,8 +10,11 @@
 #include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Pets/CSPetSystem.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Render/Items/ItemEffects.h"
 #include "Render/Models/ZzzBMD.h"
 #include "World/MapInfra/w_MapProcess.h"
+
+#include "../data/ItemModelDatabaseScope.h"
 
 #include <cstring>
 #include <memory>
@@ -533,4 +536,39 @@ TEST_CASE("A character's mark spawns its sprite in the update, and its draw spaw
 
     DeleteParts(&c);
     FenrirScope::ClearSpawns();
+}
+
+TEST_CASE("A wing's item effect spawns its lights on the bones it is given, and its draw spawns none [effects]")
+{
+    FenrirScope scope;
+    ItemModelDatabaseScope restoreModels;
+    Data::Items::ItemModelDefinition eternal;
+    eternal.group = 12;
+    eternal.number = 37;
+    eternal.file = "Data/Item/Wing37.bmd";
+    eternal.itemEffect = "wingOfEternal";
+    g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{eternal}, Data::Effects::GlowColorList{});
+    BMD* b = &Models[MODEL_WING_OF_ETERNAL];
+    b->BodyScale = 1.f;
+    Vector(0.f, 0.f, 0.f, b->BodyOrigin);
+    OBJECT wing;
+    wing.Type = MODEL_WING_OF_ETERNAL;
+
+    int level = 0;
+    CHECK(Render::Items::ItemEffects::Apply(b, &wing, MODEL_WING_OF_ETERNAL, 1.f, level) ==
+          Render::Items::ItemEffects::Result::Applied);
+    for (int i = 0; i < MAX_SPRITES; ++i)
+        CHECK_FALSE(Sprites[i].Live);
+
+    REQUIRE(Render::Items::ItemEffects::Spawns(MODEL_WING_OF_ETERNAL));
+    Render::Items::ItemEffects::Spawn(b, &wing, MODEL_WING_OF_ETERNAL, scope.bones.get());
+    int onPose = 0;
+    for (int i = 0; i < MAX_SPRITES; ++i)
+    {
+        if (!Sprites[i].Live)
+            continue;
+        CHECK(Sprites[i].Position[0] == FenrirScope::poseAt);
+        ++onPose;
+    }
+    CHECK(onPose == 28); // its lights
 }

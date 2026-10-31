@@ -6076,6 +6076,52 @@ static void HandleItemOnGround(OBJECT* o)
     }
 }
 
+// Where RenderItems draws a ground item: some maps bob it.
+static void DrawnItemPosition(int i, const vec3_t position, vec3_t drawn)
+{
+    VectorCopy(position, drawn);
+    if (gMapManager.WorldActive == WD_10HEAVEN)
+    {
+        drawn[2] += 10.0f * (float)sinf((float)(i * 1237 + WorldTime) * 0.002f);
+    }
+    else if (gMapManager.WorldActive == WD_39KANTURU_3RD && g_Direction.m_CKanturu.IsMayaScene())
+    {
+        drawn[2] += 10.0f * (float)sinf((float)(i * 1237 + WorldTime) * 0.002f);
+    }
+    else if (gMapManager.InHellas() == true)
+    {
+        drawn[2] = GetWaterTerrain(position[0], position[1]) + 180;
+    }
+}
+
+void ItemHeight(int Type, BMD* b);
+
+// The sprites a ground item's effect spawns, posed and placed as RenderItems draws it; its sprites stay out of the
+// bloom like its draw.
+static void SpawnGroundItemEffects(int i)
+{
+    OBJECT* o = &Items[i].Object;
+    const int drawnModel = Render::Items::Display::GetDrawnModel(o->Type, DrawnItemLevel(Items[i].Item));
+    if (o->Alpha <= 0.01f || o->EnableShadow || Render::Items::Display::IsDrawnOnCharacterSkeleton(drawnModel) ||
+        !PartObjectSpawns(o, drawnModel))
+        return;
+
+    BMD* b = &Models[drawnModel];
+    b->CurrentAction = o->CurrentAction;
+    ItemHeight(o->Type, b);
+    b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle,
+                 false, false);
+    b->BodyScale = o->Scale;
+
+    vec3_t position;
+    VectorCopy(o->Position, position);
+    DrawnItemPosition(i, position, o->Position);
+    VectorCopy(o->Position, b->BodyOrigin);
+    const mu::ScopedBloomExclusion classicItems;
+    SpawnPartObjectEffect(b, o, drawnModel, BoneTransform);
+    VectorCopy(position, o->Position);
+}
+
 void MoveItems()
 {
     for (int i = 0; i < MAX_ITEMS; i++)
@@ -6108,6 +6154,9 @@ void MoveItems()
             {
                 CreateShiny(o);
             }
+
+            if (o->Visible)
+                SpawnGroundItemEffects(i);
         }
     }
 }
@@ -6222,18 +6271,7 @@ void RenderItems()
 
                 vec3_t vBackup;
                 VectorCopy(o->Position, vBackup);
-                if (gMapManager.WorldActive == WD_10HEAVEN)
-                {
-                    o->Position[2] += 10.0f * (float)sinf((float)(i * 1237 + WorldTime) * 0.002f);
-                }
-                else if (gMapManager.WorldActive == WD_39KANTURU_3RD && g_Direction.m_CKanturu.IsMayaScene())
-                {
-                    o->Position[2] += 10.0f * (float)sinf((float)(i * 1237 + WorldTime) * 0.002f);
-                }
-                else if (gMapManager.InHellas() == true)
-                {
-                    o->Position[2] = GetWaterTerrain(o->Position[0], o->Position[1]) + 180;
-                }
+                DrawnItemPosition(i, vBackup, o->Position);
 
                 RenderPartObject(o, o->Type, NULL, Light, o->Alpha, DrawnItemLevel(Items[i].Item),
                                  Items[i].Item.ExcellentFlags, Items[i].Item.AncientDiscriminator, true, true, true);
@@ -7066,17 +7104,6 @@ static Render::Items::ItemEffects::Result ApplyEventModelEffect(BMD* b, OBJECT* 
     }
     if (o->Type == MODEL_EVENT + 12)
     {
-        float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
-        vec3_t p, Position, EffLight;
-        Vector(0.f, 0.f, 15.f, p);
-
-        float Scale = Luminosity * 0.8f + 2.f;
-        Vector(Luminosity * 0.32f, Luminosity * 0.32f, Luminosity * 2.f, EffLight);
-
-        b->TransformPosition(BoneTransform[0], p, Position);
-        VectorAdd(Position, o->Position, Position);
-
-        CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
         return Result::Applied;
     }
     if (o->Type == MODEL_EVENT + 6 && Level == 13)
@@ -7088,20 +7115,8 @@ static Render::Items::ItemEffects::Result ApplyEventModelEffect(BMD* b, OBJECT* 
     }
     if (o->Type == MODEL_EVENT + 13)
     {
-        float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
-        vec3_t p, Position, EffLight;
-        Vector(0.f, -5.f, -15.f, p);
-
-        float Scale = Luminosity * 0.8f + 2.5f;
-        Vector(Luminosity * 2.f, Luminosity * 0.32f, Luminosity * 0.32f, EffLight);
-
         b->StreamMesh = 0;
         o->BlendMeshTexCoordV = (int)-WorldTime % 4000 * 0.00025f;
-
-        b->TransformPosition(BoneTransform[0], p, Position);
-        VectorAdd(Position, o->Position, Position);
-
-        CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
         return Result::Applied;
     }
     if (Type == MODEL_EVENT + 18)
@@ -7120,6 +7135,47 @@ Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, OBJECT* o, int 
     const Render::Items::ItemEffects::Result effect = Render::Items::ItemEffects::Apply(b, o, Type, Alpha, Level);
     return effect != Render::Items::ItemEffects::Result::None ? effect
                                                               : ApplyEventModelEffect(b, o, Type, Level, ItemLevel);
+}
+
+// The two event models that spark have no item effect of their own.
+static bool IsSparkingEventModel(const OBJECT* o)
+{
+    return o->Type == MODEL_EVENT + 12 || o->Type == MODEL_EVENT + 13;
+}
+
+bool PartObjectSpawns(const OBJECT* o, int Type)
+{
+    return Render::Items::ItemEffects::Spawns(Type) || IsSparkingEventModel(o);
+}
+
+void SpawnPartObjectEffect(BMD* b, OBJECT* o, int Type, vec34_t* bones)
+{
+    if (Render::Items::ItemEffects::Spawns(Type))
+    {
+        Render::Items::ItemEffects::Spawn(b, o, Type, bones);
+        return;
+    }
+    if (!IsSparkingEventModel(o))
+        return;
+
+    const bool red = o->Type == MODEL_EVENT + 13;
+    float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
+    vec3_t p, Position, EffLight;
+    if (red)
+    {
+        Vector(0.f, -5.f, -15.f, p);
+        Vector(Luminosity * 2.f, Luminosity * 0.32f, Luminosity * 0.32f, EffLight);
+    }
+    else
+    {
+        Vector(0.f, 0.f, 15.f, p);
+        Vector(Luminosity * 0.32f, Luminosity * 0.32f, Luminosity * 2.f, EffLight);
+    }
+    const float Scale = Luminosity * 0.8f + (red ? 2.5f : 2.f);
+
+    b->TransformPosition(bones[0], p, Position);
+    VectorAdd(Position, o->Position, Position);
+    CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
 }
 
 extern float g_Luminosity;

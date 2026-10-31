@@ -34,4 +34,10 @@ enum class Result
 // taken from the item model database after each build of it). It may change
 // the level the model glows like.
 Result Apply(BMD* b, OBJECT* o, int modelType, float alpha, int& level);
+
+// Whether the item effect of a model spawns sprites, particles or lightning.
+bool Spawns(int modelType);
+
+// Spawns them from the model's pose, in the update; b is placed where the model is drawn.
+void Spawn(BMD* b, OBJECT* o, int modelType, float (*bones)[3][4]);
 } // namespace Render::Items::ItemEffects

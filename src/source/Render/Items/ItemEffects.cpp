@@ -20,14 +20,23 @@ namespace
 // An effect runs before the model is drawn, and may change the level the
 // model glows like. Drawn: it drew the model itself, nothing more is drawn.
 using EffectFunction = Result (*)(BMD* b, OBJECT* o, int Type, float Alpha, int& Level);
+// Spawns the effect's sprites, particles and lightning from the model's pose, in the update.
+using SpawnFunction = void (*)(BMD* b, OBJECT* o, vec34_t* bones);
 
 struct ItemEffect
 {
     const char* name;
     EffectFunction apply;
+    SpawnFunction spawn = nullptr;
 };
 
 // ------------------------------------------------ the effects
+
+// For effects that only spawn: the model is drawn as usual.
+Result ApplyNothing(BMD*, OBJECT*, int, float, int&)
+{
+    return Result::Applied;
+}
 
 Result ApplyBillOfBalrog(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 {
@@ -174,7 +183,7 @@ Result ApplyDevilsEye(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     return Result::Applied;
 }
 
-Result ApplyDevilsKey(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnDevilsKey(BMD* b, OBJECT* o, vec34_t* bones)
 {
     float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
     vec3_t p, Position, EffLight;
@@ -183,17 +192,16 @@ Result ApplyDevilsKey(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     float Scale = Luminosity * 0.8f;
     Vector(Luminosity * 2, Luminosity * 0.32f, Luminosity * 0.32f, EffLight);
 
-    b->TransformPosition(BoneTransform[1], p, Position);
+    b->TransformPosition(bones[1], p, Position);
     VectorAdd(Position, o->Position, Position);
     CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
 
-    b->TransformPosition(BoneTransform[2], p, Position);
+    b->TransformPosition(bones[2], p, Position);
     VectorAdd(Position, o->Position, Position);
     CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
-    return Result::Applied;
 }
 
-Result ApplyDevilsInvitation(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnDevilsInvitation(BMD* b, OBJECT* o, vec34_t* bones)
 {
     float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
     vec3_t p, Position, EffLight;
@@ -202,24 +210,22 @@ Result ApplyDevilsInvitation(BMD* b, OBJECT* o, int Type, float Alpha, int& Leve
     float Scale = Luminosity * 0.8f;
     Vector(Luminosity * 2, Luminosity * 0.32f, Luminosity * 0.32f, EffLight);
 
-    b->TransformPosition(BoneTransform[9], p, Position);
+    b->TransformPosition(bones[9], p, Position);
     VectorAdd(Position, o->Position, Position);
     CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
 
-    b->TransformPosition(BoneTransform[10], p, Position);
+    b->TransformPosition(bones[10], p, Position);
     VectorAdd(Position, o->Position, Position);
     CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
-    return Result::Applied;
 }
 
-Result ApplyRena(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnRena(BMD* b, OBJECT* o, vec34_t* bones)
 {
     float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.25f + 0.75f;
     vec3_t EffLight;
 
     Vector(Luminosity * 1.f, Luminosity * 0.5f, Luminosity * 0.f, EffLight);
     CreateSprite(BITMAP_SPARK + 1, o->Position, 2.5f, EffLight, o);
-    return Result::Applied;
 }
 
 Result ApplyWingsOfDragon(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
@@ -272,7 +278,7 @@ Result ApplyHideMesh1(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     return Result::Applied;
 }
 
-Result ApplyWingsOfDarkness(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnWingsOfDarkness(BMD* b, OBJECT* o, vec34_t* bones)
 {
     vec3_t posCenter, p, Position, Light;
     float Scale = sinf(WorldTime * 0.004f) * 0.3f + 0.3f;
@@ -285,8 +291,8 @@ Result ApplyWingsOfDarkness(BMD* b, OBJECT* o, int Type, float Alpha, int& Level
 
     for (int i = 0; i < 5; ++i)
     {
-        b->TransformPosition(BoneTransform[22 - i], p, posCenter, true);
-        b->TransformPosition(BoneTransform[30 - i], p, Position, true);
+        b->TransformPosition(bones[22 - i], p, posCenter, true);
+        b->TransformPosition(bones[30 - i], p, Position, true);
         if (rand_fps_check(1))
         {
             CreateJoint(BITMAP_JOINT_THUNDER, Position, posCenter, o->Angle, 14, o, Scale);
@@ -298,8 +304,8 @@ Result ApplyWingsOfDarkness(BMD* b, OBJECT* o, int Type, float Alpha, int& Level
 
     for (int i = 0; i < 5; ++i)
     {
-        b->TransformPosition(BoneTransform[7 - i], p, posCenter, true);
-        b->TransformPosition(BoneTransform[11 + i], p, Position, true);
+        b->TransformPosition(bones[7 - i], p, posCenter, true);
+        b->TransformPosition(bones[11 + i], p, Position, true);
         if (rand_fps_check(1))
         {
             CreateJoint(BITMAP_JOINT_THUNDER, Position, posCenter, o->Angle, 14, o, Scale);
@@ -308,10 +314,9 @@ Result ApplyWingsOfDarkness(BMD* b, OBJECT* o, int Type, float Alpha, int& Level
 
         CreateSprite(BITMAP_FLARE_BLUE, posCenter, Scale / 28.f, Light, o);
     }
-    return Result::Applied;
 }
 
-Result ApplyWingOfStorm(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnWingOfStorm(BMD* b, OBJECT* o, vec34_t* bones)
 {
     vec3_t vRelativePos, vPos, vLight;
     Vector(0.f, 0.f, 0.f, vRelativePos);
@@ -325,7 +330,7 @@ Result ApplyWingOfStorm(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 0; i < 25; ++i)
     {
-        b->TransformPosition(BoneTransform[iBone[i]], vRelativePos, vPos, true);
+        b->TransformPosition(bones[iBone[i]], vRelativePos, vPos, true);
         fScale = 0.5f; // (rand()%10) * 0.05f + 0.3f;
         CreateSprite(BITMAP_CLUD64, vPos, fScale, vLight, o, WorldTime * 0.01f, 1);
     }
@@ -335,7 +340,7 @@ Result ApplyWingOfStorm(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     {
         for (int i = 0; i < 6; ++i)
         {
-            b->TransformPosition(BoneTransform[iBoneThunder[i]], vRelativePos, vPos, true);
+            b->TransformPosition(bones[iBoneThunder[i]], vRelativePos, vPos, true);
             if (rand() % 20 == 0)
             {
                 Vector(0.6f, 0.6f, 0.9f, vLight);
@@ -350,7 +355,7 @@ Result ApplyWingOfStorm(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 0; i < 22; ++i)
     {
-        b->TransformPosition(BoneTransform[iBoneLight[i]], vRelativePos, vPos, true);
+        b->TransformPosition(bones[iBoneLight[i]], vRelativePos, vPos, true);
         if (iBoneLight[i] == 12 || iBoneLight[i] == 64 || iBoneLight[i] == 98 || iBoneLight[i] == 52)
         {
             Vector(0.9f, 0.0f, 0.0f, vLight);
@@ -362,10 +367,9 @@ Result ApplyWingOfStorm(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
             CreateSprite(BITMAP_LIGHT, vPos, fScale + 0.3f, vLight, o);
         }
     }
-    return Result::Applied;
 }
 
-Result ApplyWingOfEternal(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnWingOfEternal(BMD* b, OBJECT* o, vec34_t* bones)
 {
     vec3_t p, Position, Light;
     Vector(0.f, 0.f, 0.f, p);
@@ -377,7 +381,7 @@ Result ApplyWingOfEternal(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     int iRedFlarePos[] = {24, 31, 15, 8, 53, 35};
     for (int i = 0; i < 6; ++i)
     {
-        b->TransformPosition(BoneTransform[iRedFlarePos[i]], p, Position, true);
+        b->TransformPosition(bones[iRedFlarePos[i]], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, Scale + 1.3f, Light, o);
     }
 
@@ -387,20 +391,19 @@ Result ApplyWingOfEternal(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 0; i < 18; ++i)
     {
-        b->TransformPosition(BoneTransform[iGreenFlarePos[i]], p, Position, true);
+        b->TransformPosition(bones[iGreenFlarePos[i]], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, Scale + 1.5f, Light, o);
     }
     int iGreenFlarePos2[] = {56, 38, 51, 45};
 
     for (int i = 0; i < 4; ++i)
     {
-        b->TransformPosition(BoneTransform[iGreenFlarePos2[i]], p, Position, true);
+        b->TransformPosition(bones[iGreenFlarePos2[i]], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, Scale + 0.5f, Light, o);
     }
-    return Result::Applied;
 }
 
-Result ApplyWingOfIllusion(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnWingOfIllusion(BMD* b, OBJECT* o, vec34_t* bones)
 {
     vec3_t p, Position, Light;
     Vector(0.f, 0.f, 0.f, p);
@@ -411,7 +414,7 @@ Result ApplyWingOfIllusion(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     int iRedFlarePos[] = {5, 6, 7, 8, 18, 19, 23, 24, 25, 27, 37, 38};
     for (int i = 0; i < 12; ++i)
     {
-        b->TransformPosition(BoneTransform[iRedFlarePos[i]], p, Position, true);
+        b->TransformPosition(bones[iRedFlarePos[i]], p, Position, true);
         CreateSprite(BITMAP_FLARE, Position, Scale + 0.6f, Light, o);
     }
 
@@ -420,7 +423,7 @@ Result ApplyWingOfIllusion(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 0; i < 8; ++i)
     {
-        b->TransformPosition(BoneTransform[iGreenFlarePos[i]], p, Position, true);
+        b->TransformPosition(bones[iGreenFlarePos[i]], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, 1.3f, Light, o);
     }
 
@@ -430,15 +433,14 @@ Result ApplyWingOfIllusion(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     CreateSprite(BITMAP_LIGHT, Position, 0.4f, Light, o, 0.5f);
     if (rand_fps_check(2))
     {
-        b->TransformPosition(BoneTransform[13], p, Position, true);
+        b->TransformPosition(bones[13], p, Position, true);
         CreateParticle(BITMAP_SHINY, Position, o->Angle, Light, 5, 0.5f);
-        b->TransformPosition(BoneTransform[31], p, Position, true);
+        b->TransformPosition(bones[31], p, Position, true);
         CreateParticle(BITMAP_SHINY, Position, o->Angle, Light, 5, 0.5f);
     }
-    return Result::Applied;
 }
 
-Result ApplyWingOfRuin(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnWingOfRuin(BMD* b, OBJECT* o, vec34_t* bones)
 {
     vec3_t p, Position, Light;
     Vector(0.f, 0.f, 0.f, p);
@@ -449,7 +451,7 @@ Result ApplyWingOfRuin(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     int iRedFlarePos[] = {6, 15, 24, 56, 47, 38};
     for (int i = 0; i < 6; ++i)
     {
-        b->TransformPosition(BoneTransform[iRedFlarePos[i]], p, Position, true);
+        b->TransformPosition(bones[iRedFlarePos[i]], p, Position, true);
         CreateSprite(BITMAP_LIGHT, Position, Scale + 1.5f, Light, o);
     }
 
@@ -460,7 +462,7 @@ Result ApplyWingOfRuin(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 0; i < 6; ++i)
     {
-        b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
+        b->TransformPosition(bones[iSparkPos[i]], p, Position, true);
         for (int j = 0; j < iNumParticle; ++j)
             if (rand_fps_check(1))
                 CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.1f);
@@ -468,7 +470,7 @@ Result ApplyWingOfRuin(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 6; i < 18; ++i)
     {
-        b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
+        b->TransformPosition(bones[iSparkPos[i]], p, Position, true);
         for (int j = 0; j < iNumParticle; ++j)
             if (rand_fps_check(1))
                 CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.3f);
@@ -476,7 +478,7 @@ Result ApplyWingOfRuin(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 18; i < 30; ++i)
     {
-        b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
+        b->TransformPosition(bones[iSparkPos[i]], p, Position, true);
         for (int j = 0; j < iNumParticle; ++j)
             if (rand_fps_check(1))
                 CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.5f);
@@ -484,15 +486,14 @@ Result ApplyWingOfRuin(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
 
     for (int i = 30; i < 38; ++i)
     {
-        b->TransformPosition(BoneTransform[iSparkPos[i]], p, Position, true);
+        b->TransformPosition(bones[iSparkPos[i]], p, Position, true);
         for (int j = 0; j < iNumParticle; ++j)
             if (rand_fps_check(1))
                 CreateParticle(BITMAP_CHROME_ENERGY2, Position, o->Angle, Light, 0, 0.7f);
     }
-    return Result::Applied;
 }
 
-Result ApplyWingOfDimension(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+void SpawnWingOfDimension(BMD* b, OBJECT* o, vec34_t* bones)
 {
     vec3_t p, Position, Light;
     Vector(0.f, 0.f, 0.f, p);
@@ -505,13 +506,13 @@ Result ApplyWingOfDimension(BMD* b, OBJECT* o, int Type, float Alpha, int& Level
     int icnt;
     for (icnt = 0; icnt < 2; ++icnt)
     {
-        b->TransformPosition(BoneTransform[iFlarePos0[icnt]], p, Position, true);
+        b->TransformPosition(bones[iFlarePos0[icnt]], p, Position, true);
         CreateSprite(BITMAP_FLARE, Position, Scale + 2.0f, Light, o);
     }
     Vector((1.0f + Luminosity) / 4.f, (0.7f + Luminosity) / 4.f, (0.2f + Luminosity) / 4.f, Light);
     for (; icnt < 6; ++icnt)
     {
-        b->TransformPosition(BoneTransform[iFlarePos0[icnt]], p, Position, true);
+        b->TransformPosition(bones[iFlarePos0[icnt]], p, Position, true);
         CreateSprite(BITMAP_FLARE, Position, Scale + 0.5f, Light, o);
     }
 
@@ -520,10 +521,9 @@ Result ApplyWingOfDimension(BMD* b, OBJECT* o, int Type, float Alpha, int& Level
 
     for (int i = 0; i < 6; ++i)
     {
-        b->TransformPosition(BoneTransform[iGreenFlarePos[i]], p, Position, true);
+        b->TransformPosition(bones[iGreenFlarePos[i]], p, Position, true);
         CreateSprite(BITMAP_FLARE, Position, Scale + 2.0f, Light, o);
     }
-    return Result::Applied;
 }
 
 // ------------------------------------------------ the names
@@ -538,9 +538,9 @@ const ItemEffect ItemEffects[] = {
     {"potion", ApplyPotion},
     {"fruits", ApplyFruits},
     {"devilsEye", ApplyDevilsEye},
-    {"devilsKey", ApplyDevilsKey},
-    {"devilsInvitation", ApplyDevilsInvitation},
-    {"rena", ApplyRena},
+    {"devilsKey", ApplyNothing, SpawnDevilsKey},
+    {"devilsInvitation", ApplyNothing, SpawnDevilsInvitation},
+    {"rena", ApplyNothing, SpawnRena},
     {"wingsOfDragon", ApplyWingsOfDragon},
     {"wingsOfSoul", ApplyWingsOfSoul},
     {"redSpirit", ApplyRedSpirit},
@@ -548,12 +548,12 @@ const ItemEffect ItemEffects[] = {
     {"divineSet", ApplyDivineSet},
     {"hiddenMeshByLevel", ApplyHiddenMeshByLevel},
     {"hideMesh1", ApplyHideMesh1},
-    {"wingsOfDarkness", ApplyWingsOfDarkness},
-    {"wingOfStorm", ApplyWingOfStorm},
-    {"wingOfEternal", ApplyWingOfEternal},
-    {"wingOfIllusion", ApplyWingOfIllusion},
-    {"wingOfRuin", ApplyWingOfRuin},
-    {"wingOfDimension", ApplyWingOfDimension},
+    {"wingsOfDarkness", ApplyNothing, SpawnWingsOfDarkness},
+    {"wingOfStorm", ApplyNothing, SpawnWingOfStorm},
+    {"wingOfEternal", ApplyNothing, SpawnWingOfEternal},
+    {"wingOfIllusion", ApplyNothing, SpawnWingOfIllusion},
+    {"wingOfRuin", ApplyNothing, SpawnWingOfRuin},
+    {"wingOfDimension", ApplyNothing, SpawnWingOfDimension},
 };
 
 const ItemEffect* FindEffect(std::string_view name)
@@ -598,5 +598,18 @@ Result Apply(BMD* b, OBJECT* o, int modelType, float alpha, int& level)
 {
     const ItemEffect* effect = g_itemEffects.Find(modelType);
     return effect != nullptr ? effect->apply(b, o, modelType, alpha, level) : Result::None;
+}
+
+bool Spawns(int modelType)
+{
+    const ItemEffect* effect = g_itemEffects.Find(modelType);
+    return effect != nullptr && effect->spawn != nullptr;
+}
+
+void Spawn(BMD* b, OBJECT* o, int modelType, float (*bones)[3][4])
+{
+    const ItemEffect* effect = g_itemEffects.Find(modelType);
+    if (effect != nullptr && effect->spawn != nullptr)
+        effect->spawn(b, o, bones);
 }
 } // namespace Render::Items::ItemEffects

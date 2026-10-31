@@ -89,6 +89,10 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
 // change the level the model glows like.
 Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, OBJECT* o, int Type, float Alpha, int& Level,
                                                          int ItemLevel);
+// Whether the item effect of the drawn model spawns sprites, particles or lightning; the update spawns them from the
+// model's pose with SpawnPartObjectEffect, b placed where the model is drawn.
+bool PartObjectSpawns(const OBJECT* o, int Type);
+void SpawnPartObjectEffect(BMD* b, OBJECT* o, int Type, vec34_t* bones);
 void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha = 0.f, int Level = 0, int ExcellentFlags = 0,
                             int ancientDiscriminator = 0, int Select = 0, int RenderType = RENDER_TEXTURE);
 void RenderPartObject(OBJECT* o, int Type, void* p, vec3_t Light, float Alpha = 0.f, int Level = 0,
