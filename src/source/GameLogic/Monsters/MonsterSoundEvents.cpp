@@ -4,10 +4,8 @@
 
 #include "Audio/DSPlaySound.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
-#include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
-#include "Data/GameData/MonsterData/MonsterModelSlots.h"
-#include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetLinks.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/MapInfra/MapManager.h"
@@ -21,7 +19,6 @@ namespace GameLogic::Monsters::SoundEvents
 {
 namespace
 {
-using Data::Monsters::MonsterDefinition;
 using Data::Monsters::MonsterModelCue;
 using Data::Monsters::MonsterModelDefinition;
 using Data::Monsters::MonsterSoundDraw;
@@ -126,19 +123,6 @@ void PlayEvent(const MonsterSoundSet& set, const MonsterSoundEvent& event, const
     }
 }
 
-// Whether the monster appears with the model in `slot`: its entry's, or one
-// of its random variants'.
-bool AppearsWith(const MonsterDefinition& monster, int slot)
-{
-    if (Data::Monsters::FindMonsterModelReference(monster.model) == slot)
-    {
-        return true;
-    }
-    return std::any_of(monster.randomVariants.begin(), monster.randomVariants.end(),
-                       [&](const Data::Monsters::MonsterRandomVariant& variant)
-                       { return Data::Monsters::FindMonsterModelReference(variant.model) == slot; });
-}
-
 // Plays the events of the character's set in the situation of its animation,
 // or at `moment`.
 bool PlayFor(CHARACTER& character, std::optional<MonsterSoundMoment> moment)
@@ -168,14 +152,7 @@ bool PlayFor(CHARACTER& character, std::optional<MonsterSoundMoment> moment)
 
 const MonsterSoundSet* FindSoundSet(const CHARACTER& character)
 {
-    const MonsterDefinition* monster = g_MonsterDatabase.Find(static_cast<int>(character.MonsterIndex));
-    const int slot = character.Object.Type;
-    if (monster == nullptr || !AppearsWith(*monster, slot))
-    {
-        return nullptr;
-    }
-    const std::string& name = Data::Monsters::GetSoundSetWithModel(*monster, slot);
-    return name.empty() ? nullptr : g_MonsterSoundSetDatabase.Find(name);
+    return Data::Monsters::SoundSetLinks::FindSet(static_cast<int>(character.MonsterIndex), character.Object.Type);
 }
 
 bool Play(CHARACTER& character)
