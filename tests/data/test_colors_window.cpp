@@ -254,6 +254,7 @@ TEST_CASE("The Colors window opened the first time in a layout from before it do
 TEST_CASE("The Glow root removes the glow colors no item uses as one undo step and keeps the defaults [editor][items]")
 {
     TestImGuiContext context;
+    ToolWindowsScope windows;
     ItemModelDatabaseScope restoreModels;
     GlowColorsScope restoreColors({{ItemGlow::DefaultColor, {1.0, 0.5, 0.0}},
                                    {ItemGlow::DefaultShineColor, {1.0, 1.0, 1.0}},
@@ -289,6 +290,7 @@ TEST_CASE("The Glow root removes the glow colors no item uses as one undo step a
 TEST_CASE("Glow color folders are item edits, and an undone removal puts the color back in its folder [editor][items]")
 {
     TestImGuiContext context;
+    ToolWindowsScope windows;
     ItemModelDatabaseScope restoreModels;
     GlowColorsScope restoreColors({{ItemGlow::DefaultColor, {1.0, 0.5, 0.0}},
                                    {ItemGlow::DefaultShineColor, {1.0, 1.0, 1.0}},
