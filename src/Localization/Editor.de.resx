@@ -1456,6 +1456,96 @@
   <data name="Colors" xml:space="preserve">
     <value>Farben</value>
   </data>
+  <data name="Ground labels" xml:space="preserve">
+    <value>Bodenbeschriftungen</value>
+  </data>
+  <data name="Ground Label Styles" xml:space="preserve">
+    <value>Bodenbeschriftungsstile</value>
+  </data>
+  <data name="Item Tooltip" xml:space="preserve">
+    <value>Gegenstand: Tooltip</value>
+  </data>
+  <data name="New label style" xml:space="preserve">
+    <value>Neuer Beschriftungsstil</value>
+  </data>
+  <data name="Items name these styles in their ground label rules" xml:space="preserve">
+    <value>Gegenstände nennen diese Stile in ihren eigenen Bodenbeschriftungsregeln (Gegenstand: Tooltip); die Standardregeln nennen die übrigen.</value>
+  </data>
+  <data name="Apply to the style" xml:space="preserve">
+    <value>Auf den Stil anwenden</value>
+  </data>
+  <data name="Change a label style" xml:space="preserve">
+    <value>Beschriftungsstil ändern</value>
+  </data>
+  <data name="Remove a label style" xml:space="preserve">
+    <value>Beschriftungsstil entfernen</value>
+  </data>
+  <data name="Remove unused label styles" xml:space="preserve">
+    <value>Unbenutzte Beschriftungsstile entfernen</value>
+  </data>
+  <data name="No item uses these label styles: {0}" xml:space="preserve">
+    <value>Kein Gegenstand nutzt diese Beschriftungsstile: {0}</value>
+  </data>
+  <data name="A style of the standard rules" xml:space="preserve">
+    <value>Ein Stil der Standardregeln: ein Gegenstand ohne eigene Regel für eine Stufe nimmt ihn dort.</value>
+  </data>
+  <data name="A name of letters and digits that no other label style has" xml:space="preserve">
+    <value>Ein Name aus Buchstaben und Ziffern, den kein anderer Beschriftungsstil hat</value>
+  </data>
+  <data name="Text color" xml:space="preserve">
+    <value>Textfarbe</value>
+  </data>
+  <data name="Background" xml:space="preserve">
+    <value>Hintergrund</value>
+  </data>
+  <data name="Bold" xml:space="preserve">
+    <value>Fett</value>
+  </data>
+  <data name="Skill" xml:space="preserve">
+    <value>Fertigkeit</value>
+  </data>
+  <data name="Luck" xml:space="preserve">
+    <value>Glück</value>
+  </data>
+  <data name="Option" xml:space="preserve">
+    <value>Option</value>
+  </data>
+  <data name="No set" xml:space="preserve">
+    <value>Kein Set</value>
+  </data>
+  <data name="Set {0}: {1}" xml:space="preserve">
+    <value>Set {0}: {1}</value>
+  </data>
+  <data name="Ground label" xml:space="preserve">
+    <value>Bodenbeschriftung</value>
+  </data>
+  <data name="All levels" xml:space="preserve">
+    <value>Alle Stufen</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>Von</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>Bis</value>
+  </data>
+  <data name="Add rule" xml:space="preserve">
+    <value>Regel hinzufügen</value>
+  </data>
+  <data name="Change the ground label rules" xml:space="preserve">
+    <value>Bodenbeschriftungsregeln ändern</value>
+  </data>
+  <data name="The first rule whose levels hold gives the style" xml:space="preserve">
+    <value>Die erste Regel, deren Stufen zutreffen, gibt den Stil; bei den übrigen Stufen tun es die Standardregeln.</value>
+  </data>
+  <data name="No rules of its own" xml:space="preserve">
+    <value>Keine eigenen Regeln: die Standardregeln geben den Stil.</value>
+  </data>
+  <data name="Its own rule {0}" xml:space="preserve">
+    <value>Eigene Regel {0}</value>
+  </data>
+  <data name="The standard rules" xml:space="preserve">
+    <value>Die Standardregeln</value>
+  </data>
   <data name="Glow Colors" xml:space="preserve">
     <value>Leuchtfarben</value>
   </data>

@@ -257,6 +257,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
 #ifdef _EDITOR
     m_statFile = InWriterOrder(std::move(stats.file));
     m_statFileChanged = false;
+    m_groundLabelsChanged = false;
 #endif
 
     const auto buildStart = std::chrono::steady_clock::now();
@@ -728,10 +729,14 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
     std::vector<ItemDefinition> items;
     std::ranges::copy_if(g_ItemDatabase.GetAllSlots(), std::back_inserter(items), &ItemDefinition::HasEntry);
     ValidateItems(items, issues);
-    // The file as Load read it was checked then.
+    // The files as Load read them were checked then.
     if (m_statFileChanged)
     {
         ValidateItemStatsAsWritten(m_statFile, issues);
+    }
+    if (m_groundLabelsChanged)
+    {
+        ValidateGroundLabelsAsWritten(g_ItemDatabase.GetGroundLabels(), issues);
     }
 
     std::vector<ItemModelDefinition> models;
@@ -781,6 +786,9 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     models.statsFile = GetItemStatsFile();
     models.stats = &m_statFile;
     models.statsChanged = m_statFileChanged;
+    models.groundLabelsFile = GetGroundLabelsFile();
+    models.groundLabels = &g_ItemDatabase.GetGroundLabels();
+    models.groundLabelsChanged = m_groundLabelsChanged;
     return WriteItemAndModelDataDirectories(GetItemDataDirectory(), g_ItemDatabase.GetAllSlots(), models, issues);
 }
 
@@ -789,6 +797,61 @@ void CItemDataHandler::SetStatFile(const ItemStatFile& file)
     m_statFile = InWriterOrder(file);
     m_statFileChanged = true;
     g_ItemDatabase.SetStatProfiles(ItemStatProfiles(m_statFile));
+}
+
+void CItemDataHandler::SetGroundLabelStyle(const GroundLabelStyle& style)
+{
+    GroundLabelFile labels = g_ItemDatabase.GetGroundLabels();
+    const auto same = std::ranges::find(labels.styles, style.name, &GroundLabelStyle::name);
+    if (same != labels.styles.end())
+    {
+        *same = style;
+    }
+    else
+    {
+        labels.styles.push_back(style);
+    }
+    g_ItemDatabase.SetGroundLabels(std::move(labels));
+    m_groundLabelsChanged = true;
+}
+
+bool CItemDataHandler::RemoveGroundLabelStyle(std::string_view name)
+{
+    const GroundLabelFile& current = g_ItemDatabase.GetGroundLabels();
+    const auto namesIt = [name](const ItemDefinition& item)
+    {
+        return std::ranges::any_of(item.groundLabels,
+                                   [name](const ItemGroundLabel& label) { return label.style == name; });
+    };
+    if (current.IsStandardRuleStyle(name) || std::ranges::any_of(g_ItemDatabase.GetAllSlots(), namesIt))
+    {
+        return false;
+    }
+    if (current.FindStyle(name) != nullptr)
+    {
+        GroundLabelFile labels = current;
+        std::erase_if(labels.styles, [name](const GroundLabelStyle& style) { return style.name == name; });
+        Data::Colors::RemoveColorFromFolders(labels.folders, name);
+        g_ItemDatabase.SetGroundLabels(std::move(labels));
+        m_groundLabelsChanged = true;
+    }
+    return true;
+}
+
+void CItemDataHandler::RestoreGroundLabelStyles(std::span<const GroundLabelStyle> styles)
+{
+    GroundLabelFile labels = g_ItemDatabase.GetGroundLabels();
+    labels.styles.assign(styles.begin(), styles.end());
+    g_ItemDatabase.SetGroundLabels(std::move(labels));
+    m_groundLabelsChanged = true;
+}
+
+void CItemDataHandler::SetGroundLabelFolders(std::vector<Data::Colors::ColorFolder> folders)
+{
+    GroundLabelFile labels = g_ItemDatabase.GetGroundLabels();
+    labels.folders = std::move(folders);
+    g_ItemDatabase.SetGroundLabels(std::move(labels));
+    m_groundLabelsChanged = true;
 }
 
 ItemBmdImportResult CItemDataHandler::ImportFromBmd()
