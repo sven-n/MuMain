@@ -61,6 +61,8 @@ public:
 
     virtual NamedColorTexts GetTexts() const = 0;
 
+    // Counts the changes of the entries and the folders, for what the window keeps between frames.
+    virtual int GetVersion() const = 0;
     // The entries, in the file's order.
     virtual std::size_t GetCount() const = 0;
     virtual const std::string& GetName(std::size_t index) const = 0;

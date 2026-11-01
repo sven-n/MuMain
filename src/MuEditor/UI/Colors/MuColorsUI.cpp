@@ -236,7 +236,8 @@ void CMuColorsUI::RenderFolderDialog()
     }
     MuEditor::Items::InputString(I18N::Editor::FolderName, m_folderName);
 
-    // The edit tried on a copy: a name another folder here has, or none, is refused.
+    // The edit tried on a copy: a name another folder here has, or none, is refused. Tried again only when the name,
+    // the folder or the root's folders changed.
     const ColorsRoot root = m_pick.root;
     const ColorFolderPath picked = GetPickedFolder();
     const std::string name = m_folderName;
@@ -246,8 +247,14 @@ void CMuColorsUI::RenderFolderDialog()
         return renaming ? Data::Colors::RenameColorFolder(folders, picked, name)
                         : Data::Colors::AddColorFolder(folders, picked, name);
     };
-    std::vector<ColorFolder> trial = SourceOf(root).GetFolders();
-    const bool usable = edit(trial);
+    const int version = SourceOf(root).GetVersion();
+    if (m_folderTrial.root != root || m_folderTrial.version != version || m_folderTrial.renaming != renaming ||
+        m_folderTrial.folder != picked || m_folderTrial.name != name)
+    {
+        std::vector<ColorFolder> trial = SourceOf(root).GetFolders();
+        m_folderTrial = {root, version, renaming, picked, name, edit(trial)};
+    }
+    const bool usable = m_folderTrial.usable;
     MuEditor::Colors::RenderColorNote(I18N::Editor::AFolderNameOf1To32CharactersThatNoOtherFolderHereHas);
 
     ImGui::BeginDisabled(!usable);
@@ -324,14 +331,25 @@ void CMuColorsUI::RenderRoot(ColorsRoot root)
     {
         ColorFolderPath path;
         RenderFolders(root, source.GetFolders(), path);
-        for (const std::string& name :
-             Data::Colors::GetRootColors(source.GetFolders(), MuEditor::Colors::GetNames(source)))
+        for (const std::string& name : GetRootColors(root))
         {
             RenderColor(root, name, {});
         }
         ImGui::TreePop();
     }
     ImGui::PopID();
+}
+
+const std::vector<std::string>& CMuColorsUI::GetRootColors(ColorsRoot root)
+{
+    const NamedColorSource& source = SourceOf(root);
+    RootColors& cached = m_rootColors[root];
+    if (cached.version != source.GetVersion())
+    {
+        cached.names = Data::Colors::GetRootColors(source.GetFolders(), MuEditor::Colors::GetNames(source));
+        cached.version = source.GetVersion();
+    }
+    return cached.names;
 }
 
 void CMuColorsUI::RenderFolders(ColorsRoot root, const std::vector<ColorFolder>& folders, ColorFolderPath& path)

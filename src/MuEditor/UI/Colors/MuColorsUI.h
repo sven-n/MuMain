@@ -8,6 +8,7 @@
 #include "Data/GameData/ColorFolders/ColorFolder.h"
 
 #include <functional>
+#include <map>
 #include <optional>
 #include <string>
 #include <vector>
@@ -64,6 +65,22 @@ private:
         New,
         Rename,
     };
+    // The colors of a root that no folder holds, as of the root's version.
+    struct RootColors
+    {
+        int version = -1;
+        std::vector<std::string> names;
+    };
+    // Whether the folder dialog's name can be used, as last tried.
+    struct FolderTrial
+    {
+        MuEditor::Colors::ColorsRoot root = MuEditor::Colors::ColorsRoot::Glow;
+        int version = -1;
+        bool renaming = false;
+        Data::Colors::ColorFolderPath folder;
+        std::string name;
+        bool usable = false;
+    };
 
     CMuColorsUI() = default;
 
@@ -78,6 +95,8 @@ private:
     void RenderFolderDialog();
     void RenderTree();
     void RenderRoot(MuEditor::Colors::ColorsRoot root);
+    // Data::Colors::GetRootColors of the root, worked out again only after the root changed.
+    const std::vector<std::string>& GetRootColors(MuEditor::Colors::ColorsRoot root);
     void RenderFolders(MuEditor::Colors::ColorsRoot root, const std::vector<Data::Colors::ColorFolder>& folders,
                        Data::Colors::ColorFolderPath& path);
     void RenderColor(MuEditor::Colors::ColorsRoot root, const std::string& name,
@@ -104,6 +123,8 @@ private:
     std::function<void()> m_action;
     FolderDialog m_folderDialog = FolderDialog::None;
     std::string m_folderName;
+    FolderTrial m_folderTrial;
+    std::map<MuEditor::Colors::ColorsRoot, RootColors> m_rootColors;
     // The root whose new color dialog is open, and the folder its new color goes into.
     std::optional<MuEditor::Colors::ColorsRoot> m_newColorRoot;
     Data::Colors::ColorFolderPath m_newColorFolder;

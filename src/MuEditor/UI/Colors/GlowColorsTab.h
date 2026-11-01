@@ -20,6 +20,7 @@ class GlowColorsTab final : public NamedColorSource
 {
 public:
     NamedColorTexts GetTexts() const override;
+    int GetVersion() const override;
     std::size_t GetCount() const override;
     const std::string& GetName(std::size_t index) const override;
     bool Has(const std::string& name) const override;

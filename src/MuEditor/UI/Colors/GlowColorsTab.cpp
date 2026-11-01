@@ -50,6 +50,11 @@ NamedColorTexts GlowColorsTab::GetTexts() const
     return texts;
 }
 
+int GlowColorsTab::GetVersion() const
+{
+    return g_GlowColors.GetVersion();
+}
+
 std::size_t GlowColorsTab::GetCount() const
 {
     return g_GlowColors.GetColors().size();
