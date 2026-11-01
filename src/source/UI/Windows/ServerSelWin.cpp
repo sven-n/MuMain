@@ -515,6 +515,13 @@ void CServerSelWin::FitLoadTexts()
     Rml::ElementDocument* document = m_RmlView.Document();
     if (document == nullptr || !IsVisible())
         return;
+    // The rows are built from `servers` by RmlUi's next update, at the end of the frame: until then
+    // the document has the rows of the last list, or none, and they say nothing about the new ones.
+    if (m_RmlView.IsDirty("servers"))
+    {
+        m_fitPending = true;
+        return;
+    }
     m_fitWindowWidth = WindowWidth;
     m_fitWindowHeight = WindowHeight;
 

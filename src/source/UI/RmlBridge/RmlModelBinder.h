@@ -104,6 +104,13 @@ public:
             m_Handle.DirtyVariable(fieldName);
     }
 
+    // Whether the field was marked dirty and RmlUi's next Context::Update() has yet to show it: until
+    // then the document's elements bound to it are the ones of its previous value.
+    bool IsDirty(const Rml::String& fieldName)
+    {
+        return m_Handle && m_Handle.IsVariableDirty(fieldName);
+    }
+
 private:
     Model m_Model{};
     std::unique_ptr<Rml::DataTypeRegister> m_TypeRegister;

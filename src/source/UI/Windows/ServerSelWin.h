@@ -162,7 +162,8 @@ private:
     ServerEntry MakeServerEntry(const CServerInfo& serverInfo, int index) const;
     // Hides the bar segments under each load text, as laid out: they depend on the text's width,
     // which only the layout knows. Runs after the rows were built, the list shown or the window
-    // resized, until a layout gives the same segments as the last (m_fitPending).
+    // resized, until a layout gives the same segments as the last (m_fitPending). Rows built from a
+    // new list are measured once RmlUi has shown it, a frame later.
     void FitLoadTexts();
     void BindRmlModel(Rml::DataModelConstructor& c, ServerSelRmlModel& model);
     UI::RmlBridge::ThemedView<ServerSelRmlModel> m_RmlView{"server_select",
