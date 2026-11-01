@@ -17,6 +17,7 @@
 #include <array>
 #include <charconv>
 #include <optional>
+#include <vector>
 
 namespace MuEditor::ServerList::LoadUI
 {
@@ -176,16 +177,42 @@ ImU32 GetUnlitColor(const ServerListData& list, std::string_view theme)
     return (token ? ParseTokenColor(*token) : std::nullopt).value_or(UnlitFallback);
 }
 
-// The load bar as the theme draws it, in the legacy theme's size.
-void DrawLoadBar(const ServerListData& list, std::string_view theme, int percent)
+// A full or overloaded server's load text on its bar, in its color.
+struct BarText
+{
+    std::string text;
+    ImVec4 color;
+};
+
+// The bar's segments from `left` on, `width` wide in all.
+std::vector<Data::ServerList::SegmentSpan> LayOutSegments(float left, float width, float gap)
+{
+    constexpr int Count = Data::ServerList::LoadBarSegmentCount;
+    const float segmentWidth = (width - gap * (Count - 1)) / Count;
+    std::vector<Data::ServerList::SegmentSpan> spans;
+    for (int index = 0; index < Count; ++index)
+    {
+        spans.push_back({left + static_cast<float>(index) * (segmentWidth + gap), segmentWidth});
+    }
+    return spans;
+}
+
+// The load bar as the theme draws it, in the legacy theme's size. A load text sits centered on it and hides the
+// segments under it, as on the login screen.
+void DrawLoadBar(const ServerListData& list, std::string_view theme, int percent, const std::optional<BarText>& text)
 {
     const float scale = g_MuEditorCore.GetUIScale();
     const ImVec2 size(BarWidth * scale, BarHeight * scale);
-    const float gap = BarGap * scale;
-    const float textHeight = ImGui::GetTextLineHeight();
     const ImVec2 start = ImGui::GetCursorScreenPos();
-    const float top = start.y + (textHeight - size.y) / 2.0f;
-    ImGui::Dummy(ImVec2(size.x, textHeight));
+    const float top = start.y + (ImGui::GetTextLineHeight() - size.y) / 2.0f;
+    ImGui::Dummy(ImVec2(size.x, ImGui::GetTextLineHeight()));
+
+    const std::vector<Data::ServerList::SegmentSpan> spans = LayOutSegments(start.x, size.x, BarGap * scale);
+    const float textWidth = text ? ImGui::CalcTextSize(text->text.c_str()).x : 0.0f;
+    const float textLeft = start.x + (size.x - textWidth) / 2.0f;
+    const Data::ServerList::CoveredSegments covered =
+        text ? Data::ServerList::GetCoveredSegments(spans, textLeft, textLeft + textWidth)
+             : Data::ServerList::CoveredSegments{};
 
     const Data::ServerList::ThemeTokenReader readToken = TokenReader(theme);
     const auto base = Data::ServerList::ResolveLoadBarColor(list, LoadBarPart::Base, theme, readToken);
@@ -193,18 +220,25 @@ void DrawLoadBar(const ServerListData& list, std::string_view theme, int percent
     const Data::ServerList::LoadBarSegments segments =
         Data::ServerList::GetLoadBarSegments(base.value_or(Rgb{}), full.value_or(Rgb{}), percent);
     const ImU32 unlit = GetUnlitColor(list, theme);
-    const float segmentWidth =
-        (size.x - gap * (Data::ServerList::LoadBarSegmentCount - 1)) / Data::ServerList::LoadBarSegmentCount;
     ImDrawList* draw = ImGui::GetWindowDrawList();
-    for (size_t index = 0; index < segments.size(); ++index)
+    for (int index = 0; index < static_cast<int>(spans.size()); ++index)
     {
-        const float left = start.x + static_cast<float>(index) * (segmentWidth + gap);
-        draw->AddRectFilled(ImVec2(left, top), ImVec2(left + segmentWidth, top + size.y), unlit);
-        const float lit = segmentWidth * segments[index].lit;
-        if (lit > 0.0f)
+        if (index >= covered.first && index < covered.end)
         {
-            draw->AddRectFilled(ImVec2(left, top), ImVec2(left + lit, top + size.y), ToImColor(segments[index].color));
+            continue;
         }
+        const Data::ServerList::SegmentSpan& span = spans[static_cast<size_t>(index)];
+        const Data::ServerList::LoadBarSegment& segment = segments[static_cast<size_t>(index)];
+        draw->AddRectFilled(ImVec2(span.left, top), ImVec2(span.left + span.width, top + size.y), unlit);
+        if (segment.lit > 0.0f)
+        {
+            draw->AddRectFilled(ImVec2(span.left, top), ImVec2(span.left + span.width * segment.lit, top + size.y),
+                                ToImColor(segment.color));
+        }
+    }
+    if (text)
+    {
+        draw->AddText(ImVec2(textLeft, start.y), ImGui::ColorConvertFloat4ToU32(text->color), text->text.c_str());
     }
 }
 
@@ -222,35 +256,42 @@ std::string GetLoadLabel(int percent)
     }
 }
 
-// The button's text in the game's theme, its load text in that text's color.
-void RenderButtonText(const ServerListData& list, const Data::ServerList::ChannelSettings& channel,
-                      const std::string& groupName, std::string_view locale, int percent)
+// The button's name as the login screen shows it, without its load text, in the game's theme.
+void RenderButtonName(const ServerListData& list, const Data::ServerList::ChannelSettings& channel,
+                      const std::string& groupName, std::string_view locale)
 {
-    const LoadText* loadText = list.load.Text(Data::ServerList::GetLoadState(percent));
     Data::ServerList::ChannelNameValues values;
     values.name = groupName;
     values.channel = 1;
-    if (loadText != nullptr)
-    {
-        values.load = loadText->text.Get(locale);
-    }
-    const Data::ServerList::ButtonTextParts parts =
-        Data::ServerList::BuildButtonTextParts(list, channel, values, locale);
+    const std::string name =
+        Data::ServerList::BuildChannelName(list, Data::ServerList::ChannelNamePlace::Button, channel, values, locale);
     const std::string_view theme = Colors::GetGameTheme();
-    const ImVec4 buttonColor =
-        Colors::GetButtonColorSwatch(Data::ServerList::GetButtonColor(list, channel, theme), theme);
-    ImGui::TextColored(buttonColor, "%s", parts.before.c_str());
-    if (parts.load.empty())
+    ImGui::TextColored(Colors::GetButtonColorSwatch(Data::ServerList::GetButtonColor(list, channel, theme), theme),
+                       "%s", name.c_str());
+}
+
+// The load text the bar shows in the theme, in its color or else the button's; none while the server can be joined
+// or the template has no {load}.
+std::optional<BarText> GetBarText(const ServerListData& list, const Data::ServerList::ChannelSettings& channel,
+                                  std::string_view locale, int percent, std::string_view theme)
+{
+    const LoadText* loadText = list.load.Text(Data::ServerList::GetLoadState(percent));
+    if (loadText == nullptr)
     {
-        return;
+        return std::nullopt;
+    }
+    Data::ServerList::ChannelNameValues values;
+    values.load = loadText->text.Get(locale);
+    std::string text = Data::ServerList::BuildButtonTextParts(list, channel, values, locale).load;
+    if (text.empty())
+    {
+        return std::nullopt;
     }
     const Data::ServerList::ButtonColor loadColor = Data::ServerList::ResolveButtonColor(list, loadText->color, theme);
     const bool ownColor = !loadColor.shade.empty() || loadColor.theme != Data::ServerList::ThemeColor::Default;
-    ImGui::SameLine(0.0f, 0.0f);
-    ImGui::TextColored(ownColor ? Colors::GetButtonColorSwatch(loadColor, theme) : buttonColor, "%s",
-                       parts.load.c_str());
-    ImGui::SameLine(0.0f, 0.0f);
-    ImGui::TextColored(buttonColor, "%s", parts.after.c_str());
+    const Data::ServerList::ButtonColor color =
+        ownColor ? loadColor : Data::ServerList::GetButtonColor(list, channel, theme);
+    return BarText{std::move(text), Colors::GetButtonColorSwatch(color, theme)};
 }
 } // namespace
 
@@ -294,11 +335,11 @@ void RenderLoadPreview(const ServerListData& list, const Data::ServerList::Chann
         ImGui::TableNextColumn();
         ImGui::TextUnformatted(GetLoadLabel(percent).c_str());
         ImGui::TableNextColumn();
-        RenderButtonText(list, channel, groupName, locale, percent);
+        RenderButtonName(list, channel, groupName, locale);
         for (const std::string& theme : shown)
         {
             ImGui::TableNextColumn();
-            DrawLoadBar(list, theme, percent);
+            DrawLoadBar(list, theme, percent, GetBarText(list, channel, locale, percent, theme));
         }
     }
     ImGui::EndTable();
