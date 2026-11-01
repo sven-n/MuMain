@@ -200,13 +200,8 @@ void CreateCharacterScene()
 
 static void UpdateSelectedCharacterEffects();
 
-void NewMoveCharacterScene()
+static void MoveCharacterSceneState()
 {
-    if (CurrentProtocolState < RECEIVE_CHARACTERS_LIST)
-    {
-        return;
-    }
-
     // Picks the character under the mouse from what the last frame drew, before anything resets the mouse state.
     if (!CSceneUICoordinator::Instance().IsCursorOnUI() && !Core::Input::IsMouseOverUI())
         Input::Selection::SelectObjects();
@@ -303,6 +298,35 @@ void NewMoveCharacterScene()
     g_ConsoleDebug->UpdateMainScene();
 }
 
+// Where the characters stand and how they are lit for the draw, once the input has chosen the selected one.
+static void PlaceCharactersForDraw()
+{
+    for (int i = 0; i < MAX_CHARACTERS_PER_ACCOUNT; i++)
+    {
+        CharactersClient[i].Object.Position[2] = 163.0f;
+        Vector(0.0f, 0.0f, 0.0f, CharactersClient[i].Object.Light);
+    }
+    if (SelectedHero == -1)
+        return;
+    OBJECT* o = &CharactersClient[SelectedHero].Object;
+    if (!o->Live)
+        return;
+    vec3_t Light;
+    Vector(1.0f, 1.0f, 1.0f, Light);
+    Vector(1.0f, 1.0f, 1.0f, o->Light);
+    AddTerrainLight(o->Position[0], o->Position[1], Light, 1, PrimaryTerrainLight);
+}
+
+void NewMoveCharacterScene()
+{
+    if (CurrentProtocolState < RECEIVE_CHARACTERS_LIST)
+    {
+        return;
+    }
+    MoveCharacterSceneState();
+    PlaceCharactersForDraw();
+}
+
 /**
  * @brief Sets up viewport and character positioning for character selection scene.
  *
@@ -334,32 +358,19 @@ static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
     }
 
     CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
-
-    // Reset character positions and lighting
-    for (int i = 0; i < MAX_CHARACTERS_PER_ACCOUNT; i++)
-    {
-        CharactersClient[i].Object.Position[2] = 163.0f;
-        Vector(0.0f, 0.0f, 0.0f, CharactersClient[i].Object.Light);
-    }
 }
 
-/**
- * @brief Applies lighting to the currently selected character.
- */
+// The render state the selected character's lighting left (PlaceCharactersForDraw sets the light).
 static void ApplySelectedCharacterLighting()
 {
     if (SelectedHero == -1)
         return;
 
-    OBJECT* o = &CharactersClient[SelectedHero].Object;
+    const OBJECT* o = &CharactersClient[SelectedHero].Object;
     if (!o->Live)
         return;
 
     EnableAlphaBlend();
-    vec3_t Light;
-    Vector(1.0f, 1.0f, 1.0f, Light);
-    Vector(1.0f, 1.0f, 1.0f, o->Light);
-    AddTerrainLight(o->Position[0], o->Position[1], Light, 1, PrimaryTerrainLight);
     DisableAlphaBlend();
 }
 

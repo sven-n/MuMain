@@ -237,6 +237,10 @@ bool GMNewTown::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
         return true;
     }
 
+    // The light these objects are drawn with.
+    if ((pObject->Type >= 5 && pObject->Type <= 14) || pObject->Type == 4 || pObject->Type == 129)
+        Vector(1.0f, 1.0f, 1.0f, pObject->Light);
+
     vec3_t p, Position, Light;
 
     switch (pObject->Type)
@@ -754,7 +758,6 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
                 IntensityTransform[i][j] = 2.0f;
             }
         }
-        Vector(1.0f, 1.0f, 1.0f, pObject->Light);
     }
 
     if (pObject->Type == 53 || pObject->Type == 55
