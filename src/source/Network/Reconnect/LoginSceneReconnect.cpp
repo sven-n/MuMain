@@ -144,6 +144,14 @@ void LoginSceneReconnect::OnGreeting(LoginServer server, bool carryOn)
     }
 }
 
+void LoginSceneReconnect::OnServerUnreachable(LoginServer server)
+{
+    m_server = server;
+    m_resume = nullptr;
+    m_quiet = false;
+    Fail();
+}
+
 void LoginSceneReconnect::ReturnToServerList()
 {
     Begin(LoginServer::Connect, nullptr);

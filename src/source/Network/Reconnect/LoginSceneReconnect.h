@@ -48,6 +48,11 @@ public:
     // the step waiting for it is dropped then.
     void OnGreeting(LoginServer server, bool carryOn = true);
 
+    // The server the client was sent to can't be reached: a server pick's game
+    // server, which the connect server still lists. The player gets the failure
+    // message, and Reconnect starts over at the server list.
+    void OnServerUnreachable(LoginServer server);
+
     // Goes back to the server list over a new connection to the connect server: the
     // login window's Cancel, and OK after the game server closed the login for three
     // wrong passwords (rather than logging in again over a new connection to it).

@@ -101,7 +101,8 @@ After the third wrong password the game server closes the connection on
 purpose. OK on its message goes back to the server list instead of logging in
 again over a new connection to the same server.
 
-Only when the server can't be reached does the message "You are disconnected
+Only when the server can't be reached, also the game server of a channel that
+is down while the list still shows it, does the message "You are disconnected
 from the server." appear, with **Reconnect** (back to the server list, which
 shows the servers that are up) and **Exit**. The original client showed this
 message with an OK button that closed the game.

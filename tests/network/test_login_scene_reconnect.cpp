@@ -427,6 +427,22 @@ TEST_SUITE("Login scene reconnect")
         CHECK(screen.link.failures == 0);
     }
 
+    TEST_CASE("a picked game server that is down shows the failure, and Reconnect lists again")
+    {
+        // The connect server still listed it; the connect to it failed.
+        DroppedScreen screen;
+        screen.reconnect.OnServerUnreachable(LoginServer::Game);
+        CHECK(screen.link.failures == 1);
+        CHECK(screen.link.failureShown);
+        CHECK(screen.link.probes.empty());
+
+        screen.reconnect.Retry();
+        CHECK(screen.link.probes == std::vector{LoginServer::Connect});
+        screen.ServerComesBack();
+        screen.reconnect.OnGreeting(LoginServer::Connect);
+        CHECK_FALSE(screen.reconnect.IsReconnecting());
+    }
+
     TEST_CASE("Reconnect does nothing while no failure is shown")
     {
         DroppedScreen screen;

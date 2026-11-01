@@ -401,8 +401,8 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 
         // While auto-reconnecting we probe the server repeatedly; the reconnect
         // dialog already shows the status, so don't stack "server lost" popups.
-        // The login screen's reconnect shows its own message when it fails.
-        if (!ReconnectManager::Instance().IsActive() && !LoginSceneReconnect::Instance().IsReconnecting())
+        // On the login screen LoginSceneReconnect says it with its Reconnect / Exit message.
+        if (!ReconnectManager::Instance().IsActive() && SceneFlag != LOG_IN_SCENE)
         {
             static bool connectErrorDisplayed = false;
             if (!connectErrorDisplayed)
@@ -602,10 +602,14 @@ void ReceiveServerConnect(const BYTE* ReceiveBuffer)
     g_ErrorReport.Write(L"[ReceiveServerConnect]");
     DeleteSocket();
 
-    if (CreateSocket(IP, Data->Port))
+    if (!CreateSocket(IP, Data->Port))
     {
-        g_bGameServerConnected = TRUE;
+        // The connect server still lists a game server that is down.
+        LoginSceneReconnect::Instance().OnServerUnreachable(LoginServer::Game);
+        return;
     }
+
+    g_bGameServerConnected = TRUE;
 
     wchar_t Text[100];
     mu_swprintf(Text, I18N::Game::YouAreConnectedToTheServer, IP, Data->Port);
