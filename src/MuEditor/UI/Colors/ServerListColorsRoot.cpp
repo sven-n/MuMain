@@ -14,6 +14,7 @@
 #include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/ServerListData/ButtonColors.h"
 #include "I18N/All.h"
+#include "Data/GameData/ServerListData/ServerListData.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "imgui.h"
 
@@ -32,6 +33,26 @@ constexpr char NewPopupId[] = "###NewServerListColor";
 // Pixel widths before the editor UI scale.
 constexpr float IdFieldWidth = 180.0f;
 constexpr float NameFieldWidth = 320.0f;
+
+// The theme color entries, in the order the root lists them before the list's own colors.
+const std::vector<std::string>& ThemeEntries()
+{
+    static const std::vector<std::string> entries = []
+    {
+        std::vector<std::string> names;
+        for (int index = 0; index < Data::ServerList::ThemeColorEntryCount; ++index)
+        {
+            names.emplace_back(Data::ServerList::GetThemeColorEntry(index));
+        }
+        return names;
+    }();
+    return entries;
+}
+
+ImVec4 ToSwatch(const ListColors::TokenColor& color)
+{
+    return ImVec4(color.rgb[0], color.rgb[1], color.rgb[2], 1.0f);
+}
 
 const ServerListData& List()
 {
@@ -102,45 +123,58 @@ int ServerListColorsRoot::GetVersion() const
 
 std::size_t ServerListColorsRoot::GetCount() const
 {
-    return List().colors.size();
+    return ThemeEntries().size() + List().colors.size();
 }
 
 const std::string& ServerListColorsRoot::GetName(std::size_t index) const
 {
-    return List().colors[index].id;
+    const std::vector<std::string>& themeEntries = ThemeEntries();
+    return index < themeEntries.size() ? themeEntries[index] : List().colors[index - themeEntries.size()].id;
 }
 
 bool ServerListColorsRoot::Has(const std::string& name) const
 {
-    return Find(name) != nullptr;
+    return List().IsColorEntry(name);
 }
 
 void ServerListColorsRoot::RenderSwatch(const std::string& name) const
 {
     const std::string_view theme = ListColors::GetGameTheme();
+    if (const char* token = Data::ServerList::GetThemeColorEntryToken(name))
+    {
+        const std::optional<std::string> value = ListColors::ReadThemeToken(theme, token);
+        const std::optional<ListColors::TokenColor> color =
+            value ? ListColors::ParseTokenColor(*value) : std::nullopt;
+        ListColors::RenderSwatch(color ? ToSwatch(*color) : ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+        return;
+    }
     ListColors::RenderSwatch(
         ListColors::GetButtonColorSwatch(Data::ServerList::ResolveButtonColor(List(), name, theme), theme));
 }
 
 int ServerListColorsRoot::CountUsers(const std::string& name)
 {
-    const MuEditor::ServerList::ServerListEdits& edits = g_MuServerListUI.GetEdits();
-    return static_cast<int>(edits.CountRulesWithColor(name) + edits.CountLoadUsesOfColor(name));
+    return static_cast<int>(FindUsers(name).size());
 }
 
 std::vector<NamedColorUser> ServerListColorsRoot::FindUsers(const std::string& name) const
 {
+    // A load bar token is used by the bar parts left at "default"; the other colors by their name.
+    const char* token = Data::ServerList::GetThemeColorEntryToken(name);
+    const bool barToken = token != nullptr && name == token;
     std::vector<NamedColorUser> users;
-    for (std::string& label : g_MuServerListUI.DescribeColorUsers(name))
+    for (std::string& label : barToken ? g_MuServerListUI.DescribeThemeBarPartUsers(name)
+                                       : g_MuServerListUI.DescribeColorUsers(name))
     {
         users.push_back({std::move(label), [] { g_MuServerListUI.ShowChannelNames(); }, false});
     }
     return users;
 }
 
-bool ServerListColorsRoot::IsKept(const std::string&) const
+// The themes' colors: they belong to the themes.
+bool ServerListColorsRoot::IsKept(const std::string& name) const
 {
-    return false;
+    return Data::ServerList::IsThemeColorEntry(name);
 }
 
 void ServerListColorsRoot::Remove(const char* step, std::span<const std::string> names)
@@ -220,6 +254,11 @@ std::optional<std::string> ServerListColorsRoot::RenderNew(const Data::Colors::C
 
 void ServerListColorsRoot::RenderEdit(const std::string& name)
 {
+    if (Data::ServerList::IsThemeColorEntry(name))
+    {
+        RenderThemeEdit(name);
+        return;
+    }
     const CustomColor* color = Find(name);
     if (color == nullptr)
     {
@@ -273,12 +312,21 @@ void ServerListColorsRoot::RenderEdit(const std::string& name)
 
 bool ServerListColorsRoot::IsEdited(const std::string& name) const
 {
+    if (Data::ServerList::IsThemeColorEntry(name))
+    {
+        return m_themeEditOf == name && m_themeEdit != m_themeLoaded;
+    }
     const CustomColor* color = Find(name);
     return color != nullptr && m_editOf == name && m_edit != *color && IsEditedIdUsable(name);
 }
 
 void ServerListColorsRoot::ApplyEdit(const std::string& name)
 {
+    if (Data::ServerList::IsThemeColorEntry(name))
+    {
+        ApplyThemeEdit(name);
+        return;
+    }
     const std::optional<std::size_t> index = IndexOf(name);
     if (!index || !IsEditedIdUsable(name))
     {
@@ -296,6 +344,11 @@ void ServerListColorsRoot::ApplyEdit(const std::string& name)
 
 void ServerListColorsRoot::RevertEdit(const std::string& name)
 {
+    if (Data::ServerList::IsThemeColorEntry(name))
+    {
+        m_themeEdit = m_themeLoaded;
+        return;
+    }
     if (const CustomColor* color = Find(name))
     {
         m_edit = *color;
@@ -305,7 +358,90 @@ void ServerListColorsRoot::RevertEdit(const std::string& name)
 
 std::string ServerListColorsRoot::GetNameAfterEdit(const std::string& name) const
 {
+    if (Data::ServerList::IsThemeColorEntry(name))
+    {
+        return name;
+    }
     return IsEditedIdUsable(name) ? m_edit.id : name;
+}
+
+void ServerListColorsRoot::UpdateThemeEdit(const std::string& name)
+{
+    const char* token = Data::ServerList::GetThemeColorEntryToken(name);
+    std::map<std::string, ListColors::TokenColor> read;
+    for (const std::string& theme : g_MuServerListUI.GetThemes())
+    {
+        const std::optional<std::string> value = ListColors::ReadThemeToken(theme, token);
+        if (const std::optional<ListColors::TokenColor> color = value ? ListColors::ParseTokenColor(*value) : std::nullopt)
+        {
+            read[theme] = *color;
+        }
+    }
+    if (m_themeEditOf != name)
+    {
+        m_themeWriteFailed.clear();
+    }
+    const bool unchanged = m_themeEdit == m_themeLoaded;
+    if (m_themeEditOf != name || m_themeReread || (read != m_themeLoaded && unchanged))
+    {
+        m_themeEdit = read;
+        m_themeLoaded = read;
+        m_themeEditOf = name;
+        m_themeReread = false;
+    }
+}
+
+void ServerListColorsRoot::RenderThemeEdit(const std::string& name)
+{
+    UpdateThemeEdit(name);
+    const char* token = Data::ServerList::GetThemeColorEntryToken(name);
+    ImGui::TextDisabled("%s", token);
+    for (auto& [theme, color] : m_themeEdit)
+    {
+        ImGui::PushID(theme.c_str());
+        const std::string label = UI::RmlBridge::GetThemeDisplayName(theme);
+        ImGui::ColorEdit3(label.c_str(), color.rgb, ImGuiColorEditFlags_Uint8);
+        // A theme built on another takes its value until it sets its own.
+        const std::optional<std::string> source = ListColors::FindThemeTokenSource(theme, token);
+        if (source && *source != theme)
+        {
+            ImGui::SameLine();
+            ImGui::TextDisabled(
+                "(%s)", I18N::Format(I18N::Editor::From0, {UI::RmlBridge::GetThemeDisplayName(*source)}).c_str());
+        }
+        ImGui::PopID();
+    }
+    if (!m_themeWriteFailed.empty())
+    {
+        ImGui::PushTextWrapPos(0.0f);
+        ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), "%s",
+                           I18N::Format(I18N::Editor::CouldNotWriteTheTokensIniOf0, {m_themeWriteFailed}).c_str());
+        ImGui::PopTextWrapPos();
+    }
+    RenderColorNote(I18N::Editor::ThemeColorNote);
+}
+
+void ServerListColorsRoot::ApplyThemeEdit(const std::string& name)
+{
+    const char* token = Data::ServerList::GetThemeColorEntryToken(name);
+    m_themeWriteFailed.clear();
+    for (const auto& [theme, color] : m_themeEdit)
+    {
+        const auto loaded = m_themeLoaded.find(theme);
+        if (loaded != m_themeLoaded.end() && loaded->second == color)
+        {
+            continue;
+        }
+        if (!ListColors::WriteThemeToken(theme, token, ListColors::FormatTokenColor(color)))
+        {
+            m_themeWriteFailed += (m_themeWriteFailed.empty() ? "" : ", ") + theme;
+        }
+    }
+    // The values are read again from the files on the next frame.
+    m_themeReread = true;
+    // The game draws with the new tokens: the same as switching to the theme again.
+    UI::RmlBridge::SetActiveThemeName(UI::RmlBridge::GetActiveThemeName());
+    UI::RmlBridge::ReloadAllThemedDocuments();
 }
 
 MuEditor::UndoTarget& ServerListColorsRoot::GetUndoTarget()

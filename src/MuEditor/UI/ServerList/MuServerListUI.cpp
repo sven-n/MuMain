@@ -16,6 +16,7 @@
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ServerListData/ButtonColors.h"
 #include "Data/GameData/ServerListData/ChannelNameBuilder.h"
+#include "Data/GameData/ServerListData/LoadBar.h"
 #include "Data/GameData/ServerListData/ServerListIds.h"
 #include "Data/GameData/ServerListData/ServerListJson.h"
 #include "I18N/All.h"
@@ -1240,18 +1241,41 @@ std::vector<std::string> CMuServerListUI::DescribeColorUsers(std::string_view id
         }
     }
     const Data::ServerList::LoadSettings& load = list.load;
+    const bool barParts = id != Data::ServerList::GetThemeColorName(Data::ServerList::ThemeColor::Default);
     const std::pair<const std::string*, std::string> parts[] = {
-        {&load.bar.base, std::string(I18N::Editor::LoadBar) + ": " + I18N::Editor::BaseColor},
-        {&load.bar.full, std::string(I18N::Editor::LoadBar) + ": " + I18N::Editor::FullColor},
-        {&load.bar.empty, std::string(I18N::Editor::LoadBar) + ": " + I18N::Editor::UnlitColor},
+        {barParts ? &load.bar.base : nullptr, std::string(I18N::Editor::LoadBar) + ": " + I18N::Editor::BaseColor},
+        {barParts ? &load.bar.full : nullptr, std::string(I18N::Editor::LoadBar) + ": " + I18N::Editor::FullColor},
+        {barParts ? &load.bar.empty : nullptr, std::string(I18N::Editor::LoadBar) + ": " + I18N::Editor::UnlitColor},
         {&load.full.color, std::string(I18N::Editor::Load) + ": " + I18N::Editor::FullServer},
         {&load.overloaded.color, std::string(I18N::Editor::Load) + ": " + I18N::Editor::OverloadedServer},
     };
     for (const auto& [color, label] : parts)
     {
-        if (*color == id)
+        if (color != nullptr && *color == id)
         {
             users.push_back(label);
+        }
+    }
+    return users;
+}
+
+std::vector<std::string> CMuServerListUI::DescribeThemeBarPartUsers(std::string_view token) const
+{
+    using Data::ServerList::LoadBarPart;
+    const Data::ServerList::LoadBarColors& bar = m_edits.GetList().load.bar;
+    const char* defaultColor = Data::ServerList::GetThemeColorName(Data::ServerList::ThemeColor::Default);
+    const std::pair<LoadBarPart, const char*> parts[] = {
+        {LoadBarPart::Base, I18N::Editor::BaseColor},
+        {LoadBarPart::Full, I18N::Editor::FullColor},
+        {LoadBarPart::Empty, I18N::Editor::UnlitColor},
+    };
+    std::vector<std::string> users;
+    for (const auto& [part, label] : parts)
+    {
+        if (token == Data::ServerList::GetLoadBarToken(part) &&
+            Data::ServerList::GetLoadBarColor(bar, part) == defaultColor)
+        {
+            users.push_back(std::string(I18N::Editor::LoadBar) + ": " + label);
         }
     }
     return users;

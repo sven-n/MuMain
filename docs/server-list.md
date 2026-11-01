@@ -321,7 +321,12 @@ gives the channel and, when the connect server sent it, its load.
   rules and load parts that use the color first, and a color is removed only
   while none uses it. Folders sort the colors as for the item colors. The
   changes are steps of this window's undo history, and its **Save** writes
-  them;
+  them. The root also lists the themes' colors the list uses (`default`,
+  `gray`, `orange`, `silver`, and the load bar's `server-load-base`,
+  `server-load-full` and `server-load-empty`) with each theme's value, a theme
+  built on another showing whose value it takes. They can't be removed;
+  **Apply** writes a changed value into that theme's `tokens.ini` at once and
+  the game redraws with it (Undo doesn't take it back);
 - a preview of every combination (PvP on and off, with no VIP type and with
   each VIP type) in all four places, with the selected group's name and the
   button's color in each theme (named on hover). The button's `{load}` is

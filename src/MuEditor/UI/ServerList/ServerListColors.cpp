@@ -9,9 +9,16 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/ThemeInheritance.h"
 
+#include <array>
+#include <charconv>
+#include <cmath>
+#include <cstdio>
 #include <filesystem>
+#include <fstream>
 #include <map>
 #include <memory>
+#include <sstream>
+#include <vector>
 
 namespace MuEditor::ServerList::Colors
 {
@@ -67,6 +74,172 @@ std::string_view GetGameTheme()
 void ForgetThemeTokens()
 {
     GetThemeCache().clear();
+}
+
+std::optional<std::string> FindThemeTokenSource(std::string_view theme, const char* token)
+{
+    const auto setting = GetTheme(theme).GetSetting("Tokens", token);
+    if (!setting)
+    {
+        return std::nullopt;
+    }
+    const std::u8string folder = setting->directory.filename().u8string();
+    return std::string(folder.begin(), folder.end());
+}
+
+bool WriteThemeToken(std::string_view theme, const char* token, const std::string& value)
+{
+    const std::filesystem::path file =
+        std::filesystem::u8path(ThemesFolder) / std::filesystem::u8path(std::string(theme)) / "tokens.ini";
+    std::ifstream in(file, std::ios::binary);
+    if (!in)
+    {
+        return false;
+    }
+    std::stringstream read;
+    read << in.rdbuf();
+    in.close();
+    const std::string text = read.str();
+    const std::string newline = text.find("\r\n") != std::string::npos ? "\r\n" : "\n";
+
+    std::vector<std::string> lines;
+    std::size_t start = 0;
+    while (start < text.size())
+    {
+        std::size_t end = text.find('\n', start);
+        if (end == std::string::npos)
+        {
+            end = text.size();
+        }
+        std::string line = text.substr(start, end - start);
+        if (!line.empty() && line.back() == '\r')
+        {
+            line.pop_back();
+        }
+        lines.push_back(std::move(line));
+        start = end + 1;
+    }
+
+    const std::string key = std::string(token) + "=";
+    bool inTokens = false;
+    std::optional<std::size_t> lastInTokens;
+    bool written = false;
+    for (std::size_t index = 0; index < lines.size() && !written; ++index)
+    {
+        const std::string& line = lines[index];
+        if (!line.empty() && line.front() == '[')
+        {
+            inTokens = line == "[Tokens]";
+            if (inTokens)
+            {
+                lastInTokens = index;
+            }
+            continue;
+        }
+        if (!inTokens)
+        {
+            continue;
+        }
+        if (line.rfind(key, 0) == 0)
+        {
+            lines[index] = key + value;
+            written = true;
+        }
+        else if (!line.empty() && line.front() != ';')
+        {
+            lastInTokens = index;
+        }
+    }
+    if (!written)
+    {
+        if (lastInTokens)
+        {
+            lines.insert(lines.begin() + static_cast<std::ptrdiff_t>(*lastInTokens + 1), key + value);
+        }
+        else
+        {
+            lines.push_back("[Tokens]");
+            lines.push_back(key + value);
+        }
+    }
+
+    std::string out;
+    for (std::size_t index = 0; index < lines.size(); ++index)
+    {
+        out += lines[index];
+        if (index + 1 < lines.size() || text.ends_with('\n'))
+        {
+            out += newline;
+        }
+    }
+    std::ofstream write(file, std::ios::binary | std::ios::trunc);
+    if (!write)
+    {
+        return false;
+    }
+    write << out;
+    write.close();
+    ForgetThemeTokens();
+    return static_cast<bool>(write);
+}
+
+std::optional<TokenColor> ParseTokenColor(std::string_view value)
+{
+    TokenColor color;
+    if (const std::optional<ImVec4> shade = ParseShade(value))
+    {
+        color.rgb[0] = shade->x;
+        color.rgb[1] = shade->y;
+        color.rgb[2] = shade->z;
+        return color;
+    }
+    constexpr std::string_view RgbaStart = "rgba(";
+    if (!value.starts_with(RgbaStart) || !value.ends_with(')'))
+    {
+        return std::nullopt;
+    }
+    std::array<int, 4> channels{};
+    const char* position = value.data() + RgbaStart.size();
+    const char* end = value.data() + value.size() - 1;
+    for (int& channel : channels)
+    {
+        while (position < end && (*position == ' ' || *position == ','))
+        {
+            ++position;
+        }
+        const auto [parsed, error] = std::from_chars(position, end, channel);
+        if (error != std::errc{} || channel < 0 || channel > static_cast<int>(ChannelMax))
+        {
+            return std::nullopt;
+        }
+        position = parsed;
+    }
+    for (int index = 0; index < 3; ++index)
+    {
+        color.rgb[index] = static_cast<float>(channels[static_cast<std::size_t>(index)]) / ChannelMax;
+    }
+    color.alpha = channels[3];
+    return color;
+}
+
+std::string FormatTokenColor(const TokenColor& color)
+{
+    std::array<int, 3> channels{};
+    for (int index = 0; index < 3; ++index)
+    {
+        channels[static_cast<std::size_t>(index)] =
+            static_cast<int>(std::lround(std::clamp(color.rgb[index], 0.0f, 1.0f) * ChannelMax));
+    }
+    char text[32] = {};
+    if (color.alpha >= static_cast<int>(ChannelMax))
+    {
+        std::snprintf(text, sizeof(text), "#%02x%02x%02x", channels[0], channels[1], channels[2]);
+    }
+    else
+    {
+        std::snprintf(text, sizeof(text), "rgba(%d, %d, %d, %d)", channels[0], channels[1], channels[2], color.alpha);
+    }
+    return text;
 }
 
 std::optional<std::string> ReadThemeToken(std::string_view theme, const char* token)

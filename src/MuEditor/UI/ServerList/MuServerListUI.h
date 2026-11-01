@@ -48,7 +48,11 @@ public:
     // After the root changed the list: what changed is one undo step, and the login screen shows it.
     void AfterColorEdit();
     // Where the list names its color `id`: the button color rules and the parts of the load, each as a label.
+    // A load bar part set to "default" takes its own token, not the button color "default", so it doesn't
+    // count for "default"; DescribeThemeBarPartUsers lists it.
     std::vector<std::string> DescribeColorUsers(std::string_view id) const;
+    // The load bar parts drawn in the theme's own token `token` (server-load-base, ...): those set to "default".
+    std::vector<std::string> DescribeThemeBarPartUsers(std::string_view token) const;
     // The theme folders a color gets a shade for.
     const std::vector<std::string>& GetThemes() const
     {

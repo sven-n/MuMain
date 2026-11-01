@@ -981,8 +981,8 @@ void ReadServerListJson(std::string_view text, const std::string& source, Server
     // Before the rules, the load section and the groups: they name the VIP types and colors.
     ReadVipTypes(root, list.vipTypes, issueList);
     ReadCustomColors(root, list.colors, issueList);
-    list.colorFolders = Colors::ReadColorFolders(
-        root, source, [&list](std::string_view id) { return list.FindCustomColor(id) != nullptr; }, issues);
+    list.colorFolders =
+        Colors::ReadColorFolders(root, source, [&list](std::string_view id) { return list.IsColorEntry(id); }, issues);
     ReadButtonColorRules(root, list, issueList);
     ReadNames(root, list.names, issueList);
     ReadLoad(root, list, issueList);
@@ -1038,7 +1038,7 @@ std::string WriteServerListJson(const ServerListData& list)
     if (!list.colorFolders.empty())
     {
         root[Colors::ColorFoldersKey] = Colors::WriteColorFolders(list.colorFolders, [&list](std::string_view id)
-                                                                  { return list.FindCustomColor(id) != nullptr; });
+                                                                  { return list.IsColorEntry(id); });
     }
     root[ColorsKey] = std::move(colors);
     root[ButtonColorsKey] = std::move(rules);

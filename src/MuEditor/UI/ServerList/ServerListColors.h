@@ -6,6 +6,7 @@
 #include "Data/GameData/ServerListData/ServerListData.h"
 #include "imgui.h"
 
+#include <algorithm>
 #include <functional>
 #include <optional>
 #include <string>
@@ -23,6 +24,26 @@ std::optional<std::string> ReadThemeToken(std::string_view theme, const char* to
 void ForgetThemeTokens();
 // "#RRGGBB" as a color; nothing for any other text.
 std::optional<ImVec4> ParseShade(std::string_view shade);
+// The theme folder a token's value comes from: the theme itself, or one it inherits from;
+// nothing when none of them has it.
+std::optional<std::string> FindThemeTokenSource(std::string_view theme, const char* token);
+// Sets the token in the theme folder's own tokens.ini, in its [Tokens], replacing the line that
+// has it or adding one after the section's last. False when the file can't be read or written.
+// The tokens are read again afterwards (ForgetThemeTokens).
+bool WriteThemeToken(std::string_view theme, const char* token, const std::string& value);
+// A token's color as tokens.ini writes it: "#rrggbb", or "rgba(r, g, b, a)" with an alpha.
+struct TokenColor
+{
+    float rgb[3] = {1.0f, 1.0f, 1.0f};
+    int alpha = 255;
+
+    bool operator==(const TokenColor& other) const
+    {
+        return std::equal(rgb, rgb + 3, other.rgb) && alpha == other.alpha;
+    }
+};
+std::optional<TokenColor> ParseTokenColor(std::string_view value);
+std::string FormatTokenColor(const TokenColor& color);
 // The shade of a token of a theme ("server-load-base"); white when it has none.
 ImVec4 GetTokenSwatch(const char* token, std::string_view theme);
 // The shade a theme draws a theme color in: the token the server select screen's stylesheets

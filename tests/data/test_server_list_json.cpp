@@ -221,6 +221,21 @@ TEST_CASE("ServerListJson: the folders of the list's own colors are kept, withou
     CHECK(Data::ServerList::WriteServerListJson(read.list).find("colorFolders") == std::string::npos);
 }
 
+TEST_CASE("ServerListJson: color folders may hold the theme colors the list uses")
+{
+    ReadResult read = Read(ValidFile);
+    read.list.colorFolders = {{"Theme", {}, {"gray", "server-load-base", "notAColor"}}};
+    const ReadResult readBack = Read(Data::ServerList::WriteServerListJson(read.list));
+
+    CHECK_MESSAGE(readBack.issues.empty(), Messages(readBack.issues));
+    REQUIRE(readBack.list.colorFolders.size() == 1);
+    CHECK(readBack.list.colorFolders[0].colors == std::vector<std::string>{"gray", "server-load-base"});
+    CHECK(Data::ServerList::IsThemeColorEntry("silver"));
+    CHECK(Data::ServerList::IsThemeColorEntry("server-load-empty"));
+    CHECK_FALSE(Data::ServerList::IsThemeColorEntry("server-load"));
+    CHECK(std::string(Data::ServerList::GetThemeColorEntryToken("gray")) == "server-button-gray");
+}
+
 TEST_CASE("ServerListJson: an empty list is a valid file")
 {
     const ReadResult read = Read(R"({ "formatVersion": 2, "groups": [] })");

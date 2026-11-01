@@ -10,11 +10,14 @@
 #include "I18N/All.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/ServerList/MuServerListUI.h"
+#include "UI/ServerList/ServerListColors.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
 #include <cstring>
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 #include <random>
 #include <string>
 #include <system_error>
@@ -219,6 +222,52 @@ TEST_CASE("Server List window: a VIP type added on the Channel names tab is a st
 
     Press(TabId("###Groups"));
     RenderServerList();
+}
+
+// The Server list root of the Colors window writes a theme color into a theme folder's tokens.ini: the token's line
+// when the file has one, else a new line after the [Tokens] section's last; the rest of the file and its line ends
+// stay as they are.
+TEST_CASE("Server list colors: a theme color is written into a theme's tokens.ini [editor]")
+{
+    namespace ListColors = MuEditor::ServerList::Colors;
+    const std::filesystem::path folder = std::filesystem::temp_directory_path() /
+                                         ("mu_test_theme_tokens_" + std::to_string(std::random_device{}()));
+    const std::filesystem::path previous = std::filesystem::current_path();
+    std::filesystem::create_directories(folder / "Data/Interface/RmlUi/themes/plain");
+    const std::filesystem::path tokens = folder / "Data/Interface/RmlUi/themes/plain/tokens.ini";
+    {
+        std::ofstream file(tokens, std::ios::binary);
+        file << "; a theme\r\n[Tokens]\r\nserver-button=#ffff79\r\n; the load\r\nserver-load-empty=rgba(0, 0, 0, 160)\r\n"
+                "\r\n[Other]\r\nkey=1\r\n";
+    }
+    std::filesystem::current_path(folder);
+
+    CHECK(ListColors::WriteThemeToken("plain", "server-button", "#123456"));
+    CHECK(ListColors::WriteThemeToken("plain", "server-button-silver", "#abcdef"));
+    CHECK_FALSE(ListColors::WriteThemeToken("missing", "server-button", "#123456"));
+
+    std::filesystem::current_path(previous);
+    std::ifstream file(tokens, std::ios::binary);
+    std::stringstream text;
+    text << file.rdbuf();
+    CHECK(text.str() == "; a theme\r\n[Tokens]\r\nserver-button=#123456\r\n; the load\r\nserver-load-empty=rgba(0, 0, 0, 160)\r\n"
+                        "server-button-silver=#abcdef\r\n\r\n[Other]\r\nkey=1\r\n");
+    file.close();
+    std::error_code ignored;
+    std::filesystem::remove_all(folder, ignored);
+}
+
+TEST_CASE("Server list colors: a token color keeps its alpha [editor]")
+{
+    namespace ListColors = MuEditor::ServerList::Colors;
+    const std::optional<ListColors::TokenColor> rgba = ListColors::ParseTokenColor("rgba(0, 0, 0, 160)");
+    REQUIRE(rgba.has_value());
+    CHECK(rgba->alpha == 160);
+    CHECK(ListColors::FormatTokenColor(*rgba) == "rgba(0, 0, 0, 160)");
+    const std::optional<ListColors::TokenColor> hex = ListColors::ParseTokenColor("#FFB400");
+    REQUIRE(hex.has_value());
+    CHECK(ListColors::FormatTokenColor(*hex) == "#ffb400");
+    CHECK_FALSE(ListColors::ParseTokenColor("orange").has_value());
 }
 
 #endif // _EDITOR

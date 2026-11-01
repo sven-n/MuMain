@@ -3208,4 +3208,13 @@
   <data name="Only the editor shows this server; the connect server did not send it." xml:space="preserve">
     <value>Only the editor shows this server; the connect server did not send it.</value>
   </data>
+  <data name="from {0}" xml:space="preserve">
+    <value>from {0}</value>
+  </data>
+  <data name="Could not write the tokens.ini of: {0}" xml:space="preserve">
+    <value>Could not write the tokens.ini of: {0}</value>
+  </data>
+  <data name="Theme color note" xml:space="preserve">
+    <value>A theme color: each theme folder's tokens.ini sets it, and a theme built on another takes that one's value until it sets its own. Apply writes the changed themes' tokens.ini at once and the game redraws with it; Undo doesn't take it back.</value>
+  </data>
 </root>

@@ -2986,4 +2986,13 @@
   <data name="Only the editor shows this server; the connect server did not send it." xml:space="preserve">
     <value>Nur der Editor zeigt diesen Server; der Verbindungsserver hat ihn nicht gesendet.</value>
   </data>
+  <data name="from {0}" xml:space="preserve">
+    <value>von {0}</value>
+  </data>
+  <data name="Could not write the tokens.ini of: {0}" xml:space="preserve">
+    <value>Konnte die tokens.ini nicht schreiben von: {0}</value>
+  </data>
+  <data name="Theme color note" xml:space="preserve">
+    <value>Eine Theme-Farbe: Die tokens.ini jedes Theme-Ordners setzt sie, und ein Theme, das auf einem anderen aufbaut, übernimmt dessen Wert, bis es einen eigenen setzt. Übernehmen schreibt die tokens.ini der geänderten Themes sofort, und das Spiel zeichnet damit neu; Rückgängig nimmt es nicht zurück.</value>
+  </data>
 </root>

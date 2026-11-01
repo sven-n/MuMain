@@ -13,6 +13,16 @@
 
 namespace Data::ServerList
 {
+// The colors of the themes the list uses, each a token of every theme's tokens.ini: the theme
+// colors of the buttons and the load texts ("default", "gray", "orange", "silver") and the load
+// bar's own ("server-load-base", "server-load-full", "server-load-empty"). MuEditor's Colors
+// window lists them in the Server list root, and its folders may hold them.
+inline constexpr int ThemeColorEntryCount = 7;
+const char* GetThemeColorEntry(int index);
+// The token of the theme color entry, or nullptr for any other name.
+const char* GetThemeColorEntryToken(std::string_view name);
+bool IsThemeColorEntry(std::string_view name);
+
 // All that Data/Local/ServerList.json holds.
 struct ServerListData
 {
@@ -33,6 +43,9 @@ struct ServerListData
     const VipType* FindVipType(std::string_view id) const;
     // The color of the list's own with the id, or nullptr.
     const CustomColor* FindCustomColor(std::string_view id) const;
+    // Whether the name is one of the list's colors for the editor's Colors window: one of its own,
+    // or a theme color it uses (IsThemeColorEntry).
+    bool IsColorEntry(std::string_view name) const;
 
     bool operator==(const ServerListData&) const = default;
 };
