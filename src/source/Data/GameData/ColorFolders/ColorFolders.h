@@ -30,7 +30,8 @@ inline constexpr std::size_t MaxColorFolderDepth = 8;
 // A folder's name in UTF-16 units.
 inline constexpr std::size_t MaxColorFolderNameLength = 32;
 
-// Whether the name can be a folder's (not empty, valid UTF-8, not longer than MaxColorFolderNameLength).
+// Whether the name can be a folder's: not empty, valid UTF-8, no space at either end, no control character, and not
+// longer than MaxColorFolderNameLength.
 bool IsColorFolderName(std::string_view name);
 
 // Reads the "colorFolders" of a file's root object; none without the key. Problems are warnings and leave out

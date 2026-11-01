@@ -20,6 +20,15 @@ constexpr const char* NameKey = "name";
 constexpr const char* FoldersKey = "folders";
 constexpr const char* ColorsKey = "colors";
 
+// U+0000 to U+001F and U+007F, which a name can't show.
+bool IsControlCharacter(char character)
+{
+    constexpr unsigned char LastControlCharacter = 0x1F;
+    constexpr unsigned char DeleteCharacter = 0x7F;
+    const auto byte = static_cast<unsigned char>(character);
+    return byte <= LastControlCharacter || byte == DeleteCharacter;
+}
+
 bool HasFolderNamed(const std::vector<ColorFolder>& folders, std::string_view name)
 {
     return std::any_of(folders.begin(), folders.end(),
@@ -79,7 +88,8 @@ private:
         if (name == json.end() || !name->is_string() || !IsColorFolderName(name->get<std::string>()))
         {
             Warn(field + "." + NameKey, "must be a name of 1 to " + std::to_string(MaxColorFolderNameLength) +
-                                            " characters; the folder is left out");
+                                            " characters, without a space at either end or a control character; "
+                                            "the folder is left out");
             return std::nullopt;
         }
         return name->get<std::string>();
@@ -246,6 +256,11 @@ bool StartsWith(std::span<const std::size_t> path, std::span<const std::size_t> 
 bool IsColorFolderName(std::string_view name)
 {
     if (name.empty() || !Core::Text::IsValidUtf8(name))
+    {
+        return false;
+    }
+    // Blank, or with spaces around it, a name looks like another one or like none in the tree.
+    if (name.front() == ' ' || name.back() == ' ' || std::any_of(name.begin(), name.end(), &IsControlCharacter))
     {
         return false;
     }

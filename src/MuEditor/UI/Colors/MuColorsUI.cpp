@@ -8,6 +8,7 @@
 #include "../MuEditor/UI/Common/KeyboardSelection.h"
 #include "../MuEditor/UI/Common/MuEditorToolWindows.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
+#include "../MuEditor/UI/Common/SourceText.h"
 #include "../MuEditor/UI/Common/ToolGroups.h"
 #include "../MuEditor/UI/Common/ToolWindowFrame.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
@@ -250,7 +251,8 @@ void CMuColorsUI::RenderFolderDialog()
     // the folder or the root's folders changed.
     const ColorsRoot root = m_pick.root;
     const ColorFolderPath picked = GetPickedFolder();
-    const std::string name = m_folderName;
+    // Spaces typed around the name don't count (IsColorFolderName refuses them).
+    const std::string name = MuEditor::SourceText::Trimmed(m_folderName);
     const bool renaming = m_folderDialog == FolderDialog::Rename;
     const auto edit = [renaming, picked, name](std::vector<ColorFolder>& folders)
     {

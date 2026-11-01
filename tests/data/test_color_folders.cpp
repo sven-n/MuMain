@@ -259,6 +259,17 @@ TEST_SUITE("Color folders")
         CHECK(Data::Colors::IsColorFolderName(std::string(32, 'a')));
         CHECK_FALSE(Data::Colors::IsColorFolderName(std::string(33, 'a')));
         CHECK_FALSE(Data::Colors::IsColorFolderName(""));
+        // Spaces inside a name, but none around it, and no control characters.
+        CHECK(Data::Colors::IsColorFolderName("Load bar"));
+        CHECK_FALSE(Data::Colors::IsColorFolderName(" "));
+        CHECK_FALSE(Data::Colors::IsColorFolderName(" Load"));
+        CHECK_FALSE(Data::Colors::IsColorFolderName("Load "));
+        CHECK_FALSE(Data::Colors::IsColorFolderName("Lo\nad"));
+        CHECK_FALSE(Data::Colors::IsColorFolderName("Lo\tad"));
+
+        std::vector<ItemDataIssue> issues;
+        CHECK(Read(R"({"colorFolders": [{"name": "Load "}]})", issues).empty());
+        CHECK(HasWarningAbout(issues, "colorFolders[0].name"));
     }
 
     TEST_CASE("GlowColors.json keeps its folders")
