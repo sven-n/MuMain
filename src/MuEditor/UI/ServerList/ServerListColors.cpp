@@ -166,20 +166,37 @@ std::optional<std::string> FindThemeTokenSource(std::string_view theme, const ch
 
 bool WriteThemeToken(std::string_view theme, const char* token, const std::string& value)
 {
-    const std::filesystem::path file =
-        std::filesystem::u8path(ThemesFolder) / std::filesystem::u8path(std::string(theme)) / "tokens.ini";
-    std::ifstream in(file, std::ios::binary);
-    if (!in)
+    const std::filesystem::path folder =
+        std::filesystem::u8path(ThemesFolder) / std::filesystem::u8path(std::string(theme));
+    std::error_code fileError;
+    if (!std::filesystem::is_directory(folder, fileError))
     {
         return false;
     }
-    std::stringstream read;
-    read << in.rdbuf();
-    in.close();
+    const std::filesystem::path file = folder / "tokens.ini";
+    std::string text;
+    // A theme that inherits all its tokens has no tokens.ini of its own: it gets one.
+    const bool exists = std::filesystem::exists(file, fileError);
+    if (exists)
+    {
+        std::ifstream in(file, std::ios::binary);
+        if (!in)
+        {
+            return false;
+        }
+        std::stringstream read;
+        read << in.rdbuf();
+        text = read.str();
+    }
+    std::string updated = SetTokenInText(text, token, value);
+    if (!exists)
+    {
+        updated += '\n';
+    }
 
     // Through a temporary file: a write that fails leaves the theme's tokens as they were.
     std::string error;
-    const bool written = Data::WriteTextFile(file, SetTokenInText(read.str(), token, value), error);
+    const bool written = Data::WriteTextFile(file, updated, error);
     ForgetThemeTokens();
     return written;
 }

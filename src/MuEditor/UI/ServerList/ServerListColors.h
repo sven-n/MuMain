@@ -32,10 +32,12 @@ Core::Color::Rgb ToRgb(const float rgb[3]);
 // nothing when none of them has it.
 std::optional<std::string> FindThemeTokenSource(std::string_view theme, const char* token);
 // Sets the token in the theme folder's own tokens.ini, in its [Tokens], replacing the lines that
-// have it or adding one after the section's last. The lines count as the themes read them: section
-// and key in any case, spaces around them, ';' and '#' lines as comments. False when the file can't
-// be read or written; it is written through a temporary file (Data::WriteTextFile), so a write that
-// fails leaves it as it was. The tokens are read again afterwards (ForgetThemeTokens).
+// have it or adding one after the section's last; a theme folder without a tokens.ini of its own
+// (one that inherits all its tokens) gets one. The lines count as the themes read them: section
+// and key in any case, spaces around them, ';' and '#' lines as comments. False when the theme
+// folder doesn't exist or the file can't be read or written; it is written through a temporary
+// file (Data::WriteTextFile), so a write that fails leaves it as it was. The tokens are read again
+// afterwards (ForgetThemeTokens).
 bool WriteThemeToken(std::string_view theme, const char* token, const std::string& value);
 // tokens.ini's text with the token set as WriteThemeToken sets it; the text keeps its line ends.
 std::string SetTokenInText(std::string_view text, std::string_view token, const std::string& value);

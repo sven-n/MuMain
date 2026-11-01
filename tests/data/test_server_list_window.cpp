@@ -271,14 +271,22 @@ TEST_CASE("Server list colors: a theme color is written into a theme's tokens.in
     CHECK_FALSE(ListColors::WriteThemeToken("missing", "server-button", "#123456"));
     // Written through a temporary file (Data::WriteTextFile), which takes the file's place.
     CHECK_FALSE(std::filesystem::exists(tokens.string() + ".tmp"));
+    // A theme that inherits all its tokens gets a tokens.ini of its own.
+    std::filesystem::create_directories("Data/Interface/RmlUi/themes/inherits");
+    CHECK(ListColors::WriteThemeToken("inherits", "server-button", "#123456"));
 
     std::filesystem::current_path(previous);
-    std::ifstream file(tokens, std::ios::binary);
-    std::stringstream text;
-    text << file.rdbuf();
-    CHECK(text.str() == "; a theme\r\n[Tokens]\r\nserver-button=#123456\r\n; the load\r\nserver-load-empty=rgba(0, 0, 0, 160)\r\n"
-                        "server-button-silver=#abcdef\r\n\r\n[Other]\r\nkey=1\r\n");
-    file.close();
+    const auto readFile = [](const std::filesystem::path& path)
+    {
+        std::ifstream file(path, std::ios::binary);
+        std::stringstream text;
+        text << file.rdbuf();
+        return text.str();
+    };
+    CHECK(readFile(tokens) ==
+          "; a theme\r\n[Tokens]\r\nserver-button=#123456\r\n; the load\r\nserver-load-empty=rgba(0, 0, 0, 160)\r\n"
+          "server-button-silver=#abcdef\r\n\r\n[Other]\r\nkey=1\r\n");
+    CHECK(readFile(folder / "Data/Interface/RmlUi/themes/inherits/tokens.ini") == "[Tokens]\nserver-button=#123456\n");
     std::error_code ignored;
     std::filesystem::remove_all(folder, ignored);
 }
