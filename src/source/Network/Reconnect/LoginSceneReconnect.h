@@ -33,9 +33,10 @@ public:
 
     // Asks the connect server for its list. After a reconnect the client asks on
     // its own, so nothing is left to resume then; a connection that has no list
-    // request left connects anew for the same reason. Nothing while the screen is on
-    // a game server (the login window): only the connect server sends a list, and
-    // switching would end the login window's connection.
+    // request left connects anew for the same reason. Nothing while a reconnect runs
+    // (it brings its own answer, and a server pick waiting for it stays), nor while
+    // the screen is on a game server (the login window): only the connect server
+    // sends a list, and switching would end the login window's connection.
     void RequestServerList();
 
     // The login scene found its connection closed; called every frame until it is back.

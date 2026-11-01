@@ -61,6 +61,17 @@ bool LoginSceneReconnect::EnsureConnected(LoginServer server, std::function<void
 
 void LoginSceneReconnect::RequestServerList()
 {
+    if (IsReconnecting())
+    {
+        // The reconnect brings a list (or the login window) itself. A server pick
+        // waiting for it stays: opening the credits isn't a step that replaces it.
+        if (m_server == LoginServer::Connect)
+        {
+            PlayerWaits();
+        }
+        return;
+    }
+
     if (m_phase == Phase::Idle && m_link.ConnectedServer() == LoginServer::Game)
     {
         return;

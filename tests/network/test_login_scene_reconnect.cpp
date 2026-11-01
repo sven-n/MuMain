@@ -476,6 +476,21 @@ TEST_SUITE("Login scene reconnect")
         CHECK(screen.resumed == 1);
     }
 
+    TEST_CASE("the credits opened during a reconnect keep the waiting pick")
+    {
+        DroppedScreen screen;
+        screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume());
+
+        screen.reconnect.RequestServerList(); // the credits open, and close again
+        screen.reconnect.RequestServerList();
+        CHECK(screen.link.probes.size() == 1);
+        CHECK(screen.link.listRequests == 0);
+
+        screen.ServerComesBack();
+        screen.reconnect.OnGreeting(LoginServer::Connect);
+        CHECK(screen.resumed == 1);
+    }
+
     TEST_CASE("a greeting from the other server resumes nothing")
     {
         // A client started straight on a game server gets the login window back
