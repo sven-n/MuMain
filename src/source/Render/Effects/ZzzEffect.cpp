@@ -62,9 +62,86 @@ bool CheckCharacterRange(OBJECT* so, float Range, short PKKey, BYTE Kind = 0)
     return false;
 }
 
+namespace
+{
+// Frames a character spins after a tornado touched it; the spin slows down while it counts down.
+constexpr float TornadoSpinTime = 10.f;
+
+bool IsTornadoSkill(ActionSkillType skill)
+{
+    const ActionSkillType baseSkill = gSkillManager.MasterSkillToBaseSkillIndex(skill);
+    return baseSkill == AT_SKILL_STORM || baseSkill == AT_SKILL_EVIL_SPIRIT;
+}
+
+// Gates, statues and other immobile monsters keep their orientation.
+bool CanSpinInTornado(const CHARACTER& c)
+{
+    switch (c.MonsterIndex)
+    {
+    case MONSTER_DRAKAN:
+    case MONSTER_GREAT_DRAKAN:
+    case MONSTER_DARK_PHOENIX:
+    case MONSTER_CASTLE_GATE:
+    case MONSTER_STATUE_OF_SAINT_1:
+    case MONSTER_STATUE_OF_SAINT_2:
+    case MONSTER_STATUE_OF_SAINT_3:
+    case MONSTER_GATE_TO_KALIMA_1:
+    case MONSTER_GATE_TO_KALIMA_2:
+    case MONSTER_GATE_TO_KALIMA_3:
+    case MONSTER_GATE_TO_KALIMA_4:
+    case MONSTER_GATE_TO_KALIMA_5:
+    case MONSTER_GATE_TO_KALIMA_6:
+    case MONSTER_GATE_TO_KALIMA_7:
+    case MONSTER_GUARDSMAN:
+    case MONSTER_SELUPAN:
+    case MONSTER_SPIDER_EGGS_1:
+    case MONSTER_SPIDER_EGGS_2:
+    case MONSTER_SPIDER_EGGS_3:
+    case MONSTER_EVIL_GATE:
+    case MONSTER_LION_GATE:
+    case MONSTER_STATUE:
+    case MONSTER_STAR_GATE:
+    case MONSTER_RUSH_GATE:
+        return false;
+    default:
+        return true;
+    }
+}
+
+bool IsTouchedByTornado(const CHARACTER& c, const vec3_t position, float range, short pkKey)
+{
+    const OBJECT& o = c.Object;
+    if (!o.Live || !o.Visible || &c == Hero || c.Dead != 0)
+        return false;
+
+    const bool isTarget = o.Kind == KIND_MONSTER || (o.Kind == KIND_PLAYER && c.Key == pkKey);
+    if (!isTarget)
+        return false;
+
+    // Squared, so no square root per character (coding rule 12).
+    const float dx = position[0] - o.Position[0];
+    const float dy = position[1] - o.Position[1];
+    return dx * dx + dy * dy <= range * range;
+}
+} // namespace
+
 bool AttackCharacterRange(int Index, vec3_t Position, float Range, BYTE Serial, short PKKey, WORD SkillSerialNum)
 {
-    return false; // we don't send this packet anymore
+    // The server calculates the hits of area skills, so no packet is sent anymore.
+    // Only the client side effect remains: characters inside a tornado spin.
+    if (Index < 0 || Index >= MAX_SKILLS || !IsTornadoSkill(CharacterAttribute->Skill[Index]))
+        return false;
+
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
+    {
+        CHARACTER& c = CharactersClient[i];
+        if (IsTouchedByTornado(c, Position, Range, PKKey) && CanSpinInTornado(c))
+        {
+            c.StormTime = TornadoSpinTime;
+        }
+    }
+
+    return false;
 }
 
 void CreateHealing(OBJECT* o)
