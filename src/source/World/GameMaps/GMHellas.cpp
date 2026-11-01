@@ -1341,7 +1341,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
     return false;
 }
 
-bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool UpdateHellasMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     vec3_t Position, Light, p;
     float  Luminosity;

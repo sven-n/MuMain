@@ -1795,7 +1795,7 @@ bool CGM_Raklion::RenderObjectVisual(OBJECT* o, BMD* b)
     return false;
 }
 
-bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool CGM_Raklion::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     vec3_t vPos, vRelative, vLight;
 

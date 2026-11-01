@@ -786,7 +786,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderMonsterObjectMesh(OBJECT* o, BMD* b, int Ex
     return false;
 }
 
-bool SEASON3A::CGM3rdChangeUp::RenderBalgasBarrackMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool SEASON3A::CGM3rdChangeUp::UpdateBalgasBarrackMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (!(IsBalgasBarrackMap() || IsBalgasRefugeMap()))
         return false;

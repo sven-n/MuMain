@@ -189,6 +189,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
         m_BoneTransforms.reset();
         o->BoneTransform = nullptr;
     }
+    Engine::Object::Pose::Invalidate(o);
 
     int i;
     for (i = 0; i < 2; i++)

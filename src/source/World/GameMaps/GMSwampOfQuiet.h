@@ -30,7 +30,7 @@ namespace SEASON3C
 
         static bool MoveMonsterVisual(OBJECT* pObject, BMD* pModel);
         static void MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
-        static bool RenderMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
+        static bool UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
 
         static bool AttackEffectMonster(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
 

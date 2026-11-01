@@ -30,6 +30,7 @@ public: // Character
     // 몬스터 스킬 블러 이펙트
     virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
     // 몬스터 이펙트 ( 일반 )
+    virtual bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
     virtual bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
     // 몬스터 이펙트 ( 스킬 )
     virtual bool AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b);

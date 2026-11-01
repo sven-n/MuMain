@@ -16,6 +16,7 @@ namespace M34CryWolf1st {		//. 크라이울프 점령지
     bool MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
     void MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
     bool RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int ExtraMon);
+    bool UpdateCryWolf1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
     bool RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
     bool AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* b);
     bool CreateMist(PARTICLE* pParticleObj);

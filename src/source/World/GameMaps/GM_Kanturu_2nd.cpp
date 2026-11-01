@@ -768,7 +768,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(OBJECT* o, BMD* b, int E
     return false;
 }
 
-bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {
@@ -884,26 +884,9 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
         if (gMapManager.WorldActive == WD_39KANTURU_3RD &&
             g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
         {
-            vec3_t Light;
-            float Scale, Angle;
-
             o->Distance += 0.05f * FPS_ANIMATION_FACTOR;
-            Scale = o->Distance;
-
-            if (Scale >= 3.0f)
+            if (o->Distance >= 3.0f)
                 o->Distance = 0.1f;
-
-            Angle = (timeGetTime() % 9000) / 10.0f;
-
-            Light[0] = 0.6f - (Scale / 5.0f);
-            Light[1] = 0.6f - (Scale / 5.0f);
-            Light[2] = 0.0f;
-
-            EnableAlphaBlend();
-            RenderTerrainAlphaBitmap(BITMAP_ENERGY_RING, o->Position[0], o->Position[1], Scale, Scale, Light, Angle);
-
-            Vector(0.5f, 0.5f, 0.1f, Light);
-            RenderTerrainAlphaBitmap(BITMAP_ENERGY_FIELD, o->Position[0], o->Position[1], 2.0f, 2.0f, Light, Angle);
         }
 
         if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -1000,26 +983,9 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
         if (gMapManager.WorldActive == WD_39KANTURU_3RD &&
             g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
         {
-            vec3_t Light;
-            float Scale, Angle;
-
             o->Distance += 0.05f * FPS_ANIMATION_FACTOR;
-            Scale = o->Distance;
-
-            if (Scale >= 3.0f)
+            if (o->Distance >= 3.0f)
                 o->Distance = 0.1f;
-
-            Angle = (timeGetTime() % 9000) / 10.0f;
-
-            Light[0] = 1.0f - (Scale / 3.0f);
-            Light[1] = 0.0f;
-            Light[2] = 0.0f;
-
-            EnableAlphaBlend();
-            RenderTerrainAlphaBitmap(BITMAP_ENERGY_RING, o->Position[0], o->Position[1], Scale, Scale, Light, Angle);
-
-            Vector(1.0f, 0.3f, 0.1f, Light);
-            RenderTerrainAlphaBitmap(BITMAP_ENERGY_FIELD, o->Position[0], o->Position[1], 2.0f, 2.0f, Light, Angle);
         }
 
         if (o->CurrentAction == MONSTER01_WALK)
@@ -1241,6 +1207,52 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD
         g_TrapCanon.Render_Object_Visual(c, o, b);
     }
     break;
+    }
+    return false;
+}
+
+bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    switch (o->Type)
+    {
+    case MODEL_TWIN_TAIL:
+        if (gMapManager.WorldActive == WD_39KANTURU_3RD &&
+            g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
+        {
+            vec3_t Light;
+            const float Scale = o->Distance;
+            const float Angle = (timeGetTime() % 9000) / 10.0f;
+
+            Light[0] = 0.6f - (Scale / 5.0f);
+            Light[1] = 0.6f - (Scale / 5.0f);
+            Light[2] = 0.0f;
+
+            EnableAlphaBlend();
+            RenderTerrainAlphaBitmap(BITMAP_ENERGY_RING, o->Position[0], o->Position[1], Scale, Scale, Light, Angle);
+
+            Vector(0.5f, 0.5f, 0.1f, Light);
+            RenderTerrainAlphaBitmap(BITMAP_ENERGY_FIELD, o->Position[0], o->Position[1], 2.0f, 2.0f, Light, Angle);
+        }
+        break;
+    case MODEL_DREADFEAR:
+        if (gMapManager.WorldActive == WD_39KANTURU_3RD &&
+            g_Direction.m_CKanturu.m_iKanturuState == KANTURU_STATE_MAYA_BATTLE)
+        {
+            vec3_t Light;
+            const float Scale = o->Distance;
+            const float Angle = (timeGetTime() % 9000) / 10.0f;
+
+            Light[0] = 1.0f - (Scale / 3.0f);
+            Light[1] = 0.0f;
+            Light[2] = 0.0f;
+
+            EnableAlphaBlend();
+            RenderTerrainAlphaBitmap(BITMAP_ENERGY_RING, o->Position[0], o->Position[1], Scale, Scale, Light, Angle);
+
+            Vector(1.0f, 0.3f, 0.1f, Light);
+            RenderTerrainAlphaBitmap(BITMAP_ENERGY_FIELD, o->Position[0], o->Position[1], 2.0f, 2.0f, Light, Angle);
+        }
+        break;
     }
     return false;
 }

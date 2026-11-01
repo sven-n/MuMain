@@ -348,7 +348,7 @@ bool GMUnitedMarketPlace::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool GMUnitedMarketPlace::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool GMUnitedMarketPlace::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {

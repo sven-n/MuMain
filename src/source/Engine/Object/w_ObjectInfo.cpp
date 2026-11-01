@@ -172,6 +172,8 @@ void OBJECT::Initialize()
     IdentityVector3D(EyeRight2);
     IdentityVector3D(EyeLeft3);
     IdentityVector3D(EyeRight3);
+    IdentityVector3D(SetTrailLeft);
+    IdentityVector3D(SetTrailRight);
 
     IdentityVector3D(OBB.StartPos);
     IdentityVector3D(OBB.XAxis);
@@ -180,6 +182,7 @@ void OBJECT::Initialize()
 
     m_pCloth = NULL;
     BoneTransform = NULL;
+    Pose = {};
 
     Owner = NULL;
     Prior = NULL;

@@ -851,9 +851,9 @@ bool GMEmpireGuardian2::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool GMEmpireGuardian2::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool GMEmpireGuardian2::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    if (g_EmpireGuardian1.RenderMonsterVisual(c, o, b))
+    if (g_EmpireGuardian1.UpdateMonsterEffects(c, o, b))
     {
         return true;
     }

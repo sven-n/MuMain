@@ -438,6 +438,32 @@ void MapProcess::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     }
 }
 
+bool MapProcess::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
+    {
+        auto tempiter = iter;
+        ++iter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
+
+        if (basemap.expired() == false)
+        {
+            if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
+            {
+                if (basemap.lock()->UpdateMonsterEffects(c, o, b))
+                {
+                    return true;
+                }
+            }
+        }
+        else
+        {
+            m_MapList.erase(tempiter);
+        }
+    }
+    return false;
+}
+
 bool MapProcess::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
     for (auto iter = m_MapList.begin(); iter != m_MapList.end();)

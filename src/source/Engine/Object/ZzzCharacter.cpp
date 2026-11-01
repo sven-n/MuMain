@@ -6438,9 +6438,9 @@ void AnimateCharacterBones(OBJECT* o)
     BMD* model = &Models[o->Type];
     if (model->NumBones <= 0) return;
 
-    // Model space, as render builds them: the model's BodyOrigin and BodyScale belong to whichever object set them last.
-    model->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
-                     o->HeadAngle, false, false, nullptr, o->CurrentAction);
+    // Model space: the model's BodyOrigin and BodyScale belong to whichever object set them last.
+    if (!Engine::Object::Pose::IsCurrent(o))
+        Engine::Object::Pose::Build(o, model);
     o->EnableBoneMatrix = true;
 }
 
@@ -6461,17 +6461,21 @@ bool IsClientCharacterObject(const OBJECT* o)
 }
 } // namespace
 
-bool BeginPrepassBoneCheck(const OBJECT* o, int numBones)
+void CheckCharacterPose(const OBJECT* o, BMD* model, bool reused)
 {
-    if (!g_PrepassBoneCheck.enabled || !o->EnableBoneMatrix || numBones > MAX_BONES || !IsClientCharacterObject(o))
-        return false;
-    memcpy(PrepassBones, o->BoneTransform, sizeof(float) * 12 * numBones);
-    return true;
-}
-
-void EndPrepassBoneCheck(const OBJECT* o, int numBones)
-{
-    RecordPrepassBones(PrepassBones, o->BoneTransform, numBones, o->Type == MODEL_PLAYER);
+    if (!g_PrepassBoneCheck.enabled || model->NumBones > MAX_BONES || !IsClientCharacterObject(o))
+        return;
+    if (!reused)
+    {
+        ++g_PrepassBoneCheck.rebuilt;
+        return;
+    }
+    vec3_t angle, headAngle;
+    VectorCopy(o->Angle, angle);
+    VectorCopy(o->HeadAngle, headAngle);
+    model->Animation(PrepassBones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, angle, headAngle, false,
+                     false, nullptr, o->CurrentAction);
+    RecordPrepassBones(PrepassBones, o->BoneTransform, model->NumBones, o->Type == MODEL_PLAYER);
 }
 
 void RecordPrepassBones(const float (*prepass)[3][4], const float (*rendered)[3][4], int numBones, bool player)
@@ -8410,6 +8414,190 @@ void RenderEye(OBJECT* o, int Left, int Right, float fSize = 1.0f)
     VectorCopy(Position, o->EyeLeft);
 }
 
+namespace
+{
+// Returns whether o's type has its own effects, which keeps the map hooks off it.
+void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b);
+
+bool UpdateCharacterTypeEffects(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    vec3_t p, Position, Light;
+    float Luminosity;
+
+    switch (o->Type)
+    {
+    case MODEL_PLAYER:
+        UpdatePlayerEffects(c, o, b);
+        break;
+    case MODEL_BULL_FIGHTER:
+    case MODEL_DEATH_COW:
+        if ((o->Type == MODEL_BULL_FIGHTER && c->Level == 1) || (o->Type == MODEL_DEATH_COW))
+            RenderEye(o, 22, 23);
+        break;
+    case MODEL_CRUST:
+        RenderEye(o, 26, 27, 2.0f);
+        break;
+    case MODEL_HYDRA:
+        RenderLight(o, BITMAP_LIGHTNING + 1, 1.f, 63, 0.f, 0.f, 20.f);
+        RenderLight(o, BITMAP_SHINY + 2, 4.f, 63, 0.f, 0.f, 20.f);
+        break;
+    case MODEL_VEPAR:
+        RenderLight(o, BITMAP_LIGHTNING + 1, 0.5f, 30, 0.f, 0.f, -5.f);
+        RenderLight(o, BITMAP_LIGHTNING + 1, 0.5f, 39, 0.f, 0.f, -5.f);
+        RenderLight(o, BITMAP_SPARK, 4.f, 30, 0.f, 0.f, -5.f);
+        RenderLight(o, BITMAP_SPARK, 4.f, 39, 0.f, 0.f, -5.f);
+        RenderLight(o, BITMAP_SHINY + 2, 2.f, 30, 0.f, 0.f, -5.f);
+        RenderLight(o, BITMAP_SHINY + 2, 2.f, 39, 0.f, 0.f, -5.f);
+        break;
+    case MODEL_LIZARD:
+        RenderEye(o, 42, 43);
+        RenderLight(o, BITMAP_SPARK, 2.f, 26, 0.f, 0.f, 0.f);
+        RenderLight(o, BITMAP_SPARK, 2.f, 31, 0.f, 0.f, 0.f);
+        RenderLight(o, BITMAP_SPARK, 2.f, 36, 0.f, 0.f, 0.f);
+        RenderLight(o, BITMAP_SPARK, 2.f, 41, 0.f, 0.f, 0.f);
+        RenderLight(o, BITMAP_SHINY + 2, 1.f, 26, 0.f, 0.f, 0.f);
+        RenderLight(o, BITMAP_SHINY + 2, 1.f, 31, 0.f, 0.f, 0.f);
+        RenderLight(o, BITMAP_SHINY + 2, 1.f, 36, 0.f, 0.f, 0.f);
+        RenderLight(o, BITMAP_SHINY + 2, 1.f, 41, 0.f, 0.f, 0.f);
+        break;
+    case MODEL_BAHAMUT:
+        RenderLight(o, BITMAP_SPARK, 4.f, 9, 0.f, 0.f, 5.f);
+        RenderLight(o, BITMAP_SHINY + 2, 3.f, 9, 0.f, 0.f, 5.f);
+        break;
+    case MODEL_MIX_NPC:
+        RenderLight(o, BITMAP_LIGHT, 1.5f, 32, 0.f, 0.f, 0.f);
+        break;
+    case MODEL_NPC_SEVINA:
+        RenderLight(o, BITMAP_LIGHT, 2.5f, 6, 0.f, 0.f, 0.f);
+        break;
+    case MODEL_NPC_DEVILSQUARE:
+    {
+        Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
+
+        float Scale = 0.3f;
+        Vector(Luminosity, Luminosity, Luminosity, Light);
+
+        Vector(3.5f, -12.f, 10.f, p);
+        b->TransformPosition(o->BoneTransform[20], p, Position, 1);
+        CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale, Light, o, (WorldTime / 50.0f));
+        CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale, Light, o, ((-WorldTime) / 50.0f));
+
+        if (rand_fps_check(30))
+        {
+            p[0] = Position[0] + rand() % 100 - 50;
+            p[1] = Position[1] + rand() % 100 - 50;
+            p[2] = Position[2] + rand() % 100 - 50;
+
+            CreateJoint(BITMAP_JOINT_ENERGY, p, Position, o->Angle, 6, NULL, 20.f);
+        }
+    }
+    break;
+    case MODEL_NPC_CASTEL_GATE:
+    {
+        vec3_t vPos, vRelative;
+        float fLumi, fScale;
+
+        fLumi = (sinf(WorldTime * 0.002f) + 2.0f) * 0.5f;
+        Vector(fLumi * 1.0f, fLumi * 0.5f, fLumi * 0.3f, Light);
+        fScale = fLumi / 2.0f;
+
+        Vector(4.0f, 3.0f, -4.0f, vRelative);
+        b->TransformPosition(o->BoneTransform[2], vRelative, vPos, true);
+
+        CreateSprite(BITMAP_LIGHT, vPos, fScale, Light, o);
+        CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, vPos, fScale, Light, o);
+
+        Vector(5.0f, 3.0f, 2.0f, vRelative);
+        b->TransformPosition(o->BoneTransform[4], vRelative, vPos, true);
+
+        CreateSprite(BITMAP_LIGHT, vPos, fScale, Light, o);
+        CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, vPos, fScale, Light, o);
+
+        if (rand_fps_check(4))
+        {
+            Vector(-20.0f, 10.0f, 0.0f, vRelative);
+            b->TransformPosition(o->BoneTransform[3], vRelative, vPos, true);
+
+            vec3_t Angle;
+            VectorCopy(o->Angle, Angle);
+            Angle[0] += 120.0f;
+            Angle[2] -= 60.0f;
+
+            Vector(1.0f, 1.0f, 1.0f, Light);
+
+            CreateParticle(BITMAP_FLAME, vPos, Angle, Light, 10, o->Scale / 2);
+        }
+    }
+    break;
+    case MODEL_SHADOW:
+        Vector(0.f, 0.f, 0.f, p);
+        Luminosity = 1.f;
+        if (c->Level == 0)
+        {
+            Vector(Luminosity * 1.f, Luminosity * 1.f, Luminosity * 1.f, Light);
+        }
+        else
+        {
+            Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.f, Light);
+            Vector(Luminosity * 0.2f, Luminosity * 0.7f, Luminosity * 0.1f, Light);
+        }
+
+        for (int i = 0; i < b->NumBones; i++)
+        {
+            if (!b->Bones[i].Dummy)
+            {
+                if ((i >= 15 && i <= 20) || (i >= 27 && i <= 32))
+                {
+                }
+                else
+                {
+                    b->TransformPosition(o->BoneTransform[i], p, Position, true);
+                    if (c->Level == 0)
+                        CreateSprite(BITMAP_SHINY + 1, Position, 2.5f, Light, o, 0.f, 1);
+                    else
+                        CreateSprite(BITMAP_MAGIC + 1, Position, 0.8f, Light, o, 0.f);
+                    if (rand_fps_check(4) && o->CurrentAction >= MONSTER01_ATTACK1 &&
+                        o->CurrentAction <= MONSTER01_ATTACK2)
+                    {
+                        CreateParticle(BITMAP_ENERGY, Position, o->Angle, Light);
+                    }
+                    // CreateParticle(BITMAP_SMOKE,Position,o->Angle,Light,1);
+                }
+            }
+        }
+        break;
+    case MODEL_SEED_MASTER:
+    {
+        float fLumi, fScale;
+        fScale = 2.0f;
+        b->TransformByObjectBone(Position, o, 39);
+
+        fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.3f + 0.4f;
+        Vector(fLumi * 0.5f, fLumi * 0.5f, fLumi * 0.5f, Light);
+        CreateSprite(BITMAP_FLARE, Position, fScale, Light, o);
+    }
+    break;
+    case MODEL_SEED_INVESTIGATOR:
+    {
+        float fLumi, fScale;
+        fScale = 1.0f;
+        for (int i = 69; i <= 70; ++i)
+        {
+            b->TransformByObjectBone(Position, o, i);
+
+            fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.3f + 0.4f;
+            Vector(fLumi * 0.5f, fLumi * 0.5f, fLumi * 0.5f, Light);
+            CreateSprite(BITMAP_FLARE_BLUE, Position, fScale, Light, o);
+        }
+    }
+    break;
+    default:
+        return false;
+    }
+    return true;
+}
+} // namespace
+
 void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 {
     if (g_isCharacterBuff(o, eBuff_CrywolfNPCHide))
@@ -8662,45 +8850,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             {
                 VectorCopy(Models[o->Type].BodyLight, vBackupBodyLight);
                 Vector(1.f, 0.0f, 0.0f, Models[o->Type].BodyLight);
-
-                float	fEffectScale = o->Scale * 1.6f;
-                vec3_t	v3EffectLightColor, v3EffectPosition;
-
-                Vector(1.0f, 0.6f, 0.1f, v3EffectLightColor);
-
-                b->TransformPosition(o->BoneTransform[0], p, v3EffectPosition, true);
-                CreateSprite(BITMAP_LIGHTMARKS, v3EffectPosition, 2.5f, v3EffectLightColor, o);
-
-                b->TransformPosition(o->BoneTransform[4], p, v3EffectPosition, true);
-                CreateSprite(BITMAP_LIGHTMARKS, v3EffectPosition, 2.5f, v3EffectLightColor, o);
-
-                b->TransformPosition(o->BoneTransform[57], p, v3EffectPosition, true);
-                CreateSprite(BITMAP_LIGHTMARKS, v3EffectPosition, 2.5f, v3EffectLightColor, o);
-
-                b->TransformPosition(o->BoneTransform[60], p, v3EffectPosition, true);
-                CreateSprite(BITMAP_LIGHTMARKS, v3EffectPosition, 2.5f, v3EffectLightColor, o);
-
-                b->TransformPosition(o->BoneTransform[87], p, v3EffectPosition, true);
-                CreateSprite(BITMAP_LIGHTMARKS, v3EffectPosition, 2.5f, v3EffectLightColor, o);
-
-                Vector(1.0f, 0.8f, 0.1f, v3EffectLightColor);
-                if (rand_fps_check(1))
-                {
-                    b->TransformPosition(o->BoneTransform[57], p, v3EffectPosition, true);
-                    CreateEffect(MODEL_EFFECT_FIRE_HIK3_MONO, v3EffectPosition, o->Angle, v3EffectLightColor, 1, NULL, -1, 0, 0, 0, fEffectScale);
-
-                    b->TransformPosition(o->BoneTransform[60], p, v3EffectPosition, true);
-                    CreateEffect(MODEL_EFFECT_FIRE_HIK3_MONO, v3EffectPosition, o->Angle, v3EffectLightColor, 1, NULL, -1, 0, 0, 0, fEffectScale);
-
-                    b->TransformPosition(o->BoneTransform[66], p, v3EffectPosition, true);
-                    CreateEffect(MODEL_EFFECT_FIRE_HIK3_MONO, v3EffectPosition, o->Angle, v3EffectLightColor, 1, NULL, -1, 0, 0, 0, fEffectScale);
-
-                    b->TransformPosition(o->BoneTransform[78], p, v3EffectPosition, true);
-                    CreateEffect(MODEL_EFFECT_FIRE_HIK3_MONO, v3EffectPosition, o->Angle, v3EffectLightColor, 1, NULL, -1, 0, 0, 0, fEffectScale);
-
-                    b->TransformPosition(o->BoneTransform[91], p, v3EffectPosition, true);
-                    CreateEffect(MODEL_EFFECT_FIRE_HIK3_MONO, v3EffectPosition, o->Angle, v3EffectLightColor, 1, NULL, -1, 0, 0, 0, fEffectScale);
-                }
             }
             RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_METAL | RENDER_BRIGHT, Bright);
         }
@@ -8721,31 +8870,9 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     }
     else if (c->MonsterIndex == MONSTER_ALQUAMOS)
     {
-        float Luminosity = (float)(rand() % 30 + 70) * 0.01f;
-        Vector(Luminosity * 0.8f, Luminosity * 0.9f, Luminosity * 1.f, Light);
-
-        for (int i = 0; i < 9; ++i)
-        {
-            b->TransformPosition(o->BoneTransform[g_chStar[i]], p, Position, true);
-            CreateSprite(BITMAP_LIGHT, Position, 0.6f, Light, o);
-        }
-
+        // Tints c->Light below.
+        const float Luminosity = (float)(rand() % 30 + 70) * 0.01f;
         Vector(Luminosity * 0.6f, Luminosity * 0.7f, Luminosity * 0.8f, Light);
-
-        if (rand_fps_check(1))
-        {
-            for (int i = 0; i < 3; i++)
-            {
-                Vector((float)(rand() % 20 - 10), (float)(rand() % 20 - 10), (float)(rand() % 20 - 10), p);
-                b->TransformPosition(o->BoneTransform[rand() % b->NumBones], p, Position, true);
-                CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 3);
-            }
-        }
-    }
-    else if (c->MonsterIndex == MONSTER_QUEEN_RAINER)
-    {
-        b->TransformPosition(o->BoneTransform[20], p, Position, true);
-        CreateSprite(BITMAP_LIGHT, Position, 0.8f, Light, o);
     }
     else if (c->MonsterIndex == MONSTER_MEGA_CRUST || c->MonsterIndex == MONSTER_ALPHA_CRUST || c->MonsterIndex == MONSTER_OMEGA_WING)
     {
@@ -8769,48 +8896,13 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     }
     else if (c->MonsterIndex == MONSTER_DRAKAN || c->MonsterIndex == MONSTER_GREAT_DRAKAN)
     {
-        vec3_t pos1, pos2;
-        switch (c->MonsterIndex)
-        {
-        case MONSTER_DRAKAN:
+        // Tints c->Light below.
+        if (c->MonsterIndex == MONSTER_DRAKAN)
             Vector(0.1f, 0.1f, 1.f, Light);
 
-            for (int i = 13; i < 27; ++i)
-            {
-                b->TransformPosition(o->BoneTransform[i], p, Position, true);
-                CreateSprite(BITMAP_LIGHT, Position, 0.8f, Light, o);
-
-                VectorCopy(Position, pos2);
-                if ((i >= 14 && i <= 16 || i == 23) && rand_fps_check(1))
-                {
-                    CreateJoint(BITMAP_JOINT_THUNDER, pos1, pos2, o->Angle, 7, NULL, 20.f);
-                }
-                VectorCopy(Position, pos1);
-            }
-
-            for (int i = 52; i < 59; ++i)
-            {
-                b->TransformPosition(o->BoneTransform[i], p, Position, true);
-                CreateSprite(BITMAP_LIGHT, Position, 0.8f, Light, o);
-            }
-            break;
-        case MONSTER_GREAT_DRAKAN:
-            Vector(1.f, 1.f, 1.0f, Light);
-
-            if (rand_fps_check(1))
-            {
-                for (int i = 18; i < 19; ++i)
-                {
-                    Vector(0.f, 0.f, 0.f, p);
-                    b->TransformPosition(o->BoneTransform[i], p, Position, true);
-                    CreateParticle(BITMAP_FIRE, Position, o->Angle, Light, 0, 0.3f);
-                }
-            }
-            break;
-        }
-
         int RenderType = (c->MonsterIndex == MONSTER_DRAKAN) ? 0 : RENDER_EXTRA;
-        RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT | RenderType, 1.f);
+        RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT | RenderType,
+                                  1.f);
 
         if (c->MonsterIndex == MONSTER_DRAKAN)
         {
@@ -8905,185 +8997,11 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_BRIGHT | RENDER_EXTRA, 1.0f);
     }
 
-    if (o->Type == MODEL_LUNAR_RABBIT)
-    {
-        vec3_t vLight;
-        vec3_t vPos, vRelatedPos;
-        Vector(0.3f, 0.3f, 0.0f, vLight);
-        Vector(0.f, 0.f, 0.f, vRelatedPos);
-
-        if (o->CurrentAction == MONSTER01_WALK)
-        {
-            o->m_iAnimation += REFERENCE_FRAME_STEP;
-            if (rand_fps_check(20))
-                PlayBuffer(SOUND_MOONRABBIT_WALK);
-        }
-
-        if (o->CurrentAction == MONSTER01_SHOCK)
-        {
-            if (o->AnimationFrame > 2.f && o->AnimationFrame <= 3.f && rand_fps_check(1))
-                PlayBuffer(SOUND_MOONRABBIT_DAMAGE);
-        }
-
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->AnimationFrame > 1.f && o->AnimationFrame <= 2.f && rand_fps_check(1))
-                PlayBuffer(SOUND_MOONRABBIT_DEAD);
-
-            if (o->AnimationFrame > 9.f)
-            {
-                if (o->SubType != -1)
-                {
-                    Vector(0.5f, 0.5f, 0.0f, vLight);
-                    BoneManager::GetBonePosition(o, L"Rabbit_1", vPos);
-
-                    Vector(0.7f, 1.0f, 0.6f, vLight);
-                    vec3_t vMoonPos;
-                    VectorCopy(vPos, vMoonPos);
-                    vMoonPos[2] += 28.f;
-                    CreateEffect(MODEL_MOONHARVEST_MOON, vMoonPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 0.5f);
-
-                    Vector(0.4f, 0.4f, 0.8f, vLight);
-                    CreateParticle(BITMAP_EXPLOTION_MONO, vPos, o->Angle, vLight, 10, 1.0f);
-
-                    Vector(1.0f, 1.0f, 1.0f, vLight);
-                    for (int i = 0; i < 200; i++)
-                    {
-                        CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 21);
-                    }
-
-                    for (int i = 0; i < 150; i++)
-                    {
-                        CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 22);
-                    }
-                    Vector(1.0f, 1.0f, 1.0f, vLight);
-                    switch (o->SubType)
-                    {
-                    case 0:
-                    {
-                        for (int i = 0; i < 10; i++)
-                        {
-                            CreateEffect(MODEL_MOONHARVEST_GAM, vPos, o->Angle, vLight);
-                        }
-                    }break;
-                    case 1:
-                    {
-                        for (int i = 0; i < 5; i++)
-                        {
-                            CreateEffect(MODEL_MOONHARVEST_SONGPUEN1, vPos, o->Angle, vLight);
-                            CreateEffect(MODEL_MOONHARVEST_SONGPUEN2, vPos, o->Angle, vLight);
-                        }
-                    }
-                    break;
-                    case 2:
-                    {
-                        for (int i = 0; i < 10; i++)
-                        {
-                            CreateEffect(MODEL_NEWYEARSDAY_EVENT_BEKSULKI, vPos, o->Angle, vLight);
-                        }
-                    }
-                    break;
-                    }
-
-                    o->SubType = -1;
-
-                    if (o->AnimationFrame <= 10.f)
-                    {
-                        // flare
-                        Vector(1.0f, 0.0f, 0.0f, vLight);
-                        CreateSprite(BITMAP_LIGHT, vPos, 8.0f, vLight, o);
-                    }
-                }
-            }
-        }
-        else
-        {
-            BoneManager::GetBonePosition(o, L"Rabbit_1", vPos);		// Bip01 Spine
-            Vector(0.4f, 0.4f, 0.9f, vLight);
-            CreateSprite(BITMAP_LIGHT, vPos, 3.0f, vLight, o);	// flare01.jpg
-
-            BoneManager::GetBonePosition(o, L"Rabbit_2", vPos);		// Bip01 Head
-            Vector(0.4f, 0.4f, 0.9f, vLight);
-            CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, o);	// flare01.jpg
-
-            BoneManager::GetBonePosition(o, L"Rabbit_4", vPos);		// Bip01 Pelvis
-            Vector(0.4f, 0.4f, 0.9f, vLight);
-            CreateSprite(BITMAP_LIGHT, vPos, 1.0f, vLight, o);	// flare01.jpg
-        }
-    }
-
     if (o->Type == MODEL_NPC_CHERRYBLOSSOM)
     {
-        vec3_t vRelativePos, vtaWorldPos, vLight, vLight1, vLight2;
-        BMD* b = &Models[MODEL_NPC_CHERRYBLOSSOM];
-
-        Vector(0.f, 0.f, 0.f, vRelativePos);
-        Vector(1.f, 0.6f, 0.8f, vLight);
-        Vector(0.3f, 0.3f, 0.3f, vLight1);
-        Vector(1.f, 1.f, 1.f, vLight2);
-
-        float Scale = absf(sinf(WorldTime * 0.002f)) * 0.2f;
-        float Luminosity = absf(sinf(WorldTime * 0.002f)) * 0.4f;
+        // Tints c->Light below.
+        const float Luminosity = absf(sinf(WorldTime * 0.002f)) * 0.4f;
         Vector(0.5f + Luminosity, 0.0f + Luminosity, 0.0f + Luminosity, Light);
-
-        if (rand_fps_check(2))
-        {
-            VectorCopy(o->Position, b->BodyOrigin);
-            b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
-            b->TransformPosition(BoneTransform[43], vRelativePos, vtaWorldPos, false);
-            vtaWorldPos[2] += 20.f;
-
-            CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle,
-                           (rand() % 3 == 0) ? vLight : vLight1, 1, 0.3f);
-        }
-
-        VectorCopy(o->Position, b->BodyOrigin);
-        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
-        b->TransformPosition(BoneTransform[43], vRelativePos, vtaWorldPos, false);
-        vtaWorldPos[2] += 20.f;
-
-        if (rand_fps_check(1))
-        {
-            CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, (rand() % 3 == 0) ? vLight2 : vLight1, 25,
-                           Scale + 0.2f);
-            CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, (rand() % 2 == 0) ? vLight2 : vLight1, 25,
-                           Scale + 0.3f);
-        }
-
-        Vector(0.7f, 0.5f, 0.2f, vLight);
-        CreateSprite(BITMAP_LIGHT, vtaWorldPos, 2.f, vLight, o, 0.f);
-
-        Vector(0.7f, 0.2f, 0.6f, vLight);
-        VectorCopy(o->Position, b->BodyOrigin);
-        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
-        b->TransformPosition(BoneTransform[3], vRelativePos, vtaWorldPos, false);
-        CreateSprite(BITMAP_LIGHT, vtaWorldPos, 5.f, vLight, o, 0.f);
-
-        int iRedFlarePos[] = { 53, 56, 59, 62 };
-        for (int i = 0; i < 4; ++i) {
-            Vector(0.9f, 0.4f, 0.8f, vLight);
-            VectorCopy(o->Position, b->BodyOrigin);
-            b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
-            b->TransformPosition(BoneTransform[iRedFlarePos[i]], vRelativePos, vtaWorldPos, false);
-
-            CreateSprite(BITMAP_LIGHT, vtaWorldPos, 1.5f, vLight, o, 0.f);
-
-            if (rand_fps_check(3))
-            {
-                auto randpos = (float)(rand() % 30 + 5);
-
-                if (rand() % 2 == 0)
-                {
-                    vtaWorldPos[0] += randpos;
-                }
-                else {
-                    vtaWorldPos[0] -= randpos;
-                }
-
-                Vector(1.f, 0.8f, 0.4f, vLight);
-                CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, vLight, 15, Scale + 0.4f);
-            }
-        }
     }
 
     bool fullset = false;
@@ -9222,24 +9140,10 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             }
             else
             {
-                c->Object.Alpha -= 0.07f * FPS_ANIMATION_FACTOR;
                 float fAlpha = c->Object.Alpha;
                 if (fAlpha < 0) fAlpha = 0;
 
                 Vector(1.0f * fAlpha, 0.3f * fAlpha, 0.1f * fAlpha, c->Light);
-
-                // 			vec3_t vLight;
-                vec3_t vPos;
-                BMD* b = &Models[o->Type];
-
-                //Vector(0.5f, 0.5f, 0.5f, vLight);
-
-                int iNumBones = Models[o->Type].NumBones;
-                if (rand_fps_check(1))
-                {
-                    Models[o->Type].TransformByObjectBone(vPos, o, rand() % iNumBones);
-                    CreateParticle(BITMAP_TWINTAIL_WATER, vPos, o->Angle, c->Light, 2, 0.5f);
-                }
             }
         c->Object.BlendMesh = -1;
 
@@ -9376,22 +9280,12 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
         if (!g_isCharacterBuff(o, eBuff_Cloaking))
         {
-            vec3_t vLight, vPos;
-            Vector(0.4f, 0.6f, 0.8f, vLight);
-            VectorCopy(o->Position, vPos);
-            vPos[2] += 100.f;
-            CreateSprite(BITMAP_LIGHT, vPos, 6.0f, vLight, o, 0.5f);
-
-            float fLumi;
-            fLumi = sinf(WorldTime * 0.05f) * 0.4f + 0.9f;
-            Vector(fLumi * 0.3f, fLumi * 0.5f, fLumi * 0.8f, vLight);
-            CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, o);
-
+            vec3_t vLight;
             Vector(0.3f, 0.2f, 1.f, vLight);
             RenderAurora(BITMAP_MAGIC + 1, RENDER_BRIGHT, o->Position[0], o->Position[1], 2.5f, 2.5f, vLight);
 
             Vector(1.0f, 1.0f, 1.f, vLight);
-            fLumi = sinf(WorldTime * 0.0015f) * 0.3f + 0.5f;
+            const float fLumi = sinf(WorldTime * 0.0015f) * 0.3f + 0.5f;
             EnableAlphaBlend();
             Vector(fLumi * vLight[0], fLumi * vLight[1], fLumi * vLight[2], vLight);
             RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.5f, 1.5f, vLight, WorldTime * 0.01f);
@@ -9964,47 +9858,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
     if (!Bind)
     {
-        if (!g_isCharacterBuff(o, eBuff_Cloaking))
-        {
-            constexpr float CritDamageEffectInterval = 1200.0f;
-            if (g_isCharacterBuff(o, eBuff_AddCriticalDamage) && o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && (c->LastCritDamageEffect < WorldTime - CritDamageEffectInterval))
-            {
-                c->LastCritDamageEffect = WorldTime;
-                bool    renderSkillWave = (rand() % 20) ? true : false;
-                short   weaponType = -1;
-                Vector(0.f, 0.f, 0.f, p);
-                Vector(1.f, 0.6f, 0.3f, Light);
-                if (c->Weapon[0].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS)//&& ( c->Weapon[0].Type<MODEL_SHIELD || c->Weapon[0].Type>=MODEL_SHIELD+MAX_ITEM_INDEX ) )
-                {
-                    b->TransformPosition(o->BoneTransform[c->Weapon[0].LinkBone], p, Position, true);
-                    if (c->Weapon[0].Type >= MODEL_BOW && c->Weapon[0].Type < MODEL_BOW + MAX_ITEM_INDEX)
-                    {
-                        weaponType = 1;
-                    }
-                    CreateEffect(BITMAP_FLARE_FORCE, Position, o->Angle, o->Light, 1, o, weaponType, c->Weapon[0].LinkBone);
-                    if (renderSkillWave == false)
-                    {
-                        CreateEffect(MODEL_DARKLORD_SKILL, Position, o->Angle, Light, 0);
-                    }
-                }
-                if (c->Weapon[1].Type != -1 && c->Weapon[1].Type != MODEL_BOLT && (c->Weapon[1].Type < MODEL_SHIELD || c->Weapon[1].Type >= MODEL_SHIELD + MAX_ITEM_INDEX))
-                {
-                    b->TransformPosition(o->BoneTransform[c->Weapon[1].LinkBone], p, Position, true);
-                    if (c->Weapon[1].Type >= MODEL_BOW && c->Weapon[1].Type < MODEL_BOW + MAX_ITEM_INDEX)
-                    {
-                        weaponType = 1;
-                    }
-                    CreateEffect(BITMAP_FLARE_FORCE, Position, o->Angle, o->Light, 1, o, weaponType, c->Weapon[1].LinkBone);
-                    if (renderSkillWave == false)
-                    {
-                        CreateEffect(MODEL_DARKLORD_SKILL, Position, o->Angle, Light, 1);
-                    }
-                }
-
-                PlayBuffer(SOUND_CRITICAL, o);
-            }
-        }
-
         c->PostMoveProcess_Process();
 
         for (int i = 0; i < 2; i++)
@@ -10428,924 +10281,1300 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
     switch (o->Type)
     {
-    case MODEL_PLAYER:
-        Vector(0.f, 0.f, 0.f, p);
-
-        if (c->Class == CLASS_SOULMASTER)
-        {
-            if( !g_isCharacterBuff(o, eBuff_Cloaking) )
-   {
-      Vector(-4.f,11.f,0.f,p);
-      Vector(1.f,1.f,1.f,Light);
-          b->TransformPosition(o->BoneTransform[19],p,Position,true);
-      //CreateSprite(BITMAP_SPARK+1,Position,0.6f,Light,NULL); //Effect Point Armor SM
-
-      float scale = sinf(WorldTime*0.001f)*0.4f;
-      //CreateSprite(BITMAP_SHINY+1,Position,scale,Light,NULL); //Effect Point Armor SM
-        }
-     }
-        if (o->CurrentAction == PLAYER_SKILL_FLASH || o->CurrentAction == PLAYER_ATTACK_RIDE_ATTACK_FLASH || o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_FLASH)
-        {
-            if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD || o->CurrentAction == PLAYER_ATTACK_RIDE_ATTACK_FLASH || o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_FLASH)
-            {
-                if (o->AnimationFrame >= 1.2f && o->AnimationFrame < 1.6f)
-                {
-                    vec3_t Angle;
-                    Vector(1.f, 0.f, 0.f, Angle);
-                    CreateEffect(BITMAP_GATHERING, o->Position, o->Angle, o->Light, 2, o);
-
-                    PlayBuffer(SOUND_ELEC_STRIKE_READY);
-                }
-
-                if (o->AnimationFrame < 2.f)
-                {
-                    if (PartyNumber > 0 /*&& rand_fps_check(2)*/)
-                    {
-                        if (g_pPartyManager->IsPartyMemberChar(c) == false)
-                            break;
-
-                        for (int i = 0; i < PartyNumber; ++i)
-                        {
-                            PARTY_t* p = &Party[i];
-                            if (p->index < 0) continue;
-
-                            CHARACTER* tc = &CharactersClient[p->index];
-                            if (tc != c)
-                            {
-                                VectorCopy(tc->Object.Position, Position);
-                                Position[2] += 150.f;
-                                CreateJoint(BITMAP_JOINT_ENERGY, Position, Position, o->Angle, 12, o, 20.f);
-                                CreateJoint(BITMAP_JOINT_ENERGY, Position, Position, o->Angle, 13, o, 20.f);
-                            }
-                        }
-                    }
-                }
-
-                if (o->AnimationFrame >= 7 && o->AnimationFrame < 8)
-                {
-                    vec3_t Angle, Light;
-
-                    b->TransformPosition(o->BoneTransform[c->Weapon[0].LinkBone], p, Position, true);
-
-                    Vector(0.8f, 0.5f, 1.f, Light);
-                    Vector(180.f, 45.f, 0.f, Angle);
-                    CreateEffect(MODEL_DARKLORD_SKILL, Position, Angle, Light, 2);
-
-                    Vector(0.f, 0.f, o->Angle[2], Angle);
-                    CreateEffect(MODEL_DARKLORD_SKILL, Position, Angle, Light, 2);
-                }
-            }
-            else
-            {
-                if (g_isCharacterBuff(o, eBuff_Cloaking))
-                {
-                    b->TransformPosition(o->BoneTransform[c->Weapon[0].LinkBone], p, Position, true);
-                    Vector(0.1f, 0.1f, 1.f, Light);
-                    float Scale = o->AnimationFrame * 0.1f;
-                    CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale * 0.3f, Light, o);
-                    CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale * 1.f, o->Light, o, -(int)WorldTime * 0.1f);
-                    CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale * 2.5f, o->Light, o, (int)WorldTime * 0.1f);
-                }
-            }
-        }
-        else if (o->CurrentAction == PLAYER_SKILL_LIGHTNING_ORB
-            || o->CurrentAction == PLAYER_SKILL_LIGHTNING_ORB_UNI
-            || o->CurrentAction == PLAYER_SKILL_LIGHTNING_ORB_DINO
-            || o->CurrentAction == PLAYER_SKILL_LIGHTNING_ORB_FENRIR
-            )
-        {
-            vec3_t vLight, vRelativePos, vWorldPos;
-            Vector(1.0f, 1.0f, 1.0f, vLight);
-            Vector(0.f, 0.f, 0.f, vRelativePos);
-            Vector(0.f, 0.f, 0.f, vWorldPos);
-            // 27 "Bip01 R Forearm"
-            b->TransformPosition(o->BoneTransform[27], vRelativePos, vWorldPos, true);
-
-            Vector(0.2f, 0.2f, 1.0f, vLight);
-            CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
-            CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
-        }
-        else if (o->CurrentAction >= PLAYER_SKILL_SLEEP && o->CurrentAction <= PLAYER_SKILL_SLEEP_FENRIR)
-        {
-            auto iSkillType = CharacterAttribute->Skill[Hero->CurrentSkill];
-
-            vec3_t vLight, vRelativePos, vWorldPos;
-            Vector(1.0f, 1.0f, 1.0f, vLight);
-            Vector(0.f, 0.f, 0.f, vRelativePos);
-            Vector(0.f, 0.f, 0.f, vWorldPos);
-            b->TransformPosition(o->BoneTransform[37], vRelativePos, vWorldPos, true);	// "Bip01 L Hand"
-
-            float fRot = (WorldTime * 0.0006f) * 360.0f;
-
-            // shiny
-            if (iSkillType == AT_SKILL_ALICE_SLEEP
-                || iSkillType == AT_SKILL_ALICE_SLEEP_STR
-                )
-            {
-                Vector(0.5f, 0.2f, 0.8f, vLight);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_BLIND)
-            {
-                Vector(1.0f, 1.0f, 1.0f, vLight);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_THORNS)
-            {
-                Vector(0.8f, 0.5f, 0.2f, vLight);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_BERSERKER || iSkillType == AT_SKILL_ALICE_BERSERKER_STR)
-            {
-                Vector(1.0f, 0.1f, 0.2f, vLight);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_WEAKNESS)
-            {
-                Vector(0.8f, 0.1f, 0.1f, vLight);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_ENERVATION)
-            {
-                Vector(0.25f, 1.0f, 0.7f, Light);
-            }
-
-            if (iSkillType == AT_SKILL_ALICE_SLEEP
-                || iSkillType == AT_SKILL_ALICE_SLEEP_STR
-                || iSkillType == AT_SKILL_ALICE_THORNS
-                || iSkillType == AT_SKILL_ALICE_BERSERKER
-                || iSkillType == AT_SKILL_ALICE_BERSERKER_STR
-                || iSkillType == AT_SKILL_ALICE_WEAKNESS
-                || iSkillType == AT_SKILL_ALICE_ENERVATION
-                )
-            {
-                CreateSprite(BITMAP_SHINY + 5, vWorldPos, 1.0f, vLight, o, fRot);
-                CreateSprite(BITMAP_SHINY + 5, vWorldPos, 0.7f, vLight, o, -fRot);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_BLIND)
-            {
-                CreateSprite(BITMAP_SHINY + 5, vWorldPos, 1.0f, vLight, o, fRot, 1);
-                CreateSprite(BITMAP_SHINY + 5, vWorldPos, 0.7f, vLight, o, -fRot, 1);
-            }
-
-            // pin_light
-            if (iSkillType == AT_SKILL_ALICE_SLEEP
-                || iSkillType == AT_SKILL_ALICE_SLEEP_STR
-                )
-            {
-                Vector(0.7f, 0.0f, 0.8f, vLight);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_BLIND)
-            {
-                Vector(1.0f, 1.0f, 1.0f, vLight);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_THORNS)
-            {
-                Vector(0.8f, 0.5f, 0.2f, vLight);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_BERSERKER || iSkillType == AT_SKILL_ALICE_BERSERKER_STR)
-            {
-                Vector(1.0f, 0.1f, 0.2f, vLight);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_THORNS)
-            {
-                Vector(0.8f, 0.1f, 0.1f, vLight);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_ENERVATION)
-            {
-                Vector(0.25f, 1.f, 0.7f, vLight);
-            }
-
-            if (iSkillType == AT_SKILL_ALICE_SLEEP
-                || iSkillType == AT_SKILL_ALICE_SLEEP_STR
-                || iSkillType == AT_SKILL_ALICE_THORNS
-                || iSkillType == AT_SKILL_ALICE_BERSERKER
-                || iSkillType == AT_SKILL_ALICE_BERSERKER_STR
-                || iSkillType == AT_SKILL_ALICE_WEAKNESS
-                || iSkillType == AT_SKILL_ALICE_ENERVATION
-                )
-            {
-                CreateSprite(BITMAP_PIN_LIGHT, vWorldPos, 1.7f, vLight, o, (float)(rand() % 360));
-                CreateSprite(BITMAP_PIN_LIGHT, vWorldPos, 1.5f, vLight, o, (float)(rand() % 360));
-            }
-            else if (iSkillType == AT_SKILL_ALICE_BLIND)
-            {
-                CreateSprite(BITMAP_PIN_LIGHT, vWorldPos, 1.7f, vLight, o, (float)(rand() % 360), 1);
-                CreateSprite(BITMAP_PIN_LIGHT, vWorldPos, 1.5f, vLight, o, (float)(rand() % 360), 1);
-            }
-
-            // cra04, clud64
-            if (iSkillType == AT_SKILL_ALICE_SLEEP
-                || iSkillType == AT_SKILL_ALICE_SLEEP_STR
-                )
-            {
-                Vector(0.6f, 0.1f, 0.8f, vLight);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_BLIND)
-            {
-                Vector(1.0f, 1.0f, 1.0f, vLight);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_THORNS)
-            {
-                Vector(0.8f, 0.5f, 0.2f, vLight);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_BERSERKER || iSkillType == AT_SKILL_ALICE_BERSERKER_STR)
-            {
-                Vector(1.0f, 0.1f, 0.2f, vLight);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_THORNS)
-            {
-                Vector(0.8f, 0.1f, 0.1f, vLight);
-            }
-            else if (iSkillType == AT_SKILL_ALICE_ENERVATION)
-            {
-                Vector(0.25f, 1.f, 0.7f, vLight);
-            }
-            if (rand_fps_check(1))
-            {
-                if (iSkillType == AT_SKILL_ALICE_SLEEP
-                    || iSkillType == AT_SKILL_ALICE_SLEEP_STR
-                    || iSkillType == AT_SKILL_ALICE_THORNS
-                    || iSkillType == AT_SKILL_ALICE_BERSERKER
-                    || iSkillType == AT_SKILL_ALICE_BERSERKER_STR
-                    || iSkillType == AT_SKILL_ALICE_WEAKNESS
-                    || iSkillType == AT_SKILL_ALICE_ENERVATION
-                    )
-                {
-                    CreateParticle(BITMAP_LIGHT + 2, vWorldPos, o->Angle, vLight, 0, 1.0f);
-                    CreateParticle(BITMAP_CLUD64, vWorldPos, o->Angle, vLight, 3, 0.5f);
-                }
-                else if (iSkillType == AT_SKILL_ALICE_BLIND)
-                {
-                    CreateParticle(BITMAP_LIGHT + 2, vWorldPos, o->Angle, vLight, 4, 1.0f);
-                    CreateParticle(BITMAP_CLUD64, vWorldPos, o->Angle, vLight, 5, 0.5f);
-                }
-            }
-        }
-        // ChainLighting
-        else if (o->CurrentAction == PLAYER_SKILL_CHAIN_LIGHTNING)
-        {
-            vec3_t vRelativePos, vWorldPos, vLight;
-            Vector(0.f, 0.f, 0.f, vRelativePos);
-            Vector(0.4f, 0.4f, 0.8f, vLight);
-
-            b->TransformPosition(o->BoneTransform[37], vRelativePos, vWorldPos, true);	// "Bip01 L Hand"
-
-            if (rand_fps_check(1))
-            {
-                CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
-                CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
-            }
-
-            CreateSprite(BITMAP_LIGHT, vWorldPos, 1.5f, vLight, o, 0.f);
-
-            b->TransformPosition(o->BoneTransform[28], vRelativePos, vWorldPos, true);	// "Bip01 R Hand"
-            if (rand_fps_check(1))
-            {
-                CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
-                CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
-            }
-
-            CreateSprite(BITMAP_LIGHT, vWorldPos, 1.5f, vLight, o, 0.f);
-        }
-
-        if (g_isCharacterBuff(o, eBuff_Attack) || g_isCharacterBuff(o, eBuff_HelpNpc))
-        {
-            if (!g_isCharacterBuff(o, eBuff_Cloaking))
-            {
-                for (int i = 0; i < 2; i++)
-                {
-                    Luminosity = (float)(rand() % 30 + 70) * 0.01f;
-                    Vector(Luminosity * 1.f, Luminosity * 0.3f, Luminosity * 0.2f, Light);
-                    b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone], p, Position, true);
-                    CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, o);
-                    b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone - 6], p, Position, true);
-                    CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, o);
-                    b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone - 7], p, Position, true);
-                    CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, o);
-                }
-                if (!SearchJoint(MODEL_SPEARSKILL, o, 4)
-                    && !SearchJoint(MODEL_SPEARSKILL, o, 9))
-                {
-                    for (int i = 0; i < 5; i++)
-                    {
-                        CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 4, o, 20.0f, -1, 0, 0, c->TargetCharacter);
-                    }
-                }
-            }
-        }
-        else if (g_isCharacterBuff(o, eBuff_Defense))
-        {
-            if (!g_isCharacterBuff(o, eBuff_Cloaking))
-            {
-                if (SearchJoint(MODEL_SPEARSKILL, o, 4) == false && SearchJoint(MODEL_SPEARSKILL, o, 9) == false)
-                {
-                    for (int i = 0; i < 5; ++i)
-                    {
-                        CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 4, o, 20.0f, -1, 0, 0, c->TargetCharacter);
-                    }
-                }
-            }
-        }
-
-        if (g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal1)
-            || g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal2)
-            || g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal3)
-            || g_isCharacterBuff((&c->Object), eBuff_Seal1)
-            || g_isCharacterBuff((&c->Object), eBuff_Seal2)
-            || g_isCharacterBuff((&c->Object), eBuff_Seal3)
-            || g_isCharacterBuff((&c->Object), eBuff_Seal4))
-        {
-            if (SearchJoint(MODEL_SPEARSKILL, o, 10) == false
-                && SearchJoint(MODEL_SPEARSKILL, o, 11) == false)
-            {
-                for (int i = 0; i < 3; ++i)
-                {
-                    CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 10, o, 12.0f, -1, 0, 0, c->Key);
-                }
-            }
-        }
-        else
-        {
-            DeleteJoint(MODEL_SPEARSKILL, o, 10);
-            DeleteJoint(MODEL_SPEARSKILL, o, 11);
-        }
-        if (g_isCharacterBuff((&c->Object), eBuff_Thorns))
-        {
-            if (SearchJoint(BITMAP_FLARE, o, 43) == false)
-            {
-                vec3_t vLight;
-                Vector(0.9f, 0.6f, 0.1f, vLight);
-                CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 43, o, 50.f, 0, 0, 0, 0, vLight);
-            }
-        }
-        else
-        {
-            DeleteJoint(BITMAP_FLARE, o, 43);
-        }
-
-        if (g_isCharacterBuff((&c->Object), eBuff_Berserker))
-        {
-            if (!SearchEffect(BITMAP_ORORA, o, 0))
-            {
-                vec3_t vLight[2];
-                Vector(0.9f, 0.0f, 0.1f, vLight[0]);
-                Vector(1.0f, 1.0f, 1.0f, vLight[1]);
-                for (int i = 0; i < 4; ++i)
-                {
-                    CreateEffect(BITMAP_ORORA, o->Position, o->Angle, vLight[0], i, o);
-                    if (i == 2 || i == 3)
-                        CreateEffect(BITMAP_SPARK + 2, o->Position, o->Angle, vLight[1], i, o);
-                }
-                CreateEffect(BITMAP_LIGHT_MARKS, o->Position, o->Angle, vLight[0], 0, o);
-            }
-        }
-        else
-        {
-            for (int i = 0; i < 4; ++i)
-            {
-                DeleteEffect(BITMAP_ORORA, o, i);
-                if (i == 2 || i == 3)
-                    DeleteEffect(BITMAP_SPARK + 2, o, i);
-            }
-            DeleteEffect(BITMAP_LIGHT_MARKS, o);
-        }
-
-        if (g_isCharacterBuff((&c->Object), eDeBuff_Blind))
-        {
-            if (SearchEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o, 3) == false)
-            {
-                vec3_t vLight;
-                Vector(1.0f, 1.f, 1.f, vLight);
-                CreateEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o->Position, o->Angle, vLight, 3, o);
-            }
-        }
-        else
-        {
-            DeleteEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o, 3);
-        }
-
-        if (g_isCharacterBuff((&c->Object), eDeBuff_Sleep))
-        {
-            if (SearchEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o, 4) == false)
-            {
-                vec3_t vLight;
-                Vector(0.8f, 0.3f, 0.9f, vLight);
-                CreateEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o->Position, o->Angle, vLight, 4, o);
-            }
-        }
-        else
-        {
-            DeleteEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o, 4);
-        }
-
-        if (g_isCharacterBuff((&c->Object), eDeBuff_AttackDown))
-        {
-            if (!SearchEffect(BITMAP_SHINY + 6, o, 1))
-            {
-                vec3_t vLight;
-                Vector(1.4f, 0.2f, 0.2f, vLight);
-                CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 0.5f);
-                CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 1.f);
-            }
-        }
-        else
-        {
-            DeleteEffect(BITMAP_SHINY + 6, o, 1);
-            DeleteEffect(BITMAP_PIN_LIGHT, o, 1);
-        }
-
-        if (g_isCharacterBuff((&c->Object), eDeBuff_DefenseDown))
-        {
-            if (!SearchEffect(BITMAP_SHINY + 6, o, 2))
-            {
-                vec3_t vLight;
-                Vector(0.25f, 1.0f, 0.7f, Light);
-                CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, vLight, 2, o, -1, 0, 0, 0, 0.5f);
-                CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, vLight, 2, o, -1, 0, 0, 0, 1.f);
-            }
-        }
-        else
-        {
-            DeleteEffect(BITMAP_SHINY + 6, o, 2);
-            DeleteEffect(BITMAP_PIN_LIGHT, o, 2);
-        }
-
-        if (g_isCharacterBuff((&c->Object), eDeBuff_SahamuttDOT))
-        {
-            g_SummonSystem.CreateDamageOfTimeEffect(AT_SKILL_SUMMON_EXPLOSION, &c->Object);
-        }
-        else
-        {
-            g_SummonSystem.RemoveDamageOfTimeEffect(AT_SKILL_SUMMON_EXPLOSION, &c->Object);
-        }
-
-        if (g_isCharacterBuff((&c->Object), eDeBuff_NeilDOT))
-        {
-            g_SummonSystem.CreateDamageOfTimeEffect(AT_SKILL_SUMMON_REQUIEM, &c->Object);
-        }
-        else
-        {
-            g_SummonSystem.RemoveDamageOfTimeEffect(AT_SKILL_SUMMON_REQUIEM, &c->Object);
-        }
-
-        if (g_isCharacterBuff((&c->Object), eBuff_SwellOfMagicPower))
-        {
-            if (!g_isCharacterBuff((&c->Object), eBuff_Cloaking))
-            {
-                if (!SearchEffect(MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF, o, 0))
-                {
-                    vec3_t vLight;
-                    Vector(0.7f, 0.2f, 0.9f, vLight);
-                    CreateEffect(MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF, o->Position, o->Angle, vLight, 0, o);
-                }
-            }
-        }
-        else
-        {
-            DeleteEffect(MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF, o, 0);
-        }
-
-        if (gMapManager.InChaosCastle() == false)
-        {
-            if (c->ExtendState)
-            {
-                if ((o->CurrentAction < PLAYER_WALK_MALE ||
-                    o->CurrentAction == PLAYER_DARKLORD_STAND ||
-                    o->CurrentAction == PLAYER_STOP_RIDE_HORSE ||
-                    o->CurrentAction == PLAYER_STOP_TWO_HAND_SWORD_TWO
-                    ) &&
-                    c->ExtendStateTime >= 100)
-                {
-                    Vector(0.2f, 0.7f, 0.9f, Light);
-                    CreateEffect(BITMAP_LIGHT, o->Position, o->Angle, Light, 3, o);
-
-                    c->ExtendStateTime = 0;
-                }
-                c->ExtendStateTime += REFERENCE_FRAME_STEP;
-            }
-
-            if (fullset && g_pOption->GetRenderLevel() >= 2)
-            {
-                PartObjectColor(c->BodyPart[5].Type, o->Alpha, 0.5f, Light);
-
-                if (!g_isCharacterBuff(o, eBuff_Cloaking))
-                {
-                    for (int i = 0; i < 2; i++)
-                    {
-                        b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone], p, Position, true);
-                        CreateSprite(BITMAP_LIGHT, Position, 1.3f, Light, o);
-                        b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone - 6], p, Position, true);
-                        CreateSprite(BITMAP_LIGHT, Position, 1.3f, Light, o);
-                        b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone - 7], p, Position, true);
-                        CreateSprite(BITMAP_LIGHT, Position, 1.3f, Light, o);
-                    }
-                }
-                if ((c->BodyPart[BODYPART_BOOTS].Type >= MODEL_DRAGON_KNIGHT_BOOTS && c->BodyPart[BODYPART_BOOTS].Type <= MODEL_SUNLIGHT_BOOTS)
-                    || c->BodyPart[BODYPART_BOOTS].Type == MODEL_AURA_BOOTS)
-                {
-                    if (EquipmentLevelSet > 9)
-                    {
-                        VectorCopy(o->Light, Light);
-
-                        if (c->BodyPart[BODYPART_BOOTS].Type == MODEL_DRAGON_KNIGHT_BOOTS) Vector(0.65f, 0.3f, 0.1f, o->Light);
-                        if (c->BodyPart[BODYPART_BOOTS].Type == MODEL_VENOM_MIST_BOOTS) Vector(0.1f, 0.1f, 0.9f, o->Light);
-                        if (c->BodyPart[BODYPART_BOOTS].Type == MODEL_SYLPHID_RAY_BOOTS) Vector(0.0f, 0.32f, 0.24f, o->Light);
-                        if (c->BodyPart[BODYPART_BOOTS].Type == MODEL_VOLCANO_BOOTS) Vector(0.5f, 0.24f, 0.8f, o->Light);
-                        if (c->BodyPart[BODYPART_BOOTS].Type == MODEL_SUNLIGHT_BOOTS) Vector(0.6f, 0.4f, 0.0f, o->Light);
-                        if (c->BodyPart[BODYPART_BOOTS].Type == MODEL_AURA_BOOTS) Vector(0.6f, 0.3f, 0.4f, o->Light);
-                        if (EquipmentLevelSet == 10 && rand_fps_check(4))
-                        {
-                            Vector(0.0f, -18.0f, 50.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                            Vector(0.0f, 0.0f, 70.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                            Vector(0.0f, 18.0f, 50.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                        }
-                        else if (EquipmentLevelSet == 11 && rand_fps_check(3))
-                        {
-                            Vector(0.0f, -18.0f, 50.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                            Vector(0.0f, 0.0f, 70.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                            Vector(0.0f, 18.0f, 50.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                        }
-                        else if (EquipmentLevelSet == 12 && rand_fps_check(2))
-                        {
-                            Vector(0.0f, -18.0f, 50.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                            Vector(0.0f, 0.0f, 70.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                            Vector(0.0f, 18.0f, 50.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                        }
-                        else if (EquipmentLevelSet == 13 && rand_fps_check(1))
-                        {
-                            Vector(0.0f, -20.0f, 50.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                            Vector(0.0f, 0.0f, 70.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                            Vector(0.0f, 20.0f, 50.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                        }
-                        else if (EquipmentLevelSet == 14 && rand_fps_check(1))
-                        {
-                            Vector(0.0f, -20.0f, 50.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                            Vector(0.0f, 0.0f, 70.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                            Vector(0.0f, 20.0f, 50.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                        }
-                        else if (EquipmentLevelSet == 15 && rand_fps_check(1))
-                        {
-                            Vector(0.0f, -20.0f, 50.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                            Vector(0.0f, 0.0f, 70.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                            Vector(0.0f, 20.0f, 50.0f, p);
-                            b->TransformPosition(o->BoneTransform[0], p, Position, true);
-                            CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
-                        }
-
-                        VectorCopy(Light, o->Light);
-                    }
-                }
-
-                if (EquipmentLevelSet > 9)
-                {
-                    if (rand_fps_check(20))//(o->CurrentAction<PLAYER_WALK_MALE || o->CurrentAction>PLAYER_RUN_RIDE_WEAPON) && rand_fps_check(6))
-                    {
-                        VectorCopy(o->Light, Light);
-                        Vector(1.f, 1.f, 1.f, o->Light);
-
-                        if (EquipmentLevelSet == 10)
-                        {
-                            CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
-                        }
-                        else if (EquipmentLevelSet == 11)
-                        {
-                            if (rand() % 8 == 0)
-                            {
-                                CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 0, o);
-                            }
-                            else
-                            {
-                                CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
-                            }
-                        }
-                        else if (EquipmentLevelSet == 12)
-                        {
-                            if (rand() % 6 == 0)
-                            {
-                                CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
-                                CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
-                            }
-                            else if (rand() % 3 == 0)
-                            {
-                                CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
-                            }
-                        }
-                        else if (EquipmentLevelSet == 13)
-                        {
-                            if (rand() % 6 == 0)
-                            {
-                                CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
-                                CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
-                            }
-
-                            if (rand() % 4 == 0)
-                            {
-                                CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
-                                CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
-                            }
-                        }
-                        else if (EquipmentLevelSet == 14)
-                        {
-                            if (rand() % 6 == 0)
-                            {
-                                CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
-                                CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
-                            }
-
-                            if (rand() % 4 == 0)
-                            {
-                                CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
-                                CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
-                            }
-                        }
-                        else if (EquipmentLevelSet == 15)
-                        {
-                            if (rand() % 6 == 0)
-                            {
-                                CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
-                                CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
-                            }
-
-                            if (rand() % 4 == 0)
-                            {
-                                CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
-                                CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
-                            }
-                        }
-                        VectorCopy(Light, o->Light);
-                    }
-
-                    if (EquipmentLevelSet == 15 && g_pOption->GetRenderLevel() >= 4)
-                    {
-                        //left
-                        const bool spawnTrails = rand_fps_check(1);
-                        vec3_t vColor;
-                        Vector(13.0f, 10.0f, 3.0f, p);
-                        b->TransformPosition(o->BoneTransform[20], p, Position, true);
-                        VectorCopy(Position, o->EyeLeft);
-
-                        Vector(0.09f, 0.09f, 0.8f, vColor);
-                        // Sprites draw every frame; the trail joint spawns at the reference rate.
-                        if (spawnTrails)
-                            CreateJoint(BITMAP_JOINT_ENERGY, Position, o->Position, o->Angle, 55, o, 6.0f, -1, 0, 0, -1,
-                                        vColor);
-                        auto fRad = (float)sinf((WorldTime) * 0.002f);
-                        Vector(0.2f, 0.4f, 0.8f, vColor);
-                        CreateSprite(BITMAP_SHINY + 6, Position, 0.5f * fRad, vColor, o);
-
-                        Vector(0.1f, 0.15f, 1.0f, vColor);
-                        CreateSprite(BITMAP_PIN_LIGHT, Position, 1.3f * fRad + 0.5f, vColor, o, 100.0f);
-
-                        // right
-                        Vector(13.0f, 10.0f, -3.0f, p);
-                        b->TransformPosition(o->BoneTransform[20], p, Position, true);
-                        VectorCopy(Position, o->EyeRight);
-
-                        Vector(0.09f, 0.09f, 0.8f, vColor);
-                        if (spawnTrails)
-                            CreateJoint(BITMAP_JOINT_ENERGY, Position, o->Position, o->Angle, 56, o, 6.0f, -1, 0, 0, -1,
-                                        vColor);
-
-                        Vector(0.2f, 0.4f, 0.8f, vColor);
-                        CreateSprite(BITMAP_SHINY + 6, Position, 0.5f * fRad, vColor, o);
-
-                        Vector(0.1f, 0.15f, 1.0f, vColor);
-                        CreateSprite(BITMAP_PIN_LIGHT, Position, 1.3f * fRad + 0.5f, vColor, o, 80.0f);
-                    }
-                }
-            }
-        }
-        break;
-    case MODEL_BULL_FIGHTER:
-    case MODEL_DEATH_COW:
-        if ((o->Type == MODEL_BULL_FIGHTER && c->Level == 1) || (o->Type == MODEL_DEATH_COW))
-            RenderEye(o, 22, 23);
-        break;
-    case MODEL_CRUST:
-        RenderEye(o, 26, 27, 2.0f);
-        break;
-    case MODEL_HYDRA:
-        RenderLight(o, BITMAP_LIGHTNING + 1, 1.f, 63, 0.f, 0.f, 20.f);
-        RenderLight(o, BITMAP_SHINY + 2, 4.f, 63, 0.f, 0.f, 20.f);
-        break;
-    case MODEL_VEPAR:
-        RenderLight(o, BITMAP_LIGHTNING + 1, 0.5f, 30, 0.f, 0.f, -5.f);
-        RenderLight(o, BITMAP_LIGHTNING + 1, 0.5f, 39, 0.f, 0.f, -5.f);
-        RenderLight(o, BITMAP_SPARK, 4.f, 30, 0.f, 0.f, -5.f);
-        RenderLight(o, BITMAP_SPARK, 4.f, 39, 0.f, 0.f, -5.f);
-        RenderLight(o, BITMAP_SHINY + 2, 2.f, 30, 0.f, 0.f, -5.f);
-        RenderLight(o, BITMAP_SHINY + 2, 2.f, 39, 0.f, 0.f, -5.f);
-        break;
-    case MODEL_LIZARD:
-        RenderEye(o, 42, 43);
-        RenderLight(o, BITMAP_SPARK, 2.f, 26, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SPARK, 2.f, 31, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SPARK, 2.f, 36, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SPARK, 2.f, 41, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SHINY + 2, 1.f, 26, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SHINY + 2, 1.f, 31, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SHINY + 2, 1.f, 36, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SHINY + 2, 1.f, 41, 0.f, 0.f, 0.f);
-        break;
-    case MODEL_BAHAMUT:
-        RenderLight(o, BITMAP_SPARK, 4.f, 9, 0.f, 0.f, 5.f);
-        RenderLight(o, BITMAP_SHINY + 2, 3.f, 9, 0.f, 0.f, 5.f);
-        break;
-    case MODEL_MIX_NPC:
-        RenderLight(o, BITMAP_LIGHT, 1.5f, 32, 0.f, 0.f, 0.f);
-        break;
-    case MODEL_NPC_SEVINA:
-        RenderLight(o, BITMAP_LIGHT, 2.5f, 6, 0.f, 0.f, 0.f);
-        break;
-    case MODEL_NPC_DEVILSQUARE:
-    {
-        Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
-
-        float Scale = 0.3f;
-        Vector(Luminosity, Luminosity, Luminosity, Light);
-
-        Vector(3.5f, -12.f, 10.f, p);
-        b->TransformPosition(o->BoneTransform[20], p, Position, 1);
-        CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale, Light, o, (WorldTime / 50.0f));
-        CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale, Light, o, ((-WorldTime) / 50.0f));
-
-        if (rand_fps_check(30))
-        {
-            p[0] = Position[0] + rand() % 100 - 50;
-            p[1] = Position[1] + rand() % 100 - 50;
-            p[2] = Position[2] + rand() % 100 - 50;
-
-            CreateJoint(BITMAP_JOINT_ENERGY, p, Position, o->Angle, 6, NULL, 20.f);
-        }
-    }
-    break;
-    case MODEL_NPC_CASTEL_GATE:
-    {
-        vec3_t vPos, vRelative;
-        float fLumi, fScale;
-
-        fLumi = (sinf(WorldTime * 0.002f) + 2.0f) * 0.5f;
-        Vector(fLumi * 1.0f, fLumi * 0.5f, fLumi * 0.3f, Light);
-        fScale = fLumi / 2.0f;
-
-        Vector(4.0f, 3.0f, -4.0f, vRelative);
-        b->TransformPosition(o->BoneTransform[2], vRelative, vPos, true);
-
-        CreateSprite(BITMAP_LIGHT, vPos, fScale, Light, o);
-        CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, vPos, fScale, Light, o);
-
-        Vector(5.0f, 3.0f, 2.0f, vRelative);
-        b->TransformPosition(o->BoneTransform[4], vRelative, vPos, true);
-
-        CreateSprite(BITMAP_LIGHT, vPos, fScale, Light, o);
-        CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, vPos, fScale, Light, o);
-
-        if (rand_fps_check(4))
-        {
-            Vector(-20.0f, 10.0f, 0.0f, vRelative);
-            b->TransformPosition(
-                o->BoneTransform[3], vRelative, vPos, true);
-
-            vec3_t Angle;
-            VectorCopy(o->Angle, Angle);
-            Angle[0] += 120.0f;
-            Angle[2] -= 60.0f;
-
-            Vector(1.0f, 1.0f, 1.0f, Light);
-
-            CreateParticle(
-                BITMAP_FLAME, vPos, Angle, Light, 10, o->Scale / 2);
-        }
-    }
-    break;
-    case MODEL_SHADOW:
-        Vector(0.f, 0.f, 0.f, p);
-        Luminosity = 1.f;
-        if (c->Level == 0)
-        {
-            Vector(Luminosity * 1.f, Luminosity * 1.f, Luminosity * 1.f, Light);
-        }
-        else
-        {
-            Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.f, Light);
-            Vector(Luminosity * 0.2f, Luminosity * 0.7f, Luminosity * 0.1f, Light);
-        }
-
-        for (int i = 0; i < b->NumBones; i++)
-        {
-            if (!b->Bones[i].Dummy)
-            {
-                if ((i >= 15 && i <= 20) || (i >= 27 && i <= 32))
-                {
-                }
-                else
-                {
-                    b->TransformPosition(o->BoneTransform[i], p, Position, true);
-                    if (c->Level == 0)
-                        CreateSprite(BITMAP_SHINY + 1, Position, 2.5f, Light, o, 0.f, 1);
-                    else
-                        CreateSprite(BITMAP_MAGIC + 1, Position, 0.8f, Light, o, 0.f);
-                    if (rand_fps_check(4) && o->CurrentAction >= MONSTER01_ATTACK1 && o->CurrentAction <= MONSTER01_ATTACK2)
-                    {
-                        CreateParticle(BITMAP_ENERGY, Position, o->Angle, Light);
-                    }
-                    //CreateParticle(BITMAP_SMOKE,Position,o->Angle,Light,1);
-                }
-            }
-        }
-        break;
-    case MODEL_SEED_MASTER:
-    {
-        float fLumi, fScale;
-        fScale = 2.0f;
-        b->TransformByObjectBone(Position, o, 39);
-
-        fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.3f + 0.4f;
-        Vector(fLumi * 0.5f, fLumi * 0.5f, fLumi * 0.5f, Light);
-        CreateSprite(BITMAP_FLARE, Position, fScale, Light, o);
-    }
-    break;
-    case MODEL_SEED_INVESTIGATOR:
-    {
-        float fLumi, fScale;
-        fScale = 1.0f;
-        for (int i = 69; i <= 70; ++i)
-        {
-            b->TransformByObjectBone(Position, o, i);
-
-            fLumi = (sinf(WorldTime * 0.001f) + 1.0f) * 0.3f + 0.4f;
-            Vector(fLumi * 0.5f, fLumi * 0.5f, fLumi * 0.5f, Light);
-            CreateSprite(BITMAP_FLARE_BLUE, Position, fScale, Light, o);
-        }
-    }
-    break;
     default:
     {
-        if (RenderHellasMonsterVisual(c, o, b)) break;
-        if (battleCastle::RenderBattleCastleMonsterVisual(c, o, b)) break;
-        if (M31HuntingGround::RenderHuntingGroundMonsterVisual(c, o, b)) break;
-        if (M34CryingWolf2nd::RenderCryingWolf2ndMonsterVisual(c, o, b)) break;
-        if (M34CryWolf1st::RenderCryWolf1stMonsterVisual(c, o, b)) break;
-        if (M33Aida::RenderAidaMonsterVisual(c, o, b)) break;
-        if (M37Kanturu1st::RenderKanturu1stMonsterVisual(c, o, b)) break;
-        if (M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(c, o, b)) break;
-        if (M39Kanturu3rd::RenderKanturu3rdMonsterVisual(c, o, b)) break;
-        if (SEASON3A::CGM3rdChangeUp::Instance().RenderBalgasBarrackMonsterVisual(c, o, b))	break;
-        if (g_CursedTemple->RenderMonsterVisual(c, o, b)) break;
-        if (SEASON3B::GMNewTown::RenderMonsterVisual(c, o, b)) break;
-        if (SEASON3C::GMSwampOfQuiet::RenderMonsterVisual(c, o, b)) break;
-        if (TheMapProcess().RenderMonsterVisual(c, o, b) == true) break;
+        if (battleCastle::RenderBattleCastleMonsterVisual(c, o, b))
+            break;
+        if (M31HuntingGround::RenderHuntingGroundMonsterVisual(c, o, b))
+            break;
+        if (M34CryingWolf2nd::RenderCryingWolf2ndMonsterVisual(c, o, b))
+            break;
+        if (M34CryWolf1st::RenderCryWolf1stMonsterVisual(c, o, b))
+            break;
+        if (M37Kanturu1st::RenderKanturu1stMonsterVisual(c, o, b))
+            break;
+        if (M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(c, o, b))
+            break;
+        if (TheMapProcess().RenderMonsterVisual(c, o, b) == true)
+            break;
     }
     }
 
     if (SceneFlag == MAIN_SCENE)
     {
-        if ((o->Kind == KIND_PLAYER
-            && gMapManager.InBloodCastle() == false
-            && gMapManager.InChaosCastle() == false
-            && gMapManager.InBattleCastle()) == false)
+        if ((o->Kind == KIND_PLAYER && gMapManager.InBloodCastle() == false && gMapManager.InChaosCastle() == false &&
+             gMapManager.InBattleCastle()) == false)
         {
             RenderProtectGuildMark(c);
         }
     }
 
     giPetManager::RenderPet(c);
+}
 
-    if (gCharacterManager.GetBaseClass(c->Class) == CLASS_SUMMONER)
+namespace
+{
+// The effects RenderCharacter used to spawn while drawing these characters' bodies.
+void UpdateCharacterBodyEffects(CHARACTER* c, OBJECT* o)
+{
+    // The Doppelganger's death fade, drawn with the alpha it leaves.
+    if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM &&
+        o->Type != MODEL_DARK_PHEONIX_SHIELD && gMapManager.WorldActive != WD_65DOPPLEGANGER1 &&
+        o->CurrentAction == PLAYER_DIE1)
     {
-        PART_t* w = &c->Weapon[1];
-        g_SummonSystem.MoveEquipEffect(c, w->Type, w->Level, w->ExcellentFlags);
+        c->Object.Alpha -= 0.07f * FPS_ANIMATION_FACTOR;
+        const float fAlpha = c->Object.Alpha < 0 ? 0.f : c->Object.Alpha;
+        vec3_t vLight, vPos;
+        Vector(1.0f * fAlpha, 0.3f * fAlpha, 0.1f * fAlpha, vLight);
+
+        int iNumBones = Models[o->Type].NumBones;
+        if (rand_fps_check(1))
+        {
+            Models[o->Type].TransformByObjectBone(vPos, o, rand() % iNumBones);
+            CreateParticle(BITMAP_TWINTAIL_WATER, vPos, o->Angle, vLight, 2, 0.5f);
+        }
     }
+
+    if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_GM_CHARACTER &&
+        !g_isCharacterBuff(o, eBuff_Cloaking))
+    {
+        vec3_t vLight, vPos;
+        Vector(0.4f, 0.6f, 0.8f, vLight);
+        VectorCopy(o->Position, vPos);
+        vPos[2] += 100.f;
+        CreateSprite(BITMAP_LIGHT, vPos, 6.0f, vLight, o, 0.5f);
+
+        float fLumi;
+        fLumi = sinf(WorldTime * 0.05f) * 0.4f + 0.9f;
+        Vector(fLumi * 0.3f, fLumi * 0.5f, fLumi * 0.8f, vLight);
+        CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, o);
+    }
+}
+} // namespace
+
+namespace
+{
+// The crit damage burst at the weapons in hand, which RenderCharacter used to spawn while drawing them.
+void UpdateHeldWeaponEffects(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    if (AreWeaponsOnBack(c, o))
+        return;
+
+    vec3_t p, Position, Light;
+    if (!g_isCharacterBuff(o, eBuff_Cloaking))
+    {
+        constexpr float CritDamageEffectInterval = 1200.0f;
+        if (g_isCharacterBuff(o, eBuff_AddCriticalDamage) && o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER &&
+            (c->LastCritDamageEffect < WorldTime - CritDamageEffectInterval))
+        {
+            c->LastCritDamageEffect = WorldTime;
+            bool renderSkillWave = (rand() % 20) ? true : false;
+            short weaponType = -1;
+            Vector(0.f, 0.f, 0.f, p);
+            Vector(1.f, 0.6f, 0.3f, Light);
+            if (c->Weapon[0].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS)
+            {
+                b->TransformPosition(o->BoneTransform[c->Weapon[0].LinkBone], p, Position, true);
+                if (c->Weapon[0].Type >= MODEL_BOW && c->Weapon[0].Type < MODEL_BOW + MAX_ITEM_INDEX)
+                {
+                    weaponType = 1;
+                }
+                CreateEffect(BITMAP_FLARE_FORCE, Position, o->Angle, o->Light, 1, o, weaponType, c->Weapon[0].LinkBone);
+                if (renderSkillWave == false)
+                {
+                    CreateEffect(MODEL_DARKLORD_SKILL, Position, o->Angle, Light, 0);
+                }
+            }
+            if (c->Weapon[1].Type != -1 && c->Weapon[1].Type != MODEL_BOLT &&
+                (c->Weapon[1].Type < MODEL_SHIELD || c->Weapon[1].Type >= MODEL_SHIELD + MAX_ITEM_INDEX))
+            {
+                b->TransformPosition(o->BoneTransform[c->Weapon[1].LinkBone], p, Position, true);
+                if (c->Weapon[1].Type >= MODEL_BOW && c->Weapon[1].Type < MODEL_BOW + MAX_ITEM_INDEX)
+                {
+                    weaponType = 1;
+                }
+                CreateEffect(BITMAP_FLARE_FORCE, Position, o->Angle, o->Light, 1, o, weaponType, c->Weapon[1].LinkBone);
+                if (renderSkillWave == false)
+                {
+                    CreateEffect(MODEL_DARKLORD_SKILL, Position, o->Angle, Light, 1);
+                }
+            }
+
+            PlayBuffer(SOUND_CRITICAL, o);
+        }
+    }
+}
+} // namespace
+
+namespace
+{
+// The effects RenderCharacter used to spawn while drawing these monsters' bodies; p and Light start as there.
+void UpdateMonsterBodyEffects(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    vec3_t p, Position, Light;
+    Vector(0.f, 0.f, 0.f, p);
+    Vector(1.f, 1.f, 1.f, Light);
+
+    if (c->MonsterIndex == MONSTER_GOLDEN_GREAT_DRAGON)
+    {
+        float fEffectScale = o->Scale * 1.6f;
+        vec3_t v3EffectLightColor, v3EffectPosition;
+
+        Vector(1.0f, 0.6f, 0.1f, v3EffectLightColor);
+
+        b->TransformPosition(o->BoneTransform[0], p, v3EffectPosition, true);
+        CreateSprite(BITMAP_LIGHTMARKS, v3EffectPosition, 2.5f, v3EffectLightColor, o);
+
+        b->TransformPosition(o->BoneTransform[4], p, v3EffectPosition, true);
+        CreateSprite(BITMAP_LIGHTMARKS, v3EffectPosition, 2.5f, v3EffectLightColor, o);
+
+        b->TransformPosition(o->BoneTransform[57], p, v3EffectPosition, true);
+        CreateSprite(BITMAP_LIGHTMARKS, v3EffectPosition, 2.5f, v3EffectLightColor, o);
+
+        b->TransformPosition(o->BoneTransform[60], p, v3EffectPosition, true);
+        CreateSprite(BITMAP_LIGHTMARKS, v3EffectPosition, 2.5f, v3EffectLightColor, o);
+
+        b->TransformPosition(o->BoneTransform[87], p, v3EffectPosition, true);
+        CreateSprite(BITMAP_LIGHTMARKS, v3EffectPosition, 2.5f, v3EffectLightColor, o);
+
+        Vector(1.0f, 0.8f, 0.1f, v3EffectLightColor);
+        if (rand_fps_check(1))
+        {
+            b->TransformPosition(o->BoneTransform[57], p, v3EffectPosition, true);
+            CreateEffect(MODEL_EFFECT_FIRE_HIK3_MONO, v3EffectPosition, o->Angle, v3EffectLightColor, 1, NULL, -1, 0, 0,
+                         0, fEffectScale);
+
+            b->TransformPosition(o->BoneTransform[60], p, v3EffectPosition, true);
+            CreateEffect(MODEL_EFFECT_FIRE_HIK3_MONO, v3EffectPosition, o->Angle, v3EffectLightColor, 1, NULL, -1, 0, 0,
+                         0, fEffectScale);
+
+            b->TransformPosition(o->BoneTransform[66], p, v3EffectPosition, true);
+            CreateEffect(MODEL_EFFECT_FIRE_HIK3_MONO, v3EffectPosition, o->Angle, v3EffectLightColor, 1, NULL, -1, 0, 0,
+                         0, fEffectScale);
+
+            b->TransformPosition(o->BoneTransform[78], p, v3EffectPosition, true);
+            CreateEffect(MODEL_EFFECT_FIRE_HIK3_MONO, v3EffectPosition, o->Angle, v3EffectLightColor, 1, NULL, -1, 0, 0,
+                         0, fEffectScale);
+
+            b->TransformPosition(o->BoneTransform[91], p, v3EffectPosition, true);
+            CreateEffect(MODEL_EFFECT_FIRE_HIK3_MONO, v3EffectPosition, o->Angle, v3EffectLightColor, 1, NULL, -1, 0, 0,
+                         0, fEffectScale);
+        }
+    }
+    else if (c->MonsterIndex == MONSTER_ALQUAMOS)
+    {
+        float Luminosity = (float)(rand() % 30 + 70) * 0.01f;
+        Vector(Luminosity * 0.8f, Luminosity * 0.9f, Luminosity * 1.f, Light);
+
+        for (int i = 0; i < 9; ++i)
+        {
+            b->TransformPosition(o->BoneTransform[g_chStar[i]], p, Position, true);
+            CreateSprite(BITMAP_LIGHT, Position, 0.6f, Light, o);
+        }
+
+        Vector(Luminosity * 0.6f, Luminosity * 0.7f, Luminosity * 0.8f, Light);
+
+        if (rand_fps_check(1))
+        {
+            for (int i = 0; i < 3; i++)
+            {
+                Vector((float)(rand() % 20 - 10), (float)(rand() % 20 - 10), (float)(rand() % 20 - 10), p);
+                b->TransformPosition(o->BoneTransform[rand() % b->NumBones], p, Position, true);
+                CreateParticle(BITMAP_SPARK + 1, Position, o->Angle, Light, 3);
+            }
+        }
+    }
+    else if (c->MonsterIndex == MONSTER_QUEEN_RAINER)
+    {
+        b->TransformPosition(o->BoneTransform[20], p, Position, true);
+        CreateSprite(BITMAP_LIGHT, Position, 0.8f, Light, o);
+    }
+    else if (c->MonsterIndex == MONSTER_DRAKAN || c->MonsterIndex == MONSTER_GREAT_DRAKAN)
+    {
+        vec3_t pos1, pos2;
+        switch (c->MonsterIndex)
+        {
+        case MONSTER_DRAKAN:
+            Vector(0.1f, 0.1f, 1.f, Light);
+
+            for (int i = 13; i < 27; ++i)
+            {
+                b->TransformPosition(o->BoneTransform[i], p, Position, true);
+                CreateSprite(BITMAP_LIGHT, Position, 0.8f, Light, o);
+
+                VectorCopy(Position, pos2);
+                if ((i >= 14 && i <= 16 || i == 23) && rand_fps_check(1))
+                {
+                    CreateJoint(BITMAP_JOINT_THUNDER, pos1, pos2, o->Angle, 7, NULL, 20.f);
+                }
+                VectorCopy(Position, pos1);
+            }
+
+            for (int i = 52; i < 59; ++i)
+            {
+                b->TransformPosition(o->BoneTransform[i], p, Position, true);
+                CreateSprite(BITMAP_LIGHT, Position, 0.8f, Light, o);
+            }
+            break;
+        case MONSTER_GREAT_DRAKAN:
+            Vector(1.f, 1.f, 1.0f, Light);
+
+            if (rand_fps_check(1))
+            {
+                for (int i = 18; i < 19; ++i)
+                {
+                    Vector(0.f, 0.f, 0.f, p);
+                    b->TransformPosition(o->BoneTransform[i], p, Position, true);
+                    CreateParticle(BITMAP_FIRE, Position, o->Angle, Light, 0, 0.3f);
+                }
+            }
+            break;
+        }
+    }
+}
+} // namespace
+
+namespace
+{
+void UpdateEventCharacterEffects(OBJECT* o)
+{
+    if (o->Type == MODEL_LUNAR_RABBIT)
+    {
+        vec3_t vLight;
+        vec3_t vPos, vRelatedPos;
+        Vector(0.3f, 0.3f, 0.0f, vLight);
+        Vector(0.f, 0.f, 0.f, vRelatedPos);
+
+        if (o->CurrentAction == MONSTER01_WALK)
+        {
+            o->m_iAnimation += REFERENCE_FRAME_STEP;
+            if (rand_fps_check(20))
+                PlayBuffer(SOUND_MOONRABBIT_WALK);
+        }
+
+        if (o->CurrentAction == MONSTER01_SHOCK)
+        {
+            if (o->AnimationFrame > 2.f && o->AnimationFrame <= 3.f && rand_fps_check(1))
+                PlayBuffer(SOUND_MOONRABBIT_DAMAGE);
+        }
+
+        if (o->CurrentAction == MONSTER01_DIE)
+        {
+            if (o->AnimationFrame > 1.f && o->AnimationFrame <= 2.f && rand_fps_check(1))
+                PlayBuffer(SOUND_MOONRABBIT_DEAD);
+
+            if (o->AnimationFrame > 9.f)
+            {
+                if (o->SubType != -1)
+                {
+                    Vector(0.5f, 0.5f, 0.0f, vLight);
+                    BoneManager::GetBonePosition(o, L"Rabbit_1", vPos);
+
+                    Vector(0.7f, 1.0f, 0.6f, vLight);
+                    vec3_t vMoonPos;
+                    VectorCopy(vPos, vMoonPos);
+                    vMoonPos[2] += 28.f;
+                    CreateEffect(MODEL_MOONHARVEST_MOON, vMoonPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 0.5f);
+
+                    Vector(0.4f, 0.4f, 0.8f, vLight);
+                    CreateParticle(BITMAP_EXPLOTION_MONO, vPos, o->Angle, vLight, 10, 1.0f);
+
+                    Vector(1.0f, 1.0f, 1.0f, vLight);
+                    for (int i = 0; i < 200; i++)
+                    {
+                        CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 21);
+                    }
+
+                    for (int i = 0; i < 150; i++)
+                    {
+                        CreateParticle(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 22);
+                    }
+                    Vector(1.0f, 1.0f, 1.0f, vLight);
+                    switch (o->SubType)
+                    {
+                    case 0:
+                    {
+                        for (int i = 0; i < 10; i++)
+                        {
+                            CreateEffect(MODEL_MOONHARVEST_GAM, vPos, o->Angle, vLight);
+                        }
+                    }
+                    break;
+                    case 1:
+                    {
+                        for (int i = 0; i < 5; i++)
+                        {
+                            CreateEffect(MODEL_MOONHARVEST_SONGPUEN1, vPos, o->Angle, vLight);
+                            CreateEffect(MODEL_MOONHARVEST_SONGPUEN2, vPos, o->Angle, vLight);
+                        }
+                    }
+                    break;
+                    case 2:
+                    {
+                        for (int i = 0; i < 10; i++)
+                        {
+                            CreateEffect(MODEL_NEWYEARSDAY_EVENT_BEKSULKI, vPos, o->Angle, vLight);
+                        }
+                    }
+                    break;
+                    }
+
+                    o->SubType = -1;
+
+                    if (o->AnimationFrame <= 10.f)
+                    {
+                        // flare
+                        Vector(1.0f, 0.0f, 0.0f, vLight);
+                        CreateSprite(BITMAP_LIGHT, vPos, 8.0f, vLight, o);
+                    }
+                }
+            }
+        }
+        else
+        {
+            BoneManager::GetBonePosition(o, L"Rabbit_1", vPos); // Bip01 Spine
+            Vector(0.4f, 0.4f, 0.9f, vLight);
+            CreateSprite(BITMAP_LIGHT, vPos, 3.0f, vLight, o); // flare01.jpg
+
+            BoneManager::GetBonePosition(o, L"Rabbit_2", vPos); // Bip01 Head
+            Vector(0.4f, 0.4f, 0.9f, vLight);
+            CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, o); // flare01.jpg
+
+            BoneManager::GetBonePosition(o, L"Rabbit_4", vPos); // Bip01 Pelvis
+            Vector(0.4f, 0.4f, 0.9f, vLight);
+            CreateSprite(BITMAP_LIGHT, vPos, 1.0f, vLight, o); // flare01.jpg
+        }
+    }
+
+    if (o->Type == MODEL_NPC_CHERRYBLOSSOM)
+    {
+        vec3_t vRelativePos, vtaWorldPos, vLight, vLight1, vLight2;
+        BMD* b = &Models[MODEL_NPC_CHERRYBLOSSOM];
+
+        Vector(0.f, 0.f, 0.f, vRelativePos);
+        Vector(1.f, 0.6f, 0.8f, vLight);
+        Vector(0.3f, 0.3f, 0.3f, vLight1);
+        Vector(1.f, 1.f, 1.f, vLight2);
+
+        float Scale = absf(sinf(WorldTime * 0.002f)) * 0.2f;
+
+        if (rand_fps_check(2))
+        {
+            VectorCopy(o->Position, b->BodyOrigin);
+            b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                         o->HeadAngle);
+            b->TransformPosition(BoneTransform[43], vRelativePos, vtaWorldPos, false);
+            vtaWorldPos[2] += 20.f;
+
+            CreateParticle(BITMAP_CHERRYBLOSSOM_EVENT_PETAL, vtaWorldPos, o->Angle,
+                           (rand() % 3 == 0) ? vLight : vLight1, 1, 0.3f);
+        }
+
+        VectorCopy(o->Position, b->BodyOrigin);
+        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
+        b->TransformPosition(BoneTransform[43], vRelativePos, vtaWorldPos, false);
+        vtaWorldPos[2] += 20.f;
+
+        if (rand_fps_check(1))
+        {
+            CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, (rand() % 3 == 0) ? vLight2 : vLight1, 25,
+                           Scale + 0.2f);
+            CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, (rand() % 2 == 0) ? vLight2 : vLight1, 25,
+                           Scale + 0.3f);
+        }
+
+        Vector(0.7f, 0.5f, 0.2f, vLight);
+        CreateSprite(BITMAP_LIGHT, vtaWorldPos, 2.f, vLight, o, 0.f);
+
+        Vector(0.7f, 0.2f, 0.6f, vLight);
+        VectorCopy(o->Position, b->BodyOrigin);
+        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
+        b->TransformPosition(BoneTransform[3], vRelativePos, vtaWorldPos, false);
+        CreateSprite(BITMAP_LIGHT, vtaWorldPos, 5.f, vLight, o, 0.f);
+
+        int iRedFlarePos[] = {53, 56, 59, 62};
+        for (int i = 0; i < 4; ++i)
+        {
+            Vector(0.9f, 0.4f, 0.8f, vLight);
+            VectorCopy(o->Position, b->BodyOrigin);
+            b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                         o->HeadAngle);
+            b->TransformPosition(BoneTransform[iRedFlarePos[i]], vRelativePos, vtaWorldPos, false);
+
+            CreateSprite(BITMAP_LIGHT, vtaWorldPos, 1.5f, vLight, o, 0.f);
+
+            if (rand_fps_check(3))
+            {
+                auto randpos = (float)(rand() % 30 + 5);
+
+                if (rand() % 2 == 0)
+                {
+                    vtaWorldPos[0] += randpos;
+                }
+                else
+                {
+                    vtaWorldPos[0] -= randpos;
+                }
+
+                Vector(1.f, 0.8f, 0.4f, vLight);
+                CreateParticle(BITMAP_SPARK + 1, vtaWorldPos, o->Angle, vLight, 15, Scale + 0.4f);
+            }
+        }
+    }
+}
+} // namespace
+
+namespace
+{
+void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    vec3_t p, Position, Light;
+    float Luminosity;
+    // RenderCharacter's check: it also sets EquipmentLevelSet, which the set glow reads.
+    const bool fullset = !c->HideShadow && CheckFullSet(c);
+
+    Vector(0.f, 0.f, 0.f, p);
+
+    if (c->Class == CLASS_SOULMASTER)
+    {
+        if (!g_isCharacterBuff(o, eBuff_Cloaking))
+        {
+            Vector(-4.f, 11.f, 0.f, p);
+            Vector(1.f, 1.f, 1.f, Light);
+            b->TransformPosition(o->BoneTransform[19], p, Position, true);
+            // CreateSprite(BITMAP_SPARK+1,Position,0.6f,Light,NULL); //Effect Point Armor SM
+
+            float scale = sinf(WorldTime * 0.001f) * 0.4f;
+            // CreateSprite(BITMAP_SHINY+1,Position,scale,Light,NULL); //Effect Point Armor SM
+        }
+    }
+    if (o->CurrentAction == PLAYER_SKILL_FLASH || o->CurrentAction == PLAYER_ATTACK_RIDE_ATTACK_FLASH ||
+        o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_FLASH)
+    {
+        if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD ||
+            o->CurrentAction == PLAYER_ATTACK_RIDE_ATTACK_FLASH ||
+            o->CurrentAction == PLAYER_FENRIR_ATTACK_DARKLORD_FLASH)
+        {
+            if (o->AnimationFrame >= 1.2f && o->AnimationFrame < 1.6f)
+            {
+                vec3_t Angle;
+                Vector(1.f, 0.f, 0.f, Angle);
+                CreateEffect(BITMAP_GATHERING, o->Position, o->Angle, o->Light, 2, o);
+
+                PlayBuffer(SOUND_ELEC_STRIKE_READY);
+            }
+
+            if (o->AnimationFrame < 2.f)
+            {
+                if (PartyNumber > 0 /*&& rand_fps_check(2)*/)
+                {
+                    if (g_pPartyManager->IsPartyMemberChar(c) == false)
+                        return;
+
+                    for (int i = 0; i < PartyNumber; ++i)
+                    {
+                        PARTY_t* p = &Party[i];
+                        if (p->index < 0)
+                            continue;
+
+                        CHARACTER* tc = &CharactersClient[p->index];
+                        if (tc != c)
+                        {
+                            VectorCopy(tc->Object.Position, Position);
+                            Position[2] += 150.f;
+                            CreateJoint(BITMAP_JOINT_ENERGY, Position, Position, o->Angle, 12, o, 20.f);
+                            CreateJoint(BITMAP_JOINT_ENERGY, Position, Position, o->Angle, 13, o, 20.f);
+                        }
+                    }
+                }
+            }
+
+            if (o->AnimationFrame >= 7 && o->AnimationFrame < 8)
+            {
+                vec3_t Angle, Light;
+
+                b->TransformPosition(o->BoneTransform[c->Weapon[0].LinkBone], p, Position, true);
+
+                Vector(0.8f, 0.5f, 1.f, Light);
+                Vector(180.f, 45.f, 0.f, Angle);
+                CreateEffect(MODEL_DARKLORD_SKILL, Position, Angle, Light, 2);
+
+                Vector(0.f, 0.f, o->Angle[2], Angle);
+                CreateEffect(MODEL_DARKLORD_SKILL, Position, Angle, Light, 2);
+            }
+        }
+        else
+        {
+            if (g_isCharacterBuff(o, eBuff_Cloaking))
+            {
+                b->TransformPosition(o->BoneTransform[c->Weapon[0].LinkBone], p, Position, true);
+                Vector(0.1f, 0.1f, 1.f, Light);
+                float Scale = o->AnimationFrame * 0.1f;
+                CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale * 0.3f, Light, o);
+                CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale * 1.f, o->Light, o, -(int)WorldTime * 0.1f);
+                CreateSprite(BITMAP_LIGHTNING + 1, Position, Scale * 2.5f, o->Light, o, (int)WorldTime * 0.1f);
+            }
+        }
+    }
+    else if (o->CurrentAction == PLAYER_SKILL_LIGHTNING_ORB || o->CurrentAction == PLAYER_SKILL_LIGHTNING_ORB_UNI ||
+             o->CurrentAction == PLAYER_SKILL_LIGHTNING_ORB_DINO ||
+             o->CurrentAction == PLAYER_SKILL_LIGHTNING_ORB_FENRIR)
+    {
+        vec3_t vLight, vRelativePos, vWorldPos;
+        Vector(1.0f, 1.0f, 1.0f, vLight);
+        Vector(0.f, 0.f, 0.f, vRelativePos);
+        Vector(0.f, 0.f, 0.f, vWorldPos);
+        // 27 "Bip01 R Forearm"
+        b->TransformPosition(o->BoneTransform[27], vRelativePos, vWorldPos, true);
+
+        Vector(0.2f, 0.2f, 1.0f, vLight);
+        CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
+        CreateEffectFpsChecked(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
+    }
+    else if (o->CurrentAction >= PLAYER_SKILL_SLEEP && o->CurrentAction <= PLAYER_SKILL_SLEEP_FENRIR)
+    {
+        auto iSkillType = CharacterAttribute->Skill[Hero->CurrentSkill];
+
+        vec3_t vLight, vRelativePos, vWorldPos;
+        Vector(1.0f, 1.0f, 1.0f, vLight);
+        Vector(0.f, 0.f, 0.f, vRelativePos);
+        Vector(0.f, 0.f, 0.f, vWorldPos);
+        b->TransformPosition(o->BoneTransform[37], vRelativePos, vWorldPos, true); // "Bip01 L Hand"
+
+        float fRot = (WorldTime * 0.0006f) * 360.0f;
+
+        // shiny
+        if (iSkillType == AT_SKILL_ALICE_SLEEP || iSkillType == AT_SKILL_ALICE_SLEEP_STR)
+        {
+            Vector(0.5f, 0.2f, 0.8f, vLight);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_BLIND)
+        {
+            Vector(1.0f, 1.0f, 1.0f, vLight);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_THORNS)
+        {
+            Vector(0.8f, 0.5f, 0.2f, vLight);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_BERSERKER || iSkillType == AT_SKILL_ALICE_BERSERKER_STR)
+        {
+            Vector(1.0f, 0.1f, 0.2f, vLight);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_WEAKNESS)
+        {
+            Vector(0.8f, 0.1f, 0.1f, vLight);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_ENERVATION)
+        {
+            Vector(0.25f, 1.0f, 0.7f, Light);
+        }
+
+        if (iSkillType == AT_SKILL_ALICE_SLEEP || iSkillType == AT_SKILL_ALICE_SLEEP_STR ||
+            iSkillType == AT_SKILL_ALICE_THORNS || iSkillType == AT_SKILL_ALICE_BERSERKER ||
+            iSkillType == AT_SKILL_ALICE_BERSERKER_STR || iSkillType == AT_SKILL_ALICE_WEAKNESS ||
+            iSkillType == AT_SKILL_ALICE_ENERVATION)
+        {
+            CreateSprite(BITMAP_SHINY + 5, vWorldPos, 1.0f, vLight, o, fRot);
+            CreateSprite(BITMAP_SHINY + 5, vWorldPos, 0.7f, vLight, o, -fRot);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_BLIND)
+        {
+            CreateSprite(BITMAP_SHINY + 5, vWorldPos, 1.0f, vLight, o, fRot, 1);
+            CreateSprite(BITMAP_SHINY + 5, vWorldPos, 0.7f, vLight, o, -fRot, 1);
+        }
+
+        // pin_light
+        if (iSkillType == AT_SKILL_ALICE_SLEEP || iSkillType == AT_SKILL_ALICE_SLEEP_STR)
+        {
+            Vector(0.7f, 0.0f, 0.8f, vLight);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_BLIND)
+        {
+            Vector(1.0f, 1.0f, 1.0f, vLight);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_THORNS)
+        {
+            Vector(0.8f, 0.5f, 0.2f, vLight);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_BERSERKER || iSkillType == AT_SKILL_ALICE_BERSERKER_STR)
+        {
+            Vector(1.0f, 0.1f, 0.2f, vLight);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_THORNS)
+        {
+            Vector(0.8f, 0.1f, 0.1f, vLight);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_ENERVATION)
+        {
+            Vector(0.25f, 1.f, 0.7f, vLight);
+        }
+
+        if (iSkillType == AT_SKILL_ALICE_SLEEP || iSkillType == AT_SKILL_ALICE_SLEEP_STR ||
+            iSkillType == AT_SKILL_ALICE_THORNS || iSkillType == AT_SKILL_ALICE_BERSERKER ||
+            iSkillType == AT_SKILL_ALICE_BERSERKER_STR || iSkillType == AT_SKILL_ALICE_WEAKNESS ||
+            iSkillType == AT_SKILL_ALICE_ENERVATION)
+        {
+            CreateSprite(BITMAP_PIN_LIGHT, vWorldPos, 1.7f, vLight, o, (float)(rand() % 360));
+            CreateSprite(BITMAP_PIN_LIGHT, vWorldPos, 1.5f, vLight, o, (float)(rand() % 360));
+        }
+        else if (iSkillType == AT_SKILL_ALICE_BLIND)
+        {
+            CreateSprite(BITMAP_PIN_LIGHT, vWorldPos, 1.7f, vLight, o, (float)(rand() % 360), 1);
+            CreateSprite(BITMAP_PIN_LIGHT, vWorldPos, 1.5f, vLight, o, (float)(rand() % 360), 1);
+        }
+
+        // cra04, clud64
+        if (iSkillType == AT_SKILL_ALICE_SLEEP || iSkillType == AT_SKILL_ALICE_SLEEP_STR)
+        {
+            Vector(0.6f, 0.1f, 0.8f, vLight);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_BLIND)
+        {
+            Vector(1.0f, 1.0f, 1.0f, vLight);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_THORNS)
+        {
+            Vector(0.8f, 0.5f, 0.2f, vLight);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_BERSERKER || iSkillType == AT_SKILL_ALICE_BERSERKER_STR)
+        {
+            Vector(1.0f, 0.1f, 0.2f, vLight);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_THORNS)
+        {
+            Vector(0.8f, 0.1f, 0.1f, vLight);
+        }
+        else if (iSkillType == AT_SKILL_ALICE_ENERVATION)
+        {
+            Vector(0.25f, 1.f, 0.7f, vLight);
+        }
+        if (rand_fps_check(1))
+        {
+            if (iSkillType == AT_SKILL_ALICE_SLEEP
+                || iSkillType == AT_SKILL_ALICE_SLEEP_STR
+                || iSkillType == AT_SKILL_ALICE_THORNS
+                || iSkillType == AT_SKILL_ALICE_BERSERKER
+                || iSkillType == AT_SKILL_ALICE_BERSERKER_STR
+                || iSkillType == AT_SKILL_ALICE_WEAKNESS
+                || iSkillType == AT_SKILL_ALICE_ENERVATION
+                )
+            {
+                CreateParticle(BITMAP_LIGHT + 2, vWorldPos, o->Angle, vLight, 0, 1.0f);
+                CreateParticle(BITMAP_CLUD64, vWorldPos, o->Angle, vLight, 3, 0.5f);
+            }
+            else if (iSkillType == AT_SKILL_ALICE_BLIND)
+            {
+                CreateParticle(BITMAP_LIGHT + 2, vWorldPos, o->Angle, vLight, 4, 1.0f);
+                CreateParticle(BITMAP_CLUD64, vWorldPos, o->Angle, vLight, 5, 0.5f);
+            }
+        }
+    }
+    // ChainLighting
+    else if (o->CurrentAction == PLAYER_SKILL_CHAIN_LIGHTNING)
+    {
+        vec3_t vRelativePos, vWorldPos, vLight;
+        Vector(0.f, 0.f, 0.f, vRelativePos);
+        Vector(0.4f, 0.4f, 0.8f, vLight);
+
+        b->TransformPosition(o->BoneTransform[37], vRelativePos, vWorldPos, true); // "Bip01 L Hand"
+
+        if (rand_fps_check(1))
+        {
+            CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
+            CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
+        }
+
+        CreateSprite(BITMAP_LIGHT, vWorldPos, 1.5f, vLight, o, 0.f);
+
+        b->TransformPosition(o->BoneTransform[28], vRelativePos, vWorldPos, true); // "Bip01 R Hand"
+        if (rand_fps_check(1))
+        {
+            CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
+            CreateEffect(MODEL_FENRIR_THUNDER, vWorldPos, o->Angle, vLight, 2, o);
+        }
+
+        CreateSprite(BITMAP_LIGHT, vWorldPos, 1.5f, vLight, o, 0.f);
+    }
+
+    if (g_isCharacterBuff(o, eBuff_Attack) || g_isCharacterBuff(o, eBuff_HelpNpc))
+    {
+        if (!g_isCharacterBuff(o, eBuff_Cloaking))
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                Luminosity = (float)(rand() % 30 + 70) * 0.01f;
+                Vector(Luminosity * 1.f, Luminosity * 0.3f, Luminosity * 0.2f, Light);
+                b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone], p, Position, true);
+                CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, o);
+                b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone - 6], p, Position, true);
+                CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, o);
+                b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone - 7], p, Position, true);
+                CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, o);
+            }
+            if (!SearchJoint(MODEL_SPEARSKILL, o, 4) && !SearchJoint(MODEL_SPEARSKILL, o, 9))
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 4, o, 20.0f, -1, 0, 0,
+                                c->TargetCharacter);
+                }
+            }
+        }
+    }
+    else if (g_isCharacterBuff(o, eBuff_Defense))
+    {
+        if (!g_isCharacterBuff(o, eBuff_Cloaking))
+        {
+            if (SearchJoint(MODEL_SPEARSKILL, o, 4) == false && SearchJoint(MODEL_SPEARSKILL, o, 9) == false)
+            {
+                for (int i = 0; i < 5; ++i)
+                {
+                    CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 4, o, 20.0f, -1, 0, 0,
+                                c->TargetCharacter);
+                }
+            }
+        }
+    }
+
+    if (g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal1) || g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal2) ||
+        g_isCharacterBuff((&c->Object), eBuff_PcRoomSeal3) || g_isCharacterBuff((&c->Object), eBuff_Seal1) ||
+        g_isCharacterBuff((&c->Object), eBuff_Seal2) || g_isCharacterBuff((&c->Object), eBuff_Seal3) ||
+        g_isCharacterBuff((&c->Object), eBuff_Seal4))
+    {
+        if (SearchJoint(MODEL_SPEARSKILL, o, 10) == false && SearchJoint(MODEL_SPEARSKILL, o, 11) == false)
+        {
+            for (int i = 0; i < 3; ++i)
+            {
+                CreateJoint(MODEL_SPEARSKILL, o->Position, o->Position, o->Angle, 10, o, 12.0f, -1, 0, 0, c->Key);
+            }
+        }
+    }
+    else
+    {
+        DeleteJoint(MODEL_SPEARSKILL, o, 10);
+        DeleteJoint(MODEL_SPEARSKILL, o, 11);
+    }
+    if (g_isCharacterBuff((&c->Object), eBuff_Thorns))
+    {
+        if (SearchJoint(BITMAP_FLARE, o, 43) == false)
+        {
+            vec3_t vLight;
+            Vector(0.9f, 0.6f, 0.1f, vLight);
+            CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 43, o, 50.f, 0, 0, 0, 0, vLight);
+        }
+    }
+    else
+    {
+        DeleteJoint(BITMAP_FLARE, o, 43);
+    }
+
+    if (g_isCharacterBuff((&c->Object), eBuff_Berserker))
+    {
+        if (!SearchEffect(BITMAP_ORORA, o, 0))
+        {
+            vec3_t vLight[2];
+            Vector(0.9f, 0.0f, 0.1f, vLight[0]);
+            Vector(1.0f, 1.0f, 1.0f, vLight[1]);
+            for (int i = 0; i < 4; ++i)
+            {
+                CreateEffect(BITMAP_ORORA, o->Position, o->Angle, vLight[0], i, o);
+                if (i == 2 || i == 3)
+                    CreateEffect(BITMAP_SPARK + 2, o->Position, o->Angle, vLight[1], i, o);
+            }
+            CreateEffect(BITMAP_LIGHT_MARKS, o->Position, o->Angle, vLight[0], 0, o);
+        }
+    }
+    else
+    {
+        for (int i = 0; i < 4; ++i)
+        {
+            DeleteEffect(BITMAP_ORORA, o, i);
+            if (i == 2 || i == 3)
+                DeleteEffect(BITMAP_SPARK + 2, o, i);
+        }
+        DeleteEffect(BITMAP_LIGHT_MARKS, o);
+    }
+
+    if (g_isCharacterBuff((&c->Object), eDeBuff_Blind))
+    {
+        if (SearchEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o, 3) == false)
+        {
+            vec3_t vLight;
+            Vector(1.0f, 1.f, 1.f, vLight);
+            CreateEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o->Position, o->Angle, vLight, 3, o);
+        }
+    }
+    else
+    {
+        DeleteEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o, 3);
+    }
+
+    if (g_isCharacterBuff((&c->Object), eDeBuff_Sleep))
+    {
+        if (SearchEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o, 4) == false)
+        {
+            vec3_t vLight;
+            Vector(0.8f, 0.3f, 0.9f, vLight);
+            CreateEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o->Position, o->Angle, vLight, 4, o);
+        }
+    }
+    else
+    {
+        DeleteEffect(MODEL_ALICE_BUFFSKILL_EFFECT, o, 4);
+    }
+
+    if (g_isCharacterBuff((&c->Object), eDeBuff_AttackDown))
+    {
+        if (!SearchEffect(BITMAP_SHINY + 6, o, 1))
+        {
+            vec3_t vLight;
+            Vector(1.4f, 0.2f, 0.2f, vLight);
+            CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 0.5f);
+            CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, vLight, 1, o, -1, 0, 0, 0, 1.f);
+        }
+    }
+    else
+    {
+        DeleteEffect(BITMAP_SHINY + 6, o, 1);
+        DeleteEffect(BITMAP_PIN_LIGHT, o, 1);
+    }
+
+    if (g_isCharacterBuff((&c->Object), eDeBuff_DefenseDown))
+    {
+        if (!SearchEffect(BITMAP_SHINY + 6, o, 2))
+        {
+            vec3_t vLight;
+            Vector(0.25f, 1.0f, 0.7f, Light);
+            CreateEffect(BITMAP_SHINY + 6, o->Position, o->Angle, vLight, 2, o, -1, 0, 0, 0, 0.5f);
+            CreateEffect(BITMAP_PIN_LIGHT, o->Position, o->Angle, vLight, 2, o, -1, 0, 0, 0, 1.f);
+        }
+    }
+    else
+    {
+        DeleteEffect(BITMAP_SHINY + 6, o, 2);
+        DeleteEffect(BITMAP_PIN_LIGHT, o, 2);
+    }
+
+    if (g_isCharacterBuff((&c->Object), eDeBuff_SahamuttDOT))
+    {
+        g_SummonSystem.CreateDamageOfTimeEffect(AT_SKILL_SUMMON_EXPLOSION, &c->Object);
+    }
+    else
+    {
+        g_SummonSystem.RemoveDamageOfTimeEffect(AT_SKILL_SUMMON_EXPLOSION, &c->Object);
+    }
+
+    if (g_isCharacterBuff((&c->Object), eDeBuff_NeilDOT))
+    {
+        g_SummonSystem.CreateDamageOfTimeEffect(AT_SKILL_SUMMON_REQUIEM, &c->Object);
+    }
+    else
+    {
+        g_SummonSystem.RemoveDamageOfTimeEffect(AT_SKILL_SUMMON_REQUIEM, &c->Object);
+    }
+
+    if (g_isCharacterBuff((&c->Object), eBuff_SwellOfMagicPower))
+    {
+        if (!g_isCharacterBuff((&c->Object), eBuff_Cloaking))
+        {
+            if (!SearchEffect(MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF, o, 0))
+            {
+                vec3_t vLight;
+                Vector(0.7f, 0.2f, 0.9f, vLight);
+                CreateEffect(MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF, o->Position, o->Angle, vLight, 0, o);
+            }
+        }
+    }
+    else
+    {
+        DeleteEffect(MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF, o, 0);
+    }
+
+    if (gMapManager.InChaosCastle() == false)
+    {
+        if (c->ExtendState)
+        {
+            if ((o->CurrentAction < PLAYER_WALK_MALE || o->CurrentAction == PLAYER_DARKLORD_STAND ||
+                 o->CurrentAction == PLAYER_STOP_RIDE_HORSE || o->CurrentAction == PLAYER_STOP_TWO_HAND_SWORD_TWO) &&
+                c->ExtendStateTime >= 100)
+            {
+                Vector(0.2f, 0.7f, 0.9f, Light);
+                CreateEffect(BITMAP_LIGHT, o->Position, o->Angle, Light, 3, o);
+
+                c->ExtendStateTime = 0;
+            }
+            c->ExtendStateTime += REFERENCE_FRAME_STEP;
+        }
+
+        if (fullset && g_pOption->GetRenderLevel() >= 2)
+        {
+            PartObjectColor(c->BodyPart[5].Type, o->Alpha, 0.5f, Light);
+
+            if (!g_isCharacterBuff(o, eBuff_Cloaking))
+            {
+                for (int i = 0; i < 2; i++)
+                {
+                    b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone], p, Position, true);
+                    CreateSprite(BITMAP_LIGHT, Position, 1.3f, Light, o);
+                    b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone - 6], p, Position, true);
+                    CreateSprite(BITMAP_LIGHT, Position, 1.3f, Light, o);
+                    b->TransformPosition(o->BoneTransform[c->Weapon[i].LinkBone - 7], p, Position, true);
+                    CreateSprite(BITMAP_LIGHT, Position, 1.3f, Light, o);
+                }
+            }
+            if ((c->BodyPart[BODYPART_BOOTS].Type >= MODEL_DRAGON_KNIGHT_BOOTS &&
+                 c->BodyPart[BODYPART_BOOTS].Type <= MODEL_SUNLIGHT_BOOTS) ||
+                c->BodyPart[BODYPART_BOOTS].Type == MODEL_AURA_BOOTS)
+            {
+                if (EquipmentLevelSet > 9)
+                {
+                    VectorCopy(o->Light, Light);
+
+                    if (c->BodyPart[BODYPART_BOOTS].Type == MODEL_DRAGON_KNIGHT_BOOTS)
+                        Vector(0.65f, 0.3f, 0.1f, o->Light);
+                    if (c->BodyPart[BODYPART_BOOTS].Type == MODEL_VENOM_MIST_BOOTS)
+                        Vector(0.1f, 0.1f, 0.9f, o->Light);
+                    if (c->BodyPart[BODYPART_BOOTS].Type == MODEL_SYLPHID_RAY_BOOTS)
+                        Vector(0.0f, 0.32f, 0.24f, o->Light);
+                    if (c->BodyPart[BODYPART_BOOTS].Type == MODEL_VOLCANO_BOOTS)
+                        Vector(0.5f, 0.24f, 0.8f, o->Light);
+                    if (c->BodyPart[BODYPART_BOOTS].Type == MODEL_SUNLIGHT_BOOTS)
+                        Vector(0.6f, 0.4f, 0.0f, o->Light);
+                    if (c->BodyPart[BODYPART_BOOTS].Type == MODEL_AURA_BOOTS)
+                        Vector(0.6f, 0.3f, 0.4f, o->Light);
+                    if (EquipmentLevelSet == 10 && rand_fps_check(4))
+                    {
+                        Vector(0.0f, -18.0f, 50.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                        Vector(0.0f, 0.0f, 70.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                        Vector(0.0f, 18.0f, 50.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                    }
+                    else if (EquipmentLevelSet == 11 && rand_fps_check(3))
+                    {
+                        Vector(0.0f, -18.0f, 50.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                        Vector(0.0f, 0.0f, 70.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                        Vector(0.0f, 18.0f, 50.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                    }
+                    else if (EquipmentLevelSet == 12 && rand_fps_check(2))
+                    {
+                        Vector(0.0f, -18.0f, 50.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                        Vector(0.0f, 0.0f, 70.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                        Vector(0.0f, 18.0f, 50.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                    }
+                    else if (EquipmentLevelSet == 13 && rand_fps_check(1))
+                    {
+                        Vector(0.0f, -20.0f, 50.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                        Vector(0.0f, 0.0f, 70.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                        Vector(0.0f, 20.0f, 50.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                    }
+                    else if (EquipmentLevelSet == 14 && rand_fps_check(1))
+                    {
+                        Vector(0.0f, -20.0f, 50.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                        Vector(0.0f, 0.0f, 70.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                        Vector(0.0f, 20.0f, 50.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                    }
+                    else if (EquipmentLevelSet == 15 && rand_fps_check(1))
+                    {
+                        Vector(0.0f, -20.0f, 50.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                        Vector(0.0f, 0.0f, 70.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                        Vector(0.0f, 20.0f, 50.0f, p);
+                        b->TransformPosition(o->BoneTransform[0], p, Position, true);
+                        CreateParticle(BITMAP_WATERFALL_2, Position, o->Angle, o->Light, 3);
+                    }
+
+                    VectorCopy(Light, o->Light);
+                }
+            }
+
+            if (EquipmentLevelSet > 9)
+            {
+                if (rand_fps_check(20)) //(o->CurrentAction<PLAYER_WALK_MALE || o->CurrentAction>PLAYER_RUN_RIDE_WEAPON)
+                                        //&& rand_fps_check(6))
+                {
+                    VectorCopy(o->Light, Light);
+                    Vector(1.f, 1.f, 1.f, o->Light);
+
+                    if (EquipmentLevelSet == 10)
+                    {
+                        CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
+                    }
+                    else if (EquipmentLevelSet == 11)
+                    {
+                        if (rand() % 8 == 0)
+                        {
+                            CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 0, o);
+                        }
+                        else
+                        {
+                            CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
+                        }
+                    }
+                    else if (EquipmentLevelSet == 12)
+                    {
+                        if (rand() % 6 == 0)
+                        {
+                            CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
+                            CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
+                        }
+                        else if (rand() % 3 == 0)
+                        {
+                            CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
+                        }
+                    }
+                    else if (EquipmentLevelSet == 13)
+                    {
+                        if (rand() % 6 == 0)
+                        {
+                            CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
+                            CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
+                        }
+
+                        if (rand() % 4 == 0)
+                        {
+                            CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
+                            CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
+                        }
+                    }
+                    else if (EquipmentLevelSet == 14)
+                    {
+                        if (rand() % 6 == 0)
+                        {
+                            CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
+                            CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
+                        }
+
+                        if (rand() % 4 == 0)
+                        {
+                            CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
+                            CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
+                        }
+                    }
+                    else if (EquipmentLevelSet == 15)
+                    {
+                        if (rand() % 6 == 0)
+                        {
+                            CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 0);
+                            CreateJoint(BITMAP_FLARE, o->Position, o->Position, o->Angle, 18, o, 20, -1, 1);
+                        }
+
+                        if (rand() % 4 == 0)
+                        {
+                            CreateParticle(BITMAP_FLARE, o->Position, o->Angle, o->Light, 0, 0.19f, o);
+                            CreateJoint(BITMAP_FLARE + 1, o->Position, o->Position, o->Angle, 7, o, 20, 40, 1);
+                        }
+                    }
+                    VectorCopy(Light, o->Light);
+                }
+
+                if (EquipmentLevelSet == 15 && g_pOption->GetRenderLevel() >= 4)
+                {
+                    // left
+                    const bool spawnTrails = rand_fps_check(1);
+                    vec3_t vColor;
+                    Vector(13.0f, 10.0f, 3.0f, p);
+                    b->TransformPosition(o->BoneTransform[20], p, Position, true);
+                    VectorCopy(Position, o->SetTrailLeft);
+
+                    Vector(0.09f, 0.09f, 0.8f, vColor);
+                    // Sprites draw every frame; the trail joint spawns at the reference rate.
+                    if (spawnTrails)
+                        CreateJoint(BITMAP_JOINT_ENERGY, Position, o->Position, o->Angle, 55, o, 6.0f, -1, 0, 0, -1,
+                                    vColor);
+                    auto fRad = (float)sinf((WorldTime) * 0.002f);
+                    Vector(0.2f, 0.4f, 0.8f, vColor);
+                    CreateSprite(BITMAP_SHINY + 6, Position, 0.5f * fRad, vColor, o);
+
+                    Vector(0.1f, 0.15f, 1.0f, vColor);
+                    CreateSprite(BITMAP_PIN_LIGHT, Position, 1.3f * fRad + 0.5f, vColor, o, 100.0f);
+
+                    // right
+                    Vector(13.0f, 10.0f, -3.0f, p);
+                    b->TransformPosition(o->BoneTransform[20], p, Position, true);
+                    VectorCopy(Position, o->SetTrailRight);
+
+                    Vector(0.09f, 0.09f, 0.8f, vColor);
+                    if (spawnTrails)
+                        CreateJoint(BITMAP_JOINT_ENERGY, Position, o->Position, o->Angle, 56, o, 6.0f, -1, 0, 0, -1,
+                                    vColor);
+
+                    Vector(0.2f, 0.4f, 0.8f, vColor);
+                    CreateSprite(BITMAP_SHINY + 6, Position, 0.5f * fRad, vColor, o);
+
+                    Vector(0.1f, 0.15f, 1.0f, vColor);
+                    CreateSprite(BITMAP_PIN_LIGHT, Position, 1.3f * fRad + 0.5f, vColor, o, 80.0f);
+                }
+            }
+        }
+    }
+}
+} // namespace
+
+namespace
+{
+// A cloaked character of another siege side than the hero's, which the hero doesn't see during the castle siege.
+bool IsHiddenBySiegeCloak(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+    if (c == Hero || !battleCastle::IsBattleCastleStart() || !g_isCharacterBuff(o, eBuff_Cloaking))
+        return false;
+
+    const auto onSide = [](const CHARACTER* who, int kingMark, int mark)
+    { return who->EtcPart == kingMark || who->EtcPart == mark; };
+    if (onSide(Hero, PARTS_ATTACK_KING_TEAM_MARK, PARTS_ATTACK_TEAM_MARK))
+        return !onSide(c, PARTS_ATTACK_KING_TEAM_MARK, PARTS_ATTACK_TEAM_MARK);
+    if (onSide(Hero, PARTS_ATTACK_KING_TEAM_MARK2, PARTS_ATTACK_TEAM_MARK2))
+        return !onSide(c, PARTS_ATTACK_KING_TEAM_MARK2, PARTS_ATTACK_TEAM_MARK2);
+    if (onSide(Hero, PARTS_ATTACK_KING_TEAM_MARK3, PARTS_ATTACK_TEAM_MARK3))
+        return !onSide(c, PARTS_ATTACK_KING_TEAM_MARK3, PARTS_ATTACK_TEAM_MARK3);
+    if (onSide(Hero, PARTS_DEFENSE_KING_TEAM_MARK, PARTS_DEFENSE_TEAM_MARK))
+        return !onSide(c, PARTS_DEFENSE_KING_TEAM_MARK, PARTS_DEFENSE_TEAM_MARK);
+    return false;
+}
+
+// The hero of a game master hiding from the scene.
+bool IsHiddenGameMaster(const CHARACTER* c)
+{
+    return c == Hero && (0x04 & Hero->CtlCode) && SceneFlag == MAIN_SCENE;
+}
+} // namespace
+
+bool IsCharacterDrawn(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+    return o->Live && o->Visible && !IsHiddenBySiegeCloak(c) && !IsHiddenGameMaster(c) &&
+           !g_isCharacterBuff(o, eBuff_CrywolfNPCHide) && Models[o->Type].NumActions != 0;
+}
+
+namespace
+{
+// A shake these effects request reaches the camera after its next damping, as when they ran while drawing.
+bool s_hasEarthQuakeRequest = false;
+float s_earthQuakeRequest = 0.f;
+
+// Rebuilds the poses whose state the update changed after the animation pre-pass, so drawing reuses them.
+void RefreshCharacterPoses()
+{
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
+    {
+        OBJECT* o = &CharactersClient[i].Object;
+        if (!o->EnableBoneMatrix || Engine::Object::Pose::IsCurrent(o))
+            continue;
+        BMD* b = &Models[o->Type];
+        b->BodyHeight = 0.f;
+        Engine::Object::Pose::Build(o, b);
+    }
+}
+
+void UpdateDrawnCharacterEffects()
+{
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
+    {
+        CHARACTER* c = &CharactersClient[i];
+        if (!IsCharacterDrawn(c))
+            continue;
+
+        OBJECT* o = &c->Object;
+        BMD* b = &Models[o->Type];
+        // Where Calc_RenderObject places the model before RenderCharacter's visuals read it.
+        b->BodyHeight = 0.f;
+        b->BodyScale = o->Scale;
+        b->CurrentAction = o->CurrentAction;
+        VectorCopy(o->Position, b->BodyOrigin);
+        UpdateMonsterBodyEffects(c, o, b);
+        UpdateCharacterBodyEffects(c, o);
+        UpdateHeldWeaponEffects(c, o, b);
+        if (gCharacterManager.GetBaseClass(c->Class) == CLASS_SUMMONER)
+        {
+            PART_t* w = &c->Weapon[1];
+            g_SummonSystem.MoveEquipEffect(c, w->Type, w->Level, w->ExcellentFlags);
+        }
+        UpdateEventCharacterEffects(o);
+        if (UpdateCharacterTypeEffects(c, o, b))
+            continue;
+        // Same order and stop-on-claim as RenderCharacter's chain.
+        if (UpdateHellasMonsterEffects(c, o, b))
+            continue;
+        if (battleCastle::UpdateBattleCastleMonsterEffects(c, o, b))
+            continue;
+        if (M31HuntingGround::UpdateHuntingGroundMonsterEffects(c, o, b))
+            continue;
+        if (M34CryWolf1st::UpdateCryWolf1stMonsterEffects(c, o, b))
+            continue;
+        if (M33Aida::UpdateAidaMonsterEffects(c, o, b))
+            continue;
+        if (M37Kanturu1st::UpdateKanturu1stMonsterEffects(c, o, b))
+            continue;
+        if (M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(c, o, b))
+            continue;
+        if (M39Kanturu3rd::UpdateKanturu3rdMonsterEffects(c, o, b))
+            continue;
+        if (SEASON3A::CGM3rdChangeUp::Instance().UpdateBalgasBarrackMonsterEffects(c, o, b))
+            continue;
+        if (g_CursedTemple->UpdateMonsterEffects(c, o, b))
+            continue;
+        if (SEASON3B::GMNewTown::UpdateMonsterEffects(c, o, b))
+            continue;
+        if (SEASON3C::GMSwampOfQuiet::UpdateMonsterEffects(c, o, b))
+            continue;
+        TheMapProcess().UpdateMonsterEffects(c, o, b);
+    }
+}
+} // namespace
+
+void ApplyCharacterEffectsEarthQuake()
+{
+    if (s_hasEarthQuakeRequest)
+    {
+        EarthQuake = s_earthQuakeRequest;
+        s_hasEarthQuakeRequest = false;
+    }
+}
+
+void UpdateCharacterEffects()
+{
+    RefreshCharacterPoses();
+    const float sampledEarthQuake = EarthQuake;
+    {
+        // Their sprites are drawn with the characters, outside the bloom like them.
+        const mu::ScopedBloomExclusion classicCharacters;
+        UpdateDrawnCharacterEffects();
+    }
+    s_hasEarthQuakeRequest = EarthQuake != sampledEarthQuake;
+    s_earthQuakeRequest = EarthQuake;
+    EarthQuake = sampledEarthQuake;
 }
 
 void RenderCharactersClient()
@@ -11364,49 +11593,13 @@ void RenderCharactersClient()
         CHARACTER* c = &CharactersClient[i];
         OBJECT* o = &c->Object;
 
-        if (c != Hero && battleCastle::IsBattleCastleStart() == true && g_isCharacterBuff(o, eBuff_Cloaking))
+        if (IsHiddenBySiegeCloak(c))
         {
-            if ((Hero->EtcPart == PARTS_ATTACK_KING_TEAM_MARK || Hero->EtcPart == PARTS_ATTACK_TEAM_MARK))
-            {
-                if (!(c->EtcPart == PARTS_ATTACK_KING_TEAM_MARK || c->EtcPart == PARTS_ATTACK_TEAM_MARK))
-                {
-                    if (Hero->TargetCharacter == c->Key)
-                        Hero->TargetCharacter = -1;
-                    continue;
-                }
-            }
-            else
-                if ((Hero->EtcPart == PARTS_ATTACK_KING_TEAM_MARK2 || Hero->EtcPart == PARTS_ATTACK_TEAM_MARK2))
-                {
-                    if (!(c->EtcPart == PARTS_ATTACK_KING_TEAM_MARK2 || c->EtcPart == PARTS_ATTACK_TEAM_MARK2))
-                    {
-                        if (Hero->TargetCharacter == c->Key)
-                            Hero->TargetCharacter = -1;
-                        continue;
-                    }
-                }
-                else
-                    if ((Hero->EtcPart == PARTS_ATTACK_KING_TEAM_MARK3 || Hero->EtcPart == PARTS_ATTACK_TEAM_MARK3))
-                    {
-                        if (!(c->EtcPart == PARTS_ATTACK_KING_TEAM_MARK3 || c->EtcPart == PARTS_ATTACK_TEAM_MARK3))
-                        {
-                            if (Hero->TargetCharacter == c->Key)
-                                Hero->TargetCharacter = -1;
-                            continue;
-                        }
-                    }
-                    else
-                        if (Hero->EtcPart == PARTS_DEFENSE_KING_TEAM_MARK || Hero->EtcPart == PARTS_DEFENSE_TEAM_MARK)
-                        {
-                            if (!(c->EtcPart == PARTS_DEFENSE_KING_TEAM_MARK || c->EtcPart == PARTS_DEFENSE_TEAM_MARK))
-                            {
-                                if (Hero->TargetCharacter == c->Key)
-                                    Hero->TargetCharacter = -1;
-                                continue;
-                            }
-                        }
+            if (Hero->TargetCharacter == c->Key)
+                Hero->TargetCharacter = -1;
+            continue;
         }
-        if (c == Hero && (0x04 & Hero->CtlCode) && SceneFlag == MAIN_SCENE)
+        if (IsHiddenGameMaster(c))
         {
             o->OBB.StartPos[0] = 1000.0f;
             o->OBB.XAxis[0] = o->OBB.YAxis[1] = o->OBB.ZAxis[2] = 1.0f;
@@ -11752,6 +11945,7 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
         o->BoneTransform = NULL;
     }
     o->BoneTransform = new vec34_t[MAX_BONES];
+    Engine::Object::Pose::Invalidate(o);
 
     for (int i = 0; i < 2; i++)
     {
@@ -14699,7 +14893,7 @@ bool IsBackItem(CHARACTER* c, int iType)
     return false;
 }
 
-bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
+bool AreWeaponsOnBack(const CHARACTER* c, const OBJECT* o)
 {
     bool bBindBack = false;
 
@@ -14726,6 +14920,12 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
     {
         bBindBack = false;
     }
+    return bBindBack;
+}
+
+bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
+{
+    const bool bBindBack = AreWeaponsOnBack(c, o);
 
     if (o->Type == MODEL_PLAYER)
     {

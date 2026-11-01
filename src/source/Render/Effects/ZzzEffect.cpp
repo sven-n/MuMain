@@ -347,6 +347,8 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
         if (!o->Live)
         {
             o->Live = true;
+            // Not tested yet: a reused slot must not draw in a pass that trusts last frame's visibility.
+            o->Visible = false;
             o->Type = Type;
             o->SubType = SubType;
             o->LightEnable = true;

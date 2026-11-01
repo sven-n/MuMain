@@ -1631,7 +1631,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     return false;
 }
 
-bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool M34CryWolf1st::UpdateCryWolf1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (!IsCyrWolf1st() && !(gMapManager.InDevilSquare()))
         return false;
@@ -1643,48 +1643,14 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     case MODEL_CRYWOLF_ALTAR3:
     case MODEL_CRYWOLF_ALTAR4:
     case MODEL_CRYWOLF_ALTAR5:
-    {
-        vec3_t Light;
-        float fRotation1, fRotation2;
-        float Luminosity = sinf(WorldTime * 0.002f) * 0.1f + 0.28f;
-        float Luminosity2 = sinf(WorldTime * 0.002f) * 0.04f + 0.2f;
-
-        EnableAlphaBlend();
-
         if (g_isCharacterBuff(o, eBuff_CrywolfAltarContracted))
         {
-            Vector(Luminosity2, Luminosity2, 0.05f, Light);
-            fRotation1 = WorldTime * 0.01f;
-            fRotation2 = -WorldTime * 0.01f;
             Vector(0.09f, 0.09f, 0.04f, o->Light);
 
             CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light);
             CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 1);
         }
-        if (g_isCharacterBuff(o, eBuff_CrywolfAltarOccufied))
-        {
-            Vector(Luminosity, 0.1f, 0.1f, Light);
-        }
-        if (g_isCharacterBuff(o, eBuff_CrywolfAltarDisable))
-        {
-            Vector(Luminosity, 0.1f, 0.1f, Light);
-        }
-        if (g_isCharacterBuff(o, eBuff_CrywolfAltarEnable) || g_isCharacterBuff(o, eBuff_CrywolfAltarAttempt))
-        {
-            fRotation1 = WorldTime * 0.01f;
-            Vector(0.15f, 0.15f, Luminosity, Light);
-        }
-
-        Vector(Light[0] * 2.0f, Light[1] * 2.0f, Light[2] * 2.0f, Light);
-
-        RenderTerrainAlphaBitmap(BITMAP_MAGIC_CIRCLE, o->Position[0], o->Position[1], 2.8f, 2.8f, Light, fRotation1);
-        RenderTerrainAlphaBitmap(BITMAP_MAGIC_CIRCLE, o->Position[0], o->Position[1], 3.6f, 3.6f, Light, fRotation2);
-        DisableAlphaBlend();
-
-        if (fRotation1 >= 360.0f) fRotation1 = 0.0f;
-        if (fRotation2 >= 360.0f) fRotation2 = 0.0f;
-    }
-    break;
+        break;
     case MODEL_BALGASS:
     {
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
@@ -2101,6 +2067,62 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             o->SubType = FALSE;
     }
     return true;
+    }
+    return false;
+}
+
+bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    if (!IsCyrWolf1st() && !(gMapManager.InDevilSquare()))
+        return false;
+
+    switch (o->Type)
+    {
+    case MODEL_CRYWOLF_ALTAR1:
+    case MODEL_CRYWOLF_ALTAR2:
+    case MODEL_CRYWOLF_ALTAR3:
+    case MODEL_CRYWOLF_ALTAR4:
+    case MODEL_CRYWOLF_ALTAR5:
+    {
+        vec3_t Light;
+        float fRotation1, fRotation2;
+        float Luminosity = sinf(WorldTime * 0.002f) * 0.1f + 0.28f;
+        float Luminosity2 = sinf(WorldTime * 0.002f) * 0.04f + 0.2f;
+
+        EnableAlphaBlend();
+
+        if (g_isCharacterBuff(o, eBuff_CrywolfAltarContracted))
+        {
+            Vector(Luminosity2, Luminosity2, 0.05f, Light);
+            fRotation1 = WorldTime * 0.01f;
+            fRotation2 = -WorldTime * 0.01f;
+        }
+        if (g_isCharacterBuff(o, eBuff_CrywolfAltarOccufied))
+        {
+            Vector(Luminosity, 0.1f, 0.1f, Light);
+        }
+        if (g_isCharacterBuff(o, eBuff_CrywolfAltarDisable))
+        {
+            Vector(Luminosity, 0.1f, 0.1f, Light);
+        }
+        if (g_isCharacterBuff(o, eBuff_CrywolfAltarEnable) || g_isCharacterBuff(o, eBuff_CrywolfAltarAttempt))
+        {
+            fRotation1 = WorldTime * 0.01f;
+            Vector(0.15f, 0.15f, Luminosity, Light);
+        }
+
+        Vector(Light[0] * 2.0f, Light[1] * 2.0f, Light[2] * 2.0f, Light);
+
+        RenderTerrainAlphaBitmap(BITMAP_MAGIC_CIRCLE, o->Position[0], o->Position[1], 2.8f, 2.8f, Light, fRotation1);
+        RenderTerrainAlphaBitmap(BITMAP_MAGIC_CIRCLE, o->Position[0], o->Position[1], 3.6f, 3.6f, Light, fRotation2);
+        DisableAlphaBlend();
+
+        if (fRotation1 >= 360.0f)
+            fRotation1 = 0.0f;
+        if (fRotation2 >= 360.0f)
+            fRotation2 = 0.0f;
+    }
+    break;
     }
     return false;
 }

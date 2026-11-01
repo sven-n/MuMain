@@ -271,6 +271,31 @@ void BodyLight(OBJECT* o, BMD* b)
 
 extern float BoneScale;
 
+// An object with its own bones keeps the model-space pose the update built; a draw animates it again only when its
+// state changed since. Other objects are animated into the shared bones for each draw.
+static void AnimateObjectBones(OBJECT* o, BMD* b, bool Translate)
+{
+    if (!o->EnableBoneMatrix)
+    {
+        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle,
+                     false, !Translate);
+        return;
+    }
+    const bool reused = Translate && Engine::Object::Pose::IsCurrent(o);
+    if (!reused)
+    {
+        b->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                     o->HeadAngle, false, !Translate);
+        if (Translate)
+            Engine::Object::Pose::Record(o);
+        else
+            Engine::Object::Pose::Invalidate(o);
+    }
+#ifdef MU_ENABLE_CONTROL_SOCKET
+    CheckCharacterPose(o, b, reused);
+#endif
+}
+
 bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 {
     if (gMapManager.InChaosCastle() == true && Hero->Object.m_bActionStart == true)
@@ -316,23 +341,7 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
         }
     }
 
-#ifdef MU_ENABLE_CONTROL_SOCKET
-    const bool checkBones = BeginPrepassBoneCheck(o, b->NumBones);
-#endif
-    if (o->EnableBoneMatrix)
-    {
-        b->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
-                     o->HeadAngle, false, !Translate);
-    }
-    else
-    {
-        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle,
-                     false, !Translate);
-    }
-
-#ifdef MU_ENABLE_CONTROL_SOCKET
-    if (checkBones) EndPrepassBoneCheck(o, b->NumBones);
-#endif
+    AnimateObjectBones(o, b, Translate);
 
     BoneScale = 1.f;
     if (3 == Select)
@@ -430,20 +439,7 @@ bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select)
     b->CurrentAction = o->CurrentAction;
     VectorCopy(o->Position, b->BodyOrigin);
 
-#ifdef MU_ENABLE_CONTROL_SOCKET
-    const bool checkBones = BeginPrepassBoneCheck(o, b->NumBones);
-#endif
-    if (o->EnableBoneMatrix)
-    {
-        b->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, !Translate);
-    }
-    else
-    {
-        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, !Translate);
-    }
-#ifdef MU_ENABLE_CONTROL_SOCKET
-    if (checkBones) EndPrepassBoneCheck(o, b->NumBones);
-#endif
+    AnimateObjectBones(o, b, Translate);
     return true;
 }
 

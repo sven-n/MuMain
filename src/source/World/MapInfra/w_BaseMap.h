@@ -52,6 +52,12 @@ public: // Character
         return false;
     }
     virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b) {}
+    // A drawn monster's effects, sounds and state changes, after every Move* this frame: its bones are final and
+    // what it spawns is drawn this frame. True when handled.
+    virtual bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
+    {
+        return false;
+    }
     virtual bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     {
         return false;

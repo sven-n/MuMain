@@ -20,7 +20,7 @@ namespace M39Kanturu3rd {
     void MoveKanturu3rdBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
 
     bool RenderKanturu3rdMonsterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon);
-    bool RenderKanturu3rdMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
+    bool UpdateKanturu3rdMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
 
     bool AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* b);
     bool SetCurrentActionKanturu3rdMonster(CHARACTER* c, OBJECT* o);

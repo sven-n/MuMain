@@ -26,7 +26,7 @@ public: // Character
     virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
     virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
     virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
-    virtual bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
+    virtual bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
     virtual bool AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b);
     virtual bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
 
