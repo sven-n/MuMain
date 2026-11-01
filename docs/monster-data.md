@@ -387,13 +387,17 @@ Hunting Ground, the Balgass barracks, Illusion Temple and a few others (among
 them 340 to 365, 386 to 403 and 409 to 412) play their sounds from their
 map's per-frame monster effects, and their maps load them; they name no sound
 set. They move into sound events with the monsters' looks (design, MN8). The
-Aida monsters' sounds are `during` and `once` events of their sets; their
-monster effects play them where they played their sounds
-(`SoundEvents::PlayDrawn`), and for every other character
-`UpdateDrawnCharacterEffects` plays them after the maps' monster effects. Like
-those effects they run in the update for the characters the last frame drew,
-so they start one frame after a monster comes into view
-([ADR 0003](adr/0003-draw-does-not-change-game-state.md)).
+Aida monsters' walk sounds are `during` events of their sets; their monster
+effects play them where they played their sounds (`SoundEvents::PlayDrawn`),
+and for every other character `UpdateDrawnCharacterEffects` plays them after
+the maps' monster effects. Like those effects they run in the update for the
+characters the last frame drew, so they start one frame after a monster comes
+into view ([ADR 0003](adr/0003-draw-does-not-change-game-state.md)). Their
+attacks and deaths are animation events, as regular monsters' (a test,
+Q-MN86): each attack and death plays when it starts, within 500 units of the
+hero; the original draw code played them once until the monster stood, on
+screen at any distance, so an attack right after another or a death right
+after an attack was silent.
 
 ## Attacks
 

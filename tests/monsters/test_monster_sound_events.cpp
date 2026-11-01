@@ -767,6 +767,25 @@ void WalkEveryFrame(MonsterSoundSet& set)
     set.soundEvents[0].pick.reset();
     set.soundEvents[0].sounds = {"SOUND_AIDA_DEATHRAIDER_MOVE1"};
 }
+
+// The Death Rider's attacks and death as once events, as the Aida draw code
+// played them before the test of Q-MN86.
+void AttacksOnce(MonsterSoundSet& set)
+{
+    for (size_t index = 1; index < set.soundEvents.size(); ++index)
+    {
+        Data::Monsters::MonsterSoundEvent& event = set.soundEvents[index];
+        event.once = event.animations;
+        event.animations.clear();
+        event.heardAnywhere = true;
+    }
+}
+
+// The Witch Queen's, the same.
+void QueenAttacksOnce(MonsterSoundSet& set)
+{
+    AttacksOnce(set);
+}
 } // namespace
 
 TEST_CASE("Monster sounds: an event during animations plays each frame the monster is drawn in them (Q-MN84) "
@@ -816,6 +835,7 @@ TEST_CASE("Monster sounds: a once event plays the first drawn frame in its anima
     const int attack1 = SoundOf(set, "SOUND_AIDA_DEATHRAIDER_ATTACK1");
     const int attack2 = SoundOf(set, "SOUND_AIDA_DEATHRAIDER_ATTACK2");
     const int die = SoundOf(set, "SOUND_AIDA_DEATHRAIDER_DIE");
+    SetChange once("Death Rider", AttacksOnce);
     const std::unique_ptr<CHARACTER> rider = MakeCharacter(DeathRider);
     // A during event leaves the flag alone.
     {
@@ -845,6 +865,7 @@ TEST_CASE("Monster sounds: a once event whose chance does not come up leaves the
     SetChange change("Death Rider",
                      [](MonsterSoundSet& set)
                      {
+                         AttacksOnce(set);
                          set.soundEvents[1].chance =
                              Data::Monsters::MonsterSoundChance{1000, Data::Monsters::MonsterSoundDraw::Rand};
                      });
@@ -860,6 +881,7 @@ TEST_CASE("Monster sounds: once events of one animation play together: the Witch
           "(Q-MN85) [monsters][sounds]")
 {
     SoundScope scope(WD_33AIDA);
+    SetChange once("Witch Queen", QueenAttacksOnce);
     const MonsterSoundSet& set = SetOf(WitchQueen);
     const std::unique_ptr<CHARACTER> queen = MakeCharacter(WitchQueen);
     const std::vector<PlayedSound> sounds = Draw(scope, *queen, MONSTER01_ATTACK2, 2);
@@ -893,6 +915,31 @@ TEST_CASE("Monster sounds: RenderCharacter plays a drawn frame's events unless t
     CHECK(scope.Take().empty());
 }
 
+TEST_CASE("Monster sounds: the Aida monsters' attacks and deaths play when they start, each time, near the hero "
+          "(a test, Q-MN86) [monsters][sounds]")
+{
+    SoundScope scope(WD_33AIDA);
+    const MonsterSoundSet& rider = SetOf(DeathRider);
+    const int attack1 = SoundOf(rider, "SOUND_AIDA_DEATHRAIDER_ATTACK1");
+    const int attack2 = SoundOf(rider, "SOUND_AIDA_DEATHRAIDER_ATTACK2");
+    const int die = SoundOf(rider, "SOUND_AIDA_DEATHRAIDER_DIE");
+    CHECK(scope.Play(DeathRider, MONSTER01_ATTACK1) == Sounds({attack1}));
+    // Right after another attack or an attack, with no stand between.
+    CHECK(scope.Play(DeathRider, MONSTER01_ATTACK2) == Sounds({attack2}));
+    CHECK(scope.Play(DeathRider, MONSTER01_DIE) == Sounds({die}));
+    // Not farther than 500 units from the hero.
+    CHECK(scope.Play(DeathRider, MONSTER01_ATTACK1, 0.0f, 0, 600.0f).empty());
+    // The Witch Queen's second attack: a thunder and her attack.
+    const MonsterSoundSet& queen = SetOf(WitchQueen);
+    const std::vector<PlayedSound> sounds = scope.Play(WitchQueen, MONSTER01_ATTACK2);
+    REQUIRE(sounds.size() == 2);
+    CHECK((sounds[0].id == SOUND_CHAOS_THUNDER01 || sounds[0].id == SOUND_CHAOS_THUNDER02));
+    CHECK(sounds[1].id == SoundOf(queen, "SOUND_AIDA_WITCHQUEEN_ATTACK1"));
+    // The drawn frames play only the walk.
+    const std::unique_ptr<CHARACTER> character = MakeCharacter(DeathRider);
+    CHECK(Draw(scope, *character, MONSTER01_ATTACK1, 3).empty());
+}
+
 TEST_CASE("Monster sounds: a monster is created with the once flag clear, as with SubType 0 (Q-MN87) "
           "[monsters][sounds]")
 {
@@ -915,6 +962,7 @@ TEST_CASE("Monster Preview: during events play each frame, once events after eac
     Data::Monsters::ModelLoader::Open(MODEL_DEATH_RIDER);
     REQUIRE(Data::Monsters::ModelLoader::IsOpen(MODEL_DEATH_RIDER));
     scope.Take();
+    SetChange once("Death Rider", AttacksOnce);
     const MonsterSoundSet& set = SetOf(DeathRider);
     const int attack1 = SoundOf(set, "SOUND_AIDA_DEATHRAIDER_ATTACK1");
     const Data::Monsters::MonsterModelDefinition& values = ModelOf(MODEL_DEATH_RIDER);
