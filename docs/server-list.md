@@ -88,7 +88,10 @@ theme), so a long name there can run past its edges.
 OpenMU's connect server closes a connection that sends nothing for a while
 (its *Timeout* in the admin panel, one minute by default). An open server list
 asks for a fresh list every 30 seconds, which keeps that connection up and the
-load figures current. When the connection drops anyway (a Timeout below 30
+load figures current. The connect server sends only so many lists over one
+connection (*MaxServerListRequests*, 20 by default) and closes it on the next
+request, so before that the list connects anew in the background, about every
+ten minutes. When the connection drops anyway (a Timeout below 30
 seconds, a restarted server), the login screen doesn't tell the player: the next
 click that needs the server (a group, a channel, the credits, OK in the login
 window) connects again first and then carries on. The login window does the

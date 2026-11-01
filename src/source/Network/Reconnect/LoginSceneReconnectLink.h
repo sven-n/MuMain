@@ -25,6 +25,9 @@ public:
     virtual bool IsConnected() const = 0;
     // The server the connection goes to, or went to before it closed.
     virtual LoginServer ConnectedServer() const = 0;
+    // Tells the live connection from the ones before it; the connect server limits the
+    // lists it sends per connection.
+    virtual int ConnectionId() const = 0;
 
     // The server the screen waits for while it shows nothing to click (after a server
     // was picked, after the login was sent, before the first list); none while the

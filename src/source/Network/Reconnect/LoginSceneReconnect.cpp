@@ -16,6 +16,10 @@ constexpr double GreetingTimeoutMs = 10000.0;
 // load figures current.
 constexpr double ServerListRefreshMs = 30000.0;
 
+// How many list requests the connect server answers over one connection: OpenMU
+// closes the connection on the next one (MaxServerListRequests, 20 by default).
+constexpr int ListRequestsPerConnection = 20;
+
 const char* NameOf(LoginServer server)
 {
     return server == LoginServer::Game ? "game server" : "connect server";
@@ -41,6 +45,7 @@ bool LoginSceneReconnect::EnsureConnected(LoginServer server, std::function<void
         if (server == m_server)
         {
             m_resume = std::move(resume);
+            PlayerWaits();
         }
         return false;
     }
@@ -61,11 +66,19 @@ void LoginSceneReconnect::RequestServerList()
         return;
     }
 
-    if (EnsureConnected(LoginServer::Connect, nullptr))
+    if (!EnsureConnected(LoginServer::Connect, nullptr))
+    {
+        return;
+    }
+
+    if (TakeListRequest())
     {
         m_lastListMs = m_link.NowMs();
         m_link.SendServerListRequest();
+        return;
     }
+
+    Begin(LoginServer::Connect, nullptr); // the new connection's greeting is a list
 }
 
 void LoginSceneReconnect::OnConnectionLost()
@@ -194,12 +207,16 @@ bool LoginSceneReconnect::IsReconnecting() const
     return m_phase == Phase::Probing || m_phase == Phase::AwaitingGreeting;
 }
 
-void LoginSceneReconnect::Begin(LoginServer server, std::function<void()> resume)
+void LoginSceneReconnect::Begin(LoginServer server, std::function<void()> resume, bool quiet)
 {
     m_server = server;
     m_resume = std::move(resume);
+    m_quiet = quiet;
     mu::log::Get("network")->info("NET: reconnecting the login screen to the {}", NameOf(server));
-    m_link.ShowConnecting();
+    if (!m_quiet)
+    {
+        m_link.ShowConnecting();
+    }
 
     if (!m_link.StartProbe(server))
     {
@@ -208,6 +225,18 @@ void LoginSceneReconnect::Begin(LoginServer server, std::function<void()> resume
     }
 
     EnterPhase(Phase::Probing);
+}
+
+void LoginSceneReconnect::PlayerWaits()
+{
+    // A renewal went on quietly so far; the player now waits for it.
+    if (!m_quiet)
+    {
+        return;
+    }
+
+    m_quiet = false;
+    m_link.ShowConnecting();
 }
 
 void LoginSceneReconnect::RefreshServerList()
@@ -224,7 +253,33 @@ void LoginSceneReconnect::RefreshServerList()
     }
 
     m_lastListMs = now;
-    m_link.SendServerListRequest();
+    if (TakeListRequest())
+    {
+        m_link.SendServerListRequest();
+        return;
+    }
+
+    // The next request would end the connection; a new one comes with a list.
+    Begin(LoginServer::Connect, nullptr, /*quiet=*/true);
+}
+
+bool LoginSceneReconnect::TakeListRequest()
+{
+    const int connection = m_link.ConnectionId();
+    if (connection != m_listConnection)
+    {
+        // The client asked for the first list as soon as the connect server greeted it.
+        m_listConnection = connection;
+        m_listRequests = 1;
+    }
+
+    if (m_listRequests >= ListRequestsPerConnection)
+    {
+        return false;
+    }
+
+    ++m_listRequests;
+    return true;
 }
 
 void LoginSceneReconnect::UpdateProbing()
@@ -252,6 +307,15 @@ void LoginSceneReconnect::UpdateProbing()
 void LoginSceneReconnect::Fail()
 {
     m_link.StopProbe();
+    if (m_quiet)
+    {
+        // Nobody waited for it: as after any drop, the next step reconnects.
+        mu::log::Get("network")->info("NET: renewing the login screen's {} connection failed", NameOf(m_server));
+        m_resume = nullptr;
+        EnterPhase(Phase::Idle);
+        return;
+    }
+
     EnterPhase(Phase::Failed);
     mu::log::Get("network")->warn("NET: the {} can't be reached from the login screen", NameOf(m_server));
     m_link.ShowFailure();

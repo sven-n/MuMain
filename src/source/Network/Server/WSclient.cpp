@@ -609,7 +609,7 @@ void ReceiveServerConnect(const BYTE* ReceiveBuffer)
 void ReceiveServerConnectBusy(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_SERVER_BUSY)ReceiveBuffer;
-    SocketClient->ToConnectServer()->SendServerListRequest();
+    LoginSceneReconnect::Instance().RequestServerList(); // counts toward the connection's list requests
 }
 
 void ReceiveJoinServer(const BYTE* ReceiveBuffer)

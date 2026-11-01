@@ -37,6 +37,12 @@ LoginServer GameLoginSceneLink::ConnectedServer() const
     return g_bGameServerConnected ? LoginServer::Game : LoginServer::Connect;
 }
 
+int GameLoginSceneLink::ConnectionId() const
+{
+    // The client library numbers its connections without reusing a number.
+    return SocketClient != nullptr ? SocketClient->GetHandle() : 0;
+}
+
 std::optional<LoginServer> GameLoginSceneLink::AwaitedServer() const
 {
     if (!UI::LoginScene::IsWaitingForServer())

@@ -19,12 +19,14 @@ namespace
 {
 constexpr double GreetingTimeoutMs = 10000.0;   // LoginSceneReconnect.cpp
 constexpr double ServerListRefreshMs = 30000.0; // LoginSceneReconnect.cpp
+constexpr int ListRequestsPerConnection = 20;   // LoginSceneReconnect.cpp
 
 class FakeLink : public LoginSceneReconnectLink
 {
 public:
     bool connected = false;
     LoginServer connectedServer = LoginServer::Connect;
+    int connectionId = 1;
     std::optional<LoginServer> awaited;
     bool serverListShown = false;
     bool probeCanStart = true;
@@ -47,6 +49,10 @@ public:
     LoginServer ConnectedServer() const override
     {
         return connectedServer;
+    }
+    int ConnectionId() const override
+    {
+        return connectionId;
     }
     std::optional<LoginServer> AwaitedServer() const override
     {
@@ -77,6 +83,7 @@ public:
         connects.push_back(server);
         connected = connectSucceeds;
         connectedServer = server;
+        ++connectionId;
         return connectSucceeds;
     }
 
@@ -124,6 +131,26 @@ struct DroppedScreen
     {
         link.probeResult = LoginSceneReconnectLink::ProbeResult::Reachable;
         reconnect.Update();
+    }
+
+    // The next refresh of an open server list is due.
+    void RefreshDue()
+    {
+        link.now += ServerListRefreshMs;
+        reconnect.Update();
+    }
+
+    // An open server list whose connection has used up the lists the connect server sends
+    // over one connection: the first came with the connection, the refreshes asked for the rest.
+    void UseUpListRequests()
+    {
+        link.connected = true;
+        link.serverListShown = true;
+        reconnect.OnGreeting(LoginServer::Connect);
+        for (int refresh = 1; refresh < ListRequestsPerConnection; ++refresh)
+        {
+            RefreshDue();
+        }
     }
 };
 } // namespace
@@ -513,6 +540,74 @@ TEST_SUITE("Login scene reconnect")
         screen.reconnect.Update();
         CHECK(screen.link.listRequests == 0);
         CHECK(screen.link.probes.empty());
+    }
+
+    TEST_CASE("an open server list connects anew before the connect server's limit")
+    {
+        DroppedScreen screen;
+        screen.UseUpListRequests();
+        CHECK(screen.link.listRequests == ListRequestsPerConnection - 1);
+        CHECK(screen.link.probes.empty());
+
+        screen.RefreshDue(); // one more request would end the connection
+        CHECK(screen.link.listRequests == ListRequestsPerConnection - 1);
+        CHECK(screen.link.probes == std::vector{LoginServer::Connect});
+        CHECK(screen.link.connectingShown == 0); // nobody waits for it
+
+        screen.ServerComesBack();
+        screen.reconnect.OnGreeting(LoginServer::Connect); // the new connection's list
+        CHECK_FALSE(screen.reconnect.IsReconnecting());
+
+        screen.RefreshDue(); // the new connection has its own requests
+        CHECK(screen.link.listRequests == ListRequestsPerConnection);
+        CHECK(screen.link.failures == 0);
+    }
+
+    TEST_CASE("a renewal that can't reach the server counts as a drop")
+    {
+        DroppedScreen screen;
+        screen.UseUpListRequests();
+        screen.RefreshDue();
+
+        screen.link.probeResult = LoginSceneReconnectLink::ProbeResult::Unreachable;
+        screen.reconnect.Update();
+        CHECK(screen.link.failures == 0);
+        CHECK(screen.link.connectingShown == 0);
+        CHECK_FALSE(screen.reconnect.IsReconnecting());
+
+        screen.RefreshDue(); // the old connection still has no request left
+        CHECK(screen.link.probes.size() == 2);
+        CHECK(screen.link.listRequests == ListRequestsPerConnection - 1);
+    }
+
+    TEST_CASE("a step during a renewal waits for it and is told so")
+    {
+        DroppedScreen screen;
+        screen.UseUpListRequests();
+        screen.RefreshDue();
+
+        CHECK_FALSE(screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume()));
+        CHECK(screen.link.connectingShown == 1);
+
+        screen.link.probeResult = LoginSceneReconnectLink::ProbeResult::Unreachable;
+        screen.reconnect.Update();
+        CHECK(screen.link.failures == 1); // the player waits for this one
+    }
+
+    TEST_CASE("a group click with no list request left connects anew for its list")
+    {
+        DroppedScreen screen;
+        screen.link.connected = true;
+        for (int request = 1; request < ListRequestsPerConnection; ++request)
+        {
+            screen.reconnect.RequestServerList();
+        }
+        CHECK(screen.link.listRequests == ListRequestsPerConnection - 1);
+
+        screen.reconnect.RequestServerList();
+        CHECK(screen.link.listRequests == ListRequestsPerConnection - 1);
+        CHECK(screen.link.probes == std::vector{LoginServer::Connect});
+        CHECK(screen.link.connectingShown == 1);
     }
 
     TEST_CASE("leaving the login scene drops the waiting step")
