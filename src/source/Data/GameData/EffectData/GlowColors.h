@@ -15,7 +15,8 @@
 //
 // The glow of an item model names its colors from this list. Colors are red,
 // green and blue from 0 to 1. "colorFolders" before "colors" holds the folders
-// MuEditor sorts the colors in (ColorFolders.h); the game skips them.
+// MuEditor sorts the colors in (ColorFolders.h); the game reads and checks them
+// but doesn't use them.
 namespace Data::Effects
 {
 using GlowColorValue = std::array<double, 3>;

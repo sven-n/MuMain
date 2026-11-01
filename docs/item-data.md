@@ -1368,7 +1368,8 @@ folder above it), and **Move up** and **Move down** order folders and colors.
 Drag a color or a folder onto a folder or onto its root to move it there; a
 color stays in its root. **New color** adds one to the picked folder. Each file
 keeps its folders next to its colors as `"colorFolders"`, a list of folders
-each with a `name`, its `folders` and its `colors`; the game skips them.
+each with a `name`, its `folders` and its `colors`; the game reads and
+checks them (a problem shows in its data report too) but doesn't use them.
 
 #### Glow Colors
 

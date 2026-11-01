@@ -20,7 +20,8 @@
 //     {"name": "Load", "folders": [{"name": "Warnings", "colors": ["loadRed"]}], "colors": ["loadGreen"]}
 //   ]
 //
-// A color sits in at most one folder; a color in none sits under the root. The game skips the key.
+// A color sits in at most one folder; a color in none sits under the root. Every build reads and checks the key,
+// so a file reports the same problems in the game as in MuEditor; only MuEditor uses the folders.
 namespace Data::Colors
 {
 inline constexpr const char* ColorFoldersKey = "colorFolders";
