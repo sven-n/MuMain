@@ -7808,6 +7808,9 @@ static unsigned int s_effectDrawFrame = 0;
 
 void RenderEffects(bool bRenderBlendMesh)
 {
+    using Render::EffectDrawing::Blend;
+    using Render::EffectDrawing::Decal;
+    Render::EffectDrawing::EffectDrawer& out = Render::EffectDrawing::ActiveEffectDrawer();
     // The blend-mesh pass draws later in the same frame.
     if (!bRenderBlendMesh)
         ++s_effectDrawFrame;
@@ -7882,10 +7885,11 @@ void RenderEffects(bool bRenderBlendMesh)
                     if (o->SubType == 3 || o->SubType == 4 || o->SubType == 5 || o->SubType == 6 || o->SubType == 7)
                     {
                         vec3_t Light;
-                        EnableAlphaBlend();
+                        out.SetState({.blend = Blend::Glow});
                         Vector(0.3f, 0.3f, 0.3f, Light);
                         auto Rotation = (float)(WorldTime);
-                        RenderTerrainAlphaBitmap(BITMAP_POUNDING_BALL, o->Position[0], o->Position[1], 2.f, 2.f, Light, Rotation);
+                        out.DrawDecal(
+                            Decal(BITMAP_POUNDING_BALL, o->Position[0], o->Position[1], 2.f, 2.f, Light, Rotation));
                     }
                     else
                         RenderObject(o);
@@ -8056,10 +8060,9 @@ void RenderEffects(bool bRenderBlendMesh)
                         {
                             // The update turned the beam once per segment; the turn this segment had.
                             const float angle = o->Angle[2] + (19 - j) * 0.1f * FPS_ANIMATION_FACTOR;
-                            EnableAlphaBlend();
-                            RenderTerrainAlphaBitmap(BITMAP_SMOKE, Position[0], Position[1], 4.0f, 4.0f, o->Light,
-                                                     -angle);
-                            DisableAlphaBlend();
+                            out.SetState({.blend = Blend::Glow});
+                            out.DrawDecal(Decal(BITMAP_SMOKE, Position[0], Position[1], 4.0f, 4.0f, o->Light, -angle));
+                            out.SetState({.blend = Blend::Off});
                         }
 
                         VectorAdd(Position, o->Direction, Position);
@@ -8072,7 +8075,6 @@ void RenderEffects(bool bRenderBlendMesh)
                                 return;
                             }
                         }
-                        AddTerrainLight(Position[0], Position[1], o->Light, 2, PrimaryTerrainLight);
                     }
                 }
                 break;
@@ -8133,24 +8135,27 @@ void RenderEffects(bool bRenderBlendMesh)
                     break;
                 case MODEL_FENRIR_FOOT_THUNDER:
                 {
-                    EnableAlphaBlend();
-                    RenderTerrainAlphaBitmap(BITMAP_FENRIR_FOOT_THUNDER1 + (o->m_iAnimation % 5), o->Position[0], o->Position[1], 0.6f, 0.6f, o->Light);
-                    DisableAlphaBlend();
+                    out.SetState({.blend = Blend::Glow});
+                    out.DrawDecal(Decal(BITMAP_FENRIR_FOOT_THUNDER1 + (o->m_iAnimation % 5), o->Position[0],
+                                        o->Position[1], 0.6f, 0.6f, o->Light));
+                    out.SetState({.blend = Blend::Off});
                 }
                 break;
                 case MODEL_TWINTAIL_EFFECT:
                 {
                     if (o->SubType == 0)
                     {
-                        EnableAlphaBlend();
-                        RenderTerrainAlphaBitmap(BITMAP_SPARK + 1, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, 0.f, o->Alpha);
-                        DisableAlphaBlend();
+                        out.SetState({.blend = Blend::Glow});
+                        out.DrawDecal(Decal(BITMAP_SPARK + 1, o->Position[0], o->Position[1], o->Scale, o->Scale,
+                                            o->Light, 0.f, o->Alpha));
+                        out.SetState({.blend = Blend::Off});
                     }
                     else if (o->SubType == 1 || o->SubType == 2)
                     {
-                        EnableAlphaBlend();
-                        RenderTerrainAlphaBitmap(BITMAP_CLOUD, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, o->Angle[0], o->Alpha);
-                        DisableAlphaBlend();
+                        out.SetState({.blend = Blend::Glow});
+                        out.DrawDecal(Decal(BITMAP_CLOUD, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light,
+                                            o->Angle[0], o->Alpha));
+                        out.SetState({.blend = Blend::Off});
                     }
                 }
                 break;
@@ -8257,16 +8262,18 @@ void RenderEffects(bool bRenderBlendMesh)
                 case MODEL_LAVAGIANT_FOOTPRINT_R:
                 case MODEL_LAVAGIANT_FOOTPRINT_V:
                 {
-                    EnableAlphaBlend();
+                    out.SetState({.blend = Blend::Glow});
                     if (o->Type == MODEL_LAVAGIANT_FOOTPRINT_R)
                     {
-                        RenderTerrainAlphaBitmap(BITMAP_LAVAGIANT_FOOTPRINT_R, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light);
+                        out.DrawDecal(Decal(BITMAP_LAVAGIANT_FOOTPRINT_R, o->Position[0], o->Position[1], o->Scale,
+                                            o->Scale, o->Light));
                     }
                     else
                     {
-                        RenderTerrainAlphaBitmap(BITMAP_LAVAGIANT_FOOTPRINT_V, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light);
+                        out.DrawDecal(Decal(BITMAP_LAVAGIANT_FOOTPRINT_V, o->Position[0], o->Position[1], o->Scale,
+                                            o->Scale, o->Light));
                     }
-                    DisableAlphaBlend();
+                    out.SetState({.blend = Blend::Off});
                 }
                 break;
 #ifdef PBG_ADD_CHARACTERSLOT
@@ -8430,9 +8437,10 @@ void RenderEffects(bool bRenderBlendMesh)
                 break;
                 case BITMAP_EVENT_CLOUD:
                 {
-                    EnableAlphaBlend();
-                    RenderTerrainAlphaBitmap(BITMAP_EVENT_CLOUD, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, o->Angle[0], o->Alpha);
-                    DisableAlphaBlend();
+                    out.SetState({.blend = Blend::Glow});
+                    out.DrawDecal(Decal(BITMAP_EVENT_CLOUD, o->Position[0], o->Position[1], o->Scale, o->Scale,
+                                        o->Light, o->Angle[0], o->Alpha));
+                    out.SetState({.blend = Blend::Off});
                 }
                 break;
                 case MODEL_SHOCKWAVE02:
@@ -8462,23 +8470,28 @@ void RenderEffects(bool bRenderBlendMesh)
 
                     if (o->SubType == 0)
                     {
-                        EnableAlphaBlend();
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT_RED, o->Owner->Position[0], o->Owner->Position[1], fScale, fScale, vLight, o->Angle[0], o->Alpha);
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT_RED, o->Owner->Position[0], o->Owner->Position[1], fScale, fScale, vLight, o->Angle[0], o->Alpha);
-                        DisableAlphaBlend();
+                        out.SetState({.blend = Blend::Glow});
+                        out.DrawDecal(Decal(BITMAP_LIGHT_RED, o->Owner->Position[0], o->Owner->Position[1], fScale,
+                                            fScale, vLight, o->Angle[0], o->Alpha));
+                        out.DrawDecal(Decal(BITMAP_LIGHT_RED, o->Owner->Position[0], o->Owner->Position[1], fScale,
+                                            fScale, vLight, o->Angle[0], o->Alpha));
+                        out.SetState({.blend = Blend::Off});
                     }
                     else if (o->SubType == 3)
                     {
-                        EnableAlphaBlend();
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT_RED, o->Owner->Position[0], o->Owner->Position[1], fScale, fScale, vLight, o->Angle[0], o->Alpha);
-                        DisableAlphaBlend();
+                        out.SetState({.blend = Blend::Glow});
+                        out.DrawDecal(Decal(BITMAP_LIGHT_RED, o->Owner->Position[0], o->Owner->Position[1], fScale,
+                                            fScale, vLight, o->Angle[0], o->Alpha));
+                        out.SetState({.blend = Blend::Off});
                     }
                     else if (o->SubType == 4)
                     {
-                        EnableAlphaBlend();
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT_RED, o->Position[0], o->Position[1], fScale, fScale, vLight, o->Angle[0], o->Alpha);
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT_RED, o->Position[0], o->Position[1], fScale, fScale, vLight, o->Angle[0], o->Alpha);
-                        DisableAlphaBlend();
+                        out.SetState({.blend = Blend::Glow});
+                        out.DrawDecal(Decal(BITMAP_LIGHT_RED, o->Position[0], o->Position[1], fScale, fScale, vLight,
+                                            o->Angle[0], o->Alpha));
+                        out.DrawDecal(Decal(BITMAP_LIGHT_RED, o->Position[0], o->Position[1], fScale, fScale, vLight,
+                                            o->Angle[0], o->Alpha));
+                        out.SetState({.blend = Blend::Off});
                     }
 
                 }
@@ -8707,9 +8720,19 @@ static void UpdateDrawnEffectSprites(OBJECT* o)
                 (TERRAIN_ATTRIBUTE(Position[0], Position[1]) & TW_NOATTACKZONE) == TW_NOATTACKZONE)
                 break;
         }
-        // The light the draw paints the beam's smoke and terrain light with.
+        // The light the draw paints the beam's smoke with, and the terrain light below.
         if (o->SubType == 1)
             Vector(0.2f, 0.0f, 0.0f, o->Light);
+        // The beam lights the terrain along its segments, up to a no-attack zone during a siege.
+        VectorCopy(o->Position, Position);
+        for (int j = 0; j < 20; j++)
+        {
+            VectorAdd(Position, o->Direction, Position);
+            if (battleCastle::IsBattleCastleStart() &&
+                (TERRAIN_ATTRIBUTE(Position[0], Position[1]) & TW_NOATTACKZONE) == TW_NOATTACKZONE)
+                break;
+            AddTerrainLight(Position[0], Position[1], o->Light, 2, PrimaryTerrainLight);
+        }
     }
     break;
     case MODEL_BLOW_OF_DESTRUCTION:
