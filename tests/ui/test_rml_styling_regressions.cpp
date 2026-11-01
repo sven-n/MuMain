@@ -2,6 +2,7 @@
 #include <doctest.h>
 
 #include "RmlLayoutFixture.h"
+#include "Data/GameData/ServerListData/LoadBar.h"
 #include "UI/RmlBridge/RmlElementBox.h"
 #include "UI/RmlBridge/RmlPanelGeometry.h"
 #include "UI/Scaling/UITransform.h"
@@ -566,16 +567,17 @@ ChannelList LoadChannelList(UI::Tests::RmlLayoutFixture& fixture, const char* th
         const bool isLong = row == LongChannelRow;
         Child(*channel, ".server-name")
             .SetInnerRML(isLong && !texts.longName.empty() ? texts.longName : "Valhalla-" + std::to_string(row + 1));
-        // Without the bindings both are there: the bar of a server that can be joined, the load text's line of
-        // a full one.
-        Rml::Element& gauge = Child(*channel, ".server-gauge-slot");
+        // Every row has the bar's ten segments; a full one has its load text's line over them too.
+        std::string segments;
+        for (int segment = 0; segment < Data::ServerList::LoadBarSegmentCount; ++segment)
+            segments += R"(<div class="server-gauge-segment"><div class="server-gauge-fill"></div></div>)";
+        Child(*channel, ".server-gauge-slot").SetInnerRML(segments);
         Rml::Element& loadLine = Child(*channel, ".server-load-line");
         if (isLong && !texts.load.empty())
         {
             Rml::Element& load = Child(loadLine, ".server-load");
             load.SetInnerRML(texts.load);
             load.SetClass("bold", true);
-            channel->RemoveChild(&gauge);
         }
         else
         {
@@ -599,6 +601,27 @@ void Unload(UI::Tests::RmlLayoutFixture& fixture, const ChannelList& list)
 {
     list.document->Close();
     fixture.Refresh();
+}
+
+// The row's bar segments, as laid out.
+std::vector<LayoutRect> Segments(Rml::Element& row)
+{
+    Rml::ElementList segments;
+    row.QuerySelectorAll(segments, ".server-gauge-segment");
+    std::vector<LayoutRect> rects;
+    for (Rml::Element* segment : segments)
+        rects.push_back(LaidOut(*segment, Rml::BoxArea::Border));
+    return rects;
+}
+
+// The segments a full row's load text covers, measured as CServerSelWin::FitLoadTexts does.
+Data::ServerList::CoveredSegments CoveredByLoadText(Rml::Element& row)
+{
+    std::vector<Data::ServerList::SegmentSpan> spans;
+    for (const LayoutRect& segment : Segments(row))
+        spans.push_back({segment.left, segment.Width()});
+    const LayoutRect text = LaidOut(Child(row, ".server-load"), Rml::BoxArea::Border);
+    return Data::ServerList::GetCoveredSegments(spans, text.left, text.right);
 }
 
 // The width of the rows of a list with these texts.
@@ -652,27 +675,41 @@ TEST_CASE("every channel row is as wide as the longest text any channel can have
             CHECK(name.left == doctest::Approx(content.left));
             CHECK(nameBox.GetScrollWidth() <= name.Width() + Tolerance);
 
-            // The load text in the bar's place: on its line, centered between as wide segments on both sides.
+            // The load text centered on the bar, whose segments are where an open row has them; those it covers
+            // hide, the same number on each side, at least one stays on each side and none of the others is
+            // under it.
             const LayoutRect openRowBox = LaidOut(openRow, Rml::BoxArea::Border);
             const LayoutRect gauge = LaidOut(Child(openRow, ".server-gauge-slot"), Rml::BoxArea::Border);
             const LayoutRect row = LaidOut(longRow, Rml::BoxArea::Border);
             const LayoutRect line = LaidOut(Child(longRow, ".server-load-line"), Rml::BoxArea::Border);
-            CHECK(line.left - row.left == doctest::Approx(gauge.left - openRowBox.left));
-            CHECK(line.right - row.left == doctest::Approx(gauge.right - openRowBox.left));
             CHECK(line.Center() - row.top == doctest::Approx(gauge.Center() - openRowBox.top).epsilon(0.05));
             CHECK(line.bottom <= row.bottom);
-            Rml::ElementList sides;
-            longRow.QuerySelectorAll(sides, ".server-load-side");
-            REQUIRE(sides.size() == 2);
-            const LayoutRect before = LaidOut(*sides[0], Rml::BoxArea::Border);
-            const LayoutRect after = LaidOut(*sides[1], Rml::BoxArea::Border);
             const LayoutRect load = LaidOut(Child(longRow, ".server-load"), Rml::BoxArea::Border);
             CHECK(load.Width() > Tolerance);
-            CHECK(load.Middle() == doctest::Approx(line.Middle()).epsilon(0.01));
-            CHECK(before.Width() > Tolerance);
-            CHECK(before.Width() == doctest::Approx(after.Width()));
-            CHECK(before.right <= load.left + 0.01f);
-            CHECK(load.right <= after.left + 0.01f);
+            CHECK(load.Middle() - row.left == doctest::Approx(gauge.Middle() - openRowBox.left).epsilon(0.01));
+            const std::vector<LayoutRect> openSegments = Segments(openRow);
+            const std::vector<LayoutRect> fullSegments = Segments(longRow);
+            REQUIRE(fullSegments.size() == static_cast<size_t>(Data::ServerList::LoadBarSegmentCount));
+            REQUIRE(openSegments.size() == fullSegments.size());
+            for (size_t segment = 0; segment < fullSegments.size(); ++segment)
+            {
+                CAPTURE(segment);
+                CHECK(fullSegments[segment].left - row.left ==
+                      doctest::Approx(openSegments[segment].left - openRowBox.left));
+                CHECK(fullSegments[segment].Width() == doctest::Approx(openSegments[segment].Width()));
+            }
+            const Data::ServerList::CoveredSegments covered = CoveredByLoadText(longRow);
+            CHECK(covered.first >= 1);
+            CHECK(covered.end > covered.first);
+            CHECK(covered.first == Data::ServerList::LoadBarSegmentCount - covered.end);
+            for (int segment = 0; segment < Data::ServerList::LoadBarSegmentCount; ++segment)
+            {
+                if (segment >= covered.first && segment < covered.end)
+                    continue;
+                CAPTURE(segment);
+                const LayoutRect& shown = fullSegments[static_cast<size_t>(segment)];
+                CHECK((shown.right <= load.left + 0.01f || shown.left >= load.right - 0.01f));
+            }
 
             // The scrollbar sits beside the rows and takes no width from them.
             Rml::Element* scrollbar = nullptr;
@@ -723,10 +760,7 @@ TEST_CASE("every channel row is as wide as the longest text any channel can have
             longLoad.sizerLoads = {LongLoadText};
             const ChannelList wide = LoadChannelList(fixture, theme, longLoad);
             CHECK(BorderWidth(*wide.rows.front()) > width + Tolerance);
-            Rml::ElementList wideSides;
-            wide.rows[LongChannelRow]->QuerySelectorAll(wideSides, ".server-load-side");
-            REQUIRE(wideSides.size() == 2);
-            CHECK(LaidOut(*wideSides[0], Rml::BoxArea::Border).Width() > 10.f);
+            CHECK(CoveredByLoadText(*wide.rows[LongChannelRow]).first >= 1);
             Unload(fixture, wide);
         }
     }

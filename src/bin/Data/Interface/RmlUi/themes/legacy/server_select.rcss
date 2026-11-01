@@ -112,8 +112,9 @@
 	display: block;
 	text-align: left;
 }
-/* A full or overloaded server's load text in the load bar's place: centered on the bar's line, a
-   size smaller than the name, between three segments of the bar's full color on each side. */
+/* A full or overloaded server's load text, centered on the load bar, a size smaller than the name;
+   the bar's segments under it are hidden (CServerSelWin::FitLoadTexts), the others stay where
+   they are. */
 .server-load-line {
 	position: absolute;
 	left: 16rem;
@@ -122,18 +123,9 @@
 	height: 12rem;
 	display: flex;
 	flex-direction: row;
+	justify-content: center;
 	align-items: center;
 	pointer-events: none;
-}
-.server-load-side {
-	display: flex;
-	flex: 1;
-	gap: 2rem;
-	height: 4rem;
-}
-.server-load-segment {
-	flex: 1;
-	height: 100%;
 }
 .server-load {
 	display: block;

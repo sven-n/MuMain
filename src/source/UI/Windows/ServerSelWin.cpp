@@ -108,7 +108,8 @@ void CServerSelWin::BindRmlModel(Rml::DataModelConstructor& c, ServerSelRmlModel
     server.RegisterMember("load_slant", &ServerEntry::loadSlant);
     server.RegisterMember("segments", &ServerEntry::segments);
     server.RegisterMember("empty_style", &ServerEntry::emptyStyle);
-    server.RegisterMember("full_color", &ServerEntry::fullColor);
+    server.RegisterMember("text_from", &ServerEntry::textFrom);
+    server.RegisterMember("text_to", &ServerEntry::textTo);
     c.RegisterArray<std::vector<ServerEntry>>();
 
     auto loadSizer = c.RegisterStruct<LoadSizerEntry>();
@@ -309,7 +310,6 @@ void CServerSelWin::SetLoadBar(ServerEntry& entry, int percent)
         const long litPercent = std::lround(segment.lit * kPercent);
         entry.segments.push_back({std::to_string(litPercent) + "%", Core::Color::FormatRgb(segment.color)});
     }
-    entry.fullColor = Core::Color::FormatRgb(full.value_or(Core::Color::Rgb{}));
     if (Data::ServerList::IsThemeLoadBarColor(list, LoadBarPart::Empty, theme))
         return;
     if (const auto empty = Data::ServerList::ResolveLoadBarColor(list, LoadBarPart::Empty, theme, readToken))
@@ -321,6 +321,11 @@ CServerSelWin::ServerEntry CServerSelWin::MakeServerEntry(const CServerInfo& ser
     ServerEntry entry;
     entry.label = g_ServerListManager->GetServerButtonName(*m_pSelectServerGroup, serverInfo.m_iIndex);
     entry.loadText = g_ServerListManager->GetServerButtonParts(*m_pSelectServerGroup, serverInfo).load;
+    if (const auto covered = m_coveredByLoadText.find(entry.loadText); covered != m_coveredByLoadText.end())
+    {
+        entry.textFrom = covered->second.first;
+        entry.textTo = covered->second.end;
+    }
     entry.index = index;
     entry.color =
         MakeColorEntry(g_ServerListManager->GetServerButtonColor(serverInfo, UI::RmlBridge::GetActiveThemeName()));
@@ -480,7 +485,52 @@ bool CServerSelWin::UpdateMouseEvent()
 
 bool CServerSelWin::Update()
 {
+    FitLoadTexts();
     return true;
+}
+
+void CServerSelWin::FitLoadTexts()
+{
+    Rml::ElementDocument* document = m_RmlView.Document();
+    if (document == nullptr || !IsVisible())
+        return;
+
+    std::vector<ServerEntry>& servers = m_RmlView.GetModel().servers;
+    Rml::ElementList rows;
+    document->QuerySelectorAll(rows, ".server-option-btn.server-row");
+    bool changed = false;
+    size_t index = 0;
+    for (Rml::Element* row : rows)
+    {
+        // The sizer row comes after the servers' rows.
+        if (row->IsClassSet("server-row-sizer") || index >= servers.size())
+            break;
+        ServerEntry& entry = servers[index++];
+        Rml::Element* text = row->QuerySelector(".server-load");
+        if (entry.loadText.empty() || text == nullptr)
+            continue;
+        Rml::ElementList segments;
+        row->QuerySelectorAll(segments, ".server-gauge-segment");
+        std::vector<Data::ServerList::SegmentSpan> spans;
+        for (Rml::Element* segment : segments)
+            spans.push_back({segment->GetAbsoluteOffset(Rml::BoxArea::Border).x,
+                             segment->GetBox().GetSize(Rml::BoxArea::Border).x});
+        const float left = text->GetAbsoluteOffset(Rml::BoxArea::Border).x;
+        const float width = text->GetBox().GetSize(Rml::BoxArea::Border).x;
+        // Not laid out yet (a row just built): the next frame has it.
+        if (spans.empty() || spans.front().width <= 0.0f || width <= 0.0f)
+            continue;
+        const Data::ServerList::CoveredSegments covered = Data::ServerList::GetCoveredSegments(spans, left, left + width);
+        m_coveredByLoadText[entry.loadText] = covered;
+        if (entry.textFrom != covered.first || entry.textTo != covered.end)
+        {
+            entry.textFrom = covered.first;
+            entry.textTo = covered.end;
+            changed = true;
+        }
+    }
+    if (changed)
+        m_RmlView.MarkDirty("servers");
 }
 
 bool CServerSelWin::Render()

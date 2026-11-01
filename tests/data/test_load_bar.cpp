@@ -12,6 +12,7 @@
 #include <map>
 #include <optional>
 #include <string>
+#include <vector>
 
 using Core::Color::MixOklch;
 using Core::Color::ParseRgb;
@@ -231,4 +232,25 @@ TEST_CASE("ButtonTextParts: the button's text is split at its load text")
     // A server that can be joined: no load text, and its space goes with it.
     values.load = "";
     CHECK(parts("{name}-{channel} ({vip} {pvp}) {load}") == Parts{"Valhalla-1 (PvP)", "", ""});
+}
+
+TEST_CASE("Load bar: a text over the bar covers the segments reaching into it")
+{
+    using Data::ServerList::CoveredSegments;
+    using Data::ServerList::GetCoveredSegments;
+    using Data::ServerList::SegmentSpan;
+    // Ten segments 14 wide, 2 apart, as the legacy theme lays out a 158 wide bar.
+    std::vector<SegmentSpan> segments;
+    for (int index = 0; index < Data::ServerList::LoadBarSegmentCount; ++index)
+    {
+        segments.push_back({static_cast<float>(index) * 16.0f, 14.0f});
+    }
+    // A text 80 wide, centered: from 39 to 119, into segments 2 (32..46) to 7 (112..126).
+    CHECK(GetCoveredSegments(segments, 39.0f, 119.0f) == CoveredSegments{2, 8});
+    // One in the gap at the middle (78..80) covers none; edges that only touch don't count.
+    CHECK(GetCoveredSegments(segments, 78.0f, 80.0f) == CoveredSegments{});
+    CHECK(GetCoveredSegments(segments, 46.0f, 112.0f) == CoveredSegments{3, 7});
+    // Wider than the bar: all of them.
+    CHECK(GetCoveredSegments(segments, -10.0f, 200.0f) == CoveredSegments{0, 10});
+    CHECK(GetCoveredSegments({}, 0.0f, 10.0f) == CoveredSegments{});
 }

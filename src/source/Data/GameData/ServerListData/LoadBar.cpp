@@ -42,6 +42,29 @@ LoadBarSegments GetLoadBarSegments(Rgb base, Rgb full, int percent)
     return segments;
 }
 
+CoveredSegments GetCoveredSegments(std::span<const SegmentSpan> segments, float left, float right)
+{
+    // Edges that only touch, within layout rounding, don't cover.
+    constexpr float Touch = 0.01f;
+    CoveredSegments covered;
+    bool found = false;
+    for (size_t index = 0; index < segments.size(); ++index)
+    {
+        const SegmentSpan& segment = segments[index];
+        if (segment.left + segment.width <= left + Touch || segment.left >= right - Touch)
+        {
+            continue;
+        }
+        if (!found)
+        {
+            covered.first = static_cast<int>(index);
+            found = true;
+        }
+        covered.end = static_cast<int>(index) + 1;
+    }
+    return covered;
+}
+
 const char* GetLoadBarToken(LoadBarPart part)
 {
     return LoadBarTokens[static_cast<size_t>(part)];

@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <functional>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 
@@ -41,6 +42,25 @@ enum class LoadBarPart : std::uint8_t
 // `full` (Core::Color::MixOklch) and lit by as much of its tenth of the load as is reached; a full
 // or overloaded server has every segment lit in `full`.
 LoadBarSegments GetLoadBarSegments(Core::Color::Rgb base, Core::Color::Rgb full, int percent);
+
+// A segment of the bar as laid out on the screen: its left edge and width.
+struct SegmentSpan
+{
+    float left = 0.0f;
+    float width = 0.0f;
+};
+
+// The segments a text over the bar covers, [first, end): those reaching into its box from `left` to
+// `right`; first == end when none does. A full server's load text hides them (docs/server-list.md).
+struct CoveredSegments
+{
+    int first = 0;
+    int end = 0;
+
+    bool operator==(const CoveredSegments&) const = default;
+};
+
+CoveredSegments GetCoveredSegments(std::span<const SegmentSpan> segments, float left, float right);
 
 // The token of a theme that holds a part's own color ("server-load-base").
 const char* GetLoadBarToken(LoadBarPart part);

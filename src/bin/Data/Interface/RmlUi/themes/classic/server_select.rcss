@@ -126,8 +126,9 @@ body {
 	display: block;
 	text-align: left;
 }
-/* A full or overloaded server's load text in the gauge's place: centered on the gauge's line, a size
-   smaller than the name, between three segments of the gauge's full color on each side. */
+/* A full or overloaded server's load text, centered on the gauge, a size smaller than the name; the
+   gauge's segments under it are hidden (CServerSelWin::FitLoadTexts), the others stay where they
+   are. */
 .server-load-line {
 	position: absolute;
 	left: calc(18 * var(--px));
@@ -136,18 +137,9 @@ body {
 	height: 12rem;
 	display: flex;
 	flex-direction: row;
+	justify-content: center;
 	align-items: center;
 	pointer-events: none;
-}
-.server-load-side {
-	display: flex;
-	flex: 1;
-	gap: calc(1 * var(--px));
-	height: calc(3 * var(--px));
-}
-.server-load-segment {
-	flex: 1;
-	height: 100%;
 }
 .server-load {
 	display: block;

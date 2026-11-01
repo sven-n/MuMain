@@ -3,9 +3,11 @@
 //*****************************************************************************
 #pragma once
 
+#include "Data/GameData/ServerListData/LoadBar.h"
 #include "UI/Core/WindowObject.h"
 #include "UI/RmlBridge/RmlThemedView.h"
 
+#include <map>
 #include <vector>
 
 namespace Rml { class ElementDocument; }
@@ -119,8 +121,9 @@ private:
         std::vector<SegmentEntry> segments;
         // The unlit part of the segments ("#202020"); empty for the theme's own.
         Rml::String emptyStyle;
-        // The bar's full color ("#E0483E"), of the segments beside the load text.
-        Rml::String fullColor;
+        // The segments the load text covers, [textFrom, textTo), hidden under it (FitLoadTexts).
+        int textFrom = 0;
+        int textTo = 0;
         // No "checked"/selected state here -- clicking a server row connects immediately.
     };
     // A load text a button can show, in its look (CServerListManager::GetButtonLoadTexts).
@@ -157,6 +160,9 @@ private:
     static void SetLoadBar(ServerEntry& entry, int percent);
     // The button of one server of the selected group, at `index` in its list.
     ServerEntry MakeServerEntry(const CServerInfo& serverInfo, int index) const;
+    // Hides the bar segments under each load text, as laid out: they depend on the text's width,
+    // which only the layout knows. Each frame; the model changes only when they do.
+    void FitLoadTexts();
     void BindRmlModel(Rml::DataModelConstructor& c, ServerSelRmlModel& model);
     UI::RmlBridge::ThemedView<ServerSelRmlModel> m_RmlView{"server_select",
         [this](Rml::DataModelConstructor& c, ServerSelRmlModel& model) { BindRmlModel(c, model); },
@@ -164,6 +170,9 @@ private:
 
     int m_iSelectServerBtnIndex = -1;
     CServerGroup* m_pSelectServerGroup = nullptr;
+    // The segments each load text covered when last laid out, for the rows built again, so they
+    // don't show the whole bar under the text for a frame.
+    std::map<Rml::String, Data::ServerList::CoveredSegments> m_coveredByLoadText;
 
     // Fixed, author-chosen footprint used only for UpdateMouseEvent()'s own-rect check
     // (self-centered the same way SceneUICoordinator.cpp centers every other window); covers

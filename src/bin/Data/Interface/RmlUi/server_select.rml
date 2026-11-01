@@ -19,19 +19,20 @@
 			     picked (replaces the old flyout with a plain second column). -->
 			<!-- A group of many channels scrolls (.scroll-pane); #server_rows keeps a short list
 			     centered and a long one starting at the top, where the scroll starts. A row has the
-			     channel's name, and below it the load bar or, for a full or overloaded server, its load
-			     text between segments of the bar's full color. -->
+			     channel's name, and below it the load bar; a full or overloaded server's load text sits
+			     centered on the bar, the segments under it hidden (CServerSelWin::FitLoadTexts). -->
 			<div id="server_col" class="scroll-pane" data-class-hidden="!server_list_visible">
 				<div id="server_rows">
 				<div class="server-option-btn server-row" data-for="s : servers" data-class-gray="s.color.gray" data-class-orange="s.color.orange" data-class-silver="s.color.silver" data-style-color="s.color.style"
 				     data-event-click="serversel_select_server(s.index)"><div class="button-label"><div class="server-name">{{s.label}}</div></div>
 					<!-- Ten segments of 10 % each (docs/server-list.md): their colors and lit widths come from the
 					     server list, the gaps and the track from the theme. -->
-					<div class="server-gauge-slot" data-if="s.load_text == ''"><div class="server-gauge-segment" data-for="g : s.segments" data-style-background-color="s.empty_style"><div class="server-gauge-fill"
+					<div class="server-gauge-slot"><div class="server-gauge-segment" data-for="g, i : s.segments" data-style-background-color="s.empty_style"
+					     data-style-visibility="i >= s.text_from && i < s.text_to ? 'hidden' : 'visible'"><div class="server-gauge-fill"
 					     data-style-width="g.lit" data-style-background-color="g.color"></div></div></div>
-					<div class="server-load-line" data-if="s.load_text != ''"><div class="server-load-side"><div class="server-load-segment" data-style-background-color="s.full_color"></div><div class="server-load-segment" data-style-background-color="s.full_color"></div><div class="server-load-segment" data-style-background-color="s.full_color"></div></div><div class="server-load"
+					<div class="server-load-line" data-if="s.load_text != ''"><div class="server-load"
 					     data-class-load-gray="s.load_color.gray" data-class-load-orange="s.load_color.orange" data-class-load-silver="s.load_color.silver" data-style-color="s.load_color.style"
-					     data-class-bold="s.load_bold" data-class-italic="s.load_italic" data-class-slant="s.load_slant">{{s.load_text}}</div><div class="server-load-side"><div class="server-load-segment" data-style-background-color="s.full_color"></div><div class="server-load-segment" data-style-background-color="s.full_color"></div><div class="server-load-segment" data-style-background-color="s.full_color"></div></div></div>
+					     data-class-bold="s.load_bold" data-class-italic="s.load_italic" data-class-slant="s.load_slant">{{s.load_text}}</div></div>
 				</div>
 				<!-- Never seen: a row with every channel name of every group shown, each on a line of its own,
 				     and every load text with the room its bar segments need, so it is as wide as the longest
