@@ -68,12 +68,15 @@ body {
 	filter: brightness(1.0);
 }
 
+/* Twelve channels fit; a group of more scrolls (.scroll-pane, server_select.rml), with the
+   scrollbar beside the rows. */
 #server_col {
 	position: absolute;
 	left: 50%;
 	top: calc(218 * var(--px));
 	margin-left: calc(45 * var(--px));
-	width: calc(134 * var(--px));
+	width: calc(134 * var(--px) + 15dp);
+	max-height: calc(252 * var(--px));
 	display: block;
 }
 #server_col.hidden {

@@ -9,7 +9,7 @@
 /* No explicit position here -- .center-both (base.rcss) supplies position:absolute plus the
    centering math, same as sys_menu.rcss/msg_win.rcss's #panel. */
 #panel {
-	width: 420px;
+	width: 428px;
 	font-family: "token(font-body)";
 	font-size: 12px;
 	color: token(text-primary);
@@ -38,14 +38,23 @@
 	height: 300px;
 	overflow: hidden auto;
 }
+/* The channels scroll when they don't fit (.scroll-pane, server_select.rml); the rows never
+   shrink. #server_rows' auto margins center a short list and start a long one at the top. The
+   column is 8px wider than the rows for the scrollbar. */
 #server_col {
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
-	gap: 6px;
-	width: 240px;
+	width: 248px;
 	height: 300px;
-	overflow: hidden auto;
+}
+#server_rows {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin: auto 0;
+}
+#server_rows .server-row {
+	flex-shrink: 0;
 }
 /* #server_col is an ID selector, so it always outranks base.rcss's global `.hidden{display:none}`
    on specificity alone (an ID beats any number of plain classes) -- unlike the many `.foo.hidden`

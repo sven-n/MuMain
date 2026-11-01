@@ -17,7 +17,10 @@
 
 			<!-- Right column: servers in the currently-selected group; hidden until a group is
 			     picked (replaces the old flyout with a plain second column). -->
-			<div id="server_col" data-class-hidden="!server_list_visible">
+			<!-- A group of many channels scrolls (.scroll-pane); #server_rows keeps a short list
+			     centered and a long one starting at the top, where the scroll starts. -->
+			<div id="server_col" class="scroll-pane" data-class-hidden="!server_list_visible">
+				<div id="server_rows">
 				<div class="server-option-btn server-row" data-for="s : servers" data-class-gray="s.color.gray" data-class-orange="s.color.orange" data-class-silver="s.color.silver" data-style-color="s.color.style"
 				     data-event-click="serversel_select_server(s.index)"><div class="button-label">{{s.label}}<span class="server-load" data-if="s.load_text != ''"
 					     data-class-load-gray="s.load_color.gray" data-class-load-orange="s.load_color.orange" data-class-load-silver="s.load_color.silver" data-style-color="s.load_color.style"
@@ -26,6 +29,7 @@
 					     server list, the gaps and the track from the theme. -->
 					<div class="server-gauge-slot"><div class="server-gauge-segment" data-for="g : s.segments" data-style-background-color="s.empty_style"><div class="server-gauge-fill"
 					     data-style-width="g.lit" data-style-background-color="g.color"></div></div></div>
+				</div>
 				</div>
 			</div>
 		</div>
