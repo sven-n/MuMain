@@ -177,10 +177,14 @@ Result ApplyDevilsEye(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     o->BlendMeshLight = sine;
     o->BlendMeshTexCoordV = (int)WorldTime % 2000 * 0.0005f;
     o->Alpha = 2.0f;
-
-    float Luminosity = sine;
-    Vector(Luminosity / 5.0f, Luminosity / 5.0f, Luminosity / 5.0f, o->Light);
     return Result::Applied;
+}
+
+// The eye's pulse, which the ground item's next draw adds to its light.
+void SpawnDevilsEye(BMD* b, OBJECT* o, vec34_t* bones)
+{
+    float Luminosity = (float)sinf(WorldTime * 0.002f) * 10.f + 15.65f;
+    Vector(Luminosity / 5.0f, Luminosity / 5.0f, Luminosity / 5.0f, o->Light);
 }
 
 void SpawnDevilsKey(BMD* b, OBJECT* o, vec34_t* bones)
@@ -537,7 +541,7 @@ const ItemEffect ItemEffects[] = {
     {"spirit", ApplySpirit},
     {"potion", ApplyPotion},
     {"fruits", ApplyFruits},
-    {"devilsEye", ApplyDevilsEye},
+    {"devilsEye", ApplyDevilsEye, SpawnDevilsEye},
     {"devilsKey", ApplyNothing, SpawnDevilsKey},
     {"devilsInvitation", ApplyNothing, SpawnDevilsInvitation},
     {"rena", ApplyNothing, SpawnRena},

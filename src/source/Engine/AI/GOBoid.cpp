@@ -1302,6 +1302,7 @@ static void UpdateDrawnBoidEffects()
         if (!o->Live || !o->Visible || o->Type == MODEL_SPEARSKILL)
             continue;
         // The draw turns a boid a quarter for its model.
+        const float angle = o->Angle[2];
         o->Angle[2] += 90.f;
         BMD* b = &Models[o->Type];
         const auto bones = [o, b]
@@ -1352,7 +1353,7 @@ static void UpdateDrawnBoidEffects()
             CreateSprite(BITMAP_LIGHT, Position, 0.1f, Light, o);
             break;
         }
-        o->Angle[2] -= 90.f;
+        o->Angle[2] = angle;
     }
 }
 
@@ -1678,6 +1679,8 @@ void RenderBoids(bool bAfterCharacter)
     {
         OBJECT* o = &Boids[i];
         if (o->m_bRenderAfterCharacter != bAfterCharacter) continue;
+        // Drawn a quarter turn round; the angle goes back exactly, not by subtracting the turn.
+        const float angle = o->Angle[2];
         if (MODEL_SPEARSKILL != o->Type)
         {
             o->Angle[2] += 90.f;
@@ -1721,10 +1724,7 @@ void RenderBoids(bool bAfterCharacter)
                 }
             }
         }
-        if (MODEL_SPEARSKILL != o->Type)
-        {
-            o->Angle[2] -= 90.f;
-        }
+        o->Angle[2] = angle;
     }
 }
 
@@ -1738,6 +1738,7 @@ void RenderFishs()
     for (int i = 0; i < MAX_FISHS; i++)
     {
         OBJECT* o = &Fishs[i];
+        const float angle = o->Angle[2];
         o->Angle[2] += 90.f;
         if (o->Live)
         {
@@ -1764,7 +1765,7 @@ void RenderFishs()
                 }
             }
         }
-        o->Angle[2] -= 90.f;
+        o->Angle[2] = angle;
     }
 }
 
