@@ -338,6 +338,7 @@ void NewMoveCharacterScene()
     }
     MoveCharacterSceneState();
     PlaceCharactersForDraw();
+    CullEffects();
 }
 
 /**

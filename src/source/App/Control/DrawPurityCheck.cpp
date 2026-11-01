@@ -81,7 +81,8 @@ constexpr const char* ObjectFields[] = {
     "Live",       "Type",       "SubType",      "CurrentAction", "PriorAction", "AnimationFrame", "PriorAnimationFrame",
     "LifeTime",   "Position.x", "Position.y",   "Position.z",    "Angle.x",     "Angle.y",        "Angle.z",
     "Scale",      "Alpha",      "Light.r",      "Light.g",       "Light.b",     "Velocity",       "Gravity",
-    "HiddenMesh", "PKKey",      "m_iAnimation", "Owner",         "Direction.x", "Direction.y",    "Direction.z"};
+    "HiddenMesh", "PKKey",      "m_iAnimation", "Owner",         "Direction.x", "Direction.y",    "Direction.z",
+    "Visible",    "DrawnFrame"};
 constexpr const char* ParticleFields[] = {
     "Live",     "Type",     "SubType", "Scale",   "Position.x", "Position.y", "Position.z",
     "Angle.x",  "Angle.y",  "Angle.z", "Light.r", "Light.g",    "Light.b",    "Alpha",
@@ -115,6 +116,8 @@ void Record(Recorder& r, const OBJECT* o, const char* kind)
     Put(e, o->m_iAnimation);
     Put(e, static_cast<const void*>(o->Owner));
     Put(e, o->Direction);
+    Put(e, o->Visible ? 1 : 0);
+    Put(e, static_cast<int>(o->DrawnFrame));
 }
 
 void Record(Recorder& r, const PARTICLE* p)
