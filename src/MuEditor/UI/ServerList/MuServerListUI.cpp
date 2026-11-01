@@ -176,14 +176,6 @@ bool PickRuleColor(const ServerListData& list, ButtonColorRule& rule)
                      { return GetButtonColorSwatch(Data::ServerList::ResolveButtonColor(list, color, theme), theme); });
 }
 
-// A grey line that wraps at the window's edge.
-void RenderNote(const char* text)
-{
-    ImGui::PushTextWrapPos(0.0f);
-    ImGui::TextDisabled("%s", text);
-    ImGui::PopTextWrapPos();
-}
-
 void RenderError(const char* text)
 {
     ImGui::PushStyleColor(ImGuiCol_Text, ErrorColor);

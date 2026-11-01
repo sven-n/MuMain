@@ -346,6 +346,13 @@ void RenderSwatch(const ImVec4& color)
     ImGui::Dummy(ImVec2(size, size));
 }
 
+void RenderNote(const char* text)
+{
+    ImGui::PushTextWrapPos(0.0f);
+    ImGui::TextDisabled("%s", text);
+    ImGui::PopTextWrapPos();
+}
+
 const char* GetThemeColorLabel(ThemeColor color)
 {
     switch (color)

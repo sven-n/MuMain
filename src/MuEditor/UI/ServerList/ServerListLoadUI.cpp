@@ -45,13 +45,6 @@ constexpr int MaxPreviewColumns = 64;
 constexpr ImU32 UnlitFallback = IM_COL32(0, 0, 0, 160);
 constexpr ImU32 Opaque = 255;
 
-void RenderNote(const char* text)
-{
-    ImGui::PushTextWrapPos(0.0f);
-    ImGui::TextDisabled("%s", text);
-    ImGui::PopTextWrapPos();
-}
-
 ImU32 ToImColor(Rgb color)
 {
     return IM_COL32(color.red, color.green, color.blue, Opaque);
@@ -267,7 +260,7 @@ std::optional<BarText> GetBarText(const ServerListData& list, const Data::Server
 bool RenderLoadSettings(ServerListData& list, const std::function<void()>& beforeChange)
 {
     ImGui::TextUnformatted(I18N::Editor::Load);
-    RenderNote(I18N::Editor::LoadNote);
+    Colors::RenderNote(I18N::Editor::LoadNote);
     ImGui::PushID("##Load");
     ImGui::TextUnformatted(I18N::Editor::LoadBar);
     bool changed = PickBarColor(list, LoadBarPart::Base, I18N::Editor::BaseColor, beforeChange);
@@ -282,7 +275,7 @@ bool RenderLoadSettings(ServerListData& list, const std::function<void()>& befor
 void RenderLoadPreview(const ServerListData& list, const Data::ServerList::ChannelSettings& channel,
                        const std::string& groupName, std::string_view locale, std::span<const std::string> themes)
 {
-    RenderNote(I18N::Editor::LoadPreviewNote);
+    Colors::RenderNote(I18N::Editor::LoadPreviewNote);
     constexpr ImGuiTableFlags TableFlags =
         ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit;
     const std::span<const std::string> shown =

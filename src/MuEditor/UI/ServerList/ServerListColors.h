@@ -61,6 +61,8 @@ ImVec4 GetTokenSwatch(const char* token, std::string_view theme);
 ImVec4 GetThemeColorSwatch(Data::ServerList::ThemeColor color, std::string_view theme);
 ImVec4 GetButtonColorSwatch(const Data::ServerList::ButtonColor& color, std::string_view theme);
 void RenderSwatch(const ImVec4& color);
+// A grey line that wraps at the window's edge, as the Server List window's notes are.
+void RenderNote(const char* text);
 
 const char* GetThemeColorLabel(Data::ServerList::ThemeColor color);
 // A theme color's label, or a color of the list's own by its name.

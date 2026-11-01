@@ -121,14 +121,6 @@ auto WarnUnknown(IssueList& issues)
     return [&issues](const std::string& unknown, const std::string& message) { issues.Warning(unknown, message); };
 }
 
-std::string ToLowerAscii(std::string text)
-{
-    std::transform(
-        text.begin(), text.end(), text.begin(), [](char character)
-        { return character >= 'A' && character <= 'Z' ? static_cast<char>(character - 'A' + 'a') : character; });
-    return text;
-}
-
 std::string CutWarning(size_t maxUnits)
 {
     return "longer than " + std::to_string(maxUnits) + " characters (an emoji counts as two), cut";

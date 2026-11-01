@@ -180,6 +180,10 @@ TEST_CASE("ServerListIds: the ids of VIP types and colors")
     CHECK(Data::ServerList::MakeListId("New VIP type", "vip") == "newVipType");
     CHECK(Data::ServerList::MakeListId("2 Silver", "vip") == "silver");
     CHECK(Data::ServerList::MakeListId("\xC3\x96", "color") == "color");
+
+    // Theme folder names as the game has them; anything but A to Z stays.
+    CHECK(Data::ServerList::ToLowerAscii("Legacy-Theme_2") == "legacy-theme_2");
+    CHECK(Data::ServerList::ToLowerAscii("\xC3\x96") == "\xC3\x96");
 }
 
 TEST_CASE("ChannelNameBuilder: theme color names")

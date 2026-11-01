@@ -69,4 +69,11 @@ std::string MakeListId(std::string_view name, std::string_view fallback)
     }
     return id.empty() ? std::string(fallback) : id;
 }
+
+std::string ToLowerAscii(std::string_view text)
+{
+    std::string lower(text);
+    std::transform(lower.begin(), lower.end(), lower.begin(), ToLower);
+    return lower;
+}
 } // namespace Data::ServerList
