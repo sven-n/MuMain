@@ -27,8 +27,10 @@ std::optional<ImVec4> ParseShade(std::string_view shade);
 // The theme folder a token's value comes from: the theme itself, or one it inherits from;
 // nothing when none of them has it.
 std::optional<std::string> FindThemeTokenSource(std::string_view theme, const char* token);
-// Sets the token in the theme folder's own tokens.ini, in its [Tokens], replacing the line that
-// has it or adding one after the section's last. False when the file can't be read or written.
+// Sets the token in the theme folder's own tokens.ini, in its [Tokens], replacing the lines that
+// have it or adding one after the section's last. The lines count as the themes read them: section
+// and key in any case, spaces around them, ';' and '#' lines as comments. False when the file can't
+// be read or written.
 // The tokens are read again afterwards (ForgetThemeTokens).
 bool WriteThemeToken(std::string_view theme, const char* token, const std::string& value);
 // tokens.ini's text with the token set as WriteThemeToken sets it; the text keeps its line ends.

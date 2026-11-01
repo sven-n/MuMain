@@ -271,6 +271,18 @@ TEST_CASE("Server list colors: a token is set in tokens.ini's text [editor]")
     CHECK(ListColors::SetTokenInText("[Tokens]\r\na=1\r\n", "a", "9") == "[Tokens]\r\na=9\r\n");
 }
 
+TEST_CASE("Server list colors: tokens.ini's lines count as the themes read them [editor]")
+{
+    namespace ListColors = MuEditor::ServerList::Colors;
+    // Spaces around the key, another case, a header with spaces, a byte order mark.
+    CHECK(ListColors::SetTokenInText("[ tokens ]\nServer-Load-Base = #00bd8b\n", "server-load-base", "#123456") ==
+          "[ tokens ]\nserver-load-base=#123456\n");
+    CHECK(ListColors::SetTokenInText("\xef\xbb\xbf[Tokens]\na=1\n", "b", "2") == "\xef\xbb\xbf[Tokens]\na=1\nb=2\n");
+    // A '#' comment is no value line to add after; a key the section has twice takes the value in both.
+    CHECK(ListColors::SetTokenInText("[Tokens]\na=1\n# later\n", "b", "2") == "[Tokens]\na=1\nb=2\n# later\n");
+    CHECK(ListColors::SetTokenInText("[Tokens]\na=1\n[Tokens]\na=2\n", "a", "9") == "[Tokens]\na=9\n[Tokens]\na=9\n");
+}
+
 TEST_CASE("Server list colors: a token color keeps its alpha [editor]")
 {
     namespace ListColors = MuEditor::ServerList::Colors;
