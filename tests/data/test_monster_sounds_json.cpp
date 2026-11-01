@@ -169,8 +169,8 @@ TEST_CASE("Monster sounds: an event during animations and one once in them read 
     CHECK(read.sets[0] == set);
 }
 
-TEST_CASE("Monster sounds: during and once name one animation or more, a once event in stop1 or stop2 is a warning "
-          "(Q-MN84, Q-MN85) [data][monsters]")
+TEST_CASE("Monster sounds: during and once name one animation or more, a once event in stop1, stop2 or walk is a "
+          "warning (Q-MN84, Q-MN85, Q-MN89) [data][monsters]")
 {
     for (const char* key : {"during", "once"})
     {
@@ -192,6 +192,10 @@ TEST_CASE("Monster sounds: during and once name one animation or more, a once ev
                         "plays each frame"));
     REQUIRE(standing.sets.size() == 1);
     CHECK(standing.sets[0].soundEvents[0].once == std::vector<int>{MONSTER01_STOP2, MONSTER01_ATTACK1});
+    const ReadResult walking = Read(SoundsFile(Set(
+        R"("sounds": [{"file": "Data/Sound/a.wav"}], "soundEvents": [{"once": ["walk"], "sounds": ["Data/Sound/a.wav"]}])")));
+    CHECK(HasIssueAbout(walking.issues, ItemDataIssueSeverity::Warning, "sound set Hound soundEvents[0].once",
+                        "stop1, stop2 or walk"));
     const ReadResult during = Read(SoundsFile(Set(
         R"("sounds": [{"file": "Data/Sound/a.wav"}], "soundEvents": [{"during": ["stop1"], "sounds": ["Data/Sound/a.wav"]}])")));
     CHECK(during.issues.empty());

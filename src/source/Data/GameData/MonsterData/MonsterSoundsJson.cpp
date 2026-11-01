@@ -297,16 +297,17 @@ bool ReadEventAnimations(const OrderedJson& entry, const char* key, const std::s
     return true;
 }
 
-// A once event in stop1 or stop2 plays each frame: standing clears the flag
-// after the frame's events.
+// A once event in stop1, stop2 or walk plays each frame: they clear the flag
+// after the frame's events (Q-MN89).
 void WarnAboutOnceWhileStanding(const MonsterSoundEvent& event, const std::string& prefix, EntryIssues& issues)
 {
-    const bool standing = std::any_of(event.once.begin(), event.once.end(), [](int animation)
-                                      { return animation == MONSTER01_STOP1 || animation == MONSTER01_STOP2; });
+    const bool standing = std::any_of(
+        event.once.begin(), event.once.end(), [](int animation)
+        { return animation == MONSTER01_STOP1 || animation == MONSTER01_STOP2 || animation == MONSTER01_WALK; });
     if (standing)
     {
         issues.Warning(prefix + Keys::Once,
-                       "names stop1 or stop2, which clear the flag: the event plays each frame there");
+                       "names stop1, stop2 or walk, which clear the flag: the event plays each frame there");
     }
 }
 

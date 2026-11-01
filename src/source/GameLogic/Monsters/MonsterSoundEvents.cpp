@@ -240,7 +240,9 @@ bool PlayDrawn(CHARACTER& character)
     {
         character.SoundOncePlayed = true;
     }
-    if (object.CurrentAction == MONSTER01_STOP1 || object.CurrentAction == MONSTER01_STOP2)
+    // One rule for every set (Q-MN89): standing or walking clears the flag.
+    if (object.CurrentAction == MONSTER01_STOP1 || object.CurrentAction == MONSTER01_STOP2 ||
+        object.CurrentAction == MONSTER01_WALK)
     {
         character.SoundOncePlayed = false;
     }

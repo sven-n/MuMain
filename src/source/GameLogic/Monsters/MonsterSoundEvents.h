@@ -58,12 +58,12 @@ bool PlayMoment(CHARACTER& character, Data::Monsters::MonsterSoundMoment moment,
 
 // Plays the events of the character's set for a frame it is drawn: those
 // during its animation, and those once in it unless one played since it
-// stood; drawn in stop1 or stop2, it stands (Q-MN84, Q-MN85, the flag is
-// CHARACTER::SoundOncePlayed, Q-MN87). The Aida monsters' effects
-// (M33Aida::UpdateAidaMonsterEffects) call it where they played their sounds,
-// so the random draws around it keep their order; UpdateDrawnCharacterEffects
-// calls FinishDrawnFrame for every character the last frame drew. False when
-// the set has no such events.
+// stood or walked; drawn in stop1, stop2 or walk, the flag clears (Q-MN84,
+// Q-MN85, Q-MN89; the flag is CHARACTER::SoundOncePlayed, Q-MN87). The Aida
+// monsters' effects (M33Aida::UpdateAidaMonsterEffects) call it where they
+// played their sounds, so the random draws around it keep their order;
+// UpdateDrawnCharacterEffects calls FinishDrawnFrame for every character the
+// last frame drew. False when the set has no such events.
 bool PlayDrawn(CHARACTER& character);
 
 // UpdateDrawnCharacterEffects, after the maps' monster effects: plays the

@@ -2867,7 +2867,7 @@
     <value>Geräuschereignisse</value>
   </data>
   <data name="Sound events note" xml:space="preserve">
-    <value>Geräusche, die das Spiel für die Monster dieses Sets spielt: in den Animationen eines Ereignisses (wenn ein Angriff beginnt, wenn es getroffen wird oder stirbt, bei jedem Schritt und am Ende jeder Ruheschleife, bis 500 Einheiten vom Helden entfernt), in jedem Bild, in dem das Monster in ihnen gezeichnet wird, einmal in ihnen, bis es steht, an seinen Marken des Monstermodells oder zu seinen Momenten, welche Animation auch läuft. Ein Ereignis spielt Geräusche dieses Sets.</value>
+    <value>Geräusche, die das Spiel für die Monster dieses Sets spielt: in den Animationen eines Ereignisses (wenn ein Angriff beginnt, wenn es getroffen wird oder stirbt, bei jedem Schritt und am Ende jeder Ruheschleife, bis 500 Einheiten vom Helden entfernt), in jedem Bild, in dem das Monster in ihnen gezeichnet wird, einmal in ihnen, bis es steht oder geht, an seinen Marken des Monstermodells oder zu seinen Momenten, welche Animation auch läuft. Ein Ereignis spielt Geräusche dieses Sets.</value>
   </data>
   <data name="Sound event frames" xml:space="preserve">
     <value>Bilder</value>
@@ -2909,7 +2909,7 @@
     <value>Wann</value>
   </data>
   <data name="Sound event when note" xml:space="preserve">
-    <value>Animationen: das Ereignis spielt in ihnen, wenn ein Angriff, Treffer oder Tod beginnt, bei jedem Schritt eines Gangs und am Ende jeder Schleife von stop1 und stop2. In jedem Bild in: in jedem Bild, in dem das Monster in einer von ihnen gezeichnet wird; die Chance wird in jedem Bild gezogen. Einmal, bis es steht: im ersten Bild, in dem das Monster in einer von ihnen gezeichnet wird; danach spielt kein Einmal-Ereignis des Sets, bis es in stop1 oder stop2 gezeichnet wird. Marken: in den Bildern einer Marke des Monstermodells. Momente: wo das Spiel sie spielt, welche Animation auch läuft: attack und hit, wenn sie beginnen, death, wenn er beginnt (auch in Chaos Castle), stand, wenn das Monster zum Stehen gesetzt wird (ein Gang endet, der Server hält es an), walk bei jedem Schritt. Ein Ereignis nennt Animationen, jedes Bild, einmal, Marken oder Momente.</value>
+    <value>Animationen: das Ereignis spielt in ihnen, wenn ein Angriff, Treffer oder Tod beginnt, bei jedem Schritt eines Gangs und am Ende jeder Schleife von stop1 und stop2. In jedem Bild in: in jedem Bild, in dem das Monster in einer von ihnen gezeichnet wird; die Chance wird in jedem Bild gezogen. Einmal, bis es steht: im ersten Bild, in dem das Monster in einer von ihnen gezeichnet wird; danach spielt kein Einmal-Ereignis des Sets, bis es in stop1, stop2 oder walk gezeichnet wird. Marken: in den Bildern einer Marke des Monstermodells. Momente: wo das Spiel sie spielt, welche Animation auch läuft: attack und hit, wenn sie beginnen, death, wenn er beginnt (auch in Chaos Castle), stand, wenn das Monster zum Stehen gesetzt wird (ein Gang endet, der Server hält es an), walk bei jedem Schritt. Ein Ereignis nennt Animationen, jedes Bild, einmal, Marken oder Momente.</value>
   </data>
   <data name="Sound event on" xml:space="preserve">
     <value>bei</value>

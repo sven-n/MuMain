@@ -830,7 +830,7 @@ TEST_CASE("Monster sounds: the Aida monsters' walk sounds come by a frame-rate c
 }
 
 TEST_CASE("Monster sounds: a once event plays the first drawn frame in its animation, then none of the set's once "
-          "events until the monster stands (Q-MN85, Q-MN87) [monsters][sounds]")
+          "events until the monster stands or walks (Q-MN85, Q-MN87, Q-MN89) [monsters][sounds]")
 {
     SoundScope scope(WD_33AIDA);
     const MonsterSoundSet& set = SetOf(DeathRider);
@@ -856,6 +856,14 @@ TEST_CASE("Monster sounds: a once event plays the first drawn frame in its anima
     CHECK(Draw(scope, *rider, MONSTER01_DIE, 2).empty());
     CHECK(Draw(scope, *rider, MONSTER01_STOP2).empty());
     CHECK(Draw(scope, *rider, MONSTER01_DIE) == Sounds({die}));
+    // A walk clears it too (Q-MN89).
+    CHECK(Draw(scope, *rider, MONSTER01_STOP1).empty());
+    CHECK(Draw(scope, *rider, MONSTER01_ATTACK1, 2) == Sounds({attack1}));
+    CHECK(rider->SoundOncePlayed);
+    // (Its walk sounds come by their chance; they do not matter here.)
+    Draw(scope, *rider, MONSTER01_WALK);
+    CHECK_FALSE(rider->SoundOncePlayed);
+    CHECK(Draw(scope, *rider, MONSTER01_ATTACK1) == Sounds({attack1}));
     // The flag is the character's own; SubType keeps its value.
     CHECK(rider->Object.SubType == 0);
 }

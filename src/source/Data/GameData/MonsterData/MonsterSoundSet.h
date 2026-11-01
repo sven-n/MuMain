@@ -97,8 +97,8 @@ struct MonsterSoundEvent
     // PlayDrawn, Q-MN84); sorted.
     std::vector<int> during;
     // The first frame the character is drawn in one of them; then none of
-    // the set's once events plays until it is drawn in stop1 or stop2
-    // (Q-MN85, the Aida monsters' SubType flag); sorted.
+    // the set's once events plays until it is drawn in stop1, stop2 or walk
+    // (Q-MN85, Q-MN89, the map draw code's SubType flag); sorted.
     std::vector<int> once;
     // Only while the character's death effect is armed (OBJECT::LifeTime 100).
     bool deathEffectArmed = false;
