@@ -14887,7 +14887,9 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
 
 void ProcessPacketCallback(const PacketInfo* Packet)
 {
-    if (SocketClient == nullptr || Packet->ConnectionHandle != SocketClient->GetHandle())
+    // By the id, not the live handle: what a server sent right before it closed the
+    // connection (e.g. why it closed it) still counts.
+    if (SocketClient == nullptr || Packet->ConnectionHandle != SocketClient->GetId())
     {
         return;
     }

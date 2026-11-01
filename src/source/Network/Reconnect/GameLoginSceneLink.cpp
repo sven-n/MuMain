@@ -40,7 +40,7 @@ LoginServer GameLoginSceneLink::ConnectedServer() const
 int GameLoginSceneLink::ConnectionId() const
 {
     // The client library numbers its connections without reusing a number.
-    return SocketClient != nullptr ? SocketClient->GetHandle() : 0;
+    return SocketClient != nullptr ? SocketClient->GetId() : 0;
 }
 
 std::optional<LoginServer> GameLoginSceneLink::AwaitedServer() const

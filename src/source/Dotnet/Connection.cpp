@@ -232,6 +232,7 @@ Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
 
     if (IsConnected())
     {
+        this->_id = this->_handle;
         connections[this->_handle] = this;
         if (const auto beginReceive = GetBeginReceive())
         {
@@ -289,6 +290,7 @@ void Connection::Send(const BYTE* data, const int32_t size)
 
 void Connection::Close()
 {
+    this->_id = 0;
     if (!IsConnected())
     {
         return;
