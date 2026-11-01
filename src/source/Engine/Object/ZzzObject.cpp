@@ -441,6 +441,23 @@ bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select)
     return true;
 }
 
+bool Calc_ObjectAnimationInto(OBJECT* o, bool Translate, vec34_t* bones)
+{
+    if (o->Alpha < 0.01f)
+        return false;
+
+    BMD* b = &Models[o->Type];
+    b->BodyHeight = 0.f;
+    b->ContrastEnable = o->ContrastEnable;
+    BodyLight(o, b);
+    b->BodyScale = o->Scale;
+    b->CurrentAction = o->CurrentAction;
+    VectorCopy(o->Position, b->BodyOrigin);
+    b->Animation(bones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false,
+                 !Translate);
+    return true;
+}
+
 // Lost Tower blocks carry a fire layer: BITMAP_CHROME tinted orange, with the
 // texture streaming on one mesh. The look players know shows that fire only
 // through the alpha holes of the strip texture. Drawing the layer as an opaque
@@ -7208,6 +7225,8 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                             int ancientDiscriminator, int Select, int RenderType)
 {
     int Level = ItemLevel;
+    // Without the option window (headless, or before the UI exists) everything is drawn at the highest level.
+    const int renderLevel = g_pOption != nullptr ? g_pOption->GetRenderLevel() : 4;
     if (RenderType & RENDER_WAVE)
     {
         Level = 0;
@@ -7265,9 +7284,9 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
 
     Level = Render::Items::Glow::GetLevel(Type, Level);
 
-    if (g_pOption->GetRenderLevel() < 4)
+    if (renderLevel < 4)
     {
-        Level = std::min<int>(Level, g_pOption->GetRenderLevel() * 2 + 5);
+        Level = std::min<int>(Level, renderLevel * 2 + 5);
     }
 
     if (ApplyPartObjectEffect(b, o, Type, Alpha, Level, ItemLevel) == Render::Items::ItemEffects::Result::Drawn)
@@ -7357,21 +7376,21 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
             VectorMul(l, Light, b->BodyLight);
             RenderPartObjectBody(b, o, Type, Alpha, RenderType);
         }
-        else if (g_pOption->GetRenderLevel())
+        else if (renderLevel)
         {
-            if (Level < 8 && g_pOption->GetRenderLevel() >= 1) //  +7
+            if (Level < 8 && renderLevel >= 1) //  +7
             {
                 Vector(Light[0] * 0.8f, Light[1] * 0.8f, Light[2] * 0.8f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
                 RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT, 1.f);
             }
-            else if (Level < 9 && g_pOption->GetRenderLevel() >= 1) //  +8
+            else if (Level < 9 && renderLevel >= 1) //  +8
             {
                 Vector(Light[0] * 0.8f, Light[1] * 0.8f, Light[2] * 0.8f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
                 RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT, 1.f);
             }
-            else if (Level < 10 && g_pOption->GetRenderLevel() >= 2) //  +9
+            else if (Level < 10 && renderLevel >= 2) //  +9
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
@@ -7380,7 +7399,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
                                           1.f);
             }
-            else if (Level < 11 && g_pOption->GetRenderLevel() >= 2) //  +10
+            else if (Level < 11 && renderLevel >= 2) //  +10
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
@@ -7389,7 +7408,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
                                           1.f);
             }
-            else if (Level < 12 && g_pOption->GetRenderLevel() >= 3) //  +11
+            else if (Level < 12 && renderLevel >= 3) //  +11
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
@@ -7400,7 +7419,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 RenderPartObjectBodyColor(b, o, Type, Alpha,
                                           RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
-            else if (Level < 13 && g_pOption->GetRenderLevel() >= 3) //  +12
+            else if (Level < 13 && renderLevel >= 3) //  +12
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
@@ -7411,7 +7430,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 RenderPartObjectBodyColor(b, o, Type, Alpha,
                                           RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
-            else if (Level < 14 && g_pOption->GetRenderLevel() >= 4) //  +13
+            else if (Level < 14 && renderLevel >= 4) //  +13
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
@@ -7422,7 +7441,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 RenderPartObjectBodyColor(b, o, Type, Alpha,
                                           RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
-            else if (Level < 15 && g_pOption->GetRenderLevel() >= 4) //  +14
+            else if (Level < 15 && renderLevel >= 4) //  +14
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
@@ -7433,7 +7452,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 RenderPartObjectBodyColor(b, o, Type, Alpha,
                                           RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
-            else if (Level < 16 && g_pOption->GetRenderLevel() >= 4) //  +15
+            else if (Level < 16 && renderLevel >= 4) //  +15
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
@@ -7456,7 +7475,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
             RenderPartObjectBody(b, o, Type, Alpha, RenderType);
         }
 
-        if (g_pOption->GetRenderLevel() == 0)
+        if (renderLevel == 0)
         {
             return;
         }

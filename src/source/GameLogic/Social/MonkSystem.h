@@ -12,6 +12,9 @@
 #include "Engine/Object/ZzzCharacter.h"
 
 #include <set>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 class CItemEqualType
 {
@@ -127,6 +130,23 @@ private:
 
     int m_nDummyIndex;
 
+public:
+    // Where one Dark Side step places the character for a part's draw: the dash pose or an afterimage.
+    struct DarksidePlacement
+    {
+        vec3_t position;
+        vec3_t startPosition;
+        vec3_t angle;
+        float alpha;
+        float animationFrame;
+    };
+
+private:
+    using DarksideParts = std::vector<std::pair<const PART_t*, std::vector<DarksidePlacement>>>;
+    // Per character in Dark Side, the placements of the last step of each part its draw hands over.
+    std::unordered_map<const CHARACTER*, DarksideParts> m_DarksideParts;
+    void StepDarkside(CHARACTER* pCha, std::vector<DarksidePlacement>& placed);
+
     bool m_bUseEffectOnce;
     int m_nLowerEffCnt;
 
@@ -175,6 +195,12 @@ public:
     void SetDarksideCnt();
     bool SendDarksideAtt(OBJECT* _pObj);
     void InitDarksideTarget();
+    // Steps the character's Dark Side once for each part its draw hands over, in draw order, as many times as the
+    // frame has reference frames; an empty `parts` ends it for the character.
+    void UpdateDarkside(CHARACTER* pCha, const std::vector<PART_t*>& parts);
+    // Where the update's last step placed the character for the part's draw; nullptr when it placed none.
+    const std::vector<DarksidePlacement>* DarksidePlacementsOf(const CHARACTER* pCha, const PART_t* pPart) const;
+    // Draws the part where the update's last step placed it.
     void DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0);
     bool CalculateDarksideTrans(OBJECT* _pObj, vec3_t _vPos, float _fAni, float _fNextAni = 0);
     int GetDarksideEffectTotal();

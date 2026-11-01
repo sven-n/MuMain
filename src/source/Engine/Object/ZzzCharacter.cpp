@@ -11946,6 +11946,57 @@ void SpawnImpLight(CHARACTER* c, OBJECT* o)
     CreateSprite(BITMAP_LIGHT, vPos, 1.5f, vLight, o);
 }
 
+// The parts RenderCharacter hands to CMonkSystem::DarksideRendering, in its order: its model branches, read the same
+// way.
+std::vector<PART_t*> DarksideDrawnParts(CHARACTER* c)
+{
+    std::vector<PART_t*> parts;
+    const OBJECT* o = &c->Object;
+    if (gCharacterManager.GetBaseClass(c->Class) != CLASS_RAGEFIGHTER || o->m_sTargetIndex < 0 || c->JumpTime > 0)
+        return parts;
+    const bool darkside =
+        o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY || o->CurrentAction == PLAYER_SKILL_DARKSIDE_ATTACK;
+
+    if (o->Kind == KIND_NPC && gMapManager.WorldActive == WD_0LORENCIA && o->Type == MODEL_PLAYER &&
+        o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3)
+        return parts;
+    if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER &&
+        (o->SubType == MODEL_SKELETON_PCBANG || o->SubType == MODEL_HALLOWEEN || o->SubType == MODEL_PANDA ||
+         o->SubType == MODEL_SKELETON_CHANGED || o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL ||
+         o->SubType == MODEL_SKELETON1))
+    {
+        if (darkside)
+            parts.push_back(&c->BodyPart[o->SubType]);
+        return parts;
+    }
+    if (o->Type == MODEL_PLAYER &&
+        ((o->Kind == KIND_PLAYER &&
+          (o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER ||
+           o->SubType == MODEL_GM_CHARACTER)) ||
+         o->SubType == MODEL_XMAS_EVENT_CHA_SSANTA || o->SubType == MODEL_XMAS_EVENT_CHA_SNOWMAN ||
+         o->SubType == MODEL_XMAS_EVENT_CHA_DEER || (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3)))
+        return parts;
+    if (c->Change)
+        return parts;
+#ifndef GUILD_WAR_EVENT
+    if (o->Kind == KIND_PLAYER && gMapManager.InChaosCastle())
+    {
+        if (o->CurrentAction != PLAYER_SKILL_DRAGONKICK)
+            parts.push_back(&c->BodyPart[BODYPART_HEAD]);
+        return parts;
+    }
+#endif
+    if (o->CurrentAction != PLAYER_SKILL_DARKSIDE_READY ||
+        (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM))
+        return parts;
+    for (int i = MAX_BODYPART - 1; i >= 0; i--)
+    {
+        if (c->BodyPart[i].Type != -1)
+            parts.push_back(&c->BodyPart[i]);
+    }
+    return parts;
+}
+
 // Advances and poses the parts the character's last draw attached, once per draw.
 void UpdateAttachedParts(CHARACTER* c)
 {
@@ -11992,6 +12043,10 @@ void UpdateDrawnCharacterEffects()
         VectorCopy(o->Position, b->BodyOrigin);
         PrepareHeldWeapons(c);
         UpdateAttachedParts(c);
+        // Readying Dark Side turns the character the way its draw used to.
+        if (o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY)
+            o->Angle[2] = 45.0f;
+        g_CMonkSystem.UpdateDarkside(c, DarksideDrawnParts(c));
         SpawnImpLight(c, o);
         SpawnHeldWeaponGlows(c);
         UpdateMonsterBodyEffects(c, o, b);

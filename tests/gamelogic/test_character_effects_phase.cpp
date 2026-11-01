@@ -10,17 +10,20 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Pets/CSPetSystem.h"
+#include "GameLogic/Social/MonkSystem.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/GameMaps/GMNewTown.h"
 #include "World/GameMaps/GM_PK_Field.h"
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/w_MapProcess.h"
 
 #include "../data/ItemModelDatabaseScope.h"
+#include "RepeatedDraws.h"
 
 #include <cstring>
 #include <memory>
@@ -788,6 +791,108 @@ TEST_CASE("A preview gets slots of its own only while its owner tracks it [effec
     CHECK(record() != nullptr);
     Attachments::Untrack(preview.get());
     CHECK(record() == nullptr);
+}
+
+TEST_CASE("Drawing a part the update has not advanced yet, again and again, advances and spawns nothing [effects]")
+{
+    namespace Attachments = Engine::Object::Attachments;
+    CharacterScope scope(MODEL_PLAYER);
+    CHARACTER* c = &scope.character();
+    PART_t& part = c->Weapon[0];
+    part.Type = MODEL_SWORD;
+    part.AnimationFrame = 2.5f;
+    part.PriorAnimationFrame = 1.5f;
+    part.CurrentAction = 1;
+    part.PriorAction = 0;
+
+    Attachments::BeginFrame();
+    RepeatedDraws::CheckChangesNothing(
+        [c, &part]
+        {
+            Attachments::BeginCharacter(c);
+            RenderLinkObject(0.f, 0.f, 0.f, c, &part, MODEL_SWORD, 0, 0, false, true);
+        });
+
+    CHECK(part.AnimationFrame == 2.5f);
+    CHECK(part.PriorAnimationFrame == 1.5f);
+    CHECK(part.CurrentAction == 1);
+    CHECK(part.PriorAction == 0);
+}
+
+TEST_CASE(
+    "Dark Side steps in the update, once per part its draw hands over, and drawing it again steps nothing [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    // Actions without keys: the draws pose nothing, and the Rage Fighter look reads the action's key count.
+    Models[MODEL_PLAYER].NumActions = 0;
+    Models[MODEL_PLAYER].Actions = new Action_t[PLAYER_SKILL_DARKSIDE_ATTACK + 1]{};
+    CHARACTER* c = &scope.character();
+    OBJECT* o = &c->Object;
+    c->Class = CLASS_RAGEFIGHTER;
+    o->Kind = KIND_PLAYER;
+    o->CurrentAction = PLAYER_SKILL_DARKSIDE_READY;
+    o->m_sTargetIndex = 2;
+    Vector(1000.f, 1000.f, 0.f, o->Position);
+    c->BodyPart[2].Type = MODEL_SWORD;
+    c->BodyPart[3].Type = MODEL_SWORD;
+    CHARACTER& target = scope.characters[2];
+    target.Object.Live = true;
+    target.Key = 77;
+    Vector(2000.f, 1000.f, 0.f, target.Object.Position);
+
+    WORD targets[DARKSIDE_TARGET_MAX];
+    for (WORD& index : targets)
+        index = NUMOFMON;
+    targets[0] = 77;
+    g_CMonkSystem.InitDarksideTarget();
+    g_CMonkSystem.SetDarksideTargetIndex(targets, AT_SKILL_DARKSIDE);
+    const int referenceFrames = REFERENCE_FRAME_STEP;
+    REFERENCE_FRAME_STEP = 1;
+    const std::vector<PART_t*> parts{&c->BodyPart[3], &c->BodyPart[2]};
+
+    g_CMonkSystem.UpdateDarkside(c, parts);
+    const auto* first = g_CMonkSystem.DarksidePlacementsOf(c, parts[0]);
+    const auto* second = g_CMonkSystem.DarksidePlacementsOf(c, parts[1]);
+    REQUIRE(first != nullptr);
+    REQUIRE(second != nullptr);
+    REQUIRE_FALSE(first->empty());
+    REQUIRE_FALSE(second->empty());
+    // The second part's step dashed further toward the target; the character still stands where it stood.
+    CHECK(second->front().position[0] > first->front().position[0]);
+    CHECK(first->front().position[0] > 1000.f);
+    CHECK(o->Position[0] == 1000.f);
+
+    const CMonkSystem undrawn = g_CMonkSystem;
+    RepeatedDraws::CheckChangesNothing(
+        [c, &parts]
+        {
+            for (PART_t* part : parts)
+                g_CMonkSystem.DarksideRendering(c, part);
+        });
+    CHECK(o->Angle[2] == 0.f);
+    CHECK(o->Position[0] == 1000.f);
+    CHECK(o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY);
+
+    // The next step goes on from where the update left it, as if nothing had been drawn.
+    CMonkSystem stepped = undrawn;
+    stepped.UpdateDarkside(c, parts);
+    FenrirScope::ClearSpawns();
+    g_CMonkSystem.UpdateDarkside(c, parts);
+    FenrirScope::ClearSpawns();
+    CHECK(g_CMonkSystem.DarksidePlacementsOf(c, parts[0])->front().position[0] ==
+          stepped.DarksidePlacementsOf(c, parts[0])->front().position[0]);
+
+    // A frame without a reference frame steps nothing.
+    REFERENCE_FRAME_STEP = 0;
+    const float placed = g_CMonkSystem.DarksidePlacementsOf(c, parts[0])->front().position[0];
+    g_CMonkSystem.UpdateDarkside(c, parts);
+    CHECK(g_CMonkSystem.DarksidePlacementsOf(c, parts[0])->front().position[0] == placed);
+
+    g_CMonkSystem.UpdateDarkside(c, {});
+    CHECK(g_CMonkSystem.DarksidePlacementsOf(c, parts[0]) == nullptr);
+    g_CMonkSystem.InitDarksideTarget();
+    REFERENCE_FRAME_STEP = referenceFrames;
+    FenrirScope::ClearSpawns();
 }
 
 TEST_CASE("Creating a sprite while drawing is counted as a violation [effects]")

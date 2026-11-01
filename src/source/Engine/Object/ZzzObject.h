@@ -129,6 +129,9 @@ void BodyLight(OBJECT* o, BMD* b);
 
 bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon);
 bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select);
+// Calc_ObjectAnimation's pose into the caller's bones, for a draw that shows the object where it does not stand; the
+// object keeps its own pose.
+bool Calc_ObjectAnimationInto(OBJECT* o, bool Translate, vec34_t* bones);
 void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon);
 
 bool IsPartyMemberBuff(int partyindex, eBuffState buffstate);

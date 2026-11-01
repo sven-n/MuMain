@@ -504,7 +504,6 @@ bool CMonkSystem::RageFighterEffect(OBJECT* _pObj, int _Type)
         int _nAniKey = Models[_pObj->Type].Actions[PLAYER_SKILL_DARKSIDE_READY].NumAnimationKeys;
         float _nRoop = (float)(180.0f / _nAniKey) * _pObj->AnimationFrame + 180.0f;
         fAlpha = sinf(_nRoop * Q_PI / 180) * 0.7f + 1.0f;
-        _pObj->Angle[2] = 45.0f;
         b->RenderBody(RENDER_TEXTURE, fAlpha, _pObj->BlendMesh, _pObj->BlendMeshLight, _pObj->BlendMeshTexCoordU, _pObj->BlendMeshTexCoordV);
         return true;
     }
@@ -703,11 +702,22 @@ bool CMonkSystem::CalculateDarksideTrans(OBJECT* _pObj, vec3_t _vPos, float _fAn
     return false;
 }
 
-void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Translate, int Select)
+// One Dark Side step, as each of its draws took one: it moves the dash and the afterimages, spawns their effects and
+// keeps where it placed the character.
+void CMonkSystem::StepDarkside(CHARACTER* pCha, std::vector<DarksidePlacement>& placed)
 {
     OBJECT* pObj = &pCha->Object;
     float fAnimationFrame = pObj->AnimationFrame;
-    int Type = pPart->Type;
+    const auto placement = [pObj]
+    {
+        DarksidePlacement at{};
+        VectorCopy(pObj->Position, at.position);
+        VectorCopy(pObj->StartPosition, at.startPosition);
+        VectorCopy(pObj->Angle, at.angle);
+        at.alpha = pObj->Alpha;
+        at.animationFrame = pObj->AnimationFrame;
+        return at;
+    };
 
     vec3_t vPos, vStartPos, vOrgPos, vOrgAngle;
     unsigned short OrgCurrentAction;
@@ -767,8 +777,7 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Transla
 
         pObj->AnimationFrame = m_fOtherAniFrame;
         pObj->CurrentAction = PLAYER_SKILL_DARKSIDE_ATTACK;
-        Calc_ObjectAnimation(pObj, Translate, Select);
-        RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
+        placed.push_back(placement());
     }
 
     if (m_nDarksideCnt > 0)
@@ -836,8 +845,7 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Transla
 
                 pObj->AnimationFrame = m_fDummyAniFrame;
                 pObj->CurrentAction = PLAYER_SKILL_DARKSIDE_ATTACK;
-                Calc_ObjectAnimation(pObj, Translate, Select);
-                RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
+                placed.push_back(placement());
             }
         }
     }
@@ -848,8 +856,87 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Transla
     VectorCopy(vOrgPos, pObj->Position);
     VectorCopy(vStartPos, pObj->StartPosition);
     VectorCopy(vOrgAngle, pObj->Angle);
-    Calc_ObjectAnimation(pObj, Translate, Select);
-    RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
+}
+void CMonkSystem::UpdateDarkside(CHARACTER* pCha, const std::vector<PART_t*>& parts)
+{
+    if (parts.empty())
+    {
+        m_DarksideParts.erase(pCha);
+        return;
+    }
+
+    DarksideParts& drawn = m_DarksideParts[pCha];
+    if (REFERENCE_FRAME_STEP > 0)
+        drawn.clear();
+    for (int step = 0; step < REFERENCE_FRAME_STEP; ++step)
+    {
+        for (PART_t* part : parts)
+        {
+            std::vector<DarksidePlacement> placed;
+            StepDarkside(pCha, placed);
+            if (step == REFERENCE_FRAME_STEP - 1)
+                drawn.emplace_back(part, std::move(placed));
+        }
+    }
+}
+
+const std::vector<CMonkSystem::DarksidePlacement>* CMonkSystem::DarksidePlacementsOf(const CHARACTER* pCha,
+                                                                                     const PART_t* pPart) const
+{
+    const auto character = m_DarksideParts.find(pCha);
+    if (character == m_DarksideParts.end())
+        return nullptr;
+    for (const auto& [part, placements] : character->second)
+    {
+        if (part == pPart)
+            return &placements;
+    }
+    return nullptr;
+}
+
+void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Translate, int Select)
+{
+    OBJECT* pObj = &pCha->Object;
+    const int Type = pPart->Type;
+    const auto render = [&]
+    {
+        RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
+                         pPart->AncientDiscriminator, false, false, Translate, Select);
+    };
+
+    if (const std::vector<DarksidePlacement>* placements = DarksidePlacementsOf(pCha, pPart))
+    {
+        // Each placement is posed into bones of its own: the character keeps its pose for the rest of its draw.
+        static vec34_t bones[MAX_BONES];
+        vec34_t* const ownBones = pObj->BoneTransform;
+        const unsigned short action = pObj->CurrentAction;
+        const float alpha = pObj->Alpha;
+        const float animationFrame = pObj->AnimationFrame;
+        vec3_t position, startPosition, angle;
+        VectorCopy(pObj->Position, position);
+        VectorCopy(pObj->StartPosition, startPosition);
+        VectorCopy(pObj->Angle, angle);
+        for (const DarksidePlacement& at : *placements)
+        {
+            VectorCopy(at.position, pObj->Position);
+            VectorCopy(at.startPosition, pObj->StartPosition);
+            VectorCopy(at.angle, pObj->Angle);
+            pObj->Alpha = at.alpha;
+            pObj->AnimationFrame = at.animationFrame;
+            pObj->CurrentAction = PLAYER_SKILL_DARKSIDE_ATTACK;
+            Calc_ObjectAnimationInto(pObj, Translate, bones);
+            pObj->BoneTransform = bones;
+            render();
+            pObj->BoneTransform = ownBones;
+        }
+        pObj->CurrentAction = action;
+        pObj->Alpha = alpha;
+        pObj->AnimationFrame = animationFrame;
+        VectorCopy(position, pObj->Position);
+        VectorCopy(startPosition, pObj->StartPosition);
+        VectorCopy(angle, pObj->Angle);
+    }
+    render();
 }
 
 void CMonkSystem::InitDummyCal()
