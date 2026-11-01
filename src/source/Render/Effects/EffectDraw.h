@@ -38,6 +38,7 @@ struct EffectState
 {
     Blend blend = Blend::Unchanged;
     Toggle depthTest = Toggle::Unchanged;
+    Toggle depthMask = Toggle::Unchanged;
     // Adds the texture to the vertex color instead of multiplying (GL_ADD instead of GL_MODULATE).
     Toggle additiveTexture = Toggle::Unchanged;
     // The texture bound for the draws that name none; -1 keeps the bound one.
@@ -84,6 +85,21 @@ struct DecalDraw
     float alpha = 1.f;
     // How far above the terrain it floats.
     float height = 5.f;
+    // Laid on the water surface instead of the terrain.
+    bool water = false;
+};
+
+// A ring of quads around a point, wider at the top or the bottom (RenderCircle).
+struct CircleDraw
+{
+    int texture = 0;
+    float position[3] = {};
+    float scaleBottom = 0.f;
+    float scaleTop = 0.f;
+    float height = 0.f;
+    float rotation = 0.f;
+    float lightTop = 1.f;
+    float textureV = 0.f;
 };
 
 class EffectDrawer
@@ -95,7 +111,59 @@ public:
     virtual void DrawSprite(const SpriteDraw& draw) = 0;
     virtual void DrawQuads(const QuadsDraw& draw) = 0;
     virtual void DrawDecal(const DecalDraw& draw) = 0;
+    virtual void DrawCircle(const CircleDraw& draw) = 0;
 };
+
+// Builders with the legacy primitives' argument order and defaults, for describers converted from them.
+inline SpriteDraw Sprite(int texture, const float* position, float width, float height, const float* light,
+                         float rotation = 0.f, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f)
+{
+    return {.texture = texture,
+            .position = {position[0], position[1], position[2]},
+            .width = width,
+            .height = height,
+            .light = {light[0], light[1], light[2]},
+            .rotation = rotation,
+            .u = u,
+            .v = v,
+            .uWidth = uWidth,
+            .vHeight = vHeight};
+}
+
+inline DecalDraw Decal(int texture, float x, float y, float sizeX, float sizeY, const float* light,
+                       float rotation = 0.f, float alpha = 1.f, float height = 5.f)
+{
+    return {.texture = texture,
+            .x = x,
+            .y = y,
+            .sizeX = sizeX,
+            .sizeY = sizeY,
+            .light = {light[0], light[1], light[2]},
+            .rotation = rotation,
+            .alpha = alpha,
+            .height = height};
+}
+
+inline DecalDraw WaterDecal(int texture, float x, float y, float sizeX, float sizeY, const float* light,
+                            float rotation = 0.f, float alpha = 1.f, float height = 0.f)
+{
+    DecalDraw draw = Decal(texture, x, y, sizeX, sizeY, light, rotation, alpha, height);
+    draw.water = true;
+    return draw;
+}
+
+inline CircleDraw Circle(int texture, const float* position, float scaleBottom, float scaleTop, float height,
+                         float rotation = 0.f, float lightTop = 1.f, float textureV = 0.f)
+{
+    return {.texture = texture,
+            .position = {position[0], position[1], position[2]},
+            .scaleBottom = scaleBottom,
+            .scaleTop = scaleTop,
+            .height = height,
+            .rotation = rotation,
+            .lightTop = lightTop,
+            .textureV = textureV};
+}
 
 [[nodiscard]] EffectDrawer& ActiveEffectDrawer();
 // nullptr restores the default drawer. The drawer must outlive its use.

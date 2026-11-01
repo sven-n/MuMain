@@ -3,7 +3,9 @@
 #include "Render/Effects/EffectDraw.h"
 
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "World/GameMaps/GMHellas.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <optional>
@@ -21,6 +23,10 @@ void Apply(const EffectState& state)
         EnableDepthTest();
     else if (state.depthTest == Toggle::Off)
         DisableDepthTest();
+    if (state.depthMask == Toggle::On)
+        EnableDepthMask();
+    else if (state.depthMask == Toggle::Off)
+        DisableDepthMask();
     switch (state.blend)
     {
     case Blend::Unchanged:
@@ -79,8 +85,19 @@ public:
     void DrawDecal(const DecalDraw& draw) override
     {
         vec3_t light = {draw.light[0], draw.light[1], draw.light[2]};
-        RenderTerrainAlphaBitmap(draw.texture, draw.x, draw.y, draw.sizeX, draw.sizeY, light, draw.rotation, draw.alpha,
-                                 draw.height);
+        if (draw.water)
+            RenderWaterTerrain(draw.texture, draw.x, draw.y, draw.sizeX, draw.sizeY, light, draw.rotation, draw.alpha,
+                               draw.height);
+        else
+            RenderTerrainAlphaBitmap(draw.texture, draw.x, draw.y, draw.sizeX, draw.sizeY, light, draw.rotation,
+                                     draw.alpha, draw.height);
+    }
+
+    void DrawCircle(const CircleDraw& draw) override
+    {
+        vec3_t position = {draw.position[0], draw.position[1], draw.position[2]};
+        RenderCircle(draw.texture, position, draw.scaleBottom, draw.scaleTop, draw.height, draw.rotation, draw.lightTop,
+                     draw.textureV);
     }
 };
 

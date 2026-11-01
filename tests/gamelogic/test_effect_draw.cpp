@@ -6,6 +6,7 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "World/GameMaps/GMHellas.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <algorithm>
@@ -215,6 +216,7 @@ TEST_CASE("Another effect drawer receives the sprites instead of the default one
         void DrawSprite(const SpriteDraw&) override { ++sprites; }
         void DrawQuads(const Render::EffectDrawing::QuadsDraw&) override {}
         void DrawDecal(const Render::EffectDrawing::DecalDraw&) override {}
+        void DrawCircle(const Render::EffectDrawing::CircleDraw&) override {}
     } counting;
     RecordingScope scope;
     Render::EffectDrawing::SetEffectDrawer(&counting);
@@ -257,6 +259,11 @@ struct ListingDrawer final : Render::EffectDrawing::EffectDrawer
     void DrawDecal(const Render::EffectDrawing::DecalDraw& draw) override
     {
         items.push_back("decal " + std::to_string(draw.texture));
+    }
+
+    void DrawCircle(const Render::EffectDrawing::CircleDraw& draw) override
+    {
+        items.push_back("circle " + std::to_string(draw.texture));
     }
 };
 
@@ -447,4 +454,43 @@ TEST_CASE("A falling thunder's ground mark is lit by the fade the update gives i
     CHECK(std::find(out.items.begin(), out.items.end(), "decal " + std::to_string(BITMAP_MAGIC + 1)) !=
           out.items.end());
     CHECK(joint->Velocity == 0.4f);
+}
+
+TEST_CASE("Effect rings and water marks reach the renderer as the old circle and water draws did [effects]")
+{
+    RecordingScope scope;
+    vec3_t position = {300.f, 400.f, -100.f};
+    vec3_t light = {0.5f, 0.25f, 1.f};
+    CHECK(scope.Record([&] { RenderCircle(BITMAP_MAGIC + 2, position, 90.f, 130.f, 200.f, 30.f, 0.f, 0.f); }) ==
+          scope.Record(
+              [&]
+              {
+                  Render::EffectDrawing::ActiveEffectDrawer().DrawCircle(
+                      Render::EffectDrawing::Circle(BITMAP_MAGIC + 2, position, 90.f, 130.f, 200.f, 30.f, 0.f, 0.f));
+              }));
+    CHECK(scope.Record([&] { RenderWaterTerrain(BITMAP_MAGIC + 1, 300.f, 400.f, 2.f, 3.f, light, -45.f); }) ==
+          scope.Record(
+              [&]
+              {
+                  Render::EffectDrawing::ActiveEffectDrawer().DrawDecal(
+                      Render::EffectDrawing::WaterDecal(BITMAP_MAGIC + 1, 300.f, 400.f, 2.f, 3.f, light, -45.f));
+              }));
+}
+
+TEST_CASE("A fading magic mark describes its ground mark with the light the update fades, and leaves it [effects]")
+{
+    OBJECT o;
+    o.Live = true;
+    o.Visible = true;
+    o.Type = BITMAP_MAGIC + 1;
+    o.SubType = 13;
+    o.Scale = 2.f;
+    o.LifeTime = 10.f;
+    Vector(300.f, 400.f, 0.f, o.Position);
+    Vector(0.5f, 0.5f, 0.5f, o.Light);
+    ListingDrawer out;
+    DescribeEffectShadow(o, out);
+    CHECK(std::find(out.items.begin(), out.items.end(), "decal " + std::to_string(BITMAP_MAGIC + 1)) !=
+          out.items.end());
+    CHECK(o.Light[0] == 0.5f);
 }

@@ -8975,25 +8975,8 @@ namespace
 namespace
 {
 using Render::EffectDrawing::Blend;
+using Render::EffectDrawing::Sprite;
 using Render::EffectDrawing::Toggle;
-
-Render::EffectDrawing::SpriteDraw Sprite(int texture, const float* position, float width, float height,
-                                         const float* light, float rotation = 0.f, float u = 0.f, float v = 0.f,
-                                         float uWidth = 1.f, float vHeight = 1.f)
-{
-    Render::EffectDrawing::SpriteDraw draw;
-    draw.texture = texture;
-    VectorCopy(position, draw.position);
-    draw.width = width;
-    draw.height = height;
-    VectorCopy(light, draw.light);
-    draw.rotation = rotation;
-    draw.u = u;
-    draw.v = v;
-    draw.uWidth = uWidth;
-    draw.vHeight = vHeight;
-    return draw;
-}
 } // namespace
 
 // The sprites and state changes one particle draws with, given its quad size and its slot (some alternate by slot).
