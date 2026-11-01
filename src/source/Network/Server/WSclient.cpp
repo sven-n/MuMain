@@ -429,44 +429,11 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
     return bResult;
 }
 
-namespace
-{
-// Connections DeleteSocket closed while they were open: closing can still call back into them
-// (Connection::OnDisconnected), so they are deleted once they are closed.
-std::vector<Connection*> g_closingConnections;
-
-void DeleteClosedConnections()
-{
-    std::erase_if(g_closingConnections,
-                  [](Connection* connection)
-                  {
-                      if (connection->IsConnected())
-                      {
-                          return false;
-                      }
-                      delete connection;
-                      return true;
-                  });
-}
-} // namespace
-
 void DeleteSocket()
 {
-    DeleteClosedConnections();
-    if (SocketClient == nullptr)
-    {
-        return;
-    }
-    // A closed connection is out of the connection map already: nothing reaches it any more.
-    if (SocketClient->IsConnected())
-    {
-        SocketClient->Close();
-        g_closingConnections.push_back(SocketClient);
-    }
-    else
-    {
-        delete SocketClient;
-    }
+    // Deleting an open connection closes it, and takes it out of the connection map first,
+    // so the client library's threads reach it no more.
+    delete SocketClient;
     SocketClient = nullptr;
 }
 

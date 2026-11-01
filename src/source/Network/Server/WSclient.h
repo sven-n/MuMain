@@ -3604,8 +3604,7 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port);
 // The connect server listens on 44288-44543 (0xAD00-0xADFF) and talks unencrypted; every other
 // port is a game server's, whose connection is encrypted. CreateSocket connects accordingly.
 bool IsGameServerPort(unsigned short Port);
-// Closes the connection and forgets it (SocketClient is null afterwards). It is deleted once it is
-// closed: at once when the server closed it, else on a later call.
+// Closes and deletes the connection (SocketClient is null afterwards).
 void DeleteSocket();
 // Closes the connection there is (DeleteSocket) and connects for a fresh login: the
 // server greets the new connection as a new client
