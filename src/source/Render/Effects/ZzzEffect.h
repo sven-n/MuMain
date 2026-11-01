@@ -4,7 +4,8 @@
 namespace Render::EffectDrawing
 {
 struct SpriteDraw;
-}
+class EffectDrawer;
+} // namespace Render::EffectDrawing
 
 extern OBJECT Effects[];
 extern OBJECT Sprites[];
@@ -49,6 +50,9 @@ int CreateParticleFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Lig
                              OBJECT* Owner = NULL);
 
 void RenderParticles(BYTE byRenderOneMore = 0);
+// Hands the sprites and state changes a live particle draws with to `out`; `slot` is its index in Particles.
+void DescribeParticle(const PARTICLE& particle, int slot, float width, float height,
+                      Render::EffectDrawing::EffectDrawer& out);
 void MoveParticles();
 bool DeleteParticle(int iType);
 

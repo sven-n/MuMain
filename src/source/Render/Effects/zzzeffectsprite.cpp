@@ -107,15 +107,15 @@ Render::EffectDrawing::SpriteDraw DescribeSprite(const OBJECT& sprite, bool bloo
     draw.rotation = o->Angle[2];
     draw.bloomExcluded = bloomExcluded;
     if (o->Type == BITMAP_FORMATION_MARK)
-        draw.blend = Blend::AlphaTest;
+        draw.state.blend = Blend::AlphaTest;
     else if (o->SubType == 0)
-        draw.blend = Blend::Glow;
+        draw.state.blend = Blend::Glow;
     else if (o->SubType == 1)
-        draw.blend = Blend::Subtract;
+        draw.state.blend = Blend::Subtract;
     else if (o->SubType == 2)
-        draw.blend = Blend::AlphaTest;
+        draw.state.blend = Blend::AlphaTest;
     else if (o->SubType == 3)
-        draw.blend = Blend::Blend2;
+        draw.state.blend = Blend::Blend2;
 
     float Scale = UpdateAnimationFrame(o->AnimationFrame, o->Visible) * o->Scale;
 

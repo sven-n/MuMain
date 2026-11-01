@@ -99,12 +99,15 @@ struct RecordingScope
     }
 
     // Runs a draw from the same starting render state and returns what reached the renderer.
-    template <typename Draw> std::vector<std::string> Record(Draw draw)
+    template <typename Draw> std::string Record(Draw draw)
     {
         DisableAlphaBlend();
         renderer.calls.clear();
         draw();
-        return renderer.calls;
+        std::string joined;
+        for (const std::string& call : renderer.calls)
+            joined += call + '\n';
+        return joined;
     }
 };
 
@@ -174,7 +177,7 @@ TEST_CASE("A sprite's description carries its blend, its quad and its bloom excl
     OBJECT o = MakeSprite(BITMAP_LIGHT, 1);
     o.Angle[2] = 45.f;
     SpriteDraw draw = DescribeSprite(o, true);
-    CHECK(draw.blend == Blend::Subtract);
+    CHECK(draw.state.blend == Blend::Subtract);
     CHECK(draw.texture == BITMAP_LIGHT);
     CHECK(draw.position[2] == -100.f);
     CHECK(draw.light[1] == 0.5f);
@@ -183,15 +186,15 @@ TEST_CASE("A sprite's description carries its blend, its quad and its bloom excl
     CHECK(draw.u == 0.f);
     CHECK(draw.uWidth == 1.f);
 
-    CHECK(DescribeSprite(MakeSprite(BITMAP_LIGHT, 0), false).blend == Blend::Glow);
-    CHECK(DescribeSprite(MakeSprite(BITMAP_LIGHT, 2), false).blend == Blend::AlphaTest);
-    CHECK(DescribeSprite(MakeSprite(BITMAP_LIGHT, 3), false).blend == Blend::Blend2);
+    CHECK(DescribeSprite(MakeSprite(BITMAP_LIGHT, 0), false).state.blend == Blend::Glow);
+    CHECK(DescribeSprite(MakeSprite(BITMAP_LIGHT, 2), false).state.blend == Blend::AlphaTest);
+    CHECK(DescribeSprite(MakeSprite(BITMAP_LIGHT, 3), false).state.blend == Blend::Blend2);
     // Any other subtype keeps the state the previous sprite left, as the old loop did.
-    CHECK(DescribeSprite(MakeSprite(BITMAP_LIGHT, 4), false).blend == Blend::Unchanged);
+    CHECK(DescribeSprite(MakeSprite(BITMAP_LIGHT, 4), false).state.blend == Blend::Unchanged);
 
     // The formation mark draws one cell of its 3x3 sheet, 64 units wide, alpha-tested whatever its subtype.
     const SpriteDraw mark = DescribeSprite(MakeSprite(BITMAP_FORMATION_MARK, 5), false);
-    CHECK(mark.blend == Blend::AlphaTest);
+    CHECK(mark.state.blend == Blend::AlphaTest);
     CHECK(mark.width == 64.f);
     CHECK(mark.height == 64.f);
     CHECK(mark.u == 0.66f);
@@ -205,6 +208,7 @@ TEST_CASE("Another effect drawer receives the sprites instead of the default one
     struct Counting final : Render::EffectDrawing::EffectDrawer
     {
         int sprites = 0;
+        void SetState(const Render::EffectDrawing::EffectState&) override {}
         void DrawSprite(const SpriteDraw&) override { ++sprites; }
     } counting;
     RecordingScope scope;
@@ -214,4 +218,140 @@ TEST_CASE("Another effect drawer receives the sprites instead of the default one
     Render::EffectDrawing::SetEffectDrawer(nullptr);
     CHECK(counting.sprites == 1);
     CHECK(calls.empty());
+}
+
+namespace
+{
+using Render::EffectDrawing::EffectState;
+using Render::EffectDrawing::Toggle;
+
+// Keeps what an effect describes, in order, as text.
+struct ListingDrawer final : Render::EffectDrawing::EffectDrawer
+{
+    std::vector<std::string> items;
+    std::vector<SpriteDraw> sprites;
+
+    void SetState(const EffectState& state) override
+    {
+        items.push_back("state " + std::to_string(static_cast<int>(state.blend)) + " " +
+                        std::to_string(static_cast<int>(state.depthTest)) + " " +
+                        std::to_string(static_cast<int>(state.additiveTexture)));
+    }
+
+    void DrawSprite(const SpriteDraw& draw) override
+    {
+        items.push_back("sprite " + std::to_string(draw.texture));
+        sprites.push_back(draw);
+    }
+};
+
+PARTICLE MakeParticle(int type, int subType)
+{
+    PARTICLE p{};
+    p.Live = true;
+    p.Type = type;
+    p.TexType = type;
+    p.SubType = subType;
+    p.Scale = 1.f;
+    p.Rotation = 30.f;
+    Vector(10.f, -20.f, -100.f, p.Position);
+    Vector(0.9f, 0.5f, 0.25f, p.Light);
+    return p;
+}
+} // namespace
+
+TEST_CASE("Each effect render state reaches the renderer as the legacy state call did [effects]")
+{
+    RecordingScope scope;
+    struct Case
+    {
+        EffectState state;
+        void (*legacy)();
+    };
+    const Case cases[] = {
+        {{.blend = Blend::AlphaTest}, [] { EnableAlphaTest(); }},
+        {{.blend = Blend::AlphaTestKeepDepthMask}, [] { EnableAlphaTest(false); }},
+        {{.blend = Blend::Glow}, [] { EnableAlphaBlend(); }},
+        {{.blend = Blend::Subtract}, [] { EnableAlphaBlendMinus(); }},
+        {{.blend = Blend::Blend2}, [] { EnableAlphaBlend2(); }},
+        {{.blend = Blend::Blend3}, [] { EnableAlphaBlend3(); }},
+        {{.depthTest = Toggle::On}, [] { EnableDepthTest(); }},
+        {{.depthTest = Toggle::Off}, [] { DisableDepthTest(); }},
+        {{.additiveTexture = Toggle::On},
+         [] { mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD); }},
+        {{.additiveTexture = Toggle::Off},
+         [] { mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); }},
+    };
+    int index = 0;
+    for (const Case& c : cases)
+    {
+        CAPTURE(index++);
+        // Each from the state the other leaves, so the wrappers' caches don't hide a call.
+        for (const bool depthOn : {false, true})
+        {
+            const auto start = [depthOn]
+            {
+                if (depthOn)
+                    EnableDepthTest();
+                else
+                    DisableDepthTest();
+            };
+            start();
+            const auto expected = scope.Record(c.legacy);
+            start();
+            const auto actual =
+                scope.Record([&] { Render::EffectDrawing::ActiveEffectDrawer().SetState(c.state); });
+            CHECK(actual == expected);
+        }
+    }
+}
+
+TEST_CASE("A particle describes its sprites and state changes in the order its draw made them [effects]")
+{
+    SUBCASE("a bubble draws the cell of its frame")
+    {
+        ListingDrawer out;
+        PARTICLE p = MakeParticle(BITMAP_BUBBLE, 0);
+        p.Frame = 5;
+        DescribeParticle(p, 0, 32.f, 32.f, out);
+        REQUIRE(out.sprites.size() == 1);
+        CHECK(out.sprites[0].u == 5 % 3 * 0.25f + 0.005f);
+        CHECK(out.sprites[0].v == 5 / 3 * 0.25f + 0.005f);
+        CHECK(out.sprites[0].uWidth == 0.25f - 0.01f);
+        CHECK(out.sprites[0].rotation == 0.f);
+    }
+    SUBCASE("a torch fire stacks three sprites, 10 units apart")
+    {
+        ListingDrawer out;
+        DescribeParticle(MakeParticle(BITMAP_TORCH_FIRE, 0), 0, 32.f, 32.f, out);
+        REQUIRE(out.sprites.size() == 3);
+        CHECK(out.sprites[0].position[2] == -100.f);
+        CHECK(out.sprites[1].position[2] == -110.f);
+        CHECK(out.sprites[2].position[2] == -120.f);
+    }
+    SUBCASE("additive smoke switches the texture to additive around its sprite only")
+    {
+        ListingDrawer out;
+        DescribeParticle(MakeParticle(BITMAP_ADV_SMOKE + 1, 2), 0, 32.f, 32.f, out);
+        const std::vector<std::string> expected = {
+            "state 0 0 1", "state 6 0 0", "sprite " + std::to_string(BITMAP_ADV_SMOKE + 1), "state 0 0 2"};
+        CHECK(out.items == expected);
+    }
+    SUBCASE("a cloud turns one way in even slots and the other way in odd ones")
+    {
+        ListingDrawer even;
+        ListingDrawer odd;
+        PARTICLE p = MakeParticle(BITMAP_CLOUD, 0);
+        p.TurningForce[0] = 1.f;
+        const auto previousTime = WorldTime;
+        WorldTime = 1000.0;
+        DescribeParticle(p, 2, 32.f, 32.f, even);
+        DescribeParticle(p, 3, 32.f, 32.f, odd);
+        WorldTime = previousTime;
+        REQUIRE(even.sprites.size() == 1);
+        REQUIRE(odd.sprites.size() == 1);
+        const float start = p.StartPosition[1];
+        CHECK(even.sprites[0].rotation - start == doctest::Approx(20.f));
+        CHECK(odd.sprites[0].rotation - start == doctest::Approx(-20.f));
+    }
 }

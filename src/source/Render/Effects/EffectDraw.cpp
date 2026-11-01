@@ -11,14 +11,24 @@ namespace Render::EffectDrawing
 {
 namespace
 {
-void ApplyBlend(Blend blend)
+void Apply(const EffectState& state)
 {
-    switch (blend)
+    if (state.additiveTexture != Toggle::Unchanged)
+        mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE,
+                                    state.additiveTexture == Toggle::On ? GL_ADD : GL_MODULATE);
+    if (state.depthTest == Toggle::On)
+        EnableDepthTest();
+    else if (state.depthTest == Toggle::Off)
+        DisableDepthTest();
+    switch (state.blend)
     {
     case Blend::Unchanged:
         break;
     case Blend::AlphaTest:
         EnableAlphaTest();
+        break;
+    case Blend::AlphaTestKeepDepthMask:
+        EnableAlphaTest(false);
         break;
     case Blend::Glow:
         EnableAlphaBlend();
@@ -29,15 +39,23 @@ void ApplyBlend(Blend blend)
     case Blend::Blend2:
         EnableAlphaBlend2();
         break;
+    case Blend::Blend3:
+        EnableAlphaBlend3();
+        break;
     }
 }
 
 class DefaultEffectDrawer final : public EffectDrawer
 {
 public:
+    void SetState(const EffectState& state) override
+    {
+        Apply(state);
+    }
+
     void DrawSprite(const SpriteDraw& draw) override
     {
-        ApplyBlend(draw.blend);
+        Apply(draw.state);
         std::optional<mu::ScopedBloomExclusion> exclusion;
         if (draw.bloomExcluded)
             exclusion.emplace();
