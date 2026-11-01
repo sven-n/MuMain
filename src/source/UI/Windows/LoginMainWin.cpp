@@ -9,7 +9,7 @@
 #include "UI/Core/SceneUICoordinator.h"
 #include "UI/Windows/SysMenuWin.h"
 #include "UI/Windows/CreditWin.h"
-#include "Network/Server/WSclient.h"
+#include "Network/Reconnect/LoginSceneReconnect.h"
 #include "Core/Globals/_enum.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -155,7 +155,7 @@ void CLoginMainWin::OpenSysMenu()
 
 void CLoginMainWin::OpenCredits()
 {
-    SocketClient->ToConnectServer()->SendServerListRequest();
+    LoginSceneReconnect::Instance().RequestServerList();
 
     g_CreditWin.Show(true);
 

@@ -6,6 +6,7 @@
 // Flow Code: VS1-NET-CHAR16T-ENCODING
 // Story: 3.2.1 - char16_t Encoding at .NET Interop Boundary
 
+#include <atomic>
 #include <coreclr_delegates.h>
 #include <filesystem>
 
@@ -94,7 +95,8 @@ private:
     PacketFunctions_ConnectServer* _connectServer = {};
     PacketFunctions_ClientToServer* _gameServer = {};
 
-    int32_t _handle;
+    std::atomic<int32_t> _handle{0}; // a .NET thread sets it to 0 when the connection closes
+    int32_t _id = 0;
     void (*_packetHandler)(int32_t, const BYTE*, int32_t);
     bool _firstPacketLogged = false;
 
@@ -112,7 +114,15 @@ public:
 
     int32_t GetHandle() const
     {
-        return _handle;
+        return _handle.load();
+    }
+
+    // The handle its packets are queued under. Unlike GetHandle() it outlives a close by the
+    // server, so what the server sent right before closing (e.g. why) is still handled; Close()
+    // ends it, since the client wants nothing more from a connection it closed itself.
+    int32_t GetId() const
+    {
+        return _id;
     }
 
     PacketFunctions_ChatServer* ToChatServer() const

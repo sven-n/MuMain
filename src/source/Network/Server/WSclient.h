@@ -3601,7 +3601,16 @@ extern wchar_t SoccerTeamName[2][8 + 1];
 extern bool SoccerObserver;
 
 BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port);
+// The connect server listens on 44288-44543 (0xAD00-0xADFF) and talks unencrypted; every other
+// port is a game server's, whose connection is encrypted. CreateSocket connects accordingly.
+bool IsGameServerPort(unsigned short Port);
+// Closes and deletes the connection (SocketClient is null afterwards).
 void DeleteSocket();
+// Closes the connection there is (DeleteSocket) and connects for a fresh login: the
+// server greets the new connection as a new client
+// (the connect server with its list, a game server with its join answer), not as a
+// map server change. Which of the two it is follows from the port (IsGameServerPort).
+BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port);
 
 // Tears the live game session down to a clean login-scene state (matching the
 // in-game logout path). Used by the auto-reconnect flow before it replays login.

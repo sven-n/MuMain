@@ -111,3 +111,8 @@
 .mode-cancel-only #btn_cancel, .mode-both #btn_cancel, .mode-input #btn_cancel { display: block; }
 .mode-both #btn_cancel { left: 200dp; }
 .mode-input #btn_cancel { left: 264dp; }
+
+/* Captions longer than OK/Cancel (the login screen's Reconnect/Exit): a wider centred pair. */
+.own-captions #btn_ok, .own-captions #btn_cancel { width: 108dp; }
+.own-captions.mode-both #btn_ok { left: 60dp; }
+.own-captions.mode-both #btn_cancel { left: 184dp; }

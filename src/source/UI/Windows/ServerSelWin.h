@@ -79,6 +79,16 @@ private:
     // the server is full/busy -- the caller decides what busy means to it.
     bool ConnectToServer(CServerInfo* pServerInfo);
 
+    // What a click on a channel does: connects to an open one, and says a full one is full.
+    void PickServer(CServerInfo* pServerInfo);
+
+    // Marks the group (one the display placed) and rebuilds the channel column for it.
+    void ShowGroup(CServerGroup* pServerGroup);
+
+    // Picks the server with this connect server ID (CServerInfo::m_iConnectIndex) again, once
+    // the login screen reconnected and the fresh list is up.
+    void ResumeServerPick(int connectIndex);
+
     struct GroupEntry
     {
         Rml::String label;

@@ -9312,6 +9312,9 @@
   <data name="Retrying in seconds" xml:space="preserve">
     <value>Retrying in %d seconds...</value>
   </data>
+  <data name="Reconnect" xml:space="preserve">
+    <value>Reconnect</value>
+  </data>
   <data name="Font" xml:space="preserve">
     <value>Font</value>
   </data>

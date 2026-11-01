@@ -18,6 +18,7 @@
 #include "UI/Core/WindowAccess.h"
 #include "UI/Social/SocialUpdates.h"
 #include <memory>
+#include <vector>
 #include "Guild/GuildCache.h"
 #include "Guild/GuildTypes.h"
 #include "Render/Models/ZzzBMD.h"
@@ -37,6 +38,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
+#include "Network/Reconnect/LoginSceneReconnect.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
 #include "I18N/All.h"
@@ -374,13 +376,18 @@ static int64_t SaturatingAddToUpper(const int64_t current, const int64_t add, in
     return current + add;
 }
 
+bool IsGameServerPort(unsigned short Port)
+{
+    // todo: generally, it's a bad idea to assume a specific port number (range).
+    return Port > 0xADFF || Port < 0xAD00;
+}
+
 BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 {
     BOOL bResult = TRUE;
     g_ConsoleDebug->Write(MCD_NORMAL, L"[Connect to Server] ip address = %ls, port = %d", IpAddr, Port);
 
-    // todo: generally, it's a bad idea to assume a specific port number (range).
-    const bool isEncrypted = Port > 0xADFF || Port < 0xAD00;
+    const bool isEncrypted = IsGameServerPort(Port);
     SocketClient = new Connection(MU_C16(IpAddr), Port, isEncrypted, &HandleIncomingPacket);
     if (!SocketClient->IsConnected())
     {
@@ -394,7 +401,8 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 
         // While auto-reconnecting we probe the server repeatedly; the reconnect
         // dialog already shows the status, so don't stack "server lost" popups.
-        if (!ReconnectManager::Instance().IsActive())
+        // On the login screen LoginSceneReconnect says it with its Reconnect / Exit message.
+        if (!ReconnectManager::Instance().IsActive() && SceneFlag != LOG_IN_SCENE)
         {
             static bool connectErrorDisplayed = false;
             if (!connectErrorDisplayed)
@@ -423,17 +431,34 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 
 void DeleteSocket()
 {
-    if (SocketClient)
-    {
-        SocketClient->Close();
-        SocketClient = nullptr;
-    }
+    // Deleting an open connection closes it, and takes it out of the connection map first,
+    // so the client library's threads reach it no more.
+    delete SocketClient;
+    SocketClient = nullptr;
 }
 
 int LogIn = 0;
 wchar_t LogInID[MAX_USERNAME_SIZE + 1] = {
     0,
 };
+
+BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port)
+{
+    DeleteSocket();
+    LogIn = 0;
+    CurrentProtocolState = REQUEST_JOIN_SERVER;
+
+    // Game server packets (CheckHack's ping, the logout on quit) go out only while a
+    // game server is connected; the connect server doesn't know them.
+    g_bGameServerConnected = FALSE;
+    if (!CreateSocket(IpAddr, Port))
+    {
+        return FALSE;
+    }
+
+    g_bGameServerConnected = IsGameServerPort(Port) ? TRUE : FALSE;
+    return TRUE;
+}
 
 bool First = false;
 int FirstTime = 0;
@@ -529,6 +554,7 @@ void ReceiveServerList(const BYTE* ReceiveBuffer)
     }
 
     UI::LoginScene::ServerListReceived();
+    LoginSceneReconnect::Instance().OnGreeting(LoginServer::Connect);
 
     g_ErrorReport.Write(L"Success Receive Server List.\r\n");
 
@@ -541,15 +567,16 @@ void ReceiveServerConnect(const BYTE* ReceiveBuffer)
     CMultiLanguage::ConvertFromUtf8(IP, Data->IP);
 
     g_ErrorReport.Write(L"[ReceiveServerConnect]");
-    if (SocketClient != nullptr)
+    DeleteSocket();
+
+    if (!CreateSocket(IP, Data->Port))
     {
-        SocketClient->Close();
+        // The connect server still lists a game server that is down.
+        LoginSceneReconnect::Instance().OnServerUnreachable(LoginServer::Game);
+        return;
     }
 
-    if (CreateSocket(IP, Data->Port))
-    {
-        g_bGameServerConnected = TRUE;
-    }
+    g_bGameServerConnected = TRUE;
 
     wchar_t Text[100];
     mu_swprintf(Text, I18N::Game::YouAreConnectedToTheServer, IP, Data->Port);
@@ -559,13 +586,16 @@ void ReceiveServerConnect(const BYTE* ReceiveBuffer)
 void ReceiveServerConnectBusy(const BYTE* ReceiveBuffer)
 {
     auto Data = (LPPRECEIVE_SERVER_BUSY)ReceiveBuffer;
-    SocketClient->ToConnectServer()->SendServerListRequest();
+    LoginSceneReconnect::Instance().RequestServerList(); // counts toward the connection's list requests
 }
 
 void ReceiveJoinServer(const BYTE* ReceiveBuffer)
 {
     auto Data2 = (LPPRECEIVE_JOIN_SERVER)ReceiveBuffer;
     mu::log::Get("network")->info("NET: Login response result=0x{:02X}", Data2->Result);
+
+    // A login may follow: the server let the client in, and the client is new enough.
+    bool readyForLogin = false;
 
     if (LogIn != 0)
     {
@@ -610,9 +640,19 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
             UI::LoginScene::ShowMessage(MESSAGE_VERSION);
             g_ErrorReport.Write(L"Version dismatch - Join server.\r\n");
         }
+
+        readyForLogin = Data2->Result == 0x01 && actual >= received;
     }
 
     g_GuildCache.Reset();
+
+    // Last, once the join is handled: a login the login screen's reconnect waits to
+    // send goes out only to a server that let the client in, and not while the
+    // client shows that it needs a new version.
+    if (LogIn == 0)
+    {
+        LoginSceneReconnect::Instance().OnGreeting(LoginServer::Game, readyForLogin);
+    }
 
     // #if defined _DEBUG || defined FOR_WORK
     //     if (Data2->Result == 0x01)
@@ -14814,7 +14854,9 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
 
 void ProcessPacketCallback(const PacketInfo* Packet)
 {
-    if (SocketClient == nullptr || Packet->ConnectionHandle != SocketClient->GetHandle())
+    // By the id, not the live handle: what a server sent right before it closed the
+    // connection (e.g. why it closed it) still counts.
+    if (SocketClient == nullptr || Packet->ConnectionHandle != SocketClient->GetId())
     {
         return;
     }

@@ -404,6 +404,40 @@ TEST_CASE("ServerListManager: new groups replace the old ones")
     CHECK(std::wstring(groups[0]->m_szName) == L"Asgard");
 }
 
+TEST_CASE("ServerListManager: a server is found by its ID after the list changed")
+{
+    // The login screen picks a server again after a reconnect. A server that went
+    // down meanwhile moves the next one into its place, so the place names another server.
+    TestServerListManager manager;
+    manager.SetServerList(List({Group(0, "Valhalla"), Group(1, "Helheim")}));
+    for (const int channel : {1, 2, 3})
+    {
+        manager.InsertServerGroup(ServerId(0, channel), LowLoad);
+    }
+    manager.InsertServerGroup(ServerId(1, 1), LowLoad);
+    const int picked = GroupsInOrder(manager)[0]->GetServerInfo(1)->m_iConnectIndex;
+    REQUIRE(picked == ServerId(0, 2));
+
+    manager.Release(); // the next list, without channel 1
+    for (const int channel : {2, 3})
+    {
+        manager.InsertServerGroup(ServerId(0, channel), LowLoad);
+    }
+    manager.InsertServerGroup(ServerId(1, 1), LowLoad);
+    REQUIRE(GroupsInOrder(manager)[0]->GetServerInfo(1) != nullptr);
+    CHECK(GroupsInOrder(manager)[0]->GetServerInfo(1)->m_iConnectIndex == ServerId(0, 3));
+
+    CServerGroup* group = nullptr;
+    const CServerInfo* server = manager.FindServer(picked, group);
+    REQUIRE(server != nullptr);
+    CHECK(server->m_iConnectIndex == picked);
+    REQUIRE(group != nullptr);
+    CHECK(std::wstring(group->m_szName) == L"Valhalla");
+
+    CHECK(manager.FindServer(ServerId(0, 1), group) == nullptr);
+    CHECK(group == nullptr);
+}
+
 #ifdef _EDITOR
 TEST_CASE("ServerListManager: the editor's preview shows the channels the connect server did not send")
 {

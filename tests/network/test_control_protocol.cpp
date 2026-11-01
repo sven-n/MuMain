@@ -8,6 +8,7 @@
 
 #include "App/Control/ControlProtocol.h"
 #include "Network/Server/WSclient.h"
+#include "Core/Globals/_enum.h" // MESSAGE_SERVER_LOST_RECONNECT
 
 #include <cctype>
 #include <string>
@@ -218,6 +219,10 @@ TEST_CASE("Control protocol maps every login failure macro to a reason [network]
         CHECK_FALSE(App::Control::LoginFailureReason(code).empty());
         CHECK(App::Control::LoginFailureReason(code) != App::Control::LoginFailureReason(RECEIVE_LOG_IN_SUCCESS));
     }
+
+    // The login screen's own failure message ends a login too: its reconnect could not
+    // reach the server, and nothing else will answer.
+    CHECK(App::Control::IsLoginFailureCode(MESSAGE_SERVER_LOST_RECONNECT));
 
     // The password failure is the one the spec's wrong-password scenario shows.
     CHECK(App::Control::LoginFailureReason(RECEIVE_LOG_IN_FAIL_PASSWORD).find("password") != std::string_view::npos);

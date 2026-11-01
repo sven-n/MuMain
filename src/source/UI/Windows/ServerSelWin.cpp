@@ -7,6 +7,7 @@
 #include "I18N/All.h"
 
 #include "Network/Server/ServerListManager.h"
+#include "Network/Reconnect/LoginSceneReconnect.h"
 #include "Core/Globals/_enum.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -370,7 +371,7 @@ void CServerSelWin::SelectGroup(int nBtnPos)
 
     SyncRmlModel();
 
-    SocketClient->ToConnectServer()->SendServerListRequest();
+    LoginSceneReconnect::Instance().RequestServerList();
 }
 
 void CServerSelWin::RmlClickSelectGroup(int nBtnPos)
@@ -404,6 +405,11 @@ void CServerSelWin::RmlClickSelectServer(int nServerIndex)
     if (pServerInfo == nullptr || RefuseOfflinePreview(*pServerInfo))
         return;
 
+    PickServer(pServerInfo);
+}
+
+void CServerSelWin::PickServer(CServerInfo* pServerInfo)
+{
     // A full and an overloaded server say so alike; the original client did nothing for an
     // overloaded one (then "Now preparing").
     if (Data::ServerList::GetLoadState(pServerInfo->m_iPercent) == Data::ServerList::LoadState::Open)
@@ -416,12 +422,31 @@ void CServerSelWin::RmlClickSelectServer(int nServerIndex)
     }
 }
 
+void CServerSelWin::ShowGroup(CServerGroup* pServerGroup)
+{
+    m_iSelectServerBtnIndex = pServerGroup->m_iBtnPos;
+    UpdateDisplay();
+
+    // UpdateDisplay() re-derives m_pSelectServerGroup from the button index,
+    // which only agrees with pServerGroup while the list and the index agree
+    // -- the group the caller chose is the one it must connect to regardless.
+    m_pSelectServerGroup = pServerGroup;
+}
+
 bool CServerSelWin::ConnectToServer(CServerInfo* pServerInfo)
 {
     if (pServerInfo == nullptr || m_pSelectServerGroup == nullptr || RefuseOfflinePreview(*pServerInfo))
         return false;
 
     Show(false);
+
+    // The connect server drops a list left open too long; pick the same server
+    // again from the fresh list the reconnect brings. By its ID: a server that
+    // went down meanwhile moves the ones after it up in the list.
+    const int connectIndex = pServerInfo->m_iConnectIndex;
+    const auto pickAgain = [connectIndex] { g_ServerSelWin.ResumeServerPick(connectIndex); };
+    if (!LoginSceneReconnect::Instance().EnsureConnected(LoginServer::Connect, pickAgain))
+        return true;
 
     SocketClient->ToConnectServer()->SendConnectionInfoRequest(static_cast<uint16_t>(pServerInfo->m_iConnectIndex));
     g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, mu::ui::window::TYPE_SYSTEM_MESSAGE);
@@ -431,6 +456,20 @@ bool CServerSelWin::ConnectToServer(CServerInfo* pServerInfo)
                                              pServerInfo->m_iIndex, pServerInfo->m_channel);
 
     return true;
+}
+
+void CServerSelWin::ResumeServerPick(int connectIndex)
+{
+    // The fresh list is up already (UI::LoginScene::ServerListReceived). A server
+    // that left it meanwhile leaves the next pick to the player.
+    CServerGroup* pServerGroup = nullptr;
+    CServerInfo* pServerInfo = g_ServerListManager->FindServer(connectIndex, pServerGroup);
+    if (pServerInfo == nullptr || pServerGroup->m_iBtnPos < 0)
+        return;
+
+    // A server that filled up meanwhile gets the answer a click on it gets.
+    ShowGroup(pServerGroup);
+    PickServer(pServerInfo);
 }
 
 bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
@@ -466,13 +505,7 @@ bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
     // after this point puts the previous selection back rather than leaving
     // the screen on a group the caller never reached.
     const int iPreviousBtnIndex = m_iSelectServerBtnIndex;
-    m_iSelectServerBtnIndex = iBtnPos;
-    UpdateDisplay();
-
-    // UpdateDisplay() re-derives m_pSelectServerGroup from the button index,
-    // which only agrees with pChosenGroup while the list and the index agree
-    // -- the group this call chose is the one it must connect to regardless.
-    m_pSelectServerGroup = pChosenGroup;
+    ShowGroup(pChosenGroup);
 
     CServerInfo* pServerInfo = m_pSelectServerGroup->GetServerInfo(serverIndex);
     if (pServerInfo == nullptr ||

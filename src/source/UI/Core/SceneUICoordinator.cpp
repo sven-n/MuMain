@@ -182,10 +182,6 @@ void CSceneUICoordinator::Update(double dDeltaTick)
     if (UIM_SCENE_NONE == m_nScene)
         return;
 
-    // Polls for the background reconnect thread (started on Cancel) to finish, then joins it.
-    if (g_LoginWin.HasPendingConnectionReconnect())
-        g_LoginWin.ProcessPendingConnectionReconnect();
-
     // m_bCursorOnUI folds in whatever claims the mouse, so a modal like CMsgWin still blocks
     // world-click/rotation gating even without a full-screen rect of its own.
     m_NewStyleMng.UpdateMouseEvent();
