@@ -822,6 +822,16 @@ void WalkEveryFrame(MonsterSoundSet& set)
     set.soundEvents[0].sounds = {"SOUND_AIDA_DEATHRAIDER_MOVE1"};
 }
 
+// The Death Rider's events heard within 500 units of the hero, as a set
+// without heardAnywhere (Aida's are heard anywhere, Q-MN94).
+void HeardNear(MonsterSoundSet& set)
+{
+    for (Data::Monsters::MonsterSoundEvent& event : set.soundEvents)
+    {
+        event.heardAnywhere = false;
+    }
+}
+
 // The Death Rider's attacks and death as once events, as the Aida draw code
 // played them before the test of Q-MN86.
 void AttacksOnce(MonsterSoundSet& set)
@@ -977,8 +987,8 @@ TEST_CASE("Monster sounds: RenderCharacter plays a drawn frame's events unless t
     CHECK(scope.Take().empty());
 }
 
-TEST_CASE("Monster sounds: the Aida monsters' attacks and deaths play when they start, each time, near the hero "
-          "(a test, Q-MN86) [monsters][sounds]")
+TEST_CASE("Monster sounds: the Aida monsters' attacks and deaths play when they start, each time, at any distance "
+          "(Q-MN86, Q-MN94) [monsters][sounds]")
 {
     SoundScope scope(WD_33AIDA);
     const MonsterSoundSet& rider = SetOf(DeathRider);
@@ -989,11 +999,20 @@ TEST_CASE("Monster sounds: the Aida monsters' attacks and deaths play when they 
     // Right after another attack or an attack, with no stand between.
     CHECK(scope.Play(DeathRider, MONSTER01_ATTACK2) == Sounds({attack2}));
     CHECK(scope.Play(DeathRider, MONSTER01_DIE) == Sounds({die}));
-    // Not farther than 500 units from the hero.
-    CHECK(scope.Play(DeathRider, MONSTER01_ATTACK1, 0.0f, 0, 600.0f).empty());
-    // The Witch Queen's second attack: a thunder and her attack.
+    // Far from the hero too (Q-MN94).
+    CHECK(scope.Play(DeathRider, MONSTER01_ATTACK1, 0.0f, 0, 2000.0f) == Sounds({attack1}));
+    CHECK(scope.Play(DeathRider, MONSTER01_ATTACK2, 0.0f, 0, 2000.0f) == Sounds({attack2}));
+    CHECK(scope.Play(DeathRider, MONSTER01_DIE, 0.0f, 0, 2000.0f) == Sounds({die}));
+    {
+        // A set without heardAnywhere still hears its monsters within 500 units.
+        SetChange heardNear("Death Rider", HeardNear);
+        CHECK(scope.Play(DeathRider, MONSTER01_ATTACK1, 0.0f, 0, 500.0f) == Sounds({attack1}));
+        CHECK(scope.Play(DeathRider, MONSTER01_ATTACK1, 0.0f, 0, 600.0f).empty());
+    }
+    // The Witch Queen's second attack, far from the hero: a thunder and her
+    // attack.
     const MonsterSoundSet& queen = SetOf(WitchQueen);
-    const std::vector<PlayedSound> sounds = scope.Play(WitchQueen, MONSTER01_ATTACK2);
+    const std::vector<PlayedSound> sounds = scope.Play(WitchQueen, MONSTER01_ATTACK2, 0.0f, 0, 2000.0f);
     REQUIRE(sounds.size() == 2);
     CHECK((sounds[0].id == SOUND_CHAOS_THUNDER01 || sounds[0].id == SOUND_CHAOS_THUNDER02));
     CHECK(sounds[1].id == SoundOf(queen, "SOUND_AIDA_WITCHQUEEN_ATTACK1"));
@@ -1205,6 +1224,8 @@ TEST_CASE("Monster sounds: the Sound Mixer's overlay marks a drawn monster of a 
 {
     using namespace GameLogic::Monsters::SoundEvents;
     SoundScope scope(WD_33AIDA);
+    // A set heard within 500 units: its ring.
+    SetChange heardNear("Death Rider", HeardNear);
     Data::Monsters::ModelLoader::Open(MODEL_DEATH_RIDER);
     REQUIRE(Data::Monsters::ModelLoader::IsOpen(MODEL_DEATH_RIDER));
     scope.Take();

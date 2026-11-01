@@ -252,9 +252,9 @@
       ],
       "soundEvents": [
         {"during": ["walk", "run"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_AIDA_BLUEGOLEM_MOVE1", "SOUND_AIDA_BLUEGOLEM_MOVE2"]},
-        {"animations": ["attack1"], "sounds": ["SOUND_AIDA_BLUEGOLEM_ATTACK1"]},
-        {"animations": ["attack2"], "sounds": ["SOUND_AIDA_BLUEGOLEM_ATTACK2"]},
-        {"animations": ["die"], "sounds": ["SOUND_AIDA_BLUEGOLEM_DIE"]}
+        {"animations": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_BLUEGOLEM_ATTACK1"]},
+        {"animations": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_BLUEGOLEM_ATTACK2"]},
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_BLUEGOLEM_DIE"]}
       ]
     },
     {
@@ -680,9 +680,9 @@
       ],
       "soundEvents": [
         {"during": ["walk", "run"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_AIDA_DEATHRAIDER_MOVE1", "SOUND_AIDA_DEATHRAIDER_MOVE2"]},
-        {"animations": ["attack1"], "sounds": ["SOUND_AIDA_DEATHRAIDER_ATTACK1"]},
-        {"animations": ["attack2"], "sounds": ["SOUND_AIDA_DEATHRAIDER_ATTACK2"]},
-        {"animations": ["die"], "sounds": ["SOUND_AIDA_DEATHRAIDER_DIE"]}
+        {"animations": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_DEATHRAIDER_ATTACK1"]},
+        {"animations": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_DEATHRAIDER_ATTACK2"]},
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_DEATHRAIDER_DIE"]}
       ]
     },
     {
@@ -696,9 +696,9 @@
       ],
       "soundEvents": [
         {"during": ["walk", "run"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_AIDA_DEATHTREE_MOVE1", "SOUND_AIDA_DEATHTREE_MOVE2"]},
-        {"animations": ["attack1"], "sounds": ["SOUND_AIDA_DEATHTREE_ATTACK1"]},
-        {"animations": ["attack2"], "sounds": ["SOUND_AIDA_DEATHTREE_ATTACK2"]},
-        {"animations": ["die"], "sounds": ["SOUND_AIDA_DEATHTREE_DIE"]}
+        {"animations": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_DEATHTREE_ATTACK1"]},
+        {"animations": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_DEATHTREE_ATTACK2"]},
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_DEATHTREE_DIE"]}
       ]
     },
     {
@@ -866,9 +866,9 @@
       ],
       "soundEvents": [
         {"during": ["walk", "run"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_AIDA_FORESTORC_MOVE1", "SOUND_AIDA_FORESTORC_MOVE2"]},
-        {"animations": ["attack1"], "sounds": ["SOUND_AIDA_FORESTORC_ATTACK1"]},
-        {"animations": ["attack2"], "sounds": ["SOUND_AIDA_FORESTORC_ATTACK2"]},
-        {"animations": ["die"], "sounds": ["SOUND_AIDA_FORESTORC_DIE"]}
+        {"animations": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_FORESTORC_ATTACK1"]},
+        {"animations": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_FORESTORC_ATTACK2"]},
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_FORESTORC_DIE"]}
       ]
     },
     {
@@ -1128,10 +1128,10 @@
       ],
       "soundEvents": [
         {"during": ["walk", "run"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_AIDA_HELL_MOVE1", "SOUND_AIDA_HELL_MOVE2"]},
-        {"animations": ["attack1"], "sounds": ["SOUND_AIDA_HELL_ATTACK3"]},
-        {"animations": ["attack2"], "sounds": ["SOUND_AIDA_HELL_ATTACK2"]},
-        {"animations": ["attack3"], "sounds": ["SOUND_AIDA_HELL_ATTACK1"]},
-        {"animations": ["die"], "sounds": ["SOUND_AIDA_HELL_DIE"]}
+        {"animations": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_HELL_ATTACK3"]},
+        {"animations": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_HELL_ATTACK2"]},
+        {"animations": ["attack3"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_HELL_ATTACK1"]},
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_HELL_DIE"]}
       ]
     },
     {
@@ -2186,10 +2186,10 @@
       ],
       "soundEvents": [
         {"during": ["walk", "run"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_AIDA_WITCHQUEEN_MOVE1", "SOUND_AIDA_WITCHQUEEN_MOVE2"]},
-        {"animations": ["attack1"], "sounds": ["SOUND_AIDA_WITCHQUEEN_ATTACK2"]},
-        {"animations": ["attack2"], "pick": "rand", "sounds": ["SOUND_CHAOS_THUNDER01", "SOUND_CHAOS_THUNDER02"]},
-        {"animations": ["attack2"], "sounds": ["SOUND_AIDA_WITCHQUEEN_ATTACK1"]},
-        {"animations": ["die"], "sounds": ["SOUND_AIDA_WITCHQUEEN_DIE"]}
+        {"animations": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_WITCHQUEEN_ATTACK2"]},
+        {"animations": ["attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_CHAOS_THUNDER01", "SOUND_CHAOS_THUNDER02"]},
+        {"animations": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_WITCHQUEEN_ATTACK1"]},
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_WITCHQUEEN_DIE"]}
       ]
     },
     {

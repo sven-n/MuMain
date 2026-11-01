@@ -410,11 +410,10 @@ other character `UpdateDrawnCharacterEffects` plays them after the maps'
 monster effects. Like those effects they run in the update for the characters
 the last frame drew, so they start one frame after a monster comes into view
 ([ADR 0003](adr/0003-draw-does-not-change-game-state.md)). Their attacks and
-deaths are animation events, as regular monsters' (a test, Q-MN86): each
-attack and death plays when it starts, within 500 units of the hero; the
-original draw code played them once until the monster stood, on screen at any
-distance, so an attack right after another or a death right
-after an attack was silent.
+deaths are animation events, as regular monsters' (Q-MN86): each attack and
+death plays when it starts, heard anywhere as their walks (Q-MN94); the
+original draw code played them once until the monster stood, so an attack
+right after another or a death right after an attack was silent.
 
 ## Attacks
 
