@@ -7,8 +7,10 @@
 #include "Engine/Object/w_ObjectInfo.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Sprites/GlobalBitmap.h"
 
 #include <algorithm>
+#include <optional>
 #include <string_view>
 #include <vector>
 
@@ -79,25 +81,97 @@ bool RenderPlainly(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
     return false;
 }
 
+// The light a set's chrome layer is drawn in: a share of the model's light, per channel.
+struct ChromeTint
+{
+    float red;
+    float green;
+    float blue;
+};
+
+constexpr ChromeTint ThunderHawkChromeTint{0.85f, 0.85f, 1.2f};
+constexpr ChromeTint HurricaneChromeTint{0.3f, 0.8f, 1.f};
+
+bool TextureHasAlpha(const BMD* b, int meshIndex)
+{
+    return Bitmaps.GetTexture(b->IndexTexture[b->Meshs[meshIndex].Texture])->Components == 4;
+}
+
+// Draws the model with a chrome layer (BITMAP_CHROME + 1) in the tint of the model's light, or in the model's own
+// light without a tint. A mesh whose texture has alpha gets the chrome under its texture: solid and on both faces, so
+// it fills the holes the alpha cuts (the Magic Gladiator sets' grooves) and the texture covers the rest. A mesh with
+// an opaque texture gets the chrome added over its texture, and so does every mesh of a see-through model (the
+// doppelgangers of the Doppelganger map), where a solid layer would show through the texture. These sets' textures
+// have no texture scripts, so the meshes are drawn one by one without RenderBody.
+void RenderSetChrome(BMD* b, OBJECT* o, const std::optional<ChromeTint>& tint)
+{
+    const bool seeThrough = o->Alpha < 0.99f;
+    // An added chrome layer on a see-through model scales BodyLight by the alpha, so the light is put back then too.
+    const bool keepLight = tint.has_value() || seeThrough;
+    vec3_t Light;
+    if (keepLight)
+    {
+        VectorCopy(b->BodyLight, Light);
+    }
+    const auto chrome = [&](int meshIndex, int flags)
+    {
+        if (tint)
+        {
+            Vector(tint->red * Light[0], tint->green * Light[1], tint->blue * Light[2], b->BodyLight);
+        }
+        b->RenderMesh(meshIndex, RENDER_TEXTURE | RENDER_CHROME | flags, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME + 1);
+        if (keepLight)
+        {
+            VectorCopy(Light, b->BodyLight);
+        }
+    };
+    const auto texture = [&](int meshIndex)
+    {
+        b->RenderMesh(meshIndex, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+    };
+
+    b->BeginRender(o->Alpha);
+    for (int i = 0; i < b->NumMeshs; ++i)
+    {
+        if (i == o->HiddenMesh)
+        {
+            continue;
+        }
+        if (!seeThrough && TextureHasAlpha(b, i))
+        {
+            chrome(i, RENDER_TWOSIDED);
+            texture(i);
+        }
+        else
+        {
+            texture(i);
+            chrome(i, RENDER_BRIGHT);
+        }
+    }
+    b->EndRender();
+}
+
 bool RenderStormCrow(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
 {
-    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                  o->BlendMeshTexCoordV, o->HiddenMesh);
-    b->RenderBody(RENDER_TEXTURE | RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                  o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME + 1);
+    // Doppelgangers are drawn plainly.
+    if (RenderType & RENDER_DOPPELGANGER)
+    {
+        return false;
+    }
+    RenderSetChrome(b, o, std::nullopt);
     return true;
 }
 
 bool RenderThunderHawk(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
 {
-    vec3_t Light;
-    VectorCopy(b->BodyLight, Light);
-    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                  o->BlendMeshTexCoordV, o->HiddenMesh);
-    Vector(0.85f * Light[0], 0.85f * Light[1], 1.2f * Light[2], b->BodyLight);
-    b->RenderBody(RENDER_TEXTURE | RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                  o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME + 1);
-    VectorCopy(Light, b->BodyLight);
+    // Doppelgangers are drawn plainly.
+    if (RenderType & RENDER_DOPPELGANGER)
+    {
+        return false;
+    }
+    RenderSetChrome(b, o, ThunderHawkChromeTint);
     return true;
 }
 
@@ -740,15 +814,12 @@ bool RenderDarkReignBlade(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
 
 bool RenderHurricane(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
 {
-    float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
-    vec3_t Light;
-    VectorCopy(b->BodyLight, Light);
-    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                  o->BlendMeshTexCoordV, o->HiddenMesh);
-    Vector(Light[0] * 0.3f, Light[1] * 0.8f, Light[1] * 1.f, b->BodyLight);
-    b->RenderBody(RENDER_TEXTURE | RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                  o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME + 1);
-    VectorCopy(Light, b->BodyLight);
+    // Doppelgangers are drawn plainly.
+    if (RenderType & RENDER_DOPPELGANGER)
+    {
+        return false;
+    }
+    RenderSetChrome(b, o, HurricaneChromeTint);
     return true;
 }
 
