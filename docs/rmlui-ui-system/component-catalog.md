@@ -39,7 +39,9 @@ Server selection uses `.server-group-btn` (with `.checked`) and `.server-option-
 Use a `.button-label` child for the pressed text offset. `server_select.rml` is the reference;
 its stylesheet owns button and gauge geometry. Legacy uses the original `cha_bt` group
 sprite at its native size and the `server_b2_all` server frame in tiles, so every channel row grows
-as wide as the group's longest channel text, within the current two-column layout.
+as wide as the longest text any channel can have, within the current two-column layout. A row has
+`.server-name` at the left and `.server-load-box` at the right; the unseen `.server-row-sizer` row
+holds every name and load text the rows are sized by.
 
 Icon buttons have a narrower contract: `.btn-icon`, `.btn-icon-primary`, `.btn-icon-label` and
 `.btn-icon-caption` are used by the login and character-selection documents. The modern base

@@ -18,18 +18,24 @@
 			<!-- Right column: servers in the currently-selected group; hidden until a group is
 			     picked (replaces the old flyout with a plain second column). -->
 			<!-- A group of many channels scrolls (.scroll-pane); #server_rows keeps a short list
-			     centered and a long one starting at the top, where the scroll starts. -->
+			     centered and a long one starting at the top, where the scroll starts. A row has the
+			     channel's name at the left and the load text of a full or overloaded server at the right. -->
 			<div id="server_col" class="scroll-pane" data-class-hidden="!server_list_visible">
 				<div id="server_rows">
 				<div class="server-option-btn server-row" data-for="s : servers" data-class-gray="s.color.gray" data-class-orange="s.color.orange" data-class-silver="s.color.silver" data-style-color="s.color.style"
-				     data-event-click="serversel_select_server(s.index)"><div class="button-label">{{s.label}}<span class="server-load" data-if="s.load_text != ''"
+				     data-event-click="serversel_select_server(s.index)"><div class="button-label"><div class="server-name">{{s.label}}</div><div class="server-load-box"><div class="server-load" data-if="s.load_text != ''"
 					     data-class-load-gray="s.load_color.gray" data-class-load-orange="s.load_color.orange" data-class-load-silver="s.load_color.silver" data-style-color="s.load_color.style"
-					     data-class-bold="s.load_bold" data-class-italic="s.load_italic" data-class-slant="s.load_slant">{{s.load_text}}</span>{{s.label_after}}</div>
+					     data-class-bold="s.load_bold" data-class-italic="s.load_italic" data-class-slant="s.load_slant">{{s.load_text}}</div></div></div>
 					<!-- Ten segments of 10 % each (docs/server-list.md): their colors and lit widths come from the
 					     server list, the gaps and the track from the theme. -->
 					<div class="server-gauge-slot"><div class="server-gauge-segment" data-for="g : s.segments" data-style-background-color="s.empty_style"><div class="server-gauge-fill"
 					     data-style-width="g.lit" data-style-background-color="g.color"></div></div></div>
 				</div>
+				<!-- Never seen: a row with every channel name of every group shown and every load text, each
+				     on a line of its own, so it is as wide as the longest text any button can have. The rows
+				     stretch to it, so neither a load change nor another group resizes them. -->
+				<div class="server-option-btn server-row server-row-sizer"><div class="button-label"><div class="server-name"><div class="server-sizer" data-for="n : sizer_names">{{n}}</div></div><div class="server-load-box"><div class="server-load server-sizer"
+				     data-for="z : sizer_loads" data-class-bold="z.bold" data-class-italic="z.italic">{{z.text}}</div></div></div></div>
 				</div>
 			</div>
 		</div>

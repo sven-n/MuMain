@@ -90,15 +90,15 @@ body {
 	display: none;
 }
 
-/* At least 0.97's 134 px, wider when a channel's text needs it: the rows fill the column, which
-   is as wide as the widest text plus 18 px on each side, the gauge's inset. */
+/* At least 0.97's 134 px, wider when a text needs it: the rows fill the column, which is as wide as
+   the longest text any button can have (the sizer row, server_select.rml) plus 18 px on each side,
+   the gauge's inset. */
 .server-row {
 	position: relative;
 	display: block;
 	min-width: calc(98 * var(--px));
 	height: calc(20 * var(--px));
 	padding: calc(1 * var(--px)) calc(18 * var(--px)) 0;
-	text-align: center;
 	line-height: calc(12 * var(--px));
 	white-space: nowrap;
 	cursor: pointer;
@@ -115,6 +115,44 @@ body {
 }
 .server-row.orange {
 	color: token(server-button-orange);
+}
+
+/* The channel's name at the left and its load text at the right. Each a block: a div is inline in
+   RmlUi. */
+.server-row .button-label {
+	display: flex;
+	flex-direction: row;
+	height: calc(12 * var(--px));
+}
+.server-name {
+	display: block;
+	flex: 1 1 auto;
+	text-align: left;
+}
+/* At least a space after the name. */
+.server-load-box {
+	display: block;
+	flex: 0 0 auto;
+	margin-left: 1em;
+	text-align: right;
+}
+.server-load {
+	display: block;
+}
+/* The sizer row (server_select.rml) lays its texts out unseen, one per line, and takes no room. */
+.server-row-sizer {
+	height: 0;
+	padding-top: 0;
+	overflow: hidden;
+	visibility: hidden;
+	pointer-events: none;
+}
+.server-row-sizer .button-label {
+	height: 0;
+}
+.server-sizer {
+	display: block;
+	height: 0;
 }
 
 /* base.rcss gives the server list's buttons (.server-group-btn / .server-option-btn) the legacy

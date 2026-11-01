@@ -224,6 +224,47 @@ TEST_CASE("ServerListManager: the button names the server's load only when it ca
     I18N::SetLocale("en");
 }
 
+TEST_CASE("ServerListManager: a button's name leaves its load text out, for every channel the group can have")
+{
+    I18N::SetLocale("en");
+    ServerGroup valhalla = Group(0, "Valhalla");
+    valhalla.channels[6] = Channel(false, "gold");
+    TestServerListManager manager;
+    manager.SetServerList(List({valhalla}));
+    manager.InsertServerGroup(ServerId(0, 2), 128);
+
+    const std::vector<CServerGroup*> groups = GroupsInOrder(manager);
+    REQUIRE(groups.size() == 1);
+    // The overloaded server's name without "Overloaded", which the button shows apart from it.
+    CHECK(manager.GetServerButtonName(*groups[0], 2) == "Valhalla-2 (PvP)");
+    CHECK(manager.GetServerButtonParts(*groups[0], *groups[0]->GetServerInfo(0)).load == "Overloaded");
+    // A channel the connect server did not send, with its own settings.
+    CHECK(manager.GetServerButtonName(*groups[0], 7) == "Valhalla-7 (Gold Non-PvP)");
+    CHECK(manager.GetServerButtonName(*groups[0], 0).empty());
+    CHECK(manager.GetServerButtonName(*groups[0], MAX_SERVER_PER_GROUP + 1).empty());
+}
+
+TEST_CASE("ServerListManager: the load texts a button can show, none without {load} in its template")
+{
+    I18N::SetLocale("en");
+    ServerListData list = List({Group(0, "Valhalla")});
+    list.load.overloaded.bold = true;
+    list.load.overloaded.italic = true;
+    TestServerListManager manager;
+    manager.SetServerList(list);
+    const std::vector<CServerListManager::ButtonLoadText> texts = manager.GetButtonLoadTexts();
+    REQUIRE(texts.size() == 2);
+    CHECK(texts[0].text == "(Full)");
+    CHECK_FALSE(texts[0].bold);
+    CHECK(texts[1].text == "Overloaded");
+    CHECK(texts[1].bold);
+    CHECK(texts[1].italic);
+
+    list.names.Template(Data::ServerList::ChannelNamePlace::Button).Set("en", "{name}-{channel}");
+    manager.SetServerList(list);
+    CHECK(manager.GetButtonLoadTexts().empty());
+}
+
 TEST_CASE("ServerListManager: a group without a channel with PvP off shows the PvP notice")
 {
     ServerGroup helheim = Group(1, "Helheim");

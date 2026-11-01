@@ -243,6 +243,46 @@ std::wstring CServerListManager::GetServerButtonText(const CServerGroup& group, 
     return Core::Text::FromUtf8(parts.before + parts.load + parts.after);
 }
 
+std::string CServerListManager::GetServerButtonName(const CServerGroup& group, int index) const
+{
+    if (index < 1 || index > MAX_SERVER_PER_GROUP)
+    {
+        return {};
+    }
+    const std::string name = Core::Text::ToUtf8(group.m_szName);
+    Data::ServerList::ChannelNameValues values;
+    values.name = name;
+    values.channel = index;
+    return Data::ServerList::BuildChannelName(m_serverList, Data::ServerList::ChannelNamePlace::Button,
+                                              group.m_channels[static_cast<size_t>(index - 1)], values,
+                                              GetGameLocale());
+}
+
+std::vector<CServerListManager::ButtonLoadText> CServerListManager::GetButtonLoadTexts() const
+{
+    const std::string_view locale = GetGameLocale();
+    std::vector<ButtonLoadText> texts;
+    for (const Data::ServerList::LoadState state :
+         {Data::ServerList::LoadState::Full, Data::ServerList::LoadState::Overloaded})
+    {
+        const Data::ServerList::LoadText* look = m_serverList.load.Text(state);
+        if (look == nullptr)
+        {
+            continue;
+        }
+        std::string text = look->text.Get(locale);
+        Data::ServerList::ChannelNameValues values;
+        values.load = text;
+        // A template without {load} shows none of them.
+        if (text.empty() || Data::ServerList::BuildButtonTextParts(m_serverList, {}, values, locale).load.empty())
+        {
+            continue;
+        }
+        texts.push_back({std::move(text), look->bold, look->italic});
+    }
+    return texts;
+}
+
 Data::ServerList::ButtonColor CServerListManager::GetServerButtonColor(const CServerInfo& server,
                                                                        std::string_view theme) const
 {

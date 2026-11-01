@@ -83,19 +83,60 @@
 	text-align: center;
 	line-height: 30px;
 }
-/* Every row is as wide as the widest channel text in the list plus its padding (#server_rows
-   stretches them), at least 218px. */
+/* Every row is as wide as the longest text any button can have (the sizer row, server_select.rml)
+   plus its padding (#server_rows stretches them), at least 218px. */
 .server-row {
 	display: block;
 	min-width: 218px;
 	height: 23px;
 	padding: 3px 10px 4px;
-	text-align: center;
 	line-height: 14px;
 	white-space: nowrap;
 }
 .button-label {
 	pointer-events: none;
+}
+/* The channel's name at the left and its load text at the right. Each a block: a div is inline in
+   RmlUi. */
+.server-row .button-label {
+	display: flex;
+	flex-direction: row;
+	height: 14px;
+}
+.server-name {
+	display: block;
+	flex: 1 1 auto;
+	text-align: left;
+}
+/* At least a space after the name. */
+.server-load-box {
+	display: block;
+	flex: 0 0 auto;
+	margin-left: 1em;
+	text-align: right;
+}
+.server-load {
+	display: block;
+}
+/* The sizer row (server_select.rml) lays its texts out unseen, one per line, and takes no room: no
+   height, and the gap before it taken back. Its sides stay as a row's. */
+.server-row-sizer {
+	height: 0;
+	padding-top: 0;
+	padding-bottom: 0;
+	border-top-width: 0;
+	border-bottom-width: 0;
+	margin-top: -6px;
+	overflow: hidden;
+	visibility: hidden;
+	pointer-events: none;
+}
+.server-row-sizer .button-label {
+	height: 0;
+}
+.server-sizer {
+	display: block;
+	height: 0;
 }
 
 /* The {load} text of a full or overloaded server, in the server list's look for it. */

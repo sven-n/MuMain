@@ -103,10 +103,10 @@ private:
     };
     struct ServerEntry
     {
-        // The button's text, split at its {load} text (CServerListManager::GetServerButtonParts).
+        // The button's text without its load text (CServerListManager::GetServerButtonName), at the left, and
+        // the load text of a full or overloaded server, at the right.
         Rml::String label;
         Rml::String loadText;
-        Rml::String labelAfter;
         int index = 0; // position within the selected group's server list (CServerGroup::GetServerInfo(i))
         // From CServerListManager::GetServerButtonColor.
         ColorEntry color;
@@ -121,11 +121,23 @@ private:
         Rml::String emptyStyle;
         // No "checked"/selected state here -- clicking a server row connects immediately.
     };
+    // A load text a button can show, in its look (CServerListManager::GetButtonLoadTexts).
+    struct LoadSizerEntry
+    {
+        Rml::String text;
+        bool bold = false;
+        bool italic = false;
+    };
     struct ServerSelRmlModel
     {
         // One merged, order-preserving list.
         std::vector<GroupEntry> groups;
         std::vector<ServerEntry> servers;
+        // Every text a button can have, laid out unseen (server_select.rml's sizer row): the names of every
+        // channel of every group shown and the load texts. The buttons are as wide as the longest of them, so
+        // neither a load change nor another group resizes them.
+        std::vector<Rml::String> sizerNames;
+        std::vector<LoadSizerEntry> sizerLoads;
 
         // True once a group has been clicked and its server list requested/populated.
         bool serverListVisible = false;
@@ -136,6 +148,8 @@ private:
         Rml::String descriptionText;
     };
     static ColorEntry MakeColorEntry(const Data::ServerList::ButtonColor& color);
+    // The texts the buttons are sized by (ServerSelRmlModel::sizerNames), of the groups shown.
+    static void FillSizers(ServerSelRmlModel& model, const std::vector<const CServerGroup*>& groups);
     // The look of the {load} text, and the load bar, of a server with the load `percent`.
     static void SetLoadTextLook(ServerEntry& entry, int percent);
     static void SetLoadBar(ServerEntry& entry, int percent);

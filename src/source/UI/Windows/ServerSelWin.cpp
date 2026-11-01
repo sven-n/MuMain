@@ -24,6 +24,7 @@
 #include <array>
 #include <cmath>
 #include <string_view>
+#include <vector>
 
 namespace
 {
@@ -44,7 +45,7 @@ bool CanDrawItalic()
         return false;
     return UI::RmlBridge::ActiveThemeFontHasItalic(kLabelFontToken);
 }
-}
+} // namespace
 
 CServerSelWin g_ServerSelWin;
 
@@ -99,7 +100,6 @@ void CServerSelWin::BindRmlModel(Rml::DataModelConstructor& c, ServerSelRmlModel
     auto server = c.RegisterStruct<ServerEntry>();
     server.RegisterMember("label", &ServerEntry::label);
     server.RegisterMember("load_text", &ServerEntry::loadText);
-    server.RegisterMember("label_after", &ServerEntry::labelAfter);
     server.RegisterMember("index", &ServerEntry::index);
     server.RegisterMember("color", &ServerEntry::color);
     server.RegisterMember("load_color", &ServerEntry::loadColor);
@@ -110,8 +110,17 @@ void CServerSelWin::BindRmlModel(Rml::DataModelConstructor& c, ServerSelRmlModel
     server.RegisterMember("empty_style", &ServerEntry::emptyStyle);
     c.RegisterArray<std::vector<ServerEntry>>();
 
+    auto loadSizer = c.RegisterStruct<LoadSizerEntry>();
+    loadSizer.RegisterMember("text", &LoadSizerEntry::text);
+    loadSizer.RegisterMember("bold", &LoadSizerEntry::bold);
+    loadSizer.RegisterMember("italic", &LoadSizerEntry::italic);
+    c.RegisterArray<std::vector<LoadSizerEntry>>();
+    c.RegisterArray<std::vector<Rml::String>>();
+
     c.Bind("groups", &model.groups);
     c.Bind("servers", &model.servers);
+    c.Bind("sizer_names", &model.sizerNames);
+    c.Bind("sizer_loads", &model.sizerLoads);
     c.Bind("server_list_visible", &model.serverListVisible);
 
     c.Bind("pvp_notice", &model.pvpNotice);
@@ -159,6 +168,7 @@ void CServerSelWin::UpdateDisplay()
     auto& model = m_RmlView.GetModel();
 
     model.groups.clear();
+    std::vector<const CServerGroup*> shownGroups;
 
     const int nGroupCount = g_ServerListManager->GetServerGroupSize();
     if (nGroupCount >= 1)
@@ -187,6 +197,7 @@ void CServerSelWin::UpdateDisplay()
                 entry.btnPos = 0;
                 pServerGroup->m_iBtnPos = 0;
                 model.groups.push_back(entry);
+                shownGroups.push_back(pServerGroup);
                 continue;
             }
 
@@ -195,8 +206,10 @@ void CServerSelWin::UpdateDisplay()
             entry.btnPos = nNextBtnPos++;
             pServerGroup->m_iBtnPos = entry.btnPos;
             model.groups.push_back(entry);
+            shownGroups.push_back(pServerGroup);
         }
     }
+    FillSizers(model, shownGroups);
 
     model.servers.clear();
     model.descriptionText.clear();
@@ -226,10 +239,33 @@ void CServerSelWin::UpdateDisplay()
     // Unconditional: this is a genuine rebuild (clear + repopulate), not a per-frame poll.
     m_RmlView.MarkDirty("groups");
     m_RmlView.MarkDirty("servers");
+    m_RmlView.MarkDirty("sizer_names");
+    m_RmlView.MarkDirty("sizer_loads");
     m_RmlView.MarkDirty("pvp_notice");
     m_RmlView.MarkDirty("description_text");
 
     SyncRmlModel();
+}
+
+void CServerSelWin::FillSizers(ServerSelRmlModel& model, const std::vector<const CServerGroup*>& groups)
+{
+    model.sizerNames.clear();
+    for (const CServerGroup* group : groups)
+    {
+        // Every channel the group can have, not only those the connect server sent.
+        for (int index = 1; index <= MAX_SERVER_PER_GROUP; ++index)
+        {
+            std::string name = g_ServerListManager->GetServerButtonName(*group, index);
+            if (std::find(model.sizerNames.begin(), model.sizerNames.end(), name) == model.sizerNames.end())
+                model.sizerNames.push_back(std::move(name));
+        }
+    }
+    model.sizerLoads.clear();
+    for (CServerListManager::ButtonLoadText& text : g_ServerListManager->GetButtonLoadTexts())
+    {
+        // A slanted text (SetLoadTextLook) is as wide as the upright one.
+        model.sizerLoads.push_back({std::move(text.text), text.bold, text.italic && CanDrawItalic()});
+    }
 }
 
 CServerSelWin::ColorEntry CServerSelWin::MakeColorEntry(const Data::ServerList::ButtonColor& color)
@@ -281,11 +317,8 @@ void CServerSelWin::SetLoadBar(ServerEntry& entry, int percent)
 CServerSelWin::ServerEntry CServerSelWin::MakeServerEntry(const CServerInfo& serverInfo, int index) const
 {
     ServerEntry entry;
-    Data::ServerList::ButtonTextParts parts =
-        g_ServerListManager->GetServerButtonParts(*m_pSelectServerGroup, serverInfo);
-    entry.label = std::move(parts.before);
-    entry.loadText = std::move(parts.load);
-    entry.labelAfter = std::move(parts.after);
+    entry.label = g_ServerListManager->GetServerButtonName(*m_pSelectServerGroup, serverInfo.m_iIndex);
+    entry.loadText = g_ServerListManager->GetServerButtonParts(*m_pSelectServerGroup, serverInfo).load;
     entry.index = index;
     entry.color =
         MakeColorEntry(g_ServerListManager->GetServerButtonColor(serverInfo, UI::RmlBridge::GetActiveThemeName()));

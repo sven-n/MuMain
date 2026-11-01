@@ -59,6 +59,20 @@ public:
     Data::ServerList::ButtonTextParts GetServerButtonParts(const CServerGroup& group, const CServerInfo& server) const;
     // The same in one text.
     std::wstring GetServerButtonText(const CServerGroup& group, const CServerInfo& server) const;
+    // A channel's button text without its load text, for the channel `index` (1 to MAX_SERVER_PER_GROUP) of
+    // `group`, whether or not the connect server sent it: "Valhalla-4 (Gold Non-PvP)". The login screen shows the
+    // load text apart from it, at the button's right.
+    std::string GetServerButtonName(const CServerGroup& group, int index) const;
+    // A load text a button can show, in the game's language, and its look.
+    struct ButtonLoadText
+    {
+        std::string text;
+        bool bold = false;
+        bool italic = false;
+    };
+    // The list's load texts of a full and of an overloaded server, those not empty; none when the button
+    // template has no {load}.
+    std::vector<ButtonLoadText> GetButtonLoadTexts() const;
     // The groups, VIP types, colors and texts the channels are named with.
     const Data::ServerList::ServerListData& GetServerList() const
     {

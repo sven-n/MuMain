@@ -479,15 +479,33 @@ LayoutRect LaidOut(Rml::Element& element, Rml::BoxArea area)
     return {offset.x, offset.y, offset.x + size.x, offset.y + size.y};
 }
 
+float BorderWidth(Rml::Element& element)
+{
+    return element.GetBox().GetSize(Rml::BoxArea::Border).x;
+}
+
 constexpr int ChannelRowCount = 20;
 constexpr int LongChannelRow = 2;
-constexpr const char* LongChannelText =
-    R"(Valhalla-20 (Gold Non-PvP Premium Plus) <span class="server-load bold italic">Overloaded</span>)";
+constexpr const char* LongChannelName = "Valhalla-20 (Gold Non-PvP Premium Plus)";
+// Bold, not italic: the fixture has no italic face, and a text without its face is laid out with no width.
+constexpr const char* OverloadedText = R"(<div class="server-load bold">Overloaded</div>)";
+constexpr const char* SizerLoadTexts =
+    R"(<div class="server-load server-sizer bold">Overloaded</div><div class="server-load server-sizer">(Full)</div>)";
 
-// The server list (server_select.rml, without its bindings) with `count` channel rows: copies of its one
-// row, short texts but the row LongChannelRow's, when `withLong`.
-std::vector<Rml::Element*> LoadChannelRows(UI::Tests::RmlLayoutFixture& fixture, const char* theme, int count,
-                                           bool withLong, Rml::ElementDocument*& document)
+// The server list (server_select.rml without its bindings) with its channel rows and its sizer row filled.
+struct ChannelList
+{
+    Rml::ElementDocument* document = nullptr;
+    std::vector<Rml::Element*> rows;
+    Rml::Element* sizer = nullptr;
+};
+
+// `count` channel rows with short names; the row LongChannelRow named `longName` unless it is empty, and
+// overloaded when `overloaded`. The sizer row has the names `sizerNames`, and the load texts "Overloaded" (bold)
+// and "(Full)" when `withLoadTexts`.
+ChannelList LoadChannelList(UI::Tests::RmlLayoutFixture& fixture, const char* theme, int count,
+                            const std::string& longName, bool overloaded, const std::vector<std::string>& sizerNames,
+                            bool withLoadTexts)
 {
     std::string markup = UI::Tests::AssetMarkup(theme, "server_select");
     if (std::string(theme) == "classic")
@@ -499,45 +517,63 @@ std::vector<Rml::Element*> LoadChannelRows(UI::Tests::RmlLayoutFixture& fixture,
         REQUIRE(link != std::string::npos);
         markup.replace(link, shared.size(), "href=\"" + root + "/themes/legacy/base.rcss\"");
     }
-    document = fixture.LoadMarkup(markup);
-    REQUIRE(document);
+    ChannelList list;
+    list.document = fixture.LoadMarkup(markup);
+    REQUIRE(list.document);
     // The root size the game gives a "scene-window-scale" document in a theme with native text sizes
     // (RmlNativeText.h): 1rem is one original pixel. Classic builds on legacy.
     if (std::string(theme) != "modern")
     {
         const Rml::Vector2i window = fixture.context->GetDimensions();
-        document->SetProperty(Rml::PropertyId::FontSize,
-                              Rml::Property(UI::Scaling::SceneWindowScale(window.x, window.y), Rml::Unit::PX));
+        list.document->SetProperty(Rml::PropertyId::FontSize,
+                                   Rml::Property(UI::Scaling::SceneWindowScale(window.x, window.y), Rml::Unit::PX));
     }
-    Rml::Element& templateRow = Required(*document, ".server-row");
-    Rml::Element* rows = templateRow.GetParentNode();
+    list.sizer = &Required(*list.document, ".server-row-sizer");
+    Rml::Element* templateRow = list.document->QuerySelector(".server-row");
+    REQUIRE(templateRow);
+    REQUIRE(templateRow != list.sizer);
+    Rml::Element* rows = templateRow->GetParentNode();
     for (int row = 1; row < count; ++row)
-        rows->AppendChild(templateRow.Clone());
-    std::vector<Rml::Element*> result;
+        rows->InsertBefore(templateRow->Clone(), list.sizer);
     for (int row = 0; row < rows->GetNumChildren(); ++row)
     {
         Rml::Element* channel = rows->GetChild(row);
-        Rml::Element* label = channel->QuerySelector(".button-label");
-        REQUIRE(label);
-        label->SetInnerRML(withLong && row == LongChannelRow
-                               ? LongChannelText
-                               : "Valhalla-" + std::to_string(row + 1) + R"( <span class="server-load"></span>)");
-        result.push_back(channel);
+        if (channel == list.sizer)
+            continue;
+        Rml::Element* name = channel->QuerySelector(".server-name");
+        Rml::Element* load = channel->QuerySelector(".server-load-box");
+        REQUIRE(name);
+        REQUIRE(load);
+        const bool isLong = row == LongChannelRow;
+        name->SetInnerRML(isLong && !longName.empty() ? longName : "Valhalla-" + std::to_string(row + 1));
+        load->SetInnerRML(isLong && overloaded ? OverloadedText : "");
+        list.rows.push_back(channel);
     }
+    std::string names;
+    for (const std::string& name : sizerNames)
+        names += R"(<div class="server-sizer">)" + name + "</div>";
+    Rml::Element* sizerName = list.sizer->QuerySelector(".server-name");
+    Rml::Element* sizerLoad = list.sizer->QuerySelector(".server-load-box");
+    REQUIRE(sizerName);
+    REQUIRE(sizerLoad);
+    sizerName->SetInnerRML(names);
+    sizerLoad->SetInnerRML(withLoadTexts ? SizerLoadTexts : "");
     fixture.Refresh();
-    return result;
+    return list;
 }
 
-float BorderWidth(Rml::Element& element)
+void Unload(UI::Tests::RmlLayoutFixture& fixture, const ChannelList& list)
 {
-    return element.GetBox().GetSize(Rml::BoxArea::Border).x;
+    list.document->Close();
+    fixture.Refresh();
 }
 } // namespace
 
-TEST_CASE("every channel row is as wide as the longest channel text needs, in every theme [ui][styling]")
+TEST_CASE("every channel row is as wide as the longest text any channel can have, in every theme [ui][styling]")
 {
-    // The rows had a fixed width, so a long text ran out of its button; and a scrolling list's
-    // scrollbar takes its width from content sized without it, which would squeeze the rows again.
+    // The rows had a fixed width, so a long text ran out of its button; sized by the texts shown, they grew
+    // whenever a server became full or overloaded. And a scrolling list's scrollbar takes its width from
+    // content sized without it, which would squeeze the rows again.
     constexpr float Tolerance = 1.f;
     UI::Tests::RmlLayoutFixture fixture;
     for (const char* theme : {"legacy", "modern", "classic"})
@@ -547,29 +583,37 @@ TEST_CASE("every channel row is as wide as the longest channel text needs, in ev
             CAPTURE(std::string(theme));
             CAPTURE(viewport.x);
             fixture.Configure(viewport, 100);
-            Rml::ElementDocument* document = nullptr;
 
-            const float shortWidth = BorderWidth(*LoadChannelRows(fixture, theme, 1, false, document)[0]);
-            document->Close();
-            fixture.Refresh();
+            const ChannelList shortList = LoadChannelList(fixture, theme, 1, "", false, {"Valhalla-1"}, false);
+            const float shortWidth = BorderWidth(*shortList.rows[0]);
+            Unload(fixture, shortList);
 
-            const auto rows = LoadChannelRows(fixture, theme, ChannelRowCount, true, document);
-            REQUIRE(rows.size() == ChannelRowCount);
-            Rml::Element& column = Required(*document, "#server_col");
+            const std::vector<std::string> sizerNames = {"Valhalla-1", LongChannelName, "Midgard-1"};
+            const ChannelList list =
+                LoadChannelList(fixture, theme, ChannelRowCount, LongChannelName, true, sizerNames, true);
+            REQUIRE(list.rows.size() == ChannelRowCount);
+            Rml::Element& column = Required(*list.document, "#server_col");
             REQUIRE(column.GetScrollHeight() > column.GetClientHeight());
-            Rml::Element& longRow = *rows[LongChannelRow];
+            Rml::Element& longRow = *list.rows[LongChannelRow];
             const float width = BorderWidth(longRow);
             CHECK(width > shortWidth + Tolerance);
-            for (Rml::Element* row : rows)
+            for (Rml::Element* row : list.rows)
                 CHECK(BorderWidth(*row) == doctest::Approx(width));
 
-            // The text fills the row's text area, its padding left free on both sides.
+            // The name at the left of the row's text area, the load text at its right, apart.
             const LayoutRect content = LaidOut(longRow, Rml::BoxArea::Content);
-            Rml::Element* load = longRow.QuerySelector(".server-load");
-            REQUIRE(load);
-            const LayoutRect text = LaidOut(*load, Rml::BoxArea::Border);
-            CHECK(text.right <= content.right + Tolerance);
-            CHECK(text.right >= content.right - Tolerance);
+            Rml::Element* nameBox = longRow.QuerySelector(".server-name");
+            Rml::Element* loadText = longRow.QuerySelector(".server-load");
+            REQUIRE(nameBox);
+            REQUIRE(loadText);
+            const LayoutRect name = LaidOut(*nameBox, Rml::BoxArea::Border);
+            const LayoutRect load = LaidOut(*loadText, Rml::BoxArea::Border);
+            CHECK(name.left == doctest::Approx(content.left));
+            CHECK(load.right == doctest::Approx(content.right));
+            CHECK(load.right - load.left > Tolerance);
+            CHECK(load.left > name.left + Tolerance);
+            // The name fits in its box, which ends where the load text's box begins.
+            CHECK(nameBox->GetScrollWidth() <= name.right - name.left + Tolerance);
 
             // The scrollbar sits beside the rows and takes no width from them.
             Rml::Element* scrollbar = nullptr;
@@ -579,11 +623,14 @@ TEST_CASE("every channel row is as wide as the longest channel text needs, in ev
                     scrollbar = column.GetChild(child);
             }
             REQUIRE(scrollbar);
-            CHECK(LaidOut(longRow, Rml::BoxArea::Border).right <= LaidOut(*scrollbar, Rml::BoxArea::Border).left + 0.01f);
-            Rml::ElementDocument* alone = nullptr;
-            const float aloneWidth = BorderWidth(*LoadChannelRows(fixture, theme, LongChannelRow + 1, true, alone)[0]);
-            CHECK(aloneWidth == doctest::Approx(width));
-            alone->Close();
+            CHECK(LaidOut(longRow, Rml::BoxArea::Border).right <=
+                  LaidOut(*scrollbar, Rml::BoxArea::Border).left + 0.01f);
+
+            // The sizer row takes no room after the last row.
+            const LayoutRect first = LaidOut(*list.rows.front(), Rml::BoxArea::Border);
+            const LayoutRect last = LaidOut(*list.rows.back(), Rml::BoxArea::Border);
+            CHECK(LaidOut(*list.sizer, Rml::BoxArea::Border).bottom <= last.bottom + 0.01f);
+            CHECK(column.GetScrollHeight() <= last.bottom - first.top + Tolerance);
 
             // The load bar spans the row below its text.
             Rml::Element* gaugeSlot = longRow.QuerySelector(".server-gauge-slot");
@@ -593,17 +640,26 @@ TEST_CASE("every channel row is as wide as the longest channel text needs, in ev
             CHECK(gauge.left >= row.left);
             CHECK(gauge.right <= row.right);
             CHECK(gauge.right - gauge.left > (row.right - row.left) * 0.75f);
-            CHECK(gauge.top >= text.bottom);
+            CHECK(gauge.top >= load.bottom);
             CHECK(gauge.bottom <= row.bottom);
             if (std::string(theme) == "legacy")
             {
                 // At least the bar's own height free above it, to the text, and below it, to the frame's edge.
                 const float barHeight = gauge.bottom - gauge.top;
-                CHECK(gauge.top - text.bottom >= barHeight - 0.01f);
+                CHECK(gauge.top - load.bottom >= barHeight - 0.01f);
                 CHECK(row.bottom - gauge.bottom >= barHeight - 0.01f);
             }
-            document->Close();
-            fixture.Refresh();
+            Unload(fixture, list);
+
+            // Neither the loads shown nor the group's own names change the width: the sizer row has every text.
+            const ChannelList calm =
+                LoadChannelList(fixture, theme, LongChannelRow + 1, LongChannelName, false, sizerNames, true);
+            CHECK(BorderWidth(*calm.rows.front()) == doctest::Approx(width));
+            Unload(fixture, calm);
+            const ChannelList otherGroup =
+                LoadChannelList(fixture, theme, LongChannelRow + 1, "", false, sizerNames, true);
+            CHECK(BorderWidth(*otherGroup.rows.front()) == doctest::Approx(width));
+            Unload(fixture, otherGroup);
         }
     }
 }
