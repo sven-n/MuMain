@@ -361,6 +361,8 @@ void MoveMainScene()
         return;
     }
 
+    // Picks what the mouse is over from what the last frame drew (its boxes, its mouse ray), and highlights it.
+    Input::Selection::SelectObjects();
     InitializeSceneFrame();
 
     // While the reconnect dialog is up it's modal: block world clicks so they
@@ -672,7 +674,6 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
  */
 static void RenderMainSceneUI()
 {
-    Input::Selection::SelectObjects();
     BeginBitmap();
     // Recorded into the world-label layer instead when it is available (CNameWindow).
     if (g_pNameWindow == nullptr || !g_pNameWindow->RecordsInterfaceOverlays())

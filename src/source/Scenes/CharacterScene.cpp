@@ -207,6 +207,10 @@ void NewMoveCharacterScene()
         return;
     }
 
+    // Picks the character under the mouse from what the last frame drew, before anything resets the mouse state.
+    if (!CSceneUICoordinator::Instance().IsCursorOnUI() && !Core::Input::IsMouseOverUI())
+        Input::Selection::SelectObjects();
+
     MouseOnWindow = false;
 
     if (!InitCharacterScene)
@@ -370,11 +374,6 @@ static void RenderCharacterScene3D()
     RenderObjects();
     RenderCharactersClient();
     RenderMount();
-
-    // Core::Input::IsMouseOverUI() added as a 2nd gate here too -- same rationale as
-    // the check in Update() above.
-    if (!CSceneUICoordinator::Instance().IsCursorOnUI() && !Core::Input::IsMouseOverUI())
-        Input::Selection::SelectObjects();
 
     RenderBlurs();
     RenderJoints();
