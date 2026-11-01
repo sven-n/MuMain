@@ -18,7 +18,6 @@ std::string RemoveVipType(const std::string& name);
 std::string MoveVipType(const std::string& name);
 std::string AddColor(const std::string& name);
 std::string RemoveColor(const std::string& name);
-std::string MoveColor(const std::string& name);
 std::string AddButtonColorRule();
 std::string RemoveButtonColorRule();
 // A change of fields, by the first group, VIP type or text that differs; a

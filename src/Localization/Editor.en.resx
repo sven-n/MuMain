@@ -2188,9 +2188,6 @@
   <data name="Step remove color" xml:space="preserve">
     <value>Remove color {0}</value>
   </data>
-  <data name="Step move color" xml:space="preserve">
-    <value>Move color {0}</value>
-  </data>
   <data name="Step shade" xml:space="preserve">
     <value>{0}: shade</value>
   </data>

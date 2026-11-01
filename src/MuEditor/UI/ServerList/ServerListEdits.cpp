@@ -39,11 +39,6 @@ std::array<std::string*, 5> GetLoadColors(Data::ServerList::LoadSettings& load)
 {
     return {&load.bar.base, &load.bar.full, &load.bar.empty, &load.full.color, &load.overloaded.color};
 }
-
-std::array<const std::string*, 5> GetLoadColors(const Data::ServerList::LoadSettings& load)
-{
-    return {&load.bar.base, &load.bar.full, &load.bar.empty, &load.full.color, &load.overloaded.color};
-}
 } // namespace
 
 void ServerListEdits::Reset(ServerListData list, bool complete)
@@ -348,21 +343,6 @@ void ServerListEdits::SetColorOrder(std::span<const std::string> ids, std::strin
     m_pendingLabel = std::move(label);
 }
 
-bool ServerListEdits::MoveColor(size_t index, int direction)
-{
-    if (index >= m_list.colors.size())
-    {
-        return false;
-    }
-    const std::string name = m_list.colors[index].name;
-    if (!MoveEntry(m_list.colors, index, direction))
-    {
-        return false;
-    }
-    m_pendingLabel = StepLabel::MoveColor(name);
-    return true;
-}
-
 bool ServerListEdits::ChangeColorId(size_t index, const std::string& id)
 {
     if (index >= m_list.colors.size())
@@ -401,19 +381,6 @@ bool ServerListEdits::IsColorIdFree(std::string_view id) const
 {
     return Data::ServerList::IsListId(id) && !Data::ServerList::FindThemeColor(id) &&
            m_list.FindCustomColor(id) == nullptr;
-}
-
-size_t ServerListEdits::CountRulesWithColor(std::string_view id) const
-{
-    return static_cast<size_t>(std::count_if(m_list.buttonColors.begin(), m_list.buttonColors.end(),
-                                             [id](const ButtonColorRule& rule) { return rule.color == id; }));
-}
-
-size_t ServerListEdits::CountLoadUsesOfColor(std::string_view id) const
-{
-    const auto colors = GetLoadColors(m_list.load);
-    return static_cast<size_t>(
-        std::count_if(colors.begin(), colors.end(), [id](const std::string* color) { return *color == id; }));
 }
 
 std::optional<size_t> ServerListEdits::AddButtonColorRule()

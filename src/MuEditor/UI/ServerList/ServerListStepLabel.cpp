@@ -154,11 +154,6 @@ std::string RemoveColor(const std::string& name)
     return I18N::Format(I18N::Editor::StepRemoveColor, {name});
 }
 
-std::string MoveColor(const std::string& name)
-{
-    return I18N::Format(I18N::Editor::StepMoveColor, {name});
-}
-
 std::string AddButtonColorRule()
 {
     return I18N::Editor::StepAddButtonColorRule;

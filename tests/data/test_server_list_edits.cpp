@@ -412,7 +412,6 @@ TEST_CASE("ServerListEdits: rules follow their colors and VIP types")
     CHECK(edits.GetList().buttonColors[0].vip == "golden");
     edits.Commit();
 
-    CHECK(edits.CountRulesWithColor("crimson") == 1);
     edits.RemoveColor(0);
     edits.Commit();
     CHECK(edits.GetUndoLabel() == "Remove color Red");
@@ -436,8 +435,6 @@ TEST_CASE("ServerListEdits: the load bar and load texts follow their colors")
     load.overloaded.color = "red";
     edits.Commit();
     CHECK(edits.GetUndoLabel() == "Load: Load bar");
-    CHECK(edits.CountLoadUsesOfColor("red") == 2);
-    CHECK(edits.CountRulesWithColor("red") == 0);
 
     CHECK(edits.ChangeColorId(0, "crimson"));
     CHECK(edits.GetList().load.bar.full == "crimson");
@@ -448,7 +445,6 @@ TEST_CASE("ServerListEdits: the load bar and load texts follow their colors")
     edits.Commit();
     CHECK(edits.GetList().load.bar.full == "default");
     CHECK(edits.GetList().load.overloaded.color == "default");
-    CHECK(edits.CountLoadUsesOfColor("crimson") == 0);
     edits.Undo();
     CHECK(edits.GetList().load.bar.full == "crimson");
 }
