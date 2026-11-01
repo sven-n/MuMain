@@ -22,7 +22,7 @@ namespace giPetManager
     void    MovePet(CHARACTER* c);
     void    RenderPet(CHARACTER* c);
     // The pet's draw effects and state, for a character the last frame drew.
-    void    UpdatePetEffects(CHARACTER* c);
+    void UpdatePetEffects(CHARACTER* c);
     void    DeletePet(CHARACTER* c);
 
     void    InitItemBackup(void);

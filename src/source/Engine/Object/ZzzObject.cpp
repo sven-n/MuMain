@@ -1274,8 +1274,10 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     }
                                                     else if (o->Type == MODEL_STATUE_OF_SAINT)
                                                     {
-                                                        // Dying or appearing, it shows only the debris UpdateRenderObjectEffects spawns.
-                                                        if (o->CurrentAction != MONSTER01_DIE && (WorldTime - o->InitialSceneTime) >= 1000)
+                                                        // Dying or appearing, it shows only the debris
+                                                        // UpdateRenderObjectEffects spawns.
+                                                        if (o->CurrentAction != MONSTER01_DIE &&
+                                                            (WorldTime - o->InitialSceneTime) >= 1000)
                                                         {
                                                             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                             Vector(1.f, 1.f, 1.f, b->BodyLight);
@@ -1313,7 +1315,8 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     }
                                                     else if (o->Type == MODEL_FLY_BIG_STONE1)
                                                     {
-                                                        // Landing, it shows only the debris UpdateRenderObjectEffects spawns.
+                                                        // Landing, it shows only the debris UpdateRenderObjectEffects
+                                                        // spawns.
                                                         if (o->HiddenMesh != 99 || !o->Visible)
                                                         {
                                                             Vector(1.f, 1.f, 1.f, b->BodyLight);
@@ -1327,7 +1330,8 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     }
                                                     else if (o->Type == MODEL_FLY_BIG_STONE2)
                                                     {
-                                                        // Landing, it shows only the debris UpdateRenderObjectEffects spawns.
+                                                        // Landing, it shows only the debris UpdateRenderObjectEffects
+                                                        // spawns.
                                                         if (o->HiddenMesh != 99 || !o->Visible)
                                                         {
                                                             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
@@ -1726,8 +1730,10 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     float fLumi = (sinf(WorldTime * 0.004f) + 1.2f) * 0.5f + 0.1f;
                     vec3_t vLight;
                     LittleSantaLight(o->Type, vLight);
-                    RenderAurora(BITMAP_LIGHTMARKS, RENDER_BRIGHT, o->Position[0], o->Position[1], 2.0f + fLumi, 2.0f + fLumi, vLight);
-                    RenderAurora(BITMAP_LIGHTMARKS, RENDER_BRIGHT, o->Position[0], o->Position[1], 0.5f + fLumi, 0.5 + fLumi, vLight);
+                    RenderAurora(BITMAP_LIGHTMARKS, RENDER_BRIGHT, o->Position[0], o->Position[1], 2.0f + fLumi,
+                                 2.0f + fLumi, vLight);
+                    RenderAurora(BITMAP_LIGHTMARKS, RENDER_BRIGHT, o->Position[0], o->Position[1], 0.5f + fLumi,
+                                 0.5 + fLumi, vLight);
 
                     b->RenderBody(RENDER_TEXTURE, 0.9f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                     Vector(b->BodyLight[0] * 0.5f, b->BodyLight[0] * 0.5f, b->BodyLight[0] * 0.5f, b->BodyLight);
@@ -2080,7 +2086,8 @@ void UpdateRenderObjectEffects(OBJECT* o)
         if (!o->m_pCloth)
         {
             auto* pCloth = new CPhysicsCloth[1];
-            pCloth[0].Create(o, 10, 0.0f, -10.0f, 0.0f, 5, 12, 150.0f, 190.0f, BITMAP_DEASULER_CLOTH, BITMAP_DEASULER_CLOTH, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER);
+            pCloth[0].Create(o, 10, 0.0f, -10.0f, 0.0f, 5, 12, 150.0f, 190.0f, BITMAP_DEASULER_CLOTH,
+                             BITMAP_DEASULER_CLOTH, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER);
             pCloth[0].AddCollisionSphere(50.0f, -140.0f, -20.0f, 30.0f, 2);
             o->m_pCloth = (void*)pCloth;
             o->m_byNumCloth = 1;
@@ -2973,7 +2980,8 @@ void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate, 
     pObj->Alpha = 1.0f;
     pObj->AnimationFrame = fAnimationFrame;
     Calc_ObjectAnimation(pObj, Translate, Select);
-    RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
+    RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
+                     pPart->AncientDiscriminator, false, false, Translate, Select);
 }
 
 // Counts RenderObjects calls; each object the draw handled carries the count it was drawn in.
@@ -6422,7 +6430,8 @@ void UpdateTransformSkinEffects(OBJECT* o)
             {
                 int iTex = BITMAP_CURSEDTEMPLE_ALLIED_PHYSICSCLOTH;
                 auto* pCloth = new CPhysicsCloth[1];
-                pCloth[0].Create(o, 19, 0.0f, 8.0f, 0.0f, 10, 10, 140.0f, 140.0f, iTex, iTex, PCT_CURVED | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
+                pCloth[0].Create(o, 19, 0.0f, 8.0f, 0.0f, 10, 10, 140.0f, 140.0f, iTex, iTex,
+                                 PCT_CURVED | PCT_SHORT_SHOULDER | PCT_MASK_ALPHA);
                 o->m_pCloth = (void*)pCloth;
                 o->m_byNumCloth = 1;
             }
@@ -6433,7 +6442,8 @@ void UpdateTransformSkinEffects(OBJECT* o)
             {
                 int iTex = BITMAP_CURSEDTEMPLE_ILLUSION_PHYSICSCLOTH;
                 auto* pCloth = new CPhysicsCloth[2];
-                pCloth[0].Create(o, 20, -4.0f, 5.0f, 0.0f, 10, 20, 17.0f, 100.0f, iTex, iTex, PCT_SHAPE_HALLOWEEN | PCT_ELASTIC_HALLOWEEN | PCT_MASK_ALPHA);
+                pCloth[0].Create(o, 20, -4.0f, 5.0f, 0.0f, 10, 20, 17.0f, 100.0f, iTex, iTex,
+                                 PCT_SHAPE_HALLOWEEN | PCT_ELASTIC_HALLOWEEN | PCT_MASK_ALPHA);
                 o->m_pCloth = (void*)pCloth;
                 o->m_byNumCloth = 1;
             }
@@ -6686,29 +6696,35 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         vec3_t Light;
         VectorCopy(b->BodyLight, Light);
         Vector(0.9f, 0.8f, 1.0f, b->BodyLight);
-        b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_FENRIR_THUNDER);
-        b->RenderBody(RENDER_BRIGHT | RENDER_METAL, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_FENRIR_THUNDER);
+        b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, BITMAP_FENRIR_THUNDER);
+        b->RenderBody(RENDER_BRIGHT | RENDER_METAL, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, BITMAP_FENRIR_THUNDER);
         VectorCopy(Light, b->BodyLight);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER)
     {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 1);
+        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
+                      1);
 
         if (g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint))
         {
             float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
-            b->RenderMesh(1, RENDER_TEXTURE, 0.4f + Luminosity, 0, o->BlendMeshLight * Luminosity, -WorldTime * 0.0005f, WorldTime * 0.0005f);
+            b->RenderMesh(1, RENDER_TEXTURE, 0.4f + Luminosity, 0, o->BlendMeshLight * Luminosity, -WorldTime * 0.0005f,
+                          WorldTime * 0.0005f);
         }
         RenderTransformSkinCloth(o);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
     {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 2);
+        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
+                      2);
 
         if (g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint))
         {
             float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
-            b->RenderMesh(2, RENDER_TEXTURE, 0.4f + Luminosity, 0, o->BlendMeshLight * Luminosity, -WorldTime * 0.0005f, WorldTime * 0.0005f);
+            b->RenderMesh(2, RENDER_TEXTURE, 0.4f + Luminosity, 0, o->BlendMeshLight * Luminosity, -WorldTime * 0.0005f,
+                          WorldTime * 0.0005f);
         }
         RenderTransformSkinCloth(o);
     }
@@ -6733,7 +6749,8 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
             vec3_t vLight;
             VectorCopy(b->BodyLight, vLight);
             Vector(1.f, fStageG, fStageB, b->BodyLight);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
             VectorCopy(vLight, b->BodyLight);
         }
         RenderTransformSkinCloth(o);
@@ -6741,11 +6758,16 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_PANDA)
     {
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_PANDABODY_R);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, BITMAP_PANDABODY_R);
+        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL)
     {
@@ -6753,16 +6775,22 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     }
     else if (o->SubType == MODEL_XMAS_EVENT_CHA_DEER)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BLOOD + 1);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BLOOD + 1);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BLOOD + 1);
+        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
+                      BITMAP_BLOOD + 1);
+        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
+                      BITMAP_BLOOD + 1);
+        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
+                      BITMAP_BLOOD + 1);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_GM_CHARACTER)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
     }
     else
     {
@@ -7522,14 +7550,16 @@ void StepPartCloth(OBJECT* o, PART_t* p, int Type, int ItemLevel, bool Translate
         if (!p->m_pCloth[0] && iCloth > 0)
         {
             int iCount = 1;
-            CPhysicsClothMesh* pCloth[2] = { NULL, NULL };
+            CPhysicsClothMesh* pCloth[2] = {NULL, NULL};
             switch (iCloth)
             {
             case 1:
                 if (!CPhysicsClothMesh::CanCreate(Type, 2, 5, 8))
                     break;
                 pCloth[0] = new CPhysicsClothMesh;
-                pCloth[0]->Create(o, 2, 17, 0.0f, 9.0f, 7.0f, 5, 8, 45.0f, 85.0f, BITMAP_PANTS_G_SOUL, BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER, Type);
+                pCloth[0]->Create(o, 2, 17, 0.0f, 9.0f, 7.0f, 5, 8, 45.0f, 85.0f, BITMAP_PANTS_G_SOUL,
+                                  BITMAP_PANTS_G_SOUL, PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER,
+                                  Type);
                 pCloth[0]->AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
                 break;
             case 2:
@@ -7548,7 +7578,9 @@ void StepPartCloth(OBJECT* o, PART_t* p, int Type, int ItemLevel, bool Translate
                 if (!CPhysicsClothMesh::CanCreate(Type, 2, 7, 5))
                     break;
                 pCloth[0] = new CPhysicsClothMesh;
-                pCloth[0]->Create(o, 2, 17, 0.0f, 9.0f, 7.0f, 7, 5, 50.0f, 100.0f, b->IndexTexture[b->Meshs[2].Texture], b->IndexTexture[b->Meshs[2].Texture], PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER, Type);
+                pCloth[0]->Create(o, 2, 17, 0.0f, 9.0f, 7.0f, 7, 5, 50.0f, 100.0f, b->IndexTexture[b->Meshs[2].Texture],
+                                  b->IndexTexture[b->Meshs[2].Texture],
+                                  PCT_MASK_ALPHA | PCT_HEAVY | PCT_STICKED | PCT_SHORT_SHOULDER, Type);
                 pCloth[0]->AddCollisionSphere(0.0f, -15.0f, -20.0f, 30.0f, 2);
                 break;
             }

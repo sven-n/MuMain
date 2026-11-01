@@ -5739,11 +5739,6 @@ void MoveEffect(OBJECT* o, int iIndex)
         }
         break;
 
-
-
-
-
-
     case 9:
         VectorScale(o->Direction, o->Velocity, Position);
         VectorAddScaled(Position, o->Position, o->Position, FPS_ANIMATION_FACTOR);

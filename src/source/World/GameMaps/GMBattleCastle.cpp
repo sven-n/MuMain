@@ -1924,7 +1924,8 @@ namespace battleCastle
 
     void UpdateBattleCastleObjectMeshEffects(OBJECT* o, BMD* b)
     {
-        if (gMapManager.InBattleCastle() == false) return;
+        if (gMapManager.InBattleCastle() == false)
+            return;
 
         switch (o->Type)
         {
@@ -2021,11 +2022,14 @@ namespace battleCastle
             // Dying, it shows only the debris UpdateBattleCastleObjectMeshEffects spawns.
             if (IsBattleCastleStart() && o->CurrentAction != MONSTER01_DIE)
             {
-                b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                              o->BlendMeshTexCoordV, o->HiddenMesh);
                 Vector(0.3f, 0.3f, 0.3f, b->BodyLight);
-                b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
+                b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                              o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
                 Vector(0.2f, 0.2f, 0.5f, b->BodyLight);
-                b->RenderBody(RENDER_BRIGHT | RENDER_METAL, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
+                b->RenderBody(RENDER_BRIGHT | RENDER_METAL, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                              o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
                 Vector(1.f, 1.f, 1.f, b->BodyLight);
             }
             success = true;
