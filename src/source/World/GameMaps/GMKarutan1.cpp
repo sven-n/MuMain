@@ -58,7 +58,7 @@ bool CGMKarutan1::MoveObject(OBJECT* o)
     return false;
 }
 
-bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
+bool CGMKarutan1::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     if (!IsKarutanMap())
         return false;
@@ -73,10 +73,10 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
         Vector(flumi * 1.9f, flumi * 1.1f, flumi * 1.1f, vLight0);
 
         Vector(10.f, 0.f, -6.f, vRelativePos);
-        b->TransformPosition(BoneTransform[13], vRelativePos, vPos);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[13], vRelativePos, vPos);
         CreateSprite(BITMAP_SHINY + 5, vPos, 1.2f, vLight0, o);
         Vector(10.f, 0.f, 6.f, vRelativePos);
-        b->TransformPosition(BoneTransform[14], vRelativePos, vPos);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[14], vRelativePos, vPos);
         CreateSprite(BITMAP_SHINY + 5, vPos, 1.2f, vLight0, o);
     }
         return true;
@@ -89,10 +89,10 @@ bool CGMKarutan1::RenderObjectVisual(OBJECT* o, BMD* b)
         Vector(flumi * 1.3f, flumi * 1.3f, flumi * 1.9f, vLight0);
         Vector(0.15f, 0.15f, 0.15f, vLight1);
 
-        b->TransformPosition(BoneTransform[11], vRelativePos, vPos);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[11], vRelativePos, vPos);
         CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight0, o);
         CreateSprite(BITMAP_SPARK + 1, vPos, 1.5f, vLight1, o);
-        b->TransformPosition(BoneTransform[7], vRelativePos, vPos);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[7], vRelativePos, vPos);
         CreateSprite(BITMAP_SPARK + 1, vPos, 4.0f, vLight0, o);
         CreateSprite(BITMAP_SPARK + 1, vPos, 1.5f, vLight1, o);
     }

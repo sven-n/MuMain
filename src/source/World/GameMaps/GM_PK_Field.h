@@ -25,7 +25,7 @@ public:
 
     bool CreateObject(OBJECT* object) override;
     bool MoveObject(OBJECT* object) override;
-    bool RenderObjectVisual(OBJECT* object, BMD* bmd) override;
+    bool UpdateObjectEffects(OBJECT* object, BMD* bmd) override;
     bool RenderObjectMesh(OBJECT* object, BMD* bmd, bool extraMon = false) override;
     void RenderAfterObjectMesh(OBJECT* object, BMD* bmd, bool extraMon = false) override;
 

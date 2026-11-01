@@ -268,7 +268,7 @@ bool CGM_PK_Field::MoveObject(OBJECT* o)
     return false;
 }
 
-bool CGM_PK_Field::RenderObjectVisual(OBJECT* o, BMD* b)
+bool CGM_PK_Field::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     if (!gMapManager.IsPKField())
     {

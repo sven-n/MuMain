@@ -30,6 +30,11 @@ public: // Object
     {
         return false;
     }
+    // A map object's effects, sounds and state changes, for the objects the last draw drew. True when handled.
+    virtual bool UpdateObjectEffects(OBJECT* o, BMD* b)
+    {
+        return false;
+    }
     virtual bool RenderObjectVisual(OBJECT* o, BMD* b)
     {
         return false;

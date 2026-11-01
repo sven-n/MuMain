@@ -47,7 +47,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndObject(OBJECT* pObject)
     return true;
 }
 
-bool M34CryingWolf2nd::RenderCryingWolf2ndObjectVisual(OBJECT* pObject, BMD* pModel)
+bool M34CryingWolf2nd::UpdateCryingWolf2ndObjectEffects(OBJECT* pObject, BMD* pModel)
 {
     if (!IsCyringWolf2nd())
         return false;

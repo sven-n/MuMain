@@ -113,7 +113,7 @@ bool CGMDuelArena::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool CGMDuelArena::RenderObjectVisual(OBJECT* o, BMD* b)
+bool CGMDuelArena::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {

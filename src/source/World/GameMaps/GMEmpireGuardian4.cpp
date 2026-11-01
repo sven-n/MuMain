@@ -798,7 +798,7 @@ bool GMEmpireGuardian4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool GMEmpireGuardian4::RenderObjectVisual(OBJECT* o, BMD* b)
+bool GMEmpireGuardian4::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     if (gMapManager.IsEmpireGuardian4() == false)
         return false;
@@ -818,19 +818,19 @@ bool GMEmpireGuardian4::RenderObjectVisual(OBJECT* o, BMD* b)
         Vector(8.f, -3.f, -3.f, vRelativePos);
         Vector(flumi, flumi, flumi, vLight1);
         Vector(0.9f, 0.1f, 0.1f, vLight2);
-        b->TransformPosition(BoneTransform[2], vRelativePos, vPos);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[2], vRelativePos, vPos);
 #ifdef LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
         CreateSprite(BITMAP_SHINY + 6, vPos, 0.5f, vLight2, o);
         CreateSprite(BITMAP_SHINY + 6, vPos, fScale, vLight1, o);
         Vector(3.f, -3.f, -3.5f, vRelativePos);
-        b->TransformPosition(BoneTransform[3], vRelativePos, vPos);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[3], vRelativePos, vPos);
         CreateSprite(BITMAP_SHINY + 6, vPos, 0.5f, vLight2, o);
         CreateSprite(BITMAP_SHINY + 6, vPos, fScale, vLight1, o);
 #else  // LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
         CreateSprite(BITMAP_SHINY + 5, vPos, 0.5f, vLight2, o);
         CreateSprite(BITMAP_SHINY + 5, vPos, fScale, vLight1, o);
         Vector(3.f, -3.f, -3.5f, vRelativePos);
-        b->TransformPosition(BoneTransform[3], vRelativePos, vPos);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[3], vRelativePos, vPos);
         CreateSprite(BITMAP_SHINY + 5, vPos, 0.5f, vLight2, o);
         CreateSprite(BITMAP_SHINY + 5, vPos, fScale, vLight1, o);
 #endif // LDS_FIX_ACCESS_INDEXNUMBER_ALREADY_LOADTEXTURE
@@ -865,7 +865,7 @@ bool GMEmpireGuardian4::RenderObjectVisual(OBJECT* o, BMD* b)
     case 37:
     {
         Vector(0.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[1], p, Position);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[1], p, Position);
 
         float fLumi;
         fLumi = (sinf(WorldTime * 0.039f) + 1.0f) * 0.2f + 0.6f;
@@ -886,7 +886,7 @@ bool GMEmpireGuardian4::RenderObjectVisual(OBJECT* o, BMD* b)
 
         for (int i = 2; i <= 7; i++)
         {
-            b->TransformPosition(BoneTransform[i], vRelativePos, vPos);
+            b->TransformPosition(Engine::Object::Pose::World(o, b)[i], vRelativePos, vPos);
             CreateParticleFpsChecked(BITMAP_FIRE_HIK3_MONO, vPos, vAngle, vLight1, 4, o->Scale * 0.6f);
             CreateParticleFpsChecked(BITMAP_FIRE_HIK3_MONO, vPos, vAngle, vLight2, 4, o->Scale * 0.3f);
         }
@@ -1070,7 +1070,7 @@ bool GMEmpireGuardian4::RenderObjectVisual(OBJECT* o, BMD* b)
             for (int i = 0; i < 3; ++i)
             {
                 int iCurBoneIdx = arriCandleFire[i];
-                b->TransformPosition(BoneTransform[iCurBoneIdx], vRelativePos, vPos);
+                b->TransformPosition(Engine::Object::Pose::World(o, b)[iCurBoneIdx], vRelativePos, vPos);
 
                 for (int j = 0; j < 5; ++j)
                 {
@@ -1087,7 +1087,7 @@ bool GMEmpireGuardian4::RenderObjectVisual(OBJECT* o, BMD* b)
             for (int i = 0; i < 3; i++)
             {
                 int iCurBoneIdx = arriCandleSmoke[i];
-                b->TransformPosition(BoneTransform[iCurBoneIdx], vRelativePos, vPos);
+                b->TransformPosition(Engine::Object::Pose::World(o, b)[iCurBoneIdx], vRelativePos, vPos);
 
                 for (int j = 0; j < 4; ++j)
                 {

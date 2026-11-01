@@ -93,7 +93,7 @@ bool M33Aida::MoveAidaObject(OBJECT* pObject)
     return true;
 }
 
-bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
+bool M33Aida::UpdateAidaObjectEffects(OBJECT* pObject, BMD* pModel)
 {
     if (!IsInAida())
         return false;
@@ -105,62 +105,46 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
     case 30: // 풀
     {
         Vector(0.0f, -3.0f, 1.0f, p);
-        pModel->TransformPosition(BoneTransform[6], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[6], p, Position, false);
         Vector(0.1f, 0.1f, 0.3f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 5.5f, Light, pObject);
         Vector(0.15f, 0.15f, 0.15f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(0.0f, -3.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[7], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[7], p, Position, false);
         Vector(0.1f, 0.1f, 0.3f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 4.5f, Light, pObject);
         Vector(0.15f, 0.15f, 0.15f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(0.0f, -3.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[8], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[8], p, Position, false);
         Vector(0.1f, 0.1f, 0.3f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 4.0f, Light, pObject);
         Vector(0.15f, 0.15f, 0.15f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(-3.0f, -1.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[12], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[12], p, Position, false);
         Vector(0.1f, 0.1f, 0.3f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 4.5f, Light, pObject);
         Vector(0.15f, 0.15f, 0.15f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(-3.0f, -3.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[13], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[13], p, Position, false);
         Vector(0.1f, 0.1f, 0.3f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 4.0f, Light, pObject);
         Vector(0.15f, 0.15f, 0.15f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(0.0f, 2.0f, -8.0f, p);
-        pModel->TransformPosition(BoneTransform[17], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[17], p, Position, false);
         Vector(0.1f, 0.1f, 0.3f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 4.0f, Light, pObject);
         Vector(0.15f, 0.15f, 0.15f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
-    }
-    break;
-    case 41:
-    {
-        pModel->BeginRender(1.0f);
-
-        pModel->BodyLight[0] = 0.52f;
-        pModel->BodyLight[1] = 0.52f;
-        pModel->BodyLight[2] = 0.52f;
-
-        pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->StreamMesh = -1;
-
-        pModel->EndRender();
     }
     break;
     case 56:
@@ -228,19 +212,6 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
             }
         }
         break;
-    case 65:
-    case 66:
-    {
-        pModel->BeginRender(1.0f);
-
-        pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           -(int)WorldTime % 100000 * 0.00005f, pObject->BlendMeshTexCoordV);
-        pModel->StreamMesh = -1;
-
-        pModel->EndRender();
-    }
-    break;
     case 67:
         Vector(0.3f, 0.3f, 0.3f, pObject->Light);
         CreateParticleFpsChecked(BITMAP_FLAME, pObject->Position, pObject->Angle, pObject->Light, 7, pObject->Scale);
@@ -258,42 +229,42 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
     case 71:
     {
         Vector(0.0f, -3.0f, 1.0f, p);
-        pModel->TransformPosition(BoneTransform[6], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[6], p, Position, false);
         Vector(0.5f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 6.0f, Light, pObject);
         Vector(0.15f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(0.0f, -3.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[7], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[7], p, Position, false);
         Vector(0.25f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 5.5f, Light, pObject);
         Vector(0.15f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(0.0f, -3.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[8], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[8], p, Position, false);
         Vector(0.25f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 5.0f, Light, pObject);
         Vector(0.15f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(-3.0f, -1.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[12], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[12], p, Position, false);
         Vector(0.25f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 5.5f, Light, pObject);
         Vector(0.15f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(-3.0f, -3.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[13], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[13], p, Position, false);
         Vector(0.25f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 5.0f, Light, pObject);
         Vector(0.15f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(0.0f, 2.0f, -8.0f, p);
-        pModel->TransformPosition(BoneTransform[17], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[17], p, Position, false);
         Vector(0.25f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 5.0f, Light, pObject);
         Vector(0.15f, 0.0f, 0.0f, Light);
@@ -303,11 +274,52 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
     case 75:
     {
         Vector(0.f, 0.f, 0.f, p);
-        pModel->TransformPosition(BoneTransform[4], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[4], p, Position, false);
         float fLumi = (sinf(WorldTime * 0.002f) + 1.0f) * 0.5f;
         Vector(fLumi, fLumi, fLumi, Light);
         Vector(1.0f, 1.0f, 1.f, Light);
         CreateSprite(BITMAP_FLARE, Position, 3.0f, Light, pObject, (WorldTime / 10.0f));
+    }
+    break;
+    }
+
+    return true;
+}
+
+bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
+{
+    if (!IsInAida())
+        return false;
+
+    switch (pObject->Type)
+    {
+    case 41:
+    {
+        pModel->BeginRender(1.0f);
+
+        pModel->BodyLight[0] = 0.52f;
+        pModel->BodyLight[1] = 0.52f;
+        pModel->BodyLight[2] = 0.52f;
+
+        pModel->StreamMesh = 0;
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
+                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->StreamMesh = -1;
+
+        pModel->EndRender();
+    }
+    break;
+    case 65:
+    case 66:
+    {
+        pModel->BeginRender(1.0f);
+
+        pModel->StreamMesh = 0;
+        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
+                           -(int)WorldTime % 100000 * 0.00005f, pObject->BlendMeshTexCoordV);
+        pModel->StreamMesh = -1;
+
+        pModel->EndRender();
     }
     break;
     case 77:

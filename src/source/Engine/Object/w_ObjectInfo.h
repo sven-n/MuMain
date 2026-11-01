@@ -129,6 +129,8 @@ public:
     bool	      Visible;
     bool	      AlphaEnable;
     bool          EnableBoneMatrix;
+    // BoneTransform was allocated by Engine::Object::Pose::World, which DeleteObject releases.
+    bool OwnsBoneTransform;
     bool		  ContrastEnable;
     bool          ChromeEnable;
 
@@ -222,6 +224,8 @@ public:
     vec34_t	 	  Matrix;
     vec34_t* BoneTransform;
     Engine::Object::PoseInputs Pose;
+    // The RenderObjects call that last drew this map object.
+    unsigned int DrawnFrame;
 
 public:
     OBB_t		  OBB;

@@ -29,7 +29,7 @@ namespace SEASON3A
         bool CreateBalgasBarrackObject(OBJECT* pObject);
         bool CreateBalgasRefugeObject(OBJECT* pObject);
         bool MoveObject(OBJECT* pObject);
-        bool RenderObjectVisual(OBJECT* pObject, BMD* pModel);
+        bool UpdateObjectEffects(OBJECT* pObject, BMD* pModel);
         bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
         void RenderAfterObjectMesh(OBJECT* o, BMD* b);
 

@@ -226,14 +226,14 @@ void GMNewTown::PlayObjectSound(OBJECT* pObject)
     }
 }
 
-bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
+bool GMNewTown::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
 {
     if (!IsCurrentMap())
         return false;
 
     if (IsNewMap73_74())
     {
-        g_EmpireGuardian4.RenderObjectVisual(pObject, pModel);
+        g_EmpireGuardian4.UpdateObjectEffects(pObject, pModel);
         return true;
     }
 
@@ -289,7 +289,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         Vector(fLumi * 1.0f, fLumi * 1.0f, fLumi * 0.6f, Light);
 
         Vector(-40.0f, -10.0f, 0.0f, vRelative);
-        pModel->TransformPosition(BoneTransform[5], vRelative, vPos, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[5], vRelative, vPos, false);
         CreateSprite(BITMAP_LIGHT, vPos, pObject->Scale * 6.f, Light, pObject);
     }
     break;
@@ -300,7 +300,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         {
             p[0] = (float)cosf(WorldTime * 0.03f) * (30.f + rand() % 5);
             p[1] = (float)sinf(WorldTime * 0.03f) * (30.f + rand() % 5);
-            pModel->TransformPosition(BoneTransform[0], p, Position, false);
+            pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[0], p, Position, false);
             CreateParticle(BITMAP_LIGHT, Position, pObject->Angle, Light, 11, 0.6f, pObject);
         }
         break;
@@ -316,7 +316,7 @@ bool GMNewTown::RenderObjectVisual(OBJECT* pObject, BMD* pModel)
         Vector(5.0f, -4.0f, -1.0f, vRelative);
         for (int i = 3; i <= 8; ++i)
         {
-            pModel->TransformPosition(BoneTransform[i], vRelative, vPos, false);
+            pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[i], vRelative, vPos, false);
             CreateSprite(BITMAP_LIGHT, vPos, fScale, Light, pObject);
         }
     }

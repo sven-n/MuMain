@@ -9,7 +9,7 @@ namespace M34CryingWolf2nd
 
     bool CreateCryingWolf2ndObject(OBJECT* pObject);
     bool MoveCryingWolf2ndObject(OBJECT* pObject);
-    bool RenderCryingWolf2ndObjectVisual(OBJECT* pObject, BMD* pModel);
+    bool UpdateCryingWolf2ndObjectEffects(OBJECT* pObject, BMD* pModel);
     bool RenderCryingWolf2ndObjectMesh(OBJECT* pObject, BMD* pModel);
 
     CHARACTER* CreateCryingWolf2ndMonster(int iType, int PosX, int PosY, int Key);

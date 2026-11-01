@@ -424,7 +424,7 @@ void CheckGrass(OBJECT* o)
     }
 }
 
-bool RenderHellasVisual(OBJECT* o, BMD* b)
+bool UpdateHellasObjectEffects(OBJECT* o, BMD* b)
 {
     if (gMapManager.InHellas() == false) return false;
 
@@ -439,7 +439,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
 
         Vector(0.6f, 0.6f, 1.f, Light);
         Vector(0.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[5], p, Position);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[5], p, Position);
         CreateSprite(BITMAP_LIGHT, Position, Luminosity + 0.2f, Light, o);
         break;
     case 15:
@@ -453,7 +453,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
 
         Vector(0.6f, 0.6f, 1.f, Light);
         Vector(0.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[5], p, Position);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[5], p, Position);
         CreateSprite(BITMAP_LIGHT, Position, Luminosity + 0.2f, Light, o);
         o->Position[2] = GetWaterTerrain(o->Position[0], o->Position[1]) + 180;
         break;

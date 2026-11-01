@@ -14,6 +14,7 @@ public:
 public:
     virtual bool CreateObject(OBJECT* o);
     virtual bool MoveObject(OBJECT* o);
+    virtual bool UpdateObjectEffects(OBJECT* o, BMD* b);
     virtual bool RenderObjectVisual(OBJECT* o, BMD* b);
     virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
     virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);

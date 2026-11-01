@@ -1742,7 +1742,7 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool CGM_Raklion::RenderObjectVisual(OBJECT* o, BMD* b)
+bool CGM_Raklion::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {

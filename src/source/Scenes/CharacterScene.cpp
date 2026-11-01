@@ -230,6 +230,7 @@ void NewMoveCharacterScene()
 
     ThePetProcess().UpdatePets();
     UpdateCharacterEffects();
+    UpdateObjectEffects();
 
 #if defined _DEBUG || defined FOR_WORK
     std::wstring lpszTemp = { 0 };

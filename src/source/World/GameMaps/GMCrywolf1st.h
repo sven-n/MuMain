@@ -7,7 +7,7 @@ namespace M34CryWolf1st {		//. 크라이울프 점령지
     //. 오브젝트
     bool CreateCryWolf1stObject(OBJECT* o);
     bool MoveCryWolf1stObject(OBJECT* o);
-    bool RenderCryWolf1stObjectVisual(OBJECT* o, BMD* b);
+    bool UpdateCryWolf1stObjectEffects(OBJECT* o, BMD* b);
     bool RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon);
 
     //. 몬스터

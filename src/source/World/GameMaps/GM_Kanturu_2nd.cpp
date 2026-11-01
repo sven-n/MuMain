@@ -301,7 +301,7 @@ bool M38Kanturu2nd::Move_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     return false;
 }
 
-bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
+bool M38Kanturu2nd::Update_Kanturu2nd_ObjectEffects(OBJECT* o, BMD* b)
 {
     if (Is_Kanturu2nd() == false)
         return false;
@@ -316,7 +316,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
         float fLumi = (sinf(WorldTime * 0.002f) + 2.0f) * 0.5f;
         Vector(fLumi * 0.3f, fLumi * 0.5f, fLumi * 1.0f, Light);
         Vector(-1.0f, 0.0f, 0.0f, vPos);
-        b->TransformPosition(BoneTransform[1], vPos, Position, false);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[1], vPos, Position, false);
         CreateSprite(BITMAP_LIGHT, Position, fLumi / 3.2, Light, o);
         CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, Position, fLumi / 3.2, Light, o);
         CreateSprite(BITMAP_KANTURU_2ND_EFFECT1, Position, fLumi / 3.2, Light, o);
@@ -328,7 +328,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b)
         vec3_t vPos;
         Vector(0.0f, 0.0f, 0.0f, vPos);
         Vector(fLumi, fLumi, fLumi, Light);
-        b->TransformPosition(BoneTransform[4], vPos, Position, false);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[4], vPos, Position, false);
         CreateParticleFpsChecked(BITMAP_ENERGY, Position, o->Angle, Light, 0, 1.5f);
         CreateSprite(BITMAP_SPARK + 1, Position, 10.0f, Light, o);
         vec3_t StartPos, EndPos;

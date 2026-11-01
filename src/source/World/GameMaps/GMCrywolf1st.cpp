@@ -441,7 +441,7 @@ bool M34CryWolf1st::MoveCryWolf1stObject(OBJECT* o)
     return true;
 }
 
-bool M34CryWolf1st::RenderCryWolf1stObjectVisual(OBJECT* o, BMD* b)
+bool M34CryWolf1st::UpdateCryWolf1stObjectEffects(OBJECT* o, BMD* b)
 {
     if (!IsCyrWolf1st())
         return false;

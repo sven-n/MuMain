@@ -15,7 +15,7 @@ namespace M38Kanturu2nd
     // 칸투루 오브젝트 관련
     bool Create_Kanturu2nd_Object(OBJECT* o);										// 오브젝트 생성
     bool Move_Kanturu2nd_Object(OBJECT* o);											// 오브젝트 업데이트
-    bool Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b);							// 오브젝트 이펙트 효과
+    bool Update_Kanturu2nd_ObjectEffects(OBJECT* o, BMD* b);                        // 오브젝트 이펙트 효과
     bool Render_Kanturu2nd_ObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);			// 오브젝트 렌더링(몬스터 포함)
     void Render_Kanturu2nd_AfterObjectMesh(OBJECT* o, BMD* b);
 

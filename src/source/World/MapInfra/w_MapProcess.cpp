@@ -266,6 +266,32 @@ bool MapProcess::MoveObject(OBJECT* o)
     return false;
 }
 
+bool MapProcess::UpdateObjectEffects(OBJECT* o, BMD* b)
+{
+    for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
+    {
+        auto tempiter = iter;
+        ++iter;
+        Weak_Ptr(BaseMap) basemap = *tempiter;
+
+        if (basemap.expired() == false)
+        {
+            if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
+            {
+                if (basemap.lock()->UpdateObjectEffects(o, b))
+                {
+                    return true;
+                }
+            }
+        }
+        else
+        {
+            m_MapList.erase(tempiter);
+        }
+    }
+    return false;
+}
+
 bool MapProcess::RenderObjectVisual(OBJECT* o, BMD* b)
 {
     for (auto iter = m_MapList.begin(); iter != m_MapList.end();)

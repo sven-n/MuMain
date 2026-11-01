@@ -395,7 +395,7 @@ bool CGMDoppelGanger2::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool CGMDoppelGanger2::RenderObjectVisual(OBJECT* o, BMD* b)
+bool CGMDoppelGanger2::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     if (IsDoppelGanger2() == false)
         return false;
