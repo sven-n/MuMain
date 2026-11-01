@@ -338,7 +338,7 @@ void NewMoveCharacterScene()
     }
     MoveCharacterSceneState();
     PlaceCharactersForDraw();
-    CullEffects();
+    CullWorld();
 }
 
 /**

@@ -5,6 +5,8 @@
 #include "App/Control/DrawPurityCheck.h"
 #include "Camera/CameraState.h"
 #include "Core/Utilities/Random.h"
+#include "Engine/Object/ZzzObject.h"
+#include "Scenes/SceneCore.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -204,6 +206,40 @@ TEST_CASE(
 
     REQUIRE_FALSE(first.lights.empty());
     CHECK(first.lights == second.lights);
+}
+
+TEST_CASE("The update marks the map objects the frame's view shows, and only those [effects]")
+{
+    ViewScope view;
+    // The 2D cull lets everything through outside the world scenes.
+    const EGameScene scene = SceneFlag;
+    SceneFlag = MAIN_SCENE;
+    OBJECT shown{};
+    shown.Live = true;
+    shown.CollisionRange = 0.f;
+    view.Ahead(1000.f, shown.Position);
+    OBJECT hidden{};
+    hidden.Live = true;
+    Vector(200.f, 200.f, 0.f, hidden.Position); // across the map from the camera
+    shown.Next = &hidden;
+    // The block that covers the shown object: 16 tiles of 100 a side.
+    const int column = static_cast<int>(shown.Position[0] / 100.f) / 16;
+    const int row = static_cast<int>(shown.Position[1] / 100.f) / 16;
+    OBJECT_BLOCK& block = ObjectBlock[column * 16 + row];
+    OBJECT* const previousHead = block.Head;
+    block.Head = &shown;
+
+    CullObjects();
+    const unsigned int marked = shown.DrawnFrame;
+    CHECK(shown.Visible);
+    CHECK_FALSE(hidden.Visible);
+    CHECK(hidden.DrawnFrame != marked);
+
+    CullObjects();
+    CHECK(shown.DrawnFrame == marked + 1);
+
+    block.Head = previousHead;
+    SceneFlag = scene;
 }
 
 #ifdef MU_ENABLE_CONTROL_SOCKET

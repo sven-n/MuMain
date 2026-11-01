@@ -23,6 +23,11 @@ void CreateShadowAngle();
 OBJECT* CollisionDetectObjects(OBJECT* PickObject);
 
 void RenderObject(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
+// Marks the map objects the frame's view shows, in the order they draw; part of CullWorld.
+void CullObjects();
+// Marks what the frame's view shows (map objects, items, mounts, boids, effects) for the draw and the next update;
+// the last step of the update, after the view.
+void CullWorld();
 void RenderObjects();
 // Spawns the effects of the map objects the last RenderObjects drew; call once per update, after the objects moved.
 void UpdateObjectEffects();

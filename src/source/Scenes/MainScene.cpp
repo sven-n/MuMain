@@ -333,7 +333,7 @@ static void UpdateGameEntities()
 
 /**
  * @brief Moves the camera after everything it follows, builds the view the frame draws and picks with, and culls the
- * effects against it.
+ * map objects and the effects against it.
  */
 static void UpdateMainSceneView()
 {
@@ -344,7 +344,7 @@ static void UpdateMainSceneView()
     CreateFrustrum(static_cast<float>(viewport.width) / WindowWidth,
                    static_cast<float>(viewport.height) / WindowHeight);
     CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
-    CullEffects();
+    CullWorld();
 }
 
 /**

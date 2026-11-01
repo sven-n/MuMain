@@ -3022,12 +3022,11 @@ void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate, 
                      pPart->AncientDiscriminator, false, false, Translate, Select);
 }
 
-// Counts RenderObjects calls; each object the draw handled carries the count it was drawn in.
-static unsigned int s_objectDrawFrame = 0;
+// Counts CullObjects calls; each object it marked for the draw carries the count it was marked in.
+static unsigned int s_objectCullFrame = 0;
 
 void RenderObjectVisual(OBJECT* o)
 {
-    o->DrawnFrame = s_objectDrawFrame;
     BMD* b = &Models[o->Type];
 
     switch (gMapManager.WorldActive)
@@ -3647,11 +3646,11 @@ void UpdateObjectVisual(OBJECT* o)
 
 void UpdateObjectEffects()
 {
-    // Spawns once per drawn frame, for the objects that frame drew, as when the draw spawned them.
+    // Spawns once per culled frame, for the objects that frame drew, as when the draw spawned them.
     static unsigned int updatedFrame = 0;
-    if (updatedFrame == s_objectDrawFrame)
+    if (updatedFrame == s_objectCullFrame)
         return;
-    updatedFrame = s_objectDrawFrame;
+    updatedFrame = s_objectCullFrame;
 
     // The pulse the Crywolf flares bob with.
     if (Time_Effect > 40)
@@ -3662,7 +3661,7 @@ void UpdateObjectEffects()
     {
         for (OBJECT* o = ob.Head; o != nullptr; o = o->Next)
         {
-            if (o->DrawnFrame != s_objectDrawFrame)
+            if (o->DrawnFrame != s_objectCullFrame)
                 continue;
             UpdateDrawnObjectHold(o);
             PlaceObjectModel(o, &Models[o->Type]);
@@ -3694,19 +3693,19 @@ float g_MapEditorPlacementPreviewYaw = 0.0f;
 float g_MapEditorPlacementPreviewScale = 1.0f;
 #endif
 
-void RenderObjects()
-{
-    ++s_objectDrawFrame;
-#ifdef _EDITOR
-    s_bShowItemCullSphere = DevEditor_ShouldShowItemCullSphere();
-    s_bShowItemPickBoxes = DevEditor_ShouldShowItemPickBoxes();
-    s_fCullRadiusItem = DevEditor_GetCullRadiusItem();
+// The objects the last cull marked, in the order they draw.
+static std::vector<OBJECT*> s_objectsToDraw;
 
-    // Object-thumbnail requests are queued during CMuEditorCore::Update()
-    // (ImGui widget code, which runs before BeginFrame()) and can only be
-    // rendered here, inside BeginFrame()/EndFrame() - see ObjectThumbnail.h.
-    g_ObjectThumbnail.ProcessPendingRequests();
-#endif
+static void MarkDrawn(OBJECT* o)
+{
+    o->DrawnFrame = s_objectCullFrame;
+    s_objectsToDraw.push_back(o);
+}
+
+void CullObjects()
+{
+    ++s_objectCullFrame;
+    s_objectsToDraw.clear();
 
     float   range = 0.f;
     if (gMapManager.WorldActive == WD_10HEAVEN)
@@ -3738,8 +3737,7 @@ void RenderObjects()
                     {
                         if (g_Direction.m_CKanturu.IsMayaScene() && (o->Type == 0 || o->Type == MODEL_STORM2))
                         {
-                            RenderObject(o);
-                            RenderObjectVisual(o);
+                            MarkDrawn(o);
                         }
                         else
                             if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
@@ -3766,8 +3764,7 @@ void RenderObjects()
                                     else
                                         o->AlphaTarget = 1.0f;
 
-                                    RenderObject(o);
-                                    RenderObjectVisual(o);
+                                    MarkDrawn(o);
                                 }
                                 else if (TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f) && fDistance < fDis && o->Type <= MAX_WORLD_OBJECTS)
                                 {
@@ -3776,8 +3773,7 @@ void RenderObjects()
                                     else
                                         o->AlphaTarget = 1.0f;
 
-                                    RenderObject(o);
-                                    RenderObjectVisual(o);
+                                    MarkDrawn(o);
                                 }
                                 else if (o->AlphaTarget != 0 && fDistance > fDis)
                                 {
@@ -3790,28 +3786,23 @@ void RenderObjects()
                             else if ((gMapManager.WorldActive == WD_51HOME_6TH_CHAR
                                 ) && ((o->Type >= 5 && o->Type <= 14) || (o->Type >= 87 && o->Type <= 88) || (o->Type == 4 || o->Type == 129)) && TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -400.f))
                             {
-                                RenderObject(o);
-                                RenderObjectVisual(o);
+                                MarkDrawn(o);
                             }
                             else if ((gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE) && (o->Type == 129 || o->Type == 98))
                             {
-                                RenderObject(o);
-                                RenderObjectVisual(o);
+                                MarkDrawn(o);
                             }
                             else if ((gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS) && (o->Type == 30 || o->Type == 31) && TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -600.f))
                             {
-                                RenderObject(o);
-                                RenderObjectVisual(o);
+                                MarkDrawn(o);
                             }
                             else if (gMapManager.IsPKField() && (o->Type == 16 || o->Type == 67 || o->Type == 68) && TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -600.f))
                             {
-                                RenderObject(o);
-                                RenderObjectVisual(o);
+                                MarkDrawn(o);
                             }
                             else if (IsDoppelGanger2() && (o->Type == 16 || o->Type == 67 || o->Type == 68) && TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -600.f))
                             {
-                                RenderObject(o);
-                                RenderObjectVisual(o);
+                                MarkDrawn(o);
                             }
 
                         if (o->Next == NULL)
@@ -3865,40 +3856,9 @@ void RenderObjects()
                                                     Success = true;
                                                 if (Success)
                                                 {
-                                                    RenderObject(o);
-                                                    RenderObjectVisual(o);
+                                                    MarkDrawn(o);
                                                 }
                                             }
-#ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
-                            if (o->Visible == true && g_bRenderBoundingBox == true)
-                            {
-                                RenderBoundingBox(o);
-                            }
-#endif // CSK_DEBUG_RENDER_BOUNDINGBOX
-                            // Selection/hover outline is a Map Editor feature, not a debug-only
-                            // diagnostic - it must not be gated behind CSK_DEBUG_RENDER_BOUNDINGBOX,
-                            // which (see Winmain.h) is only ever defined in Debug builds. It was
-                            // nested inside that gate for a while, which meant it silently compiled
-                            // out of every Release build with no visible sign anything was wrong.
-#ifdef _EDITOR
-                            if (o->Visible == true && o == g_MapEditorSelectedObject)
-                            {
-                                // Bright flat yellow (same color all three tiers, no
-                                // pseudo-3D shading) so the outline is unmistakable
-                                // against any background - the dim debug default above
-                                // is deliberately subtle and easy to miss by comparison.
-                                static const std::uint32_t kSelectedColor = mu::PackABGR(1.0f, 0.9f, 0.1f, 1.0f);
-                                RenderObjectOutline(o, kSelectedColor);
-                            }
-                            else if (o->Visible == true && o == g_MapEditorHoveredObject)
-                            {
-                                // Distinct color from the selected outline so you can
-                                // tell "what a click would pick" apart from "what's
-                                // already selected" at a glance.
-                                static const std::uint32_t kHoverColor = mu::PackABGR(0.2f, 0.9f, 1.0f, 1.0f);
-                                RenderObjectOutline(o, kHoverColor);
-                            }
-#endif // _EDITOR
                         }
 
                         if (o->Next == NULL) break;
@@ -3909,6 +3869,69 @@ void RenderObjects()
             }
         }
     }
+}
+
+void RenderObjects()
+{
+#ifdef _EDITOR
+    s_bShowItemCullSphere = DevEditor_ShouldShowItemCullSphere();
+    s_bShowItemPickBoxes = DevEditor_ShouldShowItemPickBoxes();
+    s_fCullRadiusItem = DevEditor_GetCullRadiusItem();
+
+    // Object-thumbnail requests are queued during CMuEditorCore::Update()
+    // (ImGui widget code, which runs before BeginFrame()) and can only be
+    // rendered here, inside BeginFrame()/EndFrame() - see ObjectThumbnail.h.
+    g_ObjectThumbnail.ProcessPendingRequests();
+#endif
+
+    for (OBJECT* o : s_objectsToDraw)
+    {
+        RenderObject(o);
+        RenderObjectVisual(o);
+    }
+
+#if defined(CSK_DEBUG_RENDER_BOUNDINGBOX) || defined(_EDITOR)
+    for (const OBJECT_BLOCK& ob : ObjectBlock)
+    {
+        if (!ob.Visible && !g_Camera.TopViewEnable)
+            continue;
+        for (OBJECT* o = ob.Head; o != nullptr; o = o->Next)
+        {
+            if (!o->Live)
+                continue;
+#ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
+            if (o->Visible == true && g_bRenderBoundingBox == true)
+            {
+                RenderBoundingBox(o);
+            }
+#endif // CSK_DEBUG_RENDER_BOUNDINGBOX
+       // Selection/hover outline is a Map Editor feature, not a debug-only
+       // diagnostic - it must not be gated behind CSK_DEBUG_RENDER_BOUNDINGBOX,
+       // which (see Winmain.h) is only ever defined in Debug builds. It was
+       // nested inside that gate for a while, which meant it silently compiled
+       // out of every Release build with no visible sign anything was wrong.
+#ifdef _EDITOR
+            if (o->Visible == true && o == g_MapEditorSelectedObject)
+            {
+                // Bright flat yellow (same color all three tiers, no
+                // pseudo-3D shading) so the outline is unmistakable
+                // against any background - the dim debug default above
+                // is deliberately subtle and easy to miss by comparison.
+                static const std::uint32_t kSelectedColor = mu::PackABGR(1.0f, 0.9f, 0.1f, 1.0f);
+                RenderObjectOutline(o, kSelectedColor);
+            }
+            else if (o->Visible == true && o == g_MapEditorHoveredObject)
+            {
+                // Distinct color from the selected outline so you can
+                // tell "what a click would pick" apart from "what's
+                // already selected" at a glance.
+                static const std::uint32_t kHoverColor = mu::PackABGR(0.2f, 0.9f, 1.0f, 1.0f);
+                RenderObjectOutline(o, kHoverColor);
+            }
+#endif // _EDITOR
+        }
+    }
+#endif
 
 #ifdef _EDITOR
     // Drawn once per frame (not per-object - it isn't tied to a real OBJECT
@@ -6256,6 +6279,42 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
 }
 
 // Render dropped items and fall animation and camera rotation for items on the ground
+// Marks the items on the ground the frame's view shows, and where their names go on screen.
+static void CullItems()
+{
+#ifdef _EDITOR
+    const float cullRadius = DevEditor_GetCullRadiusItem();
+#else
+    const float cullRadius = DEFAULT_CULL_RADIUS_ITEM;
+#endif
+    for (int i = 0; i < MAX_ITEMS; i++)
+    {
+        OBJECT* o = &Items[i].Object;
+        if (!o->Live)
+            continue;
+        o->Visible = TestFrustrum(o->Position, cullRadius);
+        if (!o->Visible)
+            continue;
+
+        vec3_t Position;
+        VectorCopy(o->Position, Position);
+        Position[2] += 30.f;
+        int ScreenX, ScreenY;
+        CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
+        o->ScreenX = ScreenX;
+        o->ScreenY = ScreenY;
+    }
+}
+
+void CullWorld()
+{
+    CullObjects();
+    CullItems();
+    CullMounts();
+    CullBoids();
+    CullEffects();
+}
+
 void RenderItems()
 {
     // Items on the ground keep their Classic look like equipped ones: no bloom from them.
@@ -6270,7 +6329,6 @@ void RenderItems()
 #else
             float cullRadius = DEFAULT_CULL_RADIUS_ITEM;
 #endif
-            o->Visible = TestFrustrum(o->Position, cullRadius);
 
 #ifdef _EDITOR
             // Debug visualization: frustum-cull sphere (NOT the pick volume)
@@ -6323,14 +6381,6 @@ void RenderItems()
                                    1.0f, 0.0f, 1.0f);  // Magenta wireframe
                 }
 #endif
-
-                vec3_t Position;
-                VectorCopy(o->Position, Position);
-                Position[2] += 30.f;
-                int ScreenX, ScreenY;
-                CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
-                o->ScreenX = ScreenX;
-                o->ScreenY = ScreenY;
             }
         }
     }

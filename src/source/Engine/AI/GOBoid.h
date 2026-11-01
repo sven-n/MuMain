@@ -10,6 +10,8 @@ bool CreateMountSub(int Type, vec3_t Position, OBJECT* Owner, OBJECT* o, int Sub
 void CreateMount(int Type, vec3_t Position, OBJECT* Owner, int SubType = 0, int LinkBone = 0);
 bool MoveMount(OBJECT* o, bool bForceRender = false);
 void MoveMounts(void);
+// Marks the mounts the frame's view shows and sets their drawn scale; part of CullWorld.
+void CullMounts();
 bool RenderMount(OBJECT* o, bool bForceRender = false);
 void RenderMount(void);
 // Spawns the effects of the mounts the last RenderMount drew; call once per update, after the mounts moved.
@@ -23,6 +25,8 @@ void DeleteMount(OBJECT* Owner);
 bool IsMount(ITEM* pItem);
 
 void MoveBoids(void);
+// Marks the boids and fish the frame's view shows; part of CullWorld.
+void CullBoids();
 void RenderBoids(bool bAfterCharacter = false);
 void DeleteBoids(void);
 

@@ -303,7 +303,7 @@ void CreateLogInScene()
     g_ErrorReport.Write(L"> Login Scene init success.\r\n");
 }
 
-// Moves the camera, builds the view the frame draws with, and culls the effects against it.
+// Moves the camera, builds the view the frame draws with, and culls the map objects and the effects against it.
 static void UpdateLogInSceneView()
 {
     MoveMainCamera();
@@ -323,7 +323,9 @@ static void UpdateLogInSceneView()
     // we reset iteration bounds to cover the full terrain so stale bounds from other scenes
     // don't restrict the render loop.
     ResetFrustrumBoundsFullTerrain();
-    CullEffects();
+    // Behind the credits the world is not drawn.
+    if (!g_CreditWin.IsVisible())
+        CullWorld();
 }
 
 void NewMoveLogInScene()
