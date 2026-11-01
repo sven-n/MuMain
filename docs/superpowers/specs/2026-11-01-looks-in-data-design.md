@@ -29,6 +29,9 @@ data, and each move is compared with the old code before the old code goes.
   `ItemEffects.cpp`), all of them, in three steps (L7); layers per mesh; the
   mesh list; the look editor; FX1.7c, the live preview of effects in an
   editor view, which the look editor needs for things on bones.
+- **Also in (L27):** the glow values `ItemObjectAttribute` sets per item type,
+  the bone effects of held and worn items in the character drawing, and the
+  looks inside `RenderModelWithoutStyle` once their models have entries.
 - **Later:** monster and NPC looks (MN8) use the same format (D25: one look
   format for all areas); effect behavior as data is FX2, which the looks
   don't need: they create the existing effects with their FX1 names.
@@ -65,6 +68,7 @@ Made while reviewing sven-n/MuMain#915, 2026-11-01.
 | L24 | Names (Q-L12, 2026-11-01) | "Look" already names the **Classic and Enhanced graphics look** (`docs/enhanced-look.md`: `Data/Render/Look.json`, `Data/Maps/LightMood.json`, `$look`), and the editor used "Looks" for both that (the Data Checks area, `FileCheckArea.cpp:83`) and the Item Model section with the two dropdowns (`MuItemModelUI.cpp:125`). So the new names leave "look" to the graphics: the window is **Style Editor** (Windows > Style Editor, tabs Render styles and Item effects; L18 first called it Look Editor), the new Data Checks areas are **Render styles** and **Item effects**, the existing graphics area becomes **Graphics look**, and the Item Model section becomes **Style and effect**, with "Open in Style Editor". The files and fields (`RenderStyles.json`, `ItemEffects.json`, `renderStyle`, `itemEffect`) already say it. "Model Looks", and keeping "Look Editor" with only the graphics area renamed, were weighed. |
 | L25 | Comparing a moved look with its old code (Q-L9, 2026-11-01) | **A draw recorder in the tests**, like FX1's effect recorder (`tests/effects/EffectRecorder.h`) and the monster model recorder (`tests/monsters`). It records every draw call a look makes (mesh, kind of pass, texture, opacity, glow mesh and strength, scrolling, the model's light, and the blend, culling and depth state it sets) and what the look leaves on the item and the model afterwards (item values, the scrolling mesh, the lighting switch), plus how many random numbers it drew. Every item that uses a moved look is drawn with the old code and with the data look in the same build, in a grid of situations: several clock times (pulses, ramps, frames), item levels +0, +7, +9, +11, +13, +15 (the level glow after the look), drawn normally, as a doppelganger and in a monster's hands, worn, in the inventory and on the ground, opaque and fading, and per look its buffs and hidden-mesh states. The records must be equal. Items are set up by the game's own `ItemObjectAttribute` (an earlier recorder that assumed defaults missed a regression), the clock and the random numbers are pinned. It records calls instead of drawing pixels, so it runs in CI without a graphics card. L16's fixes, which are meant to differ, list their expected differences in the pull request and carry in-game before/after pictures. Picture comparison, a picture sheet per pull request on top, and checking in game only were weighed. |
 | L26 | The pull requests (Q-L10, 2026-11-01) | **Five pull requests after the design**, each as a fork pull request for CI and an upstream one for sven-n (the fork one closed, not merged, after the upstream merge). **0, the design:** this document as a docs pull request, reviewed first (as the monsters design was). **1, the mesh list:** L21, L22 and the names of L24; small and independent, it can run beside the design's review. **2, step 1 part 1:** the machinery (loader, the two files, layer drawing, the draw recorder of L25, the checks of L23), the Style Editor (L18 to L20), and L17's groups 1 and 2 (103 render styles, with colors and time shapes); the largest, about the size of the monsters' second pull request. **3, step 1 part 2:** L17's groups 3 to 5 (50 looks: conditions, values per item and the Magic Gladiator sets, which need #915 merged; the item effects; the additions, and the fixes in commits of their own with in-game before/after). **4, steps 2 and 3, and the end:** FX1.7c (its short design and the live preview), the 3 render styles and 9 item effects on bones, the lasting parts moved into the docs, and this document deleted. Inside each pull request, one commit or more per group of L17, so the review can go group by group. A pull request per group (9 in all), and the Style Editor only after step 1, were weighed. |
+| L27 | Looks outside the two lists (Q-L11, 2026-11-01) | **All of them join this work.** (1) The glow values `ItemObjectAttribute` (`ZzzObject.cpp:5372-5521`) sets per item type, for the hand, the inventory, the ground and the previews: a glow mesh, a pulsing or random glow strength, a scroll or a hidden mesh, for 39 item types (e.g. the Saint Crossbow, the Staff of Kundun, the Chaos Lightning Staff, the Rune Blade, Wings of Elf and the orbs). They are item values before drawing, the item effect kind (L13), and move in pull request 3 with the item effects; items that already have an item effect (`staffOfKundun`, `redSpirit`) get them in that effect. (2) The bone effects of held and worn items in the character drawing: `RenderLinkObject` (`ZzzCharacter.cpp:6549-8381`, 85 item-type cases) and `RenderCharacter` (`:8413-11349`, 44 cases), with sprites, particles and lights on the item by its type (about 75 item types by a rough count; 42 cases hold other code, not read yet). They move in a **sixth work pull request, after step 3**, with a survey of their own first that sorts looks from other code. (3) The 3 looks inside `RenderModelWithoutStyle` (`ZzzObject.cpp:6069-6123`) for 11 models without model entries (the +15 armor objects, `MODEL_SWORD_35_WING`, `MODEL_ARMORINVEN_74`) join once those models have entries (how: Q-L13). This adds to L26: a pull request 5 for (2) after pull request 4, and "the end" (the docs, this document deleted) moves to the last pull request of the work. Not looks, only noted: `ItemObjectAttribute` also sets a scale for some items on the ground (spears, staffs, the Rena), which is ground display data. Glow values only, and all three later, were weighed. |
 
 ## Current state
 
@@ -218,26 +222,31 @@ Answered one by one, each with the current state, every option with an
 example, and a recommendation.
 
 Answered: Q-L1 (L7), Q-L2a (L8), Q-L2b (L9, L10), Q-L2c (L11), Q-L3 (L12),
-Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), Q-L6a to Q-L6c (L18 to L20), Q-L7a and Q-L7b (L21, L22), Q-L8 (L23), Q-L12 (L24), Q-L9 (L25), Q-L10 (L26), all on 2026-11-01.
+Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), Q-L6a to Q-L6c (L18 to L20), Q-L7a and Q-L7b (L21, L22), Q-L8 (L23), Q-L12 (L24), Q-L9 (L25), Q-L10 (L26), Q-L11 (L27), all on 2026-11-01.
 
 | Q | Question |
 |---|---|
-| Q-L11 | Looks outside the two lists: the 3 looks inside `RenderModelWithoutStyle` (`ZzzObject.cpp:6069-6123`: the +15 armor objects, `MODEL_SWORD_35_WING`, `MODEL_ARMORINVEN_74`), models without model entries; and the glow meshes, glow strengths and hidden meshes that `ItemObjectAttribute` (`ZzzObject.cpp:5372-5521`) sets for 45 item types (e.g. the Saint Crossbow and the Staff of Kundun with a pulsing glow mesh, the Chaos Lightning Staff with a random one). Whether and when they become data (the item docs plan model entries for such effect models later; the item values could become item effects). |
+| Q-L13 | How the 11 models of `RenderModelWithoutStyle`'s looks (the +15 armor objects, `MODEL_SWORD_35_WING`, `MODEL_ARMORINVEN_74`), which are not items, get model entries so their looks can move (L27): as part of this work, or with the model entries the item docs plan for such effect models later. |
 
 ## Tasks
 
-The design, then the pull requests of L26:
+The design, then the pull requests of L26 and L27:
 
 1. [ ] Write this design: answer the open questions one by one (in progress;
-   Q-L1 to Q-L10 and Q-L12 done, Q-L11 open).
+   Q-L1 to Q-L12 done, Q-L13 open).
 2. [ ] Pull request 0, the design: this document, for review.
 3. [ ] Pull request 1, the mesh list (L21, L22) and the names of L24.
 4. [ ] Pull request 2, step 1 part 1: the machinery, the Style Editor, L17's
    groups 1 and 2.
 5. [ ] Pull request 3, step 1 part 2: L17's groups 3 to 5 (after #915 is
-   merged).
-6. [ ] Pull request 4, steps 2 and 3, and the end: FX1.7c, things on bones;
-   then:
+   merged), with `ItemObjectAttribute`'s glow values (L27).
+6. [ ] Pull request 4, steps 2 and 3: FX1.7c, the 12 looks with things on
+   bones.
+7. [ ] Pull request 5: the bone effects of held and worn items (L27), after a
+   survey of their own.
+8. [ ] The looks inside `RenderModelWithoutStyle`, once their models have
+   entries (Q-L13).
+9. [ ] The end, in the last pull request of the work:
    - move what stays true into `docs/item-data.md` and `docs/effect-data.md`
      (the look format, the Style Editor, the live preview), and point the
      roadmap (row "Items 13"), the items design (phase 13) and the possible
