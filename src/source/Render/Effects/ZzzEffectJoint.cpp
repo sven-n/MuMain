@@ -19,6 +19,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "ZzzEffect.h"
 #include "Audio/DSPlaySound.h"
+#include "Audio/SoundSource.h"
 #include "Render/Effects/AuraJointLifecycle.h"
 #include "Network/Server/WSclient.h"
 #include "GameLogic/Pets/CSPetSystem.h"
@@ -7090,6 +7091,9 @@ void MoveJoints()
         JOINT* o = &Joints[i];
         if (o->Live)
         {
+            // The sounds a joint plays as it moves are marked at it (Charon's
+            // energy sparks reaching her hand).
+            const Audio::ScopedSoundPlace place(Audio::SoundKind::Other, o->Type, o->Position);
             MoveJoint(o, i);
         }
     }
