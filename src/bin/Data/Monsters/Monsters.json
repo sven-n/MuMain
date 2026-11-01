@@ -2328,6 +2328,7 @@
       "name": {"en": "Berserker", "es": "Energúmeno", "pt": "Berserker"},
       "kind": "monster",
       "model": "MONSTER_MODEL_BERSERK",
+      "soundSet": "Berserker",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -2338,6 +2339,7 @@
       "name": {"en": "Splinter Wolf", "es": "Lobo Esquirla", "pt": "Lobo de espinhos"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SPLINTER_WOLF",
+      "soundSet": "Splinter Wolf",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -2348,6 +2350,7 @@
       "name": {"en": "Iron Rider", "es": "Jinete de Hierro", "pt": "Cavaleiro de ferro"},
       "kind": "monster",
       "model": "MONSTER_MODEL_IRON_RIDER",
+      "soundSet": "Iron Rider",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -2357,19 +2360,22 @@
       "number": 353,
       "name": {"en": "Satyros", "es": "Sátiros", "pt": "Sátiro"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SATYROS"
+      "model": "MONSTER_MODEL_SATYROS",
+      "soundSet": "Satyros"
     },
     {
       "number": 354,
       "name": {"en": "Blade Hunter", "es": "Cazador Blade", "pt": "Caçador de espada"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BLADE_HUNTER"
+      "model": "MONSTER_MODEL_BLADE_HUNTER",
+      "soundSet": "Blade Hunter"
     },
     {
       "number": 355,
       "name": {"en": "Kentauros", "es": "Centauros", "pt": "Kentauros"},
       "kind": "monster",
       "model": "MONSTER_MODEL_KENTAUROS",
+      "soundSet": "Kentauros",
       "attacks": {
         "monsterSkills": {"14": "attack2"},
         "otherwise": "attack1",
@@ -2381,6 +2387,7 @@
       "name": {"en": "Gigantis", "es": "Gigantis", "pt": "Gigantis"},
       "kind": "monster",
       "model": "MONSTER_MODEL_GIGANTIS",
+      "soundSet": "Gigantis",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -2391,6 +2398,7 @@
       "name": {"en": "Genocider", "es": "Genocida", "pt": "Genocida"},
       "kind": "monster",
       "model": "MONSTER_MODEL_GENOCIDER",
+      "soundSet": "Genocider",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -2401,6 +2409,7 @@
       "name": {"en": "Persona", "es": "Imagen", "pt": "Persona"},
       "kind": "monster",
       "model": "MONSTER_MODEL_PERSONA",
+      "soundSet": "Persona",
       "attacks": {
         "monsterSkills": {"15": "attack2"},
         "otherwise": "attack1",
@@ -2412,6 +2421,7 @@
       "name": {"en": "Twin Tale", "es": "Cola Gemela", "pt": "Cauda dupla"},
       "kind": "monster",
       "model": "MONSTER_MODEL_TWIN_TAIL",
+      "soundSet": "Twin Tail",
       "attacks": {
         "monsterSkills": {"16": "attack2"},
         "otherwise": "attack1",
@@ -2423,6 +2433,7 @@
       "name": {"en": "Dreadfear", "es": "Pavor Terrorífico", "pt": "Terror"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DREADFEAR",
+      "soundSet": "Dreadfear",
       "attacks": {
         "monsterSkills": {"17": "attack2"},
         "otherwise": "attack1",
@@ -2482,7 +2493,8 @@
       "number": 367,
       "name": {"en": "Gateway Machine", "es": "Máquina de Portón", "pt": "Máquina do portal"},
       "kind": "npc",
-      "model": "MODEL_KANTURU2ND_ENTER_NPC"
+      "model": "MODEL_KANTURU2ND_ENTER_NPC",
+      "soundSet": "Gateway Machine"
     },
     {
       "number": 368,
@@ -2950,13 +2962,15 @@
       "number": 434,
       "name": {"en": "Gigantis", "es": "Gigantis", "pt": "Gigantis"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GIGANTIS"
+      "model": "MONSTER_MODEL_GIGANTIS",
+      "soundSet": "Gigantis"
     },
     {
       "number": 435,
       "name": {"en": "Berserker", "es": "Energúmeno", "pt": "Berserker"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BERSERK"
+      "model": "MONSTER_MODEL_BERSERK",
+      "soundSet": "Berserker"
     },
     {
       "number": 436,
@@ -2974,13 +2988,15 @@
       "number": 438,
       "name": {"en": "Persona", "es": "Imagen", "pt": "Persona"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_PERSONA"
+      "model": "MONSTER_MODEL_PERSONA",
+      "soundSet": "Persona"
     },
     {
       "number": 439,
       "name": {"en": "Dreadfear", "es": "Pavor Terrorífico", "pt": "Terror"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DREADFEAR"
+      "model": "MONSTER_MODEL_DREADFEAR",
+      "soundSet": "Dreadfear"
     },
     {
       "number": 440,
@@ -3398,13 +3414,15 @@
       "number": 497,
       "name": {"en": "Golden Satyros", "es": "Sátiro Dorado", "pt": "Sátiro dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SATYROS"
+      "model": "MONSTER_MODEL_SATYROS",
+      "soundSet": "Satyros"
     },
     {
       "number": 498,
       "name": {"en": "Golden Twin Tail", "es": "Cola Gemela Dorada", "pt": "Cauda dupla dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_TWIN_TAIL"
+      "model": "MONSTER_MODEL_TWIN_TAIL",
+      "soundSet": "Twin Tail"
     },
     {
       "number": 499,
@@ -3871,6 +3889,7 @@
       "name": {"en": "Berserker Warrior", "es": "Guerrero Energúmeno", "pt": "Guerreiro berserker"},
       "kind": "monster",
       "model": "MONSTER_MODEL_BERSERKER_WARRIOR",
+      "soundSet": "Berserker",
       "attacks": {
         "monsterSkills": {"70": "attack2"},
         "otherwise": "attack1",
@@ -3882,6 +3901,7 @@
       "name": {"en": "Kentauros Warrior", "es": "Guerrero Centauro", "pt": "Guerreiro Kentauros"},
       "kind": "monster",
       "model": "MONSTER_MODEL_KENTAUROS_WARRIOR",
+      "soundSet": "Kentauros",
       "attacks": {
         "monsterSkills": {"14": "attack2"},
         "otherwise": "attack1",
@@ -3893,6 +3913,7 @@
       "name": {"en": "Gigantis Warrior", "es": "Guerrero Gigantis", "pt": "Guerreiro Gigantis"},
       "kind": "monster",
       "model": "MONSTER_MODEL_GIGANTIS_WARRIOR",
+      "soundSet": "Gigantis",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -3903,6 +3924,7 @@
       "name": {"en": "Genocider Warrior", "es": "Guerrero Genocida", "pt": "Guerreiro genocida"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SOCCERBALL",
+      "soundSet": "Genocider",
       "attacks": {
         "monsterSkills": {"71": "attack2"},
         "otherwise": "attack1",

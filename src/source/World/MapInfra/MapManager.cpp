@@ -344,45 +344,8 @@ void CMapManager::Load() // OK
         gLoadData.OpenTexture(MODEL_BUTTERFLY01, L"Object1\\");
 
         // The object sounds play from Data/Maps/ObjectSounds.json (MP1b).
-        LoadWaveFile(SOUND_KANTURU_1ST_BER_MOVE1, L"Data\\Sound\\w37\\ber_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BER_MOVE2, L"Data\\Sound\\w37\\ber_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BER_ATTACK1, L"Data\\Sound\\w37\\ber_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BER_ATTACK2, L"Data\\Sound\\w37\\ber_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BER_DIE, L"Data\\Sound\\w37\\ber_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GIGAN_MOVE1, L"Data\\Sound\\w37\\gigan_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GIGAN_ATTACK1, L"Data\\Sound\\w37\\gigan_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GIGAN_ATTACK2, L"Data\\Sound\\w37\\gigan_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GIGAN_DIE, L"Data\\Sound\\w37\\gigan_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GENO_MOVE1, L"Data\\Sound\\w37\\geno_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GENO_MOVE2, L"Data\\Sound\\w37\\geno_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GENO_ATTACK1, L"Data\\Sound\\w37\\geno_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GENO_ATTACK2, L"Data\\Sound\\w37\\geno_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_GENO_DIE, L"Data\\Sound\\w37\\geno_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_KENTA_MOVE1, L"Data\\Sound\\w37\\kenta_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_KENTA_MOVE2, L"Data\\Sound\\w37\\kenta_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_KENTA_ATTACK1, L"Data\\Sound\\w37\\kenta_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_KENTA_ATTACK2, L"Data\\Sound\\w37\\kenta_skill-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_KENTA_DIE, L"Data\\Sound\\w37\\kenta_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BLADE_MOVE1, L"Data\\Sound\\w37\\blade_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BLADE_MOVE2, L"Data\\Sound\\w37\\blade_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BLADE_ATTACK1, L"Data\\Sound\\w37\\blade_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BLADE_ATTACK2, L"Data\\Sound\\w37\\blade_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BLADE_DIE, L"Data\\Sound\\w37\\blade_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SATI_MOVE1, L"Data\\Sound\\w37\\sati_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SATI_MOVE2, L"Data\\Sound\\w37\\sati_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SATI_ATTACK1, L"Data\\Sound\\w37\\sati_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SATI_ATTACK2, L"Data\\Sound\\w37\\sati_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SATI_DIE, L"Data\\Sound\\w37\\sati_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SWOLF_MOVE1, L"Data\\Sound\\w37\\swolf_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SWOLF_MOVE2, L"Data\\Sound\\w37\\swolf_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SWOLF_ATTACK1, L"Data\\Sound\\w37\\swolf_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SWOLF_ATTACK2, L"Data\\Sound\\w37\\swolf_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_SWOLF_DIE, L"Data\\Sound\\w37\\swolf_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_IR_MOVE1, L"Data\\Sound\\w37\\ir_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_IR_MOVE2, L"Data\\Sound\\w37\\ir_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_IR_ATTACK1, L"Data\\Sound\\w37\\ir_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_IR_ATTACK2, L"Data\\Sound\\w37\\ir_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_IR_DIE, L"Data\\Sound\\w37\\ir_death.wav", 1);
+        // The monsters' sounds load with their models (their sound sets in
+        // Data/Monsters/Sounds.json, MNK).
         break;
     case WD_38KANTURU_2ND:
     {
@@ -399,22 +362,8 @@ void CMapManager::Load() // OK
         LoadBitmap(L"Npc\\khs_kan2gate004.jpg", BITMAP_KANTURU_2ND_NPC3, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
         // The object sounds play from Data/Maps/ObjectSounds.json (MP1b).
-        LoadWaveFile(SOUND_KANTURU_2ND_MAPSOUND_HOLE, L"Data\\Sound\\w38\\kan_relic_hole.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_PERSO_MOVE1, L"Data\\Sound\\w38\\perso_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_PERSO_MOVE2, L"Data\\Sound\\w38\\perso_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_PERSO_ATTACK1, L"Data\\Sound\\w38\\perso_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_PERSO_ATTACK2, L"Data\\Sound\\w38\\perso_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_PERSO_DIE, L"Data\\Sound\\w38\\perso_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_TWIN_MOVE1, L"Data\\Sound\\w38\\twin_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_TWIN_MOVE2, L"Data\\Sound\\w38\\twin_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_TWIN_ATTACK1, L"Data\\Sound\\w38\\twin_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_TWIN_ATTACK2, L"Data\\Sound\\w38\\twin_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_TWIN_DIE, L"Data\\Sound\\w38\\twin_death.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_DRED_MOVE1, L"Data\\Sound\\w38\\dred_idle-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_DRED_MOVE2, L"Data\\Sound\\w38\\dred_idle-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_DRED_ATTACK1, L"Data\\Sound\\w38\\dred_attack-01.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_DRED_ATTACK2, L"Data\\Sound\\w38\\dred_attack-02.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_DRED_DIE, L"Data\\Sound\\w38\\dred_death.wav", 1);
+        // The monsters' and the gateway machine's sounds load with their models
+        // (their sound sets in Data/Monsters/Sounds.json, MNK).
     }
     break;
     case WD_39KANTURU_3RD:

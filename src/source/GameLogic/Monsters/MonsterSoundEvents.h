@@ -68,7 +68,10 @@ bool PlayMoment(CHARACTER& character, Data::Monsters::MonsterSoundMoment moment,
 // played their sounds, so the random draws around it keep their order;
 // UpdateDrawnCharacterEffects calls FinishDrawnFrame for every character the
 // last frame drew. False when the set has no such events.
-bool PlayDrawn(CHARACTER& character);
+// `played`, when given, says whether an event of the frame played (its chance
+// came up): the map's effects that come with a sound follow it (Blade
+// Hunter's smoke with its step, Q-MN92).
+bool PlayDrawn(CHARACTER& character, bool* played = nullptr);
 
 // UpdateDrawnCharacterEffects, after the maps' monster effects: plays the
 // drawn frame's events unless that code did (PlayDrawn), and makes the next
@@ -84,6 +87,8 @@ bool HasDrawnEvents(const Data::Monsters::MonsterSoundSet& set);
 // monster appears with. `play` gets the number of each sound and whether it
 // plays with the character as PlayBuffer's object. True when a once event
 // played (passed its chance): the caller sets the flag.
+// `played`, when given, becomes whether any event played.
 bool PlayEvents(const Data::Monsters::MonsterSoundSet& set, std::span<const Data::Monsters::MonsterModelCue> cues,
-                const Situation& situation, const std::function<void(int sound, bool atMonster)>& play);
+                const Situation& situation, const std::function<void(int sound, bool atMonster)>& play,
+                bool* played = nullptr);
 } // namespace GameLogic::Monsters::SoundEvents

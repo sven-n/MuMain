@@ -280,3 +280,135 @@ TEST_CASE("Monster sounds: the Aida monsters' models load the sounds the Aida ma
     expected[SOUND_AIDA_DEATHRAIDER_MOVE1] = L"Data\\Sound\\w34\\dr_idle01.wav";
     CHECK(modelLoads == expected);
 }
+
+TEST_CASE("Monster sounds: the Kanturu monsters' models load the sounds Kanturu Ruins and Relics loaded (MNK) "
+          "[monsters][sounds][models]")
+{
+    // What CMapManager::Load loaded for the two maps' monsters and the
+    // gateway machine before their sets, all with one channel and no 3D.
+    const std::map<int, std::wstring> before = {
+        {SOUND_KANTURU_1ST_BER_MOVE1, L"Data\\Sound\\w37\\ber_idle-01.wav"},
+        {SOUND_KANTURU_1ST_BER_MOVE2, L"Data\\Sound\\w37\\ber_idle-02.wav"},
+        {SOUND_KANTURU_1ST_BER_ATTACK1, L"Data\\Sound\\w37\\ber_attack-01.wav"},
+        {SOUND_KANTURU_1ST_BER_ATTACK2, L"Data\\Sound\\w37\\ber_attack-02.wav"},
+        {SOUND_KANTURU_1ST_BER_DIE, L"Data\\Sound\\w37\\ber_death.wav"},
+        {SOUND_KANTURU_1ST_GIGAN_MOVE1, L"Data\\Sound\\w37\\gigan_idle-01.wav"},
+        {SOUND_KANTURU_1ST_GIGAN_ATTACK1, L"Data\\Sound\\w37\\gigan_attack-01.wav"},
+        {SOUND_KANTURU_1ST_GIGAN_ATTACK2, L"Data\\Sound\\w37\\gigan_attack-02.wav"},
+        {SOUND_KANTURU_1ST_GIGAN_DIE, L"Data\\Sound\\w37\\gigan_death.wav"},
+        {SOUND_KANTURU_1ST_GENO_MOVE1, L"Data\\Sound\\w37\\geno_idle-01.wav"},
+        {SOUND_KANTURU_1ST_GENO_MOVE2, L"Data\\Sound\\w37\\geno_idle-02.wav"},
+        {SOUND_KANTURU_1ST_GENO_ATTACK1, L"Data\\Sound\\w37\\geno_attack-01.wav"},
+        {SOUND_KANTURU_1ST_GENO_ATTACK2, L"Data\\Sound\\w37\\geno_attack-02.wav"},
+        {SOUND_KANTURU_1ST_GENO_DIE, L"Data\\Sound\\w37\\geno_death.wav"},
+        {SOUND_KANTURU_1ST_KENTA_MOVE1, L"Data\\Sound\\w37\\kenta_idle-01.wav"},
+        {SOUND_KANTURU_1ST_KENTA_MOVE2, L"Data\\Sound\\w37\\kenta_idle-02.wav"},
+        {SOUND_KANTURU_1ST_KENTA_ATTACK1, L"Data\\Sound\\w37\\kenta_attack-01.wav"},
+        {SOUND_KANTURU_1ST_KENTA_ATTACK2, L"Data\\Sound\\w37\\kenta_skill-01.wav"},
+        {SOUND_KANTURU_1ST_KENTA_DIE, L"Data\\Sound\\w37\\kenta_death.wav"},
+        {SOUND_KANTURU_1ST_BLADE_MOVE1, L"Data\\Sound\\w37\\blade_idle-01.wav"},
+        {SOUND_KANTURU_1ST_BLADE_MOVE2, L"Data\\Sound\\w37\\blade_idle-02.wav"},
+        {SOUND_KANTURU_1ST_BLADE_ATTACK1, L"Data\\Sound\\w37\\blade_attack-01.wav"},
+        {SOUND_KANTURU_1ST_BLADE_ATTACK2, L"Data\\Sound\\w37\\blade_attack-02.wav"},
+        {SOUND_KANTURU_1ST_BLADE_DIE, L"Data\\Sound\\w37\\blade_death.wav"},
+        {SOUND_KANTURU_1ST_SATI_MOVE1, L"Data\\Sound\\w37\\sati_idle-01.wav"},
+        {SOUND_KANTURU_1ST_SATI_MOVE2, L"Data\\Sound\\w37\\sati_idle-02.wav"},
+        {SOUND_KANTURU_1ST_SATI_ATTACK1, L"Data\\Sound\\w37\\sati_attack-01.wav"},
+        {SOUND_KANTURU_1ST_SATI_ATTACK2, L"Data\\Sound\\w37\\sati_attack-02.wav"},
+        {SOUND_KANTURU_1ST_SATI_DIE, L"Data\\Sound\\w37\\sati_death.wav"},
+        {SOUND_KANTURU_1ST_SWOLF_MOVE1, L"Data\\Sound\\w37\\swolf_idle-01.wav"},
+        {SOUND_KANTURU_1ST_SWOLF_MOVE2, L"Data\\Sound\\w37\\swolf_idle-02.wav"},
+        {SOUND_KANTURU_1ST_SWOLF_ATTACK1, L"Data\\Sound\\w37\\swolf_attack-01.wav"},
+        {SOUND_KANTURU_1ST_SWOLF_ATTACK2, L"Data\\Sound\\w37\\swolf_attack-02.wav"},
+        {SOUND_KANTURU_1ST_SWOLF_DIE, L"Data\\Sound\\w37\\swolf_death.wav"},
+        {SOUND_KANTURU_1ST_IR_MOVE1, L"Data\\Sound\\w37\\ir_idle-01.wav"},
+        {SOUND_KANTURU_1ST_IR_MOVE2, L"Data\\Sound\\w37\\ir_idle-02.wav"},
+        {SOUND_KANTURU_1ST_IR_ATTACK1, L"Data\\Sound\\w37\\ir_attack-01.wav"},
+        {SOUND_KANTURU_1ST_IR_ATTACK2, L"Data\\Sound\\w37\\ir_attack-02.wav"},
+        {SOUND_KANTURU_1ST_IR_DIE, L"Data\\Sound\\w37\\ir_death.wav"},
+        {SOUND_KANTURU_2ND_MAPSOUND_HOLE, L"Data\\Sound\\w38\\kan_relic_hole.wav"},
+        {SOUND_KANTURU_2ND_PERSO_MOVE1, L"Data\\Sound\\w38\\perso_idle-01.wav"},
+        {SOUND_KANTURU_2ND_PERSO_MOVE2, L"Data\\Sound\\w38\\perso_idle-02.wav"},
+        {SOUND_KANTURU_2ND_PERSO_ATTACK1, L"Data\\Sound\\w38\\perso_attack-01.wav"},
+        {SOUND_KANTURU_2ND_PERSO_ATTACK2, L"Data\\Sound\\w38\\perso_attack-02.wav"},
+        {SOUND_KANTURU_2ND_PERSO_DIE, L"Data\\Sound\\w38\\perso_death.wav"},
+        {SOUND_KANTURU_2ND_TWIN_MOVE1, L"Data\\Sound\\w38\\twin_idle-01.wav"},
+        {SOUND_KANTURU_2ND_TWIN_MOVE2, L"Data\\Sound\\w38\\twin_idle-02.wav"},
+        {SOUND_KANTURU_2ND_TWIN_ATTACK1, L"Data\\Sound\\w38\\twin_attack-01.wav"},
+        {SOUND_KANTURU_2ND_TWIN_ATTACK2, L"Data\\Sound\\w38\\twin_attack-02.wav"},
+        {SOUND_KANTURU_2ND_TWIN_DIE, L"Data\\Sound\\w38\\twin_death.wav"},
+        {SOUND_KANTURU_2ND_DRED_MOVE1, L"Data\\Sound\\w38\\dred_idle-01.wav"},
+        {SOUND_KANTURU_2ND_DRED_MOVE2, L"Data\\Sound\\w38\\dred_idle-02.wav"},
+        {SOUND_KANTURU_2ND_DRED_ATTACK1, L"Data\\Sound\\w38\\dred_attack-01.wav"},
+        {SOUND_KANTURU_2ND_DRED_ATTACK2, L"Data\\Sound\\w38\\dred_attack-02.wav"},
+        {SOUND_KANTURU_2ND_DRED_DIE, L"Data\\Sound\\w38\\dred_death.wav"},
+    };
+    // The models and the sounds their drawing code played: the warriors and
+    // the soccer-ball Genocider play their kin's.
+    struct ModelSounds
+    {
+        int slot = 0;
+        int first = 0;
+        int count = 0;
+    };
+    const ModelSounds models[] = {
+        {MODEL_BERSERK, SOUND_KANTURU_1ST_BER_MOVE1, 5},
+        {MODEL_BERSERKER_WARRIOR, SOUND_KANTURU_1ST_BER_MOVE1, 5},
+        {MODEL_GIGANTIS, SOUND_KANTURU_1ST_GIGAN_MOVE1, 4},
+        {MODEL_GIGANTIS_WARRIOR, SOUND_KANTURU_1ST_GIGAN_MOVE1, 4},
+        {MODEL_GENOCIDER, SOUND_KANTURU_1ST_GENO_MOVE1, 5},
+        {MODEL_SOCCERBALL, SOUND_KANTURU_1ST_GENO_MOVE1, 5},
+        {MODEL_KENTAUROS, SOUND_KANTURU_1ST_KENTA_MOVE1, 5},
+        {MODEL_KENTAUROS_WARRIOR, SOUND_KANTURU_1ST_KENTA_MOVE1, 5},
+        {MODEL_BLADE_HUNTER, SOUND_KANTURU_1ST_BLADE_MOVE1, 5},
+        {MODEL_SATYROS, SOUND_KANTURU_1ST_SATI_MOVE1, 5},
+        {MODEL_SPLINTER_WOLF, SOUND_KANTURU_1ST_SWOLF_MOVE1, 5},
+        {MODEL_IRON_RIDER, SOUND_KANTURU_1ST_IR_MOVE1, 5},
+        {MODEL_PERSONA, SOUND_KANTURU_2ND_PERSO_MOVE1, 5},
+        {MODEL_TWIN_TAIL, SOUND_KANTURU_2ND_TWIN_MOVE1, 5},
+        {MODEL_DREADFEAR, SOUND_KANTURU_2ND_DRED_MOVE1, 5},
+        {MODEL_KANTURU2ND_ENTER_NPC, SOUND_KANTURU_2ND_MAPSOUND_HOLE, 1},
+    };
+
+    std::map<int, std::wstring> modelLoads;
+    for (const int world : {WD_37KANTURU_1ST, WD_38KANTURU_2ND})
+    {
+        MonsterRecorder::LoadScope scope(world);
+        // The maps load none of them now.
+        for (const MonsterRecorder::SoundEvent& sound : scope.Run([] { gMapManager.Load(); }).sounds)
+        {
+            INFO("world " << world << " loads " << sound.id);
+            CHECK(before.find(sound.id) == before.end());
+        }
+        // Each model loads the sounds its code played, as the maps did.
+        for (const ModelSounds& model : models)
+        {
+            INFO("model " << model.slot);
+            std::set<int> numbers;
+            for (const Data::Monsters::MonsterSoundSet* set :
+                 Data::Monsters::ModelLoader::FindSoundSetsOfSlot(model.slot))
+            {
+                const std::set<int> own = OwnSounds(*set);
+                numbers.insert(own.begin(), own.end());
+            }
+            std::set<int> played;
+            for (int sound = model.first; sound < model.first + model.count; ++sound)
+            {
+                played.insert(sound);
+            }
+            CHECK(numbers == played);
+            const int slot = model.slot;
+            for (const MonsterRecorder::SoundEvent& sound :
+                 scope.Run([slot] { Data::Monsters::ModelLoader::Open(slot); }).sounds)
+            {
+                if (!sound.release)
+                {
+                    CHECK(sound.channels == 1);
+                    CHECK_FALSE(sound.spatial);
+                    modelLoads[sound.id] = sound.file;
+                }
+            }
+        }
+    }
+    CHECK(modelLoads == before);
+}

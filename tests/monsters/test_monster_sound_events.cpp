@@ -1225,3 +1225,44 @@ TEST_CASE("Monster sounds: the Sound Mixer's overlay marks a drawn monster of a 
     CHECK(starts.back().position == std::array<float, 3>{rider->Object.Position[0], rider->Object.Position[1], 50.0f});
 }
 #endif // _EDITOR
+
+TEST_CASE("Monster sounds: PlayDrawn says whether an event of the frame played, for the draw code's effects that "
+          "come with a sound: Blade Hunter's smoke with its step (Q-MN92) [monsters][sounds]")
+{
+    using GameLogic::Monsters::SoundEvents::PlayDrawn;
+    SoundScope scope(WD_37KANTURU_1ST);
+    constexpr int BladeHunter = 354;
+    const std::unique_ptr<CHARACTER> hunter = MakeCharacter(BladeHunter);
+    hunter->Object.CurrentAction = MONSTER01_WALK;
+    const float factor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 1.0f;
+    Random::SeedRand(7);
+    int steps = 0;
+    for (int frame = 0; frame < 300; ++frame)
+    {
+        bool played = true;
+        CHECK(PlayDrawn(*hunter, &played));
+        const std::vector<PlayedSound> sounds = scope.Take();
+        CHECK(played == !sounds.empty());
+        steps += played ? 1 : 0;
+        GameLogic::Monsters::SoundEvents::FinishDrawnFrame(*hunter);
+        CHECK(scope.Take().empty());
+    }
+    FPS_ANIMATION_FACTOR = factor;
+    // One in ten frames: about 30 in 300.
+    CHECK(steps > 10);
+    CHECK(steps < 60);
+    // A once event that played tells too; one held back by the flag does not.
+    hunter->Object.CurrentAction = MONSTER01_ATTACK1;
+    bool played = false;
+    PlayDrawn(*hunter, &played);
+    CHECK(played);
+    PlayDrawn(*hunter, &played);
+    CHECK_FALSE(played);
+    scope.Take();
+    // A character without a set: nothing played.
+    const std::unique_ptr<CHARACTER> bull = MakeCharacter(BullFighter);
+    played = true;
+    CHECK_FALSE(PlayDrawn(*bull, &played));
+    CHECK_FALSE(played);
+}

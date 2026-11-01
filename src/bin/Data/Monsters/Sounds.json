@@ -151,6 +151,36 @@
       ]
     },
     {
+      "name": "Berserker",
+      "sounds": [
+        {"file": "Data/Sound/w37/ber_idle-01.wav", "id": "SOUND_KANTURU_1ST_BER_MOVE1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/ber_idle-02.wav", "id": "SOUND_KANTURU_1ST_BER_MOVE2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/ber_attack-01.wav", "id": "SOUND_KANTURU_1ST_BER_ATTACK1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/ber_attack-02.wav", "id": "SOUND_KANTURU_1ST_BER_ATTACK2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/ber_death.wav", "id": "SOUND_KANTURU_1ST_BER_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_BER_MOVE1", "SOUND_KANTURU_1ST_BER_MOVE2"]},
+        {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_BER_ATTACK1", "SOUND_KANTURU_1ST_BER_ATTACK2"]},
+        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_BER_DIE"]}
+      ]
+    },
+    {
+      "name": "Blade Hunter",
+      "sounds": [
+        {"file": "Data/Sound/w37/blade_idle-01.wav", "id": "SOUND_KANTURU_1ST_BLADE_MOVE1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/blade_idle-02.wav", "id": "SOUND_KANTURU_1ST_BLADE_MOVE2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/blade_attack-01.wav", "id": "SOUND_KANTURU_1ST_BLADE_ATTACK1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/blade_attack-02.wav", "id": "SOUND_KANTURU_1ST_BLADE_ATTACK2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/blade_death.wav", "id": "SOUND_KANTURU_1ST_BLADE_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 10, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_BLADE_MOVE1", "SOUND_KANTURU_1ST_BLADE_MOVE2"]},
+        {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_BLADE_ATTACK1", "SOUND_KANTURU_1ST_BLADE_ATTACK2"]},
+        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_BLADE_DIE"]}
+      ]
+    },
+    {
       "name": "Blaze Napin",
       "sounds": [
         {"file": "Data/Sound/w57/Naipin-Blaze.wav", "id": "SOUND_SWAMPOFQUIET_BLAZE_NAIPIN_BREATH01", "channels": 1, "spatial": false},
@@ -741,6 +771,22 @@
       ]
     },
     {
+      "name": "Dreadfear",
+      "sounds": [
+        {"file": "Data/Sound/w38/dred_idle-01.wav", "id": "SOUND_KANTURU_2ND_DRED_MOVE1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w38/dred_idle-02.wav", "id": "SOUND_KANTURU_2ND_DRED_MOVE2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w38/dred_attack-01.wav", "id": "SOUND_KANTURU_2ND_DRED_ATTACK1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w38/dred_attack-02.wav", "id": "SOUND_KANTURU_2ND_DRED_ATTACK2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w38/dred_death.wav", "id": "SOUND_KANTURU_2ND_DRED_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_2ND_DRED_MOVE1", "SOUND_KANTURU_2ND_DRED_MOVE2"]},
+        {"once": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_DRED_ATTACK1"]},
+        {"duringCues": ["attack2 sound"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_DRED_ATTACK2"]},
+        {"during": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_DRED_DIE"]}
+      ]
+    },
+    {
       "name": "Elf Lala",
       "sounds": [
         {"file": "Data/Sound/nHarp.wav", "id": "SOUND_NPC_HARP", "channels": 1, "spatial": false}
@@ -881,6 +927,30 @@
       ]
     },
     {
+      "name": "Gateway Machine",
+      "sounds": [
+        {"file": "Data/Sound/w38/kan_relic_hole.wav", "id": "SOUND_KANTURU_2ND_MAPSOUND_HOLE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["stop2"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_MAPSOUND_HOLE"]}
+      ]
+    },
+    {
+      "name": "Genocider",
+      "sounds": [
+        {"file": "Data/Sound/w37/geno_idle-01.wav", "id": "SOUND_KANTURU_1ST_GENO_MOVE1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/geno_idle-02.wav", "id": "SOUND_KANTURU_1ST_GENO_MOVE2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/geno_attack-01.wav", "id": "SOUND_KANTURU_1ST_GENO_ATTACK1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/geno_attack-02.wav", "id": "SOUND_KANTURU_1ST_GENO_ATTACK2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/geno_death.wav", "id": "SOUND_KANTURU_1ST_GENO_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_GENO_MOVE1", "SOUND_KANTURU_1ST_GENO_MOVE2"]},
+        {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_GENO_ATTACK1", "SOUND_KANTURU_1ST_GENO_ATTACK2"]},
+        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_GENO_DIE"]}
+      ]
+    },
+    {
       "name": "Ghost",
       "sounds": [
         {"file": "Data/Sound/mGhost1.wav", "channels": 2, "spatial": true},
@@ -948,6 +1018,20 @@
         {"on": ["stand", "walk"], "heardAnywhere": true, "atMonster": true, "chance": {"oneIn": 16, "draw": "randFps"}, "pick": "rand", "sounds": ["Data/Sound/mHunter2.wav"]},
         {"on": ["attack", "hit"], "heardAnywhere": true, "atMonster": true, "pick": "rand", "sounds": ["SOUND_MONSTER_BLACKSKULLATTACK"]},
         {"on": ["death"], "heardAnywhere": true, "atMonster": true, "sounds": ["Data/Sound/mGhaintOrgerDie.wav"]}
+      ]
+    },
+    {
+      "name": "Gigantis",
+      "sounds": [
+        {"file": "Data/Sound/w37/gigan_idle-01.wav", "id": "SOUND_KANTURU_1ST_GIGAN_MOVE1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/gigan_attack-01.wav", "id": "SOUND_KANTURU_1ST_GIGAN_ATTACK1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/gigan_attack-02.wav", "id": "SOUND_KANTURU_1ST_GIGAN_ATTACK2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/gigan_death.wav", "id": "SOUND_KANTURU_1ST_GIGAN_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "sounds": ["SOUND_KANTURU_1ST_GIGAN_MOVE1"]},
+        {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_GIGAN_ATTACK1", "SOUND_KANTURU_1ST_GIGAN_ATTACK2"]},
+        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_GIGAN_DIE"]}
       ]
     },
     {
@@ -1226,6 +1310,21 @@
       "maps": [57, 58]
     },
     {
+      "name": "Iron Rider",
+      "sounds": [
+        {"file": "Data/Sound/w37/ir_idle-01.wav", "id": "SOUND_KANTURU_1ST_IR_MOVE1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/ir_idle-02.wav", "id": "SOUND_KANTURU_1ST_IR_MOVE2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/ir_attack-01.wav", "id": "SOUND_KANTURU_1ST_IR_ATTACK1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/ir_attack-02.wav", "id": "SOUND_KANTURU_1ST_IR_ATTACK2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/ir_death.wav", "id": "SOUND_KANTURU_1ST_IR_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_IR_MOVE1", "SOUND_KANTURU_1ST_IR_MOVE2"]},
+        {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_IR_ATTACK1", "SOUND_KANTURU_1ST_IR_ATTACK2"]},
+        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_IR_DIE"]}
+      ]
+    },
+    {
       "name": "Iron Wheel",
       "sounds": [
         {"file": "Data/Sound/iron1.wav", "channels": 2, "spatial": true},
@@ -1274,6 +1373,21 @@
         {"animations": ["die"], "sounds": ["SOUND_EMPIREGUARDIAN_2CORP_VERMONT_MONSTER_DEATH"]}
       ],
       "maps": [71]
+    },
+    {
+      "name": "Kentauros",
+      "sounds": [
+        {"file": "Data/Sound/w37/kenta_idle-01.wav", "id": "SOUND_KANTURU_1ST_KENTA_MOVE1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/kenta_idle-02.wav", "id": "SOUND_KANTURU_1ST_KENTA_MOVE2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/kenta_attack-01.wav", "id": "SOUND_KANTURU_1ST_KENTA_ATTACK1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/kenta_skill-01.wav", "id": "SOUND_KANTURU_1ST_KENTA_ATTACK2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/kenta_death.wav", "id": "SOUND_KANTURU_1ST_KENTA_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_KENTA_MOVE1", "SOUND_KANTURU_1ST_KENTA_MOVE2"]},
+        {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_KENTA_ATTACK1", "SOUND_KANTURU_1ST_KENTA_ATTACK2"]},
+        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_KENTA_DIE"]}
+      ]
     },
     {
       "name": "Knight Commander",
@@ -1494,6 +1608,22 @@
       "maps": [80, 81]
     },
     {
+      "name": "Persona",
+      "sounds": [
+        {"file": "Data/Sound/w38/perso_idle-01.wav", "id": "SOUND_KANTURU_2ND_PERSO_MOVE1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w38/perso_idle-02.wav", "id": "SOUND_KANTURU_2ND_PERSO_MOVE2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w38/perso_attack-01.wav", "id": "SOUND_KANTURU_2ND_PERSO_ATTACK1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w38/perso_attack-02.wav", "id": "SOUND_KANTURU_2ND_PERSO_ATTACK2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w38/perso_death.wav", "id": "SOUND_KANTURU_2ND_PERSO_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_2ND_PERSO_MOVE1", "SOUND_KANTURU_2ND_PERSO_MOVE2"]},
+        {"once": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_PERSO_ATTACK1"]},
+        {"once": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_PERSO_ATTACK2"]},
+        {"during": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_PERSO_DIE"]}
+      ]
+    },
+    {
       "name": "Phantom Knight",
       "sounds": [
         {"file": "Data/Sound/mPhantom1.wav", "channels": 2, "spatial": true},
@@ -1698,6 +1828,21 @@
       "maps": [56]
     },
     {
+      "name": "Satyros",
+      "sounds": [
+        {"file": "Data/Sound/w37/sati_idle-01.wav", "id": "SOUND_KANTURU_1ST_SATI_MOVE1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/sati_idle-02.wav", "id": "SOUND_KANTURU_1ST_SATI_MOVE2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/sati_attack-01.wav", "id": "SOUND_KANTURU_1ST_SATI_ATTACK1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/sati_attack-02.wav", "id": "SOUND_KANTURU_1ST_SATI_ATTACK2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/sati_death.wav", "id": "SOUND_KANTURU_1ST_SATI_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_SATI_MOVE1", "SOUND_KANTURU_1ST_SATI_MOVE2"]},
+        {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_SATI_ATTACK1", "SOUND_KANTURU_1ST_SATI_ATTACK2"]},
+        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_SATI_DIE"]}
+      ]
+    },
+    {
       "name": "Schriker",
       "sounds": [
         {"file": "Data/Sound/mSvIdle1.wav", "id": "SOUND_MONSTER_SVIDLE1", "channels": 2, "spatial": true},
@@ -1836,6 +1981,21 @@
       ]
     },
     {
+      "name": "Splinter Wolf",
+      "sounds": [
+        {"file": "Data/Sound/w37/swolf_idle-01.wav", "id": "SOUND_KANTURU_1ST_SWOLF_MOVE1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/swolf_idle-02.wav", "id": "SOUND_KANTURU_1ST_SWOLF_MOVE2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/swolf_attack-01.wav", "id": "SOUND_KANTURU_1ST_SWOLF_ATTACK1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/swolf_attack-02.wav", "id": "SOUND_KANTURU_1ST_SWOLF_ATTACK2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w37/swolf_death.wav", "id": "SOUND_KANTURU_1ST_SWOLF_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_SWOLF_MOVE1", "SOUND_KANTURU_1ST_SWOLF_MOVE2"]},
+        {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_SWOLF_ATTACK1", "SOUND_KANTURU_1ST_SWOLF_ATTACK2"]},
+        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_SWOLF_DIE"]}
+      ]
+    },
+    {
       "name": "Stone Golem",
       "sounds": [
         {"file": "Data/Sound/mGolem1.wav", "channels": 2, "spatial": true},
@@ -1923,6 +2083,22 @@
         {"animations": ["attack2"], "sounds": ["SOUND_XMAS_SNOWMAN_ATTACK_2"]},
         {"animations": ["shock"], "sounds": ["SOUND_XMAS_SNOWMAN_DAMAGE_1"]},
         {"animations": ["die"], "deathEffectArmed": true, "sounds": ["SOUND_XMAS_SNOWMAN_DEATH_1"]}
+      ]
+    },
+    {
+      "name": "Twin Tail",
+      "sounds": [
+        {"file": "Data/Sound/w38/twin_idle-01.wav", "id": "SOUND_KANTURU_2ND_TWIN_MOVE1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w38/twin_idle-02.wav", "id": "SOUND_KANTURU_2ND_TWIN_MOVE2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w38/twin_attack-01.wav", "id": "SOUND_KANTURU_2ND_TWIN_ATTACK1", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w38/twin_attack-02.wav", "id": "SOUND_KANTURU_2ND_TWIN_ATTACK2", "channels": 1, "spatial": false},
+        {"file": "Data/Sound/w38/twin_death.wav", "id": "SOUND_KANTURU_2ND_TWIN_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"timers": ["hair swing"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_2ND_TWIN_MOVE1", "SOUND_KANTURU_2ND_TWIN_MOVE2"]},
+        {"once": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_TWIN_ATTACK1"]},
+        {"once": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_TWIN_ATTACK2"]},
+        {"during": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_TWIN_DIE"]}
       ]
     },
     {

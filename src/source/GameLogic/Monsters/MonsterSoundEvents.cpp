@@ -226,9 +226,13 @@ bool PlayMoment(CHARACTER& character, MonsterSoundMoment moment, bool chanceDraw
     return PlayFor(character, moment, chanceDrawn);
 }
 
-bool PlayDrawn(CHARACTER& character)
+bool PlayDrawn(CHARACTER& character, bool* played)
 {
     character.SoundsDrawnThisFrame = true;
+    if (played != nullptr)
+    {
+        *played = false;
+    }
     const MonsterSoundSet* set = FindSoundSet(character);
     if (set == nullptr || !HasDrawnEvents(*set))
     {
@@ -243,8 +247,9 @@ bool PlayDrawn(CHARACTER& character)
     situation.tickedTimers = ModelTimers::TickedNames(character);
     // The flag is set after the frame's events, so that once events of one
     // animation play together (the Witch Queen's thunder and attack).
-    if (PlayEvents(*set, CuesOf(object), situation, [&object](int sound, bool atMonster)
-                   { PlayBuffer(static_cast<ESound>(sound), atMonster ? &object : nullptr); }))
+    if (PlayEvents(
+            *set, CuesOf(object), situation, [&object](int sound, bool atMonster)
+            { PlayBuffer(static_cast<ESound>(sound), atMonster ? &object : nullptr); }, played))
     {
         character.SoundOncePlayed = true;
     }
@@ -278,16 +283,25 @@ bool HasDrawnEvents(const MonsterSoundSet& set)
 }
 
 bool PlayEvents(const MonsterSoundSet& set, std::span<const MonsterModelCue> cues, const Situation& situation,
-                const std::function<void(int sound, bool atMonster)>& play)
+                const std::function<void(int sound, bool atMonster)>& play, bool* played)
 {
     bool oncePlayed = false;
+    bool anyPlayed = false;
     for (const MonsterSoundEvent& event : set.soundEvents)
     {
-        if (Applies(event, cues, situation) && PlayEvent(set, event, situation, play) && situation.drawn &&
-            Contains(event.once, situation.animation))
+        if (!Applies(event, cues, situation) || !PlayEvent(set, event, situation, play))
+        {
+            continue;
+        }
+        anyPlayed = true;
+        if (situation.drawn && Contains(event.once, situation.animation))
         {
             oncePlayed = true;
         }
+    }
+    if (played != nullptr)
+    {
+        *played = anyPlayed;
     }
     return oncePlayed;
 }
