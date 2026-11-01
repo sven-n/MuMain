@@ -310,6 +310,18 @@ bool M38Kanturu2nd::Update_Kanturu2nd_ObjectEffects(OBJECT* o, BMD* b)
 
     switch (o->Type)
     {
+    case 76:
+    {
+        vec3_t sparkP, sparkPosition, sparkLight;
+        Vector(0.0f, 0.0f, 0.0f, sparkP);
+        Vector(0.1f, 0.1f, 0.3f, sparkLight);
+        for (int i = 0; i <= 9; ++i)
+        {
+            b->TransformPosition(Engine::Object::Pose::World(o, b)[i], sparkP, sparkPosition, false);
+            CreateSprite(BITMAP_SPARK + 1, sparkPosition, 7.5f, sparkLight, o);
+        }
+    }
+    break;
     case 4:
     {
         vec3_t vPos, Light;
@@ -656,15 +668,6 @@ void M38Kanturu2nd::Render_Kanturu2nd_AfterObjectMesh(OBJECT* o, BMD* b)
         b->RenderMesh(0, RENDER_CHROME7 | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV, BITMAP_CHROME);
         b->EndRender();
-
-        vec3_t Light, p, Position;
-        for (int i = 0; i < 10; ++i)
-        {
-            Vector(0.0f, 0.0f, 0.0f, p);
-            b->TransformPosition(BoneTransform[i], p, Position, false);
-            Vector(0.1f, 0.1f, 0.3f, Light);
-            CreateSprite(BITMAP_SPARK + 1, Position, 7.5f, Light, o);
-        }
     }
     else if (o->Type == 33 || o->Type == 59 || o->Type == 80)
     {

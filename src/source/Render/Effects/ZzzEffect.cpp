@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -148,6 +149,7 @@ void TerminateOwnerEffectObject(int iOwnerObjectType)
 
 bool DeleteEffect(int Type, OBJECT* Owner, int iSubType)
 {
+    Diagnostics::DrawSpawnCheck::Note("delete-effect");
     bool bDelete = false;
     for (int i = 0; i < MAX_EFFECTS; i++)
     {
@@ -335,6 +337,7 @@ void CreateEffectFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Ligh
 
 void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType, OBJECT* Owner, short PKKey, WORD SkillIndex, WORD Skill, WORD SkillSerialNum, float Scale, short int sTargetIndex)
 {
+    Diagnostics::DrawSpawnCheck::Note("effect");
     for (int icntEffect = 0; icntEffect < MAX_EFFECTS; icntEffect++)
     {
         OBJECT* o = &Effects[icntEffect];
@@ -7659,13 +7662,78 @@ void MoveEffects()
     g_SkillEffects.MoveEffects();
 }
 
+namespace
+{
+// An effect drawn as its owner's weapon takes the weapon item's attributes for the draw, and gets its own back after.
+class DrawnAsWeapon
+{
+public:
+    explicit DrawnAsWeapon(OBJECT* o) : m_o(o) {}
+    ~DrawnAsWeapon()
+    {
+        Restore();
+    }
+    DrawnAsWeapon(const DrawnAsWeapon&) = delete;
+    DrawnAsWeapon& operator=(const DrawnAsWeapon&) = delete;
+
+private:
+    void Restore()
+    {
+        m_o->Type = m_type;
+        m_o->Alpha = m_alpha;
+        m_o->AlphaEnable = m_alphaEnable;
+        m_o->AnimationFrame = m_animationFrame;
+        m_o->PriorAnimationFrame = m_priorAnimationFrame;
+        m_o->CurrentAction = m_currentAction;
+        m_o->PriorAction = m_priorAction;
+        m_o->BlendMesh = m_blendMesh;
+        m_o->BlendMeshLight = m_blendMeshLight;
+        m_o->BlendMeshTexCoordU = m_blendMeshTexCoordU;
+        m_o->BlendMeshTexCoordV = m_blendMeshTexCoordV;
+        m_o->CollisionRange = m_collisionRange;
+        m_o->EnableShadow = m_enableShadow;
+        m_o->Gravity = m_gravity;
+        m_o->HiddenMesh = m_hiddenMesh;
+        m_o->LightEnable = m_lightEnable;
+        m_o->Scale = m_scale;
+        m_o->Velocity = m_velocity;
+        for (int i = 0; i < 3; ++i)
+        {
+            m_o->Light[i] = m_light[i];
+            m_o->Position[i] = m_position[i];
+            m_o->Angle[i] = m_angle[i];
+        }
+    }
+
+    OBJECT* m_o;
+    // The object's own values, taken before it draws.
+    decltype(OBJECT::Type) m_type = m_o->Type;
+    decltype(OBJECT::Alpha) m_alpha = m_o->Alpha;
+    decltype(OBJECT::AlphaEnable) m_alphaEnable = m_o->AlphaEnable;
+    decltype(OBJECT::AnimationFrame) m_animationFrame = m_o->AnimationFrame;
+    decltype(OBJECT::PriorAnimationFrame) m_priorAnimationFrame = m_o->PriorAnimationFrame;
+    decltype(OBJECT::CurrentAction) m_currentAction = m_o->CurrentAction;
+    decltype(OBJECT::PriorAction) m_priorAction = m_o->PriorAction;
+    decltype(OBJECT::BlendMesh) m_blendMesh = m_o->BlendMesh;
+    decltype(OBJECT::BlendMeshLight) m_blendMeshLight = m_o->BlendMeshLight;
+    decltype(OBJECT::BlendMeshTexCoordU) m_blendMeshTexCoordU = m_o->BlendMeshTexCoordU;
+    decltype(OBJECT::BlendMeshTexCoordV) m_blendMeshTexCoordV = m_o->BlendMeshTexCoordV;
+    decltype(OBJECT::CollisionRange) m_collisionRange = m_o->CollisionRange;
+    decltype(OBJECT::EnableShadow) m_enableShadow = m_o->EnableShadow;
+    decltype(OBJECT::Gravity) m_gravity = m_o->Gravity;
+    decltype(OBJECT::HiddenMesh) m_hiddenMesh = m_o->HiddenMesh;
+    decltype(OBJECT::LightEnable) m_lightEnable = m_o->LightEnable;
+    decltype(OBJECT::Scale) m_scale = m_o->Scale;
+    decltype(OBJECT::Velocity) m_velocity = m_o->Velocity;
+    vec3_t m_light = {m_o->Light[0], m_o->Light[1], m_o->Light[2]};
+    vec3_t m_position = {m_o->Position[0], m_o->Position[1], m_o->Position[2]};
+    vec3_t m_angle = {m_o->Angle[0], m_o->Angle[1], m_o->Angle[2]};
+};
+} // namespace
+
 void RenderWheelWeapon(OBJECT* o)
 {
-    vec3_t TempPosition, TempAngle;
-    VectorCopy(o->Position, TempPosition);
-    VectorCopy(o->Angle, TempAngle);
-
-    o->Direction[2] -= (30) * FPS_ANIMATION_FACTOR;
+    const DrawnAsWeapon drawn(o);
     o->Angle[2] += o->Direction[2];
     o->Angle[1] = 90;
     o->Position[2] += 100.f;
@@ -7679,7 +7747,6 @@ void RenderWheelWeapon(OBJECT* o)
     b->CurrentAction = o->CurrentAction;
     VectorCopy(o->Position, b->BodyOrigin);
 
-    float TempType = o->Type;
     o->Type = Type;
     ItemObjectAttribute(o);
     b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, false);
@@ -7687,16 +7754,13 @@ void RenderWheelWeapon(OBJECT* o)
     RequestModelTerrainLight(o->Position[0], o->Position[1], Light);
     VectorAdd(Light, o->Light, Light);
     RenderPartObject(o, Type, NULL, Light, Alpha, o->Owner->WeaponLevel, 0, 0, true, true, true);
-    o->Type = (short)TempType;
-
-    VectorCopy(TempPosition, o->Position);
-    VectorCopy(TempAngle, o->Angle);
 }
 
 void RenderFuryStrike(OBJECT* o)
 {
     if (o->LifeTime > 10.f && o->Kind == 0)
     {
+        const DrawnAsWeapon drawn(o);
         vec3_t p, Light, Angle;
         float Alpha = o->Alpha;
 
@@ -7808,9 +7872,7 @@ void RenderEffects(bool bRenderBlendMesh)
                 case MODEL_MULTI_SHOT2:
                 case MODEL_MULTI_SHOT3:
                 {
-                    BMD* b = &Models[o->Type];
-                    Vector(1.f, 1.f, 1.f, b->BodyLight);
-                    b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity / 6.f, o->Position, o->Angle);
+                    Vector(1.f, 1.f, 1.f, Models[o->Type].BodyLight);
                     RenderObject(o);
                 }
                 break;
@@ -7882,23 +7944,10 @@ void RenderEffects(bool bRenderBlendMesh)
                 {
                     if (o->SubType == 0)
                     {
-                        vec3_t vLight;
-                        // (Shockwave)
-                        Vector(0.6f, 0.8f, 0.6f, vLight);
-                        o->m_iAnimation += REFERENCE_FRAME_STEP;
-                        CreateSprite(BITMAP_SHOCK_WAVE, o->Position, 0.8f, vLight, o, -(o->m_iAnimation * 3.f));
-                        // Flare1
-                        Vector(0.8f, 0.6f, 0.f, vLight);
-                        CreateSprite(BITMAP_LIGHT, o->Position, 5.0f, vLight, o, 0);
                         RenderObject(o);
                     }
                     else if (o->SubType == 1)
                     {
-                        CreateSprite(BITMAP_LIGHT, o->Position, 5.0f, o->Light, o, 0);
-                        CreateSprite(BITMAP_LIGHT, o->Position, 3.0f, o->Light, o, 0);
-                        CreateSprite(BITMAP_LIGHT, o->Position, 3.0f, o->Light, o, 0);
-                        CreateSprite(BITMAP_SHINY + 6, o->Position, 2.0f, o->Light, o, 0);
-
                         RenderObject(o);
                     }
                     else if (o->SubType == 2)
@@ -7975,29 +8024,6 @@ void RenderEffects(bool bRenderBlendMesh)
                 case MODEL_SUMMONER_SUMMON_LAGUL:
                     if (o->SubType == 1)
                     {
-                        BMD* pModel = &Models[o->Type];
-                        vec3_t vPos, vLight;
-
-                        const int nBoneCount = 6;
-                        int nBone[nBoneCount] = { 54, 55, 56, 57, 58, 59 };
-                        Vector(0.2f, 0.3f, 1.0f, vLight);
-                        pModel->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame,
-                            o->PriorAction, o->Angle, o->HeadAngle, false, false);
-                        for (int i = 0; i < nBoneCount; ++i)
-                        {
-                            pModel->TransformByObjectBone(vPos, o, nBone[i]);
-                            CreateSprite(BITMAP_SHINY + 6, vPos, o->Scale * 0.3f, vLight, NULL);
-                        }
-
-                        if (rand_fps_check(5))
-                        {
-                            int nBones = Models[o->Type].NumBones;
-                            pModel->TransformByObjectBone(vPos, o, rand() % nBones);
-                            Vector(0.6f, 0.5f, 0.9f, vLight);
-                            CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 57, 2.0f);
-                            Vector(0.7f, 0.7f, 1.f, vLight);
-                            CreateParticle(BITMAP_TWINTAIL_WATER, vPos, o->Angle, vLight, 1);
-                        }
                         RenderObject(o);
                     }
                     break;
@@ -8027,22 +8053,13 @@ void RenderEffects(bool bRenderBlendMesh)
                     {
                         if (o->SubType == 1)
                         {
-                            o->Angle[2] -= (0.1f) * FPS_ANIMATION_FACTOR;
-                            Vector(1.0f, 1.0f, 1.0f, o->Light);
-                            CreateSprite(BITMAP_FIRE + 1, Position, o->Scale, o->Light, o, o->Angle[2]);
+                            // The update turned the beam once per segment; the turn this segment had.
+                            const float angle = o->Angle[2] + (19 - j) * 0.1f * FPS_ANIMATION_FACTOR;
                             EnableAlphaBlend();
-                            Vector(0.2f, 0.0f, 0.0f, o->Light);
-                            RenderTerrainAlphaBitmap(BITMAP_SMOKE, Position[0], Position[1], 4.0f, 4.0f, o->Light, -o->Angle[2]);
+                            RenderTerrainAlphaBitmap(BITMAP_SMOKE, Position[0], Position[1], 4.0f, 4.0f, o->Light,
+                                                     -angle);
                             DisableAlphaBlend();
                         }
-                        else if (o->SubType == 2)
-                        {
-                            Vector(0.0f, 0.2f, 1.f, o->Light);
-                            o->Angle[2] -= (0.1f) * FPS_ANIMATION_FACTOR;
-                            CreateSprite(BITMAP_FIRE + 1, Position, o->Scale, o->Light, o, o->Angle[2]);
-                        }
-                        else
-                            CreateSprite(BITMAP_SPARK + 1, Position, o->Scale, o->Light, o);
 
                         VectorAdd(Position, o->Direction, Position);
 
@@ -8090,11 +8107,16 @@ void RenderEffects(bool bRenderBlendMesh)
                     RenderObject(o);
                     break;
                 case MODEL_TOWER_GATE_PLANE:
+                {
                     RenderObject(o);
 
+                    // Its mirror image above the gate.
+                    const float height = o->Position[2];
                     o->Position[2] = o->StartPosition[2] + 400.f - (o->Position[2] - o->StartPosition[2]);
                     RenderObject(o);
-                    break;
+                    o->Position[2] = height;
+                }
+                break;
 
                 case BATTLE_CASTLE_WALL1:
                 case BATTLE_CASTLE_WALL2:
@@ -8266,29 +8288,7 @@ void RenderEffects(bool bRenderBlendMesh)
                 break;
                 case MODEL_BLOW_OF_DESTRUCTION:
                 {
-                    if (o->SubType == 0)
-                    {
-                        if (o->LifeTime <= 24)
-                        {
-                            vec3_t vLight, vPos;
-                            Vector(0.5f, 0.5f, 1.f, vLight);
-                            VectorCopy(o->Position, vPos);
-                            vPos[2] += 65.f;
-                            float fScale = (float)(rand() % 10 * 0.011f) + 3.f;
-                            CreateSprite(BITMAP_SWORD_EFFECT_MONO, vPos, fScale, vLight, NULL);
-                        }
-                    }
-                    else if (o->SubType == 1)
-                    {
-                        if (o->LifeTime <= 24)
-                        {
-                            vec3_t vLight, vPos;
-                            Vector(o->Light[0] * 0.5f, o->Light[1] * 0.5f, o->Light[2] * 1.0f, vLight);
-                            VectorCopy(o->Position, vPos);
-                            vPos[2] += 100.f;
-                            CreateSprite(BITMAP_LIGHT, vPos, o->Scale, vLight, NULL);
-                        }
-                    }
+                    // Only its sprites show; the update spawns them.
                 }
                 break;
                 case MODEL_NIGHTWATER_01:
@@ -8311,7 +8311,6 @@ void RenderEffects(bool bRenderBlendMesh)
                         Vector(0.0f, 0.0f, 0.0f, p);
                         pOwnerModel->RotationPosition(pOwner->BoneTransform[33], p, vPos);
                         VectorAdd(pOwner->Position, vPos, pModel->BodyOrigin);
-                        Vector(0.0f, 0.0f, 0.0f, pObject->Angle);
 
                         OBB_t OBB;
                         vec3_t Temp;
@@ -8329,57 +8328,12 @@ void RenderEffects(bool bRenderBlendMesh)
                 break;
                 case BITMAP_LIGHT_MARKS:
                 {
-                    float fLight = 1.035f;
-                    if (o->LifeTime >= 35)
-                    {
-                        o->Light[0] *= pow(1.0f / (fLight), FPS_ANIMATION_FACTOR);
-                        o->Light[1] *= pow(1.0f / (fLight), FPS_ANIMATION_FACTOR);
-                        o->Light[2] *= pow(1.0f / (fLight), FPS_ANIMATION_FACTOR);
-                    }
-                    else
-                    {
-                        o->Light[0] *= pow(fLight, FPS_ANIMATION_FACTOR);
-                        o->Light[1] *= pow(fLight, FPS_ANIMATION_FACTOR);
-                        o->Light[2] *= pow(fLight, FPS_ANIMATION_FACTOR);
-                    }
-                    BMD* pModel = &Models[o->Owner->Type];
-                    vec3_t vPos;
-                    const int nBoneCount = 14;
-                    int nBone[nBoneCount]
-                        = { 20, 20, 19, 18, 17, 2, 35, 26, 36, 27, 37, 28, 39, 30 };
-                    float fScale[nBoneCount]
-                        = { 1.5f, 1.5f, 0.6f, 1.1f, 0.9f, 0.8f, 0.6f, 0.6f,
-                        0.8f, 0.8f, 0.8f, 0.8f, 0.7f, 0.7f };
-                    for (int i = 0; i < nBoneCount; ++i)
-                    {
-                        pModel->TransformByObjectBone(vPos, o->Owner, nBone[i]);
-                        CreateSprite(o->Type, vPos, o->Scale * fScale[i], o->Light, o->Owner);
-                    }
+                    // Only its sprites show; the update spawns them.
                 }
                 break;
                 case MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF:
                 {
-                    if (o->SubType == 0)
-                    {
-                        BMD* pModel = &Models[o->Owner->Type];
-                        vec3_t vPos, vDLight;
-                        if (o->Owner->Type != MODEL_PLAYER)
-                            break;
-
-                        float fLumi = (absf((sinf(WorldTime * 0.001f))) + 0.2f) * 0.5f;
-                        // 							if( fLumi >= 0.5f)
-                        // 							{
-                        // 								fLumi = 0.5f;
-                        // 							}
-                        Vector(fLumi * 0.7f, fLumi * 0.3f, fLumi * 0.9f, vDLight);
-
-                        for (int i = 0; i < pModel->NumBones; i++)
-                        {
-                            pModel->TransformByObjectBone(vPos, o->Owner, i);
-
-                            CreateSprite(BITMAP_LIGHT, vPos, 1.8f, vDLight, o);
-                        }
-                    }
+                    // Only its sprites show; the update spawns them.
                 }break;
                 case MODEL_PROJECTILE:
                 {
@@ -8416,7 +8370,7 @@ void RenderEffects(bool bRenderBlendMesh)
                 {
                     BMD* pBMDSwordModel = &Models[o->Type];
 
-                    vec3_t* arrEachBoneTranslations;
+                    vec3_t* arrEachBoneTranslations = nullptr;
                     vec3_t			v3CurrentHighHierarchyNodePos;
 
                     if (true == o->ChromeEnable)
@@ -8441,8 +8395,6 @@ void RenderEffects(bool bRenderBlendMesh)
                         pBMDSwordModel->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, true);
                         pBMDSwordModel->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, false);
 
-                        arrEachBoneTranslations = new vec3_t[pBMDSwordModel->NumBones];
-                        pBMDSwordModel->AnimationTransformOnlySelf(arrEachBoneTranslations, o);
                     }
 
                     pBMDSwordModel->LightEnable = true;
@@ -8454,104 +8406,8 @@ void RenderEffects(bool bRenderBlendMesh)
                     pBMDSwordModel->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
                     Vector(0.2f, 0.2f, 1.0f, pBMDSwordModel->BodyLight);
-                    o->Alpha = 1.0f;
-                    pBMDSwordModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                    o->Alpha = 1.0f;
-
-                    if (o->SubType != 20)
-                    {
-                        vec3_t	vRelative, vLight;
-                        vec3_t	vPos_SwordEffectRed01,
-                            vPos_SwordEffectRed02,
-                            vPos_SwordEffectEdge01,
-                            vPos_SwordEffectEdge02,
-                            vPos_SwordEffectEdge03,
-                            vPos_SwordEffectEdge04,
-                            vPos_SwordEffectEdge05,
-                            vPos_SwordEffectEdge06,
-                            vPos_SwordEffectEdge07,
-                            vPos_SwordEffectEdge08,
-                            vPos_SwordEffectEdge09;
-                        float	fLumi1;
-                        int		arrBoneIdxs_SwordEffectRed01[] = { 2,	9,	1,	3,	10 };	// SWORD MainEffect01 BoneINDEX.
-                        int		arrBoneIdxs_SwordEffectRed02[] = { 3,	10, 2,	10, 11 };	// SWORD MainEffect02 BoneINDEX.
-                        int		arrBoneIdxs_SwordEffectEdge01[] = { 13, 13, 3,	4,	1 };	// SWORD EdgeEffect01 BoneINDEX.
-                        int		arrBoneIdxs_SwordEffectEdge02[] = { 12, 6,	4,	12, 2 };	// SWORD EdgeEffect02 BoneINDEX.
-                        int		arrBoneIdxs_SwordEffectEdge03[] = { 5,	1,	5,	2,	3 };	// SWORD EdgeEffect03 BoneINDEX.
-                        int		arrBoneIdxs_SwordEffectEdge04[] = { 6,	7,	6,	9,	4 };	// SWORD EdgeEffect04 BoneINDEX.
-                        int		arrBoneIdxs_SwordEffectEdge05[] = { 1,	2,	12,	5,	5 };	// SWORD EdgeEffect05 BoneINDEX.
-                        int		arrBoneIdxs_SwordEffectEdge06[] = { 8,	4,	8,	7,	6 };	// SWORD EdgeEffect06 BoneINDEX.
-                        int		arrBoneIdxs_SwordEffectEdge07[] = { 9,	3,	9,	6,	7 };	// SWORD EdgeEffect07 BoneINDEX.
-                        int		arrBoneIdxs_SwordEffectEdge08[] = { 10, 11, 10, 8,	8 };	// SWORD EdgeEffect08 BoneINDEX.
-                        int		arrBoneIdxs_SwordEffectEdge09[] = { 4,	8,	7,	1,	9 };	// SWORD EdgeEffect09 BoneINDEX.
-                        //MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_
-                        //MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_
-                        //MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_
-                        //MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_
-                        //MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_
-
-                        int		iBoneIdx_SwordEffectMain01 = arrBoneIdxs_SwordEffectRed01[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
-                        int		iBoneIdx_SwordEffectMain02 = arrBoneIdxs_SwordEffectRed02[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
-
-                        int		iBoneIdx_SwordEffectEdge01 = arrBoneIdxs_SwordEffectEdge01[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
-                        int		iBoneIdx_SwordEffectEdge02 = arrBoneIdxs_SwordEffectEdge02[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
-                        int		iBoneIdx_SwordEffectEdge03 = arrBoneIdxs_SwordEffectEdge03[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
-                        int		iBoneIdx_SwordEffectEdge04 = arrBoneIdxs_SwordEffectEdge04[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
-                        int		iBoneIdx_SwordEffectEdge05 = arrBoneIdxs_SwordEffectEdge05[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
-                        int		iBoneIdx_SwordEffectEdge06 = arrBoneIdxs_SwordEffectEdge06[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
-                        int		iBoneIdx_SwordEffectEdge07 = arrBoneIdxs_SwordEffectEdge07[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
-                        int		iBoneIdx_SwordEffectEdge08 = arrBoneIdxs_SwordEffectEdge08[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
-                        int		iBoneIdx_SwordEffectEdge09 = arrBoneIdxs_SwordEffectEdge09[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
-
-                        fLumi1 = 1.0f;
-                        Vector(0.0f, 0.0f, 0.0f, vRelative);
-
-                        Vector(0.0f, 0.0f, 0.0f, vLight);
-
-                        // 2-2. 기본 Jewel Effect //
-                        Vector(fLumi1 * 1.0f, fLumi1 * 0.4f, fLumi1 * 0.1f, vLight);
-
-                        //			if( MODEL_MONSTER01+164 == o->Owner->Type )	// 2-3-1.
-                        {
-                            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectMain01], vPos_SwordEffectRed01);
-                            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectMain02], vPos_SwordEffectRed02);
-                        }
-                        // 			else // 2-3-1. Effect를 통한 렌더의 경우.
-                        // 			{
-                        // 				pBMDSwordModel->TransformByObjectBone(vPos_SwordEffectRed01, o, iBoneIdx_SwordEffectMain01, vRelative);
-                        // 				pBMDSwordModel->TransformByObjectBone(vPos_SwordEffectRed02, o, iBoneIdx_SwordEffectMain02, vRelative);
-                        // 			}
-
-                        CreateSprite(BITMAP_LIGHT_RED, vPos_SwordEffectRed01, 1.3f, vLight, o);
-                        CreateSprite(BITMAP_LIGHT_RED, vPos_SwordEffectRed02, 1.3f, vLight, o);
-                        // 2-2. 기본 Jewel Effect //
-
-                        // 2-3. 기본 Edge Effect
-                        {
-                            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge01], vPos_SwordEffectEdge01);
-                            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge02], vPos_SwordEffectEdge02);
-                            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge03], vPos_SwordEffectEdge03);
-                            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge04], vPos_SwordEffectEdge04);
-                            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge05], vPos_SwordEffectEdge05);
-                            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge06], vPos_SwordEffectEdge06);
-                            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge07], vPos_SwordEffectEdge07);
-
-                            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge08], vPos_SwordEffectEdge08);
-                            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge09], vPos_SwordEffectEdge09);
-                        }
-
-                        Vector(fLumi1 * 0.3f, fLumi1 * 0.3f, fLumi1 * 1.0f, vLight);
-                        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge01, 1.5f, vLight, o);
-                        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge02, 1.5f, vLight, o);
-                        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge03, 1.5f, vLight, o);
-                        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge04, 1.5f, vLight, o);
-                        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge05, 1.5f, vLight, o);
-                        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge06, 1.5f, vLight, o);
-                        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge07, 1.5f, vLight, o);
-
-                        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge08, 1.0f, vLight, o);
-                        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge09, 1.0f, vLight, o);
-                    }
+                    pBMDSwordModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, 1.0f, o->BlendMesh, o->BlendMeshLight,
+                                               o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
                     delete[] arrEachBoneTranslations;
                 }
@@ -8563,29 +8419,7 @@ void RenderEffects(bool bRenderBlendMesh)
                 break;
                 case MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION:
                 {
-                    if (o->SubType == 0)
-                    {
-                        if (o->LifeTime <= 24)
-                        {
-                            vec3_t vLight, vPos;
-                            Vector(0.5f, 0.5f, 1.f, vLight);
-                            VectorCopy(o->Position, vPos);
-                            vPos[2] += 65.f;
-                            float fScale = (float)(rand() % 10 * 0.011f) + 3.f;
-                            CreateSprite(BITMAP_SWORD_EFFECT_MONO, vPos, fScale, vLight, NULL);
-                        }
-                    }
-                    else if (o->SubType == 1)
-                    {
-                        if (o->LifeTime <= 24)
-                        {
-                            vec3_t vLight, vPos;
-                            Vector(o->Light[0] * 0.5f, o->Light[1] * 0.5f, o->Light[2] * 1.0f, vLight);
-                            VectorCopy(o->Position, vPos);
-                            vPos[2] += 100.f;
-                            CreateSprite(BITMAP_LIGHT, vPos, o->Scale, vLight, NULL);
-                        }
-                    }
+                    // Only its sprites show; the update spawns them.
                 }
                 break;
                 case BITMAP_WATERFALL_4:
@@ -8607,9 +8441,6 @@ void RenderEffects(bool bRenderBlendMesh)
                 break;
                 case MODEL_DRAGON_LOWER_DUMMY:
                 {
-                    BMD* b = &Models[o->Type];
-                    b->CurrentAction = o->CurrentAction;
-                    b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity / 6.f, o->Position, o->Angle);
                     RenderObject(o);
                 }
                 break;
@@ -8649,47 +8480,6 @@ void RenderEffects(bool bRenderBlendMesh)
                         DisableAlphaBlend();
                     }
 
-                    if (o->SubType == 0)
-                    {
-                        vec3_t Light, Angle;
-                        int arr[17] = { 12, 17, 5,	10, 36, 27, 37,		28, 11, 35,		2, 3, 36, 20,	27, 4,26 };
-                        BMD* b = &Models[o->Owner->Type];
-                        vec3_t _vPos;
-                        Vector(0.f, 0.f, 0.f, Angle);
-
-                        for (int i = 0; i < 17; ++i)
-                        {
-                            float fFadeInOut = (float)(sinf(WorldTime * 0.01f) + 1.0f) * 0.25f + 0.2f;
-                            VectorCopy(o->Owner->Position, o->Position);
-                            Vector(1.0f, 1.0f, 1.0f, Light);
-
-                            if (i == 0 || i == 1 || i == 2)
-                            {
-                                //Vector(0.0f, 0.0f, 15.0f, _vPos);
-                                Vector(0.0f, 0.0f, 0.0f, _vPos);
-                                b->TransformByObjectBone(_vPos, o->Owner, arr[i], _vPos);
-                                VectorScale(Light, fFadeInOut, Light);
-                                CreateSprite(BITMAP_LIGHT_RED, _vPos, 1.5f, Light, o);
-                            }
-                            else if (i == 5 || i == 12 || i == 7 || i == 8 || i == 9 || i == 14 || i == 15 || i == 16)
-                            {
-                                //Vector(0.0f, 5.0f, 0.0f, _vPos);
-                                Vector(0.0f, 0.0f, 0.0f, _vPos);
-                                b->TransformByObjectBone(_vPos, o->Owner, arr[i], _vPos);
-                                fFadeInOut = (float)(sinf(WorldTime * 0.005f) + 1.0f) * 0.25f + 0.5f;
-                                VectorScale(Light, fFadeInOut, Light);
-                                CreateSprite(BITMAP_LIGHT_RED, _vPos, 1.5f, Light, o);
-                            }
-                            else
-                            {
-                                Vector(0.0f, 0.0f, 0.0f, _vPos);
-                                b->TransformByObjectBone(_vPos, o->Owner, arr[i], _vPos);
-                                fFadeInOut = (float)(sinf(WorldTime * 0.01f) + 1.0f) * 0.3f + 0.3f;
-                                VectorScale(Light, fFadeInOut, Light);
-                                CreateSprite(BITMAP_LIGHT_RED, _vPos, 1.5f, Light, o);
-                            }
-                        }
-                    }
                 }
                 break;
                 default:
@@ -8700,6 +8490,393 @@ void RenderEffects(bool bRenderBlendMesh)
                     break;
                 }
             }
+        }
+    }
+}
+
+// The jewel and edge lights of Gaion's swords, on the bones their draw poses them with.
+static void SpawnGaionSwordLights(OBJECT* o)
+{
+    BMD* pBMDSwordModel = &Models[o->Type];
+    static vec3_t arrEachBoneTranslations[MAX_BONES];
+    if (o->ChromeEnable)
+    {
+        int arrBoneIdxs[] = {4, 2, 8, 10, 6};
+        vec3_t v3CurrentHighHierarchyNodePos;
+        pBMDSwordModel->AnimationTransformWithAttachHighModel(
+            o->Owner, &Models[o->Owner->Type], arrBoneIdxs[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_],
+            v3CurrentHighHierarchyNodePos, arrEachBoneTranslations);
+    }
+    else
+    {
+        pBMDSwordModel->AnimationTransformOnlySelf(arrEachBoneTranslations, o);
+    }
+
+    if (o->SubType != 20)
+    {
+        vec3_t vRelative, vLight;
+        vec3_t vPos_SwordEffectRed01, vPos_SwordEffectRed02, vPos_SwordEffectEdge01, vPos_SwordEffectEdge02,
+            vPos_SwordEffectEdge03, vPos_SwordEffectEdge04, vPos_SwordEffectEdge05, vPos_SwordEffectEdge06,
+            vPos_SwordEffectEdge07, vPos_SwordEffectEdge08, vPos_SwordEffectEdge09;
+        float fLumi1;
+        int arrBoneIdxs_SwordEffectRed01[] = {2, 9, 1, 3, 10};    // SWORD MainEffect01 BoneINDEX.
+        int arrBoneIdxs_SwordEffectRed02[] = {3, 10, 2, 10, 11};  // SWORD MainEffect02 BoneINDEX.
+        int arrBoneIdxs_SwordEffectEdge01[] = {13, 13, 3, 4, 1};  // SWORD EdgeEffect01 BoneINDEX.
+        int arrBoneIdxs_SwordEffectEdge02[] = {12, 6, 4, 12, 2};  // SWORD EdgeEffect02 BoneINDEX.
+        int arrBoneIdxs_SwordEffectEdge03[] = {5, 1, 5, 2, 3};    // SWORD EdgeEffect03 BoneINDEX.
+        int arrBoneIdxs_SwordEffectEdge04[] = {6, 7, 6, 9, 4};    // SWORD EdgeEffect04 BoneINDEX.
+        int arrBoneIdxs_SwordEffectEdge05[] = {1, 2, 12, 5, 5};   // SWORD EdgeEffect05 BoneINDEX.
+        int arrBoneIdxs_SwordEffectEdge06[] = {8, 4, 8, 7, 6};    // SWORD EdgeEffect06 BoneINDEX.
+        int arrBoneIdxs_SwordEffectEdge07[] = {9, 3, 9, 6, 7};    // SWORD EdgeEffect07 BoneINDEX.
+        int arrBoneIdxs_SwordEffectEdge08[] = {10, 11, 10, 8, 8}; // SWORD EdgeEffect08 BoneINDEX.
+        int arrBoneIdxs_SwordEffectEdge09[] = {4, 8, 7, 1, 9};    // SWORD EdgeEffect09 BoneINDEX.
+        // MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_
+        // MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_
+        // MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_
+        // MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_
+        // MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_
+
+        int iBoneIdx_SwordEffectMain01 =
+            arrBoneIdxs_SwordEffectRed01[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
+        int iBoneIdx_SwordEffectMain02 =
+            arrBoneIdxs_SwordEffectRed02[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
+
+        int iBoneIdx_SwordEffectEdge01 =
+            arrBoneIdxs_SwordEffectEdge01[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
+        int iBoneIdx_SwordEffectEdge02 =
+            arrBoneIdxs_SwordEffectEdge02[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
+        int iBoneIdx_SwordEffectEdge03 =
+            arrBoneIdxs_SwordEffectEdge03[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
+        int iBoneIdx_SwordEffectEdge04 =
+            arrBoneIdxs_SwordEffectEdge04[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
+        int iBoneIdx_SwordEffectEdge05 =
+            arrBoneIdxs_SwordEffectEdge05[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
+        int iBoneIdx_SwordEffectEdge06 =
+            arrBoneIdxs_SwordEffectEdge06[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
+        int iBoneIdx_SwordEffectEdge07 =
+            arrBoneIdxs_SwordEffectEdge07[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
+        int iBoneIdx_SwordEffectEdge08 =
+            arrBoneIdxs_SwordEffectEdge08[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
+        int iBoneIdx_SwordEffectEdge09 =
+            arrBoneIdxs_SwordEffectEdge09[o->Type - MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_];
+
+        fLumi1 = 1.0f;
+        Vector(0.0f, 0.0f, 0.0f, vRelative);
+
+        Vector(0.0f, 0.0f, 0.0f, vLight);
+
+        // 2-2. 기본 Jewel Effect //
+        Vector(fLumi1 * 1.0f, fLumi1 * 0.4f, fLumi1 * 0.1f, vLight);
+
+        //			if( MODEL_MONSTER01+164 == o->Owner->Type )	// 2-3-1.
+        {
+            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectMain01], vPos_SwordEffectRed01);
+            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectMain02], vPos_SwordEffectRed02);
+        }
+        // 			else // 2-3-1. Effect를 통한 렌더의 경우.
+        // 			{
+        // 				pBMDSwordModel->TransformByObjectBone(vPos_SwordEffectRed01, o, iBoneIdx_SwordEffectMain01,
+        // vRelative); 				pBMDSwordModel->TransformByObjectBone(vPos_SwordEffectRed02, o,
+        // iBoneIdx_SwordEffectMain02, vRelative);
+        // 			}
+
+        CreateSprite(BITMAP_LIGHT_RED, vPos_SwordEffectRed01, 1.3f, vLight, o);
+        CreateSprite(BITMAP_LIGHT_RED, vPos_SwordEffectRed02, 1.3f, vLight, o);
+        // 2-2. 기본 Jewel Effect //
+
+        // 2-3. 기본 Edge Effect
+        {
+            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge01], vPos_SwordEffectEdge01);
+            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge02], vPos_SwordEffectEdge02);
+            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge03], vPos_SwordEffectEdge03);
+            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge04], vPos_SwordEffectEdge04);
+            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge05], vPos_SwordEffectEdge05);
+            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge06], vPos_SwordEffectEdge06);
+            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge07], vPos_SwordEffectEdge07);
+
+            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge08], vPos_SwordEffectEdge08);
+            VectorCopy(arrEachBoneTranslations[iBoneIdx_SwordEffectEdge09], vPos_SwordEffectEdge09);
+        }
+
+        Vector(fLumi1 * 0.3f, fLumi1 * 0.3f, fLumi1 * 1.0f, vLight);
+        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge01, 1.5f, vLight, o);
+        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge02, 1.5f, vLight, o);
+        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge03, 1.5f, vLight, o);
+        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge04, 1.5f, vLight, o);
+        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge05, 1.5f, vLight, o);
+        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge06, 1.5f, vLight, o);
+        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge07, 1.5f, vLight, o);
+
+        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge08, 1.0f, vLight, o);
+        CreateSprite(BITMAP_LIGHT, vPos_SwordEffectEdge09, 1.0f, vLight, o);
+    }
+}
+
+// The sprites and steps of the effects RenderEffects draws, for the effects the last frame drew.
+static void UpdateDrawnEffectSprites(OBJECT* o)
+{
+    if (const Render::Effects::EffectDescriptor* desc = Render::Effects::Lookup(o->Type); desc && desc->render)
+        return;
+
+    switch (o->Type)
+    {
+    case MODEL_EFFECT_FLAME_STRIKE:
+        // The flame is drawn and moved unturned.
+        if (o->SubType == 0)
+            Vector(0.0f, 0.0f, 0.0f, o->Angle);
+        break;
+    case MODEL_SKILL_WHEEL2:
+        // The wheel spins faster each frame.
+        o->Direction[2] -= (30) * FPS_ANIMATION_FACTOR;
+        break;
+    case MODEL_MOONHARVEST_MOON:
+        if (o->SubType == 0)
+        {
+            vec3_t vLight;
+            // (Shockwave)
+            Vector(0.6f, 0.8f, 0.6f, vLight);
+            o->m_iAnimation += REFERENCE_FRAME_STEP;
+            CreateSprite(BITMAP_SHOCK_WAVE, o->Position, 0.8f, vLight, o, -(o->m_iAnimation * 3.f));
+            // Flare1
+            Vector(0.8f, 0.6f, 0.f, vLight);
+            CreateSprite(BITMAP_LIGHT, o->Position, 5.0f, vLight, o, 0);
+        }
+        else if (o->SubType == 1)
+        {
+            CreateSprite(BITMAP_LIGHT, o->Position, 5.0f, o->Light, o, 0);
+            CreateSprite(BITMAP_LIGHT, o->Position, 3.0f, o->Light, o, 0);
+            CreateSprite(BITMAP_LIGHT, o->Position, 3.0f, o->Light, o, 0);
+            CreateSprite(BITMAP_SHINY + 6, o->Position, 2.0f, o->Light, o, 0);
+        }
+        break;
+    case MODEL_SUMMONER_SUMMON_LAGUL:
+        if (o->SubType == 1)
+        {
+            BMD* pModel = &Models[o->Type];
+            static vec34_t bones[MAX_BONES];
+            pModel->Animation(bones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle,
+                              false, false);
+            vec3_t vPos, vLight, vZero = {0.f, 0.f, 0.f};
+
+            const int nBoneCount = 6;
+            int nBone[nBoneCount] = {54, 55, 56, 57, 58, 59};
+            Vector(0.2f, 0.3f, 1.0f, vLight);
+            for (int i = 0; i < nBoneCount; ++i)
+            {
+                pModel->TransformPosition(bones[nBone[i]], vZero, vPos, true);
+                CreateSprite(BITMAP_SHINY + 6, vPos, o->Scale * 0.3f, vLight, NULL);
+            }
+
+            if (rand_fps_check(5))
+            {
+                int nBones = Models[o->Type].NumBones;
+                pModel->TransformPosition(bones[rand() % nBones], vZero, vPos, true);
+                Vector(0.6f, 0.5f, 0.9f, vLight);
+                CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 57, 2.0f);
+                Vector(0.7f, 0.7f, 1.f, vLight);
+                CreateParticle(BITMAP_TWINTAIL_WATER, vPos, o->Angle, vLight, 1);
+            }
+        }
+        break;
+    case BITMAP_BOSS_LASER:
+    case BITMAP_BOSS_LASER + 1:
+    case BITMAP_BOSS_LASER + 2:
+    {
+        vec3_t Position, Light;
+        VectorCopy(o->Position, Position);
+        for (int j = 0; j < 20; j++)
+        {
+            if (o->SubType == 1)
+            {
+                o->Angle[2] -= (0.1f) * FPS_ANIMATION_FACTOR;
+                Vector(1.0f, 1.0f, 1.0f, Light);
+                CreateSprite(BITMAP_FIRE + 1, Position, o->Scale, Light, o, o->Angle[2]);
+            }
+            else if (o->SubType == 2)
+            {
+                Vector(0.0f, 0.2f, 1.f, o->Light);
+                o->Angle[2] -= (0.1f) * FPS_ANIMATION_FACTOR;
+                CreateSprite(BITMAP_FIRE + 1, Position, o->Scale, o->Light, o, o->Angle[2]);
+            }
+            else
+                CreateSprite(BITMAP_SPARK + 1, Position, o->Scale, o->Light, o);
+
+            VectorAdd(Position, o->Direction, Position);
+            if (battleCastle::IsBattleCastleStart() &&
+                (TERRAIN_ATTRIBUTE(Position[0], Position[1]) & TW_NOATTACKZONE) == TW_NOATTACKZONE)
+                break;
+        }
+        // The light the draw paints the beam's smoke and terrain light with.
+        if (o->SubType == 1)
+            Vector(0.2f, 0.0f, 0.0f, o->Light);
+    }
+    break;
+    case MODEL_BLOW_OF_DESTRUCTION:
+    case MODEL_EMPIREGUARDIAN_BLOW_OF_DESTRUCTION:
+        if (o->SubType == 0)
+        {
+            if (o->LifeTime <= 24)
+            {
+                vec3_t vLight, vPos;
+                Vector(0.5f, 0.5f, 1.f, vLight);
+                VectorCopy(o->Position, vPos);
+                vPos[2] += 65.f;
+                float fScale = (float)(rand() % 10 * 0.011f) + 3.f;
+                CreateSprite(BITMAP_SWORD_EFFECT_MONO, vPos, fScale, vLight, NULL);
+            }
+        }
+        else if (o->SubType == 1)
+        {
+            if (o->LifeTime <= 24)
+            {
+                vec3_t vLight, vPos;
+                Vector(o->Light[0] * 0.5f, o->Light[1] * 0.5f, o->Light[2] * 1.0f, vLight);
+                VectorCopy(o->Position, vPos);
+                vPos[2] += 100.f;
+                CreateSprite(BITMAP_LIGHT, vPos, o->Scale, vLight, NULL);
+            }
+        }
+        break;
+    case BITMAP_LIGHT_MARKS:
+    {
+        // The owner's model scaled for the owner, not for the character placed last.
+        Models[o->Owner->Type].BodyScale = o->Owner->Scale;
+        float fLight = 1.035f;
+        if (o->LifeTime >= 35)
+        {
+            o->Light[0] *= pow(1.0f / (fLight), FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(1.0f / (fLight), FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(1.0f / (fLight), FPS_ANIMATION_FACTOR);
+        }
+        else
+        {
+            o->Light[0] *= pow(fLight, FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(fLight, FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(fLight, FPS_ANIMATION_FACTOR);
+        }
+        BMD* pModel = &Models[o->Owner->Type];
+        vec3_t vPos;
+        const int nBoneCount = 14;
+        int nBone[nBoneCount] = {20, 20, 19, 18, 17, 2, 35, 26, 36, 27, 37, 28, 39, 30};
+        float fScale[nBoneCount] = {1.5f, 1.5f, 0.6f, 1.1f, 0.9f, 0.8f, 0.6f, 0.6f, 0.8f, 0.8f, 0.8f, 0.8f, 0.7f, 0.7f};
+        for (int i = 0; i < nBoneCount; ++i)
+        {
+            pModel->TransformByObjectBone(vPos, o->Owner, nBone[i]);
+            CreateSprite(o->Type, vPos, o->Scale * fScale[i], o->Light, o->Owner);
+        }
+    }
+    break;
+    case MODEL_SWELL_OF_MAGICPOWER_BUFF_EFF:
+    {
+        if (o->SubType == 0)
+        {
+            BMD* pModel = &Models[o->Owner->Type];
+            vec3_t vPos, vDLight;
+            if (o->Owner->Type != MODEL_PLAYER)
+                break;
+            pModel->BodyScale = o->Owner->Scale;
+
+            float fLumi = (absf((sinf(WorldTime * 0.001f))) + 0.2f) * 0.5f;
+            // 							if( fLumi >= 0.5f)
+            // 							{
+            // 								fLumi = 0.5f;
+            // 							}
+            Vector(fLumi * 0.7f, fLumi * 0.3f, fLumi * 0.9f, vDLight);
+
+            for (int i = 0; i < pModel->NumBones; i++)
+            {
+                pModel->TransformByObjectBone(vPos, o->Owner, i);
+
+                CreateSprite(BITMAP_LIGHT, vPos, 1.8f, vDLight, o);
+            }
+        }
+    }
+    break;
+    case MODEL_SWORDLEFT01_EMPIREGUARDIAN_BOSS_GAION_:
+    case MODEL_SWORDLEFT02_EMPIREGUARDIAN_BOSS_GAION_:
+    case MODEL_SWORDRIGHT01_EMPIREGUARDIAN_BOSS_GAION_:
+    case MODEL_SWORDRIGHT02_EMPIREGUARDIAN_BOSS_GAION_:
+    case MODEL_SWORDMAIN01_EMPIREGUARDIAN_BOSS_GAION_:
+        SpawnGaionSwordLights(o);
+        break;
+    case BITMAP_LIGHT_RED:
+        if (o->SubType == 0)
+        {
+            vec3_t Light, Angle;
+            int arr[17] = {12, 17, 5, 10, 36, 27, 37, 28, 11, 35, 2, 3, 36, 20, 27, 4, 26};
+            BMD* b = &Models[o->Owner->Type];
+            b->BodyScale = o->Owner->Scale;
+            vec3_t _vPos;
+            Vector(0.f, 0.f, 0.f, Angle);
+
+            for (int i = 0; i < 17; ++i)
+            {
+                float fFadeInOut = (float)(sinf(WorldTime * 0.01f) + 1.0f) * 0.25f + 0.2f;
+                VectorCopy(o->Owner->Position, o->Position);
+                Vector(1.0f, 1.0f, 1.0f, Light);
+
+                if (i == 0 || i == 1 || i == 2)
+                {
+                    // Vector(0.0f, 0.0f, 15.0f, _vPos);
+                    Vector(0.0f, 0.0f, 0.0f, _vPos);
+                    b->TransformByObjectBone(_vPos, o->Owner, arr[i], _vPos);
+                    VectorScale(Light, fFadeInOut, Light);
+                    CreateSprite(BITMAP_LIGHT_RED, _vPos, 1.5f, Light, o);
+                }
+                else if (i == 5 || i == 12 || i == 7 || i == 8 || i == 9 || i == 14 || i == 15 || i == 16)
+                {
+                    // Vector(0.0f, 5.0f, 0.0f, _vPos);
+                    Vector(0.0f, 0.0f, 0.0f, _vPos);
+                    b->TransformByObjectBone(_vPos, o->Owner, arr[i], _vPos);
+                    fFadeInOut = (float)(sinf(WorldTime * 0.005f) + 1.0f) * 0.25f + 0.5f;
+                    VectorScale(Light, fFadeInOut, Light);
+                    CreateSprite(BITMAP_LIGHT_RED, _vPos, 1.5f, Light, o);
+                }
+                else
+                {
+                    Vector(0.0f, 0.0f, 0.0f, _vPos);
+                    b->TransformByObjectBone(_vPos, o->Owner, arr[i], _vPos);
+                    fFadeInOut = (float)(sinf(WorldTime * 0.01f) + 1.0f) * 0.3f + 0.3f;
+                    VectorScale(Light, fFadeInOut, Light);
+                    CreateSprite(BITMAP_LIGHT_RED, _vPos, 1.5f, Light, o);
+                }
+            }
+        }
+        break;
+    }
+}
+
+// The steps and spawns of the ground marks RenderEffectShadows draws, where the main scene draws them.
+static void UpdateDrawnEffectShadowState(OBJECT* o)
+{
+    if (SceneFlag != MAIN_SCENE || g_pOption == nullptr || !g_pOption->GetRenderAllEffects())
+        return;
+
+    if (o->Type == BITMAP_LIGHTNING + 1)
+    {
+        o->Scale += (0.2f) * FPS_ANIMATION_FACTOR;
+    }
+    else if (o->Type == BITMAP_MAGIC && o->SubType == 1)
+    {
+        o->Light[0] *= pow(1.0f / (1.1f), FPS_ANIMATION_FACTOR);
+        o->Light[1] *= pow(1.0f / (1.1f), FPS_ANIMATION_FACTOR);
+        o->Light[2] *= pow(1.0f / (1.1f), FPS_ANIMATION_FACTOR);
+        o->Scale += (0.05f) * FPS_ANIMATION_FACTOR;
+    }
+    else if (o->Type == BITMAP_MAGIC + 1)
+    {
+        if (o->SubType == 7)
+        {
+            VectorCopy(o->Owner->Position, o->Position);
+            o->Angle[2] += (10.0f) * FPS_ANIMATION_FACTOR;
+        }
+        else if (o->SubType == 6 && (int)o->LifeTime % 25 == 0)
+        {
+            CreateEffect(BITMAP_MAGIC + 1, o->Position, o->Angle, o->Light, 7, o->Owner);
+        }
+        else if (o->SubType == 8 && (int)o->LifeTime % 2 == 0)
+        {
+            CreateEffect(BITMAP_MAGIC + 1, o->Position, o->Angle, o->Light, 9, o->Owner);
         }
     }
 }
@@ -8716,10 +8893,27 @@ void UpdateEffectModelEffects()
     for (int i = 0; i < iEffectSize; ++i)
     {
         OBJECT* o = i < MAX_EFFECTS ? &Effects[i] : g_SkillEffects.GetEffect(i - MAX_EFFECTS);
-        if (!o->Live || o->DrawnFrame != s_effectDrawFrame || o->Type >= MAX_MODELS)
+        if (!o->Live || o->DrawnFrame != s_effectDrawFrame)
             continue;
+        if (o->Type >= MAX_MODELS)
+        {
+            UpdateDrawnEffectShadowState(o);
+            UpdateDrawnEffectSprites(o);
+            continue;
+        }
+        if (o->Type == MODEL_MULTI_SHOT1 || o->Type == MODEL_MULTI_SHOT2 || o->Type == MODEL_MULTI_SHOT3 ||
+            o->Type == MODEL_DRAGON_LOWER_DUMMY)
+        {
+            // The extra, slower animation step their draw gave them.
+            BMD* b = &Models[o->Type];
+            b->CurrentAction = o->CurrentAction;
+            b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, o->Velocity / 6.f,
+                             o->Position, o->Angle);
+        }
+        UpdateDrawnObjectHold(o);
         PlaceObjectModel(o, &Models[o->Type]);
         UpdateRenderObjectEffects(o);
+        UpdateDrawnEffectSprites(o);
     }
 }
 
@@ -8796,11 +8990,6 @@ void RenderEffectShadows()
                     if (o->SubType == 1)
                     {
                         RenderTerrainAlphaBitmap(BITMAP_MAGIC, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]);
-
-                        o->Light[0] *= pow(1.0f / (1.1f), FPS_ANIMATION_FACTOR);
-                        o->Light[1] *= pow(1.0f / (1.1f), FPS_ANIMATION_FACTOR);
-                        o->Light[2] *= pow(1.0f / (1.1f), FPS_ANIMATION_FACTOR);
-                        o->Scale += (0.05f) * FPS_ANIMATION_FACTOR;
                     }
                     else if (o->SubType == 8)
                     {
@@ -8900,11 +9089,6 @@ void RenderEffectShadows()
                     {
                         Scale = (20 - o->LifeTime) * 0.15f;
                     }
-                    if (o->SubType == 7)
-                    {
-                        VectorCopy(o->Owner->Position, o->Position);
-                        o->Angle[2] += (10.0f) * FPS_ANIMATION_FACTOR;
-                    }
                     if (o->SubType != 5 && o->SubType != 6 && o->SubType != 8)
                     {
                         switch (o->SubType)
@@ -8945,14 +9129,6 @@ void RenderEffectShadows()
                             break;
                         }
                         RenderTerrainAlphaBitmap(BITMAP_MAGIC + 1, o->Position[0], o->Position[1], Scale, Scale, Light, -o->Angle[2]);
-                    }
-                    else if (o->SubType == 6 && (int)o->LifeTime % 25 == 0)
-                    {
-                        CreateEffect(BITMAP_MAGIC + 1, o->Position, o->Angle, o->Light, 7, o->Owner);
-                    }
-                    else if (o->SubType == 8 && (int)o->LifeTime % 2 == 0)
-                    {
-                        CreateEffect(BITMAP_MAGIC + 1, o->Position, o->Angle, o->Light, 9, o->Owner);
                     }
                     break;
 
@@ -9086,7 +9262,6 @@ void RenderEffectShadows()
                     }
                     break;
                 case BITMAP_LIGHTNING + 1:
-                    o->Scale += (0.2f) * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) * 0.1f;
                     Vector(Luminosity, Luminosity, Luminosity, Light);
                     RenderTerrainAlphaBitmap(BITMAP_LIGHTNING + 1, o->Position[0], o->Position[1], o->Scale, o->Scale, Light, -o->Angle[2]);

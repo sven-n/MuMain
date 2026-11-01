@@ -26,6 +26,9 @@ bool IsCharacterDrawn(CHARACTER* c);
 void UpdateCharacterEffects();
 // Hands the camera a shake UpdateCharacterEffects requested last frame; call before the frame's damping.
 void ApplyCharacterEffectsEarthQuake();
+// A shake the update requests for the camera after its next damping, as when the draw set it; a character effect's
+// shake wins, as the characters drew later.
+void RequestEarthQuake(float value);
 
 /**
  * @brief Builds a generous axis-aligned pick box for the character selection screen.
@@ -116,7 +119,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o);
 
 void RenderGuild(OBJECT* o, int Type = -1, vec3_t vPos = NULL);
 void RenderLight(OBJECT* o, int Texture, float Scale, int Bone, float x, float y, float z);
-void RenderProtectGuildMark(CHARACTER* c);
+void SpawnProtectGuildMark(CHARACTER* c);
 
 void MakeElfHelper(CHARACTER* c);
 int GetFenrirType(CHARACTER* c);

@@ -13,6 +13,7 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "UI/Core/UIManager.h"
 #include "CSChaosCastle.h"
+#include "Engine/Object/ZzzCharacter.h"
 
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "World/MapInfra/MapManager.h"
@@ -23,6 +24,8 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
+#include <utility>
+#include <vector>
 
 extern int g_iChatInputType;
 extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
@@ -572,21 +575,35 @@ bool UpdateChaosCastleObjectEffects(OBJECT* o, BMD* b)
     return true;
 }
 
-void RenderTerrainVisual(int xi, int yi)
+namespace
 {
-    if (gMapManager.InChaosCastle() == false || Random::RangeInt(0, 7) != 0)
+// The limit-area tiles the draws since the last update drew.
+std::vector<std::pair<int, int>> s_drawnLimitTiles;
+} // namespace
+
+void NoteDrawnTerrain(int xi, int yi)
+{
+    if (gMapManager.InChaosCastle() == false)
     {
         return;
     }
 
     const CastleAreaSet* areaSet = SelectLimitArea(g_currentCastleLevel);
-    if (areaSet == nullptr)
+    if (areaSet != nullptr && IsWithinLimitArea(*areaSet, xi, yi))
     {
-        return;
+        s_drawnLimitTiles.emplace_back(xi, yi);
     }
+}
 
-    if (IsWithinLimitArea(*areaSet, xi, yi))
+void UpdateTerrainEffects()
+{
+    for (const auto& [xi, yi] : s_drawnLimitTiles)
     {
+        if (Random::RangeInt(0, 7) != 0)
+        {
+            continue;
+        }
+
         vec3_t Light = {1.f, 1.f, 1.f};
         vec3_t Angle = {0.f, 0.f, 0.f};
         vec3_t Position;
@@ -598,7 +615,8 @@ void RenderTerrainVisual(int xi, int yi)
 
         if (rand_fps_check(5))
         {
-            EarthQuake = Random::RangeFloat(-3, -1) * 0.1f;
+            RequestEarthQuake(Random::RangeFloat(-3, -1) * 0.1f);
         }
     }
+    s_drawnLimitTiles.clear();
 }

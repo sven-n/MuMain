@@ -21,6 +21,8 @@ public: // Object
     virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
     virtual void RenderFrontSideVisual();
     bool RenderMonster(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    // The wall cannons fire on every Empire Guardian map.
+    void UpdateProjectileLauncher(OBJECT* o, BMD* b);
 
 public: // Character
     virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);

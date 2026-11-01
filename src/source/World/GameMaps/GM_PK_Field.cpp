@@ -9,6 +9,7 @@
 #include <optional>
 
 #include "stdafx.h"
+#include "Engine/Object/ObjectPose.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -384,51 +385,18 @@ bool CGM_PK_Field::UpdateObjectEffects(OBJECT* o, BMD* b)
         }
     }
     return true;
-    }
-    return false;
-}
-
-bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
-{
-    if (!gMapManager.IsPKField())
+    case 67:
     {
-        return false;
-    }
-
-    if (o->Type >= MODEL_ZOMBIE_FIGHTER && o->Type <= MODEL_BURNING_LAVA_GIANT)
-    {
-        RenderMonster(o, b, ExtraMon);
-
-        return true;
-    }
-    else if (o->Type == 15)
-    {
-        b->StreamMesh = 0;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, -(int)WorldTime % 10000 * 0.0001f);
-        b->StreamMesh = -1;
-
-        return true;
-    }
-    else if (o->Type == 67)
-    {
-        b->StreamMesh = 1;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, (int)WorldTime % 10000 * 0.0001f);
-        b->StreamMesh = -1;
-        vec3_t light;
-        Vector(1.0f, 0.0f, 0.0f, light);
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        VectorCopy(light, b->BodyLight);
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.2f, 0, 0.2f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-
+        const auto bones = [o, b] { return Engine::Object::Pose::World(o, b); };
         vec3_t vLightFire, Position, vPos;
         Vector(1.0f, 0.0f, 0.0f, vLightFire);
         Vector(0.0f, 0.0f, 0.0f, vPos);
 
-        b->TransformPosition(BoneTransform[6], vPos, Position, false);
+        b->TransformPosition(bones()[6], vPos, Position, false);
         CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
 
         Vector(0.0f, 0.0f, -350.0f, vPos);
-        b->TransformPosition(BoneTransform[6], vPos, Position, false);
+        b->TransformPosition(bones()[6], vPos, Position, false);
         CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
 
         if (o->AnimationFrame >= 35 && o->AnimationFrame <= 37)
@@ -454,42 +422,88 @@ bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         Vector(0.4f, 0.1f, 0.1f, Light);
         //Vector(Random::RangeFloat(-30, -11), Random::RangeFloat(-30, -11), 0.0f, p);
         Vector(-150.0f, 0.0f, 0.0f, p);
-        b->TransformPosition(BoneTransform[4], p, Pos, false);
+        b->TransformPosition(bones()[4], p, Pos, false);
         if (o->AnimationFrame >= 35.0f && o->AnimationFrame < 50.0f)
             CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 63, o->Scale * 1.5f);
-
-        return true;
     }
-    else if (o->Type == 68)
+        return true;
+    case 68:
     {
-        b->StreamMesh = 1;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, (int)WorldTime % 10000 * 0.0001f);
-        b->StreamMesh = -1;
-
-        vec3_t light;
-        Vector(1.0f, 0.0f, 0.0f, light);
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        VectorCopy(light, b->BodyLight);
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.2f, 0, 0.2f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-
+        const auto bones = [o, b] { return Engine::Object::Pose::World(o, b); };
         vec3_t vLightFire, Position, vPos;
         Vector(1.0f, 0.0f, 0.0f, vLightFire);
         Vector(0.0f, 0.0f, 0.0f, vPos);
 
-        b->TransformPosition(BoneTransform[6], vPos, Position, false);
+        b->TransformPosition(bones()[6], vPos, Position, false);
         CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
 
         Vector(0.0f, 0.0f, -350.0f, vPos);
-        b->TransformPosition(BoneTransform[6], vPos, Position, false);
+        b->TransformPosition(bones()[6], vPos, Position, false);
         CreateSprite(BITMAP_LIGHT, Position, o->Scale * 5.0f, vLightFire, o);
 
         vec3_t p, Pos, Light;
         //Vector(0.08f, 0.08f, 0.08f, Light);
         Vector(0.3f, 0.1f, 0.1f, Light);
         Vector(Random::RangeFloat(-30, -11), Random::RangeFloat(-30, -11), 0.0f, p);
-        b->TransformPosition(BoneTransform[4], p, Pos, false);
+        b->TransformPosition(bones()[4], p, Pos, false);
         if (o->AnimationFrame >= 7.0f && o->AnimationFrame < 13.0f)
             CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 18, o->Scale * 1.5f);
+    }
+        return true;
+    }
+    return false;
+}
+
+bool CGM_PK_Field::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+{
+    if (!gMapManager.IsPKField())
+    {
+        return false;
+    }
+
+    if (o->Type >= MODEL_ZOMBIE_FIGHTER && o->Type <= MODEL_BURNING_LAVA_GIANT)
+    {
+        RenderMonster(o, b, ExtraMon);
+
+        return true;
+    }
+    else if (o->Type == 15)
+    {
+        b->StreamMesh = 0;
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      -(int)WorldTime % 10000 * 0.0001f);
+        b->StreamMesh = -1;
+
+        return true;
+    }
+    else if (o->Type == 67)
+    {
+        b->StreamMesh = 1;
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      (int)WorldTime % 10000 * 0.0001f);
+        b->StreamMesh = -1;
+        vec3_t light;
+        Vector(1.0f, 0.0f, 0.0f, light);
+        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        VectorCopy(light, b->BodyLight);
+        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.2f, 0, 0.2f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+
+        return true;
+    }
+    else if (o->Type == 68)
+    {
+        b->StreamMesh = 1;
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      (int)WorldTime % 10000 * 0.0001f);
+        b->StreamMesh = -1;
+
+        vec3_t light;
+        Vector(1.0f, 0.0f, 0.0f, light);
+        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        VectorCopy(light, b->BodyLight);
+        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.2f, 0, 0.2f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
         return true;
     }
@@ -618,11 +632,14 @@ bool CGM_PK_Field::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
     switch (o->Type)
     {
     case MODEL_ZOMBIE_FIGHTER:
-    {
-    }
-    return true;
     case MODEL_GLADIATOR:
     {
+        auto fRotation = (float)((int)(WorldTime * 0.1f) % 360);
+        float fAngle = (sinf(WorldTime * 0.004f) + 1.0f) * 0.4f + 0.2f;
+        vec3_t vWorldPos;
+        Vector(0.1f, 0.4f, 0.5f, vLight);
+        b->TransformByObjectBone(vWorldPos, o, 9);
+        CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
     }
     return true;
     case MODEL_SLAUGHTERER:
@@ -697,6 +714,9 @@ bool CGM_PK_Field::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
         {
             if ((int)o->LifeTime == 100)
             {
+                CreateEffect(o->Type == MODEL_BLOOD_ASSASSIN ? MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY
+                                                             : MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY,
+                             o->Position, o->Angle, o->Light, 0, o, 0, 0);
                 o->LifeTime = 90;
                 o->m_bRenderShadow = false;
 
@@ -809,18 +829,12 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         return false;
     }
 
-    auto fRotation = (float)((int)(WorldTime * 0.1f) % 360);
     float fAngle = (sinf(WorldTime * 0.004f) + 1.0f) * 0.4f + 0.2f;
-    vec3_t vWorldPos, vLight;
-    Vector(0.1f, 0.4f, 0.5f, vLight);
 
     switch (o->Type)
     {
     case MODEL_ZOMBIE_FIGHTER:
     {
-        b->TransformByObjectBone(vWorldPos, o, 9);
-        CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
-
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         DisableDepthTest();
@@ -830,9 +844,6 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     return true;
     case MODEL_GLADIATOR:
     {
-        b->TransformByObjectBone(vWorldPos, o, 9);
-        CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
-
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         DisableDepthTest();
@@ -855,26 +866,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     case MODEL_BLOOD_ASSASSIN:
     case MODEL_CRUEL_BLOOD_ASSASSIN:
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if ((int)o->LifeTime == 100)
-            {
-                switch (o->Type)
-                {
-                case MODEL_BLOOD_ASSASSIN:
-                {
-                    CreateEffect(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY, o->Position, o->Angle, o->Light, 0, o, 0, 0);
-                }
-                break;
-                case MODEL_CRUEL_BLOOD_ASSASSIN:
-                {
-                    CreateEffect(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY, o->Position, o->Angle, o->Light, 0, o, 0, 0);
-                }
-                break;
-                }
-            }
-        }
-        else
+        if (o->CurrentAction != MONSTER01_DIE)
         {
             float fBlendMeshLight = 0.0f;
             fBlendMeshLight = (sinf(WorldTime * 0.005f) + 1.0f) * 0.3f + 0.3f;

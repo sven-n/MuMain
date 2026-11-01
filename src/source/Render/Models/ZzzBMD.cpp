@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include <cstdint>
 // u_char is used below. On glibc it arrives transitively through other
 // headers; musl targets (Emscripten) need its declaring header explicitly.
@@ -999,6 +1000,7 @@ void BMD::RotationPosition(float(*Matrix)[4], vec3_t Position, vec3_t WorldPosit
 
 bool BMD::PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsigned short* PriorAction, float Speed, vec3_t Origin, vec3_t Angle)
 {
+    Diagnostics::DrawSpawnCheck::Note("play-animation");
     bool Loop = true;
 
     if (AnimationFrame == nullptr || PriorAnimationFrame == nullptr || PriorAction == nullptr || (NumActions > 0 && CurrentAction >= NumActions))

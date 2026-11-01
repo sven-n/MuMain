@@ -320,13 +320,20 @@ void PlaceObjectModel(const OBJECT* o, BMD* b)
     }
 }
 
-bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
+void UpdateDrawnObjectHold(OBJECT* o)
 {
     if (gMapManager.InChaosCastle() == true && Hero->Object.m_bActionStart == true)
     {
         o->Alpha -= 0.15f * FPS_ANIMATION_FACTOR;
     }
+    if (o->Owner != NULL && (g_isCharacterBuff(o->Owner, eDeBuff_Stun) || g_isCharacterBuff(o->Owner, eDeBuff_Sleep)))
+    {
+        o->AnimationFrame = 0.f;
+    }
+}
 
+bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
+{
     if (o->Alpha < 0.01f)
     {
         return false;
@@ -336,14 +343,6 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
     b->ContrastEnable = o->ContrastEnable;
     BodyLight(o, b);
     PlaceObjectModel(o, b);
-
-    if (o->Owner != NULL)
-    {
-        if (g_isCharacterBuff(o->Owner, eDeBuff_Stun) || g_isCharacterBuff(o->Owner, eDeBuff_Sleep))
-        {
-            o->AnimationFrame = 0.f;
-        }
-    }
 
     AnimateObjectBones(o, b, Translate);
 
@@ -428,11 +427,6 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 
 bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select)
 {
-    if (gMapManager.InChaosCastle() == true && Hero->Object.m_bActionStart)
-    {
-        o->Alpha -= 0.15f * FPS_ANIMATION_FACTOR;
-    }
-
     if (o->Alpha < 0.01f) return false;
 
     BMD* b = &Models[o->Type];
@@ -1389,8 +1383,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     }
                                                     else if (o->Type == MODEL_DESAIR)
                                                     {
-                                                        Vector(1.f, 1.f, 1.f, o->Light);
-                                                        VectorCopy(o->Light, b->BodyLight);
+                                                        Vector(1.f, 1.f, 1.f, b->BodyLight);
                                                         b->RenderBody(RENDER_TEXTURE | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                     }
                                                     else if (o->Type == MODEL_DARK_SCREAM)
@@ -1488,24 +1481,6 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     {
                                                         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                         b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, -WorldTime * 0.0002f, o->BlendMeshTexCoordV, BITMAP_CHROME);
-                                                        vec3_t vPos, vRelativePos, vLight;
-                                                        Vector(1.f, 1.f, 1.f, vLight);
-                                                        Vector(18.f, 0.f, 6.f, vRelativePos);
-                                                        b->TransformPosition(BoneTransform[0], vRelativePos, vPos, true);
-                                                        float fLumi = (sinf(WorldTime * 0.004f) + 1.0f) * 0.05f;
-                                                        Vector(0.8f + fLumi, 0.8f + fLumi, 0.3f + fLumi, o->Light);
-                                                        CreateSprite(BITMAP_LIGHT, vPos, 0.4f, o->Light, o, 0.5f);
-                                                        if (rand_fps_check(15))
-                                                        {
-                                                            CreateParticle(BITMAP_SHINY, vPos, o->Angle, vLight, 5, 0.5f);
-                                                        }
-                                                        Vector(-18.f, 0.f, 6.f, vRelativePos);
-                                                        b->TransformPosition(BoneTransform[0], vRelativePos, vPos, true);
-                                                        CreateSprite(BITMAP_LIGHT, vPos, 0.4f, o->Light, o, 0.5f);
-                                                        if (rand_fps_check(15))
-                                                        {
-                                                            CreateParticle(BITMAP_SHINY, vPos, o->Angle, vLight, 5, 0.5f);
-                                                        }
                                                     }
                                                     else if (o->Type == MODEL_XMAS_EVENT_ICEHEART)
                                                     {
@@ -1691,7 +1666,8 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     b->TransformPosition(o->BoneTransform[58], vRelativePos, vWorldPos, true);
                     RenderAurora(BITMAP_LIGHTMARKS, RENDER_BRIGHT, vWorldPos[0], vWorldPos[1], 2.0f, 2.0f, Light);
 
-                    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
                 else if (o->Type == MODEL_CURSED_SANTA)
                 {
@@ -1721,8 +1697,10 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     }
                     else
                     {
-                        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                     }
                 }
                 else if (o->Type >= MODEL_LITTLESANTA && o->Type <= MODEL_LITTLESANTA_END)
@@ -1735,56 +1713,77 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     RenderAurora(BITMAP_LIGHTMARKS, RENDER_BRIGHT, o->Position[0], o->Position[1], 0.5f + fLumi,
                                  0.5 + fLumi, vLight);
 
-                    b->RenderBody(RENDER_TEXTURE, 0.9f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+                    b->RenderBody(RENDER_TEXTURE, 0.9f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV);
                     Vector(b->BodyLight[0] * 0.5f, b->BodyLight[0] * 0.5f, b->BodyLight[0] * 0.5f, b->BodyLight);
-                    b->RenderBody(RENDER_BRIGHT | RENDER_TEXTURE, 0.9f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+                    b->RenderBody(RENDER_BRIGHT | RENDER_TEXTURE, 0.9f, o->BlendMesh, o->BlendMeshLight,
+                                  o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                 }
                 else if (o->Type == MODEL_DUEL_NPC_TITUS)
                 {
-                    b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                    b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                    b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                    b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU, WorldTime * 0.0001f);
+                    b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV);
+                    b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV);
+                    b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV);
+                    b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV);
+                    b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight,
+                                  o->BlendMeshTexCoordU, WorldTime * 0.0001f);
                 }
 #ifdef ASG_ADD_TIME_LIMIT_QUEST_NPC
                 else if (o->Type == MODEL_GAMBLE_NPC_MOSS || o->Type == MODEL_TIME_LIMIT_QUEST_NPC_ZAIRO)
-#else	// ASG_ADD_TIME_LIMIT_QUEST_NPC
+#else  // ASG_ADD_TIME_LIMIT_QUEST_NPC
                 else if (o->Type == MODEL_GAMBLE_NPC_MOSS)
-#endif	// ASG_ADD_TIME_LIMIT_QUEST_NPC
+#endif // ASG_ADD_TIME_LIMIT_QUEST_NPC
                 {
                     b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
                 else if (o->Type == MODEL_DOPPELGANGER_NPC_LUGARD)
                 {
-                    b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                    b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                    b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                    b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                    b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+                    b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV);
+                    b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV);
+                    b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV);
+                    b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV);
+                    b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV);
                     // 날개
                     Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
-                    b->RenderMesh(5, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                    b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 5, 0.1f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+                    b->RenderMesh(5, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV);
+                    b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 5, 0.1f, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV);
                 }
                 else if (o->Type == MODEL_DOPPELGANGER_NPC_BOX || o->Type == MODEL_DOPPELGANGER_NPC_GOLDENBOX)
                 {
                     if (o->Type == MODEL_DOPPELGANGER_NPC_BOX)
                     {
-                        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+                        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+                        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
                     }
                     else if (o->Type == MODEL_DOPPELGANGER_NPC_GOLDENBOX)
                     {
-                        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_GOLDENBOX2);
-                        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_GOLDENBOX1);
-                        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME7, 0.5f, 1, 0.3f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+                        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_GOLDENBOX2);
+                        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_GOLDENBOX1);
+                        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+                        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME7, 0.5f, 1, 0.3f, o->BlendMeshTexCoordU,
+                                      o->BlendMeshTexCoordV);
                     }
                 }
                 else if (o->Type == MODEL_DOPPELGANGER_SLIME_CHIP)
                 {
-                    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                                  o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
                 else if (o->Type == MODEL_FIRE_FLAME_GHOST)
                 {
@@ -1943,66 +1942,75 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 }
                 else if (o->Type == MODEL_DRAGON_LOWER_DUMMY)
                 {
-                    Vector(1.0f, 0.8f, 0.2f, o->Light);
-                    VectorCopy(o->Light, b->BodyLight);
+                    Vector(1.0f, 0.8f, 0.2f, b->BodyLight);
                     VectorScale(b->BodyLight, o->Alpha, b->BodyLight);
                     // grandmark2.jpg
                     b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU, -(int)WorldTime % 2000 * 0.0001f);
                     b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 2, o->BlendMeshLight, o->BlendMeshTexCoordU, -(int)WorldTime % 2000 * 0.0001f);
 
-                    Vector(1.0f, 0.2f, 0.1f, o->Light);
-                    VectorCopy(o->Light, b->BodyLight);
+                    Vector(1.0f, 0.2f, 0.1f, b->BodyLight);
                     VectorScale(b->BodyLight, o->Alpha, b->BodyLight);
                     // lines2.jpg
-                    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, o->BlendMeshLight, o->BlendMeshTexCoordU, -(int)WorldTime % 2000 * 0.0001f);
+                    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, o->BlendMeshLight,
+                                  o->BlendMeshTexCoordU, -(int)WorldTime % 2000 * 0.0001f);
                 }
                 else if (o->Type == MODEL_VOLCANO_OF_MONK)
                 {
                     if (o->SubType == 1)
                     {
                         VectorCopy(o->Light, b->BodyLight);
-                        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                      o->BlendMeshTexCoordV, o->HiddenMesh);
 
-                        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_VOLCANO_CORE);
+                        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight,
+                                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_VOLCANO_CORE);
                     }
                 }
                 else if (o->Type == MODEL_VOLCANO_STONE)
                 {
                     VectorCopy(o->Light, b->BodyLight);
-                    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
                 else if (o->Type == MODEL_SWORD_FORCE)
                 {
                     if (o->SubType == 2 || o->SubType == 3)
                     {
-                        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_KNIGHTST_BLUE);
+                        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                      o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_KNIGHTST_BLUE);
                     }
                     else
                     {
-                        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                      o->BlendMeshTexCoordV, o->HiddenMesh);
                     }
                 }
                 else
                 {
-                    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
                 if (g_isCharacterBuff(o, eDeBuff_Freeze))
                 {
-                    b->RenderBody(RENDER_TEXTURE, o->Alpha, -2, 1.f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                    b->RenderBody(RENDER_TEXTURE, o->Alpha, -2, 1.f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
+                                  o->HiddenMesh);
                 }
                 else if (g_isCharacterBuff(o, eDeBuff_BlowOfDestruction))
                 {
                     Vector(0.3f, 0.5f, 1.f, b->BodyLight);
-                    b->RenderBody(RENDER_TEXTURE, o->Alpha, -2, 1.f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                    b->RenderBody(RENDER_TEXTURE, o->Alpha, -2, 1.f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
+                                  o->HiddenMesh);
                 }
 
                 if (o->Type == MODEL_HYDRA)
                 {
                     b->BeginRender(o->Alpha);
                     float Light = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
-                    b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, 0, Light, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, b->IndexTexture[6]);
+                    b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, 0, Light, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
+                                  b->IndexTexture[6]);
                     float TexCoord = (float)((int)WorldTime % 100) * 0.01f;
-                    b->RenderMesh(3, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, 3, Light, o->BlendMeshTexCoordU, -TexCoord);
+                    b->RenderMesh(3, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, 3, Light, o->BlendMeshTexCoordU,
+                                  -TexCoord);
                     b->EndRender();
                 }
                 if (o->Type == MODEL_NPC_ARCHANGEL_MESSENGER || o->Type == MODEL_NPC_ARCHANGEL)
@@ -2015,7 +2023,8 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                     b->BodyLight[1] = 1.0f;
                     b->BodyLight[2] = 1.0f;
 
-                    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, -2, 1.f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                    b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, -2, 1.f, o->BlendMeshTexCoordU,
+                                  o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
             }
     }
@@ -2080,6 +2089,14 @@ void UpdateRenderObjectEffects(OBJECT* o)
 
     switch (o->Type)
     {
+    case MODEL_DESAIR:
+        // The light its draw left on it.
+        Vector(1.f, 1.f, 1.f, o->Light);
+        break;
+    case MODEL_DRAGON_LOWER_DUMMY:
+        // The light its draw left on it, which its sparks take.
+        Vector(1.0f, 0.2f, 0.1f, o->Light);
+        break;
     case MODEL_FRED:
     {
         MoveEye(o, b, 14, 15, 71, 72, 73, 74);
@@ -3615,12 +3632,18 @@ void UpdateObjectEffects()
         return;
     updatedFrame = s_objectDrawFrame;
 
+    // The pulse the Crywolf flares bob with.
+    if (Time_Effect > 40)
+        Time_Effect = 0;
+    Time_Effect += FPS_ANIMATION_FACTOR;
+
     for (OBJECT_BLOCK& ob : ObjectBlock)
     {
         for (OBJECT* o = ob.Head; o != nullptr; o = o->Next)
         {
             if (o->DrawnFrame != s_objectDrawFrame)
                 continue;
+            UpdateDrawnObjectHold(o);
             PlaceObjectModel(o, &Models[o->Type]);
             UpdateObjectVisual(o);
         }
@@ -3669,10 +3692,6 @@ void RenderObjects()
     {
         range = -10.f;
     }
-
-    if (Time_Effect > 40)
-        Time_Effect = 0;
-    Time_Effect += FPS_ANIMATION_FACTOR;
 
     for (int i = 0; i < 16; i++)
     {
@@ -3933,10 +3952,6 @@ void RenderObjects_AfterCharacter()
     {
         range = -10.f;
     }
-
-    if (Time_Effect > 40)
-        Time_Effect = 0;
-    Time_Effect += FPS_ANIMATION_FACTOR;
 
     for (int i = 0; i < 16; i++)
     {
@@ -6071,9 +6086,55 @@ static void HandleItemOnGround(OBJECT* o)
         if (orbitalCam)
         {
             float cameraYaw = orbitalCam->GetTotalYaw();
-            o->Angle[2] += cameraYaw;  // Add camera yaw to default angle
+            o->Angle[2] += cameraYaw; // Add camera yaw to default angle
         }
     }
+}
+
+// Where RenderItems draws a ground item: some maps bob it.
+static void DrawnItemPosition(int i, const vec3_t position, vec3_t drawn)
+{
+    VectorCopy(position, drawn);
+    if (gMapManager.WorldActive == WD_10HEAVEN)
+    {
+        drawn[2] += 10.0f * (float)sinf((float)(i * 1237 + WorldTime) * 0.002f);
+    }
+    else if (gMapManager.WorldActive == WD_39KANTURU_3RD && g_Direction.m_CKanturu.IsMayaScene())
+    {
+        drawn[2] += 10.0f * (float)sinf((float)(i * 1237 + WorldTime) * 0.002f);
+    }
+    else if (gMapManager.InHellas() == true)
+    {
+        drawn[2] = GetWaterTerrain(position[0], position[1]) + 180;
+    }
+}
+
+void ItemHeight(int Type, BMD* b);
+
+// The sprites a ground item's effect spawns, posed and placed as RenderItems draws it; its sprites stay out of the
+// bloom like its draw.
+static void SpawnGroundItemEffects(int i)
+{
+    OBJECT* o = &Items[i].Object;
+    const int drawnModel = Render::Items::Display::GetDrawnModel(o->Type, DrawnItemLevel(Items[i].Item));
+    if (o->Alpha <= 0.01f || o->EnableShadow || Render::Items::Display::IsDrawnOnCharacterSkeleton(drawnModel) ||
+        !PartObjectSpawns(o, drawnModel))
+        return;
+
+    BMD* b = &Models[drawnModel];
+    b->CurrentAction = o->CurrentAction;
+    ItemHeight(o->Type, b);
+    b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle,
+                 false, false);
+    b->BodyScale = o->Scale;
+
+    vec3_t position;
+    VectorCopy(o->Position, position);
+    DrawnItemPosition(i, position, o->Position);
+    VectorCopy(o->Position, b->BodyOrigin);
+    const mu::ScopedBloomExclusion classicItems;
+    SpawnPartObjectEffect(b, o, drawnModel, BoneTransform);
+    VectorCopy(position, o->Position);
 }
 
 void MoveItems()
@@ -6108,6 +6169,9 @@ void MoveItems()
             {
                 CreateShiny(o);
             }
+
+            if (o->Visible)
+                SpawnGroundItemEffects(i);
         }
     }
 }
@@ -6222,18 +6286,7 @@ void RenderItems()
 
                 vec3_t vBackup;
                 VectorCopy(o->Position, vBackup);
-                if (gMapManager.WorldActive == WD_10HEAVEN)
-                {
-                    o->Position[2] += 10.0f * (float)sinf((float)(i * 1237 + WorldTime) * 0.002f);
-                }
-                else if (gMapManager.WorldActive == WD_39KANTURU_3RD && g_Direction.m_CKanturu.IsMayaScene())
-                {
-                    o->Position[2] += 10.0f * (float)sinf((float)(i * 1237 + WorldTime) * 0.002f);
-                }
-                else if (gMapManager.InHellas() == true)
-                {
-                    o->Position[2] = GetWaterTerrain(o->Position[0], o->Position[1]) + 180;
-                }
+                DrawnItemPosition(i, vBackup, o->Position);
 
                 RenderPartObject(o, o->Type, NULL, Light, o->Alpha, DrawnItemLevel(Items[i].Item),
                                  Items[i].Item.ExcellentFlags, Items[i].Item.AncientDiscriminator, true, true, true);
@@ -6876,7 +6929,7 @@ void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int Re
     Render::Items::Glow::RenderShine(b, o, Type, Alpha, RenderType, Texture);
 }
 
-void NextGradeObjectRender(CHARACTER* c)
+void SpawnNextGradeWeaponEffects(CHARACTER* c)
 {
     int weaponIndex;
     int weaponIndex2;
@@ -6939,7 +6992,12 @@ void NextGradeObjectRender(CHARACTER* c)
         }break;
         }//switch
     } //for
+}
 
+void NextGradeObjectRender(CHARACTER* c)
+{
+    int Level;
+    PART_t* w;
     int bornIndex[2]{}; // left, right;
     int gradeType[2]{}; // left, right;
 
@@ -6996,8 +7054,6 @@ void NextGradeObjectRender(CHARACTER* c)
             break;
         }
 
-        OBJECT* o = &c->Object;
-
         for (int m = 0; m < 2; m++)
         {
             if (gradeType[m] == -1) continue;
@@ -7007,19 +7063,7 @@ void NextGradeObjectRender(CHARACTER* c)
             case 15: // +15
             {
                 w->LinkBone = bornIndex[m];
-                vec34_t* bones = RenderLinkObject(0.f, 0.f, 0.f, c, w, gradeType[m], 0, 0, true, true);
-
-                b->TransformByBoneMatrix(vPos, bones[0], o->Position);
-
-                fLight2 = absf(sinf(WorldTime * 0.01f));
-                Vector(0.2f * fLight2, 0.4f * fLight2, 1.0f * fLight2, vLight);
-                CreateSprite(BITMAP_MAGIC, vPos, 0.12f, vLight, o);
-
-                Vector(0.4f, 0.7f, 1.0f, vLight);
-                CreateSprite(BITMAP_SHINY + 5, vPos, 0.4f, vLight, o);
-
-                Vector(0.1f, 0.3f, 1.0f, vLight);
-                CreateSprite(BITMAP_PIN_LIGHT, vPos, 0.6f, vLight, o, 90.0f);
+                RenderLinkObject(0.f, 0.f, 0.f, c, w, gradeType[m], 0, 0, true, true);
             }break;
             }
         }
@@ -7066,17 +7110,6 @@ static Render::Items::ItemEffects::Result ApplyEventModelEffect(BMD* b, OBJECT* 
     }
     if (o->Type == MODEL_EVENT + 12)
     {
-        float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
-        vec3_t p, Position, EffLight;
-        Vector(0.f, 0.f, 15.f, p);
-
-        float Scale = Luminosity * 0.8f + 2.f;
-        Vector(Luminosity * 0.32f, Luminosity * 0.32f, Luminosity * 2.f, EffLight);
-
-        b->TransformPosition(BoneTransform[0], p, Position);
-        VectorAdd(Position, o->Position, Position);
-
-        CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
         return Result::Applied;
     }
     if (o->Type == MODEL_EVENT + 6 && Level == 13)
@@ -7088,20 +7121,8 @@ static Render::Items::ItemEffects::Result ApplyEventModelEffect(BMD* b, OBJECT* 
     }
     if (o->Type == MODEL_EVENT + 13)
     {
-        float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
-        vec3_t p, Position, EffLight;
-        Vector(0.f, -5.f, -15.f, p);
-
-        float Scale = Luminosity * 0.8f + 2.5f;
-        Vector(Luminosity * 2.f, Luminosity * 0.32f, Luminosity * 0.32f, EffLight);
-
         b->StreamMesh = 0;
         o->BlendMeshTexCoordV = (int)-WorldTime % 4000 * 0.00025f;
-
-        b->TransformPosition(BoneTransform[0], p, Position);
-        VectorAdd(Position, o->Position, Position);
-
-        CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
         return Result::Applied;
     }
     if (Type == MODEL_EVENT + 18)
@@ -7120,6 +7141,62 @@ Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, OBJECT* o, int 
     const Render::Items::ItemEffects::Result effect = Render::Items::ItemEffects::Apply(b, o, Type, Alpha, Level);
     return effect != Render::Items::ItemEffects::Result::None ? effect
                                                               : ApplyEventModelEffect(b, o, Type, Level, ItemLevel);
+}
+
+// The two event models that spark have no item effect of their own.
+static bool IsSparkingEventModel(const OBJECT* o)
+{
+    return o->Type == MODEL_EVENT + 12 || o->Type == MODEL_EVENT + 13;
+}
+
+bool PartObjectSpawns(const OBJECT* o, int Type)
+{
+    return Render::Items::ItemEffects::Spawns(Type) || Render::Items::Styles::Spawns(Type) || IsSparkingEventModel(o);
+}
+
+void SpawnPartObjectEffect(BMD* b, OBJECT* o, int Type, vec34_t* bones)
+{
+    if (Render::Items::ItemEffects::Spawns(Type))
+    {
+        Render::Items::ItemEffects::Spawn(b, o, Type, bones);
+        return;
+    }
+    if (Render::Items::Styles::Spawns(Type))
+    {
+        Render::Items::Styles::Spawn(b, o, Type, bones);
+        return;
+    }
+    if (!IsSparkingEventModel(o))
+        return;
+
+    const bool red = o->Type == MODEL_EVENT + 13;
+    float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
+    vec3_t p, Position, EffLight;
+    if (red)
+    {
+        Vector(0.f, -5.f, -15.f, p);
+        Vector(Luminosity * 2.f, Luminosity * 0.32f, Luminosity * 0.32f, EffLight);
+    }
+    else
+    {
+        Vector(0.f, 0.f, 15.f, p);
+        Vector(Luminosity * 0.32f, Luminosity * 0.32f, Luminosity * 2.f, EffLight);
+    }
+    const float Scale = Luminosity * 0.8f + (red ? 2.5f : 2.f);
+
+    b->TransformPosition(bones[0], p, Position);
+    VectorAdd(Position, o->Position, Position);
+    CreateSprite(BITMAP_SPARK + 1, Position, Scale, EffLight, o);
+}
+
+void RefreshStunSkull(OBJECT* o, vec3_t Light)
+{
+    // RenderPartObjectEffect shows the stun's tint only without cloak, poison or Blow of Destruction.
+    if (g_isCharacterBuff(o, eBuff_Cloaking) || g_isCharacterBuff(o, eDeBuff_Poison) ||
+        g_isCharacterBuff(o, eDeBuff_BlowOfDestruction) || !g_isCharacterBuff(o, eDeBuff_Stun))
+        return;
+    DeleteEffect(BITMAP_SKULL, o, 5);
+    CreateEffect(BITMAP_SKULL, o->Position, o->Angle, Light, 5, o);
 }
 
 extern float g_Luminosity;
@@ -7222,8 +7299,6 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         }
         else if (g_isCharacterBuff(o, eDeBuff_Stun))
         {
-            DeleteEffect(BITMAP_SKULL, o, 5);
-            CreateEffect(BITMAP_SKULL, o->Position, o->Angle, Light, 5, o);
             Vector(Luminosity * 0.f, Luminosity * 0.f, Luminosity * 1.0f, b->BodyLight);
             RenderPartObjectBody(b, o, Type, Alpha, RenderType);
         }

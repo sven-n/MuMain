@@ -3,6 +3,7 @@
 
 #include "Engine/AI/GOBoid.h"
 #include "Character/CSParts.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/ObjectPose.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -10,14 +11,33 @@
 #include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Pets/CSPetSystem.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "Render/Items/ItemEffects.h"
+#include "Render/Items/ItemRenderStyles.h"
 #include "Render/Models/ZzzBMD.h"
+#include "World/GameMaps/GMNewTown.h"
+#include "World/GameMaps/GM_PK_Field.h"
+#include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/w_MapProcess.h"
+
+#include "../data/ItemModelDatabaseScope.h"
 
 #include <cstring>
 #include <memory>
 
 namespace
 {
+// Runs a draw as the frame runs it and checks it spawned nothing.
+template <typename Draw> void CheckDrawSpawnsNone(Draw draw)
+{
+    Diagnostics::DrawSpawnCheck::ResetViolations();
+    {
+        const Diagnostics::DrawSpawnCheck::DrawScope drawing;
+        draw();
+    }
+    CHECK(Diagnostics::DrawSpawnCheck::Violations() == 0);
+}
+
 // One drawn character of the given model, alone in the client's character list.
 struct CharacterScope
 {
@@ -526,11 +546,251 @@ TEST_CASE("A character's mark spawns its sprite in the update, and its draw spaw
     };
     FenrirScope::ClearSpawns();
 
-    RenderParts(&c);
+    CheckDrawSpawnsNone([&c] { RenderParts(&c); });
     CHECK(liveSprites() == 0);
     UpdateParts(&c);
     CHECK(liveSprites() == 1);
 
     DeleteParts(&c);
     FenrirScope::ClearSpawns();
+}
+
+TEST_CASE("A wing's item effect spawns its lights on the bones it is given, and its draw spawns none [effects]")
+{
+    FenrirScope scope;
+    ItemModelDatabaseScope restoreModels;
+    Data::Items::ItemModelDefinition eternal;
+    eternal.group = 12;
+    eternal.number = 37;
+    eternal.file = "Data/Item/Wing37.bmd";
+    eternal.itemEffect = "wingOfEternal";
+    g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{eternal}, Data::Effects::GlowColorList{});
+    BMD* b = &Models[MODEL_WING_OF_ETERNAL];
+    b->BodyScale = 1.f;
+    Vector(0.f, 0.f, 0.f, b->BodyOrigin);
+    OBJECT wing;
+    wing.Type = MODEL_WING_OF_ETERNAL;
+
+    int level = 0;
+    CheckDrawSpawnsNone(
+        [&]
+        {
+            CHECK(Render::Items::ItemEffects::Apply(b, &wing, MODEL_WING_OF_ETERNAL, 1.f, level) ==
+                  Render::Items::ItemEffects::Result::Applied);
+        });
+    for (int i = 0; i < MAX_SPRITES; ++i)
+        CHECK_FALSE(Sprites[i].Live);
+
+    REQUIRE(Render::Items::ItemEffects::Spawns(MODEL_WING_OF_ETERNAL));
+    Render::Items::ItemEffects::Spawn(b, &wing, MODEL_WING_OF_ETERNAL, scope.bones.get());
+    int onPose = 0;
+    for (int i = 0; i < MAX_SPRITES; ++i)
+    {
+        if (!Sprites[i].Live)
+            continue;
+        CHECK(Sprites[i].Position[0] == FenrirScope::poseAt);
+        ++onPose;
+    }
+    CHECK(onPose == 28); // its lights
+}
+
+TEST_CASE(
+    "A New Town crystal sparks from the update on its own pose, and its after-character draw spawns none [effects]")
+{
+    FenrirScope scope;
+    const int previousWorld = gMapManager.WorldActive;
+    gMapManager.WorldActive = WD_51HOME_6TH_CHAR;
+    OBJECT crystal;
+    crystal.Live = true;
+    crystal.Type = 78;
+    crystal.Scale = 1.f;
+    crystal.BoneTransform = scope.bones.get();
+    crystal.EnableBoneMatrix = true;
+    BMD* b = &Models[crystal.Type];
+    PlaceObjectModel(&crystal, b);
+    Engine::Object::Pose::Record(&crystal, b, true);
+    auto liveSprites = []
+    {
+        int live = 0;
+        for (int i = 0; i < MAX_SPRITES; ++i)
+            live += Sprites[i].Live ? 1 : 0;
+        return live;
+    };
+
+    CheckDrawSpawnsNone([&] { SEASON3B::GMNewTown::RenderObjectAfterCharacter(&crystal, b); });
+    CHECK(liveSprites() == 0);
+    SEASON3B::GMNewTown::UpdateObjectEffects(&crystal, b);
+    CHECK(liveSprites() == 4);
+    for (int i = 0; i < MAX_SPRITES; ++i)
+    {
+        if (Sprites[i].Live)
+            CHECK(Sprites[i].Position[0] == FenrirScope::poseAt);
+    }
+
+    crystal.BoneTransform = nullptr;
+    gMapManager.WorldActive = previousWorld;
+}
+
+TEST_CASE("A dying Blood Assassin breaks apart from the update, body and head, and its draw spawns none [effects]")
+{
+    CharacterScope scope(MODEL_BLOOD_ASSASSIN);
+    CHARACTER& c = scope.character();
+    OBJECT& o = c.Object;
+    o.CurrentAction = MONSTER01_DIE;
+    o.LifeTime = 100;
+    const int previousWorld = gMapManager.WorldActive;
+    gMapManager.WorldActive = WD_63PK_FIELD;
+    auto map = CGM_PK_Field::Make();
+    BMD* b = &Models[o.Type];
+    auto liveEffects = []
+    {
+        int live = 0;
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+            live += Effects[i].Live ? 1 : 0;
+        return live;
+    };
+    FenrirScope::ClearSpawns();
+
+    CheckDrawSpawnsNone([&] { map->RenderObjectMesh(&o, b, false); });
+    CHECK(liveEffects() == 0);
+    map->UpdateMonsterEffects(&c, &o, b);
+    CHECK(liveEffects() == 2);
+    CHECK(o.LifeTime == 90);
+
+    FenrirScope::ClearSpawns();
+    gMapManager.WorldActive = previousWorld;
+}
+
+TEST_CASE("A helper's light comes from the mount update, even under a cloaked rider, as its draw spawned it [effects]")
+{
+    FenrirScope scope;
+    scope.mount.Type = MODEL_HELPER;
+    auto liveSprites = []
+    {
+        int live = 0;
+        for (int i = 0; i < MAX_SPRITES; ++i)
+            live += Sprites[i].Live ? 1 : 0;
+        return live;
+    };
+
+    UpdateDrawnMountEffects(&scope.mount);
+    CHECK(liveSprites() == 1);
+
+    FenrirScope::ClearSpawns();
+    OBJECT* rider = &scope.rider;
+    g_CharacterRegisterBuff(rider, eBuff_Cloaking);
+    UpdateDrawnMountEffects(&scope.mount);
+    CHECK(liveSprites() == 1);
+}
+
+TEST_CASE("A stunned or sleeping owner holds a drawn object at its first frame, as its draw did [effects]")
+{
+    OBJECT rider;
+    OBJECT* owner = &rider;
+    OBJECT mount;
+    mount.Owner = owner;
+    mount.Alpha = 1.f;
+    mount.AnimationFrame = 3.5f;
+
+    UpdateDrawnObjectHold(&mount);
+    CHECK(mount.AnimationFrame == 3.5f);
+    CHECK(mount.Alpha == 1.f);
+
+    g_CharacterRegisterBuff(owner, eDeBuff_Sleep);
+    UpdateDrawnObjectHold(&mount);
+    CHECK(mount.AnimationFrame == 0.f);
+}
+
+TEST_CASE("The stun skull is refreshed for a stunned object, and not while its stun tint is hidden by cloak [effects]")
+{
+    FenrirScope scope;
+    OBJECT* stunned = &scope.rider;
+    vec3_t light{1.f, 1.f, 1.f};
+    auto skulls = []
+    {
+        int live = 0;
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+            live += (Effects[i].Live && Effects[i].Type == BITMAP_SKULL && Effects[i].SubType == 5) ? 1 : 0;
+        return live;
+    };
+
+    RefreshStunSkull(stunned, light);
+    CHECK(skulls() == 0);
+
+    g_CharacterRegisterBuff(stunned, eDeBuff_Stun);
+    RefreshStunSkull(stunned, light);
+    RefreshStunSkull(stunned, light);
+    CHECK(skulls() == 1);
+
+    FenrirScope::ClearSpawns();
+    g_CharacterRegisterBuff(stunned, eBuff_Cloaking);
+    RefreshStunSkull(stunned, light);
+    CHECK(skulls() == 0);
+}
+
+TEST_CASE("A spawn while drawing is a violation, unless the draw allows it; outside a draw it is none [effects]")
+{
+    using namespace Diagnostics::DrawSpawnCheck;
+    ResetViolations();
+    Note("sprite");
+    CHECK(Violations() == 0);
+    {
+        const DrawScope drawing;
+        Note("sprite");
+        CHECK(Violations() == 1);
+        {
+            const AllowScope firstFrame;
+            Note("sprite");
+        }
+        CHECK(Violations() == 1);
+    }
+    ResetViolations();
+}
+
+TEST_CASE("Creating a sprite while drawing is counted as a violation [effects]")
+{
+    FenrirScope::ClearSpawns();
+    Diagnostics::DrawSpawnCheck::ResetViolations();
+    vec3_t position = {0.f, 0.f, 0.f}, light = {1.f, 1.f, 1.f};
+    {
+        const Diagnostics::DrawSpawnCheck::DrawScope drawing;
+        CreateSprite(BITMAP_LIGHT, position, 1.f, light, nullptr);
+    }
+    CHECK(Diagnostics::DrawSpawnCheck::Violations() == 1);
+    Diagnostics::DrawSpawnCheck::ResetViolations();
+    FenrirScope::ClearSpawns();
+}
+
+TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and its draw spawns none [effects]")
+{
+    FenrirScope scope;
+    ItemModelDatabaseScope restoreModels;
+    Data::Items::ItemModelDefinition water;
+    water.group = 14;
+    water.number = 64;
+    water.file = "Data/Item/Water.bmd";
+    water.renderStyle = "cursedCastleWater";
+    g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{water}, Data::Effects::GlowColorList{});
+    const int model = Data::Items::ToModelSlot(Data::Items::MakeItemType(14, 64));
+    BMD* b = &Models[model];
+    b->BodyScale = 1.f;
+    Vector(0.f, 0.f, 0.f, b->BodyOrigin);
+    OBJECT item;
+    item.Type = model;
+
+    CheckDrawSpawnsNone([&] { Render::Items::Styles::Render(b, &item, model, 1.f, RENDER_TEXTURE); });
+    for (int i = 0; i < MAX_SPRITES; ++i)
+        CHECK_FALSE(Sprites[i].Live);
+
+    REQUIRE(Render::Items::Styles::Spawns(model));
+    Render::Items::Styles::Spawn(b, &item, model, scope.bones.get());
+    int onPose = 0;
+    for (int i = 0; i < MAX_SPRITES; ++i)
+    {
+        if (!Sprites[i].Live)
+            continue;
+        CHECK(Sprites[i].Position[0] == FenrirScope::poseAt);
+        ++onPose;
+    }
+    CHECK(onPose == 1);
 }

@@ -241,6 +241,19 @@ bool GMNewTown::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
 
     switch (pObject->Type)
     {
+    case 78:
+    case 79:
+    {
+        vec3_t sparkP, sparkPosition, sparkLight;
+        Vector(0.0f, 0.0f, 0.0f, sparkP);
+        Vector(0.1f, 0.1f, 0.3f, sparkLight);
+        for (int i = 1; i <= (pObject->Type == 78 ? 4 : 6); ++i)
+        {
+            pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[i], sparkP, sparkPosition, false);
+            CreateSprite(BITMAP_SPARK + 1, sparkPosition, 5.5f, sparkLight, pObject);
+        }
+    }
+    break;
     case 0:
         if (rand_fps_check(3))
         {
@@ -830,28 +843,12 @@ void GMNewTown::RenderObjectAfterCharacter(OBJECT* pObject, BMD* pModel, bool Ex
     {
         pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
         pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        vec3_t p, Position, Light;
-        for (int i = 1; i <= 4; ++i)
-        {
-            Vector(0.0f, 0.0f, 0.0f, p);
-            pModel->TransformPosition(BoneTransform[i], p, Position, false);
-            Vector(0.1f, 0.1f, 0.3f, Light);
-            CreateSprite(BITMAP_SPARK + 1, Position, 5.5f, Light, pObject);
-        }
     }
     else if (pObject->Type == 79)
     {
         pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
         pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
 
-        vec3_t p, Position, Light;
-        for (int i = 1; i <= 6; ++i)
-        {
-            Vector(0.0f, 0.0f, 0.0f, p);
-            pModel->TransformPosition(BoneTransform[i], p, Position, false);
-            Vector(0.1f, 0.1f, 0.3f, Light);
-            CreateSprite(BITMAP_SPARK + 1, Position, 5.5f, Light, pObject);
-        }
     }
 }
 

@@ -16,7 +16,7 @@ void RenderMount(void);
 void UpdateMountEffects();
 // The effects of one mount its last draw drew.
 void UpdateDrawnMountEffects(OBJECT* o);
-void RenderDarkHorseSkill(OBJECT* o, BMD* b);
+void UpdateDarkHorseSkill(OBJECT* o, BMD* b);
 void RenderSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill = 30);
 void DeleteMount(OBJECT* Owner);
 // �������� �� �������ΰ�?

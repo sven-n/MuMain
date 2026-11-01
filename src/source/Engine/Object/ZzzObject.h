@@ -39,7 +39,14 @@ void SkinObjectMeshes(OBJECT* o, BMD* b, bool Translate);
 void UpdateTransformSkinEffects(OBJECT* o);
 // Creates, steps and drops a body part's cloth as one RenderPartObject call with that part did; the draw renders it.
 void StepPartCloth(OBJECT* o, PART_t* p, int Type, int ItemLevel, bool Translate);
+// The sparks of a character's +15 weapons, on its own pose; RenderCharacter draws its +15 armor pieces.
+void SpawnNextGradeWeaponEffects(CHARACTER* c);
 void NextGradeObjectRender(CHARACTER* c);
+// What Calc_RenderObject did to each object it drew, for the update to do once per frame to the objects the last frame
+// drew: the hero's fall in Chaos Castle fades them, and a stunned or sleeping owner holds them at their first frame.
+void UpdateDrawnObjectHold(OBJECT* o);
+// Keeps the stun skull around an object whose stun tint its part draw shows, as that draw recreated it.
+void RefreshStunSkull(OBJECT* o, vec3_t Light);
 void RenderObject_AfterImage(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0,
                                 float AniInterval1 = 1.4f, float AniInterval2 = 0.7f);
@@ -89,6 +96,10 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
 // change the level the model glows like.
 Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, OBJECT* o, int Type, float Alpha, int& Level,
                                                          int ItemLevel);
+// Whether the item effect of the drawn model spawns sprites, particles or lightning; the update spawns them from the
+// model's pose with SpawnPartObjectEffect, b placed where the model is drawn.
+bool PartObjectSpawns(const OBJECT* o, int Type);
+void SpawnPartObjectEffect(BMD* b, OBJECT* o, int Type, vec34_t* bones);
 void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha = 0.f, int Level = 0, int ExcellentFlags = 0,
                             int ancientDiscriminator = 0, int Select = 0, int RenderType = RENDER_TEXTURE);
 void RenderPartObject(OBJECT* o, int Type, void* p, vec3_t Light, float Alpha = 0.f, int Level = 0,

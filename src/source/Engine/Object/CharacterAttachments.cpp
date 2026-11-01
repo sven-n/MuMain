@@ -75,6 +75,13 @@ Slot* Record(CHARACTER* c, _PART_t* part, int type, float x, float y, float z, i
     slot.linkBone = linkBone;
     slot.ownerScale = ownerScale;
     slot.part = own;
+    if (own == nullptr && part != nullptr)
+    {
+        if (!slot.copy)
+            slot.copy = std::make_shared<_PART_t>();
+        *slot.copy = *part;
+    }
+    slot.shadow = false;
     slot.drawnFrame = s_drawFrame;
     return &slot;
 }
@@ -134,6 +141,19 @@ void ForEachToAdvance(const CHARACTER* c, const std::function<void(Slot&)>& adva
             continue;
         slot.advancedFor = s_drawFrame;
         advance(slot);
+    }
+}
+
+void ForEachCopied(const CHARACTER* c, const std::function<void(Slot&)>& visit)
+{
+    CharacterSlots* character = SlotsOf(c);
+    if (character == nullptr)
+        return;
+    for (std::size_t i = 0; i < character->next; ++i)
+    {
+        Slot& slot = character->slots[i];
+        if (slot.part == nullptr && slot.copy && !slot.shadow && slot.drawnFrame == s_drawFrame)
+            visit(slot);
     }
 }
 } // namespace Engine::Object::Attachments

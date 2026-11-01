@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Models/BoneManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -58,6 +59,7 @@ int CreateParticleFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Lig
 
 int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType, float Scale, OBJECT* Owner)
 {
+    Diagnostics::DrawSpawnCheck::Note("particle");
     if (!g_pOption->GetRenderAllEffects())
     {
         return false;
@@ -3840,6 +3842,13 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
 
 void MoveParticles()
 {
+    // A particle its last move left below zero life is drawn so once, then counts from zero.
+    for (int i = 0; i < MAX_PARTICLES; ++i)
+    {
+        if (Particles[i].Live && Particles[i].LifeTime < 0)
+            Particles[i].LifeTime = 0;
+    }
+
     if (!g_pOption->GetRenderAllEffects())
     {
         return;
@@ -8895,6 +8904,13 @@ void MoveParticles()
             }
         }
     }
+
+    // Damage numbers brighten each frame, as their draw brightened them.
+    for (int i = 0; i < MAX_PARTICLES; ++i)
+    {
+        if (Particles[i].Live && Particles[i].Type == BITMAP_DAMAGE1)
+            VectorScale(Particles[i].Light, 2.0f, Particles[i].Light);
+    }
 }
 
 namespace
@@ -9014,8 +9030,6 @@ void RenderParticles(BYTE byRenderOneMore)
                 !TestFrustrum(o->Position, std::max(Width, Height) + 50.f))
             {
                 FrameProfiler::Count(FrameProfiler::Counter::ParticlesCulled);
-                if (o->LifeTime < 0)
-                    o->LifeTime = 0;
                 continue;
             }
             if (pBitmap->Components == 3)
@@ -9249,6 +9263,8 @@ void RenderParticles(BYTE byRenderOneMore)
                 RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
                 break;
             case BITMAP_CLOUD:
+            {
+                float rotation = o->Rotation;
                 switch (o->SubType)
                 {
                 case 10:
@@ -9264,11 +9280,11 @@ void RenderParticles(BYTE byRenderOneMore)
                 case 18:
                     if ((i % 2) == 0)
                     {
-                        o->Rotation = (WorldTime * 0.02f * o->TurningForce[0]) + o->StartPosition[1];
+                        rotation = (WorldTime * 0.02f * o->TurningForce[0]) + o->StartPosition[1];
                     }
                     else
                     {
-                        o->Rotation = (WorldTime * (-0.02f) * o->TurningForce[0]) + o->StartPosition[1];
+                        rotation = (WorldTime * (-0.02f) * o->TurningForce[0]) + o->StartPosition[1];
                     }
                     break;
                 }
@@ -9278,23 +9294,24 @@ void RenderParticles(BYTE byRenderOneMore)
                     Light[0] = o->Light[0] * o->Alpha;
                     Light[1] = o->Light[1] * o->Alpha;
                     Light[2] = o->Light[2] * o->Alpha;
-                    RenderSprite(o->TexType, o->Position, Width, Height, Light, o->Rotation);
+                    RenderSprite(o->TexType, o->Position, Width, Height, Light, rotation);
                 }
                 else if (o->SubType == 17)
                 {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
+                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, rotation);
                 }
                 else if (o->SubType == 18)
                 {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
+                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, rotation);
                 }
                 else if (o->SubType == 19)
                 {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
+                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, rotation);
                 }
                 else
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
+                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, rotation);
                 break;
+            }
             case BITMAP_SPARK:
                 if (o->SubType == 10)
                     EnableAlphaBlendMinus();
@@ -9331,11 +9348,8 @@ void RenderParticles(BYTE byRenderOneMore)
             }
             break;
             case BITMAP_DAMAGE1:
-            {
-                VectorScale(o->Light, 2.0f, o->Light);
                 RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-            }
-            break;
+                break;
             case BITMAP_SWORD_EFFECT_MONO:
             {
                 vec3_t vPos;
@@ -9356,11 +9370,6 @@ void RenderParticles(BYTE byRenderOneMore)
             default:
                 RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
                 break;
-            }
-
-            if (o->LifeTime < 0)
-            {
-                o->LifeTime = 0;
             }
         }
     }

@@ -128,6 +128,34 @@ bool ArePartsShown(CHARACTER* c)
 {
     return !g_isCharacterBuff((&c->Object), eBuff_Cloaking) && !ShouldHideCastleMarks(*c);
 }
+
+// The Christmas earring's two lights, on its bone as its draw poses it.
+void SpawnPartLights(OBJECT* o)
+{
+    if (o->Type != MODEL_XMAS_EVENT_EARRING || o->Alpha < kRenderableAlphaThreshold)
+        return;
+
+    BMD* b = &Models[o->Type];
+    static vec34_t bones[MAX_BONES];
+    PlaceObjectModel(o, b);
+    b->Animation(bones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false,
+                 false);
+
+    vec3_t vPos, vRelativePos, vLight;
+    Vector(1.f, 1.f, 1.f, vLight);
+    float fLumi = (sinf(WorldTime * 0.004f) + 1.0f) * 0.05f;
+    Vector(0.8f + fLumi, 0.8f + fLumi, 0.3f + fLumi, o->Light);
+    for (float x : {18.f, -18.f})
+    {
+        Vector(x, 0.f, 6.f, vRelativePos);
+        b->TransformPosition(bones[0], vRelativePos, vPos, true);
+        CreateSprite(BITMAP_LIGHT, vPos, 0.4f, o->Light, o, 0.5f);
+        if (rand_fps_check(15))
+        {
+            CreateParticle(BITMAP_SHINY, vPos, o->Angle, vLight, 5, 0.5f);
+        }
+    }
+}
 } // namespace
 
 void UpdateParts(CHARACTER* c)
@@ -146,10 +174,14 @@ void UpdateParts(CHARACTER* c)
     if (c->m_pTempParts != nullptr)
     {
         static_cast<CSIPartsMDL*>(c->m_pTempParts)->IUpdate(c);
+        UpdateDrawnObjectHold(static_cast<CSIPartsMDL*>(c->m_pTempParts)->GetObject());
+        SpawnPartLights(static_cast<CSIPartsMDL*>(c->m_pTempParts)->GetObject());
     }
     if (c->m_pParts != nullptr)
     {
         static_cast<CSIPartsMDL*>(c->m_pParts)->IUpdate(c);
+        UpdateDrawnObjectHold(static_cast<CSIPartsMDL*>(c->m_pParts)->GetObject());
+        SpawnPartLights(static_cast<CSIPartsMDL*>(c->m_pParts)->GetObject());
     }
 }
 

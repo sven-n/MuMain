@@ -3,6 +3,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "App/Control/DrawPurityCheck.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Input/SyntheticInput.h"
 #include <cstdio>
@@ -1174,7 +1176,12 @@ void MainScene(HDC hDC)
 
     try
     {
-        Success = RenderCurrentScene(hDC);
+        {
+            const Diagnostics::DrawSpawnCheck::DrawScope drawing;
+            Diagnostics::DrawPurityCheck::BeforeDraw();
+            Success = RenderCurrentScene(hDC);
+            Diagnostics::DrawPurityCheck::AfterDraw();
+        }
         Scenes::Lighting::SubmitDynamicLights();
 
         LogFrameTiming();
