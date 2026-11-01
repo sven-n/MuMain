@@ -458,6 +458,11 @@
 						</div>
 						<span class="opt-row-tip">{{texture_pack_tooltip}}</span>
 					</div>
+                    <div id="s6-player-models" class="opt-row opt-toggle-row opt-row-tipped" data-event-click="option_toggle_s6_player_models">
+                        <span class="opt-label">{{s6_player_models_label}}</span>
+                        <div class="opt-control"><div class="opt-toggle" data-class-checked="use_s6_player_models"><div class="opt-toggle-knob"></div></div></div>
+                        <span class="opt-row-tip">{{s6_player_models_tooltip}}</span>
+                    </div>
 					<div class="opt-row opt-toggle-row" data-event-click="option_toggle_show_fps_counter">
 						<span class="opt-label">{{show_fps_counter_label}}</span>
 						<div class="opt-control"><div class="opt-toggle" data-class-checked="show_fps_counter"><div class="opt-toggle-knob"></div></div></div>

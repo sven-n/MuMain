@@ -481,6 +481,10 @@
 		<!-- Show FPS Counter/Show Debug Info are mutually exclusive (SceneManager.h enforces it
 		     internally) -- ticking one visually unticks the other on its own next sync, no extra
 		     markup needed here for that. -->
+        <div id="s6-player-models" class="option-row option-checkbox-row option-row-tipped" data-attr-data-hint="s6_player_models_tooltip" data-event-click="option_toggle_s6_player_models">
+            <span class="option-row-label">{{s6_player_models_label}}</span>
+            <div class="checkbox-box" data-class-checked="use_s6_player_models"><div class="checkbox-tick"></div></div>
+        </div>
 		<div class="option-row option-checkbox-row" data-event-click="option_toggle_show_fps_counter">
 			<span class="option-row-label">{{show_fps_counter_label}}</span>
 			<div class="checkbox-box" data-class-checked="show_fps_counter">

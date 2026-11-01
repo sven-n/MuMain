@@ -7,6 +7,8 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzOpenData.h"
+#include "Engine/Object/PlayerBodyModels.h"
+#include "Data/GameConfig/GameConfig.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Audio/DSPlaySound.h"
@@ -123,28 +125,32 @@ void OpenPlayers()
         SendMessage(g_hWnd, WM_DESTROY, 0, 0);
     }
 
+    const bool useS6 = GameConfig::GetInstance().GetUseS6PlayerModels();
     for (int i = 0; i < MAX_CLASS; ++i)
     {
-        gLoadData.AccessModel(MODEL_BODY_HELM + i, L"Data\\Player\\", L"HelmClass", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_ARMOR + i, L"Data\\Player\\", L"ArmorClass", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_PANTS + i, L"Data\\Player\\", L"PantClass", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_GLOVES + i, L"Data\\Player\\", L"GloveClass", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_BOOTS + i, L"Data\\Player\\", L"BootClass", i + 1);
+        const wchar_t* bodyDirectory = Engine::Object::PlayerBodyModelDirectory(i, useS6);
+        gLoadData.AccessModel(MODEL_BODY_HELM + i, bodyDirectory, L"HelmClass", i + 1);
+        gLoadData.AccessModel(MODEL_BODY_ARMOR + i, bodyDirectory, L"ArmorClass", i + 1);
+        gLoadData.AccessModel(MODEL_BODY_PANTS + i, bodyDirectory, L"PantClass", i + 1);
+        gLoadData.AccessModel(MODEL_BODY_GLOVES + i, bodyDirectory, L"GloveClass", i + 1);
+        gLoadData.AccessModel(MODEL_BODY_BOOTS + i, bodyDirectory, L"BootClass", i + 1);
 
         if (CLASS_DARK != i && CLASS_DARK_LORD != i && CLASS_RAGEFIGHTER != i)
         {
-            gLoadData.AccessModel(MODEL_BODY_HELM + MAX_CLASS + i, L"Data\\Player\\", L"HelmClass2", i + 1);
-            gLoadData.AccessModel(MODEL_BODY_ARMOR + MAX_CLASS + i, L"Data\\Player\\", L"ArmorClass2", i + 1);
-            gLoadData.AccessModel(MODEL_BODY_PANTS + MAX_CLASS + i, L"Data\\Player\\", L"PantClass2", i + 1);
-            gLoadData.AccessModel(MODEL_BODY_GLOVES + MAX_CLASS + i, L"Data\\Player\\", L"GloveClass2", i + 1);
-            gLoadData.AccessModel(MODEL_BODY_BOOTS + MAX_CLASS + i, L"Data\\Player\\", L"BootClass2", i + 1);
+            bodyDirectory = Engine::Object::PlayerBodyModelDirectory(MAX_CLASS + i, useS6);
+            gLoadData.AccessModel(MODEL_BODY_HELM + MAX_CLASS + i, bodyDirectory, L"HelmClass2", i + 1);
+            gLoadData.AccessModel(MODEL_BODY_ARMOR + MAX_CLASS + i, bodyDirectory, L"ArmorClass2", i + 1);
+            gLoadData.AccessModel(MODEL_BODY_PANTS + MAX_CLASS + i, bodyDirectory, L"PantClass2", i + 1);
+            gLoadData.AccessModel(MODEL_BODY_GLOVES + MAX_CLASS + i, bodyDirectory, L"GloveClass2", i + 1);
+            gLoadData.AccessModel(MODEL_BODY_BOOTS + MAX_CLASS + i, bodyDirectory, L"BootClass2", i + 1);
         }
 
-        gLoadData.AccessModel(MODEL_BODY_HELM + (MAX_CLASS * 2) + i, L"Data\\Player\\", L"HelmClass3", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_ARMOR + (MAX_CLASS * 2) + i, L"Data\\Player\\", L"ArmorClass3", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_PANTS + (MAX_CLASS * 2) + i, L"Data\\Player\\", L"PantClass3", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_GLOVES + (MAX_CLASS * 2) + i, L"Data\\Player\\", L"GloveClass3", i + 1);
-        gLoadData.AccessModel(MODEL_BODY_BOOTS + (MAX_CLASS * 2) + i, L"Data\\Player\\", L"BootClass3", i + 1);
+        bodyDirectory = Engine::Object::PlayerBodyModelDirectory((MAX_CLASS * 2) + i, useS6);
+        gLoadData.AccessModel(MODEL_BODY_HELM + (MAX_CLASS * 2) + i, bodyDirectory, L"HelmClass3", i + 1);
+        gLoadData.AccessModel(MODEL_BODY_ARMOR + (MAX_CLASS * 2) + i, bodyDirectory, L"ArmorClass3", i + 1);
+        gLoadData.AccessModel(MODEL_BODY_PANTS + (MAX_CLASS * 2) + i, bodyDirectory, L"PantClass3", i + 1);
+        gLoadData.AccessModel(MODEL_BODY_GLOVES + (MAX_CLASS * 2) + i, bodyDirectory, L"GloveClass3", i + 1);
+        gLoadData.AccessModel(MODEL_BODY_BOOTS + (MAX_CLASS * 2) + i, bodyDirectory, L"BootClass3", i + 1);
     }
 
     gLoadData.AccessModel(MODEL_MASK_HELM + 0, L"Data\\Player\\", L"MaskHelmMale", 1);
