@@ -105,10 +105,11 @@ void DrawRing(ImDrawList& list, const Projector& projector, float centerX, float
     }
 }
 
-void DrawLabel(ImDrawList& list, const ImVec2& marker, const std::string& text)
+void DrawLabel(ImDrawList& list, const ImVec2& marker, const std::string& text,
+               MuEditor::SoundOverlay::LabelLine line = MuEditor::SoundOverlay::LabelLine::Beside)
 {
     const ImVec2 size = ImGui::CalcTextSize(text.c_str());
-    const ImVec2 start(marker.x + MarkerSize * 2.0f, marker.y - size.y * 0.5f);
+    const ImVec2 start(marker.x + MarkerSize * 2.0f, MuEditor::SoundOverlay::LabelTop(marker.y, size.y, line));
     list.AddRectFilled(ImVec2(start.x - LabelGap, start.y - LabelGap),
                        ImVec2(start.x + size.x + LabelGap, start.y + size.y + LabelGap), LabelBackColor);
     list.AddText(start, LabelColor, text.c_str());
@@ -197,7 +198,7 @@ void DrawCodeMarker(ImDrawList& list, const Projector& projector, const MuEditor
     {
         label += (label.empty() ? "" : ", ") + MuEditor::SoundMixer::SoundText(sound);
     }
-    DrawLabel(list, point, label);
+    DrawLabel(list, point, label, MuEditor::SoundOverlay::LabelLine::Below);
 }
 
 void DrawFlash(ImDrawList& list, const Projector& projector, const Audio::Mixer::PlacedStart& start, double now)
@@ -246,6 +247,12 @@ ImVec2 ToDisplay(float windowX, float windowY, const ImVec2& origin, const ImVec
     const float scaleX = windowWidth > 0 ? size.x / static_cast<float>(windowWidth) : 1.0f;
     const float scaleY = windowHeight > 0 ? size.y / static_cast<float>(windowHeight) : 1.0f;
     return ImVec2(origin.x + windowX * scaleX, origin.y + windowY * scaleY);
+}
+
+float LabelTop(float markerY, float textHeight, LabelLine line)
+{
+    const float top = markerY - textHeight * 0.5f;
+    return line == LabelLine::Below ? top + textHeight + 2.0f * LabelGap : top;
 }
 
 bool IsInside(const Audio::Overlay::DrawnSource& source, float x, float y)

@@ -567,6 +567,21 @@ TEST_CASE("Sound Mixer: the overlay draws the sources a shown row names while a 
     CHECK(IsInside(anywhere, 90000.0f, 1400.0f));
 }
 
+TEST_CASE("Sound Mixer: the overlay draws the code's sounds of a place below the label of a set there (Q-SM11) "
+          "[sounds][editor]")
+{
+    using MuEditor::SoundOverlay::LabelLine;
+    using MuEditor::SoundOverlay::LabelTop;
+    constexpr float gap = 2.0f;
+    // A set's label: centred on its marker.
+    CHECK(LabelTop(100.0f, 14.0f, LabelLine::Beside) == 93.0f);
+    // The code's sounds: right below it, the backgrounds (a gap around the
+    // text) touching but not overlapping.
+    const float below = LabelTop(100.0f, 14.0f, LabelLine::Below);
+    CHECK(below - gap == LabelTop(100.0f, 14.0f, LabelLine::Beside) + 14.0f + gap);
+    CHECK(LabelTop(40.0f, 20.0f, LabelLine::Below) - gap == 30.0f + 20.0f + gap);
+}
+
 TEST_CASE("Sound Mixer: the overlay places a window pixel where the game window is, at its size (Q-SM9) "
           "[audio][mixer][editor]")
 {

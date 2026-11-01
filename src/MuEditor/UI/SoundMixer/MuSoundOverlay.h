@@ -39,6 +39,21 @@ bool IsInside(const Audio::Overlay::DrawnSource& source, float x, float y);
 // game's own code (Q-SM11), else a row that names its source.
 bool Follows(const Audio::Mixer::PlacedStart& start, const std::vector<SoundMixer::HeardRow>& shown);
 
+// The line of a label beside its marker.
+enum class LabelLine
+{
+    // Centred on the marker: a drawn source's set or file.
+    Beside,
+    // Right below that: the sounds the game's own code plays there, so that a
+    // monster's or an NPC's set and its code's sounds both stay readable.
+    Below,
+};
+
+// The top of a label `textHeight` high on its line beside a marker at
+// `markerY`; the labels' backgrounds, 2 pixels beyond the text, do not
+// overlap.
+float LabelTop(float markerY, float textHeight, LabelLine line);
+
 // A place where the game's own code plays sounds, with no range (Q-SM11).
 struct CodeMarker
 {
