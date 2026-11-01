@@ -2926,6 +2926,9 @@
   <data name="New folder" xml:space="preserve">
     <value>Neuer Ordner</value>
   </data>
+  <data name="New color" xml:space="preserve">
+    <value>Neue Farbe</value>
+  </data>
   <data name="Folder name" xml:space="preserve">
     <value>Ordnername</value>
   </data>
