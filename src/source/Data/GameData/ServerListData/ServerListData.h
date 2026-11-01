@@ -30,7 +30,8 @@ struct ServerListData
     std::vector<VipType> vipTypes;
     // In the order the editor lists them.
     std::vector<CustomColor> colors;
-    // The folders MuEditor's Colors window sorts the colors in ("colorFolders", ColorFolders.h); the game skips them.
+    // The folders MuEditor's Colors window sorts the colors in ("colorFolders", ColorFolders.h); the game reads and
+    // checks them but doesn't use them.
     std::vector<Colors::ColorFolder> colorFolders;
     // Their order does not matter.
     std::vector<ButtonColorRule> buttonColors;

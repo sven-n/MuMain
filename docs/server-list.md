@@ -143,7 +143,7 @@ theme), so a long name there can run past its edges.
 |-----------------|--------------------------------------------------------------------------|
 | `formatVersion` | `2`. A version 1 file (the four fixed channel types) is not read: the game stops and names the problem. |
 | `vipTypes`      | Optional; the VIP types, in the order the editor lists them.              |
-| `colorFolders`  | Optional; the folders the editor's Colors window sorts your colors in (each a `name`, its `folders` and its `colors`). The game skips it. |
+| `colorFolders`  | Optional; the folders the editor's Colors window sorts your colors in (each a `name`, its `folders` and its `colors`). The game reads and checks it but doesn't use it. |
 | `colors`        | Optional; your own colors, each with a shade per theme, for the buttons and the load. |
 | `buttonColors`  | Optional; the rules that color the channel buttons. Without a fitting rule a button has the theme's default color. |
 | `names`         | Optional; the texts that name a channel (below). A text left out uses the built-in English one. |
