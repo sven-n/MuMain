@@ -5,7 +5,10 @@
 #include "App/Control/ControlObjects.h"
 #include "App/Control/ControlState.h"
 #include "Core/Input/SyntheticInput.h"
+#include "App/Control/DrawPurityCheck.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
+#include "Data/GameData/EffectData/EffectTypeSymbols.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "Core/Utilities/Benchmark/BenchRecorder.h"
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -484,6 +487,95 @@ std::string DrawSpawns(const Request& request, std::unique_ptr<Act>&)
     json result;
     result["draws"] = draws;
     result["sites"] = sites;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string DrawPurity(const Request& request, std::unique_ptr<Act>&)
+{
+    bool start = false;
+    if (request.Has("start") && !request.GetBool("start", start))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "start must be a boolean");
+    }
+    if (start)
+    {
+        Diagnostics::DrawPurityCheck::Start();
+    }
+    int draws = 0;
+    json changes = json::array();
+    for (const Diagnostics::DrawPurityCheck::Change& change : Diagnostics::DrawPurityCheck::Report(draws))
+    {
+        changes.push_back({{"what", change.what}, {"count", change.count}});
+    }
+    json result;
+    result["draws"] = draws;
+    result["changes"] = changes;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string SpawnEffect(const Request& request, std::unique_ptr<Act>&)
+{
+    std::string kindText = "effect";
+    if (request.Has("kind") && !request.GetString("kind", kindText))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`kind` must be a string");
+    }
+    Data::Effects::EffectKind kind;
+    if (kindText == "effect")
+        kind = Data::Effects::EffectKind::Effect;
+    else if (kindText == "particle")
+        kind = Data::Effects::EffectKind::Particle;
+    else if (kindText == "joint")
+        kind = Data::Effects::EffectKind::Joint;
+    else
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`kind` is effect, particle or joint");
+
+    const auto symbols = Data::Effects::GetEffectTypeSymbols(kind);
+    std::string code;
+    if (!request.GetString("type", code))
+    {
+        // Without a type, the types of the kind, for a sweep to go through.
+        json types = json::array();
+        for (const Data::Effects::EffectTypeSymbol& symbol : symbols)
+            types.push_back({{"code", std::string(symbol.code)}, {"type", symbol.type}});
+        json result;
+        result["types"] = types;
+        return EncodeResult(request.EncodedId(), result.dump());
+    }
+    const auto symbol = std::ranges::find(symbols, code, &Data::Effects::EffectTypeSymbol::code);
+    if (symbol == symbols.end())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "no " + kindText + " type `" + code + "`");
+    }
+    int subType = 0;
+    if (request.Has("subtype") && !request.GetInt("subtype", subType))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`subtype` must be a number");
+    }
+    if (Hero == nullptr)
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::WrongScene, "the character is not in the world yet");
+    }
+
+    // At the hero, owned by and aimed at the hero, as most skills create them.
+    OBJECT* o = &Hero->Object;
+    vec3_t light = {1.f, 1.f, 1.f};
+    switch (kind)
+    {
+    case Data::Effects::EffectKind::Effect:
+        CreateEffect(symbol->type, o->Position, o->Angle, light, subType, o);
+        break;
+    case Data::Effects::EffectKind::Particle:
+        CreateParticle(symbol->type, o->Position, o->Angle, light, subType, 1.f, o);
+        break;
+    default:
+        CreateJoint(symbol->type, o->Position, o->Position, o->Angle, subType, o);
+        break;
+    }
+    json result;
+    result["kind"] = kindText;
+    result["type"] = code;
+    result["subtype"] = subType;
     return EncodeResult(request.EncodedId(), result.dump());
 }
 

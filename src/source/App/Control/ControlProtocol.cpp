@@ -228,6 +228,8 @@ const std::vector<std::string>& CommandNames()
         "bench",
         "bones",
         "drawspawns",
+        "drawpurity",
+        "spawn-effect",
         "tooltip",
         "tooltip-snapshot",
         "item-name",
