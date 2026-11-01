@@ -22,8 +22,11 @@ namespace
 using Audio::Overlay::DrawnSource;
 using MuEditor::SoundMixer::HeardRow;
 
-// A ring is drawn of so many pieces, a little above the ground.
-constexpr int RingSegments = 64;
+// A ring is drawn of pieces about this long (a dash and a gap of a dashed
+// one), at least and at most so many, a little above the ground.
+constexpr float RingPieceLength = 40.0f;
+constexpr int MinRingPieces = 48;
+constexpr int MaxRingPieces = 480;
 constexpr float GroundLift = 5.0f;
 // A start flashes for a second: a ring that grows and fades.
 constexpr double FlashSeconds = 1.0;
@@ -36,22 +39,22 @@ constexpr float HighlightThickness = 3.0f;
 constexpr float LabelGap = 2.0f;
 constexpr float FullAlpha = 255.0f;
 const ImU32 MapObjectColor = IM_COL32(110, 180, 240, 230);
+// A map object's quietest ring, fainter: many overlap where many objects play.
+const ImU32 QuietestRingColor = IM_COL32(110, 180, 240, 110);
 const ImU32 HeardColor = IM_COL32(120, 215, 120, 230);
 const ImU32 FarColor = IM_COL32(190, 190, 190, 200);
 const ImU32 HighlightColor = IM_COL32(255, 210, 90, 255);
 const ImU32 LabelBackColor = IM_COL32(0, 0, 0, 150);
 const ImU32 LabelColor = IM_COL32(255, 255, 255, 255);
 
-// World positions to the ImGui display: the kept camera's window pixels,
-// scaled to the display size.
+// World positions to ImGui's coordinates: the kept camera's window pixels in
+// the game window's viewport.
 class Projector
 {
 public:
-    explicit Projector(const CameraState& camera) : m_camera(camera)
+    explicit Projector(const CameraState& camera)
+        : m_camera(camera), m_origin(ImGui::GetMainViewport()->Pos), m_size(ImGui::GetMainViewport()->Size)
     {
-        const ImGuiIO& io = ImGui::GetIO();
-        m_scaleX = WindowWidth > 0 ? io.DisplaySize.x / static_cast<float>(WindowWidth) : 1.0f;
-        m_scaleY = WindowHeight > 0 ? io.DisplaySize.y / static_cast<float>(WindowHeight) : 1.0f;
     }
 
     // False behind the camera.
@@ -64,25 +67,27 @@ public:
         {
             return false;
         }
-        point = ImVec2(windowX * m_scaleX, windowY * m_scaleY);
+        point = MuEditor::SoundOverlay::ToDisplay(windowX, windowY, m_origin, m_size, WindowWidth, WindowHeight);
         return true;
     }
 
 private:
     const CameraState& m_camera;
-    float m_scaleX = 1.0f;
-    float m_scaleY = 1.0f;
+    ImVec2 m_origin;
+    ImVec2 m_size;
 };
 
 // A ring on the ground around (x, y); a dashed one draws every other piece.
 void DrawRing(ImDrawList& list, const Projector& projector, float centerX, float centerY, float radius, ImU32 color,
               float thickness, bool dashed)
 {
+    const float circumference = 2.0f * std::numbers::pi_v<float> * radius;
+    const int pieces = std::clamp(static_cast<int>(circumference / RingPieceLength), MinRingPieces, MaxRingPieces);
     ImVec2 previous;
     bool hasPrevious = false;
-    for (int i = 0; i <= RingSegments; ++i)
+    for (int i = 0; i <= pieces; ++i)
     {
-        const float angle = 2.0f * std::numbers::pi_v<float> * static_cast<float>(i) / static_cast<float>(RingSegments);
+        const float angle = 2.0f * std::numbers::pi_v<float> * static_cast<float>(i) / static_cast<float>(pieces);
         const float x = centerX + radius * std::cos(angle);
         const float y = centerY + radius * std::sin(angle);
         ImVec2 point;
@@ -121,7 +126,8 @@ void DrawSource(ImDrawList& list, const Projector& projector, const DrawnSource&
         DrawRing(list, projector, x, y, source.inner, color, thickness, false);
         if (source.outer > source.inner)
         {
-            DrawRing(list, projector, x, y, source.outer, color, thickness, true);
+            DrawRing(list, projector, x, y, source.outer, highlighted ? HighlightColor : QuietestRingColor,
+                     highlighted ? HighlightThickness : 1.0f, true);
         }
     }
     else
@@ -186,6 +192,14 @@ std::vector<Audio::Overlay::DrawnSource> Followed(const std::vector<Audio::Overl
     std::copy_if(drawn.begin(), drawn.end(), std::back_inserter(followed), [&shown](const DrawnSource& source)
                  { return AnyNames(shown, source.kind, source.name, source.sourceNumber); });
     return followed;
+}
+
+ImVec2 ToDisplay(float windowX, float windowY, const ImVec2& origin, const ImVec2& size, unsigned int windowWidth,
+                 unsigned int windowHeight)
+{
+    const float scaleX = windowWidth > 0 ? size.x / static_cast<float>(windowWidth) : 1.0f;
+    const float scaleY = windowHeight > 0 ? size.y / static_cast<float>(windowHeight) : 1.0f;
+    return ImVec2(origin.x + windowX * scaleX, origin.y + windowY * scaleY);
 }
 
 bool IsInside(const Audio::Overlay::DrawnSource& source, float x, float y)

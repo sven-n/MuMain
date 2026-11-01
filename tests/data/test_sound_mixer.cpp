@@ -562,6 +562,21 @@ TEST_CASE("Sound Mixer: the overlay draws the sources a shown row names while a 
     CHECK_FALSE(IsInside(rider, 1400.0f, 1400.0f));
 }
 
+TEST_CASE("Sound Mixer: the overlay places a window pixel where the game window is, at its size (Q-SM9) "
+          "[audio][mixer][editor]")
+{
+    using MuEditor::SoundOverlay::ToDisplay;
+    const auto at = [](const ImVec2& point) { return std::pair{point.x, point.y}; };
+    // The editor's viewports count from the desktop's corner: the window's place.
+    CHECK(at(ToDisplay(100.0f, 50.0f, ImVec2(447.0f, 133.0f), ImVec2(1024.0f, 768.0f), 1024, 768)) ==
+          std::pair{547.0f, 183.0f});
+    // A viewport twice the window's pixels.
+    CHECK(at(ToDisplay(100.0f, 50.0f, ImVec2(0.0f, 0.0f), ImVec2(2048.0f, 1536.0f), 1024, 768)) ==
+          std::pair{200.0f, 100.0f});
+    // No window size yet: as it is.
+    CHECK(at(ToDisplay(100.0f, 50.0f, ImVec2(10.0f, 20.0f), ImVec2(800.0f, 600.0f), 0, 0)) == std::pair{110.0f, 70.0f});
+}
+
 TEST_CASE("Sound Mixer: the reminder counts what is muted, solo and lowered (Q-SM5) [audio][mixer][editor]")
 {
     MixerScope scope;

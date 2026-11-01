@@ -4,6 +4,7 @@
 
 #include "Audio/SoundOverlay.h"
 #include "MuSoundMixerUI.h"
+#include "imgui.h"
 
 #include <string>
 #include <vector>
@@ -20,6 +21,13 @@ bool Names(const SoundMixer::HeardRow& row, Audio::SoundKind kind, const std::st
 // names.
 std::vector<Audio::Overlay::DrawnSource> Followed(const std::vector<Audio::Overlay::DrawnSource>& drawn,
                                                   const std::vector<SoundMixer::HeardRow>& shown, bool filtered);
+
+// A pixel of the game window in ImGui's coordinates: the window's viewport is
+// at `origin`, `size` big, for a window of `windowWidth` x `windowHeight`
+// pixels. With the editor's viewports ImGui counts from the desktop's corner,
+// so the window's place matters.
+ImVec2 ToDisplay(float windowX, float windowY, const ImVec2& origin, const ImVec2& size, unsigned int windowWidth,
+                 unsigned int windowHeight);
 
 // Whether the point (x, y) is within the source's inner ring (a monster:
 // heard).
