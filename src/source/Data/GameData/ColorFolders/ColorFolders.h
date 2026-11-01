@@ -95,9 +95,6 @@ std::optional<std::vector<std::string>> MoveRootColorBy(const std::vector<ColorF
                                                         std::span<const std::string> colors, std::string_view color,
                                                         int delta);
 
-// Keep the folders in step with the colors.
-// Takes the color out of its folder; false when none held it.
+// Keeps the folders in step with the colors: takes the color out of its folder; false when none held it.
 bool RemoveColorFromFolders(std::vector<ColorFolder>& folders, std::string_view color);
-// The folder that held `from` holds `to` in its place.
-void RenameColorInFolders(std::vector<ColorFolder>& folders, std::string_view from, const std::string& to);
 } // namespace Data::Colors

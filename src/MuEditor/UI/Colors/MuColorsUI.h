@@ -19,7 +19,6 @@ enum class ColorsRoot
 {
     Glow,
 };
-inline constexpr int ColorsRootCount = 1;
 } // namespace MuEditor::Colors
 
 // The Colors window (D69): the editor's named colors as a tree. A root for each use (the glow colors) holds the folders

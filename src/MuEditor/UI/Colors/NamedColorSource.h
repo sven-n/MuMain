@@ -26,8 +26,7 @@ struct NamedColorTexts
     const char* root = "";
     // The grey line of the root: what the entries are for.
     const char* note = "";
-    // The undo steps of a new entry, of Remove and of Remove them.
-    const char* newEntry = "";
+    // The undo steps of Remove and of Remove them.
     const char* removeOne = "";
     const char* removeUnused = "";
     // The button that applies a changed value.

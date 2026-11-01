@@ -38,7 +38,6 @@ NamedColorTexts GlowColorsTab::GetTexts() const
 {
     NamedColorTexts texts;
     texts.root = I18N::Editor::Glow;
-    texts.newEntry = I18N::Editor::NewGlowColor;
     texts.note = I18N::Editor::TheItemModelsNameTheseColorsTheModelToolPicksAnItemSColors;
     texts.usedBy = I18N::Editor::UsedBy0Items;
     texts.changeReaches = I18N::Editor::TheChangeReachesThese0Items;
