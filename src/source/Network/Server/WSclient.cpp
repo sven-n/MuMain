@@ -18,6 +18,7 @@
 #include "UI/Core/WindowAccess.h"
 #include "UI/Social/SocialUpdates.h"
 #include <memory>
+#include <vector>
 #include "Guild/GuildCache.h"
 #include "Guild/GuildTypes.h"
 #include "Render/Models/ZzzBMD.h"
@@ -423,13 +424,45 @@ BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
     return bResult;
 }
 
+namespace
+{
+// Connections DeleteSocket closed while they were open: closing can still call back into them
+// (Connection::OnDisconnected), so they are deleted once they are closed.
+std::vector<Connection*> g_closingConnections;
+
+void DeleteClosedConnections()
+{
+    std::erase_if(g_closingConnections,
+                  [](Connection* connection)
+                  {
+                      if (connection->IsConnected())
+                      {
+                          return false;
+                      }
+                      delete connection;
+                      return true;
+                  });
+}
+} // namespace
+
 void DeleteSocket()
 {
-    if (SocketClient)
+    DeleteClosedConnections();
+    if (SocketClient == nullptr)
+    {
+        return;
+    }
+    // A closed connection is out of the connection map already: nothing reaches it any more.
+    if (SocketClient->IsConnected())
     {
         SocketClient->Close();
-        SocketClient = nullptr;
+        g_closingConnections.push_back(SocketClient);
     }
+    else
+    {
+        delete SocketClient;
+    }
+    SocketClient = nullptr;
 }
 
 int LogIn = 0;
@@ -561,10 +594,7 @@ void ReceiveServerConnect(const BYTE* ReceiveBuffer)
     CMultiLanguage::ConvertFromUtf8(IP, Data->IP);
 
     g_ErrorReport.Write(L"[ReceiveServerConnect]");
-    if (SocketClient != nullptr)
-    {
-        SocketClient->Close();
-    }
+    DeleteSocket();
 
     if (CreateSocket(IP, Data->Port))
     {

@@ -77,15 +77,6 @@ void GameLoginSceneLink::StopProbe()
 bool GameLoginSceneLink::Connect(LoginServer server)
 {
     const Address address = AddressOf(server);
-
-    // DeleteSocket leaves the connection object behind, since closing an open one can
-    // still call back into it. The one the server closed is out of the connection
-    // map already, so nothing reaches it any more and it can go.
-    if (SocketClient != nullptr && !SocketClient->IsConnected())
-    {
-        delete SocketClient;
-        SocketClient = nullptr;
-    }
     DeleteSocket();
     return ConnectForLogin(address.host, address.port, server == LoginServer::Game) != FALSE;
 }

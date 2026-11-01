@@ -3601,6 +3601,8 @@ extern wchar_t SoccerTeamName[2][8 + 1];
 extern bool SoccerObserver;
 
 BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port);
+// Closes the connection and forgets it (SocketClient is null afterwards). It is deleted once it is
+// closed: at once when the server closed it, else on a later call.
 void DeleteSocket();
 // Connects for a fresh login: the server greets the new connection as a new client
 // (the connect server with its list, a game server with its join answer), not as a
