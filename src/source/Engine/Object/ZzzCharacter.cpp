@@ -8758,7 +8758,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     }
 
     BMD* b = &Models[o->Type];
-    if (Models[o->Type].NumActions == 0) return;
+    if (Models[o->Type].NumActions == 0)
+        return;
 
     bool Translate = true;
 
