@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
@@ -20,6 +21,7 @@ PARTICLE Pointers[MAX_POINTERS];
 
 void CreatePointer(int Type, vec3_t Position, float Angle, vec3_t Light, float Scale)
 {
+    Diagnostics::DrawSpawnCheck::Note("pointer");
     PARTICLE* Select = NULL;
     int MinLifeTime = 9999;
     for (int i = 0; i < MAX_POINTERS; i++)
