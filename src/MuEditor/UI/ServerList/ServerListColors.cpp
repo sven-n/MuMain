@@ -58,6 +58,84 @@ const UI::RmlBridge::ThemeInheritance& GetTheme(std::string_view theme)
     return *found->second;
 }
 
+// The text's lines without their line ends.
+std::vector<std::string> SplitLines(std::string_view text)
+{
+    std::vector<std::string> lines;
+    std::size_t start = 0;
+    while (start < text.size())
+    {
+        std::size_t end = text.find('\n', start);
+        if (end == std::string_view::npos)
+        {
+            end = text.size();
+        }
+        std::string line(text.substr(start, end - start));
+        if (!line.empty() && line.back() == '\r')
+        {
+            line.pop_back();
+        }
+        lines.push_back(std::move(line));
+        start = end + 1;
+    }
+    return lines;
+}
+
+std::string JoinLines(const std::vector<std::string>& lines, std::string_view newline, bool endsWithNewline)
+{
+    std::string text;
+    for (std::size_t index = 0; index < lines.size(); ++index)
+    {
+        text += lines[index];
+        if (index + 1 < lines.size() || endsWithNewline)
+        {
+            text += newline;
+        }
+    }
+    return text;
+}
+
+// Replaces the [Tokens] line that starts with `key` ("name="), or adds one after the section's last value line,
+// or the section with it at the end.
+void PlaceToken(std::vector<std::string>& lines, const std::string& key, const std::string& value)
+{
+    bool inTokens = false;
+    std::optional<std::size_t> lastInTokens;
+    for (std::size_t index = 0; index < lines.size(); ++index)
+    {
+        const std::string& line = lines[index];
+        if (!line.empty() && line.front() == '[')
+        {
+            inTokens = line == "[Tokens]";
+            if (inTokens)
+            {
+                lastInTokens = index;
+            }
+            continue;
+        }
+        if (!inTokens)
+        {
+            continue;
+        }
+        if (line.rfind(key, 0) == 0)
+        {
+            lines[index] = key + value;
+            return;
+        }
+        if (!line.empty() && line.front() != ';')
+        {
+            lastInTokens = index;
+        }
+    }
+    if (lastInTokens)
+    {
+        lines.insert(lines.begin() + static_cast<std::ptrdiff_t>(*lastInTokens + 1), key + value);
+        return;
+    }
+    lines.push_back("[Tokens]");
+    lines.push_back(key + value);
+}
+
 ImVec4 FromRgb(unsigned int rgb)
 {
     return {static_cast<float>((rgb >> RedShift) & ChannelMask) / ChannelMax,
@@ -99,88 +177,24 @@ bool WriteThemeToken(std::string_view theme, const char* token, const std::strin
     std::stringstream read;
     read << in.rdbuf();
     in.close();
-    const std::string text = read.str();
-    const std::string newline = text.find("\r\n") != std::string::npos ? "\r\n" : "\n";
 
-    std::vector<std::string> lines;
-    std::size_t start = 0;
-    while (start < text.size())
-    {
-        std::size_t end = text.find('\n', start);
-        if (end == std::string::npos)
-        {
-            end = text.size();
-        }
-        std::string line = text.substr(start, end - start);
-        if (!line.empty() && line.back() == '\r')
-        {
-            line.pop_back();
-        }
-        lines.push_back(std::move(line));
-        start = end + 1;
-    }
-
-    const std::string key = std::string(token) + "=";
-    bool inTokens = false;
-    std::optional<std::size_t> lastInTokens;
-    bool written = false;
-    for (std::size_t index = 0; index < lines.size() && !written; ++index)
-    {
-        const std::string& line = lines[index];
-        if (!line.empty() && line.front() == '[')
-        {
-            inTokens = line == "[Tokens]";
-            if (inTokens)
-            {
-                lastInTokens = index;
-            }
-            continue;
-        }
-        if (!inTokens)
-        {
-            continue;
-        }
-        if (line.rfind(key, 0) == 0)
-        {
-            lines[index] = key + value;
-            written = true;
-        }
-        else if (!line.empty() && line.front() != ';')
-        {
-            lastInTokens = index;
-        }
-    }
-    if (!written)
-    {
-        if (lastInTokens)
-        {
-            lines.insert(lines.begin() + static_cast<std::ptrdiff_t>(*lastInTokens + 1), key + value);
-        }
-        else
-        {
-            lines.push_back("[Tokens]");
-            lines.push_back(key + value);
-        }
-    }
-
-    std::string out;
-    for (std::size_t index = 0; index < lines.size(); ++index)
-    {
-        out += lines[index];
-        if (index + 1 < lines.size() || text.ends_with('\n'))
-        {
-            out += newline;
-        }
-    }
     std::ofstream write(file, std::ios::binary | std::ios::trunc);
     if (!write)
     {
         return false;
     }
-    write << out;
+    write << SetTokenInText(read.str(), token, value);
     write.close();
     ForgetThemeTokens();
     return static_cast<bool>(write);
+}
+
+std::string SetTokenInText(std::string_view text, std::string_view token, const std::string& value)
+{
+    std::vector<std::string> lines = SplitLines(text);
+    PlaceToken(lines, std::string(token) + "=", value);
+    const std::string_view newline = text.find("\r\n") != std::string_view::npos ? "\r\n" : "\n";
+    return JoinLines(lines, newline, text.ends_with('\n'));
 }
 
 std::optional<TokenColor> ParseTokenColor(std::string_view value)

@@ -31,6 +31,8 @@ std::optional<std::string> FindThemeTokenSource(std::string_view theme, const ch
 // has it or adding one after the section's last. False when the file can't be read or written.
 // The tokens are read again afterwards (ForgetThemeTokens).
 bool WriteThemeToken(std::string_view theme, const char* token, const std::string& value);
+// tokens.ini's text with the token set as WriteThemeToken sets it; the text keeps its line ends.
+std::string SetTokenInText(std::string_view text, std::string_view token, const std::string& value);
 // A token's color as tokens.ini writes it: "#rrggbb", or "rgba(r, g, b, a)" with an alpha.
 struct TokenColor
 {

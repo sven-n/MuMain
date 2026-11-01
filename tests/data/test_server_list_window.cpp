@@ -257,6 +257,20 @@ TEST_CASE("Server list colors: a theme color is written into a theme's tokens.in
     std::filesystem::remove_all(folder, ignored);
 }
 
+TEST_CASE("Server list colors: a token is set in tokens.ini's text [editor]")
+{
+    namespace ListColors = MuEditor::ServerList::Colors;
+    // The line that has it, else after the section's last value line, else a new section at the end.
+    CHECK(ListColors::SetTokenInText("[Tokens]\na=1\nb=2\n", "a", "9") == "[Tokens]\na=9\nb=2\n");
+    CHECK(ListColors::SetTokenInText("[Tokens]\na=1\n; end\n\n[Other]\n", "c", "3") ==
+          "[Tokens]\na=1\nc=3\n; end\n\n[Other]\n");
+    CHECK(ListColors::SetTokenInText("[Other]\nkey=1", "c", "3") == "[Other]\nkey=1\n[Tokens]\nc=3");
+    CHECK(ListColors::SetTokenInText("", "c", "3") == "[Tokens]\nc=3");
+    // A key of another section isn't the token.
+    CHECK(ListColors::SetTokenInText("[Other]\na=1\n[Tokens]\n", "a", "9") == "[Other]\na=1\n[Tokens]\na=9\n");
+    CHECK(ListColors::SetTokenInText("[Tokens]\r\na=1\r\n", "a", "9") == "[Tokens]\r\na=9\r\n");
+}
+
 TEST_CASE("Server list colors: a token color keeps its alpha [editor]")
 {
     namespace ListColors = MuEditor::ServerList::Colors;
