@@ -5,6 +5,8 @@
 // The client's view of the maps (World/MapInfra/MapManager.h).
 
 #include "I18N/All.h"
+#include "Engine/Object/ZzzCharacter.h"
+#include "GameLogic/Commands/ChatCommandValueLookup.h"
 #include "Network/Server/WSclient.h"
 #include "World/MapInfra/MapManager.h"
 
@@ -100,6 +102,44 @@ TEST_CASE("Maps: a move loads the world only for another server map, also betwee
     gMapManager.SetServerMap(WD_3NORIA);
     CHECK(gMapManager.IsServerMapLoaded(WD_3NORIA));
     CHECK_FALSE(gMapManager.IsServerMapLoaded(WD_9DEVILSQUARE));
+}
+
+TEST_CASE("Chat commands: my map uses the server number rather than the loaded world [maps][chat-commands]")
+{
+    using namespace GameLogic::Commands;
+    const HeroMapScope map(WD_0LORENCIA);
+    struct HeroScope
+    {
+        CHARACTER* previous = Hero;
+        CHARACTER value{};
+        HeroScope()
+        {
+            Hero = &value;
+        }
+        ~HeroScope()
+        {
+            Hero = previous;
+        }
+    } hero;
+
+    ChatCommandParameter parameter;
+    parameter.ShortName = L"mapIdOrName";
+    parameter.ValueReference = ChatCommandValueReference::Map;
+    ChatCommand command;
+    command.Command = L"/move";
+    command.Parameters.push_back(parameter);
+    for (const int serverMap : {32, static_cast<int>(WD_9DEVILSQUARE)})
+    {
+        gMapManager.SetServerMap(serverMap);
+        CHECK(gMapManager.WorldActive == WD_9DEVILSQUARE);
+        const auto value = ValueLookup::GetOwnValue(parameter);
+        CHECK(value == std::to_wstring(serverMap));
+        CHECK(ChatCommandCatalog::BuildCommandLine(command, {value}) ==
+              L"/move mapIdOrName=" + std::to_wstring(serverMap));
+    }
+
+    gMapManager.WorldActive = WD_0LORENCIA;
+    CHECK(ValueLookup::GetOwnValue(parameter) == L"0");
 }
 
 TEST_CASE("Maps: a test's hero map leaves no server map or stage behind [maps]")
