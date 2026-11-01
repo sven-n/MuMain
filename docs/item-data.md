@@ -974,7 +974,7 @@ A name has only letters and digits. A new color is added to the list and
 can then be used by any item; a name that is not in the list stops the
 start with a message, and so does a list without the defaults (`orange`,
 `white`, `azure`). The item editor adds colors, changes their values and
-removes the ones no item uses ([Glow Colors](#glow-colors)), and Save Items
+removes the ones no item uses (the [Colors window's Glow tab](#glow-colors)), and Save Items
 writes the file in this form, one color a line.
 
 The glow of monsters, and of the event models that level variants are
@@ -1250,7 +1250,8 @@ shows it in the others.
 - **Item Categories**: a tag and its items; add the selected item or remove
   items from it. New tags need code.
 - **Item Model**: see [Item Model](#item-model).
-- **Glow Colors**: the glow color list, see [Glow Colors](#glow-colors).
+- **Glow Colors**: the glow color list, the Glow tab of the
+  [Colors](#colors) window.
 - **Item Formulas**: the item stat file, see [Item Formulas](#item-formulas).
 - **Item Sync**: Export and Import of the items and item formulas with an
   OpenMU server, see [Item Sync](#item-sync).
@@ -1352,9 +1353,17 @@ changes in code after loading (the cloth of some pants, the second models
 of the Rage Fighter gloves, the inventory models of the Rage Fighter
 armors) may need a restart to show a new file.
 
-### Glow Colors
+### Colors
 
-The colors of the glow color list, each with how many models use it (also
+The named colors of the items, a tab per use: **Glow** for now; the ground
+label styles and the tooltip color groups get tabs of their own. **Windows >
+Colors** opens the window on the tab shown last, and **Items > Glow Colors**
+on its Glow tab. It docks with the item tools, and its changes are steps of
+the item undo history.
+
+#### Glow Colors
+
+The Glow tab lists the glow colors, each with how many models use it (also
 as the default they leave out). **New glow color** adds one: a name of
 letters and digits no other color has, and its red, green and blue. A
 picked color's value is changed with the color field and **Apply to the

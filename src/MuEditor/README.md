@@ -46,7 +46,6 @@ stores it when a field is left.
 - **MuItemRulesUI** - The rule flags of many items at once (ItemRulesTable, ItemRuleFlags)
 - **MuItemCategoriesUI** - The items of a tag
 - **MuItemModelUI** - The model entry with a preview, file picker, shared models and looks (ItemModelPreview, ItemModelFilePicker, ItemSharedModelForm, ItemModelForms)
-- **MuItemGlowColorsUI** - The glow color list: new colors, changed values and unused colors removed (GlowColorDialog, which the model tool's color fields open too)
 - **MuItemFormulasUI** - The item stat file: drop level bonus, default, profiles, level bonus tables and profile rules, changed on a copy and applied after the list of the items it reaches (ItemStatTermFields, ItemStatFileChange)
 - **ItemCheckArea** - The items in Data Checks: the checks of a save, each leading to its item and field (ItemCheckTargets)
 - **MuItemSyncUI** - Import and Export of the item exchange file with OpenMU: the import's diff of the items and formulas with a box per field (ItemSyncDiff, which also keeps the known differences), applied as one undo step after a confirmation; the export of the client's data, confirmed when it replaces a file (ItemSyncApply); and a read-only comparison of two files
@@ -58,6 +57,11 @@ stores it when a field is left.
 
 ### Item Translations
 - **MuItemTranslationsUI.h/cpp** - Item names as a grid of items and languages, with missing counts, on the shared names grid with ItemNameRows as its rows (docs/translation-system.md)
+
+### Colors (UI/Colors)
+- **MuColorsUI.h/cpp** - The Colors window: the named colors, a tab per use (Windows > Colors, and Items > Glow Colors on its tab); it docks with the item tools and its changes are item edits
+- **NamedColorList.h/cpp** - The panel every tab draws its entries with: the list with swatches and use counts, the picked entry with Apply, Revert and Remove, its users, the list of the items a change reaches, and the unused entries removed at once; a tab gives it its entries through **NamedColorSource.h**
+- **GlowColorsTab.h/cpp** - The Glow tab: new colors, changed values and unused colors removed (GlowColorDialog, which the model tool's color fields open too)
 
 ### Monster Tools (UI/MonsterTools)
 One selected monster (**MonsterSelection**) is shown by every monster tool.
