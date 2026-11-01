@@ -8,7 +8,10 @@ its own page ([light-mood.md](light-mood.md)).
 ## Object sounds
 
 `Data/Maps/ObjectSounds.json` says which object types of which maps play a
-sound while they are drawn: the Kalima waterfalls play their water sound.
+sound while they are drawn: the Kalima waterfalls play their water sound;
+Kanturu Ruins' objects play their wheel, waterfall, electric and plant
+sounds, Kanturu Relics' their gear and incubator sounds, and both maps their
+hum.
 
 ```json
 {

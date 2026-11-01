@@ -66,7 +66,6 @@ bool M37Kanturu1st::MoveKanturu1stObject(OBJECT* pObject)
         pObject->Velocity = 0.01f;
         pObject->BlendMeshLight
             = (float)sinf(WorldTime * 0.0015f) * 0.8f + 1.0f;
-        ::PlayBuffer(SOUND_KANTURU_1ST_BG_WHEEL);
         break;
     case 60:
         Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
@@ -94,13 +93,9 @@ bool M37Kanturu1st::MoveKanturu1stObject(OBJECT* pObject)
         break;
     case 77:
         pObject->BlendMeshTexCoordV = -(int)WorldTime % 10000 * 0.0002f;
-        ::PlayBuffer(SOUND_KANTURU_1ST_BG_WATERFALL);
         break;
     case 90:
         pObject->Velocity = 0.04f;
-        break;
-    case 92:
-        ::PlayBuffer(SOUND_KANTURU_1ST_BG_ELEC);
         break;
     case 96:
         pObject->Alpha = 0.5f;
@@ -113,15 +108,10 @@ bool M37Kanturu1st::MoveKanturu1stObject(OBJECT* pObject)
         if (pObject->Timer > 5.f)
             CreateParticleFpsChecked(BITMAP_BUBBLE, pObject->Position, pObject->Angle, pObject->Light, 5);
         break;
-    case 98:
-        ::PlayBuffer(SOUND_KANTURU_1ST_BG_PLANT);
-        break;
     case 102:
         pObject->BlendMeshLight = (float)sinf(WorldTime * 0.0010f) + 1.0f;
         break;
     }
-
-    ::PlayBuffer(SOUND_KANTURU_1ST_BG_GLOBAL);
 
     return true;
 }

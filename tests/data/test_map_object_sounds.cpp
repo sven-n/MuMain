@@ -361,8 +361,8 @@ TEST_CASE("Map object sounds: a file that is not in the client folder is a warni
     CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "objectSounds[1].sound.file", "not in the client"));
 }
 
-TEST_CASE("Map object sounds: the shipped file has the Kalima waterfalls and is written as the writer writes it "
-          "[data][maps]")
+TEST_CASE("Map object sounds: the shipped file has the Kalima waterfalls and Kanturu's object sounds, and is written "
+          "as the writer writes it (MP1, MP1b) [data][maps]")
 {
     const std::filesystem::path file = std::filesystem::path(MU_TEST_DATA_DIR) / "Maps" / "ObjectSounds.json";
     std::ifstream stream(file, std::ios::binary);
@@ -374,7 +374,29 @@ TEST_CASE("Map object sounds: the shipped file has the Kalima waterfalls and is 
 
     INFO(Messages(issues));
     CHECK(issues.empty());
-    CHECK(read.sounds == std::vector<MapObjectSound>{Waterfall()});
+    // What Kanturu Ruins' and Relics' object code played, compared once for
+    // every object type of the two maps when it moved (MP1b).
+    const auto kanturu = [](int map, std::vector<int> objects, const std::string& file)
+    {
+        MapObjectSound sound;
+        sound.maps = {{map}};
+        sound.anyObject = objects.empty();
+        sound.objects = std::move(objects);
+        sound.file = file;
+        return sound;
+    };
+    const std::vector<MapObjectSound> shipped = {
+        Waterfall(),
+        kanturu(37, {46}, "Data/Sound/w37/kan_ruin_wheel.wav"),
+        kanturu(37, {77}, "Data/Sound/w37/kan_ruin_waterfall.wav"),
+        kanturu(37, {92}, "Data/Sound/w37/kan_ruin_elec.wav"),
+        kanturu(37, {98}, "Data/Sound/w37/kan_ruin_plant.wav"),
+        kanturu(37, {}, "Data/Sound/w37/kan_ruin_global.wav"),
+        kanturu(38, {9}, "Data/Sound/w38/kan_relic_gear.wav"),
+        kanturu(38, {31, 35, 36, 37}, "Data/Sound/w38/kan_relic_incubator.wav"),
+        kanturu(38, {}, "Data/Sound/w38/kan_relic_global.wav"),
+    };
+    CHECK(read.sounds == shipped);
     std::string unixText = text;
     std::erase(unixText, '\r');
     CHECK(unixText == Data::Maps::WriteMapObjectSoundsJson(read.sounds));

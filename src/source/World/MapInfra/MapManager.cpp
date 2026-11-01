@@ -343,11 +343,7 @@ void CMapManager::Load() // OK
         gLoadData.AccessModel(MODEL_BUTTERFLY01, L"Data\\Object1\\", L"Butterfly", 1);
         gLoadData.OpenTexture(MODEL_BUTTERFLY01, L"Object1\\");
 
-        LoadWaveFile(SOUND_KANTURU_1ST_BG_WATERFALL, L"Data\\Sound\\w37\\kan_ruin_waterfall.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BG_ELEC, L"Data\\Sound\\w37\\kan_ruin_elec.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BG_WHEEL, L"Data\\Sound\\w37\\kan_ruin_wheel.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BG_PLANT, L"Data\\Sound\\w37\\kan_ruin_plant.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_1ST_BG_GLOBAL, L"Data\\Sound\\w37\\kan_ruin_global.wav", 1);
+        // The object sounds play from Data/Maps/ObjectSounds.json (MP1b).
         LoadWaveFile(SOUND_KANTURU_1ST_BER_MOVE1, L"Data\\Sound\\w37\\ber_idle-01.wav", 1);
         LoadWaveFile(SOUND_KANTURU_1ST_BER_MOVE2, L"Data\\Sound\\w37\\ber_idle-02.wav", 1);
         LoadWaveFile(SOUND_KANTURU_1ST_BER_ATTACK1, L"Data\\Sound\\w37\\ber_attack-01.wav", 1);
@@ -402,10 +398,8 @@ void CMapManager::Load() // OK
         LoadBitmap(L"Npc\\khs_kan2gate003.jpg", BITMAP_KANTURU_2ND_NPC2, GL_LINEAR, GL_CLAMP_TO_EDGE);
         LoadBitmap(L"Npc\\khs_kan2gate004.jpg", BITMAP_KANTURU_2ND_NPC3, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-        LoadWaveFile(SOUND_KANTURU_2ND_MAPSOUND_GEAR, L"Data\\Sound\\w38\\kan_relic_gear.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_MAPSOUND_INCUBATOR, L"Data\\Sound\\w38\\kan_relic_incubator.wav", 1);
+        // The object sounds play from Data/Maps/ObjectSounds.json (MP1b).
         LoadWaveFile(SOUND_KANTURU_2ND_MAPSOUND_HOLE, L"Data\\Sound\\w38\\kan_relic_hole.wav", 1);
-        LoadWaveFile(SOUND_KANTURU_2ND_MAPSOUND_GLOBAL, L"Data\\Sound\\w38\\kan_relic_global.wav", 1);
         LoadWaveFile(SOUND_KANTURU_2ND_PERSO_MOVE1, L"Data\\Sound\\w38\\perso_idle-01.wav", 1);
         LoadWaveFile(SOUND_KANTURU_2ND_PERSO_MOVE2, L"Data\\Sound\\w38\\perso_idle-02.wav", 1);
         LoadWaveFile(SOUND_KANTURU_2ND_PERSO_ATTACK1, L"Data\\Sound\\w38\\perso_attack-01.wav", 1);

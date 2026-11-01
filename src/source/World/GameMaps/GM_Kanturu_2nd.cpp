@@ -170,30 +170,10 @@ bool M38Kanturu2nd::AttackEffect_Kanturu2nd_Monster(CHARACTER* c, OBJECT* o, BMD
     return false;
 }
 
-void M38Kanturu2nd::Sound_Kanturu2nd_Object(OBJECT* o)
-{
-    PlayBuffer(SOUND_KANTURU_2ND_MAPSOUND_GLOBAL);
-
-    switch (o->Type)
-    {
-    case 9:
-        PlayBuffer(SOUND_KANTURU_2ND_MAPSOUND_GEAR);
-        break;
-    case 31:
-    case 35:
-    case 36:
-    case 37:
-        PlayBuffer(SOUND_KANTURU_2ND_MAPSOUND_INCUBATOR);
-        break;
-    }
-}
-
 bool M38Kanturu2nd::Move_Kanturu2nd_Object(OBJECT* o)
 {
     if (!Is_Kanturu2nd())
         return false;
-
-    Sound_Kanturu2nd_Object(o);
 
     switch (o->Type)
     {
