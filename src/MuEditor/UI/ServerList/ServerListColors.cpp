@@ -31,10 +31,6 @@ constexpr const char* ThemesFolder = "Data/Interface/RmlUi/themes";
 // The swatch of a token a theme does not have.
 constexpr ImVec4 MissingShadeSwatch{1.0f, 1.0f, 1.0f, 1.0f};
 constexpr float ChannelMax = 255.0f;
-constexpr int HexBase = 16;
-constexpr unsigned int ChannelMask = 0xFF;
-constexpr int RedShift = 16;
-constexpr int GreenShift = 8;
 
 using ThemeCache = std::map<std::string, std::unique_ptr<UI::RmlBridge::ThemeInheritance>, std::less<>>;
 
@@ -140,11 +136,9 @@ void PlaceToken(std::vector<std::string>& lines, std::string_view token, const s
     lines.push_back(line);
 }
 
-ImVec4 FromRgb(unsigned int rgb)
+std::uint8_t ToChannel(float value)
 {
-    return {static_cast<float>((rgb >> RedShift) & ChannelMask) / ChannelMax,
-            static_cast<float>((rgb >> GreenShift) & ChannelMask) / ChannelMax,
-            static_cast<float>(rgb & ChannelMask) / ChannelMax, 1.0f};
+    return static_cast<std::uint8_t>(std::lround(std::clamp(value, 0.0f, 1.0f) * ChannelMax));
 }
 } // namespace
 
@@ -242,20 +236,16 @@ std::optional<TokenColor> ParseTokenColor(std::string_view value)
 
 std::string FormatTokenColor(const TokenColor& color)
 {
-    std::array<int, 3> channels{};
-    for (int index = 0; index < 3; ++index)
-    {
-        channels[static_cast<std::size_t>(index)] =
-            static_cast<int>(std::lround(std::clamp(color.rgb[index], 0.0f, 1.0f) * ChannelMax));
-    }
+    const Core::Color::Rgb rgb = ToRgb(color.rgb);
     char text[32] = {};
+    // In small letters, as the shipped tokens.ini files write them.
     if (color.alpha >= static_cast<int>(ChannelMax))
     {
-        std::snprintf(text, sizeof(text), "#%02x%02x%02x", channels[0], channels[1], channels[2]);
+        std::snprintf(text, sizeof(text), "#%02x%02x%02x", rgb.red, rgb.green, rgb.blue);
     }
     else
     {
-        std::snprintf(text, sizeof(text), "rgba(%d, %d, %d, %d)", channels[0], channels[1], channels[2], color.alpha);
+        std::snprintf(text, sizeof(text), "rgba(%d, %d, %d, %d)", rgb.red, rgb.green, rgb.blue, color.alpha);
     }
     return text;
 }
@@ -272,11 +262,23 @@ std::optional<std::string> ReadThemeToken(std::string_view theme, const char* to
 
 std::optional<ImVec4> ParseShade(std::string_view shade)
 {
-    if (!Data::ServerList::IsShade(shade))
+    const std::optional<Core::Color::Rgb> rgb = Core::Color::ParseRgb(shade);
+    if (!rgb)
     {
         return std::nullopt;
     }
-    return FromRgb(static_cast<unsigned int>(std::stoul(std::string(shade.substr(1)), nullptr, HexBase)));
+    return ToSwatch(*rgb);
+}
+
+ImVec4 ToSwatch(Core::Color::Rgb color)
+{
+    return {static_cast<float>(color.red) / ChannelMax, static_cast<float>(color.green) / ChannelMax,
+            static_cast<float>(color.blue) / ChannelMax, 1.0f};
+}
+
+Core::Color::Rgb ToRgb(const float rgb[3])
+{
+    return {ToChannel(rgb[0]), ToChannel(rgb[1]), ToChannel(rgb[2])};
 }
 
 ImVec4 GetTokenSwatch(const char* token, std::string_view theme)

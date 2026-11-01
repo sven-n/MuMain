@@ -2,6 +2,8 @@
 
 #include "ButtonColors.h"
 
+#include "Core/Color/Rgb.h"
+
 #include <algorithm>
 
 namespace Data::ServerList
@@ -88,12 +90,7 @@ ButtonColor GetButtonColor(const ServerListData& list, const ChannelSettings& ch
 
 bool IsShade(std::string_view text)
 {
-    const auto isHexDigit = [](char character)
-    {
-        return (character >= '0' && character <= '9') || (character >= 'a' && character <= 'f') ||
-               (character >= 'A' && character <= 'F');
-    };
-    return text.size() == 7 && text.front() == '#' && std::all_of(text.begin() + 1, text.end(), isHexDigit);
+    return Core::Color::ParseRgb(text).has_value();
 }
 
 bool IsKnownColor(const ServerListData& list, std::string_view color)

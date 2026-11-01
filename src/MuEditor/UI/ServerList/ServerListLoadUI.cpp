@@ -15,7 +15,6 @@
 
 #include <algorithm>
 #include <array>
-#include <charconv>
 #include <optional>
 #include <vector>
 
@@ -58,9 +57,11 @@ ImU32 ToImColor(Rgb color)
     return IM_COL32(color.red, color.green, color.blue, Opaque);
 }
 
-ImVec4 ToSwatch(Rgb color)
+// A token's color with its alpha.
+ImU32 ToImColor(const Colors::TokenColor& color)
 {
-    return ImGui::ColorConvertU32ToFloat4(ToImColor(color));
+    const Rgb rgb = Colors::ToRgb(color.rgb);
+    return IM_COL32(rgb.red, rgb.green, rgb.blue, color.alpha);
 }
 
 Data::ServerList::ThemeTokenReader TokenReader(std::string_view theme)
@@ -74,7 +75,7 @@ ImVec4 GetBarSwatch(const ServerListData& list, LoadBarPart part, std::string_vi
     const std::string_view theme = Colors::GetGameTheme();
     const std::optional<Rgb> resolved =
         Data::ServerList::ResolveLoadBarColor(list, color, part, theme, TokenReader(theme));
-    return resolved ? ToSwatch(*resolved) : ImGui::ColorConvertU32ToFloat4(UnlitFallback);
+    return resolved ? Colors::ToSwatch(*resolved) : ImGui::ColorConvertU32ToFloat4(UnlitFallback);
 }
 
 bool PickBarColor(ServerListData& list, LoadBarPart part, const char* label, const std::function<void()>& beforeChange)
@@ -133,37 +134,6 @@ bool RenderLoadTextLook(ServerListData& list, const char* label, LoadText& text,
     return changed;
 }
 
-// "#RRGGBB" or "rgba(r, g, b, a)", as tokens.ini writes colors.
-std::optional<ImU32> ParseTokenColor(const std::string& value)
-{
-    if (const std::optional<Rgb> rgb = Core::Color::ParseRgb(value))
-    {
-        return ToImColor(*rgb);
-    }
-    constexpr std::string_view RgbaStart = "rgba(";
-    if (!value.starts_with(RgbaStart) || value.back() != ')')
-    {
-        return std::nullopt;
-    }
-    std::array<int, 4> channels{};
-    const char* position = value.data() + RgbaStart.size();
-    const char* end = value.data() + value.size() - 1;
-    for (int& channel : channels)
-    {
-        while (position < end && (*position == ' ' || *position == ','))
-        {
-            ++position;
-        }
-        const auto [parsed, error] = std::from_chars(position, end, channel);
-        if (error != std::errc{} || channel < 0 || channel > static_cast<int>(Opaque))
-        {
-            return std::nullopt;
-        }
-        position = parsed;
-    }
-    return IM_COL32(channels[0], channels[1], channels[2], channels[3]);
-}
-
 ImU32 GetUnlitColor(const ServerListData& list, std::string_view theme)
 {
     if (!Data::ServerList::IsThemeLoadBarColor(list, LoadBarPart::Empty, theme))
@@ -174,7 +144,8 @@ ImU32 GetUnlitColor(const ServerListData& list, std::string_view theme)
     }
     const std::optional<std::string> token =
         Colors::ReadThemeToken(theme, Data::ServerList::GetLoadBarToken(LoadBarPart::Empty));
-    return (token ? ParseTokenColor(*token) : std::nullopt).value_or(UnlitFallback);
+    const std::optional<Colors::TokenColor> color = token ? Colors::ParseTokenColor(*token) : std::nullopt;
+    return color ? ToImColor(*color) : UnlitFallback;
 }
 
 // A full or overloaded server's load text on its bar, in its color.

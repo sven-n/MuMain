@@ -76,15 +76,6 @@ std::optional<std::size_t> IndexOf(std::string_view id)
     return static_cast<std::size_t>(found - colors.begin());
 }
 
-std::string FormatShade(const float rgb[3])
-{
-    char text[8] = {};
-    const auto channel = [](float value)
-    { return static_cast<unsigned int>(std::clamp(value, 0.0f, 1.0f) * 255.0f + 0.5f); };
-    std::snprintf(text, sizeof(text), "#%02X%02X%02X", channel(rgb[0]), channel(rgb[1]), channel(rgb[2]));
-    return text;
-}
-
 // The themes found, and any other one the color has a shade for.
 std::vector<std::string> ThemesOf(const CustomColor& color)
 {
@@ -295,7 +286,7 @@ void ServerListColorsRoot::RenderEdit(const std::string& name)
         const std::string label = UI::RmlBridge::GetThemeDisplayName(theme);
         if (ImGui::ColorEdit3(label.c_str(), rgb, ImGuiColorEditFlags_Uint8))
         {
-            m_edit.shades[theme] = FormatShade(rgb);
+            m_edit.shades[theme] = Core::Color::FormatRgb(ListColors::ToRgb(rgb));
         }
         ImGui::SameLine();
         if (hasShade)

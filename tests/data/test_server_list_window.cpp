@@ -307,6 +307,19 @@ TEST_CASE("Server list colors: tokens.ini's lines count as the themes read them 
     CHECK(ListColors::SetTokenInText("[Tokens]\na=1\n[Tokens]\na=2\n", "a", "9") == "[Tokens]\na=9\n[Tokens]\na=9\n");
 }
 
+TEST_CASE("Server list colors: a shade goes to the swatch and back unchanged [editor]")
+{
+    namespace ListColors = MuEditor::ServerList::Colors;
+    const std::optional<ImVec4> swatch = ListColors::ParseShade("#ffb400");
+    REQUIRE(swatch.has_value());
+    const float rgb[3] = {swatch->x, swatch->y, swatch->z};
+    CHECK(Core::Color::FormatRgb(ListColors::ToRgb(rgb)) == "#FFB400");
+    CHECK_FALSE(ListColors::ParseShade("#ffb40").has_value());
+    CHECK_FALSE(ListColors::ParseShade("ffb400").has_value());
+    const float outOfRange[3] = {1.5f, -0.5f, 0.5f};
+    CHECK(ListColors::ToRgb(outOfRange) == Core::Color::Rgb{255, 0, 128});
+}
+
 TEST_CASE("Server list colors: a token color keeps its alpha [editor]")
 {
     namespace ListColors = MuEditor::ServerList::Colors;

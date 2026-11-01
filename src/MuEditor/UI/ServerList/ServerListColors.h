@@ -2,6 +2,7 @@
 
 #ifdef _EDITOR
 
+#include "Core/Color/Rgb.h"
 #include "Data/GameData/ServerListData/ButtonColors.h"
 #include "Data/GameData/ServerListData/ServerListData.h"
 #include "imgui.h"
@@ -22,8 +23,11 @@ std::string_view GetGameTheme();
 std::optional<std::string> ReadThemeToken(std::string_view theme, const char* token);
 // The tokens are read again on their next use: a theme's tokens.ini may have changed.
 void ForgetThemeTokens();
-// "#RRGGBB" as a color; nothing for any other text.
+// "#RRGGBB" as a color; nothing for any other text (Core::Color::ParseRgb).
 std::optional<ImVec4> ParseShade(std::string_view shade);
+// A color of 8 bits a channel as ImGui's, and ImGui's red, green and blue rounded to 8 bits a channel.
+ImVec4 ToSwatch(Core::Color::Rgb color);
+Core::Color::Rgb ToRgb(const float rgb[3]);
 // The theme folder a token's value comes from: the theme itself, or one it inherits from;
 // nothing when none of them has it.
 std::optional<std::string> FindThemeTokenSource(std::string_view theme, const char* token);
