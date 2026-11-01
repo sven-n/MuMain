@@ -1,0 +1,217 @@
+#include "stdafx.h"
+#include "doctest.h"
+
+#include "Camera/CameraState.h"
+#include "Render/Effects/EffectDraw.h"
+#include "Render/Effects/ZzzEffect.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+
+#include <cstdio>
+#include <cstring>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace
+{
+using Render::EffectDrawing::Blend;
+using Render::EffectDrawing::SpriteDraw;
+
+// Records every call that reaches the renderer, with its arguments, so two draw paths can be compared exactly.
+class RecordingRenderer final : public mu::IMuRenderer
+{
+public:
+    std::vector<std::string> calls;
+
+    void RenderQuad2D(std::span<const mu::Vertex2D>, std::uint32_t texture) override { Note("Quad2D", texture); }
+    void RenderTriangles(std::span<const mu::Vertex3D> v, std::uint32_t texture) override { Vertices("Triangles", v, texture); }
+    void RenderQuad3D(std::span<const mu::Vertex3D> v, std::uint32_t texture) override { Vertices("Quad3D", v, texture); }
+    void RenderQuadStrip(std::span<const mu::Vertex3D> v, std::uint32_t texture) override { Vertices("Strip", v, texture); }
+    void RenderLines(std::span<const mu::Vertex3D> v, std::uint32_t texture) override { Vertices("Lines", v, texture); }
+    void SetBlendMode(mu::BlendMode mode) override { Note("Blend", static_cast<int>(mode)); }
+    void DisableBlend() override { Note("DisableBlend", 0); }
+    void SetDepthTest(bool on) override { Note("DepthTest", on); }
+    void SetDepthMask(bool on) override { Note("DepthMask", on); }
+    void SetCullFace(bool on) override { Note("CullFace", on); }
+    void SetAlphaTest(bool on) override { Note("AlphaTest", on); }
+    void SetTexture2D(bool on) override { Note("Texture2D", on); }
+    void SetFogEnabled(bool on) override { Note("Fog", on); }
+    void BindTexture(int texture) override { Note("Bind", texture); }
+    void BeginBloomExclusion() override
+    {
+        ++m_bloomExcluded;
+        Note("BeginBloomExclusion", 0);
+    }
+    void EndBloomExclusion() override
+    {
+        --m_bloomExcluded;
+        Note("EndBloomExclusion", 0);
+    }
+    [[nodiscard]] bool IsBloomExcluded() const override { return m_bloomExcluded > 0; }
+    void SetFog(const mu::FogParams&) override {}
+    void BeginScene(int, int, int, int) override {}
+    void EndScene() override {}
+    void Begin2DPass() override {}
+    void End2DPass() override {}
+    void ClearScreen() override {}
+
+private:
+    int m_bloomExcluded = 0;
+
+    void Note(const char* name, long long value) { calls.push_back(std::string(name) + " " + std::to_string(value)); }
+
+    void Vertices(const char* name, std::span<const mu::Vertex3D> vertices, std::uint32_t texture)
+    {
+        std::string call = std::string(name) + " " + std::to_string(texture);
+        for (const mu::Vertex3D& vertex : vertices)
+        {
+            char bytes[sizeof(mu::Vertex3D) * 2 + 1];
+            const auto* raw = reinterpret_cast<const unsigned char*>(&vertex);
+            for (std::size_t i = 0; i < sizeof(mu::Vertex3D); ++i)
+                std::snprintf(bytes + i * 2, 3, "%02x", raw[i]);
+            call += " ";
+            call += bytes;
+        }
+        calls.push_back(call);
+    }
+};
+
+// Installs the recorder, with the camera at the origin looking down -z and the render state reset.
+struct RecordingScope
+{
+    RecordingRenderer renderer;
+    float savedMatrix[3][4];
+
+    RecordingScope()
+    {
+        std::memcpy(savedMatrix, g_Camera.Matrix, sizeof(savedMatrix));
+        std::memset(g_Camera.Matrix, 0, sizeof(g_Camera.Matrix));
+        for (int i = 0; i < 3; ++i)
+            g_Camera.Matrix[i][i] = 1.f;
+        mu::SetRendererOverride(&renderer);
+    }
+
+    ~RecordingScope()
+    {
+        mu::SetRendererOverride(nullptr);
+        std::memcpy(g_Camera.Matrix, savedMatrix, sizeof(savedMatrix));
+    }
+
+    // Runs a draw from the same starting render state and returns what reached the renderer.
+    template <typename Draw> std::vector<std::string> Record(Draw draw)
+    {
+        DisableAlphaBlend();
+        renderer.calls.clear();
+        draw();
+        return renderer.calls;
+    }
+};
+
+// What RenderSprites did for one sprite before effects were drawn from descriptions: the loop's blend, its bloom
+// exclusion, then the quad.
+void LegacySpriteDraw(const SpriteDraw& d, int type, int subType)
+{
+    if (type == BITMAP_FORMATION_MARK)
+        EnableAlphaTest();
+    else if (subType == 0)
+        EnableAlphaBlend();
+    else if (subType == 1)
+        EnableAlphaBlendMinus();
+    else if (subType == 2)
+        EnableAlphaTest();
+    else if (subType == 3)
+        EnableAlphaBlend2();
+    std::optional<mu::ScopedBloomExclusion> exclusion;
+    if (d.bloomExcluded)
+        exclusion.emplace();
+    vec3_t position = {d.position[0], d.position[1], d.position[2]};
+    vec3_t light = {d.light[0], d.light[1], d.light[2]};
+    RenderSprite(d.texture, position, d.width, d.height, light, d.rotation, d.u, d.v, d.uWidth, d.vHeight);
+}
+
+OBJECT MakeSprite(int type, int subType)
+{
+    OBJECT o;
+    o.Live = true;
+    o.Type = type;
+    o.SubType = subType;
+    o.Scale = 1.f;
+    o.AnimationFrame = 1.f;
+    Vector(10.f, -20.f, -100.f, o.Position);
+    Vector(0.9f, 0.5f, 0.25f, o.Light);
+    return o;
+}
+} // namespace
+
+TEST_CASE("A sprite drawn from its description reaches the renderer exactly as the old sprite draw did [effects]")
+{
+    RecordingScope scope;
+    for (const int subType : {0, 1, 2, 3, 4})
+    {
+        for (const bool excluded : {false, true})
+        {
+            for (const float rotation : {0.f, 37.f})
+            {
+                CAPTURE(subType);
+                CAPTURE(excluded);
+                CAPTURE(rotation);
+                OBJECT o = MakeSprite(BITMAP_LIGHT, subType);
+                o.Angle[2] = rotation;
+                const SpriteDraw draw = DescribeSprite(o, excluded);
+                const auto expected = scope.Record([&] { LegacySpriteDraw(draw, o.Type, o.SubType); });
+                const auto actual =
+                    scope.Record([&] { Render::EffectDrawing::ActiveEffectDrawer().DrawSprite(draw); });
+                CHECK(actual == expected);
+                CHECK_FALSE(actual.empty());
+            }
+        }
+    }
+}
+
+TEST_CASE("A sprite's description carries its blend, its quad and its bloom exclusion [effects]")
+{
+    OBJECT o = MakeSprite(BITMAP_LIGHT, 1);
+    o.Angle[2] = 45.f;
+    SpriteDraw draw = DescribeSprite(o, true);
+    CHECK(draw.blend == Blend::Subtract);
+    CHECK(draw.texture == BITMAP_LIGHT);
+    CHECK(draw.position[2] == -100.f);
+    CHECK(draw.light[1] == 0.5f);
+    CHECK(draw.rotation == 45.f);
+    CHECK(draw.bloomExcluded);
+    CHECK(draw.u == 0.f);
+    CHECK(draw.uWidth == 1.f);
+
+    CHECK(DescribeSprite(MakeSprite(BITMAP_LIGHT, 0), false).blend == Blend::Glow);
+    CHECK(DescribeSprite(MakeSprite(BITMAP_LIGHT, 2), false).blend == Blend::AlphaTest);
+    CHECK(DescribeSprite(MakeSprite(BITMAP_LIGHT, 3), false).blend == Blend::Blend2);
+    // Any other subtype keeps the state the previous sprite left, as the old loop did.
+    CHECK(DescribeSprite(MakeSprite(BITMAP_LIGHT, 4), false).blend == Blend::Unchanged);
+
+    // The formation mark draws one cell of its 3x3 sheet, 64 units wide, alpha-tested whatever its subtype.
+    const SpriteDraw mark = DescribeSprite(MakeSprite(BITMAP_FORMATION_MARK, 5), false);
+    CHECK(mark.blend == Blend::AlphaTest);
+    CHECK(mark.width == 64.f);
+    CHECK(mark.height == 64.f);
+    CHECK(mark.u == 0.66f);
+    CHECK(mark.v == 0.33f);
+    CHECK(mark.uWidth == 0.33f);
+    CHECK(mark.vHeight == 0.33f);
+}
+
+TEST_CASE("Another effect drawer receives the sprites instead of the default one [effects]")
+{
+    struct Counting final : Render::EffectDrawing::EffectDrawer
+    {
+        int sprites = 0;
+        void DrawSprite(const SpriteDraw&) override { ++sprites; }
+    } counting;
+    RecordingScope scope;
+    Render::EffectDrawing::SetEffectDrawer(&counting);
+    const auto calls =
+        scope.Record([] { Render::EffectDrawing::ActiveEffectDrawer().DrawSprite(SpriteDraw{}); });
+    Render::EffectDrawing::SetEffectDrawer(nullptr);
+    CHECK(counting.sprites == 1);
+    CHECK(calls.empty());
+}

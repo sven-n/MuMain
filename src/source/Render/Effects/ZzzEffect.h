@@ -1,6 +1,11 @@
 #ifndef __ZZZ_EFFECT_H__
 #define __ZZZ_EFFECT_H__
 
+namespace Render::EffectDrawing
+{
+struct SpriteDraw;
+}
+
 extern OBJECT Effects[];
 extern OBJECT Sprites[];
 extern JOINT Joints[];
@@ -31,6 +36,8 @@ bool IsSpriteBloomExcluded(int sprite);
 // Sprites are drawn for one frame: the update clears last frame's before anything spawns new ones.
 void ClearSprites();
 void RenderSprites(BYTE byRenderOneMore = 0);
+// The draw a live sprite asks for: its quad, its blend and whether bloom leaves it alone.
+Render::EffectDrawing::SpriteDraw DescribeSprite(const OBJECT& sprite, bool bloomExcluded);
 void CheckSprites();
 
 void AnimationFlag();

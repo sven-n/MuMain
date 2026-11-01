@@ -22,12 +22,21 @@ public:
     void ClearScreen() override {}
     void RenderLines(std::span<const Vertex3D>, std::uint32_t) override {}
 };
+
+IMuRenderer* s_rendererOverride = nullptr;
 } // namespace
 
 IMuRenderer& GetRenderer()
 {
     static NoopRenderer renderer;
+    if (s_rendererOverride)
+        return *s_rendererOverride;
     return renderer;
+}
+
+void SetRendererOverride(IMuRenderer* renderer)
+{
+    s_rendererOverride = renderer;
 }
 
 } // namespace mu
