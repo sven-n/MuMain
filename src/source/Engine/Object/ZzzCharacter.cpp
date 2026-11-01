@@ -6445,13 +6445,8 @@ void AnimateCharacterBones(OBJECT* o)
     o->EnableBoneMatrix = true;
 }
 
-#ifdef MU_ENABLE_CONTROL_SOCKET
-PrepassBoneCheck g_PrepassBoneCheck;
-
 namespace
 {
-float PrepassBones[MAX_BONES][3][4];
-
 bool IsClientCharacterObject(const OBJECT* o)
 {
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
@@ -6460,6 +6455,14 @@ bool IsClientCharacterObject(const OBJECT* o)
     }
     return false;
 }
+} // namespace
+
+#ifdef MU_ENABLE_CONTROL_SOCKET
+PrepassBoneCheck g_PrepassBoneCheck;
+
+namespace
+{
+float PrepassBones[MAX_BONES][3][4];
 } // namespace
 
 void CheckCharacterPose(const OBJECT* o, BMD* model, bool reused)
