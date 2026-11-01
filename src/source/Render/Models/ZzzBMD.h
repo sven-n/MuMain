@@ -12,6 +12,7 @@
 namespace Render::ModelDrawing
 {
 struct MeshDraw;
+struct ModelSkin;
 struct ShadowDraw;
 } // namespace Render::ModelDrawing
 
@@ -408,6 +409,8 @@ public:
     void RenderMeshEffect(int i, int iType, int iSubType = 0, vec3_t Angle = 0, VOID* obj = NULL);
 
     void RenderMesh(int meshIndex, int renderFlags, float alpha = 1.f, int blendMeshIndex = -1, float blendMeshAlpha = 1.f, float blendMeshTextureCoordU = 0.f, float blendMeshTextureCoordV = 0.f, int textureIndex = -1);
+    // The skinning the last Transform() set up, as RenderMesh and RenderBodyShadow put it in their draws.
+    [[nodiscard]] Render::ModelDrawing::ModelSkin CurrentSkin() const;
     // The default drawer's draw of one mesh (Render/Models/ModelDraw.h).
     void DrawMesh(Render::ModelDrawing::MeshDraw& draw) const;
     void BeginRenderCoinHeap();
@@ -473,9 +476,8 @@ private:
     void AddMeshShadowTriangles(int blendMesh, int hiddenMesh, int startMesh, int endMesh, const float* origin,
                                 float sx, float sy, std::uint32_t color) const;
     // The same shadow from a cached rest-pose stream skinned on the GPU; false leaves it to the CPU.
-    [[nodiscard]] bool RenderGpuMeshShadow(int blendMesh, int hiddenMesh, int startMesh, int endMesh,
-                                           const float* origin, float bodyScale, float sx, float sy,
-                                           std::uint32_t color) const;
+    [[nodiscard]] bool RenderGpuMeshShadow(const Render::ModelDrawing::ShadowDraw& draw, int startMesh, int endMesh,
+                                           float sx, float sy, std::uint32_t color) const;
     // AddMeshShadowTriangles of a model file: the meshes' shadows
     // (ProjectWeightedShadowMesh) drawn indexed, in mesh and triangle order.
     void AddWeightedMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw& draw, int startMesh, int endMesh,

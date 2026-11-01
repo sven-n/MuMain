@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 class BMD;
 
 // The seam between game code and how a model is drawn. BMD::RenderMesh describes one mesh draw
@@ -9,10 +11,26 @@ class BMD;
 // same drawer, and the renderer applies the active look to each draw.
 namespace Render::ModelDrawing
 {
+// How a model's vertices are skinned for a draw: what its last Transform() set up.
+struct ModelSkin
+{
+    // MAX_BONES bone matrices; nullptr when the model was not transformed.
+    const float (*bones)[3][4] = nullptr;
+    // g_BoneTransformVersion when the bones were set: GPU palette uploads key on it.
+    std::uint32_t boneVersion = 0;
+    float boneScale = 1.f;
+    // The rest-pose scale Transform() was given; 0 for none.
+    float restPoseScale = 0.f;
+    // Whether the bones already place the body (BMD::Transform's Translate).
+    bool translate = false;
+    // The model light vector GPU-skinned lighting uses.
+    float lightDirection[3] = {};
+};
+
 // One mesh draw: the call's arguments and the model state the draw reads.
 struct MeshDraw
 {
-    // The model's data: meshes, textures, the skinning set up by its last Transform().
+    // The model's data: meshes and textures.
     const BMD* model = nullptr;
     int mesh = 0;
     int flags = 0;
@@ -33,6 +51,7 @@ struct MeshDraw
     char streamMesh = -1;
     // The LOD of a model file to draw (0: the BMD's meshes).
     int lod = 0;
+    ModelSkin skin;
 };
 
 // One model's shadow projected on the ground: the call's arguments and the model state the draw reads.
@@ -53,6 +72,7 @@ struct ShadowDraw
     float bodyScale = 1.f;
     // The LOD of a model file whose meshes cast the shadow (0: the BMD's meshes).
     int lod = 0;
+    ModelSkin skin;
 };
 
 class ModelDrawer
