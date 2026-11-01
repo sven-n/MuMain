@@ -11,7 +11,9 @@
 #include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Pets/CSPetSystem.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Render/Items/ItemEffects.h"
+#include "Render/Items/ItemRenderStyles.h"
 #include "Render/Models/ZzzBMD.h"
 #include "World/GameMaps/GMNewTown.h"
 #include "World/MapInfra/MapManager.h"
@@ -726,4 +728,38 @@ TEST_CASE("Creating a sprite while drawing is counted as a violation [effects]")
     CHECK(Diagnostics::DrawSpawnCheck::Violations() == 1);
     Diagnostics::DrawSpawnCheck::ResetViolations();
     FenrirScope::ClearSpawns();
+}
+
+TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and its draw spawns none [effects]")
+{
+    FenrirScope scope;
+    ItemModelDatabaseScope restoreModels;
+    Data::Items::ItemModelDefinition water;
+    water.group = 14;
+    water.number = 64;
+    water.file = "Data/Item/Water.bmd";
+    water.renderStyle = "cursedCastleWater";
+    g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{water}, Data::Effects::GlowColorList{});
+    const int model = Data::Items::ToModelSlot(Data::Items::MakeItemType(14, 64));
+    BMD* b = &Models[model];
+    b->BodyScale = 1.f;
+    Vector(0.f, 0.f, 0.f, b->BodyOrigin);
+    OBJECT item;
+    item.Type = model;
+
+    CheckDrawSpawnsNone([&] { Render::Items::Styles::Render(b, &item, model, 1.f, RENDER_TEXTURE); });
+    for (int i = 0; i < MAX_SPRITES; ++i)
+        CHECK_FALSE(Sprites[i].Live);
+
+    REQUIRE(Render::Items::Styles::Spawns(model));
+    Render::Items::Styles::Spawn(b, &item, model, scope.bones.get());
+    int onPose = 0;
+    for (int i = 0; i < MAX_SPRITES; ++i)
+    {
+        if (!Sprites[i].Live)
+            continue;
+        CHECK(Sprites[i].Position[0] == FenrirScope::poseAt);
+        ++onPose;
+    }
+    CHECK(onPose == 1);
 }
