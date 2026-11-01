@@ -48,9 +48,9 @@ public:
     // the step waiting for it is dropped then.
     void OnGreeting(LoginServer server, bool carryOn = true);
 
-    // The game server closed the login after three wrong passwords. Goes back to the
-    // server list over a new connection to the connect server, rather than logging in
-    // again over a new connection to the same game server.
+    // Goes back to the server list over a new connection to the connect server: the
+    // login window's Cancel, and OK after the game server closed the login for three
+    // wrong passwords (rather than logging in again over a new connection to it).
     void ReturnToServerList();
 
     void Update(); // per frame while the login scene runs

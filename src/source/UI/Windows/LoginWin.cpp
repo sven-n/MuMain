@@ -75,13 +75,7 @@ CLoginWin g_LoginWin;
 
 CLoginWin::CLoginWin() = default;
 
-CLoginWin::~CLoginWin()
-{
-    // Backstop join: std::thread's destructor calls std::terminate() if still joinable, and
-    // there's no guarantee ProcessPendingConnectionReconnect() ran one last time before shutdown.
-    if (m_ConnectionReconnectThread.joinable())
-        m_ConnectionReconnectThread.join();
-}
+CLoginWin::~CLoginWin() = default;
 
 void CLoginWin::Create()
 {
@@ -595,34 +589,8 @@ void CLoginWin::SubmitCredentials(const wchar_t* pszUsername, const wchar_t* psz
 
 void CLoginWin::CancelLogin()
 {
-    // Hide immediately, run the blocking reconnect on a background thread. Guard against ESC-spam
-    // stacking threads: if one is already in flight, this press is a no-op.
+    // Back to the server list over a new connection to the connect server. The reconnect
+    // checks the server in the background first, so one that is down doesn't hold the screen.
     Show(false);
-
-    if (m_bConnectionReconnectInFlight.load())
-        return;
-
-    if (m_ConnectionReconnectThread.joinable())
-        m_ConnectionReconnectThread.join(); // previous run already finished and was consumed
-
-    m_bConnectionReconnectInFlight.store(true);
-    m_bConnectionReconnectDone.store(false);
-    m_ConnectionReconnectThread = std::thread([this]
-    {
-        ConnectConnectionServer();
-        m_bConnectionReconnectDone.store(true);
-    });
-}
-
-void CLoginWin::ProcessPendingConnectionReconnect()
-{
-    if (m_ConnectionReconnectThread.joinable())
-        m_ConnectionReconnectThread.join();
-    m_bConnectionReconnectDone.store(false);
-    m_bConnectionReconnectInFlight.store(false);
-}
-
-void CLoginWin::ConnectConnectionServer()
-{
-    ConnectForLogin(szServerIpAddress, g_ServerPort);
+    LoginSceneReconnect::Instance().ReturnToServerList();
 }

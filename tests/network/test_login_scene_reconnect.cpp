@@ -410,10 +410,10 @@ TEST_SUITE("Login scene reconnect")
         CHECK(screen.resumed == 0); // the player picks a server and logs in again
     }
 
-    TEST_CASE("three failed logins go back to the server list")
+    TEST_CASE("Cancel and three failed logins go back to the server list")
     {
-        // The game server closes the login after the third wrong password, maybe
-        // only after the player answered its message.
+        // The login window's Cancel, or OK after the game server closed the login for
+        // the third wrong password (maybe only after the player answered its message).
         DroppedScreen screen;
         screen.link.connected = true;
 

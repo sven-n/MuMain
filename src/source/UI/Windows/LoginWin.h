@@ -7,9 +7,6 @@
 
 #include "UI/RmlBridge/RmlThemedView.h"
 
-#include <atomic>
-#include <thread>
-
 namespace Rml { class ElementDocument; }
 
 // The login dialog: RmlUi (login.rml) renders everything, username/password entry included -- the
@@ -38,22 +35,6 @@ public:
     void Release();
     void SetPosition(int nXCoord, int nYCoord);
     void Show(bool bShow) override;
-
-    void ConnectConnectionServer();
-
-    // CancelLogin() runs ConnectConnectionServer() on a background thread since it blocks on a
-    // real socket connect; CSceneUICoordinator::Update() polls this each frame and calls
-    // ProcessPendingConnectionReconnect() to join once done. m_bConnectionReconnectDone (atomic)
-    // is the happens-before point that makes the worker thread's writes visible to the main thread.
-    bool HasPendingConnectionReconnect() const
-    {
-        return m_bConnectionReconnectDone.load();
-    }
-    void ProcessPendingConnectionReconnect();
-    bool IsReturningToServerList() const
-    {
-        return m_bConnectionReconnectInFlight.load();
-    }
 
     // Sends a login without touching the text boxes or the remembered
     // credentials in config.ini. The manual path calls it after validating
@@ -118,9 +99,6 @@ protected:
 
 private:
     int FirstLoad = 0;
-    std::atomic<bool> m_bConnectionReconnectInFlight{false};
-    std::atomic<bool> m_bConnectionReconnectDone{false};
-    std::thread m_ConnectionReconnectThread;
 
     // Shared by the immediate RmlUi callbacks and UpdateWhileActive()'s keyboard polling; each
     // re-checks the "remember password" prompt's live Pending state itself.
