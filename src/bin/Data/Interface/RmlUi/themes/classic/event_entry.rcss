@@ -53,8 +53,9 @@
     font-weight: bold;
     line-height: 1.1;
 }
-/* A block, not legacy's flex column: in this build an absolutely placed child of a flex item is
-   sized against the item's content, not its padded box, and the plate came out a strip. */
+/* A block, not legacy's flex column. It was chosen when RmlUi sized an absolutely placed child of
+   an auto-height flex box against the box before it grew, so the plate came out a strip; the pinned
+   RmlUi sizes it against the grown box, and the block band stays as it looks the same. */
 .entry-btn {
     display: block;
     position: relative;

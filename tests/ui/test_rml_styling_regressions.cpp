@@ -2,12 +2,17 @@
 #include <doctest.h>
 
 #include "RmlLayoutFixture.h"
+#include "UI/RmlBridge/RmlElementBox.h"
+#include "UI/RmlBridge/RmlPanelGeometry.h"
+#include "UI/Scaling/UITransform.h"
 #include "../../src/ThirdParty/RmlUi/Source/Core/DecoratorTiled.h"
 #include <RmlUi/Core/FontEngineInterface.h>
 #include <RmlUi/Core/Mesh.h>
+#include <RmlUi/Core/StyleSheetTypes.h>
 #include <RmlUi/Core/TextShapingContext.h>
 #include <algorithm>
 #include <cmath>
+#include <vector>
 
 namespace
 {
@@ -179,4 +184,279 @@ TEST_CASE("the legacy HUD's menu art reaches the cash shop button [ui][styling]"
     const float buttonLeft = button->GetAbsoluteOffset(Rml::BoxArea::Border).x;
     CHECK(artRight >= buttonLeft - 0.01f);
     document->Close();
+}
+
+namespace
+{
+struct DrawnRect
+{
+    float left = 0.f;
+    float top = 0.f;
+    float right = 0.f;
+    float bottom = 0.f;
+};
+
+DrawnRect Drawn(Rml::Element& element)
+{
+    Rml::Vector2f offset, size;
+    REQUIRE(UI::RmlBridge::DrawnBox(element, Rml::BoxArea::Border, offset, size));
+    return {offset.x, offset.y, offset.x + size.x, offset.y + size.y};
+}
+
+Rml::Element& Required(Rml::ElementDocument& document, const char* selector)
+{
+    Rml::Element* element = document.QuerySelector(selector);
+    CAPTURE(selector);
+    REQUIRE(element != nullptr);
+    return *element;
+}
+
+// The element's decorator as the stylesheet declares it, e.g. "ninepatch(option-tab-idle, ...)".
+std::string DecoratorText(Rml::Element& element)
+{
+    const Rml::Property* property = element.GetProperty(Rml::PropertyId::Decorator);
+    if (property == nullptr || property->unit != Rml::Unit::DECORATOR)
+        return {};
+    const auto decorators = property->Get<Rml::DecoratorsPtr>();
+    return decorators ? decorators->value : std::string{};
+}
+
+// A legacy options tab row of `tabCount` tabs with tab `active` selected, styled by the theme's sheet.
+std::string OptionTabRowMarkup(int tabCount, int active)
+{
+    const auto stylesheet = (std::filesystem::path(MU_RMLUI_DIR) / "themes/legacy/option_window.rcss").generic_string();
+    std::string tabs;
+    for (int tab = 0; tab < tabCount; ++tab)
+        tabs += std::string(R"(<div class="option-tab-btn)") + (tab == active ? " active-tab" : "") + R"(">Tab</div>)";
+    return R"(<rml><head><link type="text/rcss" href=")" + stylesheet +
+           R"("/></head><body><div id="row" class="option-tab-row" style="width: 404dp;">)" + tabs +
+           "</div></body></rml>";
+}
+
+// What the element paints: its decorator and the colours that tint, edge or fill it.
+std::string PaintText(Rml::Element& element)
+{
+    const auto& computed = element.GetComputedValues();
+    return DecoratorText(element) + '|' + Rml::ToString(computed.image_color()) + '|' +
+           Rml::ToString(computed.border_top_color()) + '|' + Rml::ToString(computed.background_color());
+}
+
+// An enabled band lights its art under the mouse and when pressed; legacy swaps the sprite.
+void CheckEntryArtStates(UI::Tests::RmlLayoutFixture& fixture, const std::string& theme, Rml::Element& band)
+{
+    auto* art = band.QuerySelector(".entry-btn-art");
+    REQUIRE(art);
+    const std::string idle = PaintText(*art);
+    band.SetPseudoClass("hover", true);
+    fixture.Refresh();
+    const std::string hovered = PaintText(*art);
+    band.SetPseudoClass("active", true);
+    fixture.Refresh();
+    const std::string pressed = PaintText(*art);
+    CHECK(hovered != idle);
+    CHECK(pressed != idle);
+    if (theme != "legacy")
+        return;
+    CHECK(idle.find("(entry-btn-up)") != std::string::npos);
+    CHECK(hovered.find("(entry-btn-over)") != std::string::npos);
+    CHECK(pressed.find("(entry-btn-down)") != std::string::npos);
+}
+
+// Lays out the first level band of an event entry window and checks that whatever paints it covers
+// the whole band.
+void CheckEntryArt(UI::Tests::RmlLayoutFixture& fixture, const std::string& theme, const std::string& window,
+                   Rml::Vector2i viewport)
+{
+    CAPTURE(theme);
+    CAPTURE(window);
+    CAPTURE(viewport.x);
+    fixture.Configure(viewport, 100);
+    auto* document = fixture.Load(theme, window);
+    REQUIRE(document);
+    UI::RmlBridge::SlotPlacement placement;
+    placement.Set(0.f, 0.f, UI::Scaling::DockRightTransform(viewport.x, viewport.y).scaleX);
+    placement.Apply(document, "panel");
+    auto* band = document->QuerySelector(".entry-btn");
+    REQUIRE(band);
+    band->SetClass("enabled", true);
+    auto* label = band->QuerySelector(".entry-label");
+    REQUIRE(label);
+    label->SetInnerRML("The 1 Square (15-130 level)");
+    fixture.Refresh();
+    const Rml::Vector2f bandSize = band->GetBox().GetSize(Rml::BoxArea::Border);
+    REQUIRE(bandSize.y > label->GetBox().GetSize(Rml::BoxArea::Border).y);
+    Rml::ElementList painters;
+    band->QuerySelectorAll(painters, "*");
+    painters.push_back(band);
+    int painted = 0;
+    for (auto* painter : painters)
+    {
+        const auto& computed = painter->GetComputedValues();
+        if (!computed.has_decorator() && computed.background_color().alpha == 0)
+            continue;
+        ++painted;
+        const Rml::Vector2f size = painter->GetBox().GetSize(Rml::BoxArea::Border);
+        CHECK(size.x == doctest::Approx(bandSize.x));
+        CHECK(size.y == doctest::Approx(bandSize.y));
+    }
+    CHECK(painted > 0);
+    CheckEntryArtStates(fixture, theme, *band);
+    fixture.context->UnloadDocument(document);
+    fixture.Refresh();
+}
+} // namespace
+
+TEST_CASE("the event entry level art covers its whole band in every theme [ui][styling]")
+{
+    // The band is an auto-height flex box that grows to its minimum height, and its art an absolute
+    // child (classic: a block band). RmlUi used to size such a child against the flex box's height
+    // from before that growth (FlexContainer::Close kept its pre-layout box), so the art covered only
+    // the band's padding: a strip above the label.
+    UI::Tests::RmlLayoutFixture fixture;
+    for (const char* theme : {"legacy", "modern", "classic"})
+        for (const char* window : {"devil_square_enter", "blood_castle_enter"})
+            for (Rml::Vector2i viewport : {Rml::Vector2i{1024, 768}, Rml::Vector2i{1920, 1080}})
+                CheckEntryArt(fixture, theme, window, viewport);
+}
+
+TEST_CASE("the legacy character window shows the points to spend between the summary and STR [ui][styling]")
+{
+    // The original drew "Point: N" beside the level (x 110); "Level: N | Resets: N" runs into it.
+    // newui_item_table03(Dw) draws the summary's bottom line on its rows 7-9 of 14.
+    constexpr float BottomLineEndRow = 10.f;
+    constexpr float BottomEdgeRows = 14.f;
+    constexpr float Tolerance = 0.5f;
+    UI::Tests::RmlLayoutFixture fixture;
+    // A display scale above 100% grows the text but not a small window; such windows are only listed
+    // where the screen gives the panel room to grow too.
+    struct Screen
+    {
+        Rml::Vector2i viewport;
+        int percent;
+        float contentScale;
+    };
+    const Screen screens[] = {{{800, 600}, 100, 1.f},    {{1024, 768}, 75, 1.f},    {{1024, 768}, 100, 1.f},
+                              {{1280, 720}, 100, 1.f},   {{1280, 720}, 150, 1.f},   {{1920, 1080}, 100, 1.f},
+                              {{1920, 1080}, 125, 1.f},  {{1920, 1080}, 150, 1.f},  {{2560, 1440}, 100, 1.f},
+                              {{1920, 1080}, 100, 1.5f}, {{2560, 1440}, 100, 1.5f}, {{3840, 2160}, 100, 2.f}};
+    for (const auto& [viewport, percent, contentScale] : screens)
+    {
+        CAPTURE(viewport.x);
+        CAPTURE(viewport.y);
+        CAPTURE(percent);
+        CAPTURE(contentScale);
+        fixture.Configure(viewport, percent, contentScale);
+        auto* document = fixture.Load("legacy", "character_info");
+        REQUIRE(document);
+        UI::RmlBridge::SlotPlacement placement;
+        placement.Set(0.f, 0.f, UI::Scaling::DockRightTransform(viewport.x, viewport.y).scaleX);
+        placement.Apply(document, "panel");
+        const std::string fontSize =
+            std::to_string(UI::Scaling::NativeTextPixelSize(UI::Scaling::FontRole::Normal, viewport.x, viewport.y)) +
+            "px";
+        auto& level = Required(*document, ".level-text");
+        auto& points = Required(*document, ".levelup-point-text");
+        level.SetProperty("font-size", fontSize);
+        points.SetProperty("font-size", fontSize);
+        level.SetInnerRML("Level: 400 | Resets: 65535");
+        points.SetInnerRML("Point: 65535");
+        fixture.Refresh();
+
+        const DrawnRect levelBox = Drawn(level);
+        const DrawnRect pointsBox = Drawn(points);
+        const DrawnRect bottomEdge = Drawn(Required(*document, ".edge-bottom"));
+        const DrawnRect summary = Drawn(Required(*document, ".summary-fill"));
+        const DrawnRect strength = Drawn(Required(*document, ".attr-textbox-str"));
+        const float bottomLine =
+            bottomEdge.top + (bottomEdge.bottom - bottomEdge.top) * BottomLineEndRow / BottomEdgeRows;
+        CHECK(pointsBox.top >= bottomLine - Tolerance);
+        CHECK(pointsBox.bottom <= strength.top + Tolerance);
+        CHECK(pointsBox.right <= summary.right + Tolerance);
+        // Its transform writes base.rcss's counter-scale out; it must still match the other texts'.
+        CHECK(UI::RmlBridge::DrawnScale(points) == doctest::Approx(UI::RmlBridge::DrawnScale(level)));
+        CHECK((pointsBox.top >= levelBox.bottom || pointsBox.left >= levelBox.right));
+
+        // The rows moved down to make the gap; the Dark Lord's Command row still clears the action row.
+        const DrawnRect command = Drawn(Required(*document, ".attr-textbox-cmd"));
+        const DrawnRect actions = Drawn(Required(*document, ".info-btn-quest"));
+        CHECK(command.bottom <= actions.top);
+
+        fixture.context->UnloadDocument(document);
+        fixture.Refresh();
+    }
+}
+
+TEST_CASE("every legacy attribute row sits the points' room lower than the original [ui][styling]")
+{
+    // Each row's top is the original's plus --points-room. A var() that failed to resolve would leave
+    // a row at its original top or at 0, at some UI scales only, so the small ones are included.
+    constexpr float PointsRoom = 8.f;
+    constexpr size_t RowElements = 24; // 5 text boxes, labels, values and buttons; 4 line blocks
+    UI::Tests::RmlLayoutFixture fixture;
+    const std::pair<Rml::Vector2i, int> screens[] = {
+        {{800, 600}, 100}, {{1024, 768}, 75}, {{1024, 768}, 100}, {{1920, 1080}, 100}};
+    for (const auto& [viewport, percent] : screens)
+    {
+        CAPTURE(viewport.x);
+        CAPTURE(percent);
+        fixture.Configure(viewport, percent);
+        auto* document = fixture.Load("legacy", "character_info");
+        REQUIRE(document);
+        UI::RmlBridge::SlotPlacement placement;
+        placement.Set(0.f, 0.f, UI::Scaling::DockRightTransform(viewport.x, viewport.y).scaleX);
+        placement.Apply(document, "panel");
+        fixture.Refresh();
+        Rml::ElementList rows;
+        document->QuerySelectorAll(rows, ".attr-textbox, .attr-label, .attr-value, .attr-lines, .stat-btn");
+        REQUIRE(rows.size() == RowElements);
+        std::vector<float> tops;
+        for (auto* row : rows)
+            tops.push_back(row->GetAbsoluteOffset(Rml::BoxArea::Border).y);
+        Required(*document, "#panel").SetProperty("--points-room", "0px");
+        fixture.Refresh();
+        for (size_t row = 0; row < rows.size(); ++row)
+        {
+            CAPTURE(rows[row]->GetClassNames());
+            CHECK(tops[row] - rows[row]->GetAbsoluteOffset(Rml::BoxArea::Border).y == doctest::Approx(PointsRoom));
+        }
+        fixture.context->UnloadDocument(document);
+        fixture.Refresh();
+    }
+}
+
+TEST_CASE("the legacy options tabs each paint their own tab, so a separator sits between every two [ui][styling]")
+{
+    // One 3-tab strip stretched under the whole row put its two separators across the labels. Each
+    // tab now paints one cell of it; the last also takes the strip's closing column, and the selected
+    // tab keeps its own art wherever it is.
+    constexpr int TabCount = 5;
+    UI::Tests::RmlLayoutFixture fixture;
+    fixture.Configure({1024, 768}, 100);
+    for (int active : {0, TabCount - 1})
+    {
+        CAPTURE(active);
+        auto* document = fixture.LoadMarkup(OptionTabRowMarkup(TabCount, active));
+        REQUIRE(document);
+        auto* row = document->GetElementById("row");
+        REQUIRE(row);
+        Rml::ElementList tabs;
+        row->QuerySelectorAll(tabs, ".option-tab-btn");
+        REQUIRE(tabs.size() == TabCount);
+        CHECK_FALSE(row->GetComputedValues().has_decorator());
+        const float rowLeft = row->GetAbsoluteOffset(Rml::BoxArea::Content).x;
+        float edge = rowLeft;
+        for (int tab = 0; tab < TabCount; ++tab)
+        {
+            CAPTURE(tab);
+            const char* sprite = tab == active         ? "option-tab-active"
+                                 : tab == TabCount - 1 ? "option-tab-idle-last"
+                                                       : "option-tab-idle";
+            CHECK(DecoratorText(*tabs[tab]).find(std::string("(") + sprite + ",") != std::string::npos);
+            const float left = tabs[tab]->GetAbsoluteOffset(Rml::BoxArea::Border).x;
+            CHECK(left == doctest::Approx(edge));
+            edge = left + tabs[tab]->GetBox().GetSize(Rml::BoxArea::Border).x;
+        }
+        CHECK(edge == doctest::Approx(rowLeft + row->GetBox().GetSize(Rml::BoxArea::Content).x));
+        document->Close();
+    }
 }

@@ -17,6 +17,11 @@ struct ToolWindowEntry
     const char* windowId;
     const char* const* label;
     bool ToolWindows::* open;
+    // For an entry that is one part of a window with several (Items > Glow
+    // Colors, the Colors window's Glow root): opening the window on that part,
+    // and whether the window shows it. nullptr for a window of its own.
+    void (*showTab)() = nullptr;
+    bool (*isTabShown)() = nullptr;
 };
 
 // Tools that share one selection (the item tools, the monster tools): they

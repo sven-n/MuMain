@@ -68,6 +68,15 @@ struct ItemTooltipValues
     bool timed = false;
     // The item has options to show (SpecialNum > 0: its skill, luck, additional and excellent options).
     bool hasOptions = false;
+    // An item that can have sockets (CSocketItemMgr::IsSocketItem).
+    bool socketItem = false;
+    // Wings or a cape of the second or third tier (its data's wingTier).
+    bool upperTierWings = false;
+    // The item has its skill, luck or an additional option (an option level above 0); excellent options don't count.
+    bool skillLuckOrOption = false;
+    // The item's ancient discriminator names one of its sets, so its name starts with the set's (GetSetItemName);
+    // `ancient` is any discriminator.
+    bool setItem = false;
     // The hero's level.
     int heroLevel = 0;
     // The item's name as its data has it, which {name} writes only for a line showing it, its level + 1, and its
@@ -88,9 +97,25 @@ struct ItemTooltipValues
 
 namespace Engine::Items::TooltipValues
 {
+// How much of the values ComputeItemTooltipValues works out. Basics leaves the stat lines' values that need lookups
+// beyond the item and its data at 0: damage and defense with the Jewel of Harmony's bonus, the full durability, the
+// requirements (the hero's stats, the harmony and socket reductions), the add option and the bundle count. A caller on
+// a hot path (the ground labels, each frame for every drop) takes Basics while its conditions name none of them
+// (NeedsAllTooltipValues).
+enum class TooltipValueScope
+{
+    All,
+    Basics,
+};
+
 // The values of `item` for the hero as he is (CharacterAttribute); without a hero (none set yet), the requirements
 // are shown but nothing is missing.
-ItemTooltipValues ComputeItemTooltipValues(const ITEM& item);
+ItemTooltipValues ComputeItemTooltipValues(const ITEM& item, TooltipValueScope scope = TooltipValueScope::All);
+
+// Whether the value, the state, or one of the conditions is one that Basics leaves out.
+bool NeedsAllTooltipValues(Data::Items::TooltipValue value);
+bool NeedsAllTooltipValues(Data::Items::TooltipState state);
+bool NeedsAllTooltipValues(std::span<const Data::Items::TooltipCondition> conditions);
 
 // The value of a built-in value that is a number, or nothing for {level} (the item's level, which the caller has) and
 // the texts ({name}, {addOptionDuration}).

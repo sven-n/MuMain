@@ -18,6 +18,7 @@ fields, so it can be exchanged with the server (see [Item Sync](#item-sync)).
 | `Group00_Sword.json` … `Group15_Etc.json` | 0–15, named after the `ITEM_GROUP_*` constants |
 | `Stats/ItemStats.json` | What the + level, excellent options, ancient sets and option level add to the stats and requirements; see [Item stats by level](#item-stats-by-level) |
 | `Tooltips/Tooltip.json` | The item tooltip's shared texts and layouts: which stat and requirement lines a tooltip shows; see [Tooltip layouts](#tooltip-layouts) |
+| `Tooltips/GroundLabels.json` | The looks of the item names on the ground: the label styles and the standard rules; see [Ground labels](#ground-labels) |
 | `Sync/KnownDifferences.json` | Not read by the game: the differences from the server that MuEditor's Item Sync leaves unchecked; see [Item Sync](#item-sync) |
 
 The file name is only a convention; the group comes from the file content.
@@ -130,6 +131,7 @@ variants or option words. An online keyword need not select the same items offli
 | `levelValues` | Values of the description's own placeholders, one per item level from +0: `{"stat": ["ENG", "STA", ...]}` makes `{stat}` "ENG" at +0 and "STA" at +1. Each value is a text with its translations (written like `name`) or a shared text (`"@name"`), without placeholders. A line that shows one is shown only at levels that have a value. The Fruits' `{stat}` is one. A client-only field; the bmd import keeps it |
 | `description` | Lines the tooltip shows for the item, e.g. the Jewel of Bless's "It is used to increase your item level up to 6"; see [Descriptions](#descriptions). A client-only field; the bmd import keeps it |
 | `nameLines` | How the game names the item (its tooltip, the repair window, windows, messages and ground labels) and the tooltip's name color, when not the standard name and color (see [Name lines](#name-lines)). Each is written like a `description` line without `bold` and `after` (the name is always bold and first), its text is checked like one, and its `text` and `color` may be left out. Name lines are in the item names' language (English with the options' "Translate item names" off), and a text that is empty in it keeps the standard name. A client-only field; the bmd import keeps it |
+| `groundLabels` | The styles of the item's name on the ground, by level: `[{"style": "giftBoxPink", "levels": [0, 1]}, {"style": "white"}]`. The first rule whose `levels` hold gives the style; at a level none holds at, the standard rules do (see [Ground labels](#ground-labels)). A client-only field; the bmd import keeps it |
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
@@ -275,6 +277,10 @@ The **states** a condition can name:
 | `hasDurability` | The item keeps a durability: an item of groups 0 to 11 or 13 with a `durability` or `magicDurability`, or the wings and capes 12/0–6, 12/36–43 and 12/49–50 |
 | `timed` | A timed item, one that expires |
 | `hasOptions` | The item has options to show: a skill, luck, an additional or an excellent option |
+| `skillLuckOrOption` | The item has its skill, luck or an additional option; excellent options don't count |
+| `setItem` | An ancient item of a set: its discriminator names one of the item's sets, whose name the item's name starts with (`ancient` is any discriminator) |
+| `socketItem` | An item that can have sockets |
+| `upperTierWings` | Wings or a cape of the second or third tier (`wingTier`) |
 
 A **section** is a part of the tooltip the code still writes, and the lines
 of a layout go between them:
@@ -429,6 +435,63 @@ options. `[{"color": "yellow"}]` keeps the standard name in yellow (the
 jewels); `{"text": "{monster} Transformation Ring", "values": {"monster":
 "monsterName:2"}, "levels": [0, 0]}` names a +0 Transformation Ring after the
 Budge Dragon.
+
+### Ground labels
+
+The name above an item on the ground (while the pointer is over it, or with
+Alt for every item) is its name line's text, Zen's with its amount. Its look
+comes from a **label style** of `Tooltips/GroundLabels.json`: a text color, a
+background (black when left out) and bold.
+
+```json
+{
+  "formatVersion": 1,
+  "styles": {
+    "ticket": {"color": "#e58721"},
+    "jewel": {"color": "#ffcc19", "bold": true},
+    "setItem": {"color": "#00ff00", "background": "#3c3cc8", "bold": true},
+    "level0": {"color": "#b2b2b2"}
+  },
+  "standard": [
+    {"when": ["setItem"], "style": "setItem"},
+    {"when": ["level=0"], "style": "level0"}
+  ]
+}
+```
+
+- **An item's own styles** are its `groundLabels`: the first rule whose
+  `levels` hold gives the style. The Devil Square Ticket has
+  `[{"style": "ticket"}]`; the Pink Chocolate Box has
+  `[{"style": "giftBoxPink", "levels": [0, 1]}, {"style": "white"}]`. A rule
+  without `levels` holds at every level, also above +15 (Zen's amount is its
+  level).
+- **The standard rules** give the style at the levels where an item has none
+  of its own: the first rule whose `when` holds, with the
+  [conditions](#tooltip-layouts) of the tooltip lines. They are the level ladder
+  of the original client: the set items, the divine archangel weapons, the
+  socket items, the excellent items (not the second- and third-tier wings and
+  capes), from +7, with a skill, luck or option, then by level. A tag is read
+  from the item the drop is drawn as: the Weapon of Archangel at +0 to +2 is
+  drawn as a divine archangel weapon. Without a rule that holds the label is
+  white on black.
+- **Only a label of the standard rules** has the set's name in front of the
+  name and " +Skill", " +Option" and " +Luck" after it.
+- Colors are `"#rrggbb"`, red, green and blue from `00` to `ff`.
+- The first styles are named by role and keep the looks of the original
+  client: `ticket`, `seal`, `pet`, `jewel`, `cashShopItem`, `giftBoxRed`, …
+  Two of them don't match their kind and are left as they were: the Open Access
+  Ticket to Chaos Castle is yellow (`eventItem`) beside the orange tickets, and
+  the Summoner Character Card is orange (`cashShopItem`) beside the yellow
+  character cards.
+
+**Errors** when the item data loads: a style without a color or with a color
+that is not `"#rrggbb"`, a rule or an item naming a style the file doesn't have
+(the message suggests the name meant for a typo), and an unknown condition.
+**Warnings**: a style neither a rule nor an item names, a standard rule without
+conditions that isn't the last (the warning is on that rule: it always holds,
+so the rules after it are never used), and an item's rule whose levels the
+rules before it all take, such as every rule after one without `levels` (never
+used).
 
 ### Description placeholders
 
@@ -911,7 +974,7 @@ A name has only letters and digits. A new color is added to the list and
 can then be used by any item; a name that is not in the list stops the
 start with a message, and so does a list without the defaults (`orange`,
 `white`, `azure`). The item editor adds colors, changes their values and
-removes the ones no item uses ([Glow Colors](#glow-colors)), and Save Items
+removes the ones no item uses (the [Colors window's Glow root](#glow-colors)), and Save Items
 writes the file in this form, one color a line.
 
 The glow of monsters, and of the event models that level variants are
@@ -1187,7 +1250,8 @@ shows it in the others.
 - **Item Categories**: a tag and its items; add the selected item or remove
   items from it. New tags need code.
 - **Item Model**: see [Item Model](#item-model).
-- **Glow Colors**: the glow color list, see [Glow Colors](#glow-colors).
+- **Glow Colors**: the glow color list, the Glow root of the
+  [Colors](#colors) window.
 - **Item Formulas**: the item stat file, see [Item Formulas](#item-formulas).
 - **Item Sync**: Export and Import of the items and item formulas with an
   OpenMU server, see [Item Sync](#item-sync).
@@ -1289,9 +1353,28 @@ changes in code after loading (the cloth of some pants, the second models
 of the Rage Fighter gloves, the inventory models of the Rage Fighter
 armors) may need a restart to show a new file.
 
-### Glow Colors
+### Colors
 
-The colors of the glow color list, each with how many models use it (also
+The named colors as a tree, a root per use: **Glow** for now; the ground label
+styles, the server list's colors and the tooltip color groups get roots of
+their own. **Windows > Colors** opens the window on what was picked last, and
+**Items > Glow Colors** on its root. It docks with the item tools. The changes
+of the item roots are steps of the item undo history, Save Items writes them.
+
+Under a root you sort its colors into **folders**, also folders in folders,
+at most eight levels deep: **New folder** adds one under the picked root or
+folder (a name of 1 to 32 characters no other folder there has), **Rename** and
+**Remove** change the picked folder (its folders and colors move up into the
+folder above it), and **Move up** and **Move down** order folders and colors.
+Drag a color or a folder onto a folder or onto its root to move it there; a
+color stays in its root. **New color** adds one to the picked folder. Each file
+keeps its folders next to its colors as `"colorFolders"`, a list of folders
+each with a `name`, its `folders` and its `colors`; the game reads and
+checks them (a problem shows in its data report too) but doesn't use them.
+
+#### Glow Colors
+
+The Glow root lists the glow colors, each with how many models use it (also
 as the default they leave out). **New glow color** adds one: a name of
 letters and digits no other color has, and its red, green and blue. A
 picked color's value is changed with the color field and **Apply to the

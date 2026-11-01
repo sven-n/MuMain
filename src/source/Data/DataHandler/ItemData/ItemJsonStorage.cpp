@@ -188,7 +188,8 @@ void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& fil
     }
     if (models.glowColorsChanged)
     {
-        files.push_back({models.glowColorsFile, Effects::WriteGlowColorsJson(models.glowColors)});
+        files.push_back(
+            {models.glowColorsFile, Effects::WriteGlowColorsJson(models.glowColors, models.glowColorFolders)});
     }
 #ifdef _EDITOR
     if (models.statsChanged && models.stats != nullptr)
@@ -291,6 +292,25 @@ ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file)
     return result;
 }
 
+std::filesystem::path GetGroundLabelsFile()
+{
+    return GetItemDataDirectory() / "Tooltips" / GroundLabelsFileName;
+}
+
+GroundLabelsLoadResult LoadGroundLabelsFile(const std::filesystem::path& file)
+{
+    GroundLabelsLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddFatal(result.issues, source, "could not be read");
+        return result;
+    }
+    ReadGroundLabelsJson(*text, source, result.file, result.issues);
+    return result;
+}
+
 std::filesystem::path GetGlowColorsFile()
 {
     return std::filesystem::path(Effects::GlowColorsFile);
@@ -306,7 +326,7 @@ GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file)
         AddFatal(result.issues, source, "could not be read");
         return result;
     }
-    Effects::ReadGlowColorsJson(*text, source, result.colors, result.issues);
+    Effects::ReadGlowColorsJson(*text, source, result.colors, result.folders, result.issues);
     return result;
 }
 

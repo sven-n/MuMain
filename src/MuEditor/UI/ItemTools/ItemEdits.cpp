@@ -8,6 +8,7 @@
 #include "ItemSelection.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
@@ -78,6 +79,23 @@ void RestoreGlowColors(std::span<const Data::Effects::GlowColor> colors)
     g_ItemDataHandler.RestoreGlowColors(colors);
 }
 
+std::vector<Data::Colors::ColorFolder> ReadColorFolders(std::string_view root)
+{
+    if (root == ItemEdits::GlowFolders)
+    {
+        return g_GlowColors.GetFolders();
+    }
+    return {};
+}
+
+void RestoreColorFolders(std::string_view root, std::span<const Data::Colors::ColorFolder> folders)
+{
+    if (root == ItemEdits::GlowFolders)
+    {
+        g_ItemDataHandler.SetGlowColorFolders(std::vector<Data::Colors::ColorFolder>(folders.begin(), folders.end()));
+    }
+}
+
 Data::Items::ItemStatFile ReadStatFile()
 {
     return g_ItemDataHandler.GetStatFile();
@@ -111,7 +129,8 @@ ItemEdits& ItemEdits::GetInstance()
 ItemEdits::ItemEdits()
     : m_history({&ItemEdits::ReadSlot, &RestoreSlots, [](int from, int to)
                  { return g_ItemDataHandler.MoveItem(from, to); }, &ReadSharedModel, &RestoreSharedModel,
-                 &IsHeldByCharacter, &ReadGlowColors, &RestoreGlowColors, &ReadStatFile, &RestoreStatFile})
+                 &IsHeldByCharacter, &ReadGlowColors, &RestoreGlowColors, &ReadStatFile, &RestoreStatFile,
+                 &ReadColorFolders, &RestoreColorFolders})
 {
 }
 
@@ -295,9 +314,34 @@ void ItemEdits::SetGlowColor(std::string label, const Data::Effects::GlowColor& 
     Record({std::move(label), {std::move(step)}});
 }
 
+void ItemEdits::AddGlowColor(std::string label, const Data::Effects::GlowColor& color,
+                             std::span<const std::size_t> folder)
+{
+    std::vector<Data::Effects::GlowColor> before = ReadGlowColors();
+    std::vector<Data::Colors::ColorFolder> foldersBefore = ReadColorFolders(GlowFolders);
+    g_ItemDataHandler.SetGlowColor(color);
+    std::vector<Data::Effects::GlowColor> after = ReadGlowColors();
+    if (after == before)
+    {
+        return;
+    }
+    std::vector<Data::Colors::ColorFolder> folders = foldersBefore;
+    if (Data::Colors::MoveColorInto(folders, color.name, folder))
+    {
+        RestoreColorFolders(GlowFolders, folders);
+    }
+    ItemEditStep step{ItemEditStep::Kind::GlowColors};
+    step.colorsBefore = std::move(before);
+    step.colorsAfter = std::move(after);
+    ItemEditEntry entry{std::move(label), {std::move(step)}};
+    AddFolderStep(entry, GlowFolders, std::move(foldersBefore));
+    Record(std::move(entry));
+}
+
 bool ItemEdits::RemoveGlowColors(std::string label, std::span<const std::string> names)
 {
     std::vector<Data::Effects::GlowColor> before = ReadGlowColors();
+    std::vector<Data::Colors::ColorFolder> foldersBefore = ReadColorFolders(GlowFolders);
     for (const std::string& name : names)
     {
         g_ItemDataHandler.RemoveGlowColor(name);
@@ -310,8 +354,55 @@ bool ItemEdits::RemoveGlowColors(std::string label, std::span<const std::string>
     ItemEditStep step{ItemEditStep::Kind::GlowColors};
     step.colorsBefore = std::move(before);
     step.colorsAfter = std::move(after);
-    Record({std::move(label), {std::move(step)}});
+    ItemEditEntry entry{std::move(label), {std::move(step)}};
+    AddFolderStep(entry, GlowFolders, std::move(foldersBefore));
+    Record(std::move(entry));
     return true;
+}
+
+void ItemEdits::SetColorFolders(std::string label, std::string_view root,
+                                std::vector<Data::Colors::ColorFolder> folders)
+{
+    std::vector<Data::Colors::ColorFolder> before = ReadColorFolders(root);
+    // The same folders change nothing: the file isn't marked changed, and there is no step.
+    if (folders == before)
+    {
+        return;
+    }
+    RestoreColorFolders(root, folders);
+    ItemEditEntry entry{std::move(label), {}};
+    AddFolderStep(entry, root, std::move(before));
+    Record(std::move(entry));
+}
+
+void ItemEdits::SetGlowColorOrder(std::string label, std::span<const Data::Effects::GlowColor> colors)
+{
+    std::vector<Data::Effects::GlowColor> before = ReadGlowColors();
+    g_ItemDataHandler.RestoreGlowColors(colors);
+    std::vector<Data::Effects::GlowColor> after = ReadGlowColors();
+    if (after == before)
+    {
+        return;
+    }
+    ItemEditStep step{ItemEditStep::Kind::GlowColors};
+    step.colorsBefore = std::move(before);
+    step.colorsAfter = std::move(after);
+    Record({std::move(label), {std::move(step)}});
+}
+
+void ItemEdits::AddFolderStep(ItemEditEntry& entry, std::string_view root,
+                              std::vector<Data::Colors::ColorFolder> before)
+{
+    std::vector<Data::Colors::ColorFolder> after = ReadColorFolders(root);
+    if (after == before)
+    {
+        return;
+    }
+    ItemEditStep step{ItemEditStep::Kind::ColorFolders};
+    step.folderRoot = std::string(root);
+    step.foldersBefore = std::move(before);
+    step.foldersAfter = std::move(after);
+    entry.steps.push_back(std::move(step));
 }
 
 void ItemEdits::SetStatFile(std::string label, const Data::Items::ItemStatFile& file,
@@ -386,7 +477,8 @@ void ItemEdits::Record(ItemEditEntry entry)
             {
                 return grouped.kind == step.kind &&
                        ((step.kind == ItemEditStep::Kind::Slot && grouped.itemType == step.itemType) ||
-                        step.kind == ItemEditStep::Kind::GlowColors || step.kind == ItemEditStep::Kind::StatFile);
+                        step.kind == ItemEditStep::Kind::GlowColors || step.kind == ItemEditStep::Kind::StatFile ||
+                        (step.kind == ItemEditStep::Kind::ColorFolders && grouped.folderRoot == step.folderRoot));
             });
         if (same == m_group->steps.end())
         {
@@ -395,6 +487,10 @@ void ItemEdits::Record(ItemEditEntry entry)
         else if (step.kind == ItemEditStep::Kind::GlowColors)
         {
             same->colorsAfter = std::move(step.colorsAfter);
+        }
+        else if (step.kind == ItemEditStep::Kind::ColorFolders)
+        {
+            same->foldersAfter = std::move(step.foldersAfter);
         }
         else if (step.kind == ItemEditStep::Kind::StatFile)
         {

@@ -36,11 +36,14 @@ enum class ChatCommandAction
     SaveTemplate = 4,
     ExecuteTemplate = 5,
     RemoveTemplate = 6,
+    FillOwnValue = 7,
 };
 
-// One of the selected command's parameters: its label, whether a required value is still missing
-// (which is what blocks sending), and the value in its box -- the valid values as a placeholder
-// while there is none. The edited one shows the field instead.
+// One of the selected command's parameters: its label, whether its value blocks sending (a required
+// one still missing, or one out of the accepted range), and the value in its box -- the valid values
+// or a small accepted range as a placeholder while there is none -- with the name of what the value
+// refers to right of it. The edited one shows the field instead. A parameter the own character has
+// a value for (its position, its map, ...) offers to fill it in.
 struct ChatCommandParameterRow
 {
     Rml::String label;
@@ -49,6 +52,9 @@ struct ChatCommandParameterRow
     Rml::String value;
     float valueTextPx = 0.f;
     bool placeholder = false;
+    Rml::String valueName;
+    float valueNameTextPx = 0.f;
+    bool hasOwnValue = false;
     bool edited = false;
 
     bool operator==(const ChatCommandParameterRow&) const = default;
@@ -74,6 +80,8 @@ struct ChatCommandRmlModel
     std::vector<ChatCommandParameterRow> parameters;
     ChatCommandLine favouriteAction;
     ChatCommandLine saveAction;
+    // What a parameter's own-value cell says; the same for every parameter which has one.
+    ChatCommandLine ownValueAction;
 
     bool hasLeftButton = false;
     bool hasRightButton = false;

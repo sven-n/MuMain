@@ -1564,7 +1564,7 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x11 [ReceiveMagicList]");
 }
 
-void Receive_Master_SetSkillList(PMSG_MASTER_SKILL_LIST_SEND* lpMsg)
+void Receive_Master_SetSkillList(const PMSG_MASTER_SKILL_LIST_SEND* lpMsg)
 {
     memset(CharacterAttribute->MasterSkillInfo, 0, sizeof(CharacterAttribute->MasterSkillInfo));
 
@@ -1572,8 +1572,9 @@ void Receive_Master_SetSkillList(PMSG_MASTER_SKILL_LIST_SEND* lpMsg)
     skills.reserve(lpMsg->count);
     for (DWORD n = 0; n < lpMsg->count; n++)
     {
-        auto lpInfo = (PMSG_MASTER_SKILL_LIST*)(((BYTE*)lpMsg) + sizeof(PMSG_MASTER_SKILL_LIST_SEND) +
-                                                (sizeof(PMSG_MASTER_SKILL_LIST) * n));
+        const auto* lpInfo = reinterpret_cast<const PMSG_MASTER_SKILL_LIST*>(reinterpret_cast<const BYTE*>(lpMsg) +
+                                                                             sizeof(PMSG_MASTER_SKILL_LIST_SEND) +
+                                                                             (sizeof(PMSG_MASTER_SKILL_LIST) * n));
         skills.push_back({ lpInfo->SkillIndex, lpInfo->SkillLevel, lpInfo->MainValue, lpInfo->NextValue });
     }
     UI::Hud::ReplaceMasterSkills(Hero->Class, skills);
@@ -9264,7 +9265,8 @@ void ReceiveCreateShopTitleViewport(const BYTE* ReceiveBuffer)
 {
     auto Header = (LPPSHOPTITLE_HEADERINFO)ReceiveBuffer;
 
-    auto* pShopTitle = (PSHOPTITLE_DATAINFO*)(ReceiveBuffer + sizeof(PSHOPTITLE_HEADERINFO));
+    const auto* pShopTitle =
+        reinterpret_cast<const PSHOPTITLE_DATAINFO*>(ReceiveBuffer + sizeof(PSHOPTITLE_HEADERINFO));
     for (int i = 0; i < Header->byCount; i++, pShopTitle++)
     {
         int key = MAKEWORD(pShopTitle->byIndexL, pShopTitle->byIndexH);
@@ -10456,13 +10458,14 @@ void ReceiveQuestByItemUseEP(const BYTE* ReceiveBuffer)
 void ReceiveQuestByEtcEPList(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
-    g_QuestMng.SetQuestIndexByEtcList((DWORD*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST)), pData->m_wQuestCount);
+    g_QuestMng.SetQuestIndexByEtcList(reinterpret_cast<const DWORD*>(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST)),
+                                      pData->m_wQuestCount);
 }
 
 void ReceiveQuestByNPCEPList(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_NPCTALK_QUESTLIST)ReceiveBuffer;
-    auto questIndices = (const std::uint32_t*)(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST));
+    auto questIndices = reinterpret_cast<const std::uint32_t*>(ReceiveBuffer + sizeof(PMSG_NPCTALK_QUESTLIST));
     UI::Npc::ShowQuestList({ questIndices, pData->m_wQuestCount });
 }
 
@@ -10522,8 +10525,9 @@ void ReceiveQuestGiveUp(const BYTE* ReceiveBuffer)
 void ReceiveProgressQuestList(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPMSG_ANS_QUESTEXP_PROGRESS_LIST)ReceiveBuffer;
-    g_QuestMng.SetCurQuestIndexList((DWORD*)(ReceiveBuffer + sizeof(PMSG_ANS_QUESTEXP_PROGRESS_LIST)),
-                                    int(pData->m_byQuestCount));
+    g_QuestMng.SetCurQuestIndexList(
+        reinterpret_cast<const DWORD*>(ReceiveBuffer + sizeof(PMSG_ANS_QUESTEXP_PROGRESS_LIST)),
+        int(pData->m_byQuestCount));
 }
 
 void ReceiveProgressQuestRequestReward(const BYTE* ReceiveBuffer)
@@ -12676,6 +12680,12 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 // (0xD2)(0x01)
+// D2 01 CashShopPointInfo: the view type at 4, then five doubles. The exact sizes of the
+// D2 packets are generated from OpenMU's XML (wire_sizes.generated.h); the handlers cast the
+// buffer, so a field at the wrong offset would be read without any message.
+static_assert(offsetof(PMSG_CASHSHOP_CASHPOINT_ANS, dTotalCash) == 5);
+static_assert(offsetof(PMSG_CASHSHOP_CASHPOINT_ANS, dTotalMileage) == 37);
+
 bool ReceiveIGS_CashPoint(const BYTE* pReceiveBuffer)
 {
     auto Data = (LPPMSG_CASHSHOP_CASHPOINT_ANS)pReceiveBuffer;
@@ -12707,6 +12717,10 @@ bool ReceiveIGS_ShopOpenResult(const BYTE* pReceiveBuffer)
 
     return true;
 }
+
+// D2 03 CashShopItemBuyResult: the result at 4, the left count at 5.
+static_assert(offsetof(PMSG_CASHSHOP_BUYITEM_ANS, byResultCode) == 4);
+static_assert(offsetof(PMSG_CASHSHOP_BUYITEM_ANS, lItemLeftCount) == 5);
 
 // (0xD2)(0x03)
 bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
@@ -12794,6 +12808,10 @@ bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
 
 //----------------------------------------------------------------------------
 // (0xD2)(0x04)
+// D2 04 CashShopItemGiftResult: the result at 4, the left count at 5, the limited cash at 9.
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSEND_ANS, lItemLeftCount) == 5);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSEND_ANS, dLimitedCash) == 9);
+
 bool ReceiveIGS_SendItemGift(const BYTE* pReceiveBuffer)
 {
     auto Data = (LPPMSG_CASHSHOP_GIFTSEND_ANS)pReceiveBuffer;
@@ -12892,6 +12910,13 @@ bool ReceiveIGS_StorageItemListCount(const BYTE* pReceiveBuffer)
     return true;
 }
 
+// D2 0D CashShopStorageItem: five 32-bit sequences from 4, the cash points at 24 and the item
+// type at 32. AddStorageItem() drops an item whose type isn't 'C' or 'P' without a message.
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, lStorageIndex) == 4);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, lPriceSeq) == 20);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, dCashPoint) == 24);
+static_assert(offsetof(PMSG_CASHSHOP_STORAGELIST, chItemType) == 32);
+
 // (0xD2)(0x0D)
 bool ReceiveIGS_StorageItemList(const BYTE* pReceiveBuffer)
 {
@@ -12907,6 +12932,13 @@ bool ReceiveIGS_StorageItemList(const BYTE* pReceiveBuffer)
                                        (char)Data->chItemType });
     return true;
 }
+
+// D2 0E CashShopGiftStorageItem: the storage item's fields, then the sender at 33 and the
+// message at 44.
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, dCashPoint) == 24);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, chItemType) == 32);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, chSendUserName) == 33);
+static_assert(offsetof(PMSG_CASHSHOP_GIFTSTORAGELIST, chMessage) == 44);
 
 // (0xD2)(0x0E)
 bool ReceiveIGS_StorageGiftItemList(const BYTE* pReceiveBuffer)
@@ -13067,7 +13099,7 @@ bool ReceiveIGS_EventItemlistCnt(const BYTE* pReceiveBuffer)
 bool ReceiveIGS_EventItemlist(const BYTE* pReceiveBuffer)
 {
     auto Data = (LPPMSG_CASHSHOP_EVENTITEM_LIST)pReceiveBuffer;
-    g_InGameShopSystem->InsertEventPackage((int*)Data->lPackageSeq);
+    g_InGameShopSystem->InsertEventPackage(Data->lPackageSeq);
     return true;
 }
 
@@ -13152,6 +13184,11 @@ bool ReceivePeriodItemListCount(const BYTE* pReceiveBuffer)
     auto Data = (LPPMSG_PERIODITEMEX_ITEMCOUNT)pReceiveBuffer;
     return true;
 }
+
+// D2 12 period item list: not in OpenMU's XML, so its size is guarded here. The struct isn't
+// packed; the expire date is at 8.
+static_assert(sizeof(PMSG_PERIODITEMEX_ITEMLIST) == 12);
+static_assert(offsetof(PMSG_PERIODITEMEX_ITEMLIST, lExpireDate) == 8);
 
 bool ReceivePeriodItemList(const BYTE* pReceiveBuffer)
 {
@@ -13495,7 +13532,7 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
             Receive_Master_LevelGetSkill(ReceiveBuffer);
             break;
         case 0x53:
-            Receive_Master_SetSkillList((PMSG_MASTER_SKILL_LIST_SEND*)ReceiveBuffer);
+            Receive_Master_SetSkillList(reinterpret_cast<const PMSG_MASTER_SKILL_LIST_SEND*>(ReceiveBuffer));
             break;
         }
         break;

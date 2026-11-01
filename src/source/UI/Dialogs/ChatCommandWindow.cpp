@@ -9,6 +9,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Core/Text/TextLineWrap.h"
 #include "GameLogic/Commands/ChatCommandFavourites.h"
+#include "GameLogic/Commands/ChatCommandValueLookup.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 
@@ -35,6 +36,7 @@ using GameLogic::Commands::ChatCommandCatalog;
 using GameLogic::Commands::ChatCommandParameter;
 using GameLogic::Commands::ChatCommandParameterType;
 using GameLogic::Commands::ChatCommandTemplate;
+namespace ValueLookup = GameLogic::Commands::ValueLookup;
 
 namespace
 {
@@ -42,6 +44,9 @@ namespace
 constexpr const wchar_t* FavouriteMarker = L"* ";
 // Signals a command takes parameters; their names don't fit at this window width.
 constexpr const wchar_t* ParameterMarker = L" ...";
+// A range is only shown when it's between 0 and this. One as wide as that of a 32-bit number tells
+// the player nothing and doesn't fit the box anyway.
+constexpr int64_t LargestShownRangeMaximum = 65535;
 
 struct TextColor
 {
@@ -213,6 +218,13 @@ void mu::ui::window::CChatCommandWindow::PickCommand(int row)
     }
 
     m_parameterValues.resize(command->Parameters.size());
+    m_valueNames.assign(command->Parameters.size(), std::wstring());
+    m_placeholders.clear();
+    for (const auto& parameter : command->Parameters)
+    {
+        m_placeholders.push_back(GetPlaceholder(parameter));
+    }
+
     ShowPage(PAGE_PARAMETERS);
 }
 
@@ -235,6 +247,25 @@ bool mu::ui::window::CChatCommandWindow::AreRequiredValuesSet() const
     return true;
 }
 
+bool mu::ui::window::CChatCommandWindow::AreValuesAccepted() const
+{
+    const auto* command = GetSelectedCommand();
+    if (command == nullptr)
+    {
+        return false;
+    }
+
+    for (size_t i = 0; i < command->Parameters.size(); ++i)
+    {
+        if (!command->Parameters[i].Accepts(m_parameterValues[i]))
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
 void mu::ui::window::CChatCommandWindow::ExecuteSelectedCommand()
 {
     CommitEditedValue();
@@ -249,6 +280,12 @@ void mu::ui::window::CChatCommandWindow::ExecuteSelectedCommand()
     if (!AreRequiredValuesSet())
     {
         g_pSystemLogBox->AddText(I18N::Game::ChatCommandsFillRequired, mu::ui::window::TYPE_ERROR_MESSAGE);
+        return;
+    }
+
+    if (!AreValuesAccepted())
+    {
+        g_pSystemLogBox->AddText(I18N::Game::ChatCommandsValueOutOfRange, mu::ui::window::TYPE_ERROR_MESSAGE);
         return;
     }
 
@@ -377,6 +414,64 @@ void mu::ui::window::CChatCommandWindow::CycleParameterValue(size_t parameterInd
 
     // Cycling past the last value clears it -- how an optional parameter is left blank.
     m_parameterValues[parameterIndex] = (next >= values.size()) ? std::wstring() : values[next];
+    RefreshValueNames();
+}
+
+std::wstring mu::ui::window::CChatCommandWindow::GetPlaceholder(const ChatCommandParameter& parameter)
+{
+    if (!parameter.ValidValues.empty())
+    {
+        return parameter.ValidValues;
+    }
+
+    const bool isSmallRange =
+        parameter.HasRange && parameter.Minimum >= 0 && parameter.Maximum <= LargestShownRangeMaximum;
+    if (!isSmallRange)
+    {
+        return {};
+    }
+
+    return std::to_wstring(parameter.Minimum) + L" - " + std::to_wstring(parameter.Maximum);
+}
+
+void mu::ui::window::CChatCommandWindow::FillOwnValue(size_t parameterIndex)
+{
+    // A field which is being edited would overwrite the value once it's left.
+    StopEditing();
+
+    const auto* command = GetSelectedCommand();
+    if (command == nullptr || parameterIndex >= command->Parameters.size())
+    {
+        return;
+    }
+
+    // There may be nothing to fill in, e.g. the guild of a character without one.
+    auto value = ValueLookup::GetOwnValue(command->Parameters[parameterIndex]);
+    if (value.empty())
+    {
+        return;
+    }
+
+    m_parameterValues[parameterIndex] = std::move(value);
+    RefreshValueNames();
+}
+
+void mu::ui::window::CChatCommandWindow::RefreshValueNames()
+{
+    m_valueNames.assign(m_parameterValues.size(), std::wstring());
+
+    const auto* command = GetSelectedCommand();
+    if (command == nullptr)
+    {
+        return;
+    }
+
+    // All of them, because one value can name what another one refers to, like the group of an
+    // item number.
+    for (size_t i = 0; i < m_valueNames.size(); ++i)
+    {
+        m_valueNames[i] = ValueLookup::DescribeValue(*command, i, m_parameterValues);
+    }
 }
 
 void mu::ui::window::CChatCommandWindow::BeginEditingParameter(size_t parameterIndex)
@@ -406,6 +501,7 @@ void mu::ui::window::CChatCommandWindow::CommitEditedValue()
     }
 
     m_parameterValues[m_editedParameter] = ReadValueField();
+    RefreshValueNames();
 }
 
 void mu::ui::window::CChatCommandWindow::StopEditing()
@@ -507,6 +603,16 @@ void mu::ui::window::CChatCommandWindow::HandleHit(ChatCommandAction action, int
         {
             BeginEditingParameter(index);
         }
+        PlayBuffer(SOUND_CLICK01);
+        break;
+    }
+
+    case ChatCommandAction::FillOwnValue:
+    {
+        const auto* command = GetSelectedCommand();
+        if (command == nullptr || index < 0 || static_cast<size_t>(index) >= command->Parameters.size())
+            break;
+        FillOwnValue(static_cast<size_t>(index));
         PlayBuffer(SOUND_CLICK01);
         break;
     }
@@ -677,6 +783,7 @@ void mu::ui::window::CChatCommandWindow::BindRmlModel(Rml::DataModelConstructor&
     c.Bind("template_rows", &model.templateRows);
     c.Bind("favourite_action", &model.favouriteAction);
     c.Bind("save_action", &model.saveAction);
+    c.Bind("own_value_action", &model.ownValueAction);
     auto commandRow = c.RegisterStruct<ChatCommandRow>();
     commandRow.RegisterMember("text", &ChatCommandRow::text);
     commandRow.RegisterMember("text_px", &ChatCommandRow::textPx);
@@ -690,6 +797,9 @@ void mu::ui::window::CChatCommandWindow::BindRmlModel(Rml::DataModelConstructor&
     parameter.RegisterMember("value", &ChatCommandParameterRow::value);
     parameter.RegisterMember("value_text_px", &ChatCommandParameterRow::valueTextPx);
     parameter.RegisterMember("placeholder", &ChatCommandParameterRow::placeholder);
+    parameter.RegisterMember("value_name", &ChatCommandParameterRow::valueName);
+    parameter.RegisterMember("value_name_text_px", &ChatCommandParameterRow::valueNameTextPx);
+    parameter.RegisterMember("has_own_value", &ChatCommandParameterRow::hasOwnValue);
     parameter.RegisterMember("edited", &ChatCommandParameterRow::edited);
     c.RegisterArray<std::vector<ChatCommandParameterRow>>();
     c.Bind("parameters", &model.parameters);
@@ -802,7 +912,7 @@ void mu::ui::window::CChatCommandWindow::SyncContent()
     std::vector<ChatCommandLine> descriptionLines;
     std::vector<ChatCommandLine> templateRows;
     std::vector<ChatCommandParameterRow> parameters;
-    ChatCommandLine favouriteAction, saveAction;
+    ChatCommandLine favouriteAction, saveAction, ownValueAction;
 
     if (m_page == PAGE_COMMANDS)
     {
@@ -841,26 +951,35 @@ void mu::ui::window::CChatCommandWindow::SyncContent()
                 const auto& parameter = command->Parameters[i];
                 const auto& value = m_parameterValues[i];
 
-                // Required parameters that are still empty are what's blocking send.
+                // Required parameters that are still empty, and values the server would reject,
+                // are what's blocking send.
                 std::wstring label = parameter.Name;
                 if (parameter.IsRequired)
                     label += L" *";
                 ChatCommandParameterRow entry;
-                const ChatCommandLine labelLine = line(label.c_str(), CONTENT_WIDTH);
+                entry.hasOwnValue = ValueLookup::HasOwnValue(parameter);
+                const ChatCommandLine labelLine =
+                    line(label.c_str(), CONTENT_WIDTH - (entry.hasOwnValue ? OWN_VALUE_WIDTH : 0));
                 entry.label = labelLine.text;
                 entry.labelTextPx = labelLine.textPx;
-                entry.missing = parameter.IsRequired && value.empty();
+                entry.missing = (parameter.IsRequired && value.empty()) || !parameter.Accepts(value);
                 entry.edited = m_editedParameter == static_cast<int>(i);
                 if (!entry.edited)
                 {
                     entry.placeholder = value.empty();
                     const ChatCommandLine valueLine =
-                        line(value.empty() ? parameter.ValidValues.c_str() : value.c_str(), CONTENT_WIDTH - 4);
+                        line(value.empty() ? m_placeholders[i].c_str() : value.c_str(), CONTENT_WIDTH - 4);
                     entry.value = valueLine.text;
                     entry.valueTextPx = valueLine.textPx;
+
+                    const ChatCommandLine nameLine =
+                        line(m_valueNames[i].c_str(), CONTENT_WIDTH - 4 - NUMBER_VALUE_WIDTH);
+                    entry.valueName = nameLine.text;
+                    entry.valueNameTextPx = nameLine.textPx;
                 }
                 parameters.push_back(std::move(entry));
             }
+            ownValueAction = line(I18N::Game::ChatCommandsOwnValue, OWN_VALUE_WIDTH);
 
             const bool isFavourite = GameLogic::Commands::Favourites::Contains(command->Command);
             favouriteAction = line(isFavourite ? I18N::Game::ChatCommandsRemoveFavourite
@@ -889,6 +1008,7 @@ void mu::ui::window::CChatCommandWindow::SyncContent()
     SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::emptyMessage, "empty_message", std::move(emptyMessage));
     SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::favouriteAction, "favourite_action", std::move(favouriteAction));
     SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::saveAction, "save_action", std::move(saveAction));
+    SyncField(m_RmlView.Binder(), &ChatCommandRmlModel::ownValueAction, "own_value_action", std::move(ownValueAction));
     if (model.commandRows != commandRows)
     {
         model.commandRows = std::move(commandRows);

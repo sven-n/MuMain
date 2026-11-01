@@ -9,6 +9,7 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/DataHandler/DataIssueReport.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
+#include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -240,6 +241,12 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     {
         ValidateDescriptionTexts(result.items, tooltips.file, GetItemTooltipFile().generic_string(), result.issues);
     }
+    GroundLabelsLoadResult groundLabels = LoadGroundLabelsFile(GetGroundLabelsFile());
+    result.issues.insert(result.issues.end(), groundLabels.issues.begin(), groundLabels.issues.end());
+    if (!HasFatal(groundLabels.issues))
+    {
+        ValidateGroundLabels(result.items, groundLabels.file, GetGroundLabelsFile().generic_string(), result.issues);
+    }
     Data::LogDataIssues(ItemDataLabel, result.issues);
     if (HasFatal(result.issues))
     {
@@ -256,6 +263,7 @@ bool CItemDataHandler::Load(std::string& errorMessage)
     g_ItemDatabase.SetDisplayLocale(ItemNameLocale());
     g_ItemDatabase.SetStatProfiles(std::move(statProfiles));
     g_ItemDatabase.SetTooltipFile(std::move(tooltips.file));
+    g_ItemDatabase.SetGroundLabels(std::move(groundLabels.file));
     g_ItemDatabase.Build(result.items);
     FillItemAttributes();
     m_loaded = true;
@@ -285,6 +293,9 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
     }
 
     g_GlowColors.Build(colors.colors);
+#ifdef _EDITOR
+    g_GlowColors.SetFolders(std::move(colors.folders));
+#endif
     g_ItemModelDatabase.Build(result.models, g_GlowColors);
     g_ItemModelDatabase.SetSharedModels(result.sharedModels);
 #ifdef _EDITOR
@@ -581,6 +592,12 @@ void CItemDataHandler::RestoreGlowColors(std::span<const Data::Effects::GlowColo
     g_ItemModelDatabase.ResolveGlowColors(g_GlowColors);
 }
 
+void CItemDataHandler::SetGlowColorFolders(std::vector<Data::Colors::ColorFolder> folders)
+{
+    g_GlowColors.SetFolders(std::move(folders));
+    m_glowColorsChanged = true;
+}
+
 std::vector<ItemModelProblem> CItemDataHandler::ReopenChangedModels(const ModelLoader::LookNames& lookNames)
 {
     std::vector<int> itemTypes;
@@ -705,6 +722,8 @@ void CItemDataHandler::Validate(std::vector<ItemDataIssue>& issues) const
                              GetItemTooltipFile().generic_string(), issues);
     ValidateTableUses(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetStatProfiles(), g_ItemDatabase.GetTooltipFile(),
                       GetItemStatsFile().generic_string(), issues);
+    ValidateGroundLabels(g_ItemDatabase.GetAllSlots(), g_ItemDatabase.GetGroundLabels(),
+                         GetGroundLabelsFile().generic_string(), issues);
     ValidateNameLocales(g_ItemDatabase.GetAllSlots(), I18N::GetAvailableLocales(), issues);
     std::vector<ItemDefinition> items;
     std::ranges::copy_if(g_ItemDatabase.GetAllSlots(), std::back_inserter(items), &ItemDefinition::HasEntry);
@@ -757,6 +776,7 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     models.sharedModelsChanged = m_sharedModelsChanged;
     models.glowColorsFile = GetGlowColorsFile();
     models.glowColors = g_GlowColors.GetColors();
+    models.glowColorFolders = g_GlowColors.GetFolders();
     models.glowColorsChanged = m_glowColorsChanged;
     models.statsFile = GetItemStatsFile();
     models.stats = &m_statFile;
@@ -797,6 +817,8 @@ ItemBmdImportResult CItemDataHandler::ImportFromBmd()
                              result.validationIssues);
     ValidateTableUses(result.items, g_ItemDatabase.GetStatProfiles(), g_ItemDatabase.GetTooltipFile(),
                       GetItemStatsFile().generic_string(), result.validationIssues);
+    ValidateGroundLabels(result.items, g_ItemDatabase.GetGroundLabels(), GetGroundLabelsFile().generic_string(),
+                         result.validationIssues);
     ValidateNameLocales(result.items, I18N::GetAvailableLocales(), result.validationIssues);
 
     // The entries without a name stay as they are: they are not from the bmd files, so they

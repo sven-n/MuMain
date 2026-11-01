@@ -77,13 +77,17 @@ public:
                 {
                     m_statFile = file;
                     ++m_statFileRestores;
-                }};
+                },
+                [this](std::string_view root) { return m_folders[std::string(root)]; },
+                [this](std::string_view root, std::span<const Data::Colors::ColorFolder> folders)
+                { m_folders[std::string(root)].assign(folders.begin(), folders.end()); }};
     }
 
     std::map<std::string, Data::Items::SharedItemModel> m_shared;
     std::vector<Data::Effects::GlowColor> m_colors;
     Data::Items::ItemStatFile m_statFile;
     int m_statFileRestores = 0;
+    std::map<std::string, std::vector<Data::Colors::ColorFolder>> m_folders;
     // The move changes the weapon kind, as a move to another group may.
     static inline bool MoveDerives = false;
 
@@ -223,6 +227,28 @@ TEST_CASE("The item edit history undoes moves and shared model changes [editor][
 
         // A list changed past the history is not overwritten.
         items.m_colors.push_back({"gold", {1, 0.7, 0.2}});
+        CHECK_FALSE(history.Undo());
+        CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemsChanged);
+    }
+
+    SUBCASE("the folders of a root of the Colors window")
+    {
+        const std::vector<Data::Colors::ColorFolder> before{{"Warm", {}, {"orange"}}};
+        const std::vector<Data::Colors::ColorFolder> after{{"Warm", {{"Reds", {}, {"red"}}}, {"orange"}}};
+        items.m_folders["glow"] = after;
+        ItemEditStep step{ItemEditStep::Kind::ColorFolders};
+        step.folderRoot = "glow";
+        step.foldersBefore = before;
+        step.foldersAfter = after;
+        history.Record({"New color folder", {step}});
+        REQUIRE(history.Undo());
+        CHECK(items.m_folders["glow"] == before);
+        CHECK_FALSE(history.GetLastChangedItem().has_value());
+        REQUIRE(history.Redo());
+        CHECK(items.m_folders["glow"] == after);
+
+        // Folders changed past the history are not overwritten.
+        items.m_folders["glow"].clear();
         CHECK_FALSE(history.Undo());
         CHECK(history.GetLastRefusal() == ItemEditHistory::Refusal::ItemsChanged);
     }

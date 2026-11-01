@@ -3,6 +3,7 @@
 #include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
+#include "Data/GameData/ItemData/ItemGroundLabels.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
@@ -62,6 +63,13 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
 // that neither a layout nor a description uses is a warning.
 void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
                               const std::string& tooltipFile, std::vector<ItemDataIssue>& issues);
+
+// The styles the items' ground label rules and the standard rules name, against the ground label file (`labelFile`
+// names it in messages): a style the file does not have is an error, with the nearest name when it looks like a typo.
+// An item's rule whose levels the rules before it all take is never used, and a style nothing names is unused:
+// warnings.
+void ValidateGroundLabels(std::span<const ItemDefinition> items, const GroundLabelFile& labels,
+                          const std::string& labelFile, std::vector<ItemDataIssue>& issues);
 
 // The tables of the item stat file the items use (`statFile` names it in messages), in their description and name
 // lines' texts (written in place or shared in `tooltips`) and "values". A table that neither a stat nor a description

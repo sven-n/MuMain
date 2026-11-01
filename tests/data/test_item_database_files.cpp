@@ -61,7 +61,7 @@
 #include "UI/ItemTools/MuItemCategoriesUI.h"
 #include "UI/DataChecks/MuDataChecksUI.h"
 #include "UI/ItemTools/MuItemFormulasUI.h"
-#include "UI/ItemTools/MuItemGlowColorsUI.h"
+#include "UI/Colors/MuColorsUI.h"
 #include "UI/ItemTools/MuItemModelUI.h"
 #include "UI/ItemTools/MuItemRequirementsUI.h"
 #include "UI/ItemTools/MuItemRulesUI.h"
@@ -261,6 +261,22 @@ TEST_CASE("The shipped descriptions' placeholders and shared texts are known [da
         INFO(issue.ToString());
         CHECK(false);
     }
+}
+
+TEST_CASE("The shipped ground labels load without problems and are written as they are read [data][items]")
+{
+    const std::filesystem::path file = DataDirectory / "Items" / "Tooltips" / GroundLabelsFileName;
+    const GroundLabelsLoadResult labels = LoadGroundLabelsFile(file);
+    std::vector<ItemDataIssue> issues = labels.issues;
+    // Every style the items and the standard rules name is in the file, and every style of the file is used.
+    ValidateGroundLabels(LoadItemDataDirectory(DataDirectory / "Items").items, labels.file, GroundLabelsFileName,
+                         issues);
+    for (const ItemDataIssue& issue : issues)
+    {
+        INFO(issue.ToString());
+        CHECK(false);
+    }
+    CHECK(WriteGroundLabelsJson(labels.file) == TestFiles::ReadWholeFile(file));
 }
 
 // The shipped tooltip file, read once.
@@ -2817,7 +2833,7 @@ void RenderItemTools()
     g_MuItemRulesUI.Render(&open);
     g_MuItemCategoriesUI.Render(&open);
     g_MuItemModelUI.Render(&open);
-    g_MuItemGlowColorsUI.Render(&open);
+    g_MuColorsUI.Render(&open);
     g_MuItemSyncUI.Render(&open);
     g_MuItemFormulasUI.Render(&open);
     g_MuDataChecksUI.Render(&open);

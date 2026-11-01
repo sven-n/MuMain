@@ -17,6 +17,7 @@
 #include "Core/Input/KeyState.h"
 #include "Core/Input/SyntheticInput.h"
 #include "../Config/MuEditorConfig.h"
+#include "../MuEditor/UI/Colors/MuColorsUI.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
 #include "../MuEditor/UI/DataChecks/MuDataChecksUI.h"
 #include "../MuEditor/UI/ItemTools/ItemHeldByCharacter.h"
@@ -25,7 +26,6 @@
 #include "../MuEditor/UI/ItemTools/MuItemCategoriesUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemFormulasUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemSyncUI.h"
-#include "../MuEditor/UI/ItemTools/MuItemGlowColorsUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemModelUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemRequirementsUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemRulesUI.h"
@@ -607,9 +607,10 @@ void CMuEditorCore::RenderItemTools()
     {
         g_MuItemModelUI.Render(&m_windows.itemModel);
     }
-    if (m_windows.itemGlowColors)
+    // The named colors: a root per use, all of them item edits for now.
+    if (m_windows.colors)
     {
-        g_MuItemGlowColorsUI.Render(&m_windows.itemGlowColors);
+        g_MuColorsUI.Render(&m_windows.colors);
     }
     if (m_windows.itemFormulas)
     {

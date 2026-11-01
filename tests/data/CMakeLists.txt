@@ -1,11 +1,13 @@
 mu_add_test(
     NAME test_item_database
     SOURCES
+        test_color_folders.cpp
         test_item_check_targets.cpp
         test_item_code_references.cpp
         test_item_database.cpp
         test_item_description_placeholders.cpp
         test_item_edit_history.cpp
+        test_item_ground_labels.cpp
         test_item_json.cpp
         test_item_list_model.cpp
         test_item_model_json.cpp
@@ -117,6 +119,7 @@ mu_add_test(
     NAME test_item_database_files
     SOURCES
         test_helper_pickup_filters.cpp
+        test_colors_window.cpp
         test_dark_lord_pet_tooltip.cpp
         test_item_database_files.cpp
         test_item_descriptions.cpp
