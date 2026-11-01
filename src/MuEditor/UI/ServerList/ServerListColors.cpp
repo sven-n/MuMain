@@ -5,6 +5,7 @@
 #include "ServerListColors.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "Data/DataHandler/TextFile.h"
 #include "I18N/All.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/ThemeInheritance.h"
@@ -176,15 +177,11 @@ bool WriteThemeToken(std::string_view theme, const char* token, const std::strin
     read << in.rdbuf();
     in.close();
 
-    std::ofstream write(file, std::ios::binary | std::ios::trunc);
-    if (!write)
-    {
-        return false;
-    }
-    write << SetTokenInText(read.str(), token, value);
-    write.close();
+    // Through a temporary file: a write that fails leaves the theme's tokens as they were.
+    std::string error;
+    const bool written = Data::WriteTextFile(file, SetTokenInText(read.str(), token, value), error);
     ForgetThemeTokens();
-    return static_cast<bool>(write);
+    return written;
 }
 
 std::string SetTokenInText(std::string_view text, std::string_view token, const std::string& value)

@@ -269,6 +269,8 @@ TEST_CASE("Server list colors: a theme color is written into a theme's tokens.in
     CHECK(ListColors::WriteThemeToken("plain", "server-button", "#123456"));
     CHECK(ListColors::WriteThemeToken("plain", "server-button-silver", "#abcdef"));
     CHECK_FALSE(ListColors::WriteThemeToken("missing", "server-button", "#123456"));
+    // Written through a temporary file (Data::WriteTextFile), which takes the file's place.
+    CHECK_FALSE(std::filesystem::exists(tokens.string() + ".tmp"));
 
     std::filesystem::current_path(previous);
     std::ifstream file(tokens, std::ios::binary);
