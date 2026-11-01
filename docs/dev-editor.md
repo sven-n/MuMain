@@ -163,10 +163,14 @@ ground: full volume within 3 tiles (solid) and its quietest from 15 tiles
 (dashed). A monster with a sound set gets a dot, the set's name and its
 5-tile hearing ring, solid green while the hero is inside it (its sounds are
 heard) and dashed grey outside. A source flashes a growing ring for a second
-when one of its sounds starts. Only the sources of the rows shown are drawn
-while a filter is set (none set: every source in view), and the sources of
-the row under the mouse are drawn yellow. Music, the ambience loops and the
-other sounds have no place and are not drawn.
+when one of its sounds starts. The sounds that the maps' and monsters' own code plays
+(most maps, Kanturu's for one) have no data and so no range: a hollow
+violet square (a map object) or circle (a monster) with the files marks
+where such a sound last started, while it plays and for a second after.
+Only the sources of the rows shown are drawn while a filter is set (none
+set: every source in view), and the sources of the row under the mouse are
+drawn yellow. Music and sounds that no map object or monster plays have no
+place and are not drawn.
 
 Each row has a volume slider, **Mute** and **Solo**. A sound plays at its
 kind's volume times its own; mute wins; while anything is solo, only what is

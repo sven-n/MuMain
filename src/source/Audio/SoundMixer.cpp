@@ -12,12 +12,14 @@
 #include <cstdint>
 #include <deque>
 #include <map>
+#include <utility>
 
 namespace Audio
 {
 namespace
 {
 const SoundSource* g_currentSource = nullptr;
+const SoundPlace* g_currentPlace = nullptr;
 } // namespace
 
 ScopedSoundSource::ScopedSoundSource(SoundKind kind, std::string_view name, int number, const float* position)
@@ -39,6 +41,22 @@ const SoundSource* CurrentSoundSource()
 {
     return g_currentSource;
 }
+
+ScopedSoundPlace::ScopedSoundPlace(SoundKind kind, int number, const float* position)
+    : m_place{kind, number, {position[0], position[1], position[2]}}, m_outer(g_currentPlace)
+{
+    g_currentPlace = &m_place;
+}
+
+ScopedSoundPlace::~ScopedSoundPlace()
+{
+    g_currentPlace = m_outer;
+}
+
+const SoundPlace* CurrentSoundPlace()
+{
+    return g_currentPlace;
+}
 } // namespace Audio
 
 namespace Audio::Mixer
@@ -48,6 +66,9 @@ namespace
 // The placed starts kept for the overlay: a few seconds, at most so many.
 constexpr double KeptStartSeconds = 5.0;
 constexpr size_t KeptStarts = 256;
+// A sound of the game's own code is marked so long after its start, also when
+// it played for less.
+constexpr double CodeSoundHoldSeconds = 1.0;
 
 struct Listed
 {
@@ -71,6 +92,8 @@ struct State
     std::uint32_t startsBefore = 0;
     // The latest placed starts, oldest first.
     std::deque<PlacedStart> starts;
+    // The last start of each sound of the game's own code, by sound number.
+    std::map<int, PlacedStart> codeStarts;
 };
 
 State& Mixer()
@@ -216,12 +239,25 @@ void OnPlayed(int number, double now)
     }
     row->second.sound.plays += static_cast<int>(started);
     row->second.sound.lastStarted = now;
-    const SoundSource* source = CurrentSoundSource();
-    if (source == nullptr || !source->position)
+    PlacedStart start;
+    if (const SoundSource* source = CurrentSoundSource())
+    {
+        if (!source->position)
+        {
+            return;
+        }
+        start = PlacedStart{number, source->kind, source->name, source->number, *source->position, now, false};
+    }
+    else if (const SoundPlace* place = CurrentSoundPlace())
+    {
+        start = PlacedStart{number, place->kind, {}, place->number, place->position, now, true};
+        state.codeStarts[number] = start;
+    }
+    else
     {
         return;
     }
-    state.starts.push_back(PlacedStart{number, source->kind, source->name, source->number, *source->position, now});
+    state.starts.push_back(std::move(start));
     while (state.starts.size() > KeptStarts || now - state.starts.front().time > KeptStartSeconds)
     {
         state.starts.pop_front();
@@ -239,6 +275,27 @@ std::vector<PlacedStart> RecentStarts(double now, double seconds)
         }
     }
     return recent;
+}
+
+std::vector<PlacedStart> CodeSounds(double now)
+{
+    State& state = Mixer();
+    std::vector<PlacedStart> sounds;
+    for (auto start = state.codeStarts.begin(); start != state.codeStarts.end();)
+    {
+        const bool playing =
+            g_platformAudio != nullptr && g_platformAudio->IsSoundPlaying(static_cast<ESound>(start->first));
+        if (playing || now - start->second.time <= CodeSoundHoldSeconds)
+        {
+            sounds.push_back(start->second);
+            ++start;
+        }
+        else
+        {
+            start = state.codeStarts.erase(start);
+        }
+    }
+    return sounds;
 }
 
 std::vector<HeardSound> Heard()

@@ -1,6 +1,6 @@
 # Sound Mixer (editor) design
 
-> Status: agreed with the owner on 2026-11-01 (Q-SM1 to Q-SM10). The last step
+> Status: agreed with the owner on 2026-11-01 (Q-SM1 to Q-SM11). The last step
 > moves what lasts into `docs/dev-editor.md` and removes this document.
 
 ## Goal
@@ -26,6 +26,7 @@ one effect and one music volume (0 to 10).
 | Q-SM8 | What do Mute all and Unmute all act on? | **The rows shown**: every row the filters leave (no filter = every listed sound). Sounds heard later are not muted and come as new rows. The top button becomes **Reset all** (unmute, unsolo, full volume). Not chosen: every listed sound whatever the filters, the kinds (everything, also later sounds). |
 | Q-SM9 | What does the in-world overlay draw? | **Both sources with a position**: a map object with a sound gets a marker, its file and two rings (3 tiles = full volume, 15 tiles = quietest); a monster with a sound set gets a marker, the set's name and a 5-tile hearing ring, solid while the hero is inside it (heard), dashed outside. A source flashes for a second when one of its sounds starts. Music, ambience loops and other sounds have no position and are not drawn. Not chosen: map object sounds only, monster sounds only, markers without rings. |
 | Q-SM10 | How is the overlay switched on? | A **Show in world** checkbox in the Sound Mixer, for the session; the menu bar reminder names it while it is on. It **follows the filters**: it draws the sources of the rows shown (no filter = every source in view), and hovering a row highlights its sources. Not chosen: a checkbox that always draws all, two checkboxes (map objects, monsters), a Dev Editor toggle. |
+| Q-SM11 | (After trying it: Kanturu's sounds are listed but not drawn.) How does the overlay show the sounds a map's or monster's own code plays, with no data? | **Both: markers now, data later.** While the game moves or draws a map object, and moves or draws a monster, its place is named (`Audio::ScopedSoundPlace`); a sound its code starts there gets a marker at that place and a flash, no ring (the code has no range), and one marker per sound, so a map-wide sound played from every object (Kanturu's hum) shows once. The place changes no sound's kind. Moving a map's sounds into data (object sounds, monster sound sets) follows map by map and gives it rings. Not chosen: data first, leave it. |
 
 ## Design
 
@@ -44,6 +45,13 @@ one effect and one music volume (0 to 10).
    no solo, everything not muted plays.
 4. The sound starts with that gain. A muted sound still starts, silently, so
    that unmuting it brings it back (Q-SM4).
+
+**Naming the place.** Most sounds are played by the maps' and monsters' own
+code, with no data. `Audio::ScopedSoundPlace` names where that code runs: the
+map object in `MoveObject` and `UpdateObjectVisual`, the monster in
+`MoveCharacter` and `UpdateDrawnCharacterEffects`. A start under a place and no source is
+kept with the place's position for the overlay (Q-SM11); a source wins over a
+place, and the kind never comes from a place.
 
 **Naming the source.** `Audio::ScopedSoundSource` names the kind and source of
 the sounds played while it lives. The data's players set it: the monster sound

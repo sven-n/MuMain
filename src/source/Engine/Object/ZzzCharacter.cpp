@@ -37,6 +37,7 @@
 #include "Scenes/SceneCore.h"
 #include "Scenes/MainScene.h"
 #include "Audio/DSPlaySound.h"
+#include "Audio/SoundSource.h"
 #include "I18N/All.h"
 
 #include "Engine/Physics/PhysicsManager.h"
@@ -3970,6 +3971,10 @@ void PlayAttackHitSound(CHARACTER* attacker, OBJECT* o)
 
 void MoveCharacter(CHARACTER* c, OBJECT* o)
 {
+    // The sounds a monster's code plays meanwhile are marked here (Q-SM11).
+    std::optional<Audio::ScopedSoundPlace> place;
+    if (o->Kind == KIND_MONSTER)
+        place.emplace(Audio::SoundKind::Monster, static_cast<int>(c->MonsterIndex), o->Position);
     if (o->Type == MODEL_WARCRAFT)
     {
         wchar_t Text[100];
@@ -12124,6 +12129,10 @@ void UpdateDrawnCharacterEffects()
             continue;
 
         OBJECT* o = &c->Object;
+        // The sounds a monster's code plays meanwhile are marked here (Q-SM11).
+        std::optional<Audio::ScopedSoundPlace> place;
+        if (o->Kind == KIND_MONSTER)
+            place.emplace(Audio::SoundKind::Monster, static_cast<int>(c->MonsterIndex), o->Position);
         BMD* b = PlaceCharacterModel(o);
         PrepareHeldWeapons(c);
         UpdateAttachedParts(c);

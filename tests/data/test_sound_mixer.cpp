@@ -20,6 +20,7 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
+#include <array>
 #include <cstdint>
 #include <map>
 #include <optional>
@@ -575,6 +576,161 @@ TEST_CASE("Sound Mixer: the overlay places a window pixel where the game window 
           std::pair{200.0f, 100.0f});
     // No window size yet: as it is.
     CHECK(at(ToDisplay(100.0f, 50.0f, ImVec2(10.0f, 20.0f), ImVec2(800.0f, 600.0f), 0, 0)) == std::pair{110.0f, 70.0f});
+}
+
+TEST_CASE("Sound Mixer: a sound the game's own code plays starts at its place and keeps its kind, a source "
+          "wins over a place, and the last start of each is marked while it plays (Q-SM11) [audio][mixer][editor]")
+{
+    MixerScope scope;
+    using namespace Audio::Mixer;
+    const float wheel[3] = {100.0f, 200.0f, 30.0f};
+    const float otherWheel[3] = {700.0f, 800.0f, 40.0f};
+    const float rider[3] = {1000.0f, 1000.0f, 0.0f};
+    const auto play = [&scope](int number, double now, bool starts, bool looped = false)
+    {
+        OnPlay(number, looped);
+        if (starts)
+        {
+            ++scope.audio.started[number];
+        }
+        OnPlayed(number, now);
+    };
+    {
+        const Audio::ScopedSoundPlace place(SoundKind::MapObject, 46, wheel);
+        play(5, 10.0, true);
+        play(6, 10.0, true, true);
+        {
+            // A monster drawn while the object is moved: the innermost place.
+            const Audio::ScopedSoundPlace monster(SoundKind::Monster, 307, rider);
+            play(9, 10.0, true);
+        }
+        // The object's place again.
+        play(3, 10.0, true);
+        {
+            // The data's source wins over the place, with its position or none.
+            const Audio::ScopedSoundSource source(SoundKind::Monster, "Death Rider", 306, rider);
+            play(7, 10.0, true);
+            const Audio::ScopedSoundSource unplaced(SoundKind::MapObject, {}, 37);
+            play(8, 10.0, true);
+        }
+    }
+    // No place left: nothing to mark.
+    play(4, 10.0, true);
+
+    const std::vector<HeardSound> heard = Heard();
+    REQUIRE(FindHeard(heard, 5) != nullptr);
+    CHECK(FindHeard(heard, 5)->kind == SoundKind::Other);
+    CHECK(FindHeard(heard, 5)->sourceNumber == -1);
+    CHECK(FindHeard(heard, 6)->kind == SoundKind::MapAmbience);
+    CHECK(FindHeard(heard, 7)->kind == SoundKind::Monster);
+
+    const std::vector<PlacedStart> recent = RecentStarts(10.0, 1.0);
+    REQUIRE(recent.size() == 5);
+    CHECK(recent[0].number == 5);
+    CHECK(recent[0].byCode);
+    CHECK(recent[0].kind == SoundKind::MapObject);
+    CHECK(recent[0].sourceNumber == 46);
+    CHECK(recent[0].name.empty());
+    CHECK(recent[0].position == std::array<float, 3>{100.0f, 200.0f, 30.0f});
+    CHECK(recent[1].number == 6);
+    CHECK(recent[2].number == 9);
+    CHECK(recent[2].kind == SoundKind::Monster);
+    CHECK(recent[2].sourceNumber == 307);
+    CHECK(recent[3].number == 3);
+    CHECK(recent[3].kind == SoundKind::MapObject);
+    CHECK(recent[3].sourceNumber == 46);
+    CHECK(recent[4].number == 7);
+    CHECK_FALSE(recent[4].byCode);
+    CHECK(recent[4].name == "Death Rider");
+
+    const auto numbersOf = [](const std::vector<PlacedStart>& starts)
+    {
+        std::vector<int> numbers;
+        for (const PlacedStart& start : starts)
+        {
+            numbers.push_back(start.number);
+        }
+        return numbers;
+    };
+    // A second after its start, also when it stopped.
+    CHECK(numbersOf(CodeSounds(11.0)) == std::vector<int>{3, 5, 6, 9});
+    // Later only while it plays.
+    scope.audio.playing.insert(5);
+    CHECK(numbersOf(CodeSounds(11.5)) == std::vector<int>{5});
+    // Another place that starts it moves the mark; a call that starts nothing
+    // does not.
+    {
+        const Audio::ScopedSoundPlace place(SoundKind::MapObject, 46, otherWheel);
+        play(5, 12.0, true);
+    }
+    {
+        const Audio::ScopedSoundPlace place(SoundKind::MapObject, 46, wheel);
+        play(5, 12.5, false);
+    }
+    std::vector<PlacedStart> marked = CodeSounds(30.0);
+    REQUIRE(marked.size() == 1);
+    CHECK(marked[0].position == std::array<float, 3>{700.0f, 800.0f, 40.0f});
+    CHECK(marked[0].time == 12.0);
+    scope.audio.playing.clear();
+    CHECK(CodeSounds(30.0).empty());
+}
+
+TEST_CASE("Sound Mixer: the overlay marks each place of the game's own code's sounds once, and a shown or hovered "
+          "row of one of its sounds follows it (Q-SM11) [audio][mixer][editor]")
+{
+    using Audio::Mixer::PlacedStart;
+    using namespace MuEditor::SoundOverlay;
+    const auto codeStart = [](int number, SoundKind kind, int sourceNumber, std::array<float, 3> position)
+    {
+        PlacedStart start;
+        start.number = number;
+        start.kind = kind;
+        start.sourceNumber = sourceNumber;
+        start.position = position;
+        start.byCode = true;
+        return start;
+    };
+    const std::array<float, 3> here{100.0f, 200.0f, 30.0f};
+    const std::array<float, 3> there{700.0f, 800.0f, 40.0f};
+    const std::vector<CodeMarker> markers = GroupCodeSounds({
+        codeStart(5, SoundKind::MapObject, 46, here),
+        codeStart(9, SoundKind::MapObject, 46, here),
+        codeStart(7, SoundKind::Monster, 46, here),
+        codeStart(8, SoundKind::MapObject, 47, here),
+        codeStart(6, SoundKind::MapObject, 46, there),
+    });
+    REQUIRE(markers.size() == 4);
+    CHECK(markers[0].kind == SoundKind::MapObject);
+    CHECK(markers[0].sourceNumber == 46);
+    CHECK(markers[0].position == here);
+    CHECK(markers[0].sounds == std::vector<int>{5, 9});
+    CHECK(markers[1].kind == SoundKind::Monster);
+    CHECK(markers[1].sounds == std::vector<int>{7});
+    CHECK(markers[2].sourceNumber == 47);
+    CHECK(markers[3].position == there);
+    CHECK(markers[3].sounds == std::vector<int>{6});
+
+    // A code start follows a row of its sound, whatever the row's kind.
+    const PlacedStart wheel = codeStart(5, SoundKind::MapObject, 46, here);
+    CHECK(Follows(wheel, {Row(6, "", "", 0), Row(5, "", "", 0)}));
+    CHECK_FALSE(Follows(wheel, {Row(6, "", "", 0)}));
+    CHECK_FALSE(Follows(wheel, {}));
+    // A data start follows a row that names its source, not one of its sound.
+    PlacedStart riderStart;
+    riderStart.number = 5;
+    riderStart.kind = SoundKind::Monster;
+    riderStart.name = "Death Rider";
+    riderStart.sourceNumber = 306;
+    HeardRow riderRow = Row(11, "", "", 0);
+    riderRow.sound.kind = SoundKind::Monster;
+    riderRow.sound.name = "Death Rider";
+    riderRow.sound.sourceNumber = 306;
+    CHECK(Follows(riderStart, {riderRow}));
+    CHECK_FALSE(Follows(riderStart, {Row(5, "", "", 0)}));
+
+    CHECK(Highlights(Row(9, "", "", 0), markers[0]));
+    CHECK(Highlights(Row(5, "", "", 0), markers[0]));
+    CHECK_FALSE(Highlights(Row(7, "", "", 0), markers[0]));
 }
 
 TEST_CASE("Sound Mixer: the reminder counts what is muted, solo and lowered (Q-SM5) [audio][mixer][editor]")

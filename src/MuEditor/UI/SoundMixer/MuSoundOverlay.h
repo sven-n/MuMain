@@ -2,10 +2,12 @@
 
 #ifdef _EDITOR
 
+#include "Audio/SoundMixer.h"
 #include "Audio/SoundOverlay.h"
 #include "MuSoundMixerUI.h"
 #include "imgui.h"
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -33,9 +35,31 @@ ImVec2 ToDisplay(float windowX, float windowY, const ImVec2& origin, const ImVec
 // heard).
 bool IsInside(const Audio::Overlay::DrawnSource& source, float x, float y);
 
-// Takes the frame's drawn sources and, while the overlay is on, draws them
-// and the starts of the last second behind the editor's windows. `hovered`:
-// the table row under the mouse, or nullptr.
+// Whether a shown row follows a start: a row of its sound for a sound of the
+// game's own code (Q-SM11), else a row that names its source.
+bool Follows(const Audio::Mixer::PlacedStart& start, const std::vector<SoundMixer::HeardRow>& shown);
+
+// A place where the game's own code plays sounds, with no range (Q-SM11).
+struct CodeMarker
+{
+    Audio::SoundKind kind = Audio::SoundKind::MapObject;
+    int sourceNumber = -1;
+    std::array<float, 3> position{};
+    // The sound numbers, in the order of the starts given.
+    std::vector<int> sounds;
+};
+
+// One marker for each place: the starts of the same kind, number and
+// position share it.
+std::vector<CodeMarker> GroupCodeSounds(const std::vector<Audio::Mixer::PlacedStart>& starts);
+
+// Whether the hovered row lights up the marker: a row of one of its sounds.
+bool Highlights(const SoundMixer::HeardRow& hovered, const CodeMarker& marker);
+
+// Takes the frame's drawn sources and, while the overlay is on, draws them,
+// the places of the game's own code's sounds and the starts of the last
+// second behind the editor's windows. `hovered`: the table row under the
+// mouse, or nullptr.
 void Render(const std::vector<SoundMixer::HeardRow>& shown, bool filtered, const SoundMixer::HeardRow* hovered);
 } // namespace MuEditor::SoundOverlay
 

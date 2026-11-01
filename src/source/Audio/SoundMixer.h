@@ -44,7 +44,8 @@ struct HeardSound
 };
 
 // A start of a sound whose source has a position: the overlay flashes the
-// source (Q-SM9).
+// source (Q-SM9). A sound the game's own code plays starts at its place
+// (Q-SM11): `byCode`, with the place's kind and number and no name.
 struct PlacedStart
 {
     int number = 0;
@@ -54,6 +55,7 @@ struct PlacedStart
     std::array<float, 3> position{};
     // The mixer's clock (Now).
     double time = 0.0;
+    bool byCode = false;
 };
 
 Control& KindControl(SoundKind kind);
@@ -69,7 +71,8 @@ float MusicGain();
 float OnPlay(int number, bool looped);
 
 // The play OnPlay announced is done: counts a start at `now` when the backend
-// started the sound.
+// started the sound, and keeps where it started: at the living source's
+// position, else at the living place (a sound of the game's own code).
 void OnPlayed(int number, double now);
 
 // The sounds heard since the list was last cleared, in the order they were
@@ -79,6 +82,10 @@ std::vector<HeardSound> Heard();
 // The starts with a position in the last `seconds` before `now`, oldest
 // first. A few seconds of them are kept.
 std::vector<PlacedStart> RecentStarts(double now, double seconds);
+
+// The sounds of the game's own code to mark (Q-SM11): the last start of each,
+// while it plays or for a second after it started, by sound number.
+std::vector<PlacedStart> CodeSounds(double now);
 
 // The window's "Clear all": empties the list and starts the counts again. The
 // sounds whose controls are changed stay listed, with no plays, so that what

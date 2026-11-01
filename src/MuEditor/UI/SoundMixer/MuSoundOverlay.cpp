@@ -44,6 +44,8 @@ const ImU32 QuietestRingColor = IM_COL32(110, 180, 240, 110);
 const ImU32 HeardColor = IM_COL32(120, 215, 120, 230);
 const ImU32 FarColor = IM_COL32(190, 190, 190, 200);
 const ImU32 HighlightColor = IM_COL32(255, 210, 90, 255);
+// A place of the game's own code's sounds: hollow, as it has no range.
+const ImU32 CodeColor = IM_COL32(210, 165, 255, 235);
 const ImU32 LabelBackColor = IM_COL32(0, 0, 0, 150);
 const ImU32 LabelColor = IM_COL32(255, 255, 255, 255);
 
@@ -154,6 +156,36 @@ void DrawSource(ImDrawList& list, const Projector& projector, const DrawnSource&
     DrawLabel(list, marker, mapObject ? MuEditor::SoundMixer::SoundText(source.soundNumber) : source.name);
 }
 
+// A place of the game's own code's sounds: a hollow square (a map object) or
+// circle (a monster) and its sounds' files; no ring, as the code has no range.
+void DrawCodeMarker(ImDrawList& list, const Projector& projector, const MuEditor::SoundOverlay::CodeMarker& marker,
+                    bool highlighted)
+{
+    ImVec2 point;
+    if (!projector.Project(marker.position[0], marker.position[1], marker.position[2], point))
+    {
+        return;
+    }
+    const ImU32 color = highlighted ? HighlightColor : CodeColor;
+    const float size = highlighted ? MarkerSize * HighlightGrowth : MarkerSize;
+    const float thickness = highlighted ? HighlightThickness : LineThickness;
+    if (marker.kind == Audio::SoundKind::MapObject)
+    {
+        list.AddRect(ImVec2(point.x - size, point.y - size), ImVec2(point.x + size, point.y + size), color, 0.0f, 0,
+                     thickness);
+    }
+    else
+    {
+        list.AddCircle(point, size, color, 0, thickness);
+    }
+    std::string label;
+    for (const int sound : marker.sounds)
+    {
+        label += (label.empty() ? "" : ", ") + MuEditor::SoundMixer::SoundText(sound);
+    }
+    DrawLabel(list, point, label);
+}
+
 void DrawFlash(ImDrawList& list, const Projector& projector, const Audio::Mixer::PlacedStart& start, double now)
 {
     const float age = std::clamp(static_cast<float>((now - start.time) / FlashSeconds), 0.0f, 1.0f);
@@ -209,6 +241,45 @@ bool IsInside(const Audio::Overlay::DrawnSource& source, float x, float y)
     return dx * dx + dy * dy <= source.inner * source.inner;
 }
 
+bool Follows(const Audio::Mixer::PlacedStart& start, const std::vector<SoundMixer::HeardRow>& shown)
+{
+    if (!start.byCode)
+    {
+        return AnyNames(shown, start.kind, start.name, start.sourceNumber);
+    }
+    return std::any_of(shown.begin(), shown.end(),
+                       [&start](const HeardRow& row) { return row.sound.number == start.number; });
+}
+
+std::vector<CodeMarker> GroupCodeSounds(const std::vector<Audio::Mixer::PlacedStart>& starts)
+{
+    std::vector<CodeMarker> markers;
+    for (const Audio::Mixer::PlacedStart& start : starts)
+    {
+        const auto same = std::find_if(markers.begin(), markers.end(),
+                                       [&start](const CodeMarker& marker)
+                                       {
+                                           return marker.kind == start.kind &&
+                                                  marker.sourceNumber == start.sourceNumber &&
+                                                  marker.position == start.position;
+                                       });
+        if (same != markers.end())
+        {
+            same->sounds.push_back(start.number);
+        }
+        else
+        {
+            markers.push_back(CodeMarker{start.kind, start.sourceNumber, start.position, {start.number}});
+        }
+    }
+    return markers;
+}
+
+bool Highlights(const SoundMixer::HeardRow& hovered, const CodeMarker& marker)
+{
+    return std::find(marker.sounds.begin(), marker.sounds.end(), hovered.sound.number) != marker.sounds.end();
+}
+
 void Render(const std::vector<SoundMixer::HeardRow>& shown, bool filtered, const SoundMixer::HeardRow* hovered)
 {
     const std::vector<DrawnSource> drawn = Audio::Overlay::TakeDrawn();
@@ -225,9 +296,21 @@ void Render(const std::vector<SoundMixer::HeardRow>& shown, bool filtered, const
                    hovered != nullptr && Names(*hovered, source.kind, source.name, source.sourceNumber));
     }
     const double now = Audio::Mixer::Now();
+    std::vector<Audio::Mixer::PlacedStart> codeSounds;
+    for (const Audio::Mixer::PlacedStart& start : Audio::Mixer::CodeSounds(now))
+    {
+        if (!filtered || Follows(start, shown))
+        {
+            codeSounds.push_back(start);
+        }
+    }
+    for (const CodeMarker& marker : GroupCodeSounds(codeSounds))
+    {
+        DrawCodeMarker(list, projector, marker, hovered != nullptr && Highlights(*hovered, marker));
+    }
     for (const Audio::Mixer::PlacedStart& start : Audio::Mixer::RecentStarts(now, FlashSeconds))
     {
-        if (!filtered || AnyNames(shown, start.kind, start.name, start.sourceNumber))
+        if (!filtered || Follows(start, shown))
         {
             DrawFlash(list, projector, start, now);
         }

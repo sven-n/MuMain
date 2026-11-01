@@ -29,6 +29,7 @@
 #include "Scenes/SceneCore.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Audio/DSPlaySound.h"
+#include "Audio/SoundSource.h"
 #include "Camera/ICamera.h"
 
 #include "Render/Models/SideHair.h"
@@ -3548,6 +3549,8 @@ void RenderObjectVisual(const OBJECT* o)
 
 void UpdateObjectVisual(OBJECT* o)
 {
+    // The sounds its map's code plays meanwhile are marked here (Q-SM11).
+    const Audio::ScopedSoundPlace place(Audio::SoundKind::MapObject, o->Type, o->Position);
     // The sound of its type, while it is drawn (Data/Maps/ObjectSounds.json).
     World::MapObjectSounds::OnObjectDrawn(*o);
 
@@ -4620,6 +4623,8 @@ int GetLoginCameraWalkCut();
 
 void MoveObject(OBJECT* o)
 {
+    // The sounds its map's code plays meanwhile are marked here (Q-SM11).
+    const Audio::ScopedSoundPlace place(Audio::SoundKind::MapObject, o->Type, o->Position);
     if (gMapManager.WorldActive == 9)
     {
         if ((int)WorldTime % 4000 < 1000)

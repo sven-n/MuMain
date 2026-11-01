@@ -51,6 +51,38 @@ private:
 
 // The innermost living source; nullptr for none.
 const SoundSource* CurrentSoundSource();
+
+// Where the game's own code that plays a sound stands: a map object while it
+// is moved or drawn, a monster while it moves or is drawn (Q-SM11). Only the
+// overlay reads it, to mark the sounds that no data names; a sound's kind
+// still comes from its SoundSource.
+struct SoundPlace
+{
+    // MapObject or Monster.
+    SoundKind kind = SoundKind::MapObject;
+    // The map object's type or the monster's number.
+    int number = -1;
+    std::array<float, 3> position{};
+};
+
+// Names the place of the sounds played while it lives; the innermost wins.
+class ScopedSoundPlace
+{
+public:
+    // `position`: three coordinates.
+    ScopedSoundPlace(SoundKind kind, int number, const float* position);
+    ~ScopedSoundPlace();
+
+    ScopedSoundPlace(const ScopedSoundPlace&) = delete;
+    ScopedSoundPlace& operator=(const ScopedSoundPlace&) = delete;
+
+private:
+    SoundPlace m_place;
+    const SoundPlace* m_outer = nullptr;
+};
+
+// The innermost living place; nullptr for none.
+const SoundPlace* CurrentSoundPlace();
 #else
 class ScopedSoundSource
 {
@@ -59,6 +91,13 @@ public:
     // Not trivial, so that a scope nobody reads draws no unused-variable
     // warning.
     ~ScopedSoundSource() {}
+};
+
+class ScopedSoundPlace
+{
+public:
+    ScopedSoundPlace(SoundKind, int, const float*) {}
+    ~ScopedSoundPlace() {}
 };
 #endif
 } // namespace Audio
