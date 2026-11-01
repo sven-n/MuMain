@@ -124,7 +124,7 @@ struct NormalMapTexture
 
 // A mesh of a coarser LOD (extras.lod 1 or 2), on the
 // same skin as the BMD's meshes (LOD 0): drawn in place of the BMD mesh of the
-// same index while that LOD is active (BMD::ActiveLod).
+// same index in a draw at that LOD (MeshDraw::lod).
 struct LodMesh
 {
     std::vector<SkinnedVertex> vertices;
