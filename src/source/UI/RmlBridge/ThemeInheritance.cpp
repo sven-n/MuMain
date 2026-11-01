@@ -182,9 +182,22 @@ std::map<std::string, ThemeInheritance::Setting> ThemeInheritance::Section(const
 std::optional<ThemeInheritance::Setting> ThemeInheritance::GetSetting(const std::string& section,
                                                                     const std::string& key) const
 {
-    const auto entries = Section(section);
-    const auto found = entries.find(Lower(key));
-    return found == entries.end() ? std::nullopt : std::optional(found->second);
+    if (!IsValid())
+        return std::nullopt;
+    // The first theme of the chain that has the key, as Section() takes it, without copying the whole section: the
+    // editor's swatches and the server select window read tokens this way many times a frame.
+    const std::string sectionName = Lower(section);
+    const std::string keyName = Lower(key);
+    for (size_t i = 0; i < m_Values.size(); ++i)
+    {
+        const auto found = m_Values[i].find(sectionName);
+        if (found == m_Values[i].end())
+            continue;
+        const auto value = found->second.find(keyName);
+        if (value != found->second.end())
+            return Setting{value->second, m_Directories[i]};
+    }
+    return std::nullopt;
 }
 
 std::optional<std::filesystem::path> ThemeDirectoryForResource(const std::string& path)

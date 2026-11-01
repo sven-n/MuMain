@@ -47,6 +47,17 @@ TEST_CASE("theme chains merge settings and replace files from child to ancestor 
     CHECK(theme.GetSetting("Tokens", "muted")->value == "gray");
     CHECK(theme.GetSetting("Capabilities", "NativeTextSize")->value == "0");
     CHECK(theme.GetSetting("Fonts", "body")->directory == files.root / "base");
+    // Section and key in any case; a key no theme of the chain has is none. GetSetting gives what Section() has.
+    CHECK(theme.GetSetting("TOKENS", "Accent")->value == "blue");
+    CHECK_FALSE(theme.GetSetting("Tokens", "missing"));
+    CHECK_FALSE(theme.GetSetting("Missing", "accent"));
+    for (const auto& [key, setting] : theme.Section("Tokens"))
+    {
+        CAPTURE(key);
+        REQUIRE(theme.GetSetting("Tokens", key));
+        CHECK(theme.GetSetting("Tokens", key)->value == setting.value);
+        CHECK(theme.GetSetting("Tokens", key)->directory == setting.directory);
+    }
     CHECK(theme.ResolveFile("base.rcss") == files.root / "base/base.rcss");
     CHECK(theme.ResolveFile("panel.rcss") == files.root / "child/panel.rcss");
     CHECK_FALSE(theme.ResolveFile("../base/base.rcss"));
@@ -62,6 +73,7 @@ TEST_CASE("invalid ancestry fails without partial settings or file fallback [ui]
     CHECK_FALSE(ThemeInheritance(files.root / "a").IsValid());
     CHECK_FALSE(ThemeInheritance(files.root / "a").ResolveFile("base.rcss"));
     CHECK(ThemeInheritance(files.root / "a").Section("Theme").empty());
+    CHECK_FALSE(ThemeInheritance(files.root / "a").GetSetting("Theme", "Base"));
     files.Write("b/theme.ini", "[Theme]\nBase=b\n");
     CHECK_FALSE(ThemeInheritance(files.root / "b").IsValid());
     files.Write("b/theme.ini", "[Theme]\nBase=missing\n");
