@@ -259,7 +259,9 @@ void ValidateMonsterSoundLinks(std::span<const MonsterDefinition* const> monster
         }
         for (size_t event = 0; event < set.soundEvents.size(); ++event)
         {
-            for (const std::string& cue : set.soundEvents[event].cues)
+            const auto& soundEvent = set.soundEvents[event];
+            const bool drawn = !soundEvent.duringCues.empty();
+            for (const std::string& cue : drawn ? soundEvent.duringCues : soundEvent.cues)
             {
                 std::set<int> lacking;
                 for (const SetUser& user : found->second)
@@ -283,10 +285,11 @@ void ValidateMonsterSoundLinks(std::span<const MonsterDefinition* const> monster
                 {
                     numbers += (numbers.empty() ? "" : ", ") + std::to_string(number);
                 }
-                AddIssue(issues, ItemDataIssueSeverity::Warning, soundsSource, ItemDataIssue::NoItem,
-                         MonsterSoundSetField(set.name, "soundEvents[" + std::to_string(event) + "].cues"),
-                         "the model of monster " + numbers + " has no cue \"" + cue +
-                             "\": the event never plays for it");
+                AddIssue(
+                    issues, ItemDataIssueSeverity::Warning, soundsSource, ItemDataIssue::NoItem,
+                    MonsterSoundSetField(set.name,
+                                         "soundEvents[" + std::to_string(event) + (drawn ? "].duringCues" : "].cues")),
+                    "the model of monster " + numbers + " has no cue \"" + cue + "\": the event never plays for it");
             }
         }
     }

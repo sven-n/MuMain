@@ -62,11 +62,11 @@ void PlaySound(const MonsterSoundSet& set, const MonsterSoundEvent& event, const
     }
 }
 
-// Whether one of the event's cues is a cue of the model in the animation, at
-// the frame (Q-MN79).
-bool IsOnCue(const MonsterSoundEvent& event, std::span<const MonsterModelCue> cues, const Situation& situation)
+// Whether one of `names` is a cue of the model in the animation, at the frame
+// (Q-MN79, Q-MN90).
+bool IsOnCue(const std::vector<std::string>& names, std::span<const MonsterModelCue> cues, const Situation& situation)
 {
-    return std::any_of(event.cues.begin(), event.cues.end(),
+    return std::any_of(names.begin(), names.end(),
                        [&](const std::string& name)
                        {
                            return std::any_of(cues.begin(), cues.end(),
@@ -88,7 +88,7 @@ bool IsWhen(const MonsterSoundEvent& event, std::span<const MonsterModelCue> cue
 {
     if (situation.drawn)
     {
-        return Contains(event.during, situation.animation) ||
+        return Contains(event.during, situation.animation) || IsOnCue(event.duringCues, cues, situation) ||
                (!situation.oncePlayed && Contains(event.once, situation.animation));
     }
     if (situation.moment)
@@ -96,7 +96,7 @@ bool IsWhen(const MonsterSoundEvent& event, std::span<const MonsterModelCue> cue
         return std::find(event.moments.begin(), event.moments.end(), *situation.moment) != event.moments.end();
     }
     return std::find(event.animations.begin(), event.animations.end(), situation.animation) != event.animations.end() ||
-           IsOnCue(event, cues, situation);
+           IsOnCue(event.cues, cues, situation);
 }
 
 bool Applies(const MonsterSoundEvent& event, std::span<const MonsterModelCue> cues, const Situation& situation)
@@ -263,8 +263,8 @@ void FinishDrawnFrame(CHARACTER& character)
 
 bool HasDrawnEvents(const MonsterSoundSet& set)
 {
-    return std::any_of(set.soundEvents.begin(), set.soundEvents.end(),
-                       [](const MonsterSoundEvent& event) { return !event.during.empty() || !event.once.empty(); });
+    return std::any_of(set.soundEvents.begin(), set.soundEvents.end(), [](const MonsterSoundEvent& event)
+                       { return !event.during.empty() || !event.once.empty() || !event.duringCues.empty(); });
 }
 
 bool PlayEvents(const MonsterSoundSet& set, std::span<const MonsterModelCue> cues, const Situation& situation,

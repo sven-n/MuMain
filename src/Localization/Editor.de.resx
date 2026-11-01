@@ -2909,7 +2909,7 @@
     <value>Wann</value>
   </data>
   <data name="Sound event when note" xml:space="preserve">
-    <value>Animationen: das Ereignis spielt in ihnen, wenn ein Angriff, Treffer oder Tod beginnt, bei jedem Schritt eines Gangs und am Ende jeder Schleife von stop1 und stop2. In jedem Bild in: in jedem Bild, in dem das Monster in einer von ihnen gezeichnet wird; die Chance wird in jedem Bild gezogen. Einmal, bis es steht: im ersten Bild, in dem das Monster in einer von ihnen gezeichnet wird; danach spielt kein Einmal-Ereignis des Sets, bis es in stop1, stop2 oder walk gezeichnet wird. Marken: in den Bildern einer Marke des Monstermodells. Momente: wo das Spiel sie spielt, welche Animation auch läuft: attack und hit, wenn sie beginnen, death, wenn er beginnt (auch in Chaos Castle), stand, wenn das Monster zum Stehen gesetzt wird (ein Gang endet, der Server hält es an), walk bei jedem Schritt. Ein Ereignis nennt Animationen, jedes Bild, einmal, Marken oder Momente.</value>
+    <value>Animationen: das Ereignis spielt in ihnen, wenn ein Angriff, Treffer oder Tod beginnt, bei jedem Schritt eines Gangs und am Ende jeder Schleife von stop1 und stop2. In jedem Bild in: in jedem Bild, in dem das Monster in einer von ihnen gezeichnet wird; die Chance wird in jedem Bild gezogen. Einmal, bis es steht: im ersten Bild, in dem das Monster in einer von ihnen gezeichnet wird; danach spielt kein Einmal-Ereignis des Sets, bis es in stop1, stop2 oder walk gezeichnet wird. Marken: in den Bildern einer Marke des Monstermodells. In jedem Bild in einer Marke: in jedem Bild, in dem das Monster in den Bildern einer Marke seines Modells gezeichnet wird. Momente: wo das Spiel sie spielt, welche Animation auch läuft: attack und hit, wenn sie beginnen, death, wenn er beginnt (auch in Chaos Castle), stand, wenn das Monster zum Stehen gesetzt wird (ein Gang endet, der Server hält es an), walk bei jedem Schritt. Ein Ereignis nennt Animationen, jedes Bild, einmal, Marken, jedes Bild in Marken oder Momente.</value>
   </data>
   <data name="Sound event on" xml:space="preserve">
     <value>bei</value>
@@ -3324,6 +3324,12 @@
   </data>
   <data name="Sound event cues of {0}" xml:space="preserve">
     <value>Marken von {0}</value>
+  </data>
+  <data name="Sound event each frame in cues of {0}" xml:space="preserve">
+    <value>In jedem Bild in einer Marke von {0}</value>
+  </data>
+  <data name="Sound event each frame in cue" xml:space="preserve">
+    <value>jedes Bild in Marke</value>
   </data>
   <data name="Sound event new cue at {0} {1}" xml:space="preserve">
     <value>Neue Marke am Bild der Vorschau ({0} {1})</value>

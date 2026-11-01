@@ -183,7 +183,7 @@ TEST_CASE("Monster sounds: during and once name one animation or more, a once ev
         const ReadResult two = Read(SoundsFile(Set(std::string(R"("soundEvents": [{"animations": ["walk"], ")") + key +
                                                    R"(": ["walk"], "sounds": ["a"]}])")));
         CHECK(HasIssueAbout(two.issues, ItemDataIssueSeverity::Fatal, "sound set Hound soundEvents[0]",
-                            "one of animations, on, cues, during and once"));
+                            "one of animations, on, cues, during, once and duringCues"));
     }
     const ReadResult standing = Read(SoundsFile(Set(
         R"("sounds": [{"file": "Data/Sound/a.wav"}], "soundEvents": [{"once": ["stop2", "attack1"], "sounds": ["Data/Sound/a.wav"]}])")));
@@ -356,11 +356,11 @@ TEST_CASE("Monster sounds: wrong values are errors that name the set and the fie
         {Set(R"("sounds": [{"channels": 2}])"), "sound set Hound sounds[0].file", "missing"},
         {Set(R"("sounds": [{"file": "Data\\Sound\\a.wav"}])"), "sound set Hound sounds[0].file", "/"},
         {Set(R"("soundEvents": [{"sounds": ["a"]}])"), "sound set Hound soundEvents[0]",
-         "one of animations, on, cues, during and once"},
+         "one of animations, on, cues, during, once and duringCues"},
         {Set(R"("soundEvents": [{"animations": ["walk"], "on": ["walk"], "sounds": ["a"]}])"),
-         "sound set Hound soundEvents[0]", "one of animations, on, cues, during and once"},
+         "sound set Hound soundEvents[0]", "one of animations, on, cues, during, once and duringCues"},
         {Set(R"("soundEvents": [{"cues": ["step 1"], "on": ["walk"], "sounds": ["a"]}])"),
-         "sound set Hound soundEvents[0]", "one of animations, on, cues, during and once"},
+         "sound set Hound soundEvents[0]", "one of animations, on, cues, during, once and duringCues"},
         {Set(R"("soundEvents": [{"on": [], "sounds": ["a"]}])"), "sound set Hound soundEvents[0].on",
          "one moment or more"},
         {Set(R"("soundEvents": [{"on": ["jump"], "sounds": ["a"]}])"), "sound set Hound soundEvents[0].on[0]",
@@ -498,6 +498,46 @@ TEST_CASE("Monster sounds: the links between monsters, models and sets are check
                                               "Monsters.json", "Sounds.json", issues);
     INFO(Messages(issues));
     CHECK(issues.empty());
+}
+
+TEST_CASE("Monster sounds: an event each drawn frame in cues reads and writes its cues, which must be on the "
+          "models (Q-MN90) [data][monsters]")
+{
+    const ReadResult read = Read(SoundsFile(Set(
+        R"("sounds": [{"file": "Data/Sound/a.wav"}], "soundEvents": [{"duringCues": ["attack2 sound"], "sounds": ["Data/Sound/a.wav"]}])")));
+    INFO(Messages(read.issues));
+    CHECK(read.issues.empty());
+    REQUIRE(read.sets.size() == 1);
+    REQUIRE(read.sets[0].soundEvents.size() == 1);
+    CHECK(read.sets[0].soundEvents[0].duringCues == std::vector<std::string>{"attack2 sound"});
+    CHECK(read.sets[0].soundEvents[0].cues.empty());
+    const std::string text = Data::Monsters::WriteMonsterSoundsJson(read.sets);
+    INFO(text);
+    CHECK(text.find(R"("duringCues": ["attack2 sound"])") != std::string::npos);
+    CHECK(Read(text).sets == read.sets);
+
+    const ReadResult empty = Read(SoundsFile(Set(R"("soundEvents": [{"duringCues": [], "sounds": ["a"]}])")));
+    CHECK(HasIssueAbout(empty.issues, ItemDataIssueSeverity::Fatal, "sound set Hound soundEvents[0].duringCues",
+                        "one cue or more"));
+    const ReadResult two =
+        Read(SoundsFile(Set(R"("soundEvents": [{"cues": ["a"], "duringCues": ["a"], "sounds": ["a"]}])")));
+    CHECK(HasIssueAbout(two.issues, ItemDataIssueSeverity::Fatal, "sound set Hound soundEvents[0]",
+                        "one of animations, on, cues, during, once and duringCues"));
+
+    // A model without the cue: a warning, as for an event on cues.
+    MonsterModelDefinition hound;
+    hound.slot = "MONSTER_MODEL_HOUND";
+    MonsterSoundEvent drawn;
+    drawn.duringCues = {"attack2 sound"};
+    drawn.sounds = {"Data/Sound/a.wav"};
+    std::vector<ItemDataIssue> issues;
+    Data::Monsters::ValidateMonsterSoundLinks(
+        std::vector<MonsterDefinition>{Monster(1, "MONSTER_MODEL_HOUND", "Hound")},
+        std::vector<MonsterModelDefinition>{hound}, std::vector<MonsterSoundSet>{SetOf("Hound", {drawn})},
+        "Monsters.json", "Sounds.json", issues);
+    INFO(Messages(issues));
+    CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "sound set Hound soundEvents[0].duringCues",
+                        "the model of monster 1 has no cue \"attack2 sound\""));
 }
 
 TEST_CASE("Monster sounds: a random variant without a set of its own plays the entry's on its model, whose cues "

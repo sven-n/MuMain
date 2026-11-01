@@ -1171,6 +1171,15 @@ TEST_CASE("Monster Sounds: a sound event plays each drawn frame in animations or
     CHECK(ToggleAnimation(event, MONSTER01_DIE));
     CHECK(event.once.empty());
     CHECK(event.animations == std::vector{static_cast<int>(MONSTER01_DIE)});
+
+    // Each frame in a cue (Q-MN90).
+    CHECK(ToggleDuringCue(event, "attack2 sound"));
+    CHECK(event.animations.empty());
+    CHECK(event.duringCues == std::vector<std::string>{"attack2 sound"});
+    CHECK(WhenText(event) == "each frame in cue attack2 sound");
+    CHECK_FALSE(ToggleDuringCue(event, "attack2 sound"));
+    CHECK(ToggleCue(event, "step 1"));
+    CHECK(event.duringCues.empty());
 }
 
 TEST_CASE("Monster Sounds: a new cue is one frame at the preview's frame, named after it once (Q-MN82) "

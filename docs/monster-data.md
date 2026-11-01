@@ -332,7 +332,10 @@ each frame); `once`, played the first frame the character is drawn in one of
 them, after which none of the set's once events plays until it is drawn in
 stop1, stop2 or walk (Q-MN89: the maps' draw code cleared its flag in stop1
 and stop2, in Kanturu Relics also in walk, for some Kanturu monsters never; a
-death right after an attack, with no stand or walk between, is silent); or `on`
+death right after an attack, with no stand or walk between, is silent);
+`duringCues`, played each frame the character is drawn in the frames of one of
+the named cues of its model (Q-MN90: Kanturu Relics' Dreadfear in the first
+frames of its second attack; the once flag stays as it is); or `on`
 moments, played where the game reaches them, whatever the animation:
 
 | Moment | Where the game plays it |
@@ -368,6 +371,7 @@ unless it is `heardAnywhere`:
 | `during` | The animations it plays in each drawn frame, instead of animations |
 | `once` | The animations it plays once in until the character stands or walks, instead of animations; once events of one frame all play (the Witch Queen's thunder and attack). In stop1, stop2 or walk it would play each frame (a warning) |
 | `cues` | The cues of the monster's model it plays on, instead of animations; a model without the cue plays nothing for it (Data Checks warns) |
+| `duringCues` | The cues of the monster's model it plays in each drawn frame, instead of animations; a model without the cue plays nothing for it (Data Checks warns) |
 | `on` | The moments it plays at, instead of animations |
 | `deathEffectArmed` | Only while the character's death effect is armed |
 | `heardAnywhere` | Heard at any distance from the hero and on every map |

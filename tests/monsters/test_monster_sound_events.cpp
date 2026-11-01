@@ -503,6 +503,46 @@ TEST_CASE("Monster sounds: one set plays on the cues of each model that has them
     CHECK(PlayIn(set, At(MonsterSoundMoment::Walk, MONSTER01_WALK), early).empty());
 }
 
+TEST_CASE("Monster sounds: an event during cues plays each drawn frame in their frames, and leaves the once flag "
+          "alone (Q-MN90) [monsters][sounds]")
+{
+    MonsterSoundSet set;
+    Data::Monsters::MonsterSoundEvent attack2;
+    attack2.duringCues = {"attack2 sound"};
+    attack2.sounds = {"SOUND_MONSTER_DSIDLE1"};
+    Data::Monsters::MonsterSoundEvent once;
+    once.once = {MONSTER01_ATTACK1};
+    once.sounds = {"SOUND_MONSTER_BULLATTACK1"};
+    set.soundEvents = {attack2, once};
+    CHECK(GameLogic::Monsters::SoundEvents::HasDrawnEvents(set));
+    // Dreadfear's: attack 2 from frame 0 through frame 2.
+    const std::vector<Data::Monsters::MonsterModelCue> cues = {{"attack2 sound", MONSTER01_ATTACK2, {0.0f, 2.001f}}};
+    const auto drawn = [](int animation, float frame)
+    {
+        Situation situation = In(animation, frame);
+        situation.drawn = true;
+        return situation;
+    };
+    for (const float frame : {0.0f, 1.3f, 2.0f})
+    {
+        CAPTURE(frame);
+        CHECK(PlayIn(set, drawn(MONSTER01_ATTACK2, frame), cues) == Played{{SOUND_MONSTER_DSIDLE1, false}});
+    }
+    CHECK(PlayIn(set, drawn(MONSTER01_ATTACK2, 2.1f), cues).empty());
+    CHECK(PlayIn(set, drawn(MONSTER01_ATTACK1, 1.0f), cues) == Played{{SOUND_MONSTER_BULLATTACK1, false}});
+    // Once played, it still plays (the flag is the once events').
+    Situation flagged = drawn(MONSTER01_ATTACK2, 1.0f);
+    flagged.oncePlayed = true;
+    CHECK(PlayIn(set, flagged, cues) == Played{{SOUND_MONSTER_DSIDLE1, false}});
+    // It does not set the flag: PlayEvents says no once event played.
+    CHECK_FALSE(
+        GameLogic::Monsters::SoundEvents::PlayEvents(set, cues, drawn(MONSTER01_ATTACK2, 1.0f), [](int, bool) {}));
+    // Not at an animation's fixed points: only in drawn frames.
+    CHECK(PlayIn(set, In(MONSTER01_ATTACK2, 1.0f), cues).empty());
+    // A model without the cue plays nothing.
+    CHECK(PlayIn(set, drawn(MONSTER01_ATTACK2, 1.0f)).empty());
+}
+
 TEST_CASE("Monster sounds: an event heard anywhere and at the monster (Q-MN76) [monsters][sounds]")
 {
     MonsterSoundSet set;
