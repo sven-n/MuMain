@@ -4,7 +4,7 @@
 #include <cmath>
 #include <cwchar>
 
-#include "Network/Server/WSclient.h"   // SocketClient, CreateSocket, DeleteSocket,
+#include "Network/Server/WSclient.h"   // SocketClient, ConnectForLogin, DeleteSocket,
                                        // ResetClientToLoginScene, protocol states
 #include "Scenes/SceneCore.h"          // SceneFlag
 #include "Scenes/SceneCommon.h"        // SelectedHero, MAX_CHARACTERS_PER_ACCOUNT
@@ -30,7 +30,6 @@ extern int LogIn;
 extern wchar_t LogInID[MAX_USERNAME_SIZE + 1];
 extern BYTE Version[SIZE_PROTOCOLVERSION];
 extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
-extern BOOL g_bGameServerConnected;
 
 ReconnectManager& ReconnectManager::Instance()
 {
@@ -351,16 +350,10 @@ void ReconnectManager::UpdateRetrying()
     }
 
     // Already torn down (Begin ran once); just re-open the socket and let the
-    // Connecting phase re-drive the login. Reset the protocol state so the
-    // server hello is treated as a fresh login rather than a map change.
-    LogIn = 0;
-    CurrentProtocolState = REQUEST_JOIN_SERVER;
-    DeleteSocket();
-    CreateSocket(m_serverIp, m_serverPort);
-
-    if (IsSocketAlive())
+    // Connecting phase re-drive the login. ConnectForLogin resets the protocol
+    // state so the server hello is treated as a fresh login rather than a map change.
+    if (ConnectForLogin(m_serverIp, m_serverPort))
     {
-        g_bGameServerConnected = TRUE;
         EnterPhase(Phase::Connecting);
         return;
     }

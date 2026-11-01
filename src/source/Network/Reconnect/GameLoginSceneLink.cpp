@@ -83,7 +83,6 @@ void GameLoginSceneLink::StopProbe()
 bool GameLoginSceneLink::Connect(LoginServer server)
 {
     const Address address = AddressOf(server);
-    DeleteSocket();
     return ConnectForLogin(address.host, address.port) != FALSE;
 }
 

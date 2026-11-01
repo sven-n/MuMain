@@ -477,6 +477,7 @@ wchar_t LogInID[MAX_USERNAME_SIZE + 1] = {
 
 BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port)
 {
+    DeleteSocket();
     LogIn = 0;
     CurrentProtocolState = REQUEST_JOIN_SERVER;
 
