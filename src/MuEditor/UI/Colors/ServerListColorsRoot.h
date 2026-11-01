@@ -44,6 +44,9 @@ public:
     MuEditor::UndoTarget& GetUndoTarget() override;
 
 private:
+    // A load bar token (server-load-base, ...), used by the bar parts left at "default"; the other colors are used by
+    // their name.
+    static bool IsBarToken(const std::string& name);
     // The edited color follows the list's (an undo, a redo) until it is changed.
     void UpdateEdit(const Data::ServerList::CustomColor& color);
     // Whether the edited ID can be the color's: its own, or a free one.

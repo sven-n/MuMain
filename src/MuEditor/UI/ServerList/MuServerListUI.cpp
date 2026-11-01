@@ -1226,6 +1226,50 @@ void CMuServerListUI::AfterColorEdit()
     ShowInGame();
 }
 
+namespace
+{
+// A part of the load that names a color, and the two halves of its label.
+struct LoadColorPart
+{
+    const std::string* color;
+    const char* group;
+    const char* part;
+};
+
+// The parts of the load that can name the color `id`. A bar part set to "default" takes its own token, not the
+// button color "default", so the bar's parts don't count for it.
+std::array<LoadColorPart, 5> GetLoadColorParts(const Data::ServerList::LoadSettings& load, std::string_view id)
+{
+    const bool barParts = id != Data::ServerList::GetThemeColorName(Data::ServerList::ThemeColor::Default);
+    return {{
+        {barParts ? &load.bar.base : nullptr, I18N::Editor::LoadBar, I18N::Editor::BaseColor},
+        {barParts ? &load.bar.full : nullptr, I18N::Editor::LoadBar, I18N::Editor::FullColor},
+        {barParts ? &load.bar.empty : nullptr, I18N::Editor::LoadBar, I18N::Editor::UnlitColor},
+        {&load.full.color, I18N::Editor::Load, I18N::Editor::FullServer},
+        {&load.overloaded.color, I18N::Editor::Load, I18N::Editor::OverloadedServer},
+    }};
+}
+
+// The bar's parts and their labels, in the editor's language now.
+std::array<std::pair<Data::ServerList::LoadBarPart, const char*>, 3> GetBarParts()
+{
+    return {{
+        {Data::ServerList::LoadBarPart::Base, I18N::Editor::BaseColor},
+        {Data::ServerList::LoadBarPart::Full, I18N::Editor::FullColor},
+        {Data::ServerList::LoadBarPart::Empty, I18N::Editor::UnlitColor},
+    }};
+}
+
+// Whether the bar's part is drawn in the theme's own token `token`: it is set to "default".
+bool DrawsInThemeToken(const Data::ServerList::LoadBarColors& bar, Data::ServerList::LoadBarPart part,
+                       std::string_view token)
+{
+    return token == Data::ServerList::GetLoadBarToken(part) &&
+           Data::ServerList::GetLoadBarColor(bar, part) ==
+               Data::ServerList::GetThemeColorName(Data::ServerList::ThemeColor::Default);
+}
+} // namespace
+
 std::vector<std::string> CMuServerListUI::DescribeColorUsers(std::string_view id) const
 {
     const ServerListData& list = m_edits.GetList();
@@ -1240,45 +1284,54 @@ std::vector<std::string> CMuServerListUI::DescribeColorUsers(std::string_view id
                             GetRulePvpLabel(rule.pvp));
         }
     }
-    const Data::ServerList::LoadSettings& load = list.load;
-    const bool barParts = id != Data::ServerList::GetThemeColorName(Data::ServerList::ThemeColor::Default);
-    const std::pair<const std::string*, std::string> parts[] = {
-        {barParts ? &load.bar.base : nullptr, std::string(I18N::Editor::LoadBar) + ": " + I18N::Editor::BaseColor},
-        {barParts ? &load.bar.full : nullptr, std::string(I18N::Editor::LoadBar) + ": " + I18N::Editor::FullColor},
-        {barParts ? &load.bar.empty : nullptr, std::string(I18N::Editor::LoadBar) + ": " + I18N::Editor::UnlitColor},
-        {&load.full.color, std::string(I18N::Editor::Load) + ": " + I18N::Editor::FullServer},
-        {&load.overloaded.color, std::string(I18N::Editor::Load) + ": " + I18N::Editor::OverloadedServer},
-    };
-    for (const auto& [color, label] : parts)
+    for (const LoadColorPart& part : GetLoadColorParts(list.load, id))
     {
-        if (color != nullptr && *color == id)
+        if (part.color != nullptr && *part.color == id)
         {
-            users.push_back(label);
+            users.push_back(std::string(part.group) + ": " + part.part);
         }
     }
     return users;
 }
 
+int CMuServerListUI::CountColorUsers(std::string_view id) const
+{
+    const ServerListData& list = m_edits.GetList();
+    int count = 0;
+    for (const ButtonColorRule& rule : list.buttonColors)
+    {
+        count += rule.color == id ? 1 : 0;
+    }
+    for (const LoadColorPart& part : GetLoadColorParts(list.load, id))
+    {
+        count += part.color != nullptr && *part.color == id ? 1 : 0;
+    }
+    return count;
+}
+
 std::vector<std::string> CMuServerListUI::DescribeThemeBarPartUsers(std::string_view token) const
 {
-    using Data::ServerList::LoadBarPart;
     const Data::ServerList::LoadBarColors& bar = m_edits.GetList().load.bar;
-    const char* defaultColor = Data::ServerList::GetThemeColorName(Data::ServerList::ThemeColor::Default);
-    const std::pair<LoadBarPart, const char*> parts[] = {
-        {LoadBarPart::Base, I18N::Editor::BaseColor},
-        {LoadBarPart::Full, I18N::Editor::FullColor},
-        {LoadBarPart::Empty, I18N::Editor::UnlitColor},
-    };
     std::vector<std::string> users;
-    for (const auto& [part, label] : parts)
+    for (const auto& [part, label] : GetBarParts())
     {
-        if (token == Data::ServerList::GetLoadBarToken(part) &&
-            Data::ServerList::GetLoadBarColor(bar, part) == defaultColor)
+        if (DrawsInThemeToken(bar, part, token))
         {
             users.push_back(std::string(I18N::Editor::LoadBar) + ": " + label);
         }
     }
     return users;
+}
+
+int CMuServerListUI::CountThemeBarPartUsers(std::string_view token) const
+{
+    const Data::ServerList::LoadBarColors& bar = m_edits.GetList().load.bar;
+    int count = 0;
+    for (const auto& [part, label] : GetBarParts())
+    {
+        count += DrawsInThemeToken(bar, part, token) ? 1 : 0;
+    }
+    return count;
 }
 
 void CMuServerListUI::ShowChannelNames()

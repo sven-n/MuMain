@@ -224,6 +224,30 @@ TEST_CASE("Server List window: a VIP type added on the Channel names tab is a st
     RenderServerList();
 }
 
+// The Colors window counts a color's users each frame without their labels; the count is the list's length.
+TEST_CASE("Server list colors: a color's count is the number of its users [editor]")
+{
+    I18N::SetLocale("en");
+    ServerListFolder folder;
+    TestImGuiContext context;
+    StartWithValhalla();
+
+    for (const char* color : {"default", "gray", "orange", "silver", "server-load-base", "none"})
+    {
+        CAPTURE(color);
+        CHECK(g_MuServerListUI.CountColorUsers(color) ==
+              static_cast<int>(g_MuServerListUI.DescribeColorUsers(color).size()));
+        CHECK(g_MuServerListUI.CountThemeBarPartUsers(color) ==
+              static_cast<int>(g_MuServerListUI.DescribeThemeBarPartUsers(color).size()));
+    }
+    // The built-in load: both load texts in the button's color, the bar in the theme's tokens.
+    CHECK(g_MuServerListUI.CountColorUsers("default") == 2);
+    for (const char* token : {"server-load-base", "server-load-full", "server-load-empty"})
+    {
+        CHECK(g_MuServerListUI.CountThemeBarPartUsers(token) == 1);
+    }
+}
+
 // The Server list root of the Colors window writes a theme color into a theme folder's tokens.ini: the token's line
 // when the file has one, else a new line after the [Tokens] section's last; the rest of the file and its line ends
 // stay as they are.

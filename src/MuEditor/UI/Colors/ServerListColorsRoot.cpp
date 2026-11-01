@@ -154,21 +154,24 @@ void ServerListColorsRoot::RenderSwatch(const std::string& name) const
 
 int ServerListColorsRoot::CountUsers(const std::string& name)
 {
-    return static_cast<int>(FindUsers(name).size());
+    return IsBarToken(name) ? g_MuServerListUI.CountThemeBarPartUsers(name) : g_MuServerListUI.CountColorUsers(name);
 }
 
 std::vector<NamedColorUser> ServerListColorsRoot::FindUsers(const std::string& name) const
 {
-    // A load bar token is used by the bar parts left at "default"; the other colors by their name.
-    const char* token = Data::ServerList::GetThemeColorEntryToken(name);
-    const bool barToken = token != nullptr && name == token;
     std::vector<NamedColorUser> users;
-    for (std::string& label : barToken ? g_MuServerListUI.DescribeThemeBarPartUsers(name)
-                                       : g_MuServerListUI.DescribeColorUsers(name))
+    for (std::string& label : IsBarToken(name) ? g_MuServerListUI.DescribeThemeBarPartUsers(name)
+                                               : g_MuServerListUI.DescribeColorUsers(name))
     {
         users.push_back({std::move(label), [] { g_MuServerListUI.ShowChannelNames(); }, false});
     }
     return users;
+}
+
+bool ServerListColorsRoot::IsBarToken(const std::string& name)
+{
+    const char* token = Data::ServerList::GetThemeColorEntryToken(name);
+    return token != nullptr && name == token;
 }
 
 // The themes' colors: they belong to the themes.

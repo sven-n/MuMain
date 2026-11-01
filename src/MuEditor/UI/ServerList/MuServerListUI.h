@@ -53,6 +53,9 @@ public:
     std::vector<std::string> DescribeColorUsers(std::string_view id) const;
     // The load bar parts drawn in the theme's own token `token` (server-load-base, ...): those set to "default".
     std::vector<std::string> DescribeThemeBarPartUsers(std::string_view token) const;
+    // How many each would list, without making the labels: the Colors window counts them each frame.
+    int CountColorUsers(std::string_view id) const;
+    int CountThemeBarPartUsers(std::string_view token) const;
     // The theme folders a color gets a shade for.
     const std::vector<std::string>& GetThemes() const
     {
