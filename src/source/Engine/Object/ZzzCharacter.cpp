@@ -9237,10 +9237,9 @@ void UpdateCloakCloth(CHARACTER* c, OBJECT* o)
 bool UpdateTransformCharacterState(CHARACTER* c)
 {
     OBJECT* o = &c->Object;
-    if (o->Type == MODEL_PLAYER
-        && (o->SubType == MODEL_XMAS_EVENT_CHA_SSANTA
-            || o->SubType == MODEL_XMAS_EVENT_CHA_SNOWMAN
-            || o->SubType == MODEL_XMAS_EVENT_CHA_DEER))
+    if (o->Type == MODEL_PLAYER &&
+        (o->SubType == MODEL_XMAS_EVENT_CHA_SSANTA || o->SubType == MODEL_XMAS_EVENT_CHA_SNOWMAN ||
+         o->SubType == MODEL_XMAS_EVENT_CHA_DEER))
     {
         OBJECT* pOwner = o->Owner;
 
@@ -9262,10 +9261,9 @@ bool UpdateTransformCharacterState(CHARACTER* c)
             return false;
         }
     }
-    else if (o->Type == MODEL_PLAYER && o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL
-        || o->Type == MODEL_PLAYER && o->SubType == MODEL_PANDA
-        || o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_CHANGED
-        )
+    else if (o->Type == MODEL_PLAYER && o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL ||
+             o->Type == MODEL_PLAYER && o->SubType == MODEL_PANDA ||
+             o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_CHANGED)
     {
         if (o->m_iAnimation >= 1)
         {
@@ -9544,7 +9542,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 }
                 else
                 {
-                    RenderPartObject(&c->Object, MODEL_SHADOW_BODY, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate);
+                    RenderPartObject(&c->Object, MODEL_SHADOW_BODY, NULL, c->Light, o->Alpha, 0, 0, 0, false, false,
+                                     Translate);
                 }
             }
 
@@ -9571,11 +9570,14 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
     if (byRender == CHARACTER_RENDER_OBJ)
     {
-        if (MONSTER_METAL_BALROG == c->MonsterIndex || MONSTER_ALPHA_CRUST == c->MonsterIndex || MONSTER_GREAT_DRAKAN == c->MonsterIndex
-            || MONSTER_WHITE_WIZARD == c->MonsterIndex || MONSTER_ORC_SOLDIER_OF_DOOM == c->MonsterIndex || MONSTER_ORC_ARCHER_OF_DOOM == c->MonsterIndex
-            || MONSTER_MUTANT_HERO == c->MonsterIndex || MONSTER_OMEGA_WING == c->MonsterIndex || MONSTER_AXE_HERO == c->MonsterIndex || MONSTER_GIGAS_GOLEM == c->MonsterIndex
-            || MONSTER_SCOUTHERO == c->MonsterIndex || MONSTER_WEREWOLFHERO == c->MonsterIndex || MONSTER_VALAM == c->MonsterIndex || MONSTER_SOLAM == c->MonsterIndex || MONSTER_SCOUT == c->MonsterIndex || 319 == c->MonsterIndex
-            )
+        if (MONSTER_METAL_BALROG == c->MonsterIndex || MONSTER_ALPHA_CRUST == c->MonsterIndex ||
+            MONSTER_GREAT_DRAKAN == c->MonsterIndex || MONSTER_WHITE_WIZARD == c->MonsterIndex ||
+            MONSTER_ORC_SOLDIER_OF_DOOM == c->MonsterIndex || MONSTER_ORC_ARCHER_OF_DOOM == c->MonsterIndex ||
+            MONSTER_MUTANT_HERO == c->MonsterIndex || MONSTER_OMEGA_WING == c->MonsterIndex ||
+            MONSTER_AXE_HERO == c->MonsterIndex || MONSTER_GIGAS_GOLEM == c->MonsterIndex ||
+            MONSTER_SCOUTHERO == c->MonsterIndex || MONSTER_WEREWOLFHERO == c->MonsterIndex ||
+            MONSTER_VALAM == c->MonsterIndex || MONSTER_SOLAM == c->MonsterIndex || MONSTER_SCOUT == c->MonsterIndex ||
+            319 == c->MonsterIndex)
         {
             RenderObject(o, Translate, Select, c->MonsterIndex);
         }
@@ -9592,12 +9594,11 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         }
     }
 
-    if ((
-        o->Type != MODEL_PLAYER && o->Kind != KIND_TRAP &&
-        c->MonsterIndex != MONSTER_ICE_QUEEN && c->MonsterIndex != MONSTER_ICE_MONSTER && c->MonsterIndex != MONSTER_RED_DRAGON && c->MonsterIndex != MONSTER_ELF_LALA && c->MonsterIndex != MONSTER_ZAIKAN && c->MonsterIndex != MONSTER_DEATH_BEAM_KNIGHT
-        && c->MonsterIndex != MONSTER_GATE_TO_KALIMA_1
-        ) && gMapManager.WorldActive != WD_10HEAVEN
-        )
+    if ((o->Type != MODEL_PLAYER && o->Kind != KIND_TRAP && c->MonsterIndex != MONSTER_ICE_QUEEN &&
+         c->MonsterIndex != MONSTER_ICE_MONSTER && c->MonsterIndex != MONSTER_RED_DRAGON &&
+         c->MonsterIndex != MONSTER_ELF_LALA && c->MonsterIndex != MONSTER_ZAIKAN &&
+         c->MonsterIndex != MONSTER_DEATH_BEAM_KNIGHT && c->MonsterIndex != MONSTER_GATE_TO_KALIMA_1) &&
+        gMapManager.WorldActive != WD_10HEAVEN)
     {
         if (o->Alpha >= 0.3f)
         {
@@ -9615,9 +9616,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             else if (c->MonsterIndex == MONSTER_MESSENGER_OF_ARCH)
                 o->HiddenMesh = 2;
 
-            if (o->Type != MODEL_STATUE_OF_SAINT && o->Type != MODEL_CASTLE_GATE
-                && !(o->Type >= MODEL_FACE
-                    && o->Type <= MODEL_FACE + 6))
+            if (o->Type != MODEL_STATUE_OF_SAINT && o->Type != MODEL_CASTLE_GATE &&
+                !(o->Type >= MODEL_FACE && o->Type <= MODEL_FACE + 6))
             {
                 o->EnableShadow = true;
                 RenderPartObject(&c->Object, o->Type, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate);
@@ -9635,21 +9635,27 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 float Luminosity = sinf(WorldTime * 0.0015f) * 0.3f + 0.8f;
 
                 Vector(Luminosity * 0.5f, Luminosity * 0.5f, Luminosity, Light);
-                RenderTerrainAlphaBitmap(BITMAP_MAGIC + 1, o->Position[0], o->Position[1], 2.7f, 2.7f, Light, -o->Angle[2]);
+                RenderTerrainAlphaBitmap(BITMAP_MAGIC + 1, o->Position[0], o->Position[1], 2.7f, 2.7f, Light,
+                                         -o->Angle[2]);
 
                 o->HiddenMesh = -1;
             }
         }
     }
 
-    if (c->MonsterIndex == MONSTER_BALROG || c->MonsterIndex == MONSTER_GOLDEN_BUDGE_DRAGON || c->MonsterIndex == MONSTER_SILVER_VALKYRIE || c->MonsterIndex == MONSTER_ZAIKAN || c->MonsterIndex == MONSTER_METAL_BALROG || (78 <= c->MonsterIndex && c->MonsterIndex <= MONSTER_GOLDEN_WHEEL) || (c->MonsterIndex >= MONSTER_GOLDEN_DARK_KNIGHT && c->MonsterIndex <= MONSTER_GOLDEN_RABBIT))
+    if (c->MonsterIndex == MONSTER_BALROG || c->MonsterIndex == MONSTER_GOLDEN_BUDGE_DRAGON ||
+        c->MonsterIndex == MONSTER_SILVER_VALKYRIE || c->MonsterIndex == MONSTER_ZAIKAN ||
+        c->MonsterIndex == MONSTER_METAL_BALROG || (78 <= c->MonsterIndex && c->MonsterIndex <= MONSTER_GOLDEN_WHEEL) ||
+        (c->MonsterIndex >= MONSTER_GOLDEN_DARK_KNIGHT && c->MonsterIndex <= MONSTER_GOLDEN_RABBIT))
     {
         vec3_t vBackupBodyLight;
 
         float Bright = 1.f;
         if (c->MonsterIndex == MONSTER_ZAIKAN)
             Bright = 0.5f;
-        if (c->MonsterIndex == MONSTER_GOLDEN_BUDGE_DRAGON || (78 <= c->MonsterIndex && c->MonsterIndex <= MONSTER_GOLDEN_WHEEL) || (c->MonsterIndex >= MONSTER_GOLDEN_DARK_KNIGHT && c->MonsterIndex <= MONSTER_GOLDEN_RABBIT))
+        if (c->MonsterIndex == MONSTER_GOLDEN_BUDGE_DRAGON ||
+            (78 <= c->MonsterIndex && c->MonsterIndex <= MONSTER_GOLDEN_WHEEL) ||
+            (c->MonsterIndex >= MONSTER_GOLDEN_DARK_KNIGHT && c->MonsterIndex <= MONSTER_GOLDEN_RABBIT))
         {
             if (c->MonsterIndex >= MONSTER_GOLDEN_DARK_KNIGHT)
             {
@@ -9667,7 +9673,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
         if (c->MonsterIndex == MONSTER_METAL_BALROG)
         {
-            RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT | RENDER_EXTRA, Bright);
+            RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha,
+                                      RENDER_CHROME | RENDER_BRIGHT | RENDER_EXTRA, Bright);
         }
         else
         {
@@ -9685,7 +9692,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         const float Luminosity = (float)(rand() % 30 + 70) * 0.01f;
         Vector(Luminosity * 0.6f, Luminosity * 0.7f, Luminosity * 0.8f, Light);
     }
-    else if (c->MonsterIndex == MONSTER_MEGA_CRUST || c->MonsterIndex == MONSTER_ALPHA_CRUST || c->MonsterIndex == MONSTER_OMEGA_WING)
+    else if (c->MonsterIndex == MONSTER_MEGA_CRUST || c->MonsterIndex == MONSTER_ALPHA_CRUST ||
+             c->MonsterIndex == MONSTER_OMEGA_WING)
     {
         if (auto* pCloth = (CPhysicsCloth*)c->Object.m_pCloth)
         {
@@ -9704,13 +9712,15 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
         if (c->MonsterIndex == MONSTER_DRAKAN)
         {
-            RenderPartObjectBodyColor2(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME2 | RENDER_LIGHTMAP | RENDER_BRIGHT, 1.f);
+            RenderPartObjectBodyColor2(&Models[o->Type], o, o->Type, o->Alpha,
+                                       RENDER_CHROME2 | RENDER_LIGHTMAP | RENDER_BRIGHT, 1.f);
         }
     }
     else if (c->MonsterIndex == MONSTER_DARK_PHOENIX)
     {
         float fSin = 0.5f * (1.0f + sinf((float)((int)WorldTime % 10000) * 0.001f));
-        RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT, 0.3f + fSin * 0.7f);
+        RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT,
+                                  0.3f + fSin * 0.7f);
         fSin = 0.3f * (1.0f - fSin) + 0.3f;
         o->BlendMeshLight = fSin;
         o->BlendMesh = 0;
@@ -9732,7 +9742,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
     if (c->MonsterIndex == MONSTER_GOLDEN_TITAN || c->MonsterIndex == MONSTER_GOLDEN_SOLDIER)
     {
-        RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_METAL | RENDER_BRIGHT, 1.f, BITMAP_SHINY + 1);
+        RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_METAL | RENDER_BRIGHT, 1.f,
+                                  BITMAP_SHINY + 1);
     }
 
     if (c->MonsterIndex == MONSTER_RED_DRAGON)
@@ -9832,22 +9843,23 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             Vector(1.0f, 0.3f, 0.1f, c->Light);
         }
 
-        if (gMapManager.WorldActive == WD_65DOPPLEGANGER1);
+        if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
+            ;
+        else if (o->CurrentAction != PLAYER_DIE1)
+        {
+            // 			if (!g_isCharacterBuff((&c->Object), eBuff_Doppelganger_Ascension))
+            // 			{
+            c->Object.Alpha = 1.0f;
+            // 			}
+        }
         else
-            if (o->CurrentAction != PLAYER_DIE1)
-            {
-                // 			if (!g_isCharacterBuff((&c->Object), eBuff_Doppelganger_Ascension))
-                // 			{
-                c->Object.Alpha = 1.0f;
-                // 			}
-            }
-            else
-            {
-                float fAlpha = c->Object.Alpha;
-                if (fAlpha < 0) fAlpha = 0;
+        {
+            float fAlpha = c->Object.Alpha;
+            if (fAlpha < 0)
+                fAlpha = 0;
 
-                Vector(1.0f * fAlpha, 0.3f * fAlpha, 0.1f * fAlpha, c->Light);
-            }
+            Vector(1.0f * fAlpha, 0.3f * fAlpha, 0.1f * fAlpha, c->Light);
+        }
         c->Object.BlendMesh = -1;
 
         if (g_isCharacterBuff((&c->Object), eBuff_Doppelganger_Ascension))
@@ -9858,22 +9870,30 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
     if (c == Hero)
     {
-        vec3_t AbilityLight = { 1.f, 1.f, 1.f };
+        vec3_t AbilityLight = {1.f, 1.f, 1.f};
         if (CharacterAttribute->Ability & ABILITY_FAST_ATTACK_SPEED)
         {
-            AbilityLight[0] *= 0.9f; AbilityLight[1] *= 0.5f; AbilityLight[2] *= 0.5f;
+            AbilityLight[0] *= 0.9f;
+            AbilityLight[1] *= 0.5f;
+            AbilityLight[2] *= 0.5f;
         }
         if (CharacterAttribute->Ability & ABILITY_PLUS_DAMAGE)
         {
-            AbilityLight[0] *= 0.5f; AbilityLight[1] *= 0.9f; AbilityLight[2] *= 0.5f;
+            AbilityLight[0] *= 0.5f;
+            AbilityLight[1] *= 0.9f;
+            AbilityLight[2] *= 0.5f;
         }
         if (CharacterAttribute->Ability & ABILITY_FAST_ATTACK_RING)
         {
-            AbilityLight[0] *= 0.9f; AbilityLight[1] *= 0.5f; AbilityLight[2] *= 0.5f;
+            AbilityLight[0] *= 0.9f;
+            AbilityLight[1] *= 0.5f;
+            AbilityLight[2] *= 0.5f;
         }
         if (CharacterAttribute->Ability & ABILITY_FAST_ATTACK_SPEED2)
         {
-            AbilityLight[0] *= 0.9f; AbilityLight[1] *= 0.5f; AbilityLight[2] *= 0.5f;
+            AbilityLight[0] *= 0.9f;
+            AbilityLight[1] *= 0.5f;
+            AbilityLight[2] *= 0.5f;
         }
         if (SceneFlag == CHARACTER_SCENE)
         {
@@ -9884,14 +9904,17 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             Render::Lighting::LightMood::ScaleOwnHeroLight(o->Position[0], o->Position[1], AbilityLight, c->Light);
     }
 
-    if (o->Kind == KIND_NPC && gMapManager.WorldActive == WD_0LORENCIA && o->Type == MODEL_PLAYER && (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
+    if (o->Kind == KIND_NPC && gMapManager.WorldActive == WD_0LORENCIA && o->Type == MODEL_PLAYER &&
+        (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
     {
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, c->Level, 0, 0, false, false, Translate, Select);
+        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, c->Level, 0, 0, false, false, Translate,
+                         Select);
     }
-    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER
-        && (o->SubType == MODEL_SKELETON_PCBANG || o->SubType == MODEL_HALLOWEEN
-            || o->SubType == MODEL_PANDA || o->SubType == MODEL_SKELETON_CHANGED
-            || o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL || o->SubType == MODEL_SKELETON1))
+    else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER &&
+             gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER &&
+             (o->SubType == MODEL_SKELETON_PCBANG || o->SubType == MODEL_HALLOWEEN || o->SubType == MODEL_PANDA ||
+              o->SubType == MODEL_SKELETON_CHANGED || o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL ||
+              o->SubType == MODEL_SKELETON1))
     {
         PART_t* p = &c->BodyPart[o->SubType];
         if (o->CurrentAction == PLAYER_SKILL_DRAGONKICK)
@@ -9904,7 +9927,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             OBJECT* pObj = &c->Object;
             if (pObj->m_sTargetIndex < 0 || c->JumpTime > 0)
             {
-                RenderPartObject(&c->Object, o->SubType, p, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+                RenderPartObject(&c->Object, o->SubType, p, c->Light, o->Alpha, 0, 0, 0, false, false, Translate,
+                                 Select);
             }
             else
             {
@@ -9914,7 +9938,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         }
         else
         {
-            RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+            RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate,
+                             Select);
         }
 
         if (o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL)
@@ -9966,17 +9991,18 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             const float fLumi = sinf(WorldTime * 0.0015f) * 0.3f + 0.5f;
             EnableAlphaBlend();
             Vector(fLumi * vLight[0], fLumi * vLight[1], fLumi * vLight[2], vLight);
-            RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.5f, 1.5f, vLight, WorldTime * 0.01f);
-            RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.f, 1.f, vLight, -WorldTime * 0.01f);
-            //RenderAurora ( BITMAP_GM_AURORA, RENDER_BRIGHT, o->Position[0], o->Position[1], 1.5f, 1.5f, vLight );
+            RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.5f, 1.5f, vLight,
+                                     WorldTime * 0.01f);
+            RenderTerrainAlphaBitmap(BITMAP_GM_AURORA, o->Position[0], o->Position[1], 1.f, 1.f, vLight,
+                                     -WorldTime * 0.01f);
+            // RenderAurora ( BITMAP_GM_AURORA, RENDER_BRIGHT, o->Position[0], o->Position[1], 1.5f, 1.5f, vLight );
 
             DisableAlphaBlend();
         }
     }
-    else if (o->Type == MODEL_PLAYER
-        && (o->SubType == MODEL_XMAS_EVENT_CHA_SSANTA
-            || o->SubType == MODEL_XMAS_EVENT_CHA_SNOWMAN
-            || o->SubType == MODEL_XMAS_EVENT_CHA_DEER))
+    else if (o->Type == MODEL_PLAYER &&
+             (o->SubType == MODEL_XMAS_EVENT_CHA_SSANTA || o->SubType == MODEL_XMAS_EVENT_CHA_SNOWMAN ||
+              o->SubType == MODEL_XMAS_EVENT_CHA_DEER))
     {
         vec3_t vOriginPos;
         VectorCopy(o->Position, vOriginPos);
@@ -10013,7 +10039,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 RenderType |= RENDER_CHROME;
             }
 
-            if ((o->CurrentAction == PLAYER_SKILL_DRAGONKICK) && (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
+            if ((o->CurrentAction == PLAYER_SKILL_DRAGONKICK) &&
+                (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
             {
                 p->Type = MODEL_ANGEL;
                 RenderCharacter_AfterImage(c, p, Translate, Select, 2.5f, 1.0f);
@@ -10023,7 +10050,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 OBJECT* pObj = &c->Object;
                 if (pObj->m_sTargetIndex < 0 || c->JumpTime > 0)
                 {
-                    RenderPartObject(&c->Object, MODEL_ANGEL, p, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select, RenderType);
+                    RenderPartObject(&c->Object, MODEL_ANGEL, p, c->Light, o->Alpha, 0, 0, 0, false, false, Translate,
+                                     Select, RenderType);
                 }
                 else
                 {
@@ -10033,11 +10061,12 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             }
             else
             {
-                RenderPartObject(&c->Object, MODEL_ANGEL, p, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select, RenderType);
+                RenderPartObject(&c->Object, MODEL_ANGEL, p, c->Light, o->Alpha, 0, 0, 0, false, false, Translate,
+                                 Select, RenderType);
             }
         }
         else
-#endif// GUILD_WAR_EVENT
+#endif // GUILD_WAR_EVENT
         {
             for (int i = MAX_BODYPART - 1; i >= 0; i--)
             {
@@ -10051,8 +10080,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         int nItemType = Data::Items::GetItemGroup(Data::Items::ToItemType(Type));
                         int nItemSubType = Data::Items::GetItemNumber(Data::Items::ToItemType(Type));
 
-                        if (nItemType >= 7 && nItemType <= 11
-                            && (nItemSubType == 10 || nItemSubType == 11))
+                        if (nItemType >= 7 && nItemType <= 11 && (nItemSubType == 10 || nItemSubType == 11))
                         {
                             Type = MODEL_HELM2 + (nItemType - 7) * MODEL_ITEM_COMMON_NUM + nItemSubType - 10;
                         }
@@ -10063,14 +10091,16 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     }
 
                     BMD* b = &Models[Type];
-                    
+
                     if (CLASS_RAGEFIGHTER == gCharacterManager.GetBaseClass(c->Class))
                     {
-                        b->Skin = gCharacterManager.GetBaseClass(c->Class) * 2 + gCharacterManager.IsThirdClass(c->Class);
+                        b->Skin =
+                            gCharacterManager.GetBaseClass(c->Class) * 2 + gCharacterManager.IsThirdClass(c->Class);
                     }
                     else
                     {
-                        b->Skin = gCharacterManager.GetBaseClass(c->Class) * 2 + gCharacterManager.IsSecondClass(c->Class);
+                        b->Skin =
+                            gCharacterManager.GetBaseClass(c->Class) * 2 + gCharacterManager.IsSecondClass(c->Class);
                     }
 
                     if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD && i == BODYPART_HELM)
@@ -10090,37 +10120,41 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
                     {
                         if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
-                            RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level, p->ExcellentFlags, p->AncientDiscriminator, false, false, Translate,
-                                Select, RENDER_DOPPELGANGER | RENDER_TEXTURE);
+                            RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level, p->ExcellentFlags,
+                                             p->AncientDiscriminator, false, false, Translate, Select,
+                                             RENDER_DOPPELGANGER | RENDER_TEXTURE);
                         else
-                            RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level, p->ExcellentFlags, p->AncientDiscriminator, false, false, Translate,
-                                Select, RENDER_DOPPELGANGER | RENDER_BRIGHT | RENDER_TEXTURE);
+                            RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level, p->ExcellentFlags,
+                                             p->AncientDiscriminator, false, false, Translate, Select,
+                                             RENDER_DOPPELGANGER | RENDER_BRIGHT | RENDER_TEXTURE);
                         // 						RenderPartObject(&c->Object,Type,p,c->Light,o->Alpha,p->Level<<3,p->Option1,p->ExtOption,false,false,Translate,
                         // 							Select,RENDER_DOPPELGANGER|RENDER_BRIGHT|RENDER_CHROME);
                     }
                     else
                     {
-                        if ((o->CurrentAction == PLAYER_SKILL_DRAGONKICK) && (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
+                        if ((o->CurrentAction == PLAYER_SKILL_DRAGONKICK) &&
+                            (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
                         {
                             RenderCharacter_AfterImage(c, p, Translate, Select, 2.5f, 1.0f);
                         }
-                        else
-                            if ((o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY) && (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
-                            {
-                                if (o->m_sTargetIndex < 0 || c->JumpTime>0)
-                                {
-                                    RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level, p->ExcellentFlags, p->AncientDiscriminator, false, false, Translate, Select);
-                                }
-                                else
-                                {
-                                    g_CMonkSystem.DarksideRendering(c, p, Translate, Select);
-                                }
-                            }
-                            else
+                        else if ((o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY) &&
+                                 (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
+                        {
+                            if (o->m_sTargetIndex < 0 || c->JumpTime > 0)
                             {
                                 RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level, p->ExcellentFlags,
                                                  p->AncientDiscriminator, false, false, Translate, Select);
                             }
+                            else
+                            {
+                                g_CMonkSystem.DarksideRendering(c, p, Translate, Select);
+                            }
+                        }
+                        else
+                        {
+                            RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level, p->ExcellentFlags,
+                                             p->AncientDiscriminator, false, false, Translate, Select);
+                        }
                     }
                 }
             }
@@ -10190,11 +10224,12 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         VectorAdd(Light, o->Light, c->Light);
 
         int nCastle = BLOODCASTLE_NUM + (gMapManager.WorldActive - WD_11BLOODCASTLE_END);
-        if (nCastle > 0 && nCastle <= BLOODCASTLE_NUM)		//. 블러드 캐슬일경우
+        if (nCastle > 0 && nCastle <= BLOODCASTLE_NUM) //. 블러드 캐슬일경우
         {
             if ((c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_1 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_1) ||
                 (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_2 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_2) ||
-                (c->MonsterIndex == MONSTER_GIANT_OGRE_3 && c->MonsterIndex == MONSTER_RED_SKELETON_KNIGHT_3 && c->MonsterIndex == MONSTER_MAGIC_SKELETON_3) ||
+                (c->MonsterIndex == MONSTER_GIANT_OGRE_3 && c->MonsterIndex == MONSTER_RED_SKELETON_KNIGHT_3 &&
+                 c->MonsterIndex == MONSTER_MAGIC_SKELETON_3) ||
                 (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_4 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_4) ||
                 (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_5 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_5) ||
                 (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_6 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_6) ||
@@ -10214,8 +10249,10 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         NextGradeObjectRender(c);
     }
 
-    for (int i = 0; i < 2; i++) {
-        if (g_CMonkSystem.EqualItemModelType(c->Weapon[i].Type) == MODEL_PHOENIX_SOUL_STAR) {
+    for (int i = 0; i < 2; i++)
+    {
+        if (g_CMonkSystem.EqualItemModelType(c->Weapon[i].Type) == MODEL_PHOENIX_SOUL_STAR)
+        {
             g_CMonkSystem.RenderPhoenixGloves(c, i);
         }
     }
@@ -10898,14 +10935,10 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
         }
         if (rand_fps_check(1))
         {
-            if (iSkillType == AT_SKILL_ALICE_SLEEP
-                || iSkillType == AT_SKILL_ALICE_SLEEP_STR
-                || iSkillType == AT_SKILL_ALICE_THORNS
-                || iSkillType == AT_SKILL_ALICE_BERSERKER
-                || iSkillType == AT_SKILL_ALICE_BERSERKER_STR
-                || iSkillType == AT_SKILL_ALICE_WEAKNESS
-                || iSkillType == AT_SKILL_ALICE_ENERVATION
-                )
+            if (iSkillType == AT_SKILL_ALICE_SLEEP || iSkillType == AT_SKILL_ALICE_SLEEP_STR ||
+                iSkillType == AT_SKILL_ALICE_THORNS || iSkillType == AT_SKILL_ALICE_BERSERKER ||
+                iSkillType == AT_SKILL_ALICE_BERSERKER_STR || iSkillType == AT_SKILL_ALICE_WEAKNESS ||
+                iSkillType == AT_SKILL_ALICE_ENERVATION)
             {
                 CreateParticle(BITMAP_LIGHT + 2, vWorldPos, o->Angle, vLight, 0, 1.0f);
                 CreateParticle(BITMAP_CLUD64, vWorldPos, o->Angle, vLight, 3, 0.5f);
