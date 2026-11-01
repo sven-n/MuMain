@@ -1234,6 +1234,19 @@ TEST_CASE("Monster sounds: the Sound Mixer's overlay marks a drawn monster of a 
     CHECK(drawn[0].position == std::array<float, 3>{rider->Object.Position[0], rider->Object.Position[1], 50.0f});
     CHECK(drawn[0].inner == 500.0f);
     CHECK(drawn[0].outer == 0.0f);
+    // A set heard anywhere (Kanturu's Berserker) has no hearing ring.
+    {
+        SoundScope kanturu(WD_37KANTURU_1ST);
+        const std::unique_ptr<CHARACTER> berserker = MakeCharacter(350);
+        Audio::Overlay::SetOn(true);
+        FinishDrawnFrame(*berserker);
+        const std::vector<Audio::Overlay::DrawnSource> anywhere = Audio::Overlay::TakeDrawn();
+        Audio::Overlay::SetOn(false);
+        kanturu.Take();
+        REQUIRE(anywhere.size() == 1);
+        CHECK(anywhere[0].name == "Berserker");
+        CHECK(anywhere[0].inner == 0.0f);
+    }
     REQUIRE_FALSE(starts.empty());
     CHECK(starts.back().kind == Audio::SoundKind::Monster);
     CHECK(starts.back().name == "Death Rider");

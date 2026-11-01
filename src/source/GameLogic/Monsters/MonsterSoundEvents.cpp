@@ -205,7 +205,11 @@ void NoteForOverlay(const CHARACTER& character)
     drawn.name = set->name;
     drawn.sourceNumber = static_cast<int>(character.MonsterIndex);
     drawn.position = {character.Object.Position[0], character.Object.Position[1], character.Object.Position[2]};
-    drawn.inner = HearingDistance;
+    // A set heard anywhere (Kanturu's) has no hearing ring: a ring would say
+    // its sounds stop there.
+    const bool limited = std::any_of(set->soundEvents.begin(), set->soundEvents.end(),
+                                     [](const MonsterSoundEvent& event) { return !event.heardAnywhere; });
+    drawn.inner = limited ? HearingDistance : 0.0f;
     Audio::Overlay::NoteDrawn(drawn);
 }
 #endif

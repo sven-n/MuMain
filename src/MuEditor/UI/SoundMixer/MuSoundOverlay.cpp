@@ -8,6 +8,7 @@
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraState.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "I18N/All.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "imgui.h"
@@ -16,6 +17,7 @@
 #include <cmath>
 #include <iterator>
 #include <numbers>
+#include <string>
 
 namespace
 {
@@ -137,7 +139,10 @@ void DrawSource(ImDrawList& list, const Projector& projector, const DrawnSource&
         const bool heard = Hero != nullptr &&
                            MuEditor::SoundOverlay::IsInside(source, Hero->Object.Position[0], Hero->Object.Position[1]);
         color = highlighted ? HighlightColor : (heard ? HeardColor : FarColor);
-        DrawRing(list, projector, x, y, source.inner, color, thickness, !heard);
+        if (source.inner > 0.0f)
+        {
+            DrawRing(list, projector, x, y, source.inner, color, thickness, !heard);
+        }
     }
     ImVec2 marker;
     if (!projector.Project(x, y, source.position[2], marker))
@@ -153,7 +158,16 @@ void DrawSource(ImDrawList& list, const Projector& projector, const DrawnSource&
     {
         list.AddCircleFilled(marker, size, color);
     }
-    DrawLabel(list, marker, mapObject ? MuEditor::SoundMixer::SoundText(source.soundNumber) : source.name);
+    std::string label = source.name;
+    if (mapObject)
+    {
+        label = MuEditor::SoundMixer::SoundText(source.soundNumber);
+    }
+    else if (source.inner <= 0.0f)
+    {
+        label = I18N::Format(I18N::Editor::SoundMixerHeardAnywhere0, {source.name});
+    }
+    DrawLabel(list, marker, label);
 }
 
 // A place of the game's own code's sounds: a hollow square (a map object) or
@@ -236,6 +250,11 @@ ImVec2 ToDisplay(float windowX, float windowY, const ImVec2& origin, const ImVec
 
 bool IsInside(const Audio::Overlay::DrawnSource& source, float x, float y)
 {
+    // No ring: heard anywhere.
+    if (source.inner <= 0.0f)
+    {
+        return true;
+    }
     const float dx = x - source.position[0];
     const float dy = y - source.position[1];
     return dx * dx + dy * dy <= source.inner * source.inner;

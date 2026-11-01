@@ -561,6 +561,10 @@ TEST_CASE("Sound Mixer: the overlay draws the sources a shown row names while a 
 
     CHECK(IsInside(rider, 1300.0f, 1400.0f));
     CHECK_FALSE(IsInside(rider, 1400.0f, 1400.0f));
+    // No ring: heard anywhere.
+    DrawnSource anywhere = rider;
+    anywhere.inner = 0.0f;
+    CHECK(IsInside(anywhere, 90000.0f, 1400.0f));
 }
 
 TEST_CASE("Sound Mixer: the overlay places a window pixel where the game window is, at its size (Q-SM9) "

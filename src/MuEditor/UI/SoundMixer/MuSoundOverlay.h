@@ -32,7 +32,7 @@ ImVec2 ToDisplay(float windowX, float windowY, const ImVec2& origin, const ImVec
                  unsigned int windowHeight);
 
 // Whether the point (x, y) is within the source's inner ring (a monster:
-// heard).
+// heard); always for a source without one (a set heard anywhere).
 bool IsInside(const Audio::Overlay::DrawnSource& source, float x, float y);
 
 // Whether a shown row follows a start: a row of its sound for a sound of the

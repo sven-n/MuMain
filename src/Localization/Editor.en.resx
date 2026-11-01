@@ -3808,6 +3808,9 @@
   <data name="Sound mixer overlay on" xml:space="preserve">
     <value>overlay on</value>
   </data>
+  <data name="Sound mixer heard anywhere {0}" xml:space="preserve">
+    <value>{0} (heard anywhere)</value>
+  </data>
   <data name="Sound mixer kinds" xml:space="preserve">
     <value>Kinds</value>
   </data>

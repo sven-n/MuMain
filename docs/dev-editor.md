@@ -162,7 +162,8 @@ the menu bar reminder says "overlay on"). A map object with a sound
 ground: full volume within 3 tiles (solid) and its quietest from 15 tiles
 (dashed). A monster with a sound set gets a dot, the set's name and its
 5-tile hearing ring, solid green while the hero is inside it (its sounds are
-heard) and dashed grey outside. A source flashes a growing ring for a second
+heard) and dashed grey outside; a set whose sounds are all heard anywhere
+(Kanturu's) has no ring and says "heard anywhere". A source flashes a growing ring for a second
 when one of its sounds starts. The sounds that the maps' and monsters' own code plays
 (most maps, Kanturu's for one) have no data and so no range: a hollow
 violet square (a map object) or circle (a monster) with the files marks
