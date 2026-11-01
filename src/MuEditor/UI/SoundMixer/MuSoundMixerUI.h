@@ -4,12 +4,77 @@
 
 #include "Audio/SoundMixer.h"
 
+#include <array>
+#include <optional>
 #include <string>
+#include <vector>
 
 namespace MuEditor
 {
 struct ToolWindows;
 }
+
+namespace MuEditor::SoundMixer
+{
+enum class ShowFilter
+{
+    All,
+    Playing,
+    Changed,
+};
+
+enum class LoopFilter
+{
+    All,
+    Loops,
+    OneShots,
+};
+
+// The filter bar above the Sounds heard table (Q-SM7).
+struct HeardFilter
+{
+    // Contained in the sound's file or its source, whatever the case.
+    std::string text;
+    // Every kind, or one.
+    std::optional<Audio::SoundKind> kind;
+    ShowFilter show = ShowFilter::All;
+    LoopFilter loops = LoopFilter::All;
+    int minimumPlays = 0;
+
+    // Anything set.
+    bool IsActive() const;
+};
+
+// The columns a header click sorts by (Q-SM7).
+enum class HeardColumn
+{
+    Sound,
+    Source,
+    Plays,
+    Length,
+    LastPlayed,
+};
+
+struct HeardSort
+{
+    // None: the order of first hearing.
+    std::optional<HeardColumn> column;
+    bool descending = false;
+};
+
+// A row of the table: the sound, its texts and what the backend and its
+// control say of it.
+struct HeardRow
+{
+    Audio::Mixer::HeardSound sound;
+    std::string file;
+    std::string source;
+    float length = 0.0f;
+    bool playing = false;
+    // Muted, solo or lowered.
+    bool changed = false;
+};
+} // namespace MuEditor::SoundMixer
 
 // The Sound Mixer window (Windows menu, docs/superpowers/specs/2026-11-01-sound-mixer-design.md):
 // mute, solo and a volume for each kind of sound and each sound heard, for the
@@ -21,7 +86,13 @@ public:
 
 private:
     void RenderKinds();
+    void RenderFilterBar();
     void RenderHeard();
+
+    // The filters and the sort, for the session.
+    MuEditor::SoundMixer::HeardFilter m_filter;
+    std::array<char, 128> m_filterText{};
+    MuEditor::SoundMixer::HeardSort m_sort;
 };
 
 extern MuSoundMixerUI g_MuSoundMixerUI;
@@ -40,6 +111,22 @@ std::string SourceText(const Audio::Mixer::HeardSound& sound);
 
 // The file a heard sound plays below Data/Sound, or its number.
 std::string SoundText(int number);
+
+// The sound's row: its texts, length, whether it plays and is changed.
+HeardRow MakeRow(const Audio::Mixer::HeardSound& sound);
+
+// Whether the row passes every filter set.
+bool Passes(const HeardRow& row, const HeardFilter& filter);
+
+// The rows the filter leaves, in their order.
+std::vector<HeardRow> FilterRows(const std::vector<HeardRow>& rows, const HeardFilter& filter);
+
+// Sorts by the column, keeping equal rows in their order; no column keeps
+// the order. Last played goes from the most recent (playing) to never.
+void SortRows(std::vector<HeardRow>& rows, const HeardSort& sort, double now);
+
+// Mute all / Unmute all (Q-SM8): the rows given, then applies once.
+void SetMuted(const std::vector<HeardRow>& rows, bool muted);
 
 // A sound's length: "1.4 s", "6.0 s loop"; "" when it is not known (0).
 std::string LengthText(float seconds, bool looped);

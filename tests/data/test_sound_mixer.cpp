@@ -19,7 +19,9 @@
 
 #include <cstdint>
 #include <map>
+#include <optional>
 #include <set>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -296,6 +298,135 @@ TEST_CASE("Sound Mixer: a row says how long its sound is and when it last starte
     sound.lastStarted = 7.5;
     CHECK(LastText(sound, 10.0, false) == "2.5 s ago");
     CHECK(LastText(sound, 10.0, true) == "playing");
+}
+
+namespace
+{
+using MuEditor::SoundMixer::HeardRow;
+
+HeardRow Row(int number, const std::string& file, const std::string& source, int plays)
+{
+    HeardRow row;
+    row.sound.number = number;
+    row.sound.plays = plays;
+    row.file = file;
+    row.source = source;
+    return row;
+}
+
+std::vector<int> NumbersOf(const std::vector<HeardRow>& rows)
+{
+    std::vector<int> numbers;
+    for (const HeardRow& row : rows)
+    {
+        numbers.push_back(row.sound.number);
+    }
+    return numbers;
+}
+} // namespace
+
+TEST_CASE("Sound Mixer: the filter bar leaves the rows that pass every filter set (Q-SM7) [audio][mixer][editor]")
+{
+    using namespace MuEditor::SoundMixer;
+    HeardRow waterfall = Row(1, "aKalimaWaterFall.wav", "Map object sounds: object 37", 30);
+    waterfall.sound.kind = SoundKind::MapObject;
+    HeardRow idle = Row(2, "aida/dr_idle01.wav", "Monster sounds: Death Rider (306)", 12);
+    idle.sound.kind = SoundKind::Monster;
+    idle.playing = true;
+    HeardRow wind = Row(3, "aWind.wav", "Map ambience (loops)", 1);
+    wind.sound.kind = SoundKind::MapAmbience;
+    wind.sound.looped = true;
+    wind.changed = true;
+    const std::vector<HeardRow> rows{waterfall, idle, wind};
+
+    HeardFilter filter;
+    CHECK_FALSE(filter.IsActive());
+    CHECK(NumbersOf(FilterRows(rows, filter)) == std::vector<int>{1, 2, 3});
+    // Text: the file or the source, whatever the case.
+    filter.text = "WATERFALL";
+    CHECK(filter.IsActive());
+    CHECK(NumbersOf(FilterRows(rows, filter)) == std::vector<int>{1});
+    filter.text = "death rider";
+    CHECK(NumbersOf(FilterRows(rows, filter)) == std::vector<int>{2});
+    filter = {};
+    filter.kind = SoundKind::MapAmbience;
+    CHECK(filter.IsActive());
+    CHECK(NumbersOf(FilterRows(rows, filter)) == std::vector<int>{3});
+    filter = {};
+    filter.show = ShowFilter::Playing;
+    CHECK(NumbersOf(FilterRows(rows, filter)) == std::vector<int>{2});
+    filter.show = ShowFilter::Changed;
+    CHECK(NumbersOf(FilterRows(rows, filter)) == std::vector<int>{3});
+    filter = {};
+    filter.loops = LoopFilter::Loops;
+    CHECK(NumbersOf(FilterRows(rows, filter)) == std::vector<int>{3});
+    filter.loops = LoopFilter::OneShots;
+    CHECK(NumbersOf(FilterRows(rows, filter)) == std::vector<int>{1, 2});
+    filter = {};
+    filter.minimumPlays = 12;
+    CHECK(filter.IsActive());
+    CHECK(NumbersOf(FilterRows(rows, filter)) == std::vector<int>{1, 2});
+    // Every filter at once.
+    filter.text = "a";
+    filter.show = ShowFilter::Playing;
+    CHECK(NumbersOf(FilterRows(rows, filter)) == std::vector<int>{2});
+}
+
+TEST_CASE("Sound Mixer: a header sorts by its column, again reverses, none keeps the order of first hearing "
+          "(Q-SM7) [audio][mixer][editor]")
+{
+    using namespace MuEditor::SoundMixer;
+    HeardRow first = Row(1, "B.wav", "Monster sounds", 5);
+    first.length = 2.0f;
+    first.sound.lastStarted = 9.0;
+    HeardRow second = Row(2, "a.wav", "everything else", 5);
+    second.length = 0.5f;
+    second.sound.lastStarted = 2.0;
+    HeardRow third = Row(3, "c.wav", "Map object sounds", 1);
+    third.length = 1.0f;
+    third.playing = true;
+    HeardRow fourth = Row(4, "d.wav", "map ambience", 7);
+    fourth.length = 3.0f;
+    const std::vector<HeardRow> rows{first, second, third, fourth};
+    const auto sorted = [&rows](std::optional<HeardColumn> column, bool descending)
+    {
+        std::vector<HeardRow> copy = rows;
+        SortRows(copy, HeardSort{column, descending}, 10.0);
+        return NumbersOf(copy);
+    };
+    CHECK(sorted(std::nullopt, false) == std::vector<int>{1, 2, 3, 4});
+    // Text without case.
+    CHECK(sorted(HeardColumn::Sound, false) == std::vector<int>{2, 1, 3, 4});
+    CHECK(sorted(HeardColumn::Sound, true) == std::vector<int>{4, 3, 1, 2});
+    CHECK(sorted(HeardColumn::Source, false) == std::vector<int>{2, 4, 3, 1});
+    // Equal rows keep their order.
+    CHECK(sorted(HeardColumn::Plays, false) == std::vector<int>{3, 1, 2, 4});
+    CHECK(sorted(HeardColumn::Plays, true) == std::vector<int>{4, 1, 2, 3});
+    CHECK(sorted(HeardColumn::Length, false) == std::vector<int>{2, 3, 1, 4});
+    // Last played: playing, then the most recent, never last.
+    CHECK(sorted(HeardColumn::LastPlayed, false) == std::vector<int>{3, 1, 2, 4});
+    CHECK(sorted(HeardColumn::LastPlayed, true) == std::vector<int>{4, 2, 1, 3});
+}
+
+TEST_CASE("Sound Mixer: Mute all and Unmute all act on the rows given, at once (Q-SM8) [audio][mixer][editor]")
+{
+    MixerScope scope;
+    using namespace MuEditor::SoundMixer;
+    Audio::Mixer::OnPlay(1, false);
+    Audio::Mixer::OnPlay(2, false);
+    Audio::Mixer::OnPlay(3, false);
+    scope.audio.gains.clear();
+    SetMuted({Row(1, "", "", 0), Row(3, "", "", 0)}, true);
+    CHECK(Audio::Mixer::SoundControl(1).muted);
+    CHECK_FALSE(Audio::Mixer::SoundControl(2).muted);
+    CHECK(Audio::Mixer::SoundControl(3).muted);
+    CHECK(scope.audio.gains == std::vector<std::pair<int, float>>{{1, 0.0f}, {2, 1.0f}, {3, 0.0f}});
+    CHECK(MakeRow(Audio::Mixer::Heard()[0]).changed);
+    CHECK_FALSE(MakeRow(Audio::Mixer::Heard()[1]).changed);
+    SetMuted({Row(3, "", "", 0)}, false);
+    CHECK(Audio::Mixer::SoundControl(1).muted);
+    CHECK_FALSE(Audio::Mixer::SoundControl(3).muted);
+    CHECK(scope.audio.gains.back() == std::pair{3, 1.0f});
 }
 
 TEST_CASE("Sound Mixer: the reminder counts what is muted, solo and lowered (Q-SM5) [audio][mixer][editor]")

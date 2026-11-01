@@ -148,15 +148,21 @@ only.
   frame counts once per start), its length ("loop" for a loop) and when it
   last started ("playing" while it plays; the row is green then). **Clear
   all** empties the list and counts again from 0; the sounds whose controls
-  are changed stay listed.
+  are changed stay listed. A click on a column header sorts by it, a second
+  one reverses, a third goes back to the order of first hearing. The filter
+  bar above the table leaves the rows whose file or source contains a text,
+  of one kind, playing now or changed only, loops or one-shots, or played at
+  least so often ("3 of 41 shown"). **Mute all** and **Unmute all** act on
+  the rows shown, so a filter and Mute all silence, say, every Death Rider
+  sound; sounds heard later come as new rows and play.
 
 Each row has a volume slider, **Mute** and **Solo**. A sound plays at its
 kind's volume times its own; mute wins; while anything is solo, only what is
 solo plays, the music too. Changes reach playing sounds at once, and a muted
 loop keeps running silently, so it is back where it is when unmuted.
-**Unmute all** puts everything back. Nothing is kept: each start plays
-everything as normal, and while anything is changed the editor's menu bar
-says so ("Sound Mixer: 2 muted, 1 solo"); a click opens the window.
+**Reset all** puts everything back (unmuted, not solo, full volume).
+Nothing is kept: each start plays everything as normal, and while anything
+is changed the editor's menu bar says so ("Sound Mixer: 2 muted, 1 solo"); a click opens the window.
 
 The game's own volumes stay as they are, and the editor's previews (the Play
 buttons of Monster Sounds and the Map Editor, Monster Preview, the effect

@@ -3484,8 +3484,56 @@
   <data name="Sound mixer nothing changed" xml:space="preserve">
     <value>Alle Geräusche wie gewohnt</value>
   </data>
-  <data name="Sound mixer unmute all" xml:space="preserve">
+  <data name="Sound mixer reset all" xml:space="preserve">
     <value>Alles zurücksetzen</value>
+  </data>
+  <data name="Sound mixer reset all tip" xml:space="preserve">
+    <value>Hebt Stumm und Solo auf und stellt jede Art und jedes Geräusch wieder auf volle Lautstärke.</value>
+  </data>
+  <data name="Sound mixer filter hint" xml:space="preserve">
+    <value>Geräusch oder Quelle</value>
+  </data>
+  <data name="Sound mixer all kinds" xml:space="preserve">
+    <value>Alle Arten</value>
+  </data>
+  <data name="Sound mixer show all" xml:space="preserve">
+    <value>Alle</value>
+  </data>
+  <data name="Sound mixer show playing" xml:space="preserve">
+    <value>Spielt gerade</value>
+  </data>
+  <data name="Sound mixer show changed" xml:space="preserve">
+    <value>Nur geänderte</value>
+  </data>
+  <data name="Sound mixer loops all" xml:space="preserve">
+    <value>Schleifen und einmalige</value>
+  </data>
+  <data name="Sound mixer loops only" xml:space="preserve">
+    <value>Nur Schleifen</value>
+  </data>
+  <data name="Sound mixer one-shots only" xml:space="preserve">
+    <value>Nur einmalige</value>
+  </data>
+  <data name="Sound mixer minimum plays" xml:space="preserve">
+    <value>Mindestens gespielt</value>
+  </data>
+  <data name="Sound mixer mute shown" xml:space="preserve">
+    <value>Alle stumm</value>
+  </data>
+  <data name="Sound mixer mute shown tip" xml:space="preserve">
+    <value>Schaltet jede gezeigte Zeile stumm.</value>
+  </data>
+  <data name="Sound mixer unmute shown" xml:space="preserve">
+    <value>Alle hörbar</value>
+  </data>
+  <data name="Sound mixer unmute shown tip" xml:space="preserve">
+    <value>Hebt bei jeder gezeigten Zeile die Stummschaltung auf.</value>
+  </data>
+  <data name="Sound mixer clear filters" xml:space="preserve">
+    <value>Filter löschen</value>
+  </data>
+  <data name="Sound mixer shown {0} {1}" xml:space="preserve">
+    <value>{0} von {1} gezeigt</value>
   </data>
   <data name="Sound mixer note" xml:space="preserve">
     <value>Zum Hören im Editor: Arten von Geräuschen und jedes gehörte Geräusch stumm, solo oder leiser schalten. Änderungen wirken sofort; eine stumme Schleife läuft lautlos weiter. Die Lautstärken des Spiels bleiben, wie sie sind, die Abspielknöpfe und Vorschauen des Editors sind nicht betroffen, und jeder Start spielt alles wie gewohnt.</value>

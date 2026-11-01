@@ -3703,8 +3703,56 @@
   <data name="Sound mixer nothing changed" xml:space="preserve">
     <value>All sounds as normal</value>
   </data>
-  <data name="Sound mixer unmute all" xml:space="preserve">
+  <data name="Sound mixer reset all" xml:space="preserve">
+    <value>Reset all</value>
+  </data>
+  <data name="Sound mixer reset all tip" xml:space="preserve">
+    <value>Unmutes, unsolos and turns every kind and sound back to full volume.</value>
+  </data>
+  <data name="Sound mixer filter hint" xml:space="preserve">
+    <value>Sound or source</value>
+  </data>
+  <data name="Sound mixer all kinds" xml:space="preserve">
+    <value>All kinds</value>
+  </data>
+  <data name="Sound mixer show all" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="Sound mixer show playing" xml:space="preserve">
+    <value>Playing now</value>
+  </data>
+  <data name="Sound mixer show changed" xml:space="preserve">
+    <value>Changed only</value>
+  </data>
+  <data name="Sound mixer loops all" xml:space="preserve">
+    <value>Loops and one-shots</value>
+  </data>
+  <data name="Sound mixer loops only" xml:space="preserve">
+    <value>Loops only</value>
+  </data>
+  <data name="Sound mixer one-shots only" xml:space="preserve">
+    <value>One-shots only</value>
+  </data>
+  <data name="Sound mixer minimum plays" xml:space="preserve">
+    <value>Plays at least</value>
+  </data>
+  <data name="Sound mixer mute shown" xml:space="preserve">
+    <value>Mute all</value>
+  </data>
+  <data name="Sound mixer mute shown tip" xml:space="preserve">
+    <value>Mutes every row shown.</value>
+  </data>
+  <data name="Sound mixer unmute shown" xml:space="preserve">
     <value>Unmute all</value>
+  </data>
+  <data name="Sound mixer unmute shown tip" xml:space="preserve">
+    <value>Unmutes every row shown.</value>
+  </data>
+  <data name="Sound mixer clear filters" xml:space="preserve">
+    <value>Clear filters</value>
+  </data>
+  <data name="Sound mixer shown {0} {1}" xml:space="preserve">
+    <value>{0} of {1} shown</value>
   </data>
   <data name="Sound mixer note" xml:space="preserve">
     <value>For listening in the editor: mute, solo and turn down kinds of sounds and every sound heard. Changes apply at once; a muted loop keeps running silently. The game's own volumes stay as they are, the editor's Play buttons and previews are not affected, and every start plays everything as normal.</value>

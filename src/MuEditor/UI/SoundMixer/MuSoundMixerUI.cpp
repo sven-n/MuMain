@@ -19,7 +19,10 @@
 #include <cctype>
 #include <cmath>
 #include <cstdio>
+#include <iterator>
+#include <limits>
 #include <string_view>
+#include <utility>
 
 MuSoundMixerUI g_MuSoundMixerUI;
 
@@ -35,6 +38,11 @@ constexpr float SliderWidth = 120.0f;
 // The heard table: its columns and at least this many rows of height.
 constexpr int HeardColumns = 6;
 constexpr float HeardMinimumRows = 6.0f;
+constexpr int VolumeColumn = 5;
+// The filter bar's widths.
+constexpr float FilterTextWidth = 170.0f;
+constexpr float FilterChoiceWidth = 140.0f;
+constexpr float FilterPlaysWidth = 90.0f;
 const ImVec4 MutedColor(0.66f, 0.29f, 0.23f, 1.0f);
 const ImVec4 SoloColor(0.23f, 0.48f, 0.29f, 1.0f);
 // A row whose sound plays.
@@ -96,6 +104,62 @@ float LengthOf(int number)
 {
     return g_platformAudio != nullptr ? g_platformAudio->GetSoundLength(static_cast<ESound>(number)) : 0.0f;
 }
+
+std::string Lowered(std::string text)
+{
+    for (char& c : text)
+    {
+        c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    }
+    return text;
+}
+
+// How long ago the row last started: playing first, never last.
+double AgoOf(const MuEditor::SoundMixer::HeardRow& row, double now)
+{
+    if (row.playing)
+    {
+        return -1.0;
+    }
+    return row.sound.lastStarted < 0.0 ? std::numeric_limits<double>::max() : now - row.sound.lastStarted;
+}
+
+// A combo of fixed choices; true when one is picked.
+template <typename Choice, size_t Count>
+bool RenderChoice(const char* id, Choice& value, const std::array<std::pair<Choice, const char*>, Count>& choices)
+{
+    const char* shown = choices[0].second;
+    for (const auto& [choice, label] : choices)
+    {
+        if (choice == value)
+        {
+            shown = label;
+        }
+    }
+    bool picked = false;
+    ImGui::SetNextItemWidth(FilterChoiceWidth * g_MuEditorCore.GetUIScale());
+    if (ImGui::BeginCombo(id, shown))
+    {
+        for (const auto& [choice, label] : choices)
+        {
+            if (ImGui::Selectable(label, choice == value))
+            {
+                value = choice;
+                picked = true;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    return picked;
+}
+
+void Tooltip(const char* text)
+{
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s", text);
+    }
+}
 } // namespace
 
 void MuSoundMixerUI::Render(bool* open)
@@ -109,10 +173,11 @@ void MuSoundMixerUI::Render(bool* open)
         const std::string changes = SoundMixer::ChangesText(Audio::Mixer::CountChanges());
         ImGui::TextUnformatted(changes.empty() ? I18N::Editor::SoundMixerNothingChanged : changes.c_str());
         ImGui::SameLine();
-        if (ImGui::SmallButton(I18N::Editor::SoundMixerUnmuteAll))
+        if (ImGui::SmallButton(I18N::Editor::SoundMixerResetAll))
         {
             Audio::Mixer::ResetAll();
         }
+        Tooltip(I18N::Editor::SoundMixerResetAllTip);
         ImGui::PushTextWrapPos(0.0f);
         ImGui::TextDisabled("%s", I18N::Editor::SoundMixerNote);
         ImGui::PopTextWrapPos();
@@ -140,31 +205,108 @@ void MuSoundMixerUI::RenderKinds()
     ImGui::EndTable();
 }
 
+void MuSoundMixerUI::RenderFilterBar()
+{
+    using namespace MuEditor::SoundMixer;
+    const float scale = g_MuEditorCore.GetUIScale();
+    ImGui::SetNextItemWidth(FilterTextWidth * scale);
+    if (ImGui::InputTextWithHint("##Filter", I18N::Editor::SoundMixerFilterHint, m_filterText.data(),
+                                 m_filterText.size()))
+    {
+        m_filter.text = m_filterText.data();
+    }
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(FilterChoiceWidth * scale);
+    if (ImGui::BeginCombo("##Kind", m_filter.kind ? KindName(*m_filter.kind) : I18N::Editor::SoundMixerAllKinds))
+    {
+        if (ImGui::Selectable(I18N::Editor::SoundMixerAllKinds, !m_filter.kind))
+        {
+            m_filter.kind.reset();
+        }
+        for (const SoundKind kind : Kinds)
+        {
+            if (ImGui::Selectable(KindName(kind), m_filter.kind == kind))
+            {
+                m_filter.kind = kind;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    ImGui::SameLine();
+    RenderChoice("##Show", m_filter.show,
+                 std::array<std::pair<ShowFilter, const char*>, 3>{{
+                     {ShowFilter::All, I18N::Editor::SoundMixerShowAll},
+                     {ShowFilter::Playing, I18N::Editor::SoundMixerShowPlaying},
+                     {ShowFilter::Changed, I18N::Editor::SoundMixerShowChanged},
+                 }});
+    ImGui::SameLine();
+    RenderChoice("##Loops", m_filter.loops,
+                 std::array<std::pair<LoopFilter, const char*>, 3>{{
+                     {LoopFilter::All, I18N::Editor::SoundMixerLoopsAll},
+                     {LoopFilter::Loops, I18N::Editor::SoundMixerLoopsOnly},
+                     {LoopFilter::OneShots, I18N::Editor::SoundMixerOneShotsOnly},
+                 }});
+    ImGui::SameLine();
+    ImGui::TextUnformatted(I18N::Editor::SoundMixerMinimumPlays);
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(FilterPlaysWidth * scale);
+    if (ImGui::InputInt("##MinimumPlays", &m_filter.minimumPlays))
+    {
+        m_filter.minimumPlays = std::max(m_filter.minimumPlays, 0);
+    }
+}
+
 void MuSoundMixerUI::RenderHeard()
 {
     using namespace MuEditor::SoundMixer;
     ImGui::SeparatorText(I18N::Editor::SoundMixerSoundsHeard);
+    RenderFilterBar();
+    std::vector<HeardRow> rows;
+    for (const Audio::Mixer::HeardSound& sound : Audio::Mixer::Heard())
+    {
+        rows.push_back(MakeRow(sound));
+    }
+    std::vector<HeardRow> shown = FilterRows(rows, m_filter);
     if (ImGui::SmallButton(I18N::Editor::SoundMixerClearAll))
     {
         Audio::Mixer::ClearHeard();
     }
-    if (ImGui::IsItemHovered())
+    Tooltip(I18N::Editor::SoundMixerClearAllTip);
+    ImGui::SameLine();
+    if (ImGui::SmallButton(I18N::Editor::SoundMixerMuteShown))
     {
-        ImGui::SetTooltip("%s", I18N::Editor::SoundMixerClearAllTip);
+        SetMuted(shown, true);
     }
-    const std::vector<Audio::Mixer::HeardSound> heard = Audio::Mixer::Heard();
-    if (heard.empty())
+    Tooltip(I18N::Editor::SoundMixerMuteShownTip);
+    ImGui::SameLine();
+    if (ImGui::SmallButton(I18N::Editor::SoundMixerUnmuteShown))
+    {
+        SetMuted(shown, false);
+    }
+    Tooltip(I18N::Editor::SoundMixerUnmuteShownTip);
+    ImGui::SameLine();
+    if (ImGui::SmallButton(I18N::Editor::SoundMixerClearFilters))
+    {
+        m_filter = {};
+        m_filterText.fill('\0');
+    }
+    ImGui::SameLine();
+    ImGui::TextDisabled(
+        "%s", I18N::Format(I18N::Editor::SoundMixerShown01, {std::to_string(shown.size()), std::to_string(rows.size())})
+                  .c_str());
+    if (rows.empty())
     {
         ImGui::TextDisabled("%s", I18N::Editor::SoundMixerNothingHeard);
         return;
     }
-    // Rows keep their place (the order of first hearing) and the header stays
-    // while the rows scroll, so that a sound is easy to find and mute.
+    // Rows keep the order of first hearing unless a header sorts them, and
+    // the header stays while the rows scroll, so that a sound is easy to find
+    // and mute.
     const float height =
         std::max(ImGui::GetContentRegionAvail().y, ImGui::GetFrameHeightWithSpacing() * (HeardMinimumRows + 1.0f));
-    constexpr ImGuiTableFlags Flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV |
-                                      ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY |
-                                      ImGuiTableFlags_SizingFixedFit;
+    constexpr ImGuiTableFlags Flags =
+        ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY |
+        ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_Sortable | ImGuiTableFlags_SortTristate;
     if (!ImGui::BeginTable("##Heard", HeardColumns, Flags, ImVec2(0.0f, height)))
     {
         return;
@@ -175,32 +317,42 @@ void MuSoundMixerUI::RenderHeard()
     ImGui::TableSetupColumn(I18N::Editor::SoundMixerColumnPlays);
     ImGui::TableSetupColumn(I18N::Editor::SoundMixerColumnLength);
     ImGui::TableSetupColumn(I18N::Editor::SoundMixerColumnLast);
-    ImGui::TableSetupColumn(I18N::Editor::SoundMixerColumnVolume);
+    ImGui::TableSetupColumn(I18N::Editor::SoundMixerColumnVolume, ImGuiTableColumnFlags_NoSort);
     ImGui::TableHeadersRow();
-    const double now = Audio::Mixer::Now();
-    for (const Audio::Mixer::HeardSound& sound : heard)
+    if (ImGuiTableSortSpecs* specs = ImGui::TableGetSortSpecs(); specs != nullptr && specs->SpecsDirty)
     {
-        const bool playing = IsPlaying(sound.number);
+        m_sort = {};
+        if (specs->SpecsCount > 0 && specs->Specs[0].ColumnIndex < VolumeColumn)
+        {
+            m_sort.column = static_cast<HeardColumn>(specs->Specs[0].ColumnIndex);
+            m_sort.descending = specs->Specs[0].SortDirection == ImGuiSortDirection_Descending;
+        }
+        specs->SpecsDirty = false;
+    }
+    const double now = Audio::Mixer::Now();
+    SortRows(shown, m_sort, now);
+    for (const HeardRow& row : shown)
+    {
         ImGui::TableNextRow();
-        if (playing)
+        if (row.playing)
         {
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(PlayingRowColor));
         }
         ImGui::TableNextColumn();
-        ImGui::TextUnformatted(SoundText(sound.number).c_str());
+        ImGui::TextUnformatted(row.file.c_str());
         if (ImGui::IsItemHovered())
         {
-            ImGui::SetTooltip("#%d", sound.number);
+            ImGui::SetTooltip("#%d", row.sound.number);
         }
         ImGui::TableNextColumn();
-        ImGui::TextUnformatted(SourceText(sound).c_str());
+        ImGui::TextUnformatted(row.source.c_str());
         ImGui::TableNextColumn();
-        ImGui::Text("%d", sound.plays);
+        ImGui::Text("%d", row.sound.plays);
         ImGui::TableNextColumn();
-        ImGui::TextUnformatted(LengthText(LengthOf(sound.number), sound.looped).c_str());
+        ImGui::TextUnformatted(LengthText(row.length, row.sound.looped).c_str());
         ImGui::TableNextColumn();
-        const std::string last = LastText(sound, now, playing);
-        if (playing)
+        const std::string last = LastText(row.sound, now, row.playing);
+        if (row.playing)
         {
             ImGui::TextUnformatted(last.c_str());
         }
@@ -209,7 +361,7 @@ void MuSoundMixerUI::RenderHeard()
             ImGui::TextDisabled("%s", last.c_str());
         }
         ImGui::TableNextColumn();
-        RenderControl(std::to_string(sound.number).c_str(), Audio::Mixer::SoundControl(sound.number));
+        RenderControl(std::to_string(row.sound.number).c_str(), Audio::Mixer::SoundControl(row.sound.number));
     }
     ImGui::EndTable();
 }
@@ -300,6 +452,94 @@ std::string SoundText(int number)
         }
     }
     return file;
+}
+
+bool HeardFilter::IsActive() const
+{
+    return !text.empty() || kind.has_value() || show != ShowFilter::All || loops != LoopFilter::All || minimumPlays > 0;
+}
+
+HeardRow MakeRow(const Audio::Mixer::HeardSound& sound)
+{
+    HeardRow row;
+    row.sound = sound;
+    row.file = SoundText(sound.number);
+    row.source = SourceText(sound);
+    row.length = LengthOf(sound.number);
+    row.playing = IsPlaying(sound.number);
+    row.changed = Audio::Mixer::SoundControl(sound.number).IsChanged();
+    return row;
+}
+
+bool Passes(const HeardRow& row, const HeardFilter& filter)
+{
+    if (!filter.text.empty())
+    {
+        const std::string text = Lowered(filter.text);
+        if (Lowered(row.file).find(text) == std::string::npos && Lowered(row.source).find(text) == std::string::npos)
+        {
+            return false;
+        }
+    }
+    if (filter.kind && row.sound.kind != *filter.kind)
+    {
+        return false;
+    }
+    if ((filter.show == ShowFilter::Playing && !row.playing) || (filter.show == ShowFilter::Changed && !row.changed))
+    {
+        return false;
+    }
+    if ((filter.loops == LoopFilter::Loops && !row.sound.looped) ||
+        (filter.loops == LoopFilter::OneShots && row.sound.looped))
+    {
+        return false;
+    }
+    return row.sound.plays >= filter.minimumPlays;
+}
+
+std::vector<HeardRow> FilterRows(const std::vector<HeardRow>& rows, const HeardFilter& filter)
+{
+    std::vector<HeardRow> shown;
+    std::copy_if(rows.begin(), rows.end(), std::back_inserter(shown),
+                 [&filter](const HeardRow& row) { return Passes(row, filter); });
+    return shown;
+}
+
+void SortRows(std::vector<HeardRow>& rows, const HeardSort& sort, double now)
+{
+    if (!sort.column)
+    {
+        return;
+    }
+    const HeardColumn column = *sort.column;
+    const auto before = [column, now](const HeardRow& left, const HeardRow& right)
+    {
+        switch (column)
+        {
+        case HeardColumn::Sound:
+            return Lowered(left.file) < Lowered(right.file);
+        case HeardColumn::Source:
+            return Lowered(left.source) < Lowered(right.source);
+        case HeardColumn::Plays:
+            return left.sound.plays < right.sound.plays;
+        case HeardColumn::Length:
+            return left.length < right.length;
+        case HeardColumn::LastPlayed:
+            break;
+        }
+        return AgoOf(left, now) < AgoOf(right, now);
+    };
+    std::stable_sort(rows.begin(), rows.end(), [&before, &sort](const HeardRow& left, const HeardRow& right)
+                     { return sort.descending ? before(right, left) : before(left, right); });
+}
+
+void SetMuted(const std::vector<HeardRow>& rows, bool muted)
+{
+    for (const HeardRow& row : rows)
+    {
+        Audio::Mixer::SoundControl(row.sound.number).muted = muted;
+    }
+    Audio::Mixer::Apply();
 }
 
 std::string LengthText(float seconds, bool looped)

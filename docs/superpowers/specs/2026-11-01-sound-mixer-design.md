@@ -1,6 +1,6 @@
 # Sound Mixer (editor) design
 
-> Status: agreed with the owner on 2026-11-01 (Q-SM1 to Q-SM6). The last step
+> Status: agreed with the owner on 2026-11-01 (Q-SM1 to Q-SM10). The last step
 > moves what lasts into `docs/dev-editor.md` and removes this document.
 
 ## Goal
@@ -22,6 +22,10 @@ one effect and one music volume (0 to 10).
 | Q-SM4 | What happens to sounds already playing? | Changes apply **at once**: a muted sound goes silent while it plays, sliders change playing copies, and a muted loop keeps running silently, so unmuting brings it back where it is. Not chosen: only new sounds, mute stops them. |
 | Q-SM5 | Are the settings kept? | **Session only**: each start plays everything as normal. While anything is muted, solo or below 100 %, the menu bar says so ("Sound Mixer: 2 muted, 1 solo"); a click opens the window. Not chosen: saved with the reminder, named presets. |
 | Q-SM6 | Where does the work go? | On a branch whose base has the monster sounds (sven-n/MuMain#909), the Aida sounds (MNA) and the map object sounds (MP1), so the owner can listen to them with it: `feat/sound-mixer`, the Aida branch with the map object sounds merged in. |
+| Q-SM7 | What does a click on a column header do? (asked after trying the table) | It **sorts** by the column; again reverses; a third click goes back to the order of first hearing. **Filters** sit in a bar above the table, not in the columns: text (sound or source contains), kind, show (all, playing now, changed only), loops (all, loops, one-shots), at least N plays; "Clear filters"; "N of M shown". Not chosen: a filter per column behind the header, sort plus a filter row under the header. |
+| Q-SM8 | What do Mute all and Unmute all act on? | **The rows shown**: every row the filters leave (no filter = every listed sound). Sounds heard later are not muted and come as new rows. The top button becomes **Reset all** (unmute, unsolo, full volume). Not chosen: every listed sound whatever the filters, the kinds (everything, also later sounds). |
+| Q-SM9 | What does the in-world overlay draw? | **Both sources with a position**: a map object with a sound gets a marker, its file and two rings (3 tiles = full volume, 15 tiles = quietest); a monster with a sound set gets a marker, the set's name and a 5-tile hearing ring, solid while the hero is inside it (heard), dashed outside. A source flashes for a second when one of its sounds starts. Music, ambience loops and other sounds have no position and are not drawn. Not chosen: map object sounds only, monster sounds only, markers without rings. |
+| Q-SM10 | How is the overlay switched on? | A **Show in world** checkbox in the Sound Mixer, for the session; the menu bar reminder names it while it is on. It **follows the filters**: it draws the sources of the rows shown (no filter = every source in view), and hovering a row highlights its sources. Not chosen: a checkbox that always draws all, two checkboxes (map objects, monsters), a Dev Editor toggle. |
 
 ## Design
 
@@ -60,7 +64,7 @@ mixer says. The effect preview's mute (`Audio::EditorMute`) stays as it is.
 
 **The window.** Windows → Sound Mixer:
 
-- a line with what is changed and **Unmute all**, which puts every control
+- a line with what is changed and **Reset all**, which puts every control
   back;
 - **Kinds**: music, map ambience, map object sounds, monster sounds,
   everything else, each with a volume slider, Mute and Solo;
