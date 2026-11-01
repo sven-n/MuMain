@@ -2959,4 +2959,7 @@
   <data name="It holds {0} colors and {1} folders." xml:space="preserve">
     <value>Er enthält {0} Farben und {1} Ordner.</value>
   </data>
+  <data name="Folders go at most {0} levels deep." xml:space="preserve">
+    <value>Ordner gehen höchstens {0} Ebenen tief.</value>
+  </data>
 </root>

@@ -2980,4 +2980,7 @@
   <data name="It holds {0} colors and {1} folders." xml:space="preserve">
     <value>It holds {0} colors and {1} folders.</value>
   </data>
+  <data name="Folders go at most {0} levels deep." xml:space="preserve">
+    <value>Folders go at most {0} levels deep.</value>
+  </data>
 </root>

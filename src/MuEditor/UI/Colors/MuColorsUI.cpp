@@ -155,11 +155,21 @@ ColorFolderPath CMuColorsUI::GetPickedFolder() const
 void CMuColorsUI::RenderToolbar()
 {
     NamedColorSource& source = SourceOf(m_pick.root);
+    // No folder goes below the deepest level (AddColorFolder refuses it).
+    const bool deepest = GetPickedFolder().size() >= Data::Colors::MaxColorFolderDepth;
+    ImGui::BeginDisabled(deepest);
     if (ImGui::Button(I18N::Editor::NewFolder))
     {
         m_folderDialog = FolderDialog::New;
         m_folderName.clear();
         ImGui::OpenPopup(FolderPopupId);
+    }
+    ImGui::EndDisabled();
+    if (deepest && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+    {
+        ImGui::SetTooltip("%s", I18N::Format(I18N::Editor::FoldersGoAtMost0LevelsDeep,
+                                             {std::to_string(Data::Colors::MaxColorFolderDepth)})
+                                    .c_str());
     }
     ImGui::SameLine();
     if (ImGui::Button(I18N::Editor::NewColor))

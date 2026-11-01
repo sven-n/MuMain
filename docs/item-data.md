@@ -1361,8 +1361,9 @@ their own. **Windows > Colors** opens the window on what was picked last, and
 **Items > Glow Colors** on its root. It docks with the item tools. The changes
 of the item roots are steps of the item undo history, Save Items writes them.
 
-Under a root you sort its colors into **folders**, also folders in folders:
-**New folder** adds one under the picked root or folder, **Rename** and
+Under a root you sort its colors into **folders**, also folders in folders,
+at most eight levels deep: **New folder** adds one under the picked root or
+folder (a name of 1 to 32 characters no other folder there has), **Rename** and
 **Remove** change the picked folder (its folders and colors move up into the
 folder above it), and **Move up** and **Move down** order folders and colors.
 Drag a color or a folder onto a folder or onto its root to move it there; a
