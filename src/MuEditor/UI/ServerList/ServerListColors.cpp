@@ -107,10 +107,15 @@ ImVec4 GetButtonColorSwatch(const Data::ServerList::ButtonColor& color, std::str
 
 void RenderSwatch(const ImVec4& color)
 {
+    // Drawn, not a widget: a swatch takes no clicks, so it needs no ID that could meet the list's or another
+    // swatch's in the same scope.
     const float size = ImGui::GetTextLineHeight();
-    ImGui::ColorButton("##Color", color,
-                       ImGuiColorEditFlags_NoTooltip | ImGuiColorEditFlags_NoPicker | ImGuiColorEditFlags_NoDragDrop,
-                       ImVec2(size, size));
+    const ImVec2 from = ImGui::GetCursorScreenPos();
+    const ImVec2 to(from.x + size, from.y + size);
+    ImDrawList* drawList = ImGui::GetWindowDrawList();
+    drawList->AddRectFilled(from, to, ImGui::ColorConvertFloat4ToU32(ImVec4(color.x, color.y, color.z, 1.0f)));
+    drawList->AddRect(from, to, ImGui::GetColorU32(ImGuiCol_Border));
+    ImGui::Dummy(ImVec2(size, size));
 }
 
 const char* GetThemeColorLabel(ThemeColor color)
