@@ -59,6 +59,8 @@ Made while reviewing sven-n/MuMain#915, 2026-11-01.
 | L18 | Where the Look Editor lives (Q-L6a, 2026-11-01) | **A window of its own**, Windows > Look Editor, next to the Effect Browser, for the items now and the monsters later (D25: one look editor for all areas). Built like Glow Colors (`MuItemGlowColorsUI.cpp`): tabs Render styles and Item effects; a button row (New look, Copy, Rename) and a grey note; on the left a resizable list with each look's name, how many items use it, and "(code)" for looks not moved yet; on the right the picked look, Apply to the look / Revert / Remove, "Used by N items:" with the list of items, and the confirm that lists them (D26). The Item Model window keeps its two dropdowns, "Values for this item" and gets "Open in Look Editor". An item tool under Windows > Items, and editing inside the Item Model window, were weighed. |
 | L19 | The layer list (Q-L6b, 2026-11-01) | **A list, then the picked layer.** The look's layers in drawing order, one line each written from its fields ("texture, mesh 0, glowing blue, pulsing"), with + Add, Copy, up, down and Remove above the list, and "Item values after drawing" (or "before drawing" for an item effect) as the last line. Clicking a line shows its fields below: the fields of L8 to L11, the value graph beside a field that changes over time (L9), and the "Each item sets this" box (L12). A collapsing section per layer, and a table with a column per field, were weighed. |
 | L20 | The Look Editor's preview (Q-L6c, 2026-11-01) | **The Item Model preview with helpers for designing.** As in the Item Model window (`ItemModelPreview.h`): the look shown on an item (any of its users, or any other item to try it on), at an item level, excellent or ancient, in the inventory pose or on the ground, turning, with the same camera; changes show before they are applied. Added: stopping time and moving it with a slider (the clock the looks read while the preview draws), an eye per layer to hide it or show only it, and "Draw as: doppelganger" to see "Not for". Things on bones show here after FX1.7c (L7, step 2). **Later, on top:** a pose worn by a character in an animation (no preview draws a character with equipment yet). |
+| L21 | The mesh list's rows (Q-L7a, 2026-11-01) | Under Model file in the Item Model window, after Texture folders and None-blend meshes: **one row per mesh with its number, its texture name, marks and "used by"**. Marks: hidden (a "hid…" texture name or an `_H` script: never drawn), glows (`_R`), scrolls (`_S`), no chrome (`_N` or None-blend meshes), holes (the load-time flag asked for in #915; added by the first pull request of the move if #915 doesn't). "Used by": the fields that name the mesh (None-blend, glow, shine and excellent meshes) and the layers of the item's looks that draw it ("Render style textured: layer 1, all meshes"); a look that is still code says so until its move. A tooltip shows the texture's size and the folder it was found in, and the mesh's vertices and triangles. Number and texture only, and a wide table with every column, were weighed. |
+| L22 | Highlighting a mesh (Q-L7b, 2026-11-01) | **Pointing at a mesh row, or at a number in a mesh field** (None-blend meshes, glow meshes, a layer's Meshes in the Look Editor), **draws the other meshes see-through** in the preview, so the pointed mesh stands out as it looks in game and a part behind another shows (editor builds only); the pointed mesh itself gets no highlight color. A click keeps it so until clicked again; without a pointed mesh the item is drawn as in game. **Clicking a part in the preview selects its row** and its number in the mesh field being edited (new code: the meshes drawn with ID colors into a hidden picture, the pixel under the mouse read back). Works in the Item Model preview and the Look Editor's preview. A mesh that is never drawn can't be shown this way; its row says so. A highlight color drawn on top of the mesh, with or without the others dimmed, and no highlight at all, were weighed. |
 
 ## Current state
 
@@ -212,11 +214,11 @@ Answered one by one, each with the current state, every option with an
 example, and a recommendation.
 
 Answered: Q-L1 (L7), Q-L2a (L8), Q-L2b (L9, L10), Q-L2c (L11), Q-L3 (L12),
-Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), Q-L6a to Q-L6c (L18 to L20), all on 2026-11-01.
+Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), Q-L6a to Q-L6c (L18 to L20), Q-L7a and Q-L7b (L21, L22), all on
+2026-11-01.
 
 | Q | Question |
 |---|---|
-| Q-L7 | The mesh list: what each row shows (number, texture, hidden, glowing, has holes), and whether hovering a row highlights the mesh in the preview. |
 | Q-L8 | Data checks: mesh numbers the model doesn't have, missing textures, unknown kinds. |
 | Q-L9 | How each moved style is compared with its old code (the render recorder). |
 | Q-L10 | The pull requests and their order (the order of moving looks is L17). |
@@ -225,7 +227,7 @@ Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), Q-L6a to Q-L6c 
 ## Tasks
 
 1. [ ] Write this design: answer the open questions one by one (in progress;
-   Q-L1 to Q-L6 done).
+   Q-L1 to Q-L7 done).
 2. [ ] Step 1 of L7: draw passes and conditions, in L17's order (the pull
    requests from Q-L10).
 3. [ ] Step 2 of L7: FX1.7c, its short design, then the live preview.
