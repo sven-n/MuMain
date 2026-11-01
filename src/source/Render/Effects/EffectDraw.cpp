@@ -8,6 +8,7 @@
 #include "World/GameMaps/GMHellas.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
+#include <cstring>
 #include <optional>
 
 namespace Render::EffectDrawing
@@ -91,6 +92,16 @@ public:
         else
             RenderTerrainAlphaBitmap(draw.texture, draw.x, draw.y, draw.sizeX, draw.sizeY, light, draw.rotation,
                                      draw.alpha, draw.height);
+    }
+
+    void DrawPlane(const PlaneDraw& draw) override
+    {
+        float rotation[3][4];
+        std::memcpy(rotation, draw.rotation, sizeof(rotation));
+        mu::GetRenderer().PushMatrix();
+        mu::GetRenderer().Translate(draw.position[0], draw.position[1], draw.position[2]);
+        RenderPlane3D(draw.width, draw.height, rotation);
+        mu::GetRenderer().PopMatrix();
     }
 
     void DrawCircle(const CircleDraw& draw) override

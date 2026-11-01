@@ -217,6 +217,7 @@ TEST_CASE("Another effect drawer receives the sprites instead of the default one
         void DrawQuads(const Render::EffectDrawing::QuadsDraw&) override {}
         void DrawDecal(const Render::EffectDrawing::DecalDraw&) override {}
         void DrawCircle(const Render::EffectDrawing::CircleDraw&) override {}
+        void DrawPlane(const Render::EffectDrawing::PlaneDraw&) override {}
     } counting;
     RecordingScope scope;
     Render::EffectDrawing::SetEffectDrawer(&counting);
@@ -264,6 +265,11 @@ struct ListingDrawer final : Render::EffectDrawing::EffectDrawer
     void DrawCircle(const Render::EffectDrawing::CircleDraw& draw) override
     {
         items.push_back("circle " + std::to_string(draw.texture));
+    }
+
+    void DrawPlane(const Render::EffectDrawing::PlaneDraw& draw) override
+    {
+        items.push_back("plane " + std::to_string(draw.width) + " " + std::to_string(draw.height));
     }
 };
 
@@ -493,4 +499,28 @@ TEST_CASE("A fading magic mark describes its ground mark with the light the upda
     CHECK(std::find(out.items.begin(), out.items.end(), "decal " + std::to_string(BITMAP_MAGIC + 1)) !=
           out.items.end());
     CHECK(o.Light[0] == 0.5f);
+}
+
+TEST_CASE("A leaf plane reaches the renderer as the old translated plane draw did [effects]")
+{
+    RecordingScope scope;
+    vec3_t angle = {10.f, 20.f, 30.f};
+    Render::EffectDrawing::PlaneDraw plane;
+    plane.position[0] = 300.f;
+    plane.position[1] = 400.f;
+    plane.position[2] = 50.f;
+    AngleMatrix(angle, plane.rotation);
+    plane.width = 3.f;
+    plane.height = 4.f;
+    const auto legacy = scope.Record(
+        [&]
+        {
+            mu::GetRenderer().PushMatrix();
+            mu::GetRenderer().Translate(300.f, 400.f, 50.f);
+            float matrix[3][4];
+            AngleMatrix(angle, matrix);
+            RenderPlane3D(3.f, 4.f, matrix);
+            mu::GetRenderer().PopMatrix();
+        });
+    CHECK(scope.Record([&] { Render::EffectDrawing::ActiveEffectDrawer().DrawPlane(plane); }) == legacy);
 }

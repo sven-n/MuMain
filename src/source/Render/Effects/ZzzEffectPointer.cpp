@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -91,18 +92,17 @@ void MovePointers()
 
 void RenderPointers()
 {
-    EnableAlphaBlend();
+    using Render::EffectDrawing::Blend;
+    Render::EffectDrawing::EffectDrawer& out = Render::EffectDrawing::ActiveEffectDrawer();
+    out.SetState({.blend = Blend::Glow});
     for (int i = 0; i < MAX_POINTERS; i++)
     {
         PARTICLE* o = &Pointers[i];
         if (o->Live)
         {
-            if (Bitmaps[o->Type].Components == 3)
-                EnableAlphaBlend();
-            else
-                EnableAlphaTest();
-            RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light,
-                                     -o->Angle[2], o->Alpha);
+            out.SetState({.blend = Bitmaps[o->Type].Components == 3 ? Blend::Glow : Blend::AlphaTest});
+            out.DrawDecal(Render::EffectDrawing::Decal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale,
+                                                       o->Light, -o->Angle[2], o->Alpha));
         }
     }
 }

@@ -102,6 +102,16 @@ struct CircleDraw
     float textureV = 0.f;
 };
 
+// A flat quad at a point, turned by a rotation matrix (leaves, rain): drawn under a translated matrix.
+struct PlaneDraw
+{
+    float position[3] = {};
+    float rotation[3][4] = {};
+    // Half extents across and along the plane.
+    float width = 0.f;
+    float height = 0.f;
+};
+
 class EffectDrawer
 {
 public:
@@ -112,6 +122,7 @@ public:
     virtual void DrawQuads(const QuadsDraw& draw) = 0;
     virtual void DrawDecal(const DecalDraw& draw) = 0;
     virtual void DrawCircle(const CircleDraw& draw) = 0;
+    virtual void DrawPlane(const PlaneDraw& draw) = 0;
 };
 
 // Builders with the legacy primitives' argument order and defaults, for describers converted from them.
