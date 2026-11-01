@@ -1,6 +1,7 @@
 mu_add_test(
     NAME test_item_database
     SOURCES
+        test_color_folders.cpp
         test_item_check_targets.cpp
         test_item_code_references.cpp
         test_item_database.cpp

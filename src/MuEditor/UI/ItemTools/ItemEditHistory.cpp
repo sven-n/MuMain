@@ -185,6 +185,13 @@ bool ItemEditHistory::IsAsLeft(const ItemEditEntry& entry, bool undoing) const
                 return false;
             }
             break;
+        case ItemEditStep::Kind::ColorFolders:
+            if (m_hooks.readColorFolders &&
+                m_hooks.readColorFolders(step.folderRoot) != (undoing ? step.foldersAfter : step.foldersBefore))
+            {
+                return false;
+            }
+            break;
         }
     }
     return true;
@@ -220,6 +227,7 @@ bool ItemEditHistory::ChangesHeldItem(const ItemEditEntry& entry, bool undoing) 
         case ItemEditStep::Kind::SharedModel:
         case ItemEditStep::Kind::GlowColors:
         case ItemEditStep::Kind::StatFile:
+        case ItemEditStep::Kind::ColorFolders:
             break;
         }
     }
@@ -285,6 +293,12 @@ void ItemEditHistory::ApplyStep(const ItemEditStep& step, bool undoing)
         break;
     case ItemEditStep::Kind::StatFile:
         m_hooks.restoreStatFile(*(undoing ? step.statFileBefore : step.statFileAfter));
+        break;
+    case ItemEditStep::Kind::ColorFolders:
+        if (m_hooks.restoreColorFolders)
+        {
+            m_hooks.restoreColorFolders(step.folderRoot, undoing ? step.foldersBefore : step.foldersAfter);
+        }
         break;
     }
 }

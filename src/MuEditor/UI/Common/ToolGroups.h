@@ -17,8 +17,8 @@ struct ToolWindowEntry
     const char* windowId;
     const char* const* label;
     bool ToolWindows::* open;
-    // For an entry that is a tab of a window with several (Items > Glow
-    // Colors, the Colors window's Glow tab): opening the window on the tab,
+    // For an entry that is one part of a window with several (Items > Glow
+    // Colors, the Colors window's Glow root): opening the window on that part,
     // and whether the window shows it. nullptr for a window of its own.
     void (*showTab)() = nullptr;
     bool (*isTabShown)() = nullptr;

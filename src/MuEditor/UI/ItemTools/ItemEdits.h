@@ -43,9 +43,18 @@ public:
     bool RemoveSharedModel(std::string label, std::string_view name);
     // CItemDataHandler::SetGlowColor.
     void SetGlowColor(std::string label, const Data::Effects::GlowColor& color);
+    // A new glow color (CItemDataHandler::SetGlowColor) put into the glow folder at `folder` (the empty path: under
+    // the root), as one step.
+    void AddGlowColor(std::string label, const Data::Effects::GlowColor& color, std::span<const std::size_t> folder);
     // CItemDataHandler::RemoveGlowColor for each name, as one step; false
     // when none could be removed.
     bool RemoveGlowColors(std::string label, std::span<const std::string> names);
+    // The Colors window's roots of the item data, for SetColorFolders and the history.
+    static constexpr std::string_view GlowFolders = "glow";
+    // The folders of the root (CItemDataHandler::SetGlowColorFolders), as one step.
+    void SetColorFolders(std::string label, std::string_view root, std::vector<Data::Colors::ColorFolder> folders);
+    // Puts the glow colors in this order (the same names), as one step.
+    void SetGlowColorOrder(std::string label, std::span<const Data::Effects::GlowColor> colors);
     // CItemDataHandler::SetStatFile, with the items in `repointed` stored as
     // they are (their new stat profile), as one step. `file` must be valid.
     void SetStatFile(std::string label, const Data::Items::ItemStatFile& file,
@@ -77,6 +86,8 @@ private:
     template <typename TChange> void RecordSlots(std::string label, std::span<const int> itemTypes, TChange&& change);
     // Into the history, or into the open group.
     void Record(ItemEditEntry entry);
+    // Adds the step of the root's folders from `before` to as they are now, when they changed.
+    static void AddFolderStep(ItemEditEntry& entry, std::string_view root, std::vector<Data::Colors::ColorFolder> before);
 
     ItemEditHistory m_history;
     std::optional<ItemEditEntry> m_group;

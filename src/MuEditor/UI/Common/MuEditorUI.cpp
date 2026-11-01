@@ -219,7 +219,7 @@ void CMuEditorUI::RenderWindowsMenu(MuEditor::ToolWindows& windows, SDL_Window* 
     // The item tools, which share one selected item, and the monster tools.
     RenderToolGroupMenu(MuEditor::GetItemTools(), windows);
     RenderToolGroupMenu(MuEditor::GetMonsterTools(), windows);
-    // The named colors, a tab per use; the group entries (Items > Glow Colors) open it on their tab.
+    // The named colors, a root per use; the group entries (Items > Glow Colors) open it on their root.
     ImGui::MenuItem(I18N::Editor::Colors, nullptr, &windows.colors);
     ImGui::MenuItem(I18N::Editor::DataChecks, nullptr, &windows.dataChecks);
     ImGui::MenuItem(I18N::Editor::ServerList, nullptr, &windows.serverList);

@@ -2,10 +2,14 @@
 
 #include "GlowColors.h"
 
+#include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemModelJsonValues.h"
 
+#include <algorithm>
 #include <cmath>
+#include <functional>
+#include <span>
 
 namespace Data::Effects
 {
@@ -41,10 +45,26 @@ void AddFatal(std::vector<ItemDataIssue>& issues, const std::string& source, con
 {
     Items::Json::AddFileIssue(issues, source, ItemDataIssue::NoItem, field, message);
 }
+
+// Whether one of the colors has the name: the folders read and write only the file's colors.
+std::function<bool(std::string_view)> IsColorOf(std::span<const GlowColor> colors)
+{
+    return [colors](std::string_view name)
+    {
+        return std::any_of(colors.begin(), colors.end(), [name](const GlowColor& color) { return color.name == name; });
+    };
+}
 } // namespace
 
 void ReadGlowColorsJson(std::string_view text, const std::string& source, std::vector<GlowColor>& colors,
                         std::vector<ItemDataIssue>& issues)
+{
+    std::vector<Colors::ColorFolder> folders;
+    ReadGlowColorsJson(text, source, colors, folders, issues);
+}
+
+void ReadGlowColorsJson(std::string_view text, const std::string& source, std::vector<GlowColor>& colors,
+                        std::vector<Colors::ColorFolder>& folders, std::vector<ItemDataIssue>& issues)
 {
     OrderedJson root;
     if (!Items::Json::ReadFileVersion(text, source, GlowColorsFormatVersion, root, issues))
@@ -79,9 +99,10 @@ void ReadGlowColorsJson(std::string_view text, const std::string& source, std::v
             colors.push_back({name, value});
         }
     }
+    folders = Colors::ReadColorFolders(root, source, IsColorOf(colors), issues);
     for (const auto& [key, value] : root.items())
     {
-        if (key != Items::Json::Keys::FormatVersion && key != ColorsKey)
+        if (key != Items::Json::Keys::FormatVersion && key != ColorsKey && key != Colors::ColorFoldersKey)
         {
             issues.push_back({ItemDataIssueSeverity::Warning, source, ItemDataIssue::NoItem, ItemDataIssue::NoItem, key,
                               "unknown field, ignored"});
@@ -89,7 +110,7 @@ void ReadGlowColorsJson(std::string_view text, const std::string& source, std::v
     }
 }
 
-std::string WriteGlowColorsJson(std::span<const GlowColor> colors)
+std::string WriteGlowColorsJson(std::span<const GlowColor> colors, std::span<const Colors::ColorFolder> folders)
 {
     OrderedJson list = OrderedJson::object();
     for (const GlowColor& color : colors)
@@ -98,8 +119,13 @@ std::string WriteGlowColorsJson(std::span<const GlowColor> colors)
     }
     OrderedJson root;
     root[Items::Json::Keys::FormatVersion] = GlowColorsFormatVersion;
+    if (!folders.empty())
+    {
+        root[Colors::ColorFoldersKey] = Colors::WriteColorFolders(folders, IsColorOf(colors));
+    }
     root[ColorsKey] = std::move(list);
     std::string text = root.dump(Items::Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
+    text = Colors::PutColorFoldersOnLines(text);
     for (const GlowColor& color : colors)
     {
         text = Items::Json::PutListsOnOneLine(text, color.name);

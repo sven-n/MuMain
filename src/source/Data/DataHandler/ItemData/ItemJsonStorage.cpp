@@ -188,7 +188,8 @@ void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& fil
     }
     if (models.glowColorsChanged)
     {
-        files.push_back({models.glowColorsFile, Effects::WriteGlowColorsJson(models.glowColors)});
+        files.push_back(
+            {models.glowColorsFile, Effects::WriteGlowColorsJson(models.glowColors, models.glowColorFolders)});
     }
 #ifdef _EDITOR
     if (models.statsChanged && models.stats != nullptr)
@@ -325,7 +326,7 @@ GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file)
         AddFatal(result.issues, source, "could not be read");
         return result;
     }
-    Effects::ReadGlowColorsJson(*text, source, result.colors, result.issues);
+    Effects::ReadGlowColorsJson(*text, source, result.colors, result.folders, result.issues);
     return result;
 }
 

@@ -1483,9 +1483,6 @@
   <data name="The item models name these colors; the model tool picks an item's colors." xml:space="preserve">
     <value>The item models name these colors; the model tool picks an item's colors.</value>
   </data>
-  <data name="Pick a color in the list." xml:space="preserve">
-    <value>Pick a color in the list.</value>
-  </data>
   <data name="Apply to the glow color" xml:space="preserve">
     <value>Apply to the glow color</value>
   </data>
@@ -2946,5 +2943,44 @@
   </data>
   <data name="Not saved yet: the changes are only in the editor" xml:space="preserve">
     <value>Not saved yet: the changes are only in the editor until you save the items.</value>
+  </data>
+  <data name="New folder" xml:space="preserve">
+    <value>New folder</value>
+  </data>
+  <data name="New color" xml:space="preserve">
+    <value>New color</value>
+  </data>
+  <data name="Folder name" xml:space="preserve">
+    <value>Folder name</value>
+  </data>
+  <data name="A folder name of 1 to 32 characters that no other folder here has." xml:space="preserve">
+    <value>A folder name of 1 to 32 characters that no other folder here has.</value>
+  </data>
+  <data name="New color folder" xml:space="preserve">
+    <value>New color folder</value>
+  </data>
+  <data name="Rename a color folder" xml:space="preserve">
+    <value>Rename a color folder</value>
+  </data>
+  <data name="Remove a color folder" xml:space="preserve">
+    <value>Remove a color folder</value>
+  </data>
+  <data name="Move a color folder" xml:space="preserve">
+    <value>Move a color folder</value>
+  </data>
+  <data name="Move a color" xml:space="preserve">
+    <value>Move a color</value>
+  </data>
+  <data name="Colors tree note" xml:space="preserve">
+    <value>A root holds the colors of one use. Folders only sort them: drag a color or a folder onto a folder or onto its root. A color stays in its root.</value>
+  </data>
+  <data name="Folder note" xml:space="preserve">
+    <value>Removing a folder moves what it holds into the folder above it.</value>
+  </data>
+  <data name="It holds {0} colors and {1} folders." xml:space="preserve">
+    <value>It holds {0} colors and {1} folders.</value>
+  </data>
+  <data name="Folders go at most {0} levels deep." xml:space="preserve">
+    <value>Folders go at most {0} levels deep.</value>
   </data>
 </root>

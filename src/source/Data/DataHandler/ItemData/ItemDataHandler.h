@@ -105,6 +105,8 @@ public:
     bool RemoveGlowColor(std::string_view name);
     // Makes the glow color list this one (an undo).
     void RestoreGlowColors(std::span<const Data::Effects::GlowColor> colors);
+    // The folders MuEditor sorts the glow colors in (D69); Save writes them with the colors.
+    void SetGlowColorFolders(std::vector<Data::Colors::ColorFolder> folders);
     // Opens the models changed since the last call again (ModelLoader::ReopenModels).
     // For between frames: the editor calls it before the game draws.
     std::vector<Data::Items::ItemModelProblem>

@@ -607,7 +607,7 @@ void CMuEditorCore::RenderItemTools()
     {
         g_MuItemModelUI.Render(&m_windows.itemModel);
     }
-    // The named colors: a tab per use, all of them item edits for now.
+    // The named colors: a root per use, all of them item edits for now.
     if (m_windows.colors)
     {
         g_MuColorsUI.Render(&m_windows.colors);

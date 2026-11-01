@@ -974,7 +974,7 @@ A name has only letters and digits. A new color is added to the list and
 can then be used by any item; a name that is not in the list stops the
 start with a message, and so does a list without the defaults (`orange`,
 `white`, `azure`). The item editor adds colors, changes their values and
-removes the ones no item uses (the [Colors window's Glow tab](#glow-colors)), and Save Items
+removes the ones no item uses (the [Colors window's Glow root](#glow-colors)), and Save Items
 writes the file in this form, one color a line.
 
 The glow of monsters, and of the event models that level variants are
@@ -1250,7 +1250,7 @@ shows it in the others.
 - **Item Categories**: a tag and its items; add the selected item or remove
   items from it. New tags need code.
 - **Item Model**: see [Item Model](#item-model).
-- **Glow Colors**: the glow color list, the Glow tab of the
+- **Glow Colors**: the glow color list, the Glow root of the
   [Colors](#colors) window.
 - **Item Formulas**: the item stat file, see [Item Formulas](#item-formulas).
 - **Item Sync**: Export and Import of the items and item formulas with an
@@ -1355,15 +1355,26 @@ armors) may need a restart to show a new file.
 
 ### Colors
 
-The named colors of the items, a tab per use: **Glow** for now; the ground
-label styles and the tooltip color groups get tabs of their own. **Windows >
-Colors** opens the window on the tab shown last, and **Items > Glow Colors**
-on its Glow tab. It docks with the item tools, and its changes are steps of
-the item undo history.
+The named colors as a tree, a root per use: **Glow** for now; the ground label
+styles, the server list's colors and the tooltip color groups get roots of
+their own. **Windows > Colors** opens the window on what was picked last, and
+**Items > Glow Colors** on its root. It docks with the item tools. The changes
+of the item roots are steps of the item undo history, Save Items writes them.
+
+Under a root you sort its colors into **folders**, also folders in folders,
+at most eight levels deep: **New folder** adds one under the picked root or
+folder (a name of 1 to 32 characters no other folder there has), **Rename** and
+**Remove** change the picked folder (its folders and colors move up into the
+folder above it), and **Move up** and **Move down** order folders and colors.
+Drag a color or a folder onto a folder or onto its root to move it there; a
+color stays in its root. **New color** adds one to the picked folder. Each file
+keeps its folders next to its colors as `"colorFolders"`, a list of folders
+each with a `name`, its `folders` and its `colors`; the game reads and
+checks them (a problem shows in its data report too) but doesn't use them.
 
 #### Glow Colors
 
-The Glow tab lists the glow colors, each with how many models use it (also
+The Glow root lists the glow colors, each with how many models use it (also
 as the default they leave out). **New glow color** adds one: a name of
 letters and digits no other color has, and its red, green and blue. A
 picked color's value is changed with the color field and **Apply to the

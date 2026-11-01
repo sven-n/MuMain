@@ -94,6 +94,7 @@ GroundLabelsLoadResult LoadGroundLabelsFile(const std::filesystem::path& file);
 struct GlowColorsLoadResult
 {
     std::vector<Effects::GlowColor> colors;
+    std::vector<Colors::ColorFolder> folders;
     std::vector<ItemDataIssue> issues;
 };
 
@@ -142,6 +143,7 @@ struct ItemModelSave
     // Written to glowColorsFile (GetGlowColorsFile) when glowColorsChanged.
     std::filesystem::path glowColorsFile;
     std::span<const Effects::GlowColor> glowColors;
+    std::span<const Colors::ColorFolder> glowColorFolders;
     bool glowColorsChanged = false;
 #ifdef _EDITOR
     // Written to statsFile (GetItemStatsFile) when statsChanged.
