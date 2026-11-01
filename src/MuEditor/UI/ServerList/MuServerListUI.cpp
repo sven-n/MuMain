@@ -4,6 +4,7 @@
 
 #include "MuServerListUI.h"
 
+#include "../MuEditor/Config/MuEditorConfig.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/IssueLevels.h"
 #include "../MuEditor/UI/Common/KeyboardSelection.h"
@@ -62,6 +63,8 @@ constexpr float PvpComboWidth = VipComboWidth * 0.6f;
 // Where the channel list of the remove VIP type question wraps.
 constexpr float PopupWrapWidth = TextFieldWidth * 1.5f;
 constexpr int ChannelTableColumns = 5;
+// The load slider of the offline servers' preview.
+constexpr float OfflineLoadWidth = 140.0f;
 constexpr int PreviewTableColumns = 3 + Data::ServerList::ChannelNamePlaceCount;
 constexpr ImVec4 ErrorColor{1.0f, 0.4f, 0.4f, 1.0f};
 // {character} in the preview.
@@ -526,6 +529,38 @@ void CMuServerListUI::RenderToolbar()
     {
         ImGui::SameLine();
         ImGui::TextUnformatted(I18N::Editor::UnsavedChanges);
+    }
+    RenderOfflinePreview();
+}
+
+void CMuServerListUI::RenderOfflinePreview()
+{
+    bool show = g_ServerListManager->IsShowingOfflineServers();
+    int percent = g_ServerListManager->GetOfflineServerPercent();
+    bool changed = ImGui::Checkbox(I18N::Editor::ShowOfflineServersInTheGame, &show);
+    bool finished = changed;
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::OfflineServersNote);
+    }
+    if (show)
+    {
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(OfflineLoadWidth * g_MuEditorCore.GetUIScale());
+        changed |= ImGui::SliderInt(I18N::Editor::TheirLoad, &percent, 0, CServerListManager::MaxOfflineServerPercent,
+                                    "%d %%");
+        finished |= ImGui::IsItemDeactivatedAfterEdit();
+    }
+    if (changed)
+    {
+        g_ServerListManager->SetOfflinePreview(show, percent);
+        ShowInGame();
+    }
+    // The setting is kept when a change is done, not at each step of the slider.
+    if (finished)
+    {
+        g_MuEditorConfig.SetOfflineServers(show, percent);
+        g_MuEditorConfig.Save();
     }
 }
 

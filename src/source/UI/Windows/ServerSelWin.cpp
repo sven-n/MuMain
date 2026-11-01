@@ -12,6 +12,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlNativeText.h"
+#include "Core/Text/Utf8.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include <RmlUi/Core/ElementDocument.h>
@@ -313,13 +314,30 @@ void CServerSelWin::RmlClickSelectGroup(int nBtnPos)
     SelectGroup(nBtnPos);
 }
 
+namespace
+{
+// A server that only MuEditor's preview shows (CServerListManager::SetOfflinePreview): nothing to join, which
+// the system messages say.
+bool RefuseOfflinePreview(const CServerInfo& server)
+{
+    if (!server.m_offline)
+        return false;
+#ifdef _EDITOR
+    g_pSystemLogBox->AddText(
+        Core::Text::FromUtf8(I18N::Editor::OnlyTheEditorShowsThisServerTheConnectServerDidNotSendIt),
+        mu::ui::window::TYPE_SYSTEM_MESSAGE);
+#endif
+    return true;
+}
+} // namespace
+
 void CServerSelWin::RmlClickSelectServer(int nServerIndex)
 {
     if (m_pSelectServerGroup == nullptr)
         return;
 
     CServerInfo* pServerInfo = m_pSelectServerGroup->GetServerInfo(nServerIndex);
-    if (pServerInfo == nullptr)
+    if (pServerInfo == nullptr || RefuseOfflinePreview(*pServerInfo))
         return;
 
     // A full and an overloaded server say so alike; the original client did nothing for an
@@ -336,7 +354,7 @@ void CServerSelWin::RmlClickSelectServer(int nServerIndex)
 
 bool CServerSelWin::ConnectToServer(CServerInfo* pServerInfo)
 {
-    if (pServerInfo == nullptr || m_pSelectServerGroup == nullptr)
+    if (pServerInfo == nullptr || m_pSelectServerGroup == nullptr || RefuseOfflinePreview(*pServerInfo))
         return false;
 
     Show(false);

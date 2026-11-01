@@ -350,6 +350,12 @@ For both tabs:
   it cannot remove the rest, until the file is fixed and **Revert** reads it
   again.
 - **Revert** reads the file again.
+- **Show offline servers in the game** (editor only): the login screen also
+  lists every channel 1 to 20 of every group that the connect server did not
+  send, at the load set next to it (**Their load**, 0 to 140 %), so their
+  names, colors, load bars and Full / Overloaded texts can be checked without
+  the servers running. A click on one only says that the editor shows it. The
+  switch and the load are kept in `MuEditor/MuEditor.ini` (`[ServerList]`).
 - **Undo** and **Redo** in the editor bar (or Ctrl+Z and Ctrl+Y in the window)
   work through the changes of the session. Each change is one step: a group,
   VIP type, color or rule added, removed or moved, a box, list or shade

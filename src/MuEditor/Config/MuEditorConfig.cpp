@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "MuEditorConfig.h"
+#include <charconv>
 #include <fstream>
 #include <sstream>
 #include <filesystem>
@@ -78,6 +79,19 @@ void CMuEditorConfig::Load()
                     m_openMUAdminPanelUrl = value;
                 }
             }
+            else if (currentSection == "ServerList")
+            {
+                if (key == "ShowOfflineServers")
+                {
+                    m_showOfflineServers = value == "1" || value == "true";
+                }
+                else if (key == "OfflineServerLoad")
+                {
+                    int load = m_offlineServerLoad;
+                    std::from_chars(value.data(), value.data() + value.size(), load);
+                    m_offlineServerLoad = load;
+                }
+            }
         }
     }
 
@@ -112,6 +126,11 @@ void CMuEditorConfig::Save()
     // kept here (MU_OPENMU_API_KEY).
     file << "\n[OpenMU]\n";
     file << "AdminPanelUrl=" << m_openMUAdminPanelUrl << "\n";
+
+    // [ServerList]: the Server List window's preview of the servers the connect server didn't send.
+    file << "\n[ServerList]\n";
+    file << "ShowOfflineServers=" << (m_showOfflineServers ? "1" : "0") << "\n";
+    file << "OfflineServerLoad=" << m_offlineServerLoad << "\n";
 
     file.close();
 }

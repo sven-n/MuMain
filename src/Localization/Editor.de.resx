@@ -2974,4 +2974,16 @@
   <data name="No rule and no load part uses these colors: {0}" xml:space="preserve">
     <value>Keine Regel und kein Auslastungsteil nutzt diese Farben: {0}</value>
   </data>
+  <data name="Show offline servers in the game" xml:space="preserve">
+    <value>Offline-Server im Spiel zeigen</value>
+  </data>
+  <data name="Their load" xml:space="preserve">
+    <value>Ihre Auslastung</value>
+  </data>
+  <data name="Offline servers note" xml:space="preserve">
+    <value>Nur im Editor: Der Anmeldebildschirm zeigt auch jeden Kanal 1 bis 20 jeder Gruppe, den der Verbindungsserver nicht gesendet hat, mit dieser Auslastung, damit du Name, Farbe und Auslastungsbalken siehst. Beitreten kann man ihm nicht.</value>
+  </data>
+  <data name="Only the editor shows this server; the connect server did not send it." xml:space="preserve">
+    <value>Nur der Editor zeigt diesen Server; der Verbindungsserver hat ihn nicht gesendet.</value>
+  </data>
 </root>

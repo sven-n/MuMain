@@ -341,6 +341,37 @@ TEST_CASE("ServerListManager: new groups replace the old ones")
 }
 
 #ifdef _EDITOR
+TEST_CASE("ServerListManager: the editor's preview shows the channels the connect server did not send")
+{
+    TestServerListManager manager;
+    manager.SetServerList(List({Group(0, "Valhalla"), Group(1, "Helheim")}));
+    manager.InsertServerGroup(ServerId(0, 3), LowLoad);
+    manager.SetOfflinePreview(true, 75);
+    manager.RebuildServerGroups();
+
+    const std::vector<CServerGroup*> groups = GroupsInOrder(manager);
+    REQUIRE(groups.size() == 2);
+    REQUIRE(groups[0]->GetServerSize() == MAX_SERVER_PER_GROUP);
+    REQUIRE(groups[1]->GetServerSize() == MAX_SERVER_PER_GROUP);
+    // In channel order: the sent one keeps its load, the others have the preview's and can't be joined.
+    for (int channel = 1; channel <= MAX_SERVER_PER_GROUP; ++channel)
+    {
+        const CServerInfo* server = groups[0]->GetServerInfo(channel - 1);
+        REQUIRE(server != nullptr);
+        CHECK(server->m_iIndex == channel);
+        CHECK(server->m_offline == (channel != 3));
+        CHECK(server->m_iPercent == (channel == 3 ? LowLoad : 75));
+    }
+    CHECK(manager.GetReceivedServers().size() == 1);
+
+    manager.SetOfflinePreview(false, 75);
+    manager.RebuildServerGroups();
+    const std::vector<CServerGroup*> sent = GroupsInOrder(manager);
+    REQUIRE(sent.size() == 1);
+    REQUIRE(sent[0]->GetServerSize() == 1);
+    CHECK_FALSE(sent[0]->GetServerInfo(0)->m_offline);
+}
+
 TEST_CASE("ServerListManager: a rebuild names the servers last sent with the new groups")
 {
     I18N::SetLocale("en");

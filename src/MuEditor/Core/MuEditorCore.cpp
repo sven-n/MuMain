@@ -40,6 +40,7 @@
 #include "../MuEditor/UI/MonsterTools/MuMonsterPreviewUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterTranslationsUI.h"
 #include "../MuEditor/UI/ServerList/MuServerListUI.h"
+#include "Network/Server/ServerListManager.h"
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
@@ -468,6 +469,9 @@ void CMuEditorCore::Initialize(SDL_Window* window)
     // Winmain before we got here; do not touch I18N::SetLocale from editor
     // init or it'll overwrite the game-side selection.
     g_MuEditorConfig.Load();
+    // The Server List window's preview of the offline servers, as it was left.
+    g_ServerListManager->SetOfflinePreview(g_MuEditorConfig.GetShowOfflineServers(),
+                                           g_MuEditorConfig.GetOfflineServerLoad());
     // The item checks know the looks; they are drawing code.
     g_ItemDataHandler.SetLookNames(Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists);
     g_MuEditorConsoleUI.LogEditor(std::string("Active locale: ") + I18N::GetCurrentLocale());

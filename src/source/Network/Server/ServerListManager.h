@@ -90,12 +90,28 @@ public:
     // Builds the groups of the last list the connect server sent again, with
     // the groups SetServerList set since.
     void RebuildServerGroups();
+    // The highest load the preview of the offline servers takes: an overloaded server's.
+    static constexpr int MaxOfflineServerPercent = 140;
+    // MuEditor's preview of the servers that are offline: every channel 1 to 20 of every group of the list
+    // that the connect server didn't send is shown too, at `percent` load, and can't be joined (m_offline). It
+    // takes effect with the next RebuildServerGroups.
+    void SetOfflinePreview(bool show, int percent);
+    bool IsShowingOfflineServers() const
+    {
+        return m_showOffline;
+    }
+    int GetOfflineServerPercent() const
+    {
+        return m_offlinePercent;
+    }
 #endif
 
 protected:
     // The list's group with the ID, and its place in the list from 1 (`sequence`); nullptr when the list has none.
     const Data::ServerList::ServerGroup* FindListGroup(int groupId, int& sequence) const;
     bool MakeServerGroup(IN int iServerGroupIndex, OUT CServerGroup* pServerGroup);
+    // The group of the server with this connect index, made when the list has it; nullptr when it doesn't.
+    CServerGroup* FindOrMakeGroup(int iConnectIndex);
     void InsertServer(CServerGroup* pServerGroup, int iConnectIndex, int iServerPercent);
 
 public:
@@ -125,6 +141,8 @@ protected:
 #ifdef _EDITOR
     std::vector<ReceivedServer> m_receivedServers;
     int m_receivedServersVersion = 0;
+    bool m_showOffline = false;
+    int m_offlinePercent = 50;
 #endif
 };
 

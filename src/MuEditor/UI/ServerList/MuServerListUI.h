@@ -80,6 +80,8 @@ private:
     // screen shows the groups.
     void AfterHistoryStep();
     void RenderToolbar();
+    // The switch and the load of MuEditor's preview of the offline servers (CServerListManager::SetOfflinePreview).
+    void RenderOfflinePreview();
     void RenderStatus();
     // Each of these that changes the groups returns true.
     bool RenderGroupList();

@@ -13,7 +13,9 @@
 
 #include <algorithm>
 #include <filesystem>
+#include <map>
 #include <memory>
+#include <optional>
 #include <string_view>
 
 namespace
@@ -94,10 +96,46 @@ void CServerListManager::RebuildServerGroups()
     const int totalServer = m_iTotalServer;
     Release();
     SetTotalServer(totalServer);
+    if (!m_showOffline)
+    {
+        for (const ReceivedServer& server : servers)
+        {
+            InsertServerGroup(server.connectIndex, server.percent);
+        }
+        return;
+    }
+    // With the preview, each group has all its channels, in their order: the load of a sent one, none for the others.
+    std::map<int, std::optional<int>> channels;
     for (const ReceivedServer& server : servers)
     {
-        InsertServerGroup(server.connectIndex, server.percent);
+        channels[server.connectIndex] = server.percent;
     }
+    for (const Data::ServerList::ServerGroup& group : m_serverList.groups)
+    {
+        for (int channel = 0; channel < MAX_SERVER_PER_GROUP; ++channel)
+        {
+            channels.try_emplace(group.id * MAX_SERVER_PER_GROUP + channel, std::nullopt);
+        }
+    }
+    for (const auto& [connectIndex, percent] : channels)
+    {
+        if (percent)
+        {
+            InsertServerGroup(connectIndex, *percent);
+        }
+        else if (CServerGroup* pServerGroup = FindOrMakeGroup(connectIndex))
+        {
+            InsertServer(pServerGroup, connectIndex, m_offlinePercent);
+            pServerGroup->m_listServerInfo.back()->m_offline = true;
+            m_iterServerGroup = m_mapServerGroup.begin();
+        }
+    }
+}
+
+void CServerListManager::SetOfflinePreview(bool show, int percent)
+{
+    m_showOffline = show;
+    m_offlinePercent = std::clamp(percent, 0, MaxOfflineServerPercent);
 }
 #endif
 
@@ -118,40 +156,33 @@ void CServerListManager::InsertServerGroup(int iConnectIndex, int iServerPercent
     m_receivedServers.push_back({iConnectIndex, iServerPercent});
     ++m_receivedServersVersion;
 #endif
-    CServerGroup* pServerGroup = NULL;
-
-    auto iterServerGroup = m_mapServerGroup.begin();
-
-    bool bEqual = false;
-    while (iterServerGroup != m_mapServerGroup.end())
-    {
-        if ((iterServerGroup->second)->m_iServerIndex == iConnectIndex / MAX_SERVER_PER_GROUP)
-        {
-            bEqual = true;
-            break;
-        }
-
-        iterServerGroup++;
-    }
-
-    if (bEqual == true)
-    {
-        pServerGroup = iterServerGroup->second;
-    }
-    else
-    {
-        // A server of a group the list does not have is not shown.
-        auto pNewServerGroup = std::make_unique<CServerGroup>();
-        if (MakeServerGroup(iConnectIndex / MAX_SERVER_PER_GROUP, pNewServerGroup.get()) == false)
-            return;
-
-        pServerGroup = pNewServerGroup.release();
-        m_mapServerGroup.insert(type_mapServerGroup::value_type(pServerGroup->m_iSequence, pServerGroup));
-    }
+    // A server of a group the list does not have is not shown.
+    CServerGroup* pServerGroup = FindOrMakeGroup(iConnectIndex);
+    if (pServerGroup == nullptr)
+        return;
 
     InsertServer(pServerGroup, iConnectIndex, iServerPercent);
 
     m_iterServerGroup = m_mapServerGroup.begin();
+}
+
+CServerGroup* CServerListManager::FindOrMakeGroup(int iConnectIndex)
+{
+    for (const auto& entry : m_mapServerGroup)
+    {
+        if (entry.second->m_iServerIndex == iConnectIndex / MAX_SERVER_PER_GROUP)
+        {
+            return entry.second;
+        }
+    }
+
+    auto pNewServerGroup = std::make_unique<CServerGroup>();
+    if (MakeServerGroup(iConnectIndex / MAX_SERVER_PER_GROUP, pNewServerGroup.get()) == false)
+        return nullptr;
+
+    CServerGroup* pServerGroup = pNewServerGroup.release();
+    m_mapServerGroup.insert(type_mapServerGroup::value_type(pServerGroup->m_iSequence, pServerGroup));
+    return pServerGroup;
 }
 
 bool CServerListManager::MakeServerGroup(IN int iServerGroupIndex, OUT CServerGroup* pServerGroup)

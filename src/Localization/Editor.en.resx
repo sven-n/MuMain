@@ -3196,4 +3196,16 @@
   <data name="No rule and no load part uses these colors: {0}" xml:space="preserve">
     <value>No rule and no load part uses these colors: {0}</value>
   </data>
+  <data name="Show offline servers in the game" xml:space="preserve">
+    <value>Show offline servers in the game</value>
+  </data>
+  <data name="Their load" xml:space="preserve">
+    <value>Their load</value>
+  </data>
+  <data name="Offline servers note" xml:space="preserve">
+    <value>Editor only: the login screen also lists every channel 1 to 20 of every group that the connect server did not send, at this load, so you can see its name, color and load bar. It cannot be joined.</value>
+  </data>
+  <data name="Only the editor shows this server; the connect server did not send it." xml:space="preserve">
+    <value>Only the editor shows this server; the connect server did not send it.</value>
+  </data>
 </root>

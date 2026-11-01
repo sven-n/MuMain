@@ -19,6 +19,13 @@ namespace UI::LoginScene
 {
 void ServerListReceived()
 {
+#ifdef _EDITOR
+    // MuEditor's preview adds the channels the connect server didn't send.
+    if (g_ServerListManager->IsShowingOfflineServers())
+    {
+        g_ServerListManager->RebuildServerGroups();
+    }
+#endif
     if (std::getenv("MU_INPUT_DIAGNOSTICS") != nullptr)
     {
         mu::log::Get("input")->info(
