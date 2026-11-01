@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Data/GameData/ColorFolders/ColorFolder.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemTooltipConditions.h"
 
@@ -53,9 +54,14 @@ struct GroundLabelFile
 {
     std::vector<GroundLabelStyle> styles;
     std::vector<GroundLabelRule> standard;
+    // The folders MuEditor sorts the styles in ("colorFolders", ColorFolders.h); the game reads and checks them
+    // but doesn't use them.
+    std::vector<Colors::ColorFolder> folders;
 
     // The style of that name, or nullptr.
     const GroundLabelStyle* FindStyle(std::string_view name) const;
+    // Whether a standard rule gives the style of that name.
+    bool IsStandardRuleStyle(std::string_view name) const;
 
     bool operator==(const GroundLabelFile&) const = default;
 };

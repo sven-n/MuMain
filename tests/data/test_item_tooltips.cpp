@@ -13,8 +13,10 @@
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
+#include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "Engine/Object/ItemDropModel.h"
 #include "Engine/Object/ItemTooltipSnapshot.h"
 #include "Engine/Object/ItemTooltipValues.h"
 #include "Engine/Object/ZzzInventory.h"
@@ -948,6 +950,24 @@ TEST_CASE("A ground label takes its look from the item's own style or else the s
     const GroundItemLabel zenLabel = DescribeGroundItemLabel(&zenObject, &zen);
     CHECK(zenLabel.text == L"Zen 123456");
     CHECK(zenLabel.textColor == rgb(0xff, 0xcc, 0x19));
+}
+
+// The drawn model a drop takes, which the ground label's tag conditions read: the Weapon of Archangel's level picks one of
+// the divine weapons, a chocolate box opened at +1 and a Box of Luck's kinds have models of their own.
+TEST_CASE("A dropped item is drawn with its own model but for some items at some levels [data][items][tooltip]")
+{
+    using Engine::Items::Drops::DrawnModel;
+    CHECK(DrawnModel(ITEM_WEAPON_OF_ARCHANGEL, 0) == MODEL_DIVINE_STAFF_OF_ARCHANGEL);
+    CHECK(DrawnModel(ITEM_WEAPON_OF_ARCHANGEL, 1) == MODEL_DIVINE_SWORD_OF_ARCHANGEL);
+    CHECK(DrawnModel(ITEM_WEAPON_OF_ARCHANGEL, 2) == MODEL_DIVINE_CB_OF_ARCHANGEL);
+    CHECK(DrawnModel(ITEM_WEAPON_OF_ARCHANGEL, 3) == Data::Items::ToModelSlot(ITEM_WEAPON_OF_ARCHANGEL));
+    CHECK(DrawnModel(ITEM_RED_CHOCOLATE_BOX, 1) == MODEL_EVENT + 22);
+    CHECK(DrawnModel(ITEM_RED_CHOCOLATE_BOX, 0) == Data::Items::ToModelSlot(ITEM_RED_CHOCOLATE_BOX));
+    CHECK(DrawnModel(ITEM_BOX_OF_LUCK, 2) == MODEL_EVENT + 5);
+    CHECK(DrawnModel(ITEM_BOX_OF_LUCK, 4) == Data::Items::ToModelSlot(ITEM_BOX_OF_LUCK));
+    CHECK(DrawnModel(ITEM_GEMSTONE, 0) == MODEL_GEMSTONE);
+    CHECK(DrawnModel(ITEM_ZEN, 0) == MODEL_ZEN);
+    CHECK(DrawnModel(Data::Items::MakeItemType(0, 1), 9) == Data::Items::ToModelSlot(Data::Items::MakeItemType(0, 1)));
 }
 
 // The option lines are the lines the full item has and the plain one doesn't (luck, skill, the option, the excellent

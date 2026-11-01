@@ -185,6 +185,33 @@ TEST_CASE("Items > Glow Colors opens the Colors window on its Glow root [editor]
     CHECK(glow->isTabShown());
 }
 
+// Items > Ground Label Styles is the Colors window's Ground labels root.
+TEST_CASE("Items > Ground Label Styles opens the Colors window on its Ground labels root [editor][items]")
+{
+    TestImGuiContext context;
+    ToolWindowsScope windows;
+    const MuEditor::ToolWindowEntry* styles = FindItemTool(&I18N::Editor::GroundLabelStyles);
+    REQUIRE(styles != nullptr);
+    CHECK(std::string_view(styles->windowId) == WindowIds::Colors);
+    REQUIRE(styles->showTab != nullptr);
+    const MuEditor::ToolWindowEntry* glow = FindItemTool(&I18N::Editor::GlowColors);
+    REQUIRE(glow != nullptr);
+
+    styles->showTab();
+    CHECK(g_MuEditorCore.GetToolWindows().colors);
+    RenderColors();
+    RenderColors();
+    CHECK(g_MuColorsUI.GetShownRoot() == ColorsRoot::GroundLabels);
+    CHECK(styles->isTabShown());
+    CHECK_FALSE(glow->isTabShown());
+
+    // And back to the glow colors.
+    glow->showTab();
+    RenderColors();
+    RenderColors();
+    CHECK(g_MuColorsUI.GetShownRoot() == ColorsRoot::Glow);
+}
+
 TEST_CASE("The first layout docks the Colors window with the item tools [editor][items]")
 {
     TestImGuiContext context;

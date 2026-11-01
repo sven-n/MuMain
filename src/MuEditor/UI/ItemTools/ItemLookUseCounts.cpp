@@ -4,7 +4,10 @@
 
 #include "ItemLookUseCounts.h"
 
+#include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
+
+#include <algorithm>
 
 namespace MuEditor::Items
 {
@@ -30,6 +33,36 @@ int ItemLookUseCounts::GlowColor(std::string_view name)
 {
     Update();
     return Find(m_glowColors, name);
+}
+
+int ItemLookUseCounts::GroundLabelStyle(std::string_view name)
+{
+    UpdateItems();
+    return Find(m_groundLabelStyles, name);
+}
+
+void ItemLookUseCounts::UpdateItems()
+{
+    if (m_itemVersion == g_ItemDatabase.GetVersion())
+    {
+        return;
+    }
+    m_itemVersion = g_ItemDatabase.GetVersion();
+    m_groundLabelStyles.clear();
+    for (const Data::Items::ItemDefinition& item : g_ItemDatabase.GetAllSlots())
+    {
+        const auto& labels = item.groundLabels;
+        for (auto label = labels.begin(); label != labels.end(); ++label)
+        {
+            // An item with the style in several rules counts once for it.
+            const auto sameStyle = [&](const Data::Items::ItemGroundLabel& other)
+            { return other.style == label->style; };
+            if (std::none_of(labels.begin(), label, sameStyle))
+            {
+                ++m_groundLabelStyles[label->style];
+            }
+        }
+    }
 }
 
 void ItemLookUseCounts::Update()

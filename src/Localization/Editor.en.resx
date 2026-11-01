@@ -1477,6 +1477,96 @@
   <data name="Colors" xml:space="preserve">
     <value>Colors</value>
   </data>
+  <data name="Ground labels" xml:space="preserve">
+    <value>Ground labels</value>
+  </data>
+  <data name="Ground Label Styles" xml:space="preserve">
+    <value>Ground Label Styles</value>
+  </data>
+  <data name="Item Tooltip" xml:space="preserve">
+    <value>Item Tooltip</value>
+  </data>
+  <data name="New label style" xml:space="preserve">
+    <value>New label style</value>
+  </data>
+  <data name="Items name these styles in their ground label rules" xml:space="preserve">
+    <value>Items name these styles in their own ground label rules (Item Tooltip); the standard rules name the others.</value>
+  </data>
+  <data name="Apply to the style" xml:space="preserve">
+    <value>Apply to the style</value>
+  </data>
+  <data name="Change a label style" xml:space="preserve">
+    <value>Change a label style</value>
+  </data>
+  <data name="Remove a label style" xml:space="preserve">
+    <value>Remove a label style</value>
+  </data>
+  <data name="Remove unused label styles" xml:space="preserve">
+    <value>Remove unused label styles</value>
+  </data>
+  <data name="No item uses these label styles: {0}" xml:space="preserve">
+    <value>No item uses these label styles: {0}</value>
+  </data>
+  <data name="A style of the standard rules" xml:space="preserve">
+    <value>A style of the standard rules: an item without a rule of its own for a level takes it there.</value>
+  </data>
+  <data name="A name of letters and digits that no other label style has" xml:space="preserve">
+    <value>A name of letters and digits that no other label style has</value>
+  </data>
+  <data name="Text color" xml:space="preserve">
+    <value>Text color</value>
+  </data>
+  <data name="Background" xml:space="preserve">
+    <value>Background</value>
+  </data>
+  <data name="Bold" xml:space="preserve">
+    <value>Bold</value>
+  </data>
+  <data name="Skill" xml:space="preserve">
+    <value>Skill</value>
+  </data>
+  <data name="Luck" xml:space="preserve">
+    <value>Luck</value>
+  </data>
+  <data name="Option" xml:space="preserve">
+    <value>Option</value>
+  </data>
+  <data name="No set" xml:space="preserve">
+    <value>No set</value>
+  </data>
+  <data name="Set {0}: {1}" xml:space="preserve">
+    <value>Set {0}: {1}</value>
+  </data>
+  <data name="Ground label" xml:space="preserve">
+    <value>Ground label</value>
+  </data>
+  <data name="All levels" xml:space="preserve">
+    <value>All levels</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>From</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>To</value>
+  </data>
+  <data name="Add rule" xml:space="preserve">
+    <value>Add rule</value>
+  </data>
+  <data name="Change the ground label rules" xml:space="preserve">
+    <value>Change the ground label rules</value>
+  </data>
+  <data name="The first rule whose levels hold gives the style" xml:space="preserve">
+    <value>The first rule whose levels hold gives the style; at the other levels the standard rules do.</value>
+  </data>
+  <data name="No rules of its own" xml:space="preserve">
+    <value>No rules of its own: the standard rules give the style.</value>
+  </data>
+  <data name="Its own rule {0}" xml:space="preserve">
+    <value>Its own rule {0}</value>
+  </data>
+  <data name="The standard rules" xml:space="preserve">
+    <value>The standard rules</value>
+  </data>
   <data name="Glow Colors" xml:space="preserve">
     <value>Glow Colors</value>
   </data>

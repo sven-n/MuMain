@@ -49,12 +49,23 @@ public:
     // CItemDataHandler::RemoveGlowColor for each name, as one step; false
     // when none could be removed.
     bool RemoveGlowColors(std::string label, std::span<const std::string> names);
+    // CItemDataHandler::SetGroundLabelStyle.
+    void SetGroundLabelStyle(std::string label, const Data::Items::GroundLabelStyle& style);
+    // A new label style (CItemDataHandler::SetGroundLabelStyle) put into the ground label folder at `folder` (the empty
+    // path: under the root), as one step.
+    void AddGroundLabelStyle(std::string label, const Data::Items::GroundLabelStyle& style,
+                             std::span<const std::size_t> folder);
+    // CItemDataHandler::RemoveGroundLabelStyle for each name, as one step;
+    // false when none could be removed.
+    bool RemoveGroundLabelStyles(std::string label, std::span<const std::string> names);
     // The Colors window's roots of the item data, for SetColorFolders and the history.
     static constexpr std::string_view GlowFolders = "glow";
-    // The folders of the root (CItemDataHandler::SetGlowColorFolders), as one step.
+    static constexpr std::string_view GroundLabelFolders = "groundLabels";
+    // The folders of the root (CItemDataHandler::SetGlowColorFolders, SetGroundLabelFolders), as one step.
     void SetColorFolders(std::string label, std::string_view root, std::vector<Data::Colors::ColorFolder> folders);
-    // Puts the glow colors in this order (the same names), as one step.
+    // Puts the glow colors or the label styles in this order (the same names), as one step.
     void SetGlowColorOrder(std::string label, std::span<const Data::Effects::GlowColor> colors);
+    void SetGroundLabelStyleOrder(std::string label, std::span<const Data::Items::GroundLabelStyle> styles);
     // CItemDataHandler::SetStatFile, with the items in `repointed` stored as
     // they are (their new stat profile), as one step. `file` must be valid.
     void SetStatFile(std::string label, const Data::Items::ItemStatFile& file,
@@ -86,6 +97,10 @@ private:
     template <typename TChange> void RecordSlots(std::string label, std::span<const int> itemTypes, TChange&& change);
     // Into the history, or into the open group.
     void Record(ItemEditEntry entry);
+    // The ground label styles from `before` to as they are now, as one entry with the folders' change; false when
+    // they did not change.
+    bool RecordGroundLabelStyles(std::string label, std::vector<Data::Items::GroundLabelStyle> before,
+                                 std::vector<Data::Colors::ColorFolder> foldersBefore);
     // Adds the step of the root's folders from `before` to as they are now, when they changed.
     static void AddFolderStep(ItemEditEntry& entry, std::string_view root, std::vector<Data::Colors::ColorFolder> before);
 

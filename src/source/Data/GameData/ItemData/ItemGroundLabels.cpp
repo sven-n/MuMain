@@ -2,6 +2,7 @@
 
 #include "ItemGroundLabels.h"
 
+#include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemTooltipConditionsJson.h"
 
@@ -158,6 +159,12 @@ const GroundLabelStyle* GroundLabelFile::FindStyle(std::string_view name) const
     return found != styles.end() ? &*found : nullptr;
 }
 
+bool GroundLabelFile::IsStandardRuleStyle(std::string_view name) const
+{
+    return std::any_of(standard.begin(), standard.end(),
+                       [&](const GroundLabelRule& rule) { return rule.style == name; });
+}
+
 std::string WriteGroundLabelColor(const GroundLabelColor& color)
 {
     char text[8];
@@ -224,9 +231,13 @@ void ReadGroundLabelsJson(std::string_view text, const std::string& source, Grou
         ReadRules(*standard, source, file, issues);
     }
 
+    file.folders = Colors::ReadColorFolders(
+        root, source, [&file](std::string_view name) { return file.FindStyle(name) != nullptr; }, issues);
+
     for (const auto& [key, value] : root.items())
     {
-        if (key != Json::Keys::FormatVersion && key != StylesKey && key != StandardKey)
+        if (key != Json::Keys::FormatVersion && key != StylesKey && key != StandardKey &&
+            key != Colors::ColorFoldersKey)
         {
             AddWarning(issues, source, key, "unknown field, ignored");
         }
@@ -268,9 +279,15 @@ std::string WriteGroundLabelsJson(const GroundLabelFile& file)
     }
     OrderedJson root;
     root[Json::Keys::FormatVersion] = GroundLabelsFormatVersion;
+    if (!file.folders.empty())
+    {
+        root[Colors::ColorFoldersKey] = Colors::WriteColorFolders(file.folders, [&file](std::string_view name)
+                                                                  { return file.FindStyle(name) != nullptr; });
+    }
     root[StylesKey] = std::move(styles);
     root[StandardKey] = std::move(standard);
     std::string text = root.dump(Json::Indent, ' ', false, OrderedJson::error_handler_t::replace);
+    text = Colors::PutColorFoldersOnLines(text);
     for (const GroundLabelStyle& style : file.styles)
     {
         text = Json::PutObjectsOnOneLine(text, style.name);

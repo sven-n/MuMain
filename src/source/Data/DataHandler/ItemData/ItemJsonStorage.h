@@ -150,6 +150,10 @@ struct ItemModelSave
     std::filesystem::path statsFile;
     const ItemStatFile* stats = nullptr;
     bool statsChanged = false;
+    // Written to groundLabelsFile (GetGroundLabelsFile) when groundLabelsChanged.
+    std::filesystem::path groundLabelsFile;
+    const GroundLabelFile* groundLabels = nullptr;
+    bool groundLabelsChanged = false;
 #endif
 };
 
@@ -188,6 +192,9 @@ void ValidateGlowColorsAsWritten(std::span<const Effects::GlowColor> colors, std
 // The same for the item stat file (the changes of Item Formulas), read back
 // from ItemStats.json as the save would write it.
 void ValidateItemStatsAsWritten(const ItemStatFile& file, std::vector<ItemDataIssue>& issues);
+// The same for the ground label file (the styles the Colors window changed),
+// read back from GroundLabels.json as the save would write it.
+void ValidateGroundLabelsAsWritten(const GroundLabelFile& file, std::vector<ItemDataIssue>& issues);
 #endif
 
 // A model file that is not in the client folder (relative to the working

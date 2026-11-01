@@ -484,6 +484,11 @@ background (black when left out) and bold.
   the Summoner Character Card is orange (`cashShopItem`) beside the yellow
   character cards.
 
+In the item editor, the [Colors](#colors) window's Ground labels root changes
+the styles, and [Item Tooltip](#item-tooltip) previews an item's label and
+changes its own rules. The labels on the ground take a change at once, and
+Save Items writes the file.
+
 **Errors** when the item data loads: a style without a color or with a color
 that is not `"#rrggbb"`, a rule or an item naming a style the file doesn't have
 (the message suggests the name meant for a typo), and an unknown condition.
@@ -1252,6 +1257,9 @@ shows it in the others.
 - **Item Model**: see [Item Model](#item-model).
 - **Glow Colors**: the glow color list, the Glow root of the
   [Colors](#colors) window.
+- **Ground Label Styles**: the looks of the item names on the ground, the
+  Ground labels root of the [Colors](#colors) window.
+- **Item Tooltip**: how the item is shown, see [Item Tooltip](#item-tooltip).
 - **Item Formulas**: the item stat file, see [Item Formulas](#item-formulas).
 - **Item Sync**: Export and Import of the items and item formulas with an
   OpenMU server, see [Item Sync](#item-sync).
@@ -1355,11 +1363,12 @@ armors) may need a restart to show a new file.
 
 ### Colors
 
-The named colors as a tree, a root per use: **Glow** and the server list's
-colors ([server-list.md](server-list.md)); the ground label styles and the
-tooltip color groups get roots of their own. **Windows > Colors** opens the window on what was picked last, and
-**Items > Glow Colors** on its root. It docks with the item tools. The changes
-of the item roots are steps of the item undo history, Save Items writes them.
+The named colors as a tree, a root per use: **Glow**, **Ground labels** and
+the server list's colors ([server-list.md](server-list.md)); the tooltip color
+groups get a root of their own. **Windows > Colors** opens the window on what
+was picked last, and **Items > Glow Colors** and **Items > Ground Label
+Styles** on their root. It docks with the item tools. The changes of the item
+roots are steps of the item undo history, Save Items writes them.
 
 Under a root you sort its colors into **folders**, also folders in folders,
 at most eight levels deep: **New folder** adds one under the picked root or
@@ -1383,6 +1392,34 @@ shared model. A color no item uses is removed (**Remove**, or **Remove
 them** for all of them); the defaults (`orange`, `white`, `azure`) stay,
 since items without colors of their own glow with them. Every change is a
 step of the undo history; renaming a color is left out.
+
+#### Ground labels
+
+The Ground labels root lists the [label styles](#ground-labels), each with how
+many items name it in their own rules. A picked style's text color,
+background and bold are changed in its fields, under which the selected
+item's name is shown in that look, and **Apply to the style** takes them;
+when items name the style, the change lists them first. The labels on the
+ground take it at once. **New label style** adds one: a name of letters and
+digits no other style has, starting with the look of the picked style. A
+style no item names is removed (**Remove**, or **Remove them** for all of
+them); the styles of the standard rules stay. Renaming a style is left out.
+The editor has no bold font, so it draws a bold label twice, a pixel apart.
+
+### Item Tooltip
+
+How the selected item is shown, for now its [ground label](#ground-labels).
+The preview takes a level, skill, luck, an option, the excellent options and
+a set (one of the item's sets), and draws the label the game draws for such a
+drop, with the rule that gives it: one of the item's own, or the standard
+rules.
+
+Under it are the item's own rules, the first whose levels hold giving the
+style: a style, **All levels** or the levels from and to, and buttons to move
+a rule up or down and to remove it. **Add rule** adds a rule for the
+previewed level with the look the label has there, before a rule for every
+level (a rule after that one would never be used). Every change is a step of
+the undo history, and Save Items writes it to the item file.
 
 ### Item Formulas
 

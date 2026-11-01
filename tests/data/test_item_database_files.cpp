@@ -14,6 +14,7 @@
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/DataHandler/ItemData/ItemDataLoader.h"
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
+#include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -25,13 +26,16 @@
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelJsonFormat.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemStatsJson.h"
 #include "Data/GameData/ItemData/ItemStructs.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Data/GameData/ItemData/ItemTypeUse.h"
+#include "Engine/Object/ItemTooltipSnapshot.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Items/ItemStats.h"
 #include "Core/Text/Utf8.h"
@@ -49,6 +53,7 @@
 #include "UI/ItemTools/ItemEdits.h"
 #include "UI/ItemTools/ItemFieldWidgets.h"
 #include "UI/ItemTools/ItemHeldByCharacter.h"
+#include "UI/ItemTools/ItemLookUseCounts.h"
 #include "UI/ItemTools/ItemNamesakes.h"
 #include "UI/ItemTools/ItemRequirementTable.h"
 #include "UI/ItemTools/ItemRulesTable.h"
@@ -66,6 +71,7 @@
 #include "UI/ItemTools/MuItemRequirementsUI.h"
 #include "UI/ItemTools/MuItemRulesUI.h"
 #include "UI/ItemTools/MuItemSyncUI.h"
+#include "UI/ItemTools/MuItemTooltipUI.h"
 #include "UI/ItemTranslations/MuItemTranslationsUI.h"
 #include "UI/MapEditor/MapEditorUI.h"
 #include "TestModelSlots.h"
@@ -2834,6 +2840,7 @@ void RenderItemTools()
     g_MuItemCategoriesUI.Render(&open);
     g_MuItemModelUI.Render(&open);
     g_MuColorsUI.Render(&open);
+    g_MuItemTooltipUI.Render(&open);
     g_MuItemSyncUI.Render(&open);
     g_MuItemFormulasUI.Render(&open);
     g_MuDataChecksUI.Render(&open);
@@ -4407,6 +4414,167 @@ TEST_CASE("The item tools add glow colors, change them and remove unused ones [d
 
     edits.GetHistory().Clear();
     g_GlowColors.Build(shipped);
+}
+
+// D26 for the ground label styles (D68): a changed look reaches every label that takes it at once and is saved in its
+// place, and only a style that no item and no standard rule names is removed.
+TEST_CASE("The item tools change ground label styles and remove unused ones [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    const GroundLabelFile shipped = g_ItemDatabase.GetGroundLabels();
+    const std::filesystem::path labelsFile = folder.Directory() / GetGroundLabelsFile();
+    const std::string shippedText = TestFiles::ReadWholeFile(labelsFile);
+    MuEditor::Items::ItemEdits& edits = g_ItemEdits;
+    edits.GetHistory().Clear();
+    const auto labels = [] { return g_ItemDatabase.GetGroundLabels(); };
+    // The Devil Square Ticket's label, which its own rule gives the style "ticket".
+    const auto ticketLabel = []
+    {
+        ITEM item;
+        FillItemFromParameters(item, Engine::Items::TooltipSnapshot::FullItemParameters(13, 46));
+        OBJECT object{};
+        object.Type = Data::Items::ToModelSlot(item.Type);
+        return DescribeGroundItemLabel(&object, &item);
+    };
+
+    SUBCASE("a changed look is on the ground at once, saved in its place and read back")
+    {
+        // Nothing changed: the save leaves the file as it is.
+        std::vector<ItemDataIssue> issues;
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        CHECK(TestFiles::ReadWholeFile(labelsFile) == shippedText);
+
+        GroundLabelStyle ticket = *shipped.FindStyle("ticket");
+        ticket.color = {0x12, 0x34, 0x56};
+        ticket.bold = true;
+        edits.SetGroundLabelStyle("Change a label style", ticket);
+        CHECK(ticketLabel().textColor == 0xFF563412u);
+        CHECK(ticketLabel().bold);
+        // The style keeps its place in the file, and the standard rules stay.
+        REQUIRE(labels().styles.size() == shipped.styles.size());
+        for (size_t index = 0; index < shipped.styles.size(); ++index)
+        {
+            CHECK(labels().styles[index].name == shipped.styles[index].name);
+        }
+        CHECK(labels().standard == shipped.standard);
+
+        issues.clear();
+        REQUIRE(g_ItemDataHandler.Save(issues) == ItemDataSaveResult::Saved);
+        const GroundLabelsLoadResult saved = LoadGroundLabelsFile(labelsFile);
+        CHECK(saved.issues.empty());
+        CHECK(saved.file == labels());
+
+        REQUIRE(edits.Undo());
+        CHECK(labels() == shipped);
+        CHECK_FALSE(ticketLabel().bold);
+        REQUIRE(edits.Redo());
+
+        // The next start reads it back.
+        REQUIRE(g_ItemDataHandler.Load(errorMessage));
+        CHECK(*labels().FindStyle("ticket") == ticket);
+    }
+
+    SUBCASE("only styles no item and no standard rule names are removed")
+    {
+        edits.SetGroundLabelStyle("New label style", {"spare", {1, 2, 3}});
+        CHECK(labels().styles.back().name == "spare");
+        CHECK(MuEditor::Items::FindGroundLabelStyleUsers("spare").empty());
+        CHECK_FALSE(MuEditor::Items::FindGroundLabelStyleUsers("ticket").empty());
+        REQUIRE(shipped.IsStandardRuleStyle("level0"));
+        const std::string names[] = {"spare", "ticket", "level0"};
+        REQUIRE(edits.RemoveGroundLabelStyles("Remove unused label styles", names));
+        CHECK(labels().FindStyle("spare") == nullptr);
+        CHECK(labels().FindStyle("ticket") != nullptr);
+        CHECK(labels().FindStyle("level0") != nullptr);
+        const std::string used[] = {"ticket"};
+        CHECK_FALSE(edits.RemoveGroundLabelStyles("Remove a label style", used));
+
+        REQUIRE(edits.Undo());
+        CHECK(labels().FindStyle("spare") != nullptr);
+        REQUIRE(edits.Undo());
+        CHECK(labels() == shipped);
+    }
+
+    SUBCASE("a new style made in a folder is one undo step")
+    {
+        const std::vector<Data::Colors::ColorFolder> folders{{"Shop", {}, {}}};
+        edits.SetColorFolders("New folder", MuEditor::Items::ItemEdits::GroundLabelFolders, folders);
+        edits.GetHistory().Clear();
+
+        const Data::Colors::ColorFolderPath shop{0};
+        edits.AddGroundLabelStyle("New label style", {"spare", {1, 2, 3}}, shop);
+        CHECK(labels().FindStyle("spare") != nullptr);
+        CHECK(Data::Colors::FindFolderOfColor(labels().folders, "spare") == shop);
+        CHECK(edits.GetHistory().GetUndoLabel() == std::string("New label style"));
+
+        REQUIRE(edits.Undo());
+        CHECK(labels().FindStyle("spare") == nullptr);
+        CHECK(labels().folders == folders);
+        CHECK_FALSE(edits.GetHistory().CanUndo());
+
+        REQUIRE(edits.Redo());
+        CHECK(Data::Colors::FindFolderOfColor(labels().folders, "spare") == shop);
+    }
+
+    SUBCASE("the item tools count each item that names a style once")
+    {
+        MuEditor::Items::ItemLookUseCounts counts;
+        for (const GroundLabelStyle& style : shipped.styles)
+        {
+            INFO(style.name);
+            CHECK(counts.GroundLabelStyle(style.name) ==
+                  static_cast<int>(MuEditor::Items::FindGroundLabelStyleUsers(style.name).size()));
+        }
+        CHECK(counts.GroundLabelStyle("level0") == 0);
+        CHECK(counts.GroundLabelStyle("ticket") > 0);
+    }
+
+    edits.GetHistory().Clear();
+}
+
+// Item Tooltip (D71): Add rule gives the item a rule for the previewed level, with the style its label has there,
+// before its rule for every level (one after it would never be used), as one undo step.
+TEST_CASE("Item Tooltip adds an item's ground label rule as an undo step [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TestImGuiContext context;
+    g_ItemEdits.GetHistory().Clear();
+    // The Devil Square Ticket: one rule, "ticket" at every level.
+    const int ticketType = MakeItemType(13, 46);
+    g_ItemSelection.Select(ticketType);
+    const std::vector<ItemGroundLabel> shipped = g_ItemDatabase.Find(ticketType)->groundLabels;
+    REQUIRE(shipped == std::vector<ItemGroundLabel>{{"ticket"}});
+    const auto frame = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuItemTooltipUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    frame();
+    const ImGuiWindow* window = ImGui::FindWindowByName(MuEditor::WindowIds::ItemTooltip);
+    REQUIRE(window != nullptr);
+    ImGui::ActivateItemByID(
+        ImGui::GetIDWithSeed(I18N::Editor::AddRule, nullptr, ImGui::GetIDWithSeed(ticketType, window->ID)));
+    frame();
+
+    const ItemGroundLabel added{"ticket", true, 0, 0};
+    CHECK(g_ItemDatabase.Find(ticketType)->groundLabels == std::vector<ItemGroundLabel>{added, shipped[0]});
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == I18N::Editor::ChangeTheGroundLabelRules);
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(g_ItemDatabase.Find(ticketType)->groundLabels == shipped);
+    g_ItemEdits.GetHistory().Clear();
 }
 
 TEST_CASE("A description placeholder that names no table stops the save [editor][items]")
