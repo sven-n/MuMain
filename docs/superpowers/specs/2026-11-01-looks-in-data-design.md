@@ -13,8 +13,8 @@
 
 ## Goal
 
-What a named item look is made of moves from code into data, with a look
-editor in MuEditor (D25). Each part (mesh) of a model can get its own layers:
+What a named item look is made of moves from code into data, with an
+editor for looks in MuEditor, the Style Editor (D25, L18, L24). Each part (mesh) of a model can get its own layers:
 a chrome layer on the hilt only, a glow on the blade, and so on. The Item
 Model window gets a list of the model's meshes, so a mesh number can be
 picked knowing which part it is.
@@ -27,8 +27,8 @@ data, and each move is compared with the old code before the old code goes.
 - **In:** the item render styles (`renderStyle`, 140 names in
   `ItemRenderStyles.cpp`) and the item effects (`itemEffect`, 25 names in
   `ItemEffects.cpp`), all of them, in three steps (L7); layers per mesh; the
-  mesh list; the look editor; FX1.7c, the live preview of effects in an
-  editor view, which the look editor needs for things on bones.
+  mesh list; the Style Editor; FX1.7c, the live preview of effects in an
+  editor view, which the Style Editor needs for things on bones.
 - **Also in (L27):** the glow values `ItemObjectAttribute` sets per item type,
   the bone effects of held and worn items in the character drawing, and the
   looks inside `RenderModelWithoutStyle` once their models have entries.
@@ -48,7 +48,7 @@ Made while reviewing sven-n/MuMain#915, 2026-11-01.
 | L4 | Mesh list | The Item Model window lists the model's meshes under Model file. |
 | L5 | No render style per mesh | A style draws the whole model, so a mesh gets layers, not a style of its own. |
 | L6 | This document | Deleted by its last task, after its lasting content has moved into the docs. |
-| L7 | Building blocks (Q-L1, 2026-11-01) | All of D25's blocks for the item looks, in three steps. **Step 1:** draw passes (texture, chrome, metal, glow, dark; pulse, scrolling, light, tint) and conditions (doppelganger, inventory and ground, item level, which item). **Step 2:** FX1.7c, the live preview of effects in an editor view, with its own short design first (see the possible follow-up ideas). **Step 3:** things on bones (sprites, particles, lightning; chances per frame), named as FX1 decided for phase 13 (`{ "joint": "jointThunder", "subType": 14, "fromBone": 3, "toBone": 4 }`, SubType a number, D30), shown live in the look editor. |
+| L7 | Building blocks (Q-L1, 2026-11-01) | All of D25's blocks for the item looks, in three steps. **Step 1:** draw passes (texture, chrome, metal, glow, dark; pulse, scrolling, light, tint) and conditions (doppelganger, inventory and ground, item level, which item). **Step 2:** FX1.7c, the live preview of effects in an editor view, with its own short design first (see the possible follow-up ideas). **Step 3:** things on bones (sprites, particles, lightning; chances per frame), named as FX1 decided for phase 13 (`{ "joint": "jointThunder", "subType": 14, "fromBone": 3, "toBone": 4 }`, SubType a number, D30), shown live in the Style Editor. |
 | L8 | Names of a layer's fields (Q-L2a, 2026-11-01) | Designer terms, with no part for raw engine values (one could be added later without changing data). **Kind:** texture, reflection, light map, flat color. **Motion** (reflections): slow drift (`RENDER_CHROME`), fast sweep (`CHROME2`), follows the light (`CHROME3`), swirl (`CHROME4`), strong swirl (`CHROME5`), stripes (`CHROME6`), very slow drift (`CHROME7`), oil sheen (`OIL`), still shine (`METAL`). **Blend:** normal, glow (`RENDER_BRIGHT`, adds light), darken (`RENDER_DARK`), as the drawing asks (the drawing's own render type). **Meshes:** empty for all. **Where** (reflections): over, or under the holes (as #915 draws it). **Texture:** empty for the mesh's own, or the one that belongs to the motion. **Color:** the model's light, a fixed color, or a tint of the model's light. Kind, Motion and Blend combine freely; an engine feature with no field (e.g. `RENDER_NODEPTH`) gets one added in code. Opacity, the glow mesh and scrolling: L10. |
 | L9 | Values that change over time (Q-L2b, 2026-11-01) | A field that changes over time names a shape whose parameters a designer can picture: **fixed**; **wave** (from, to, seconds per cycle); **bounce** (the absolute sine: from, to, seconds); **scroll** (per second); **ramp** (from, to, seconds, then back to the start); **frames** (count, step, seconds each); **random** (from, to, step, a new value each frame). The loader turns them into the code's numbers; a moved look keeps its exact values (e.g. 6.283185 s for `sin(WorldTime * 0.001f)`), checked against the old code. The editor draws the value over time beside the field. No formula text (D43: building blocks with parameters, not code transcribed). Chances per frame belong to things on bones (L7 step 3). |
 | L10 | Glow mesh, scrolling and opacity (Q-L2b, 2026-11-01) | **Fields of each layer**, empty for the item's value: glow mesh (none, a mesh, or all meshes), glow strength, scrolling mesh, scrolling (U and V), opacity (the item's, the drawing's, a number or a shape). **Item values of the look:** the glow mesh, glow strength, scrolling mesh, scrolling, opacity and hidden mesh it leaves on the item for what is drawn after it (the +7 glow, the excellent glow), as `masterScepter` leaves glow mesh 1 (`ItemRenderStyles.cpp:338-352`). The 11 item effects that only change values become looks with item values and no layers. When item values apply: L13 (an item effect's before the layers, a render style's after them). |
@@ -148,6 +148,7 @@ so a few can be off:
 - The plain drawing, `RenderModelWithoutStyle` (`ZzzObject.cpp`), has looks
   of its own for some models (the +15 armor objects, `MODEL_SWORD_35_WING`,
   `MODEL_ARMORINVEN_74`, …) outside the style list; Q-L5 looks at them too.
+
 ### The survey of the looks (Q-L5)
 
 Every render style and item effect, with the helper functions it calls, read
@@ -215,7 +216,294 @@ where there are holes needs that flag.
 
 ## Target design
 
-Written from the answers to the open questions.
+The finished design, put together from L1 to L28. The examples use real
+looks with the values of their code. Field names in the examples are this
+design's working names; the pull request that first reads a field (L26)
+fixes its name in `docs/item-data.md`. Points that are no decision of their
+own but follow from two of them say so.
+
+### 1. Two kinds of looks, in two files
+
+An item model has at most two looks, as today (L13):
+
+| Kind | Named by | Parts | When it acts |
+|---|---|---|---|
+| **Render style** | `renderStyle` in the model entry, the Render style dropdown | Not for; layers; item values after drawing; values per item | It draws the item. Without one, the game draws the item plainly. |
+| **Item effect** | `itemEffect` in the model entry, the Item effect dropdown | item values before drawing; things on bones (step 3); values per item | Before the drawing, every frame. |
+
+A look can't have the other kind's parts (a fatal check, L23), so two looks
+never both draw. Combining two looks is a field on the item: Wing of Ruin
+can keep its render style and pick the item effect `wingsOfDarkness`. A
+change to a look reaches every item that uses it (D26).
+
+Looks are named and shared (L12), in one file per kind in `Data/Effects/`
+(L15), built like the effect catalogue's files: a format version, the kind,
+a list sorted by name. The two lists are separate, so a name can be in both.
+
+```json
+Data/Effects/RenderStyles.json
+{
+  "formatVersion": 1,
+  "kind": "renderStyle",
+  "looks": [
+    {
+      "name": "greatScepter",
+      "notFor": ["doppelganger"],
+      "layers": [
+        { "kind": "texture", "meshes": { "allBut": [2] }, "opacity": "drawing" },
+        { "kind": "texture", "meshes": [2], "glowMesh": 2, "glowStrength": 1,
+          "opacity": "drawing",
+          "scrollU": { "scroll": { "perSecond": 0.5 } },
+          "scrollV": { "scroll": { "perSecond": 0.5 } } }
+      ],
+      "itemValuesAfter": { "hiddenMesh": 2, "glowMesh": 2, "glowStrength": 1 }
+    },
+    {
+      "name": "masterScepter",
+      "layers": [
+        { "kind": "texture", "opacity": "drawing" },
+        { "kind": "texture", "meshes": [0], "color": [0.1, 0.3, 1.0],
+          "glowMesh": 0, "opacity": "drawing",
+          "glowStrength": { "wave": { "from": -0.2, "to": 1.0, "seconds": 6.283185 } } },
+        { "kind": "texture", "meshes": [1], "texture": "Effect/Chrome01.jpg",
+          "color": [0.6, 0.8, 1.0], "glowMesh": 1, "glowStrength": 1,
+          "opacity": "drawing", "scrollV": { "scroll": { "perSecond": 0.3 } } }
+      ],
+      "itemValuesAfter": { "glowMesh": 1, "glowStrength": 1 }
+    },
+    {
+      "name": "thunderHawk",
+      "layers": [
+        { "kind": "texture" },
+        { "kind": "reflection", "motion": "slowDrift", "blend": "glow",
+          "where": "underHoles", "texture": "Effect/bab2.jpg",
+          "color": { "tint": [0.85, 0.85, 1.2] },
+          "meshes": { "eachItem": "chromeMeshes", "default": "all" } }
+      ]
+    }
+  ]
+}
+```
+
+```json
+Data/Effects/ItemEffects.json
+{
+  "formatVersion": 1,
+  "kind": "itemEffect",
+  "looks": [
+    { "name": "hiddenMeshByLevel",
+      "itemValuesBefore": [
+        { "onlyWhen": { "level": [0, 0] }, "hiddenMesh": 1 },
+        { "onlyWhen": { "level": [1, 1] }, "hiddenMesh": 0 } ] },
+    { "name": "potion",
+      "itemValuesBefore": [ { "onlyWhen": { "level": [1, 15] }, "glowsLikeLevel": 7 } ] }
+  ]
+}
+```
+
+### 2. A layer
+
+A render style draws its layers in their order; each layer draws its
+meshes. Control per part is a layer's meshes, never a style per mesh (L3,
+L5). The fields, in designer terms (L8, L10, L11), each with the engine
+value it becomes:
+
+| Field | Values | Becomes |
+|---|---|---|
+| Kind | texture, reflection, light map, flat color | the texture pass, the chrome family, `RENDER_LIGHTMAP`, `RENDER_COLOR` |
+| Motion (reflections) | slow drift, fast sweep, follows the light, swirl, strong swirl, stripes, very slow drift, oil sheen, still shine | `RENDER_CHROME`, `CHROME2` to `CHROME7`, `OIL`, `METAL` |
+| Blend | normal, glow, darken, as the drawing asks | none, `RENDER_BRIGHT`, `RENDER_DARK`, the drawing's own render type |
+| Meshes | empty for all, a list, all but a list | the meshes the layer draws |
+| Where (reflections) | over, or under the holes | section 4 |
+| Texture | empty for the mesh's own (or the motion's own, `ZzzBMD.cpp:1718-1743`), or a file | the texture bound for the pass |
+| Color | empty for the model's light, a fixed color, a tint of the model's light, the model's light at a fixed brightness (L16) | the model's light while the layer draws |
+| Opacity | empty for the item's, the drawing's, a number, a shape | the pass's alpha |
+| Glow mesh, glow strength | empty for the item's, none, a mesh, all meshes; a number or a shape | the blend mesh and its light |
+| Scrolling mesh, scroll U and V | empty for the item's, a mesh; numbers or shapes | the stream mesh and the texture offsets |
+| Only when | worn; in the inventory and on the ground; in the inventory (L16); an item level range; the item's hidden mesh; a buff on the character | the layer is skipped otherwise |
+
+Kind, Motion and Blend combine freely. An engine feature with no field gets
+one added in code, never raw flags in the data (L8). A layer draws with
+`RenderBody`'s mesh rules (section 4).
+
+**Values over time (L9, L16).** A field that changes over time names a
+shape: fixed; wave (from, to, seconds per cycle); bounce (from, to,
+seconds); scroll (per second); ramp (from, to, seconds, then back to the
+start); frames (count, step, seconds each); random (from, to, step, a new
+value each frame); zigzag (straight up and down, L16). Two more sources
+(L16): the item's own value times a shape, and the item's turning angle.
+The loader turns shapes into the code's numbers, and a moved look keeps its
+exact values (6.283185 s above is `sin(WorldTime * 0.001f)`). The editor
+draws the value over time beside the field.
+
+**Values per item (L12).** Any field can be ticked "Each item sets this",
+with a name and the look's value as default (`eachItem` above). The item
+stores its values in its model entry, one set per look kind (follows from
+L12 and L13):
+
+```json
+{ "number": 100, "renderStyle": "socketSeedSphere",
+  "renderStyleValues": { "color": [0.9, 0.1, 0.2] } }
+```
+
+In the same way the Divine Sword of L12 names `thunderHawk` and sets
+`chromeMeshes` to `[1]`.
+
+So `socketSeedSphere` loses its test for the sphere item types
+(`ItemRenderStyles.cpp:1379`): its users set their color, and other items
+don't name it.
+
+### 3. Item values and conditions
+
+**Item values** are what a look leaves on the item for what is drawn after
+it in the same drawing, the +7 glow and the excellent glow (L10, L16): glow
+mesh, glow strength, scrolling mesh, scrolling, opacity, hidden mesh, the
+level the item glows like (`potion`), and the model lit by the scene light
+(`firecracker`). An item effect's apply before the layers, a render style's
+after them (L13). An entry of item values can carry an Only when, so a value
+can depend on the item level (follows from L11 and L13; `hiddenMeshByLevel`,
+`potion`). A look that sets an item value before its own passes today
+(`greatScepter` sets its hidden mesh, glow mesh and glow strength first)
+names the values in its layers and leaves them after.
+
+**Not for** (L11) is on a render style: for those drawings (doppelgangers,
+outside a monster's hands) the game draws the item plainly, as a style
+returning false does today.
+
+### 4. Drawing
+
+**Shared mesh rules (L1, L2).** `RenderBody` and the layer drawing use the
+same code for the texture scripts:
+- a hidden mesh (`_H`, or a "hid…" texture name) is skipped;
+- a glowing mesh (`_R`, or the item's glow mesh) is drawn glowing; a
+  reflection layer on it is still added over it; None-blend meshes takes
+  reflections and the level glow off a mesh, as today;
+- `_DC` / `_DT` add their shadow pass, as in `RenderBody`.
+
+**Under the holes (L8, as #915 draws it).** On a mesh whose texture has
+holes, a reflection marked "under the holes" is drawn before the texture,
+solid and on both faces, so it fills the holes and the texture covers the
+rest. On a mesh without holes, and on every mesh of a see-through drawing
+(the doppelgangers), it is added over the texture with the layer's blend. "Has holes" is a flag set
+when a texture loads, from its pixels at or below the alpha-test cutoff
+(0.25), the same for `.tga` and glTF textures; the pull request that adds it
+sets the share that counts and checks it against the 142 stock `.tga`
+textures. #915 is asked to add it; if it doesn't, pull request 2 does.
+
+### 5. Model entries and part models
+
+Model entries keep `renderStyle` and `itemEffect` (L13, L15) and gain the
+values per item. During the move a name is looked up in the look files
+first, then in the code list (L14). Two groups of entries do change, in
+pull request 3, because their look changes kind (follows from L13 and L27;
+the exception to L14's "model entries never change"):
+- the 12 items whose item effect draws (the 7 effects of L13) name it as
+  their render style instead; none of them has a render style today;
+- the items with `ItemObjectAttribute` glow values (L27) get an item effect
+  holding them; `staffOfKundun` and `redSpirit` get them in their own.
+
+**Part models (L28).** The 11 models that are no items (the 9 +15
+decorations, the Phoenix Soul Star's wing, inventory armor model 74) get
+entries in `Data/Items/Models/PartModels.json`, so their 3 looks can be
+render styles. The code keeps deciding when and where they are drawn.
+
+```json
+Data/Items/Models/PartModels.json
+{ "formatVersion": 1,
+  "partModels": [
+    { "name": "phoenixSoulStarWing", "file": "Data/Item/sword36wing.bmd",
+      "textureFolders": ["Item"], "renderStyle": "phoenixSoulStarWing" } ] }
+```
+
+### 6. Checks
+
+The project's three levels (L23). **Fatal:** the data can't be used (broken
+JSON or format version, a file of the wrong kind, bad or doubled names,
+wrong types and ranges, unknown kinds, motions, blends, shapes, conditions
+or places, a part the look's kind doesn't have, a field taken from an item
+value the look doesn't declare). **Error:** something named is missing (a
+texture, in step 3 an effect type); the game runs without it. **Warning:**
+it works but is worth knowing (a mesh number an item's model lacks, per
+item; values an item sets that its look doesn't offer; unknown fields; a
+look no item uses; a model entry naming a look that exists nowhere). They
+show in Data Checks in the areas Render styles and Item effects, and in the
+Style Editor under the picked look, whose Apply is off while a fatal one is
+left.
+
+### 7. The editor
+
+- **Style Editor** (L18, L24): Windows > Style Editor, built like Glow
+  Colors. Tabs Render styles and Item effects; New look, Copy, Rename; the
+  list with how many items use each look and "(code)" for looks not moved
+  yet (read-only); the picked look with Apply to the look, Revert, Remove,
+  "Used by N items:" and the confirm that lists them (D26).
+- **Layers** (L19): the list in drawing order, one line each written from
+  its fields, with + Add, Copy, up, down, Remove, and "Item values after
+  drawing" (or "before drawing") as the last line; the picked line's fields
+  below, with the value graphs and the "Each item sets this" boxes.
+- **Preview** (L20): the Item Model preview (any item, its level,
+  excellent, ancient, inventory or ground, turning), showing changes before
+  they are applied, plus stopping and moving time, an eye per layer, and
+  "Draw as: doppelganger".
+- **Item Model window** (L12, L21, L22, L24): the section **Style and
+  effect** with the two dropdowns, "Values for this item" with Reset, and
+  "Open in Style Editor". Under Model file the **mesh list**: a row per mesh
+  with its number, texture, marks (hidden, glows, scrolls, no chrome, holes)
+  and "used by", a tooltip with the texture's size and folder and the mesh's
+  vertices and triangles. Pointing at a row or at a number in a mesh field
+  draws the other meshes see-through, a click keeps it, and clicking a part
+  in a preview picks its row.
+- **Data Checks** (L23, L24): the new areas Render styles and Item effects;
+  the graphics area renamed Graphics look.
+
+### 8. The move and its proof
+
+Looks move by building block (L17), in the pull requests of section 9. Each
+move is proven by a **draw recorder** in the tests (L25): every item that
+uses a moved look is drawn with the old code and with the data in the same
+build, over clock times, levels +0, +7, +9, +11, +13 and +15, normal, doppelganger and in a
+monster's hands, worn, in the inventory and on the ground, opaque and
+fading, and per look its buffs and hidden-mesh states, set up by the game's
+own `ItemObjectAttribute`, with the clock and random numbers pinned. The
+records must be equal. Then the moved functions and their code names are
+deleted, and a test checks that no name is both in data and in code (L14).
+The six quirks of L16 are fixed instead of copied,
+each in its own commit with its expected differences and an in-game
+before/after.
+
+**Step 2** (L7) is FX1.7c: the live preview of effects in an editor view,
+with a short design of its own first. **Step 3** adds things on bones to
+item effects: sprites, particles and lightning by their FX1 names, the
+SubType a number (`{ "joint": "jointThunder", "subType": 14, "fromBone": 3,
+"toBone": 4 }`, D30), with chances per frame and values as in section 2,
+shown live in the Style Editor. The bone effects of held and worn items
+(L27) follow after a survey of their own that sorts the looks in
+`RenderLinkObject` and `RenderCharacter` from the other code there.
+
+### 9. Pull requests
+
+| PR | Contents | Waits for |
+|---|---|---|
+| 0 | This design, for review (L26) | – |
+| 1 | The mesh list and showing a mesh (L21, L22), the names of L24 | – |
+| 2 | Step 1 part 1: loader, the two look files, layer drawing with the shared mesh rules, the holes flag if #915 has none, the draw recorder, the checks, the Style Editor; L17's groups 1 and 2 (103 render styles) | – |
+| 3 | Step 1 part 2: L17's groups 3 to 5 (50 looks), `ItemObjectAttribute`'s glow values, the part models with the 3 looks of `RenderModelWithoutStyle` | #915 merged |
+| 4 | Steps 2 and 3: FX1.7c, the 12 looks with things on bones | – |
+| 5 | The bone effects of held and worn items, after their survey; then task 8 (the docs, this document deleted) | PR 4 |
+
+Each goes up as a fork pull request for CI and an upstream one, with one
+commit or more per group inside (L26).
+
+### 10. Not in this work
+
+- A pose worn by a character in the Style Editor's preview (L20).
+- A part for raw engine values in a layer (L8); it can be added without
+  changing data.
+- When and where the part models are drawn, as data (L28).
+- Monster and NPC looks, in the same files (MN8, L15); effect behavior as
+  data (FX2).
+- The ground scales `ItemObjectAttribute` sets for some items (ground
+  display data, L27).
 
 ## Open questions
 
@@ -229,8 +517,8 @@ Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), Q-L6a to Q-L6c 
 
 The design, then the pull requests of L26 and L27:
 
-1. [ ] Write this design: the questions are answered (Q-L1 to Q-L13); the
-   target design is still to be written from the decisions.
+1. [x] Write this design: the questions are answered (Q-L1 to Q-L13) and
+   the target design is written from the decisions.
 2. [ ] Pull request 0, the design: this document, for review.
 3. [ ] Pull request 1, the mesh list (L21, L22) and the names of L24.
 4. [ ] Pull request 2, step 1 part 1: the machinery, the Style Editor, L17's
