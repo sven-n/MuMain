@@ -251,9 +251,7 @@ std::optional<BarText> GetBarText(const ServerListData& list, const Data::Server
     {
         return std::nullopt;
     }
-    Data::ServerList::ChannelNameValues values;
-    values.load = loadText->text.Get(locale);
-    std::string text = Data::ServerList::BuildButtonTextParts(list, channel, values, locale).load;
+    std::string text = Data::ServerList::GetButtonLoadText(list, loadText->text.Get(locale), locale);
     if (text.empty())
     {
         return std::nullopt;

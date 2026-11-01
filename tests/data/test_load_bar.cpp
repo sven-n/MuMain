@@ -210,28 +210,20 @@ TEST_CASE("LoadBar: each shipped theme has its bar's colors")
     }
 }
 
-TEST_CASE("ButtonTextParts: the button's text is split at its load text")
+TEST_CASE("ButtonLoadText: a button shows the load text when its template has {load}")
 {
     ServerListData list;
-    Data::ServerList::ChannelSettings channel;
-    Data::ServerList::ChannelNameValues values;
-    values.name = "Valhalla";
-    values.channel = 1;
-    values.load = "(Full)";
-    const auto parts = [&](const std::string& text)
+    const auto loadText = [&list](const std::string& text, std::string_view load)
     {
         list.names.Template(Data::ServerList::ChannelNamePlace::Button).Set(Data::LocalizedString::NeutralLocale, text);
-        return Data::ServerList::BuildButtonTextParts(list, channel, values, "en");
+        return Data::ServerList::GetButtonLoadText(list, load, "en");
     };
-    using Parts = Data::ServerList::ButtonTextParts;
-    CHECK(parts("{name}-{channel} ({vip} {pvp}) {load}") == Parts{"Valhalla-1 (PvP) ", "(Full)", ""});
-    CHECK(parts("{load} {name}") == Parts{"", "(Full)", " Valhalla"});
-    CHECK(parts("{name}") == Parts{"Valhalla", "", ""});
-    CHECK(parts("{name} {load} / {load}") == Parts{"Valhalla ", "(Full)", " / (Full)"});
-
-    // A server that can be joined: no load text, and its space goes with it.
-    values.load = "";
-    CHECK(parts("{name}-{channel} ({vip} {pvp}) {load}") == Parts{"Valhalla-1 (PvP)", "", ""});
+    CHECK(loadText("{name}-{channel} ({vip} {pvp}) {load}", "(Full)") == "(Full)");
+    CHECK(loadText("{load} {name}", "(Full)") == "(Full)");
+    CHECK(loadText("{name} {load} / {load}", "(Full)") == "(Full)");
+    CHECK(loadText("{name}", "(Full)").empty());
+    // A server that can be joined has no load text.
+    CHECK(loadText("{name}-{channel} ({vip} {pvp}) {load}", "").empty());
 }
 
 TEST_CASE("Load bar: a text over the bar covers the segments reaching into it")

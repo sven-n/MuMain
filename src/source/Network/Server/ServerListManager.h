@@ -54,11 +54,10 @@ public:
     // The same at `place`, in UTF-8, for the windows that show it every frame (login, character
     // info): built again only when the list, the selected channel or the game's language changed.
     const std::string& GetSelectServerTitleUtf8(Data::ServerList::ChannelNamePlace place);
-    // A channel's button on the login screen, split at its {load} text: "Valhalla-1 (Gold Non-PvP)",
-    // with the list's text for a full or overloaded server ("(Full)") after it.
-    Data::ServerList::ButtonTextParts GetServerButtonParts(const CServerGroup& group, const CServerInfo& server) const;
-    // The same in one text.
-    std::wstring GetServerButtonText(const CServerGroup& group, const CServerInfo& server) const;
+    // The load text the server's button shows on its load bar, in the game's language: the list's text of
+    // a full or overloaded server ("(Full)"); none while it can be joined or the button template has no
+    // {load} (Data::ServerList::GetButtonLoadText).
+    std::string GetServerLoadText(const CServerInfo& server) const;
     // A channel's button text without its load text, for the channel `index` (1 to MAX_SERVER_PER_GROUP) of
     // `group`, whether or not the connect server sent it: "Valhalla-4 (Gold Non-PvP)". The login screen shows the
     // load text apart from it, at the button's right.

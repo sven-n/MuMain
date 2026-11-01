@@ -220,27 +220,15 @@ void CServerListManager::InsertServer(CServerGroup* pServerGroup, int iConnectIn
     pServerGroup->InsertServerInfo(pServerInfo);
 }
 
-Data::ServerList::ButtonTextParts CServerListManager::GetServerButtonParts(const CServerGroup& group,
-                                                                           const CServerInfo& server) const
+std::string CServerListManager::GetServerLoadText(const CServerInfo& server) const
 {
-    const std::string name = Core::Text::ToUtf8(group.m_szName);
-    const std::string_view locale = GetGameLocale();
-    const Data::ServerList::LoadText* loadText =
-        m_serverList.load.Text(Data::ServerList::GetLoadState(server.m_iPercent));
-    Data::ServerList::ChannelNameValues values;
-    values.name = name;
-    values.channel = server.m_iIndex;
-    if (loadText != nullptr)
+    const Data::ServerList::LoadText* look = m_serverList.load.Text(Data::ServerList::GetLoadState(server.m_iPercent));
+    if (look == nullptr)
     {
-        values.load = loadText->text.Get(locale);
+        return {};
     }
-    return Data::ServerList::BuildButtonTextParts(m_serverList, server.m_channel, values, locale);
-}
-
-std::wstring CServerListManager::GetServerButtonText(const CServerGroup& group, const CServerInfo& server) const
-{
-    const Data::ServerList::ButtonTextParts parts = GetServerButtonParts(group, server);
-    return Core::Text::FromUtf8(parts.before + parts.load + parts.after);
+    const std::string_view locale = GetGameLocale();
+    return Data::ServerList::GetButtonLoadText(m_serverList, look->text.Get(locale), locale);
 }
 
 std::string CServerListManager::GetServerButtonName(const CServerGroup& group, int index) const
@@ -270,11 +258,9 @@ std::vector<CServerListManager::ButtonLoadText> CServerListManager::GetButtonLoa
         {
             continue;
         }
-        std::string text = look->text.Get(locale);
-        Data::ServerList::ChannelNameValues values;
-        values.load = text;
         // A template without {load} shows none of them.
-        if (text.empty() || Data::ServerList::BuildButtonTextParts(m_serverList, {}, values, locale).load.empty())
+        std::string text = Data::ServerList::GetButtonLoadText(m_serverList, look->text.Get(locale), locale);
+        if (text.empty())
         {
             continue;
         }

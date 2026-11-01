@@ -28,7 +28,7 @@ constexpr std::array<std::string_view, 5> ScreenshotPlaceholders = {Name, Channe
 // Where an empty value was, until the spaces around it are tidied. A control
 // character no template has.
 constexpr char Gap = '\x01';
-// Where the {load} text goes, until the button's name is split there. Another one.
+// Where the {load} text would go, to find whether the button's template has it. Another one.
 constexpr char LoadMark = '\x02';
 
 // The value of a placeholder of `place`, or nothing for one the place does not have.
@@ -180,28 +180,17 @@ std::string BuildChannelName(const ServerListData& list, ChannelNamePlace place,
     return FillChannelName(list.names.Template(place).Get(locale), place, values);
 }
 
-ButtonTextParts BuildButtonTextParts(const ServerListData& list, const ChannelSettings& channel,
-                                     ChannelNameValues values, std::string_view locale)
+std::string GetButtonLoadText(const ServerListData& list, std::string_view load, std::string_view locale)
 {
-    const std::string load(values.load);
+    if (load.empty())
+    {
+        return {};
+    }
     const std::string mark(1, LoadMark);
-    if (!load.empty())
-    {
-        // Fills like the text would: not empty, so its spaces and brackets stay.
-        values.load = mark;
-    }
-    const std::string name = BuildChannelName(list, ChannelNamePlace::Button, channel, values, locale);
-    const size_t at = load.empty() ? std::string::npos : name.find(LoadMark);
-    if (at == std::string::npos)
-    {
-        return {name, "", ""};
-    }
-    ButtonTextParts parts{name.substr(0, at), load, name.substr(at + 1)};
-    for (size_t more = parts.after.find(LoadMark); more != std::string::npos; more = parts.after.find(LoadMark, more))
-    {
-        parts.after.replace(more, 1, load);
-        more += load.size();
-    }
-    return parts;
+    ChannelNameValues values;
+    values.load = mark;
+    const std::string filled =
+        FillChannelName(list.names.Template(ChannelNamePlace::Button).Get(locale), ChannelNamePlace::Button, values);
+    return filled.find(LoadMark) != std::string::npos ? std::string(load) : std::string();
 }
 } // namespace Data::ServerList

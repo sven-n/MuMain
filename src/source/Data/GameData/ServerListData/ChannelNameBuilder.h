@@ -41,19 +41,8 @@ std::string FillChannelName(std::string_view text, ChannelNamePlace place, const
 std::string BuildChannelName(const ServerListData& list, ChannelNamePlace place, const ChannelSettings& channel,
                              ChannelNameValues values, std::string_view locale);
 
-// A channel's button text in three parts, so that its {load} text can look different.
-struct ButtonTextParts
-{
-    std::string before;
-    // `values.load`; empty when it is, or the template has no {load}.
-    std::string load;
-    std::string after;
-
-    bool operator==(const ButtonTextParts&) const = default;
-};
-
-// The button's name as BuildChannelName builds it, split at its {load}. A second {load} in the
-// template shows the text without a look of its own.
-ButtonTextParts BuildButtonTextParts(const ServerListData& list, const ChannelSettings& channel,
-                                     ChannelNameValues values, std::string_view locale);
+// The load text a channel's button shows: `load` when the list's button template in `locale` has
+// {load}, else nothing. The login screen shows it on the load bar, apart from the button's name
+// (BuildChannelName at ChannelNamePlace::Button, with no load).
+std::string GetButtonLoadText(const ServerListData& list, std::string_view load, std::string_view locale);
 } // namespace Data::ServerList

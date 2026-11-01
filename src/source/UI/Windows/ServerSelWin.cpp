@@ -340,7 +340,7 @@ CServerSelWin::ServerEntry CServerSelWin::MakeServerEntry(const CServerInfo& ser
 {
     ServerEntry entry;
     entry.label = g_ServerListManager->GetServerButtonName(*m_pSelectServerGroup, serverInfo.m_iIndex);
-    entry.loadText = g_ServerListManager->GetServerButtonParts(*m_pSelectServerGroup, serverInfo).load;
+    entry.loadText = g_ServerListManager->GetServerLoadText(serverInfo);
     if (const auto covered = m_coveredByLoadText.find(entry.loadText); covered != m_coveredByLoadText.end())
     {
         entry.textFrom = covered->second.first;

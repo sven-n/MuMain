@@ -15,7 +15,7 @@ public:
     int m_iIndex;
     int m_iConnectIndex;
     int m_iPercent;
-    // PvP and the VIP type, from the server list (CServerListManager::GetServerButtonText names it).
+    // PvP and the VIP type, from the server list (CServerListManager::GetServerButtonName names it).
     Data::ServerList::ChannelSettings m_channel;
     // A channel the connect server didn't send, which only MuEditor's preview shows
     // (CServerListManager::SetOfflinePreview); it can't be joined.
