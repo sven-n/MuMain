@@ -66,20 +66,23 @@
 	text-align: center;
 	line-height: 26rem;
 }
+/* 6px taller than the original 193x26 frame (a nine-patch, base.rcss), so the channel's text
+   and the load bar below it each have room: 4px from the top border to the text, 4px from the
+   text to the bar and 4px from the bar to the bottom border. */
 .server-row {
 	position: relative;
 	width: 193rem;
-	height: 26rem;
+	height: 32rem;
 	text-align: center;
-	line-height: 26rem;
+	line-height: 32rem;
 	white-space: nowrap;
 }
 .button-label {
 	pointer-events: none;
 }
-/* A channel's text sits 2px above the frame's middle, so the load bar below it has room. */
+/* The channel's text in the top 18px. */
 .server-row .button-label {
-	line-height: 22rem;
+	line-height: 18rem;
 }
 
 /* The {load} text of a full or overloaded server, in the server list's look for it. */
@@ -94,13 +97,13 @@
 	transform: skewX(-12deg);
 }
 
-/* Original gauge footprint: 160x4, inset 16px from the left, now ten segments of 10 % each and
-   1px lower than the original's 19px, to keep clear of the text; its geometry follows the
-   frame's scene scale. */
+/* Original gauge footprint: 160x4, inset 16px from the left, now ten segments of 10 % each,
+   4px below the text and 4px above the bottom border; its geometry follows the frame's scene
+   scale. */
 .server-gauge-slot {
 	position: absolute;
 	left: 16rem;
-	top: 20rem;
+	top: 22rem;
 	width: 160rem;
 	height: 4rem;
 	display: flex;

@@ -22,12 +22,17 @@
 	legacy-server-group-pressed:  0px 52px 108px 26px;
 	legacy-server-group-selected: 0px 78px 108px 26px;
 }
+/* The server frame is a nine-patch, so it grows taller without stretching its corner ornaments,
+   its bottom border or the original gauge track: only rows 9 to 17, plain dark, stretch. */
 @spritesheet legacy-server-option-sheet
 {
 	src: "../../../server_b2_all.tga";
-	legacy-server-option-idle:    0px 0px 193px 26px;
-	legacy-server-option-hover:   0px 26px 193px 26px;
-	legacy-server-option-pressed: 0px 52px 193px 26px;
+	legacy-server-option-idle:          0px 0px 193px 26px;
+	legacy-server-option-idle-inner:    8px 9px 177px 9px;
+	legacy-server-option-hover:         0px 26px 193px 26px;
+	legacy-server-option-hover-inner:   8px 35px 177px 9px;
+	legacy-server-option-pressed:       0px 52px 193px 26px;
+	legacy-server-option-pressed-inner: 8px 61px 177px 9px;
 }
 
 .server-group-btn, .server-option-btn {
@@ -56,15 +61,15 @@
 	color: token(text-dim);
 }
 .server-option-btn {
-	decorator: image(legacy-server-option-idle);
+	decorator: ninepatch(legacy-server-option-idle, legacy-server-option-idle-inner);
 	color: token(server-button);
 }
 .server-option-btn:hover {
-	decorator: image(legacy-server-option-hover);
+	decorator: ninepatch(legacy-server-option-hover, legacy-server-option-hover-inner);
 	color: #ffeec1;
 }
 .server-option-btn:active {
-	decorator: image(legacy-server-option-pressed);
+	decorator: ninepatch(legacy-server-option-pressed, legacy-server-option-pressed-inner);
 	color: #ffff79;
 }
 .server-option-btn.gray {
