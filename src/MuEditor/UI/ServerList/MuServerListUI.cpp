@@ -464,7 +464,8 @@ void CMuServerListUI::LoadFile()
 {
     Data::ServerList::ServerListLoadResult loaded =
         Data::ServerList::LoadServerListFile(Data::ServerList::ServerListFile, I18N::GetAvailableLocales());
-    m_edits.Reset(std::move(loaded.list), !Data::Items::HasFatal(loaded.issues));
+    // A read that left something out (ReadServerListJson) keeps Save off: it would remove that from the file.
+    m_edits.Reset(std::move(loaded.list), loaded.complete && !Data::Items::HasFatal(loaded.issues));
     m_issues = std::move(loaded.issues);
     m_status.clear();
     m_statusIsError = false;
@@ -504,7 +505,7 @@ void CMuServerListUI::Save()
 
 void CMuServerListUI::RenderToolbar()
 {
-    // A save after a read with fatal problems would remove the groups the read left out.
+    // A save after a read that left something out would remove it from the file.
     ImGui::BeginDisabled(!m_edits.IsComplete());
     if (ImGui::Button(I18N::Editor::Save))
     {
@@ -513,7 +514,7 @@ void CMuServerListUI::RenderToolbar()
     ImGui::EndDisabled();
     if (!m_edits.IsComplete() && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
     {
-        ImGui::SetTooltip("%s", I18N::Editor::SaveOffAfterFatalReadProblems);
+        ImGui::SetTooltip("%s", I18N::Editor::SaveOffAfterAReadThatLeftSomethingOut);
     }
     ImGui::SameLine();
     if (ImGui::Button(I18N::Editor::Revert))
@@ -649,7 +650,7 @@ void CMuServerListUI::RenderStatus()
     }
     if (!m_edits.IsComplete())
     {
-        RenderError(I18N::Editor::SaveOffAfterFatalReadProblems);
+        RenderError(I18N::Editor::SaveOffAfterAReadThatLeftSomethingOut);
     }
     if (m_issues.empty())
     {

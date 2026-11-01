@@ -43,8 +43,11 @@ constexpr const char* ServerListFile = "Data/Local/ServerList.json";
 // Reads the file into `list`. A group or VIP type with an error is left out; a
 // text that is too long is cut (a warning). Lengths are counted in UTF-16
 // units, as the client's wide strings hold them on Windows: an emoji counts as
-// two.
-void ReadServerListJson(std::string_view text, const std::string& source, ServerListData& list,
+// two. True when the list has all the file has: false when a problem left an
+// entry or value out or replaced it (a fatal one, a rule not used, a shade or a
+// channel's VIP type left out, an unknown color made the default one), so that
+// the list written back would lose it.
+bool ReadServerListJson(std::string_view text, const std::string& source, ServerListData& list,
                         std::vector<Items::ItemDataIssue>& issues);
 
 // Warns about each translation in a language the game has no texts in
@@ -59,6 +62,8 @@ struct ServerListLoadResult
 {
     ServerListData list;
     std::vector<Items::ItemDataIssue> issues;
+    // ReadServerListJson's answer; false for a file that could not be read.
+    bool complete = false;
 };
 
 // Reads the file; one that cannot be read is an error. Its translations are

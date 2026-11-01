@@ -1951,8 +1951,8 @@
   <data name="Server list order note" xml:space="preserve">
     <value>Die Reihenfolge der Liste ist die der Schaltflächen auf dem Anmeldebildschirm, der jede Änderung sofort zeigt. Speichern schreibt {0}.</value>
   </data>
-  <data name="Save off after fatal read problems" xml:space="preserve">
-    <value>Die Datei hatte beim Lesen fatale Probleme, daher enthält die Liste nur die Gruppen, die gelesen werden konnten. Speichern bleibt aus, bis die Datei korrigiert ist und Zurücksetzen sie neu einliest; es würde die anderen Gruppen aus der Datei entfernen.</value>
+  <data name="Save off after a read that left something out" xml:space="preserve">
+    <value>Beim Lesen der Datei wurde wegen Problemen etwas ausgelassen (siehe die Probleme unten): eine Gruppe, ein VIP-Typ oder eine Farbe mit einem fatalen Problem, oder eine Regel, ein Farbton, der VIP-Typ eines Kanals oder eine Farbe, die die Liste nicht verwenden konnte. Speichern bleibt aus, bis die Datei korrigiert ist und Zurücksetzen sie neu einliest; es würde diese Einträge aus der Datei entfernen oder ersetzen.</value>
   </data>
   <data name="Step add" xml:space="preserve">
     <value>{0} hinzufügen</value>

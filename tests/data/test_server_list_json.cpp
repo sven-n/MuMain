@@ -670,6 +670,33 @@ TEST_CASE("ServerListJson: a load section of the wrong shape is fatal, a long lo
     CHECK(cut.list.load.full.text.GetNeutral() == std::string(32, 'x'));
 }
 
+// MuEditor keeps Save off after a read that left something out: written back, the file would lose it.
+TEST_CASE("ServerListJson: a read is complete only when the list has all the file has")
+{
+    const auto isComplete = [](const std::string& text)
+    {
+        ServerListData list;
+        std::vector<ItemDataIssue> issues;
+        return Data::ServerList::ReadServerListJson(text, "ServerList.json", list, issues);
+    };
+    CHECK(isComplete(ValidFile));
+    // A template shown as written and a rule without a color keep everything.
+    CHECK(isComplete(NamesFile(R"({"login": {"en": "[{name} {nope}]"}})")));
+    CHECK(isComplete(ColorsFile("", R"({"vip": "gold"})")));
+
+    // A rule not used, a shade or a channel's VIP type left out, an unknown color made the default one.
+    CHECK_FALSE(isComplete(ColorsFile("", R"({"vip": "silver", "color": "gray"})")));
+    CHECK_FALSE(isComplete(ColorsFile("", R"({"pvp": "on", "color": "gray"})")));
+    CHECK_FALSE(isComplete(ColorsFile("", R"({"vip": "gold", "color": "orange"}, {"vip": "gold", "color": "gray"})")));
+    CHECK_FALSE(isComplete(ColorsFile("", R"({"vip": "gold", "color": "goldRedd"})")));
+    CHECK_FALSE(isComplete(ColorsFile(R"({"id": "goldRed", "name": "Gold red", "shades": {"legacy": "#FF5A5"}})", "")));
+    CHECK_FALSE(isComplete(GroupFile(R"({"id": 0, "name": "Valhalla", "channels": {"1": {"vip": "silver"}}})")));
+    CHECK_FALSE(isComplete(LoadFile(R"({"full": {"color": "loadRedd"}})")));
+    // Fatal problems.
+    CHECK_FALSE(isComplete(GroupFile(R"({"id": 0})")));
+    CHECK_FALSE(isComplete(R"({ "formatVersion": 1, "groups": [] })"));
+}
+
 TEST_CASE("ServerListJson: the shipped file reads without problems and is written as the editor writes it")
 {
     // MU_TEST_DATA_DIR is the client folder's Data; the file name starts with it.
@@ -678,6 +705,7 @@ TEST_CASE("ServerListJson: the shipped file reads without problems and is writte
     const Data::ServerList::ServerListLoadResult loaded = Data::ServerList::LoadServerListFile(file, GameLocales);
 
     CHECK_MESSAGE(loaded.issues.empty(), Messages(loaded.issues));
+    CHECK(loaded.complete);
     REQUIRE(loaded.list.groups.size() == 3);
     CHECK(loaded.list.groups[0].name == "Valhalla");
     CHECK(loaded.list.groups[1].name == "Helheim");
@@ -731,6 +759,7 @@ TEST_CASE("ServerListJson: a missing file is an error")
 
     CHECK(HasIssueAbout(loaded.issues, "", "could not be read"));
     CHECK(loaded.list.groups.empty());
+    CHECK_FALSE(loaded.complete);
 }
 
 TEST_CASE("ServerListJson: save writes the file and refuses a list with errors")

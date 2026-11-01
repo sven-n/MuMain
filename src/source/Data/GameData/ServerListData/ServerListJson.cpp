@@ -58,9 +58,11 @@ class IssueList
 public:
     IssueList(const std::string& source, std::vector<ItemDataIssue>& issues) : m_source(source), m_issues(issues) {}
 
+    // What a fatal problem is in leaves the list.
     void Fatal(const std::string& field, const std::string& message)
     {
         Items::Json::AddFileIssue(m_issues, m_source, ItemDataIssue::NoItem, field, message);
+        m_complete = false;
     }
 
     void Error(const std::string& field, const std::string& message)
@@ -73,6 +75,26 @@ public:
         Add(ItemDataIssueSeverity::Warning, field, message);
     }
 
+    // An entry or value the list does not keep as the file has it: a rule not used, a shade or a VIP
+    // type left out, a color replaced by the default one. Written back, the file would lose it.
+    void ErrorLeftOut(const std::string& field, const std::string& message)
+    {
+        Error(field, message);
+        m_complete = false;
+    }
+
+    void WarningReplaced(const std::string& field, const std::string& message)
+    {
+        Warning(field, message);
+        m_complete = false;
+    }
+
+    // Whether the list has all the file has (ReadServerListJson).
+    bool IsComplete() const
+    {
+        return m_complete;
+    }
+
 private:
     void Add(ItemDataIssueSeverity severity, const std::string& field, const std::string& message)
     {
@@ -81,6 +103,7 @@ private:
 
     const std::string& m_source;
     std::vector<ItemDataIssue>& m_issues;
+    bool m_complete = true;
 };
 
 std::string ListField(const char* key, size_t index)
@@ -308,13 +331,13 @@ std::optional<CustomColor> ReadCustomColor(const OrderedJson& json, const std::s
             const std::string shadeField = Field(Field(field, ShadesKey), key.c_str());
             if (!shade.is_string() || !IsShade(shade.get<std::string>()))
             {
-                issues.Error(shadeField, "not a color like #FF5A5A; the theme draws its default color");
+                issues.ErrorLeftOut(shadeField, "not a color like #FF5A5A; the theme draws its default color");
                 continue;
             }
             // The game names its themes in lowercase (UI::RmlBridge::GetActiveThemeName).
             if (!color.shades.emplace(ToLowerAscii(key), shade.get<std::string>()).second)
             {
-                issues.Warning(shadeField, "the theme has a shade already; the first one is used");
+                issues.WarningReplaced(shadeField, "the theme has a shade already; the first one is used");
             }
         }
     }
@@ -358,7 +381,7 @@ std::optional<ButtonColorRule> ReadButtonColorRule(const OrderedJson& json, cons
 {
     if (!json.is_object())
     {
-        issues.Error(field, "must be an object; the rule is not used");
+        issues.ErrorLeftOut(field, "must be an object; the rule is not used");
         return std::nullopt;
     }
     ButtonColorRule rule;
@@ -371,8 +394,8 @@ std::optional<ButtonColorRule> ReadButtonColorRule(const OrderedJson& json, cons
     {
         if (list.FindVipType(vip->get<std::string>()) == nullptr)
         {
-            issues.Error(Field(field, VipKey),
-                         "\"" + vip->get<std::string>() + "\" is not the id of a VIP type; the rule is not used");
+            issues.ErrorLeftOut(Field(field, VipKey), "\"" + vip->get<std::string>() +
+                                                          "\" is not the id of a VIP type; the rule is not used");
             return std::nullopt;
         }
         rule.vipMatch = RuleVip::VipType;
@@ -380,14 +403,14 @@ std::optional<ButtonColorRule> ReadButtonColorRule(const OrderedJson& json, cons
     }
     else if (vip != json.end())
     {
-        issues.Error(Field(field, VipKey), "must be the id of a VIP type, true or false; the rule is not used");
+        issues.ErrorLeftOut(Field(field, VipKey), "must be the id of a VIP type, true or false; the rule is not used");
         return std::nullopt;
     }
 
     const auto pvp = json.find(PvpKey);
     if (pvp != json.end() && !pvp->is_boolean())
     {
-        issues.Error(Field(field, PvpKey), "must be true or false; the rule is not used");
+        issues.ErrorLeftOut(Field(field, PvpKey), "must be true or false; the rule is not used");
         return std::nullopt;
     }
     if (pvp != json.end())
@@ -400,8 +423,13 @@ std::optional<ButtonColorRule> ReadButtonColorRule(const OrderedJson& json, cons
     {
         rule.color = color->get<std::string>();
     }
+    else if (color != json.end())
+    {
+        issues.WarningReplaced(Field(field, ColorKey), UnknownColorWarning);
+    }
     else
     {
+        // Left out, it is the default color, as the file is written then.
         issues.Warning(Field(field, ColorKey), UnknownColorWarning);
     }
     Items::Json::WarnAboutUnknownKeys(json, {VipKey, PvpKey, ColorKey}, field + ".", WarnUnknown(issues));
@@ -432,7 +460,7 @@ void ReadButtonColorRules(const OrderedJson& root, ServerListData& list, IssueLi
                                        [&rule](const ButtonColorRule& other) { return rule->FitsAsMuchAs(other); });
         if (same != list.buttonColors.end())
         {
-            issues.Error(field, "fits the same channels as an earlier rule; it is not used");
+            issues.ErrorLeftOut(field, "fits the same channels as an earlier rule; it is not used");
             continue;
         }
         list.buttonColors.push_back(std::move(*rule));
@@ -569,7 +597,7 @@ void ReadLoadColor(const OrderedJson& json, const std::string& field, const char
         color = value->get<std::string>();
         return;
     }
-    issues.Warning(Field(field, key), UnknownColorWarning);
+    issues.WarningReplaced(Field(field, key), UnknownColorWarning);
 }
 
 void ReadLoadBar(const OrderedJson& load, const ServerListData& list, LoadBarColors& bar, IssueList& issues)
@@ -695,8 +723,8 @@ bool ReadChannel(const std::string& key, const OrderedJson& value, const std::st
         }
         else if (list.FindVipType(vip->get<std::string>()) == nullptr)
         {
-            issues.Error(Field(field, VipKey),
-                         "\"" + vip->get<std::string>() + "\" is not the id of a VIP type; the channel has none");
+            issues.ErrorLeftOut(Field(field, VipKey), "\"" + vip->get<std::string>() +
+                                                          "\" is not the id of a VIP type; the channel has none");
         }
         else
         {
@@ -964,7 +992,7 @@ template <typename TVisit> void ForEachText(const ServerListData& list, TVisit&&
 }
 } // namespace
 
-void ReadServerListJson(std::string_view text, const std::string& source, ServerListData& list,
+bool ReadServerListJson(std::string_view text, const std::string& source, ServerListData& list,
                         std::vector<ItemDataIssue>& issues)
 {
     IssueList issueList(source, issues);
@@ -972,7 +1000,7 @@ void ReadServerListJson(std::string_view text, const std::string& source, Server
     if (!Items::Json::ReadFileVersion(text, source, ServerListFormatVersion, root, issues) ||
         !IsCurrentVersion(root, issueList))
     {
-        return;
+        return false;
     }
     Items::Json::WarnAboutUnknownKeys(root,
                                       {Items::Json::Keys::FormatVersion, VipTypesKey, Colors::ColorFoldersKey,
@@ -988,6 +1016,7 @@ void ReadServerListJson(std::string_view text, const std::string& source, Server
     ReadLoad(root, list, issueList);
     ReadGroups(root, list, issueList);
     WarnAboutMoreTestServers(list.groups, issueList);
+    return issueList.IsComplete();
 }
 
 void ValidateServerListLocales(const ServerListData& list, std::span<const char* const> uiLocales,
@@ -1069,7 +1098,7 @@ ServerListLoadResult LoadServerListFile(const std::filesystem::path& file, std::
         IssueList(source, result.issues).Fatal("", "could not be read");
         return result;
     }
-    ReadServerListJson(*text, source, result.list, result.issues);
+    result.complete = ReadServerListJson(*text, source, result.list, result.issues);
     ValidateServerListLocales(result.list, uiLocales, source, result.issues);
     return result;
 }

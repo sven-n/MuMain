@@ -359,11 +359,12 @@ For both tabs:
   that ID.
 - **Save** writes `Data/Local/ServerList.json` in the folder the game runs
   from. It refuses a list with fatal problems (a group without a name, an ID
-  used twice, a VIP type without an English name) and lists them. When the
-  file itself had fatal problems as it was read (changed by hand while the
-  game ran), the window has only what could be read: Save stays off then, so
-  it cannot remove the rest, until the file is fixed and **Revert** reads it
-  again.
+  used twice, a VIP type without an English name) and lists them. When reading
+  the file itself left something out (changed by hand while the game ran): a
+  fatal problem, or a rule, shade or channel VIP type the list could not use,
+  or a color it replaced with the default one, the window has only what could
+  be read: Save stays off then, so it cannot remove or replace the rest, until
+  the file is fixed and **Revert** reads it again.
 - **Revert** reads the file again.
 - **Show offline servers in the game** (editor only): the login screen also
   lists every channel 1 to 20 of every group that the connect server did not

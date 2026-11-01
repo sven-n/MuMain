@@ -1972,8 +1972,8 @@
   <data name="Server list order note" xml:space="preserve">
     <value>The order of the list is the order of the buttons on the login screen, which shows each change right away. Save writes {0}.</value>
   </data>
-  <data name="Save off after fatal read problems" xml:space="preserve">
-    <value>The file had fatal problems when it was read, so the list has only the groups that could be read. Save is off until the file is fixed and Revert reads it again; it would remove the other groups from the file.</value>
+  <data name="Save off after a read that left something out" xml:space="preserve">
+    <value>The file had problems that left something out when it was read (see the problems below): a group, VIP type or color with a fatal problem, or a rule, shade, channel VIP type or color the list could not use. Save is off until the file is fixed and Revert reads it again; it would remove or replace those in the file.</value>
   </data>
   <data name="Step add" xml:space="preserve">
     <value>Add {0}</value>
