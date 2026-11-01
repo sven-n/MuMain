@@ -49,6 +49,7 @@ Made while reviewing sven-n/MuMain#915, 2026-11-01.
 | L8 | Names of a layer's fields (Q-L2a, 2026-11-01) | Designer terms, with no part for raw engine values (one could be added later without changing data). **Kind:** texture, reflection, light map, flat color. **Motion** (reflections): slow drift (`RENDER_CHROME`), fast sweep (`CHROME2`), follows the light (`CHROME3`), swirl (`CHROME4`), strong swirl (`CHROME5`), stripes (`CHROME6`), very slow drift (`CHROME7`), oil sheen (`OIL`), still shine (`METAL`). **Blend:** normal, glow (`RENDER_BRIGHT`, adds light), darken (`RENDER_DARK`), as the drawing asks (the drawing's own render type). **Meshes:** empty for all. **Where** (reflections): over, or under the holes (as #915 draws it). **Texture:** empty for the mesh's own, or the one that belongs to the motion. **Color:** the model's light, a fixed color, or a tint of the model's light. Kind, Motion and Blend combine freely; an engine feature with no field (e.g. `RENDER_NODEPTH`) gets one added in code. Opacity, the glow mesh and scrolling: L10. |
 | L9 | Values that change over time (Q-L2b, 2026-11-01) | A field that changes over time names a shape whose parameters a designer can picture: **fixed**; **wave** (from, to, seconds per cycle); **bounce** (the absolute sine: from, to, seconds); **scroll** (per second); **ramp** (from, to, seconds, then back to the start); **frames** (count, step, seconds each); **random** (from, to, step, a new value each frame). The loader turns them into the code's numbers; a moved look keeps its exact values (e.g. 6.283185 s for `sin(WorldTime * 0.001f)`), checked against the old code. The editor draws the value over time beside the field. No formula text (D43: building blocks with parameters, not code transcribed). Chances per frame belong to things on bones (L7 step 3). |
 | L10 | Glow mesh, scrolling and opacity (Q-L2b, 2026-11-01) | **Fields of each layer**, empty for the item's value: glow mesh (none, a mesh, or all meshes), glow strength, scrolling mesh, scrolling (U and V), opacity (the item's, the drawing's, a number or a shape). **Item values of the look:** the glow mesh, glow strength, scrolling mesh, scrolling, opacity and hidden mesh it leaves on the item for what is drawn after it (the +7 glow, the excellent glow), as `masterScepter` leaves glow mesh 1 (`ItemRenderStyles.cpp:338-352`). The 11 item effects that only change values become looks with item values and no layers. When item values apply (before the layers, as item effects do today, or after them, as styles do): Q-L4. |
+| L11 | Conditions (Q-L2c, 2026-11-01) | **On the look, "Not for":** the drawings the look is not for, which the game then draws plainly, as a style returning false does today: doppelgangers, and outside a monster's hands (`monsterBattleBow`). **On a layer, "Only when":** worn, in the inventory and on the ground (the skin hidden), an item level range, the item's hidden mesh, a buff on the character. "Which item" is no condition: values chosen per item are Q-L3. Conditions found in the survey that fit neither list (the light being exactly white, the turning angle): Q-L5. |
 
 ## Current state
 
@@ -110,6 +111,23 @@ so a few can be off:
   `METAL` binds `BITMAP_SHINY`. `CHROME5`, `CHROME7` and `OIL` bind none and
   use whatever texture was bound before (e.g. `ItemRenderStyles.cpp:838`);
   Q-L5 checks those uses.
+- The conditions, read one by one: the drawing's render type (not for
+  doppelgangers: `runeBlade`, `greatScepter`, `grandSoulShield`, the three
+  `violentWindToEternalWing…`; only in a monster's hands: `monsterBattleBow`);
+  the skin hidden, in the inventory and on the ground (`onlyMesh0/1/2WithoutSkin`,
+  `sylphidRay`, `phoenixSoulHelmet`, `violentWindToEternalWing…`,
+  `divineAndSuccubusSkin`, `luckyItem`); which item (`socketSeed`,
+  `socketSeedSphere`, `sylphWindBow`, `luckyItem`, `violentWindToEternalWing…`);
+  the item level (the item effects `potion`, `fruits`, `spirit`,
+  `meshesPerLevel`, `hiddenMeshByLevel`); the item's hidden mesh
+  (`siegePotion`, `contractSummon`); a buff (`ammunition`: Infinity Arrow);
+  the light being exactly white (`capeOfEmperor`, `smallCapeOfLord`, likely
+  the inventory's light); the turning angle (`gambleItem`, a brightness
+  that follows it); a light value kept between bounds (`symbolOfKundun`,
+  `invisibilityCloak`); a texture frame counter (`wingOfStorm`).
+- The plain drawing, `RenderModelWithoutStyle` (`ZzzObject.cpp`), has looks
+  of its own for some models (the +15 armor objects, `MODEL_SWORD_35_WING`,
+  `MODEL_ARMORINVEN_74`, …) outside the style list; Q-L5 looks at them too.
 - Step 1 of L7 is meant for those 137 styles and 16 item effects (Q-L5
   checks that each one fits), step 3 for the other 3 styles (`pumpkinOfLuck`,
   `cursedCastleWater`, `helperNpcPlate`) and 9 item effects.
@@ -155,14 +173,14 @@ Written from the answers to the open questions.
 Answered one by one, each with the current state, every option with an
 example, and a recommendation.
 
-Answered: Q-L1 (L7), Q-L2a (L8), Q-L2b (L9, L10), all on 2026-11-01.
+Answered: Q-L1 (L7), Q-L2a (L8), Q-L2b (L9, L10), Q-L2c (L11), all on
+2026-11-01.
 
 | Q | Question |
 |---|---|
-| Q-L2c | Conditions (doppelganger, inventory and ground, item level, which item): on a layer, or on the whole look. |
-| Q-L3 | Where looks live: named looks in `Data/Effects/` that model entries name (D25, D26), layers inside the model entry, or a named look with meshes chosen per item. |
+| Q-L3 | Where looks live: named looks in `Data/Effects/` that model entries name (D25, D26), layers inside the model entry, or a named look with values chosen per item (meshes, a color, a texture: the socket seeds, the Lucky items, the Violent Wind pieces). |
 | Q-L4 | How `renderStyle` and the new looks relate while the styles move (same names, one style at a time); how an item's render style and item effect relate as looks, and so when a look's item values apply (before its layers, as item effects do, or after, as styles do). |
-| Q-L5 | Which of the 140 styles fit the first building blocks (a survey), and the order of moving them. |
+| Q-L5 | Which of the 140 styles fit the first building blocks (a survey of each, including the conditions that fit neither list of L11, the reflection motions without a texture of their own, and the looks inside `RenderModelWithoutStyle`), and the order of moving them. |
 | Q-L6 | The look editor: in the Item Model window under Looks, or a window of its own (D25: one look editor for all areas); layer list, preview, the items that use a look. |
 | Q-L7 | The mesh list: what each row shows (number, texture, hidden, glowing, has holes), and whether hovering a row highlights the mesh in the preview. |
 | Q-L8 | Data checks: mesh numbers the model doesn't have, missing textures, unknown kinds. |
@@ -172,7 +190,7 @@ Answered: Q-L1 (L7), Q-L2a (L8), Q-L2b (L9, L10), all on 2026-11-01.
 ## Tasks
 
 1. [ ] Write this design: answer the open questions one by one (in progress;
-   Q-L1, Q-L2a and Q-L2b done).
+   Q-L1 and Q-L2 done).
 2. [ ] Step 1 of L7: draw passes and conditions (the pull requests from
    Q-L10).
 3. [ ] Step 2 of L7: FX1.7c, its short design, then the live preview.
