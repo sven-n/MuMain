@@ -4,8 +4,6 @@
 
 #include "NamedColorList.h"
 
-#include "../MuEditor/Core/MuEditorCore.h"
-#include "../MuEditor/UI/Common/KeyboardSelection.h"
 #include "../MuEditor/UI/ItemTools/ItemSelection.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "I18N/All.h"
@@ -18,106 +16,79 @@ namespace MuEditor::Colors
 namespace
 {
 constexpr char ConfirmPopupId[] = "###NamedColorChange";
-// Pixel width before the editor UI scale.
-constexpr float ListWidth = 220.0f;
 constexpr float UserListLines = 8.0f;
 
-// The items as a list; a click selects one.
-void RenderUsers(const char* id, const std::vector<int>& users)
+// The users as a list; a click on one runs its select.
+void RenderUsers(const char* id, const std::vector<NamedColorUser>& users)
 {
     if (!ImGui::BeginListBox(id, ImVec2(-FLT_MIN, UserListLines * ImGui::GetTextLineHeightWithSpacing())))
     {
         return;
     }
-    for (const int user : users)
+    for (std::size_t index = 0; index < users.size(); ++index)
     {
-        ImGui::PushID(user);
-        if (ImGui::Selectable(g_ItemDatabase.GetLogName(user).c_str(), user == g_ItemSelection.GetItemType()))
+        const NamedColorUser& user = users[index];
+        ImGui::PushID(static_cast<int>(index));
+        if (ImGui::Selectable(user.label.c_str(), user.selected) && user.select)
         {
-            g_ItemSelection.Select(user);
+            user.select();
         }
         ImGui::PopID();
     }
     ImGui::EndListBox();
 }
+} // namespace
 
-// A grey line that wraps at the window's edge.
-void RenderNote(const char* text)
+std::vector<std::string> GetNames(const NamedColorSource& source)
+{
+    std::vector<std::string> names;
+    names.reserve(source.GetCount());
+    for (std::size_t index = 0; index < source.GetCount(); ++index)
+    {
+        names.push_back(source.GetName(index));
+    }
+    return names;
+}
+
+std::vector<NamedColorUser> MakeItemUsers(std::span<const int> itemTypes)
+{
+    std::vector<NamedColorUser> users;
+    users.reserve(itemTypes.size());
+    for (const int itemType : itemTypes)
+    {
+        users.push_back({g_ItemDatabase.GetLogName(itemType), [itemType] { g_ItemSelection.Select(itemType); },
+                         itemType == g_ItemSelection.GetItemType()});
+    }
+    return users;
+}
+
+void RenderColorNote(const char* text)
 {
     ImGui::PushTextWrapPos(0.0f);
     ImGui::TextDisabled("%s", text);
     ImGui::PopTextWrapPos();
 }
-} // namespace
 
-void NamedColorList::Render(NamedColorSource& source)
+std::string NamedColorList::RenderEntry(NamedColorSource& source, const std::string& name)
 {
     const NamedColorTexts texts = source.GetTexts();
-    if (ImGui::Button(texts.newEntry))
-    {
-        source.OpenNew(m_picked);
-    }
-    if (std::optional<std::string> created = source.RenderNew())
-    {
-        m_picked = std::move(*created);
-    }
-    RenderNote(texts.note);
-    RenderUnused(source, texts);
-    ImGui::Separator();
+    ImGui::TextUnformatted(name.c_str());
+    source.RenderEdit(name);
 
-    const ImVec2 listSize(ListWidth * g_MuEditorCore.GetUIScale(), 0.0f);
-    if (ImGui::BeginChild("##Entries", listSize, ImGuiChildFlags_Borders | ImGuiChildFlags_ResizeX))
-    {
-        RenderList(source);
-    }
-    ImGui::EndChild();
-    ImGui::SameLine();
-    if (ImGui::BeginChild("##Picked"))
-    {
-        RenderPicked(source, texts);
-        RenderConfirm(source, texts);
-    }
-    ImGui::EndChild();
-}
-
-void NamedColorList::RenderList(NamedColorSource& source)
-{
-    for (std::size_t index = 0; index < source.GetCount(); ++index)
-    {
-        const std::string& name = source.GetName(index);
-        ImGui::PushID(name.c_str());
-        source.RenderSwatch(index);
-        ImGui::SameLine();
-        const std::string label = name + " (" + std::to_string(source.CountUsers(name)) + ")";
-        if (ImGui::Selectable(label.c_str(), name == m_picked, MuEditor::KeyboardSelection::RowFlags))
-        {
-            m_picked = name;
-        }
-        ImGui::PopID();
-    }
-}
-
-void NamedColorList::RenderPicked(NamedColorSource& source, const NamedColorTexts& texts)
-{
-    if (!source.Has(m_picked))
-    {
-        ImGui::TextDisabled("%s", texts.pickAnEntry);
-        return;
-    }
-    ImGui::TextUnformatted(m_picked.c_str());
-    source.RenderEdit(m_picked);
-
-    const std::vector<int> users = source.FindUsers(m_picked);
-    ImGui::BeginDisabled(!source.IsEdited(m_picked));
+    std::string after = name;
+    const std::vector<NamedColorUser> users = source.FindUsers(name);
+    ImGui::BeginDisabled(!source.IsEdited(name));
     if (ImGui::Button(texts.apply))
     {
         if (users.empty())
         {
-            source.ApplyEdit(m_picked);
+            after = source.GetNameAfterEdit(name);
+            source.ApplyEdit(name);
         }
         else
         {
-            // D26: a change to an entry reaches all its items; they are listed before it is applied.
+            // D26: a change to an entry reaches all its users; they are listed before it is applied.
+            m_confirmOf = name;
             m_confirmUsers = users;
             ImGui::OpenPopup(ConfirmPopupId);
         }
@@ -125,41 +96,51 @@ void NamedColorList::RenderPicked(NamedColorSource& source, const NamedColorText
     ImGui::SameLine();
     if (ImGui::Button(I18N::Editor::Revert))
     {
-        source.RevertEdit(m_picked);
+        source.RevertEdit(name);
     }
     ImGui::EndDisabled();
     ImGui::SameLine();
-    // D26: only an entry no item uses goes.
-    const bool kept = source.IsKept(m_picked);
+    // D26: only an entry nothing uses goes.
+    const bool kept = source.IsKept(name);
     ImGui::BeginDisabled(!users.empty() || kept);
     if (ImGui::Button(I18N::Editor::Remove))
     {
-        const std::string names[] = {m_picked};
+        const std::string names[] = {name};
         source.Remove(texts.removeOne, names);
+        after.clear();
     }
     ImGui::EndDisabled();
     if (kept)
     {
-        RenderNote(texts.kept);
+        RenderColorNote(texts.kept);
     }
-    ImGui::TextUnformatted(I18N::Format(I18N::Editor::UsedBy0Items, {std::to_string(users.size())}).c_str());
+    ImGui::TextUnformatted(I18N::Format(texts.usedBy, {std::to_string(users.size())}).c_str());
     RenderUsers("##Users", users);
+    if (std::string confirmed = RenderConfirm(source, texts); !confirmed.empty())
+    {
+        after = std::move(confirmed);
+    }
+    return after;
 }
 
-void NamedColorList::RenderConfirm(NamedColorSource& source, const NamedColorTexts& texts)
+std::string NamedColorList::RenderConfirm(NamedColorSource& source, const NamedColorTexts& texts)
 {
     char title[128];
     std::snprintf(title, sizeof(title), "%s%s", texts.change, ConfirmPopupId);
     if (!ImGui::BeginPopupModal(title, nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        return;
+        return {};
     }
-    ImGui::TextUnformatted(
-        I18N::Format(I18N::Editor::TheChangeReachesThese0Items, {std::to_string(m_confirmUsers.size())}).c_str());
+    std::string applied;
+    ImGui::TextUnformatted(I18N::Format(texts.changeReaches, {std::to_string(m_confirmUsers.size())}).c_str());
     RenderUsers("##ConfirmUsers", m_confirmUsers);
     if (ImGui::Button(texts.apply))
     {
-        source.ApplyEdit(m_picked);
+        if (source.Has(m_confirmOf))
+        {
+            applied = source.GetNameAfterEdit(m_confirmOf);
+            source.ApplyEdit(m_confirmOf);
+        }
         ImGui::CloseCurrentPopup();
     }
     ImGui::SameLine();
@@ -168,10 +149,11 @@ void NamedColorList::RenderConfirm(NamedColorSource& source, const NamedColorTex
         ImGui::CloseCurrentPopup();
     }
     ImGui::EndPopup();
+    return applied;
 }
 
-// D26: an entry is removed only while no item uses it; the kept ones stay.
-void NamedColorList::RenderUnused(NamedColorSource& source, const NamedColorTexts& texts)
+// D26: an entry is removed only while nothing uses it; the kept ones stay.
+void NamedColorList::RenderUnused(NamedColorSource& source)
 {
     std::vector<std::string> unused;
     for (std::size_t index = 0; index < source.GetCount(); ++index)
@@ -191,7 +173,8 @@ void NamedColorList::RenderUnused(NamedColorSource& source, const NamedColorText
     {
         names += (names.empty() ? "" : ", ") + name;
     }
-    RenderNote(I18N::Format(texts.unused, {names}).c_str());
+    const NamedColorTexts texts = source.GetTexts();
+    RenderColorNote(I18N::Format(texts.unused, {names}).c_str());
     if (ImGui::SmallButton(I18N::Editor::RemoveThem))
     {
         source.Remove(texts.removeUnused, unused);

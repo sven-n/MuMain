@@ -5,7 +5,10 @@
 #include "GlowColorsTab.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "NamedColorList.h"
+
 #include "../MuEditor/UI/ItemTools/ItemEdits.h"
+#include "../MuEditor/UI/ItemTools/ItemToolWindow.h"
 #include "../MuEditor/UI/ItemTools/ItemUsers.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
@@ -31,17 +34,14 @@ GlowColorValue AsShown(const GlowColorValue& value)
 }
 } // namespace
 
-void GlowColorsTab::Render()
-{
-    m_list.Render(*this);
-}
-
 NamedColorTexts GlowColorsTab::GetTexts() const
 {
     NamedColorTexts texts;
+    texts.root = I18N::Editor::Glow;
     texts.newEntry = I18N::Editor::NewGlowColor;
     texts.note = I18N::Editor::TheItemModelsNameTheseColorsTheModelToolPicksAnItemSColors;
-    texts.pickAnEntry = I18N::Editor::PickAColorInTheList;
+    texts.usedBy = I18N::Editor::UsedBy0Items;
+    texts.changeReaches = I18N::Editor::TheChangeReachesThese0Items;
     texts.apply = I18N::Editor::ApplyToTheGlowColor;
     texts.change = I18N::Editor::ChangeAGlowColor;
     texts.removeOne = I18N::Editor::RemoveAGlowColor;
@@ -66,9 +66,10 @@ bool GlowColorsTab::Has(const std::string& name) const
     return g_GlowColors.Find(name) != nullptr;
 }
 
-void GlowColorsTab::RenderSwatch(std::size_t index) const
+void GlowColorsTab::RenderSwatch(const std::string& name) const
 {
-    const std::array<float, 3> rgb = ToColorField(g_GlowColors.GetColors()[index].value);
+    const GlowColorValue* value = g_GlowColors.Find(name);
+    const std::array<float, 3> rgb = value != nullptr ? ToColorField(*value) : std::array<float, 3>{};
     ImGui::ColorButton("##Swatch", ImVec4(rgb[0], rgb[1], rgb[2], 1.0f), ImGuiColorEditFlags_NoTooltip);
 }
 
@@ -77,9 +78,9 @@ int GlowColorsTab::CountUsers(const std::string& name)
     return m_counts.GlowColor(name);
 }
 
-std::vector<int> GlowColorsTab::FindUsers(const std::string& name) const
+std::vector<NamedColorUser> GlowColorsTab::FindUsers(const std::string& name) const
 {
-    return MuEditor::Items::FindGlowColorUsers(name);
+    return MakeItemUsers(MuEditor::Items::FindGlowColorUsers(name));
 }
 
 // Items without colors of their own glow with these (ItemGlow), so they stay.
@@ -93,6 +94,37 @@ bool GlowColorsTab::IsKept(const std::string& name) const
 void GlowColorsTab::Remove(const char* step, std::span<const std::string> names)
 {
     g_ItemEdits.RemoveGlowColors(step, names);
+}
+
+const std::vector<Data::Colors::ColorFolder>& GlowColorsTab::GetFolders() const
+{
+    return g_GlowColors.GetFolders();
+}
+
+void GlowColorsTab::SetFolders(const char* step, std::vector<Data::Colors::ColorFolder> folders)
+{
+    g_ItemEdits.SetColorFolders(step, MuEditor::Items::ItemEdits::GlowFolders, std::move(folders));
+}
+
+void GlowColorsTab::SetOrder(const char* step, std::span<const std::string> names)
+{
+    std::vector<GlowColor> colors;
+    for (const std::string& name : names)
+    {
+        if (const GlowColorValue* value = g_GlowColors.Find(name))
+        {
+            colors.push_back({name, *value});
+        }
+    }
+    if (colors.size() == g_GlowColors.GetColors().size())
+    {
+        g_ItemEdits.SetGlowColorOrder(step, colors);
+    }
+}
+
+MuEditor::UndoTarget& GlowColorsTab::GetUndoTarget()
+{
+    return MuEditor::Items::ToolWindow::GetUndoTarget();
 }
 
 void GlowColorsTab::OpenNew(const std::string& from)

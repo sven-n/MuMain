@@ -1462,9 +1462,6 @@
   <data name="The item models name these colors; the model tool picks an item's colors." xml:space="preserve">
     <value>Die Gegenstandsmodelle nennen diese Farben; im Modell-Werkzeug wählen Sie die Farben eines Gegenstands.</value>
   </data>
-  <data name="Pick a color in the list." xml:space="preserve">
-    <value>Wählen Sie eine Farbe in der Liste.</value>
-  </data>
   <data name="Apply to the glow color" xml:space="preserve">
     <value>Auf die Leuchtfarbe anwenden</value>
   </data>
@@ -2925,5 +2922,38 @@
   </data>
   <data name="Not saved yet: the changes are only in the editor" xml:space="preserve">
     <value>Noch nicht gespeichert: Die Änderungen sind nur im Editor, bis Sie die Gegenstände speichern.</value>
+  </data>
+  <data name="New folder" xml:space="preserve">
+    <value>Neuer Ordner</value>
+  </data>
+  <data name="Folder name" xml:space="preserve">
+    <value>Ordnername</value>
+  </data>
+  <data name="A folder name of 1 to 32 characters that no other folder here has." xml:space="preserve">
+    <value>Ein Ordnername mit 1 bis 32 Zeichen, den kein anderer Ordner hier hat.</value>
+  </data>
+  <data name="New color folder" xml:space="preserve">
+    <value>Neuer Farbordner</value>
+  </data>
+  <data name="Rename a color folder" xml:space="preserve">
+    <value>Farbordner umbenennen</value>
+  </data>
+  <data name="Remove a color folder" xml:space="preserve">
+    <value>Farbordner entfernen</value>
+  </data>
+  <data name="Move a color folder" xml:space="preserve">
+    <value>Farbordner verschieben</value>
+  </data>
+  <data name="Move a color" xml:space="preserve">
+    <value>Farbe verschieben</value>
+  </data>
+  <data name="Colors tree note" xml:space="preserve">
+    <value>Eine Wurzel enthält die Farben einer Verwendung. Ordner sortieren sie nur: Ziehe eine Farbe oder einen Ordner auf einen Ordner oder auf seine Wurzel. Eine Farbe bleibt in ihrer Wurzel.</value>
+  </data>
+  <data name="Folder note" xml:space="preserve">
+    <value>Wird ein Ordner entfernt, kommt sein Inhalt in den Ordner darüber.</value>
+  </data>
+  <data name="It holds {0} colors and {1} folders." xml:space="preserve">
+    <value>Er enthält {0} Farben und {1} Ordner.</value>
   </data>
 </root>

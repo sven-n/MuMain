@@ -17,12 +17,12 @@ namespace
 {
 void ShowGlowColors()
 {
-    g_MuColorsUI.Show(Colors::ColorsTab::Glow);
+    g_MuColorsUI.Show(Colors::ColorsRoot::Glow);
 }
 
 bool IsGlowColorsShown()
 {
-    return g_MuColorsUI.GetShownTab() == Colors::ColorsTab::Glow;
+    return g_MuColorsUI.GetShownRoot() == Colors::ColorsRoot::Glow;
 }
 
 const std::array<ToolWindowEntry, 9> ItemToolEntries = {{

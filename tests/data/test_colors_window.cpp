@@ -22,13 +22,14 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
+#include <cstring>
 #include <string_view>
 #include <vector>
 
 using Data::Effects::GlowColor;
 using Data::Items::ItemGlow;
 using Data::Items::ItemModelDefinition;
-using MuEditor::Colors::ColorsTab;
+using MuEditor::Colors::ColorsRoot;
 namespace WindowIds = MuEditor::WindowIds;
 
 namespace
@@ -71,14 +72,20 @@ void RenderColors()
     CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
 }
 
-// The id of a widget of the Glow tab, outside its two panes.
-ImGuiID GlowTabWidgetId(const char* label)
+// The id of a widget of the pane that shows what the tree picked.
+ImGuiID PickedPaneWidgetId(const char* label)
 {
-    const ImGuiWindow* window = ImGui::FindWindowByName(WindowIds::Colors);
-    REQUIRE(window != nullptr);
-    const ImGuiID tabBar = ImGui::GetIDWithSeed("##Tabs", nullptr, window->ID);
-    const ImGuiID tab = ImGui::GetIDWithSeed("###Glow", nullptr, tabBar);
-    return ImGui::GetIDWithSeed(label, nullptr, tab);
+    const ImGuiWindow* colors = ImGui::FindWindowByName(WindowIds::Colors);
+    REQUIRE(colors != nullptr);
+    for (const ImGuiWindow* window : ImGui::GetCurrentContext()->Windows)
+    {
+        if (window->ParentWindow == colors && std::strstr(window->Name, "##Picked") != nullptr)
+        {
+            return ImGui::GetIDWithSeed(label, nullptr, window->ID);
+        }
+    }
+    FAIL("the Colors window has no picked pane");
+    return 0;
 }
 
 ItemModelDefinition Model(int number, const char* color)
@@ -95,13 +102,16 @@ class GlowColorsScope
 {
 public:
     explicit GlowColorsScope(const std::vector<GlowColor>& colors)
-        : m_previous(g_GlowColors.GetColors().begin(), g_GlowColors.GetColors().end())
+        : m_previous(g_GlowColors.GetColors().begin(), g_GlowColors.GetColors().end()),
+          m_previousFolders(g_GlowColors.GetFolders())
     {
         g_GlowColors.Build(colors);
+        g_GlowColors.SetFolders({});
     }
     ~GlowColorsScope()
     {
         g_GlowColors.Build(m_previous);
+        g_GlowColors.SetFolders(m_previousFolders);
         g_ItemEdits.GetHistory().Clear();
     }
     GlowColorsScope(const GlowColorsScope&) = delete;
@@ -109,6 +119,7 @@ public:
 
 private:
     std::vector<GlowColor> m_previous;
+    std::vector<Data::Colors::ColorFolder> m_previousFolders;
 };
 
 bool HasGlowColor(const char* name)
@@ -117,8 +128,8 @@ bool HasGlowColor(const char* name)
 }
 } // namespace
 
-// Items > Glow Colors is the Colors window's Glow tab: it opens the window there.
-TEST_CASE("Items > Glow Colors opens the Colors window on its Glow tab [editor][items]")
+// Items > Glow Colors is the Colors window's Glow root: it opens the window there.
+TEST_CASE("Items > Glow Colors opens the Colors window on its Glow root [editor][items]")
 {
     TestImGuiContext context;
     ToolWindowsScope windows;
@@ -135,7 +146,7 @@ TEST_CASE("Items > Glow Colors opens the Colors window on its Glow tab [editor][
     CHECK(glow->isTabShown());
     RenderColors();
     RenderColors();
-    CHECK(g_MuColorsUI.GetShownTab() == ColorsTab::Glow);
+    CHECK(g_MuColorsUI.GetShownRoot() == ColorsRoot::Glow);
     CHECK(glow->isTabShown());
 }
 
@@ -205,7 +216,7 @@ TEST_CASE("The Colors window opened the first time in a layout from before it do
 
 // D26 on the shared panel: Remove them takes every color no item uses, as one undo step; the defaults stay although no
 // item names them, and so does a color an item uses.
-TEST_CASE("The Glow tab removes the glow colors no item uses as one undo step and keeps the defaults [editor][items]")
+TEST_CASE("The Glow root removes the glow colors no item uses as one undo step and keeps the defaults [editor][items]")
 {
     TestImGuiContext context;
     ItemModelDatabaseScope restoreModels;
@@ -219,8 +230,9 @@ TEST_CASE("The Glow tab removes the glow colors no item uses as one undo step an
     g_ItemModelDatabase.Build(models, g_GlowColors);
     g_ItemEdits.GetHistory().Clear();
 
+    g_MuColorsUI.Show(ColorsRoot::Glow);
     RenderColors();
-    ImGui::ActivateItemByID(GlowTabWidgetId(I18N::Editor::RemoveThem));
+    ImGui::ActivateItemByID(PickedPaneWidgetId(I18N::Editor::RemoveThem));
     RenderColors();
 
     CHECK(HasGlowColor("red"));
@@ -236,6 +248,39 @@ TEST_CASE("The Glow tab removes the glow colors no item uses as one undo step an
     CHECK(HasGlowColor("gold"));
     CHECK(HasGlowColor("teal"));
     CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+}
+
+// The glow color folders are steps of the item history (D69), and removing a color undone puts it back in its folder.
+TEST_CASE("Glow color folders are item edits, and an undone removal puts the color back in its folder [editor][items]")
+{
+    TestImGuiContext context;
+    ItemModelDatabaseScope restoreModels;
+    GlowColorsScope restoreColors({{ItemGlow::DefaultColor, {1.0, 0.5, 0.0}},
+                                   {ItemGlow::DefaultShineColor, {1.0, 1.0, 1.0}},
+                                   {ItemGlow::DefaultAncientColor, {0.0, 0.5, 1.0}},
+                                   {"red", {1.0, 0.0, 0.0}},
+                                   {"gold", {1.0, 0.7, 0.2}}});
+    g_ItemModelDatabase.Build({}, g_GlowColors);
+    g_ItemEdits.GetHistory().Clear();
+    const std::vector<Data::Colors::ColorFolder> folders{{"Warm", {}, {"red", "gold"}}};
+
+    g_ItemEdits.SetColorFolders(I18N::Editor::NewColorFolder, MuEditor::Items::ItemEdits::GlowFolders, folders);
+    CHECK(g_GlowColors.GetFolders() == folders);
+    const std::string gold[] = {"gold"};
+    REQUIRE(g_ItemEdits.RemoveGlowColors(I18N::Editor::RemoveAGlowColor, gold));
+    CHECK(g_GlowColors.GetFolders()[0].colors == std::vector<std::string>{"red"});
+
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(HasGlowColor("gold"));
+    CHECK(g_GlowColors.GetFolders() == folders);
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(g_GlowColors.GetFolders().empty());
+
+    // The window draws the folder and the color in it without an error.
+    REQUIRE(g_ItemEdits.Redo());
+    g_MuColorsUI.Show(ColorsRoot::Glow);
+    RenderColors();
+    RenderColors();
 }
 
 #endif // _EDITOR
