@@ -46,7 +46,9 @@ Made while reviewing sven-n/MuMain#915, 2026-11-01.
 | L5 | No render style per mesh | A style draws the whole model, so a mesh gets layers, not a style of its own. |
 | L6 | This document | Deleted by its last task, after its lasting content has moved into the docs. |
 | L7 | Building blocks (Q-L1, 2026-11-01) | All of D25's blocks for the item looks, in three steps. **Step 1:** draw passes (texture, chrome, metal, glow, dark; pulse, scrolling, light, tint) and conditions (doppelganger, inventory and ground, item level, which item). **Step 2:** FX1.7c, the live preview of effects in an editor view, with its own short design first (see the possible follow-up ideas). **Step 3:** things on bones (sprites, particles, lightning; chances per frame), named as FX1 decided for phase 13 (`{ "joint": "jointThunder", "subType": 14, "fromBone": 3, "toBone": 4 }`, SubType a number, D30), shown live in the look editor. |
-| L8 | Names of a layer's fields (Q-L2a, 2026-11-01) | Designer terms, with no part for raw engine values (one could be added later without changing data). **Kind:** texture, reflection, light map, flat color. **Motion** (reflections): slow drift (`RENDER_CHROME`), fast sweep (`CHROME2`), follows the light (`CHROME3`), swirl (`CHROME4`), strong swirl (`CHROME5`), stripes (`CHROME6`), very slow drift (`CHROME7`), oil sheen (`OIL`), still shine (`METAL`). **Blend:** normal, glow (`RENDER_BRIGHT`, adds light), darken (`RENDER_DARK`), as the drawing asks (the drawing's own render type). **Meshes:** empty for all. **Where** (reflections): over, or under the holes (as #915 draws it). **Texture:** empty for the mesh's own, or the one that belongs to the motion. **Color:** the model's light, a fixed color, or a tint of the model's light. Kind, Motion and Blend combine freely; an engine feature with no field (e.g. `RENDER_NODEPTH`) gets one added in code. Opacity, the glow mesh and scrolling: Q-L2b. |
+| L8 | Names of a layer's fields (Q-L2a, 2026-11-01) | Designer terms, with no part for raw engine values (one could be added later without changing data). **Kind:** texture, reflection, light map, flat color. **Motion** (reflections): slow drift (`RENDER_CHROME`), fast sweep (`CHROME2`), follows the light (`CHROME3`), swirl (`CHROME4`), strong swirl (`CHROME5`), stripes (`CHROME6`), very slow drift (`CHROME7`), oil sheen (`OIL`), still shine (`METAL`). **Blend:** normal, glow (`RENDER_BRIGHT`, adds light), darken (`RENDER_DARK`), as the drawing asks (the drawing's own render type). **Meshes:** empty for all. **Where** (reflections): over, or under the holes (as #915 draws it). **Texture:** empty for the mesh's own, or the one that belongs to the motion. **Color:** the model's light, a fixed color, or a tint of the model's light. Kind, Motion and Blend combine freely; an engine feature with no field (e.g. `RENDER_NODEPTH`) gets one added in code. Opacity, the glow mesh and scrolling: L10. |
+| L9 | Values that change over time (Q-L2b, 2026-11-01) | A field that changes over time names a shape whose parameters a designer can picture: **fixed**; **wave** (from, to, seconds per cycle); **bounce** (the absolute sine: from, to, seconds); **scroll** (per second); **ramp** (from, to, seconds, then back to the start); **frames** (count, step, seconds each); **random** (from, to, step, a new value each frame). The loader turns them into the code's numbers; a moved look keeps its exact values (e.g. 6.283185 s for `sin(WorldTime * 0.001f)`), checked against the old code. The editor draws the value over time beside the field. No formula text (D43: building blocks with parameters, not code transcribed). Chances per frame belong to things on bones (L7 step 3). |
+| L10 | Glow mesh, scrolling and opacity (Q-L2b, 2026-11-01) | **Fields of each layer**, empty for the item's value: glow mesh (none, a mesh, or all meshes), glow strength, scrolling mesh, scrolling (U and V), opacity (the item's, the drawing's, a number or a shape). **Item values of the look:** the glow mesh, glow strength, scrolling mesh, scrolling, opacity and hidden mesh it leaves on the item for what is drawn after it (the +7 glow, the excellent glow), as `masterScepter` leaves glow mesh 1 (`ItemRenderStyles.cpp:338-352`). The 11 item effects that only change values become looks with item values and no layers. When item values apply (before the layers, as item effects do today, or after them, as styles do): Q-L4. |
 
 ## Current state
 
@@ -92,6 +94,13 @@ so a few can be off:
   glow mesh and its strength, scrolling). The looks set the model's light 75
   times: 64 fixed colors, 5 tints of the model's light, 6 that change over
   time.
+- An item starts each drawing with no glow mesh, glow strength 1, no
+  scrolling and opacity 1 (`ItemObjectAttribute`, `ZzzObject.cpp:5372`).
+  The looks pass these values through, name their own for single passes
+  (116 draw calls name a glow mesh number), and change them on the item for
+  what is drawn after them (about 45 writes; `b->StreamMesh`, the scrolling
+  mesh, is a value of the model). Scrolling moves the texture of the glow
+  mesh and the scrolling mesh only.
 - Values that change over time have four shapes: waves (a sine of the time,
   57), steady scrolling (31), repeating ramps (time modulo a period: scrolls
   that jump back, texture frames; 17) and random chances per frame (8).
@@ -146,14 +155,13 @@ Written from the answers to the open questions.
 Answered one by one, each with the current state, every option with an
 example, and a recommendation.
 
-Answered: Q-L1 (2026-11-01, L7), Q-L2a (2026-11-01, L8).
+Answered: Q-L1 (L7), Q-L2a (L8), Q-L2b (L9, L10), all on 2026-11-01.
 
 | Q | Question |
 |---|---|
-| Q-L2b | Values that change over time (opacity, color, the glow mesh's strength, scrolling): how waves, scrolling, repeating ramps and chances are written; and the glow mesh and opacity fields. |
 | Q-L2c | Conditions (doppelganger, inventory and ground, item level, which item): on a layer, or on the whole look. |
 | Q-L3 | Where looks live: named looks in `Data/Effects/` that model entries name (D25, D26), layers inside the model entry, or a named look with meshes chosen per item. |
-| Q-L4 | How `renderStyle` and the new looks relate while the styles move (same names, one style at a time). |
+| Q-L4 | How `renderStyle` and the new looks relate while the styles move (same names, one style at a time); how an item's render style and item effect relate as looks, and so when a look's item values apply (before its layers, as item effects do, or after, as styles do). |
 | Q-L5 | Which of the 140 styles fit the first building blocks (a survey), and the order of moving them. |
 | Q-L6 | The look editor: in the Item Model window under Looks, or a window of its own (D25: one look editor for all areas); layer list, preview, the items that use a look. |
 | Q-L7 | The mesh list: what each row shows (number, texture, hidden, glowing, has holes), and whether hovering a row highlights the mesh in the preview. |
@@ -164,7 +172,7 @@ Answered: Q-L1 (2026-11-01, L7), Q-L2a (2026-11-01, L8).
 ## Tasks
 
 1. [ ] Write this design: answer the open questions one by one (in progress;
-   Q-L1 and Q-L2a done).
+   Q-L1, Q-L2a and Q-L2b done).
 2. [ ] Step 1 of L7: draw passes and conditions (the pull requests from
    Q-L10).
 3. [ ] Step 2 of L7: FX1.7c, its short design, then the live preview.
