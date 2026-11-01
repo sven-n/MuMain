@@ -6,6 +6,7 @@
 #include <fstream>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "doctest.h"
 
@@ -633,4 +634,84 @@ TEST_CASE("sound files get one number each after the SOUND_* list [audio]")
     CHECK(second != first);
     // The same file, as the game opens it: without case, \ and / alike.
     CHECK(Audio::SoundNumbers::ForFile(L"data\\sound\\testnumbersone.wav") == first);
+}
+
+TEST_CASE("the Sound Mixer's gain changes a sound's playing and new copies at once, not a preview's level; the "
+          "music's too [audio][volume][mixer]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    ma_engine_config engineConfig = ma_engine_config_init();
+    engineConfig.noDevice = MA_TRUE;
+    engineConfig.channels = 1;
+    engineConfig.sampleRate = 48000;
+    REQUIRE(ma_engine_init(&engineConfig, &backend->m_engine) == MA_SUCCESS);
+    backend->m_initialized = true;
+
+    constexpr ma_uint64 sourceFrameCount = 48000;
+    std::vector<float> sourceFrames(sourceFrameCount, 0.25f);
+    ma_audio_buffer_config bufferConfig =
+        ma_audio_buffer_config_init(ma_format_f32, 1, sourceFrameCount, sourceFrames.data(), nullptr);
+    std::array<ma_audio_buffer, 3> buffers{};
+    for (ma_audio_buffer& buffer : buffers)
+    {
+        REQUIRE(ma_audio_buffer_init(&bufferConfig, &buffer) == MA_SUCCESS);
+    }
+    constexpr ESound soundId = SOUND_CLICK01;
+    const int soundIndex = static_cast<int>(soundId);
+    for (int channel = 0; channel < 2; ++channel)
+    {
+        REQUIRE(ma_sound_init_from_data_source(&backend->m_engine, reinterpret_cast<ma_data_source*>(&buffers[channel]),
+                                               0, nullptr, &backend->m_sounds[soundIndex][channel]) == MA_SUCCESS);
+    }
+    backend->m_soundLoaded[soundIndex] = true;
+    backend->m_loadedChannels[soundIndex] = 2;
+    backend->m_activeChannel[soundIndex] = 0;
+    ma_sound& first = backend->m_sounds[soundIndex][0];
+    ma_sound& second = backend->m_sounds[soundIndex][1];
+    backend->SetSFXVolume(0.8f);
+
+    // A playing copy follows the gain at once, and keeps running muted.
+    REQUIRE(backend->PlaySound(soundId, nullptr, false));
+    CHECK(ma_sound_get_volume(&first) == doctest::Approx(0.8f));
+    backend->SetSoundMixGain(soundId, 0.0f);
+    CHECK(ma_sound_get_volume(&first) == doctest::Approx(0.0f));
+    CHECK(ma_sound_is_playing(&first));
+    backend->SetSoundMixGain(soundId, 0.5f);
+    CHECK(ma_sound_get_volume(&first) == doctest::Approx(0.4f));
+    // A new copy starts at it.
+    REQUIRE(backend->PlaySound(soundId, nullptr, false));
+    CHECK(ma_sound_get_volume(&second) == doctest::Approx(0.4f));
+    // The effect volume keeps it.
+    backend->SetSFXVolume(1.0f);
+    CHECK(ma_sound_get_volume(&first) == doctest::Approx(0.5f));
+    CHECK(ma_sound_get_volume(&second) == doctest::Approx(0.5f));
+    // A preview's level is its own, also when the gain changes after.
+    REQUIRE(backend->PlaySoundAtLevel(soundId, 0.6f));
+    CHECK(ma_sound_get_volume(&first) == doctest::Approx(0.6f));
+    backend->SetSoundMixGain(soundId, 0.0f);
+    CHECK(ma_sound_get_volume(&first) == doctest::Approx(0.6f));
+    CHECK(ma_sound_get_volume(&second) == doctest::Approx(0.0f));
+    // A copy on a free channel too.
+    ma_sound_stop(&second);
+    backend->m_activeChannel[soundIndex] = 1;
+    backend->SetSoundMixGain(soundId, 0.5f);
+    REQUIRE(backend->PlaySoundOnFreeChannel(soundId, 0.5f));
+    CHECK(ma_sound_get_volume(&second) == doctest::Approx(0.25f));
+
+    // The music: its volume times its gain.
+    REQUIRE(ma_sound_init_from_data_source(&backend->m_engine, reinterpret_cast<ma_data_source*>(&buffers[2]), 0,
+                                           nullptr, &backend->m_musicSound) == MA_SUCCESS);
+    backend->m_musicLoaded = true;
+    backend->SetBGMVolume(0.8f);
+    CHECK(ma_sound_get_volume(&backend->m_musicSound) == doctest::Approx(0.8f));
+    backend->SetMusicMixGain(0.5f);
+    CHECK(ma_sound_get_volume(&backend->m_musicSound) == doctest::Approx(0.4f));
+    backend->SetBGMVolume(0.6f);
+    CHECK(ma_sound_get_volume(&backend->m_musicSound) == doctest::Approx(0.3f));
+
+    backend->Shutdown();
+    for (ma_audio_buffer& buffer : buffers)
+    {
+        ma_audio_buffer_uninit(&buffer);
+    }
 }

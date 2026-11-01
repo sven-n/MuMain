@@ -3478,4 +3478,67 @@
   <data name="Not read again {0}" xml:space="preserve">
     <value>Nicht neu gelesen: {0}</value>
   </data>
+  <data name="Sound mixer title" xml:space="preserve">
+    <value>Sound-Mixer</value>
+  </data>
+  <data name="Sound mixer nothing changed" xml:space="preserve">
+    <value>Alle Geräusche wie gewohnt</value>
+  </data>
+  <data name="Sound mixer unmute all" xml:space="preserve">
+    <value>Alles zurücksetzen</value>
+  </data>
+  <data name="Sound mixer note" xml:space="preserve">
+    <value>Zum Hören im Editor: Arten von Geräuschen und gerade gehörte Geräusche stumm, solo oder leiser schalten. Änderungen wirken sofort; eine stumme Schleife läuft lautlos weiter. Die Lautstärken des Spiels bleiben, wie sie sind, die Abspielknöpfe und Vorschauen des Editors sind nicht betroffen, und jeder Start spielt alles wie gewohnt.</value>
+  </data>
+  <data name="Sound mixer kinds" xml:space="preserve">
+    <value>Arten</value>
+  </data>
+  <data name="Sound mixer heard just now" xml:space="preserve">
+    <value>Gerade gehört (letzte 10 s)</value>
+  </data>
+  <data name="Sound mixer nothing heard" xml:space="preserve">
+    <value>Kein Geräusch in den letzten 10 Sekunden.</value>
+  </data>
+  <data name="Sound mute" xml:space="preserve">
+    <value>Stumm</value>
+  </data>
+  <data name="Sound muted" xml:space="preserve">
+    <value>Stummgeschaltet</value>
+  </data>
+  <data name="Sound solo" xml:space="preserve">
+    <value>Solo</value>
+  </data>
+  <data name="Sound solo on" xml:space="preserve">
+    <value>Solo an</value>
+  </data>
+  <data name="Sound mixer muted {0}" xml:space="preserve">
+    <value>{0} stumm</value>
+  </data>
+  <data name="Sound mixer solo {0}" xml:space="preserve">
+    <value>{0} solo</value>
+  </data>
+  <data name="Sound mixer lowered {0}" xml:space="preserve">
+    <value>{0} leiser</value>
+  </data>
+  <data name="Sound mixer reminder {0}" xml:space="preserve">
+    <value>Sound-Mixer: {0}</value>
+  </data>
+  <data name="Sound mixer object {0}" xml:space="preserve">
+    <value>Objekt {0}</value>
+  </data>
+  <data name="Sound kind music" xml:space="preserve">
+    <value>Musik</value>
+  </data>
+  <data name="Sound kind map ambience" xml:space="preserve">
+    <value>Kartenatmosphäre (Schleifen)</value>
+  </data>
+  <data name="Sound kind map objects" xml:space="preserve">
+    <value>Geräusche von Kartenobjekten</value>
+  </data>
+  <data name="Sound kind monsters" xml:space="preserve">
+    <value>Monstergeräusche</value>
+  </data>
+  <data name="Sound kind everything else" xml:space="preserve">
+    <value>Alles andere</value>
+  </data>
 </root>

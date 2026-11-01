@@ -52,6 +52,17 @@ target_compile_definitions(map_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
+# The editor's Sound Mixer: its rules, sources, heard list and window. The
+# window needs the client globals of Winmain.cpp.
+mu_add_test(
+    NAME sound_mixer_tests
+    SOURCES
+        test_sound_mixer.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
 # The server groups of the login screen (Data/Local/ServerList.json). The
 # window test draws the editor's Server List window, which needs the client
 # globals of Winmain.cpp.

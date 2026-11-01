@@ -61,6 +61,20 @@ public:
     [[nodiscard]] virtual int GetMusicPosition() = 0;
 
     // Volume controls — linear 0.0 (mute) to 1.0 (full). Story 5.4.1.
+    // The editor's Sound Mixer (Audio/SoundMixer.h): a gain per sound number
+    // and one for the music, on top of the volumes; playing copies follow at
+    // once. 1 unless the editor sets them; a backend without them ignores
+    // them.
+    virtual void SetSoundMixGain(ESound buffer, float gain)
+    {
+        static_cast<void>(buffer);
+        static_cast<void>(gain);
+    }
+    virtual void SetMusicMixGain(float gain)
+    {
+        static_cast<void>(gain);
+    }
+
     virtual void SetBGMVolume(float level) = 0;
     virtual void SetSFXVolume(float level) = 0;
     [[nodiscard]] virtual float GetBGMVolume() const = 0;

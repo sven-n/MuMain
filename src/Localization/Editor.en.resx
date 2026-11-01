@@ -3697,4 +3697,67 @@
   <data name="Not read again {0}" xml:space="preserve">
     <value>Not read again: {0}</value>
   </data>
+  <data name="Sound mixer title" xml:space="preserve">
+    <value>Sound Mixer</value>
+  </data>
+  <data name="Sound mixer nothing changed" xml:space="preserve">
+    <value>All sounds as normal</value>
+  </data>
+  <data name="Sound mixer unmute all" xml:space="preserve">
+    <value>Unmute all</value>
+  </data>
+  <data name="Sound mixer note" xml:space="preserve">
+    <value>For listening in the editor: mute, solo and turn down kinds of sounds and the sounds just heard. Changes apply at once; a muted loop keeps running silently. The game's own volumes stay as they are, the editor's Play buttons and previews are not affected, and every start plays everything as normal.</value>
+  </data>
+  <data name="Sound mixer kinds" xml:space="preserve">
+    <value>Kinds</value>
+  </data>
+  <data name="Sound mixer heard just now" xml:space="preserve">
+    <value>Heard just now (last 10 s)</value>
+  </data>
+  <data name="Sound mixer nothing heard" xml:space="preserve">
+    <value>No sound in the last 10 seconds.</value>
+  </data>
+  <data name="Sound mute" xml:space="preserve">
+    <value>Mute</value>
+  </data>
+  <data name="Sound muted" xml:space="preserve">
+    <value>Muted</value>
+  </data>
+  <data name="Sound solo" xml:space="preserve">
+    <value>Solo</value>
+  </data>
+  <data name="Sound solo on" xml:space="preserve">
+    <value>Solo on</value>
+  </data>
+  <data name="Sound mixer muted {0}" xml:space="preserve">
+    <value>{0} muted</value>
+  </data>
+  <data name="Sound mixer solo {0}" xml:space="preserve">
+    <value>{0} solo</value>
+  </data>
+  <data name="Sound mixer lowered {0}" xml:space="preserve">
+    <value>{0} lowered</value>
+  </data>
+  <data name="Sound mixer reminder {0}" xml:space="preserve">
+    <value>Sound Mixer: {0}</value>
+  </data>
+  <data name="Sound mixer object {0}" xml:space="preserve">
+    <value>object {0}</value>
+  </data>
+  <data name="Sound kind music" xml:space="preserve">
+    <value>Music</value>
+  </data>
+  <data name="Sound kind map ambience" xml:space="preserve">
+    <value>Map ambience (loops)</value>
+  </data>
+  <data name="Sound kind map objects" xml:space="preserve">
+    <value>Map object sounds</value>
+  </data>
+  <data name="Sound kind monsters" xml:space="preserve">
+    <value>Monster sounds</value>
+  </data>
+  <data name="Sound kind everything else" xml:space="preserve">
+    <value>Everything else</value>
+  </data>
 </root>

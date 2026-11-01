@@ -39,7 +39,8 @@ The editor opens in a window of its own, beside the game window where the
 screen has room (else over its right side), and stays in front of the game. Its
 **Windows** menu opens the tool windows: Item, Monster
 ([monster-data.md](monster-data.md)), Colors ([item-data.md](item-data.md#colors)),
-Data Checks ([below](#data-checks)), Server List
+Data Checks ([below](#data-checks)), the Sound Mixer ([below](#sound-mixer)),
+Server List
 ([server-list.md](server-list.md)), Skill, Dev and Map Editor, the Effect
 Browser and the console. They open as tabs docked in the editor window, the
 console along the bottom. Drag a tab out to float a tool window anywhere, over
@@ -127,6 +128,36 @@ or monster tool of its field, Item Formulas for the item stat file, the
 Server List, the Effect Browser, the Map Editor for the map sounds, or the
 Dev Editor for the graphics look. An arrow
 key onto a problem only selects it.
+
+### Sound Mixer
+
+**Windows > Sound Mixer** is for listening: it mutes, solos and turns down
+kinds of sounds and single sounds while the game runs, in editor builds
+only.
+
+- **Kinds**: music, map ambience (the looped sounds: wind, rain, water),
+  map object sounds ([map-data.md](map-data.md)), monster sounds (the sound
+  sets' events and the attacks' sounds, [monster-data.md](monster-data.md))
+  and everything else. A sound's kind is where it comes from: the data's
+  players name it (`Audio::ScopedSoundSource`), a loop is ambience, the rest
+  is everything else.
+- **Heard just now**: each sound of the last 10 seconds, newest first, with
+  its file below `Data/Sound` (or its number), its kind and source (the set
+  and monster, the map object type). A sound whose controls are changed stays
+  listed.
+
+Each row has a volume slider, **Mute** and **Solo**. A sound plays at its
+kind's volume times its own; mute wins; while anything is solo, only what is
+solo plays, the music too. Changes reach playing sounds at once, and a muted
+loop keeps running silently, so it is back where it is when unmuted.
+**Unmute all** puts everything back. Nothing is kept: each start plays
+everything as normal, and while anything is changed the editor's menu bar
+says so ("Sound Mixer: 2 muted, 1 solo"); a click opens the window.
+
+The game's own volumes stay as they are, and the editor's previews (the Play
+buttons of Monster Sounds and the Map Editor, Monster Preview, the effect
+preview) play at their own volume, whatever the mixer says. The effect
+preview's **Mute** still silences the game's one-shot sounds while it runs.
 
 ---
 

@@ -12,6 +12,9 @@
 #include "Engine/Object/w_CharacterInfo.h"
 #include "Engine/Object/w_ObjectInfo.h"
 #include "World/MapInfra/MapObjectSounds.h"
+#ifdef _EDITOR
+#include "Audio/SoundMixer.h"
+#endif
 
 #include <algorithm>
 #include <filesystem>
@@ -393,3 +396,26 @@ TEST_CASE("Map object sounds: a copy plays quieter the farther its object is fro
     CHECK(scope.audio.freeLevels[0] == 1.0f);
     CHECK(scope.audio.freeLevels[1] == doctest::Approx(0.625f));
 }
+
+#ifdef _EDITOR
+TEST_CASE("Map object sounds: the Sound Mixer hears them as map object sounds of the object's type (Q-SM2) "
+          "[data][maps][editor]")
+{
+    AudioScope scope;
+    Audio::Mixer::Clear();
+    g_MapObjectSoundDatabase.Build(std::vector<MapObjectSound>{Waterfall()});
+    World::MapObjectSounds::LoadForMap(24, 0);
+    const std::optional<ESound> sound = World::MapObjectSounds::FindSound(38);
+    REQUIRE(sound);
+    OBJECT waterfall;
+    waterfall.Type = 38;
+    World::MapObjectSounds::OnObjectDrawn(waterfall);
+    const std::vector<Audio::Mixer::HeardSound> heard = Audio::Mixer::Heard(Audio::Mixer::Now());
+    World::MapObjectSounds::LoadForMap(-1, 0);
+    Audio::Mixer::Clear();
+    REQUIRE(heard.size() == 1);
+    CHECK(heard[0].number == static_cast<int>(*sound));
+    CHECK(heard[0].kind == Audio::SoundKind::MapObject);
+    CHECK(heard[0].sourceNumber == 38);
+}
+#endif // _EDITOR

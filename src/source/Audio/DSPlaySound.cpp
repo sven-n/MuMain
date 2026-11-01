@@ -18,6 +18,7 @@
 #include "Core/Platform/IPlatformAudio.h"
 #ifdef _EDITOR
 #include "Audio/EditorSoundMute.h"
+#include "Audio/SoundMixer.h"
 #endif
 
 #include <cwctype>
@@ -83,6 +84,26 @@ HRESULT ReleaseBuffer(int bufferId)
     return S_OK;
 }
 
+std::wstring GetLoadedSoundFile(ESound bufferId)
+{
+    const auto sound = LoadedSounds().find(static_cast<int>(bufferId));
+    return sound != LoadedSounds().end() ? sound->second.file : std::wstring();
+}
+
+#ifdef _EDITOR
+namespace
+{
+// The Sound Mixer notes a loaded sound that starts and gives it its gain.
+void NoteForMixer(ESound bufferId, bool looped)
+{
+    if (LoadedSounds().contains(static_cast<int>(bufferId)))
+    {
+        Audio::Mixer::OnPlay(static_cast<int>(bufferId), looped, Audio::Mixer::Now());
+    }
+}
+} // namespace
+#endif
+
 HRESULT PlayBuffer(ESound bufferId, OBJECT* object, BOOL looped)
 {
     Diagnostics::DrawSpawnCheck::Note("sound");
@@ -90,6 +111,7 @@ HRESULT PlayBuffer(ESound bufferId, OBJECT* object, BOOL looped)
     // Nothing started; no caller reads the result.
     if (Audio::EditorMute::IsMuted() && looped == FALSE)
         return S_FALSE;
+    NoteForMixer(bufferId, looped != FALSE);
 #endif
     if (g_platformAudio != nullptr)
     {
@@ -117,6 +139,7 @@ HRESULT PlayBufferOnFreeChannel(ESound bufferId, float level)
 #ifdef _EDITOR
     if (Audio::EditorMute::IsMuted())
         return S_FALSE;
+    NoteForMixer(bufferId, false);
 #endif
     if (g_platformAudio != nullptr)
     {

@@ -1013,6 +1013,8 @@ bool IsSoundLoaded(ESound Buffer, const wchar_t* strFileName, int BufferChannel,
 // Forgets what LoadWaveFile loaded: for an audio backend that holds none of
 // it (the tests' recorders).
 void ForgetLoadedSounds();
+// The file LoadWaveFile loaded into the sound (without case); "" for none.
+std::wstring GetLoadedSoundFile(ESound Buffer);
 HRESULT PlayBuffer(ESound Buffer, OBJECT* Object = nullptr, BOOL bLooped = false);
 // Plays the sound once at `Level` (0 to 1) instead of the effect volume: the
 // editor's previews of a sound, heard also while the game's effect volume is

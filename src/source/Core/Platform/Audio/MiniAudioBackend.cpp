@@ -135,6 +135,9 @@ bool MiniAudioBackend::AddSlotsUpTo(int buffer)
     m_soundLoaded.resize(count);
     m_activeChannel.resize(count);
     m_loadedChannels.resize(count);
+    m_mixGain.resize(count, 1.0f);
+    m_channelVolume.resize(count);
+    m_channelMixed.resize(count);
     return true;
 }
 
@@ -275,12 +278,12 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
 // ---------------------------------------------------------------------------
 bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped)
 {
-    return StartSound(buffer, pObject, looped, m_sfxVolume);
+    return StartSound(buffer, pObject, looped, m_sfxVolume, true);
 }
 
 bool MiniAudioBackend::PlaySoundAtLevel(ESound buffer, float level)
 {
-    return StartSound(buffer, nullptr, false, std::clamp(level, 0.0f, 1.0f));
+    return StartSound(buffer, nullptr, false, std::clamp(level, 0.0f, 1.0f), false);
 }
 
 bool MiniAudioBackend::PlaySoundOnFreeChannel(ESound buffer, float level)
@@ -309,12 +312,19 @@ bool MiniAudioBackend::PlaySoundOnFreeChannel(ESound buffer, float level)
     // level of the effect volume.
     ma_sound_seek_to_pcm_frame(pSound, 0);
     ma_sound_set_looping(pSound, MA_FALSE);
-    ma_sound_set_volume(pSound, m_sfxVolume * std::clamp(level, 0.0f, 1.0f));
+    SetChannelVolume(bufIdx, ch, m_sfxVolume * std::clamp(level, 0.0f, 1.0f), true);
     ma_sound_start(pSound);
     return true;
 }
 
-bool MiniAudioBackend::StartSound(ESound buffer, const void* pObject, bool looped, float volume)
+void MiniAudioBackend::SetChannelVolume(int buffer, int channel, float volume, bool mixed)
+{
+    m_channelVolume[buffer][channel] = volume;
+    m_channelMixed[buffer][channel] = mixed;
+    ma_sound_set_volume(&m_sounds[buffer][channel], mixed ? volume * m_mixGain[buffer] : volume);
+}
+
+bool MiniAudioBackend::StartSound(ESound buffer, const void* pObject, bool looped, float volume, bool mixed)
 {
     if (!m_initialized)
     {
@@ -376,7 +386,7 @@ bool MiniAudioBackend::StartSound(ESound buffer, const void* pObject, bool loope
     ma_sound_set_looping(pSound, looped ? MA_TRUE : MA_FALSE);
 
     // The effect volume, or a preview's own level.
-    ma_sound_set_volume(pSound, volume);
+    SetChannelVolume(bufIdx, ch, volume, mixed);
 
     ma_sound_start(pSound);
 
@@ -500,7 +510,7 @@ void MiniAudioBackend::SetVolume(ESound buffer, long vol)
     const float linear = DbToLinear(vol);
     for (int ch = 0; ch < m_loadedChannels[bufIdx]; ++ch)
     {
-        ma_sound_set_volume(&m_sounds[bufIdx][ch], linear);
+        SetChannelVolume(bufIdx, ch, linear, m_channelMixed[bufIdx][ch]);
     }
 }
 
@@ -588,7 +598,7 @@ bool MiniAudioBackend::StartMusicStream(const std::string& identity)
     }
 
     ma_sound_set_looping(&m_musicSound, MA_TRUE);
-    ma_sound_set_volume(&m_musicSound, m_bgmVolume);
+    ma_sound_set_volume(&m_musicSound, m_bgmVolume * m_musicMixGain);
     result = ma_sound_start(&m_musicSound);
     if (result != MA_SUCCESS)
     {
@@ -727,7 +737,38 @@ void MiniAudioBackend::SetBGMVolume(float level)
     m_bgmVolume = std::clamp(level, 0.0f, 1.0f);
     if (m_initialized && m_musicLoaded)
     {
-        ma_sound_set_volume(&m_musicSound, m_bgmVolume);
+        ma_sound_set_volume(&m_musicSound, m_bgmVolume * m_musicMixGain);
+    }
+}
+
+void MiniAudioBackend::SetMusicMixGain(float gain)
+{
+    m_musicMixGain = std::clamp(gain, 0.0f, 1.0f);
+    if (m_initialized && m_musicLoaded)
+    {
+        ma_sound_set_volume(&m_musicSound, m_bgmVolume * m_musicMixGain);
+    }
+}
+
+void MiniAudioBackend::SetSoundMixGain(ESound buffer, float gain)
+{
+    const int bufIdx = static_cast<int>(buffer);
+    if (!HasSlot(bufIdx))
+    {
+        return;
+    }
+    m_mixGain[bufIdx] = std::clamp(gain, 0.0f, 1.0f);
+    if (!m_initialized || !m_soundLoaded[bufIdx])
+    {
+        return;
+    }
+    // Playing copies follow at once; a muted loop keeps running silently.
+    for (int ch = 0; ch < m_loadedChannels[bufIdx]; ++ch)
+    {
+        if (m_channelMixed[bufIdx][ch])
+        {
+            ma_sound_set_volume(&m_sounds[bufIdx][ch], m_channelVolume[bufIdx][ch] * m_mixGain[bufIdx]);
+        }
     }
 }
 
@@ -752,7 +793,7 @@ void MiniAudioBackend::SetSFXVolume(float level)
         }
         for (int ch = 0; ch < m_loadedChannels[buf]; ++ch)
         {
-            ma_sound_set_volume(&m_sounds[buf][ch], m_sfxVolume);
+            SetChannelVolume(buf, ch, m_sfxVolume, m_channelMixed[buf][ch]);
         }
     }
 }

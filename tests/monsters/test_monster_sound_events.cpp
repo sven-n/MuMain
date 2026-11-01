@@ -27,6 +27,7 @@
 #include "World/MapInfra/w_MapProcess.h"
 
 #ifdef _EDITOR
+#include "Audio/SoundMixer.h"
 #include "UI/MonsterTools/MonsterSelection.h"
 #include "UI/MonsterTools/MuMonsterPreviewUI.h"
 #endif
@@ -991,5 +992,26 @@ TEST_CASE("Monster Preview: during events play each frame, once events after eac
     FPS_ANIMATION_FACTOR = factor;
     g_MonsterSelection.Select(MuEditor::Monsters::MonsterSelection::NoMonster);
     scope.Take();
+}
+#endif // _EDITOR
+
+#ifdef _EDITOR
+TEST_CASE("Monster sounds: the Sound Mixer hears a set's events as monster sounds of the set and the monster "
+          "(Q-SM2) [monsters][sounds][editor]")
+{
+    SoundScope scope(WD_33AIDA);
+    Data::Monsters::ModelLoader::Open(MODEL_DEATH_RIDER);
+    REQUIRE(Data::Monsters::ModelLoader::IsOpen(MODEL_DEATH_RIDER));
+    scope.Take();
+    Audio::Mixer::Clear();
+    const int attack1 = SoundOf(SetOf(DeathRider), "SOUND_AIDA_DEATHRAIDER_ATTACK1");
+    CHECK(scope.Play(DeathRider, MONSTER01_ATTACK1) == Sounds({attack1}));
+    const std::vector<Audio::Mixer::HeardSound> heard = Audio::Mixer::Heard(Audio::Mixer::Now());
+    Audio::Mixer::Clear();
+    REQUIRE(heard.size() == 1);
+    CHECK(heard[0].number == attack1);
+    CHECK(heard[0].kind == Audio::SoundKind::Monster);
+    CHECK(heard[0].name == "Death Rider");
+    CHECK(heard[0].sourceNumber == DeathRider);
 }
 #endif // _EDITOR

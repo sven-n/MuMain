@@ -5,6 +5,7 @@
 #include "Audio/SoundNumbers.h"
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/MapData/MapObjectSoundDatabase.h"
+#include "Audio/SoundSource.h"
 #include "Engine/Object/ZzzCharacter.h"
 
 #include <algorithm>
@@ -116,6 +117,7 @@ void OnObjectDrawn(const OBJECT& object)
     FollowTable();
     if (const std::optional<ESound> sound = FindSound(object.Type))
     {
+        const Audio::ScopedSoundSource source(Audio::SoundKind::MapObject, {}, object.Type);
         PlayBufferOnFreeChannel(*sound, DistanceLevel(DistanceFromHero(object)));
     }
 }

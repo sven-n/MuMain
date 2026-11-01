@@ -63,12 +63,19 @@ public:
     // Volume controls (Story 5.4.1)
     void SetBGMVolume(float level) override;
     void SetSFXVolume(float level) override;
+    void SetSoundMixGain(ESound buffer, float gain) override;
+    void SetMusicMixGain(float gain) override;
     [[nodiscard]] float GetBGMVolume() const override;
     [[nodiscard]] float GetSFXVolume() const override;
 
 private:
-    // PlaySound at `volume`.
-    bool StartSound(ESound buffer, const void* pObject, bool looped, float volume);
+    // PlaySound at `volume`, times the sound's mix gain when `mixed` (the
+    // game's plays; a preview's level is its own).
+    bool StartSound(ESound buffer, const void* pObject, bool looped, float volume, bool mixed);
+
+    // Sets the channel to `volume`, times its sound's mix gain when `mixed`,
+    // and keeps both for a later change of the gain.
+    void SetChannelVolume(int buffer, int channel, float volume, bool mixed);
 
     // Convert DirectSound volume (dB * 100, range -10000..0) to linear 0.0..1.0
     static float DbToLinear(long dsVol);
@@ -97,6 +104,13 @@ private:
     // iterating all MAX_CHANNEL slots when numChannels < MAX_CHANNEL calls miniaudio
     // APIs on uninitialized ma_sound handles (UB).
     std::deque<int> m_loadedChannels = std::deque<int>(MAX_BUFFER);
+    // The Sound Mixer's gain per sound number (1 unless the editor sets it),
+    // each channel's volume without it, and whether it applies to the
+    // channel (not to a preview's PlaySoundAtLevel).
+    std::deque<float> m_mixGain = std::deque<float>(MAX_BUFFER, 1.0f);
+    std::deque<std::array<float, MAX_CHANNEL>> m_channelVolume = std::deque<std::array<float, MAX_CHANNEL>>(MAX_BUFFER);
+    std::deque<std::array<bool, MAX_CHANNEL>> m_channelMixed = std::deque<std::array<bool, MAX_CHANNEL>>(MAX_BUFFER);
+    float m_musicMixGain = 1.0f;
 
     float m_bgmVolume = 1.0f; // BGM volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1
     float m_sfxVolume = 1.0f; // SFX volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1

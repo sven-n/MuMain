@@ -4,6 +4,7 @@
 #include "GameLogic/Monsters/MonsterSoundEvents.h"
 
 #include "Audio/DSPlaySound.h"
+#include "Audio/SoundSource.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetLinks.h"
@@ -167,6 +168,8 @@ bool PlayFor(CHARACTER& character, std::optional<MonsterSoundMoment> moment, boo
         return false;
     }
     OBJECT& object = character.Object;
+    const Audio::ScopedSoundSource source(Audio::SoundKind::Monster, set->name,
+                                          static_cast<int>(character.MonsterIndex));
     Situation situation = SituationOf(object, *set);
     situation.moment = moment;
     situation.chanceDrawn = chanceDrawn;
@@ -200,6 +203,8 @@ bool PlayDrawn(CHARACTER& character)
         return false;
     }
     OBJECT& object = character.Object;
+    const Audio::ScopedSoundSource source(Audio::SoundKind::Monster, set->name,
+                                          static_cast<int>(character.MonsterIndex));
     Situation situation = SituationOf(object, *set);
     situation.drawn = true;
     situation.oncePlayed = character.SoundOncePlayed;
