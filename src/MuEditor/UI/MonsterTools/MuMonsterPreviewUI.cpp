@@ -4,6 +4,7 @@
 #ifdef _EDITOR
 
 #include "MuMonsterPreviewUI.h"
+#include "GameLogic/Monsters/MonsterModelTimers.h"
 
 #include "MonsterAnimationFacts.h"
 #include "MonsterEdits.h"
@@ -262,7 +263,12 @@ void MuMonsterPreviewUI::PlayDrawnSounds(int slot)
     {
         return;
     }
-    SoundPreview::PlayDrawn(*set, GetCues(slot), m_animation, m_frame, m_soundOncePlayed);
+    // The model's timers tick on the preview's own clock (Q-MN91).
+    const std::vector<Data::Monsters::MonsterModelTimer>& timers = ValuesOf(slot)->timers;
+    const std::uint32_t ticks = GameLogic::Monsters::ModelTimers::Advance(
+        timers, m_animation, static_cast<std::uint32_t>(timeGetTime()), m_timerLastTicks);
+    SoundPreview::PlayDrawn(*set, GetCues(slot), m_animation, m_frame, m_soundOncePlayed,
+                            GameLogic::Monsters::ModelTimers::NamesOf(timers, ticks));
 }
 
 void MuMonsterPreviewUI::RenderPreview(int slot)

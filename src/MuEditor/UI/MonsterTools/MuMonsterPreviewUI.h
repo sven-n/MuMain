@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "MonsterPreviewScene.h"
+#include "GameLogic/Monsters/MonsterModelTimers.h"
 
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewCamera.h"
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewTarget.h"
@@ -116,6 +117,8 @@ private:
     bool m_once = false;
     // A once event played since the animation started.
     bool m_soundOncePlayed = false;
+    // The last ticks of the shown model's timers (Q-MN91).
+    GameLogic::Monsters::ModelTimers::LastTicks m_timerLastTicks{};
     bool m_turn = false;
     bool m_sounds = true;
     bool m_gameFactors = true;

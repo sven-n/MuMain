@@ -33,6 +33,9 @@ void CHARACTER::Initialize()
     Decoy = false;
     SoundOncePlayed = false;
     SoundsDrawnThisFrame = false;
+    ModelTimerLastTicks.fill(0);
+    ModelTimerTicks = 0;
+    ModelTimersAsked = false;
 
     Class = CLASS_WIZARD;
     Skin = 0;

@@ -21,6 +21,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Core/Utilities/Random.h"
+#include "GameLogic/Monsters/MonsterModelTimers.h"
 #include "GameLogic/Monsters/MonsterSoundEvents.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/MapInfra/MapManager.h"
@@ -988,6 +989,126 @@ TEST_CASE("Monster sounds: the Aida monsters' attacks and deaths play when they 
     // The drawn frames play only the walk.
     const std::unique_ptr<CHARACTER> character = MakeCharacter(DeathRider);
     CHECK(Draw(scope, *character, MONSTER01_ATTACK1, 3).empty());
+}
+
+namespace
+{
+std::uint32_t g_timerClock = 0;
+
+std::uint32_t TimerClock()
+{
+    return g_timerClock;
+}
+
+// The model list with the slot's model changed, and the timers' clock, for
+// the life of the scope.
+class ModelChange
+{
+public:
+    ModelChange(int slot, const std::function<void(Data::Monsters::MonsterModelDefinition&)>& change)
+    {
+        for (const Data::Monsters::MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
+        {
+            m_models.push_back(*model);
+        }
+        std::vector<Data::Monsters::MonsterModelDefinition> changed = m_models;
+        const Data::Monsters::MonsterModelDefinition* own = g_MonsterModelDatabase.Find(slot);
+        REQUIRE(own != nullptr);
+        for (Data::Monsters::MonsterModelDefinition& model : changed)
+        {
+            if (model.slot == own->slot)
+            {
+                change(model);
+            }
+        }
+        g_MonsterModelDatabase.Build(changed);
+        GameLogic::Monsters::ModelTimers::SetClock(&TimerClock);
+    }
+    ~ModelChange()
+    {
+        GameLogic::Monsters::ModelTimers::SetClock(nullptr);
+        g_MonsterModelDatabase.Build(m_models);
+    }
+    ModelChange(const ModelChange&) = delete;
+    ModelChange& operator=(const ModelChange&) = delete;
+
+private:
+    std::vector<Data::Monsters::MonsterModelDefinition> m_models;
+};
+} // namespace
+
+TEST_CASE("Monster sounds: a model timer ticks in its animation each time more than its interval passed, unsigned "
+          "as the draw code counted (Q-MN91) [monsters][sounds]")
+{
+    using GameLogic::Monsters::ModelTimers::Advance;
+    using GameLogic::Monsters::ModelTimers::NamesOf;
+    const std::vector<Data::Monsters::MonsterModelTimer> timers = {{"hair swing", MONSTER01_WALK, 500},
+                                                                   {"blink", MONSTER01_STOP1, 100}};
+    GameLogic::Monsters::ModelTimers::LastTicks last{};
+    CHECK(Advance(timers, MONSTER01_WALK, 500, last) == 0u);
+    CHECK(Advance(timers, MONSTER01_WALK, 501, last) == 1u);
+    CHECK(last[0] == 501u);
+    CHECK(Advance(timers, MONSTER01_WALK, 1001, last) == 0u);
+    CHECK(Advance(timers, MONSTER01_WALK, 1002, last) == 1u);
+    // Another animation's timer only; the walk's waits.
+    CHECK(Advance(timers, MONSTER01_STOP1, 1600, last) == 2u);
+    CHECK(last[0] == 1002u);
+    CHECK(NamesOf(timers, 3u) == std::vector<std::string>{"hair swing", "blink"});
+    CHECK(NamesOf(timers, 2u) == std::vector<std::string>{"blink"});
+    // A clock that wraps.
+    last[0] = 0xFFFFFF00u;
+    CHECK(Advance(timers, MONSTER01_WALK, 0x100u, last) == 1u);
+}
+
+TEST_CASE("Monster sounds: a drawn frame asks the model's timers once, the draw code and the sound events get the "
+          "same tick, and a timer event plays on it (Q-MN91) [monsters][sounds]")
+{
+    using namespace GameLogic::Monsters;
+    SoundScope scope(WD_33AIDA);
+    const std::unique_ptr<CHARACTER> rider = MakeCharacter(DeathRider);
+    const int move1 = SoundOf(SetOf(DeathRider), "SOUND_AIDA_DEATHRAIDER_MOVE1");
+    ModelChange model(rider->Object.Type, [](Data::Monsters::MonsterModelDefinition& definition)
+                      { definition.timers = {{"hair swing", MONSTER01_WALK, 500}}; });
+    SetChange set("Death Rider",
+                  [](MonsterSoundSet& definition)
+                  {
+                      Data::Monsters::MonsterSoundEvent swing;
+                      swing.timers = {"hair swing"};
+                      swing.heardAnywhere = true;
+                      swing.sounds = {"SOUND_AIDA_DEATHRAIDER_MOVE1"};
+                      definition.soundEvents = {swing};
+                  });
+    rider->Object.CurrentAction = MONSTER01_WALK;
+    rider->ModelTimerLastTicks.fill(0);
+    g_timerClock = 1000;
+    // The draw code asks first; the frame's sound events get the same tick.
+    CHECK(ModelTimers::Ticked(*rider, "hair swing"));
+    CHECK(ModelTimers::Ticked(*rider, "hair swing"));
+    CHECK_FALSE(ModelTimers::Ticked(*rider, "tail"));
+    SoundEvents::FinishDrawnFrame(*rider);
+    CHECK(scope.Take() == Sounds({move1}));
+    // The next frames: no tick until more than 500 ms passed.
+    g_timerClock = 1400;
+    SoundEvents::FinishDrawnFrame(*rider);
+    CHECK(scope.Take().empty());
+    CHECK_FALSE(ModelTimers::Ticked(*rider, "hair swing"));
+    SoundEvents::FinishDrawnFrame(*rider);
+    g_timerClock = 1501;
+    SoundEvents::FinishDrawnFrame(*rider);
+    CHECK(scope.Take() == Sounds({move1}));
+    // Standing, it waits.
+    rider->Object.CurrentAction = MONSTER01_STOP1;
+    g_timerClock = 5000;
+    SoundEvents::FinishDrawnFrame(*rider);
+    CHECK(scope.Take().empty());
+    // A character made again keeps its last ticks, as OBJECT::m_dwTime did.
+    CHARACTER* again = scope.Creation().Create(DeathRider);
+    REQUIRE(again != nullptr);
+    again->ModelTimerLastTicks[0] = 4800;
+    CHARACTER* made = scope.Creation().Create(DeathRider);
+    REQUIRE(made == again);
+    CHECK(made->ModelTimerLastTicks[0] == 4800u);
+    CHECK_FALSE(made->ModelTimersAsked);
 }
 
 TEST_CASE("Monster sounds: a monster is created with the once flag clear, as with SubType 0 (Q-MN87) "

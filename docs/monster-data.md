@@ -211,6 +211,7 @@ to `MuError.log`:
 | `streamMesh` | The mesh drawn as a stream; without it as the file has it |
 | `noneBlendMeshes` | Meshes drawn without blending |
 | `cues` | Named points of its animations that [sound events](#sound-events) play on: `name` (unique in the model), `animation`, and `frames`, from the first to below the second (the game checks the frame each game frame): where Raymond's feet land in the walk |
+| `timers` | Up to 4 timers of its animations (Q-MN91): `name` (unique in the model), `animation`, and `everyMs`, 1 to 60000; one ticks while the character is in the animation, each time more than `everyMs` passed since its last tick. The model's draw code may ask for one by name (Twintail's `hair swing`, which swings its hair) and sound events play on it (`timers`), on the same tick |
 | `bitmaps` | Bitmaps loaded into fixed bitmap slots that the model's code draws with: `file` below `Data/`, `slot` (`BITMAP_MONSTER_SKIN`), `filter` (`linear` or `nearest`), `wrap` (`repeat` or `clamp`) |
 | `parts` | Models loaded with it: `slot` (an NPC slot) or `effect` (an effect type of the effect catalogue), `file`, `textureFolders`, `animations`, `holdLastFrame` (no range defaults), and `maps` for parts loaded with a map instead (the Kundun parts in Kalima, the Totem Golem's in Elbeland) |
 | `boundingBox` | `min` and `max` of a character's box; without one -60, -60, 0 to 50, 50, 150 |
@@ -335,7 +336,9 @@ and stop2, in Kanturu Relics also in walk, for some Kanturu monsters never; a
 death right after an attack, with no stand or walk between, is silent);
 `duringCues`, played each frame the character is drawn in the frames of one of
 the named cues of its model (Q-MN90: Kanturu Relics' Dreadfear in the first
-frames of its second attack; the once flag stays as it is); or `on`
+frames of its second attack; the once flag stays as it is); `timers`, played in
+a drawn frame where one of the named timers of its model ticks (Q-MN91:
+Twintail's walk sound with its hair swing); or `on`
 moments, played where the game reaches them, whatever the animation:
 
 | Moment | Where the game plays it |
@@ -372,6 +375,7 @@ unless it is `heardAnywhere`:
 | `once` | The animations it plays once in until the character stands or walks, instead of animations; once events of one frame all play (the Witch Queen's thunder and attack). In stop1, stop2 or walk it would play each frame (a warning) |
 | `cues` | The cues of the monster's model it plays on, instead of animations; a model without the cue plays nothing for it (Data Checks warns) |
 | `duringCues` | The cues of the monster's model it plays in each drawn frame, instead of animations; a model without the cue plays nothing for it (Data Checks warns) |
+| `timers` | The timers of the monster's model it plays on, in a drawn frame where one ticks, instead of animations; a model without the timer plays nothing for it (Data Checks warns) |
 | `on` | The moments it plays at, instead of animations |
 | `deathEffectArmed` | Only while the character's death effect is armed |
 | `heardAnywhere` | Heard at any distance from the hero and on every map |

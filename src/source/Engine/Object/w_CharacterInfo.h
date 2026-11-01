@@ -2,6 +2,9 @@
 
 #include "Core/Utilities/SpinLock.h"
 
+#include <array>
+#include <cstdint>
+
 typedef struct _PATH_t
 {
     unsigned char CurrentPath;
@@ -135,6 +138,14 @@ public:
     // SoundEvents::PlayDrawn ran this frame (a map's monster effects called
     // it), so FinishDrawnFrame does not play the frame again.
     bool SoundsDrawnThisFrame;
+    // The last ticks of its model's timers (Q-MN91), from when the character
+    // was made, as the draw code kept Twintail's in OBJECT::m_dwTime: a
+    // character that appears again keeps them.
+    std::array<std::uint32_t, 4> ModelTimerLastTicks;
+    // The model timers that tick in this drawn frame (bit i: timer i), and
+    // whether the frame asked them already (GameLogic::Monsters::ModelTimers).
+    std::uint32_t ModelTimerTicks;
+    bool ModelTimersAsked;
     CLASS_TYPE			Class;
     CLASS_SKIN_INDEX            SkinIndex;
     BYTE			Skin; // What is this good for?

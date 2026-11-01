@@ -53,6 +53,9 @@ bool ToggleOnce(Data::Monsters::MonsterSoundEvent& event, int animation);
 bool ToggleCue(Data::Monsters::MonsterSoundEvent& event, const std::string& cue);
 bool ToggleDuringCue(Data::Monsters::MonsterSoundEvent& event, const std::string& cue);
 
+// As ToggleMoment, for a timer of the model (Q-MN91).
+bool ToggleTimer(Data::Monsters::MonsterSoundEvent& event, const std::string& timer);
+
 // The sounds Play plays for the event, without its chance: all of them, or
 // with a pick the `draw`th (0 or 1, drawn at random), the only one when it has
 // one sound.

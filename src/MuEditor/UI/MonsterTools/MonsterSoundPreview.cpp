@@ -51,7 +51,7 @@ void PlayEvents(const Data::Monsters::MonsterSoundSet& set, std::span<const Data
 }
 
 void PlayDrawn(const Data::Monsters::MonsterSoundSet& set, std::span<const Data::Monsters::MonsterModelCue> cues,
-               int animation, float frame, bool& oncePlayed)
+               int animation, float frame, bool& oncePlayed, std::vector<std::string> tickedTimers)
 {
     GameLogic::Monsters::SoundEvents::Situation situation;
     situation.animation = animation;
@@ -59,6 +59,7 @@ void PlayDrawn(const Data::Monsters::MonsterSoundSet& set, std::span<const Data:
     situation.deathEffectArmed = true;
     situation.drawn = true;
     situation.oncePlayed = oncePlayed;
+    situation.tickedTimers = std::move(tickedTimers);
     if (GameLogic::Monsters::SoundEvents::PlayEvents(set, cues, situation, [](int number, bool) { Play(number); }))
     {
         oncePlayed = true;

@@ -12639,6 +12639,9 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     o->SubType = 0;
     c->SoundOncePlayed = false;
     c->SoundsDrawnThisFrame = false;
+    // A new frame for its model's timers; their last ticks stay (Q-MN91).
+    c->ModelTimersAsked = false;
+    c->ModelTimerTicks = 0;
     c->MonsterIndex = MONSTER_UNDEFINED;
     o->BlendMeshTexCoordU = 0.f;
     o->BlendMeshTexCoordV = 0.f;

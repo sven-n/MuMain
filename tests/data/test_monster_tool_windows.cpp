@@ -482,6 +482,7 @@ TEST_CASE("The Monster Model, Monster Preview and Monster Sounds windows draw wi
     model.load.textureFolders = {"Monster"};
     model.load.speeds = {{2, 0.34f}};
     model.cues = {{"step 1", MONSTER01_WALK, {1.0f, 2.0f}}};
+    model.timers = {{"hair swing", MONSTER01_WALK, 500}};
     Data::Monsters::MonsterModelDefinition wizard = model;
     wizard.slot = "MONSTER_MODEL_CHAOSCASTLE_WIZARD";
     wizard.cues.clear();
@@ -1180,6 +1181,15 @@ TEST_CASE("Monster Sounds: a sound event plays each drawn frame in animations or
     CHECK_FALSE(ToggleDuringCue(event, "attack2 sound"));
     CHECK(ToggleCue(event, "step 1"));
     CHECK(event.duringCues.empty());
+
+    // On a timer of the model (Q-MN91).
+    CHECK(ToggleTimer(event, "hair swing"));
+    CHECK(event.cues.empty());
+    CHECK(event.timers == std::vector<std::string>{"hair swing"});
+    CHECK(WhenText(event) == "on timer hair swing");
+    CHECK_FALSE(ToggleTimer(event, "hair swing"));
+    CHECK(ToggleDuring(event, MONSTER01_WALK));
+    CHECK(event.timers.empty());
 }
 
 TEST_CASE("Monster Sounds: a new cue is one frame at the preview's frame, named after it once (Q-MN82) "

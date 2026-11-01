@@ -2,6 +2,7 @@
 #include "Core/Utilities/Random.h"
 
 #include "GameLogic/Monsters/MonsterSoundEvents.h"
+#include "GameLogic/Monsters/MonsterModelTimers.h"
 
 #include "Audio/DSPlaySound.h"
 #include "Audio/SoundOverlay.h"
@@ -89,6 +90,12 @@ bool IsWhen(const MonsterSoundEvent& event, std::span<const MonsterModelCue> cue
     if (situation.drawn)
     {
         return Contains(event.during, situation.animation) || IsOnCue(event.duringCues, cues, situation) ||
+               std::any_of(event.timers.begin(), event.timers.end(),
+                           [&](const std::string& timer)
+                           {
+                               return std::find(situation.tickedTimers.begin(), situation.tickedTimers.end(), timer) !=
+                                      situation.tickedTimers.end();
+                           }) ||
                (!situation.oncePlayed && Contains(event.once, situation.animation));
     }
     if (situation.moment)
@@ -233,6 +240,7 @@ bool PlayDrawn(CHARACTER& character)
     Situation situation = SituationOf(object, *set);
     situation.drawn = true;
     situation.oncePlayed = character.SoundOncePlayed;
+    situation.tickedTimers = ModelTimers::TickedNames(character);
     // The flag is set after the frame's events, so that once events of one
     // animation play together (the Witch Queen's thunder and attack).
     if (PlayEvents(*set, CuesOf(object), situation, [&object](int sound, bool atMonster)
@@ -259,12 +267,14 @@ void FinishDrawnFrame(CHARACTER& character)
         PlayDrawn(character);
     }
     character.SoundsDrawnThisFrame = false;
+    ModelTimers::FinishFrame(character);
 }
 
 bool HasDrawnEvents(const MonsterSoundSet& set)
 {
-    return std::any_of(set.soundEvents.begin(), set.soundEvents.end(), [](const MonsterSoundEvent& event)
-                       { return !event.during.empty() || !event.once.empty() || !event.duringCues.empty(); });
+    return std::any_of(
+        set.soundEvents.begin(), set.soundEvents.end(), [](const MonsterSoundEvent& event)
+        { return !event.during.empty() || !event.once.empty() || !event.duringCues.empty() || !event.timers.empty(); });
 }
 
 bool PlayEvents(const MonsterSoundSet& set, std::span<const MonsterModelCue> cues, const Situation& situation,

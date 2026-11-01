@@ -4,6 +4,7 @@
 #include "Core/Utilities/Random.h"
 
 #include <array>
+#include <cstddef>
 #include <optional>
 #include <string>
 #include <utility>
@@ -25,6 +26,24 @@ struct MonsterModelCue
     std::pair<float, float> frames;
 
     bool operator==(const MonsterModelCue&) const = default;
+};
+
+// The most timers a model has (CHARACTER keeps their last ticks), and the
+// longest interval of one.
+constexpr std::size_t MaxModelTimers = 4;
+constexpr int MaxModelTimerMs = 60000;
+
+// A timer of one of the model's animations (monsters design, Q-MN91): it
+// ticks while the character is in the animation, each time more than
+// `everyMs` passed since its last tick. The model's draw code and its sound
+// events share it: Twintail's hair swings and its walk sound.
+struct MonsterModelTimer
+{
+    std::string name;
+    int animation = 0;
+    int everyMs = 0;
+
+    bool operator==(const MonsterModelTimer&) const = default;
 };
 
 // Texture folders that the model uses on some maps (server map numbers)
@@ -121,6 +140,9 @@ struct MonsterModelDefinition
     // The points of its animations that sound events play on; the names are
     // unique. The sounds are in the sound sets that its monsters name.
     std::vector<MonsterModelCue> cues;
+    // The timers of its animations, at most MaxModelTimers; the names are
+    // unique (Q-MN91).
+    std::vector<MonsterModelTimer> timers;
     std::vector<MonsterModelBitmap> bitmaps;
     std::vector<MonsterModelPart> parts;
     MonsterModelBody body;

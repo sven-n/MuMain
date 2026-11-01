@@ -3131,7 +3131,7 @@
     <value>When</value>
   </data>
   <data name="Sound event when note" xml:space="preserve">
-    <value>Animations: the event plays in them, when an attack, hit or death starts, at each step of a walk and at the end of each loop of stop1 and stop2. Each frame in: each frame the monster is drawn in one of them; the chance draws each frame. Once until it stands: the first frame the monster is drawn in one of them; then no once event of the set plays until it is drawn in stop1, stop2 or walk. Cues: in the frames of a cue of the monster's model. Each frame in a cue: each frame the monster is drawn in the frames of a cue of its model. Moments: where the game plays them, whatever the animation: attack and hit when they start, death when it starts (also in Chaos Castle), stand when the monster is set to stand (a walk ends, the server stops it), walk at each step. An event names animations, each frame, once, cues, each frame in cues or moments.</value>
+    <value>Animations: the event plays in them, when an attack, hit or death starts, at each step of a walk and at the end of each loop of stop1 and stop2. Each frame in: each frame the monster is drawn in one of them; the chance draws each frame. Once until it stands: the first frame the monster is drawn in one of them; then no once event of the set plays until it is drawn in stop1, stop2 or walk. Cues: in the frames of a cue of the monster's model. Each frame in a cue: each frame the monster is drawn in the frames of a cue of its model. Timers: a drawn frame where a timer of the monster's model ticks. Moments: where the game plays them, whatever the animation: attack and hit when they start, death when it starts (also in Chaos Castle), stand when the monster is set to stand (a walk ends, the server stops it), walk at each step. An event names animations, each frame, once, cues, each frame in cues, timers or moments.</value>
   </data>
   <data name="Sound event on" xml:space="preserve">
     <value>on</value>
@@ -3543,6 +3543,33 @@
   </data>
   <data name="Sound event cues of {0}" xml:space="preserve">
     <value>Cues of {0}</value>
+  </data>
+  <data name="Sound event timers of {0}" xml:space="preserve">
+    <value>Timers of {0}</value>
+  </data>
+  <data name="Sound event on timer" xml:space="preserve">
+    <value>on timer</value>
+  </data>
+  <data name="Model timers" xml:space="preserve">
+    <value>Timers</value>
+  </data>
+  <data name="Model timers note" xml:space="preserve">
+    <value>Timers of the model's animations: one ticks while the monster is in its animation, each time more than its interval passed since its last tick. The model's draw code (Twintail's hair swing) and sound events (Monster Sounds, When: Timers of) tick on the same timer.</value>
+  </data>
+  <data name="The model has no timers" xml:space="preserve">
+    <value>The model has no timers.</value>
+  </data>
+  <data name="Add a timer" xml:space="preserve">
+    <value>Add a timer</value>
+  </data>
+  <data name="Timer every ms" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="Remove timer note" xml:space="preserve">
+    <value>The draw code may ask for a timer by its name (Twintail's "hair swing"); without it, what it times stops.</value>
+  </data>
+  <data name="Step what timer {0}" xml:space="preserve">
+    <value>timer {0}</value>
   </data>
   <data name="Sound event each frame in cues of {0}" xml:space="preserve">
     <value>Each frame in a cue of {0}</value>

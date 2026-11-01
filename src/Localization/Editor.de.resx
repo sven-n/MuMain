@@ -2909,7 +2909,7 @@
     <value>Wann</value>
   </data>
   <data name="Sound event when note" xml:space="preserve">
-    <value>Animationen: das Ereignis spielt in ihnen, wenn ein Angriff, Treffer oder Tod beginnt, bei jedem Schritt eines Gangs und am Ende jeder Schleife von stop1 und stop2. In jedem Bild in: in jedem Bild, in dem das Monster in einer von ihnen gezeichnet wird; die Chance wird in jedem Bild gezogen. Einmal, bis es steht: im ersten Bild, in dem das Monster in einer von ihnen gezeichnet wird; danach spielt kein Einmal-Ereignis des Sets, bis es in stop1, stop2 oder walk gezeichnet wird. Marken: in den Bildern einer Marke des Monstermodells. In jedem Bild in einer Marke: in jedem Bild, in dem das Monster in den Bildern einer Marke seines Modells gezeichnet wird. Momente: wo das Spiel sie spielt, welche Animation auch läuft: attack und hit, wenn sie beginnen, death, wenn er beginnt (auch in Chaos Castle), stand, wenn das Monster zum Stehen gesetzt wird (ein Gang endet, der Server hält es an), walk bei jedem Schritt. Ein Ereignis nennt Animationen, jedes Bild, einmal, Marken, jedes Bild in Marken oder Momente.</value>
+    <value>Animationen: das Ereignis spielt in ihnen, wenn ein Angriff, Treffer oder Tod beginnt, bei jedem Schritt eines Gangs und am Ende jeder Schleife von stop1 und stop2. In jedem Bild in: in jedem Bild, in dem das Monster in einer von ihnen gezeichnet wird; die Chance wird in jedem Bild gezogen. Einmal, bis es steht: im ersten Bild, in dem das Monster in einer von ihnen gezeichnet wird; danach spielt kein Einmal-Ereignis des Sets, bis es in stop1, stop2 oder walk gezeichnet wird. Marken: in den Bildern einer Marke des Monstermodells. In jedem Bild in einer Marke: in jedem Bild, in dem das Monster in den Bildern einer Marke seines Modells gezeichnet wird. Timer: ein gezeichnetes Bild, in dem ein Timer des Monstermodells tickt. Momente: wo das Spiel sie spielt, welche Animation auch läuft: attack und hit, wenn sie beginnen, death, wenn er beginnt (auch in Chaos Castle), stand, wenn das Monster zum Stehen gesetzt wird (ein Gang endet, der Server hält es an), walk bei jedem Schritt. Ein Ereignis nennt Animationen, jedes Bild, einmal, Marken, jedes Bild in Marken, Timer oder Momente.</value>
   </data>
   <data name="Sound event on" xml:space="preserve">
     <value>bei</value>
@@ -3324,6 +3324,33 @@
   </data>
   <data name="Sound event cues of {0}" xml:space="preserve">
     <value>Marken von {0}</value>
+  </data>
+  <data name="Sound event timers of {0}" xml:space="preserve">
+    <value>Timer von {0}</value>
+  </data>
+  <data name="Sound event on timer" xml:space="preserve">
+    <value>bei Timer</value>
+  </data>
+  <data name="Model timers" xml:space="preserve">
+    <value>Timer</value>
+  </data>
+  <data name="Model timers note" xml:space="preserve">
+    <value>Timer der Animationen des Modells: einer tickt, solange das Monster in seiner Animation ist, jedes Mal, wenn mehr als sein Abstand seit seinem letzten Tick vergangen ist. Der Zeichencode des Modells (Twintails Haarschwung) und Geräuschereignisse (Monstergeräusche, Wann: Timer von) ticken mit demselben Timer.</value>
+  </data>
+  <data name="The model has no timers" xml:space="preserve">
+    <value>Das Modell hat keine Timer.</value>
+  </data>
+  <data name="Add a timer" xml:space="preserve">
+    <value>Timer hinzufügen</value>
+  </data>
+  <data name="Timer every ms" xml:space="preserve">
+    <value>ms</value>
+  </data>
+  <data name="Remove timer note" xml:space="preserve">
+    <value>Der Zeichencode kann einen Timer über seinen Namen abfragen (Twintails "hair swing"); ohne ihn hört auf, was er taktet.</value>
+  </data>
+  <data name="Step what timer {0}" xml:space="preserve">
+    <value>Timer {0}</value>
   </data>
   <data name="Sound event each frame in cues of {0}" xml:space="preserve">
     <value>In jedem Bild in einer Marke von {0}</value>

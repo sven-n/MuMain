@@ -263,6 +263,7 @@ private:
         RenderDrawnChoices(event, I18N::Editor::SoundEventOnceUntilItStands, event.once, ToggleOnce, "once");
         RenderCueChoices(event);
         RenderDuringCueChoices(event);
+        RenderTimerChoices(event);
         ImGui::EndCombo();
     }
 
@@ -362,6 +363,32 @@ private:
             if (ImGui::Selectable(cue.name.c_str(), chosen, ImGuiSelectableFlags_DontClosePopups))
             {
                 m_draft.AfterChange(ToggleDuringCue(event, cue.name), m_label);
+            }
+            ImGui::EndDisabled();
+            ImGui::PopID();
+        }
+        ImGui::PopID();
+    }
+
+    // The model's timers, a drawn frame where one ticks (Q-MN91); Monster
+    // Model edits them.
+    void RenderTimerChoices(MonsterSoundEvent& event)
+    {
+        if (m_context.model == nullptr || m_context.model->timers.empty())
+        {
+            return;
+        }
+        ImGui::Separator();
+        ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::SoundEventTimersOf0, {m_context.model->slot}).c_str());
+        ImGui::PushID("timers");
+        for (const Data::Monsters::MonsterModelTimer& timer : m_context.model->timers)
+        {
+            const bool chosen = std::find(event.timers.begin(), event.timers.end(), timer.name) != event.timers.end();
+            ImGui::PushID(timer.name.c_str());
+            ImGui::BeginDisabled(chosen && event.timers.size() == 1);
+            if (ImGui::Selectable(timer.name.c_str(), chosen, ImGuiSelectableFlags_DontClosePopups))
+            {
+                m_draft.AfterChange(ToggleTimer(event, timer.name), m_label);
             }
             ImGui::EndDisabled();
             ImGui::PopID();
@@ -700,6 +727,7 @@ void ClearWhen(MonsterSoundEvent& event)
     event.during.clear();
     event.once.clear();
     event.duringCues.clear();
+    event.timers.clear();
 }
 
 // Toggles `animation` in `list`, one of the event's lists of animations; the
@@ -758,6 +786,15 @@ std::string WhenText(const MonsterSoundEvent& event)
     {
         return std::string(I18N::Editor::SoundEventOnce) + " " + AnimationsText(event.once);
     }
+    if (!event.timers.empty())
+    {
+        std::string text = I18N::Editor::SoundEventOnTimer;
+        for (size_t index = 0; index < event.timers.size(); ++index)
+        {
+            text += (index == 0 ? " " : ", ") + event.timers[index];
+        }
+        return text;
+    }
     if (!event.duringCues.empty())
     {
         std::string text = I18N::Editor::SoundEventEachFrameInCue;
@@ -815,6 +852,17 @@ bool ToggleCue(MonsterSoundEvent& event, const std::string& cue)
         return true;
     }
     return Toggle(event.cues, cue, false);
+}
+
+bool ToggleTimer(MonsterSoundEvent& event, const std::string& timer)
+{
+    if (event.timers.empty())
+    {
+        ClearWhen(event);
+        event.timers = {timer};
+        return true;
+    }
+    return Toggle(event.timers, timer, false);
 }
 
 bool ToggleDuringCue(MonsterSoundEvent& event, const std::string& cue)

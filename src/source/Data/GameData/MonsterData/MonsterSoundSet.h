@@ -84,8 +84,8 @@ enum class MonsterSoundMoment
 // step of a walk and at the end of each loop of stop1 and stop2), in one of
 // the frames its model's `cues` name, at one of `moments`, each frame it is
 // drawn in one of `during`, once in one of `once` until it stands or walks,
-// or each frame it is drawn in one of `duringCues`. An event names one of the
-// six.
+// each frame it is drawn in one of `duringCues`, or in a drawn frame where one
+// of `timers` ticks. An event names one of the seven.
 struct MonsterSoundEvent
 {
     // Sorted.
@@ -105,6 +105,10 @@ struct MonsterSoundEvent
     // of its model (Q-MN90: Dreadfear's attack 2 in its frames 0 to 2), in
     // their order. The once flag stays as it is.
     std::vector<std::string> duringCues;
+    // Each drawn frame in which one of these timers of its model ticks
+    // (Q-MN91: Twintail's walk sound with its hair swing), in their order.
+    // The once flag stays as it is.
+    std::vector<std::string> timers;
     // Only while the character's death effect is armed (OBJECT::LifeTime 100).
     bool deathEffectArmed = false;
     // Heard at any distance from the hero and on every map; else within 500

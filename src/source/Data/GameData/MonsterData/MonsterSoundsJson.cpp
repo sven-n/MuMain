@@ -36,6 +36,7 @@ constexpr const char* Cues = "cues";
 constexpr const char* During = "during";
 constexpr const char* Once = "once";
 constexpr const char* DuringCues = "duringCues";
+constexpr const char* Timers = "timers";
 constexpr const char* DeathEffectArmed = "deathEffectArmed";
 constexpr const char* HeardAnywhere = "heardAnywhere";
 constexpr const char* AtMonster = "atMonster";
@@ -52,21 +53,10 @@ constexpr const char* OldNotSubType = "notSubType";
 const KeySet SetKeys{Keys::Name, Keys::Sounds, Keys::SoundEvents, Keys::Maps};
 const KeySet SoundKeys{Keys::File, Keys::Id, Keys::Channels, Keys::Spatial};
 // With the old keys: the reader refuses them, they are not unknown.
-const KeySet SoundEventKeys{Keys::Animations,
-                            Keys::On,
-                            Keys::Cues,
-                            Keys::During,
-                            Keys::Once,
-                            Keys::DuringCues,
-                            Keys::DeathEffectArmed,
-                            Keys::HeardAnywhere,
-                            Keys::AtMonster,
-                            Keys::Chance,
-                            Keys::Pick,
-                            Keys::Sounds,
-                            Keys::OldFrames,
-                            Keys::OldSubType,
-                            Keys::OldNotSubType};
+const KeySet SoundEventKeys{Keys::Animations,    Keys::On,         Keys::Cues,       Keys::During,
+                            Keys::Once,          Keys::DuringCues, Keys::Timers,     Keys::DeathEffectArmed,
+                            Keys::HeardAnywhere, Keys::AtMonster,  Keys::Chance,     Keys::Pick,
+                            Keys::Sounds,        Keys::OldFrames,  Keys::OldSubType, Keys::OldNotSubType};
 const KeySet ChanceKeys{Keys::OneIn, Keys::Draw};
 
 constexpr const char* RandFpsDraw = "randFps";
@@ -325,7 +315,8 @@ void WarnAboutOnceWhileStanding(const MonsterSoundEvent& event, const std::strin
 
 // When the event plays: in animations, at moments (Q-MN76), on cues
 // (Q-MN79), each drawn frame in animations (Q-MN84), once in them until the
-// monster stands or walks (Q-MN85) or each drawn frame in cues (Q-MN90).
+// monster stands or walks (Q-MN85), each drawn frame in cues (Q-MN90) or on
+// timers of the model (Q-MN91).
 bool ReadEventWhen(const OrderedJson& entry, const std::string& prefix, MonsterSoundEvent& event, EntryIssues& issues)
 {
     if (entry.contains(Keys::Animations))
@@ -345,18 +336,23 @@ bool ReadEventWhen(const OrderedJson& entry, const std::string& prefix, MonsterS
         WarnAboutOnceWhileStanding(event, prefix, issues);
         return true;
     }
-    const bool onCues = entry.contains(Keys::Cues);
-    if (onCues || entry.contains(Keys::DuringCues))
+    // The kinds that name cues or timers of the model.
+    for (const auto& [key, names, what] :
+         {std::tuple<const char*, std::vector<std::string>*, const char*>{Keys::Cues, &event.cues, "cue"},
+          std::tuple<const char*, std::vector<std::string>*, const char*>{Keys::DuringCues, &event.duringCues, "cue"},
+          std::tuple<const char*, std::vector<std::string>*, const char*>{Keys::Timers, &event.timers, "timer"}})
     {
-        const char* key = onCues ? Keys::Cues : Keys::DuringCues;
-        std::vector<std::string>& cues = onCues ? event.cues : event.duringCues;
-        if (!ReadCueList(entry[key], prefix + key, cues, issues))
+        if (!entry.contains(key))
+        {
+            continue;
+        }
+        if (!ReadCueList(entry[key], prefix + key, *names, issues))
         {
             return false;
         }
-        if (cues.empty())
+        if (names->empty())
         {
-            issues.Fatal(prefix + key, "must name one cue or more");
+            issues.Fatal(prefix + key, std::string("must name one ") + what + " or more");
             return false;
         }
         return true;
@@ -379,12 +375,13 @@ bool ReadSoundEvent(const OrderedJson& entry, const std::string& key, MonsterSou
         entry.is_object()
             ? static_cast<int>(entry.contains(Keys::Animations)) + static_cast<int>(entry.contains(Keys::On)) +
                   static_cast<int>(entry.contains(Keys::Cues)) + static_cast<int>(entry.contains(Keys::During)) +
-                  static_cast<int>(entry.contains(Keys::Once)) + static_cast<int>(entry.contains(Keys::DuringCues))
+                  static_cast<int>(entry.contains(Keys::Once)) + static_cast<int>(entry.contains(Keys::DuringCues)) +
+                  static_cast<int>(entry.contains(Keys::Timers))
             : 0;
     if (!entry.is_object() || whens != 1 || !entry.contains(Keys::Sounds))
     {
-        issues.Fatal(key,
-                     "must be an object with one of animations, on, cues, during, once and duringCues, and sounds");
+        issues.Fatal(key, "must be an object with one of animations, on, cues, during, once, duringCues and "
+                          "timers, and sounds");
         return false;
     }
     const std::string prefix = key + ".";
@@ -533,6 +530,10 @@ OrderedJson WriteSoundEvent(const MonsterSoundEvent& event)
     else if (!event.duringCues.empty())
     {
         json[Keys::DuringCues] = event.duringCues;
+    }
+    else if (!event.timers.empty())
+    {
+        json[Keys::Timers] = event.timers;
     }
     else
     {

@@ -6,6 +6,8 @@
 #include <functional>
 #include <optional>
 #include <span>
+#include <string>
+#include <vector>
 
 class CHARACTER;
 
@@ -36,6 +38,8 @@ struct Situation
     bool drawn = false;
     // A once event played since the character last stood.
     bool oncePlayed = false;
+    // The timers of the model that tick in the drawn frame (Q-MN91).
+    std::vector<std::string> tickedTimers;
 };
 
 // The sound set the character plays: the one its monster (MonsterIndex) names
@@ -71,7 +75,8 @@ bool PlayDrawn(CHARACTER& character);
 // frame a new one.
 void FinishDrawnFrame(CHARACTER& character);
 
-// Whether the set has events that play in drawn frames (during, once).
+// Whether the set has events that play in drawn frames (during, once, cues of
+// drawn frames, timers).
 bool HasDrawnEvents(const Data::Monsters::MonsterSoundSet& set);
 
 // The set's sound events that play in `situation`, in order, each event's

@@ -83,6 +83,7 @@ MonsterModelDefinition FullModel()
     model.cues = {{"step 2", MONSTER01_WALK, {7.0f, 7.5f}},
                   {"step 1", MONSTER01_WALK, {1.0f, 2.0f}},
                   {"swing", MONSTER01_ATTACK1, {3.25f, 4.0f}}};
+    model.timers = {{"hair swing", MONSTER01_WALK, 500}, {"blink", MONSTER01_STOP1, 2000}};
     model.bitmaps = {{"Monster/bv01_2.jpg", "BITMAP_MONSTER_SKIN", true, true}, {"Monster/iui02.tga", "BITMAP_ROBE+3"}};
     Data::Monsters::MonsterModelPart part;
     part.effect = "totemGolemPart1";
@@ -229,6 +230,25 @@ TEST_CASE("Monster models: wrong values are errors that name the model and the f
         {Model("MONSTER_MODEL_HOUND", R"("headBone": 1.5)"), "model MONSTER_MODEL_HOUND headBone", "whole number"},
         {Model("MONSTER_MODEL_HOUND", R"("cues": {"step 1": [1, 2]})"), "model MONSTER_MODEL_HOUND cues",
          "list of cues"},
+        // The model timers (Q-MN91).
+        {Model("MONSTER_MODEL_HOUND", R"("timers": {"hair swing": 500})"), "model MONSTER_MODEL_HOUND timers",
+         "4 timers or fewer"},
+        {Model("MONSTER_MODEL_HOUND",
+               R"("timers": [{"name": "a", "animation": "walk", "everyMs": 1}, {"name": "b", "animation": "walk", )"
+               R"("everyMs": 1}, {"name": "c", "animation": "walk", "everyMs": 1}, {"name": "d", "animation": )"
+               R"("walk", "everyMs": 1}, {"name": "e", "animation": "walk", "everyMs": 1}])"),
+         "model MONSTER_MODEL_HOUND timers", "4 timers or fewer"},
+        {Model("MONSTER_MODEL_HOUND", R"("timers": [{"name": "hair swing", "animation": "walk"}])"),
+         "model MONSTER_MODEL_HOUND timers[0]", "name, animation and everyMs"},
+        {Model("MONSTER_MODEL_HOUND", R"("timers": [{"name": "hair swing", "animation": "jump", "everyMs": 500}])"),
+         "model MONSTER_MODEL_HOUND timers[0].animation", "not an animation"},
+        {Model("MONSTER_MODEL_HOUND", R"("timers": [{"name": "hair swing", "animation": "walk", "everyMs": 0}])"),
+         "model MONSTER_MODEL_HOUND timers[0].everyMs", "from 1 to 60000"},
+        {Model("MONSTER_MODEL_HOUND", R"("timers": [{"name": "hair swing", "animation": "walk", "everyMs": 60001}])"),
+         "model MONSTER_MODEL_HOUND timers[0].everyMs", "from 1 to 60000"},
+        {Model("MONSTER_MODEL_HOUND", R"("timers": [{"name": "a", "animation": "walk", "everyMs": 5}, )"
+                                      R"({"name": "a", "animation": "stop1", "everyMs": 5}])"),
+         "model MONSTER_MODEL_HOUND timers[1].name", "another timer"},
         {Model("MONSTER_MODEL_HOUND", R"("cues": [{"name": "step 1", "frames": [1, 2]}])"),
          "model MONSTER_MODEL_HOUND cues[0]", "name, animation and frames"},
         {Model("MONSTER_MODEL_HOUND", R"("cues": [{"name": "", "animation": "walk", "frames": [1, 2]}])"),
