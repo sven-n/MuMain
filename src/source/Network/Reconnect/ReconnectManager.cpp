@@ -6,7 +6,7 @@
 
 #include "Network/Server/WSclient.h"   // SocketClient, CreateSocket, DeleteSocket,
                                        // ResetClientToLoginScene, protocol states
-#include "Scenes/SceneCore.h"          // SceneFlag, szServerIpAddress, g_ServerPort
+#include "Scenes/SceneCore.h"          // SceneFlag
 #include "Scenes/SceneCommon.h"        // SelectedHero, MAX_CHARACTERS_PER_ACCOUNT
 #include "Scenes/CharacterScene.h"     // StartGame
 #include "Engine/Object/ZzzCharacter.h"// CharactersClient
@@ -45,7 +45,12 @@ void ReconnectManager::CacheServer(const wchar_t* ip, unsigned short port)
         return;
     }
 
-    wcscpy_s(m_serverIp, _countof(m_serverIp), ip);
+    // A connect to the cached server itself passes m_serverIp back in; copying a
+    // string onto itself is undefined.
+    if (ip != m_serverIp)
+    {
+        wcscpy_s(m_serverIp, _countof(m_serverIp), ip);
+    }
     m_serverPort = port;
 }
 
@@ -121,13 +126,10 @@ void ReconnectManager::Begin()
         return;
     }
 
-    // Point the login scene at the cached game server before tearing down.
-    // ResetClientToLoginScene() switches to LOG_IN_SCENE, and this frame's
-    // NewMoveLogInScene() -> CreateLogInScene() opens the reconnect socket.
-    szServerIpAddress = m_serverIp;
-    g_ServerPort = m_serverPort;
-
     // Tear the live session down to a clean login state.
+    // ResetClientToLoginScene() switches to LOG_IN_SCENE, and this frame's
+    // NewMoveLogInScene() -> CreateLogInScene() opens the reconnect socket to the
+    // cached game server while this reconnect is active.
     ResetClientToLoginScene();
 
     // Cancel pressed while probing: stop here at the login screen.
