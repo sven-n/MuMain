@@ -35,26 +35,22 @@ bool LoginSceneReconnect::EnsureConnected(LoginServer server, std::function<void
         EnterPhase(Phase::Idle);
     }
 
-    switch (m_phase)
+    if (IsReconnecting())
     {
-    case Phase::Idle:
-        if (m_link.IsConnected() && m_link.ConnectedServer() == server)
-        {
-            return true;
-        }
-        Begin(server, std::move(resume));
-        return false;
-    case Phase::Probing:
-    case Phase::AwaitingGreeting:
         // Already on the way back; the player's latest step is the one to carry out.
         if (server == m_server)
         {
             m_resume = std::move(resume);
         }
         return false;
-    case Phase::Failed:
-        break;
     }
+
+    if (m_link.IsConnected() && m_link.ConnectedServer() == server)
+    {
+        return true;
+    }
+
+    Begin(server, std::move(resume));
     return false;
 }
 
