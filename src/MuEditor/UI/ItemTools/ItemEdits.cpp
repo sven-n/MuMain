@@ -364,13 +364,15 @@ void ItemEdits::SetColorFolders(std::string label, std::string_view root,
                                 std::vector<Data::Colors::ColorFolder> folders)
 {
     std::vector<Data::Colors::ColorFolder> before = ReadColorFolders(root);
+    // The same folders change nothing: the file isn't marked changed, and there is no step.
+    if (folders == before)
+    {
+        return;
+    }
     RestoreColorFolders(root, folders);
     ItemEditEntry entry{std::move(label), {}};
     AddFolderStep(entry, root, std::move(before));
-    if (!entry.steps.empty())
-    {
-        Record(std::move(entry));
-    }
+    Record(std::move(entry));
 }
 
 void ItemEdits::SetGlowColorOrder(std::string label, std::span<const Data::Effects::GlowColor> colors)
