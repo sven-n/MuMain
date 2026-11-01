@@ -52,6 +52,14 @@ std::string PutColorFoldersOnLines(const std::string& text);
 ColorFolder* FindColorFolder(std::vector<ColorFolder>& folders, std::span<const std::size_t> path);
 const ColorFolder* FindColorFolder(const std::vector<ColorFolder>& folders, std::span<const std::size_t> path);
 
+// The names of the folders down to the one at the path; none for the root or a path to no folder. Siblings' names
+// differ, so the names find the folder again after the folders moved (FindColorFolderByNames).
+std::vector<std::string> GetColorFolderNames(const std::vector<ColorFolder>& folders,
+                                             std::span<const std::size_t> path);
+// The path the names lead to (the empty path for none: the root); nullopt when a name isn't found on the way.
+std::optional<ColorFolderPath> FindColorFolderByNames(const std::vector<ColorFolder>& folders,
+                                                      std::span<const std::string> names);
+
 // The path of the folder that holds the color; nullopt when none does (it sits under the root).
 std::optional<ColorFolderPath> FindFolderOfColor(const std::vector<ColorFolder>& folders, std::string_view color);
 

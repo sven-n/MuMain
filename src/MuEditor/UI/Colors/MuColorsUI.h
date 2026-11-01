@@ -46,6 +46,8 @@ public:
     {
         return m_pick.color;
     }
+    // The folder a new folder or color goes into: the picked folder, or the one of the picked color.
+    Data::Colors::ColorFolderPath GetPickedFolder() const;
 
 private:
     // What the tree has picked: a root, one of its folders (by path), or one of its colors.
@@ -54,6 +56,8 @@ private:
         MuEditor::Colors::ColorsRoot root = MuEditor::Colors::ColorsRoot::Glow;
         Data::Colors::ColorFolderPath folder;
         std::string color;
+        // The names of the folders down to `folder`, which find it again after the folders moved.
+        std::vector<std::string> folderNames;
     };
     enum class FolderDialog
     {
@@ -65,7 +69,10 @@ private:
     CMuColorsUI() = default;
 
     MuEditor::Colors::NamedColorSource& SourceOf(MuEditor::Colors::ColorsRoot root);
-    // The pick stays on what is still there: a color by its name (in whatever folder it is now), a folder by its path.
+    // Picks the root's folder at `folder` (the empty path: the root), or the color in it.
+    void SetPick(MuEditor::Colors::ColorsRoot root, Data::Colors::ColorFolderPath folder, std::string color = {});
+    // The pick stays on what is still there: a color by its name (in whatever folder it is now), a folder by its
+    // names (also after an undo moved it), or by its path when it was renamed there.
     void KeepPickValid();
     void RenderToolbar();
     void RenderNewEntries();
@@ -86,8 +93,6 @@ private:
                        const std::function<bool(std::vector<Data::Colors::ColorFolder>&)>& edit);
     void MovePicked(int delta);
     void RemovePicked();
-    // The folder a new folder or color goes into: the picked folder, or the one of the picked color.
-    Data::Colors::ColorFolderPath GetPickedFolder() const;
 
     Pick m_pick;
     // Show's root, opened in the tree on the next frame.

@@ -184,6 +184,20 @@ TEST_SUITE("Color folders")
         CHECK(Data::Colors::GetPathAfterMove(ColorFolderPath{1, 0}, {}).empty());
     }
 
+    TEST_CASE("a folder is found again by its names after the folders moved")
+    {
+        std::vector<ColorFolder> folders = Sample();
+        const std::vector<std::string> reds = Data::Colors::GetColorFolderNames(folders, ColorFolderPath{0, 0});
+        CHECK(reds == std::vector<std::string>{"Warm", "Reds"});
+        CHECK(Data::Colors::GetColorFolderNames(folders, ColorFolderPath{0, 5}).empty());
+        CHECK(Data::Colors::GetColorFolderNames(folders, {}).empty());
+
+        REQUIRE(Data::Colors::MoveColorFolderBy(folders, ColorFolderPath{0}, 1));
+        CHECK(Data::Colors::FindColorFolderByNames(folders, reds) == ColorFolderPath{1, 0});
+        CHECK(Data::Colors::FindColorFolderByNames(folders, std::vector<std::string>{"Warm", "Blues"}) == std::nullopt);
+        CHECK(Data::Colors::FindColorFolderByNames(folders, {}) == ColorFolderPath{});
+    }
+
     TEST_CASE("a removed folder leaves what it holds to the folder above it")
     {
         std::vector<ColorFolder> folders = Sample();

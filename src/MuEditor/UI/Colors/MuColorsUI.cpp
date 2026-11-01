@@ -98,7 +98,7 @@ void CMuColorsUI::Render(bool* open)
 void CMuColorsUI::Show(ColorsRoot root)
 {
     g_MuEditorCore.GetToolWindows().colors = true;
-    m_pick = {root, {}, {}};
+    SetPick(root, {});
     m_openRoot = root;
     ImGui::SetWindowFocus(MuEditor::WindowIds::Colors);
 }
@@ -113,23 +113,38 @@ NamedColorSource& CMuColorsUI::SourceOf(ColorsRoot root)
     }
 }
 
+void CMuColorsUI::SetPick(ColorsRoot root, ColorFolderPath folder, std::string color)
+{
+    std::vector<std::string> names = Data::Colors::GetColorFolderNames(SourceOf(root).GetFolders(), folder);
+    m_pick = {root, std::move(folder), std::move(color), std::move(names)};
+}
+
 void CMuColorsUI::KeepPickValid()
 {
     const NamedColorSource& source = SourceOf(m_pick.root);
+    const std::vector<ColorFolder>& folders = source.GetFolders();
     if (!m_pick.color.empty())
     {
         if (source.Has(m_pick.color))
         {
-            m_pick.folder =
-                Data::Colors::FindFolderOfColor(source.GetFolders(), m_pick.color).value_or(ColorFolderPath{});
+            m_pick.folder = Data::Colors::FindFolderOfColor(folders, m_pick.color).value_or(ColorFolderPath{});
+            m_pick.folderNames = Data::Colors::GetColorFolderNames(folders, m_pick.folder);
             return;
         }
         m_pick.color.clear();
     }
-    if (!m_pick.folder.empty() && Data::Colors::FindColorFolder(source.GetFolders(), m_pick.folder) == nullptr)
+    // A folder by its names first: an undo or a redo that moved folders around keeps the same one picked.
+    if (const std::optional<ColorFolderPath> found = Data::Colors::FindColorFolderByNames(folders, m_pick.folderNames))
+    {
+        m_pick.folder = *found;
+        return;
+    }
+    // Then by its place: one renamed there stays picked, under its new name.
+    if (Data::Colors::FindColorFolder(folders, m_pick.folder) == nullptr)
     {
         m_pick.folder.clear();
     }
+    m_pick.folderNames = Data::Colors::GetColorFolderNames(folders, m_pick.folder);
 }
 
 ColorFolderPath CMuColorsUI::GetPickedFolder() const
@@ -200,8 +215,8 @@ void CMuColorsUI::RenderNewEntries()
         {
             continue;
         }
-        m_pick = {root, Data::Colors::FindFolderOfColor(source.GetFolders(), *created).value_or(ColorFolderPath{}),
-                  *created};
+        SetPick(root, Data::Colors::FindFolderOfColor(source.GetFolders(), *created).value_or(ColorFolderPath{}),
+                *created);
         m_newColorRoot.reset();
     }
 }
@@ -253,7 +268,7 @@ void CMuColorsUI::RenderFolderDialog()
                 const std::size_t count = parent != nullptr ? parent->folders.size() : SourceOf(root).GetFolders().size();
                 ColorFolderPath path = picked;
                 path.push_back(count - 1);
-                m_pick = {root, path, {}};
+                SetPick(root, path);
                 m_openRoot = root;
             }
         };
@@ -297,7 +312,7 @@ void CMuColorsUI::RenderRoot(ColorsRoot root)
     const bool open = ImGui::TreeNodeEx("##Root", flags, "%s", texts.root);
     if (IsPicking())
     {
-        m_pick = {root, {}, {}};
+        SetPick(root, {});
     }
     if (m_openRoot == root)
     {
@@ -346,7 +361,7 @@ void CMuColorsUI::RenderFolders(ColorsRoot root, const std::vector<ColorFolder>&
         }
         if (IsPicking())
         {
-            m_pick = {root, path, {}};
+            SetPick(root, path);
         }
         BeginDrag(root, path, {}, folder.name.c_str());
         AcceptDrop(root, path);
@@ -377,7 +392,7 @@ void CMuColorsUI::RenderColor(ColorsRoot root, const std::string& name, const Co
     if (ImGui::Selectable(label.c_str(), m_pick.root == root && m_pick.color == name,
                           MuEditor::KeyboardSelection::RowFlags))
     {
-        m_pick = {root, folder, name};
+        SetPick(root, folder, name);
     }
     BeginDrag(root, folder, name, label.c_str());
     ImGui::PopID();
@@ -458,7 +473,7 @@ void CMuColorsUI::AcceptDrop(ColorsRoot root, const ColorFolderPath& folder)
                 if (moved)
                 {
                     // The folder it went into, which moved up when the dragged one came before it.
-                    m_pick = {root, Data::Colors::GetPathAfterMove(from, folder), {}};
+                    SetPick(root, Data::Colors::GetPathAfterMove(from, folder));
                 }
             };
         }
@@ -502,7 +517,9 @@ void CMuColorsUI::MovePicked(int delta)
                   { return moved = Data::Colors::MoveColorFolderBy(folders, path, delta); });
     if (moved)
     {
-        m_pick.folder.back() = static_cast<std::size_t>(static_cast<long long>(m_pick.folder.back()) + delta);
+        ColorFolderPath movedTo = path;
+        movedTo.back() = static_cast<std::size_t>(static_cast<long long>(movedTo.back()) + delta);
+        SetPick(m_pick.root, std::move(movedTo));
     }
 }
 
@@ -519,7 +536,9 @@ void CMuColorsUI::RemovePicked()
     const ColorFolderPath path = m_pick.folder;
     ChangeFolders(m_pick.root, I18N::Editor::RemoveAColorFolder,
                   [&](std::vector<ColorFolder>& folders) { return Data::Colors::RemoveColorFolder(folders, path); });
-    m_pick.folder.pop_back();
+    ColorFolderPath parent = path;
+    parent.pop_back();
+    SetPick(m_pick.root, std::move(parent));
 }
 
 #endif // _EDITOR

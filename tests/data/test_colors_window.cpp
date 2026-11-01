@@ -371,6 +371,42 @@ TEST_CASE("A color folder stays open in the tree when the folders move [editor][
     CHECK(g_MuColorsUI.GetPickedColor() == "red");
 }
 
+// The picked folder is found by its names: an undo that moves it back keeps it picked, not the folder now in its place.
+TEST_CASE("The picked color folder stays picked when an undo moves it [editor][items]")
+{
+    TestImGuiContext context;
+    ToolWindowsScope windows;
+    ItemModelDatabaseScope restoreModels;
+    GlowColorsScope restoreColors({{"red", {1.0, 0.0, 0.0}}});
+    g_ItemModelDatabase.Build({}, g_GlowColors);
+    g_ItemEdits.SetColorFolders(I18N::Editor::NewColorFolder, MuEditor::Items::ItemEdits::GlowFolders,
+                                {{"A", {}, {}}, {"B", {}, {}}});
+    g_ItemEdits.GetHistory().Clear();
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    g_MuColorsUI.Show(ColorsRoot::Glow);
+    RenderColors();
+    RenderColors();
+
+    // B picked with the keyboard, down from A.
+    ImGuiWindow* tree = FindColorsPane("##Tree");
+    ImGui::FocusWindow(tree);
+    ImGui::SetFocusID(GlowNodeId({"A"}), tree);
+    RenderColors();
+    PressKey(ImGuiKey_DownArrow);
+    REQUIRE(g_MuColorsUI.GetPickedFolder() == Data::Colors::ColorFolderPath{1});
+
+    const ImGuiWindow* colors = ImGui::FindWindowByName(WindowIds::Colors);
+    ImGui::ActivateItemByID(ImGui::GetIDWithSeed(I18N::Editor::MoveUp, nullptr, colors->ID));
+    RenderColors();
+    RenderColors();
+    REQUIRE(g_GlowColors.GetFolders()[0].name == "B");
+    CHECK(g_MuColorsUI.GetPickedFolder() == Data::Colors::ColorFolderPath{0});
+
+    REQUIRE(g_ItemEdits.Undo());
+    RenderColors();
+    CHECK(g_MuColorsUI.GetPickedFolder() == Data::Colors::ColorFolderPath{1});
+}
+
 // New color with a folder picked: the color and its place in the folder are one undo step.
 TEST_CASE("A new glow color made in a folder is one undo step [editor][items]")
 {

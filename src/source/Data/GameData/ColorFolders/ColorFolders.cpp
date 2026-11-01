@@ -303,6 +303,41 @@ const ColorFolder* FindColorFolder(const std::vector<ColorFolder>& folders, std:
     return FindColorFolder(const_cast<std::vector<ColorFolder>&>(folders), path);
 }
 
+std::vector<std::string> GetColorFolderNames(const std::vector<ColorFolder>& folders, std::span<const std::size_t> path)
+{
+    std::vector<std::string> names;
+    const std::vector<ColorFolder>* level = &folders;
+    for (const std::size_t index : path)
+    {
+        if (index >= level->size())
+        {
+            return {};
+        }
+        names.push_back((*level)[index].name);
+        level = &(*level)[index].folders;
+    }
+    return names;
+}
+
+std::optional<ColorFolderPath> FindColorFolderByNames(const std::vector<ColorFolder>& folders,
+                                                      std::span<const std::string> names)
+{
+    ColorFolderPath path;
+    const std::vector<ColorFolder>* level = &folders;
+    for (const std::string& name : names)
+    {
+        const auto found = std::find_if(level->begin(), level->end(),
+                                        [&name](const ColorFolder& folder) { return folder.name == name; });
+        if (found == level->end())
+        {
+            return std::nullopt;
+        }
+        path.push_back(static_cast<std::size_t>(found - level->begin()));
+        level = &found->folders;
+    }
+    return path;
+}
+
 std::optional<ColorFolderPath> FindFolderOfColor(const std::vector<ColorFolder>& folders, std::string_view color)
 {
     ColorFolderPath path;
