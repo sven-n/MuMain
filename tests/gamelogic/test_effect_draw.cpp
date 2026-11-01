@@ -5,10 +5,13 @@
 #include "Render/Effects/EffectDraw.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
+#include <algorithm>
 #include <cstdio>
 #include <cstring>
+#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
@@ -210,6 +213,8 @@ TEST_CASE("Another effect drawer receives the sprites instead of the default one
         int sprites = 0;
         void SetState(const Render::EffectDrawing::EffectState&) override {}
         void DrawSprite(const SpriteDraw&) override { ++sprites; }
+        void DrawQuads(const Render::EffectDrawing::QuadsDraw&) override {}
+        void DrawDecal(const Render::EffectDrawing::DecalDraw&) override {}
     } counting;
     RecordingScope scope;
     Render::EffectDrawing::SetEffectDrawer(&counting);
@@ -242,6 +247,16 @@ struct ListingDrawer final : Render::EffectDrawing::EffectDrawer
     {
         items.push_back("sprite " + std::to_string(draw.texture));
         sprites.push_back(draw);
+    }
+
+    void DrawQuads(const Render::EffectDrawing::QuadsDraw& draw) override
+    {
+        items.push_back("quads " + std::to_string(draw.vertices.size()) + " " + std::to_string(draw.texture));
+    }
+
+    void DrawDecal(const Render::EffectDrawing::DecalDraw& draw) override
+    {
+        items.push_back("decal " + std::to_string(draw.texture));
     }
 };
 
@@ -334,7 +349,7 @@ TEST_CASE("A particle describes its sprites and state changes in the order its d
         ListingDrawer out;
         DescribeParticle(MakeParticle(BITMAP_ADV_SMOKE + 1, 2), 0, 32.f, 32.f, out);
         const std::vector<std::string> expected = {
-            "state 0 0 1", "state 6 0 0", "sprite " + std::to_string(BITMAP_ADV_SMOKE + 1), "state 0 0 2"};
+            "state 0 0 1", "state 7 0 0", "sprite " + std::to_string(BITMAP_ADV_SMOKE + 1), "state 0 0 2"};
         CHECK(out.items == expected);
     }
     SUBCASE("a cloud turns one way in even slots and the other way in odd ones")
@@ -354,4 +369,82 @@ TEST_CASE("A particle describes its sprites and state changes in the order its d
         CHECK(even.sprites[0].rotation - start == doctest::Approx(20.f));
         CHECK(odd.sprites[0].rotation - start == doctest::Approx(-20.f));
     }
+}
+
+namespace
+{
+// A joint with `tails` valid tail entries one unit apart, drawn with face one.
+std::unique_ptr<JOINT> MakeJoint(int type, int subType, int tails)
+{
+    auto joint = std::make_unique<JOINT>();
+    *joint = JOINT{};
+    joint->Live = true;
+    joint->Type = type;
+    joint->TexType = BITMAP_JOINT_ENERGY;
+    joint->SubType = subType;
+    joint->RenderType = RENDER_TYPE_ALPHA_BLEND;
+    joint->RenderFace = RENDER_FACE_ONE;
+    joint->NumTails = tails;
+    joint->MaxTails = tails + 1;
+    Vector(1.f, 1.f, 1.f, joint->Light);
+    for (int t = 0; t <= tails; ++t)
+    {
+        for (int corner = 0; corner < 4; ++corner)
+            Vector(static_cast<float>(t), static_cast<float>(corner), -100.f, joint->Tails[t][corner]);
+    }
+    return joint;
+}
+} // namespace
+
+TEST_CASE("Effect quads and ground marks reach the renderer as the old trail and decal draws did [effects]")
+{
+    RecordingScope scope;
+    const mu::Vertex3D quad[4] = {
+        {0.f, 0.f, -10.f, 0.f, 0.f, 1.f, 0.f, 1.f, 0xffffffffu},
+        {1.f, 0.f, -10.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0xffffffffu},
+        {1.f, 1.f, -10.f, 0.f, 0.f, 1.f, 1.f, 0.f, 0xff808080u},
+        {0.f, 1.f, -10.f, 0.f, 0.f, 1.f, 1.f, 1.f, 0xff808080u},
+    };
+    CHECK(scope.Record([&] { mu::GetRenderer().RenderQuad3D(quad, 7u); }) ==
+          scope.Record([&] { Render::EffectDrawing::ActiveEffectDrawer().DrawQuads({quad, 7u}); }));
+
+    vec3_t light = {0.5f, 0.25f, 1.f};
+    const auto legacy = scope.Record([&] { RenderTerrainAlphaBitmap(BITMAP_MAGIC + 1, 300.f, 400.f, 2.f, 3.f, light, 45.f, 0.5f, 7.f); });
+    const auto described = scope.Record(
+        [&]
+        {
+            Render::EffectDrawing::ActiveEffectDrawer().DrawDecal({.texture = BITMAP_MAGIC + 1,
+                                                                   .x = 300.f,
+                                                                   .y = 400.f,
+                                                                   .sizeX = 2.f,
+                                                                   .sizeY = 3.f,
+                                                                   .light = {0.5f, 0.25f, 1.f},
+                                                                   .rotation = 45.f,
+                                                                   .alpha = 0.5f,
+                                                                   .height = 7.f});
+        });
+    CHECK(described == legacy);
+}
+
+TEST_CASE("A joint describes its blend, its texture and one batch of trail quads [effects]")
+{
+    ListingDrawer out;
+    const auto joint = MakeJoint(BITMAP_JOINT_ENERGY, 0, 3);
+    DescribeJoint(*joint, out);
+    const std::vector<std::string> expected = {"state 4 0 0", "state 0 0 0",
+                                               "quads 12 " + std::to_string(BITMAP_JOINT_ENERGY)};
+    CHECK(out.items == expected);
+}
+
+TEST_CASE("A falling thunder's ground mark is lit by the fade the update gives it, and its draw leaves it [effects]")
+{
+    ListingDrawer out;
+    const auto joint = MakeJoint(BITMAP_JOINT_THUNDER + 1, 6, 2);
+    joint->Velocity = 0.4f;
+    DescribeJoint(*joint, out);
+    REQUIRE(!out.items.empty());
+    CHECK(out.items.back() == "state 1 0 0");
+    CHECK(std::find(out.items.begin(), out.items.end(), "decal " + std::to_string(BITMAP_MAGIC + 1)) !=
+          out.items.end());
+    CHECK(joint->Velocity == 0.4f);
 }

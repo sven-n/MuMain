@@ -1,6 +1,9 @@
 #pragma once
 
+#include "Render/Renderer/MuRenderer.h"
+
 #include <cstdint>
+#include <span>
 
 // The seam between game code and how an effect is drawn. The effect passes describe each draw as plain data
 // (a SpriteDraw, ...) and hand it to the active EffectDrawer; the default drawer draws it as the game always has.
@@ -11,6 +14,8 @@ namespace Render::EffectDrawing
 enum class Blend : std::uint8_t
 {
     Unchanged,
+    // Blending and alpha test off (DisableAlphaBlend).
+    Off,
     AlphaTest,
     // Alpha test that leaves the depth mask as it is (EnableAlphaTest(false)).
     AlphaTestKeepDepthMask,
@@ -35,6 +40,8 @@ struct EffectState
     Toggle depthTest = Toggle::Unchanged;
     // Adds the texture to the vertex color instead of multiplying (GL_ADD instead of GL_MODULATE).
     Toggle additiveTexture = Toggle::Unchanged;
+    // The texture bound for the draws that name none; -1 keeps the bound one.
+    int texture = -1;
 };
 
 // One camera-facing textured quad.
@@ -56,6 +63,29 @@ struct SpriteDraw
     bool bloomExcluded = false;
 };
 
+// Quads already in world space, four vertices each (joint trails, weapon blurs).
+struct QuadsDraw
+{
+    std::span<const mu::Vertex3D> vertices;
+    // 0 draws with the bound texture.
+    std::uint32_t texture = 0;
+};
+
+// A texture laid on the terrain around a point.
+struct DecalDraw
+{
+    int texture = 0;
+    float x = 0.f;
+    float y = 0.f;
+    float sizeX = 1.f;
+    float sizeY = 1.f;
+    float light[3] = {};
+    float rotation = 0.f;
+    float alpha = 1.f;
+    // How far above the terrain it floats.
+    float height = 5.f;
+};
+
 class EffectDrawer
 {
 public:
@@ -63,6 +93,8 @@ public:
     // State the following draws inherit, set without drawing.
     virtual void SetState(const EffectState& state) = 0;
     virtual void DrawSprite(const SpriteDraw& draw) = 0;
+    virtual void DrawQuads(const QuadsDraw& draw) = 0;
+    virtual void DrawDecal(const DecalDraw& draw) = 0;
 };
 
 [[nodiscard]] EffectDrawer& ActiveEffectDrawer();

@@ -127,6 +127,8 @@ void CreateTailAxis(JOINT* o, float Matrix[3][4], BYTE axis = 0);
 void MoveJoint(JOINT* o, int iIndex);
 void MoveJoints();
 void RenderJoints(BYTE bRenderOneMore = 0);
+// Hands the state changes, trail quads and ground mark a live joint draws with to `out`.
+void DescribeJoint(const JOINT& joint, Render::EffectDrawing::EffectDrawer& out);
 
 void GetMagicScrew(int iParam, vec3_t vResult, float fSpeedRate = 1.0f);
 void GetMagicScrewAt(double frame, vec3_t vResult, float fSpeedRate = 1.0f);

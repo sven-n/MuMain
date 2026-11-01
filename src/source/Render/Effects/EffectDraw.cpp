@@ -3,6 +3,7 @@
 #include "Render/Effects/EffectDraw.h"
 
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <optional>
@@ -24,6 +25,9 @@ void Apply(const EffectState& state)
     {
     case Blend::Unchanged:
         break;
+    case Blend::Off:
+        DisableAlphaBlend();
+        break;
     case Blend::AlphaTest:
         EnableAlphaTest();
         break;
@@ -43,6 +47,8 @@ void Apply(const EffectState& state)
         EnableAlphaBlend3();
         break;
     }
+    if (state.texture >= 0)
+        BindTexture(state.texture);
 }
 
 class DefaultEffectDrawer final : public EffectDrawer
@@ -63,6 +69,18 @@ public:
         vec3_t light = {draw.light[0], draw.light[1], draw.light[2]};
         RenderSprite(draw.texture, position, draw.width, draw.height, light, draw.rotation, draw.u, draw.v, draw.uWidth,
                      draw.vHeight);
+    }
+
+    void DrawQuads(const QuadsDraw& draw) override
+    {
+        mu::GetRenderer().RenderQuad3D(draw.vertices, draw.texture);
+    }
+
+    void DrawDecal(const DecalDraw& draw) override
+    {
+        vec3_t light = {draw.light[0], draw.light[1], draw.light[2]};
+        RenderTerrainAlphaBitmap(draw.texture, draw.x, draw.y, draw.sizeX, draw.sizeY, light, draw.rotation, draw.alpha,
+                                 draw.height);
     }
 };
 
