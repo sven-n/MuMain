@@ -16,7 +16,7 @@ namespace MuEditor::Colors
 // The Colors window's Glow root (D26 for the glow colors of the item models): the colors with how many items use each;
 // a new color, a changed value (the items it reaches are listed before it is applied) and the colors no item uses
 // removed. The model tool picks an item's colors from them.
-class GlowColorsTab final : public NamedColorSource
+class GlowColorsRoot final : public NamedColorSource
 {
 public:
     NamedColorTexts GetTexts() const override;

@@ -2,7 +2,7 @@
 
 #ifdef _EDITOR
 
-#include "GlowColorsTab.h"
+#include "GlowColorsRoot.h"
 #include "NamedColorList.h"
 
 #include "Data/GameData/ColorFolders/ColorFolder.h"
@@ -129,7 +129,7 @@ private:
     std::optional<MuEditor::Colors::ColorsRoot> m_newColorRoot;
     Data::Colors::ColorFolderPath m_newColorFolder;
 
-    MuEditor::Colors::GlowColorsTab m_glow;
+    MuEditor::Colors::GlowColorsRoot m_glow;
     MuEditor::Colors::NamedColorList m_panel;
 };
 
