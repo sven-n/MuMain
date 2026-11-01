@@ -5,85 +5,99 @@
       "number": 0,
       "name": {"en": "Bull Fighter", "es": "Toro Luchador", "pt": "Toureiro"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 1,
       "name": {"en": "Hound", "es": "Sabueso", "pt": "Cão"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_HOUND"
+      "model": "MONSTER_MODEL_HOUND",
+      "soundSet": "Hound"
     },
     {
       "number": 2,
       "name": {"en": "Budge Dragon", "es": "Dragón Escurridizo", "pt": "Dragão Lento"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BUDGE_DRAGON"
+      "model": "MONSTER_MODEL_BUDGE_DRAGON",
+      "soundSet": "Budge Dragon"
     },
     {
       "number": 3,
       "name": {"en": "Spider", "es": "Araña", "pt": "Aranha"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SPIDER"
+      "model": "MONSTER_MODEL_SPIDER",
+      "soundSet": "Spider"
     },
     {
       "number": 4,
       "name": {"en": "Elite Bull Fighter", "es": "Toro Luchador de Élite", "pt": "Toureiro de elite"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 5,
       "name": {"en": "Hell Hound", "es": "Sabueso Infernal", "pt": "Cão do inferno"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_HOUND"
+      "model": "MONSTER_MODEL_HOUND",
+      "soundSet": "Hound"
     },
     {
       "number": 6,
       "name": {"en": "LIch", "es": "Lich", "pt": "Liche"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_LICH"
+      "model": "MONSTER_MODEL_LICH",
+      "soundSet": "LIch"
     },
     {
       "number": 7,
       "name": {"en": "Giant", "es": "Gigante", "pt": "Gigante"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT"
+      "model": "MONSTER_MODEL_GIANT",
+      "soundSet": "Giant"
     },
     {
       "number": 8,
       "name": {"en": "Poison Bull Fighter", "es": "Toro Luchador Venenoso", "pt": "Toureiro Venenoso"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 9,
       "name": {"en": "Thunder Lich", "es": "Lich de Trueno", "pt": "Liche do trovão"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_LICH"
+      "model": "MONSTER_MODEL_LICH",
+      "soundSet": "LIch"
     },
     {
       "number": 10,
       "name": {"en": "Dark Knight", "es": "Caballero Oscuro", "pt": "Cavaleiro negro"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_KNIGHT"
+      "model": "MONSTER_MODEL_DARK_KNIGHT",
+      "soundSet": "Dark Knight"
     },
     {
       "number": 11,
       "name": {"en": "Ghost", "es": "Espíritu Fantasmal", "pt": "Fantasma"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GHOST"
+      "model": "MONSTER_MODEL_GHOST",
+      "soundSet": "Ghost"
     },
     {
       "number": 12,
       "name": {"en": "Larva", "es": "Larva", "pt": "Larva"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_LARVA"
+      "model": "MONSTER_MODEL_LARVA",
+      "soundSet": "Larva"
     },
     {
       "number": 13,
       "name": {"en": "Hell Spider", "es": "Araña Infernal", "pt": "Aranha do inferno"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_HELL_SPIDER"
+      "model": "MONSTER_MODEL_HELL_SPIDER",
+      "soundSet": "Hell Spider"
     },
     {
       "number": 14,
@@ -107,103 +121,120 @@
       "number": 17,
       "name": {"en": "Cyclops", "es": "Cíclope", "pt": "Ciclope"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CYCLOPS"
+      "model": "MONSTER_MODEL_CYCLOPS",
+      "soundSet": "Cyclops"
     },
     {
       "number": 18,
       "name": {"en": "Gorgon", "es": "Gorgon", "pt": "Górgone"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GORGON"
+      "model": "MONSTER_MODEL_GORGON",
+      "soundSet": "Gorgon"
     },
     {
       "number": 19,
       "name": {"en": "Yeti", "es": "Yeti", "pt": "Ieti"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_YETI"
+      "model": "MONSTER_MODEL_YETI",
+      "soundSet": "Yeti"
     },
     {
       "number": 20,
       "name": {"en": "Elite Yeti", "es": "Yeti de Élite", "pt": "Ieti de elite"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ELITE_YETI"
+      "model": "MONSTER_MODEL_ELITE_YETI",
+      "soundSet": "Elite Yeti"
     },
     {
       "number": 21,
       "name": {"en": "Assassin", "es": "Asesino", "pt": "Assassino"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ASSASSIN"
+      "model": "MONSTER_MODEL_ASSASSIN",
+      "soundSet": "Assassin"
     },
     {
       "number": 22,
       "name": {"en": "Ice Monster", "es": "Monstruo de Hielo", "pt": "Monstro de gelo"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ICE_MONSTER"
+      "model": "MONSTER_MODEL_ICE_MONSTER",
+      "soundSet": "Ice Monster"
     },
     {
       "number": 23,
       "name": {"en": "Hommerd", "es": "Hommerd", "pt": "Hommerd"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_HOMMERD"
+      "model": "MONSTER_MODEL_HOMMERD",
+      "soundSet": "Hommerd"
     },
     {
       "number": 24,
       "name": {"en": "Worm", "es": "Gusano", "pt": "Verme"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_WORM"
+      "model": "MONSTER_MODEL_WORM",
+      "soundSet": "Worm"
     },
     {
       "number": 25,
       "name": {"en": "Ice Queen", "es": "Reina de Hielo", "pt": "Rainha de gelo"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ICE_QUEEN"
+      "model": "MONSTER_MODEL_ICE_QUEEN",
+      "soundSet": "Ice Queen"
     },
     {
       "number": 26,
       "name": {"en": "Goblin", "es": "Duende", "pt": "Goblin"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GOBLIN"
+      "model": "MONSTER_MODEL_GOBLIN",
+      "soundSet": "Goblin"
     },
     {
       "number": 27,
       "name": {"en": "Chain Scorpion", "es": "Escorpión Cadena", "pt": "Escorpião de correntes"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CHAIN_SCORPION"
+      "model": "MONSTER_MODEL_CHAIN_SCORPION",
+      "soundSet": "Chain Scorpion"
     },
     {
       "number": 28,
       "name": {"en": "Beetle Monster", "es": "Monstruo Escarabajo", "pt": "Monstro besouro"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BEETLE_MONSTER"
+      "model": "MONSTER_MODEL_BEETLE_MONSTER",
+      "soundSet": "Beetle Monster"
     },
     {
       "number": 29,
       "name": {"en": "Hunter", "es": "Cazador", "pt": "Caçador"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_HUNTER"
+      "model": "MONSTER_MODEL_HUNTER",
+      "soundSet": "Hunter"
     },
     {
       "number": 30,
       "name": {"en": "Forest Monster", "es": "Monstruo del Bosque", "pt": "Monstro da floresta"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_FOREST_MONSTER"
+      "model": "MONSTER_MODEL_FOREST_MONSTER",
+      "soundSet": "Forest Monster"
     },
     {
       "number": 31,
       "name": {"en": "Agon", "es": "Agon", "pt": "Agon"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_AGON"
+      "model": "MONSTER_MODEL_AGON",
+      "soundSet": "Agon"
     },
     {
       "number": 32,
       "name": {"en": "Stone Golem", "es": "Gólem de Piedra", "pt": "Golem de pedra"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_STONE_GOLEM"
+      "model": "MONSTER_MODEL_STONE_GOLEM",
+      "soundSet": "Stone Golem"
     },
     {
       "number": 33,
       "name": {"en": "Elite Goblin", "es": "Duende de Élite", "pt": "Goblin de Elite"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GOBLIN"
+      "model": "MONSTER_MODEL_GOBLIN",
+      "soundSet": "Goblin"
     },
     {
       "number": 34,
@@ -215,91 +246,106 @@
       "number": 35,
       "name": {"en": "Death Gorgon", "es": "Gorgon de la Muerte", "pt": "Górgone da morte"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GORGON"
+      "model": "MONSTER_MODEL_GORGON",
+      "soundSet": "Gorgon"
     },
     {
       "number": 36,
       "name": {"en": "Shadow", "es": "Sombra", "pt": "Sombra"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SHADOW"
+      "model": "MONSTER_MODEL_SHADOW",
+      "soundSet": "Shadow"
     },
     {
       "number": 37,
       "name": {"en": "Devil", "es": "Diablo", "pt": "Demônio"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DEVIL"
+      "model": "MONSTER_MODEL_DEVIL",
+      "soundSet": "Devil"
     },
     {
       "number": 38,
       "name": {"en": "Balrog", "es": "Balrog", "pt": "Balrog"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BALROG"
+      "model": "MONSTER_MODEL_BALROG",
+      "soundSet": "Balrog"
     },
     {
       "number": 39,
       "name": {"en": "Poison Shadow", "es": "Sombra Venenosa", "pt": "Sombra venenosa"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SHADOW"
+      "model": "MONSTER_MODEL_SHADOW",
+      "soundSet": "Shadow"
     },
     {
       "number": 40,
       "name": {"en": "Death Knight", "es": "Caballero de la Muerte", "pt": "Cavaleiro da morte"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_KNIGHT"
+      "model": "MONSTER_MODEL_DEATH_KNIGHT",
+      "soundSet": "Dark Knight"
     },
     {
       "number": 41,
       "name": {"en": "Death Cow", "es": "Vaca de la Muerte", "pt": "Vaca da morte"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_COW"
+      "model": "MONSTER_MODEL_DEATH_COW",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 42,
       "name": {"en": "Red Dragon", "es": "Dragón Rojo", "pt": "Dragão Vermelho"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DRAGON"
+      "model": "MONSTER_MODEL_DRAGON",
+      "soundSet": "Red Dragon"
     },
     {
       "number": 43,
       "name": {"en": "Golden Budge Dragon", "es": "Dragón Escurridizo Dorado", "pt": "Dragão Lento Dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BUDGE_DRAGON"
+      "model": "MONSTER_MODEL_BUDGE_DRAGON",
+      "soundSet": "Budge Dragon"
     },
     {
       "number": 44,
       "name": {"en": "Dragon", "es": "Dragón", "pt": "Dragão"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DRAGON"
+      "model": "MONSTER_MODEL_DRAGON",
+      "soundSet": "Red Dragon"
     },
     {
       "number": 45,
       "name": {"en": "Bahamut", "es": "Bahamut", "pt": "Bahamut"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BAHAMUT"
+      "model": "MONSTER_MODEL_BAHAMUT",
+      "soundSet": "Bahamut"
     },
     {
       "number": 46,
       "name": {"en": "Vepar", "es": "Vepar", "pt": "Vepar"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_VEPAR"
+      "model": "MONSTER_MODEL_VEPAR",
+      "soundSet": "Vepar"
     },
     {
       "number": 47,
       "name": {"en": "Valkyrie", "es": "Valquiria", "pt": "Valquíria"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_VALKYRIE"
+      "model": "MONSTER_MODEL_VALKYRIE",
+      "soundSet": "Valkyrie"
     },
     {
       "number": 48,
       "name": {"en": "Lizard King", "es": "Rey Lagarto", "pt": "Rei Lagarto"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_LIZARD"
+      "model": "MONSTER_MODEL_LIZARD",
+      "soundSet": "Lizard King"
     },
     {
       "number": 49,
       "name": {"en": "Hydra", "es": "Hidra", "pt": "Hidra"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_HYDRA"
+      "model": "MONSTER_MODEL_HYDRA",
+      "soundSet": "Hydra"
     },
     {
       "number": 50,
@@ -311,25 +357,29 @@
       "number": 51,
       "name": {"en": "Great Bahamut", "es": "Gran Bahamut", "pt": "Grande Bahamut"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BAHAMUT"
+      "model": "MONSTER_MODEL_BAHAMUT",
+      "soundSet": "Bahamut"
     },
     {
       "number": 52,
       "name": {"en": "Silver Valkyrie", "es": "Valquiria Plateada", "pt": "Valquíria prateada"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_VALKYRIE"
+      "model": "MONSTER_MODEL_VALKYRIE",
+      "soundSet": "Valkyrie"
     },
     {
       "number": 53,
       "name": {"en": "Golden Titan", "es": "Titán Dorado", "pt": "Titã dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_TITAN"
+      "model": "MONSTER_MODEL_TITAN",
+      "soundSet": "Dark Knight"
     },
     {
       "number": 54,
       "name": {"en": "Golden Soldier", "es": "Soldado Dorado", "pt": "Soldado dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SOLDIER"
+      "model": "MONSTER_MODEL_SOLDIER",
+      "soundSet": "Lizard King"
     },
     {
       "number": 55,
@@ -347,259 +397,302 @@
       "number": 57,
       "name": {"en": "Iron Wheel", "es": "Rueda de Acero", "pt": "Roda de ferro"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GOLDEN_WHEEL"
+      "model": "MONSTER_MODEL_GOLDEN_WHEEL",
+      "soundSet": "Iron Wheel"
     },
     {
       "number": 58,
       "name": {"en": "Tantalos", "es": "Tantalos", "pt": "Tântalo"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_TANTALLOS"
+      "model": "MONSTER_MODEL_TANTALLOS",
+      "soundSet": "Tantalos"
     },
     {
       "number": 59,
       "name": {"en": "Zaikan", "es": "Zaikan", "pt": "Zaikan"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_TANTALLOS"
+      "model": "MONSTER_MODEL_TANTALLOS",
+      "soundSet": "Tantalos"
     },
     {
       "number": 60,
       "name": {"en": "Bloody wolf", "es": "Lobo Sangriento", "pt": "Lobo sanguinário"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BLOODY_WOLF"
+      "model": "MONSTER_MODEL_BLOODY_WOLF",
+      "soundSet": "Bloody wolf"
     },
     {
       "number": 61,
       "name": {"en": "Beam Knight", "es": "Caballero de Rayo", "pt": "Cavaleiro do raio"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BEAM_KNIGHT"
+      "model": "MONSTER_MODEL_BEAM_KNIGHT",
+      "soundSet": "Beam Knight"
     },
     {
       "number": 62,
       "name": {"en": "Mutant", "es": "Mutante", "pt": "Mutante"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_MUTANT"
+      "model": "MONSTER_MODEL_MUTANT",
+      "soundSet": "Mutant"
     },
     {
       "number": 63,
       "name": {"en": "Death Beam Knight", "es": "Caballero de Rayo de la Muerte", "pt": "Cavaleiro do raio da morte"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BEAM_KNIGHT"
+      "model": "MONSTER_MODEL_BEAM_KNIGHT",
+      "soundSet": "Beam Knight"
     },
     {
       "number": 64,
       "name": {"en": "Ogre archer", "es": "Arquero Ogro", "pt": "Arqueiro ogro"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER"
+      "model": "MONSTER_MODEL_ORC_ARCHER",
+      "soundSet": "Ogre archer"
     },
     {
       "number": 65,
       "name": {"en": "Elite Ogre", "es": "Ogre de Élite", "pt": "Ogro de elite"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC"
+      "model": "MONSTER_MODEL_ORC",
+      "soundSet": "Elite Ogre"
     },
     {
       "number": 66,
       "name": {"en": "Cursed king", "es": "Rey Maldito", "pt": "Rei amaldiçoado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CURSED_KING"
+      "model": "MONSTER_MODEL_CURSED_KING",
+      "soundSet": "Cursed king"
     },
     {
       "number": 67,
       "name": {"en": "Metal Balrog", "es": "Balrog de Metal", "pt": "Balrog de metal"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BALROG"
+      "model": "MONSTER_MODEL_BALROG",
+      "soundSet": "Balrog"
     },
     {
       "number": 68,
       "name": {"en": "Molt", "es": "Molt", "pt": "Molt"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_MOLT"
+      "model": "MONSTER_MODEL_MOLT",
+      "soundSet": "Molt"
     },
     {
       "number": 69,
       "name": {"en": "Alquamos", "es": "Alquamos", "pt": "Alquamos"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ALQUAMOS"
+      "model": "MONSTER_MODEL_ALQUAMOS",
+      "soundSet": "Alquamos"
     },
     {
       "number": 70,
       "name": {"en": "Queen Rainier", "es": "Reina Rainier", "pt": "Rainha Rainier"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_QUEEN_RAINER"
+      "model": "MONSTER_MODEL_QUEEN_RAINER",
+      "soundSet": "Queen Rainier"
     },
     {
       "number": 71,
       "name": {"en": "Mega Crust", "es": "Mega Corteza", "pt": "Mega Crust"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CRUST"
+      "model": "MONSTER_MODEL_CRUST",
+      "soundSet": "Mega Crust"
     },
     {
       "number": 72,
       "name": {"en": "Phantom Knight", "es": "Caballero Fantasma", "pt": "Cavaleiro fantasma"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_PHANTOM_KNIGHT"
+      "model": "MONSTER_MODEL_PHANTOM_KNIGHT",
+      "soundSet": "Phantom Knight"
     },
     {
       "number": 73,
       "name": {"en": "Drakan", "es": "Drakan", "pt": "Drakan"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DRAKAN"
+      "model": "MONSTER_MODEL_DRAKAN",
+      "soundSet": "Drakan"
     },
     {
       "number": 74,
       "name": {"en": "Alpha Crust", "es": "Corteza Alfa", "pt": "Crust Alfa"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CRUST"
+      "model": "MONSTER_MODEL_CRUST",
+      "soundSet": "Mega Crust"
     },
     {
       "number": 75,
       "name": {"en": "Great Drakan", "es": "Gran Drakan", "pt": "Grande Drakan"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DRAKAN"
+      "model": "MONSTER_MODEL_DRAKAN",
+      "soundSet": "Drakan"
     },
     {
       "number": 76,
       "name": {"en": "Phoenix Darkness shield", "es": "Escudo de Fénix de Oscuridad", "pt": "Escudo da Fênix da escuridão"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 77,
       "name": {"en": "Phoenix of Darkness", "es": "Fénix de la Oscuridad", "pt": "Fênix da escuridão"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_PHOENIX_SHIELD"
+      "model": "MONSTER_MODEL_DARK_PHOENIX_SHIELD",
+      "soundSet": "Phoenix of Darkness"
     },
     {
       "number": 78,
       "name": {"en": "Golden Goblin", "es": "Duende Dorado", "pt": "Goblin dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GOBLIN"
+      "model": "MONSTER_MODEL_GOBLIN",
+      "soundSet": "Goblin"
     },
     {
       "number": 79,
       "name": {"en": "Golden Derkon", "es": "Derkon Dorado", "pt": "Derkon dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DRAGON"
+      "model": "MONSTER_MODEL_DRAGON",
+      "soundSet": "Red Dragon"
     },
     {
       "number": 80,
       "name": {"en": "Golden Lizard King", "es": "Rey Lagarto Dorado", "pt": "Rei Lagarto dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_LIZARD"
+      "model": "MONSTER_MODEL_LIZARD",
+      "soundSet": "Lizard King"
     },
     {
       "number": 81,
       "name": {"en": "Golden Vepar", "es": "Vepar Dorado", "pt": "Vepar dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_VEPAR"
+      "model": "MONSTER_MODEL_VEPAR",
+      "soundSet": "Vepar"
     },
     {
       "number": 82,
       "name": {"en": "Golden Tantalos", "es": "Tantalos Dorado", "pt": "Tântalo dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_TANTALLOS"
+      "model": "MONSTER_MODEL_TANTALLOS",
+      "soundSet": "Tantalos"
     },
     {
       "number": 83,
       "name": {"en": "Golden Wheel", "es": "Rueda Dorada", "pt": "Roda dourada"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GOLDEN_WHEEL"
+      "model": "MONSTER_MODEL_GOLDEN_WHEEL",
+      "soundSet": "Iron Wheel"
     },
     {
       "number": 84,
       "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC"
+      "model": "MONSTER_MODEL_ORC",
+      "soundSet": "Elite Ogre"
     },
     {
       "number": 85,
       "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER"
+      "model": "MONSTER_MODEL_ORC_ARCHER",
+      "soundSet": "Ogre archer"
     },
     {
       "number": 86,
       "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER"
+      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
+      "soundSet": "Dark Skull Soldier"
     },
     {
       "number": 87,
       "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT_OGRE"
+      "model": "MONSTER_MODEL_GIANT_OGRE",
+      "soundSet": "Giant Ogre"
     },
     {
       "number": 88,
       "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT"
+      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
+      "soundSet": "Red Skeleton Knight"
     },
     {
       "number": 89,
       "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_MAGIC_SKELETON"
+      "model": "MONSTER_MODEL_MAGIC_SKELETON",
+      "soundSet": "Magic Skeleton"
     },
     {
       "number": 90,
       "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC"
+      "model": "MONSTER_MODEL_ORC",
+      "soundSet": "Elite Ogre"
     },
     {
       "number": 91,
       "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER"
+      "model": "MONSTER_MODEL_ORC_ARCHER",
+      "soundSet": "Ogre archer"
     },
     {
       "number": 92,
       "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER"
+      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
+      "soundSet": "Dark Skull Soldier"
     },
     {
       "number": 93,
       "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT_OGRE"
+      "model": "MONSTER_MODEL_GIANT_OGRE",
+      "soundSet": "Giant Ogre"
     },
     {
       "number": 94,
       "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT"
+      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
+      "soundSet": "Red Skeleton Knight"
     },
     {
       "number": 95,
       "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_MAGIC_SKELETON"
+      "model": "MONSTER_MODEL_MAGIC_SKELETON",
+      "soundSet": "Magic Skeleton"
     },
     {
       "number": 96,
       "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC"
+      "model": "MONSTER_MODEL_ORC",
+      "soundSet": "Elite Ogre"
     },
     {
       "number": 97,
       "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER"
+      "model": "MONSTER_MODEL_ORC_ARCHER",
+      "soundSet": "Ogre archer"
     },
     {
       "number": 98,
       "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER"
+      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
+      "soundSet": "Dark Skull Soldier"
     },
     {
       "number": 99,
       "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT_OGRE"
+      "model": "MONSTER_MODEL_GIANT_OGRE",
+      "soundSet": "Giant Ogre"
     },
     {
       "number": 100,
@@ -669,121 +762,141 @@
       "number": 111,
       "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT"
+      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
+      "soundSet": "Red Skeleton Knight"
     },
     {
       "number": 112,
       "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_MAGIC_SKELETON"
+      "model": "MONSTER_MODEL_MAGIC_SKELETON",
+      "soundSet": "Magic Skeleton"
     },
     {
       "number": 113,
       "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC"
+      "model": "MONSTER_MODEL_ORC",
+      "soundSet": "Elite Ogre"
     },
     {
       "number": 114,
       "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER"
+      "model": "MONSTER_MODEL_ORC_ARCHER",
+      "soundSet": "Ogre archer"
     },
     {
       "number": 115,
       "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER"
+      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
+      "soundSet": "Dark Skull Soldier"
     },
     {
       "number": 116,
       "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT_OGRE"
+      "model": "MONSTER_MODEL_GIANT_OGRE",
+      "soundSet": "Giant Ogre"
     },
     {
       "number": 117,
       "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT"
+      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
+      "soundSet": "Red Skeleton Knight"
     },
     {
       "number": 118,
       "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_MAGIC_SKELETON"
+      "model": "MONSTER_MODEL_MAGIC_SKELETON",
+      "soundSet": "Magic Skeleton"
     },
     {
       "number": 119,
       "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC"
+      "model": "MONSTER_MODEL_ORC",
+      "soundSet": "Elite Ogre"
     },
     {
       "number": 120,
       "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER"
+      "model": "MONSTER_MODEL_ORC_ARCHER",
+      "soundSet": "Ogre archer"
     },
     {
       "number": 121,
       "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER"
+      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
+      "soundSet": "Dark Skull Soldier"
     },
     {
       "number": 122,
       "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT_OGRE"
+      "model": "MONSTER_MODEL_GIANT_OGRE",
+      "soundSet": "Giant Ogre"
     },
     {
       "number": 123,
       "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT"
+      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
+      "soundSet": "Red Skeleton Knight"
     },
     {
       "number": 124,
       "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_MAGIC_SKELETON"
+      "model": "MONSTER_MODEL_MAGIC_SKELETON",
+      "soundSet": "Magic Skeleton"
     },
     {
       "number": 125,
       "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC"
+      "model": "MONSTER_MODEL_ORC",
+      "soundSet": "Elite Ogre"
     },
     {
       "number": 126,
       "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER"
+      "model": "MONSTER_MODEL_ORC_ARCHER",
+      "soundSet": "Ogre archer"
     },
     {
       "number": 127,
       "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER"
+      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
+      "soundSet": "Dark Skull Soldier"
     },
     {
       "number": 128,
       "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT_OGRE"
+      "model": "MONSTER_MODEL_GIANT_OGRE",
+      "soundSet": "Giant Ogre"
     },
     {
       "number": 129,
       "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT"
+      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
+      "soundSet": "Red Skeleton Knight"
     },
     {
       "number": 130,
       "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_MAGIC_SKELETON"
+      "model": "MONSTER_MODEL_MAGIC_SKELETON",
+      "soundSet": "Magic Skeleton"
     },
     {
       "number": 131,
@@ -813,67 +926,78 @@
       "number": 135,
       "name": {"en": "White wizard", "es": "Mago Blanco", "pt": "Mago branco"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CURSED_KING"
+      "model": "MONSTER_MODEL_CURSED_KING",
+      "soundSet": "Cursed king"
     },
     {
       "number": 136,
       "name": {"en": "Destructive ogre soldier", "es": "Soldado ogro destructivo", "pt": "Soldado ogro destrutivo"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC"
+      "model": "MONSTER_MODEL_ORC",
+      "soundSet": "Elite Ogre"
     },
     {
       "number": 137,
       "name": {"en": "Destructive ogre archer", "es": "Arquero ogro destructivo", "pt": "Arqueiro ogro destrutivo"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER"
+      "model": "MONSTER_MODEL_ORC_ARCHER",
+      "soundSet": "Ogre archer"
     },
     {
       "number": 138,
       "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC"
+      "model": "MONSTER_MODEL_ORC",
+      "soundSet": "Elite Ogre"
     },
     {
       "number": 139,
       "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER"
+      "model": "MONSTER_MODEL_ORC_ARCHER",
+      "soundSet": "Ogre archer"
     },
     {
       "number": 140,
       "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER"
+      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
+      "soundSet": "Dark Skull Soldier"
     },
     {
       "number": 141,
       "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT_OGRE"
+      "model": "MONSTER_MODEL_GIANT_OGRE",
+      "soundSet": "Giant Ogre"
     },
     {
       "number": 142,
       "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT"
+      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
+      "soundSet": "Red Skeleton Knight"
     },
     {
       "number": 143,
       "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_MAGIC_SKELETON"
+      "model": "MONSTER_MODEL_MAGIC_SKELETON",
+      "soundSet": "Magic Skeleton"
     },
     {
       "number": 144,
       "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_ANGEL"
+      "model": "MONSTER_MODEL_DEATH_ANGEL",
+      "soundSet": "Death Angel"
     },
     {
       "number": 145,
       "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Death Centurion",
       "attacks": {
         "skills": {"1": "attack2", "17": "attack2", "55": "attack2", "200": "attack2", "201": "attack2", "202": "attack2", "384": "attack2", "490": "attack2"},
         "otherwise": "attack1",
@@ -884,13 +1008,15 @@
       "number": 146,
       "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BLOOD_SOLDIER"
+      "model": "MONSTER_MODEL_BLOOD_SOLDIER",
+      "soundSet": "Blood Soldier"
     },
     {
       "number": 147,
       "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
       "kind": "monster",
       "model": "MONSTER_MODEL_AEGIS",
+      "soundSet": "Aegis",
       "attacks": {
         "skills": {"17": "attack2"},
         "otherwise": "attack1",
@@ -902,6 +1028,7 @@
       "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Rogue Centurion",
       "attacks": {
         "skills": {"17": "attack2"},
         "otherwise": "attack1",
@@ -913,6 +1040,7 @@
       "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
       "kind": "monster",
       "model": "MONSTER_MODEL_NECRON",
+      "soundSet": "Necron",
       "attacks": {
         "skills": {"1": "attack2", "17": "attack1", "384": "attack2"},
         "otherwise": "none",
@@ -924,6 +1052,7 @@
       "name": {"en": "Bali", "es": "Bali", "pt": "Bali"},
       "kind": "monster",
       "model": "MONSTER_MODEL_BALI",
+      "soundSet": "Bali",
       "attacks": {
         "otherwiseRandom": "bali",
         "clearSkill": "never"
@@ -933,7 +1062,8 @@
       "number": 151,
       "name": {"en": "Soldier", "es": "Soldado", "pt": "Soldado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SOLDIER"
+      "model": "MONSTER_MODEL_SOLDIER",
+      "soundSet": "Lizard King"
     },
     {
       "number": 152,
@@ -982,6 +1112,7 @@
       "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SHRIKER",
+      "soundSet": "Schriker",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -992,6 +1123,7 @@
       "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SHRIKER",
+      "soundSet": "Illusion of Kundun",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -1001,85 +1133,117 @@
       "number": 162,
       "name": {"en": "Chaos Castle 1", "es": "Castillo del Caos 1", "pt": "Castelo do Caos 1"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT"
+      "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
+      "soundSet": "Chaos Castle"
     },
     {
       "number": 163,
       "name": {"en": "Chaos Castle 2", "es": "Castillo del Caos 2", "pt": "Castelo do Caos 2"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CHAOSCASTLE_ELF"
+      "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
+      "soundSet": "Chaos Castle",
+      "randomVariants": [
+        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
+      ]
     },
     {
       "number": 164,
       "name": {"en": "Chaos Castle 3", "es": "Castillo del Caos 3", "pt": "Castelo do Caos 3"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT"
+      "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
+      "soundSet": "Chaos Castle"
     },
     {
       "number": 165,
       "name": {"en": "Chaos Castle 4", "es": "Castillo del Caos 4", "pt": "Castelo do Caos 4"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CHAOSCASTLE_ELF"
+      "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
+      "soundSet": "Chaos Castle",
+      "randomVariants": [
+        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
+      ]
     },
     {
       "number": 166,
       "name": {"en": "Chaos Castle 5", "es": "Castillo del Caos 5", "pt": "Castelo do Caos 5"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT"
+      "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
+      "soundSet": "Chaos Castle"
     },
     {
       "number": 167,
       "name": {"en": "Chaos Castle 6", "es": "Castillo del Caos 6", "pt": "Castelo do Caos 6"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CHAOSCASTLE_ELF"
+      "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
+      "soundSet": "Chaos Castle",
+      "randomVariants": [
+        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
+      ]
     },
     {
       "number": 168,
       "name": {"en": "Chaos Castle 7", "es": "Castillo del Caos 7", "pt": "Castelo do Caos 7"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT"
+      "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
+      "soundSet": "Chaos Castle"
     },
     {
       "number": 169,
       "name": {"en": "Chaos Castle 8", "es": "Castillo del Caos 8", "pt": "Castelo do Caos 8"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CHAOSCASTLE_ELF"
+      "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
+      "soundSet": "Chaos Castle",
+      "randomVariants": [
+        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
+      ]
     },
     {
       "number": 170,
       "name": {"en": "Chaos Castle 9", "es": "Castillo del Caos 9", "pt": "Castelo do Caos 9"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT"
+      "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
+      "soundSet": "Chaos Castle"
     },
     {
       "number": 171,
       "name": {"en": "Chaos Castle 10", "es": "Castillo del Caos 10", "pt": "Castelo do Caos 10"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CHAOSCASTLE_ELF"
+      "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
+      "soundSet": "Chaos Castle",
+      "randomVariants": [
+        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
+      ]
     },
     {
       "number": 172,
       "name": {"en": "Chaos Castle 11", "es": "Castillo del Caos 11", "pt": "Castelo do Caos 11"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT"
+      "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
+      "soundSet": "Chaos Castle"
     },
     {
       "number": 173,
       "name": {"en": "Chaos Castle 12", "es": "Castillo del Caos 12", "pt": "Castelo do Caos 12"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CHAOSCASTLE_ELF"
+      "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
+      "soundSet": "Chaos Castle",
+      "randomVariants": [
+        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
+      ]
     },
     {
       "number": 174,
       "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_ANGEL"
+      "model": "MONSTER_MODEL_DEATH_ANGEL",
+      "soundSet": "Death Angel"
     },
     {
       "number": 175,
       "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Death Centurion",
       "attacks": {
         "skills": {"1": "attack2", "17": "attack2", "55": "attack2", "200": "attack2", "201": "attack2", "202": "attack2", "384": "attack2", "490": "attack2"},
         "otherwise": "attack1",
@@ -1090,13 +1254,15 @@
       "number": 176,
       "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BLOOD_SOLDIER"
+      "model": "MONSTER_MODEL_BLOOD_SOLDIER",
+      "soundSet": "Blood Soldier"
     },
     {
       "number": 177,
       "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
       "kind": "monster",
       "model": "MONSTER_MODEL_AEGIS",
+      "soundSet": "Aegis",
       "attacks": {
         "skills": {"17": "attack2"},
         "otherwise": "attack1",
@@ -1108,6 +1274,7 @@
       "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Rogue Centurion",
       "attacks": {
         "skills": {"17": "attack2"},
         "otherwise": "attack1",
@@ -1119,6 +1286,7 @@
       "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
       "kind": "monster",
       "model": "MONSTER_MODEL_NECRON",
+      "soundSet": "Necron",
       "attacks": {
         "skills": {"1": "attack2", "17": "attack1", "384": "attack2"},
         "otherwise": "none",
@@ -1130,6 +1298,7 @@
       "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SHRIKER",
+      "soundSet": "Schriker",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -1140,6 +1309,7 @@
       "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SHRIKER",
+      "soundSet": "Illusion of Kundun",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -1149,13 +1319,15 @@
       "number": 182,
       "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_ANGEL"
+      "model": "MONSTER_MODEL_DEATH_ANGEL",
+      "soundSet": "Death Angel"
     },
     {
       "number": 183,
       "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Death Centurion",
       "attacks": {
         "skills": {"1": "attack2", "17": "attack2", "55": "attack2", "200": "attack2", "201": "attack2", "202": "attack2", "384": "attack2", "490": "attack2"},
         "otherwise": "attack1",
@@ -1166,13 +1338,15 @@
       "number": 184,
       "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BLOOD_SOLDIER"
+      "model": "MONSTER_MODEL_BLOOD_SOLDIER",
+      "soundSet": "Blood Soldier"
     },
     {
       "number": 185,
       "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
       "kind": "monster",
       "model": "MONSTER_MODEL_AEGIS",
+      "soundSet": "Aegis",
       "attacks": {
         "skills": {"17": "attack2"},
         "otherwise": "attack1",
@@ -1184,6 +1358,7 @@
       "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Rogue Centurion",
       "attacks": {
         "skills": {"17": "attack2"},
         "otherwise": "attack1",
@@ -1195,6 +1370,7 @@
       "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
       "kind": "monster",
       "model": "MONSTER_MODEL_NECRON",
+      "soundSet": "Necron",
       "attacks": {
         "skills": {"1": "attack2", "17": "attack1", "384": "attack2"},
         "otherwise": "none",
@@ -1206,6 +1382,7 @@
       "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SHRIKER",
+      "soundSet": "Schriker",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -1216,6 +1393,7 @@
       "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SHRIKER",
+      "soundSet": "Illusion of Kundun",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -1225,13 +1403,15 @@
       "number": 190,
       "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_ANGEL"
+      "model": "MONSTER_MODEL_DEATH_ANGEL",
+      "soundSet": "Death Angel"
     },
     {
       "number": 191,
       "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Death Centurion",
       "attacks": {
         "skills": {"1": "attack2", "17": "attack2", "55": "attack2", "200": "attack2", "201": "attack2", "202": "attack2", "384": "attack2", "490": "attack2"},
         "otherwise": "attack1",
@@ -1242,13 +1422,15 @@
       "number": 192,
       "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BLOOD_SOLDIER"
+      "model": "MONSTER_MODEL_BLOOD_SOLDIER",
+      "soundSet": "Blood Soldier"
     },
     {
       "number": 193,
       "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
       "kind": "monster",
       "model": "MONSTER_MODEL_AEGIS",
+      "soundSet": "Aegis",
       "attacks": {
         "skills": {"17": "attack2"},
         "otherwise": "attack1",
@@ -1260,6 +1442,7 @@
       "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Rogue Centurion",
       "attacks": {
         "skills": {"17": "attack2"},
         "otherwise": "attack1",
@@ -1271,6 +1454,7 @@
       "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
       "kind": "monster",
       "model": "MONSTER_MODEL_NECRON",
+      "soundSet": "Necron",
       "attacks": {
         "skills": {"1": "attack2", "17": "attack1", "384": "attack2"},
         "otherwise": "none",
@@ -1282,6 +1466,7 @@
       "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SHRIKER",
+      "soundSet": "Schriker",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -1292,6 +1477,7 @@
       "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SHRIKER",
+      "soundSet": "Illusion of Kundun",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -1374,6 +1560,7 @@
       "name": {"en": "Gatekeeper", "es": "Guardián de Entrada", "pt": "Porteiro"},
       "kind": "npc",
       "model": "MONSTER_MODEL_BATTLE_GUARD2",
+      "soundSet": "Gatekeeper",
       "attacks": {
         "otherwise": "shock",
         "clearSkill": "never"
@@ -1443,7 +1630,8 @@
       "number": 234,
       "name": {"en": "Pet Trainer", "es": "Mascota Adiestrador", "pt": "Trein. de Animais de Estimação"},
       "kind": "npc",
-      "model": "MONSTER_MODEL_GOBLIN"
+      "model": "MONSTER_MODEL_GOBLIN",
+      "soundSet": "Goblin"
     },
     {
       "number": 235,
@@ -1467,7 +1655,8 @@
       "number": 238,
       "name": {"en": "Chaos Goblin", "es": "Duende del Caos", "pt": "Goblin do Caos"},
       "kind": "npc",
-      "model": "MODEL_MIX_NPC"
+      "model": "MODEL_MIX_NPC",
+      "soundSet": "Chaos Goblin"
     },
     {
       "number": 239,
@@ -1491,7 +1680,8 @@
       "number": 242,
       "name": {"en": "Elf Lala", "es": "Elfa Lala", "pt": "Elfa Lala"},
       "kind": "npc",
-      "model": "MODEL_ELF_WIZARD"
+      "model": "MODEL_ELF_WIZARD",
+      "soundSet": "Elf Lala"
     },
     {
       "number": 243,
@@ -1545,13 +1735,15 @@
       "number": 251,
       "name": {"en": "Hanzo the Blacksmith", "es": "Hanzo el Herrero", "pt": "Hanzo, o ferreiro"},
       "kind": "npc",
-      "model": "MODEL_SMITH"
+      "model": "MODEL_SMITH",
+      "soundSet": "Hanzo the Blacksmith"
     },
     {
       "number": 252,
       "name": {"en": ""},
       "kind": "npc",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 253,
@@ -1599,13 +1791,15 @@
       "number": 260,
       "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_ANGEL"
+      "model": "MONSTER_MODEL_DEATH_ANGEL",
+      "soundSet": "Death Angel"
     },
     {
       "number": 261,
       "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Death Centurion",
       "attacks": {
         "skills": {"1": "attack2", "17": "attack2", "55": "attack2", "200": "attack2", "201": "attack2", "202": "attack2", "384": "attack2", "490": "attack2"},
         "otherwise": "attack1",
@@ -1616,13 +1810,15 @@
       "number": 262,
       "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BLOOD_SOLDIER"
+      "model": "MONSTER_MODEL_BLOOD_SOLDIER",
+      "soundSet": "Blood Soldier"
     },
     {
       "number": 263,
       "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
       "kind": "monster",
       "model": "MONSTER_MODEL_AEGIS",
+      "soundSet": "Aegis",
       "attacks": {
         "skills": {"17": "attack2"},
         "otherwise": "attack1",
@@ -1634,6 +1830,7 @@
       "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Rogue Centurion",
       "attacks": {
         "skills": {"17": "attack2"},
         "otherwise": "attack1",
@@ -1645,6 +1842,7 @@
       "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
       "kind": "monster",
       "model": "MONSTER_MODEL_NECRON",
+      "soundSet": "Necron",
       "attacks": {
         "skills": {"1": "attack2", "17": "attack1", "384": "attack2"},
         "otherwise": "none",
@@ -1656,6 +1854,7 @@
       "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SHRIKER",
+      "soundSet": "Schriker",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -1666,6 +1865,7 @@
       "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SHRIKER",
+      "soundSet": "Illusion of Kundun",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -1675,13 +1875,15 @@
       "number": 268,
       "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_ANGEL"
+      "model": "MONSTER_MODEL_DEATH_ANGEL",
+      "soundSet": "Death Angel"
     },
     {
       "number": 269,
       "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Death Centurion",
       "attacks": {
         "skills": {"1": "attack2", "17": "attack2", "55": "attack2", "200": "attack2", "201": "attack2", "202": "attack2", "384": "attack2", "490": "attack2"},
         "otherwise": "attack1",
@@ -1692,13 +1894,15 @@
       "number": 270,
       "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BLOOD_SOLDIER"
+      "model": "MONSTER_MODEL_BLOOD_SOLDIER",
+      "soundSet": "Blood Soldier"
     },
     {
       "number": 271,
       "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
       "kind": "monster",
       "model": "MONSTER_MODEL_AEGIS",
+      "soundSet": "Aegis",
       "attacks": {
         "skills": {"17": "attack2"},
         "otherwise": "attack1",
@@ -1710,6 +1914,7 @@
       "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Rogue Centurion",
       "attacks": {
         "skills": {"17": "attack2"},
         "otherwise": "attack1",
@@ -1721,6 +1926,7 @@
       "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
       "kind": "monster",
       "model": "MONSTER_MODEL_NECRON",
+      "soundSet": "Necron",
       "attacks": {
         "skills": {"1": "attack2", "17": "attack1", "384": "attack2"},
         "otherwise": "none",
@@ -1732,6 +1938,7 @@
       "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SHRIKER",
+      "soundSet": "Schriker",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -1742,6 +1949,7 @@
       "name": {"en": "Kundun", "es": "Kundun", "pt": "Kundun"},
       "kind": "monster",
       "model": "MONSTER_MODEL_ILLUSION_OF_KUNDUN",
+      "soundSet": "Kundun",
       "attacks": {
         "otherwiseRandom": "rand",
         "clearSkill": "never"
@@ -1751,7 +1959,8 @@
       "number": 277,
       "name": {"en": "Castle Gate", "es": "Puerta del Castillo", "pt": "Portão do castelo"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CASTLE_GATE1"
+      "model": "MONSTER_MODEL_CASTLE_GATE1",
+      "soundSet": "Castle Gate"
     },
     {
       "number": 278,
@@ -1776,6 +1985,7 @@
       "name": {"en": "Archer", "es": "Arquero", "pt": "Arqueiro"},
       "kind": "monster",
       "model": "MONSTER_MODEL_BATTLE_GUARD1",
+      "soundSet": "Archer",
       "attacks": {
         "otherwise": "shock",
         "clearSkill": "never"
@@ -1786,6 +1996,7 @@
       "name": {"en": "Spearman", "es": "Lancero", "pt": "Lanceiro"},
       "kind": "monster",
       "model": "MONSTER_MODEL_BATTLE_GUARD2",
+      "soundSet": "Gatekeeper",
       "attacks": {
         "otherwise": "shock",
         "clearSkill": "never"
@@ -1851,7 +2062,8 @@
       "number": 296,
       "name": {"en": "Monster7", "es": "Monstruo7", "pt": "Monstro7"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 297,
@@ -1863,13 +2075,15 @@
       "number": 300,
       "name": {"en": "Hero Mutant", "es": "Héroe Mutante", "pt": "Herói mutante"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_MUTANT"
+      "model": "MONSTER_MODEL_MUTANT",
+      "soundSet": "Mutant"
     },
     {
       "number": 301,
       "name": {"en": "Omega Wing", "es": "Ala Omega", "pt": "Asa ômega"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CRUST"
+      "model": "MONSTER_MODEL_CRUST",
+      "soundSet": "Mega Crust"
     },
     {
       "number": 302,
@@ -1990,49 +2204,57 @@
       "number": 331,
       "name": {"en": "Aegis", "es": "Aegis", "pt": "Aegis"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_AEGIS"
+      "model": "MONSTER_MODEL_AEGIS",
+      "soundSet": "Aegis"
     },
     {
       "number": 332,
       "name": {"en": "Rogue Centurion", "es": "Centurión Canalla", "pt": "Centurião vigarista"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_CENTURION"
+      "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Rogue Centurion"
     },
     {
       "number": 333,
       "name": {"en": "Blood Soldier", "es": "Soldado Sangriento", "pt": "Soldado sanguinário"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BLOOD_SOLDIER"
+      "model": "MONSTER_MODEL_BLOOD_SOLDIER",
+      "soundSet": "Blood Soldier"
     },
     {
       "number": 334,
       "name": {"en": "Death Angel", "es": "Ángel de la Muerte", "pt": "Anjo da Morte"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_ANGEL"
+      "model": "MONSTER_MODEL_DEATH_ANGEL",
+      "soundSet": "Death Angel"
     },
     {
       "number": 335,
       "name": {"en": "Necron", "es": "Necron", "pt": "Necron"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_NECRON"
+      "model": "MONSTER_MODEL_NECRON",
+      "soundSet": "Necron"
     },
     {
       "number": 336,
       "name": {"en": "Death Centurion", "es": "Centurión de la Muerte", "pt": "Centurião da morte"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_CENTURION"
+      "model": "MONSTER_MODEL_DEATH_CENTURION",
+      "soundSet": "Death Centurion"
     },
     {
       "number": 337,
       "name": {"en": "Schriker", "es": "Schriker", "pt": "Schriker"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SHRIKER"
+      "model": "MONSTER_MODEL_SHRIKER",
+      "soundSet": "Schriker"
     },
     {
       "number": 338,
       "name": {"en": "Illusion of Kundun", "es": "Ilusión de Kundun", "pt": "Ilusão de Kundun"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SHRIKER"
+      "model": "MONSTER_MODEL_SHRIKER",
+      "soundSet": "Illusion of Kundun"
     },
     {
       "number": 340,
@@ -2607,97 +2829,116 @@
       "number": 418,
       "name": {"en": "Strange Rabbit", "es": "Conejo Raro", "pt": "Coelho estranho"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_RABBIT"
+      "model": "MONSTER_MODEL_RABBIT",
+      "soundSet": "Strange Rabbit"
     },
     {
       "number": 419,
       "name": {"en": "Hideous Rabbit", "es": "Conejo Espantoso", "pt": "Coelho horrendo"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BUTTERFLY"
+      "model": "MONSTER_MODEL_BUTTERFLY",
+      "soundSet": "Hideous Rabbit"
     },
     {
       "number": 420,
       "name": {"en": "Werewolf", "es": "Hombre Lobo", "pt": "Lobisomem"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_HIDEOUS_RABBIT"
+      "model": "MONSTER_MODEL_HIDEOUS_RABBIT",
+      "soundSet": "Werewolf"
     },
     {
       "number": 421,
       "name": {"en": "Polluted Butterfly", "es": "Mariposa Contaminada", "pt": "Borboleta poluída"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_WEREWOLF2"
+      "model": "MONSTER_MODEL_WEREWOLF2",
+      "soundSet": "Polluted Butterfly"
     },
     {
       "number": 422,
       "name": {"en": "Cursed Lich", "es": "Lich Maldito", "pt": "Liche amaldiçoado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CURSED_LICH"
+      "model": "MONSTER_MODEL_CURSED_LICH",
+      "soundSet": "Cursed Lich"
     },
     {
       "number": 423,
       "name": {"en": "Totem Golem", "es": "Gólem Tótem", "pt": "Totem Golem "},
       "kind": "monster",
-      "model": "MONSTER_MODEL_TOTEM_GOLEM"
+      "model": "MONSTER_MODEL_TOTEM_GOLEM",
+      "soundSet": "Totem Golem"
     },
     {
       "number": 424,
       "name": {"en": "Grizzly", "es": "Grizzly", "pt": "Grizzly"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GRIZZLY"
+      "model": "MONSTER_MODEL_GRIZZLY",
+      "soundSet": "Grizzly"
     },
     {
       "number": 425,
       "name": {"en": "Captain Grizzly", "es": "Capitán Grizzly", "pt": "Capitão Grizzly"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CAPTAIN_GRIZZLY"
+      "model": "MONSTER_MODEL_CAPTAIN_GRIZZLY",
+      "soundSet": "Captain Grizzly"
     },
     {
       "number": 426,
       "name": {"en": "Chaos Castle13", "es": "Castillo del Caos13", "pt": "Castelo do Caos13"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT"
+      "model": "MONSTER_MODEL_CHAOSCASTLE_KNIGHT",
+      "soundSet": "Chaos Castle"
     },
     {
       "number": 427,
       "name": {"en": "Chaos Castle14", "es": "Castillo del Caos14", "pt": "Castelo do Caos14"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CHAOSCASTLE_ELF"
+      "model": "MONSTER_MODEL_CHAOSCASTLE_ELF",
+      "soundSet": "Chaos Castle",
+      "randomVariants": [
+        {"model": "MONSTER_MODEL_CHAOSCASTLE_WIZARD", "soundSet": "Chaos Castle Wizard"}
+      ]
     },
     {
       "number": 428,
       "name": {"en": "Chief Skeleton Warrior", "es": "Jefe Guerrero Esqueleto", "pt": "Guerreiro Esqueleto Chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC"
+      "model": "MONSTER_MODEL_ORC",
+      "soundSet": "Elite Ogre"
     },
     {
       "number": 429,
       "name": {"en": "Chief Skeleton Archer", "es": "Jefe Arquero Esqueleto", "pt": "Arqueiro esqueleto chefe"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORC_ARCHER"
+      "model": "MONSTER_MODEL_ORC_ARCHER",
+      "soundSet": "Ogre archer"
     },
     {
       "number": 430,
       "name": {"en": "Dark Skull Soldier", "es": "Soldado Calavera Oscura", "pt": "Soldado da caveira negra"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER"
+      "model": "MONSTER_MODEL_DARK_SKULL_SOLDIER",
+      "soundSet": "Dark Skull Soldier"
     },
     {
       "number": 431,
       "name": {"en": "Giant Ogre", "es": "Ogro Gigante", "pt": "Ogro gigante"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GIANT_OGRE"
+      "model": "MONSTER_MODEL_GIANT_OGRE",
+      "soundSet": "Giant Ogre"
     },
     {
       "number": 432,
       "name": {"en": "Red Skeleton Knight", "es": "Caballero Rojo Esqueleto", "pt": "Cavaleiro Esqueleto Vermelho"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT"
+      "model": "MONSTER_MODEL_RED_SKELETON_KNIGHT",
+      "soundSet": "Red Skeleton Knight"
     },
     {
       "number": 433,
       "name": {"en": "Magic Skeleton", "es": "Esqueleto Mágico", "pt": "Esqueleto mágico"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_MAGIC_SKELETON"
+      "model": "MONSTER_MODEL_MAGIC_SKELETON",
+      "soundSet": "Magic Skeleton"
     },
     {
       "number": 434,
@@ -2750,55 +2991,64 @@
       "number": 441,
       "name": {"en": "Sapi-Unus", "es": "Sapi-Unus", "pt": "Sapi-Unus"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SAPIUNUS"
+      "model": "MONSTER_MODEL_SAPIUNUS",
+      "soundSet": "Sapi-Unus"
     },
     {
       "number": 442,
       "name": {"en": "Sapi-Duo", "es": "Sapi-Duo", "pt": "Sapi-Duo"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SAPIDUO"
+      "model": "MONSTER_MODEL_SAPIDUO",
+      "soundSet": "Sapi-Unus"
     },
     {
       "number": 443,
       "name": {"en": "Sapi-Tres", "es": "Sapi-Tres", "pt": "Sapi-Tres"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SAPITRES"
+      "model": "MONSTER_MODEL_SAPITRES",
+      "soundSet": "Sapi-Tres"
     },
     {
       "number": 444,
       "name": {"en": "Shadow Pawn", "es": "Peón Sombra", "pt": "Peão das sombras"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SHADOW_PAWN"
+      "model": "MONSTER_MODEL_SHADOW_PAWN",
+      "soundSet": "Shadow Pawn"
     },
     {
       "number": 445,
       "name": {"en": "Shadow Knight", "es": "Caballero de la Sombra", "pt": "Cavaleiro das sombras"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SHADOW_KNIGHT"
+      "model": "MONSTER_MODEL_SHADOW_KNIGHT",
+      "soundSet": "Shadow Knight"
     },
     {
       "number": 446,
       "name": {"en": "Shadow Look", "es": "Mirada Sombría", "pt": "Visão das sombras"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SHADOW_LOOK"
+      "model": "MONSTER_MODEL_SHADOW_LOOK",
+      "soundSet": "Shadow Look"
     },
     {
       "number": 447,
       "name": {"en": "Thunder Napin", "es": "Napin Trueno", "pt": "Napin do trovão"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_NAPIN"
+      "model": "MONSTER_MODEL_NAPIN",
+      "soundSet": "Thunder Napin"
     },
     {
       "number": 448,
       "name": {"en": "Ghost Napin", "es": "Napin Espíritu Fantasmal", "pt": "Napin fantasma"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GHOST_NAPIN"
+      "model": "MONSTER_MODEL_GHOST_NAPIN",
+      "soundSet": "Ghost Napin"
     },
     {
       "number": 449,
       "name": {"en": "Blaze Napin", "es": "Napin Llamarada", "pt": "Blaze Napin"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BLAZE_NAPIN"
+      "model": "MONSTER_MODEL_BLAZE_NAPIN",
+      "soundSet": "Blaze Napin"
     },
     {
       "number": 450,
@@ -2829,6 +3079,7 @@
       "name": {"en": "Ice Walker", "es": "Caminante del Hielo", "pt": "Caminhante do gelo"},
       "kind": "monster",
       "model": "MONSTER_MODEL_ICE_WALKER",
+      "soundSet": "Ice Walker",
       "attacks": {
         "monsterSkills": {"29": "attack2"},
         "otherwise": "attack1",
@@ -2840,6 +3091,7 @@
       "name": {"en": "Giant Mammoth", "es": "Mamut Gigante", "pt": "Mamute gigante"},
       "kind": "monster",
       "model": "MONSTER_MODEL_GIANT_MAMMOTH",
+      "soundSet": "Giant Mammoth",
       "attacks": {
         "monsterSkills": {"30": "attack2"},
         "otherwise": "attack1",
@@ -2851,6 +3103,7 @@
       "name": {"en": "Ice Giant", "es": "Gigante de Hielo", "pt": "Gigante de gelo"},
       "kind": "monster",
       "model": "MONSTER_MODEL_ICE_GIANT",
+      "soundSet": "Ice Giant",
       "attacks": {
         "monsterSkills": {"31": "attack2"},
         "otherwise": "attack1",
@@ -2862,6 +3115,7 @@
       "name": {"en": "Coolutin", "es": "Coolutin", "pt": "Coolutin"},
       "kind": "monster",
       "model": "MONSTER_MODEL_COOLUTIN",
+      "soundSet": "Coolutin",
       "attacks": {
         "monsterSkills": {"32": "attack2"},
         "otherwise": "attack1",
@@ -2873,6 +3127,7 @@
       "name": {"en": "Iron Knight", "es": "Caballero de Acero", "pt": "Cavaleiro de ferro"},
       "kind": "monster",
       "model": "MONSTER_MODEL_IRON_KNIGHT",
+      "soundSet": "Iron Knight",
       "attacks": {
         "monsterSkills": {"33": "attack2"},
         "otherwise": "attack1",
@@ -2884,6 +3139,7 @@
       "name": {"en": "Selupan", "es": "Selupan", "pt": "Selupan"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SELUPAN",
+      "soundSet": "Selupan",
       "attacks": {
         "monsterSkills": {"34": "attack2", "35": "attack1", "36": "attack3", "37": "appear", "38": "attack4", "39": "attack4", "40": "attack4", "41": "none", "42": "attack4"},
         "otherwise": "attack4",
@@ -2930,7 +3186,8 @@
       "number": 466,
       "name": {"en": "Cursed Goblin", "es": "Lich Maldito", "pt": "Goblin amaldiçoado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_EVIL_GOBLIN"
+      "model": "MONSTER_MODEL_EVIL_GOBLIN",
+      "soundSet": "Goblin"
     },
     {
       "number": 467,
@@ -2990,13 +3247,15 @@
       "number": 476,
       "name": {"en": "Cursed Santa", "es": "Santa Maldito", "pt": "Papai Noel Amaldiçoado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CURSED_SANTA"
+      "model": "MONSTER_MODEL_CURSED_SANTA",
+      "soundSet": "Cursed Santa"
     },
     {
       "number": 477,
       "name": {"en": "Transformed Snowman", "es": "Hombre de nieve transformado", "pt": "Homem de neve transformado"},
       "kind": "monster",
-      "model": "MODEL_XMAS2008_SNOWMAN"
+      "model": "MODEL_XMAS2008_SNOWMAN",
+      "soundSet": "Transformed Snowman"
     },
     {
       "number": 478,
@@ -3008,79 +3267,92 @@
       "number": 479,
       "name": {"en": "Doorkeeper Titus", "es": "Portero Titus", "pt": "Porteiro Titus"},
       "kind": "npc",
-      "model": "MODEL_DUEL_NPC_TITUS"
+      "model": "MODEL_DUEL_NPC_TITUS",
+      "soundSet": "Doorkeeper Titus"
     },
     {
       "number": 480,
       "name": {"en": "Zombie Fighter", "es": "Luchador Zombie", "pt": "Lutador zumbi"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ZOMBIE_FIGHTER"
+      "model": "MONSTER_MODEL_ZOMBIE_FIGHTER",
+      "soundSet": "Zombie Fighter"
     },
     {
       "number": 481,
       "name": {"en": "Zombie Fighter", "es": "Luchador Zombie", "pt": "Lutador zumbi"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ZOMBIE_FIGHTER"
+      "model": "MONSTER_MODEL_ZOMBIE_FIGHTER",
+      "soundSet": "Zombie Fighter"
     },
     {
       "number": 482,
       "name": {"en": "Resurrected Gladiator", "es": "Gladiador Resucitado", "pt": "Gladiador ressuscitado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GLADIATOR"
+      "model": "MONSTER_MODEL_GLADIATOR",
+      "soundSet": "Resurrected Gladiator"
     },
     {
       "number": 483,
       "name": {"en": "Resurrected Gladiator", "es": "Gladiador Resucitado", "pt": "Gladiador ressuscitado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GLADIATOR"
+      "model": "MONSTER_MODEL_GLADIATOR",
+      "soundSet": "Resurrected Gladiator"
     },
     {
       "number": 484,
       "name": {"en": "Ash Slaughterer", "es": "Descuartizador Ceniza", "pt": "Matador das cinzas"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SLAUGTHERER"
+      "model": "MONSTER_MODEL_SLAUGTHERER",
+      "soundSet": "Ash Slaughterer"
     },
     {
       "number": 485,
       "name": {"en": "Ash Slaughterer", "es": "Descuartizador Ceniza", "pt": "Matador das cinzas"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_SLAUGTHERER"
+      "model": "MONSTER_MODEL_SLAUGTHERER",
+      "soundSet": "Ash Slaughterer"
     },
     {
       "number": 486,
       "name": {"en": "Blood Assassin", "es": "Soldado Sangriento", "pt": "Assassino sanguinário"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BLOOD_ASSASSIN"
+      "model": "MONSTER_MODEL_BLOOD_ASSASSIN",
+      "soundSet": "Blood Assassin"
     },
     {
       "number": 487,
       "name": {"en": "Cruel Blood Assassin", "es": "Asesino Sangriento Cruel", "pt": "Assassino sanguinário cruel"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN"
+      "model": "MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN",
+      "soundSet": "Cruel Blood Assassin"
     },
     {
       "number": 488,
       "name": {"en": "Cruel Blood Assassin", "es": "Asesino Sangriento Cruel", "pt": "Assassino sanguinário cruel"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN"
+      "model": "MONSTER_MODEL_CRUEL_BLOOD_ASSASSIN",
+      "soundSet": "Cruel Blood Assassin"
     },
     {
       "number": 489,
       "name": {"en": "Burning Lava Giant", "es": "Gigante de Lava Ardiente", "pt": "Gigante de lava incandescente"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BURNING_LAVA_GIANT"
+      "model": "MONSTER_MODEL_BURNING_LAVA_GIANT",
+      "soundSet": "Burning Lava Giant"
     },
     {
       "number": 490,
       "name": {"en": "Ruthless Lava Giant", "es": "Gigante de Lava Despiadado", "pt": "Gigante de lava cruel"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_LAVA_GIANT"
+      "model": "MONSTER_MODEL_LAVA_GIANT",
+      "soundSet": "Ruthless Lava Giant"
     },
     {
       "number": 491,
       "name": {"en": "Ruthless Lava Giant", "es": "Gigante de Lava Despiadado", "pt": "Gigante de lava cruel"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_LAVA_GIANT"
+      "model": "MONSTER_MODEL_LAVA_GIANT",
+      "soundSet": "Ruthless Lava Giant"
     },
     {
       "number": 492,
@@ -3092,13 +3364,15 @@
       "number": 493,
       "name": {"en": "Golden Dark Knight", "es": "Caballero Oscuro Dorado", "pt": "Cavaleiro negro dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DARK_KNIGHT"
+      "model": "MONSTER_MODEL_DARK_KNIGHT",
+      "soundSet": "Dark Knight"
     },
     {
       "number": 494,
       "name": {"en": "Golden Devil", "es": "Diablo Dorado", "pt": "Demônio dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DEVIL"
+      "model": "MONSTER_MODEL_DEVIL",
+      "soundSet": "Devil"
     },
     {
       "number": 495,
@@ -3110,7 +3384,8 @@
       "number": 496,
       "name": {"en": "Golden Crust", "es": "Corteza Dorada", "pt": "Crust dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CRUST"
+      "model": "MONSTER_MODEL_CRUST",
+      "soundSet": "Mega Crust"
     },
     {
       "number": 497,
@@ -3128,25 +3403,29 @@
       "number": 499,
       "name": {"en": "Golden Iron Knight", "es": "Caballero de Hierro Dorado", "pt": "Cavaleiro de ferro dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_IRON_KNIGHT"
+      "model": "MONSTER_MODEL_IRON_KNIGHT",
+      "soundSet": "Iron Knight"
     },
     {
       "number": 500,
       "name": {"en": "Golden Napin", "es": "Napin Dorado", "pt": "Napin dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_NAPIN"
+      "model": "MONSTER_MODEL_NAPIN",
+      "soundSet": "Thunder Napin"
     },
     {
       "number": 501,
       "name": {"en": "Great Golden Dragon", "es": "Gran Dragón Dorado", "pt": "Grande Dragão dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DRAGON"
+      "model": "MONSTER_MODEL_DRAGON",
+      "soundSet": "Red Dragon"
     },
     {
       "number": 502,
       "name": {"en": "Golden Rabbit", "es": "Conejo Dorado", "pt": "Coelho dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_RABBIT"
+      "model": "MONSTER_MODEL_RABBIT",
+      "soundSet": "Strange Rabbit"
     },
     {
       "number": 503,
@@ -3159,6 +3438,7 @@
       "name": {"en": "Gaion Kharein", "es": "Gaion Kharein", "pt": "Gaion Kharein"},
       "kind": "monster",
       "model": "MONSTER_MODEL_GAYION",
+      "soundSet": "Gaion Kharein",
       "attacks": {
         "monsterSkills": {"59": "appear", "64": "attack2", "65": "attack3", "66": "attack4", "67": "attack1"},
         "otherwise": "attack1",
@@ -3170,6 +3450,7 @@
       "name": {"en": "Jerint", "es": "Jerint", "pt": "Jerint"},
       "kind": "monster",
       "model": "MONSTER_MODEL_JERRY",
+      "soundSet": "Jerint",
       "attacks": {
         "monsterSkills": {"55": "attack2", "59": "appear", "61": "attack3"},
         "otherwise": "attack1",
@@ -3181,6 +3462,7 @@
       "name": {"en": "Raymond", "es": "Raymond", "pt": "Raymond"},
       "kind": "monster",
       "model": "MONSTER_MODEL_RAYMOND",
+      "soundSet": "Raymond",
       "attacks": {
         "monsterSkills": {"52": "attack3", "59": "appear", "60": "attack2"},
         "otherwise": "attack1",
@@ -3192,6 +3474,7 @@
       "name": {"en": "Erkanne", "es": "Erkanne", "pt": "Erkanne"},
       "kind": "monster",
       "model": "MONSTER_MODEL_LUCAS",
+      "soundSet": "Erkanne",
       "attacks": {
         "monsterSkills": {"59": "appear", "62": "attack2", "63": "attack3"},
         "otherwise": "attack1",
@@ -3212,6 +3495,7 @@
       "name": {"en": "Destler", "es": "Destler", "pt": "Destler"},
       "kind": "monster",
       "model": "MONSTER_MODEL_FRED",
+      "soundSet": "Destler",
       "attacks": {
         "monsterSkills": {"57": "attack2", "58": "attack3", "59": "appear"},
         "otherwise": "attack1",
@@ -3223,6 +3507,7 @@
       "name": {"en": "Vermont", "es": "Vermont", "pt": "Vermont"},
       "kind": "monster",
       "model": "MONSTER_MODEL_HAMMERIZE",
+      "soundSet": "Vermont",
       "attacks": {
         "monsterSkills": {"59": "appear", "60": "attack2", "61": "attack3"},
         "otherwise": "attack1",
@@ -3234,6 +3519,7 @@
       "name": {"en": "Kato", "es": "Kato", "pt": "Kato"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DUAL_BERSERKER",
+      "soundSet": "Kato",
       "attacks": {
         "monsterSkills": {"58": "attack2", "59": "appear", "60": "attack3"},
         "otherwise": "attack1",
@@ -3245,6 +3531,7 @@
       "name": {"en": "Galia", "es": "Galia", "pt": "Galia"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DEVIL_LORD",
+      "soundSet": "Galia",
       "attacks": {
         "monsterSkills": {"58": "attack2", "59": "appear", "60": "attack3"},
         "otherwise": "attack1",
@@ -3255,13 +3542,15 @@
       "number": 512,
       "name": {"en": "Quartermaster", "es": "Amo del Cuartel", "pt": "Contramestre"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_QUARTER_MASTER"
+      "model": "MONSTER_MODEL_QUARTER_MASTER",
+      "soundSet": "Quartermaster"
     },
     {
       "number": 513,
       "name": {"en": "Combat Instructor", "es": "Instructor de Combate", "pt": "Instrutor de combate"},
       "kind": "monster",
       "model": "MONSTER_MODEL_COMBAT_INSTRUCTOR",
+      "soundSet": "Combat Instructor",
       "attacks": {
         "monsterSkills": {"47": "attack2", "49": "appear"},
         "otherwise": "attack1",
@@ -3273,6 +3562,7 @@
       "name": {"en": "Knight Commander", "es": "Comandante de Caballeros", "pt": "Comandante dos Cavaleiros"},
       "kind": "monster",
       "model": "MONSTER_MODEL_ATICLES_HEAD",
+      "soundSet": "Knight Commander",
       "attacks": {
         "monsterSkills": {"47": "attack2", "50": "appear"},
         "otherwise": "attack1",
@@ -3284,6 +3574,7 @@
       "name": {"en": "Grand Wizard", "es": "Gran Mago", "pt": "Grande Mago"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DARK_GHOST",
+      "soundSet": "Grand Wizard",
       "attacks": {
         "monsterSkills": {"51": "attack2", "52": "attack2"},
         "otherwise": "attack1",
@@ -3295,6 +3586,7 @@
       "name": {"en": "Master Assassin", "es": "Amo Asesino", "pt": "Mestre Assassino"},
       "kind": "monster",
       "model": "MONSTER_MODEL_BANSHEE",
+      "soundSet": "Master Assassin",
       "attacks": {
         "monsterSkills": {"47": "attack2", "53": "attack3"},
         "otherwise": "attack1",
@@ -3306,6 +3598,7 @@
       "name": {"en": "Cavalry Captain", "es": "Capitán de Caballería", "pt": "Capitão da Cavalaria"},
       "kind": "monster",
       "model": "MONSTER_MODEL_HEAD_MOUNTER",
+      "soundSet": "Cavalry Captain",
       "attacks": {
         "monsterSkills": {"54": "attack2", "55": "appear", "56": "attack3"},
         "otherwise": "attack1",
@@ -3317,6 +3610,7 @@
       "name": {"en": "Shield Bearer", "es": "Portador de Escudo", "pt": "Portador do escudo"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DEFENDER",
+      "soundSet": "Shield Bearer",
       "attacks": {
         "monsterSkills": {"44": "appear", "45": "attack2"},
         "otherwise": "attack1",
@@ -3328,6 +3622,7 @@
       "name": {"en": "Medic", "es": "Médico", "pt": "Médico"},
       "kind": "monster",
       "model": "MONSTER_MODEL_FORSAKER",
+      "soundSet": "Medic",
       "attacks": {
         "monsterSkills": {"46": "attack2"},
         "otherwise": "attack1",
@@ -3350,13 +3645,15 @@
       "number": 522,
       "name": {"en": "Jerint the Assistant", "es": "Jerint el Asistente", "pt": "Jerint, o Assistente"},
       "kind": "npc",
-      "model": "MONSTER_MODEL_JERRY"
+      "model": "MONSTER_MODEL_JERRY",
+      "soundSet": "Jerint"
     },
     {
       "number": 523,
       "name": {"en": "Trap", "es": "Trampa", "pt": "Armadilha"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 524,
@@ -3392,31 +3689,36 @@
       "number": 529,
       "name": {"en": "Furious Slaughterer", "es": "Descuartizador Furioso", "pt": "Matador furioso"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_TERRIBLE_BUTCHER"
+      "model": "MONSTER_MODEL_TERRIBLE_BUTCHER",
+      "soundSet": "Furious Slaughterer"
     },
     {
       "number": 530,
       "name": {"en": "Slaughterer", "es": "Descuartizador", "pt": "Matador"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_MAD_BUTCHER"
+      "model": "MONSTER_MODEL_MAD_BUTCHER",
+      "soundSet": "Slaughterer"
     },
     {
       "number": 531,
       "name": {"en": "Ice Walker", "es": "Caminante del Hielo", "pt": "Caminhante do gelo"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ICE_WALKER"
+      "model": "MONSTER_MODEL_ICE_WALKER",
+      "soundSet": "Ice Walker"
     },
     {
       "number": 532,
       "name": {"en": "Larva", "es": "Larva", "pt": "Larva"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_LARVA"
+      "model": "MONSTER_MODEL_LARVA",
+      "soundSet": "Larva"
     },
     {
       "number": 533,
       "name": {"en": "Doppelganger", "es": "Doppelganger", "pt": "Doppelganger"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DOPPELGANGER"
+      "model": "MONSTER_MODEL_DOPPELGANGER",
+      "soundSet": "Doppelganger"
     },
     {
       "number": 534,
@@ -3458,19 +3760,22 @@
       "number": 540,
       "name": {"en": "Lugard", "es": "Lugard", "pt": "Lugard"},
       "kind": "npc",
-      "model": "MODEL_DOPPELGANGER_NPC_LUGARD"
+      "model": "MODEL_DOPPELGANGER_NPC_LUGARD",
+      "soundSet": "Lugard"
     },
     {
       "number": 541,
       "name": {"en": "Interim Reward Chest", "es": "Arcón de Recompensa Provisorio", "pt": "Baú de recompensa temporário"},
       "kind": "npc",
-      "model": "MODEL_DOPPELGANGER_NPC_BOX"
+      "model": "MODEL_DOPPELGANGER_NPC_BOX",
+      "soundSet": "Interim Reward Chest"
     },
     {
       "number": 542,
       "name": {"en": "Final Reward Chest", "es": "Arcón de Recompensa Final", "pt": "Baú de recompensa final"},
       "kind": "npc",
-      "model": "MODEL_DOPPELGANGER_NPC_GOLDENBOX"
+      "model": "MODEL_DOPPELGANGER_NPC_GOLDENBOX",
+      "soundSet": "Interim Reward Chest"
     },
     {
       "number": 543,
@@ -3598,6 +3903,7 @@
       "name": {"en": "Sapi Queen", "es": "Reina Sapi", "pt": "Rainha Sapi"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SAPI_QUEEN",
+      "soundSet": "Sapi Queen",
       "attacks": {
         "monsterSkills": {"72": "attack2"},
         "otherwise": "attack1",
@@ -3609,6 +3915,7 @@
       "name": {"en": "Ice Napin", "es": "Napin del Hielo", "pt": "Napin de gelo"},
       "kind": "monster",
       "model": "MONSTER_MODEL_ICE_NAPIN",
+      "soundSet": "Blaze Napin",
       "attacks": {
         "monsterSkills": {"73": "attack2"},
         "otherwise": "attack1",
@@ -3620,6 +3927,7 @@
       "name": {"en": "Shadow Master", "es": "Amo de la Sombra", "pt": "Mestre das sombras"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SHADOW_MASTER",
+      "soundSet": "Shadow Master",
       "attacks": {
         "monsterSkills": {"74": "attack2"},
         "otherwise": "attack1",
@@ -3631,6 +3939,7 @@
       "name": {"en": "Sapi Queen", "es": "Reina Sapi", "pt": "Rainha Sapi"},
       "kind": "monster",
       "model": "MONSTER_MODEL_SAPI_QUEEN",
+      "soundSet": "Sapi Queen",
       "attacks": {
         "monsterSkills": {"72": "attack2"},
         "otherwise": "attack1",
@@ -3653,6 +3962,7 @@
       "name": {"en": "Dark Mammoth", "es": "Mamut Oscuro", "pt": "Mamute negro"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DARK_MAMMOTH",
+      "soundSet": "Dark Mammoth",
       "attacks": {
         "monsterSkills": {"75": "attack2"},
         "otherwise": "attack1",
@@ -3664,6 +3974,7 @@
       "name": {"en": "Dark Giant", "es": "Gigante Oscuro", "pt": "Gigante negro"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DARK_GIANT",
+      "soundSet": "Dark Giant",
       "attacks": {
         "monsterSkills": {"76": "attack2"},
         "otherwise": "attack1",
@@ -3675,6 +3986,7 @@
       "name": {"en": "Dark Coolutin", "es": "Coolutin Oscuro", "pt": "Coolutin negro"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DARK_COOLUTIN",
+      "soundSet": "Dark Coolutin",
       "attacks": {
         "monsterSkills": {"32": "attack2"},
         "otherwise": "attack1",
@@ -3686,6 +3998,7 @@
       "name": {"en": "Dark Iron Knight", "es": "Caballero de Hierro Oscuro", "pt": "Cavaleiro de ferro negro"},
       "kind": "monster",
       "model": "MONSTER_MODEL_DARK_IRON_KNIGHT",
+      "soundSet": "Dark Iron Knight",
       "attacks": {
         "monsterSkills": {"77": "attack2"},
         "otherwise": "attack1",
@@ -3714,49 +4027,57 @@
       "number": 569,
       "name": {"en": "Venomous Chain Scorpion", "es": "Escorpión de Cadena Venenosa", "pt": "Escorpião Cadeia Venenosa"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_VENOMOUS_CHAIN_SCORPION"
+      "model": "MONSTER_MODEL_VENOMOUS_CHAIN_SCORPION",
+      "soundSet": "Venomous Chain Scorpion"
     },
     {
       "number": 570,
       "name": {"en": "Bone Scorpion", "es": "Escorpión de Hueso", "pt": "Escorpião de Osso"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BONE_SCORPION"
+      "model": "MONSTER_MODEL_BONE_SCORPION",
+      "soundSet": "Bone Scorpion"
     },
     {
       "number": 571,
       "name": {"en": "Orcus", "es": "Orco", "pt": "Orcus"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_ORCUS"
+      "model": "MONSTER_MODEL_ORCUS",
+      "soundSet": "Orcus"
     },
     {
       "number": 572,
       "name": {"en": "Gollock", "es": "Gollock", "pt": "Gollock"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GOLLOCK"
+      "model": "MONSTER_MODEL_GOLLOCK",
+      "soundSet": "Gollock"
     },
     {
       "number": 573,
       "name": {"en": "Crypta", "es": "Crypta", "pt": "Crypta"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CRYPTA"
+      "model": "MONSTER_MODEL_CRYPTA",
+      "soundSet": "Crypta"
     },
     {
       "number": 574,
       "name": {"en": "Crypos", "es": "Crypos", "pt": "Crypos"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CRYPOS"
+      "model": "MONSTER_MODEL_CRYPOS",
+      "soundSet": "Crypos"
     },
     {
       "number": 575,
       "name": {"en": "Condra", "es": "Condra", "pt": "Condra"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_CONDRA"
+      "model": "MONSTER_MODEL_CONDRA",
+      "soundSet": "Condra"
     },
     {
       "number": 576,
       "name": {"en": "Narcondra", "es": "Narcondra", "pt": "Narcondra"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_NACONDRA"
+      "model": "MONSTER_MODEL_NACONDRA",
+      "soundSet": "Narcondra"
     },
     {
       "number": 577,
@@ -3780,73 +4101,85 @@
       "number": 585,
       "name": {"en": "Scarecrow", "es": "Scarecrow", "pt": "Scarecrow"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 658,
       "name": {"en": "Cursed Statue"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 659,
       "name": {"en": "Captured Stone Statue (1)"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 660,
       "name": {"en": "Captured Stone Statue (2)"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 661,
       "name": {"en": "Captured Stone Statue (3)"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 662,
       "name": {"en": "Captured Stone Statue (4)"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 663,
       "name": {"en": "Captured Stone Statue (5)"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 664,
       "name": {"en": "Captured Stone Statue (6)"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 665,
       "name": {"en": "Captured Stone Statue (7)"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 666,
       "name": {"en": "Captured Stone Statue (8)"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 667,
       "name": {"en": "Captured Stone Statue (9)"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     },
     {
       "number": 668,
       "name": {"en": "Captured Stone Statue (10)"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_BULL_FIGHTER"
+      "model": "MONSTER_MODEL_BULL_FIGHTER",
+      "soundSet": "Bull Fighter"
     }
   ]
 }

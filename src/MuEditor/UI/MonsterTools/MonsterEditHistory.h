@@ -5,6 +5,7 @@
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/GameData/MonsterData/MonsterDefinition.h"
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
+#include "Data/GameData/MonsterData/MonsterSoundSet.h"
 
 #include <cstddef>
 #include <functional>
@@ -36,14 +37,27 @@ struct MonsterModelEditStep
     int monster = -1;
 };
 
+// One sound set an edit changed: the set of the name before and after
+// (nullopt: none), and the monster the tools showed it for, which its undo
+// selects again (-1: none).
+struct MonsterSoundSetEditStep
+{
+    std::string name;
+    std::optional<Data::Monsters::MonsterSoundSet> before;
+    std::optional<Data::Monsters::MonsterSoundSet> after;
+    int monster = -1;
+};
+
 // What one action of a tool changed, undone and redone as a whole: an edited
-// name, a kind, an added monster, an import of names, a model's speed. Each
-// number and each model slot is in one step of an entry at most.
+// name, a kind, an added monster, an import of names, a model's speed, a
+// sound set and the cue it plays on. Each number, model slot and set name is
+// in one step of an entry at most.
 struct MonsterEditEntry
 {
     std::string label;
     std::vector<MonsterEditStep> steps;
     std::vector<MonsterModelEditStep> models;
+    std::vector<MonsterSoundSetEditStep> soundSets;
 };
 
 // The undo history of the monster tools for the session. Entries are applied
@@ -64,6 +78,9 @@ public:
         // model steps.
         std::function<std::optional<Data::Monsters::MonsterModelDefinition>(int slot)> readModel;
         std::function<void(std::span<const Data::Monsters::MonsterModelSnapshot> snapshots)> restoreModels;
+        // The same for the sound sets; needed only for entries with set steps.
+        std::function<std::optional<Data::Monsters::MonsterSoundSet>(const std::string& name)> readSoundSet;
+        std::function<void(std::span<const Data::Monsters::MonsterSoundSetSnapshot> snapshots)> restoreSoundSets;
     };
 
     // Why the last Undo or Redo did nothing.

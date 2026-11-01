@@ -401,12 +401,14 @@ static void OpenServerList()
 }
 
 // Loads the monster list (Data/Monsters/Monsters.json), with the names in the
-// UI language, and the model list (Data/Monsters/Models.json), which names
-// effect types; errors stop the game.
+// UI language, the model list (Data/Monsters/Models.json), which names effect
+// types, and the sound sets (Data/Monsters/Sounds.json), which the monsters
+// name; errors stop the game.
 static void OpenMonsterData()
 {
     std::string errorMessage;
-    if (!g_MonsterDataHandler.Load(errorMessage) || !g_MonsterDataHandler.LoadModels(errorMessage))
+    if (!g_MonsterDataHandler.Load(errorMessage) || !g_MonsterDataHandler.LoadModels(errorMessage) ||
+        !g_MonsterDataHandler.LoadSounds(errorMessage))
     {
         StopOnDataError("Monster data error", errorMessage);
     }

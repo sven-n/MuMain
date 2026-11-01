@@ -25,6 +25,11 @@ void RunMonsters(std::vector<Data::Items::ItemDataIssue>& issues);
 // of a model has no number and names the model in its field
 // ("model MONSTER_MODEL_MOLT file").
 void RunModels(std::vector<Data::Items::ItemDataIssue>& issues);
+// Appends the problems of the sound sets and of what the monsters, models
+// and sets name of each other (MonsterDataHandler::ValidateSounds) to
+// `issues`. A problem of a monster has its number; a problem of a set names
+// the set in its field ("sound set Raymond soundEvents[0].cues").
+void RunSounds(std::vector<Data::Items::ItemDataIssue>& issues);
 } // namespace MuEditor::Monsters::MonsterChecks
 
 #endif // _EDITOR

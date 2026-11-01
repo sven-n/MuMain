@@ -10,7 +10,7 @@
 
 // The model list of the monster area (Data/Monsters/Models.json):
 //
-//   { "formatVersion": 1,
+//   { "formatVersion": 2,
 //     "models": [
 //       {
 //         "slot": "MONSTER_MODEL_BUDGE_DRAGON",
@@ -18,18 +18,18 @@
 //         "textureFolders": ["Monster"],
 //         "animations": {"walk": 0.7},
 //         "headBone": 7,
-//         "sounds": [
-//           {"file": "Data/Sound/mBudge1.wav", "channels": 2, "spatial": true}
-//         ],
-//         "soundSlots": {"idle": ["Data/Sound/mBudge1.wav", ...], "attack": [...], "die": ...}
+//         "cues": [
+//           {"name": "step 1", "animation": "walk", "frames": [1, 2]}
+//         ]
 //       } ] }
 //
-// docs/monster-data.md "Models" describes the fields. The reader checks the
-// form of the values; whether the names in them (slots, sound ids, effect
-// types, bitmap slots) exist is checked when the models are loaded.
+// docs/monster-data.md "Models" describes the fields; the sounds are in the
+// sound sets of Sounds.json (MonsterSoundsJson.h). The reader checks the form
+// of the values; whether the names in them (slots, effect types, bitmap
+// slots) exist is checked when the models are loaded.
 namespace Data::Monsters
 {
-constexpr int MonsterModelsFormatVersion = 1;
+constexpr int MonsterModelsFormatVersion = 2;
 
 // Reads the models of the text into `models`, in their order. A model with an
 // error is left out; a slot that is there twice is an error.

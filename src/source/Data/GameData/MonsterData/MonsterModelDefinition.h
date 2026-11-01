@@ -13,87 +13,17 @@
 // docs/monster-data.md "Models".
 namespace Data::Monsters
 {
-// LoadWaveFile's defaults.
-constexpr int DefaultSoundChannels = 4;
-
-// One sound the model loads.
-struct MonsterModelSound
+// A named point of one of the model's animations that sound events play on
+// (monsters design, Q-MN79): "step 1" where a foot lands in the walk.
+struct MonsterModelCue
 {
-    // "Data/Sound/mBull1.wav".
-    std::string file;
-    // The SOUND_* id that code plays the sound by ("SOUND_MONSTER_BULL1").
-    // Empty: the sound gets a number when it is loaded (Q-MN16).
-    std::string id;
-    int channels = DefaultSoundChannels;
-    // Played in 3D, louder near the hero.
-    bool spatial = false;
+    std::string name;
+    int animation = 0;
+    // From the first frame to below the second, as the game checks the frame
+    // each game frame.
+    std::pair<float, float> frames;
 
-    bool operator==(const MonsterModelSound&) const = default;
-};
-
-// The name a sound slot or a sound event names the model's sound by: its id,
-// or its file when it has none.
-inline const std::string& SoundNameOf(const MonsterModelSound& sound)
-{
-    return sound.id.empty() ? sound.file : sound.id;
-}
-
-// The sound slots of the model: the game plays one of the two idle sounds
-// while it stands or walks, one of the two attack sounds when it attacks or
-// is hit, and the die sound. A slot names a sound by its id, or by its file
-// when the sound has no id; an empty slot plays nothing.
-constexpr int SoundSlotSetSize = 5;
-using MonsterSoundSlotSet = std::array<std::string, SoundSlotSetSize>;
-struct MonsterSoundSlots
-{
-    MonsterSoundSlotSet first;
-    // What a monster with SubType 9 plays (the Hellas monsters): the game
-    // plays the first set's sound numbers + 5, which the second set names.
-    std::optional<MonsterSoundSlotSet> second;
-
-    bool operator==(const MonsterSoundSlots&) const = default;
-};
-
-// How a sound event draws: rand_fps_check as the original client did, whose
-// chance depends on the frame rate when it is drawn once per step, attack,
-// hit or idle loop, or rand().
-enum class MonsterSoundDraw
-{
-    RandFps,
-    Rand,
-};
-
-// A chance of one in `oneIn`: rand_fps_check(oneIn), or rand() % oneIn == 0.
-struct MonsterSoundChance
-{
-    int oneIn = 1;
-    MonsterSoundDraw draw = MonsterSoundDraw::RandFps;
-
-    bool operator==(const MonsterSoundChance&) const = default;
-};
-
-// Sounds that the game plays for a character of the model while it is in one
-// of `animations` (monsters design, MN7): PlayMonsterSound, at the start of an
-// attack, a hit and the death, at each step of a walk and at the end of each
-// loop of stop1 and stop2, on top of the sound slots.
-struct MonsterSoundEvent
-{
-    // Sorted.
-    std::vector<int> animations;
-    // Only while the animation's frame is from `first` to below `second`.
-    std::optional<std::pair<float, float>> frames;
-    // Only while the character's death effect is armed (OBJECT::LifeTime 100).
-    bool deathEffectArmed = false;
-    std::optional<MonsterSoundChance> chance;
-    // Plays the first of two sounds when a draw of one in two comes up
-    // (rand_fps_check(2), or rand() % 2 == 0), else the second.
-    std::optional<MonsterSoundDraw> pick;
-    // The sounds, played together (one of the two with `pick`), each named
-    // as a sound slot names it: by its id, or by the file of a sound of the
-    // model without one.
-    std::vector<std::string> sounds;
-
-    bool operator==(const MonsterSoundEvent&) const = default;
+    bool operator==(const MonsterModelCue&) const = default;
 };
 
 // Texture folders that the model uses on some maps (server map numbers)
@@ -187,15 +117,9 @@ struct MonsterModelDefinition
     std::optional<int> streamMesh;
     // Meshes drawn without blending.
     std::vector<int> noneBlendMeshes;
-    std::vector<MonsterModelSound> sounds;
-    // nullopt: no slot has a sound (the loader sets them all to -1).
-    std::optional<MonsterSoundSlots> soundSlots;
-    // In order: one call can play several, and their draws come in this
-    // order.
-    std::vector<MonsterSoundEvent> soundEvents;
-    // The maps (server map numbers) the sound events play on; empty: every
-    // map.
-    std::vector<Data::Maps::MapRef> soundEventMaps;
+    // The points of its animations that sound events play on; the names are
+    // unique. The sounds are in the sound sets that its monsters name.
+    std::vector<MonsterModelCue> cues;
     std::vector<MonsterModelBitmap> bitmaps;
     std::vector<MonsterModelPart> parts;
     MonsterModelBody body;

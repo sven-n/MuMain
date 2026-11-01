@@ -27,9 +27,6 @@ struct RecordedValue
 };
 using Record = std::vector<RecordedValue>;
 
-// The sound slots of a model (MAX_MONSTER_SOUND).
-constexpr int SoundSlotCount = 10;
-
 // One LoadWaveFile, or a release of a sound, in the order they came.
 struct SoundEvent
 {
@@ -69,7 +66,6 @@ struct ModelSlotState
     std::vector<Action> actions;
     int boneHead = 0;
     int streamMesh = 0;
-    std::array<int, SoundSlotCount> sounds{};
     struct Texture
     {
         std::string name;
@@ -104,7 +100,8 @@ struct LoadChanges
 Record ToRecord(const LoadChanges& changes);
 
 // What a load needs for the life of the scope, like the game sets it up at
-// startup: the client folder as the working folder, the model table loaded
+// startup: the client folder as the working folder, the monster, model and
+// sound set tables loaded
 // from the client folder, model slots that start zeroed, uploads skipped, the
 // recording audio backend and the active world.
 // Each scope has slots of its own, so two loads compared start the same.
