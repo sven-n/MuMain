@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <vector>
 
 namespace World::MapObjectSounds
 {
@@ -38,6 +39,8 @@ struct LoadedMap
     int version = -1;
     // The sound of each object type, NoNumber for none.
     std::array<ESound, ObjectTypeCount> sounds{};
+    // The sounds that any object plays (Q-MP8).
+    std::vector<ESound> anyObject;
 };
 
 LoadedMap& Loaded()
@@ -114,6 +117,7 @@ void LoadForMap(int serverMap, int stage)
     loaded.stage = stage;
     loaded.version = g_MapObjectSoundDatabase.GetVersion();
     loaded.sounds.fill(Audio::SoundNumbers::NoNumber);
+    loaded.anyObject.clear();
     for (const MapObjectSound& sound : g_MapObjectSoundDatabase.GetAll())
     {
         // An entry the Map Editor added has no file yet.
@@ -122,6 +126,10 @@ void LoadForMap(int serverMap, int stage)
             continue;
         }
         const ESound number = LoadSound(sound);
+        if (sound.anyObject && number != Audio::SoundNumbers::NoNumber)
+        {
+            loaded.anyObject.push_back(number);
+        }
         for (const int type : sound.objects)
         {
             if (type >= 0 && type < ObjectTypeCount)
@@ -142,6 +150,12 @@ void OnObjectDrawn(const OBJECT& object)
 #endif
         const Audio::ScopedSoundSource source(Audio::SoundKind::MapObject, {}, object.Type, object.Position);
         PlayBufferOnFreeChannel(*sound, DistanceLevel(DistanceFromHero(object)));
+    }
+    // A map-wide sound: at full volume, as no one object is its place.
+    for (const ESound sound : Loaded().anyObject)
+    {
+        const Audio::ScopedSoundSource source(Audio::SoundKind::MapObject, {}, object.Type, object.Position);
+        PlayBufferOnFreeChannel(sound, 1.0f);
     }
 }
 

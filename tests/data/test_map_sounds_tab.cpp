@@ -105,6 +105,19 @@ TEST_CASE("Map Editor Sounds tab: draws, adds an entry for the map, takes picked
     REQUIRE(Data::Maps::RevertMapObjectSounds(issues));
     CHECK(g_MapObjectSoundDatabase.GetAll() == std::vector<MapObjectSound>{sound});
     draw();
+
+    // An entry of any object draws so; a picked object makes it one of types
+    // (Q-MP8).
+    MapObjectSound hum = sound;
+    hum.anyObject = true;
+    hum.objects.clear();
+    g_MapObjectSoundDatabase.Build(std::vector<MapObjectSound>{hum});
+    draw();
+    g_MapSoundsTab.Picked(46);
+    draw();
+    REQUIRE(g_MapObjectSoundDatabase.GetAll().size() == 1);
+    CHECK_FALSE(g_MapObjectSoundDatabase.GetAll()[0].anyObject);
+    CHECK(g_MapObjectSoundDatabase.GetAll()[0].objects == std::vector<int>{46});
 }
 
 #endif // _EDITOR

@@ -66,12 +66,14 @@ public:
 
     bool Read(const OrderedJson& json, MapObjectSound& sound)
     {
-        if (!json.is_object() || !json.contains(Keys::Maps) || !json.contains(Keys::Objects) ||
-            !json.contains(Keys::Sound))
+        if (!json.is_object() || !json.contains(Keys::Maps) || !json.contains(Keys::Sound))
         {
-            return Fail("", "must be an object with maps, objects and sound");
+            return Fail("", "must be an object with maps and sound");
         }
-        return ReadMaps(json[Keys::Maps], sound.maps) && ReadObjects(json[Keys::Objects], sound.objects) &&
+        // No objects: any object of the maps (Q-MP8).
+        sound.anyObject = !json.contains(Keys::Objects);
+        return ReadMaps(json[Keys::Maps], sound.maps) &&
+               (sound.anyObject || ReadObjects(json[Keys::Objects], sound.objects)) &&
                ReadSound(json[Keys::Sound], sound) && ReadPlays(json, sound.plays) && WarnUnknown(json);
     }
 
@@ -97,7 +99,7 @@ private:
     {
         if (!json.is_array() || json.empty())
         {
-            return Fail(Keys::Objects, "must be a list of one object type or more");
+            return Fail(Keys::Objects, "must be a list of one object type or more (left out: any object)");
         }
         for (size_t i = 0; i < json.size(); ++i)
         {
@@ -182,7 +184,10 @@ OrderedJson WriteEntry(const MapObjectSound& sound)
 {
     OrderedJson json = OrderedJson::object();
     json[Keys::Maps] = WriteMapRefs(sound.maps);
-    json[Keys::Objects] = sound.objects;
+    if (!sound.anyObject)
+    {
+        json[Keys::Objects] = sound.objects;
+    }
     OrderedJson file = OrderedJson::object();
     file[Keys::File] = sound.file;
     file[Keys::Channels] = sound.channels;

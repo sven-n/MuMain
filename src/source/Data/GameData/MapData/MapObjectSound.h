@@ -30,8 +30,11 @@ struct MapObjectSound
 {
     // The maps (server numbers, with a stage for one stage), sorted.
     std::vector<MapRef> maps;
-    // The object types, sorted.
+    // The object types, sorted; none with anyObject.
     std::vector<int> objects;
+    // Plays for any object of the maps (the file names no objects): a sound
+    // a map played from every object it moved, its hum (Kanturu, Q-MP8).
+    bool anyObject = false;
     // "Data/Sound/aKalimaWaterFall.wav"; its number is its file's
     // (Audio/SoundNumbers.h).
     std::string file;

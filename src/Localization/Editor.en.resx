@@ -3682,6 +3682,15 @@
   <data name="While in view note" xml:space="preserve">
     <value>Each frame an object of the type is drawn, a channel that has ended starts again and a playing one is left alone; a copy plays quieter the farther its object is from the hero.</value>
   </data>
+  <data name="Any object" xml:space="preserve">
+    <value>Any object</value>
+  </data>
+  <data name="Any object note" xml:space="preserve">
+    <value>Plays while any object of the entry's maps is drawn: a sound of the whole map (a hum), at full volume.</value>
+  </data>
+  <data name="Object sound types" xml:space="preserve">
+    <value>Types</value>
+  </data>
   <data name="Object sound maps" xml:space="preserve">
     <value>Maps</value>
   </data>

@@ -149,7 +149,9 @@ void CMapSoundsTab::RenderEntries(int serverMap, int stage)
         ImGui::PushID(static_cast<int>(index));
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
-        const std::string objects = sound.objects.empty() ? std::string("-") : ObjectsText(sound.objects);
+        const std::string objects = sound.anyObject         ? std::string(I18N::Editor::AnyObject)
+                                    : sound.objects.empty() ? std::string("-")
+                                                            : ObjectsText(sound.objects);
         if (ImGui::Selectable(objects.c_str(), m_selected == index, ImGuiSelectableFlags_SpanAllColumns))
         {
             m_selected = index;
@@ -225,6 +227,28 @@ void CMapSoundsTab::RenderEntry(size_t index, int world)
 void CMapSoundsTab::RenderObjects(MapObjectSound& sound, int world, bool& changed)
 {
     ImGui::TextUnformatted(I18N::Editor::ObjectTypes);
+    ImGui::SameLine();
+    if (ImGui::RadioButton(I18N::Editor::AnyObject, sound.anyObject) && !sound.anyObject)
+    {
+        sound.anyObject = true;
+        sound.objects.clear();
+        m_picking = false;
+        changed = true;
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::AnyObjectNote);
+    }
+    ImGui::SameLine();
+    if (ImGui::RadioButton(I18N::Editor::ObjectSoundTypes, !sound.anyObject) && sound.anyObject)
+    {
+        sound.anyObject = false;
+        changed = true;
+    }
+    if (sound.anyObject)
+    {
+        return;
+    }
     std::optional<int> removed;
     for (const int type : sound.objects)
     {
@@ -326,6 +350,8 @@ void CMapSoundsTab::Picked(int objectType)
     {
         return;
     }
+    // A picked object makes an entry of any object one of types.
+    sound.anyObject = false;
     sound.objects.push_back(objectType);
     std::sort(sound.objects.begin(), sound.objects.end());
     Store(*m_selected, sound);

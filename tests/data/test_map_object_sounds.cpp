@@ -209,10 +209,10 @@ TEST_CASE("Map object sounds: wrong values are fatal and name the entry and fiel
     };
     const std::string sound = R"("sound": {"file": "Data/Sound/a.wav"})";
     const std::vector<Case> cases = {
-        {R"("not an object")", "objectSounds[0]", "maps, objects and sound"},
-        {R"({"maps": [24], )" + sound + "}", "objectSounds[0]", "maps, objects and sound"},
+        {R"("not an object")", "objectSounds[0]", "maps and sound"},
+        {R"({"objects": [37], )" + sound + "}", "objectSounds[0]", "maps and sound"},
         {R"({"maps": [], "objects": [37], )" + sound + "}", "objectSounds[0].maps", "one map or more"},
-        {R"({"maps": [24], "objects": [], )" + sound + "}", "objectSounds[0].objects", "one object type or more"},
+        {R"({"maps": [24], "objects": [], )" + sound + "}", "objectSounds[0].objects", "left out: any object"},
         {R"({"maps": [24], "objects": [160], )" + sound + "}", "objectSounds[0].objects[0]", "from 0 to 159"},
         {R"({"maps": [24], "objects": [37, 37], )" + sound + "}", "objectSounds[0].objects", "37 more than once"},
         {R"({"maps": [24], "objects": [37], "sound": {"channels": 3}})", "objectSounds[0].sound", "with file"},
@@ -244,6 +244,63 @@ TEST_CASE("Map object sounds: wrong values are fatal and name the entry and fiel
     CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Warning, "extra", "unknown"));
     CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Warning, "objectSounds[0].volume", "unknown"));
     CHECK(HasIssueAbout(read.issues, ItemDataIssueSeverity::Warning, "objectSounds[0].sound.loop", "unknown"));
+}
+
+TEST_CASE("Map object sounds: an entry without objects plays for any object of its maps, at full volume (Q-MP8) "
+          "[data][maps]")
+{
+    const ReadResult read = Read(
+        File(R"({"maps": [37], "sound": {"file": "Data/Sound/w37/kan_ruin_global.wav"}, "plays": "whileInView"})"));
+    INFO(Messages(read.issues));
+    CHECK(read.issues.empty());
+    REQUIRE(read.sounds.size() == 1);
+    const MapObjectSound hum = read.sounds[0];
+    CHECK(hum.anyObject);
+    CHECK(hum.objects.empty());
+    const std::string text = Data::Maps::WriteMapObjectSoundsJson(std::vector<MapObjectSound>{hum});
+    INFO(text);
+    CHECK(text.find("objects") == std::string::npos);
+    CHECK(Read(text).sounds == std::vector<MapObjectSound>{hum});
+
+    // A type's own sound and the hum on one map are no clash.
+    MapObjectSound wheel = Waterfall();
+    wheel.maps = {{37}};
+    wheel.objects = {46};
+    wheel.file = "Data/Sound/w37/kan_ruin_wheel.wav";
+    wheel.channels = 1;
+    std::vector<ItemDataIssue> issues;
+    Data::Maps::ValidateMapObjectSounds(std::vector<MapObjectSound>{wheel, hum, hum}, "ObjectSounds.json", issues);
+    INFO(Messages(issues));
+    CHECK(issues.empty());
+
+    AudioScope scope;
+    g_MapObjectSoundDatabase.Build(std::vector<MapObjectSound>{wheel, hum});
+    World::MapObjectSounds::LoadForMap(37, 0);
+    const int wheelNumber = static_cast<int>(Audio::SoundNumbers::ForFile(L"Data\\Sound\\w37\\kan_ruin_wheel.wav"));
+    const int humNumber = static_cast<int>(Audio::SoundNumbers::ForFile(L"Data\\Sound\\w37\\kan_ruin_global.wav"));
+    CHECK(scope.audio.loads.size() == 2);
+    CHARACTER hero;
+    CHARACTER* const previousHero = Hero;
+    Hero = &hero;
+    OBJECT wheelObject;
+    wheelObject.Type = 46;
+    OBJECT farObject;
+    farObject.Type = 5;
+    farObject.Position[0] = 5000.0f;
+    World::MapObjectSounds::OnObjectDrawn(wheelObject);
+    World::MapObjectSounds::OnObjectDrawn(farObject);
+    CHECK(scope.audio.freePlays == std::vector<int>{wheelNumber, humNumber, humNumber});
+    CHECK(scope.audio.freeLevels == std::vector<float>{1.0f, 1.0f, 1.0f});
+    // Not a type of its own.
+    CHECK_FALSE(World::MapObjectSounds::FindSound(5));
+
+    // Another map: no hum.
+    scope.audio.freePlays.clear();
+    World::MapObjectSounds::LoadForMap(38, 0);
+    World::MapObjectSounds::OnObjectDrawn(farObject);
+    CHECK(scope.audio.freePlays.empty());
+    Hero = previousHero;
+    World::MapObjectSounds::LoadForMap(-1, 0);
 }
 
 TEST_CASE("Map object sounds: an object type on a map in two entries is fatal [data][maps]")

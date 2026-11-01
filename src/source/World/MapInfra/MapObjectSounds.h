@@ -17,7 +17,8 @@ namespace World::MapObjectSounds
 void LoadForMap(int serverMap, int stage);
 
 // The object is drawn this frame (RenderObjectVisual): plays its type's
-// sound on a free channel, if an entry of the map names the type.
+// sound on a free channel, if an entry of the map names the type, and the
+// sounds of the map's entries without objects (any object, Q-MP8).
 void OnObjectDrawn(const OBJECT& object);
 
 // The sound an object type plays on the map loaded; nullopt for none.

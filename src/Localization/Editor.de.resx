@@ -3463,6 +3463,15 @@
   <data name="While in view note" xml:space="preserve">
     <value>In jedem Bild, in dem ein Objekt des Typs gezeichnet wird, startet ein beendeter Kanal neu und ein spielender bleibt unberührt; eine Kopie spielt leiser, je weiter ihr Objekt vom Helden entfernt ist.</value>
   </data>
+  <data name="Any object" xml:space="preserve">
+    <value>Jedes Objekt</value>
+  </data>
+  <data name="Any object note" xml:space="preserve">
+    <value>Spielt, solange irgendein Objekt der Karten des Eintrags gezeichnet wird: ein Klang der ganzen Karte (ein Summen), in voller Lautstärke.</value>
+  </data>
+  <data name="Object sound types" xml:space="preserve">
+    <value>Typen</value>
+  </data>
   <data name="Object sound maps" xml:space="preserve">
     <value>Karten</value>
   </data>
