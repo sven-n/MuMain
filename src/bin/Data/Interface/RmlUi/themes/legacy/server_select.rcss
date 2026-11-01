@@ -85,10 +85,11 @@
 	text-align: center;
 	line-height: 26rem;
 }
-/* The original 193x26 frame (tiled, base.rcss), 10px taller so the channel's text and the load
+/* The original 193x26 frame (tiled, base.rcss), 10px taller so the channel's name and the load
    bar below it each have room, and wider when a text needs it: every row is as wide as the longest
-   text any button can have (the sizer row, server_select.rml) plus 16px on each side
-   (#server_rows stretches them), at least the original 193px. */
+   name any button can have, or a load text with its bar segments (the sizer row,
+   server_select.rml), plus 16px on each side (#server_rows stretches them), at least the original
+   193px. */
 .server-row {
 	position: relative;
 	min-width: 161rem;
@@ -99,29 +100,47 @@
 .button-label {
 	pointer-events: none;
 }
-/* The channel's name at the left and its load text at the right, at the top, their capitals about
-   4px below the top border. Each a block: a div is inline in RmlUi. */
+/* The channel's name at the left of the top line, its capitals about 4px below the top border. A
+   block: a div is inline in RmlUi. */
 .server-row .button-label {
-	display: flex;
-	flex-direction: row;
+	display: block;
 	padding-top: 4rem;
 	height: 16rem;
 	line-height: 16rem;
 }
 .server-name {
 	display: block;
-	flex: 1 1 auto;
 	text-align: left;
 }
-/* At least a space after the name. */
-.server-load-box {
-	display: block;
-	flex: 0 0 auto;
-	margin-left: 1em;
-	text-align: right;
+/* A full or overloaded server's load text in the load bar's place: centered on the bar's line, a
+   size smaller than the name, between three segments of the bar's full color on each side. */
+.server-load-line {
+	position: absolute;
+	left: 16rem;
+	right: 17rem;
+	top: 20rem;
+	height: 12rem;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	pointer-events: none;
+}
+.server-load-side {
+	display: flex;
+	flex: 1;
+	gap: 2rem;
+	height: 4rem;
+}
+.server-load-segment {
+	flex: 1;
+	height: 100%;
 }
 .server-load {
 	display: block;
+	flex: 0 0 auto;
+	padding: 0 6rem;
+	font-size: 11rem;
+	line-height: 12rem;
 }
 /* The sizer row (server_select.rml) lays its texts out unseen, one per line, and takes no room: no
    height, and the gap before it taken back. */
@@ -139,6 +158,11 @@
 .server-sizer {
 	display: block;
 	height: 0;
+}
+/* A load text with at least 30px of segments on each side, within the bar's insets. */
+.server-load-sizer {
+	display: block;
+	padding: 0 31rem 0 30rem;
 }
 
 /* The {load} text of a full or overloaded server, in the server list's look for it. */

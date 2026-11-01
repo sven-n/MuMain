@@ -103,8 +103,8 @@ private:
     };
     struct ServerEntry
     {
-        // The button's text without its load text (CServerListManager::GetServerButtonName), at the left, and
-        // the load text of a full or overloaded server, at the right.
+        // The button's text without its load text (CServerListManager::GetServerButtonName), and the load text
+        // of a full or overloaded server, which the button shows on the load bar's line instead of the bar.
         Rml::String label;
         Rml::String loadText;
         int index = 0; // position within the selected group's server list (CServerGroup::GetServerInfo(i))
@@ -119,6 +119,8 @@ private:
         std::vector<SegmentEntry> segments;
         // The unlit part of the segments ("#202020"); empty for the theme's own.
         Rml::String emptyStyle;
+        // The bar's full color ("#E0483E"), of the segments beside the load text.
+        Rml::String fullColor;
         // No "checked"/selected state here -- clicking a server row connects immediately.
     };
     // A load text a button can show, in its look (CServerListManager::GetButtonLoadTexts).

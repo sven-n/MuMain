@@ -108,6 +108,7 @@ void CServerSelWin::BindRmlModel(Rml::DataModelConstructor& c, ServerSelRmlModel
     server.RegisterMember("load_slant", &ServerEntry::loadSlant);
     server.RegisterMember("segments", &ServerEntry::segments);
     server.RegisterMember("empty_style", &ServerEntry::emptyStyle);
+    server.RegisterMember("full_color", &ServerEntry::fullColor);
     c.RegisterArray<std::vector<ServerEntry>>();
 
     auto loadSizer = c.RegisterStruct<LoadSizerEntry>();
@@ -308,6 +309,7 @@ void CServerSelWin::SetLoadBar(ServerEntry& entry, int percent)
         const long litPercent = std::lround(segment.lit * kPercent);
         entry.segments.push_back({std::to_string(litPercent) + "%", Core::Color::FormatRgb(segment.color)});
     }
+    entry.fullColor = Core::Color::FormatRgb(full.value_or(Core::Color::Rgb{}));
     if (Data::ServerList::IsThemeLoadBarColor(list, LoadBarPart::Empty, theme))
         return;
     if (const auto empty = Data::ServerList::ResolveLoadBarColor(list, LoadBarPart::Empty, theme, readToken))

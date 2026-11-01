@@ -36,19 +36,21 @@ admin panel; to put a server into a second group, give it an ID from 20 to 39.
   | off | Gold     | `Valhalla-1 (Gold Non-PvP)` | `[Valhalla-1 (Gold Non-PvP)]` |
 
 - **Load:** the connect server sends each server's load in percent. A *full*
-  server (100 to 127) gets the list's full text at the right of its button,
-  `(Full)` with the bundled file, an *overloaded* one (128 and more) its
-  overloaded text, `Overloaded`; each in a color, bold and italic of the list's
-  (see [Load](#load)). Wherever the template puts `{load}`, the rest of the
-  button text stays at the left. A click on either says that the server is
-  full.
+  server (100 to 127) shows the list's full text, `(Full)` with the bundled
+  file, an *overloaded* one (128 and more) its overloaded text, `Overloaded`;
+  each in a color, bold and italic of the list's (see [Load](#load)). The text
+  takes the load bar's place, centered on its line between three segments of
+  the bar's full color on each side, and the button's top line keeps the rest of
+  the button text, wherever the template puts `{load}`. A click on either says
+  that the server is full.
 - **Load bar:** below the button text, ten segments of 10 % each. A segment is
   lit as far as the load reaches into it: 35 % lights three and half of the
-  fourth. A full or overloaded server has every segment lit in the full color.
-- **Button width:** all channel buttons are as wide as the longest text any of
-  them can have: the longest name of every channel of every group shown, the
-  20 of each whether the connect server sent them or not, and room for the
-  longer load text, with space on both sides; never narrower than the theme's
+  fourth. Without `{load}` in the template a full or overloaded server has every
+  segment lit in the full color instead of its load text.
+- **Button width:** all channel buttons are as wide as the longest name any of
+  them can have, of every channel of every group shown (the 20 of each, whether
+  the connect server sent them or not), with space on both sides; wider when a
+  load text needs it to keep segments beside it; never narrower than the theme's
   own button. A load change or another group never resizes them.
 - **Button color:** set by the button color rules, by VIP type, PvP or both
   (see [Button colors](#button-colors)). With the bundled file Gold channels are
