@@ -51,9 +51,11 @@ Made while reviewing sven-n/MuMain#915, 2026-11-01.
 | L10 | Glow mesh, scrolling and opacity (Q-L2b, 2026-11-01) | **Fields of each layer**, empty for the item's value: glow mesh (none, a mesh, or all meshes), glow strength, scrolling mesh, scrolling (U and V), opacity (the item's, the drawing's, a number or a shape). **Item values of the look:** the glow mesh, glow strength, scrolling mesh, scrolling, opacity and hidden mesh it leaves on the item for what is drawn after it (the +7 glow, the excellent glow), as `masterScepter` leaves glow mesh 1 (`ItemRenderStyles.cpp:338-352`). The 11 item effects that only change values become looks with item values and no layers. When item values apply: L13 (an item effect's before the layers, a render style's after them). |
 | L11 | Conditions (Q-L2c, 2026-11-01) | **On the look, "Not for":** the drawings the look is not for, which the game then draws plainly, as a style returning false does today: doppelgangers, and outside a monster's hands (`monsterBattleBow`). **On a layer, "Only when":** worn, in the inventory and on the ground (the skin hidden), an item level range, the item's hidden mesh, a buff on the character. "Which item" is no condition: values chosen per item are Q-L3. Conditions found in the survey that fit neither list (the light being exactly white, the turning angle): Q-L5. |
 | L12 | Where looks live (Q-L3, 2026-11-01) | **Named looks** in a look file in `Data/Effects/`, which model entries name (D25), with D26's rules: the editor shows which items use a look, saving a look that others use first lists them, a copy makes a variant for one user, renaming updates the references, a look still in use can't be deleted, names are resolved when loading. **Values per item:** in the Look Editor a field can be ticked "Each item sets this", with a name and the look's value as default. Every item using the look shows those fields under "Values for this item" in its Item Model window, stored in its model entry; Reset goes back to the look's default. Everything else is shared, so a change to the look reaches all its items and keeps their own values. This covers a color per item (the 30 Seed Spheres), meshes per item (the Lucky items, the Violent Wind pieces), and chrome on chosen parts of one item (e.g. the Divine Sword using `thunderHawk` with its chrome meshes set to 1). The Item Model window keeps its **Render style** dropdown for picking the look (a new "Look" label was found confusing); the field name in the data and the look file's name: Q-L4. |
-| L13 | Render style and item effect (Q-L4a, 2026-11-01) | **Two looks per item, with fixed roles**, as today's two fields: at most one render style and one item effect. A **render style** look draws the item: its layers, its "Not for" and the item values it leaves after drawing. An **item effect** look does what comes before the drawing: item values before drawing, and things on bones. The Look Editor offers only the parts of a look's kind, so two looks can never both draw. Mixing is a field on the item (Wing of Ruin can pick the item effect `wingsOfDarkness`), and an edit to a look reaches every item that uses it (D26). Render styles and item effects stay two lists, so a name can be in both (`wingsOfDarkness`). This answers L10's open point: an item effect's item values apply before the layers, a render style's after them. The 6 item effects that draw the model themselves (`darkLordScroll`, `fruits`, `spirit`, `firecracker`, `gmGift`, `meshesPerLevel`) have layers, so they become render styles. One look per item (its parts copied when mixing) and one look whose parts can be linked to other looks were weighed: both need a new look for every mix, and copies don't get later edits. Compared with linked parts in five tasks, two looks are quicker to combine (one dropdown), keep today's data unchanged and are less to build; linked parts only read better (one window per item). |
+| L13 | Render style and item effect (Q-L4a, 2026-11-01) | **Two looks per item, with fixed roles**, as today's two fields: at most one render style and one item effect. A **render style** look draws the item: its layers, its "Not for" and the item values it leaves after drawing. An **item effect** look does what comes before the drawing: item values before drawing, and things on bones. The Look Editor offers only the parts of a look's kind, so two looks can never both draw. Mixing is a field on the item (Wing of Ruin can pick the item effect `wingsOfDarkness`), and an edit to a look reaches every item that uses it (D26). Render styles and item effects stay two lists, so a name can be in both (`wingsOfDarkness`). This answers L10's open point: an item effect's item values apply before the layers, a render style's after them. The 7 item effects that draw have layers, so they become render styles: 6 draw the model themselves (`darkLordScroll`, `fruits`, `spirit`, `firecracker`, `gmGift`, `meshesPerLevel`), and `billOfBalrog` draws an extra pass before the usual drawing (found in the survey, Q-L5). One look per item (its parts copied when mixing) and one look whose parts can be linked to other looks were weighed: both need a new look for every mix, and copies don't get later edits. Compared with linked parts in five tasks, two looks are quicker to combine (one dropdown), keep today's data unchanged and are less to build; linked parts only read better (one window per item). |
 | L14 | The move from code to data (Q-L4b, 2026-11-01) | **Same names, data first.** When loading, a name is looked up in the look file first, then in the code list; a name in neither is reported and drawn plainly, as today. Model entries never change during the move. Each pull request moves a group of looks: it adds them to the look file under their names, a test draws their items with the old code and with the data in the same build and compares the records (as FX1's moves did), and then it deletes their functions and code names; a test checks that no name is in both. The editor marks looks that are still code ("(code)" in the dropdowns); they can be picked but open read-only in the Look Editor until moved. New names for data looks (every model entry changed twice) and one move of all looks at once (one very large pull request) were weighed. |
 | L15 | The look files (Q-L4c, 2026-11-01) | **One file per kind** in `Data/Effects/`: `RenderStyles.json` and `ItemEffects.json`, named like the fields `renderStyle` and `itemEffect` and the two dropdowns. Built like the effect catalogue files next to them: a format version, the kind, and a list sorted by name, which the Look Editor writes back sorted so a change stays a few lines. Looks are shared across item groups, so they are not split by group like the model files. When monsters and NPCs get looks (MN8), they use the same files (D25); renaming the "item effect" kind for them is the monsters design's call. One file for both kinds and one file per look (165 files) were weighed. |
+| L16 | Looks that don't fit (Q-L5a, 2026-11-01) | **Real features become blocks:** a value that is the item's value times a shape (the four Phoenix Soul items, `cursedCastleWater`); the model's light at a fixed brightness (`invisibilityCloak`); a value from the item's turning angle (`gambleItem`); "in the inventory" as a place condition next to L11's "inventory and ground" (`capeOfEmperor`, `smallCapeOfLord`, which test for exactly white light today; the pull request checks which drawings have white light); a zigzag shape, straight up and down (`symbolOfKundun`); the model lit by the scene light (`firecracker` sets `b->LightEnable`). **Bug-like quirks are fixed while moving**, each in its own commit with a before/after in game, not copied with blocks of their own: `wingOfStorm` and `symbolOfKundun` count their animation per drawing in a shared `static` counter, so it speeds up with every one on screen (moved: counted in time); `bloodBone` scrolls by `sin(map number × 0.0001)` instead of the clock (moved: no offset, under 1/100 of the texture); `runeBlade`, `elementalMace` and `grandSoulShield` make a grey from the red channel of the model's light only (moved: the light's tint, the same under white light). Copying the quirks exactly, and leaving these looks as code, were weighed. |
+| L17 | The order of moving (Q-L5b, 2026-11-01) | **By building block**, so each pull request brings one kind of block and moves the looks that need exactly it: (1) the machinery (loader, layer drawing, comparison test, Look Editor basics) with the 36 render styles of plain passes; (2) light and time, 67 render styles; (3) conditions and values per item, 20 render styles, among them the Magic Gladiator sets after #915 is merged (reflection under the holes); (4) the item effect kind, 16 item effects (9 that set values, 7 that draw become render styles); (5) the additions and quirk fixes of L16, 14 render styles. Then step 2 (FX1.7c) and step 3 (3 render styles, 9 item effects). The counts come from the survey script; each pull request's comparison test shows the exact list. The split into pull requests, with the mesh list and the editor parts: Q-L10. The Magic Gladiator sets as a first pilot, one pull request per item group, and the most-used looks first were weighed. |
 
 ## Current state
 
@@ -132,9 +134,38 @@ so a few can be off:
 - The plain drawing, `RenderModelWithoutStyle` (`ZzzObject.cpp`), has looks
   of its own for some models (the +15 armor objects, `MODEL_SWORD_35_WING`,
   `MODEL_ARMORINVEN_74`, …) outside the style list; Q-L5 looks at them too.
-- Step 1 of L7 is meant for those 137 styles and 16 item effects (Q-L5
-  checks that each one fits), step 3 for the other 3 styles (`pumpkinOfLuck`,
-  `cursedCastleWater`, `helperNpcPlate`) and 9 item effects.
+### The survey of the looks (Q-L5)
+
+Every render style and item effect, with the helper functions it calls, read
+against the blocks of L8 to L13 (a script flagged the candidates, each one
+was read by hand):
+
+| Group | Render styles | Item effects | Names |
+|---|---|---|---|
+| Fit as designed | 123 | 9 | All render styles not listed below. The item effects that only set values: `devilsEye`, `wingsOfDragon`, `wingsOfSoul`, `redSpirit`, `staffOfKundun`, `divineSet`, `hideMesh1`, `potion`, `hiddenMeshByLevel`. |
+| Item effects that draw, become render styles (L13) | – | 7 | `darkLordScroll`, `fruits`, `spirit`, `gmGift`, `meshesPerLevel`, `firecracker`, `billOfBalrog` |
+| Need a feature (L16) | 8 | – | `phoenixSoulStar`, `phoenixSoulHelmet`, `phoenixSoulArmor`, `phoenixSoulBoots`, `invisibilityCloak`, `gambleItem`, `capeOfEmperor`, `smallCapeOfLord` |
+| Bug-like quirks, fixed while moving (L16) | 6 | – | `wingOfStorm`, `symbolOfKundun`, `bloodBone`, `runeBlade`, `elementalMace`, `grandSoulShield` |
+| Things on bones, step 3 | 3 | 9 | `pumpkinOfLuck`, `cursedCastleWater`, `helperNpcPlate` (which the roadmap moves to the helper NPCs); `devilsKey`, `devilsInvitation`, `rena`, `wingsOfDarkness`, `wingOfStorm`, `wingOfEternal`, `wingOfIllusion`, `wingOfRuin`, `wingOfDimension` |
+
+Notes from reading them:
+- Setting the model's scrolling mesh (`b->StreamMesh`, or
+  `Models[...].StreamMesh`) for a pass or for good (`crossShield`,
+  `bloodBone`, `darkReignBlade`, `sylphWindBow`, `lostMap`; the item effects
+  `billOfBalrog`, `meshesPerLevel`, `firecracker`) is L10's scrolling mesh,
+  as a layer field or an item value.
+- A mesh or texture chosen per item (`violentWindToEternalWing…`,
+  `luckyItem` with inventory textures of its own, `divineAndSuccubusSkin`,
+  `sylphWindBow`) is L12's values per item.
+- `albatrossBow` uses `RENDER_CHROME5`, which binds no texture: it draws
+  with the texture the pass before it bound, mesh 2's own, so its data
+  names the mesh's own texture.
+- Random values (`elementalShield`, `grandSoulShield`, `rand() % 10 * 0.1`)
+  are L9's random shape; the data must draw the random numbers in the same
+  order for the comparison to stay exact (Q-L9).
+- So step 1 of L7 covers 137 render styles and 16 item effects, with L16's
+  additions and fixes; step 3 covers the other 3 render styles and 9 item
+  effects.
 
 ### Control per mesh today
 
@@ -178,23 +209,24 @@ Answered one by one, each with the current state, every option with an
 example, and a recommendation.
 
 Answered: Q-L1 (L7), Q-L2a (L8), Q-L2b (L9, L10), Q-L2c (L11), Q-L3 (L12),
-Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), all on 2026-11-01.
+Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), all on
+2026-11-01.
 
 | Q | Question |
 |---|---|
-| Q-L5 | Which of the 140 styles fit the first building blocks (a survey of each, including the conditions that fit neither list of L11, the reflection motions without a texture of their own, and the looks inside `RenderModelWithoutStyle`), and the order of moving them. |
 | Q-L6 | The look editor: in the Item Model window under Looks, or a window of its own (D25: one look editor for all areas); layer list, preview, the items that use a look. |
 | Q-L7 | The mesh list: what each row shows (number, texture, hidden, glowing, has holes), and whether hovering a row highlights the mesh in the preview. |
 | Q-L8 | Data checks: mesh numbers the model doesn't have, missing textures, unknown kinds. |
 | Q-L9 | How each moved style is compared with its old code (the render recorder). |
-| Q-L10 | The pull requests and their order. |
+| Q-L10 | The pull requests and their order (the order of moving looks is L17). |
+| Q-L11 | The 3 looks inside `RenderModelWithoutStyle` (`ZzzObject.cpp:6069-6123`: the +15 armor objects, `MODEL_SWORD_35_WING`, `MODEL_ARMORINVEN_74`), models without model entries: whether and when they get model entries and move (the item docs plan model entries for such effect models later). |
 
 ## Tasks
 
 1. [ ] Write this design: answer the open questions one by one (in progress;
-   Q-L1 to Q-L4 done).
-2. [ ] Step 1 of L7: draw passes and conditions (the pull requests from
-   Q-L10).
+   Q-L1 to Q-L5 done).
+2. [ ] Step 1 of L7: draw passes and conditions, in L17's order (the pull
+   requests from Q-L10).
 3. [ ] Step 2 of L7: FX1.7c, its short design, then the live preview.
 4. [ ] Step 3 of L7: things on bones.
 5. [ ] Move what stays true into `docs/item-data.md` and `docs/effect-data.md`
