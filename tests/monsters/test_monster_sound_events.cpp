@@ -1294,3 +1294,35 @@ TEST_CASE("Monster sounds: PlayDrawn says whether an event of the frame played, 
     CHECK_FALSE(PlayDrawn(*bull, &played));
     CHECK_FALSE(played);
 }
+
+TEST_CASE("Monster sounds: Kanturu's monsters sound each death when it starts, also right after an attack, at any "
+          "distance (Q-MN93) [monsters][sounds]")
+{
+    SoundScope scope(WD_37KANTURU_1ST);
+    struct Death
+    {
+        int monster = 0;
+        int sound = 0;
+    };
+    const Death deaths[] = {
+        {350, SOUND_KANTURU_1ST_BER_DIE},   {351, SOUND_KANTURU_1ST_SWOLF_DIE}, {352, SOUND_KANTURU_1ST_IR_DIE},
+        {353, SOUND_KANTURU_1ST_SATI_DIE},  {354, SOUND_KANTURU_1ST_BLADE_DIE}, {355, SOUND_KANTURU_1ST_KENTA_DIE},
+        {356, SOUND_KANTURU_1ST_GIGAN_DIE}, {357, SOUND_KANTURU_1ST_GENO_DIE},  {358, SOUND_KANTURU_2ND_PERSO_DIE},
+        {359, SOUND_KANTURU_2ND_TWIN_DIE},  {360, SOUND_KANTURU_2ND_DRED_DIE},
+    };
+    for (const Death& death : deaths)
+    {
+        INFO("monster " << death.monster);
+        // Far from the hero too.
+        CHECK(scope.Play(death.monster, MONSTER01_DIE, 0.0f, 0, 2000.0f) == Sounds({death.sound}));
+    }
+    // Right after an attack: the once flag does not hold it back.
+    const std::unique_ptr<CHARACTER> berserker = MakeCharacter(350);
+    Draw(scope, *berserker, MONSTER01_ATTACK1);
+    CHECK(berserker->SoundOncePlayed);
+    berserker->Object.CurrentAction = MONSTER01_DIE;
+    CHECK(GameLogic::Monsters::SoundEvents::Play(*berserker));
+    CHECK(scope.Take() == Sounds({SOUND_KANTURU_1ST_BER_DIE}));
+    // The drawn frames of the death play nothing more.
+    CHECK(Draw(scope, *berserker, MONSTER01_DIE, 3).empty());
+}

@@ -398,8 +398,9 @@ their sounds from their map's per-frame monster effects, and their maps load
 them; they name no sound set. They move into sound events with the monsters'
 looks (design, MN8). The monsters of Kanturu Ruins and Kanturu Relics and
 Relics' gateway machine play theirs from their sets (MNK): walks as `during`
-events, attacks and deaths as `once` events, heard anywhere as their map's
-code played them; Relics' deaths each drawn frame (`during`), Dreadfear's
+events and attacks as `once` events, heard anywhere as their map's code
+played them, and each death when it starts, also right after an attack
+(animation events, Q-MN93); Dreadfear's
 second attack on a cue of its first frames (`duringCues`), Twintail's walk on
 its model's 500 ms timer, which also swings its hair (`timers`), and Blade
 Hunter's walk smoke comes with its step sound (Q-MN92). The Aida monsters'

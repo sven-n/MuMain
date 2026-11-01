@@ -162,7 +162,7 @@
       "soundEvents": [
         {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_BER_MOVE1", "SOUND_KANTURU_1ST_BER_MOVE2"]},
         {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_BER_ATTACK1", "SOUND_KANTURU_1ST_BER_ATTACK2"]},
-        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_BER_DIE"]}
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_BER_DIE"]}
       ]
     },
     {
@@ -177,7 +177,7 @@
       "soundEvents": [
         {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 10, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_BLADE_MOVE1", "SOUND_KANTURU_1ST_BLADE_MOVE2"]},
         {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_BLADE_ATTACK1", "SOUND_KANTURU_1ST_BLADE_ATTACK2"]},
-        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_BLADE_DIE"]}
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_BLADE_DIE"]}
       ]
     },
     {
@@ -783,7 +783,7 @@
         {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_2ND_DRED_MOVE1", "SOUND_KANTURU_2ND_DRED_MOVE2"]},
         {"once": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_DRED_ATTACK1"]},
         {"duringCues": ["attack2 sound"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_DRED_ATTACK2"]},
-        {"during": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_DRED_DIE"]}
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_DRED_DIE"]}
       ]
     },
     {
@@ -947,7 +947,7 @@
       "soundEvents": [
         {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_GENO_MOVE1", "SOUND_KANTURU_1ST_GENO_MOVE2"]},
         {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_GENO_ATTACK1", "SOUND_KANTURU_1ST_GENO_ATTACK2"]},
-        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_GENO_DIE"]}
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_GENO_DIE"]}
       ]
     },
     {
@@ -1031,7 +1031,7 @@
       "soundEvents": [
         {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "sounds": ["SOUND_KANTURU_1ST_GIGAN_MOVE1"]},
         {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_GIGAN_ATTACK1", "SOUND_KANTURU_1ST_GIGAN_ATTACK2"]},
-        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_GIGAN_DIE"]}
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_GIGAN_DIE"]}
       ]
     },
     {
@@ -1321,7 +1321,7 @@
       "soundEvents": [
         {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_IR_MOVE1", "SOUND_KANTURU_1ST_IR_MOVE2"]},
         {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_IR_ATTACK1", "SOUND_KANTURU_1ST_IR_ATTACK2"]},
-        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_IR_DIE"]}
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_IR_DIE"]}
       ]
     },
     {
@@ -1386,7 +1386,7 @@
       "soundEvents": [
         {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_KENTA_MOVE1", "SOUND_KANTURU_1ST_KENTA_MOVE2"]},
         {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_KENTA_ATTACK1", "SOUND_KANTURU_1ST_KENTA_ATTACK2"]},
-        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_KENTA_DIE"]}
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_KENTA_DIE"]}
       ]
     },
     {
@@ -1620,7 +1620,7 @@
         {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_2ND_PERSO_MOVE1", "SOUND_KANTURU_2ND_PERSO_MOVE2"]},
         {"once": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_PERSO_ATTACK1"]},
         {"once": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_PERSO_ATTACK2"]},
-        {"during": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_PERSO_DIE"]}
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_PERSO_DIE"]}
       ]
     },
     {
@@ -1839,7 +1839,7 @@
       "soundEvents": [
         {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_SATI_MOVE1", "SOUND_KANTURU_1ST_SATI_MOVE2"]},
         {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_SATI_ATTACK1", "SOUND_KANTURU_1ST_SATI_ATTACK2"]},
-        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_SATI_DIE"]}
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_SATI_DIE"]}
       ]
     },
     {
@@ -1992,7 +1992,7 @@
       "soundEvents": [
         {"during": ["walk"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_SWOLF_MOVE1", "SOUND_KANTURU_1ST_SWOLF_MOVE2"]},
         {"once": ["attack1", "attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_1ST_SWOLF_ATTACK1", "SOUND_KANTURU_1ST_SWOLF_ATTACK2"]},
-        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_SWOLF_DIE"]}
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_1ST_SWOLF_DIE"]}
       ]
     },
     {
@@ -2098,7 +2098,7 @@
         {"timers": ["hair swing"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_KANTURU_2ND_TWIN_MOVE1", "SOUND_KANTURU_2ND_TWIN_MOVE2"]},
         {"once": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_TWIN_ATTACK1"]},
         {"once": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_TWIN_ATTACK2"]},
-        {"during": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_TWIN_DIE"]}
+        {"animations": ["die"], "heardAnywhere": true, "sounds": ["SOUND_KANTURU_2ND_TWIN_DIE"]}
       ]
     },
     {
