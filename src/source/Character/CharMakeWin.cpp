@@ -512,7 +512,7 @@ void CCharMakeWin::SyncRmlModel()
 
 void CCharMakeWin::SyncDescription()
 {
-    const wchar_t* description = I18N::Game::Lookup(ResolveDescriptionTextId(m_nSelJob));
+    const wchar_t* description = GetJobDescription(m_nSelJob);
     if (description == m_LastDescription)
         return;
 
