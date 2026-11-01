@@ -43,6 +43,9 @@ public:
     bool RemoveSharedModel(std::string label, std::string_view name);
     // CItemDataHandler::SetGlowColor.
     void SetGlowColor(std::string label, const Data::Effects::GlowColor& color);
+    // A new glow color (CItemDataHandler::SetGlowColor) put into the glow folder at `folder` (the empty path: under
+    // the root), as one step.
+    void AddGlowColor(std::string label, const Data::Effects::GlowColor& color, std::span<const std::size_t> folder);
     // CItemDataHandler::RemoveGlowColor for each name, as one step; false
     // when none could be removed.
     bool RemoveGlowColors(std::string label, std::span<const std::string> names);

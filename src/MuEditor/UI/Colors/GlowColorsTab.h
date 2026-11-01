@@ -32,7 +32,7 @@ public:
     void SetFolders(const char* step, std::vector<Data::Colors::ColorFolder> folders) override;
     void SetOrder(const char* step, std::span<const std::string> names) override;
     void OpenNew(const std::string& from) override;
-    std::optional<std::string> RenderNew() override;
+    std::optional<std::string> RenderNew(const Data::Colors::ColorFolderPath& folder) override;
     void RenderEdit(const std::string& name) override;
     bool IsEdited(const std::string& name) const override;
     void ApplyEdit(const std::string& name) override;

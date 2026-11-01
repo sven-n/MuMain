@@ -9,6 +9,7 @@
 #include "ToolWindowsScope.h"
 
 #include "Core/MuEditorCore.h"
+#include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
@@ -281,6 +282,34 @@ TEST_CASE("Glow color folders are item edits, and an undone removal puts the col
     g_MuColorsUI.Show(ColorsRoot::Glow);
     RenderColors();
     RenderColors();
+}
+
+// New color with a folder picked: the color and its place in the folder are one undo step.
+TEST_CASE("A new glow color made in a folder is one undo step [editor][items]")
+{
+    TestImGuiContext context;
+    ItemModelDatabaseScope restoreModels;
+    GlowColorsScope restoreColors({{ItemGlow::DefaultColor, {1.0, 0.5, 0.0}},
+                                   {ItemGlow::DefaultShineColor, {1.0, 1.0, 1.0}},
+                                   {ItemGlow::DefaultAncientColor, {0.0, 0.5, 1.0}}});
+    g_ItemModelDatabase.Build({}, g_GlowColors);
+    const std::vector<Data::Colors::ColorFolder> folders{{"Warm", {}, {}}};
+    g_ItemEdits.SetColorFolders(I18N::Editor::NewColorFolder, MuEditor::Items::ItemEdits::GlowFolders, folders);
+    g_ItemEdits.GetHistory().Clear();
+
+    const Data::Colors::ColorFolderPath warm{0};
+    g_ItemEdits.AddGlowColor(I18N::Editor::NewGlowColor, {"amber", {1.0, 0.6, 0.0}}, warm);
+    CHECK(HasGlowColor("amber"));
+    CHECK(Data::Colors::FindFolderOfColor(g_GlowColors.GetFolders(), "amber") == warm);
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == I18N::Editor::NewGlowColor);
+
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK_FALSE(HasGlowColor("amber"));
+    CHECK(g_GlowColors.GetFolders() == folders);
+    CHECK_FALSE(g_ItemEdits.GetHistory().CanUndo());
+
+    REQUIRE(g_ItemEdits.Redo());
+    CHECK(Data::Colors::FindFolderOfColor(g_GlowColors.GetFolders(), "amber") == warm);
 }
 
 #endif // _EDITOR

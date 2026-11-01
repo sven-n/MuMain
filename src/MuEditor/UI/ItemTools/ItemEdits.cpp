@@ -8,6 +8,7 @@
 #include "ItemSelection.h"
 
 #include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
 #include "Data/GameData/ItemData/ItemModelDatabase.h"
@@ -311,6 +312,30 @@ void ItemEdits::SetGlowColor(std::string label, const Data::Effects::GlowColor& 
     step.colorsBefore = std::move(before);
     step.colorsAfter = std::move(after);
     Record({std::move(label), {std::move(step)}});
+}
+
+void ItemEdits::AddGlowColor(std::string label, const Data::Effects::GlowColor& color,
+                             std::span<const std::size_t> folder)
+{
+    std::vector<Data::Effects::GlowColor> before = ReadGlowColors();
+    std::vector<Data::Colors::ColorFolder> foldersBefore = ReadColorFolders(GlowFolders);
+    g_ItemDataHandler.SetGlowColor(color);
+    std::vector<Data::Effects::GlowColor> after = ReadGlowColors();
+    if (after == before)
+    {
+        return;
+    }
+    std::vector<Data::Colors::ColorFolder> folders = foldersBefore;
+    if (Data::Colors::MoveColorInto(folders, color.name, folder))
+    {
+        RestoreColorFolders(GlowFolders, folders);
+    }
+    ItemEditStep step{ItemEditStep::Kind::GlowColors};
+    step.colorsBefore = std::move(before);
+    step.colorsAfter = std::move(after);
+    ItemEditEntry entry{std::move(label), {std::move(step)}};
+    AddFolderStep(entry, GlowFolders, std::move(foldersBefore));
+    Record(std::move(entry));
 }
 
 bool ItemEdits::RemoveGlowColors(std::string label, std::span<const std::string> names)

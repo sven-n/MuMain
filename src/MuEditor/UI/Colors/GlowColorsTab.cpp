@@ -132,14 +132,14 @@ void GlowColorsTab::OpenNew(const std::string& from)
     m_dialog.Open(from);
 }
 
-std::optional<std::string> GlowColorsTab::RenderNew()
+std::optional<std::string> GlowColorsTab::RenderNew(const Data::Colors::ColorFolderPath& folder)
 {
     const std::optional<GlowColor> created = m_dialog.Render();
     if (!created)
     {
         return std::nullopt;
     }
-    g_ItemEdits.SetGlowColor(I18N::Editor::NewGlowColor, *created);
+    g_ItemEdits.AddGlowColor(I18N::Editor::NewGlowColor, *created, folder);
     return created->name;
 }
 

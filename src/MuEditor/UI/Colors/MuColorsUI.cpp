@@ -184,22 +184,16 @@ void CMuColorsUI::RenderNewEntries()
 {
     for (const ColorsRoot root : Roots)
     {
-        const std::optional<std::string> created = SourceOf(root).RenderNew();
+        NamedColorSource& source = SourceOf(root);
+        // One undo step: the new color and its place in the folder that was picked.
+        const ColorFolderPath folder = m_newColorRoot == root ? m_newColorFolder : ColorFolderPath{};
+        const std::optional<std::string> created = source.RenderNew(folder);
         if (!created)
         {
             continue;
         }
-        m_pick = {root, {}, *created};
-        if (m_newColorRoot == root && !m_newColorFolder.empty())
-        {
-            const ColorFolderPath folder = m_newColorFolder;
-            const std::string color = *created;
-            m_action = [this, root, folder, color]
-            {
-                ChangeFolders(root, I18N::Editor::MoveAColor, [&](std::vector<ColorFolder>& folders)
-                              { return Data::Colors::MoveColorInto(folders, color, folder); });
-            };
-        }
+        m_pick = {root, Data::Colors::FindFolderOfColor(source.GetFolders(), *created).value_or(ColorFolderPath{}),
+                  *created};
         m_newColorRoot.reset();
     }
 }

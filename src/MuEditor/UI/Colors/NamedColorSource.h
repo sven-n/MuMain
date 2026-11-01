@@ -83,9 +83,10 @@ public:
     virtual void SetOrder(const char* step, std::span<const std::string> names) = 0;
 
     // The dialog for a new entry, opened with the value of `from` ("" while none is picked). RenderNew gives the new
-    // entry's name in the frame it is added.
+    // entry's name in the frame it is added; it goes into the folder at `folder` (the empty path: under the root) in
+    // the same undo step.
     virtual void OpenNew(const std::string& from) = 0;
-    virtual std::optional<std::string> RenderNew() = 0;
+    virtual std::optional<std::string> RenderNew(const Data::Colors::ColorFolderPath& folder) = 0;
 
     // The fields of the picked entry's value. The edit follows the entry (an undo, a redo) until it is changed.
     virtual void RenderEdit(const std::string& name) = 0;
