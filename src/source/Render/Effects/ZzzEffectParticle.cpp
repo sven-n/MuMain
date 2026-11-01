@@ -3779,7 +3779,7 @@ int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Su
             break;
             case BITMAP_AG_ADDITION_EFFECT:
             {
-                float _Scale;
+                float _Scale = o->Scale;
                 if (o->SubType == 0)
                 {
                     o->LifeTime = 33 + rand() % 5;

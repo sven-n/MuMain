@@ -964,8 +964,8 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
                     {
                         vec3_t vLight;
                         Vector(0.0f, 0.0f, 0.1f, vLight);
-                        CreateEffect(MODEL_SUMMONER_SUMMON_LAGUL, o->Position, o->Angle,
-                            vLight, 1, (OBJECT*)o, -1, 0, 0, 0, fRargleScale);
+                        CreateEffect(MODEL_SUMMONER_SUMMON_LAGUL, o->Position, o->Angle, vLight, 1,
+                                     reinterpret_cast<OBJECT*>(o), -1, 0, 0, 0, fRargleScale);
                     }
                 }
                 break;
@@ -6625,13 +6625,10 @@ void MoveJoint(JOINT* o, int iIndex)
                         {
                             o->TargetPosition[1] -= (20.f) * FPS_ANIMATION_FACTOR;
                         }
-                        else if (o->SubType >= 11 || o->SubType <= 13)
-                        {
-                            o->TargetPosition[1] -= (20.f) * FPS_ANIMATION_FACTOR;
-                        }
                         else
                         {
-                            o->TargetPosition[1] += (20.f) * FPS_ANIMATION_FACTOR;
+                            // The old test here (SubType >= 11 || SubType <= 13) held for every subtype.
+                            o->TargetPosition[1] -= (20.f) * FPS_ANIMATION_FACTOR;
                         }
                         Vector(0.f, o->TargetPosition[1], o->Angle[2], Angle);
                         AngleMatrix(Angle, Matrix);
