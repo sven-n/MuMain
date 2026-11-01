@@ -50,6 +50,7 @@ Made while reviewing sven-n/MuMain#915, 2026-11-01.
 | L9 | Values that change over time (Q-L2b, 2026-11-01) | A field that changes over time names a shape whose parameters a designer can picture: **fixed**; **wave** (from, to, seconds per cycle); **bounce** (the absolute sine: from, to, seconds); **scroll** (per second); **ramp** (from, to, seconds, then back to the start); **frames** (count, step, seconds each); **random** (from, to, step, a new value each frame). The loader turns them into the code's numbers; a moved look keeps its exact values (e.g. 6.283185 s for `sin(WorldTime * 0.001f)`), checked against the old code. The editor draws the value over time beside the field. No formula text (D43: building blocks with parameters, not code transcribed). Chances per frame belong to things on bones (L7 step 3). |
 | L10 | Glow mesh, scrolling and opacity (Q-L2b, 2026-11-01) | **Fields of each layer**, empty for the item's value: glow mesh (none, a mesh, or all meshes), glow strength, scrolling mesh, scrolling (U and V), opacity (the item's, the drawing's, a number or a shape). **Item values of the look:** the glow mesh, glow strength, scrolling mesh, scrolling, opacity and hidden mesh it leaves on the item for what is drawn after it (the +7 glow, the excellent glow), as `masterScepter` leaves glow mesh 1 (`ItemRenderStyles.cpp:338-352`). The 11 item effects that only change values become looks with item values and no layers. When item values apply (before the layers, as item effects do today, or after them, as styles do): Q-L4. |
 | L11 | Conditions (Q-L2c, 2026-11-01) | **On the look, "Not for":** the drawings the look is not for, which the game then draws plainly, as a style returning false does today: doppelgangers, and outside a monster's hands (`monsterBattleBow`). **On a layer, "Only when":** worn, in the inventory and on the ground (the skin hidden), an item level range, the item's hidden mesh, a buff on the character. "Which item" is no condition: values chosen per item are Q-L3. Conditions found in the survey that fit neither list (the light being exactly white, the turning angle): Q-L5. |
+| L12 | Where looks live (Q-L3, 2026-11-01) | **Named looks** in a look file in `Data/Effects/`, which model entries name (D25), with D26's rules: the editor shows which items use a look, saving a look that others use first lists them, a copy makes a variant for one user, renaming updates the references, a look still in use can't be deleted, names are resolved when loading. **Values per item:** in the Look Editor a field can be ticked "Each item sets this", with a name and the look's value as default. Every item using the look shows those fields under "Values for this item" in its Item Model window, stored in its model entry; Reset goes back to the look's default. Everything else is shared, so a change to the look reaches all its items and keeps their own values. This covers a color per item (the 30 Seed Spheres), meshes per item (the Lucky items, the Violent Wind pieces), and chrome on chosen parts of one item (e.g. the Divine Sword using `thunderHawk` with its chrome meshes set to 1). The Item Model window keeps its **Render style** dropdown for picking the look (a new "Look" label was found confusing); the field name in the data and the look file's name: Q-L4. |
 
 ## Current state
 
@@ -173,13 +174,12 @@ Written from the answers to the open questions.
 Answered one by one, each with the current state, every option with an
 example, and a recommendation.
 
-Answered: Q-L1 (L7), Q-L2a (L8), Q-L2b (L9, L10), Q-L2c (L11), all on
-2026-11-01.
+Answered: Q-L1 (L7), Q-L2a (L8), Q-L2b (L9, L10), Q-L2c (L11), Q-L3 (L12),
+all on 2026-11-01.
 
 | Q | Question |
 |---|---|
-| Q-L3 | Where looks live: named looks in `Data/Effects/` that model entries name (D25, D26), layers inside the model entry, or a named look with values chosen per item (meshes, a color, a texture: the socket seeds, the Lucky items, the Violent Wind pieces). |
-| Q-L4 | How `renderStyle` and the new looks relate while the styles move (same names, one style at a time); how an item's render style and item effect relate as looks, and so when a look's item values apply (before its layers, as item effects do, or after, as styles do). |
+| Q-L4 | How `renderStyle` and the new looks relate while the styles move (same names, one style at a time; whether the data field keeps the name `renderStyle`; the look file's name); how an item's render style and item effect relate as looks, and so when a look's item values apply (before its layers, as item effects do, or after, as styles do). |
 | Q-L5 | Which of the 140 styles fit the first building blocks (a survey of each, including the conditions that fit neither list of L11, the reflection motions without a texture of their own, and the looks inside `RenderModelWithoutStyle`), and the order of moving them. |
 | Q-L6 | The look editor: in the Item Model window under Looks, or a window of its own (D25: one look editor for all areas); layer list, preview, the items that use a look. |
 | Q-L7 | The mesh list: what each row shows (number, texture, hidden, glowing, has holes), and whether hovering a row highlights the mesh in the preview. |
@@ -190,7 +190,7 @@ Answered: Q-L1 (L7), Q-L2a (L8), Q-L2b (L9, L10), Q-L2c (L11), all on
 ## Tasks
 
 1. [ ] Write this design: answer the open questions one by one (in progress;
-   Q-L1 and Q-L2 done).
+   Q-L1, Q-L2 and Q-L3 done).
 2. [ ] Step 1 of L7: draw passes and conditions (the pull requests from
    Q-L10).
 3. [ ] Step 2 of L7: FX1.7c, its short design, then the live preview.
