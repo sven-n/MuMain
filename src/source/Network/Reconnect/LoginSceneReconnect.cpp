@@ -38,7 +38,7 @@ bool LoginSceneReconnect::EnsureConnected(LoginServer server, std::function<void
     switch (m_phase)
     {
     case Phase::Idle:
-        if (m_link.IsConnected())
+        if (m_link.IsConnected() && m_link.ConnectedServer() == server)
         {
             return true;
         }
@@ -60,6 +60,11 @@ bool LoginSceneReconnect::EnsureConnected(LoginServer server, std::function<void
 
 void LoginSceneReconnect::RequestServerList()
 {
+    if (m_phase == Phase::Idle && m_link.ConnectedServer() == LoginServer::Game)
+    {
+        return;
+    }
+
     if (EnsureConnected(LoginServer::Connect, nullptr))
     {
         m_lastListMs = m_link.NowMs();

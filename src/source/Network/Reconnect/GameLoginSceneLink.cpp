@@ -31,6 +31,12 @@ bool GameLoginSceneLink::IsConnected() const
     return SocketClient != nullptr && SocketClient->IsConnected();
 }
 
+LoginServer GameLoginSceneLink::ConnectedServer() const
+{
+    // ConnectForLogin and a server pick (ReceiveServerConnect) set it; a drop leaves it.
+    return g_bGameServerConnected ? LoginServer::Game : LoginServer::Connect;
+}
+
 std::optional<LoginServer> GameLoginSceneLink::AwaitedServer() const
 {
     if (!UI::LoginScene::IsWaitingForServer())

@@ -23,6 +23,8 @@ public:
     virtual ~LoginSceneReconnectLink() = default;
 
     virtual bool IsConnected() const = 0;
+    // The server the connection goes to, or went to before it closed.
+    virtual LoginServer ConnectedServer() const = 0;
 
     // The server the screen waits for while it shows nothing to click (after a server
     // was picked, after the login was sent, before the first list); none while the

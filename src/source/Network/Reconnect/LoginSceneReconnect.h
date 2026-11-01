@@ -24,13 +24,15 @@ public:
     // The one the game uses, wired to the game's connection (GameLoginSceneLink.cpp).
     static LoginSceneReconnect& Instance();
 
-    // True when the connection is up, so the caller sends right away. Otherwise
-    // reconnects to `server` and runs `resume` (if any) once the server greeted
-    // the client again, and returns false.
+    // True when the connection to `server` is up, so the caller sends right away.
+    // Otherwise (no connection, or one to the other server) connects to `server`,
+    // runs `resume` (if any) once it greeted the client, and returns false.
     bool EnsureConnected(LoginServer server, std::function<void()> resume);
 
     // Asks the connect server for its list. After a reconnect the client asks on
-    // its own, so nothing is left to resume then.
+    // its own, so nothing is left to resume then. Nothing while the screen is on a
+    // game server (the login window): only the connect server sends a list, and
+    // switching would end the login window's connection.
     void RequestServerList();
 
     // The login scene found its connection closed; called every frame until it is back.

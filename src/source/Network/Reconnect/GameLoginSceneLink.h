@@ -9,6 +9,7 @@ class GameLoginSceneLink : public LoginSceneReconnectLink
 {
 public:
     bool IsConnected() const override;
+    LoginServer ConnectedServer() const override;
     std::optional<LoginServer> AwaitedServer() const override;
     bool IsServerListShown() const override;
     bool StartProbe(LoginServer server) override;

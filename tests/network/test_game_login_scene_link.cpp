@@ -102,6 +102,16 @@ TEST_SUITE("Game login scene link")
         CHECK_FALSE(screen.link.IsServerListShown());
     }
 
+    TEST_CASE("the connection goes to the server the last connect named")
+    {
+        LoginScreen screen;
+        g_bGameServerConnected = FALSE;
+        CHECK(screen.link.ConnectedServer() == LoginServer::Connect);
+
+        g_bGameServerConnected = TRUE; // a server pick or ConnectForLogin to the game server
+        CHECK(screen.link.ConnectedServer() == LoginServer::Game);
+    }
+
     TEST_CASE("no failure message is up on a fresh screen")
     {
         LoginScreen screen;

@@ -24,6 +24,7 @@ class FakeLink : public LoginSceneReconnectLink
 {
 public:
     bool connected = false;
+    LoginServer connectedServer = LoginServer::Connect;
     std::optional<LoginServer> awaited;
     bool serverListShown = false;
     bool probeCanStart = true;
@@ -42,6 +43,10 @@ public:
     bool IsConnected() const override
     {
         return connected;
+    }
+    LoginServer ConnectedServer() const override
+    {
+        return connectedServer;
     }
     std::optional<LoginServer> AwaitedServer() const override
     {
@@ -71,6 +76,7 @@ public:
     {
         connects.push_back(server);
         connected = connectSucceeds;
+        connectedServer = server;
         return connectSucceeds;
     }
 
@@ -170,6 +176,45 @@ TEST_SUITE("Login scene reconnect")
 
         screen.reconnect.OnGreeting(LoginServer::Game);
         CHECK(screen.resumed == 1);
+    }
+
+    TEST_CASE("a login doesn't go out over the connect server's connection")
+    {
+        DroppedScreen screen;
+        screen.link.connected = true; // reconnected to the connect server meanwhile
+
+        CHECK_FALSE(screen.reconnect.EnsureConnected(LoginServer::Game, screen.CountResume()));
+        CHECK(screen.link.probes == std::vector{LoginServer::Game});
+
+        screen.ServerComesBack();
+        CHECK(screen.link.connects == std::vector{LoginServer::Game});
+        screen.reconnect.OnGreeting(LoginServer::Game);
+        CHECK(screen.resumed == 1);
+    }
+
+    TEST_CASE("a server pick doesn't go out over a game server's connection")
+    {
+        DroppedScreen screen;
+        screen.link.connected = true;
+        screen.link.connectedServer = LoginServer::Game;
+
+        CHECK_FALSE(screen.reconnect.EnsureConnected(LoginServer::Connect, screen.CountResume()));
+        CHECK(screen.link.probes == std::vector{LoginServer::Connect});
+    }
+
+    TEST_CASE("the login window asks for no list, connected or dropped")
+    {
+        // The credits open and close over the login window.
+        DroppedScreen screen;
+        screen.link.connectedServer = LoginServer::Game;
+        screen.link.connected = true;
+        screen.reconnect.RequestServerList();
+        screen.link.connected = false;
+        screen.reconnect.RequestServerList();
+
+        CHECK(screen.link.listRequests == 0);
+        CHECK(screen.link.probes.empty());
+        CHECK_FALSE(screen.reconnect.IsReconnecting());
     }
 
     TEST_CASE("a join answer that ends the login drops the waiting login")
