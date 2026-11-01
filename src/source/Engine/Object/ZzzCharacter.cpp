@@ -8901,7 +8901,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             Vector(0.1f, 0.1f, 1.f, Light);
 
         int RenderType = (c->MonsterIndex == MONSTER_DRAKAN) ? 0 : RENDER_EXTRA;
-        RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT | RenderType, 1.f);
+        RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT | RenderType,
+                                  1.f);
 
         if (c->MonsterIndex == MONSTER_DRAKAN)
         {
