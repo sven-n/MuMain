@@ -127,6 +127,7 @@ server, the client log free of sound errors, and the owner listens.
 | Step | Name | Depends on | Summary |
 |---|---|---|---|
 | MP1 | Map object sounds | – | D-MP1 to D-MP6; the Kalima waterfalls as the first entry; then the distance volume test (D-MP7). Lands before MN9 of the monsters design. |
+| MP1b | Kanturu object sounds | MP1 | The object sounds of Kanturu Ruins and Kanturu Relics, which their maps' object update played: entries for the object types, and an entry without objects for each map-wide hum (Q-MP8). |
 | MP2+ | Later | MP1 | Not designed: the other object sounds, map loops and timed ambience, object effects, maps as data, Map Editor changes. |
 
 ## Agreed questions
@@ -140,3 +141,4 @@ server, the client log free of sound errors, and the owner listens.
 | Q-MP5 | How does "while in view" play? *(2026-11-01)* | As the original: up to N copies on free channels, full volume, copies run out after the view moves. |
 | Q-MP6 | Distance? *(2026-11-01)* | A separate test commit with the volume lowered by distance; kept or dropped after listening. |
 | Q-MP7 | Engine fix too? *(2026-11-01)* | Later, as its own PR; recommended because every sound path benefits. |
+| Q-MP8 | Kanturu Ruins and Relics play a map-wide hum from every object's update: while any object of the map is in view. How does the data say that? *(2026-11-01)* | An entry that names **maps but no objects** plays while any object of those maps is in view; the Sounds tab offers "Any object". Not chosen: listing every object type, a new map ambience file (MP2), keeping the hums in code. |
