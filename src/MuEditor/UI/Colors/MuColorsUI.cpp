@@ -5,6 +5,7 @@
 #include "MuColorsUI.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
+#include "../MuEditor/UI/Common/KeyboardSelection.h"
 #include "../MuEditor/UI/Common/MuEditorToolWindows.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/Common/ToolGroups.h"
@@ -34,6 +35,13 @@ constexpr float FolderNameWidth = 260.0f;
 constexpr std::size_t MaxDraggedName = 64;
 
 constexpr ColorsRoot Roots[] = {ColorsRoot::Glow};
+
+// A root's or a folder's tree node picks it on a click (not on its arrow) and when the arrow keys move onto it, as
+// the colors' rows do (KeyboardSelection).
+bool IsPicking()
+{
+    return (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) || MuEditor::KeyboardSelection::MovedOnto();
+}
 
 // What a drag carries: a folder (its path) or a color (its name, then) of a root.
 struct DragPayload
@@ -280,7 +288,7 @@ void CMuColorsUI::RenderRoot(ColorsRoot root)
         flags |= ImGuiTreeNodeFlags_Selected;
     }
     const bool open = ImGui::TreeNodeEx("##Root", flags, "%s", texts.root);
-    if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+    if (IsPicking())
     {
         m_pick = {root, {}, {}};
     }
@@ -319,7 +327,7 @@ void CMuColorsUI::RenderFolders(ColorsRoot root, const std::vector<ColorFolder>&
             flags |= ImGuiTreeNodeFlags_Selected;
         }
         const bool open = ImGui::TreeNodeEx("##Folder", flags, "%s", folder.name.c_str());
-        if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+        if (IsPicking())
         {
             m_pick = {root, path, {}};
         }
@@ -349,7 +357,8 @@ void CMuColorsUI::RenderColor(ColorsRoot root, const std::string& name, const Co
     source.RenderSwatch(name);
     ImGui::SameLine();
     const std::string label = name + " (" + std::to_string(source.CountUsers(name)) + ")";
-    if (ImGui::Selectable(label.c_str(), m_pick.root == root && m_pick.color == name))
+    if (ImGui::Selectable(label.c_str(), m_pick.root == root && m_pick.color == name,
+                          MuEditor::KeyboardSelection::RowFlags))
     {
         m_pick = {root, folder, name};
     }

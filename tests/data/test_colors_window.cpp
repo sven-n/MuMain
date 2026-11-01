@@ -73,20 +73,54 @@ void RenderColors()
     CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
 }
 
-// The id of a widget of the pane that shows what the tree picked.
-ImGuiID PickedPaneWidgetId(const char* label)
+// A pane of the Colors window: "##Tree" or "##Picked".
+ImGuiWindow* FindColorsPane(const char* pane)
 {
     const ImGuiWindow* colors = ImGui::FindWindowByName(WindowIds::Colors);
     REQUIRE(colors != nullptr);
-    for (const ImGuiWindow* window : ImGui::GetCurrentContext()->Windows)
+    for (ImGuiWindow* window : ImGui::GetCurrentContext()->Windows)
     {
-        if (window->ParentWindow == colors && std::strstr(window->Name, "##Picked") != nullptr)
+        if (window->ParentWindow == colors && std::strstr(window->Name, pane) != nullptr)
         {
-            return ImGui::GetIDWithSeed(label, nullptr, window->ID);
+            return window;
         }
     }
-    FAIL("the Colors window has no picked pane");
-    return 0;
+    FAIL("the Colors window has no pane " << pane);
+    return nullptr;
+}
+
+// The id of a widget of the pane that shows what the tree picked.
+ImGuiID PickedPaneWidgetId(const char* label)
+{
+    return ImGui::GetIDWithSeed(label, nullptr, FindColorsPane("##Picked")->ID);
+}
+
+// The id of the Glow root's node in the tree, or with `folders` of the folder down that way; the scope of the rows in
+// it while it is open.
+ImGuiID GlowNodeId(std::initializer_list<const char*> folders = {})
+{
+    const ImGuiID root = ImGui::GetIDWithSeed(static_cast<int>(ColorsRoot::Glow), FindColorsPane("##Tree")->ID);
+    ImGuiID node = ImGui::GetIDWithSeed("##Root", nullptr, root);
+    for (const char* folder : folders)
+    {
+        node = ImGui::GetIDWithSeed("##Folder", nullptr, ImGui::GetIDWithSeed(folder, nullptr, node));
+    }
+    return node;
+}
+
+// The id of a color's row in the node, `label` being its name and use count.
+ImGuiID ColorRowId(ImGuiID node, const char* name, const char* label)
+{
+    return ImGui::GetIDWithSeed(label, nullptr, ImGui::GetIDWithSeed(name, nullptr, node));
+}
+
+void PressKey(ImGuiKey key)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    io.AddKeyEvent(key, true);
+    RenderColors();
+    io.AddKeyEvent(key, false);
+    RenderColors();
 }
 
 ItemModelDefinition Model(int number, const char* color)
@@ -282,6 +316,34 @@ TEST_CASE("Glow color folders are item edits, and an undone removal puts the col
     g_MuColorsUI.Show(ColorsRoot::Glow);
     RenderColors();
     RenderColors();
+}
+
+// The arrow keys move the pick through the tree, as through the editor's other lists (KeyboardSelection).
+TEST_CASE("The arrow keys pick the next color in the Colors window [editor][items]")
+{
+    TestImGuiContext context;
+    ToolWindowsScope windows;
+    ItemModelDatabaseScope restoreModels;
+    GlowColorsScope restoreColors({{"red", {1.0, 0.0, 0.0}}, {"gold", {1.0, 0.7, 0.2}}});
+    g_ItemModelDatabase.Build({}, g_GlowColors);
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    g_MuColorsUI.Show(ColorsRoot::Glow);
+    RenderColors();
+    RenderColors();
+
+    // The keyboard on red's row, as after a click on it.
+    ImGuiWindow* tree = FindColorsPane("##Tree");
+    ImGui::FocusWindow(tree);
+    ImGui::SetFocusID(ColorRowId(GlowNodeId(), "red", "red (0)"), tree);
+    RenderColors();
+    PressKey(ImGuiKey_DownArrow);
+    CHECK(g_MuColorsUI.GetPickedColor() == "gold");
+    PressKey(ImGuiKey_UpArrow);
+    CHECK(g_MuColorsUI.GetPickedColor() == "red");
+    // Up again, onto the root.
+    PressKey(ImGuiKey_UpArrow);
+    CHECK(g_MuColorsUI.GetPickedColor().empty());
+    CHECK(g_MuColorsUI.GetShownRoot() == ColorsRoot::Glow);
 }
 
 // New color with a folder picked: the color and its place in the folder are one undo step.

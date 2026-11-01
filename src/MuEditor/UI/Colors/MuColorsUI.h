@@ -41,6 +41,11 @@ public:
     {
         return m_pick.root;
     }
+    // The color the tree has picked; "" while a root or a folder is.
+    const std::string& GetPickedColor() const
+    {
+        return m_pick.color;
+    }
 
 private:
     // What the tree has picked: a root, one of its folders (by path), or one of its colors.
