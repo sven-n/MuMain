@@ -33,7 +33,7 @@ bool GameLoginSceneLink::IsConnected() const
 
 LoginServer GameLoginSceneLink::ConnectedServer() const
 {
-    // ConnectForLogin and a server pick (ReceiveServerConnect) set it; a drop leaves it.
+    // ConnectForLogin (by the port) and a server pick (ReceiveServerConnect) set it; a drop leaves it.
     return g_bGameServerConnected ? LoginServer::Game : LoginServer::Connect;
 }
 
@@ -84,7 +84,7 @@ bool GameLoginSceneLink::Connect(LoginServer server)
 {
     const Address address = AddressOf(server);
     DeleteSocket();
-    return ConnectForLogin(address.host, address.port, server == LoginServer::Game) != FALSE;
+    return ConnectForLogin(address.host, address.port) != FALSE;
 }
 
 void GameLoginSceneLink::SendServerListRequest()

@@ -376,13 +376,18 @@ static int64_t SaturatingAddToUpper(const int64_t current, const int64_t add, in
     return current + add;
 }
 
+bool IsGameServerPort(unsigned short Port)
+{
+    // todo: generally, it's a bad idea to assume a specific port number (range).
+    return Port > 0xADFF || Port < 0xAD00;
+}
+
 BOOL CreateSocket(const wchar_t* IpAddr, unsigned short Port)
 {
     BOOL bResult = TRUE;
     g_ConsoleDebug->Write(MCD_NORMAL, L"[Connect to Server] ip address = %ls, port = %d", IpAddr, Port);
 
-    // todo: generally, it's a bad idea to assume a specific port number (range).
-    const bool isEncrypted = Port > 0xADFF || Port < 0xAD00;
+    const bool isEncrypted = IsGameServerPort(Port);
     SocketClient = new Connection(MU_C16(IpAddr), Port, isEncrypted, &HandleIncomingPacket);
     if (!SocketClient->IsConnected())
     {
@@ -470,7 +475,7 @@ wchar_t LogInID[MAX_USERNAME_SIZE + 1] = {
     0,
 };
 
-BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port, bool isGameServer)
+BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port)
 {
     LogIn = 0;
     CurrentProtocolState = REQUEST_JOIN_SERVER;
@@ -483,7 +488,7 @@ BOOL ConnectForLogin(const wchar_t* IpAddr, unsigned short Port, bool isGameServ
         return FALSE;
     }
 
-    g_bGameServerConnected = isGameServer ? TRUE : FALSE;
+    g_bGameServerConnected = IsGameServerPort(Port) ? TRUE : FALSE;
     return TRUE;
 }
 

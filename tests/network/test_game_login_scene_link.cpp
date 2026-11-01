@@ -112,6 +112,18 @@ TEST_SUITE("Game login scene link")
         CHECK(screen.link.ConnectedServer() == LoginServer::Game);
     }
 
+    TEST_CASE("a game server is told by its port")
+    {
+        // ConnectForLogin names the server it connected to by the port, also for a client
+        // started straight on a game server.
+        CHECK_FALSE(IsGameServerPort(44405)); // OpenMU's connect server
+        CHECK_FALSE(IsGameServerPort(0xAD00));
+        CHECK_FALSE(IsGameServerPort(0xADFF));
+        CHECK(IsGameServerPort(0xAD00 - 1));
+        CHECK(IsGameServerPort(0xADFF + 1));
+        CHECK(IsGameServerPort(55901)); // OpenMU's first game server
+    }
+
     TEST_CASE("no failure message is up on a fresh screen")
     {
         LoginScreen screen;

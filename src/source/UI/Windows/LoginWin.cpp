@@ -624,5 +624,5 @@ void CLoginWin::ProcessPendingConnectionReconnect()
 
 void CLoginWin::ConnectConnectionServer()
 {
-    ConnectForLogin(szServerIpAddress, g_ServerPort, /*isGameServer=*/false);
+    ConnectForLogin(szServerIpAddress, g_ServerPort);
 }
