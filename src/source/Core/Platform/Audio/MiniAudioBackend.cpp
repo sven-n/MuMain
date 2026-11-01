@@ -138,6 +138,7 @@ bool MiniAudioBackend::AddSlotsUpTo(int buffer)
     m_mixGain.resize(count, 1.0f);
     m_channelVolume.resize(count);
     m_channelMixed.resize(count);
+    m_starts.resize(count);
     return true;
 }
 
@@ -314,6 +315,7 @@ bool MiniAudioBackend::PlaySoundOnFreeChannel(ESound buffer, float level)
     ma_sound_set_looping(pSound, MA_FALSE);
     SetChannelVolume(bufIdx, ch, m_sfxVolume * std::clamp(level, 0.0f, 1.0f), true);
     ma_sound_start(pSound);
+    ++m_starts[bufIdx];
     return true;
 }
 
@@ -389,6 +391,10 @@ bool MiniAudioBackend::StartSound(ESound buffer, const void* pObject, bool loope
     SetChannelVolume(bufIdx, ch, volume, mixed);
 
     ma_sound_start(pSound);
+    if (mixed)
+    {
+        ++m_starts[bufIdx];
+    }
 
     return true;
 }
@@ -809,6 +815,40 @@ float MiniAudioBackend::GetBGMVolume() const
 float MiniAudioBackend::GetSFXVolume() const
 {
     return m_sfxVolume;
+}
+
+std::uint32_t MiniAudioBackend::GetSoundStarts(ESound buffer) const
+{
+    const int bufIdx = static_cast<int>(buffer);
+    return HasSlot(bufIdx) ? m_starts[bufIdx] : 0;
+}
+
+bool MiniAudioBackend::IsSoundPlaying(ESound buffer) const
+{
+    const int bufIdx = static_cast<int>(buffer);
+    if (!m_initialized || !HasSlot(bufIdx) || !m_soundLoaded[bufIdx])
+    {
+        return false;
+    }
+    for (int ch = 0; ch < m_loadedChannels[bufIdx]; ++ch)
+    {
+        if (m_channelMixed[bufIdx][ch] && ma_sound_is_playing(&m_sounds[bufIdx][ch]))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+float MiniAudioBackend::GetSoundLength(ESound buffer) const
+{
+    const int bufIdx = static_cast<int>(buffer);
+    if (!m_initialized || !HasSlot(bufIdx) || !m_soundLoaded[bufIdx])
+    {
+        return 0.0f;
+    }
+    float seconds = 0.0f;
+    return ma_sound_get_length_in_seconds(&m_sounds[bufIdx][0], &seconds) == MA_SUCCESS ? seconds : 0.0f;
 }
 
 // ---------------------------------------------------------------------------

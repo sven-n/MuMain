@@ -9,6 +9,7 @@
 #include "../MuEditor/UI/Common/MuEditorToolWindows.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "Audio/DSPlaySound.h"
+#include "Core/Platform/IPlatformAudio.h"
 #include "Core/Text/Utf8.h"
 #include "I18N/All.h"
 #include "imgui.h"
@@ -31,8 +32,13 @@ constexpr std::array<SoundKind, Audio::SoundKindCount> Kinds = {
     SoundKind::Music, SoundKind::MapAmbience, SoundKind::MapObject, SoundKind::Monster, SoundKind::Other};
 constexpr float FullPercent = 100.0f;
 constexpr float SliderWidth = 120.0f;
+// The heard table: its columns and at least this many rows of height.
+constexpr int HeardColumns = 6;
+constexpr float HeardMinimumRows = 6.0f;
 const ImVec4 MutedColor(0.66f, 0.29f, 0.23f, 1.0f);
 const ImVec4 SoloColor(0.23f, 0.48f, 0.29f, 1.0f);
+// A row whose sound plays.
+const ImVec4 PlayingRowColor(0.23f, 0.48f, 0.29f, 0.35f);
 
 // A volume slider, Mute and Solo for one control.
 void RenderControl(const char* id, Control& control)
@@ -74,11 +80,21 @@ void RenderControl(const char* id, Control& control)
     ImGui::PopID();
 }
 
-std::string AgoText(double seconds)
+std::string SecondsText(double seconds)
 {
     char text[32];
     std::snprintf(text, sizeof(text), "%.1f s", seconds < 0.0 ? 0.0 : seconds);
     return text;
+}
+
+bool IsPlaying(int number)
+{
+    return g_platformAudio != nullptr && g_platformAudio->IsSoundPlaying(static_cast<ESound>(number));
+}
+
+float LengthOf(int number)
+{
+    return g_platformAudio != nullptr ? g_platformAudio->GetSoundLength(static_cast<ESound>(number)) : 0.0f;
 }
 } // namespace
 
@@ -127,27 +143,71 @@ void MuSoundMixerUI::RenderKinds()
 void MuSoundMixerUI::RenderHeard()
 {
     using namespace MuEditor::SoundMixer;
-    ImGui::SeparatorText(I18N::Editor::SoundMixerHeardJustNow);
-    const double now = Audio::Mixer::Now();
-    const std::vector<Audio::Mixer::HeardSound> heard = Audio::Mixer::Heard(now);
+    ImGui::SeparatorText(I18N::Editor::SoundMixerSoundsHeard);
+    if (ImGui::SmallButton(I18N::Editor::SoundMixerClearAll))
+    {
+        Audio::Mixer::ClearHeard();
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s", I18N::Editor::SoundMixerClearAllTip);
+    }
+    const std::vector<Audio::Mixer::HeardSound> heard = Audio::Mixer::Heard();
     if (heard.empty())
     {
         ImGui::TextDisabled("%s", I18N::Editor::SoundMixerNothingHeard);
         return;
     }
-    if (!ImGui::BeginTable("##Heard", 4, ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
+    // Rows keep their place (the order of first hearing) and the header stays
+    // while the rows scroll, so that a sound is easy to find and mute.
+    const float height =
+        std::max(ImGui::GetContentRegionAvail().y, ImGui::GetFrameHeightWithSpacing() * (HeardMinimumRows + 1.0f));
+    constexpr ImGuiTableFlags Flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV |
+                                      ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY |
+                                      ImGuiTableFlags_SizingFixedFit;
+    if (!ImGui::BeginTable("##Heard", HeardColumns, Flags, ImVec2(0.0f, height)))
     {
         return;
     }
+    ImGui::TableSetupScrollFreeze(0, 1);
+    ImGui::TableSetupColumn(I18N::Editor::SoundMixerColumnSound, ImGuiTableColumnFlags_WidthStretch, 1.0f);
+    ImGui::TableSetupColumn(I18N::Editor::SoundMixerColumnSource, ImGuiTableColumnFlags_WidthStretch, 1.0f);
+    ImGui::TableSetupColumn(I18N::Editor::SoundMixerColumnPlays);
+    ImGui::TableSetupColumn(I18N::Editor::SoundMixerColumnLength);
+    ImGui::TableSetupColumn(I18N::Editor::SoundMixerColumnLast);
+    ImGui::TableSetupColumn(I18N::Editor::SoundMixerColumnVolume);
+    ImGui::TableHeadersRow();
+    const double now = Audio::Mixer::Now();
     for (const Audio::Mixer::HeardSound& sound : heard)
     {
+        const bool playing = IsPlaying(sound.number);
         ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::TextDisabled("%s", AgoText(now - sound.lastHeard).c_str());
+        if (playing)
+        {
+            ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(PlayingRowColor));
+        }
         ImGui::TableNextColumn();
         ImGui::TextUnformatted(SoundText(sound.number).c_str());
+        if (ImGui::IsItemHovered())
+        {
+            ImGui::SetTooltip("#%d", sound.number);
+        }
         ImGui::TableNextColumn();
         ImGui::TextUnformatted(SourceText(sound).c_str());
+        ImGui::TableNextColumn();
+        ImGui::Text("%d", sound.plays);
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted(LengthText(LengthOf(sound.number), sound.looped).c_str());
+        ImGui::TableNextColumn();
+        const std::string last = LastText(sound, now, playing);
+        if (playing)
+        {
+            ImGui::TextUnformatted(last.c_str());
+        }
+        else
+        {
+            ImGui::TextDisabled("%s", last.c_str());
+        }
         ImGui::TableNextColumn();
         RenderControl(std::to_string(sound.number).c_str(), Audio::Mixer::SoundControl(sound.number));
     }
@@ -240,6 +300,29 @@ std::string SoundText(int number)
         }
     }
     return file;
+}
+
+std::string LengthText(float seconds, bool looped)
+{
+    if (seconds <= 0.0f)
+    {
+        return {};
+    }
+    const std::string length = SecondsText(seconds);
+    return looped ? I18N::Format(I18N::Editor::SoundMixerLoop0, {length}) : length;
+}
+
+std::string LastText(const Audio::Mixer::HeardSound& sound, double now, bool playing)
+{
+    if (playing)
+    {
+        return I18N::Editor::SoundMixerPlaying;
+    }
+    if (sound.lastStarted < 0.0)
+    {
+        return {};
+    }
+    return I18N::Format(I18N::Editor::SoundMixerAgo0, {SecondsText(now - sound.lastStarted)});
 }
 
 void RenderReminder(ToolWindows& windows)

@@ -3707,16 +3707,49 @@
     <value>Unmute all</value>
   </data>
   <data name="Sound mixer note" xml:space="preserve">
-    <value>For listening in the editor: mute, solo and turn down kinds of sounds and the sounds just heard. Changes apply at once; a muted loop keeps running silently. The game's own volumes stay as they are, the editor's Play buttons and previews are not affected, and every start plays everything as normal.</value>
+    <value>For listening in the editor: mute, solo and turn down kinds of sounds and every sound heard. Changes apply at once; a muted loop keeps running silently. The game's own volumes stay as they are, the editor's Play buttons and previews are not affected, and every start plays everything as normal.</value>
   </data>
   <data name="Sound mixer kinds" xml:space="preserve">
     <value>Kinds</value>
   </data>
-  <data name="Sound mixer heard just now" xml:space="preserve">
-    <value>Heard just now (last 10 s)</value>
+  <data name="Sound mixer sounds heard" xml:space="preserve">
+    <value>Sounds heard</value>
   </data>
   <data name="Sound mixer nothing heard" xml:space="preserve">
-    <value>No sound in the last 10 seconds.</value>
+    <value>No sound heard yet.</value>
+  </data>
+  <data name="Sound mixer clear all" xml:space="preserve">
+    <value>Clear all</value>
+  </data>
+  <data name="Sound mixer clear all tip" xml:space="preserve">
+    <value>Empties the list and counts again from 0. Muted, solo and lowered sounds stay listed.</value>
+  </data>
+  <data name="Sound mixer column sound" xml:space="preserve">
+    <value>Sound</value>
+  </data>
+  <data name="Sound mixer column source" xml:space="preserve">
+    <value>Source</value>
+  </data>
+  <data name="Sound mixer column plays" xml:space="preserve">
+    <value>Plays</value>
+  </data>
+  <data name="Sound mixer column length" xml:space="preserve">
+    <value>Length</value>
+  </data>
+  <data name="Sound mixer column last" xml:space="preserve">
+    <value>Last played</value>
+  </data>
+  <data name="Sound mixer column volume" xml:space="preserve">
+    <value>Volume</value>
+  </data>
+  <data name="Sound mixer playing" xml:space="preserve">
+    <value>playing</value>
+  </data>
+  <data name="Sound mixer ago {0}" xml:space="preserve">
+    <value>{0} ago</value>
+  </data>
+  <data name="Sound mixer loop {0}" xml:space="preserve">
+    <value>{0} loop</value>
   </data>
   <data name="Sound mute" xml:space="preserve">
     <value>Mute</value>

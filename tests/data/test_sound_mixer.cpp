@@ -17,6 +17,9 @@
 #include "imgui.h"
 #include "imgui_internal.h"
 
+#include <cstdint>
+#include <map>
+#include <set>
 #include <utility>
 #include <vector>
 
@@ -25,7 +28,8 @@ namespace
 using Audio::SoundKind;
 using Audio::Mixer::HeardSound;
 
-// A backend that records the mixer's gains.
+// A backend that records the mixer's gains and counts a start for each play
+// while `starts` is true.
 class GainAudio : public mu::IPlatformAudio
 {
 public:
@@ -38,7 +42,20 @@ public:
     bool PlaySound(ESound buffer, const void*, bool) override
     {
         plays.push_back(static_cast<int>(buffer));
+        if (starts)
+        {
+            ++started[static_cast<int>(buffer)];
+        }
         return true;
+    }
+    std::uint32_t GetSoundStarts(ESound buffer) const override
+    {
+        const auto found = started.find(static_cast<int>(buffer));
+        return found != started.end() ? found->second : 0;
+    }
+    bool IsSoundPlaying(ESound buffer) const override
+    {
+        return playing.contains(static_cast<int>(buffer));
     }
     bool PlaySoundAtLevel(ESound, float) override
     {
@@ -80,6 +97,9 @@ public:
     }
 
     std::vector<int> plays;
+    bool starts = true;
+    std::map<int, std::uint32_t> started;
+    std::set<int> playing;
     std::vector<std::pair<int, float>> gains;
     std::vector<float> musicGains;
 };
@@ -167,21 +187,21 @@ TEST_CASE("Sound Mixer: a sound's kind is its source's, a loop's map ambience, e
 {
     MixerScope scope;
     using Audio::Mixer::OnPlay;
-    OnPlay(5, false, 0.0);
-    OnPlay(6, true, 0.0);
+    OnPlay(5, false);
+    OnPlay(6, true);
     {
         const Audio::ScopedSoundSource monster(SoundKind::Monster, "Death Rider", 306);
-        OnPlay(7, false, 0.0);
+        OnPlay(7, false);
         {
             const Audio::ScopedSoundSource object(SoundKind::MapObject, {}, 37);
-            OnPlay(8, true, 0.0);
+            OnPlay(8, true);
         }
-        OnPlay(9, false, 0.0);
+        OnPlay(9, false);
     }
-    OnPlay(10, false, 0.0);
+    OnPlay(10, false);
     CHECK(Audio::CurrentSoundSource() == nullptr);
 
-    const std::vector<HeardSound> heard = Audio::Mixer::Heard(1.0);
+    const std::vector<HeardSound> heard = Audio::Mixer::Heard();
     REQUIRE(heard.size() == 6);
     const auto kindOf = [&](int number)
     {
@@ -203,28 +223,79 @@ TEST_CASE("Sound Mixer: a sound's kind is its source's, a loop's map ambience, e
     CHECK(MuEditor::SoundMixer::SourceText(*FindHeard(heard, 8)) == "Map object sounds: object 37");
 }
 
-TEST_CASE("Sound Mixer: the heard list keeps the last ten seconds, newest first, and the sounds with changed "
-          "controls (Q-SM2) [audio][mixer][editor]")
+TEST_CASE("Sound Mixer: the heard list keeps each sound where it was first heard and counts the backend's starts; "
+          "Clear all keeps the changed sounds [audio][mixer][editor]")
 {
     MixerScope scope;
     using namespace Audio::Mixer;
-    OnPlay(1, false, 0.0);
-    OnPlay(2, false, 5.0);
-    OnPlay(1, false, 1.0);
-    std::vector<HeardSound> heard = Heard(9.0);
+    const auto play = [&scope](int number, double now, bool starts)
+    {
+        scope.audio.starts = starts;
+        OnPlay(number, false);
+        if (starts)
+        {
+            ++scope.audio.started[number];
+        }
+        OnPlayed(number, now);
+    };
+    play(1, 0.0, true);
+    play(2, 5.0, true);
+    play(1, 6.0, true);
+    // A call while it plays (a loop, a map object's sound each frame) is no
+    // start.
+    play(2, 7.0, false);
+    std::vector<HeardSound> heard = Heard();
     REQUIRE(heard.size() == 2);
-    CHECK(heard[0].number == 2);
-    CHECK(heard[1].number == 1);
-    CHECK(heard[1].plays == 2);
-    CHECK(heard[1].lastHeard == 1.0);
-    heard = Heard(12.0);
-    REQUIRE(heard.size() == 1);
-    CHECK(heard[0].number == 2);
-    // A lowered sound stays listed.
-    SoundControl(1).volume = 0.4f;
-    heard = Heard(30.0);
-    REQUIRE(heard.size() == 1);
     CHECK(heard[0].number == 1);
+    CHECK(heard[0].plays == 2);
+    CHECK(heard[0].lastStarted == 6.0);
+    CHECK(heard[1].number == 2);
+    CHECK(heard[1].plays == 1);
+    CHECK(heard[1].lastStarted == 5.0);
+    // A start that no OnPlay announced is not counted.
+    ++scope.audio.started[1];
+    OnPlayed(1, 8.0);
+    CHECK(Heard()[0].plays == 2);
+
+    // Clear all: the lowered sound stays, with no plays; the other goes.
+    SoundControl(2).volume = 0.4f;
+    ClearHeard();
+    heard = Heard();
+    REQUIRE(heard.size() == 1);
+    CHECK(heard[0].number == 2);
+    CHECK(heard[0].plays == 0);
+    CHECK(heard[0].lastStarted < 0.0);
+    // The sounds heard after it come after it, a cleared one as new.
+    play(3, 9.0, true);
+    play(1, 10.0, true);
+    heard = Heard();
+    REQUIRE(heard.size() == 3);
+    CHECK(heard[0].number == 2);
+    CHECK(heard[1].number == 3);
+    CHECK(heard[2].number == 1);
+    CHECK(heard[2].plays == 1);
+
+    // A cleared sound still gets its gain: it may play on.
+    ClearHeard();
+    REQUIRE(Heard().size() == 1);
+    scope.audio.gains.clear();
+    KindControl(SoundKind::Other).muted = true;
+    Apply();
+    CHECK(scope.audio.gains == std::vector<std::pair<int, float>>{{1, 0.0f}, {2, 0.0f}, {3, 0.0f}});
+}
+
+TEST_CASE("Sound Mixer: a row says how long its sound is and when it last started [audio][mixer][editor]")
+{
+    using namespace MuEditor::SoundMixer;
+    CHECK(LengthText(1.42f, false) == "1.4 s");
+    CHECK(LengthText(6.0f, true) == "6.0 s loop");
+    CHECK(LengthText(0.0f, true).empty());
+    HeardSound sound;
+    CHECK(LastText(sound, 10.0, false).empty());
+    CHECK(LastText(sound, 10.0, true) == "playing");
+    sound.lastStarted = 7.5;
+    CHECK(LastText(sound, 10.0, false) == "2.5 s ago");
+    CHECK(LastText(sound, 10.0, true) == "playing");
 }
 
 TEST_CASE("Sound Mixer: the reminder counts what is muted, solo and lowered (Q-SM5) [audio][mixer][editor]")
@@ -254,7 +325,7 @@ TEST_CASE("Sound Mixer: a starting sound and every change give the backend the g
     MixerScope scope;
     using namespace Audio::Mixer;
     KindControl(SoundKind::Other).muted = true;
-    CHECK(OnPlay(12, false, 0.0) == 0.0f);
+    CHECK(OnPlay(12, false) == 0.0f);
     REQUIRE(scope.audio.gains.size() == 1);
     CHECK(scope.audio.gains[0] == std::pair{12, 0.0f});
     // The window's buttons apply at once: every sound heard and the music.
@@ -284,10 +355,15 @@ TEST_CASE("Sound Mixer: PlayBuffer notes a loaded sound with its gain, and start
     // A sound that was never loaded is not listed.
     PlayBuffer(static_cast<ESound>(SOUND_CLICK01 + 1));
     PlayBufferOnFreeChannel(SOUND_CLICK01, 0.5f);
-    const std::vector<HeardSound> heard = Audio::Mixer::Heard(Audio::Mixer::Now());
+    // A call that starts nothing counts nothing.
+    scope.audio.starts = false;
+    PlayBuffer(SOUND_CLICK01, nullptr, TRUE);
+    const std::vector<HeardSound> heard = Audio::Mixer::Heard();
     REQUIRE(heard.size() == 1);
     CHECK(heard[0].number == SOUND_CLICK01);
     CHECK(heard[0].plays == 2);
+    CHECK(heard[0].looped);
+    CHECK(heard[0].lastStarted >= 0.0);
     REQUIRE_FALSE(scope.audio.gains.empty());
     CHECK(scope.audio.gains.front() == std::pair{static_cast<int>(SOUND_CLICK01), 0.0f});
     // It still starts, silently, so that unmuting brings it back.
@@ -301,7 +377,9 @@ TEST_CASE("Sound Mixer: the window draws its kinds and the sounds heard, the rem
           "[audio][mixer][editor]")
 {
     MixerScope scope;
-    Audio::Mixer::OnPlay(20, false, Audio::Mixer::Now());
+    Audio::Mixer::OnPlay(20, false);
+    Audio::Mixer::OnPlay(21, true);
+    scope.audio.playing.insert(21);
     TestImGuiContext context;
     MuEditor::ToolWindows windows;
     const auto draw = [&]

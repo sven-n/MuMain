@@ -3488,16 +3488,49 @@
     <value>Alles zurücksetzen</value>
   </data>
   <data name="Sound mixer note" xml:space="preserve">
-    <value>Zum Hören im Editor: Arten von Geräuschen und gerade gehörte Geräusche stumm, solo oder leiser schalten. Änderungen wirken sofort; eine stumme Schleife läuft lautlos weiter. Die Lautstärken des Spiels bleiben, wie sie sind, die Abspielknöpfe und Vorschauen des Editors sind nicht betroffen, und jeder Start spielt alles wie gewohnt.</value>
+    <value>Zum Hören im Editor: Arten von Geräuschen und jedes gehörte Geräusch stumm, solo oder leiser schalten. Änderungen wirken sofort; eine stumme Schleife läuft lautlos weiter. Die Lautstärken des Spiels bleiben, wie sie sind, die Abspielknöpfe und Vorschauen des Editors sind nicht betroffen, und jeder Start spielt alles wie gewohnt.</value>
   </data>
   <data name="Sound mixer kinds" xml:space="preserve">
     <value>Arten</value>
   </data>
-  <data name="Sound mixer heard just now" xml:space="preserve">
-    <value>Gerade gehört (letzte 10 s)</value>
+  <data name="Sound mixer sounds heard" xml:space="preserve">
+    <value>Gehörte Geräusche</value>
   </data>
   <data name="Sound mixer nothing heard" xml:space="preserve">
-    <value>Kein Geräusch in den letzten 10 Sekunden.</value>
+    <value>Noch kein Geräusch gehört.</value>
+  </data>
+  <data name="Sound mixer clear all" xml:space="preserve">
+    <value>Alle löschen</value>
+  </data>
+  <data name="Sound mixer clear all tip" xml:space="preserve">
+    <value>Leert die Liste und zählt wieder ab 0. Stumme, solo und leiser geschaltete Geräusche bleiben stehen.</value>
+  </data>
+  <data name="Sound mixer column sound" xml:space="preserve">
+    <value>Geräusch</value>
+  </data>
+  <data name="Sound mixer column source" xml:space="preserve">
+    <value>Quelle</value>
+  </data>
+  <data name="Sound mixer column plays" xml:space="preserve">
+    <value>Gespielt</value>
+  </data>
+  <data name="Sound mixer column length" xml:space="preserve">
+    <value>Länge</value>
+  </data>
+  <data name="Sound mixer column last" xml:space="preserve">
+    <value>Zuletzt</value>
+  </data>
+  <data name="Sound mixer column volume" xml:space="preserve">
+    <value>Lautstärke</value>
+  </data>
+  <data name="Sound mixer playing" xml:space="preserve">
+    <value>spielt</value>
+  </data>
+  <data name="Sound mixer ago {0}" xml:space="preserve">
+    <value>vor {0}</value>
+  </data>
+  <data name="Sound mixer loop {0}" xml:space="preserve">
+    <value>{0} Schleife</value>
   </data>
   <data name="Sound mute" xml:space="preserve">
     <value>Stumm</value>

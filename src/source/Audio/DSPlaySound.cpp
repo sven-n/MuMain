@@ -93,13 +93,19 @@ std::wstring GetLoadedSoundFile(ESound bufferId)
 #ifdef _EDITOR
 namespace
 {
-// The Sound Mixer notes a loaded sound that starts and gives it its gain.
+// The Sound Mixer lists a loaded sound and gives it its gain before it plays,
+// and counts it after when it started.
 void NoteForMixer(ESound bufferId, bool looped)
 {
     if (LoadedSounds().contains(static_cast<int>(bufferId)))
     {
-        Audio::Mixer::OnPlay(static_cast<int>(bufferId), looped, Audio::Mixer::Now());
+        Audio::Mixer::OnPlay(static_cast<int>(bufferId), looped);
     }
+}
+
+void CountForMixer(ESound bufferId)
+{
+    Audio::Mixer::OnPlayed(static_cast<int>(bufferId), Audio::Mixer::Now());
 }
 } // namespace
 #endif
@@ -113,11 +119,15 @@ HRESULT PlayBuffer(ESound bufferId, OBJECT* object, BOOL looped)
         return S_FALSE;
     NoteForMixer(bufferId, looped != FALSE);
 #endif
+    HRESULT result = E_FAIL;
     if (g_platformAudio != nullptr)
     {
-        return g_platformAudio->PlaySound(bufferId, object, looped != FALSE) ? S_OK : E_FAIL;
+        result = g_platformAudio->PlaySound(bufferId, object, looped != FALSE) ? S_OK : E_FAIL;
     }
-    return E_FAIL;
+#ifdef _EDITOR
+    CountForMixer(bufferId);
+#endif
+    return result;
 }
 
 HRESULT PlayBufferAtLevel(ESound bufferId, float level)
@@ -141,11 +151,15 @@ HRESULT PlayBufferOnFreeChannel(ESound bufferId, float level)
         return S_FALSE;
     NoteForMixer(bufferId, false);
 #endif
+    HRESULT result = E_FAIL;
     if (g_platformAudio != nullptr)
     {
-        return g_platformAudio->PlaySoundOnFreeChannel(bufferId, level) ? S_OK : E_FAIL;
+        result = g_platformAudio->PlaySoundOnFreeChannel(bufferId, level) ? S_OK : E_FAIL;
     }
-    return E_FAIL;
+#ifdef _EDITOR
+    CountForMixer(bufferId);
+#endif
+    return result;
 }
 
 VOID StopBuffer(ESound bufferId, BOOL resetPosition)

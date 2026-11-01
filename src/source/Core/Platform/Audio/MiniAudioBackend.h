@@ -21,6 +21,7 @@
 #include "miniaudio.h"
 
 #include <array>
+#include <cstdint>
 #include <deque>
 #include <string>
 #include <vector>
@@ -65,6 +66,9 @@ public:
     void SetSFXVolume(float level) override;
     void SetSoundMixGain(ESound buffer, float gain) override;
     void SetMusicMixGain(float gain) override;
+    [[nodiscard]] std::uint32_t GetSoundStarts(ESound buffer) const override;
+    [[nodiscard]] bool IsSoundPlaying(ESound buffer) const override;
+    [[nodiscard]] float GetSoundLength(ESound buffer) const override;
     [[nodiscard]] float GetBGMVolume() const override;
     [[nodiscard]] float GetSFXVolume() const override;
 
@@ -110,6 +114,8 @@ private:
     std::deque<float> m_mixGain = std::deque<float>(MAX_BUFFER, 1.0f);
     std::deque<std::array<float, MAX_CHANNEL>> m_channelVolume = std::deque<std::array<float, MAX_CHANNEL>>(MAX_BUFFER);
     std::deque<std::array<bool, MAX_CHANNEL>> m_channelMixed = std::deque<std::array<bool, MAX_CHANNEL>>(MAX_BUFFER);
+    // How often each sound started on a mixed channel (GetSoundStarts).
+    std::deque<std::uint32_t> m_starts = std::deque<std::uint32_t>(MAX_BUFFER);
     float m_musicMixGain = 1.0f;
 
     float m_bgmVolume = 1.0f; // BGM volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1

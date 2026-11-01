@@ -410,7 +410,7 @@ TEST_CASE("Map object sounds: the Sound Mixer hears them as map object sounds of
     OBJECT waterfall;
     waterfall.Type = 38;
     World::MapObjectSounds::OnObjectDrawn(waterfall);
-    const std::vector<Audio::Mixer::HeardSound> heard = Audio::Mixer::Heard(Audio::Mixer::Now());
+    const std::vector<Audio::Mixer::HeardSound> heard = Audio::Mixer::Heard();
     World::MapObjectSounds::LoadForMap(-1, 0);
     Audio::Mixer::Clear();
     REQUIRE(heard.size() == 1);

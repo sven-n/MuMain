@@ -10,6 +10,8 @@
 
 #include "Audio/DSPlaySound.h" // ESound enum, MAX_CHANNEL, MAX_BUFFER
 
+#include <cstdint>
+
 namespace mu
 {
 
@@ -73,6 +75,26 @@ public:
     virtual void SetMusicMixGain(float gain)
     {
         static_cast<void>(gain);
+    }
+    // For the Sound Mixer's list: how often the sound started on a channel its
+    // mix gain reaches (a call while it plays and is not restarted is none,
+    // nor is a preview's PlaySoundAtLevel), whether such a channel plays, and
+    // its length in seconds (0 when it is not loaded). A backend without them
+    // gives 0, false and 0.
+    [[nodiscard]] virtual std::uint32_t GetSoundStarts(ESound buffer) const
+    {
+        static_cast<void>(buffer);
+        return 0;
+    }
+    [[nodiscard]] virtual bool IsSoundPlaying(ESound buffer) const
+    {
+        static_cast<void>(buffer);
+        return false;
+    }
+    [[nodiscard]] virtual float GetSoundLength(ESound buffer) const
+    {
+        static_cast<void>(buffer);
+        return 0.0f;
     }
 
     virtual void SetBGMVolume(float level) = 0;

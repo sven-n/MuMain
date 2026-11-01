@@ -25,19 +25,21 @@ struct Control
     bool IsChanged() const;
 };
 
-// The sounds of the last ten seconds are listed (Q-SM2).
-constexpr double HeardSeconds = 10.0;
-
-// A sound heard this session, as it last played.
+// A row of the list of sounds heard: a sound as it last played, and how often
+// it started since the list was cleared.
 struct HeardSound
 {
     int number = 0;
     SoundKind kind = SoundKind::Other;
     std::string name;
     int sourceNumber = -1;
-    // The mixer's clock (Now) when it last started.
-    double lastHeard = 0.0;
+    // Whether it last played as a loop.
+    bool looped = false;
+    // The starts since the list was cleared: a call while it plays and is not
+    // restarted (a loop, a map object's sound each frame) is none.
     int plays = 0;
+    // The mixer's clock (Now) at its last start; -1 for none since the clear.
+    double lastStarted = -1.0;
 };
 
 Control& KindControl(SoundKind kind);
@@ -47,14 +49,23 @@ Control& SoundControl(int number);
 float GainFor(int number, SoundKind kind);
 float MusicGain();
 
-// A sound starts (PlayBuffer, PlayBufferOnFreeChannel): its kind is the
-// living source's, else map ambience for a loop, else everything else. Notes
-// it as heard at `now`, gives the backend its gain and returns the gain.
-float OnPlay(int number, bool looped, double now);
+// A sound is about to play (PlayBuffer, PlayBufferOnFreeChannel): its kind is
+// the living source's, else map ambience for a loop, else everything else.
+// Lists it, gives the backend its gain before it starts and returns the gain.
+float OnPlay(int number, bool looped);
 
-// The sounds heard in the last HeardSeconds before `now` and those whose
-// controls are changed, newest first.
-std::vector<HeardSound> Heard(double now);
+// The play OnPlay announced is done: counts a start at `now` when the backend
+// started the sound.
+void OnPlayed(int number, double now);
+
+// The sounds heard since the list was last cleared, in the order they were
+// first heard, so that a row stays where it is.
+std::vector<HeardSound> Heard();
+
+// The window's "Clear all": empties the list and starts the counts again. The
+// sounds whose controls are changed stay listed, with no plays, so that what
+// is muted can be found again.
+void ClearHeard();
 
 struct Changes
 {
@@ -72,8 +83,8 @@ struct Changes
 // What is changed, for the menu bar's reminder (Q-SM5).
 Changes CountChanges();
 
-// Gives the backend the gains of every sound heard this session and of the
-// music; after a control changes.
+// Gives the backend the gains of every sound heard this session, listed or
+// cleared, and of the music; after a control changes.
 void Apply();
 
 // Puts every control back to normal, and applies it.

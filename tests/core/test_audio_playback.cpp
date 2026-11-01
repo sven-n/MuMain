@@ -715,3 +715,69 @@ TEST_CASE("the Sound Mixer's gain changes a sound's playing and new copies at on
         ma_audio_buffer_uninit(&buffer);
     }
 }
+
+TEST_CASE("the backend counts the starts the Sound Mixer lists, not a call while it plays nor a preview; it says "
+          "whether they play and how long the sound is [audio][mixer]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    ma_engine_config engineConfig = ma_engine_config_init();
+    engineConfig.noDevice = MA_TRUE;
+    engineConfig.channels = 1;
+    engineConfig.sampleRate = 48000;
+    REQUIRE(ma_engine_init(&engineConfig, &backend->m_engine) == MA_SUCCESS);
+    backend->m_initialized = true;
+
+    // Two channels of a sound of a second and a half.
+    constexpr ma_uint64 sourceFrameCount = 72000;
+    std::vector<float> sourceFrames(sourceFrameCount, 0.25f);
+    ma_audio_buffer_config bufferConfig =
+        ma_audio_buffer_config_init(ma_format_f32, 1, sourceFrameCount, sourceFrames.data(), nullptr);
+    bufferConfig.sampleRate = 48000;
+    std::array<ma_audio_buffer, 2> buffers{};
+    for (ma_audio_buffer& buffer : buffers)
+    {
+        REQUIRE(ma_audio_buffer_init(&bufferConfig, &buffer) == MA_SUCCESS);
+    }
+    constexpr ESound soundId = SOUND_CLICK01;
+    const int soundIndex = static_cast<int>(soundId);
+    for (int channel = 0; channel < 2; ++channel)
+    {
+        REQUIRE(ma_sound_init_from_data_source(&backend->m_engine, reinterpret_cast<ma_data_source*>(&buffers[channel]),
+                                               0, nullptr, &backend->m_sounds[soundIndex][channel]) == MA_SUCCESS);
+    }
+    backend->m_soundLoaded[soundIndex] = true;
+    backend->m_loadedChannels[soundIndex] = 2;
+    backend->m_activeChannel[soundIndex] = 0;
+
+    CHECK(backend->GetSoundStarts(soundId) == 0);
+    CHECK_FALSE(backend->IsSoundPlaying(soundId));
+    CHECK(backend->GetSoundLength(soundId) == doctest::Approx(1.5f));
+    // A loop starts once; asked for again while it plays, it is no start.
+    REQUIRE(backend->PlaySound(soundId, nullptr, true));
+    CHECK(backend->GetSoundStarts(soundId) == 1);
+    CHECK(backend->IsSoundPlaying(soundId));
+    REQUIRE(backend->PlaySound(soundId, nullptr, true));
+    CHECK(backend->GetSoundStarts(soundId) == 1);
+    backend->StopSound(soundId, true);
+    CHECK_FALSE(backend->IsSoundPlaying(soundId));
+    // A preview is neither counted nor playing for the mixer.
+    REQUIRE(backend->PlaySoundAtLevel(soundId, 0.5f));
+    CHECK(backend->GetSoundStarts(soundId) == 1);
+    CHECK_FALSE(backend->IsSoundPlaying(soundId));
+    backend->StopSound(soundId, true);
+    // A copy on a free channel counts.
+    REQUIRE(backend->PlaySoundOnFreeChannel(soundId, 1.0f));
+    CHECK(backend->GetSoundStarts(soundId) == 2);
+    CHECK(backend->IsSoundPlaying(soundId));
+    // A sound that is not loaded: none, not playing, no length.
+    constexpr ESound otherId = static_cast<ESound>(SOUND_CLICK01 + 1);
+    CHECK(backend->GetSoundStarts(otherId) == 0);
+    CHECK_FALSE(backend->IsSoundPlaying(otherId));
+    CHECK(backend->GetSoundLength(otherId) == 0.0f);
+
+    backend->Shutdown();
+    for (ma_audio_buffer& buffer : buffers)
+    {
+        ma_audio_buffer_uninit(&buffer);
+    }
+}

@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <cstdint>
 #include <map>
 
 namespace Audio
@@ -39,11 +40,26 @@ namespace Audio::Mixer
 {
 namespace
 {
+struct Listed
+{
+    HeardSound sound;
+    // Its place in the list: the order of first hearing.
+    int order = 0;
+};
+
 struct State
 {
     std::array<Control, SoundKindCount> kinds;
     std::map<int, Control> sounds;
-    std::map<int, HeardSound> heard;
+    // The rows since the list was cleared.
+    std::map<int, Listed> listed;
+    int nextOrder = 0;
+    // The kind of every sound heard this session, for Apply: a cleared sound
+    // may still play.
+    std::map<int, SoundKind> kindOf;
+    // The backend's starts of OnPlay's sound before its play.
+    int playing = -1;
+    std::uint32_t startsBefore = 0;
 };
 
 State& Mixer()
@@ -66,6 +82,17 @@ bool AnySolo(const State& state)
 float Level(float volume)
 {
     return std::clamp(volume, 0.0f, 1.0f);
+}
+
+std::uint32_t StartsOf(int number)
+{
+    return g_platformAudio != nullptr ? g_platformAudio->GetSoundStarts(static_cast<ESound>(number)) : 0;
+}
+
+bool IsChanged(const State& state, int number)
+{
+    const auto control = state.sounds.find(number);
+    return control != state.sounds.end() && control->second.IsChanged();
 }
 
 void Count(const Control& control, Changes& changes)
@@ -128,10 +155,17 @@ float MusicGain()
     return Level(music.volume);
 }
 
-float OnPlay(int number, bool looped, double now)
+float OnPlay(int number, bool looped)
 {
-    HeardSound& heard = Mixer().heard[number];
+    State& state = Mixer();
+    const auto [row, added] = state.listed.try_emplace(number);
+    if (added)
+    {
+        row->second.order = state.nextOrder++;
+    }
+    HeardSound& heard = row->second.sound;
     heard.number = number;
+    heard.looped = looped;
     if (const SoundSource* source = CurrentSoundSource())
     {
         heard.kind = source->kind;
@@ -144,8 +178,9 @@ float OnPlay(int number, bool looped, double now)
         heard.name.clear();
         heard.sourceNumber = -1;
     }
-    heard.lastHeard = now;
-    ++heard.plays;
+    state.kindOf[number] = heard.kind;
+    state.playing = number;
+    state.startsBefore = StartsOf(number);
     const float gain = GainFor(number, heard.kind);
     if (g_platformAudio != nullptr)
     {
@@ -154,22 +189,60 @@ float OnPlay(int number, bool looped, double now)
     return gain;
 }
 
-std::vector<HeardSound> Heard(double now)
+void OnPlayed(int number, double now)
+{
+    State& state = Mixer();
+    if (state.playing != number)
+    {
+        return;
+    }
+    state.playing = -1;
+    const std::uint32_t started = StartsOf(number) - state.startsBefore;
+    const auto row = state.listed.find(number);
+    if (started == 0 || row == state.listed.end())
+    {
+        return;
+    }
+    row->second.sound.plays += static_cast<int>(started);
+    row->second.sound.lastStarted = now;
+}
+
+std::vector<HeardSound> Heard()
 {
     const State& state = Mixer();
-    std::vector<HeardSound> heard;
-    for (const auto& [number, sound] : state.heard)
+    std::vector<const Listed*> rows;
+    rows.reserve(state.listed.size());
+    for (const auto& row : state.listed)
     {
-        const auto control = state.sounds.find(number);
-        const bool changed = control != state.sounds.end() && control->second.IsChanged();
-        if (changed || now - sound.lastHeard <= HeardSeconds)
+        rows.push_back(&row.second);
+    }
+    std::sort(rows.begin(), rows.end(),
+              [](const Listed* left, const Listed* right) { return left->order < right->order; });
+    std::vector<HeardSound> heard;
+    heard.reserve(rows.size());
+    for (const Listed* row : rows)
+    {
+        heard.push_back(row->sound);
+    }
+    return heard;
+}
+
+void ClearHeard()
+{
+    State& state = Mixer();
+    for (auto row = state.listed.begin(); row != state.listed.end();)
+    {
+        if (IsChanged(state, row->first))
         {
-            heard.push_back(sound);
+            row->second.sound.plays = 0;
+            row->second.sound.lastStarted = -1.0;
+            ++row;
+        }
+        else
+        {
+            row = state.listed.erase(row);
         }
     }
-    std::stable_sort(heard.begin(), heard.end(),
-                     [](const HeardSound& left, const HeardSound& right) { return left.lastHeard > right.lastHeard; });
-    return heard;
 }
 
 Changes CountChanges()
@@ -193,9 +266,9 @@ void Apply()
     {
         return;
     }
-    for (const auto& [number, sound] : Mixer().heard)
+    for (const auto& [number, kind] : Mixer().kindOf)
     {
-        g_platformAudio->SetSoundMixGain(static_cast<ESound>(number), GainFor(number, sound.kind));
+        g_platformAudio->SetSoundMixGain(static_cast<ESound>(number), GainFor(number, kind));
     }
     g_platformAudio->SetMusicMixGain(MusicGain());
 }

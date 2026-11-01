@@ -141,10 +141,14 @@ only.
   and everything else. A sound's kind is where it comes from: the data's
   players name it (`Audio::ScopedSoundSource`), a loop is ambience, the rest
   is everything else.
-- **Heard just now**: each sound of the last 10 seconds, newest first, with
-  its file below `Data/Sound` (or its number), its kind and source (the set
-  and monster, the map object type). A sound whose controls are changed stays
-  listed.
+- **Sounds heard**: one row per sound, in the order they were first heard,
+  so that a row stays where it is: its file below `Data/Sound` (or its
+  number), its kind and source (the set and monster, the map object type),
+  how often it started (a loop or a map object's sound that is asked for each
+  frame counts once per start), its length ("loop" for a loop) and when it
+  last started ("playing" while it plays; the row is green then). **Clear
+  all** empties the list and counts again from 0; the sounds whose controls
+  are changed stay listed.
 
 Each row has a volume slider, **Mute** and **Solo**. A sound plays at its
 kind's volume times its own; mute wins; while anything is solo, only what is

@@ -64,10 +64,16 @@ mixer says. The effect preview's mute (`Audio::EditorMute`) stays as it is.
   back;
 - **Kinds**: music, map ambience, map object sounds, monster sounds,
   everything else, each with a volume slider, Mute and Solo;
-- **Heard just now**: one row per sound heard in the last 10 seconds, newest
-  first: how long ago, the file (or the sound number of a sound without a
-  file), the kind and source of its last play, a slider, Mute and Solo. A
-  sound whose controls are changed stays listed after the 10 seconds.
+- **Sounds heard**: one row per sound heard since the list was cleared, in
+  the order of first hearing: the file (or the sound number of a sound
+  without a file), the kind and source of its last play, how often it
+  started, its length, when it last started ("playing", a green row, while it
+  plays), a slider, Mute and Solo. **Clear all** empties the list and counts
+  again; the sounds whose controls are changed stay listed. (Changed after
+  trying it, 2026-11-01: in the first "heard just now" list of the last 10
+  seconds, newest first, the rows came, went and moved, so a sound was hard
+  to mute. The backend counts the starts, so a sound asked for each frame is
+  not counted each frame.)
 
 **The reminder.** While a kind or sound is muted, solo or below 100 %, the menu
 bar shows "Sound Mixer: …" with the counts; a click opens the window.
@@ -84,7 +90,7 @@ bar shows "Sound Mixer: …" with the counts; a click opens the window.
 ## Tests
 
 The rules (mute, solo, volume, mute over solo, music), the kinds of the
-sources (scope, looped, other), the heard list (10 seconds, changed sounds
-kept), the counts of the reminder, the backend's gains on playing and new
+sources (scope, looped, other), the heard list (order of first hearing, starts
+counted, Clear all keeping the changed sounds), the counts of the reminder, the backend's gains on playing and new
 copies and on music, the sources of the monster events and map object sounds,
 the window's rows and buttons. Mutation checks for each.

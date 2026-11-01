@@ -1006,7 +1006,7 @@ TEST_CASE("Monster sounds: the Sound Mixer hears a set's events as monster sound
     Audio::Mixer::Clear();
     const int attack1 = SoundOf(SetOf(DeathRider), "SOUND_AIDA_DEATHRAIDER_ATTACK1");
     CHECK(scope.Play(DeathRider, MONSTER01_ATTACK1) == Sounds({attack1}));
-    const std::vector<Audio::Mixer::HeardSound> heard = Audio::Mixer::Heard(Audio::Mixer::Now());
+    const std::vector<Audio::Mixer::HeardSound> heard = Audio::Mixer::Heard();
     Audio::Mixer::Clear();
     REQUIRE(heard.size() == 1);
     CHECK(heard[0].number == attack1);
