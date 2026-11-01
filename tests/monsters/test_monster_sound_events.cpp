@@ -516,6 +516,17 @@ TEST_CASE("Monster sounds: an event during cues plays each drawn frame in their 
     once.sounds = {"SOUND_MONSTER_BULLATTACK1"};
     set.soundEvents = {attack2, once};
     CHECK(GameLogic::Monsters::SoundEvents::HasDrawnEvents(set));
+    // An event of cues alone, or of timers alone (Q-MN91), makes a set one of
+    // drawn frames.
+    MonsterSoundSet onlyCues;
+    onlyCues.soundEvents = {attack2};
+    CHECK(GameLogic::Monsters::SoundEvents::HasDrawnEvents(onlyCues));
+    MonsterSoundSet onlyTimers;
+    Data::Monsters::MonsterSoundEvent swing;
+    swing.timers = {"hair swing"};
+    swing.sounds = {"SOUND_MONSTER_DSIDLE1"};
+    onlyTimers.soundEvents = {swing};
+    CHECK(GameLogic::Monsters::SoundEvents::HasDrawnEvents(onlyTimers));
     // Dreadfear's: attack 2 from frame 0 through frame 2.
     const std::vector<Data::Monsters::MonsterModelCue> cues = {{"attack2 sound", MONSTER01_ATTACK2, {0.0f, 2.001f}}};
     const auto drawn = [](int animation, float frame)
@@ -1105,10 +1116,14 @@ TEST_CASE("Monster sounds: a drawn frame asks the model's timers once, the draw 
     CHARACTER* again = scope.Creation().Create(DeathRider);
     REQUIRE(again != nullptr);
     again->ModelTimerLastTicks[0] = 4800;
+    // A frame it was asked in does not carry over.
+    again->ModelTimersAsked = true;
+    again->ModelTimerTicks = 1;
     CHARACTER* made = scope.Creation().Create(DeathRider);
     REQUIRE(made == again);
     CHECK(made->ModelTimerLastTicks[0] == 4800u);
     CHECK_FALSE(made->ModelTimersAsked);
+    CHECK(made->ModelTimerTicks == 0u);
 }
 
 TEST_CASE("Monster sounds: a monster is created with the once flag clear, as with SubType 0 (Q-MN87) "
