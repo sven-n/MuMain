@@ -49,7 +49,7 @@ struct Slot
     // Drawn in the shadow pass.
     bool shadow = false;
     unsigned int drawnFrame = 0;
-    // The previous draw recorded the same attachment in this slot.
+    // The previous frame's draw recorded the same attachment in this slot.
     bool sameAsLast = false;
 
     // The draw an update advanced and posed the part for (its animation step for the next draw), and how.
@@ -58,12 +58,15 @@ struct Slot
     std::unique_ptr<vec34_t[]> bones;
 };
 
-// Starts a frame's character draws.
+// Starts the frame the next draws record into; the last step of the update, after it advanced the parts.
 void BeginFrame();
+// Gives a character outside CharactersClient (a preview) slots of its own, until Untrack; its owner updates it.
+void Track(const CHARACTER* c);
+void Untrack(const CHARACTER* c);
 // Starts recording the parts drawn for this character.
 void BeginCharacter(const CHARACTER* c);
-// The next slot of the character, recorded with this draw; nullptr for a character outside CharactersClient, which
-// keeps drawing its parts with the shared bones.
+// The next slot of the character, recorded with this draw; nullptr for a character neither in CharactersClient nor
+// tracked, which draws its parts with the shared bones.
 Slot* Record(CHARACTER* c, _PART_t* part, int type, float x, float y, float z, int level, int option1, bool link,
              bool translate, int renderType, bool rightHandItem, unsigned char linkBone, float ownerScale);
 // The slot's own bones, MAX_BONES long.

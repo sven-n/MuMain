@@ -6,6 +6,7 @@
 
 #include <array>
 #include <deque>
+#include <unordered_map>
 
 namespace
 {
@@ -21,11 +22,19 @@ struct CharacterSlots
 std::array<CharacterSlots, MAX_CHARACTERS_CLIENT> s_characters;
 unsigned int s_drawFrame = 0;
 
+// Built on first use: owners that are globals track their previews during static initialization.
+std::unordered_map<const CHARACTER*, CharacterSlots>& Tracked()
+{
+    static std::unordered_map<const CHARACTER*, CharacterSlots> tracked;
+    return tracked;
+}
+
 CharacterSlots* SlotsOf(const CHARACTER* c)
 {
-    if (CharactersClient == nullptr || c < CharactersClient || c >= CharactersClient + MAX_CHARACTERS_CLIENT)
-        return nullptr;
-    return &s_characters[static_cast<std::size_t>(c - CharactersClient)];
+    if (CharactersClient != nullptr && c >= CharactersClient && c < CharactersClient + MAX_CHARACTERS_CLIENT)
+        return &s_characters[static_cast<std::size_t>(c - CharactersClient)];
+    const auto tracked = Tracked().find(c);
+    return tracked != Tracked().end() ? &tracked->second : nullptr;
 }
 
 bool IsPartOf(const CHARACTER* c, const void* part)
@@ -41,6 +50,16 @@ namespace Engine::Object::Attachments
 void BeginFrame()
 {
     ++s_drawFrame;
+}
+
+void Track(const CHARACTER* c)
+{
+    Tracked().try_emplace(c);
+}
+
+void Untrack(const CHARACTER* c)
+{
+    Tracked().erase(c);
 }
 
 void BeginCharacter(const CHARACTER* c)
@@ -59,9 +78,14 @@ Slot* Record(CHARACTER* c, _PART_t* part, int type, float x, float y, float z, i
         character->slots.emplace_back();
     Slot& slot = character->slots[character->next++];
     _PART_t* const own = IsPartOf(c, part) ? part : nullptr;
-    slot.sameAsLast = slot.drawnFrame + 1 == s_drawFrame && slot.type == type && slot.part == own && slot.x == x &&
-                      slot.y == y && slot.z == z && slot.link == link && slot.rightHandItem == rightHandItem &&
-                      slot.linkBone == linkBone && slot.ownerScale == ownerScale;
+    const bool same = slot.type == type && slot.part == own && slot.x == x && slot.y == y && slot.z == z &&
+                      slot.link == link && slot.rightHandItem == rightHandItem && slot.linkBone == linkBone &&
+                      slot.ownerScale == ownerScale;
+    // A later pass of the same frame keeps what the frame's first pass found.
+    if (slot.drawnFrame == s_drawFrame)
+        slot.sameAsLast = slot.sameAsLast && same;
+    else
+        slot.sameAsLast = slot.drawnFrame + 1 == s_drawFrame && same;
     slot.type = type;
     slot.x = x;
     slot.y = y;

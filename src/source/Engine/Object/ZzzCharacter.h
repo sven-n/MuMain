@@ -24,6 +24,9 @@ bool IsCharacterDrawn(CHARACTER* c);
 // The effects, sounds and state changes of the characters drawn this frame, after every Move* of the frame: their
 // bones are final, and what they spawn is drawn this frame.
 void UpdateCharacterEffects();
+// A preview's update (a character outside CharactersClient, tracked by Engine::Object::Attachments::Track): its parts,
+// cloth and transformation, which its draw only draws. Its owner calls it in its update, before drawing it.
+void UpdatePreviewCharacter(CHARACTER* c);
 // Hands the camera a shake UpdateCharacterEffects requested last frame; call before the frame's damping.
 void ApplyCharacterEffectsEarthQuake();
 // A shake the update requests for the camera after its next damping, as when the draw set it; a character effect's
@@ -60,7 +63,7 @@ struct PrepassBoneCheck
     // Draws of a client character's own part: reusing the update's animation step, or advancing it themselves
     // (an attachment's first frame; steadily rising when update and draw disagree).
     int partsReused = 0;
-    int partsAdvancedInDraw = 0;
+    int partsDrawnUnadvanced = 0;
     float maxDelta = 0.f;
 };
 extern PrepassBoneCheck g_PrepassBoneCheck;

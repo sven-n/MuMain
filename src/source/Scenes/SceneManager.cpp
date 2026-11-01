@@ -59,6 +59,7 @@ FrameTimingState g_frameTiming;
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/ServerListManager.h"
 #include "UI/Core/WindowSystem.h"
+#include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/HUD/Notices.h"
 #include "I18N/All.h"
@@ -1195,6 +1196,8 @@ void MainScene(HDC hDC)
 
     UpdateCoreSystems();
     SetWorldClearColor();
+    // Every update of the frame has run, previews included: the draws record into the next frame.
+    Engine::Object::Attachments::BeginFrame();
 
     bool Success = false;
 

@@ -15,7 +15,6 @@
 #include <eh.h>
 #endif
 #include "UI/Core/UIManager.h"
-#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Guild/GuildCache.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -7016,28 +7015,21 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     }
 
     OBB_t OBB;
-    vec3_t p, Position;
 
     const LinkPlacement placement = PlaceLinkedPart(x, y, z, c, f->LinkBone, o->Scale, Type, Link, bRightHandItem);
     std::memcpy(ParentMatrix, placement.parent, sizeof(placement.parent));
     VectorCopy(placement.origin, b->BodyOrigin);
     VectorCopy(placement.angle, Object->Angle);
-    VectorCopy(placement.position, Position);
     b->BodyScale = placement.scale;
     if (Type == MODEL_BOSS_HEAD)
         b->BoneHead = 0;
 
-    // The update advanced and posed a client character's part since the last draw; other parts advance here.
+    // The update advanced and posed the part since the last frame; a part it has not seen yet is drawn as it stands.
     const bool advanced = slot != nullptr && Engine::Object::Attachments::WasAdvanced(*slot);
 #ifdef MU_ENABLE_CONTROL_SOCKET
     if (g_PrepassBoneCheck.enabled && slot != nullptr && slot->part != nullptr)
-        ++(advanced ? g_PrepassBoneCheck.partsReused : g_PrepassBoneCheck.partsAdvancedInDraw);
+        ++(advanced ? g_PrepassBoneCheck.partsReused : g_PrepassBoneCheck.partsDrawnUnadvanced);
 #endif
-    if (!advanced && !copied)
-    {
-        const Diagnostics::DrawSpawnCheck::AllowScope firstFrame;
-        AdvanceLinkedPart(c, f, Type, Link);
-    }
     b->CurrentAction = LinkedPartAction(c, f);
 
     VectorCopy(b->BodyOrigin, Object->Position);
@@ -7094,13 +7086,6 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     if (Object->EnableShadow)
     {
         return bones;
-    }
-
-    // The update spawns the effects of a part it advanced or copied; the draw spawns the others'.
-    if (!advanced && !copied)
-    {
-        const Diagnostics::DrawSpawnCheck::AllowScope firstFrame;
-        SpawnLinkedPartEffects(c, Type, Object, bones, Position);
     }
 
     if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE &&
@@ -10192,18 +10177,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         }
     }
 
-    // A preview outside the client's characters gets no update; its draw runs its cloth, transformation and parts.
-    if (!IsClientCharacterObject(o))
-    {
-        const Diagnostics::DrawSpawnCheck::AllowScope preview;
-        UpdateCharacterCloth(c);
-        UpdateTransformSkinEffects(o);
-        if (o->Type == MODEL_PLAYER)
-        {
-            UpdateParts(c);
-        }
-        UpdatePlayerBodyParts(c);
-    }
     if (cloak.shown && !g_isCharacterBuff(o, eBuff_Cloaking) && o->m_pCloth)
     {
         auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
@@ -10243,11 +10216,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     }
 
     if (DrawsNextGradeObjects(c))
-    {
-        if (!IsClientCharacterObject(o))
-            SpawnNextGradeWeaponEffects(c);
         NextGradeObjectRender(c);
-    }
 
     for (int i = 0; i < 2; i++)
     {
@@ -12080,6 +12049,20 @@ void UpdateDrawnCharacterEffects()
 }
 } // namespace
 
+void UpdatePreviewCharacter(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+    UpdateAttachedParts(c);
+    SpawnImpLight(c, o);
+    if (DrawsNextGradeObjects(c))
+        SpawnNextGradeWeaponEffects(c);
+    UpdateCharacterCloth(c);
+    UpdateTransformSkinEffects(o);
+    if (o->Type == MODEL_PLAYER)
+        UpdateParts(c);
+    UpdatePlayerBodyParts(c);
+}
+
 void ApplyCharacterEffectsEarthQuake()
 {
     if (s_hasEarthQuakeRequest)
@@ -12123,7 +12106,6 @@ void RenderCharactersClient()
 #endif
 
     WaitCharactersAnimation();
-    Engine::Object::Attachments::BeginFrame();
 
     // Characters keep their Classic look with post-processing on: their bodies,
     // equipment, wings and glow parts never feed the bloom.
@@ -15646,8 +15628,6 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
                     RenderLinkObject(20.f, -5.f, 20.f, c, w, iType, iLevel, iOption1, false, bTranslate);
                 else
                     RenderLinkObject(20.f, 0.f, 0.f, c, w, iType, iLevel, iOption1, false, bTranslate);
-                if (!IsClientCharacterObject(o))
-                    SpawnImpLight(c, o);
             }
         }
     }

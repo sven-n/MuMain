@@ -294,7 +294,7 @@ TEST_CASE("The update advances each part of the last draw once, and the next dra
     Attachments::BeginCharacter(c);
     CHECK(Attachments::WasAdvanced(*record(&c->Weapon[0], 0.f)));
 
-    // The next draw attaches something else in that slot: it advances the part itself.
+    // The next draw attaches something else in that slot: it draws the part as it stands, for the update to advance.
     CHECK(advance() == 1);
     Attachments::BeginFrame();
     Attachments::BeginCharacter(c);
@@ -728,7 +728,7 @@ TEST_CASE("The stun skull is refreshed for a stunned object, and not while its s
     CHECK(skulls() == 0);
 }
 
-TEST_CASE("A spawn while drawing is a violation, unless the draw allows it; outside a draw it is none [effects]")
+TEST_CASE("Every spawn while drawing is a violation; outside a draw it is none [effects]")
 {
     using namespace Diagnostics::DrawSpawnCheck;
     ResetViolations();
@@ -737,14 +737,57 @@ TEST_CASE("A spawn while drawing is a violation, unless the draw allows it; outs
     {
         const DrawScope drawing;
         Note("sprite");
-        CHECK(Violations() == 1);
-        {
-            const AllowScope firstFrame;
-            Note("sprite");
-        }
-        CHECK(Violations() == 1);
+        Note("sprite");
+        CHECK(Violations() == 2);
     }
     ResetViolations();
+}
+
+TEST_CASE(
+    "A second draw pass of the frame finds the part the update advanced, which the update advances once [effects]")
+{
+    namespace Attachments = Engine::Object::Attachments;
+    CharacterScope scope(MODEL_PLAYER);
+    CHARACTER* c = &scope.character();
+    const auto record = [c]
+    { return Attachments::Record(c, &c->Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 0, 0, false, true, 0, false, 33, 1.f); };
+    const auto advance = [c]
+    {
+        int advanced = 0;
+        Attachments::ForEachToAdvance(c, [&advanced](Attachments::Slot&) { ++advanced; });
+        return advanced;
+    };
+
+    Attachments::BeginFrame();
+    Attachments::BeginCharacter(c);
+    record();
+    CHECK(advance() == 1);
+
+    Attachments::BeginFrame();
+    for (int pass = 0; pass < 2; ++pass)
+    {
+        Attachments::BeginCharacter(c);
+        CHECK(Attachments::WasAdvanced(*record()));
+    }
+    CHECK(advance() == 1);
+}
+
+TEST_CASE("A preview gets slots of its own only while its owner tracks it [effects]")
+{
+    namespace Attachments = Engine::Object::Attachments;
+    auto preview = std::make_unique<CHARACTER>();
+    const auto record = [&preview]
+    {
+        return Attachments::Record(preview.get(), &preview->Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 0, 0, false, true, 0,
+                                   false, 33, 1.f);
+    };
+
+    CHECK(record() == nullptr);
+    Attachments::Track(preview.get());
+    Attachments::BeginCharacter(preview.get());
+    CHECK(record() != nullptr);
+    Attachments::Untrack(preview.get());
+    CHECK(record() == nullptr);
 }
 
 TEST_CASE("Creating a sprite while drawing is counted as a violation [effects]")

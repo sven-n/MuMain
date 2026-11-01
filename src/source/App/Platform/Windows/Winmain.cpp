@@ -7,6 +7,8 @@
 #include "Core/Platform/GameWindow.h"
 #include "Core/Input/UiInputRouter.h"
 #include "App/Control/ControlServer.h"
+#include "App/Control/DrawPurityCheck.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Core/Text/Utf8.h"
 #include "App/Platform/DiagnosticFrameCaptureSchedule.h"
 #include "App/Platform/DiagnosticFrameCaptureWriter.h"
@@ -2252,7 +2254,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     mu::GetRenderer().SetOffscreenRenderCallback([]
     {
         FRAME_PROFILE(UI);
+        // A draw pass like the scene's: what the previews draw was updated by their owners.
+        const Diagnostics::DrawSpawnCheck::DrawScope drawing;
+        Diagnostics::DrawPurityCheck::BeforeDraw();
         UI::RmlBridge::RenderTarget::RenderAll();
+        Diagnostics::DrawPurityCheck::AfterDraw();
     });
 
     mu::GetRenderer().SetPostRmlUiCallback(

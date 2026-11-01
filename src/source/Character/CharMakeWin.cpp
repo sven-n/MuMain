@@ -13,6 +13,7 @@
 #include "Network/Server/WSclient.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Camera/CameraProjection.h"
+#include "Engine/Object/CharacterAttachments.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Scenes/SceneCore.h"
@@ -148,10 +149,12 @@ CCharMakeWin g_CharMakeWin;
 
 CCharMakeWin::CCharMakeWin()
 {
+    Engine::Object::Attachments::Track(&CharacterView);
 }
 
 CCharMakeWin::~CCharMakeWin()
 {
+    Engine::Object::Attachments::Untrack(&CharacterView);
     Release();
 }
 
@@ -543,8 +546,16 @@ void CCharMakeWin::SelectCreateCharacter()
 
 void CCharMakeWin::UpdateCreateCharacter()
 {
-    if (!CharacterAnimation(&CharacterView, &CharacterView.Object))
-        SetAction(&CharacterView.Object, 0);
+    OBJECT* o = &CharacterView.Object;
+    if (!CharacterAnimation(&CharacterView, o))
+        SetAction(o, 0);
+
+    const ClassRenderParameters params = GetRenderParameters(CharacterView.Class);
+    Vector(1.0f, 1.0f, 1.0f, o->Light);
+    if (params.overrideAngle)
+        Vector(params.angleX, params.angleY, params.angleZ, o->Angle);
+    o->Scale = params.scale;
+    UpdatePreviewCharacter(&CharacterView);
 }
 
 void CCharMakeWin::SyncPreview()
@@ -578,26 +589,17 @@ void CCharMakeWin::RenderPreviewInto(std::uint32_t width, std::uint32_t height)
     OBJECT* o = &CharacterView.Object;
     vec3_t Position, Angle;
 
-    Vector(1.0f, 1.0f, 1.0f, o->Light);
+    // The class's offset in the frame moves the camera the other way, so the character stays where it stands.
+    const ClassRenderParameters params = GetRenderParameters(CharacterView.Class);
+    vec3_t framed;
+    Vector(o->Position[0] - params.positionOffsetX, o->Position[1], o->Position[2] - params.positionOffsetZ, framed);
     Vector(10, -500.f, 48.f, Position);
     Vector(-90.f, 0.f, 0.f, Angle);
     g_Camera.FOV = 10.f;
-    MoveCharacterCamera(CharacterView.Object.Position, Position, Angle);
+    MoveCharacterCamera(framed, Position, Angle);
     CameraProjection::UpdateView(g_Camera, 0, 0, static_cast<int>(width), static_cast<int>(height));
 
     BeginOpenglForTarget(static_cast<int>(width), static_cast<int>(height));
-
-    const ClassRenderParameters params = GetRenderParameters(CharacterView.Class);
-    if (params.overrideAngle)
-        Vector(params.angleX, params.angleY, params.angleZ, o->Angle);
-
-    o->Scale = params.scale;
-
-    if (params.positionOffsetX != 0.0f)
-        CharacterView.Object.Position[0] += params.positionOffsetX;
-    if (params.positionOffsetZ != 0.0f)
-        CharacterView.Object.Position[2] += params.positionOffsetZ;
-
     RenderCharacter(&CharacterView, o);
 
     EndOpengl();

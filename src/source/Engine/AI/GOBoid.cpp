@@ -5,7 +5,6 @@
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "Engine/Object/ZzzInfomation.h"
-#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "GOBoid.h"
@@ -723,12 +722,6 @@ bool RenderMount(OBJECT* o, bool bForceRender)
 
             RenderObject(o, false, 0, State);
             o->DrawnFrame = s_mountDrawFrame;
-            // A preview mount outside Mounts gets no update; its draw spawns its effects.
-            if (bForceRender)
-            {
-                const Diagnostics::DrawSpawnCheck::AllowScope preview;
-                UpdateDrawnMountEffects(o);
-            }
         }
     }
     return TRUE;

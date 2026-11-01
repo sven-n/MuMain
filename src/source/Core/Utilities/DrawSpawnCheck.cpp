@@ -30,7 +30,6 @@ using Callers = std::array<void*, CallerDepth>;
 
 std::mutex s_mutex;
 int s_drawDepth = 0;
-int s_allowDepth = 0;
 int s_violations = 0;
 bool s_listing = false;
 int s_draws = 0;
@@ -84,34 +83,19 @@ DrawScope::~DrawScope()
     --s_drawDepth;
 }
 
-AllowScope::AllowScope()
-{
-    ++s_allowDepth;
-}
-
-AllowScope::~AllowScope()
-{
-    --s_allowDepth;
-}
-
 void Note([[maybe_unused]] const char* kind)
 {
     if (s_drawDepth == 0)
         return;
-    const bool violation = s_allowDepth == 0;
-    if (violation)
-        ++s_violations;
+    ++s_violations;
 #ifdef MU_DRAW_SPAWN_LOG
-    if (!violation && !s_listing)
-        return;
     Callers callers{};
 #ifdef _WIN32
     // Skips Note and the spawn function itself.
     CaptureStackBackTrace(2, CallerDepth, callers.data(), nullptr);
 #endif
     std::lock_guard lock(s_mutex);
-    if (violation)
-        LogViolation(kind, callers);
+    LogViolation(kind, callers);
 #ifdef MU_ENABLE_CONTROL_SOCKET
     if (s_listing)
         ++s_counts[{kind, callers}];
