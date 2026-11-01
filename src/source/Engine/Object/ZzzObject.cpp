@@ -18,6 +18,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Engine/Object/ItemDropModel.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Scenes/SceneCore.h"
@@ -5828,147 +5829,8 @@ void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool
 
     OBJECT* o = &ip->Object;
     o->Live = true;
-    o->Type = Data::Items::ToModelSlot(Type);
+    o->Type = Engine::Items::Drops::DrawnModel(Type, n->Level);
     o->SubType = 1;
-    if (Type == (int)(ITEM_BOX_OF_LUCK))
-    {
-        switch (n->Level)
-        {
-        case 1:
-            o->Type = MODEL_EVENT + 4;
-            break;
-        case 2:
-            o->Type = MODEL_EVENT + 5;
-            break;
-        case 3:
-            o->Type = MODEL_EVENT + 6;
-            break;
-        case 5:
-            o->Type = MODEL_EVENT + 8;
-            break;
-        case 6:
-            o->Type = MODEL_EVENT + 9;
-            break;
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-        case 12:
-            o->Type = MODEL_EVENT + 10;
-            break;
-        case 13:
-            o->Type = MODEL_EVENT + 6;
-            break;
-        case 14:
-        case 15:
-            o->Type = MODEL_EVENT + 5;
-        }
-    }
-    if (Type >= ITEM_JACK_OLANTERN_BLESSINGS && Type <= ITEM_JACK_OLANTERN_CRY)
-    {
-        o->Type = Data::Items::ToModelSlot(Type);
-    }
-    if (GameLogic::Items::IsChocolateBoxType(Type))
-    {
-        if (n->Level == 1)
-        {
-            int Num = Type - (ITEM_PINK_CHOCOLATE_BOX);
-            o->Type = MODEL_EVENT + 21 + Num;
-        }
-    }
-    else if (Type == (int)(ITEM_RENA))
-    {
-        switch (n->Level)
-        {
-        case 1:
-        case 2:
-            o->Type = MODEL_EVENT + 11;
-            break;
-        }
-    }
-    else if (Type == (int)(ITEM_WEAPON_OF_ARCHANGEL))
-    {
-        // The level tells the three weapons apart: the item keeps it (its name), the model is drawn at +0
-        // (DrawnItemLevel).
-        switch (n->Level)
-        {
-        case 0:
-            o->Type = MODEL_DIVINE_STAFF_OF_ARCHANGEL;
-            break;
-        case 1:
-            o->Type = MODEL_DIVINE_SWORD_OF_ARCHANGEL;
-            break;
-        case 2:
-            o->Type = MODEL_DIVINE_CB_OF_ARCHANGEL;
-            break;
-        }
-    }
-    else if (Type == ITEM_SCROLL_OF_EMPEROR_RING_OF_HONOR)
-    {
-        switch (n->Level)
-        {
-        case 1:
-            o->Type = MODEL_EVENT + 12;
-            break;
-            break;
-        }
-    }
-    else if (Type == ITEM_BROKEN_SWORD_DARK_STONE)
-    {
-        switch (n->Level)
-        {
-        case 1:
-            o->Type = MODEL_EVENT + 13;
-            break;
-        }
-    }
-    else if (Type == ITEM_WIZARDS_RING)
-    {
-        switch (n->Level)
-        {
-        case 0:
-            o->Type = MODEL_EVENT + 15;
-            break;
-        case 1:
-        case 2:
-        case 3:
-            o->Type = MODEL_EVENT + 14;
-            break;
-        }
-    }
-    else if (Type == (int)(ITEM_ALE))
-    {
-        switch (n->Level)
-        {
-        case 1:
-            o->Type = MODEL_EVENT + 7;
-            break;
-        }
-    }
-    else if (Type == ITEM_LOCHS_FEATHER && n->Level == 1)
-    {
-        o->Type = MODEL_EVENT + 16;
-    }
-    else if (Type == ITEM_LIFE_STONE_ITEM && n->Level == 1)
-    {
-        o->Type = MODEL_EVENT + 18;
-    }
-    else if (Type == ITEM_GEMSTONE)
-    {
-        o->Type = MODEL_GEMSTONE;
-    }
-    else if (Type == ITEM_JEWEL_OF_HARMONY)
-    {
-        o->Type = MODEL_JEWEL_OF_HARMONY;
-    }
-    else if (Type == ITEM_LOWER_REFINE_STONE)
-    {
-        o->Type = MODEL_LOWER_REFINE_STONE;
-    }
-    else if (Type == ITEM_HIGHER_REFINE_STONE)
-    {
-        o->Type = MODEL_HIGHER_REFINE_STONE;
-    }
     ItemObjectAttribute(o);
     Vector(-30.f, -30.f, -30.f, o->BoundingBoxMin);
     Vector(30.f, 30.f, 30.f, o->BoundingBoxMax);
