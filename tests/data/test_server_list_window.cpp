@@ -6,17 +6,21 @@
 
 #include "TestImGuiContext.h"
 
+#include "Config/MuEditorConfig.h"
 #include "Data/GameData/ServerListData/ServerListJson.h"
 #include "I18N/All.h"
+#include "Network/Server/ServerListManager.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/ServerList/MuServerListUI.h"
 #include "UI/ServerList/ServerListColors.h"
+#include "UI/ServerList/ServerListOfflinePreviewUI.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
 #include <cstring>
 #include <filesystem>
 #include <fstream>
+#include <optional>
 #include <sstream>
 #include <random>
 #include <string>
@@ -151,6 +155,80 @@ void StartWithValhalla()
     Press(GroupRowId(0));
     REQUIRE_FALSE(g_MuServerListUI.CanUndo());
 }
+
+// The id of a widget in a row of the selected group's channel table (RenderChannelRow pushes the channel from 0).
+ImGuiID ChannelRowId(int channel, const char* label)
+{
+    const ImGuiID table = PaneId("##Group", "##Channels");
+    return ImGui::GetIDWithSeed(label, nullptr, ImGui::GetIDWithSeed(channel, table));
+}
+
+// The editor's preview of the offline servers on for one test (as MuEditor.ini has it, so nothing writes the
+// file); after it every channel is shown again without a load of its own, and the preview is as before.
+class OfflinePreviewOn
+{
+public:
+    static constexpr int Load = 50;
+
+    OfflinePreviewOn()
+        : m_show(g_ServerListManager->IsShowingOfflineServers()),
+          m_percent(g_ServerListManager->GetOfflineServerPercent()),
+          m_configShow(g_MuEditorConfig.GetShowOfflineServers()), m_configLoad(g_MuEditorConfig.GetOfflineServerLoad())
+    {
+        g_MuEditorConfig.SetOfflineServers(true, Load);
+        g_ServerListManager->SetOfflinePreview(true, Load);
+    }
+
+    ~OfflinePreviewOn()
+    {
+        for (int serverId = 0; serverId < GroupCount * Data::ServerList::MaxChannelsPerGroup; ++serverId)
+        {
+            g_ServerListManager->SetOfflineServerShown(serverId, true);
+            g_ServerListManager->SetOfflineServerLoad(serverId, std::nullopt);
+        }
+        g_ServerListManager->SetOfflinePreview(m_show, m_percent);
+        g_MuEditorConfig.SetOfflineServers(m_configShow, m_configLoad);
+    }
+
+    OfflinePreviewOn(const OfflinePreviewOn&) = delete;
+    OfflinePreviewOn& operator=(const OfflinePreviewOn&) = delete;
+
+private:
+    // Valhalla, Helheim and Midgard (ServerListFolder).
+    static constexpr int GroupCount = 3;
+
+    bool m_show;
+    int m_percent;
+    bool m_configShow;
+    int m_configLoad;
+};
+
+constexpr const char* OfflineChannelWindow = "Offline channel";
+
+// The preview's controls of the channel `serverId` alone in a window, as the channel table draws them; the
+// rectangle of the last one (the load slider while the channel follows Their load).
+ImRect RenderOfflineChannel(int serverId)
+{
+    ImGui::NewFrame();
+    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+    ImGui::Begin(OfflineChannelWindow);
+    MuEditor::ServerList::OfflinePreview::RenderChannel(serverId);
+    const ImRect last(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+    ImGui::End();
+    ImGui::Render();
+    return last;
+}
+
+ImGuiID OfflineChannelId(const char* label)
+{
+    return ImGui::GetIDWithSeed(label, nullptr, ImGui::FindWindowByName(OfflineChannelWindow)->ID);
+}
+
+void SetMouseButton(bool down, int serverId)
+{
+    ImGui::GetIO().AddMouseButtonEvent(ImGuiMouseButton_Left, down);
+    RenderOfflineChannel(serverId);
+}
 } // namespace
 
 TEST_CASE("Server List window: a typed name is a step of its own before a button moves the group [editor]")
@@ -222,6 +300,82 @@ TEST_CASE("Server List window: a VIP type added on the Channel names tab is a st
 
     Press(TabId("###Groups"));
     RenderServerList();
+}
+
+TEST_CASE("Server List window: an offline channel's Show box leaves it out, All and None the group's [editor]")
+{
+    I18N::SetLocale("en");
+    ServerListFolder folder;
+    TestImGuiContext context;
+    OfflinePreviewOn preview;
+    StartWithValhalla();
+
+    // Valhalla's channel 4; the test has no connect server, so every channel is offline.
+    constexpr int ServerId = 3;
+    REQUIRE(g_ServerListManager->IsOfflineServerShown(ServerId));
+    Press(ChannelRowId(ServerId, I18N::Editor::ShowOfflineChannel));
+    RenderServerList();
+    CHECK_FALSE(g_ServerListManager->IsOfflineServerShown(ServerId));
+    CHECK(g_ServerListManager->IsOfflineServerShown(ServerId + 1));
+    // The preview is not part of the list.
+    CHECK_FALSE(g_MuServerListUI.CanUndo());
+
+    Press(PaneId("##Group", I18N::Editor::NoOfflineChannel));
+    for (int channel = 0; channel < Data::ServerList::MaxChannelsPerGroup; ++channel)
+    {
+        CHECK_FALSE(g_ServerListManager->IsOfflineServerShown(channel));
+    }
+    // Helheim's stay.
+    CHECK(g_ServerListManager->IsOfflineServerShown(Data::ServerList::MaxChannelsPerGroup));
+    Press(PaneId("##Group", I18N::Editor::AllOfflineChannels));
+    CHECK(g_ServerListManager->IsOfflineServerShown(ServerId));
+    CHECK_FALSE(g_MuServerListUI.CanUndo());
+}
+
+TEST_CASE("Server List window: a double-click on an offline channel's load types its own one [editor]")
+{
+    I18N::SetLocale("en");
+    TestImGuiContext context;
+    OfflinePreviewOn preview;
+    constexpr int ServerId = 3;
+    const ImRect slider = RenderOfflineChannel(ServerId);
+    const ImGuiID sliderId = OfflineChannelId("##OfflineLoad");
+    REQUIRE(slider.GetWidth() > 0.0f);
+
+    // At a quarter of the slider: a click alone would set about 35 %.
+    ImGui::GetIO().AddMousePosEvent(slider.Min.x + slider.GetWidth() / 4.0f, slider.GetCenter().y);
+    RenderOfflineChannel(ServerId);
+    SetMouseButton(true, ServerId);
+    SetMouseButton(false, ServerId);
+    SetMouseButton(true, ServerId);
+    // The text field opens in the frame after the double-click, with the load from before the first click.
+    RenderOfflineChannel(ServerId);
+    CHECK(ImGui::TempInputIsActive(sliderId));
+    CHECK(g_ServerListManager->GetOfflineServerLoad(ServerId) == OfflinePreviewOn::Load);
+    SetMouseButton(false, ServerId);
+
+    ImGui::GetIO().AddInputCharactersUTF8("120");
+    RenderOfflineChannel(ServerId);
+    ImGui::GetIO().AddKeyEvent(ImGuiKey_Enter, true);
+    RenderOfflineChannel(ServerId);
+    ImGui::GetIO().AddKeyEvent(ImGuiKey_Enter, false);
+    RenderOfflineChannel(ServerId);
+    CHECK_FALSE(ImGui::TempInputIsActive(sliderId));
+    CHECK(g_ServerListManager->GetOfflineServerLoad(ServerId) == 120);
+}
+
+TEST_CASE("Server List window: the x next to an offline channel's own load goes back to Their load [editor]")
+{
+    I18N::SetLocale("en");
+    TestImGuiContext context;
+    OfflinePreviewOn preview;
+    constexpr int ServerId = 3;
+    g_ServerListManager->SetOfflineServerLoad(ServerId, 120);
+    RenderOfflineChannel(ServerId);
+
+    ImGui::ActivateItemByID(OfflineChannelId("\xC3\x97##DropOwnLoad"));
+    RenderOfflineChannel(ServerId);
+    CHECK_FALSE(g_ServerListManager->GetOfflineServerLoad(ServerId).has_value());
 }
 
 // The Colors window counts a color's users each frame without their labels; the count is the list's length.

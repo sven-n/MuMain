@@ -4,7 +4,6 @@
 
 #include "MuServerListUI.h"
 
-#include "../MuEditor/Config/MuEditorConfig.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/IssueLevels.h"
 #include "../MuEditor/UI/Common/KeyboardSelection.h"
@@ -23,6 +22,7 @@
 #include "Scenes/SceneCore.h"
 #include "ServerListColors.h"
 #include "ServerListLoadUI.h"
+#include "ServerListOfflinePreviewUI.h"
 #include "ServerListStepLabel.h"
 #include "../MuEditor/UI/Colors/MuColorsUI.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -63,8 +63,6 @@ constexpr float PvpComboWidth = VipComboWidth * 0.6f;
 // Where the channel list of the remove VIP type question wraps.
 constexpr float PopupWrapWidth = TextFieldWidth * 1.5f;
 constexpr int ChannelTableColumns = 5;
-// The load slider of the offline servers' preview.
-constexpr float OfflineLoadWidth = 140.0f;
 constexpr int PreviewTableColumns = 3 + Data::ServerList::ChannelNamePlaceCount;
 constexpr ImVec4 ErrorColor{1.0f, 0.4f, 0.4f, 1.0f};
 // {character} in the preview.
@@ -233,11 +231,27 @@ std::optional<std::string> PickVipType(const ServerListData& list, const std::st
     return picked;
 }
 
+// The load the connect server sent for the channel (sentChannels: the group's,
+// or nullptr); for one it didn't send, the offline preview's box and load.
+// True when the preview changed.
+bool RenderConnectServerCell(int groupId, int channel, const std::map<int, int>* sentChannels)
+{
+    if (sentChannels != nullptr && sentChannels->contains(channel))
+    {
+        const std::string load = std::to_string(sentChannels->at(channel));
+        ImGui::TextUnformatted(I18N::Format(I18N::Editor::Sent0Load, {load}).c_str());
+        return false;
+    }
+    return MuEditor::ServerList::OfflinePreview::RenderChannel(groupId * Data::ServerList::MaxChannelsPerGroup +
+                                                               channel);
+}
+
 // One channel: its number, PvP box, VIP type, button text on the login screen
-// and the load the connect server sent for it (sentChannels: the group's, or
-// nullptr). Returns its settings when they were changed; the caller sets them.
+// and its connect server cell (RenderConnectServerCell; `previewChanged` set
+// when the preview changed). Returns its settings when they were changed; the
+// caller sets them.
 std::optional<ChannelSettings> RenderChannelRow(const ServerListData& list, const ServerGroup& group, int channel,
-                                                const std::map<int, int>* sentChannels)
+                                                const std::map<int, int>* sentChannels, bool& previewChanged)
 {
     ImGui::PushID(channel);
     ImGui::TableNextRow();
@@ -272,14 +286,7 @@ std::optional<ChannelSettings> RenderChannelRow(const ServerListData& list, cons
                        name.c_str());
 
     ImGui::TableNextColumn();
-    if (sentChannels != nullptr)
-    {
-        const auto load = sentChannels->find(channel);
-        if (load != sentChannels->end())
-        {
-            ImGui::TextUnformatted(I18N::Format(I18N::Editor::Sent0Load, {std::to_string(load->second)}).c_str());
-        }
-    }
+    previewChanged |= RenderConnectServerCell(group.id, channel, sentChannels);
     ImGui::PopID();
     return changed ? std::optional<ChannelSettings>(std::move(settings)) : std::nullopt;
 }
@@ -518,37 +525,9 @@ void CMuServerListUI::RenderToolbar()
         ImGui::SameLine();
         ImGui::TextUnformatted(I18N::Editor::UnsavedChanges);
     }
-    RenderOfflinePreview();
-}
-
-void CMuServerListUI::RenderOfflinePreview()
-{
-    bool show = g_ServerListManager->IsShowingOfflineServers();
-    int percent = g_ServerListManager->GetOfflineServerPercent();
-    bool changed = ImGui::Checkbox(I18N::Editor::ShowOfflineServersInTheGame, &show);
-    bool finished = changed;
-    if (ImGui::IsItemHovered())
+    if (MuEditor::ServerList::OfflinePreview::RenderSwitch())
     {
-        ImGui::SetTooltip("%s", I18N::Editor::OfflineServersNote);
-    }
-    if (show)
-    {
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(OfflineLoadWidth * g_MuEditorCore.GetUIScale());
-        changed |= ImGui::SliderInt(I18N::Editor::TheirLoad, &percent, 0, CServerListManager::MaxOfflineServerPercent,
-                                    "%d %%");
-        finished |= ImGui::IsItemDeactivatedAfterEdit();
-    }
-    if (changed)
-    {
-        g_ServerListManager->SetOfflinePreview(show, percent);
         ShowInGame();
-    }
-    // The setting is kept when a change is done, not at each step of the slider.
-    if (finished)
-    {
-        g_MuEditorConfig.SetOfflineServers(show, percent);
-        g_MuEditorConfig.Save();
     }
 }
 
@@ -836,16 +815,18 @@ bool CMuServerListUI::RenderGroupFields(ServerGroup& group)
 
 bool CMuServerListUI::RenderChannels(ServerGroup& group)
 {
+    const auto sentGroup = m_sent.find(group.id);
+    const std::map<int, int>* sentChannels = sentGroup != m_sent.end() ? &sentGroup->second : nullptr;
+    bool previewChanged = MuEditor::ServerList::OfflinePreview::RenderGroupButtons(group.id, sentChannels);
     if (!BeginChannelTable())
     {
         return false;
     }
-    const auto sentGroup = m_sent.find(group.id);
-    const std::map<int, int>* sentChannels = sentGroup != m_sent.end() ? &sentGroup->second : nullptr;
     bool changed = false;
     for (int channel = 0; channel < Data::ServerList::MaxChannelsPerGroup; ++channel)
     {
-        if (std::optional<ChannelSettings> picked = RenderChannelRow(m_edits.GetList(), group, channel, sentChannels))
+        if (std::optional<ChannelSettings> picked =
+                RenderChannelRow(m_edits.GetList(), group, channel, sentChannels, previewChanged))
         {
             CommitPending();
             group.channels[static_cast<size_t>(channel)] = std::move(*picked);
@@ -853,6 +834,11 @@ bool CMuServerListUI::RenderChannels(ServerGroup& group)
         }
     }
     ImGui::EndTable();
+    // Not a change of the list: no undo step, only the login screen shows it.
+    if (previewChanged)
+    {
+        ShowInGame();
+    }
     return changed;
 }
 
