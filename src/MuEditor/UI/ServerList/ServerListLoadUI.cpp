@@ -13,6 +13,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "imgui.h"
 
+#include <algorithm>
 #include <array>
 #include <charconv>
 #include <optional>
@@ -36,8 +37,10 @@ constexpr float BarGap = 2.0f;
 constexpr int PreviewLoadPercent = 35;
 constexpr std::array<int, 3> PreviewLoads = {PreviewLoadPercent, Data::ServerList::FullLoadPercent,
                                              Data::ServerList::OverloadedLoadPercent};
-constexpr std::array<std::string_view, 2> PreviewThemes = {"legacy", "modern"};
-constexpr int PreviewColumns = 2 + static_cast<int>(PreviewThemes.size());
+// The columns before the themes' bars: the load and the button.
+constexpr int PreviewTextColumns = 2;
+// ImGui tables have at most this many columns; further themes are left out.
+constexpr int MaxPreviewColumns = 64;
 // An unlit segment whose theme token is no color the editor can read.
 constexpr ImU32 UnlitFallback = IM_COL32(0, 0, 0, 160);
 constexpr ImU32 Opaque = 255;
@@ -267,20 +270,22 @@ bool RenderLoadSettings(ServerListData& list, const std::function<void()>& befor
 }
 
 void RenderLoadPreview(const ServerListData& list, const Data::ServerList::ChannelSettings& channel,
-                       const std::string& groupName, std::string_view locale)
+                       const std::string& groupName, std::string_view locale, std::span<const std::string> themes)
 {
     RenderNote(I18N::Editor::LoadPreviewNote);
     constexpr ImGuiTableFlags TableFlags =
         ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit;
-    if (!ImGui::BeginTable("##LoadPreview", PreviewColumns, TableFlags))
+    const std::span<const std::string> shown =
+        themes.first(std::min(themes.size(), static_cast<size_t>(MaxPreviewColumns - PreviewTextColumns)));
+    if (!ImGui::BeginTable("##LoadPreview", PreviewTextColumns + static_cast<int>(shown.size()), TableFlags))
     {
         return;
     }
     ImGui::TableSetupColumn(I18N::Editor::Load);
     ImGui::TableSetupColumn(I18N::Editor::ServerListButton);
-    for (const std::string_view theme : PreviewThemes)
+    for (const std::string& theme : shown)
     {
-        ImGui::TableSetupColumn(UI::RmlBridge::GetThemeDisplayName(std::string(theme)).c_str());
+        ImGui::TableSetupColumn(UI::RmlBridge::GetThemeDisplayName(theme).c_str());
     }
     ImGui::TableHeadersRow();
     for (const int percent : PreviewLoads)
@@ -290,7 +295,7 @@ void RenderLoadPreview(const ServerListData& list, const Data::ServerList::Chann
         ImGui::TextUnformatted(GetLoadLabel(percent).c_str());
         ImGui::TableNextColumn();
         RenderButtonText(list, channel, groupName, locale, percent);
-        for (const std::string_view theme : PreviewThemes)
+        for (const std::string& theme : shown)
         {
             ImGui::TableNextColumn();
             DrawLoadBar(list, theme, percent);

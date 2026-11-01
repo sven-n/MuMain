@@ -2123,7 +2123,7 @@
     <value>Italic</value>
   </data>
   <data name="Load preview note" xml:space="preserve">
-    <value>The button at 35 % load, full and overloaded, with its bar in the legacy and modern theme. Bold and italic show only in game.</value>
+    <value>The button at 35 % load, full and overloaded, with its bar in each theme. Bold and italic show only in game.</value>
   </data>
   <data name="Load {0}%" xml:space="preserve">
     <value>{0} % load</value>

@@ -5,6 +5,7 @@
 #include "Data/GameData/ServerListData/ServerListData.h"
 
 #include <functional>
+#include <span>
 #include <string>
 #include <string_view>
 
@@ -17,9 +18,9 @@ namespace MuEditor::ServerList::LoadUI
 // changed.
 bool RenderLoadSettings(Data::ServerList::ServerListData& list, const std::function<void()>& beforeChange);
 // The button of `channel` (channel 1 of the group `groupName`) at 35 % load, full and
-// overloaded, in `locale`, with its load bar in the legacy and modern theme.
+// overloaded, in `locale`, with its load bar in each of the theme folders `themes`.
 void RenderLoadPreview(const Data::ServerList::ServerListData& list, const Data::ServerList::ChannelSettings& channel,
-                       const std::string& groupName, std::string_view locale);
+                       const std::string& groupName, std::string_view locale, std::span<const std::string> themes);
 } // namespace MuEditor::ServerList::LoadUI
 
 #endif // _EDITOR

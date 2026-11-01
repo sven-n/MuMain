@@ -68,9 +68,6 @@ constexpr int PreviewTableColumns = 3 + Data::ServerList::ChannelNamePlaceCount;
 constexpr ImVec4 ErrorColor{1.0f, 0.4f, 0.4f, 1.0f};
 // {character} in the preview.
 constexpr const char* PreviewCharacter = "Hero";
-// The theme folders the preview shows the button colors in.
-constexpr std::string_view LegacyTheme = "legacy";
-constexpr std::string_view ModernTheme = "modern";
 
 std::string_view GetEditorLocale()
 {
@@ -1450,14 +1447,15 @@ void CMuServerListUI::RenderPreview()
             ImGui::TextUnformatted((pvp ? list.names.pvp : list.names.nonPvp).Get(m_textLocale).c_str());
             ImGui::TableNextColumn();
             ImGui::TextUnformatted(GetVipTypeLabel(vipType, m_textLocale).c_str());
-            // The button's color in the legacy and the modern theme.
+            // The button's color in each theme, named on hover.
             ImGui::TableNextColumn();
             ImGui::PushID(vipType != nullptr ? vipType->id.c_str() : "##None");
             ImGui::PushID(pvp ? 1 : 0);
-            for (const std::string_view theme : {LegacyTheme, ModernTheme})
+            for (const std::string& theme : m_themes)
             {
-                ImGui::PushID(theme.data(), theme.data() + theme.size());
+                ImGui::PushID(theme.c_str());
                 RenderSwatch(GetButtonColorSwatch(Data::ServerList::GetButtonColor(list, channel, theme), theme));
+                ImGui::SetItemTooltip("%s", UI::RmlBridge::GetThemeDisplayName(theme).c_str());
                 ImGui::PopID();
                 ImGui::SameLine();
             }
@@ -1487,7 +1485,7 @@ void CMuServerListUI::RenderPreview()
     ImGui::EndTable();
     const ChannelSettings firstChannel =
         hasGroup ? groups[static_cast<size_t>(m_selected)].channels.front() : ChannelSettings{};
-    MuEditor::ServerList::LoadUI::RenderLoadPreview(list, firstChannel, groupName, m_textLocale);
+    MuEditor::ServerList::LoadUI::RenderLoadPreview(list, firstChannel, groupName, m_textLocale, m_themes);
 }
 
 void CMuServerListUI::ShowInGame()

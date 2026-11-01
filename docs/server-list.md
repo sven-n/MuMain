@@ -319,11 +319,11 @@ gives the channel and, when the connect server sent it, its load.
   asks; they then have the default color;
 - a preview of every combination (PvP on and off, with no VIP type and with
   each VIP type) in all four places, with the selected group's name and the
-  button's color in the legacy and modern theme. The button's `{load}` is
+  button's color in each theme (named on hover). The button's `{load}` is
   empty there, as for a server that can be joined. Below it, the button of
   channel 1 at 35 % load, full and overloaded, with its load text in its color
-  and the load bar in the legacy and modern theme; bold and italic show only
-  in game.
+  and the load bar in each theme; bold and italic show only in game. The
+  previews show every theme folder.
 
 The Groups tab's channel table shows each channel's button text in its color.
 

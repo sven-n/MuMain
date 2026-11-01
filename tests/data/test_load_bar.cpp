@@ -6,7 +6,9 @@
 #include "Core/Color/Rgb.h"
 #include "Data/GameData/ServerListData/ChannelNameBuilder.h"
 #include "Data/GameData/ServerListData/LoadBar.h"
+#include "UI/RmlBridge/ThemeInheritance.h"
 
+#include <filesystem>
 #include <map>
 #include <optional>
 #include <string>
@@ -182,6 +184,29 @@ TEST_CASE("LoadBar: a theme without the tokens has the built-in base and full co
     CHECK(Data::ServerList::ResolveLoadBarColor(list, LoadBarPart::Base, "other", none) == Green);
     CHECK(Data::ServerList::ResolveLoadBarColor(list, LoadBarPart::Full, "other", none) == Red);
     CHECK_FALSE(Data::ServerList::ResolveLoadBarColor(list, LoadBarPart::Empty, "other", none).has_value());
+}
+
+TEST_CASE("LoadBar: each shipped theme has its bar's colors")
+{
+    // MU_TEST_DATA_DIR is the client folder's Data.
+    const std::filesystem::path themes = std::filesystem::path(MU_TEST_DATA_DIR) / "Interface/RmlUi/themes";
+    for (const char* theme : {"legacy", "modern", "classic"})
+    {
+        CAPTURE(theme);
+        const UI::RmlBridge::ThemeInheritance inheritance(themes / theme);
+        const auto reader = [&inheritance](const char* token) -> std::optional<std::string>
+        {
+            const auto setting = inheritance.GetSetting("Tokens", token);
+            return setting ? std::optional<std::string>(setting->value) : std::nullopt;
+        };
+        for (const LoadBarPart part : {LoadBarPart::Base, LoadBarPart::Full})
+        {
+            const std::optional<std::string> token = reader(Data::ServerList::GetLoadBarToken(part));
+            REQUIRE(token.has_value());
+            CHECK(ParseRgb(*token).has_value());
+        }
+        CHECK(reader(Data::ServerList::GetLoadBarToken(LoadBarPart::Empty)).has_value());
+    }
 }
 
 TEST_CASE("ButtonTextParts: the button's text is split at its load text")
