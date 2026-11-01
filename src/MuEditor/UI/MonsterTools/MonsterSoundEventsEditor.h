@@ -43,6 +43,11 @@ bool ToggleMoment(Data::Monsters::MonsterSoundEvent& event, Data::Monsters::Mons
 // As ToggleMoment, for an animation.
 bool ToggleAnimation(Data::Monsters::MonsterSoundEvent& event, int animation);
 
+// As ToggleMoment, for an animation of each drawn frame (Q-MN84) and one of
+// once until it stands (Q-MN85).
+bool ToggleDuring(Data::Monsters::MonsterSoundEvent& event, int animation);
+bool ToggleOnce(Data::Monsters::MonsterSoundEvent& event, int animation);
+
 // As ToggleMoment, for a cue of the model.
 bool ToggleCue(Data::Monsters::MonsterSoundEvent& event, const std::string& cue);
 

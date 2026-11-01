@@ -90,6 +90,9 @@ private:
     // The sound events of the animation at the frame, then those of the
     // moment, as the game plays them.
     void PlaySounds(int slot, int animation, float frame, std::optional<Data::Monsters::MonsterSoundMoment> moment);
+    // The events of the drawn frame: during the animation, and once in it
+    // after each start (Q-MN88).
+    void PlayDrawnSounds(int slot);
     void RenderControls(int slot, const Data::Monsters::MonsterModelDefinition& values);
     void RenderFrameSlider(int slot, int keys);
     void RenderView(int slot, const Data::Monsters::MonsterModelDefinition& values);
@@ -111,6 +114,8 @@ private:
     bool m_playing = true;
     // An attack Play started: the model stands when it ends.
     bool m_once = false;
+    // A once event played since the animation started.
+    bool m_soundOncePlayed = false;
     bool m_turn = false;
     bool m_sounds = true;
     bool m_gameFactors = true;

@@ -129,6 +129,12 @@ public:
     bool			HideShadow;
     bool			m_bIsSelected;
     bool			Decoy;
+    // The flag of the sound events once in an animation (Q-MN85, Q-MN87): a
+    // once event played since the character last stood.
+    bool SoundOncePlayed;
+    // SoundEvents::PlayDrawn ran this frame (a map's monster effects called
+    // it), so FinishDrawnFrame does not play the frame again.
+    bool SoundsDrawnThisFrame;
     CLASS_TYPE			Class;
     CLASS_SKIN_INDEX            SkinIndex;
     BYTE			Skin; // What is this good for?

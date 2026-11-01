@@ -27,6 +27,12 @@ void Play(int number);
 void PlayEvents(const Data::Monsters::MonsterSoundSet& set, std::span<const Data::Monsters::MonsterModelCue> cues,
                 int animation, float frame);
 
+// The set's events of a drawn frame (Q-MN84, Q-MN85, Q-MN88) at the preview
+// volume, on any map and at any distance: those during `animation`, and
+// those once in it unless `oncePlayed`, which a once event that plays sets.
+void PlayDrawn(const Data::Monsters::MonsterSoundSet& set, std::span<const Data::Monsters::MonsterModelCue> cues,
+               int animation, float frame, bool& oncePlayed);
+
 // The set's sound events at `moment` at the preview volume, as the game
 // plays them, on any map and at any distance (Q-MN76).
 void PlayMoment(const Data::Monsters::MonsterSoundSet& set, Data::Monsters::MonsterSoundMoment moment);

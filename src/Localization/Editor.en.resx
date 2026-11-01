@@ -3089,7 +3089,7 @@
     <value>Sound events</value>
   </data>
   <data name="Sound events note" xml:space="preserve">
-    <value>Sounds the game plays for the monsters of this set: in an event's animations (when an attack starts, when it is hit or dies, at each step and at the end of each idle loop, within 500 units of the hero), on its cues of the monster's model, or at its moments, whatever the animation. An event plays sounds of this set.</value>
+    <value>Sounds the game plays for the monsters of this set: in an event's animations (when an attack starts, when it is hit or dies, at each step and at the end of each idle loop, within 500 units of the hero), each frame the monster is drawn in them, once in them until it stands, on its cues of the monster's model, or at its moments, whatever the animation. An event plays sounds of this set.</value>
   </data>
   <data name="Sound event frames" xml:space="preserve">
     <value>Frames</value>
@@ -3131,7 +3131,7 @@
     <value>When</value>
   </data>
   <data name="Sound event when note" xml:space="preserve">
-    <value>Animations: the event plays in them, when an attack, hit or death starts, at each step of a walk and at the end of each loop of stop1 and stop2. Cues: in the frames of a cue of the monster's model. Moments: where the game plays them, whatever the animation: attack and hit when they start, death when it starts (also in Chaos Castle), stand when the monster is set to stand (a walk ends, the server stops it), walk at each step. An event names animations, cues or moments.</value>
+    <value>Animations: the event plays in them, when an attack, hit or death starts, at each step of a walk and at the end of each loop of stop1 and stop2. Each frame in: each frame the monster is drawn in one of them; the chance draws each frame. Once until it stands: the first frame the monster is drawn in one of them; then no once event of the set plays until it is drawn in stop1 or stop2. Cues: in the frames of a cue of the monster's model. Moments: where the game plays them, whatever the animation: attack and hit when they start, death when it starts (also in Chaos Castle), stand when the monster is set to stand (a walk ends, the server stops it), walk at each step. An event names animations, each frame, once, cues or moments.</value>
   </data>
   <data name="Sound event on" xml:space="preserve">
     <value>on</value>
@@ -3633,5 +3633,17 @@
   </data>
   <data name="Cue in use note" xml:space="preserve">
     <value>Sound events play on the cue: move them to another cue or a moment first.</value>
+  </data>
+  <data name="Sound event each frame in" xml:space="preserve">
+    <value>Each frame in</value>
+  </data>
+  <data name="Sound event once until it stands" xml:space="preserve">
+    <value>Once until it stands</value>
+  </data>
+  <data name="Sound event each frame" xml:space="preserve">
+    <value>each frame:</value>
+  </data>
+  <data name="Sound event once" xml:space="preserve">
+    <value>once:</value>
   </data>
 </root>

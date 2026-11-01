@@ -1135,6 +1135,44 @@ TEST_CASE("Monster Sounds: a sound event plays on cues of the model, one of anot
     CHECK(event.cues.empty());
 }
 
+TEST_CASE("Monster Sounds: a sound event plays each drawn frame in animations or once in them, one of another "
+          "kind switches it (Q-MN84, Q-MN85, Q-MN88) [editor][monsters]")
+{
+    using Data::Monsters::MonsterSoundMoment;
+    using namespace MuEditor::Monsters::SoundEventsEditor;
+    Data::Monsters::MonsterSoundEvent event;
+    event.animations = {MONSTER01_WALK};
+    // Each frame in: the event becomes one of drawn frames.
+    CHECK(ToggleDuring(event, MONSTER01_RUN));
+    CHECK(event.animations.empty());
+    CHECK(event.during == std::vector{static_cast<int>(MONSTER01_RUN)});
+    CHECK(ToggleDuring(event, MONSTER01_WALK));
+    CHECK(event.during == std::vector{static_cast<int>(MONSTER01_WALK), static_cast<int>(MONSTER01_RUN)});
+    CHECK(WhenText(event) == "each frame: walk, run");
+    CHECK(ToggleDuring(event, MONSTER01_RUN));
+    CHECK_FALSE(ToggleDuring(event, MONSTER01_WALK));
+    CHECK(event.during == std::vector{static_cast<int>(MONSTER01_WALK)});
+
+    // Once until it stands: picking one switches the event again.
+    CHECK(ToggleOnce(event, MONSTER01_ATTACK1));
+    CHECK(event.during.empty());
+    CHECK(event.once == std::vector{static_cast<int>(MONSTER01_ATTACK1)});
+    CHECK(WhenText(event) == "once: attack1");
+
+    // A moment, a cue or an animation makes it one of them.
+    CHECK(ToggleMoment(event, MonsterSoundMoment::Death));
+    CHECK(event.once.empty());
+    CHECK(ToggleDuring(event, MONSTER01_WALK));
+    CHECK(event.moments.empty());
+    CHECK(ToggleCue(event, "step 1"));
+    CHECK(event.during.empty());
+    CHECK(ToggleOnce(event, MONSTER01_DIE));
+    CHECK(event.cues.empty());
+    CHECK(ToggleAnimation(event, MONSTER01_DIE));
+    CHECK(event.once.empty());
+    CHECK(event.animations == std::vector{static_cast<int>(MONSTER01_DIE)});
+}
+
 TEST_CASE("Monster Sounds: a new cue is one frame at the preview's frame, named after it once (Q-MN82) "
           "[editor][monsters]")
 {

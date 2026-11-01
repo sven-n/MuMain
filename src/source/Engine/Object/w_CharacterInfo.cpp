@@ -31,6 +31,8 @@ void CHARACTER::Initialize()
     HideShadow = false;
     m_bIsSelected = false;
     Decoy = false;
+    SoundOncePlayed = false;
+    SoundsDrawnThisFrame = false;
 
     Class = CLASS_WIZARD;
     Skin = 0;

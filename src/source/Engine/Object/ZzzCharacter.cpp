@@ -12081,6 +12081,40 @@ static BMD* PlaceCharacterModel(OBJECT* o)
     return b;
 }
 
+// The effects of the character's type, or else of the first map whose monster
+// effects claim it.
+static void UpdateTypeAndMapMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    if (UpdateCharacterTypeEffects(c, o, b))
+        return;
+    // Same order and stop-on-claim as RenderCharacter's chain.
+    if (UpdateHellasMonsterEffects(c, o, b))
+        return;
+    if (battleCastle::UpdateBattleCastleMonsterEffects(c, o, b))
+        return;
+    if (M31HuntingGround::UpdateHuntingGroundMonsterEffects(c, o, b))
+        return;
+    if (M34CryWolf1st::UpdateCryWolf1stMonsterEffects(c, o, b))
+        return;
+    if (M33Aida::UpdateAidaMonsterEffects(c, o, b))
+        return;
+    if (M37Kanturu1st::UpdateKanturu1stMonsterEffects(c, o, b))
+        return;
+    if (M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(c, o, b))
+        return;
+    if (M39Kanturu3rd::UpdateKanturu3rdMonsterEffects(c, o, b))
+        return;
+    if (SEASON3A::CGM3rdChangeUp::Instance().UpdateBalgasBarrackMonsterEffects(c, o, b))
+        return;
+    if (g_CursedTemple->UpdateMonsterEffects(c, o, b))
+        return;
+    if (SEASON3B::GMNewTown::UpdateMonsterEffects(c, o, b))
+        return;
+    if (SEASON3C::GMSwampOfQuiet::UpdateMonsterEffects(c, o, b))
+        return;
+    TheMapProcess().UpdateMonsterEffects(c, o, b);
+}
+
 void UpdateDrawnCharacterEffects()
 {
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
@@ -12124,34 +12158,10 @@ void UpdateDrawnCharacterEffects()
             SpawnProtectGuildMark(c);
         if (o->Type == MODEL_PLAYER)
             battleCastle::CreateBattleCastleCharacter_Visual(c, o);
-        if (UpdateCharacterTypeEffects(c, o, b))
-            continue;
-        // Same order and stop-on-claim as RenderCharacter's chain.
-        if (UpdateHellasMonsterEffects(c, o, b))
-            continue;
-        if (battleCastle::UpdateBattleCastleMonsterEffects(c, o, b))
-            continue;
-        if (M31HuntingGround::UpdateHuntingGroundMonsterEffects(c, o, b))
-            continue;
-        if (M34CryWolf1st::UpdateCryWolf1stMonsterEffects(c, o, b))
-            continue;
-        if (M33Aida::UpdateAidaMonsterEffects(c, o, b))
-            continue;
-        if (M37Kanturu1st::UpdateKanturu1stMonsterEffects(c, o, b))
-            continue;
-        if (M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(c, o, b))
-            continue;
-        if (M39Kanturu3rd::UpdateKanturu3rdMonsterEffects(c, o, b))
-            continue;
-        if (SEASON3A::CGM3rdChangeUp::Instance().UpdateBalgasBarrackMonsterEffects(c, o, b))
-            continue;
-        if (g_CursedTemple->UpdateMonsterEffects(c, o, b))
-            continue;
-        if (SEASON3B::GMNewTown::UpdateMonsterEffects(c, o, b))
-            continue;
-        if (SEASON3C::GMSwampOfQuiet::UpdateMonsterEffects(c, o, b))
-            continue;
-        TheMapProcess().UpdateMonsterEffects(c, o, b);
+        UpdateTypeAndMapMonsterEffects(c, o, b);
+        // The sound events of the drawn frame, unless a map's code played
+        // them where it played its sounds (the Aida monsters).
+        GameLogic::Monsters::SoundEvents::FinishDrawnFrame(*c);
     }
 }
 } // namespace
@@ -12618,6 +12628,8 @@ void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, uns
     o->Kind = KIND_PLAYER;
     c->Change = false;
     o->SubType = 0;
+    c->SoundOncePlayed = false;
+    c->SoundsDrawnThisFrame = false;
     c->MonsterIndex = MONSTER_UNDEFINED;
     o->BlendMeshTexCoordU = 0.f;
     o->BlendMeshTexCoordV = 0.f;

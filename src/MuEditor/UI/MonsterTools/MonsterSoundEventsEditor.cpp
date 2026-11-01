@@ -212,8 +212,9 @@ public:
     }
 
 private:
-    // The moments, the animations, then the model's cues; picking one of
-    // another kind makes the event one of it.
+    // The moments, the animations, each frame in, once until it stands, then
+    // the model's cues (Q-MN88); picking one of another kind makes the event
+    // one of it.
     void RenderWhen(MonsterSoundEvent& event)
     {
         ImGui::SetNextItemWidth(WhenWidth * m_scale);
@@ -258,8 +259,35 @@ private:
             ImGui::EndDisabled();
             ImGui::PopID();
         }
+        RenderDrawnChoices(event, I18N::Editor::SoundEventEachFrameIn, event.during, ToggleDuring, "during");
+        RenderDrawnChoices(event, I18N::Editor::SoundEventOnceUntilItStands, event.once, ToggleOnce, "once");
         RenderCueChoices(event);
         ImGui::EndCombo();
+    }
+
+    // A section of the When list for the events of drawn frames (Q-MN84,
+    // Q-MN85): the animations, those of `chosen` marked.
+    void RenderDrawnChoices(MonsterSoundEvent& event, const char* heading, const std::vector<int>& chosen,
+                            bool (*toggle)(MonsterSoundEvent&, int), const char* id)
+    {
+        ImGui::Separator();
+        ImGui::TextDisabled("%s", heading);
+        ImGui::PushID(id);
+        for (const int animation : OfferedAnimations(m_context))
+        {
+            const bool picked = std::find(chosen.begin(), chosen.end(), animation) != chosen.end();
+            const std::string name = Data::Monsters::GetMonsterAnimationName(animation);
+            ImGui::PushID(animation);
+            // An event plays in one animation at least.
+            ImGui::BeginDisabled(picked && chosen.size() == 1);
+            if (ImGui::Selectable(name.c_str(), picked, ImGuiSelectableFlags_DontClosePopups))
+            {
+                m_draft.AfterChange(toggle(event, animation), m_label);
+            }
+            ImGui::EndDisabled();
+            ImGui::PopID();
+        }
+        ImGui::PopID();
     }
 
     void RenderCueChoices(MonsterSoundEvent& event)
@@ -630,6 +658,33 @@ void RenderRemoveCuePopup(MonsterSoundSet& set, SetDraft& draft, const Context& 
 }
 } // namespace
 
+namespace
+{
+// Makes the event name nothing yet: picking a choice of another kind
+// replaces what it named.
+void ClearWhen(MonsterSoundEvent& event)
+{
+    event.moments.clear();
+    event.animations.clear();
+    event.cues.clear();
+    event.during.clear();
+    event.once.clear();
+}
+
+// Toggles `animation` in `list`, one of the event's lists of animations; the
+// first pick in it makes the event one of its kind.
+bool ToggleAnimationOf(MonsterSoundEvent& event, std::vector<int>& list, int animation)
+{
+    if (list.empty())
+    {
+        ClearWhen(event);
+        list = {animation};
+        return true;
+    }
+    return Toggle(list, animation);
+}
+} // namespace
+
 SetDraft MakeSetDraft(SetDraft::Load load, SetDraft::Store store)
 {
     return SetDraft(std::move(load), std::move(store), Items::ReloadAfterStore::NextFrame);
@@ -664,6 +719,14 @@ std::string WhenText(const MonsterSoundEvent& event)
         }
         return text;
     }
+    if (!event.during.empty())
+    {
+        return std::string(I18N::Editor::SoundEventEachFrame) + " " + AnimationsText(event.during);
+    }
+    if (!event.once.empty())
+    {
+        return std::string(I18N::Editor::SoundEventOnce) + " " + AnimationsText(event.once);
+    }
     if (event.moments.empty())
     {
         return AnimationsText(event.animations);
@@ -681,8 +744,7 @@ bool ToggleMoment(MonsterSoundEvent& event, MonsterSoundMoment moment)
 {
     if (event.moments.empty())
     {
-        event.animations.clear();
-        event.cues.clear();
+        ClearWhen(event);
         event.moments = {moment};
         return true;
     }
@@ -691,22 +753,24 @@ bool ToggleMoment(MonsterSoundEvent& event, MonsterSoundMoment moment)
 
 bool ToggleAnimation(MonsterSoundEvent& event, int animation)
 {
-    if (event.animations.empty())
-    {
-        event.moments.clear();
-        event.cues.clear();
-        event.animations = {animation};
-        return true;
-    }
-    return Toggle(event.animations, animation);
+    return ToggleAnimationOf(event, event.animations, animation);
+}
+
+bool ToggleDuring(MonsterSoundEvent& event, int animation)
+{
+    return ToggleAnimationOf(event, event.during, animation);
+}
+
+bool ToggleOnce(MonsterSoundEvent& event, int animation)
+{
+    return ToggleAnimationOf(event, event.once, animation);
 }
 
 bool ToggleCue(MonsterSoundEvent& event, const std::string& cue)
 {
     if (event.cues.empty())
     {
-        event.moments.clear();
-        event.animations.clear();
+        ClearWhen(event);
         event.cues = {cue};
         return true;
     }

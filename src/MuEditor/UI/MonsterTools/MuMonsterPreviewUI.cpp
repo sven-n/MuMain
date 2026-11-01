@@ -255,6 +255,16 @@ void MuMonsterPreviewUI::PlaySounds(int slot, int animation, float frame,
     }
 }
 
+void MuMonsterPreviewUI::PlayDrawnSounds(int slot)
+{
+    const MonsterSoundSet* set = ShownSet(slot);
+    if (set == nullptr || ValuesOf(slot) == nullptr)
+    {
+        return;
+    }
+    SoundPreview::PlayDrawn(*set, GetCues(slot), m_animation, m_frame, m_soundOncePlayed);
+}
+
 void MuMonsterPreviewUI::RenderPreview(int slot)
 {
     ShownModel::OpenWhenShown(slot);
@@ -562,6 +572,11 @@ void MuMonsterPreviewUI::Advance(int slot, const MonsterModelDefinition& values)
     {
         return;
     }
+    // The events of each drawn frame (Q-MN84, Q-MN85).
+    if (m_sounds)
+    {
+        PlayDrawnSounds(slot);
+    }
     // SetPlayerWalk plays a walk's sound events every frame, then those of
     // the walk moment.
     if (m_sounds && m_animation == MONSTER01_WALK)
@@ -626,6 +641,8 @@ void MuMonsterPreviewUI::PlayAttack(int slot, int animation, std::optional<int> 
 void MuMonsterPreviewUI::Restart(int slot)
 {
     m_frame = 0.0f;
+    // Once events play again after each start in the preview (Q-MN88).
+    m_soundOncePlayed = false;
     if (!m_sounds)
     {
         return;

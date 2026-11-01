@@ -141,6 +141,62 @@ TEST_CASE("Monster sounds: a written set reads back the same (Q-MN78) [data][mon
     CHECK(read.sets[0] == set);
 }
 
+TEST_CASE("Monster sounds: an event during animations and one once in them read back the same (Q-MN84, Q-MN85) "
+          "[data][monsters]")
+{
+    MonsterSoundSet set;
+    set.name = "Death Rider";
+    set.sounds = {{"Data/Sound/w34/dr_idle01.wav", "SOUND_AIDA_DEATHRAIDER_MOVE1", 1, false},
+                  {"Data/Sound/w34/dr_attack1.wav", "SOUND_AIDA_DEATHRAIDER_ATTACK1", 1, false}};
+    MonsterSoundEvent walk;
+    walk.during = {MONSTER01_WALK, MONSTER01_RUN};
+    walk.heardAnywhere = true;
+    walk.chance = Data::Monsters::MonsterSoundChance{15, Data::Monsters::MonsterSoundDraw::RandFps};
+    walk.sounds = {"SOUND_AIDA_DEATHRAIDER_MOVE1"};
+    MonsterSoundEvent attack;
+    attack.once = {MONSTER01_ATTACK1, MONSTER01_DIE};
+    attack.heardAnywhere = true;
+    attack.sounds = {"SOUND_AIDA_DEATHRAIDER_ATTACK1"};
+    set.soundEvents = {walk, attack};
+    const std::string text = Data::Monsters::WriteMonsterSoundsJson(std::vector<MonsterSoundSet>{set});
+    INFO(text);
+    CHECK(text.find(R"({"during": ["walk", "run"], "heardAnywhere": true, "chance": )") != std::string::npos);
+    CHECK(text.find(R"({"once": ["attack1", "die"], "heardAnywhere": true, "sounds": )") != std::string::npos);
+    const ReadResult read = Read(text);
+    INFO(Messages(read.issues));
+    CHECK(read.issues.empty());
+    REQUIRE(read.sets.size() == 1);
+    CHECK(read.sets[0] == set);
+}
+
+TEST_CASE("Monster sounds: during and once name one animation or more, a once event in stop1 or stop2 is a warning "
+          "(Q-MN84, Q-MN85) [data][monsters]")
+{
+    for (const char* key : {"during", "once"})
+    {
+        INFO(key);
+        const ReadResult empty =
+            Read(SoundsFile(Set(std::string(R"("soundEvents": [{")") + key + R"(": [], "sounds": ["a"]}])")));
+        CHECK(HasIssueAbout(empty.issues, ItemDataIssueSeverity::Fatal,
+                            std::string("sound set Hound soundEvents[0].") + key, "one animation or more"));
+        // One kind only: with animations, it is fatal.
+        const ReadResult two = Read(SoundsFile(Set(std::string(R"("soundEvents": [{"animations": ["walk"], ")") + key +
+                                                   R"(": ["walk"], "sounds": ["a"]}])")));
+        CHECK(HasIssueAbout(two.issues, ItemDataIssueSeverity::Fatal, "sound set Hound soundEvents[0]",
+                            "one of animations, on, cues, during and once"));
+    }
+    const ReadResult standing = Read(SoundsFile(Set(
+        R"("sounds": [{"file": "Data/Sound/a.wav"}], "soundEvents": [{"once": ["stop2", "attack1"], "sounds": ["Data/Sound/a.wav"]}])")));
+    CHECK_FALSE(HasFatal(standing.issues));
+    CHECK(HasIssueAbout(standing.issues, ItemDataIssueSeverity::Warning, "sound set Hound soundEvents[0].once",
+                        "plays each frame"));
+    REQUIRE(standing.sets.size() == 1);
+    CHECK(standing.sets[0].soundEvents[0].once == std::vector<int>{MONSTER01_STOP2, MONSTER01_ATTACK1});
+    const ReadResult during = Read(SoundsFile(Set(
+        R"("sounds": [{"file": "Data/Sound/a.wav"}], "soundEvents": [{"during": ["stop1"], "sounds": ["Data/Sound/a.wav"]}])")));
+    CHECK(during.issues.empty());
+}
+
 TEST_CASE("Monster sounds: the writer sorts by name and puts each sound and event on one line [data][monsters]")
 {
     MonsterSoundSet hound;
@@ -296,11 +352,11 @@ TEST_CASE("Monster sounds: wrong values are errors that name the set and the fie
         {Set(R"("sounds": [{"channels": 2}])"), "sound set Hound sounds[0].file", "missing"},
         {Set(R"("sounds": [{"file": "Data\\Sound\\a.wav"}])"), "sound set Hound sounds[0].file", "/"},
         {Set(R"("soundEvents": [{"sounds": ["a"]}])"), "sound set Hound soundEvents[0]",
-         "one of animations, on and cues"},
+         "one of animations, on, cues, during and once"},
         {Set(R"("soundEvents": [{"animations": ["walk"], "on": ["walk"], "sounds": ["a"]}])"),
-         "sound set Hound soundEvents[0]", "one of animations, on and cues"},
+         "sound set Hound soundEvents[0]", "one of animations, on, cues, during and once"},
         {Set(R"("soundEvents": [{"cues": ["step 1"], "on": ["walk"], "sounds": ["a"]}])"),
-         "sound set Hound soundEvents[0]", "one of animations, on and cues"},
+         "sound set Hound soundEvents[0]", "one of animations, on, cues, during and once"},
         {Set(R"("soundEvents": [{"on": [], "sounds": ["a"]}])"), "sound set Hound soundEvents[0].on",
          "one moment or more"},
         {Set(R"("soundEvents": [{"on": ["jump"], "sounds": ["a"]}])"), "sound set Hound soundEvents[0].on[0]",

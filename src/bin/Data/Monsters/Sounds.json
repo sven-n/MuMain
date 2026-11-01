@@ -219,6 +219,12 @@
         {"file": "Data/Sound/w34/bg_attack1.wav", "id": "SOUND_AIDA_BLUEGOLEM_ATTACK1", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w34/bg_attack2.wav", "id": "SOUND_AIDA_BLUEGOLEM_ATTACK2", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w34/bg_death.wav", "id": "SOUND_AIDA_BLUEGOLEM_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk", "run"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_AIDA_BLUEGOLEM_MOVE1", "SOUND_AIDA_BLUEGOLEM_MOVE2"]},
+        {"once": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_BLUEGOLEM_ATTACK1"]},
+        {"once": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_BLUEGOLEM_ATTACK2"]},
+        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_BLUEGOLEM_DIE"]}
       ]
     },
     {
@@ -641,6 +647,12 @@
         {"file": "Data/Sound/w34/dr_attack1.wav", "id": "SOUND_AIDA_DEATHRAIDER_ATTACK1", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w34/dr_attack2.wav", "id": "SOUND_AIDA_DEATHRAIDER_ATTACK2", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w34/dr_death.wav", "id": "SOUND_AIDA_DEATHRAIDER_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk", "run"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_AIDA_DEATHRAIDER_MOVE1", "SOUND_AIDA_DEATHRAIDER_MOVE2"]},
+        {"once": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_DEATHRAIDER_ATTACK1"]},
+        {"once": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_DEATHRAIDER_ATTACK2"]},
+        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_DEATHRAIDER_DIE"]}
       ]
     },
     {
@@ -651,6 +663,12 @@
         {"file": "Data/Sound/w34/dt_attack1.wav", "id": "SOUND_AIDA_DEATHTREE_ATTACK1", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w34/dt_attack2.wav", "id": "SOUND_AIDA_DEATHTREE_ATTACK2", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w34/dt_death.wav", "id": "SOUND_AIDA_DEATHTREE_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk", "run"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_AIDA_DEATHTREE_MOVE1", "SOUND_AIDA_DEATHTREE_MOVE2"]},
+        {"once": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_DEATHTREE_ATTACK1"]},
+        {"once": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_DEATHTREE_ATTACK2"]},
+        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_DEATHTREE_DIE"]}
       ]
     },
     {
@@ -799,6 +817,12 @@
         {"file": "Data/Sound/w34/fo_attack1.wav", "id": "SOUND_AIDA_FORESTORC_ATTACK1", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w34/fo_attack2.wav", "id": "SOUND_AIDA_FORESTORC_ATTACK2", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w34/fo_death.wav", "id": "SOUND_AIDA_FORESTORC_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk", "run"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_AIDA_FORESTORC_MOVE1", "SOUND_AIDA_FORESTORC_MOVE2"]},
+        {"once": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_FORESTORC_ATTACK1"]},
+        {"once": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_FORESTORC_ATTACK2"]},
+        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_FORESTORC_DIE"]}
       ]
     },
     {
@@ -1017,6 +1041,13 @@
         {"file": "Data/Sound/w34/hm_firelay.wav", "id": "SOUND_AIDA_HELL_ATTACK2", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w34/hm_bloodywind.wav", "id": "SOUND_AIDA_HELL_ATTACK3", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w34/hm_death.wav", "id": "SOUND_AIDA_HELL_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk", "run"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_AIDA_HELL_MOVE1", "SOUND_AIDA_HELL_MOVE2"]},
+        {"once": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_HELL_ATTACK3"]},
+        {"once": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_HELL_ATTACK2"]},
+        {"once": ["attack3"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_HELL_ATTACK1"]},
+        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_HELL_DIE"]}
       ]
     },
     {
@@ -1976,6 +2007,13 @@
         {"file": "Data/Sound/w34/wq_attack1.wav", "id": "SOUND_AIDA_WITCHQUEEN_ATTACK1", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w34/wq_attack2.wav", "id": "SOUND_AIDA_WITCHQUEEN_ATTACK2", "channels": 1, "spatial": false},
         {"file": "Data/Sound/w34/wq_death.wav", "id": "SOUND_AIDA_WITCHQUEEN_DIE", "channels": 1, "spatial": false}
+      ],
+      "soundEvents": [
+        {"during": ["walk", "run"], "heardAnywhere": true, "chance": {"oneIn": 15, "draw": "randFps"}, "pick": "rand", "sounds": ["SOUND_AIDA_WITCHQUEEN_MOVE1", "SOUND_AIDA_WITCHQUEEN_MOVE2"]},
+        {"once": ["attack1"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_WITCHQUEEN_ATTACK2"]},
+        {"once": ["attack2"], "heardAnywhere": true, "pick": "rand", "sounds": ["SOUND_CHAOS_THUNDER01", "SOUND_CHAOS_THUNDER02"]},
+        {"once": ["attack2"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_WITCHQUEEN_ATTACK1"]},
+        {"once": ["die"], "heardAnywhere": true, "sounds": ["SOUND_AIDA_WITCHQUEEN_DIE"]}
       ]
     },
     {

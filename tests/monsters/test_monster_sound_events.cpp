@@ -741,3 +741,207 @@ TEST_CASE("Monster sounds: the shipped chances and picks are the same at any fra
     CHECK(first < Seeds * 2 / 3);
     FPS_ANIMATION_FACTOR = factor;
 }
+
+namespace
+{
+constexpr int WitchQueen = 304;
+constexpr int DeathRider = 306;
+
+// Draws the character `frames` frames in the animation, as RenderCharacter
+// does (FinishDrawnFrame after the maps' draw code), and returns the sounds.
+std::vector<PlayedSound> Draw(SoundScope& scope, CHARACTER& character, int animation, int frames = 1)
+{
+    character.Object.CurrentAction = static_cast<unsigned short>(animation);
+    for (int frame = 0; frame < frames; ++frame)
+    {
+        GameLogic::Monsters::SoundEvents::FinishDrawnFrame(character);
+    }
+    return scope.Take();
+}
+
+// The Death Rider's walk event without its chance and pick: its first sound
+// each frame.
+void WalkEveryFrame(MonsterSoundSet& set)
+{
+    set.soundEvents[0].chance.reset();
+    set.soundEvents[0].pick.reset();
+    set.soundEvents[0].sounds = {"SOUND_AIDA_DEATHRAIDER_MOVE1"};
+}
+} // namespace
+
+TEST_CASE("Monster sounds: an event during animations plays each frame the monster is drawn in them (Q-MN84) "
+          "[monsters][sounds]")
+{
+    SoundScope scope(WD_33AIDA);
+    SetChange change("Death Rider", WalkEveryFrame);
+    const int move1 = SoundOf(SetOf(DeathRider), "SOUND_AIDA_DEATHRAIDER_MOVE1");
+    const std::unique_ptr<CHARACTER> rider = MakeCharacter(DeathRider);
+    CHECK(Draw(scope, *rider, MONSTER01_WALK, 3) == Sounds({move1, move1, move1}));
+    CHECK(Draw(scope, *rider, MONSTER01_RUN, 2) == Sounds({move1, move1}));
+    CHECK(Draw(scope, *rider, MONSTER01_STOP1, 2).empty());
+    // Not at the fixed points of animation events.
+    rider->Object.CurrentAction = MONSTER01_WALK;
+    CHECK(GameLogic::Monsters::SoundEvents::Play(*rider));
+    CHECK(scope.Take().empty());
+}
+
+TEST_CASE("Monster sounds: the Aida monsters' walk sounds come by a frame-rate chance each drawn frame, one of two "
+          "(Q-MN84) [monsters][sounds]")
+{
+    SoundScope scope(WD_33AIDA);
+    const MonsterSoundSet& set = SetOf(DeathRider);
+    const int move1 = SoundOf(set, "SOUND_AIDA_DEATHRAIDER_MOVE1");
+    const int move2 = SoundOf(set, "SOUND_AIDA_DEATHRAIDER_MOVE2");
+    const float factor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 1.0f;
+    Random::SeedRand(7);
+    Random::Seed(7);
+    const std::unique_ptr<CHARACTER> rider = MakeCharacter(DeathRider);
+    const std::vector<PlayedSound> sounds = Draw(scope, *rider, MONSTER01_WALK, 300);
+    FPS_ANIMATION_FACTOR = factor;
+    // One in 15 frames: about 20 in 300.
+    CHECK(sounds.size() > 5);
+    CHECK(sounds.size() < 60);
+    CHECK(std::all_of(sounds.begin(), sounds.end(),
+                      [&](const PlayedSound& sound) { return sound.id == move1 || sound.id == move2; }));
+    CHECK(std::any_of(sounds.begin(), sounds.end(), [&](const PlayedSound& sound) { return sound.id == move1; }));
+    CHECK(std::any_of(sounds.begin(), sounds.end(), [&](const PlayedSound& sound) { return sound.id == move2; }));
+}
+
+TEST_CASE("Monster sounds: a once event plays the first drawn frame in its animation, then none of the set's once "
+          "events until the monster stands (Q-MN85, Q-MN87) [monsters][sounds]")
+{
+    SoundScope scope(WD_33AIDA);
+    const MonsterSoundSet& set = SetOf(DeathRider);
+    const int attack1 = SoundOf(set, "SOUND_AIDA_DEATHRAIDER_ATTACK1");
+    const int attack2 = SoundOf(set, "SOUND_AIDA_DEATHRAIDER_ATTACK2");
+    const int die = SoundOf(set, "SOUND_AIDA_DEATHRAIDER_DIE");
+    const std::unique_ptr<CHARACTER> rider = MakeCharacter(DeathRider);
+    // A during event leaves the flag alone.
+    {
+        SetChange change("Death Rider", WalkEveryFrame);
+        CHECK(Draw(scope, *rider, MONSTER01_WALK, 2).size() == 2);
+        CHECK_FALSE(rider->SoundOncePlayed);
+    }
+    CHECK(Draw(scope, *rider, MONSTER01_ATTACK1, 3) == Sounds({attack1}));
+    CHECK(rider->SoundOncePlayed);
+    // As the Aida draw code played them: without a stand, none.
+    CHECK(Draw(scope, *rider, MONSTER01_ATTACK2, 2).empty());
+    CHECK(Draw(scope, *rider, MONSTER01_STOP1).empty());
+    CHECK_FALSE(rider->SoundOncePlayed);
+    CHECK(Draw(scope, *rider, MONSTER01_ATTACK2) == Sounds({attack2}));
+    // A death right after an attack is silent, as in the original client.
+    CHECK(Draw(scope, *rider, MONSTER01_DIE, 2).empty());
+    CHECK(Draw(scope, *rider, MONSTER01_STOP2).empty());
+    CHECK(Draw(scope, *rider, MONSTER01_DIE) == Sounds({die}));
+    // The flag is the character's own; SubType keeps its value.
+    CHECK(rider->Object.SubType == 0);
+}
+
+TEST_CASE("Monster sounds: a once event whose chance does not come up leaves the flag clear (Q-MN85) "
+          "[monsters][sounds]")
+{
+    SoundScope scope(WD_33AIDA);
+    SetChange change("Death Rider",
+                     [](MonsterSoundSet& set)
+                     {
+                         set.soundEvents[1].chance =
+                             Data::Monsters::MonsterSoundChance{1000, Data::Monsters::MonsterSoundDraw::Rand};
+                     });
+    const std::unique_ptr<CHARACTER> rider = MakeCharacter(DeathRider);
+    Random::SeedRand(7);
+    const bool comesUp = Random::Rand() % 1000 == 0;
+    Random::SeedRand(7);
+    CHECK(Draw(scope, *rider, MONSTER01_ATTACK1).size() == (comesUp ? 1u : 0u));
+    CHECK(rider->SoundOncePlayed == comesUp);
+}
+
+TEST_CASE("Monster sounds: once events of one animation play together: the Witch Queen's thunder and attack "
+          "(Q-MN85) [monsters][sounds]")
+{
+    SoundScope scope(WD_33AIDA);
+    const MonsterSoundSet& set = SetOf(WitchQueen);
+    const std::unique_ptr<CHARACTER> queen = MakeCharacter(WitchQueen);
+    const std::vector<PlayedSound> sounds = Draw(scope, *queen, MONSTER01_ATTACK2, 2);
+    REQUIRE(sounds.size() == 2);
+    CHECK((sounds[0].id == SOUND_CHAOS_THUNDER01 || sounds[0].id == SOUND_CHAOS_THUNDER02));
+    CHECK(sounds[1].id == SoundOf(set, "SOUND_AIDA_WITCHQUEEN_ATTACK1"));
+}
+
+TEST_CASE("Monster sounds: RenderCharacter plays a drawn frame's events unless the map's draw code did, once a frame "
+          "[monsters][sounds]")
+{
+    using namespace GameLogic::Monsters::SoundEvents;
+    SoundScope scope(WD_33AIDA);
+    SetChange change("Death Rider", WalkEveryFrame);
+    const int move1 = SoundOf(SetOf(DeathRider), "SOUND_AIDA_DEATHRAIDER_MOVE1");
+    const std::unique_ptr<CHARACTER> rider = MakeCharacter(DeathRider);
+    rider->Object.CurrentAction = MONSTER01_WALK;
+    // The Aida draw code's call, then RenderCharacter's: one frame, one sound.
+    CHECK(PlayDrawn(*rider));
+    FinishDrawnFrame(*rider);
+    CHECK(scope.Take() == Sounds({move1}));
+    // A frame without the draw code's call: RenderCharacter plays it.
+    FinishDrawnFrame(*rider);
+    CHECK(scope.Take() == Sounds({move1}));
+    // A set without events of drawn frames plays nothing.
+    const std::unique_ptr<CHARACTER> bull = MakeCharacter(BullFighter);
+    bull->Object.CurrentAction = MONSTER01_WALK;
+    CHECK_FALSE(HasDrawnEvents(SetOf(BullFighter)));
+    CHECK_FALSE(PlayDrawn(*bull));
+    FinishDrawnFrame(*bull);
+    CHECK(scope.Take().empty());
+}
+
+TEST_CASE("Monster sounds: a monster is created with the once flag clear, as with SubType 0 (Q-MN87) "
+          "[monsters][sounds]")
+{
+    SoundScope scope(WD_33AIDA);
+    CHARACTER* first = scope.Creation().Create(DeathRider);
+    REQUIRE(first != nullptr);
+    first->SoundOncePlayed = true;
+    first->SoundsDrawnThisFrame = true;
+    CHARACTER* again = scope.Creation().Create(DeathRider);
+    REQUIRE(again != nullptr);
+    CHECK_FALSE(again->SoundOncePlayed);
+    CHECK_FALSE(again->SoundsDrawnThisFrame);
+}
+
+#ifdef _EDITOR
+TEST_CASE("Monster Preview: during events play each frame, once events after each start of the animation (Q-MN88) "
+          "[monsters][sounds][editor]")
+{
+    SoundScope scope(WD_33AIDA);
+    Data::Monsters::ModelLoader::Open(MODEL_DEATH_RIDER);
+    REQUIRE(Data::Monsters::ModelLoader::IsOpen(MODEL_DEATH_RIDER));
+    scope.Take();
+    const MonsterSoundSet& set = SetOf(DeathRider);
+    const int attack1 = SoundOf(set, "SOUND_AIDA_DEATHRAIDER_ATTACK1");
+    const Data::Monsters::MonsterModelDefinition& values = ModelOf(MODEL_DEATH_RIDER);
+    const float factor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 1.0f;
+    g_MonsterSelection.Select(DeathRider);
+    g_MuMonsterPreviewUI.PlayAttack(MODEL_DEATH_RIDER, MONSTER01_ATTACK1, std::nullopt);
+    g_MuMonsterPreviewUI.Advance(MODEL_DEATH_RIDER, values);
+    g_MuMonsterPreviewUI.Advance(MODEL_DEATH_RIDER, values);
+    CHECK(scope.Take() == Sounds({attack1}));
+    // Started again, it plays again.
+    g_MuMonsterPreviewUI.PlayAttack(MODEL_DEATH_RIDER, MONSTER01_ATTACK1, std::nullopt);
+    g_MuMonsterPreviewUI.Advance(MODEL_DEATH_RIDER, values);
+    CHECK(scope.Take() == Sounds({attack1}));
+    {
+        SetChange change("Death Rider", WalkEveryFrame);
+        const int move1 = SoundOf(SetOf(DeathRider), "SOUND_AIDA_DEATHRAIDER_MOVE1");
+        g_MuMonsterPreviewUI.PlayAttack(MODEL_DEATH_RIDER, MONSTER01_WALK, std::nullopt);
+        scope.Take();
+        for (int frame = 0; frame < 3; ++frame)
+        {
+            g_MuMonsterPreviewUI.Advance(MODEL_DEATH_RIDER, values);
+        }
+        CHECK(scope.Take() == Sounds({move1, move1, move1}));
+    }
+    FPS_ANIMATION_FACTOR = factor;
+    g_MonsterSelection.Select(MuEditor::Monsters::MonsterSelection::NoMonster);
+    scope.Take();
+}
+#endif // _EDITOR

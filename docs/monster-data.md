@@ -297,7 +297,7 @@ the Evil Goblin).
 |---|---|
 | `name` | The set's name, unique; monsters name it |
 | `sounds` | The sound files: `file`, `channels` (how many can play at once), `spatial` (3D, louder near the hero), and `id` for a sound that keeps its `SOUND_*` number, see below |
-| `soundEvents` | The sounds the game plays for a monster of the set, in animations, on cues of its model or at moments, see [Sound events](#sound-events) |
+| `soundEvents` | The sounds the game plays for a monster of the set, in animations, on cues of its model, at moments, each frame it is drawn or once until it stands, see [Sound events](#sound-events) |
 | `maps` | The maps the sound events play on; without it every map |
 
 Sets are sorted by name and written in one way, as the other files; a test
@@ -326,8 +326,13 @@ names when: `animations`, played while the character is in one of them, when
 it starts an attack, is hit or dies, at each step of a walk and at the end of
 each loop of stop1 and stop2; `cues`, played while the character is in the
 frames of one of the named [cues](#model-fields) of its model (the Empire
-Guardian and Karutan monsters' steps); or `on` moments, played where the
-game reaches them, whatever the animation:
+Guardian and Karutan monsters' steps); `during`, played each frame the
+character is drawn in one of the animations (on screen; the `chance` draws
+each frame); `once`, played the first frame the character is drawn in one of
+them, after which none of the set's once events plays until it is drawn in
+stop1 or stop2 (the Aida monsters' attacks and deaths: a death right after an
+attack, with no stand between, is silent, as in the original client); or `on`
+moments, played where the game reaches them, whatever the animation:
 
 | Moment | Where the game plays it |
 |---|---|
@@ -359,6 +364,8 @@ unless it is `heardAnywhere`:
 | Field | Meaning |
 |---|---|
 | `animations` | The animations it plays in |
+| `during` | The animations it plays in each drawn frame, instead of animations |
+| `once` | The animations it plays once in until the character stands, instead of animations; once events of one frame all play (the Witch Queen's thunder and attack). In stop1 or stop2 it would play each frame (a warning) |
 | `cues` | The cues of the monster's model it plays on, instead of animations; a model without the cue plays nothing for it (Data Checks warns) |
 | `on` | The moments it plays at, instead of animations |
 | `deathEffectArmed` | Only while the character's death effect is armed |
@@ -375,13 +382,18 @@ own nor one of its random variants', plays none. The `subType`, `notSubType`
 and `frames` of the events before the sound sets are fatal problems that
 name what replaced them: the monsters' own sets, and the cues.
 
-Not all monster sounds are data yet: the monsters of Aida, Crywolf, Kanturu,
-the Hunting Ground, the Balgass barracks, Illusion Temple and a few others
-(among them 340 to 365, 386 to 403 and 409 to 412) play their sounds from
-their map's per-frame drawing code. The Aida monsters name sound sets that
-list those sounds under their `SOUND_*` ids, which their models load; the
-others' maps load them, and they name no sound set. They move into sound
-events with the monsters' looks (design, MN8).
+Not all monster sounds are data yet: the monsters of Crywolf, Kanturu, the
+Hunting Ground, the Balgass barracks, Illusion Temple and a few others (among
+them 340 to 365, 386 to 403 and 409 to 412) play their sounds from their
+map's per-frame monster effects, and their maps load them; they name no sound
+set. They move into sound events with the monsters' looks (design, MN8). The
+Aida monsters' sounds are `during` and `once` events of their sets; their
+monster effects play them where they played their sounds
+(`SoundEvents::PlayDrawn`), and for every other character
+`UpdateDrawnCharacterEffects` plays them after the maps' monster effects. Like
+those effects they run in the update for the characters the last frame drew,
+so they start one frame after a monster comes into view
+([ADR 0003](adr/0003-draw-does-not-change-game-state.md)).
 
 ## Attacks
 
@@ -631,7 +643,9 @@ item tools.
     plays), and a row to add a file with its `SOUND_*` id (optional),
     channels and 3D;
   - **Sound events**: a row per [sound event](#sound-events): **When**, its
-    moments, animations or cues of the shown look's model (one or more;
+    moments, animations, animations of **Each frame in** (`during`) or
+    **Once until it stands** (`once`), or cues of the shown look's model
+    (one or more;
     picking one of another kind makes the event one of it; **New cue at the
     preview's frame** adds a cue to the model there), on a cue's event the
     cue's animation and frames, which change the model's cue for all its
@@ -654,8 +668,10 @@ item tools.
   play as the game plays them: those of the animation and its cues when it
   starts, at each loop of stop1 and stop2 and frame by frame in a walk, then
   those of its moment (stand for stop1 and stop2, attack for the attacks, hit
-  for the shock, death, and walk at each frame of a walk); on any map and at
-  any distance, with the death effect counted as armed. The hit frame of
+  for the shock, death, and walk at each frame of a walk); `during` events
+  at each frame of their animations and `once` events on the first frame
+  after each start of the animation; on any map and at any distance, with
+  the death effect counted as armed. The hit frame of
   attacks 1 and 2 is marked on the slider, and the line under it says what
   the game adds. The model's cues of the animation are tags under the
   slider: hovering one says its frames and what it plays, a click shows its

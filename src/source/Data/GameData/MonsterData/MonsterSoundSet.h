@@ -79,10 +79,12 @@ enum class MonsterSoundMoment
 };
 
 // Sounds that the game plays for a monster of the set (monsters design, MN7,
-// Q-MN76, Q-MN79): while it is in one of `animations` (PlayMonsterSound, at
-// the start of an attack, a hit and the death, at each step of a walk and at
-// the end of each loop of stop1 and stop2), in one of the frames its model's
-// `cues` name, or at one of `moments`. An event names one of the three.
+// Q-MN76, Q-MN79, Q-MN84, Q-MN85): while it is in one of `animations`
+// (PlayMonsterSound, at the start of an attack, a hit and the death, at each
+// step of a walk and at the end of each loop of stop1 and stop2), in one of
+// the frames its model's `cues` name, at one of `moments`, each frame it is
+// drawn in one of `during`, or once in one of `once` until it stands. An
+// event names one of the five.
 struct MonsterSoundEvent
 {
     // Sorted.
@@ -91,6 +93,13 @@ struct MonsterSoundEvent
     std::vector<MonsterSoundMoment> moments;
     // Cues of the monster's model (MonsterModelCue::name), in their order.
     std::vector<std::string> cues;
+    // Each frame the character is drawn in one of them (SoundEvents::
+    // PlayDrawn, Q-MN84); sorted.
+    std::vector<int> during;
+    // The first frame the character is drawn in one of them; then none of
+    // the set's once events plays until it is drawn in stop1 or stop2
+    // (Q-MN85, the Aida monsters' SubType flag); sorted.
+    std::vector<int> once;
     // Only while the character's death effect is armed (OBJECT::LifeTime 100).
     bool deathEffectArmed = false;
     // Heard at any distance from the hero and on every map; else within 500

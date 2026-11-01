@@ -9,6 +9,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "GameLogic/Monsters/MonsterSoundEvents.h"
 #include "Audio/DSPlaySound.h"
 #include "World/MapInfra/MapManager.h"
 #include "Render/Models/BoneManager.h"
@@ -732,6 +733,9 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
     }
 }
 
+// Each model plays the sound events of the drawn frame (its sound set in
+// Data/Monsters/Sounds.json) where it played its sounds, so the random draws
+// around them keep their order (monsters design, MNA).
 bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
 {
     switch (pObject->Type)
@@ -758,36 +762,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         BoneManager::GetBonePosition(pObject, L"Monster100_Footstepst", Relative, Position);
         CreateParticleFpsChecked(BITMAP_LIGHT + 1, Position, Angle, Light, 4, 4.0f);
 
-        if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_WITCHQUEEN_MOVE1 + Random::Rand() % 2));
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_WITCHQUEEN_ATTACK2);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + Random::Rand() % 2));
-                PlayBuffer(SOUND_AIDA_WITCHQUEEN_ATTACK1);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_WITCHQUEEN_DIE);
-            }
-        }
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*pCharacter);
 
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -828,9 +803,6 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
                 }
             }
         }
-
-        if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
-            pObject->SubType = FALSE;
     }
     break;
     case MODEL_GOLDEN_STONE_GOLEM:
@@ -845,35 +817,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         BoneManager::GetBonePosition(pObject, L"Monster101_Head", Position);
         CreateParticleFpsChecked(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
 
-        if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_BLUEGOLEM_MOVE1 + Random::Rand() % 2));
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_BLUEGOLEM_ATTACK1);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_BLUEGOLEM_ATTACK2);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_BLUEGOLEM_DIE);
-            }
-        }
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*pCharacter);
 
         if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -907,9 +851,6 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
                 CreateJointFpsChecked(BITMAP_JOINT_ENERGY, vTemp, pObject->Position, to->Angle, 16, pObject, 20.0f);
             }
         }
-
-        if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
-            pObject->SubType = FALSE;
     }
     break;
     case MODEL_DEATH_RIDER:
@@ -924,108 +865,18 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         CreateSprite(BITMAP_LIGHT + 1, Position, 3.0f, Light, pObject);
         CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, Light, 7);
 
-        if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHRAIDER_MOVE1 + Random::Rand() % 2));
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_DEATHRAIDER_ATTACK1);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_DEATHRAIDER_ATTACK2);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_DEATHRAIDER_DIE);
-            }
-        }
-
-        if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
-            pObject->SubType = FALSE;
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*pCharacter);
     }
     break;
 
     case MODEL_FOREST_ORC:
     {
-        if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_FORESTORC_MOVE1 + Random::Rand() % 2));
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_FORESTORC_ATTACK1);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_FORESTORC_ATTACK2);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_FORESTORC_DIE);
-            }
-        }
-
-        if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
-            pObject->SubType = FALSE;
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*pCharacter);
     }
     break;
     case MODEL_DEATH_TREE:
     {
-        if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHTREE_MOVE1 + Random::Rand() % 2));
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_DEATHTREE_ATTACK1);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_DEATHTREE_ATTACK2);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_DEATHTREE_DIE);
-            }
-        }
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*pCharacter);
 
         vec3_t Position, Light, Angle = {0.0f, 0.0f, 0.0f};
         float Random_Light;
@@ -1046,9 +897,6 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
             BoneManager::GetBonePosition(pObject, L"Monster104_Footsteps", Relative, Position);
             CreateParticleFpsChecked(BITMAP_SMOKE, Position, pObject->Angle, Light, 26);
         }
-
-        if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
-            pObject->SubType = FALSE;
     }
     break;
     case MODEL_HELL_MAINE:
@@ -1074,43 +922,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         BoneManager::GetBonePosition(pObject, L"Monster105_L_Arm02", Position);
         CreateSprite(BITMAP_LIGHT + 1, Position, 1.0f, Light, pObject);
 
-        if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_HELL_MOVE1 + Random::Rand() % 2));
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_HELL_ATTACK3);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_HELL_ATTACK2);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK3)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_HELL_ATTACK1);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_HELL_DIE);
-            }
-        }
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*pCharacter);
 
         if (pObject->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -1134,45 +946,11 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         {
             CreateEffectFpsChecked(BITMAP_BOSS_LASER, Position, pObject->Angle, Light, 1);
         }
-
-        if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
-            pObject->SubType = FALSE;
     }
     break;
     case MODEL_BLOODY_ORC:
     {
-        if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_FORESTORC_MOVE1 + Random::Rand() % 2));
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_FORESTORC_ATTACK1);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_FORESTORC_ATTACK2);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_FORESTORC_DIE);
-            }
-        }
-
-        if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
-            pObject->SubType = FALSE;
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*pCharacter);
     }
     break;
     case MODEL_BLOODY_DEATH_RIDER:
@@ -1187,38 +965,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         CreateSprite(BITMAP_LIGHT + 1, Position, 3.0f, Light, pObject);
         CreateParticleFpsChecked(BITMAP_SPARK + 1, Position, Angle, Light, 7);
 
-        if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHRAIDER_MOVE1 + Random::Rand() % 2));
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_DEATHRAIDER_ATTACK1);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_DEATHRAIDER_ATTACK2);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_DEATHRAIDER_DIE);
-            }
-        }
-
-        if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
-            pObject->SubType = FALSE;
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*pCharacter);
     }
     break;
 
@@ -1234,35 +981,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         BoneManager::GetBonePosition(pObject, L"Monster101_Head", Position);
         CreateParticleFpsChecked(BITMAP_WATERFALL_2, Position, Angle, Light, 1);
 
-        if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_BLUEGOLEM_MOVE1 + Random::Rand() % 2));
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_BLUEGOLEM_ATTACK1);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_BLUEGOLEM_ATTACK2);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_BLUEGOLEM_DIE);
-            }
-        }
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*pCharacter);
 
         if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1296,9 +1015,6 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
                 CreateJointFpsChecked(BITMAP_JOINT_ENERGY, vTemp, pObject->Position, to->Angle, 16, pObject, 20.0f);
             }
         }
-
-        if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
-            pObject->SubType = FALSE;
     }
     break;
     case MODEL_BLOODY_WITCH_QUEEN:
@@ -1323,36 +1039,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         BoneManager::GetBonePosition(pObject, L"Monster100_Footstepst", Relative, Position);
         CreateParticleFpsChecked(BITMAP_LIGHT + 1, Position, Angle, Light, 4, 4.0f);
 
-        if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
-        {
-            if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_WITCHQUEEN_MOVE1 + Random::Rand() % 2));
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK1)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_WITCHQUEEN_ATTACK2);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_ATTACK2)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + Random::Rand() % 2));
-                PlayBuffer(SOUND_AIDA_WITCHQUEEN_ATTACK1);
-            }
-        }
-        else if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            if (pObject->SubType == FALSE)
-            {
-                pObject->SubType = TRUE;
-                PlayBuffer(SOUND_AIDA_WITCHQUEEN_DIE);
-            }
-        }
+        GameLogic::Monsters::SoundEvents::PlayDrawn(*pCharacter);
 
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
         {
@@ -1393,9 +1080,6 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
                 }
             }
         }
-
-        if (pObject->CurrentAction == MONSTER01_STOP1 || pObject->CurrentAction == MONSTER01_STOP2)
-            pObject->SubType = FALSE;
     }
     break;
     }

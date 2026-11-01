@@ -77,8 +77,18 @@ bool IsOnCue(const MonsterSoundEvent& event, std::span<const MonsterModelCue> cu
                        });
 }
 
+bool Contains(const std::vector<int>& animations, int animation)
+{
+    return std::find(animations.begin(), animations.end(), animation) != animations.end();
+}
+
 bool IsWhen(const MonsterSoundEvent& event, std::span<const MonsterModelCue> cues, const Situation& situation)
 {
+    if (situation.drawn)
+    {
+        return Contains(event.during, situation.animation) ||
+               (!situation.oncePlayed && Contains(event.once, situation.animation));
+    }
     if (situation.moment)
     {
         return std::find(event.moments.begin(), event.moments.end(), *situation.moment) != event.moments.end();
@@ -100,12 +110,13 @@ bool Applies(const MonsterSoundEvent& event, std::span<const MonsterModelCue> cu
     return event.heardAnywhere || situation.heard;
 }
 
-void PlayEvent(const MonsterSoundSet& set, const MonsterSoundEvent& event, const Situation& situation,
+// False when the event's chance did not come up.
+bool PlayEvent(const MonsterSoundSet& set, const MonsterSoundEvent& event, const Situation& situation,
                const std::function<void(int, bool)>& play)
 {
     if (event.chance && !situation.chanceDrawn && !Draw(event.chance->draw, event.chance->oneIn))
     {
-        return;
+        return false;
     }
     if (event.pick)
     {
@@ -117,12 +128,33 @@ void PlayEvent(const MonsterSoundSet& set, const MonsterSoundEvent& event, const
         {
             PlaySound(set, event, event.sounds[1], play);
         }
-        return;
+        return true;
     }
     for (const std::string& sound : event.sounds)
     {
         PlaySound(set, event, sound, play);
     }
+    return true;
+}
+
+std::span<const MonsterModelCue> CuesOf(const OBJECT& object)
+{
+    const MonsterModelDefinition* model = g_MonsterModelDatabase.Find(object.Type);
+    return model != nullptr ? std::span<const MonsterModelCue>(model->cues) : std::span<const MonsterModelCue>();
+}
+
+// The situation of the character's animation; heard within 500 units and on
+// the set's maps.
+Situation SituationOf(const OBJECT& object, const MonsterSoundSet& set)
+{
+    Situation situation;
+    situation.animation = object.CurrentAction;
+    situation.frame = object.AnimationFrame;
+    situation.deathEffectArmed = object.LifeTime == ArmedDeathEffect;
+    situation.heard =
+        !IsFarFromHero(object) &&
+        (set.maps.empty() || Data::Maps::Names(set.maps, gMapManager.GetServerMap(), gMapManager.GetServerStage()));
+    return situation;
 }
 
 // Plays the events of the character's set in the situation of its animation,
@@ -135,19 +167,10 @@ bool PlayFor(CHARACTER& character, std::optional<MonsterSoundMoment> moment, boo
         return false;
     }
     OBJECT& object = character.Object;
-    const MonsterModelDefinition* model = g_MonsterModelDatabase.Find(object.Type);
-    const std::span<const MonsterModelCue> cues =
-        model != nullptr ? std::span<const MonsterModelCue>(model->cues) : std::span<const MonsterModelCue>();
-    Situation situation;
-    situation.animation = object.CurrentAction;
-    situation.frame = object.AnimationFrame;
+    Situation situation = SituationOf(object, *set);
     situation.moment = moment;
     situation.chanceDrawn = chanceDrawn;
-    situation.deathEffectArmed = object.LifeTime == ArmedDeathEffect;
-    situation.heard =
-        !IsFarFromHero(object) &&
-        (set->maps.empty() || Data::Maps::Names(set->maps, gMapManager.GetServerMap(), gMapManager.GetServerStage()));
-    PlayEvents(*set, cues, situation, [&object](int sound, bool atMonster)
+    PlayEvents(*set, CuesOf(object), situation, [&object](int sound, bool atMonster)
                { PlayBuffer(static_cast<ESound>(sound), atMonster ? &object : nullptr); });
     return true;
 }
@@ -168,15 +191,59 @@ bool PlayMoment(CHARACTER& character, MonsterSoundMoment moment, bool chanceDraw
     return PlayFor(character, moment, chanceDrawn);
 }
 
-void PlayEvents(const MonsterSoundSet& set, std::span<const MonsterModelCue> cues, const Situation& situation,
+bool PlayDrawn(CHARACTER& character)
+{
+    character.SoundsDrawnThisFrame = true;
+    const MonsterSoundSet* set = FindSoundSet(character);
+    if (set == nullptr || !HasDrawnEvents(*set))
+    {
+        return false;
+    }
+    OBJECT& object = character.Object;
+    Situation situation = SituationOf(object, *set);
+    situation.drawn = true;
+    situation.oncePlayed = character.SoundOncePlayed;
+    // The flag is set after the frame's events, so that once events of one
+    // animation play together (the Witch Queen's thunder and attack).
+    if (PlayEvents(*set, CuesOf(object), situation, [&object](int sound, bool atMonster)
+                   { PlayBuffer(static_cast<ESound>(sound), atMonster ? &object : nullptr); }))
+    {
+        character.SoundOncePlayed = true;
+    }
+    if (object.CurrentAction == MONSTER01_STOP1 || object.CurrentAction == MONSTER01_STOP2)
+    {
+        character.SoundOncePlayed = false;
+    }
+    return true;
+}
+
+void FinishDrawnFrame(CHARACTER& character)
+{
+    if (!character.SoundsDrawnThisFrame)
+    {
+        PlayDrawn(character);
+    }
+    character.SoundsDrawnThisFrame = false;
+}
+
+bool HasDrawnEvents(const MonsterSoundSet& set)
+{
+    return std::any_of(set.soundEvents.begin(), set.soundEvents.end(),
+                       [](const MonsterSoundEvent& event) { return !event.during.empty() || !event.once.empty(); });
+}
+
+bool PlayEvents(const MonsterSoundSet& set, std::span<const MonsterModelCue> cues, const Situation& situation,
                 const std::function<void(int sound, bool atMonster)>& play)
 {
+    bool oncePlayed = false;
     for (const MonsterSoundEvent& event : set.soundEvents)
     {
-        if (Applies(event, cues, situation))
+        if (Applies(event, cues, situation) && PlayEvent(set, event, situation, play) && situation.drawn &&
+            Contains(event.once, situation.animation))
         {
-            PlayEvent(set, event, situation, play);
+            oncePlayed = true;
         }
     }
+    return oncePlayed;
 }
 } // namespace GameLogic::Monsters::SoundEvents
