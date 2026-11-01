@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Data/GameData/ColorFolders/ColorFolder.h"
 #include "Data/GameData/ServerListData/ButtonColorRule.h"
 #include "Data/GameData/ServerListData/ChannelNames.h"
 #include "Data/GameData/ServerListData/CustomColor.h"
@@ -19,6 +20,8 @@ struct ServerListData
     std::vector<VipType> vipTypes;
     // In the order the editor lists them.
     std::vector<CustomColor> colors;
+    // The folders MuEditor's Colors window sorts the colors in ("colorFolders", ColorFolders.h); the game skips them.
+    std::vector<Colors::ColorFolder> colorFolders;
     // Their order does not matter.
     std::vector<ButtonColorRule> buttonColors;
     ChannelNames names = GetDefaultChannelNames();

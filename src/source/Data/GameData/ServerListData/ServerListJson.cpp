@@ -7,6 +7,7 @@
 #include "ServerListIds.h"
 #include "Core/Text/Utf8.h"
 #include "Data/DataHandler/TextFile.h"
+#include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 
@@ -973,12 +974,15 @@ void ReadServerListJson(std::string_view text, const std::string& source, Server
     {
         return;
     }
-    Items::Json::WarnAboutUnknownKeys(
-        root, {Items::Json::Keys::FormatVersion, VipTypesKey, ColorsKey, ButtonColorsKey, NamesKey, LoadKey, GroupsKey},
-        "", WarnUnknown(issueList));
+    Items::Json::WarnAboutUnknownKeys(root,
+                                      {Items::Json::Keys::FormatVersion, VipTypesKey, Colors::ColorFoldersKey,
+                                       ColorsKey, ButtonColorsKey, NamesKey, LoadKey, GroupsKey},
+                                      "", WarnUnknown(issueList));
     // Before the rules, the load section and the groups: they name the VIP types and colors.
     ReadVipTypes(root, list.vipTypes, issueList);
     ReadCustomColors(root, list.colors, issueList);
+    list.colorFolders = Colors::ReadColorFolders(
+        root, source, [&list](std::string_view id) { return list.FindCustomColor(id) != nullptr; }, issues);
     ReadButtonColorRules(root, list, issueList);
     ReadNames(root, list.names, issueList);
     ReadLoad(root, list, issueList);
@@ -1031,6 +1035,11 @@ std::string WriteServerListJson(const ServerListData& list)
     OrderedJson root = OrderedJson::object();
     root[Items::Json::Keys::FormatVersion] = ServerListFormatVersion;
     root[VipTypesKey] = std::move(vipTypes);
+    if (!list.colorFolders.empty())
+    {
+        root[Colors::ColorFoldersKey] = Colors::WriteColorFolders(list.colorFolders, [&list](std::string_view id)
+                                                                  { return list.FindCustomColor(id) != nullptr; });
+    }
     root[ColorsKey] = std::move(colors);
     root[ButtonColorsKey] = std::move(rules);
     root[NamesKey] = WriteNames(list.names);
@@ -1044,8 +1053,9 @@ std::string WriteServerListJson(const ServerListData& list)
     text = Items::Json::PutObjectsOnOneLine(text, BarKey);
     // A load text's texts, by language, on the line of its text.
     text = Items::Json::PutObjectsOnOneLine(text, TextKey);
-    // Each rule on a line of its own.
+    // Each rule on a line of its own, and each folder of the list's own colors.
     text = Items::Json::PutListEntriesOnOneLine(text, ButtonColorsKey);
+    text = Colors::PutColorFoldersOnLines(text);
     return text + "\n";
 }
 

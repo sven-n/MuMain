@@ -201,6 +201,26 @@ TEST_CASE("ServerListJson: writes what it reads")
     CHECK(written.find(R"("screenshot": {)") != std::string::npos);
 }
 
+TEST_CASE("ServerListJson: the folders of the list's own colors are kept, without colors the list lacks")
+{
+    ReadResult read = Read(ValidFile);
+    REQUIRE_FALSE(read.list.colors.empty());
+    const std::string color = read.list.colors.front().id;
+    read.list.colorFolders = {{"Load", {{"Warnings", {}, {color, "gone"}}}, {}}};
+    const std::string written = Data::ServerList::WriteServerListJson(read.list);
+    const ReadResult readBack = Read(written);
+
+    CHECK_MESSAGE(readBack.issues.empty(), Messages(readBack.issues));
+    REQUIRE(readBack.list.colorFolders.size() == 1);
+    CHECK(readBack.list.colorFolders[0].folders[0].colors == std::vector<std::string>{color});
+    // Each folder on a line of its own, before the colors.
+    CHECK(written.find(R"({"name": "Load", "folders": [{"name": "Warnings", "colors": [")") != std::string::npos);
+    CHECK(written.find(R"("colorFolders": [)") < written.find(R"("colors": [)"));
+    // A list without folders writes none.
+    read.list.colorFolders.clear();
+    CHECK(Data::ServerList::WriteServerListJson(read.list).find("colorFolders") == std::string::npos);
+}
+
 TEST_CASE("ServerListJson: an empty list is a valid file")
 {
     const ReadResult read = Read(R"({ "formatVersion": 2, "groups": [] })");
