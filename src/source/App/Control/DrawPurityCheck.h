@@ -5,7 +5,8 @@
 
 // Finds the game state the draw still writes: while listing, the fields of the characters, effects, items, map
 // objects, mounts, boids, particles and joints (visibility and drawn-frame stamps included) and the frame's view are
-// compared before and after each draw pass, the scene's and the offscreen one (control socket "drawpurity").
+// compared before and after each draw pass, the scene's and the offscreen one, and so is whether the pass drew from the
+// random sequences the update draws from (control socket "drawpurity").
 namespace Diagnostics::DrawPurityCheck
 {
 #ifdef MU_ENABLE_CONTROL_SOCKET

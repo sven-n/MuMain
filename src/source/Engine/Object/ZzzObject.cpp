@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Camera/CameraMove.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
@@ -7496,7 +7497,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 Alpha = sinf(WorldTime * 0.001f) * 0.5f + 0.4f;
                 if (Alpha <= 0.01f)
                 {
-                    b->renderCount = rand() % 100;
+                    b->renderCount = Random::DrawRand(o, static_cast<std::uint32_t>(Type)) % 100;
                 }
                 RenderPartObjectBodyColor2(b, o, Type, Alpha, RENDER_CHROME3 | RENDER_BRIGHT, 1.f);
             }

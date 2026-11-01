@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -9000,7 +9001,7 @@ void DescribeEffectShadow(const OBJECT& effect, Render::EffectDrawing::EffectDra
     using namespace Render::EffectDrawing;
     const OBJECT* o = &effect;
     vec3_t Light;
-    float Luminosity = (float)(rand() % 4 + 8) * 0.1f;
+    float Luminosity = (float)(Random::DrawRand(o, 1) % 4 + 8) * 0.1f;
     float Rotation, Scale;
     out.SetState({.blend = Blend::Glow});
 
@@ -9288,7 +9289,7 @@ void DescribeEffectShadow(const OBJECT& effect, Render::EffectDrawing::EffectDra
     case BITMAP_FLAME:
         if (o->SubType != 3 && o->SubType != 6)
         {
-            Luminosity = (float)(rand() % 4 + 8) * 0.1f;
+            Luminosity = (float)(Random::DrawRand(o, 2) % 4 + 8) * 0.1f;
             Vector(Luminosity, Luminosity, Luminosity, Light);
             out.DrawDecal(Decal(BITMAP_FLAME, o->Position[0], o->Position[1], 2.f, 2.f, Light, -o->Angle[2]));
         }

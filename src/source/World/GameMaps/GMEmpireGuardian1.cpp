@@ -1,6 +1,7 @@
 ﻿// GMEmpireGuardian1.cpp: implementation of the GMEmpireGuardian1 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
@@ -2330,7 +2331,7 @@ void GMEmpireGuardian1::RenderFrontSideVisual()
     break;
     case WEATHER_STORM:
     {
-        if (rand_fps_check(20))
+        if (Random::DrawFpsCheck(20, FPS_ANIMATION_FACTOR, this, 1))
         {
             EnableAlphaBlend();
             float WindX2 = (float)((int)WorldTime % 100000) * 0.0006f;

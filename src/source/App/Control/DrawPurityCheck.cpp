@@ -5,6 +5,7 @@
 #ifdef MU_ENABLE_CONTROL_SOCKET
 
 #include "Camera/CameraState.h"
+#include "Core/Utilities/Random.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
 #include "GameLogic/Skills/SkillEffectMgr.h"
@@ -15,6 +16,7 @@
 #include <array>
 #include <bit>
 #include <cstdint>
+#include <cstdlib>
 #include <map>
 #include <string>
 #include <unordered_map>
@@ -213,7 +215,7 @@ void Snapshot(std::unordered_map<const void*, Entry>& into)
 {
     into.clear();
     Recorder r(into);
-    for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
+    for (int i = 0; CharactersClient != nullptr && i < MAX_CHARACTERS_CLIENT; ++i)
         Record(r, &CharactersClient[i].Object, "character");
     for (int i = 0; i < MAX_EFFECTS; ++i)
         Record(r, &Effects[i], "effect");
@@ -244,6 +246,10 @@ int s_draws = 0;
 std::unordered_map<const void*, Entry> s_before;
 std::unordered_map<const void*, Entry> s_after;
 std::map<std::string, int> s_counts;
+// While listing, the CRT sequence restarts from a seed of its own before each draw, so its next value is known; the
+// engine is compared whole.
+int s_randNext = 0;
+std::mt19937 s_engine;
 
 void Count(const Entry& e, const char* field)
 {
@@ -253,8 +259,14 @@ void Count(const Entry& e, const char* field)
 
 void BeforeDraw()
 {
-    if (s_listing)
-        Snapshot(s_before);
+    if (!s_listing)
+        return;
+    Snapshot(s_before);
+    const auto seed = static_cast<unsigned>(std::rand());
+    std::srand(seed);
+    s_randNext = std::rand();
+    std::srand(seed);
+    s_engine = Random::Snapshot();
 }
 
 void AfterDraw()
@@ -262,6 +274,10 @@ void AfterDraw()
     if (!s_listing)
         return;
     ++s_draws;
+    if (std::rand() != s_randNext)
+        ++s_counts["random rand()"];
+    if (Random::Snapshot() != s_engine)
+        ++s_counts["random engine"];
     Snapshot(s_after);
     for (const auto& [key, after] : s_after)
     {

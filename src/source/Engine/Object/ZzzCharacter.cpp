@@ -6,6 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include <execution>
 #include <algorithm>
 #include <span>
@@ -9674,7 +9675,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     else if (c->MonsterIndex == MONSTER_ALQUAMOS)
     {
         // Tints c->Light below.
-        const float Luminosity = (float)(rand() % 30 + 70) * 0.01f;
+        const float Luminosity = (float)(Random::DrawRand(o, 1) % 30 + 70) * 0.01f;
         Vector(Luminosity * 0.6f, Luminosity * 0.7f, Luminosity * 0.8f, Light);
     }
     else if (c->MonsterIndex == MONSTER_MEGA_CRUST || c->MonsterIndex == MONSTER_ALPHA_CRUST ||

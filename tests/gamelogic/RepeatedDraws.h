@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Utilities/DrawSpawnCheck.h"
+#include "Core/Utilities/Random.h"
 #include "GameLogic/Skills/SkillEffectMgr.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "doctest.h"
@@ -33,7 +34,7 @@ inline std::vector<unsigned char> Pools()
 }
 
 // Runs `draw` `passes` times as the frame runs it, and checks it spawned nothing, left the pools as they were and
-// took nothing from the random sequence the update draws from.
+// took nothing from the random sequences the update draws from.
 template <typename Draw> void CheckChangesNothing(Draw draw, int passes = 2)
 {
     const std::vector<unsigned char> before = Pools();
@@ -41,6 +42,7 @@ template <typename Draw> void CheckChangesNothing(Draw draw, int passes = 2)
     std::srand(seed);
     const int next = std::rand();
     std::srand(seed);
+    const std::mt19937 engine = Random::Snapshot();
 
     Diagnostics::DrawSpawnCheck::ResetViolations();
     for (int i = 0; i < passes; ++i)
@@ -51,6 +53,7 @@ template <typename Draw> void CheckChangesNothing(Draw draw, int passes = 2)
 
     CHECK(Diagnostics::DrawSpawnCheck::Violations() == 0);
     CHECK(std::rand() == next);
+    CHECK(Random::Snapshot() == engine);
     CHECK(Pools() == before);
 }
 } // namespace RepeatedDraws

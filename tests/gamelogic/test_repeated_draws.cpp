@@ -2,11 +2,17 @@
 #include "doctest.h"
 
 #include "Camera/CameraProjection.h"
+#include "App/Control/DrawPurityCheck.h"
 #include "Camera/CameraState.h"
+#include "Core/Utilities/Random.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 
 #include "RepeatedDraws.h"
+
+#include <cstdlib>
+#include <vector>
 
 extern unsigned int WindowWidth;
 extern unsigned int WindowHeight;
@@ -112,3 +118,120 @@ TEST_CASE("Drawing the effect passes again and again changes nothing the next up
 
     ClearEffects();
 }
+
+namespace
+{
+// Keeps the lights of the ground marks it is handed.
+class DecalLights final : public Render::EffectDrawing::EffectDrawer
+{
+public:
+    std::vector<float> lights;
+
+    void SetState(const Render::EffectDrawing::EffectState&) override {}
+    void DrawSprite(const Render::EffectDrawing::SpriteDraw&) override {}
+    void DrawQuads(const Render::EffectDrawing::QuadsDraw&) override {}
+    void DrawDecal(const Render::EffectDrawing::DecalDraw& draw) override
+    {
+        lights.insert(lights.end(), draw.light, draw.light + 3);
+    }
+    void DrawCircle(const Render::EffectDrawing::CircleDraw&) override {}
+    void DrawPlane(const Render::EffectDrawing::PlaneDraw&) override {}
+};
+} // namespace
+
+TEST_CASE("A draw's random value is the same in every pass of a frame and takes nothing from the update's sequences "
+          "[effects]")
+{
+    int key = 0;
+    std::srand(914);
+    const int next = std::rand();
+    std::srand(914);
+    const std::mt19937 engine = Random::Snapshot();
+
+    const int first = Random::DrawRand(&key, 1);
+    CHECK(Random::DrawRand(&key, 1) == first);
+    CHECK(std::rand() == next);
+    CHECK(Random::Snapshot() == engine);
+
+    // Over frames it spreads like rand() does.
+    int changed = 0;
+    long long sum = 0;
+    for (int frame = 0; frame < 1000; ++frame)
+    {
+        Random::NextDrawFrame();
+        const int value = Random::DrawRand(&key, 1);
+        CHECK(value >= 0);
+        CHECK(value <= 32767);
+        changed += value != first ? 1 : 0;
+        sum += value;
+    }
+    CHECK(changed > 990);
+    CHECK(sum / 1000 > 15000);
+    CHECK(sum / 1000 < 17800);
+}
+
+TEST_CASE("A draw's frame check passes as often as rand_fps_check does [effects]")
+{
+    int key = 0;
+    int passed = 0;
+    for (int frame = 0; frame < 20000; ++frame)
+    {
+        Random::NextDrawFrame();
+        passed += Random::DrawFpsCheck(20, 1.0, &key, 1) ? 1 : 0;
+    }
+    CHECK(passed > 850);
+    CHECK(passed < 1150);
+}
+
+TEST_CASE(
+    "An effect's flickering ground mark is the same in every pass of a frame, and draws from no sequence [effects]")
+{
+    OBJECT flame{};
+    flame.Live = true;
+    flame.Type = BITMAP_FLAME;
+    flame.SubType = 0;
+    flame.Scale = 1.f;
+
+    DecalLights first;
+    DecalLights second;
+    Render::EffectDrawing::SetEffectDrawer(&first);
+    RepeatedDraws::CheckChangesNothing(
+        [&flame] { DescribeEffectShadow(flame, Render::EffectDrawing::ActiveEffectDrawer()); }, 1);
+    Render::EffectDrawing::SetEffectDrawer(&second);
+    RepeatedDraws::CheckChangesNothing(
+        [&flame] { DescribeEffectShadow(flame, Render::EffectDrawing::ActiveEffectDrawer()); }, 1);
+    Render::EffectDrawing::SetEffectDrawer(nullptr);
+
+    REQUIRE_FALSE(first.lights.empty());
+    CHECK(first.lights == second.lights);
+}
+
+#ifdef MU_ENABLE_CONTROL_SOCKET
+TEST_CASE("The draw purity check counts a draw pass that draws from the update's random sequences [effects]")
+{
+    namespace Purity = Diagnostics::DrawPurityCheck;
+    const auto counted = [](const char* what)
+    {
+        int draws = 0;
+        for (const Purity::Change& change : Purity::Report(draws))
+        {
+            if (change.what == what)
+                return change.count;
+        }
+        return 0;
+    };
+
+    Purity::Start();
+    Purity::BeforeDraw();
+    Purity::AfterDraw();
+    Purity::BeforeDraw();
+    (void)std::rand();
+    Purity::AfterDraw();
+    Purity::BeforeDraw();
+    (void)Random::Unit();
+    Purity::AfterDraw();
+
+    CHECK(counted("random rand()") == 1);
+    CHECK(counted("random engine") == 1);
+}
+#endif

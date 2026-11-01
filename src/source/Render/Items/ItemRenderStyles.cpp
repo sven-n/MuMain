@@ -1,5 +1,6 @@
 #include "stdafx.h"
 
+#include "Core/Utilities/Random.h"
 #include "ItemRenderStyles.h"
 #include "ItemModelTable.h"
 
@@ -1187,8 +1188,8 @@ bool RenderGrandSoulShield(BMD* b, OBJECT* o, int Type, float Alpha, int RenderT
     b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, 1.f, 2, o->BlendMeshLight, o->BlendMeshTexCoordU, WorldTime * 0.01f,
                   BITMAP_CHROME);
     b->RenderMesh(0, RENDER_TEXTURE, 1.f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-    b->RenderMesh(1, RENDER_TEXTURE, 1.f, 1, o->BlendMeshLight, (float)(rand() % 10) * 0.1f,
-                  (float)(rand() % 10) * 0.1f);
+    b->RenderMesh(1, RENDER_TEXTURE, 1.f, 1, o->BlendMeshLight, (float)(Random::DrawRand(o, 1) % 10) * 0.1f,
+                  (float)(Random::DrawRand(o, 2) % 10) * 0.1f);
 
     float Luminosity = sinf(WorldTime * 0.001f) * 0.4f + 0.6f;
     Vector(Light[0] * Luminosity, Light[0] * Luminosity, Light[0] * Luminosity, b->BodyLight);
@@ -1206,8 +1207,8 @@ bool RenderElementalShield(BMD* b, OBJECT* o, int Type, float Alpha, int RenderT
 
     b->RenderMesh(0, RENDER_TEXTURE, 1.f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
     b->RenderMesh(2, RENDER_TEXTURE, 1.f, 2, o->BlendMeshLight, WorldTime * 0.0005f, o->BlendMeshTexCoordV);
-    b->RenderMesh(3, RENDER_TEXTURE, 1.f, 3, o->BlendMeshLight, (float)(rand() % 10) * 0.1f,
-                  (float)(rand() % 10) * 0.1f);
+    b->RenderMesh(3, RENDER_TEXTURE, 1.f, 3, o->BlendMeshLight, (float)(Random::DrawRand(o, 1) % 10) * 0.1f,
+                  (float)(Random::DrawRand(o, 2) % 10) * 0.1f);
     b->EndRender();
     return true;
 }

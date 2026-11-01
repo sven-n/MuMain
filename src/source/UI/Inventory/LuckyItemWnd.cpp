@@ -1,5 +1,6 @@
 ﻿
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "I18N/All.h"
 
 #include "UI/Inventory/LuckyItemWnd.h"
@@ -94,13 +95,7 @@ int CLuckyItemWnd::SetActAction()
 void CLuckyItemWnd::RenderMixEffect()
 {
     if (m_nMixEffectTimer <= 0)
-    {
         return;
-    }
-    else
-    {
-        m_nMixEffectTimer -= REFERENCE_FRAME_STEP;
-    }
 
     EnableAlphaBlend();
     for (int i = 0; i < (int)m_pNewInventoryCtrl->GetNumberOfItems(); ++i)
@@ -112,16 +107,19 @@ void CLuckyItemWnd::RenderMixEffect()
         {
             for (int w = 0; w < iWidth; ++w)
             {
-                const BYTE red = static_cast<BYTE>((rand() % 6 + 6) * 0.1f * 255.f);
-                const BYTE green = static_cast<BYTE>((rand() % 4 + 4) * 0.1f * 255.f);
+                // Every pass of the frame draws the cell's sparkle alike.
+                const void* item = m_pNewInventoryCtrl->GetItem(i);
+                const auto salt = static_cast<std::uint32_t>((h * 16 + w) * 8);
+                const BYTE red = static_cast<BYTE>((Random::DrawRand(item, salt) % 6 + 6) * 0.1f * 255.f);
+                const BYTE green = static_cast<BYTE>((Random::DrawRand(item, salt + 1) % 4 + 4) * 0.1f * 255.f);
                 const DWORD sparkleColor = RGBA(red, green, 51, 255);
                 float Rotate = (float)((int)(WorldTime) % 100) * 20.f;
                 const UI::Items::GridRect cell = m_pNewInventoryCtrl->Geometry().CellsRect(
                     m_pNewInventoryCtrl->GetItem(i)->x + w, m_pNewInventoryCtrl->GetItem(i)->y + h, 1, 1);
                 // The original's sizes, for its 20-unit cell, at the cell's drawn size.
-                float Scale = (5.f + (rand() % 10)) * cell.width / 20.f;
-                float x = cell.x + (rand() % (std::max)(1, static_cast<int>(cell.width)));
-                float y = cell.y + (rand() % (std::max)(1, static_cast<int>(cell.height)));
+                float Scale = (5.f + (Random::DrawRand(item, salt + 2) % 10)) * cell.width / 20.f;
+                float x = cell.x + (Random::DrawRand(item, salt + 3) % (std::max)(1, static_cast<int>(cell.width)));
+                float y = cell.y + (Random::DrawRand(item, salt + 4) % (std::max)(1, static_cast<int>(cell.height)));
                 RenderBitmapRotate(BITMAP_SHINY, x, y, Scale, Scale, 0, 0.f, 0.f, 1.f, 1.f, sparkleColor);
                 RenderBitmapRotate(BITMAP_SHINY, x, y, Scale, Scale, Rotate, 0.f, 0.f, 1.f, 1.f, sparkleColor);
                 RenderBitmapRotate(BITMAP_SHINY + 1, x, y, Scale * 3.f, Scale * 3.f, Rotate,
@@ -528,6 +526,10 @@ bool CLuckyItemWnd::Update(void)
 {
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->Update())
         return false;
+
+    // The mix sparkle runs down while it shows.
+    if (IsVisible() && m_nMixEffectTimer > 0)
+        m_nMixEffectTimer -= REFERENCE_FRAME_STEP;
 
     SyncRmlModel();
     return true;
