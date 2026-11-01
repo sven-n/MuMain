@@ -241,6 +241,11 @@ void CMuColorsUI::RenderFolderDialog()
         m_action = [this, root, picked, edit, renaming]
         {
             ChangeFolders(root, renaming ? I18N::Editor::RenameAColorFolder : I18N::Editor::NewColorFolder, edit);
+            if (renaming && m_pickedFolderOpen)
+            {
+                // Its tree node takes its id from its name: it stays open under the new one.
+                m_openFolder = picked;
+            }
             if (!renaming)
             {
                 // The new folder is the last one of its parent.
@@ -265,11 +270,13 @@ void CMuColorsUI::RenderFolderDialog()
 
 void CMuColorsUI::RenderTree()
 {
+    m_pickedFolderOpen = false;
     for (const ColorsRoot root : Roots)
     {
         RenderRoot(root);
     }
     m_openRoot.reset();
+    m_openFolder.reset();
 }
 
 void CMuColorsUI::RenderRoot(ColorsRoot root)
@@ -319,14 +326,24 @@ void CMuColorsUI::RenderFolders(ColorsRoot root, const std::vector<ColorFolder>&
     {
         const ColorFolder& folder = folders[index];
         path.push_back(index);
-        ImGui::PushID(static_cast<int>(index));
+        // By its name, which no sibling has: the node stays open or closed when the folder moves.
+        ImGui::PushID(folder.name.c_str());
+        if (m_openFolder == path)
+        {
+            ImGui::SetNextItemOpen(true);
+        }
         ImGuiTreeNodeFlags flags =
             ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_SpanAvailWidth;
-        if (m_pick.root == root && m_pick.color.empty() && m_pick.folder == path)
+        const bool picked = m_pick.root == root && m_pick.color.empty() && m_pick.folder == path;
+        if (picked)
         {
             flags |= ImGuiTreeNodeFlags_Selected;
         }
         const bool open = ImGui::TreeNodeEx("##Folder", flags, "%s", folder.name.c_str());
+        if (picked)
+        {
+            m_pickedFolderOpen = open;
+        }
         if (IsPicking())
         {
             m_pick = {root, path, {}};

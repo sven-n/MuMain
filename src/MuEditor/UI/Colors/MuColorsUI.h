@@ -92,6 +92,10 @@ private:
     Pick m_pick;
     // Show's root, opened in the tree on the next frame.
     std::optional<MuEditor::Colors::ColorsRoot> m_openRoot;
+    // A folder opened in the tree on the next frame: a renamed one that was open.
+    std::optional<Data::Colors::ColorFolderPath> m_openFolder;
+    // Whether the picked folder's node was open when the tree was last drawn.
+    bool m_pickedFolderOpen = false;
     // What a button or a drop asked for, done after the tree is drawn.
     std::function<void()> m_action;
     FolderDialog m_folderDialog = FolderDialog::None;

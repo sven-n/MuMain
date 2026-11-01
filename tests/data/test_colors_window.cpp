@@ -346,6 +346,31 @@ TEST_CASE("The arrow keys pick the next color in the Colors window [editor][item
     CHECK(g_MuColorsUI.GetShownRoot() == ColorsRoot::Glow);
 }
 
+// A folder's node is open or closed by the folder, not by its place: moved, an open folder stays open.
+TEST_CASE("A color folder stays open in the tree when the folders move [editor][items]")
+{
+    TestImGuiContext context;
+    ToolWindowsScope windows;
+    ItemModelDatabaseScope restoreModels;
+    GlowColorsScope restoreColors({{"red", {1.0, 0.0, 0.0}}, {"gold", {1.0, 0.7, 0.2}}});
+    g_ItemModelDatabase.Build({}, g_GlowColors);
+    const auto setFolders = [](std::vector<Data::Colors::ColorFolder> folders)
+    { g_ItemEdits.SetColorFolders(I18N::Editor::MoveAColorFolder, MuEditor::Items::ItemEdits::GlowFolders, folders); };
+    setFolders({{"A", {}, {"red"}}, {"B", {}, {"gold"}}});
+    g_MuColorsUI.Show(ColorsRoot::Glow);
+    RenderColors();
+    FindColorsPane("##Tree")->StateStorage.SetInt(GlowNodeId({"A"}), 1);
+    RenderColors();
+
+    // B before A: A's row of red is still drawn, and a click on it picks red.
+    setFolders({{"B", {}, {"gold"}}, {"A", {}, {"red"}}});
+    RenderColors();
+    ImGui::ActivateItemByID(ColorRowId(GlowNodeId({"A"}), "red", "red (0)"));
+    RenderColors();
+    RenderColors();
+    CHECK(g_MuColorsUI.GetPickedColor() == "red");
+}
+
 // New color with a folder picked: the color and its place in the folder are one undo step.
 TEST_CASE("A new glow color made in a folder is one undo step [editor][items]")
 {
