@@ -520,7 +520,8 @@ void CServerSelWin::FitLoadTexts()
         // Not laid out yet (a row just built): the next frame has it.
         if (spans.empty() || spans.front().width <= 0.0f || width <= 0.0f)
             continue;
-        const Data::ServerList::CoveredSegments covered = Data::ServerList::GetCoveredSegments(spans, left, left + width);
+        const Data::ServerList::CoveredSegments covered =
+            Data::ServerList::GetCoveredSegments(spans, left, left + width);
         m_coveredByLoadText[entry.loadText] = covered;
         if (entry.textFrom != covered.first || entry.textTo != covered.end)
         {
