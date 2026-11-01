@@ -12,6 +12,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Network/Server/WSclient.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Camera/CameraProjection.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Scenes/SceneCore.h"
@@ -582,6 +583,7 @@ void CCharMakeWin::RenderPreviewInto(std::uint32_t width, std::uint32_t height)
     Vector(-90.f, 0.f, 0.f, Angle);
     g_Camera.FOV = 10.f;
     MoveCharacterCamera(CharacterView.Object.Position, Position, Angle);
+    CameraProjection::UpdateView(g_Camera, 0, 0, static_cast<int>(width), static_cast<int>(height));
 
     BeginOpenglForTarget(static_cast<int>(width), static_cast<int>(height));
 

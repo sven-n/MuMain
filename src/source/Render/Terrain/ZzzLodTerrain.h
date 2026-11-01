@@ -84,8 +84,8 @@ void OpenTerrainLight(wchar_t* FileName);
 void SaveTerrainLight(wchar_t* FileName);
 
 // Frustum creation and testing (restored original implementations)
-void CreateFrustrum(float xAspect, float yAspect, vec3_t position);
-void CreateFrustrum2D(vec3_t Position);
+void CreateFrustrum(float xAspect, float yAspect);
+void CreateFrustrum2D();
 bool TestFrustrum(vec3_t Position, float Range);
 bool TestFrustrum2D(float x, float y, float Range);
 void CacheActiveFrustum();   // Call once per frame after camera update

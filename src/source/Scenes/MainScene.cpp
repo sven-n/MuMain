@@ -332,6 +332,20 @@ static void UpdateGameEntities()
 }
 
 /**
+ * @brief Moves the camera after everything it follows, and builds the view the frame draws and picks with.
+ */
+static void UpdateMainSceneView()
+{
+    MoveMainCamera();
+
+    const auto viewport = UI::Scaling::WorldViewport(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
+    CameraProjection::UpdateView(g_Camera, viewport.x, viewport.y, viewport.width, viewport.height);
+    CreateFrustrum(static_cast<float>(viewport.width) / WindowWidth,
+                   static_cast<float>(viewport.height) / WindowHeight);
+    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
+}
+
+/**
  * @brief Main update function for the game scene.
  *
  * This is the primary per-frame update loop for the main gameplay scene.
@@ -341,6 +355,7 @@ static void UpdateGameEntities()
  * 3. InitializeSceneFrame() - Per-frame state reset
  * 4. UpdateUIAndInput() - UI and input processing
  * 5. UpdateGameEntities() - Game world and entity updates
+ * 6. UpdateMainSceneView() - Camera and the frame's view
  *
  * @note Returns early if EnableMainRender is false (waiting for server join).
  */
@@ -378,6 +393,10 @@ void MoveMainScene()
     UpdateGameEntities();
 
     g_ConsoleDebug->UpdateMainScene();
+
+    // The draw keeps the loading screen up until the world is back, and the camera waits with it.
+    if (LoadingWorld <= 30)
+        UpdateMainSceneView();
 }
 
 /**
@@ -386,9 +405,8 @@ void MoveMainScene()
  * @param outWidth Output screen width
  * @param outHeight Output screen height
  * @param outByWaterMap Output water map flag (0=normal, 1=hellas water, 2=water terrain)
- * @param cameraPos Camera position for frustum
  */
-static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWaterMap, vec3_t cameraPos)
+static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWaterMap)
 {
     outByWaterMap = 0;
 
@@ -400,8 +418,6 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
     // All background colors are now centralized in SceneManager.cpp
 
     BeginOpenglPhysical(viewport.x, viewport.y, viewport.width, viewport.height);
-    CreateFrustrum(static_cast<float>(viewport.width) / WindowWidth,
-                   static_cast<float>(viewport.height) / WindowHeight, cameraPos);
 
     // Setup fog for battle castle
     if (gMapManager.InBattleCastle())
@@ -414,7 +430,6 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
         // Don't disable fog - let BeginOpengl() handle it based on FogEnable
     }
     Scenes::Lighting::SubmitSceneLighting();
-    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
     App::Control::Frames::RecordWorldCamera();
 }
 
@@ -710,10 +725,9 @@ static void RenderMainSceneUI()
  * @brief Main rendering function for the game scene.
  *
  * Orchestrates the complete rendering pipeline:
- * 1. Determines camera position based on camera mode
- * 2. Sets up viewport and clear color
- * 3. Renders 3D world (terrain, objects, characters, effects)
- * 4. Renders UI and overlays
+ * 1. Sets up viewport and clear color
+ * 2. Renders 3D world (terrain, objects, characters, effects)
+ * 3. Renders UI and overlays
  *
  * @return true if rendering succeeded, false if rendering was skipped
  */
@@ -765,26 +779,10 @@ bool RenderMainScene()
     }
 #endif
 
-    vec3_t cameraPos;
     int width, height;
     BYTE byWaterMap;
 
-    // Determine camera position
-    if (MoveMainCamera() == true)
-    {
-        VectorCopy(Hero->Object.StartPosition, cameraPos);
-    }
-    else
-    {
-        g_pCatapultWindow->GetCameraPos(cameraPos);
-
-        if (g_Direction.IsDirection() && g_Direction.m_bDownHero == false)
-        {
-            g_Direction.GetCameraPosition(cameraPos);
-        }
-    }
-
-    SetupMainSceneViewport(width, height, byWaterMap, cameraPos);
+    SetupMainSceneViewport(width, height, byWaterMap);
     AddFrameHistoryLights();
     RenderGameWorld(byWaterMap, width, height);
 

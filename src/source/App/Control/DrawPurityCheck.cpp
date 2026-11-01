@@ -4,10 +4,12 @@
 
 #ifdef MU_ENABLE_CONTROL_SOCKET
 
+#include "Camera/CameraState.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
 #include "GameLogic/Skills/SkillEffectMgr.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <algorithm>
 #include <array>
@@ -16,6 +18,14 @@
 #include <map>
 #include <string>
 #include <unordered_map>
+
+extern float FrustrumX[];
+extern float FrustrumY[];
+extern int FrustrumCount;
+extern int FrustrumBoundMinX;
+extern int FrustrumBoundMinY;
+extern int FrustrumBoundMaxX;
+extern int FrustrumBoundMaxY;
 
 namespace Diagnostics::DrawPurityCheck
 {
@@ -144,6 +154,58 @@ void Record(Recorder& r, const JOINT* j)
     Put(e, j->MultiUse);
 }
 
+constexpr const char* ViewFields[] = {
+    "Position.x",   "Position.y",   "Position.z",    "Angle.x",       "Angle.y",           "Angle.z",
+    "Matrix[0][0]", "Matrix[0][1]", "Matrix[0][2]",  "Matrix[0][3]",  "Matrix[1][0]",      "Matrix[1][1]",
+    "Matrix[1][2]", "Matrix[1][3]", "Matrix[2][0]",  "Matrix[2][1]",  "Matrix[2][2]",      "Matrix[2][3]",
+    "PerspectiveX", "PerspectiveY", "ScreenCenterX", "ScreenCenterY", "ScreenCenterYFlip", "FOV",
+    "ViewNear",     "ViewFar",      "TopViewEnable"};
+constexpr const char* FrustumFields[] = {"Count", "BoundMinX", "BoundMinY", "BoundMaxX", "BoundMaxY"};
+constexpr const char* HullFields[] = {"0", "1", "2",  "3",  "4",  "5",  "6",  "7",
+                                      "8", "9", "10", "11", "12", "13", "14", "15"};
+constexpr const char* MouseRayFields[] = {"MouseTarget.x",   "MouseTarget.y",   "MouseTarget.z",
+                                          "MousePosition.x", "MousePosition.y", "MousePosition.z"};
+
+// The view the update built: the draw only reads it.
+void RecordView(Recorder& r)
+{
+    Entry& view = r.Begin(&g_Camera, "view", ViewFields, 0);
+    Put(view, g_Camera.Position);
+    Put(view, g_Camera.Angle);
+    for (const auto& row : g_Camera.Matrix)
+    {
+        for (const float value : row)
+            Put(view, value);
+    }
+    Put(view, g_Camera.PerspectiveX);
+    Put(view, g_Camera.PerspectiveY);
+    Put(view, g_Camera.ScreenCenterX);
+    Put(view, g_Camera.ScreenCenterY);
+    Put(view, g_Camera.ScreenCenterYFlip);
+    Put(view, g_Camera.FOV);
+    Put(view, g_Camera.ViewNear);
+    Put(view, g_Camera.ViewFar);
+    Put(view, g_Camera.TopViewEnable ? 1 : 0);
+
+    Entry& frustum = r.Begin(&FrustrumCount, "frustum", FrustumFields, 0);
+    Put(frustum, FrustrumCount);
+    Put(frustum, FrustrumBoundMinX);
+    Put(frustum, FrustrumBoundMinY);
+    Put(frustum, FrustrumBoundMaxX);
+    Put(frustum, FrustrumBoundMaxY);
+    Entry& hullX = r.Begin(FrustrumX, "frustum hull x", HullFields, 0);
+    Entry& hullY = r.Begin(FrustrumY, "frustum hull y", HullFields, 0);
+    for (int i = 0; i < 16; ++i)
+    {
+        Put(hullX, FrustrumX[i]);
+        Put(hullY, FrustrumY[i]);
+    }
+
+    Entry& mouse = r.Begin(MouseTarget, "mouse ray", MouseRayFields, 0);
+    Put(mouse, MouseTarget);
+    Put(mouse, MousePosition);
+}
+
 void Snapshot(std::unordered_map<const void*, Entry>& into)
 {
     into.clear();
@@ -171,6 +233,7 @@ void Snapshot(std::unordered_map<const void*, Entry>& into)
         Record(r, &Particles[i]);
     for (int i = 0; i < MAX_JOINTS; ++i)
         Record(r, &Joints[i]);
+    RecordView(r);
 }
 
 bool s_listing = false;

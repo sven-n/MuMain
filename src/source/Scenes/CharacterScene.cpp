@@ -200,6 +200,18 @@ void CreateCharacterScene()
 
 static void UpdateSelectedCharacterEffects();
 
+// Moves the camera and builds the view the frame draws and picks with, before anything tests visibility against it.
+static void UpdateCharacterSceneView()
+{
+    MoveMainCamera();
+
+    const auto viewport = UI::Scaling::FullReferenceViewport();
+    UpdateCameraView(viewport.x, viewport.y, viewport.width, viewport.height);
+    CreateFrustrum(static_cast<float>(viewport.width) / REFERENCE_WIDTH,
+                   static_cast<float>(viewport.height) / REFERENCE_HEIGHT);
+    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
+}
+
 static void MoveCharacterSceneState()
 {
     // Picks the character under the mouse from what the last frame drew, before anything resets the mouse state.
@@ -219,6 +231,7 @@ static void MoveCharacterSceneState()
 
     // Update camera BEFORE checking character visibility
     MoveCamera();
+    UpdateCharacterSceneView();
 
     // Now check character visibility with updated frustum
     MoveCharactersClient();
@@ -335,11 +348,6 @@ void NewMoveCharacterScene()
  */
 static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
 {
-    vec3_t pos;
-    Vector(9758.0f, 18913.0f, 675.0f, pos);
-
-    MoveMainCamera();
-
     const auto viewport = UI::Scaling::FullReferenceViewport();
     outWidth = viewport.width;
     outHeight = viewport.height;
@@ -347,17 +355,6 @@ static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
     mu::GetRenderer().SetClearColor(0.f, 0.f, 0.f, 1.f);
     BeginOpengl(viewport.x, viewport.y, outWidth, outHeight);
     Scenes::Lighting::SubmitSceneLighting();
-
-    // Build global frustum arrays for TestFrustrum/TestFrustrum2D
-    // Must be called after BeginOpengl (needs GL matrices) in every scene that renders terrain/objects
-    {
-        vec3_t cameraPos;
-        VectorCopy(g_Camera.Position, cameraPos);
-        CreateFrustrum((float)outWidth / (float)REFERENCE_WIDTH,
-                       (float)outHeight / (float)REFERENCE_HEIGHT, cameraPos);
-    }
-
-    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
 }
 
 // The render state the selected character's lighting left (PlaceCharactersForDraw sets the light).
