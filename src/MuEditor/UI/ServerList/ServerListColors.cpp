@@ -224,21 +224,42 @@ std::optional<TokenColor> ParseTokenColor(std::string_view value)
     {
         return std::nullopt;
     }
+    // Four whole numbers from 0 to 255 between commas, spaces around them, and nothing else: "0.5" or a
+    // fifth number is no color the editor could write back as the theme has it.
     std::array<int, 4> channels{};
     const char* position = value.data() + RgbaStart.size();
     const char* end = value.data() + value.size() - 1;
-    for (int& channel : channels)
+    const auto skipSpaces = [&position, end]
     {
-        while (position < end && (*position == ' ' || *position == ','))
+        while (position < end && *position == ' ')
         {
             ++position;
         }
+    };
+    for (std::size_t index = 0; index < channels.size(); ++index)
+    {
+        skipSpaces();
+        if (index > 0)
+        {
+            if (position == end || *position != ',')
+            {
+                return std::nullopt;
+            }
+            ++position;
+            skipSpaces();
+        }
+        int& channel = channels[index];
         const auto [parsed, error] = std::from_chars(position, end, channel);
         if (error != std::errc{} || channel < 0 || channel > static_cast<int>(ChannelMax))
         {
             return std::nullopt;
         }
         position = parsed;
+    }
+    skipSpaces();
+    if (position != end)
+    {
+        return std::nullopt;
     }
     for (int index = 0; index < 3; ++index)
     {

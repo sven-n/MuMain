@@ -341,6 +341,16 @@ TEST_CASE("Server list colors: a token color keeps its alpha [editor]")
     REQUIRE(hex.has_value());
     CHECK(ListColors::FormatTokenColor(*hex) == "#ffb400");
     CHECK_FALSE(ListColors::ParseTokenColor("orange").has_value());
+    // Spaces or none around the numbers.
+    REQUIRE(ListColors::ParseTokenColor("rgba(1,2,3,4)").has_value());
+    CHECK(ListColors::ParseTokenColor("rgba( 1 , 2 , 3 , 4 )")->alpha == 4);
+    // Only four whole numbers from 0 to 255: anything else the editor could not write back as the theme has it.
+    CHECK_FALSE(ListColors::ParseTokenColor("rgba(0, 0, 0, 0.5)").has_value());
+    CHECK_FALSE(ListColors::ParseTokenColor("rgba(1, 2, 3, 4, 5)").has_value());
+    CHECK_FALSE(ListColors::ParseTokenColor("rgba(1, 2, 3)").has_value());
+    CHECK_FALSE(ListColors::ParseTokenColor("rgba(1 2 3 4)").has_value());
+    CHECK_FALSE(ListColors::ParseTokenColor("rgba(1,, 2, 3, 4)").has_value());
+    CHECK_FALSE(ListColors::ParseTokenColor("rgba(0, 0, 0, 256)").has_value());
 }
 
 #endif // _EDITOR
