@@ -34,7 +34,8 @@ public:
     // errorMessage then, for the player.
     bool LoadServerListScript(std::string& errorMessage);
     // The list the login screen names the servers with: the groups in their
-    // order, the VIP types and the texts.
+    // order, the VIP types and the texts. The selected channel follows it
+    // (SetSelectServerInfo).
     void SetServerList(const Data::ServerList::ServerListData& list);
     void SetFirst();
     bool GetNext(OUT CServerGroup*& pServerGroup);
@@ -42,7 +43,11 @@ public:
 
     int GetServerGroupSize();
 
-    void SetSelectServerInfo(const wchar_t* pszName, int iIndex, const Data::ServerList::ChannelSettings& channel);
+    // The channel the player joined: channel `iIndex` of the group `groupId` (its name `pszName`), with its PvP and
+    // VIP type. While the list has the group, its name and the channel's settings follow the list
+    // (SetServerList: MuEditor changes them while the game runs).
+    void SetSelectServerInfo(int groupId, const wchar_t* pszName, int iIndex,
+                             const Data::ServerList::ChannelSettings& channel);
     wchar_t* GetSelectServerName();
     int GetSelectServerIndex();
     // Whether the selected channel has PvP off.
@@ -120,6 +125,8 @@ public:
 #endif
 
 protected:
+    // The selected channel's group name and settings as the list has them now; kept when the list has no such group.
+    void FollowSelectedChannel();
     // The list's group with the ID, and its place in the list from 1 (`sequence`); nullptr when the list has none.
     const Data::ServerList::ServerGroup* FindListGroup(int groupId, int& sequence) const;
     bool MakeServerGroup(IN int iServerGroupIndex, OUT CServerGroup* pServerGroup);
@@ -132,6 +139,8 @@ public:
     type_mapServerGroup::iterator m_iterServerGroup;
 
     int m_iTotalServer;
+    // The selected channel's group (its ID, -1 for none, and name), its number and settings.
+    int m_iSelectServerGroupId = -1;
     wchar_t m_szSelectServerName[MAX_TEXT_LENGTH];
     int m_iSelectServerIndex;
     Data::ServerList::ChannelSettings m_selectChannel;

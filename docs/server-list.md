@@ -350,7 +350,9 @@ The Groups tab's channel table shows each channel's button text in its color.
 
 For both tabs:
 
-- The login screen shows each change right away, while the window is open.
+- The login screen shows each change right away, while the window is open, and
+  so do the login window's and the character info's titles and the screenshot
+  message of the channel the game joined.
 - **Add**, **Remove**, **Move up** and **Move down** change the list of groups,
   of VIP types or of colors. Removing a VIP type that channels or button color
   rules use first asks, and lists the channels and the number of rules; the

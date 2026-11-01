@@ -87,6 +87,19 @@ void CServerListManager::SetServerList(const Data::ServerList::ServerListData& l
     {
         m_groupIndexById[m_serverList.groups[index].id] = index;
     }
+    FollowSelectedChannel();
+}
+
+void CServerListManager::FollowSelectedChannel()
+{
+    int sequence = 0;
+    const Data::ServerList::ServerGroup* group =
+        m_iSelectServerGroupId >= 0 ? FindListGroup(m_iSelectServerGroupId, sequence) : nullptr;
+    if (group == nullptr || m_iSelectServerIndex < 1 || m_iSelectServerIndex > MAX_SERVER_PER_GROUP)
+        return;
+
+    wcsncpy_s(m_szSelectServerName, Core::Text::FromUtf8(group->name).c_str(), _TRUNCATE);
+    m_selectChannel = group->channels[static_cast<size_t>(m_iSelectServerIndex - 1)];
 }
 
 #ifdef _EDITOR
@@ -316,9 +329,10 @@ CServerGroup* CServerListManager::GetServerGroupByBtnPos(int iBtnPos)
     return NULL;
 }
 
-void CServerListManager::SetSelectServerInfo(const wchar_t* pszName, int iIndex,
+void CServerListManager::SetSelectServerInfo(int groupId, const wchar_t* pszName, int iIndex,
                                              const Data::ServerList::ChannelSettings& channel)
 {
+    m_iSelectServerGroupId = groupId;
     wcsncpy_s(m_szSelectServerName, pszName, _TRUNCATE);
     m_iSelectServerIndex = iIndex;
     m_selectChannel = channel;

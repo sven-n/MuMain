@@ -423,8 +423,8 @@ bool CServerSelWin::ConnectToServer(CServerInfo* pServerInfo)
     g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     g_pSystemLogBox->AddText(I18N::Game::PleaseWait, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
-    g_ServerListManager->SetSelectServerInfo(m_pSelectServerGroup->m_szName, pServerInfo->m_iIndex,
-                                             pServerInfo->m_channel);
+    g_ServerListManager->SetSelectServerInfo(m_pSelectServerGroup->m_iServerIndex, m_pSelectServerGroup->m_szName,
+                                             pServerInfo->m_iIndex, pServerInfo->m_channel);
 
     return true;
 }
