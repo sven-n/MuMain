@@ -331,40 +331,9 @@ void CMapManager::Load() // OK
 
         LoadBitmap(L"Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
+        // The monsters' sounds load with their models (their sound sets in
+        // Data/Monsters/Sounds.json); eElec1 and eElec2 load at start.
         LoadWaveFile(SOUND_AIDA_AMBIENT, L"Data\\Sound\\w34\\aida_ambi.wav", 1, true);
-        LoadWaveFile(SOUND_AIDA_BLUEGOLEM_MOVE1, L"Data\\Sound\\w34\\bg_idle1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_BLUEGOLEM_MOVE2, L"Data\\Sound\\w34\\bg_idle2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_BLUEGOLEM_ATTACK1, L"Data\\Sound\\w34\\bg_attack1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_BLUEGOLEM_ATTACK2, L"Data\\Sound\\w34\\bg_attack2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_BLUEGOLEM_DIE, L"Data\\Sound\\w34\\bg_death.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHRAIDER_MOVE1, L"Data\\Sound\\w34\\dr_idle1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHRAIDER_MOVE2, L"Data\\Sound\\w34\\dr_idle2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHRAIDER_ATTACK1, L"Data\\Sound\\w34\\dr_attack1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHRAIDER_ATTACK2, L"Data\\Sound\\w34\\dr_attack2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHRAIDER_DIE, L"Data\\Sound\\w34\\dr_death.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHTREE_MOVE1, L"Data\\Sound\\w34\\dt_idle1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHTREE_MOVE2, L"Data\\Sound\\w34\\dt_idle2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHTREE_ATTACK1, L"Data\\Sound\\w34\\dt_attack1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHTREE_ATTACK2, L"Data\\Sound\\w34\\dt_attack2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_DEATHTREE_DIE, L"Data\\Sound\\w34\\dt_death.wav", 1);
-        LoadWaveFile(SOUND_AIDA_FORESTORC_MOVE1, L"Data\\Sound\\w34\\fo_idle1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_FORESTORC_MOVE2, L"Data\\Sound\\w34\\fo_idle2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_FORESTORC_ATTACK1, L"Data\\Sound\\w34\\fo_attack1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_FORESTORC_ATTACK2, L"Data\\Sound\\w34\\fo_attack2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_FORESTORC_DIE, L"Data\\Sound\\w34\\fo_death.wav", 1);
-        LoadWaveFile(SOUND_AIDA_HELL_MOVE1, L"Data\\Sound\\w34\\hm_idle1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_HELL_MOVE2, L"Data\\Sound\\w34\\hm_idle2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_HELL_ATTACK1, L"Data\\Sound\\w34\\hm_attack1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_HELL_ATTACK2, L"Data\\Sound\\w34\\hm_firelay.wav", 1);
-        LoadWaveFile(SOUND_AIDA_HELL_ATTACK3, L"Data\\Sound\\w34\\hm_bloodywind.wav", 1);
-        LoadWaveFile(SOUND_AIDA_HELL_DIE, L"Data\\Sound\\w34\\hm_death.wav", 1);
-        LoadWaveFile(SOUND_AIDA_WITCHQUEEN_MOVE1, L"Data\\Sound\\w34\\wq_idle1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_WITCHQUEEN_MOVE2, L"Data\\Sound\\w34\\wq_idle2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_WITCHQUEEN_ATTACK1, L"Data\\Sound\\w34\\wq_attack1.wav", 1);
-        LoadWaveFile(SOUND_AIDA_WITCHQUEEN_ATTACK2, L"Data\\Sound\\w34\\wq_attack2.wav", 1);
-        LoadWaveFile(SOUND_AIDA_WITCHQUEEN_DIE, L"Data\\Sound\\w34\\wq_death.wav", 1);
-        LoadWaveFile(SOUND_CHAOS_THUNDER01, L"Data\\Sound\\eElec1.wav", 1);
-        LoadWaveFile(SOUND_CHAOS_THUNDER02, L"Data\\Sound\\eElec2.wav", 1);
         break;
     case WD_68DOPPLEGANGER4:
         LoadBitmap(L"Effect\\clouds.jpg", BITMAP_CLOUD, GL_LINEAR, GL_CLAMP_TO_EDGE);

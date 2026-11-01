@@ -378,9 +378,10 @@ name what replaced them: the monsters' own sets, and the cues.
 Not all monster sounds are data yet: the monsters of Aida, Crywolf, Kanturu,
 the Hunting Ground, the Balgass barracks, Illusion Temple and a few others
 (among them 340 to 365, 386 to 403 and 409 to 412) play their sounds from
-their map's per-frame drawing code, and their maps load them; they name no
-sound set. They move into sound events with the monsters' looks (design,
-MN8).
+their map's per-frame drawing code. The Aida monsters name sound sets that
+list those sounds under their `SOUND_*` ids, which their models load; the
+others' maps load them, and they name no sound set. They move into sound
+events with the monsters' looks (design, MN8).
 
 ## Attacks
 

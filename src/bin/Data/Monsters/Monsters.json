@@ -2102,6 +2102,7 @@
       "name": {"en": "Witch Queen", "es": "Reina Bruja", "pt": "Rainha Bruxa"},
       "kind": "monster",
       "model": "MONSTER_MODEL_WITCH_QUEEN",
+      "soundSet": "Witch Queen",
       "attacks": {
         "otherwise": "attack1",
         "clearSkill": "always"
@@ -2112,6 +2113,7 @@
       "name": {"en": "Blue Golem", "es": "Gólem Azul", "pt": "Golem azul"},
       "kind": "monster",
       "model": "MONSTER_MODEL_GOLDEN_STONE_GOLEM",
+      "soundSet": "Blue Golem",
       "attacks": {
         "otherwise": "attack1",
         "clearSkill": "always"
@@ -2121,25 +2123,29 @@
       "number": 306,
       "name": {"en": "Death Rider", "es": "Jinete de la Muerte", "pt": "Cavaleiro da morte"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_RIDER"
+      "model": "MONSTER_MODEL_DEATH_RIDER",
+      "soundSet": "Death Rider"
     },
     {
       "number": 307,
       "name": {"en": "Forest Orc", "es": "Orc del Bosque", "pt": "Orc da floresta"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_FOREST_ORC"
+      "model": "MONSTER_MODEL_FOREST_ORC",
+      "soundSet": "Forest Orc"
     },
     {
       "number": 308,
       "name": {"en": "Death Tree", "es": "Árbol de la Muerte", "pt": "Árvore da morte"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_DEATH_TREE"
+      "model": "MONSTER_MODEL_DEATH_TREE",
+      "soundSet": "Death Tree"
     },
     {
       "number": 309,
       "name": {"en": "Hell Maine", "es": "Maine Infernal", "pt": "Maine do inferno"},
       "kind": "monster",
       "model": "MONSTER_MODEL_HELL_MAINE",
+      "soundSet": "Hell Maine",
       "attacks": {
         "monsterSkills": {"2": "attack1", "3": "attack2"},
         "otherwise": "attack1",
@@ -3378,7 +3384,8 @@
       "number": 495,
       "name": {"en": "Golden Stone Golem", "es": "Gólem de Piedra Dorado", "pt": "Golem de pedra dourado"},
       "kind": "monster",
-      "model": "MONSTER_MODEL_GOLDEN_STONE_GOLEM"
+      "model": "MONSTER_MODEL_GOLDEN_STONE_GOLEM",
+      "soundSet": "Blue Golem"
     },
     {
       "number": 496,
@@ -3818,6 +3825,7 @@
       "name": {"en": "Bloody Orc", "es": "Orc Sangriento", "pt": "Orc sanguinário"},
       "kind": "monster",
       "model": "MONSTER_MODEL_BLOODY_ORC",
+      "soundSet": "Forest Orc",
       "attacks": {
         "otherwise": "attack1",
         "clearSkill": "always"
@@ -3828,6 +3836,7 @@
       "name": {"en": "Bloody Death Rider", "es": "Jinete Sangriento de la Muerte", "pt": "Cavaleiro da morte sanguinário"},
       "kind": "monster",
       "model": "MONSTER_MODEL_BLOODY_DEATH_RIDER",
+      "soundSet": "Death Rider",
       "attacks": {
         "otherwise": "attack1",
         "clearSkill": "always"
@@ -3838,6 +3847,7 @@
       "name": {"en": "Bloody Golem", "es": "Gólem Sangriento", "pt": "Golem sanguinário"},
       "kind": "monster",
       "model": "MONSTER_MODEL_BLOODY_GOLEM",
+      "soundSet": "Blue Golem",
       "attacks": {
         "monsterSkills": {"68": "attack2"},
         "otherwise": "attack1",
@@ -3849,6 +3859,7 @@
       "name": {"en": "Bloody Witch Queen", "es": "Reina Bruja Sangrienta", "pt": "Rainha feiticeira sanguinária"},
       "kind": "monster",
       "model": "MONSTER_MODEL_BLOODY_WITCH_QUEEN",
+      "soundSet": "Witch Queen",
       "attacks": {
         "monsterSkills": {"69": "attack2"},
         "otherwise": "attack1",
