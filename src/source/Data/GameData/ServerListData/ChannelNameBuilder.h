@@ -6,6 +6,7 @@
 #include <span>
 #include <string>
 #include <string_view>
+#include <vector>
 
 // Builds a channel's name from a template of Data/Local/ServerList.json:
 // "[{name}-{channel} ({vip} {pvp})]" is "[Valhalla-1 (Gold Non-PvP)]" (docs/server-list.md).
@@ -26,6 +27,15 @@ struct ChannelNameValues
     std::string_view load;      // the list's load text ((Full), Overloaded); empty while joinable; Button only
     std::string_view character; // the player's character; Screenshot only
 };
+
+// What a template of `place` shows as written: a problem of its braces (ScanPlaceholders' message,
+// and nothing else then), or the placeholders the place does not have, without braces.
+struct TemplateProblems
+{
+    std::string braceError;
+    std::vector<std::string> unknownPlaceholders;
+};
+TemplateProblems FindTemplateProblems(std::string_view text, ChannelNamePlace place);
 
 // Fills the template `text` for `place`. Each placeholder of the place gets its
 // value; an empty value goes together with one space next to it (the one before,

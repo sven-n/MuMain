@@ -10,6 +10,7 @@
 #include <filesystem>
 #include <optional>
 #include <string>
+#include <vector>
 
 using Data::ServerList::BuildChannelName;
 using Data::ServerList::ChannelNamePlace;
@@ -105,6 +106,25 @@ TEST_CASE("ChannelNameBuilder: each place has its own placeholders")
     CHECK(FillChannelName("[{name} / {character}]", ChannelNamePlace::Screenshot, values) == "[Valhalla / Hero]");
     CHECK(FillChannelName("{character}", ChannelNamePlace::Button, values) == "{character}");
     CHECK(FillChannelName("{load}", ChannelNamePlace::CharacterInfo, values) == "{load}");
+}
+
+// What the file check reports and the editor shows under a template.
+TEST_CASE("ChannelNameBuilder: a template's problems are its braces or the placeholders its place lacks")
+{
+    using Data::ServerList::FindTemplateProblems;
+    const auto fine = FindTemplateProblems("[{name}-{channel} ({vip} {pvp})]", ChannelNamePlace::Login);
+    CHECK(fine.braceError.empty());
+    CHECK(fine.unknownPlaceholders.empty());
+
+    const auto unknown = FindTemplateProblems("{name} {load} {character} {nope}", ChannelNamePlace::Login);
+    CHECK(unknown.braceError.empty());
+    CHECK(unknown.unknownPlaceholders == std::vector<std::string>{"load", "character", "nope"});
+    CHECK(FindTemplateProblems("{name} {load}", ChannelNamePlace::Button).unknownPlaceholders.empty());
+
+    // A brace problem is the only one told.
+    const auto braces = FindTemplateProblems("{name {nope}", ChannelNamePlace::Login);
+    CHECK_FALSE(braces.braceError.empty());
+    CHECK(braces.unknownPlaceholders.empty());
 }
 
 TEST_CASE("ChannelNameBuilder: a channel's name in a language")

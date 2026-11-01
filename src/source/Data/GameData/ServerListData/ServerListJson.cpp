@@ -8,7 +8,6 @@
 #include "Core/Text/Utf8.h"
 #include "Data/DataHandler/TextFile.h"
 #include "Data/GameData/ColorFolders/ColorFolders.h"
-#include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 
 #include <algorithm>
@@ -510,20 +509,15 @@ std::string ListPlaceholders(ChannelNamePlace place)
 // A template shows what it cannot fill as written: an error for each.
 void CheckTemplate(const std::string& text, ChannelNamePlace place, const std::string& field, IssueList& issues)
 {
-    const Items::PlaceholderScan scan = Items::ScanPlaceholders(text);
-    if (!scan.error.empty())
+    const TemplateProblems problems = FindTemplateProblems(text, place);
+    if (!problems.braceError.empty())
     {
-        issues.Error(field, scan.error);
-        return;
+        issues.Error(field, problems.braceError);
     }
-    const std::span<const std::string_view> known = GetChannelNamePlaceholders(place);
-    for (const std::string& name : scan.names)
+    for (const std::string& name : problems.unknownPlaceholders)
     {
-        if (std::find(known.begin(), known.end(), name) == known.end())
-        {
-            issues.Error(field, "{" + name + "} is not a placeholder of the " + GetChannelNamePlaceKey(place) +
-                                    " template, which has " + ListPlaceholders(place) + "; it is shown as written");
-        }
+        issues.Error(field, "{" + name + "} is not a placeholder of the " + GetChannelNamePlaceKey(place) +
+                                " template, which has " + ListPlaceholders(place) + "; it is shown as written");
     }
 }
 

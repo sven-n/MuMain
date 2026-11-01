@@ -13,7 +13,6 @@
 #include "../MuEditor/UI/Common/SavedDataFiles.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
 #include "Core/Text/Utf8.h"
-#include "Data/GameData/ItemData/ItemDescriptionPlaceholders.h"
 #include "Data/GameData/ServerListData/ButtonColors.h"
 #include "Data/GameData/ServerListData/ChannelNameBuilder.h"
 #include "Data/GameData/ServerListData/LoadBar.h"
@@ -296,19 +295,14 @@ std::optional<ChannelSettings> RenderChannelRow(const ServerListData& list, cons
 // What a template shows as written: a brace problem, or a placeholder its place does not have.
 void RenderTemplateProblems(std::string_view text, ChannelNamePlace place)
 {
-    const Data::Items::PlaceholderScan scan = Data::Items::ScanPlaceholders(text);
-    if (!scan.error.empty())
+    const Data::ServerList::TemplateProblems problems = Data::ServerList::FindTemplateProblems(text, place);
+    if (!problems.braceError.empty())
     {
-        RenderError(scan.error.c_str());
-        return;
+        RenderError(problems.braceError.c_str());
     }
-    const std::span<const std::string_view> known = Data::ServerList::GetChannelNamePlaceholders(place);
-    for (const std::string& name : scan.names)
+    for (const std::string& name : problems.unknownPlaceholders)
     {
-        if (std::find(known.begin(), known.end(), name) == known.end())
-        {
-            RenderError(I18N::Format(I18N::Editor::NotAPlaceholderOfThisTemplate0, {"{" + name + "}"}).c_str());
-        }
+        RenderError(I18N::Format(I18N::Editor::NotAPlaceholderOfThisTemplate0, {"{" + name + "}"}).c_str());
     }
 }
 

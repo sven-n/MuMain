@@ -139,6 +139,26 @@ std::span<const std::string_view> GetChannelNamePlaceholders(ChannelNamePlace pl
     }
 }
 
+TemplateProblems FindTemplateProblems(std::string_view text, ChannelNamePlace place)
+{
+    TemplateProblems problems;
+    Items::PlaceholderScan scan = Items::ScanPlaceholders(text);
+    if (!scan.error.empty())
+    {
+        problems.braceError = std::move(scan.error);
+        return problems;
+    }
+    const std::span<const std::string_view> known = GetChannelNamePlaceholders(place);
+    for (std::string& name : scan.names)
+    {
+        if (std::find(known.begin(), known.end(), name) == known.end())
+        {
+            problems.unknownPlaceholders.push_back(std::move(name));
+        }
+    }
+    return problems;
+}
+
 std::string FillChannelName(std::string_view text, ChannelNamePlace place, const ChannelNameValues& values)
 {
     // Text from a brace problem on (FindPlaceholders' stop) stays as written.
