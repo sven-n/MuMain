@@ -136,19 +136,66 @@ void CServerListManager::RebuildServerGroups()
         {
             InsertServerGroup(connectIndex, *percent);
         }
-        else if (CServerGroup* pServerGroup = FindOrMakeGroup(connectIndex))
+        else if (!m_hiddenOffline.contains(connectIndex))
         {
-            InsertServer(pServerGroup, connectIndex, m_offlinePercent);
-            pServerGroup->m_listServerInfo.back()->m_offline = true;
-            m_iterServerGroup = m_mapServerGroup.begin();
+            InsertOfflineServer(connectIndex);
         }
     }
+}
+
+void CServerListManager::InsertOfflineServer(int iConnectIndex)
+{
+    CServerGroup* pServerGroup = FindOrMakeGroup(iConnectIndex);
+    if (pServerGroup == nullptr)
+        return;
+
+    const std::optional<int> ownLoad = GetOfflineServerLoad(iConnectIndex);
+    InsertServer(pServerGroup, iConnectIndex, ownLoad.value_or(m_offlinePercent));
+    pServerGroup->m_listServerInfo.back()->m_offline = true;
+    m_iterServerGroup = m_mapServerGroup.begin();
 }
 
 void CServerListManager::SetOfflinePreview(bool show, int percent)
 {
     m_showOffline = show;
     m_offlinePercent = std::clamp(percent, 0, MaxOfflineServerPercent);
+}
+
+void CServerListManager::SetOfflineServerShown(int connectIndex, bool shown)
+{
+    if (shown)
+    {
+        m_hiddenOffline.erase(connectIndex);
+    }
+    else
+    {
+        m_hiddenOffline.insert(connectIndex);
+    }
+}
+
+bool CServerListManager::IsOfflineServerShown(int connectIndex) const
+{
+    return !m_hiddenOffline.contains(connectIndex);
+}
+
+void CServerListManager::SetOfflineServerLoad(int connectIndex, std::optional<int> percent)
+{
+    if (!percent)
+    {
+        m_offlineLoads.erase(connectIndex);
+        return;
+    }
+    m_offlineLoads[connectIndex] = std::clamp(*percent, 0, MaxOfflineServerPercent);
+}
+
+std::optional<int> CServerListManager::GetOfflineServerLoad(int connectIndex) const
+{
+    const auto found = m_offlineLoads.find(connectIndex);
+    if (found == m_offlineLoads.end())
+    {
+        return std::nullopt;
+    }
+    return found->second;
 }
 #endif
 

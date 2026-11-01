@@ -11,6 +11,8 @@
 #include <array>
 #include <cstddef>
 #include <map>
+#include <optional>
+#include <set>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -114,8 +116,8 @@ public:
     // The highest load the preview of the offline servers takes: an overloaded server's.
     static constexpr int MaxOfflineServerPercent = 140;
     // MuEditor's preview of the servers that are offline: every channel 1 to 20 of every group of the list
-    // that the connect server didn't send is shown too, at `percent` load, and can't be joined (m_offline). It
-    // takes effect with the next RebuildServerGroups.
+    // that the connect server didn't send is shown too (unless SetOfflineServerShown left it out), at `percent`
+    // load or its own, and can't be joined (m_offline). It takes effect with the next RebuildServerGroups.
     void SetOfflinePreview(bool show, int percent);
     bool IsShowingOfflineServers() const
     {
@@ -125,6 +127,12 @@ public:
     {
         return m_offlinePercent;
     }
+    // One offline channel of the preview, by its server ID: each one is shown until it is left out, and has the
+    // preview's load until it gets its own (nothing: the preview's again). Kept while the game runs.
+    void SetOfflineServerShown(int connectIndex, bool shown);
+    bool IsOfflineServerShown(int connectIndex) const;
+    void SetOfflineServerLoad(int connectIndex, std::optional<int> percent);
+    std::optional<int> GetOfflineServerLoad(int connectIndex) const;
 #endif
 
 protected:
@@ -136,6 +144,10 @@ protected:
     // The group of the server with this connect index, made when the list has it; nullptr when it doesn't.
     CServerGroup* FindOrMakeGroup(int iConnectIndex);
     void InsertServer(CServerGroup* pServerGroup, int iConnectIndex, int iServerPercent);
+#ifdef _EDITOR
+    // A server of the preview the connect server didn't send, at its own load or the preview's.
+    void InsertOfflineServer(int iConnectIndex);
+#endif
 
 public:
     type_mapServerGroup m_mapServerGroup;
@@ -168,6 +180,9 @@ protected:
     int m_receivedServersVersion = 0;
     bool m_showOffline = false;
     int m_offlinePercent = 50;
+    // The offline channels the preview leaves out, and the ones with a load of their own, by server ID.
+    std::set<int> m_hiddenOffline;
+    std::map<int, int> m_offlineLoads;
 #endif
 };
 
