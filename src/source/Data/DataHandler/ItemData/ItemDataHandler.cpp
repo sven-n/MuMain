@@ -9,6 +9,7 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Data/DataHandler/DataIssueReport.h"
 #include "Data/GameData/ItemData/ItemAttributeConversion.h"
+#include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/EffectData/GlowColorList.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
@@ -292,6 +293,9 @@ bool CItemDataHandler::LoadModels(std::string& errorMessage)
     }
 
     g_GlowColors.Build(colors.colors);
+#ifdef _EDITOR
+    g_GlowColors.SetFolders(std::move(colors.folders));
+#endif
     g_ItemModelDatabase.Build(result.models, g_GlowColors);
     g_ItemModelDatabase.SetSharedModels(result.sharedModels);
 #ifdef _EDITOR
@@ -588,6 +592,12 @@ void CItemDataHandler::RestoreGlowColors(std::span<const Data::Effects::GlowColo
     g_ItemModelDatabase.ResolveGlowColors(g_GlowColors);
 }
 
+void CItemDataHandler::SetGlowColorFolders(std::vector<Data::Colors::ColorFolder> folders)
+{
+    g_GlowColors.SetFolders(std::move(folders));
+    m_glowColorsChanged = true;
+}
+
 std::vector<ItemModelProblem> CItemDataHandler::ReopenChangedModels(const ModelLoader::LookNames& lookNames)
 {
     std::vector<int> itemTypes;
@@ -766,6 +776,7 @@ ItemDataSaveResult CItemDataHandler::Save(std::vector<ItemDataIssue>& issues)
     models.sharedModelsChanged = m_sharedModelsChanged;
     models.glowColorsFile = GetGlowColorsFile();
     models.glowColors = g_GlowColors.GetColors();
+    models.glowColorFolders = g_GlowColors.GetFolders();
     models.glowColorsChanged = m_glowColorsChanged;
     models.statsFile = GetItemStatsFile();
     models.stats = &m_statFile;
