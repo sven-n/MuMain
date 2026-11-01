@@ -240,12 +240,20 @@ TEST_CASE("Server list colors: a color's count is the number of its users [edito
         CHECK(g_MuServerListUI.CountThemeBarPartUsers(color) ==
               static_cast<int>(g_MuServerListUI.DescribeThemeBarPartUsers(color).size()));
     }
-    // The built-in load: both load texts in the button's color, the bar in the theme's tokens.
-    CHECK(g_MuServerListUI.CountColorUsers("default") == 2);
+    // The built-in load: both load texts in the button's own color, which isn't the server-button token "default"
+    // is, and the bar in the theme's tokens.
+    CHECK(g_MuServerListUI.CountColorUsers("default") == 0);
     for (const char* token : {"server-load-base", "server-load-full", "server-load-empty"})
     {
         CHECK(g_MuServerListUI.CountThemeBarPartUsers(token) == 1);
     }
+    // A rule in "default" is drawn in it; a load text in a theme color is that color's.
+    Data::ServerList::ServerListData& list = g_MuServerListUI.GetEdits().EditList();
+    list.buttonColors.push_back(Data::ServerList::ButtonColorRule{});
+    list.load.full.color = "gray";
+    CHECK(g_MuServerListUI.CountColorUsers("default") == 1);
+    CHECK(g_MuServerListUI.CountColorUsers("gray") == 1);
+    CHECK(g_MuServerListUI.DescribeColorUsers("gray").size() == 1);
 }
 
 // The Server list root of the Colors window writes a theme color into a theme folder's tokens.ini: the token's line

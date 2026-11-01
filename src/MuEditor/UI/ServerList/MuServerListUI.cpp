@@ -1237,17 +1237,18 @@ struct LoadColorPart
     const char* part;
 };
 
-// The parts of the load that can name the color `id`. A bar part set to "default" takes its own token, not the
-// button color "default", so the bar's parts don't count for it.
+// The parts of the load that can name the color `id`. None of them is drawn in the button color "default" (the
+// server-button token) when set to "default": a bar part then takes its own token, a load text the button's own
+// color, whichever that is. So none counts for "default".
 std::array<LoadColorPart, 5> GetLoadColorParts(const Data::ServerList::LoadSettings& load, std::string_view id)
 {
-    const bool barParts = id != Data::ServerList::GetThemeColorName(Data::ServerList::ThemeColor::Default);
+    const bool counts = id != Data::ServerList::GetThemeColorName(Data::ServerList::ThemeColor::Default);
     return {{
-        {barParts ? &load.bar.base : nullptr, I18N::Editor::LoadBar, I18N::Editor::BaseColor},
-        {barParts ? &load.bar.full : nullptr, I18N::Editor::LoadBar, I18N::Editor::FullColor},
-        {barParts ? &load.bar.empty : nullptr, I18N::Editor::LoadBar, I18N::Editor::UnlitColor},
-        {&load.full.color, I18N::Editor::Load, I18N::Editor::FullServer},
-        {&load.overloaded.color, I18N::Editor::Load, I18N::Editor::OverloadedServer},
+        {counts ? &load.bar.base : nullptr, I18N::Editor::LoadBar, I18N::Editor::BaseColor},
+        {counts ? &load.bar.full : nullptr, I18N::Editor::LoadBar, I18N::Editor::FullColor},
+        {counts ? &load.bar.empty : nullptr, I18N::Editor::LoadBar, I18N::Editor::UnlitColor},
+        {counts ? &load.full.color : nullptr, I18N::Editor::Load, I18N::Editor::FullServer},
+        {counts ? &load.overloaded.color : nullptr, I18N::Editor::Load, I18N::Editor::OverloadedServer},
     }};
 }
 
