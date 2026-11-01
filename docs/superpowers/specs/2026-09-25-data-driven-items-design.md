@@ -1309,8 +1309,8 @@ server with original clients (after phases 6 and B).
         ticket is yellow beside the orange tickets, and the Summoner
         Character Card is orange beside the yellow character cards.
      2. **The Colors window** (D69), with the glow colour tool as its Glow
-        root on the shared panel (first as a tab; the tree with folders and
-        the server list's root came with sven-n/MuMain#895).
+        root on the shared panel (first as a tab; the tree with folders came
+        with sven-n/MuMain#926, the server list's root with #895).
      3. **Ground labels in MuEditor**: the Ground labels tab, and Item Tooltip
         (D71) with the item controls, the label preview and an item's label
         rules.
