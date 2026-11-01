@@ -142,10 +142,9 @@ private:
         Rml::String descLine1;
         Rml::String descLine2;
 
-        // Only matters for the modern theme (legacy hides it -- real sprite art already gives
-        // OK/Cancel a visual identity, see themes/legacy/char_make.rcss's `color: transparent`).
         // Same I18N::Game::OK/Cancel + {{ok_label}}/{{cancel_label}} pattern as LoginWin.cpp.
         Rml::String okLabel, cancelLabel;
+        Rml::String nameLabel, classLabel, attributesLabel;
 
         // The typed character name, two-way bound to char_make.rml's <input data-value="char_name">.
         // RmlUi owns the edit buffer/caret/selection/IME; this is only the committed value, copied
@@ -163,6 +162,8 @@ private:
     int m_nOriginX = 0;
     int m_nOriginY = 0;
 
+    const wchar_t* m_LastDescription = nullptr;
+
     // Last, so it is destroyed first and its drawer never runs against a half-destroyed window.
     UI::RmlBridge::RenderTarget m_PreviewTarget{
         [this](std::uint32_t width, std::uint32_t height) { RenderPreviewInto(width, height); }};
@@ -172,6 +173,8 @@ private:
     void CloseDialog();
 
     void SyncRmlModel();
+    void SyncJobButtons();
+    void SyncDescription();
 };
 
 // Replaces CUIMng's old `CCharMakeWin m_CharMakeWin;` member, same convention as g_CreditWin.

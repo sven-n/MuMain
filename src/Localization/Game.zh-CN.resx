@@ -4,6 +4,45 @@
   <resheader name="version"><value>2.0</value></resheader>
   <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
   <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Dark Wizard" xml:space="preserve">
+    <value>魔法师</value>
+  </data>
+  <data name="Dark Knight" xml:space="preserve">
+    <value>剑士</value>
+  </data>
+  <data name="Elf" xml:space="preserve">
+    <value>弓箭手</value>
+  </data>
+  <data name="Magic Gladiator" xml:space="preserve">
+    <value>魔剑士</value>
+  </data>
+  <data name="Dark Lord" xml:space="preserve">
+    <value>圣导师</value>
+  </data>
+  <data name="Soul Master" xml:space="preserve">
+    <value>魔导师</value>
+  </data>
+  <data name="Blade Knight" xml:space="preserve">
+    <value>骑士</value>
+  </data>
+  <data name="Muse Elf" xml:space="preserve">
+    <value>圣射手</value>
+  </data>
+  <data name="Can be equipped by %s" xml:space="preserve">
+    <value>适用职业：%s</value>
+  </data>
+  <data name="STR" xml:space="preserve">
+    <value>力量</value>
+  </data>
+  <data name="AGI" xml:space="preserve">
+    <value>敏捷</value>
+  </data>
+  <data name="ENG" xml:space="preserve">
+    <value>智力</value>
+  </data>
+  <data name="STA" xml:space="preserve">
+    <value>体力</value>
+  </data>
   <data name="OK" xml:space="preserve">
     <value>确定</value>
   </data>
@@ -328,6 +367,21 @@
   <data name="Close388" xml:space="preserve">
     <value>关闭</value>
   </data>
+  <data name="Type more than 4 letters" xml:space="preserve">
+    <value>名称至少需要 4 个字符。</value>
+  </data>
+  <data name="Cannot use symbols." xml:space="preserve">
+    <value>不能使用特殊符号。</value>
+  </data>
+  <data name="No more characters can be created." xml:space="preserve">
+    <value>无法创建更多角色。</value>
+  </data>
+  <data name="You cannot delete characters" xml:space="preserve">
+    <value>无法删除角色。</value>
+  </data>
+  <data name="The password you have entered is incorrect." xml:space="preserve">
+    <value>输入的密码错误。</value>
+  </data>
   <data name="Enter your account" xml:space="preserve">
     <value>请输入账号</value>
   </data>
@@ -345,6 +399,24 @@
   </data>
   <data name="This account is blocked" xml:space="preserve">
     <value>该账号已被封停</value>
+  </data>
+  <data name="Please enter your WEBZEN.COM password." xml:space="preserve">
+    <value>请输入你的 WEBZEN.COM 密码。</value>
+  </data>
+  <data name="This is a blocked character" xml:space="preserve">
+    <value>该角色已被封停。</value>
+  </data>
+  <data name="This account is item blocked." xml:space="preserve">
+    <value>该账号的物品已被锁定。</value>
+  </data>
+  <data name="Please check on http://muonline.webzen.com site" xml:space="preserve">
+    <value>请访问 http://muonline.webzen.com 查看详情。</value>
+  </data>
+  <data name="You cannot remove your character since the guild cannot be removed" xml:space="preserve">
+    <value>战盟无法解散，因此无法删除该角色。</value>
+  </data>
+  <data name="The character is item blocked" xml:space="preserve">
+    <value>该角色的物品已被锁定。</value>
   </data>
   <data name="Account" xml:space="preserve">
     <value>账号</value>
@@ -372,6 +444,9 @@
     <value>保存密码后，任何使用这台电脑的人都可以登录你的账号。请仅在可信任的电脑上保存密码。是否保存密码？</value>
     <comment>Remember-password confirmation dialog: body.</comment>
   </data>
+  <data name="Connect" xml:space="preserve">
+    <value>连接</value>
+  </data>
   <data name="[%s-%d(Non-PvP) Server]" xml:space="preserve">
     <value>[%s-%d（非 PvP）服务器]</value>
   </data>
@@ -384,22 +459,151 @@
   <data name="Verifying your account" xml:space="preserve">
     <value>正在验证账号</value>
   </data>
+  <data name="Commoner" xml:space="preserve">
+    <value>平民</value>
+  </data>
   <data name="Exit game after closing the Chaos interface." xml:space="preserve">
     <value>请先关闭合成界面，再进行此操作。</value>
   </data>
   <data name="Slide Help" xml:space="preserve">
     <value>滚动帮助提示</value>
   </data>
+  <data name="Delete" xml:space="preserve">
+    <value>删除</value>
+  </data>
+  <data name="Master" xml:space="preserve">
+    <value>盟主</value>
+  </data>
+  <data name="Assist. M." xml:space="preserve">
+    <value>副盟主</value>
+  </data>
+  <data name="Battle M." xml:space="preserve">
+    <value>战斗队长</value>
+  </data>
+  <data name="Members" xml:space="preserve">
+    <value>战盟成员</value>
+  </data>
+  <data name="Name" xml:space="preserve">
+    <value>名称</value>
+  </data>
+  <data name="Create" xml:space="preserve">
+    <value>创建</value>
+  </data>
+  <data name="You can't delete the character that belongs to the guild" xml:space="preserve">
+    <value>无法删除已加入战盟的角色。</value>
+  </data>
+  <data name="Blade Master" xml:space="preserve">
+    <value>神骑士</value>
+  </data>
+  <data name="Grand Master" xml:space="preserve">
+    <value>神导师</value>
+  </data>
+  <data name="High Elf" xml:space="preserve">
+    <value>神射手</value>
+  </data>
+  <data name="Dual Master" xml:space="preserve">
+    <value>剑圣</value>
+  </data>
+  <data name="Lord Emperor" xml:space="preserve">
+    <value>祭祀</value>
+  </data>
+  <data name="Summoner" xml:space="preserve">
+    <value>召唤术师</value>
+  </data>
+  <data name="Bloody Summoner" xml:space="preserve">
+    <value>召唤导师</value>
+  </data>
+  <data name="Dimension Master" xml:space="preserve">
+    <value>召唤巫师</value>
+  </data>
+  <data name="StrongMentalityAndExcellentInsightCreates" xml:space="preserve">
+    <value>凭借强大精神力与敏锐洞察力施展诅咒，召唤异界生物，以巫术打击敌人。</value>
+  </data>
+  <data name="Create a character" xml:space="preserve">
+    <value>创建角色</value>
+  </data>
+  <data name="Strength" xml:space="preserve">
+    <value>力量</value>
+  </data>
+  <data name="Agility" xml:space="preserve">
+    <value>敏捷</value>
+  </data>
+  <data name="Vitality" xml:space="preserve">
+    <value>体力</value>
+  </data>
+  <data name="Energy" xml:space="preserve">
+    <value>智力</value>
+  </data>
+  <data name="KingdomOfWizardsDescendantOfArka" xml:space="preserve">
+    <value>魔法王国 Arka 的后裔。体质较弱，却拥有强大魔力，能自如施展攻击魔法。</value>
+  </data>
+  <data name="KingdomOfKnightsDescendantOfLorencia" xml:space="preserve">
+    <value>来自骑士王国勇者大陆的后裔。力量强大，剑术精湛，擅长使用各种近战武器。</value>
+  </data>
+  <data name="KingdomOfElvesDescendantsOfNoria" xml:space="preserve">
+    <value>来自仙踪林的精灵后裔。精通弓箭，也能施展多种魔法。</value>
+  </data>
+  <data name="ComplexCharacterThatHasACharacteristics" xml:space="preserve">
+    <value>兼具剑士与魔法师特点的职业。既精通近身战斗，也能自如施展魔法。</value>
+  </data>
+  <data name="CharismaticCharacterThatCanCommandThe" xml:space="preserve">
+    <value>富有领袖魅力，能够统率部队，并驾驭天鹰与黑王马。</value>
+  </data>
+  <data name="Character level above %d cannot be deleted." xml:space="preserve">
+    <value>等级超过 %d 的角色无法删除。</value>
+  </data>
+  <data name="Would you like to delete %s character?" xml:space="preserve">
+    <value>确定要删除角色 %s 吗？</value>
+  </data>
+  <data name="Character was deleted successfully." xml:space="preserve">
+    <value>角色删除成功。</value>
+  </data>
+  <data name="It contains prohibited words." xml:space="preserve">
+    <value>名称包含禁用词语。</value>
+  </data>
+  <data name="Incorrect character name was entered or same character name exists." xml:space="preserve">
+    <value>角色名称无效，或该名称已被使用。</value>
+  </data>
+  <data name="Command" xml:space="preserve">
+    <value>统率</value>
+  </data>
   <data name="+Effect limitation" xml:space="preserve">
     <value>+效果限制</value>
   </data>
+  <data name="Decrease" xml:space="preserve">
+    <value>减少</value>
+  </data>
+  <data name="It can be used with item removed." xml:space="preserve">
+    <value>卸下装备后方可使用。</value>
+  </data>
+  <data name="Class" xml:space="preserve">
+    <value>职业</value>
+  </data>
+  <data name="Rage Fighter" xml:space="preserve">
+    <value>格斗家</value>
+  </data>
+  <data name="Fist Master" xml:space="preserve">
+    <value>格斗大师</value>
+  </data>
+  <data name="LegitimateBearersOfTheKarutanRoyal" xml:space="preserve">
+    <value>卡伦特皇家骑士的正统传人，体魄强健、精通格斗，也能施展辅助技能帮助队友。</value>
+  </data>
   <data name="System Menu" xml:space="preserve">
     <value>系统菜单</value>
+  </data>
+  <data name="Loading character list" xml:space="preserve">
+    <value>正在加载角色列表</value>
   </data>
   <data name="Font" xml:space="preserve">
     <value>字体</value>
   </data>
   <data name="DefaultFont" xml:space="preserve">
     <value>默认</value>
+  </data>
+  <data name="Menu" xml:space="preserve">
+    <value>菜单</value>
+  </data>
+  <data name="Base Attributes" xml:space="preserve">
+    <value>基础属性</value>
   </data>
 </root>

@@ -27,8 +27,8 @@
 		<input id="msgwin_input" type="password" class="text-field msgwin-input-field"
 		       data-value="password_input" data-class-hidden="!mode_input"/>
 
-		<div id="btn_ok" class="btn btn-ok" data-event-click="msgwin_ok_click">{{ok_label}}</div>
-		<div id="btn_cancel" class="btn btn-cancel" data-event-click="msgwin_cancel_click">{{cancel_label}}</div>
+		<div id="btn_ok" class="btn btn-ok text-fit" data-event-click="msgwin_ok_click">{{ok_label}}</div>
+		<div id="btn_cancel" class="btn btn-cancel text-fit" data-event-click="msgwin_cancel_click">{{cancel_label}}</div>
 	</div>
 </body>
 </rml>

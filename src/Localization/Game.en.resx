@@ -9549,4 +9549,10 @@
   <data name="MagicStoneOfOwner" xml:space="preserve">
     <value>Magic stone of %ls</value>
   </data>
+  <data name="Menu" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="Base Attributes" xml:space="preserve">
+    <value>Base Attributes</value>
+  </data>
 </root>

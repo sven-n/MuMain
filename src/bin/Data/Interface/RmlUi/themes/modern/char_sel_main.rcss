@@ -25,6 +25,10 @@
 .btn-icon {
 	bottom: 25dp;
 }
+
+.btn-icon-item { font-size: 9dp; }
+.btn-icon-caption { font-size: 1em; }
+
 #btn_create { left: 22dp; }
 #btn_menu   { left: 77dp; }
 #btn_connect { right: 77dp; }

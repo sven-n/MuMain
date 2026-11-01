@@ -2,26 +2,11 @@
    frames are reproduced. Stat/description panels were flat CSprite fills originally, so they're
    plain background-color here too. */
 
-@spritesheet charmake-input-sheet
-{
-	src: "../../../cha_id.tga";
-	charmake-input-image: 0px 0px 346px 38px;
-}
 @spritesheet charmake-job-sheet
 {
 	src: "../../../cha_bt.tga";
 	charmake-job-unchecked: 0px 0px 108px 26px;
 	charmake-job-checked:   0px 78px 108px 26px;
-}
-@spritesheet charmake-ok-sheet
-{
-	src: "../../../message_ok_b_all.tga";
-	charmake-ok-idle: 0px 0px 54px 30px;
-}
-@spritesheet charmake-cancel-sheet
-{
-	src: "../../../loding_cancel_b_all.tga";
-	charmake-cancel-idle: 0px 0px 54px 30px;
 }
 
 /* Static RCSS instead of C++-pushed for width/height and most children (except #panel's own
@@ -46,7 +31,7 @@
 
 #stat_panel  { left: 346px; top: 24px;  }
 #desc_panel  { left: 0px;   top: 355px; }
-#input_frame { left: 0px;   top: 317px; }
+#input_frame { left: 0px;   top: 325px; }
 #btn_ok      { left: 346px; top: 325px; }
 #btn_cancel  { left: 400px; top: 325px; }
 
@@ -135,16 +120,21 @@
 
 .input-frame {
 	position: absolute;
-	width: 346px;
-	height: 38px;
-	decorator: image(charmake-input-image);
+	width: 344px;
+	height: 28px;
+	background-color: token(surface-overlay);
+	border: 1px token(border-control);
 	pointer-events: none;
 }
 
-/* Real legacy screen has no separate label element -- cha_id.tga's own baked art already shows
-   one as part of the single wide sprite above. */
+/* Preserve the name-field row while rendering its label as localizable text. */
 .input-label {
-	display: none;
+	position: absolute;
+	left: 12px;
+	top: 332px;
+	font-family: "token(font-body)";
+	font-size: 12px;
+	color: token(text-primary);
 }
 
 /* modern-only decorative backdrops/kickers (char_make.rml's own comment) -- real legacy sprite art
@@ -153,15 +143,11 @@
 	display: none;
 }
 
-/* Name field: placement/size only -- appearance comes from base.rcss's shared .text-field, with the
-   fill/border dropped here because cha_id.tga's own baked art (#input_frame above) already provides
-   them. Box matches where the native CUITextInputBox sat: the old kInputTextOffsetX=78/
-   kInputTextOffsetY=21 (relative to kInputSpriteOffsetY=317) origin at its Init()'d 200x20 size.
-   Text colour matches the old Configure({textR 255, textG 230, textB 210}). */
+/* Name field aligns with its translated label inside the existing identity row. */
 .char-make-name-field {
 	position: absolute;
 	left: 78px;
-	top: 338px;
+	top: 332px;
 	width: 200px;
 	height: 20px;
 	padding: 0;
@@ -179,16 +165,12 @@
 	line-height: 30px;
 	cursor: pointer;
 	pointer-events: auto;
-	/* Real sprite art already renders OK/Cancel text -- hide the bound label text behind it
-	   (color:transparent); line-height/text-align/vertical-align set explicitly rather than
-	   relying on inheritance from base.rcss's .btn. */
-	color: transparent;
+	color: token(text-primary);
 }
-.btn-ok {
-	decorator: image(charmake-ok-idle);
-}
-.btn-cancel {
-	decorator: image(charmake-cancel-idle);
+
+.btn-text {
+	display: block;
+	white-space: nowrap;
 }
 
 /* The stat rows' own places, so a theme can move them -- they were style attributes, which are
