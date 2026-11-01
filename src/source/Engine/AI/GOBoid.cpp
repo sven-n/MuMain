@@ -685,6 +685,8 @@ void MoveMounts()
     }
 }
 
+static unsigned int s_mountDrawFrame = 0;
+
 bool RenderMount(OBJECT* o, bool bForceRender)
 {
     if (o->Live)
@@ -712,6 +714,10 @@ bool RenderMount(OBJECT* o, bool bForceRender)
             }
 
             RenderObject(o, false, 0, State);
+            o->DrawnFrame = s_mountDrawFrame;
+            // A preview mount outside Mounts gets no update; its draw spawns its effects.
+            if (bForceRender)
+                UpdateDrawnMountEffects(o);
 
             vec3_t Light;
             float  Luminosity = (float)(rand() % 30 + 70) * 0.01f;
@@ -729,6 +735,7 @@ bool RenderMount(OBJECT* o, bool bForceRender)
 
 void RenderMount()
 {
+    ++s_mountDrawFrame;
     // Like their riders, mounts keep their Classic look: no bloom from them.
     const mu::ScopedBloomExclusion classicMounts;
     for (int i = 0; i < MAX_MOUNTS; i++)
@@ -739,6 +746,34 @@ void RenderMount()
             return;
         }
     }
+}
+
+void UpdateMountEffects()
+{
+    // Spawns once per drawn frame, for the mounts that frame drew, as when the draw spawned them.
+    static unsigned int updatedFrame = 0;
+    if (updatedFrame == s_mountDrawFrame)
+        return;
+    updatedFrame = s_mountDrawFrame;
+
+    for (int i = 0; i < MAX_MOUNTS; i++)
+    {
+        OBJECT* o = &Mounts[i];
+        if (!o->Live || o->DrawnFrame != s_mountDrawFrame)
+            continue;
+        UpdateDrawnMountEffects(o);
+    }
+}
+
+void UpdateDrawnMountEffects(OBJECT* o)
+{
+    // A cloaked rider's mount draws only as a faint outline (Draw_RenderObject's ExtraMon 10), with no effects.
+    if (g_isCharacterBuff(o->Owner, eBuff_Cloaking))
+        return;
+    // Like their draws, the mounts' sprites stay out of the bloom.
+    const mu::ScopedBloomExclusion classicMounts;
+    PlaceObjectModel(o, &Models[o->Type]);
+    UpdateRenderObjectEffects(o);
 }
 
 constexpr float HorseEffectInterval = 10 * (1000.f / 25.f); // every 10 frames on a 25fps basis (400 ms)

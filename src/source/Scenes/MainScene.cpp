@@ -318,6 +318,8 @@ static void UpdateGameEntities()
         FRAME_PROFILE(UpdateEffects);
         UpdateCharacterEffects();
         UpdateObjectEffects();
+        UpdateMountEffects();
+        UpdateEffectModelEffects();
     }
 
     g_Direction.CheckDirection();

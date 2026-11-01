@@ -3528,33 +3528,35 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
                     vec3_t vPos;
                     Vector(0.0f, 0.0f, 0.0f, vPos);
                     BMD* p_b = &Models[o->Owner->Type];
+                    // The Fenrir's own world pose, which its update builds before creating this.
+                    vec34_t* ownerBones = o->Owner->BoneTransform != nullptr ? o->Owner->BoneTransform : BoneTransform;
                     int irandom = rand() % 30;
 
                     if (irandom >= 1 && irandom <= 2)
                     {
-                        p_b->TransformPosition(BoneTransform[10], vPos, o->Position, false);
+                        p_b->TransformPosition(ownerBones[10], vPos, o->Position, false);
                     }
                     else if (irandom == 3)
                     {
                         o->Scale -= 0.2f;
-                        p_b->TransformPosition(BoneTransform[14], vPos, o->Position, false);
+                        p_b->TransformPosition(ownerBones[14], vPos, o->Position, false);
                     }
                     else if (irandom >= 4 && irandom <= 5)
                     {
-                        p_b->TransformPosition(BoneTransform[2], vPos, o->Position, false);
+                        p_b->TransformPosition(ownerBones[2], vPos, o->Position, false);
                     }
                     else if (irandom >= 6 && irandom <= 7)
                     {
                         o->Scale -= 0.2f;
                         if (rand() % 2 == 0)
-                            p_b->TransformPosition(BoneTransform[50], vPos, o->Position, false);
+                            p_b->TransformPosition(ownerBones[50], vPos, o->Position, false);
                         else
-                            p_b->TransformPosition(BoneTransform[51], vPos, o->Position, false);
+                            p_b->TransformPosition(ownerBones[51], vPos, o->Position, false);
                     }
                     else if (irandom == 8)
                     {
                         o->Scale -= 0.2f;
-                        p_b->TransformPosition(BoneTransform[53], vPos, o->Position, false);
+                        p_b->TransformPosition(ownerBones[53], vPos, o->Position, false);
                     }
                     else if (irandom >= 9 && irandom <= 10)
                     {
@@ -5724,11 +5726,18 @@ void MoveEffect(OBJECT* o, int iIndex)
     else
     switch (o->Type)
     {
-
-
-
-
-
+    case BATTLE_CASTLE_WALL1:
+    case BATTLE_CASTLE_WALL2:
+    case BATTLE_CASTLE_WALL3:
+    case BATTLE_CASTLE_WALL4:
+        // Its two-tick life can end before a draw stamps it, so the debris bursts once, here.
+        if (o->SubType != 0 && o->HiddenMesh != -2)
+        {
+            o->HiddenMesh = -2;
+            SkinObjectMeshes(o, &Models[o->Type], false);
+            Models[o->Type].RenderMeshEffect(0, MODEL_WALL_PART1);
+        }
+        break;
 
     case 9:
         VectorScale(o->Direction, o->Velocity, Position);
@@ -7730,8 +7739,13 @@ void RenderSkillSpear(OBJECT* o)
     RenderPartObject(o, MODEL_SPEARSKILL, NULL, Light, 1.0f, 0, 0, 0, true, true, true, false, RENDER_BRIGHT | RENDER_TEXTURE);
 }
 
+static unsigned int s_effectDrawFrame = 0;
+
 void RenderEffects(bool bRenderBlendMesh)
 {
+    // The blend-mesh pass draws later in the same frame.
+    if (!bRenderBlendMesh)
+        ++s_effectDrawFrame;
     int iEffectSize = MAX_EFFECTS + g_SkillEffects.GetSize();
 
     for (int i = 0; i < iEffectSize; ++i)
@@ -7760,6 +7774,7 @@ void RenderEffects(bool bRenderBlendMesh)
 
             if (o->Visible)
             {
+                o->DrawnFrame = s_effectDrawFrame;
                 if (bRenderBlendMesh)
                 {
                     if (o->BlendMesh == -1 || o->BlendMesh < -2) continue;
@@ -8686,6 +8701,25 @@ void RenderEffects(bool bRenderBlendMesh)
                 }
             }
         }
+    }
+}
+
+void UpdateEffectModelEffects()
+{
+    // Spawns once per drawn frame, for the effects that frame drew, as when their draw spawned them.
+    static unsigned int updatedFrame = 0;
+    if (updatedFrame == s_effectDrawFrame)
+        return;
+    updatedFrame = s_effectDrawFrame;
+
+    const int iEffectSize = MAX_EFFECTS + g_SkillEffects.GetSize();
+    for (int i = 0; i < iEffectSize; ++i)
+    {
+        OBJECT* o = i < MAX_EFFECTS ? &Effects[i] : g_SkillEffects.GetEffect(i - MAX_EFFECTS);
+        if (!o->Live || o->DrawnFrame != s_effectDrawFrame || o->Type >= MAX_MODELS)
+            continue;
+        PlaceObjectModel(o, &Models[o->Type]);
+        UpdateRenderObjectEffects(o);
     }
 }
 

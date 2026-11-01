@@ -67,6 +67,8 @@ BOOL FindSameEffectOfSameOwner(int iType, OBJECT* pOwner);
 void CheckClientArrow(OBJECT* o);
 
 void RenderEffects(bool bRenderBlendMesh = false);
+// Spawns the effects of the effect models the last RenderEffects drew; call once per update, after the effects moved.
+void UpdateEffectModelEffects();
 void RenderAfterEffects();
 void RenderEffectShadows();
 void CreateEffectFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0,

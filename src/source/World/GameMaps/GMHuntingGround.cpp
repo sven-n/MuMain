@@ -6,6 +6,7 @@
 #include "Scenes/SceneCore.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/ZzzAI.h"
+#include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Audio/DSPlaySound.h"
 #include "World/MapInfra/MapManager.h"
@@ -369,6 +370,25 @@ void M31HuntingGround::MoveHuntingGroundBlurEffect(CHARACTER* pCharacter, OBJECT
 }
 bool M31HuntingGround::UpdateHuntingGroundMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
 {
+    if (pObject->CurrentAction == MONSTER01_DIE)
+    {
+        switch (pObject->Type)
+        {
+        case MODEL_FIRE_GOLEM:
+            SkinObjectMeshes(pObject, pModel, true);
+            pModel->RenderMeshEffect(0, MODEL_GOLEM_STONE);
+            pObject->Live = false;
+            PlayBuffer(SOUND_BC_FIREGOLEM_DIE);
+            break;
+        case MODEL_POISON_GOLEM:
+            SkinObjectMeshes(pObject, pModel, true);
+            pModel->RenderMeshEffect(0, MODEL_GOLEM_STONE, 1);
+            pObject->Live = false;
+            PlayBuffer(SOUND_BC_POISONGOLEM_DIE);
+            break;
+        }
+    }
+
     switch (pObject->Type)
     {
     case MODEL_LIZARD_WARRIOR:
@@ -700,27 +720,6 @@ bool M31HuntingGround::UpdateHuntingGroundMonsterEffects(CHARACTER* pCharacter, 
             pObject->SubType = FALSE;
     }
     break;
-    }
-    return false;
-}
-bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
-{
-    // The stone bursts spawn from this frame's skinned vertices, so the golems' deaths stay with their draw.
-    if (pObject->CurrentAction != MONSTER01_DIE)
-        return false;
-
-    switch (pObject->Type)
-    {
-    case MODEL_FIRE_GOLEM:
-        pModel->RenderMeshEffect(0, MODEL_GOLEM_STONE);
-        pObject->Live = false;
-        PlayBuffer(SOUND_BC_FIREGOLEM_DIE);
-        break;
-    case MODEL_POISON_GOLEM:
-        pModel->RenderMeshEffect(0, MODEL_GOLEM_STONE, 1);
-        pObject->Live = false;
-        PlayBuffer(SOUND_BC_POISONGOLEM_DIE);
-        break;
     }
     return false;
 }

@@ -1,13 +1,19 @@
 #include "stdafx.h"
 #include "doctest.h"
 
+#include "Engine/AI/GOBoid.h"
+#include "Character/CSParts.h"
 #include "Engine/Object/CharacterAttachments.h"
+#include "Engine/Object/ObjectPose.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Engine/Physics/PhysicsManager.h"
+#include "GameLogic/Pets/CSPetSystem.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Models/ZzzBMD.h"
 #include "World/MapInfra/w_MapProcess.h"
 
+#include <cstring>
 #include <memory>
 
 namespace
@@ -57,6 +63,69 @@ struct CharacterScope
 };
 
 // A Cursed Temple statue that dies this frame: its effects shake the camera, on any map.
+// A red Fenrir under a rider, its own world pose already built: every bone sits at `poseAt`, every bone of the
+// shared array at `sharedAt`.
+struct FenrirScope
+{
+    static constexpr float poseAt = 500.f;
+    static constexpr float sharedAt = -90000.f;
+    std::unique_ptr<BMD[]> models{new BMD[MAX_MODELS]};
+    std::unique_ptr<vec34_t[]> bones{new vec34_t[MAX_BONES]{}};
+    std::unique_ptr<vec34_t[]> savedShared{new vec34_t[MAX_BONES]};
+    BMD* previousModels = Models;
+    float previousFrameFactor = FPS_ANIMATION_FACTOR;
+    OBJECT rider;
+    OBJECT mount;
+
+    FenrirScope()
+    {
+        Models = models.get();
+        Models[MODEL_FENRIR_RED].NumActions = 1;
+        FPS_ANIMATION_FACTOR = 1.f; // one reference frame per update: every frame-checked spawn runs
+        std::memcpy(savedShared.get(), BoneTransform, sizeof(vec34_t) * MAX_BONES);
+        for (int i = 0; i < MAX_BONES; ++i)
+        {
+            for (int axis = 0; axis < 3; ++axis)
+            {
+                bones[i][axis][axis] = 1.f;
+                bones[i][axis][3] = poseAt;
+                BoneTransform[i][axis][3] = sharedAt;
+            }
+        }
+
+        rider.Live = true;
+        rider.Type = MODEL_PLAYER;
+        mount.Live = true;
+        mount.Type = MODEL_FENRIR_RED;
+        mount.Owner = &rider;
+        mount.Alpha = 1.f;
+        mount.Scale = 1.f;
+        mount.HiddenMesh = -1;
+        mount.BoneTransform = bones.get();
+        mount.EnableBoneMatrix = true;
+        PlaceObjectModel(&mount, &Models[mount.Type]);
+        Engine::Object::Pose::Record(&mount, &Models[mount.Type], true);
+        ClearSpawns();
+    }
+
+    ~FenrirScope()
+    {
+        ClearSpawns();
+        mount.BoneTransform = nullptr;
+        std::memcpy(BoneTransform, savedShared.get(), sizeof(vec34_t) * MAX_BONES);
+        FPS_ANIMATION_FACTOR = previousFrameFactor;
+        Models = previousModels;
+    }
+
+    static void ClearSpawns()
+    {
+        for (int i = 0; i < MAX_SPRITES; ++i)
+            Sprites[i].Live = false;
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+            Effects[i].Live = false;
+    }
+};
+
 struct DyingStatueScope : CharacterScope
 {
     DyingStatueScope() : CharacterScope(MODEL_CURSEDTEMPLE_STATUE)
@@ -210,4 +279,258 @@ TEST_CASE("The update advances each part of the last draw once, and the next dra
     Attachments::BeginFrame();
     Attachments::BeginCharacter(c);
     CHECK_FALSE(Attachments::WasAdvanced(*record(&c->Weapon[0], 15.f)));
+}
+
+TEST_CASE("A cloaked rider's Fenrir spawns none of its effects, as its outline draw spawned none [effects]")
+{
+    FenrirScope scope;
+    OBJECT* rider = &scope.rider;
+    g_CharacterRegisterBuff(rider, eBuff_Cloaking);
+
+    UpdateDrawnMountEffects(&scope.mount);
+
+    for (int i = 0; i < MAX_SPRITES; ++i)
+        CHECK_FALSE(Sprites[i].Live);
+    for (int i = 0; i < MAX_EFFECTS; ++i)
+        CHECK_FALSE(Effects[i].Live);
+}
+
+TEST_CASE("A Fenrir's sprites stay out of the bloom, as when its draw spawned them [effects]")
+{
+    FenrirScope scope;
+
+    UpdateDrawnMountEffects(&scope.mount);
+
+    int created = 0;
+    for (int i = 0; i < MAX_SPRITES; ++i)
+    {
+        if (!Sprites[i].Live)
+            continue;
+        ++created;
+        CHECK(IsSpriteBloomExcluded(i));
+    }
+    CHECK(created >= 6); // its eye and chest lights
+}
+
+TEST_CASE("A Fenrir's body thunder starts on the Fenrir's own pose, not on the shared bones [effects]")
+{
+    FenrirScope scope;
+
+    int onPose = 0;
+    for (int frame = 0; frame < 40; ++frame)
+    {
+        UpdateDrawnMountEffects(&scope.mount);
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+        {
+            const OBJECT& thunder = Effects[i];
+            if (!thunder.Live || thunder.Type != MODEL_FENRIR_THUNDER || thunder.SubType != 0)
+                continue;
+            CHECK(thunder.Position[0] > FenrirScope::sharedAt / 2.f);
+            if (thunder.Position[0] == FenrirScope::poseAt && thunder.Position[2] == FenrirScope::poseAt)
+                ++onPose;
+        }
+        FenrirScope::ClearSpawns();
+    }
+    CHECK(onPose > 0);
+}
+
+TEST_CASE("A dying castle gate crumbles from its own posed mesh in the update [effects]")
+{
+    CharacterScope scope(MODEL_CASTLE_GATE);
+    const float previousFrameFactor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 1.f; // every frame-checked spawn gets its chance
+    Vertex_t vertices[3]{};
+    Triangle_t triangle{};
+    triangle.Polygon = 3;
+    for (short k = 0; k < 3; ++k)
+        triangle.VertexIndex[k] = k;
+    Mesh_t mesh;
+    mesh.NumVertices = 3;
+    mesh.Vertices = vertices;
+    mesh.NumTriangles = 1;
+    mesh.Triangles = &triangle;
+    BMD& model = Models[MODEL_CASTLE_GATE];
+    model.NumMeshs = 1;
+    model.Meshs = &mesh;
+
+    OBJECT& gate = scope.character().Object;
+    for (int axis = 0; axis < 3; ++axis)
+        gate.BoneTransform[0][axis][axis] = 1.f;
+    gate.BoneTransform[0][0][3] = 100.f; // every vertex sits 100 along x in model space
+    Vector(1000.f, 2000.f, 0.f, gate.Position);
+    gate.Alpha = 1.f;
+    gate.HiddenMesh = -1;
+    gate.EnableBoneMatrix = true;
+    gate.CurrentAction = MONSTER01_DIE;
+    FenrirScope::ClearSpawns();
+
+    int debris = 0;
+    for (int frame = 0; frame < 60; ++frame)
+    {
+        gate.Live = true;
+        UpdateRenderObjectEffects(&gate);
+        CHECK_FALSE(gate.Live);
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+        {
+            const OBJECT& piece = Effects[i];
+            if (!piece.Live || (piece.Type != MODEL_GATE && piece.Type != MODEL_GATE + 1))
+                continue;
+            // The vertex, placed where the gate's draw puts it (60 behind its position).
+            CHECK(piece.Position[0] == doctest::Approx(1100.f));
+            CHECK(piece.Position[1] == doctest::Approx(2060.f));
+            ++debris;
+        }
+        FenrirScope::ClearSpawns();
+    }
+    CHECK(debris > 0);
+
+    model.Meshs = nullptr;
+    model.NumMeshs = 0;
+    FPS_ANIMATION_FACTOR = previousFrameFactor;
+}
+
+TEST_CASE("A wall's debris effect bursts before its two ticks of life run out, drawn or not [effects]")
+{
+    CharacterScope scope(BATTLE_CASTLE_WALL1);
+    const float previousFrameFactor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 1.f; // 25 FPS: the effect lives two moves
+    Vertex_t vertices[3]{};
+    Triangle_t triangles[10]{};
+    for (Triangle_t& triangle : triangles)
+    {
+        triangle.Polygon = 3;
+        for (short k = 0; k < 3; ++k)
+            triangle.VertexIndex[k] = k;
+    }
+    Mesh_t mesh;
+    mesh.NumVertices = 3;
+    mesh.Vertices = vertices;
+    mesh.NumTriangles = 10; // 30 one-in-three chances
+    mesh.Triangles = triangles;
+    BMD& model = Models[BATTLE_CASTLE_WALL1];
+    model.NumActions = 0; // no keys to pose: the scratch bones stay as they are
+    model.NumMeshs = 1;
+    model.Meshs = &mesh;
+    FenrirScope::ClearSpawns();
+
+    vec3_t position{1000.f, 2000.f, 0.f};
+    vec3_t angle{0.f, 0.f, 0.f};
+    vec3_t light{1.f, 1.f, 1.f};
+    CreateEffect(BATTLE_CASTLE_WALL1, position, angle, light, 1);
+    OBJECT& wall = Effects[0];
+    REQUIRE(wall.Type == BATTLE_CASTLE_WALL1);
+    wall.LifeTime = 2.f;
+
+    int debris = 0;
+    for (int move = 0; move < 2; ++move)
+    {
+        MoveEffects();
+        for (int i = 1; i < MAX_EFFECTS; ++i)
+        {
+            if (Effects[i].Live && (Effects[i].Type == MODEL_WALL_PART1 || Effects[i].Type == MODEL_WALL_PART1 + 1))
+                ++debris;
+            Effects[i].Live = false;
+        }
+    }
+    CHECK_FALSE(wall.Live);
+    CHECK(debris > 0);
+
+    model.Meshs = nullptr;
+    model.NumMeshs = 0;
+    FPS_ANIMATION_FACTOR = previousFrameFactor;
+}
+
+TEST_CASE("A Dark Spirit the last frame left off screen flies back from the update [effects]")
+{
+    struct Raven : CSPetDarkSpirit
+    {
+        using CSPetDarkSpirit::CSPetDarkSpirit;
+        OBJECT& object()
+        {
+            return m_PetCharacter.Object;
+        }
+    };
+    CharacterScope scope(MODEL_PLAYER);
+    Raven raven(&scope.character());
+    OBJECT& o = raven.object();
+    o.Visible = false;
+    o.AI = PET_ATTACK;
+    o.Velocity = 0.f;
+
+    raven.UpdatePetEffects();
+
+    CHECK(o.AI == PET_FLYING);
+    CHECK(o.Velocity == 3.f);
+}
+
+TEST_CASE("A drawn caped monster's cloth is made and simulated by the update, not by the draw [effects]")
+{
+    CharacterScope scope(MODEL_CRUST);
+    CHARACTER& c = scope.character();
+    OBJECT& o = c.Object;
+    for (int bone = 0; bone < MAX_BONES; ++bone)
+        for (int axis = 0; axis < 3; ++axis)
+            o.BoneTransform[bone][axis][axis] = 1.f;
+    o.Alpha = 1.f;
+    c.MonsterIndex = MONSTER_DEATH_KING;
+    c.GuildMarkIndex = -1;
+
+    UpdateCharacterEffects();
+
+    REQUIRE(o.m_pCloth != nullptr);
+    CHECK(o.m_byNumCloth == 1);
+    CHECK(((CPhysicsCloth*)o.m_pCloth)[0].GetOwner() == &o);
+    DeleteCloth(&c, &o);
+}
+
+TEST_CASE("A GM's transformation spawns its lights from the update, and none while cloaked [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    OBJECT& o = scope.character().Object;
+    o.Kind = KIND_PLAYER;
+    o.SubType = MODEL_GM_CHARACTER;
+    o.Alpha = 1.f;
+    o.HiddenMesh = -1;
+    auto liveSprites = []
+    {
+        int live = 0;
+        for (int i = 0; i < MAX_SPRITES; ++i)
+            live += Sprites[i].Live ? 1 : 0;
+        return live;
+    };
+    FenrirScope::ClearSpawns();
+
+    UpdateTransformSkinEffects(&o);
+    CHECK(o.HiddenMesh == 2);
+    CHECK(liveSprites() == 8);
+
+    FenrirScope::ClearSpawns();
+    OBJECT* gm = &o;
+    g_CharacterRegisterBuff(gm, eBuff_Cloaking);
+    UpdateTransformSkinEffects(gm);
+    CHECK(liveSprites() == 0);
+    g_CharacterClearBuff(gm);
+}
+
+TEST_CASE("A character's mark spawns its sprite in the update, and its draw spawns none [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    CHARACTER& c = scope.character();
+    c.m_pParts = new CSParts2D(BITMAP_LIGHT, 0, 0);
+    auto liveSprites = []
+    {
+        int live = 0;
+        for (int i = 0; i < MAX_SPRITES; ++i)
+            live += Sprites[i].Live ? 1 : 0;
+        return live;
+    };
+    FenrirScope::ClearSpawns();
+
+    RenderParts(&c);
+    CHECK(liveSprites() == 0);
+    UpdateParts(&c);
+    CHECK(liveSprites() == 1);
+
+    DeleteParts(&c);
+    FenrirScope::ClearSpawns();
 }
