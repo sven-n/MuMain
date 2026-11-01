@@ -3,11 +3,11 @@
 #include <string>
 #include <vector>
 
-// Finds what the draw still spawns or animates: while the frame draws, every spawn function notes who called it, so a
-// sweep of the maps lists the spawns the update has not taken over (control socket "drawspawns").
+// Keeps the draw from changing the game: while the frame draws, every spawn function notes its call, and a spawn no
+// AllowScope covers is a violation. Developer builds log each violating caller once; tests read the count; the control
+// socket's "drawspawns" lists every draw spawn with its callers.
 namespace Diagnostics::DrawSpawnCheck
 {
-#ifdef MU_ENABLE_CONTROL_SOCKET
 // Marks the frame's draw for as long as it lives.
 class DrawScope
 {
@@ -18,10 +18,25 @@ public:
     DrawScope& operator=(const DrawScope&) = delete;
 };
 
-// Called first by each spawn function; records its callers when checking and inside a draw.
+// Lets the draw spawn for as long as it lives, for what no update sees yet: a part's first frame, a preview.
+class AllowScope
+{
+public:
+    AllowScope();
+    ~AllowScope();
+    AllowScope(const AllowScope&) = delete;
+    AllowScope& operator=(const AllowScope&) = delete;
+};
+
+// Called first by each spawn function.
 void Note(const char* kind);
 
-// Clears the counts and starts checking.
+// The spawns inside a draw that no AllowScope covered, since the last reset.
+int Violations();
+void ResetViolations();
+
+#ifdef MU_ENABLE_CONTROL_SOCKET
+// Clears the counts and starts listing.
 void Start();
 
 struct Site
@@ -33,10 +48,5 @@ struct Site
 };
 // The sites seen since Start, most frequent first, and the draws they were counted over.
 std::vector<Site> Report(int& draws);
-#else
-class DrawScope
-{
-};
-inline void Note(const char*) {}
 #endif
 } // namespace Diagnostics::DrawSpawnCheck

@@ -2,15 +2,20 @@
 
 #include "DrawSpawnCheck.h"
 
-#ifdef MU_ENABLE_CONTROL_SOCKET
-
 #include <algorithm>
 #include <array>
+#include <cstdio>
 #include <map>
 #include <mutex>
+#include <set>
 #include <tuple>
 
-#ifdef _WIN32
+#if defined(MU_ENABLE_CONTROL_SOCKET) || !defined(NDEBUG)
+#define MU_DRAW_SPAWN_LOG
+#include "Core/Utilities/Log/ErrorReport.h"
+#endif
+
+#if defined(MU_DRAW_SPAWN_LOG) && defined(_WIN32)
 #include <windows.h>
 #include <dbghelp.h>
 #pragma comment(lib, "dbghelp.lib")
@@ -24,11 +29,14 @@ constexpr int CallerDepth = 3;
 using Callers = std::array<void*, CallerDepth>;
 
 std::mutex s_mutex;
-bool s_enabled = false;
 int s_drawDepth = 0;
+int s_allowDepth = 0;
+int s_violations = 0;
+bool s_listing = false;
 int s_draws = 0;
 std::map<std::tuple<const char*, Callers>, int> s_counts;
 
+#ifdef MU_DRAW_SPAWN_LOG
 std::string FunctionAt(void* address)
 {
 #ifdef _WIN32
@@ -51,12 +59,22 @@ std::string FunctionAt(void* address)
     snprintf(hex, sizeof(hex), "%p", address);
     return hex;
 }
+
+void LogViolation(const char* kind, const Callers& callers)
+{
+    static std::set<void*> logged;
+    if (!logged.insert(callers[0]).second)
+        return;
+    g_ErrorReport.Write(L"[DrawSpawnCheck] the draw spawned a %hs from %hs; spawn it in the update\r\n", kind,
+                        FunctionAt(callers[0]).c_str());
+}
+#endif
 } // namespace
 
 DrawScope::DrawScope()
 {
     std::lock_guard lock(s_mutex);
-    if (s_drawDepth++ == 0 && s_enabled)
+    if (s_drawDepth++ == 0 && s_listing)
         ++s_draws;
 }
 
@@ -66,9 +84,25 @@ DrawScope::~DrawScope()
     --s_drawDepth;
 }
 
-void Note(const char* kind)
+AllowScope::AllowScope()
 {
-    if (!s_enabled || s_drawDepth == 0)
+    ++s_allowDepth;
+}
+
+AllowScope::~AllowScope()
+{
+    --s_allowDepth;
+}
+
+void Note([[maybe_unused]] const char* kind)
+{
+    if (s_drawDepth == 0)
+        return;
+    const bool violation = s_allowDepth == 0;
+    if (violation)
+        ++s_violations;
+#ifdef MU_DRAW_SPAWN_LOG
+    if (!violation && !s_listing)
         return;
     Callers callers{};
 #ifdef _WIN32
@@ -76,15 +110,32 @@ void Note(const char* kind)
     CaptureStackBackTrace(2, CallerDepth, callers.data(), nullptr);
 #endif
     std::lock_guard lock(s_mutex);
-    ++s_counts[{kind, callers}];
+    if (violation)
+        LogViolation(kind, callers);
+#ifdef MU_ENABLE_CONTROL_SOCKET
+    if (s_listing)
+        ++s_counts[{kind, callers}];
+#endif
+#endif
 }
 
+int Violations()
+{
+    return s_violations;
+}
+
+void ResetViolations()
+{
+    s_violations = 0;
+}
+
+#ifdef MU_ENABLE_CONTROL_SOCKET
 void Start()
 {
     std::lock_guard lock(s_mutex);
     s_counts.clear();
     s_draws = 0;
-    s_enabled = true;
+    s_listing = true;
 }
 
 std::vector<Site> Report(int& draws)
@@ -112,6 +163,5 @@ std::vector<Site> Report(int& draws)
     std::ranges::sort(sites, [](const Site& a, const Site& b) { return a.count > b.count; });
     return sites;
 }
-} // namespace Diagnostics::DrawSpawnCheck
-
 #endif
+} // namespace Diagnostics::DrawSpawnCheck

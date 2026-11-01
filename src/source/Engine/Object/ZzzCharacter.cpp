@@ -15,6 +15,7 @@
 #include <eh.h>
 #endif
 #include "UI/Core/UIManager.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Guild/GuildCache.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -7033,7 +7034,10 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
         ++(advanced ? g_PrepassBoneCheck.partsReused : g_PrepassBoneCheck.partsAdvancedInDraw);
 #endif
     if (!advanced && !copied)
+    {
+        const Diagnostics::DrawSpawnCheck::AllowScope firstFrame;
         AdvanceLinkedPart(c, f, Type, Link);
+    }
     b->CurrentAction = LinkedPartAction(c, f);
 
     VectorCopy(b->BodyOrigin, Object->Position);
@@ -7094,7 +7098,10 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
 
     // The update spawns the effects of a part it advanced or copied; the draw spawns the others'.
     if (!advanced && !copied)
+    {
+        const Diagnostics::DrawSpawnCheck::AllowScope firstFrame;
         SpawnLinkedPartEffects(c, Type, Object, bones, Position);
+    }
 
     if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE &&
         !g_Direction.m_CKanturu.IsMayaScene() && !IsWingShadowDisabledDebug())
@@ -10154,6 +10161,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     // A preview outside the client's characters gets no update; its draw runs its cloth, transformation and parts.
     if (!IsClientCharacterObject(o))
     {
+        const Diagnostics::DrawSpawnCheck::AllowScope preview;
         UpdateCharacterCloth(c);
         UpdateTransformSkinEffects(o);
         if (o->Type == MODEL_PLAYER)

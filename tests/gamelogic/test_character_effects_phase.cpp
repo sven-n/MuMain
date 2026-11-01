@@ -3,6 +3,7 @@
 
 #include "Engine/AI/GOBoid.h"
 #include "Character/CSParts.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/ObjectPose.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -23,6 +24,17 @@
 
 namespace
 {
+// Runs a draw as the frame runs it and checks it spawned nothing.
+template <typename Draw> void CheckDrawSpawnsNone(Draw draw)
+{
+    Diagnostics::DrawSpawnCheck::ResetViolations();
+    {
+        const Diagnostics::DrawSpawnCheck::DrawScope drawing;
+        draw();
+    }
+    CHECK(Diagnostics::DrawSpawnCheck::Violations() == 0);
+}
+
 // One drawn character of the given model, alone in the client's character list.
 struct CharacterScope
 {
@@ -531,7 +543,7 @@ TEST_CASE("A character's mark spawns its sprite in the update, and its draw spaw
     };
     FenrirScope::ClearSpawns();
 
-    RenderParts(&c);
+    CheckDrawSpawnsNone([&c] { RenderParts(&c); });
     CHECK(liveSprites() == 0);
     UpdateParts(&c);
     CHECK(liveSprites() == 1);
@@ -557,8 +569,12 @@ TEST_CASE("A wing's item effect spawns its lights on the bones it is given, and 
     wing.Type = MODEL_WING_OF_ETERNAL;
 
     int level = 0;
-    CHECK(Render::Items::ItemEffects::Apply(b, &wing, MODEL_WING_OF_ETERNAL, 1.f, level) ==
-          Render::Items::ItemEffects::Result::Applied);
+    CheckDrawSpawnsNone(
+        [&]
+        {
+            CHECK(Render::Items::ItemEffects::Apply(b, &wing, MODEL_WING_OF_ETERNAL, 1.f, level) ==
+                  Render::Items::ItemEffects::Result::Applied);
+        });
     for (int i = 0; i < MAX_SPRITES; ++i)
         CHECK_FALSE(Sprites[i].Live);
 
@@ -598,7 +614,7 @@ TEST_CASE(
         return live;
     };
 
-    SEASON3B::GMNewTown::RenderObjectAfterCharacter(&crystal, b);
+    CheckDrawSpawnsNone([&] { SEASON3B::GMNewTown::RenderObjectAfterCharacter(&crystal, b); });
     CHECK(liveSprites() == 0);
     SEASON3B::GMNewTown::UpdateObjectEffects(&crystal, b);
     CHECK(liveSprites() == 4);
@@ -677,4 +693,37 @@ TEST_CASE("The stun skull is refreshed for a stunned object, and not while its s
     g_CharacterRegisterBuff(stunned, eBuff_Cloaking);
     RefreshStunSkull(stunned, light);
     CHECK(skulls() == 0);
+}
+
+TEST_CASE("A spawn while drawing is a violation, unless the draw allows it; outside a draw it is none [effects]")
+{
+    using namespace Diagnostics::DrawSpawnCheck;
+    ResetViolations();
+    Note("sprite");
+    CHECK(Violations() == 0);
+    {
+        const DrawScope drawing;
+        Note("sprite");
+        CHECK(Violations() == 1);
+        {
+            const AllowScope firstFrame;
+            Note("sprite");
+        }
+        CHECK(Violations() == 1);
+    }
+    ResetViolations();
+}
+
+TEST_CASE("Creating a sprite while drawing is counted as a violation [effects]")
+{
+    FenrirScope::ClearSpawns();
+    Diagnostics::DrawSpawnCheck::ResetViolations();
+    vec3_t position = {0.f, 0.f, 0.f}, light = {1.f, 1.f, 1.f};
+    {
+        const Diagnostics::DrawSpawnCheck::DrawScope drawing;
+        CreateSprite(BITMAP_LIGHT, position, 1.f, light, nullptr);
+    }
+    CHECK(Diagnostics::DrawSpawnCheck::Violations() == 1);
+    Diagnostics::DrawSpawnCheck::ResetViolations();
+    FenrirScope::ClearSpawns();
 }
