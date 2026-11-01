@@ -100,6 +100,8 @@ private:
     // The row under the mouse and the frame it was, for the overlay.
     std::optional<MuEditor::SoundMixer::HeardRow> m_hovered;
     int m_hoveredFrame = -1;
+    // The sound whose file was copied last, for its cell's tooltip.
+    int m_copied = -1;
 };
 
 extern MuSoundMixerUI g_MuSoundMixerUI;
@@ -122,6 +124,15 @@ std::string SourceText(const Audio::Mixer::HeardSound& sound);
 
 // The file a heard sound plays below Data/Sound, or its number.
 std::string SoundText(int number);
+
+// The tooltip of a row's Sound cell: the sound's number and that a click
+// copies the file, or, once `copied` is the row's sound, that it was.
+std::string SoundCellTip(const HeardRow& row, int copied);
+
+// A row's Sound cell: its file, which a click copies (to quote it
+// elsewhere), and its tooltip. `copied`: the sound copied last. Whether this
+// frame's click copied it.
+bool RenderSoundCell(const HeardRow& row, int& copied);
 
 // The sound's row: its texts, length, whether it plays and is changed.
 HeardRow MakeRow(const Audio::Mixer::HeardSound& sound);

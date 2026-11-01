@@ -373,11 +373,7 @@ void MuSoundMixerUI::RenderHeard()
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(PlayingRowColor));
         }
         ImGui::TableNextColumn();
-        ImGui::TextUnformatted(row.file.c_str());
-        if (ImGui::IsItemHovered())
-        {
-            ImGui::SetTooltip("#%d", row.sound.number);
-        }
+        MuEditor::SoundMixer::RenderSoundCell(row, m_copied);
         ImGui::TableNextColumn();
         ImGui::TextUnformatted(row.source.c_str());
         ImGui::TableNextColumn();
@@ -486,6 +482,33 @@ std::string SoundText(int number)
         }
     }
     return file;
+}
+
+std::string SoundCellTip(const HeardRow& row, int copied)
+{
+    if (copied == row.sound.number)
+    {
+        return I18N::Format(I18N::Editor::SoundMixerCopied0, {row.file});
+    }
+    return I18N::Format(I18N::Editor::SoundMixerCopyTip0, {std::to_string(row.sound.number)});
+}
+
+bool RenderSoundCell(const HeardRow& row, int& copied)
+{
+    // Two numbers can load the same file.
+    ImGui::PushID(row.sound.number);
+    const bool clicked = ImGui::Selectable(row.file.c_str());
+    ImGui::PopID();
+    if (clicked)
+    {
+        ImGui::SetClipboardText(row.file.c_str());
+        copied = row.sound.number;
+    }
+    if (ImGui::IsItemHovered())
+    {
+        ImGui::SetTooltip("%s", SoundCellTip(row, copied).c_str());
+    }
+    return clicked;
 }
 
 bool HeardFilter::IsActive() const

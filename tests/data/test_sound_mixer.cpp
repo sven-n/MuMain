@@ -831,6 +831,62 @@ TEST_CASE("Sound Mixer: PlayBuffer notes a loaded sound with its gain, and start
     ForgetLoadedSounds();
 }
 
+namespace
+{
+std::string g_clipboard;
+}
+
+TEST_CASE("Sound Mixer: a click on a Sound cell copies its file, the tooltip says so [audio][mixer][editor]")
+{
+    using MuEditor::SoundMixer::HeardRow;
+    TestImGuiContext context;
+    g_clipboard.clear();
+    ImGui::GetPlatformIO().Platform_SetClipboardTextFn = [](ImGuiContext*, const char* text) { g_clipboard = text; };
+    ImGuiIO& io = ImGui::GetIO();
+    HeardRow energy;
+    energy.sound.number = 120;
+    energy.file = "penergy.wav";
+    // Another number of the same file.
+    HeardRow again = energy;
+    again.sound.number = 121;
+    int copied = -1;
+    int clicks[2] = {};
+    ImVec2 secondCell;
+    const auto frame = [&]
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(300.0f, 200.0f));
+        ImGui::Begin("Cells");
+        clicks[0] += MuEditor::SoundMixer::RenderSoundCell(energy, copied) ? 1 : 0;
+        clicks[1] += MuEditor::SoundMixer::RenderSoundCell(again, copied) ? 1 : 0;
+        secondCell = ImVec2((ImGui::GetItemRectMin().x + ImGui::GetItemRectMax().x) * 0.5f,
+                            (ImGui::GetItemRectMin().y + ImGui::GetItemRectMax().y) * 0.5f);
+        ImGui::End();
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    frame();
+    io.AddMousePosEvent(secondCell.x, secondCell.y);
+    frame();
+    frame();
+    CHECK(g_clipboard.empty());
+    CHECK(MuEditor::SoundMixer::SoundCellTip(again, copied) == "#121, click to copy the name");
+    io.AddMouseButtonEvent(ImGuiMouseButton_Left, true);
+    frame();
+    io.AddMouseButtonEvent(ImGuiMouseButton_Left, false);
+    frame();
+    // The second cell: its file, under its own number.
+    CHECK(clicks[0] == 0);
+    CHECK(clicks[1] == 1);
+    CHECK(g_clipboard == "penergy.wav");
+    CHECK(copied == 121);
+    CHECK(MuEditor::SoundMixer::SoundCellTip(again, copied) == "Copied: penergy.wav");
+    // The other number of the file was not copied.
+    CHECK(MuEditor::SoundMixer::SoundCellTip(energy, copied) == "#120, click to copy the name");
+    ImGui::GetPlatformIO().Platform_SetClipboardTextFn = nullptr;
+}
+
 TEST_CASE("Sound Mixer: the window draws its kinds and the sounds heard, the reminder opens it (Q-SM1, Q-SM5) "
           "[audio][mixer][editor]")
 {

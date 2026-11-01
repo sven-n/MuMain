@@ -3592,6 +3592,12 @@
   <data name="Sound mixer heard anywhere {0}" xml:space="preserve">
     <value>{0} (überall zu hören)</value>
   </data>
+  <data name="Sound mixer copy tip {0}" xml:space="preserve">
+    <value>#{0}, Klick kopiert den Namen</value>
+  </data>
+  <data name="Sound mixer copied {0}" xml:space="preserve">
+    <value>Kopiert: {0}</value>
+  </data>
   <data name="Sound mixer kinds" xml:space="preserve">
     <value>Arten</value>
   </data>
