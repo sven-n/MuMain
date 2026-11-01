@@ -161,7 +161,8 @@ private:
     // The button of one server of the selected group, at `index` in its list.
     ServerEntry MakeServerEntry(const CServerInfo& serverInfo, int index) const;
     // Hides the bar segments under each load text, as laid out: they depend on the text's width,
-    // which only the layout knows. Each frame; the model changes only when they do.
+    // which only the layout knows. Runs after the rows were built, the list shown or the window
+    // resized, until a layout gives the same segments as the last (m_fitPending).
     void FitLoadTexts();
     void BindRmlModel(Rml::DataModelConstructor& c, ServerSelRmlModel& model);
     UI::RmlBridge::ThemedView<ServerSelRmlModel> m_RmlView{"server_select",
@@ -173,6 +174,11 @@ private:
     // The segments each load text covered when last laid out, for the rows built again, so they
     // don't show the whole bar under the text for a frame.
     std::map<Rml::String, Data::ServerList::CoveredSegments> m_coveredByLoadText;
+    // FitLoadTexts has rows left to measure, or its last pass changed them.
+    bool m_fitPending = true;
+    // The window size of FitLoadTexts' last pass; another size lays the rows out anew.
+    unsigned int m_fitWindowWidth = 0;
+    unsigned int m_fitWindowHeight = 0;
 
     // Fixed, author-chosen footprint used only for UpdateMouseEvent()'s own-rect check
     // (self-centered the same way SceneUICoordinator.cpp centers every other window); covers

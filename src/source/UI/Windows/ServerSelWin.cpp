@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <array>
 #include <cmath>
+#include <optional>
 #include <string_view>
 #include <vector>
 
@@ -44,6 +45,22 @@ bool CanDrawItalic()
     if (std::find(kLocalesWithoutItalic.begin(), kLocalesWithoutItalic.end(), current) != kLocalesWithoutItalic.end())
         return false;
     return UI::RmlBridge::ActiveThemeFontHasItalic(kLabelFontToken);
+}
+
+// The segments of a server row's bar its load text covers as laid out; none while the row isn't laid out yet.
+std::optional<Data::ServerList::CoveredSegments> MeasureCoveredSegments(Rml::Element& row, Rml::Element& text)
+{
+    Rml::ElementList segments;
+    row.QuerySelectorAll(segments, ".server-gauge-segment");
+    std::vector<Data::ServerList::SegmentSpan> spans;
+    for (Rml::Element* segment : segments)
+        spans.push_back(
+            {segment->GetAbsoluteOffset(Rml::BoxArea::Border).x, segment->GetBox().GetSize(Rml::BoxArea::Border).x});
+    const float left = text.GetAbsoluteOffset(Rml::BoxArea::Border).x;
+    const float width = text.GetBox().GetSize(Rml::BoxArea::Border).x;
+    if (spans.empty() || spans.front().width <= 0.0f || width <= 0.0f)
+        return std::nullopt;
+    return Data::ServerList::GetCoveredSegments(spans, left, left + width);
 }
 } // namespace
 
@@ -163,6 +180,8 @@ void CServerSelWin::Show(bool bShow)
         if (bShow) { SyncRmlModel(); m_RmlView.Document()->Show(); }
         else       m_RmlView.Document()->Hide();
     }
+    if (bShow)
+        m_fitPending = true;
 }
 
 void CServerSelWin::UpdateDisplay()
@@ -245,6 +264,7 @@ void CServerSelWin::UpdateDisplay()
     m_RmlView.MarkDirty("sizer_loads");
     m_RmlView.MarkDirty("pvp_notice");
     m_RmlView.MarkDirty("description_text");
+    m_fitPending = true;
 
     SyncRmlModel();
 }
@@ -485,7 +505,8 @@ bool CServerSelWin::UpdateMouseEvent()
 
 bool CServerSelWin::Update()
 {
-    FitLoadTexts();
+    if (m_fitPending || WindowWidth != m_fitWindowWidth || WindowHeight != m_fitWindowHeight)
+        FitLoadTexts();
     return true;
 }
 
@@ -494,11 +515,14 @@ void CServerSelWin::FitLoadTexts()
     Rml::ElementDocument* document = m_RmlView.Document();
     if (document == nullptr || !IsVisible())
         return;
+    m_fitWindowWidth = WindowWidth;
+    m_fitWindowHeight = WindowHeight;
 
     std::vector<ServerEntry>& servers = m_RmlView.GetModel().servers;
     Rml::ElementList rows;
     document->QuerySelectorAll(rows, ".server-option-btn.server-row");
     bool changed = false;
+    bool unmeasured = false;
     size_t index = 0;
     for (Rml::Element* row : rows)
     {
@@ -509,27 +533,23 @@ void CServerSelWin::FitLoadTexts()
         Rml::Element* text = row->QuerySelector(".server-load");
         if (entry.loadText.empty() || text == nullptr)
             continue;
-        Rml::ElementList segments;
-        row->QuerySelectorAll(segments, ".server-gauge-segment");
-        std::vector<Data::ServerList::SegmentSpan> spans;
-        for (Rml::Element* segment : segments)
-            spans.push_back({segment->GetAbsoluteOffset(Rml::BoxArea::Border).x,
-                             segment->GetBox().GetSize(Rml::BoxArea::Border).x});
-        const float left = text->GetAbsoluteOffset(Rml::BoxArea::Border).x;
-        const float width = text->GetBox().GetSize(Rml::BoxArea::Border).x;
+        const std::optional<Data::ServerList::CoveredSegments> covered = MeasureCoveredSegments(*row, *text);
         // Not laid out yet (a row just built): the next frame has it.
-        if (spans.empty() || spans.front().width <= 0.0f || width <= 0.0f)
-            continue;
-        const Data::ServerList::CoveredSegments covered =
-            Data::ServerList::GetCoveredSegments(spans, left, left + width);
-        m_coveredByLoadText[entry.loadText] = covered;
-        if (entry.textFrom != covered.first || entry.textTo != covered.end)
+        if (!covered)
         {
-            entry.textFrom = covered.first;
-            entry.textTo = covered.end;
+            unmeasured = true;
+            continue;
+        }
+        m_coveredByLoadText[entry.loadText] = *covered;
+        if (entry.textFrom != covered->first || entry.textTo != covered->end)
+        {
+            entry.textFrom = covered->first;
+            entry.textTo = covered->end;
             changed = true;
         }
     }
+    // The hidden segments can lay the row out anew: the next pass checks it.
+    m_fitPending = changed || unmeasured;
     if (changed)
         m_RmlView.MarkDirty("servers");
 }
