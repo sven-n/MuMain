@@ -8107,11 +8107,16 @@ void RenderEffects(bool bRenderBlendMesh)
                     RenderObject(o);
                     break;
                 case MODEL_TOWER_GATE_PLANE:
+                {
                     RenderObject(o);
 
+                    // Its mirror image above the gate.
+                    const float height = o->Position[2];
                     o->Position[2] = o->StartPosition[2] + 400.f - (o->Position[2] - o->StartPosition[2]);
                     RenderObject(o);
-                    break;
+                    o->Position[2] = height;
+                }
+                break;
 
                 case BATTLE_CASTLE_WALL1:
                 case BATTLE_CASTLE_WALL2:
@@ -8306,7 +8311,6 @@ void RenderEffects(bool bRenderBlendMesh)
                         Vector(0.0f, 0.0f, 0.0f, p);
                         pOwnerModel->RotationPosition(pOwner->BoneTransform[33], p, vPos);
                         VectorAdd(pOwner->Position, vPos, pModel->BodyOrigin);
-                        Vector(0.0f, 0.0f, 0.0f, pObject->Angle);
 
                         OBB_t OBB;
                         vec3_t Temp;
@@ -8616,6 +8620,11 @@ static void UpdateDrawnEffectSprites(OBJECT* o)
 
     switch (o->Type)
     {
+    case MODEL_EFFECT_FLAME_STRIKE:
+        // The flame is drawn and moved unturned.
+        if (o->SubType == 0)
+            Vector(0.0f, 0.0f, 0.0f, o->Angle);
+        break;
     case MODEL_SKILL_WHEEL2:
         // The wheel spins faster each frame.
         o->Direction[2] -= (30) * FPS_ANIMATION_FACTOR;
@@ -8843,7 +8852,11 @@ static void UpdateDrawnEffectShadowState(OBJECT* o)
     if (SceneFlag != MAIN_SCENE || g_pOption == nullptr || !g_pOption->GetRenderAllEffects())
         return;
 
-    if (o->Type == BITMAP_MAGIC && o->SubType == 1)
+    if (o->Type == BITMAP_LIGHTNING + 1)
+    {
+        o->Scale += (0.2f) * FPS_ANIMATION_FACTOR;
+    }
+    else if (o->Type == BITMAP_MAGIC && o->SubType == 1)
     {
         o->Light[0] *= pow(1.0f / (1.1f), FPS_ANIMATION_FACTOR);
         o->Light[1] *= pow(1.0f / (1.1f), FPS_ANIMATION_FACTOR);
@@ -9249,7 +9262,6 @@ void RenderEffectShadows()
                     }
                     break;
                 case BITMAP_LIGHTNING + 1:
-                    o->Scale += (0.2f) * FPS_ANIMATION_FACTOR;
                     Luminosity = (float)(o->LifeTime) * 0.1f;
                     Vector(Luminosity, Luminosity, Luminosity, Light);
                     RenderTerrainAlphaBitmap(BITMAP_LIGHTNING + 1, o->Position[0], o->Position[1], o->Scale, o->Scale, Light, -o->Angle[2]);

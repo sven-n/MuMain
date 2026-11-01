@@ -1383,8 +1383,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                                                     }
                                                     else if (o->Type == MODEL_DESAIR)
                                                     {
-                                                        Vector(1.f, 1.f, 1.f, o->Light);
-                                                        VectorCopy(o->Light, b->BodyLight);
+                                                        Vector(1.f, 1.f, 1.f, b->BodyLight);
                                                         b->RenderBody(RENDER_TEXTURE | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                                                     }
                                                     else if (o->Type == MODEL_DARK_SCREAM)
@@ -1943,15 +1942,13 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 }
                 else if (o->Type == MODEL_DRAGON_LOWER_DUMMY)
                 {
-                    Vector(1.0f, 0.8f, 0.2f, o->Light);
-                    VectorCopy(o->Light, b->BodyLight);
+                    Vector(1.0f, 0.8f, 0.2f, b->BodyLight);
                     VectorScale(b->BodyLight, o->Alpha, b->BodyLight);
                     // grandmark2.jpg
                     b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU, -(int)WorldTime % 2000 * 0.0001f);
                     b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 2, o->BlendMeshLight, o->BlendMeshTexCoordU, -(int)WorldTime % 2000 * 0.0001f);
 
-                    Vector(1.0f, 0.2f, 0.1f, o->Light);
-                    VectorCopy(o->Light, b->BodyLight);
+                    Vector(1.0f, 0.2f, 0.1f, b->BodyLight);
                     VectorScale(b->BodyLight, o->Alpha, b->BodyLight);
                     // lines2.jpg
                     b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, o->BlendMeshLight,
@@ -2092,6 +2089,14 @@ void UpdateRenderObjectEffects(OBJECT* o)
 
     switch (o->Type)
     {
+    case MODEL_DESAIR:
+        // The light its draw left on it.
+        Vector(1.f, 1.f, 1.f, o->Light);
+        break;
+    case MODEL_DRAGON_LOWER_DUMMY:
+        // The light its draw left on it, which its sparks take.
+        Vector(1.0f, 0.2f, 0.1f, o->Light);
+        break;
     case MODEL_FRED:
     {
         MoveEye(o, b, 14, 15, 71, 72, 73, 74);

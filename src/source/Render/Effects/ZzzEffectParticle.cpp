@@ -8904,6 +8904,13 @@ void MoveParticles()
             }
         }
     }
+
+    // Damage numbers brighten each frame, as their draw brightened them.
+    for (int i = 0; i < MAX_PARTICLES; ++i)
+    {
+        if (Particles[i].Live && Particles[i].Type == BITMAP_DAMAGE1)
+            VectorScale(Particles[i].Light, 2.0f, Particles[i].Light);
+    }
 }
 
 namespace
@@ -9341,11 +9348,8 @@ void RenderParticles(BYTE byRenderOneMore)
             }
             break;
             case BITMAP_DAMAGE1:
-            {
-                VectorScale(o->Light, 2.0f, o->Light);
                 RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-            }
-            break;
+                break;
             case BITMAP_SWORD_EFFECT_MONO:
             {
                 vec3_t vPos;
