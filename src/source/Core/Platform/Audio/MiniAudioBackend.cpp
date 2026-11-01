@@ -283,7 +283,7 @@ bool MiniAudioBackend::PlaySoundAtLevel(ESound buffer, float level)
     return StartSound(buffer, nullptr, false, std::clamp(level, 0.0f, 1.0f));
 }
 
-bool MiniAudioBackend::PlaySoundOnFreeChannel(ESound buffer)
+bool MiniAudioBackend::PlaySoundOnFreeChannel(ESound buffer, float level)
 {
     if (!m_initialized)
     {
@@ -305,11 +305,11 @@ bool MiniAudioBackend::PlaySoundOnFreeChannel(ESound buffer)
         return true;
     }
 
-    // The channel has ended or never played: from the start, once, at the
-    // effect volume.
+    // The channel has ended or never played: from the start, once, at its
+    // level of the effect volume.
     ma_sound_seek_to_pcm_frame(pSound, 0);
     ma_sound_set_looping(pSound, MA_FALSE);
-    ma_sound_set_volume(pSound, m_sfxVolume);
+    ma_sound_set_volume(pSound, m_sfxVolume * std::clamp(level, 0.0f, 1.0f));
     ma_sound_start(pSound);
     return true;
 }

@@ -22,4 +22,9 @@ void OnObjectDrawn(const OBJECT& object);
 
 // The sound an object type plays on the map loaded; nullopt for none.
 std::optional<ESound> FindSound(int objectType);
+
+// The volume of a copy a drawn object starts, by its distance from the hero
+// (maps design, D-MP7, a look-and-feel test): full within 3 tiles, then
+// lower to a quarter at 15 tiles and beyond.
+float DistanceLevel(float distance);
 } // namespace World::MapObjectSounds

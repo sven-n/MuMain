@@ -20,7 +20,8 @@ enum class MapObjectSoundPlay
 {
     // Asked for each frame an object of the type is drawn (it passes the
     // view test); a channel that has ended starts again, a playing one is
-    // left alone, at full volume at any distance (D-MP3).
+    // left alone (D-MP3); a copy plays quieter the farther its object is
+    // from the hero (D-MP7, a look-and-feel test).
     WhileInView,
 };
 

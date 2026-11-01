@@ -8,6 +8,8 @@
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
 #include "Data/GameData/MapData/MapObjectSoundDatabase.h"
 #include "Data/GameData/MapData/MapObjectSoundsJson.h"
+#include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/w_CharacterInfo.h"
 #include "Engine/Object/w_ObjectInfo.h"
 #include "World/MapInfra/MapObjectSounds.h"
 
@@ -79,6 +81,7 @@ class RecordingAudio final : public mu::IPlatformAudio
 public:
     std::vector<std::pair<int, std::wstring>> loads;
     std::vector<int> freePlays;
+    std::vector<float> freeLevels;
     std::vector<int> plays;
 
     bool Initialize() override
@@ -95,9 +98,10 @@ public:
         plays.push_back(static_cast<int>(buffer));
         return true;
     }
-    bool PlaySoundOnFreeChannel(ESound buffer) override
+    bool PlaySoundOnFreeChannel(ESound buffer, float level) override
     {
         freePlays.push_back(static_cast<int>(buffer));
+        freeLevels.push_back(level);
         return true;
     }
     void StopSound(ESound, bool) override {}
@@ -351,4 +355,41 @@ TEST_CASE("Map object sounds: a drawn object of an entry's type plays its sound 
     World::MapObjectSounds::OnObjectDrawn(waterfall);
     CHECK(scope.audio.freePlays.size() == 1);
     World::MapObjectSounds::LoadForMap(-1, 0);
+}
+
+TEST_CASE("Map object sounds: a copy plays quieter the farther its object is from the hero (D-MP7, a test) "
+          "[data][maps]")
+{
+    using World::MapObjectSounds::DistanceLevel;
+    CHECK(DistanceLevel(0.0f) == 1.0f);
+    CHECK(DistanceLevel(300.0f) == 1.0f);
+    CHECK(DistanceLevel(900.0f) == doctest::Approx(0.625f));
+    CHECK(DistanceLevel(1500.0f) == doctest::Approx(0.25f));
+    CHECK(DistanceLevel(5000.0f) == doctest::Approx(0.25f));
+
+    AudioScope scope;
+    g_MapObjectSoundDatabase.Build(std::vector<MapObjectSound>{Waterfall()});
+    World::MapObjectSounds::LoadForMap(24, 0);
+    CHARACTER hero;
+    hero.Object.Position[0] = 1000.0f;
+    hero.Object.Position[1] = 1000.0f;
+    CHARACTER* const previousHero = Hero;
+    Hero = &hero;
+    OBJECT nearObject;
+    nearObject.Type = 37;
+    nearObject.Position[0] = 1100.0f;
+    nearObject.Position[1] = 1000.0f;
+    OBJECT farObject;
+    farObject.Type = 38;
+    farObject.Position[0] = 1000.0f;
+    farObject.Position[1] = 1900.0f;
+
+    World::MapObjectSounds::OnObjectDrawn(nearObject);
+    World::MapObjectSounds::OnObjectDrawn(farObject);
+
+    Hero = previousHero;
+    World::MapObjectSounds::LoadForMap(-1, 0);
+    REQUIRE(scope.audio.freeLevels.size() == 2);
+    CHECK(scope.audio.freeLevels[0] == 1.0f);
+    CHECK(scope.audio.freeLevels[1] == doctest::Approx(0.625f));
 }

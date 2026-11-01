@@ -1021,7 +1021,8 @@ HRESULT PlayBufferAtLevel(ESound Buffer, float Level);
 // Plays the sound on the next of its channels when that channel has ended,
 // and leaves a playing one alone, as DirectSound did (maps design, D-MP3): a
 // sound asked for every frame runs as up to as many copies as it has channels.
-HRESULT PlayBufferOnFreeChannel(ESound Buffer);
+// A copy it starts plays at `Level` (0 to 1) of the effect volume.
+HRESULT PlayBufferOnFreeChannel(ESound Buffer, float Level = 1.0f);
 void StopBuffer(ESound Buffer, BOOL bResetPosition);
 void AllStopSound(void);
 void Set3DSoundPosition();

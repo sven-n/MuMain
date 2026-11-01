@@ -3461,7 +3461,7 @@
     <value>solange sichtbar</value>
   </data>
   <data name="While in view note" xml:space="preserve">
-    <value>In jedem Bild, in dem ein Objekt des Typs gezeichnet wird, startet ein beendeter Kanal neu und ein spielender bleibt unberührt, in voller Lautstärke auf jede Entfernung.</value>
+    <value>In jedem Bild, in dem ein Objekt des Typs gezeichnet wird, startet ein beendeter Kanal neu und ein spielender bleibt unberührt; eine Kopie spielt leiser, je weiter ihr Objekt vom Helden entfernt ist.</value>
   </data>
   <data name="Object sound maps" xml:space="preserve">
     <value>Karten</value>

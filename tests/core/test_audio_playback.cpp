@@ -154,7 +154,7 @@ TEST_CASE("a sound on a free channel leaves its playing channels alone and start
     // Three frames start the three channels in turn.
     for (int frame = 0; frame < Channels; ++frame)
     {
-        REQUIRE(backend->PlaySoundOnFreeChannel(soundId));
+        REQUIRE(backend->PlaySoundOnFreeChannel(soundId, 1.0f));
     }
     for (int channel = 0; channel < Channels; ++channel)
     {
@@ -167,16 +167,18 @@ TEST_CASE("a sound on a free channel leaves its playing channels alone and start
     // The next frames find every channel playing: nothing starts over.
     for (int frame = 0; frame < Channels; ++frame)
     {
-        REQUIRE(backend->PlaySoundOnFreeChannel(soundId));
+        REQUIRE(backend->PlaySoundOnFreeChannel(soundId, 1.0f));
     }
     CHECK(cursor(0) == before);
 
     // Once the copies have ended, the next ask starts a channel again.
     mix(sourceFrameCount + 256);
     REQUIRE_FALSE(ma_sound_is_playing(&backend->m_sounds[soundIndex][0]));
-    REQUIRE(backend->PlaySoundOnFreeChannel(soundId));
+    REQUIRE(backend->PlaySoundOnFreeChannel(soundId, 0.5f));
     CHECK(ma_sound_is_playing(&backend->m_sounds[soundIndex][0]));
     CHECK(cursor(0) == 0);
+    // At its level of the effect volume (a map object's distance, D-MP7).
+    CHECK(ma_sound_get_volume(&backend->m_sounds[soundIndex][0]) == doctest::Approx(0.5f));
 
     backend->Shutdown();
     for (ma_audio_buffer& audioBuffer : audioBuffers)

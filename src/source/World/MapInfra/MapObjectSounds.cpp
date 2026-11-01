@@ -5,9 +5,11 @@
 #include "Audio/SoundNumbers.h"
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/MapData/MapObjectSoundDatabase.h"
+#include "Engine/Object/ZzzCharacter.h"
 
 #include <algorithm>
 #include <array>
+#include <cmath>
 
 namespace World::MapObjectSounds
 {
@@ -16,6 +18,10 @@ namespace
 using Data::Maps::MapObjectSound;
 
 constexpr int ObjectTypeCount = Data::Maps::MaxMapObjectType + 1;
+// The distances of DistanceLevel (100 units a tile) and its lowest level.
+constexpr float FullVolumeDistance = 300.0f;
+constexpr float QuietestDistance = 1500.0f;
+constexpr float QuietestLevel = 0.25f;
 
 struct LoadedMap
 {
@@ -66,6 +72,18 @@ void FollowTable()
         LoadForMap(loaded.serverMap, loaded.stage);
     }
 }
+
+// The object's distance from the hero on the ground; 0 without a hero.
+float DistanceFromHero(const OBJECT& object)
+{
+    if (Hero == nullptr)
+    {
+        return 0.0f;
+    }
+    const float dx = object.Position[0] - Hero->Object.Position[0];
+    const float dy = object.Position[1] - Hero->Object.Position[1];
+    return std::sqrt(dx * dx + dy * dy);
+}
 } // namespace
 
 void LoadForMap(int serverMap, int stage)
@@ -98,8 +116,22 @@ void OnObjectDrawn(const OBJECT& object)
     FollowTable();
     if (const std::optional<ESound> sound = FindSound(object.Type))
     {
-        PlayBufferOnFreeChannel(*sound);
+        PlayBufferOnFreeChannel(*sound, DistanceLevel(DistanceFromHero(object)));
     }
+}
+
+float DistanceLevel(float distance)
+{
+    if (distance <= FullVolumeDistance)
+    {
+        return 1.0f;
+    }
+    if (distance >= QuietestDistance)
+    {
+        return QuietestLevel;
+    }
+    const float along = (distance - FullVolumeDistance) / (QuietestDistance - FullVolumeDistance);
+    return 1.0f - along * (1.0f - QuietestLevel);
 }
 
 std::optional<ESound> FindSound(int objectType)
