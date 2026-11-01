@@ -9473,6 +9473,9 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
     Vector(0.f, 0.f, 0.f, p);
     Vector(1.f, 1.f, 1.f, Light);
+    // The body draws in a light of its own; the update's light is back for the rest of the draw and after it.
+    vec3_t preparedLight;
+    VectorCopy(c->Light, preparedLight);
 
     BYTE byRender = CHARACTER_NONE;
 
@@ -9588,18 +9591,9 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     {
         if (o->Alpha >= 0.3f)
         {
-            if (gMapManager.InBloodCastle() == true && o->m_bActionStart && c->Dead > 0)
-            {
-                float height = RequestTerrainHeight(o->Position[0], o->Position[1]);
-                if (height < o->Position[2])
-                {
-                    o->Position[2] = height;
-                }
-            }
-
-            if (c->MonsterIndex == MONSTER_ARCHANGEL)
-                o->HiddenMesh = 2;
-            else if (c->MonsterIndex == MONSTER_MESSENGER_OF_ARCH)
+            // An archangel's shadow leaves out its wings' mesh.
+            const int hiddenMesh = o->HiddenMesh;
+            if (c->MonsterIndex == MONSTER_ARCHANGEL || c->MonsterIndex == MONSTER_MESSENGER_OF_ARCH)
                 o->HiddenMesh = 2;
 
             if (o->Type != MODEL_STATUE_OF_SAINT && o->Type != MODEL_CASTLE_GATE &&
@@ -9609,6 +9603,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 RenderPartObject(&c->Object, o->Type, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate);
                 o->EnableShadow = false;
             }
+            o->HiddenMesh = hiddenMesh;
             if (c->MonsterIndex == MONSTER_ARCHANGEL || c->MonsterIndex == MONSTER_MESSENGER_OF_ARCH)
             {
                 EnableAlphaBlend();
@@ -9623,8 +9618,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 Vector(Luminosity * 0.5f, Luminosity * 0.5f, Luminosity, Light);
                 RenderTerrainAlphaBitmap(BITMAP_MAGIC + 1, o->Position[0], o->Position[1], 2.7f, 2.7f, Light,
                                          -o->Angle[2]);
-
-                o->HiddenMesh = -1;
             }
         }
     }
@@ -9707,12 +9700,12 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         float fSin = 0.5f * (1.0f + sinf((float)((int)WorldTime % 10000) * 0.001f));
         RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT,
                                   0.3f + fSin * 0.7f);
-        fSin = 0.3f * (1.0f - fSin) + 0.3f;
-        o->BlendMeshLight = fSin;
+        // Its blend mesh light is set by the update.
+        const int blendMesh = o->BlendMesh;
         o->BlendMesh = 0;
         RenderObject(o, Translate, 2, 0);
         RenderObject(o, Translate, 3, 0);
-        o->BlendMesh = -1;
+        o->BlendMesh = blendMesh;
         memcpy(g_fBoneSave[2], o->BoneTransform[24], 3 * 4 * sizeof(float));
         o->Type++;
         RenderObject(o, Translate, Select, 0);
@@ -9817,26 +9810,14 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
     else if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
     {
-        c->HideShadow = true;
-
+        // Its shadow, alpha, blend mesh and rise are set by the update.
         if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
         {
             Vector(0.5f, 0.7f, 1.0f, c->Light);
-            c->Object.Alpha = 0.7f;
         }
-        else
-        {
-            Vector(1.0f, 0.3f, 0.1f, c->Light);
-        }
-
-        if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
-            ;
         else if (o->CurrentAction != PLAYER_DIE1)
         {
-            // 			if (!g_isCharacterBuff((&c->Object), eBuff_Doppelganger_Ascension))
-            // 			{
-            c->Object.Alpha = 1.0f;
-            // 			}
+            Vector(1.0f, 0.3f, 0.1f, c->Light);
         }
         else
         {
@@ -9845,12 +9826,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 fAlpha = 0;
 
             Vector(1.0f * fAlpha, 0.3f * fAlpha, 0.1f * fAlpha, c->Light);
-        }
-        c->Object.BlendMesh = -1;
-
-        if (g_isCharacterBuff((&c->Object), eBuff_Doppelganger_Ascension))
-        {
-            o->Position[2] += 2.0f * FPS_ANIMATION_FACTOR;
         }
     }
 
@@ -9902,10 +9877,12 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
               o->SubType == MODEL_SKELETON_CHANGED || o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL ||
               o->SubType == MODEL_SKELETON1))
     {
-        PART_t* p = &c->BodyPart[o->SubType];
+        // The skin is one model, drawn as a part of its own; the update keys its Dark Side by the head part.
+        PART_t skin;
+        skin.Type = o->SubType;
+        PART_t* p = &skin;
         if (o->CurrentAction == PLAYER_SKILL_DRAGONKICK)
         {
-            p->Type = o->SubType;
             RenderCharacter_AfterImage(c, p, Translate, Select, 2.5f, 1.0f);
         }
         else if (o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY || o->CurrentAction == PLAYER_SKILL_DARKSIDE_ATTACK)
@@ -9918,8 +9895,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             }
             else
             {
-                p->Type = o->SubType;
-                g_CMonkSystem.DarksideRendering(c, p, Translate, Select);
+                g_CMonkSystem.DarksideRendering(c, p, Translate, Select, &c->BodyPart[BODYPART_HEAD]);
             }
         }
         else
@@ -10019,7 +9995,10 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         if ((o->Kind == KIND_PLAYER && gMapManager.InChaosCastle() == true))
         {
             int RenderType = RENDER_TEXTURE;
-            PART_t* p = &c->BodyPart[BODYPART_HEAD];
+            // Drawn as an angel: the head part's copy, so the character keeps its own head.
+            PART_t angel = c->BodyPart[BODYPART_HEAD];
+            angel.Type = MODEL_ANGEL;
+            PART_t* p = &angel;
             if (c == Hero)
             {
                 RenderType |= RENDER_CHROME;
@@ -10028,7 +10007,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             if ((o->CurrentAction == PLAYER_SKILL_DRAGONKICK) &&
                 (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
             {
-                p->Type = MODEL_ANGEL;
                 RenderCharacter_AfterImage(c, p, Translate, Select, 2.5f, 1.0f);
             }
             else if ((gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
@@ -10041,8 +10019,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 }
                 else
                 {
-                    p->Type = MODEL_ANGEL;
-                    g_CMonkSystem.DarksideRendering(c, p, Translate, Select);
+                    g_CMonkSystem.DarksideRendering(c, p, Translate, Select, &c->BodyPart[BODYPART_HEAD]);
                 }
             }
             else
@@ -10091,7 +10068,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
                     if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD && i == BODYPART_HELM)
                     {
-                        o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.1f + 0.7f;
                         if (i == BODYPART_HELM)
                         {
                             int index = Data::Items::ToItemType(Type) - ITEM_HELM;
@@ -10189,32 +10165,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         }
     }
 
-    if (c->PK >= PVP_MURDERER2)
-    {
-        Vector(1.f, 0.1f, 0.1f, c->Light);
-    }
-    else
-    {
-        VectorAdd(Light, o->Light, c->Light);
-
-        int nCastle = BLOODCASTLE_NUM + (gMapManager.WorldActive - WD_11BLOODCASTLE_END);
-        if (nCastle > 0 && nCastle <= BLOODCASTLE_NUM) //. 블러드 캐슬일경우
-        {
-            if ((c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_1 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_1) ||
-                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_2 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_2) ||
-                (c->MonsterIndex == MONSTER_GIANT_OGRE_3 && c->MonsterIndex == MONSTER_RED_SKELETON_KNIGHT_3 &&
-                 c->MonsterIndex == MONSTER_MAGIC_SKELETON_3) ||
-                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_4 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_4) ||
-                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_5 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_5) ||
-                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_6 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_6) ||
-                (c->MonsterIndex >= MONSTER_CHIEF_SKELETON_WARRIOR_7 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_7))
-            {
-                int level = nCastle / 3;
-                if (level)
-                    Vector(level * 0.5f, 0.1f, 0.1f, c->Light);
-            }
-        }
-    }
+    VectorCopy(preparedLight, c->Light);
 
     if (DrawsNextGradeObjects(c))
         NextGradeObjectRender(c);
@@ -11947,53 +11898,77 @@ void SpawnImpLight(CHARACTER* c, OBJECT* o)
     CreateSprite(BITMAP_LIGHT, vPos, 1.5f, vLight, o);
 }
 
-// The parts RenderCharacter hands to CMonkSystem::DarksideRendering, in its order: its model branches, read the same
-// way.
+// Which of RenderCharacter's model branches draws the character's body, read the same way it reads them.
+enum class DrawBranch
+{
+    Other,
+    // A Rage Fighter in a transformation skin: one model.
+    Transformed,
+    ChaosCastle,
+    BodyParts,
+};
+
+DrawBranch DrawBranchOf(const CHARACTER* c)
+{
+    const OBJECT* o = &c->Object;
+    if (o->Kind == KIND_NPC && gMapManager.WorldActive == WD_0LORENCIA && o->Type == MODEL_PLAYER &&
+        o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3)
+        return DrawBranch::Other;
+    if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER &&
+        gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER &&
+        (o->SubType == MODEL_SKELETON_PCBANG || o->SubType == MODEL_HALLOWEEN || o->SubType == MODEL_PANDA ||
+         o->SubType == MODEL_SKELETON_CHANGED || o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL ||
+         o->SubType == MODEL_SKELETON1))
+        return DrawBranch::Transformed;
+    if (o->Type == MODEL_PLAYER &&
+        ((o->Kind == KIND_PLAYER &&
+          (o->SubType == MODEL_SKELETON_PCBANG || o->SubType == MODEL_HALLOWEEN ||
+           o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER ||
+           o->SubType == MODEL_PANDA || o->SubType == MODEL_SKELETON_CHANGED ||
+           o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL || o->SubType == MODEL_GM_CHARACTER)) ||
+         o->SubType == MODEL_XMAS_EVENT_CHA_SSANTA || o->SubType == MODEL_XMAS_EVENT_CHA_SNOWMAN ||
+         o->SubType == MODEL_XMAS_EVENT_CHA_DEER || (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3)))
+        return DrawBranch::Other;
+    if (c->Change)
+        return DrawBranch::Other;
+#ifndef GUILD_WAR_EVENT
+    if (o->Kind == KIND_PLAYER && gMapManager.InChaosCastle())
+        return DrawBranch::ChaosCastle;
+#endif
+    return DrawBranch::BodyParts;
+}
+
+// The parts RenderCharacter hands to CMonkSystem::DarksideRendering, in its order; a transformed or a Chaos Castle
+// character's single model is keyed by its head part.
 std::vector<PART_t*> DarksideDrawnParts(CHARACTER* c)
 {
     std::vector<PART_t*> parts;
     const OBJECT* o = &c->Object;
     if (gCharacterManager.GetBaseClass(c->Class) != CLASS_RAGEFIGHTER || o->m_sTargetIndex < 0 || c->JumpTime > 0)
         return parts;
-    const bool darkside =
-        o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY || o->CurrentAction == PLAYER_SKILL_DARKSIDE_ATTACK;
 
-    if (o->Kind == KIND_NPC && gMapManager.WorldActive == WD_0LORENCIA && o->Type == MODEL_PLAYER &&
-        o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3)
-        return parts;
-    if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER &&
-        (o->SubType == MODEL_SKELETON_PCBANG || o->SubType == MODEL_HALLOWEEN || o->SubType == MODEL_PANDA ||
-         o->SubType == MODEL_SKELETON_CHANGED || o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL ||
-         o->SubType == MODEL_SKELETON1))
+    switch (DrawBranchOf(c))
     {
-        if (darkside)
-            parts.push_back(&c->BodyPart[o->SubType]);
-        return parts;
-    }
-    if (o->Type == MODEL_PLAYER &&
-        ((o->Kind == KIND_PLAYER &&
-          (o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER ||
-           o->SubType == MODEL_GM_CHARACTER)) ||
-         o->SubType == MODEL_XMAS_EVENT_CHA_SSANTA || o->SubType == MODEL_XMAS_EVENT_CHA_SNOWMAN ||
-         o->SubType == MODEL_XMAS_EVENT_CHA_DEER || (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3)))
-        return parts;
-    if (c->Change)
-        return parts;
-#ifndef GUILD_WAR_EVENT
-    if (o->Kind == KIND_PLAYER && gMapManager.InChaosCastle())
-    {
+    case DrawBranch::Transformed:
+        if (o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY || o->CurrentAction == PLAYER_SKILL_DARKSIDE_ATTACK)
+            parts.push_back(&c->BodyPart[BODYPART_HEAD]);
+        break;
+    case DrawBranch::ChaosCastle:
         if (o->CurrentAction != PLAYER_SKILL_DRAGONKICK)
             parts.push_back(&c->BodyPart[BODYPART_HEAD]);
-        return parts;
-    }
-#endif
-    if (o->CurrentAction != PLAYER_SKILL_DARKSIDE_READY ||
-        (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM))
-        return parts;
-    for (int i = MAX_BODYPART - 1; i >= 0; i--)
-    {
-        if (c->BodyPart[i].Type != -1)
-            parts.push_back(&c->BodyPart[i]);
+        break;
+    case DrawBranch::BodyParts:
+        if (o->CurrentAction != PLAYER_SKILL_DARKSIDE_READY ||
+            (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM))
+            break;
+        for (int i = MAX_BODYPART - 1; i >= 0; i--)
+        {
+            if (c->BodyPart[i].Type != -1)
+                parts.push_back(&c->BodyPart[i]);
+        }
+        break;
+    case DrawBranch::Other:
+        break;
     }
     return parts;
 }
@@ -12128,6 +12103,109 @@ void UpdatePreviewCharacter(CHARACTER* c)
     if (o->Type == MODEL_PLAYER)
         UpdateParts(c);
     UpdatePlayerBodyParts(c);
+    PrepareCharacterForDraw(c);
+}
+
+void PrepareCharacterForDraw(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+
+    // A dying Blood Castle monster's body is held to the ground.
+    if (o->Type != MODEL_PLAYER && o->Kind != KIND_TRAP && c->MonsterIndex != MONSTER_ICE_QUEEN &&
+        c->MonsterIndex != MONSTER_ICE_MONSTER && c->MonsterIndex != MONSTER_RED_DRAGON &&
+        c->MonsterIndex != MONSTER_ELF_LALA && c->MonsterIndex != MONSTER_ZAIKAN &&
+        c->MonsterIndex != MONSTER_DEATH_BEAM_KNIGHT && c->MonsterIndex != MONSTER_GATE_TO_KALIMA_1 &&
+        gMapManager.WorldActive != WD_10HEAVEN && o->Alpha >= 0.3f && gMapManager.InBloodCastle() == true &&
+        o->m_bActionStart && c->Dead > 0)
+    {
+        const float height = RequestTerrainHeight(o->Position[0], o->Position[1]);
+        if (height < o->Position[2])
+            o->Position[2] = height;
+    }
+
+    vec3_t Light;
+    if (SceneFlag == CHARACTER_SCENE)
+    {
+        const float level = c == Hero ? 0.5f : 0.4f;
+        Vector(level, level, level, Light);
+    }
+    else
+    {
+        RequestModelTerrainLight(o->Position[0], o->Position[1], Light);
+        Render::Lighting::LightMood::CorrectFigureTerrainLight(o->Position[0], o->Position[1], Light);
+    }
+
+    if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
+    {
+        c->HideShadow = true;
+        if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
+            o->Alpha = 0.7f;
+        else if (o->CurrentAction != PLAYER_DIE1)
+            o->Alpha = 1.0f;
+        o->BlendMesh = -1;
+        if (g_isCharacterBuff(o, eBuff_Doppelganger_Ascension))
+            o->Position[2] += 2.0f * FPS_ANIMATION_FACTOR;
+    }
+
+    if (c->PK >= PVP_MURDERER2)
+    {
+        Vector(1.f, 0.1f, 0.1f, c->Light);
+    }
+    else
+    {
+        VectorAdd(Light, o->Light, c->Light);
+
+        int nCastle = BLOODCASTLE_NUM + (gMapManager.WorldActive - WD_11BLOODCASTLE_END);
+        if (nCastle > 0 && nCastle <= BLOODCASTLE_NUM)
+        {
+            if ((c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_1 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_1) ||
+                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_2 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_2) ||
+                (c->MonsterIndex == MONSTER_GIANT_OGRE_3 && c->MonsterIndex == MONSTER_RED_SKELETON_KNIGHT_3 &&
+                 c->MonsterIndex == MONSTER_MAGIC_SKELETON_3) ||
+                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_4 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_4) ||
+                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_5 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_5) ||
+                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_6 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_6) ||
+                (c->MonsterIndex >= MONSTER_CHIEF_SKELETON_WARRIOR_7 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_7))
+            {
+                int level = nCastle / 3;
+                if (level)
+                    Vector(level * 0.5f, 0.1f, 0.1f, c->Light);
+            }
+        }
+    }
+
+    if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD && DrawBranchOf(c) == DrawBranch::BodyParts &&
+        c->BodyPart[BODYPART_HELM].Type != -1)
+        o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.1f + 0.7f;
+    if (c->MonsterIndex == MONSTER_DARK_PHOENIX)
+    {
+        const float fSin = 0.5f * (1.0f + sinf((float)((int)WorldTime % 10000) * 0.001f));
+        o->BlendMeshLight = 0.3f * (1.0f - fSin) + 0.3f;
+    }
+}
+
+void PrepareCharactersForDraw()
+{
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
+    {
+        CHARACTER* c = &CharactersClient[i];
+        OBJECT* o = &c->Object;
+        if (IsHiddenBySiegeCloak(c))
+        {
+            if (Hero != nullptr && Hero->TargetCharacter == c->Key)
+                Hero->TargetCharacter = -1;
+            continue;
+        }
+        if (IsHiddenGameMaster(c))
+        {
+            // No pick box where the mouse can reach it.
+            o->OBB.StartPos[0] = 1000.0f;
+            o->OBB.XAxis[0] = o->OBB.YAxis[1] = o->OBB.ZAxis[2] = 1.0f;
+            continue;
+        }
+        if (IsCharacterDrawn(c))
+            PrepareCharacterForDraw(c);
+    }
 }
 
 void ApplyCharacterEffectsEarthQuake()
@@ -12182,18 +12260,9 @@ void RenderCharactersClient()
         CHARACTER* c = &CharactersClient[i];
         OBJECT* o = &c->Object;
 
-        if (IsHiddenBySiegeCloak(c))
-        {
-            if (Hero->TargetCharacter == c->Key)
-                Hero->TargetCharacter = -1;
+        // The update cleared a target the siege cloak hides, and moved a hidden GM's pick box away.
+        if (IsHiddenBySiegeCloak(c) || IsHiddenGameMaster(c))
             continue;
-        }
-        if (IsHiddenGameMaster(c))
-        {
-            o->OBB.StartPos[0] = 1000.0f;
-            o->OBB.XAxis[0] = o->OBB.YAxis[1] = o->OBB.ZAxis[2] = 1.0f;
-            continue;
-        }
         if (o->Live)
         {
             if (o->Visible)

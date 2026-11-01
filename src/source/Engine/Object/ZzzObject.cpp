@@ -6308,6 +6308,7 @@ static void CullItems()
 
 void CullWorld()
 {
+    PrepareCharactersForDraw();
     CullObjects();
     CullItems();
     CullMounts();

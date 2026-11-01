@@ -27,6 +27,12 @@ void UpdateCharacterEffects();
 // A preview's update (a character outside CharactersClient, tracked by Engine::Object::Attachments::Track): its parts,
 // cloth and transformation, which its draw only draws. Its owner calls it in its update, before drawing it.
 void UpdatePreviewCharacter(CHARACTER* c);
+// What a character's draw used to set while drawing it, set before the draw: its light, a Doppelganger's look and
+// rise, a Blood Castle corpse held to the ground, the blend mesh lights it draws with.
+void PrepareCharacterForDraw(CHARACTER* c);
+// PrepareCharacterForDraw for the client characters drawn this frame; also clears a target the siege cloak hides and
+// moves a hidden GM's pick box away. Part of CullWorld.
+void PrepareCharactersForDraw();
 // Hands the camera a shake UpdateCharacterEffects requested last frame; call before the frame's damping.
 void ApplyCharacterEffectsEarthQuake();
 // A shake the update requests for the camera after its next damping, as when the draw set it; a character effect's

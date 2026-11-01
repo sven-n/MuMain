@@ -894,7 +894,7 @@ const std::vector<CMonkSystem::DarksidePlacement>* CMonkSystem::DarksidePlacemen
     return nullptr;
 }
 
-void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Translate, int Select)
+void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Translate, int Select, const PART_t* key)
 {
     OBJECT* pObj = &pCha->Object;
     const int Type = pPart->Type;
@@ -904,7 +904,7 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Transla
                          pPart->AncientDiscriminator, false, false, Translate, Select);
     };
 
-    if (const std::vector<DarksidePlacement>* placements = DarksidePlacementsOf(pCha, pPart))
+    if (const std::vector<DarksidePlacement>* placements = DarksidePlacementsOf(pCha, key != nullptr ? key : pPart))
     {
         // Each placement is posed into bones of its own: the character keeps its pose for the rest of its draw.
         static vec34_t bones[MAX_BONES];

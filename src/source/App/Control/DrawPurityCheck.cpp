@@ -33,7 +33,7 @@ namespace Diagnostics::DrawPurityCheck
 {
 namespace
 {
-constexpr int MaxFields = 32;
+constexpr int MaxFields = 48;
 
 struct Entry
 {
@@ -79,12 +79,46 @@ void Put(Entry& e, const vec3_t v)
     Put(e, v[2]);
 }
 
-constexpr const char* ObjectFields[] = {
-    "Live",       "Type",       "SubType",      "CurrentAction", "PriorAction", "AnimationFrame", "PriorAnimationFrame",
-    "LifeTime",   "Position.x", "Position.y",   "Position.z",    "Angle.x",     "Angle.y",        "Angle.z",
-    "Scale",      "Alpha",      "Light.r",      "Light.g",       "Light.b",     "Velocity",       "Gravity",
-    "HiddenMesh", "PKKey",      "m_iAnimation", "Owner",         "Direction.x", "Direction.y",    "Direction.z",
-    "Visible",    "DrawnFrame"};
+constexpr const char* ObjectFields[] = {"Live",
+                                        "Type",
+                                        "SubType",
+                                        "CurrentAction",
+                                        "PriorAction",
+                                        "AnimationFrame",
+                                        "PriorAnimationFrame",
+                                        "LifeTime",
+                                        "Position.x",
+                                        "Position.y",
+                                        "Position.z",
+                                        "Angle.x",
+                                        "Angle.y",
+                                        "Angle.z",
+                                        "Scale",
+                                        "Alpha",
+                                        "Light.r",
+                                        "Light.g",
+                                        "Light.b",
+                                        "Velocity",
+                                        "Gravity",
+                                        "HiddenMesh",
+                                        "PKKey",
+                                        "m_iAnimation",
+                                        "Owner",
+                                        "Direction.x",
+                                        "Direction.y",
+                                        "Direction.z",
+                                        "Visible",
+                                        "DrawnFrame",
+                                        "BlendMesh",
+                                        "BlendMeshLight",
+                                        "BlendMeshTexCoordU",
+                                        "BlendMeshTexCoordV",
+                                        "AlphaTarget",
+                                        "StartPosition.x",
+                                        "StartPosition.y",
+                                        "StartPosition.z",
+                                        "ScreenX",
+                                        "ScreenY"};
 constexpr const char* ParticleFields[] = {
     "Live",     "Type",     "SubType", "Scale",   "Position.x", "Position.y", "Position.z",
     "Angle.x",  "Angle.y",  "Angle.z", "Light.r", "Light.g",    "Light.b",    "Alpha",
@@ -120,6 +154,59 @@ void Record(Recorder& r, const OBJECT* o, const char* kind)
     Put(e, o->Direction);
     Put(e, o->Visible ? 1 : 0);
     Put(e, static_cast<int>(o->DrawnFrame));
+    Put(e, o->BlendMesh);
+    Put(e, o->BlendMeshLight);
+    Put(e, o->BlendMeshTexCoordU);
+    Put(e, o->BlendMeshTexCoordV);
+    Put(e, o->AlphaTarget);
+    Put(e, o->StartPosition);
+    Put(e, o->ScreenX);
+    Put(e, o->ScreenY);
+}
+
+constexpr const char* CharacterFields[] = {"Light.r",
+                                           "Light.g",
+                                           "Light.b",
+                                           "HideShadow",
+                                           "SafeZone",
+                                           "TargetCharacter",
+                                           "BodyPart[0].Type",
+                                           "BodyPart[1].Type",
+                                           "BodyPart[2].Type",
+                                           "BodyPart[3].Type",
+                                           "BodyPart[4].Type",
+                                           "BodyPart[5].Type",
+                                           "Weapon[0].Type",
+                                           "Weapon[1].Type",
+                                           "Wing.Type",
+                                           "Helper.Type",
+                                           "Weapon[0].AnimationFrame",
+                                           "Weapon[1].AnimationFrame",
+                                           "Wing.AnimationFrame",
+                                           "Wing.LinkBone",
+                                           "Wing.CurrentAction",
+                                           "Wing.PlaySpeed"};
+
+// The character's own state beside its object: its draw colour, its parts and what it targets.
+void Record(Recorder& r, const CHARACTER* c)
+{
+    Entry& e = r.Begin(&c->Light, "character state", CharacterFields, c->Object.Type);
+    Put(e, c->Light);
+    Put(e, c->HideShadow ? 1 : 0);
+    Put(e, c->SafeZone ? 1 : 0);
+    Put(e, static_cast<int>(c->TargetCharacter));
+    for (const PART_t& part : c->BodyPart)
+        Put(e, static_cast<int>(part.Type));
+    Put(e, static_cast<int>(c->Weapon[0].Type));
+    Put(e, static_cast<int>(c->Weapon[1].Type));
+    Put(e, static_cast<int>(c->Wing.Type));
+    Put(e, static_cast<int>(c->Helper.Type));
+    Put(e, c->Weapon[0].AnimationFrame);
+    Put(e, c->Weapon[1].AnimationFrame);
+    Put(e, c->Wing.AnimationFrame);
+    Put(e, static_cast<int>(c->Wing.LinkBone));
+    Put(e, static_cast<int>(c->Wing.CurrentAction));
+    Put(e, c->Wing.PlaySpeed);
 }
 
 void Record(Recorder& r, const PARTICLE* p)
@@ -216,7 +303,10 @@ void Snapshot(std::unordered_map<const void*, Entry>& into)
     into.clear();
     Recorder r(into);
     for (int i = 0; CharactersClient != nullptr && i < MAX_CHARACTERS_CLIENT; ++i)
+    {
         Record(r, &CharactersClient[i].Object, "character");
+        Record(r, &CharactersClient[i]);
+    }
     for (int i = 0; i < MAX_EFFECTS; ++i)
         Record(r, &Effects[i], "effect");
     for (int i = 0; i < g_SkillEffects.GetSize(); ++i)
