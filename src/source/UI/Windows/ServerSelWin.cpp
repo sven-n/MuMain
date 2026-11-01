@@ -24,6 +24,8 @@
 #include <array>
 #include <cmath>
 #include <optional>
+#include <set>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -272,13 +274,15 @@ void CServerSelWin::UpdateDisplay()
 void CServerSelWin::FillSizers(ServerSelRmlModel& model, const std::vector<const CServerGroup*>& groups)
 {
     model.sizerNames.clear();
+    // Each name once, in the order first met: up to 20 channels of 20 groups.
+    std::set<std::string, std::less<>> seen;
     for (const CServerGroup* group : groups)
     {
         // Every channel the group can have, not only those the connect server sent.
         for (int index = 1; index <= MAX_SERVER_PER_GROUP; ++index)
         {
             std::string name = g_ServerListManager->GetServerButtonName(*group, index);
-            if (std::find(model.sizerNames.begin(), model.sizerNames.end(), name) == model.sizerNames.end())
+            if (seen.insert(name).second)
                 model.sizerNames.push_back(std::move(name));
         }
     }
