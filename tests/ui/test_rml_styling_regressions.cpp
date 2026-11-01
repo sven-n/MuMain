@@ -460,3 +460,150 @@ TEST_CASE("the legacy options tabs each paint their own tab, so a separator sits
         document->Close();
     }
 }
+
+namespace
+{
+// A box in layout coordinates, the same for every element of one document.
+struct LayoutRect
+{
+    float left = 0.f;
+    float top = 0.f;
+    float right = 0.f;
+    float bottom = 0.f;
+};
+
+LayoutRect LaidOut(Rml::Element& element, Rml::BoxArea area)
+{
+    const Rml::Vector2f offset = element.GetAbsoluteOffset(area);
+    const Rml::Vector2f size = element.GetBox().GetSize(area);
+    return {offset.x, offset.y, offset.x + size.x, offset.y + size.y};
+}
+
+constexpr int ChannelRowCount = 20;
+constexpr int LongChannelRow = 2;
+constexpr const char* LongChannelText =
+    R"(Valhalla-20 (Gold Non-PvP Premium Plus) <span class="server-load bold italic">Overloaded</span>)";
+
+// The server list (server_select.rml, without its bindings) with `count` channel rows: copies of its one
+// row, short texts but the row LongChannelRow's, when `withLong`.
+std::vector<Rml::Element*> LoadChannelRows(UI::Tests::RmlLayoutFixture& fixture, const char* theme, int count,
+                                           bool withLong, Rml::ElementDocument*& document)
+{
+    std::string markup = UI::Tests::AssetMarkup(theme, "server_select");
+    if (std::string(theme) == "classic")
+    {
+        // Classic builds on legacy (its theme.ini's Base): the game gives it legacy's base.rcss.
+        const std::string root = std::filesystem::path(MU_RMLUI_DIR).generic_string();
+        const std::string shared = "href=\"" + root + "/base.rcss\"";
+        const size_t link = markup.find(shared);
+        REQUIRE(link != std::string::npos);
+        markup.replace(link, shared.size(), "href=\"" + root + "/themes/legacy/base.rcss\"");
+    }
+    document = fixture.LoadMarkup(markup);
+    REQUIRE(document);
+    // The root size the game gives a "scene-window-scale" document in a theme with native text sizes
+    // (RmlNativeText.h): 1rem is one original pixel. Classic builds on legacy.
+    if (std::string(theme) != "modern")
+    {
+        const Rml::Vector2i window = fixture.context->GetDimensions();
+        document->SetProperty(Rml::PropertyId::FontSize,
+                              Rml::Property(UI::Scaling::SceneWindowScale(window.x, window.y), Rml::Unit::PX));
+    }
+    Rml::Element& templateRow = Required(*document, ".server-row");
+    Rml::Element* rows = templateRow.GetParentNode();
+    for (int row = 1; row < count; ++row)
+        rows->AppendChild(templateRow.Clone());
+    std::vector<Rml::Element*> result;
+    for (int row = 0; row < rows->GetNumChildren(); ++row)
+    {
+        Rml::Element* channel = rows->GetChild(row);
+        Rml::Element* label = channel->QuerySelector(".button-label");
+        REQUIRE(label);
+        label->SetInnerRML(withLong && row == LongChannelRow
+                               ? LongChannelText
+                               : "Valhalla-" + std::to_string(row + 1) + R"( <span class="server-load"></span>)");
+        result.push_back(channel);
+    }
+    fixture.Refresh();
+    return result;
+}
+
+float BorderWidth(Rml::Element& element)
+{
+    return element.GetBox().GetSize(Rml::BoxArea::Border).x;
+}
+} // namespace
+
+TEST_CASE("every channel row is as wide as the longest channel text needs, in every theme [ui][styling]")
+{
+    // The rows had a fixed width, so a long text ran out of its button; and a scrolling list's
+    // scrollbar takes its width from content sized without it, which would squeeze the rows again.
+    constexpr float Tolerance = 1.f;
+    UI::Tests::RmlLayoutFixture fixture;
+    for (const char* theme : {"legacy", "modern", "classic"})
+    {
+        for (const Rml::Vector2i viewport : {Rml::Vector2i{1024, 768}, Rml::Vector2i{1920, 1080}})
+        {
+            CAPTURE(std::string(theme));
+            CAPTURE(viewport.x);
+            fixture.Configure(viewport, 100);
+            Rml::ElementDocument* document = nullptr;
+
+            const float shortWidth = BorderWidth(*LoadChannelRows(fixture, theme, 1, false, document)[0]);
+            document->Close();
+            fixture.Refresh();
+
+            const auto rows = LoadChannelRows(fixture, theme, ChannelRowCount, true, document);
+            REQUIRE(rows.size() == ChannelRowCount);
+            Rml::Element& column = Required(*document, "#server_col");
+            REQUIRE(column.GetScrollHeight() > column.GetClientHeight());
+            Rml::Element& longRow = *rows[LongChannelRow];
+            const float width = BorderWidth(longRow);
+            CHECK(width > shortWidth + Tolerance);
+            for (Rml::Element* row : rows)
+                CHECK(BorderWidth(*row) == doctest::Approx(width));
+
+            // The text fills the row's text area, its padding left free on both sides.
+            const LayoutRect content = LaidOut(longRow, Rml::BoxArea::Content);
+            Rml::Element* load = longRow.QuerySelector(".server-load");
+            REQUIRE(load);
+            const LayoutRect text = LaidOut(*load, Rml::BoxArea::Border);
+            CHECK(text.right <= content.right + Tolerance);
+            CHECK(text.right >= content.right - Tolerance);
+
+            // The scrollbar sits beside the rows and takes no width from them.
+            Rml::Element* scrollbar = nullptr;
+            for (int child = 0; child < column.GetNumChildren(true); ++child)
+            {
+                if (column.GetChild(child)->GetTagName() == "scrollbarvertical")
+                    scrollbar = column.GetChild(child);
+            }
+            REQUIRE(scrollbar);
+            CHECK(LaidOut(longRow, Rml::BoxArea::Border).right <= LaidOut(*scrollbar, Rml::BoxArea::Border).left + 0.01f);
+            Rml::ElementDocument* alone = nullptr;
+            const float aloneWidth = BorderWidth(*LoadChannelRows(fixture, theme, LongChannelRow + 1, true, alone)[0]);
+            CHECK(aloneWidth == doctest::Approx(width));
+            alone->Close();
+
+            // The load bar spans the row below its text.
+            Rml::Element* gaugeSlot = longRow.QuerySelector(".server-gauge-slot");
+            REQUIRE(gaugeSlot);
+            const LayoutRect row = LaidOut(longRow, Rml::BoxArea::Border);
+            const LayoutRect gauge = LaidOut(*gaugeSlot, Rml::BoxArea::Border);
+            CHECK(gauge.left >= row.left);
+            CHECK(gauge.right <= row.right);
+            CHECK(gauge.right - gauge.left > (row.right - row.left) * 0.75f);
+            CHECK(gauge.top >= text.bottom);
+            CHECK(gauge.bottom <= row.bottom);
+            if (std::string(theme) == "legacy")
+            {
+                // At least the bar's own height free above it, to the text, and below it, to the frame's edge.
+                const float barHeight = gauge.bottom - gauge.top;
+                CHECK(gauge.top - text.bottom >= barHeight - 0.01f);
+                CHECK(row.bottom - gauge.bottom >= barHeight - 0.01f);
+            }
+            document->Close();
+            fixture.Refresh();
+        }
+    }
+}

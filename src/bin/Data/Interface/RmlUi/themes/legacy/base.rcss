@@ -22,17 +22,42 @@
 	legacy-server-group-pressed:  0px 52px 108px 26px;
 	legacy-server-group-selected: 0px 78px 108px 26px;
 }
-/* The server frame is a nine-patch, so it grows taller without stretching its corner ornaments,
-   its bottom border or the original gauge track: only rows 9 to 17, plain dark, stretch. */
+/* The server frame is drawn in nine tiles (tiled-box), so it grows wider and taller without
+   stretching its corner ornaments or its borders: the top, the middle and the bottom bands are
+   split as a nine-patch would at x 8 and 185, rows 9 and 18. The bottom edge is not the middle of
+   the bottom band but a strip beside it (x 10 to 14): the band holds the original gauge track, a
+   dark outline 1px above the border, too close to it for the load bar, which draws its own track
+   (server_select.rcss). Each state is 26 rows below the one before. */
 @spritesheet legacy-server-option-sheet
 {
 	src: "../../../server_b2_all.tga";
-	legacy-server-option-idle:          0px 0px 193px 26px;
-	legacy-server-option-idle-inner:    8px 9px 177px 9px;
-	legacy-server-option-hover:         0px 26px 193px 26px;
-	legacy-server-option-hover-inner:   8px 35px 177px 9px;
-	legacy-server-option-pressed:       0px 52px 193px 26px;
-	legacy-server-option-pressed-inner: 8px 61px 177px 9px;
+	legacy-server-option-idle-tl:      0px  0px   8px 9px;
+	legacy-server-option-idle-t:       8px  0px 177px 9px;
+	legacy-server-option-idle-tr:    185px  0px   8px 9px;
+	legacy-server-option-idle-l:       0px  9px   8px 9px;
+	legacy-server-option-idle-c:       8px  9px 177px 9px;
+	legacy-server-option-idle-r:     185px  9px   8px 9px;
+	legacy-server-option-idle-bl:      0px 18px   8px 8px;
+	legacy-server-option-idle-b:      10px 18px   5px 8px;
+	legacy-server-option-idle-br:    185px 18px   8px 8px;
+	legacy-server-option-hover-tl:     0px 26px   8px 9px;
+	legacy-server-option-hover-t:      8px 26px 177px 9px;
+	legacy-server-option-hover-tr:   185px 26px   8px 9px;
+	legacy-server-option-hover-l:      0px 35px   8px 9px;
+	legacy-server-option-hover-c:      8px 35px 177px 9px;
+	legacy-server-option-hover-r:    185px 35px   8px 9px;
+	legacy-server-option-hover-bl:     0px 44px   8px 8px;
+	legacy-server-option-hover-b:     10px 44px   5px 8px;
+	legacy-server-option-hover-br:   185px 44px   8px 8px;
+	legacy-server-option-pressed-tl:   0px 52px   8px 9px;
+	legacy-server-option-pressed-t:    8px 52px 177px 9px;
+	legacy-server-option-pressed-tr: 185px 52px   8px 9px;
+	legacy-server-option-pressed-l:    0px 61px   8px 9px;
+	legacy-server-option-pressed-c:    8px 61px 177px 9px;
+	legacy-server-option-pressed-r:  185px 61px   8px 9px;
+	legacy-server-option-pressed-bl:   0px 70px   8px 8px;
+	legacy-server-option-pressed-b:   10px 70px   5px 8px;
+	legacy-server-option-pressed-br: 185px 70px   8px 8px;
 }
 
 .server-group-btn, .server-option-btn {
@@ -61,15 +86,21 @@
 	color: token(text-dim);
 }
 .server-option-btn {
-	decorator: ninepatch(legacy-server-option-idle, legacy-server-option-idle-inner);
+	decorator: tiled-box(legacy-server-option-idle-tl, legacy-server-option-idle-t, legacy-server-option-idle-tr,
+		legacy-server-option-idle-l, legacy-server-option-idle-c, legacy-server-option-idle-r,
+		legacy-server-option-idle-bl, legacy-server-option-idle-b, legacy-server-option-idle-br);
 	color: token(server-button);
 }
 .server-option-btn:hover {
-	decorator: ninepatch(legacy-server-option-hover, legacy-server-option-hover-inner);
+	decorator: tiled-box(legacy-server-option-hover-tl, legacy-server-option-hover-t, legacy-server-option-hover-tr,
+		legacy-server-option-hover-l, legacy-server-option-hover-c, legacy-server-option-hover-r,
+		legacy-server-option-hover-bl, legacy-server-option-hover-b, legacy-server-option-hover-br);
 	color: #ffeec1;
 }
 .server-option-btn:active {
-	decorator: ninepatch(legacy-server-option-pressed, legacy-server-option-pressed-inner);
+	decorator: tiled-box(legacy-server-option-pressed-tl, legacy-server-option-pressed-t, legacy-server-option-pressed-tr,
+		legacy-server-option-pressed-l, legacy-server-option-pressed-c, legacy-server-option-pressed-r,
+		legacy-server-option-pressed-bl, legacy-server-option-pressed-b, legacy-server-option-pressed-br);
 	color: #ffff79;
 }
 .server-option-btn.gray {

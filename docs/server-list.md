@@ -43,6 +43,9 @@ admin panel; to put a server into a second group, give it an ID from 20 to 39.
 - **Load bar:** below the button text, ten segments of 10 % each. A segment is
   lit as far as the load reaches into it: 35 % lights three and half of the
   fourth. A full or overloaded server has every segment lit in the full color.
+- **Button width:** all channel buttons of a group are as wide as its longest
+  button text, load text included, needs, with room on both sides; never
+  narrower than the theme's own button.
 - **Button color:** set by the button color rules, by VIP type, PvP or both
   (see [Button colors](#button-colors)). With the bundled file Gold channels are
   orange, channels without a VIP type gray with PvP on and the theme's default

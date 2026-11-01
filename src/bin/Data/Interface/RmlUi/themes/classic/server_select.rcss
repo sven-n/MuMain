@@ -69,27 +69,35 @@ body {
 }
 
 /* Twelve channels fit; a group of more scrolls (.scroll-pane, server_select.rml), with the
-   scrollbar beside the rows. */
+   scrollbar beside the rows. As wide as the rows, which are all as wide as the widest
+   (.server-row): a long channel text widens it to the right. */
 #server_col {
 	position: absolute;
 	left: 50%;
 	top: calc(218 * var(--px));
 	margin-left: calc(45 * var(--px));
-	width: calc(134 * var(--px) + 15dp);
+	padding-right: 15dp;
 	max-height: calc(252 * var(--px));
 	display: block;
+}
+/* RmlUi sizes the column to its content without its scrollbar, so a scrollbar taking its width
+   from the content would squeeze the rows: it takes none (its margin cancels its width) and
+   sits in the column's right padding. */
+#server_col scrollbarvertical {
+	margin-left: -15dp;
 }
 #server_col.hidden {
 	display: none;
 }
 
+/* At least 0.97's 134 px, wider when a channel's text needs it: the rows fill the column, which
+   is as wide as the widest text plus 18 px on each side, the gauge's inset. */
 .server-row {
 	position: relative;
 	display: block;
-	width: calc(134 * var(--px));
+	min-width: calc(98 * var(--px));
 	height: calc(20 * var(--px));
-	padding: 0;
-	padding-top: calc(1 * var(--px));
+	padding: calc(1 * var(--px)) calc(18 * var(--px)) 0;
 	text-align: center;
 	line-height: calc(12 * var(--px));
 	white-space: nowrap;
@@ -139,8 +147,8 @@ body {
 .server-gauge-slot {
 	position: absolute;
 	left: calc(18 * var(--px));
+	right: calc(18 * var(--px));
 	top: calc(14 * var(--px));
-	width: calc(98 * var(--px));
 	height: calc(3 * var(--px));
 	margin: 0;
 	display: flex;

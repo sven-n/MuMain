@@ -33,6 +33,7 @@
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	flex-shrink: 0;
 	gap: 6px; /* matches the reference's own list row gap */
 	width: 140px;
 	height: 300px;
@@ -40,12 +41,21 @@
 }
 /* The channels scroll when they don't fit (.scroll-pane, server_select.rml); the rows never
    shrink. #server_rows' auto margins center a short list and start a long one at the top. The
-   column is 8px wider than the rows for the scrollbar. */
+   column is as wide as its rows, which are all as wide as the widest (.server-row), and 8px
+   wider for the scrollbar: a long channel text widens it to the right, past #panel's width if it
+   must. */
 #server_col {
 	display: flex;
 	flex-direction: column;
-	width: 248px;
+	flex-shrink: 0;
 	height: 300px;
+	padding-right: 8dp;
+}
+/* RmlUi sizes a column to its content without its scrollbar, so a scrollbar taking its width
+   from the content would squeeze the rows again: it takes none (its margin cancels its width)
+   and sits in the column's right padding. */
+#server_col scrollbarvertical {
+	margin-left: -8dp;
 }
 #server_rows {
 	display: flex;
@@ -73,9 +83,11 @@
 	text-align: center;
 	line-height: 30px;
 }
+/* Every row is as wide as the widest channel text in the list plus its padding (#server_rows
+   stretches them), at least 218px. */
 .server-row {
 	display: block;
-	width: 218px;
+	min-width: 218px;
 	height: 23px;
 	padding: 3px 10px 4px;
 	text-align: center;
@@ -98,13 +110,13 @@
 	transform: skewX(-12deg);
 }
 
-/* Population track of ten recessed segments of 10 % each; the server list colors their lit part. */
+/* Population track of ten recessed segments of 10 % each; the server list colors their lit part.
+   As wide as the row's text area less 9px on each side (200px in a 218px row). */
 .server-gauge-slot {
 	display: flex;
 	gap: 2px;
-	width: 200px;
 	height: 5px;
-	margin: 4px 0 0 9px;
+	margin: 4px 9px 0;
 }
 .server-gauge-segment {
 	flex: 1;
