@@ -454,6 +454,8 @@ std::string Bones(const Request& request, std::unique_ptr<Act>&)
     result["players"] = g_PrepassBoneCheck.players;
     result["mismatched"] = g_PrepassBoneCheck.mismatched;
     result["rebuilt"] = g_PrepassBoneCheck.rebuilt;
+    result["parts_reused"] = g_PrepassBoneCheck.partsReused;
+    result["parts_advanced_in_draw"] = g_PrepassBoneCheck.partsAdvancedInDraw;
     result["max_delta"] = g_PrepassBoneCheck.maxDelta;
     result["characters"] = g_LastActiveCharacterCount;
     result["parallel"] = g_LastAnimationWasParallel;

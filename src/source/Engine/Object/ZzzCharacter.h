@@ -14,8 +14,9 @@ DWORD GetGuildRelationShipBGColor(BYTE GuildRelationShip);
 CHARACTER* FindCharacterByID(wchar_t* szName);
 CHARACTER* FindCharacterByKey(int Key);
 
-void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1, bool Link,
-                      bool Translate, int RenderType = 0, bool bRightHandItem = true);
+// Draws a linked part and returns the bones it posed it into.
+vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1,
+                          bool Link, bool Translate, int RenderType = 0, bool bRightHandItem = true);
 void RenderCharacter(CHARACTER* c, OBJECT* o, int Select = 0);
 void RenderCharactersClient();
 // Whether RenderCharactersClient draws the character this frame.
@@ -53,6 +54,10 @@ struct PrepassBoneCheck
     int mismatched = 0;
     // Draws that animated the character again: its state changed after the update built the pose.
     int rebuilt = 0;
+    // Draws of a client character's own part: reusing the update's animation step, or advancing it themselves
+    // (an attachment's first frame; steadily rising when update and draw disagree).
+    int partsReused = 0;
+    int partsAdvancedInDraw = 0;
     float maxDelta = 0.f;
 };
 extern PrepassBoneCheck g_PrepassBoneCheck;

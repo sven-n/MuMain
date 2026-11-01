@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "doctest.h"
 
+#include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -142,4 +143,71 @@ TEST_CASE("The sprites of the monster effects stay out of the bloom, as when the
         Sprites[i].Live = false;
     }
     CHECK(created == 2);
+}
+
+TEST_CASE("A client character's drawn parts get a slot each, in draw order, with their own bones [effects]")
+{
+    namespace Attachments = Engine::Object::Attachments;
+    CharacterScope scope(MODEL_PLAYER);
+    CHARACTER* c = &scope.character();
+    PART_t temporary;
+
+    Attachments::BeginFrame();
+    Attachments::BeginCharacter(c);
+    Attachments::Slot* weapon =
+        Attachments::Record(c, &c->Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 3, 0, false, true, 0, false, 33, 1.f);
+    Attachments::Slot* copy =
+        Attachments::Record(c, &temporary, MODEL_SWORD, 0.f, 0.f, 15.f, 3, 0, true, true, 0, true, 33, 1.f);
+    REQUIRE(weapon != nullptr);
+    REQUIRE(copy != nullptr);
+    CHECK(weapon != copy);
+    CHECK(weapon->part == &c->Weapon[0]);
+    CHECK(copy->part == nullptr);
+    CHECK(copy->z == 15.f);
+    CHECK(Attachments::Bones(*weapon) != Attachments::Bones(*copy));
+
+    // The next frame's draw of the same character reuses the slots in the same order.
+    float (*bones)[3][4] = Attachments::Bones(*weapon);
+    Attachments::BeginFrame();
+    Attachments::BeginCharacter(c);
+    Attachments::Slot* again =
+        Attachments::Record(c, &c->Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 3, 0, false, true, 0, false, 33, 1.f);
+    CHECK(Attachments::Bones(*again) == bones);
+
+    CHARACTER preview;
+    CHECK(Attachments::Record(&preview, &preview.Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 0, 0, false, true, 0, false, 33,
+                              1.f) == nullptr);
+}
+
+TEST_CASE("The update advances each part of the last draw once, and the next draw reuses it [effects]")
+{
+    namespace Attachments = Engine::Object::Attachments;
+    CharacterScope scope(MODEL_PLAYER);
+    CHARACTER* c = &scope.character();
+    PART_t temporary;
+    const auto record = [c](PART_t* part, float z)
+    { return Attachments::Record(c, part, MODEL_SWORD, 0.f, 0.f, z, 0, 0, false, true, 0, false, 33, 1.f); };
+    const auto advance = [c]
+    {
+        int advanced = 0;
+        Attachments::ForEachToAdvance(c, [&advanced](Attachments::Slot&) { ++advanced; });
+        return advanced;
+    };
+
+    Attachments::BeginFrame();
+    Attachments::BeginCharacter(c);
+    record(&c->Weapon[0], 0.f);
+    record(&temporary, 0.f);
+    CHECK(advance() == 1); // a part built for one call has no animation state to advance
+    CHECK(advance() == 0); // once per draw
+
+    Attachments::BeginFrame();
+    Attachments::BeginCharacter(c);
+    CHECK(Attachments::WasAdvanced(*record(&c->Weapon[0], 0.f)));
+
+    // The next draw attaches something else in that slot: it advances the part itself.
+    CHECK(advance() == 1);
+    Attachments::BeginFrame();
+    Attachments::BeginCharacter(c);
+    CHECK_FALSE(Attachments::WasAdvanced(*record(&c->Weapon[0], 15.f)));
 }
