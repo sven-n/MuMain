@@ -17,7 +17,10 @@
 #include "imgui.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <cstring>
+#include <string>
+#include <vector>
 
 using Data::Colors::ColorFolder;
 using Data::Colors::ColorFolderPath;
@@ -32,8 +35,6 @@ constexpr char DragPayloadType[] = "MU_COLORS_TREE";
 // Pixel widths before the editor UI scale.
 constexpr float TreeWidth = 260.0f;
 constexpr float FolderNameWidth = 260.0f;
-// The longest color name a drag carries.
-constexpr std::size_t MaxDraggedName = 64;
 
 constexpr ColorsRoot Roots[] = {ColorsRoot::Glow};
 
@@ -44,13 +45,13 @@ bool IsPicking()
     return (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) || MuEditor::KeyboardSelection::MovedOnto();
 }
 
-// What a drag carries: a folder (its path) or a color (its name, then) of a root.
-struct DragPayload
+// What a drag carries first: a folder (its path) or a color of a root. A color's name follows, of any length.
+struct DragHeader
 {
     int root = 0;
     std::size_t depth = 0;
     std::size_t path[Data::Colors::MaxColorFolderDepth] = {};
-    char color[MaxDraggedName] = {};
+    std::size_t colorLength = 0;
 };
 } // namespace
 
@@ -459,16 +460,19 @@ void CMuColorsUI::RenderPicked()
 void CMuColorsUI::BeginDrag(ColorsRoot root, const ColorFolderPath& folder, const std::string& color,
                             const char* label)
 {
-    if (color.size() >= MaxDraggedName || !ImGui::BeginDragDropSource())
+    if (!ImGui::BeginDragDropSource())
     {
         return;
     }
-    DragPayload payload;
-    payload.root = static_cast<int>(root);
-    payload.depth = std::min(folder.size(), Data::Colors::MaxColorFolderDepth);
-    std::copy_n(folder.begin(), payload.depth, payload.path);
-    std::copy(color.begin(), color.end(), payload.color);
-    ImGui::SetDragDropPayload(DragPayloadType, &payload, sizeof(payload));
+    DragHeader header;
+    header.root = static_cast<int>(root);
+    header.depth = std::min(folder.size(), Data::Colors::MaxColorFolderDepth);
+    std::copy_n(folder.begin(), header.depth, header.path);
+    header.colorLength = color.size();
+    std::vector<char> payload(sizeof(header) + color.size());
+    std::memcpy(payload.data(), &header, sizeof(header));
+    std::copy(color.begin(), color.end(), payload.begin() + static_cast<std::ptrdiff_t>(sizeof(header)));
+    ImGui::SetDragDropPayload(DragPayloadType, payload.data(), payload.size());
     ImGui::TextUnformatted(label);
     ImGui::EndDragDropSource();
 }
@@ -481,13 +485,19 @@ void CMuColorsUI::AcceptDrop(ColorsRoot root, const ColorFolderPath& folder)
     }
     if (const ImGuiPayload* dropped = ImGui::AcceptDragDropPayload(DragPayloadType))
     {
-        DragPayload payload;
-        std::memcpy(&payload, dropped->Data, sizeof(payload));
-        // A color moves only within its root: the values differ.
-        if (payload.root == static_cast<int>(root))
+        DragHeader header;
+        const auto size = static_cast<std::size_t>(dropped->DataSize);
+        if (size >= sizeof(header))
         {
-            const std::string color = payload.color;
-            const ColorFolderPath from(payload.path, payload.path + payload.depth);
+            std::memcpy(&header, dropped->Data, sizeof(header));
+        }
+        const bool whole = size >= sizeof(header) && header.depth <= Data::Colors::MaxColorFolderDepth &&
+                           size == sizeof(header) + header.colorLength;
+        // A color moves only within its root: the values differ.
+        if (whole && header.root == static_cast<int>(root))
+        {
+            const std::string color(static_cast<const char*>(dropped->Data) + sizeof(header), header.colorLength);
+            const ColorFolderPath from(header.path, header.path + header.depth);
             m_action = [this, root, folder, color, from]
             {
                 if (!color.empty())
