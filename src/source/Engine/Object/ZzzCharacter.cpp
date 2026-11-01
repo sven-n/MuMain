@@ -12204,7 +12204,10 @@ void PrepareCharactersForDraw()
             continue;
         }
         if (IsCharacterDrawn(c))
+        {
             PrepareCharacterForDraw(c);
+            PlaceObjectBounds(o, o->Position);
+        }
     }
 }
 

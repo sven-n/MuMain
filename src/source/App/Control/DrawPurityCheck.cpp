@@ -118,7 +118,13 @@ constexpr const char* ObjectFields[] = {"Live",
                                         "StartPosition.y",
                                         "StartPosition.z",
                                         "ScreenX",
-                                        "ScreenY"};
+                                        "ScreenY",
+                                        "OBB.StartPos.x",
+                                        "OBB.StartPos.y",
+                                        "OBB.StartPos.z",
+                                        "OBB.XAxis.x",
+                                        "OBB.YAxis.y",
+                                        "OBB.ZAxis.z"};
 constexpr const char* ParticleFields[] = {
     "Live",     "Type",     "SubType", "Scale",   "Position.x", "Position.y", "Position.z",
     "Angle.x",  "Angle.y",  "Angle.z", "Light.r", "Light.g",    "Light.b",    "Alpha",
@@ -162,6 +168,10 @@ void Record(Recorder& r, const OBJECT* o, const char* kind)
     Put(e, o->StartPosition);
     Put(e, o->ScreenX);
     Put(e, o->ScreenY);
+    Put(e, o->OBB.StartPos);
+    Put(e, o->OBB.XAxis[0]);
+    Put(e, o->OBB.YAxis[1]);
+    Put(e, o->OBB.ZAxis[2]);
 }
 
 constexpr const char* CharacterFields[] = {"Light.r",

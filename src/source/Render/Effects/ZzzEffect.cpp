@@ -8410,8 +8410,7 @@ void RenderEffects(bool bRenderBlendMesh)
                         VectorCopy(o->Position, pBMDSwordModel->BodyOrigin);
 
                         pBMDSwordModel->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, true);
-                        pBMDSwordModel->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, false);
-
+                        pBMDSwordModel->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, false);
                     }
 
                     pBMDSwordModel->LightEnable = true;

@@ -34,6 +34,10 @@ void UpdateObjectEffects();
 // The effects and state changes of a character's body draw (Draw_RenderObject), for a character the last frame
 // drew; its bones are the pose the update built.
 void UpdateRenderObjectEffects(OBJECT* o);
+// Where an object's model stands, as its draw places it.
+void ObjectModelOrigin(const OBJECT* o, vec3_t origin);
+// The pick box a draw's transform used to leave on the object: its bounding box at `origin`; the update places it.
+void PlaceObjectBounds(OBJECT* o, const vec3_t origin);
 // Places an object's model where its draw poses and draws it.
 void PlaceObjectModel(const OBJECT* o, BMD* b);
 // Skins an object's meshes as its draw would, for BMD::RenderMeshEffect's spawns: characters pass Translate true

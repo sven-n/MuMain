@@ -295,30 +295,30 @@ static void AnimateObjectBones(OBJECT* o, BMD* b, bool Translate)
 #endif
 }
 
+void ObjectModelOrigin(const OBJECT* o, vec3_t origin)
+{
+    VectorCopy(o->Position, origin);
+    if (o->Type == MODEL_CASTLE_GATE)
+        origin[1] += 60.f;
+    else if (o->Type == MODEL_STATUE_OF_SAINT)
+        origin[1] += 120.f;
+}
+
 // Where an object's model stands when it is posed and drawn.
 void PlaceObjectModel(const OBJECT* o, BMD* b)
 {
     b->BodyHeight = 0.f;
     b->BodyScale = o->Scale;
     b->CurrentAction = o->CurrentAction;
-    VectorCopy(o->Position, b->BodyOrigin);
+    ObjectModelOrigin(o, b->BodyOrigin);
+}
 
-    if (o->Type == MODEL_CASTLE_GATE)
-    {
-        vec3_t Position;
-        VectorCopy(o->Position, Position);
-
-        Position[1] += 60.f;
-        VectorCopy(Position, b->BodyOrigin);
-    }
-    else if (o->Type == MODEL_STATUE_OF_SAINT)
-    {
-        vec3_t Position;
-        VectorCopy(o->Position, Position);
-
-        Position[1] += 120.f;
-        VectorCopy(Position, b->BodyOrigin);
-    }
+void PlaceObjectBounds(OBJECT* o, const vec3_t origin)
+{
+    VectorAdd(o->BoundingBoxMin, origin, o->OBB.StartPos);
+    Vector(o->BoundingBoxMax[0] - o->BoundingBoxMin[0], 0.f, 0.f, o->OBB.XAxis);
+    Vector(0.f, o->BoundingBoxMax[1] - o->BoundingBoxMin[1], 0.f, o->OBB.YAxis);
+    Vector(0.f, 0.f, o->BoundingBoxMax[2] - o->BoundingBoxMin[2], o->OBB.ZAxis);
 }
 
 void UpdateDrawnObjectHold(OBJECT* o)
@@ -416,11 +416,11 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 
     if (o->EnableBoneMatrix)
     {
-        b->Transform(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, Translate);
+        b->Transform(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, Translate);
     }
     else
     {
-        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, Translate);
+        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, Translate);
     }
 
     return true;
@@ -3700,6 +3700,9 @@ static void MarkDrawn(OBJECT* o)
 {
     o->DrawnFrame = s_objectCullFrame;
     s_objectsToDraw.push_back(o);
+    vec3_t origin;
+    ObjectModelOrigin(o, origin);
+    PlaceObjectBounds(o, origin);
 }
 
 void CullObjects()
@@ -6267,7 +6270,7 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
 
         VectorAdd(tempPosition, randomPosition, o->Position);
         VectorCopy(o->Position, b->BodyOrigin);
-        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, true);
+        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, true);
 
         target_vertex_index = b->AddToCoinHeap(i, target_vertex_index);
     }
@@ -6296,6 +6299,7 @@ static void CullItems()
         if (!o->Visible)
             continue;
 
+        PlaceObjectBounds(o, o->Position);
         vec3_t Position;
         VectorCopy(o->Position, Position);
         Position[2] += 30.f;
@@ -7608,11 +7612,11 @@ void RenderPartObjectEdge(BMD* b, OBJECT* o, int Flag, bool Translate, float Sca
     BoneScale = Scale;
     if (o->EnableBoneMatrix == 1)
     {
-        b->Transform(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, Translate);
+        b->Transform(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, Translate);
     }
     else
     {
-        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB);
+        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr);
     }
 
     if (o->Type == MODEL_WARCRAFT)
@@ -7826,11 +7830,11 @@ void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, 
 
     if (GlobalTransform)
     {
-        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, Translate);
+        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, Translate);
     }
     else
     {
-        b->Transform(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, Translate);
+        b->Transform(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, Translate);
     }
 
     if (p && p->m_pCloth[0] && PartClothKind(Type) > 0)
