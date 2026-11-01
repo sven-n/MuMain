@@ -10,11 +10,14 @@
 #include "I18N/All.h"
 #include "UI/Common/MuEditorWindowIds.h"
 #include "UI/ServerList/MuServerListUI.h"
+#include "UI/ServerList/ServerListColors.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
 #include <cstring>
 #include <filesystem>
+#include <fstream>
+#include <sstream>
 #include <random>
 #include <string>
 #include <system_error>
@@ -36,17 +39,17 @@ public:
                       ("mu_test_server_list_window_" + std::to_string(std::random_device{}()))),
           m_previousDirectory(std::filesystem::current_path())
     {
-        std::vector<ServerGroup> groups;
+        Data::ServerList::ServerListData list;
         int id = 0;
         for (const char* name : {"Valhalla", "Helheim", "Midgard"})
         {
             ServerGroup group;
             group.id = id++;
             group.name = name;
-            groups.push_back(group);
+            list.groups.push_back(group);
         }
         std::vector<Data::Items::ItemDataIssue> issues;
-        REQUIRE(Data::ServerList::SaveServerListFile(m_directory / Data::ServerList::ServerListFile, groups, issues));
+        REQUIRE(Data::ServerList::SaveServerListFile(m_directory / Data::ServerList::ServerListFile, list, issues));
         std::filesystem::current_path(m_directory);
     }
 
@@ -87,8 +90,15 @@ ImGuiID ToolbarId(const char* label)
     return ImGui::GetIDWithSeed(label, nullptr, ServerListWindow()->ID);
 }
 
-// One of the window's panes: "##Groups" (the list and its buttons) or
-// "##Group" (the selected group). ImGui names a child window
+// A tab of the window ("###ChannelNames"), in its tab bar.
+ImGuiID TabId(const char* tab)
+{
+    const ImGuiID tabBar = ImGui::GetIDWithSeed("##ServerListTabs", nullptr, ServerListWindow()->ID);
+    return ImGui::GetIDWithSeed(tab, nullptr, tabBar);
+}
+
+// One of the window's panes: "##Groups" (the list and its buttons), "##Group"
+// (the selected group), "##VipTypes" or "##Names". ImGui names a child window
 // "<parent>/<name>_<id>".
 const ImGuiWindow* Pane(const char* pane)
 {
@@ -191,6 +201,164 @@ TEST_CASE("Server List window: leaving a text field for another makes what was t
     CHECK(g_MuServerListUI.GetUndoLabel() == "Asgard: description");
     g_MuServerListUI.Undo();
     CHECK(g_MuServerListUI.GetUndoLabel() == "Valhalla: name");
+}
+
+TEST_CASE("Server List window: a VIP type added on the Channel names tab is a step [editor]")
+{
+    I18N::SetLocale("en");
+    ServerListFolder folder;
+    TestImGuiContext context;
+    StartWithValhalla();
+
+    // A tab picked shows from the next frame on.
+    Press(TabId("###ChannelNames"));
+    RenderServerList();
+    Press(PaneId("##VipTypes", I18N::Editor::Add));
+    RenderServerList();
+
+    CHECK(g_MuServerListUI.GetUndoLabel() == "Add VIP type New VIP type");
+    g_MuServerListUI.Undo();
+    CHECK_FALSE(g_MuServerListUI.CanUndo());
+
+    Press(TabId("###Groups"));
+    RenderServerList();
+}
+
+// The Colors window counts a color's users each frame without their labels; the count is the list's length.
+TEST_CASE("Server list colors: a color's count is the number of its users [editor]")
+{
+    I18N::SetLocale("en");
+    ServerListFolder folder;
+    TestImGuiContext context;
+    StartWithValhalla();
+
+    for (const char* color : {"default", "gray", "orange", "silver", "server-load-base", "none"})
+    {
+        CAPTURE(color);
+        CHECK(g_MuServerListUI.CountColorUsers(color) ==
+              static_cast<int>(g_MuServerListUI.DescribeColorUsers(color).size()));
+        CHECK(g_MuServerListUI.CountThemeBarPartUsers(color) ==
+              static_cast<int>(g_MuServerListUI.DescribeThemeBarPartUsers(color).size()));
+    }
+    // The built-in load: both load texts in the button's own color, which isn't the server-button token "default"
+    // is, and the bar in the theme's tokens.
+    CHECK(g_MuServerListUI.CountColorUsers("default") == 0);
+    for (const char* token : {"server-load-base", "server-load-full", "server-load-empty"})
+    {
+        CHECK(g_MuServerListUI.CountThemeBarPartUsers(token) == 1);
+    }
+    // A rule in "default" is drawn in it; a load text in a theme color is that color's.
+    Data::ServerList::ServerListData& list = g_MuServerListUI.GetEdits().EditList();
+    list.buttonColors.push_back(Data::ServerList::ButtonColorRule{});
+    list.load.full.color = "gray";
+    CHECK(g_MuServerListUI.CountColorUsers("default") == 1);
+    CHECK(g_MuServerListUI.CountColorUsers("gray") == 1);
+    CHECK(g_MuServerListUI.DescribeColorUsers("gray").size() == 1);
+}
+
+// The Server list root of the Colors window writes a theme color into a theme folder's tokens.ini: the token's line
+// when the file has one, else a new line after the [Tokens] section's last; the rest of the file and its line ends
+// stay as they are.
+TEST_CASE("Server list colors: a theme color is written into a theme's tokens.ini [editor]")
+{
+    namespace ListColors = MuEditor::ServerList::Colors;
+    const std::filesystem::path folder = std::filesystem::temp_directory_path() /
+                                         ("mu_test_theme_tokens_" + std::to_string(std::random_device{}()));
+    const std::filesystem::path previous = std::filesystem::current_path();
+    std::filesystem::create_directories(folder / "Data/Interface/RmlUi/themes/plain");
+    const std::filesystem::path tokens = folder / "Data/Interface/RmlUi/themes/plain/tokens.ini";
+    {
+        std::ofstream file(tokens, std::ios::binary);
+        file << "; a theme\r\n[Tokens]\r\nserver-button=#ffff79\r\n; the load\r\nserver-load-empty=rgba(0, 0, 0, 160)\r\n"
+                "\r\n[Other]\r\nkey=1\r\n";
+    }
+    std::filesystem::current_path(folder);
+
+    CHECK(ListColors::WriteThemeToken("plain", "server-button", "#123456"));
+    CHECK(ListColors::WriteThemeToken("plain", "server-button-silver", "#abcdef"));
+    CHECK_FALSE(ListColors::WriteThemeToken("missing", "server-button", "#123456"));
+    // Written through a temporary file (Data::WriteTextFile), which takes the file's place.
+    CHECK_FALSE(std::filesystem::exists(tokens.string() + ".tmp"));
+    // A theme that inherits all its tokens gets a tokens.ini of its own.
+    std::filesystem::create_directories("Data/Interface/RmlUi/themes/inherits");
+    CHECK(ListColors::WriteThemeToken("inherits", "server-button", "#123456"));
+
+    std::filesystem::current_path(previous);
+    const auto readFile = [](const std::filesystem::path& path)
+    {
+        std::ifstream file(path, std::ios::binary);
+        std::stringstream text;
+        text << file.rdbuf();
+        return text.str();
+    };
+    CHECK(readFile(tokens) ==
+          "; a theme\r\n[Tokens]\r\nserver-button=#123456\r\n; the load\r\nserver-load-empty=rgba(0, 0, 0, 160)\r\n"
+          "server-button-silver=#abcdef\r\n\r\n[Other]\r\nkey=1\r\n");
+    CHECK(readFile(folder / "Data/Interface/RmlUi/themes/inherits/tokens.ini") == "[Tokens]\nserver-button=#123456\n");
+    std::error_code ignored;
+    std::filesystem::remove_all(folder, ignored);
+}
+
+TEST_CASE("Server list colors: a token is set in tokens.ini's text [editor]")
+{
+    namespace ListColors = MuEditor::ServerList::Colors;
+    // The line that has it, else after the section's last value line, else a new section at the end.
+    CHECK(ListColors::SetTokenInText("[Tokens]\na=1\nb=2\n", "a", "9") == "[Tokens]\na=9\nb=2\n");
+    CHECK(ListColors::SetTokenInText("[Tokens]\na=1\n; end\n\n[Other]\n", "c", "3") ==
+          "[Tokens]\na=1\nc=3\n; end\n\n[Other]\n");
+    CHECK(ListColors::SetTokenInText("[Other]\nkey=1", "c", "3") == "[Other]\nkey=1\n[Tokens]\nc=3");
+    CHECK(ListColors::SetTokenInText("", "c", "3") == "[Tokens]\nc=3");
+    // A key of another section isn't the token.
+    CHECK(ListColors::SetTokenInText("[Other]\na=1\n[Tokens]\n", "a", "9") == "[Other]\na=1\n[Tokens]\na=9\n");
+    CHECK(ListColors::SetTokenInText("[Tokens]\r\na=1\r\n", "a", "9") == "[Tokens]\r\na=9\r\n");
+}
+
+TEST_CASE("Server list colors: tokens.ini's lines count as the themes read them [editor]")
+{
+    namespace ListColors = MuEditor::ServerList::Colors;
+    // Spaces around the key, another case, a header with spaces, a byte order mark.
+    CHECK(ListColors::SetTokenInText("[ tokens ]\nServer-Load-Base = #00bd8b\n", "server-load-base", "#123456") ==
+          "[ tokens ]\nserver-load-base=#123456\n");
+    CHECK(ListColors::SetTokenInText("\xef\xbb\xbf[Tokens]\na=1\n", "b", "2") == "\xef\xbb\xbf[Tokens]\na=1\nb=2\n");
+    // A '#' comment is no value line to add after; a key the section has twice takes the value in both.
+    CHECK(ListColors::SetTokenInText("[Tokens]\na=1\n# later\n", "b", "2") == "[Tokens]\na=1\nb=2\n# later\n");
+    CHECK(ListColors::SetTokenInText("[Tokens]\na=1\n[Tokens]\na=2\n", "a", "9") == "[Tokens]\na=9\n[Tokens]\na=9\n");
+}
+
+TEST_CASE("Server list colors: a shade goes to the swatch and back unchanged [editor]")
+{
+    namespace ListColors = MuEditor::ServerList::Colors;
+    const std::optional<ImVec4> swatch = ListColors::ParseShade("#ffb400");
+    REQUIRE(swatch.has_value());
+    const float rgb[3] = {swatch->x, swatch->y, swatch->z};
+    CHECK(Core::Color::FormatRgb(ListColors::ToRgb(rgb)) == "#FFB400");
+    CHECK_FALSE(ListColors::ParseShade("#ffb40").has_value());
+    CHECK_FALSE(ListColors::ParseShade("ffb400").has_value());
+    const float outOfRange[3] = {1.5f, -0.5f, 0.5f};
+    CHECK(ListColors::ToRgb(outOfRange) == Core::Color::Rgb{255, 0, 128});
+}
+
+TEST_CASE("Server list colors: a token color keeps its alpha [editor]")
+{
+    namespace ListColors = MuEditor::ServerList::Colors;
+    const std::optional<ListColors::TokenColor> rgba = ListColors::ParseTokenColor("rgba(0, 0, 0, 160)");
+    REQUIRE(rgba.has_value());
+    CHECK(rgba->alpha == 160);
+    CHECK(ListColors::FormatTokenColor(*rgba) == "rgba(0, 0, 0, 160)");
+    const std::optional<ListColors::TokenColor> hex = ListColors::ParseTokenColor("#FFB400");
+    REQUIRE(hex.has_value());
+    CHECK(ListColors::FormatTokenColor(*hex) == "#ffb400");
+    CHECK_FALSE(ListColors::ParseTokenColor("orange").has_value());
+    // Spaces or none around the numbers.
+    REQUIRE(ListColors::ParseTokenColor("rgba(1,2,3,4)").has_value());
+    CHECK(ListColors::ParseTokenColor("rgba( 1 , 2 , 3 , 4 )")->alpha == 4);
+    // Only four whole numbers from 0 to 255: anything else the editor could not write back as the theme has it.
+    CHECK_FALSE(ListColors::ParseTokenColor("rgba(0, 0, 0, 0.5)").has_value());
+    CHECK_FALSE(ListColors::ParseTokenColor("rgba(1, 2, 3, 4, 5)").has_value());
+    CHECK_FALSE(ListColors::ParseTokenColor("rgba(1, 2, 3)").has_value());
+    CHECK_FALSE(ListColors::ParseTokenColor("rgba(1 2 3 4)").has_value());
+    CHECK_FALSE(ListColors::ParseTokenColor("rgba(1,, 2, 3, 4)").has_value());
+    CHECK_FALSE(ListColors::ParseTokenColor("rgba(0, 0, 0, 256)").has_value());
 }
 
 #endif // _EDITOR

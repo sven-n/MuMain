@@ -544,4 +544,13 @@ bool RemoveColorFromFolders(std::vector<ColorFolder>& folders, std::string_view 
     }
     return false;
 }
+
+void RenameColorInFolders(std::vector<ColorFolder>& folders, std::string_view from, const std::string& to)
+{
+    for (ColorFolder& folder : folders)
+    {
+        std::replace(folder.colors.begin(), folder.colors.end(), std::string(from), to);
+        RenameColorInFolders(folder.folders, from, to);
+    }
+}
 } // namespace Data::Colors

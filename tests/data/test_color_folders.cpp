@@ -245,12 +245,14 @@ TEST_SUITE("Color folders")
         CHECK_FALSE(Data::Colors::MoveRootColorBy(Sample(), colors, "red", 1).has_value());
     }
 
-    TEST_CASE("a removed color leaves its folder")
+    TEST_CASE("a removed or renamed color leaves or changes its folder")
     {
         std::vector<ColorFolder> folders = Sample();
-        CHECK(Data::Colors::RemoveColorFromFolders(folders, "red"));
+        Data::Colors::RenameColorInFolders(folders, "red", "crimson");
+        CHECK(folders[0].folders[0].colors == std::vector<std::string>{"crimson"});
+        CHECK(Data::Colors::RemoveColorFromFolders(folders, "crimson"));
         CHECK(folders[0].folders[0].colors.empty());
-        CHECK_FALSE(Data::Colors::RemoveColorFromFolders(folders, "red"));
+        CHECK_FALSE(Data::Colors::RemoveColorFromFolders(folders, "crimson"));
     }
 
     TEST_CASE("folder names are 1 to 32 characters")

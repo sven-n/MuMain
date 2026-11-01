@@ -16,6 +16,7 @@ mu_add_test(
     NAME utf8_tests
     SOURCES
         test_utf8.cpp
+        test_wide_string.cpp
     LINK_LIBS
         MuClient
 )

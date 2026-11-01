@@ -1,0 +1,58 @@
+#pragma once
+
+#include "Data/GameData/ServerListData/ServerListData.h"
+
+#include <optional>
+#include <span>
+#include <string>
+#include <string_view>
+#include <vector>
+
+// Builds a channel's name from a template of Data/Local/ServerList.json:
+// "[{name}-{channel} ({vip} {pvp})]" is "[Valhalla-1 (Gold Non-PvP)]" (docs/server-list.md).
+namespace Data::ServerList
+{
+// The key of a place's template in the file ("button").
+const char* GetChannelNamePlaceKey(ChannelNamePlace place);
+// The placeholders a place's template can use, without braces ("name", "channel", ...).
+std::span<const std::string_view> GetChannelNamePlaceholders(ChannelNamePlace place);
+
+// What a template's placeholders are filled with.
+struct ChannelNameValues
+{
+    std::string_view name; // the group's
+    int channel = 0;
+    std::string_view vip;       // the VIP type's name; empty without one
+    std::string_view pvp;       // the PvP or Non-PvP text
+    std::string_view load;      // the list's load text ((Full), Overloaded); empty while joinable; Button only
+    std::string_view character; // the player's character; Screenshot only
+};
+
+// What a template of `place` shows as written: a problem of its braces (ScanPlaceholders' message,
+// and nothing else then), or the placeholders the place does not have, without braces.
+struct TemplateProblems
+{
+    std::string braceError;
+    std::vector<std::string> unknownPlaceholders;
+};
+TemplateProblems FindTemplateProblems(std::string_view text, ChannelNamePlace place);
+
+// Fills the template `text` for `place`. Each placeholder of the place gets its
+// value; an empty value goes together with one space next to it (the one before,
+// else the one after), and brackets, () or [], that are left with nothing in
+// them go the same way. Anything else stays as written, a placeholder the place
+// does not have too.
+std::string FillChannelName(std::string_view text, ChannelNamePlace place, const ChannelNameValues& values);
+
+// A channel's name at `place` in the language `locale`: the list's template,
+// PvP text and VIP type name in it, or in English where it has none.
+// `values.vip` and `values.pvp` come from `channel`; a VIP type the list does
+// not have is none.
+std::string BuildChannelName(const ServerListData& list, ChannelNamePlace place, const ChannelSettings& channel,
+                             ChannelNameValues values, std::string_view locale);
+
+// The load text a channel's button shows: `load` when the list's button template in `locale` has
+// {load}, else nothing. The login screen shows it on the load bar, apart from the button's name
+// (BuildChannelName at ChannelNamePlace::Button, with no load).
+std::string GetButtonLoadText(const ServerListData& list, std::string_view load, std::string_view locale);
+} // namespace Data::ServerList

@@ -1225,9 +1225,6 @@
   <data name="Password" xml:space="preserve">
     <value>Password</value>
   </data>
-  <data name="Connect" xml:space="preserve">
-    <value>Kumonekta</value>
-  </data>
   <data name="Exit" xml:space="preserve">
     <value>Lumabas</value>
   </data>
@@ -1248,12 +1245,6 @@
   </data>
   <data name="%s: Screenshot Saved" xml:space="preserve">
     <value>%s: Na-save ang Screenshot</value>
-  </data>
-  <data name="[%s-%d(Non-PvP) Server]" xml:space="preserve">
-    <value>[%s-%d(Non-PvP) Server]</value>
-  </data>
-  <data name="[%s-%d Server]" xml:space="preserve">
-    <value>[%s-%d Server]</value>
   </data>
   <data name="1)After moving your account into the divided server," xml:space="preserve">
     <value>1) Pagkatapos ilipat ang iyong account sa hinati na server,</value>
@@ -1536,12 +1527,6 @@
   </data>
   <data name="test" xml:space="preserve">
     <value>pagsubok</value>
-  </data>
-  <data name="Now preparing" xml:space="preserve">
-    <value>Ngayon naghahanda</value>
-  </data>
-  <data name="(Full)" xml:space="preserve">
-    <value>(Buo)</value>
   </data>
   <data name="The TEST server is intended for testing," xml:space="preserve">
     <value>Ang TEST server ay inilaan para sa pagsubok,</value>
@@ -7551,12 +7536,6 @@
   </data>
   <data name="Please repurchase after expiration." xml:space="preserve">
     <value>Mangyaring bumili muli pagkatapos mag-expire.</value>
-  </data>
-  <data name="[%s-%d(Gold PvP) Server]" xml:space="preserve">
-    <value>[%s-%d(Gold PvP) Server]</value>
-  </data>
-  <data name="[%s-%d(Gold) Server]" xml:space="preserve">
-    <value>[%s-%d(Gold) Server]</value>
   </data>
   <data name="Maximum HP increase +%d" xml:space="preserve">
     <value>Maximum na pagtaas ng HP +%d</value>

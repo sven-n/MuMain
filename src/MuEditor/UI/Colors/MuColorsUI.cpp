@@ -36,7 +36,7 @@ constexpr char DragPayloadType[] = "MU_COLORS_TREE";
 constexpr float TreeWidth = 260.0f;
 constexpr float FolderNameWidth = 260.0f;
 
-constexpr ColorsRoot Roots[] = {ColorsRoot::Glow};
+constexpr ColorsRoot Roots[] = {ColorsRoot::Glow, ColorsRoot::ServerList};
 
 // A root's or a folder's tree node picks it on a click (not on its arrow) and when the arrow keys move onto it, as
 // the colors' rows do (KeyboardSelection).
@@ -109,6 +109,8 @@ NamedColorSource& CMuColorsUI::SourceOf(ColorsRoot root)
 {
     switch (root)
     {
+    case ColorsRoot::ServerList:
+        return m_serverList;
     case ColorsRoot::Glow:
     default:
         return m_glow;
@@ -339,7 +341,7 @@ void CMuColorsUI::RenderRoot(ColorsRoot root)
         ImGui::SetScrollHereY(0.0f);
     }
     AcceptDrop(root, {});
-    // A closed root's entries aren't read.
+    // A closed root's entries aren't read: the server list's file is read when its root is first opened.
     if (open)
     {
         ColorFolderPath path;

@@ -1225,9 +1225,6 @@
   <data name="Password" xml:space="preserve">
     <value>Пароль</value>
   </data>
-  <data name="Connect" xml:space="preserve">
-    <value>Соединять</value>
-  </data>
   <data name="Exit" xml:space="preserve">
     <value>Выход</value>
   </data>
@@ -1248,12 +1245,6 @@
   </data>
   <data name="%s: Screenshot Saved" xml:space="preserve">
     <value>%s: снимок экрана сохранен.</value>
-  </data>
-  <data name="[%s-%d(Non-PvP) Server]" xml:space="preserve">
-    <value>[%s-%d (не PvP) сервер]</value>
-  </data>
-  <data name="[%s-%d Server]" xml:space="preserve">
-    <value>[Сервер %s-%d]</value>
   </data>
   <data name="1)After moving your account into the divided server," xml:space="preserve">
     <value>1)После перемещения вашей учетной записи на разделенный сервер,</value>
@@ -1536,12 +1527,6 @@
   </data>
   <data name="test" xml:space="preserve">
     <value>тест</value>
-  </data>
-  <data name="Now preparing" xml:space="preserve">
-    <value>Сейчас готовимся</value>
-  </data>
-  <data name="(Full)" xml:space="preserve">
-    <value>(Полный)</value>
   </data>
   <data name="The TEST server is intended for testing," xml:space="preserve">
     <value>ТЕСТ-сервер предназначен для тестирования,</value>
@@ -7551,12 +7536,6 @@
   </data>
   <data name="Please repurchase after expiration." xml:space="preserve">
     <value>Пожалуйста, сделайте повторную покупку после истечения срока годности.</value>
-  </data>
-  <data name="[%s-%d(Gold PvP) Server]" xml:space="preserve">
-    <value>[%s-%d(Золотой PvP) Сервер]</value>
-  </data>
-  <data name="[%s-%d(Gold) Server]" xml:space="preserve">
-    <value>[%s-%d(Золотой) Сервер]</value>
   </data>
   <data name="Maximum HP increase +%d" xml:space="preserve">
     <value>Максимальное увеличение HP +%d</value>

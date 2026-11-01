@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Data/GameData/ServerListData/ChannelSettings.h"
+
 class CServerInfo
 {
 public:
@@ -13,6 +15,9 @@ public:
     int m_iIndex;
     int m_iConnectIndex;
     int m_iPercent;
-    BYTE m_byNonPvP;
-    wchar_t m_bName[MAX_TEXT_LENGTH];
+    // PvP and the VIP type, from the server list (CServerListManager::GetServerButtonName names it).
+    Data::ServerList::ChannelSettings m_channel;
+    // A channel the connect server didn't send, which only MuEditor's preview shows
+    // (CServerListManager::SetOfflinePreview); it can't be joined.
+    bool m_offline = false;
 };

@@ -59,9 +59,10 @@ stores it when a field is left.
 - **MuItemTranslationsUI.h/cpp** - Item names as a grid of items and languages, with missing counts, on the shared names grid with ItemNameRows as its rows (docs/translation-system.md)
 
 ### Colors (UI/Colors)
-- **MuColorsUI.h/cpp** - The Colors window: the named colors as a tree, a root per use with the user's folders (Data/GameData/ColorFolders), drag and drop within a root (Windows > Colors, and Items > Glow Colors on its root); it docks with the item tools, and each root's changes go to its own history
+- **MuColorsUI.h/cpp** - The Colors window: the named colors as a tree, a root per use with the user's folders (Data/GameData/ColorFolders), drag and drop within a root (Windows > Colors, Items > Glow Colors and the Server List window's Edit colors on their root); it docks with the item tools, and each root's changes go to its own history
 - **NamedColorList.h/cpp** - The panel the picked entry of any root is drawn with: its value with Apply, Revert and Remove, its users, the list of the users a change reaches, and for a picked root the unused entries removed at once; a root gives it its entries through **NamedColorSource.h**
 - **GlowColorsRoot.h/cpp** - The Glow root: new colors, changed values and unused colors removed (GlowColorDialog, which the model tool's color fields open too)
+- **ServerListColorsRoot.h/cpp** - The Server list root: the themes' colors the list uses (written into each theme's tokens.ini on Apply) and the server list's own colors with a shade per theme, used by the button color rules and the load; the own colors' changes are steps of the Server List window's history
 
 ### Monster Tools (UI/MonsterTools)
 One selected monster (**MonsterSelection**) is shown by every monster tool.
@@ -91,7 +92,7 @@ Parts the item tools and the monster tools both use:
 - **CodeTokenLine.h/cpp**, **CodeRanges.h/cpp**, **CodeReference.h**, **CodeReferenceList.h/cpp** - Reading the sources for the lines that name an item or a monster, and their list in the remove dialogs
 
 ### Server List (UI/ServerList)
-- **MuServerListUI.h/cpp** - The server groups of the login screen (Data/Local/ServerList.json): order, names, test server and channel types, shown on the login screen right away (docs/server-list.md)
+- **MuServerListUI.h/cpp** - The server groups of the login screen (Data/Local/ServerList.json): order, names, test server, the channels' PvP and VIP type, the VIP types and the texts that name a channel, shown on the login screen right away (docs/server-list.md)
 - **ServerListEdits.h/cpp** - The groups being changed, what the file has, and their undo history (the editor bar's Undo and Redo while the window was used last)
 - **ServerListStepLabel.h/cpp** - What each undo step did ("Remove Helheim", "Valhalla: channel 3"), for the tooltips of the editor bar's Undo and Redo
 

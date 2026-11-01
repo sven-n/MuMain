@@ -426,13 +426,13 @@ void mu::ui::window::CCharacterInfoWindow::BuildSubjectTexts()
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::classNameText, "classname_text",
               StringUtils::WideToNarrow(strClassName));
 
-    wchar_t strServerName[MAX_TEXT_LENGTH];
-    const wchar_t* apszGlobalText[4]
-        = { I18N::Game::SDServer, I18N::Game::SDNonPvPServer, I18N::Game::SDGoldPvPServer, I18N::Game::SDGoldServer };
-    mu_swprintf(strServerName, apszGlobalText[g_ServerListManager->GetNonPVPInfo()],
-        g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
-    SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::serverNameText, "servername_text",
-              StringUtils::WideToNarrow(strServerName));
+    // Every frame: the cached title, copied only when it changed.
+    const std::string& serverTitle =
+        g_ServerListManager->GetSelectServerTitleUtf8(Data::ServerList::ChannelNamePlace::CharacterInfo);
+    if (model.serverNameText != serverTitle)
+    {
+        SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::serverNameText, "servername_text", serverTitle);
+    }
 
     const float fAlpha = sinf(WorldTime * 0.001f) + 1.f;
     SyncField(m_RmlView.Binder(), &CharacterInfoRmlModel::classNameOpacity, "classname_opacity",

@@ -36,6 +36,13 @@ namespace UI::RmlBridge
     // writes to, not necessarily GameConfig's current value.
     const std::string& GetActiveThemeName();
 
+    // A token of the active theme's tokens.ini, or of the theme it inherits from ("#00BD8B" for
+    // server-load-base); nothing when none of them has it.
+    std::optional<std::string> GetActiveThemeToken(const std::string& token);
+    // Whether the active theme's font for the token ("font-body") has an italic face
+    // (ThemeFontHasItalic).
+    bool ActiveThemeFontHasItalic(const std::string& token);
+
     // Validates a saved selection; falls back to legacy, or returns empty if neither is usable.
     std::string ResolveStartupThemeName(const std::string& savedName);
 

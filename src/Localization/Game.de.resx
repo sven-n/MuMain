@@ -1245,9 +1245,6 @@
     <value>Wenn das Passwort gespeichert wird, kann sich jeder, der diesen Computer benutzt, mit Ihrem Konto anmelden. Tun Sie dies nur auf einem PC, dem Sie vertrauen. Passwort speichern?</value>
     <comment>Remember-password confirmation dialog: body.</comment>
   </data>
-  <data name="Connect" xml:space="preserve">
-    <value>Verbinden</value>
-  </data>
   <data name="Exit" xml:space="preserve">
     <value>Beenden</value>
   </data>
@@ -1268,12 +1265,6 @@
   </data>
   <data name="%s: Screenshot Saved" xml:space="preserve">
     <value>%s: Screenshot gespeichert</value>
-  </data>
-  <data name="[%s-%d(Non-PvP) Server]" xml:space="preserve">
-    <value>[%s-%d (Nicht-PvP) Server]</value>
-  </data>
-  <data name="[%s-%d Server]" xml:space="preserve">
-    <value>[%s-%d-Server]</value>
   </data>
   <data name="1)After moving your account into the divided server," xml:space="preserve">
     <value>1)Nachdem Sie Ihr Konto auf den geteilten Server verschoben haben,</value>
@@ -1556,12 +1547,6 @@
   </data>
   <data name="test" xml:space="preserve">
     <value>test</value>
-  </data>
-  <data name="Now preparing" xml:space="preserve">
-    <value>In Vorbereitung</value>
-  </data>
-  <data name="(Full)" xml:space="preserve">
-    <value>(Voll)</value>
   </data>
   <data name="The TEST server is intended for testing," xml:space="preserve">
     <value>Der TEST-Server ist zum Testen gedacht,</value>
@@ -7571,12 +7556,6 @@
   </data>
   <data name="Please repurchase after expiration." xml:space="preserve">
     <value>Bitte nach Ablauf erneut kaufen.</value>
-  </data>
-  <data name="[%s-%d(Gold PvP) Server]" xml:space="preserve">
-    <value>[%s-%d(Gold PvP) Server]</value>
-  </data>
-  <data name="[%s-%d(Gold) Server]" xml:space="preserve">
-    <value>[%s-%d(Gold) Server]</value>
   </data>
   <data name="Maximum HP increase +%d" xml:space="preserve">
     <value>Max. HP +%d</value>

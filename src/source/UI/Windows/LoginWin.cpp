@@ -470,10 +470,9 @@ void CLoginWin::SyncRmlModel()
         m_RmlView.MarkDirty("save_password_checked");
     }
 
-    wchar_t szServerName[MAX_TEXT_LENGTH] = {};
-    const wchar_t* pServerStatus = g_ServerListManager->GetNonPVPInfo() ? I18N::Game::SDServer : I18N::Game::SDNonPvPServer;
-    mu_swprintf(szServerName, pServerStatus, g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
-    const std::string serverNameUtf8 = StringUtils::WideToNarrow(szServerName);
+    // Every frame: the cached title, copied only when it changed.
+    const std::string& serverNameUtf8 =
+        g_ServerListManager->GetSelectServerTitleUtf8(Data::ServerList::ChannelNamePlace::Login);
     if (m_RmlView.GetModel().serverName != serverNameUtf8)
     {
         m_RmlView.GetModel().serverName = serverNameUtf8;

@@ -21,6 +21,7 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/PlatformInfo.h"
 #include "Core/Text/Utf8.h"
+#include "Core/Text/WideString.h"
 #include "Render/Text/CUIRenderText.h"
 
 //=============================================================================
@@ -239,8 +240,9 @@ double GetTargetFps()
  * @brief Generates a timestamped filename and message for screenshot capture.
  * @param outFileName Buffer to receive the filename
  * @param outMessage Buffer to receive the log message
+ * @param messageSize Its size, in characters
  */
-static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage)
+static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage, size_t messageSize)
 {
     SYSTEMTIME st;
     GetLocalTime(&st);
@@ -248,9 +250,10 @@ static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage
         st.wMonth, st.wDay, st.wHour, st.wMinute, GrabScreen);
     mu_swprintf(outMessage, I18N::Game::SScreenshotSaved, outFileName);
 
-    wchar_t lpszTemp[64];
-    mu_swprintf(lpszTemp, L" [%ls / %ls]", g_ServerListManager->GetSelectServerName(), Hero->ID);
-    wcscat(outMessage, lpszTemp);
+    // The server list's screenshot template, " [Valhalla / MaxiDK]", as much of it as fits.
+    const std::wstring server =
+        L" " + g_ServerListManager->GetSelectServerTitle(Data::ServerList::ChannelNamePlace::Screenshot, Hero->ID);
+    Core::Text::AppendWideString(outMessage, messageSize, server.c_str());
 }
 
 /**
@@ -408,7 +411,7 @@ static bool BeginScreenshotCapture(const std::wstring& fileName, const std::wstr
 static void RequestScreenshot()
 {
     wchar_t screenshotText[256];
-    GenerateScreenshotFilename(GrabFileName, screenshotText);
+    GenerateScreenshotFilename(GrabFileName, screenshotText, std::size(screenshotText));
 
     if (BeginScreenshotCapture(GrabFileName, screenshotText))
     {

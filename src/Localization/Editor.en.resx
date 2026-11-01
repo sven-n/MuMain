@@ -1951,26 +1951,11 @@
   <data name="Channel" xml:space="preserve">
     <value>Channel</value>
   </data>
-  <data name="Type" xml:space="preserve">
-    <value>Type</value>
-  </data>
   <data name="On the login screen" xml:space="preserve">
     <value>On the login screen</value>
   </data>
   <data name="Connect server" xml:space="preserve">
     <value>Connect server</value>
-  </data>
-  <data name="Normal" xml:space="preserve">
-    <value>Normal</value>
-  </data>
-  <data name="Non-PvP" xml:space="preserve">
-    <value>Non-PvP</value>
-  </data>
-  <data name="Gold PvP" xml:space="preserve">
-    <value>Gold PvP</value>
-  </data>
-  <data name="Gold" xml:space="preserve">
-    <value>Gold</value>
   </data>
   <data name="Sent, {0}% load" xml:space="preserve">
     <value>Sent, {0}% load</value>
@@ -1987,8 +1972,8 @@
   <data name="Server list order note" xml:space="preserve">
     <value>The order of the list is the order of the buttons on the login screen, which shows each change right away. Save writes {0}.</value>
   </data>
-  <data name="Save off after fatal read problems" xml:space="preserve">
-    <value>The file had fatal problems when it was read, so the list has only the groups that could be read. Save is off until the file is fixed and Revert reads it again; it would remove the other groups from the file.</value>
+  <data name="Save off after a read that left something out" xml:space="preserve">
+    <value>The file had problems that left something out when it was read (see the problems below): a group, VIP type or color with a fatal problem, or a rule, shade, channel VIP type or color the list could not use. Save is off until the file is fixed and Revert reads it again; it would remove or replace those in the file.</value>
   </data>
   <data name="Step add" xml:space="preserve">
     <value>Add {0}</value>
@@ -2013,6 +1998,207 @@
   </data>
   <data name="Step channel" xml:space="preserve">
     <value>{0}: channel {1}</value>
+  </data>
+  <data name="Groups" xml:space="preserve">
+    <value>Groups</value>
+  </data>
+  <data name="Channel names" xml:space="preserve">
+    <value>Channel names</value>
+  </data>
+  <data name="PvP" xml:space="preserve">
+    <value>PvP</value>
+  </data>
+  <data name="VIP" xml:space="preserve">
+    <value>VIP</value>
+  </data>
+  <data name="VIP types" xml:space="preserve">
+    <value>VIP types</value>
+  </data>
+  <data name="New VIP type" xml:space="preserve">
+    <value>New VIP type</value>
+  </data>
+  <data name="Pick a VIP type in the list." xml:space="preserve">
+    <value>Pick a VIP type in the list.</value>
+  </data>
+  <data name="VIP type ID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="VIP type ID note" xml:space="preserve">
+    <value>What channels name the type by: letters and digits, starting with a lowercase letter. A new ID is given to the channels with the type too.</value>
+  </data>
+  <data name="Not a VIP type ID" xml:space="preserve">
+    <value>Not a VIP type ID: letters and digits, starting with a lowercase letter.</value>
+  </data>
+  <data name="Another VIP type has the ID {0}." xml:space="preserve">
+    <value>Another VIP type has the ID {0}.</value>
+  </data>
+  <data name="A VIP type needs a name." xml:space="preserve">
+    <value>A VIP type needs a name.</value>
+  </data>
+  <data name="Gray" xml:space="preserve">
+    <value>Gray</value>
+  </data>
+  <data name="Orange" xml:space="preserve">
+    <value>Orange</value>
+  </data>
+  <data name="Silver" xml:space="preserve">
+    <value>Silver</value>
+  </data>
+  <data name="Remove VIP type {0}?" xml:space="preserve">
+    <value>Remove VIP type {0}?</value>
+  </data>
+  <data name="VIP type used note" xml:space="preserve">
+    <value>{0} channels have this VIP type; they then have none:</value>
+  </data>
+  <data name="VIP type rules note" xml:space="preserve">
+    <value>{0} button color rules are for this VIP type; they go too.</value>
+  </data>
+  <data name="Texts" xml:space="preserve">
+    <value>Texts</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Language</value>
+  </data>
+  <data name="PvP text" xml:space="preserve">
+    <value>PvP text</value>
+  </data>
+  <data name="Non-PvP text" xml:space="preserve">
+    <value>Non-PvP text</value>
+  </data>
+  <data name="Server list button" xml:space="preserve">
+    <value>Server list button</value>
+  </data>
+  <data name="Login window" xml:space="preserve">
+    <value>Login window</value>
+  </data>
+  <data name="Character info" xml:space="preserve">
+    <value>Character info</value>
+  </data>
+  <data name="Screenshot message" xml:space="preserve">
+    <value>Screenshot message</value>
+  </data>
+  <data name="Texts note" xml:space="preserve">
+    <value>A field left empty uses the English text, shown greyed. Each template can use {name}, {channel}, {vip} and {pvp}; the server list button also {load}, the screenshot message also {character}. An empty one goes with one space next to it, and brackets left empty go too.</value>
+  </data>
+  <data name="Not a placeholder of this template: {0}" xml:space="preserve">
+    <value>Not a placeholder of this template: {0}</value>
+  </data>
+  <data name="Preview note" xml:space="preserve">
+    <value>Every combination of PvP and VIP type, for channel 1 of the selected group, in the language picked above. The button's {load} is empty, as for a server that can be joined.</value>
+  </data>
+  <data name="Load" xml:space="preserve">
+    <value>Load</value>
+  </data>
+  <data name="Load note" xml:space="preserve">
+    <value>How the button of a full server (load 100 % and more) or an overloaded one (128 and more) looks: its {load} text, and the load bar's ten segments of 10 % each, from the base color toward the full color. Default is the theme's own color; for a load text, the button's color.</value>
+  </data>
+  <data name="Load bar" xml:space="preserve">
+    <value>Load bar</value>
+  </data>
+  <data name="Base color" xml:space="preserve">
+    <value>Base</value>
+  </data>
+  <data name="Full color" xml:space="preserve">
+    <value>Full</value>
+  </data>
+  <data name="Unlit color" xml:space="preserve">
+    <value>Unlit</value>
+  </data>
+  <data name="Full server" xml:space="preserve">
+    <value>Full server</value>
+  </data>
+  <data name="Overloaded server" xml:space="preserve">
+    <value>Overloaded server</value>
+  </data>
+  <data name="Full text" xml:space="preserve">
+    <value>Full text</value>
+  </data>
+  <data name="Overloaded text" xml:space="preserve">
+    <value>Overloaded text</value>
+  </data>
+  <data name="Bold" xml:space="preserve">
+    <value>Bold</value>
+  </data>
+  <data name="Italic" xml:space="preserve">
+    <value>Italic</value>
+  </data>
+  <data name="Load preview note" xml:space="preserve">
+    <value>The button at 35 % load, full and overloaded, with its bar in each theme and the load text on the bar. Bold and italic show only in game.</value>
+  </data>
+  <data name="Load {0}%" xml:space="preserve">
+    <value>{0} % load</value>
+  </data>
+  <data name="Step load" xml:space="preserve">
+    <value>Load: {0}</value>
+  </data>
+  <data name="Step add VIP type" xml:space="preserve">
+    <value>Add VIP type {0}</value>
+  </data>
+  <data name="Step remove VIP type" xml:space="preserve">
+    <value>Remove VIP type {0}</value>
+  </data>
+  <data name="Step move VIP type" xml:space="preserve">
+    <value>Move VIP type {0}</value>
+  </data>
+  <data name="Step text" xml:space="preserve">
+    <value>Text: {0}</value>
+  </data>
+  <data name="Button colors" xml:space="preserve">
+    <value>Button colors</value>
+  </data>
+  <data name="Button colors note" xml:space="preserve">
+    <value>Of the rules that fit a channel, the most specific one colors its button: one with a VIP type beats one for any VIP type or none, which beats one without, and one with PvP beats one without. The order of the rules does not matter.</value>
+  </data>
+  <data name="Any VIP type" xml:space="preserve">
+    <value>Any VIP type</value>
+  </data>
+  <data name="On" xml:space="preserve">
+    <value>On</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>Off</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Color</value>
+  </data>
+  <data name="Add rule" xml:space="preserve">
+    <value>Add rule</value>
+  </data>
+  <data name="Another rule fits the same channels." xml:space="preserve">
+    <value>Another rule fits the same channels.</value>
+  </data>
+  <data name="Every VIP type and PvP setting has a rule." xml:space="preserve">
+    <value>Every VIP type and PvP setting has a rule.</value>
+  </data>
+  <data name="Colors note" xml:space="preserve">
+    <value>The list's own colors are the Server list root of the Colors window.</value>
+  </data>
+  <data name="New color" xml:space="preserve">
+    <value>New color</value>
+  </data>
+  <data name="Color ID note" xml:space="preserve">
+    <value>What the rules name the color by: letters and digits, starting with a lowercase letter, none of the theme colors' names (default, gray, orange, silver). A new ID is given to the rules with the color too.</value>
+  </data>
+  <data name="Not a free color ID" xml:space="preserve">
+    <value>Not a free color ID: letters and digits, starting with a lowercase letter, not a theme color's name or another color's.</value>
+  </data>
+  <data name="Step add color" xml:space="preserve">
+    <value>Add color {0}</value>
+  </data>
+  <data name="Step remove color" xml:space="preserve">
+    <value>Remove color {0}</value>
+  </data>
+  <data name="Step shade" xml:space="preserve">
+    <value>{0}: shade</value>
+  </data>
+  <data name="Step add button color rule" xml:space="preserve">
+    <value>Add button color rule</value>
+  </data>
+  <data name="Step remove button color rule" xml:space="preserve">
+    <value>Remove button color rule</value>
+  </data>
+  <data name="Step button color rule" xml:space="preserve">
+    <value>Button color rule {0}</value>
   </data>
   <data name="Monster Browser" xml:space="preserve">
     <value>Monster Browser</value>
@@ -2947,9 +3133,6 @@
   <data name="New folder" xml:space="preserve">
     <value>New folder</value>
   </data>
-  <data name="New color" xml:space="preserve">
-    <value>New color</value>
-  </data>
   <data name="Folder name" xml:space="preserve">
     <value>Folder name</value>
   </data>
@@ -2982,5 +3165,53 @@
   </data>
   <data name="Folders go at most {0} levels deep." xml:space="preserve">
     <value>Folders go at most {0} levels deep.</value>
+  </data>
+  <data name="Edit colors..." xml:space="preserve">
+    <value>Edit colors...</value>
+  </data>
+  <data name="Server list colors note" xml:space="preserve">
+    <value>The list's own colors, each with a shade per theme. The button color rules and the load name them by their ID; Save in the Server List window writes them.</value>
+  </data>
+  <data name="Remove a color" xml:space="preserve">
+    <value>Remove a color</value>
+  </data>
+  <data name="Remove unused colors" xml:space="preserve">
+    <value>Remove unused colors</value>
+  </data>
+  <data name="Apply to the color" xml:space="preserve">
+    <value>Apply to the color</value>
+  </data>
+  <data name="Change a color" xml:space="preserve">
+    <value>Change a color</value>
+  </data>
+  <data name="Used by {0} rules and load parts" xml:space="preserve">
+    <value>Used by {0} rules and load parts</value>
+  </data>
+  <data name="The change reaches these {0} rules and load parts:" xml:space="preserve">
+    <value>The change reaches these {0} rules and load parts:</value>
+  </data>
+  <data name="No rule and no load part uses these colors: {0}" xml:space="preserve">
+    <value>No rule and no load part uses these colors: {0}</value>
+  </data>
+  <data name="Show offline servers in the game" xml:space="preserve">
+    <value>Show offline servers in the game</value>
+  </data>
+  <data name="Their load" xml:space="preserve">
+    <value>Their load</value>
+  </data>
+  <data name="Offline servers note" xml:space="preserve">
+    <value>Editor only: the login screen also lists every channel 1 to 20 of every group that the connect server did not send, at this load, so you can see its name, color and load bar. It cannot be joined.</value>
+  </data>
+  <data name="Only the editor shows this server; the connect server did not send it." xml:space="preserve">
+    <value>Only the editor shows this server; the connect server did not send it.</value>
+  </data>
+  <data name="from {0}" xml:space="preserve">
+    <value>from {0}</value>
+  </data>
+  <data name="Could not write the tokens.ini of: {0}" xml:space="preserve">
+    <value>Could not write the tokens.ini of: {0}</value>
+  </data>
+  <data name="Theme color note" xml:space="preserve">
+    <value>A theme color: each theme folder's tokens.ini sets it, and a theme built on another takes that one's value until it sets its own. Apply writes the changed themes' tokens.ini at once and the game redraws with it; Undo doesn't take it back.</value>
   </data>
 </root>

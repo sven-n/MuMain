@@ -89,6 +89,22 @@ class StylesheetTest(unittest.TestCase):
         css = self.converter.convert(".a { decorator: linear-gradient(to right, #000, #fff); }", ROOT)
         self.assertIn("background-image: linear-gradient(to right, #000, #fff)", css)
 
+    def test_tiled_box_places_corners_edges_and_center(self):
+        sheet = pathlib.Path(self.temp.name) / "frame.tga"
+        sheet.write_bytes(tga((255, 0, 0, 255)))
+        sprites = "".join(f"{name}: 0px 0px {w}px {h}px; " for name, w, h in (
+            ("tl", 2, 3), ("t", 1, 3), ("tr", 4, 3), ("l", 2, 1), ("c", 1, 1), ("r", 4, 1),
+            ("bl", 2, 5), ("b", 1, 5), ("br", 4, 5)))
+        css = self.converter.convert(f'@spritesheet s {{ src: "{sheet.as_posix()}"; {sprites}}} '
+                                     ".a { decorator: tiled-box(tl, t, tr, l, c, r, bl, b, br); }", ROOT)
+        self.assertEqual(css.count("url("), 9)
+        # Sizes at the converter's dp ratio of 2: the top edge between the 4px and 8px corners, 6px tall.
+        self.assertIn("calc(100% - 12.000px) 6.000px", css)
+        self.assertIn("left 4.000px top 0", css)
+        # The bottom edge 10px tall at the bottom, the center between the 6px top and the 10px bottom.
+        self.assertIn("left 4.000px bottom 0", css)
+        self.assertIn("calc(100% - 12.000px) calc(100% - 16.000px)", css)
+
 
 def tga(rgba):
     """A 1x1 uncompressed 32-bit TGA of one RGBA pixel."""
