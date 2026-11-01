@@ -225,6 +225,12 @@ static std::uint8_t g_tabBar = 0;
         }
     }
 
+    void CullPet(CHARACTER* c)
+    {
+        if (auto* petSystem = ResolvePetSystem(c))
+            petSystem->CullPet();
+    }
+
     void RenderPet(CHARACTER* c)
     {
         OBJECT* o = &c->Object;

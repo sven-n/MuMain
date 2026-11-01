@@ -12207,6 +12207,7 @@ void PrepareCharactersForDraw()
         {
             PrepareCharacterForDraw(c);
             PlaceObjectBounds(o, o->Position);
+            giPetManager::CullPet(c);
         }
     }
 }

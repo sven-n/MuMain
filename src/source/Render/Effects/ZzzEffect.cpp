@@ -8972,14 +8972,9 @@ void RenderAfterEffects()
         {
             o = g_SkillEffects.GetEffect(i - MAX_EFFECTS);
         }
+        // CullEffects marked it.
         if (o->Live && o->m_bRenderAfterCharacter)
         {
-            o->Visible = TestFrustrum(o->Position, 400.f);
-
-            if (gMapManager.WorldActive == WD_39KANTURU_3RD)
-                if (o->Type == MODEL_STORM3 || o->Type == MODEL_MAYASTAR)
-                    o->Visible = true;
-
             if (o->Visible)
             {
                 switch (o->Type)

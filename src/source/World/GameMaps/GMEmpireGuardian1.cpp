@@ -359,6 +359,144 @@ bool GMEmpireGuardian1::MoveMonsterVisual(OBJECT* o, BMD* b)
     return false;
 }
 
+// The gates stand where the map places them, at their own scale; their draws used to put them there.
+static void PlaceGate(OBJECT* o)
+{
+    switch (o->Type)
+    {
+    case MODEL_EVIL_GATE:
+    {
+        int tileX = int(o->Position[0] / 100);
+        int tileY = int(o->Position[1] / 100);
+
+        switch (gMapManager.WorldActive)
+        {
+        case WD_69EMPIREGUARDIAN1:
+        {
+            if (tileX == 233 && tileY == 55)
+            {
+                o->Position[0] = 23350;
+                o->Position[1] = 5520;
+            }
+            else if ((165 <= tileX && tileX <= 167) && (25 <= tileY && tileY <= 27))
+            {
+                o->Position[0] = 16710;
+                o->Position[1] = 2620;
+            }
+        }
+        break;
+        case WD_70EMPIREGUARDIAN2:
+        {
+            if ((49 <= tileX && tileX <= 51) && (64 <= tileY && tileY <= 66))
+            {
+                o->Position[0] = 5075;
+                o->Position[1] = 6490;
+            }
+            else if ((40 <= tileX && tileX <= 42) && (116 <= tileY && tileY <= 118))
+            {
+                o->Position[0] = 4200;
+                o->Position[1] = 11680;
+            }
+        }
+        break;
+        case WD_71EMPIREGUARDIAN3:
+        {
+            if ((118 <= tileX && tileX <= 120) && (191 <= tileY && tileY <= 193))
+            {
+                o->Scale = 0.9f;
+                o->Position[0] = 11985;
+                o->Position[1] = 19250;
+            }
+            else if ((221 <= tileX && tileX <= 223) && (159 <= tileY && tileY <= 161))
+            {
+                o->Scale = 1.08f;
+                o->Position[0] = 22300;
+                o->Position[1] = 16000;
+            }
+        }
+        break;
+        }
+    }
+    break;
+    case MODEL_STAR_GATE:
+        if (gMapManager.IsEmpireGuardian4())
+        {
+            int tileX = int(o->Position[0] / 100);
+            int tileY = int(o->Position[1] / 100);
+
+            if ((49 <= tileX && tileX <= 51) && (68 <= tileY && tileY <= 70))
+            {
+                o->Scale = 1.0f;
+                o->Position[0] = 5080;
+                o->Position[1] = 6920;
+            }
+            else if ((51 <= tileX && tileX <= 53) && (190 <= tileY && tileY <= 192))
+            {
+                o->Scale = 1.0f;
+                o->Position[0] = 5270;
+                o->Position[1] = 19120;
+            }
+            else if ((196 <= tileX && tileX <= 198) && (131 <= tileY && tileY <= 133))
+            {
+                o->Scale = 1.0f;
+                o->Position[0] = 19750;
+                o->Position[1] = 13220;
+            }
+        }
+        break;
+    case MODEL_RUSH_GATE:
+        if (gMapManager.IsEmpireGuardian4() && o->CurrentAction != MONSTER01_DIE)
+        {
+            int tileX = int(o->Position[0] / 100);
+            int tileY = int(o->Position[1] / 100);
+
+            if ((80 <= tileX && tileX <= 82) && (68 <= tileY && tileY <= 70))
+            {
+                o->Scale = 0.8f;
+                o->Position[0] = 8115;
+                o->Position[1] = 6880;
+            }
+            else if ((31 <= tileX && tileX <= 33) && (89 <= tileY && tileY <= 91))
+            {
+                o->Scale = 0.9f;
+                o->Position[0] = 3250;
+                o->Position[1] = 9000;
+            }
+            else if ((33 <= tileX && tileX <= 35) && (175 <= tileY && tileY <= 177))
+            {
+                o->Scale = 0.8f;
+                o->Position[0] = 3470;
+                o->Position[1] = 17600;
+            }
+            else if ((68 <= tileX && tileX <= 70) && (165 <= tileY && tileY <= 167))
+            {
+                o->Scale = 0.9f;
+                o->Position[0] = 6915;
+                o->Position[1] = 16650;
+            }
+            else if ((155 <= tileX && tileX <= 157) && (131 <= tileY && tileY <= 133))
+            {
+                o->Scale = 0.9f;
+                o->Position[0] = 15710;
+                o->Position[1] = 13250;
+            }
+            else if ((223 <= tileX && tileX <= 225) && (158 <= tileY && tileY <= 160))
+            {
+                o->Scale = 0.8f;
+                o->Position[0] = 22500;
+                o->Position[1] = 16000;
+            }
+            else if ((213 <= tileX && tileX <= 215) && (23 <= tileY && tileY <= 25))
+            {
+                o->Scale = 0.9f;
+                o->Position[0] = 21480;
+                o->Position[1] = 2430;
+            }
+        }
+        break;
+    }
+}
+
 bool GMEmpireGuardian1::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (gMapManager.IsEmpireGuardian1() == false && gMapManager.IsEmpireGuardian2() == false &&
@@ -366,6 +504,8 @@ bool GMEmpireGuardian1::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     {
         return false;
     }
+
+    PlaceGate(o);
 
     vec3_t vPos, Light;
 
@@ -1887,57 +2027,6 @@ bool GMEmpireGuardian1::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         return true;
     case MODEL_EVIL_GATE:
     {
-        int tileX = int(o->Position[0] / 100);
-        int tileY = int(o->Position[1] / 100);
-
-        switch (gMapManager.WorldActive)
-        {
-        case WD_69EMPIREGUARDIAN1:
-        {
-            if (tileX == 233 && tileY == 55)
-            {
-                o->Position[0] = 23350;
-                o->Position[1] = 5520;
-            }
-            else if ((165 <= tileX && tileX <= 167) && (25 <= tileY && tileY <= 27))
-            {
-                o->Position[0] = 16710;
-                o->Position[1] = 2620;
-            }
-        }
-        break;
-        case WD_70EMPIREGUARDIAN2:
-        {
-            if ((49 <= tileX && tileX <= 51) && (64 <= tileY && tileY <= 66))
-            {
-                o->Position[0] = 5075;
-                o->Position[1] = 6490;
-            }
-            else if ((40 <= tileX && tileX <= 42) && (116 <= tileY && tileY <= 118))
-            {
-                o->Position[0] = 4200;
-                o->Position[1] = 11680;
-            }
-        }
-        break;
-        case WD_71EMPIREGUARDIAN3:
-        {
-            if ((118 <= tileX && tileX <= 120) && (191 <= tileY && tileY <= 193))
-            {
-                o->Scale = 0.9f;
-                o->Position[0] = 11985;
-                o->Position[1] = 19250;
-            }
-            else if ((221 <= tileX && tileX <= 223) && (159 <= tileY && tileY <= 161))
-            {
-                o->Scale = 1.08f;
-                o->Position[0] = 22300;
-                o->Position[1] = 16000;
-            }
-        }
-        break;
-        }
-
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV, o->HiddenMesh);
     }

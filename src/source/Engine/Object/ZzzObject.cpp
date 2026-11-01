@@ -3994,19 +3994,13 @@ void RenderObjects_AfterCharacter()
         ))
         return;
 
-    float   range = 0.f;
-    if (gMapManager.WorldActive == WD_10HEAVEN)
-    {
-        range = -10.f;
-    }
-
     for (int i = 0; i < 16; i++)
     {
         for (int j = 0; j < 16; j++)
         {
             OBJECT_BLOCK* ob = &ObjectBlock[i * 16 + j];
 
-            ob->Visible = TestFrustrum2D((float)(i * 16 + 8), (float)(j * 16 + 8), -180.f);
+            // CullObjects marked the blocks and their objects.
 
             if (g_Direction.m_CKanturu.IsMayaScene())
             {
@@ -4080,7 +4074,6 @@ void RenderObjects_AfterCharacter()
                     {
                         if (o->Live && o->m_bRenderAfterCharacter == true)
                         {
-                            o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, o->CollisionRange + range);
                             if ((gMapManager.WorldActive == WD_51HOME_6TH_CHAR
                                 ) && (o->Type == 89));
                             else
