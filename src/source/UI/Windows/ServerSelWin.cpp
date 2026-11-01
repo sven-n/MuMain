@@ -405,6 +405,11 @@ void CServerSelWin::RmlClickSelectServer(int nServerIndex)
     if (pServerInfo == nullptr || RefuseOfflinePreview(*pServerInfo))
         return;
 
+    PickServer(pServerInfo);
+}
+
+void CServerSelWin::PickServer(CServerInfo* pServerInfo)
+{
     // A full and an overloaded server say so alike; the original client did nothing for an
     // overloaded one (then "Now preparing").
     if (Data::ServerList::GetLoadState(pServerInfo->m_iPercent) == Data::ServerList::LoadState::Open)
@@ -415,6 +420,17 @@ void CServerSelWin::RmlClickSelectServer(int nServerIndex)
     {
         CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_SERVER_BUSY);
     }
+}
+
+void CServerSelWin::ShowGroup(CServerGroup* pServerGroup)
+{
+    m_iSelectServerBtnIndex = pServerGroup->m_iBtnPos;
+    UpdateDisplay();
+
+    // UpdateDisplay() re-derives m_pSelectServerGroup from the button index,
+    // which only agrees with pServerGroup while the list and the index agree
+    // -- the group the caller chose is the one it must connect to regardless.
+    m_pSelectServerGroup = pServerGroup;
 }
 
 bool CServerSelWin::ConnectToServer(CServerInfo* pServerInfo)
@@ -451,18 +467,9 @@ void CServerSelWin::ResumeServerPick(int connectIndex)
     if (pServerInfo == nullptr || pServerGroup->m_iBtnPos < 0)
         return;
 
-    m_iSelectServerBtnIndex = pServerGroup->m_iBtnPos;
-    UpdateDisplay();
-    m_pSelectServerGroup = pServerGroup;
-
     // A server that filled up meanwhile gets the answer a click on it gets.
-    if (Data::ServerList::GetLoadState(pServerInfo->m_iPercent) != Data::ServerList::LoadState::Open)
-    {
-        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_SERVER_BUSY);
-        return;
-    }
-
-    ConnectToServer(pServerInfo);
+    ShowGroup(pServerGroup);
+    PickServer(pServerInfo);
 }
 
 bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
@@ -498,13 +505,7 @@ bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
     // after this point puts the previous selection back rather than leaving
     // the screen on a group the caller never reached.
     const int iPreviousBtnIndex = m_iSelectServerBtnIndex;
-    m_iSelectServerBtnIndex = iBtnPos;
-    UpdateDisplay();
-
-    // UpdateDisplay() re-derives m_pSelectServerGroup from the button index,
-    // which only agrees with pChosenGroup while the list and the index agree
-    // -- the group this call chose is the one it must connect to regardless.
-    m_pSelectServerGroup = pChosenGroup;
+    ShowGroup(pChosenGroup);
 
     CServerInfo* pServerInfo = m_pSelectServerGroup->GetServerInfo(serverIndex);
     if (pServerInfo == nullptr ||
