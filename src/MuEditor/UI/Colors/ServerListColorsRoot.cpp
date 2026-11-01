@@ -251,7 +251,7 @@ void ServerListColorsRoot::RenderEdit(const std::string& name)
         const ImVec4 current = hasShade ? ListColors::ParseShade(shade->second).value_or(fallback) : fallback;
         float rgb[3] = {current.x, current.y, current.z};
         const std::string label = UI::RmlBridge::GetThemeDisplayName(theme);
-        if (ImGui::ColorEdit3(label.c_str(), rgb, ImGuiColorEditFlags_DisplayHex))
+        if (ImGui::ColorEdit3(label.c_str(), rgb, ImGuiColorEditFlags_Uint8))
         {
             m_edit.shades[theme] = FormatShade(rgb);
         }
