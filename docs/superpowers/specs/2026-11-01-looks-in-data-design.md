@@ -56,6 +56,9 @@ Made while reviewing sven-n/MuMain#915, 2026-11-01.
 | L15 | The look files (Q-L4c, 2026-11-01) | **One file per kind** in `Data/Effects/`: `RenderStyles.json` and `ItemEffects.json`, named like the fields `renderStyle` and `itemEffect` and the two dropdowns. Built like the effect catalogue files next to them: a format version, the kind, and a list sorted by name, which the Look Editor writes back sorted so a change stays a few lines. Looks are shared across item groups, so they are not split by group like the model files. When monsters and NPCs get looks (MN8), they use the same files (D25); renaming the "item effect" kind for them is the monsters design's call. One file for both kinds and one file per look (165 files) were weighed. |
 | L16 | Looks that don't fit (Q-L5a, 2026-11-01) | **Real features become blocks:** a value that is the item's value times a shape (the four Phoenix Soul items, `cursedCastleWater`); the model's light at a fixed brightness (`invisibilityCloak`); a value from the item's turning angle (`gambleItem`); "in the inventory" as a place condition next to L11's "inventory and ground" (`capeOfEmperor`, `smallCapeOfLord`, which test for exactly white light today; the pull request checks which drawings have white light); a zigzag shape, straight up and down (`symbolOfKundun`); the model lit by the scene light (`firecracker` sets `b->LightEnable`). **Bug-like quirks are fixed while moving**, each in its own commit with a before/after in game, not copied with blocks of their own: `wingOfStorm` and `symbolOfKundun` count their animation per drawing in a shared `static` counter, so it speeds up with every one on screen (moved: counted in time); `bloodBone` scrolls by `sin(map number × 0.0001)` instead of the clock (moved: no offset, under 1/100 of the texture); `runeBlade`, `elementalMace` and `grandSoulShield` make a grey from the red channel of the model's light only (moved: the light's tint, the same under white light). Copying the quirks exactly, and leaving these looks as code, were weighed. |
 | L17 | The order of moving (Q-L5b, 2026-11-01) | **By building block**, so each pull request brings one kind of block and moves the looks that need exactly it: (1) the machinery (loader, layer drawing, comparison test, Look Editor basics) with the 36 render styles of plain passes; (2) light and time, 67 render styles; (3) conditions and values per item, 20 render styles, among them the Magic Gladiator sets after #915 is merged (reflection under the holes); (4) the item effect kind, 16 item effects (9 that set values, 7 that draw become render styles); (5) the additions and quirk fixes of L16, 14 render styles. Then step 2 (FX1.7c) and step 3 (3 render styles, 9 item effects). The counts come from the survey script; each pull request's comparison test shows the exact list. The split into pull requests, with the mesh list and the editor parts: Q-L10. The Magic Gladiator sets as a first pilot, one pull request per item group, and the most-used looks first were weighed. |
+| L18 | Where the Look Editor lives (Q-L6a, 2026-11-01) | **A window of its own**, Windows > Look Editor, next to the Effect Browser, for the items now and the monsters later (D25: one look editor for all areas). Built like Glow Colors (`MuItemGlowColorsUI.cpp`): tabs Render styles and Item effects; a button row (New look, Copy, Rename) and a grey note; on the left a resizable list with each look's name, how many items use it, and "(code)" for looks not moved yet; on the right the picked look, Apply to the look / Revert / Remove, "Used by N items:" with the list of items, and the confirm that lists them (D26). The Item Model window keeps its two dropdowns, "Values for this item" and gets "Open in Look Editor". An item tool under Windows > Items, and editing inside the Item Model window, were weighed. |
+| L19 | The layer list (Q-L6b, 2026-11-01) | **A list, then the picked layer.** The look's layers in drawing order, one line each written from its fields ("texture, mesh 0, glowing blue, pulsing"), with + Add, Copy, up, down and Remove above the list, and "Item values after drawing" (or "before drawing" for an item effect) as the last line. Clicking a line shows its fields below: the fields of L8 to L11, the value graph beside a field that changes over time (L9), and the "Each item sets this" box (L12). A collapsing section per layer, and a table with a column per field, were weighed. |
+| L20 | The Look Editor's preview (Q-L6c, 2026-11-01) | **The Item Model preview with helpers for designing.** As in the Item Model window (`ItemModelPreview.h`): the look shown on an item (any of its users, or any other item to try it on), at an item level, excellent or ancient, in the inventory pose or on the ground, turning, with the same camera; changes show before they are applied. Added: stopping time and moving it with a slider (the clock the looks read while the preview draws), an eye per layer to hide it or show only it, and "Draw as: doppelganger" to see "Not for". Things on bones show here after FX1.7c (L7, step 2). **Later, on top:** a pose worn by a character in an animation (no preview draws a character with equipment yet). |
 
 ## Current state
 
@@ -209,12 +212,10 @@ Answered one by one, each with the current state, every option with an
 example, and a recommendation.
 
 Answered: Q-L1 (L7), Q-L2a (L8), Q-L2b (L9, L10), Q-L2c (L11), Q-L3 (L12),
-Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), all on
-2026-11-01.
+Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), Q-L6a to Q-L6c (L18 to L20), all on 2026-11-01.
 
 | Q | Question |
 |---|---|
-| Q-L6 | The look editor: in the Item Model window under Looks, or a window of its own (D25: one look editor for all areas); layer list, preview, the items that use a look. |
 | Q-L7 | The mesh list: what each row shows (number, texture, hidden, glowing, has holes), and whether hovering a row highlights the mesh in the preview. |
 | Q-L8 | Data checks: mesh numbers the model doesn't have, missing textures, unknown kinds. |
 | Q-L9 | How each moved style is compared with its old code (the render recorder). |
@@ -224,7 +225,7 @@ Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), all on
 ## Tasks
 
 1. [ ] Write this design: answer the open questions one by one (in progress;
-   Q-L1 to Q-L5 done).
+   Q-L1 to Q-L6 done).
 2. [ ] Step 1 of L7: draw passes and conditions, in L17's order (the pull
    requests from Q-L10).
 3. [ ] Step 2 of L7: FX1.7c, its short design, then the live preview.
