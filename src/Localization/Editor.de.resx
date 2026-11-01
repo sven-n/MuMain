@@ -2947,4 +2947,31 @@
   <data name="Folders go at most {0} levels deep." xml:space="preserve">
     <value>Ordner gehen höchstens {0} Ebenen tief.</value>
   </data>
+  <data name="Edit colors..." xml:space="preserve">
+    <value>Farben bearbeiten...</value>
+  </data>
+  <data name="Server list colors note" xml:space="preserve">
+    <value>Die eigenen Farben der Liste, jede mit einem Farbton je Theme. Die Regeln der Schaltflächenfarben und die Auslastung nennen sie über ihre ID; Speichern im Serverlisten-Fenster schreibt sie.</value>
+  </data>
+  <data name="Remove a color" xml:space="preserve">
+    <value>Farbe entfernen</value>
+  </data>
+  <data name="Remove unused colors" xml:space="preserve">
+    <value>Ungenutzte Farben entfernen</value>
+  </data>
+  <data name="Apply to the color" xml:space="preserve">
+    <value>Auf die Farbe anwenden</value>
+  </data>
+  <data name="Change a color" xml:space="preserve">
+    <value>Farbe ändern</value>
+  </data>
+  <data name="Used by {0} rules and load parts" xml:space="preserve">
+    <value>Von {0} Regeln und Auslastungsteilen genutzt</value>
+  </data>
+  <data name="The change reaches these {0} rules and load parts:" xml:space="preserve">
+    <value>Die Änderung betrifft diese {0} Regeln und Auslastungsteile:</value>
+  </data>
+  <data name="No rule and no load part uses these colors: {0}" xml:space="preserve">
+    <value>Keine Regel und kein Auslastungsteil nutzt diese Farben: {0}</value>
+  </data>
 </root>

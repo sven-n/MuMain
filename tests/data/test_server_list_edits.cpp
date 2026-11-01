@@ -453,6 +453,31 @@ TEST_CASE("ServerListEdits: the load bar and load texts follow their colors")
     CHECK(edits.GetList().load.bar.full == "crimson");
 }
 
+// What the Colors window keeps of the Server list root is worked out again after each of these.
+TEST_CASE("ServerListEdits: the version counts the reads and the steps, also undone and redone")
+{
+    ServerListEdits edits = ThreeGroups();
+    int before = edits.GetVersion();
+    edits.Commit();
+    CHECK(edits.GetVersion() == before);
+
+    edits.AddColor("Silver");
+    edits.Commit();
+    CHECK(edits.GetVersion() != before);
+
+    before = edits.GetVersion();
+    edits.Undo();
+    CHECK(edits.GetVersion() != before);
+
+    before = edits.GetVersion();
+    edits.Redo();
+    CHECK(edits.GetVersion() != before);
+
+    before = edits.GetVersion();
+    edits.Reset(List({Group(0, "Valhalla")}));
+    CHECK(edits.GetVersion() != before);
+}
+
 TEST_CASE("ServerListEdits: a load text's look and text are steps named after its server")
 {
     I18N::SetLocale("en");

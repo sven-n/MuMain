@@ -2128,9 +2128,6 @@
   <data name="Load {0}%" xml:space="preserve">
     <value>{0} % load</value>
   </data>
-  <data name="Color load used note" xml:space="preserve">
-    <value>The load bar and load texts use it {0} times; they then have the default color.</value>
-  </data>
   <data name="Step load" xml:space="preserve">
     <value>Load: {0}</value>
   </data>
@@ -2174,7 +2171,7 @@
     <value>Every VIP type and PvP setting has a rule.</value>
   </data>
   <data name="Colors note" xml:space="preserve">
-    <value>Your own button colors, with a shade for each theme; a theme without one draws its default color. A button in an own color keeps it on hover.</value>
+    <value>The list's own colors are the Server list root of the Colors window.</value>
   </data>
   <data name="New color" xml:space="preserve">
     <value>New color</value>
@@ -2184,12 +2181,6 @@
   </data>
   <data name="Not a free color ID" xml:space="preserve">
     <value>Not a free color ID: letters and digits, starting with a lowercase letter, not a theme color's name or another color's.</value>
-  </data>
-  <data name="Remove color {0}?" xml:space="preserve">
-    <value>Remove color {0}?</value>
-  </data>
-  <data name="Color used note" xml:space="preserve">
-    <value>{0} rules have this color; they then have the default color.</value>
   </data>
   <data name="Step add color" xml:space="preserve">
     <value>Add color {0}</value>
@@ -3177,5 +3168,32 @@
   </data>
   <data name="Folders go at most {0} levels deep." xml:space="preserve">
     <value>Folders go at most {0} levels deep.</value>
+  </data>
+  <data name="Edit colors..." xml:space="preserve">
+    <value>Edit colors...</value>
+  </data>
+  <data name="Server list colors note" xml:space="preserve">
+    <value>The list's own colors, each with a shade per theme. The button color rules and the load name them by their ID; Save in the Server List window writes them.</value>
+  </data>
+  <data name="Remove a color" xml:space="preserve">
+    <value>Remove a color</value>
+  </data>
+  <data name="Remove unused colors" xml:space="preserve">
+    <value>Remove unused colors</value>
+  </data>
+  <data name="Apply to the color" xml:space="preserve">
+    <value>Apply to the color</value>
+  </data>
+  <data name="Change a color" xml:space="preserve">
+    <value>Change a color</value>
+  </data>
+  <data name="Used by {0} rules and load parts" xml:space="preserve">
+    <value>Used by {0} rules and load parts</value>
+  </data>
+  <data name="The change reaches these {0} rules and load parts:" xml:space="preserve">
+    <value>The change reaches these {0} rules and load parts:</value>
+  </data>
+  <data name="No rule and no load part uses these colors: {0}" xml:space="preserve">
+    <value>No rule and no load part uses these colors: {0}</value>
   </data>
 </root>

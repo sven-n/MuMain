@@ -59,9 +59,10 @@ stores it when a field is left.
 - **MuItemTranslationsUI.h/cpp** - Item names as a grid of items and languages, with missing counts, on the shared names grid with ItemNameRows as its rows (docs/translation-system.md)
 
 ### Colors (UI/Colors)
-- **MuColorsUI.h/cpp** - The Colors window: the named colors as a tree, a root per use with the user's folders (Data/GameData/ColorFolders), drag and drop within a root (Windows > Colors, and Items > Glow Colors on its root); it docks with the item tools, and each root's changes go to its own history
+- **MuColorsUI.h/cpp** - The Colors window: the named colors as a tree, a root per use with the user's folders (Data/GameData/ColorFolders), drag and drop within a root (Windows > Colors, Items > Glow Colors and the Server List window's Edit colors on their root); it docks with the item tools, and each root's changes go to its own history
 - **NamedColorList.h/cpp** - The panel the picked entry of any root is drawn with: its value with Apply, Revert and Remove, its users, the list of the users a change reaches, and for a picked root the unused entries removed at once; a root gives it its entries through **NamedColorSource.h**
 - **GlowColorsRoot.h/cpp** - The Glow root: new colors, changed values and unused colors removed (GlowColorDialog, which the model tool's color fields open too)
+- **ServerListColorsRoot.h/cpp** - The Server list root: the server list's own colors with a shade per theme, used by the button color rules and the load; its changes are steps of the Server List window's history
 
 ### Monster Tools (UI/MonsterTools)
 One selected monster (**MonsterSelection**) is shown by every monster tool.

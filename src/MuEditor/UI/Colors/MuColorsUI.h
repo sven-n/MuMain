@@ -4,6 +4,7 @@
 
 #include "GlowColorsRoot.h"
 #include "NamedColorList.h"
+#include "ServerListColorsRoot.h"
 
 #include "Data/GameData/ColorFolders/ColorFolder.h"
 
@@ -19,14 +20,16 @@ namespace MuEditor::Colors
 enum class ColorsRoot
 {
     Glow,
+    ServerList,
 };
 } // namespace MuEditor::Colors
 
-// The Colors window (D69): the editor's named colors as a tree. A root for each use (the glow colors) holds the folders
-// the user sorts its colors in, also folders in folders, and the colors no folder holds; a color moves only within its
-// root. The picked color is drawn with the shared panel (NamedColorList). Windows > Colors opens it on what was picked
-// last, the entry of the item tools (Items > Glow Colors) on its root. It docks with the item tools; each root's
-// changes are steps of its own history (the item edits).
+// The Colors window (D69): the editor's named colors as a tree. A root for each use (the glow colors, the server list's
+// colors) holds the folders the user sorts its colors in, also folders in folders, and the colors no folder holds; a
+// color moves only within its root. The picked color is drawn with the shared panel (NamedColorList). Windows > Colors
+// opens it on what was picked last, the entry of the item tools (Items > Glow Colors) and the Server List window's
+// Edit colors on their root. It docks with the item tools; each root's changes are steps of its own history (the item
+// edits, the Server List window's).
 class CMuColorsUI
 {
 public:
@@ -130,6 +133,7 @@ private:
     Data::Colors::ColorFolderPath m_newColorFolder;
 
     MuEditor::Colors::GlowColorsRoot m_glow;
+    MuEditor::Colors::ServerListColorsRoot m_serverList;
     MuEditor::Colors::NamedColorList m_panel;
 };
 

@@ -6,6 +6,7 @@
 
 #include "ServerListStepLabel.h"
 
+#include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/ServerListData/ThemeColor.h"
 #include "Data/GameData/ServerListData/ServerListIds.h"
 
@@ -54,6 +55,7 @@ void ServerListEdits::Reset(ServerListData list, bool complete)
     m_undo.clear();
     m_redo.clear();
     m_pendingLabel.clear();
+    ++m_version;
 }
 
 void ServerListEdits::Commit()
@@ -72,6 +74,7 @@ void ServerListEdits::Commit()
     m_redo.clear();
     m_committed = m_list;
     m_pendingLabel.clear();
+    ++m_version;
 }
 
 void ServerListEdits::Undo()
@@ -86,6 +89,7 @@ void ServerListEdits::Undo()
     m_redo.push_back({std::move(m_list), std::move(step.label)});
     m_list = std::move(step.list);
     m_committed = m_list;
+    ++m_version;
 }
 
 void ServerListEdits::Redo()
@@ -100,6 +104,7 @@ void ServerListEdits::Redo()
     m_undo.push_back({std::move(m_list), std::move(step.label)});
     m_list = std::move(step.list);
     m_committed = m_list;
+    ++m_version;
 }
 
 std::string ServerListEdits::GetUndoLabel() const
@@ -315,7 +320,32 @@ void ServerListEdits::RemoveColor(size_t index)
             *loadColor = defaultColor;
         }
     }
+    Data::Colors::RemoveColorFromFolders(m_list.colorFolders, color.id);
     m_list.colors.erase(m_list.colors.begin() + static_cast<std::ptrdiff_t>(index));
+}
+
+void ServerListEdits::SetColorFolders(std::vector<Data::Colors::ColorFolder> folders, std::string label)
+{
+    m_list.colorFolders = std::move(folders);
+    m_pendingLabel = std::move(label);
+}
+
+void ServerListEdits::SetColorOrder(std::span<const std::string> ids, std::string label)
+{
+    std::vector<CustomColor> ordered;
+    for (const std::string& id : ids)
+    {
+        if (const CustomColor* color = m_list.FindCustomColor(id))
+        {
+            ordered.push_back(*color);
+        }
+    }
+    if (ordered.size() != m_list.colors.size())
+    {
+        return;
+    }
+    m_list.colors = std::move(ordered);
+    m_pendingLabel = std::move(label);
 }
 
 bool ServerListEdits::MoveColor(size_t index, int direction)
@@ -362,6 +392,7 @@ bool ServerListEdits::ChangeColorId(size_t index, const std::string& id)
             *loadColor = id;
         }
     }
+    Data::Colors::RenameColorInFolders(m_list.colorFolders, color.id, id);
     color.id = id;
     return true;
 }

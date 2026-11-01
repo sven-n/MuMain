@@ -38,6 +38,25 @@ public:
     void Undo() override;
     void Redo() override;
 
+    // For the Colors window's Server list root (MuEditor::Colors::ServerListColorsRoot), which edits the list's own
+    // colors and their folders. The file is read the first time.
+    void EnsureLoaded();
+    MuEditor::ServerList::ServerListEdits& GetEdits()
+    {
+        return m_edits;
+    }
+    // After the root changed the list: what changed is one undo step, and the login screen shows it.
+    void AfterColorEdit();
+    // Where the list names its color `id`: the button color rules and the parts of the load, each as a label.
+    std::vector<std::string> DescribeColorUsers(std::string_view id) const;
+    // The theme folders a color gets a shade for.
+    const std::vector<std::string>& GetThemes() const
+    {
+        return m_themes;
+    }
+    // Opens the window on its Channel names tab and brings it to the front.
+    void ShowChannelNames();
+
 private:
     // Begins the window with the editor's bar; false (and ended) while hidden.
     bool BeginWindow(bool* open);
@@ -77,11 +96,8 @@ private:
     bool RenderSelectedVipType();
     bool RenderTexts();
     bool RenderButtonColorRules();
-    bool RenderCustomColors();
-    bool RenderCustomColorButtons();
-    bool RenderSelectedCustomColor();
-    // Asks before a color that rules have is removed.
-    bool RenderRemoveColorPopup();
+    // The list's own colors are the Colors window's Server list root; this opens it.
+    void RenderEditColorsButton();
     void RenderPreview();
     // One text in the language picked on the tab, the English one as its hint.
     bool RenderLocalizedField(const char* label, Data::LocalizedString& text, size_t maxUnits);
@@ -91,7 +107,6 @@ private:
     void ShowInGame();
     void Select(int index);
     void SelectVipType(int index);
-    void SelectColor(int index);
 
     MuEditor::ServerList::ServerListEdits m_edits;
     bool m_loaded = false;
@@ -107,18 +122,14 @@ private:
     bool m_vipTypeIdActive = false;
     // The VIP type the remove popup asks about, or -1.
     int m_removeVipType = -1;
-    int m_selectedColor = -1;
-    // As m_vipTypeIdDraft, for the selected color.
-    std::string m_colorIdDraft;
-    bool m_colorIdActive = false;
-    // The color the remove popup asks about, or -1.
-    int m_removeColor = -1;
     // The rule whose last change was refused (another rule fits the same channels), or -1.
     int m_refusedRule = -1;
     // The theme folders a color gets a shade for (UI::RmlBridge::DiscoverAvailableThemes).
     std::vector<std::string> m_themes;
     // The language the Channel names tab shows and edits the texts in.
     std::string m_textLocale = "en";
+    // ShowChannelNames asked for the Channel names tab, until the tab bar is drawn.
+    bool m_selectChannelNames = false;
     // What the last read or save found, and what it said.
     std::vector<Data::Items::ItemDataIssue> m_issues;
     std::string m_status;

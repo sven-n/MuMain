@@ -1355,9 +1355,9 @@ armors) may need a restart to show a new file.
 
 ### Colors
 
-The named colors as a tree, a root per use: **Glow** for now; the ground label
-styles, the server list's colors and the tooltip color groups get roots of
-their own. **Windows > Colors** opens the window on what was picked last, and
+The named colors as a tree, a root per use: **Glow** and the server list's
+colors ([server-list.md](server-list.md)); the ground label styles and the
+tooltip color groups get roots of their own. **Windows > Colors** opens the window on what was picked last, and
 **Items > Glow Colors** on its root. It docks with the item tools. The changes
 of the item roots are steps of the item undo history, Save Items writes them.
 

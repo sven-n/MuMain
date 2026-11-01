@@ -23,6 +23,7 @@
 #include "ServerListColors.h"
 #include "ServerListLoadUI.h"
 #include "ServerListStepLabel.h"
+#include "../MuEditor/UI/Colors/MuColorsUI.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Windows/ServerSelWin.h"
 #include "imgui.h"
@@ -44,7 +45,6 @@ using Data::ServerList::ChannelSettings;
 using Data::ServerList::RuleVip;
 using Data::ServerList::ServerGroup;
 using Data::ServerList::ServerListData;
-using Data::ServerList::ThemeColor;
 using Data::ServerList::VipType;
 using namespace MuEditor::ServerList::Colors;
 
@@ -61,8 +61,6 @@ constexpr float WideIdFieldWidth = IdFieldWidth * 1.5f;
 constexpr float PvpComboWidth = VipComboWidth * 0.6f;
 // Where the channel list of the remove VIP type question wraps.
 constexpr float PopupWrapWidth = TextFieldWidth * 1.5f;
-// The height of the list of the list's own colors.
-constexpr float ColorListHeight = 110.0f;
 constexpr int ChannelTableColumns = 5;
 constexpr int PreviewTableColumns = 3 + Data::ServerList::ChannelNamePlaceCount;
 constexpr ImVec4 ErrorColor{1.0f, 0.4f, 0.4f, 1.0f};
@@ -79,15 +77,6 @@ std::string_view GetEditorLocale()
 std::string GetVipTypeLabel(const VipType* vipType, std::string_view locale)
 {
     return vipType != nullptr ? vipType->name.Get(locale) : std::string(I18N::Editor::None);
-}
-
-std::string FormatShade(const float rgb[3])
-{
-    char text[8] = {};
-    const auto channel = [](float value)
-    { return static_cast<unsigned int>(std::clamp(value, 0.0f, 1.0f) * 255.0f + 0.5f); };
-    std::snprintf(text, sizeof(text), "#%02X%02X%02X", channel(rgb[0]), channel(rgb[1]), channel(rgb[2]));
-    return text;
 }
 
 std::string GetRuleVipLabel(const ServerListData& list, const ButtonColorRule& rule, std::string_view locale)
@@ -376,7 +365,10 @@ void CMuServerListUI::Render(bool* open)
             ImGui::EndTabItem();
         }
         const std::string namesTab = std::string(I18N::Editor::ChannelNames) + "###ChannelNames";
-        if (ImGui::BeginTabItem(namesTab.c_str()))
+        const ImGuiTabItemFlags namesFlags =
+            m_selectChannelNames ? ImGuiTabItemFlags_SetSelected : ImGuiTabItemFlags_None;
+        m_selectChannelNames = false;
+        if (ImGui::BeginTabItem(namesTab.c_str(), nullptr, namesFlags))
         {
             changed |= RenderChannelNamesTab();
             ImGui::EndTabItem();
@@ -479,8 +471,6 @@ void CMuServerListUI::LoadFile()
                                        : std::clamp(m_selected, 0, static_cast<int>(m_edits.GetGroups().size()) - 1));
     const int vipTypes = static_cast<int>(m_edits.GetList().vipTypes.size());
     SelectVipType(vipTypes == 0 ? -1 : std::clamp(m_selectedVipType, 0, vipTypes - 1));
-    const int colors = static_cast<int>(m_edits.GetList().colors.size());
-    SelectColor(colors == 0 ? -1 : std::clamp(m_selectedColor, 0, colors - 1));
     m_refusedRule = -1;
     m_themes = UI::RmlBridge::DiscoverAvailableThemes();
     // A theme's tokens.ini may have changed since; its shades are read again.
@@ -582,9 +572,7 @@ void CMuServerListUI::AfterHistoryStep()
     m_takenId = -1;
     Select(std::min(m_selected, static_cast<int>(m_edits.GetGroups().size()) - 1));
     SelectVipType(std::min(m_selectedVipType, static_cast<int>(m_edits.GetList().vipTypes.size()) - 1));
-    SelectColor(std::min(m_selectedColor, static_cast<int>(m_edits.GetList().colors.size()) - 1));
     m_removeVipType = -1;
-    m_removeColor = -1;
     m_refusedRule = -1;
     ShowInGame();
 }
@@ -881,7 +869,7 @@ bool CMuServerListUI::RenderChannelNamesTab()
         ImGui::Separator();
         changed |= MuEditor::ServerList::LoadUI::RenderLoadSettings(m_edits.EditList(), [this] { CommitPending(); });
         ImGui::Separator();
-        changed |= RenderCustomColors();
+        RenderEditColorsButton();
         ImGui::Separator();
         RenderPreview();
     }
@@ -1176,228 +1164,69 @@ bool CMuServerListUI::RenderButtonColorRules()
     return changed;
 }
 
-bool CMuServerListUI::RenderCustomColors()
+void CMuServerListUI::RenderEditColorsButton()
 {
     ImGui::TextUnformatted(I18N::Editor::Colors);
     RenderNote(I18N::Editor::ColorsNote);
-    const float scale = g_MuEditorCore.GetUIScale();
-    bool changed = false;
-    ImGui::BeginGroup();
-    if (ImGui::BeginChild("##CustomColors", ImVec2(GroupListWidth * scale, ColorListHeight * scale),
-                          ImGuiChildFlags_Borders))
-    {
-        const ServerListData& list = m_edits.GetList();
-        const std::string_view theme = GetGameTheme();
-        for (int index = 0; index < static_cast<int>(list.colors.size()); ++index)
-        {
-            const Data::ServerList::CustomColor& color = list.colors[static_cast<size_t>(index)];
-            ImGui::PushID(index);
-            RenderSwatch(GetButtonColorSwatch(Data::ServerList::ResolveButtonColor(list, color.id, theme), theme));
-            ImGui::SameLine();
-            const std::string label = GetColorLabel(list, color.id) + " (" + color.id + ")";
-            if (SelectableText("##CustomColor", label, index == m_selectedColor, MuEditor::KeyboardSelection::RowFlags))
-            {
-                SelectColor(index);
-            }
-            ImGui::PopID();
-        }
-    }
-    ImGui::EndChild();
-    changed |= RenderCustomColorButtons();
-    ImGui::EndGroup();
-    ImGui::SameLine();
-    ImGui::BeginGroup();
-    // Its ID and Name fields are not the VIP type's above.
-    ImGui::PushID("##SelectedColor");
-    changed |= RenderSelectedCustomColor();
-    ImGui::PopID();
-    ImGui::EndGroup();
-    return changed;
-}
-
-bool CMuServerListUI::RenderCustomColorButtons()
-{
-    ImGui::PushID("##CustomColorButtons");
-    bool changed = false;
-    if (ImGui::Button(I18N::Editor::Add))
+    if (ImGui::Button(I18N::Editor::EditColors))
     {
         CommitPending();
-        SelectColor(static_cast<int>(m_edits.AddColor(I18N::Editor::NewColor)));
-        changed = true;
+        g_MuColorsUI.Show(MuEditor::Colors::ColorsRoot::ServerList);
     }
-    ImGui::SameLine();
-    const int count = static_cast<int>(m_edits.GetList().colors.size());
-    const bool hasSelection = m_selectedColor >= 0 && m_selectedColor < count;
-    ImGui::BeginDisabled(!hasSelection);
-    if (ImGui::Button(I18N::Editor::Remove))
-    {
-        const Data::ServerList::CustomColor& color = m_edits.GetList().colors[static_cast<size_t>(m_selectedColor)];
-        if (m_edits.CountRulesWithColor(color.id) == 0 && m_edits.CountLoadUsesOfColor(color.id) == 0)
-        {
-            CommitPending();
-            m_edits.RemoveColor(static_cast<size_t>(m_selectedColor));
-            SelectColor(std::min(m_selectedColor, count - 2));
-            changed = true;
-        }
-        else
-        {
-            m_removeColor = m_selectedColor;
-            ImGui::OpenPopup("###RemoveColor");
-        }
-    }
-    ImGui::EndDisabled();
-    ImGui::BeginDisabled(!hasSelection || m_selectedColor == 0);
-    if (ImGui::Button(I18N::Editor::MoveUp))
-    {
-        CommitPending();
-        if (m_edits.MoveColor(static_cast<size_t>(m_selectedColor), -1))
-        {
-            SelectColor(m_selectedColor - 1);
-            changed = true;
-        }
-    }
-    ImGui::EndDisabled();
-    ImGui::SameLine();
-    ImGui::BeginDisabled(!hasSelection || m_selectedColor + 1 >= count);
-    if (ImGui::Button(I18N::Editor::MoveDown))
-    {
-        CommitPending();
-        if (m_edits.MoveColor(static_cast<size_t>(m_selectedColor), 1))
-        {
-            SelectColor(m_selectedColor + 1);
-            changed = true;
-        }
-    }
-    ImGui::EndDisabled();
-    // In the ID scope of the Remove button, which opens it.
-    changed |= RenderRemoveColorPopup();
-    ImGui::PopID();
-    return changed;
 }
 
-bool CMuServerListUI::RenderRemoveColorPopup()
+void CMuServerListUI::EnsureLoaded()
 {
-    const std::vector<Data::ServerList::CustomColor>& colors = m_edits.GetList().colors;
-    if (m_removeColor < 0 || m_removeColor >= static_cast<int>(colors.size()))
+    if (!m_loaded)
     {
-        return false;
+        LoadFile();
     }
-    const Data::ServerList::CustomColor& color = colors[static_cast<size_t>(m_removeColor)];
-    const std::string title =
-        I18N::Format(I18N::Editor::RemoveColor0, {GetColorLabel(m_edits.GetList(), color.id)}) + "###RemoveColor";
-    bool changed = false;
-    if (ImGui::BeginPopupModal(title.c_str(), nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        if (const size_t rules = m_edits.CountRulesWithColor(color.id); rules > 0)
-        {
-            ImGui::TextUnformatted(I18N::Format(I18N::Editor::ColorUsedNote, {std::to_string(rules)}).c_str());
-        }
-        if (const size_t loadUses = m_edits.CountLoadUsesOfColor(color.id); loadUses > 0)
-        {
-            ImGui::TextUnformatted(I18N::Format(I18N::Editor::ColorLoadUsedNote, {std::to_string(loadUses)}).c_str());
-        }
-        if (ImGui::Button(I18N::Editor::Remove))
-        {
-            CommitPending();
-            m_edits.RemoveColor(static_cast<size_t>(m_removeColor));
-            SelectColor(std::min(m_selectedColor, static_cast<int>(m_edits.GetList().colors.size()) - 1));
-            m_removeColor = -1;
-            changed = true;
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::SameLine();
-        if (ImGui::Button(I18N::Editor::Cancel))
-        {
-            m_removeColor = -1;
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
-    }
-    return changed;
 }
 
-bool CMuServerListUI::RenderSelectedCustomColor()
+void CMuServerListUI::AfterColorEdit()
 {
-    std::vector<Data::ServerList::CustomColor>& colors = m_edits.EditList().colors;
-    if (m_selectedColor < 0 || m_selectedColor >= static_cast<int>(colors.size()))
-    {
-        ImGui::TextDisabled("%s", I18N::Editor::PickAColorInTheList);
-        return false;
-    }
-    const size_t index = static_cast<size_t>(m_selectedColor);
-    const float scale = g_MuEditorCore.GetUIScale();
-    bool changed = false;
+    m_edits.Commit();
+    m_uncommitted = false;
+    ShowInGame();
+}
 
-    // As the VIP type's ID: it changes the color only while it is a free color id.
-    if (!m_colorIdActive)
+std::vector<std::string> CMuServerListUI::DescribeColorUsers(std::string_view id) const
+{
+    const ServerListData& list = m_edits.GetList();
+    const std::string_view locale = GetEditorLocale();
+    std::vector<std::string> users;
+    for (const ButtonColorRule& rule : list.buttonColors)
     {
-        m_colorIdDraft = colors[index].id;
+        if (rule.color == id)
+        {
+            users.push_back(std::string(I18N::Editor::ButtonColors) + ": " + I18N::Editor::VIP + " " +
+                            GetRuleVipLabel(list, rule, locale) + ", " + I18N::Editor::PvP + " " +
+                            GetRulePvpLabel(rule.pvp));
+        }
     }
-    ImGui::SetNextItemWidth(WideIdFieldWidth * scale);
-    if (MuEditor::Items::InputString(I18N::Editor::VIPTypeID, m_colorIdDraft))
+    const Data::ServerList::LoadSettings& load = list.load;
+    const std::pair<const std::string*, std::string> parts[] = {
+        {&load.bar.base, std::string(I18N::Editor::LoadBar) + ": " + I18N::Editor::BaseColor},
+        {&load.bar.full, std::string(I18N::Editor::LoadBar) + ": " + I18N::Editor::FullColor},
+        {&load.bar.empty, std::string(I18N::Editor::LoadBar) + ": " + I18N::Editor::UnlitColor},
+        {&load.full.color, std::string(I18N::Editor::Load) + ": " + I18N::Editor::FullServer},
+        {&load.overloaded.color, std::string(I18N::Editor::Load) + ": " + I18N::Editor::OverloadedServer},
+    };
+    for (const auto& [color, label] : parts)
     {
-        const std::string before = colors[index].id;
-        changed = m_edits.ChangeColorId(index, m_colorIdDraft) && colors[index].id != before;
+        if (*color == id)
+        {
+            users.push_back(label);
+        }
     }
-    m_colorIdActive = ImGui::IsItemActive();
-    CommitWhenFieldLeft();
-    if (m_colorIdDraft != colors[index].id)
-    {
-        RenderError(I18N::Editor::NotAFreeColorID);
-    }
-    RenderNote(I18N::Editor::ColorIDNote);
+    return users;
+}
 
-    Data::ServerList::CustomColor& color = colors[index];
-    ImGui::SetNextItemWidth(TextFieldWidth * scale);
-    if (MuEditor::Items::InputString(I18N::Editor::Name, color.name))
-    {
-        Core::Text::CutToUtf16Length(color.name, Data::ServerList::MaxCustomColorNameLength);
-        changed = true;
-    }
-    CommitWhenFieldLeft();
-
-    // The themes found, and any other one the color has a shade for.
-    std::vector<std::string> themes = m_themes;
-    for (const auto& [theme, shade] : color.shades)
-    {
-        if (std::find(themes.begin(), themes.end(), theme) == themes.end())
-        {
-            themes.push_back(theme);
-        }
-    }
-    for (const std::string& theme : themes)
-    {
-        ImGui::PushID(theme.c_str());
-        const auto shade = color.shades.find(theme);
-        const bool hasShade = shade != color.shades.end();
-        const ImVec4 current = hasShade
-                                   ? ParseShade(shade->second).value_or(GetThemeColorSwatch(ThemeColor::Default, theme))
-                                   : GetThemeColorSwatch(ThemeColor::Default, theme);
-        float rgb[3] = {current.x, current.y, current.z};
-        const std::string label = UI::RmlBridge::GetThemeDisplayName(theme);
-        if (ImGui::ColorEdit3(label.c_str(), rgb, ImGuiColorEditFlags_DisplayHex))
-        {
-            color.shades[theme] = FormatShade(rgb);
-            changed = true;
-        }
-        CommitWhenFieldLeft();
-        ImGui::SameLine();
-        if (hasShade)
-        {
-            if (ImGui::SmallButton(I18N::Editor::Remove))
-            {
-                CommitPending();
-                color.shades.erase(theme);
-                changed = true;
-            }
-        }
-        else
-        {
-            ImGui::TextDisabled("(%s)", I18N::Editor::Default);
-        }
-        ImGui::PopID();
-    }
-    return changed;
+void CMuServerListUI::ShowChannelNames()
+{
+    g_MuEditorCore.GetToolWindows().serverList = true;
+    m_selectChannelNames = true;
+    ImGui::SetWindowFocus(MuEditor::WindowIds::ServerList);
 }
 
 void CMuServerListUI::RenderPreview()
@@ -1513,15 +1342,6 @@ void CMuServerListUI::Select(int index)
         m_takenId = -1;
     }
     m_selected = index;
-}
-
-void CMuServerListUI::SelectColor(int index)
-{
-    if (index != m_selectedColor)
-    {
-        m_colorIdActive = false;
-    }
-    m_selectedColor = index;
 }
 
 void CMuServerListUI::SelectVipType(int index)

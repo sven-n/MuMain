@@ -134,6 +134,7 @@ theme), so a long name there can run past its edges.
 |-----------------|--------------------------------------------------------------------------|
 | `formatVersion` | `2`. A version 1 file (the four fixed channel types) is not read: the game stops and names the problem. |
 | `vipTypes`      | Optional; the VIP types, in the order the editor lists them.              |
+| `colorFolders`  | Optional; the folders the editor's Colors window sorts your colors in (each a `name`, its `folders` and its `colors`). The game skips it. |
 | `colors`        | Optional; your own colors, each with a shade per theme, for the buttons and the load. |
 | `buttonColors`  | Optional; the rules that color the channel buttons. Without a fitting rule a button has the theme's default color. |
 | `names`         | Optional; the texts that name a channel (below). A text left out uses the built-in English one. |
@@ -314,9 +315,13 @@ gives the channel and, when the connect server sent it, its load.
 - the load: **Base**, **Full** and **Unlit** color lists for the load bar, and
   for the full and the overloaded server a **Color** list with **Bold** and
   **Italic** boxes;
-- your own colors: their list, and for the selected one its ID, name and a
-  shade for each theme. Removing a color that rules or the load use first
-  asks; they then have the default color;
+- **Edit colors...**: your own colors are the Server list root of the
+  [Colors](item-data.md#colors) window. There a picked color has its ID, name
+  and a shade for each theme, with **Apply to the color**; a change lists the
+  rules and load parts that use the color first, and a color is removed only
+  while none uses it. Folders sort the colors as for the item colors. The
+  changes are steps of this window's undo history, and its **Save** writes
+  them;
 - a preview of every combination (PvP on and off, with no VIP type and with
   each VIP type) in all four places, with the selected group's name and the
   button's color in each theme (named on hover). The button's `{load}` is

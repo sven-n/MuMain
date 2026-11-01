@@ -6,6 +6,7 @@
 
 #include <cstddef>
 #include <optional>
+#include <span>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -75,6 +76,12 @@ public:
     {
         m_saved = m_list;
     }
+    // Counts the reads and the steps, also undone and redone, for what the Colors window keeps between frames. A
+    // change of the colors or their folders is a step at once (CMuServerListUI::AfterColorEdit).
+    int GetVersion() const
+    {
+        return m_version;
+    }
     // Whether the list is all the file has. After a read with fatal problems it
     // is not, and a save would remove what the read left out from the file.
     bool IsComplete() const
@@ -112,12 +119,17 @@ public:
     // Adds a color named `name` at the end, its id made from the name (one no
     // other color or theme color has), with no shades. Returns its index.
     size_t AddColor(const std::string& name);
-    // The rules, the load bar and the load texts with the color then have the default color.
+    // The rules, the load bar and the load texts with the color then have the default color; it
+    // leaves its folder.
     void RemoveColor(size_t index);
     bool MoveColor(size_t index, int direction);
-    // Gives the color the id; the rules, the load bar and the load texts with the old one get
-    // it too. False (and nothing changed) when it is no color id or another color has it.
+    // Gives the color the id; the rules, the load bar, the load texts and the color folders with
+    // the old one get it too. False (and nothing changed) when it is no color id or another color has it.
     bool ChangeColorId(size_t index, const std::string& id);
+    // The folders the Colors window sorts the colors in, as the step `label`.
+    void SetColorFolders(std::vector<Data::Colors::ColorFolder> folders, std::string label);
+    // The colors in this order (the same ids), as the step `label`.
+    void SetColorOrder(std::span<const std::string> ids, std::string label);
     // Whether `id` would be a free id for a color: a color id no other color has.
     bool IsColorIdFree(std::string_view id) const;
     // How many rules have the color.
@@ -152,6 +164,7 @@ private:
     ServerListData m_saved;
     std::vector<Step> m_undo;
     std::vector<Step> m_redo;
+    int m_version = 0;
     // Set by the Add, Remove and Move functions until the next Commit; a change
     // of fields is described by comparing the lists instead.
     std::string m_pendingLabel;
