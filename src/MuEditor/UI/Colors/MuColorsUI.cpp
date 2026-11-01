@@ -437,7 +437,8 @@ void CMuColorsUI::AcceptDrop(ColorsRoot root, const ColorFolderPath& folder)
                               { return moved = Data::Colors::MoveColorFolderInto(folders, from, folder); });
                 if (moved)
                 {
-                    m_pick = {root, folder, {}};
+                    // The folder it went into, which moved up when the dragged one came before it.
+                    m_pick = {root, Data::Colors::GetPathAfterMove(from, folder), {}};
                 }
             };
         }

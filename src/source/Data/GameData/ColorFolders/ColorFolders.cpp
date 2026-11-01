@@ -378,16 +378,24 @@ bool MoveColorFolderInto(std::vector<ColorFolder>& folders, std::span<const std:
     ColorFolder moved = *folder;
     std::vector<ColorFolder>* siblings = FindSiblings(folders, path);
     siblings->erase(siblings->begin() + static_cast<std::ptrdiff_t>(path.back()));
-    // The removal moves the parent up by one when it came after the folder in the same list.
+    FindChildren(folders, GetPathAfterMove(path, parent))->push_back(std::move(moved));
+    return true;
+}
+
+ColorFolderPath GetPathAfterMove(std::span<const std::size_t> path, std::span<const std::size_t> parent)
+{
     ColorFolderPath to(parent.begin(), parent.end());
+    if (path.empty())
+    {
+        return to;
+    }
     const std::size_t level = path.size() - 1;
     if (to.size() > level && std::equal(path.begin(), path.begin() + static_cast<std::ptrdiff_t>(level), to.begin()) &&
         to[level] > path.back())
     {
         --to[level];
     }
-    FindChildren(folders, to)->push_back(std::move(moved));
-    return true;
+    return to;
 }
 
 bool MoveColorFolderBy(std::vector<ColorFolder>& folders, std::span<const std::size_t> path, int delta)

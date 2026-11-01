@@ -71,6 +71,9 @@ bool RemoveColorFolder(std::vector<ColorFolder>& folders, std::span<const std::s
 // folder in it, next to a folder of its name, or when the folders in it would go below MaxColorFolderDepth.
 bool MoveColorFolderInto(std::vector<ColorFolder>& folders, std::span<const std::size_t> path,
                          std::span<const std::size_t> parent);
+// Where the folder at `parent` is after MoveColorFolderInto took the folder at `path` out of its list: one place up
+// when it came after it in the same list.
+ColorFolderPath GetPathAfterMove(std::span<const std::size_t> path, std::span<const std::size_t> parent);
 // Moves the folder up (-1) or down (+1) among its siblings.
 bool MoveColorFolderBy(std::vector<ColorFolder>& folders, std::span<const std::size_t> path, int delta);
 // Puts the color at the end of the folder's colors (the empty path: under the root), out of the folder it was in.

@@ -161,10 +161,27 @@ TEST_SUITE("Color folders")
         CHECK_FALSE(Data::Colors::MoveColorFolderInto(folders, ColorFolderPath{0}, ColorFolderPath{0, 0}));
         CHECK_FALSE(Data::Colors::MoveColorFolderInto(folders, ColorFolderPath{1, 0}, ColorFolderPath{1}));
         // A folder before the target in the same list: the target's place shifts up by one.
+        CHECK(Data::Colors::GetPathAfterMove(ColorFolderPath{0}, ColorFolderPath{1}) == ColorFolderPath{0});
         CHECK(Data::Colors::MoveColorFolderInto(folders, ColorFolderPath{0}, ColorFolderPath{1}));
         REQUIRE(folders.size() == 1);
         CHECK(folders[0].name == "Cold");
         CHECK(folders[0].folders[1].name == "Warm");
+    }
+
+    TEST_CASE("after a move the folder it went into is found where it now is")
+    {
+        std::vector<ColorFolder> folders = {{"A", {}, {}}, {"B", {}, {}}, {"C", {}, {}}, {"D", {}, {}}};
+        CHECK(Data::Colors::MoveColorFolderInto(folders, ColorFolderPath{0}, ColorFolderPath{2}));
+        const ColorFolderPath target = Data::Colors::GetPathAfterMove(ColorFolderPath{0}, ColorFolderPath{2});
+        REQUIRE(Data::Colors::FindColorFolder(folders, target) != nullptr);
+        CHECK(Data::Colors::FindColorFolder(folders, target)->name == "C");
+
+        // Into an earlier folder, a folder in another list, or the root: the place stays.
+        CHECK(Data::Colors::GetPathAfterMove(ColorFolderPath{2}, ColorFolderPath{0}) == ColorFolderPath{0});
+        CHECK(Data::Colors::GetPathAfterMove(ColorFolderPath{0, 0}, ColorFolderPath{1}) == ColorFolderPath{1});
+        CHECK(Data::Colors::GetPathAfterMove(ColorFolderPath{0, 1}, ColorFolderPath{0, 2, 0}) ==
+              ColorFolderPath{0, 1, 0});
+        CHECK(Data::Colors::GetPathAfterMove(ColorFolderPath{1, 0}, {}).empty());
     }
 
     TEST_CASE("a removed folder leaves what it holds to the folder above it")
