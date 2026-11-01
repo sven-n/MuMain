@@ -6198,6 +6198,9 @@ void ReceiveGetItem(std::span<const BYTE> ReceiveBuffer)
             {
                 mu_swprintf(szMessage, L"%d %ls %ls", getGold, I18N::Game::Zen, I18N::Game::Obtained);
                 UI::Chat::PostSystem(szMessage, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+                // Zen picked up sounds like a picked-up item; the original
+                // played nothing (Q-SM12).
+                PlayBuffer(SOUND_GET_ITEM01, &Hero->Object);
             }
         }
         else
