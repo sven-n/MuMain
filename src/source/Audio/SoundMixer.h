@@ -4,6 +4,7 @@
 
 #include "Audio/SoundSource.h"
 
+#include <array>
 #include <string>
 #include <vector>
 
@@ -42,6 +43,19 @@ struct HeardSound
     double lastStarted = -1.0;
 };
 
+// A start of a sound whose source has a position: the overlay flashes the
+// source (Q-SM9).
+struct PlacedStart
+{
+    int number = 0;
+    SoundKind kind = SoundKind::Other;
+    std::string name;
+    int sourceNumber = -1;
+    std::array<float, 3> position{};
+    // The mixer's clock (Now).
+    double time = 0.0;
+};
+
 Control& KindControl(SoundKind kind);
 Control& SoundControl(int number);
 
@@ -61,6 +75,10 @@ void OnPlayed(int number, double now);
 // The sounds heard since the list was last cleared, in the order they were
 // first heard, so that a row stays where it is.
 std::vector<HeardSound> Heard();
+
+// The starts with a position in the last `seconds` before `now`, oldest
+// first. A few seconds of them are kept.
+std::vector<PlacedStart> RecentStarts(double now, double seconds);
 
 // The window's "Clear all": empties the list and starts the counts again. The
 // sounds whose controls are changed stay listed, with no plays, so that what

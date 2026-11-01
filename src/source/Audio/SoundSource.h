@@ -1,5 +1,7 @@
 #pragma once
 
+#include <array>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -27,13 +29,16 @@ struct SoundSource
     std::string name;
     // The monster's number or the map object's type; -1 for none.
     int number = -1;
+    // Where it stands (a monster, a map object), for the overlay's flash.
+    std::optional<std::array<float, 3>> position;
 };
 
 // Names the source of the sounds played while it lives; the innermost wins.
 class ScopedSoundSource
 {
 public:
-    ScopedSoundSource(SoundKind kind, std::string_view name, int number = -1);
+    // `position`: three coordinates, or nullptr for none.
+    ScopedSoundSource(SoundKind kind, std::string_view name, int number = -1, const float* position = nullptr);
     ~ScopedSoundSource();
 
     ScopedSoundSource(const ScopedSoundSource&) = delete;
@@ -50,7 +55,7 @@ const SoundSource* CurrentSoundSource();
 class ScopedSoundSource
 {
 public:
-    ScopedSoundSource(SoundKind, std::string_view, int = -1) {}
+    ScopedSoundSource(SoundKind, std::string_view, int = -1, const float* = nullptr) {}
     // Not trivial, so that a scope nobody reads draws no unused-variable
     // warning.
     ~ScopedSoundSource() {}

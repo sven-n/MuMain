@@ -5,6 +5,7 @@
 #include "Audio/SoundNumbers.h"
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/MapData/MapObjectSoundDatabase.h"
+#include "Audio/SoundOverlay.h"
 #include "Audio/SoundSource.h"
 #include "Engine/Object/ZzzCharacter.h"
 
@@ -85,6 +86,25 @@ float DistanceFromHero(const OBJECT& object)
     const float dy = object.Position[1] - Hero->Object.Position[1];
     return std::sqrt(dx * dx + dy * dy);
 }
+
+#ifdef _EDITOR
+// The Sound Mixer's overlay marks the drawn object with its volume rings.
+void NoteForOverlay(const OBJECT& object, ESound sound)
+{
+    if (!Audio::Overlay::IsOn())
+    {
+        return;
+    }
+    Audio::Overlay::DrawnSource drawn;
+    drawn.kind = Audio::SoundKind::MapObject;
+    drawn.sourceNumber = object.Type;
+    drawn.soundNumber = static_cast<int>(sound);
+    drawn.position = {object.Position[0], object.Position[1], object.Position[2]};
+    drawn.inner = FullVolumeDistance;
+    drawn.outer = QuietestDistance;
+    Audio::Overlay::NoteDrawn(drawn);
+}
+#endif
 } // namespace
 
 void LoadForMap(int serverMap, int stage)
@@ -117,7 +137,10 @@ void OnObjectDrawn(const OBJECT& object)
     FollowTable();
     if (const std::optional<ESound> sound = FindSound(object.Type))
     {
-        const Audio::ScopedSoundSource source(Audio::SoundKind::MapObject, {}, object.Type);
+#ifdef _EDITOR
+        NoteForOverlay(object, *sound);
+#endif
+        const Audio::ScopedSoundSource source(Audio::SoundKind::MapObject, {}, object.Type, object.Position);
         PlayBufferOnFreeChannel(*sound, DistanceLevel(DistanceFromHero(object)));
     }
 }

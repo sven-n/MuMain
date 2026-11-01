@@ -9,11 +9,14 @@
 #ifdef _EDITOR
 #include "Audio/DSPlaySound.h"
 #include "Audio/SoundMixer.h"
+#include "Audio/SoundOverlay.h"
 #include "Audio/SoundSource.h"
+#include "Camera/CameraState.h"
 #include "Core/Platform/IPlatformAudio.h"
 #include "TestImGuiContext.h"
 #include "UI/Common/MuEditorToolWindows.h"
 #include "UI/SoundMixer/MuSoundMixerUI.h"
+#include "UI/SoundMixer/MuSoundOverlay.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
@@ -429,6 +432,136 @@ TEST_CASE("Sound Mixer: Mute all and Unmute all act on the rows given, at once (
     CHECK(scope.audio.gains.back() == std::pair{3, 1.0f});
 }
 
+TEST_CASE("Sound Mixer: a start whose source has a place is kept a few seconds for the overlay's flash (Q-SM9) "
+          "[audio][mixer][editor]")
+{
+    MixerScope scope;
+    using namespace Audio::Mixer;
+    const float place[3] = {100.0f, 200.0f, 30.0f};
+    const auto play = [&scope](int number, double now, bool starts)
+    {
+        OnPlay(number, false);
+        if (starts)
+        {
+            ++scope.audio.started[number];
+        }
+        OnPlayed(number, now);
+    };
+    {
+        const Audio::ScopedSoundSource source(SoundKind::Monster, "Death Rider", 306, place);
+        play(7, 10.0, true);
+        // A call that starts nothing flashes nothing.
+        play(7, 10.2, false);
+    }
+    {
+        // A source without a place neither.
+        const Audio::ScopedSoundSource source(SoundKind::MapObject, {}, 37);
+        play(8, 10.5, true);
+    }
+    std::vector<PlacedStart> recent = RecentStarts(10.8, 1.0);
+    REQUIRE(recent.size() == 1);
+    CHECK(recent[0].number == 7);
+    CHECK(recent[0].kind == SoundKind::Monster);
+    CHECK(recent[0].name == "Death Rider");
+    CHECK(recent[0].sourceNumber == 306);
+    CHECK(recent[0].position == std::array<float, 3>{100.0f, 200.0f, 30.0f});
+    CHECK(recent[0].time == 10.0);
+    CHECK(RecentStarts(11.5, 1.0).empty());
+    // A few seconds are kept: a new start drops the older ones.
+    {
+        const Audio::ScopedSoundSource source(SoundKind::Monster, "Death Rider", 306, place);
+        play(7, 20.0, true);
+    }
+    recent = RecentStarts(20.0, 100.0);
+    REQUIRE(recent.size() == 1);
+    CHECK(recent[0].time == 20.0);
+}
+
+TEST_CASE("Sound Mixer: the overlay notes drawn sources and keeps the camera only while it is on, and hands a "
+          "frame's sources over once (Q-SM10) [audio][mixer][editor]")
+{
+    using namespace Audio::Overlay;
+    SetOn(false);
+    DrawnSource source;
+    source.sourceNumber = 37;
+    NoteDrawn(source);
+    CHECK(TakeDrawn().empty());
+    const CameraState camera;
+    KeepCamera(camera);
+    CHECK(KeptCamera() == nullptr);
+    SetOn(true);
+    CHECK(IsOn());
+    NoteDrawn(source);
+    KeepCamera(camera);
+    CHECK(KeptCamera() != nullptr);
+    const std::vector<DrawnSource> drawn = TakeDrawn();
+    REQUIRE(drawn.size() == 1);
+    CHECK(drawn[0].sourceNumber == 37);
+    CHECK(TakeDrawn().empty());
+    // Off forgets the sources and the camera.
+    NoteDrawn(source);
+    SetOn(false);
+    CHECK_FALSE(IsOn());
+    CHECK(TakeDrawn().empty());
+    CHECK(KeptCamera() == nullptr);
+}
+
+TEST_CASE("Sound Mixer: the overlay draws the sources a shown row names while a filter is set, and a monster's "
+          "ring holds who hears it (Q-SM9, Q-SM10) [audio][mixer][editor]")
+{
+    using Audio::Overlay::DrawnSource;
+    using namespace MuEditor::SoundOverlay;
+    DrawnSource waterfall;
+    waterfall.kind = SoundKind::MapObject;
+    waterfall.sourceNumber = 37;
+    DrawnSource rider;
+    rider.kind = SoundKind::Monster;
+    rider.name = "Death Rider";
+    rider.sourceNumber = 306;
+    rider.position = {1000.0f, 1000.0f, 0.0f};
+    rider.inner = 500.0f;
+    DrawnSource orc = rider;
+    orc.name = "Forest Orc";
+    orc.sourceNumber = 307;
+    const std::vector<DrawnSource> drawn{waterfall, rider, orc};
+
+    HeardRow riderRow = Row(1, "", "", 0);
+    riderRow.sound.kind = SoundKind::Monster;
+    riderRow.sound.name = "Death Rider";
+    riderRow.sound.sourceNumber = 306;
+    // An attack's sound names no set.
+    HeardRow orcAttack = Row(2, "", "", 0);
+    orcAttack.sound.kind = SoundKind::Monster;
+    orcAttack.sound.sourceNumber = 307;
+    HeardRow waterRow = Row(3, "", "", 0);
+    waterRow.sound.kind = SoundKind::MapObject;
+    waterRow.sound.sourceNumber = 37;
+    CHECK(Names(riderRow, SoundKind::Monster, "Death Rider", 306));
+    CHECK_FALSE(Names(riderRow, SoundKind::Monster, "Forest Orc", 306));
+    CHECK_FALSE(Names(riderRow, SoundKind::Monster, "Death Rider", 307));
+    CHECK_FALSE(Names(riderRow, SoundKind::MapObject, "", 306));
+    CHECK(Names(orcAttack, SoundKind::Monster, "Forest Orc", 307));
+    CHECK(Names(waterRow, SoundKind::MapObject, "", 37));
+
+    const auto numbersOf = [](const std::vector<DrawnSource>& sources)
+    {
+        std::vector<int> numbers;
+        for (const DrawnSource& source : sources)
+        {
+            numbers.push_back(source.sourceNumber);
+        }
+        return numbers;
+    };
+    // No filter: every source in view, whatever the rows.
+    CHECK(numbersOf(Followed(drawn, {}, false)) == std::vector<int>{37, 306, 307});
+    CHECK(numbersOf(Followed(drawn, {riderRow}, true)) == std::vector<int>{306});
+    CHECK(numbersOf(Followed(drawn, {waterRow, orcAttack}, true)) == std::vector<int>{37, 307});
+    CHECK(Followed(drawn, {}, true).empty());
+
+    CHECK(IsInside(rider, 1300.0f, 1400.0f));
+    CHECK_FALSE(IsInside(rider, 1400.0f, 1400.0f));
+}
+
 TEST_CASE("Sound Mixer: the reminder counts what is muted, solo and lowered (Q-SM5) [audio][mixer][editor]")
 {
     MixerScope scope;
@@ -446,6 +579,10 @@ TEST_CASE("Sound Mixer: the reminder counts what is muted, solo and lowered (Q-S
     // A muted sound that is also turned down counts as muted.
     CHECK(changes.lowered == 1);
     CHECK(MuEditor::SoundMixer::ChangesText(changes) == "2 muted, 1 solo, 1 lowered");
+    // The overlay is named too.
+    CHECK(MuEditor::SoundMixer::ReminderText(changes, true) == "2 muted, 1 solo, 1 lowered, overlay on");
+    CHECK(MuEditor::SoundMixer::ReminderText({}, true) == "overlay on");
+    CHECK(MuEditor::SoundMixer::ReminderText({}, false).empty());
     ResetAll();
     CHECK_FALSE(CountChanges().Any());
 }
@@ -518,6 +655,7 @@ TEST_CASE("Sound Mixer: the window draws its kinds and the sounds heard, the rem
         ImGui::NewFrame();
         bool open = true;
         g_MuSoundMixerUI.Render(&open);
+        g_MuSoundMixerUI.RenderOverlay();
         ImGui::Begin("Bar", nullptr, ImGuiWindowFlags_MenuBar);
         if (ImGui::BeginMenuBar())
         {
@@ -533,5 +671,16 @@ TEST_CASE("Sound Mixer: the window draws its kinds and the sounds heard, the rem
     Audio::Mixer::SoundControl(20).muted = true;
     draw();
     CHECK_FALSE(windows.soundMixer);
+    // The overlay draws its sources over the game, also while filtered.
+    Audio::Overlay::SetOn(true);
+    Audio::Overlay::KeepCamera(CameraState{});
+    Audio::Overlay::DrawnSource rider;
+    rider.kind = SoundKind::Monster;
+    rider.name = "Death Rider";
+    rider.inner = 500.0f;
+    Audio::Overlay::NoteDrawn(rider);
+    draw();
+    CHECK(Audio::Overlay::TakeDrawn().empty());
+    Audio::Overlay::SetOn(false);
 }
 #endif // _EDITOR

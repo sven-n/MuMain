@@ -10,6 +10,7 @@
 #include <array>
 #include <chrono>
 #include <cstdint>
+#include <deque>
 #include <map>
 
 namespace Audio
@@ -19,9 +20,13 @@ namespace
 const SoundSource* g_currentSource = nullptr;
 } // namespace
 
-ScopedSoundSource::ScopedSoundSource(SoundKind kind, std::string_view name, int number)
-    : m_source{kind, std::string(name), number}, m_outer(g_currentSource)
+ScopedSoundSource::ScopedSoundSource(SoundKind kind, std::string_view name, int number, const float* position)
+    : m_source{kind, std::string(name), number, std::nullopt}, m_outer(g_currentSource)
 {
+    if (position != nullptr)
+    {
+        m_source.position = std::array<float, 3>{position[0], position[1], position[2]};
+    }
     g_currentSource = &m_source;
 }
 
@@ -40,6 +45,10 @@ namespace Audio::Mixer
 {
 namespace
 {
+// The placed starts kept for the overlay: a few seconds, at most so many.
+constexpr double KeptStartSeconds = 5.0;
+constexpr size_t KeptStarts = 256;
+
 struct Listed
 {
     HeardSound sound;
@@ -60,6 +69,8 @@ struct State
     // The backend's starts of OnPlay's sound before its play.
     int playing = -1;
     std::uint32_t startsBefore = 0;
+    // The latest placed starts, oldest first.
+    std::deque<PlacedStart> starts;
 };
 
 State& Mixer()
@@ -205,6 +216,29 @@ void OnPlayed(int number, double now)
     }
     row->second.sound.plays += static_cast<int>(started);
     row->second.sound.lastStarted = now;
+    const SoundSource* source = CurrentSoundSource();
+    if (source == nullptr || !source->position)
+    {
+        return;
+    }
+    state.starts.push_back(PlacedStart{number, source->kind, source->name, source->number, *source->position, now});
+    while (state.starts.size() > KeptStarts || now - state.starts.front().time > KeptStartSeconds)
+    {
+        state.starts.pop_front();
+    }
+}
+
+std::vector<PlacedStart> RecentStarts(double now, double seconds)
+{
+    std::vector<PlacedStart> recent;
+    for (const PlacedStart& start : Mixer().starts)
+    {
+        if (now - start.time <= seconds)
+        {
+            recent.push_back(start);
+        }
+    }
+    return recent;
 }
 
 std::vector<HeardSound> Heard()

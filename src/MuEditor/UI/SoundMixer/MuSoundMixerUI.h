@@ -84,6 +84,10 @@ class MuSoundMixerUI
 public:
     void Render(bool* open);
 
+    // The overlay over the game, once a frame, also while the window is
+    // closed (Q-SM10): the sources of the rows the filters show.
+    void RenderOverlay();
+
 private:
     void RenderKinds();
     void RenderFilterBar();
@@ -93,6 +97,9 @@ private:
     MuEditor::SoundMixer::HeardFilter m_filter;
     std::array<char, 128> m_filterText{};
     MuEditor::SoundMixer::HeardSort m_sort;
+    // The row under the mouse and the frame it was, for the overlay.
+    std::optional<MuEditor::SoundMixer::HeardRow> m_hovered;
+    int m_hoveredFrame = -1;
 };
 
 extern MuSoundMixerUI g_MuSoundMixerUI;
@@ -101,6 +108,10 @@ namespace MuEditor::SoundMixer
 {
 // "2 muted, 1 solo, 1 lowered"; "" for nothing changed.
 std::string ChangesText(const Audio::Mixer::Changes& changes);
+
+// The menu bar's reminder: the changes and whether the overlay is on
+// ("2 muted, overlay on"); "" for neither.
+std::string ReminderText(const Audio::Mixer::Changes& changes, bool overlayOn);
 
 // The kind's name in the window.
 const char* KindName(Audio::SoundKind kind);

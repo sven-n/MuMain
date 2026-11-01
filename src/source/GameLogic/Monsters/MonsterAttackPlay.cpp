@@ -70,7 +70,8 @@ bool Play(CHARACTER& character, OBJECT& object)
     }
     if (const std::optional<int> sound = Data::Monsters::FindMonsterSoundId(attacks->sound))
     {
-        const Audio::ScopedSoundSource source(Audio::SoundKind::Monster, {}, static_cast<int>(character.MonsterIndex));
+        const Audio::ScopedSoundSource source(Audio::SoundKind::Monster, {}, static_cast<int>(character.MonsterIndex),
+                                              character.Object.Position);
         PlayBuffer(static_cast<ESound>(*sound), attacks->soundAtMonster ? &object : nullptr);
     }
     return true;

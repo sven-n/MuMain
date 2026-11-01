@@ -4,15 +4,19 @@
 
 #include "MuSoundMixerUI.h"
 
+#include "MuSoundOverlay.h"
+
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "../MuEditor/UI/Common/MuEditorToolWindows.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "Audio/DSPlaySound.h"
+#include "Audio/SoundOverlay.h"
 #include "Core/Platform/IPlatformAudio.h"
 #include "Core/Text/Utf8.h"
 #include "I18N/All.h"
 #include "imgui.h"
+#include "imgui_internal.h"
 
 #include <algorithm>
 #include <array>
@@ -181,6 +185,12 @@ void MuSoundMixerUI::Render(bool* open)
         ImGui::PushTextWrapPos(0.0f);
         ImGui::TextDisabled("%s", I18N::Editor::SoundMixerNote);
         ImGui::PopTextWrapPos();
+        bool overlay = Audio::Overlay::IsOn();
+        if (ImGui::Checkbox(I18N::Editor::SoundMixerShowInWorld, &overlay))
+        {
+            Audio::Overlay::SetOn(overlay);
+        }
+        Tooltip(I18N::Editor::SoundMixerShowInWorldTip);
         RenderKinds();
         RenderHeard();
     }
@@ -203,6 +213,24 @@ void MuSoundMixerUI::RenderKinds()
         RenderControl(MuEditor::SoundMixer::KindName(kind), Audio::Mixer::KindControl(kind));
     }
     ImGui::EndTable();
+}
+
+void MuSoundMixerUI::RenderOverlay()
+{
+    using namespace MuEditor::SoundMixer;
+    std::vector<HeardRow> shown;
+    const bool filtered = m_filter.IsActive();
+    if (Audio::Overlay::IsOn() && filtered)
+    {
+        std::vector<HeardRow> rows;
+        for (const Audio::Mixer::HeardSound& sound : Audio::Mixer::Heard())
+        {
+            rows.push_back(MakeRow(sound));
+        }
+        shown = FilterRows(rows, m_filter);
+    }
+    const bool hovering = m_hovered.has_value() && m_hoveredFrame == ImGui::GetFrameCount();
+    MuEditor::SoundOverlay::Render(shown, filtered, hovering ? &*m_hovered : nullptr);
 }
 
 void MuSoundMixerUI::RenderFilterBar()
@@ -334,6 +362,12 @@ void MuSoundMixerUI::RenderHeard()
     for (const HeardRow& row : shown)
     {
         ImGui::TableNextRow();
+        // Last frame's hovered row: the overlay highlights its sources.
+        if (ImGui::TableGetHoveredRow() == ImGui::TableGetRowIndex())
+        {
+            m_hovered = row;
+            m_hoveredFrame = ImGui::GetFrameCount();
+        }
         if (row.playing)
         {
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(PlayingRowColor));
@@ -565,14 +599,24 @@ std::string LastText(const Audio::Mixer::HeardSound& sound, double now, bool pla
     return I18N::Format(I18N::Editor::SoundMixerAgo0, {SecondsText(now - sound.lastStarted)});
 }
 
+std::string ReminderText(const Audio::Mixer::Changes& changes, bool overlayOn)
+{
+    std::string text = ChangesText(changes);
+    if (overlayOn)
+    {
+        text += (text.empty() ? "" : ", ") + std::string(I18N::Editor::SoundMixerOverlayOn);
+    }
+    return text;
+}
+
 void RenderReminder(ToolWindows& windows)
 {
-    const std::string changes = ChangesText(Audio::Mixer::CountChanges());
-    if (changes.empty())
+    const std::string reminder = ReminderText(Audio::Mixer::CountChanges(), Audio::Overlay::IsOn());
+    if (reminder.empty())
     {
         return;
     }
-    const std::string label = I18N::Format(I18N::Editor::SoundMixerReminder0, {changes});
+    const std::string label = I18N::Format(I18N::Editor::SoundMixerReminder0, {reminder});
     ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.78f, 0.45f, 1.0f));
     if (ImGui::MenuItem(label.c_str()))
     {

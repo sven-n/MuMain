@@ -905,6 +905,10 @@ void CMuEditorCore::Render()
     // tool windows: they dock into the editor window.
     g_MuEditorUI.Render(m_bEditorMode, m_windows);
 
+    // The Sound Mixer's overlay over the game, also while the editor is
+    // closed: its frame's sources are taken either way.
+    g_MuSoundMixerUI.RenderOverlay();
+
     if (m_bEditorMode)
     {
         // Render center pane (handles all editor windows and input blocking)

@@ -14,9 +14,12 @@
 #include "World/MapInfra/MapObjectSounds.h"
 #ifdef _EDITOR
 #include "Audio/SoundMixer.h"
+#include "Audio/SoundOverlay.h"
 #endif
 
 #include <algorithm>
+#include <array>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <string>
@@ -106,6 +109,11 @@ public:
         freePlays.push_back(static_cast<int>(buffer));
         freeLevels.push_back(level);
         return true;
+    }
+    // Every free-channel play starts, for the Sound Mixer's placed starts.
+    std::uint32_t GetSoundStarts(ESound) const override
+    {
+        return static_cast<std::uint32_t>(freePlays.size());
     }
     void StopSound(ESound, bool) override {}
     void AllStopSound() override {}
@@ -417,5 +425,43 @@ TEST_CASE("Map object sounds: the Sound Mixer hears them as map object sounds of
     CHECK(heard[0].number == static_cast<int>(*sound));
     CHECK(heard[0].kind == Audio::SoundKind::MapObject);
     CHECK(heard[0].sourceNumber == 38);
+}
+
+TEST_CASE("Map object sounds: the Sound Mixer's overlay marks a drawn object with its volume rings while it is on, "
+          "and its start with the object's place (Q-SM9) [data][maps][editor]")
+{
+    AudioScope scope;
+    Audio::Mixer::Clear();
+    g_MapObjectSoundDatabase.Build(std::vector<MapObjectSound>{Waterfall()});
+    World::MapObjectSounds::LoadForMap(24, 0);
+    const std::optional<ESound> sound = World::MapObjectSounds::FindSound(38);
+    REQUIRE(sound);
+    OBJECT waterfall;
+    waterfall.Type = 38;
+    waterfall.Position[0] = 1200.0f;
+    waterfall.Position[1] = 3400.0f;
+    waterfall.Position[2] = 50.0f;
+    Audio::Overlay::SetOn(false);
+    World::MapObjectSounds::OnObjectDrawn(waterfall);
+    const bool notedWhileOff = !Audio::Overlay::TakeDrawn().empty();
+    Audio::Overlay::SetOn(true);
+    World::MapObjectSounds::OnObjectDrawn(waterfall);
+    const std::vector<Audio::Overlay::DrawnSource> drawn = Audio::Overlay::TakeDrawn();
+    Audio::Overlay::SetOn(false);
+    const std::vector<Audio::Mixer::PlacedStart> starts = Audio::Mixer::RecentStarts(Audio::Mixer::Now(), 60.0);
+    World::MapObjectSounds::LoadForMap(-1, 0);
+    Audio::Mixer::Clear();
+    CHECK_FALSE(notedWhileOff);
+    REQUIRE(drawn.size() == 1);
+    CHECK(drawn[0].kind == Audio::SoundKind::MapObject);
+    CHECK(drawn[0].sourceNumber == 38);
+    CHECK(drawn[0].soundNumber == static_cast<int>(*sound));
+    CHECK(drawn[0].position == std::array<float, 3>{1200.0f, 3400.0f, 50.0f});
+    CHECK(drawn[0].inner == 300.0f);
+    CHECK(drawn[0].outer == 1500.0f);
+    REQUIRE_FALSE(starts.empty());
+    CHECK(starts.back().kind == Audio::SoundKind::MapObject);
+    CHECK(starts.back().sourceNumber == 38);
+    CHECK(starts.back().position == std::array<float, 3>{1200.0f, 3400.0f, 50.0f});
 }
 #endif // _EDITOR

@@ -28,6 +28,7 @@
 
 #ifdef _EDITOR
 #include "Audio/SoundMixer.h"
+#include "Audio/SoundOverlay.h"
 #include "UI/MonsterTools/MonsterSelection.h"
 #include "UI/MonsterTools/MuMonsterPreviewUI.h"
 #endif
@@ -1013,5 +1014,45 @@ TEST_CASE("Monster sounds: the Sound Mixer hears a set's events as monster sound
     CHECK(heard[0].kind == Audio::SoundKind::Monster);
     CHECK(heard[0].name == "Death Rider");
     CHECK(heard[0].sourceNumber == DeathRider);
+}
+
+TEST_CASE("Monster sounds: the Sound Mixer's overlay marks a drawn monster of a set with its hearing ring while it "
+          "is on, and a start with the monster's place (Q-SM9) [monsters][sounds][editor]")
+{
+    using namespace GameLogic::Monsters::SoundEvents;
+    SoundScope scope(WD_33AIDA);
+    Data::Monsters::ModelLoader::Open(MODEL_DEATH_RIDER);
+    REQUIRE(Data::Monsters::ModelLoader::IsOpen(MODEL_DEATH_RIDER));
+    scope.Take();
+    Audio::Mixer::Clear();
+    const std::unique_ptr<CHARACTER> rider = MakeCharacter(DeathRider);
+    rider->Object.Position[0] = Hero->Object.Position[0] + 100.0f;
+    rider->Object.Position[1] = Hero->Object.Position[1];
+    rider->Object.Position[2] = 50.0f;
+    Audio::Overlay::SetOn(false);
+    FinishDrawnFrame(*rider);
+    const bool notedWhileOff = !Audio::Overlay::TakeDrawn().empty();
+    Audio::Overlay::SetOn(true);
+    FinishDrawnFrame(*rider);
+    const std::vector<Audio::Overlay::DrawnSource> drawn = Audio::Overlay::TakeDrawn();
+    Audio::Overlay::SetOn(false);
+    // An attack's start: the set's event and the attack table's sound.
+    rider->Object.CurrentAction = MONSTER01_ATTACK1;
+    CHECK(Play(*rider));
+    const std::vector<Audio::Mixer::PlacedStart> starts = Audio::Mixer::RecentStarts(Audio::Mixer::Now(), 60.0);
+    scope.Take();
+    Audio::Mixer::Clear();
+    CHECK_FALSE(notedWhileOff);
+    REQUIRE(drawn.size() == 1);
+    CHECK(drawn[0].kind == Audio::SoundKind::Monster);
+    CHECK(drawn[0].name == "Death Rider");
+    CHECK(drawn[0].sourceNumber == DeathRider);
+    CHECK(drawn[0].position == std::array<float, 3>{rider->Object.Position[0], rider->Object.Position[1], 50.0f});
+    CHECK(drawn[0].inner == 500.0f);
+    CHECK(drawn[0].outer == 0.0f);
+    REQUIRE_FALSE(starts.empty());
+    CHECK(starts.back().kind == Audio::SoundKind::Monster);
+    CHECK(starts.back().name == "Death Rider");
+    CHECK(starts.back().position == std::array<float, 3>{rider->Object.Position[0], rider->Object.Position[1], 50.0f});
 }
 #endif // _EDITOR

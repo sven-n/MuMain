@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <limits>
@@ -58,8 +59,15 @@ public:
     bool PlaySound(ESound buffer, const void* object, bool looped) override
     {
         plays.push_back({static_cast<int>(buffer), object, looped});
+        ++starts;
         return true;
     }
+    // Every play starts, for the Sound Mixer's count and its placed starts.
+    std::uint32_t GetSoundStarts(ESound) const override
+    {
+        return starts;
+    }
+    std::uint32_t starts = 0;
     void StopSound(ESound, bool) override {}
     void AllStopSound() override {}
     void ReleaseSound(ESound buffer) override

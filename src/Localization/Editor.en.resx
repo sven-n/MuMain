@@ -3757,6 +3757,15 @@
   <data name="Sound mixer note" xml:space="preserve">
     <value>For listening in the editor: mute, solo and turn down kinds of sounds and every sound heard. Changes apply at once; a muted loop keeps running silently. The game's own volumes stay as they are, the editor's Play buttons and previews are not affected, and every start plays everything as normal.</value>
   </data>
+  <data name="Sound mixer show in world" xml:space="preserve">
+    <value>Show in world</value>
+  </data>
+  <data name="Sound mixer show in world tip" xml:space="preserve">
+    <value>Marks the map objects and monsters of the rows shown, with their ranges: around a map object a ring of full volume (3 tiles) and a dashed one of its quietest (15 tiles); around a monster its 5-tile hearing ring, solid while you are inside it. A source flashes when one of its sounds starts; hover a row to highlight its sources.</value>
+  </data>
+  <data name="Sound mixer overlay on" xml:space="preserve">
+    <value>overlay on</value>
+  </data>
   <data name="Sound mixer kinds" xml:space="preserve">
     <value>Kinds</value>
   </data>

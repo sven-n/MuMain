@@ -4,6 +4,7 @@
 
 #include "stdafx.h"
 #include "App/Control/ControlTaps.h"
+#include "Audio/SoundOverlay.h"
 #include "Engine/Object/EditObjects.h"
 #include "UI/Chat/Chat.h"
 #include "MainScene.h"
@@ -442,6 +443,9 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
     }
     Scenes::Lighting::SubmitSceneLighting();
     App::Control::Frames::RecordWorldCamera();
+#ifdef _EDITOR
+    Audio::Overlay::KeepCamera(g_Camera);
+#endif
 }
 
 // Diagnostic toggle -- see MainScene.h's SetDisableEffects() doc comment.

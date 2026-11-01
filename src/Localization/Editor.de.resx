@@ -3538,6 +3538,15 @@
   <data name="Sound mixer note" xml:space="preserve">
     <value>Zum Hören im Editor: Arten von Geräuschen und jedes gehörte Geräusch stumm, solo oder leiser schalten. Änderungen wirken sofort; eine stumme Schleife läuft lautlos weiter. Die Lautstärken des Spiels bleiben, wie sie sind, die Abspielknöpfe und Vorschauen des Editors sind nicht betroffen, und jeder Start spielt alles wie gewohnt.</value>
   </data>
+  <data name="Sound mixer show in world" xml:space="preserve">
+    <value>In der Welt zeigen</value>
+  </data>
+  <data name="Sound mixer show in world tip" xml:space="preserve">
+    <value>Markiert die Kartenobjekte und Monster der gezeigten Zeilen mit ihren Reichweiten: um ein Kartenobjekt ein Ring voller Lautstärke (3 Felder) und ein gestrichelter seiner leisesten (15 Felder); um ein Monster sein Hörring von 5 Feldern, durchgezogen, solange du darin bist. Eine Quelle blinkt, wenn eines ihrer Geräusche startet; fahre über eine Zeile, um ihre Quellen hervorzuheben.</value>
+  </data>
+  <data name="Sound mixer overlay on" xml:space="preserve">
+    <value>Overlay an</value>
+  </data>
   <data name="Sound mixer kinds" xml:space="preserve">
     <value>Arten</value>
   </data>

@@ -4,6 +4,7 @@
 #include "GameLogic/Monsters/MonsterSoundEvents.h"
 
 #include "Audio/DSPlaySound.h"
+#include "Audio/SoundOverlay.h"
 #include "Audio/SoundSource.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
@@ -169,7 +170,7 @@ bool PlayFor(CHARACTER& character, std::optional<MonsterSoundMoment> moment, boo
     }
     OBJECT& object = character.Object;
     const Audio::ScopedSoundSource source(Audio::SoundKind::Monster, set->name,
-                                          static_cast<int>(character.MonsterIndex));
+                                          static_cast<int>(character.MonsterIndex), object.Position);
     Situation situation = SituationOf(object, *set);
     situation.moment = moment;
     situation.chanceDrawn = chanceDrawn;
@@ -177,6 +178,30 @@ bool PlayFor(CHARACTER& character, std::optional<MonsterSoundMoment> moment, boo
                { PlayBuffer(static_cast<ESound>(sound), atMonster ? &object : nullptr); });
     return true;
 }
+
+#ifdef _EDITOR
+// The Sound Mixer's overlay marks a drawn monster with a sound set and its
+// hearing ring.
+void NoteForOverlay(const CHARACTER& character)
+{
+    if (!Audio::Overlay::IsOn())
+    {
+        return;
+    }
+    const MonsterSoundSet* set = FindSoundSet(character);
+    if (set == nullptr)
+    {
+        return;
+    }
+    Audio::Overlay::DrawnSource drawn;
+    drawn.kind = Audio::SoundKind::Monster;
+    drawn.name = set->name;
+    drawn.sourceNumber = static_cast<int>(character.MonsterIndex);
+    drawn.position = {character.Object.Position[0], character.Object.Position[1], character.Object.Position[2]};
+    drawn.inner = HearingDistance;
+    Audio::Overlay::NoteDrawn(drawn);
+}
+#endif
 } // namespace
 
 const MonsterSoundSet* FindSoundSet(const CHARACTER& character)
@@ -204,7 +229,7 @@ bool PlayDrawn(CHARACTER& character)
     }
     OBJECT& object = character.Object;
     const Audio::ScopedSoundSource source(Audio::SoundKind::Monster, set->name,
-                                          static_cast<int>(character.MonsterIndex));
+                                          static_cast<int>(character.MonsterIndex), object.Position);
     Situation situation = SituationOf(object, *set);
     situation.drawn = true;
     situation.oncePlayed = character.SoundOncePlayed;
@@ -224,6 +249,9 @@ bool PlayDrawn(CHARACTER& character)
 
 void FinishDrawnFrame(CHARACTER& character)
 {
+#ifdef _EDITOR
+    NoteForOverlay(character);
+#endif
     if (!character.SoundsDrawnThisFrame)
     {
         PlayDrawn(character);
