@@ -11915,6 +11915,35 @@ void SpawnSlotEffects(CHARACTER* c, Engine::Object::Attachments::Slot& slot, con
         SpawnLinkedPartEffects(c, slot.type, Object, Engine::Object::Attachments::Bones(slot), placement.position);
 }
 
+bool IsImpOnRageFighterArmor(const CHARACTER* c)
+{
+    const int armor = c->BodyPart[BODYPART_ARMOR].Type;
+    return gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER &&
+           (armor == MODEL_SACRED_ARMOR || armor == MODEL_STORM_HARD_ARMOR || armor == MODEL_PIERCING_ARMOR ||
+            armor == MODEL_PHOENIX_SOUL_ARMOR);
+}
+
+// The Imp's red glow, which RenderCharacterBackItem used to spawn while drawing it.
+void SpawnImpLight(CHARACTER* c, OBJECT* o)
+{
+    if (o->Type != MODEL_PLAYER || c->Helper.Type != MODEL_IMP || gMapManager.InChaosCastle())
+        return;
+    vec3_t vRelativePos, vPos, vLight;
+    if (IsImpOnRageFighterArmor(c))
+    {
+        Vector(20.f, -5.f, 35.f, vRelativePos);
+    }
+    else
+    {
+        Vector(20.f, 0.f, 15.f, vRelativePos);
+    }
+    constexpr int ImpLinkBone = 34;
+    Models[o->Type].TransformPosition(o->BoneTransform[ImpLinkBone], vRelativePos, vPos, true);
+    float fLuminosity = (float)(rand() % 30 + 70) * 0.01f;
+    Vector(fLuminosity * 0.5f, 0.f, 0.f, vLight);
+    CreateSprite(BITMAP_LIGHT, vPos, 1.5f, vLight, o);
+}
+
 // Advances and poses the parts the character's last draw attached, once per draw.
 void UpdateAttachedParts(CHARACTER* c)
 {
@@ -11961,6 +11990,7 @@ void UpdateDrawnCharacterEffects()
         VectorCopy(o->Position, b->BodyOrigin);
         PrepareHeldWeapons(c);
         UpdateAttachedParts(c);
+        SpawnImpLight(c, o);
         SpawnHeldWeaponGlows(c);
         UpdateMonsterBodyEffects(c, o, b);
         UpdateCharacterBodyEffects(c, o);
@@ -15579,29 +15609,12 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
                 w->LinkBone = 34;
                 w->PlaySpeed = 0.5f;
                 iOption1 = w->ExcellentFlags;
-                vec3_t vRelativePos;
-                if (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER
-                    && (c->BodyPart[BODYPART_ARMOR].Type == MODEL_SACRED_ARMOR
-                        || c->BodyPart[BODYPART_ARMOR].Type == MODEL_STORM_HARD_ARMOR
-                        || c->BodyPart[BODYPART_ARMOR].Type == MODEL_PIERCING_ARMOR
-                        || c->BodyPart[BODYPART_ARMOR].Type == MODEL_PHOENIX_SOUL_ARMOR))
-                {
+                if (IsImpOnRageFighterArmor(c))
                     RenderLinkObject(20.f, -5.f, 20.f, c, w, iType, iLevel, iOption1, false, bTranslate);
-                    Vector(20.f, -5.f, 35.f, vRelativePos);
-                }
                 else
-                {
                     RenderLinkObject(20.f, 0.f, 0.f, c, w, iType, iLevel, iOption1, false, bTranslate);
-                    Vector(20.f, 0.f, 15.f, vRelativePos);
-                }
-
-                vec3_t vPos;
-                Models[o->Type].TransformPosition(o->BoneTransform[w->LinkBone], vRelativePos, vPos, true);
-
-                vec3_t vLight;
-                float fLuminosity = (float)(rand() % 30 + 70) * 0.01f;
-                Vector(fLuminosity * 0.5f, fLuminosity * 0.f, fLuminosity * 0.f, vLight);
-                CreateSprite(BITMAP_LIGHT, vPos, 1.5f, vLight, o);
+                if (!IsClientCharacterObject(o))
+                    SpawnImpLight(c, o);
             }
         }
     }

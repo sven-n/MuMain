@@ -632,11 +632,14 @@ bool CGM_PK_Field::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
     switch (o->Type)
     {
     case MODEL_ZOMBIE_FIGHTER:
-    {
-    }
-    return true;
     case MODEL_GLADIATOR:
     {
+        auto fRotation = (float)((int)(WorldTime * 0.1f) % 360);
+        float fAngle = (sinf(WorldTime * 0.004f) + 1.0f) * 0.4f + 0.2f;
+        vec3_t vWorldPos;
+        Vector(0.1f, 0.4f, 0.5f, vLight);
+        b->TransformByObjectBone(vWorldPos, o, 9);
+        CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
     }
     return true;
     case MODEL_SLAUGHTERER:
@@ -711,6 +714,9 @@ bool CGM_PK_Field::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
         {
             if ((int)o->LifeTime == 100)
             {
+                CreateEffect(o->Type == MODEL_BLOOD_ASSASSIN ? MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY
+                                                             : MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY,
+                             o->Position, o->Angle, o->Light, 0, o, 0, 0);
                 o->LifeTime = 90;
                 o->m_bRenderShadow = false;
 
@@ -823,18 +829,12 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         return false;
     }
 
-    auto fRotation = (float)((int)(WorldTime * 0.1f) % 360);
     float fAngle = (sinf(WorldTime * 0.004f) + 1.0f) * 0.4f + 0.2f;
-    vec3_t vWorldPos, vLight;
-    Vector(0.1f, 0.4f, 0.5f, vLight);
 
     switch (o->Type)
     {
     case MODEL_ZOMBIE_FIGHTER:
     {
-        b->TransformByObjectBone(vWorldPos, o, 9);
-        CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
-
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         DisableDepthTest();
@@ -844,9 +844,6 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     return true;
     case MODEL_GLADIATOR:
     {
-        b->TransformByObjectBone(vWorldPos, o, 9);
-        CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, fAngle, vLight, o, fRotation);
-
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         DisableDepthTest();
@@ -869,26 +866,7 @@ bool CGM_PK_Field::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     case MODEL_BLOOD_ASSASSIN:
     case MODEL_CRUEL_BLOOD_ASSASSIN:
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if ((int)o->LifeTime == 100)
-            {
-                switch (o->Type)
-                {
-                case MODEL_BLOOD_ASSASSIN:
-                {
-                    CreateEffect(MODEL_PKFIELD_ASSASSIN_EFFECT_RED_BODY, o->Position, o->Angle, o->Light, 0, o, 0, 0);
-                }
-                break;
-                case MODEL_CRUEL_BLOOD_ASSASSIN:
-                {
-                    CreateEffect(MODEL_PKFIELD_ASSASSIN_EFFECT_GREEN_BODY, o->Position, o->Angle, o->Light, 0, o, 0, 0);
-                }
-                break;
-                }
-            }
-        }
-        else
+        if (o->CurrentAction != MONSTER01_DIE)
         {
             float fBlendMeshLight = 0.0f;
             fBlendMeshLight = (sinf(WorldTime * 0.005f) + 1.0f) * 0.3f + 0.3f;

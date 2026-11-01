@@ -1342,14 +1342,14 @@ static void UpdateDrawnBoidEffects()
 
         case MODEL_CROW:
             Vector(-5.f, 0.f, 0.f, p);
-            b->TransformPosition(bones()[1], p, Position, true);
+            b->TransformPosition(bones()[1], p, Position);
 
             float Luminosity = (float)(rand() % 32 + 128) * 0.01f;
             Vector(Luminosity * 1.f, Luminosity * 0.2f, 0.f, Light);
             CreateSprite(BITMAP_LIGHT, Position, 0.1f, Light, o);
 
             Vector(5.f, 0.f, 0.f, p);
-            b->TransformPosition(bones()[1], p, Position, true);
+            b->TransformPosition(bones()[1], p, Position);
             CreateSprite(BITMAP_LIGHT, Position, 0.1f, Light, o);
             break;
         }
@@ -1474,6 +1474,7 @@ void MoveBoids()
             {
                 int iCreateBoid = 0;
 
+                Engine::Object::Pose::Release(o);
                 o->Initialize();
 
                 o->Live = true;

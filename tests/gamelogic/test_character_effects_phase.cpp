@@ -16,6 +16,7 @@
 #include "Render/Items/ItemRenderStyles.h"
 #include "Render/Models/ZzzBMD.h"
 #include "World/GameMaps/GMNewTown.h"
+#include "World/GameMaps/GM_PK_Field.h"
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/w_MapProcess.h"
 
@@ -627,6 +628,36 @@ TEST_CASE(
     }
 
     crystal.BoneTransform = nullptr;
+    gMapManager.WorldActive = previousWorld;
+}
+
+TEST_CASE("A dying Blood Assassin breaks apart from the update, body and head, and its draw spawns none [effects]")
+{
+    CharacterScope scope(MODEL_BLOOD_ASSASSIN);
+    CHARACTER& c = scope.character();
+    OBJECT& o = c.Object;
+    o.CurrentAction = MONSTER01_DIE;
+    o.LifeTime = 100;
+    const int previousWorld = gMapManager.WorldActive;
+    gMapManager.WorldActive = WD_63PK_FIELD;
+    auto map = CGM_PK_Field::Make();
+    BMD* b = &Models[o.Type];
+    auto liveEffects = []
+    {
+        int live = 0;
+        for (int i = 0; i < MAX_EFFECTS; ++i)
+            live += Effects[i].Live ? 1 : 0;
+        return live;
+    };
+    FenrirScope::ClearSpawns();
+
+    CheckDrawSpawnsNone([&] { map->RenderObjectMesh(&o, b, false); });
+    CHECK(liveEffects() == 0);
+    map->UpdateMonsterEffects(&c, &o, b);
+    CHECK(liveEffects() == 2);
+    CHECK(o.LifeTime == 90);
+
+    FenrirScope::ClearSpawns();
     gMapManager.WorldActive = previousWorld;
 }
 
