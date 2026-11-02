@@ -4646,6 +4646,32 @@ TEST_CASE("Item Tooltip adds a rule before the item's ranged rule that holds at 
     g_ItemEdits.GetHistory().Clear();
 }
 
+// Item Tooltip: for an item without a rule of its own at the level, Add rule takes the style the standard rules give
+// there by its name, not the first style of the same look.
+TEST_CASE("Item Tooltip adds the standard rules' style for an item without rules of its own [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TestImGuiContext context;
+    g_ItemEdits.GetHistory().Clear();
+    // A Kris at +0 takes "level0", whose grey "orbOfSummoning" has too, earlier in the file.
+    const GroundLabelFile& labels = g_ItemDatabase.GetGroundLabels();
+    REQUIRE(labels.FindStyle("orbOfSummoning")->color == labels.FindStyle("level0")->color);
+    REQUIRE(g_ItemDatabase.Find(KrisType)->groundLabels.empty());
+    g_ItemSelection.Select(KrisType);
+    RenderItemTool(g_MuItemTooltipUI, true);
+    ImGui::ActivateItemByID(ItemToolFieldId(MuEditor::WindowIds::ItemTooltip, {KrisType}, I18N::Editor::AddRule));
+    RenderItemTool(g_MuItemTooltipUI, true);
+
+    const ItemGroundLabel added{"level0", true, 0, 0};
+    CHECK(g_ItemDatabase.Find(KrisType)->groundLabels == std::vector<ItemGroundLabel>{added});
+    g_ItemEdits.GetHistory().Clear();
+}
+
 TEST_CASE("A description placeholder that names no table stops the save [editor][items]")
 {
     TemporaryClientFolder folder;

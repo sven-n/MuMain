@@ -76,6 +76,28 @@ std::string SetName(int itemType, int set)
     return text;
 }
 
+// The style a label took. With no rule holding the label keeps the game's own look: a style that looks like it, else
+// the first style.
+std::string StyleOfLabel(const GroundItemLabel& label)
+{
+    if (!label.style.empty())
+    {
+        return label.style;
+    }
+    const std::vector<Data::Items::GroundLabelStyle>& styles = g_ItemDatabase.GetGroundLabels().styles;
+    const auto looksLike = [&label](const Data::Items::GroundLabelStyle& style)
+    {
+        return style.color == GroundLabelWidgets::FromGameColor(label.textColor) &&
+               style.background == GroundLabelWidgets::FromGameColor(label.backgroundColor) && style.bold == label.bold;
+    };
+    const auto same = std::ranges::find_if(styles, looksLike);
+    if (same != styles.end())
+    {
+        return same->name;
+    }
+    return styles.empty() ? std::string() : styles.front().name;
+}
+
 bool LevelField(const char* label, int& level)
 {
     ImGui::SetNextItemWidth(LevelFieldWidth * g_MuEditorCore.GetUIScale());
@@ -270,9 +292,9 @@ bool CMuItemTooltipUI::RenderRuleLevels(std::vector<ItemGroundLabel>& rules, siz
     return false;
 }
 
-// A rule for the previewed level with the look the label has there: its own rule's style, else a style that looks like
-// the label the standard rules give. It goes before the item's rule that holds at the level (the first rule that holds
-// gives the style), so it is the one used there.
+// A rule for the previewed level with the style the label has there: its own rule's, else the one the standard rules
+// give (by its name: other styles may look the same). It goes before the item's rule that holds at the level (the
+// first rule that holds gives the style), so it is the one used there.
 void CMuItemTooltipUI::AddRule(ItemDefinition& item) const
 {
     ItemGroundLabel rule;
@@ -281,30 +303,9 @@ void CMuItemTooltipUI::AddRule(ItemDefinition& item) const
     rule.maxLevel = m_level;
     const auto own = std::ranges::find_if(item.groundLabels, [this](const ItemGroundLabel& existing)
                                           { return existing.HoldsAt(m_level); });
-    const Data::Items::GroundLabelFile& labels = g_ItemDatabase.GetGroundLabels();
-    if (own != item.groundLabels.end())
-    {
-        rule.style = own->style;
-    }
-    else
-    {
-        const GroundItemLabel label = DescribePreviewLabel(Data::Items::MakeItemType(item.group, item.number));
-        const auto looksLike = [&label](const Data::Items::GroundLabelStyle& style)
-        {
-            return style.color == GroundLabelWidgets::FromGameColor(label.textColor) &&
-                   style.background == GroundLabelWidgets::FromGameColor(label.backgroundColor) &&
-                   style.bold == label.bold;
-        };
-        const auto same = std::ranges::find_if(labels.styles, looksLike);
-        if (same != labels.styles.end())
-        {
-            rule.style = same->name;
-        }
-        else if (!labels.styles.empty())
-        {
-            rule.style = labels.styles.front().name;
-        }
-    }
+    rule.style = own != item.groundLabels.end()
+                     ? own->style
+                     : StyleOfLabel(DescribePreviewLabel(Data::Items::MakeItemType(item.group, item.number)));
     item.groundLabels.insert(own, rule);
 }
 

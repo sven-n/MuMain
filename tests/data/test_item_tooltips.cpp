@@ -888,6 +888,7 @@ TEST_CASE("A ground label takes its look from the item's own style or else the s
     CHECK(ticket.textColor == rgb(0xe5, 0x87, 0x21));
     CHECK(ticket.backgroundColor == black);
     CHECK_FALSE(ticket.bold);
+    CHECK(ticket.style == "ticket");
     const GroundItemLabel bless = label(at(14, 13, 0));
     CHECK(bless.textColor == rgb(0xff, 0xcc, 0x19));
     CHECK(bless.bold);
@@ -903,12 +904,16 @@ TEST_CASE("A ground label takes its look from the item's own style or else the s
     CHECK(label(at(0, 0, 0)).textColor == rgb(0xb2, 0xb2, 0xb2));
     CHECK(label(at(0, 0, 3)).textColor == rgb(0xff, 0x7f, 0x33));
     CHECK(label(at(0, 0, 9)).textColor == rgb(0xff, 0xcc, 0x19));
+    // (by the style's name: other styles look the same, such as "orbOfSummoning" as "level0")
+    CHECK(label(at(0, 0, 0)).style == "level0");
+    CHECK(label(at(0, 0, 9)).style == "level7up");
     // ... blue with an option below +7, the options after the name, ...
     ItemCreationParams luckyKris = at(0, 0, 3);
     luckyKris.WithLuck = true;
     const GroundItemLabel lucky = label(luckyKris);
     CHECK(lucky.textColor == rgb(0x66, 0xb2, 0xff));
     CHECK(lucky.text == std::wstring(L"Kris +3") + I18N::Game::Luck);
+    CHECK(lucky.style == "withOptions");
     // ... green when excellent, also first-tier wings, but not the second-tier wings, ...
     const auto excellent = [&](int group, int number)
     {
