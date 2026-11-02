@@ -15,17 +15,23 @@
 
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include "DSPlaySound.h"
+#include "Audio/SoundIds.h"
 #include "Core/Platform/IPlatformAudio.h"
+#include "Core/Text/Utf8.h"
+#include "Core/Utilities/Log/MuLogger.h"
+#include "Data/GameData/SoundData/SoundFileDatabase.h"
 #ifdef _EDITOR
 #include "Audio/EditorSoundMute.h"
 #include "Audio/SoundMixer.h"
 #include "Audio/SoundPlaces.h"
 #endif
 
+#include <algorithm>
 #include <cwctype>
 #include <optional>
 #include <string>
 #include <unordered_map>
+#include <unordered_set>
 
 namespace
 {
@@ -63,6 +69,25 @@ void LoadWaveFile(ESound bufferId, const wchar_t* filename, int maxChannel, bool
         g_platformAudio->LoadSound(bufferId, filename, maxChannel, enable3D);
         LoadedSounds()[static_cast<int>(bufferId)] = Describe(filename, maxChannel, enable3D);
     }
+}
+
+void LoadGameSound(ESound bufferId)
+{
+    const Data::Sounds::SoundFile* sound = g_SoundFileDatabase.Find(static_cast<int>(bufferId));
+    if (sound == nullptr)
+    {
+        static std::unordered_set<int> reported;
+        if (reported.insert(static_cast<int>(bufferId)).second)
+        {
+            MU_LOG_ERROR(mu::log::Get("audio"), "{} ({}) is not in Data/Audio/SoundFiles.json: it is silent",
+                         ::Audio::SoundIds::NameOf(bufferId), static_cast<int>(bufferId));
+        }
+        return;
+    }
+    // "Data/Sound/a.wav" -> "Data\Sound\a.wav", as the code named it.
+    std::wstring file = Core::Text::FromUtf8(sound->file.c_str());
+    std::replace(file.begin(), file.end(), L'/', L'\\');
+    LoadWaveFile(bufferId, file.c_str(), sound->channels, sound->spatial);
 }
 
 bool IsSoundLoaded(ESound bufferId, const wchar_t* filename, int maxChannel, bool enable3D)

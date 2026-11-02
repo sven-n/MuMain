@@ -26,12 +26,16 @@ Castle files the code names are not in the client (`oProtectionDis.wav`,
 
 | | Question *(2026-11-02)* | Answer |
 |---|---|---|
-| Q-SE1 | Where do the code's file names live, what can be edited, and what is a sound's name? | **All in data, the engine way.** `Data/Sound/SoundFiles.json` holds the code's 388 sounds (id, file, channels, 3D); the code still loads each where it does today but takes them from the data (checked identical). The monster sets and map object sounds stay in their files. In the editor a sound's file is picked from the files in `Data/Sound` (search, play first) and its channels and 3D changed; the sound reloads at once; the files on disk are never touched (they are not in git and every build folder links one shared client folder). Like Unity's GUIDs or Godot's `uid://`, the `SOUND_` id stays the hidden identity that C++ and the data (751 references) point at; every sound gets a free **name** in data, shown in every editor window instead of the id, so a rename never breaks anything. **Sound events now:** which sound plays when moves into data (`Data/Sound/SoundEvents.json`, an Events tab), starting with the hero's footsteps and the weapon swings, checked identical; other systems follow one at a time. Not chosen: only changed files in data, files and load moments in data, a rename on disk, names as data keys, keys that generate the C++ ids, events later. |
+| Q-SE1 | Where do the code's file names live, what can be edited, and what is a sound's name? | **All in data, the engine way.** `Data/Audio/SoundFiles.json` holds the code's 388 sounds (id, file, channels, 3D); the code still loads each where it does today but takes them from the data (checked identical). The monster sets and map object sounds stay in their files. In the editor a sound's file is picked from the files in `Data/Sound` (search, play first) and its channels and 3D changed; the sound reloads at once; the files on disk are never touched (they are not in git and every build folder links one shared client folder). Like Unity's GUIDs or Godot's `uid://`, the `SOUND_` id stays the hidden identity that C++ and the data (751 references) point at; every sound gets a free **name** in data, shown in every editor window instead of the id, so a rename never breaks anything. **Sound events now:** which sound plays when moves into data (`Data/Audio/SoundEvents.json`, an Events tab), starting with the hero's footsteps and the weapon swings, checked identical; other systems follow one at a time. Not chosen: only changed files in data, files and load moments in data, a rename on disk, names as data keys, keys that generate the C++ ids, events later. |
 | Q-SE2 | What is a sound's type in the editor? | **A stored fallback type**: a type per code sound in data, used only when no source or place names one (level up, quest prize, trade, whisper alerts get a type), next to the live "heard as" of this session. Not chosen: heard as only, a stored type that always wins. |
 | Q-SE3 | How do the Sound Mixer and the Sound Editor follow each other? | **Quietly**: a click on a sound in either window selects it in both; a closed or hidden window is not opened or raised, it shows the sound selected when it is looked at. The mixer's copy on click stays. Not chosen: open and raise the other window, a menu item per row. |
-| Q-SE4 | How are sounds grouped? | **Folders**, as in the Colors window: nested folders, each sound in exactly one (else "Not sorted"), new, rename, remove (contents move up), move, drag and drop; seeded from what is known (the monster sets, the maps' loads, the files' prefixes `i` interface, `p` player, `s` skill, `m` monster, `e` effect, `a` ambience, `n` NPC). Editor only: `Data/Sound/SoundFolders.json`, which the game never reads. Not chosen: tags, groups from data only. |
+| Q-SE4 | How are sounds grouped? | **Folders**, as in the Colors window: nested folders, each sound in exactly one (else "Not sorted"), new, rename, remove (contents move up), move, drag and drop; seeded from what is known (the monster sets, the maps' loads, the files' prefixes `i` interface, `p` player, `s` skill, `m` monster, `e` effect, `a` ambience, `n` NPC). Editor only: `Data/Audio/SoundFolders.json`, which the game never reads. Not chosen: tags, groups from data only. |
 
 ## Design
+
+**Where the files are.** `Data/Audio`, not `Data/Sound`: a build folder's
+`Data/Sound` links the shared client folder, which the asset copy would write
+into (decided while building, 2026-11-03).
 
 **SoundFiles.json.** `{"formatVersion": 1, "sounds": [{"id": "SOUND_CLICK01",
 "name": "Button click", "file": "Data/Sound/iButtonClick.wav", "channels": 1,
@@ -50,7 +54,8 @@ labels and the Monster Sounds window's event picker show them.
 
 **The Sound Editor** (Windows menu): one tree table of every sound (983 rows
 today) in its folders: name (edited in the cell, the id in grey), file (the
-picker), channels, 3D, when it loads (startup, a map, with its monster), the
+picker), channels, 3D, when it loads (as seen this session: startup, the map
+being entered, with its monster; "not loaded yet" before), the
 type if no place, heard as, the data file it lives in. Search finds names,
 ids and files; "Only problems" leaves the files that are missing on disk, the
 ids loaded twice and the ids played but never loaded. Edits of code sounds
@@ -65,13 +70,13 @@ Map Editor's, so two windows never write one file differently.
 and scrolls to it when it changed while the window was visible or the next
 time it is drawn. A sound not heard yet has no mixer row.
 
-**Folders.** `Data/Sound/SoundFolders.json`: `{"formatVersion": 1, "folders":
+**Folders.** `Data/Audio/SoundFolders.json`: `{"formatVersion": 1, "folders":
 [{"name": "Monsters", "folders": [...], "sounds": ["SOUND_CLICK01",
 "set:Death Tree:Data/Sound/w34/dt_idle1.wav", "objects:<entry>"]}]}`; a
 sound named twice keeps its first place; stale entries are warned and
 dropped on save.
 
-**Sound events.** `Data/Sound/SoundEvents.json`: per event an ordered list of
+**Sound events.** `Data/Audio/SoundEvents.json`: per event an ordered list of
 rules, the first that matches plays; each event has the conditions its code
 can tell (footsteps: map, ground tile, safe zone, not flying; swings: what
 the character holds: bow, crossbow, magic weapon, light saber or spear, any

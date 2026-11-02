@@ -1006,6 +1006,10 @@ constexpr int MAX_FILE_SOUNDS = 16384;
 
 void LoadWaveFile(ESound Buffer, const wchar_t* strFileName, int BufferChannel = MAX_CHANNEL,
                   bool Enable3DSound = false);
+// Loads a sound of the code with the file, channels and 3D that
+// Data/Audio/SoundFiles.json gives its id (sound editor design, Q-SE1); one
+// the file has not is logged as an error and stays silent.
+void LoadGameSound(ESound Buffer);
 // Whether LoadWaveFile loaded this file into the sound, with these channels
 // and 3D setting, and it was not released since; the file without case. A
 // load of the same again would only start over (and stop it where it plays).

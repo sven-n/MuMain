@@ -10,6 +10,8 @@
 #include "Data/DataHandler/EffectData/EffectDataHandler.h"
 #include "Data/DataHandler/LoadData.h"
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "Data/DataHandler/SoundData/SoundFileStorage.h"
+#include "Data/GameData/SoundData/SoundFileDatabase.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Sprites/GpuUploadSkip.h"
@@ -226,7 +228,8 @@ void CollectTextureError(const std::string& message)
 
 // The tables as the game loads them at startup: the effect catalogue first,
 // whose effect types the model list names, the monster list, the model list,
-// and the sound sets the monsters name, whose sounds a model loads (Q-MN78).
+// the sound sets the monsters name, whose sounds a model loads (Q-MN78), and
+// the files of the code's sounds, which OpenSounds and the maps load (Q-SE1).
 // Once per test binary; the tables stay loaded (a test that builds its own
 // monster table puts the shipped one back).
 void LoadModelTable()
@@ -238,6 +241,13 @@ void LoadModelTable()
     if (!Data::Effects::LoadEffectTypes(error) || !g_MonsterDataHandler.Load(error) ||
         !g_MonsterDataHandler.LoadModels(error) || !g_MonsterDataHandler.LoadSounds(error))
         throw std::runtime_error("the monster tables do not load: " + error);
+    // Read as the game reads it, without logging that the client's sound
+    // files are not in this folder.
+    const Data::Sounds::SoundFilesLoadResult soundFiles =
+        Data::Sounds::LoadSoundFilesFile(Data::Sounds::GetSoundFilesFile());
+    if (Data::Items::HasFatal(soundFiles.issues))
+        throw std::runtime_error("the sound files do not load");
+    g_SoundFileDatabase.Build(soundFiles.sounds);
     loaded = true;
 }
 
