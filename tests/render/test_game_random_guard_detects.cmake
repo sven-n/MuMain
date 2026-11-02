@@ -1,27 +1,38 @@
-# The owned-random guard (test_game_random_is_owned.cmake) fails on every spelling of a CRT random call and passes
-# code that only mentions one in a comment or a string.
-foreach(name MU_GUARD MU_FIXTURES)
+# The owned-random guard (test_game_random_is_owned.cmake) flags every compiled fixture that calls the CRT's rand() or
+# srand(), however its source spells the call, and none that only mentions them or has a rand() of its own.
+foreach(name MU_GUARD MU_SYMBOL_TOOL MU_USES MU_CLEAN MU_WORK)
     if(NOT DEFINED ${name})
         message(FATAL_ERROR "${name} is required")
     endif()
 endforeach()
 
+execute_process(COMMAND "${CMAKE_COMMAND}" "-DMU_OBJECT_LIST=${MU_USES}" "-DMU_SYMBOL_TOOL=${MU_SYMBOL_TOOL}"
+                        "-DMU_OUTPUT=${MU_WORK}/crt_random_uses.txt" -P "${MU_GUARD}"
+                RESULT_VARIABLE result OUTPUT_QUIET ERROR_QUIET)
+file(STRINGS "${MU_USES}" uses)
+file(STRINGS "${MU_WORK}/crt_random_uses.txt.found" flagged)
 set(missed "")
-foreach(case bare spaced parenthesized c_file seed global_seed between_comments deref comment_in_string
-             raw_delimiter raw_in_line_comments raw_in_block_comments)
-    execute_process(COMMAND "${CMAKE_COMMAND}" "-DMU_SOURCE_DIRS=${MU_FIXTURES}/${case}" -P "${MU_GUARD}"
-                    RESULT_VARIABLE result OUTPUT_QUIET ERROR_QUIET)
-    if(result EQUAL 0)
-        list(APPEND missed "${case}")
+foreach(object IN LISTS uses)
+    get_filename_component(name "${object}" NAME)
+    set(seen FALSE)
+    foreach(entry IN LISTS flagged)
+        file(TO_CMAKE_PATH "${entry}" entry)
+        get_filename_component(flagged_name "${entry}" NAME)
+        if(flagged_name STREQUAL name)
+            set(seen TRUE)
+        endif()
+    endforeach()
+    if(NOT seen)
+        list(APPEND missed "${name}")
     endif()
 endforeach()
-if(missed)
+if(result EQUAL 0 OR missed)
     message(FATAL_ERROR "The guard let these CRT calls through: ${missed}")
 endif()
 
-execute_process(COMMAND "${CMAKE_COMMAND}" "-DMU_SOURCE_DIRS=${MU_FIXTURES}/clean" -P "${MU_GUARD}"
+execute_process(COMMAND "${CMAKE_COMMAND}" "-DMU_OBJECT_LIST=${MU_CLEAN}" "-DMU_SYMBOL_TOOL=${MU_SYMBOL_TOOL}"
+                        "-DMU_OUTPUT=${MU_WORK}/crt_random_clean.txt" -P "${MU_GUARD}"
                 RESULT_VARIABLE result OUTPUT_VARIABLE out ERROR_VARIABLE out)
 if(NOT result EQUAL 0)
-    message(FATAL_ERROR "The guard flagged code that only mentions rand():
-${out}")
+    message(FATAL_ERROR "The guard flagged code that calls neither rand() nor srand():\n${out}")
 endif()
