@@ -87,8 +87,9 @@ drawer, and the renderer applies the active look per draw.
   longer brighten in both water passes.
 - Objects drawn more than once per frame no longer fade faster during the
   Chaos Castle fall.
-- An attached part on its first frame (newly equipped, or moved between hand
-  and back) is drawn as it stands; its effects start with the next update.
+- The parts of a character on its first drawn frame are drawn as they stand;
+  their effects start with the next update. A part equipped, or moved between
+  hand and back, while the character is in view is planned by the next update.
 - Dark Side steps once per reference frame for each part its draw shows; it
   stepped once per drawn part per frame, faster at a high frame rate.
 - Effect ground marks show the frame's visibility; they lagged a frame.
@@ -117,11 +118,13 @@ drawer, and the renderer applies the active look per draw.
   bones in as an argument.
 - An object that owns a pose buffer releases it (`Pose::Release`) before its
   slot is reused.
-- The update sets every carried part's bone and animation from the
-  character's state (`PrepareCarriedParts`); a draw reads them and passes
-  only a bone it hangs a part from when that differs (`RenderLinkObject`'s
-  `linkBone`). No draw sets a part the update advances, so no pass can choose
-  how the next update advances it.
+- The update plans a character's attachments from its state, in draw order:
+  which model hangs from which part, where, and at what speed each one steps
+  the part (`PlanAttachments`; a wing carrying the Blood Castle quest item
+  steps once for each). It advances and poses each one. A draw finds its
+  attachment in the plan and shows that pose; shown elsewhere, it poses into
+  bones of its own. Nothing a draw does reaches the plan, so no pass can
+  choose what the next update advances or how.
 - Visibility, drawn-frame marks and pick boxes come from the cull at the end
   of the update. A draw may still set its own parameters on the object it is
   drawing and put them back (a mesh to hide, a light for one part); D5 turns
