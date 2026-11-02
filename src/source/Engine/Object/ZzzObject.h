@@ -64,7 +64,7 @@ void RenderObject_AfterImage(OBJECT* o, bool Translate = false, int Select = 0, 
 void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0,
                                 float AniInterval1 = 1.4f, float AniInterval2 = 0.7f);
 void RenderObject_AfterCharacter(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
-void Draw_RenderObject_AfterCharacter(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
+void Draw_RenderObject_AfterCharacter(const OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderObjects_AfterCharacter();
 // The map objects and effects this frame's draws send to the after-character passes; the boids are sent by their
 // update (m_bRenderAfterCharacter). Cleared when the frame's draw starts.
@@ -129,7 +129,9 @@ void RenderPartObject(OBJECT* o, int Type, void* p, vec3_t Light, float Alpha = 
                       int ExcellentFlags = 0, int ancientDiscriminator = 0, bool GlobalTransform = false,
                       bool HideSkin = false, bool Translate = false, int Select = 0, int RenderType = RENDER_TEXTURE);
 
-void RenderPartObjectEdge(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale);
+// bones: the pose drawn; none for the object's own (or the shared bones without a bone matrix).
+void RenderPartObjectEdge(BMD* b, const OBJECT* o, int Flag, bool Translate, float Scale,
+                          float (*bones)[3][4] = nullptr);
 void RenderPartObjectEdge2(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale, OBB_t* OBB);
 
 void RenderPartObjectEdgeLight(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale);
@@ -148,14 +150,15 @@ void ClearActionObject();
 void SetActionObject(int iWorld, int iType, int iLifeTime, int iVel = -1);
 void ActionObject(OBJECT* o);
 
-void BodyLight(OBJECT* o, BMD* b);
+void BodyLight(const OBJECT* o, BMD* b);
 
-bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon);
+// origin: where to draw the model instead of where the object stands.
+bool Calc_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon, const float* origin = nullptr);
 bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select);
 // Calc_ObjectAnimation's pose into the caller's bones, for a draw that shows the object where it does not stand; the
 // object keeps its own pose.
 bool Calc_ObjectAnimationInto(OBJECT* o, bool Translate, vec34_t* bones);
-void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon);
+void Draw_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon);
 
 bool IsPartyMemberBuff(int partyindex, eBuffState buffstate);
 bool isPartyMemberBuff(int partyindex);

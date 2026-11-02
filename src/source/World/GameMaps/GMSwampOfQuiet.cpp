@@ -202,7 +202,7 @@ bool GMSwampOfQuiet::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
     return true;
 }
 
-bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
+bool GMSwampOfQuiet::RenderObject(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon)
 {
     if (pObject->Type >= MODEL_SHADOW_PAWN && pObject->Type <= MODEL_SHADOW_LOOK)
     {
@@ -218,15 +218,15 @@ bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
             {
             case MODEL_SHADOW_PAWN:
                 Vector(1.0f, 0.2f, 0.2f, pModel->BodyLight);
-                pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 3, fLumi);
+                pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 3, fLumi);
                 break;
             case MODEL_SHADOW_KNIGHT:
                 Vector(0.5f, 0.8f, 1.0f, pModel->BodyLight);
-                pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 3, fLumi);
+                pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 3, fLumi);
                 break;
             case MODEL_SHADOW_LOOK:
                 Vector(0.5f, 1.0f, 0.5f, pModel->BodyLight);
-                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 4, fLumi);
+                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 4, fLumi);
                 break;
             }
         }
@@ -236,31 +236,37 @@ bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
             switch (pObject->Type)
             {
             case MODEL_SHADOW_PAWN:
-                pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(4, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(3, RENDER_TEXTURE, 0.7f, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 4, fLumi, 0, 0, BITMAP_SHADOW_PAWN_RED);
-                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 4, fLumi, 0, 0, BITMAP_SHADOW_PAWN_RED);
+                pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(4, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(3, RENDER_TEXTURE, 0.7f, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 4, fLumi, 0, 0,
+                                   BITMAP_SHADOW_PAWN_RED);
+                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 4, fLumi, 0, 0,
+                                   BITMAP_SHADOW_PAWN_RED);
                 break;
             case MODEL_SHADOW_KNIGHT:
-                pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(4, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(3, RENDER_TEXTURE, 0.7f, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 4, fLumi, 0, 0, BITMAP_SHADOW_KINGHT_BLUE);
-                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 4, fLumi, 0, 0, BITMAP_SHADOW_KINGHT_BLUE);
+                pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(4, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(3, RENDER_TEXTURE, 0.7f, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 4, fLumi, 0, 0,
+                                   BITMAP_SHADOW_KINGHT_BLUE);
+                pModel->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 4, fLumi, 0, 0,
+                                   BITMAP_SHADOW_KINGHT_BLUE);
                 break;
             case MODEL_SHADOW_LOOK:
-                pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(3, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(4, RENDER_TEXTURE, 0.7f, pObject->BlendMesh, pObject->BlendMeshLight);
-                pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 0, fLumi, 0, 0, BITMAP_SHADOW_ROOK_GREEN);
-                pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, 0, fLumi, 0, 0, BITMAP_SHADOW_ROOK_GREEN);
+                pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(4, RENDER_TEXTURE, 0.7f, look.blendMesh, look.blendMeshLight);
+                pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, 0, 0,
+                                   BITMAP_SHADOW_ROOK_GREEN);
+                pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, 0, 0,
+                                   BITMAP_SHADOW_ROOK_GREEN);
                 break;
             }
         }
@@ -271,14 +277,15 @@ bool GMSwampOfQuiet::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
     return true;
 }
 
-void GMSwampOfQuiet::RenderObjectAfterCharacter(OBJECT* pObject, BMD* pModel, bool ExtraMon0)
+void GMSwampOfQuiet::RenderObjectAfterCharacter(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon0)
 {
     if (!IsCurrentMap())
         return;
 
-    // 	if(pObject->Type == 2 || pObject->Type == 53 || pObject->Type == 55 || pObject->Type == 89 || pObject->Type == 125 || pObject->Type == 128)	// 폭포물1,2, 수로, 회오리, 빛
+    // 	if(pObject->Type == 2 || pObject->Type == 53 || pObject->Type == 55 || pObject->Type == 89 || pObject->Type ==
+    // 125 || pObject->Type == 128)	// 폭포물1,2, 수로, 회오리, 빛
     // 	{
-    // 		pModel->RenderBody(RENDER_TEXTURE,pObject->Alpha,pObject->BlendMesh,pObject->BlendMeshLight,pObject->BlendMeshTexCoordU,pObject->BlendMeshTexCoordV,pObject->HiddenMesh);
+    // 		pModel->RenderBody(RENDER_TEXTURE,look.alpha,look.blendMesh,look.blendMeshLight,look.blendMeshU,look.blendMeshV,look.hiddenMesh);
     // 	}
 }
 

@@ -287,7 +287,7 @@ bool M33Aida::UpdateAidaObjectEffects(OBJECT* pObject, BMD* pModel)
     return true;
 }
 
-bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
+bool M33Aida::RenderAidaObjectVisual(const OBJECT* pObject, DrawLook& look, BMD* pModel)
 {
     if (!IsInAida())
         return false;
@@ -303,8 +303,8 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
         pModel->BodyLight[2] = 0.52f;
 
         pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                           look.blendMeshU, look.blendMeshV);
         pModel->StreamMesh = -1;
 
         pModel->EndRender();
@@ -316,8 +316,8 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
         pModel->BeginRender(1.0f);
 
         pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           -(int)WorldTime % 100000 * 0.00005f, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
+                           -(int)WorldTime % 100000 * 0.00005f, look.blendMeshV);
         pModel->StreamMesh = -1;
 
         pModel->EndRender();
@@ -328,8 +328,8 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
     {
         pModel->BeginRender(1.0f);
         pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           (int)WorldTime % 100000 * 0.0002f, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
+                           (int)WorldTime % 100000 * 0.0002f, look.blendMeshV);
         pModel->StreamMesh = -1;
         pModel->EndRender();
     }
@@ -338,13 +338,13 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 
     return true;
 }
-bool M33Aida::RenderAidaObjectMesh(OBJECT* pObject, BMD* pModel, bool ExtraMon)
+bool M33Aida::RenderAidaObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon)
 {
     if (IsInAida())
     {
     }
 
-    return RenderAidaMonsterObjectMesh(pObject, pModel, ExtraMon);
+    return RenderAidaMonsterObjectMesh(pObject, look, pModel, ExtraMon);
 }
 
 CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
@@ -1402,7 +1402,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
     return false;
 }
 
-bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool ExtraMon)
+bool M33Aida::RenderAidaMonsterObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon)
 {
     switch (pObject->Type)
     {
@@ -1415,13 +1415,13 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         pModel->BodyLight[2] = 0.9f;
 
         pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
                            -(int)WorldTime % 10000 * 0.0003f, -(int)WorldTime % 10000 * 0.0003f);
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh,
+                           look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         pModel->StreamMesh = -1;
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
 
         pModel->EndRender();
 
@@ -1436,17 +1436,17 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         pModel->BodyLight[1] = 0.9f;
         pModel->BodyLight[2] = 0.9f;
 
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
+        pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
         pModel->StreamMesh = 0;
-        pModel->RenderMesh(3, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
+        pModel->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
                            -(int)WorldTime % 10000 * 0.0006f, -(int)WorldTime % 10000 * 0.0006f);
-        pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh,
+                           look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         pModel->StreamMesh = -1;
 
         pModel->EndRender();
@@ -1463,29 +1463,29 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         pModel->BodyLight[2] = 1.0f;
 
         pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
         pModel->BodyLight[0] = 1.0f;
         pModel->BodyLight[1] = 0.0f;
         pModel->BodyLight[2] = 0.0f;
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh,
+                           look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         pModel->StreamMesh = -1;
 
         pModel->BodyLight[0] = 1.0f;
         pModel->BodyLight[1] = 1.0f;
         pModel->BodyLight[2] = 1.0f;
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
 
         pModel->StreamMesh = 1;
-        pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
         pModel->BodyLight[0] = 0.5f;
         pModel->BodyLight[1] = 0.0f;
         pModel->BodyLight[2] = 0.0f;
-        pModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh,
+                           look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         pModel->StreamMesh = -1;
 
         pModel->EndRender();
@@ -1501,17 +1501,17 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         pModel->BodyLight[1] = 0.9f;
         pModel->BodyLight[2] = 0.9f;
 
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
+        pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
         pModel->StreamMesh = 0;
-        pModel->RenderMesh(3, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
+        pModel->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
                            -(int)WorldTime % 10000 * 0.0006f, -(int)WorldTime % 10000 * 0.0006f);
-        pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh,
+                           look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         pModel->StreamMesh = -1;
 
         pModel->EndRender();
@@ -1528,13 +1528,13 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         pModel->BodyLight[2] = 0.9f;
 
         pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
                            -(int)WorldTime % 10000 * 0.0003f, -(int)WorldTime % 10000 * 0.0003f);
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh,
+                           look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         pModel->StreamMesh = -1;
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
 
         pModel->EndRender();
 

@@ -230,7 +230,7 @@ void CGMDoppelGanger2::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BM
     }
 }
 
-bool CGMDoppelGanger2::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool CGMDoppelGanger2::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (IsDoppelGanger2() == false)
         return false;
@@ -249,7 +249,7 @@ bool CGMDoppelGanger2::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 15:
     {
         b->StreamMesh = 0;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
                       -(int)WorldTime % 10000 * 0.0001f);
         b->StreamMesh = -1;
         return true;
@@ -257,83 +257,82 @@ bool CGMDoppelGanger2::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 16:
     {
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         return true;
     }
     case 67:
     {
         b->StreamMesh = 1;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
                       (int)WorldTime % 10000 * 0.0001f);
         b->StreamMesh = -1;
         vec3_t light;
         Vector(1.0f, 0.0f, 0.0f, light);
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         VectorCopy(light, b->BodyLight);
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.5f, 0, 0.5f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.5f, 0, 0.5f, look.blendMeshU, look.blendMeshV);
 
         return true;
     }
     case 68:
     {
         b->StreamMesh = 1;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
                       (int)WorldTime % 10000 * 0.0001f);
         b->StreamMesh = -1;
 
         vec3_t light;
         Vector(1.0f, 0.0f, 0.0f, light);
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         VectorCopy(light, b->BodyLight);
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.5f, 0, 0.5f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.5f, 0, 0.5f, look.blendMeshU, look.blendMeshV);
 
         return true;
     }
     case 72:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
         float fLumi = (sinf(WorldTime * 0.003f) + 1.f) * 0.5f * 0.5f + 0.5f;
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-                      o->HiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         return true;
     }
     case MODEL_ICE_WALKER:
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_ICEWALKER0);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_ICEWALKER1);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_DOPPELGANGER_ICEWALKER0);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, BITMAP_DOPPELGANGER_ICEWALKER1);
         return true;
     case MODEL_LARVA:
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_DOPPELGANGER_SNAKE01);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_DOPPELGANGER_SNAKE01);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         return true;
     case MODEL_MAD_BUTCHER:
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         fBlendMeshLight = (sinf(WorldTime * 0.003f) + 1.0f) * 0.5f * 0.8f;
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fBlendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_BUGBEAR_R);
         // b->Actions[MONSTER01_WALK].PlaySpeed =		0.34f;
         return true;
     case MODEL_TERRIBLE_BUTCHER:
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         fBlendMeshLight = (sinf(WorldTime * 0.003f) + 1.0f) * 0.5f * 0.8f;
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fBlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_BUGBEAR_R);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fBlendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_BUGBEAR_R);
         return true;
     case MODEL_DOPPELGANGER:
         return true;
@@ -644,7 +643,7 @@ bool CGMDoppelGanger2::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-void CGMDoppelGanger2::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+void CGMDoppelGanger2::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (!IsDoppelGanger2())
         return;
@@ -654,20 +653,20 @@ void CGMDoppelGanger2::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 16:
     {
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
     }
     break;
     case 10:
     case 19:
     case 20:
     case 31:
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         break;
     case 33:
         b->StreamMesh = 0;
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, (int)WorldTime % 10000 * 0.0001f);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, (int)WorldTime % 10000 * 0.0001f);
         b->StreamMesh = -1;
         break;
     default:

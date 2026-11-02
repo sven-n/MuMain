@@ -1052,7 +1052,7 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     }
 }
 
-bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool CGM_Raklion::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (IsIceCity() == false)
         return false;
@@ -1071,49 +1071,49 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
                 IntensityTransform[i][j] = 0.5f;
             }
         }
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
         return true;
     }
     else if (o->Type == 16)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
         return true;
     }
     else if (o->Type == 17)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
         return true;
     }
     else if (o->Type == 19)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
         return true;
     }
     else if (o->Type == 20)
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_CHROME2 | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_CHROME8);
-        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME8);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_CHROME2 | RENDER_DARK, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_CHROME8);
+        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, BITMAP_CHROME8);
 
         return true;
     }
     else if (o->Type == 21)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
         return true;
     }
@@ -1132,15 +1132,15 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         Vector(1.0f, 1.0f, 1.0f, vLight);
         // CreateEffect(BITMAP_GATHERING,vWorldPos,o->Angle,vLight,3,o);
 
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
 
         return true;
     }
     else if (o->Type == 68 || o->Type == 69 || o->Type == 71)
     {
         float fLumi = (sinf(WorldTime * 0.001f) + 1.f) * 0.5f + 0.3f;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV);
 
         return true;
     }
@@ -1149,22 +1149,22 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->BodyLight[0] = 1.0f;
         b->BodyLight[1] = 1.0f;
         b->BodyLight[2] = 1.0f;
-        o->BlendMeshLight = 1.0f;
+        look.blendMeshLight = 1.0f;
 
         if (o->Type == MODEL_WARP)
         {
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
         }
         else if (o->Type == MODEL_WARP2)
         {
-            b->RenderBody(RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
+            b->RenderBody(RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
         }
         else if (o->Type == MODEL_WARP3)
         {
-            b->RenderMesh(0, RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_DARK, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
         }
 
         return true;
@@ -1179,37 +1179,37 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->BodyLight[0] = 0.5f;
         b->BodyLight[1] = 0.6f;
         b->BodyLight[2] = 1.0f;
-        o->BlendMeshLight = 0.8f;
+        look.blendMeshLight = 0.8f;
 
         if (o->Type == MODEL_WARP4)
         {
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
         }
         else if (o->Type == MODEL_WARP5)
         {
-            b->RenderBody(RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
+            b->RenderBody(RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
         }
         else if (o->Type == MODEL_WARP6)
         {
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
         }
 
         return true;
     }
     else if (o->Type == 82)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
 
         return true;
     }
     else if ((o->Type >= MODEL_ICE_WALKER && o->Type <= MODEL_SPIDER_EGGS_3) || o->Type == MODEL_DARK_MAMMOTH ||
              o->Type == MODEL_DARK_GIANT || o->Type == MODEL_DARK_IRON_KNIGHT || o->Type == MODEL_DARK_COOLUTIN)
     {
-        RenderMonster(o, b, ExtraMon);
+        RenderMonster(o, look, b, ExtraMon);
 
         return true;
     }
@@ -1217,32 +1217,32 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
+bool CGM_Raklion::RenderMonster(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     switch (o->Type)
     {
     case MODEL_ICE_WALKER:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
 
         return true;
     }
     break;
     case MODEL_GIANT_MAMMOTH:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
 
-        // b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-        // o->BlendMeshTexCoordV); b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-        // o->BlendMeshTexCoordU, o->BlendMeshTexCoordV); b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh,
-        // o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        // b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+        // look.blendMeshV); b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
+        // look.blendMeshU, look.blendMeshV); b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh,
+        // look.blendMeshLight, look.blendMeshU, look.blendMeshV);
 
-        b->RenderMesh(1, RENDER_CHROME6 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_CHROME6 | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
 
         return true;
     }
@@ -1252,22 +1252,22 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         if (o->CurrentAction != MONSTER01_DIE)
         {
             Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME7, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
-            b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
-            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME7, look.alpha, look.blendMesh,
+                          look.blendMeshLight, look.blendMeshU, look.blendMeshV);
+            b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
+            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh,
+                          look.blendMeshLight, look.blendMeshU, look.blendMeshV);
 
             return true;
         }
@@ -1275,10 +1275,10 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 
     case MODEL_COOLUTIN:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
 
         return true;
     }
@@ -1287,69 +1287,69 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     case MODEL_IRON_KNIGHT:
         if (o->CurrentAction == MONSTER01_DIE)
         {
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
         }
         else
         {
             float fLumi = (sinf(WorldTime * 0.01f) + 1.0f) * 0.4f + 0.2f;
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, BITMAP_IRONKNIGHT_BODY_BRIGHT);
-            b->RenderMesh(1, RENDER_TEXTURE, 0.4f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, 0.7f, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.5f, 1, 0.5f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-                          o->HiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV,
+                          BITMAP_IRONKNIGHT_BODY_BRIGHT);
+            b->RenderMesh(1, RENDER_TEXTURE, 0.4f, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, 0.7f, look.blendMeshU, look.blendMeshV,
+                          look.hiddenMesh);
+            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.5f, 1, 0.5f, look.blendMeshU, look.blendMeshV,
+                          look.hiddenMesh);
         }
 
         return true;
 
     case MODEL_SELUPAN:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
 
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
 
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
 
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
 
-        b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(4, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
 
-        b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 5, o->BlendMeshLight,
-                      (int)WorldTime % 10000 * 0.0002f, (int)WorldTime % 10000 * 0.0002f, o->HiddenMesh);
+        b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 5, look.blendMeshLight,
+                      (int)WorldTime % 10000 * 0.0002f, (int)WorldTime % 10000 * 0.0002f, look.hiddenMesh);
 
         float fLumi2 = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
 
-        b->RenderMesh(4, RENDER_TEXTURE | RENDER_CHROME4 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_SERUFAN_ARM_R);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_SERUFAN_ARM_R);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_SERUFAN_ARM_R);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_SERUFAN_ARM_R);
+        b->RenderMesh(4, RENDER_TEXTURE | RENDER_CHROME4 | RENDER_BRIGHT, look.alpha, look.blendMesh,
+                      look.blendMeshLight, look.blendMeshU, look.blendMeshV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi2, look.blendMeshU, look.blendMeshV,
+                      BITMAP_SERUFAN_ARM_R);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi2, look.blendMeshU, look.blendMeshV,
+                      BITMAP_SERUFAN_ARM_R);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi2, look.blendMeshU, look.blendMeshV,
+                      BITMAP_SERUFAN_ARM_R);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi2, look.blendMeshU, look.blendMeshV,
+                      BITMAP_SERUFAN_ARM_R);
 
         if (m_byDetailState >= BATTLE_OF_SELUPAN_PATTERN_2)
         {
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_CHROME6 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_MAGIC_EMBLEM);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_CHROME4 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_CHROME6 | RENDER_BRIGHT, look.alpha, look.blendMesh,
+                          look.blendMeshLight, look.blendMeshU, look.blendMeshV, BITMAP_MAGIC_EMBLEM);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_CHROME4 | RENDER_BRIGHT, look.alpha, look.blendMesh,
+                          look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         }
 
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
 
         return true;
     }
@@ -1358,78 +1358,44 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     case MODEL_SPIDER_EGGS_2:
     case MODEL_SPIDER_EGGS_3:
     {
+        // Three eggs: offset on X, then on X and Y, then where the object stands.
+        const float offset = o->Type == MODEL_SPIDER_EGGS_1 ? 60.f : 100.f;
+        vec3_t eggs[3];
+        VectorCopy(o->Position, eggs[0]);
+        eggs[0][0] += offset;
+        VectorCopy(eggs[0], eggs[1]);
+        eggs[1][1] += offset;
+        VectorCopy(o->Position, eggs[2]);
+
         if (o->CurrentAction == MONSTER01_DIE)
         {
             float fBlendLight = 20.f - o->AnimationFrame;
             fBlendLight /= 15;
-            vec3_t vOriginPos;
-            VectorCopy(o->Position, vOriginPos);
 
             for (int i = 0; i < 3; ++i)
             {
-                if (i == 0)
-                {
-                    if (o->Type == MODEL_SPIDER_EGGS_1)
-                        o->Position[0] += 60;
-                    else
-                        o->Position[0] += 100;
-                }
-                else if (i == 1)
-                {
-                    if (o->Type == MODEL_SPIDER_EGGS_1)
-                        o->Position[1] += 60;
-                    else
-                        o->Position[1] += 100;
-                }
-                else
-                {
-                    VectorCopy(vOriginPos, o->Position);
-                }
-
-                Calc_RenderObject(o, true, false, 0);
-                b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                              o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                              o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                              o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 3, fBlendLight, o->BlendMeshTexCoordU,
-                              o->BlendMeshTexCoordV, o->HiddenMesh);
+                Calc_RenderObject(o, true, false, 0, eggs[i]);
+                b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh);
+                b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh);
+                b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh);
+                b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 3, fBlendLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh);
             }
 
-            // b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
+            // b->RenderBody(RENDER_TEXTURE,look.alpha,look.blendMesh,look.blendMeshLight,look.blendMeshU,look.blendMeshV,look.hiddenMesh);
         }
         else
         {
-            // b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
-
-            vec3_t vOriginPos;
-            VectorCopy(o->Position, vOriginPos);
+            // b->RenderBody(RENDER_TEXTURE,look.alpha,look.blendMesh,look.blendMeshLight,look.blendMeshU,look.blendMeshV,look.hiddenMesh);
 
             for (int i = 0; i < 3; ++i)
             {
-                if (i == 0)
-                {
-                    if (o->Type == MODEL_SPIDER_EGGS_1)
-                        o->Position[0] += 60;
-                    else
-                        o->Position[0] += 100;
-                }
-                else if (i == 1)
-                {
-                    if (o->Type == MODEL_SPIDER_EGGS_1)
-                        o->Position[1] += 60;
-                    else
-                        o->Position[1] += 100;
-                }
-                else
-                {
-                    VectorCopy(vOriginPos, o->Position);
-                }
-
-                Calc_RenderObject(o, true, false, 0);
-                b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                              o->BlendMeshTexCoordV, o->HiddenMesh);
+                Calc_RenderObject(o, true, false, 0, eggs[i]);
+                b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh);
             }
         }
 
@@ -1438,10 +1404,10 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     break;
     case MODEL_DARK_MAMMOTH:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_CHROME6 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(1, RENDER_CHROME6 | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
 
         return true;
     }
@@ -1451,22 +1417,22 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         if (o->CurrentAction != MONSTER01_DIE)
         {
             Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME7, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
-            b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
-            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME7, look.alpha, look.blendMesh,
+                          look.blendMeshLight, look.blendMeshU, look.blendMeshV);
+            b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
+            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh,
+                          look.blendMeshLight, look.blendMeshU, look.blendMeshV);
 
             return true;
         }
@@ -1474,32 +1440,32 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     break;
     case MODEL_DARK_COOLUTIN:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
     }
     break;
     case MODEL_DARK_IRON_KNIGHT:
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
         }
         else
         {
             float fLumi = (sinf(WorldTime * 0.01f) + 1.0f) * 0.4f + 0.2f;
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, BITMAP_IRONKNIGHT_BODY_BRIGHT);
-            b->RenderMesh(1, RENDER_TEXTURE, 0.4f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, 0.7f, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.5f, 1, 0.5f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-                          o->HiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV,
+                          BITMAP_IRONKNIGHT_BODY_BRIGHT);
+            b->RenderMesh(1, RENDER_TEXTURE, 0.4f, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, 0.7f, look.blendMeshU, look.blendMeshV,
+                          look.hiddenMesh);
+            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.5f, 1, 0.5f, look.blendMeshU, look.blendMeshV,
+                          look.hiddenMesh);
         }
 
         return true;
@@ -2299,17 +2265,17 @@ bool CGM_Raklion::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
     return true;
 }
 
-void CGM_Raklion::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+void CGM_Raklion::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (o->Type == 46 || o->Type == 53)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
     else if (o->Type == 76)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
 }
 

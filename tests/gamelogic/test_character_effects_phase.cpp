@@ -21,6 +21,10 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/GameMaps/GMBattleCastle.h"
+#include "World/GameMaps/GMEmpireGuardian1.h"
+#include "World/GameMaps/GM_Kanturu_1st.h"
+#include "World/GameMaps/GM_Kanturu_2nd.h"
+#include "World/GameMaps/GM_Kanturu_3rd.h"
 #include "World/GameMaps/GMNewTown.h"
 #include "World/GameMaps/GM_PK_Field.h"
 #include "World/MapInfra/MapManager.h"
@@ -595,7 +599,8 @@ TEST_CASE(
         return live;
     };
 
-    CheckDrawSpawnsNone([&] { SEASON3B::GMNewTown::RenderObjectAfterCharacter(&crystal, b); });
+    DrawLook look = DrawLook::Of(crystal);
+    CheckDrawSpawnsNone([&] { SEASON3B::GMNewTown::RenderObjectAfterCharacter(&crystal, look, b); });
     CHECK(liveSprites() == 0);
     SEASON3B::GMNewTown::UpdateObjectEffects(&crystal, b);
     CHECK(liveSprites() == 4);
@@ -629,7 +634,8 @@ TEST_CASE("A dying Blood Assassin breaks apart from the update, body and head, a
     };
     FenrirScope::ClearSpawns();
 
-    CheckDrawSpawnsNone([&] { map->RenderObjectMesh(&o, b, false); });
+    DrawLook look = DrawLook::Of(o);
+    CheckDrawSpawnsNone([&] { map->RenderObjectMesh(&o, look, b, false); });
     CHECK(liveEffects() == 0);
     map->UpdateMonsterEffects(&c, &o, b);
     CHECK(liveEffects() == 2);
@@ -974,6 +980,93 @@ TEST_CASE("A cycling item look comes from the clock: every pass of a frame shows
     CHECK(later[0] == doctest::Approx(0.30f));
     CHECK(later[2] == later[0]);
     WorldTime = previousTime;
+}
+
+TEST_CASE("A Lion Gate is placed by its update, not by its draw [effects]")
+{
+    CharacterScope scope(MODEL_LION_GATE);
+    const int previousWorld = gMapManager.WorldActive;
+    gMapManager.WorldActive = WD_69EMPIREGUARDIAN1;
+    OBJECT& gate = scope.character().Object;
+    gate.Type = MODEL_LION_GATE;
+    Vector(23410.f, 2860.f, 0.f, gate.Position); // tile 234, 28
+    BMD* b = &Models[gate.Type];
+
+    DrawLook look = DrawLook::Of(gate);
+    CheckDrawSpawnsNone([&] { GMEmpireGuardian1::Make()->RenderMonster(&gate, look, b); });
+    CHECK(gate.Position[0] == 23410.f);
+
+    GMEmpireGuardian1::Make()->MoveMonsterVisual(&scope.character(), &gate, b);
+    CHECK(gate.Position[0] == 23450.f);
+    CHECK(gate.Position[1] == 2820.f);
+    gMapManager.WorldActive = previousWorld;
+}
+
+TEST_CASE("A dying Blade Hunter loses its shadow in its update [effects]")
+{
+    CharacterScope scope(MODEL_BLADE_HUNTER);
+    OBJECT& hunter = scope.character().Object;
+    hunter.Type = MODEL_BLADE_HUNTER;
+    hunter.m_bRenderShadow = true;
+    hunter.CurrentAction = MONSTER01_WALK;
+    M37Kanturu1st::MoveKanturu1stMonsterVisual(&scope.character(), &hunter, &Models[hunter.Type]);
+    CHECK(hunter.m_bRenderShadow);
+    hunter.CurrentAction = MONSTER01_DIE;
+    M37Kanturu1st::MoveKanturu1stMonsterVisual(&scope.character(), &hunter, &Models[hunter.Type]);
+    CHECK_FALSE(hunter.m_bRenderShadow);
+}
+
+TEST_CASE("A dying Dreadfear fades in its update, by the reference clock, not in its draw [effects]")
+{
+    CharacterScope scope(MODEL_DREADFEAR);
+    const int previousWorld = gMapManager.WorldActive;
+    const float previousFactor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 1.f;
+    OBJECT& dreadfear = scope.character().Object;
+    dreadfear.Type = MODEL_DREADFEAR;
+    dreadfear.CurrentAction = MONSTER01_DIE;
+    BMD* b = &Models[dreadfear.Type];
+
+    for (const int world : {static_cast<int>(WD_38KANTURU_2ND), static_cast<int>(WD_39KANTURU_3RD)})
+    {
+        CAPTURE(world);
+        gMapManager.WorldActive = world;
+        dreadfear.Alpha = 0.5f;
+        DrawLook look = DrawLook::Of(dreadfear);
+        CheckDrawSpawnsNone(
+            [&]
+            {
+                M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(&dreadfear, look, b, 0);
+                M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(&dreadfear, look, b, false);
+            });
+        CHECK(dreadfear.Alpha == 0.5f);
+
+        // The monster update runs both maps' steps; each fades only on its own map, once.
+        M38Kanturu2nd::Move_Kanturu2nd_MonsterVisual(&scope.character(), &dreadfear, b);
+        M39Kanturu3rd::MoveKanturu3rdMonsterVisual(&dreadfear, b);
+        CHECK(dreadfear.Alpha == doctest::Approx(0.4f));
+    }
+    FPS_ANIMATION_FACTOR = previousFactor;
+    gMapManager.WorldActive = previousWorld;
+}
+
+TEST_CASE("Drawing an object whose pose the update has not built leaves its pose and bones as they were [effects]")
+{
+    FenrirScope scope;
+    OBJECT rock;
+    rock.Live = true;
+    rock.Type = 78;
+    rock.Scale = 1.f;
+    rock.Alpha = 1.f;
+    rock.BoneTransform = scope.bones.get();
+    rock.EnableBoneMatrix = true;
+    BMD* b = &Models[rock.Type];
+    REQUIRE_FALSE(Engine::Object::Pose::IsCurrent(&rock, b, true));
+    const float before = rock.BoneTransform[0][0][3];
+
+    CheckDrawSpawnsNone([&] { CHECK(Calc_RenderObject(&rock, false, 0, 0)); });
+    CHECK_FALSE(Engine::Object::Pose::IsCurrent(&rock, b, true));
+    CHECK(rock.BoneTransform[0][0][3] == before);
 }
 
 TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and its draw spawns none [effects]")

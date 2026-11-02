@@ -337,15 +337,16 @@ public:
     // never carry a previous model's matrices; callers passing a buffer smaller than MAX_BONES
     // (e.g. the internal new vec34_t[NumBones] scratch arrays) MUST pass their real capacity.
     void Animation(float (*BoneTransform)[3][4], float AnimationFrame, float PriorAnimationFrame,
-                   unsigned short PriorAction, vec3_t Angle, vec3_t HeadAngle, bool Parent = false,
+                   unsigned short PriorAction, const vec3_t Angle, const vec3_t HeadAngle, bool Parent = false,
                    bool Translate = true, const float (*ExtParentMatrix)[4] = nullptr, short CurrentAction = -1,
                    int BoneMatrixCapacity = MAX_BONES);
     void InterpolationTrans(float(*Mat1)[4], float(*TransMat2)[4], float _Scale);
-    void Transform(float(*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB, bool Translate = false, float _Scale = 0.0f);
+    void Transform(float (*BoneMatrix)[3][4], const vec3_t BoundingBoxMin, const vec3_t BoundingBoxMax, OBB_t* OBB,
+                   bool Translate = false, float _Scale = 0.0f);
     // DXP-20 increment 2: the state-stash + OBB-from-args portion of Transform(), without the
     // expensive per-mesh vertex/normal loop. Only equivalent to Transform() when EditFlag != 2 and
     // not a _DEBUG build -- those need the vertex-loop-derived OBB Transform() itself still computes.
-    void TransformCheap(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB,
+    void TransformCheap(float (*BoneMatrix)[3][4], const vec3_t BoundingBoxMin, const vec3_t BoundingBoxMax, OBB_t* OBB,
                         bool Translate = false, float _Scale = 0.0f);
     // DXP-20 increment 2: skins ONE vertex from BoneMatrix, replicating Transform()'s per-vertex
     // math exactly (position only -- no normals, lighting, or bounding box). `_Scale`/`Translate`

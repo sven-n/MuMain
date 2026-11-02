@@ -3,6 +3,8 @@
 //////////////////////////////////////////////////////////////////////
 
 #pragma once
+
+#include "Render/Models/DrawLook.h"
 #include "World/MapInfra/w_BaseMap.h"
 
 SmartPointer(GMEmpireGuardian1);
@@ -17,10 +19,10 @@ public: // Object
     virtual bool CreateObject(OBJECT* o);
     virtual bool MoveObject(OBJECT* o);
     virtual bool UpdateObjectEffects(OBJECT* o, BMD* b);
-    virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-    virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+    virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
     virtual void RenderFrontSideVisual();
-    bool RenderMonster(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    bool RenderMonster(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
     // The wall cannons fire on every Empire Guardian map.
     void UpdateProjectileLauncher(OBJECT* o, BMD* b);
 

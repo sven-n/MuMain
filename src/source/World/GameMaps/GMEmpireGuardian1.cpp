@@ -364,6 +364,112 @@ static void PlaceGate(OBJECT* o)
 {
     switch (o->Type)
     {
+    case MODEL_LION_GATE:
+    {
+        int tileX = int(o->Position[0] / 100);
+        int tileY = int(o->Position[1] / 100);
+        switch (gMapManager.WorldActive)
+        {
+        case WD_69EMPIREGUARDIAN1:
+        {
+            if (tileX == 234 && tileY == 28)
+            {
+                o->Position[0] = 23450;
+                o->Position[1] = 2820;
+            }
+            else if (tileX == 216 && tileY == 80)
+            {
+                o->Position[0] = 21650;
+                o->Position[1] = 8000;
+            }
+            else if (tileX == 194 && tileY == 25)
+            {
+                o->Position[0] = 19450;
+                o->Position[1] = 2530;
+            }
+            else if ((153 <= tileX && tileX <= 155) && (52 <= tileY && tileY <= 54))
+            {
+                o->Scale = 1.15f;
+                o->Position[0] = 15510;
+                o->Position[1] = 5360;
+            }
+            else if (tileX == 180 && tileY == 79)
+            {
+                o->Position[0] = 18070;
+                o->Position[1] = 7950;
+            }
+        }
+        break;
+        case WD_70EMPIREGUARDIAN2:
+        {
+            if ((74 <= tileX && tileX <= 76) && (66 <= tileY && tileY <= 68))
+            {
+                o->Scale = 1.17f;
+                o->Position[0] = 7620;
+                o->Position[1] = 6740;
+            }
+            else if ((18 <= tileX && tileX <= 20) && (64 <= tileY && tileY <= 66))
+            {
+                o->Position[0] = 1950;
+                o->Position[1] = 6500;
+            }
+            else if ((36 <= tileX && tileX <= 38) && (92 <= tileY && tileY <= 94))
+            {
+                o->Scale = 1.1f;
+                o->Position[0] = 3770;
+                o->Position[1] = 9250;
+            }
+            else if ((54 <= tileX && tileX <= 56) && (153 <= tileY && tileY <= 155))
+            {
+                o->Scale = 1.15f;
+                o->Position[0] = 5515;
+                o->Position[1] = 15350;
+            }
+            else if ((106 <= tileX && tileX <= 108) && (111 <= tileY && tileY <= 113))
+            {
+                o->Scale = 1.05f;
+                o->Position[0] = 10830;
+                o->Position[1] = 11180;
+            }
+        }
+        break;
+        case WD_71EMPIREGUARDIAN3:
+        {
+            if ((145 <= tileX && tileX <= 147) && (190 <= tileY && tileY <= 192))
+            {
+                o->Scale = 1.28f;
+                o->Position[0] = 14700;
+                o->Position[1] = 19140;
+            }
+            else if ((88 <= tileX && tileX <= 90) && (194 <= tileY && tileY <= 196))
+            {
+                o->Scale = 1.10f;
+                o->Position[0] = 9010;
+                o->Position[1] = 19580;
+            }
+            else if ((221 <= tileX && tileX <= 223) && (133 <= tileY && tileY <= 135))
+            {
+                o->Scale = 1.1f;
+                o->Position[0] = 22300;
+                o->Position[1] = 13360;
+            }
+            else if ((222 <= tileX && tileX <= 224) && (192 <= tileY && tileY <= 194))
+            {
+                o->Scale = 1.1f;
+                o->Position[0] = 22305;
+                o->Position[1] = 19280;
+            }
+            else if ((166 <= tileX && tileX <= 168) && (216 <= tileY && tileY <= 218))
+            {
+                o->Scale = 1.23f;
+                o->Position[0] = 16720;
+                o->Position[1] = 21750;
+            }
+        }
+        break;
+        }
+    }
+    break;
     case MODEL_EVIL_GATE:
     {
         int tileX = int(o->Position[0] / 100);
@@ -1465,7 +1571,7 @@ void GMEmpireGuardian1::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     } // switch end
 }
 
-bool GMEmpireGuardian1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool GMEmpireGuardian1::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (gMapManager.IsEmpireGuardian1() == false && gMapManager.IsEmpireGuardian2() == false &&
         gMapManager.IsEmpireGuardian3() == false && gMapManager.IsEmpireGuardian4() == false)
@@ -1485,143 +1591,143 @@ bool GMEmpireGuardian1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
     case 37:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
     }
         return true;
 
     case 41: // sos_bobpu
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         float Luminosity = sinf(WorldTime * 0.002f) * 0.5f + 0.6f;
         Vector(Luminosity * b->BodyLight[0], Luminosity * b->BodyLight[1], Luminosity * b->BodyLight[2], b->BodyLight);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
     }
         return true;
 
     case 47: // Gateflag
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         Vector(1.2f, 1.2f, 1.2f, b->BodyLight);
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
     }
         return true;
 
     case 48: // Gateflag2
     {
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         Vector(1.1f, 1.1f, 1.1f, b->BodyLight);
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
     }
         return true;
 
     case 49:
     {
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
     }
         return true;
 
     case 55:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
         return true;
 
     case 64:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         Vector(1.0f, 0.0f, 0.0f, b->BodyLight);
-        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
+        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
     }
         return true;
 
     case 70:
     {
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
     }
         return true;
 
     case 115:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
-        o->BlendMeshTexCoordV = (int)WorldTime % 25000 * 0.0004f;
+        look.blendMeshV = (int)WorldTime % 25000 * 0.0004f;
         b->StreamMesh = 1;
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
-        o->BlendMeshTexCoordV = (int)WorldTime % 25000 * -0.0004f;
+        look.blendMeshV = (int)WorldTime % 25000 * -0.0004f;
         b->StreamMesh = 3;
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         b->StreamMesh = -1;
     }
         return true;
 
     case 117:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
-        o->BlendMeshTexCoordV = (int)WorldTime % 25000 * 0.0004f;
+        look.blendMeshV = (int)WorldTime % 25000 * 0.0004f;
         b->StreamMesh = 1;
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
-        o->BlendMeshTexCoordV = (int)WorldTime % 25000 * -0.0004f;
+        look.blendMeshV = (int)WorldTime % 25000 * -0.0004f;
         b->StreamMesh = 4;
-        b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(4, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         b->StreamMesh = -1;
     }
         return true;
 
     case MODEL_PROJECTILE:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
         return true;
     case MODEL_DOOR_CRUSH_EFFECT_PIECE01:
@@ -1642,8 +1748,8 @@ bool GMEmpireGuardian1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case MODEL_STATUE_CRUSH_EFFECT_PIECE03:
     case MODEL_STATUE_CRUSH_EFFECT_PIECE04:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
         return true;
 
@@ -1656,7 +1762,7 @@ bool GMEmpireGuardian1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case MODEL_QUARTER_MASTER:
     case MODEL_DEFENDER:
     {
-        RenderMonster(o, b, ExtraMon);
+        RenderMonster(o, look, b, ExtraMon);
     }
         return true;
     }
@@ -1954,196 +2060,93 @@ bool GMEmpireGuardian1::UpdateObjectEffects(OBJECT* o, BMD* b)
     return false;
 }
 
-bool GMEmpireGuardian1::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
+bool GMEmpireGuardian1::RenderMonster(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     switch (o->Type)
     {
     case MODEL_RAYMOND:
     {
         float fBlendMeshLight = (sinf(WorldTime * 0.003f) + 1.0f) * 0.5f;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         vec3_t _temp;
         VectorCopy(b->BodyLight, _temp);
         Vector(b->BodyLight[0] * 3.0f, b->BodyLight[0] * 3.0f, b->BodyLight[0] * 3.0f, b->BodyLight);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, fBlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_RAYMOND_SWORD);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, fBlendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_RAYMOND_SWORD);
         VectorCopy(_temp, b->BodyLight);
-        b->RenderMesh(3, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(3, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
     }
         return true;
     case MODEL_LUCAS:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(3, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(3, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
 
-        b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        // b->RenderMesh ( 4, RENDER_BRIGHT|RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-        // o->BlendMeshTexCoordU, o->BlendMeshTexCoordV ); b->RenderMesh ( 4, RENDER_BRIGHT|RENDER_CHROME6, o->Alpha,
-        // o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV );
+        b->RenderMesh(4, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        // b->RenderMesh ( 4, RENDER_BRIGHT|RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
+        // look.blendMeshU, look.blendMeshV ); b->RenderMesh ( 4, RENDER_BRIGHT|RENDER_CHROME6, look.alpha,
+        // look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV );
     }
         return true;
     case MODEL_DEVIL_LORD:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_CHROME4, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE | RENDER_CHROME4, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
     }
         return true;
     case MODEL_QUARTER_MASTER:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, 0.3f, 2, 0.3f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, 0.3f, 2, 0.3f, look.blendMeshU, look.blendMeshV);
     }
         return true;
     case MODEL_DEFENDER:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
         return true;
     case MODEL_EVIL_GATE:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
         return true;
 
     case MODEL_LION_GATE:
     {
-        int tileX = int(o->Position[0] / 100);
-        int tileY = int(o->Position[1] / 100);
-        switch (gMapManager.WorldActive)
-        {
-        case WD_69EMPIREGUARDIAN1:
-        {
-            if (tileX == 234 && tileY == 28)
-            {
-                o->Position[0] = 23450;
-                o->Position[1] = 2820;
-            }
-            else if (tileX == 216 && tileY == 80)
-            {
-                o->Position[0] = 21650;
-                o->Position[1] = 8000;
-            }
-            else if (tileX == 194 && tileY == 25)
-            {
-                o->Position[0] = 19450;
-                o->Position[1] = 2530;
-            }
-            else if ((153 <= tileX && tileX <= 155) && (52 <= tileY && tileY <= 54))
-            {
-                o->Scale = 1.15f;
-                o->Position[0] = 15510;
-                o->Position[1] = 5360;
-            }
-            else if (tileX == 180 && tileY == 79)
-            {
-                o->Position[0] = 18070;
-                o->Position[1] = 7950;
-            }
-        }
-        break;
-        case WD_70EMPIREGUARDIAN2:
-        {
-            if ((74 <= tileX && tileX <= 76) && (66 <= tileY && tileY <= 68))
-            {
-                o->Scale = 1.17f;
-                o->Position[0] = 7620;
-                o->Position[1] = 6740;
-            }
-            else if ((18 <= tileX && tileX <= 20) && (64 <= tileY && tileY <= 66))
-            {
-                o->Position[0] = 1950;
-                o->Position[1] = 6500;
-            }
-            else if ((36 <= tileX && tileX <= 38) && (92 <= tileY && tileY <= 94))
-            {
-                o->Scale = 1.1f;
-                o->Position[0] = 3770;
-                o->Position[1] = 9250;
-            }
-            else if ((54 <= tileX && tileX <= 56) && (153 <= tileY && tileY <= 155))
-            {
-                o->Scale = 1.15f;
-                o->Position[0] = 5515;
-                o->Position[1] = 15350;
-            }
-            else if ((106 <= tileX && tileX <= 108) && (111 <= tileY && tileY <= 113))
-            {
-                o->Scale = 1.05f;
-                o->Position[0] = 10830;
-                o->Position[1] = 11180;
-            }
-        }
-        break;
-        case WD_71EMPIREGUARDIAN3:
-        {
-            if ((145 <= tileX && tileX <= 147) && (190 <= tileY && tileY <= 192))
-            {
-                o->Scale = 1.28f;
-                o->Position[0] = 14700;
-                o->Position[1] = 19140;
-            }
-            else if ((88 <= tileX && tileX <= 90) && (194 <= tileY && tileY <= 196))
-            {
-                o->Scale = 1.10f;
-                o->Position[0] = 9010;
-                o->Position[1] = 19580;
-            }
-            else if ((221 <= tileX && tileX <= 223) && (133 <= tileY && tileY <= 135))
-            {
-                o->Scale = 1.1f;
-                o->Position[0] = 22300;
-                o->Position[1] = 13360;
-            }
-            else if ((222 <= tileX && tileX <= 224) && (192 <= tileY && tileY <= 194))
-            {
-                o->Scale = 1.1f;
-                o->Position[0] = 22305;
-                o->Position[1] = 19280;
-            }
-            else if ((166 <= tileX && tileX <= 168) && (216 <= tileY && tileY <= 218))
-            {
-                o->Scale = 1.23f;
-                o->Position[0] = 16720;
-                o->Position[1] = 21750;
-            }
-        }
-        break;
-        }
-
         if (o->CurrentAction != MONSTER01_DIE)
         {
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
         }
     }
         return true;
@@ -2151,8 +2154,8 @@ bool GMEmpireGuardian1::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     {
         if (o->CurrentAction != MONSTER01_DIE)
         {
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
         }
     }
         return true;
@@ -2337,7 +2340,7 @@ bool GMEmpireGuardian1::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-void GMEmpireGuardian1::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+void GMEmpireGuardian1::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (gMapManager.IsEmpireGuardian1() == false)
         return;
@@ -2352,19 +2355,18 @@ void GMEmpireGuardian1::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         float fLumi;
         fLumi = (sinf(WorldTime * 0.0015f) + 1.0f) * 0.4f + 0.2f;
 
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 2, fLumi, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 2, fLumi, look.blendMeshU, look.blendMeshV);
     }
     break;
 
     case 81:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
     break;
     }

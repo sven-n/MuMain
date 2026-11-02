@@ -3,6 +3,8 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 #include "Render/Models/ZzzBMD.h"
 #include "World/MapInfra/MapManager.h"
 
@@ -35,15 +37,15 @@ public: // Object
     {
         return false;
     }
-    virtual bool RenderObjectVisual(OBJECT* o, BMD* b)
+    virtual bool RenderObjectVisual(const OBJECT* o, DrawLook& look, BMD* b)
     {
         return false;
     }
-    virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0)
+    virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0)
     {
         return false;
     }
-    virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0) {}
+    virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0) {}
 
     virtual void RenderFrontSideVisual() {}
 

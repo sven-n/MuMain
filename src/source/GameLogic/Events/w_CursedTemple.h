@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 class BMD;
 namespace SEASON3A
 {
@@ -44,10 +46,10 @@ namespace SEASON3A
         void MoveMonsterSoundVisual(OBJECT* o, BMD* b);
 
     public:
-        bool RenderObject_AfterCharacter(OBJECT* o, BMD* b);
+        bool RenderObject_AfterCharacter(const OBJECT* o, DrawLook& look, BMD* b);
         bool UpdateObjectEffects(OBJECT* o, BMD* b);
         bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
-        bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+        bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
         void UpdateTempleSystemMsg(int _Value);
         void SetGaugebarEnabled(bool bFlag);
         void SetGaugebarCloseTimer();

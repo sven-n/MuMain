@@ -2,6 +2,8 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 #include "World/MapInfra/w_BaseMap.h"
 
 SmartPointer(CGMDoppelGanger4);
@@ -15,9 +17,9 @@ public:
     virtual bool CreateObject(OBJECT* o);
     virtual bool MoveObject(OBJECT* o);
     virtual bool UpdateObjectEffects(OBJECT* o, BMD* b);
-    virtual bool RenderObjectVisual(OBJECT* o, BMD* b);
-    virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-    virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    virtual bool RenderObjectVisual(const OBJECT* o, DrawLook& look, BMD* b);
+    virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+    virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
 
 public:
     virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);

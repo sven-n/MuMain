@@ -1,6 +1,8 @@
 // GMDoppelGanger3.h: interface for the GMDoppelGanger3 class.
 //////////////////////////////////////////////////////////////////////
 #pragma once
+
+#include "Render/Models/DrawLook.h"
 #include "World/MapInfra/w_BaseMap.h"
 
 SmartPointer(CGMDoppelGanger3);
@@ -18,9 +20,9 @@ public: // Object
     // 오브젝트 이펙트
     virtual bool UpdateObjectEffects(OBJECT* o, BMD* b);
     // 오브젝트 랜더
-    virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
     // 맵 관련 오브젝트 이펙트
-    virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
 
 public: // Character
     // 몬스터 생성

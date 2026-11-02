@@ -248,8 +248,8 @@ static std::optional<float> GltfCrossfadeKeyTime(const BMD& model, unsigned shor
 }
 
 void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float PriorFrame, unsigned short PriorAction,
-                    vec3_t Angle, vec3_t HeadAngle, bool Parent, bool Translate, const float (*ExtParentMatrix)[4],
-                    short CurrentActionArg, int BoneMatrixCapacity)
+                    const vec3_t Angle, const vec3_t HeadAngle, bool Parent, bool Translate,
+                    const float (*ExtParentMatrix)[4], short CurrentActionArg, int BoneMatrixCapacity)
 {
     if (NumActions <= 0) return;
 
@@ -591,8 +591,8 @@ void BMD::ClaimSkinStamp() const
     }
 }
 
-void BMD::TransformCheap(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB,
-                         bool Translate, float _Scale)
+void BMD::TransformCheap(float (*BoneMatrix)[3][4], const vec3_t BoundingBoxMin, const vec3_t BoundingBoxMax,
+                         OBB_t* OBB, bool Translate, float _Scale)
 {
     m_pCurrentBoneTransform = BoneMatrix;
     SetActiveBoneTransform(BoneMatrix);
@@ -789,8 +789,8 @@ void BMD::MarkCpuVerticesExternallyWritten(int mesh) const
     m_CpuVertsReady[mesh] = true;
 }
 
-void BMD::Transform(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB, bool Translate,
-                    float _Scale)
+void BMD::Transform(float (*BoneMatrix)[3][4], const vec3_t BoundingBoxMin, const vec3_t BoundingBoxMax, OBB_t* OBB,
+                    bool Translate, float _Scale)
 {
     FRAME_PROFILE(Skinning); // baseline measurement
     TransformCheap(BoneMatrix, BoundingBoxMin, BoundingBoxMax, OBB, Translate, _Scale);

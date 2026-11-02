@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 class BMD;
 
 #include "World/MapInfra/w_BaseMap.h"
@@ -54,8 +56,8 @@ namespace SEASON4A
         virtual bool CreateObject(OBJECT* o);
         virtual bool MoveObject(OBJECT* o);
         virtual bool UpdateObjectEffects(OBJECT* o, BMD* b);
-        virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-        virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+        virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+        virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
 
     public:	// Character
         virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
@@ -77,7 +79,7 @@ namespace SEASON4A
 
     private:
         CGM_Raklion();
-        bool RenderMonster(OBJECT* o, BMD* b, bool ExtraMon = 0);
+        bool RenderMonster(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
         bool SetBossMonsterAction(CHARACTER* c, OBJECT* o);
 
     public:

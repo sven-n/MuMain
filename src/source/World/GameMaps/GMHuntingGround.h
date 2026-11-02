@@ -11,14 +11,14 @@ namespace M31HuntingGround {		//. 공성 사냥터
     bool CreateHuntingGroundObject(OBJECT* pObject);
     bool MoveHuntingGroundObject(OBJECT* pObject);
     bool UpdateHuntingGroundObjectEffects(OBJECT* pObject, BMD* pModel);
-    bool RenderHuntingGroundObjectMesh(OBJECT* pObject, BMD* pModel, bool ExtraMon = 0);
+    bool RenderHuntingGroundObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon = 0);
 
     //. 몬스터
     CHARACTER* CreateHuntingGroundMonster(int iType, int PosX, int PosY, int Key);
 
     bool MoveHuntingGroundMonsterVisual(OBJECT* pObject, BMD* pModel);
     void MoveHuntingGroundBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
-    bool RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool ExtraMon);
+    bool RenderHuntingGroundMonsterObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon);
     bool UpdateHuntingGroundMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
 
     bool AttackEffectHuntingGroundMonster(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);

@@ -586,7 +586,7 @@ bool M34CryWolf1st::UpdateCryWolf1stObjectEffects(OBJECT* o, BMD* b)
 
     return true;
 }
-bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
+bool M34CryWolf1st::RenderCryWolf1stObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon)
 {
     if (!IsCyrWolf1st())
     {
@@ -603,27 +603,27 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
         if (m_OccupationState == CRYWOLF_OCCUPATION_STATE_PEACE)
         {
             Vector(0.4f, 0.4f, 0.4f, b->BodyLight);
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
         }
         else
         {
             Vector(0.4f, 0.4f, 0.4f, b->BodyLight);
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
         }
     }
         return true;
     case 56:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
         return true;
     case 41:
         Vector(0.2f, 0.7f, 0.f, Light);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         return true;
     // Fires, smoke and mist only: UpdateCryWolf1stObjectEffects spawns them.
     case 57:
@@ -646,11 +646,13 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
             b->BodyLight[2] = m_StatueHP / 20.0f - 0.5f;
 
             b->StreamMesh = 0;
-            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
             b->StreamMesh = -1;
 
             b->StreamMesh = 1;
-            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME2, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME2, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
             b->StreamMesh = -1;
         }
     }
@@ -658,12 +660,13 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
     case MODEL_SKILL_FURY_STRIKE:
     {
         Vector(0.0f, 0.0f, 0.9f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
     return true;
     }
 
-    return RenderCryWolf1stMonsterObjectMesh(o, b, ExtraMon);
+    return RenderCryWolf1stMonsterObjectMesh(o, look, b, ExtraMon);
 }
 
 CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY, int Key)
@@ -1502,15 +1505,16 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     }
 }
 
-bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
+bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon)
 {
     switch (o->Type)
     {
     case MODEL_SORAM:
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->BeginRender(o->Alpha);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
+        b->BeginRender(look.alpha);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      5);
         b->EndRender();
         return true;
     }
@@ -1518,11 +1522,13 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     case MODEL_BALGASS:
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         for (int i = 0; i < Models[o->Type].NumMeshs; i++)
         {
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(i, RENDER_CHROME2 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME3);
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(i, RENDER_CHROME2 | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME3);
         }
         b->EndRender();
         return true;
@@ -1530,13 +1536,14 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     break;
     case MODEL_BALRAM:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      5);
         return true;
     }
     break;
     case MODEL_DEATH_SPIRIT:
     {
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         static float aaa = 0.f;
         aaa += 0.1f;
         if (aaa > 1.0f)
@@ -1545,22 +1552,23 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         {
             if (i == 2)
             {
-                if (o->Alpha > 0.3f)
-                    o->Alpha = 0.3f;
+                if (look.alpha > 0.3f)
+                    look.alpha = 0.3f;
 
-                o->BlendMesh = -2;
+                look.blendMesh = -2;
                 b->EndRender();
-                b->BeginRender(o->Alpha);
+                b->BeginRender(look.alpha);
                 Models[o->Type].StreamMesh = i;
             }
             else
-                o->BlendMesh = -1;
+                look.blendMesh = -1;
 
-            o->BlendMeshTexCoordU = (int)WorldTime % 10000 * 0.0005f;
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            look.blendMeshU = (int)WorldTime % 10000 * 0.0005f;
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
         }
         b->EndRender();
-        o->Alpha = 1.0f;
+        look.alpha = 1.0f;
         return true;
     }
     break;
@@ -1569,16 +1577,19 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         if (ExtraMon)
         {
             Vector(0.5f, 0.5f, 0.6f, b->BodyLight);
-            b->BeginRender(o->Alpha);
+            b->BeginRender(look.alpha);
             for (int i = 0; i < Models[o->Type].NumMeshs; i++)
             {
-                b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+                b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV);
+                b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                              look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
             }
             b->EndRender();
         }
         else
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, 5);
         return true;
     }
     break;
@@ -1587,27 +1598,32 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         if (ExtraMon)
         {
             Vector(0.5f, 0.5f, 0.8f, b->BodyLight);
-            b->BeginRender(o->Alpha);
+            b->BeginRender(look.alpha);
             for (int i = 0; i < Models[o->Type].NumMeshs; i++)
             {
-                b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+                b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV);
+                b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                              look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
             }
             b->EndRender();
         }
         else
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, 5);
         return true;
     }
     break;
     case MODEL_TANTALLOS:
     {
         Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         for (int i = 0; i < Models[o->Type].NumMeshs; i++)
         {
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         b->EndRender();
         return true;
@@ -1616,11 +1632,13 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     case MODEL_BLOODY_WOLF:
     {
         Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         for (int i = 0; i < Models[o->Type].NumMeshs; i++)
         {
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         b->EndRender();
         return true;
@@ -1629,11 +1647,13 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     case MODEL_BEAM_KNIGHT:	//318
     {
         Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         for (int i = 0; i < Models[o->Type].NumMeshs; i++)
         {
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         b->EndRender();
         return true;
@@ -1642,11 +1662,13 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     case MODEL_DRAGON_:	//319
     {
         Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         for (int i = 0; i < Models[o->Type].NumMeshs; i++)
         {
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         b->EndRender();
         return true;

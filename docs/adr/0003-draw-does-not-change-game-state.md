@@ -117,6 +117,14 @@ drawer, and the renderer applies the active look per draw.
   on the reference clock. Each draw advanced a shared counter, so they ran
   faster with more passes, more of them on screen or, for the Symbol, a
   higher frame rate.
+- A dying Dreadfear (Kanturu) fades in its update, by the reference clock;
+  each draw faded it, faster with more passes. A dying Blade Hunter's
+  shadow and the Lion Gate's place (Empire Guardian) are set by their
+  update.
+- The Erohim (Hunting Ground) no longer has its alpha set to 1 by its draw,
+  so it shows the alpha its update gives it.
+- A Dark Phoenix's thunder starts from the pose its update reads that frame,
+  not from bones its last draw saved.
 
 ## Consequences
 

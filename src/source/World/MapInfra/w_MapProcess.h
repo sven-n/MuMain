@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 #include "World/MapInfra/w_BaseMap.h"
 #include "World/MapInfra/MapManager.h"
 
@@ -21,9 +23,9 @@ public:
     bool CreateObject(OBJECT* o);
     bool MoveObject(OBJECT* o);
     bool UpdateObjectEffects(OBJECT* o, BMD* b);
-    bool RenderObjectVisual(OBJECT* o, BMD* b);
-    bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-    void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    bool RenderObjectVisual(const OBJECT* o, DrawLook& look, BMD* b);
+    bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+    void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
     void RenderFrontSideVisual();
 
 public:

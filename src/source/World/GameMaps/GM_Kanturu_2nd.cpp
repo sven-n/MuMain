@@ -294,9 +294,10 @@ bool M38Kanturu2nd::Move_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     }
     break;
     case MODEL_DREADFEAR:
-    {
-    }
-    break;
+        // A dying Dreadfear fades out; Kanturu 3rd's update fades its own.
+        if (Is_Kanturu2nd() && o->CurrentAction == MONSTER01_DIE)
+            o->Alpha = std::max(o->Alpha - 0.1f * static_cast<float>(FPS_ANIMATION_FACTOR), 0.f);
+        break;
     }
 
     return false;
@@ -515,7 +516,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_ObjectEffects(OBJECT* o, BMD* b)
     return true;
 }
 
-bool M38Kanturu2nd::Render_Kanturu2nd_ObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool M38Kanturu2nd::Render_Kanturu2nd_ObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (Is_Kanturu2nd() == true)
     {
@@ -524,10 +525,10 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectMesh(OBJECT* o, BMD* b, bool ExtraMo
         case 1:
         {
             float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-            o->HiddenMesh = 1;
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            look.hiddenMesh = 1;
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(1, RENDER_TEXTURE, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV);
 
             return true;
         }
@@ -535,25 +536,25 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectMesh(OBJECT* o, BMD* b, bool ExtraMo
         case 2:
         {
             float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-            o->HiddenMesh = 1;
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            look.hiddenMesh = 1;
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(1, RENDER_TEXTURE, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV);
 
             return true;
         }
         break;
         case 12:
         {
-            o->HiddenMesh = 0;
+            look.hiddenMesh = 0;
             b->StreamMesh = 1;
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          -(int)WorldTime % 2000 * 0.0005f, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          -(int)WorldTime % 2000 * 0.0005f, look.hiddenMesh);
             b->StreamMesh = -1;
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, 0, o->BlendMeshLight, (int)WorldTime % 2000 * 0.0005f,
+            b->RenderMesh(0, RENDER_TEXTURE, look.alpha, 0, look.blendMeshLight, (int)WorldTime % 2000 * 0.0005f,
                           (int)WorldTime % 2000 * 0.0005f);
-            b->RenderMesh(0, RENDER_CHROME | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+            b->RenderMesh(0, RENDER_CHROME | RENDER_DARK, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
 
             return true;
         }
@@ -561,8 +562,8 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectMesh(OBJECT* o, BMD* b, bool ExtraMo
         case 13:
         {
             b->StreamMesh = 1;
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          -(int)WorldTime % 2000 * 0.0005f, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          -(int)WorldTime % 2000 * 0.0005f, look.hiddenMesh);
             b->StreamMesh = -1;
 
             return true;
@@ -571,8 +572,8 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectMesh(OBJECT* o, BMD* b, bool ExtraMo
         case 14:
         {
             b->StreamMesh = 1;
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          -(int)WorldTime % 2000 * 0.0005f, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          -(int)WorldTime % 2000 * 0.0005f, look.hiddenMesh);
             b->StreamMesh = -1;
 
             return true;
@@ -582,8 +583,8 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectMesh(OBJECT* o, BMD* b, bool ExtraMo
         case 16:
         {
             b->StreamMesh = 3;
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          -(int)WorldTime % 2000 * 0.0005f, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          -(int)WorldTime % 2000 * 0.0005f, look.hiddenMesh);
             b->StreamMesh = -1;
 
             return true;
@@ -591,13 +592,13 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectMesh(OBJECT* o, BMD* b, bool ExtraMo
         break;
         case 27:
         {
-            o->HiddenMesh = 2;
+            look.hiddenMesh = 2;
             b->StreamMesh = 4;
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          -(int)WorldTime % 2000 * 0.0005f, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          -(int)WorldTime % 2000 * 0.0005f, look.hiddenMesh);
             b->StreamMesh = -1;
-            b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
 
             return true;
         }
@@ -620,79 +621,79 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectMesh(OBJECT* o, BMD* b, bool ExtraMo
         }
     }
 
-    return Render_Kanturu2nd_MonsterObjectMesh(o, b, ExtraMon);
+    return Render_Kanturu2nd_MonsterObjectMesh(o, look, b, ExtraMon);
 }
 
-void M38Kanturu2nd::Render_Kanturu2nd_AfterObjectMesh(OBJECT* o, BMD* b)
+void M38Kanturu2nd::Render_Kanturu2nd_AfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (false == Is_Kanturu2nd())
         return;
 
     if (o->Type == 31)
     {
-        o->HiddenMesh = 0;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        look.hiddenMesh = 0;
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
     }
     else if (o->Type == 8)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
     }
     else if (o->Type == 10)
     {
-        o->HiddenMesh = 2;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+        look.hiddenMesh = 2;
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
     }
     else if (o->Type == 35 || o->Type == 36)
     {
-        o->HiddenMesh = 1;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        look.hiddenMesh = 1;
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
     }
     else if (o->Type == 76)
     {
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
 
         b->BodyLight[0] = 0.4f;
         b->BodyLight[1] = 0.4f;
         b->BodyLight[2] = 0.4f;
 
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_CHROME7 | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_CHROME);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
+        b->RenderMesh(0, RENDER_CHROME7 | RENDER_DARK, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_CHROME);
         b->EndRender();
     }
     else if (o->Type == 33 || o->Type == 59 || o->Type == 80)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
 }
 
-bool M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
+bool M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon)
 {
     switch (o->Type)
     {
     case MODEL_PERSONA:
     {
         float fLumi2 = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_PRSONA_EFFECT);
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 2, fLumi2, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_PRSONA_EFFECT2);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi2, look.blendMeshU, look.blendMeshV,
+                      BITMAP_PRSONA_EFFECT);
+        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 2, fLumi2, look.blendMeshU, look.blendMeshV,
+                      BITMAP_PRSONA_EFFECT2);
         return true;
     }
     break;
@@ -710,63 +711,55 @@ bool M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(OBJECT* o, BMD* b, int E
             Vector(0.3f, 1.0f, 0.2f, b->BodyLight);
         }
 
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
 
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 2, fLumi2, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_TWINTAIL_EFFECT);
+        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 2, fLumi2, look.blendMeshU, look.blendMeshV,
+                      BITMAP_TWINTAIL_EFFECT);
 
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 3, fLumi);
+        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 3, fLumi);
         return true;
     }
     break;
     case MODEL_DREADFEAR:
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            o->Alpha -= 0.1f * FPS_ANIMATION_FACTOR;
-            if (o->Alpha <= 0.0f)
-            {
-                o->Alpha = 0.0f;
-            }
-        }
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         return true;
     }
     break;
     case MODEL_KANTURU2ND_ENTER_NPC:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
-        b->RenderMesh(1, RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_CHROME);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_KANTURU_2ND_NPC3);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_CHROME);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, BITMAP_KANTURU_2ND_NPC3);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
-        b->RenderMesh(2, RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_CHROME);
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_KANTURU_2ND_NPC2);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(2, RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_CHROME);
+        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, BITMAP_KANTURU_2ND_NPC2);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, 3, o->BlendMeshLight, o->BlendMeshTexCoordU, -WorldTime * 0.0003f,
+        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, 3, look.blendMeshLight, look.blendMeshU, -WorldTime * 0.0003f,
                       BITMAP_CHROME);
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_KANTURU_2ND_NPC1);
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, BITMAP_KANTURU_2ND_NPC1);
+        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
         return true;
     }
     break;
     case MODEL_TRAP_CANON:
     {
-        g_TrapCanon.Render_Object(o, b);
+        g_TrapCanon.Render_Object(o, look, b);
         return true;
     }
     break;
@@ -1431,12 +1424,11 @@ CHARACTER* CTrapCanon::Create_TrapCanon(int iPosX, int iPosY, int iKey)
     return pCha;
 }
 
-void CTrapCanon::Render_Object(OBJECT* o, BMD* b)
+void CTrapCanon::Render_Object(const OBJECT* o, DrawLook& look, BMD* b)
 {
-    b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                  o->BlendMeshTexCoordV);
+    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
     float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-    b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 2, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+    b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 2, fLumi, look.blendMeshU, look.blendMeshV);
 }
 
 void CTrapCanon::Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
