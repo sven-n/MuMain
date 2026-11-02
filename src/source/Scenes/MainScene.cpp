@@ -332,8 +332,8 @@ static void UpdateGameEntities()
 }
 
 /**
- * @brief Moves the camera after everything it follows, builds the view the frame draws and picks with, and culls the
- * map objects and the effects against it.
+ * @brief Moves the camera after everything it follows, builds the view the frame draws and picks with, culls the
+ * map objects and the effects against it, and replays the frame's lights.
  */
 static void UpdateMainSceneView()
 {
@@ -345,6 +345,8 @@ static void UpdateMainSceneView()
                    static_cast<float>(viewport.height) / WindowHeight);
     CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
     CullWorld();
+    // The frame's lights, from every light the update added; the draw only shows them.
+    AddFrameHistoryLights();
 }
 
 /**
@@ -785,7 +787,6 @@ bool RenderMainScene()
     BYTE byWaterMap;
 
     SetupMainSceneViewport(width, height, byWaterMap);
-    AddFrameHistoryLights();
     RenderGameWorld(byWaterMap, width, height);
 
 #ifdef _EDITOR
