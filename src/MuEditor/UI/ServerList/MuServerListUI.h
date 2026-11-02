@@ -116,6 +116,9 @@ private:
     bool RenderRemoveVipTypePopup();
     // The game names the servers of the connect server with the list now.
     void ShowInGame();
+    // The login screen builds its groups again with the list the game has, for a change of the offline preview: each
+    // change of the list is in the game already (ShowInGame).
+    void RebuildGroupsInGame();
     void Select(int index);
     void SelectVipType(int index);
 

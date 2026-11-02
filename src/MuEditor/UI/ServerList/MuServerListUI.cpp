@@ -527,7 +527,7 @@ void CMuServerListUI::RenderToolbar()
     }
     if (MuEditor::ServerList::OfflinePreview::RenderSwitch())
     {
-        ShowInGame();
+        RebuildGroupsInGame();
     }
 }
 
@@ -822,7 +822,7 @@ bool CMuServerListUI::RenderChannels(ServerGroup& group)
     // Not a change of the list: no undo step, only the login screen shows it.
     if (previewChanged)
     {
-        ShowInGame();
+        RebuildGroupsInGame();
     }
     return changed;
 }
@@ -1413,6 +1413,11 @@ void CMuServerListUI::RenderPreview()
 void CMuServerListUI::ShowInGame()
 {
     g_ServerListManager->SetServerList(m_edits.GetList());
+    RebuildGroupsInGame();
+}
+
+void CMuServerListUI::RebuildGroupsInGame()
+{
     // Only the login screen shows the groups; elsewhere the next list the
     // connect server sends gets the new names.
     if (SceneFlag != LOG_IN_SCENE)
