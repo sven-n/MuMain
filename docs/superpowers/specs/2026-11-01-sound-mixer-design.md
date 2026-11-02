@@ -1,6 +1,6 @@
 # Sound Mixer (editor) design
 
-> Status: agreed with the owner on 2026-11-01 (Q-SM1 to Q-SM12). The last step
+> Status: agreed with the owner on 2026-11-01 (Q-SM1 to Q-SM12), 2026-11-02 (Q-SM13 to Q-SM15). The last step
 > moves what lasts into `docs/dev-editor.md` and removes this document.
 
 ## Goal
@@ -28,6 +28,9 @@ one effect and one music volume (0 to 10).
 | Q-SM10 | How is the overlay switched on? | A **Show in world** checkbox in the Sound Mixer, for the session; the menu bar reminder names it while it is on. It **follows the filters**: it draws the sources of the rows shown (no filter = every source in view), and hovering a row highlights its sources. Not chosen: a checkbox that always draws all, two checkboxes (map objects, monsters), a Dev Editor toggle. |
 | Q-SM11 | (After trying it: Kanturu's sounds are listed but not drawn.) How does the overlay show the sounds a map's or monster's own code plays, with no data? | **Both: markers now, data later.** While the game moves or draws a map object, and moves or draws a monster, its place is named (`Audio::ScopedSoundPlace`); a sound its code starts there gets a marker at that place and a flash, no ring (the code has no range), and one marker per sound, so a map-wide sound played from every object (Kanturu's hum) shows once. The place changes no sound's kind. Moving a map's sounds into data (object sounds, monster sound sets) follows map by map and gives it rings. Not chosen: data first, leave it. |
 | Q-SM12 | (Asked with Q-SM11.) Picking up zen plays nothing, in the original too; what should it play? | The **item pickup sound** (pGetItem.wav), as other picked-up items. Zen dropping keeps the coin sound. Not chosen: the coin sound, silence. |
+| Q-SM13 | *(2026-11-02, after an audit found sounds with no marker: players', skills from the server, drops, birds, the interface.)* Which types does the mixer list? | **12 types**: music, map ambience, map object sounds, monsters, NPCs, your character, other players, effects, items, creatures (birds, bats, mice, fish), interface, everything else. A sound's type comes from where it plays: the data's source, else the code's place (the monster, NPC, player, map object or effect whose code runs; the caster of a skill the server sends), else the object the game passes along, else map ambience for a loop, else everything else. An effect counts for whoever made it (your fireball: your character; Charon's sparks: NPCs); one nobody made is an effect. Not chosen: 9 types (players together; effects, items and creatures together), 7 types (the five plus NPCs and players). |
+| Q-SM14 | What does a type's checkbox do? | **Hear and Show**: two boxes per type. Hear off mutes the type (it replaces the type's Mute button; the reminder counts it); Show off draws nothing of the type in the world and in the top-left list, but it is still heard. Volume and Solo stay. Not chosen: Hear only, a row of Hear boxes above the old table. |
+| Q-SM15 | How do the sounds without a place show? (Interface, ambience loops, music, some server messages.) | **A log at the top left** of the game while Show in world is on: the last 10 starts without a place, newest on top, each with how long ago ("0.2 s  iButtonClick.wav (Interface)"); every start gets its line, a loop once when it starts, a music track when it starts. Lines stay until newer ones push them out and follow the Show boxes and the table's filters. (The owner first picked a live list of what plays, with times, then the log.) Not chosen: a live list while each plays, a section in the mixer window only. |
 
 ## Design
 
@@ -53,6 +56,16 @@ map object in `MoveObject` and `UpdateObjectVisual`, the monster in
 `MoveCharacter` and `UpdateDrawnCharacterEffects`. A start under a place and no source is
 kept with the place's position for the overlay (Q-SM11); a source wins over a
 place, and the kind never comes from a place.
+
+**Types (Q-SM13 to Q-SM15).** The mixer's kinds are the 12 types. A sound's
+type is resolved when it starts: the living source (data) wins; else the
+innermost living place (`ScopedSoundPlace`, now also for players, NPCs, the
+casters of `ReceiveMagic*`, effects as their makers and the interface, which
+has no position); else the object `PlayBuffer` was given (the hero, a
+character by its kind, a ground item, a bird or fish, an effect); else a loop
+is map ambience; else everything else. Each type has Hear (its mute) and Show
+(the overlay's markers, rings, flashes and log lines of the type). A start
+with no position goes to the overlay's log of place-less starts.
 
 **Naming the source.** `Audio::ScopedSoundSource` names the kind and source of
 the sounds played while it lives. The data's players set it: the monster sound
