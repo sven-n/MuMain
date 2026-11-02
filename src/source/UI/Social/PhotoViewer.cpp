@@ -82,6 +82,8 @@ void CUIPhotoViewer::RenderPhotoCharacter(float aspect)
     CHARACTER* c = &m_PhotoChar;
     OBJECT* o = &c->Object;
 
+    // The photo's projection and view replace the world camera's for this pass only.
+    SaveCameraPerspective();
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PushMatrix();
     mu::GetRenderer().LoadIdentity();
@@ -126,6 +128,7 @@ void CUIPhotoViewer::RenderPhotoCharacter(float aspect)
     mu::GetRenderer().PopMatrix();
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PopMatrix();
+    RestoreCameraPerspective();
 }
 
 int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)
