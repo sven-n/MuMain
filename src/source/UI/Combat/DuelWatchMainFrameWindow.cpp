@@ -167,7 +167,7 @@ bool CDuelWatchMainFrameWindow::Update()
         }
         else if (IsVisible() && g_DuelMgr.GetCurrentChannel() >= 0)
         {
-            SocketClient->ToGameServer()->SendDuelChannelQuitRequest();
+            SocketClient->ToGameServer()->SendDuelChannelQuitRequest(static_cast<BYTE>(g_DuelMgr.GetCurrentChannel()));
         }
     }
     return true;
