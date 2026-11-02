@@ -29,8 +29,7 @@ void ResetViolations();
 struct Violation
 {
     std::string kind;
-    // The function that called the spawn function, by name where symbols are loaded, else its address; empty where the
-    // platform gives no call stack.
+    // The function that called the spawn function, by name where symbols are loaded, else its address.
     std::string caller;
     // The return address into that function.
     void* callerAddress = nullptr;

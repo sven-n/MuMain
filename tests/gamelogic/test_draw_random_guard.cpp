@@ -6,6 +6,7 @@
 #include "Engine/Object/ZzzObject.h"
 
 #include <functional>
+#include <latch>
 #include <random>
 #include <string>
 #include <thread>
@@ -14,6 +15,8 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#else
+#include <execinfo.h>
 #endif
 
 namespace
@@ -26,14 +29,31 @@ using namespace Diagnostics::DrawSpawnCheck;
 #define MU_NOINLINE __attribute__((noinline))
 #endif
 
-// A draw that draws from the update's legacy sequence; the guard should name it. `here` gets an address inside it.
+// An address inside the calling function; it reads the frame after the capture, so the capture is no tail call.
+MU_NOINLINE void* CallerOfHere()
+{
+    void* frames[2] = {};
+#ifdef _WIN32
+    const int count = CaptureStackBackTrace(0, 2, frames, nullptr);
+#else
+    const int count = backtrace(frames, 2);
+#endif
+    return count == 2 ? frames[1] : nullptr;
+}
+
+// Two draws that draw from the update's sequences; the guard should name each. `here` gets an address inside them.
 MU_NOINLINE int DrawsFromTheUpdateSequence(void** here)
 {
     const int value = Random::Rand();
-#ifdef _WIN32
-    CaptureStackBackTrace(0, 1, here, nullptr);
-#endif
+    *here = CallerOfHere();
     return value + 1;
+}
+
+MU_NOINLINE float DrawsFromTheEngine(void** here)
+{
+    const float value = Random::Unit();
+    *here = CallerOfHere();
+    return value + 1.f;
 }
 
 // Every call that advances or reseeds one of the two gameplay sequences, with the kind the guard records.
@@ -96,27 +116,35 @@ TEST_CASE("The update advances and reseeds its random sequences freely [random]"
     CHECK(Violations() == 0);
 }
 
-TEST_CASE("The guard names the function that drew from a gameplay sequence while drawing [random]")
+TEST_CASE("The guard names each function that drew from a gameplay sequence while drawing [random]")
 {
     const LegacyStateScope legacy;
-    ResetViolations();
-    void* here = nullptr;
+    const auto drawnFrom = [](auto draw, const char* kind)
     {
-        const DrawScope drawing;
-        DrawsFromTheUpdateSequence(&here);
-    }
-    REQUIRE(Violations() == 1);
-    const Violation violation = LastViolation();
-    CHECK(violation.kind == "legacy random draw");
-#ifdef _WIN32
-    // The recorded return address lies in the drawing function, a few instructions from the address it took itself.
-    CAPTURE(violation.caller);
-    REQUIRE(violation.callerAddress != nullptr);
-    const auto distance = static_cast<char*>(violation.callerAddress) - static_cast<char*>(here);
-    CHECK(distance > -256);
-    CHECK(distance < 256);
-    CHECK(!violation.caller.empty());
-#endif
+        CAPTURE(kind);
+        ResetViolations();
+        void* here = nullptr;
+        {
+            const DrawScope drawing;
+            draw(&here);
+        }
+        REQUIRE(Violations() == 1);
+        const Violation violation = LastViolation();
+        CHECK(violation.kind == kind);
+        CAPTURE(violation.caller);
+        // The recorded return address lies in the drawing function, a few instructions from the address it took itself.
+        REQUIRE(here != nullptr);
+        REQUIRE(violation.callerAddress != nullptr);
+        const auto distance = static_cast<char*>(violation.callerAddress) - static_cast<char*>(here);
+        CHECK(distance > -256);
+        CHECK(distance < 256);
+        CHECK(!violation.caller.empty());
+        return violation.callerAddress;
+    };
+    void* const legacySite = drawnFrom(DrawsFromTheUpdateSequence, "legacy random draw");
+    void* const engineSite = drawnFrom(DrawsFromTheEngine, "random engine draw");
+    // Two sites, two callers: the log names each of them once.
+    CHECK(legacySite != engineSite);
     ResetViolations();
 }
 
@@ -167,6 +195,28 @@ TEST_CASE("Another thread's random sequences are its own while the frame draws [
         worker.join();
     }
     CHECK(Violations() == 0);
+}
+
+TEST_CASE("Threads drawing at the same time each count every call [random]")
+{
+    constexpr int threads = 8;
+    constexpr int callsEach = 2000;
+    ResetViolations();
+    std::latch start(threads);
+    std::vector<std::thread> workers;
+    for (int t = 0; t < threads; ++t)
+        workers.emplace_back(
+            [&start]
+            {
+                const DrawScope drawing;
+                start.arrive_and_wait();
+                for (int i = 0; i < callsEach; ++i)
+                    Random::Unit();
+            });
+    for (std::thread& worker : workers)
+        worker.join();
+    CHECK(Violations() == threads * callsEach);
+    ResetViolations();
 }
 
 TEST_CASE("Setting up a shimmering item for a draw takes nothing from the gameplay sequences [random]")
