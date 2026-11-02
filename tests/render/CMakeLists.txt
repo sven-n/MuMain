@@ -323,6 +323,14 @@ add_test(
 )
 
 add_test(
+    NAME game_random_guard_detects
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_GUARD=${CMAKE_CURRENT_SOURCE_DIR}/test_game_random_is_owned.cmake"
+        "-DMU_FIXTURES=${CMAKE_CURRENT_SOURCE_DIR}/fixtures/crt_random"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_game_random_guard_detects.cmake"
+)
+
+add_test(
     NAME renderer_pipeline_fail_fast
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_RENDERER_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRendererSDLGpu.cpp"
