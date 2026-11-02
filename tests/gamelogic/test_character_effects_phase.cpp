@@ -32,6 +32,7 @@
 #include <cstring>
 #include <functional>
 #include <memory>
+#include <new>
 #include <vector>
 
 namespace
@@ -1306,6 +1307,20 @@ TEST_CASE("Starting or stopping music while drawing is a violation [effects]")
     }
     CHECK(Diagnostics::DrawSpawnCheck::Violations() == 2);
     Diagnostics::DrawSpawnCheck::ResetViolations();
+}
+
+TEST_CASE("Every value Dark Side's fingerprint reads starts defined, whatever memory the system is built in [effects]")
+{
+    // Built over zeros and over a pattern, a member the constructor leaves unset would differ.
+    alignas(CMonkSystem) unsigned char zeroed[sizeof(CMonkSystem)];
+    alignas(CMonkSystem) unsigned char patterned[sizeof(CMonkSystem)];
+    std::memset(zeroed, 0, sizeof(zeroed));
+    std::memset(patterned, 0xA5, sizeof(patterned));
+    CMonkSystem* first = new (zeroed) CMonkSystem;
+    CMonkSystem* second = new (patterned) CMonkSystem;
+    CHECK(first->DarksideStateHash() == second->DarksideStateHash());
+    first->~CMonkSystem();
+    second->~CMonkSystem();
 }
 
 TEST_CASE("Dark Side's fingerprint follows a dummy's step, not only how many dummies there are [effects]")
