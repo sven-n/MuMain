@@ -378,7 +378,7 @@ void MoveMainScene()
         return;
     }
 
-    // Picks what the mouse is over from what the last frame drew (its boxes, its mouse ray), and highlights it.
+    // Picks what the cursor is over in what the last frame drew, and highlights it.
     Input::Selection::SelectObjects();
     InitializeSceneFrame();
 

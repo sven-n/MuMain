@@ -214,7 +214,7 @@ static void UpdateCharacterSceneView()
 
 static void MoveCharacterSceneState()
 {
-    // Picks the character under the mouse from what the last frame drew, before anything resets the mouse state.
+    // Picks the character under the cursor in what the last frame drew, before anything resets the mouse state.
     if (!CSceneUICoordinator::Instance().IsCursorOnUI() && !Core::Input::IsMouseOverUI())
         Input::Selection::SelectObjects();
 

@@ -1,15 +1,24 @@
 #include "stdafx.h"
 #include "doctest.h"
 
+#include "../data/TestModelSlots.h"
+
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraState.h"
+#include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/ZzzInterface.h"
+#include "Input/Selection.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "Scenes/SceneCore.h"
+#include "World/MapInfra/MapManager.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <cstring>
+#include <memory>
 
 extern unsigned int WindowWidth;
 extern unsigned int WindowHeight;
@@ -150,6 +159,67 @@ TEST_CASE("The frustum built from the view holds what is ahead and not what is b
     CHECK_FALSE(TestFrustrum(behind, 0.f));
 
     g_Camera = saved;
+    WindowWidth = windowWidth;
+    WindowHeight = windowHeight;
+}
+
+TEST_CASE("Picking follows the cursor as it is now, not the ray the last update built [render]")
+{
+    const unsigned int windowWidth = WindowWidth;
+    const unsigned int windowHeight = WindowHeight;
+    const CameraState savedCamera = g_Camera;
+    const EGameScene savedScene = SceneFlag;
+    const int savedWorld = gMapManager.WorldActive;
+    const float savedRate[] = {g_fScreenRate_x, g_fScreenRate_y, g_fScreenOffset_x, g_fScreenOffset_y};
+    const int savedMouse[] = {MouseX, MouseY};
+    CHARACTER* const savedCharacters = CharactersClient;
+    WindowWidth = 1280;
+    WindowHeight = 720;
+    g_fScreenRate_x = g_fScreenRate_y = 1.f;
+    g_fScreenOffset_x = g_fScreenOffset_y = 0.f;
+    SceneFlag = CHARACTER_SCENE;
+    gMapManager.WorldActive = WD_1DUNGEON;
+
+    TestModelSlots models;
+    auto characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT + 1);
+    CharactersClient = characters.get();
+    g_Camera = Camera(-48.5f, 33.3f, false);
+    CameraProjection::UpdateView(g_Camera, 0, 0, 1280, 720);
+
+    CHARACTER* c = &CharactersClient[3];
+    OBJECT* o = &c->Object;
+    o->Live = o->Visible = true;
+    o->Alpha = 1.f;
+    o->Kind = KIND_PLAYER;
+    c->m_bIsSelected = true;
+    for (int i = 0; i < 3; i++)
+        o->Position[i] = g_Camera.Position[i] - g_Camera.Matrix[2][i] * 1500.f;
+
+    float x = 0.f;
+    float y = 0.f;
+    REQUIRE(CameraProjection::WorldToWindowPixel(g_Camera, o->Position, &x, &y));
+
+    // The last update built its ray with the cursor in a corner, over nothing.
+    CameraProjection::ScreenToWorldRay(g_Camera, 5, 5, MouseTarget);
+    MouseX = static_cast<int>(x);
+    MouseY = static_cast<int>(y);
+    Input::Selection::SelectObjects();
+    CHECK(SelectedCharacter == 3);
+
+    MouseX = MouseY = 5;
+    Input::Selection::SelectObjects();
+    CHECK(SelectedCharacter == -1);
+
+    CharactersClient = savedCharacters;
+    MouseX = savedMouse[0];
+    MouseY = savedMouse[1];
+    g_fScreenRate_x = savedRate[0];
+    g_fScreenRate_y = savedRate[1];
+    g_fScreenOffset_x = savedRate[2];
+    g_fScreenOffset_y = savedRate[3];
+    gMapManager.WorldActive = savedWorld;
+    SceneFlag = savedScene;
+    g_Camera = savedCamera;
     WindowWidth = windowWidth;
     WindowHeight = windowHeight;
 }
