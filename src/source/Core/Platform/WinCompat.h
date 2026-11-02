@@ -97,6 +97,12 @@ inline std::string mu_narrow_path(const char* path)
     return result;
 }
 
+// The file system ignores the case here, so the narrow path is the resolved one.
+inline std::string mu_resolved_narrow_path(const std::wstring& path)
+{
+    return mu_narrow_path(path);
+}
+
 #else // ---- non-Windows: minimal Win32 type shims -------------------------
 
 #include <cstdint>
@@ -105,6 +111,7 @@ inline std::string mu_narrow_path(const char* path)
 #include <algorithm>
 #include <string>
 #include <type_traits> // underlying_type for DEFINE_ENUM_FLAG_OPERATORS
+#include "Core/Platform/PathResolve.h" // MuResolvePath for mu_resolved_narrow_path
 
 // Fixed-width scalar aliases. Widths match the Windows definitions (DWORD/LONG
 // are 32-bit there, unlike `long` on LP64 Linux) so struct layouts stay stable.
@@ -263,6 +270,15 @@ inline std::string mu_narrow_path(const char* path)
     std::string result = path == nullptr ? "" : path;
     std::replace(result.begin(), result.end(), '\\', '/');
     return result;
+}
+
+// For std::ifstream and std::filesystem, which don't go through the file shims: the narrow path
+// with each component spelled like the entry on disk, the same resolution as the file shims
+// (CreateFile, GetFileAttributes, DeleteFile, _wfopen_s). With mu_narrow_path such a path only
+// opens when it's spelled exactly like the files, although the shims find them.
+inline std::string mu_resolved_narrow_path(const std::wstring& path)
+{
+    return MuResolvePath(mu_narrow_path(path).c_str());
 }
 
 // MSVC fixed-width keyword aliases (gcc/clang lack these). Defined as macros,

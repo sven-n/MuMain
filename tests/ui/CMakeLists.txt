@@ -67,6 +67,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME shop_script_list_tests
+    SOURCES
+        test_shop_script_list.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+
+mu_add_test(
     NAME item_grid_geometry_tests
     SOURCES
         test_item_grid_geometry.cpp
