@@ -10,7 +10,6 @@
 #include "I18N/All.h"
 #include "Network/Server/ServerListManager.h"
 #include "imgui.h"
-#include "imgui_internal.h"
 
 #include <optional>
 
@@ -34,11 +33,10 @@ struct EditStart
 };
 EditStart s_editStart;
 
-// Opens the slider's text field in the next frame, as Ctrl+click does.
-void OpenTextField(ImGuiID id)
+// Opens the text field of the slider just drawn in the next frame, as Ctrl+click does (and Tab to it).
+void OpenTextField()
 {
-    ImGui::ActivateItemByID(id);
-    ImGui::GetCurrentContext()->NavNextActivateFlags = ImGuiActivateFlags_PreferInput;
+    ImGui::SetKeyboardFocusHere(-1);
 }
 
 // Whether the click that just activated the slider is the second of a double-click whose first click started an
@@ -58,7 +56,7 @@ void TrackEdit(std::optional<int>& load, const std::optional<int>& before, int f
     if (IsDoubleClickOnSlider())
     {
         load = s_editStart.load;
-        OpenTextField(id);
+        OpenTextField();
     }
     else if (ImGui::IsItemActivated())
     {
