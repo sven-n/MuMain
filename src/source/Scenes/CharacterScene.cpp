@@ -200,12 +200,23 @@ void CreateCharacterScene()
 
 static void UpdateSelectedCharacterEffects();
 
-void NewMoveCharacterScene()
+// Moves the camera and builds the view the frame draws and picks with, before anything tests visibility against it.
+static void UpdateCharacterSceneView()
 {
-    if (CurrentProtocolState < RECEIVE_CHARACTERS_LIST)
-    {
-        return;
-    }
+    MoveMainCamera();
+
+    const auto viewport = UI::Scaling::FullReferenceViewport();
+    UpdateCameraView(viewport.x, viewport.y, viewport.width, viewport.height);
+    CreateFrustrum(static_cast<float>(viewport.width) / REFERENCE_WIDTH,
+                   static_cast<float>(viewport.height) / REFERENCE_HEIGHT);
+    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
+}
+
+static void MoveCharacterSceneState()
+{
+    // Picks the character under the cursor in what the last frame drew, before anything resets the mouse state.
+    if (!CSceneUICoordinator::Instance().IsCursorOnUI() && !Core::Input::IsMouseOverUI())
+        Input::Selection::SelectObjects();
 
     MouseOnWindow = false;
 
@@ -220,6 +231,7 @@ void NewMoveCharacterScene()
 
     // Update camera BEFORE checking character visibility
     MoveCamera();
+    UpdateCharacterSceneView();
 
     // Now check character visibility with updated frustum
     MoveCharactersClient();
@@ -299,6 +311,36 @@ void NewMoveCharacterScene()
     g_ConsoleDebug->UpdateMainScene();
 }
 
+// Where the characters stand and how they are lit for the draw, once the input has chosen the selected one.
+static void PlaceCharactersForDraw()
+{
+    for (int i = 0; i < MAX_CHARACTERS_PER_ACCOUNT; i++)
+    {
+        CharactersClient[i].Object.Position[2] = 163.0f;
+        Vector(0.0f, 0.0f, 0.0f, CharactersClient[i].Object.Light);
+    }
+    if (SelectedHero == -1)
+        return;
+    OBJECT* o = &CharactersClient[SelectedHero].Object;
+    if (!o->Live)
+        return;
+    vec3_t Light;
+    Vector(1.0f, 1.0f, 1.0f, Light);
+    Vector(1.0f, 1.0f, 1.0f, o->Light);
+    AddTerrainLight(o->Position[0], o->Position[1], Light, 1, PrimaryTerrainLight);
+}
+
+void NewMoveCharacterScene()
+{
+    if (CurrentProtocolState < RECEIVE_CHARACTERS_LIST)
+    {
+        return;
+    }
+    MoveCharacterSceneState();
+    PlaceCharactersForDraw();
+    CullEffects();
+}
+
 /**
  * @brief Sets up viewport and character positioning for character selection scene.
  *
@@ -307,11 +349,6 @@ void NewMoveCharacterScene()
  */
 static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
 {
-    vec3_t pos;
-    Vector(9758.0f, 18913.0f, 675.0f, pos);
-
-    MoveMainCamera();
-
     const auto viewport = UI::Scaling::FullReferenceViewport();
     outWidth = viewport.width;
     outHeight = viewport.height;
@@ -319,43 +356,19 @@ static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
     mu::GetRenderer().SetClearColor(0.f, 0.f, 0.f, 1.f);
     BeginOpengl(viewport.x, viewport.y, outWidth, outHeight);
     Scenes::Lighting::SubmitSceneLighting();
-
-    // Build global frustum arrays for TestFrustrum/TestFrustrum2D
-    // Must be called after BeginOpengl (needs GL matrices) in every scene that renders terrain/objects
-    {
-        vec3_t cameraPos;
-        VectorCopy(g_Camera.Position, cameraPos);
-        CreateFrustrum((float)outWidth / (float)REFERENCE_WIDTH,
-                       (float)outHeight / (float)REFERENCE_HEIGHT, cameraPos);
-    }
-
-    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
-
-    // Reset character positions and lighting
-    for (int i = 0; i < MAX_CHARACTERS_PER_ACCOUNT; i++)
-    {
-        CharactersClient[i].Object.Position[2] = 163.0f;
-        Vector(0.0f, 0.0f, 0.0f, CharactersClient[i].Object.Light);
-    }
 }
 
-/**
- * @brief Applies lighting to the currently selected character.
- */
+// The render state the selected character's lighting left (PlaceCharactersForDraw sets the light).
 static void ApplySelectedCharacterLighting()
 {
     if (SelectedHero == -1)
         return;
 
-    OBJECT* o = &CharactersClient[SelectedHero].Object;
+    const OBJECT* o = &CharactersClient[SelectedHero].Object;
     if (!o->Live)
         return;
 
     EnableAlphaBlend();
-    vec3_t Light;
-    Vector(1.0f, 1.0f, 1.0f, Light);
-    Vector(1.0f, 1.0f, 1.0f, o->Light);
-    AddTerrainLight(o->Position[0], o->Position[1], Light, 1, PrimaryTerrainLight);
     DisableAlphaBlend();
 }
 
@@ -370,11 +383,6 @@ static void RenderCharacterScene3D()
     RenderObjects();
     RenderCharactersClient();
     RenderMount();
-
-    // Core::Input::IsMouseOverUI() added as a 2nd gate here too -- same rationale as
-    // the check in Update() above.
-    if (!CSceneUICoordinator::Instance().IsCursorOnUI() && !Core::Input::IsMouseOverUI())
-        Input::Selection::SelectObjects();
 
     RenderBlurs();
     RenderJoints();

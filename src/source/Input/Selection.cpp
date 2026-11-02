@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
 #include "Input/Selection.h"
+#include "Camera/CameraProjection.h"
 #include "Character/CharacterManager.h" // gCharacterManager
 
 // Includes mirror ZzzInterface.cpp, the unit this was extracted from.
@@ -270,6 +271,9 @@ int SelectOperate()
 
 void SelectObjects()
 {
+    // The cursor as it is now, through the view the last frame was drawn with: what the player sees under it.
+    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
+
     BYTE CKind_1, CKind_2;
 
     if (SceneFlag == CHARACTER_SCENE)

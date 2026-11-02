@@ -303,6 +303,29 @@ void CreateLogInScene()
     g_ErrorReport.Write(L"> Login Scene init success.\r\n");
 }
 
+// Moves the camera, builds the view the frame draws with, and culls the effects against it.
+static void UpdateLogInSceneView()
+{
+    MoveMainCamera();
+
+#ifdef _EDITOR
+    g_Camera.ViewFar = DevEditor_GetLoginTerrainDist();
+#else
+    g_Camera.ViewFar = LoginSceneCameraDefaults::RENDER_TERRAIN_DIST;
+#endif
+    g_Camera.ViewNear = 100.f; // Push near plane out to preserve z-buffer precision
+
+    const auto viewport = UI::Scaling::FullReferenceViewport();
+    UpdateCameraView(viewport.x, viewport.y, viewport.width, viewport.height);
+
+    // LoginScene doesn't call CreateFrustrum (DefaultCamera tour mode angles differ from
+    // legacy hardcoded values). Instead, TestFrustrum2D is bypassed for LOG_IN_SCENE and
+    // we reset iteration bounds to cover the full terrain so stale bounds from other scenes
+    // don't restrict the render loop.
+    ResetFrustrumBoundsFullTerrain();
+    CullEffects();
+}
+
 void NewMoveLogInScene()
 {
     if (!InitLogIn)
@@ -334,6 +357,8 @@ void NewMoveLogInScene()
         UpdateMountEffects();
         UpdateEffectModelEffects();
     }
+
+    UpdateLogInSceneView();
 
     // ESC menu toggle is handled by CSceneUICoordinator::Update()
     if (RECEIVE_LOG_IN_SUCCESS == CurrentProtocolState)
@@ -392,37 +417,14 @@ bool NewRenderLogInScene(HDC hDC)
 
     FogEnable = true;
 
-    vec3_t pos;
-    VectorCopy(g_Camera.Position, pos);
-    if (CCameraMove::GetInstancePtr()->IsCameraMove())
-    {
-        VectorCopy(g_Camera.Position, pos);
-    }
-
-    MoveMainCamera();
-
     // Play login music (called every frame — PlayMp3 no-ops if already playing)
     ::PlayMp3(MUSIC_LOGIN_THEME);
 
     mu::GetRenderer().SetClearColor(0.f, 0.f, 0.f, 1.f);
 
-    // Set ViewFar BEFORE BeginOpengl so the projection matrix covers the full render distance
-#ifdef _EDITOR
-    g_Camera.ViewFar = DevEditor_GetLoginTerrainDist();
-#else
-    g_Camera.ViewFar = LoginSceneCameraDefaults::RENDER_TERRAIN_DIST;
-#endif
-    g_Camera.ViewNear = 100.f;  // Push near plane out to preserve z-buffer precision
-
     const auto viewport = UI::Scaling::FullReferenceViewport();
     BeginOpengl(viewport.x, viewport.y, viewport.width, viewport.height);
     Scenes::Lighting::SubmitSceneLighting();
-
-    // LoginScene doesn't call CreateFrustrum (DefaultCamera tour mode angles differ from
-    // legacy hardcoded values). Instead, TestFrustrum2D is bypassed for LOG_IN_SCENE and
-    // we reset iteration bounds to cover the full terrain so stale bounds from other scenes
-    // don't restrict the render loop.
-    ResetFrustrumBoundsFullTerrain();
 
     if (!g_CreditWin.IsVisible())
     {

@@ -592,12 +592,23 @@ float ConvertPositionY(float y)
     return ConvertY(y) + g_fScreenOffset_y;
 }
 
-void BeginOpengl(int x, int y, int Width, int Height)
+static void ToWindowPixels(int& x, int& y, int& Width, int& Height)
 {
     x = static_cast<int>(ConvertPositionX(static_cast<float>(x)));
     y = static_cast<int>(ConvertPositionY(static_cast<float>(y)));
     Width = static_cast<int>(ConvertX(static_cast<float>(Width)));
     Height = static_cast<int>(ConvertY(static_cast<float>(Height)));
+}
+
+void UpdateCameraView(int x, int y, int Width, int Height)
+{
+    ToWindowPixels(x, y, Width, Height);
+    CameraProjection::UpdateView(g_Camera, x, y, Width, Height);
+}
+
+void BeginOpengl(int x, int y, int Width, int Height)
+{
+    ToWindowPixels(x, y, Width, Height);
     BeginOpenglPhysical(x, y, Width, Height);
 }
 
@@ -614,26 +625,12 @@ void BeginOpenglForTarget(int width, int height)
     width = std::max(width, 1);
     height = std::max(height, 1);
 
+    // The view was built in the update (CameraProjection::UpdateView); the draw only applies it.
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PushMatrix();
-    mu::GetRenderer().LoadIdentity();
-
-    // Calculate aspect ratio dynamically from viewport dimensions
-    // This ensures camera adapts to window resizing (WM_SIZE updates WindowWidth/WindowHeight)
-    // FOV stays constant, aspect ratio scales the horizontal view accordingly
-    const float aspectRatio = static_cast<float>(width) / height;
-
-    // Apply RENDER_DISTANCE_MULTIPLIER for consistent rendering distance across all systems
-    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio, g_Camera.ViewNear, g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
-
     mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
     mu::GetRenderer().PushMatrix();
-    mu::GetRenderer().LoadIdentity();
-    mu::GetRenderer().Rotate(g_Camera.Angle[1], 0.f, 1.f, 0.f);
-    if (g_Camera.TopViewEnable == false)
-        mu::GetRenderer().Rotate(g_Camera.Angle[0], 1.f, 0.f, 0.f);
-    mu::GetRenderer().Rotate(g_Camera.Angle[2], 0.f, 0.f, 1.f);
-    mu::GetRenderer().Translate(-g_Camera.Position[0], -g_Camera.Position[1], -g_Camera.Position[2]);
+    CameraProjection::ApplyView(g_Camera, width, height);
 
     mu::GetRenderer().SetAlphaTest(false);
     mu::GetRenderer().SetTexture2D(true);
@@ -685,8 +682,6 @@ void BeginOpenglForTarget(int width, int height)
     {
         mu::GetRenderer().SetFogEnabled(false);
     }
-
-    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
 }
 
 void EndOpengl()
@@ -695,18 +690,6 @@ void EndOpengl()
     mu::GetRenderer().PopMatrix();
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PopMatrix();
-}
-
-void UpdateMousePositionn()
-{
-    vec3_t vPos;
-
-    mu::GetRenderer().LoadIdentity();
-    mu::GetRenderer().Translate(-g_Camera.Position[0], -g_Camera.Position[1], -g_Camera.Position[2]);
-    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
-
-    Vector(-g_Camera.Matrix[0][3], -g_Camera.Matrix[1][3], -g_Camera.Matrix[2][3], vPos);
-    VectorIRotate(vPos, g_Camera.Matrix, MousePosition);
 }
 
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
@@ -1472,11 +1455,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
         flag <<= 3;
 
     int i;
-    vec3_t* vtx[4];
-    vtx[0] = (vec3_t*)v1;
-    vtx[1] = (vec3_t*)v2;
-    vtx[2] = (vec3_t*)v3;
-    vtx[3] = (vec3_t*)v4;
+    const float* vtx[4] = {v1, v2, v3, v4};
 
     int j = n - 1;
     switch (flag)
@@ -1484,7 +1463,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 1:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[1] - y) * ((*vtx[j])[2] - z) - ((*vtx[j])[1] - y) * ((*vtx[i])[2] - z);
+            float d = (vtx[i][1] - y) * (vtx[j][2] - z) - (vtx[j][1] - y) * (vtx[i][2] - z);
             if (d <= 0.f)
                 return false;
         }
@@ -1492,7 +1471,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 2:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[2] - z) * ((*vtx[j])[0] - x) - ((*vtx[j])[2] - z) * ((*vtx[i])[0] - x);
+            float d = (vtx[i][2] - z) * (vtx[j][0] - x) - (vtx[j][2] - z) * (vtx[i][0] - x);
             if (d <= 0.f)
                 return false;
         }
@@ -1500,7 +1479,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 4:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[0] - x) * ((*vtx[j])[1] - y) - ((*vtx[j])[0] - x) * ((*vtx[i])[1] - y);
+            float d = (vtx[i][0] - x) * (vtx[j][1] - y) - (vtx[j][0] - x) * (vtx[i][1] - y);
             if (d <= 0.f)
                 return false;
         }
@@ -1508,7 +1487,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 8:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[1] - y) * ((*vtx[j])[2] - z) - ((*vtx[j])[1] - y) * ((*vtx[i])[2] - z);
+            float d = (vtx[i][1] - y) * (vtx[j][2] - z) - (vtx[j][1] - y) * (vtx[i][2] - z);
             if (d >= 0.f)
                 return false;
         }
@@ -1516,7 +1495,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 16:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[2] - z) * ((*vtx[j])[0] - x) - ((*vtx[j])[2] - z) * ((*vtx[i])[0] - x);
+            float d = (vtx[i][2] - z) * (vtx[j][0] - x) - (vtx[j][2] - z) * (vtx[i][0] - x);
             if (d >= 0.f)
                 return false;
         }
@@ -1524,7 +1503,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 32:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[0] - x) * ((*vtx[j])[1] - y) - ((*vtx[j])[0] - x) * ((*vtx[i])[1] - y);
+            float d = (vtx[i][0] - x) * (vtx[j][1] - y) - (vtx[j][0] - x) * (vtx[i][1] - y);
             if (d >= 0.f)
                 return false;
         }

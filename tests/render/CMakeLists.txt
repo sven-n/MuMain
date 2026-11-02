@@ -36,6 +36,15 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME camera_view_tests
+    SOURCES
+        test_camera_view.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME skinned_bone_palette_tests
     SOURCES
         test_skinned_bone_palette.cpp

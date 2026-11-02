@@ -2196,7 +2196,7 @@ static void ExpandHullOutward(float offset)
     ComputeIterationBoundsFromHull();
 }
 
-void CreateFrustrum2D(vec3_t Position)
+void CreateFrustrum2D()
 {
     CameraMode currentMode = CameraManager::Instance().GetCurrentMode();
     // Default joins the Orbital natural-hull path so the cull hull is built
@@ -2231,7 +2231,7 @@ void CreateFrustrum2D(vec3_t Position)
             }
         }
 #endif
-        // Orbital mode: build 2D hull from the ACTUAL GL modelview matrix,
+        // Orbital mode: build 2D hull from the camera's view matrix,
         // then clip against the far-clip plane at ground level (Z=0).
         //
         // The hull extends to fogEnd distance (= terrainCullRange) so terrain is only
@@ -2353,7 +2353,7 @@ void CreateFrustrum2D(vec3_t Position)
             Vector(-halfW,     -halfH,     -terrainDist, viewPts[7]);
 
             // Transform to world space using the actual GL modelview matrix
-            // (g_Camera.Matrix was set by CameraProjection::GetOpenGLMatrix in BeginOpengl)
+            // (g_Camera.Matrix is the view CameraProjection::UpdateView built)
             float px[8], py[8];
             for (int i = 0; i < 8; i++)
             {
@@ -2442,7 +2442,7 @@ void CreateFrustrum2D(vec3_t Position)
 
 }
 
-void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
+void CreateFrustrum(float xAspect, float yAspect)
 {
     const auto fovv = tanf(g_Camera.FOV * Q_PI / 360.f);
     float Distance = g_Camera.ViewFar;
@@ -2460,12 +2460,10 @@ void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
     float FrustrumMinY = (float)TERRAIN_SIZE * TERRAIN_SCALE;
     float FrustrumMaxX = 0.f;
     float FrustrumMaxY = 0.f;
-    float OGLMatrix[3][4];
-    CameraProjection::GetOpenGLMatrix(OGLMatrix);
     for (int i = 0; i < 5; i++)
     {
         vec3_t t;
-        VectorIRotate(Temp[i], OGLMatrix, t);
+        VectorIRotate(Temp[i], g_Camera.Matrix, t);
         VectorAdd(t, g_Camera.Position, FrustrumVertex[i]);
         if (FrustrumMinX > FrustrumVertex[i][0]) FrustrumMinX = FrustrumVertex[i][0];
         if (FrustrumMinY > FrustrumVertex[i][1]) FrustrumMinY = FrustrumVertex[i][1];
@@ -2494,7 +2492,7 @@ void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
     FrustrumFaceD[3] = -VectorDotProduct(FrustrumVertex[0], FrustrumFaceNormal[3]);
     FrustrumFaceD[4] = -VectorDotProduct(FrustrumVertex[1], FrustrumFaceNormal[4]);
 
-    CreateFrustrum2D(position);
+    CreateFrustrum2D();
 
 #ifdef _EDITOR
     // In FreeFly spectator mode, override 3D frustum planes with spectated camera's

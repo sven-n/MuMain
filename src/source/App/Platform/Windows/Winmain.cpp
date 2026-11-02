@@ -106,7 +106,6 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Scaling/UITransform.h"
 #include "Camera/CameraConfig.h"
-#include "Camera/CameraProjection.h"
 #include "I18N/All.h"
 
 #ifdef _EDITOR
@@ -1882,13 +1881,6 @@ void UpdateCursorClip()
 // Update camera state when window resolution changes
 void UpdateResolutionDependentSystems()
 {
-    // Force camera state update with new viewport dimensions
-    // This updates ScreenCenterX/Y and PerspectiveX/Y used for 3D item positioning
-    extern CameraState g_Camera;
-    float aspectRatio = (float)WindowWidth / (float)WindowHeight;
-    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio, g_Camera.ViewNear,
-                                       g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
-
     // Reposition old-style CWin-based UI for the current scene. Without this,
     // login/character-scene info boxes stay anchored to the old screen size
     // until the player re-enters the scene.

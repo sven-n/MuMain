@@ -208,6 +208,23 @@ bool M39Kanturu3rd::UpdateKanturu3rdObjectEffects(OBJECT* o, BMD* b)
     {
         vec3_t p, Pos, Light;
 
+        // Maya darkens as she explodes, until only her outline is left.
+        if (g_Direction.m_CKanturu.GetMayaExplotion())
+        {
+            o->Light[0] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
+            if (o->Light[0] <= 0.05f)
+            {
+                o->Light[0] = 0.05f;
+                o->Light[1] = 0.05f;
+                o->Light[2] = 0.05f;
+                o->HiddenMesh = -2;
+            }
+        }
+        else
+            Vector(1.0f, 1.0f, 1.0f, o->Light);
+
         if (!g_Direction.m_CKanturu.GetMayaExplotion())
             o->HiddenMesh = 0;
 
@@ -401,23 +418,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         case 0: // 마야
         {
             if (g_Direction.m_CKanturu.GetMayaExplotion())
-            {
-                o->Light[0] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
-                o->Light[1] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
-                o->Light[2] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
-
                 VectorCopy(o->Light, b->BodyLight);
-
-                if (o->Light[0] <= 0.05f)
-                {
-                    o->Light[0] = 0.05f;
-                    o->Light[1] = 0.05f;
-                    o->Light[2] = 0.05f;
-                    o->HiddenMesh = -2;
-                }
-            }
-            else
-                Vector(1.0f, 1.0f, 1.0f, o->Light);
 
             b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
             b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);

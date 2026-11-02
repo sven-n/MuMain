@@ -1070,7 +1070,6 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
                 IntensityTransform[i][j] = 0.5f;
             }
         }
-        Vector(1.0f, 1.0f, 1.0f, o->Light);
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV);
 
@@ -1513,6 +1512,16 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 bool CGM_Raklion::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     const auto bones = [o, b] { return Engine::Object::Pose::World(o, b); };
+    // The lights these objects are drawn with.
+    if (IsIceCity() && o->Type >= 6 && o->Type <= 12)
+    {
+        Vector(1.0f, 1.0f, 1.0f, o->Light);
+    }
+    else if (o->Type == 76)
+    {
+        Vector(sinf(WorldTime * 0.002f) * 0.2f + 0.5f, sinf(WorldTime * 0.0015f) * 0.2f + 0.5f,
+               sinf(WorldTime * 0.0014f) * 0.2f + 0.5f, o->Light);
+    }
     switch (o->Type)
     {
     case 16:
@@ -2298,11 +2307,6 @@ void CGM_Raklion::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     }
     else if (o->Type == 76)
     {
-        float R, G, B;
-        R = (float)sinf(WorldTime * 0.002f) * 0.2f + 0.5f;
-        G = (float)sinf(WorldTime * 0.0015f) * 0.2f + 0.5f;
-        B = (float)sinf(WorldTime * 0.0014f) * 0.2f + 0.5f;
-        Vector(R, G, B, o->Light);
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV, o->HiddenMesh);
     }

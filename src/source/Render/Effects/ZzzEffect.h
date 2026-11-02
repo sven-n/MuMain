@@ -77,8 +77,10 @@ BOOL FindSameEffectOfSameOwner(int iType, OBJECT* pOwner);
 
 void CheckClientArrow(OBJECT* o);
 
+// Marks the effects the frame's view holds, for the draw and the next update; the last step of the update.
+void CullEffects();
 void RenderEffects(bool bRenderBlendMesh = false);
-// Spawns the effects of the effect models the last RenderEffects drew; call once per update, after the effects moved.
+// Spawns the effects of the effect models the last cull marked; call once per update, after the effects moved.
 void UpdateEffectModelEffects();
 void RenderAfterEffects();
 void RenderEffectShadows();

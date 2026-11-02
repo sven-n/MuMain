@@ -1859,8 +1859,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 else if (o->Type == MODEL_WOLF_HEAD_EFFECT2)
                 {
                     float _BlendLight = o->BlendMeshLight;
-                    Vector(0.4f, 0.4f, 0.6f, o->Light);
-                    VectorCopy(o->Light, b->BodyLight);
+                    Vector(0.4f, 0.4f, 0.6f, b->BodyLight);
                     VectorScale(b->BodyLight, 0.3f, b->BodyLight);
                     b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, _BlendLight * 0.5f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
                 }
@@ -2096,6 +2095,10 @@ void UpdateRenderObjectEffects(OBJECT* o)
     case MODEL_DRAGON_LOWER_DUMMY:
         // The light its draw left on it, which its sparks take.
         Vector(1.0f, 0.2f, 0.1f, o->Light);
+        break;
+    case MODEL_WOLF_HEAD_EFFECT2:
+        // The light its draw left on it.
+        Vector(0.4f, 0.4f, 0.6f, o->Light);
         break;
     case MODEL_FRED:
     {
