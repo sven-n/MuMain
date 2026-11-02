@@ -17,6 +17,21 @@
 #include <mutex>
 #include <thread>
 
+namespace
+{
+// The local folder spelled like the folder on disk. std::filesystem doesn't correct the case, so
+// with another spelling create_directories() would make a second, empty data folder next to the
+// client's, which the asset paths then resolve to.
+std::wstring ResolveLocalFolder(const wchar_t* folder)
+{
+#ifdef _WIN32
+    return folder;
+#else
+    return mu_utf8_to_wchar(mu_resolved_narrow_path(folder));
+#endif
+}
+} // namespace
+
 CListManager::CListManager() // OK
 {
     this->m_pFTPDownLoader = NULL;
@@ -54,7 +69,7 @@ void CListManager::SetListManagerInfo(DownloaderType type, const wchar_t* Server
     this->m_ListManagerInfo.m_DownloaderType = type;
     this->m_ListManagerInfo.m_nPortNum = PortNum;
     this->m_ListManagerInfo.m_ftpMode = ftpMode;
-    this->m_ListManagerInfo.m_strLocalPath = LocalPath;
+    this->m_ListManagerInfo.m_strLocalPath = ResolveLocalFolder(LocalPath);
     this->m_ListManagerInfo.m_strRemotePath = RemotePath;
     this->m_ListManagerInfo.m_strPWD = Pwd;
     this->m_ListManagerInfo.m_strServerIP = ServerIP;
@@ -63,7 +78,7 @@ void CListManager::SetListManagerInfo(DownloaderType type, const wchar_t* Server
     this->m_ListManagerInfo.m_dwDownloadMaxTime = dwDownloadMaxTime;
 
     std::error_code error;
-    std::filesystem::create_directories(std::filesystem::path(LocalPath), error);
+    std::filesystem::create_directories(std::filesystem::path(this->m_ListManagerInfo.m_strLocalPath), error);
 
     const wchar_t separator = std::filesystem::path::preferred_separator;
     if (!this->m_ListManagerInfo.m_strLocalPath.empty() && this->m_ListManagerInfo.m_strLocalPath.back() != separator)
