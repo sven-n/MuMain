@@ -73,6 +73,8 @@ void BeginFrame();
 // Gives a character outside CharactersClient (a preview) slots of its own, until Untrack; its owner updates it.
 void Track(const CHARACTER* c);
 void Untrack(const CHARACTER* c);
+// Every character an owner tracks: the previews.
+void ForEachTracked(const std::function<void(const CHARACTER*)>& visit);
 // Starts recording the parts drawn for this character.
 void BeginCharacter(const CHARACTER* c);
 // The next slot of the character, recorded with this draw; nullptr for a character neither in CharactersClient nor

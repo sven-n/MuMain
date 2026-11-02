@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "doctest.h"
 
+#include "App/Platform/Windows/Winmain.h"
 #include "Engine/AI/GOBoid.h"
 #include "Character/CSParts.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
@@ -1108,4 +1109,16 @@ TEST_CASE("Drawing a carried part sets none of its settings; the update advances
     Attachments::Untrack(c);
     o->BoneTransform = nullptr;
     FPS_ANIMATION_FACTOR = frameFactor;
+}
+
+TEST_CASE("Starting or stopping music while drawing is a violation [effects]")
+{
+    Diagnostics::DrawSpawnCheck::ResetViolations();
+    {
+        const Diagnostics::DrawSpawnCheck::DrawScope drawing;
+        PlayMp3("Music/MuTheme.mp3");
+        StopMp3("Music/MuTheme.mp3");
+    }
+    CHECK(Diagnostics::DrawSpawnCheck::Violations() == 2);
+    Diagnostics::DrawSpawnCheck::ResetViolations();
 }

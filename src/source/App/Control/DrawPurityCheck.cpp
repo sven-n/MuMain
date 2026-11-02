@@ -5,11 +5,17 @@
 #ifdef MU_ENABLE_CONTROL_SOCKET
 
 #include "Camera/CameraState.h"
+#include "Core/Utilities/Fnv1aHash.h"
 #include "Core/Utilities/Random.h"
+#include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Skills/SkillEffectMgr.h"
+#include "GameLogic/Social/MonkSystem.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Render/Lighting/DynamicLightHistory.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <algorithm>
@@ -68,6 +74,10 @@ void Put(Entry& e, int v)
 {
     e.values[e.count++] = static_cast<std::uint32_t>(v);
 }
+void Put(Entry& e, std::uint64_t v)
+{
+    e.values[e.count++] = v;
+}
 void Put(Entry& e, const void* v)
 {
     e.values[e.count++] = reinterpret_cast<std::uintptr_t>(v);
@@ -124,7 +134,8 @@ constexpr const char* ObjectFields[] = {"Live",
                                         "OBB.StartPos.z",
                                         "OBB.XAxis.x",
                                         "OBB.YAxis.y",
-                                        "OBB.ZAxis.z"};
+                                        "OBB.ZAxis.z",
+                                        "Buffs"};
 constexpr const char* ParticleFields[] = {
     "Live",     "Type",     "SubType", "Scale",   "Position.x", "Position.y", "Position.z",
     "Angle.x",  "Angle.y",  "Angle.z", "Light.r", "Light.g",    "Light.b",    "Alpha",
@@ -172,32 +183,38 @@ void Record(Recorder& r, const OBJECT* o, const char* kind)
     Put(e, o->OBB.XAxis[0]);
     Put(e, o->OBB.YAxis[1]);
     Put(e, o->OBB.ZAxis[2]);
+    Fnv1aHash buffs;
+    for (DWORD i = 0; i < o->m_BuffMap.GetBuffSize(); ++i)
+        buffs.Add(o->m_BuffMap.GetBuff(static_cast<int>(i)));
+    Put(e, buffs.Value());
 }
 
-constexpr const char* CharacterFields[] = {"Light.r",
-                                           "Light.g",
-                                           "Light.b",
-                                           "HideShadow",
-                                           "SafeZone",
-                                           "TargetCharacter",
-                                           "BodyPart[0].Type",
-                                           "BodyPart[1].Type",
-                                           "BodyPart[2].Type",
-                                           "BodyPart[3].Type",
-                                           "BodyPart[4].Type",
-                                           "BodyPart[5].Type",
-                                           "Weapon[0].Type",
-                                           "Weapon[1].Type",
-                                           "Wing.Type",
-                                           "Helper.Type",
-                                           "Weapon[0].AnimationFrame",
-                                           "Weapon[1].AnimationFrame",
-                                           "Wing.AnimationFrame",
-                                           "Wing.LinkBone",
-                                           "Wing.CurrentAction",
-                                           "Wing.PlaySpeed"};
+constexpr const char* CharacterFields[] = {"Light.r",    "Light.g",  "Light.b",
+                                           "HideShadow", "SafeZone", "TargetCharacter"};
+constexpr const char* PartFields[] = {
+    "Type", "Level", "CurrentAction", "PriorAction", "AnimationFrame", "PriorAnimationFrame", "PlaySpeed", "LinkBone"};
+constexpr const char* HashFields[] = {"state"};
 
-// The character's own state beside its object: its draw colour, its parts and what it targets.
+void Record(Recorder& r, const PART_t* part, int type)
+{
+    Entry& e = r.Begin(part, "character part", PartFields, type);
+    Put(e, static_cast<int>(part->Type));
+    Put(e, static_cast<int>(part->Level));
+    Put(e, static_cast<int>(part->CurrentAction));
+    Put(e, static_cast<int>(part->PriorAction));
+    Put(e, part->AnimationFrame);
+    Put(e, part->PriorAnimationFrame);
+    Put(e, part->PlaySpeed);
+    Put(e, static_cast<int>(part->LinkBone));
+}
+
+void RecordHash(Recorder& r, const void* key, const char* kind, std::uint64_t value)
+{
+    Entry& e = r.Begin(key, kind, HashFields, 0);
+    Put(e, value);
+}
+
+// The character's own state beside its object: its draw colour, its flags, what it targets, its parts and its cloth.
 void Record(Recorder& r, const CHARACTER* c)
 {
     Entry& e = r.Begin(&c->Light, "character state", CharacterFields, c->Object.Type);
@@ -205,18 +222,49 @@ void Record(Recorder& r, const CHARACTER* c)
     Put(e, c->HideShadow ? 1 : 0);
     Put(e, c->SafeZone ? 1 : 0);
     Put(e, static_cast<int>(c->TargetCharacter));
+    const int type = c->Object.Type;
     for (const PART_t& part : c->BodyPart)
-        Put(e, static_cast<int>(part.Type));
-    Put(e, static_cast<int>(c->Weapon[0].Type));
-    Put(e, static_cast<int>(c->Weapon[1].Type));
-    Put(e, static_cast<int>(c->Wing.Type));
-    Put(e, static_cast<int>(c->Helper.Type));
-    Put(e, c->Weapon[0].AnimationFrame);
-    Put(e, c->Weapon[1].AnimationFrame);
-    Put(e, c->Wing.AnimationFrame);
-    Put(e, static_cast<int>(c->Wing.LinkBone));
-    Put(e, static_cast<int>(c->Wing.CurrentAction));
-    Put(e, c->Wing.PlaySpeed);
+        Record(r, &part, type);
+    for (const PART_t& part : c->Weapon)
+        Record(r, &part, type);
+    Record(r, &c->Wing, type);
+    Record(r, &c->Helper, type);
+
+    const auto* cloth = static_cast<const CPhysicsCloth*>(c->Object.m_pCloth);
+    if (cloth == nullptr)
+        return;
+    Fnv1aHash vertices;
+    for (int i = 0; i < c->Object.m_byNumCloth; ++i)
+    {
+        for (int v = 0; v < cloth[i].GetNumVertices(); ++v)
+        {
+            vec3_t position;
+            cloth[i].GetPosition(v, &position);
+            for (const float axis : position)
+                vertices.Add(axis);
+        }
+    }
+    RecordHash(r, c->Object.m_pCloth, "cloth", vertices.Value());
+}
+
+// What the update keeps for the whole world: terrain collision, the frame's terrain light and light history, and
+// Dark Side's skill state.
+void RecordWorld(Recorder& r)
+{
+    constexpr int cells = TERRAIN_SIZE * TERRAIN_SIZE;
+    Fnv1aHash walls;
+    Fnv1aHash light;
+    for (int i = 0; i < cells; ++i)
+    {
+        walls.Add(TerrainWall[i]);
+        for (const float channel : PrimaryTerrainLight[i])
+            light.Add(channel);
+    }
+    RecordHash(r, TerrainWall, "terrain walls", walls.Value());
+    RecordHash(r, PrimaryTerrainLight, "terrain light", light.Value());
+    RecordHash(r, &Render::Lighting::FrameLightHistory(), "light history",
+               Render::Lighting::FrameLightHistory().StateHash());
+    RecordHash(r, &g_CMonkSystem, "dark side", g_CMonkSystem.DarksideStateHash());
 }
 
 void Record(Recorder& r, const PARTICLE* p)
@@ -317,6 +365,14 @@ void Snapshot(std::unordered_map<const void*, Entry>& into)
         Record(r, &CharactersClient[i].Object, "character");
         Record(r, &CharactersClient[i]);
     }
+    Engine::Object::Attachments::ForEachTracked(
+        [&r](const CHARACTER* preview)
+        {
+            Record(r, &preview->Object, "preview");
+            Record(r, preview);
+        });
+    for (int i = 0; i < MAX_SPRITES; ++i)
+        Record(r, &Sprites[i], "sprite");
     for (int i = 0; i < MAX_EFFECTS; ++i)
         Record(r, &Effects[i], "effect");
     for (int i = 0; i < g_SkillEffects.GetSize(); ++i)
@@ -339,6 +395,7 @@ void Snapshot(std::unordered_map<const void*, Entry>& into)
     for (int i = 0; i < MAX_JOINTS; ++i)
         Record(r, &Joints[i]);
     RecordView(r);
+    RecordWorld(r);
 }
 
 bool s_listing = false;

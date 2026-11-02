@@ -128,7 +128,7 @@ void CPhysicsVertex::Move(float fTime)
     }
 }
 
-void CPhysicsVertex::GetPosition(vec3_t* pPos)
+void CPhysicsVertex::GetPosition(vec3_t* pPos) const
 {
     for (int i = 0; i < 3; ++i)
     {
@@ -621,7 +621,7 @@ BOOL CPhysicsCloth::Move(float fTime)
     return (TRUE);
 }
 
-void CPhysicsCloth::GetPosition(int index, vec3_t* pPos)
+void CPhysicsCloth::GetPosition(int index, vec3_t* pPos) const
 {
     m_pVertices[index].GetPosition(pPos);
 }

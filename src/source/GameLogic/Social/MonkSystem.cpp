@@ -4,6 +4,7 @@
 #include "stdafx.h"
 
 #include "GameLogic/Social/MonkSystem.h"
+#include "Core/Utilities/Fnv1aHash.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -245,6 +246,55 @@ bool CMonkSystem::IsSwordformGloves(int _Type)
         return true;
 
     return false;
+}
+
+std::uint64_t CMonkSystem::DarksideStateHash() const
+{
+    Fnv1aHash hash;
+    hash.Add(m_nRepeatedlyCnt);
+    for (const DamageInfo& damage : m_arrRepeatedly)
+    {
+        hash.Add(damage.m_Damage);
+        hash.Add(damage.m_DamageType);
+        hash.Add(damage.m_Double);
+    }
+    hash.Add(m_nDarksideCnt);
+    for (const WORD index : m_DarksideIndex)
+        hash.Add(index);
+    for (const int target : m_DarkTargetIndex)
+        hash.Add(target);
+    for (const float value :
+         {m_fFirstFrame, m_fSecondFrame, m_fDistanceFrame, m_fOtherAniFrame, m_fDistanceNextFrame, m_fDummyAniFrame})
+        hash.Add(value);
+    hash.Add(m_btAttState);
+    hash.Add(m_nDarksideEffectTotal);
+    hash.Add(m_nDarksideEffectAttCnt);
+    hash.Add(m_bDarkSideEffOnce);
+    hash.Add(m_bDarkSideEffOnce2);
+    hash.Add(m_nDummyIndex);
+    hash.Add(m_tmDummyUnit.size());
+    hash.Add(m_bUseEffectOnce);
+    hash.Add(m_nLowerEffCnt);
+    for (const auto& [character, parts] : m_DarksideParts)
+    {
+        hash.Add(character);
+        for (const auto& [part, placements] : parts)
+        {
+            hash.Add(part);
+            for (const DarksidePlacement& placement : placements)
+            {
+                for (int k = 0; k < 3; ++k)
+                {
+                    hash.Add(placement.position[k]);
+                    hash.Add(placement.startPosition[k]);
+                    hash.Add(placement.angle[k]);
+                }
+                hash.Add(placement.alpha);
+                hash.Add(placement.animationFrame);
+            }
+        }
+    }
+    return hash.Value();
 }
 
 void CMonkSystem::RenderPhoenixGloves(CHARACTER* _pCha, BYTE _Hand)

@@ -150,12 +150,12 @@ const DWORD Buff::GetBuffCount(eBuffState buffstate)
     return tempcount;
 }
 
-const DWORD Buff::GetBuffSize()
+const DWORD Buff::GetBuffSize() const
 {
     return m_Buff.size();
 }
 
-const eBuffState Buff::GetBuff(int iterindex)
+const eBuffState Buff::GetBuff(int iterindex) const
 {
     if (iterindex >= (int)GetBuffSize())
         return eBuffNone;

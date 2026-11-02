@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Audio/AudioPlayer.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 
 #include "App/Platform/Windows/Winmain.h"
 #include "Core/Platform/IPlatformAudio.h"
@@ -54,6 +55,7 @@ void StopMusic()
 
 void StopMp3(const char* name, BOOL enforce)
 {
+    Diagnostics::DrawSpawnCheck::Note("music");
     if (!m_MusicOnOff && !enforce)
     {
         return;
@@ -66,6 +68,7 @@ void StopMp3(const char* name, BOOL enforce)
 
 void PlayMp3(const char* name, BOOL enforce)
 {
+    Diagnostics::DrawSpawnCheck::Note("music");
     if (Destroy || (!m_MusicOnOff && !enforce))
     {
         return;

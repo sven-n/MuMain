@@ -57,6 +57,12 @@ void Track(const CHARACTER* c)
     Tracked().try_emplace(c);
 }
 
+void ForEachTracked(const std::function<void(const CHARACTER*)>& visit)
+{
+    for (const auto& [c, slots] : Tracked())
+        visit(c);
+}
+
 void Untrack(const CHARACTER* c)
 {
     Tracked().erase(c);

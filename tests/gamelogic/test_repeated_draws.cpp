@@ -5,7 +5,11 @@
 #include "App/Control/DrawPurityCheck.h"
 #include "Camera/CameraState.h"
 #include "Core/Utilities/Random.h"
+#include "Engine/Object/CharacterAttachments.h"
+#include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
+#include "GameLogic/Social/MonkSystem.h"
+#include "Render/Lighting/DynamicLightHistory.h"
 #include "Scenes/SceneCore.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -14,6 +18,8 @@
 #include "RepeatedDraws.h"
 
 #include <cstdlib>
+#include <memory>
+#include <string>
 #include <vector>
 
 extern unsigned int WindowWidth;
@@ -265,6 +271,51 @@ TEST_CASE("The draw purity check counts a draw pass that draws from the update's
     Purity::AfterDraw();
 
     CHECK(counted("random engine") == 1);
+}
+
+TEST_CASE("The draw purity check reports a draw that changes parts, previews, sprites, buffs, the terrain, the light "
+          "history or Dark Side [effects]")
+{
+    namespace Purity = Diagnostics::DrawPurityCheck;
+    const auto reported = [](const std::string& kind)
+    {
+        int draws = 0;
+        for (const Purity::Change& change : Purity::Report(draws))
+        {
+            if (change.what.rfind(kind, 0) == 0)
+                return true;
+        }
+        return false;
+    };
+    // Runs `change` as a draw pass would, and tells whether the check reported `kind`.
+    const auto caught = [&reported](const std::string& kind, const auto& change)
+    {
+        Purity::Start();
+        Purity::BeforeDraw();
+        change();
+        Purity::AfterDraw();
+        return reported(kind);
+    };
+
+    CHARACTER* const savedCharacters = CharactersClient;
+    auto characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT + 1);
+    CharactersClient = characters.get();
+    CHECK(caught("character part", [] { CharactersClient[2].Helper.LinkBone = 34; }));
+    CharactersClient = savedCharacters;
+
+    auto preview = std::make_unique<CHARACTER>();
+    Engine::Object::Attachments::Track(preview.get());
+    CHECK(caught("preview", [&preview] { preview->Object.Alpha = 0.5f; }));
+    CHECK(caught("character part", [&preview] { preview->Wing.PlaySpeed = 0.25f; }));
+    Engine::Object::Attachments::Untrack(preview.get());
+
+    CHECK(caught("sprite", [] { Sprites[0].Live = !Sprites[0].Live; }));
+    CHECK(caught("item", [] { Items[0].Object.m_BuffMap.RegisterBuff(eBuff_Cloaking); }));
+    Items[0].Object.m_BuffMap.ClearBuff();
+    CHECK(caught("terrain walls", [] { TerrainWall[TERRAIN_INDEX(10, 10)] ^= TW_NOMOVE; }));
+    CHECK(caught("terrain light", [] { PrimaryTerrainLight[TERRAIN_INDEX(10, 10)][0] += 1.f; }));
+    CHECK(caught("light history", [] { Render::Lighting::FrameLightHistory().BeginTick(); }));
+    CHECK(caught("dark side", [] { g_CMonkSystem.SetRepeatedly(100, 0, false, false); }));
 }
 
 TEST_CASE("The draw purity check draws nothing from the update's random sequences itself [effects]")

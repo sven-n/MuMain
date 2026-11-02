@@ -38,7 +38,7 @@ public:
     void Move(float fTime);
 
 public:
-    void GetPosition(vec3_t* pPos);
+    void GetPosition(vec3_t* pPos) const;
     float GetDistance(CPhysicsVertex* pVertex2, vec3_t* pDistance);
 
 protected:
@@ -208,7 +208,11 @@ protected:
 public:
     BOOL Move2(float fTime, int iCount);
     BOOL Move(float fTime);
-    void GetPosition(int index, vec3_t* pPos);
+    void GetPosition(int index, vec3_t* pPos) const;
+    int GetNumVertices() const
+    {
+        return m_iNumVertices;
+    }
     int GetVerticesCount() const
     {
         return m_iNumVertices;

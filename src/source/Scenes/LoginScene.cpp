@@ -336,6 +336,9 @@ void NewMoveLogInScene()
         CreateLogInScene();
     }
 
+    // Starts the theme again when it ends; a no-op while it plays.
+    ::PlayMp3(MUSIC_LOGIN_THEME);
+
     if (!g_CreditWin.IsVisible())
     {
         InitTerrainLight();
@@ -418,9 +421,6 @@ bool NewRenderLogInScene(HDC hDC)
     if (!InitLogIn) return false;
 
     FogEnable = true;
-
-    // Play login music (called every frame — PlayMp3 no-ops if already playing)
-    ::PlayMp3(MUSIC_LOGIN_THEME);
 
     mu::GetRenderer().SetClearColor(0.f, 0.f, 0.f, 1.f);
 
