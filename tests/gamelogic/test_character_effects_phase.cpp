@@ -16,7 +16,9 @@
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "World/GameMaps/GMBattleCastle.h"
 #include "World/GameMaps/GMNewTown.h"
 #include "World/GameMaps/GM_PK_Field.h"
 #include "World/MapInfra/MapManager.h"
@@ -1013,4 +1015,38 @@ TEST_CASE("Drawing a Christmas companion's three copies leaves the companion whe
         CHECK(o->Position[1] == 1200.f);
         CHECK(o->Position[2] == 30.f);
     }
+}
+
+TEST_CASE("Character passes leave a standing siege gate's collision; the update finishes the siege census [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    const int world = gMapManager.WorldActive;
+    gMapManager.WorldActive = WD_30BATTLECASTLE;
+    CHARACTER* gate = &scope.character();
+    gate->MonsterIndex = MONSTER_CASTLE_GATE1;
+    gate->Object.Visible = false;
+    // The first gate's row of tiles blocks movement.
+    const int row = (114 + 1) * TERRAIN_SIZE;
+    WORD saved[4];
+    for (int x = 0; x < 4; ++x)
+    {
+        saved[x] = TerrainWall[row + 66 + x];
+        TerrainWall[row + 66 + x] |= TW_NOMOVE;
+    }
+
+    battleCastle::MoveBattleCastleMonster(gate, &gate->Object);
+    for (int pass = 0; pass < 2; ++pass)
+    {
+        CheckDrawSpawnsNone([] { RenderCharactersClient(); });
+        CHECK((TerrainWall[row + 67] & TW_NOMOVE) == TW_NOMOVE);
+    }
+
+    // With no gate reported by this update, the census drops the gate's collision.
+    UpdateCharacterEffects();
+    UpdateCharacterEffects();
+    CHECK((TerrainWall[row + 67] & TW_NOMOVE) == 0);
+
+    for (int x = 0; x < 4; ++x)
+        TerrainWall[row + 66 + x] = saved[x];
+    gMapManager.WorldActive = world;
 }

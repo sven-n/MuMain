@@ -12054,6 +12054,8 @@ void UpdateDrawnCharacterEffects()
         if (SceneFlag == MAIN_SCENE && (o->Kind == KIND_PLAYER && gMapManager.InBloodCastle() == false &&
                                         gMapManager.InChaosCastle() == false && gMapManager.InBattleCastle()) == false)
             SpawnProtectGuildMark(c);
+        if (o->Type == MODEL_PLAYER)
+            battleCastle::CreateBattleCastleCharacter_Visual(c, o);
         if (UpdateCharacterTypeEffects(c, o, b))
             continue;
         // Same order and stop-on-claim as RenderCharacter's chain.
@@ -12246,6 +12248,10 @@ void UpdateCharacterEffects()
     s_hasEarthQuakeRequest = EarthQuake != sampledEarthQuake;
     s_earthQuakeRequest = EarthQuake;
     EarthQuake = sampledEarthQuake;
+
+    // This update's siege census is complete: a gate no character reported loses its collision.
+    if (gMapManager.InBattleCastle() || gMapManager.WorldActive == WD_31HUNTING_GROUND)
+        battleCastle::InitEtcSetting();
 }
 
 void RenderCharactersClient()
@@ -12276,20 +12282,12 @@ void RenderCharactersClient()
                 else
                     RenderCharacter(c, o, true);
 
-                if (o->Type == MODEL_PLAYER)
-                    battleCastle::CreateBattleCastleCharacter_Visual(c, o);
-
 #ifdef _EDITOR
                 if (s_bShowCharacterPickBoxes)
                     RenderCharacterPickBoxDebug(o);
 #endif
             }
         }
-    }
-
-    if (gMapManager.InBattleCastle() || gMapManager.WorldActive == WD_31HUNTING_GROUND)
-    {
-        battleCastle::InitEtcSetting();
     }
 }
 
