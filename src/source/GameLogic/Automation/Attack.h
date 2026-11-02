@@ -18,7 +18,7 @@ enum class AttackResult : std::uint8_t
     Attacked,
     // Out of range: a step towards the target was taken instead.
     Approaching,
-    // A swing is still playing; try again on a later frame.
+    // A walk or swing is still playing; try again on a later frame.
     Busy,
     // No target was given.
     NoTarget,

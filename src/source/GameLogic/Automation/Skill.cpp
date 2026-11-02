@@ -2,6 +2,7 @@
 #include "GameLogic/Automation/Skill.h"
 
 #include "GameLogic/Automation/Attack.h"
+#include "GameLogic/Automation/Movement.h"
 #include "GameLogic/Combat/SkillExecution.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Engine/AI/ZzzAI.h"
@@ -154,8 +155,8 @@ static SkillResult AimAtTarget(int targetKey, bool allowPlayers, int huntingDist
 
 SkillResult CastSkill(ActionSkillType skill, bool targetRequired, int targetKey, bool allowPlayers, int huntingDistance)
 {
-    // Let the current swing finish before issuing another action.
-    if (IsSwingInProgress())
+    // Let the current action finish before the timer can replace its path or swing.
+    if (IsSwingInProgress() || IsWalkInProgress())
     {
         return SkillResult::Busy;
     }

@@ -192,12 +192,12 @@ namespace MUHelper
                 return;
             }
 
-            if (!ObtainItem())
+            if (!Regroup())
             {
                 return;
             }
 
-            if (!Regroup())
+            if (!ObtainItem())
             {
                 return;
             }
@@ -871,27 +871,21 @@ namespace MUHelper
 
     int CMuHelper::Regroup()
     {
-        if (m_config.bReturnToOriginalPosition && m_iSecondsAway > m_config.iMaxSecondsAway)
-        {
-            if (!SimulateMove(m_posOriginal))
-            {
-                return 0;
-            }
+        if (!m_config.bReturnToOriginalPosition || m_iSecondsAway <= m_config.iMaxSecondsAway)
+            return 1;
 
-            m_iSecondsAway = 0;
-            m_iComboState = 0;
-            m_iCurrentTarget = -1;
-        }
+        using GameLogic::Automation::MoveResult;
+        const MoveResult result = GameLogic::Automation::WalkTo(m_posOriginal.x, m_posOriginal.y);
+        if (result == MoveResult::Walking)
+            return 0;
+        if (result == MoveResult::NoPath)
+            return 1;
+
+        m_iSecondsAway = 0;
+        m_iComboState = 0;
+        m_iCurrentTarget = -1;
 
         return 1;
-    }
-
-    int CMuHelper::SimulateMove(POINT posMove)
-    {
-        const GameLogic::Automation::MoveResult result =
-            GameLogic::Automation::WalkTo(static_cast<int>(posMove.x), static_cast<int>(posMove.y));
-
-        return result == GameLogic::Automation::MoveResult::Arrived ? 1 : 0;
     }
 
     bool CMuHelper::HasAssignedBuffSkill()
@@ -973,13 +967,16 @@ namespace MUHelper
             DeleteItem(m_iCurrentItem);
             return 1;
         case PickupResult::Gone:
+        case PickupResult::NoPath:
+            // shortcut: blocked drops wait for a new viewport event; add timed retries for changing obstacles.
             DeleteItem(m_iCurrentItem);
             return 1;
         case PickupResult::Approaching:
-        case PickupResult::NoPath:
             // Walking towards it: the helper's other work waits a frame.
             return 0;
         case PickupResult::TooFar:
+            m_iCurrentItem = MAX_ITEMS;
+            return 1;
         case PickupResult::Busy:
             return 1;
         }
