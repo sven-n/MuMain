@@ -5710,7 +5710,7 @@ void ItemObjectAttribute(OBJECT* o)
         break;
     case MODEL_CHAOS_LIGHTNING_STAFF:
         o->BlendMesh = 1;
-        o->BlendMeshLight = (float)(Random::Rand() % 11) * 0.1f;
+        o->BlendMeshLight = (float)(Random::DrawRand(o, 1) % 11) * 0.1f;
         break;
     case MODEL_STAFF_OF_RESURRECTION:
         o->BlendMesh = -2;
@@ -5746,8 +5746,9 @@ void ItemObjectAttribute(OBJECT* o)
         break;
     case MODEL_LEGENDARY_SHIELD:
         o->BlendMesh = 1;
-        o->BlendMeshTexCoordU = (float)(Random::Rand() % 10) * 0.1f;
-        o->BlendMeshTexCoordV = (float)(Random::Rand() % 10) * 0.1f;
+        // Draws set this up for every pass, so the shimmer comes from the frame, not from the update's sequence.
+        o->BlendMeshTexCoordU = (float)(Random::DrawRand(o, 1) % 10) * 0.1f;
+        o->BlendMeshTexCoordV = (float)(Random::DrawRand(o, 2) % 10) * 0.1f;
         break;
     case MODEL_ELEMENTAL_SHIELD:
         o->HiddenMesh = 2;
@@ -5766,8 +5767,8 @@ void ItemObjectAttribute(OBJECT* o)
         break;
     case MODEL_LEGENDARY_STAFF:
         o->BlendMesh = 2;
-        o->BlendMeshTexCoordU = (float)(Random::Rand() % 10) * 0.1f;
-        o->BlendMeshTexCoordV = (float)(Random::Rand() % 10) * 0.1f;
+        o->BlendMeshTexCoordU = (float)(Random::DrawRand(o, 1) % 10) * 0.1f;
+        o->BlendMeshTexCoordV = (float)(Random::DrawRand(o, 2) % 10) * 0.1f;
         break;
     case MODEL_ETC:
         o->Scale = 0.7f;
@@ -5780,7 +5781,7 @@ void ItemObjectAttribute(OBJECT* o)
         break;
     case MODEL_LIGHTING_SWORD:
         o->BlendMesh = 1;
-        o->BlendMeshTexCoordU = (float)(Random::Rand() % 10) * 0.1f;
+        o->BlendMeshTexCoordU = (float)(Random::DrawRand(o, 1) % 10) * 0.1f;
         o->BlendMeshLight = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
         break;
     case MODEL_LIGHT_SABER:

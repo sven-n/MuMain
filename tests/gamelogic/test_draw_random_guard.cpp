@@ -3,6 +3,7 @@
 
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include "Core/Utilities/Random.h"
+#include "Engine/Object/ZzzObject.h"
 
 #include <functional>
 #include <random>
@@ -166,4 +167,28 @@ TEST_CASE("Another thread's random sequences are its own while the frame draws [
         worker.join();
     }
     CHECK(Violations() == 0);
+}
+
+TEST_CASE("Setting up a shimmering item for a draw takes nothing from the gameplay sequences [random]")
+{
+    const LegacyStateScope legacy;
+    const std::uint32_t legacyBefore = Random::RandState();
+    const std::mt19937 engineBefore = Random::Snapshot();
+    ResetViolations();
+    for (const int type : {static_cast<int>(MODEL_LEGENDARY_SHIELD), static_cast<int>(MODEL_LEGENDARY_STAFF),
+                           static_cast<int>(MODEL_CHAOS_LIGHTNING_STAFF), static_cast<int>(MODEL_LIGHTING_SWORD)})
+    {
+        CAPTURE(type);
+        OBJECT item;
+        item.Type = type;
+        {
+            // The inventory view and a held part set the item up like this in every pass.
+            const DrawScope drawing;
+            ItemObjectAttribute(&item);
+        }
+        CHECK(item.BlendMesh >= 1);
+    }
+    CHECK(Violations() == 0);
+    CHECK(Random::RandState() == legacyBefore);
+    CHECK(Random::Snapshot() == engineBefore);
 }
