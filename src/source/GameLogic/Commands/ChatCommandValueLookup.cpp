@@ -152,7 +152,7 @@ std::wstring GetOwnValue(const ChatCommandParameter& parameter)
         return GetOwnGuildName();
 
     case ChatCommandValueReference::Map:
-        return std::to_wstring(gMapManager.WorldActive);
+        return std::to_wstring(gMapManager.GetServerMap());
 
     case ChatCommandValueReference::MapCoordinateX:
         return std::to_wstring(Hero->PositionX);
