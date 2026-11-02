@@ -10,6 +10,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Core/Utilities/BaseCls.h"
+#include "Core/Utilities/Fnv1aHash.h"
 
 #define PVS_NORMAL (0x00)
 #define PVS_FIXEDPOS (0x01)
@@ -39,6 +40,8 @@ public:
 
 public:
     void GetPosition(vec3_t* pPos) const;
+    // Adds what the next step reads (force, velocity, position, state) to a fingerprint.
+    void AddStateTo(Fnv1aHash& hash) const;
     float GetDistance(CPhysicsVertex* pVertex2, vec3_t* pDistance);
 
 protected:
@@ -213,6 +216,8 @@ public:
     {
         return m_iNumVertices;
     }
+    // Adds what the next simulation step reads to a fingerprint: the settings, wind, vertices and links.
+    virtual void AddStateTo(Fnv1aHash& hash) const;
     int GetVerticesCount() const
     {
         return m_iNumVertices;
@@ -259,6 +264,7 @@ public:
     CPhysicsClothMesh();
     virtual ~CPhysicsClothMesh();
     virtual void Clear(void);
+    void AddStateTo(Fnv1aHash& hash) const override;
 
 protected:
     int m_iMesh;

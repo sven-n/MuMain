@@ -8,6 +8,7 @@
 #include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "Render/Lighting/DynamicLightHistory.h"
 #include "Scenes/SceneCore.h"
@@ -274,7 +275,7 @@ TEST_CASE("The draw purity check counts a draw pass that draws from the update's
 }
 
 TEST_CASE("The draw purity check reports a draw that changes parts, previews, sprites, buffs, the terrain, the light "
-          "history or Dark Side [effects]")
+          "history, cloth or Dark Side [effects]")
 {
     namespace Purity = Diagnostics::DrawPurityCheck;
     const auto reported = [](const std::string& kind)
@@ -301,6 +302,13 @@ TEST_CASE("The draw purity check reports a draw that changes parts, previews, sp
     auto characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT + 1);
     CharactersClient = characters.get();
     CHECK(caught("character part", [] { CharactersClient[2].Helper.LinkBone = 34; }));
+    // A part's cloth whose wind changes, with no vertex moved.
+    CPhysicsCloth cape;
+    CharactersClient[2].Wing.m_byNumCloth = 1;
+    CharactersClient[2].Wing.m_pCloth[0] = &cape;
+    CHECK(caught("cloth", [&cape] { cape.SetWindMinMax(3, 9); }));
+    CharactersClient[2].Wing.m_pCloth[0] = nullptr;
+    CharactersClient[2].Wing.m_byNumCloth = 0;
     CharactersClient = savedCharacters;
 
     auto preview = std::make_unique<CHARACTER>();

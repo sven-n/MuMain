@@ -214,6 +214,13 @@ void RecordHash(Recorder& r, const void* key, const char* kind, std::uint64_t va
     Put(e, value);
 }
 
+void RecordCloth(Recorder& r, const CPhysicsCloth* cloth)
+{
+    Fnv1aHash state;
+    cloth->AddStateTo(state);
+    RecordHash(r, cloth, "cloth", state.Value());
+}
+
 // The character's own state beside its object: its draw colour, its flags, what it targets, its parts and its cloth.
 void Record(Recorder& r, const CHARACTER* c)
 {
@@ -230,21 +237,26 @@ void Record(Recorder& r, const CHARACTER* c)
     Record(r, &c->Wing, type);
     Record(r, &c->Helper, type);
 
-    const auto* cloth = static_cast<const CPhysicsCloth*>(c->Object.m_pCloth);
-    if (cloth == nullptr)
-        return;
-    Fnv1aHash vertices;
-    for (int i = 0; i < c->Object.m_byNumCloth; ++i)
+    // The cloth the character owns, and the cloth each part owns.
+    if (const auto* cloth = static_cast<const CPhysicsCloth*>(c->Object.m_pCloth))
     {
-        for (int v = 0; v < cloth[i].GetNumVertices(); ++v)
-        {
-            vec3_t position;
-            cloth[i].GetPosition(v, &position);
-            for (const float axis : position)
-                vertices.Add(axis);
-        }
+        for (int i = 0; i < c->Object.m_byNumCloth; ++i)
+            RecordCloth(r, &cloth[i]);
     }
-    RecordHash(r, c->Object.m_pCloth, "cloth", vertices.Value());
+    const auto partCloth = [&r](const PART_t& part)
+    {
+        for (int i = 0; i < part.m_byNumCloth && i < 2; ++i)
+        {
+            if (part.m_pCloth[i] != nullptr)
+                RecordCloth(r, static_cast<const CPhysicsCloth*>(part.m_pCloth[i]));
+        }
+    };
+    for (const PART_t& part : c->BodyPart)
+        partCloth(part);
+    for (const PART_t& part : c->Weapon)
+        partCloth(part);
+    partCloth(c->Wing);
+    partCloth(c->Helper);
 }
 
 // What the update keeps for the whole world: terrain collision, the frame's terrain light and light history, and
