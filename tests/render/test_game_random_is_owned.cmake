@@ -12,6 +12,9 @@ foreach(name MU_OBJECT_LIST MU_SYMBOL_TOOL MU_OUTPUT)
     endif()
 endforeach()
 
+# MU_OUTPUT.found holds this run's findings only, and only once every object was read.
+file(REMOVE "${MU_OUTPUT}.found")
+
 file(STRINGS "${MU_OBJECT_LIST}" objects)
 # Compiled code only: a target's objects can include resources (resource.rc.res), which hold none.
 list(FILTER objects INCLUDE REGEX "\\.(obj|o)$")
@@ -35,11 +38,12 @@ if(tool STREQUAL "link")
     set(object_line "^Dump of file (.+)$")
     set(use_line "UNDEF .* External +\\| (__imp_)?s?rand[ \t\r]*$")
 else()
-    # Each line starts with its object; the CRT functions are undefined (U), with a leading _ on Apple platforms.
+    # Each line starts with its object; the CRT functions are undefined, strong (U) or weak (w, v), with a leading _ on
+    # Apple platforms. Defined symbols (T, W, V) are the code's own.
     execute_process(COMMAND "${MU_SYMBOL_TOOL}" -A ${objects} COMMAND grep rand OUTPUT_FILE "${MU_OUTPUT}"
                     RESULTS_VARIABLE results)
     set(object_line "")
-    set(use_line "^(.+): *U _?s?rand(@[^ ]*)?[ \t\r]*$")
+    set(use_line "^(.+): *[Uvw] _?s?rand(@[^ ]*)?[ \t\r]*$")
 endif()
 # The symbol tool must succeed; the filter ran when it found lines (0) or none (1).
 list(GET results 0 result)
@@ -73,7 +77,6 @@ foreach(line IN LISTS lines)
 endforeach()
 list(REMOVE_DUPLICATES found)
 list(JOIN found "\n" listed)
-file(WRITE "${MU_OUTPUT}.found" "${listed}")
 
 list(LENGTH objects count)
 # Every object read: a filter that dropped the headers would otherwise pass anything.
@@ -84,6 +87,7 @@ if(object_line)
         message(FATAL_ERROR "Read ${read} of ${count} objects")
     endif()
 endif()
+file(WRITE "${MU_OUTPUT}.found" "${listed}")
 if(found)
     message(FATAL_ERROR "The CRT's random sequence is used; draw from Random::Rand / Random::SeedRand:\n${listed}")
 endif()
