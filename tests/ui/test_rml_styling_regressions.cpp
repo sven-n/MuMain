@@ -765,3 +765,75 @@ TEST_CASE("every channel row is as wide as the longest text any channel can have
         }
     }
 }
+
+TEST_CASE("a style that reads a custom property follows a later change of that property [ui][styling]")
+{
+    // Stylesheets size text through custom properties (e.g. font-size: calc(13px * var(--root-scale))) that the
+    // scaling code sets, and changes, after the first layout: a live resize or a new UI scale must resize the
+    // text, and what is measured in em must follow it.
+    UI::Tests::RmlLayoutFixture fixture;
+    auto* document = fixture.LoadMarkup(R"(<rml><head><style>
+        body { --scale: 1; }
+        div { display: block; }
+        #mid { --text: calc(10px * var(--scale)); }
+        #direct { font-size: var(--px); line-height: 1.5; padding-left: 1em; }
+        #scaled { font-size: var(--text); }
+        #scaled span { display: block; padding-left: 2em; }
+        #line { font-size: 10px; line-height: var(--line); }
+        #others { opacity: var(--fade); width: var(--w); color: var(--c); padding-right: var(--pad); }
+    </style></head><body>
+        <div id="mid">
+            <div id="direct" style="--px: 10px;">x</div>
+            <div id="scaled">x<span id="nested">y</span></div>
+        </div>
+        <div id="line" style="--line: 12px;">x</div>
+        <div id="others" style="--fade: 1; --w: 20px; --c: #ffffff; --pad: 3px;">x</div>
+    </body></rml>)");
+    Rml::Element& direct = Required(*document, "#direct");
+    Rml::Element& scaled = Required(*document, "#scaled");
+    Rml::Element& nested = Required(*document, "#nested");
+    Rml::Element& line = Required(*document, "#line");
+    Rml::Element& others = Required(*document, "#others");
+    REQUIRE(direct.GetComputedValues().font_size() == doctest::Approx(10.f));
+    REQUIRE(scaled.GetComputedValues().font_size() == doctest::Approx(10.f));
+
+    SUBCASE("on the element itself")
+    {
+        direct.SetProperty("--px", "16px");
+        fixture.Refresh();
+        CHECK(direct.GetComputedValues().font_size() == doctest::Approx(16.f));
+        CHECK(direct.GetComputedValues().line_height().value == doctest::Approx(24.f));
+        CHECK(direct.GetBox().GetEdge(Rml::BoxArea::Padding, Rml::BoxEdge::Left) == doctest::Approx(16.f));
+    }
+
+    SUBCASE("on an ancestor, through another custom property")
+    {
+        document->SetProperty("--scale", "2");
+        fixture.Refresh();
+        CHECK(scaled.GetComputedValues().font_size() == doctest::Approx(20.f));
+        CHECK(nested.GetComputedValues().font_size() == doctest::Approx(20.f));
+        CHECK(nested.GetBox().GetEdge(Rml::BoxArea::Padding, Rml::BoxEdge::Left) == doctest::Approx(40.f));
+    }
+
+    SUBCASE("a line height of its own")
+    {
+        line.SetProperty("--line", "18px");
+        fixture.Refresh();
+        CHECK(line.GetComputedValues().line_height().value == doctest::Approx(18.f));
+    }
+
+    SUBCASE("other property kinds")
+    {
+        others.SetProperty("--fade", "0.5");
+        others.SetProperty("--w", "30px");
+        others.SetProperty("--c", "#ff0000");
+        others.SetProperty("--pad", "5px");
+        fixture.Refresh();
+        CHECK(others.GetComputedValues().opacity() == doctest::Approx(0.5f));
+        CHECK(others.GetBox().GetSize().x == doctest::Approx(30.f));
+        CHECK(others.GetComputedValues().color() == Rml::Colourb(255, 0, 0));
+        CHECK(others.GetBox().GetEdge(Rml::BoxArea::Padding, Rml::BoxEdge::Right) == doctest::Approx(5.f));
+    }
+    document->Close();
+    fixture.Refresh();
+}
