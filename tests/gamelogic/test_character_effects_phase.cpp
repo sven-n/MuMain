@@ -942,3 +942,30 @@ TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and 
     }
     CHECK(onPose == 1);
 }
+
+TEST_CASE("A Dragon Kick afterimage leaves the fading character's alpha, place and frame as it found them [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    // Actions without keys pose nothing; the afterimage spreads its ghosts over the action's key count.
+    Models[MODEL_PLAYER].NumActions = 0;
+    Models[MODEL_PLAYER].Actions = new Action_t[1]{};
+    Models[MODEL_PLAYER].Actions[0].NumAnimationKeys = 10;
+    CHARACTER* c = &scope.character();
+    OBJECT* o = &c->Object;
+    o->CurrentAction = 0;
+    o->AnimationFrame = 4.f;
+    o->Alpha = 0.4f;
+    Vector(1000.f, 1000.f, 0.f, o->Position);
+    Vector(900.f, 1000.f, 0.f, o->StartPosition);
+    PART_t* part = &c->BodyPart[BODYPART_ARMOR];
+    part->Type = MODEL_SWORD;
+
+    RepeatedDraws::CheckChangesNothing([c, part] { RenderCharacter_AfterImage(c, part, true, 0, 2.5f, 1.0f); });
+    CHECK(o->Alpha == 0.4f);
+    CHECK(o->AnimationFrame == 4.f);
+    CHECK(o->Position[0] == 1000.f);
+
+    RepeatedDraws::CheckChangesNothing([o] { RenderObject_AfterImage(o, true, 0, 0); });
+    CHECK(o->Alpha == 0.4f);
+    CHECK(o->AnimationFrame == 4.f);
+}

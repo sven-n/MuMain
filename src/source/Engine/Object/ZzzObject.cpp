@@ -2949,6 +2949,8 @@ void RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 void RenderObject_AfterImage(OBJECT* o, bool Translate, int Select, int ExtraMon)
 {
     float fAnimationFrame = o->AnimationFrame;
+    // The ghosts borrow the object's alpha; its own body is drawn at, and keeps, the alpha it came with.
+    const float alpha = o->Alpha;
     float fAni1, fAni2;
 
     fAni1 = fAnimationFrame - 1.4f;
@@ -2966,7 +2968,7 @@ void RenderObject_AfterImage(OBJECT* o, bool Translate, int Select, int ExtraMon
         RenderObject(o, Translate, Select, 0);
     }
 
-    o->Alpha = 1.0f;
+    o->Alpha = alpha;
     o->AnimationFrame = fAnimationFrame;
     RenderObject(o, Translate, Select, 0);
 }
@@ -2975,6 +2977,8 @@ void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate, 
 {
     OBJECT* pObj = &pCha->Object;
     float fAnimationFrame = pObj->AnimationFrame;
+    // The ghosts borrow the character's alpha; the part itself is drawn at, and keeps, the alpha it came with.
+    const float alpha = pObj->Alpha;
     float fAni1, fAni2;
     int Type = pPart->Type;
 
@@ -3015,7 +3019,7 @@ void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate, 
     }
 
     VectorCopy(vOrgPos, pObj->Position);
-    pObj->Alpha = 1.0f;
+    pObj->Alpha = alpha;
     pObj->AnimationFrame = fAnimationFrame;
     Calc_ObjectAnimation(pObj, Translate, Select);
     RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
