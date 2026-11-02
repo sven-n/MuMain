@@ -277,22 +277,23 @@ extern float BoneScale;
 // changed since. Other objects are animated into the shared bones for each draw.
 // The bones an object is drawn with: its own pose when the update built it, else bones of this draw's (it came into
 // view after the update ran). The draw records nothing on the object.
-static float (*DrawPose(const OBJECT* o, BMD* b, bool Translate))[3][4]
+static float (*DrawPose(const OBJECT* o, BMD* b, bool Translate, const ObjectGhost* ghost))[3][4]
 {
+    const float frame = ghost != nullptr ? ghost->animationFrame : o->AnimationFrame;
     if (!o->EnableBoneMatrix)
     {
-        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle,
-                     false, !Translate);
+        b->Animation(BoneTransform, frame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false,
+                     !Translate);
         return BoneTransform;
     }
     const bool world = !Translate;
-    const bool reused = Engine::Object::Pose::IsCurrent(o, b, world);
+    // A ghost is at another frame than the pose the update built.
+    const bool reused = ghost == nullptr && Engine::Object::Pose::IsCurrent(o, b, world);
     float (*bones)[3][4] = o->BoneTransform;
     if (!reused)
     {
         bones = Engine::Object::Attachments::DrawBones();
-        b->Animation(bones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false,
-                     world);
+        b->Animation(bones, frame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, world);
     }
 #ifdef MU_ENABLE_CONTROL_SOCKET
     CheckCharacterPose(o, b, reused);
@@ -359,9 +360,13 @@ void UpdateDrawnObjectHold(OBJECT* o)
     }
 }
 
-bool Calc_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon, const float* origin)
+bool Calc_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon, const float* origin,
+                       const ObjectGhost* ghost)
 {
-    if (o->Alpha < 0.01f)
+    DrawLook look = DrawLook::Of(*o);
+    if (ghost != nullptr)
+        look.alpha = ghost->alpha;
+    if (look.alpha < 0.01f)
     {
         return false;
     }
@@ -373,7 +378,7 @@ bool Calc_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon
     if (origin != nullptr)
         VectorCopy(origin, b->BodyOrigin);
 
-    float (*bones)[3][4] = DrawPose(o, b, Translate);
+    float (*bones)[3][4] = DrawPose(o, b, Translate, ghost);
 
     BoneScale = 1.f;
     if (3 == Select)
@@ -411,7 +416,7 @@ bool Calc_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon
             BoneScale = o->m_fEdgeScale;
         }
         float Scale = BoneScale;
-        RenderPartObjectEdge(b, o, RENDER_BRIGHT, Translate, Scale, bones);
+        RenderPartObjectEdge(b, o, RENDER_BRIGHT, Translate, Scale, bones, &look);
 
         if (gMapManager.InChaosCastle() == true || o->Kind != KIND_NPC)
         {
@@ -437,7 +442,7 @@ bool Calc_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon
         }
 
         Scale = BoneScale;
-        RenderPartObjectEdge(b, o, RENDER_BRIGHT, Translate, Scale, bones);
+        RenderPartObjectEdge(b, o, RENDER_BRIGHT, Translate, Scale, bones, &look);
         BodyLight(o, b);
         BoneScale = 1.f;
     }
@@ -538,9 +543,12 @@ static void LittleSantaLight(int type, vec3_t light)
     }
 }
 
-void Draw_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon)
+void Draw_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon, const ObjectGhost* ghost)
 {
     DrawLook look = DrawLook::Of(*o);
+    if (ghost != nullptr)
+        look.alpha = ghost->alpha;
+    const float animationFrame = ghost != nullptr ? ghost->animationFrame : o->AnimationFrame;
     BMD* b = &Models[o->Type];
     bool View = true;
 
@@ -697,7 +705,7 @@ void Draw_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon
             b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
                           look.blendMeshV);
 
-            if (o->CurrentAction != MONSTER01_ATTACK2 || o->AnimationFrame < 2.5f)
+            if (o->CurrentAction != MONSTER01_ATTACK2 || animationFrame < 2.5f)
             {
                 b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
                               look.blendMeshV);
@@ -2103,7 +2111,7 @@ void Draw_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon
                 }
                 else if (o->Type == MODEL_CURSED_SANTA)
                 {
-                    if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame >= 13)
+                    if (o->CurrentAction == MONSTER01_DIE && animationFrame >= 13)
                     {
                         b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
                                       look.blendMeshU, look.blendMeshV, BITMAP_GOOD_SANTA);
@@ -2112,9 +2120,9 @@ void Draw_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon
                         b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
                                       look.blendMeshU, look.blendMeshV, look.hiddenMesh);
                     }
-                    else if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame >= 9)
+                    else if (o->CurrentAction == MONSTER01_DIE && animationFrame >= 9)
                     {
-                        float fFade = (13.0f - o->AnimationFrame) / (13.0f - 9.0f);
+                        float fFade = (13.0f - animationFrame) / (13.0f - 9.0f);
                         b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
                                       look.blendMeshU, look.blendMeshV, BITMAP_GOOD_SANTA);
                         b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
@@ -3392,7 +3400,7 @@ private:
 };
 } // namespace
 
-void RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
+void RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon, const ObjectGhost* ghost)
 {
     const ModelLodScope lod(*o);
     // Split only for map objects; characters' parts come through here too.
@@ -3401,7 +3409,7 @@ void RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
         std::optional<FrameProfiler::Scope> animate;
         if (mapObject)
             animate.emplace(FrameProfiler::Pass::ObjectsAnimate);
-        if (Calc_RenderObject(o, Translate, Select, ExtraMon) == false)
+        if (Calc_RenderObject(o, Translate, Select, ExtraMon, nullptr, ghost) == false)
         {
             return;
         }
@@ -3409,33 +3417,18 @@ void RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
     std::optional<FrameProfiler::Scope> draw;
     if (mapObject)
         draw.emplace(FrameProfiler::Pass::ObjectsDraw);
-    Draw_RenderObject(o, Translate, Select, ExtraMon);
+    Draw_RenderObject(o, Translate, Select, ExtraMon, ghost);
 }
 
 void RenderObject_AfterImage(OBJECT* o, bool Translate, int Select, int ExtraMon)
 {
-    float fAnimationFrame = o->AnimationFrame;
-    // The ghosts borrow the object's alpha; its own body is drawn at, and keeps, the alpha it came with.
-    const float alpha = o->Alpha;
-    float fAni1, fAni2;
-
-    fAni1 = fAnimationFrame - 1.4f;
-    fAni2 = fAnimationFrame - 0.7f;
-    if (fAni1 > 0.0f)
+    // Two ghosts behind the object, at earlier frames and fainter; the object stays as it stands.
+    const ObjectGhost ghosts[] = {{0.2f, o->AnimationFrame - 1.4f}, {0.6f, o->AnimationFrame - 0.7f}};
+    for (const ObjectGhost& ghost : ghosts)
     {
-        o->Alpha = 0.2f;
-        o->AnimationFrame = fAni1;
-        RenderObject(o, Translate, Select, 0);
+        if (ghost.animationFrame > 0.0f)
+            RenderObject(o, Translate, Select, 0, &ghost);
     }
-    if (fAni2 > 0.0f)
-    {
-        o->Alpha = 0.6f;
-        o->AnimationFrame = fAni2;
-        RenderObject(o, Translate, Select, 0);
-    }
-
-    o->Alpha = alpha;
-    o->AnimationFrame = fAnimationFrame;
     RenderObject(o, Translate, Select, 0);
 }
 
@@ -8115,8 +8108,10 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
 
 extern float BoneScale;
 
-void RenderPartObjectEdge(BMD* b, const OBJECT* o, int Flag, bool Translate, float Scale, float (*bones)[3][4])
+void RenderPartObjectEdge(BMD* b, const OBJECT* o, int Flag, bool Translate, float Scale, float (*bones)[3][4],
+                          const DrawLook* look)
 {
+    const DrawLook drawn = look != nullptr ? *look : DrawLook::Of(*o);
     if (g_isCharacterBuff(o, eBuff_Cloaking))
     {
         return;
@@ -8132,29 +8127,38 @@ void RenderPartObjectEdge(BMD* b, const OBJECT* o, int Flag, bool Translate, flo
 
     if (o->Type == MODEL_WARCRAFT)
     {
-        b->BeginRender(o->Alpha);
-        b->RenderMesh(0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->BeginRender(drawn.alpha);
+        b->RenderMesh(0, Flag, drawn.alpha, drawn.blendMesh, drawn.blendMeshLight, drawn.blendMeshU, drawn.blendMeshV,
+                      drawn.hiddenMesh);
         b->EndRender();
     }
     else if (o->Type == MODEL_PERSONA)
     {
-        b->RenderMesh(0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, Flag, drawn.alpha, drawn.blendMesh, drawn.blendMeshLight, drawn.blendMeshU, drawn.blendMeshV,
+                      drawn.hiddenMesh);
+        b->RenderMesh(1, Flag, drawn.alpha, drawn.blendMesh, drawn.blendMeshLight, drawn.blendMeshU, drawn.blendMeshV,
+                      drawn.hiddenMesh);
     }
     else if (o->Type == MODEL_DREADFEAR)
     {
-        b->RenderMesh(0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, Flag, drawn.alpha, drawn.blendMesh, drawn.blendMeshLight, drawn.blendMeshU, drawn.blendMeshV,
+                      drawn.hiddenMesh);
+        b->RenderMesh(1, Flag, drawn.alpha, drawn.blendMesh, drawn.blendMeshLight, drawn.blendMeshU, drawn.blendMeshV,
+                      drawn.hiddenMesh);
     }
     else if (o->Type == MODEL_DARK_SKULL_SOLDIER_5)
     {
-        b->RenderMesh(0, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(2, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(3, Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, Flag, drawn.alpha, drawn.blendMesh, drawn.blendMeshLight, drawn.blendMeshU, drawn.blendMeshV,
+                      drawn.hiddenMesh);
+        b->RenderMesh(2, Flag, drawn.alpha, drawn.blendMesh, drawn.blendMeshLight, drawn.blendMeshU, drawn.blendMeshV,
+                      drawn.hiddenMesh);
+        b->RenderMesh(3, Flag, drawn.alpha, drawn.blendMesh, drawn.blendMeshLight, drawn.blendMeshU, drawn.blendMeshV,
+                      drawn.hiddenMesh);
     }
     else
     {
-        b->RenderBody(Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(Flag, drawn.alpha, drawn.blendMesh, drawn.blendMeshLight, drawn.blendMeshU, drawn.blendMeshV,
+                      drawn.hiddenMesh);
     }
 
     BoneScale = 1.f;

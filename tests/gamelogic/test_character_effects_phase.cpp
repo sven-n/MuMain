@@ -1050,6 +1050,49 @@ TEST_CASE("A dying Dreadfear fades in its update, by the reference clock, not in
     gMapManager.WorldActive = previousWorld;
 }
 
+TEST_CASE("An afterimage draws its ghosts fainter and at earlier frames, and leaves the object as it stands [effects]")
+{
+    struct AlphaRecorder final : Render::ModelDrawing::ModelDrawer
+    {
+        void DrawMesh(const Render::ModelDrawing::MeshDraw& draw) override
+        {
+            meshes.emplace_back(draw.mesh, draw.alpha);
+        }
+        void DrawShadow(const Render::ModelDrawing::ShadowDraw&) override {}
+        std::vector<std::pair<int, float>> meshes;
+    };
+
+    FenrirScope scope;
+    // Fred draws mesh 3 only before frame 2.5 of its second attack, so each ghost's frame shows.
+    OBJECT fred;
+    fred.Live = true;
+    fred.Type = MODEL_FRED;
+    fred.Scale = 1.f;
+    fred.Alpha = 1.f;
+    fred.CurrentAction = MONSTER01_ATTACK2;
+    fred.AnimationFrame = 3.f;
+
+    AlphaRecorder recorder;
+    Render::ModelDrawing::SetModelDrawer(&recorder);
+    CheckDrawSpawnsNone([&] { RenderObject_AfterImage(&fred); });
+    Render::ModelDrawing::SetModelDrawer(nullptr);
+
+    CHECK(fred.Alpha == 1.f);
+    CHECK(fred.AnimationFrame == 3.f);
+    // The first ghost (frame 1.6, alpha 0.2) and the second (frame 2.3, alpha 0.6) are before frame 2.5, so they
+    // draw mesh 3; the object itself (frame 3, alpha 1) does not.
+    std::vector<float> mesh3;
+    std::string drawn;
+    for (const auto& [mesh, alpha] : recorder.meshes)
+    {
+        drawn += std::to_string(mesh) + "@" + std::to_string(alpha) + " ";
+        if (mesh == 3)
+            mesh3.push_back(alpha);
+    }
+    CAPTURE(drawn);
+    CHECK(mesh3 == std::vector<float>{0.2f, 0.6f});
+}
+
 TEST_CASE("Drawing an object whose pose the update has not built leaves its pose and bones as they were [effects]")
 {
     FenrirScope scope;

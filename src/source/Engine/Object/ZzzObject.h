@@ -24,7 +24,14 @@ void CreateShadowAngle();
 
 OBJECT* CollisionDetectObjects(OBJECT* PickObject);
 
-void RenderObject(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
+// A ghost of an object: drawn at another alpha and animation frame than it stands in.
+struct ObjectGhost
+{
+    float alpha;
+    float animationFrame;
+};
+void RenderObject(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0,
+                  const ObjectGhost* ghost = nullptr);
 // Marks the map objects the frame's view shows, in the order they draw; part of CullWorld.
 void CullObjects();
 // Marks what the frame's view shows (map objects, items, mounts, boids, effects) for the draw and the next update;
@@ -131,7 +138,7 @@ void RenderPartObject(OBJECT* o, int Type, void* p, vec3_t Light, float Alpha = 
 
 // bones: the pose drawn; none for the object's own (or the shared bones without a bone matrix).
 void RenderPartObjectEdge(BMD* b, const OBJECT* o, int Flag, bool Translate, float Scale,
-                          float (*bones)[3][4] = nullptr);
+                          float (*bones)[3][4] = nullptr, const DrawLook* look = nullptr);
 void RenderPartObjectEdge2(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale, OBB_t* OBB);
 
 void RenderPartObjectEdgeLight(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale);
@@ -153,12 +160,13 @@ void ActionObject(OBJECT* o);
 void BodyLight(const OBJECT* o, BMD* b);
 
 // origin: where to draw the model instead of where the object stands.
-bool Calc_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon, const float* origin = nullptr);
+bool Calc_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon, const float* origin = nullptr,
+                       const ObjectGhost* ghost = nullptr);
 bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select);
 // Calc_ObjectAnimation's pose into the caller's bones, for a draw that shows the object where it does not stand; the
 // object keeps its own pose.
 bool Calc_ObjectAnimationInto(OBJECT* o, bool Translate, vec34_t* bones);
-void Draw_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon);
+void Draw_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon, const ObjectGhost* ghost = nullptr);
 
 bool IsPartyMemberBuff(int partyindex, eBuffState buffstate);
 bool isPartyMemberBuff(int partyindex);
