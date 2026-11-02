@@ -165,6 +165,31 @@ struct ItemLevelValues
     bool operator==(const ItemLevelValues& other) const = default;
 };
 
+// Lines an item adds to its tooltip layout after the line of `after`'s id; written as its description lines are,
+// without "after": "options".
+struct ItemTooltipLayoutAddition
+{
+    std::string after;
+    std::vector<ItemDescriptionLine> lines;
+
+    bool operator==(const ItemTooltipLayoutAddition& other) const = default;
+};
+
+// An item's own changes to the tooltip layout it uses ("tooltipLayoutChanges", D73): the ids of the layout lines it
+// leaves out, and the lines it adds.
+struct ItemTooltipLayoutChanges
+{
+    std::vector<std::string> hide;
+    std::vector<ItemTooltipLayoutAddition> add;
+
+    bool IsEmpty() const
+    {
+        return hide.empty() && add.empty();
+    }
+
+    bool operator==(const ItemTooltipLayoutChanges& other) const = default;
+};
+
 // One of an item's ground label rules ("groundLabels"): the style of Data/Items/Tooltips/GroundLabels.json its name
 // on the ground takes at these item levels, both included; without levels at every level, also above +15 (Zen's
 // amount is its level).
@@ -304,6 +329,10 @@ struct ItemDefinition
     // The styles of its name on the ground, by level: the first rule that holds at the item's level gives the style;
     // at a level none holds at (or with none), the standard rules of the ground label file do.
     std::vector<ItemGroundLabel> groundLabels;
+    // The tooltip layout of Data/Items/Tooltips/Tooltip.json it uses (empty: the default one), and its own changes to
+    // it (D73).
+    std::string tooltipLayout;
+    ItemTooltipLayoutChanges tooltipLayoutChanges;
 
     const ItemLevelValues* FindLevelValues(std::string_view name) const
     {

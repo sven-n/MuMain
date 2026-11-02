@@ -35,6 +35,11 @@ constexpr const char* Values = "values";
 constexpr const char* LevelValues = "levelValues";
 constexpr const char* NameLines = "nameLines";
 constexpr const char* GroundLabels = "groundLabels";
+constexpr const char* TooltipLayout = "tooltipLayout";
+constexpr const char* TooltipLayoutChanges = "tooltipLayoutChanges";
+constexpr const char* Hide = "hide";
+constexpr const char* Add = "add";
+constexpr const char* Lines = "lines";
 constexpr const char* Style = "style";
 constexpr const char* Colors = "colors";
 constexpr const char* Bold = "bold";
@@ -283,6 +288,27 @@ OrderedJson WriteGroundLabels(const std::vector<ItemGroundLabel>& groundLabels)
     return json;
 }
 
+// {"hide": ["blankAfterOptions"], "add": [{"after": "classLines", "lines": [{"text": ""}]}]}: the ids of the layout
+// lines the item leaves out, and the lines it adds, each written as a description line.
+OrderedJson WriteTooltipLayoutChanges(const ItemTooltipLayoutChanges& changes)
+{
+    OrderedJson json = OrderedJson::object();
+    if (!changes.hide.empty())
+    {
+        json[Keys::Hide] = changes.hide;
+    }
+    if (!changes.add.empty())
+    {
+        OrderedJson add = OrderedJson::array();
+        for (const ItemTooltipLayoutAddition& addition : changes.add)
+        {
+            add.push_back(OrderedJson{{Keys::After, addition.after}, {Keys::Lines, WriteDescription(addition.lines)}});
+        }
+        json[Keys::Add] = std::move(add);
+    }
+    return json;
+}
+
 OrderedJson WriteItemObject(const ItemDefinition& definition)
 {
     OrderedJson item;
@@ -311,6 +337,14 @@ OrderedJson WriteItemObject(const ItemDefinition& definition)
     if (!definition.groundLabels.empty())
     {
         item[Keys::GroundLabels] = WriteGroundLabels(definition.groundLabels);
+    }
+    if (!definition.tooltipLayout.empty())
+    {
+        item[Keys::TooltipLayout] = definition.tooltipLayout;
+    }
+    if (!definition.tooltipLayoutChanges.IsEmpty())
+    {
+        item[Keys::TooltipLayoutChanges] = WriteTooltipLayoutChanges(definition.tooltipLayoutChanges);
     }
 
     const auto writeIfNotDefault = [](OrderedJson& target)
@@ -375,6 +409,9 @@ private:
     void ReadDescription(const OrderedJson& json, std::vector<ItemDescriptionLine>& description);
     void ReadNameLines(const OrderedJson& json, std::vector<ItemNameLine>& nameLines);
     void ReadGroundLabels(const OrderedJson& json, std::vector<ItemGroundLabel>& groundLabels);
+    void ReadTooltipLayoutChanges(const OrderedJson& json, ItemTooltipLayoutChanges& changes);
+    void ReadTooltipLayoutAddition(const OrderedJson& entry, const std::string& field,
+                                   ItemTooltipLayoutChanges& changes);
     bool ReadLevelRange(const OrderedJson& json, const std::string& field, int& first, int& last);
     bool ReadLine(const OrderedJson& entry, const std::string& field, size_t maxLength, ItemDescriptionLine& line);
     void ReadDescriptionLevels(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
@@ -636,6 +673,94 @@ void ItemReader::ReadGroundLabels(const OrderedJson& json, std::vector<ItemGroun
         WarnAboutUnknownKeys(entry, {Keys::Style, Keys::Levels}, field + ".");
         groundLabels.push_back(std::move(label));
     }
+}
+
+// The item's own changes to its tooltip layout: {"hide": ["<line id>", ...], "add": [{"after": "<line id>", "lines":
+// [...]}]}, the added lines written as description lines without "after". Whether its layout has those ids is checked
+// with the tooltip file (CheckItemTooltipLayout).
+void ItemReader::ReadTooltipLayoutChanges(const OrderedJson& json, ItemTooltipLayoutChanges& changes)
+{
+    const auto found = json.find(Keys::TooltipLayoutChanges);
+    if (found == json.end())
+    {
+        return;
+    }
+    const std::string field = Keys::TooltipLayoutChanges;
+    if (!found->is_object())
+    {
+        AddIssue(ItemDataIssueSeverity::Fatal, field,
+                 R"(must be {"hide": ["<line id>", ...], "add": [{"after": "<line id>", "lines": [...]}]})");
+        return;
+    }
+    if (const auto hide = found->find(Keys::Hide); hide != found->end())
+    {
+        if (!hide->is_array() || !std::all_of(hide->begin(), hide->end(), [](const OrderedJson& id)
+                                              { return id.is_string() && Json::IsName(id.get<std::string>()); }))
+        {
+            AddIssue(ItemDataIssueSeverity::Fatal, field + "." + Keys::Hide, "must be a list of line ids");
+        }
+        else
+        {
+            for (const OrderedJson& id : *hide)
+            {
+                changes.hide.push_back(id.get<std::string>());
+            }
+        }
+    }
+    if (const auto add = found->find(Keys::Add); add != found->end())
+    {
+        if (!add->is_array())
+        {
+            AddIssue(ItemDataIssueSeverity::Fatal, field + "." + Keys::Add,
+                     R"(must be a list of {"after": "<line id>", "lines": [...]})");
+        }
+        else
+        {
+            for (size_t index = 0; index < add->size(); ++index)
+            {
+                ReadTooltipLayoutAddition((*add)[index], field + "." + Keys::Add + "[" + std::to_string(index) + "]",
+                                          changes);
+            }
+        }
+    }
+    WarnAboutUnknownKeys(*found, {Keys::Hide, Keys::Add}, field + ".");
+}
+
+void ItemReader::ReadTooltipLayoutAddition(const OrderedJson& entry, const std::string& field,
+                                           ItemTooltipLayoutChanges& changes)
+{
+    const auto after = entry.is_object() ? entry.find(Keys::After) : entry.end();
+    const auto lines = entry.is_object() ? entry.find(Keys::Lines) : entry.end();
+    if (after == entry.end() || !after->is_string() || !Json::IsName(after->get<std::string>()) ||
+        lines == entry.end() || !lines->is_array())
+    {
+        AddIssue(ItemDataIssueSeverity::Fatal, field, R"(must be {"after": "<line id>", "lines": [...]})");
+        return;
+    }
+    ItemTooltipLayoutAddition addition;
+    addition.after = after->get<std::string>();
+    for (size_t index = 0; index < lines->size(); ++index)
+    {
+        const OrderedJson& lineJson = (*lines)[index];
+        const std::string lineField = field + "." + Keys::Lines + "[" + std::to_string(index) + "]";
+        if (!lineJson.is_object() || !lineJson.contains(Keys::Text))
+        {
+            AddIssue(ItemDataIssueSeverity::Fatal, lineField, "must be an object with a text");
+            continue;
+        }
+        if (lineJson.contains(Keys::After))
+        {
+            AddIssue(ItemDataIssueSeverity::Fatal, lineField + "." + Keys::After,
+                     "does not apply to an added line: it comes after the line its entry names");
+        }
+        ItemDescriptionLine line;
+        if (ReadLine(lineJson, lineField, MaxDescriptionLineLength, line))
+        {
+            addition.lines.push_back(std::move(line));
+        }
+    }
+    WarnAboutUnknownKeys(entry, {Keys::After, Keys::Lines}, field + ".");
+    changes.add.push_back(std::move(addition));
 }
 
 // The fields of one line of a description or of the name lines; false when its text could not be read. A text longer
@@ -1019,10 +1144,19 @@ void ItemReader::ReadRequirementsByLevel(const OrderedJson& json, ItemDefinition
 
 std::set<std::string, std::less<>> GetKnownItemKeys()
 {
-    std::set<std::string, std::less<>> keys{
-        Keys::Number,     Keys::Name,         Keys::Tags,         Keys::Description,         Keys::LevelValues,
-        Keys::NameLines,  Keys::GroundLabels, Keys::Requirements, Keys::RequirementsByLevel, Keys::ClassRequirements,
-        Keys::Resistances};
+    std::set<std::string, std::less<>> keys{Keys::Number,
+                                            Keys::Name,
+                                            Keys::Tags,
+                                            Keys::Description,
+                                            Keys::LevelValues,
+                                            Keys::NameLines,
+                                            Keys::GroundLabels,
+                                            Keys::Requirements,
+                                            Keys::RequirementsByLevel,
+                                            Keys::ClassRequirements,
+                                            Keys::Resistances,
+                                            Keys::TooltipLayout,
+                                            Keys::TooltipLayoutChanges};
     ItemDefinition unused;
     VisitStatFields(unused, [&](const char* key, auto&, const auto&) { keys.insert(key); });
     return keys;
@@ -1045,6 +1179,11 @@ bool ItemReader::Read(const OrderedJson& json, ItemDefinition& definition)
     ReadLevelValues(json, definition.levelValues);
     ReadNameLines(json, definition.nameLines);
     ReadGroundLabels(json, definition.groundLabels);
+    if (const auto layout = json.find(Keys::TooltipLayout); layout != json.end())
+    {
+        ReadValue(*layout, Keys::TooltipLayout, definition.tooltipLayout);
+    }
+    ReadTooltipLayoutChanges(json, definition.tooltipLayoutChanges);
     ReadStats(json, definition);
     ReadRequirements(json, definition);
     ReadRequirementsByLevel(json, definition);
@@ -1137,6 +1276,7 @@ std::string LayOutItemJsonText(const std::string& text)
 {
     std::string laidOut = Json::PutListsOnOneLine(text, Keys::Tags);
     laidOut = Json::PutListsOnOneLine(laidOut, Keys::GroundLabels);
+    laidOut = Json::PutListsOnOneLine(laidOut, Keys::Hide);
     laidOut = Json::PutListsOnOneLine(laidOut, Keys::Levels);
     laidOut = Json::PutListsOnOneLine(laidOut, Keys::When);
     laidOut = Json::PutObjectsOnOneLine(laidOut, Keys::Values);

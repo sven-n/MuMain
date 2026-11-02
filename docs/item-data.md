@@ -132,6 +132,8 @@ variants or option words. An online keyword need not select the same items offli
 | `description` | Lines the tooltip shows for the item, e.g. the Jewel of Bless's "It is used to increase your item level up to 6"; see [Descriptions](#descriptions). A client-only field; the bmd import keeps it |
 | `nameLines` | How the game names the item (its tooltip, the repair window, windows, messages and ground labels) and the tooltip's name color, when not the standard name and color (see [Name lines](#name-lines)). Each is written like a `description` line without `bold` and `after` (the name is always bold and first), its text is checked like one, and its `text` and `color` may be left out. Name lines are in the item names' language (English with the options' "Translate item names" off), and a text that is empty in it keeps the standard name. A client-only field; the bmd import keeps it |
 | `groundLabels` | The styles of the item's name on the ground, by level: `[{"style": "giftBoxPink", "levels": [0, 1]}, {"style": "white"}]`. The first rule whose `levels` hold gives the style; at a level none holds at, the standard rules do (see [Ground labels](#ground-labels)). A client-only field; the bmd import keeps it |
+| `tooltipLayout` | The [tooltip layout](#tooltip-layouts) the item uses, a preset like `"noClassLines"` (left out: `default`). A client-only field; the bmd import keeps it |
+| `tooltipLayoutChanges` | The item's own changes to its tooltip layout: `{"hide": ["blankAfterOptions"], "add": [{"after": "classLines", "lines": [{"text": ""}]}]}`, the ids of the layout lines it leaves out and the lines it adds after a line, each written like a `description` line without `after` (see [Presets](#presets)). A client-only field; the bmd import keeps it |
 | `width`, `height` | Size in inventory slots |
 | `slot` | Equipment slot: `mainHand`, `offHand`, `helm`, `armor`, `pants`, `gloves`, `boots`, `wings`, `pet`, `pendant`, `ring`. Left out = not equippable |
 | `wingTier` | Only for wings: `small`, `first`, `second`, `third`. The wing formulas (defense, defense per level, damage increase, absorption) depend on it; excellent second and third tier wings get no extra durability, and the chaos mix knows a wing's tier from it |
@@ -189,51 +191,64 @@ can have several tags; the file lists them in the order below.
 | `gemJewelry` | The gem rings and necklaces from the cash shop |
 | `luckyItemTicket` | Lucky item tickets |
 | `valuable` | The game asks for confirmation before the item is sold or dropped |
-| `noLevelRequirement` | The tooltip shows no level requirement, though the item has one (Loch's Feather) |
-| `noDurabilityLine` | The tooltip shows no standard durability line, though the item has a durability: it shows none, or its description has its own (a pet's "Life", a stack's "Number of items", a ticket's "usable … times") |
-| `noBlankAfterOptions` | The tooltip leaves out the blank line after the options, so the item's lines drawn there follow the options directly (the Pet Skeleton, the Invitation to Santa Village) |
-| `noClassLines` | The tooltip shows no class lines ("Can be equipped by …") and not the blank line before them. The original client's list, 99 items: most seals, talismans, tickets, scrolls, elixirs, elite and cash shop potions, chaos cards and reset fruits, the transformation rings and gamble items, five pets (Demon, Spirit of Guardian, Rudolf, Panda, Unicorn), the Bundles of Jewel of Bless and Soul (not the other bundles), the ribbon boxes, the Jewel of Chaos, the Horn of Fenrir, the Weapon of Archangel, the Armor of Guardsman and the Gem of Secret; Item Categories lists them. Every item with `elitePotion`, `buffScroll`, `elixir`, `gambleItem`, `battleOrStrengthScroll` or `guardianPet` has it; one without it is a warning |
 
-Wings need no tag: an item is a wing when its `slot` is `wings`.
+Wings need no tag: an item is a wing when its `slot` is `wings`. Which lines an
+item's tooltip leaves out (its class lines, its durability line, …) is no tag
+but its [tooltip layout](#presets).
 
 ### Tooltip layouts
 
 `Tooltips/Tooltip.json` says which lines an item tooltip shows besides the
-item's own description: damage, defense, magic defense, defense rate, the
-speeds, the resistances, the requirements with their "(lacking …)" lines, and
-the wizardry, curse and pet attack increases. It has the **shared texts**, by
-name and with their translations, and the **layouts**. Every item uses the
-layout `default` for now.
+item's own description: the blank rows between its parts, damage, defense,
+magic defense, defense rate, the speeds, the resistances, the requirements with
+their "(lacking …)" lines, the class lines ("Can be equipped by …"), the boots'
+and gloves' texts from +5, the wizardry, curse and pet attack increases, and a
+timed item's end. It has the **shared texts**, by name and with their
+translations, and the **layouts**: `default`, and the [presets](#presets) made
+from it.
 
 ```json
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "texts": {
     "defense": {"en": "Defense: {defense}", "de": "Verteidigung: {defense}"},
-    "lacking": {"en": "(lacking {missing})", "de": "(fehlt {missing})"}
+    "lacking": {"en": "(lacking {missing})", "de": "(fehlt {missing})"},
+    "canBeEquippedBy": {"en": "Can be equipped by {className}", "de": "Kann von {className} ausgerüstet werden"}
   },
   "layouts": [
     {
       "name": "default",
       "lines": [
+        {"id": "firstRow", "text": ""},
         {"section": "name"},
+        {"id": "blankAfterName", "text": ""},
+        {"section": "itemCases"},
         {"text": "@defense", "when": ["defense"], "colors": [{"when": ["defenseHarmonyBonus"], "color": "yellow"}, {"when": ["armour", "excellent"], "color": "blue"}]},
         {"section": "description"},
-        {"text": "@durability", "when": ["hasDurability", "!timed", "!tag:noDurabilityLine"]},
-        {"text": "@requiredLevel", "when": ["requiredLevel", "!tag:noLevelRequirement"], "colors": [{"when": ["missingLevel"], "color": "red"}]},
-        {"text": "@lacking", "values": {"missing": "missingLevel"}, "when": ["requiredLevel", "!tag:noLevelRequirement", "missingLevel"], "color": "red"},
+        {"id": "durability", "text": "@durability", "when": ["hasDurability", "!timed"]},
+        {"id": "requiredLevel", "text": "@requiredLevel", "when": ["requiredLevel"], "colors": [{"when": ["missingLevel"], "color": "red"}]},
+        {"id": "lackingLevel", "text": "@lacking", "values": {"missing": "missingLevel"}, "when": ["requiredLevel", "missingLevel"], "color": "red"},
         {"section": "classes"},
-        {"text": "", "when": ["tag:sceptre"]},
-        {"text": "@petAttackIncrease", "when": ["tag:sceptre"], "color": "blue", "bold": true},
-        {"section": "options"}
+        {"id": "classLinesBlank", "text": ""},
+        {"id": "classLines", "text": "@canBeEquippedBy", "forEachClass": true, "when": ["!allClasses"], "colors": [{"when": ["!classUsable"], "color": "darkRed"}]},
+        {"text": "@increasesMovingSpeed", "when": ["boots", "level>=5"], "color": "blue", "bold": true},
+        {"id": "blankBeforeOptions", "text": "", "when": ["hasOptions", "!tag:gemJewelry"]},
+        {"section": "options"},
+        {"id": "blankAfterOptions", "text": ""},
+        {"section": "afterOptions"},
+        {"text": "@expiredItem", "when": ["timed", "expired"], "color": "red"},
+        {"text": "{expireDate}", "when": ["timed", "!expired"], "color": "blue"}
       ]
-    }
+    },
+    {"name": "noClassLines", "base": "default", "hide": ["classLinesBlank", "classLines"]}
   ]
 }
 ```
 
 A layout line has:
 
+- **`id`**: a name of letters and digits, for the presets and the items that
+  hide the line or add lines after it; most lines have none.
 - **`text`**: `"@name"` for a shared text, a text written in place (with its
   translations, as in a description), or `""` for a blank line. Its
   placeholders are the [built-in values](#description-placeholders) and those
@@ -260,6 +275,12 @@ A layout line has:
 - **`bold`**: `true` for a bold line.
 - **`values`**: a placeholder of the text and the built-in value it shows on
   this line. One "(lacking {missing})" serves every requirement this way.
+- **`forEachClass`**: `true` writes the line once for each class the item's
+  `classRequirements` name, in their order, with `{className}` the class at the
+  level the item needs (Dark Knight, Blade Knight or Blade Master) and the state
+  `classUsable` for that class. The default layout's class lines are such a
+  line: white for the hero who can use the item, dark red for the others, and
+  none when every class can (`allClasses`).
 
 The **states** a condition can name:
 
@@ -281,19 +302,52 @@ The **states** a condition can name:
 | `setItem` | An ancient item of a set: its discriminator names one of the item's sets, whose name the item's name starts with (`ancient` is any discriminator) |
 | `socketItem` | An item that can have sockets |
 | `upperTierWings` | Wings or a cape of the second or third tier (`wingTier`) |
+| `allClasses` | Every class can use the item (its `classRequirements` name all seven) |
+| `classUsable` | On a line with `forEachClass`: the hero is that class at the level the item needs or above |
+| `boots`, `gloves` | Boots (group 11) or gloves (group 10) |
+| `expired` | A timed item whose time is up |
 
 A **section** is a part of the tooltip the code still writes, and the lines
-of a layout go between them:
+of a layout go between them: the lines after a section come right after what
+the code writes there, and the lines before the first section come first.
 
 | Section | What the code writes there |
 |---|---|
-| `name` | Everything up to the item's name, and the name |
+| `name` | The shop prices, and the item's name |
+| `itemCases` | The lines of the items that need the game: the reset fruits' points, the Talismans' saved places, the socket seeds and spheres, the Sign of Dimensions' count |
 | `description` | The item's own texts: the code's texts for particular items, the item's [description](#fields) |
-| `classes` | The classes that can use the item (not for items with the tag `noClassLines`), and the boots' and gloves' texts from +5 |
-| `options` | The excellent, set, socket, Jewel of Harmony and other options, to the end of the tooltip |
+| `classes` | Nothing: the class lines and the boots' and gloves' texts are layout lines |
+| `options` | The Jewel of Harmony, excellent and other options |
+| `afterOptions` | The description's lines after the options and the Horn of Fenrir's lines; the set and socket options come after the lines of this section |
 
-Each layout has the four sections once each, in this order: it starts with
-`name` and ends with `options`.
+Each layout has the six sections once each, in this order.
+
+#### Presets
+
+A layout with a `base` is a **preset**: its base's lines without the lines
+whose `id` its `hide` lists, and with the lines of each `add` entry right after
+the line of that entry's `after` id (`{"after": "classLines", "lines": [...]}`),
+so a change to `default` reaches every preset. A preset can be based on another
+one. An item uses a preset with `tooltipLayout`, and changes its layout itself
+with `tooltipLayoutChanges` (the same `hide` and `add`, the added lines written
+as its description lines are, with `levels`); without either it uses
+`default`. So no item writes the blank rows or the class lines itself, and an
+exception is a preset or an item's own change, without code. The shipped
+presets:
+
+| Preset | What it leaves out | Items |
+|---|---|---|
+| `noClassLines` | The class lines and the blank row before them | 72: the Jewel of Chaos, the Gem of Secret, the Bundles of Jewel of Bless and Soul, the ribbon boxes, the Armor of Guardsman, the event transformation rings (Elite Skeleton, Jack O'Lantern, Christmas, GM, Snowman, Panda and Skeleton Ring), the seals, the talismans, the Chaos Cards, the Rare Item Tickets, the elite potions, the buff, battle and strength scrolls, the elixirs and the Summoner Character Card |
+| `noDurabilityLine` | The durability line, where an item shows none or its description has its own (a stack's "Number of items", a ticket's "usable … times") | 30: arrows and bolts, the Guardian Angel and the Imp, the Horns of Uniria and Dinorant, the Dark Horse and Dark Raven, the quest items (Contract, Order, Scroll of Archangel, Blood Bone, Invisibility Cloak, Wizard's Ring, Splinter of Armor, Bless of Guardian, Claw of Beast, Fragment of Horn), the Invitation to Santa Village, the Pet Skeleton and the lucky item tickets |
+| `noClassOrDurabilityLines` | Both (based on `noClassLines`) | 27: the Transformation Ring, the Absolute Weapon of Archangel, the Horn of Fenrir, the event tickets (Devil Square, Blood Castle, Kalima, Illusion Temple, Chaos Castle, Doppelganger, Varka), the reset fruits, the Talisman of Mobility, the gamble items and five pets (Demon, Spirit of Guardian, Rudolf, Panda, Unicorn) |
+
+Loch's Feather hides its level requirement itself (`requiredLevel`,
+`lackingLevel`), and the Pet Skeleton and the Invitation to Santa Village the
+blank row after the options (`blankAfterOptions`), so their lines there follow
+the options directly. Every item with `elitePotion`, `buffScroll`, `elixir`,
+`gambleItem`, `battleOrStrengthScroll` or `guardianPet` uses a layout without
+the class lines, as the original client's list did; one whose layout has them
+is a warning.
 
 **Errors** when the item data loads: a `@name` that is not a shared text (in a
 layout or a description), an entry of `when` that is neither a value, a
@@ -304,11 +358,14 @@ color, a placeholder that is neither built in nor named by the line's
 are not those of the English text,
 a text (other than a blank line) without its English text, a language code
 that has more than letters, digits and `-`, a `values` entry that names no
-built-in value, missing or misplaced sections, and no layout `default`. The
-messages suggest the name meant for a typo. **Warnings**: a shared text that
-neither a layout nor a description uses, a `values` entry the text does not
-have (a layout's or a description's line), a translation in a language the game has no texts in (as for item
-names), and a layout other than `default` (nothing uses it yet).
+built-in value, missing or misplaced sections, no layout `default`, two lines
+of a layout with the same `id`, a preset whose `base` is no layout (or whose
+bases go round in a circle), a `hide` or `after` id its base doesn't have, and
+an item's `tooltipLayout` the file doesn't have or a `tooltipLayoutChanges` id
+its layout doesn't have. The messages suggest the name meant for a typo.
+**Warnings**: a shared text that neither a layout nor a description uses, a
+`values` entry the text does not have (a layout's or a description's line), and
+a translation in a language the game has no texts in (as for item names).
 
 ### Flight equipment
 
@@ -524,7 +581,9 @@ placeholder is one of:
   (its `name` in the item names' language), `levelPlusOne` (its level + 1),
   `bundleCount` (how many jewels or stones a bundle holds, as the game counts
   them; 0 for other items) and `excellentFlags` (its excellent options, 0 to 63; the Horn of Fenrir's
-  1, 2 and 4 are its Destroy, Protect and Illusion kinds);
+  1, 2 and 4 are its Destroy, Protect and Illusion kinds); and for the layout's lines
+  `className` (on a line with `forEachClass`, the class at the level the item needs)
+  and `expireDate` (when a timed item ends, in local time: "2026-11-30  18:00");
 - a **level bonus table** of [`Stats/ItemStats.json`](#item-stats-by-level),
   as `table:` and its name: the table's value at the item's + level
   (`{table:damageIncreaseWeapons}` is 3 at +1 and 66 at +15, the damage a

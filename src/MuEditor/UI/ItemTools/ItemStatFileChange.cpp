@@ -73,11 +73,13 @@ bool LineNamesTable(const Data::Items::ItemDescriptionLine& line, std::string_vi
                                { return Data::Items::NamesTable(translation.second, table); });
 }
 
-// A description line or a name line of the item names the table.
+// A description line, a name line or a line the item adds to its tooltip layout names the table.
 bool DescriptionNamesTable(const ItemDefinition& item, std::string_view table)
 {
     const auto names = [&](const Data::Items::ItemDescriptionLine& line) { return LineNamesTable(line, table); };
-    return std::ranges::any_of(item.description, names) || std::ranges::any_of(item.nameLines, names);
+    return std::ranges::any_of(item.description, names) || std::ranges::any_of(item.nameLines, names) ||
+           std::ranges::any_of(item.tooltipLayoutChanges.add, [&](const Data::Items::ItemTooltipLayoutAddition& added)
+                               { return std::ranges::any_of(added.lines, names); });
 }
 
 // The line naming the table `to` where it names `from`, in every language and in its "values".
@@ -212,6 +214,13 @@ void RenameTableInDescriptions(std::span<const ItemDefinition> slots, std::vecto
         for (Data::Items::ItemDescriptionLine& line : renamed.nameLines)
         {
             RenameTableInLine(line, from, to);
+        }
+        for (Data::Items::ItemTooltipLayoutAddition& added : renamed.tooltipLayoutChanges.add)
+        {
+            for (Data::Items::ItemDescriptionLine& line : added.lines)
+            {
+                RenameTableInLine(line, from, to);
+            }
         }
     }
 }
