@@ -223,13 +223,24 @@ TEST_CASE("Sound files: the shipped file names each sound the code loads once, r
     Data::Sounds::ValidateSoundFiles(result.sounds, "SoundFiles.json", result.issues);
     CHECK_FALSE(HasFatal(result.issues));
     CHECK(result.issues.empty());
-    CHECK(result.sounds.size() == 388);
+    CHECK(result.sounds.size() == 389);
     std::set<int> numbers;
     for (const SoundFile& sound : result.sounds)
     {
         CHECK(numbers.insert(sound.number).second);
     }
     CHECK(Data::Sounds::WriteSoundFilesJson(result.sounds) == text);
+
+    // The files fixed after the move.
+    const auto fileOf = [&result](const std::string& id)
+    {
+        const auto found = std::find_if(result.sounds.begin(), result.sounds.end(),
+                                        [&id](const SoundFile& sound) { return sound.id == id; });
+        return found != result.sounds.end() ? found->file : std::string();
+    };
+    // Fenrir's two pain sounds, of which the second was never loaded.
+    CHECK(fileOf("SOUND_FENRIR_DAMAGE_1") == "Data/Sound/pWpain1.wav");
+    CHECK(fileOf("SOUND_FENRIR_DAMAGE_2") == "Data/Sound/pWpain2.wav");
 }
 
 TEST_CASE("Sound files: LoadGameSound loads the file the data gives the id, with its channels and 3D; an id the "

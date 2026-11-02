@@ -1418,7 +1418,7 @@ void OpenSounds()
     LoadGameSound(SOUND_FENRIR_IDLE_1);
     LoadGameSound(SOUND_FENRIR_IDLE_2);
     LoadGameSound(SOUND_FENRIR_DAMAGE_1);
-    LoadGameSound(SOUND_FENRIR_DAMAGE_1);
+    LoadGameSound(SOUND_FENRIR_DAMAGE_2);
     LoadGameSound(SOUND_FENRIR_SKILL);
     LoadGameSound(SOUND_JEWEL02);
 
