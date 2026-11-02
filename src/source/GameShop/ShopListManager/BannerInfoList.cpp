@@ -44,7 +44,7 @@ WZResult CBannerInfoList::LoadBanner(std::wstring strDirPath, std::wstring strSc
 
         while (true)
         {
-            if (!ifs.getline(buff, sizeof(buff)))
+            if (!ifs.getline(buff, std::size(buff)))
                 break;
 
             CBannerInfo info;
