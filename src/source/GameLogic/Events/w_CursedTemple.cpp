@@ -119,10 +119,10 @@ bool CursedTemple::GetInterfaceState(int type, int subtype)
 
 bool CursedTemple::IsPartyMember(DWORD selectcharacterindex)
 {
-    if (PartyNumber == 0) return false;
+    if (PartyNumber == 0 || selectcharacterindex >= MAX_CHARACTERS_CLIENT)
+        return false;
 
     CHARACTER* c = &CharactersClient[selectcharacterindex];
-    if (c == NULL) return false;
 
     for (int i = 0; i < PartyNumber; ++i)
     {

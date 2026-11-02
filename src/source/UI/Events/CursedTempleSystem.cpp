@@ -51,6 +51,11 @@ using namespace mu::ui::window;
 
 namespace
 {
+bool IsTargetedTempleSkill(int skill)
+{
+    return skill == AT_SKILL_CURSED_TEMPLE_RESTRAINT || skill == AT_SKILL_CURSED_TEMPLE_SUBLIMATION;
+}
+
     const int HolyItemNpc = 380;
     const int AlliedNpc = 381;
     const int IllusionNpc = 382;
@@ -1126,21 +1131,27 @@ void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJ
 
     float Distance = gSkillManager.GetSkillDistance(CursedTempleCurSkillType, c);
 
+    const bool targetedSkill = IsTargetedTempleSkill(CursedTempleCurSkillType);
     bool checktile = true;
 
-    if (CursedTempleCurSkillType == AT_SKILL_CURSED_TEMPLE_RESTRAINT
-        || CursedTempleCurSkillType == AT_SKILL_CURSED_TEMPLE_SUBLIMATION)
+    if (targetedSkill)
     {
         checktile = CheckTile(c, o, Distance);
     }
 
     if (checktile)
     {
-        CHARACTER* tc = NULL;
+        CHARACTER* tc = Hero;
 
-        if (CursedTempleCurSkillType == AT_SKILL_CURSED_TEMPLE_RESTRAINT
-            || CursedTempleCurSkillType == AT_SKILL_CURSED_TEMPLE_SUBLIMATION)
+        if (targetedSkill)
         {
+            // Protect the character-table access in the teammate loop below.
+            if (selectcharacterindex >= MAX_CHARACTERS_CLIENT || getTargetCharacterKey(c, selectcharacterindex) == -1)
+            {
+                MouseRButtonPush = false;
+                return;
+            }
+
             for (int i = 0; i < m_CursedTempleMyTeamCount; ++i)
             {
                 if (m_CursedTempleMyTeam[i].userIndex == CharactersClient[selectcharacterindex].Key)
@@ -1150,30 +1161,8 @@ void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJ
                 }
             }
 
-            if (selectcharacterindex == -1)
-            {
-                MouseRButtonPush = false;
-                return;
-            }
-            else if (getTargetCharacterKey(c, selectcharacterindex) == -1)
-            {
-                MouseRButtonPush = false;
-                return;
-            }
-
             tc = &CharactersClient[selectcharacterindex];
         }
-        else
-        {
-            tc = Hero;
-        }
-
-        if (tc == NULL)
-        {
-            MouseRButtonPush = false;
-            return;
-        }
-
         SocketClient->ToGameServer()->SendIllusionTempleSkillRequest(CursedTempleCurSkillType, static_cast<BYTE>(tc->Key), Distance);
         Hero->m_CursedTempleCurSkillPacket = true;
         MouseRButtonPush = false;
