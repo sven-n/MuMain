@@ -23,14 +23,30 @@ constexpr float ChannelLoadWidth = 90.0f;
 constexpr const char* DropOwnLoadLabel = "\xC3\x97##DropOwnLoad";
 constexpr const char* LoadFormat = "%d %%";
 
-// A load slider's value before the last click on it: a double-click's first click already moved it.
-int s_loadBeforeClick = 0;
+// The load slider a click last started an edit on, when, and its value before that click: a double-click's first
+// click already moved the slider.
+struct EditStart
+{
+    ImGuiID slider = 0;
+    double time = 0.0;
+    int percent = 0;
+};
+EditStart s_editStart;
 
 // Opens the slider's text field in the next frame, as Ctrl+click does.
 void OpenTextField(ImGuiID id)
 {
     ImGui::ActivateItemByID(id);
     ImGui::GetCurrentContext()->NavNextActivateFlags = ImGuiActivateFlags_PreferInput;
+}
+
+// Whether the click that just activated the slider is the second of a double-click whose first click started an
+// edit on it too: not on its label, which takes no click, nor on an item beside it.
+bool IsDoubleClickOnSlider()
+{
+    return ImGui::IsItemActivated() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left) &&
+           s_editStart.slider == ImGui::GetItemID() &&
+           ImGui::GetTime() - s_editStart.time <= ImGui::GetIO().MouseDoubleClickTime;
 }
 
 // A load slider from 0 to the preview's highest load that also takes a typed value: a double-click or Ctrl+click
@@ -49,15 +65,14 @@ bool LoadSlider(const char* label, int& percent, float width, bool greyed)
     {
         ImGui::PopStyleColor();
     }
-    const bool doubleClicked = ImGui::IsItemHovered() && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left);
-    if (ImGui::IsItemActivated() && !doubleClicked)
+    if (IsDoubleClickOnSlider())
     {
-        s_loadBeforeClick = before;
-    }
-    if (doubleClicked)
-    {
-        percent = s_loadBeforeClick;
+        percent = s_editStart.percent;
         OpenTextField(ImGui::GetItemID());
+    }
+    else if (ImGui::IsItemActivated())
+    {
+        s_editStart = {ImGui::GetItemID(), ImGui::GetTime(), before};
     }
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
     {

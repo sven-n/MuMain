@@ -204,19 +204,33 @@ private:
 };
 
 constexpr const char* OfflineChannelWindow = "Offline channel";
+constexpr const char* OfflineSwitchWindow = "Offline switch";
+
+// A frame with `render` alone in the window `name`; the rectangle of the last item it drew.
+template <typename Render> ImRect RenderAlone(const char* name, Render render)
+{
+    ImGui::NewFrame();
+    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+    ImGui::Begin(name, nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+    render();
+    const ImRect last(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
+    ImGui::End();
+    ImGui::Render();
+    return last;
+}
 
 // The preview's controls of the channel `serverId` alone in a window, as the channel table draws them; the
 // rectangle of the last one (the load slider while the channel follows Their load).
 ImRect RenderOfflineChannel(int serverId)
 {
-    ImGui::NewFrame();
-    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-    ImGui::Begin(OfflineChannelWindow);
-    MuEditor::ServerList::OfflinePreview::RenderChannel(serverId);
-    const ImRect last(ImGui::GetItemRectMin(), ImGui::GetItemRectMax());
-    ImGui::End();
-    ImGui::Render();
-    return last;
+    return RenderAlone(OfflineChannelWindow,
+                       [serverId] { MuEditor::ServerList::OfflinePreview::RenderChannel(serverId); });
+}
+
+// The toolbar's switch and Their load alone in a window; the rectangle of Their load with its label.
+ImRect RenderOfflineSwitch()
+{
+    return RenderAlone(OfflineSwitchWindow, [] { MuEditor::ServerList::OfflinePreview::RenderSwitch(); });
 }
 
 ImGuiID OfflineChannelId(const char* label)
@@ -224,10 +238,22 @@ ImGuiID OfflineChannelId(const char* label)
     return ImGui::GetIDWithSeed(label, nullptr, ImGui::FindWindowByName(OfflineChannelWindow)->ID);
 }
 
-void SetMouseButton(bool down, int serverId)
+ImGuiID OfflineSwitchId(const char* label)
 {
-    ImGui::GetIO().AddMouseButtonEvent(ImGuiMouseButton_Left, down);
-    RenderOfflineChannel(serverId);
+    return ImGui::GetIDWithSeed(label, nullptr, ImGui::FindWindowByName(OfflineSwitchWindow)->ID);
+}
+
+// A double-click at `at`, with a frame after each step.
+template <typename Frame> void DoubleClick(ImVec2 at, Frame frame)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    io.AddMousePosEvent(at.x, at.y);
+    frame();
+    for (const bool down : {true, false, true, false})
+    {
+        io.AddMouseButtonEvent(ImGuiMouseButton_Left, down);
+        frame();
+    }
 }
 } // namespace
 
@@ -342,17 +368,12 @@ TEST_CASE("Server List window: a double-click on an offline channel's load types
     const ImGuiID sliderId = OfflineChannelId("##OfflineLoad");
     REQUIRE(slider.GetWidth() > 0.0f);
 
-    // At a quarter of the slider: a click alone would set about 35 %.
-    ImGui::GetIO().AddMousePosEvent(slider.Min.x + slider.GetWidth() / 4.0f, slider.GetCenter().y);
-    RenderOfflineChannel(ServerId);
-    SetMouseButton(true, ServerId);
-    SetMouseButton(false, ServerId);
-    SetMouseButton(true, ServerId);
-    // The text field opens in the frame after the double-click, with the load from before the first click.
-    RenderOfflineChannel(ServerId);
+    // At a quarter of the slider: a click alone would set about 35 %. The text field opens in the frame after the
+    // double-click, with the load from before the first click.
+    DoubleClick(ImVec2(slider.Min.x + slider.GetWidth() / 4.0f, slider.GetCenter().y),
+                [&] { RenderOfflineChannel(ServerId); });
     CHECK(ImGui::TempInputIsActive(sliderId));
     CHECK(g_ServerListManager->GetOfflineServerLoad(ServerId) == OfflinePreviewOn::Load);
-    SetMouseButton(false, ServerId);
 
     ImGui::GetIO().AddInputCharactersUTF8("120");
     RenderOfflineChannel(ServerId);
@@ -362,6 +383,27 @@ TEST_CASE("Server List window: a double-click on an offline channel's load types
     RenderOfflineChannel(ServerId);
     CHECK_FALSE(ImGui::TempInputIsActive(sliderId));
     CHECK(g_ServerListManager->GetOfflineServerLoad(ServerId) == 120);
+}
+
+TEST_CASE("Server List window: a double-click on Their load's label leaves the load as it is [editor]")
+{
+    I18N::SetLocale("en");
+    // The switch keeps a changed load in MuEditor.ini: the one of the test's folder.
+    ServerListFolder folder;
+    TestImGuiContext context;
+    OfflinePreviewOn preview;
+    // Not a load a slider's earlier click could give back.
+    constexpr int TheirLoad = 80;
+    g_ServerListManager->SetOfflinePreview(true, TheirLoad);
+    g_MuEditorConfig.SetOfflineServers(true, TheirLoad);
+    const ImRect slider = RenderOfflineSwitch();
+    REQUIRE(slider.GetWidth() > 0.0f);
+
+    // The label is at the slider's right end; a click on it doesn't take the slider.
+    DoubleClick(ImVec2(slider.Max.x - 2.0f, slider.GetCenter().y), [] { RenderOfflineSwitch(); });
+    RenderOfflineSwitch();
+    CHECK(g_ServerListManager->GetOfflineServerPercent() == TheirLoad);
+    CHECK_FALSE(ImGui::TempInputIsActive(OfflineSwitchId(I18N::Editor::TheirLoad)));
 }
 
 TEST_CASE("Server List window: the x next to an offline channel's own load goes back to Their load [editor]")
