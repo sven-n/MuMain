@@ -138,11 +138,17 @@ drawer, and the renderer applies the active look per draw.
 ## Enforcement
 
 - **Every build:** the spawn functions (effects, sprites, particles, joints,
-  blurs, pointers, terrain lights, sounds, music, actions, animations) report any
-  call inside a draw pass, the scene's or the offscreen one
-  (`Diagnostics::DrawSpawnCheck`); every such call is a violation. Developer
-  builds log each offending caller once to the error log. Tests read the
-  count.
+  blurs, pointers, terrain lights, sounds, music, actions, animations) and
+  every call that advances or reseeds a gameplay random sequence (`Rand`,
+  `SeedRand`, the `Random` engine's draws and `Seed`) report any call inside
+  a draw pass on the drawing thread, the scene's or the offscreen one
+  (`Diagnostics::DrawSpawnCheck`); every such call is a violation. Reading a
+  sequence's state and the draws' own `DrawRand` / `DrawFpsCheck` report
+  nothing. Every build logs each offending caller once to the error log, with
+  or without the control socket. Tests read the count and the last caller.
+- **The compiled game:** `game_random_is_owned` reads the undefined symbols
+  of the game's objects and fails if any calls the CRT's `rand()` or
+  `srand()`, a second sequence nothing can see.
 - **Tests:** draws under test run inside a `DrawScope` and must spawn
   nothing (`CheckDrawSpawnsNone`). Repeated-draw tests run a draw pass several
   times after one update and check that the pools, the spawn count and both
