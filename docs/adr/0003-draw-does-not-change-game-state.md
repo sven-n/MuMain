@@ -106,6 +106,13 @@ drawer, and the renderer applies the active look per draw.
 - A transformed Rage Fighter's skin and the Chaos Castle angel no longer write
   into the character's parts (the skin wrote outside them).
 - The mix windows' sparkle ends one frame sooner; it runs down in the update.
+- The Legendary Shield and Staff, the Chaos Lightning Staff and the Lightning
+  Sword shimmer with the draw's randomness; creating one no longer draws from
+  the update's sequence.
+- Item effects and styles no longer leave their look on the item they draw.
+  A Devil's Eye on the ground is drawn bright in every pass, not from its
+  second pass on, and the update reads its own alpha; a GM gift is drawn at
+  its own alpha, with its glow at half.
 
 ## Consequences
 
