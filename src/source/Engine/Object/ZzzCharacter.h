@@ -17,8 +17,9 @@ CHARACTER* FindCharacterByKey(int Key);
 
 // Draws a linked part and returns the bones it posed it into.
 vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1,
-                          bool Link, bool Translate, int RenderType = 0, bool bRightHandItem = true,
-                          const Engine::Object::Attachments::LinkOverride& attach = {});
+                          bool Link, bool Translate, int RenderType = 0, bool bRightHandItem = true, int linkBone = -1);
+bool RendersWingCarriedModels(const CHARACTER* c);
+void RenderWingCarriedModels(CHARACTER* c, bool Translate);
 void RenderChristmasCompanions(CHARACTER* c, bool Translate, int Select);
 void RenderCharacter(CHARACTER* c, OBJECT* o, int Select = 0);
 void RenderCharactersClient();
@@ -149,6 +150,8 @@ void CreateJointFpsChecked(int Type, vec3_t Position, vec3_t TargetPosition, vec
 // Whether the character carries its weapons on its back instead of in hand.
 bool AreWeaponsOnBack(const CHARACTER* c, const OBJECT* o);
 bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate);
+bool DrawsWeaponOnBack(CHARACTER* c, const OBJECT* o, int index);
+void PrepareCarriedParts(CHARACTER* c);
 bool IsBackItem(CHARACTER* c, int iType);
 
 bool IsPlayer(CHARACTER* c);

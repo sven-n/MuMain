@@ -300,8 +300,8 @@ std::uint64_t CMonkSystem::DarksideStateHash() const
 void CMonkSystem::RenderPhoenixGloves(CHARACTER* _pCha, BYTE _Hand)
 {
     PART_t* w = &_pCha->Weapon[_Hand];
-    const Engine::Object::Attachments::LinkOverride glove{.bone = PhoenixGloveBone(_Hand)};
-    RenderLinkObject(_Hand ? 100.f : 80.f, 10.0, -75.0, _pCha, w, MODEL_SWORD_35_WING, 0, 0, true, true, 0, 1, glove);
+    RenderLinkObject(_Hand ? 100.f : 80.f, 10.0, -75.0, _pCha, w, MODEL_SWORD_35_WING, 0, 0, true, true, 0, 1,
+                     PhoenixGloveBone(_Hand));
 }
 
 void CMonkSystem::RenderSwordformGloves(CHARACTER* _pCha, int _ModelType, int _Hand, float _Alpha, bool _Translate, int _Select)

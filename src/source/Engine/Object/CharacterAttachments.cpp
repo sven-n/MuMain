@@ -75,8 +75,7 @@ void BeginCharacter(const CHARACTER* c)
 }
 
 Slot* Record(CHARACTER* c, _PART_t* part, int type, float x, float y, float z, int level, int option1, bool link,
-             bool translate, int renderType, bool rightHandItem, unsigned char linkBone, float ownerScale,
-             const LinkOverride& attach)
+             bool translate, int renderType, bool rightHandItem, unsigned char linkBone, float ownerScale)
 {
     CharacterSlots* character = SlotsOf(c);
     if (character == nullptr)
@@ -104,7 +103,6 @@ Slot* Record(CHARACTER* c, _PART_t* part, int type, float x, float y, float z, i
     slot.renderType = renderType;
     slot.rightHandItem = rightHandItem;
     slot.linkBone = linkBone;
-    slot.attach = attach;
     slot.ownerScale = ownerScale;
     slot.part = own;
     if (own == nullptr && part != nullptr)

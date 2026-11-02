@@ -7135,7 +7135,7 @@ void NextGradeObjectRender(CHARACTER* c)
             {
             case 15: // +15
             {
-                RenderLinkObject(0.f, 0.f, 0.f, c, w, gradeType[m], 0, 0, true, true, 0, true, {.bone = bornIndex[m]});
+                RenderLinkObject(0.f, 0.f, 0.f, c, w, gradeType[m], 0, 0, true, true, 0, true, bornIndex[m]);
             }break;
             }
         }

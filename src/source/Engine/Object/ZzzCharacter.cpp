@@ -6880,22 +6880,20 @@ OBJECT* ItemObjectFor(CHARACTER* c, int Type)
 void SpawnLinkedPartEffects(CHARACTER* c, int Type, OBJECT* Object, vec34_t* bones, const vec3_t position);
 
 // The action a linked part plays: Wings of Darkness fold in a safe zone.
-unsigned short LinkedPartAction(const CHARACTER* c, const PART_t* f,
-                                const Engine::Object::Attachments::LinkOverride& attach = {})
+unsigned short LinkedPartAction(const CHARACTER* c, const PART_t* f)
 {
     if ((f->Type >= MODEL_WINGS_OF_DARKNESS && f->Type <= MODEL_WINGS_OF_DARKNESS) && c->SafeZone)
         return 1;
-    return attach.action >= 0 ? static_cast<unsigned short>(attach.action) : f->CurrentAction;
+    return f->CurrentAction;
 }
 
 // A linked part's animation step: its speed and frame overrides, then PlayAnimation.
-void AdvanceLinkedPart(CHARACTER* c, PART_t* f, int Type, bool Link,
-                       const Engine::Object::Attachments::LinkOverride& attach)
+void AdvanceLinkedPart(CHARACTER* c, PART_t* f, int Type, bool Link)
 {
     OBJECT* o = &c->Object;
     BMD* b = &Models[Type];
 
-    float playSpeed = attach.playSpeed >= 0.f ? attach.playSpeed : f->PlaySpeed;
+    float playSpeed = f->PlaySpeed;
     switch (Type)
     {
     case MODEL_WING_OF_RUIN:
@@ -6912,7 +6910,7 @@ void AdvanceLinkedPart(CHARACTER* c, PART_t* f, int Type, bool Link,
             f->AnimationFrame = 3.2f;
         }
     }
-    b->CurrentAction = LinkedPartAction(c, f, attach);
+    b->CurrentAction = LinkedPartAction(c, f);
     if (!Link || (Type < MODEL_BOW || Type >= MODEL_BOW + MAX_ITEM_INDEX) || Type == MODEL_STINGER_BOW)
     {
         if (!g_isCharacterBuff(o, eDeBuff_Stun) && !g_isCharacterBuff(o, eDeBuff_Sleep))
@@ -6964,10 +6962,10 @@ void PoseLinkedPart(const CHARACTER* c, int Type, bool Link, const Engine::Objec
 } // namespace
 
 vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1,
-                          bool Link, bool Translate, int RenderType, bool bRightHandItem,
-                          const Engine::Object::Attachments::LinkOverride& attach)
+                          bool Link, bool Translate, int RenderType, bool bRightHandItem, int linkBone)
 {
-    const auto linkBone = static_cast<unsigned char>(attach.bone >= 0 ? attach.bone : f->LinkBone);
+    // A bone the call hangs the part from, where it differs from the part's own.
+    const auto bone = static_cast<unsigned char>(linkBone >= 0 ? linkBone : f->LinkBone);
     OBJECT* o = &c->Object;
     BMD* b = &Models[Type];
 
@@ -6993,7 +6991,7 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
 
     // A client character's part gets its own pose; other characters' parts use the shared bones, as before.
     Engine::Object::Attachments::Slot* slot = Engine::Object::Attachments::Record(
-        c, f, Type, x, y, z, Level, Option1, Link, Translate, RenderType, bRightHandItem, linkBone, o->Scale, attach);
+        c, f, Type, x, y, z, Level, Option1, Link, Translate, RenderType, bRightHandItem, bone, o->Scale);
     vec34_t* bones = slot != nullptr ? Engine::Object::Attachments::Bones(*slot) : BoneTransform;
     if (slot != nullptr)
         slot->shadow = o->EnableShadow;
@@ -7004,7 +7002,7 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     // CopyShadowAngle(f,b);
     b->ContrastEnable = o->ContrastEnable;
     b->BodyScale = o->Scale;
-    b->CurrentAction = LinkedPartAction(c, f, attach);
+    b->CurrentAction = LinkedPartAction(c, f);
     b->BodyHeight = 0.f;
 
     OBJECT* Object = ItemObjectFor(c, Type);
@@ -7021,7 +7019,7 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
 
     OBB_t OBB;
 
-    const LinkPlacement placement = PlaceLinkedPart(x, y, z, c, linkBone, o->Scale, Type, Link, bRightHandItem);
+    const LinkPlacement placement = PlaceLinkedPart(x, y, z, c, bone, o->Scale, Type, Link, bRightHandItem);
     std::memcpy(ParentMatrix, placement.parent, sizeof(placement.parent));
     VectorCopy(placement.origin, b->BodyOrigin);
     VectorCopy(placement.angle, Object->Angle);
@@ -7035,7 +7033,7 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     if (g_PrepassBoneCheck.enabled && slot != nullptr && slot->part != nullptr)
         ++(advanced ? g_PrepassBoneCheck.partsReused : g_PrepassBoneCheck.partsDrawnUnadvanced);
 #endif
-    b->CurrentAction = LinkedPartAction(c, f, attach);
+    b->CurrentAction = LinkedPartAction(c, f);
 
     VectorCopy(b->BodyOrigin, Object->Position);
 
@@ -9459,6 +9457,46 @@ void UpdateCharacterCloth(CHARACTER* c)
 }
 } // namespace
 
+bool RendersWingCarriedModels(const CHARACTER* c)
+{
+    return c->MonsterIndex == MONSTER_RED_DRAGON ||
+           (c->MonsterIndex >= MONSTER_STATUE_OF_SAINT_1 && c->MonsterIndex <= MONSTER_STATUE_OF_SAINT_3);
+}
+
+// The Red Dragon's head and the princess it carries, or a Saint statue's archangel weapon: models that play on the
+// wing part, whose animation the update sets (PrepareCarriedParts).
+void RenderWingCarriedModels(CHARACTER* c, bool Translate)
+{
+    OBJECT* o = &c->Object;
+    PART_t* w = &c->Wing;
+    const float scale = o->Scale;
+    if (c->MonsterIndex == MONSTER_RED_DRAGON)
+    {
+        RenderLinkObject(0.f, 0.f, -40.f, c, w, MODEL_BOSS_HEAD, 0, 0, false, Translate, 0, true, 9);
+
+        vec3_t light;
+        VectorCopy(c->Light, light);
+        Vector(1.f, 1.f, 1.f, c->Light);
+        o->Scale = 0.9f;
+        RenderLinkObject(0.f, -40.f, 45.f, c, w, MODEL_PRINCESS, 0, 0, false, Translate, 0, true, 61);
+        VectorCopy(light, c->Light);
+    }
+    else
+    {
+        int weapon = MODEL_DIVINE_STAFF_OF_ARCHANGEL;
+        o->Scale = 0.7f;
+        if (c->MonsterIndex == MONSTER_STATUE_OF_SAINT_2)
+            weapon = MODEL_DIVINE_SWORD_OF_ARCHANGEL;
+        if (c->MonsterIndex == MONSTER_STATUE_OF_SAINT_3)
+        {
+            weapon = MODEL_DIVINE_CB_OF_ARCHANGEL;
+            o->Scale = 0.9f;
+        }
+        RenderLinkObject(0.f, 0.f, 0.f, c, w, weapon, 0, 0, true, true, 0, true, 1);
+    }
+    o->Scale = scale;
+}
+
 void RenderChristmasCompanions(CHARACTER* c, bool Translate, int Select)
 {
     OBJECT* o = &c->Object;
@@ -9746,50 +9784,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                                   BITMAP_SHINY + 1);
     }
 
-    if (c->MonsterIndex == MONSTER_RED_DRAGON)
-    {
-        PART_t* w = &c->Wing;
-        w->Type = MODEL_BOSS_HEAD;
-        w->LinkBone = 9;
-        w->CurrentAction = 1;
-        w->PriorAction = 1;
-        w->PlaySpeed = 0.2f;
-        RenderLinkObject(0.f, 0.f, -40.f, c, w, w->Type, 0, 0, false, Translate);
-
-        w->Type = MODEL_PRINCESS;
-        w->LinkBone = 61;
-        float TempScale = o->Scale;
-        vec3_t TempLight;
-        VectorCopy(c->Light, TempLight);
-        Vector(1.f, 1.f, 1.f, c->Light);
-        o->Scale = 0.9f;
-        RenderLinkObject(0.f, -40.f, 45.f, c, w, w->Type, 0, 0, false, Translate);
-        VectorCopy(TempLight, c->Light);
-        o->Scale = TempScale;
-    }
-    else if (c->MonsterIndex >= MONSTER_STATUE_OF_SAINT_1 && c->MonsterIndex <= MONSTER_STATUE_OF_SAINT_3)
-    {
-        PART_t* w = &c->Wing;
-        w->LinkBone = 1;
-        w->CurrentAction = 1;
-        w->PriorAction = 1;
-        w->PlaySpeed = 0.2f;
-        float TempScale = o->Scale;
-        o->Scale = 0.7f;
-
-        if (c->MonsterIndex == MONSTER_STATUE_OF_SAINT_1)
-            w->Type = MODEL_DIVINE_STAFF_OF_ARCHANGEL;
-        if (c->MonsterIndex == MONSTER_STATUE_OF_SAINT_2)
-            w->Type = MODEL_DIVINE_SWORD_OF_ARCHANGEL;
-        if (c->MonsterIndex == MONSTER_STATUE_OF_SAINT_3)
-        {
-            w->Type = MODEL_DIVINE_CB_OF_ARCHANGEL;
-            o->Scale = 0.9f;
-        }
-
-        RenderLinkObject(0.f, 0.f, 0.f, c, w, w->Type, 0, 0, true, true);
-        o->Scale = TempScale;
-    }
+    if (RendersWingCarriedModels(c))
+        RenderWingCarriedModels(c, Translate);
     else if (c->MonsterIndex == MONSTER_WHITE_WIZARD)
     {
         RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_BRIGHT | RENDER_EXTRA, 1.0f);
@@ -11994,8 +11990,8 @@ void UpdateAttachedParts(CHARACTER* c)
             PART_t* f = slot.part;
             const LinkPlacement placement = PlaceLinkedPart(slot.x, slot.y, slot.z, c, slot.linkBone, slot.ownerScale,
                                                             slot.type, slot.link, slot.rightHandItem);
-            AdvanceLinkedPart(c, f, slot.type, slot.link, slot.attach);
-            slot.posed = PosedAt(f, LinkedPartAction(c, f, slot.attach), placement);
+            AdvanceLinkedPart(c, f, slot.type, slot.link);
+            slot.posed = PosedAt(f, LinkedPartAction(c, f), placement);
             PoseLinkedPart(c, slot.type, slot.link, slot.posed, Engine::Object::Attachments::Bones(slot));
             SpawnSlotEffects(c, slot, placement);
         });
@@ -12007,7 +12003,7 @@ void UpdateAttachedParts(CHARACTER* c)
             PART_t* f = slot.copy.get();
             const LinkPlacement placement = PlaceLinkedPart(slot.x, slot.y, slot.z, c, slot.linkBone, slot.ownerScale,
                                                             slot.type, slot.link, slot.rightHandItem);
-            PoseLinkedPart(c, slot.type, slot.link, PosedAt(f, LinkedPartAction(c, f, slot.attach), placement),
+            PoseLinkedPart(c, slot.type, slot.link, PosedAt(f, LinkedPartAction(c, f), placement),
                            Engine::Object::Attachments::Bones(slot));
             SpawnSlotEffects(c, slot, placement);
         });
@@ -12122,6 +12118,8 @@ void UpdatePreviewCharacter(CHARACTER* c)
 void PrepareCharacterForDraw(CHARACTER* c)
 {
     OBJECT* o = &c->Object;
+
+    PrepareCarriedParts(c);
 
     // A dying Blood Castle monster's body is held to the ground.
     if (o->Type != MODEL_PLAYER && o->Kind != KIND_TRAP && c->MonsterIndex != MONSTER_ICE_QUEEN &&
@@ -15594,6 +15592,81 @@ bool AreWeaponsOnBack(const CHARACTER* c, const OBJECT* o)
     return bBindBack;
 }
 
+// Whether RenderCharacterBackItem draws weapon `index` on the back: an earlier weapon on the back keeps the later
+// ones there, ammunition always goes there, and the rest only where the weapons are bound to the back.
+bool DrawsWeaponOnBack(CHARACTER* c, const OBJECT* o, int index)
+{
+    if (o->Type != MODEL_PLAYER || c->Weapon[index].Type < 0)
+        return false;
+    const bool bindBack = AreWeaponsOnBack(c, o);
+    bool back = false;
+    for (int i = 0; i <= index; ++i)
+    {
+        int type = c->Weapon[i].Type;
+        if (type < 0)
+            continue;
+        if (i == 0 && o->Kind == KIND_NPC && gMapManager.WorldActive == WD_0LORENCIA && o->SubType >= MODEL_SKELETON1 &&
+            o->SubType <= MODEL_SKELETON3)
+        {
+            back = true;
+            type = MODEL_GOLDEN_CROSSBOW;
+        }
+        if (IsBackItem(c, type))
+            back = true;
+        if (!GameLogic::Items::IsAmmunitionModel(type) && !bindBack)
+            back = false;
+    }
+    return back;
+}
+
+// The bones the carried parts hang from and the animation they play, from the character's state: the update advances
+// them and the draw shows them, so no draw sets a part the update reads.
+void PrepareCarriedParts(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+    PART_t* w = &c->Wing;
+    if (RendersWingCarriedModels(c))
+    {
+        // What the monster carries on its wing part plays its first action.
+        w->CurrentAction = 1;
+        w->PriorAction = 1;
+        w->PlaySpeed = 0.2f;
+        return;
+    }
+    if (o->Type != MODEL_PLAYER)
+        return;
+
+    const bool flying = o->CurrentAction == PLAYER_FLY || o->CurrentAction == PLAYER_FLY_CROSSBOW;
+    if (!gMapManager.InChaosCastle() && w->Type != -1)
+    {
+        const bool cape = w->Type == MODEL_CAPE_OF_EMPEROR || w->Type == MODEL_CAPE_OF_OVERRULE;
+        w->LinkBone = cape ? 19 : 47;
+        w->PlaySpeed = flying ? (w->Type == MODEL_WING_OF_STORM ? 0.5f : 1.f) : 0.25f;
+    }
+    else if (gMapManager.InBloodCastle() && c->EtcPart >= 1 && c->EtcPart <= 3)
+    {
+        // The quest item plays on the wing part.
+        w->LinkBone = 47;
+        w->PlaySpeed = flying ? 1.f : 0.25f;
+    }
+
+    if (!gMapManager.InChaosCastle() && c->Helper.Type == MODEL_IMP)
+    {
+        c->Helper.LinkBone = 34;
+        c->Helper.PlaySpeed = 0.5f;
+    }
+
+    // A Stinger Bow on the back flaps its wings.
+    for (int i = 0; i < 2; ++i)
+    {
+        if (c->Weapon[i].Type == MODEL_STINGER_BOW && DrawsWeaponOnBack(c, o, i))
+        {
+            c->Weapon[1].CurrentAction = 2;
+            c->Weapon[1].PlaySpeed = 0.25f;
+        }
+    }
+}
+
 bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
 {
     const bool bBindBack = AreWeaponsOnBack(c, o);
@@ -15622,20 +15695,7 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
                 }
             }
 
-            if (IsBackItem(c, iType) == true)
-            {
-                bBack = true;
-            }
-
-            if (GameLogic::Items::IsAmmunitionModel(iType))
-            {
-                bBack = true;
-            }
-            else
-            {
-                if (bBindBack == false)
-                    bBack = false;
-            }
+            bBack = DrawsWeaponOnBack(c, o, i);
 
             // 			if(iBackupType == iType)
             // 			{
@@ -15649,7 +15709,7 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
                 float fAnimationFrameBackUp = w->AnimationFrame;
 
                 // Carried on the back bone, whatever the wing hangs from.
-                constexpr Engine::Object::Attachments::LinkOverride onBack{.bone = 47};
+                constexpr int backBone = 47;
                 PART_t t_Part;
 
                 if (iType >= MODEL_SWORD && iType < MODEL_SHIELD + MAX_ITEM_INDEX)
@@ -15664,11 +15724,9 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
 
                 if (iType == MODEL_STINGER_BOW)
                 {
-                    // Its wings flap on the back.
-                    constexpr Engine::Object::Attachments::LinkOverride flapping{
-                        .bone = 47, .action = 2, .playSpeed = 0.25f};
+                    // Its wings flap on the back, as PrepareCarriedParts set them.
                     RenderLinkObject(0.f, 0.f, 15.f, c, &c->Weapon[1], iType, iLevel, iOption1, true, bTranslate, 0,
-                                     true, flapping);
+                                     true, backBone);
                 }
                 else if (g_CMonkSystem.IsSwordformGloves(iType))
                     g_CMonkSystem.RenderSwordformGloves(c, iType, i, o->Alpha, bTranslate);
@@ -15678,7 +15736,7 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
                     if (i == 0)
                         bRightHandItem = true;
                     RenderLinkObject(0.f, 0.f, 15.f, c, &t_Part, iType, iLevel, iOption1, true, bTranslate, 0,
-                                     bRightHandItem, onBack);
+                                     bRightHandItem, backBone);
                 }
 
                 w->AnimationFrame = fAnimationFrameBackUp;
@@ -15697,8 +15755,6 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             int iLevel = 0;
             int iOption1 = 0;
 
-            const bool flying = o->CurrentAction == PLAYER_FLY || o->CurrentAction == PLAYER_FLY_CROSSBOW;
-            const Engine::Object::Attachments::LinkOverride questItem{.bone = 47, .playSpeed = flying ? 1.f : 0.25f};
 
             switch (c->EtcPart)
             {
@@ -15709,7 +15765,8 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
 
             if (iType != 0)
             {
-                RenderLinkObject(0.f, 0.f, 15.f, c, w, iType, iLevel, iOption1, true, bTranslate, 0, true, questItem);
+                // On the back bone, whatever the wing hangs from; it plays on the wing.
+                RenderLinkObject(0.f, 0.f, 15.f, c, w, iType, iLevel, iOption1, true, bTranslate, 0, true, 47);
             }
         }
 
@@ -15720,21 +15777,15 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             PART_t* w = &c->Wing;
             if (w->Type != -1)
             {
-                const bool flying = o->CurrentAction == PLAYER_FLY || o->CurrentAction == PLAYER_FLY_CROSSBOW;
-                Engine::Object::Attachments::LinkOverride wing{
-                    .bone = 47, .playSpeed = flying ? (w->Type == MODEL_WING_OF_STORM ? 0.5f : 1.f) : 0.25f};
-
+                // Its bone and play speed are the ones PrepareCarriedParts set.
                 switch (w->Type)
                 {
                 case MODEL_CAPE_OF_EMPEROR:
                 case MODEL_CAPE_OF_OVERRULE:
-                    wing.bone = 19;
-                    RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->ExcellentFlags, true, bTranslate, 0,
-                                     true, wing);
+                    RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->ExcellentFlags, true, bTranslate);
                     break;
                 default:
-                    RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->ExcellentFlags, false, bTranslate, 0,
-                                     true, wing);
+                    RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->ExcellentFlags, false, bTranslate);
                     break;
                 }
             }
@@ -15746,12 +15797,11 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             if (iType == MODEL_IMP)
             {
                 PART_t* w = &c->Helper;
-                constexpr Engine::Object::Attachments::LinkOverride imp{.bone = 34, .playSpeed = 0.5f};
                 iOption1 = w->ExcellentFlags;
                 if (IsImpOnRageFighterArmor(c))
-                    RenderLinkObject(20.f, -5.f, 20.f, c, w, iType, iLevel, iOption1, false, bTranslate, 0, true, imp);
+                    RenderLinkObject(20.f, -5.f, 20.f, c, w, iType, iLevel, iOption1, false, bTranslate);
                 else
-                    RenderLinkObject(20.f, 0.f, 0.f, c, w, iType, iLevel, iOption1, false, bTranslate, 0, true, imp);
+                    RenderLinkObject(20.f, 0.f, 0.f, c, w, iType, iLevel, iOption1, false, bTranslate);
             }
         }
     }

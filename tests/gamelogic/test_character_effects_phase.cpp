@@ -1052,7 +1052,29 @@ TEST_CASE("Character passes leave a standing siege gate's collision; the update 
     gMapManager.WorldActive = world;
 }
 
-TEST_CASE("Drawing a carried part sets none of its settings; the update advances it as the draw attached it [effects]")
+namespace
+{
+// Every field of a part an update or a draw could read.
+struct PartFields
+{
+    short type;
+    unsigned char linkBone;
+    unsigned short currentAction;
+    unsigned short priorAction;
+    float animationFrame;
+    float priorAnimationFrame;
+    float playSpeed;
+
+    explicit PartFields(const PART_t& part)
+        : type(part.Type), linkBone(part.LinkBone), currentAction(part.CurrentAction), priorAction(part.PriorAction),
+          animationFrame(part.AnimationFrame), priorAnimationFrame(part.PriorAnimationFrame), playSpeed(part.PlaySpeed)
+    {
+    }
+    bool operator==(const PartFields&) const = default;
+};
+} // namespace
+
+TEST_CASE("The update prepares a carried part's bone and animation; no draw pass sets them, in any order [effects]")
 {
     namespace Attachments = Engine::Object::Attachments;
     CharacterScope scope(MODEL_PLAYER);
@@ -1087,6 +1109,16 @@ TEST_CASE("Drawing a carried part sets none of its settings; the update advances
     }
     Attachments::Track(c);
 
+    // The end of the last update.
+    PrepareCarriedParts(c);
+    CHECK(c->Wing.LinkBone == 47);
+    CHECK(c->Wing.PlaySpeed == 0.25f);
+    CHECK(c->Helper.LinkBone == 34);
+    CHECK(c->Helper.PlaySpeed == 0.5f);
+    const PartFields wing(c->Wing);
+    const PartFields helper(c->Helper);
+
+    // The frame's passes, then one more that hangs the wing from a bone of its own.
     Attachments::BeginFrame();
     RepeatedDraws::CheckChangesNothing(
         [c, o]
@@ -1094,21 +1126,47 @@ TEST_CASE("Drawing a carried part sets none of its settings; the update advances
             Attachments::BeginCharacter(c);
             RenderCharacterBackItem(c, o, true);
         });
-    for (const PART_t* part : {&c->Wing, &c->Helper})
-    {
-        CHECK(part->LinkBone == 3);
-        CHECK(part->PlaySpeed == 0.7f);
-    }
+    Attachments::BeginCharacter(c);
+    RenderLinkObject(0.f, 0.f, 15.f, c, &c->Wing, MODEL_WING, 0, 0, true, true, 0, true, 19);
+    CHECK(PartFields(c->Wing) == wing);
+    CHECK(PartFields(c->Helper) == helper);
     CHECK(c->Weapon[0].LinkBone == 33);
 
     UpdatePreviewCharacter(c);
-    // Standing, the wing flaps at a quarter speed, as the draw attached it.
+    // Standing, the wing flaps at the quarter speed the update prepared, whatever the passes drew.
     CHECK(c->Wing.AnimationFrame == doctest::Approx(0.25f));
     CHECK(c->Weapon[0].LinkBone == PhoenixGloveBone(0));
 
     Attachments::Untrack(c);
     o->BoneTransform = nullptr;
     FPS_ANIMATION_FACTOR = frameFactor;
+}
+
+TEST_CASE("The Red Dragon's and the Saint statues' carried models play on a wing the update prepares [effects]")
+{
+    for (const int monster : {static_cast<int>(MONSTER_RED_DRAGON), static_cast<int>(MONSTER_STATUE_OF_SAINT_1),
+                              static_cast<int>(MONSTER_STATUE_OF_SAINT_2), static_cast<int>(MONSTER_STATUE_OF_SAINT_3)})
+    {
+        CharacterScope scope(MODEL_PLAYER);
+        CHARACTER* c = &scope.character();
+        OBJECT* o = &c->Object;
+        o->Type = MODEL_PLAYER + 1;
+        c->MonsterIndex = static_cast<EMonsterType>(monster);
+        c->Wing.Type = -1;
+        Vector(0.4f, 0.5f, 0.6f, c->Light);
+        REQUIRE(RendersWingCarriedModels(c));
+
+        PrepareCarriedParts(c);
+        CHECK(c->Wing.CurrentAction == 1);
+        CHECK(c->Wing.PriorAction == 1);
+        CHECK(c->Wing.PlaySpeed == 0.2f);
+        const PartFields wing(c->Wing);
+
+        RepeatedDraws::CheckChangesNothing([c] { RenderWingCarriedModels(c, true); });
+        CHECK(PartFields(c->Wing) == wing);
+        CHECK(o->Scale == 1.f);
+        CHECK(c->Light[0] == 0.4f);
+    }
 }
 
 TEST_CASE("Starting or stopping music while drawing is a violation [effects]")

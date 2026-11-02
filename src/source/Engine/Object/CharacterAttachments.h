@@ -13,14 +13,6 @@ struct _PART_t;
 // RenderLinkObject call in draw order, each with the part's own pose.
 namespace Engine::Object::Attachments
 {
-// How a draw attaches a part where that differs from the part's own settings; a negative value keeps the part's.
-struct LinkOverride
-{
-    int bone = -1;
-    int action = -1;
-    float playSpeed = -1.f;
-};
-
 // The animation state and placement a slot's bones were posed with.
 struct Posed
 {
@@ -48,8 +40,6 @@ struct Slot
     int renderType = 0;
     bool rightHandItem = false;
     unsigned char linkBone = 0;
-    // What the call set instead of the part's own action and play speed; the update advances the part with it.
-    LinkOverride attach;
     // The character's scale during the call; some draws change it around one part.
     float ownerScale = 1.f;
     // The character's part, or nullptr for a part the draw built for this call only.
@@ -80,8 +70,7 @@ void BeginCharacter(const CHARACTER* c);
 // The next slot of the character, recorded with this draw; nullptr for a character neither in CharactersClient nor
 // tracked, which draws its parts with the shared bones.
 Slot* Record(CHARACTER* c, _PART_t* part, int type, float x, float y, float z, int level, int option1, bool link,
-             bool translate, int renderType, bool rightHandItem, unsigned char linkBone, float ownerScale,
-             const LinkOverride& attach = {});
+             bool translate, int renderType, bool rightHandItem, unsigned char linkBone, float ownerScale);
 // The slot's own bones, MAX_BONES long.
 float (*Bones(Slot& slot))[3][4];
 // Whether the update since the last draw already advanced and posed this slot's part; the draw then reuses it.
