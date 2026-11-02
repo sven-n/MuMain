@@ -28,6 +28,8 @@ bool IsAttackSkillAvailable(ActionSkillType skill)
 namespace
 {
 constexpr int AttackSlotCount = static_cast<int>(std::tuple_size_v<decltype(ConfigData::aiSkill)>);
+static_assert(AttackSlotCount == AttackSkillRotation::SlotCount);
+constexpr int MaxNotReadyAttempts = 4;
 
 bool IsValidSkill(uint32_t skill)
 {
@@ -101,6 +103,7 @@ void AttackSkillRotation::Reset()
     m_notReadyAttempts = 0;
     m_timerDueAt.fill(0);
     m_timerSlotDue = -1;
+    m_timerNotReadyAttempts = 0;
 }
 
 ActionSkillType AttackSkillRotation::Select(const ConfigData& config, int secondsElapsed, std::size_t nearby,
@@ -143,9 +146,18 @@ ActionSkillType AttackSkillRotation::Select(const ConfigData& config, int second
 void AttackSkillRotation::Complete(GameLogic::Automation::SkillResult result)
 {
     using GameLogic::Automation::SkillResult;
-    // A refused timed cast waits for its next interval instead of claiming every tick.
-    if (m_timerSlotDue >= 0 && (result == SkillResult::Cast || result == SkillResult::Refused))
-        m_timerDueAt[m_timerSlotDue] = m_selectSeconds + m_timerInterval;
+    // A timed cast that is refused or keeps producing no action waits for its next interval
+    // instead of claiming every tick.
+    if (m_timerSlotDue >= 0)
+    {
+        const bool timerRetryExhausted =
+            result == SkillResult::NotReady && ++m_timerNotReadyAttempts >= MaxNotReadyAttempts;
+        if (result == SkillResult::Cast || result == SkillResult::Refused || timerRetryExhausted)
+        {
+            m_timerDueAt[m_timerSlotDue] = m_selectSeconds + m_timerInterval;
+            m_timerNotReadyAttempts = 0;
+        }
+    }
     m_timerSlotDue = -1;
     if (m_selectedSlot < 0)
         return;
@@ -153,7 +165,6 @@ void AttackSkillRotation::Complete(GameLogic::Automation::SkillResult result)
     // Select can skip the starting cursor. Retain the slot actually chosen,
     // including across a lost target and the walk/animation before a cast.
     m_nextSlot = m_selectedSlot;
-    constexpr int MaxNotReadyAttempts = 4;
     const bool retryExhausted = result == SkillResult::NotReady && ++m_notReadyAttempts >= MaxNotReadyAttempts;
     if (result != SkillResult::NotReady)
         m_notReadyAttempts = 0;

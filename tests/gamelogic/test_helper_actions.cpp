@@ -292,3 +292,31 @@ TEST_CASE("Ending the session stops the helper and forgets its world [helper_act
     CHECK(pickupAttempts.empty());
     CHECK(submittedCasts.empty());
 }
+
+TEST_CASE("Refused pickups back off and are given up after three requests [helper_actions]")
+{
+    HelperActionFixture fixture;
+    pickupResult = GameLogic::Automation::PickupResult::Requested;
+    fixture.Tick();
+    fixture.Tick(std::chrono::seconds(3));
+    REQUIRE(pickupAttempts.size() == 2);
+    fixture.Tick(std::chrono::seconds(3));
+    CHECK(pickupAttempts.size() == 2);
+    fixture.Tick(std::chrono::seconds(3));
+    CHECK(pickupAttempts.size() == 3);
+    fixture.Tick(std::chrono::seconds(30));
+    CHECK(pickupAttempts.size() == 3);
+}
+
+TEST_CASE("A monster standing out of hunting range is attacked again once back in range [helper_actions]")
+{
+    HelperActionFixture fixture;
+    constexpr int FarTile = HeroTile - 20;
+    fixture.hero.PositionX = FarTile;
+    fixture.Tick();
+    CHECK(submittedCasts.empty());
+    fixture.hero.PositionX = HeroTile;
+    fixture.Tick();
+    REQUIRE_FALSE(submittedCasts.empty());
+    CHECK(submittedCasts.back().second == 123);
+}

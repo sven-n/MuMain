@@ -58,4 +58,6 @@ attempt; combat and other reachable loot continue during that delay. If the
 starting position cannot be reached, combat continues and the Helper retries
 the return on later ticks. A requested pickup stays tracked until the server
 removes the drop; if the server refuses it, for example because the inventory is
-full, the Helper tries again after three seconds.
+full, the Helper tries again after three and then six seconds, and gives the drop up
+after a third refused request. Monsters that leave hunting range stay tracked but
+are not chased or counted until they are back in range.

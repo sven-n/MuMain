@@ -25,6 +25,9 @@ public:
                            std::size_t attacking);
     void Complete(GameLogic::Automation::SkillResult result);
 
+    // Matches MUHelper::ConfigData::aiSkill; checked where that type is complete.
+    static constexpr int SlotCount = 3;
+
 private:
     int SelectTriggeredSlot(const MUHelper::_PetAttackConfig& config, int secondsElapsed, std::size_t nearby,
                             std::size_t attacking);
@@ -33,8 +36,9 @@ private:
     int m_selectedSlot = -1;
     int m_notReadyAttempts = 0;
     // Helper second at which each timed slot is next due; 0 until first scheduled.
-    std::array<int, 3> m_timerDueAt{};
+    std::array<int, SlotCount> m_timerDueAt{};
     int m_timerSlotDue = -1;
+    int m_timerNotReadyAttempts = 0;
     int m_timerInterval = 0;
     int m_selectSeconds = 0;
 };

@@ -31,6 +31,7 @@ constexpr int MAX_ACTIONABLE_DISTANCE = 10;
 constexpr int DEFAULT_DURABILITY_THRESHOLD = 50;
 constexpr auto PICKUP_RETRY_DELAY = std::chrono::seconds(1);
 constexpr auto PICKUP_REQUEST_RETRY_DELAY = std::chrono::seconds(3);
+constexpr int MAX_PICKUP_REQUESTS = 3;
 
 SpinLock _targetsLock;
 SpinLock _itemsLock;
@@ -123,6 +124,7 @@ namespace MUHelper
         m_iCurrentSkill = (ActionSkillType)m_config.aiSkill[0];
         m_iCurrentItem = MAX_ITEMS;
         m_itemRetryAt.clear();
+        m_itemPickupRequests.clear();
         m_posOriginal = { Hero->PositionX, Hero->PositionY };
 
         m_iSecondsElapsed = 0;
@@ -162,6 +164,7 @@ namespace MUHelper
         _itemsLock.lock();
         m_setItems.clear();
         m_itemRetryAt.clear();
+        m_itemPickupRequests.clear();
         _itemsLock.unlock();
         m_iCurrentTarget = -1;
         m_iCurrentItem = MAX_ITEMS;
@@ -413,15 +416,21 @@ namespace MUHelper
             if (pTarget->Dead > 0 || !pTarget->Object.Live)
             {
                 DeleteTarget(iMonsterId);
-                continue;
-            }
-
-            const bool bCounterAttack = m_config.bLongRangeCounterAttack && m_setTargetsAttacking.count(iMonsterId) > 0;
-            if (!bCounterAttack && ComputeDistanceFromTarget(pTarget) > m_iHuntingDistance)
-            {
-                DeleteTarget(iMonsterId);
             }
         }
+    }
+
+    // Out-of-range monsters stay tracked: one standing still sends no packet that would add it back.
+    bool CMuHelper::IsWithinHuntingRange(int iTargetId)
+    {
+        CHARACTER* pTarget = FindCharacterByKey(iTargetId);
+        if (pTarget == nullptr)
+        {
+            return false;
+        }
+
+        const bool bCounterAttack = m_config.bLongRangeCounterAttack && m_setTargetsAttacking.count(iTargetId) > 0;
+        return bCounterAttack || ComputeDistanceFromTarget(pTarget) <= m_iHuntingDistance;
     }
 
     int CMuHelper::ActivatePet()
@@ -788,9 +797,12 @@ namespace MUHelper
         if (m_iCurrentTarget != -1)
         {
             const auto* target = FindCharacterByKey(m_iCurrentTarget);
-            if (target != nullptr && target->Object.Live && target->Dead == 0)
+            if (target == nullptr || !target->Object.Live || target->Dead > 0)
+                DeleteTarget(m_iCurrentTarget);
+            else if (IsWithinHuntingRange(m_iCurrentTarget))
                 return true;
-            DeleteTarget(m_iCurrentTarget);
+            else
+                m_iCurrentTarget = -1; // Still tracked, but no longer chased out of hunting range.
         }
         if (m_config.bLongRangeCounterAttack)
             m_iCurrentTarget = GetFarthestAttackingTarget();
@@ -839,7 +851,11 @@ namespace MUHelper
 
     ActionSkillType CMuHelper::SelectAttackSkill()
     {
-        return m_attackSkills.Select(m_config, m_iSecondsElapsed, m_setTargets.size(), m_setTargetsAttacking.size());
+        const auto inRange = [this](int iTargetId) { return IsWithinHuntingRange(iTargetId); };
+        const auto nearby = std::count_if(m_setTargets.begin(), m_setTargets.end(), inRange);
+        const auto attacking = std::count_if(m_setTargetsAttacking.begin(), m_setTargetsAttacking.end(), inRange);
+        return m_attackSkills.Select(m_config, m_iSecondsElapsed, static_cast<std::size_t>(nearby),
+                                     static_cast<std::size_t>(attacking));
     }
 
     int CMuHelper::SimulateComboAttack()
@@ -1013,10 +1029,19 @@ namespace MUHelper
         switch (result)
         {
         case PickupResult::Requested:
-            // The server's removal packet forgets the drop; a rejected pickup is retried later.
-            m_itemRetryAt[m_iCurrentItem] = m_now + PICKUP_REQUEST_RETRY_DELAY;
+        {
+            // The server's removal packet forgets the drop. A refused one (full inventory, someone else's
+            // loot) is retried with a doubling delay, then given up so it cannot keep pulling the hero back.
+            const int iRequests = ++m_itemPickupRequests[m_iCurrentItem];
+            if (iRequests >= MAX_PICKUP_REQUESTS)
+            {
+                DeleteItem(m_iCurrentItem);
+                return 1;
+            }
+            m_itemRetryAt[m_iCurrentItem] = m_now + PICKUP_REQUEST_RETRY_DELAY * (1 << (iRequests - 1));
             m_iCurrentItem = MAX_ITEMS;
             return 1;
+        }
         case PickupResult::Gone:
             DeleteItem(m_iCurrentItem);
             return 1;
@@ -1051,6 +1076,7 @@ namespace MUHelper
         _itemsLock.lock();
         m_setItems.insert(iItemId);
         m_itemRetryAt.erase(iItemId);
+        m_itemPickupRequests.erase(iItemId);
         _itemsLock.unlock();
     }
 
@@ -1059,6 +1085,7 @@ namespace MUHelper
         _itemsLock.lock();
         m_setItems.erase(iItemId);
         m_itemRetryAt.erase(iItemId);
+        m_itemPickupRequests.erase(iItemId);
         _itemsLock.unlock();
 
         if (iItemId == m_iCurrentItem)

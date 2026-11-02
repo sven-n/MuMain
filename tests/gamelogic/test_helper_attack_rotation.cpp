@@ -573,3 +573,20 @@ TEST_CASE("Zero-delay skills ignore stale delay counters as execution does [help
     CHECK(GameLogic::Automation::IsAttackSkillAvailable(ExtraOne));
     CHECK(CharacterAttribute->SkillDelay[1] == 50);
 }
+
+TEST_CASE("A timed skill that keeps producing no action yields after bounded attempts [helper_rotation]")
+{
+    SkillFixture fixture;
+    fixture.config.aiSkillCondition[1] = MUHelper::ON_TIMER;
+    fixture.config.aiSkillInterval[1] = 5;
+    CHECK(fixture.Select(0) == Primary);
+    for (int attempt = 0; attempt < 3; ++attempt)
+    {
+        REQUIRE(fixture.Select(5) == ExtraOne);
+        fixture.rotation.Complete(SkillResult::NotReady);
+    }
+    REQUIRE(fixture.Select(5) == ExtraOne);
+    fixture.rotation.Complete(SkillResult::NotReady);
+    CHECK(fixture.Select(5) != ExtraOne);
+    CHECK(fixture.Select(10) == ExtraOne);
+}

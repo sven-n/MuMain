@@ -78,6 +78,7 @@ private:
     int GetNearestTarget();
     int GetFarthestAttackingTarget();
     void CleanupTargets();
+    bool IsWithinHuntingRange(int iTargetId);
     int ComputeDistanceByRange(int iRange);
     int ComputeDistanceFromTarget(CHARACTER* pTarget);
     int ComputeDistanceBetween(POINT posA, POINT posB);
@@ -98,6 +99,7 @@ private:
     std::set<int> m_setTargetsAttacking;
     std::set<int> m_setItems;
     std::map<int, std::chrono::steady_clock::time_point> m_itemRetryAt;
+    std::map<int, int> m_itemPickupRequests;
     int m_iCurrentItem;
     int m_iCurrentTarget;
     int m_iCurrentBuffIndex;
