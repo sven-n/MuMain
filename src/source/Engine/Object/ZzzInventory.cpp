@@ -3023,7 +3023,6 @@ std::wstring GetItemDisplayName(ITEM* pItem)
     return strDisplayName;
 }
 
-OBJECT ObjectSelect;
 
 namespace
 {
@@ -3047,25 +3046,20 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
     Type = Render::Items::Display::GetDrawnModel(Type, Level);
 
     const Render::Items::Display::InventoryDisplay display = Render::Items::Display::GetInventoryDisplay(Type);
-    Vector(display.rotation[0], display.rotation[1], display.rotation[2], ObjectSelect.Angle);
+    vec3_t angle = {display.rotation[0], display.rotation[1], display.rotation[2]};
 
     // Gamble items turn slowly, and every item turns while the mouse is on it.
     if (GameLogic::Items::IsGambleItemModel(Type) && Select != 1)
     {
-        ObjectSelect.Angle[1] = WorldTime * GambleItemTurnSpeed;
+        angle[1] = WorldTime * GambleItemTurnSpeed;
     }
     if (1 == Select)
     {
-        ObjectSelect.Angle[1] = WorldTime * SelectedItemTurnSpeed;
+        angle[1] = WorldTime * SelectedItemTurnSpeed;
     }
 
-    ObjectSelect.Type = Render::Items::Display::IsDrawnOnCharacterSkeleton(Type) ? MODEL_PLAYER : Type;
-
-    BMD* b = &Models[ObjectSelect.Type];
+    BMD* b = &Models[Render::Items::Display::IsDrawnOnCharacterSkeleton(Type) ? MODEL_PLAYER : Type];
     b->CurrentAction = 0;
-    ObjectSelect.AnimationFrame = 0;
-    ObjectSelect.PriorAnimationFrame = 0;
-    ObjectSelect.PriorAction = 0;
     b->BodyHeight = display.bodyHeight;
 
     float Scale = display.scale;
@@ -3077,7 +3071,8 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
 
     VectorAdd(Position, display.offset.data(), Position);
 
-    b->Animation(BoneTransform, ObjectSelect.AnimationFrame, ObjectSelect.PriorAnimationFrame, ObjectSelect.PriorAction, ObjectSelect.Angle, ObjectSelect.HeadAngle, false, false);
+    const vec3_t headAngle = {0.f, 0.f, 0.f};
+    b->Animation(BoneTransform, 0.f, 0.f, 0, angle, headAngle, false, false);
 
     CHARACTER Armor;
     OBJECT* o = &Armor.Object;

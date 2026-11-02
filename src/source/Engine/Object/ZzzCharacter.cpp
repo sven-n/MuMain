@@ -6886,17 +6886,23 @@ LinkPlacement PlaceLinkedPart(float x, float y, float z, const CHARACTER* c, BYT
 }
 bool DrawsHeldWeapon(CHARACTER* c, int hand);
 
-// The shared item object of a part type, set up from the character the part is drawn on.
-OBJECT* ItemObjectFor(CHARACTER* c, int Type)
+// Sets up an item object of a part type from the character the part is on.
+void SetUpItemObject(OBJECT* Object, const CHARACTER* c, int Type)
 {
-    OBJECT* o = &c->Object;
-    OBJECT* Object = &g_ItemObject[Type];
+    const OBJECT* o = &c->Object;
     Object->Type = Type;
     ItemObjectAttribute(Object);
     Object->EnableShadow = o->EnableShadow;
     Object->m_bRenderShadow = o->m_bRenderShadow;
     Object->m_bySkillCount = o->m_bySkillCount;
     g_CharacterCopyBuff(Object, o);
+}
+
+// The shared item object of a part type, set up from the character the part is on; effects keep it as their owner.
+OBJECT* ItemObjectFor(CHARACTER* c, int Type)
+{
+    OBJECT* Object = &g_ItemObject[Type];
+    SetUpItemObject(Object, c, Type);
     return Object;
 }
 
@@ -7026,7 +7032,10 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     b->CurrentAction = LinkedPartAction(c, f);
     b->BodyHeight = 0.f;
 
-    OBJECT* Object = ItemObjectFor(c, Type);
+    // The draw's own copy: the shared one keeps what the update's effects set on it.
+    OBJECT item = g_ItemObject[Type];
+    SetUpItemObject(&item, c, Type);
+    OBJECT* Object = &item;
     b->LightEnable = Object->LightEnable;
     b->LightEnable = false;
 

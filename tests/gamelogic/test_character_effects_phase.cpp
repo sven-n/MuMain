@@ -761,6 +761,31 @@ TEST_CASE("Drawing a part the update has not advanced yet, again and again, adva
     CHECK(part.PriorAction == 0);
 }
 
+extern OBJECT g_ItemObject[];
+
+TEST_CASE("Drawing a held part sets up its own item object and leaves the shared one as it stands [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    CHARACTER* c = &scope.character();
+    c->Object.EnableShadow = true;
+    PART_t& part = c->Weapon[0];
+    part.Type = MODEL_SWORD;
+    OBJECT& shared = g_ItemObject[MODEL_SWORD];
+    shared.Type = MODEL_STAFF;
+    shared.EnableShadow = false;
+    Vector(1.f, 2.f, 3.f, shared.Position);
+    Vector(4.f, 5.f, 6.f, shared.Angle);
+
+    Engine::Object::Attachments::BeginFrame();
+    RenderLinkObject(10.f, 20.f, 30.f, c, &part, MODEL_SWORD, 0, 0, false, true);
+
+    CHECK(shared.Type == MODEL_STAFF);
+    CHECK_FALSE(shared.EnableShadow);
+    CHECK(shared.Position[0] == 1.f);
+    CHECK(shared.Position[2] == 3.f);
+    CHECK(shared.Angle[1] == 5.f);
+}
+
 TEST_CASE(
     "Dark Side steps in the update, once per part its draw hands over, and drawing it again steps nothing [effects]")
 {
