@@ -94,6 +94,16 @@
       }
     },
     {
+      "name": "windows-x64-in-game-tests",
+      "displayName": "Windows x64 In-game tests",
+      "description": "Player build plus the control socket and the in-game tester, no editor (docs/in-game-tests.md)",
+      "inherits": "windows-x64",
+      "cacheVariables": {
+        "ENABLE_CONTROL_SOCKET": "ON",
+        "ENABLE_IN_GAME_TESTS": "ON"
+      }
+    },
+    {
       "name": "linux-base",
       "hidden": true,
       "description": "Base configuration for native Linux builds",
@@ -133,6 +143,16 @@
       }
     },
     {
+      "name": "linux-x64-in-game-tests",
+      "displayName": "Linux x86_64 In-game tests",
+      "description": "Native Linux x64 player build plus the control socket and the in-game tester, no editor (docs/in-game-tests.md)",
+      "inherits": "linux-x64",
+      "cacheVariables": {
+        "ENABLE_CONTROL_SOCKET": "ON",
+        "ENABLE_IN_GAME_TESTS": "ON"
+      }
+    },
+    {
       "name": "macos-base",
       "hidden": true,
       "description": "Base configuration for native macOS builds",
@@ -158,6 +178,16 @@
         "ENABLE_EDITOR": "OFF",
         "ENABLE_CONTROL_SOCKET": "OFF",
         "ENABLE_IN_GAME_TESTS": "OFF"
+      }
+    },
+    {
+      "name": "macos-arm64-in-game-tests",
+      "displayName": "macOS arm64 In-game tests",
+      "description": "Native macOS Apple Silicon player build plus the control socket and the in-game tester, no editor (docs/in-game-tests.md)",
+      "inherits": "macos-arm64",
+      "cacheVariables": {
+        "ENABLE_CONTROL_SOCKET": "ON",
+        "ENABLE_IN_GAME_TESTS": "ON"
       }
     }
   ],
@@ -217,6 +247,20 @@
       "configuration": "Release"
     },
     {
+      "name": "windows-x64-in-game-tests-release",
+      "displayName": "x64 In-game tests Release",
+      "configurePreset": "windows-x64-in-game-tests",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-x64-in-game-tests-gui",
+      "displayName": "x64 In-game tests Release + window",
+      "description": "Builds like -release, then opens the in-game tester's window; the build ends when the window is closed",
+      "configurePreset": "windows-x64-in-game-tests",
+      "configuration": "Release",
+      "targets": ["InGameTestsGui"]
+    },
+    {
       "name": "linux-x64-debug",
       "displayName": "Linux x64 Debug",
       "configurePreset": "linux-x64",
@@ -241,6 +285,20 @@
       "configuration": "Release"
     },
     {
+      "name": "linux-x64-in-game-tests-release",
+      "displayName": "Linux x64 In-game tests Release",
+      "configurePreset": "linux-x64-in-game-tests",
+      "configuration": "Release"
+    },
+    {
+      "name": "linux-x64-in-game-tests-gui",
+      "displayName": "Linux x64 In-game tests Release + window",
+      "description": "Builds like -release, then opens the in-game tester's window; the build ends when the window is closed",
+      "configurePreset": "linux-x64-in-game-tests",
+      "configuration": "Release",
+      "targets": ["InGameTestsGui"]
+    },
+    {
       "name": "macos-arm64-debug",
       "displayName": "macOS arm64 Debug",
       "configurePreset": "macos-arm64",
@@ -251,6 +309,20 @@
       "displayName": "macOS arm64 Release",
       "configurePreset": "macos-arm64",
       "configuration": "Release"
+    },
+    {
+      "name": "macos-arm64-in-game-tests-release",
+      "displayName": "macOS arm64 In-game tests Release",
+      "configurePreset": "macos-arm64-in-game-tests",
+      "configuration": "Release"
+    },
+    {
+      "name": "macos-arm64-in-game-tests-gui",
+      "displayName": "macOS arm64 In-game tests Release + window",
+      "description": "Builds like -release, then opens the in-game tester's window; the build ends when the window is closed",
+      "configurePreset": "macos-arm64-in-game-tests",
+      "configuration": "Release",
+      "targets": ["InGameTestsGui"]
     }
   ]
 }
