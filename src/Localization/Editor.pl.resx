@@ -1285,20 +1285,53 @@
   <data name="Remove the model entry" xml:space="preserve">
     <value>Usuń wpis modelu</value>
   </data>
-  <data name="Item Checks" xml:space="preserve">
-    <value>Kontrola przedmiotów</value>
-  </data>
-  <data name="Check" xml:space="preserve">
-    <value>Sprawdź</value>
-  </data>
   <data name="Errors: {0}" xml:space="preserve">
     <value>Błędy: {0}</value>
+  </data>
+  <data name="Fatal: {0}" xml:space="preserve">
+    <value>Krytyczne: {0}</value>
   </data>
   <data name="Warnings: {0}" xml:space="preserve">
     <value>Ostrzeżenia: {0}</value>
   </data>
+  <data name="Data Checks" xml:space="preserve">
+    <value>Kontrola danych</value>
+  </data>
+  <data name="Check all data" xml:space="preserve">
+    <value>Sprawdź wszystko</value>
+  </data>
+  <data name="Areas" xml:space="preserve">
+    <value>Obszary:</value>
+  </data>
+  <data name="Area" xml:space="preserve">
+    <value>Obszar</value>
+  </data>
+  <data name="What" xml:space="preserve">
+    <value>Co</value>
+  </data>
+  <data name="Monster models" xml:space="preserve">
+    <value>Modele potworów</value>
+  </data>
+  <data name="Model files" xml:space="preserve">
+    <value>Pliki modeli</value>
+  </data>
+  <data name="Data checks what note" xml:space="preserve">
+    <value>Przedmioty i potwory są sprawdzane tak, jak zapisałoby je ich Zapisz; tabela plików modeli glTF, lista serwerów, efekty i wygląd — tak, jak gra czyta ich pliki przy starcie.</value>
+  </data>
+  <data name="Data checks save note" xml:space="preserve">
+    <value>Każde Zapisz odrzuca dane z krytycznymi problemami, a dane z błędami i ostrzeżeniami zapisuje.</value>
+  </data>
+  <data name="Data checks click note" xml:space="preserve">
+    <value>Kliknij problem, aby zaznaczyć to, czego dotyczy, i otworzyć jego narzędzie.</value>
+  </data>
+  <data name="The data changed since the last check; check again." xml:space="preserve">
+    <value>Dane zmieniły się od ostatniego sprawdzenia; sprawdź ponownie.</value>
+  </data>
   <data name="Error" xml:space="preserve">
     <value>Błąd</value>
+  </data>
+  <data name="Fatal" xml:space="preserve">
+    <value>Krytyczny</value>
   </data>
   <data name="Warning" xml:space="preserve">
     <value>Ostrzeżenie</value>
@@ -1309,17 +1342,8 @@
   <data name="Message" xml:space="preserve">
     <value>Komunikat</value>
   </data>
-  <data name="No errors or warnings" xml:space="preserve">
-    <value>Brak błędów i ostrzeżeń</value>
-  </data>
-  <data name="The items changed since the last check; check again." xml:space="preserve">
-    <value>Przedmioty zmieniły się od ostatniej kontroli; sprawdź ponownie.</value>
-  </data>
-  <data name="Save Items refuses data with errors and saves data with warnings." xml:space="preserve">
-    <value>Zapisz przedmioty odrzuca dane z błędami, a dane z ostrzeżeniami zapisuje.</value>
-  </data>
-  <data name="Click a problem of an item to select the item and open the tool of its field." xml:space="preserve">
-    <value>Kliknij problem przedmiotu, aby zaznaczyć przedmiot i otworzyć narzędzie jego pola.</value>
+  <data name="No fatal problems, errors or warnings" xml:space="preserve">
+    <value>Brak krytycznych problemów, błędów i ostrzeżeń</value>
   </data>
   <data name="Item Rules" xml:space="preserve">
     <value>Reguły przedmiotów</value>
@@ -1447,14 +1471,14 @@
   <data name="A name of letters and digits that no other glow color has" xml:space="preserve">
     <value>Nazwa z liter i cyfr, której nie ma żaden inny kolor poświaty</value>
   </data>
+  <data name="Colors" xml:space="preserve">
+    <value>Kolory</value>
+  </data>
   <data name="Glow Colors" xml:space="preserve">
     <value>Kolory poświaty</value>
   </data>
   <data name="The item models name these colors; the model tool picks an item's colors." xml:space="preserve">
     <value>Modele przedmiotów wskazują te kolory; narzędzie modelu wybiera kolory przedmiotu.</value>
-  </data>
-  <data name="Pick a color in the list." xml:space="preserve">
-    <value>Wybierz kolor z listy.</value>
   </data>
   <data name="Apply to the glow color" xml:space="preserve">
     <value>Zastosuj do koloru poświaty</value>
@@ -1924,26 +1948,11 @@
   <data name="Channel" xml:space="preserve">
     <value>Kanał</value>
   </data>
-  <data name="Type" xml:space="preserve">
-    <value>Typ</value>
-  </data>
   <data name="On the login screen" xml:space="preserve">
     <value>Na ekranie logowania</value>
   </data>
   <data name="Connect server" xml:space="preserve">
     <value>Connect Server</value>
-  </data>
-  <data name="Normal" xml:space="preserve">
-    <value>Normalny</value>
-  </data>
-  <data name="Non-PvP" xml:space="preserve">
-    <value>Non-PvP</value>
-  </data>
-  <data name="Gold PvP" xml:space="preserve">
-    <value>Gold PvP</value>
-  </data>
-  <data name="Gold" xml:space="preserve">
-    <value>Gold</value>
   </data>
   <data name="Sent, {0}% load" xml:space="preserve">
     <value>Wysłany, obciążenie {0}%</value>
@@ -1960,8 +1969,8 @@
   <data name="Server list order note" xml:space="preserve">
     <value>Kolejność na liście to kolejność przycisków na ekranie logowania, który od razu pokazuje każdą zmianę. Zapisz zapisuje {0}.</value>
   </data>
-  <data name="Save off after read errors" xml:space="preserve">
-    <value>Plik miał błędy przy wczytywaniu, więc lista zawiera tylko grupy, które udało się wczytać. Zapisz jest wyłączone, dopóki plik nie zostanie poprawiony, a Przywróć wczyta go ponownie; zapis usunąłby z pliku pozostałe grupy.</value>
+  <data name="Save off after a read that left something out" xml:space="preserve">
+    <value>Plik miał problemy, przez które przy wczytaniu coś zostało pominięte (zobacz problemy poniżej): grupa, typ VIP lub kolor z krytycznym problemem albo reguła, odcień, typ VIP kanału lub kolor, których lista nie mogła użyć. Zapisz jest wyłączone, dopóki plik nie zostanie poprawiony, a Przywróć nie wczyta go ponownie; zapis usunąłby lub zastąpił te elementy w pliku.</value>
   </data>
   <data name="Step add" xml:space="preserve">
     <value>Dodaj {0}</value>
@@ -1987,14 +1996,212 @@
   <data name="Step channel" xml:space="preserve">
     <value>{0}: kanał {1}</value>
   </data>
+  <data name="Groups" xml:space="preserve">
+    <value>Grupy</value>
+  </data>
+  <data name="Channel names" xml:space="preserve">
+    <value>Nazwy kanałów</value>
+  </data>
+  <data name="PvP" xml:space="preserve">
+    <value>PvP</value>
+  </data>
+  <data name="VIP" xml:space="preserve">
+    <value>VIP</value>
+  </data>
+  <data name="VIP types" xml:space="preserve">
+    <value>Typy VIP</value>
+  </data>
+  <data name="New VIP type" xml:space="preserve">
+    <value>Nowy typ VIP</value>
+  </data>
+  <data name="Pick a VIP type in the list." xml:space="preserve">
+    <value>Wybierz typ VIP z listy.</value>
+  </data>
+  <data name="VIP type ID" xml:space="preserve">
+    <value>ID</value>
+  </data>
+  <data name="VIP type ID note" xml:space="preserve">
+    <value>Identyfikator, którym kanały wskazują typ: litery i cyfry, zaczynając od małej litery. Nowe ID otrzymują też kanały z tym typem.</value>
+  </data>
+  <data name="Not a VIP type ID" xml:space="preserve">
+    <value>To nie jest ID typu VIP: litery i cyfry, zaczynając od małej litery.</value>
+  </data>
+  <data name="Another VIP type has the ID {0}." xml:space="preserve">
+    <value>Inny typ VIP ma już ID {0}.</value>
+  </data>
+  <data name="A VIP type needs a name." xml:space="preserve">
+    <value>Typ VIP musi mieć nazwę.</value>
+  </data>
+  <data name="Gray" xml:space="preserve">
+    <value>Szary</value>
+  </data>
+  <data name="Orange" xml:space="preserve">
+    <value>Pomarańczowy</value>
+  </data>
+  <data name="Silver" xml:space="preserve">
+    <value>Srebrny</value>
+  </data>
+  <data name="Remove VIP type {0}?" xml:space="preserve">
+    <value>Usunąć typ VIP {0}?</value>
+  </data>
+  <data name="VIP type used note" xml:space="preserve">
+    <value>Kanały z tym typem VIP ({0}) zostaną bez typu:</value>
+  </data>
+  <data name="VIP type rules note" xml:space="preserve">
+    <value>Reguły kolorów przycisków dla tego typu VIP ({0}) też zostaną usunięte.</value>
+  </data>
+  <data name="Texts" xml:space="preserve">
+    <value>Teksty</value>
+  </data>
+  <data name="Language" xml:space="preserve">
+    <value>Język</value>
+  </data>
+  <data name="PvP text" xml:space="preserve">
+    <value>Tekst PvP</value>
+  </data>
+  <data name="Non-PvP text" xml:space="preserve">
+    <value>Tekst bez PvP</value>
+  </data>
+  <data name="Server list button" xml:space="preserve">
+    <value>Przycisk listy serwerów</value>
+  </data>
+  <data name="Login window" xml:space="preserve">
+    <value>Okno logowania</value>
+  </data>
+  <data name="Character info" xml:space="preserve">
+    <value>Informacje o postaci</value>
+  </data>
+  <data name="Screenshot message" xml:space="preserve">
+    <value>Komunikat zrzutu ekranu</value>
+  </data>
+  <data name="Texts note" xml:space="preserve">
+    <value>Puste pole używa tekstu angielskiego, pokazanego na szaro. Każdy szablon może używać {name}, {channel}, {vip} i {pvp}; przycisk listy serwerów także {load}, a komunikat zrzutu ekranu także {character}. Pusty znika razem z jedną sąsiednią spacją, a puste nawiasy też znikają.</value>
+  </data>
+  <data name="Not a placeholder of this template: {0}" xml:space="preserve">
+    <value>To nie jest symbol zastępczy tego szablonu: {0}</value>
+  </data>
+  <data name="Preview note" xml:space="preserve">
+    <value>Każde połączenie PvP i typu VIP dla kanału 1 zaznaczonej grupy, w języku wybranym powyżej. {load} przycisku jest pusty, jak dla serwera, do którego można dołączyć.</value>
+  </data>
+  <data name="Load" xml:space="preserve">
+    <value>Obciążenie</value>
+  </data>
+  <data name="Load note" xml:space="preserve">
+    <value>Jak wygląda przycisk pełnego serwera (obciążenie 100 % i więcej) lub przeciążonego (128 i więcej): jego tekst {load} oraz dziesięć segmentów paska obciążenia po 10 %, od koloru bazowego do koloru pełnego. Domyślny to własny kolor motywu; dla tekstu obciążenia — kolor przycisku.</value>
+  </data>
+  <data name="Load bar" xml:space="preserve">
+    <value>Pasek obciążenia</value>
+  </data>
+  <data name="Base color" xml:space="preserve">
+    <value>Bazowy</value>
+  </data>
+  <data name="Full color" xml:space="preserve">
+    <value>Pełny</value>
+  </data>
+  <data name="Unlit color" xml:space="preserve">
+    <value>Zgaszony</value>
+  </data>
+  <data name="Full server" xml:space="preserve">
+    <value>Pełny serwer</value>
+  </data>
+  <data name="Overloaded server" xml:space="preserve">
+    <value>Przeciążony serwer</value>
+  </data>
+  <data name="Full text" xml:space="preserve">
+    <value>Tekst pełnego</value>
+  </data>
+  <data name="Overloaded text" xml:space="preserve">
+    <value>Tekst przeciążonego</value>
+  </data>
+  <data name="Bold" xml:space="preserve">
+    <value>Pogrubienie</value>
+  </data>
+  <data name="Italic" xml:space="preserve">
+    <value>Kursywa</value>
+  </data>
+  <data name="Load preview note" xml:space="preserve">
+    <value>Przycisk przy obciążeniu 35 %, pełny i przeciążony, z paskiem w każdym motywie i tekstem obciążenia na pasku. Pogrubienie i kursywa widać tylko w grze.</value>
+  </data>
+  <data name="Load {0}%" xml:space="preserve">
+    <value>obciążenie {0} %</value>
+  </data>
+  <data name="Step load" xml:space="preserve">
+    <value>Obciążenie: {0}</value>
+  </data>
+  <data name="Step add VIP type" xml:space="preserve">
+    <value>Dodaj typ VIP {0}</value>
+  </data>
+  <data name="Step remove VIP type" xml:space="preserve">
+    <value>Usuń typ VIP {0}</value>
+  </data>
+  <data name="Step move VIP type" xml:space="preserve">
+    <value>Przenieś typ VIP {0}</value>
+  </data>
+  <data name="Step text" xml:space="preserve">
+    <value>Tekst: {0}</value>
+  </data>
+  <data name="Button colors" xml:space="preserve">
+    <value>Kolory przycisków</value>
+  </data>
+  <data name="Button colors note" xml:space="preserve">
+    <value>Spośród reguł pasujących do kanału jego przycisk koloruje najbardziej szczegółowa: reguła z typem VIP wygrywa z regułą dla dowolnego typu VIP lub bez typu, która wygrywa z regułą bez tego ustawienia, a reguła z PvP wygrywa z regułą bez PvP. Kolejność reguł nie ma znaczenia.</value>
+  </data>
+  <data name="Any VIP type" xml:space="preserve">
+    <value>Dowolny typ VIP</value>
+  </data>
+  <data name="On" xml:space="preserve">
+    <value>Wł.</value>
+  </data>
+  <data name="Off" xml:space="preserve">
+    <value>Wył.</value>
+  </data>
+  <data name="Color" xml:space="preserve">
+    <value>Kolor</value>
+  </data>
+  <data name="Add rule" xml:space="preserve">
+    <value>Dodaj regułę</value>
+  </data>
+  <data name="Another rule fits the same channels." xml:space="preserve">
+    <value>Inna reguła pasuje do tych samych kanałów.</value>
+  </data>
+  <data name="Every VIP type and PvP setting has a rule." xml:space="preserve">
+    <value>Każdy typ VIP i ustawienie PvP ma już regułę.</value>
+  </data>
+  <data name="Colors note" xml:space="preserve">
+    <value>Własne kolory listy to gałąź Lista serwerów w oknie Kolory.</value>
+  </data>
+  <data name="New color" xml:space="preserve">
+    <value>Nowy kolor</value>
+  </data>
+  <data name="Color ID note" xml:space="preserve">
+    <value>Identyfikator, którym reguły wskazują kolor: litery i cyfry, zaczynając od małej litery, inny niż nazwy kolorów motywu (default, gray, orange, silver). Nowe ID otrzymują też reguły z tym kolorem.</value>
+  </data>
+  <data name="Not a free color ID" xml:space="preserve">
+    <value>To nie jest wolne ID koloru: litery i cyfry, zaczynając od małej litery, inne niż nazwa koloru motywu lub innego koloru.</value>
+  </data>
+  <data name="Step add color" xml:space="preserve">
+    <value>Dodaj kolor {0}</value>
+  </data>
+  <data name="Step remove color" xml:space="preserve">
+    <value>Usuń kolor {0}</value>
+  </data>
+  <data name="Step shade" xml:space="preserve">
+    <value>{0}: odcień</value>
+  </data>
+  <data name="Step add button color rule" xml:space="preserve">
+    <value>Dodaj regułę koloru przycisku</value>
+  </data>
+  <data name="Step remove button color rule" xml:space="preserve">
+    <value>Usuń regułę koloru przycisku</value>
+  </data>
+  <data name="Step button color rule" xml:space="preserve">
+    <value>Reguła koloru przycisku {0}</value>
+  </data>
   <data name="Monster Browser" xml:space="preserve">
     <value>Przeglądarka potworów</value>
   </data>
   <data name="Monster Translations" xml:space="preserve">
     <value>Tłumaczenia potworów</value>
-  </data>
-  <data name="Monster Checks" xml:space="preserve">
-    <value>Kontrola potworów</value>
   </data>
   <data name="The monsters changed since this step; it is not undone." xml:space="preserve">
     <value>Potwory zmieniły się od tego kroku; nie zostanie on cofnięty.</value>
@@ -2104,18 +2311,6 @@
   <data name="Monster names not exported" xml:space="preserve">
     <value>Nie wszystkie pliki zostały zapisane. Zobacz konsolę.</value>
   </data>
-  <data name="Monster" xml:space="preserve">
-    <value>Potwór</value>
-  </data>
-  <data name="The monsters changed since the last check; check again." xml:space="preserve">
-    <value>Potwory zmieniły się od ostatniej kontroli; sprawdź ponownie.</value>
-  </data>
-  <data name="Save Monsters refuses data with errors and saves data with warnings." xml:space="preserve">
-    <value>Zapisz potwory odrzuca dane z błędami, a dane z ostrzeżeniami zapisuje.</value>
-  </data>
-  <data name="Monster checks click note" xml:space="preserve">
-    <value>Kliknij problem potwora, aby zaznaczyć potwora i otworzyć narzędzie jego pola.</value>
-  </data>
   <data name="Item Sync" xml:space="preserve">
     <value>Synchronizacja przedmiotów</value>
   </data>
@@ -2141,7 +2336,7 @@
     <value>Z OpenMU, serwer {0}</value>
   </data>
   <data name="The diff counts" xml:space="preserve">
-    <value>Przedmioty: dodane {0}, zmienione {1}, usunięte {2}; wpisy wzorów: {3}</value>
+    <value>Przedmioty: dodane {0}, zmienione {1}; wpisy wzorów: {2}</value>
   </data>
   <data name="Check all" xml:space="preserve">
     <value>Zaznacz wszystkie</value>
@@ -2467,6 +2662,21 @@
   <data name="Play animation" xml:space="preserve">
     <value>Odtwórz</value>
   </data>
+  <data name="Play" xml:space="preserve">
+    <value>Odtwórz</value>
+  </data>
+  <data name="Play next attack" xml:space="preserve">
+    <value>Odtwórz następny atak</value>
+  </data>
+  <data name="Play next attack note" xml:space="preserve">
+    <value>Animacja następnego ataku, którego nie odtwarza żaden wpis umiejętności, liczona tak, jak gra liczy dla jednego potwora od jego utworzenia.</value>
+  </data>
+  <data name="Played {0}" xml:space="preserve">
+    <value>Odtworzono {0}</value>
+  </data>
+  <data name="Plays it once in the Monster Preview, with the attack sounds." xml:space="preserve">
+    <value>Odtwarza ją raz w Podglądzie potwora, z dźwiękami ataku.</value>
+  </data>
   <data name="Play this sound" xml:space="preserve">
     <value>Odtwórz</value>
   </data>
@@ -2599,59 +2809,32 @@
   <data name="Clear skill after attack" xml:space="preserve">
     <value>po własnym ataku: gdy się skończy albo przerwie go inny atak lub trafienie (afterAttack)</value>
   </data>
-  <data name="Reader Hellas" xml:space="preserve">
-    <value>obsługa Hellas, na każdej mapie</value>
-  </data>
   <data name="Reader Battle Castle guards" xml:space="preserve">
-    <value>obsługa Battle Castle, według modeli strażników, na każdej mapie</value>
-  </data>
-  <data name="Reader Hunting Ground" xml:space="preserve">
-    <value>obsługa Hunting Ground, na jej mapie</value>
-  </data>
-  <data name="Reader Aida" xml:space="preserve">
-    <value>obsługa Aida, na Aida</value>
-  </data>
-  <data name="Reader Crywolf and Devil Square" xml:space="preserve">
-    <value>obsługa Crywolf, na Crywolf i w Devil Square</value>
-  </data>
-  <data name="Reader Kanturu 1st" xml:space="preserve">
-    <value>obsługa Kanturu 1st, na Kanturu 1st</value>
-  </data>
-  <data name="Reader Kanturu 2nd and 3rd" xml:space="preserve">
-    <value>obsługa Kanturu 2nd, na Kanturu 2nd i 3rd</value>
+    <value>stan ataku strażników Battle Castle (AI), według ich modeli, na każdej mapie</value>
   </data>
   <data name="Reader Kanturu 3rd" xml:space="preserve">
-    <value>obsługa Kanturu 3rd, na Kanturu 3rd</value>
-  </data>
-  <data name="Reader Balgass barracks" xml:space="preserve">
-    <value>obsługa Balgass Barracks, w Barracks i w Refuge</value>
-  </data>
-  <data name="Reader Illusion Temple" xml:space="preserve">
-    <value>obsługa Illusion Temple, w Illusion Temple</value>
-  </data>
-  <data name="Reader Swamp of Quiet" xml:space="preserve">
-    <value>obsługa Swamp of Quiet, według modeli, na jej mapie</value>
+    <value>scena Mayi, na Kanturu 3rd</value>
   </data>
   <data name="Reader Raklion" xml:space="preserve">
-    <value>obsługa Raklion, na Raklion i mapie jego bossa</value>
+    <value>wysokość, dźwięki i efekty Selupana, na Raklion i mapie jego bossa</value>
   </data>
   <data name="Reader Empire Guardian" xml:space="preserve">
-    <value>obsługa Empire Guardian, na czterech mapach Empire Guardian</value>
+    <value>furia bossów (uruchamia ją umiejętność Berserker, w niej odtwarza się pojawienie), na czterech mapach Empire Guardian</value>
   </data>
   <data name="Reader Empire Guardian 2" xml:space="preserve">
-    <value>obsługa Empire Guardian 2, na jej mapie</value>
+    <value>furia bossa, na Empire Guardian 2</value>
   </data>
   <data name="Reader Empire Guardian 3" xml:space="preserve">
-    <value>obsługa Empire Guardian 3, na jej mapie</value>
+    <value>furia bossa, na Empire Guardian 3</value>
   </data>
   <data name="Reader Empire Guardian 4" xml:space="preserve">
-    <value>obsługa Empire Guardian 4, na jej mapie</value>
+    <value>furia bossów, na Empire Guardian 4</value>
   </data>
   <data name="Reader traps" xml:space="preserve">
-    <value>SetPlayerAttack, według modeli pułapek; ich efekty i dźwięki zostają w kodzie</value>
+    <value>efekty pułapek, według modeli pułapek</value>
   </data>
-  <data name="Reader Bali" xml:space="preserve">
-    <value>SetPlayerAttack, według modelu Balego</value>
+  <data name="Map code that also runs" xml:space="preserve">
+    <value>Kod mapy, który też działa:</value>
   </data>
   <data name="Player shaped monsters choose a player attack" xml:space="preserve">
     <value>Potwór w kształcie gracza wybiera atak gracza ze swojego wyposażenia; ataki go nie dotyczą.</value>
@@ -2674,12 +2857,6 @@
   <data name="Remove the attacks" xml:space="preserve">
     <value>Usuń ataki</value>
   </data>
-  <data name="No code reads these attacks." xml:space="preserve">
-    <value>Żadna obsługa nie czyta tych ataków: nic nie robią, dopóki kod ich nie odczyta.</value>
-  </data>
-  <data name="Read by" xml:space="preserve">
-    <value>Czytane przez:</value>
-  </data>
   <data name="Monster skills note" xml:space="preserve">
     <value>Umiejętność potwora z pakietu 0x69; gra odtwarza atak dla umiejętności od 1 do 77.</value>
   </data>
@@ -2700,6 +2877,45 @@
   </data>
   <data name="A draw" xml:space="preserve">
     <value>Losowanie</value>
+  </data>
+  <data name="A rotation" xml:space="preserve">
+    <value>Kolejka</value>
+  </data>
+  <data name="The generic pattern" xml:space="preserve">
+    <value>Wzorzec ogólny (atak 1, atak 2, atak 2)</value>
+  </data>
+  <data name="Played in turn, counted for each monster from its creation." xml:space="preserve">
+    <value>Odtwarzane po kolei, liczone dla każdego potwora od jego utworzenia.</value>
+  </data>
+  <data name="Add an animation" xml:space="preserve">
+    <value>Dodaj animację</value>
+  </data>
+  <data name="Map" xml:space="preserve">
+    <value>Mapa</value>
+  </data>
+  <data name="All maps" xml:space="preserve">
+    <value>Wszystkie mapy</value>
+  </data>
+  <data name="Add a map variant" xml:space="preserve">
+    <value>Dodaj wariant mapy</value>
+  </data>
+  <data name="Plays on" xml:space="preserve">
+    <value>Działa na</value>
+  </data>
+  <data name="No map yet" xml:space="preserve">
+    <value>jeszcze bez mapy</value>
+  </data>
+  <data name="Pick the maps of the variant; until then Save refuses the monsters." xml:space="preserve">
+    <value>Wybierz mapy wariantu; do tego czasu Zapisz odrzuca potwory.</value>
+  </data>
+  <data name="Variant maps in another variant" xml:space="preserve">
+    <value>{0}: inny wariant też ją wskazuje; dopóki dwa warianty wskazują tę samą mapę, Zapisz odrzuca potwory.</value>
+  </data>
+  <data name="On its maps the variant attacks instead of the monster." xml:space="preserve">
+    <value>Na swoich mapach ataki wariantu zastępują ataki potwora.</value>
+  </data>
+  <data name="Remove the map variant" xml:space="preserve">
+    <value>Usuń wariant mapy</value>
   </data>
   <data name="Clear the monster skill" xml:space="preserve">
     <value>Wyczyść umiejętność potwora</value>
@@ -2784,5 +3000,215 @@
   </data>
   <data name="Preview volume note" xml:space="preserve">
     <value>Głośność podglądów dźwięków w narzędziach potworów (Odtwórz, dźwięki podglądu). Głośność dźwięku w grze zostaje bez zmian i nie jest zapisywana.</value>
+  </data>
+  <data name="Taken by the item {0}" xml:space="preserve">
+    <value>Zajęte przez przedmiot {0}</value>
+  </data>
+  <data name="Taken by a model without an item {0}" xml:space="preserve">
+    <value>Zajęte przez model bez przedmiotu: {0}</value>
+  </data>
+  <data name="The code calls it {0}" xml:space="preserve">
+    <value>Kod nazywa go {0}</value>
+  </data>
+  <data name="The Item Browser lists it as No item at this number" xml:space="preserve">
+    <value>Przeglądarka przedmiotów pokazuje go jako „Brak przedmiotu pod tym numerem”</value>
+  </data>
+  <data name="Entry without a name" xml:space="preserve">
+    <value>Wpis bez nazwy</value>
+  </data>
+  <data name="Taken by an entry without a name" xml:space="preserve">
+    <value>Zajęte przez wpis bez nazwy</value>
+  </data>
+  <data name="Its model {0}" xml:space="preserve">
+    <value>Jego model: {0}</value>
+  </data>
+  <data name="The Item Browser lists it as Entry without a name" xml:space="preserve">
+    <value>Przeglądarka przedmiotów pokazuje go jako „Wpis bez nazwy”</value>
+  </data>
+  <data name="Update from server" xml:space="preserve">
+    <value>Aktualizuj z serwera</value>
+  </data>
+  <data name="Admin panel address" xml:space="preserve">
+    <value>Adres panelu admina</value>
+  </data>
+  <data name="Update from {0}" xml:space="preserve">
+    <value>Aktualizuj z {0}</value>
+  </data>
+  <data name="Downloading {0}" xml:space="preserve">
+    <value>Pobieranie {0} ...</value>
+  </data>
+  <data name="What Update from server does" xml:space="preserve">
+    <value>Aktualizuj z serwera pobiera przedmioty serwera OpenMU z jego panelu admina i pokazuje, czym różnią się od przedmiotów klienta, tak jak Import. Wpisz klucz API panelu admina; Zapamiętaj przechowuje go dla tego adresu w magazynie kluczy systemu. Bez klucza pole wypełnia zmienna środowiskowa {0}.</value>
+  </data>
+  <data name="Enter the address of the OpenMU admin panel" xml:space="preserve">
+    <value>Wpisz adres panelu admina OpenMU, np. https://admin.example.org lub http://localhost:8080.</value>
+  </data>
+  <data name="The admin panel address must be https" xml:space="preserve">
+    <value>Adres panelu admina musi zaczynać się od https://; http:// działa tylko dla tego komputera (localhost, 127.0.0.1, [::1]).</value>
+  </data>
+  <data name="The admin panel could not be reached ({0})" xml:space="preserve">
+    <value>Nie udało się połączyć z panelem admina ({0}).</value>
+  </data>
+  <data name="The api key may not download the items" xml:space="preserve">
+    <value>Ten klucz API nie może pobierać przedmiotów (403): potrzebuje roli Viewer, a panel admina potrzebuje użytkownika.</value>
+  </data>
+  <data name="The admin panel has no item exchange" xml:space="preserve">
+    <value>Panel admina nie ma pliku wymiany przedmiotów (404): potrzebny jest nowszy OpenMU.</value>
+  </data>
+  <data name="Too many requests, try again in a minute" xml:space="preserve">
+    <value>Za dużo żądań (429): spróbuj ponownie za minutę.</value>
+  </data>
+  <data name="The admin panel answered with http status {0}" xml:space="preserve">
+    <value>Panel admina odpowiedział statusem HTTP {0}.</value>
+  </data>
+  <data name="The update was cancelled" xml:space="preserve">
+    <value>Aktualizacja została anulowana.</value>
+  </data>
+  <data name="The file does not carry all fields of an item, it is not added" xml:space="preserve">
+    <value>Plik nie zawiera wszystkich pól przedmiotu: nie zostanie on dodany.</value>
+  </data>
+  <data name="Every item of the file matches the client" xml:space="preserve">
+    <value>Każdy przedmiot z pliku zgadza się z klientem.</value>
+  </data>
+  <data name="Items only in the client {0} stay unless checked" xml:space="preserve">
+    <value>Przedmioty tylko w kliencie: {0}. Zostają bez zmian, chyba że zaznaczysz je na liście poniżej.</value>
+  </data>
+  <data name="Only in the client ({0}), not on the server" xml:space="preserve">
+    <value>Tylko w kliencie ({0}), nie na serwerze</value>
+  </data>
+  <data name="Only in the client ({0}), not in the file" xml:space="preserve">
+    <value>Tylko w kliencie ({0}), nie w pliku</value>
+  </data>
+  <data name="Copy as Markdown" xml:space="preserve">
+    <value>Kopiuj jako Markdown</value>
+  </data>
+  <data name="Copied {0} rows" xml:space="preserve">
+    <value>Skopiowano wiersze: {0}</value>
+  </data>
+  <data name="Copies the list as a Markdown table" xml:space="preserve">
+    <value>Kopiuje listę jako tabelę Markdown (grupa, numer i angielska nazwa każdego przedmiotu), np. do zgłoszenia na GitHubie.</value>
+  </data>
+  <data name="It removes 0 items from the client" xml:space="preserve">
+    <value>Usuwa z klienta przedmioty ({0}) razem z ich modelami. Cofnij je przywraca.</value>
+  </data>
+  <data name="Api key" xml:space="preserve">
+    <value>Klucz API</value>
+  </data>
+  <data name="Remember" xml:space="preserve">
+    <value>Zapamiętaj</value>
+  </data>
+  <data name="Keeps the key for this address in {0}" xml:space="preserve">
+    <value>Przechowuje klucz dla tego adresu w: {0}, nie w pliku.</value>
+  </data>
+  <data name="This build cannot keep the key" xml:space="preserve">
+    <value>Ta wersja nie może przechować klucza: przy budowaniu MuEditora nie znaleziono libsecret (systemowego magazynu kluczy). Klucz zostaje do zamknięcia edytora.</value>
+  </data>
+  <data name="The key could not be stored in {0}" xml:space="preserve">
+    <value>Nie udało się zapisać klucza w: {0}.</value>
+  </data>
+  <data name="the Windows Credential Manager" xml:space="preserve">
+    <value>Menedżer poświadczeń Windows</value>
+  </data>
+  <data name="the macOS Keychain" xml:space="preserve">
+    <value>Pęk kluczy macOS</value>
+  </data>
+  <data name="the system keyring" xml:space="preserve">
+    <value>systemowy magazyn kluczy</value>
+  </data>
+  <data name="Enter an api key of the admin panel {0}" xml:space="preserve">
+    <value>Wpisz klucz API panelu admina (jego strona kluczy API; wystarczy rola Viewer) albo ustaw zmienną środowiskową {0} przed uruchomieniem edytora.</value>
+  </data>
+  <data name="The admin panel does not know the api key" xml:space="preserve">
+    <value>Panel admina nie zna tego klucza API (401).</value>
+  </data>
+  <data name="From the server" xml:space="preserve">
+    <value>Z serwera</value>
+  </data>
+  <data name="Not saved yet: the changes are only in the editor" xml:space="preserve">
+    <value>Jeszcze nie zapisano: zmiany są tylko w edytorze, dopóki nie zapiszesz przedmiotów.</value>
+  </data>
+  <data name="New folder" xml:space="preserve">
+    <value>Nowy folder</value>
+  </data>
+  <data name="Folder name" xml:space="preserve">
+    <value>Nazwa folderu</value>
+  </data>
+  <data name="A folder name of 1 to 32 characters that no other folder here has." xml:space="preserve">
+    <value>Nazwa folderu od 1 do 32 znaków, której nie ma tu żaden inny folder.</value>
+  </data>
+  <data name="New color folder" xml:space="preserve">
+    <value>Nowy folder kolorów</value>
+  </data>
+  <data name="Rename a color folder" xml:space="preserve">
+    <value>Zmień nazwę folderu kolorów</value>
+  </data>
+  <data name="Remove a color folder" xml:space="preserve">
+    <value>Usuń folder kolorów</value>
+  </data>
+  <data name="Move a color folder" xml:space="preserve">
+    <value>Przenieś folder kolorów</value>
+  </data>
+  <data name="Move a color" xml:space="preserve">
+    <value>Przenieś kolor</value>
+  </data>
+  <data name="Colors tree note" xml:space="preserve">
+    <value>Gałąź główna zawiera kolory jednego zastosowania. Foldery tylko je porządkują: przeciągnij kolor lub folder na folder albo na jego gałąź główną. Kolor zostaje w swojej gałęzi.</value>
+  </data>
+  <data name="Folder note" xml:space="preserve">
+    <value>Usunięcie folderu przenosi jego zawartość do folderu nadrzędnego.</value>
+  </data>
+  <data name="It holds {0} colors and {1} folders." xml:space="preserve">
+    <value>Zawiera kolory: {0} i foldery: {1}.</value>
+  </data>
+  <data name="Folders go at most {0} levels deep." xml:space="preserve">
+    <value>Foldery mogą mieć najwyżej {0} poziomów zagnieżdżenia.</value>
+  </data>
+  <data name="Edit colors..." xml:space="preserve">
+    <value>Edytuj kolory...</value>
+  </data>
+  <data name="Server list colors note" xml:space="preserve">
+    <value>Własne kolory listy, każdy z odcieniem dla każdego motywu. Reguły kolorów przycisków i obciążenie wskazują je po ID; zapisuje je Zapisz w oknie Lista serwerów.</value>
+  </data>
+  <data name="Remove a color" xml:space="preserve">
+    <value>Usuń kolor</value>
+  </data>
+  <data name="Remove unused colors" xml:space="preserve">
+    <value>Usuń nieużywane kolory</value>
+  </data>
+  <data name="Apply to the color" xml:space="preserve">
+    <value>Zastosuj do koloru</value>
+  </data>
+  <data name="Change a color" xml:space="preserve">
+    <value>Zmień kolor</value>
+  </data>
+  <data name="Used by {0} rules and load parts" xml:space="preserve">
+    <value>Używany przez reguły i części obciążenia: {0}</value>
+  </data>
+  <data name="The change reaches these {0} rules and load parts:" xml:space="preserve">
+    <value>Zmiana obejmie te reguły i części obciążenia ({0}):</value>
+  </data>
+  <data name="No rule and no load part uses these colors: {0}" xml:space="preserve">
+    <value>Żadna reguła ani część obciążenia nie używa tych kolorów: {0}</value>
+  </data>
+  <data name="Show offline servers in the game" xml:space="preserve">
+    <value>Pokaż w grze serwery offline</value>
+  </data>
+  <data name="Their load" xml:space="preserve">
+    <value>Ich obciążenie</value>
+  </data>
+  <data name="Offline servers note" xml:space="preserve">
+    <value>Tylko w edytorze: ekran logowania pokazuje też każdy kanał od 1 do 20 każdej grupy, którego Connect Server nie wysłał, z tym obciążeniem, żeby było widać jego nazwę, kolor i pasek obciążenia. Nie można do niego dołączyć.</value>
+  </data>
+  <data name="Only the editor shows this server; the connect server did not send it." xml:space="preserve">
+    <value>Ten serwer pokazuje tylko edytor; Connect Server go nie wysłał.</value>
+  </data>
+  <data name="from {0}" xml:space="preserve">
+    <value>z {0}</value>
+  </data>
+  <data name="Could not write the tokens.ini of: {0}" xml:space="preserve">
+    <value>Nie udało się zapisać tokens.ini dla: {0}</value>
+  </data>
+  <data name="Theme color note" xml:space="preserve">
+    <value>Kolor motywu: ustawia go tokens.ini w folderze każdego motywu, a motyw oparty na innym przejmuje jego wartość, dopóki nie ustawi własnej. Zastosuj od razu zapisuje tokens.ini zmienionych motywów i gra przerysowuje się z nimi; Cofnij tego nie wycofuje.</value>
   </data>
 </root>

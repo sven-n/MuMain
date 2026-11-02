@@ -5908,7 +5908,7 @@
     <value>Kanturu</value>
   </data>
   <data name="Kanturu3" xml:space="preserve">
-    <value>Ruiny Kanturu</value>
+    <value>Kanturu Relics</value>
   </data>
   <data name="Refinery Tower" xml:space="preserve">
     <value>Refinery Tower</value>
@@ -9251,6 +9251,12 @@
   </data>
   <data name="ChatCommandsUnknownCommand" xml:space="preserve">
     <value>Ta komenda nie jest już dostępna.</value>
+  </data>
+  <data name="ChatCommandsValueOutOfRange" xml:space="preserve">
+    <value>Najpierw popraw wartości zaznaczone na czerwono.</value>
+  </data>
+  <data name="ChatCommandsOwnValue" xml:space="preserve">
+    <value>własna</value>
   </data>
   <data name="KeepFlightEquipmentInIcarus" xml:space="preserve">
     <value>W Icarus nie możesz zdjąć ostatnich skrzydeł ani latającego wierzchowca.</value>
