@@ -33,13 +33,12 @@ enum class MoveStage
     SharedCodeOnly,
 };
 
-// The drawing: a registry handler, the case of RenderEffects' switch, the
+// The drawing: the case of RenderEffects' switch, the
 // switch's default that draws the skill models, only the case of
 // RenderEffectShadows that draws on the ground, or not drawn (most texture
 // effects only create sprites, particles or joints).
 enum class RenderStage
 {
-    Handler,
     Switch,
     DrawnAsModel,
     OnGround,
@@ -49,8 +48,8 @@ enum class RenderStage
 constexpr std::array<CreateStage, 5> CreateStages = {CreateStage::Data, CreateStage::Hook, CreateStage::DataThenHook,
                                                      CreateStage::Switch, CreateStage::SetupOnly};
 constexpr std::array<MoveStage, 3> MoveStages = {MoveStage::Handler, MoveStage::Switch, MoveStage::SharedCodeOnly};
-constexpr std::array<RenderStage, 5> RenderStages = {
-    RenderStage::Handler, RenderStage::Switch, RenderStage::DrawnAsModel, RenderStage::OnGround, RenderStage::NotDrawn};
+constexpr std::array<RenderStage, 4> RenderStages = {RenderStage::Switch, RenderStage::DrawnAsModel,
+                                                     RenderStage::OnGround, RenderStage::NotDrawn};
 
 struct EffectStages
 {

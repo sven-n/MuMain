@@ -7861,13 +7861,6 @@ void RenderEffects(bool bRenderBlendMesh)
                     //if ( (o->Position[2]+o->BoundingBoxMax[2])<350.f ) continue;
                 }
 
-                // Registry-driven rendering. Effects with a render handler draw
-                // through it; everything else falls to the legacy switch.
-                if (const Render::Effects::EffectDescriptor* desc = Render::Effects::Lookup(o->Type); desc && desc->render)
-                {
-                    desc->render(o);
-                }
-                else
                 switch (o->Type)
                 {
                 case MODEL_DRAGON:
@@ -8637,9 +8630,6 @@ static void SpawnGaionSwordLights(OBJECT* o)
 // The sprites and steps of the effects RenderEffects draws, for the effects the last frame drew.
 static void UpdateDrawnEffectSprites(OBJECT* o)
 {
-    if (const Render::Effects::EffectDescriptor* desc = Render::Effects::Lookup(o->Type); desc && desc->render)
-        return;
-
     switch (o->Type)
     {
     case MODEL_EFFECT_FLAME_STRIKE:

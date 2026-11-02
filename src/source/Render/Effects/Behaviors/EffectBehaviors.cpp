@@ -7,11 +7,6 @@
 
 namespace Render::Effects::Behaviors
 {
-    void RenderDefault(OBJECT* o)
-    {
-        RenderObject(o);
-    }
-
     // MODEL_MAYASTONE4 / MODEL_MAYASTONE5: launch a stone with a random lifetime,
     // size, spin and gravity, its initial direction rotated by the random spin.
     // The rand() draws happen in the original order so the sequence is preserved.
