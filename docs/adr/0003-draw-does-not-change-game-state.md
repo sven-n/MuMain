@@ -117,10 +117,11 @@ drawer, and the renderer applies the active look per draw.
   bones in as an argument.
 - An object that owns a pose buffer releases it (`Pose::Release`) before its
   slot is reused.
-- A draw that attaches a part differently from the part's own settings (a
-  bone, an action, a play speed) passes them to `RenderLinkObject` as a
-  `LinkOverride`; it does not set the part. The update advances the part with
-  what the last draw attached it with.
+- The update sets every carried part's bone and animation from the
+  character's state (`PrepareCarriedParts`); a draw reads them and passes
+  only a bone it hangs a part from when that differs (`RenderLinkObject`'s
+  `linkBone`). No draw sets a part the update advances, so no pass can choose
+  how the next update advances it.
 - Visibility, drawn-frame marks and pick boxes come from the cull at the end
   of the update. A draw may still set its own parameters on the object it is
   drawing and put them back (a mesh to hide, a light for one part); D5 turns
