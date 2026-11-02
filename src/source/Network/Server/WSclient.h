@@ -1207,7 +1207,7 @@ typedef struct
 typedef struct {
     PBMSG_HEADER Header;
     BYTE         SubCode;
-    BYTE         Reserved;
+    BYTE Reserved;
     WORD         Time;
 } PRECEIVE_SOCCER_TIME, * LPPRECEIVE_SOCCER_TIME;
 
