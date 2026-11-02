@@ -259,7 +259,7 @@
     {"id": "SOUND_AIDA_AMBIENT", "file": "Data/Sound/w34/aida_ambi.wav", "channels": 1, "spatial": true},
     {"id": "SOUND_BMS_STUN", "file": "Data/Sound/BattleCastle/sDStun.wav", "channels": 4, "spatial": true},
     {"id": "SOUND_BMS_STUN_REMOVAL", "file": "Data/Sound/BattleCastle/sDStunCancel.wav", "channels": 4, "spatial": true},
-    {"id": "SOUND_BMS_MANA", "file": "Data/Sound/BattleCastle/sDSwllMana.wav", "channels": 4, "spatial": true},
+    {"id": "SOUND_BMS_MANA", "file": "Data/Sound/BattleCastle/sDSwellMana.wav", "channels": 4, "spatial": true},
     {"id": "SOUND_BMS_INVISIBLE", "file": "Data/Sound/BattleCastle/sDTrans.wav", "channels": 4, "spatial": true},
     {"id": "SOUND_BMS_VISIBLE", "file": "Data/Sound/BattleCastle/sDStunCancel.wav", "channels": 4, "spatial": true},
     {"id": "SOUND_BMS_MAGIC_REMOVAL", "file": "Data/Sound/BattleCastle/sDMagicCancel.wav", "channels": 4, "spatial": true},

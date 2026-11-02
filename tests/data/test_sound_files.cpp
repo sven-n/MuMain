@@ -245,6 +245,8 @@ TEST_CASE("Sound files: the shipped file names each sound the code loads once, r
     CHECK(fileOf("SOUND_KANTURU_3RD_NIGHTMARE_ATT2") == "Data/Sound/w39/nightmare_skill-01.wav");
     CHECK(fileOf("SOUND_KANTURU_3RD_NIGHTMARE_ATT3") == "Data/Sound/w39/nightmare_skill-02.wav");
     CHECK(fileOf("SOUND_KANTURU_3RD_NIGHTMARE_ATT4") == "Data/Sound/w39/nightmare_skill-03.wav");
+    // Battle Castle's mana sound, whose file name had a typo.
+    CHECK(fileOf("SOUND_BMS_MANA") == "Data/Sound/BattleCastle/sDSwellMana.wav");
 }
 
 TEST_CASE("Sound files: LoadGameSound loads the file the data gives the id, with its channels and 3D; an id the "
