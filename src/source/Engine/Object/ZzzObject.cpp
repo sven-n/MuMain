@@ -302,25 +302,26 @@ static float (*DrawPose(const OBJECT* o, BMD* b, bool Translate, const ObjectGho
     return bones;
 }
 
-static void AnimateObjectBones(OBJECT* o, BMD* b, bool Translate)
+namespace
 {
-    if (!o->EnableBoneMatrix)
-    {
-        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle,
-                     false, !Translate);
-        return;
-    }
-    const bool world = !Translate;
-    const bool reused = Engine::Object::Pose::IsCurrent(o, b, world);
-    if (!reused)
-    {
-        b->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
-                     o->HeadAngle, false, world);
-        Engine::Object::Pose::Record(o, b, world);
-    }
-#ifdef MU_ENABLE_CONTROL_SOCKET
-    CheckCharacterPose(o, b, reused);
-#endif
+// The draw bones of the objects posed by this frame's draws; cleared when the frame's object draws begin.
+std::unordered_map<const OBJECT*, vec34_t*> s_drawnPoses;
+} // namespace
+
+vec34_t* DrawnPose(const OBJECT* o)
+{
+    const auto it = s_drawnPoses.find(o);
+    return it != s_drawnPoses.end() ? it->second : o->BoneTransform;
+}
+
+static void AnimateObjectBones(const OBJECT* o, BMD* b, bool Translate)
+{
+    vec34_t* bones = DrawPose(o, b, Translate, nullptr);
+    // A later draw of the object in the frame (after a ghost's) may be back on its own pose.
+    if (o->EnableBoneMatrix && bones != o->BoneTransform)
+        s_drawnPoses[o] = bones;
+    else
+        s_drawnPoses.erase(o);
 }
 
 void ObjectModelOrigin(const OBJECT* o, vec3_t origin)
@@ -453,7 +454,7 @@ bool Calc_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon
     return true;
 }
 
-bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select)
+bool Calc_ObjectAnimation(const OBJECT* o, bool Translate, int Select)
 {
     if (o->Alpha < 0.01f) return false;
 
@@ -4481,6 +4482,7 @@ bool DrawsShadow(const OBJECT* o)
 void BeginObjectDraws()
 {
     s_sentAfterCharacter.clear();
+    s_drawnPoses.clear();
     s_lastFrameLods.swap(s_drawnLods);
     s_drawnLods.clear();
 }
@@ -8390,7 +8392,7 @@ void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, 
     }
     else
     {
-        b->Transform(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, Translate);
+        b->Transform(DrawnPose(o), o->BoundingBoxMin, o->BoundingBoxMax, nullptr, Translate);
     }
 
     if (p && p->m_pCloth[0] && PartClothKind(Type) > 0)

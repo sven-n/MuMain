@@ -1156,6 +1156,39 @@ TEST_CASE("Drawing an object whose pose the update has not built leaves its pose
     CHECK(rock.BoneTransform[0][0][3] == before);
 }
 
+TEST_CASE("A character drawn before the update posed it is posed into draw bones its parts use; its own stay [effects]")
+{
+    FenrirScope scope;
+    OBJECT body;
+    body.Live = true;
+    body.Type = 78;
+    body.Scale = 1.f;
+    body.Alpha = 1.f;
+    body.AnimationFrame = 2.5f;
+    body.BoneTransform = scope.bones.get();
+    body.EnableBoneMatrix = true;
+    BMD* b = &Models[body.Type];
+    REQUIRE_FALSE(Engine::Object::Pose::IsCurrent(&body, b, false));
+    const float before = body.BoneTransform[0][0][3];
+
+    BeginObjectDraws();
+    Engine::Object::Attachments::BeginFrame();
+    CHECK(DrawnPose(&body) == body.BoneTransform);
+    CheckDrawSpawnsNone([&] { CHECK(Calc_ObjectAnimation(&body, true, 0)); });
+    CHECK(DrawnPose(&body) != body.BoneTransform);
+    CHECK_FALSE(Engine::Object::Pose::IsCurrent(&body, b, false));
+    CHECK(body.BoneTransform[0][0][3] == before);
+
+    // A later draw in the frame that finds the update's pose (as after a ghost's) is back on the object's bones.
+    Engine::Object::Pose::Record(&body, b, false);
+    CHECK(Calc_ObjectAnimation(&body, true, 0));
+    CHECK(DrawnPose(&body) == body.BoneTransform);
+
+    // The next frame's draws start from the object's own bones again.
+    BeginObjectDraws();
+    CHECK(DrawnPose(&body) == body.BoneTransform);
+}
+
 TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and its draw spawns none [effects]")
 {
     FenrirScope scope;

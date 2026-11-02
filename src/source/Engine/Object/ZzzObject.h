@@ -180,7 +180,10 @@ void BodyLight(const OBJECT* o, BMD* b);
 // origin: where to draw the model instead of where the object stands.
 bool Calc_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon, const float* origin = nullptr,
                        const ObjectGhost* ghost = nullptr);
-bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select);
+bool Calc_ObjectAnimation(const OBJECT* o, bool Translate, int Select);
+// The bones `o` is drawn with this frame: those a draw posed it into when the update's pose was not current,
+// otherwise its own. For the draw only.
+[[nodiscard]] vec34_t* DrawnPose(const OBJECT* o);
 // Calc_ObjectAnimation's pose into the caller's bones, for a draw that shows the object where it does not stand; the
 // object keeps its own pose.
 bool Calc_ObjectAnimationInto(OBJECT* o, bool Translate, vec34_t* bones);

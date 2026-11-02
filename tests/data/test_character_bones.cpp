@@ -4,6 +4,7 @@
 
 #include "TestModelSlots.h"
 
+#include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/ObjectPose.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
@@ -135,7 +136,7 @@ TEST_CASE("A character's pose stays current until its animation state changes [d
     CHECK_FALSE(Engine::Object::Pose::IsCurrent(&o, &model, false));
 }
 
-TEST_CASE("A draw reuses the pose the update built, and animates it after a change [data][animation]")
+TEST_CASE("A draw reuses the pose the update built, and poses a change into bones of its own [data][animation]")
 {
     TestModelSlots slots;
     BMD& model = Models[MODEL_PLAYER];
@@ -154,13 +155,16 @@ TEST_CASE("A draw reuses the pose the update built, and animates it after a chan
     REQUIRE(Calc_ObjectAnimation(&o, true, 0));
     CHECK(bones[0][0][3] == 12345.f);
 
-    // A change during the draw, like SetPlayerStop, gets its own pose.
+    // A change after the update built the pose is drawn with a pose of the draw's own; the object's stays.
     o.AnimationFrame += 0.5f;
+    BeginObjectDraws();
+    Engine::Object::Attachments::BeginFrame();
     REQUIRE(Calc_ObjectAnimation(&o, true, 0));
     model.Animation(fresh, o.AnimationFrame, o.PriorAnimationFrame, o.PriorAction, o.Angle, o.HeadAngle, false, false,
                     nullptr, o.CurrentAction);
-    CHECK(std::memcmp(bones, fresh, sizeof(float) * 12 * model.NumBones) == 0);
-    CHECK(Engine::Object::Pose::IsCurrent(&o, &model, false));
+    CHECK(std::memcmp(DrawnPose(&o), fresh, sizeof(float) * 12 * model.NumBones) == 0);
+    CHECK(bones[0][0][3] == 12345.f);
+    CHECK_FALSE(Engine::Object::Pose::IsCurrent(&o, &model, false));
 }
 
 TEST_CASE("The pre-pass leaves a current pose alone [data][animation]")

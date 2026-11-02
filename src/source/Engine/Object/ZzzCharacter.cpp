@@ -6595,9 +6595,11 @@ struct LinkPlacement
 };
 
 LinkPlacement PlaceLinkedPart(float x, float y, float z, const CHARACTER* c, BYTE linkBone, float ownerScale, int Type,
-                              bool Link, bool bRightHandItem)
+                              bool Link, bool bRightHandItem, vec34_t* bones = nullptr)
 {
     const OBJECT* o = &c->Object;
+    if (bones == nullptr)
+        bones = o->BoneTransform;
     LinkPlacement placement;
     placement.scale = ownerScale;
     vec3_t p;
@@ -6865,17 +6867,17 @@ LinkPlacement PlaceLinkedPart(float x, float y, float z, const CHARACTER* c, BYT
             R_ConcatTransforms(Matrix, mNewRot, Matrix);
         }
 
-        R_ConcatTransforms(o->BoneTransform[linkBone], Matrix, placement.parent);
+        R_ConcatTransforms(bones[linkBone], Matrix, placement.parent);
         VectorCopy(c->Object.Position, placement.origin);
     }
     else
     {
         Vector(x, y, z, p);
         // As BMD::RotationPosition, with the character model's scale.
-        VectorRotate(p, o->BoneTransform[linkBone], placement.position);
+        VectorRotate(p, bones[linkBone], placement.position);
         VectorScale(placement.position, Models[o->Type].BodyScale, placement.position);
         VectorAdd(c->Object.Position, placement.position, placement.origin);
-        std::memcpy(placement.parent, o->BoneTransform[linkBone], sizeof(placement.parent));
+        std::memcpy(placement.parent, bones[linkBone], sizeof(placement.parent));
     }
     if (Type == MODEL_BOSS_HEAD)
     {
@@ -7049,7 +7051,8 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
 
     OBB_t OBB;
 
-    const LinkPlacement placement = PlaceLinkedPart(x, y, z, c, bone, o->Scale, Type, Link, bRightHandItem);
+    const LinkPlacement placement =
+        PlaceLinkedPart(x, y, z, c, bone, o->Scale, Type, Link, bRightHandItem, DrawnPose(o));
     std::memcpy(ParentMatrix, placement.parent, sizeof(placement.parent));
     VectorCopy(placement.origin, b->BodyOrigin);
     VectorCopy(placement.angle, Object->Angle);
