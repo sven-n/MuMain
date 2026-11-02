@@ -384,6 +384,30 @@ TEST_CASE("Server List window: an offline channel's Show box leaves it out, All 
     CHECK_FALSE(g_MuServerListUI.CanUndo());
 }
 
+TEST_CASE("Server List window: an offline channel's Show box stays with its group when the ID changes [editor]")
+{
+    I18N::SetLocale("en");
+    ServerListFolder folder;
+    TestImGuiContext context;
+    OfflinePreviewOn preview;
+    StartWithValhalla();
+    // Valhalla's channel 4.
+    constexpr int Channel = 3;
+    Press(ChannelRowId(Channel, I18N::Editor::ShowOfflineChannel));
+    RenderServerList();
+    REQUIRE_FALSE(g_ServerListManager->IsOfflineServerShown(Channel));
+
+    constexpr int NewId = 7;
+    Type(PaneId("##Group", I18N::Editor::GroupID), std::to_string(NewId).c_str());
+    PressKey(ImGuiKey_Enter, RenderServerList);
+    CHECK_FALSE(g_ServerListManager->IsOfflineServerShown(NewId * Data::ServerList::MaxChannelsPerGroup + Channel));
+    CHECK(g_ServerListManager->IsOfflineServerShown(Channel));
+    // Back to the folder's ID, which the next test's list has.
+    Type(PaneId("##Group", I18N::Editor::GroupID), "0");
+    PressKey(ImGuiKey_Enter, RenderServerList);
+    CHECK_FALSE(g_ServerListManager->IsOfflineServerShown(Channel));
+}
+
 TEST_CASE("Server List window: a double-click on an offline channel's load types its own one [editor]")
 {
     I18N::SetLocale("en");

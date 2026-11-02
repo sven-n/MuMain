@@ -521,6 +521,30 @@ TEST_CASE("ServerListManager: the editor's preview leaves out the channels it is
     CHECK_FALSE(manager.GetOfflineServerLoad(ServerId(0, 5)).has_value());
 }
 
+TEST_CASE("ServerListManager: the editor's preview keeps an offline channel's picks with its group")
+{
+    TestServerListManager manager;
+    manager.SetServerList(List({Group(0, "Valhalla"), Group(1, "Helheim")}));
+    manager.SetOfflineServerShown(ServerId(0, 4), false);
+    manager.SetOfflineServerLoad(ServerId(0, 5), 130);
+    manager.SetOfflineServerShown(ServerId(1, 2), false);
+
+    // Valhalla's ID changed from 0 to 7: its picks go with it, Helheim's stay.
+    manager.SetServerList(List({Group(7, "Valhalla"), Group(1, "Helheim")}));
+    CHECK_FALSE(manager.IsOfflineServerShown(ServerId(7, 4)));
+    CHECK(manager.GetOfflineServerLoad(ServerId(7, 5)) == 130);
+    CHECK(manager.IsOfflineServerShown(ServerId(0, 4)));
+    CHECK_FALSE(manager.GetOfflineServerLoad(ServerId(0, 5)).has_value());
+    CHECK_FALSE(manager.IsOfflineServerShown(ServerId(1, 2)));
+
+    // Valhalla removed, then a group added with its ID: that one starts with all shown.
+    manager.SetServerList(List({Group(1, "Helheim")}));
+    manager.SetServerList(List({Group(1, "Helheim"), Group(7, "Asgard")}));
+    CHECK(manager.IsOfflineServerShown(ServerId(7, 4)));
+    CHECK_FALSE(manager.GetOfflineServerLoad(ServerId(7, 5)).has_value());
+    CHECK_FALSE(manager.IsOfflineServerShown(ServerId(1, 2)));
+}
+
 TEST_CASE("ServerListManager: an offline channel's own load stays within the preview's loads")
 {
     TestServerListManager manager;

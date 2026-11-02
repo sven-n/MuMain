@@ -128,7 +128,8 @@ public:
         return m_offlinePercent;
     }
     // One offline channel of the preview, by its server ID: each one is shown until it is left out, and has the
-    // preview's load until it gets its own (nothing: the preview's again). Kept while the game runs.
+    // preview's load until it gets its own (nothing: the preview's again). Kept while the game runs, with the
+    // channel's group (KeepOfflineServersWithGroups).
     void SetOfflineServerShown(int connectIndex, bool shown);
     bool IsOfflineServerShown(int connectIndex) const;
     void SetOfflineServerLoad(int connectIndex, std::optional<int> percent);
@@ -147,6 +148,12 @@ protected:
 #ifdef _EDITOR
     // A server of the preview the connect server didn't send, at its own load or the preview's.
     void InsertOfflineServer(int iConnectIndex);
+    // After SetServerList (`previousGroups`: the group IDs it had before): when one group ID left the list as
+    // another came, a group's ID changed, and the preview's offline channels of the old ID go to the new one. Those
+    // of a group the list no longer has are dropped, so a group that takes its ID later starts with all shown.
+    void KeepOfflineServersWithGroups(const std::map<int, size_t>& previousGroups);
+    // The preview's offline channels of the group `fromGroupId` (shown or not, their own loads) go to `toGroupId`.
+    void MoveOfflineServers(int fromGroupId, int toGroupId);
 #endif
 
 public:

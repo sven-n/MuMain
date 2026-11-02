@@ -406,7 +406,8 @@ For both tabs:
   it is changed (dragged, or typed after a double-click or Ctrl+click); **×**
   goes back to Their load. A group without a channel left makes no button. The
   boxes and own loads are kept until the game closes, and they are no undo
-  steps.
+  steps. They stay with their group when its ID changes; a group that is
+  removed drops them, so one added later starts with all its channels shown.
 - **Undo** and **Redo** in the editor bar (or Ctrl+Z and Ctrl+Y in the window)
   work through the changes of the session. Each change is one step: a group,
   VIP type, color or rule added, removed or moved, a box, list or shade

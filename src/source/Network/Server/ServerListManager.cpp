@@ -80,6 +80,9 @@ bool CServerListManager::LoadServerListScript(std::string& errorMessage)
 
 void CServerListManager::SetServerList(const Data::ServerList::ServerListData& list)
 {
+#ifdef _EDITOR
+    const std::map<int, size_t> previousGroups = m_groupIndexById;
+#endif
     m_serverList = list;
     ++m_titleVersion;
     m_groupIndexById.clear();
@@ -87,6 +90,9 @@ void CServerListManager::SetServerList(const Data::ServerList::ServerListData& l
     {
         m_groupIndexById[m_serverList.groups[index].id] = index;
     }
+#ifdef _EDITOR
+    KeepOfflineServersWithGroups(previousGroups);
+#endif
     FollowSelectedChannel();
 }
 
@@ -196,6 +202,50 @@ std::optional<int> CServerListManager::GetOfflineServerLoad(int connectIndex) co
         return std::nullopt;
     }
     return found->second;
+}
+
+void CServerListManager::KeepOfflineServersWithGroups(const std::map<int, size_t>& previousGroups)
+{
+    std::vector<int> left;
+    for (const auto& [groupId, index] : previousGroups)
+    {
+        if (!m_groupIndexById.contains(groupId))
+        {
+            left.push_back(groupId);
+        }
+    }
+    std::vector<int> came;
+    for (const auto& [groupId, index] : m_groupIndexById)
+    {
+        if (!previousGroups.contains(groupId))
+        {
+            came.push_back(groupId);
+        }
+    }
+    if (left.size() == 1 && came.size() == 1)
+    {
+        MoveOfflineServers(left.front(), came.front());
+    }
+    const auto outsideList = [this](int connectIndex)
+    { return !m_groupIndexById.contains(connectIndex / MAX_SERVER_PER_GROUP); };
+    std::erase_if(m_hiddenOffline, outsideList);
+    std::erase_if(m_offlineLoads, [&outsideList](const auto& entry) { return outsideList(entry.first); });
+}
+
+void CServerListManager::MoveOfflineServers(int fromGroupId, int toGroupId)
+{
+    if (fromGroupId == toGroupId)
+        return;
+
+    for (int channel = 0; channel < MAX_SERVER_PER_GROUP; ++channel)
+    {
+        const int from = fromGroupId * MAX_SERVER_PER_GROUP + channel;
+        const int to = toGroupId * MAX_SERVER_PER_GROUP + channel;
+        SetOfflineServerShown(to, IsOfflineServerShown(from));
+        SetOfflineServerLoad(to, GetOfflineServerLoad(from));
+        SetOfflineServerShown(from, true);
+        SetOfflineServerLoad(from, std::nullopt);
+    }
 }
 #endif
 
