@@ -28,8 +28,11 @@
 #include "../data/ItemModelDatabaseScope.h"
 #include "RepeatedDraws.h"
 
+#include <algorithm>
 #include <cstring>
+#include <functional>
 #include <memory>
+#include <vector>
 
 namespace
 {
@@ -240,71 +243,36 @@ TEST_CASE("The sprites of the monster effects stay out of the bloom, as when the
     CHECK(created == 2);
 }
 
-TEST_CASE("A client character's drawn parts get a slot each, in draw order, with their own bones [effects]")
+TEST_CASE("The update plans a client character's parts in draw order, each with bones of its own [effects]")
 {
     namespace Attachments = Engine::Object::Attachments;
     CharacterScope scope(MODEL_PLAYER);
     CHARACTER* c = &scope.character();
     PART_t temporary;
 
-    Attachments::BeginFrame();
-    Attachments::BeginCharacter(c);
-    Attachments::Slot* weapon =
-        Attachments::Record(c, &c->Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 3, 0, false, true, 0, false, 33, 1.f);
-    Attachments::Slot* copy =
-        Attachments::Record(c, &temporary, MODEL_SWORD, 0.f, 0.f, 15.f, 3, 0, true, true, 0, true, 33, 1.f);
-    REQUIRE(weapon != nullptr);
-    REQUIRE(copy != nullptr);
-    CHECK(weapon != copy);
-    CHECK(weapon->part == &c->Weapon[0]);
-    CHECK(copy->part == nullptr);
-    CHECK(copy->z == 15.f);
-    CHECK(Attachments::Bones(*weapon) != Attachments::Bones(*copy));
+    REQUIRE(Attachments::BeginPlan(c));
+    Attachments::Slot& weapon =
+        Attachments::Plan(c, &c->Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, false, true, 33, 1.f, 0.5f);
+    Attachments::Slot& copy = Attachments::Plan(c, &temporary, MODEL_SWORD, 0.f, 0.f, 15.f, true, false, 33, 1.f, 0.f);
+    CHECK(&weapon != &copy);
+    CHECK(weapon.part == &c->Weapon[0]);
+    CHECK(copy.part == nullptr);
+    CHECK(copy.copy != nullptr);
+    CHECK(Attachments::Bones(weapon) != Attachments::Bones(copy));
 
-    // The next frame's draw of the same character reuses the slots in the same order.
-    float (*bones)[3][4] = Attachments::Bones(*weapon);
+    // The draws of the coming frame find it, a part built for one draw by its model and hand.
+    CHECK(Attachments::Find(c, &c->Weapon[0], MODEL_SWORD, true) == nullptr);
     Attachments::BeginFrame();
-    Attachments::BeginCharacter(c);
-    Attachments::Slot* again =
-        Attachments::Record(c, &c->Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 3, 0, false, true, 0, false, 33, 1.f);
-    CHECK(Attachments::Bones(*again) == bones);
+    CHECK(Attachments::Find(c, &c->Weapon[0], MODEL_SWORD, true) == &weapon);
+    PART_t other;
+    CHECK(Attachments::Find(c, &other, MODEL_SWORD, false) == &copy);
+    CHECK(Attachments::Find(c, &c->Weapon[0], MODEL_AXE, true) == nullptr);
+    // A frame the update planned nothing for finds nothing.
+    Attachments::BeginFrame();
+    CHECK(Attachments::Find(c, &c->Weapon[0], MODEL_SWORD, true) == nullptr);
 
     CHARACTER preview;
-    CHECK(Attachments::Record(&preview, &preview.Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 0, 0, false, true, 0, false, 33,
-                              1.f) == nullptr);
-}
-
-TEST_CASE("The update advances each part of the last draw once, and the next draw reuses it [effects]")
-{
-    namespace Attachments = Engine::Object::Attachments;
-    CharacterScope scope(MODEL_PLAYER);
-    CHARACTER* c = &scope.character();
-    PART_t temporary;
-    const auto record = [c](PART_t* part, float z)
-    { return Attachments::Record(c, part, MODEL_SWORD, 0.f, 0.f, z, 0, 0, false, true, 0, false, 33, 1.f); };
-    const auto advance = [c]
-    {
-        int advanced = 0;
-        Attachments::ForEachToAdvance(c, [&advanced](Attachments::Slot&) { ++advanced; });
-        return advanced;
-    };
-
-    Attachments::BeginFrame();
-    Attachments::BeginCharacter(c);
-    record(&c->Weapon[0], 0.f);
-    record(&temporary, 0.f);
-    CHECK(advance() == 1); // a part built for one call has no animation state to advance
-    CHECK(advance() == 0); // once per draw
-
-    Attachments::BeginFrame();
-    Attachments::BeginCharacter(c);
-    CHECK(Attachments::WasAdvanced(*record(&c->Weapon[0], 0.f)));
-
-    // The next draw attaches something else in that slot: it draws the part as it stands, for the update to advance.
-    CHECK(advance() == 1);
-    Attachments::BeginFrame();
-    Attachments::BeginCharacter(c);
-    CHECK_FALSE(Attachments::WasAdvanced(*record(&c->Weapon[0], 15.f)));
+    CHECK_FALSE(Attachments::BeginPlan(&preview));
 }
 
 TEST_CASE("A cloaked rider's Fenrir spawns none of its effects, as its outline draw spawned none [effects]")
@@ -749,51 +717,16 @@ TEST_CASE("Every spawn while drawing is a violation; outside a draw it is none [
     ResetViolations();
 }
 
-TEST_CASE(
-    "A second draw pass of the frame finds the part the update advanced, which the update advances once [effects]")
-{
-    namespace Attachments = Engine::Object::Attachments;
-    CharacterScope scope(MODEL_PLAYER);
-    CHARACTER* c = &scope.character();
-    const auto record = [c]
-    { return Attachments::Record(c, &c->Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 0, 0, false, true, 0, false, 33, 1.f); };
-    const auto advance = [c]
-    {
-        int advanced = 0;
-        Attachments::ForEachToAdvance(c, [&advanced](Attachments::Slot&) { ++advanced; });
-        return advanced;
-    };
-
-    Attachments::BeginFrame();
-    Attachments::BeginCharacter(c);
-    record();
-    CHECK(advance() == 1);
-
-    Attachments::BeginFrame();
-    for (int pass = 0; pass < 2; ++pass)
-    {
-        Attachments::BeginCharacter(c);
-        CHECK(Attachments::WasAdvanced(*record()));
-    }
-    CHECK(advance() == 1);
-}
-
 TEST_CASE("A preview gets slots of its own only while its owner tracks it [effects]")
 {
     namespace Attachments = Engine::Object::Attachments;
     auto preview = std::make_unique<CHARACTER>();
-    const auto record = [&preview]
-    {
-        return Attachments::Record(preview.get(), &preview->Weapon[0], MODEL_SWORD, 0.f, 0.f, 0.f, 0, 0, false, true, 0,
-                                   false, 33, 1.f);
-    };
 
-    CHECK(record() == nullptr);
+    CHECK_FALSE(Attachments::BeginPlan(preview.get()));
     Attachments::Track(preview.get());
-    Attachments::BeginCharacter(preview.get());
-    CHECK(record() != nullptr);
+    CHECK(Attachments::BeginPlan(preview.get()));
     Attachments::Untrack(preview.get());
-    CHECK(record() == nullptr);
+    CHECK_FALSE(Attachments::BeginPlan(preview.get()));
 }
 
 TEST_CASE("Drawing a part the update has not advanced yet, again and again, advances and spawns nothing [effects]")
@@ -810,11 +743,7 @@ TEST_CASE("Drawing a part the update has not advanced yet, again and again, adva
 
     Attachments::BeginFrame();
     RepeatedDraws::CheckChangesNothing(
-        [c, &part]
-        {
-            Attachments::BeginCharacter(c);
-            RenderLinkObject(0.f, 0.f, 0.f, c, &part, MODEL_SWORD, 0, 0, false, true);
-        });
+        [c, &part] { RenderLinkObject(0.f, 0.f, 0.f, c, &part, MODEL_SWORD, 0, 0, false, true); });
 
     CHECK(part.AnimationFrame == 2.5f);
     CHECK(part.PriorAnimationFrame == 1.5f);
@@ -1072,74 +1001,198 @@ struct PartFields
     }
     bool operator==(const PartFields&) const = default;
 };
+
+// Gives the model `count` looping actions of ten keys; the scope's models free them.
+void LoopingActions(int type, int count = 1)
+{
+    BMD& model = Models[type];
+    model.NumActions = count;
+    model.Actions = new Action_t[count]{};
+    for (int i = 0; i < count; ++i)
+    {
+        model.Actions[i].NumAnimationKeys = 10;
+        model.Actions[i].Loop = true;
+    }
+}
+
+// A preview player carrying no weapons and no body parts, tracked until the scope ends.
+struct PreviewPlayer
+{
+    std::unique_ptr<CHARACTER> character = std::make_unique<CHARACTER>();
+    float frameFactor = FPS_ANIMATION_FACTOR;
+
+    explicit PreviewPlayer(CharacterScope& scope)
+    {
+        FPS_ANIMATION_FACTOR = 1.f;
+        CHARACTER* c = character.get();
+        OBJECT* o = &c->Object;
+        o->Live = o->Visible = true;
+        o->Type = MODEL_PLAYER;
+        o->Scale = 1.f;
+        o->Alpha = 1.f;
+        o->BoneTransform = scope.bones.get();
+        for (PART_t& part : c->BodyPart)
+            part.Type = -1;
+        for (PART_t& part : c->Weapon)
+            part.Type = -1;
+        c->Wing.Type = -1;
+        c->Helper.Type = -1;
+        Engine::Object::Attachments::Track(c);
+    }
+
+    ~PreviewPlayer()
+    {
+        Engine::Object::Attachments::Untrack(character.get());
+        character->Object.BoneTransform = nullptr;
+        FPS_ANIMATION_FACTOR = frameFactor;
+    }
+};
+
+void RestAnimation(PART_t& part)
+{
+    part.CurrentAction = part.PriorAction = 0;
+    part.AnimationFrame = part.PriorAnimationFrame = 0.f;
+}
 } // namespace
 
-TEST_CASE("The update prepares a carried part's bone and animation; no draw pass sets them, in any order [effects]")
+TEST_CASE("Which passes draw a carried part, and in what order, changes nothing the next update does [effects]")
 {
     namespace Attachments = Engine::Object::Attachments;
     CharacterScope scope(MODEL_PLAYER);
-    BMD& wingModel = Models[MODEL_WING];
-    wingModel.NumActions = 1;
-    wingModel.Actions = new Action_t[1]{};
-    wingModel.Actions[0].NumAnimationKeys = 10;
-    wingModel.Actions[0].Loop = true;
-    const float frameFactor = FPS_ANIMATION_FACTOR;
-    FPS_ANIMATION_FACTOR = 1.f;
-
-    auto preview = std::make_unique<CHARACTER>();
-    CHARACTER* c = preview.get();
+    LoopingActions(MODEL_PLAYER, MAX_PLAYER_ACTION);
+    LoopingActions(MODEL_WING);
+    LoopingActions(MODEL_IMP);
+    // The gloves the character holds, and the wing each glove carries.
+    LoopingActions(MODEL_PHOENIX_SOUL_STAR);
+    LoopingActions(MODEL_SWORD_35_WING);
+    PreviewPlayer player(scope);
+    CHARACTER* c = player.character.get();
     OBJECT* o = &c->Object;
-    o->Live = o->Visible = true;
-    o->Type = MODEL_PLAYER;
-    o->Scale = 1.f;
-    o->Alpha = 1.f;
-    o->BoneTransform = scope.bones.get();
-    for (PART_t& part : c->BodyPart)
-        part.Type = -1;
-    c->Weapon[1].Type = -1;
     c->Weapon[0].Type = MODEL_PHOENIX_SOUL_STAR;
     c->Weapon[0].LinkBone = 33;
     c->Wing.Type = MODEL_WING;
     c->Helper.Type = MODEL_IMP;
+    // The bone the extra pass hangs the wing from is elsewhere than the back bone.
+    scope.bones[19][0][3] = 30.f;
     for (PART_t* part : {&c->Wing, &c->Helper})
     {
         part->LinkBone = 3;
         part->PlaySpeed = 0.7f;
-        part->AnimationFrame = 0.f;
     }
-    Attachments::Track(c);
 
-    // The end of the last update.
     PrepareCarriedParts(c);
     CHECK(c->Wing.LinkBone == 47);
     CHECK(c->Wing.PlaySpeed == 0.25f);
     CHECK(c->Helper.LinkBone == 34);
     CHECK(c->Helper.PlaySpeed == 0.5f);
-    const PartFields wing(c->Wing);
-    const PartFields helper(c->Helper);
 
-    // The frame's passes, then one more that hangs the wing from a bone of its own.
-    Attachments::BeginFrame();
-    RepeatedDraws::CheckChangesNothing(
-        [c, o]
-        {
-            Attachments::BeginCharacter(c);
-            RenderCharacterBackItem(c, o, true);
-        });
-    Attachments::BeginCharacter(c);
-    RenderLinkObject(0.f, 0.f, 15.f, c, &c->Wing, MODEL_WING, 0, 0, true, true, 0, true, 19);
-    CHECK(PartFields(c->Wing) == wing);
-    CHECK(PartFields(c->Helper) == helper);
-    CHECK(c->Weapon[0].LinkBone == 33);
+    struct Result
+    {
+        PartFields wing;
+        PartFields helper;
+        float wingPosed;
+        float impPosed;
+        bool operator==(const Result&) const = default;
+    };
+    // From the same start: an update, the frame's passes, the next update.
+    const auto run = [c](const std::function<void()>& passes)
+    {
+        RestAnimation(c->Wing);
+        RestAnimation(c->Helper);
+        UpdatePreviewCharacter(c);
+        Attachments::BeginFrame();
+        const Attachments::Slot* wing = Attachments::Find(c, &c->Wing, MODEL_WING, true);
+        REQUIRE(wing != nullptr);
+        const std::vector<float> planned(&Attachments::Bones(*wing)[0][0][0],
+                                         &Attachments::Bones(*wing)[0][0][0] + MAX_BONES * 12);
+        passes();
+        // No pass touches what the update planned.
+        CHECK(std::equal(planned.begin(), planned.end(), &Attachments::Bones(*wing)[0][0][0]));
 
-    UpdatePreviewCharacter(c);
-    // Standing, the wing flaps at the quarter speed the update prepared, whatever the passes drew.
-    CHECK(c->Wing.AnimationFrame == doctest::Approx(0.25f));
+        UpdatePreviewCharacter(c);
+        Attachments::BeginFrame();
+        wing = Attachments::Find(c, &c->Wing, MODEL_WING, true);
+        const Attachments::Slot* imp = Attachments::Find(c, &c->Helper, MODEL_IMP, true);
+        REQUIRE(wing != nullptr);
+        REQUIRE(imp != nullptr);
+        return Result{PartFields(c->Wing), PartFields(c->Helper), wing->posed.animationFrame,
+                      imp->posed.animationFrame};
+    };
+    const auto normal = [c, o] { RenderCharacterBackItem(c, o, true); };
+    // A pass that shows only the wing, hung from a bone of its own.
+    const auto wingOnly = [c] { RenderLinkObject(0.f, 0.f, 15.f, c, &c->Wing, MODEL_WING, 0, 0, true, true, 0, true, 19); };
+
+    const Result none = run([] {});
+    // Two updates: standing, the wing at a quarter step, the Imp at half.
+    CHECK(none.wing.animationFrame == doctest::Approx(0.5f));
+    CHECK(none.helper.animationFrame == doctest::Approx(1.f));
+    CHECK(none.wingPosed == none.wing.animationFrame);
+    CHECK(none.impPosed == none.helper.animationFrame);
     CHECK(c->Weapon[0].LinkBone == PhoenixGloveBone(0));
 
-    Attachments::Untrack(c);
-    o->BoneTransform = nullptr;
-    FPS_ANIMATION_FACTOR = frameFactor;
+    CHECK(run(normal) == none);
+    CHECK(run([&] { normal(); wingOnly(); }) == none);
+    CHECK(run([&] { wingOnly(); normal(); }) == none);
+    CHECK(run([&] { normal(); normal(); }) == none);
+
+    // The planned draw shows the update's bones; the other bone gets a pose of its own.
+    const Attachments::Slot* wing = Attachments::Find(c, &c->Wing, MODEL_WING, true);
+    REQUIRE(wing != nullptr);
+    CHECK(RenderLinkObject(0.f, 0.f, 15.f, c, &c->Wing, MODEL_WING, 0, 0, false, true) == Attachments::Bones(*wing));
+    CHECK(RenderLinkObject(0.f, 0.f, 15.f, c, &c->Wing, MODEL_WING, 0, 0, true, true, 0, true, 19) !=
+          Attachments::Bones(*wing));
+}
+
+TEST_CASE("A flying Storm wing and the quest item it carries step the shared wing each at its own speed [effects]")
+{
+    namespace Attachments = Engine::Object::Attachments;
+    CharacterScope scope(MODEL_PLAYER);
+    LoopingActions(MODEL_PLAYER, MAX_PLAYER_ACTION);
+    for (const int type : {static_cast<int>(MODEL_WING_OF_STORM), static_cast<int>(MODEL_DIVINE_STAFF_OF_ARCHANGEL),
+                           static_cast<int>(MODEL_WING), static_cast<int>(MODEL_CAPE_OF_EMPEROR)})
+        LoopingActions(type);
+    PreviewPlayer player(scope);
+    CHARACTER* c = player.character.get();
+    OBJECT* o = &c->Object;
+    const int world = gMapManager.WorldActive;
+    gMapManager.WorldActive = WD_11BLOODCASTLE1;
+    o->CurrentAction = PLAYER_FLY;
+    c->EtcPart = 1;
+    c->Wing.Type = MODEL_WING_OF_STORM;
+
+    UpdatePreviewCharacter(c);
+    Attachments::BeginFrame();
+    // The quest item steps first, at its full speed; the wing then adds its half step.
+    const Attachments::Slot* quest = Attachments::Find(c, &c->Wing, MODEL_DIVINE_STAFF_OF_ARCHANGEL, true);
+    const Attachments::Slot* wing = Attachments::Find(c, &c->Wing, MODEL_WING_OF_STORM, true);
+    REQUIRE(quest != nullptr);
+    REQUIRE(wing != nullptr);
+    CHECK(quest->posed.animationFrame == doctest::Approx(1.f));
+    CHECK(wing->posed.animationFrame == doctest::Approx(1.5f));
+    CHECK(c->Wing.AnimationFrame == doctest::Approx(1.5f));
+
+    // Repeated passes add no step.
+    RepeatedDraws::CheckChangesNothing([c, o] { RenderCharacterBackItem(c, o, true); });
+    UpdatePreviewCharacter(c);
+    CHECK(c->Wing.AnimationFrame == doctest::Approx(3.f));
+
+    // Without the quest item: an ordinary wing in flight takes full steps, a standing cape quarter steps.
+    c->EtcPart = 0;
+    c->Wing.Type = MODEL_WING;
+    RestAnimation(c->Wing);
+    UpdatePreviewCharacter(c);
+    CHECK(c->Wing.AnimationFrame == doctest::Approx(1.f));
+    c->Wing.Type = MODEL_CAPE_OF_EMPEROR;
+    o->CurrentAction = 0;
+    RestAnimation(c->Wing);
+    UpdatePreviewCharacter(c);
+    Attachments::BeginFrame();
+    CHECK(c->Wing.AnimationFrame == doctest::Approx(0.25f));
+    const Attachments::Slot* cape = Attachments::Find(c, &c->Wing, MODEL_CAPE_OF_EMPEROR, true);
+    REQUIRE(cape != nullptr);
+    CHECK(cape->linkBone == 19);
+
+    gMapManager.WorldActive = world;
 }
 
 TEST_CASE("The Red Dragon's and the Saint statues' carried models play on a wing the update prepares [effects]")

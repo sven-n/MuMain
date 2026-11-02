@@ -7,6 +7,7 @@
 #include <array>
 #include <deque>
 #include <unordered_map>
+#include <vector>
 
 namespace
 {
@@ -14,13 +15,17 @@ struct CharacterSlots
 {
     // A deque keeps slots in place as later ones are added.
     std::deque<Engine::Object::Attachments::Slot> slots;
-    std::size_t next = 0;
-    unsigned int weaponsFrame = 0;
-    bool weaponsInHands = false;
+    std::size_t count = 0;
+    // The draw frame the plan is for.
+    unsigned int plannedFor = 0;
 };
 
 std::array<CharacterSlots, MAX_CHARACTERS_CLIENT> s_characters;
 unsigned int s_drawFrame = 0;
+
+// Bones the draws pose parts into themselves this frame; reused from the next frame on.
+std::vector<std::unique_ptr<vec34_t[]>> s_drawBones;
+std::size_t s_drawBonesUsed = 0;
 
 // Built on first use: owners that are globals track their previews during static initialization.
 std::unordered_map<const CHARACTER*, CharacterSlots>& Tracked()
@@ -36,13 +41,6 @@ CharacterSlots* SlotsOf(const CHARACTER* c)
     const auto tracked = Tracked().find(c);
     return tracked != Tracked().end() ? &tracked->second : nullptr;
 }
-
-bool IsPartOf(const CHARACTER* c, const void* part)
-{
-    const auto* begin = reinterpret_cast<const unsigned char*>(c);
-    const auto* at = static_cast<const unsigned char*>(part);
-    return at >= begin && at < begin + sizeof(CHARACTER);
-}
 } // namespace
 
 namespace Engine::Object::Attachments
@@ -50,6 +48,7 @@ namespace Engine::Object::Attachments
 void BeginFrame()
 {
     ++s_drawFrame;
+    s_drawBonesUsed = 0;
 }
 
 void Track(const CHARACTER* c)
@@ -68,122 +67,102 @@ void Untrack(const CHARACTER* c)
     Tracked().erase(c);
 }
 
-void BeginCharacter(const CHARACTER* c)
-{
-    if (CharacterSlots* character = SlotsOf(c))
-        character->next = 0;
-}
-
-Slot* Record(CHARACTER* c, _PART_t* part, int type, float x, float y, float z, int level, int option1, bool link,
-             bool translate, int renderType, bool rightHandItem, unsigned char linkBone, float ownerScale)
+bool BeginPlan(const CHARACTER* c)
 {
     CharacterSlots* character = SlotsOf(c);
     if (character == nullptr)
-        return nullptr;
-    if (character->next == character->slots.size())
+        return false;
+    character->count = 0;
+    character->plannedFor = s_drawFrame + 1;
+    return true;
+}
+
+Slot& Plan(CHARACTER* c, _PART_t* part, int type, float x, float y, float z, bool link, bool rightHandItem,
+           unsigned char linkBone, float ownerScale, float playSpeed)
+{
+    CharacterSlots* character = SlotsOf(c);
+    if (character->count == character->slots.size())
         character->slots.emplace_back();
-    Slot& slot = character->slots[character->next++];
-    _PART_t* const own = IsPartOf(c, part) ? part : nullptr;
-    const bool same = slot.type == type && slot.part == own && slot.x == x && slot.y == y && slot.z == z &&
-                      slot.link == link && slot.rightHandItem == rightHandItem && slot.linkBone == linkBone &&
-                      slot.ownerScale == ownerScale;
-    // A later pass of the same frame keeps what the frame's first pass found.
-    if (slot.drawnFrame == s_drawFrame)
-        slot.sameAsLast = slot.sameAsLast && same;
-    else
-        slot.sameAsLast = slot.drawnFrame + 1 == s_drawFrame && same;
+    Slot& slot = character->slots[character->count++];
     slot.type = type;
     slot.x = x;
     slot.y = y;
     slot.z = z;
-    slot.level = level;
-    slot.option1 = option1;
     slot.link = link;
-    slot.translate = translate;
-    slot.renderType = renderType;
     slot.rightHandItem = rightHandItem;
     slot.linkBone = linkBone;
     slot.ownerScale = ownerScale;
-    slot.part = own;
-    if (own == nullptr && part != nullptr)
+    slot.playSpeed = playSpeed;
+    slot.part = IsPartOf(c, part) ? part : nullptr;
+    if (slot.part == nullptr)
     {
         if (!slot.copy)
             slot.copy = std::make_shared<_PART_t>();
         *slot.copy = *part;
     }
-    slot.shadow = false;
-    slot.drawnFrame = s_drawFrame;
-    return &slot;
-}
-
-float (*Bones(Slot& slot))[3][4]
-{
     if (!slot.bones)
         slot.bones = std::make_unique<vec34_t[]>(MAX_BONES);
-    return slot.bones.get();
+    return slot;
 }
 
-bool WasAdvanced(const Slot& slot)
+void ForEachPlanned(const CHARACTER* c, const std::function<void(Slot&)>& visit)
 {
-    return slot.part != nullptr && slot.sameAsLast && slot.advancedFor + 1 == s_drawFrame;
+    CharacterSlots* character = SlotsOf(c);
+    if (character == nullptr)
+        return;
+    for (std::size_t i = 0; i < character->count; ++i)
+        visit(character->slots[i]);
 }
 
-void RecordWeaponsHeld(const CHARACTER* c, bool inHands)
-{
-    if (CharacterSlots* character = SlotsOf(c))
-    {
-        character->weaponsFrame = s_drawFrame;
-        character->weaponsInHands = inHands;
-    }
-}
-
-std::optional<bool> WeaponsHeldInLastDraw(const CHARACTER* c)
-{
-    const CharacterSlots* character = SlotsOf(c);
-    if (character == nullptr || character->weaponsFrame != s_drawFrame)
-        return std::nullopt;
-    return character->weaponsInHands;
-}
-
-vec34_t* LastBonesOf(const CHARACTER* c, const _PART_t* part)
+vec34_t* PlannedBonesOf(const CHARACTER* c, const _PART_t* part)
 {
     CharacterSlots* character = SlotsOf(c);
     if (character == nullptr)
         return nullptr;
-    for (std::size_t i = 0; i < character->next; ++i)
+    for (std::size_t i = 0; i < character->count; ++i)
     {
-        Slot& slot = character->slots[i];
-        if (slot.part == part && slot.drawnFrame == s_drawFrame && slot.bones)
-            return slot.bones.get();
+        if (character->slots[i].part == part)
+            return character->slots[i].bones.get();
     }
     return nullptr;
 }
 
-void ForEachToAdvance(const CHARACTER* c, const std::function<void(Slot&)>& advance)
+const Slot* Find(const CHARACTER* c, const _PART_t* part, int type, bool rightHandItem)
 {
-    CharacterSlots* character = SlotsOf(c);
-    if (character == nullptr)
-        return;
-    for (std::size_t i = 0; i < character->next; ++i)
+    const CharacterSlots* character = SlotsOf(c);
+    if (character == nullptr || character->plannedFor != s_drawFrame)
+        return nullptr;
+    const _PART_t* own = IsPartOf(c, part) ? part : nullptr;
+    for (std::size_t i = 0; i < character->count; ++i)
     {
-        Slot& slot = character->slots[i];
-        if (slot.part == nullptr || slot.drawnFrame != s_drawFrame || slot.advancedFor == s_drawFrame)
-            continue;
-        slot.advancedFor = s_drawFrame;
-        advance(slot);
+        const Slot& slot = character->slots[i];
+        if (slot.part == own && slot.type == type && slot.rightHandItem == rightHandItem)
+            return &slot;
     }
+    return nullptr;
 }
 
-void ForEachCopied(const CHARACTER* c, const std::function<void(Slot&)>& visit)
+float (*Bones(const Slot& slot))[3][4]
 {
-    CharacterSlots* character = SlotsOf(c);
-    if (character == nullptr)
-        return;
-    for (std::size_t i = 0; i < character->next; ++i)
-    {
-        Slot& slot = character->slots[i];
-        if (slot.part == nullptr && slot.copy && !slot.shadow && slot.drawnFrame == s_drawFrame)
-            visit(slot);
-    }
+    return slot.bones.get();
+}
+
+float (*DrawBones())[3][4]
+{
+    if (s_drawBonesUsed == s_drawBones.size())
+        s_drawBones.push_back(std::make_unique<vec34_t[]>(MAX_BONES));
+    return s_drawBones[s_drawBonesUsed++].get();
+}
+
+bool HasSlots(const CHARACTER* c)
+{
+    return SlotsOf(c) != nullptr;
+}
+
+bool IsPartOf(const CHARACTER* c, const void* part)
+{
+    const auto* begin = reinterpret_cast<const unsigned char*>(c);
+    const auto* at = static_cast<const unsigned char*>(part);
+    return at >= begin && at < begin + sizeof(CHARACTER);
 }
 } // namespace Engine::Object::Attachments

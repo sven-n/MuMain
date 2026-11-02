@@ -19,6 +19,18 @@ CHARACTER* FindCharacterByKey(int Key);
 vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1,
                           bool Link, bool Translate, int RenderType = 0, bool bRightHandItem = true, int linkBone = -1);
 bool RendersWingCarriedModels(const CHARACTER* c);
+// A model a Red Dragon or a Saint statue carries on its wing part: where it hangs, and the character's scale for it.
+struct WingCarriedModel
+{
+    int type;
+    float x;
+    float y;
+    float z;
+    bool link;
+    int bone;
+    float scale;
+};
+int WingCarriedModels(const CHARACTER* c, WingCarriedModel (&models)[2]);
 void RenderWingCarriedModels(CHARACTER* c, bool Translate);
 void RenderChristmasCompanions(CHARACTER* c, bool Translate, int Select);
 void RenderCharacter(CHARACTER* c, OBJECT* o, int Select = 0);
@@ -152,6 +164,23 @@ bool AreWeaponsOnBack(const CHARACTER* c, const OBJECT* o);
 bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate);
 bool DrawsWeaponOnBack(CHARACTER* c, const OBJECT* o, int index);
 void PrepareCarriedParts(CHARACTER* c);
+bool IsFlying(const OBJECT* o);
+// The capes that hang from the shoulders (bone 19) and link to the body.
+bool IsLinkedCape(int type);
+// The Archangel quest item a Blood Castle player carries on the back, or 0.
+int BloodCastleQuestItem(const CHARACTER* c);
+// The quest item plays on the wing part, at its own speed.
+float QuestItemPlaySpeed(const OBJECT* o);
+// A Lorencia skeleton guard, which carries a golden crossbow on the back.
+bool IsSkeletonGuard(const OBJECT* o);
+// The model RenderCharacterBackItem shows for weapon `index` on the back.
+int BackWeaponType(const CHARACTER* c, const OBJECT* o, int index);
+// The part a weapon on the back is drawn with: the wing's, at rest.
+PART_t BackWeaponPart(const CHARACTER* c);
+// Where the Imp hangs: higher on a Rage Fighter's armor.
+void ImpOffset(const CHARACTER* c, vec3_t offset);
+// Whether RenderCharacter gets to the character's attachments.
+bool DrawsAttachments(CHARACTER* c);
 bool IsBackItem(CHARACTER* c, int iType);
 
 bool IsPlayer(CHARACTER* c);

@@ -7069,6 +7069,12 @@ void SpawnNextGradeWeaponEffects(CHARACTER* c)
 
 void NextGradeObjectRender(CHARACTER* c)
 {
+    ForEachNextGradeObject(c, [c](PART_t* w, int type, int bone)
+                           { RenderLinkObject(0.f, 0.f, 0.f, c, w, type, 0, 0, true, true, 0, true, bone); });
+}
+
+void ForEachNextGradeObject(CHARACTER* c, const std::function<void(PART_t* part, int type, int bone)>& visit)
+{
     int Level;
     PART_t* w;
     int bornIndex[2]{}; // left, right;
@@ -7135,7 +7141,7 @@ void NextGradeObjectRender(CHARACTER* c)
             {
             case 15: // +15
             {
-                RenderLinkObject(0.f, 0.f, 0.f, c, w, gradeType[m], 0, 0, true, true, 0, true, bornIndex[m]);
+                visit(w, gradeType[m], bornIndex[m]);
             }break;
             }
         }

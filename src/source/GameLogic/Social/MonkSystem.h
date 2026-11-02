@@ -84,6 +84,19 @@ constexpr int PhoenixGloveBone(int hand)
     return hand ? 37 : 28;
 }
 
+struct LinkOffset
+{
+    float x;
+    float y;
+    float z;
+};
+
+// Where a Phoenix Soul Star glove's wing hangs from that bone.
+constexpr LinkOffset PhoenixGloveOffset(int hand)
+{
+    return {hand ? 100.f : 80.f, 10.f, -75.f};
+}
+
 class CMonkSystem
 {
 private:

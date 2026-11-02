@@ -2,6 +2,8 @@
 #include "UI/Inventory/ItemMng.h"
 #include "Render/Items/ItemEffects.h"
 
+#include <functional>
+
 extern OBJECT_BLOCK ObjectBlock[256];
 extern OBJECT Mounts[];
 extern OBJECT Boids[];
@@ -51,6 +53,8 @@ void StepPartCloth(OBJECT* o, PART_t* p, int Type, int ItemLevel, bool Translate
 // The sparks of a character's +15 weapons, on its own pose; RenderCharacter draws its +15 armor pieces.
 void SpawnNextGradeWeaponEffects(CHARACTER* c);
 void NextGradeObjectRender(CHARACTER* c);
+// The character's +15 armor pieces RenderCharacter attaches: the body part each plays on, its model and bone.
+void ForEachNextGradeObject(CHARACTER* c, const std::function<void(PART_t* part, int type, int bone)>& visit);
 // What Calc_RenderObject did to each object it drew, for the update to do once per frame to the objects the last frame
 // drew: the hero's fall in Chaos Castle fades them, and a stunned or sleeping owner holds them at their first frame.
 void UpdateDrawnObjectHold(OBJECT* o);
