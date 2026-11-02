@@ -9,6 +9,7 @@
 #include <fstream>
 #include <initializer_list>
 #include <string>
+#include <vector>
 
 #include "GameShop/ShopListManager/ShopListManager.h"
 
@@ -54,6 +55,17 @@ void WriteFiles(const std::filesystem::path& folder, std::initializer_list<const
     }
 }
 
+// The names of the entries in the working directory, as they are spelled on disk.
+std::vector<std::string> WorkingDirectoryEntries()
+{
+    std::vector<std::string> names;
+    for (const auto& entry : std::filesystem::directory_iterator(std::filesystem::current_path()))
+    {
+        names.push_back(entry.path().filename().string());
+    }
+    return names;
+}
+
 WZResult LoadShippedScript(CShopListManager& manager)
 {
     CListVersionInfo version{};
@@ -94,8 +106,7 @@ TEST_CASE("the shop loads a script whose folder and files are spelled differentl
     CHECK(std::filesystem::exists(folder / "ibscategory.txt"));
     CHECK(std::filesystem::exists(folder / "ibspackage.txt"));
     CHECK(std::filesystem::exists(folder / "ibsproduct.txt"));
-#ifndef _WIN32
-    // The folder isn't created a second time in the requested spelling.
-    CHECK_FALSE(std::filesystem::exists("Data"));
-#endif
+    // The folder isn't created a second time in the requested spelling. Listed instead of asking
+    // for "Data", which a case-insensitive file system (Windows, macOS) reports for "data" too.
+    CHECK(WorkingDirectoryEntries() == std::vector<std::string>{"data"});
 }
