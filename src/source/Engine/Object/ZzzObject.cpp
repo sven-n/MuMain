@@ -14,6 +14,7 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include <array>
 #include <optional>
+#include <unordered_map>
 #include <unordered_set>
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -3345,22 +3346,33 @@ float ModelScreenHeight(const Render::Models::Gltf::SkinnedModel& model, const O
     return Render::Models::ScreenHeightFraction(rows, allInFront, static_cast<float>(WindowHeight));
 }
 
+// The LOD each object's model file was drawn with, this frame and the last: the draw's hysteresis history.
+std::unordered_map<const OBJECT*, unsigned char> s_drawnLods;
+std::unordered_map<const OBJECT*, unsigned char> s_lastFrameLods;
+
+int DrawnLod(const std::unordered_map<const OBJECT*, unsigned char>& lods, const OBJECT& o)
+{
+    const auto it = lods.find(&o);
+    return it != lods.end() ? it->second : 0;
+}
+
 // Draws a model file's LOD for one object: picks it by screen height (with
-// the object's previous LOD for hysteresis) and sets it on the shared model
+// the LOD drawn last frame for hysteresis) and sets it on the shared model
 // for the draw only.
 class ModelLodScope
 {
 public:
-    explicit ModelLodScope(OBJECT& o) : model_(Models[o.Type])
+    explicit ModelLodScope(const OBJECT& o) : model_(Models[o.Type])
     {
         const auto* skinned = Render::Models::Gltf::SkinnedModelOf(model_);
         if (!skinned || skinned->LodCount() < 2)
         {
             return;
         }
-        o.ModelLod = static_cast<unsigned char>(Render::Models::SelectLod(ModelScreenHeight(*skinned, o), o.ModelLod,
-                                                                          skinned->lodSettings, skinned->LodCount()));
-        model_.ActiveLod = o.ModelLod;
+        const int lod = Render::Models::SelectLod(ModelScreenHeight(*skinned, o), DrawnLod(s_lastFrameLods, o),
+                                                  skinned->lodSettings, skinned->LodCount());
+        s_drawnLods[&o] = static_cast<unsigned char>(lod);
+        model_.ActiveLod = lod;
     }
     ~ModelLodScope()
     {
@@ -3384,7 +3396,7 @@ public:
         const auto* skinned = Render::Models::Gltf::SkinnedModelOf(model_);
         if (type == o.Type && skinned && skinned->LodCount() >= 2)
         {
-            model_.ActiveLod = o.ModelLod;
+            model_.ActiveLod = DrawnLod(s_drawnLods, o);
         }
     }
     ~DrawnModelLodScope()
@@ -3400,7 +3412,7 @@ private:
 };
 } // namespace
 
-void RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon, const ObjectGhost* ghost)
+void RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon, const ObjectGhost* ghost)
 {
     const ModelLodScope lod(*o);
     // Split only for map objects; characters' parts come through here too.
@@ -3420,7 +3432,7 @@ void RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon, const Obj
     Draw_RenderObject(o, Translate, Select, ExtraMon, ghost);
 }
 
-void RenderObject_AfterImage(OBJECT* o, bool Translate, int Select, int ExtraMon)
+void RenderObject_AfterImage(const OBJECT* o, bool Translate, int Select, int ExtraMon)
 {
     // Two ghosts behind the object, at earlier frames and fainter; the object stays as it stands.
     const ObjectGhost ghosts[] = {{0.2f, o->AnimationFrame - 1.4f}, {0.6f, o->AnimationFrame - 0.7f}};
@@ -4440,9 +4452,11 @@ namespace
 std::unordered_set<const OBJECT*> s_sentAfterCharacter;
 } // namespace
 
-void BeginAfterCharacterDraws()
+void BeginObjectDraws()
 {
     s_sentAfterCharacter.clear();
+    s_lastFrameLods.swap(s_drawnLods);
+    s_drawnLods.clear();
 }
 
 void SendAfterCharacter(const OBJECT* o)

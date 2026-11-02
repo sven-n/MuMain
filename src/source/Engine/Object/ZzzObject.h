@@ -30,7 +30,7 @@ struct ObjectGhost
     float alpha;
     float animationFrame;
 };
-void RenderObject(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0,
+void RenderObject(const OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0,
                   const ObjectGhost* ghost = nullptr);
 // Marks the map objects the frame's view shows, in the order they draw; part of CullWorld.
 void CullObjects();
@@ -67,15 +67,16 @@ void ForEachNextGradeObject(CHARACTER* c, const std::function<void(PART_t* part,
 void UpdateDrawnObjectHold(OBJECT* o);
 // Keeps the stun skull around an object whose stun tint its part draw shows, as that draw recreated it.
 void RefreshStunSkull(OBJECT* o, vec3_t Light);
-void RenderObject_AfterImage(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
+void RenderObject_AfterImage(const OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0,
                                 float AniInterval1 = 1.4f, float AniInterval2 = 0.7f);
 void RenderObject_AfterCharacter(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void Draw_RenderObject_AfterCharacter(const OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderObjects_AfterCharacter();
+// Starts a frame's object draws: clears the after-character sends and keeps the LODs drawn last frame.
+void BeginObjectDraws();
 // The map objects and effects this frame's draws send to the after-character passes; the boids are sent by their
-// update (m_bRenderAfterCharacter). Cleared when the frame's draw starts.
-void BeginAfterCharacterDraws();
+// update (m_bRenderAfterCharacter).
 void SendAfterCharacter(const OBJECT* o);
 [[nodiscard]] bool IsSentAfterCharacter(const OBJECT* o);
 

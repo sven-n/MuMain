@@ -138,13 +138,13 @@ TEST_CASE("A draw sends an effect to the after-character pass for its own frame,
     storm.Type = MODEL_STORM3;
     storm.Visible = true;
 
-    BeginAfterCharacterDraws();
+    BeginObjectDraws();
     RepeatedDraws::CheckChangesNothing([] { RenderEffects(); }, 3);
     CHECK(IsSentAfterCharacter(&storm));
     CHECK_FALSE(storm.m_bRenderAfterCharacter);
 
     // The next frame's draw decides again.
-    BeginAfterCharacterDraws();
+    BeginObjectDraws();
     CHECK_FALSE(IsSentAfterCharacter(&storm));
     ClearEffects();
 }

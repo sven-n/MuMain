@@ -1199,7 +1199,7 @@ void MainScene(HDC hDC)
     SetWorldClearColor();
     // Every update of the frame has run, previews included: the draws record into the next frame.
     Engine::Object::Attachments::BeginFrame();
-    BeginAfterCharacterDraws();
+    BeginObjectDraws();
     Random::NextDrawFrame();
 
     bool Success = false;
