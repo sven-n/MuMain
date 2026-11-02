@@ -307,6 +307,9 @@ TEST_CASE("The draw purity check reports a draw that changes parts, previews, sp
     CharactersClient[2].Wing.m_byNumCloth = 1;
     CharactersClient[2].Wing.m_pCloth[0] = &cape;
     CHECK(caught("cloth", [&cape] { cape.SetWindMinMax(3, 9); }));
+    // A collider the next step pushes the cloth out of.
+    CHECK(caught("cloth", [&cape] { cape.AddCollisionSphere(0.f, 0.f, 20.f, 25.f, 17); }));
+    cape.Destroy();
     CharactersClient[2].Wing.m_pCloth[0] = nullptr;
     CharactersClient[2].Wing.m_byNumCloth = 0;
     CharactersClient = savedCharacters;
@@ -324,6 +327,27 @@ TEST_CASE("The draw purity check reports a draw that changes parts, previews, sp
     CHECK(caught("terrain light", [] { PrimaryTerrainLight[TERRAIN_INDEX(10, 10)][0] += 1.f; }));
     CHECK(caught("light history", [] { Render::Lighting::FrameLightHistory().BeginTick(); }));
     CHECK(caught("dark side", [] { g_CMonkSystem.SetRepeatedly(100, 0, false, false); }));
+}
+
+TEST_CASE("A cloth vertex's fingerprint follows the move it has pending for the next step [effects]")
+{
+    const auto fingerprint = [](const CPhysicsVertex& vertex)
+    {
+        Fnv1aHash hash;
+        vertex.AddStateTo(hash);
+        return hash.Value();
+    };
+    CPhysicsVertex vertex;
+    const std::uint64_t before = fingerprint(vertex);
+    vec3_t move = {4.f, 0.f, 0.f};
+    vertex.AddOneTimeMove(move);
+    CHECK(fingerprint(vertex) != before);
+
+    // The next step moves the vertex by it.
+    vertex.DoOneTimeMove();
+    vec3_t position;
+    vertex.GetPosition(&position);
+    CHECK(position[0] == 4.f);
 }
 
 TEST_CASE("The draw purity check draws nothing from the update's random sequences itself [effects]")

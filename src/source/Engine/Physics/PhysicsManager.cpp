@@ -628,8 +628,24 @@ void CPhysicsVertex::AddStateTo(Fnv1aHash& hash) const
         hash.Add(m_vForce[k]);
         hash.Add(m_vVel[k]);
         hash.Add(m_vPos[k]);
+        hash.Add(m_vOneTimeMove[k]);
     }
     hash.Add(m_byState);
+    hash.Add(m_iCountOneTimeMove);
+}
+
+void CPhysicsCollision::AddStateTo(Fnv1aHash& hash) const
+{
+    hash.Add(m_iBone);
+    for (const float axis : m_vCenterBeforeTransform)
+        hash.Add(axis);
+}
+
+void CPhysicsColSphere::AddStateTo(Fnv1aHash& hash) const
+{
+    CPhysicsCollision::AddStateTo(hash);
+    hash.Add(static_cast<int>(CLT_SPHERE));
+    hash.Add(m_fRadius);
 }
 
 void CPhysicsCloth::AddStateTo(Fnv1aHash& hash) const
@@ -639,7 +655,7 @@ void CPhysicsCloth::AddStateTo(Fnv1aHash& hash) const
     hash.Add(m_iTexFront);
     hash.Add(m_iTexBack);
     hash.Add(m_dwType);
-    for (const float value : {m_fxPos, m_fyPos, m_fzPos, m_fWidth, m_fHeight, m_fWind, m_fUnitWidth, m_fUnitHeight})
+    for (const float value : {m_fxPos, m_fyPos, m_fzPos, m_fWidth, m_fHeight, m_fUnitWidth, m_fUnitHeight})
         hash.Add(value);
     hash.Add(m_iNumHor);
     hash.Add(m_iNumVer);
@@ -658,13 +674,15 @@ void CPhysicsCloth::AddStateTo(Fnv1aHash& hash) const
         hash.Add(link.m_fDistance[1]);
         hash.Add(link.m_byStyle);
     }
+    hash.Add(m_lstCollision.GetCount());
+    for (const CNode<CPhysicsCollision*>* node = m_lstCollision.FindHead(); node; node = m_lstCollision.GetNext(node))
+        node->GetData()->AddStateTo(hash);
 }
 
 void CPhysicsClothMesh::AddStateTo(Fnv1aHash& hash) const
 {
     CPhysicsCloth::AddStateTo(hash);
     hash.Add(m_iMesh);
-    hash.Add(m_iBoneForFixed);
     hash.Add(m_iBMDType);
 }
 

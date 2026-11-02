@@ -40,7 +40,7 @@ public:
 
 public:
     void GetPosition(vec3_t* pPos) const;
-    // Adds what the next step reads (force, velocity, position, state) to a fingerprint.
+    // Adds what the next step reads (force, velocity, position, state, the pending move) to a fingerprint.
     void AddStateTo(Fnv1aHash& hash) const;
     float GetDistance(CPhysicsVertex* pVertex2, vec3_t* pDistance);
 
@@ -88,6 +88,8 @@ public:
     void GetCenter(vec3_t vCenter);
     void GetCenterBeforeTransform(vec3_t vCenter);
     virtual void ProcessCollision(CPhysicsVertex* pVertex);
+    // Adds the collider's definition to a fingerprint; its center is rebuilt every step.
+    virtual void AddStateTo(Fnv1aHash& hash) const;
 };
 
 class CPhysicsColSphere : public CPhysicsCollision
@@ -109,6 +111,7 @@ public:
 
     void Init(float fXPos, float fYPos, float fZPos, float fRadius, int iBone);
     virtual void ProcessCollision(CPhysicsVertex* pVertex);
+    void AddStateTo(Fnv1aHash& hash) const override;
     float GetRadius(void)
     {
         return (m_fRadius);
@@ -216,7 +219,8 @@ public:
     {
         return m_iNumVertices;
     }
-    // Adds what the next simulation step reads to a fingerprint: the settings, wind, vertices and links.
+    // Adds what the next simulation step reads to a fingerprint: the settings, wind limits, vertices, links and
+    // colliders.
     virtual void AddStateTo(Fnv1aHash& hash) const;
     int GetVerticesCount() const
     {
@@ -267,9 +271,8 @@ public:
     void AddStateTo(Fnv1aHash& hash) const override;
 
 protected:
-    int m_iMesh;
-    int m_iBoneForFixed;
-    int m_iBMDType;
+    int m_iMesh = -1;
+    int m_iBMDType = -1;
 
 public:
     virtual BOOL Create(OBJECT* o, int iMesh, int iBone, DWORD dwType = 0, int iBMDType = -1);
