@@ -131,9 +131,14 @@ option(ENABLE_CONTROL_SOCKET "Developer control socket for scripted clients (nev
 # In-game tests (docs/in-game-tests.md): publishes the tester, which plays test
 # scenarios with the client through the control socket, next to Main, and adds
 # the InGameTests / InGameTestsGui targets. Developers only, like the socket.
-option(ENABLE_IN_GAME_TESTS "Publish the in-game tester next to Main (developer builds with the control socket)" OFF)
+# The tester needs the socket, so turning the tests on turns the socket on. The
+# cache entry itself changes, so tests/ sees the socket too; the player presets
+# set ENABLE_IN_GAME_TESTS=OFF, so a build folder reused for a player build
+# drops both again.
+option(ENABLE_IN_GAME_TESTS "Publish the in-game tester next to Main (turns on ENABLE_CONTROL_SOCKET)" OFF)
 if(ENABLE_IN_GAME_TESTS AND NOT ENABLE_CONTROL_SOCKET)
-  message(FATAL_ERROR "ENABLE_IN_GAME_TESTS needs ENABLE_CONTROL_SOCKET: the tester drives the client through it")
+  message(STATUS "ENABLE_IN_GAME_TESTS turns on ENABLE_CONTROL_SOCKET: the tester drives the client through it")
+  set(ENABLE_CONTROL_SOCKET ON CACHE BOOL "Developer control socket for scripted clients (never for player builds)" FORCE)
 endif()
 
 # ---------------------------------------------------------------------------

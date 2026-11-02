@@ -34,6 +34,7 @@
       "cacheVariables": {
         "ENABLE_EDITOR": "OFF",
         "ENABLE_CONTROL_SOCKET": "OFF",
+        "ENABLE_IN_GAME_TESTS": "OFF",
         "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/toolchain-x86.cmake",
         "VCPKG_TARGET_TRIPLET": "x86-windows"
       }
@@ -69,6 +70,7 @@
       "cacheVariables": {
         "ENABLE_EDITOR": "OFF",
         "ENABLE_CONTROL_SOCKET": "OFF",
+        "ENABLE_IN_GAME_TESTS": "OFF",
         "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/toolchain-x64.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-windows"
       }
@@ -115,7 +117,8 @@
       "toolchainFile": "${sourceDir}/cmake/toolchains/linux-x64.cmake",
       "cacheVariables": {
         "ENABLE_EDITOR": "OFF",
-        "ENABLE_CONTROL_SOCKET": "OFF"
+        "ENABLE_CONTROL_SOCKET": "OFF",
+        "ENABLE_IN_GAME_TESTS": "OFF"
       }
     },
     {
@@ -153,7 +156,8 @@
       "toolchainFile": "${sourceDir}/cmake/toolchains/macos-arm64.cmake",
       "cacheVariables": {
         "ENABLE_EDITOR": "OFF",
-        "ENABLE_CONTROL_SOCKET": "OFF"
+        "ENABLE_CONTROL_SOCKET": "OFF",
+        "ENABLE_IN_GAME_TESTS": "OFF"
       }
     }
   ],

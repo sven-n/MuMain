@@ -46,8 +46,10 @@ again only when its sources change.
 Start it without anything (a double-click, or `./InGameTests`) and it opens
 its window with the client next to it; the reports go to
 `in-game-test-results` next to it. The file can also be copied next to
-another developer build of the same platform. `ENABLE_IN_GAME_TESTS` needs
-`ENABLE_CONTROL_SOCKET`; CMake stops when only the first is on.
+another developer build of the same platform. The tester drives the client
+through the control socket, so `ENABLE_IN_GAME_TESTS` turns on
+`ENABLE_CONTROL_SOCKET` too (CMake says so when it does); the player presets
+turn both off.
 
 ## The test server
 
