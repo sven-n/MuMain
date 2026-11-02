@@ -150,6 +150,15 @@ public:
     // writes it. `file` must be valid (ValidateItemStatsAsWritten). Items keep
     // the profile they name.
     void SetStatFile(const Data::Items::ItemStatFile& file);
+    // Adds a ground label style or changes the one of its name (D68): every label that takes it looks that way at once.
+    // Save writes Data/Items/Tooltips/GroundLabels.json.
+    void SetGroundLabelStyle(const Data::Items::GroundLabelStyle& style);
+    // Removes a ground label style that no item and no standard rule names; false while one does.
+    bool RemoveGroundLabelStyle(std::string_view name);
+    // Makes the ground label styles these (an undo); the standard rules stay as they are.
+    void RestoreGroundLabelStyles(std::span<const Data::Items::GroundLabelStyle> styles);
+    // The folders MuEditor sorts the ground label styles in (D69); Save writes them with the styles.
+    void SetGroundLabelFolders(std::vector<Data::Colors::ColorFolder> folders);
     // The item editor swapped two entries of ItemAttribute[]. A moved item
     // takes its model along (the item model database and the opened model
     // slot), and its weapon kind and stat profile follow its new group like
@@ -266,6 +275,8 @@ private:
     // The item stat file as Load read it, and whether the editor changed it since.
     Data::Items::ItemStatFile m_statFile;
     bool m_statFileChanged = false;
+    // Whether the editor changed the ground label styles since Load.
+    bool m_groundLabelsChanged = false;
     // The item types whose opened models no longer match their model entries.
     std::vector<int> m_modelsToReopen;
     OpenedModelHooks m_openedModelHooks;

@@ -1,6 +1,6 @@
 // doctest unit tests for the folders MuEditor's Colors window sorts named colors in (D69, ColorFolders.h): the
-// "colorFolders" of a file read and written, the edits of the window, and the file that keeps them
-// (GlowColors.json).
+// "colorFolders" of a file read and written, the edits of the window, and the files that keep them (GlowColors.json,
+// GroundLabels.json).
 
 #include "stdafx.h"
 
@@ -8,6 +8,7 @@
 
 #include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/EffectData/GlowColors.h"
+#include "Data/GameData/ItemData/ItemGroundLabels.h"
 
 #include <algorithm>
 #include <set>
@@ -290,5 +291,18 @@ TEST_SUITE("Color folders")
         CHECK(readFolders == folders);
         // Without folders the file is as before.
         CHECK(Data::Effects::WriteGlowColorsJson(colors).find("colorFolders") == std::string::npos);
+    }
+
+    TEST_CASE("GroundLabels.json keeps its folders")
+    {
+        Data::Items::GroundLabelFile file;
+        file.styles = {{"ticket", {229, 135, 33}, {0, 0, 0}, false}, {"jewel", {255, 204, 25}, {0, 0, 0}, true}};
+        file.standard = {{{}, "ticket"}};
+        file.folders = {{"Shop", {}, {"jewel"}}};
+        Data::Items::GroundLabelFile read;
+        std::vector<ItemDataIssue> issues;
+        Data::Items::ReadGroundLabelsJson(Data::Items::WriteGroundLabelsJson(file), "GroundLabels.json", read, issues);
+        CHECK(issues.empty());
+        CHECK(read == file);
     }
 }

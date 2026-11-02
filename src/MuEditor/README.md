@@ -48,6 +48,7 @@ stores it when a field is left.
 - **MuItemModelUI** - The model entry with a preview, file picker, shared models and looks (ItemModelPreview, ItemModelFilePicker, ItemSharedModelForm, ItemModelForms)
 - **MuItemFormulasUI** - The item stat file: drop level bonus, default, profiles, level bonus tables and profile rules, changed on a copy and applied after the list of the items it reaches (ItemStatTermFields, ItemStatFileChange)
 - **ItemCheckArea** - The items in Data Checks: the checks of a save, each leading to its item and field (ItemCheckTargets)
+- **MuItemTooltipUI** - Item Tooltip: the item's ground label previewed at a level and with options (drawn by the game's own label function), and the item's own label rules
 - **MuItemSyncUI** - Import and Export of the item exchange file with OpenMU: the import's diff of the items and formulas with a box per field (ItemSyncDiff, which also keeps the known differences), applied as one undo step after a confirmation; the export of the client's data, confirmed when it replaces a file (ItemSyncApply); and a read-only comparison of two files
 - **ItemToolWindow** - What every item tool window shares: its title, the selected item, and the item edit history as the editor bar's undo target
 
@@ -59,10 +60,12 @@ stores it when a field is left.
 - **MuItemTranslationsUI.h/cpp** - Item names as a grid of items and languages, with missing counts, on the shared names grid with ItemNameRows as its rows (docs/translation-system.md)
 
 ### Colors (UI/Colors)
-- **MuColorsUI.h/cpp** - The Colors window: the named colors as a tree, a root per use with the user's folders (Data/GameData/ColorFolders), drag and drop within a root (Windows > Colors, Items > Glow Colors and the Server List window's Edit colors on their root); it docks with the item tools, and each root's changes go to its own history
+- **MuColorsUI.h/cpp** - The Colors window: the named colors as a tree, a root per use with the user's folders (Data/GameData/ColorFolders), drag and drop within a root (Windows > Colors, Items > Glow Colors, Items > Ground Label Styles and the Server List window's Edit colors on their root); it docks with the item tools, and each root's changes go to its own history
 - **NamedColorList.h/cpp** - The panel the picked entry of any root is drawn with: its value with Apply, Revert and Remove, its users, the list of the users a change reaches, and for a picked root the unused entries removed at once; a root gives it its entries through **NamedColorSource.h**
 - **GlowColorsRoot.h/cpp** - The Glow root: new colors, changed values and unused colors removed (GlowColorDialog, which the model tool's color fields open too)
+- **GroundLabelStylesRoot.h/cpp** - The Ground labels root: new label styles (GroundLabelStyleDialog), changed looks and unused styles removed; the styles of the standard rules stay
 - **ServerListColorsRoot.h/cpp** - The Server list root: the themes' colors the list uses (written into each theme's tokens.ini on Apply) and the server list's own colors with a shade per theme, used by the button color rules and the load; the own colors' changes are steps of the Server List window's history
+- **GroundLabelWidgets.h/cpp** - A label style's fields, a label drawn in a style, its swatch and the style combo, for the Ground labels root and Item Tooltip
 
 ### Monster Tools (UI/MonsterTools)
 One selected monster (**MonsterSelection**) is shown by every monster tool.

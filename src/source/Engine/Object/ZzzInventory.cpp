@@ -2620,6 +2620,8 @@ struct GroundItemLabelDescriptor
     bool Bold = false;
     DWORD TextColor = 0xFFFFFFFF;
     DWORD BgColor = 0xFF000000;
+    // The style the look came from; nullptr while none.
+    const Data::Items::GroundLabelStyle* Style = nullptr;
 };
 
 DWORD MakeRgba(BYTE red, BYTE green, BYTE blue, BYTE alpha = 255)
@@ -2637,6 +2639,7 @@ void ApplyGroundLabelStyle(GroundItemLabelDescriptor& descriptor, const Data::It
     descriptor.TextColor = MakeRgba(style->color[0], style->color[1], style->color[2]);
     descriptor.BgColor = MakeRgba(style->background[0], style->background[1], style->background[2]);
     descriptor.Bold = style->bold;
+    descriptor.Style = style;
 }
 
 template <size_t BufferSize, typename... Args>
@@ -2762,7 +2765,8 @@ GroundItemLabel DescribeGroundItemLabel(OBJECT* o, ITEM* ip)
 {
     GroundItemLabelDescriptor descriptor;
     BuildGroundItemLabelDescriptor(o, ip, descriptor);
-    return {descriptor.Name, descriptor.TextColor, descriptor.BgColor, descriptor.Bold};
+    return {descriptor.Name, descriptor.TextColor, descriptor.BgColor, descriptor.Bold,
+            descriptor.Style != nullptr ? descriptor.Style->name : std::string()};
 }
 
 void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)

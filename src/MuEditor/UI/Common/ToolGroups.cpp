@@ -25,14 +25,27 @@ bool IsGlowColorsShown()
     return g_MuColorsUI.GetShownRoot() == Colors::ColorsRoot::Glow;
 }
 
-const std::array<ToolWindowEntry, 9> ItemToolEntries = {{
+void ShowGroundLabelStyles()
+{
+    g_MuColorsUI.Show(Colors::ColorsRoot::GroundLabels);
+}
+
+bool IsGroundLabelStylesShown()
+{
+    return g_MuColorsUI.GetShownRoot() == Colors::ColorsRoot::GroundLabels;
+}
+
+const std::array<ToolWindowEntry, 11> ItemToolEntries = {{
     {WindowIds::ItemBasics, &I18N::Editor::ItemBasics, &ToolWindows::itemBasics},
     {WindowIds::ItemRequirements, &I18N::Editor::ItemRequirements, &ToolWindows::itemRequirements},
     {WindowIds::ItemRules, &I18N::Editor::ItemRules, &ToolWindows::itemRules},
     {WindowIds::ItemCategories, &I18N::Editor::ItemCategories, &ToolWindows::itemCategories},
     {WindowIds::ItemModel, &I18N::Editor::ItemModel, &ToolWindows::itemModel},
-    // A tab of the Colors window, which docks with the item tools.
+    // Tabs of the Colors window, which docks with the item tools.
     {WindowIds::Colors, &I18N::Editor::GlowColors, &ToolWindows::colors, &ShowGlowColors, &IsGlowColorsShown},
+    {WindowIds::Colors, &I18N::Editor::GroundLabelStyles, &ToolWindows::colors, &ShowGroundLabelStyles,
+     &IsGroundLabelStylesShown},
+    {WindowIds::ItemTooltip, &I18N::Editor::ItemTooltip, &ToolWindows::itemTooltip},
     {WindowIds::ItemFormulas, &I18N::Editor::ItemFormulas, &ToolWindows::itemFormulas},
     {WindowIds::ItemSync, &I18N::Editor::ItemSync, &ToolWindows::itemSync},
     {WindowIds::ItemTranslations, &I18N::Editor::ItemTranslations, &ToolWindows::itemTranslations},

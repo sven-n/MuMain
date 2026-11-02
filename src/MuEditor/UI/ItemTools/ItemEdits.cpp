@@ -79,20 +79,35 @@ void RestoreGlowColors(std::span<const Data::Effects::GlowColor> colors)
     g_ItemDataHandler.RestoreGlowColors(colors);
 }
 
+std::vector<Data::Items::GroundLabelStyle> ReadGroundLabelStyles()
+{
+    return g_ItemDatabase.GetGroundLabels().styles;
+}
+
+void RestoreGroundLabelStyles(std::span<const Data::Items::GroundLabelStyle> styles)
+{
+    g_ItemDataHandler.RestoreGroundLabelStyles(styles);
+}
+
 std::vector<Data::Colors::ColorFolder> ReadColorFolders(std::string_view root)
 {
     if (root == ItemEdits::GlowFolders)
     {
         return g_GlowColors.GetFolders();
     }
-    return {};
+    return g_ItemDatabase.GetGroundLabels().folders;
 }
 
 void RestoreColorFolders(std::string_view root, std::span<const Data::Colors::ColorFolder> folders)
 {
+    std::vector<Data::Colors::ColorFolder> copy(folders.begin(), folders.end());
     if (root == ItemEdits::GlowFolders)
     {
-        g_ItemDataHandler.SetGlowColorFolders(std::vector<Data::Colors::ColorFolder>(folders.begin(), folders.end()));
+        g_ItemDataHandler.SetGlowColorFolders(std::move(copy));
+    }
+    else
+    {
+        g_ItemDataHandler.SetGroundLabelFolders(std::move(copy));
     }
 }
 
@@ -127,10 +142,11 @@ ItemEdits& ItemEdits::GetInstance()
 }
 
 ItemEdits::ItemEdits()
-    : m_history({&ItemEdits::ReadSlot, &RestoreSlots, [](int from, int to)
-                 { return g_ItemDataHandler.MoveItem(from, to); }, &ReadSharedModel, &RestoreSharedModel,
-                 &IsHeldByCharacter, &ReadGlowColors, &RestoreGlowColors, &ReadStatFile, &RestoreStatFile,
-                 &ReadColorFolders, &RestoreColorFolders})
+    : m_history({&ItemEdits::ReadSlot, &RestoreSlots,
+                 [](int from, int to) { return g_ItemDataHandler.MoveItem(from, to); }, &ReadSharedModel,
+                 &RestoreSharedModel, &IsHeldByCharacter, &ReadGlowColors, &RestoreGlowColors, &ReadStatFile,
+                 &RestoreStatFile, &ReadGroundLabelStyles, &RestoreGroundLabelStyles, &ReadColorFolders,
+                 &RestoreColorFolders})
 {
 }
 
@@ -390,6 +406,14 @@ void ItemEdits::SetGlowColorOrder(std::string label, std::span<const Data::Effec
     Record({std::move(label), {std::move(step)}});
 }
 
+void ItemEdits::SetGroundLabelStyleOrder(std::string label, std::span<const Data::Items::GroundLabelStyle> styles)
+{
+    std::vector<Data::Items::GroundLabelStyle> before = ReadGroundLabelStyles();
+    std::vector<Data::Colors::ColorFolder> foldersBefore = ReadColorFolders(GroundLabelFolders);
+    g_ItemDataHandler.RestoreGroundLabelStyles(styles);
+    RecordGroundLabelStyles(std::move(label), std::move(before), std::move(foldersBefore));
+}
+
 void ItemEdits::AddFolderStep(ItemEditEntry& entry, std::string_view root,
                               std::vector<Data::Colors::ColorFolder> before)
 {
@@ -403,6 +427,60 @@ void ItemEdits::AddFolderStep(ItemEditEntry& entry, std::string_view root,
     step.foldersBefore = std::move(before);
     step.foldersAfter = std::move(after);
     entry.steps.push_back(std::move(step));
+}
+
+void ItemEdits::SetGroundLabelStyle(std::string label, const Data::Items::GroundLabelStyle& style)
+{
+    std::vector<Data::Items::GroundLabelStyle> before = ReadGroundLabelStyles();
+    std::vector<Data::Colors::ColorFolder> foldersBefore = ReadColorFolders(GroundLabelFolders);
+    g_ItemDataHandler.SetGroundLabelStyle(style);
+    RecordGroundLabelStyles(std::move(label), std::move(before), std::move(foldersBefore));
+}
+
+void ItemEdits::AddGroundLabelStyle(std::string label, const Data::Items::GroundLabelStyle& style,
+                                    std::span<const std::size_t> folder)
+{
+    std::vector<Data::Items::GroundLabelStyle> before = ReadGroundLabelStyles();
+    std::vector<Data::Colors::ColorFolder> foldersBefore = ReadColorFolders(GroundLabelFolders);
+    g_ItemDataHandler.SetGroundLabelStyle(style);
+    if (ReadGroundLabelStyles() == before)
+    {
+        return;
+    }
+    std::vector<Data::Colors::ColorFolder> folders = foldersBefore;
+    if (Data::Colors::MoveColorInto(folders, style.name, folder))
+    {
+        RestoreColorFolders(GroundLabelFolders, folders);
+    }
+    RecordGroundLabelStyles(std::move(label), std::move(before), std::move(foldersBefore));
+}
+
+bool ItemEdits::RemoveGroundLabelStyles(std::string label, std::span<const std::string> names)
+{
+    std::vector<Data::Items::GroundLabelStyle> before = ReadGroundLabelStyles();
+    std::vector<Data::Colors::ColorFolder> foldersBefore = ReadColorFolders(GroundLabelFolders);
+    for (const std::string& name : names)
+    {
+        g_ItemDataHandler.RemoveGroundLabelStyle(name);
+    }
+    return RecordGroundLabelStyles(std::move(label), std::move(before), std::move(foldersBefore));
+}
+
+bool ItemEdits::RecordGroundLabelStyles(std::string label, std::vector<Data::Items::GroundLabelStyle> before,
+                                        std::vector<Data::Colors::ColorFolder> foldersBefore)
+{
+    std::vector<Data::Items::GroundLabelStyle> after = ReadGroundLabelStyles();
+    if (after == before)
+    {
+        return false;
+    }
+    ItemEditStep step{ItemEditStep::Kind::GroundLabelStyles};
+    step.stylesBefore = std::move(before);
+    step.stylesAfter = std::move(after);
+    ItemEditEntry entry{std::move(label), {std::move(step)}};
+    AddFolderStep(entry, GroundLabelFolders, std::move(foldersBefore));
+    Record(std::move(entry));
+    return true;
 }
 
 void ItemEdits::SetStatFile(std::string label, const Data::Items::ItemStatFile& file,
@@ -466,9 +544,9 @@ void ItemEdits::Record(ItemEditEntry entry)
         m_history.Record(std::move(entry));
         return;
     }
-    // One step per item type, one for the glow colors and one for the item
-    // stat file: what changed twice keeps its first "before" and its last
-    // "after".
+    // One step per item type, one for the glow colors, one for the item stat
+    // file and one for the ground label styles: what changed twice keeps its
+    // first "before" and its last "after".
     for (ItemEditStep& step : entry.steps)
     {
         const auto same = std::ranges::find_if(
@@ -478,6 +556,7 @@ void ItemEdits::Record(ItemEditEntry entry)
                 return grouped.kind == step.kind &&
                        ((step.kind == ItemEditStep::Kind::Slot && grouped.itemType == step.itemType) ||
                         step.kind == ItemEditStep::Kind::GlowColors || step.kind == ItemEditStep::Kind::StatFile ||
+                        step.kind == ItemEditStep::Kind::GroundLabelStyles ||
                         (step.kind == ItemEditStep::Kind::ColorFolders && grouped.folderRoot == step.folderRoot));
             });
         if (same == m_group->steps.end())
@@ -487,6 +566,10 @@ void ItemEdits::Record(ItemEditEntry entry)
         else if (step.kind == ItemEditStep::Kind::GlowColors)
         {
             same->colorsAfter = std::move(step.colorsAfter);
+        }
+        else if (step.kind == ItemEditStep::Kind::GroundLabelStyles)
+        {
+            same->stylesAfter = std::move(step.stylesAfter);
         }
         else if (step.kind == ItemEditStep::Kind::ColorFolders)
         {

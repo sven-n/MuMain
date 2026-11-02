@@ -10,6 +10,8 @@
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemType.h"
 
+#include <algorithm>
+
 namespace MuEditor::Items
 {
 namespace
@@ -68,6 +70,21 @@ std::vector<int> FindGlowColorUsers(std::string_view name)
     return FindModelUsers(
         [name](const ItemModelDefinition& model)
         { return model.glow.color == name || model.glow.shineColor == name || model.glow.ancientColor == name; });
+}
+
+std::vector<int> FindGroundLabelStyleUsers(std::string_view name)
+{
+    std::vector<int> users;
+    for (int itemType = 0; itemType < MAX_ITEM; ++itemType)
+    {
+        const ItemDefinition* item = g_ItemDatabase.Find(itemType);
+        if (item != nullptr && std::ranges::any_of(item->groundLabels, [name](const Data::Items::ItemGroundLabel& label)
+                                                   { return label.style == name; }))
+        {
+            users.push_back(itemType);
+        }
+    }
+    return users;
 }
 
 bool UsesStatProfile(const ItemDefinition& item, std::string_view name)

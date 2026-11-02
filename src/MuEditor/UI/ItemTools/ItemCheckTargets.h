@@ -19,6 +19,7 @@ enum class ItemTool
     Categories,
     Model,
     Translations,
+    Tooltip,
     Browser,
 };
 
@@ -33,8 +34,9 @@ struct ItemToolWindowRef
 // The tool of a field as the item files and the model files name it
 // (docs/item-data.md): "glow.color" and "renderStyle" go to the model tool,
 // "requirementsByLevel.level[3]" to the requirements, "name.de" to the
-// translations, "number" and a problem of the whole item (no field) to the
-// browser, and every other field of an item to the basics.
+// translations, "groundLabels[1]" to Item Tooltip, "number" and a problem of
+// the whole item (no field) to the browser, and every other field of an item
+// to the basics.
 ItemTool GetToolForField(std::string_view field);
 
 // GetToolForField, except that a problem of a name in another language than
