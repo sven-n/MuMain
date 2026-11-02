@@ -32,6 +32,7 @@ constexpr int DEFAULT_DURABILITY_THRESHOLD = 50;
 constexpr auto PICKUP_RETRY_DELAY = std::chrono::seconds(1);
 constexpr auto PICKUP_REQUEST_RETRY_DELAY = std::chrono::seconds(3);
 constexpr int MAX_PICKUP_REQUESTS = 3;
+constexpr auto TARGET_RETRY_DELAY = std::chrono::seconds(2);
 
 SpinLock _targetsLock;
 SpinLock _itemsLock;
@@ -125,6 +126,7 @@ namespace MUHelper
         m_iCurrentItem = MAX_ITEMS;
         m_itemRetryAt.clear();
         m_itemPickupRequests.clear();
+        m_targetRetryAt.clear();
         m_posOriginal = { Hero->PositionX, Hero->PositionY };
 
         m_iSecondsElapsed = 0;
@@ -166,6 +168,7 @@ namespace MUHelper
         m_itemRetryAt.clear();
         m_itemPickupRequests.clear();
         _itemsLock.unlock();
+        m_targetRetryAt.clear();
         m_iCurrentTarget = -1;
         m_iCurrentItem = MAX_ITEMS;
     }
@@ -216,6 +219,13 @@ namespace MUHelper
             }
 
             if (!RecoverHealth())
+            {
+                return;
+            }
+
+            // A drop already walked to is picked up before regrouping; otherwise a short return delay turns
+            // every loot walk into a round trip. Regrouping still comes before choosing more loot.
+            if (m_iCurrentItem != MAX_ITEMS && !ObtainItem())
             {
                 return;
             }
@@ -272,7 +282,7 @@ namespace MUHelper
         _targetsLock.unlock();
 
         // Only an attack on the hero may redirect combat; a sighting must not.
-        if (bIsAttacking && m_config.bUseSelfDefense && IsMonster(pTarget))
+        if (bIsAttacking && m_config.bUseSelfDefense && IsMonster(pTarget) && !IsTargetCoolingDown(iTargetId))
         {
             m_iCurrentTarget = iTargetId;
         }
@@ -291,6 +301,32 @@ namespace MUHelper
         {
             m_iCurrentTarget = -1;
         }
+    }
+
+    // An unreachable monster is re-added by its next packet; the cooldown stops the nearest-target pick from
+    // choosing it again on every tick while reachable ones wait.
+    void CMuHelper::ForgetTarget(int iTargetId, bool bUnreachable)
+    {
+        DeleteTarget(iTargetId);
+        if (bUnreachable)
+        {
+            m_targetRetryAt[iTargetId] = m_now + TARGET_RETRY_DELAY;
+        }
+    }
+
+    bool CMuHelper::IsTargetCoolingDown(int iTargetId)
+    {
+        const auto retry = m_targetRetryAt.find(iTargetId);
+        if (retry == m_targetRetryAt.end())
+        {
+            return false;
+        }
+        if (m_now < retry->second)
+        {
+            return true;
+        }
+        m_targetRetryAt.erase(retry);
+        return false;
     }
 
     void CMuHelper::DeleteAllTargets()
@@ -345,7 +381,7 @@ namespace MUHelper
             int iIndex = FindCharacterIndex(iMonsterId);
             CHARACTER* pTarget = &CharactersClient[iIndex];
 
-            if (!IsMonster(pTarget))
+            if (!IsMonster(pTarget) || IsTargetCoolingDown(iMonsterId))
             {
                 continue;
             }
@@ -378,7 +414,7 @@ namespace MUHelper
             int iIndex = FindCharacterIndex(iMonsterId);
             CHARACTER* pTarget = &CharactersClient[iIndex];
 
-            if (!IsMonster(pTarget))
+            if (!IsMonster(pTarget) || IsTargetCoolingDown(iMonsterId))
             {
                 continue;
             }
@@ -475,46 +511,26 @@ namespace MUHelper
 
             PARTY_t* pMember = &Party[m_iCurrentBuffPartyIndex];
             CHARACTER* pChar = g_pPartyManager->GetPartyMemberChar(pMember);
-            int iBuffResult = 1;
 
             if (pChar != NULL
                 && ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE)
             {
-                if (!m_config.bBuffDurationParty && m_config.iBuffCastInterval != 0 &&
-                    m_iSecondsElapsed >= m_iNextBuffCastAt)
-                {
-                    m_bTimerActivatedBuffOngoing = true;
-                    m_iNextBuffCastAt = m_iSecondsElapsed + m_config.iBuffCastInterval;
-                }
+                StartTimedBuffRefresh(m_config.bBuffDurationParty);
 
-                iBuffResult = BuffTarget(pChar, (ActionSkillType)m_config.aiBuff[m_iCurrentBuffIndex]);
+                // A cast still under way keeps this member and buff for the next tick.
+                if (!BuffTarget(pChar, (ActionSkillType)m_config.aiBuff[m_iCurrentBuffIndex]))
+                {
+                    return 0;
+                }
             }
 
             m_iCurrentBuffPartyIndex = (m_iCurrentBuffPartyIndex + 1) % PartyNumber;
-
-            if (m_iCurrentBuffPartyIndex == 0)
-            {
-                m_iCurrentBuffIndex = (m_iCurrentBuffIndex + 1) % m_config.aiBuff.size();
-
-                // Reaching this branch means everyone's been buffed, 
-                // so we're resetting the timer activated buff flag
-                if (m_iCurrentBuffIndex == 0)
-                {
-                    m_bTimerActivatedBuffOngoing = false;
-                }
-            }
-
-            return iBuffResult;
         }
         else
         {
             m_iCurrentBuffPartyIndex = 0;
 
-            if (!m_config.bBuffDuration && m_config.iBuffCastInterval != 0 && m_iSecondsElapsed >= m_iNextBuffCastAt)
-            {
-                m_bTimerActivatedBuffOngoing = true;
-                m_iNextBuffCastAt = m_iSecondsElapsed + m_config.iBuffCastInterval;
-            }
+            StartTimedBuffRefresh(m_config.bBuffDuration);
 
             if (!BuffTarget(Hero, (ActionSkillType)m_config.aiBuff[m_iCurrentBuffIndex]))
             {
@@ -526,15 +542,24 @@ namespace MUHelper
         {
             m_iCurrentBuffIndex = (m_iCurrentBuffIndex + 1) % m_config.aiBuff.size();
 
-            // Reaching this branch means everyone's been buffed, 
-            // so we're resetting the timer activated buff flag
-            if (m_iCurrentBuffIndex == 0)
+            // Everyone has had every buff: a scheduled refresh is complete, and the next one counts from now.
+            if (m_iCurrentBuffIndex == 0 && m_bTimerActivatedBuffOngoing)
             {
                 m_bTimerActivatedBuffOngoing = false;
+                m_iNextBuffCastAt = m_iSecondsElapsed + m_config.iBuffCastInterval;
             }
         }
 
         return 1;
+    }
+
+    void CMuHelper::StartTimedBuffRefresh(bool bRefreshOnExpiryOnly)
+    {
+        if (!bRefreshOnExpiryOnly && m_config.iBuffCastInterval != 0 && !m_bTimerActivatedBuffOngoing &&
+            m_iSecondsElapsed >= m_iNextBuffCastAt)
+        {
+            m_bTimerActivatedBuffOngoing = true;
+        }
     }
 
     int CMuHelper::BuffTarget(CHARACTER* pTargetChar, ActionSkillType iBuffSkill)
@@ -908,7 +933,7 @@ namespace MUHelper
 
         if (iTarget != -1 && GameLogic::Automation::ShouldForgetTarget(result))
         {
-            DeleteTarget(iTarget);
+            ForgetTarget(iTarget, result == SkillResult::NoPath || result == SkillResult::Blocked);
         }
 
         return result;
@@ -929,7 +954,7 @@ namespace MUHelper
 
         if (GameLogic::Automation::ShouldForgetTarget(result))
         {
-            DeleteTarget(iTarget);
+            ForgetTarget(iTarget, result == AttackResult::NoPath || result == AttackResult::Blocked);
         }
 
         return result == AttackResult::Attacked ? 1 : 0;

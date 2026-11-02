@@ -22,8 +22,9 @@ Additional attacks with Delay or Condition enabled keep their existing priority
 over the rotation while they can be cast; an unlearned or cooling-down skill
 leaves the turn to the rotation. When both are enabled, either a due timer or a
 satisfied monster condition can select the skill, as before. A Delay is a
-deadline: it stays due until a cast or refusal consumes it, then waits a full
-interval. Monster counts include only live monsters within hunting range, and a
+deadline: it stays due until a cast, a refusal, or four attempts that produce no
+action consume it, then waits a full interval. A condition skill that is refused
+or keeps producing no action yields to the rotation for one second. Monster counts include only live monsters within hunting range, and a
 monster counts as attacking only when its attack targets the character. Combo
 mode keeps its existing sequence and does not use the automatic rotation.
 
@@ -46,14 +47,17 @@ cast still under way does.
 Starting the Helper picks up monsters already in view. With self-defense on,
 only a monster attacking the character replaces the current target; monsters
 that leave hunting range are dropped unless long-range counterattack keeps an
-attacker. Logging out, returning to character selection, or a reconnect stops the
-Helper and forgets its targets and drops; a reconnect resumes it afterwards.
+attacker. Logging out, returning to character selection, a warp, or a reconnect stops the
+Helper and forgets its targets and drops; a reconnect resumes it afterwards. A
+monster that cannot be reached, behind a wall or with no path, is skipped for two
+seconds so reachable ones are fought first.
 Range changes apply immediately while the Helper runs.
 
 Automated movement finishes its current path before planning another one, even
 when low frame rates make a walk last longer than a Helper tick. Once the return
 delay expires, returning to the starting position takes priority over collecting
-more drops. A drop with no available path waits one second before another pickup
+more drops, but a drop the Helper is already walking to is picked up first. A
+scheduled buff refresh waits for a cast still under way and is not skipped. A drop with no available path waits one second before another pickup
 attempt; combat and other reachable loot continue during that delay. If the
 starting position cannot be reached, combat continues and the Helper retries
 the return on later ticks. A requested pickup stays tracked until the server

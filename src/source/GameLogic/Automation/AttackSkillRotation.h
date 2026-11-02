@@ -37,8 +37,11 @@ private:
     int m_notReadyAttempts = 0;
     // Helper second at which each timed slot is next due; 0 until first scheduled.
     std::array<int, SlotCount> m_timerDueAt{};
+    // Helper second until which a refused condition slot leaves the turn to the rotation.
+    std::array<int, SlotCount> m_conditionHeldUntil{};
+    int m_triggeredSlot = -1;
     int m_timerSlotDue = -1;
-    int m_timerNotReadyAttempts = 0;
+    int m_triggeredNotReadyAttempts = 0;
     int m_timerInterval = 0;
     int m_selectSeconds = 0;
 };

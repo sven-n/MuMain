@@ -2245,6 +2245,9 @@ BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         // Before the view is emptied, not after: the events name the objects
         // that are about to disappear, and their slots are reused.
         App::Control::Events::RecordViewCleared("the character teleported");
+        // The helper's targets, drops and starting position belong to the view being emptied; the stop
+        // requested below may never be confirmed by the server.
+        MUHelper::g_MuHelper.EndSession();
         ClearItems();
         ClearCharacters(HeroKey);
         RemoveAllShopTitleExceptHero();

@@ -30,6 +30,7 @@ constexpr int OtherDropSlot = MAX_ITEMS - 2;
 constexpr auto HelperTick = std::chrono::milliseconds(250);
 std::vector<std::pair<ActionSkillType, int>> submittedCasts;
 std::map<ActionSkillType, GameLogic::Automation::SkillResult> castResults;
+std::map<int, GameLogic::Automation::SkillResult> targetCastResults;
 std::vector<int> pickupAttempts;
 GameLogic::Automation::PickupResult pickupResult;
 
@@ -54,6 +55,7 @@ struct HelperActionFixture
     {
         submittedCasts.clear();
         castResults.clear();
+        targetCastResults.clear();
         pickupAttempts.clear();
         pickupResult = GameLogic::Automation::PickupResult::NoPath;
         for (int drop = 0; drop < previousDropLive.size(); ++drop)
@@ -166,6 +168,8 @@ namespace GameLogic::Automation
 SkillResult CastSkill(ActionSkillType skill, bool, int targetKey, bool, int)
 {
     submittedCasts.emplace_back(skill, targetKey);
+    if (const auto target = targetCastResults.find(targetKey); target != targetCastResults.end())
+        return target->second;
     const auto result = castResults.find(skill);
     return result == castResults.end() ? SkillResult::Cast : result->second;
 }
@@ -319,4 +323,44 @@ TEST_CASE("A monster standing out of hunting range is attacked again once back i
     fixture.Tick();
     REQUIRE_FALSE(submittedCasts.empty());
     CHECK(submittedCasts.back().second == 123);
+}
+
+TEST_CASE("An unreachable monster waits out a cooldown while a reachable one is attacked [helper_actions]")
+{
+    HelperActionFixture fixture;
+    auto& reachable = fixture.characters[1];
+    reachable.Key = 124;
+    reachable.Object.Live = true;
+    reachable.Object.Kind = KIND_MONSTER;
+    reachable.PositionX = reachable.TargetX = HeroTile + 2;
+    reachable.PositionY = reachable.TargetY = HeroRow;
+    MUHelper::g_MuHelper.AddTarget(reachable.Key, false);
+    targetCastResults[123] = GameLogic::Automation::SkillResult::NoPath;
+    fixture.Tick();
+    REQUIRE(submittedCasts.size() == 1);
+    CHECK(submittedCasts[0].second == 123);
+    MUHelper::g_MuHelper.AddTarget(123, false);
+    fixture.Tick();
+    REQUIRE(submittedCasts.size() == 2);
+    CHECK(submittedCasts[1].second == 124);
+    MUHelper::g_MuHelper.DeleteTarget(124);
+    MUHelper::g_MuHelper.AddTarget(123, false);
+    fixture.Tick(std::chrono::seconds(2));
+    REQUIRE(submittedCasts.size() == 3);
+    CHECK(submittedCasts[2].second == 123);
+}
+
+TEST_CASE("A drop already walked to is picked up before the return home [helper_actions]")
+{
+    HelperActionFixture fixture;
+    pickupResult = GameLogic::Automation::PickupResult::Approaching;
+    fixture.Tick();
+    REQUIRE(pickupAttempts == std::vector<int>{DropSlot});
+    // The return delay has expired while a walk is still under way, so a regroup would wait on it.
+    fixture.hero.Movement = true;
+    fixture.hero.Path.PathNum = 2;
+    fixture.hero.Path.CurrentPath = 0;
+    pickupResult = GameLogic::Automation::PickupResult::Requested;
+    fixture.Tick(std::chrono::seconds(1));
+    CHECK(pickupAttempts == std::vector<int>{DropSlot, DropSlot});
 }

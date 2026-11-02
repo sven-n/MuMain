@@ -30,6 +30,7 @@ namespace
 constexpr int AttackSlotCount = static_cast<int>(std::tuple_size_v<decltype(ConfigData::aiSkill)>);
 static_assert(AttackSlotCount == AttackSkillRotation::SlotCount);
 constexpr int MaxNotReadyAttempts = 4;
+constexpr int ConditionYieldSeconds = 1;
 
 bool IsValidSkill(uint32_t skill)
 {
@@ -84,9 +85,12 @@ int AttackSkillRotation::SelectTriggeredSlot(const ConfigData& config, int secon
         const auto condition = config.aiSkillCondition[slot];
         const auto interval = static_cast<int>(config.aiSkillInterval[slot]);
         const bool timerDue = (condition & MUHelper::ON_TIMER) && interval > 0 && secondsElapsed >= m_timerDueAt[slot];
-        const bool conditionMet = (condition & MUHelper::ON_CONDITION) && IsConditionMet(condition, nearby, attacking);
+        const bool conditionMet = (condition & MUHelper::ON_CONDITION) &&
+                                  secondsElapsed >= m_conditionHeldUntil[slot] &&
+                                  IsConditionMet(condition, nearby, attacking);
         if ((timerDue || conditionMet) && IsAttackSkillAvailable(static_cast<ActionSkillType>(skill)))
         {
+            m_triggeredSlot = slot;
             m_timerSlotDue = timerDue ? slot : -1;
             m_timerInterval = interval;
             m_selectSeconds = secondsElapsed;
@@ -102,8 +106,10 @@ void AttackSkillRotation::Reset()
     m_selectedSlot = -1;
     m_notReadyAttempts = 0;
     m_timerDueAt.fill(0);
+    m_conditionHeldUntil.fill(0);
+    m_triggeredSlot = -1;
     m_timerSlotDue = -1;
-    m_timerNotReadyAttempts = 0;
+    m_triggeredNotReadyAttempts = 0;
 }
 
 ActionSkillType AttackSkillRotation::Select(const ConfigData& config, int secondsElapsed, std::size_t nearby,
@@ -111,6 +117,7 @@ ActionSkillType AttackSkillRotation::Select(const ConfigData& config, int second
 {
     const int previousSlot = m_selectedSlot;
     m_selectedSlot = -1;
+    m_triggeredSlot = -1;
     m_timerSlotDue = -1;
     const int triggered = SelectTriggeredSlot(config, secondsElapsed, nearby, attacking);
     if (triggered >= 0)
@@ -146,18 +153,23 @@ ActionSkillType AttackSkillRotation::Select(const ConfigData& config, int second
 void AttackSkillRotation::Complete(GameLogic::Automation::SkillResult result)
 {
     using GameLogic::Automation::SkillResult;
-    // A timed cast that is refused or keeps producing no action waits for its next interval
-    // instead of claiming every tick.
-    if (m_timerSlotDue >= 0)
+    // A triggered cast that is refused or keeps producing no action must not claim every tick: a timer waits
+    // for its next interval, and a condition yields to the rotation for a helper second. Mana and AG are only
+    // checked by the cast itself, so a resource-starved skill still passes selection.
+    if (m_triggeredSlot >= 0)
     {
-        const bool timerRetryExhausted =
-            result == SkillResult::NotReady && ++m_timerNotReadyAttempts >= MaxNotReadyAttempts;
-        if (result == SkillResult::Cast || result == SkillResult::Refused || timerRetryExhausted)
+        const bool retryExhausted =
+            result == SkillResult::NotReady && ++m_triggeredNotReadyAttempts >= MaxNotReadyAttempts;
+        if (result == SkillResult::Cast || result == SkillResult::Refused || retryExhausted)
         {
-            m_timerDueAt[m_timerSlotDue] = m_selectSeconds + m_timerInterval;
-            m_timerNotReadyAttempts = 0;
+            if (m_timerSlotDue >= 0)
+                m_timerDueAt[m_timerSlotDue] = m_selectSeconds + m_timerInterval;
+            if (result != SkillResult::Cast)
+                m_conditionHeldUntil[m_triggeredSlot] = m_selectSeconds + ConditionYieldSeconds;
+            m_triggeredNotReadyAttempts = 0;
         }
     }
+    m_triggeredSlot = -1;
     m_timerSlotDue = -1;
     if (m_selectedSlot < 0)
         return;

@@ -590,3 +590,21 @@ TEST_CASE("A timed skill that keeps producing no action yields after bounded att
     CHECK(fixture.Select(5) != ExtraOne);
     CHECK(fixture.Select(10) == ExtraOne);
 }
+
+TEST_CASE("A refused conditional skill yields to the rotation for a helper second [helper_rotation]")
+{
+    SkillFixture fixture;
+    fixture.config.aiSkillCondition[1] =
+        MUHelper::ON_CONDITION | MUHelper::ON_MOBS_NEARBY | MUHelper::ON_MORE_THAN_TWO_MOBS;
+    REQUIRE(fixture.Select(3, 5) == ExtraOne);
+    fixture.rotation.Complete(SkillResult::Refused);
+    CHECK(fixture.Select(3, 5) != ExtraOne);
+    fixture.rotation.Complete(SkillResult::Cast);
+    CHECK(fixture.Select(4, 5) == ExtraOne);
+    for (int attempt = 0; attempt < 4; ++attempt)
+    {
+        REQUIRE(fixture.Select(4, 5) == ExtraOne);
+        fixture.rotation.Complete(SkillResult::NotReady);
+    }
+    CHECK(fixture.Select(4, 5) != ExtraOne);
+}

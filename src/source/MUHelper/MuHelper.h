@@ -61,6 +61,7 @@ private:
     int ActivatePet();
     int Buff();
     int BuffTarget(CHARACTER* pTargetChar, ActionSkillType iBuffSkill);
+    void StartTimedBuffRefresh(bool bRefreshOnExpiryOnly);
     int RecoverHealth();
     int Heal();
     int HealSelf(ActionSkillType iHealingSkill);
@@ -79,6 +80,8 @@ private:
     int GetFarthestAttackingTarget();
     void CleanupTargets();
     bool IsWithinHuntingRange(int iTargetId);
+    void ForgetTarget(int iTargetId, bool bUnreachable);
+    bool IsTargetCoolingDown(int iTargetId);
     int ComputeDistanceByRange(int iRange);
     int ComputeDistanceFromTarget(CHARACTER* pTarget);
     int ComputeDistanceBetween(POINT posA, POINT posB);
@@ -100,6 +103,7 @@ private:
     std::set<int> m_setItems;
     std::map<int, std::chrono::steady_clock::time_point> m_itemRetryAt;
     std::map<int, int> m_itemPickupRequests;
+    std::map<int, std::chrono::steady_clock::time_point> m_targetRetryAt;
     int m_iCurrentItem;
     int m_iCurrentTarget;
     int m_iCurrentBuffIndex;
