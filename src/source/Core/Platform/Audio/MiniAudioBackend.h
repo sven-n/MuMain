@@ -67,6 +67,7 @@ public:
     void SetSoundMixGain(ESound buffer, float gain) override;
     void SetMusicMixGain(float gain) override;
     [[nodiscard]] std::uint32_t GetSoundStarts(ESound buffer) const override;
+    [[nodiscard]] std::uint32_t GetMusicStarts() const override;
     [[nodiscard]] bool IsSoundPlaying(ESound buffer) const override;
     [[nodiscard]] float GetSoundLength(ESound buffer) const override;
     [[nodiscard]] float GetBGMVolume() const override;
@@ -117,6 +118,8 @@ private:
     // How often each sound started on a mixed channel (GetSoundStarts).
     std::deque<std::uint32_t> m_starts = std::deque<std::uint32_t>(MAX_BUFFER);
     float m_musicMixGain = 1.0f;
+    // How many tracks started (GetMusicStarts).
+    std::uint32_t m_musicStarts = 0;
 
     float m_bgmVolume = 1.0f; // BGM volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1
     float m_sfxVolume = 1.0f; // SFX volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1

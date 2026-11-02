@@ -19,9 +19,11 @@
 #ifdef _EDITOR
 #include "Audio/EditorSoundMute.h"
 #include "Audio/SoundMixer.h"
+#include "Audio/SoundPlaces.h"
 #endif
 
 #include <cwctype>
+#include <optional>
 #include <string>
 #include <unordered_map>
 
@@ -94,12 +96,14 @@ std::wstring GetLoadedSoundFile(ESound bufferId)
 namespace
 {
 // The Sound Mixer lists a loaded sound and gives it its gain before it plays,
-// and counts it after when it started.
-void NoteForMixer(ESound bufferId, bool looped)
+// and counts it after when it started. `object`: where it plays, or nullptr;
+// its place counts when no source or place of the code lives (Q-SM13).
+void NoteForMixer(ESound bufferId, bool looped, const OBJECT* object = nullptr)
 {
     if (LoadedSounds().contains(static_cast<int>(bufferId)))
     {
-        Audio::Mixer::OnPlay(static_cast<int>(bufferId), looped);
+        const std::optional<Audio::SoundPlace> place = Audio::PlaceOfObject(object);
+        Audio::Mixer::OnPlay(static_cast<int>(bufferId), looped, place ? &*place : nullptr);
     }
 }
 
@@ -117,7 +121,7 @@ HRESULT PlayBuffer(ESound bufferId, OBJECT* object, BOOL looped)
     // Nothing started; no caller reads the result.
     if (Audio::EditorMute::IsMuted() && looped == FALSE)
         return S_FALSE;
-    NoteForMixer(bufferId, looped != FALSE);
+    NoteForMixer(bufferId, looped != FALSE, object);
 #endif
     HRESULT result = E_FAIL;
     if (g_platformAudio != nullptr)

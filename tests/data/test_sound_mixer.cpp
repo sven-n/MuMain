@@ -7,10 +7,15 @@
 #include "doctest.h"
 
 #ifdef _EDITOR
+#include "App/Platform/Windows/Winmain.h"
 #include "Audio/DSPlaySound.h"
 #include "Audio/SoundMixer.h"
 #include "Audio/SoundOverlay.h"
+#include "Audio/SoundPlaces.h"
 #include "Audio/SoundSource.h"
+#include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/ZzzObject.h"
+#include "Render/Effects/ZzzEffect.h"
 #include "Camera/CameraState.h"
 #include "Core/Platform/IPlatformAudio.h"
 #include "TestImGuiContext.h"
@@ -23,6 +28,7 @@
 #include <array>
 #include <cstdint>
 #include <map>
+#include <memory>
 #include <optional>
 #include <set>
 #include <string>
@@ -73,7 +79,18 @@ public:
     void Set3DSoundPosition() override {}
     void SetVolume(ESound, long) override {}
     void SetMasterVolume(long) override {}
-    void PlayMusic(const char*, bool) override {}
+    void PlayMusic(const char* name, bool) override
+    {
+        if (music != name)
+        {
+            music = name;
+            ++musicStarts;
+        }
+    }
+    std::uint32_t GetMusicStarts() const override
+    {
+        return musicStarts;
+    }
     void StopMusic(const char*, bool) override {}
     bool IsEndMusic() override
     {
@@ -108,6 +125,8 @@ public:
     std::set<int> playing;
     std::vector<std::pair<int, float>> gains;
     std::vector<float> musicGains;
+    std::string music;
+    std::uint32_t musicStarts = 0;
 };
 
 // The mixer cleared and a recording backend for the life of the scope.
@@ -188,8 +207,8 @@ TEST_CASE("Sound Mixer: a sound plays at its kind's volume times its own, mute w
     CHECK(GainFor(3, SoundKind::Other) == 0.0f);
 }
 
-TEST_CASE("Sound Mixer: a sound's kind is its source's, a loop's map ambience, else everything else (Q-SM2) "
-          "[audio][mixer][editor]")
+TEST_CASE("Sound Mixer: a sound's type is its source's, a loop's map ambience, else everything else (Q-SM2, "
+          "Q-SM13) [audio][mixer][editor]")
 {
     MixerScope scope;
     using Audio::Mixer::OnPlay;
@@ -225,7 +244,7 @@ TEST_CASE("Sound Mixer: a sound's kind is its source's, a loop's map ambience, e
     CHECK(FindHeard(heard, 7)->sourceNumber == 306);
     CHECK(FindHeard(heard, 8)->sourceNumber == 37);
     CHECK(FindHeard(heard, 10)->sourceNumber == -1);
-    CHECK(MuEditor::SoundMixer::SourceText(*FindHeard(heard, 7)) == "Monster sounds: Death Rider (306)");
+    CHECK(MuEditor::SoundMixer::SourceText(*FindHeard(heard, 7)) == "Monsters: Death Rider (306)");
     CHECK(MuEditor::SoundMixer::SourceText(*FindHeard(heard, 8)) == "Map object sounds: object 37");
 }
 
@@ -597,8 +616,9 @@ TEST_CASE("Sound Mixer: the overlay places a window pixel where the game window 
     CHECK(at(ToDisplay(100.0f, 50.0f, ImVec2(10.0f, 20.0f), ImVec2(800.0f, 600.0f), 0, 0)) == std::pair{110.0f, 70.0f});
 }
 
-TEST_CASE("Sound Mixer: a sound the game's own code plays starts at its place and keeps its kind, a source "
-          "wins over a place, and the last start of each is marked while it plays (Q-SM11) [audio][mixer][editor]")
+TEST_CASE("Sound Mixer: a sound the game's own code plays gets its place's type and starts there, a source "
+          "wins over a place, and the last start of each is marked while it plays (Q-SM11, Q-SM13) "
+          "[audio][mixer][editor]")
 {
     MixerScope scope;
     using namespace Audio::Mixer;
@@ -638,10 +658,16 @@ TEST_CASE("Sound Mixer: a sound the game's own code plays starts at its place an
 
     const std::vector<HeardSound> heard = Heard();
     REQUIRE(FindHeard(heard, 5) != nullptr);
-    CHECK(FindHeard(heard, 5)->kind == SoundKind::Other);
-    CHECK(FindHeard(heard, 5)->sourceNumber == -1);
-    CHECK(FindHeard(heard, 6)->kind == SoundKind::MapAmbience);
+    CHECK(FindHeard(heard, 5)->kind == SoundKind::MapObject);
+    CHECK(FindHeard(heard, 5)->sourceNumber == 46);
+    CHECK(FindHeard(heard, 5)->name.empty());
+    // A loop of a place is the place's, not map ambience.
+    CHECK(FindHeard(heard, 6)->kind == SoundKind::MapObject);
+    CHECK(FindHeard(heard, 9)->kind == SoundKind::Monster);
+    CHECK(FindHeard(heard, 9)->sourceNumber == 307);
+    CHECK(MuEditor::SoundMixer::SourceText(*FindHeard(heard, 9)) == "Monsters: 307");
     CHECK(FindHeard(heard, 7)->kind == SoundKind::Monster);
+    CHECK(FindHeard(heard, 4)->kind == SoundKind::Other);
 
     const std::vector<PlacedStart> recent = RecentStarts(10.0, 1.0);
     REQUIRE(recent.size() == 5);
@@ -752,6 +778,328 @@ TEST_CASE("Sound Mixer: the overlay marks each place of the game's own code's so
     CHECK_FALSE(Highlights(Row(7, "", "", 0), markers[0]));
 }
 
+TEST_CASE("Sound Mixer: without a source or place a sound gets the type and place of the object it plays at, and a "
+          "start without a position is logged, music too (Q-SM13, Q-SM15) [audio][mixer][editor]")
+{
+    MixerScope scope;
+    using namespace Audio::Mixer;
+    const auto play = [&scope](int number, double now, bool looped = false, const Audio::SoundPlace* object = nullptr)
+    {
+        OnPlay(number, looped, object);
+        ++scope.audio.started[number];
+        OnPlayed(number, now);
+    };
+    const Audio::SoundPlace bird{SoundKind::Creature, 175, std::array<float, 3>{1.0f, 2.0f, 3.0f}};
+    const float hero[3] = {50.0f, 60.0f, 0.0f};
+    play(5, 10.0, false, &bird);
+    {
+        // A living place wins over the object.
+        const Audio::ScopedSoundPlace place(SoundKind::Hero, -1, hero);
+        play(6, 10.0, false, &bird);
+    }
+    {
+        // A place without a position: logged, not marked.
+        const Audio::ScopedSoundPlace ui(SoundKind::Interface, -1, nullptr);
+        play(7, 10.1);
+        // Its starts each get a line, also of the same sound.
+        play(7, 10.3);
+    }
+    play(8, 10.4, true);
+    play(9, 10.5);
+    // A call that starts nothing logs nothing.
+    OnPlay(10, false);
+    OnPlayed(10, 10.6);
+    OnMusicStarted("Data\\Music\\MuTheme.mp3", 10.7);
+
+    const std::vector<HeardSound> heard = Heard();
+    CHECK(FindHeard(heard, 5)->kind == SoundKind::Creature);
+    CHECK(FindHeard(heard, 5)->sourceNumber == 175);
+    CHECK(MuEditor::SoundMixer::SourceText(*FindHeard(heard, 5)) == "Creatures: 175");
+    CHECK(FindHeard(heard, 6)->kind == SoundKind::Hero);
+    CHECK(MuEditor::SoundMixer::SourceText(*FindHeard(heard, 6)) == "Your character");
+    CHECK(FindHeard(heard, 7)->kind == SoundKind::Interface);
+    CHECK(FindHeard(heard, 8)->kind == SoundKind::MapAmbience);
+    CHECK(FindHeard(heard, 9)->kind == SoundKind::Other);
+
+    const std::vector<PlacedStart> recent = RecentStarts(10.7, 1.0);
+    REQUIRE(recent.size() == 2);
+    CHECK(recent[0].number == 5);
+    CHECK(recent[0].byCode);
+    CHECK(recent[0].kind == SoundKind::Creature);
+    CHECK(recent[0].position == std::array<float, 3>{1.0f, 2.0f, 3.0f});
+    CHECK(recent[1].number == 6);
+    CHECK(recent[1].kind == SoundKind::Hero);
+    CHECK(recent[1].position == std::array<float, 3>{50.0f, 60.0f, 0.0f});
+
+    const std::vector<PlacelessStart> logged = PlacelessStarts();
+    REQUIRE(logged.size() == 5);
+    CHECK(logged[0].number == -1);
+    CHECK(logged[0].kind == SoundKind::Music);
+    CHECK(logged[0].music == "Data\\Music\\MuTheme.mp3");
+    CHECK(logged[1].number == 9);
+    CHECK(logged[1].kind == SoundKind::Other);
+    CHECK(logged[2].number == 8);
+    CHECK(logged[2].kind == SoundKind::MapAmbience);
+    CHECK(logged[2].looped);
+    CHECK(logged[3].number == 7);
+    CHECK(logged[3].time == 10.3);
+    CHECK(logged[4].number == 7);
+    CHECK(logged[4].kind == SoundKind::Interface);
+    CHECK_FALSE(logged[4].looped);
+    CHECK(logged[4].time == 10.1);
+
+    // A few dozen are kept, the newest.
+    for (int i = 0; i < 70; ++i)
+    {
+        play(9, 20.0 + i);
+    }
+    const std::vector<PlacelessStart> kept = PlacelessStarts();
+    CHECK(kept.size() == 64);
+    CHECK(kept.front().time == 89.0);
+    CHECK(kept.back().time == 26.0);
+}
+
+TEST_CASE("Sound Mixer: PlayMp3 logs a track when the backend starts it (Q-SM15) [audio][mixer][editor]")
+{
+    MixerScope scope;
+    PlayMp3("Data\\Music\\MuTheme.mp3", TRUE);
+    // The track that plays starts nothing.
+    PlayMp3("Data\\Music\\MuTheme.mp3", TRUE);
+    PlayMp3("Data\\Music\\Devias.mp3", TRUE);
+    const std::vector<Audio::Mixer::PlacelessStart> logged = Audio::Mixer::PlacelessStarts();
+    REQUIRE(logged.size() == 2);
+    CHECK(logged[0].music == "Data\\Music\\Devias.mp3");
+    CHECK(logged[0].kind == SoundKind::Music);
+    CHECK(logged[1].music == "Data\\Music\\MuTheme.mp3");
+}
+
+TEST_CASE("Sound Mixer: a character's sounds are typed by its kind, the hero's as your character, and an effect's "
+          "by its maker (Q-SM13) [audio][mixer][editor]")
+{
+    using Audio::CharacterSoundKind;
+    CHECK(CharacterSoundKind(KIND_PLAYER, true) == SoundKind::Hero);
+    CHECK(CharacterSoundKind(KIND_PLAYER, false) == SoundKind::Player);
+    CHECK(CharacterSoundKind(KIND_MONSTER, false) == SoundKind::Monster);
+    CHECK(CharacterSoundKind(KIND_TRAP, false) == SoundKind::Monster);
+    CHECK(CharacterSoundKind(KIND_NPC, false) == SoundKind::Npc);
+    CHECK_FALSE(CharacterSoundKind(KIND_PET, false).has_value());
+
+    // The game's characters for the scope.
+    std::unique_ptr<CHARACTER[]> characters(new CHARACTER[MAX_CHARACTERS_CLIENT + 1]{});
+    CHARACTER* const previousCharacters = CharactersClient;
+    CHARACTER* const previousHero = Hero;
+    CharactersClient = characters.get();
+    Hero = &characters[3];
+    characters[3].Object.Kind = KIND_PLAYER;
+    Vector(100.0f, 200.0f, 0.0f, characters[3].Object.Position);
+    characters[4].Object.Kind = KIND_PLAYER;
+    characters[5].Object.Kind = KIND_NPC;
+    characters[5].MonsterIndex = static_cast<EMonsterType>(229);
+    Vector(300.0f, 400.0f, 10.0f, characters[5].Object.Position);
+    characters[6].Object.Kind = KIND_PET;
+    Audio::ForgetMakers();
+
+    const auto placeOf = [](const CHARACTER& c) -> std::optional<Audio::SoundPlace>
+    {
+        std::optional<Audio::ScopedSoundPlace> place;
+        Audio::PlaceCharacter(place, c);
+        if (const Audio::SoundPlace* living = Audio::CurrentSoundPlace(); place && living != nullptr)
+        {
+            return *living;
+        }
+        return std::nullopt;
+    };
+    const std::optional<Audio::SoundPlace> hero = placeOf(characters[3]);
+    REQUIRE(hero.has_value());
+    CHECK(hero->kind == SoundKind::Hero);
+    CHECK(hero->number == -1);
+    CHECK(hero->position == std::array<float, 3>{100.0f, 200.0f, 0.0f});
+    CHECK(placeOf(characters[4])->kind == SoundKind::Player);
+    const std::optional<Audio::SoundPlace> npc = placeOf(characters[5]);
+    REQUIRE(npc.has_value());
+    CHECK(npc->kind == SoundKind::Npc);
+    CHECK(npc->number == 229);
+    HeardSound npcSound;
+    npcSound.kind = SoundKind::Npc;
+    npcSound.sourceNumber = 229;
+    CHECK(MuEditor::SoundMixer::SourceText(npcSound) == "NPCs: 229");
+    HeardSound playerSound;
+    playerSound.kind = SoundKind::Player;
+    CHECK(MuEditor::SoundMixer::SourceText(playerSound) == "Other players");
+    CHECK(npc->position == std::array<float, 3>{300.0f, 400.0f, 10.0f});
+    CHECK_FALSE(placeOf(characters[6]).has_value());
+    CHECK(Audio::CurrentSoundPlace() == nullptr);
+
+    // The objects PlayBuffer gets: a character, an item, a creature, an
+    // effect, anything else.
+    CHECK(Audio::PlaceOfObject(&characters[3].Object)->kind == SoundKind::Hero);
+    CHECK(Audio::PlaceOfObject(&characters[5].Object)->number == 229);
+    Items[4].Object.Type = 512;
+    CHECK(Audio::PlaceOfObject(&Items[4].Object)->kind == SoundKind::Item);
+    CHECK(Audio::PlaceOfObject(&Items[4].Object)->number == 512);
+    Fishs[1].Type = 180;
+    CHECK(Audio::PlaceOfObject(&Fishs[1])->kind == SoundKind::Creature);
+    OBJECT loose;
+    loose.Type = 77;
+    Vector(1.0f, 2.0f, 3.0f, loose.Position);
+    const std::optional<Audio::SoundPlace> other = Audio::PlaceOfObject(&loose);
+    REQUIRE(other.has_value());
+    CHECK(other->kind == SoundKind::Other);
+    CHECK(other->number == 77);
+    CHECK(other->position == std::array<float, 3>{1.0f, 2.0f, 3.0f});
+    CHECK_FALSE(Audio::PlaceOfObject(nullptr).has_value());
+
+    // An effect made while the hero's code runs counts as the hero's, where
+    // the effect is; one made by an effect of the hero's too; one nobody
+    // made is an effect of its type.
+    const float effectAt[3] = {7.0f, 8.0f, 9.0f};
+    {
+        std::optional<Audio::ScopedSoundPlace> place;
+        Audio::PlaceCharacter(place, characters[3]);
+        Audio::RememberMaker(&Effects[10]);
+    }
+    {
+        std::optional<Audio::ScopedSoundPlace> place;
+        Audio::PlaceEffect(place, &Effects[10], 334, effectAt);
+        Audio::RememberMaker(&Effects[11]);
+    }
+    Audio::RememberMaker(&Effects[12]);
+    const Audio::SoundPlace fireball = Audio::EffectPlace(&Effects[10], 334, effectAt);
+    CHECK(fireball.kind == SoundKind::Hero);
+    CHECK(fireball.number == -1);
+    CHECK(fireball.position == std::array<float, 3>{7.0f, 8.0f, 9.0f});
+    CHECK(Audio::EffectPlace(&Effects[11], 335, effectAt).kind == SoundKind::Hero);
+    const Audio::SoundPlace nobodys = Audio::EffectPlace(&Effects[12], 336, effectAt);
+    CHECK(nobodys.kind == SoundKind::Effect);
+    CHECK(nobodys.number == 336);
+    // PlayBuffer's effect object: by its maker too.
+    Effects[10].Type = 334;
+    CHECK(Audio::PlaceOfObject(&Effects[10])->kind == SoundKind::Hero);
+    // A slot made again by nobody forgets its maker.
+    Audio::RememberMaker(&Effects[10]);
+    CHECK(Audio::EffectPlace(&Effects[10], 334, effectAt).kind == SoundKind::Effect);
+
+    Audio::ForgetMakers();
+    Hero = previousHero;
+    CharactersClient = previousCharacters;
+}
+
+TEST_CASE("Sound Mixer: a type's Hear box mutes it and its Show box hides it from the overlay and its log (Q-SM14) "
+          "[audio][mixer][editor]")
+{
+    MixerScope scope;
+    TestImGuiContext context;
+    ImGuiIO& io = ImGui::GetIO();
+    Audio::Mixer::Control control;
+    int clicks[2] = {};
+    const auto frame = [&]
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(300.0f, 200.0f));
+        ImGui::Begin("Boxes");
+        clicks[0] += MuEditor::SoundMixer::RenderHearBox(control) ? 1 : 0;
+        clicks[1] += MuEditor::SoundMixer::RenderShowBox(SoundKind::Hero) ? 1 : 0;
+        ImGui::End();
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    };
+    const auto click = [&](float y)
+    {
+        const float x = ImGui::GetStyle().WindowPadding.x + ImGui::GetFrameHeight() * 0.5f;
+        io.AddMousePosEvent(x, y);
+        frame();
+        io.AddMouseButtonEvent(ImGuiMouseButton_Left, true);
+        frame();
+        io.AddMouseButtonEvent(ImGuiMouseButton_Left, false);
+        frame();
+    };
+    frame();
+    const float top = ImGui::GetStyle().WindowPadding.y + ImGui::GetFrameHeight();
+    const float hearY = top + ImGui::GetFrameHeight() * 0.5f;
+    const float showY = hearY + ImGui::GetFrameHeightWithSpacing();
+    CHECK(MuEditor::SoundMixer::HearBoxTicked(control));
+    click(hearY);
+    CHECK(clicks[0] == 1);
+    CHECK(control.muted);
+    CHECK_FALSE(MuEditor::SoundMixer::HearBoxTicked(control));
+    click(showY);
+    CHECK(clicks[1] == 1);
+    CHECK_FALSE(Audio::Overlay::IsShown(SoundKind::Hero));
+    CHECK(Audio::Overlay::IsShown(SoundKind::Player));
+    click(hearY);
+    CHECK_FALSE(control.muted);
+
+    // The overlay leaves out what is of a hidden type.
+    using Audio::Overlay::DrawnSource;
+    DrawnSource waterfall;
+    waterfall.kind = SoundKind::MapObject;
+    waterfall.sourceNumber = 37;
+    DrawnSource rider;
+    rider.kind = SoundKind::Monster;
+    rider.sourceNumber = 306;
+    Audio::Overlay::SetShown(SoundKind::Monster, false);
+    const std::vector<DrawnSource> followed = MuEditor::SoundOverlay::Followed({waterfall, rider}, {}, false);
+    REQUIRE(followed.size() == 1);
+    CHECK(followed[0].sourceNumber == 37);
+    Audio::Mixer::PlacelessStart click1{5, SoundKind::Interface, {}, false, 1.0};
+    Audio::Mixer::PlacelessStart music{-1, SoundKind::Music, "Data\\Music\\MuTheme.mp3", true, 0.5};
+    Audio::Overlay::SetShown(SoundKind::Interface, false);
+    const std::vector<Audio::Mixer::PlacelessStart> logged = MuEditor::SoundOverlay::Logged({click1, music}, {}, false);
+    REQUIRE(logged.size() == 1);
+    CHECK(logged[0].kind == SoundKind::Music);
+    // A code start's marker and flash: of a shown type, and while filtered of
+    // a shown row's sound.
+    Audio::Mixer::PlacedStart step;
+    step.number = 8;
+    step.kind = SoundKind::Hero;
+    step.byCode = true;
+    Audio::Mixer::PlacedStart swing = step;
+    swing.number = 60;
+    swing.kind = SoundKind::Player;
+    CHECK_FALSE(MuEditor::SoundOverlay::Draws(step, {}, false));
+    CHECK(MuEditor::SoundOverlay::Draws(swing, {}, false));
+    CHECK(MuEditor::SoundOverlay::Draws(swing, {Row(60, "", "", 0)}, true));
+    CHECK_FALSE(MuEditor::SoundOverlay::Draws(swing, {Row(61, "", "", 0)}, true));
+    for (int kind = 0; kind < Audio::SoundKindCount; ++kind)
+    {
+        Audio::Overlay::SetShown(static_cast<SoundKind>(kind), true);
+    }
+}
+
+TEST_CASE("Sound Mixer: the log shows the newest 10 starts without a place, how long ago, and while a filter is "
+          "set those of the rows shown (Q-SM15) [audio][mixer][editor]")
+{
+    using Audio::Mixer::PlacelessStart;
+    using namespace MuEditor::SoundOverlay;
+    std::vector<PlacelessStart> starts;
+    for (int i = 0; i < 12; ++i)
+    {
+        starts.push_back(PlacelessStart{100 + i, SoundKind::Interface, {}, false, 20.0 - i});
+    }
+    std::vector<PlacelessStart> logged = Logged(starts, {}, false);
+    REQUIRE(logged.size() == LogLines);
+    CHECK(logged.front().number == 100);
+    CHECK(logged.back().number == 109);
+    // While filtered: the starts of the rows shown; a track has no row.
+    starts.insert(starts.begin(), PlacelessStart{-1, SoundKind::Music, "Data\\Music\\MuTheme.mp3", true, 21.0});
+    logged = Logged(starts, {Row(111, "", "", 0), Row(103, "", "", 0)}, true);
+    REQUIRE(logged.size() == 2);
+    CHECK(logged[0].number == 103);
+    CHECK(logged[1].number == 111);
+    CHECK(Logged(starts, {}, true).empty());
+    CHECK(Logged(starts, {}, false).front().kind == SoundKind::Music);
+
+    CHECK(MusicText("Data\\Music\\MuTheme.mp3") == "MuTheme.mp3");
+    CHECK(MusicText("data/music/Devias.mp3") == "Devias.mp3");
+    CHECK(MusicText("Other\\Theme.mp3") == "Other/Theme.mp3");
+    CHECK(LogText(PlacelessStart{-1, SoundKind::Music, "Data\\Music\\MuTheme.mp3", true, 10.0}, 13.0) ==
+          "3.0 s  Music: MuTheme.mp3");
+    CHECK(LogText(PlacelessStart{5, SoundKind::Interface, {}, false, 10.0}, 10.2) == "0.2 s  #5 (Interface)");
+    CHECK(LogText(PlacelessStart{6, SoundKind::MapAmbience, {}, true, 10.0}, 51.0) ==
+          "41.0 s  #6 (Map ambience, loop)");
+}
+
 TEST_CASE("Sound Mixer: the reminder counts what is muted, solo and lowered (Q-SM5) [audio][mixer][editor]")
 {
     MixerScope scope;
@@ -828,6 +1176,21 @@ TEST_CASE("Sound Mixer: PlayBuffer notes a loaded sound with its gain, and start
     CHECK_FALSE(scope.audio.plays.empty());
     CHECK(MuEditor::SoundMixer::SoundText(SOUND_CLICK01) == "ibuttonclick.wav");
     CHECK(MuEditor::SoundMixer::SoundText(SOUND_CLICK01 + 1) == "#" + std::to_string(SOUND_CLICK01 + 1));
+    // The object it plays at gives a sound without a source or place its type
+    // and place (Q-SM13).
+    LoadWaveFile(SOUND_BIRD01, L"Data\\Sound\\aBird1.wav", 1);
+    Boids[2].Type = 175;
+    Vector(10.0f, 20.0f, 30.0f, Boids[2].Position);
+    scope.audio.starts = true;
+    PlayBuffer(SOUND_BIRD01, &Boids[2]);
+    const std::vector<HeardSound> withBird = Audio::Mixer::Heard();
+    const HeardSound* bird = FindHeard(withBird, SOUND_BIRD01);
+    REQUIRE(bird != nullptr);
+    CHECK(bird->kind == SoundKind::Creature);
+    CHECK(bird->sourceNumber == 175);
+    const std::vector<Audio::Mixer::PlacedStart> marked = Audio::Mixer::CodeSounds(Audio::Mixer::Now());
+    REQUIRE(marked.size() == 1);
+    CHECK(marked[0].position == std::array<float, 3>{10.0f, 20.0f, 30.0f});
     ForgetLoadedSounds();
 }
 

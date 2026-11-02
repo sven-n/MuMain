@@ -19,8 +19,8 @@ namespace MuEditor::SoundOverlay
 // monster, the same set (an attack's row names no set).
 bool Names(const SoundMixer::HeardRow& row, Audio::SoundKind kind, const std::string& name, int sourceNumber);
 
-// The drawn sources to show: all, or while a filter is set those a shown row
-// names.
+// The drawn sources to show: those of a shown type (Q-SM14), all of them or,
+// while a filter is set, those a shown row names.
 std::vector<Audio::Overlay::DrawnSource> Followed(const std::vector<Audio::Overlay::DrawnSource>& drawn,
                                                   const std::vector<SoundMixer::HeardRow>& shown, bool filtered);
 
@@ -38,6 +38,10 @@ bool IsInside(const Audio::Overlay::DrawnSource& source, float x, float y);
 // Whether a shown row follows a start: a row of its sound for a sound of the
 // game's own code (Q-SM11), else a row that names its source.
 bool Follows(const Audio::Mixer::PlacedStart& start, const std::vector<SoundMixer::HeardRow>& shown);
+
+// Whether the overlay draws a start's marker or flash: one of a shown type
+// (Q-SM14) and, while a filter is set, one a shown row follows.
+bool Draws(const Audio::Mixer::PlacedStart& start, const std::vector<SoundMixer::HeardRow>& shown, bool filtered);
 
 // The line of a label beside its marker.
 enum class LabelLine
@@ -71,10 +75,27 @@ std::vector<CodeMarker> GroupCodeSounds(const std::vector<Audio::Mixer::PlacedSt
 // Whether the hovered row lights up the marker: a row of one of its sounds.
 bool Highlights(const SoundMixer::HeardRow& hovered, const CodeMarker& marker);
 
-// Takes the frame's drawn sources and, while the overlay is on, draws them,
-// the places of the game's own code's sounds and the starts of the last
-// second behind the editor's windows. `hovered`: the table row under the
-// mouse, or nullptr.
+// The overlay's log of starts without a place (Q-SM15): so many lines.
+constexpr int LogLines = 10;
+
+// The log's lines: the newest `LogLines` of `starts` (newest first) of a
+// shown type and, while a filter is set, of a sound a shown row names (a
+// music track, with no row, then none).
+std::vector<Audio::Mixer::PlacelessStart> Logged(const std::vector<Audio::Mixer::PlacelessStart>& starts,
+                                                 const std::vector<SoundMixer::HeardRow>& shown, bool filtered);
+
+// The music's file below Data/Music.
+std::string MusicText(const std::string& music);
+
+// A log line: how long ago it started, the file and its type
+// ("0.2 s  iButtonClick.wav (Interface)").
+std::string LogText(const Audio::Mixer::PlacelessStart& start, double now);
+
+// Takes the frame's drawn sources and, while the overlay is on, draws the log
+// of starts without a place at the game's top left and, where the world is
+// drawn, the sources, the places of the game's own code's sounds and the
+// starts of the last second, of the types shown, behind the editor's
+// windows. `hovered`: the table row under the mouse, or nullptr.
 void Render(const std::vector<SoundMixer::HeardRow>& shown, bool filtered, const SoundMixer::HeardRow* hovered);
 } // namespace MuEditor::SoundOverlay
 

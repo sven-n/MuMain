@@ -12,6 +12,8 @@
 #include <cstdint>
 #include <deque>
 #include <map>
+#include <optional>
+#include <string>
 #include <utility>
 
 namespace Audio
@@ -43,7 +45,16 @@ const SoundSource* CurrentSoundSource()
 }
 
 ScopedSoundPlace::ScopedSoundPlace(SoundKind kind, int number, const float* position)
-    : m_place{kind, number, {position[0], position[1], position[2]}}, m_outer(g_currentPlace)
+    : m_place{kind, number, std::nullopt}, m_outer(g_currentPlace)
+{
+    if (position != nullptr)
+    {
+        m_place.position = std::array<float, 3>{position[0], position[1], position[2]};
+    }
+    g_currentPlace = &m_place;
+}
+
+ScopedSoundPlace::ScopedSoundPlace(const SoundPlace& place) : m_place(place), m_outer(g_currentPlace)
 {
     g_currentPlace = &m_place;
 }
@@ -69,6 +80,20 @@ constexpr size_t KeptStarts = 256;
 // A sound of the game's own code is marked so long after its start, also when
 // it played for less.
 constexpr double CodeSoundHoldSeconds = 1.0;
+// The starts without a place kept for the overlay's log (Q-SM15).
+constexpr size_t KeptPlacelessStarts = 64;
+
+// Where a starting sound comes from: its type and source, and its position
+// if it has one.
+struct Origin
+{
+    SoundKind kind = SoundKind::Other;
+    std::string name;
+    int sourceNumber = -1;
+    std::optional<std::array<float, 3>> position;
+    // Named by a place (the game's own code), not by a source (data).
+    bool byCode = false;
+};
 
 struct Listed
 {
@@ -87,13 +112,17 @@ struct State
     // The kind of every sound heard this session, for Apply: a cleared sound
     // may still play.
     std::map<int, SoundKind> kindOf;
-    // The backend's starts of OnPlay's sound before its play.
+    // The backend's starts of OnPlay's sound before its play, and where it
+    // comes from.
     int playing = -1;
     std::uint32_t startsBefore = 0;
+    Origin origin;
     // The latest placed starts, oldest first.
     std::deque<PlacedStart> starts;
     // The last start of each sound of the game's own code, by sound number.
     std::map<int, PlacedStart> codeStarts;
+    // The latest starts without a place, newest first.
+    std::deque<PlacelessStart> placeless;
 };
 
 State& Mixer()
@@ -105,6 +134,35 @@ State& Mixer()
 size_t IndexOf(SoundKind kind)
 {
     return static_cast<size_t>(kind);
+}
+
+// The living source, else the innermost living place, else the object's
+// place, else a loop is map ambience and the rest everything else (Q-SM13).
+Origin Resolve(bool looped, const SoundPlace* objectPlace)
+{
+    if (const SoundSource* source = CurrentSoundSource())
+    {
+        return Origin{source->kind, source->name, source->number, source->position, false};
+    }
+    const SoundPlace* place = CurrentSoundPlace();
+    if (place == nullptr)
+    {
+        place = objectPlace;
+    }
+    if (place != nullptr)
+    {
+        return Origin{place->kind, {}, place->number, place->position, true};
+    }
+    return Origin{looped ? SoundKind::MapAmbience : SoundKind::Other, {}, -1, std::nullopt, true};
+}
+
+void KeepPlaceless(State& state, PlacelessStart start)
+{
+    state.placeless.push_front(std::move(start));
+    if (state.placeless.size() > KeptPlacelessStarts)
+    {
+        state.placeless.pop_back();
+    }
 }
 
 bool AnySolo(const State& state)
@@ -189,7 +247,7 @@ float MusicGain()
     return Level(music.volume);
 }
 
-float OnPlay(int number, bool looped)
+float OnPlay(int number, bool looped, const SoundPlace* objectPlace)
 {
     State& state = Mixer();
     const auto [row, added] = state.listed.try_emplace(number);
@@ -200,18 +258,10 @@ float OnPlay(int number, bool looped)
     HeardSound& heard = row->second.sound;
     heard.number = number;
     heard.looped = looped;
-    if (const SoundSource* source = CurrentSoundSource())
-    {
-        heard.kind = source->kind;
-        heard.name = source->name;
-        heard.sourceNumber = source->number;
-    }
-    else
-    {
-        heard.kind = looped ? SoundKind::MapAmbience : SoundKind::Other;
-        heard.name.clear();
-        heard.sourceNumber = -1;
-    }
+    state.origin = Resolve(looped, objectPlace);
+    heard.kind = state.origin.kind;
+    heard.name = state.origin.name;
+    heard.sourceNumber = state.origin.sourceNumber;
     state.kindOf[number] = heard.kind;
     state.playing = number;
     state.startsBefore = StartsOf(number);
@@ -239,23 +289,16 @@ void OnPlayed(int number, double now)
     }
     row->second.sound.plays += static_cast<int>(started);
     row->second.sound.lastStarted = now;
-    PlacedStart start;
-    if (const SoundSource* source = CurrentSoundSource())
+    const Origin& origin = state.origin;
+    if (!origin.position)
     {
-        if (!source->position)
-        {
-            return;
-        }
-        start = PlacedStart{number, source->kind, source->name, source->number, *source->position, now, false};
-    }
-    else if (const SoundPlace* place = CurrentSoundPlace())
-    {
-        start = PlacedStart{number, place->kind, {}, place->number, place->position, now, true};
-        state.codeStarts[number] = start;
-    }
-    else
-    {
+        KeepPlaceless(state, PlacelessStart{number, origin.kind, {}, row->second.sound.looped, now});
         return;
+    }
+    PlacedStart start{number, origin.kind, origin.name, origin.sourceNumber, *origin.position, now, origin.byCode};
+    if (origin.byCode)
+    {
+        state.codeStarts[number] = start;
     }
     state.starts.push_back(std::move(start));
     while (state.starts.size() > KeptStarts || now - state.starts.front().time > KeptStartSeconds)
@@ -296,6 +339,17 @@ std::vector<PlacedStart> CodeSounds(double now)
         }
     }
     return sounds;
+}
+
+void OnMusicStarted(const std::string& music, double now)
+{
+    KeepPlaceless(Mixer(), PlacelessStart{-1, SoundKind::Music, music, true, now});
+}
+
+std::vector<PlacelessStart> PlacelessStarts()
+{
+    const State& state = Mixer();
+    return {state.placeless.begin(), state.placeless.end()};
 }
 
 std::vector<HeardSound> Heard()

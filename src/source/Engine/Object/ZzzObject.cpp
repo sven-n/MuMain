@@ -6350,6 +6350,8 @@ void CreateMoneyDrop(ITEM_t* ip, int amount, vec3_t position, bool isFreshDrop)
     n->AncientDiscriminator = 0;
     if (isFreshDrop)
     {
+        // The coins' sound is the item's, where it lands (Q-SM13).
+        const Audio::ScopedSoundPlace place(Audio::SoundKind::Item, Type, position);
         PlayBuffer(SOUND_DROP_GOLD01);
     }
 

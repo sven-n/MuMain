@@ -37,7 +37,7 @@
 #include "Scenes/SceneCore.h"
 #include "Scenes/MainScene.h"
 #include "Audio/DSPlaySound.h"
-#include "Audio/SoundSource.h"
+#include "Audio/SoundPlaces.h"
 #include "I18N/All.h"
 
 #include "Engine/Physics/PhysicsManager.h"
@@ -3967,22 +3967,12 @@ void PlayAttackHitSound(CHARACTER* attacker, OBJECT* o)
                                                                                             : SOUND_ATTACK_MELEE_HIT1;
     PlayBuffer(static_cast<ESound>(firstSound + Random::Rand() % HitSoundVariants), o);
 }
-
-// The sounds a monster's or an NPC's code plays while `place` lives are marked
-// at it in the sound overlay (Q-SM11).
-void PlaceCodeSounds(std::optional<Audio::ScopedSoundPlace>& place, const CHARACTER& c, const OBJECT& o)
-{
-    if (o.Kind == KIND_MONSTER || o.Kind == KIND_NPC)
-    {
-        place.emplace(Audio::SoundKind::Monster, static_cast<int>(c.MonsterIndex), o.Position);
-    }
-}
 } // namespace
 
 void MoveCharacter(CHARACTER* c, OBJECT* o)
 {
     std::optional<Audio::ScopedSoundPlace> place;
-    PlaceCodeSounds(place, *c, *o);
+    Audio::PlaceCharacter(place, *c);
     if (o->Type == MODEL_WARCRAFT)
     {
         wchar_t Text[100];
@@ -5531,7 +5521,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
 {
     // NPCs play their sounds here (Elf Lala's harp, the Chaos Goblin's mix).
     std::optional<Audio::ScopedSoundPlace> place;
-    PlaceCodeSounds(place, *c, *o);
+    Audio::PlaceCharacter(place, *c);
     BMD* b = &Models[o->Type];
     if (b->NumActions == 0)
     {
@@ -12141,7 +12131,7 @@ void UpdateDrawnCharacterEffects()
 
         OBJECT* o = &c->Object;
         std::optional<Audio::ScopedSoundPlace> place;
-        PlaceCodeSounds(place, *c, *o);
+        Audio::PlaceCharacter(place, *c);
         BMD* b = PlaceCharacterModel(o);
         PrepareHeldWeapons(c);
         UpdateAttachedParts(c);

@@ -115,8 +115,22 @@ std::string ChangesText(const Audio::Mixer::Changes& changes);
 // ("2 muted, overlay on"); "" for neither.
 std::string ReminderText(const Audio::Mixer::Changes& changes, bool overlayOn);
 
-// The kind's name in the window.
+// The type's name in the window.
 const char* KindName(Audio::SoundKind kind);
+
+// "1.4 s".
+std::string SecondsText(double seconds);
+
+// Whether a type's Hear box is ticked: while the type is not muted.
+bool HearBoxTicked(const Audio::Mixer::Control& control);
+
+// A type's Hear box (Q-SM14): HearBoxTicked; a click mutes or unmutes the
+// type at once. Whether this frame's click did.
+bool RenderHearBox(Audio::Mixer::Control& control);
+
+// A type's Show box (Q-SM14): whether the overlay draws the type. Whether
+// this frame's click changed it.
+bool RenderShowBox(Audio::SoundKind kind);
 
 // Where a heard sound came from: its kind, and the set and monster or the map
 // object type.

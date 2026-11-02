@@ -12,12 +12,15 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "imgui.h"
+#include "imgui_internal.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cmath>
 #include <iterator>
 #include <numbers>
 #include <string>
+#include <string_view>
 
 namespace
 {
@@ -50,6 +53,8 @@ const ImU32 HighlightColor = IM_COL32(255, 210, 90, 255);
 const ImU32 CodeColor = IM_COL32(210, 165, 255, 235);
 const ImU32 LabelBackColor = IM_COL32(0, 0, 0, 150);
 const ImU32 LabelColor = IM_COL32(255, 255, 255, 255);
+// The log sits so far from the game's top left, below the editor's menu bar.
+constexpr float LogMargin = 8.0f;
 
 // World positions to ImGui's coordinates: the kept camera's window pixels in
 // the game window's viewport.
@@ -215,6 +220,31 @@ bool AnyNames(const std::vector<HeardRow>& rows, Audio::SoundKind kind, const st
     return std::any_of(rows.begin(), rows.end(), [&](const HeardRow& row)
                        { return MuEditor::SoundOverlay::Names(row, kind, name, sourceNumber); });
 }
+
+// A line of the log, newest on top: yellow when it starts, white a second
+// later, yellow while its row is hovered.
+void DrawLog(ImDrawList& list, const std::vector<Audio::Mixer::PlacelessStart>& starts, double now,
+             const HeardRow* hovered)
+{
+    const ImVec4 fresh = ImGui::ColorConvertU32ToFloat4(HighlightColor);
+    const ImVec4 settled = ImGui::ColorConvertU32ToFloat4(LabelColor);
+    ImVec2 at(ImGui::GetMainViewport()->WorkPos.x + LogMargin, ImGui::GetMainViewport()->WorkPos.y + LogMargin);
+    for (const Audio::Mixer::PlacelessStart& start : starts)
+    {
+        const std::string text = MuEditor::SoundOverlay::LogText(start, now);
+        const ImVec2 size = ImGui::CalcTextSize(text.c_str());
+        const float age = std::clamp(static_cast<float>((now - start.time) / FlashSeconds), 0.0f, 1.0f);
+        ImU32 color = ImGui::ColorConvertFloat4ToU32(ImLerp(fresh, settled, age));
+        if (hovered != nullptr && hovered->sound.number == start.number)
+        {
+            color = HighlightColor;
+        }
+        list.AddRectFilled(ImVec2(at.x - LabelGap, at.y - LabelGap),
+                           ImVec2(at.x + size.x + LabelGap, at.y + size.y + LabelGap), LabelBackColor);
+        list.AddText(at, color, text.c_str());
+        at.y += size.y + 2.0f * LabelGap + 1.0f;
+    }
+}
 } // namespace
 
 namespace MuEditor::SoundOverlay
@@ -231,13 +261,13 @@ bool Names(const SoundMixer::HeardRow& row, Audio::SoundKind kind, const std::st
 std::vector<Audio::Overlay::DrawnSource> Followed(const std::vector<Audio::Overlay::DrawnSource>& drawn,
                                                   const std::vector<SoundMixer::HeardRow>& shown, bool filtered)
 {
-    if (!filtered)
-    {
-        return drawn;
-    }
     std::vector<Audio::Overlay::DrawnSource> followed;
-    std::copy_if(drawn.begin(), drawn.end(), std::back_inserter(followed), [&shown](const DrawnSource& source)
-                 { return AnyNames(shown, source.kind, source.name, source.sourceNumber); });
+    std::copy_if(drawn.begin(), drawn.end(), std::back_inserter(followed),
+                 [&shown, filtered](const DrawnSource& source)
+                 {
+                     return Audio::Overlay::IsShown(source.kind) &&
+                            (!filtered || AnyNames(shown, source.kind, source.name, source.sourceNumber));
+                 });
     return followed;
 }
 
@@ -277,6 +307,11 @@ bool Follows(const Audio::Mixer::PlacedStart& start, const std::vector<SoundMixe
                        [&start](const HeardRow& row) { return row.sound.number == start.number; });
 }
 
+bool Draws(const Audio::Mixer::PlacedStart& start, const std::vector<SoundMixer::HeardRow>& shown, bool filtered)
+{
+    return Audio::Overlay::IsShown(start.kind) && (!filtered || Follows(start, shown));
+}
+
 std::vector<CodeMarker> GroupCodeSounds(const std::vector<Audio::Mixer::PlacedStart>& starts)
 {
     std::vector<CodeMarker> markers;
@@ -306,15 +341,69 @@ bool Highlights(const SoundMixer::HeardRow& hovered, const CodeMarker& marker)
     return std::find(marker.sounds.begin(), marker.sounds.end(), hovered.sound.number) != marker.sounds.end();
 }
 
+std::vector<Audio::Mixer::PlacelessStart> Logged(const std::vector<Audio::Mixer::PlacelessStart>& starts,
+                                                 const std::vector<SoundMixer::HeardRow>& shown, bool filtered)
+{
+    std::vector<Audio::Mixer::PlacelessStart> logged;
+    for (const Audio::Mixer::PlacelessStart& start : starts)
+    {
+        if (logged.size() == static_cast<size_t>(LogLines))
+        {
+            break;
+        }
+        const bool followed = !filtered || std::any_of(shown.begin(), shown.end(), [&start](const HeardRow& row)
+                                                       { return row.sound.number == start.number; });
+        if (Audio::Overlay::IsShown(start.kind) && followed)
+        {
+            logged.push_back(start);
+        }
+    }
+    return logged;
+}
+
+std::string MusicText(const std::string& music)
+{
+    std::string file = music;
+    std::replace(file.begin(), file.end(), '\\', '/');
+    constexpr std::string_view MusicFolder = "data/music/";
+    if (file.size() > MusicFolder.size())
+    {
+        std::string start = file.substr(0, MusicFolder.size());
+        std::transform(start.begin(), start.end(), start.begin(),
+                       [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
+        if (start == MusicFolder)
+        {
+            file.erase(0, MusicFolder.size());
+        }
+    }
+    return file;
+}
+
+std::string LogText(const Audio::Mixer::PlacelessStart& start, double now)
+{
+    const std::string ago = SoundMixer::SecondsText(now - start.time);
+    if (start.kind == Audio::SoundKind::Music && start.number < 0)
+    {
+        return I18N::Format(I18N::Editor::SoundMixerLogMusic01, {ago, MusicText(start.music)});
+    }
+    return I18N::Format(start.looped ? I18N::Editor::SoundMixerLogLoop012 : I18N::Editor::SoundMixerLog012,
+                        {ago, SoundMixer::SoundText(start.number), SoundMixer::KindName(start.kind)});
+}
+
 void Render(const std::vector<SoundMixer::HeardRow>& shown, bool filtered, const SoundMixer::HeardRow* hovered)
 {
     const std::vector<DrawnSource> drawn = Audio::Overlay::TakeDrawn();
-    const CameraState* camera = Audio::Overlay::KeptCamera();
-    if (!Audio::Overlay::IsOn() || camera == nullptr)
+    if (!Audio::Overlay::IsOn())
     {
         return;
     }
     ImDrawList& list = *ImGui::GetBackgroundDrawList();
+    DrawLog(list, Logged(Audio::Mixer::PlacelessStarts(), shown, filtered), Audio::Mixer::Now(), hovered);
+    const CameraState* camera = Audio::Overlay::KeptCamera();
+    if (camera == nullptr)
+    {
+        return;
+    }
     const Projector projector(*camera);
     for (const DrawnSource& source : Followed(drawn, shown, filtered))
     {
@@ -325,7 +414,7 @@ void Render(const std::vector<SoundMixer::HeardRow>& shown, bool filtered, const
     std::vector<Audio::Mixer::PlacedStart> codeSounds;
     for (const Audio::Mixer::PlacedStart& start : Audio::Mixer::CodeSounds(now))
     {
-        if (!filtered || Follows(start, shown))
+        if (Draws(start, shown, filtered))
         {
             codeSounds.push_back(start);
         }
@@ -336,7 +425,7 @@ void Render(const std::vector<SoundMixer::HeardRow>& shown, bool filtered, const
     }
     for (const Audio::Mixer::PlacedStart& start : Audio::Mixer::RecentStarts(now, FlashSeconds))
     {
-        if (!filtered || Follows(start, shown))
+        if (Draws(start, shown, filtered))
         {
             DrawFlash(list, projector, start, now);
         }

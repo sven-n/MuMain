@@ -5,21 +5,35 @@
 #include <string>
 #include <string_view>
 
-// Where a sound comes from, for the editor's Sound Mixer (Q-SM2): the data's
-// players name the kind and source of the sounds they play while a
-// ScopedSoundSource lives. In the game's own builds it does nothing.
+// Where a sound comes from, for the editor's Sound Mixer (Q-SM2, Q-SM13): the
+// data's players name the kind and source of the sounds they play while a
+// ScopedSoundSource lives, the game's code the place it runs for while a
+// ScopedSoundPlace lives. In the game's own builds they do nothing.
 namespace Audio
 {
+// The mixer's types (Q-SM13), in the window's order.
 enum class SoundKind
 {
     Music,
     MapAmbience,
     MapObject,
     Monster,
+    Npc,
+    // The hero: your character.
+    Hero,
+    // Every other player.
+    Player,
+    // An effect nobody made: an effect counts for its maker.
+    Effect,
+    // An item on the ground.
+    Item,
+    // Birds, bats, mice, fish.
+    Creature,
+    Interface,
     Other,
 };
 
-constexpr int SoundKindCount = 5;
+constexpr int SoundKindCount = 12;
 
 #ifdef _EDITOR
 struct SoundSource
@@ -52,25 +66,28 @@ private:
 // The innermost living source; nullptr for none.
 const SoundSource* CurrentSoundSource();
 
-// Where the game's own code that plays a sound stands: a map object while it
-// is moved or drawn, a monster while it moves or is drawn (Q-SM11). Only the
-// overlay reads it, to mark the sounds that no data names; a sound's kind
-// still comes from its SoundSource.
+// What the game's own code that plays a sound runs for (Q-SM11, Q-SM13): a map
+// object while it is moved or drawn, a character while it moves or is drawn,
+// the caster of a skill the server sends, an effect as it moves (typed by its
+// maker), the interface. Without a source, a sound's type is its place's, and
+// the overlay marks it there; one without a position (the interface) goes to
+// the overlay's log.
 struct SoundPlace
 {
-    // MapObject or Monster.
     SoundKind kind = SoundKind::MapObject;
-    // The map object's type or the monster's number.
+    // The map object's type, the monster's or NPC's number, the effect's type;
+    // -1 for none.
     int number = -1;
-    std::array<float, 3> position{};
+    std::optional<std::array<float, 3>> position;
 };
 
 // Names the place of the sounds played while it lives; the innermost wins.
 class ScopedSoundPlace
 {
 public:
-    // `position`: three coordinates.
+    // `position`: three coordinates, or nullptr for none.
     ScopedSoundPlace(SoundKind kind, int number, const float* position);
+    explicit ScopedSoundPlace(const SoundPlace& place);
     ~ScopedSoundPlace();
 
     ScopedSoundPlace(const ScopedSoundPlace&) = delete;

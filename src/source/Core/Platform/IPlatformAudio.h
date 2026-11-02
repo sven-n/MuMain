@@ -96,6 +96,12 @@ public:
         static_cast<void>(buffer);
         return 0.0f;
     }
+    // How many music tracks started (a call for the track that plays is
+    // none), for the Sound Mixer's log; 0 for a backend without it.
+    [[nodiscard]] virtual std::uint32_t GetMusicStarts() const
+    {
+        return 0;
+    }
 
     virtual void SetBGMVolume(float level) = 0;
     virtual void SetSFXVolume(float level) = 0;

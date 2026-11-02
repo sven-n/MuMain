@@ -58,6 +58,20 @@ struct PlacedStart
     bool byCode = false;
 };
 
+// A start with no place in the world (Q-SM15): the interface, ambience, a
+// music track, some of the server's messages. The overlay logs them.
+struct PlacelessStart
+{
+    // -1 for a music track.
+    int number = -1;
+    SoundKind kind = SoundKind::Other;
+    // The music's file; "" for a sound.
+    std::string music;
+    bool looped = false;
+    // The mixer's clock (Now).
+    double time = 0.0;
+};
+
 Control& KindControl(SoundKind kind);
 Control& SoundControl(int number);
 
@@ -65,15 +79,24 @@ Control& SoundControl(int number);
 float GainFor(int number, SoundKind kind);
 float MusicGain();
 
-// A sound is about to play (PlayBuffer, PlayBufferOnFreeChannel): its kind is
-// the living source's, else map ambience for a loop, else everything else.
-// Lists it, gives the backend its gain before it starts and returns the gain.
-float OnPlay(int number, bool looped);
+// A sound is about to play (PlayBuffer, PlayBufferOnFreeChannel): its type is
+// the living source's, else the innermost living place's, else the place of
+// the object it plays at (`objectPlace`, or nullptr), else map ambience for a
+// loop, else everything else (Q-SM13). Lists it, gives the backend its gain
+// before it starts and returns the gain.
+float OnPlay(int number, bool looped, const SoundPlace* objectPlace = nullptr);
 
 // The play OnPlay announced is done: counts a start at `now` when the backend
-// started the sound, and keeps where it started: at the living source's
-// position, else at the living place (a sound of the game's own code).
+// started the sound, and keeps where it started: at the position of what
+// OnPlay found (a source, a place of the game's own code), else as a start
+// without a place.
 void OnPlayed(int number, double now);
+
+// A music track started (PlayMp3): a start without a place.
+void OnMusicStarted(const std::string& music, double now);
+
+// The latest starts without a place, newest first; a few dozen are kept.
+std::vector<PlacelessStart> PlacelessStarts();
 
 // The sounds heard since the list was last cleared, in the order they were
 // first heard, so that a row stays where it is.

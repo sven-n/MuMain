@@ -373,6 +373,30 @@ TEST_CASE("a track stopped by name plays again when replayed [audio][music]")
     std::filesystem::remove_all(testDirectory);
 }
 
+TEST_CASE("the music start count rises once for each track started, for the Sound Mixer's log [audio][music]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitNoDeviceEngine(*backend);
+    const std::filesystem::path testDirectory = CreateMusicAsset();
+
+    const std::string track = testDirectory.string() + "\\data\\music\\track.wav";
+    CHECK(backend->GetMusicStarts() == 0);
+    backend->PlayMusic(track.c_str(), false);
+    CHECK(backend->GetMusicStarts() == 1);
+    // The track that plays starts nothing.
+    backend->PlayMusic(track.c_str(), false);
+    CHECK(backend->GetMusicStarts() == 1);
+    // A missing track neither.
+    const std::string missing = testDirectory.string() + "\\data\\music\\missing.wav";
+    backend->PlayMusic(missing.c_str(), false);
+    CHECK(backend->GetMusicStarts() == 1);
+    backend->PlayMusic(track.c_str(), false);
+    CHECK(backend->GetMusicStarts() == 2);
+
+    backend->Shutdown();
+    std::filesystem::remove_all(testDirectory);
+}
+
 TEST_CASE("missing tracks stay suppressed across frame requests and stops [audio][music]")
 {
     auto backend = std::make_unique<mu::MiniAudioBackend>();

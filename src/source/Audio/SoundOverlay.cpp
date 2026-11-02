@@ -6,6 +6,7 @@
 
 #include "Camera/CameraState.h"
 
+#include <array>
 #include <optional>
 #include <utility>
 
@@ -19,6 +20,12 @@ constexpr size_t MaxDrawn = 2048;
 struct State
 {
     bool on = false;
+    std::array<bool, SoundKindCount> shown = []
+    {
+        std::array<bool, SoundKindCount> all{};
+        all.fill(true);
+        return all;
+    }();
     std::vector<DrawnSource> drawn;
     std::optional<CameraState> camera;
 };
@@ -43,6 +50,16 @@ void SetOn(bool on)
         Overlay().drawn.clear();
         Overlay().camera.reset();
     }
+}
+
+bool IsShown(SoundKind kind)
+{
+    return Overlay().shown[static_cast<size_t>(kind)];
+}
+
+void SetShown(SoundKind kind, bool shown)
+{
+    Overlay().shown[static_cast<size_t>(kind)] = shown;
 }
 
 void NoteDrawn(const DrawnSource& source)

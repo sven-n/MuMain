@@ -567,6 +567,7 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
 
     std::erase(m_failedMusicNames, identity);
     m_currentMusicName = std::move(identity);
+    ++m_musicStarts;
 }
 
 bool MiniAudioBackend::HasFailedMusicTrack(const char* name) const
@@ -821,6 +822,11 @@ std::uint32_t MiniAudioBackend::GetSoundStarts(ESound buffer) const
 {
     const int bufIdx = static_cast<int>(buffer);
     return HasSlot(bufIdx) ? m_starts[bufIdx] : 0;
+}
+
+std::uint32_t MiniAudioBackend::GetMusicStarts() const
+{
+    return m_musicStarts;
 }
 
 bool MiniAudioBackend::IsSoundPlaying(ESound buffer) const

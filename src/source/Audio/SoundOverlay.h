@@ -37,6 +37,11 @@ struct DrawnSource
 bool IsOn();
 void SetOn(bool on);
 
+// A type's Show box (Q-SM14), for the session: whether the overlay draws the
+// type's sources, markers, flashes and log lines. Every type at first.
+bool IsShown(SoundKind kind);
+void SetShown(SoundKind kind, bool shown);
+
 // Notes a source while the overlay is on; nothing while it is off.
 void NoteDrawn(const DrawnSource& source);
 

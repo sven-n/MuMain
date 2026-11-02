@@ -18,7 +18,7 @@
 #include "Render/Effects/Behaviors/MoveHandlers.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Audio/DSPlaySound.h"
-#include "Audio/SoundSource.h"
+#include "Audio/SoundPlaces.h"
 #include "UI/Core/UIManager.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
@@ -355,6 +355,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
             o->Live = true;
             // Not tested yet: a reused slot must not draw in a pass that trusts last frame's visibility.
             o->Visible = false;
+            Audio::RememberMaker(o);
             o->Type = Type;
             o->SubType = SubType;
             o->LightEnable = true;
@@ -7688,8 +7689,10 @@ void MoveEffects()
         OBJECT* o = &Effects[i];
         if (o->Live)
         {
-            // The sounds an effect plays as it moves are marked at it.
-            const Audio::ScopedSoundPlace place(Audio::SoundKind::Other, o->Type, o->Position);
+            // The sounds an effect plays as it moves are marked at it, typed by
+            // its maker.
+            std::optional<Audio::ScopedSoundPlace> place;
+            Audio::PlaceEffect(place, o, o->Type, o->Position);
             MoveEffect(o, i);
         }
     }

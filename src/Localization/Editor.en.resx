@@ -3755,7 +3755,7 @@
     <value>Sound or source</value>
   </data>
   <data name="Sound mixer all kinds" xml:space="preserve">
-    <value>All kinds</value>
+    <value>All types</value>
   </data>
   <data name="Sound mixer show all" xml:space="preserve">
     <value>All</value>
@@ -3797,13 +3797,13 @@
     <value>{0} of {1} shown</value>
   </data>
   <data name="Sound mixer note" xml:space="preserve">
-    <value>For listening in the editor: mute, solo and turn down kinds of sounds and every sound heard. Changes apply at once; a muted loop keeps running silently. The game's own volumes stay as they are, the editor's Play buttons and previews are not affected, and every start plays everything as normal.</value>
+    <value>For listening in the editor: mute, solo and turn down types of sounds and every sound heard. Changes apply at once; a muted loop keeps running silently. The game's own volumes stay as they are, the editor's Play buttons and previews are not affected, and every start plays everything as normal.</value>
   </data>
   <data name="Sound mixer show in world" xml:space="preserve">
     <value>Show in world</value>
   </data>
   <data name="Sound mixer show in world tip" xml:space="preserve">
-    <value>Marks the map objects and monsters of the rows shown, with their ranges: around a map object a ring of full volume (3 tiles) and a dashed one of its quietest (15 tiles); around a monster its 5-tile hearing ring, solid while you are inside it. A source flashes when one of its sounds starts; hover a row to highlight its sources.</value>
+    <value>Marks where the sounds of the rows shown come from: a map object with its rings of full volume (3 tiles) and of its quietest (15 tiles, dashed), a monster with its 5-tile hearing ring (solid while you are inside it), and where the game's own code plays a sound (a hollow marker: a character, an NPC, an effect, an item, a creature). A source flashes when one of its sounds starts; the sounds without a place (the interface, ambience, music) are logged at the top left. Hover a row to highlight its sources; the Show boxes pick the types.</value>
   </data>
   <data name="Sound mixer overlay on" xml:space="preserve">
     <value>overlay on</value>
@@ -3818,7 +3818,28 @@
     <value>Copied: {0}</value>
   </data>
   <data name="Sound mixer kinds" xml:space="preserve">
-    <value>Kinds</value>
+    <value>Types</value>
+  </data>
+  <data name="Sound mixer hear" xml:space="preserve">
+    <value>Hear</value>
+  </data>
+  <data name="Sound mixer hear tip" xml:space="preserve">
+    <value>Off: the type is muted.</value>
+  </data>
+  <data name="Sound mixer show" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="Sound mixer show tip" xml:space="preserve">
+    <value>Off: Show in world draws nothing of the type (no markers, rings, flashes or log lines); it is still heard.</value>
+  </data>
+  <data name="Sound mixer log {0} {1} {2}" xml:space="preserve">
+    <value>{0}  {1} ({2})</value>
+  </data>
+  <data name="Sound mixer log loop {0} {1} {2}" xml:space="preserve">
+    <value>{0}  {1} ({2}, loop)</value>
+  </data>
+  <data name="Sound mixer log music {0} {1}" xml:space="preserve">
+    <value>{0}  Music: {1}</value>
   </data>
   <data name="Sound mixer sounds heard" xml:space="preserve">
     <value>Sounds heard</value>
@@ -3890,13 +3911,34 @@
     <value>Music</value>
   </data>
   <data name="Sound kind map ambience" xml:space="preserve">
-    <value>Map ambience (loops)</value>
+    <value>Map ambience</value>
   </data>
   <data name="Sound kind map objects" xml:space="preserve">
     <value>Map object sounds</value>
   </data>
   <data name="Sound kind monsters" xml:space="preserve">
-    <value>Monster sounds</value>
+    <value>Monsters</value>
+  </data>
+  <data name="Sound kind npcs" xml:space="preserve">
+    <value>NPCs</value>
+  </data>
+  <data name="Sound kind hero" xml:space="preserve">
+    <value>Your character</value>
+  </data>
+  <data name="Sound kind players" xml:space="preserve">
+    <value>Other players</value>
+  </data>
+  <data name="Sound kind effects" xml:space="preserve">
+    <value>Effects</value>
+  </data>
+  <data name="Sound kind items" xml:space="preserve">
+    <value>Items</value>
+  </data>
+  <data name="Sound kind creatures" xml:space="preserve">
+    <value>Creatures</value>
+  </data>
+  <data name="Sound kind interface" xml:space="preserve">
+    <value>Interface</value>
   </data>
   <data name="Sound kind everything else" xml:space="preserve">
     <value>Everything else</value>

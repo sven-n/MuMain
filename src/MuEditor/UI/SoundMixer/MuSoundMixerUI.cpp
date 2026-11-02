@@ -36,7 +36,9 @@ using Audio::SoundKind;
 using Audio::Mixer::Control;
 
 constexpr std::array<SoundKind, Audio::SoundKindCount> Kinds = {
-    SoundKind::Music, SoundKind::MapAmbience, SoundKind::MapObject, SoundKind::Monster, SoundKind::Other};
+    SoundKind::Music, SoundKind::MapAmbience, SoundKind::MapObject, SoundKind::Monster,
+    SoundKind::Npc,   SoundKind::Hero,        SoundKind::Player,    SoundKind::Effect,
+    SoundKind::Item,  SoundKind::Creature,    SoundKind::Interface, SoundKind::Other};
 constexpr float FullPercent = 100.0f;
 constexpr float SliderWidth = 120.0f;
 // The heard table: its columns and at least this many rows of height.
@@ -52,8 +54,9 @@ const ImVec4 SoloColor(0.23f, 0.48f, 0.29f, 1.0f);
 // A row whose sound plays.
 const ImVec4 PlayingRowColor(0.23f, 0.48f, 0.29f, 0.35f);
 
-// A volume slider, Mute and Solo for one control.
-void RenderControl(const char* id, Control& control)
+// A volume slider, Mute (unless a Hear box is its mute) and Solo for one
+// control.
+void RenderControl(const char* id, Control& control, bool withMute = true)
 {
     using namespace MuEditor::SoundMixer;
     ImGui::PushID(id);
@@ -63,18 +66,21 @@ void RenderControl(const char* id, Control& control)
     {
         SetVolume(control, static_cast<float>(percent) / FullPercent);
     }
-    ImGui::SameLine();
-    if (control.muted)
+    if (withMute)
     {
-        ImGui::PushStyleColor(ImGuiCol_Button, MutedColor);
-    }
-    if (ImGui::SmallButton(control.muted ? I18N::Editor::SoundMuted : I18N::Editor::SoundMute))
-    {
-        ToggleMute(control);
-    }
-    if (control.muted)
-    {
-        ImGui::PopStyleColor();
+        ImGui::SameLine();
+        if (control.muted)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Button, MutedColor);
+        }
+        if (ImGui::SmallButton(control.muted ? I18N::Editor::SoundMuted : I18N::Editor::SoundMute))
+        {
+            ToggleMute(control);
+        }
+        if (control.muted)
+        {
+            ImGui::PopStyleColor();
+        }
     }
     ImGui::SameLine();
     if (control.solo)
@@ -90,13 +96,6 @@ void RenderControl(const char* id, Control& control)
         ImGui::PopStyleColor();
     }
     ImGui::PopID();
-}
-
-std::string SecondsText(double seconds)
-{
-    char text[32];
-    std::snprintf(text, sizeof(text), "%.1f s", seconds < 0.0 ? 0.0 : seconds);
-    return text;
 }
 
 bool IsPlaying(int number)
@@ -199,18 +198,33 @@ void MuSoundMixerUI::Render(bool* open)
 
 void MuSoundMixerUI::RenderKinds()
 {
+    using namespace MuEditor::SoundMixer;
     ImGui::SeparatorText(I18N::Editor::SoundMixerKinds);
-    if (!ImGui::BeginTable("##Kinds", 2, ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchProp))
+    // Each type: Hear (its mute) and Show (the overlay's), its name, volume
+    // and Solo (Q-SM14).
+    if (!ImGui::BeginTable("##Kinds", 4, ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit))
     {
         return;
     }
+    ImGui::TableSetupColumn(I18N::Editor::SoundMixerHear);
+    ImGui::TableSetupColumn(I18N::Editor::SoundMixerShow);
+    ImGui::TableSetupColumn("##Type", ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableSetupColumn("##Volume");
+    ImGui::TableHeadersRow();
     for (const SoundKind kind : Kinds)
     {
+        Control& control = Audio::Mixer::KindControl(kind);
+        ImGui::PushID(static_cast<int>(kind));
         ImGui::TableNextRow();
         ImGui::TableNextColumn();
-        ImGui::TextUnformatted(MuEditor::SoundMixer::KindName(kind));
+        RenderHearBox(control);
         ImGui::TableNextColumn();
-        RenderControl(MuEditor::SoundMixer::KindName(kind), Audio::Mixer::KindControl(kind));
+        RenderShowBox(kind);
+        ImGui::TableNextColumn();
+        ImGui::TextUnformatted(KindName(kind));
+        ImGui::TableNextColumn();
+        RenderControl(KindName(kind), control, false);
+        ImGui::PopID();
     }
     ImGui::EndTable();
 }
@@ -426,6 +440,20 @@ const char* KindName(Audio::SoundKind kind)
         return I18N::Editor::SoundKindMapObjects;
     case SoundKind::Monster:
         return I18N::Editor::SoundKindMonsters;
+    case SoundKind::Npc:
+        return I18N::Editor::SoundKindNpcs;
+    case SoundKind::Hero:
+        return I18N::Editor::SoundKindHero;
+    case SoundKind::Player:
+        return I18N::Editor::SoundKindPlayers;
+    case SoundKind::Effect:
+        return I18N::Editor::SoundKindEffects;
+    case SoundKind::Item:
+        return I18N::Editor::SoundKindItems;
+    case SoundKind::Creature:
+        return I18N::Editor::SoundKindCreatures;
+    case SoundKind::Interface:
+        return I18N::Editor::SoundKindInterface;
     case SoundKind::Other:
         break;
     }
@@ -443,13 +471,16 @@ std::string SourceText(const Audio::Mixer::HeardSound& sound)
             text += " (" + std::to_string(sound.sourceNumber) + ")";
         }
     }
-    else if (sound.kind == SoundKind::Monster && sound.sourceNumber >= 0)
-    {
-        text += ": " + std::to_string(sound.sourceNumber);
-    }
     else if (sound.kind == SoundKind::MapObject && sound.sourceNumber >= 0)
     {
         text += ": " + I18N::Format(I18N::Editor::SoundMixerObject0, {std::to_string(sound.sourceNumber)});
+    }
+    else if ((sound.kind == SoundKind::Monster || sound.kind == SoundKind::Npc || sound.kind == SoundKind::Effect ||
+              sound.kind == SoundKind::Item || sound.kind == SoundKind::Creature) &&
+             sound.sourceNumber >= 0)
+    {
+        // The monster's or NPC's number, the effect's, item's or creature's type.
+        text += ": " + std::to_string(sound.sourceNumber);
     }
     return text;
 }
@@ -491,6 +522,42 @@ std::string SoundCellTip(const HeardRow& row, int copied)
         return I18N::Format(I18N::Editor::SoundMixerCopied0, {row.file});
     }
     return I18N::Format(I18N::Editor::SoundMixerCopyTip0, {std::to_string(row.sound.number)});
+}
+
+std::string SecondsText(double seconds)
+{
+    char text[32];
+    std::snprintf(text, sizeof(text), "%.1f s", seconds < 0.0 ? 0.0 : seconds);
+    return text;
+}
+
+bool HearBoxTicked(const Audio::Mixer::Control& control)
+{
+    return !control.muted;
+}
+
+bool RenderHearBox(Audio::Mixer::Control& control)
+{
+    bool hear = HearBoxTicked(control);
+    const bool clicked = ImGui::Checkbox("##Hear", &hear);
+    if (clicked)
+    {
+        ToggleMute(control);
+    }
+    Tooltip(I18N::Editor::SoundMixerHearTip);
+    return clicked;
+}
+
+bool RenderShowBox(Audio::SoundKind kind)
+{
+    bool shown = Audio::Overlay::IsShown(kind);
+    const bool clicked = ImGui::Checkbox("##Show", &shown);
+    if (clicked)
+    {
+        Audio::Overlay::SetShown(kind, shown);
+    }
+    Tooltip(I18N::Editor::SoundMixerShowTip);
+    return clicked;
 }
 
 bool RenderSoundCell(const HeardRow& row, int& copied)

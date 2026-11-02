@@ -132,15 +132,27 @@ key onto a problem only selects it.
 ### Sound Mixer
 
 **Windows > Sound Mixer** is for listening: it mutes, solos and turns down
-kinds of sounds and single sounds while the game runs, in editor builds
+types of sounds and single sounds while the game runs, in editor builds
 only.
 
-- **Kinds**: music, map ambience (the looped sounds: wind, rain, water),
-  map object sounds ([map-data.md](map-data.md)), monster sounds (the sound
-  sets' events and the attacks' sounds, [monster-data.md](monster-data.md))
-  and everything else. A sound's kind is where it comes from: the data's
-  players name it (`Audio::ScopedSoundSource`), a loop is ambience, the rest
-  is everything else.
+- **Types**: music, map ambience (wind, rain, water, forest), map object
+  sounds ([map-data.md](map-data.md)), monsters (the sound sets' events,
+  the attacks' sounds, [monster-data.md](monster-data.md), and their code's
+  sounds), NPCs, your character, other players, effects, items, creatures
+  (birds, bats, mice, fish), the interface and everything else. A sound's
+  type is where it comes from: the data's players name it
+  (`Audio::ScopedSoundSource`); else the place the game's code runs for
+  (`Audio::ScopedSoundPlace`, `Audio/SoundPlaces.h`): a map object, a
+  character by its kind (the hero is your character), the caster of a
+  skill the server sends, an effect as its maker (your fireball is your
+  character's, Charon's sparks the NPCs'), the windows and the interface's
+  input, the map's ambience; else the object `PlayBuffer` is given (a
+  character, a ground item, a bird or fish, a mount by its rider); else a
+  loop is ambience and the rest is everything else. Each type has **Hear**
+  (off mutes it), **Show** (off: Show in world draws nothing of it, but it
+  is still heard), a volume slider and **Solo**. The volume is per sound
+  file, so a sound two types play (a swing of yours and of another player)
+  follows the type of its latest start.
 - **Sounds heard**: one row per sound, in the order they were first heard,
   so that a row stays where it is: its file below `Data/Sound` (or its
   number), its kind and source (the set and monster, the map object type),
@@ -151,7 +163,7 @@ only.
   are changed stay listed. A click on a column header sorts by it, a second
   one reverses, a third goes back to the order of first hearing. The filter
   bar above the table leaves the rows whose file or source contains a text,
-  of one kind, playing now or changed only, loops or one-shots, or played at
+  of one type, playing now or changed only, loops or one-shots, or played at
   least so often ("3 of 41 shown"). **Mute all** and **Unmute all** act on
   the rows shown, so a filter and Mute all silence, say, every Death Rider
   sound; sounds heard later come as new rows and play.
@@ -164,18 +176,22 @@ ground: full volume within 3 tiles (solid) and its quietest from 15 tiles
 5-tile hearing ring, solid green while the hero is inside it (its sounds are
 heard) and dashed grey outside; a set whose sounds are all heard anywhere
 (Kanturu's, Aida's) has no ring and says "heard anywhere". A source flashes a growing ring for a second
-when one of its sounds starts. The sounds that the maps', monsters' and NPCs' own code plays
-(most maps; Elf Lala's harp, the Chaos Goblin's mix and Hanzo's smithing) have no data and so no
-range: a hollow violet square (a map object) or circle (a monster or an NPC) with the files, on the
-line below a set's name at the same place, marks where such a sound last started, while it plays
-and for a second after.
-Only the sources of the rows shown are drawn while a filter is set (none
-set: every source in view), and the sources of the row under the mouse are
-drawn yellow. Music and sounds that no map object or monster plays have no
-place and are not drawn.
+when one of its sounds starts. The sounds that the game's own code plays have no data and so no
+range (most maps; Elf Lala's harp, the Chaos Goblin's mix and Hanzo's smithing; your footsteps,
+swings and skills, other players', effects, drops, birds): a hollow violet square (a map object)
+or circle (anything else) with the files, on the line below a set's name at the same place, marks
+where such a sound last started, while it plays and for a second after.
+The sounds without a place (the interface, the map's ambience, music, some of the server's
+messages) are logged at the top left of the game: the last 10 starts, newest on top, each with
+how long ago it started, its file and type ("0.2 s  iButtonClick.wav (Interface)"); a new line is
+yellow and turns white within a second.
+Only the types whose Show box is ticked are drawn, and while a filter is set
+only the sources and log lines of the rows shown (none set: everything in
+view); the sources and log lines of the row under the mouse are drawn
+yellow.
 
 Each row has a volume slider, **Mute** and **Solo**. A sound plays at its
-kind's volume times its own; mute wins; while anything is solo, only what is
+type's volume times its own; mute wins; while anything is solo, only what is
 solo plays, the music too. Changes reach playing sounds at once, and a muted
 loop keeps running silently, so it is back where it is when unmuted.
 **Reset all** puts everything back (unmuted, not solo, full volume).
