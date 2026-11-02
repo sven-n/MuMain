@@ -818,6 +818,18 @@ bool CMuServerListUI::RenderChannels(ServerGroup& group)
     const auto sentGroup = m_sent.find(group.id);
     const std::map<int, int>* sentChannels = sentGroup != m_sent.end() ? &sentGroup->second : nullptr;
     bool previewChanged = MuEditor::ServerList::OfflinePreview::RenderGroupButtons(group.id, sentChannels);
+    const bool changed = RenderChannelTable(group, sentChannels, previewChanged);
+    // Not a change of the list: no undo step, only the login screen shows it.
+    if (previewChanged)
+    {
+        ShowInGame();
+    }
+    return changed;
+}
+
+bool CMuServerListUI::RenderChannelTable(ServerGroup& group, const std::map<int, int>* sentChannels,
+                                         bool& previewChanged)
+{
     if (!BeginChannelTable())
     {
         return false;
@@ -834,11 +846,6 @@ bool CMuServerListUI::RenderChannels(ServerGroup& group)
         }
     }
     ImGui::EndTable();
-    // Not a change of the list: no undo step, only the login screen shows it.
-    if (previewChanged)
-    {
-        ShowInGame();
-    }
     return changed;
 }
 

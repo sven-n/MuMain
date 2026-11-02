@@ -96,6 +96,10 @@ private:
     bool RenderGroupId(Data::ServerList::ServerGroup& group);
     bool RenderGroupFields(Data::ServerList::ServerGroup& group);
     bool RenderChannels(Data::ServerList::ServerGroup& group);
+    // The group's channel rows (sentChannels: what the connect server sent of them, or nullptr); `previewChanged`
+    // set when the offline preview changed in them.
+    bool RenderChannelTable(Data::ServerList::ServerGroup& group, const std::map<int, int>* sentChannels,
+                            bool& previewChanged);
     // The Channel names tab: the VIP types, the texts and a preview.
     bool RenderChannelNamesTab();
     bool RenderVipTypeList();
