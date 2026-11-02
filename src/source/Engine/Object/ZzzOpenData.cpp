@@ -1695,6 +1695,8 @@ static void OpenItemDataAndShowModelProblems()
 
 void OpenBasicData(HDC hDC)
 {
+    // Before the first LoadGameSound: the duel sounds below.
+    OpenSoundData();
     TitleSceneUI::RenderSceneUI(hDC, 0, 11);
 
     LoadBitmap(L"Interface\\Cursor.tga", BITMAP_CURSOR, GL_LINEAR, GL_CLAMP_TO_EDGE);
@@ -2143,7 +2145,6 @@ void OpenBasicData(HDC hDC)
     OpenImages();
     TitleSceneUI::RenderSceneUI(hDC, 7, 11);
 
-    OpenSoundData();
     OpenSounds();
     TitleSceneUI::RenderSceneUI(hDC, 8, 11);
 
