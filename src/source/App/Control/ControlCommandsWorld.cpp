@@ -188,24 +188,15 @@ public:
 
     [[nodiscard]] Status Tick(std::string& response) override
     {
-        if (Hero == nullptr)
+        // Logical arrival precedes the end of the visible movement segment.
+        if (Hero == nullptr || Automation::IsWalkInProgress())
         {
             return Status::Running;
         }
 
         if (std::abs(Hero->PositionX - m_tileX) <= ArrivalTiles && std::abs(Hero->PositionY - m_tileY) <= ArrivalTiles)
         {
-            json result;
-            result["position"] = PositionObject();
-            response = App::Control::EncodeResult(EncodedId(), result.dump());
-            return Status::Finished;
-        }
-
-        // Let the planned path play out before planning the next one:
-        // re-planning every frame would restart the walk mid-step.
-        if (Automation::IsWalkInProgress())
-        {
-            return Status::Running;
+            return FinishArrival(response);
         }
 
         // Pace the walk packets like a player's clicks; the server treats a
@@ -225,16 +216,21 @@ public:
 
         if (result == Automation::MoveResult::Arrived)
         {
-            json arrived;
-            arrived["position"] = PositionObject();
-            response = App::Control::EncodeResult(EncodedId(), arrived.dump());
-            return Status::Finished;
+            return FinishArrival(response);
         }
 
         return Status::Running;
     }
 
 private:
+    Status FinishArrival(std::string& response) const
+    {
+        json result;
+        result["position"] = PositionObject();
+        response = App::Control::EncodeResult(EncodedId(), result.dump());
+        return Status::Finished;
+    }
+
     int m_tileX;
     int m_tileY;
     std::chrono::steady_clock::time_point m_lastWalkAt{};

@@ -30,6 +30,7 @@ skill-selection implementation.
 Automated movement finishes its current path before planning another one, even
 when low frame rates make a walk last longer than a Helper tick. Once the return
 delay expires, returning to the starting position takes priority over collecting
-more drops. Drops with no available path are skipped until announced again by the
-server. If the starting position cannot be reached, combat continues and the
-Helper retries the return on later ticks.
+more drops. A drop with no available path waits one second before another pickup
+attempt; combat and other reachable loot continue during that delay. If the
+starting position cannot be reached, combat continues and the Helper retries
+the return on later ticks.

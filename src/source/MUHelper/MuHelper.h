@@ -6,6 +6,8 @@
 #include <string>
 #include <thread>
 #include <atomic>
+#include <chrono>
+#include <map>
 
 #include "MuHelperData.h"
 #include "GameLogic/Automation/AttackSkillRotation.h"
@@ -67,7 +69,7 @@ namespace MUHelper
 		int ComputeDistanceBetween(POINT posA, POINT posB);
 		int ObtainItem();
 		int SelectItemToObtain();
-		bool ShouldObtainItem(int iItemId);
+        bool ShouldObtainItem(int iItemId, std::chrono::steady_clock::time_point now);
 		ActionSkillType GetHealingSkill();
 		ActionSkillType GetDrainLifeSkill();
 		bool HasAssignedBuffSkill();
@@ -81,6 +83,7 @@ namespace MUHelper
 		std::set<int> m_setTargets;
 		std::set<int> m_setTargetsAttacking;
 		std::set<int> m_setItems;
+        std::map<int, std::chrono::steady_clock::time_point> m_itemRetryAt;
 		int m_iCurrentItem;
 		int m_iCurrentTarget;
 		int m_iCurrentBuffIndex;

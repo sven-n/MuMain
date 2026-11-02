@@ -27,6 +27,7 @@
 
 constexpr int MAX_ACTIONABLE_DISTANCE = 10;
 constexpr int DEFAULT_DURABILITY_THRESHOLD = 50;
+constexpr auto PICKUP_RETRY_DELAY = std::chrono::seconds(1);
 
 SpinLock _targetsLock;
 SpinLock _itemsLock;
@@ -117,6 +118,7 @@ namespace MUHelper
         m_iCurrentTarget = -1;
         m_iCurrentSkill = (ActionSkillType)m_config.aiSkill[0];
         m_iCurrentItem = MAX_ITEMS;
+        m_itemRetryAt.clear();
         m_posOriginal = { Hero->PositionX, Hero->PositionY };
 
         m_iHuntingDistance = ComputeDistanceByRange(m_config.iHuntingRange);
@@ -967,9 +969,11 @@ namespace MUHelper
             DeleteItem(m_iCurrentItem);
             return 1;
         case PickupResult::Gone:
-        case PickupResult::NoPath:
-            // shortcut: blocked drops wait for a new viewport event; add timed retries for changing obstacles.
             DeleteItem(m_iCurrentItem);
+            return 1;
+        case PickupResult::NoPath:
+            m_itemRetryAt[m_iCurrentItem] = std::chrono::steady_clock::now() + PICKUP_RETRY_DELAY;
+            m_iCurrentItem = MAX_ITEMS;
             return 1;
         case PickupResult::Approaching:
             // Walking towards it: the helper's other work waits a frame.
@@ -984,8 +988,12 @@ namespace MUHelper
         return 1;
     }
 
-    bool CMuHelper::ShouldObtainItem(int iItemId)
+    bool CMuHelper::ShouldObtainItem(int iItemId, std::chrono::steady_clock::time_point now)
     {
+        const auto retry = m_itemRetryAt.find(iItemId);
+        if (retry != m_itemRetryAt.end() && now < retry->second)
+            return false;
+
         return GameLogic::Automation::ShouldPickUpHelperItem(m_config, &Items[iItemId].Item);
     }
 
@@ -993,6 +1001,7 @@ namespace MUHelper
     {
         _itemsLock.lock();
         m_setItems.insert(iItemId);
+        m_itemRetryAt.erase(iItemId);
         _itemsLock.unlock();
     }
 
@@ -1000,6 +1009,7 @@ namespace MUHelper
     {
         _itemsLock.lock();
         m_setItems.erase(iItemId);
+        m_itemRetryAt.erase(iItemId);
         _itemsLock.unlock();
 
         if (iItemId == m_iCurrentItem)
@@ -1020,9 +1030,10 @@ namespace MUHelper
             _itemsLock.unlock();
         }
 
+        const auto now = std::chrono::steady_clock::now();
         for (const int& iItemId : setItems)
         {
-            if (!ShouldObtainItem(iItemId))
+            if (!ShouldObtainItem(iItemId, now))
             {
                 continue;
             }
