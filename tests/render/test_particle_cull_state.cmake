@@ -14,8 +14,9 @@ string(SUBSTRING "${source}" ${begin} -1 rest)
 string(FIND "${rest}" "\n}" end)
 string(SUBSTRING "${rest}" 0 ${end} body)
 
-string(FIND "${body}" "EnableDepthTest();" enable_at)
-string(FIND "${body}" "DisableDepthTest();" disable_at)
+# The switches are state commands to the effect drawer.
+string(FIND "${body}" ".depthTest = Toggle::On" enable_at)
+string(FIND "${body}" ".depthTest = Toggle::Off" disable_at)
 string(FIND "${body}" "TestFrustrum(o->Position" cull_at)
 if(enable_at EQUAL -1 OR disable_at EQUAL -1 OR cull_at EQUAL -1)
     message(FATAL_ERROR "RenderParticles' depth test switches or its frustum cull are missing")
