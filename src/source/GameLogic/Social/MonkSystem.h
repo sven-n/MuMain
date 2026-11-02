@@ -75,6 +75,12 @@ typedef std::list<int> list_ItemType;
 typedef std::vector<WORD> vec_DarkIndex;
 typedef std::vector<int> vec_DarkTargetIndex;
 
+// The bone a Phoenix Soul Star glove hangs from: the left hand (0) or the right (1).
+constexpr int PhoenixGloveBone(int hand)
+{
+    return hand ? 37 : 28;
+}
+
 class CMonkSystem
 {
 private:

@@ -1050,3 +1050,62 @@ TEST_CASE("Character passes leave a standing siege gate's collision; the update 
         TerrainWall[row + 66 + x] = saved[x];
     gMapManager.WorldActive = world;
 }
+
+TEST_CASE("Drawing a carried part sets none of its settings; the update advances it as the draw attached it [effects]")
+{
+    namespace Attachments = Engine::Object::Attachments;
+    CharacterScope scope(MODEL_PLAYER);
+    BMD& wingModel = Models[MODEL_WING];
+    wingModel.NumActions = 1;
+    wingModel.Actions = new Action_t[1]{};
+    wingModel.Actions[0].NumAnimationKeys = 10;
+    wingModel.Actions[0].Loop = true;
+    const float frameFactor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 1.f;
+
+    auto preview = std::make_unique<CHARACTER>();
+    CHARACTER* c = preview.get();
+    OBJECT* o = &c->Object;
+    o->Live = o->Visible = true;
+    o->Type = MODEL_PLAYER;
+    o->Scale = 1.f;
+    o->Alpha = 1.f;
+    o->BoneTransform = scope.bones.get();
+    for (PART_t& part : c->BodyPart)
+        part.Type = -1;
+    c->Weapon[1].Type = -1;
+    c->Weapon[0].Type = MODEL_PHOENIX_SOUL_STAR;
+    c->Weapon[0].LinkBone = 33;
+    c->Wing.Type = MODEL_WING;
+    c->Helper.Type = MODEL_IMP;
+    for (PART_t* part : {&c->Wing, &c->Helper})
+    {
+        part->LinkBone = 3;
+        part->PlaySpeed = 0.7f;
+        part->AnimationFrame = 0.f;
+    }
+    Attachments::Track(c);
+
+    Attachments::BeginFrame();
+    RepeatedDraws::CheckChangesNothing(
+        [c, o]
+        {
+            Attachments::BeginCharacter(c);
+            RenderCharacterBackItem(c, o, true);
+        });
+    for (const PART_t* part : {&c->Wing, &c->Helper})
+    {
+        CHECK(part->LinkBone == 3);
+        CHECK(part->PlaySpeed == 0.7f);
+    }
+    CHECK(c->Weapon[0].LinkBone == 33);
+
+    UpdatePreviewCharacter(c);
+    // Standing, the wing flaps at a quarter speed, as the draw attached it.
+    CHECK(c->Wing.AnimationFrame == doctest::Approx(0.25f));
+    CHECK(c->Weapon[0].LinkBone == PhoenixGloveBone(0));
+
+    Attachments::Untrack(c);
+    o->BoneTransform = nullptr;
+    FPS_ANIMATION_FACTOR = frameFactor;
+}

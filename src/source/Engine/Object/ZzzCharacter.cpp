@@ -6880,23 +6880,26 @@ OBJECT* ItemObjectFor(CHARACTER* c, int Type)
 void SpawnLinkedPartEffects(CHARACTER* c, int Type, OBJECT* Object, vec34_t* bones, const vec3_t position);
 
 // The action a linked part plays: Wings of Darkness fold in a safe zone.
-unsigned short LinkedPartAction(const CHARACTER* c, const PART_t* f)
+unsigned short LinkedPartAction(const CHARACTER* c, const PART_t* f,
+                                const Engine::Object::Attachments::LinkOverride& attach = {})
 {
     if ((f->Type >= MODEL_WINGS_OF_DARKNESS && f->Type <= MODEL_WINGS_OF_DARKNESS) && c->SafeZone)
         return 1;
-    return f->CurrentAction;
+    return attach.action >= 0 ? static_cast<unsigned short>(attach.action) : f->CurrentAction;
 }
 
 // A linked part's animation step: its speed and frame overrides, then PlayAnimation.
-void AdvanceLinkedPart(CHARACTER* c, PART_t* f, int Type, bool Link)
+void AdvanceLinkedPart(CHARACTER* c, PART_t* f, int Type, bool Link,
+                       const Engine::Object::Attachments::LinkOverride& attach)
 {
     OBJECT* o = &c->Object;
     BMD* b = &Models[Type];
 
+    float playSpeed = attach.playSpeed >= 0.f ? attach.playSpeed : f->PlaySpeed;
     switch (Type)
     {
     case MODEL_WING_OF_RUIN:
-        f->PlaySpeed = 0.15f;
+        playSpeed = 0.15f;
         break;
     }
 
@@ -6909,14 +6912,13 @@ void AdvanceLinkedPart(CHARACTER* c, PART_t* f, int Type, bool Link)
             f->AnimationFrame = 3.2f;
         }
     }
-    b->CurrentAction = LinkedPartAction(c, f);
+    b->CurrentAction = LinkedPartAction(c, f, attach);
     if (!Link || (Type < MODEL_BOW || Type >= MODEL_BOW + MAX_ITEM_INDEX) || Type == MODEL_STINGER_BOW)
     {
         if (!g_isCharacterBuff(o, eDeBuff_Stun) && !g_isCharacterBuff(o, eDeBuff_Sleep))
         {
             vec3_t unused{};
-            b->PlayAnimation(&f->AnimationFrame, &f->PriorAnimationFrame, &f->PriorAction, f->PlaySpeed, unused,
-                             unused);
+            b->PlayAnimation(&f->AnimationFrame, &f->PriorAnimationFrame, &f->PriorAction, playSpeed, unused, unused);
         }
     }
 }
@@ -6962,8 +6964,10 @@ void PoseLinkedPart(const CHARACTER* c, int Type, bool Link, const Engine::Objec
 } // namespace
 
 vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1,
-                          bool Link, bool Translate, int RenderType, bool bRightHandItem)
+                          bool Link, bool Translate, int RenderType, bool bRightHandItem,
+                          const Engine::Object::Attachments::LinkOverride& attach)
 {
+    const auto linkBone = static_cast<unsigned char>(attach.bone >= 0 ? attach.bone : f->LinkBone);
     OBJECT* o = &c->Object;
     BMD* b = &Models[Type];
 
@@ -6989,7 +6993,7 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
 
     // A client character's part gets its own pose; other characters' parts use the shared bones, as before.
     Engine::Object::Attachments::Slot* slot = Engine::Object::Attachments::Record(
-        c, f, Type, x, y, z, Level, Option1, Link, Translate, RenderType, bRightHandItem, f->LinkBone, o->Scale);
+        c, f, Type, x, y, z, Level, Option1, Link, Translate, RenderType, bRightHandItem, linkBone, o->Scale, attach);
     vec34_t* bones = slot != nullptr ? Engine::Object::Attachments::Bones(*slot) : BoneTransform;
     if (slot != nullptr)
         slot->shadow = o->EnableShadow;
@@ -7000,7 +7004,7 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     // CopyShadowAngle(f,b);
     b->ContrastEnable = o->ContrastEnable;
     b->BodyScale = o->Scale;
-    b->CurrentAction = f->CurrentAction;
+    b->CurrentAction = LinkedPartAction(c, f, attach);
     b->BodyHeight = 0.f;
 
     OBJECT* Object = ItemObjectFor(c, Type);
@@ -7017,7 +7021,7 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
 
     OBB_t OBB;
 
-    const LinkPlacement placement = PlaceLinkedPart(x, y, z, c, f->LinkBone, o->Scale, Type, Link, bRightHandItem);
+    const LinkPlacement placement = PlaceLinkedPart(x, y, z, c, linkBone, o->Scale, Type, Link, bRightHandItem);
     std::memcpy(ParentMatrix, placement.parent, sizeof(placement.parent));
     VectorCopy(placement.origin, b->BodyOrigin);
     VectorCopy(placement.angle, Object->Angle);
@@ -7031,7 +7035,7 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     if (g_PrepassBoneCheck.enabled && slot != nullptr && slot->part != nullptr)
         ++(advanced ? g_PrepassBoneCheck.partsReused : g_PrepassBoneCheck.partsDrawnUnadvanced);
 #endif
-    b->CurrentAction = LinkedPartAction(c, f);
+    b->CurrentAction = LinkedPartAction(c, f, attach);
 
     VectorCopy(b->BodyOrigin, Object->Position);
 
@@ -11416,6 +11420,13 @@ bool DrawsHeldWeapon(CHARACTER* c, int hand)
 // The weapons' animation settings for the frame, before they advance: in the hands, or reset on the back.
 void PrepareHeldWeapons(CHARACTER* c)
 {
+    // Phoenix Soul Star gloves hang from the hands; the weapon effects read the bone too.
+    for (int i = 0; i < 2; i++)
+    {
+        if (g_CMonkSystem.EqualItemModelType(c->Weapon[i].Type) == MODEL_PHOENIX_SOUL_STAR)
+            c->Weapon[i].LinkBone = PhoenixGloveBone(i);
+    }
+
     const std::optional<bool> inHands = Engine::Object::Attachments::WeaponsHeldInLastDraw(c);
     if (!inHands)
         return;
@@ -11983,8 +11994,8 @@ void UpdateAttachedParts(CHARACTER* c)
             PART_t* f = slot.part;
             const LinkPlacement placement = PlaceLinkedPart(slot.x, slot.y, slot.z, c, slot.linkBone, slot.ownerScale,
                                                             slot.type, slot.link, slot.rightHandItem);
-            AdvanceLinkedPart(c, f, slot.type, slot.link);
-            slot.posed = PosedAt(f, LinkedPartAction(c, f), placement);
+            AdvanceLinkedPart(c, f, slot.type, slot.link, slot.attach);
+            slot.posed = PosedAt(f, LinkedPartAction(c, f, slot.attach), placement);
             PoseLinkedPart(c, slot.type, slot.link, slot.posed, Engine::Object::Attachments::Bones(slot));
             SpawnSlotEffects(c, slot, placement);
         });
@@ -11996,7 +12007,7 @@ void UpdateAttachedParts(CHARACTER* c)
             PART_t* f = slot.copy.get();
             const LinkPlacement placement = PlaceLinkedPart(slot.x, slot.y, slot.z, c, slot.linkBone, slot.ownerScale,
                                                             slot.type, slot.link, slot.rightHandItem);
-            PoseLinkedPart(c, slot.type, slot.link, PosedAt(f, LinkedPartAction(c, f), placement),
+            PoseLinkedPart(c, slot.type, slot.link, PosedAt(f, LinkedPartAction(c, f, slot.attach), placement),
                            Engine::Object::Attachments::Bones(slot));
             SpawnSlotEffects(c, slot, placement);
         });
@@ -15637,17 +15648,8 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
 
                 float fAnimationFrameBackUp = w->AnimationFrame;
 
-                w->LinkBone = 47;
-
-                if (o->CurrentAction == PLAYER_FLY || o->CurrentAction == PLAYER_FLY_CROSSBOW)
-                {
-                    w->PlaySpeed = 1.f;
-                }
-                else
-                {
-                    w->PlaySpeed = 0.25f;
-                }
-
+                // Carried on the back bone, whatever the wing hangs from.
+                constexpr Engine::Object::Attachments::LinkOverride onBack{.bone = 47};
                 PART_t t_Part;
 
                 if (iType >= MODEL_SWORD && iType < MODEL_SHIELD + MAX_ITEM_INDEX)
@@ -15662,13 +15664,11 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
 
                 if (iType == MODEL_STINGER_BOW)
                 {
-                    PART_t* pWeapon = &c->Weapon[1];
-                    BYTE byTempLinkBone = pWeapon->LinkBone;
-                    pWeapon->CurrentAction = 2;
-                    pWeapon->PlaySpeed = 0.25f;
-                    pWeapon->LinkBone = 47;
-                    RenderLinkObject(0.f, 0.f, 15.f, c, pWeapon, iType, iLevel, iOption1, true, bTranslate);
-                    pWeapon->LinkBone = byTempLinkBone;
+                    // Its wings flap on the back.
+                    constexpr Engine::Object::Attachments::LinkOverride flapping{
+                        .bone = 47, .action = 2, .playSpeed = 0.25f};
+                    RenderLinkObject(0.f, 0.f, 15.f, c, &c->Weapon[1], iType, iLevel, iOption1, true, bTranslate, 0,
+                                     true, flapping);
                 }
                 else if (g_CMonkSystem.IsSwordformGloves(iType))
                     g_CMonkSystem.RenderSwordformGloves(c, iType, i, o->Alpha, bTranslate);
@@ -15677,7 +15677,8 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
                     bool bRightHandItem = false;
                     if (i == 0)
                         bRightHandItem = true;
-                    RenderLinkObject(0.f, 0.f, 15.f, c, &t_Part, iType, iLevel, iOption1, true, bTranslate, 0, bRightHandItem);
+                    RenderLinkObject(0.f, 0.f, 15.f, c, &t_Part, iType, iLevel, iOption1, true, bTranslate, 0,
+                                     bRightHandItem, onBack);
                 }
 
                 w->AnimationFrame = fAnimationFrameBackUp;
@@ -15696,11 +15697,8 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             int iLevel = 0;
             int iOption1 = 0;
 
-            w->LinkBone = 47;
-            if (o->CurrentAction == PLAYER_FLY || o->CurrentAction == PLAYER_FLY_CROSSBOW)
-                w->PlaySpeed = 1.f;
-            else
-                w->PlaySpeed = 0.25f;
+            const bool flying = o->CurrentAction == PLAYER_FLY || o->CurrentAction == PLAYER_FLY_CROSSBOW;
+            const Engine::Object::Attachments::LinkOverride questItem{.bone = 47, .playSpeed = flying ? 1.f : 0.25f};
 
             switch (c->EtcPart)
             {
@@ -15711,7 +15709,7 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
 
             if (iType != 0)
             {
-                RenderLinkObject(0.f, 0.f, 15.f, c, w, iType, iLevel, iOption1, true, bTranslate);
+                RenderLinkObject(0.f, 0.f, 15.f, c, w, iType, iLevel, iOption1, true, bTranslate, 0, true, questItem);
             }
         }
 
@@ -15722,32 +15720,21 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             PART_t* w = &c->Wing;
             if (w->Type != -1)
             {
-                w->LinkBone = 47;
-                if (o->CurrentAction == PLAYER_FLY || o->CurrentAction == PLAYER_FLY_CROSSBOW)
-                {
-                    if (w->Type == MODEL_WING_OF_STORM)
-                    {
-                        w->PlaySpeed = 0.5f;
-                    }
-                    else
-                    {
-                        w->PlaySpeed = 1.f;
-                    }
-                }
-                else
-                {
-                    w->PlaySpeed = 0.25f;
-                }
+                const bool flying = o->CurrentAction == PLAYER_FLY || o->CurrentAction == PLAYER_FLY_CROSSBOW;
+                Engine::Object::Attachments::LinkOverride wing{
+                    .bone = 47, .playSpeed = flying ? (w->Type == MODEL_WING_OF_STORM ? 0.5f : 1.f) : 0.25f};
 
                 switch (w->Type)
                 {
                 case MODEL_CAPE_OF_EMPEROR:
                 case MODEL_CAPE_OF_OVERRULE:
-                    w->LinkBone = 19;
-                    RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->ExcellentFlags, true, bTranslate);
+                    wing.bone = 19;
+                    RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->ExcellentFlags, true, bTranslate, 0,
+                                     true, wing);
                     break;
                 default:
-                    RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->ExcellentFlags, false, bTranslate);
+                    RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->ExcellentFlags, false, bTranslate, 0,
+                                     true, wing);
                     break;
                 }
             }
@@ -15759,13 +15746,12 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             if (iType == MODEL_IMP)
             {
                 PART_t* w = &c->Helper;
-                w->LinkBone = 34;
-                w->PlaySpeed = 0.5f;
+                constexpr Engine::Object::Attachments::LinkOverride imp{.bone = 34, .playSpeed = 0.5f};
                 iOption1 = w->ExcellentFlags;
                 if (IsImpOnRageFighterArmor(c))
-                    RenderLinkObject(20.f, -5.f, 20.f, c, w, iType, iLevel, iOption1, false, bTranslate);
+                    RenderLinkObject(20.f, -5.f, 20.f, c, w, iType, iLevel, iOption1, false, bTranslate, 0, true, imp);
                 else
-                    RenderLinkObject(20.f, 0.f, 0.f, c, w, iType, iLevel, iOption1, false, bTranslate);
+                    RenderLinkObject(20.f, 0.f, 0.f, c, w, iType, iLevel, iOption1, false, bTranslate, 0, true, imp);
             }
         }
     }
