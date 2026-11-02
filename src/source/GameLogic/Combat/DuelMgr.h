@@ -55,7 +55,7 @@ public:
     float GetHP(int iPlayerNum);
     float GetSD(int iPlayerNum);
 
-    BOOL IsDuelPlayer(CHARACTER* pCharacter, int iPlayerNum, BOOL bIncludeSummon = TRUE);
+    BOOL IsDuelPlayer(const CHARACTER* pCharacter, int iPlayerNum, BOOL bIncludeSummon = TRUE);
     BOOL IsDuelPlayer(WORD wIndex, int iPlayerNum);
 
     void SendDuelRequestAnswer(int iPlayerNum, BOOL bOK);

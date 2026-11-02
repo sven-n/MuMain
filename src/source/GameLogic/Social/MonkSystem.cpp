@@ -564,7 +564,7 @@ bool CMonkSystem::SendAttackPacket(CHARACTER* _pCha, int _nMoveTarget, int _nSki
     return false;
 }
 
-bool CMonkSystem::RageFighterEffect(OBJECT* _pObj, int _Type)
+bool CMonkSystem::RageFighterEffect(const OBJECT* _pObj, int _Type)
 {
     BMD* b = &Models[_Type];
     if (_pObj->CurrentAction == PLAYER_SKILL_DARKSIDE_READY)

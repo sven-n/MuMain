@@ -7563,16 +7563,24 @@ void SpawnNextGradeWeaponEffects(CHARACTER* c)
     } //for
 }
 
-void NextGradeObjectRender(CHARACTER* c)
+void NextGradeObjectRender(const CHARACTER* c)
 {
-    ForEachNextGradeObject(c, [c](PART_t* w, int type, int bone)
+    ForEachNextGradeObject(c, [c](const PART_t* w, int type, int bone)
                            { RenderLinkObject(0.f, 0.f, 0.f, c, w, type, 0, 0, true, true, 0, true, bone); });
 }
 
 void ForEachNextGradeObject(CHARACTER* c, const std::function<void(PART_t* part, int type, int bone)>& visit)
 {
+    // The parts are c's, which the caller may change.
+    ForEachNextGradeObject(static_cast<const CHARACTER*>(c), [&visit](const PART_t* part, int type, int bone)
+                           { visit(const_cast<PART_t*>(part), type, bone); });
+}
+
+void ForEachNextGradeObject(const CHARACTER* c,
+                            const std::function<void(const PART_t* part, int type, int bone)>& visit)
+{
     int Level;
-    PART_t* w;
+    const PART_t* w;
     int bornIndex[2]{}; // left, right;
     int gradeType[2]{}; // left, right;
 
@@ -7786,8 +7794,8 @@ void RefreshStunSkull(OBJECT* o, vec3_t Light)
 
 extern float g_Luminosity;
 
-void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int ItemLevel, int ExcellentFlags,
-                            int ancientDiscriminator, int Select, int RenderType)
+void RenderPartObjectEffect(const OBJECT* o, int Type, const vec3_t Light, float Alpha, int ItemLevel,
+                            int ExcellentFlags, int ancientDiscriminator, int Select, int RenderType)
 {
     // The item effects and styles change the look for this draw; the object keeps its own.
     DrawLook look = DrawLook::Of(*o);
@@ -8283,7 +8291,9 @@ void StepPartCloth(OBJECT* o, PART_t* p, int Type, int ItemLevel, bool Translate
     }
 }
 
-void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, int ItemLevel, int ExcellentFlags, int ancientDiscriminator, bool GlobalTransform, bool HideSkin, bool Translate, int Select, int RenderType)
+void RenderPartObject(const OBJECT* o, int Type, void* p2, const vec3_t Light, float Alpha, int ItemLevel,
+                      int ExcellentFlags, int ancientDiscriminator, bool GlobalTransform, bool HideSkin, bool Translate,
+                      int Select, int RenderType)
 {
     if (Alpha <= 0.01f)
     {

@@ -16,8 +16,9 @@ CHARACTER* FindCharacterByID(wchar_t* szName);
 CHARACTER* FindCharacterByKey(int Key);
 
 // Draws a linked part and returns the bones it posed it into.
-vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1,
-                          bool Link, bool Translate, int RenderType = 0, bool bRightHandItem = true, int linkBone = -1);
+vec34_t* RenderLinkObject(float x, float y, float z, const CHARACTER* c, const PART_t* f, int Type, int Level,
+                          int Option1, bool Link, bool Translate, int RenderType = 0, bool bRightHandItem = true,
+                          int linkBone = -1);
 bool RendersWingCarriedModels(const CHARACTER* c);
 // A model a Red Dragon or a Saint statue carries on its wing part: where it hangs, and the character's scale for it.
 struct WingCarriedModel
@@ -97,7 +98,10 @@ void CheckCharacterPose(const OBJECT* o, BMD* model, bool reused);
 void MoveEye(OBJECT* o, BMD* b, int Right, int Left, int Right2 = -1, int Left2 = -1, int Right3 = -1, int Left3 = -1);
 void DeleteCloth(CHARACTER* c, OBJECT* o = NULL, PART_t* p2 = NULL);
 
+// Whether c wears a full set; also sets EquipmentLevelSet and g_bAddDefense, and in Chaos Castle its unit.
 bool CheckFullSet(CHARACTER* c);
+// The same check for a draw: it sets nothing.
+[[nodiscard]] bool IsFullSet(const CHARACTER* c);
 
 void MoveCharacterPosition(CHARACTER* c);
 void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter = NULL, OBJECT* pHelper = NULL);
@@ -142,7 +146,7 @@ float CharacterMoveSpeed(CHARACTER* c);
 bool CharacterAnimation(CHARACTER* c, OBJECT* o);
 bool AttackStage(CHARACTER* c, OBJECT* o);
 
-void RenderGuild(OBJECT* o, int Type = -1, vec3_t vPos = NULL);
+void RenderGuild(const OBJECT* o, int Type = -1, vec3_t vPos = NULL);
 void RenderLight(OBJECT* o, int Texture, float Scale, int Bone, float x, float y, float z);
 void SpawnProtectGuildMark(CHARACTER* c);
 

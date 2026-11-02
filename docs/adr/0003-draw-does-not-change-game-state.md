@@ -125,6 +125,9 @@ drawer, and the renderer applies the active look per draw.
   so it shows the alpha its update gives it.
 - A Dark Phoenix's thunder starts from the pose its update reads that frame,
   not from bones its last draw saved.
+- A character's draw no longer sets the full-set level and defense bonus
+  globals or, in Chaos Castle, its unit (helper, friend windows, weapons);
+  the update's full-set check, which ran for the same characters, still does.
 
 ## Consequences
 

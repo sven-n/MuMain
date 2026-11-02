@@ -59,8 +59,10 @@ void UpdateTransformSkinEffects(OBJECT* o);
 void StepPartCloth(OBJECT* o, PART_t* p, int Type, int ItemLevel, bool Translate);
 // The sparks of a character's +15 weapons, on its own pose; RenderCharacter draws its +15 armor pieces.
 void SpawnNextGradeWeaponEffects(CHARACTER* c);
-void NextGradeObjectRender(CHARACTER* c);
+void NextGradeObjectRender(const CHARACTER* c);
 // The character's +15 armor pieces RenderCharacter attaches: the body part each plays on, its model and bone.
+void ForEachNextGradeObject(const CHARACTER* c,
+                            const std::function<void(const PART_t* part, int type, int bone)>& visit);
 void ForEachNextGradeObject(CHARACTER* c, const std::function<void(PART_t* part, int type, int bone)>& visit);
 // What Calc_RenderObject did to each object it drew, for the update to do once per frame to the objects the last frame
 // drew: the hero's fall in Chaos Castle fades them, and a stunned or sleeping owner holds them at their first frame.
@@ -148,9 +150,10 @@ Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, const OBJECT* o
 // model's pose with SpawnPartObjectEffect, b placed where the model is drawn.
 bool PartObjectSpawns(const OBJECT* o, int Type);
 void SpawnPartObjectEffect(BMD* b, OBJECT* o, int Type, vec34_t* bones);
-void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha = 0.f, int Level = 0, int ExcellentFlags = 0,
-                            int ancientDiscriminator = 0, int Select = 0, int RenderType = RENDER_TEXTURE);
-void RenderPartObject(OBJECT* o, int Type, void* p, vec3_t Light, float Alpha = 0.f, int Level = 0,
+void RenderPartObjectEffect(const OBJECT* o, int Type, const vec3_t Light, float Alpha = 0.f, int Level = 0,
+                            int ExcellentFlags = 0, int ancientDiscriminator = 0, int Select = 0,
+                            int RenderType = RENDER_TEXTURE);
+void RenderPartObject(const OBJECT* o, int Type, void* p, const vec3_t Light, float Alpha = 0.f, int Level = 0,
                       int ExcellentFlags = 0, int ancientDiscriminator = 0, bool GlobalTransform = false,
                       bool HideSkin = false, bool Translate = false, int Select = 0, int RenderType = RENDER_TEXTURE);
 

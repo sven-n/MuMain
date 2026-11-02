@@ -5296,13 +5296,14 @@ void PlayWalkSound()
     }
 }
 
-bool CheckFullSet(CHARACTER* c)
+// Whether `c` wears a full set; levelSet is the set's lowest level (9 and up), addDefense its defense bonus.
+static bool FullSetOf(const CHARACTER* c, int& levelSet, bool& addDefense)
 {
     int tmpLevel = 10;
     bool Success = true;
     int  start = 5, end = 1;
 
-    EquipmentLevelSet = 0;
+    levelSet = 0;
 
     bool bHero = false;
 
@@ -5343,13 +5344,13 @@ bool CheckFullSet(CHARACTER* c)
                 int Level = CharacterMachine->Equipment[i].Level;
                 if (Level < 9)
                 {
-                    EquipmentLevelSet = 0;
+                    levelSet = 0;
                     Success = false;
                     break;
                 }
                 if (Type != Data::Items::GetItemNumber(CharacterMachine->Equipment[i].Type))
                 {
-                    EquipmentLevelSet = 0;
+                    levelSet = 0;
                     Success = false;
                     break;
                 }
@@ -5357,12 +5358,12 @@ bool CheckFullSet(CHARACTER* c)
                 if (Level >= 9 && tmpLevel >= Level)
                 {
                     tmpLevel = Level;
-                    EquipmentLevelSet = Level;
+                    levelSet = Level;
                 }
             }
         }
 
-        g_bAddDefense = true;
+        addDefense = true;
 
         if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK && Success)
         {
@@ -5375,7 +5376,7 @@ bool CheckFullSet(CHARACTER* c)
                 && CharacterMachine->Equipment[EQUIPMENT_ARMOR].Type != ITEM_PHANTOM_ARMOR
                 )
             {
-                g_bAddDefense = false;
+                addDefense = false;
             }
         }
     }
@@ -5400,13 +5401,13 @@ bool CheckFullSet(CHARACTER* c)
                 int Level = c->BodyPart[i].Level & 0xf;
                 if (Level < 9)
                 {
-                    EquipmentLevelSet = 0;
+                    levelSet = 0;
                     Success = false;
                     break;
                 }
                 if (Type != Data::Items::GetItemNumber(Data::Items::ToItemType(c->BodyPart[i].Type)))
                 {
-                    EquipmentLevelSet = 0;
+                    levelSet = 0;
                     Success = false;
                     break;
                 }
@@ -5414,12 +5415,12 @@ bool CheckFullSet(CHARACTER* c)
                 if (Level >= 9 && tmpLevel >= Level)
                 {
                     tmpLevel = Level;
-                    EquipmentLevelSet = Level;
+                    levelSet = Level;
                 }
             }
         }
 
-        g_bAddDefense = true;
+        addDefense = true;
 
         if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK && Success)
         {
@@ -5432,16 +5433,29 @@ bool CheckFullSet(CHARACTER* c)
                 && c->BodyPart[BODYPART_ARMOR].Type != ITEM_PHANTOM_ARMOR
                 )
             {
-                g_bAddDefense = false;
+                addDefense = false;
             }
         }
     }
 
+    return Success;
+}
+
+bool CheckFullSet(CHARACTER* c)
+{
+    const bool full = FullSetOf(c, EquipmentLevelSet, g_bAddDefense);
     if (gMapManager.InChaosCastle())
     {
         ChangeChaosCastleUnit(c);
     }
-    return Success;
+    return full;
+}
+
+bool IsFullSet(const CHARACTER* c)
+{
+    int levelSet = 0;
+    bool addDefense = false;
+    return FullSetOf(c, levelSet, addDefense);
 }
 
 void MoveEye(OBJECT* o, BMD* b, int Right, int Left, int Right2, int Left2, int Right3, int Left3)
@@ -6531,7 +6545,7 @@ void WaitCharactersAnimation()
 
 extern thread_local float  ParentMatrix[3][4];
 
-void RenderGuild(OBJECT* o, int Type, vec3_t vPos)
+void RenderGuild(const OBJECT* o, int Type, vec3_t vPos)
 {
     EnableAlphaTest();
     EnableCullFace();
@@ -6886,7 +6900,7 @@ LinkPlacement PlaceLinkedPart(float x, float y, float z, const CHARACTER* c, BYT
     }
     return placement;
 }
-bool DrawsHeldWeapon(CHARACTER* c, int hand);
+bool DrawsHeldWeapon(const CHARACTER* c, int hand);
 
 // Sets up an item object of a part type from the character the part is on.
 void SetUpItemObject(OBJECT* Object, const CHARACTER* c, int Type)
@@ -6920,9 +6934,9 @@ unsigned short LinkedPartAction(const CHARACTER* c, const PART_t* f)
 }
 
 // Parts no draw shows: Cursed Temple players' wings and capes, summoner books, and anything on a cloaked character.
-bool HidesLinkedPart(CHARACTER* c, int Type)
+bool HidesLinkedPart(const CHARACTER* c, int Type)
 {
-    OBJECT* o = &c->Object;
+    const OBJECT* o = &c->Object;
     if (o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
     {
         if (Type >= MODEL_WING && Type <= MODEL_WINGS_OF_DARKNESS)
@@ -7012,12 +7026,12 @@ void PoseLinkedPart(const CHARACTER* c, int Type, bool Link, const Engine::Objec
 }
 } // namespace
 
-vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1,
-                          bool Link, bool Translate, int RenderType, bool bRightHandItem, int linkBone)
+vec34_t* RenderLinkObject(float x, float y, float z, const CHARACTER* c, const PART_t* f, int Type, int Level,
+                          int Option1, bool Link, bool Translate, int RenderType, bool bRightHandItem, int linkBone)
 {
     // A bone the call hangs the part from, where it differs from the part's own.
     const auto bone = static_cast<unsigned char>(linkBone >= 0 ? linkBone : f->LinkBone);
-    OBJECT* o = &c->Object;
+    const OBJECT* o = &c->Object;
     BMD* b = &Models[Type];
 
     if (HidesLinkedPart(c, Type))
@@ -8835,7 +8849,7 @@ struct Cloak
 };
 
 // Whether a character wears a simulated cape, and its tint; its simulation and its draw both read it.
-Cloak CloakOf(CHARACTER* c, OBJECT* o)
+Cloak CloakOf(const CHARACTER* c, const OBJECT* o)
 {
     Cloak cloak;
 
@@ -8925,7 +8939,7 @@ Cloak CloakOf(CHARACTER* c, OBJECT* o)
 }
 
 // The cape cloths a character's draw leaves out; its simulation skips them too.
-bool IsCloakClothHidden(CHARACTER* c, int i, const vec3_t light)
+bool IsCloakClothHidden(const CHARACTER* c, int i, const vec3_t light)
 {
     if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD)
     {
@@ -9316,7 +9330,7 @@ bool UpdateTransformCharacterState(CHARACTER* c)
 }
 
 // Whether RenderCharacter draws a player's body parts into the shadow pass.
-bool DrawsPlayerBodyShadow(CHARACTER* c, OBJECT* o)
+bool DrawsPlayerBodyShadow(const CHARACTER* c, const OBJECT* o)
 {
     return gMapManager.WorldActive != WD_10HEAVEN && o->Type == MODEL_PLAYER &&
            (!(MODEL_HORN_OF_UNIRIA <= c->Helper.Type && c->Helper.Type <= MODEL_HORN_OF_DINORANT) || c->SafeZone) &&
@@ -9324,7 +9338,7 @@ bool DrawsPlayerBodyShadow(CHARACTER* c, OBJECT* o)
 }
 
 // Whether RenderCharacter shows a character's +15 weapon sparks and armor pieces.
-bool DrawsNextGradeObjects(CHARACTER* c)
+bool DrawsNextGradeObjects(const CHARACTER* c)
 {
     return !gMapManager.InChaosCastle() && !(gMapManager.IsCursedTemple() && !c->SafeZone);
 }
@@ -9846,7 +9860,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     {
         if (c->HideShadow == false)
         {
-            fullset = CheckFullSet(c);
+            fullset = IsFullSet(c);
         }
     }
 
@@ -11445,9 +11459,9 @@ void RefreshCharacterPoses()
 
 // Whether RenderCharacter draws the weapon of this hand: a real weapon, and not the first one during the start of
 // a fury strike or while a post-move process runs.
-bool DrawsHeldWeapon(CHARACTER* c, int hand)
+bool DrawsHeldWeapon(const CHARACTER* c, int hand)
 {
-    OBJECT* o = &c->Object;
+    const OBJECT* o = &c->Object;
     if (hand == 0 && ((o->CurrentAction == PLAYER_ATTACK_SKILL_FURY_STRIKE && o->AnimationFrame <= 4.f) ||
                       c->PostMoveProcess_IsProcessing()))
         return false;

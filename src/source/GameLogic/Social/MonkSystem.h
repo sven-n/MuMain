@@ -210,7 +210,7 @@ public:
     bool SetRageSkillAni(int _nSkill, OBJECT* _pObj);
     bool IsRageHalfwaySkillAni(int _nSkill);
     bool SendAttackPacket(CHARACTER* _pCha, int _nMoveTarget, int _nSkill);
-    bool RageFighterEffect(OBJECT* _pObj, int _Type);
+    bool RageFighterEffect(const OBJECT* _pObj, int _Type);
     void SetDarksideTargetIndex(WORD* _pTargetIndex, ActionSkillType skill);
     WORD GetDarksideTargetIndex(int _nIndex);
     int GetDarksideCnt();

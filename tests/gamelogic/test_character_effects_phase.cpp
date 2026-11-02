@@ -763,6 +763,31 @@ TEST_CASE("Drawing a part the update has not advanced yet, again and again, adva
 
 extern OBJECT g_ItemObject[];
 
+TEST_CASE("The draw's full-set check sets nothing; the update's sets the set level and defense [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    CHARACTER* c = &scope.character();
+    c->Class = CLASS_KNIGHT;
+    // A +11 set: helm, armor, pants, gloves and boots of the same number.
+    for (int part = BODYPART_HELM; part <= BODYPART_BOOTS; ++part)
+    {
+        c->BodyPart[part].Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(7 + part - BODYPART_HELM, 1));
+        c->BodyPart[part].Level = 11;
+    }
+    EquipmentLevelSet = 0;
+    g_bAddDefense = false;
+
+    CHECK(IsFullSet(c));
+    CHECK(EquipmentLevelSet == 0);
+    CHECK_FALSE(g_bAddDefense);
+
+    CHECK(CheckFullSet(c));
+    CHECK(EquipmentLevelSet == 11);
+    CHECK(g_bAddDefense);
+    EquipmentLevelSet = 0;
+    g_bAddDefense = false;
+}
+
 TEST_CASE("A shadow pass draws shadows while it lasts and leaves the object's own flag alone [effects]")
 {
     OBJECT o;

@@ -124,7 +124,7 @@ void CreatePartsFactory(CHARACTER* c)
 
 namespace
 {
-bool ArePartsShown(CHARACTER* c)
+bool ArePartsShown(const CHARACTER* c)
 {
     return !g_isCharacterBuff((&c->Object), eBuff_Cloaking) && !ShouldHideCastleMarks(*c);
 }
@@ -185,7 +185,7 @@ void UpdateParts(CHARACTER* c)
     }
 }
 
-void RenderParts(CHARACTER* c)
+void RenderParts(const CHARACTER* c)
 {
     if (c == nullptr || !ArePartsShown(c))
     {
@@ -270,7 +270,7 @@ void CSParts::IUpdate(CHARACTER* c)
     b->PlayAnimation(&m_pObj.AnimationFrame, &m_pObj.PriorAnimationFrame, &m_pObj.PriorAction, speed, m_pObj.Position, m_pObj.Angle);
 }
 
-void CSParts::IRender(CHARACTER* c)
+void CSParts::IRender(const CHARACTER* c)
 {
     if (c == nullptr || m_pObj.Alpha < kRenderableAlphaThreshold)
     {
@@ -333,7 +333,7 @@ void CSAnimationParts::IUpdate(CHARACTER* c)
     Animation(c);
 }
 
-void CSAnimationParts::IRender(CHARACTER* c)
+void CSAnimationParts::IRender(const CHARACTER* c)
 {
     if (c == nullptr || m_pObj.Alpha < kRenderableAlphaThreshold)
     {
@@ -398,4 +398,4 @@ void CSParts2D::IUpdate(CHARACTER* c)
 }
 
 // A billboard sprite, which IUpdate spawns.
-void CSParts2D::IRender(CHARACTER*) {}
+void CSParts2D::IRender(const CHARACTER*) {}
