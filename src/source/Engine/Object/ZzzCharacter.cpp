@@ -6892,7 +6892,7 @@ void SetUpItemObject(OBJECT* Object, const CHARACTER* c, int Type)
     const OBJECT* o = &c->Object;
     Object->Type = Type;
     ItemObjectAttribute(Object);
-    Object->EnableShadow = o->EnableShadow;
+    Object->EnableShadow = DrawsShadow(o);
     Object->m_bRenderShadow = o->m_bRenderShadow;
     Object->m_bySkillCount = o->m_bySkillCount;
     g_CharacterCopyBuff(Object, o);
@@ -9626,7 +9626,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     {
         if (DrawsPlayerBodyShadow(c, o))
         {
-            o->EnableShadow = true;
+            const ShadowPass shadow;
             for (int i = MAX_BODYPART - 1; i >= 0; i--)
             {
                 PART_t* p = &c->BodyPart[i];
@@ -9660,7 +9660,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     RenderLinkObject(0.f, 0.f, 0.f, c, &ShadowPart, Type, 0, 0, false, Translate);
                 }
             }
-            o->EnableShadow = false;
         }
     }
 
@@ -9698,19 +9697,15 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     {
         if (o->Alpha >= 0.3f)
         {
-            // An archangel's shadow leaves out its wings' mesh.
-            const int hiddenMesh = o->HiddenMesh;
-            if (c->MonsterIndex == MONSTER_ARCHANGEL || c->MonsterIndex == MONSTER_MESSENGER_OF_ARCH)
-                o->HiddenMesh = 2;
-
             if (o->Type != MODEL_STATUE_OF_SAINT && o->Type != MODEL_CASTLE_GATE &&
                 !(o->Type >= MODEL_FACE && o->Type <= MODEL_FACE + 6))
             {
-                o->EnableShadow = true;
+                // An archangel's shadow leaves out its wings' mesh.
+                const bool archangel =
+                    c->MonsterIndex == MONSTER_ARCHANGEL || c->MonsterIndex == MONSTER_MESSENGER_OF_ARCH;
+                const ShadowPass shadow(archangel ? 2 : ShadowPass::ObjectHiddenMesh);
                 RenderPartObject(&c->Object, o->Type, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate);
-                o->EnableShadow = false;
             }
-            o->HiddenMesh = hiddenMesh;
             if (c->MonsterIndex == MONSTER_ARCHANGEL || c->MonsterIndex == MONSTER_MESSENGER_OF_ARCH)
             {
                 EnableAlphaBlend();
@@ -9807,20 +9802,20 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         float fSin = 0.5f * (1.0f + sinf((float)((int)WorldTime % 10000) * 0.001f));
         RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT,
                                   0.3f + fSin * 0.7f);
-        // Its blend mesh light is set by the update.
-        const int blendMesh = o->BlendMesh;
-        o->BlendMesh = 0;
-        RenderObject(o, Translate, 2, 0);
-        RenderObject(o, Translate, 3, 0);
-        o->BlendMesh = blendMesh;
-        o->Type++;
-        RenderObject(o, Translate, Select, 0);
+        // Its blend mesh light is set by the update. Its outlines draw without the blend mesh, and its second model
+        // (its type + 1) over the body: both from copies of the object.
+        OBJECT outline = *o;
+        outline.BlendMesh = 0;
+        RenderObject(&outline, Translate, 2, 0);
+        RenderObject(&outline, Translate, 3, 0);
+        OBJECT second = *o;
+        ++second.Type;
+        RenderObject(&second, Translate, Select, 0);
 
         if (auto* pCloth = (CPhysicsCloth*)c->Object.m_pCloth)
         {
             pCloth[0].Render();
         }
-        o->Type--;
     }
 
     if (c->MonsterIndex == MONSTER_GOLDEN_TITAN || c->MonsterIndex == MONSTER_GOLDEN_SOLDIER)

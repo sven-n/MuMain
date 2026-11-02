@@ -4455,6 +4455,29 @@ namespace
 std::unordered_set<const OBJECT*> s_sentAfterCharacter;
 } // namespace
 
+namespace
+{
+bool s_shadowPass = false;
+int s_shadowHiddenMesh = ShadowPass::ObjectHiddenMesh;
+} // namespace
+
+ShadowPass::ShadowPass(int hiddenMesh) : previous_(s_shadowPass), previousHiddenMesh_(s_shadowHiddenMesh)
+{
+    s_shadowPass = true;
+    s_shadowHiddenMesh = hiddenMesh;
+}
+
+ShadowPass::~ShadowPass()
+{
+    s_shadowPass = previous_;
+    s_shadowHiddenMesh = previousHiddenMesh_;
+}
+
+bool DrawsShadow(const OBJECT* o)
+{
+    return o->EnableShadow || s_shadowPass;
+}
+
 void BeginObjectDraws()
 {
     s_sentAfterCharacter.clear();
@@ -7813,7 +7836,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
     }
     BMD* b = &Models[Type];
 
-    if (o->EnableShadow == true)
+    if (DrawsShadow(o))
     {
         if (gMapManager.WorldActive == 7)
         {
@@ -7844,7 +7867,8 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         {
             if (o->m_bRenderShadow)
             {
-                int iHiddenMesh = look.hiddenMesh;
+                int iHiddenMesh =
+                    s_shadowHiddenMesh != ShadowPass::ObjectHiddenMesh ? s_shadowHiddenMesh : look.hiddenMesh;
 
                 if (o->Type == MODEL_DREADFEAR)
                 {
@@ -7874,7 +7898,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         return;
     }
 
-    if (!o->EnableShadow)
+    if (!DrawsShadow(o))
     {
         float Luminosity = 1.f;
 

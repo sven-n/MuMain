@@ -75,6 +75,23 @@ void Draw_RenderObject_AfterCharacter(const OBJECT* o, bool Translate = false, i
 void RenderObjects_AfterCharacter();
 // Starts a frame's object draws: clears the after-character sends and keeps the LODs drawn last frame.
 void BeginObjectDraws();
+// A shadow pass of a character's draw: the parts drawn while it lasts draw their shadows. With a hidden mesh, the
+// body's shadow leaves out that mesh instead of the object's.
+class ShadowPass
+{
+public:
+    static constexpr int ObjectHiddenMesh = -2;
+    explicit ShadowPass(int hiddenMesh = ObjectHiddenMesh);
+    ~ShadowPass();
+    ShadowPass(const ShadowPass&) = delete;
+    ShadowPass& operator=(const ShadowPass&) = delete;
+
+private:
+    bool previous_;
+    int previousHiddenMesh_;
+};
+// Whether `o` draws its shadow: set on it, or in a ShadowPass.
+[[nodiscard]] bool DrawsShadow(const OBJECT* o);
 // The map objects and effects this frame's draws send to the after-character passes; the boids are sent by their
 // update (m_bRenderAfterCharacter).
 void SendAfterCharacter(const OBJECT* o);

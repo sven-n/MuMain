@@ -763,6 +763,25 @@ TEST_CASE("Drawing a part the update has not advanced yet, again and again, adva
 
 extern OBJECT g_ItemObject[];
 
+TEST_CASE("A shadow pass draws shadows while it lasts and leaves the object's own flag alone [effects]")
+{
+    OBJECT o;
+    CHECK_FALSE(DrawsShadow(&o));
+    {
+        const ShadowPass shadow(2);
+        CHECK(DrawsShadow(&o));
+        {
+            const ShadowPass inner;
+            CHECK(DrawsShadow(&o));
+        }
+        CHECK(DrawsShadow(&o));
+    }
+    CHECK_FALSE(DrawsShadow(&o));
+    CHECK_FALSE(o.EnableShadow);
+    o.EnableShadow = true;
+    CHECK(DrawsShadow(&o));
+}
+
 TEST_CASE("Drawing a held part sets up its own item object and leaves the shared one as it stands [effects]")
 {
     CharacterScope scope(MODEL_PLAYER);
