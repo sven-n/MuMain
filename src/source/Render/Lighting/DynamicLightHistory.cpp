@@ -400,6 +400,16 @@ std::uint64_t DynamicLightHistory::StateHash() const
     hash.Add(m_callCount);
     hash.Add(m_tickStart);
     hash.Add(m_tickOpen);
+    for (std::size_t i = 0; i < m_callCount; ++i)
+    {
+        const LightCall& call = m_calls[i];
+        hash.Add(call.x);
+        hash.Add(call.y);
+        for (const float channel : call.color)
+            hash.Add(channel);
+        hash.Add(call.range);
+        hash.Add(call.source);
+    }
     hash.Add(m_followedCount);
     for (std::size_t i = 0; i < m_followedCount; ++i)
     {
