@@ -232,14 +232,25 @@ std::optional<std::string> PickVipType(const ServerListData& list, const std::st
 }
 
 // The load the connect server sent for the channel (sentChannels: the group's,
-// or nullptr); for one it didn't send, the offline preview's box and load.
-// True when the preview changed.
+// or nullptr); nothing when it didn't send the channel.
+std::optional<int> FindSentLoad(const std::map<int, int>* sentChannels, int channel)
+{
+    if (sentChannels == nullptr)
+    {
+        return std::nullopt;
+    }
+    const auto sent = sentChannels->find(channel);
+    return sent != sentChannels->end() ? std::optional<int>(sent->second) : std::nullopt;
+}
+
+// The load the connect server sent for the channel (FindSentLoad); for one it
+// didn't send, the offline preview's box and load. True when the preview
+// changed.
 bool RenderConnectServerCell(int groupId, int channel, const std::map<int, int>* sentChannels)
 {
-    if (sentChannels != nullptr && sentChannels->contains(channel))
+    if (const std::optional<int> load = FindSentLoad(sentChannels, channel))
     {
-        const std::string load = std::to_string(sentChannels->at(channel));
-        ImGui::TextUnformatted(I18N::Format(I18N::Editor::Sent0Load, {load}).c_str());
+        ImGui::TextUnformatted(I18N::Format(I18N::Editor::Sent0Load, {std::to_string(*load)}).c_str());
         return false;
     }
     return MuEditor::ServerList::OfflinePreview::RenderChannel(Data::ServerList::ChannelServerId(groupId, channel));
