@@ -189,10 +189,11 @@ void CMuItemTooltipUI::RenderRules(ItemDefinition& item)
     for (size_t index = 0; index < rules.size(); ++index)
     {
         ImGui::PushID(static_cast<int>(index));
-        ItemGroundLabel& rule = rules[index];
-        m_draft.AfterChange(GroundLabelWidgets::RenderStyleCombo("##Style", rule.style, m_counts), step);
+        // A stored change takes the item back as stored, into new storage of the rules: each widget takes its rule
+        // from the list again.
+        m_draft.AfterChange(GroundLabelWidgets::RenderStyleCombo("##Style", rules[index].style, m_counts), step);
         ImGui::SameLine();
-        if (RenderRuleLevels(rule))
+        if (RenderRuleLevels(rules, index))
         {
             m_draft.AfterChange(true, step);
         }
@@ -236,31 +237,34 @@ void CMuItemTooltipUI::RenderRules(ItemDefinition& item)
     }
 }
 
-bool CMuItemTooltipUI::RenderRuleLevels(ItemGroundLabel& rule)
+bool CMuItemTooltipUI::RenderRuleLevels(std::vector<ItemGroundLabel>& rules, size_t index)
 {
-    bool allLevels = !rule.hasLevels;
+    // Taken from the list at each use: the From field left after a change is stored, and the To field drawn after it
+    // edits the rule as stored.
+    const auto rule = [&rules, index]() -> ItemGroundLabel& { return rules[index]; };
+    bool allLevels = !rule().hasLevels;
     if (ImGui::Checkbox(I18N::Editor::AllLevels, &allLevels))
     {
-        rule.hasLevels = !allLevels;
-        rule.minLevel = 0;
-        rule.maxLevel = MaxLevel;
+        rule().hasLevels = !allLevels;
+        rule().minLevel = 0;
+        rule().maxLevel = MaxLevel;
         return true;
     }
-    if (!rule.hasLevels)
+    if (!rule().hasLevels)
     {
         return false;
     }
     ImGui::SameLine();
     // A level typed past the other one moves it along, so the levels never run backwards.
-    if (LevelField(I18N::Editor::From, rule.minLevel))
+    if (LevelField(I18N::Editor::From, rule().minLevel))
     {
-        rule.maxLevel = std::max(rule.maxLevel, rule.minLevel);
+        rule().maxLevel = std::max(rule().maxLevel, rule().minLevel);
     }
     m_draft.AfterField(I18N::Editor::ChangeTheGroundLabelRules);
     ImGui::SameLine();
-    if (LevelField(I18N::Editor::To, rule.maxLevel))
+    if (LevelField(I18N::Editor::To, rule().maxLevel))
     {
-        rule.minLevel = std::min(rule.minLevel, rule.maxLevel);
+        rule().minLevel = std::min(rule().minLevel, rule().maxLevel);
     }
     m_draft.AfterField(I18N::Editor::ChangeTheGroundLabelRules);
     return false;

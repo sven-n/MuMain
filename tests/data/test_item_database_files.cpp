@@ -4577,6 +4577,49 @@ TEST_CASE("Item Tooltip adds an item's ground label rule as an undo step [data][
     g_ItemEdits.GetHistory().Clear();
 }
 
+// Item Tooltip: From left after a change by a click into To is stored the frame after, which takes the item back as
+// stored. To, drawn after From in that frame, reads the rule as stored: To isn't changed by it, and a level typed into
+// it keeps both levels. (It read the freed rule before; the Debug heap's fill of freed memory made that an edit.)
+TEST_CASE("Item Tooltip's To field reads the rule as stored in the frame From is stored [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TestImGuiContext context;
+    g_ItemEdits.GetHistory().Clear();
+    // The Devil Square Ticket with a rule for the levels +0 to +15.
+    const int ticketType = MakeItemType(13, 46);
+    EditItem(ticketType, [](ItemDefinition& ticket) { ticket.groundLabels = {{"ticket", true, 0, 15}}; });
+    g_ItemSelection.Select(ticketType);
+    RenderItemTool(g_MuItemTooltipUI, true);
+    const ImGuiID from = ItemToolFieldId(MuEditor::WindowIds::ItemTooltip, {ticketType, 0}, I18N::Editor::From);
+    const ImGuiID to = ItemToolFieldId(MuEditor::WindowIds::ItemTooltip, {ticketType, 0}, I18N::Editor::To);
+
+    // Activation selects the field's text: the typed text replaces it.
+    ImGui::ActivateItemByID(from);
+    RenderItemTool(g_MuItemTooltipUI, true);
+    REQUIRE(ImGui::GetActiveID() == from);
+    RenderItemTool(g_MuItemTooltipUI, true, "3");
+    // A click into To; From is stored in the next frame, before To is drawn. To, untouched, isn't edited by it.
+    ImGui::ActivateItemByID(to);
+    RenderItemTool(g_MuItemTooltipUI, true);
+    REQUIRE(ImGui::GetActiveID() == to);
+    RenderItemTool(g_MuItemTooltipUI, true);
+    CHECK(g_ItemDatabase.Find(ticketType)->groundLabels[0].minLevel == 3);
+    CHECK_FALSE(ImGui::GetCurrentContext()->ActiveIdHasBeenEditedBefore);
+    RenderItemTool(g_MuItemTooltipUI, true, "9");
+    ImGui::ClearActiveID();
+    RenderItemTool(g_MuItemTooltipUI, true);
+    RenderItemTool(g_MuItemTooltipUI, true);
+
+    const ItemGroundLabel typed{"ticket", true, 3, 9};
+    CHECK(g_ItemDatabase.Find(ticketType)->groundLabels == std::vector<ItemGroundLabel>{typed});
+    g_ItemEdits.GetHistory().Clear();
+}
+
 TEST_CASE("A description placeholder that names no table stops the save [editor][items]")
 {
     TemporaryClientFolder folder;

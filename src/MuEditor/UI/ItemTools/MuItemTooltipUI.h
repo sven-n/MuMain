@@ -26,8 +26,8 @@ private:
     void RenderPreview(const Data::Items::ItemDefinition& item, int itemType);
     void RenderSetCombo(int itemType);
     void RenderRules(Data::Items::ItemDefinition& item);
-    // The rule's level fields; true when the rule changed.
-    bool RenderRuleLevels(Data::Items::ItemGroundLabel& rule);
+    // The level fields of the rule at `index`; true when the rule changed.
+    bool RenderRuleLevels(std::vector<Data::Items::ItemGroundLabel>& rules, size_t index);
     void AddRule(Data::Items::ItemDefinition& item) const;
     // The label of the item as the game draws it on the ground, with the previewed level and options.
     GroundItemLabel DescribePreviewLabel(int itemType) const;
