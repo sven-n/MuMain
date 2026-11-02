@@ -242,8 +242,7 @@ bool RenderConnectServerCell(int groupId, int channel, const std::map<int, int>*
         ImGui::TextUnformatted(I18N::Format(I18N::Editor::Sent0Load, {load}).c_str());
         return false;
     }
-    return MuEditor::ServerList::OfflinePreview::RenderChannel(groupId * Data::ServerList::MaxChannelsPerGroup +
-                                                               channel);
+    return MuEditor::ServerList::OfflinePreview::RenderChannel(Data::ServerList::ChannelServerId(groupId, channel));
 }
 
 // One channel: its number, PvP box, VIP type, button text on the login screen
@@ -321,7 +320,7 @@ std::string ListServerIds(const std::map<int, int>& channels, int groupId)
     std::string text;
     for (const auto& [channel, load] : channels)
     {
-        text += (text.empty() ? "" : ", ") + std::to_string(groupId * Data::ServerList::MaxChannelsPerGroup + channel);
+        text += (text.empty() ? "" : ", ") + std::to_string(Data::ServerList::ChannelServerId(groupId, channel));
     }
     return text;
 }
@@ -766,12 +765,12 @@ bool CMuServerListUI::RenderGroupId(ServerGroup& group)
         }
     }
     CommitWhenFieldLeft();
-    const int firstServer = group.id * Data::ServerList::MaxChannelsPerGroup;
+    const int firstServer = Data::ServerList::ChannelServerId(group.id, 0);
+    const int lastServer = Data::ServerList::ChannelServerId(group.id, Data::ServerList::MaxChannelsPerGroup - 1);
     ImGui::SameLine();
-    ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::Servers0To1,
-                                           {std::to_string(firstServer),
-                                            std::to_string(firstServer + Data::ServerList::MaxChannelsPerGroup - 1)})
-                                  .c_str());
+    ImGui::TextDisabled(
+        "%s",
+        I18N::Format(I18N::Editor::Servers0To1, {std::to_string(firstServer), std::to_string(lastServer)}).c_str());
     if (m_takenId >= 0)
     {
         RenderError(I18N::Format(I18N::Editor::AnotherGroupHasTheID0, {std::to_string(m_takenId)}).c_str());

@@ -142,8 +142,7 @@ void ShowOfflineChannels(int groupId, const std::map<int, int>* sent, bool shown
     {
         if (sent == nullptr || !sent->contains(channel))
         {
-            g_ServerListManager->SetOfflineServerShown(groupId * Data::ServerList::MaxChannelsPerGroup + channel,
-                                                       shown);
+            g_ServerListManager->SetOfflineServerShown(Data::ServerList::ChannelServerId(groupId, channel), shown);
         }
     }
 }

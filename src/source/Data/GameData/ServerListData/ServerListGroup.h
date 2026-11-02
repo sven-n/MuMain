@@ -13,6 +13,12 @@ namespace Data::ServerList
 inline constexpr int MaxChannelsPerGroup = MAX_SERVER_PER_GROUP;
 // Server IDs are 16 bit.
 inline constexpr int MaxServerGroupId = 0xFFFF / MAX_SERVER_PER_GROUP;
+
+// The server ID of the group `groupId`'s channel `channel` (from 0).
+constexpr int ChannelServerId(int groupId, int channel)
+{
+    return groupId * MaxChannelsPerGroup + channel;
+}
 // In UTF-16 units, as the client's wide strings hold them on Windows (an emoji
 // takes two): the name goes into fixed wide buffers, e.g. the screenshot
 // message's 64 with the character name. 32 is also the width of the group

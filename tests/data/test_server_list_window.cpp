@@ -400,7 +400,7 @@ TEST_CASE("Server List window: an offline channel's Show box stays with its grou
     constexpr int NewId = 7;
     Type(PaneId("##Group", I18N::Editor::GroupID), std::to_string(NewId).c_str());
     PressKey(ImGuiKey_Enter, RenderServerList);
-    CHECK_FALSE(g_ServerListManager->IsOfflineServerShown(NewId * Data::ServerList::MaxChannelsPerGroup + Channel));
+    CHECK_FALSE(g_ServerListManager->IsOfflineServerShown(Data::ServerList::ChannelServerId(NewId, Channel)));
     CHECK(g_ServerListManager->IsOfflineServerShown(Channel));
     // Back to the folder's ID, which the next test's list has.
     Type(PaneId("##Group", I18N::Editor::GroupID), "0");

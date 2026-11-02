@@ -133,7 +133,7 @@ void CServerListManager::RebuildServerGroups()
     {
         for (int channel = 0; channel < MAX_SERVER_PER_GROUP; ++channel)
         {
-            channels.try_emplace(group.id * MAX_SERVER_PER_GROUP + channel, std::nullopt);
+            channels.try_emplace(Data::ServerList::ChannelServerId(group.id, channel), std::nullopt);
         }
     }
     for (const auto& [connectIndex, percent] : channels)
@@ -239,8 +239,8 @@ void CServerListManager::MoveOfflineServers(int fromGroupId, int toGroupId)
 
     for (int channel = 0; channel < MAX_SERVER_PER_GROUP; ++channel)
     {
-        const int from = fromGroupId * MAX_SERVER_PER_GROUP + channel;
-        const int to = toGroupId * MAX_SERVER_PER_GROUP + channel;
+        const int from = Data::ServerList::ChannelServerId(fromGroupId, channel);
+        const int to = Data::ServerList::ChannelServerId(toGroupId, channel);
         SetOfflineServerShown(to, IsOfflineServerShown(from));
         SetOfflineServerLoad(to, GetOfflineServerLoad(from));
         SetOfflineServerShown(from, true);
