@@ -4538,7 +4538,7 @@ TEST_CASE("The item tools change ground label styles and remove unused ones [dat
 }
 
 // Item Tooltip (D71): Add rule gives the item a rule for the previewed level, with the style its label has there,
-// before its rule for every level (one after it would never be used), as one undo step.
+// before its rule that holds there (one after it would not be used there), as one undo step.
 TEST_CASE("Item Tooltip adds an item's ground label rule as an undo step [data][items][editor]")
 {
     TemporaryClientFolder folder;
@@ -4617,6 +4617,32 @@ TEST_CASE("Item Tooltip's To field reads the rule as stored in the frame From is
 
     const ItemGroundLabel typed{"ticket", true, 3, 9};
     CHECK(g_ItemDatabase.Find(ticketType)->groundLabels == std::vector<ItemGroundLabel>{typed});
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// Item Tooltip: Add rule puts the new rule before the item's rule that holds at the previewed level, also when that
+// rule has levels; after it the new rule would not be used there.
+TEST_CASE("Item Tooltip adds a rule before the item's ranged rule that holds at the level [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TestImGuiContext context;
+    g_ItemEdits.GetHistory().Clear();
+    // The Devil Square Ticket with a rule for the levels +0 to +3, previewed at +0.
+    const int ticketType = MakeItemType(13, 46);
+    const ItemGroundLabel ranged{"jewel", true, 0, 3};
+    EditItem(ticketType, [&ranged](ItemDefinition& ticket) { ticket.groundLabels = {ranged}; });
+    g_ItemSelection.Select(ticketType);
+    RenderItemTool(g_MuItemTooltipUI, true);
+    ImGui::ActivateItemByID(ItemToolFieldId(MuEditor::WindowIds::ItemTooltip, {ticketType}, I18N::Editor::AddRule));
+    RenderItemTool(g_MuItemTooltipUI, true);
+
+    const ItemGroundLabel added{"jewel", true, 0, 0};
+    CHECK(g_ItemDatabase.Find(ticketType)->groundLabels == std::vector<ItemGroundLabel>{added, ranged});
     g_ItemEdits.GetHistory().Clear();
 }
 

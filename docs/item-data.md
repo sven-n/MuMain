@@ -1417,9 +1417,10 @@ rules.
 Under it are the item's own rules, the first whose levels hold giving the
 style: a style, **All levels** or the levels from and to, and buttons to move
 a rule up or down and to remove it. **Add rule** adds a rule for the
-previewed level with the look the label has there, before a rule for every
-level (a rule after that one would never be used). Every change is a step of
-the undo history, and Save Items writes it to the item file.
+previewed level with the look the label has there, before the item's rule
+that holds at that level (a rule after it would not be used there). Every
+change is a step of the undo history, and Save Items writes it to the item
+file.
 
 ### Item Formulas
 

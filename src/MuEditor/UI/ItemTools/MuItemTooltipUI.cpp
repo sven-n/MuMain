@@ -271,8 +271,8 @@ bool CMuItemTooltipUI::RenderRuleLevels(std::vector<ItemGroundLabel>& rules, siz
 }
 
 // A rule for the previewed level with the look the label has there: its own rule's style, else a style that looks like
-// the label the standard rules give. It goes before the first rule for every level: a rule after that one would never
-// be used.
+// the label the standard rules give. It goes before the item's rule that holds at the level (the first rule that holds
+// gives the style), so it is the one used there.
 void CMuItemTooltipUI::AddRule(ItemDefinition& item) const
 {
     ItemGroundLabel rule;
@@ -305,9 +305,7 @@ void CMuItemTooltipUI::AddRule(ItemDefinition& item) const
             rule.style = labels.styles.front().name;
         }
     }
-    const auto everyLevel =
-        std::ranges::find_if(item.groundLabels, [](const ItemGroundLabel& existing) { return !existing.hasLevels; });
-    item.groundLabels.insert(everyLevel, rule);
+    item.groundLabels.insert(own, rule);
 }
 
 GroundItemLabel CMuItemTooltipUI::DescribePreviewLabel(int itemType) const
