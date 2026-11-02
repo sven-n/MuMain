@@ -7024,6 +7024,10 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     if (Type == MODEL_BOSS_HEAD)
         b->BoneHead = 0;
 
+    // A part built for this draw only is the planned one only where it was planned (a weapon's shadow is not the
+    // weapon on the back); elsewhere it shows its own state.
+    if (slot != nullptr && slot->part == nullptr && !IsPlacedAt(slot->posed, placement))
+        slot = nullptr;
     // The update posed the part where this draw shows it; a part it has not planned yet is drawn as it stands.
     const bool reused = slot != nullptr && IsPlacedAt(slot->posed, placement);
 #ifdef MU_ENABLE_CONTROL_SOCKET

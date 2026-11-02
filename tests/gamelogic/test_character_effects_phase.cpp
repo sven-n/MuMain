@@ -1048,6 +1048,27 @@ struct PreviewPlayer
     }
 };
 
+// Gives the model one bone whose x position is ten times its animation frame, over ten looping keys.
+void SlidingBone(int type)
+{
+    LoopingActions(type);
+    BMD& model = Models[type];
+    model.NumBones = 1;
+    model.Bones = new Bone_t[1]{};
+    Bone_t& bone = model.Bones[0];
+    bone.Parent = -1;
+    bone.BoneMatrixes = new BoneMatrix_t[1]{};
+    BoneMatrix_t& keys = bone.BoneMatrixes[0];
+    keys.Position = new vec3_t[10]{};
+    keys.Rotation = new vec3_t[10]{};
+    keys.Quaternion = new vec4_t[10]{};
+    for (int key = 0; key < 10; ++key)
+    {
+        keys.Position[key][0] = 10.f * static_cast<float>(key);
+        keys.Quaternion[key][3] = 1.f;
+    }
+}
+
 void RestAnimation(PART_t& part)
 {
     part.CurrentAction = part.PriorAction = 0;
@@ -1141,6 +1162,59 @@ TEST_CASE("Which passes draw a carried part, and in what order, changes nothing 
     CHECK(RenderLinkObject(0.f, 0.f, 15.f, c, &c->Wing, MODEL_WING, 0, 0, false, true) == Attachments::Bones(*wing));
     CHECK(RenderLinkObject(0.f, 0.f, 15.f, c, &c->Wing, MODEL_WING, 0, 0, true, true, 0, true, 19) !=
           Attachments::Bones(*wing));
+}
+
+TEST_CASE("A weapon's shadow shows the weapon's own frame, not the rest pose of the same weapon on the back [effects]")
+{
+    namespace Attachments = Engine::Object::Attachments;
+    CharacterScope scope(MODEL_PLAYER);
+    LoopingActions(MODEL_PLAYER, MAX_PLAYER_ACTION);
+    SlidingBone(MODEL_CRYSTAL_SWORD);
+    // The character's bones are identities, so an attached part's pose shows its own frame.
+    for (int i = 0; i < MAX_BONES; ++i)
+    {
+        std::memset(scope.bones[i], 0, sizeof(scope.bones[i]));
+        scope.bones[i][0][0] = scope.bones[i][1][1] = scope.bones[i][2][2] = 1.f;
+    }
+    PreviewPlayer player(scope);
+    CHARACTER* c = player.character.get();
+    OBJECT* o = &c->Object;
+    // Greeting, the weapons go on the back; outside a safe zone the weapons still cast their shadows.
+    o->CurrentAction = PLAYER_GREETING1;
+    for (int hand = 0; hand < 2; ++hand)
+    {
+        PART_t& weapon = c->Weapon[hand];
+        weapon.Type = MODEL_CRYSTAL_SWORD;
+        weapon.AnimationFrame = weapon.PriorAnimationFrame = 3.f;
+    }
+
+    UpdatePreviewCharacter(c);
+    Attachments::BeginFrame();
+    PART_t any;
+    const Attachments::Slot* back = Attachments::Find(c, &any, MODEL_CRYSTAL_SWORD, true);
+    REQUIRE(back != nullptr);
+    // The weapon on the back is drawn at rest.
+    CHECK(back->posed.animationFrame == 0.f);
+
+    // Each hand's shadow pose, as the shadow pass draws it; then the same with nothing planned.
+    const auto shadows = [c, o]
+    {
+        std::vector<float> roots;
+        o->EnableShadow = true;
+        for (int hand = 0; hand < 2; ++hand)
+        {
+            PART_t shadow = c->Weapon[hand];
+            const vec34_t* bones = RenderLinkObject(0.f, 0.f, 0.f, c, &shadow, MODEL_CRYSTAL_SWORD, 0, 0, false, true, 0,
+                                                    hand == 0);
+            roots.insert(roots.end(), &bones[0][0][0], &bones[0][0][0] + 12);
+        }
+        o->EnableShadow = false;
+        return roots;
+    };
+    const std::vector<float> withPlan = shadows();
+    Attachments::BeginFrame();
+    REQUIRE(Attachments::Find(c, &any, MODEL_CRYSTAL_SWORD, true) == nullptr);
+    CHECK(shadows() == withPlan);
 }
 
 TEST_CASE("A flying Storm wing and the quest item it carries step the shared wing each at its own speed [effects]")
