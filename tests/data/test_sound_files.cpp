@@ -241,6 +241,10 @@ TEST_CASE("Sound files: the shipped file names each sound the code loads once, r
     // Fenrir's two pain sounds, of which the second was never loaded.
     CHECK(fileOf("SOUND_FENRIR_DAMAGE_1") == "Data/Sound/pWpain1.wav");
     CHECK(fileOf("SOUND_FENRIR_DAMAGE_2") == "Data/Sound/pWpain2.wav");
+    // Nightmare's skills, which named their files without ".wav".
+    CHECK(fileOf("SOUND_KANTURU_3RD_NIGHTMARE_ATT2") == "Data/Sound/w39/nightmare_skill-01.wav");
+    CHECK(fileOf("SOUND_KANTURU_3RD_NIGHTMARE_ATT3") == "Data/Sound/w39/nightmare_skill-02.wav");
+    CHECK(fileOf("SOUND_KANTURU_3RD_NIGHTMARE_ATT4") == "Data/Sound/w39/nightmare_skill-03.wav");
 }
 
 TEST_CASE("Sound files: LoadGameSound loads the file the data gives the id, with its channels and 3D; an id the "
