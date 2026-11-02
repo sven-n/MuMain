@@ -208,6 +208,9 @@ SkillResult CastSkill(ActionSkillType skill, bool targetRequired, int targetKey,
     g_MovementSkill.m_bMagic = true;
 
     const int executed = GameLogic::Combat::ExecuteSkill(Hero, skill, skillDistance);
+    // With auto-attack on, ExecuteSkill arms the per-frame repeat (Attacking = 2), which would recast
+    // this skill before the caller picks the next one; -1 is the state with auto-attack off.
+    Attacking = -1;
     if (executed == SkillExecutionRefused)
     {
         return SkillResult::Refused;
