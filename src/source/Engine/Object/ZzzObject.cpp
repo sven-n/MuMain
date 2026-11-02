@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Camera/CameraMove.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
@@ -294,30 +295,30 @@ static void AnimateObjectBones(OBJECT* o, BMD* b, bool Translate)
 #endif
 }
 
+void ObjectModelOrigin(const OBJECT* o, vec3_t origin)
+{
+    VectorCopy(o->Position, origin);
+    if (o->Type == MODEL_CASTLE_GATE)
+        origin[1] += 60.f;
+    else if (o->Type == MODEL_STATUE_OF_SAINT)
+        origin[1] += 120.f;
+}
+
 // Where an object's model stands when it is posed and drawn.
 void PlaceObjectModel(const OBJECT* o, BMD* b)
 {
     b->BodyHeight = 0.f;
     b->BodyScale = o->Scale;
     b->CurrentAction = o->CurrentAction;
-    VectorCopy(o->Position, b->BodyOrigin);
+    ObjectModelOrigin(o, b->BodyOrigin);
+}
 
-    if (o->Type == MODEL_CASTLE_GATE)
-    {
-        vec3_t Position;
-        VectorCopy(o->Position, Position);
-
-        Position[1] += 60.f;
-        VectorCopy(Position, b->BodyOrigin);
-    }
-    else if (o->Type == MODEL_STATUE_OF_SAINT)
-    {
-        vec3_t Position;
-        VectorCopy(o->Position, Position);
-
-        Position[1] += 120.f;
-        VectorCopy(Position, b->BodyOrigin);
-    }
+void PlaceObjectBounds(OBJECT* o, const vec3_t origin)
+{
+    VectorAdd(o->BoundingBoxMin, origin, o->OBB.StartPos);
+    Vector(o->BoundingBoxMax[0] - o->BoundingBoxMin[0], 0.f, 0.f, o->OBB.XAxis);
+    Vector(0.f, o->BoundingBoxMax[1] - o->BoundingBoxMin[1], 0.f, o->OBB.YAxis);
+    Vector(0.f, 0.f, o->BoundingBoxMax[2] - o->BoundingBoxMin[2], o->OBB.ZAxis);
 }
 
 void UpdateDrawnObjectHold(OBJECT* o)
@@ -415,11 +416,11 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 
     if (o->EnableBoneMatrix)
     {
-        b->Transform(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, Translate);
+        b->Transform(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, Translate);
     }
     else
     {
-        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, Translate);
+        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, Translate);
     }
 
     return true;
@@ -438,6 +439,23 @@ bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select)
     VectorCopy(o->Position, b->BodyOrigin);
 
     AnimateObjectBones(o, b, Translate);
+    return true;
+}
+
+bool Calc_ObjectAnimationInto(OBJECT* o, bool Translate, vec34_t* bones)
+{
+    if (o->Alpha < 0.01f)
+        return false;
+
+    BMD* b = &Models[o->Type];
+    b->BodyHeight = 0.f;
+    b->ContrastEnable = o->ContrastEnable;
+    BodyLight(o, b);
+    b->BodyScale = o->Scale;
+    b->CurrentAction = o->CurrentAction;
+    VectorCopy(o->Position, b->BodyOrigin);
+    b->Animation(bones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false,
+                 !Translate);
     return true;
 }
 
@@ -2931,6 +2949,8 @@ void RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 void RenderObject_AfterImage(OBJECT* o, bool Translate, int Select, int ExtraMon)
 {
     float fAnimationFrame = o->AnimationFrame;
+    // The ghosts borrow the object's alpha; its own body is drawn at, and keeps, the alpha it came with.
+    const float alpha = o->Alpha;
     float fAni1, fAni2;
 
     fAni1 = fAnimationFrame - 1.4f;
@@ -2948,7 +2968,7 @@ void RenderObject_AfterImage(OBJECT* o, bool Translate, int Select, int ExtraMon
         RenderObject(o, Translate, Select, 0);
     }
 
-    o->Alpha = 1.0f;
+    o->Alpha = alpha;
     o->AnimationFrame = fAnimationFrame;
     RenderObject(o, Translate, Select, 0);
 }
@@ -2957,6 +2977,8 @@ void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate, 
 {
     OBJECT* pObj = &pCha->Object;
     float fAnimationFrame = pObj->AnimationFrame;
+    // The ghosts borrow the character's alpha; the part itself is drawn at, and keeps, the alpha it came with.
+    const float alpha = pObj->Alpha;
     float fAni1, fAni2;
     int Type = pPart->Type;
 
@@ -2997,19 +3019,18 @@ void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate, 
     }
 
     VectorCopy(vOrgPos, pObj->Position);
-    pObj->Alpha = 1.0f;
+    pObj->Alpha = alpha;
     pObj->AnimationFrame = fAnimationFrame;
     Calc_ObjectAnimation(pObj, Translate, Select);
     RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
                      pPart->AncientDiscriminator, false, false, Translate, Select);
 }
 
-// Counts RenderObjects calls; each object the draw handled carries the count it was drawn in.
-static unsigned int s_objectDrawFrame = 0;
+// Counts CullObjects calls; each object it marked for the draw carries the count it was marked in.
+static unsigned int s_objectCullFrame = 0;
 
 void RenderObjectVisual(OBJECT* o)
 {
-    o->DrawnFrame = s_objectDrawFrame;
     BMD* b = &Models[o->Type];
 
     switch (gMapManager.WorldActive)
@@ -3629,11 +3650,11 @@ void UpdateObjectVisual(OBJECT* o)
 
 void UpdateObjectEffects()
 {
-    // Spawns once per drawn frame, for the objects that frame drew, as when the draw spawned them.
+    // Spawns once per culled frame, for the objects that frame drew, as when the draw spawned them.
     static unsigned int updatedFrame = 0;
-    if (updatedFrame == s_objectDrawFrame)
+    if (updatedFrame == s_objectCullFrame)
         return;
-    updatedFrame = s_objectDrawFrame;
+    updatedFrame = s_objectCullFrame;
 
     // The pulse the Crywolf flares bob with.
     if (Time_Effect > 40)
@@ -3644,7 +3665,7 @@ void UpdateObjectEffects()
     {
         for (OBJECT* o = ob.Head; o != nullptr; o = o->Next)
         {
-            if (o->DrawnFrame != s_objectDrawFrame)
+            if (o->DrawnFrame != s_objectCullFrame)
                 continue;
             UpdateDrawnObjectHold(o);
             PlaceObjectModel(o, &Models[o->Type]);
@@ -3676,19 +3697,22 @@ float g_MapEditorPlacementPreviewYaw = 0.0f;
 float g_MapEditorPlacementPreviewScale = 1.0f;
 #endif
 
-void RenderObjects()
-{
-    ++s_objectDrawFrame;
-#ifdef _EDITOR
-    s_bShowItemCullSphere = DevEditor_ShouldShowItemCullSphere();
-    s_bShowItemPickBoxes = DevEditor_ShouldShowItemPickBoxes();
-    s_fCullRadiusItem = DevEditor_GetCullRadiusItem();
+// The objects the last cull marked, in the order they draw.
+static std::vector<OBJECT*> s_objectsToDraw;
 
-    // Object-thumbnail requests are queued during CMuEditorCore::Update()
-    // (ImGui widget code, which runs before BeginFrame()) and can only be
-    // rendered here, inside BeginFrame()/EndFrame() - see ObjectThumbnail.h.
-    g_ObjectThumbnail.ProcessPendingRequests();
-#endif
+static void MarkDrawn(OBJECT* o)
+{
+    o->DrawnFrame = s_objectCullFrame;
+    s_objectsToDraw.push_back(o);
+    vec3_t origin;
+    ObjectModelOrigin(o, origin);
+    PlaceObjectBounds(o, origin);
+}
+
+void CullObjects()
+{
+    ++s_objectCullFrame;
+    s_objectsToDraw.clear();
 
     float   range = 0.f;
     if (gMapManager.WorldActive == WD_10HEAVEN)
@@ -3720,8 +3744,7 @@ void RenderObjects()
                     {
                         if (g_Direction.m_CKanturu.IsMayaScene() && (o->Type == 0 || o->Type == MODEL_STORM2))
                         {
-                            RenderObject(o);
-                            RenderObjectVisual(o);
+                            MarkDrawn(o);
                         }
                         else
                             if (gMapManager.WorldActive == WD_73NEW_LOGIN_SCENE)
@@ -3748,8 +3771,7 @@ void RenderObjects()
                                     else
                                         o->AlphaTarget = 1.0f;
 
-                                    RenderObject(o);
-                                    RenderObjectVisual(o);
+                                    MarkDrawn(o);
                                 }
                                 else if (TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -500.f) && fDistance < fDis && o->Type <= MAX_WORLD_OBJECTS)
                                 {
@@ -3758,8 +3780,7 @@ void RenderObjects()
                                     else
                                         o->AlphaTarget = 1.0f;
 
-                                    RenderObject(o);
-                                    RenderObjectVisual(o);
+                                    MarkDrawn(o);
                                 }
                                 else if (o->AlphaTarget != 0 && fDistance > fDis)
                                 {
@@ -3772,28 +3793,23 @@ void RenderObjects()
                             else if ((gMapManager.WorldActive == WD_51HOME_6TH_CHAR
                                 ) && ((o->Type >= 5 && o->Type <= 14) || (o->Type >= 87 && o->Type <= 88) || (o->Type == 4 || o->Type == 129)) && TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -400.f))
                             {
-                                RenderObject(o);
-                                RenderObjectVisual(o);
+                                MarkDrawn(o);
                             }
                             else if ((gMapManager.WorldActive == WD_74NEW_CHARACTER_SCENE) && (o->Type == 129 || o->Type == 98))
                             {
-                                RenderObject(o);
-                                RenderObjectVisual(o);
+                                MarkDrawn(o);
                             }
                             else if ((gMapManager.WorldActive == WD_57ICECITY || gMapManager.WorldActive == WD_58ICECITY_BOSS) && (o->Type == 30 || o->Type == 31) && TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -600.f))
                             {
-                                RenderObject(o);
-                                RenderObjectVisual(o);
+                                MarkDrawn(o);
                             }
                             else if (gMapManager.IsPKField() && (o->Type == 16 || o->Type == 67 || o->Type == 68) && TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -600.f))
                             {
-                                RenderObject(o);
-                                RenderObjectVisual(o);
+                                MarkDrawn(o);
                             }
                             else if (IsDoppelGanger2() && (o->Type == 16 || o->Type == 67 || o->Type == 68) && TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -600.f))
                             {
-                                RenderObject(o);
-                                RenderObjectVisual(o);
+                                MarkDrawn(o);
                             }
 
                         if (o->Next == NULL)
@@ -3847,40 +3863,9 @@ void RenderObjects()
                                                     Success = true;
                                                 if (Success)
                                                 {
-                                                    RenderObject(o);
-                                                    RenderObjectVisual(o);
+                                                    MarkDrawn(o);
                                                 }
                                             }
-#ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
-                            if (o->Visible == true && g_bRenderBoundingBox == true)
-                            {
-                                RenderBoundingBox(o);
-                            }
-#endif // CSK_DEBUG_RENDER_BOUNDINGBOX
-                            // Selection/hover outline is a Map Editor feature, not a debug-only
-                            // diagnostic - it must not be gated behind CSK_DEBUG_RENDER_BOUNDINGBOX,
-                            // which (see Winmain.h) is only ever defined in Debug builds. It was
-                            // nested inside that gate for a while, which meant it silently compiled
-                            // out of every Release build with no visible sign anything was wrong.
-#ifdef _EDITOR
-                            if (o->Visible == true && o == g_MapEditorSelectedObject)
-                            {
-                                // Bright flat yellow (same color all three tiers, no
-                                // pseudo-3D shading) so the outline is unmistakable
-                                // against any background - the dim debug default above
-                                // is deliberately subtle and easy to miss by comparison.
-                                static const std::uint32_t kSelectedColor = mu::PackABGR(1.0f, 0.9f, 0.1f, 1.0f);
-                                RenderObjectOutline(o, kSelectedColor);
-                            }
-                            else if (o->Visible == true && o == g_MapEditorHoveredObject)
-                            {
-                                // Distinct color from the selected outline so you can
-                                // tell "what a click would pick" apart from "what's
-                                // already selected" at a glance.
-                                static const std::uint32_t kHoverColor = mu::PackABGR(0.2f, 0.9f, 1.0f, 1.0f);
-                                RenderObjectOutline(o, kHoverColor);
-                            }
-#endif // _EDITOR
                         }
 
                         if (o->Next == NULL) break;
@@ -3891,6 +3876,69 @@ void RenderObjects()
             }
         }
     }
+}
+
+void RenderObjects()
+{
+#ifdef _EDITOR
+    s_bShowItemCullSphere = DevEditor_ShouldShowItemCullSphere();
+    s_bShowItemPickBoxes = DevEditor_ShouldShowItemPickBoxes();
+    s_fCullRadiusItem = DevEditor_GetCullRadiusItem();
+
+    // Object-thumbnail requests are queued during CMuEditorCore::Update()
+    // (ImGui widget code, which runs before BeginFrame()) and can only be
+    // rendered here, inside BeginFrame()/EndFrame() - see ObjectThumbnail.h.
+    g_ObjectThumbnail.ProcessPendingRequests();
+#endif
+
+    for (OBJECT* o : s_objectsToDraw)
+    {
+        RenderObject(o);
+        RenderObjectVisual(o);
+    }
+
+#if defined(CSK_DEBUG_RENDER_BOUNDINGBOX) || defined(_EDITOR)
+    for (const OBJECT_BLOCK& ob : ObjectBlock)
+    {
+        if (!ob.Visible && !g_Camera.TopViewEnable)
+            continue;
+        for (OBJECT* o = ob.Head; o != nullptr; o = o->Next)
+        {
+            if (!o->Live)
+                continue;
+#ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
+            if (o->Visible == true && g_bRenderBoundingBox == true)
+            {
+                RenderBoundingBox(o);
+            }
+#endif // CSK_DEBUG_RENDER_BOUNDINGBOX
+       // Selection/hover outline is a Map Editor feature, not a debug-only
+       // diagnostic - it must not be gated behind CSK_DEBUG_RENDER_BOUNDINGBOX,
+       // which (see Winmain.h) is only ever defined in Debug builds. It was
+       // nested inside that gate for a while, which meant it silently compiled
+       // out of every Release build with no visible sign anything was wrong.
+#ifdef _EDITOR
+            if (o->Visible == true && o == g_MapEditorSelectedObject)
+            {
+                // Bright flat yellow (same color all three tiers, no
+                // pseudo-3D shading) so the outline is unmistakable
+                // against any background - the dim debug default above
+                // is deliberately subtle and easy to miss by comparison.
+                static const std::uint32_t kSelectedColor = mu::PackABGR(1.0f, 0.9f, 0.1f, 1.0f);
+                RenderObjectOutline(o, kSelectedColor);
+            }
+            else if (o->Visible == true && o == g_MapEditorHoveredObject)
+            {
+                // Distinct color from the selected outline so you can
+                // tell "what a click would pick" apart from "what's
+                // already selected" at a glance.
+                static const std::uint32_t kHoverColor = mu::PackABGR(0.2f, 0.9f, 1.0f, 1.0f);
+                RenderObjectOutline(o, kHoverColor);
+            }
+#endif // _EDITOR
+        }
+    }
+#endif
 
 #ifdef _EDITOR
     // Drawn once per frame (not per-object - it isn't tied to a real OBJECT
@@ -3950,19 +3998,13 @@ void RenderObjects_AfterCharacter()
         ))
         return;
 
-    float   range = 0.f;
-    if (gMapManager.WorldActive == WD_10HEAVEN)
-    {
-        range = -10.f;
-    }
-
     for (int i = 0; i < 16; i++)
     {
         for (int j = 0; j < 16; j++)
         {
             OBJECT_BLOCK* ob = &ObjectBlock[i * 16 + j];
 
-            ob->Visible = TestFrustrum2D((float)(i * 16 + 8), (float)(j * 16 + 8), -180.f);
+            // CullObjects marked the blocks and their objects.
 
             if (g_Direction.m_CKanturu.IsMayaScene())
             {
@@ -4036,7 +4078,6 @@ void RenderObjects_AfterCharacter()
                     {
                         if (o->Live && o->m_bRenderAfterCharacter == true)
                         {
-                            o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, o->CollisionRange + range);
                             if ((gMapManager.WorldActive == WD_51HOME_6TH_CHAR
                                 ) && (o->Type == 89));
                             else
@@ -6226,7 +6267,7 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
 
         VectorAdd(tempPosition, randomPosition, o->Position);
         VectorCopy(o->Position, b->BodyOrigin);
-        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, true);
+        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, true);
 
         target_vertex_index = b->AddToCoinHeap(i, target_vertex_index);
     }
@@ -6238,6 +6279,44 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
 }
 
 // Render dropped items and fall animation and camera rotation for items on the ground
+// Marks the items on the ground the frame's view shows, and where their names go on screen.
+static void CullItems()
+{
+#ifdef _EDITOR
+    const float cullRadius = DevEditor_GetCullRadiusItem();
+#else
+    const float cullRadius = DEFAULT_CULL_RADIUS_ITEM;
+#endif
+    for (int i = 0; i < MAX_ITEMS; i++)
+    {
+        OBJECT* o = &Items[i].Object;
+        if (!o->Live)
+            continue;
+        o->Visible = TestFrustrum(o->Position, cullRadius);
+        if (!o->Visible)
+            continue;
+
+        PlaceObjectBounds(o, o->Position);
+        vec3_t Position;
+        VectorCopy(o->Position, Position);
+        Position[2] += 30.f;
+        int ScreenX, ScreenY;
+        CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
+        o->ScreenX = ScreenX;
+        o->ScreenY = ScreenY;
+    }
+}
+
+void CullWorld()
+{
+    PrepareCharactersForDraw();
+    CullObjects();
+    CullItems();
+    CullMounts();
+    CullBoids();
+    CullEffects();
+}
+
 void RenderItems()
 {
     // Items on the ground keep their Classic look like equipped ones: no bloom from them.
@@ -6252,7 +6331,6 @@ void RenderItems()
 #else
             float cullRadius = DEFAULT_CULL_RADIUS_ITEM;
 #endif
-            o->Visible = TestFrustrum(o->Position, cullRadius);
 
 #ifdef _EDITOR
             // Debug visualization: frustum-cull sphere (NOT the pick volume)
@@ -6305,14 +6383,6 @@ void RenderItems()
                                    1.0f, 0.0f, 1.0f);  // Magenta wireframe
                 }
 #endif
-
-                vec3_t Position;
-                VectorCopy(o->Position, Position);
-                Position[2] += 30.f;
-                int ScreenX, ScreenY;
-                CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
-                o->ScreenX = ScreenX;
-                o->ScreenY = ScreenY;
             }
         }
     }
@@ -6999,6 +7069,12 @@ void SpawnNextGradeWeaponEffects(CHARACTER* c)
 
 void NextGradeObjectRender(CHARACTER* c)
 {
+    ForEachNextGradeObject(c, [c](PART_t* w, int type, int bone)
+                           { RenderLinkObject(0.f, 0.f, 0.f, c, w, type, 0, 0, true, true, 0, true, bone); });
+}
+
+void ForEachNextGradeObject(CHARACTER* c, const std::function<void(PART_t* part, int type, int bone)>& visit)
+{
     int Level;
     PART_t* w;
     int bornIndex[2]{}; // left, right;
@@ -7065,8 +7141,7 @@ void NextGradeObjectRender(CHARACTER* c)
             {
             case 15: // +15
             {
-                w->LinkBone = bornIndex[m];
-                RenderLinkObject(0.f, 0.f, 0.f, c, w, gradeType[m], 0, 0, true, true);
+                visit(w, gradeType[m], bornIndex[m]);
             }break;
             }
         }
@@ -7208,6 +7283,8 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                             int ancientDiscriminator, int Select, int RenderType)
 {
     int Level = ItemLevel;
+    // Without the option window (headless, or before the UI exists) everything is drawn at the highest level.
+    const int renderLevel = g_pOption != nullptr ? g_pOption->GetRenderLevel() : 4;
     if (RenderType & RENDER_WAVE)
     {
         Level = 0;
@@ -7265,9 +7342,9 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
 
     Level = Render::Items::Glow::GetLevel(Type, Level);
 
-    if (g_pOption->GetRenderLevel() < 4)
+    if (renderLevel < 4)
     {
-        Level = std::min<int>(Level, g_pOption->GetRenderLevel() * 2 + 5);
+        Level = std::min<int>(Level, renderLevel * 2 + 5);
     }
 
     if (ApplyPartObjectEffect(b, o, Type, Alpha, Level, ItemLevel) == Render::Items::ItemEffects::Result::Drawn)
@@ -7357,21 +7434,21 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
             VectorMul(l, Light, b->BodyLight);
             RenderPartObjectBody(b, o, Type, Alpha, RenderType);
         }
-        else if (g_pOption->GetRenderLevel())
+        else if (renderLevel)
         {
-            if (Level < 8 && g_pOption->GetRenderLevel() >= 1) //  +7
+            if (Level < 8 && renderLevel >= 1) //  +7
             {
                 Vector(Light[0] * 0.8f, Light[1] * 0.8f, Light[2] * 0.8f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
                 RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT, 1.f);
             }
-            else if (Level < 9 && g_pOption->GetRenderLevel() >= 1) //  +8
+            else if (Level < 9 && renderLevel >= 1) //  +8
             {
                 Vector(Light[0] * 0.8f, Light[1] * 0.8f, Light[2] * 0.8f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
                 RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT, 1.f);
             }
-            else if (Level < 10 && g_pOption->GetRenderLevel() >= 2) //  +9
+            else if (Level < 10 && renderLevel >= 2) //  +9
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
@@ -7380,7 +7457,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
                                           1.f);
             }
-            else if (Level < 11 && g_pOption->GetRenderLevel() >= 2) //  +10
+            else if (Level < 11 && renderLevel >= 2) //  +10
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
@@ -7389,7 +7466,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
                                           1.f);
             }
-            else if (Level < 12 && g_pOption->GetRenderLevel() >= 3) //  +11
+            else if (Level < 12 && renderLevel >= 3) //  +11
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
@@ -7400,7 +7477,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 RenderPartObjectBodyColor(b, o, Type, Alpha,
                                           RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
-            else if (Level < 13 && g_pOption->GetRenderLevel() >= 3) //  +12
+            else if (Level < 13 && renderLevel >= 3) //  +12
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
@@ -7411,7 +7488,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 RenderPartObjectBodyColor(b, o, Type, Alpha,
                                           RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
-            else if (Level < 14 && g_pOption->GetRenderLevel() >= 4) //  +13
+            else if (Level < 14 && renderLevel >= 4) //  +13
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
@@ -7422,7 +7499,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 RenderPartObjectBodyColor(b, o, Type, Alpha,
                                           RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
-            else if (Level < 15 && g_pOption->GetRenderLevel() >= 4) //  +14
+            else if (Level < 15 && renderLevel >= 4) //  +14
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
@@ -7433,7 +7510,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 RenderPartObjectBodyColor(b, o, Type, Alpha,
                                           RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
-            else if (Level < 16 && g_pOption->GetRenderLevel() >= 4) //  +15
+            else if (Level < 16 && renderLevel >= 4) //  +15
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
@@ -7456,7 +7533,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
             RenderPartObjectBody(b, o, Type, Alpha, RenderType);
         }
 
-        if (g_pOption->GetRenderLevel() == 0)
+        if (renderLevel == 0)
         {
             return;
         }
@@ -7477,7 +7554,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 Alpha = sinf(WorldTime * 0.001f) * 0.5f + 0.4f;
                 if (Alpha <= 0.01f)
                 {
-                    b->renderCount = rand() % 100;
+                    b->renderCount = Random::DrawRand(o, static_cast<std::uint32_t>(Type)) % 100;
                 }
                 RenderPartObjectBodyColor2(b, o, Type, Alpha, RENDER_CHROME3 | RENDER_BRIGHT, 1.f);
             }
@@ -7537,11 +7614,11 @@ void RenderPartObjectEdge(BMD* b, OBJECT* o, int Flag, bool Translate, float Sca
     BoneScale = Scale;
     if (o->EnableBoneMatrix == 1)
     {
-        b->Transform(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, Translate);
+        b->Transform(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, Translate);
     }
     else
     {
-        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB);
+        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr);
     }
 
     if (o->Type == MODEL_WARCRAFT)
@@ -7755,11 +7832,11 @@ void RenderPartObject(OBJECT* o, int Type, void* p2, vec3_t Light, float Alpha, 
 
     if (GlobalTransform)
     {
-        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, Translate);
+        b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, Translate);
     }
     else
     {
-        b->Transform(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, Translate);
+        b->Transform(o->BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, Translate);
     }
 
     if (p && p->m_pCloth[0] && PartClothKind(Type) > 0)

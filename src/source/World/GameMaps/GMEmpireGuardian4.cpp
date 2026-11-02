@@ -711,28 +711,6 @@ bool GMEmpireGuardian4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         return true;
     case MODEL_STAR_GATE:
     {
-        int tileX = int(o->Position[0] / 100);
-        int tileY = int(o->Position[1] / 100);
-
-        if ((49 <= tileX && tileX <= 51) && (68 <= tileY && tileY <= 70))
-        {
-            o->Scale = 1.0f;
-            o->Position[0] = 5080;
-            o->Position[1] = 6920;
-        }
-        else if ((51 <= tileX && tileX <= 53) && (190 <= tileY && tileY <= 192))
-        {
-            o->Scale = 1.0f;
-            o->Position[0] = 5270;
-            o->Position[1] = 19120;
-        }
-        else if ((196 <= tileX && tileX <= 198) && (131 <= tileY && tileY <= 133))
-        {
-            o->Scale = 1.0f;
-            o->Position[0] = 19750;
-            o->Position[1] = 13220;
-        }
-
         b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                       o->BlendMeshTexCoordV, o->HiddenMesh);
     }
@@ -742,52 +720,6 @@ bool GMEmpireGuardian4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     {
         if (o->CurrentAction != MONSTER01_DIE)
         {
-            int tileX = int(o->Position[0] / 100);
-            int tileY = int(o->Position[1] / 100);
-
-            if ((80 <= tileX && tileX <= 82) && (68 <= tileY && tileY <= 70))
-            {
-                o->Scale = 0.8f;
-                o->Position[0] = 8115;
-                o->Position[1] = 6880;
-            }
-            else if ((31 <= tileX && tileX <= 33) && (89 <= tileY && tileY <= 91))
-            {
-                o->Scale = 0.9f;
-                o->Position[0] = 3250;
-                o->Position[1] = 9000;
-            }
-            else if ((33 <= tileX && tileX <= 35) && (175 <= tileY && tileY <= 177))
-            {
-                o->Scale = 0.8f;
-                o->Position[0] = 3470;
-                o->Position[1] = 17600;
-            }
-            else if ((68 <= tileX && tileX <= 70) && (165 <= tileY && tileY <= 167))
-            {
-                o->Scale = 0.9f;
-                o->Position[0] = 6915;
-                o->Position[1] = 16650;
-            }
-            else if ((155 <= tileX && tileX <= 157) && (131 <= tileY && tileY <= 133))
-            {
-                o->Scale = 0.9f;
-                o->Position[0] = 15710;
-                o->Position[1] = 13250;
-            }
-            else if ((223 <= tileX && tileX <= 225) && (158 <= tileY && tileY <= 160))
-            {
-                o->Scale = 0.8f;
-                o->Position[0] = 22500;
-                o->Position[1] = 16000;
-            }
-            else if ((213 <= tileX && tileX <= 215) && (23 <= tileY && tileY <= 25))
-            {
-                o->Scale = 0.9f;
-                o->Position[0] = 21480;
-                o->Position[1] = 2430;
-            }
-
             b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
                           o->BlendMeshTexCoordV, o->HiddenMesh);
         }

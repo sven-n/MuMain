@@ -46,10 +46,19 @@ tracked in [#914](https://github.com/sven-n/MuMain/issues/914).
   pose per slot (`CharacterAttachments`). The update builds the pose, the
   draw reuses it, and no effect reads the shared `BoneTransform` for another
   object.
-- **Allowed exceptions:** an attached part on its first frame (the update
-  hasn't seen it yet), and previews that have no update of their own
-  (characters outside the client's character list, forced mount previews).
-  The code marks each one with `DrawSpawnCheck::AllowScope`.
+- **The frame's view belongs to the update.** The camera moves, and the view
+  matrix, frustum and mouse ray are built, at the end of the update
+  (`CameraProjection::UpdateView`); the draw only applies them. The update
+  then culls against that view (`CullWorld`): visibility, drawn-frame marks,
+  the order map objects draw in, pick boxes, and what the character draw used
+  to set on itself (its light, a Doppelganger's look).
+- **Draws take randomness from the frame.** A flicker drawn in a pass comes
+  from `Random::DrawRand`, fixed for the frame and the object, so every pass
+  draws the same and no random sequence the update draws from moves.
+- **There are no exceptions.** A part the update has not seen yet is drawn as
+  it stands and advanced by the next update. A preview has an update of its
+  own, run by the window that owns it. The offscreen pass that draws previews
+  is a draw pass like the scene's.
 
 ## How it is done
 
@@ -62,8 +71,8 @@ same output at each step:
 | D1 | Model meshes and shadows are described as `MeshDraw` / `ShadowDraw` and handed to the active `ModelDrawer`; the default drawer keeps today's output | [#917](https://github.com/sven-n/MuMain/pull/917) |
 | D2 | Draws carry the skinning their model was transformed with, instead of reading the shared model | [#918](https://github.com/sven-n/MuMain/pull/918) |
 | D3 | Spawns, animation, cloth and state writes move from the draw to the update: characters and monsters, map objects, attached parts, body draws, pets, mounts, boids, the effects themselves; the guard and the purity tools | [#929](https://github.com/sven-n/MuMain/pull/929), [#930](https://github.com/sven-n/MuMain/pull/930), [#931](https://github.com/sven-n/MuMain/pull/931), [#932](https://github.com/sven-n/MuMain/pull/932), [#933](https://github.com/sven-n/MuMain/pull/933) |
-| D4 | Effects (sprites, particles, trails) are described and handed to a replaceable effect drawer; the draw can no longer write effect state | planned |
-| D5 | The drawer interface is complete, with a second drawer as proof | planned |
+| D4 | Effects (sprites, particles, trails, ground marks, leaves, pointers) are described to a replaceable effect drawer; the view, culling, pick boxes and the character's look move to the update; parts, previews and Dark Side advance only in their update; draws take randomness from the frame; the checks cover everything the update reads | [#935](https://github.com/sven-n/MuMain/pull/935), [#936](https://github.com/sven-n/MuMain/pull/936), [#937](https://github.com/sven-n/MuMain/pull/937), [#938](https://github.com/sven-n/MuMain/pull/938), [#940](https://github.com/sven-n/MuMain/pull/940) |
+| D5 | Every draw takes what it draws as read-only and describes it to the drawer interface, which is complete, with a second drawer as proof | planned |
 
 The Classic and Enhanced looks are not drawers: both go through the same
 drawer, and the renderer applies the active look per draw.
@@ -78,13 +87,27 @@ drawer, and the renderer applies the active look per draw.
   longer brighten in both water passes.
 - Objects drawn more than once per frame no longer fade faster during the
   Chaos Castle fall.
-- An attached part on its first frame (newly equipped, or moved between hand
-  and back) still spawns from the draw for that one frame.
+- The parts of a character on its first drawn frame are drawn as they stand;
+  their effects start with the next update. A part equipped, or moved between
+  hand and back, while the character is in view is planned by the next update.
+- Dark Side steps once per reference frame for each part its draw shows; it
+  stepped once per drawn part per frame, faster at a high frame rate.
+- Effect ground marks show the frame's visibility; they lagged a frame.
+- Debug switches that hide a pass no longer stop what it used to spawn.
+- Draw flickers no longer move the random sequences, so the update's later
+  random choices differ from what the same seed gave before.
+- A Dragon Kick afterimage no longer resets a fading character to full alpha.
+- The character creation preview no longer moves its character by the class
+  offset on every draw; the offset moves its camera.
+- A transformed Rage Fighter's skin and the Chaos Castle angel no longer write
+  into the character's parts (the skin wrote outside them).
+- The mix windows' sparkle ends one frame sooner; it runs down in the update.
 
 ## Consequences
 
-- A spawn or a state write inside a draw is a defect unless it is one of the
-  allowed exceptions.
+- A spawn, a state write or a random draw from the update's sequences inside
+  a draw is a defect. So is a draw pass that changes anything when it runs a
+  second time.
 - When code moves from the draw to the update, its order changes relative to
   the code still in the draw. State handed between the two halves (a
   lifetime the draw checks and the update changes) must move with them.
@@ -95,24 +118,41 @@ drawer, and the renderer applies the active look per draw.
   bones in as an argument.
 - An object that owns a pose buffer releases it (`Pose::Release`) before its
   slot is reused.
-- Draw-side bookkeeping (`Visible`, drawn-frame marks) is still written by
-  the draw. It is meant to move to a cull step before the draw, so that
-  drawing writes nothing at all.
+- The update plans a character's attachments from its state, in draw order:
+  which model hangs from which part, where, and at what speed each one steps
+  the part (`PlanAttachments`; a wing carrying the Blood Castle quest item
+  steps once for each). It advances and poses each one. A draw finds its
+  attachment in the plan and shows that pose; shown elsewhere, it poses into
+  bones of its own. Nothing a draw does reaches the plan, so no pass can
+  choose what the next update advances or how.
+- Visibility, drawn-frame marks and pick boxes come from the cull at the end
+  of the update. A draw may still set its own parameters on the object it is
+  drawing and put them back (a mesh to hide, a light for one part); D5 turns
+  those into locals when the draws take their objects as read-only.
 
 ## Enforcement
 
-- **Every build:** the spawn functions report any spawn inside the frame's
-  draw (`Diagnostics::DrawSpawnCheck`). Developer builds log each offending
-  caller once to the error log. Tests read the count.
+- **Every build:** the spawn functions (effects, sprites, particles, joints,
+  blurs, pointers, terrain lights, sounds, music, actions, animations) report any
+  call inside a draw pass, the scene's or the offscreen one
+  (`Diagnostics::DrawSpawnCheck`); every such call is a violation. Developer
+  builds log each offending caller once to the error log. Tests read the
+  count.
 - **Tests:** draws under test run inside a `DrawScope` and must spawn
-  nothing (`CheckDrawSpawnsNone`). Effects that moved are tested with
-  sentinel shared bones and a non-zero position, so a stale or wrong-space
-  read lands where a check fails.
+  nothing (`CheckDrawSpawnsNone`). Repeated-draw tests run a draw pass several
+  times after one update and check that the pools, the spawn count and both
+  random sequences are unchanged (`RepeatedDraws::CheckChangesNothing`).
+  Effects that moved are tested with sentinel shared bones and a non-zero
+  position, so a stale or wrong-space read lands where a check fails.
 - **Control socket (developer builds):**
   - `drawspawns` lists every spawn the draw made, with its callers.
-  - `drawpurity` compares the gameplay fields of characters, effects, items,
-    map objects, mounts, boids, particles and joints before and after the
-    draw, and lists the changes.
+  - `drawpurity` compares, before and after each draw pass, the fields of
+    characters (their state, every part and their cloth), previews, effects,
+    sprites, items, map objects, mounts, boids, particles and joints,
+    including visibility, drawn-frame marks, pick boxes and buffs; the frame's
+    view, frustum and mouse ray; the terrain's collision and light, the light
+    history and Dark Side's state; and whether the pass drew from the random
+    engine. Its own snapshots draw from no sequence. It lists the changes.
   - `spawn-effect` creates any effect, particle or joint type at the
     character, so effects no map or skill reaches can be checked.
 - These checks show *whether* the draw spawns or writes, not *where* an
@@ -129,5 +169,8 @@ drawer, and the renderer applies the active look per draw.
 - [Per-object poses](../../src/source/Engine/Object/ObjectPose.h)
 - [Attached-part slots](../../src/source/Engine/Object/CharacterAttachments.h)
 - [Effects-phase tests](../../tests/gamelogic/test_character_effects_phase.cpp)
+- [Repeated-draw tests](../../tests/gamelogic/test_repeated_draws.cpp)
+- [The frame's view](../../src/source/Camera/CameraProjection.h)
+- [Draw randomness](../../src/source/Core/Utilities/Random.h)
 - [Control-socket commands](../control-socket.md)
 - [ADR 0001: 25 FPS reference timing](0001-preserve-25-fps-reference-timing.md)

@@ -4,13 +4,13 @@
 
 #include <functional>
 #include <memory>
-#include <optional>
 
 class CHARACTER;
 struct _PART_t;
 
-// The parts a character's draw attaches to it (weapons, wings, back items, set objects), one slot per
-// RenderLinkObject call in draw order, each with the part's own pose.
+// The parts a character carries (weapons, wings, back items, set objects), as its update plans them from the
+// character's state: one slot per attachment, in draw order, each with the pose the update advanced it to. Draws
+// find their slot and show it; nothing a draw does changes a plan.
 namespace Engine::Object::Attachments
 {
 // The animation state and placement a slot's bones were posed with.
@@ -28,56 +28,52 @@ struct Posed
 
 struct Slot
 {
-    // The RenderLinkObject call this slot is.
+    // The model attached, and where (RenderLinkObject's placement arguments).
     int type = -1;
     float x = 0.f;
     float y = 0.f;
     float z = 0.f;
-    int level = 0;
-    int option1 = 0;
     bool link = false;
-    bool translate = false;
-    int renderType = 0;
     bool rightHandItem = false;
     unsigned char linkBone = 0;
-    // The character's scale during the call; some draws change it around one part.
+    // The character's scale for this attachment; some draws change it around one part.
     float ownerScale = 1.f;
-    // The character's part, or nullptr for a part the draw built for this call only.
+    // The character's part, or nullptr for a part built for this attachment only (a weapon on the back).
     _PART_t* part = nullptr;
-    // A copy of a part the draw built for this call only (a weapon on the back, a weapon's shadow).
+    // That part, for an attachment that has none of its own.
     std::shared_ptr<_PART_t> copy;
-    // Drawn in the shadow pass.
-    bool shadow = false;
-    unsigned int drawnFrame = 0;
-    // The previous draw recorded the same attachment in this slot.
-    bool sameAsLast = false;
+    // How fast the update advances the part for this attachment; two attachments can share one part.
+    float playSpeed = 0.f;
 
-    // The draw an update advanced and posed the part for (its animation step for the next draw), and how.
-    unsigned int advancedFor = 0;
     Posed posed;
     std::unique_ptr<vec34_t[]> bones;
 };
 
-// Starts a frame's character draws.
+// Starts the frame the next draws show; the last step of the update, after every plan of the frame.
 void BeginFrame();
-// Starts recording the parts drawn for this character.
-void BeginCharacter(const CHARACTER* c);
-// The next slot of the character, recorded with this draw; nullptr for a character outside CharactersClient, which
-// keeps drawing its parts with the shared bones.
-Slot* Record(CHARACTER* c, _PART_t* part, int type, float x, float y, float z, int level, int option1, bool link,
-             bool translate, int renderType, bool rightHandItem, unsigned char linkBone, float ownerScale);
+// Gives a character outside CharactersClient (a preview) slots of its own, until Untrack; its owner updates it.
+void Track(const CHARACTER* c);
+void Untrack(const CHARACTER* c);
+// Every character an owner tracks: the previews.
+void ForEachTracked(const std::function<void(const CHARACTER*)>& visit);
+// Starts the character's plan for the coming draw; false for a character neither in CharactersClient nor tracked.
+bool BeginPlan(const CHARACTER* c);
+// Adds an attachment to the plan the update is making, in draw order.
+Slot& Plan(CHARACTER* c, _PART_t* part, int type, float x, float y, float z, bool link, bool rightHandItem,
+           unsigned char linkBone, float ownerScale, float playSpeed);
+// The slots of the plan the update just made.
+void ForEachPlanned(const CHARACTER* c, const std::function<void(Slot&)>& visit);
+// The bones of the first slot the update just planned for this part of the character, or nullptr.
+vec34_t* PlannedBonesOf(const CHARACTER* c, const _PART_t* part);
+// The slot of the current plan a draw of this part as this model shows; nullptr when the update planned none (the
+// character's first drawn frame). A part built for one draw matches a slot planned without a part of its own.
+const Slot* Find(const CHARACTER* c, const _PART_t* part, int type, bool rightHandItem);
 // The slot's own bones, MAX_BONES long.
-float (*Bones(Slot& slot))[3][4];
-// Whether the update since the last draw already advanced and posed this slot's part; the draw then reuses it.
-bool WasAdvanced(const Slot& slot);
-// Records whether this draw drew the character's weapons in its hands or on its back.
-void RecordWeaponsHeld(const CHARACTER* c, bool inHands);
-// Whether the character's last draw held its weapons in its hands; nullopt when that draw did not get to them.
-std::optional<bool> WeaponsHeldInLastDraw(const CHARACTER* c);
-// The bones the character's last draw posed this part of it into, or nullptr.
-vec34_t* LastBonesOf(const CHARACTER* c, const _PART_t* part);
-// The slots of the character's last draw, for the update to advance once per draw; marks each one it hands out.
-void ForEachToAdvance(const CHARACTER* c, const std::function<void(Slot&)>& advance);
-// The slots of the character's last draw outside its shadow pass that drew a part built for that call only.
-void ForEachCopied(const CHARACTER* c, const std::function<void(Slot&)>& visit);
+float (*Bones(const Slot& slot))[3][4];
+// Bones a draw poses a part into itself, MAX_BONES long; valid until the next frame.
+float (*DrawBones())[3][4];
+// Whether the character has slots: a client character or a tracked preview.
+bool HasSlots(const CHARACTER* c);
+// Whether `part` is one of the character's own parts.
+bool IsPartOf(const CHARACTER* c, const void* part);
 } // namespace Engine::Object::Attachments

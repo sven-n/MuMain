@@ -2,6 +2,8 @@
 #include "UI/Inventory/ItemMng.h"
 #include "Render/Items/ItemEffects.h"
 
+#include <functional>
+
 extern OBJECT_BLOCK ObjectBlock[256];
 extern OBJECT Mounts[];
 extern OBJECT Boids[];
@@ -23,12 +25,21 @@ void CreateShadowAngle();
 OBJECT* CollisionDetectObjects(OBJECT* PickObject);
 
 void RenderObject(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
+// Marks the map objects the frame's view shows, in the order they draw; part of CullWorld.
+void CullObjects();
+// Marks what the frame's view shows (map objects, items, mounts, boids, effects) for the draw and the next update;
+// the last step of the update, after the view.
+void CullWorld();
 void RenderObjects();
 // Spawns the effects of the map objects the last RenderObjects drew; call once per update, after the objects moved.
 void UpdateObjectEffects();
 // The effects and state changes of a character's body draw (Draw_RenderObject), for a character the last frame
 // drew; its bones are the pose the update built.
 void UpdateRenderObjectEffects(OBJECT* o);
+// Where an object's model stands, as its draw places it.
+void ObjectModelOrigin(const OBJECT* o, vec3_t origin);
+// The pick box a draw's transform used to leave on the object: its bounding box at `origin`; the update places it.
+void PlaceObjectBounds(OBJECT* o, const vec3_t origin);
 // Places an object's model where its draw poses and draws it.
 void PlaceObjectModel(const OBJECT* o, BMD* b);
 // Skins an object's meshes as its draw would, for BMD::RenderMeshEffect's spawns: characters pass Translate true
@@ -42,6 +53,8 @@ void StepPartCloth(OBJECT* o, PART_t* p, int Type, int ItemLevel, bool Translate
 // The sparks of a character's +15 weapons, on its own pose; RenderCharacter draws its +15 armor pieces.
 void SpawnNextGradeWeaponEffects(CHARACTER* c);
 void NextGradeObjectRender(CHARACTER* c);
+// The character's +15 armor pieces RenderCharacter attaches: the body part each plays on, its model and bone.
+void ForEachNextGradeObject(CHARACTER* c, const std::function<void(PART_t* part, int type, int bone)>& visit);
 // What Calc_RenderObject did to each object it drew, for the update to do once per frame to the objects the last frame
 // drew: the hero's fall in Chaos Castle fades them, and a stunned or sleeping owner holds them at their first frame.
 void UpdateDrawnObjectHold(OBJECT* o);
@@ -129,6 +142,9 @@ void BodyLight(OBJECT* o, BMD* b);
 
 bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon);
 bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select);
+// Calc_ObjectAnimation's pose into the caller's bones, for a draw that shows the object where it does not stand; the
+// object keeps its own pose.
+bool Calc_ObjectAnimationInto(OBJECT* o, bool Translate, vec34_t* bones);
 void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon);
 
 bool IsPartyMemberBuff(int partyindex, eBuffState buffstate);

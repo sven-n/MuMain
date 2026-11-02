@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -7860,13 +7861,6 @@ void RenderEffects(bool bRenderBlendMesh)
                     //if ( (o->Position[2]+o->BoundingBoxMax[2])<350.f ) continue;
                 }
 
-                // Registry-driven rendering. Effects with a render handler draw
-                // through it; everything else falls to the legacy switch.
-                if (const Render::Effects::EffectDescriptor* desc = Render::Effects::Lookup(o->Type); desc && desc->render)
-                {
-                    desc->render(o);
-                }
-                else
                 switch (o->Type)
                 {
                 case MODEL_DRAGON:
@@ -8409,8 +8403,7 @@ void RenderEffects(bool bRenderBlendMesh)
                         VectorCopy(o->Position, pBMDSwordModel->BodyOrigin);
 
                         pBMDSwordModel->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, true);
-                        pBMDSwordModel->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, &o->OBB, false);
-
+                        pBMDSwordModel->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, false);
                     }
 
                     pBMDSwordModel->LightEnable = true;
@@ -8637,9 +8630,6 @@ static void SpawnGaionSwordLights(OBJECT* o)
 // The sprites and steps of the effects RenderEffects draws, for the effects the last frame drew.
 static void UpdateDrawnEffectSprites(OBJECT* o)
 {
-    if (const Render::Effects::EffectDescriptor* desc = Render::Effects::Lookup(o->Type); desc && desc->render)
-        return;
-
     switch (o->Type)
     {
     case MODEL_EFFECT_FLAME_STRIKE:
@@ -8972,14 +8962,9 @@ void RenderAfterEffects()
         {
             o = g_SkillEffects.GetEffect(i - MAX_EFFECTS);
         }
+        // CullEffects marked it.
         if (o->Live && o->m_bRenderAfterCharacter)
         {
-            o->Visible = TestFrustrum(o->Position, 400.f);
-
-            if (gMapManager.WorldActive == WD_39KANTURU_3RD)
-                if (o->Type == MODEL_STORM3 || o->Type == MODEL_MAYASTAR)
-                    o->Visible = true;
-
             if (o->Visible)
             {
                 switch (o->Type)
@@ -9000,7 +8985,7 @@ void DescribeEffectShadow(const OBJECT& effect, Render::EffectDrawing::EffectDra
     using namespace Render::EffectDrawing;
     const OBJECT* o = &effect;
     vec3_t Light;
-    float Luminosity = (float)(rand() % 4 + 8) * 0.1f;
+    float Luminosity = (float)(Random::DrawRand(o, 1) % 4 + 8) * 0.1f;
     float Rotation, Scale;
     out.SetState({.blend = Blend::Glow});
 
@@ -9288,7 +9273,7 @@ void DescribeEffectShadow(const OBJECT& effect, Render::EffectDrawing::EffectDra
     case BITMAP_FLAME:
         if (o->SubType != 3 && o->SubType != 6)
         {
-            Luminosity = (float)(rand() % 4 + 8) * 0.1f;
+            Luminosity = (float)(Random::DrawRand(o, 2) % 4 + 8) * 0.1f;
             Vector(Luminosity, Luminosity, Luminosity, Light);
             out.DrawDecal(Decal(BITMAP_FLAME, o->Position[0], o->Position[1], 2.f, 2.f, Light, -o->Angle[2]));
         }

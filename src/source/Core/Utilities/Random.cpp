@@ -28,6 +28,23 @@ std::mt19937& GetThreadEngine()
     return engine;
 }
 
+std::uint64_t s_drawFrame = 0;
+
+// splitmix64's finalizer: every input bit reaches every output bit.
+std::uint64_t Mix(std::uint64_t x)
+{
+    x += 0x9E3779B97F4A7C15ull;
+    x = (x ^ (x >> 30)) * 0xBF58476D1CE4E5B9ull;
+    x = (x ^ (x >> 27)) * 0x94D049BB133111EBull;
+    return x ^ (x >> 31);
+}
+
+double ChanceOf(std::int32_t referenceFrames, double animationFactor)
+{
+    const double clampedFactor = std::min<double>(1.0, std::max<double>(0.0, animationFactor));
+    return (referenceFrames == 1) ? clampedFactor : (1.0 / static_cast<double>(referenceFrames)) * clampedFactor;
+}
+
 } // anonymous namespace
 
 // The distributions are made per call: they are cheap and keep no state, so
@@ -74,19 +91,38 @@ bool FpsCheck(std::int32_t referenceFrames, double animationFactor)
         return false;
     }
 
-    const double clampedFactor = std::min<double>(1.0, std::max<double>(0.0, animationFactor));
-
     const double randomValue = UnitDouble();
-
-    const double chance =
-        (referenceFrames == 1) ? clampedFactor : (1.0 / static_cast<double>(referenceFrames)) * clampedFactor;
-
-    return randomValue <= chance;
+    return randomValue <= ChanceOf(referenceFrames, animationFactor);
 }
 
 void Seed(std::uint32_t seed)
 {
     GetThreadEngine().seed(seed);
+}
+
+std::mt19937 Snapshot()
+{
+    return GetThreadEngine();
+}
+
+void NextDrawFrame()
+{
+    ++s_drawFrame;
+}
+
+std::int32_t DrawRand(const void* key, std::uint32_t salt)
+{
+    const auto at = static_cast<std::uint64_t>(reinterpret_cast<std::uintptr_t>(key));
+    return static_cast<std::int32_t>(Mix(Mix(s_drawFrame ^ (static_cast<std::uint64_t>(salt) << 32)) ^ at) & 0x7fff);
+}
+
+bool DrawFpsCheck(std::int32_t referenceFrames, double animationFactor, const void* key, std::uint32_t salt)
+{
+    if (referenceFrames <= 0)
+    {
+        return false;
+    }
+    return DrawRand(key, salt) / 32767.0 <= ChanceOf(referenceFrames, animationFactor);
 }
 
 } // namespace Random

@@ -27,8 +27,8 @@ public:
     void TokenBuff(eBuffState curbufftype);
 
 public:
-    const DWORD GetBuffSize();
-    const eBuffState GetBuff(int iterindex);
+    const DWORD GetBuffSize() const;
+    const eBuffState GetBuff(int iterindex) const;
     const DWORD GetBuffCount(eBuffState buffstate);
     void ClearBuff();
     bool IsEqualBuffType(IN int iBuffType, OUT wchar_t* szBuffName);

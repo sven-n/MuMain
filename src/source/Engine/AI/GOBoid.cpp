@@ -5,7 +5,6 @@
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "Engine/Object/ZzzInfomation.h"
-#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "GOBoid.h"
@@ -693,50 +692,52 @@ void MoveMounts()
     }
 }
 
-static unsigned int s_mountDrawFrame = 0;
+static unsigned int s_mountCullFrame = 0;
+
+// Whether the mount draws at all, for its rider.
+static bool IsMountDrawn(const OBJECT* o)
+{
+    return o->Owner->Type == MODEL_PLAYER || o->Type == MODEL_HELPER;
+}
+
+void CullMounts()
+{
+    ++s_mountCullFrame;
+    for (int i = 0; i < MAX_MOUNTS; i++)
+    {
+        OBJECT* o = &Mounts[i];
+        if (!o->Live)
+            continue;
+        o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f);
+        if (!o->Visible || !IsMountDrawn(o))
+            continue;
+
+        if (SceneFlag == CHARACTER_SCENE)
+            o->Scale = 1.2f;
+        else if (o->Type != MODEL_FENRIR_BLACK && o->Type != MODEL_FENRIR_BLUE && o->Type != MODEL_FENRIR_RED &&
+                 o->Type != MODEL_FENRIR_GOLD)
+            o->Scale = 1.0f;
+        o->DrawnFrame = s_mountCullFrame;
+    }
+}
 
 bool RenderMount(OBJECT* o, bool bForceRender)
 {
-    if (o->Live)
+    // A forced mount (a preview's) draws wherever it stands, at the scale its owner gave it.
+    if (!o->Live || (!bForceRender && !o->Visible) || !IsMountDrawn(o))
+        return TRUE;
+
+    int State = 0;
+    if (g_isCharacterBuff(o->Owner, eBuff_Cloaking))
     {
-        o->Visible = (bForceRender == FALSE ? TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f) : true);
-
-        if (o->Visible)
-        {
-            if (o->Owner->Type != MODEL_PLAYER && o->Type != MODEL_HELPER)
-                return TRUE;
-
-            if (bForceRender)
-                o->Scale = o->Scale;
-            else if (SceneFlag == CHARACTER_SCENE)
-                o->Scale = 1.2f;
-            else if (o->Type != MODEL_FENRIR_BLACK && o->Type != MODEL_FENRIR_BLUE && o->Type != MODEL_FENRIR_RED
-                && o->Type != MODEL_FENRIR_GOLD
-                )
-                o->Scale = 1.0f;
-
-            int State = 0;
-            if (g_isCharacterBuff(o->Owner, eBuff_Cloaking))
-            {
-                State = 10;
-            }
-
-            RenderObject(o, false, 0, State);
-            o->DrawnFrame = s_mountDrawFrame;
-            // A preview mount outside Mounts gets no update; its draw spawns its effects.
-            if (bForceRender)
-            {
-                const Diagnostics::DrawSpawnCheck::AllowScope preview;
-                UpdateDrawnMountEffects(o);
-            }
-        }
+        State = 10;
     }
+    RenderObject(o, false, 0, State);
     return TRUE;
 }
 
 void RenderMount()
 {
-    ++s_mountDrawFrame;
     // Like their riders, mounts keep their Classic look: no bloom from them.
     const mu::ScopedBloomExclusion classicMounts;
     for (int i = 0; i < MAX_MOUNTS; i++)
@@ -751,16 +752,16 @@ void RenderMount()
 
 void UpdateMountEffects()
 {
-    // Spawns once per drawn frame, for the mounts that frame drew, as when the draw spawned them.
+    // Spawns once per culled frame, for the mounts that frame drew, as when the draw spawned them.
     static unsigned int updatedFrame = 0;
-    if (updatedFrame == s_mountDrawFrame)
+    if (updatedFrame == s_mountCullFrame)
         return;
-    updatedFrame = s_mountDrawFrame;
+    updatedFrame = s_mountCullFrame;
 
     for (int i = 0; i < MAX_MOUNTS; i++)
     {
         OBJECT* o = &Mounts[i];
-        if (!o->Live || o->DrawnFrame != s_mountDrawFrame)
+        if (!o->Live || o->DrawnFrame != s_mountCullFrame)
             continue;
         UpdateDrawnMountEffects(o);
     }
@@ -1669,6 +1670,21 @@ void MoveBoids()
     UpdateDrawnBoidEffects();
 }
 
+void CullBoids()
+{
+    const auto cull = [](OBJECT* objects, int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            OBJECT* o = &objects[i];
+            if (o->Live)
+                o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f);
+        }
+    };
+    cull(Boids, MAX_BOIDS);
+    cull(Fishs, MAX_FISHS);
+}
+
 void RenderBoids(bool bAfterCharacter)
 {
     if (!g_pOption->GetRenderAllEffects())
@@ -1688,7 +1704,6 @@ void RenderBoids(bool bAfterCharacter)
         }
         if (o->Live)
         {
-            o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f);
             if (o->Visible)
             {
                 if (MODEL_SPEARSKILL == o->Type)
@@ -1743,7 +1758,6 @@ void RenderFishs()
         o->Angle[2] += 90.f;
         if (o->Live)
         {
-            o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f);
             if (o->Visible && o->Type != -1)
             {
                 RenderObject(o);

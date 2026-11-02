@@ -228,6 +228,20 @@ bool M39Kanturu3rd::UpdateKanturu3rdObjectEffects(OBJECT* o, BMD* b)
         if (!g_Direction.m_CKanturu.GetMayaExplotion())
             o->HiddenMesh = 0;
 
+        // Her body's glow, kept in StartPosition: it fades as she explodes and pulses otherwise.
+        if (g_Direction.m_CKanturu.GetMayaExplotion())
+        {
+            o->StartPosition[0] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
+            o->StartPosition[1] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
+            o->StartPosition[2] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
+        }
+        else
+        {
+            o->StartPosition[0] = sinf(WorldTime * 0.001f) * 0.12f + 0.05f;
+            o->StartPosition[1] = sinf(WorldTime * 0.001f) * 0.12f + 0.3f;
+            o->StartPosition[2] = sinf(WorldTime * 0.001f) * 0.12f + 0.21f;
+        }
+
         if (g_Direction.m_CKanturu.m_iMayaState >= KANTURU_MAYA_DIRECTION_MONSTER1 && g_Direction.m_CKanturu.m_iMayaState <= KANTURU_MAYA_DIRECTION_ENDCYCLE)
             o->Position[2] = -749.5f;
 
@@ -439,22 +453,8 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
             }
             b->RenderMesh(1, RENDER_TEXTURE | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
 
-            if (g_Direction.m_CKanturu.GetMayaExplotion())
-            {
-                o->StartPosition[0] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
-                o->StartPosition[1] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
-                o->StartPosition[2] *= pow(1.0f / (1.02f), FPS_ANIMATION_FACTOR);
-
-                VectorCopy(o->StartPosition, b->BodyLight);
-            }
-            else
-            {
-                b->BodyLight[0] = sinf(WorldTime * 0.001f) * 0.12f + 0.05f;
-                b->BodyLight[1] = sinf(WorldTime * 0.001f) * 0.12f + 0.3f;
-                b->BodyLight[2] = sinf(WorldTime * 0.001f) * 0.12f + 0.21f;
-
-                VectorCopy(b->BodyLight, o->StartPosition);
-            }
+            // Her body's glow, which the update keeps in StartPosition.
+            VectorCopy(o->StartPosition, b->BodyLight);
 
             b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_MAYA_BODY);
             if (g_Direction.m_CKanturu.GetMayaExplotion())

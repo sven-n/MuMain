@@ -12,6 +12,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Core/Input/KeyState.h"
@@ -80,13 +81,9 @@ void CUIPhotoViewer::RenderPhotoCharacter(float aspect)
 {
     CHARACTER* c = &m_PhotoChar;
     OBJECT* o = &c->Object;
-    int WorldBackup = gMapManager.WorldActive;
-    gMapManager.WorldActive = WD_0LORENCIA;
-    MoveCharacter(c, o);
-    MoveCharacterVisual(c, o);
-    MoveMount(&m_PhotoHelper, TRUE);
-    gMapManager.WorldActive = WorldBackup;
 
+    // The photo's projection and view replace the world camera's for this pass only.
+    SaveCameraPerspective();
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PushMatrix();
     mu::GetRenderer().LoadIdentity();
@@ -109,8 +106,6 @@ void CUIPhotoViewer::RenderPhotoCharacter(float aspect)
     else
         mu::GetRenderer().Translate(-o->Position[0], -o->Position[1], -o->Position[2]);
 
-    Vector(0.0f, 0.0f, m_fCurrentAngle, o->Angle);
-
     mu::GetRenderer().SetAlphaTest(false);
     mu::GetRenderer().SetTexture2D(true);
     EnableDepthTest();
@@ -126,30 +121,14 @@ void CUIPhotoViewer::RenderPhotoCharacter(float aspect)
     mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.25f);
     mu::GetRenderer().SetFogEnabled(false);
     mu::GetRenderer().ClearDepthBuffer();
-    o->Scale = 0.7f * m_fCurrentZoom;
-    m_PhotoHelper.Scale = m_fPhotoHelperScale * m_fCurrentZoom;
-    Vector(1, 1, 1, o->Light);
-    Vector(1, 1, 1, m_PhotoHelper.Light);
-
-    c->HideShadow = true;
-    if (c->Wing.Type != -1 && m_iSettingAnimation > AT_HEALING1)
-        c->SafeZone = true;
-    else c->SafeZone = false;
-    if (c->Helper.Type == MODEL_HORN_OF_UNIRIA)
-        m_PhotoHelper.Position[2] += 10;
-    else if (c->Helper.Type == MODEL_HORN_OF_DINORANT)
-        m_PhotoHelper.Position[2] += 25;
     RenderMount(&m_PhotoHelper, TRUE);
-    if (c->Helper.Type == MODEL_HORN_OF_UNIRIA)
-        m_PhotoHelper.Position[2] -= 10;
-    else if (c->Helper.Type == MODEL_HORN_OF_DINORANT)
-        m_PhotoHelper.Position[2] -= 25;
     RenderCharacter(c, o);
 
     mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
     mu::GetRenderer().PopMatrix();
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PopMatrix();
+    RestoreCameraPerspective();
 }
 
 int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)
@@ -348,6 +327,7 @@ int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)
 CUIPhotoViewer::CUIPhotoViewer()
     : m_Target([this](std::uint32_t width, std::uint32_t height) { RenderInto(width, height); })
 {
+    Engine::Object::Attachments::Track(&m_PhotoChar);
     m_bIsInitialized = FALSE;
     m_iSettingAnimation = 0;
     m_iCurrentFrame = 0;
@@ -366,6 +346,7 @@ CUIPhotoViewer::CUIPhotoViewer()
 
 CUIPhotoViewer::~CUIPhotoViewer()
 {
+    Engine::Object::Attachments::Untrack(&m_PhotoChar);
     g_SummonSystem.RemoveEquipEffects(&m_PhotoChar);
     DeleteCloth(&m_PhotoChar, &m_PhotoChar.Object);
 }
@@ -748,9 +729,9 @@ void CUIPhotoViewer::ToggleHelp()
 
 // The target's drawer, from the renderer's offscreen seam. Only the character: the "?" and its help
 // are the document's own now, drawn above this image rather than inside it.
-void CUIPhotoViewer::RenderInto(std::uint32_t width, std::uint32_t height)
+void CUIPhotoViewer::Update()
 {
-    if (m_bIsWebzenMail == TRUE || height == 0)
+    if (m_bIsWebzenMail == TRUE)
         return;
 
     CHARACTER* c = &m_PhotoChar;
@@ -780,5 +761,34 @@ void CUIPhotoViewer::RenderInto(std::uint32_t width, std::uint32_t height)
     {
         DeleteParts(&m_PhotoChar);
     }
+
+    const int worldBackup = gMapManager.WorldActive;
+    gMapManager.WorldActive = WD_0LORENCIA;
+    MoveCharacter(c, o);
+    MoveCharacterVisual(c, o);
+    MoveMount(&m_PhotoHelper, TRUE);
+    gMapManager.WorldActive = worldBackup;
+
+    Vector(0.0f, 0.0f, m_fCurrentAngle, o->Angle);
+    o->Scale = 0.7f * m_fCurrentZoom;
+    m_PhotoHelper.Scale = m_fPhotoHelperScale * m_fCurrentZoom;
+    Vector(1, 1, 1, o->Light);
+    Vector(1, 1, 1, m_PhotoHelper.Light);
+    c->HideShadow = true;
+    c->SafeZone = c->Wing.Type != -1 && m_iSettingAnimation > AT_HEALING1;
+    // The mount stands higher in the photo; MoveMount places it on its owner again next update.
+    if (c->Helper.Type == MODEL_HORN_OF_UNIRIA)
+        m_PhotoHelper.Position[2] += 10;
+    else if (c->Helper.Type == MODEL_HORN_OF_DINORANT)
+        m_PhotoHelper.Position[2] += 25;
+    if (m_PhotoHelper.Live && (m_PhotoHelper.Owner->Type == MODEL_PLAYER || m_PhotoHelper.Type == MODEL_HELPER))
+        UpdateDrawnMountEffects(&m_PhotoHelper);
+    UpdatePreviewCharacter(c);
+}
+
+void CUIPhotoViewer::RenderInto(std::uint32_t width, std::uint32_t height)
+{
+    if (m_bIsWebzenMail == TRUE || height == 0)
+        return;
     RenderPhotoCharacter(static_cast<float>(width) / static_cast<float>(height));
 }

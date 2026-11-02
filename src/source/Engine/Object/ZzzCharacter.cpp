@@ -6,6 +6,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include <execution>
 #include <algorithm>
 #include <span>
@@ -15,7 +16,6 @@
 #include <eh.h>
 #endif
 #include "UI/Core/UIManager.h"
-#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Guild/GuildCache.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -6887,8 +6887,28 @@ unsigned short LinkedPartAction(const CHARACTER* c, const PART_t* f)
     return f->CurrentAction;
 }
 
-// A linked part's animation step: its speed and frame overrides, then PlayAnimation.
-void AdvanceLinkedPart(CHARACTER* c, PART_t* f, int Type, bool Link)
+// Parts no draw shows: Cursed Temple players' wings and capes, summoner books, and anything on a cloaked character.
+bool HidesLinkedPart(CHARACTER* c, int Type)
+{
+    OBJECT* o = &c->Object;
+    if (o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
+    {
+        if (Type >= MODEL_WING && Type <= MODEL_WINGS_OF_DARKNESS)
+            return true;                                                         // 1st and 2nd Wings
+        else if (Type >= MODEL_WING_OF_STORM && Type <= MODEL_WING_OF_DIMENSION) // 3rd Wings
+            return true;
+        else if (MODEL_SMALL_CAPE_OF_LORD >= Type && Type <= MODEL_LITTLE_WARRIORS_CLOAK)
+            return true; // Small Wings and Capes
+        else if (Type >= MODEL_CAPE_OF_FIGHTER && Type <= MODEL_CAPE_OF_OVERRULE)
+            return true; // Capes
+    }
+    if (GameLogic::Items::IsSummonerBookModel(Type))
+        return true;
+    return g_isCharacterBuff(o, eBuff_Cloaking);
+}
+
+// A linked part's animation step at an attachment's speed: the frame overrides, then PlayAnimation.
+void AdvanceLinkedPart(CHARACTER* c, PART_t* f, int Type, bool Link, float playSpeed)
 {
     OBJECT* o = &c->Object;
     BMD* b = &Models[Type];
@@ -6896,7 +6916,7 @@ void AdvanceLinkedPart(CHARACTER* c, PART_t* f, int Type, bool Link)
     switch (Type)
     {
     case MODEL_WING_OF_RUIN:
-        f->PlaySpeed = 0.15f;
+        playSpeed = 0.15f;
         break;
     }
 
@@ -6915,8 +6935,7 @@ void AdvanceLinkedPart(CHARACTER* c, PART_t* f, int Type, bool Link)
         if (!g_isCharacterBuff(o, eDeBuff_Stun) && !g_isCharacterBuff(o, eDeBuff_Sleep))
         {
             vec3_t unused{};
-            b->PlayAnimation(&f->AnimationFrame, &f->PriorAnimationFrame, &f->PriorAction, f->PlaySpeed, unused,
-                             unused);
+            b->PlayAnimation(&f->AnimationFrame, &f->PriorAnimationFrame, &f->PriorAction, playSpeed, unused, unused);
         }
     }
 }
@@ -6962,45 +6981,25 @@ void PoseLinkedPart(const CHARACTER* c, int Type, bool Link, const Engine::Objec
 } // namespace
 
 vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1,
-                          bool Link, bool Translate, int RenderType, bool bRightHandItem)
+                          bool Link, bool Translate, int RenderType, bool bRightHandItem, int linkBone)
 {
+    // A bone the call hangs the part from, where it differs from the part's own.
+    const auto bone = static_cast<unsigned char>(linkBone >= 0 ? linkBone : f->LinkBone);
     OBJECT* o = &c->Object;
     BMD* b = &Models[Type];
 
-    if (o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
-    {
-        if (Type >= MODEL_WING && Type <= MODEL_WINGS_OF_DARKNESS)
-            return BoneTransform;                                                // 1st and 2nd Wings
-        else if (Type >= MODEL_WING_OF_STORM && Type <= MODEL_WING_OF_DIMENSION) // 3rd Wings
-            return BoneTransform;
-        else if (MODEL_SMALL_CAPE_OF_LORD >= Type && Type <= MODEL_LITTLE_WARRIORS_CLOAK)
-            return BoneTransform; // Small Wings and Capes
-        else if (Type >= MODEL_CAPE_OF_FIGHTER && Type <= MODEL_CAPE_OF_OVERRULE)
-            return BoneTransform; // Capes
-    }
-
-    if (GameLogic::Items::IsSummonerBookModel(Type))
-    {
-        return BoneTransform;
-    }
-
-    if (g_isCharacterBuff(o, eBuff_Cloaking))
+    if (HidesLinkedPart(c, Type))
         return BoneTransform;
 
-    // A client character's part gets its own pose; other characters' parts use the shared bones, as before.
-    Engine::Object::Attachments::Slot* slot = Engine::Object::Attachments::Record(
-        c, f, Type, x, y, z, Level, Option1, Link, Translate, RenderType, bRightHandItem, f->LinkBone, o->Scale);
-    vec34_t* bones = slot != nullptr ? Engine::Object::Attachments::Bones(*slot) : BoneTransform;
-    if (slot != nullptr)
-        slot->shadow = o->EnableShadow;
-    // A client character's part copied for this call shows its source's pose, which the update already advanced; the
-    // update spawns its effects.
-    const bool copied = slot != nullptr && slot->part == nullptr;
+    // The slot the update planned, advanced and posed for this attachment of a client character or a preview; other
+    // characters' parts use the shared bones, as before.
+    const Engine::Object::Attachments::Slot* slot = Engine::Object::Attachments::Find(c, f, Type, bRightHandItem);
+    vec34_t* bones = BoneTransform;
 
     // CopyShadowAngle(f,b);
     b->ContrastEnable = o->ContrastEnable;
     b->BodyScale = o->Scale;
-    b->CurrentAction = f->CurrentAction;
+    b->CurrentAction = LinkedPartAction(c, f);
     b->BodyHeight = 0.f;
 
     OBJECT* Object = ItemObjectFor(c, Type);
@@ -7016,28 +7015,25 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     }
 
     OBB_t OBB;
-    vec3_t p, Position;
 
-    const LinkPlacement placement = PlaceLinkedPart(x, y, z, c, f->LinkBone, o->Scale, Type, Link, bRightHandItem);
+    const LinkPlacement placement = PlaceLinkedPart(x, y, z, c, bone, o->Scale, Type, Link, bRightHandItem);
     std::memcpy(ParentMatrix, placement.parent, sizeof(placement.parent));
     VectorCopy(placement.origin, b->BodyOrigin);
     VectorCopy(placement.angle, Object->Angle);
-    VectorCopy(placement.position, Position);
     b->BodyScale = placement.scale;
     if (Type == MODEL_BOSS_HEAD)
         b->BoneHead = 0;
 
-    // The update advanced and posed a client character's part since the last draw; other parts advance here.
-    const bool advanced = slot != nullptr && Engine::Object::Attachments::WasAdvanced(*slot);
+    // A part built for this draw only is the planned one only where it was planned (a weapon's shadow is not the
+    // weapon on the back); elsewhere it shows its own state.
+    if (slot != nullptr && slot->part == nullptr && !IsPlacedAt(slot->posed, placement))
+        slot = nullptr;
+    // The update posed the part where this draw shows it; a part it has not planned yet is drawn as it stands.
+    const bool reused = slot != nullptr && IsPlacedAt(slot->posed, placement);
 #ifdef MU_ENABLE_CONTROL_SOCKET
-    if (g_PrepassBoneCheck.enabled && slot != nullptr && slot->part != nullptr)
-        ++(advanced ? g_PrepassBoneCheck.partsReused : g_PrepassBoneCheck.partsAdvancedInDraw);
+    if (g_PrepassBoneCheck.enabled && Engine::Object::Attachments::IsPartOf(c, f))
+        ++(reused ? g_PrepassBoneCheck.partsReused : g_PrepassBoneCheck.partsDrawnUnadvanced);
 #endif
-    if (!advanced && !copied)
-    {
-        const Diagnostics::DrawSpawnCheck::AllowScope firstFrame;
-        AdvanceLinkedPart(c, f, Type, Link);
-    }
     b->CurrentAction = LinkedPartAction(c, f);
 
     VectorCopy(b->BodyOrigin, Object->Position);
@@ -7050,20 +7046,22 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     const float (*savedActiveBones)[3][4] = g_pActiveBoneTransform;
 
     vec3_t Temp;
-    if (!advanced || !IsPlacedAt(slot->posed, placement))
+    if (reused)
+        bones = Engine::Object::Attachments::Bones(*slot);
+    else
     {
-        // A part whose parent moved since the update keeps the update's animation step.
+        // Shown elsewhere than planned, the part keeps the update's animation step, in bones of this draw's own.
         Engine::Object::Attachments::Posed posed = PosedAt(f, b->CurrentAction, placement);
-        if (advanced)
+        if (slot != nullptr)
         {
             posed.animationFrame = slot->posed.animationFrame;
             posed.priorAnimationFrame = slot->posed.priorAnimationFrame;
             posed.priorAction = slot->posed.priorAction;
             posed.action = slot->posed.action;
         }
+        if (Engine::Object::Attachments::HasSlots(c))
+            bones = Engine::Object::Attachments::DrawBones();
         PoseLinkedPart(c, Type, Link, posed, bones);
-        if (slot != nullptr)
-            slot->posed = posed;
     }
     if (g_CMonkSystem.IsRagefighterCommonWeapon(c->Class, Type) && !Link)
     {
@@ -7094,13 +7092,6 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     if (Object->EnableShadow)
     {
         return bones;
-    }
-
-    // The update spawns the effects of a part it advanced or copied; the draw spawns the others'.
-    if (!advanced && !copied)
-    {
-        const Diagnostics::DrawSpawnCheck::AllowScope firstFrame;
-        SpawnLinkedPartEffects(c, Type, Object, bones, Position);
     }
 
     if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE &&
@@ -9469,9 +9460,75 @@ void UpdateCharacterCloth(CHARACTER* c)
 }
 } // namespace
 
+bool RendersWingCarriedModels(const CHARACTER* c)
+{
+    return c->MonsterIndex == MONSTER_RED_DRAGON ||
+           (c->MonsterIndex >= MONSTER_STATUE_OF_SAINT_1 && c->MonsterIndex <= MONSTER_STATUE_OF_SAINT_3);
+}
+
+int WingCarriedModels(const CHARACTER* c, WingCarriedModel (&models)[2])
+{
+    if (c->MonsterIndex == MONSTER_RED_DRAGON)
+    {
+        models[0] = {MODEL_BOSS_HEAD, 0.f, 0.f, -40.f, false, 9, c->Object.Scale};
+        models[1] = {MODEL_PRINCESS, 0.f, -40.f, 45.f, false, 61, 0.9f};
+        return 2;
+    }
+    int weapon = MODEL_DIVINE_STAFF_OF_ARCHANGEL;
+    float scale = 0.7f;
+    if (c->MonsterIndex == MONSTER_STATUE_OF_SAINT_2)
+        weapon = MODEL_DIVINE_SWORD_OF_ARCHANGEL;
+    if (c->MonsterIndex == MONSTER_STATUE_OF_SAINT_3)
+    {
+        weapon = MODEL_DIVINE_CB_OF_ARCHANGEL;
+        scale = 0.9f;
+    }
+    models[0] = {weapon, 0.f, 0.f, 0.f, true, 1, scale};
+    return 1;
+}
+
+// The Red Dragon's head and the princess it carries, or a Saint statue's archangel weapon: models that play on the
+// wing part, whose animation the update sets (PrepareCarriedParts).
+void RenderWingCarriedModels(CHARACTER* c, bool Translate)
+{
+    OBJECT* o = &c->Object;
+    const float scale = o->Scale;
+    vec3_t light;
+    VectorCopy(c->Light, light);
+    WingCarriedModel models[2];
+    const int count = WingCarriedModels(c, models);
+    for (int i = 0; i < count; ++i)
+    {
+        const WingCarriedModel& m = models[i];
+        // The princess is lit white.
+        if (m.type == MODEL_PRINCESS)
+            Vector(1.f, 1.f, 1.f, c->Light);
+        o->Scale = m.scale;
+        RenderLinkObject(m.x, m.y, m.z, c, &c->Wing, m.type, 0, 0, m.link, Translate, 0, true, m.bone);
+    }
+    VectorCopy(light, c->Light);
+    o->Scale = scale;
+}
+
+void RenderChristmasCompanions(CHARACTER* c, bool Translate, int Select)
+{
+    OBJECT* o = &c->Object;
+    // Three copies around the character, each on the ground where it stands; the character stays where it is.
+    constexpr float offsets[3][2] = {{50.f, 50.f}, {-50.f, -50.f}, {50.f, -50.f}};
+    vec3_t standing;
+    VectorCopy(o->Position, standing);
+    for (const auto& offset : offsets)
+    {
+        o->Position[0] = standing[0] + offset[0];
+        o->Position[1] = standing[1] + offset[1];
+        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
+        RenderPartObject(o, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+    }
+    VectorCopy(standing, o->Position);
+}
+
 void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 {
-    Engine::Object::Attachments::BeginCharacter(c);
     if (g_isCharacterBuff(o, eBuff_CrywolfNPCHide))
     {
         return;
@@ -9487,6 +9544,9 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
     Vector(0.f, 0.f, 0.f, p);
     Vector(1.f, 1.f, 1.f, Light);
+    // The body draws in a light of its own; the update's light is back for the rest of the draw and after it.
+    vec3_t preparedLight;
+    VectorCopy(c->Light, preparedLight);
 
     BYTE byRender = CHARACTER_NONE;
 
@@ -9602,18 +9662,9 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     {
         if (o->Alpha >= 0.3f)
         {
-            if (gMapManager.InBloodCastle() == true && o->m_bActionStart && c->Dead > 0)
-            {
-                float height = RequestTerrainHeight(o->Position[0], o->Position[1]);
-                if (height < o->Position[2])
-                {
-                    o->Position[2] = height;
-                }
-            }
-
-            if (c->MonsterIndex == MONSTER_ARCHANGEL)
-                o->HiddenMesh = 2;
-            else if (c->MonsterIndex == MONSTER_MESSENGER_OF_ARCH)
+            // An archangel's shadow leaves out its wings' mesh.
+            const int hiddenMesh = o->HiddenMesh;
+            if (c->MonsterIndex == MONSTER_ARCHANGEL || c->MonsterIndex == MONSTER_MESSENGER_OF_ARCH)
                 o->HiddenMesh = 2;
 
             if (o->Type != MODEL_STATUE_OF_SAINT && o->Type != MODEL_CASTLE_GATE &&
@@ -9623,6 +9674,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 RenderPartObject(&c->Object, o->Type, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate);
                 o->EnableShadow = false;
             }
+            o->HiddenMesh = hiddenMesh;
             if (c->MonsterIndex == MONSTER_ARCHANGEL || c->MonsterIndex == MONSTER_MESSENGER_OF_ARCH)
             {
                 EnableAlphaBlend();
@@ -9637,8 +9689,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 Vector(Luminosity * 0.5f, Luminosity * 0.5f, Luminosity, Light);
                 RenderTerrainAlphaBitmap(BITMAP_MAGIC + 1, o->Position[0], o->Position[1], 2.7f, 2.7f, Light,
                                          -o->Angle[2]);
-
-                o->HiddenMesh = -1;
             }
         }
     }
@@ -9689,7 +9739,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     else if (c->MonsterIndex == MONSTER_ALQUAMOS)
     {
         // Tints c->Light below.
-        const float Luminosity = (float)(rand() % 30 + 70) * 0.01f;
+        const float Luminosity = (float)(Random::DrawRand(o, 1) % 30 + 70) * 0.01f;
         Vector(Luminosity * 0.6f, Luminosity * 0.7f, Luminosity * 0.8f, Light);
     }
     else if (c->MonsterIndex == MONSTER_MEGA_CRUST || c->MonsterIndex == MONSTER_ALPHA_CRUST ||
@@ -9721,12 +9771,12 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         float fSin = 0.5f * (1.0f + sinf((float)((int)WorldTime % 10000) * 0.001f));
         RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_CHROME | RENDER_BRIGHT,
                                   0.3f + fSin * 0.7f);
-        fSin = 0.3f * (1.0f - fSin) + 0.3f;
-        o->BlendMeshLight = fSin;
+        // Its blend mesh light is set by the update.
+        const int blendMesh = o->BlendMesh;
         o->BlendMesh = 0;
         RenderObject(o, Translate, 2, 0);
         RenderObject(o, Translate, 3, 0);
-        o->BlendMesh = -1;
+        o->BlendMesh = blendMesh;
         memcpy(g_fBoneSave[2], o->BoneTransform[24], 3 * 4 * sizeof(float));
         o->Type++;
         RenderObject(o, Translate, Select, 0);
@@ -9746,50 +9796,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                                   BITMAP_SHINY + 1);
     }
 
-    if (c->MonsterIndex == MONSTER_RED_DRAGON)
-    {
-        PART_t* w = &c->Wing;
-        w->Type = MODEL_BOSS_HEAD;
-        w->LinkBone = 9;
-        w->CurrentAction = 1;
-        w->PriorAction = 1;
-        w->PlaySpeed = 0.2f;
-        RenderLinkObject(0.f, 0.f, -40.f, c, w, w->Type, 0, 0, false, Translate);
-
-        w->Type = MODEL_PRINCESS;
-        w->LinkBone = 61;
-        float TempScale = o->Scale;
-        vec3_t TempLight;
-        VectorCopy(c->Light, TempLight);
-        Vector(1.f, 1.f, 1.f, c->Light);
-        o->Scale = 0.9f;
-        RenderLinkObject(0.f, -40.f, 45.f, c, w, w->Type, 0, 0, false, Translate);
-        VectorCopy(TempLight, c->Light);
-        o->Scale = TempScale;
-    }
-    else if (c->MonsterIndex >= MONSTER_STATUE_OF_SAINT_1 && c->MonsterIndex <= MONSTER_STATUE_OF_SAINT_3)
-    {
-        PART_t* w = &c->Wing;
-        w->LinkBone = 1;
-        w->CurrentAction = 1;
-        w->PriorAction = 1;
-        w->PlaySpeed = 0.2f;
-        float TempScale = o->Scale;
-        o->Scale = 0.7f;
-
-        if (c->MonsterIndex == MONSTER_STATUE_OF_SAINT_1)
-            w->Type = MODEL_DIVINE_STAFF_OF_ARCHANGEL;
-        if (c->MonsterIndex == MONSTER_STATUE_OF_SAINT_2)
-            w->Type = MODEL_DIVINE_SWORD_OF_ARCHANGEL;
-        if (c->MonsterIndex == MONSTER_STATUE_OF_SAINT_3)
-        {
-            w->Type = MODEL_DIVINE_CB_OF_ARCHANGEL;
-            o->Scale = 0.9f;
-        }
-
-        RenderLinkObject(0.f, 0.f, 0.f, c, w, w->Type, 0, 0, true, true);
-        o->Scale = TempScale;
-    }
+    if (RendersWingCarriedModels(c))
+        RenderWingCarriedModels(c, Translate);
     else if (c->MonsterIndex == MONSTER_WHITE_WIZARD)
     {
         RenderPartObjectBodyColor(&Models[o->Type], o, o->Type, o->Alpha, RENDER_BRIGHT | RENDER_EXTRA, 1.0f);
@@ -9831,26 +9839,14 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
     else if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
     {
-        c->HideShadow = true;
-
+        // Its shadow, alpha, blend mesh and rise are set by the update.
         if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
         {
             Vector(0.5f, 0.7f, 1.0f, c->Light);
-            c->Object.Alpha = 0.7f;
         }
-        else
-        {
-            Vector(1.0f, 0.3f, 0.1f, c->Light);
-        }
-
-        if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
-            ;
         else if (o->CurrentAction != PLAYER_DIE1)
         {
-            // 			if (!g_isCharacterBuff((&c->Object), eBuff_Doppelganger_Ascension))
-            // 			{
-            c->Object.Alpha = 1.0f;
-            // 			}
+            Vector(1.0f, 0.3f, 0.1f, c->Light);
         }
         else
         {
@@ -9859,12 +9855,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 fAlpha = 0;
 
             Vector(1.0f * fAlpha, 0.3f * fAlpha, 0.1f * fAlpha, c->Light);
-        }
-        c->Object.BlendMesh = -1;
-
-        if (g_isCharacterBuff((&c->Object), eBuff_Doppelganger_Ascension))
-        {
-            o->Position[2] += 2.0f * FPS_ANIMATION_FACTOR;
         }
     }
 
@@ -9916,10 +9906,12 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
               o->SubType == MODEL_SKELETON_CHANGED || o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL ||
               o->SubType == MODEL_SKELETON1))
     {
-        PART_t* p = &c->BodyPart[o->SubType];
+        // The skin is one model, drawn as a part of its own; the update keys its Dark Side by the head part.
+        PART_t skin;
+        skin.Type = o->SubType;
+        PART_t* p = &skin;
         if (o->CurrentAction == PLAYER_SKILL_DRAGONKICK)
         {
-            p->Type = o->SubType;
             RenderCharacter_AfterImage(c, p, Translate, Select, 2.5f, 1.0f);
         }
         else if (o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY || o->CurrentAction == PLAYER_SKILL_DARKSIDE_ATTACK)
@@ -9932,8 +9924,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             }
             else
             {
-                p->Type = o->SubType;
-                g_CMonkSystem.DarksideRendering(c, p, Translate, Select);
+                g_CMonkSystem.DarksideRendering(c, p, Translate, Select, &c->BodyPart[BODYPART_HEAD]);
             }
         }
         else
@@ -10004,24 +9995,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
              (o->SubType == MODEL_XMAS_EVENT_CHA_SSANTA || o->SubType == MODEL_XMAS_EVENT_CHA_SNOWMAN ||
               o->SubType == MODEL_XMAS_EVENT_CHA_DEER))
     {
-        vec3_t vOriginPos;
-        VectorCopy(o->Position, vOriginPos);
-        o->Position[0] += 50.f;
-        o->Position[1] += 50.f;
-        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
-
-        VectorCopy(vOriginPos, o->Position);
-        o->Position[0] -= 50.f;
-        o->Position[1] -= 50.f;
-        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
-
-        VectorCopy(vOriginPos, o->Position);
-        o->Position[0] += 50.f;
-        o->Position[1] -= 50.f;
-        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+        RenderChristmasCompanions(c, Translate, Select);
     }
     else if (o->Type == MODEL_PLAYER && (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
     {
@@ -10033,7 +10007,10 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         if ((o->Kind == KIND_PLAYER && gMapManager.InChaosCastle() == true))
         {
             int RenderType = RENDER_TEXTURE;
-            PART_t* p = &c->BodyPart[BODYPART_HEAD];
+            // Drawn as an angel: the head part's copy, so the character keeps its own head.
+            PART_t angel = c->BodyPart[BODYPART_HEAD];
+            angel.Type = MODEL_ANGEL;
+            PART_t* p = &angel;
             if (c == Hero)
             {
                 RenderType |= RENDER_CHROME;
@@ -10042,7 +10019,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             if ((o->CurrentAction == PLAYER_SKILL_DRAGONKICK) &&
                 (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
             {
-                p->Type = MODEL_ANGEL;
                 RenderCharacter_AfterImage(c, p, Translate, Select, 2.5f, 1.0f);
             }
             else if ((gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
@@ -10055,8 +10031,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                 }
                 else
                 {
-                    p->Type = MODEL_ANGEL;
-                    g_CMonkSystem.DarksideRendering(c, p, Translate, Select);
+                    g_CMonkSystem.DarksideRendering(c, p, Translate, Select, &c->BodyPart[BODYPART_HEAD]);
                 }
             }
             else
@@ -10105,7 +10080,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
                     if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD && i == BODYPART_HELM)
                     {
-                        o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.1f + 0.7f;
                         if (i == BODYPART_HELM)
                         {
                             int index = Data::Items::ToItemType(Type) - ITEM_HELM;
@@ -10192,18 +10166,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         }
     }
 
-    // A preview outside the client's characters gets no update; its draw runs its cloth, transformation and parts.
-    if (!IsClientCharacterObject(o))
-    {
-        const Diagnostics::DrawSpawnCheck::AllowScope preview;
-        UpdateCharacterCloth(c);
-        UpdateTransformSkinEffects(o);
-        if (o->Type == MODEL_PLAYER)
-        {
-            UpdateParts(c);
-        }
-        UpdatePlayerBodyParts(c);
-    }
     if (cloak.shown && !g_isCharacterBuff(o, eBuff_Cloaking) && o->m_pCloth)
     {
         auto* pCloth = (CPhysicsCloth*)o->m_pCloth;
@@ -10215,39 +10177,10 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         }
     }
 
-    if (c->PK >= PVP_MURDERER2)
-    {
-        Vector(1.f, 0.1f, 0.1f, c->Light);
-    }
-    else
-    {
-        VectorAdd(Light, o->Light, c->Light);
-
-        int nCastle = BLOODCASTLE_NUM + (gMapManager.WorldActive - WD_11BLOODCASTLE_END);
-        if (nCastle > 0 && nCastle <= BLOODCASTLE_NUM) //. 블러드 캐슬일경우
-        {
-            if ((c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_1 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_1) ||
-                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_2 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_2) ||
-                (c->MonsterIndex == MONSTER_GIANT_OGRE_3 && c->MonsterIndex == MONSTER_RED_SKELETON_KNIGHT_3 &&
-                 c->MonsterIndex == MONSTER_MAGIC_SKELETON_3) ||
-                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_4 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_4) ||
-                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_5 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_5) ||
-                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_6 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_6) ||
-                (c->MonsterIndex >= MONSTER_CHIEF_SKELETON_WARRIOR_7 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_7))
-            {
-                int level = nCastle / 3;
-                if (level)
-                    Vector(level * 0.5f, 0.1f, 0.1f, c->Light);
-            }
-        }
-    }
+    VectorCopy(preparedLight, c->Light);
 
     if (DrawsNextGradeObjects(c))
-    {
-        if (!IsClientCharacterObject(o))
-            SpawnNextGradeWeaponEffects(c);
         NextGradeObjectRender(c);
-    }
 
     for (int i = 0; i < 2; i++)
     {
@@ -10260,7 +10193,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     bool Bind = false;
     Bind = RenderCharacterBackItem(c, o, Translate);
 
-    Engine::Object::Attachments::RecordWeaponsHeld(c, !Bind);
     if (!Bind)
     {
         for (int i = 0; i < 2; i++)
@@ -11495,11 +11427,17 @@ bool DrawsHeldWeapon(CHARACTER* c, int hand)
 // The weapons' animation settings for the frame, before they advance: in the hands, or reset on the back.
 void PrepareHeldWeapons(CHARACTER* c)
 {
-    const std::optional<bool> inHands = Engine::Object::Attachments::WeaponsHeldInLastDraw(c);
-    if (!inHands)
-        return;
+    // Phoenix Soul Star gloves hang from the hands; the weapon effects read the bone too.
+    for (int i = 0; i < 2; i++)
+    {
+        if (g_CMonkSystem.EqualItemModelType(c->Weapon[i].Type) == MODEL_PHOENIX_SOUL_STAR)
+            c->Weapon[i].LinkBone = PhoenixGloveBone(i);
+    }
+
     OBJECT* o = &c->Object;
-    if (!*inHands)
+    if (!DrawsAttachments(c))
+        return;
+    if (AreWeaponsOnBack(c, o))
     {
         for (int i = 0; i < 2; i++)
         {
@@ -11920,7 +11858,7 @@ void SpawnHeldWeaponGlow(CHARACTER* c, PART_t* w, vec34_t* weaponBones, float Lu
 
 void SpawnHeldWeaponGlows(CHARACTER* c)
 {
-    if (Engine::Object::Attachments::WeaponsHeldInLastDraw(c) != true)
+    if (!DrawsAttachments(c) || AreWeaponsOnBack(c, &c->Object))
         return;
     const float Luminosity = (float)(rand() % 30 + 70) * 0.01f;
     for (int i = 0; i < 2; i++)
@@ -11930,7 +11868,7 @@ void SpawnHeldWeaponGlows(CHARACTER* c)
         PART_t* w = &c->Weapon[i];
         if (g_CMonkSystem.IsSwordformGloves(w->Type))
             continue;
-        if (vec34_t* weaponBones = Engine::Object::Attachments::LastBonesOf(c, w))
+        if (vec34_t* weaponBones = Engine::Object::Attachments::PlannedBonesOf(c, w))
             SpawnHeldWeaponGlow(c, w, weaponBones, Luminosity);
     }
 }
@@ -11977,33 +11915,115 @@ void SpawnImpLight(CHARACTER* c, OBJECT* o)
     CreateSprite(BITMAP_LIGHT, vPos, 1.5f, vLight, o);
 }
 
-// Advances and poses the parts the character's last draw attached, once per draw.
+// Which of RenderCharacter's model branches draws the character's body, read the same way it reads them.
+enum class DrawBranch
+{
+    Other,
+    // A Rage Fighter in a transformation skin: one model.
+    Transformed,
+    ChaosCastle,
+    BodyParts,
+};
+
+DrawBranch DrawBranchOf(const CHARACTER* c)
+{
+    const OBJECT* o = &c->Object;
+    if (o->Kind == KIND_NPC && gMapManager.WorldActive == WD_0LORENCIA && o->Type == MODEL_PLAYER &&
+        o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3)
+        return DrawBranch::Other;
+    if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER &&
+        gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER &&
+        (o->SubType == MODEL_SKELETON_PCBANG || o->SubType == MODEL_HALLOWEEN || o->SubType == MODEL_PANDA ||
+         o->SubType == MODEL_SKELETON_CHANGED || o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL ||
+         o->SubType == MODEL_SKELETON1))
+        return DrawBranch::Transformed;
+    if (o->Type == MODEL_PLAYER &&
+        ((o->Kind == KIND_PLAYER &&
+          (o->SubType == MODEL_SKELETON_PCBANG || o->SubType == MODEL_HALLOWEEN ||
+           o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER || o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER ||
+           o->SubType == MODEL_PANDA || o->SubType == MODEL_SKELETON_CHANGED ||
+           o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL || o->SubType == MODEL_GM_CHARACTER)) ||
+         o->SubType == MODEL_XMAS_EVENT_CHA_SSANTA || o->SubType == MODEL_XMAS_EVENT_CHA_SNOWMAN ||
+         o->SubType == MODEL_XMAS_EVENT_CHA_DEER || (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3)))
+        return DrawBranch::Other;
+    if (c->Change)
+        return DrawBranch::Other;
+#ifndef GUILD_WAR_EVENT
+    if (o->Kind == KIND_PLAYER && gMapManager.InChaosCastle())
+        return DrawBranch::ChaosCastle;
+#endif
+    return DrawBranch::BodyParts;
+}
+
+// The parts RenderCharacter hands to CMonkSystem::DarksideRendering, in its order; a transformed or a Chaos Castle
+// character's single model is keyed by its head part.
+std::vector<PART_t*> DarksideDrawnParts(CHARACTER* c)
+{
+    std::vector<PART_t*> parts;
+    const OBJECT* o = &c->Object;
+    if (gCharacterManager.GetBaseClass(c->Class) != CLASS_RAGEFIGHTER || o->m_sTargetIndex < 0 || c->JumpTime > 0)
+        return parts;
+
+    switch (DrawBranchOf(c))
+    {
+    case DrawBranch::Transformed:
+        if (o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY || o->CurrentAction == PLAYER_SKILL_DARKSIDE_ATTACK)
+            parts.push_back(&c->BodyPart[BODYPART_HEAD]);
+        break;
+    case DrawBranch::ChaosCastle:
+        if (o->CurrentAction != PLAYER_SKILL_DRAGONKICK)
+            parts.push_back(&c->BodyPart[BODYPART_HEAD]);
+        break;
+    case DrawBranch::BodyParts:
+        if (o->CurrentAction != PLAYER_SKILL_DARKSIDE_READY ||
+            (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM))
+            break;
+        for (int i = MAX_BODYPART - 1; i >= 0; i--)
+        {
+            if (c->BodyPart[i].Type != -1)
+                parts.push_back(&c->BodyPart[i]);
+        }
+        break;
+    case DrawBranch::Other:
+        break;
+    }
+    return parts;
+}
+
+void PlanAttachments(CHARACTER* c);
+
+// Plans the parts the character's draw attaches from its state, then advances, poses and spawns each, once per update.
 void UpdateAttachedParts(CHARACTER* c)
 {
-    Engine::Object::Attachments::ForEachToAdvance(
+    if (!Engine::Object::Attachments::BeginPlan(c))
+        return;
+    PrepareCarriedParts(c);
+    PlanAttachments(c);
+    Engine::Object::Attachments::ForEachPlanned(
         c,
         [c](Engine::Object::Attachments::Slot& slot)
         {
-            PART_t* f = slot.part;
             const LinkPlacement placement = PlaceLinkedPart(slot.x, slot.y, slot.z, c, slot.linkBone, slot.ownerScale,
                                                             slot.type, slot.link, slot.rightHandItem);
-            AdvanceLinkedPart(c, f, slot.type, slot.link);
+            // A part built for this attachment only, such as a weapon on the back, is posed as it stands.
+            PART_t* f = slot.part != nullptr ? slot.part : slot.copy.get();
+            if (slot.part != nullptr)
+                AdvanceLinkedPart(c, f, slot.type, slot.link, slot.playSpeed);
             slot.posed = PosedAt(f, LinkedPartAction(c, f), placement);
             PoseLinkedPart(c, slot.type, slot.link, slot.posed, Engine::Object::Attachments::Bones(slot));
             SpawnSlotEffects(c, slot, placement);
         });
-    // A part the draw copies for one call, such as a weapon on the back: posed as drawn, without advancing it.
-    Engine::Object::Attachments::ForEachCopied(
-        c,
-        [c](Engine::Object::Attachments::Slot& slot)
-        {
-            PART_t* f = slot.copy.get();
-            const LinkPlacement placement = PlaceLinkedPart(slot.x, slot.y, slot.z, c, slot.linkBone, slot.ownerScale,
-                                                            slot.type, slot.link, slot.rightHandItem);
-            PoseLinkedPart(c, slot.type, slot.link, PosedAt(f, LinkedPartAction(c, f), placement),
-                           Engine::Object::Attachments::Bones(slot));
-            SpawnSlotEffects(c, slot, placement);
-        });
+}
+
+// Places the shared model where Calc_RenderObject places it before RenderCharacter's visuals read it.
+static BMD* PlaceCharacterModel(OBJECT* o)
+{
+    BMD* b = &Models[o->Type];
+    b->BodyHeight = 0.f;
+    b->BodyScale = o->Scale;
+    b->CurrentAction = o->CurrentAction;
+    VectorCopy(o->Position, b->BodyOrigin);
+    return b;
 }
 
 void UpdateDrawnCharacterEffects()
@@ -12015,14 +12035,13 @@ void UpdateDrawnCharacterEffects()
             continue;
 
         OBJECT* o = &c->Object;
-        BMD* b = &Models[o->Type];
-        // Where Calc_RenderObject places the model before RenderCharacter's visuals read it.
-        b->BodyHeight = 0.f;
-        b->BodyScale = o->Scale;
-        b->CurrentAction = o->CurrentAction;
-        VectorCopy(o->Position, b->BodyOrigin);
+        BMD* b = PlaceCharacterModel(o);
         PrepareHeldWeapons(c);
         UpdateAttachedParts(c);
+        // Readying Dark Side turns the character the way its draw used to.
+        if (o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY)
+            o->Angle[2] = 45.0f;
+        g_CMonkSystem.UpdateDarkside(c, DarksideDrawnParts(c));
         SpawnImpLight(c, o);
         SpawnHeldWeaponGlows(c);
         UpdateMonsterBodyEffects(c, o, b);
@@ -12048,6 +12067,8 @@ void UpdateDrawnCharacterEffects()
         if (SceneFlag == MAIN_SCENE && (o->Kind == KIND_PLAYER && gMapManager.InBloodCastle() == false &&
                                         gMapManager.InChaosCastle() == false && gMapManager.InBattleCastle()) == false)
             SpawnProtectGuildMark(c);
+        if (o->Type == MODEL_PLAYER)
+            battleCastle::CreateBattleCastleCharacter_Visual(c, o);
         if (UpdateCharacterTypeEffects(c, o, b))
             continue;
         // Same order and stop-on-claim as RenderCharacter's chain.
@@ -12079,6 +12100,134 @@ void UpdateDrawnCharacterEffects()
     }
 }
 } // namespace
+
+void UpdatePreviewCharacter(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+    // Posed and placed before anything reads its bones, as the client characters are.
+    Models[o->Type].BodyHeight = 0.f;
+    AnimateCharacterBones(o);
+    PlaceCharacterModel(o);
+    PrepareHeldWeapons(c);
+    UpdateAttachedParts(c);
+    SpawnImpLight(c, o);
+    if (DrawsNextGradeObjects(c))
+        SpawnNextGradeWeaponEffects(c);
+    UpdateCharacterCloth(c);
+    UpdateTransformSkinEffects(o);
+    if (o->Type == MODEL_PLAYER)
+        UpdateParts(c);
+    UpdatePlayerBodyParts(c);
+    PrepareCharacterForDraw(c);
+}
+
+void PrepareCharacterForDraw(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+
+    PrepareCarriedParts(c);
+
+    // A dying Blood Castle monster's body is held to the ground.
+    if (o->Type != MODEL_PLAYER && o->Kind != KIND_TRAP && c->MonsterIndex != MONSTER_ICE_QUEEN &&
+        c->MonsterIndex != MONSTER_ICE_MONSTER && c->MonsterIndex != MONSTER_RED_DRAGON &&
+        c->MonsterIndex != MONSTER_ELF_LALA && c->MonsterIndex != MONSTER_ZAIKAN &&
+        c->MonsterIndex != MONSTER_DEATH_BEAM_KNIGHT && c->MonsterIndex != MONSTER_GATE_TO_KALIMA_1 &&
+        gMapManager.WorldActive != WD_10HEAVEN && o->Alpha >= 0.3f && gMapManager.InBloodCastle() == true &&
+        o->m_bActionStart && c->Dead > 0)
+    {
+        const float height = RequestTerrainHeight(o->Position[0], o->Position[1]);
+        if (height < o->Position[2])
+            o->Position[2] = height;
+    }
+
+    vec3_t Light;
+    if (SceneFlag == CHARACTER_SCENE)
+    {
+        const float level = c == Hero ? 0.5f : 0.4f;
+        Vector(level, level, level, Light);
+    }
+    else
+    {
+        RequestModelTerrainLight(o->Position[0], o->Position[1], Light);
+        Render::Lighting::LightMood::CorrectFigureTerrainLight(o->Position[0], o->Position[1], Light);
+    }
+
+    if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
+    {
+        c->HideShadow = true;
+        if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
+            o->Alpha = 0.7f;
+        else if (o->CurrentAction != PLAYER_DIE1)
+            o->Alpha = 1.0f;
+        o->BlendMesh = -1;
+        if (g_isCharacterBuff(o, eBuff_Doppelganger_Ascension))
+            o->Position[2] += 2.0f * FPS_ANIMATION_FACTOR;
+    }
+
+    if (c->PK >= PVP_MURDERER2)
+    {
+        Vector(1.f, 0.1f, 0.1f, c->Light);
+    }
+    else
+    {
+        VectorAdd(Light, o->Light, c->Light);
+
+        int nCastle = BLOODCASTLE_NUM + (gMapManager.WorldActive - WD_11BLOODCASTLE_END);
+        if (nCastle > 0 && nCastle <= BLOODCASTLE_NUM)
+        {
+            if ((c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_1 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_1) ||
+                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_2 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_2) ||
+                (c->MonsterIndex == MONSTER_GIANT_OGRE_3 && c->MonsterIndex == MONSTER_RED_SKELETON_KNIGHT_3 &&
+                 c->MonsterIndex == MONSTER_MAGIC_SKELETON_3) ||
+                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_4 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_4) ||
+                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_5 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_5) ||
+                (c->MonsterIndex >= MONSTER_DARK_SKULL_SOLDIER_6 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_6) ||
+                (c->MonsterIndex >= MONSTER_CHIEF_SKELETON_WARRIOR_7 && c->MonsterIndex <= MONSTER_MAGIC_SKELETON_7))
+            {
+                int level = nCastle / 3;
+                if (level)
+                    Vector(level * 0.5f, 0.1f, 0.1f, c->Light);
+            }
+        }
+    }
+
+    if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD && DrawBranchOf(c) == DrawBranch::BodyParts &&
+        c->BodyPart[BODYPART_HELM].Type != -1)
+        o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.1f + 0.7f;
+    if (c->MonsterIndex == MONSTER_DARK_PHOENIX)
+    {
+        const float fSin = 0.5f * (1.0f + sinf((float)((int)WorldTime % 10000) * 0.001f));
+        o->BlendMeshLight = 0.3f * (1.0f - fSin) + 0.3f;
+    }
+}
+
+void PrepareCharactersForDraw()
+{
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
+    {
+        CHARACTER* c = &CharactersClient[i];
+        OBJECT* o = &c->Object;
+        if (IsHiddenBySiegeCloak(c))
+        {
+            if (Hero != nullptr && Hero->TargetCharacter == c->Key)
+                Hero->TargetCharacter = -1;
+            continue;
+        }
+        if (IsHiddenGameMaster(c))
+        {
+            // No pick box where the mouse can reach it.
+            o->OBB.StartPos[0] = 1000.0f;
+            o->OBB.XAxis[0] = o->OBB.YAxis[1] = o->OBB.ZAxis[2] = 1.0f;
+            continue;
+        }
+        if (IsCharacterDrawn(c))
+        {
+            PrepareCharacterForDraw(c);
+            PlaceObjectBounds(o, o->Position);
+            giPetManager::CullPet(c);
+        }
+    }
+}
 
 void ApplyCharacterEffectsEarthQuake()
 {
@@ -12114,6 +12263,10 @@ void UpdateCharacterEffects()
     s_hasEarthQuakeRequest = EarthQuake != sampledEarthQuake;
     s_earthQuakeRequest = EarthQuake;
     EarthQuake = sampledEarthQuake;
+
+    // This update's siege census is complete: a gate no character reported loses its collision.
+    if (gMapManager.InBattleCastle() || gMapManager.WorldActive == WD_31HUNTING_GROUND)
+        battleCastle::InitEtcSetting();
 }
 
 void RenderCharactersClient()
@@ -12123,7 +12276,6 @@ void RenderCharactersClient()
 #endif
 
     WaitCharactersAnimation();
-    Engine::Object::Attachments::BeginFrame();
 
     // Characters keep their Classic look with post-processing on: their bodies,
     // equipment, wings and glow parts never feed the bloom.
@@ -12133,18 +12285,9 @@ void RenderCharactersClient()
         CHARACTER* c = &CharactersClient[i];
         OBJECT* o = &c->Object;
 
-        if (IsHiddenBySiegeCloak(c))
-        {
-            if (Hero->TargetCharacter == c->Key)
-                Hero->TargetCharacter = -1;
+        // The update cleared a target the siege cloak hides, and moved a hidden GM's pick box away.
+        if (IsHiddenBySiegeCloak(c) || IsHiddenGameMaster(c))
             continue;
-        }
-        if (IsHiddenGameMaster(c))
-        {
-            o->OBB.StartPos[0] = 1000.0f;
-            o->OBB.XAxis[0] = o->OBB.YAxis[1] = o->OBB.ZAxis[2] = 1.0f;
-            continue;
-        }
         if (o->Live)
         {
             if (o->Visible)
@@ -12154,20 +12297,12 @@ void RenderCharactersClient()
                 else
                     RenderCharacter(c, o, true);
 
-                if (o->Type == MODEL_PLAYER)
-                    battleCastle::CreateBattleCastleCharacter_Visual(c, o);
-
 #ifdef _EDITOR
                 if (s_bShowCharacterPickBoxes)
                     RenderCharacterPickBoxDebug(o);
 #endif
             }
         }
-    }
-
-    if (gMapManager.InBattleCastle() || gMapManager.WorldActive == WD_31HUNTING_GROUND)
-    {
-        battleCastle::InitEtcSetting();
     }
 }
 
@@ -15463,6 +15598,235 @@ bool AreWeaponsOnBack(const CHARACTER* c, const OBJECT* o)
     return bBindBack;
 }
 
+// Whether RenderCharacterBackItem draws weapon `index` on the back: an earlier weapon on the back keeps the later
+// ones there, ammunition always goes there, and the rest only where the weapons are bound to the back.
+bool DrawsWeaponOnBack(CHARACTER* c, const OBJECT* o, int index)
+{
+    if (o->Type != MODEL_PLAYER || c->Weapon[index].Type < 0)
+        return false;
+    const bool bindBack = AreWeaponsOnBack(c, o);
+    bool back = false;
+    for (int i = 0; i <= index; ++i)
+    {
+        int type = c->Weapon[i].Type;
+        if (type < 0)
+            continue;
+        if (i == 0 && o->Kind == KIND_NPC && gMapManager.WorldActive == WD_0LORENCIA && o->SubType >= MODEL_SKELETON1 &&
+            o->SubType <= MODEL_SKELETON3)
+        {
+            back = true;
+            type = MODEL_GOLDEN_CROSSBOW;
+        }
+        if (IsBackItem(c, type))
+            back = true;
+        if (!GameLogic::Items::IsAmmunitionModel(type) && !bindBack)
+            back = false;
+    }
+    return back;
+}
+
+// The bones the carried parts hang from and the animation they play, from the character's state: the update advances
+// them and the draw shows them, so no draw sets a part the update reads.
+void PrepareCarriedParts(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+    PART_t* w = &c->Wing;
+    if (RendersWingCarriedModels(c))
+    {
+        // What the monster carries on its wing part plays its first action.
+        w->CurrentAction = 1;
+        w->PriorAction = 1;
+        w->PlaySpeed = 0.2f;
+        return;
+    }
+    if (o->Type != MODEL_PLAYER)
+        return;
+
+    if (!gMapManager.InChaosCastle() && w->Type != -1)
+    {
+        w->LinkBone = IsLinkedCape(w->Type) ? 19 : 47;
+        w->PlaySpeed = IsFlying(o) ? (w->Type == MODEL_WING_OF_STORM ? 0.5f : 1.f) : 0.25f;
+    }
+    else if (BloodCastleQuestItem(c) != 0)
+    {
+        // The quest item plays on the wing part.
+        w->LinkBone = 47;
+        w->PlaySpeed = QuestItemPlaySpeed(o);
+    }
+
+    if (!gMapManager.InChaosCastle() && c->Helper.Type == MODEL_IMP)
+    {
+        c->Helper.LinkBone = 34;
+        c->Helper.PlaySpeed = 0.5f;
+    }
+
+    // A Stinger Bow on the back flaps its wings.
+    for (int i = 0; i < 2; ++i)
+    {
+        if (c->Weapon[i].Type == MODEL_STINGER_BOW && DrawsWeaponOnBack(c, o, i))
+        {
+            c->Weapon[1].CurrentAction = 2;
+            c->Weapon[1].PlaySpeed = 0.25f;
+        }
+    }
+}
+
+bool IsFlying(const OBJECT* o)
+{
+    return o->CurrentAction == PLAYER_FLY || o->CurrentAction == PLAYER_FLY_CROSSBOW;
+}
+
+bool IsLinkedCape(int type)
+{
+    return type == MODEL_CAPE_OF_EMPEROR || type == MODEL_CAPE_OF_OVERRULE;
+}
+
+int BloodCastleQuestItem(const CHARACTER* c)
+{
+    if (!gMapManager.InBloodCastle())
+        return 0;
+    switch (c->EtcPart)
+    {
+    case 1:
+        return MODEL_DIVINE_STAFF_OF_ARCHANGEL;
+    case 2:
+        return MODEL_DIVINE_SWORD_OF_ARCHANGEL;
+    case 3:
+        return MODEL_DIVINE_CB_OF_ARCHANGEL;
+    }
+    return 0;
+}
+
+float QuestItemPlaySpeed(const OBJECT* o)
+{
+    return IsFlying(o) ? 1.f : 0.25f;
+}
+
+bool IsSkeletonGuard(const OBJECT* o)
+{
+    return o->Kind == KIND_NPC && gMapManager.WorldActive == WD_0LORENCIA && o->Type == MODEL_PLAYER &&
+           o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3;
+}
+
+int BackWeaponType(const CHARACTER* c, const OBJECT* o, int index)
+{
+    return index == 0 && IsSkeletonGuard(o) ? MODEL_GOLDEN_CROSSBOW : c->Weapon[index].Type;
+}
+
+PART_t BackWeaponPart(const CHARACTER* c)
+{
+    PART_t part = c->Wing;
+    part.CurrentAction = 0;
+    part.AnimationFrame = 0.f;
+    part.PlaySpeed = 0.f;
+    part.PriorAction = 0;
+    part.PriorAnimationFrame = 0.f;
+    return part;
+}
+
+void ImpOffset(const CHARACTER* c, vec3_t offset)
+{
+    if (IsImpOnRageFighterArmor(c))
+    {
+        Vector(20.f, -5.f, 20.f, offset);
+    }
+    else
+    {
+        Vector(20.f, 0.f, 0.f, offset);
+    }
+}
+
+bool DrawsAttachments(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+    return !g_isCharacterBuff(o, eBuff_CrywolfNPCHide) && Models[o->Type].NumActions != 0;
+}
+
+namespace
+{
+// The parts RenderCharacter attaches to the character, in its order and at its placements, decided from the
+// character's state: the update advances and poses each before any draw shows it. A part two attachments share (the
+// wing carries the quest item too) takes one step per attachment, each at that attachment's speed.
+void PlanAttachments(CHARACTER* c)
+{
+    OBJECT* o = &c->Object;
+    if (!DrawsAttachments(c))
+        return;
+    const auto plan = [c](float x, float y, float z, PART_t* part, int type, bool link, bool rightHandItem,
+                          int linkBone, float playSpeed, float ownerScale)
+    {
+        if (HidesLinkedPart(c, type))
+            return;
+        const auto bone = static_cast<unsigned char>(linkBone >= 0 ? linkBone : part->LinkBone);
+        Engine::Object::Attachments::Plan(c, part, type, x, y, z, link, rightHandItem, bone, ownerScale, playSpeed);
+    };
+
+    if (RendersWingCarriedModels(c))
+    {
+        WingCarriedModel models[2];
+        const int count = WingCarriedModels(c, models);
+        for (int i = 0; i < count; ++i)
+        {
+            const WingCarriedModel& m = models[i];
+            plan(m.x, m.y, m.z, &c->Wing, m.type, m.link, true, m.bone, c->Wing.PlaySpeed, m.scale);
+        }
+    }
+    if (DrawsNextGradeObjects(c))
+    {
+        ForEachNextGradeObject(c, [&plan, o](PART_t* part, int type, int bone)
+                               { plan(0.f, 0.f, 0.f, part, type, true, true, bone, part->PlaySpeed, o->Scale); });
+    }
+    for (int i = 0; i < 2; ++i)
+    {
+        if (g_CMonkSystem.EqualItemModelType(c->Weapon[i].Type) != MODEL_PHOENIX_SOUL_STAR)
+            continue;
+        const LinkOffset at = PhoenixGloveOffset(i);
+        plan(at.x, at.y, at.z, &c->Weapon[i], MODEL_SWORD_35_WING, true, true, PhoenixGloveBone(i),
+             c->Weapon[i].PlaySpeed, o->Scale);
+    }
+
+    if (o->Type == MODEL_PLAYER)
+    {
+        constexpr int backBone = 47;
+        PART_t backWeapon = BackWeaponPart(c);
+        for (int i = 0; i < 2; ++i)
+        {
+            const int type = BackWeaponType(c, o, i);
+            if (!DrawsWeaponOnBack(c, o, i) || g_CMonkSystem.IsSwordformGloves(type))
+                continue;
+            if (type == MODEL_STINGER_BOW)
+                plan(0.f, 0.f, 15.f, &c->Weapon[1], type, true, true, backBone, c->Weapon[1].PlaySpeed, o->Scale);
+            else
+                plan(0.f, 0.f, 15.f, &backWeapon, type, true, i == 0, backBone, 0.f, o->Scale);
+        }
+        if (const int questItem = BloodCastleQuestItem(c))
+            plan(0.f, 0.f, 15.f, &c->Wing, questItem, true, true, backBone, QuestItemPlaySpeed(o), o->Scale);
+        if (!gMapManager.InChaosCastle())
+        {
+            PART_t* w = &c->Wing;
+            if (w->Type != -1)
+                plan(0.f, 0.f, 15.f, w, w->Type, IsLinkedCape(w->Type), true, -1, w->PlaySpeed, o->Scale);
+            if (c->Helper.Type == MODEL_IMP)
+            {
+                vec3_t at;
+                ImpOffset(c, at);
+                plan(at[0], at[1], at[2], &c->Helper, MODEL_IMP, false, true, -1, c->Helper.PlaySpeed, o->Scale);
+            }
+        }
+    }
+
+    if (!AreWeaponsOnBack(c, o))
+    {
+        for (int i = 0; i < 2; ++i)
+        {
+            PART_t* w = &c->Weapon[i];
+            if (DrawsHeldWeapon(c, i) && !g_CMonkSystem.IsSwordformGloves(w->Type))
+                plan(0.f, 0.f, 0.f, w, w->Type, false, true, -1, w->PlaySpeed, o->Scale);
+        }
+    }
+}
+} // namespace
+
 bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
 {
     const bool bBindBack = AreWeaponsOnBack(c, o);
@@ -15481,30 +15845,10 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             if (iType < 0)
                 continue;
 
-            if (o->Kind == KIND_NPC && gMapManager.WorldActive == WD_0LORENCIA && o->Type == MODEL_PLAYER && (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
-            {
-                if (i == 0)
-                {
-                    bBack = true;
-                    iType = MODEL_GOLDEN_CROSSBOW;
-                    iLevel = 8;
-                }
-            }
-
-            if (IsBackItem(c, iType) == true)
-            {
-                bBack = true;
-            }
-
-            if (GameLogic::Items::IsAmmunitionModel(iType))
-            {
-                bBack = true;
-            }
-            else
-            {
-                if (bBindBack == false)
-                    bBack = false;
-            }
+            if (IsSkeletonGuard(o) && i == 0)
+                iLevel = 8;
+            iType = BackWeaponType(c, o, i);
+            bBack = DrawsWeaponOnBack(c, o, i);
 
             // 			if(iBackupType == iType)
             // 			{
@@ -15517,38 +15861,15 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
 
                 float fAnimationFrameBackUp = w->AnimationFrame;
 
-                w->LinkBone = 47;
-
-                if (o->CurrentAction == PLAYER_FLY || o->CurrentAction == PLAYER_FLY_CROSSBOW)
-                {
-                    w->PlaySpeed = 1.f;
-                }
-                else
-                {
-                    w->PlaySpeed = 0.25f;
-                }
-
-                PART_t t_Part;
-
-                if (iType >= MODEL_SWORD && iType < MODEL_SHIELD + MAX_ITEM_INDEX)
-                {
-                    ::memcpy(&t_Part, w, sizeof(PART_t));
-                    t_Part.CurrentAction = 0;
-                    t_Part.AnimationFrame = 0.f;
-                    t_Part.PlaySpeed = 0.f;
-                    t_Part.PriorAction = 0;
-                    t_Part.PriorAnimationFrame = 0.f;
-                }
+                // Carried on the back bone, whatever the wing hangs from.
+                constexpr int backBone = 47;
+                PART_t t_Part = BackWeaponPart(c);
 
                 if (iType == MODEL_STINGER_BOW)
                 {
-                    PART_t* pWeapon = &c->Weapon[1];
-                    BYTE byTempLinkBone = pWeapon->LinkBone;
-                    pWeapon->CurrentAction = 2;
-                    pWeapon->PlaySpeed = 0.25f;
-                    pWeapon->LinkBone = 47;
-                    RenderLinkObject(0.f, 0.f, 15.f, c, pWeapon, iType, iLevel, iOption1, true, bTranslate);
-                    pWeapon->LinkBone = byTempLinkBone;
+                    // Its wings flap on the back, as PrepareCarriedParts set them.
+                    RenderLinkObject(0.f, 0.f, 15.f, c, &c->Weapon[1], iType, iLevel, iOption1, true, bTranslate, 0,
+                                     true, backBone);
                 }
                 else if (g_CMonkSystem.IsSwordformGloves(iType))
                     g_CMonkSystem.RenderSwordformGloves(c, iType, i, o->Alpha, bTranslate);
@@ -15557,7 +15878,8 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
                     bool bRightHandItem = false;
                     if (i == 0)
                         bRightHandItem = true;
-                    RenderLinkObject(0.f, 0.f, 15.f, c, &t_Part, iType, iLevel, iOption1, true, bTranslate, 0, bRightHandItem);
+                    RenderLinkObject(0.f, 0.f, 15.f, c, &t_Part, iType, iLevel, iOption1, true, bTranslate, 0,
+                                     bRightHandItem, backBone);
                 }
 
                 w->AnimationFrame = fAnimationFrameBackUp;
@@ -15566,34 +15888,9 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             iBackupType = iType;
         }
 
-        // Blood Castle Archangel Quest Item Check: Bounded to 1..3 to prevent default iType=0
-        // from rendering Models[0] (Blood Castle stone wall map object) on character back.
-        if (gMapManager.InBloodCastle() && (c->EtcPart >= 1 && c->EtcPart <= 3))
-        {
-            PART_t* w = &c->Wing;
-
-            int iType = 0;
-            int iLevel = 0;
-            int iOption1 = 0;
-
-            w->LinkBone = 47;
-            if (o->CurrentAction == PLAYER_FLY || o->CurrentAction == PLAYER_FLY_CROSSBOW)
-                w->PlaySpeed = 1.f;
-            else
-                w->PlaySpeed = 0.25f;
-
-            switch (c->EtcPart)
-            {
-            case 1: iType = MODEL_DIVINE_STAFF_OF_ARCHANGEL; break;
-            case 2: iType = MODEL_DIVINE_SWORD_OF_ARCHANGEL; break;
-            case 3: iType = MODEL_DIVINE_CB_OF_ARCHANGEL; break;
-            }
-
-            if (iType != 0)
-            {
-                RenderLinkObject(0.f, 0.f, 15.f, c, w, iType, iLevel, iOption1, true, bTranslate);
-            }
-        }
+        // The Archangel quest item, on the back bone whatever the wing hangs from; it plays on the wing.
+        if (const int questItem = BloodCastleQuestItem(c))
+            RenderLinkObject(0.f, 0.f, 15.f, c, &c->Wing, questItem, 0, 0, true, bTranslate, 0, true, 47);
 
         RenderParts(c);
 
@@ -15602,34 +15899,9 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             PART_t* w = &c->Wing;
             if (w->Type != -1)
             {
-                w->LinkBone = 47;
-                if (o->CurrentAction == PLAYER_FLY || o->CurrentAction == PLAYER_FLY_CROSSBOW)
-                {
-                    if (w->Type == MODEL_WING_OF_STORM)
-                    {
-                        w->PlaySpeed = 0.5f;
-                    }
-                    else
-                    {
-                        w->PlaySpeed = 1.f;
-                    }
-                }
-                else
-                {
-                    w->PlaySpeed = 0.25f;
-                }
-
-                switch (w->Type)
-                {
-                case MODEL_CAPE_OF_EMPEROR:
-                case MODEL_CAPE_OF_OVERRULE:
-                    w->LinkBone = 19;
-                    RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->ExcellentFlags, true, bTranslate);
-                    break;
-                default:
-                    RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->ExcellentFlags, false, bTranslate);
-                    break;
-                }
+                // Its bone is the one PrepareCarriedParts set.
+                RenderLinkObject(0.f, 0.f, 15.f, c, w, w->Type, w->Level, w->ExcellentFlags, IsLinkedCape(w->Type),
+                                 bTranslate);
             }
 
             // 사탄
@@ -15639,15 +15911,10 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             if (iType == MODEL_IMP)
             {
                 PART_t* w = &c->Helper;
-                w->LinkBone = 34;
-                w->PlaySpeed = 0.5f;
                 iOption1 = w->ExcellentFlags;
-                if (IsImpOnRageFighterArmor(c))
-                    RenderLinkObject(20.f, -5.f, 20.f, c, w, iType, iLevel, iOption1, false, bTranslate);
-                else
-                    RenderLinkObject(20.f, 0.f, 0.f, c, w, iType, iLevel, iOption1, false, bTranslate);
-                if (!IsClientCharacterObject(o))
-                    SpawnImpLight(c, o);
+                vec3_t at;
+                ImpOffset(c, at);
+                RenderLinkObject(at[0], at[1], at[2], c, w, iType, iLevel, iOption1, false, bTranslate);
             }
         }
     }

@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
@@ -160,6 +161,7 @@ void AddBlur(Blur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
 
 void CreateBlur(CHARACTER* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short, int SubType)
 {
+    Diagnostics::DrawSpawnCheck::Note("blur");
     Blur* freeBlur = nullptr;
     for (auto& blur : g_blurs)
     {
@@ -307,6 +309,7 @@ void AddObjectBlur(ObjectBlur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
 
 void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short, int SubType, int iLimitLifeTime)
 {
+    Diagnostics::DrawSpawnCheck::Note("object-blur");
     ObjectBlur* freeBlur = nullptr;
     for (auto& blur : g_objectBlurs)
     {

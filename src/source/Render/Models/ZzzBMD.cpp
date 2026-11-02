@@ -634,18 +634,22 @@ void BMD::TransformCheap(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_
 
     // Release/gameplay OBB: from the caller-supplied bounding box args, not a vertex-loop-derived
     // one -- this is Transform()'s own "else" branch (EditFlag != 2), which is why TransformCheap()
-    // is only a valid substitute for Transform() in that same case (see header comment).
-    VectorCopy(BoundingBoxMin, OBB->StartPos);
-    OBB->XAxis[0] = (BoundingBoxMax[0] - BoundingBoxMin[0]);
-    OBB->YAxis[1] = (BoundingBoxMax[1] - BoundingBoxMin[1]);
-    OBB->ZAxis[2] = (BoundingBoxMax[2] - BoundingBoxMin[2]);
-    VectorAdd(OBB->StartPos, BodyOrigin, OBB->StartPos);
-    OBB->XAxis[1] = 0.f;
-    OBB->XAxis[2] = 0.f;
-    OBB->YAxis[0] = 0.f;
-    OBB->YAxis[2] = 0.f;
-    OBB->ZAxis[0] = 0.f;
-    OBB->ZAxis[1] = 0.f;
+    // is only a valid substitute for Transform() in that same case (see header comment). A draw passes
+    // no OBB: the update places the pick boxes.
+    if (OBB != nullptr)
+    {
+        VectorCopy(BoundingBoxMin, OBB->StartPos);
+        OBB->XAxis[0] = (BoundingBoxMax[0] - BoundingBoxMin[0]);
+        OBB->YAxis[1] = (BoundingBoxMax[1] - BoundingBoxMin[1]);
+        OBB->ZAxis[2] = (BoundingBoxMax[2] - BoundingBoxMin[2]);
+        VectorAdd(OBB->StartPos, BodyOrigin, OBB->StartPos);
+        OBB->XAxis[1] = 0.f;
+        OBB->XAxis[2] = 0.f;
+        OBB->YAxis[0] = 0.f;
+        OBB->YAxis[2] = 0.f;
+        OBB->ZAxis[0] = 0.f;
+        OBB->ZAxis[1] = 0.f;
+    }
     // NOTE: does not update fTransformedSize (left at its last value from a real Transform() call).
     // Its only consumer (ZzzCharacter.cpp's character-select pick-box fallback height) already
     // floors the result, and Models[] is shared-by-type mutable state already, so a stale value
@@ -886,17 +890,20 @@ void BMD::Transform(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t Bou
     {
         // Overrides TransformCheap()'s args-based OBB with the vertex-loop-derived bounds --
         // the map-editor-only accurate path.
-        VectorCopy(BoundingMin, OBB->StartPos);
-        OBB->XAxis[0] = (BoundingMax[0] - BoundingMin[0]);
-        OBB->YAxis[1] = (BoundingMax[1] - BoundingMin[1]);
-        OBB->ZAxis[2] = (BoundingMax[2] - BoundingMin[2]);
-        VectorAdd(OBB->StartPos, BodyOrigin, OBB->StartPos);
-        OBB->XAxis[1] = 0.f;
-        OBB->XAxis[2] = 0.f;
-        OBB->YAxis[0] = 0.f;
-        OBB->YAxis[2] = 0.f;
-        OBB->ZAxis[0] = 0.f;
-        OBB->ZAxis[1] = 0.f;
+        if (OBB != nullptr)
+        {
+            VectorCopy(BoundingMin, OBB->StartPos);
+            OBB->XAxis[0] = (BoundingMax[0] - BoundingMin[0]);
+            OBB->YAxis[1] = (BoundingMax[1] - BoundingMin[1]);
+            OBB->ZAxis[2] = (BoundingMax[2] - BoundingMin[2]);
+            VectorAdd(OBB->StartPos, BodyOrigin, OBB->StartPos);
+            OBB->XAxis[1] = 0.f;
+            OBB->XAxis[2] = 0.f;
+            OBB->YAxis[0] = 0.f;
+            OBB->YAxis[2] = 0.f;
+            OBB->ZAxis[0] = 0.f;
+            OBB->ZAxis[1] = 0.f;
+        }
     }
     fTransformedSize =
         std::max<float>(std::max<float>(BoundingMax[0] - BoundingMin[0], BoundingMax[1] - BoundingMin[1]),
@@ -2857,7 +2864,7 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
 
 void BMD::DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) const
 {
-    if (!g_pOption->GetRenderAllEffects() || IsBodyShadowsDisabledDebug())
+    if ((g_pOption != nullptr && !g_pOption->GetRenderAllEffects()) || IsBodyShadowsDisabledDebug())
     {
         return;
     }

@@ -3,13 +3,14 @@
 #include <string>
 #include <vector>
 
-// Finds the game state the draw still writes: while listing, the gameplay fields of the characters, effects, items,
-// map objects, mounts, boids, particles and joints are compared before and after each frame's draw (control socket
-// "drawpurity"). The draw's own bookkeeping (visibility, drawn-frame stamps, bounds) is left out.
+// Finds the game state the draw still writes: while listing, the fields of the characters, effects, items, map
+// objects, mounts, boids, particles and joints (visibility and drawn-frame stamps included) and the frame's view are
+// compared before and after each draw pass, the scene's and the offscreen one, and so is whether the pass drew from the
+// random sequences the update draws from (control socket "drawpurity").
 namespace Diagnostics::DrawPurityCheck
 {
 #ifdef MU_ENABLE_CONTROL_SOCKET
-// Around the frame's draw; both do nothing unless listing.
+// Around each draw pass; both do nothing unless listing.
 void BeforeDraw();
 void AfterDraw();
 

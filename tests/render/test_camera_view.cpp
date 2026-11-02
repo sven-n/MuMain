@@ -12,6 +12,7 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Scenes/SceneCore.h"
+#include "UI/Social/PhotoViewer.h"
 #include "World/MapInfra/MapManager.h"
 
 #include <glm/glm.hpp>
@@ -222,4 +223,32 @@ TEST_CASE("Picking follows the cursor as it is now, not the ray the last update 
     g_Camera = savedCamera;
     WindowWidth = windowWidth;
     WindowHeight = windowHeight;
+}
+
+TEST_CASE("Drawing a letter's photo leaves the world camera as the update built it [render]")
+{
+    const CameraState saved = g_Camera;
+    g_Camera = Camera(-48.5f, 33.3f, false);
+    CameraProjection::UpdateView(g_Camera, 0, 0, 1280, 720);
+    const CameraState world = g_Camera;
+    TestModelSlots models;
+    ViewRenderer renderer;
+    mu::SetRendererOverride(&renderer);
+    {
+        // The photo target's drawer, as RenderTarget calls it.
+        struct Photo : CUIPhotoViewer
+        {
+            using CUIPhotoViewer::RenderInto;
+        } photo;
+        photo.RenderInto(256, 256);
+    }
+    mu::SetRendererOverride(nullptr);
+
+    CHECK(std::memcmp(g_Camera.Matrix, world.Matrix, sizeof(world.Matrix)) == 0);
+    CHECK(g_Camera.PerspectiveX == world.PerspectiveX);
+    CHECK(g_Camera.PerspectiveY == world.PerspectiveY);
+    CHECK(g_Camera.ScreenCenterX == world.ScreenCenterX);
+    CHECK(g_Camera.ScreenCenterY == world.ScreenCenterY);
+    CHECK(g_Camera.ScreenCenterYFlip == world.ScreenCenterYFlip);
+    g_Camera = saved;
 }

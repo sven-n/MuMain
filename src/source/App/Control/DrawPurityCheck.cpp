@@ -5,16 +5,24 @@
 #ifdef MU_ENABLE_CONTROL_SOCKET
 
 #include "Camera/CameraState.h"
+#include "Core/Utilities/Fnv1aHash.h"
+#include "Core/Utilities/Random.h"
+#include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Engine/Physics/PhysicsManager.h"
 #include "GameLogic/Skills/SkillEffectMgr.h"
+#include "GameLogic/Social/MonkSystem.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Render/Lighting/DynamicLightHistory.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <algorithm>
 #include <array>
 #include <bit>
 #include <cstdint>
+#include <cstdlib>
 #include <map>
 #include <string>
 #include <unordered_map>
@@ -31,7 +39,7 @@ namespace Diagnostics::DrawPurityCheck
 {
 namespace
 {
-constexpr int MaxFields = 32;
+constexpr int MaxFields = 48;
 
 struct Entry
 {
@@ -66,6 +74,10 @@ void Put(Entry& e, int v)
 {
     e.values[e.count++] = static_cast<std::uint32_t>(v);
 }
+void Put(Entry& e, std::uint64_t v)
+{
+    e.values[e.count++] = v;
+}
 void Put(Entry& e, const void* v)
 {
     e.values[e.count++] = reinterpret_cast<std::uintptr_t>(v);
@@ -77,12 +89,53 @@ void Put(Entry& e, const vec3_t v)
     Put(e, v[2]);
 }
 
-constexpr const char* ObjectFields[] = {
-    "Live",       "Type",       "SubType",      "CurrentAction", "PriorAction", "AnimationFrame", "PriorAnimationFrame",
-    "LifeTime",   "Position.x", "Position.y",   "Position.z",    "Angle.x",     "Angle.y",        "Angle.z",
-    "Scale",      "Alpha",      "Light.r",      "Light.g",       "Light.b",     "Velocity",       "Gravity",
-    "HiddenMesh", "PKKey",      "m_iAnimation", "Owner",         "Direction.x", "Direction.y",    "Direction.z",
-    "Visible",    "DrawnFrame"};
+constexpr const char* ObjectFields[] = {"Live",
+                                        "Type",
+                                        "SubType",
+                                        "CurrentAction",
+                                        "PriorAction",
+                                        "AnimationFrame",
+                                        "PriorAnimationFrame",
+                                        "LifeTime",
+                                        "Position.x",
+                                        "Position.y",
+                                        "Position.z",
+                                        "Angle.x",
+                                        "Angle.y",
+                                        "Angle.z",
+                                        "Scale",
+                                        "Alpha",
+                                        "Light.r",
+                                        "Light.g",
+                                        "Light.b",
+                                        "Velocity",
+                                        "Gravity",
+                                        "HiddenMesh",
+                                        "PKKey",
+                                        "m_iAnimation",
+                                        "Owner",
+                                        "Direction.x",
+                                        "Direction.y",
+                                        "Direction.z",
+                                        "Visible",
+                                        "DrawnFrame",
+                                        "BlendMesh",
+                                        "BlendMeshLight",
+                                        "BlendMeshTexCoordU",
+                                        "BlendMeshTexCoordV",
+                                        "AlphaTarget",
+                                        "StartPosition.x",
+                                        "StartPosition.y",
+                                        "StartPosition.z",
+                                        "ScreenX",
+                                        "ScreenY",
+                                        "OBB.StartPos.x",
+                                        "OBB.StartPos.y",
+                                        "OBB.StartPos.z",
+                                        "OBB.XAxis.x",
+                                        "OBB.YAxis.y",
+                                        "OBB.ZAxis.z",
+                                        "Buffs"};
 constexpr const char* ParticleFields[] = {
     "Live",     "Type",     "SubType", "Scale",   "Position.x", "Position.y", "Position.z",
     "Angle.x",  "Angle.y",  "Angle.z", "Light.r", "Light.g",    "Light.b",    "Alpha",
@@ -118,6 +171,112 @@ void Record(Recorder& r, const OBJECT* o, const char* kind)
     Put(e, o->Direction);
     Put(e, o->Visible ? 1 : 0);
     Put(e, static_cast<int>(o->DrawnFrame));
+    Put(e, o->BlendMesh);
+    Put(e, o->BlendMeshLight);
+    Put(e, o->BlendMeshTexCoordU);
+    Put(e, o->BlendMeshTexCoordV);
+    Put(e, o->AlphaTarget);
+    Put(e, o->StartPosition);
+    Put(e, o->ScreenX);
+    Put(e, o->ScreenY);
+    Put(e, o->OBB.StartPos);
+    Put(e, o->OBB.XAxis[0]);
+    Put(e, o->OBB.YAxis[1]);
+    Put(e, o->OBB.ZAxis[2]);
+    Fnv1aHash buffs;
+    for (DWORD i = 0; i < o->m_BuffMap.GetBuffSize(); ++i)
+        buffs.Add(o->m_BuffMap.GetBuff(static_cast<int>(i)));
+    Put(e, buffs.Value());
+}
+
+constexpr const char* CharacterFields[] = {"Light.r",    "Light.g",  "Light.b",
+                                           "HideShadow", "SafeZone", "TargetCharacter"};
+constexpr const char* PartFields[] = {
+    "Type", "Level", "CurrentAction", "PriorAction", "AnimationFrame", "PriorAnimationFrame", "PlaySpeed", "LinkBone"};
+constexpr const char* HashFields[] = {"state"};
+
+void Record(Recorder& r, const PART_t* part, int type)
+{
+    Entry& e = r.Begin(part, "character part", PartFields, type);
+    Put(e, static_cast<int>(part->Type));
+    Put(e, static_cast<int>(part->Level));
+    Put(e, static_cast<int>(part->CurrentAction));
+    Put(e, static_cast<int>(part->PriorAction));
+    Put(e, part->AnimationFrame);
+    Put(e, part->PriorAnimationFrame);
+    Put(e, part->PlaySpeed);
+    Put(e, static_cast<int>(part->LinkBone));
+}
+
+void RecordHash(Recorder& r, const void* key, const char* kind, std::uint64_t value)
+{
+    Entry& e = r.Begin(key, kind, HashFields, 0);
+    Put(e, value);
+}
+
+void RecordCloth(Recorder& r, const CPhysicsCloth* cloth)
+{
+    Fnv1aHash state;
+    cloth->AddStateTo(state);
+    RecordHash(r, cloth, "cloth", state.Value());
+}
+
+// The character's own state beside its object: its draw colour, its flags, what it targets, its parts and its cloth.
+void Record(Recorder& r, const CHARACTER* c)
+{
+    Entry& e = r.Begin(&c->Light, "character state", CharacterFields, c->Object.Type);
+    Put(e, c->Light);
+    Put(e, c->HideShadow ? 1 : 0);
+    Put(e, c->SafeZone ? 1 : 0);
+    Put(e, static_cast<int>(c->TargetCharacter));
+    const int type = c->Object.Type;
+    for (const PART_t& part : c->BodyPart)
+        Record(r, &part, type);
+    for (const PART_t& part : c->Weapon)
+        Record(r, &part, type);
+    Record(r, &c->Wing, type);
+    Record(r, &c->Helper, type);
+
+    // The cloth the character owns, and the cloth each part owns.
+    if (const auto* cloth = static_cast<const CPhysicsCloth*>(c->Object.m_pCloth))
+    {
+        for (int i = 0; i < c->Object.m_byNumCloth; ++i)
+            RecordCloth(r, &cloth[i]);
+    }
+    const auto partCloth = [&r](const PART_t& part)
+    {
+        for (int i = 0; i < part.m_byNumCloth && i < 2; ++i)
+        {
+            if (part.m_pCloth[i] != nullptr)
+                RecordCloth(r, static_cast<const CPhysicsCloth*>(part.m_pCloth[i]));
+        }
+    };
+    for (const PART_t& part : c->BodyPart)
+        partCloth(part);
+    for (const PART_t& part : c->Weapon)
+        partCloth(part);
+    partCloth(c->Wing);
+    partCloth(c->Helper);
+}
+
+// What the update keeps for the whole world: terrain collision, the frame's terrain light and light history, and
+// Dark Side's skill state.
+void RecordWorld(Recorder& r)
+{
+    constexpr int cells = TERRAIN_SIZE * TERRAIN_SIZE;
+    Fnv1aHash walls;
+    Fnv1aHash light;
+    for (int i = 0; i < cells; ++i)
+    {
+        walls.Add(TerrainWall[i]);
+        for (const float channel : PrimaryTerrainLight[i])
+            light.Add(channel);
+    }
+    RecordHash(r, TerrainWall, "terrain walls", walls.Value());
+    RecordHash(r, PrimaryTerrainLight, "terrain light", light.Value());
+    RecordHash(r, &Render::Lighting::FrameLightHistory(), "light history",
+               Render::Lighting::FrameLightHistory().StateHash());
+    RecordHash(r, &g_CMonkSystem, "dark side", g_CMonkSystem.DarksideStateHash());
 }
 
 void Record(Recorder& r, const PARTICLE* p)
@@ -213,8 +372,19 @@ void Snapshot(std::unordered_map<const void*, Entry>& into)
 {
     into.clear();
     Recorder r(into);
-    for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
+    for (int i = 0; CharactersClient != nullptr && i < MAX_CHARACTERS_CLIENT; ++i)
+    {
         Record(r, &CharactersClient[i].Object, "character");
+        Record(r, &CharactersClient[i]);
+    }
+    Engine::Object::Attachments::ForEachTracked(
+        [&r](const CHARACTER* preview)
+        {
+            Record(r, &preview->Object, "preview");
+            Record(r, preview);
+        });
+    for (int i = 0; i < MAX_SPRITES; ++i)
+        Record(r, &Sprites[i], "sprite");
     for (int i = 0; i < MAX_EFFECTS; ++i)
         Record(r, &Effects[i], "effect");
     for (int i = 0; i < g_SkillEffects.GetSize(); ++i)
@@ -237,6 +407,7 @@ void Snapshot(std::unordered_map<const void*, Entry>& into)
     for (int i = 0; i < MAX_JOINTS; ++i)
         Record(r, &Joints[i]);
     RecordView(r);
+    RecordWorld(r);
 }
 
 bool s_listing = false;
@@ -244,6 +415,8 @@ int s_draws = 0;
 std::unordered_map<const void*, Entry> s_before;
 std::unordered_map<const void*, Entry> s_after;
 std::map<std::string, int> s_counts;
+// The engine is compared whole; copying it draws nothing from it.
+std::mt19937 s_engine;
 
 void Count(const Entry& e, const char* field)
 {
@@ -253,8 +426,10 @@ void Count(const Entry& e, const char* field)
 
 void BeforeDraw()
 {
-    if (s_listing)
-        Snapshot(s_before);
+    if (!s_listing)
+        return;
+    Snapshot(s_before);
+    s_engine = Random::Snapshot();
 }
 
 void AfterDraw()
@@ -262,6 +437,8 @@ void AfterDraw()
     if (!s_listing)
         return;
     ++s_draws;
+    if (Random::Snapshot() != s_engine)
+        ++s_counts["random engine"];
     Snapshot(s_after);
     for (const auto& [key, after] : s_after)
     {

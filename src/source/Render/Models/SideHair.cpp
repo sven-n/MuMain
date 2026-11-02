@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -109,7 +110,7 @@ void CSideHair::RenderLine(vec3_t v1, vec3_t v2, vec3_t c1, vec3_t c2)
     VectorSubtract(p1, d, p1);
     VectorAdd(p2, d, p2);
 
-    float fTextureV = (float)(rand() % 100) * 0.01f;
+    float fTextureV = (float)(Random::DrawRand(v1, 1) % 100) * 0.01f;
     BindTexture(BITMAP_ROBE + 4);
     EnableAlphaBlendMinus();
     vec3_t vOrtho;
