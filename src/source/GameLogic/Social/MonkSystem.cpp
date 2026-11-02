@@ -977,35 +977,20 @@ void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, vec3_t light
 
     if (const std::vector<DarksidePlacement>* placements = DarksidePlacementsOf(pCha, key != nullptr ? key : pPart))
     {
-        // Each placement is posed into bones of its own: the character keeps its pose for the rest of its draw.
-        static vec34_t bones[MAX_BONES];
-        vec34_t* const ownBones = pObj->BoneTransform;
-        const unsigned short action = pObj->CurrentAction;
-        const float alpha = pObj->Alpha;
-        const float animationFrame = pObj->AnimationFrame;
-        vec3_t position, startPosition, angle;
-        VectorCopy(pObj->Position, position);
-        VectorCopy(pObj->StartPosition, startPosition);
-        VectorCopy(pObj->Angle, angle);
+        // Each placement is drawn from a copy of the character, posed for it; the character stays as it stands.
+        OBJECT ghost = *pObj;
         for (const DarksidePlacement& at : *placements)
         {
-            VectorCopy(at.position, pObj->Position);
-            VectorCopy(at.startPosition, pObj->StartPosition);
-            VectorCopy(at.angle, pObj->Angle);
-            pObj->Alpha = at.alpha;
-            pObj->AnimationFrame = at.animationFrame;
-            pObj->CurrentAction = PLAYER_SKILL_DARKSIDE_ATTACK;
-            Calc_ObjectAnimationInto(pObj, Translate, bones);
-            pObj->BoneTransform = bones;
-            render();
-            pObj->BoneTransform = ownBones;
+            VectorCopy(at.position, ghost.Position);
+            VectorCopy(at.startPosition, ghost.StartPosition);
+            VectorCopy(at.angle, ghost.Angle);
+            ghost.Alpha = at.alpha;
+            ghost.AnimationFrame = at.animationFrame;
+            ghost.CurrentAction = PLAYER_SKILL_DARKSIDE_ATTACK;
+            Calc_ObjectAnimation(&ghost, Translate, Select);
+            RenderPartObject(&ghost, Type, pPart, light, ghost.Alpha, pPart->Level, pPart->ExcellentFlags,
+                             pPart->AncientDiscriminator, false, false, Translate, Select);
         }
-        pObj->CurrentAction = action;
-        pObj->Alpha = alpha;
-        pObj->AnimationFrame = animationFrame;
-        VectorCopy(position, pObj->Position);
-        VectorCopy(startPosition, pObj->StartPosition);
-        VectorCopy(angle, pObj->Angle);
     }
     render();
 }

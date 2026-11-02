@@ -184,9 +184,6 @@ bool Calc_ObjectAnimation(const OBJECT* o, bool Translate, int Select);
 // The bones `o` is drawn with this frame: those a draw posed it into when the update's pose was not current,
 // otherwise its own. For the draw only.
 [[nodiscard]] vec34_t* DrawnPose(const OBJECT* o);
-// Calc_ObjectAnimation's pose into the caller's bones, for a draw that shows the object where it does not stand; the
-// object keeps its own pose.
-bool Calc_ObjectAnimationInto(OBJECT* o, bool Translate, vec34_t* bones);
 void Draw_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon, const ObjectGhost* ghost = nullptr);
 
 bool IsPartyMemberBuff(int partyindex, eBuffState buffstate);

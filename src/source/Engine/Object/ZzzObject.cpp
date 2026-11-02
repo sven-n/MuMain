@@ -470,23 +470,6 @@ bool Calc_ObjectAnimation(const OBJECT* o, bool Translate, int Select)
     return true;
 }
 
-bool Calc_ObjectAnimationInto(OBJECT* o, bool Translate, vec34_t* bones)
-{
-    if (o->Alpha < 0.01f)
-        return false;
-
-    BMD* b = &Models[o->Type];
-    b->BodyHeight = 0.f;
-    b->ContrastEnable = o->ContrastEnable;
-    BodyLight(o, b);
-    b->BodyScale = o->Scale;
-    b->CurrentAction = o->CurrentAction;
-    VectorCopy(o->Position, b->BodyOrigin);
-    b->Animation(bones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false,
-                 !Translate);
-    return true;
-}
-
 // Lost Tower blocks carry a fire layer: BITMAP_CHROME tinted orange, with the
 // texture streaming on one mesh. The look players know shows that fire only
 // through the alpha holes of the strip texture. Drawing the layer as an opaque
@@ -3449,53 +3432,32 @@ void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, vec3_t light, bo
                                 float AniInterval1, float AniInterval2)
 {
     OBJECT* pObj = &pCha->Object;
-    float fAnimationFrame = pObj->AnimationFrame;
-    // The ghosts borrow the character's alpha; the part itself is drawn at, and keeps, the alpha it came with.
-    const float alpha = pObj->Alpha;
-    float fAni1, fAni2;
-    int Type = pPart->Type;
-
-    fAni1 = (float)(fAnimationFrame - AniInterval1);
-    fAni2 = (float)(fAnimationFrame - AniInterval2);
-
-    vec3_t vPos, vStartPos, vOrgPos;
-    VectorCopy(pObj->Position, vOrgPos);
-    VectorCopy(pObj->Position, vPos);
-    VectorCopy(pObj->StartPosition, vStartPos);
-    VectorSubtract(vPos, vStartPos, vPos);
-    float fDis = fAni1 / Models[pObj->Type].Actions[pObj->CurrentAction].NumAnimationKeys;
-
-    if (fAni1 > 0.0f)
+    const int Type = pPart->Type;
+    const float keys = Models[pObj->Type].Actions[pObj->CurrentAction].NumAnimationKeys;
+    // Two ghosts on the way from where the move started, at earlier frames and fainter, drawn from a copy of the
+    // character; then the part as it stands.
+    struct Ghost
     {
-        pObj->Alpha = 0.3f;
-        pObj->AnimationFrame = fAni1;
-        VectorScale(vPos, fDis, vPos);
-        VectorAdd(vStartPos, vPos, vPos);
-        VectorCopy(vPos, pObj->Position);
-        Calc_ObjectAnimation(pObj, Translate, Select);
-        RenderPartObject(pObj, Type, pPart, light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
+        float alpha;
+        float interval;
+    };
+    const Ghost ghosts[] = {{0.3f, AniInterval1}, {0.5f, AniInterval2}};
+    OBJECT ghost = *pObj;
+    for (const Ghost& g : ghosts)
+    {
+        const float frame = pObj->AnimationFrame - g.interval;
+        if (frame <= 0.0f)
+            continue;
+        vec3_t travel;
+        VectorSubtract(pObj->Position, pObj->StartPosition, travel);
+        VectorScale(travel, frame / keys, travel);
+        VectorAdd(pObj->StartPosition, travel, ghost.Position);
+        ghost.Alpha = g.alpha;
+        ghost.AnimationFrame = frame;
+        Calc_ObjectAnimation(&ghost, Translate, Select);
+        RenderPartObject(&ghost, Type, pPart, light, ghost.Alpha, pPart->Level, pPart->ExcellentFlags,
                          pPart->AncientDiscriminator, false, false, Translate, Select);
     }
-
-    VectorCopy(vOrgPos, vPos);
-    VectorCopy(pObj->StartPosition, vStartPos);
-    VectorSubtract(vPos, vStartPos, vPos);
-    if (fAni2 > 0.0f)
-    {
-        fDis = fAni2 / Models[pObj->Type].Actions[pObj->CurrentAction].NumAnimationKeys;
-        pObj->Alpha = 0.5f;
-        pObj->AnimationFrame = fAni2;
-        VectorScale(vPos, fDis, vPos);
-        VectorAdd(vStartPos, vPos, vPos);
-        VectorCopy(vPos, pObj->Position);
-        Calc_ObjectAnimation(pObj, Translate, Select);
-        RenderPartObject(pObj, Type, pPart, light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
-                         pPart->AncientDiscriminator, false, false, Translate, Select);
-    }
-
-    VectorCopy(vOrgPos, pObj->Position);
-    pObj->Alpha = alpha;
-    pObj->AnimationFrame = fAnimationFrame;
     Calc_ObjectAnimation(pObj, Translate, Select);
     RenderPartObject(pObj, Type, pPart, light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
                      pPart->AncientDiscriminator, false, false, Translate, Select);
