@@ -32,6 +32,9 @@ struct MonsterSound
     int channels = DefaultSoundChannels;
     // Played in 3D, louder near the hero.
     bool spatial = false;
+    // What the Sound Editor shows instead of the set and file (sound editor
+    // design, Q-SE1); "" for none. The game reads and ignores it.
+    std::string name;
 
     bool operator==(const MonsterSound&) const = default;
 };

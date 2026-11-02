@@ -28,6 +28,7 @@ struct ToolWindows
     bool monsterSounds = false;
     bool dataChecks = false;
     bool soundMixer = false;
+    bool soundEditor = false;
     bool serverList = false;
     bool skillEditor = false;
     bool devEditor = false;

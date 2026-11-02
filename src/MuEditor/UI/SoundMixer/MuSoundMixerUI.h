@@ -68,6 +68,8 @@ struct HeardRow
 {
     Audio::Mixer::HeardSound sound;
     std::string file;
+    // The name the Sound Editor gave the sound (Q-SE1); "" for none.
+    std::string name;
     std::string source;
     float length = 0.0f;
     bool playing = false;
@@ -138,6 +140,13 @@ std::string SourceText(const Audio::Mixer::HeardSound& sound);
 
 // The file a heard sound plays below Data/Sound, or its number.
 std::string SoundText(int number);
+
+// What the mixer and the overlay show for a sound: the name the Sound Editor
+// gave it (Q-SE1), else SoundText.
+std::string ShownSoundText(int number);
+
+// A row's Sound cell text: its name, else its file.
+const std::string& CellText(const HeardRow& row);
 
 // The tooltip of a row's Sound cell: the sound's number and that a click
 // copies the file, or, once `copied` is the row's sound, that it was.

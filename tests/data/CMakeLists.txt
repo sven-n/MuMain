@@ -66,6 +66,17 @@ target_compile_definitions(sound_data_tests PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
+# The editor's Sound Editor: its rows, changes, names, file picker and window.
+# The window needs the client globals of Winmain.cpp.
+mu_add_test(
+    NAME sound_editor_tests
+    SOURCES
+        test_sound_editor.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
 # The editor's Sound Mixer: its rules, sources, heard list and window. The
 # window needs the client globals of Winmain.cpp.
 mu_add_test(

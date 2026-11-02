@@ -3742,6 +3742,87 @@
   <data name="Sound mixer title" xml:space="preserve">
     <value>Sound Mixer</value>
   </data>
+  <data name="Sound editor title" xml:space="preserve">
+    <value>Sound Editor</value>
+  </data>
+  <data name="Sound editor note" xml:space="preserve">
+    <value>Every sound the game loads: the code's (Data/Audio/SoundFiles.json), the monster sound sets' (Data/Monsters/Sounds.json) and the map object sounds (Data/Maps/ObjectSounds.json). A name, file, channels or 3D changed here reaches the game at once; Save writes the files that changed. Files are picked from Data/Sound, which is never changed.</value>
+  </data>
+  <data name="Sound editor at start" xml:space="preserve">
+    <value>at start</value>
+  </data>
+  <data name="Sound editor not loaded yet" xml:space="preserve">
+    <value>not loaded yet</value>
+  </data>
+  <data name="Sound editor with its monster" xml:space="preserve">
+    <value>with its monster</value>
+  </data>
+  <data name="Sound editor nothing loads it" xml:space="preserve">
+    <value>nothing loads it</value>
+  </data>
+  <data name="Sound editor step {0}" xml:space="preserve">
+    <value>Sound {0}</value>
+  </data>
+  <data name="Sound editor filter hint" xml:space="preserve">
+    <value>Name, id or file</value>
+  </data>
+  <data name="Sound editor only problems {0}" xml:space="preserve">
+    <value>Only problems ({0})</value>
+  </data>
+  <data name="Sound editor shown {0} {1}" xml:space="preserve">
+    <value>{0} of {1} shown</value>
+  </data>
+  <data name="Sound editor column name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Sound editor column id" xml:space="preserve">
+    <value>Id or set</value>
+  </data>
+  <data name="Sound editor column file" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Sound editor column channels" xml:space="preserve">
+    <value>Ch</value>
+  </data>
+  <data name="Sound editor column 3D" xml:space="preserve">
+    <value>3D</value>
+  </data>
+  <data name="Sound editor column loads" xml:space="preserve">
+    <value>Loads</value>
+  </data>
+  <data name="Sound editor column lives in" xml:space="preserve">
+    <value>Lives in</value>
+  </data>
+  <data name="Sound editor channels tip" xml:space="preserve">
+    <value>Channels: how many copies of the sound play at once (1 to 4).</value>
+  </data>
+  <data name="Sound editor 3D tip" xml:space="preserve">
+    <value>Placed in 3D at the object it plays at.</value>
+  </data>
+  <data name="Sound editor pick tip" xml:space="preserve">
+    <value>Pick another file from Data/Sound; play one first with its play button.</value>
+  </data>
+  <data name="Sound editor pick for {0}" xml:space="preserve">
+    <value>A file for {0}</value>
+  </data>
+  <data name="Sound editor files {0} {1}" xml:space="preserve">
+    <value>{0} of {1} files</value>
+  </data>
+  <data name="Sound editor missing file" xml:space="preserve">
+    <value>The file is not in the client folder: the sound is silent.</value>
+  </data>
+  <data name="Sound editor shared file" xml:space="preserve">
+    <value>Another sound of the code loads this file too.</value>
+  </data>
+  <data name="Sound editor played not loaded" xml:space="preserve">
+    <value>The game played this sound, but nothing loads it: it is silent.</value>
+  </data>
+  <data name="Sound editor saved" xml:space="preserve">
+    <value>Saved.</value>
+  </data>
+  <data name="Sound editor reverted" xml:space="preserve">
+    <value>Read again from the files.</value>
+  </data>
   <data name="Sound mixer nothing changed" xml:space="preserve">
     <value>All sounds as normal</value>
   </data>
@@ -3813,6 +3894,9 @@
   </data>
   <data name="Sound mixer copy tip {0}" xml:space="preserve">
     <value>#{0}, click to copy the name</value>
+  </data>
+  <data name="Sound mixer copy named tip {0} {1}" xml:space="preserve">
+    <value>#{0}, {1}, click to copy the file name</value>
   </data>
   <data name="Sound mixer copied {0}" xml:space="preserve">
     <value>Copied: {0}</value>

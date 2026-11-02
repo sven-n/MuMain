@@ -18,6 +18,7 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Camera/CameraState.h"
 #include "Core/Platform/IPlatformAudio.h"
+#include "Data/GameData/SoundData/SoundFileDatabase.h"
 #include "TestImGuiContext.h"
 #include "UI/Common/MuEditorToolWindows.h"
 #include "UI/SoundMixer/MuSoundMixerUI.h"
@@ -1248,6 +1249,48 @@ TEST_CASE("Sound Mixer: a click on a Sound cell copies its file, the tooltip say
     // The other number of the file was not copied.
     CHECK(MuEditor::SoundMixer::SoundCellTip(energy, copied) == "#120, click to copy the name");
     ImGui::GetPlatformIO().Platform_SetClipboardTextFn = nullptr;
+}
+
+TEST_CASE("Sound Mixer: a sound the Sound Editor named shows its name in its cell, the overlay and the log, is "
+          "found and sorted by it and still copies its file (Q-SE1) [audio][mixer][editor]")
+{
+    MixerScope scope;
+    using namespace MuEditor::SoundMixer;
+    const std::vector<Data::Sounds::SoundFile> previous = g_SoundFileDatabase.GetAll();
+    Data::Sounds::SoundFile click;
+    click.id = "SOUND_CLICK01";
+    click.number = static_cast<int>(SOUND_CLICK01);
+    click.name = "Button click";
+    click.file = "Data/Sound/iButtonClick.wav";
+    g_SoundFileDatabase.Build(std::vector<Data::Sounds::SoundFile>{click});
+    ForgetLoadedSounds();
+    LoadWaveFile(SOUND_CLICK01, L"Data\\Sound\\iButtonClick.wav", 1);
+    HeardSound heard;
+    heard.number = static_cast<int>(SOUND_CLICK01);
+    const HeardRow row = MakeRow(heard);
+    CHECK(row.name == "Button click");
+    CHECK(row.file == "ibuttonclick.wav");
+    CHECK(CellText(row) == "Button click");
+    CHECK(SoundCellTip(row, -1) ==
+          "#" + std::to_string(SOUND_CLICK01) + ", ibuttonclick.wav, click to copy the file name");
+    CHECK(SoundCellTip(row, row.sound.number) == "Copied: ibuttonclick.wav");
+    CHECK(ShownSoundText(SOUND_CLICK01) == "Button click");
+    CHECK(ShownSoundText(SOUND_RAIN01) == SoundText(SOUND_RAIN01));
+    HeardFilter filter;
+    filter.text = "BUTTON";
+    CHECK(Passes(row, filter));
+    filter.text = "ibuttonclick";
+    CHECK(Passes(row, filter));
+    Audio::Mixer::PlacelessStart start{static_cast<int>(SOUND_CLICK01), SoundKind::Interface, {}, false, 10.0};
+    CHECK(MuEditor::SoundOverlay::LogText(start, 10.2) == "0.2 s  Button click (Interface)");
+    // Sorted by what the cell shows.
+    HeardRow other = Row(5, "aaa.wav", "", 0);
+    other.name = "Zebra";
+    std::vector<HeardRow> rows{other, row};
+    SortRows(rows, HeardSort{HeardColumn::Sound, false}, 0.0);
+    CHECK(rows[0].name == "Button click");
+    ForgetLoadedSounds();
+    g_SoundFileDatabase.Build(previous);
 }
 
 TEST_CASE("Sound Mixer: the window draws its kinds and the sounds heard, the reminder opens it (Q-SM1, Q-SM5) "

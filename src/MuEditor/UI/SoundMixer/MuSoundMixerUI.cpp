@@ -6,6 +6,7 @@
 
 #include "MuSoundOverlay.h"
 
+#include "../MuEditor/UI/SoundEditor/SoundEditorRows.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "../MuEditor/UI/Common/MuEditorToolWindows.h"
@@ -515,11 +516,26 @@ std::string SoundText(int number)
     return file;
 }
 
+std::string ShownSoundText(int number)
+{
+    std::string name = MuEditor::SoundEditor::NameOfNumber(number);
+    return name.empty() ? SoundText(number) : name;
+}
+
+const std::string& CellText(const HeardRow& row)
+{
+    return row.name.empty() ? row.file : row.name;
+}
+
 std::string SoundCellTip(const HeardRow& row, int copied)
 {
     if (copied == row.sound.number)
     {
         return I18N::Format(I18N::Editor::SoundMixerCopied0, {row.file});
+    }
+    if (!row.name.empty())
+    {
+        return I18N::Format(I18N::Editor::SoundMixerCopyNamedTip01, {std::to_string(row.sound.number), row.file});
     }
     return I18N::Format(I18N::Editor::SoundMixerCopyTip0, {std::to_string(row.sound.number)});
 }
@@ -564,7 +580,7 @@ bool RenderSoundCell(const HeardRow& row, int& copied)
 {
     // Two numbers can load the same file.
     ImGui::PushID(row.sound.number);
-    const bool clicked = ImGui::Selectable(row.file.c_str());
+    const bool clicked = ImGui::Selectable(CellText(row).c_str());
     ImGui::PopID();
     if (clicked)
     {
@@ -588,6 +604,7 @@ HeardRow MakeRow(const Audio::Mixer::HeardSound& sound)
     HeardRow row;
     row.sound = sound;
     row.file = SoundText(sound.number);
+    row.name = MuEditor::SoundEditor::NameOfNumber(sound.number);
     row.source = SourceText(sound);
     row.length = LengthOf(sound.number);
     row.playing = IsPlaying(sound.number);
@@ -600,7 +617,8 @@ bool Passes(const HeardRow& row, const HeardFilter& filter)
     if (!filter.text.empty())
     {
         const std::string text = Lowered(filter.text);
-        if (Lowered(row.file).find(text) == std::string::npos && Lowered(row.source).find(text) == std::string::npos)
+        if (Lowered(row.file).find(text) == std::string::npos && Lowered(row.name).find(text) == std::string::npos &&
+            Lowered(row.source).find(text) == std::string::npos)
         {
             return false;
         }
@@ -641,7 +659,7 @@ void SortRows(std::vector<HeardRow>& rows, const HeardSort& sort, double now)
         switch (column)
         {
         case HeardColumn::Sound:
-            return Lowered(left.file) < Lowered(right.file);
+            return Lowered(CellText(left)) < Lowered(CellText(right));
         case HeardColumn::Source:
             return Lowered(left.source) < Lowered(right.source);
         case HeardColumn::Plays:

@@ -24,6 +24,7 @@ constexpr const char* Maps = "maps";
 constexpr const char* Objects = "objects";
 constexpr const char* Sound = "sound";
 constexpr const char* File = "file";
+constexpr const char* Name = "name";
 constexpr const char* Channels = "channels";
 constexpr const char* Plays = "plays";
 } // namespace Keys
@@ -31,7 +32,7 @@ constexpr const char* Plays = "plays";
 constexpr const char* WhileInView = "whileInView";
 
 const Items::Json::KeySet EntryKeys{Keys::Maps, Keys::Objects, Keys::Sound, Keys::Plays};
-const Items::Json::KeySet SoundKeys{Keys::File, Keys::Channels};
+const Items::Json::KeySet SoundKeys{Keys::File, Keys::Channels, Keys::Name};
 
 void AddIssue(std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity severity, const std::string& source,
               const std::string& field, const std::string& message)
@@ -144,6 +145,14 @@ private:
             }
             sound.channels = *count;
         }
+        if (const auto name = json.find(Keys::Name); name != json.end())
+        {
+            if (!name->is_string())
+            {
+                return Fail(key + "." + Keys::Name, "must be a text");
+            }
+            sound.name = name->get<std::string>();
+        }
         Items::Json::WarnAboutUnknownKeys(
             json, SoundKeys, MapObjectSoundField(m_index, key) + ".",
             [&](const std::string& field, const std::string& message)
@@ -191,6 +200,10 @@ OrderedJson WriteEntry(const MapObjectSound& sound)
     OrderedJson file = OrderedJson::object();
     file[Keys::File] = sound.file;
     file[Keys::Channels] = sound.channels;
+    if (!sound.name.empty())
+    {
+        file[Keys::Name] = sound.name;
+    }
     json[Keys::Sound] = std::move(file);
     json[Keys::Plays] = WhileInView;
     return json;

@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/MapObjectSounds.h"
+#include "Audio/SoundLoads.h"
 #include "Camera/CameraMove.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Audio/DSPlaySound.h"
@@ -37,6 +38,8 @@ CMapManager::~CMapManager() // OK
 
 void CMapManager::Load() // OK
 {
+    // The Sound Editor shows which map loaded a sound.
+    const Audio::SoundLoads::ScopedLoadWhere loadsFor(gMapManager.WorldActive);
     int i;
     bool Temp = true;
 

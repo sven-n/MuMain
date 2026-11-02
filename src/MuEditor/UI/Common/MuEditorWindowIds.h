@@ -29,6 +29,7 @@ inline constexpr char ItemTranslations[] = "###ItemTranslations";
 inline constexpr char ServerList[] = "###ServerList";
 inline constexpr char DataChecks[] = "###DataChecks";
 inline constexpr char SoundMixer[] = "###SoundMixer";
+inline constexpr char SoundEditor[] = "###SoundEditor";
 inline constexpr char MonsterBrowser[] = "###MonsterBrowser";
 inline constexpr char MonsterTranslations[] = "###MonsterTranslations";
 inline constexpr char MonsterModel[] = "###MonsterModel";

@@ -22,6 +22,7 @@
 #include "Data/GameData/SoundData/SoundFileDatabase.h"
 #ifdef _EDITOR
 #include "Audio/EditorSoundMute.h"
+#include "Audio/SoundLoads.h"
 #include "Audio/SoundMixer.h"
 #include "Audio/SoundPlaces.h"
 #endif
@@ -88,6 +89,9 @@ void LoadGameSound(ESound bufferId)
     std::wstring file = Core::Text::FromUtf8(sound->file.c_str());
     std::replace(file.begin(), file.end(), L'/', L'\\');
     LoadWaveFile(bufferId, file.c_str(), sound->channels, sound->spatial);
+#ifdef _EDITOR
+    Audio::SoundLoads::NoteLoad(static_cast<int>(bufferId));
+#endif
 }
 
 bool IsSoundLoaded(ESound bufferId, const wchar_t* filename, int maxChannel, bool enable3D)
@@ -146,6 +150,11 @@ HRESULT PlayBuffer(ESound bufferId, OBJECT* object, BOOL looped)
     // Nothing started; no caller reads the result.
     if (Audio::EditorMute::IsMuted() && looped == FALSE)
         return S_FALSE;
+    // A sound nothing loaded is silent: the Sound Editor lists it.
+    if (!LoadedSounds().contains(static_cast<int>(bufferId)))
+    {
+        Audio::SoundLoads::NotePlayedUnloaded(static_cast<int>(bufferId));
+    }
     NoteForMixer(bufferId, looped != FALSE, object);
 #endif
     HRESULT result = E_FAIL;

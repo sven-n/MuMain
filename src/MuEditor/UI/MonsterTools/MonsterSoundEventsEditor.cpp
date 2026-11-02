@@ -151,14 +151,33 @@ bool SoundCombo(const char* id, const MonsterSoundSet& set, std::string& value, 
 {
     bool picked = false;
     ImGui::SetNextItemWidth(width);
-    if (ImGui::BeginCombo(id, value.c_str()))
+    // A sound the Sound Editor named shows its name, its id or file after it
+    // (Q-SE1).
+    const auto labelOf = [](const MonsterSound& sound)
+    {
+        const std::string& name = Data::Monsters::SoundNameOf(sound);
+        return sound.name.empty() ? name : sound.name + " (" + name + ")";
+    };
+    std::string shown = value;
+    for (const MonsterSound& sound : set.sounds)
+    {
+        if (Data::Monsters::SoundNameOf(sound) == value)
+        {
+            shown = labelOf(sound);
+        }
+    }
+    if (ImGui::BeginCombo(id, shown.c_str()))
     {
         bool listed = false;
-        for (const MonsterSound& sound : set.sounds)
+        for (size_t index = 0; index < set.sounds.size(); ++index)
         {
+            const MonsterSound& sound = set.sounds[index];
             const std::string& name = Data::Monsters::SoundNameOf(sound);
             listed = listed || name == value;
-            if (ImGui::Selectable(name.c_str(), name == value) && name != value)
+            ImGui::PushID(static_cast<int>(index));
+            const bool chosen = ImGui::Selectable(labelOf(sound).c_str(), name == value);
+            ImGui::PopID();
+            if (chosen && name != value)
             {
                 value = name;
                 picked = true;

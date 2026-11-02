@@ -3523,6 +3523,87 @@
   <data name="Sound mixer title" xml:space="preserve">
     <value>Sound-Mixer</value>
   </data>
+  <data name="Sound editor title" xml:space="preserve">
+    <value>Sound-Editor</value>
+  </data>
+  <data name="Sound editor note" xml:space="preserve">
+    <value>Jedes Geräusch, das das Spiel lädt: die des Codes (Data/Audio/SoundFiles.json), die der Monster-Geräuschsätze (Data/Monsters/Sounds.json) und die Geräusche der Kartenobjekte (Data/Maps/ObjectSounds.json). Ein hier geänderter Name, eine Datei, Kanäle oder 3D wirken sofort im Spiel; Speichern schreibt die geänderten Dateien. Dateien werden aus Data/Sound gewählt, das nie geändert wird.</value>
+  </data>
+  <data name="Sound editor at start" xml:space="preserve">
+    <value>beim Start</value>
+  </data>
+  <data name="Sound editor not loaded yet" xml:space="preserve">
+    <value>noch nicht geladen</value>
+  </data>
+  <data name="Sound editor with its monster" xml:space="preserve">
+    <value>mit seinem Monster</value>
+  </data>
+  <data name="Sound editor nothing loads it" xml:space="preserve">
+    <value>nichts lädt es</value>
+  </data>
+  <data name="Sound editor step {0}" xml:space="preserve">
+    <value>Geräusch {0}</value>
+  </data>
+  <data name="Sound editor filter hint" xml:space="preserve">
+    <value>Name, ID oder Datei</value>
+  </data>
+  <data name="Sound editor only problems {0}" xml:space="preserve">
+    <value>Nur Probleme ({0})</value>
+  </data>
+  <data name="Sound editor shown {0} {1}" xml:space="preserve">
+    <value>{0} von {1} gezeigt</value>
+  </data>
+  <data name="Sound editor column name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="Sound editor column id" xml:space="preserve">
+    <value>ID oder Satz</value>
+  </data>
+  <data name="Sound editor column file" xml:space="preserve">
+    <value>Datei</value>
+  </data>
+  <data name="Sound editor column channels" xml:space="preserve">
+    <value>Kan.</value>
+  </data>
+  <data name="Sound editor column 3D" xml:space="preserve">
+    <value>3D</value>
+  </data>
+  <data name="Sound editor column loads" xml:space="preserve">
+    <value>Lädt</value>
+  </data>
+  <data name="Sound editor column lives in" xml:space="preserve">
+    <value>Steht in</value>
+  </data>
+  <data name="Sound editor channels tip" xml:space="preserve">
+    <value>Kanäle: wie viele Kopien des Geräuschs zugleich spielen (1 bis 4).</value>
+  </data>
+  <data name="Sound editor 3D tip" xml:space="preserve">
+    <value>In 3D an dem Objekt platziert, an dem es spielt.</value>
+  </data>
+  <data name="Sound editor pick tip" xml:space="preserve">
+    <value>Eine andere Datei aus Data/Sound wählen; mit ihrem Abspielknopf vorher anhören.</value>
+  </data>
+  <data name="Sound editor pick for {0}" xml:space="preserve">
+    <value>Eine Datei für {0}</value>
+  </data>
+  <data name="Sound editor files {0} {1}" xml:space="preserve">
+    <value>{0} von {1} Dateien</value>
+  </data>
+  <data name="Sound editor missing file" xml:space="preserve">
+    <value>Die Datei ist nicht im Client-Ordner: das Geräusch ist stumm.</value>
+  </data>
+  <data name="Sound editor shared file" xml:space="preserve">
+    <value>Ein anderes Geräusch des Codes lädt diese Datei auch.</value>
+  </data>
+  <data name="Sound editor played not loaded" xml:space="preserve">
+    <value>Das Spiel hat dieses Geräusch gespielt, aber nichts lädt es: es ist stumm.</value>
+  </data>
+  <data name="Sound editor saved" xml:space="preserve">
+    <value>Gespeichert.</value>
+  </data>
+  <data name="Sound editor reverted" xml:space="preserve">
+    <value>Neu aus den Dateien gelesen.</value>
+  </data>
   <data name="Sound mixer nothing changed" xml:space="preserve">
     <value>Alle Geräusche wie gewohnt</value>
   </data>
@@ -3594,6 +3675,9 @@
   </data>
   <data name="Sound mixer copy tip {0}" xml:space="preserve">
     <value>#{0}, Klick kopiert den Namen</value>
+  </data>
+  <data name="Sound mixer copy named tip {0} {1}" xml:space="preserve">
+    <value>#{0}, {1}, Klick kopiert den Dateinamen</value>
   </data>
   <data name="Sound mixer copied {0}" xml:space="preserve">
     <value>Kopiert: {0}</value>

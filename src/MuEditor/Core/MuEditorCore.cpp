@@ -56,6 +56,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "World/MapInfra/MapManager.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "UI/SoundEditor/MuSoundEditorUI.h"
 #include "UI/SoundMixer/MuSoundMixerUI.h"
 
 namespace mu
@@ -950,6 +951,10 @@ void CMuEditorCore::Render()
         if (m_windows.soundMixer)
         {
             g_MuSoundMixerUI.Render(&m_windows.soundMixer);
+        }
+        if (m_windows.soundEditor)
+        {
+            g_MuSoundEditorUI.Render(&m_windows.soundEditor);
         }
 
         // Render console (if enabled)

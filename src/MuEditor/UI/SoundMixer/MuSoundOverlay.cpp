@@ -167,7 +167,7 @@ void DrawSource(ImDrawList& list, const Projector& projector, const DrawnSource&
     std::string label = source.name;
     if (mapObject)
     {
-        label = MuEditor::SoundMixer::SoundText(source.soundNumber);
+        label = MuEditor::SoundMixer::ShownSoundText(source.soundNumber);
     }
     else if (source.inner <= 0.0f)
     {
@@ -201,7 +201,7 @@ void DrawCodeMarker(ImDrawList& list, const Projector& projector, const MuEditor
     std::string label;
     for (const int sound : marker.sounds)
     {
-        label += (label.empty() ? "" : ", ") + MuEditor::SoundMixer::SoundText(sound);
+        label += (label.empty() ? "" : ", ") + MuEditor::SoundMixer::ShownSoundText(sound);
     }
     DrawLabel(list, point, label, MuEditor::SoundOverlay::LabelLine::Below);
 }
@@ -387,7 +387,7 @@ std::string LogText(const Audio::Mixer::PlacelessStart& start, double now)
         return I18N::Format(I18N::Editor::SoundMixerLogMusic01, {ago, MusicText(start.music)});
     }
     return I18N::Format(start.looped ? I18N::Editor::SoundMixerLogLoop012 : I18N::Editor::SoundMixerLog012,
-                        {ago, SoundMixer::SoundText(start.number), SoundMixer::KindName(start.kind)});
+                        {ago, SoundMixer::ShownSoundText(start.number), SoundMixer::KindName(start.kind)});
 }
 
 void Render(const std::vector<SoundMixer::HeardRow>& shown, bool filtered, const SoundMixer::HeardRow* hovered)

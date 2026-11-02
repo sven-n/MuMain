@@ -51,7 +51,7 @@ constexpr const char* OldNotSubType = "notSubType";
 } // namespace Keys
 
 const KeySet SetKeys{Keys::Name, Keys::Sounds, Keys::SoundEvents, Keys::Maps};
-const KeySet SoundKeys{Keys::File, Keys::Id, Keys::Channels, Keys::Spatial};
+const KeySet SoundKeys{Keys::File, Keys::Id, Keys::Channels, Keys::Spatial, Keys::Name};
 // With the old keys: the reader refuses them, they are not unknown.
 const KeySet SoundEventKeys{Keys::Animations,    Keys::On,         Keys::Cues,       Keys::During,
                             Keys::Once,          Keys::DuringCues, Keys::Timers,     Keys::DeathEffectArmed,
@@ -169,6 +169,11 @@ void ReadSounds(const OrderedJson& json, std::vector<MonsterSound>& sounds, Entr
                 return;
             }
             sound.spatial = spatial->get<bool>();
+        }
+        if (const auto name = entry.find(Keys::Name);
+            name != entry.end() && !Json::ReadText(*name, key + "." + Keys::Name, sound.name, issues))
+        {
+            return;
         }
         issues.WarnAboutUnknownKeys(entry, SoundKeys, key + ".");
         sounds.push_back(std::move(sound));
@@ -500,6 +505,10 @@ OrderedJson WriteSound(const MonsterSound& sound)
     }
     json[Keys::Channels] = sound.channels;
     json[Keys::Spatial] = sound.spatial;
+    if (!sound.name.empty())
+    {
+        json[Keys::Name] = sound.name;
+    }
     return json;
 }
 

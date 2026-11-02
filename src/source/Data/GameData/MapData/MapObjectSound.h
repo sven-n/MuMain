@@ -39,6 +39,9 @@ struct MapObjectSound
     // (Audio/SoundNumbers.h).
     std::string file;
     int channels = 1;
+    // What the Sound Editor shows instead of the file (sound editor design,
+    // Q-SE1); "" for none. The game reads and ignores it.
+    std::string name;
     MapObjectSoundPlay plays = MapObjectSoundPlay::WhileInView;
 
     bool operator==(const MapObjectSound&) const = default;
