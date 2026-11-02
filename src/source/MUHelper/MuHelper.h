@@ -28,6 +28,8 @@ public:
     void Load(const ConfigData& config);
     void Start();
     void Stop();
+    // Stops locally and forgets the torn-down world's targets and drops.
+    void EndSession();
     void Toggle();
     void TriggerStart();
     void TriggerStop();
@@ -51,8 +53,10 @@ public:
     void AddItem(int iItemId, POINT posDropped);
     void DeleteItem(int iItemId);
 
+    // One helper step at `now`; TimerProc passes the current time.
+    void Tick(std::chrono::steady_clock::time_point now);
+
 private:
-    void WorkLoop(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
     void Work();
     int ActivatePet();
     int Buff();
@@ -68,6 +72,7 @@ private:
     ActionSkillType SelectAttackSkill();
     int SimulateAttack(ActionSkillType iSkill);
     int SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget);
+    int SimulateSupportSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget);
     int SimulateBasicAttack(int iTarget);
     int SimulateComboAttack();
     int GetNearestTarget();
@@ -102,8 +107,10 @@ private:
     ActionSkillType m_iCurrentSkill;
     int m_iHuntingDistance;
     int m_iObtainingDistance;
-    int m_iLoopCounter;
+    std::chrono::steady_clock::time_point m_now;
+    std::chrono::steady_clock::time_point m_nextSecondAt;
     int m_iSecondsElapsed;
+    int m_iNextBuffCastAt;
     int m_iSecondsAway;
     bool m_bTimerActivatedBuffOngoing;
     bool m_bPetActivated;

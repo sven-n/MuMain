@@ -1022,6 +1022,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
         UI::Inventory::RestorePickedItem();
 
+        MUHelper::g_MuHelper.EndSession();
         ReleaseMainData();
         CryWolfMVPInit();
 
@@ -1040,6 +1041,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             StopMusic();
             AllStopSound();
             UI::Inventory::RestorePickedItem();
+            MUHelper::g_MuHelper.EndSession();
             ReleaseMainData();
         }
 
@@ -1085,6 +1087,7 @@ void ResetClientToLoginScene()
     StopMusic();
     AllStopSound();
     UI::Inventory::RestorePickedItem();
+    MUHelper::g_MuHelper.EndSession();
     ReleaseMainData();
 
     g_GuildCache.Reset();
@@ -3573,9 +3576,10 @@ void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
     auto ShieldDamage = Data->ShieldDamage;
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x15 [ReceiveAttackDamageExtended(%d %d)]", AttackPlayer, Damage);
+    // The key is the monster receiving damage, not its attacker.
     if (IsMonster(c))
     {
-        MUHelper::g_MuHelper.AddTarget(Key, true);
+        MUHelper::g_MuHelper.AddTarget(Key, false);
     }
 
     if (Data->HealthStatus == 0xFF)
@@ -3660,7 +3664,7 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
         c->TargetCharacter = HeroIndex;
         if (IsMonster(c))
         {
-            MUHelper::g_MuHelper.AddTarget(Key, true);
+            MUHelper::g_MuHelper.AddTarget(Key, iTargetKey == HeroKey);
         }
 
         AttackPlayer = Index;

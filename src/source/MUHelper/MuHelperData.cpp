@@ -9,7 +9,7 @@ void ConfigDataSerDe::Serialize(const ConfigData& gameData, PRECEIVE_MUHELPER_DA
     memset(&netData, 0, sizeof(netData));
 
     netData.HuntingRange = static_cast<BYTE>(gameData.iHuntingRange & 0x0F);
-    netData.DistanceMin = static_cast<BYTE>(gameData.iMaxSecondsAway & 0x0F);
+    netData.DistanceMin = static_cast<WORD>(std::clamp(gameData.iMaxSecondsAway, 0, 0xFFFF));
     netData.LongDistanceAttack = gameData.bLongRangeCounterAttack ? 1 : 0;
     netData.OriginalPosition = gameData.bReturnToOriginalPosition ? 1 : 0;
 
@@ -219,7 +219,10 @@ void ConfigDataSerDe::Deserialize(const PRECEIVE_MUHELPER_DATA& netData, ConfigD
     {
         memset(wsExtraItemBuffer, 0, sizeof(wsExtraItemBuffer));
 
-        size_t n = std::mbstowcs(wsExtraItemBuffer, &netData.ExtraItems[i][0], 15);
+        // The 15-byte field need not be terminated; mbstowcs' limit counts output characters, not input bytes.
+        char szExtraItem[sizeof(netData.ExtraItems[i]) + 1] = {};
+        memcpy(szExtraItem, netData.ExtraItems[i], sizeof(netData.ExtraItems[i]));
+        size_t n = std::mbstowcs(wsExtraItemBuffer, szExtraItem, 15);
         if (n > 0 && n <= 15)
         {
             wsExtraItemBuffer[n] = L'\0';

@@ -60,31 +60,47 @@ bool IsConditionMet(uint32_t condition, std::size_t nearby, std::size_t attackin
            ((condition & MUHelper::ON_MORE_THAN_FIVE_MOBS) && count >= FiveMobs);
 }
 
-ActionSkillType SelectTriggeredSkill(const ConfigData& config, int secondsElapsed, std::size_t nearby,
-                                     std::size_t attacking)
+} // namespace
+
+int AttackSkillRotation::SelectTriggeredSlot(const ConfigData& config, int secondsElapsed, std::size_t nearby,
+                                             std::size_t attacking)
 {
-    for (int slot = 1; slot < static_cast<int>(config.aiSkill.size()); ++slot)
+    // A deadline, not a due second: a second spans several ticks, and a busy one must not lose the activation.
+    for (int slot = 1; slot < AttackSlotCount; ++slot)
     {
-        if (!IsValidSkill(config.aiSkill[slot]))
+        if ((config.aiSkillCondition[slot] & MUHelper::ON_TIMER) && config.aiSkillInterval[slot] > 0 &&
+            m_timerDueAt[slot] == 0)
+            m_timerDueAt[slot] = secondsElapsed + static_cast<int>(config.aiSkillInterval[slot]);
+    }
+
+    for (int slot = 1; slot < AttackSlotCount; ++slot)
+    {
+        const auto skill = config.aiSkill[slot];
+        if (!IsValidSkill(skill))
             continue;
 
         const auto condition = config.aiSkillCondition[slot];
-        const auto interval = config.aiSkillInterval[slot];
-        const bool timerDue =
-            (condition & MUHelper::ON_TIMER) && interval != 0 && secondsElapsed > 0 && secondsElapsed % interval == 0;
+        const auto interval = static_cast<int>(config.aiSkillInterval[slot]);
+        const bool timerDue = (condition & MUHelper::ON_TIMER) && interval > 0 && secondsElapsed >= m_timerDueAt[slot];
         const bool conditionMet = (condition & MUHelper::ON_CONDITION) && IsConditionMet(condition, nearby, attacking);
-        if (timerDue || conditionMet)
-            return static_cast<ActionSkillType>(config.aiSkill[slot]);
+        if ((timerDue || conditionMet) && IsAttackSkillAvailable(static_cast<ActionSkillType>(skill)))
+        {
+            m_timerSlotDue = timerDue ? slot : -1;
+            m_timerInterval = interval;
+            m_selectSeconds = secondsElapsed;
+            return slot;
+        }
     }
-    return AT_SKILL_UNDEFINED;
+    return -1;
 }
-} // namespace
 
 void AttackSkillRotation::Reset()
 {
     m_nextSlot = 0;
     m_selectedSlot = -1;
     m_notReadyAttempts = 0;
+    m_timerDueAt.fill(0);
+    m_timerSlotDue = -1;
 }
 
 ActionSkillType AttackSkillRotation::Select(const ConfigData& config, int secondsElapsed, std::size_t nearby,
@@ -92,9 +108,10 @@ ActionSkillType AttackSkillRotation::Select(const ConfigData& config, int second
 {
     const int previousSlot = m_selectedSlot;
     m_selectedSlot = -1;
-    const auto triggered = SelectTriggeredSkill(config, secondsElapsed, nearby, attacking);
-    if (triggered > AT_SKILL_UNDEFINED)
-        return triggered;
+    m_timerSlotDue = -1;
+    const int triggered = SelectTriggeredSlot(config, secondsElapsed, nearby, attacking);
+    if (triggered >= 0)
+        return static_cast<ActionSkillType>(config.aiSkill[triggered]);
 
     bool hasAutomaticExtra = false;
     for (int slot = 1; slot < AttackSlotCount; ++slot)
@@ -126,6 +143,10 @@ ActionSkillType AttackSkillRotation::Select(const ConfigData& config, int second
 void AttackSkillRotation::Complete(GameLogic::Automation::SkillResult result)
 {
     using GameLogic::Automation::SkillResult;
+    // A refused timed cast waits for its next interval instead of claiming every tick.
+    if (m_timerSlotDue >= 0 && (result == SkillResult::Cast || result == SkillResult::Refused))
+        m_timerDueAt[m_timerSlotDue] = m_selectSeconds + m_timerInterval;
+    m_timerSlotDue = -1;
     if (m_selectedSlot < 0)
         return;
 

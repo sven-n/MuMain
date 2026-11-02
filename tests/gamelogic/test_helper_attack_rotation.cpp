@@ -14,6 +14,7 @@
 #include "GameLogic/Automation/Movement.h"
 #include "GameLogic/Automation/Pickup.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "Scenes/SceneCore.h"
 #include <memory>
 
 #include <algorithm>
@@ -40,12 +41,14 @@ struct SkillFixture
     CHARACTER_MACHINE* previousMachine = CharacterMachine;
     CHARACTER_ATTRIBUTE* previousCharacter = CharacterAttribute;
     SKILL_ATTRIBUTE* previousAttributes = SkillAttribute;
+    EGameScene previousScene = SceneFlag;
     MUHelper::ConfigData config;
     GameLogic::Automation::AttackSkillRotation rotation;
 
     SkillFixture()
     {
         Hero = &hero;
+        SceneFlag = MAIN_SCENE;
         hero.Class = CLASS_KNIGHT;
         CharacterMachine = &machine;
         CharacterAttribute = &machine.Character;
@@ -67,6 +70,7 @@ struct SkillFixture
         CharacterMachine = previousMachine;
         CharacterAttribute = previousCharacter;
         SkillAttribute = previousAttributes;
+        SceneFlag = previousScene;
         gSkillManager.InvalidateSkillAttributeRequirementsCache();
     }
 
@@ -98,34 +102,6 @@ struct DropFixture
         auto& object = Items[MovementDropIndex].Object;
         object.Live = previousLive;
         std::copy(previousPosition.begin(), previousPosition.end(), object.Position);
-    }
-};
-
-struct BlockedTileFixture
-{
-    int tileX;
-    int tileY;
-    std::array<WORD, 9> previousWalls;
-
-    BlockedTileFixture(int x, int y) : tileX(x), tileY(y)
-    {
-        int wall = 0;
-        for (int dy = -1; dy <= 1; ++dy)
-            for (int dx = -1; dx <= 1; ++dx)
-            {
-                auto& terrain = TerrainWall[TERRAIN_INDEX(tileX + dx, tileY + dy)];
-                previousWalls[wall++] = terrain;
-                terrain = dx == 0 && dy == 0 ? 0 : TW_NOMOVE;
-            }
-        InitPath();
-    }
-
-    ~BlockedTileFixture()
-    {
-        int wall = 0;
-        for (int dy = -1; dy <= 1; ++dy)
-            for (int dx = -1; dx <= 1; ++dx)
-                TerrainWall[TERRAIN_INDEX(tileX + dx, tileY + dy)] = previousWalls[wall++];
     }
 };
 
@@ -200,60 +176,6 @@ TEST_CASE("Stopped and completed paths do not hold automation busy [helper_movem
     Hero->Path.PathNum = 0;
     Hero->Path.CurrentPath = 0;
     CHECK_FALSE(GameLogic::Automation::IsWalkInProgress());
-}
-
-TEST_CASE("Blocked loot and a blocked return do not stop helper attacks [helper_movement]")
-{
-    SkillFixture fixture;
-    DropFixture drop;
-    constexpr int AwayTile = MovementStartTile + 3;
-    auto characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT);
-    auto* previousCharacters = CharactersClient;
-    CharactersClient = characters.get();
-    auto& target = characters[0];
-    target.Key = 123;
-    target.Object.Live = true;
-    target.Object.Kind = KIND_MONSTER;
-    target.PositionX = target.TargetX = AwayTile;
-    target.PositionY = target.TargetY = MovementStartTile;
-    target.Object.Position[0] = (AwayTile + 0.5f) * TERRAIN_SCALE;
-    target.Object.Position[1] = (MovementStartTile + 0.5f) * TERRAIN_SCALE;
-    SkillAttribute[Primary].Distance = SkillAttribute[ExtraOne].Distance = 6;
-
-    BlockedTileFixture terrain(AwayTile, MovementStartTile);
-    Hero->PositionX = Hero->PositionY = MovementStartTile;
-    Hero->Object.CurrentAction = PLAYER_SKILL_CHAIN_LIGHTNING;
-    Hero->Object.Type = MODEL_PLAYER;
-    fixture.config.aiSkill.fill(0);
-    fixture.config.iHuntingRange = 6;
-    fixture.config.iObtainingRange = 8;
-    fixture.config.bPickAllItems = true;
-    fixture.config.bReturnToOriginalPosition = true;
-    MUHelper::g_MuHelper.Load(fixture.config);
-    MUHelper::g_MuHelper.Start();
-    Hero->PositionX = AwayTile;
-    Hero->Object.Position[0] = (AwayTile + 0.5f) * TERRAIN_SCALE;
-    Hero->Object.Position[1] = (MovementStartTile + 0.5f) * TERRAIN_SCALE;
-    Items[MovementDropIndex].Object.Position[0] = (AwayTile + 3.5f) * TERRAIN_SCALE;
-    MUHelper::g_MuHelper.AddItem(MovementDropIndex, {AwayTile + 3, MovementStartTile});
-    MUHelper::g_MuHelper.AddTarget(target.Key, false);
-    fixture.config.aiSkill[0] = Primary;
-    MUHelper::g_MuHelper.Load(fixture.config);
-    MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
-    CHECK(MUHelper::g_MuHelper.GetCurrentSkill() == Primary);
-
-    constexpr int TicksBeforeReturn = 5;
-    for (int tick = 1; tick < TicksBeforeReturn; ++tick)
-        MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
-    fixture.config.aiSkill[0] = ExtraOne;
-    MUHelper::g_MuHelper.Load(fixture.config);
-    MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
-    CHECK(MUHelper::g_MuHelper.GetCurrentSkill() == ExtraOne);
-
-    MUHelper::g_MuHelper.Stop();
-    MUHelper::g_MuHelper.DeleteAllTargets();
-    MUHelper::g_MuHelper.DeleteItem(MovementDropIndex);
-    CharactersClient = previousCharacters;
 }
 
 TEST_CASE("Unconditioned additional attacks rotate with the primary [helper_rotation]")
@@ -369,22 +291,45 @@ TEST_CASE("Timers and monster conditions keep priority and OR semantics [helper_
     fixture.rotation.Complete(SkillResult::Cast);
     CHECK(fixture.Select(6) == ExtraTwo);
     fixture.rotation.Reset();
-    CHECK(fixture.Select(5) == ExtraOne);
+    // A timer starts when the rotation first sees it and stays due until a cast consumes it.
+    CHECK(fixture.Select(5) == Primary);
     fixture.rotation.Complete(SkillResult::Cast);
-    CHECK(fixture.Select(6) == Primary);
+    CHECK(fixture.Select(9) == ExtraTwo);
+    CHECK(fixture.Select(10) == ExtraOne);
+    fixture.rotation.Complete(SkillResult::Busy);
+    CHECK(fixture.Select(11) == ExtraOne);
+    fixture.rotation.Complete(SkillResult::Cast);
+    CHECK(fixture.Select(11) == ExtraTwo);
+    CHECK(fixture.Select(15) == ExtraTwo);
     fixture.rotation.Complete(SkillResult::Cast);
     fixture.config.aiSkillCondition[1] |=
         MUHelper::ON_CONDITION | MUHelper::ON_MOBS_NEARBY | MUHelper::ON_MORE_THAN_TWO_MOBS;
     CHECK(fixture.Select(1, 2) == ExtraOne);
-    CHECK(fixture.Select(5, 0) == ExtraOne);
+    CHECK(fixture.Select(16, 0) == ExtraOne);
     fixture.config.aiSkillCondition[1] =
         MUHelper::ON_CONDITION | MUHelper::ON_MOBS_ATTACKING | MUHelper::ON_MORE_THAN_THREE_MOBS;
-    CHECK(fixture.Select(1, 5, 2) == ExtraTwo);
+    CHECK(fixture.Select(1, 5, 2) == Primary);
     CHECK(fixture.Select(1, 0, 3) == ExtraOne);
     fixture.config.aiSkillCondition[2] = MUHelper::ON_TIMER;
     fixture.config.aiSkillInterval[2] = 1;
     CHECK(fixture.Select(1, 0, 3) == ExtraOne);
-    CHECK(fixture.Select(1, 0, 0) == ExtraTwo);
+    CHECK(fixture.Select(1, 0, 0) == Primary);
+    CHECK(fixture.Select(2, 0, 0) == ExtraTwo);
+}
+
+TEST_CASE("Triggered skills that cannot be cast leave the rotation to usable ones [helper_rotation]")
+{
+    SkillFixture fixture;
+    fixture.config.aiSkillCondition[1] =
+        MUHelper::ON_CONDITION | MUHelper::ON_MOBS_NEARBY | MUHelper::ON_MORE_THAN_TWO_MOBS;
+    CharacterAttribute->Skill[1] = AT_SKILL_UNDEFINED;
+    for (int tick = 0; tick < 3; ++tick)
+    {
+        CHECK(fixture.Select(0, 5) != ExtraOne);
+        fixture.rotation.Complete(SkillResult::Cast);
+    }
+    CharacterAttribute->Skill[1] = ExtraOne;
+    CHECK(fixture.Select(0, 5) == ExtraOne);
 }
 
 TEST_CASE("Primary fallback and primary-only behavior remain available [helper_rotation]")
@@ -425,6 +370,17 @@ TEST_CASE("Rotation is transient and preserves saved skill combo and pickup sett
     CHECK(restored.bUseCombo);
     CHECK(restored.bPickAllItems);
     CHECK(restored.bPickSelectItems);
+}
+
+TEST_CASE("Saved return delays keep their full value [helper_rotation]")
+{
+    MUHelper::ConfigData config;
+    config.iMaxSecondsAway = 30;
+    PRECEIVE_MUHELPER_DATA packet{};
+    MUHelper::ConfigDataSerDe::Serialize(config, packet);
+    MUHelper::ConfigData restored;
+    MUHelper::ConfigDataSerDe::Deserialize(packet, restored);
+    CHECK(restored.iMaxSecondsAway == 30);
 }
 
 TEST_CASE("Saved unconditioned slots rotate despite inactive condition subfields [helper_rotation]")

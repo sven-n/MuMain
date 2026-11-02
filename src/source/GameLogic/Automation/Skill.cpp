@@ -161,6 +161,12 @@ SkillResult CastSkill(ActionSkillType skill, bool targetRequired, int targetKey,
         return SkillResult::Busy;
     }
 
+    // Saved helper configurations reach here unchecked; the skill table is indexed below.
+    if (skill <= AT_SKILL_UNDEFINED || skill >= MAX_SKILLS)
+    {
+        return SkillResult::Refused;
+    }
+
     const float skillDistance = gSkillManager.GetSkillDistance(skill, Hero);
 
     if (!targetRequired)

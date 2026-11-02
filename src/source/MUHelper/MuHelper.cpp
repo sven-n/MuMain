@@ -5,6 +5,7 @@
 #include "GameLogic/Automation/Pickup.h"
 #include "GameLogic/Automation/Skill.h"
 #include "GameLogic/Combat/SkillExecution.h"
+#include "GameLogic/Items/ShopRestrictions.h"
 
 #include <thread>
 #include <atomic>
@@ -22,12 +23,14 @@
 #include "GameLogic/Social/PartyManager.h"
 #include "World/MapInfra/MapManager.h"
 #include "Network/Server/WSclient.h"
+#include "Scenes/SceneCore.h"
 
 #include "MuHelper.h"
 
 constexpr int MAX_ACTIONABLE_DISTANCE = 10;
 constexpr int DEFAULT_DURABILITY_THRESHOLD = 50;
 constexpr auto PICKUP_RETRY_DELAY = std::chrono::seconds(1);
+constexpr auto PICKUP_REQUEST_RETRY_DELAY = std::chrono::seconds(3);
 
 SpinLock _targetsLock;
 SpinLock _itemsLock;
@@ -49,13 +52,12 @@ namespace MUHelper
 
     void CALLBACK CMuHelper::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
     {
-        g_MuHelper.WorkLoop(hwnd, uMsg, idEvent, dwTime);
+        g_MuHelper.Tick(std::chrono::steady_clock::now());
     }
 
     void CMuHelper::Save(const ConfigData& config)
     {
-        m_attackSkills.Reset();
-        m_config = config;
+        Load(config);
 
         PRECEIVE_MUHELPER_DATA netData;
         ConfigDataSerDe::Serialize(m_config, netData);
@@ -67,6 +69,8 @@ namespace MUHelper
     {
         m_attackSkills.Reset();
         m_config = config;
+        m_iHuntingDistance = ComputeDistanceByRange(m_config.iHuntingRange);
+        m_iObtainingDistance = ComputeDistanceByRange(m_config.iObtainingRange);
     }
 
     ConfigData CMuHelper::GetConfig() const {
@@ -121,18 +125,27 @@ namespace MUHelper
         m_itemRetryAt.clear();
         m_posOriginal = { Hero->PositionX, Hero->PositionY };
 
-        m_iHuntingDistance = ComputeDistanceByRange(m_config.iHuntingRange);
-        m_iObtainingDistance = ComputeDistanceByRange(m_config.iObtainingRange);
-
         m_iSecondsElapsed = 0;
         m_iSecondsAway = 0;
+        m_now = std::chrono::steady_clock::now();
+        m_nextSecondAt = m_now + std::chrono::seconds(1);
+        m_iNextBuffCastAt = 0;
 
         m_bTimerActivatedBuffOngoing = false;
         m_bPetActivated = false;
 
-        m_iLoopCounter = 0;
-
         m_bActive = true;
+
+        // Monsters already in view sent their packets before the helper listened.
+        for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
+        {
+            CHARACTER& character = CharactersClient[i];
+            if (character.Object.Live && character.Dead == 0 && IsMonster(&character))
+            {
+                AddTarget(character.Key, false);
+            }
+        }
+
         g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Started");
     }
 
@@ -142,12 +155,26 @@ namespace MUHelper
         g_ConsoleDebug->Write(MCD_NORMAL, L"[MU Helper] Stopped");
     }
 
-    void CMuHelper::WorkLoop(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
+    void CMuHelper::EndSession()
     {
-        if (!m_bActive)
+        Stop();
+        DeleteAllTargets();
+        _itemsLock.lock();
+        m_setItems.clear();
+        m_itemRetryAt.clear();
+        _itemsLock.unlock();
+        m_iCurrentTarget = -1;
+        m_iCurrentItem = MAX_ITEMS;
+    }
+
+    void CMuHelper::Tick(std::chrono::steady_clock::time_point now)
+    {
+        if (!m_bActive || Hero == nullptr || SceneFlag != MAIN_SCENE)
         {
             return;
         }
+
+        m_now = now;
 
         if (Hero->SafeZone)
         {
@@ -156,23 +183,16 @@ namespace MUHelper
             return;
         }
 
-        Work();
-
-        if (m_iLoopCounter++ == 4)
+        // Helper seconds follow the clock; timer callbacks run late or not at all when frames are slow.
+        const bool bAway = ComputeDistanceBetween({Hero->PositionX, Hero->PositionY}, m_posOriginal) > 1;
+        while (now >= m_nextSecondAt)
         {
             m_iSecondsElapsed++;
-
-            if (ComputeDistanceBetween({ Hero->PositionX, Hero->PositionY }, m_posOriginal) > 1)
-            {
-                m_iSecondsAway++;
-            }
-            else
-            {
-                m_iSecondsAway = 0;
-            }
-
-            m_iLoopCounter = 0;
+            m_iSecondsAway = bAway ? m_iSecondsAway + 1 : 0;
+            m_nextSecondAt += std::chrono::seconds(1);
         }
+
+        Work();
     }
 
     void CMuHelper::Work()
@@ -183,6 +203,9 @@ namespace MUHelper
             {
                 return;
             }
+
+            // Emergency potions never wait behind actions that can.
+            ConsumePotion();
 
             if (!Buff())
             {
@@ -229,22 +252,24 @@ namespace MUHelper
 
         int iDistance = ComputeDistanceFromTarget(pTarget);
 
-        if ((iDistance <= m_iHuntingDistance)
-            || (bIsAttacking && m_config.bLongRangeCounterAttack))
+        if ((iDistance > m_iHuntingDistance) && !(bIsAttacking && m_config.bLongRangeCounterAttack))
         {
-            _targetsLock.lock();
-
-            m_setTargets.insert(iTargetId);
-
-            if (bIsAttacking)
-            {
-                m_setTargetsAttacking.insert(iTargetId);
-            }
-
-            _targetsLock.unlock();
+            return;
         }
 
-        if (m_config.bUseSelfDefense && IsMonster(pTarget))
+        _targetsLock.lock();
+
+        m_setTargets.insert(iTargetId);
+
+        if (bIsAttacking)
+        {
+            m_setTargetsAttacking.insert(iTargetId);
+        }
+
+        _targetsLock.unlock();
+
+        // Only an attack on the hero may redirect combat; a sighting must not.
+        if (bIsAttacking && m_config.bUseSelfDefense && IsMonster(pTarget))
         {
             m_iCurrentTarget = iTargetId;
         }
@@ -388,6 +413,13 @@ namespace MUHelper
             if (pTarget->Dead > 0 || !pTarget->Object.Live)
             {
                 DeleteTarget(iMonsterId);
+                continue;
+            }
+
+            const bool bCounterAttack = m_config.bLongRangeCounterAttack && m_setTargetsAttacking.count(iMonsterId) > 0;
+            if (!bCounterAttack && ComputeDistanceFromTarget(pTarget) > m_iHuntingDistance)
+            {
+                DeleteTarget(iMonsterId);
             }
         }
     }
@@ -439,11 +471,11 @@ namespace MUHelper
             if (pChar != NULL
                 && ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE)
             {
-                if (!m_config.bBuffDurationParty
-                    && m_config.iBuffCastInterval != 0
-                    && m_iSecondsElapsed % m_config.iBuffCastInterval == 0)
+                if (!m_config.bBuffDurationParty && m_config.iBuffCastInterval != 0 &&
+                    m_iSecondsElapsed >= m_iNextBuffCastAt)
                 {
                     m_bTimerActivatedBuffOngoing = true;
+                    m_iNextBuffCastAt = m_iSecondsElapsed + m_config.iBuffCastInterval;
                 }
 
                 iBuffResult = BuffTarget(pChar, (ActionSkillType)m_config.aiBuff[m_iCurrentBuffIndex]);
@@ -469,11 +501,10 @@ namespace MUHelper
         {
             m_iCurrentBuffPartyIndex = 0;
 
-            if (!m_config.bBuffDuration
-                && m_config.iBuffCastInterval != 0
-                && m_iSecondsElapsed % m_config.iBuffCastInterval == 0)
+            if (!m_config.bBuffDuration && m_config.iBuffCastInterval != 0 && m_iSecondsElapsed >= m_iNextBuffCastAt)
             {
                 m_bTimerActivatedBuffOngoing = true;
+                m_iNextBuffCastAt = m_iSecondsElapsed + m_config.iBuffCastInterval;
             }
 
             if (!BuffTarget(Hero, (ActionSkillType)m_config.aiBuff[m_iCurrentBuffIndex]))
@@ -504,7 +535,7 @@ namespace MUHelper
         auto CastIfMissing = [&](bool bBuffActive, bool bTimerRespected, bool bNeedsTarget) -> int
         {
             if (!bBuffActive || (bTimerRespected && m_bTimerActivatedBuffOngoing))
-                return SimulateSkill(iBuffSkill, bNeedsTarget, pTargetChar->Key);
+                return SimulateSupportSkill(iBuffSkill, bNeedsTarget, pTargetChar->Key);
             return 1;
         };
 
@@ -607,11 +638,6 @@ namespace MUHelper
             return 0;
         }
 
-        if (!ConsumePotion())
-        {
-            return 0;
-        }
-
         return 1;
     }
 
@@ -645,7 +671,7 @@ namespace MUHelper
                 else if (pMember->stepHP * 10 <= m_config.iHealPartyThreshold
                     && ComputeDistanceFromTarget(pChar) <= MAX_ACTIONABLE_DISTANCE)
                 {
-                    iHealResult = SimulateSkill(iHealingSkill, true, pChar->Key);
+                    iHealResult = SimulateSupportSkill(iHealingSkill, true, pChar->Key);
                 }
             }
 
@@ -666,11 +692,15 @@ namespace MUHelper
     {
         int64_t iLife = CharacterAttribute->Life;
         int64_t iLifeMax = CharacterAttribute->LifeMax;
+        if (iLifeMax <= 0)
+        {
+            return 1;
+        }
         int64_t iRemaining = (iLife * 100 + iLifeMax - 1) / iLifeMax;
 
         if (iRemaining <= m_config.iHealThreshold)
         {
-            return SimulateSkill(iHealingSkill, true, HeroKey);
+            return SimulateSupportSkill(iHealingSkill, true, HeroKey);
         }
 
         return 1;
@@ -691,6 +721,10 @@ namespace MUHelper
 
         int64_t iLife = CharacterAttribute->Life;
         int64_t iLifeMax = CharacterAttribute->LifeMax;
+        if (iLifeMax <= 0)
+        {
+            return 1;
+        }
         int64_t iRemaining = (iLife * 100 + iLifeMax - 1) / iLifeMax;
 
         if (iRemaining <= m_config.iHealThreshold)
@@ -698,7 +732,7 @@ namespace MUHelper
             m_iCurrentTarget = GetNearestTarget();
             if (m_iCurrentTarget != -1)
             {
-                return SimulateSkill(iDrainLife, true, m_iCurrentTarget);
+                return SimulateSupportSkill(iDrainLife, true, m_iCurrentTarget);
             }
         }
 
@@ -712,7 +746,7 @@ namespace MUHelper
             for (int i = 0; i < MAX_EQUIPMENT; i++)
             {
                 ITEM* pItem = &CharacterMachine->Equipment[i];
-                if (!pItem || pItem->Type == -1)
+                if (!pItem || pItem->Type == -1 || GameLogic::Items::IsRepairBan(pItem))
                 {
                     continue;
                 }
@@ -726,6 +760,10 @@ namespace MUHelper
                 int iLevel = pItem->Level;
                 int iDurability = pItem->Durability;
                 int iMaxDurability = CalcMaxDurability(pItem, pAttr, iLevel);
+                if (iMaxDurability <= 0)
+                {
+                    continue;
+                }
 
                 int64_t iHealth = (iDurability * 100 + iMaxDurability - 1) / iMaxDurability;
 
@@ -745,6 +783,8 @@ namespace MUHelper
 
     bool CMuHelper::SelectAttackTarget()
     {
+        // Condition counts read these sets, so they are refreshed even while the current target lives.
+        CleanupTargets();
         if (m_iCurrentTarget != -1)
         {
             const auto* target = FindCharacterByKey(m_iCurrentTarget);
@@ -752,7 +792,6 @@ namespace MUHelper
                 return true;
             DeleteTarget(m_iCurrentTarget);
         }
-        CleanupTargets();
         if (m_config.bLongRangeCounterAttack)
             m_iCurrentTarget = GetFarthestAttackingTarget();
         if (m_iCurrentTarget == -1)
@@ -807,7 +846,7 @@ namespace MUHelper
     {
         for (int i = 0; i < m_config.aiSkill.size(); i++)
         {
-            if (m_config.aiSkill[i] == 0)
+            if (m_config.aiSkill[i] <= AT_SKILL_UNDEFINED || m_config.aiSkill[i] >= MAX_SKILLS)
             {
                 return 0;
             }
@@ -829,6 +868,15 @@ namespace MUHelper
     int CMuHelper::SimulateSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget)
     {
         return CastSkill(iSkill, bTargetRequired, iTarget) == GameLogic::Automation::SkillResult::Cast ? 1 : 0;
+    }
+
+    int CMuHelper::SimulateSupportSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget)
+    {
+        using GameLogic::Automation::SkillResult;
+
+        // Only a cast under way holds up the actions after it; one that cannot happen must not starve them.
+        const SkillResult result = CastSkill(iSkill, bTargetRequired, iTarget);
+        return result == SkillResult::Busy || result == SkillResult::Approaching ? 0 : 1;
     }
 
     GameLogic::Automation::SkillResult CMuHelper::CastSkill(ActionSkillType iSkill, bool bTargetRequired, int iTarget)
@@ -965,14 +1013,15 @@ namespace MUHelper
         switch (result)
         {
         case PickupResult::Requested:
-            // The request is out; stop tracking the drop, as before.
-            DeleteItem(m_iCurrentItem);
+            // The server's removal packet forgets the drop; a rejected pickup is retried later.
+            m_itemRetryAt[m_iCurrentItem] = m_now + PICKUP_REQUEST_RETRY_DELAY;
+            m_iCurrentItem = MAX_ITEMS;
             return 1;
         case PickupResult::Gone:
             DeleteItem(m_iCurrentItem);
             return 1;
         case PickupResult::NoPath:
-            m_itemRetryAt[m_iCurrentItem] = std::chrono::steady_clock::now() + PICKUP_RETRY_DELAY;
+            m_itemRetryAt[m_iCurrentItem] = m_now + PICKUP_RETRY_DELAY;
             m_iCurrentItem = MAX_ITEMS;
             return 1;
         case PickupResult::Approaching:
@@ -1030,10 +1079,9 @@ namespace MUHelper
             _itemsLock.unlock();
         }
 
-        const auto now = std::chrono::steady_clock::now();
         for (const int& iItemId : setItems)
         {
-            if (!ShouldObtainItem(iItemId, now))
+            if (!ShouldObtainItem(iItemId, m_now))
             {
                 continue;
             }

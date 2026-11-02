@@ -9,12 +9,13 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "MUHelper/MuHelper.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "Scenes/SceneCore.h"
 
 #include <algorithm>
 #include <array>
 #include <chrono>
+#include <map>
 #include <memory>
-#include <thread>
 #include <utility>
 #include <vector>
 
@@ -26,7 +27,9 @@ constexpr int HeroTile = 103;
 constexpr int HeroRow = 100;
 constexpr int DropSlot = MAX_ITEMS - 1;
 constexpr int OtherDropSlot = MAX_ITEMS - 2;
+constexpr auto HelperTick = std::chrono::milliseconds(250);
 std::vector<std::pair<ActionSkillType, int>> submittedCasts;
+std::map<ActionSkillType, GameLogic::Automation::SkillResult> castResults;
 std::vector<int> pickupAttempts;
 GameLogic::Automation::PickupResult pickupResult;
 
@@ -41,6 +44,8 @@ struct HelperActionFixture
     CHARACTER_MACHINE* previousMachine = CharacterMachine;
     CHARACTER_ATTRIBUTE* previousCharacter = CharacterAttribute;
     SKILL_ATTRIBUTE* previousAttributes = SkillAttribute;
+    EGameScene previousScene = SceneFlag;
+    std::chrono::steady_clock::time_point now;
     std::array<WORD, 9> previousWalls;
     std::array<bool, 2> previousDropLive = {Items[DropSlot].Object.Live, Items[OtherDropSlot].Object.Live};
     std::array<std::array<float, 3>, 2> previousDropPositions;
@@ -48,6 +53,7 @@ struct HelperActionFixture
     HelperActionFixture()
     {
         submittedCasts.clear();
+        castResults.clear();
         pickupAttempts.clear();
         pickupResult = GameLogic::Automation::PickupResult::NoPath;
         for (int drop = 0; drop < previousDropLive.size(); ++drop)
@@ -60,6 +66,7 @@ struct HelperActionFixture
         config.bReturnToOriginalPosition = true;
         MUHelper::g_MuHelper.Load(config);
         MUHelper::g_MuHelper.Start();
+        now = std::chrono::steady_clock::now();
         hero.PositionX = HeroTile;
         hero.Object.Position[0] = (HeroTile + 0.5f) * TERRAIN_SCALE;
         hero.Object.Position[1] = (HeroRow + 0.5f) * TERRAIN_SCALE;
@@ -79,6 +86,7 @@ struct HelperActionFixture
     void InitializeCharacter()
     {
         Hero = &hero;
+        SceneFlag = MAIN_SCENE;
         CharactersClient = characters.get();
         CharacterMachine = &machine;
         CharacterAttribute = &machine.Character;
@@ -132,6 +140,7 @@ struct HelperActionFixture
         CharacterMachine = previousMachine;
         CharacterAttribute = previousCharacter;
         SkillAttribute = previousAttributes;
+        SceneFlag = previousScene;
         gSkillManager.InvalidateSkillAttributeRequirementsCache();
     }
 
@@ -143,9 +152,10 @@ struct HelperActionFixture
         MUHelper::g_MuHelper.AddItem(slot, {tileX, HeroRow});
     }
 
-    void Tick()
+    void Tick(std::chrono::milliseconds elapsed = HelperTick)
     {
-        MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
+        now += elapsed;
+        MUHelper::g_MuHelper.Tick(now);
     }
 };
 } // namespace
@@ -156,7 +166,8 @@ namespace GameLogic::Automation
 SkillResult CastSkill(ActionSkillType skill, bool, int targetKey, bool, int)
 {
     submittedCasts.emplace_back(skill, targetKey);
-    return SkillResult::Cast;
+    const auto result = castResults.find(skill);
+    return result == castResults.end() ? SkillResult::Cast : result->second;
 }
 
 bool IsSelfPositionSkill(ActionSkillType)
@@ -183,7 +194,7 @@ TEST_CASE("Blocked loot and return paths still submit successful cast actions [h
         CHECK(submittedCasts[tick].first == (tick % 2 == 0 ? Primary : Extra));
         CHECK(submittedCasts[tick].second == 123);
     }
-    CHECK(pickupAttempts == std::vector<int>{DropSlot});
+    CHECK(pickupAttempts == std::vector<int>{DropSlot, DropSlot});
 }
 
 TEST_CASE("Blocked drops retry after cooldown while other loot and casts continue [helper_actions]")
@@ -197,8 +208,7 @@ TEST_CASE("Blocked drops retry after cooldown while other loot and casts continu
     CHECK(pickupAttempts == std::vector<int>{DropSlot, OtherDropSlot});
     CHECK(submittedCasts.size() == 2);
     constexpr auto AfterPickupRetry = std::chrono::milliseconds(1100);
-    std::this_thread::sleep_for(AfterPickupRetry);
-    fixture.Tick();
+    fixture.Tick(AfterPickupRetry);
     CHECK(pickupAttempts == std::vector<int>{DropSlot, OtherDropSlot, DropSlot});
     CHECK(submittedCasts.size() == 3);
 }
@@ -212,4 +222,73 @@ TEST_CASE("A reused drop slot does not inherit a failed pickup cooldown [helper_
     fixture.Tick();
     CHECK(pickupAttempts == std::vector<int>{DropSlot, DropSlot});
     CHECK(submittedCasts.size() == 2);
+}
+
+TEST_CASE("A requested pickup stays tracked until the server removes the drop [helper_actions]")
+{
+    HelperActionFixture fixture;
+    pickupResult = GameLogic::Automation::PickupResult::Requested;
+    fixture.Tick();
+    REQUIRE(pickupAttempts == std::vector<int>{DropSlot});
+    fixture.Tick();
+    CHECK(pickupAttempts.size() == 1);
+    constexpr auto AfterRejectedPickup = std::chrono::seconds(3);
+    fixture.Tick(AfterRejectedPickup);
+    CHECK(pickupAttempts == std::vector<int>{DropSlot, DropSlot});
+    MUHelper::g_MuHelper.DeleteItem(DropSlot);
+    fixture.Tick(AfterRejectedPickup);
+    CHECK(pickupAttempts.size() == 2);
+}
+
+TEST_CASE("A buff that cannot be cast does not starve later helper actions [helper_actions]")
+{
+    HelperActionFixture fixture;
+    auto config = MUHelper::g_MuHelper.GetConfig();
+    config.aiBuff = {AT_SKILL_ATTACK, 0, 0};
+    MUHelper::g_MuHelper.Load(config);
+    castResults[AT_SKILL_ATTACK] = GameLogic::Automation::SkillResult::Refused;
+    fixture.Tick();
+    REQUIRE(submittedCasts.size() == 2);
+    CHECK(submittedCasts[0].first == AT_SKILL_ATTACK);
+    CHECK(submittedCasts[1].first == Primary);
+}
+
+TEST_CASE("Starting the helper finds monsters that were already in view [helper_actions]")
+{
+    HelperActionFixture fixture;
+    MUHelper::g_MuHelper.Stop();
+    MUHelper::g_MuHelper.DeleteAllTargets();
+    MUHelper::g_MuHelper.Start();
+    fixture.Tick();
+    REQUIRE_FALSE(submittedCasts.empty());
+    CHECK(submittedCasts.back().second == 123);
+}
+
+TEST_CASE("Helper seconds follow the clock rather than the number of ticks [helper_actions]")
+{
+    HelperActionFixture fixture;
+    auto config = MUHelper::g_MuHelper.GetConfig();
+    config.aiSkillCondition[1] = MUHelper::ON_TIMER;
+    config.aiSkillInterval[1] = 2;
+    MUHelper::g_MuHelper.Load(config);
+    fixture.Tick(std::chrono::milliseconds(0));
+    for (int tick = 0; tick < 10; ++tick)
+        fixture.Tick(std::chrono::milliseconds(150));
+    CHECK(std::count(submittedCasts.begin(), submittedCasts.end(), std::pair{Extra, 123}) == 0);
+    fixture.Tick(std::chrono::milliseconds(600));
+    CHECK(std::count(submittedCasts.begin(), submittedCasts.end(), std::pair{Extra, 123}) == 1);
+    fixture.Tick();
+    CHECK(std::count(submittedCasts.begin(), submittedCasts.end(), std::pair{Extra, 123}) == 1);
+}
+
+TEST_CASE("Ending the session stops the helper and forgets its world [helper_actions]")
+{
+    HelperActionFixture fixture;
+    MUHelper::g_MuHelper.EndSession();
+    CHECK_FALSE(MUHelper::g_MuHelper.IsActive());
+    MUHelper::g_MuHelper.Start();
+    MUHelper::g_MuHelper.DeleteAllTargets();
+    fixture.Tick();
+    CHECK(pickupAttempts.empty());
+    CHECK(submittedCasts.empty());
 }
