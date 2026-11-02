@@ -95,6 +95,7 @@ drawer, and the renderer applies the active look per draw.
 - Debug switches that hide a pass no longer stop what it used to spawn.
 - Draw flickers no longer move the random sequences, so the update's later
   random choices differ from what the same seed gave before.
+- A Dragon Kick afterimage no longer resets a fading character to full alpha.
 - The character creation preview no longer moves its character by the class
   offset on every draw; the offset moves its camera.
 - A transformed Rage Fighter's skin and the Chaos Castle angel no longer write
@@ -116,6 +117,10 @@ drawer, and the renderer applies the active look per draw.
   bones in as an argument.
 - An object that owns a pose buffer releases it (`Pose::Release`) before its
   slot is reused.
+- A draw that attaches a part differently from the part's own settings (a
+  bone, an action, a play speed) passes them to `RenderLinkObject` as a
+  `LinkOverride`; it does not set the part. The update advances the part with
+  what the last draw attached it with.
 - Visibility, drawn-frame marks and pick boxes come from the cull at the end
   of the update. A draw may still set its own parameters on the object it is
   drawing and put them back (a mesh to hide, a light for one part); D5 turns
@@ -124,7 +129,7 @@ drawer, and the renderer applies the active look per draw.
 ## Enforcement
 
 - **Every build:** the spawn functions (effects, sprites, particles, joints,
-  blurs, pointers, terrain lights, sounds, actions, animations) report any
+  blurs, pointers, terrain lights, sounds, music, actions, animations) report any
   call inside a draw pass, the scene's or the offscreen one
   (`Diagnostics::DrawSpawnCheck`); every such call is a violation. Developer
   builds log each offending caller once to the error log. Tests read the
@@ -138,10 +143,12 @@ drawer, and the renderer applies the active look per draw.
 - **Control socket (developer builds):**
   - `drawspawns` lists every spawn the draw made, with its callers.
   - `drawpurity` compares, before and after each draw pass, the fields of
-    characters (their state and parts too), effects, items, map objects,
-    mounts, boids, particles and joints, including visibility, drawn-frame
-    marks and pick boxes; the frame's view, frustum and mouse ray; and whether
-    the pass drew from either random sequence. It lists the changes.
+    characters (their state, every part and their cloth), previews, effects,
+    sprites, items, map objects, mounts, boids, particles and joints,
+    including visibility, drawn-frame marks, pick boxes and buffs; the frame's
+    view, frustum and mouse ray; the terrain's collision and light, the light
+    history and Dark Side's state; and whether the pass drew from the random
+    engine. Its own snapshots draw from no sequence. It lists the changes.
   - `spawn-effect` creates any effect, particle or joint type at the
     character, so effects no map or skill reaches can be checked.
 - These checks show *whether* the draw spawns or writes, not *where* an
