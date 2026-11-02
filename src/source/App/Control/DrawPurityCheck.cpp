@@ -246,9 +246,7 @@ int s_draws = 0;
 std::unordered_map<const void*, Entry> s_before;
 std::unordered_map<const void*, Entry> s_after;
 std::map<std::string, int> s_counts;
-// While listing, the CRT sequence restarts from a seed of its own before each draw, so its next value is known; the
-// engine is compared whole.
-int s_randNext = 0;
+// The engine is compared whole; copying it draws nothing from it.
 std::mt19937 s_engine;
 
 void Count(const Entry& e, const char* field)
@@ -262,10 +260,6 @@ void BeforeDraw()
     if (!s_listing)
         return;
     Snapshot(s_before);
-    const auto seed = static_cast<unsigned>(std::rand());
-    std::srand(seed);
-    s_randNext = std::rand();
-    std::srand(seed);
     s_engine = Random::Snapshot();
 }
 
@@ -274,8 +268,6 @@ void AfterDraw()
     if (!s_listing)
         return;
     ++s_draws;
-    if (std::rand() != s_randNext)
-        ++s_counts["random rand()"];
     if (Random::Snapshot() != s_engine)
         ++s_counts["random engine"];
     Snapshot(s_after);

@@ -207,7 +207,7 @@ TEST_CASE(
 }
 
 #ifdef MU_ENABLE_CONTROL_SOCKET
-TEST_CASE("The draw purity check counts a draw pass that draws from the update's random sequences [effects]")
+TEST_CASE("The draw purity check counts a draw pass that draws from the update's random engine [effects]")
 {
     namespace Purity = Diagnostics::DrawPurityCheck;
     const auto counted = [](const char* what)
@@ -225,13 +225,27 @@ TEST_CASE("The draw purity check counts a draw pass that draws from the update's
     Purity::BeforeDraw();
     Purity::AfterDraw();
     Purity::BeforeDraw();
-    (void)std::rand();
-    Purity::AfterDraw();
-    Purity::BeforeDraw();
     (void)Random::Unit();
     Purity::AfterDraw();
 
-    CHECK(counted("random rand()") == 1);
     CHECK(counted("random engine") == 1);
+}
+
+TEST_CASE("The draw purity check draws nothing from the update's random sequences itself [effects]")
+{
+    namespace Purity = Diagnostics::DrawPurityCheck;
+    std::srand(914);
+    const int next = std::rand();
+    const std::mt19937 engine = Random::Snapshot();
+
+    std::srand(914);
+    Purity::Start();
+    for (int pass = 0; pass < 2; ++pass)
+    {
+        Purity::BeforeDraw();
+        Purity::AfterDraw();
+    }
+    CHECK(std::rand() == next);
+    CHECK(Random::Snapshot() == engine);
 }
 #endif
