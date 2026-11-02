@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
@@ -7807,6 +7808,9 @@ static unsigned int s_effectDrawFrame = 0;
 
 void RenderEffects(bool bRenderBlendMesh)
 {
+    using Render::EffectDrawing::Blend;
+    using Render::EffectDrawing::Decal;
+    Render::EffectDrawing::EffectDrawer& out = Render::EffectDrawing::ActiveEffectDrawer();
     // The blend-mesh pass draws later in the same frame.
     if (!bRenderBlendMesh)
         ++s_effectDrawFrame;
@@ -7881,10 +7885,11 @@ void RenderEffects(bool bRenderBlendMesh)
                     if (o->SubType == 3 || o->SubType == 4 || o->SubType == 5 || o->SubType == 6 || o->SubType == 7)
                     {
                         vec3_t Light;
-                        EnableAlphaBlend();
+                        out.SetState({.blend = Blend::Glow});
                         Vector(0.3f, 0.3f, 0.3f, Light);
                         auto Rotation = (float)(WorldTime);
-                        RenderTerrainAlphaBitmap(BITMAP_POUNDING_BALL, o->Position[0], o->Position[1], 2.f, 2.f, Light, Rotation);
+                        out.DrawDecal(
+                            Decal(BITMAP_POUNDING_BALL, o->Position[0], o->Position[1], 2.f, 2.f, Light, Rotation));
                     }
                     else
                         RenderObject(o);
@@ -8055,10 +8060,9 @@ void RenderEffects(bool bRenderBlendMesh)
                         {
                             // The update turned the beam once per segment; the turn this segment had.
                             const float angle = o->Angle[2] + (19 - j) * 0.1f * FPS_ANIMATION_FACTOR;
-                            EnableAlphaBlend();
-                            RenderTerrainAlphaBitmap(BITMAP_SMOKE, Position[0], Position[1], 4.0f, 4.0f, o->Light,
-                                                     -angle);
-                            DisableAlphaBlend();
+                            out.SetState({.blend = Blend::Glow});
+                            out.DrawDecal(Decal(BITMAP_SMOKE, Position[0], Position[1], 4.0f, 4.0f, o->Light, -angle));
+                            out.SetState({.blend = Blend::Off});
                         }
 
                         VectorAdd(Position, o->Direction, Position);
@@ -8071,7 +8075,6 @@ void RenderEffects(bool bRenderBlendMesh)
                                 return;
                             }
                         }
-                        AddTerrainLight(Position[0], Position[1], o->Light, 2, PrimaryTerrainLight);
                     }
                 }
                 break;
@@ -8132,24 +8135,27 @@ void RenderEffects(bool bRenderBlendMesh)
                     break;
                 case MODEL_FENRIR_FOOT_THUNDER:
                 {
-                    EnableAlphaBlend();
-                    RenderTerrainAlphaBitmap(BITMAP_FENRIR_FOOT_THUNDER1 + (o->m_iAnimation % 5), o->Position[0], o->Position[1], 0.6f, 0.6f, o->Light);
-                    DisableAlphaBlend();
+                    out.SetState({.blend = Blend::Glow});
+                    out.DrawDecal(Decal(BITMAP_FENRIR_FOOT_THUNDER1 + (o->m_iAnimation % 5), o->Position[0],
+                                        o->Position[1], 0.6f, 0.6f, o->Light));
+                    out.SetState({.blend = Blend::Off});
                 }
                 break;
                 case MODEL_TWINTAIL_EFFECT:
                 {
                     if (o->SubType == 0)
                     {
-                        EnableAlphaBlend();
-                        RenderTerrainAlphaBitmap(BITMAP_SPARK + 1, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, 0.f, o->Alpha);
-                        DisableAlphaBlend();
+                        out.SetState({.blend = Blend::Glow});
+                        out.DrawDecal(Decal(BITMAP_SPARK + 1, o->Position[0], o->Position[1], o->Scale, o->Scale,
+                                            o->Light, 0.f, o->Alpha));
+                        out.SetState({.blend = Blend::Off});
                     }
                     else if (o->SubType == 1 || o->SubType == 2)
                     {
-                        EnableAlphaBlend();
-                        RenderTerrainAlphaBitmap(BITMAP_CLOUD, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, o->Angle[0], o->Alpha);
-                        DisableAlphaBlend();
+                        out.SetState({.blend = Blend::Glow});
+                        out.DrawDecal(Decal(BITMAP_CLOUD, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light,
+                                            o->Angle[0], o->Alpha));
+                        out.SetState({.blend = Blend::Off});
                     }
                 }
                 break;
@@ -8256,16 +8262,18 @@ void RenderEffects(bool bRenderBlendMesh)
                 case MODEL_LAVAGIANT_FOOTPRINT_R:
                 case MODEL_LAVAGIANT_FOOTPRINT_V:
                 {
-                    EnableAlphaBlend();
+                    out.SetState({.blend = Blend::Glow});
                     if (o->Type == MODEL_LAVAGIANT_FOOTPRINT_R)
                     {
-                        RenderTerrainAlphaBitmap(BITMAP_LAVAGIANT_FOOTPRINT_R, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light);
+                        out.DrawDecal(Decal(BITMAP_LAVAGIANT_FOOTPRINT_R, o->Position[0], o->Position[1], o->Scale,
+                                            o->Scale, o->Light));
                     }
                     else
                     {
-                        RenderTerrainAlphaBitmap(BITMAP_LAVAGIANT_FOOTPRINT_V, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light);
+                        out.DrawDecal(Decal(BITMAP_LAVAGIANT_FOOTPRINT_V, o->Position[0], o->Position[1], o->Scale,
+                                            o->Scale, o->Light));
                     }
-                    DisableAlphaBlend();
+                    out.SetState({.blend = Blend::Off});
                 }
                 break;
 #ifdef PBG_ADD_CHARACTERSLOT
@@ -8429,9 +8437,10 @@ void RenderEffects(bool bRenderBlendMesh)
                 break;
                 case BITMAP_EVENT_CLOUD:
                 {
-                    EnableAlphaBlend();
-                    RenderTerrainAlphaBitmap(BITMAP_EVENT_CLOUD, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, o->Angle[0], o->Alpha);
-                    DisableAlphaBlend();
+                    out.SetState({.blend = Blend::Glow});
+                    out.DrawDecal(Decal(BITMAP_EVENT_CLOUD, o->Position[0], o->Position[1], o->Scale, o->Scale,
+                                        o->Light, o->Angle[0], o->Alpha));
+                    out.SetState({.blend = Blend::Off});
                 }
                 break;
                 case MODEL_SHOCKWAVE02:
@@ -8461,23 +8470,28 @@ void RenderEffects(bool bRenderBlendMesh)
 
                     if (o->SubType == 0)
                     {
-                        EnableAlphaBlend();
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT_RED, o->Owner->Position[0], o->Owner->Position[1], fScale, fScale, vLight, o->Angle[0], o->Alpha);
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT_RED, o->Owner->Position[0], o->Owner->Position[1], fScale, fScale, vLight, o->Angle[0], o->Alpha);
-                        DisableAlphaBlend();
+                        out.SetState({.blend = Blend::Glow});
+                        out.DrawDecal(Decal(BITMAP_LIGHT_RED, o->Owner->Position[0], o->Owner->Position[1], fScale,
+                                            fScale, vLight, o->Angle[0], o->Alpha));
+                        out.DrawDecal(Decal(BITMAP_LIGHT_RED, o->Owner->Position[0], o->Owner->Position[1], fScale,
+                                            fScale, vLight, o->Angle[0], o->Alpha));
+                        out.SetState({.blend = Blend::Off});
                     }
                     else if (o->SubType == 3)
                     {
-                        EnableAlphaBlend();
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT_RED, o->Owner->Position[0], o->Owner->Position[1], fScale, fScale, vLight, o->Angle[0], o->Alpha);
-                        DisableAlphaBlend();
+                        out.SetState({.blend = Blend::Glow});
+                        out.DrawDecal(Decal(BITMAP_LIGHT_RED, o->Owner->Position[0], o->Owner->Position[1], fScale,
+                                            fScale, vLight, o->Angle[0], o->Alpha));
+                        out.SetState({.blend = Blend::Off});
                     }
                     else if (o->SubType == 4)
                     {
-                        EnableAlphaBlend();
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT_RED, o->Position[0], o->Position[1], fScale, fScale, vLight, o->Angle[0], o->Alpha);
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT_RED, o->Position[0], o->Position[1], fScale, fScale, vLight, o->Angle[0], o->Alpha);
-                        DisableAlphaBlend();
+                        out.SetState({.blend = Blend::Glow});
+                        out.DrawDecal(Decal(BITMAP_LIGHT_RED, o->Position[0], o->Position[1], fScale, fScale, vLight,
+                                            o->Angle[0], o->Alpha));
+                        out.DrawDecal(Decal(BITMAP_LIGHT_RED, o->Position[0], o->Position[1], fScale, fScale, vLight,
+                                            o->Angle[0], o->Alpha));
+                        out.SetState({.blend = Blend::Off});
                     }
 
                 }
@@ -8706,9 +8720,19 @@ static void UpdateDrawnEffectSprites(OBJECT* o)
                 (TERRAIN_ATTRIBUTE(Position[0], Position[1]) & TW_NOATTACKZONE) == TW_NOATTACKZONE)
                 break;
         }
-        // The light the draw paints the beam's smoke and terrain light with.
+        // The light the draw paints the beam's smoke with, and the terrain light below.
         if (o->SubType == 1)
             Vector(0.2f, 0.0f, 0.0f, o->Light);
+        // The beam lights the terrain along its segments, up to a no-attack zone during a siege.
+        VectorCopy(o->Position, Position);
+        for (int j = 0; j < 20; j++)
+        {
+            VectorAdd(Position, o->Direction, Position);
+            if (battleCastle::IsBattleCastleStart() &&
+                (TERRAIN_ATTRIBUTE(Position[0], Position[1]) & TW_NOATTACKZONE) == TW_NOATTACKZONE)
+                break;
+            AddTerrainLight(Position[0], Position[1], o->Light, 2, PrimaryTerrainLight);
+        }
     }
     break;
     case MODEL_BLOW_OF_DESTRUCTION:
@@ -8878,6 +8902,12 @@ static void UpdateDrawnEffectShadowState(OBJECT* o)
         {
             CreateEffect(BITMAP_MAGIC + 1, o->Position, o->Angle, o->Light, 9, o->Owner);
         }
+        else if (o->SubType == 13)
+        {
+            o->Light[0] *= pow(1.0f / (1.05f), FPS_ANIMATION_FACTOR);
+            o->Light[1] *= pow(1.0f / (1.05f), FPS_ANIMATION_FACTOR);
+            o->Light[2] *= pow(1.0f / (1.05f), FPS_ANIMATION_FACTOR);
+        }
     }
 }
 
@@ -8956,6 +8986,392 @@ void RenderAfterEffects()
     }
 }
 
+// The ground marks and rings an effect lays under itself.
+void DescribeEffectShadow(const OBJECT& effect, Render::EffectDrawing::EffectDrawer& out)
+{
+    using namespace Render::EffectDrawing;
+    const OBJECT* o = &effect;
+    vec3_t Light;
+    float Luminosity = (float)(rand() % 4 + 8) * 0.1f;
+    float Rotation, Scale;
+    out.SetState({.blend = Blend::Glow});
+
+    switch (o->Type)
+    {
+    case BITMAP_MAGIC:
+        if (o->SubType == 1)
+        {
+            out.DrawDecal(
+                Decal(BITMAP_MAGIC, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]));
+        }
+        else if (o->SubType == 8)
+        {
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]));
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale * 0.8f, o->Scale * 0.8f, o->Light,
+                                -o->Angle[2]));
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale * 1.2f, o->Scale * 1.2f, o->Light,
+                                -o->Angle[2]));
+        }
+        else if (o->SubType == 9)
+        {
+            vec3_t vLight;
+            Vector(o->Light[0] * o->Alpha, o->Light[1] * o->Alpha, o->Light[2] * o->Alpha, vLight);
+            out.DrawDecal(Decal(BITMAP_SUMMON_IMPACT, o->Position[0], o->Position[1], o->Scale, o->Scale, vLight,
+                                o->HeadAngle[1]));
+            // RenderTerrainAlphaBitmap ( BITMAP_SUMMON_IMPACT, o->Position[0], o->Position[1], o->Scale*0.8f,
+            // o->Scale*0.8f, vLight, o->HeadAngle[0] );
+            out.DrawDecal(Decal(BITMAP_SUMMON_IMPACT, o->Position[0], o->Position[1], o->Scale * 1.2f, o->Scale * 1.2f,
+                                vLight, o->HeadAngle[2]));
+        }
+        else if (o->SubType == 10)
+        {
+            out.SetState({.blend = Blend::Subtract});
+            vec3_t vLight;
+            Vector(o->Light[0] * o->Alpha, o->Light[1] * o->Alpha, o->Light[2] * o->Alpha, vLight);
+            for (int i = 0; i < 5; ++i)
+            {
+                if (o->LifeTime < 3 && i > 0)
+                    continue;
+                else if (o->LifeTime < 6 && i > 1)
+                    continue;
+                else if (o->LifeTime < 9 && i > 2)
+                    continue;
+                else if (o->LifeTime < 12 && i > 3)
+                    continue;
+                else if (o->LifeTime < 16 && i > 4)
+                    continue;
+                out.DrawDecal(
+                    Decal(BITMAP_LIGHT, o->Position[0], o->Position[1], o->Scale, o->Scale, vLight, -o->Angle[2]));
+            }
+        }
+        else if (o->SubType == 11)
+        {
+            vec3_t vLight;
+            Vector(o->Light[0] * o->Alpha, o->Light[1] * o->Alpha, o->Light[2] * o->Alpha, vLight);
+            out.DrawDecal(Decal(BITMAP_SUMMON_IMPACT, o->Position[0], o->Position[1], o->Scale, o->Scale, vLight,
+                                o->HeadAngle[1]));
+            out.DrawDecal(Decal(BITMAP_SUMMON_IMPACT, o->Position[0], o->Position[1], o->Scale * 1.2f, o->Scale * 1.2f,
+                                vLight, o->HeadAngle[2]));
+        }
+        else if (o->SubType == 12)
+        {
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]));
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]));
+        }
+        else if (o->SubType == 13 || o->SubType == 14)
+        {
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]));
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]));
+        }
+        break;
+    case BITMAP_MAGIC + 1:
+        Luminosity = 1.f;
+        if (o->LifeTime < 5)
+        {
+            Luminosity -= (float)(5 - o->LifeTime) * 0.2f;
+        }
+        else if (o->SubType == 7)
+        {
+            if (o->LifeTime > 30)
+                Luminosity = (float)(40 - o->LifeTime) * 0.1f;
+        }
+
+        if (o->SubType == 4 || o->SubType == 10)
+        {
+            Scale = o->Scale; //(rand()%100)/100.f*4.f;
+            if (Luminosity == 1.f)
+            {
+                Luminosity = sinf((60 - o->LifeTime) * 0.05f) * 1.f + 0.5f;
+            }
+        }
+        else if (o->SubType == 6)
+        {
+            Scale = (80 - o->LifeTime) * 0.05f;
+        }
+        else if (o->SubType == 7)
+        {
+            Scale = (o->LifeTime) * 0.07f;
+        }
+        else if (o->SubType == 9)
+        {
+            Scale = o->Scale;
+        }
+        else if (o->SubType == 11)
+        {
+            Scale = (20 - o->LifeTime) * 0.15f;
+        }
+        else if (o->SubType == 12)
+        {
+            Scale = (20 - o->LifeTime) * 0.15f;
+        }
+        else if (o->SubType == 13)
+        {
+            Scale = o->Scale;
+        }
+        else
+        {
+            Scale = (20 - o->LifeTime) * 0.15f;
+        }
+        if (o->SubType != 5 && o->SubType != 6 && o->SubType != 8)
+        {
+            switch (o->SubType)
+            {
+            case 0:
+                Vector(Luminosity * 0.4f, Luminosity * 0.6f, Luminosity * 1.f, Light);
+                break;
+            case 1:
+                Vector(Luminosity * 0.4f, Luminosity * 0.6f, Luminosity * 1.f, Light);
+                break;
+            case 2:
+                Vector(Luminosity * 0.4f, Luminosity * 1.f, Luminosity * 0.6f, Light);
+                break;
+            case 3:
+                Vector(Luminosity * 1.f, Luminosity * 0.6f, Luminosity * 0.4f, Light);
+                break;
+            case 4:
+                Vector(Luminosity * 1.f, Luminosity * 0.5f, Luminosity * 0.1f, Light);
+                break;
+            case 7:
+                Vector(Luminosity * 0.9f, Luminosity * 0.4f, Luminosity * 0.2f, Light);
+                break;
+            case 9:
+                Vector(Luminosity * 0.9f, Luminosity * 0.4f, Luminosity * 0.2f, Light);
+                break;
+            case 10:
+                Vector(Luminosity * 0.1f, Luminosity * 0.5f, Luminosity * 1.f, Light);
+                break;
+            case 11:
+                Vector(Luminosity * o->Light[0], Luminosity * o->Light[1], Luminosity * o->Light[2], Light);
+                break;
+            case 12:
+                out.SetState({.blend = Blend::Subtract});
+                Vector(Luminosity * o->Light[0], Luminosity * o->Light[1], Luminosity * o->Light[2], Light);
+                break;
+            case 13:
+                Vector(o->Light[0], o->Light[1], o->Light[2], Light);
+                break;
+            }
+            out.DrawDecal(Decal(BITMAP_MAGIC + 1, o->Position[0], o->Position[1], Scale, Scale, Light, -o->Angle[2]));
+        }
+        break;
+
+    case BITMAP_FIRE_HIK2_MONO:
+        if (o->SubType == 0)
+        {
+            Vector(Luminosity * 1.f, Luminosity * 1.0f, Luminosity * 1.0f, Light);
+            out.DrawDecal(Decal(BITMAP_LIGHTNING + 1, o->Position[0], o->Position[1], 2.f, 2.f, Light, -o->Angle[2]));
+        }
+        break;
+
+    case BITMAP_CLOUD:
+        if (o->SubType == 0)
+        {
+            Vector(Luminosity * o->Light[0], Luminosity * o->Light[1], Luminosity * o->Light[2], Light);
+            out.DrawDecal(Decal(BITMAP_CLOUD, o->Position[0], o->Position[1], o->Scale, o->Scale, Light, -o->Angle[2]));
+        }
+        break;
+    case MODEL_RAKLION_BOSS_MAGIC:
+    {
+        if (o->SubType == 0)
+        {
+            Vector(Luminosity * 0.4f, Luminosity * 0.4f, Luminosity * 1.f, Light);
+            out.DrawDecal(Decal(BITMAP_LIGHT, o->Position[0], o->Position[1], 15.f, 15.f, Light, -o->Angle[2]));
+            Vector(Luminosity * 1.0f, Luminosity * 1.0f, Luminosity * 1.f, Light);
+            out.DrawDecal(Decal(BITMAP_LIGHT, o->Position[0], o->Position[1], 5.f, 5.f, Light, -o->Angle[2]));
+        }
+    }
+    break;
+    case MODEL_EFFECT_BROKEN_ICE0:
+    case MODEL_EFFECT_BROKEN_ICE1:
+    case MODEL_EFFECT_BROKEN_ICE2:
+    case MODEL_EFFECT_BROKEN_ICE3:
+    {
+        if (o->SubType == 1)
+        {
+            Vector(Luminosity * o->Light[0], Luminosity * o->Light[0], Luminosity * o->Light[0], Light);
+            out.DrawDecal(Decal(BITMAP_LIGHT, o->Position[0], o->Position[1], 5.f, 5.f, Light, -o->Angle[2]));
+        }
+    }
+    break;
+    case BITMAP_MAGIC + 2:
+        out.SetState({.blend = Blend::Glow});
+        Rotation = (int)WorldTime % 3600 / (float)10.f;
+
+        Luminosity = 1.f;
+        if (o->SubType != 2)
+        {
+            out.DrawCircle(Circle(BITMAP_MAGIC + 2, o->Position, 90.f, 130.f, 200.f, Rotation, 0.f, 0.f));
+            out.DrawCircle(Circle(BITMAP_MAGIC + 2, o->Position, 90.f, 130.f, 200.f, -Rotation, 0.f, 0.f));
+
+            if (o->LifeTime < 5)
+                Luminosity -= (float)(5 - o->LifeTime) * 0.2f;
+            Scale = (20 - o->LifeTime) * 0.15f;
+        }
+        else if (o->SubType == 2)
+        {
+            if (o->LifeTime > 10)
+            {
+                Scale = (20 - o->LifeTime) * 0.55f;
+            }
+            else
+            {
+                Luminosity -= (float)(10 - o->LifeTime) * 0.1f;
+            }
+        }
+        Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.2f, Light);
+        out.DrawDecal(Decal(BITMAP_MAGIC + 1, o->Position[0], o->Position[1], Scale, Scale, Light, -o->Angle[2]));
+        break;
+
+    case BITMAP_MAGIC_ZIN:
+    {
+        vec3_t vLight;
+        switch (o->SubType)
+        {
+        case 0:
+            Vector(o->Light[0] * o->Alpha * 2.f, o->Light[1] * o->Alpha * 2.f, o->Light[2] * o->Alpha * 2.f, vLight);
+            break;
+        case 1:
+            Vector(o->Light[0] * o->Alpha / 2.5f, o->Light[1] * o->Alpha / 2.5f, o->Light[2] * o->Alpha / 2.5f, vLight);
+            break;
+        case 2:
+            Vector(o->Light[0] * o->Alpha, o->Light[1] * o->Alpha, o->Light[2] * o->Alpha, vLight);
+            break;
+        }
+        out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, vLight, o->HeadAngle[1]));
+    }
+    break;
+
+#ifdef ASG_ADD_INFLUENCE_GROUND_EFFECT
+    case BITMAP_OUR_INFLUENCE_GROUND:
+        if (o->SubType == 0)
+        {
+            vec3_t vLight;
+
+            Vector(0.6f * o->Alpha, 0.9f * o->Alpha, 1.0f * o->Alpha, vLight);
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, vLight, 45.f));
+
+            Vector(0.6f * o->AlphaTarget, 0.9f * o->AlphaTarget, 1.0f * o->AlphaTarget, vLight);
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], 0.8f, 0.8f, vLight, 45.f));
+
+            Vector(0.2f * o->AlphaTarget, 0.8f * o->AlphaTarget, 1.0f * o->AlphaTarget, vLight);
+            out.DrawDecal(Decal(BITMAP_LIGHT, o->Position[0], o->Position[1], 2.0f, 2.0f, vLight));
+            out.DrawDecal(Decal(BITMAP_LIGHT, o->Position[0], o->Position[1], 2.0f, 2.0f, vLight));
+        }
+        break;
+
+    case BITMAP_ENEMY_INFLUENCE_GROUND:
+        if (o->SubType == 0)
+        {
+            vec3_t vLight;
+
+            Vector(1.0f * o->Alpha, 0.3f * o->Alpha, 0.2f * o->Alpha, vLight);
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale * 1.6f, o->Scale * 1.6f, vLight));
+
+            Vector(1.0f * o->AlphaTarget, 0.3f * o->AlphaTarget, 0.2f * o->AlphaTarget, vLight);
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], 1.15f, 1.15f, vLight));
+
+            Vector(1.0f * o->AlphaTarget, 1.0f * o->AlphaTarget, 1.0f * o->AlphaTarget, vLight);
+            out.DrawDecal(Decal(BITMAP_LIGHT_RED, o->Position[0], o->Position[1], 1.8f, 1.8f, vLight));
+            Vector(1.0f * o->AlphaTarget, 0.0f * o->AlphaTarget, 0.0f * o->AlphaTarget, vLight);
+            out.DrawDecal(Decal(BITMAP_LIGHT, o->Position[0], o->Position[1], 2.0f, 2.0f, vLight));
+        }
+        break;
+#endif	// ASG_ADD_INFLUENCE_GROUND_EFFECT
+    case BITMAP_FLAME:
+        if (o->SubType != 3 && o->SubType != 6)
+        {
+            Luminosity = (float)(rand() % 4 + 8) * 0.1f;
+            Vector(Luminosity, Luminosity, Luminosity, Light);
+            out.DrawDecal(Decal(BITMAP_FLAME, o->Position[0], o->Position[1], 2.f, 2.f, Light, -o->Angle[2]));
+        }
+        break;
+    case BITMAP_LIGHTNING + 1:
+        Luminosity = (float)(o->LifeTime) * 0.1f;
+        Vector(Luminosity, Luminosity, Luminosity, Light);
+        out.DrawDecal(
+            Decal(BITMAP_LIGHTNING + 1, o->Position[0], o->Position[1], o->Scale, o->Scale, Light, -o->Angle[2]));
+        break;
+    case BITMAP_TWLIGHT:
+    case BITMAP_SHOCK_WAVE:
+        if (o->Type == BITMAP_SHOCK_WAVE && gMapManager.InHellas() && o->SubType != 6)
+        {
+            out.SetState({.depthMask = Toggle::Off});
+            out.DrawDecal(
+                WaterDecal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]));
+            out.SetState({.depthMask = Toggle::On});
+        }
+        else
+        {
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]));
+        }
+        break;
+
+    case BITMAP_DAMAGE_01_MONO:
+        if (o->SubType == 0)
+        {
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]));
+        }
+        else if (o->SubType == 1)
+        {
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]));
+        }
+        break;
+
+    case BITMAP_CRATER:
+        out.SetState({.blend = Blend::AlphaTest});
+        out.DrawDecal(
+            Decal(o->Type, o->Position[0], o->Position[1], o->StartPosition[0], o->StartPosition[1], o->Light));
+        break;
+    case MODEL_BLOW_OF_DESTRUCTION:
+        if (o->SubType == 0)
+        {
+            if (o->LifeTime <= 24)
+            {
+                out.DrawDecal(
+                    Decal(BITMAP_FLARE_BLUE, o->Position[0], o->Position[1], 4.f, 4.f, o->Light, -o->Angle[2]));
+            }
+        }
+        else if (o->SubType == 1)
+        {
+            if (o->LifeTime <= 24)
+            {
+                out.DrawDecal(
+                    Decal(BITMAP_FLARE_BLUE, o->Position[0], o->Position[1], 6.f, 6.f, o->Light, -o->Angle[2]));
+            }
+        }
+        break;
+    case BITMAP_CHROME_ENERGY2:
+        out.SetState({.blend = Blend::Glow});
+        out.DrawDecal(
+            Decal(o->Type, o->Position[0], o->Position[1], o->StartPosition[0], o->StartPosition[1], o->Light));
+        break;
+    case BITMAP_TARGET_POSITION_EFFECT1:
+    {
+        if (o->SubType == 0)
+        {
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light));
+        }
+    }
+    break;
+    case BITMAP_TARGET_POSITION_EFFECT2:
+    {
+        if (o->SubType == 0)
+        {
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light));
+        }
+    }
+    break;
+    case BITMAP_RING_OF_GRADATION:
+    {
+        if (o->SubType == 0)
+        {
+            out.DrawDecal(Decal(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light));
+        }
+    }
+    break;
+    }
+}
+
 void RenderEffectShadows()
 {
     if (!g_pOption->GetRenderAllEffects())
@@ -8979,366 +9395,7 @@ void RenderEffectShadows()
         {
             if (o->Visible)
             {
-                vec3_t Light;
-                float Luminosity = (float)(rand() % 4 + 8) * 0.1f;
-                float Rotation, Scale;
-                EnableAlphaBlend();
-
-                switch (o->Type)
-                {
-                case BITMAP_MAGIC:
-                    if (o->SubType == 1)
-                    {
-                        RenderTerrainAlphaBitmap(BITMAP_MAGIC, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]);
-                    }
-                    else if (o->SubType == 8)
-                    {
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]);
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale * 0.8f, o->Scale * 0.8f, o->Light, -o->Angle[2]);
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale * 1.2f, o->Scale * 1.2f, o->Light, -o->Angle[2]);
-                    }
-                    else if (o->SubType == 9)
-                    {
-                        vec3_t vLight;
-                        Vector(o->Light[0] * o->Alpha, o->Light[1] * o->Alpha, o->Light[2] * o->Alpha, vLight);
-                        RenderTerrainAlphaBitmap(BITMAP_SUMMON_IMPACT, o->Position[0], o->Position[1], o->Scale, o->Scale, vLight, o->HeadAngle[1]);
-                        //RenderTerrainAlphaBitmap ( BITMAP_SUMMON_IMPACT, o->Position[0], o->Position[1], o->Scale*0.8f, o->Scale*0.8f, vLight, o->HeadAngle[0] );
-                        RenderTerrainAlphaBitmap(BITMAP_SUMMON_IMPACT, o->Position[0], o->Position[1], o->Scale * 1.2f, o->Scale * 1.2f, vLight, o->HeadAngle[2]);
-                    }
-                    else if (o->SubType == 10)
-                    {
-                        EnableAlphaBlendMinus();
-                        vec3_t vLight;
-                        Vector(o->Light[0] * o->Alpha, o->Light[1] * o->Alpha, o->Light[2] * o->Alpha, vLight);
-                        for (int i = 0; i < 5; ++i)
-                        {
-                            if (o->LifeTime < 3 && i > 0) continue;
-                            else if (o->LifeTime < 6 && i > 1) continue;
-                            else if (o->LifeTime < 9 && i > 2) continue;
-                            else if (o->LifeTime < 12 && i > 3) continue;
-                            else if (o->LifeTime < 16 && i > 4) continue;
-                            RenderTerrainAlphaBitmap(BITMAP_LIGHT, o->Position[0], o->Position[1], o->Scale, o->Scale, vLight, -o->Angle[2]);
-                        }
-                    }
-                    else if (o->SubType == 11)
-                    {
-                        vec3_t vLight;
-                        Vector(o->Light[0] * o->Alpha, o->Light[1] * o->Alpha, o->Light[2] * o->Alpha, vLight);
-                        RenderTerrainAlphaBitmap(BITMAP_SUMMON_IMPACT, o->Position[0], o->Position[1], o->Scale, o->Scale, vLight, o->HeadAngle[1]);
-                        RenderTerrainAlphaBitmap(BITMAP_SUMMON_IMPACT, o->Position[0], o->Position[1], o->Scale * 1.2f, o->Scale * 1.2f, vLight, o->HeadAngle[2]);
-                    }
-                    else if (o->SubType == 12)
-                    {
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]);
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]);
-                    }
-                    else if (o->SubType == 13 || o->SubType == 14)
-                    {
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]);
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]);
-                    }
-                    break;
-                case BITMAP_MAGIC + 1:
-                    Luminosity = 1.f;
-                    if (o->LifeTime < 5)
-                    {
-                        Luminosity -= (float)(5 - o->LifeTime) * 0.2f;
-                    }
-                    else if (o->SubType == 7)
-                    {
-                        if (o->LifeTime > 30)
-                            Luminosity = (float)(40 - o->LifeTime) * 0.1f;
-                    }
-
-                    if (o->SubType == 4 || o->SubType == 10)
-                    {
-                        Scale = o->Scale;//(rand()%100)/100.f*4.f;
-                        if (Luminosity == 1.f)
-                        {
-                            Luminosity = sinf((60 - o->LifeTime) * 0.05f) * 1.f + 0.5f;
-                        }
-                    }
-                    else if (o->SubType == 6)
-                    {
-                        Scale = (80 - o->LifeTime) * 0.05f;
-                    }
-                    else if (o->SubType == 7)
-                    {
-                        Scale = (o->LifeTime) * 0.07f;
-                    }
-                    else if (o->SubType == 9)
-                    {
-                        Scale = o->Scale;
-                    }
-                    else if (o->SubType == 11)
-                    {
-                        Scale = (20 - o->LifeTime) * 0.15f;
-                    }
-                    else if (o->SubType == 12)
-                    {
-                        Scale = (20 - o->LifeTime) * 0.15f;
-                    }
-                    else if (o->SubType == 13)
-                    {
-                        o->Light[0] *= pow(1.0f / (1.05f), FPS_ANIMATION_FACTOR);
-                        o->Light[1] *= pow(1.0f / (1.05f), FPS_ANIMATION_FACTOR);
-                        o->Light[2] *= pow(1.0f / (1.05f), FPS_ANIMATION_FACTOR);
-                        Scale = o->Scale;
-                    }
-                    else
-                    {
-                        Scale = (20 - o->LifeTime) * 0.15f;
-                    }
-                    if (o->SubType != 5 && o->SubType != 6 && o->SubType != 8)
-                    {
-                        switch (o->SubType)
-                        {
-                        case 0:
-                            Vector(Luminosity * 0.4f, Luminosity * 0.6f, Luminosity * 1.f, Light);
-                            break;
-                        case 1:
-                            Vector(Luminosity * 0.4f, Luminosity * 0.6f, Luminosity * 1.f, Light);
-                            break;
-                        case 2:
-                            Vector(Luminosity * 0.4f, Luminosity * 1.f, Luminosity * 0.6f, Light);
-                            break;
-                        case 3:
-                            Vector(Luminosity * 1.f, Luminosity * 0.6f, Luminosity * 0.4f, Light);
-                            break;
-                        case 4:
-                            Vector(Luminosity * 1.f, Luminosity * 0.5f, Luminosity * 0.1f, Light);
-                            break;
-                        case 7:
-                            Vector(Luminosity * 0.9f, Luminosity * 0.4f, Luminosity * 0.2f, Light);
-                            break;
-                        case 9:
-                            Vector(Luminosity * 0.9f, Luminosity * 0.4f, Luminosity * 0.2f, Light);
-                            break;
-                        case 10:
-                            Vector(Luminosity * 0.1f, Luminosity * 0.5f, Luminosity * 1.f, Light);
-                            break;
-                        case 11:
-                            Vector(Luminosity * o->Light[0], Luminosity * o->Light[1], Luminosity * o->Light[2], Light);
-                            break;
-                        case 12:
-                            EnableAlphaBlendMinus();
-                            Vector(Luminosity * o->Light[0], Luminosity * o->Light[1], Luminosity * o->Light[2], Light);
-                            break;
-                        case 13:
-                            Vector(o->Light[0], o->Light[1], o->Light[2], Light);
-                            break;
-                        }
-                        RenderTerrainAlphaBitmap(BITMAP_MAGIC + 1, o->Position[0], o->Position[1], Scale, Scale, Light, -o->Angle[2]);
-                    }
-                    break;
-
-                case BITMAP_FIRE_HIK2_MONO:
-                    if (o->SubType == 0)
-                    {
-                        Vector(Luminosity * 1.f, Luminosity * 1.0f, Luminosity * 1.0f, Light);
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHTNING + 1, o->Position[0], o->Position[1], 2.f, 2.f, Light, -o->Angle[2]);
-                    }
-                    break;
-
-                case BITMAP_CLOUD:
-                    if (o->SubType == 0)
-                    {
-                        Vector(Luminosity * o->Light[0], Luminosity * o->Light[1], Luminosity * o->Light[2], Light);
-                        RenderTerrainAlphaBitmap(BITMAP_CLOUD, o->Position[0], o->Position[1], o->Scale, o->Scale, Light, -o->Angle[2]);
-                    }
-                    break;
-                case MODEL_RAKLION_BOSS_MAGIC:
-                {
-                    if (o->SubType == 0)
-                    {
-                        Vector(Luminosity * 0.4f, Luminosity * 0.4f, Luminosity * 1.f, Light);
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT, o->Position[0], o->Position[1], 15.f, 15.f, Light, -o->Angle[2]);
-                        Vector(Luminosity * 1.0f, Luminosity * 1.0f, Luminosity * 1.f, Light);
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT, o->Position[0], o->Position[1], 5.f, 5.f, Light, -o->Angle[2]);
-                    }
-                }
-                break;
-                case MODEL_EFFECT_BROKEN_ICE0:
-                case MODEL_EFFECT_BROKEN_ICE1:
-                case MODEL_EFFECT_BROKEN_ICE2:
-                case MODEL_EFFECT_BROKEN_ICE3:
-                {
-                    if (o->SubType == 1)
-                    {
-                        Vector(Luminosity * o->Light[0], Luminosity * o->Light[0], Luminosity * o->Light[0], Light);
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT, o->Position[0], o->Position[1], 5.f, 5.f, Light, -o->Angle[2]);
-                    }
-                }
-                break;
-                case BITMAP_MAGIC + 2:
-                    EnableAlphaBlend();
-                    Rotation = (int)WorldTime % 3600 / (float)10.f;
-
-                    Luminosity = 1.f;
-                    if (o->SubType != 2)
-                    {
-                        RenderCircle(BITMAP_MAGIC + 2, o->Position, 90.f, 130.f, 200.f, Rotation, 0.f, 0.f);
-                        RenderCircle(BITMAP_MAGIC + 2, o->Position, 90.f, 130.f, 200.f, -Rotation, 0.f, 0.f);
-
-                        if (o->LifeTime < 5) Luminosity -= (float)(5 - o->LifeTime) * 0.2f;
-                        Scale = (20 - o->LifeTime) * 0.15f;
-                    }
-                    else if (o->SubType == 2)
-                    {
-                        if (o->LifeTime > 10)
-                        {
-                            Scale = (20 - o->LifeTime) * 0.55f;
-                        }
-                        else
-                        {
-                            Luminosity -= (float)(10 - o->LifeTime) * 0.1f;
-                        }
-                    }
-                    Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.2f, Light);
-                    RenderTerrainAlphaBitmap(BITMAP_MAGIC + 1, o->Position[0], o->Position[1], Scale, Scale, Light, -o->Angle[2]);
-                    break;
-
-                case BITMAP_MAGIC_ZIN:
-                {
-                    vec3_t vLight;
-                    switch (o->SubType)
-                    {
-                    case 0:
-                        Vector(o->Light[0] * o->Alpha * 2.f, o->Light[1] * o->Alpha * 2.f, o->Light[2] * o->Alpha * 2.f, vLight);
-                        break;
-                    case 1:
-                        Vector(o->Light[0] * o->Alpha / 2.5f, o->Light[1] * o->Alpha / 2.5f, o->Light[2] * o->Alpha / 2.5f, vLight);
-                        break;
-                    case 2:
-                        Vector(o->Light[0] * o->Alpha, o->Light[1] * o->Alpha, o->Light[2] * o->Alpha, vLight);
-                        break;
-                    }
-                    RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, vLight, o->HeadAngle[1]);
-                }
-                break;
-
-#ifdef ASG_ADD_INFLUENCE_GROUND_EFFECT
-                case BITMAP_OUR_INFLUENCE_GROUND:
-                    if (o->SubType == 0)
-                    {
-                        vec3_t vLight;
-
-                        Vector(0.6f * o->Alpha, 0.9f * o->Alpha, 1.0f * o->Alpha, vLight);
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, vLight, 45.f);
-
-                        Vector(0.6f * o->AlphaTarget, 0.9f * o->AlphaTarget, 1.0f * o->AlphaTarget, vLight);
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], 0.8f, 0.8f, vLight, 45.f);
-
-                        Vector(0.2f * o->AlphaTarget, 0.8f * o->AlphaTarget, 1.0f * o->AlphaTarget, vLight);
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT, o->Position[0], o->Position[1], 2.0f, 2.0f, vLight);
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT, o->Position[0], o->Position[1], 2.0f, 2.0f, vLight);
-                    }
-                    break;
-
-                case BITMAP_ENEMY_INFLUENCE_GROUND:
-                    if (o->SubType == 0)
-                    {
-                        vec3_t vLight;
-
-                        Vector(1.0f * o->Alpha, 0.3f * o->Alpha, 0.2f * o->Alpha, vLight);
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale * 1.6f, o->Scale * 1.6f, vLight);
-
-                        Vector(1.0f * o->AlphaTarget, 0.3f * o->AlphaTarget, 0.2f * o->AlphaTarget, vLight);
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], 1.15f, 1.15f, vLight);
-
-                        Vector(1.0f * o->AlphaTarget, 1.0f * o->AlphaTarget, 1.0f * o->AlphaTarget, vLight);
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT_RED, o->Position[0], o->Position[1], 1.8f, 1.8f, vLight);
-                        Vector(1.0f * o->AlphaTarget, 0.0f * o->AlphaTarget, 0.0f * o->AlphaTarget, vLight);
-                        RenderTerrainAlphaBitmap(BITMAP_LIGHT, o->Position[0], o->Position[1], 2.0f, 2.0f, vLight);
-                    }
-                    break;
-#endif	// ASG_ADD_INFLUENCE_GROUND_EFFECT
-                case BITMAP_FLAME:
-                    if (o->SubType != 3 && o->SubType != 6)
-                    {
-                        Luminosity = (float)(rand() % 4 + 8) * 0.1f;
-                        Vector(Luminosity, Luminosity, Luminosity, Light);
-                        RenderTerrainAlphaBitmap(BITMAP_FLAME, o->Position[0], o->Position[1], 2.f, 2.f, Light, -o->Angle[2]);
-                    }
-                    break;
-                case BITMAP_LIGHTNING + 1:
-                    Luminosity = (float)(o->LifeTime) * 0.1f;
-                    Vector(Luminosity, Luminosity, Luminosity, Light);
-                    RenderTerrainAlphaBitmap(BITMAP_LIGHTNING + 1, o->Position[0], o->Position[1], o->Scale, o->Scale, Light, -o->Angle[2]);
-                    break;
-                case BITMAP_TWLIGHT:
-                case BITMAP_SHOCK_WAVE:
-                    if (o->Type == BITMAP_SHOCK_WAVE && gMapManager.InHellas() && o->SubType != 6)
-                    {
-                        DisableDepthMask();
-                        RenderWaterTerrain(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]);
-                        EnableDepthMask();
-                    }
-                    else
-                    {
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]);
-                    }
-                    break;
-
-                case BITMAP_DAMAGE_01_MONO:
-                    if (o->SubType == 0)
-                    {
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]);
-                    }
-                    else if (o->SubType == 1)
-                    {
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light, -o->Angle[2]);
-                    }
-                    break;
-
-                case BITMAP_CRATER:
-                    EnableAlphaTest();
-                    RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->StartPosition[0], o->StartPosition[1], o->Light);
-                    break;
-                case MODEL_BLOW_OF_DESTRUCTION:
-                    if (o->SubType == 0)
-                    {
-                        if (o->LifeTime <= 24)
-                        {
-                            RenderTerrainAlphaBitmap(BITMAP_FLARE_BLUE, o->Position[0], o->Position[1], 4.f, 4.f, o->Light, -o->Angle[2]);
-                        }
-                    }
-                    else if (o->SubType == 1)
-                    {
-                        if (o->LifeTime <= 24)
-                        {
-                            RenderTerrainAlphaBitmap(BITMAP_FLARE_BLUE, o->Position[0], o->Position[1], 6.f, 6.f, o->Light, -o->Angle[2]);
-                        }
-                    }
-                    break;
-                case BITMAP_CHROME_ENERGY2:
-                    EnableAlphaBlend();
-                    RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->StartPosition[0], o->StartPosition[1], o->Light);
-                    break;
-                case BITMAP_TARGET_POSITION_EFFECT1:
-                {
-                    if (o->SubType == 0)
-                    {
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light);
-                    }
-                }
-                break;
-                case BITMAP_TARGET_POSITION_EFFECT2:
-                {
-                    if (o->SubType == 0)
-                    {
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light);
-                    }
-                }
-                break;
-                case BITMAP_RING_OF_GRADATION:
-                {
-                    if (o->SubType == 0)
-                    {
-                        RenderTerrainAlphaBitmap(o->Type, o->Position[0], o->Position[1], o->Scale, o->Scale, o->Light);
-                    }
-                }break;
-                }
+                DescribeEffectShadow(*o, Render::EffectDrawing::ActiveEffectDrawer());
             }
         }
     }

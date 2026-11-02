@@ -1,6 +1,12 @@
 #ifndef __ZZZ_EFFECT_H__
 #define __ZZZ_EFFECT_H__
 
+namespace Render::EffectDrawing
+{
+struct SpriteDraw;
+class EffectDrawer;
+} // namespace Render::EffectDrawing
+
 extern OBJECT Effects[];
 extern OBJECT Sprites[];
 extern JOINT Joints[];
@@ -31,6 +37,8 @@ bool IsSpriteBloomExcluded(int sprite);
 // Sprites are drawn for one frame: the update clears last frame's before anything spawns new ones.
 void ClearSprites();
 void RenderSprites(BYTE byRenderOneMore = 0);
+// The draw a live sprite asks for: its quad, its blend and whether bloom leaves it alone.
+Render::EffectDrawing::SpriteDraw DescribeSprite(const OBJECT& sprite, bool bloomExcluded);
 void CheckSprites();
 
 void AnimationFlag();
@@ -42,6 +50,9 @@ int CreateParticleFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Lig
                              OBJECT* Owner = NULL);
 
 void RenderParticles(BYTE byRenderOneMore = 0);
+// Hands the sprites and state changes a live particle draws with to `out`; `slot` is its index in Particles.
+void DescribeParticle(const PARTICLE& particle, int slot, float width, float height,
+                      Render::EffectDrawing::EffectDrawer& out);
 void MoveParticles();
 bool DeleteParticle(int iType);
 
@@ -71,6 +82,8 @@ void RenderEffects(bool bRenderBlendMesh = false);
 void UpdateEffectModelEffects();
 void RenderAfterEffects();
 void RenderEffectShadows();
+// Hands the ground marks and rings a visible effect lays under itself to `out`.
+void DescribeEffectShadow(const OBJECT& effect, Render::EffectDrawing::EffectDrawer& out);
 void CreateEffectFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0,
                             OBJECT* Target = NULL, short PKKey = -1, WORD SkillIndex = 0, WORD Skill = 0,
                             WORD SkillSerialNum = 0, float Scale = 0.0f, short int sTargetIndex = -1);
@@ -116,6 +129,8 @@ void CreateTailAxis(JOINT* o, float Matrix[3][4], BYTE axis = 0);
 void MoveJoint(JOINT* o, int iIndex);
 void MoveJoints();
 void RenderJoints(BYTE bRenderOneMore = 0);
+// Hands the state changes, trail quads and ground mark a live joint draws with to `out`.
+void DescribeJoint(const JOINT& joint, Render::EffectDrawing::EffectDrawer& out);
 
 void GetMagicScrew(int iParam, vec3_t vResult, float fSpeedRate = 1.0f);
 void GetMagicScrewAt(double frame, vec3_t vResult, float fSpeedRate = 1.0f);

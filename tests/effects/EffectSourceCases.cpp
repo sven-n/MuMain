@@ -23,7 +23,7 @@ std::string_view SignatureOf(Stage stage)
     case Stage::Render:
         return "void RenderEffects(bool bRenderBlendMesh)";
     case Stage::Ground:
-        return "void RenderEffectShadows()";
+        return "void DescribeEffectShadow(const OBJECT& effect,";
     case Stage::AfterCharacters:
         break;
     }

@@ -12,6 +12,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"
 #include "ZzzEffect.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
 #include "UI/Core/WindowSystem.h"
@@ -20,7 +21,6 @@
 
 #include <algorithm>
 #include <array>
-#include <optional>
 
 namespace
 {
@@ -96,8 +96,27 @@ bool IsSpriteBloomExcluded(int sprite)
     return s_spriteBloomExcluded[sprite];
 }
 
-void RenderSprite(OBJECT* o, OBJECT* Owner)
+Render::EffectDrawing::SpriteDraw DescribeSprite(const OBJECT& sprite, bool bloomExcluded)
 {
+    using Render::EffectDrawing::Blend;
+    const OBJECT* o = &sprite;
+    Render::EffectDrawing::SpriteDraw draw;
+    draw.texture = o->Type;
+    VectorCopy(o->Position, draw.position);
+    VectorCopy(o->Light, draw.light);
+    draw.rotation = o->Angle[2];
+    draw.bloomExcluded = bloomExcluded;
+    if (o->Type == BITMAP_FORMATION_MARK)
+        draw.state.blend = Blend::AlphaTest;
+    else if (o->SubType == 0)
+        draw.state.blend = Blend::Glow;
+    else if (o->SubType == 1)
+        draw.state.blend = Blend::Subtract;
+    else if (o->SubType == 2)
+        draw.state.blend = Blend::AlphaTest;
+    else if (o->SubType == 3)
+        draw.state.blend = Blend::Blend2;
+
     float Scale = UpdateAnimationFrame(o->AnimationFrame, o->Visible) * o->Scale;
 
     BITMAP_t* pBitmap = Bitmaps.GetTexture(o->Type);
@@ -152,12 +171,19 @@ void RenderSprite(OBJECT* o, OBJECT* Owner)
             break;
         }
 
-        RenderSprite(o->Type, o->Position, 64, 64, o->Light, o->Angle[2], u, v, uw, vw);
+        draw.width = 64.f;
+        draw.height = 64.f;
+        draw.u = u;
+        draw.v = v;
+        draw.uWidth = uw;
+        draw.vHeight = vw;
     }
     else
     {
-        RenderSprite(o->Type, o->Position, Width, Height, o->Light, o->Angle[2]);
+        draw.width = Width;
+        draw.height = Height;
     }
+    return draw;
 }
 
 void RenderSprites(BYTE byRenderOneMore)
@@ -192,34 +218,7 @@ void RenderSprites(BYTE byRenderOneMore)
 
         if (o->Live && !s_spriteDrawn[i])
         {
-            if (o->Type == BITMAP_FORMATION_MARK)
-            {
-                EnableAlphaTest();
-            }
-            else if (o->SubType == 0)
-            {
-                EnableAlphaBlend();
-            }
-            else if (o->SubType == 1)
-            {
-                EnableAlphaBlendMinus();
-            }
-            else if (o->SubType == 2)
-            {
-                EnableAlphaTest();
-            }
-            else if (o->SubType == 3)
-            {
-                EnableAlphaBlend2();
-            }
-            {
-                std::optional<mu::ScopedBloomExclusion> exclusion;
-                if (s_spriteBloomExcluded[i])
-                {
-                    exclusion.emplace();
-                }
-                RenderSprite(o, o->Owner);
-            }
+            Render::EffectDrawing::ActiveEffectDrawer().DrawSprite(DescribeSprite(*o, s_spriteBloomExcluded[i]));
 
             if (byRenderOneMore == 0 || byRenderOneMore == 2)
             {

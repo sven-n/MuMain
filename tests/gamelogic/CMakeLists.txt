@@ -33,6 +33,15 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_effect_draw
+    SOURCES
+        test_effect_draw.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_character_effects_phase
     SOURCES
         test_character_effects_phase.cpp

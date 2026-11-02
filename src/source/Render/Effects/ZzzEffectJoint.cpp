@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include <cfloat>
 #include <cstring>
@@ -6975,6 +6976,9 @@ static void UpdateDrawnJointEffects()
             continue;
         if (o->Type == BITMAP_JOINT_ENERGY && o->SubType == 54 && o->Target->CurrentAction != MONSTER01_ATTACK1)
             continue;
+        // The falling thunder's ground mark fades as it is drawn.
+        if (o->Type == BITMAP_JOINT_THUNDER + 1 && o->SubType == 6)
+            o->Velocity *= powf(1.f / 1.1f, FPS_ANIMATION_FACTOR);
         const bool spear = o->Type == MODEL_SPEARSKILL && (o->SubType == 0 || o->SubType == 4 || o->SubType == 9);
         const bool healing = o->Type == BITMAP_JOINT_HEALING && (o->SubType == 9 || o->SubType == 10);
         const bool flare = o->Type == BITMAP_FLARE + 1 && (o->SubType == 6 || o->SubType == 8);
@@ -7049,6 +7053,282 @@ void MoveJoints()
     UpdateDrawnJointEffects();
 }
 
+// The state changes, trail quads and ground mark one joint draws with.
+void DescribeJoint(const JOINT& joint, Render::EffectDrawing::EffectDrawer& out)
+{
+    using Render::EffectDrawing::Blend;
+    using Render::EffectDrawing::Toggle;
+    const JOINT* o = &joint;
+    switch (o->RenderType)
+    {
+    case RENDER_TYPE_ALPHA_BLEND:
+        out.SetState({.blend = Blend::Glow});
+        break;
+
+    case RENDER_TYPE_ALPHA_TEST:
+        out.SetState({.blend = Blend::AlphaTest});
+        break;
+
+    case RENDER_TYPE_ALPHA_BLEND_MINUS:
+        out.SetState({.blend = Blend::Subtract});
+        break;
+
+    case RENDER_TYPE_ALPHA_BLEND_OTHER:
+        out.SetState({.blend = Blend::Blend2});
+        break;
+    }
+
+    if (o->Type == BITMAP_JOINT_HEALING && o->SubType == 8)
+    {
+        out.SetState({.depthTest = Toggle::Off});
+    }
+
+    if (o->Type == MODEL_SPEARSKILL)
+    {
+        if (o->SubType == 15)
+            out.SetState({.blend = Blend::Subtract});
+    }
+    else if (o->Type == BITMAP_FLARE_BLUE && o->SubType == 20)
+    {
+        out.SetState({.blend = Blend::Blend2});
+    }
+    else if (o->Type == BITMAP_JOINT_SPARK)
+    {
+        if (o->SubType == 5)
+            out.SetState({.texture = o->TexType});
+    }
+    out.SetState({.texture = o->TexType});
+
+    // Runs of segments outside the view frustum are skipped. Not for the trails that fade their
+    // light per drawn segment, add sprites larger than the trail, or draw translated from it.
+    const bool cullOffscreen =
+        !IsEffectCullingDisabledDebug() &&
+        !(o->Type == BITMAP_JOINT_HEALING && (o->SubType == 9 || o->SubType == 10)) &&
+        !(o->Type == MODEL_SPEARSKILL && (o->SubType == 0 || o->SubType == 4 || o->SubType == 9)) &&
+        !(o->Type == BITMAP_FLARE + 1 && (o->SubType == 6 || o->SubType == 8)) &&
+        !(o->Type == BITMAP_FLARE && o->SubType == 22);
+    bool runVisible = true;
+
+    // One joint's quads share its texture and state, so they go to the renderer in one call.
+    static std::vector<mu::Vertex3D> s_quads;
+    const auto flushQuads = [&]
+    {
+        if (!s_quads.empty())
+            out.DrawQuads({s_quads, static_cast<std::uint32_t>(o->TexType)});
+        s_quads.clear();
+    };
+    const auto addQuad = [](const mu::Vertex3D(&quad)[4]) { s_quads.insert(s_quads.end(), quad, quad + 4); };
+
+    for (int j = 0; j < (int)o->NumTails; j++)
+    {
+        if (cullOffscreen && j % kCulledSegmentRun == 0)
+            runVisible = IsTailRunInFrustum(o, j);
+        if (!runVisible)
+        {
+            FrameProfiler::Count(FrameProfiler::Counter::JointSegmentsCulled);
+            continue;
+        }
+
+        if (o->Type == BITMAP_SMOKE && o->SubType == 0 && j < 1)
+        {
+            continue;
+        }
+
+        if (o->Type == BITMAP_JOINT_HEALING && (o->SubType == 9 || o->SubType == 10) && j == (int)o->NumTails - 1)
+        {
+            continue;
+        }
+
+        auto currentTail = o->Tails[j];
+        auto nextTail = o->Tails[j + 1];
+
+        if (!IsValidTailQuad(currentTail) || !IsValidTailQuad(nextTail))
+        {
+            continue;
+        }
+
+        float Light1, Light2;
+        if (o->bTileMapping)
+        {
+            Light1 = ((int)o->NumTails - (j)) / 16.f;
+            Light2 = ((int)o->NumTails - (j + 1)) / 16.f;
+        }
+        else if (o->m_byReverseUV == 3)
+        {
+            Light1 = 1.f - (j) / (float)(o->MaxTails - 1);
+            Light2 = 1.f - (j + 1) / (float)(o->MaxTails - 1);
+        }
+        else
+        {
+            Light1 = ((int)o->NumTails - (j)) / (float)(o->MaxTails - 1);
+            Light2 = ((int)o->NumTails - (j + 1)) / (float)(o->MaxTails - 1);
+        }
+
+        float Scroll = (float)((int)WorldTime % 1000) * 0.001f;
+        if (o->Type == BITMAP_JOINT_THUNDER || o->Type == BITMAP_JOINT_THUNDER + 1)
+        {
+            Light1 *= 2.f;
+            Light2 *= 2.f;
+            Light1 -= Scroll;
+            Light2 -= Scroll;
+        }
+        if (o->Type == BITMAP_FLARE_FORCE &&
+            ((o->SubType >= 0 && o->SubType <= 4) || (o->SubType >= 11 && o->SubType <= 13)) //^ 펜릴 스킬 관련
+        )
+        {
+            Light1 = ((int)o->NumTails - (j)) / (float)((o->MaxTails - 1) / 2);
+            Light2 = ((int)o->NumTails - (j + 1)) / (float)((o->MaxTails - 1) / 2);
+            Light1 -= Scroll;
+            Light2 -= Scroll;
+        }
+        if (o->bTileMapping)
+        {
+            Scroll *= 2.f;
+            Light1 *= 2.f;
+            Light2 *= 2.f;
+            Light1 -= Scroll;
+            Light2 -= Scroll;
+        }
+        if (o->Type == BITMAP_JOINT_FORCE && o->SubType == 0)
+        {
+            float Luminosity = ((float)((o->MaxTails - j) / (float)(o->MaxTails)) * 2);
+            Luminosity *= o->Light[0];
+
+            const std::uint32_t forceColor = PackABGR(Luminosity, Luminosity, Luminosity, 1.f);
+            const mu::Vertex3D forceVerts[4] = {
+                {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, Light1, 0.f, forceColor},
+                {currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, Light1, 1.f, forceColor},
+                {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, Light2, 1.f, forceColor},
+                {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, Light2, 0.f, forceColor},
+            };
+            addQuad(forceVerts);
+        }
+        else
+        {
+            std::uint32_t faceColor = PackABGR(o->Light[0], o->Light[1], o->Light[2], 1.f);
+            if (o->Type == BITMAP_JOINT_THUNDER + 1 && o->SubType == 0)
+            {
+                int tail = (int)(o->Light[2]);
+                if (tail == j)
+                {
+                    float l = o->Light[2] - j;
+                    faceColor = PackABGR(l, l, l, 1.f);
+                }
+                else if (tail < j)
+                {
+                    faceColor = PackABGR(0.f, 0.f, 0.f, 1.f);
+                }
+                else
+                {
+                    faceColor = PackABGR(0.7f, 0.7f, 0.7f, 1.f);
+                }
+            }
+            else if (o->Type == BITMAP_FLARE_FORCE &&
+                     ((o->SubType >= 0 && o->SubType <= 4) || (o->SubType >= 11 && o->SubType <= 13)))
+            {
+                float Luminosity = ((float)(((int)o->NumTails - 1 - j) / (float)(o->MaxTails)) * 2);
+                faceColor = PackABGR(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity, 1.f);
+            }
+            else if (o->Type == BITMAP_JOINT_FORCE && o->SubType == 1)
+            {
+                float Luminosity = (1.f - ((int)o->NumTails - j) / (float)(o->NumTails)) * 2.f;
+                faceColor = PackABGR(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity, 1.f);
+            }
+#ifdef GUILD_WAR_EVENT
+            if (o->Type == BITMAP_FLARE && o->SubType == 22)
+            {
+                vec3_t t_bias;
+                VectorSubtract(o->Target->Position, o->StartPosition, t_bias);
+                flushQuads();
+                mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+                mu::GetRenderer().PushMatrix();
+                mu::GetRenderer().Translate(t_bias[0], t_bias[1], t_bias[2]);
+
+                const std::uint32_t guildColor = PackABGR(o->Light[0], o->Light[1], o->Light[2], 1.f);
+                const mu::Vertex3D guildFace1[4] = {
+                    {currentTail[2][0], currentTail[2][1], currentTail[2][2], 0.f, 0.f, 0.f, Light1, 1.f, guildColor},
+                    {currentTail[3][0], currentTail[3][1], currentTail[3][2], 0.f, 0.f, 0.f, Light1, 0.f, guildColor},
+                    {nextTail[3][0], nextTail[3][1], nextTail[3][2], 0.f, 0.f, 0.f, Light2, 0.f, guildColor},
+                    {nextTail[2][0], nextTail[2][1], nextTail[2][2], 0.f, 0.f, 0.f, Light2, 1.f, guildColor},
+                };
+                mu::GetRenderer().RenderQuad3D(guildFace1, static_cast<std::uint32_t>(o->TexType));
+
+                const mu::Vertex3D guildFace2[4] = {
+                    {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, Light1, 0.f, guildColor},
+                    {currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, Light1, 1.f, guildColor},
+                    {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, Light2, 1.f, guildColor},
+                    {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, Light2, 0.f, guildColor},
+                };
+                mu::GetRenderer().RenderQuad3D(guildFace2, static_cast<std::uint32_t>(o->TexType));
+
+                mu::GetRenderer().PopMatrix();
+                continue;
+            }
+#endif //GUILD_WAR_EVENT
+
+            float V1 = 0.f;
+            float V2 = 1.f;
+            float L1 = Light1;
+            float L2 = Light2;
+            if (o->m_byReverseUV == 1)
+            {
+                V1 = 1.f;
+                V2 = 0.f;
+            }
+            else if (o->m_byReverseUV == 2)
+            {
+                L1 = 1.f - L1;
+                L2 = 1.f - L2;
+            }
+
+            if ((o->RenderFace & RENDER_FACE_ONE) == RENDER_FACE_ONE)
+            {
+                const mu::Vertex3D faceOneVerts[4] = {
+                    {currentTail[2][0], currentTail[2][1], currentTail[2][2], 0.f, 0.f, 0.f, L1, V2, faceColor},
+                    {currentTail[3][0], currentTail[3][1], currentTail[3][2], 0.f, 0.f, 0.f, L1, V1, faceColor},
+                    {nextTail[3][0], nextTail[3][1], nextTail[3][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
+                    {nextTail[2][0], nextTail[2][1], nextTail[2][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
+                };
+                addQuad(faceOneVerts);
+            }
+
+            if ((o->RenderFace & RENDER_FACE_TWO) == RENDER_FACE_TWO)
+            {
+                if (o->Type == BITMAP_JOINT_THUNDER || o->Type == BITMAP_JOINT_THUNDER + 1)
+                {
+                    L1 += Scroll * 2.f;
+                    L2 += Scroll * 2.f;
+                }
+                const mu::Vertex3D faceTwoVerts[4] = {
+                    {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, L1, V1, faceColor},
+                    {currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, L1, V2, faceColor},
+                    {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
+                    {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
+                };
+                addQuad(faceTwoVerts);
+            }
+        }
+    }
+    flushQuads();
+    if (o->Type == BITMAP_JOINT_HEALING && o->SubType == 8)
+    {
+        out.SetState({.depthTest = Toggle::On});
+    }
+    if (o->Type == BITMAP_JOINT_THUNDER + 1 && o->SubType == 6)
+    {
+        vec3_t Light;
+        out.SetState({.blend = Blend::Glow});
+        Vector(o->Velocity, o->Velocity, o->Velocity, Light);
+        out.DrawDecal({.texture = BITMAP_MAGIC + 1,
+                       .x = o->TargetPosition[0],
+                       .y = o->TargetPosition[1],
+                       .sizeX = 2.f,
+                       .sizeY = 2.f,
+                       .light = {Light[0], Light[1], Light[2]}});
+        out.SetState({.blend = Blend::Off});
+    }
+}
+
 void RenderJoints(BYTE bRenderOneMore)
 {
     if (IsJointsDisabledDebug()) // DXP-23 diagnostic
@@ -7062,282 +7342,12 @@ void RenderJoints(BYTE bRenderOneMore)
             continue;
         if (o->Live && o->NumTails > 0 && o->RenderFace != 0)
         {
-            if (bRenderOneMore == 1 && o->byOnlyOneRender == 2) continue;
-            else if (bRenderOneMore == 2 && o->byOnlyOneRender == 1) continue;
+            if (bRenderOneMore == 1 && o->byOnlyOneRender == 2)
+                continue;
+            else if (bRenderOneMore == 2 && o->byOnlyOneRender == 1)
+                continue;
 
-            switch (o->RenderType)
-            {
-            case RENDER_TYPE_ALPHA_BLEND:
-                EnableAlphaBlend();
-                break;
-
-            case RENDER_TYPE_ALPHA_TEST:
-                EnableAlphaTest();
-                break;
-
-            case RENDER_TYPE_ALPHA_BLEND_MINUS:
-                EnableAlphaBlendMinus();
-                break;
-
-            case RENDER_TYPE_ALPHA_BLEND_OTHER:
-                EnableAlphaBlend2();
-                break;
-            }
-
-            if (o->Type == BITMAP_JOINT_HEALING && o->SubType == 8)
-            {
-                DisableDepthTest();
-            }
-
-            if (o->Type == MODEL_SPEARSKILL)
-            {
-                if (o->SubType == 15)
-                    EnableAlphaBlendMinus();
-            }
-            else if (o->Type == BITMAP_FLARE_BLUE && o->SubType == 20)
-            {
-                EnableAlphaBlend2();
-            }
-            else if (o->Type == BITMAP_JOINT_SPARK)
-            {
-                if (o->SubType == 5)
-                    BindTexture(o->TexType);
-            }
-            BindTexture(o->TexType);
-
-            // Runs of segments outside the view frustum are skipped. Not for the trails that fade their
-            // light per drawn segment, add sprites larger than the trail, or draw translated from it.
-            const bool cullOffscreen =
-                !IsEffectCullingDisabledDebug() &&
-                !(o->Type == BITMAP_JOINT_HEALING && (o->SubType == 9 || o->SubType == 10)) &&
-                !(o->Type == MODEL_SPEARSKILL && (o->SubType == 0 || o->SubType == 4 || o->SubType == 9)) &&
-                !(o->Type == BITMAP_FLARE + 1 && (o->SubType == 6 || o->SubType == 8)) &&
-                !(o->Type == BITMAP_FLARE && o->SubType == 22);
-            bool runVisible = true;
-
-            // One joint's quads share its texture and state, so they go to the renderer in one call.
-            static std::vector<mu::Vertex3D> s_quads;
-            const auto flushQuads = [&]
-            {
-                if (!s_quads.empty())
-                    mu::GetRenderer().RenderQuad3D(s_quads, static_cast<std::uint32_t>(o->TexType));
-                s_quads.clear();
-            };
-            const auto addQuad = [](const mu::Vertex3D(&quad)[4]) { s_quads.insert(s_quads.end(), quad, quad + 4); };
-
-            for (int j = 0; j < (int)o->NumTails; j++)
-            {
-                if (cullOffscreen && j % kCulledSegmentRun == 0)
-                    runVisible = IsTailRunInFrustum(o, j);
-                if (!runVisible)
-                {
-                    FrameProfiler::Count(FrameProfiler::Counter::JointSegmentsCulled);
-                    continue;
-                }
-
-                if (o->Type == BITMAP_SMOKE && o->SubType == 0 && j < 1)
-                {
-                    continue;
-                }
-
-                if (o->Type == BITMAP_JOINT_HEALING && (o->SubType == 9 || o->SubType == 10) && j == (int)o->NumTails - 1)
-                {
-                    continue;
-                }
-
-                auto currentTail = o->Tails[j];
-                auto nextTail = o->Tails[j + 1];
-
-                if (!IsValidTailQuad(currentTail) || !IsValidTailQuad(nextTail))
-                {
-                    continue;
-                }
-
-                float Light1, Light2;
-                if (o->bTileMapping)
-                {
-                    Light1 = ((int)o->NumTails - (j)) / 16.f;
-                    Light2 = ((int)o->NumTails - (j + 1)) / 16.f;
-                }
-                else if (o->m_byReverseUV == 3)
-                {
-                    Light1 = 1.f - (j) / (float)(o->MaxTails - 1);
-                    Light2 = 1.f - (j + 1) / (float)(o->MaxTails - 1);
-                }
-                else
-                {
-                    Light1 = ((int)o->NumTails - (j)) / (float)(o->MaxTails - 1);
-                    Light2 = ((int)o->NumTails - (j + 1)) / (float)(o->MaxTails - 1);
-                }
-
-                float Scroll = (float)((int)WorldTime % 1000) * 0.001f;
-                if (o->Type == BITMAP_JOINT_THUNDER || o->Type == BITMAP_JOINT_THUNDER + 1)
-                {
-                    Light1 *= 2.f;
-                    Light2 *= 2.f;
-                    Light1 -= Scroll;
-                    Light2 -= Scroll;
-                }
-                if (o->Type == BITMAP_FLARE_FORCE &&
-                    ((o->SubType >= 0 && o->SubType <= 4) || (o->SubType >= 11 && o->SubType <= 13))	//^ 펜릴 스킬 관련
-                    )
-                {
-                    Light1 = ((int)o->NumTails - (j)) / (float)((o->MaxTails - 1) / 2);
-                    Light2 = ((int)o->NumTails - (j + 1)) / (float)((o->MaxTails - 1) / 2);
-                    Light1 -= Scroll;
-                    Light2 -= Scroll;
-                }
-                if (o->bTileMapping)
-                {
-                    Scroll *= 2.f;
-                    Light1 *= 2.f;
-                    Light2 *= 2.f;
-                    Light1 -= Scroll;
-                    Light2 -= Scroll;
-                }
-                if (o->Type == BITMAP_JOINT_FORCE && o->SubType == 0)
-                {
-                    float Luminosity = ((float)((o->MaxTails - j) / (float)(o->MaxTails)) * 2);
-                    Luminosity *= o->Light[0];
-
-                    const std::uint32_t forceColor = PackABGR(Luminosity, Luminosity, Luminosity, 1.f);
-                    const mu::Vertex3D forceVerts[4] = {
-                        {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, Light1, 0.f,
-                         forceColor},
-                        {currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, Light1, 1.f,
-                         forceColor},
-                        {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, Light2, 1.f, forceColor},
-                        {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, Light2, 0.f, forceColor},
-                    };
-                    addQuad(forceVerts);
-                }
-                else
-                {
-                    std::uint32_t faceColor = PackABGR(o->Light[0], o->Light[1], o->Light[2], 1.f);
-                    if (o->Type == BITMAP_JOINT_THUNDER + 1 && o->SubType == 0)
-                    {
-                        int tail = (int)(o->Light[2]);
-                        if (tail == j)
-                        {
-                            float l = o->Light[2] - j;
-                            faceColor = PackABGR(l, l, l, 1.f);
-                        }
-                        else if (tail < j)
-                        {
-                            faceColor = PackABGR(0.f, 0.f, 0.f, 1.f);
-                        }
-                        else
-                        {
-                            faceColor = PackABGR(0.7f, 0.7f, 0.7f, 1.f);
-                        }
-                    }
-                    else if (o->Type == BITMAP_FLARE_FORCE &&
-                        ((o->SubType >= 0 && o->SubType <= 4) || (o->SubType >= 11 && o->SubType <= 13))
-                        )
-                    {
-                        float Luminosity = ((float)(((int)o->NumTails - 1 - j) / (float)(o->MaxTails)) * 2);
-                        faceColor =
-                            PackABGR(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity, 1.f);
-                    }
-                    else if (o->Type == BITMAP_JOINT_FORCE && o->SubType == 1)
-                    {
-                        float Luminosity = (1.f - ((int)o->NumTails - j) / (float)(o->NumTails)) * 2.f;
-                        faceColor =
-                            PackABGR(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity, 1.f);
-                    }
-#ifdef GUILD_WAR_EVENT
-                    if (o->Type == BITMAP_FLARE && o->SubType == 22)
-                    {
-                        vec3_t t_bias;
-                        VectorSubtract(o->Target->Position, o->StartPosition, t_bias);
-                        flushQuads();
-                        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
-                        mu::GetRenderer().PushMatrix();
-                        mu::GetRenderer().Translate(t_bias[0], t_bias[1], t_bias[2]);
-
-                        const std::uint32_t guildColor = PackABGR(o->Light[0], o->Light[1], o->Light[2], 1.f);
-                        const mu::Vertex3D guildFace1[4] = {
-                            {currentTail[2][0], currentTail[2][1], currentTail[2][2], 0.f, 0.f, 0.f, Light1, 1.f,
-                             guildColor},
-                            {currentTail[3][0], currentTail[3][1], currentTail[3][2], 0.f, 0.f, 0.f, Light1, 0.f,
-                             guildColor},
-                            {nextTail[3][0], nextTail[3][1], nextTail[3][2], 0.f, 0.f, 0.f, Light2, 0.f, guildColor},
-                            {nextTail[2][0], nextTail[2][1], nextTail[2][2], 0.f, 0.f, 0.f, Light2, 1.f, guildColor},
-                        };
-                        mu::GetRenderer().RenderQuad3D(guildFace1, static_cast<std::uint32_t>(o->TexType));
-
-                        const mu::Vertex3D guildFace2[4] = {
-                            {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, Light1, 0.f,
-                             guildColor},
-                            {currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, Light1, 1.f,
-                             guildColor},
-                            {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, Light2, 1.f, guildColor},
-                            {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, Light2, 0.f, guildColor},
-                        };
-                        mu::GetRenderer().RenderQuad3D(guildFace2, static_cast<std::uint32_t>(o->TexType));
-
-                        mu::GetRenderer().PopMatrix();
-                        continue;
-                    }
-#endif //GUILD_WAR_EVENT
-
-                    float V1 = 0.f;
-                    float V2 = 1.f;
-                    float L1 = Light1;
-                    float L2 = Light2;
-                    if (o->m_byReverseUV == 1)
-                    {
-                        V1 = 1.f;
-                        V2 = 0.f;
-                    }
-                    else if (o->m_byReverseUV == 2)
-                    {
-                        L1 = 1.f - L1;
-                        L2 = 1.f - L2;
-                    }
-
-                    if ((o->RenderFace & RENDER_FACE_ONE) == RENDER_FACE_ONE)
-                    {
-                        const mu::Vertex3D faceOneVerts[4] = {
-                            {currentTail[2][0], currentTail[2][1], currentTail[2][2], 0.f, 0.f, 0.f, L1, V2, faceColor},
-                            {currentTail[3][0], currentTail[3][1], currentTail[3][2], 0.f, 0.f, 0.f, L1, V1, faceColor},
-                            {nextTail[3][0], nextTail[3][1], nextTail[3][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
-                            {nextTail[2][0], nextTail[2][1], nextTail[2][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
-                        };
-                        addQuad(faceOneVerts);
-                    }
-
-                    if ((o->RenderFace & RENDER_FACE_TWO) == RENDER_FACE_TWO)
-                    {
-                        if (o->Type == BITMAP_JOINT_THUNDER || o->Type == BITMAP_JOINT_THUNDER + 1)
-                        {
-                            L1 += Scroll * 2.f;
-                            L2 += Scroll * 2.f;
-                        }
-                        const mu::Vertex3D faceTwoVerts[4] = {
-                            {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, L1, V1, faceColor},
-                            {currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, L1, V2, faceColor},
-                            {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
-                            {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
-                        };
-                        addQuad(faceTwoVerts);
-                    }
-                }
-            }
-            flushQuads();
-            if (o->Type == BITMAP_JOINT_HEALING && o->SubType == 8)
-            {
-                EnableDepthTest();
-            }
-            if (o->Type == BITMAP_JOINT_THUNDER + 1 && o->SubType == 6)
-            { 
-                vec3_t Light;
-                EnableAlphaBlend();
-                o->Velocity *= powf(1.f / 1.1f, FPS_ANIMATION_FACTOR);
-                Vector(o->Velocity, o->Velocity, o->Velocity, Light);
-                RenderTerrainAlphaBitmap(BITMAP_MAGIC + 1, o->TargetPosition[0], o->TargetPosition[1], 2.f, 2.f, Light);
-                DisableAlphaBlend();
-            }
+            DescribeJoint(*o, Render::EffectDrawing::ActiveEffectDrawer());
         }
     }
 }

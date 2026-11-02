@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include "Render/Models/BoneManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -8971,6 +8972,364 @@ namespace
     }
 }
 
+namespace
+{
+using Render::EffectDrawing::Blend;
+using Render::EffectDrawing::Sprite;
+using Render::EffectDrawing::Toggle;
+} // namespace
+
+// The sprites and state changes one particle draws with, given its quad size and its slot (some alternate by slot).
+void DescribeParticle(const PARTICLE& particle, int i, float Width, float Height,
+                      Render::EffectDrawing::EffectDrawer& out)
+{
+    const PARTICLE* o = &particle;
+    int Frame;
+    switch (o->Type)
+    {
+    case BITMAP_WATERFALL_1:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+
+    case BITMAP_BUBBLE:
+        Frame = o->Frame % 9;
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, Frame % 3 * 0.25f + 0.005f,
+                              Frame / 3 * 0.25f + 0.005f, 0.25f - 0.01f, 0.25f - 0.01f));
+        break;
+    case BITMAP_SPOT_WATER:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height * 0.125, o->Light, o->Angle[0], 0.f,
+                              o->Frame % 8 * 0.125f, 1.f, 0.125f));
+        break;
+
+    case BITMAP_SPARK + 2:
+        if (o->SubType == 0 || o->SubType == 2 || o->SubType == 3)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 2 * 0.5f,
+                                  o->Frame / 2 * 0.5f, 0.5f, 0.5f));
+        }
+        break;
+
+    case BITMAP_EXPLOTION_MONO:
+    case BITMAP_EXPLOTION:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 4 * 0.25f + 0.005f,
+                              o->Frame / 4 * 0.25f + 0.005f, 0.25f - 0.01f, 0.25f - 0.01f));
+        break;
+    case BITMAP_EXPLOTION + 1:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Angle[0],
+                              o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f));
+        break;
+    case BITMAP_SUMMON_SAHAMUTT_EXPLOSION:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 4 * 0.25f + 0.005f,
+                              o->Frame / 4 * 0.25f + 0.005f, 0.25f - 0.01f, 0.25f - 0.01f));
+        break;
+    case BITMAP_CLUD64:
+    {
+        if (o->SubType == 0 || o->SubType == 5 || o->SubType == 11)
+        {
+            out.SetState({.blend = Blend::Subtract});
+        }
+
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+    }
+    break;
+    case BITMAP_TORCH_FIRE:
+    {
+        vec3_t vPos;
+        VectorCopy(o->Position, vPos);
+        for (int i = 0; i < 3; ++i)
+        {
+            out.DrawSprite(Sprite(o->Type, vPos, Width, Height, o->Light, o->Rotation));
+            vPos[2] -= 10.f;
+        }
+    }
+    break;
+    case BITMAP_GHOST_CLOUD1:
+    case BITMAP_GHOST_CLOUD2:
+    {
+        out.DrawSprite(Sprite(o->Type, o->Position, Width, Height, o->Light, o->Rotation));
+    }
+    break;
+    case BITMAP_LIGHT + 3:
+    {
+        out.DrawSprite(Sprite(o->Type, o->Position, Width, Height, o->Light, o->Rotation));
+    }
+    break;
+    case BITMAP_TWINTAIL_WATER:
+    {
+        out.SetState({.blend = Blend::Glow});
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+    }
+    break;
+    case BITMAP_SMOKE:
+        if (o->SubType == 2 || o->SubType == 5 || o->SubType == 12 || o->SubType == 14 || o->SubType == 15 ||
+            o->SubType == 20 || o->SubType == 21 || o->SubType == 29)
+            out.SetState({.blend = Blend::Subtract});
+        if (o->SubType == 37 || o->SubType == 38 || o->SubType == 59)
+            out.SetState({.blend = Blend::Subtract});
+        if (o->SubType == 6)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light));
+        }
+        else
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        break;
+    case BITMAP_SMOKE + 1:
+    case BITMAP_SMOKE + 4:
+        out.SetState({.blend = Blend::Blend3});
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_ADV_SMOKE + 1:
+        if (o->SubType == 2)
+        {
+            out.SetState({.additiveTexture = Toggle::On});
+            out.SetState({.blend = Blend::Blend3});
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+            out.SetState({.additiveTexture = Toggle::Off});
+        }
+        else
+        {
+            out.SetState({.blend = Blend::Blend3});
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        break;
+    case BITMAP_SMOKE + 3:
+        if (o->SubType == 3 || o->SubType == 4)
+        {
+            out.SetState({.blend = Blend::Subtract});
+        }
+        else
+        {
+            out.SetState({.blend = Blend::Blend3});
+        }
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_LIGHTNING:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Angle[0],
+                              o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f));
+        break;
+    case BITMAP_BLOOD + 1:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 2 * 0.5f,
+                              o->Frame / 2 * 0.5f, 0.5f, 0.5f));
+        break;
+    case BITMAP_CHROME_ENERGY2:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Rotation,
+                              o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f));
+        break;
+    case BITMAP_FIRE_CURSEDLICH:
+    case BITMAP_FIRE_HIK2_MONO:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_LEAF_TOTEMGOLEM:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_FIRE:
+    case BITMAP_FIRE + 2:
+    case BITMAP_FIRE + 3:
+        if (o->SubType == 17 || o->SubType == 5 || o->SubType == 7 || o->SubType == 8 || o->SubType == 11 ||
+            o->SubType == 12 || o->SubType == 13)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Rotation,
+                                  o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f));
+        }
+        else if (o->SubType == 18)
+        {
+            out.SetState({.blend = Blend::Blend3});
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        else if (o->SubType == 14 || o->SubType == 15)
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        else
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Angle[0],
+                                  o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f));
+        }
+        break;
+    case BITMAP_FIRECRACKER:
+    {
+        int iCount = i % 8 + 22;
+        vec3_t Position;
+        vec3_t Light;
+        int iTemp = o->LifeTime / 4 + o->SubType;
+        // int iTemp = 0;
+        int iColor = iTemp / 10;
+        int iColorChange = iTemp % 10;
+        for (int j = iCount; j >= 0; --j)
+        {
+            for (int k = 0; k < 3; ++k)
+            {
+                Position[k] = o->Position[k] - (float)j * o->Velocity[k] * 0.1f;
+                Light[k] =
+                    (float)(std::min<int>(iCount - j, 10)) *
+                    (o->Light[(k + iColor) % 3] * (10 - iColorChange) + o->Light[(k + iColor + 1) % 3] * iColorChange) *
+                    ((float)std::min<int>(o->LifeTime, 10) * 0.001f);
+            }
+            out.DrawSprite(Sprite(o->TexType, Position, Width, Height, Light, o->Rotation));
+        }
+    }
+    break;
+    case BITMAP_FLARE:
+        if (o->SubType == 11)
+        {
+            BITMAP_t* pBitmap = Bitmaps.GetTexture(o->TexType);
+            Width = pBitmap->Width * 0.5f * o->Scale;
+            Height = pBitmap->Height * 0.4f;
+
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        else if (o->SubType != 4)
+        {
+            if (o->LifeTime != 60)
+                out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        else
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        break;
+    case BITMAP_FLARE_BLUE:
+        if (o->SubType == 0)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        else if (o->SubType == 1)
+        {
+            BITMAP_t* pBitmap = Bitmaps.GetTexture(o->TexType);
+            Width = pBitmap->Width * 0.2f * o->Scale;
+            Height = pBitmap->Height * 0.3f;
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        break;
+    case BITMAP_FLARE + 1:
+        if (o->SubType == 0)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        break;
+    case BITMAP_LIGHT + 2:
+        if (o->SubType == 3 || o->SubType == 4 || o->SubType == 6) // || o->SubType == 7)
+        {
+            out.SetState({.blend = Blend::Subtract});
+        }
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_MAGIC + 1:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_CLOUD:
+    {
+        float rotation = o->Rotation;
+        switch (o->SubType)
+        {
+        case 10:
+        case 12:
+        case 7:
+        case 14:
+        case 16:
+            out.SetState({.blend = Blend::Subtract});
+            break;
+        case 0:
+        case 8:
+        case 3:
+        case 18:
+            if ((i % 2) == 0)
+            {
+                rotation = (WorldTime * 0.02f * o->TurningForce[0]) + o->StartPosition[1];
+            }
+            else
+            {
+                rotation = (WorldTime * (-0.02f) * o->TurningForce[0]) + o->StartPosition[1];
+            }
+            break;
+        }
+        if (o->SubType == 8 || o->SubType == 9 || o->SubType == 20 || o->SubType == 21)
+        {
+            vec3_t Light;
+            Light[0] = o->Light[0] * o->Alpha;
+            Light[1] = o->Light[1] * o->Alpha;
+            Light[2] = o->Light[2] * o->Alpha;
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, Light, rotation));
+        }
+        else if (o->SubType == 17)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, rotation));
+        }
+        else if (o->SubType == 18)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, rotation));
+        }
+        else if (o->SubType == 19)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, rotation));
+        }
+        else
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, rotation));
+        break;
+    }
+    case BITMAP_SPARK:
+        if (o->SubType == 10)
+            out.SetState({.blend = Blend::Subtract});
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_FLAME:
+        if (o->SubType == 11)
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        else
+        {
+            out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        }
+        break;
+    case BITMAP_CURSEDTEMPLE_EFFECT_MASKER:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_SHINY + 6:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        out.DrawSprite(Sprite(BITMAP_LIGHT, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_SMOKELINE2:
+    {
+        if (o->SubType == 3)
+        {
+            out.SetState({.blend = Blend::Subtract});
+        }
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+    }
+    break;
+    case BITMAP_SBUMB:
+    {
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, 0.0f,
+                              o->Frame % 4 * 0.25f + 0.005f, 0.0f, 0.25f - 0.01f, 1.0f));
+    }
+    break;
+    case BITMAP_DAMAGE1:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    case BITMAP_SWORD_EFFECT_MONO:
+    {
+        vec3_t vPos;
+        VectorCopy(o->Position, vPos);
+        vPos[2] += (31.0f * o->Scale);
+        out.DrawSprite(Sprite(o->TexType, vPos, Width * 0.9f, Height * 1.1f, o->Light, o->Rotation));
+    }
+    break;
+    case BITMAP_DAMAGE2:
+    {
+        vec3_t vLight;
+        VectorCopy(o->Light, vLight);
+        VectorScale(vLight, 1.4f, vLight);
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, vLight, o->Rotation));
+    }
+    break;
+    case BITMAP_TRUE_FIRE:
+    default:
+        out.DrawSprite(Sprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation));
+        break;
+    }
+}
+
 void RenderParticles(BYTE byRenderOneMore)
 {
     if (!g_pOption->GetRenderAllEffects())
@@ -8995,6 +9354,7 @@ void RenderParticles(BYTE byRenderOneMore)
         Render::Effects::DrawOrder::GroupByTexture(drawOrder, drawCount, drawOrderScratch);
     }
 
+    Render::EffectDrawing::EffectDrawer& out = Render::EffectDrawing::ActiveEffectDrawer();
     for (std::size_t drawIndex = 0; drawIndex < drawCount; drawIndex++)
     {
         const int i = sortDraws ? drawOrder[drawIndex].particleIndex : static_cast<int>(drawIndex);
@@ -9018,11 +9378,11 @@ void RenderParticles(BYTE byRenderOneMore)
             // whether or not they are drawn.
             if (o->Type == BITMAP_LIGHT && o->SubType == 6)
             {
-                EnableDepthTest();
+                out.SetState({.depthTest = Toggle::On});
             }
             if (o->Type == BITMAP_EXPLOTION && o->SubType == 5)
             {
-                DisableDepthTest();
+                out.SetState({.depthTest = Toggle::Off});
             }
             // The margin covers the few types drawn a little off their position. Damage numbers
             // brighten on every draw and firecrackers trail far behind theirs, so those always draw.
@@ -9034,343 +9394,14 @@ void RenderParticles(BYTE byRenderOneMore)
             }
             if (pBitmap->Components == 3)
             {
-                EnableAlphaBlend();
+                out.SetState({.blend = Blend::Glow});
             }
             else
             {
-                EnableAlphaTest(false);
+                out.SetState({.blend = Blend::AlphaTestKeepDepthMask});
             }
 
-            int Frame;
-            switch (o->Type)
-            {
-            case BITMAP_WATERFALL_1:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-
-            case BITMAP_BUBBLE:
-                Frame = o->Frame % 9;
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, Frame % 3 * 0.25f + 0.005f, Frame / 3 * 0.25f + 0.005f, 0.25f - 0.01f, 0.25f - 0.01f);
-                break;
-            case BITMAP_SPOT_WATER:
-                RenderSprite(o->TexType, o->Position, Width, Height * 0.125, o->Light, o->Angle[0], 0.f, o->Frame % 8 * 0.125f, 1.f, 0.125f);
-                break;
-
-            case BITMAP_SPARK + 2:
-                if (o->SubType == 0 || o->SubType == 2 || o->SubType == 3)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 2 * 0.5f, o->Frame / 2 * 0.5f, 0.5f, 0.5f);
-                }
-                break;
-
-            case BITMAP_EXPLOTION_MONO:
-            case BITMAP_EXPLOTION:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 4 * 0.25f + 0.005f, o->Frame / 4 * 0.25f + 0.005f, 0.25f - 0.01f, 0.25f - 0.01f);
-                break;
-            case BITMAP_EXPLOTION + 1:
-                RenderSprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Angle[0], o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f);
-                break;
-            case BITMAP_SUMMON_SAHAMUTT_EXPLOSION:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 4 * 0.25f + 0.005f, o->Frame / 4 * 0.25f + 0.005f, 0.25f - 0.01f, 0.25f - 0.01f);
-                break;
-            case BITMAP_CLUD64:
-            {
-                if (o->SubType == 0 || o->SubType == 5 || o->SubType == 11)
-                {
-                    EnableAlphaBlendMinus();
-                }
-
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-            }
-            break;
-            case BITMAP_TORCH_FIRE:
-            {
-                vec3_t vPos;
-                VectorCopy(o->Position, vPos);
-                for (int i = 0; i < 3; ++i)
-                {
-                    RenderSprite(o->Type, vPos, Width, Height, o->Light, o->Rotation);
-                    vPos[2] -= 10.f;
-                }
-            }
-            break;
-            case BITMAP_GHOST_CLOUD1:
-            case BITMAP_GHOST_CLOUD2:
-            {
-                RenderSprite(o->Type, o->Position, Width, Height, o->Light, o->Rotation);
-            }
-            break;
-            case BITMAP_LIGHT + 3:
-            {
-                RenderSprite(o->Type, o->Position, Width, Height, o->Light, o->Rotation);
-            }
-            break;
-            case BITMAP_TWINTAIL_WATER:
-            {
-                EnableAlphaBlend();
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-            }
-            break;
-            case BITMAP_SMOKE:
-                if (o->SubType == 2 || o->SubType == 5 || o->SubType == 12 || o->SubType == 14 || o->SubType == 15 || o->SubType == 20 || o->SubType == 21 || o->SubType == 29)
-                    EnableAlphaBlendMinus();
-                if (o->SubType == 37 || o->SubType == 38 || o->SubType == 59)
-                    EnableAlphaBlendMinus();
-                if (o->SubType == 6)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light);
-                }
-                else
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                break;
-            case BITMAP_SMOKE + 1:
-            case BITMAP_SMOKE + 4:
-                EnableAlphaBlend3();
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_ADV_SMOKE + 1:
-                if (o->SubType == 2)
-                {
-                    mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
-                    EnableAlphaBlend3();
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                    mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-                }
-                else
-                {
-                    EnableAlphaBlend3();
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                break;
-            case BITMAP_SMOKE + 3:
-                if (o->SubType == 3 || o->SubType == 4)
-                {
-                    EnableAlphaBlendMinus();
-                }
-                else
-                {
-                    EnableAlphaBlend3();
-                }
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_LIGHTNING:
-                RenderSprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Angle[0], o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f);
-                break;
-            case BITMAP_BLOOD + 1:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, 0.f, o->Frame % 2 * 0.5f, o->Frame / 2 * 0.5f, 0.5f, 0.5f);
-                break;
-            case BITMAP_CHROME_ENERGY2:
-                RenderSprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Rotation, o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f);
-                break;
-            case BITMAP_FIRE_CURSEDLICH:
-            case BITMAP_FIRE_HIK2_MONO:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_LEAF_TOTEMGOLEM:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_FIRE:
-            case BITMAP_FIRE + 2:
-            case BITMAP_FIRE + 3:
-                if (
-                    o->SubType == 17 || o->SubType == 5 || o->SubType == 7 || o->SubType == 8 || o->SubType == 11 || o->SubType == 12 || o->SubType == 13)
-                {
-                    RenderSprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Rotation, o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f);
-                }
-                else if (o->SubType == 18)
-                {
-                    EnableAlphaBlend3();
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                else if (o->SubType == 14 || o->SubType == 15)
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                else
-                {
-                    RenderSprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, o->Angle[0], o->Frame % 4 * 0.25f, 0.f, 0.25f, 1.f);
-                }
-                break;
-            case BITMAP_FIRECRACKER:
-            {
-                int iCount = i % 8 + 22;
-                vec3_t Position;
-                vec3_t Light;
-                int iTemp = o->LifeTime / 4 + o->SubType;
-                //int iTemp = 0;
-                int iColor = iTemp / 10;
-                int iColorChange = iTemp % 10;
-                for (int j = iCount; j >= 0; --j)
-                {
-                    for (int k = 0; k < 3; ++k)
-                    {
-                        Position[k] = o->Position[k] - (float)j * o->Velocity[k] * 0.1f;
-                        Light[k] = (float)(std::min<int>(iCount - j, 10)) *
-                            (o->Light[(k + iColor) % 3] * (10 - iColorChange) +
-                                o->Light[(k + iColor + 1) % 3] * iColorChange) *
-                            ((float)std::min<int>(o->LifeTime, 10) * 0.001f);
-                    }
-                    RenderSprite(o->TexType, Position, Width, Height, Light, o->Rotation);
-                }
-            }
-            break;
-            case BITMAP_FLARE:
-                if (o->SubType == 11)
-                {
-                    BITMAP_t* pBitmap = Bitmaps.GetTexture(o->TexType);
-                    Width = pBitmap->Width * 0.5f * o->Scale;
-                    Height = pBitmap->Height * 0.4f;
-
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                else if (o->SubType != 4)
-                {
-                    if (o->LifeTime != 60)
-                        RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                else
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                break;
-            case BITMAP_FLARE_BLUE:
-                if (o->SubType == 0)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                else if (o->SubType == 1)
-                {
-                    BITMAP_t* pBitmap = Bitmaps.GetTexture(o->TexType);
-                    Width = pBitmap->Width * 0.2f * o->Scale;
-                    Height = pBitmap->Height * 0.3f;
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                break;
-            case BITMAP_FLARE + 1:
-                if (o->SubType == 0)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                break;
-            case BITMAP_LIGHT + 2:
-                if (o->SubType == 3 || o->SubType == 4 || o->SubType == 6)// || o->SubType == 7)
-                {
-                    EnableAlphaBlendMinus();
-                }
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_MAGIC + 1:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_CLOUD:
-            {
-                float rotation = o->Rotation;
-                switch (o->SubType)
-                {
-                case 10:
-                case 12:
-                case 7:
-                case 14:
-                case 16:
-                    EnableAlphaBlendMinus();
-                    break;
-                case 0:
-                case 8:
-                case 3:
-                case 18:
-                    if ((i % 2) == 0)
-                    {
-                        rotation = (WorldTime * 0.02f * o->TurningForce[0]) + o->StartPosition[1];
-                    }
-                    else
-                    {
-                        rotation = (WorldTime * (-0.02f) * o->TurningForce[0]) + o->StartPosition[1];
-                    }
-                    break;
-                }
-                if (o->SubType == 8 || o->SubType == 9 || o->SubType == 20 || o->SubType == 21)
-                {
-                    vec3_t Light;
-                    Light[0] = o->Light[0] * o->Alpha;
-                    Light[1] = o->Light[1] * o->Alpha;
-                    Light[2] = o->Light[2] * o->Alpha;
-                    RenderSprite(o->TexType, o->Position, Width, Height, Light, rotation);
-                }
-                else if (o->SubType == 17)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, rotation);
-                }
-                else if (o->SubType == 18)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, rotation);
-                }
-                else if (o->SubType == 19)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, rotation);
-                }
-                else
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, rotation);
-                break;
-            }
-            case BITMAP_SPARK:
-                if (o->SubType == 10)
-                    EnableAlphaBlendMinus();
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_FLAME:
-                if (o->SubType == 11)
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                else
-                {
-                    RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                }
-                break;
-            case BITMAP_CURSEDTEMPLE_EFFECT_MASKER:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_SHINY + 6:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                RenderSprite(BITMAP_LIGHT, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_SMOKELINE2:
-            {
-                if (o->SubType == 3)
-                {
-                    EnableAlphaBlendMinus();
-                }
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-            }break;
-            case BITMAP_SBUMB:
-            {
-                RenderSprite(o->TexType, o->Position, Width * 0.25f, Height, o->Light, 0.0f, o->Frame % 4 * 0.25f + 0.005f, 0.0f, 0.25f - 0.01f, 1.0f);
-            }
-            break;
-            case BITMAP_DAMAGE1:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            case BITMAP_SWORD_EFFECT_MONO:
-            {
-                vec3_t vPos;
-                VectorCopy(o->Position, vPos);
-                vPos[2] += (31.0f * o->Scale);
-                RenderSprite(o->TexType, vPos, Width * 0.9f, Height * 1.1f, o->Light, o->Rotation);
-            }
-            break;
-            case BITMAP_DAMAGE2:
-            {
-                vec3_t vLight;
-                VectorCopy(o->Light, vLight);
-                VectorScale(vLight, 1.4f, vLight);
-                RenderSprite(o->TexType, o->Position, Width, Height, vLight, o->Rotation);
-            }
-            break;
-            case BITMAP_TRUE_FIRE:
-            default:
-                RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                break;
-            }
+            DescribeParticle(*o, i, Width, Height, out);
         }
     }
 }

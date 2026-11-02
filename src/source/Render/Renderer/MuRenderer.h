@@ -830,6 +830,9 @@ public:
 // ---------------------------------------------------------------------------
 [[nodiscard]] IMuRenderer& GetRenderer();
 
+// Routes GetRenderer() to another renderer, such as a test's recorder; nullptr restores the backend.
+void SetRendererOverride(IMuRenderer* renderer);
+
 // Keeps Classic texture sampling for the draws made while it is alive.
 class ScopedScreenSpaceSampling
 {
