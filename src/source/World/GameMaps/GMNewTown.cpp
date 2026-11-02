@@ -768,7 +768,7 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
         || pObject->Type == 2
         )
     {
-        pObject->m_bRenderAfterCharacter = true;
+        SendAfterCharacter(pObject);
     }
     else if (pObject->Type == 73)
     {

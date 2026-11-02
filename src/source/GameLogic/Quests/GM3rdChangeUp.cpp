@@ -285,7 +285,7 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon
         case 57:
         case 78:
         case 84:
-            o->m_bRenderAfterCharacter = true;
+            SendAfterCharacter(o);
             return true;
         }
     }

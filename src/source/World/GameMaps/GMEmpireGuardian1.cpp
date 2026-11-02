@@ -1480,7 +1480,7 @@ bool GMEmpireGuardian1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 3:
     case 44:
     case 81:
-        o->m_bRenderAfterCharacter = true;
+        SendAfterCharacter(o);
         return true;
 
     case 37:

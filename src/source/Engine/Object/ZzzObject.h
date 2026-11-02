@@ -66,6 +66,11 @@ void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate =
 void RenderObject_AfterCharacter(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void Draw_RenderObject_AfterCharacter(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderObjects_AfterCharacter();
+// The map objects and effects this frame's draws send to the after-character passes; the boids are sent by their
+// update (m_bRenderAfterCharacter). Cleared when the frame's draw starts.
+void BeginAfterCharacterDraws();
+void SendAfterCharacter(const OBJECT* o);
+[[nodiscard]] bool IsSentAfterCharacter(const OBJECT* o);
 
 void MoveObjects();
 void DeleteObjectTile(int x, int y);

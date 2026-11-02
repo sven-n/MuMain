@@ -14,6 +14,7 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include <array>
 #include <optional>
+#include <unordered_set>
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -784,7 +785,7 @@ void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
                 }
                 else if (o->Type == 64 || o->Type == 65 || o->Type == 66 || o->Type == 80)
                 {
-                    o->m_bRenderAfterCharacter = true;
+                    SendAfterCharacter(o);
                 }
             }
             else if (o->Type == MODEL_EFFECT_SKURA_ITEM)
@@ -3978,6 +3979,27 @@ void Draw_RenderObject_AfterCharacter(OBJECT* o, bool Translate, int Select, int
     }
 }
 
+namespace
+{
+// Draw-side bookkeeping for one frame, not object state.
+std::unordered_set<const OBJECT*> s_sentAfterCharacter;
+} // namespace
+
+void BeginAfterCharacterDraws()
+{
+    s_sentAfterCharacter.clear();
+}
+
+void SendAfterCharacter(const OBJECT* o)
+{
+    s_sentAfterCharacter.insert(o);
+}
+
+bool IsSentAfterCharacter(const OBJECT* o)
+{
+    return s_sentAfterCharacter.contains(o);
+}
+
 void RenderObjects_AfterCharacter()
 {
     if (!(gMapManager.WorldActive == WD_37KANTURU_1ST || gMapManager.WorldActive == WD_38KANTURU_2ND || gMapManager.WorldActive == WD_39KANTURU_3RD
@@ -4079,7 +4101,7 @@ void RenderObjects_AfterCharacter()
                 {
                     if (o != NULL)
                     {
-                        if (o->Live && o->m_bRenderAfterCharacter == true)
+                        if (o->Live && IsSentAfterCharacter(o))
                         {
                             if ((gMapManager.WorldActive == WD_51HOME_6TH_CHAR
                                 ) && (o->Type == 89));

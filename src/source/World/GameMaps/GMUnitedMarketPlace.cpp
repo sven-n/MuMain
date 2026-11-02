@@ -227,7 +227,7 @@ bool GMUnitedMarketPlace::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     {
     case 8:
     case 30:
-        o->m_bRenderAfterCharacter = true;
+        SendAfterCharacter(o);
         return true;
     }
 

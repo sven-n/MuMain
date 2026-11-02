@@ -1119,7 +1119,7 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     }
     else if (o->Type == 46 || o->Type == 53 || o->Type == 76)
     {
-        o->m_bRenderAfterCharacter = true;
+        SendAfterCharacter(o);
 
         return true;
     }

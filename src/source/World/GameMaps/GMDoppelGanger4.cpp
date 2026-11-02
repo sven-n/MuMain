@@ -295,7 +295,7 @@ bool CGMDoppelGanger4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 20:
     case 31:
     case 33:
-        o->m_bRenderAfterCharacter = true;
+        SendAfterCharacter(o);
         return true;
     case 103:
     {
@@ -311,7 +311,7 @@ bool CGMDoppelGanger4::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 92:
     case 95:
     case 105:
-        o->m_bRenderAfterCharacter = true;
+        SendAfterCharacter(o);
         return true;
     case 142:
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);

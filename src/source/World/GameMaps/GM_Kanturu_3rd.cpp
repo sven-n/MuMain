@@ -556,7 +556,7 @@ bool M39Kanturu3rd::RenderKanturu3rdObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         case 25:
         case 73:
         {
-            o->m_bRenderAfterCharacter = true;
+            SendAfterCharacter(o);
         }
         return true;
         }

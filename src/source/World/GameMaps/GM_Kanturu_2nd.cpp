@@ -612,7 +612,7 @@ bool M38Kanturu2nd::Render_Kanturu2nd_ObjectMesh(OBJECT* o, BMD* b, bool ExtraMo
         case 76:
         case 80:
         {
-            o->m_bRenderAfterCharacter = true;
+            SendAfterCharacter(o);
 
             return true;
         }

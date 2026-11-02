@@ -244,7 +244,7 @@ bool CGMDoppelGanger2::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 20:
     case 31:
     case 33:
-        o->m_bRenderAfterCharacter = true;
+        SendAfterCharacter(o);
         return true;
     case 15:
     {

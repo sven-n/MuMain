@@ -348,7 +348,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         case 92:
         case 95:
         case 105:
-            o->m_bRenderAfterCharacter = true;
+            SendAfterCharacter(o);
             return true;
         }
     }

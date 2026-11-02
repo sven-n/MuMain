@@ -181,10 +181,10 @@ bool CGMKarutan1::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case 62:
     case 63:
     case 119:
-        o->m_bRenderAfterCharacter = true;
+        SendAfterCharacter(o);
         return true;
     case 66:
-        o->m_bRenderAfterCharacter = true;
+        SendAfterCharacter(o);
         return true;
 
 #ifdef ASG_ADD_KARUTAN_MONSTERS
