@@ -798,7 +798,7 @@ void CMapEditorUI::RenderSelectedObjectPanel()
 void CMapEditorUI::RenderAttributeTab()
 {
     const int world = ResolveWorldNumber();
-    const int serverMap = (m_serverMapOverride >= 0) ? m_serverMapOverride : gMapManager.WorldActive;
+    const int serverMap = (m_serverMapOverride >= 0) ? m_serverMapOverride : gMapManager.GetServerMap();
 
     // Must run before anything reads m_attrBaseline / m_attrEdited below.
     EnsureAttrBaseline(world);
@@ -865,11 +865,12 @@ void CMapEditorUI::RenderAttributeTab()
 
     ImGui::Spacing();
     ImGui::TextColored(ImVec4(0.9f, 0.9f, 0.6f, 1.0f), "2) Server file (OpenMU)");
-    // The server keys maps by the world ENUM (Arena = 6); the client folder is
-    // World{enum+1} (World7). Show both so they're never confused.
+    // The server keys maps by its own number: the world ENUM (Arena = 6), but 32 for
+    // Devil Square 5-7, which loads world 9. The client folder is World{enum+1}
+    // (World7, World10). Show both so they're never confused.
     bool autoServer = (m_serverMapOverride < 0);
     if (ImGui::Checkbox("Auto server map number", &autoServer))
-        m_serverMapOverride = autoServer ? -1 : gMapManager.WorldActive;
+        m_serverMapOverride = autoServer ? -1 : gMapManager.GetServerMap();
     if (!autoServer)
     {
         ImGui::SameLine();
