@@ -55,6 +55,10 @@ tracked in [#914](https://github.com/sven-n/MuMain/issues/914).
 - **Draws take randomness from the frame.** A flicker drawn in a pass comes
   from `Random::DrawRand`, fixed for the frame and the object, so every pass
   draws the same and no random sequence the update draws from moves.
+- **The game owns its random sequences.** The update draws from
+  `Random::Rand`, the game's copy of the Windows CRT's `rand()` (the same
+  values on every platform), and from the `Random` engine. Both states can be
+  read without drawing, so a check can tell whether a draw used them.
 - **There are no exceptions.** A part the update has not seen yet is drawn as
   it stands and advanced by the next update. A preview has an update of its
   own, run by the window that owns it. The offscreen pass that draws previews
@@ -105,6 +109,7 @@ drawer, and the renderer applies the active look per draw.
 
 ## Consequences
 
+- The CRT's `rand()` and `srand()` are not used; a source test keeps them out.
 - A spawn, a state write or a random draw from the update's sequences inside
   a draw is a defect. So is a draw pass that changes anything when it runs a
   second time.
@@ -151,8 +156,9 @@ drawer, and the renderer applies the active look per draw.
     sprites, items, map objects, mounts, boids, particles and joints,
     including visibility, drawn-frame marks, pick boxes and buffs; the frame's
     view, frustum and mouse ray; the terrain's collision and light, the light
-    history and Dark Side's state; and whether the pass drew from the random
-    engine. Its own snapshots draw from no sequence. It lists the changes.
+    history and Dark Side's state; and whether the pass drew from either
+    random sequence. Its own snapshots draw from no sequence. It lists the
+    changes.
   - `spawn-effect` creates any effect, particle or joint type at the
     character, so effects no map or skill reaches can be checked.
 - These checks show *whether* the draw spawns or writes, not *where* an
