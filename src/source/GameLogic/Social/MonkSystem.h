@@ -68,6 +68,8 @@ public:
     float GetAniFrame();
     float GetAlpha();
     void CalDummyPosition(vec3_t vOutPos, float& fAni, bool bChange = false);
+    // A fingerprint of everything the next step reads, to tell whether anything changed it.
+    std::uint64_t StateHash() const;
 };
 typedef std::map<int, CDummyUnit> tm_DummyUnit;
 

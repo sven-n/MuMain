@@ -1180,3 +1180,17 @@ TEST_CASE("Starting or stopping music while drawing is a violation [effects]")
     CHECK(Diagnostics::DrawSpawnCheck::Violations() == 2);
     Diagnostics::DrawSpawnCheck::ResetViolations();
 }
+
+TEST_CASE("Dark Side's fingerprint follows a dummy's step, not only how many dummies there are [effects]")
+{
+    CMonkSystem monk;
+    vec3_t position{1000.f, 1000.f, 0.f};
+    vec3_t target{2000.f, 1000.f, 0.f};
+    monk.SetDummy(position, target, 1);
+    const std::uint64_t before = monk.DarksideStateHash();
+
+    vec3_t placed;
+    float frame = 0.f;
+    monk.IsDummyRender(placed, target, frame, 1);
+    CHECK(monk.DarksideStateHash() != before);
+}

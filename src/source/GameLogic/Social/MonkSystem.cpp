@@ -248,6 +248,19 @@ bool CMonkSystem::IsSwordformGloves(int _Type)
     return false;
 }
 
+std::uint64_t CDummyUnit::StateHash() const
+{
+    Fnv1aHash hash;
+    for (const vec_t* vector : {m_vPosition, m_vStartPosition, m_vTargetPosition, m_vDirection})
+    {
+        for (int k = 0; k < 3; ++k)
+            hash.Add(vector[k]);
+    }
+    for (const float value : {m_fDisFrame, m_fAniFrame, m_fAlpha, m_fAniFrameSpeed})
+        hash.Add(value);
+    return hash.Value();
+}
+
 std::uint64_t CMonkSystem::DarksideStateHash() const
 {
     Fnv1aHash hash;
@@ -272,7 +285,13 @@ std::uint64_t CMonkSystem::DarksideStateHash() const
     hash.Add(m_bDarkSideEffOnce);
     hash.Add(m_bDarkSideEffOnce2);
     hash.Add(m_nDummyIndex);
+    hash.Add(m_CDummyUnit.StateHash());
     hash.Add(m_tmDummyUnit.size());
+    for (const auto& [key, dummy] : m_tmDummyUnit)
+    {
+        hash.Add(key);
+        hash.Add(dummy.StateHash());
+    }
     hash.Add(m_bUseEffectOnce);
     hash.Add(m_nLowerEffCnt);
     for (const auto& [character, parts] : m_DarksideParts)
