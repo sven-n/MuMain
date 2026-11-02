@@ -17,6 +17,7 @@ CHARACTER* FindCharacterByKey(int Key);
 // Draws a linked part and returns the bones it posed it into.
 vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1,
                           bool Link, bool Translate, int RenderType = 0, bool bRightHandItem = true);
+void RenderChristmasCompanions(CHARACTER* c, bool Translate, int Select);
 void RenderCharacter(CHARACTER* c, OBJECT* o, int Select = 0);
 void RenderCharactersClient();
 // Whether RenderCharactersClient draws the character this frame.

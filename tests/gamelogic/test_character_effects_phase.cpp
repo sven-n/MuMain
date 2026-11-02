@@ -992,3 +992,25 @@ TEST_CASE("Drawing an Explosion Blade leaves the item's alpha for the next pass 
         CHECK(item.Alpha == 1.f);
     }
 }
+
+TEST_CASE("Drawing a Christmas companion's three copies leaves the companion where it stands [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    CHARACTER* c = &scope.character();
+    OBJECT* o = &c->Object;
+    for (PART_t& part : c->BodyPart)
+        part.Type = -1;
+    c->Weapon[0].Type = c->Weapon[1].Type = c->Wing.Type = c->Helper.Type = -1;
+    c->HideShadow = true;
+    o->SubType = MODEL_XMAS_EVENT_CHA_SNOWMAN;
+    o->Alpha = 1.f;
+    Vector(1000.f, 1200.f, 30.f, o->Position);
+
+    for (int pass = 0; pass < 2; ++pass)
+    {
+        CheckDrawSpawnsNone([c] { RenderChristmasCompanions(c, true, 0); });
+        CHECK(o->Position[0] == 1000.f);
+        CHECK(o->Position[1] == 1200.f);
+        CHECK(o->Position[2] == 30.f);
+    }
+}

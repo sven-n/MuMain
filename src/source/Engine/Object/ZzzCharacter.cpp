@@ -9455,6 +9455,23 @@ void UpdateCharacterCloth(CHARACTER* c)
 }
 } // namespace
 
+void RenderChristmasCompanions(CHARACTER* c, bool Translate, int Select)
+{
+    OBJECT* o = &c->Object;
+    // Three copies around the character, each on the ground where it stands; the character stays where it is.
+    constexpr float offsets[3][2] = {{50.f, 50.f}, {-50.f, -50.f}, {50.f, -50.f}};
+    vec3_t standing;
+    VectorCopy(o->Position, standing);
+    for (const auto& offset : offsets)
+    {
+        o->Position[0] = standing[0] + offset[0];
+        o->Position[1] = standing[1] + offset[1];
+        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
+        RenderPartObject(o, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+    }
+    VectorCopy(standing, o->Position);
+}
+
 void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 {
     Engine::Object::Attachments::BeginCharacter(c);
@@ -9966,24 +9983,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
              (o->SubType == MODEL_XMAS_EVENT_CHA_SSANTA || o->SubType == MODEL_XMAS_EVENT_CHA_SNOWMAN ||
               o->SubType == MODEL_XMAS_EVENT_CHA_DEER))
     {
-        vec3_t vOriginPos;
-        VectorCopy(o->Position, vOriginPos);
-        o->Position[0] += 50.f;
-        o->Position[1] += 50.f;
-        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
-
-        VectorCopy(vOriginPos, o->Position);
-        o->Position[0] -= 50.f;
-        o->Position[1] -= 50.f;
-        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
-
-        VectorCopy(vOriginPos, o->Position);
-        o->Position[0] += 50.f;
-        o->Position[1] -= 50.f;
-        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+        RenderChristmasCompanions(c, Translate, Select);
     }
     else if (o->Type == MODEL_PLAYER && (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
     {
