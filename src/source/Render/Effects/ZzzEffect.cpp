@@ -7924,7 +7924,7 @@ void RenderEffects(bool bRenderBlendMesh)
                     break;
                 case MODEL_STORM3:
                 case MODEL_MAYAHANDSKILL:
-                    o->m_bRenderAfterCharacter = true;
+                    SendAfterCharacter(o);
                     break;
                 case MODEL_SUMMON:
                 case MODEL_STORM2:
@@ -8989,7 +8989,7 @@ void RenderAfterEffects()
             o = g_SkillEffects.GetEffect(i - MAX_EFFECTS);
         }
         // CullEffects marked it.
-        if (o->Live && o->m_bRenderAfterCharacter)
+        if (o->Live && IsSentAfterCharacter(o))
         {
             if (o->Visible)
             {

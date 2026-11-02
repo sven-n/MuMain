@@ -4,6 +4,8 @@
 
 #include <array>
 
+#include "Render/Models/DrawLook.h"
+
 class BMD;
 class OBJECT;
 
@@ -33,11 +35,11 @@ int GetLevel(int modelType, int level);
 bool HasExcellentGlow(int modelType);
 
 // Draws the glow pass of items +7 and up.
-void RenderGlow(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, int texture);
+void RenderGlow(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType, int texture);
 
 // Draws the shine of items +11 and up, or the glow of ancient items.
-void RenderShine(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, int texture);
+void RenderShine(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType, int texture);
 
 // Draws the excellent glow of the model.
-void RenderExcellentGlow(BMD* b, OBJECT* o, int modelType, float alpha);
+void RenderExcellentGlow(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha);
 } // namespace Render::Items::Glow

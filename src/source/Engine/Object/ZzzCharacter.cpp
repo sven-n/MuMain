@@ -1561,6 +1561,18 @@ void CalcAddPosition(OBJECT* o, float x, float y, float z, vec3_t Position)
 
 vec3_t BossHeadPosition;
 
+// The Dark Phoenix's second model (its type + 1, drawn over the body) posed as the object stands; its thunder
+// starts at bone 23.
+static float (*DarkPhoenixThunderBone(const OBJECT* o))[4]
+{
+    static vec34_t bones[MAX_BONES];
+    BMD* b = &Models[o->Type + 1];
+    PlaceObjectModel(o, b);
+    b->Animation(bones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false,
+                 false);
+    return bones[23];
+}
+
 void AttackEffect(CHARACTER* c)
 {
     OBJECT* o = &c->Object;
@@ -2089,7 +2101,7 @@ void AttackEffect(CHARACTER* c)
                 if (c->CheckAttackTime(14))
                 {
                     Vector(0.f, 0.f, 0.f, p);
-                    b->TransformPosition(g_fBoneSave[2], p, Position, true);
+                    b->TransformPosition(o->BoneTransform[24], p, Position, true);
                     /*for ( int i = 0; i < 10; ++i)
                     {
                         CreateEffect(MODEL_FIRE,Position,o->Angle,o->Light,3,to);
@@ -2264,7 +2276,7 @@ void AttackEffect(CHARACTER* c)
                 if (8 <= c->AttackTime && rand_fps_check(1))
                 {
                     Vector(0.f, 0.f, 0.f, p);
-                    b->TransformPosition(g_fBoneSave[0], p, Position, true);
+                    b->TransformPosition(DarkPhoenixThunderBone(o), p, Position, true);
                     for (int i = 0; i < 4; ++i)
                     {
                         Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
@@ -6874,17 +6886,23 @@ LinkPlacement PlaceLinkedPart(float x, float y, float z, const CHARACTER* c, BYT
 }
 bool DrawsHeldWeapon(CHARACTER* c, int hand);
 
-// The shared item object of a part type, set up from the character the part is drawn on.
-OBJECT* ItemObjectFor(CHARACTER* c, int Type)
+// Sets up an item object of a part type from the character the part is on.
+void SetUpItemObject(OBJECT* Object, const CHARACTER* c, int Type)
 {
-    OBJECT* o = &c->Object;
-    OBJECT* Object = &g_ItemObject[Type];
+    const OBJECT* o = &c->Object;
     Object->Type = Type;
     ItemObjectAttribute(Object);
     Object->EnableShadow = o->EnableShadow;
     Object->m_bRenderShadow = o->m_bRenderShadow;
     Object->m_bySkillCount = o->m_bySkillCount;
     g_CharacterCopyBuff(Object, o);
+}
+
+// The shared item object of a part type, set up from the character the part is on; effects keep it as their owner.
+OBJECT* ItemObjectFor(CHARACTER* c, int Type)
+{
+    OBJECT* Object = &g_ItemObject[Type];
+    SetUpItemObject(Object, c, Type);
     return Object;
 }
 
@@ -7014,7 +7032,10 @@ vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, in
     b->CurrentAction = LinkedPartAction(c, f);
     b->BodyHeight = 0.f;
 
-    OBJECT* Object = ItemObjectFor(c, Type);
+    // The draw's own copy: the shared one keeps what the update's effects set on it.
+    OBJECT item = g_ItemObject[Type];
+    SetUpItemObject(&item, c, Type);
+    OBJECT* Object = &item;
     b->LightEnable = Object->LightEnable;
     b->LightEnable = false;
 
@@ -9793,11 +9814,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         RenderObject(o, Translate, 2, 0);
         RenderObject(o, Translate, 3, 0);
         o->BlendMesh = blendMesh;
-        memcpy(g_fBoneSave[2], o->BoneTransform[24], 3 * 4 * sizeof(float));
         o->Type++;
         RenderObject(o, Translate, Select, 0);
-        memcpy(g_fBoneSave[0], o->BoneTransform[23], 3 * 4 * sizeof(float));
-        memcpy(g_fBoneSave[1], o->BoneTransform[14], 3 * 4 * sizeof(float));
 
         if (auto* pCloth = (CPhysicsCloth*)c->Object.m_pCloth)
         {

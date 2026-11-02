@@ -13,10 +13,9 @@ namespace
 class RecordingDrawer final : public Render::ModelDrawing::ModelDrawer
 {
 public:
-    void DrawMesh(Render::ModelDrawing::MeshDraw& draw) override
+    void DrawMesh(const Render::ModelDrawing::MeshDraw& draw) override
     {
         draws.push_back(draw);
-        draw.bodyLight[0] *= 0.5f;
     }
 
     void DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) override
@@ -78,21 +77,44 @@ TEST_CASE("RenderMesh hands the active drawer the call and the model state it re
     CHECK(draw.lod == 1);
 }
 
-TEST_CASE("The light a drawer leaves in the draw is the model's light for the next mesh [render][model_draw]")
+TEST_CASE("A faded bright or chrome pass dims the model's light for it and the meshes after it, before any drawer "
+          "sees it [render][model_draw]")
 {
-    auto model = std::make_unique<BMD>();
-    Vector(0.8f, 0.6f, 0.4f, model->BodyLight);
+    // One drawn mesh, and a second one whose texture is hidden.
+    Mesh_t meshes[2]{};
+    meshes[0].NumTriangles = 1;
+    meshes[0].Texture = 0;
+    meshes[0].NoneBlendMesh = false;
+    meshes[1].NumTriangles = 1;
+    meshes[1].Texture = 1;
+    meshes[1].NoneBlendMesh = false;
+    GLuint textures[2] = {BITMAP_CHROME, BITMAP_HIDE};
+    BMD model;
+    model.NumMeshs = 2;
+    model.Meshs = meshes;
+    model.IndexTexture = textures;
+    Vector(0.8f, 0.6f, 0.4f, model.BodyLight);
 
     RecordingDrawer drawer;
     {
         DrawerScope scope(drawer);
-        model->RenderMesh(0, RENDER_TEXTURE);
-        model->RenderMesh(1, RENDER_TEXTURE);
+        model.RenderMesh(0, RENDER_TEXTURE, 0.5f);                // not a chrome pass
+        model.RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 1.f);  // not faded
+        model.RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.5f); // draws nothing
+        model.RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 0.5f); // dims
+        model.RenderMesh(0, RENDER_TEXTURE);                      // keeps the dimmed light
     }
 
-    REQUIRE(drawer.draws.size() == 2);
-    CHECK(drawer.draws[1].bodyLight[0] == doctest::Approx(0.4f));
-    CHECK(model->BodyLight[0] == doctest::Approx(0.2f));
+    REQUIRE(drawer.draws.size() == 5);
+    for (int i = 0; i < 3; ++i)
+        CHECK(drawer.draws[i].bodyLight[0] == doctest::Approx(0.8f));
+    CHECK(drawer.draws[3].bodyLight[0] == doctest::Approx(0.4f));
+    CHECK(drawer.draws[4].bodyLight[0] == doctest::Approx(0.4f));
+    CHECK(model.BodyLight[0] == doctest::Approx(0.4f));
+
+    model.NumMeshs = 0;
+    model.Meshs = nullptr;
+    model.IndexTexture = nullptr;
 }
 
 TEST_CASE("RenderBodyShadow hands the active drawer the call and the model state it reads [render][model_draw]")

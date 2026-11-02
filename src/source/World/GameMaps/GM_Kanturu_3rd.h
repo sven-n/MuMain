@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 #include "Render/Models/ZzzBMD.h"
 
 namespace M39Kanturu3rd {
@@ -11,15 +13,15 @@ namespace M39Kanturu3rd {
     bool CreateKanturu3rdObject(OBJECT* o);
     bool MoveKanturu3rdObject(OBJECT* o);
     bool UpdateKanturu3rdObjectEffects(OBJECT* o, BMD* b);
-    bool RenderKanturu3rdObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-    void RenderKanturu3rdAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    bool RenderKanturu3rdObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+    void RenderKanturu3rdAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
 
     CHARACTER* CreateKanturu3rdMonster(int iType, int PosX, int PosY, int Key);
 
     bool MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b);
     void MoveKanturu3rdBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
 
-    bool RenderKanturu3rdMonsterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon);
+    bool RenderKanturu3rdMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon);
     bool UpdateKanturu3rdMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
 
     bool AttackEffectKanturu3rdMonster(CHARACTER* c, OBJECT* o, BMD* b);

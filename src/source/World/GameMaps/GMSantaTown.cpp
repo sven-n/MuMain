@@ -113,7 +113,7 @@ void CGMSantaTown::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     // 	}
 }
 
-bool CGMSantaTown::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool CGMSantaTown::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (IsSantaTown() == false)
         return false;
@@ -122,15 +122,15 @@ bool CGMSantaTown::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     {
     case 16:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         Vector(0.0f, 0.5f, 0.5f, b->BodyLight);
-        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
 
         return true;
     }
@@ -189,7 +189,7 @@ bool CGMSantaTown::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     return true;
 }
 
-void CGMSantaTown::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon) {}
+void CGMSantaTown::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon) {}
 
 bool CGMSantaTown::CreateSnow(PARTICLE* o)
 {

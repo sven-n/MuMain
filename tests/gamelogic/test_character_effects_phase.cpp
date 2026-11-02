@@ -16,10 +16,15 @@
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
+#include "Render/Models/ModelDraw.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/GameMaps/GMBattleCastle.h"
+#include "World/GameMaps/GMEmpireGuardian1.h"
+#include "World/GameMaps/GM_Kanturu_1st.h"
+#include "World/GameMaps/GM_Kanturu_2nd.h"
+#include "World/GameMaps/GM_Kanturu_3rd.h"
 #include "World/GameMaps/GMNewTown.h"
 #include "World/GameMaps/GM_PK_Field.h"
 #include "World/MapInfra/MapManager.h"
@@ -548,10 +553,11 @@ TEST_CASE("A wing's item effect spawns its lights on the bones it is given, and 
 
     int level = 0;
     float alpha = 1.f;
+    DrawLook look;
     CheckDrawSpawnsNone(
         [&]
         {
-            CHECK(Render::Items::ItemEffects::Apply(b, &wing, MODEL_WING_OF_ETERNAL, alpha, level) ==
+            CHECK(Render::Items::ItemEffects::Apply(b, &wing, look, MODEL_WING_OF_ETERNAL, alpha, level) ==
                   Render::Items::ItemEffects::Result::Applied);
         });
     for (int i = 0; i < MAX_SPRITES; ++i)
@@ -593,7 +599,8 @@ TEST_CASE(
         return live;
     };
 
-    CheckDrawSpawnsNone([&] { SEASON3B::GMNewTown::RenderObjectAfterCharacter(&crystal, b); });
+    DrawLook look = DrawLook::Of(crystal);
+    CheckDrawSpawnsNone([&] { SEASON3B::GMNewTown::RenderObjectAfterCharacter(&crystal, look, b); });
     CHECK(liveSprites() == 0);
     SEASON3B::GMNewTown::UpdateObjectEffects(&crystal, b);
     CHECK(liveSprites() == 4);
@@ -627,7 +634,8 @@ TEST_CASE("A dying Blood Assassin breaks apart from the update, body and head, a
     };
     FenrirScope::ClearSpawns();
 
-    CheckDrawSpawnsNone([&] { map->RenderObjectMesh(&o, b, false); });
+    DrawLook look = DrawLook::Of(o);
+    CheckDrawSpawnsNone([&] { map->RenderObjectMesh(&o, look, b, false); });
     CHECK(liveEffects() == 0);
     map->UpdateMonsterEffects(&c, &o, b);
     CHECK(liveEffects() == 2);
@@ -751,6 +759,31 @@ TEST_CASE("Drawing a part the update has not advanced yet, again and again, adva
     CHECK(part.PriorAnimationFrame == 1.5f);
     CHECK(part.CurrentAction == 1);
     CHECK(part.PriorAction == 0);
+}
+
+extern OBJECT g_ItemObject[];
+
+TEST_CASE("Drawing a held part sets up its own item object and leaves the shared one as it stands [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    CHARACTER* c = &scope.character();
+    c->Object.EnableShadow = true;
+    PART_t& part = c->Weapon[0];
+    part.Type = MODEL_SWORD;
+    OBJECT& shared = g_ItemObject[MODEL_SWORD];
+    shared.Type = MODEL_STAFF;
+    shared.EnableShadow = false;
+    Vector(1.f, 2.f, 3.f, shared.Position);
+    Vector(4.f, 5.f, 6.f, shared.Angle);
+
+    Engine::Object::Attachments::BeginFrame();
+    RenderLinkObject(10.f, 20.f, 30.f, c, &part, MODEL_SWORD, 0, 0, false, true);
+
+    CHECK(shared.Type == MODEL_STAFF);
+    CHECK_FALSE(shared.EnableShadow);
+    CHECK(shared.Position[0] == 1.f);
+    CHECK(shared.Position[2] == 3.f);
+    CHECK(shared.Angle[1] == 5.f);
 }
 
 TEST_CASE(
@@ -897,10 +930,211 @@ TEST_CASE("Drawing an item's effect or style again and again leaves the look on 
     item.Type = eyeModel;
     float alpha = 0.6f;
     int level = 0;
-    CHECK(ApplyPartObjectEffect(&Models[eyeModel], &item, eyeModel, alpha, level, 0) ==
+    DrawLook look = DrawLook::Of(item);
+    CHECK(ApplyPartObjectEffect(&Models[eyeModel], &item, look, eyeModel, alpha, level, 0) ==
           Render::Items::ItemEffects::Result::Applied);
     CHECK(alpha == 2.f);
     WorldTime = previousTime;
+}
+
+TEST_CASE("A cycling item look comes from the clock: every pass of a frame shows the same, and no draw keeps a count "
+          "[effects]")
+{
+    struct MeshRecorder final : Render::ModelDrawing::ModelDrawer
+    {
+        void DrawMesh(const Render::ModelDrawing::MeshDraw& draw) override
+        {
+            draws.push_back(draw);
+        }
+        void DrawShadow(const Render::ModelDrawing::ShadowDraw&) override {}
+        std::vector<Render::ModelDrawing::MeshDraw> draws;
+    };
+
+    FenrirScope scope;
+    ItemModelDatabaseScope restoreModels;
+    Data::Items::ItemModelDefinition storm;
+    storm.group = 12;
+    storm.number = 36;
+    storm.file = "Data/Item/Wing36.bmd";
+    storm.renderStyle = "wingOfStorm";
+    Data::Items::ItemModelDefinition symbol;
+    symbol.group = 14;
+    symbol.number = 29;
+    symbol.file = "Data/Item/Symbol.bmd";
+    symbol.renderStyle = "symbolOfKundun";
+    g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{storm, symbol},
+                              Data::Effects::GlowColorList{});
+    const int stormModel = Data::Items::ToModelSlot(Data::Items::MakeItemType(12, 36));
+    const int symbolModel = Data::Items::ToModelSlot(Data::Items::MakeItemType(14, 29));
+    const double previousTime = WorldTime;
+
+    // The value each style gives its cycling mesh in three passes at one time.
+    const auto drawnAt = [&](int model, int mesh, double time, auto value)
+    {
+        WorldTime = time;
+        MeshRecorder recorder;
+        Render::ModelDrawing::SetModelDrawer(&recorder);
+        OBJECT item;
+        item.Type = model;
+        for (int pass = 0; pass < 3; ++pass)
+        {
+            DrawLook look = DrawLook::Of(item);
+            Render::Items::Styles::Render(&Models[model], &item, look, model, 1.f, RENDER_TEXTURE);
+        }
+        Render::ModelDrawing::SetModelDrawer(nullptr);
+        std::vector<float> values;
+        for (const auto& draw : recorder.draws)
+            if (draw.mesh == mesh)
+                values.push_back(value(draw));
+        return values;
+    };
+    const auto texCoordU = [](const Render::ModelDrawing::MeshDraw& draw) { return draw.blendMeshU; };
+    const auto meshLight = [](const Render::ModelDrawing::MeshDraw& draw) { return draw.blendMeshAlpha; };
+
+    // 1000 ms is 25 reference frames: the Storm wing's fourth-frame texture strip is on frame 2 (25 % 16 / 4), and
+    // the Symbol of Kundun's light is 0.01 + 0.25 on its way up.
+    CHECK(drawnAt(stormModel, 1, 1000.0, texCoordU) == std::vector<float>(3, 0.5f));
+    const std::vector<float> first = drawnAt(symbolModel, 2, 1000.0, meshLight);
+    REQUIRE(first.size() == 3);
+    CHECK(first[0] == doctest::Approx(0.26f));
+    CHECK(first[2] == first[0]);
+    // 29 reference frames: strip frame 3; 0.29 later the light still climbs.
+    CHECK(drawnAt(stormModel, 1, 1160.0, texCoordU) == std::vector<float>(3, 0.75f));
+    const std::vector<float> later = drawnAt(symbolModel, 2, 1160.0, meshLight);
+    REQUIRE(later.size() == 3);
+    CHECK(later[0] == doctest::Approx(0.30f));
+    CHECK(later[2] == later[0]);
+    WorldTime = previousTime;
+}
+
+TEST_CASE("A Lion Gate is placed by its update, not by its draw [effects]")
+{
+    CharacterScope scope(MODEL_LION_GATE);
+    const int previousWorld = gMapManager.WorldActive;
+    gMapManager.WorldActive = WD_69EMPIREGUARDIAN1;
+    OBJECT& gate = scope.character().Object;
+    gate.Type = MODEL_LION_GATE;
+    Vector(23410.f, 2860.f, 0.f, gate.Position); // tile 234, 28
+    BMD* b = &Models[gate.Type];
+
+    DrawLook look = DrawLook::Of(gate);
+    CheckDrawSpawnsNone([&] { GMEmpireGuardian1::Make()->RenderMonster(&gate, look, b); });
+    CHECK(gate.Position[0] == 23410.f);
+
+    GMEmpireGuardian1::Make()->MoveMonsterVisual(&scope.character(), &gate, b);
+    CHECK(gate.Position[0] == 23450.f);
+    CHECK(gate.Position[1] == 2820.f);
+    gMapManager.WorldActive = previousWorld;
+}
+
+TEST_CASE("A dying Blade Hunter loses its shadow in its update [effects]")
+{
+    CharacterScope scope(MODEL_BLADE_HUNTER);
+    OBJECT& hunter = scope.character().Object;
+    hunter.Type = MODEL_BLADE_HUNTER;
+    hunter.m_bRenderShadow = true;
+    hunter.CurrentAction = MONSTER01_WALK;
+    M37Kanturu1st::MoveKanturu1stMonsterVisual(&scope.character(), &hunter, &Models[hunter.Type]);
+    CHECK(hunter.m_bRenderShadow);
+    hunter.CurrentAction = MONSTER01_DIE;
+    M37Kanturu1st::MoveKanturu1stMonsterVisual(&scope.character(), &hunter, &Models[hunter.Type]);
+    CHECK_FALSE(hunter.m_bRenderShadow);
+}
+
+TEST_CASE("A dying Dreadfear fades in its update, by the reference clock, not in its draw [effects]")
+{
+    CharacterScope scope(MODEL_DREADFEAR);
+    const int previousWorld = gMapManager.WorldActive;
+    const float previousFactor = FPS_ANIMATION_FACTOR;
+    FPS_ANIMATION_FACTOR = 1.f;
+    OBJECT& dreadfear = scope.character().Object;
+    dreadfear.Type = MODEL_DREADFEAR;
+    dreadfear.CurrentAction = MONSTER01_DIE;
+    BMD* b = &Models[dreadfear.Type];
+
+    for (const int world : {static_cast<int>(WD_38KANTURU_2ND), static_cast<int>(WD_39KANTURU_3RD)})
+    {
+        CAPTURE(world);
+        gMapManager.WorldActive = world;
+        dreadfear.Alpha = 0.5f;
+        DrawLook look = DrawLook::Of(dreadfear);
+        CheckDrawSpawnsNone(
+            [&]
+            {
+                M38Kanturu2nd::Render_Kanturu2nd_MonsterObjectMesh(&dreadfear, look, b, 0);
+                M39Kanturu3rd::RenderKanturu3rdMonsterObjectMesh(&dreadfear, look, b, false);
+            });
+        CHECK(dreadfear.Alpha == 0.5f);
+
+        // The monster update runs both maps' steps; each fades only on its own map, once.
+        M38Kanturu2nd::Move_Kanturu2nd_MonsterVisual(&scope.character(), &dreadfear, b);
+        M39Kanturu3rd::MoveKanturu3rdMonsterVisual(&dreadfear, b);
+        CHECK(dreadfear.Alpha == doctest::Approx(0.4f));
+    }
+    FPS_ANIMATION_FACTOR = previousFactor;
+    gMapManager.WorldActive = previousWorld;
+}
+
+TEST_CASE("An afterimage draws its ghosts fainter and at earlier frames, and leaves the object as it stands [effects]")
+{
+    struct AlphaRecorder final : Render::ModelDrawing::ModelDrawer
+    {
+        void DrawMesh(const Render::ModelDrawing::MeshDraw& draw) override
+        {
+            meshes.emplace_back(draw.mesh, draw.alpha);
+        }
+        void DrawShadow(const Render::ModelDrawing::ShadowDraw&) override {}
+        std::vector<std::pair<int, float>> meshes;
+    };
+
+    FenrirScope scope;
+    // Fred draws mesh 3 only before frame 2.5 of its second attack, so each ghost's frame shows.
+    OBJECT fred;
+    fred.Live = true;
+    fred.Type = MODEL_FRED;
+    fred.Scale = 1.f;
+    fred.Alpha = 1.f;
+    fred.CurrentAction = MONSTER01_ATTACK2;
+    fred.AnimationFrame = 3.f;
+
+    AlphaRecorder recorder;
+    Render::ModelDrawing::SetModelDrawer(&recorder);
+    CheckDrawSpawnsNone([&] { RenderObject_AfterImage(&fred); });
+    Render::ModelDrawing::SetModelDrawer(nullptr);
+
+    CHECK(fred.Alpha == 1.f);
+    CHECK(fred.AnimationFrame == 3.f);
+    // The first ghost (frame 1.6, alpha 0.2) and the second (frame 2.3, alpha 0.6) are before frame 2.5, so they
+    // draw mesh 3; the object itself (frame 3, alpha 1) does not.
+    std::vector<float> mesh3;
+    std::string drawn;
+    for (const auto& [mesh, alpha] : recorder.meshes)
+    {
+        drawn += std::to_string(mesh) + "@" + std::to_string(alpha) + " ";
+        if (mesh == 3)
+            mesh3.push_back(alpha);
+    }
+    CAPTURE(drawn);
+    CHECK(mesh3 == std::vector<float>{0.2f, 0.6f});
+}
+
+TEST_CASE("Drawing an object whose pose the update has not built leaves its pose and bones as they were [effects]")
+{
+    FenrirScope scope;
+    OBJECT rock;
+    rock.Live = true;
+    rock.Type = 78;
+    rock.Scale = 1.f;
+    rock.Alpha = 1.f;
+    rock.BoneTransform = scope.bones.get();
+    rock.EnableBoneMatrix = true;
+    BMD* b = &Models[rock.Type];
+    REQUIRE_FALSE(Engine::Object::Pose::IsCurrent(&rock, b, true));
+    const float before = rock.BoneTransform[0][0][3];
+
+    CheckDrawSpawnsNone([&] { CHECK(Calc_RenderObject(&rock, false, 0, 0)); });
+    CHECK_FALSE(Engine::Object::Pose::IsCurrent(&rock, b, true));
+    CHECK(rock.BoneTransform[0][0][3] == before);
 }
 
 TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and its draw spawns none [effects]")
@@ -920,7 +1154,12 @@ TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and 
     OBJECT item;
     item.Type = model;
 
-    CheckDrawSpawnsNone([&] { Render::Items::Styles::Render(b, &item, model, 1.f, RENDER_TEXTURE); });
+    CheckDrawSpawnsNone(
+        [&]
+        {
+            DrawLook look = DrawLook::Of(item);
+            Render::Items::Styles::Render(b, &item, look, model, 1.f, RENDER_TEXTURE);
+        });
     for (int i = 0; i < MAX_SPRITES; ++i)
         CHECK_FALSE(Sprites[i].Live);
 
@@ -982,7 +1221,12 @@ TEST_CASE("Drawing an Explosion Blade leaves the item's alpha for the next pass 
 
     for (int pass = 0; pass < 2; ++pass)
     {
-        CheckDrawSpawnsNone([&] { Render::Items::Styles::Render(b, &item, model, item.Alpha, RENDER_TEXTURE); });
+        CheckDrawSpawnsNone(
+            [&]
+            {
+                DrawLook look = DrawLook::Of(item);
+                Render::Items::Styles::Render(b, &item, look, model, item.Alpha, RENDER_TEXTURE);
+            });
         CHECK(item.Alpha == 1.f);
     }
 }

@@ -102,7 +102,7 @@ void CGMDuelArena::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     // 	}
 }
 
-bool CGMDuelArena::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool CGMDuelArena::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (IsDuelArena() == false)
         return false;
@@ -169,7 +169,7 @@ bool CGMDuelArena::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     return true;
 }
 
-void CGMDuelArena::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon) {}
+void CGMDuelArena::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon) {}
 
 bool IsDuelArena()
 {

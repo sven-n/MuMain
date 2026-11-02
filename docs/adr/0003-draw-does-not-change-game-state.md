@@ -113,6 +113,18 @@ drawer, and the renderer applies the active look per draw.
   A Devil's Eye on the ground is drawn bright in every pass, not from its
   second pass on, and the update reads its own alpha; a GM gift is drawn at
   its own alpha, with its glow at half.
+- The Wings of Storm's texture strip and the Symbol of Kundun's light cycle
+  on the reference clock. Each draw advanced a shared counter, so they ran
+  faster with more passes, more of them on screen or, for the Symbol, a
+  higher frame rate.
+- A dying Dreadfear (Kanturu) fades in its update, by the reference clock;
+  each draw faded it, faster with more passes. A dying Blade Hunter's
+  shadow and the Lion Gate's place (Empire Guardian) are set by their
+  update.
+- The Erohim (Hunting Ground) no longer has its alpha set to 1 by its draw,
+  so it shows the alpha its update gives it.
+- A Dark Phoenix's thunder starts from the pose its update reads that frame,
+  not from bones its last draw saved.
 
 ## Consequences
 

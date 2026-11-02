@@ -295,7 +295,7 @@ bool M37Kanturu1st::UpdateKanturu1stObjectEffects(OBJECT* pObject, BMD* pModel)
     return true;
 }
 
-bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
+bool M37Kanturu1st::RenderKanturu1stObjectVisual(const OBJECT* pObject, DrawLook& look, BMD* pModel)
 {
     if (!(IsKanturu1st() || M40GMArea::IsGmArea()))
         return false;
@@ -303,18 +303,18 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
     switch (pObject->Type)
     {
     case 85:
-        pModel->BeginRender(pObject->Alpha);
-        pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(3, RENDER_CHROME | RENDER_DARK, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, BITMAP_CHROME);
+        pModel->BeginRender(look.alpha);
+        pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                           look.blendMeshU, look.blendMeshV);
+        pModel->RenderMesh(3, RENDER_CHROME | RENDER_DARK, look.alpha, look.blendMesh, look.blendMeshLight,
+                           look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         pModel->EndRender();
         break;
     case 96:
         pModel->StreamMesh = 0;
         mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.0f);
-        pModel->RenderMesh(0, RENDER_TEXTURE, 1.0f, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, -(int)WorldTime % 20000 * 0.00005f);
+        pModel->RenderMesh(0, RENDER_TEXTURE, 1.0f, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           -(int)WorldTime % 20000 * 0.00005f);
         mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.25f);
         pModel->StreamMesh = -1;
         break;
@@ -323,7 +323,7 @@ bool M37Kanturu1st::RenderKanturu1stObjectVisual(OBJECT* pObject, BMD* pModel)
     return true;
 }
 
-bool M37Kanturu1st::RenderKanturu1stObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool M37Kanturu1st::RenderKanturu1stObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (IsKanturu1st() || M40GMArea::IsGmArea())
     {
@@ -332,12 +332,10 @@ bool M37Kanturu1st::RenderKanturu1stObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         case 103:
         {
             float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-            o->HiddenMesh = 1;
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
-                o->BlendMeshLight, o->BlendMeshTexCoordU,
-                o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi,
-                o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            look.hiddenMesh = 1;
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(1, RENDER_TEXTURE, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV);
 
             return true;
         }
@@ -348,15 +346,15 @@ bool M37Kanturu1st::RenderKanturu1stObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         case 92:
         case 95:
         case 105:
-            o->m_bRenderAfterCharacter = true;
+            SendAfterCharacter(o);
             return true;
         }
     }
 
-    return RenderKanturu1stMonsterObjectMesh(o, b, ExtraMon);
+    return RenderKanturu1stMonsterObjectMesh(o, look, b, ExtraMon);
 }
 
-void M37Kanturu1st::RenderKanturu1stAfterObjectMesh(OBJECT* o, BMD* b)
+void M37Kanturu1st::RenderKanturu1stAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (!(IsKanturu1st() || M40GMArea::IsGmArea()))
         return;
@@ -369,42 +367,35 @@ void M37Kanturu1st::RenderKanturu1stAfterObjectMesh(OBJECT* o, BMD* b)
         b->BodyLight[2] = 0.52f;
 
         b->StreamMesh = 0;
-        b->RenderMesh(
-            0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh,
-            o->BlendMeshLight, -(int)WorldTime % 100000 * 0.00001f,
-            o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      -(int)WorldTime % 100000 * 0.00001f, look.blendMeshV);
         b->StreamMesh = -1;
         break;
 
     case 95:
     {
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
 
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha,
-            o->BlendMesh, o->BlendMeshLight,
-            o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_CHROME7 | RENDER_DARK, o->Alpha,
-            o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-            o->BlendMeshTexCoordV, BITMAP_CHROME);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
+        b->RenderMesh(0, RENDER_CHROME7 | RENDER_DARK, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_CHROME);
         b->EndRender();
     }
     break;
 
     case 105:
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
-            o->BlendMeshLight, o->BlendMeshTexCoordU,
-            o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha,
-            o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-            o->BlendMeshTexCoordV, BITMAP_CHROME);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         break;
 
     case 77:
     case 91:
     case 92:
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
-            o->BlendMeshLight, o->BlendMeshTexCoordU,
-            o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         break;
     }
 }
@@ -802,6 +793,11 @@ bool M37Kanturu1st::MoveKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {
+    case MODEL_BLADE_HUNTER:
+        // A dying Blade Hunter fades without a shadow.
+        if (o->CurrentAction == MONSTER01_DIE)
+            o->m_bRenderShadow = false;
+        break;
     case MODEL_BERSERK:
         break;
     case MODEL_GIGANTIS:
@@ -831,53 +827,46 @@ bool M37Kanturu1st::MoveKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
+bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon)
 {
     switch (o->Type)
     {
     case MODEL_BERSERK:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
-            o->BlendMeshLight, o->BlendMeshTexCoordU,
-            o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
 
         if (o->CurrentAction == MONSTER01_DIE)
             return true;
 
         float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0,
-            fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-            BITMAP_BERSERK_EFFECT);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1,
-            fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-            BITMAP_BERSERK_WP_EFFECT);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV,
+                      BITMAP_BERSERK_EFFECT);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV,
+                      BITMAP_BERSERK_WP_EFFECT);
 
         return true;
     }
     break;
     case MODEL_GIGANTIS:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh,
-            o->BlendMeshLight, o->BlendMeshTexCoordU,
-            o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
         if (o->CurrentAction != MONSTER01_DIE)
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha,
-                o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                o->BlendMeshTexCoordV);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
 
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh,
-            o->BlendMeshLight, o->BlendMeshTexCoordU,
-            o->BlendMeshTexCoordV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
         return true;
     }
     break;
     case MODEL_GENOCIDER:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
-            o->BlendMeshLight, o->BlendMeshTexCoordU,
-            o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         return true;
     }
     break;
@@ -887,8 +876,8 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         Vector(1.f, 1.f, 1.f, b->BodyLight);
         b->RenderMesh(0, RENDER_TEXTURE);
         b->RenderMesh(1, RENDER_TEXTURE);
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 2, fLumi);
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 3, fLumi);
+        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 2, fLumi);
+        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 3, fLumi);
         b->RenderMesh(4, RENDER_TEXTURE);
         return true;
     }
@@ -896,7 +885,8 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
 
     case MODEL_IRON_RIDER:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         return true;
     }
     break;
@@ -905,22 +895,26 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         if (o->CurrentAction != MONSTER01_DIE)
         {
             float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_BLADEHUNTER_EFFECT);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV,
+                          BITMAP_BLADEHUNTER_EFFECT);
         }
         else
         {
-            if (o->Alpha < 0.f)
-                o->Alpha = 0.f;
-            o->m_bRenderShadow = false;
+            if (look.alpha < 0.f)
+                look.alpha = 0.f;
 
-            if (o->Alpha > 0.8f)
+            if (look.alpha > 0.8f)
             {
-                b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh);
             }
             else
-                b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
-            b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+                b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                              look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
+            b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         return true;
     }
@@ -930,14 +924,18 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         vec3_t Light;
         VectorCopy(b->BodyLight, Light);
         b->BeginRender(1.f);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         b->StreamMesh = 1;
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, 1.f, 0, o->BlendMeshLight, o->BlendMeshTexCoordU, WorldTime * 0.0005f);
-        b->RenderMesh(3, RENDER_CHROME | RENDER_BRIGHT, 1.f, 0, o->BlendMeshLight, o->BlendMeshTexCoordU, WorldTime * 0.001f, BITMAP_CHROME);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, 1.f, 0, look.blendMeshLight, look.blendMeshU,
+                      WorldTime * 0.0005f);
+        b->RenderMesh(3, RENDER_CHROME | RENDER_BRIGHT, 1.f, 0, look.blendMeshLight, look.blendMeshU,
+                      WorldTime * 0.001f, BITMAP_CHROME);
 
         float Luminosity = sinf(WorldTime * 0.001f) * 0.5f + 0.5f;
         Vector(Light[0] * Luminosity, Light[0] * Luminosity, Light[0] * Luminosity, b->BodyLight);
-        b->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, 1.f, 2, o->BlendMeshLight, WorldTime * 0.0001f, -WorldTime * 0.0005f);
+        b->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, 1.f, 2, look.blendMeshLight, WorldTime * 0.0001f,
+                      -WorldTime * 0.0005f);
         b->EndRender();
         return true;
     }
@@ -946,28 +944,27 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     {
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
         Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, fLumi);
-        b->RenderMesh(1, RENDER_CHROME2 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, fLumi);
+        b->RenderMesh(1, RENDER_CHROME2 | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
         return true;
     }
     break;
     case MODEL_BERSERKER_WARRIOR:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
-            o->BlendMeshLight, o->BlendMeshTexCoordU,
-            o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
 
         if (o->CurrentAction == MONSTER01_DIE)
             return true;
 
         float fLumi = sinf(WorldTime * 0.002f) + 1.0f;
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0,
-            fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-            BITMAP_BERSERK_EFFECT);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1,
-            fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-            BITMAP_BERSERK_WP_EFFECT);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV,
+                      BITMAP_BERSERK_EFFECT);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV,
+                      BITMAP_BERSERK_WP_EFFECT);
 
         return true;
     }
@@ -976,35 +973,33 @@ bool M37Kanturu1st::RenderKanturu1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     {
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
         Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, fLumi);
-        b->RenderMesh(1, RENDER_CHROME2 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, fLumi);
+        b->RenderMesh(1, RENDER_CHROME2 | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
         return true;
     }
     break;
     case MODEL_GIGANTIS_WARRIOR:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh,
-            o->BlendMeshLight, o->BlendMeshTexCoordU,
-            o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
         if (o->CurrentAction != MONSTER01_DIE)
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha,
-                o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                o->BlendMeshTexCoordV);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
 
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh,
-            o->BlendMeshLight, o->BlendMeshTexCoordU,
-            o->BlendMeshTexCoordV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
 
         return true;
     }
     break;
     case MODEL_SOCCERBALL:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh,
-            o->BlendMeshLight, o->BlendMeshTexCoordU,
-            o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         return true;
     }
     break;

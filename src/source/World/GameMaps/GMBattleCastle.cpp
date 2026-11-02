@@ -1198,46 +1198,52 @@ namespace battleCastle
         return true;
     }
 
-    bool    RenderBattleCastleObjectMesh(OBJECT* o, BMD* b)
+    bool RenderBattleCastleObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
     {
         if (gMapManager.InBattleCastle() == false)  return false;
 
         if (o->Type == 12)
         {
             Vector(1.f, 1.f, 1.f, b->BodyLight);
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_INTERFACE_MAP);
+            b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, BITMAP_INTERFACE_MAP);
             return true;
         }
         else if (o->Type == 17)
         {
             b->StreamMesh = 0;
             Vector(0.45f, 0.45f, 0.45f, b->BodyLight);
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, (int)WorldTime % 10000 * 0.0002f, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          (int)WorldTime % 10000 * 0.0002f, look.hiddenMesh);
             b->StreamMesh = -1;
             return true;
         }
         else if (o->Type == 51)
         {
             b->StreamMesh = 0;
-            b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, -(int)WorldTime % 10000 * 0.0002f, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          -(int)WorldTime % 10000 * 0.0002f, look.blendMeshV, look.hiddenMesh);
             b->StreamMesh = -1;
             return true;
         }
         else if (o->Type == 66)
         {
             Vector(0.1f, 0.4f, 0.6f, b->BodyLight);
-            b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, sinf(WorldTime * 0.001f) * 0.2f + 0.3f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh,
+                          sinf(WorldTime * 0.001f) * 0.2f + 0.3f, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
             return true;
         }
         else if (o->Type == 50 || o->Type == 83 || o->Type == 84 || o->Type == 85)
         {
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
 
             if (IsBattleCastleStart() == false)
             {
                 DisableAlphaBlend();
-                b->RenderBodyShadow(o->BlendMesh, o->HiddenMesh);
+                b->RenderBodyShadow(look.blendMesh, look.hiddenMesh);
             }
             return true;
         }
@@ -1245,22 +1251,28 @@ namespace battleCastle
         {
             if (IsBattleCastleStart())
             {
-                b->BeginRender(o->Alpha);
-                b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+                b->BeginRender(look.alpha);
+                b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV);
                 Vector(0.3f, 0.3f, 0.3f, b->BodyLight);
-                b->RenderMesh(3, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+                b->RenderMesh(3, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
+                              look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
                 Vector(0.2f, 0.2f, 0.5f, b->BodyLight);
-                b->RenderMesh(3, RENDER_BRIGHT | RENDER_METAL, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+                b->RenderMesh(3, RENDER_BRIGHT | RENDER_METAL, look.alpha, look.blendMesh, look.blendMeshLight,
+                              look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
                 Vector(1.f, 1.f, 1.f, b->BodyLight);
                 b->EndRender();
             }
             else
             {
-                b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh);
                 Vector(0.3f, 0.3f, 0.3f, b->BodyLight);
-                b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
+                b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, look.alpha, 0.5f, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh, BITMAP_CHROME);
                 Vector(0.2f, 0.2f, 0.5f, b->BodyLight);
-                b->RenderBody(RENDER_BRIGHT | RENDER_METAL, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
+                b->RenderBody(RENDER_BRIGHT | RENDER_METAL, look.alpha, 0.5f, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh, BITMAP_CHROME);
                 Vector(1.f, 1.f, 1.f, b->BodyLight);
             }
             return true;
@@ -1270,13 +1282,14 @@ namespace battleCastle
             // A wall's debris effect (SubType 1) shows only the debris its first move spawns.
             if (o->SubType == 0)
             {
-                b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh);
             }
             return true;
         }
         else
         {
-            return RenderBattleCastleMonsterObjectMesh(o, b);
+            return RenderBattleCastleMonsterObjectMesh(o, look, b);
         }
 
         return false;
@@ -1971,7 +1984,7 @@ namespace battleCastle
         }
     }
 
-    bool    RenderBattleCastleMonsterObjectMesh(OBJECT* o, BMD* b)
+    bool RenderBattleCastleMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
     {
         if (gMapManager.InBattleCastle() == false) return false;
 
@@ -1981,7 +1994,8 @@ namespace battleCastle
         {
         case MODEL_NPC_CAPATULT_ATT:
         {
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
 
             OBB_t   OBB;
             vec3_t  Temp, p, Position;
@@ -1999,7 +2013,8 @@ namespace battleCastle
                 VectorCopy(Position, linkBmd->BodyOrigin);
                 linkBmd->Animation(BoneTransform, 0.f, 0.f, 0, o->Angle, o->Angle, true);
                 linkBmd->Transform(BoneTransform, Temp, Temp, &OBB, true);
-                linkBmd->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                linkBmd->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                                    look.blendMeshV, look.hiddenMesh);
             }
 
             if (o->CurrentAction == 1 && o->AnimationFrame > 13.f && o->AnimationFrame < 22.f)
@@ -2009,7 +2024,8 @@ namespace battleCastle
                 VectorCopy(Position, linkBmd->BodyOrigin);
                 linkBmd->Animation(BoneTransform, 0.f, 0.f, 0, o->Angle, o->Angle, true);
                 linkBmd->Transform(BoneTransform, Temp, Temp, &OBB, true);
-                linkBmd->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                linkBmd->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                                    look.blendMeshV, look.hiddenMesh);
             }
         }
         success = true;
@@ -2017,9 +2033,12 @@ namespace battleCastle
 
         case MODEL_NPC_BARRIER:
             Vector(0.3f, 0.3f, 1.f, b->BodyLight);
-            b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_WATER + WaterTextureNumber);
+            b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh, BITMAP_WATER + WaterTextureNumber);
             Vector(0.3f, 1.f, 0.3f, b->BodyLight);
-            b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_WATER + ((int)(WorldTime * 0.01f) % 32));
+            b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh,
+                          BITMAP_WATER + ((int)(WorldTime * 0.01f) % 32));
             success = true;
             break;
 
@@ -2027,7 +2046,8 @@ namespace battleCastle
             // Dying, it shows only the debris UpdateBattleCastleObjectMeshEffects spawns.
             if (o->CurrentAction != MONSTER01_DIE)
             {
-                b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh);
             }
             break;
 
@@ -2035,22 +2055,22 @@ namespace battleCastle
             // Dying, it shows only the debris UpdateBattleCastleObjectMeshEffects spawns.
             if (IsBattleCastleStart() && o->CurrentAction != MONSTER01_DIE)
             {
-                b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                              o->BlendMeshTexCoordV, o->HiddenMesh);
+                b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh);
                 Vector(0.3f, 0.3f, 0.3f, b->BodyLight);
-                b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                              o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
+                b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, look.alpha, 0.5f, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh, BITMAP_CHROME);
                 Vector(0.2f, 0.2f, 0.5f, b->BodyLight);
-                b->RenderBody(RENDER_BRIGHT | RENDER_METAL, o->Alpha, 0.5f, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                              o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_CHROME);
+                b->RenderBody(RENDER_BRIGHT | RENDER_METAL, look.alpha, 0.5f, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh, BITMAP_CHROME);
                 Vector(1.f, 1.f, 1.f, b->BodyLight);
             }
             success = true;
             break;
 
         case MODEL_LIFE_STONE:
-            o->BlendMeshLight = o->m_byBuildTime / 10.f;
-            Vector(o->BlendMeshLight, o->BlendMeshLight, o->BlendMeshLight, b->BodyLight);
+            look.blendMeshLight = o->m_byBuildTime / 10.f;
+            Vector(look.blendMeshLight, look.blendMeshLight, look.blendMeshLight, b->BodyLight);
             if (o->m_byBuildTime >= 2)
             {
                 b->RenderMesh(0, RENDER_TEXTURE);
@@ -2061,7 +2081,8 @@ namespace battleCastle
             }
             if (o->m_byBuildTime >= 4)
             {
-                Vector(o->BlendMeshLight * 0.5f, o->BlendMeshLight * 0.5f, o->BlendMeshLight * 0.5f, b->BodyLight);
+                Vector(look.blendMeshLight * 0.5f, look.blendMeshLight * 0.5f, look.blendMeshLight * 0.5f,
+                       b->BodyLight);
                 b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT);
             }
             if (o->m_byBuildTime >= 5)

@@ -84,14 +84,14 @@ Buff::~Buff()
     ClearBuff();
 }
 
-bool Buff::isBuff()
+bool Buff::isBuff() const
 {
     if (m_Buff.size() != 0)
         return true;
     return false;
 }
 
-bool Buff::isBuff(eBuffState buffstate)
+bool Buff::isBuff(eBuffState buffstate) const
 {
     if (!isBuff())
         return false;
@@ -106,7 +106,7 @@ bool Buff::isBuff(eBuffState buffstate)
     return false;
 }
 
-const eBuffState Buff::isBuff(std::list<eBuffState> buffstatelist)
+const eBuffState Buff::isBuff(std::list<eBuffState> buffstatelist) const
 {
     if (!isBuff())
         return eBuffNone;

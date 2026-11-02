@@ -735,13 +735,13 @@ bool GMNewTown::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
 
 extern float  IntensityTransform[MAX_MESH][MAX_VERTICES];
 
-bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
+bool GMNewTown::RenderObject(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon)
 {
     if (!IsCurrentMap())
         return false;
 
     if (IsNewMap73_74())
-        return g_EmpireGuardian4.RenderObjectMesh(pObject, pModel, ExtraMon);
+        return g_EmpireGuardian4.RenderObjectMesh(pObject, look, pModel, ExtraMon);
 
     // ���
     if ((pObject->Type >= 5 && pObject->Type <= 14) || pObject->Type == 4 || pObject->Type == 129)
@@ -768,50 +768,55 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
         || pObject->Type == 2
         )
     {
-        pObject->m_bRenderAfterCharacter = true;
+        SendAfterCharacter(pObject);
     }
     else if (pObject->Type == 73)
     {
-        pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
-        pModel->RenderBody(RENDER_BRIGHT | RENDER_CHROME, 0.5f, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
+        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV, look.hiddenMesh);
+        pModel->RenderBody(RENDER_BRIGHT | RENDER_CHROME, 0.5f, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV, look.hiddenMesh);
     }
     else if (pObject->Type == 104)
     {
-        pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
+        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV, look.hiddenMesh);
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        pModel->RenderMesh(4, RENDER_BRIGHT, pObject->Alpha, 4, fLumi);
+        pModel->RenderMesh(4, RENDER_BRIGHT, look.alpha, 4, fLumi);
     }
     else if (pObject->Type == 113)
     {
-        pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
-        pModel->RenderMesh(9, RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
+        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV, look.hiddenMesh);
+        pModel->RenderMesh(9, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight);
     }
     else if (pObject->Type == 114)
     {
-        pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
-        pModel->RenderMesh(9, RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
+        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV, look.hiddenMesh);
+        pModel->RenderMesh(9, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight);
     }
     else if (pObject->Type == 121)
     {
-        pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-        pModel->RenderMesh(3, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
+        pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+        pModel->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        pModel->RenderMesh(1, RENDER_BRIGHT, pObject->Alpha, 1, fLumi);
+        pModel->RenderMesh(1, RENDER_BRIGHT, look.alpha, 1, fLumi);
         fLumi = (sinf(WorldTime * 0.0015f) + 1.0f) * 0.1f + 0.1f;
         pModel->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, fLumi, 0, fLumi);
     }
     // NPC
     else if (pObject->Type == MODEL_ELBELAND_MARCE)
     {
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-        pModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+        pModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight);
     }
     else if (pObject->Type == MODEL_HIDEOUS_RABBIT)
     {
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
     }
     else if (pObject->Type == MODEL_TOTEM_GOLEM && pObject->CurrentAction == MONSTER01_DIE)
     {
@@ -822,37 +827,42 @@ bool GMNewTown::RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon)
     return true;
 }
 
-void GMNewTown::RenderObjectAfterCharacter(OBJECT* pObject, BMD* pModel, bool ExtraMon0)
+void GMNewTown::RenderObjectAfterCharacter(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon0)
 {
     if (!IsCurrentMap())
         return;
 
     if (IsNewMap73_74())
     {
-        g_EmpireGuardian4.RenderAfterObjectMesh(pObject, pModel, ExtraMon0);
+        g_EmpireGuardian4.RenderAfterObjectMesh(pObject, look, pModel, ExtraMon0);
         return;
     }
 
     if (pObject->Type == 2 || pObject->Type == 53 || pObject->Type == 55 || pObject->Type == 89 || pObject->Type == 125 || pObject->Type == 128)	// ������1,2, ����, ȸ����, ��
     {
-        pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
+        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV, look.hiddenMesh);
     }
     else if (pObject->Type == 110)
     {
-        pModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME2, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-        pModel->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight);
+        pModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME2, look.alpha, look.blendMesh,
+                           look.blendMeshLight);
+        pModel->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight);
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight);
     }
     else if (pObject->Type == 78)
     {
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                           look.blendMeshU, look.blendMeshV);
     }
     else if (pObject->Type == 79)
     {
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                           look.blendMeshU, look.blendMeshV);
     }
 }
 

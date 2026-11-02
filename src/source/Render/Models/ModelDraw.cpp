@@ -11,7 +11,7 @@ namespace
 class DefaultModelDrawer final : public ModelDrawer
 {
 public:
-    void DrawMesh(MeshDraw& draw) override
+    void DrawMesh(const MeshDraw& draw) override
     {
         draw.model->DrawMesh(draw);
     }

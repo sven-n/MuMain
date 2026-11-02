@@ -128,6 +128,27 @@ TEST_CASE("Drawing the effect passes again and again changes nothing the next up
     ClearEffects();
 }
 
+TEST_CASE("A draw sends an effect to the after-character pass for its own frame, without marking the effect "
+          "[effects]")
+{
+    ViewScope view;
+    ClearEffects();
+    OBJECT& storm = Effects[0];
+    storm.Live = true;
+    storm.Type = MODEL_STORM3;
+    storm.Visible = true;
+
+    BeginObjectDraws();
+    RepeatedDraws::CheckChangesNothing([] { RenderEffects(); }, 3);
+    CHECK(IsSentAfterCharacter(&storm));
+    CHECK_FALSE(storm.m_bRenderAfterCharacter);
+
+    // The next frame's draw decides again.
+    BeginObjectDraws();
+    CHECK_FALSE(IsSentAfterCharacter(&storm));
+    ClearEffects();
+}
+
 namespace
 {
 // Keeps the lights of the ground marks it is handed.

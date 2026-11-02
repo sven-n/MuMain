@@ -253,7 +253,7 @@ bool SEASON3A::CGM3rdChangeUp::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
     return true;
 }
 
-bool SEASON3A::CGM3rdChangeUp::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool SEASON3A::CGM3rdChangeUp::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (IsBalgasBarrackMap() || IsBalgasRefugeMap())
     {
@@ -261,38 +261,36 @@ bool SEASON3A::CGM3rdChangeUp::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon
         {
         case 79:
             b->StreamMesh = 0;
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
                           -(int)WorldTime % 10000 * 0.0001f);
             b->StreamMesh = -1;
             return true;
         case 81:
         {
             float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f + 0.3f;
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-                          o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, 0, fLumi, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         }
             return true;
         case 82:
         case 83:
         {
             float fLumi = (sinf(WorldTime * 0.0005f)) * 10.f;
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-                          o->HiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(1, RENDER_TEXTURE, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         }
             return true;
         case 57:
         case 78:
         case 84:
-            o->m_bRenderAfterCharacter = true;
+            SendAfterCharacter(o);
             return true;
         }
     }
-    return RenderMonsterObjectMesh(o, b, ExtraMon);
+    return RenderMonsterObjectMesh(o, look, b, ExtraMon);
 }
 
-void SEASON3A::CGM3rdChangeUp::RenderAfterObjectMesh(OBJECT* o, BMD* b)
+void SEASON3A::CGM3rdChangeUp::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (!(IsBalgasBarrackMap() || IsBalgasRefugeMap()))
         return;
@@ -300,8 +298,8 @@ void SEASON3A::CGM3rdChangeUp::RenderAfterObjectMesh(OBJECT* o, BMD* b)
     switch (o->Type)
     {
     case 57:
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         break;
     case 78:
         b->BodyLight[0] = 0.52f;
@@ -309,18 +307,18 @@ void SEASON3A::CGM3rdChangeUp::RenderAfterObjectMesh(OBJECT* o, BMD* b)
         b->BodyLight[2] = 0.52f;
 
         b->StreamMesh = 0;
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      -(int)WorldTime % 100000 * 0.00001f, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      -(int)WorldTime % 100000 * 0.00001f, look.blendMeshV);
         b->StreamMesh = -1;
         break;
     case 84:
         b->StreamMesh = 0;
         float fLumi = (sinf(WorldTime * 0.001f) + 1.f) * 0.5f;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, 0, fLumi, (int)WorldTime % 10000 * 0.0001f, o->BlendMeshTexCoordV,
-                      o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, 0, fLumi, (int)WorldTime % 10000 * 0.0001f, look.blendMeshV,
+                      look.hiddenMesh);
         b->StreamMesh = -1;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         break;
     }
 }
@@ -717,20 +715,20 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
     }
 }
 
-bool SEASON3A::CGM3rdChangeUp::RenderMonsterObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
+bool SEASON3A::CGM3rdChangeUp::RenderMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon)
 {
     switch (o->Type)
     {
     case MODEL_BALRAM:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, 5);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      5);
         return true;
     }
     break;
     case MODEL_DEATH_SPIRIT:
     {
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         static float aaa = 0.f;
         aaa += 0.1f;
         if (aaa > 1.0f)
@@ -739,49 +737,49 @@ bool SEASON3A::CGM3rdChangeUp::RenderMonsterObjectMesh(OBJECT* o, BMD* b, int Ex
         {
             if (i == 2)
             {
-                if (o->Alpha > 0.3f)
-                    o->Alpha = 0.3f;
+                if (look.alpha > 0.3f)
+                    look.alpha = 0.3f;
 
-                o->BlendMesh = -2;
+                look.blendMesh = -2;
                 b->EndRender();
-                b->BeginRender(o->Alpha);
+                b->BeginRender(look.alpha);
                 Models[o->Type].StreamMesh = i;
             }
             else
-                o->BlendMesh = -1;
+                look.blendMesh = -1;
 
-            o->BlendMeshTexCoordU = (int)WorldTime % 10000 * 0.0005f;
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
+            look.blendMeshU = (int)WorldTime % 10000 * 0.0005f;
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
         }
         b->EndRender();
-        o->Alpha = 1.0f;
+        look.alpha = 1.0f;
         return true;
     }
     break;
     case MODEL_SORAM:
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->BeginRender(o->Alpha);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, 5);
+        b->BeginRender(look.alpha);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      5);
         b->EndRender();
         return true;
     }
     break;
     case MODEL_DARK_ELF:
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME6, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME6, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
+        b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME6, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
+        b->RenderMesh(1, RENDER_BRIGHT | RENDER_CHROME6, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
         return true;
     }
     return false;

@@ -40,7 +40,7 @@ namespace   battleCastle
     bool    CreateBattleCastleObject(OBJECT* o);
     bool    MoveBattleCastleVisual(OBJECT* o);
     bool UpdateBattleCastleObjectEffects(OBJECT* o, BMD* b);
-    bool    RenderBattleCastleObjectMesh(OBJECT* o, BMD* b);
+    bool RenderBattleCastleObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
     void    MoveFlyBigStone(OBJECT* o);
     CHARACTER* CreateBattleCastleMonster(EMonsterType Type, int PositionX, int PositionY, int Key);
     // Castle Gate 1 counts its attacks from 0 again when it appears.
@@ -56,7 +56,7 @@ namespace   battleCastle
     bool    RenderBattleCastleMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate, int Select);
     // The vertex spawns and state changes of RenderBattleCastleObjectMesh, for an object the last frame drew.
     void UpdateBattleCastleObjectMeshEffects(OBJECT* o, BMD* b);
-    bool    RenderBattleCastleMonsterObjectMesh(OBJECT* o, BMD* b);
+    bool RenderBattleCastleMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
     void    RenderMonsterHitEffect(OBJECT* o);
 }
 

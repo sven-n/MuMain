@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 namespace SEASON3B
 {
     class GMNewTown
@@ -21,8 +23,8 @@ namespace SEASON3B
         static void CreateObject(OBJECT* pObject);
         static bool MoveObject(OBJECT* pObject);
         static bool UpdateObjectEffects(OBJECT* pObject, BMD* pModel);
-        static bool RenderObject(OBJECT* pObject, BMD* pModel, bool ExtraMon = 0);
-        static void RenderObjectAfterCharacter(OBJECT* pObject, BMD* pModel, bool ExtraMon = 0);
+        static bool RenderObject(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon = 0);
+        static void RenderObjectAfterCharacter(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon = 0);
 
         //. 몬스터
         static CHARACTER* CreateNewTownMonster(int iType, int PosX, int PosY, int Key);

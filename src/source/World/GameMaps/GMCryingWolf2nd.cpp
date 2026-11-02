@@ -118,12 +118,12 @@ bool M34CryingWolf2nd::UpdateCryingWolf2ndObjectEffects(OBJECT* pObject, BMD* pM
     return true;
 }
 
-bool M34CryingWolf2nd::RenderCryingWolf2ndObjectMesh(OBJECT* pObject, BMD* pModel)
+bool M34CryingWolf2nd::RenderCryingWolf2ndObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel)
 {
     if (!IsCyringWolf2nd())
         return false;
 
-    return RenderCryingWolf2ndMonsterObjectMesh(pObject, pModel);
+    return RenderCryingWolf2ndMonsterObjectMesh(pObject, look, pModel);
 }
 
 CHARACTER* M34CryingWolf2nd::CreateCryingWolf2ndMonster(int iType, int PosX, int PosY, int Key)
@@ -265,7 +265,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
     }
     return false;
 }
-bool M34CryingWolf2nd::RenderCryingWolf2ndMonsterObjectMesh(OBJECT* pObject, BMD* pModel)
+bool M34CryingWolf2nd::RenderCryingWolf2ndMonsterObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel)
 {
     return false;
 }

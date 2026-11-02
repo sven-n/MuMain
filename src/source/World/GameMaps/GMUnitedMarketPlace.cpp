@@ -216,7 +216,7 @@ void GMUnitedMarketPlace::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     // 	} //switch end
 }
 
-bool GMUnitedMarketPlace::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool GMUnitedMarketPlace::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (IsUnitedMarketPlace() == false)
     {
@@ -227,7 +227,7 @@ bool GMUnitedMarketPlace::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     {
     case 8:
     case 30:
-        o->m_bRenderAfterCharacter = true;
+        SendAfterCharacter(o);
         return true;
     }
 
@@ -331,7 +331,7 @@ bool GMUnitedMarketPlace::UpdateObjectEffects(OBJECT* o, BMD* b)
     return false;
 }
 
-bool GMUnitedMarketPlace::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
+bool GMUnitedMarketPlace::RenderMonster(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     switch (o->Type)
     {
@@ -339,8 +339,8 @@ bool GMUnitedMarketPlace::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     {
         if (o->CurrentAction != MONSTER01_DIE)
         {
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
         }
     }
         return true;
@@ -406,7 +406,7 @@ bool GMUnitedMarketPlace::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-void GMUnitedMarketPlace::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+void GMUnitedMarketPlace::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (IsUnitedMarketPlace() == false)
         return;
@@ -415,20 +415,20 @@ void GMUnitedMarketPlace::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon
     {
     case 8:
     {
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight);
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight);
-        b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+        b->RenderMesh(4, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
         float fFlow_u = sinf(WorldTime * 0.0007f) * 0.05f;
         float fFlow_v = sinf(WorldTime * 0.001f) * 0.05f;
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, 0.3f, o->BlendMeshTexCoordU,
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, 0.3f, look.blendMeshU,
                       -(int)WorldTime % 10000 * 0.001f);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, 0.3f, fFlow_u, fFlow_v);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, 0.3f, fFlow_u, fFlow_v);
     }
     break;
     case 30:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
     break;
     }

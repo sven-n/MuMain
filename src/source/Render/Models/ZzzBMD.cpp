@@ -248,8 +248,8 @@ static std::optional<float> GltfCrossfadeKeyTime(const BMD& model, unsigned shor
 }
 
 void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float PriorFrame, unsigned short PriorAction,
-                    vec3_t Angle, vec3_t HeadAngle, bool Parent, bool Translate, const float (*ExtParentMatrix)[4],
-                    short CurrentActionArg, int BoneMatrixCapacity)
+                    const vec3_t Angle, const vec3_t HeadAngle, bool Parent, bool Translate,
+                    const float (*ExtParentMatrix)[4], short CurrentActionArg, int BoneMatrixCapacity)
 {
     if (NumActions <= 0) return;
 
@@ -591,8 +591,8 @@ void BMD::ClaimSkinStamp() const
     }
 }
 
-void BMD::TransformCheap(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB,
-                         bool Translate, float _Scale)
+void BMD::TransformCheap(float (*BoneMatrix)[3][4], const vec3_t BoundingBoxMin, const vec3_t BoundingBoxMax,
+                         OBB_t* OBB, bool Translate, float _Scale)
 {
     m_pCurrentBoneTransform = BoneMatrix;
     SetActiveBoneTransform(BoneMatrix);
@@ -789,8 +789,8 @@ void BMD::MarkCpuVerticesExternallyWritten(int mesh) const
     m_CpuVertsReady[mesh] = true;
 }
 
-void BMD::Transform(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB, bool Translate,
-                    float _Scale)
+void BMD::Transform(float (*BoneMatrix)[3][4], const vec3_t BoundingBoxMin, const vec3_t BoundingBoxMax, OBB_t* OBB,
+                    bool Translate, float _Scale)
 {
     FRAME_PROFILE(Skinning); // baseline measurement
     TransformCheap(BoneMatrix, BoundingBoxMin, BoundingBoxMax, OBB, Translate, _Scale);
@@ -1594,15 +1594,80 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
                                         .streamMesh = StreamMesh,
                                         .lod = ActiveLod,
                                         .skin = CurrentSkin()};
+    // A faded bright or chrome pass dims the model's light, and the meshes drawn after it keep the dimmed light:
+    // the look depends on it.
+    if (DimsLight(draw))
+    {
+        VectorScale(BodyLight, alpha, BodyLight);
+    }
     VectorCopy(BodyLight, draw.bodyLight);
     VectorCopy(BodyOrigin, draw.bodyOrigin);
     Render::ModelDrawing::ActiveModelDrawer().DrawMesh(draw);
-    // The default drawer dims the light of a faded bright or chrome pass, and the meshes drawn after it
-    // keep the dimmed light: the look depends on it.
-    VectorCopy(draw.bodyLight, BodyLight);
 }
 
-void BMD::DrawMesh(Render::ModelDrawing::MeshDraw& draw) const
+namespace
+{
+bool IsChromePass(int renderFlags)
+{
+    if ((renderFlags & RENDER_COLOR) == RENDER_COLOR)
+    {
+        return false;
+    }
+    return (renderFlags & RENDER_CHROME) == RENDER_CHROME || (renderFlags & RENDER_CHROME2) == RENDER_CHROME2 ||
+           (renderFlags & RENDER_CHROME3) == RENDER_CHROME3 || (renderFlags & RENDER_CHROME4) == RENDER_CHROME4 ||
+           (renderFlags & RENDER_CHROME5) == RENDER_CHROME5 || (renderFlags & RENDER_CHROME6) == RENDER_CHROME6 ||
+           (renderFlags & RENDER_CHROME7) == RENDER_CHROME7 || (renderFlags & RENDER_METAL) == RENDER_METAL ||
+           (renderFlags & RENDER_OIL) == RENDER_OIL;
+}
+
+// A chrome pass that blends additively; faded, it dims the light.
+bool IsBrightChromePass(int renderFlags)
+{
+    return (renderFlags & RENDER_CHROME3) == RENDER_CHROME3 || (renderFlags & RENDER_CHROME4) == RENDER_CHROME4 ||
+           (renderFlags & RENDER_CHROME5) == RENDER_CHROME5 || (renderFlags & RENDER_CHROME7) == RENDER_CHROME7 ||
+           (renderFlags & RENDER_BRIGHT) == RENDER_BRIGHT;
+}
+
+bool SkipsChromePass(const Mesh_t& m)
+{
+    return (m.m_csTScript != nullptr && m.m_csTScript->getNoneBlendMesh()) || m.NoneBlendMesh;
+}
+} // namespace
+
+Mesh_t* BMD::DrawnMesh(const Render::ModelDrawing::MeshDraw& draw, int& textureIndex, BITMAP_t*& texture) const
+{
+    if (draw.mesh >= NumMeshs || draw.mesh < 0)
+        return nullptr;
+
+    Mesh_t* m = &Meshs[draw.mesh];
+    if (m->NumTriangles == 0)
+        return nullptr;
+
+    textureIndex = IndexTexture[m->Texture];
+    if (textureIndex == BITMAP_HIDE)
+        return nullptr;
+    if (textureIndex == BITMAP_WATER)
+        textureIndex = BITMAP_WATER + WaterTextureNumber;
+    if (draw.texture != -1)
+        textureIndex = draw.texture;
+
+    texture = Bitmaps.GetTexture(textureIndex);
+    if ((texture->IsSkin || texture->IsHair) && draw.hideSkin)
+        return nullptr;
+    return m;
+}
+
+bool BMD::DimsLight(const Render::ModelDrawing::MeshDraw& draw) const
+{
+    if (draw.alpha >= 0.99f || !IsChromePass(draw.flags) || !IsBrightChromePass(draw.flags))
+        return false;
+    int textureIndex = 0;
+    BITMAP_t* texture = nullptr;
+    const Mesh_t* m = DrawnMesh(draw, textureIndex, texture);
+    return m != nullptr && !SkipsChromePass(*m);
+}
+
+void BMD::DrawMesh(const Render::ModelDrawing::MeshDraw& draw) const
 {
     const int meshIndex = draw.mesh;
     const int renderFlags = draw.flags;
@@ -1612,39 +1677,13 @@ void BMD::DrawMesh(Render::ModelDrawing::MeshDraw& draw) const
     const float blendMeshTextureCoordU = draw.blendMeshU;
     const float blendMeshTextureCoordV = draw.blendMeshV;
     const int explicitTextureIndex = draw.texture;
-    if (meshIndex >= NumMeshs || meshIndex < 0) return;
-
-    Mesh_t* m = &Meshs[meshIndex];
-    if (m->NumTriangles == 0) return;
+    int textureIndex = 0;
+    BITMAP_t* texture = nullptr;
+    Mesh_t* m = DrawnMesh(draw, textureIndex, texture);
+    if (m == nullptr)
+        return;
 
     float wave = static_cast<long>(WorldTime) % 10000 * 0.0001f;
-
-    int textureIndex = IndexTexture[m->Texture];
-    if (textureIndex == BITMAP_HIDE)
-    {
-        return;
-    }
-
-    if (textureIndex == BITMAP_WATER)
-    {
-        textureIndex = BITMAP_WATER + WaterTextureNumber;
-    }
-
-    if (explicitTextureIndex != -1)
-    {
-        textureIndex = explicitTextureIndex;
-    }
-
-    const auto texture = Bitmaps.GetTexture(textureIndex);
-    if (texture->IsSkin && draw.hideSkin)
-    {
-        return;
-    }
-
-    if (texture->IsHair && draw.hideSkin)
-    {
-        return;
-    }
 
     bool EnableWave = false;
     int streamMesh = static_cast<u_char>(draw.streamMesh);
@@ -1746,13 +1785,7 @@ void BMD::DrawMesh(Render::ModelDrawing::MeshDraw& draw) const
             || (renderFlags & RENDER_BRIGHT) == RENDER_BRIGHT
             )
         {
-            if (alpha < 0.99f)
-            {
-                draw.bodyLight[0] *= alpha;
-                draw.bodyLight[1] *= alpha;
-                draw.bodyLight[2] *= alpha;
-            }
-
+            // Faded, the pass draws with the model's light dimmed (BMD::DimsLight).
             EnableAlphaBlend();
         }
         else if ((renderFlags & RENDER_DARK) == RENDER_DARK)

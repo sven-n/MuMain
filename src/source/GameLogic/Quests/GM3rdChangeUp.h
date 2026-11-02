@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 class BMD;
 
 namespace SEASON3A
@@ -30,8 +32,8 @@ namespace SEASON3A
         bool CreateBalgasRefugeObject(OBJECT* pObject);
         bool MoveObject(OBJECT* pObject);
         bool UpdateObjectEffects(OBJECT* pObject, BMD* pModel);
-        bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-        void RenderAfterObjectMesh(OBJECT* o, BMD* b);
+        bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
+        void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
 
         bool CreateFireSnuff(PARTICLE* o);
         void PlayEffectSound(OBJECT* o);
@@ -41,7 +43,7 @@ namespace SEASON3A
         bool AttackEffectBalgasBarrackMonster(CHARACTER* c, OBJECT* o, BMD* b);
         bool MoveBalgasBarrackMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
         void MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
-        bool RenderMonsterObjectMesh(OBJECT* o, BMD* b, int ExtraMon);
+        bool RenderMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon);
         bool UpdateBalgasBarrackMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
     };
 }

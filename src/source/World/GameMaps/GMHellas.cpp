@@ -506,12 +506,13 @@ bool UpdateHellasObjectEffects(OBJECT* o, BMD* b)
     return true;
 }
 
-bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
+bool RenderHellasObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (o->Type == MODEL_BAHAMUT && gMapManager.InHellas())
     {
         Vector(0.0f, 0.0f, 0.0f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         Vector(1.f, 1.f, 1.f, b->BodyLight);
         return true;
     }
@@ -525,20 +526,24 @@ bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
         {
             Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
         }
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         return true;
     }
     else if (o->Type == MODEL_CUNDUN_DRAGON_HEAD)
     {
         Vector(0.3f, 0.3f, 0.3f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         return true;
     }
     else if (o->Type == MODEL_CUNDUN_GHOST)
     {
         Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderBody(RENDER_TEXTURE | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE | RENDER_DARK, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderBody(RENDER_TEXTURE | RENDER_DARK, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
         Vector(0.0f, 0.0f, 0.0f, b->BodyLight);
         RenderPartObjectEdge(b, o, RENDER_COLOR, true, 0.7f);
 
@@ -546,7 +551,8 @@ bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
     }
     else if (gMapManager.InHellas() == true && (o->Type >= MODEL_WORLD_OBJECT && o->Type < MAX_WORLD_OBJECTS))
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
 
         if (o->Type >= 0 && o->Type <= 66)
         {
@@ -555,15 +561,17 @@ bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
             {
                 float Luminosity = sinf(WorldTime * 0.002f) * 0.1f + 0.3f;
                 Vector(Luminosity, Luminosity, Luminosity, b->BodyLight);
-                b->RenderBody(RENDER_TEXTURE, 0.3f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_WATER + WaterTextureNumber);
+                b->RenderBody(RENDER_TEXTURE, 0.3f, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh, BITMAP_WATER + WaterTextureNumber);
             }
 
             if (o->Type == 34)
             {
                 if (b->NumMeshs > 1)
                 {
-                    b->BeginRender(o->Alpha);
-                    b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                    b->BeginRender(look.alpha);
+                    b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                                  look.blendMeshU, look.blendMeshV, look.hiddenMesh);
                     b->EndRender();
                 }
             }
@@ -572,7 +580,8 @@ bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
             {
                 DisableAlphaBlend();
                 Vector(0.1f, 0.1f, 0.1f, b->BodyLight);
-                b->RenderBody(RENDER_TEXTURE | RENDER_SHADOWMAP, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                b->RenderBody(RENDER_TEXTURE | RENDER_SHADOWMAP, look.alpha, look.blendMesh, look.blendMeshLight,
+                              look.blendMeshU, look.blendMeshV, look.hiddenMesh);
                 Vector(1.f, 1.f, 1.f, b->BodyLight);
             }
         }
@@ -580,7 +589,7 @@ bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
     }
     else
     {
-        return RenderHellasMonsterObjectMesh(o, b);
+        return RenderHellasMonsterObjectMesh(o, look, b);
     }
 
     return false;
@@ -1969,13 +1978,15 @@ bool RenderHellasMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate, int Selec
     return false;
 }
 
-bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
+bool RenderHellasMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     bool    success = false;
     if (o->Type == MODEL_DEATH_ANGEL)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_METAL | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(0, RENDER_METAL | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_CHROME);
         success = true;
     }
     else if (o->Type == MODEL_ILLUSION_OF_KUNDUN)
@@ -1983,35 +1994,35 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         // UpdateHellasObjectMeshEffects runs its death; it shows until it bursts.
         if (o->LifeTime >= 90)
         {
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
             Vector(0.4f, 0.4f, 0.3f, b->BodyLight);
-            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(3, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(4, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(5, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(6, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(3, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(4, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(5, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(6, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
 
             if (o->CurrentAction == MONSTER01_SHOCK)
             {
                 if ((o->AnimationFrame > 3.5f && o->AnimationFrame < 6.0f) ||
                     (o->AnimationFrame > 8.0f && o->AnimationFrame < 11.0f))
                 {
-                    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                                  o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                    b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                                  o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                    b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                                  o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                    b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                                  o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                                  look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+                    b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                                  look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+                    b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                                  look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+                    b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                                  look.blendMeshU, look.blendMeshV, look.hiddenMesh);
                 }
             }
         }
@@ -2020,24 +2031,31 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
     else if (o->Type == MODEL_CUNDUN_PART1 || o->Type == MODEL_CUNDUN_PART2 || o->Type == MODEL_CUNDUN_PART3 ||
         o->Type == MODEL_CUNDUN_PART4 || o->Type == MODEL_CUNDUN_PART5 || o->Type == MODEL_CUNDUN_PART8)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         Vector(0.4f, 0.4f, 0.3f, b->BodyLight);
-        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
         success = true;
     }
     else if (o->Type == MODEL_BLOOD_SOLDIER)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         Vector(0.5f, 0.1f, 0.0f, b->BodyLight);
-        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         success = true;
     }
     else if (o->Type == MODEL_AEGIS)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         Vector(0.25f, 0.2f, 0.1f, b->BodyLight);
-        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         success = true;
     }
     else if (o->Type == MODEL_DEATH_CENTURION)
@@ -2049,74 +2067,94 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         else
         {
         }
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
         if (o->SubType == 9)
         {
             Vector(1.f, 0.6f, 0.3f, b->BodyLight);
-            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.5f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.5f, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
             Vector(1.f, 1.f, 1.f, b->BodyLight);
-            b->RenderMesh(1, RENDER_CHROME2 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(1, RENDER_CHROME2 | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
             Vector(1.f, 0.6f, 0.1f, b->BodyLight);
         }
         else
         {
             Vector(0.1f, 0.6f, 1.f, b->BodyLight);
         }
-        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         success = true;
     }
     else if (o->Type == MODEL_NECRON)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
 
         float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.7f;
         Vector(0.5f, Luminosity, 0.5f, b->BodyLight);
-        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 0.8f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 0.8f, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
         success = true;
     }
     else if (o->Type == MODEL_SHRIKER)
     {
         b->BeginRender(1.f);
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(5, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(5, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
 
         float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.7f;
         if (o->SubType == 9)
         {
-            o->BlendMeshLight = 0.5f;
+            look.blendMeshLight = 0.5f;
 
             Vector(Luminosity, Luminosity * 0.4f, Luminosity * 0.4f, b->BodyLight);
         }
         else
         {
-            o->BlendMeshLight = 1.f;
+            look.blendMeshLight = 1.f;
             Vector(Luminosity * 0.3f, Luminosity * 0.6f, Luminosity * 1.f, b->BodyLight);
         }
-        b->RenderMesh(2, RENDER_WAVE | RENDER_BRIGHT, o->Alpha, 2, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(4, RENDER_WAVE | RENDER_BRIGHT, o->Alpha, 4, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(2, RENDER_WAVE | RENDER_BRIGHT, look.alpha, 2, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(4, RENDER_WAVE | RENDER_BRIGHT, look.alpha, 4, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
 
         if (o->SubType == 9)
         {
             Vector(1.f, 1.f, 1.f, b->BodyLight);
-            b->RenderMesh(0, RENDER_METAL | RENDER_BRIGHT, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_METAL | RENDER_BRIGHT, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(3, RENDER_METAL | RENDER_BRIGHT, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(0, RENDER_METAL | RENDER_BRIGHT, look.alpha, -1, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(1, RENDER_METAL | RENDER_BRIGHT, look.alpha, -1, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(3, RENDER_METAL | RENDER_BRIGHT, look.alpha, -1, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
         }
         else
         {
             float Light = sinf(WorldTime * 0.002f) * 0.3f + 0.7f;
-            b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, 2, Light, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, 4, Light, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(2, RENDER_TEXTURE, look.alpha, 2, Light, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(4, RENDER_TEXTURE, look.alpha, 4, Light, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         }
 
-        o->BlendMeshLight = sinf(WorldTime * 0.002f) * 0.1f + 0.05f;
-        b->RenderMesh(6, RENDER_TEXTURE, o->Alpha, 6, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        look.blendMeshLight = sinf(WorldTime * 0.002f) * 0.1f + 0.05f;
+        b->RenderMesh(6, RENDER_TEXTURE, look.alpha, 6, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         b->EndRender();
         success = true;
     }

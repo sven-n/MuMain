@@ -11,6 +11,8 @@
 
 #pragma once
 
+#include "Render/Models/DrawLook.h"
+
 #ifdef ASG_ADD_MAP_KARUTAN
 
 #include "World/MapInfra/w_BaseMap.h"
@@ -35,9 +37,9 @@ public:
     // 오브젝트 이펙트
     virtual bool UpdateObjectEffects(OBJECT* o, BMD* b);
     // 오브젝트 랜더
-    virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    virtual bool RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
     // 맵 관련 오브젝트 이펙트
-    virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+    virtual void RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon = 0);
 
 #ifdef ASG_ADD_KARUTAN_MONSTERS
     // Character

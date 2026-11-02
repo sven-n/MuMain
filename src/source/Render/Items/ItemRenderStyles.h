@@ -5,6 +5,8 @@
 #include <span>
 #include <string_view>
 
+#include "Render/Models/DrawLook.h"
+
 class BMD;
 class OBJECT;
 
@@ -25,7 +27,7 @@ std::span<const std::string_view> GetNames();
 // from the item model database after each build of it). False when the item
 // has no style, or its style is not for this drawing (e.g. a doppelganger);
 // the drawing code then draws the model itself.
-bool Render(BMD* b, OBJECT* o, int modelType, float alpha, int renderType);
+bool Render(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType);
 
 // Whether the item's style spawns lights or animates where it is drawn.
 bool Spawns(int modelType);
@@ -37,7 +39,7 @@ void SpawnHelperNpcPlateLights(OBJECT* o);
 
 // Draws the glow pass of items +7 and up for the few render styles that glow
 // differently from their "glow" values. False for the others.
-bool RenderGlow(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, int texture);
+bool RenderGlow(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType, int texture);
 
 // How a few render styles shine below +3: the light of the item scaled, the
 // model drawn, then two shine passes (RenderPartObjectBodyColor2).

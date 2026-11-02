@@ -292,7 +292,7 @@ bool MapProcess::UpdateObjectEffects(OBJECT* o, BMD* b)
     return false;
 }
 
-bool MapProcess::RenderObjectVisual(OBJECT* o, BMD* b)
+bool MapProcess::RenderObjectVisual(const OBJECT* o, DrawLook& look, BMD* b)
 {
     for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
     {
@@ -304,7 +304,7 @@ bool MapProcess::RenderObjectVisual(OBJECT* o, BMD* b)
         {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
             {
-                bool result = basemap.lock()->RenderObjectVisual(o, b);
+                bool result = basemap.lock()->RenderObjectVisual(o, look, b);
                 if (result)
                 {
                     return true;
@@ -319,7 +319,7 @@ bool MapProcess::RenderObjectVisual(OBJECT* o, BMD* b)
     return false;
 }
 
-bool MapProcess::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool MapProcess::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
     {
@@ -331,7 +331,7 @@ bool MapProcess::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
             {
-                bool result = basemap.lock()->RenderObjectMesh(o, b, ExtraMon);
+                bool result = basemap.lock()->RenderObjectMesh(o, look, b, ExtraMon);
                 if (result)
                 {
                     return true;
@@ -346,7 +346,7 @@ bool MapProcess::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-void MapProcess::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+void MapProcess::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
     {
@@ -358,7 +358,7 @@ void MapProcess::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         {
             if (basemap.lock()->IsCurrentMap(gMapManager.WorldActive))
             {
-                basemap.lock()->RenderAfterObjectMesh(o, b, ExtraMon);
+                basemap.lock()->RenderAfterObjectMesh(o, look, b, ExtraMon);
             }
         }
         else
