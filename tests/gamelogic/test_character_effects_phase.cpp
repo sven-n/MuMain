@@ -969,3 +969,26 @@ TEST_CASE("A Dragon Kick afterimage leaves the fading character's alpha, place a
     CHECK(o->Alpha == 0.4f);
     CHECK(o->AnimationFrame == 4.f);
 }
+
+TEST_CASE("Drawing an Explosion Blade leaves the item's alpha for the next pass [effects]")
+{
+    FenrirScope scope;
+    ItemModelDatabaseScope restoreModels;
+    Data::Items::ItemModelDefinition blade;
+    blade.group = 0;
+    blade.number = 31;
+    blade.file = "Data/Item/Sword32.bmd";
+    blade.renderStyle = "explosionBlade";
+    g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{blade}, Data::Effects::GlowColorList{});
+    const int model = Data::Items::ToModelSlot(Data::Items::MakeItemType(0, 31));
+    BMD* b = &Models[model];
+    OBJECT item;
+    item.Type = model;
+    item.Alpha = 1.f;
+
+    for (int pass = 0; pass < 2; ++pass)
+    {
+        CheckDrawSpawnsNone([&] { Render::Items::Styles::Render(b, &item, model, item.Alpha, RENDER_TEXTURE); });
+        CHECK(item.Alpha == 1.f);
+    }
+}

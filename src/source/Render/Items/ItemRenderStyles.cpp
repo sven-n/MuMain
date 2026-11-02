@@ -794,10 +794,9 @@ bool RenderExplosionBlade(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     Vector(Luminosity, Luminosity, Luminosity + 0.1f, b->BodyLight);
     b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, -2, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordU);
 
-    o->Alpha = 0.5f;
     float Luminosity4 = sinf(WorldTime * 0.0025f) * 0.5f + 0.7f;
     Vector(0.4f, 0.4f, 0.8f, b->BodyLight);
-    b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, -2, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordU);
+    b->RenderMesh(1, RENDER_TEXTURE, 0.5f, -2, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordU);
     return true;
 }
 
