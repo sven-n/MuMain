@@ -8,12 +8,21 @@
 #include "MUHelper/MuHelperData.h"
 #include "MUHelper/MuHelper.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Engine/Object/ZzzObject.h"
+#include "Engine/AI/ZzzAI.h"
+#include "GameLogic/Automation/Attack.h"
+#include "GameLogic/Automation/Movement.h"
+#include "GameLogic/Automation/Pickup.h"
+#include "Render/Terrain/ZzzLodTerrain.h"
 #include <memory>
 
+#include <algorithm>
 #include <array>
 #include <cstring>
 
 extern MovementSkill g_MovementSkill;
+extern int TargetX;
+extern int TargetY;
 
 namespace
 {
@@ -66,7 +75,186 @@ struct SkillFixture
         return rotation.Select(config, seconds, nearby, attacking);
     }
 };
+
+constexpr int MovementStartTile = 100;
+constexpr int MovementDropIndex = MAX_ITEMS - 1;
+
+struct DropFixture
+{
+    bool previousLive = Items[MovementDropIndex].Object.Live;
+    std::array<float, 3> previousPosition;
+
+    DropFixture()
+    {
+        auto& object = Items[MovementDropIndex].Object;
+        std::copy_n(object.Position, previousPosition.size(), previousPosition.begin());
+        object.Live = true;
+        object.Position[0] = (MovementStartTile + 3.5f) * TERRAIN_SCALE;
+        object.Position[1] = (MovementStartTile + 0.5f) * TERRAIN_SCALE;
+    }
+
+    ~DropFixture()
+    {
+        auto& object = Items[MovementDropIndex].Object;
+        object.Live = previousLive;
+        std::copy(previousPosition.begin(), previousPosition.end(), object.Position);
+    }
+};
+
+struct BlockedTileFixture
+{
+    int tileX;
+    int tileY;
+    std::array<WORD, 9> previousWalls;
+
+    BlockedTileFixture(int x, int y) : tileX(x), tileY(y)
+    {
+        int wall = 0;
+        for (int dy = -1; dy <= 1; ++dy)
+            for (int dx = -1; dx <= 1; ++dx)
+            {
+                auto& terrain = TerrainWall[TERRAIN_INDEX(tileX + dx, tileY + dy)];
+                previousWalls[wall++] = terrain;
+                terrain = dx == 0 && dy == 0 ? 0 : TW_NOMOVE;
+            }
+        InitPath();
+    }
+
+    ~BlockedTileFixture()
+    {
+        int wall = 0;
+        for (int dy = -1; dy <= 1; ++dy)
+            for (int dx = -1; dx <= 1; ++dx)
+                TerrainWall[TERRAIN_INDEX(tileX + dx, tileY + dy)] = previousWalls[wall++];
+    }
+};
+
+void CheckActionsWaitForWalk()
+{
+    using namespace GameLogic::Automation;
+    const auto currentPath = Hero->Path.CurrentPath;
+    const auto currentFraction = Hero->Path.CurrentPathFloat;
+    const int targetX = TargetX;
+    const int targetY = TargetY;
+    CHECK(WalkTo(MovementStartTile - 3, MovementStartTile) == MoveResult::Walking);
+    CHECK(AttackObject(123, false, 6) == AttackResult::Busy);
+    CHECK(CastSkill(Primary, true, 123, true, 6) == SkillResult::Busy);
+    CHECK(PickUpItem(MovementDropIndex, 8) == PickupResult::Approaching);
+    CHECK(Hero->Path.CurrentPath == currentPath);
+    CHECK(Hero->Path.CurrentPathFloat == currentFraction);
+    CHECK(TargetX == targetX);
+    CHECK(TargetY == targetY);
+}
 } // namespace
+
+TEST_CASE("Helper actions finish a walk across slow frames before replanning [helper_movement]")
+{
+    SkillFixture fixture;
+    DropFixture drop;
+    constexpr float WalkSpeed = 15.f;
+    constexpr double HelperIntervalMs = 250.0;
+    for (const double fps : {5.0, 25.0, 60.0})
+    {
+        CAPTURE(fps);
+        Hero->PositionX = Hero->PositionY = MovementStartTile;
+        Hero->Object.Position[0] = Hero->Object.Position[1] = (MovementStartTile + 0.5f) * TERRAIN_SCALE;
+        Hero->Object.CurrentAction = PLAYER_WALK_MALE;
+        Hero->Movement = true;
+        auto& path = Hero->Path;
+        path.PathNum = 2;
+        path.CurrentPath = path.CurrentPathFloat = 0;
+        path.PathX[0] = path.PathY[0] = path.PathY[1] = MovementStartTile;
+        path.PathX[1] = MovementStartTile + 1;
+        double nextTickMs = 0.0;
+        for (int frame = 0; frame < 120 && Hero->Movement; ++frame)
+        {
+            if (frame * 1000.0 / fps >= nextTickMs)
+            {
+                CheckActionsWaitForWalk();
+                nextTickMs += HelperIntervalMs;
+            }
+            if (MovePath(Hero, false))
+                Hero->Movement = false;
+            else
+                Hero->Object.Position[0] += WalkSpeed * std::min(static_cast<float>(REFERENCE_FPS / fps), 1.f);
+        }
+        CHECK_FALSE(Hero->Movement);
+        CHECK_FALSE(GameLogic::Automation::IsWalkInProgress());
+        CHECK(Hero->PositionX == MovementStartTile + 1);
+        CHECK(Hero->Object.Position[0] == doctest::Approx((MovementStartTile + 1.5f) * TERRAIN_SCALE));
+    }
+}
+
+TEST_CASE("Stopped and completed paths do not hold automation busy [helper_movement]")
+{
+    SkillFixture fixture;
+    Hero->Movement = true;
+    Hero->Path.PathNum = 2;
+    Hero->Path.CurrentPath = 0;
+    CHECK(GameLogic::Automation::IsWalkInProgress());
+    Hero->Movement = false;
+    CHECK_FALSE(GameLogic::Automation::IsWalkInProgress());
+    Hero->Movement = true;
+    Hero->Path.CurrentPath = 1;
+    CHECK_FALSE(GameLogic::Automation::IsWalkInProgress());
+    Hero->Path.PathNum = 0;
+    Hero->Path.CurrentPath = 0;
+    CHECK_FALSE(GameLogic::Automation::IsWalkInProgress());
+}
+
+TEST_CASE("Blocked loot and a blocked return do not stop helper attacks [helper_movement]")
+{
+    SkillFixture fixture;
+    DropFixture drop;
+    constexpr int AwayTile = MovementStartTile + 3;
+    auto characters = std::make_unique<CHARACTER[]>(MAX_CHARACTERS_CLIENT);
+    auto* previousCharacters = CharactersClient;
+    CharactersClient = characters.get();
+    auto& target = characters[0];
+    target.Key = 123;
+    target.Object.Live = true;
+    target.Object.Kind = KIND_MONSTER;
+    target.PositionX = target.TargetX = AwayTile;
+    target.PositionY = target.TargetY = MovementStartTile;
+    target.Object.Position[0] = (AwayTile + 0.5f) * TERRAIN_SCALE;
+    target.Object.Position[1] = (MovementStartTile + 0.5f) * TERRAIN_SCALE;
+    SkillAttribute[Primary].Distance = SkillAttribute[ExtraOne].Distance = 6;
+
+    BlockedTileFixture terrain(AwayTile, MovementStartTile);
+    Hero->PositionX = Hero->PositionY = MovementStartTile;
+    Hero->Object.CurrentAction = PLAYER_SKILL_CHAIN_LIGHTNING;
+    Hero->Object.Type = MODEL_PLAYER;
+    fixture.config.aiSkill.fill(0);
+    fixture.config.iHuntingRange = 6;
+    fixture.config.iObtainingRange = 8;
+    fixture.config.bPickAllItems = true;
+    fixture.config.bReturnToOriginalPosition = true;
+    MUHelper::g_MuHelper.Load(fixture.config);
+    MUHelper::g_MuHelper.Start();
+    Hero->PositionX = AwayTile;
+    Hero->Object.Position[0] = (AwayTile + 0.5f) * TERRAIN_SCALE;
+    Hero->Object.Position[1] = (MovementStartTile + 0.5f) * TERRAIN_SCALE;
+    Items[MovementDropIndex].Object.Position[0] = (AwayTile + 3.5f) * TERRAIN_SCALE;
+    MUHelper::g_MuHelper.AddItem(MovementDropIndex, {AwayTile + 3, MovementStartTile});
+    MUHelper::g_MuHelper.AddTarget(target.Key, false);
+    fixture.config.aiSkill[0] = Primary;
+    MUHelper::g_MuHelper.Load(fixture.config);
+    MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
+    CHECK(MUHelper::g_MuHelper.GetCurrentSkill() == Primary);
+
+    constexpr int TicksBeforeReturn = 5;
+    for (int tick = 1; tick < TicksBeforeReturn; ++tick)
+        MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
+    fixture.config.aiSkill[0] = ExtraOne;
+    MUHelper::g_MuHelper.Load(fixture.config);
+    MUHelper::CMuHelper::TimerProc(nullptr, 0, 0, 0);
+    CHECK(MUHelper::g_MuHelper.GetCurrentSkill() == ExtraOne);
+
+    MUHelper::g_MuHelper.Stop();
+    MUHelper::g_MuHelper.DeleteAllTargets();
+    MUHelper::g_MuHelper.DeleteItem(MovementDropIndex);
+    CharactersClient = previousCharacters;
+}
 
 TEST_CASE("Unconditioned additional attacks rotate with the primary [helper_rotation]")
 {
