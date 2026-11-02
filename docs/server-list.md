@@ -399,6 +399,15 @@ For both tabs:
   names, colors, load bars and Full / Overloaded texts can be checked without
   the servers running. A click on one only says that the editor shows it. The
   switch and the load are kept in `MuEditor/MuEditor.ini` (`[ServerList]`).
+  While it is on, the Groups tab's channel list has a **Show** box for each
+  channel the connect server did not send, and **All** / **None** above it for
+  the group's offline channels, so any set of them can be tried. Next to the box
+  is the channel's load: greyed while it follows Their load, and its own once
+  it is changed (dragged, or typed after a double-click or Ctrl+click); **×**
+  goes back to Their load. A group without a channel left makes no button. The
+  boxes and own loads are kept until the game closes, and they are no undo
+  steps. They stay with their group when its ID changes; a group that is
+  removed drops them, so one added later starts with all its channels shown.
 - **Undo** and **Redo** in the editor bar (or Ctrl+Z and Ctrl+Y in the window)
   work through the changes of the session. Each change is one step: a group,
   VIP type, color or rule added, removed or moved, a box, list or shade

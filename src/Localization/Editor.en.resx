@@ -3200,10 +3200,31 @@
     <value>Their load</value>
   </data>
   <data name="Offline servers note" xml:space="preserve">
-    <value>Editor only: the login screen also lists every channel 1 to 20 of every group that the connect server did not send, at this load, so you can see its name, color and load bar. It cannot be joined.</value>
+    <value>Editor only: the login screen also lists every channel 1 to 20 of every group that the connect server did not send, at this load, so you can see its name, color and load bar. It cannot be joined. In a group's channel list each one can be left out or given a load of its own, until the game closes.</value>
   </data>
   <data name="Only the editor shows this server; the connect server did not send it." xml:space="preserve">
     <value>Only the editor shows this server; the connect server did not send it.</value>
+  </data>
+  <data name="Offline channels:" xml:space="preserve">
+    <value>Offline channels:</value>
+  </data>
+  <data name="All offline channels" xml:space="preserve">
+    <value>All</value>
+  </data>
+  <data name="No offline channel" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="Show offline channel" xml:space="preserve">
+    <value>Show</value>
+  </data>
+  <data name="Offline channel note" xml:space="preserve">
+    <value>Editor only: whether the login screen lists this channel, which the connect server did not send, and at which load. Without a load of its own it has Their load. Kept until the game closes.</value>
+  </data>
+  <data name="Load slider note" xml:space="preserve">
+    <value>Drag, or double-click or Ctrl+click to type a value.</value>
+  </data>
+  <data name="Use Their load again" xml:space="preserve">
+    <value>Use Their load again</value>
   </data>
   <data name="from {0}" xml:space="preserve">
     <value>from {0}</value>

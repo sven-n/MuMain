@@ -2981,10 +2981,31 @@
     <value>Ihre Auslastung</value>
   </data>
   <data name="Offline servers note" xml:space="preserve">
-    <value>Nur im Editor: Der Anmeldebildschirm zeigt auch jeden Kanal 1 bis 20 jeder Gruppe, den der Verbindungsserver nicht gesendet hat, mit dieser Auslastung, damit du Name, Farbe und Auslastungsbalken siehst. Beitreten kann man ihm nicht.</value>
+    <value>Nur im Editor: Der Anmeldebildschirm zeigt auch jeden Kanal 1 bis 20 jeder Gruppe, den der Verbindungsserver nicht gesendet hat, mit dieser Auslastung, damit du Name, Farbe und Auslastungsbalken siehst. Beitreten kann man ihm nicht. In der Kanalliste einer Gruppe lässt sich jeder weglassen oder mit eigener Auslastung zeigen, bis das Spiel beendet wird.</value>
   </data>
   <data name="Only the editor shows this server; the connect server did not send it." xml:space="preserve">
     <value>Nur der Editor zeigt diesen Server; der Verbindungsserver hat ihn nicht gesendet.</value>
+  </data>
+  <data name="Offline channels:" xml:space="preserve">
+    <value>Offline-Kanäle:</value>
+  </data>
+  <data name="All offline channels" xml:space="preserve">
+    <value>Alle</value>
+  </data>
+  <data name="No offline channel" xml:space="preserve">
+    <value>Keine</value>
+  </data>
+  <data name="Show offline channel" xml:space="preserve">
+    <value>Zeigen</value>
+  </data>
+  <data name="Offline channel note" xml:space="preserve">
+    <value>Nur im Editor: ob der Anmeldebildschirm diesen Kanal zeigt, den der Verbindungsserver nicht gesendet hat, und mit welcher Auslastung. Ohne eigene Auslastung hat er „Ihre Auslastung“. Gilt, bis das Spiel beendet wird.</value>
+  </data>
+  <data name="Load slider note" xml:space="preserve">
+    <value>Ziehen, oder mit Doppelklick oder Strg+Klick einen Wert eingeben.</value>
+  </data>
+  <data name="Use Their load again" xml:space="preserve">
+    <value>Wieder „Ihre Auslastung“ nehmen</value>
   </data>
   <data name="from {0}" xml:space="preserve">
     <value>von {0}</value>

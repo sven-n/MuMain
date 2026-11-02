@@ -470,6 +470,90 @@ TEST_CASE("ServerListManager: the editor's preview shows the channels the connec
     CHECK_FALSE(sent[0]->GetServerInfo(0)->m_offline);
 }
 
+TEST_CASE("ServerListManager: the editor's preview leaves out the channels it is told to, at their own load")
+{
+    TestServerListManager manager;
+    manager.SetServerList(List({Group(0, "Valhalla"), Group(1, "Helheim")}));
+    manager.InsertServerGroup(ServerId(0, 3), LowLoad);
+    manager.SetOfflinePreview(true, 75);
+    CHECK(manager.IsOfflineServerShown(ServerId(0, 4)));
+    manager.SetOfflineServerShown(ServerId(0, 4), false);
+    // A sent channel is shown whatever the preview says.
+    manager.SetOfflineServerShown(ServerId(0, 3), false);
+    manager.SetOfflineServerLoad(ServerId(0, 5), 130);
+    // A group with no channel left makes no button.
+    for (int channel = 1; channel <= MAX_SERVER_PER_GROUP; ++channel)
+    {
+        manager.SetOfflineServerShown(ServerId(1, channel), false);
+    }
+    manager.RebuildServerGroups();
+
+    const std::vector<CServerGroup*> groups = GroupsInOrder(manager);
+    REQUIRE(groups.size() == 1);
+    REQUIRE(groups[0]->GetServerSize() == MAX_SERVER_PER_GROUP - 1);
+    for (int index = 0; index < groups[0]->GetServerSize(); ++index)
+    {
+        const CServerInfo* server = groups[0]->GetServerInfo(index);
+        REQUIRE(server != nullptr);
+        CHECK(server->m_iIndex != 4);
+        if (server->m_iIndex == 3)
+        {
+            CHECK_FALSE(server->m_offline);
+            CHECK(server->m_iPercent == LowLoad);
+        }
+        else
+        {
+            CHECK(server->m_offline);
+            CHECK(server->m_iPercent == (server->m_iIndex == 5 ? 130 : 75));
+        }
+    }
+
+    // Without its own load a channel follows the preview's again.
+    manager.SetOfflineServerLoad(ServerId(0, 5), std::nullopt);
+    manager.SetOfflinePreview(true, 40);
+    manager.SetOfflineServerShown(ServerId(0, 4), true);
+    manager.RebuildServerGroups();
+    const std::vector<CServerGroup*> again = GroupsInOrder(manager);
+    REQUIRE(again.size() == 1);
+    REQUIRE(again[0]->GetServerSize() == MAX_SERVER_PER_GROUP);
+    CHECK(again[0]->GetServerInfo(3)->m_iPercent == 40);
+    CHECK(again[0]->GetServerInfo(4)->m_iPercent == 40);
+    CHECK_FALSE(manager.GetOfflineServerLoad(ServerId(0, 5)).has_value());
+}
+
+TEST_CASE("ServerListManager: the editor's preview keeps an offline channel's picks with its group")
+{
+    TestServerListManager manager;
+    manager.SetServerList(List({Group(0, "Valhalla"), Group(1, "Helheim")}));
+    manager.SetOfflineServerShown(ServerId(0, 4), false);
+    manager.SetOfflineServerLoad(ServerId(0, 5), 130);
+    manager.SetOfflineServerShown(ServerId(1, 2), false);
+
+    // Valhalla's ID changed from 0 to 7: its picks go with it, Helheim's stay.
+    manager.SetServerList(List({Group(7, "Valhalla"), Group(1, "Helheim")}));
+    CHECK_FALSE(manager.IsOfflineServerShown(ServerId(7, 4)));
+    CHECK(manager.GetOfflineServerLoad(ServerId(7, 5)) == 130);
+    CHECK(manager.IsOfflineServerShown(ServerId(0, 4)));
+    CHECK_FALSE(manager.GetOfflineServerLoad(ServerId(0, 5)).has_value());
+    CHECK_FALSE(manager.IsOfflineServerShown(ServerId(1, 2)));
+
+    // Valhalla removed, then a group added with its ID: that one starts with all shown.
+    manager.SetServerList(List({Group(1, "Helheim")}));
+    manager.SetServerList(List({Group(1, "Helheim"), Group(7, "Asgard")}));
+    CHECK(manager.IsOfflineServerShown(ServerId(7, 4)));
+    CHECK_FALSE(manager.GetOfflineServerLoad(ServerId(7, 5)).has_value());
+    CHECK_FALSE(manager.IsOfflineServerShown(ServerId(1, 2)));
+}
+
+TEST_CASE("ServerListManager: an offline channel's own load stays within the preview's loads")
+{
+    TestServerListManager manager;
+    manager.SetOfflineServerLoad(ServerId(0, 1), CServerListManager::MaxOfflineServerPercent + 60);
+    manager.SetOfflineServerLoad(ServerId(0, 2), -5);
+    CHECK(manager.GetOfflineServerLoad(ServerId(0, 1)) == CServerListManager::MaxOfflineServerPercent);
+    CHECK(manager.GetOfflineServerLoad(ServerId(0, 2)) == 0);
+}
+
 TEST_CASE("ServerListManager: a rebuild names the servers last sent with the new groups")
 {
     I18N::SetLocale("en");

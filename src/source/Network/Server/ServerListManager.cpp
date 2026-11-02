@@ -80,6 +80,9 @@ bool CServerListManager::LoadServerListScript(std::string& errorMessage)
 
 void CServerListManager::SetServerList(const Data::ServerList::ServerListData& list)
 {
+#ifdef _EDITOR
+    const std::map<int, size_t> previousGroups = m_groupIndexById;
+#endif
     m_serverList = list;
     ++m_titleVersion;
     m_groupIndexById.clear();
@@ -87,6 +90,9 @@ void CServerListManager::SetServerList(const Data::ServerList::ServerListData& l
     {
         m_groupIndexById[m_serverList.groups[index].id] = index;
     }
+#ifdef _EDITOR
+    KeepOfflineServersWithGroups(previousGroups);
+#endif
     FollowSelectedChannel();
 }
 
@@ -127,7 +133,7 @@ void CServerListManager::RebuildServerGroups()
     {
         for (int channel = 0; channel < MAX_SERVER_PER_GROUP; ++channel)
         {
-            channels.try_emplace(group.id * MAX_SERVER_PER_GROUP + channel, std::nullopt);
+            channels.try_emplace(Data::ServerList::ChannelServerId(group.id, channel), std::nullopt);
         }
     }
     for (const auto& [connectIndex, percent] : channels)
@@ -136,19 +142,116 @@ void CServerListManager::RebuildServerGroups()
         {
             InsertServerGroup(connectIndex, *percent);
         }
-        else if (CServerGroup* pServerGroup = FindOrMakeGroup(connectIndex))
+        else if (!m_hiddenOffline.contains(connectIndex))
         {
-            InsertServer(pServerGroup, connectIndex, m_offlinePercent);
-            pServerGroup->m_listServerInfo.back()->m_offline = true;
-            m_iterServerGroup = m_mapServerGroup.begin();
+            InsertOfflineServer(connectIndex);
         }
     }
+}
+
+void CServerListManager::InsertOfflineServer(int iConnectIndex)
+{
+    CServerGroup* pServerGroup = FindOrMakeGroup(iConnectIndex);
+    if (pServerGroup == nullptr)
+        return;
+
+    const std::optional<int> ownLoad = GetOfflineServerLoad(iConnectIndex);
+    InsertServer(pServerGroup, iConnectIndex, ownLoad.value_or(m_offlinePercent));
+    pServerGroup->m_listServerInfo.back()->m_offline = true;
+    m_iterServerGroup = m_mapServerGroup.begin();
 }
 
 void CServerListManager::SetOfflinePreview(bool show, int percent)
 {
     m_showOffline = show;
     m_offlinePercent = std::clamp(percent, 0, MaxOfflineServerPercent);
+}
+
+void CServerListManager::SetOfflineServerShown(int connectIndex, bool shown)
+{
+    if (shown)
+    {
+        m_hiddenOffline.erase(connectIndex);
+    }
+    else
+    {
+        m_hiddenOffline.insert(connectIndex);
+    }
+}
+
+bool CServerListManager::IsOfflineServerShown(int connectIndex) const
+{
+    return !m_hiddenOffline.contains(connectIndex);
+}
+
+void CServerListManager::SetOfflineServerLoad(int connectIndex, std::optional<int> percent)
+{
+    if (!percent)
+    {
+        m_offlineLoads.erase(connectIndex);
+        return;
+    }
+    m_offlineLoads[connectIndex] = std::clamp(*percent, 0, MaxOfflineServerPercent);
+}
+
+std::optional<int> CServerListManager::GetOfflineServerLoad(int connectIndex) const
+{
+    const auto found = m_offlineLoads.find(connectIndex);
+    if (found == m_offlineLoads.end())
+    {
+        return std::nullopt;
+    }
+    return found->second;
+}
+
+void CServerListManager::ResetOfflineServers()
+{
+    m_hiddenOffline.clear();
+    m_offlineLoads.clear();
+}
+
+void CServerListManager::KeepOfflineServersWithGroups(const std::map<int, size_t>& previousGroups)
+{
+    std::vector<int> left;
+    for (const auto& [groupId, index] : previousGroups)
+    {
+        if (!m_groupIndexById.contains(groupId))
+        {
+            left.push_back(groupId);
+        }
+    }
+    std::vector<int> came;
+    for (const auto& [groupId, index] : m_groupIndexById)
+    {
+        if (!previousGroups.contains(groupId))
+        {
+            came.push_back(groupId);
+        }
+    }
+    if (left.size() == 1 && came.size() == 1)
+    {
+        MoveOfflineServers(left.front(), came.front());
+    }
+    const auto outsideList = [this](int connectIndex)
+    { return !m_groupIndexById.contains(connectIndex / MAX_SERVER_PER_GROUP); };
+    std::erase_if(m_hiddenOffline, outsideList);
+    std::erase_if(m_offlineLoads, [&outsideList](const auto& entry) { return outsideList(entry.first); });
+}
+
+void CServerListManager::MoveOfflineServers(int fromGroupId, int toGroupId)
+{
+    if (fromGroupId == toGroupId)
+        return;
+
+    for (int channel = 0; channel < MAX_SERVER_PER_GROUP; ++channel)
+    {
+        const int from = Data::ServerList::ChannelServerId(fromGroupId, channel);
+        const int to = Data::ServerList::ChannelServerId(toGroupId, channel);
+        SetOfflineServerShown(to, IsOfflineServerShown(from));
+        SetOfflineServerLoad(to, GetOfflineServerLoad(from));
+        SetOfflineServerShown(from, true);
+        SetOfflineServerLoad(from, std::nullopt);
+    }
 }
 #endif
 
