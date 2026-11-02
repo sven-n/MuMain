@@ -6438,7 +6438,8 @@ void PartObjectColor3(int Type, float Alpha, float Bright, vec3_t Light, bool Ex
 
 // The models RenderPartObjectBody draws without a render style: a few that
 // are not items, and the plain drawing.
-static void RenderModelWithoutStyle(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
+static void RenderModelWithoutStyle(BMD* b, const OBJECT* o, const DrawLook& look, int Type, float Alpha,
+                                    int RenderType)
 {
     if (o->Type == MODEL_15GRADE_ARMOR_OBJ_ARMLEFT || o->Type == MODEL_15GRADE_ARMOR_OBJ_ARMRIGHT ||
         o->Type == MODEL_15GRADE_ARMOR_OBJ_BODYLEFT || o->Type == MODEL_15GRADE_ARMOR_OBJ_BODYRIGHT ||
@@ -6449,30 +6450,30 @@ static void RenderModelWithoutStyle(BMD* b, OBJECT* o, int Type, float Alpha, in
         float fLight, texCoordU;
 
         fLight = 0.8f - absf(sinf(WorldTime * 0.0018f) * 0.5f);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLight - 0.1f, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLight - 0.1f, look.blendMeshU,
+                      look.blendMeshV);
         texCoordU = absf(sinf(WorldTime * 0.0005f));
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLight - 0.3f, texCoordU, o->BlendMeshTexCoordV,
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, fLight - 0.3f, texCoordU, look.blendMeshV,
                       BITMAP_RGB_MIX);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_CHROME4, o->Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_CHROME4, look.alpha, 0, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
     }
     else if (Type == MODEL_SWORD_35_WING)
     {
         float fLumi = (sinf(WorldTime * 0.003) + 1.f) * 0.3f + 0.4f;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_BRIGHT, o->Alpha * fLumi, 0, o->BlendMeshLight * fLumi, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_PHOENIXSOULWING);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(0, RENDER_BRIGHT, look.alpha * fLumi, 0, look.blendMeshLight * fLumi, look.blendMeshU,
+                      look.blendMeshV, BITMAP_PHOENIXSOULWING);
 
         Vector(.15f, 1.f, .25f, b->BodyLight);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
         Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->RenderMesh(1, RENDER_CHROME3 | RENDER_BRIGHT, o->Alpha, 1, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_CHROME3 | RENDER_BRIGHT, look.alpha, 1, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         Vector(1.f, 1.f, 1.f, b->BodyLight);
     }
     else if (Type == MODEL_ARMORINVEN_74)
@@ -6480,22 +6481,22 @@ static void RenderModelWithoutStyle(BMD* b, OBJECT* o, int Type, float Alpha, in
         vec3_t Light;
         VectorCopy(b->BodyLight, Light);
         float fLumi = (sinf(WorldTime * 0.003) + 1.f) * 0.3f + 0.4f;
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, -1);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      (double)(-int(WorldTime) % 1000) * 0.00009f, o->BlendMeshTexCoordV, -1);
-        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha * fLumi, o->BlendMesh, o->BlendMeshLight * fLumi,
-                      (double)(-int(WorldTime) % 1000) * 0.00009f, o->BlendMeshTexCoordV, -1);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, -1);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
+                      (double)(-int(WorldTime) % 1000) * 0.00009f, look.blendMeshV, -1);
+        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha * fLumi, look.blendMesh, look.blendMeshLight * fLumi,
+                      (double)(-int(WorldTime) % 1000) * 0.00009f, look.blendMeshV, -1);
         VectorCopy(Light, b->BodyLight);
     }
     else
     {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
     }
 }
 
 // Draws the cloth UpdateTransformSkinEffects simulates.
-static void RenderTransformSkinCloth(OBJECT* o)
+static void RenderTransformSkinCloth(const OBJECT* o)
 {
     if (auto* pCloth = (CPhysicsCloth*)o->m_pCloth)
     {
@@ -6803,63 +6804,60 @@ void UpdateTransformSkinEffects(OBJECT* o)
     }
 }
 
-void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType)
+void RenderPartObjectBody(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
 {
     if (Type == MODEL_ANGEL && b->NumMeshs)
     {
-        b->RenderBody(RENDER_TEXTURE, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         if (RenderType & RENDER_CHROME)
         {
             Vector(0.75f, 0.55f, 0.5f, b->BodyLight);
-            b->RenderMesh(0, RENDER_CHROME4 | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_CHROME4 | RENDER_BRIGHT, Alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
             Vector(1.f, 1.f, 1.f, b->BodyLight);
-            b->RenderMesh(0, RENDER_CHROME | RENDER_TEXTURE | RENDER_BRIGHT, Alpha, o->BlendMesh, o->BlendMeshLight,
-                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_CHROME | RENDER_TEXTURE | RENDER_BRIGHT, Alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
         }
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_PCBANG)
     {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         vec3_t Light;
         VectorCopy(b->BodyLight, Light);
         Vector(0.9f, 0.8f, 1.0f, b->BodyLight);
-        b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_FENRIR_THUNDER);
-        b->RenderBody(RENDER_BRIGHT | RENDER_METAL, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_FENRIR_THUNDER);
+        b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_FENRIR_THUNDER);
+        b->RenderBody(RENDER_BRIGHT | RENDER_METAL, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_FENRIR_THUNDER);
         VectorCopy(Light, b->BodyLight);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER)
     {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-                      1);
+        b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV, 1);
 
         if (g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint))
         {
             float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
-            b->RenderMesh(1, RENDER_TEXTURE, 0.4f + Luminosity, 0, o->BlendMeshLight * Luminosity, -WorldTime * 0.0005f,
-                          WorldTime * 0.0005f);
+            b->RenderMesh(1, RENDER_TEXTURE, 0.4f + Luminosity, 0, look.blendMeshLight * Luminosity,
+                          -WorldTime * 0.0005f, WorldTime * 0.0005f);
         }
         RenderTransformSkinCloth(o);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
     {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-                      2);
+        b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV, 2);
 
         if (g_isCharacterBuff(o, eDeBuff_CursedTempleRestraint))
         {
             float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
-            b->RenderMesh(2, RENDER_TEXTURE, 0.4f + Luminosity, 0, o->BlendMeshLight * Luminosity, -WorldTime * 0.0005f,
-                          WorldTime * 0.0005f);
+            b->RenderMesh(2, RENDER_TEXTURE, 0.4f + Luminosity, 0, look.blendMeshLight * Luminosity,
+                          -WorldTime * 0.0005f, WorldTime * 0.0005f);
         }
         RenderTransformSkinCloth(o);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_HALLOWEEN)
     {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
 
         if (o->CurrentAction == PLAYER_JACK_1 || o->CurrentAction == PLAYER_JACK_2)
         {
@@ -6878,8 +6876,8 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
             vec3_t vLight;
             VectorCopy(b->BodyLight, vLight);
             Vector(1.f, fStageG, fStageB, b->BodyLight);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
+            b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
             VectorCopy(vLight, b->BodyLight);
         }
         RenderTransformSkinCloth(o);
@@ -6887,53 +6885,51 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_PANDA)
     {
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, BITMAP_PANDABODY_R);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV,
+                      BITMAP_PANDABODY_R);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL)
     {
-        b->RenderBody(RenderType, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RenderType, Alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
     }
     else if (o->SubType == MODEL_XMAS_EVENT_CHA_DEER)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-                      BITMAP_BLOOD + 1);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-                      BITMAP_BLOOD + 1);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, 1, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
-                      BITMAP_BLOOD + 1);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV, BITMAP_BLOOD + 1);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV, BITMAP_BLOOD + 1);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, 1, fLumi, look.blendMeshU, look.blendMeshV, BITMAP_BLOOD + 1);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_GM_CHARACTER)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
     }
     else
     {
         // Items are drawn with the render style of their model entry, after
         // the player transformations: a transformed Rage Fighter draws its
         // sword-form gloves with the look of the transformation.
-        if (!Render::Items::Styles::Render(b, o, Type, Alpha, RenderType))
+        if (!Render::Items::Styles::Render(b, o, look, Type, Alpha, RenderType))
         {
-            RenderModelWithoutStyle(b, o, Type, Alpha, RenderType);
+            RenderModelWithoutStyle(b, o, look, Type, Alpha, RenderType);
         }
     }
 }
 
-void RenderPartObjectBodyColor(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float Bright, int Texture, int iMonsterIndex)
+void RenderPartObjectBodyColor(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType,
+                               float Bright, int Texture, int iMonsterIndex)
 {
     if (Type >= MODEL_HELM_MONK && Type <= MODEL_BOOTS_MONK + MODEL_ITEM_COMMONCNT_RAGEFIGHTER)
         Type = g_CMonkSystem.OrginalTypeCommonItemMonk(Type);
@@ -6982,10 +6978,11 @@ void RenderPartObjectBodyColor(BMD* b, OBJECT* o, int Type, float Alpha, int Ren
         PartObjectColor(Type, Alpha, Bright, b->BodyLight, (RenderType & RENDER_EXTRA) ? true : false);
     }
 
-    Render::Items::Glow::RenderGlow(b, o, Type, Alpha, RenderType, Texture);
+    Render::Items::Glow::RenderGlow(b, o, look, Type, Alpha, RenderType, Texture);
 }
 
-void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float Bright, int Texture)
+void RenderPartObjectBodyColor2(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType,
+                                float Bright, int Texture)
 {
     if (Type >= MODEL_HELM_MONK && Type <= MODEL_BOOTS_MONK + MODEL_ITEM_COMMONCNT_RAGEFIGHTER)
         Type = g_CMonkSystem.OrginalTypeCommonItemMonk(Type);
@@ -7002,7 +6999,21 @@ void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int Re
     {
         PartObjectColor2(Type, Alpha, Bright, b->BodyLight, (RenderType & RENDER_EXTRA) ? true : false);
     }
-    Render::Items::Glow::RenderShine(b, o, Type, Alpha, RenderType, Texture);
+    Render::Items::Glow::RenderShine(b, o, look, Type, Alpha, RenderType, Texture);
+}
+
+void RenderPartObjectBodyColor(BMD* b, const OBJECT* o, int Type, float Alpha, int RenderType, float Bright,
+                               int Texture, int iMonsterIndex)
+{
+    DrawLook look = DrawLook::Of(*o);
+    RenderPartObjectBodyColor(b, o, look, Type, Alpha, RenderType, Bright, Texture, iMonsterIndex);
+}
+
+void RenderPartObjectBodyColor2(BMD* b, const OBJECT* o, int Type, float Alpha, int RenderType, float Bright,
+                                int Texture)
+{
+    DrawLook look = DrawLook::Of(*o);
+    RenderPartObjectBodyColor2(b, o, look, Type, Alpha, RenderType, Bright, Texture);
 }
 
 void SpawnNextGradeWeaponEffects(CHARACTER* c)
@@ -7154,40 +7165,50 @@ void ForEachNextGradeObject(CHARACTER* c, const std::function<void(PART_t* part,
 
 // The effects of the event models of level variants, which have no model
 // entry yet (the items have theirs in Render/Items/ItemEffects).
-static Render::Items::ItemEffects::Result ApplyEventModelEffect(BMD* b, OBJECT* o, int Type, int Level, int ItemLevel)
+static Render::Items::ItemEffects::Result ApplyEventModelEffect(BMD* b, const OBJECT* o, DrawLook& look, int Type,
+                                                                int Level, int ItemLevel)
 {
     using Render::Items::ItemEffects::Result;
     if (o->Type == MODEL_EVENT + 14 && Level == 9)
     {
         Vector(0.3f, 0.8f, 1.f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         Vector(1.f, 0.8f, 0.3f, b->BodyLight);
-        b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_BRIGHT | RENDER_CHROME, look.alpha, -1, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         return Result::Drawn;
     }
     if (o->Type == MODEL_EVENT + 11)
     {
         Vector(0.9f, 0.9f, 0.9f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, 0.5f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, -1, BITMAP_CHROME + 1);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, 0.5f, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, -1, BITMAP_CHROME + 1);
         return Result::Drawn;
     }
     if (Type == MODEL_EVENT + 5 && ItemLevel == 14)
     {
         Vector(0.2f, 0.3f, 0.5f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         Vector(0.1f, 0.3f, 1.f, b->BodyLight);
-        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderBody(RENDER_METAL | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderBody(RENDER_METAL | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         return Result::Drawn;
     }
     if (Type == MODEL_EVENT + 5 && ItemLevel == 15)
     {
         Vector(0.5f, 0.3f, 0.2f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         Vector(1.f, 0.3f, 0.1f, b->BodyLight);
-        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderBody(RENDER_METAL | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderBody(RENDER_METAL | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         return Result::Drawn;
     }
     if (o->Type == MODEL_EVENT + 12)
@@ -7197,19 +7218,19 @@ static Render::Items::ItemEffects::Result ApplyEventModelEffect(BMD* b, OBJECT* 
     if (o->Type == MODEL_EVENT + 6 && Level == 13)
     {
         Vector(0.4f, 0.6f, 1.0f, b->BodyLight);
-        b->RenderBody(RENDER_COLOR, 1.0f, 0, 1.0f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, 1.0f, 0, 1.0f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_COLOR, 1.0f, 0, 1.0f, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, 1.0f, 0, 1.0f, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         return Result::Drawn;
     }
     if (o->Type == MODEL_EVENT + 13)
     {
         b->StreamMesh = 0;
-        o->BlendMeshTexCoordV = (int)-WorldTime % 4000 * 0.00025f;
+        look.blendMeshV = (int)-WorldTime % 4000 * 0.00025f;
         return Result::Applied;
     }
     if (Type == MODEL_EVENT + 18)
     {
-        o->BlendMesh = 1;
+        look.blendMesh = 1;
         return Result::Applied;
     }
     return Result::None;
@@ -7217,12 +7238,13 @@ static Render::Items::ItemEffects::Result ApplyEventModelEffect(BMD* b, OBJECT* 
 
 // Items have the item effect of their model entry; the event models of level
 // variants have theirs in ApplyEventModelEffect.
-Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level,
-                                                         int ItemLevel)
+Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, const OBJECT* o, DrawLook& look, int Type,
+                                                         float& Alpha, int& Level, int ItemLevel)
 {
-    const Render::Items::ItemEffects::Result effect = Render::Items::ItemEffects::Apply(b, o, Type, Alpha, Level);
-    return effect != Render::Items::ItemEffects::Result::None ? effect
-                                                              : ApplyEventModelEffect(b, o, Type, Level, ItemLevel);
+    const Render::Items::ItemEffects::Result effect = Render::Items::ItemEffects::Apply(b, o, look, Type, Alpha, Level);
+    return effect != Render::Items::ItemEffects::Result::None
+               ? effect
+               : ApplyEventModelEffect(b, o, look, Type, Level, ItemLevel);
 }
 
 // The two event models that spark have no item effect of their own.
@@ -7283,44 +7305,11 @@ void RefreshStunSkull(OBJECT* o, vec3_t Light)
 
 extern float g_Luminosity;
 
-namespace
-{
-// The item effects and styles set the look of the part they draw on its object; the object gets its own look back.
-class PartLookScope
-{
-public:
-    explicit PartLookScope(OBJECT& o)
-        : m_o(o), m_alpha(o.Alpha), m_blendMesh(o.BlendMesh), m_blendMeshLight(o.BlendMeshLight),
-          m_texCoordU(o.BlendMeshTexCoordU), m_texCoordV(o.BlendMeshTexCoordV), m_hiddenMesh(o.HiddenMesh)
-    {
-    }
-    ~PartLookScope()
-    {
-        m_o.Alpha = m_alpha;
-        m_o.BlendMesh = m_blendMesh;
-        m_o.BlendMeshLight = m_blendMeshLight;
-        m_o.BlendMeshTexCoordU = m_texCoordU;
-        m_o.BlendMeshTexCoordV = m_texCoordV;
-        m_o.HiddenMesh = m_hiddenMesh;
-    }
-    PartLookScope(const PartLookScope&) = delete;
-    PartLookScope& operator=(const PartLookScope&) = delete;
-
-private:
-    OBJECT& m_o;
-    float m_alpha;
-    int m_blendMesh;
-    float m_blendMeshLight;
-    float m_texCoordU;
-    float m_texCoordV;
-    int m_hiddenMesh;
-};
-} // namespace
-
 void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int ItemLevel, int ExcellentFlags,
                             int ancientDiscriminator, int Select, int RenderType)
 {
-    const PartLookScope look(*o);
+    // The item effects and styles change the look for this draw; the object keeps its own.
+    DrawLook look = DrawLook::Of(*o);
     int Level = ItemLevel;
     // Without the option window (headless, or before the UI exists) everything is drawn at the highest level.
     const int renderLevel = g_pOption != nullptr ? g_pOption->GetRenderLevel() : 4;
@@ -7361,7 +7350,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         {
             if (o->m_bRenderShadow)
             {
-                int iHiddenMesh = o->HiddenMesh;
+                int iHiddenMesh = look.hiddenMesh;
 
                 if (o->Type == MODEL_DREADFEAR)
                 {
@@ -7373,7 +7362,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 }
 
                 const DrawnModelLodScope lod(*b, *o, Type);
-                b->RenderBodyShadow(o->BlendMesh, iHiddenMesh);
+                b->RenderBodyShadow(look.blendMesh, iHiddenMesh);
             }
         }
         return;
@@ -7386,7 +7375,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         Level = std::min<int>(Level, renderLevel * 2 + 5);
     }
 
-    if (ApplyPartObjectEffect(b, o, Type, Alpha, Level, ItemLevel) == Render::Items::ItemEffects::Result::Drawn)
+    if (ApplyPartObjectEffect(b, o, look, Type, Alpha, Level, ItemLevel) == Render::Items::ItemEffects::Result::Drawn)
     {
         return;
     }
@@ -7399,42 +7388,43 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         {
             Alpha = 0.5f;
             Vector(1.f, 1.f, 1.f, b->BodyLight);
-            b->RenderBody(RENDER_BRIGHT | RENDER_CHROME5, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU * 8.f, o->BlendMeshTexCoordV * 2.f, -1, BITMAP_CHROME2);
+            b->RenderBody(RENDER_BRIGHT | RENDER_CHROME5, Alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU * 8.f, look.blendMeshV * 2.f, -1, BITMAP_CHROME2);
         }
         else if (g_isCharacterBuff(o, eDeBuff_Poison) && g_isCharacterBuff(o, eDeBuff_Freeze))
         {
             Vector(Luminosity * 0.3f, Luminosity * 1.f, Luminosity * 1.f, b->BodyLight);
-            RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+            RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
         }
         else if (g_isCharacterBuff(o, eDeBuff_BlowOfDestruction))
         {
             Vector(Luminosity * 0.3f, Luminosity * 1.f, Luminosity * 1.f, b->BodyLight);
-            RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+            RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
         }
         else if (g_isCharacterBuff(o, eDeBuff_Poison))
         {
             Vector(Luminosity * 0.3f, Luminosity * 1.f, Luminosity * 0.5f, b->BodyLight);
-            RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+            RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
         }
         else if (g_isCharacterBuff(o, eDeBuff_Stun))
         {
             Vector(Luminosity * 0.f, Luminosity * 0.f, Luminosity * 1.0f, b->BodyLight);
-            RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+            RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
         }
         else if (g_isCharacterBuff(o, eDeBuff_Freeze))
         {
             Vector(Luminosity * 0.3f, Luminosity * 0.5f, Luminosity * 1.f, b->BodyLight);
-            RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+            RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
         }
         else if (g_isCharacterBuff(o, eDeBuff_BlowOfDestruction))
         {
             Vector(Luminosity * 0.3f, Luminosity * 0.5f, Luminosity * 1.f, b->BodyLight);
-            RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+            RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
         }
         else if (g_isCharacterBuff(o, eDeBuff_Harden))
         {
             Vector(Luminosity * 0.3f, Luminosity * 0.5f, Luminosity * 1.f, b->BodyLight);
-            RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+            RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
         }
         else if (Level < 3)
         {
@@ -7449,13 +7439,13 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 const float factor = *shine->light;
                 Vector(Light[0] * factor, Light[1] * factor, Light[2] * factor, b->BodyLight);
             }
-            RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+            RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
             if (shine != nullptr)
             {
                 for (const Render::Items::Styles::ShineBelowPlus3::Pass& pass : shine->passes)
                 {
-                    RenderPartObjectBodyColor2(b, o, Type, pass.alpha, pass.renderType | (RenderType & RENDER_EXTRA),
-                                               pass.bright);
+                    RenderPartObjectBodyColor2(b, o, look, Type, pass.alpha,
+                                               pass.renderType | (RenderType & RENDER_EXTRA), pass.bright);
                 }
             }
         }
@@ -7464,112 +7454,112 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
             vec3_t l;
             Vector(g_Luminosity, g_Luminosity * 0.6f, g_Luminosity * 0.6f, l);
             VectorMul(l, Light, b->BodyLight);
-            RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+            RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
         }
         else if (Level < 7)
         {
             vec3_t l;
             Vector(g_Luminosity * 0.5f, g_Luminosity * 0.7f, g_Luminosity, l);
             VectorMul(l, Light, b->BodyLight);
-            RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+            RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
         }
         else if (renderLevel)
         {
             if (Level < 8 && renderLevel >= 1) //  +7
             {
                 Vector(Light[0] * 0.8f, Light[1] * 0.8f, Light[2] * 0.8f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT, 1.f);
+                RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT, 1.f);
             }
             else if (Level < 9 && renderLevel >= 1) //  +8
             {
                 Vector(Light[0] * 0.8f, Light[1] * 0.8f, Light[2] * 0.8f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT, 1.f);
+                RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT, 1.f);
             }
             else if (Level < 10 && renderLevel >= 2) //  +9
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor(b, o, Type, Alpha,
+                RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha,
                                           RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
-                                          1.f);
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha,
+                                          RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
             else if (Level < 11 && renderLevel >= 2) //  +10
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor(b, o, Type, Alpha,
+                RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha,
                                           RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
-                                          1.f);
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha,
+                                          RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
             else if (Level < 12 && renderLevel >= 3) //  +11
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f,
+                RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
+                RenderPartObjectBodyColor2(b, o, look, Type, 1.f,
                                            RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
-                                          1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha,
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha,
+                                          RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha,
                                           RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
             else if (Level < 13 && renderLevel >= 3) //  +12
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f,
+                RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
+                RenderPartObjectBodyColor2(b, o, look, Type, 1.f,
                                            RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
-                                          1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha,
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha,
+                                          RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha,
                                           RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
             else if (Level < 14 && renderLevel >= 4) //  +13
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f,
+                RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
+                RenderPartObjectBodyColor2(b, o, look, Type, 1.f,
                                            RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
-                                          1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha,
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha,
+                                          RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha,
                                           RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
             else if (Level < 15 && renderLevel >= 4) //  +14
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f,
+                RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
+                RenderPartObjectBodyColor2(b, o, look, Type, 1.f,
                                            RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
-                                          1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha,
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha,
+                                          RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha,
                                           RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
             else if (Level < 16 && renderLevel >= 4) //  +15
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f,
+                RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
+                RenderPartObjectBodyColor2(b, o, look, Type, 1.f,
                                            RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
-                                          1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha,
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha,
+                                          RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor(b, o, look, Type, Alpha,
                                           RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
             else
             {
                 VectorCopy(Light, b->BodyLight);
-                RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+                RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
             }
         }
         else
         {
             VectorCopy(Light, b->BodyLight);
-            RenderPartObjectBody(b, o, Type, Alpha, RenderType);
+            RenderPartObjectBody(b, o, look, Type, Alpha, RenderType);
         }
 
         if (renderLevel == 0)
@@ -7586,7 +7576,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 Luminosity = sinf(WorldTime * 0.002f) * 0.5f + 0.5f;
                 Vector(Luminosity, Luminosity * 0.3f, 1.f - Luminosity, b->BodyLight);
                 Alpha = 1.f;
-                Render::Items::Glow::RenderExcellentGlow(b, o, Type, Alpha);
+                Render::Items::Glow::RenderExcellentGlow(b, o, look, Type, Alpha);
             }
             else if (ancientDiscriminator > 0)
             {
@@ -7595,7 +7585,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
                 {
                     b->renderCount = Random::DrawRand(o, static_cast<std::uint32_t>(Type)) % 100;
                 }
-                RenderPartObjectBodyColor2(b, o, Type, Alpha, RENDER_CHROME3 | RENDER_BRIGHT, 1.f);
+                RenderPartObjectBodyColor2(b, o, look, Type, Alpha, RENDER_CHROME3 | RENDER_BRIGHT, 1.f);
             }
         }
     }
@@ -7632,7 +7622,7 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
             bRenderShadow = o->m_bRenderShadow;
             if (bRenderShadow)
             {
-                b->RenderBodyShadow(o->BlendMesh, o->HiddenMesh);
+                b->RenderBodyShadow(look.blendMesh, look.hiddenMesh);
             }
         }
 #endif

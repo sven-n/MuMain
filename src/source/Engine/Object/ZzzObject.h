@@ -98,17 +98,22 @@ void CreateMoneyDrop(ITEM_t* ip, int amount, vec3_t position, bool isFreshDrop);
 void PartObjectColor(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon = false);
 void PartObjectColor2(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon = false);
 
-void RenderPartObjectBodyColor(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float Bright, int Texture = -1,
-                               int iMonsterIndex = -1);
-void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float Bright,
+void RenderPartObjectBodyColor(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType,
+                               float Bright, int Texture = -1, int iMonsterIndex = -1);
+void RenderPartObjectBodyColor2(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType,
+                                float Bright, int Texture = -1);
+// Drawn outside a part draw: with the object's own look.
+void RenderPartObjectBodyColor(BMD* b, const OBJECT* o, int Type, float Alpha, int RenderType, float Bright,
+                               int Texture = -1, int iMonsterIndex = -1);
+void RenderPartObjectBodyColor2(BMD* b, const OBJECT* o, int Type, float Alpha, int RenderType, float Bright,
                                 int Texture = -1);
-void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType);
+void RenderPartObjectBody(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType);
 
 // Runs the item effect of the model before it is drawn: the one of its item's
 // model entry, or for the event models of level variants theirs. It may
 // change the level the model glows like and the alpha it is drawn with.
-Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level,
-                                                         int ItemLevel);
+Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, const OBJECT* o, DrawLook& look, int Type,
+                                                         float& Alpha, int& Level, int ItemLevel);
 // Whether the item effect of the drawn model spawns sprites, particles or lightning; the update spawns them from the
 // model's pose with SpawnPartObjectEffect, b placed where the model is drawn.
 bool PartObjectSpawns(const OBJECT* o, int Type);

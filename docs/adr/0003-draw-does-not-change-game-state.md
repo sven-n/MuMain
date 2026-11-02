@@ -113,6 +113,10 @@ drawer, and the renderer applies the active look per draw.
   A Devil's Eye on the ground is drawn bright in every pass, not from its
   second pass on, and the update reads its own alpha; a GM gift is drawn at
   its own alpha, with its glow at half.
+- The Wings of Storm's texture strip and the Symbol of Kundun's light cycle
+  on the reference clock. Each draw advanced a shared counter, so they ran
+  faster with more passes, more of them on screen or, for the Symbol, a
+  higher frame rate.
 
 ## Consequences
 

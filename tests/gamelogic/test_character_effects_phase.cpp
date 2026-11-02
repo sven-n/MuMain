@@ -16,6 +16,7 @@
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "Render/Items/ItemEffects.h"
 #include "Render/Items/ItemRenderStyles.h"
+#include "Render/Models/ModelDraw.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -548,10 +549,11 @@ TEST_CASE("A wing's item effect spawns its lights on the bones it is given, and 
 
     int level = 0;
     float alpha = 1.f;
+    DrawLook look;
     CheckDrawSpawnsNone(
         [&]
         {
-            CHECK(Render::Items::ItemEffects::Apply(b, &wing, MODEL_WING_OF_ETERNAL, alpha, level) ==
+            CHECK(Render::Items::ItemEffects::Apply(b, &wing, look, MODEL_WING_OF_ETERNAL, alpha, level) ==
                   Render::Items::ItemEffects::Result::Applied);
         });
     for (int i = 0; i < MAX_SPRITES; ++i)
@@ -897,9 +899,80 @@ TEST_CASE("Drawing an item's effect or style again and again leaves the look on 
     item.Type = eyeModel;
     float alpha = 0.6f;
     int level = 0;
-    CHECK(ApplyPartObjectEffect(&Models[eyeModel], &item, eyeModel, alpha, level, 0) ==
+    DrawLook look = DrawLook::Of(item);
+    CHECK(ApplyPartObjectEffect(&Models[eyeModel], &item, look, eyeModel, alpha, level, 0) ==
           Render::Items::ItemEffects::Result::Applied);
     CHECK(alpha == 2.f);
+    WorldTime = previousTime;
+}
+
+TEST_CASE("A cycling item look comes from the clock: every pass of a frame shows the same, and no draw keeps a count "
+          "[effects]")
+{
+    struct MeshRecorder final : Render::ModelDrawing::ModelDrawer
+    {
+        void DrawMesh(const Render::ModelDrawing::MeshDraw& draw) override
+        {
+            draws.push_back(draw);
+        }
+        void DrawShadow(const Render::ModelDrawing::ShadowDraw&) override {}
+        std::vector<Render::ModelDrawing::MeshDraw> draws;
+    };
+
+    FenrirScope scope;
+    ItemModelDatabaseScope restoreModels;
+    Data::Items::ItemModelDefinition storm;
+    storm.group = 12;
+    storm.number = 36;
+    storm.file = "Data/Item/Wing36.bmd";
+    storm.renderStyle = "wingOfStorm";
+    Data::Items::ItemModelDefinition symbol;
+    symbol.group = 14;
+    symbol.number = 29;
+    symbol.file = "Data/Item/Symbol.bmd";
+    symbol.renderStyle = "symbolOfKundun";
+    g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{storm, symbol},
+                              Data::Effects::GlowColorList{});
+    const int stormModel = Data::Items::ToModelSlot(Data::Items::MakeItemType(12, 36));
+    const int symbolModel = Data::Items::ToModelSlot(Data::Items::MakeItemType(14, 29));
+    const double previousTime = WorldTime;
+
+    // The value each style gives its cycling mesh in three passes at one time.
+    const auto drawnAt = [&](int model, int mesh, double time, auto value)
+    {
+        WorldTime = time;
+        MeshRecorder recorder;
+        Render::ModelDrawing::SetModelDrawer(&recorder);
+        OBJECT item;
+        item.Type = model;
+        for (int pass = 0; pass < 3; ++pass)
+        {
+            DrawLook look = DrawLook::Of(item);
+            Render::Items::Styles::Render(&Models[model], &item, look, model, 1.f, RENDER_TEXTURE);
+        }
+        Render::ModelDrawing::SetModelDrawer(nullptr);
+        std::vector<float> values;
+        for (const auto& draw : recorder.draws)
+            if (draw.mesh == mesh)
+                values.push_back(value(draw));
+        return values;
+    };
+    const auto texCoordU = [](const Render::ModelDrawing::MeshDraw& draw) { return draw.blendMeshU; };
+    const auto meshLight = [](const Render::ModelDrawing::MeshDraw& draw) { return draw.blendMeshAlpha; };
+
+    // 1000 ms is 25 reference frames: the Storm wing's fourth-frame texture strip is on frame 2 (25 % 16 / 4), and
+    // the Symbol of Kundun's light is 0.01 + 0.25 on its way up.
+    CHECK(drawnAt(stormModel, 1, 1000.0, texCoordU) == std::vector<float>(3, 0.5f));
+    const std::vector<float> first = drawnAt(symbolModel, 2, 1000.0, meshLight);
+    REQUIRE(first.size() == 3);
+    CHECK(first[0] == doctest::Approx(0.26f));
+    CHECK(first[2] == first[0]);
+    // 29 reference frames: strip frame 3; 0.29 later the light still climbs.
+    CHECK(drawnAt(stormModel, 1, 1160.0, texCoordU) == std::vector<float>(3, 0.75f));
+    const std::vector<float> later = drawnAt(symbolModel, 2, 1160.0, meshLight);
+    REQUIRE(later.size() == 3);
+    CHECK(later[0] == doctest::Approx(0.30f));
+    CHECK(later[2] == later[0]);
     WorldTime = previousTime;
 }
 
@@ -920,7 +993,12 @@ TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and 
     OBJECT item;
     item.Type = model;
 
-    CheckDrawSpawnsNone([&] { Render::Items::Styles::Render(b, &item, model, 1.f, RENDER_TEXTURE); });
+    CheckDrawSpawnsNone(
+        [&]
+        {
+            DrawLook look = DrawLook::Of(item);
+            Render::Items::Styles::Render(b, &item, look, model, 1.f, RENDER_TEXTURE);
+        });
     for (int i = 0; i < MAX_SPRITES; ++i)
         CHECK_FALSE(Sprites[i].Live);
 
@@ -982,7 +1060,12 @@ TEST_CASE("Drawing an Explosion Blade leaves the item's alpha for the next pass 
 
     for (int pass = 0; pass < 2; ++pass)
     {
-        CheckDrawSpawnsNone([&] { Render::Items::Styles::Render(b, &item, model, item.Alpha, RENDER_TEXTURE); });
+        CheckDrawSpawnsNone(
+            [&]
+            {
+                DrawLook look = DrawLook::Of(item);
+                Render::Items::Styles::Render(b, &item, look, model, item.Alpha, RENDER_TEXTURE);
+            });
         CHECK(item.Alpha == 1.f);
     }
 }

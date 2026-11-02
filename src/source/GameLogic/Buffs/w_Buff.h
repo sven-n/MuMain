@@ -21,9 +21,9 @@ public:
     void UnRegisterBuff(eBuffState buffstate);
     void UnRegisterBuff(std::list<eBuffState> buffstate);
 
-    bool isBuff();
-    bool isBuff(eBuffState buffstate);
-    const eBuffState isBuff(std::list<eBuffState> buffstatelist);
+    bool isBuff() const;
+    bool isBuff(eBuffState buffstate) const;
+    const eBuffState isBuff(std::list<eBuffState> buffstatelist) const;
     void TokenBuff(eBuffState curbufftype);
 
 public:
