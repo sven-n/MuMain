@@ -50,6 +50,16 @@ mu_add_test(
         MuClient
 )
 
+# The draw guard on the gameplay random sequences: no control socket code, so it builds and runs without the socket.
+mu_add_test(
+    NAME test_draw_random_guard
+    SOURCES
+        test_draw_random_guard.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
 mu_add_test(
     NAME test_repeated_draws
     SOURCES

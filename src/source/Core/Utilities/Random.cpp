@@ -7,6 +7,8 @@
 #include "stdafx.h"
 #include "Core/Utilities/Random.h"
 
+#include "Core/Utilities/DrawSpawnCheck.h"
+
 #include <algorithm>
 #include <random>
 
@@ -41,6 +43,12 @@ std::uint64_t Mix(std::uint64_t x)
     return x ^ (x >> 31);
 }
 
+double EngineUnitDouble()
+{
+    std::uniform_real_distribution<double> dist(0.0, 1.0);
+    return dist(GetThreadEngine());
+}
+
 double ChanceOf(std::int32_t referenceFrames, double animationFactor)
 {
     const double clampedFactor = std::min<double>(1.0, std::max<double>(0.0, animationFactor));
@@ -49,8 +57,12 @@ double ChanceOf(std::int32_t referenceFrames, double animationFactor)
 
 } // anonymous namespace
 
+// Each call that advances or reseeds a gameplay sequence tells the draw guard first: the draws take theirs from
+// DrawRand. Reading the state (RandState, Snapshot) changes nothing and tells nothing.
+
 std::int32_t Rand()
 {
+    Diagnostics::DrawSpawnCheck::Note("legacy random draw");
     // The Windows CRT's linear congruential generator.
     s_randState = s_randState * 214013u + 2531011u;
     return static_cast<std::int32_t>((s_randState >> 16) & 0x7FFF);
@@ -58,6 +70,7 @@ std::int32_t Rand()
 
 void SeedRand(std::uint32_t seed)
 {
+    Diagnostics::DrawSpawnCheck::Note("legacy random reseed");
     s_randState = seed;
 }
 
@@ -76,6 +89,7 @@ std::int32_t RangeInt(std::int32_t minInclusive, std::int32_t maxInclusive)
         return minInclusive;
     }
 
+    Diagnostics::DrawSpawnCheck::Note("random engine draw");
     std::uniform_int_distribution<std::int32_t> dist(minInclusive, maxInclusive);
     return dist(GetThreadEngine());
 }
@@ -87,20 +101,22 @@ float RangeFloat(float minInclusive, float maxInclusive)
         return minInclusive;
     }
 
+    Diagnostics::DrawSpawnCheck::Note("random engine draw");
     std::uniform_real_distribution<float> dist(minInclusive, maxInclusive);
     return dist(GetThreadEngine());
 }
 
 float Unit()
 {
+    Diagnostics::DrawSpawnCheck::Note("random engine draw");
     std::uniform_real_distribution<float> dist(0.0f, 1.0f);
     return dist(GetThreadEngine());
 }
 
 double UnitDouble()
 {
-    std::uniform_real_distribution<double> dist(0.0, 1.0);
-    return dist(GetThreadEngine());
+    Diagnostics::DrawSpawnCheck::Note("random engine draw");
+    return EngineUnitDouble();
 }
 
 bool FpsCheck(std::int32_t referenceFrames, double animationFactor)
@@ -110,12 +126,14 @@ bool FpsCheck(std::int32_t referenceFrames, double animationFactor)
         return false;
     }
 
-    const double randomValue = UnitDouble();
+    Diagnostics::DrawSpawnCheck::Note("random engine draw");
+    const double randomValue = EngineUnitDouble();
     return randomValue <= ChanceOf(referenceFrames, animationFactor);
 }
 
 void Seed(std::uint32_t seed)
 {
+    Diagnostics::DrawSpawnCheck::Note("random engine reseed");
     GetThreadEngine().seed(seed);
 }
 
