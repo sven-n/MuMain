@@ -476,6 +476,45 @@ TEST_CASE("Server List window: a double-click on Their load's label leaves the l
     CHECK_FALSE(ImGui::TempInputIsActive(OfflineSwitchId(I18N::Editor::TheirLoad)));
 }
 
+TEST_CASE("Server List window: MuEditor.ini keeps a typed Their load once it is confirmed, not left with Escape "
+          "[editor]")
+{
+    I18N::SetLocale("en");
+    // MuEditor.ini in the test's folder.
+    ServerListFolder folder;
+    const std::filesystem::path configFile = "MuEditor/MuEditor.ini";
+    TestImGuiContext context;
+    OfflinePreviewOn preview;
+    const auto render = [] { RenderOfflineSwitch(); };
+    const ImRect slider = RenderOfflineSwitch();
+    const ImGuiID sliderId = OfflineSwitchId(I18N::Editor::TheirLoad);
+    // Inside the slider, left of its label.
+    const ImVec2 inSlider(slider.Min.x + 4.0f, slider.GetCenter().y);
+
+    CtrlClick(inSlider, render);
+    REQUIRE(ImGui::TempInputIsActive(sliderId));
+    ImGui::GetIO().AddInputCharactersUTF8("120");
+    render();
+    // The login screen shows a typed load right away; MuEditor.ini waits until the text field is left.
+    CHECK(g_ServerListManager->GetOfflineServerPercent() == 120);
+    CHECK(g_MuEditorConfig.GetOfflineServerLoad() == OfflinePreviewOn::Load);
+    PressKey(ImGuiKey_Escape, render);
+    CHECK(g_ServerListManager->GetOfflineServerPercent() == OfflinePreviewOn::Load);
+    CHECK(g_MuEditorConfig.GetOfflineServerLoad() == OfflinePreviewOn::Load);
+    CHECK_FALSE(std::filesystem::exists(configFile));
+
+    CtrlClick(inSlider, render);
+    REQUIRE(ImGui::TempInputIsActive(sliderId));
+    ImGui::GetIO().AddInputCharactersUTF8("120");
+    render();
+    PressKey(ImGuiKey_Enter, render);
+    CHECK(g_MuEditorConfig.GetOfflineServerLoad() == 120);
+    std::ifstream file(configFile);
+    std::stringstream text;
+    text << file.rdbuf();
+    CHECK(text.str().find("OfflineServerLoad=120") != std::string::npos);
+}
+
 TEST_CASE("Server List window: the x next to an offline channel's own load goes back to Their load [editor]")
 {
     I18N::SetLocale("en");
