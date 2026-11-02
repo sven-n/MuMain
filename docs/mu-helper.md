@@ -26,3 +26,10 @@ without Delay or Condition now rotate when Combo is off. The saved packet format
 is unchanged, and inactive monster-condition subfields do not enable a condition.
 These are the online client's rules; server-side offline leveling has its own
 skill-selection implementation.
+
+Automated movement finishes its current path before planning another one, even
+when low frame rates make a walk last longer than a Helper tick. Once the return
+delay expires, returning to the starting position takes priority over collecting
+more drops. Drops with no available path are skipped until announced again by the
+server. If the starting position cannot be reached, combat continues and the
+Helper retries the return on later ticks.

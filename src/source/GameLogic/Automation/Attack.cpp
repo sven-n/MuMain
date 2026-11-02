@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "GameLogic/Automation/Attack.h"
+#include "GameLogic/Automation/Movement.h"
 
 #include "Character/CharacterManager.h"
 #include "Engine/AI/ZzzAI.h"
@@ -48,8 +49,7 @@ bool IsSwingInProgress()
     return true;
 }
 
-// Steps of the planned path that are walked per call. Re-planning every
-// frame keeps a moving target reachable without committing to a long walk.
+// Short approaches let the next completed step follow a moving target.
 constexpr int StepsPerApproach = 2;
 
 // Walks the first steps of `path` towards the target and sends the move.
@@ -90,9 +90,8 @@ AttackResult AttackObject(int targetKey, bool allowPlayers, int huntingDistance)
         return AttackResult::NoTarget;
     }
 
-    // Let the current swing finish before attacking again, so the cadence
-    // tracks AttackSpeed instead of the caller's timer.
-    if (IsSwingInProgress())
+    // Let the current action finish before the timer can replace its path or swing.
+    if (IsSwingInProgress() || IsWalkInProgress())
     {
         return AttackResult::Busy;
     }

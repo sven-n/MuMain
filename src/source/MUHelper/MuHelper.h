@@ -65,7 +65,6 @@ namespace MUHelper
 		int ComputeDistanceByRange(int iRange);
 		int ComputeDistanceFromTarget(CHARACTER* pTarget);
 		int ComputeDistanceBetween(POINT posA, POINT posB);
-		int SimulateMove(POINT posMove);
 		int ObtainItem();
 		int SelectItemToObtain();
 		bool ShouldObtainItem(int iItemId);

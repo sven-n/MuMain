@@ -105,14 +105,6 @@ bool ParseMapIndex(const std::string& text, int& map)
     return true;
 }
 
-// True while the character is still walking a planned path. Re-issuing a
-// move before it ends restarts the walk from the current tile, so an act
-// that walks into range would crawl.
-bool WalkInProgress()
-{
-    return Hero != nullptr && Hero->Path.PathNum > 0 && Hero->Path.CurrentPath < Hero->Path.PathNum - 1;
-}
-
 // True when the next step of a per-frame act is due, remembering when the
 // previous one was taken.
 bool StepIsDue(std::chrono::steady_clock::time_point& last, std::chrono::milliseconds interval = PrimitiveInterval)
@@ -211,7 +203,7 @@ public:
 
         // Let the planned path play out before planning the next one:
         // re-planning every frame would restart the walk mid-step.
-        if (WalkInProgress())
+        if (Automation::IsWalkInProgress())
         {
             return Status::Running;
         }
@@ -292,7 +284,7 @@ public:
             return Status::Running;
         }
 
-        if (WalkInProgress() || !StepIsDue(m_lastStep))
+        if (Automation::IsWalkInProgress() || !StepIsDue(m_lastStep))
         {
             return Status::Running;
         }
@@ -389,7 +381,7 @@ public:
 
     [[nodiscard]] Status Tick(std::string& response) override
     {
-        if (WalkInProgress() || !StepIsDue(m_lastStep))
+        if (Automation::IsWalkInProgress() || !StepIsDue(m_lastStep))
         {
             return Status::Running;
         }
@@ -482,7 +474,7 @@ public:
             return Status::Finished;
         }
 
-        if (WalkInProgress() || !StepIsDue(m_lastStep))
+        if (Automation::IsWalkInProgress() || !StepIsDue(m_lastStep))
         {
             return Status::Running;
         }
