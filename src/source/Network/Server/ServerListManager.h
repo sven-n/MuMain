@@ -134,6 +134,8 @@ public:
     bool IsOfflineServerShown(int connectIndex) const;
     void SetOfflineServerLoad(int connectIndex, std::optional<int> percent);
     std::optional<int> GetOfflineServerLoad(int connectIndex) const;
+    // Every offline channel of the preview shown again, at the preview's load.
+    void ResetOfflineServers();
 #endif
 
 protected:

@@ -204,6 +204,12 @@ std::optional<int> CServerListManager::GetOfflineServerLoad(int connectIndex) co
     return found->second;
 }
 
+void CServerListManager::ResetOfflineServers()
+{
+    m_hiddenOffline.clear();
+    m_offlineLoads.clear();
+}
+
 void CServerListManager::KeepOfflineServersWithGroups(const std::map<int, size_t>& previousGroups)
 {
     std::vector<int> left;

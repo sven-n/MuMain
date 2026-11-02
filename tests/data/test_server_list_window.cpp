@@ -181,11 +181,7 @@ public:
 
     ~OfflinePreviewOn()
     {
-        for (int serverId = 0; serverId < GroupCount * Data::ServerList::MaxChannelsPerGroup; ++serverId)
-        {
-            g_ServerListManager->SetOfflineServerShown(serverId, true);
-            g_ServerListManager->SetOfflineServerLoad(serverId, std::nullopt);
-        }
+        g_ServerListManager->ResetOfflineServers();
         g_ServerListManager->SetOfflinePreview(m_show, m_percent);
         g_MuEditorConfig.SetOfflineServers(m_configShow, m_configLoad);
     }
@@ -194,9 +190,6 @@ public:
     OfflinePreviewOn& operator=(const OfflinePreviewOn&) = delete;
 
 private:
-    // Valhalla, Helheim and Midgard (ServerListFolder).
-    static constexpr int GroupCount = 3;
-
     bool m_show;
     int m_percent;
     bool m_configShow;
@@ -402,7 +395,7 @@ TEST_CASE("Server List window: an offline channel's Show box stays with its grou
     PressKey(ImGuiKey_Enter, RenderServerList);
     CHECK_FALSE(g_ServerListManager->IsOfflineServerShown(Data::ServerList::ChannelServerId(NewId, Channel)));
     CHECK(g_ServerListManager->IsOfflineServerShown(Channel));
-    // Back to the folder's ID, which the next test's list has.
+    // Back to 0: the box comes along again.
     Type(PaneId("##Group", I18N::Editor::GroupID), "0");
     PressKey(ImGuiKey_Enter, RenderServerList);
     CHECK_FALSE(g_ServerListManager->IsOfflineServerShown(Channel));
