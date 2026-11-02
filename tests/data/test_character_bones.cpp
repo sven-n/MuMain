@@ -7,10 +7,12 @@
 #include "Engine/Object/ObjectPose.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Render/Effects/ZzzEffect.h"
 
 #include <cmath>
 #include <cstring>
 #include <filesystem>
+#include <memory>
 #include <span>
 
 namespace
@@ -236,3 +238,55 @@ TEST_CASE("The bones check counts a character whose bone differs [data][animatio
     g_PrepassBoneCheck = PrepassBoneCheck{};
 }
 #endif
+
+TEST_CASE("A preview's update poses it before its effects read the pose, with no draw before it [data][animation]")
+{
+    TestModelSlots slots;
+    BMD& model = Models[MODEL_PLAYER];
+    const std::wstring folder = PlayerFolder.wstring() + L"/";
+    REQUIRE(model.Open2(folder.c_str(), L"player.bmd"));
+    REQUIRE(model.NumBones > 34);
+
+    static float bones[MAX_BONES][3][4];
+    static float expected[MAX_BONES][3][4];
+    std::memset(bones, 0, sizeof(bones));
+    auto preview = std::make_unique<CHARACTER>();
+    for (PART_t& part : preview->BodyPart)
+        part.Type = -1;
+    preview->Weapon[0].Type = preview->Weapon[1].Type = preview->Wing.Type = -1;
+    preview->Helper.Type = MODEL_IMP;
+    OBJECT& o = preview->Object;
+    PlaceCharacter(o, 100.f, 0.7f, bones);
+    o.Live = true;
+    // Another object of the same model was drawn last somewhere else.
+    Vector(5000.f, 5000.f, 500.f, model.BodyOrigin);
+    model.BodyScale = 3.f;
+    for (int i = 0; i < MAX_SPRITES; ++i)
+        Sprites[i].Live = false;
+
+    UpdatePreviewCharacter(preview.get());
+
+    VectorCopy(o.Position, model.BodyOrigin);
+    model.BodyScale = o.Scale;
+    model.Animation(expected, o.AnimationFrame, o.PriorAnimationFrame, o.PriorAction, o.Angle, o.HeadAngle, false,
+                    false, nullptr, o.CurrentAction);
+    CHECK(std::memcmp(bones, expected, sizeof(float) * 12 * model.NumBones) == 0);
+
+    // The Imp's light sits on the preview's own bone, where the preview stands.
+    vec3_t relative{20.f, 0.f, 15.f};
+    vec3_t at;
+    model.TransformPosition(expected[34], relative, at, true);
+    int lights = 0;
+    for (int i = 0; i < MAX_SPRITES; ++i)
+    {
+        if (!Sprites[i].Live || Sprites[i].Owner != &o)
+            continue;
+        ++lights;
+        for (int axis = 0; axis < 3; ++axis)
+            CHECK(Sprites[i].Position[axis] == doctest::Approx(at[axis]));
+    }
+    CHECK(lights == 1);
+    for (int i = 0; i < MAX_SPRITES; ++i)
+        Sprites[i].Live = false;
+    o.BoneTransform = nullptr;
+}

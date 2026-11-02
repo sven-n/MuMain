@@ -12027,6 +12027,17 @@ void UpdateAttachedParts(CHARACTER* c)
         });
 }
 
+// Places the shared model where Calc_RenderObject places it before RenderCharacter's visuals read it.
+static BMD* PlaceCharacterModel(OBJECT* o)
+{
+    BMD* b = &Models[o->Type];
+    b->BodyHeight = 0.f;
+    b->BodyScale = o->Scale;
+    b->CurrentAction = o->CurrentAction;
+    VectorCopy(o->Position, b->BodyOrigin);
+    return b;
+}
+
 void UpdateDrawnCharacterEffects()
 {
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
@@ -12036,12 +12047,7 @@ void UpdateDrawnCharacterEffects()
             continue;
 
         OBJECT* o = &c->Object;
-        BMD* b = &Models[o->Type];
-        // Where Calc_RenderObject places the model before RenderCharacter's visuals read it.
-        b->BodyHeight = 0.f;
-        b->BodyScale = o->Scale;
-        b->CurrentAction = o->CurrentAction;
-        VectorCopy(o->Position, b->BodyOrigin);
+        BMD* b = PlaceCharacterModel(o);
         PrepareHeldWeapons(c);
         UpdateAttachedParts(c);
         // Readying Dark Side turns the character the way its draw used to.
@@ -12108,6 +12114,11 @@ void UpdateDrawnCharacterEffects()
 void UpdatePreviewCharacter(CHARACTER* c)
 {
     OBJECT* o = &c->Object;
+    // Posed and placed before anything reads its bones, as the client characters are.
+    Models[o->Type].BodyHeight = 0.f;
+    AnimateCharacterBones(o);
+    PlaceCharacterModel(o);
+    PrepareHeldWeapons(c);
     UpdateAttachedParts(c);
     SpawnImpLight(c, o);
     if (DrawsNextGradeObjects(c))
