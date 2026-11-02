@@ -42,7 +42,7 @@ struct MeshDraw
     // A texture instead of the mesh's own; -1 for none.
     int texture = -1;
 
-    // The drawer may change it: RenderMesh copies it back to the model (see there).
+    // The model's light for this draw; a faded bright or chrome pass has dimmed it (BMD::DimsLight).
     float bodyLight[3] = {};
     float bodyOrigin[3] = {};
     float bodyScale = 1.f;
@@ -79,7 +79,7 @@ class ModelDrawer
 {
 public:
     virtual ~ModelDrawer() = default;
-    virtual void DrawMesh(MeshDraw& draw) = 0;
+    virtual void DrawMesh(const MeshDraw& draw) = 0;
     virtual void DrawShadow(const ShadowDraw& draw) = 0;
 };
 

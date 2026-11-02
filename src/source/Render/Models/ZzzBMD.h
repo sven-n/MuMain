@@ -16,6 +16,8 @@ struct ModelSkin;
 struct ShadowDraw;
 } // namespace Render::ModelDrawing
 
+struct BITMAP_t;
+
 extern const float (*g_pActiveBoneTransform)[3][4];
 // Bumped by every SetActiveBoneTransform() call — lets BoneUBO detect "the pointer is
 // the same address as last upload, but the content underneath it has changed" (e.g. a
@@ -412,7 +414,12 @@ public:
     // The skinning the last Transform() set up, as RenderMesh and RenderBodyShadow put it in their draws.
     [[nodiscard]] Render::ModelDrawing::ModelSkin CurrentSkin() const;
     // The default drawer's draw of one mesh (Render/Models/ModelDraw.h).
-    void DrawMesh(Render::ModelDrawing::MeshDraw& draw) const;
+    void DrawMesh(const Render::ModelDrawing::MeshDraw& draw) const;
+    // The mesh a draw shows, or nullptr when the draw shows nothing; textureIndex and texture get what it shows.
+    [[nodiscard]] Mesh_t* DrawnMesh(const Render::ModelDrawing::MeshDraw& draw, int& textureIndex,
+                                    BITMAP_t*& texture) const;
+    // Whether a draw is a faded bright or chrome pass that dims the model's light, for it and the meshes after it.
+    [[nodiscard]] bool DimsLight(const Render::ModelDrawing::MeshDraw& draw) const;
     void BeginRenderCoinHeap();
     int AddToCoinHeap(int coinIndex, int target_vertex_index);
     void EndRenderCoinHeap(int coinCount);
