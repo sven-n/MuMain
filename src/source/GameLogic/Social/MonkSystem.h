@@ -114,15 +114,15 @@ private:
     };
 
     DamageInfo m_arrRepeatedly[MAX_REPEATEDLY];
-    int m_nRepeatedlyCnt;
+    int m_nRepeatedlyCnt = 0;
 
-    int m_nTotalCnt;
+    int m_nTotalCnt = 0;
     tm_ItemEqualType m_mapItemEqualType;
     std::set<int> m_subItemModels;
     CItemEqualType m_cItemEqualType;
     list_ItemType m_listGloveformSword;
 
-    int m_nDarksideCnt;
+    int m_nDarksideCnt = 0;
     vec_DarkIndex m_DarksideIndex;
     vec_DarkTargetIndex m_DarkTargetIndex;
 
@@ -133,24 +133,24 @@ private:
         FRAME_SECONDATT = 2,
     };
 
-    float m_fFirstFrame;
-    float m_fSecondFrame;
-    BYTE m_btAttState;
+    float m_fFirstFrame = 0.f;
+    float m_fSecondFrame = 0.f;
+    BYTE m_btAttState = NONE_ATT;
 
-    float m_fDistanceFrame;
-    int m_nDarksideEffectTotal;
-    int m_nDarksideEffectAttCnt;
+    float m_fDistanceFrame = 0.f;
+    int m_nDarksideEffectTotal = 0;
+    int m_nDarksideEffectAttCnt = 0;
 
-    float m_fOtherAniFrame;
-    float m_fDistanceNextFrame;
-    bool m_bDarkSideEffOnce;
-    bool m_bDarkSideEffOnce2;
+    float m_fOtherAniFrame = 0.f;
+    float m_fDistanceNextFrame = 0.f;
+    bool m_bDarkSideEffOnce = false;
+    bool m_bDarkSideEffOnce2 = false;
 
     CDummyUnit m_CDummyUnit;
     tm_DummyUnit m_tmDummyUnit;
-    float m_fDummyAniFrame;
+    float m_fDummyAniFrame = 0.f;
 
-    int m_nDummyIndex;
+    int m_nDummyIndex = 0;
 
 public:
     // Where one Dark Side step places the character for a part's draw: the dash pose or an afterimage.
@@ -169,8 +169,8 @@ private:
     std::unordered_map<const CHARACTER*, DarksideParts> m_DarksideParts;
     void StepDarkside(CHARACTER* pCha, std::vector<DarksidePlacement>& placed);
 
-    bool m_bUseEffectOnce;
-    int m_nLowerEffCnt;
+    bool m_bUseEffectOnce = false;
+    int m_nLowerEffCnt = 0;
 
 public:
     CMonkSystem();
