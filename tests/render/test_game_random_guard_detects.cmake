@@ -7,7 +7,8 @@ foreach(name MU_GUARD MU_FIXTURES)
 endforeach()
 
 set(missed "")
-foreach(case bare spaced parenthesized c_file seed global_seed between_comments deref comment_in_string)
+foreach(case bare spaced parenthesized c_file seed global_seed between_comments deref comment_in_string
+             raw_delimiter)
     execute_process(COMMAND "${CMAKE_COMMAND}" "-DMU_SOURCE_DIRS=${MU_FIXTURES}/${case}" -P "${MU_GUARD}"
                     RESULT_VARIABLE result OUTPUT_QUIET ERROR_QUIET)
     if(result EQUAL 0)

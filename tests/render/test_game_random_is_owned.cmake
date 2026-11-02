@@ -17,10 +17,9 @@ if(NOT sources)
     message(FATAL_ERROR "No sources under ${MU_SOURCE_DIRS}")
 endif()
 
-# What is not code, whichever starts first, as a tokenizer reads it: a raw string, a string, a character literal (a
-# few characters, so a digit separator opens none), a line comment, a block comment, an include line.
-set(not_code "R\"\\([^)]*(\\)[^)\"][^)]*)*\\)\"")
-string(APPEND not_code "|\"[^\"\\\\\n]*(\\\\.[^\"\\\\\n]*)*\"")
+# What else is not code, whichever starts first, as a tokenizer reads it: a string, a character literal (a few
+# characters, so a digit separator opens none), a line comment, a block comment, an include line.
+set(not_code "\"[^\"\\\\\n]*(\\\\.[^\"\\\\\n]*)*\"")
 string(APPEND not_code "|'(\\\\.|[^'\\\\\n])[^'\\\\\n]?[^'\\\\\n]?[^'\\\\\n]?'")
 string(APPEND not_code "|//[^\n]*")
 string(APPEND not_code "|/\\*[^*]*\\*+([^/*][^*]*\\*+)*/")
@@ -33,6 +32,27 @@ foreach(path IN LISTS sources)
         continue()
     endif()
     file(READ "${path}" text)
+    # Raw strings first: each ends at its own delimiter, which a regular expression cannot match.
+    while(text MATCHES "R\"([^ ()\\\\\t\n\"]*)\\(")
+        set(open "${CMAKE_MATCH_0}")
+        set(close ")${CMAKE_MATCH_1}\"")
+        string(FIND "${text}" "${open}" begin)
+        string(LENGTH "${open}" length)
+        math(EXPR after "${begin} + ${length}")
+        string(SUBSTRING "${text}" ${after} -1 rest)
+        string(FIND "${rest}" "${close}" end)
+        string(SUBSTRING "${text}" 0 ${begin} head)
+        if(end EQUAL -1)
+            # No end: not a raw string; its quote is left to the tokenizer.
+            math(EXPR after "${begin} + 1")
+            string(SUBSTRING "${text}" ${after} -1 tail)
+        else()
+            string(LENGTH "${close}" length)
+            math(EXPR resume "${end} + ${length}")
+            string(SUBSTRING "${rest}" ${resume} -1 tail)
+        endif()
+        set(text "${head} ${tail}")
+    endwhile()
     string(REGEX REPLACE "${not_code}" " " code "${text}")
     string(APPEND code "\n")
     # rand or srand as a name of its own, or qualified by std:: or the global ::, however it is spelled.

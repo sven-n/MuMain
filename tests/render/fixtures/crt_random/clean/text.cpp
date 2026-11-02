@@ -20,3 +20,4 @@ int After()
 {
     return Random::Rand();
 }
+const char* Tagged = R"tag(a "quoted" /* rand() */ )" tag)tag";
