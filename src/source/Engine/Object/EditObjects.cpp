@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Core/Input/KeyState.h"
 #include "Engine/Object/EditObjects.h"
 
@@ -142,11 +143,12 @@ void EditObjects()
                     {
                         VectorCopy(PickObject->Position, Position);
                         VectorCopy(PickObject->Angle, Angle);
-                        Position[0] += (float)(rand() % 2000 - 1000);
-                        Position[1] += (float)(rand() % 2000 - 1000);
+                        Position[0] += (float)(Random::Rand() % 2000 - 1000);
+                        Position[1] += (float)(Random::Rand() % 2000 - 1000);
                         Position[2] = RequestTerrainHeight(Position[0], Position[1]);
-                        Angle[2] = (float)(rand() % 360);
-                        CreateObject(PickObject->Type, Position, Angle, PickObject->Scale + (float)(rand() % 16 - 8) * 0.01f);
+                        Angle[2] = (float)(Random::Rand() % 360);
+                        CreateObject(PickObject->Type, Position, Angle,
+                                     PickObject->Scale + (float)(Random::Rand() % 16 - 8) * 0.01f);
                     }
                 }
                 DeleteObject(PickObject, &ObjectBlock[PickObject->Block]);

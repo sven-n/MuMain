@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzInfomation.h"
 
@@ -2884,7 +2885,7 @@ void CHARACTER_MACHINE::CalculateAll()
     MONSTER_ATTRIBUTE* c = &Enemy.Attribute;
     const int finalAttackDamageRight = static_cast<int>(AttackDamageRight) - c->Defense;
     const int finalAttackDamageLeft = static_cast<int>(AttackDamageLeft) - c->Defense;
-    int EnemyAttackDamage = c->AttackDamageMin + rand() % (c->AttackDamageMax - c->AttackDamageMin + 1);
+    int EnemyAttackDamage = c->AttackDamageMin + Random::Rand() % (c->AttackDamageMax - c->AttackDamageMin + 1);
     const int finalHitPoint = EnemyAttackDamage - Character.Defense;
     const int finalAttackRating = static_cast<int>(Character.AttackRating) - c->SuccessfulBlocking;
     const int finalDefenseRating = static_cast<int>(Character.SuccessfulBlocking) - c->AttackRating;
@@ -2906,11 +2907,11 @@ void CHARACTER_MACHINE::CalculateAll()
         FinalDefenseRating = 100;
     else
         FinalDefenseRating = static_cast<WORD>(finalDefenseRating);
-    if (rand() % 100 < FinalAttackRating)
+    if (Random::Rand() % 100 < FinalAttackRating)
         FinalSuccessAttack = true;
     else
         FinalSuccessAttack = false;
-    if (rand() % 100 < FinalDefenseRating)
+    if (Random::Rand() % 100 < FinalDefenseRating)
         FinalSuccessDefense = true;
     else
         FinalSuccessDefense = false;

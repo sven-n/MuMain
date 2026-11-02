@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Data/GameData/MonsterData/MonsterAttacks.h"
+#include "Core/Utilities/Random.h"
 
 #include <cstdint>
 
@@ -31,7 +32,7 @@ int NextGenericAttack(CHARACTER& character);
 // The same on a count of its own.
 int NextGenericAttack(std::uint8_t& swordCount);
 
-// The animation a draw picks, with rand() and rand_fps_check() as the old
+// The animation a draw picks, with Random::Rand() and rand_fps_check() as the old
 // code's draws.
 int DrawAttack(Data::Monsters::MonsterAttackRandom random);
 

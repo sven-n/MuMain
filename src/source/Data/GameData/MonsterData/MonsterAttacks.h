@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Globals/_define.h"
+#include "Core/Utilities/Random.h"
 
 #include <optional>
 #include <string>
@@ -19,12 +20,12 @@ constexpr int NoAttackAnimation = -1;
 // `otherwise`: the old code's random choices.
 enum class MonsterAttackRandom
 {
-    // Attack 1 or attack 2 by rand() % 2 (Hellas).
+    // Attack 1 or attack 2 by Random::Rand() % 2 (Hellas).
     Rand,
     // Attack 1 when rand_fps_check(2), else attack 2; the chance depends on
     // the frame rate (Kanturu 1st, P18).
     RandFps,
-    // Bali's draw: rand() % 8 above 2 picks attack 1 or 2 by rand() % 2,
+    // Bali's draw: Random::Rand() % 8 above 2 picks attack 1 or 2 by Random::Rand() % 2,
     // above 0 attack 3, else attack 4.
     Bali,
 };

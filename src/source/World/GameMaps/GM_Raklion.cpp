@@ -2,6 +2,7 @@
 // GM_Raklion.cpp: implementation of the CGM_Raklion class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Engine/Object/ObjectPose.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Models/ZzzBMD.h"
@@ -359,7 +360,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                 for (int iu = 0; iu < 60; iu++)
                 {
                     Vector(0.4f, 0.8f, 0.9f, Light);
-                    CreateEffect(MODEL_EFFECT_BROKEN_ICE0 + rand() % 3, EndPos, o->Angle, Light, 0);
+                    CreateEffect(MODEL_EFFECT_BROKEN_ICE0 + Random::Rand() % 3, EndPos, o->Angle, Light, 0);
                 }
             }
         }
@@ -439,7 +440,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
             {
                 vec3_t vPos, vLight;
 
-                if (rand() % 3 != 0)
+                if (Random::Rand() % 3 != 0)
                 {
                     for (int i = 0; i < b->NumBones; ++i)
                     {
@@ -460,15 +461,15 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                 if (rand_fps_check(3))
                 {
                     VectorCopy(o->Position, vPos);
-                    vPos[0] += (float)(rand() % 200 - 100);
-                    vPos[1] += (float)(rand() % 200 - 100);
+                    vPos[0] += (float)(Random::Rand() % 200 - 100);
+                    vPos[1] += (float)(Random::Rand() % 200 - 100);
                     Vector(1.0f, 1.f, 1.f, vLight);
                     CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 1, 0.5f);
                     CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 24, 1.25f);
 
                     VectorCopy(o->Position, vPos);
-                    vPos[0] += (float)(rand() % 250 - 125);
-                    vPos[1] += (float)(rand() % 250 - 125);
+                    vPos[0] += (float)(Random::Rand() % 250 - 125);
+                    vPos[1] += (float)(Random::Rand() % 250 - 125);
                     Vector(0.1f, 1.0f, 0.1f, vLight);
                     CreateEffect(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 1.0f);
 
@@ -502,10 +503,10 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                 Vector(0.2f, 0.4f, 1.f, vLight);
                 for (int i = 0; i < 20; ++i)
                 {
-                    vPos[0] = Hero->Object.Position[0] + (float)(rand() % 20 - 10) * 80.0f + 500.0f;
-                    vPos[1] = Hero->Object.Position[1] + (float)(rand() % 20 - 10) * 80.0f + 200.0f;
-                    vPos[2] = Hero->Object.Position[2] + 300.0f + (float)(rand() % 10) * 100.0f;
-                    float fScale = 1.0f + (rand() % 10) / 5.0f;
+                    vPos[0] = Hero->Object.Position[0] + (float)(Random::Rand() % 20 - 10) * 80.0f + 500.0f;
+                    vPos[1] = Hero->Object.Position[1] + (float)(Random::Rand() % 20 - 10) * 80.0f + 200.0f;
+                    vPos[2] = Hero->Object.Position[2] + 300.0f + (float)(Random::Rand() % 10) * 100.0f;
+                    float fScale = 1.0f + (Random::Rand() % 10) / 5.0f;
                     int iIndex = MODEL_EFFECT_BROKEN_ICE1;
                     if (rand_fps_check(2))
                     {
@@ -585,44 +586,44 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                 for (int i = 0; i < 1; ++i)
                 {
                     VectorCopy(o->Position, vPos);
-                    vPos[0] += (rand() % 2000 - 1000.f);
-                    vPos[1] += (rand() % 2000 - 1000.f);
-                    vPos[2] = 500.f + rand() % 100;
+                    vPos[0] += (Random::Rand() % 2000 - 1000.f);
+                    vPos[1] += (Random::Rand() % 2000 - 1000.f);
+                    vPos[2] = 500.f + Random::Rand() % 100;
 
-                    fScale = 2.0f + (rand() % 20) / 5.0f;
+                    fScale = 2.0f + (Random::Rand() % 20) / 5.0f;
                     int iIndex = MODEL_EFFECT_BROKEN_ICE1;
 
                     CreateEffect(iIndex, vPos, o->Angle, vLight, 2, NULL, -1, 0, 0, 0, fScale);
 
                     VectorCopy(o->Position, vPos);
-                    vPos[0] += (rand() % 2000 - 1000.f);
-                    vPos[1] += (rand() % 2000 - 1000.f);
-                    vPos[2] = 500.f + rand() % 100;
+                    vPos[0] += (Random::Rand() % 2000 - 1000.f);
+                    vPos[1] += (Random::Rand() % 2000 - 1000.f);
+                    vPos[2] = 500.f + Random::Rand() % 100;
 
-                    fScale = 0.5f + (rand() % 10) / 5.0f;
+                    fScale = 0.5f + (Random::Rand() % 10) / 5.0f;
                     iIndex = MODEL_EFFECT_BROKEN_ICE3;
 
                     CreateEffect(iIndex, vPos, o->Angle, vLight, 2, NULL, -1, 0, 0, 0, fScale);
 
                     VectorCopy(o->Position, vPos);
-                    vPos[0] += (rand() % 2000 - 1000.f);
-                    vPos[1] += (rand() % 2000 - 1000.f);
-                    vPos[2] = 500.f + rand() % 100;
+                    vPos[0] += (Random::Rand() % 2000 - 1000.f);
+                    vPos[1] += (Random::Rand() % 2000 - 1000.f);
+                    vPos[2] = 500.f + Random::Rand() % 100;
 
                     Vector(1.f, 0.8f, 0.8f, vLight);
-                    fScale = 0.05f + (rand() % 10) / 20.0f;
+                    fScale = 0.05f + (Random::Rand() % 10) / 20.0f;
                     CreateEffect(MODEL_FALL_STONE_EFFECT, vPos, o->Angle, vLight, 2, NULL, -1, 0, 0, 0, fScale);
 
                     Vector(0.7f, 0.7f, 0.8f, vLight);
-                    vPos[0] += (float)(rand() % 80 - 40);
-                    vPos[1] += (float)(rand() % 80 - 40);
-                    CreateParticle(BITMAP_WATERFALL_3 + (rand() % 2), vPos, o->Angle, vLight, 2);
+                    vPos[0] += (float)(Random::Rand() % 80 - 40);
+                    vPos[1] += (float)(Random::Rand() % 80 - 40);
+                    CreateParticle(BITMAP_WATERFALL_3 + (Random::Rand() % 2), vPos, o->Angle, vLight, 2);
                 }
             }
 
             if (o->AnimationFrame >= 5.f && o->AnimationFrame <= 7.f)
             {
-                EarthQuake = (float)(rand() % 4 - 2) * 1.0f;
+                EarthQuake = (float)(Random::Rand() % 4 - 2) * 1.0f;
 
                 if (o->AnimationFrame >= 5.6f && o->AnimationFrame <= 6.1f)
                 {
@@ -658,7 +659,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
         {
             vec3_t vPos, vLight;
 
-            if (rand() % 3 != 0)
+            if (Random::Rand() % 3 != 0)
             {
                 for (int i = 0; i < b->NumBones; ++i)
                 {
@@ -679,15 +680,15 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
             if (rand_fps_check(3))
             {
                 VectorCopy(o->Position, vPos);
-                vPos[0] += (float)(rand() % 400 - 200);
-                vPos[1] += (float)(rand() % 400 - 200);
+                vPos[0] += (float)(Random::Rand() % 400 - 200);
+                vPos[1] += (float)(Random::Rand() % 400 - 200);
                 Vector(1.0f, 1.f, 1.f, vLight);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 1, 1.f);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 24, 2.5f);
 
                 VectorCopy(o->Position, vPos);
-                vPos[0] += (float)(rand() % 500 - 250);
-                vPos[1] += (float)(rand() % 500 - 250);
+                vPos[0] += (float)(Random::Rand() % 500 - 250);
+                vPos[1] += (float)(Random::Rand() % 500 - 250);
                 Vector(0.1f, 1.0f, 0.1f, vLight);
                 CreateEffect(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 2.0f);
 
@@ -722,11 +723,11 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                     vec3_t vPos1, vPos2;
                     b->TransformByObjectBone(vPos1, o, 34);
                     CreateParticle(BITMAP_SMOKE, vPos1, o->Angle, vLight, 50, fScale);
-                    CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPos1, o->Angle, vLight, 0, fScale);
+                    CreateParticle(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos1, o->Angle, vLight, 0, fScale);
 
                     b->TransformByObjectBone(vPos2, o, 52);
                     CreateParticle(BITMAP_SMOKE, vPos2, o->Angle, vLight, 50, fScale);
-                    CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPos2, o->Angle, vLight, 0, fScale);
+                    CreateParticle(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos2, o->Angle, vLight, 0, fScale);
 
                     if (m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_6 ||
                         m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_7)
@@ -756,17 +757,17 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                     vPos[0] += 100.f;
                 }
 
-                vPos[0] += rand() % 60 - 30.f;
-                vPos[1] += rand() % 60 - 30.f;
-                vPos[2] += rand() % 20 - 10.f;
+                vPos[0] += Random::Rand() % 60 - 30.f;
+                vPos[1] += Random::Rand() % 60 - 30.f;
+                vPos[2] += Random::Rand() % 20 - 10.f;
                 Vector(0.2f, 0.4f, 1.0f, vLight);
                 CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 11, 1.2f);
 
                 if (rand_fps_check(2))
                 {
                     VectorCopy(o->Position, vPos);
-                    vPos[0] += (float)(rand() % 200 - 100);
-                    vPos[1] += (float)(rand() % 200 - 100);
+                    vPos[0] += (float)(Random::Rand() % 200 - 100);
+                    vPos[1] += (float)(Random::Rand() % 200 - 100);
                     Vector(0.2f, 0.4f, 1.0f, vLight);
                     CreateEffect(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 1.0f);
                 }
@@ -798,7 +799,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                 for (int iu = 0; iu < 60; iu++)
                 {
                     Vector(0.4f, 0.8f, 0.9f, Light);
-                    CreateEffect(MODEL_EFFECT_BROKEN_ICE0 + rand() % 3, EndPos, o->Angle, Light, 0);
+                    CreateEffect(MODEL_EFFECT_BROKEN_ICE0 + Random::Rand() % 3, EndPos, o->Angle, Light, 0);
                 }
             }
         }
@@ -878,7 +879,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
             {
                 vec3_t vPos, vLight;
 
-                if (rand() % 3 != 0)
+                if (Random::Rand() % 3 != 0)
                 {
                     for (int i = 0; i < b->NumBones; ++i)
                     {
@@ -899,15 +900,15 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                 if (rand_fps_check(3))
                 {
                     VectorCopy(o->Position, vPos);
-                    vPos[0] += (float)(rand() % 200 - 100);
-                    vPos[1] += (float)(rand() % 200 - 100);
+                    vPos[0] += (float)(Random::Rand() % 200 - 100);
+                    vPos[1] += (float)(Random::Rand() % 200 - 100);
                     Vector(1.0f, 1.f, 1.f, vLight);
                     CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 1, 0.5f);
                     CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 24, 1.25f);
 
                     VectorCopy(o->Position, vPos);
-                    vPos[0] += (float)(rand() % 250 - 125);
-                    vPos[1] += (float)(rand() % 250 - 125);
+                    vPos[0] += (float)(Random::Rand() % 250 - 125);
+                    vPos[1] += (float)(Random::Rand() % 250 - 125);
                     Vector(0.1f, 1.0f, 0.1f, vLight);
                     CreateEffect(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 1.0f);
 
@@ -1528,7 +1529,7 @@ bool CGM_Raklion::UpdateObjectEffects(OBJECT* o, BMD* b)
     {
         if (o->AnimationFrame >= 19)
         {
-            SetAction(o, rand() % 2);
+            SetAction(o, Random::Rand() % 2);
         }
         return true;
     }
@@ -1536,7 +1537,7 @@ bool CGM_Raklion::UpdateObjectEffects(OBJECT* o, BMD* b)
     {
         if (o->CurrentAction >= 0 && o->CurrentAction <= 1 && o->AnimationFrame >= 19)
         {
-            int iAniIndex = rand() % 100;
+            int iAniIndex = Random::Rand() % 100;
 
             if (iAniIndex < 90)
             {
@@ -1555,11 +1556,11 @@ bool CGM_Raklion::UpdateObjectEffects(OBJECT* o, BMD* b)
         }
         else if (o->CurrentAction == 2 && o->AnimationFrame >= 97)
         {
-            SetAction(o, rand() % 2);
+            SetAction(o, Random::Rand() % 2);
         }
         else if (o->CurrentAction == 3 && o->AnimationFrame >= 98)
         {
-            SetAction(o, rand() % 2);
+            SetAction(o, Random::Rand() % 2);
         }
         return true;
     }
@@ -1618,7 +1619,7 @@ bool CGM_Raklion::UpdateObjectEffects(OBJECT* o, BMD* b)
         }
         else if (o->CurrentAction == 1)
         {
-            if (rand() % 40 == 30)
+            if (Random::Rand() % 40 == 30)
             {
                 o->CurrentAction = 0;
             }
@@ -1672,7 +1673,7 @@ bool CGM_Raklion::UpdateObjectEffects(OBJECT* o, BMD* b)
         }
         else if (o->CurrentAction == 1)
         {
-            if (rand() % 40 == 25)
+            if (Random::Rand() % 40 == 25)
             {
                 o->CurrentAction = 0;
             }
@@ -1722,7 +1723,7 @@ bool CGM_Raklion::UpdateObjectEffects(OBJECT* o, BMD* b)
         }
         else if (o->CurrentAction == 1)
         {
-            if (rand() % 40 == 19)
+            if (Random::Rand() % 40 == 19)
             {
                 o->CurrentAction = 0;
             }
@@ -1743,7 +1744,7 @@ bool CGM_Raklion::UpdateObjectEffects(OBJECT* o, BMD* b)
         vec3_t vLight;
         Vector(0.1f, 0.4f, 1.0f, vLight);
 
-        switch (rand() % 3)
+        switch (Random::Rand() % 3)
         {
         case 0:
             CreateParticle(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
@@ -1765,7 +1766,7 @@ bool CGM_Raklion::UpdateObjectEffects(OBJECT* o, BMD* b)
         vec3_t vLight;
         Vector(0.7f, 0.2f, 0.1f, vLight);
 
-        switch (rand() % 3)
+        switch (Random::Rand() % 3)
         {
         case 0:
             CreateParticle(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
@@ -1882,7 +1883,7 @@ bool CGM_Raklion::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 
                 b->TransformByObjectBone(vPos, o, iBones[i]);
                 for (int j = 0; j < 12; ++j)
-                    CreateEffect(MODEL_EFFECT_BROKEN_ICE0 + rand() % 3, vPos, o->Angle, vLight, 0);
+                    CreateEffect(MODEL_EFFECT_BROKEN_ICE0 + Random::Rand() % 3, vPos, o->Angle, vLight, 0);
             }
 
             o->LifeTime = 90;
@@ -1938,10 +1939,10 @@ bool CGM_Raklion::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 
         for (int i = 0; i < 4; ++i)
         {
-            if (rand() % 6 > 0)
+            if (Random::Rand() % 6 > 0)
                 continue;
 
-            if (rand() % 3 > 0)
+            if (Random::Rand() % 3 > 0)
             {
                 Vector(0.3f, 0.6f, 1.0f, vLight);
             }
@@ -1952,7 +1953,7 @@ bool CGM_Raklion::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 
             b->TransformByObjectBone(vPos, o, iBones[i]);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 50, 1.0f);
-            CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPos, o->Angle, vLight, 2, 0.8f);
+            CreateParticle(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos, o->Angle, vLight, 2, 0.8f);
         }
 
         if (o->CurrentAction == MONSTER01_ATTACK2)
@@ -2029,7 +2030,7 @@ bool CGM_Raklion::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 
                 b->TransformByObjectBone(vPos, o, iBones[i]);
                 for (int j = 0; j < 6; ++j)
-                    CreateEffect(MODEL_EFFECT_BROKEN_ICE0 + rand() % 3, vPos, o->Angle, vLight, 0);
+                    CreateEffect(MODEL_EFFECT_BROKEN_ICE0 + Random::Rand() % 3, vPos, o->Angle, vLight, 0);
             }
         }
     }
@@ -2141,7 +2142,7 @@ bool CGM_Raklion::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 
                 b->TransformByObjectBone(vPos, o, iBones[i]);
                 for (int j = 0; j < 12; ++j)
-                    CreateEffect(MODEL_EFFECT_BROKEN_ICE0 + rand() % 3, vPos, o->Angle, vLight, 0);
+                    CreateEffect(MODEL_EFFECT_BROKEN_ICE0 + Random::Rand() % 3, vPos, o->Angle, vLight, 0);
             }
 
             o->LifeTime = 90;
@@ -2194,10 +2195,10 @@ bool CGM_Raklion::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 
         for (int i = 0; i < 4; ++i)
         {
-            if (rand() % 6 > 0)
+            if (Random::Rand() % 6 > 0)
                 continue;
 
-            if (rand() % 3 > 0)
+            if (Random::Rand() % 3 > 0)
             {
                 Vector(0.3f, 0.6f, 1.0f, vLight);
             }
@@ -2208,7 +2209,7 @@ bool CGM_Raklion::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 
             b->TransformByObjectBone(vPos, o, iBones[i]);
             CreateParticle(BITMAP_SMOKE, vPos, o->Angle, vLight, 50, 1.0f);
-            CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPos, o->Angle, vLight, 2, 0.8f);
+            CreateParticle(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos, o->Angle, vLight, 2, 0.8f);
         }
 
         if (o->CurrentAction == MONSTER01_ATTACK2)
@@ -2284,7 +2285,7 @@ bool CGM_Raklion::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 
                 b->TransformByObjectBone(vPos, o, iBones[i]);
                 for (int j = 0; j < 6; ++j)
-                    CreateEffect(MODEL_EFFECT_BROKEN_ICE0 + rand() % 3, vPos, o->Angle, vLight, 0);
+                    CreateEffect(MODEL_EFFECT_BROKEN_ICE0 + Random::Rand() % 3, vPos, o->Angle, vLight, 0);
             }
         }
     }
@@ -2318,18 +2319,18 @@ bool CGM_Raklion::CreateSnow(PARTICLE* o)
         return false;
 
     o->Type = BITMAP_LEAF1;
-    o->Scale = (float)(rand() % 10 + 3);
+    o->Scale = (float)(Random::Rand() % 10 + 3);
     if (rand_fps_check(10))
     {
-        o->Scale = (float)(rand() % 3 + 10);
+        o->Scale = (float)(Random::Rand() % 3 + 10);
     }
 
-    Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800),
-           Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
-           Hero->Object.Position[2] + (float)(rand() % 200 + 200), o->Position);
-    Vector(-(float)(rand() % 30 + 50), 0.f, 0.f, o->Angle);
+    Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 1600 - 800),
+           Hero->Object.Position[1] + (float)(Random::Rand() % 1400 - 500),
+           Hero->Object.Position[2] + (float)(Random::Rand() % 200 + 200), o->Position);
+    Vector(-(float)(Random::Rand() % 30 + 50), 0.f, 0.f, o->Angle);
     vec3_t Velocity;
-    Vector(0.f, 0.f, -(float)(rand() % 20 + 30), Velocity);
+    Vector(0.f, 0.f, -(float)(Random::Rand() % 20 + 30), Velocity);
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     VectorRotate(Velocity, Matrix, o->Velocity);
@@ -2399,10 +2400,10 @@ bool CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
         Vector(1.f, 1.f, 1.f, vLight);
         for (int i = 0; i < 20; ++i)
         {
-            Vector(0.f, 0.f, rand() % 360, vAngle);
+            Vector(0.f, 0.f, Random::Rand() % 360, vAngle);
             VectorCopy(o->Position, vPos);
-            vPos[0] += rand() % 400 - 200;
-            vPos[1] += rand() % 400 - 200;
+            vPos[0] += Random::Rand() % 400 - 200;
+            vPos[1] += Random::Rand() % 400 - 200;
             vPos[2] -= 100.f;
             CreateJoint(BITMAP_FLARE, vPos, vPos, vAngle, 2, NULL, 40);
         }
@@ -2552,44 +2553,44 @@ void CGM_Raklion::CreateMapEffect()
         {
             Vector(1.f, 1.0f, 1.0f, vLight);
             VectorCopy(pObject->Position, vPos);
-            vPos[0] += (rand() % 1600 - 800.f);
-            vPos[1] += (rand() % 1600 - 800.f);
-            vPos[2] = 600.f + rand() % 100;
+            vPos[0] += (Random::Rand() % 1600 - 800.f);
+            vPos[1] += (Random::Rand() % 1600 - 800.f);
+            vPos[2] = 600.f + Random::Rand() % 100;
 
-            fScale = 2.0f + (rand() % 20) / 5.0f;
+            fScale = 2.0f + (Random::Rand() % 20) / 5.0f;
             int iIndex = MODEL_EFFECT_BROKEN_ICE0;
 
             CreateEffect(iIndex, vPos, pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, fScale);
 
             VectorCopy(pObject->Position, vPos);
-            vPos[0] += (rand() % 1600 - 800.f);
-            vPos[1] += (rand() % 1600 - 800.f);
-            vPos[2] = 600.f + rand() % 100;
+            vPos[0] += (Random::Rand() % 1600 - 800.f);
+            vPos[1] += (Random::Rand() % 1600 - 800.f);
+            vPos[2] = 600.f + Random::Rand() % 100;
 
-            fScale = 0.5f + (rand() % 10) / 5.0f;
+            fScale = 0.5f + (Random::Rand() % 10) / 5.0f;
             iIndex = MODEL_EFFECT_BROKEN_ICE2;
 
             CreateEffect(iIndex, vPos, pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, fScale);
 
             VectorCopy(pObject->Position, vPos);
-            vPos[0] += (rand() % 1600 - 800.f);
-            vPos[1] += (rand() % 1600 - 800.f);
-            vPos[2] = 600.f + rand() % 100;
+            vPos[0] += (Random::Rand() % 1600 - 800.f);
+            vPos[1] += (Random::Rand() % 1600 - 800.f);
+            vPos[2] = 600.f + Random::Rand() % 100;
 
             Vector(1.f, 0.8f, 0.8f, vLight);
-            fScale = 0.005f + (rand() % 10) / 200.0f;
+            fScale = 0.005f + (Random::Rand() % 10) / 200.0f;
             CreateEffect(MODEL_FALL_STONE_EFFECT, vPos, pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, fScale);
 
             Vector(0.4f, 0.4f, 0.5f, vLight);
-            fScale = 0.5f + (rand() % 10) / 20.0f;
+            fScale = 0.5f + (Random::Rand() % 10) / 20.0f;
             for (int k = 0; k < 3; ++k)
             {
                 VectorCopy(pObject->Position, vPos);
-                vPos[0] += (rand() % 1000 - 500.f);
-                vPos[1] += (rand() % 1000 - 500.f);
-                vPos[2] = 760.f + rand() % 150;
-                fScale = 0.2f + (rand() % 20) / 40.0f;
-                CreateParticle(BITMAP_WATERFALL_3 + (rand() % 2), vPos, pObject->Angle, vLight, 13, fScale);
+                vPos[0] += (Random::Rand() % 1000 - 500.f);
+                vPos[1] += (Random::Rand() % 1000 - 500.f);
+                vPos[2] = 760.f + Random::Rand() % 150;
+                fScale = 0.2f + (Random::Rand() % 20) / 40.0f;
+                CreateParticle(BITMAP_WATERFALL_3 + (Random::Rand() % 2), vPos, pObject->Angle, vLight, 13, fScale);
             }
         }
     }
@@ -2600,35 +2601,35 @@ void CGM_Raklion::CreateMapEffect()
         OBJECT* pObject = &Hero->Object;
         Vector(0.3f, 0.5f, 1.f, vLight);
 
-        EarthQuake = (float)(rand() % 2 - 2) * 0.5f;
+        EarthQuake = (float)(Random::Rand() % 2 - 2) * 0.5f;
 
         VectorCopy(pObject->Position, vPos);
-        vPos[0] += (rand() % 2000 - 1000.f);
-        vPos[1] += (rand() % 2000 - 1000.f);
-        vPos[2] = 500.f + rand() % 100;
+        vPos[0] += (Random::Rand() % 2000 - 1000.f);
+        vPos[1] += (Random::Rand() % 2000 - 1000.f);
+        vPos[2] = 500.f + Random::Rand() % 100;
 
-        fScale = 2.0f + (rand() % 20) / 5.0f;
+        fScale = 2.0f + (Random::Rand() % 20) / 5.0f;
         int iIndex = MODEL_EFFECT_BROKEN_ICE1;
 
         CreateEffect(iIndex, vPos, pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, fScale);
 
         VectorCopy(pObject->Position, vPos);
-        vPos[0] += (rand() % 2000 - 1000.f);
-        vPos[1] += (rand() % 2000 - 1000.f);
-        vPos[2] = 500.f + rand() % 100;
+        vPos[0] += (Random::Rand() % 2000 - 1000.f);
+        vPos[1] += (Random::Rand() % 2000 - 1000.f);
+        vPos[2] = 500.f + Random::Rand() % 100;
 
-        fScale = 0.5f + (rand() % 10) / 5.0f;
+        fScale = 0.5f + (Random::Rand() % 10) / 5.0f;
         iIndex = MODEL_EFFECT_BROKEN_ICE3;
 
         CreateEffect(iIndex, vPos, pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, fScale);
 
         VectorCopy(pObject->Position, vPos);
-        vPos[0] += (rand() % 2000 - 1000.f);
-        vPos[1] += (rand() % 2000 - 1000.f);
-        vPos[2] = 500.f + rand() % 100;
+        vPos[0] += (Random::Rand() % 2000 - 1000.f);
+        vPos[1] += (Random::Rand() % 2000 - 1000.f);
+        vPos[2] = 500.f + Random::Rand() % 100;
 
         Vector(1.f, 0.8f, 0.8f, vLight);
-        fScale = 0.05f + (rand() % 10) / 20.0f;
+        fScale = 0.05f + (Random::Rand() % 10) / 20.0f;
         CreateEffect(MODEL_FALL_STONE_EFFECT, vPos, pObject->Angle, vLight, 2, NULL, -1, 0, 0, 0, fScale);
     }
 }

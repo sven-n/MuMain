@@ -1,6 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Input/SyntheticInput.h"
@@ -128,7 +129,7 @@ CUIMapName* g_pUIMapName = nullptr; // rozy
 
 float Time_Effect = 0;
 bool ashies = false;
-int weather = rand() % 3;
+int weather = Random::Rand() % 3;
 
 HWND g_hWnd = nullptr;
 HINSTANCE g_hInst = nullptr;
@@ -2400,18 +2401,18 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     timers.SetRepeating(MUHELPER_TIMER, 250 /* ms */,
                         [] { MUHelper::CMuHelper::TimerProc(nullptr, 0, MUHELPER_TIMER, 0); });
 
-    srand((unsigned)time(nullptr));
+    Random::SeedRand((unsigned)time(nullptr));
 
     for (int& i : RandomTable)
-        i = rand() % 360;
+        i = Random::Rand() % 360;
 
-    RendomMemoryDump = new BYTE[rand() % 100 + 1];
+    RendomMemoryDump = new BYTE[Random::Rand() % 100 + 1];
     GateAttribute = new GATE_ATTRIBUTE[MAX_GATES]{};
     SkillAttribute = new SKILL_ATTRIBUTE[MAX_SKILLS]{};
     ItemAttRibuteMemoryDump = new ITEM_ATTRIBUTE[MAX_ITEM + 1024]{};
-    ItemAttribute = ItemAttRibuteMemoryDump + rand() % 1024;
+    ItemAttribute = ItemAttRibuteMemoryDump + Random::Rand() % 1024;
     CharacterMemoryDump = new CHARACTER[MAX_CHARACTERS_CLIENT + 1 + 128]{};
-    CharactersClient = CharacterMemoryDump + rand() % 128;
+    CharactersClient = CharacterMemoryDump + Random::Rand() % 128;
     CharacterMachine = new CHARACTER_MACHINE;
 
     memset(GateAttribute, 0, sizeof(GATE_ATTRIBUTE) * (MAX_GATES));

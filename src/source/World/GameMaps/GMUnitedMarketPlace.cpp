@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -302,7 +303,7 @@ bool GMUnitedMarketPlace::UpdateObjectEffects(OBJECT* o, BMD* b)
         vec3_t vLight;
         Vector(1.0f, 1.0f, 1.0f, vLight);
 
-        switch (rand() % 3)
+        switch (Random::Rand() % 3)
         {
         case 0:
             CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
@@ -365,7 +366,7 @@ bool GMUnitedMarketPlace::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
         vec3_t vAngle;
         Vector(10.0f, 0.0f, 0.0f, vAngle);
         b->TransformPosition(o->BoneTransform[43], vRelativePos, vWorldPos, true);
-        CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vWorldPos, o->Angle, Light, 1, 0.6f, o);
+        CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vWorldPos, o->Angle, Light, 1, 0.6f, o);
         CreateParticleFpsChecked(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 6, 0.6f, o);
 
         Vector(1.0f, 1.0f, 1.0f, Light);
@@ -471,12 +472,12 @@ bool GMUnitedMarketPlace::CreateRain(PARTICLE* o)
     }
 
     o->Type = BITMAP_RAIN;
-    Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800),
-           Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
-           Hero->Object.Position[2] + (float)(rand() % 200 + 200), o->Position);
+    Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 1600 - 800),
+           Hero->Object.Position[1] + (float)(Random::Rand() % 1400 - 500),
+           Hero->Object.Position[2] + (float)(Random::Rand() % 200 + 200), o->Position);
     Vector(-30.f, 0.f, 0.f, o->Angle);
     vec3_t Velocity;
-    Vector(0.f, 0.f, -(float)(rand() % 24 + 20), Velocity);
+    Vector(0.f, 0.f, -(float)(Random::Rand() % 24 + 20), Velocity);
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     VectorRotate(Velocity, Matrix, o->Velocity);
@@ -509,14 +510,14 @@ bool GMUnitedMarketPlace::MoveRain(PARTICLE* o)
     }
     else
     {
-        o->Velocity[0] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
-        o->Velocity[1] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
-        o->Velocity[2] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[0] += (float)(Random::Rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[1] += (float)(Random::Rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[2] += (float)(Random::Rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
         VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
 
-        o->TurningForce[0] += (float)(rand() % 8 - 4) * 0.02f * FPS_ANIMATION_FACTOR;
-        o->TurningForce[1] += (float)(rand() % 16 - 8) * 0.02f * FPS_ANIMATION_FACTOR;
-        o->TurningForce[2] += (float)(rand() % 8 - 4) * 0.02f * FPS_ANIMATION_FACTOR;
+        o->TurningForce[0] += (float)(Random::Rand() % 8 - 4) * 0.02f * FPS_ANIMATION_FACTOR;
+        o->TurningForce[1] += (float)(Random::Rand() % 16 - 8) * 0.02f * FPS_ANIMATION_FACTOR;
+        o->TurningForce[2] += (float)(Random::Rand() % 8 - 4) * 0.02f * FPS_ANIMATION_FACTOR;
         VectorAdd(o->Angle, o->TurningForce, o->Angle);
 
         vec3_t Range;

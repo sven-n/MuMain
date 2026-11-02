@@ -1,6 +1,7 @@
 ﻿// GMEmpireGuardian4.cpp: implementation of the GMEmpireGuardian4 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
@@ -56,7 +57,7 @@ bool GMEmpireGuardian4::CreateObject(OBJECT* o)
         return true;
     case 10:
     {
-        o->SubType = rand() % 50;
+        o->SubType = Random::Rand() % 50;
     }
         return true;
     }
@@ -546,7 +547,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 Vector(0.0f, 0.0f, 0.0f, vRelative2);
                 for (int i = 0; i < 100; i++)
                 {
-                    float fRandDistance = (float)(rand() % 100) + 100;
+                    float fRandDistance = (float)(Random::Rand() % 100) + 100;
                     Vector(0.0f, fRandDistance, 0.0f, vRandomDir);
 
                     b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
@@ -555,7 +556,7 @@ bool GMEmpireGuardian4::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     b->TransformPosition(BoneTransform[61], vRelative, vPosition, false);
                     CreateParticleFpsChecked(BITMAP_FIRE, vPosition, o->Angle, o->Light, 0);
 
-                    Vector((float)(rand() % 360), 0.f, (float)(rand() % 360), vAngle);
+                    Vector((float)(Random::Rand() % 360), 0.f, (float)(Random::Rand() % 360), vAngle);
                     AngleMatrix(vAngle, matRandomRotation);
                     VectorRotate(vRandomDir, matRandomRotation, vRandomDirPosition);
                     VectorAdd(vPosition, vRandomDirPosition, vResultRandomPosition);
@@ -780,7 +781,7 @@ bool GMEmpireGuardian4::UpdateObjectEffects(OBJECT* o, BMD* b)
             vec3_t Angle;
             for (int i = 0; i < 4; ++i)
             {
-                Vector((float)(rand() % 60 + 60 + 90), 0.f, o->Angle[2] + 180, Angle);
+                Vector((float)(Random::Rand() % 60 + 60 + 90), 0.f, o->Angle[2] + 180, Angle);
                 CreateJointFpsChecked(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
             }
             CreateParticleFpsChecked(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
@@ -790,7 +791,7 @@ bool GMEmpireGuardian4::UpdateObjectEffects(OBJECT* o, BMD* b)
             vec3_t Angle;
             for (int i = 0; i < 4; ++i)
             {
-                Vector((float)(rand() % 60 + 60 + 90), 0.f, o->Angle[2], Angle);
+                Vector((float)(Random::Rand() % 60 + 60 + 90), 0.f, o->Angle[2], Angle);
                 CreateJointFpsChecked(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
             }
             CreateParticleFpsChecked(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
@@ -860,7 +861,7 @@ bool GMEmpireGuardian4::UpdateObjectEffects(OBJECT* o, BMD* b)
         vec3_t vLight;
         Vector(1.0f, 1.0f, 1.0f, vLight);
 
-        switch (rand() % 3)
+        switch (Random::Rand() % 3)
         {
         case 0:
             CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
@@ -916,7 +917,7 @@ bool GMEmpireGuardian4::UpdateObjectEffects(OBJECT* o, BMD* b)
 
         if (iRemainder >= 0 && iRemainder <= 1)
         {
-            int iRand = rand() % 4 + 4;
+            int iRand = Random::Rand() % 4 + 4;
             for (int i = 0; i < iRand; ++i)
             {
                 CreateEffectFpsChecked(BITMAP_FLAME, o->Position, o->Angle, vLight, 6, NULL, -1, 0, o->Scale);
@@ -1125,13 +1126,14 @@ bool GMEmpireGuardian4::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
             Vector(1.0f, 0.1f, 0.1f, vLightRage);
             for (int i = 0; i < iBoneCount; ++i)
             {
-                if (rand() % 6 > 0)
+                if (Random::Rand() % 6 > 0)
                     continue;
                 if (i % 5 == 0)
                 {
                     b->TransformByObjectBone(vPosRage, o, i);
                     CreateParticleFpsChecked(BITMAP_SMOKE, vPosRage, o->Angle, vLightRage, 50, 1.0f);
-                    CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPosRage, o->Angle, vLightRage, 0, 1.0f);
+                    CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPosRage, o->Angle, vLightRage, 0,
+                                             1.0f);
                 }
             }
         }
@@ -1259,7 +1261,7 @@ bool GMEmpireGuardian4::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
                 {
                     b->TransformByObjectBone(vPosRage, o, i);
                     CreateParticle(BITMAP_SMOKE, vPosRage, o->Angle, vLightRage, 50, 1.0f);
-                    CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPosRage, o->Angle, vLightRage, 0, 1.0f);
+                    CreateParticle(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPosRage, o->Angle, vLightRage, 0, 1.0f);
                 }
             }
         }

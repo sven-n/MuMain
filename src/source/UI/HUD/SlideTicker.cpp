@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "UI/HUD/SlideTicker.h"
 
 #include "Core/Time/FrameTimerScheduler.h"
@@ -559,7 +560,7 @@ const wchar_t* SlideTicker::GetSlideText(int iLevel)
     if (iHelpType == -1) return nullptr;
     if (m_iTextNumber[iHelpType] == 0) return nullptr;
 
-    int iRandom = rand() % m_iTextNumber[iHelpType];
+    int iRandom = Random::Rand() % m_iTextNumber[iHelpType];
 
     if ((unsigned int)iRandom >= m_SlideTextList[iHelpType].size()) return nullptr;
 

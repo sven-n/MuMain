@@ -55,6 +55,10 @@ tracked in [#914](https://github.com/sven-n/MuMain/issues/914).
 - **Draws take randomness from the frame.** A flicker drawn in a pass comes
   from `Random::DrawRand`, fixed for the frame and the object, so every pass
   draws the same and no random sequence the update draws from moves.
+- **The game owns its random sequences.** The update draws from
+  `Random::Rand`, the game's copy of the Windows CRT's `rand()` (the same
+  values on every platform), and from the `Random` engine. Both states can be
+  read without drawing, so a check can tell whether a draw used them.
 - **There are no exceptions.** A part the update has not seen yet is drawn as
   it stands and advanced by the next update. A preview has an update of its
   own, run by the window that owns it. The offscreen pass that draws previews
@@ -102,9 +106,17 @@ drawer, and the renderer applies the active look per draw.
 - A transformed Rage Fighter's skin and the Chaos Castle angel no longer write
   into the character's parts (the skin wrote outside them).
 - The mix windows' sparkle ends one frame sooner; it runs down in the update.
+- The Legendary Shield and Staff, the Chaos Lightning Staff and the Lightning
+  Sword shimmer with the draw's randomness; creating one no longer draws from
+  the update's sequence.
+- Item effects and styles no longer leave their look on the item they draw.
+  A Devil's Eye on the ground is drawn bright in every pass, not from its
+  second pass on, and the update reads its own alpha; a GM gift is drawn at
+  its own alpha, with its glow at half.
 
 ## Consequences
 
+- The CRT's `rand()` and `srand()` are not used; a source test keeps them out.
 - A spawn, a state write or a random draw from the update's sequences inside
   a draw is a defect. So is a draw pass that changes anything when it runs a
   second time.
@@ -133,11 +145,17 @@ drawer, and the renderer applies the active look per draw.
 ## Enforcement
 
 - **Every build:** the spawn functions (effects, sprites, particles, joints,
-  blurs, pointers, terrain lights, sounds, music, actions, animations) report any
-  call inside a draw pass, the scene's or the offscreen one
-  (`Diagnostics::DrawSpawnCheck`); every such call is a violation. Developer
-  builds log each offending caller once to the error log. Tests read the
-  count.
+  blurs, pointers, terrain lights, sounds, music, actions, animations) and
+  every call that advances or reseeds a gameplay random sequence (`Rand`,
+  `SeedRand`, the `Random` engine's draws and `Seed`) report any call inside
+  a draw pass on the drawing thread, the scene's or the offscreen one
+  (`Diagnostics::DrawSpawnCheck`); every such call is a violation. Reading a
+  sequence's state and the draws' own `DrawRand` / `DrawFpsCheck` report
+  nothing. Every build logs each offending caller once to the error log, with
+  or without the control socket. Tests read the count and the last caller.
+- **The compiled game:** `game_random_is_owned` reads the undefined symbols
+  of the game's objects and fails if any calls the CRT's `rand()` or
+  `srand()`, a second sequence nothing can see.
 - **Tests:** draws under test run inside a `DrawScope` and must spawn
   nothing (`CheckDrawSpawnsNone`). Repeated-draw tests run a draw pass several
   times after one update and check that the pools, the spawn count and both
@@ -151,8 +169,9 @@ drawer, and the renderer applies the active look per draw.
     sprites, items, map objects, mounts, boids, particles and joints,
     including visibility, drawn-frame marks, pick boxes and buffs; the frame's
     view, frustum and mouse ray; the terrain's collision and light, the light
-    history and Dark Side's state; and whether the pass drew from the random
-    engine. Its own snapshots draw from no sequence. It lists the changes.
+    history and Dark Side's state; and whether the pass drew from either
+    random sequence. Its own snapshots draw from no sequence. It lists the
+    changes.
   - `spawn-effect` creates any effect, particle or joint type at the
     character, so effects no map or skill reaches can be checked.
 - These checks show *whether* the draw spawns or writes, not *where* an

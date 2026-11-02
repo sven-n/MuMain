@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "WebzenScene.h"
 #include "SceneCore.h"
 #include "Core/Platform/ScopedSystemCursor.h"
@@ -41,7 +42,7 @@ enum class BackgroundTheme
  */
 static BackgroundTheme SelectBackgroundTheme()
 {
-    int roll = rand() % BACKGROUND_SELECTION_PERCENTAGE;
+    int roll = Random::Rand() % BACKGROUND_SELECTION_PERCENTAGE;
     return (roll <= CLASSIC_BACKGROUND_PROBABILITY) ? BackgroundTheme::Classic : BackgroundTheme::Season5;
 }
 

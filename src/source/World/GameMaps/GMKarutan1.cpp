@@ -3,6 +3,7 @@
 //*****************************************************************************
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #ifdef ASG_ADD_MAP_KARUTAN
 
@@ -43,7 +44,7 @@ bool CGMKarutan1::MoveObject(OBJECT* o)
     case 113:
     {
         vec3_t vLight;
-        float fLuminosity = (float)(rand() % 4 + 3) * 0.1f;
+        float fLuminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(fLuminosity, fLuminosity * 0.6f, fLuminosity * 0.2f, vLight);
         AddTerrainLight(o->Position[0], o->Position[1], vLight, 3, PrimaryTerrainLight);
     }
@@ -109,7 +110,7 @@ bool CGMKarutan1::UpdateObjectEffects(OBJECT* o, BMD* b)
         vec3_t vLight;
         Vector(1.0f, 1.0f, 1.0f, vLight);
 
-        switch (rand() % 3)
+        switch (Random::Rand() % 3)
         {
         case 0:
             CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
@@ -418,7 +419,7 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
 
     vec3_t p, Position;
     vec3_t Light;
-    float Luminosity = (float)(rand() % 8 + 2) * 0.1f;
+    float Luminosity = (float)(Random::Rand() % 8 + 2) * 0.1f;
     ;
 
     switch (o->Type)
@@ -439,7 +440,8 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
         if (o->CurrentAction == MONSTER01_WALK)
         {
             vec3_t Position;
-            Vector(o->Position[0] + rand() % 200 - 100, o->Position[1] + rand() % 200 - 100, o->Position[2], Position);
+            Vector(o->Position[0] + Random::Rand() % 200 - 100, o->Position[1] + Random::Rand() % 200 - 100,
+                   o->Position[2], Position);
             CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
         }
         return true;
@@ -452,7 +454,7 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
                 Vector(1.0f, 1.0f, 1.0f, vLight);
                 b->TransformByObjectBone(vPos, o, 6);
                 for (int j = 0; j < 6; ++j)
-                    CreateEffect(MODEL_CONDRA_STONE + rand() % 6, vPos, o->Angle, vLight, 0);
+                    CreateEffect(MODEL_CONDRA_STONE + Random::Rand() % 6, vPos, o->Angle, vLight, 0);
             }
             if ((int)o->LifeTime == 100)
             {
@@ -490,9 +492,9 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
                 Vector(0.5f, 0.5f, 0.5f, Light);
                 for (i = 0; i < 20; ++i)
                 {
-                    vWorldPos[0] = vRelativePos[0] + rand() % 160 - 80;
-                    vWorldPos[1] = vRelativePos[1] + rand() % 160 - 80;
-                    vWorldPos[2] = vRelativePos[2] + (rand() % 150) - 50;
+                    vWorldPos[0] = vRelativePos[0] + Random::Rand() % 160 - 80;
+                    vWorldPos[1] = vRelativePos[1] + Random::Rand() % 160 - 80;
+                    vWorldPos[2] = vRelativePos[2] + (Random::Rand() % 150) - 50;
                     CreateParticle(BITMAP_SMOKE, vWorldPos, o->Angle, Light, 48, 1.0f);
                 }
             }
@@ -525,7 +527,7 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
                 Vector(1.0f, 1.0f, 1.0f, vLight);
                 b->TransformByObjectBone(vPos, o, 6);
                 for (int j = 0; j < 4; ++j)
-                    CreateEffect(MODEL_NARCONDRA_STONE + rand() % 4, vPos, o->Angle, vLight, 0);
+                    CreateEffect(MODEL_NARCONDRA_STONE + Random::Rand() % 4, vPos, o->Angle, vLight, 0);
             }
             if ((int)o->LifeTime == 100)
             {
@@ -575,9 +577,9 @@ bool CGMKarutan1::MoveMonsterVisual(OBJECT* o, BMD* b)
                 Vector(0.5f, 0.5f, 0.5f, Light);
                 for (i = 0; i < 20; ++i)
                 {
-                    vWorldPos[0] = vRelativePos[0] + rand() % 160 - 80;
-                    vWorldPos[1] = vRelativePos[1] + rand() % 160 - 80;
-                    vWorldPos[2] = vRelativePos[2] + (rand() % 150) - 50;
+                    vWorldPos[0] = vRelativePos[0] + Random::Rand() % 160 - 80;
+                    vWorldPos[1] = vRelativePos[1] + Random::Rand() % 160 - 80;
+                    vWorldPos[2] = vRelativePos[2] + (Random::Rand() % 150) - 50;
                     CreateParticle(BITMAP_SMOKE, vWorldPos, o->Angle, Light, 48, 1.0f);
                 }
             }

@@ -221,7 +221,7 @@ std::array<float, 3> BoltEnd(float frameFactor)
     FPS_ANIMATION_FACTOR = frameFactor;
     vec3_t start = {1000.f, 1000.f, 100.f};
     vec3_t angle = {0.f, 0.f, 90.f};
-    srand(1234);
+    Random::SeedRand(1234);
     // This seed spawns no fire particle at the bolt's end; particles need the option window, which tests lack.
     Random::Seed(1);
     CreateJoint(BITMAP_JOINT_LASER + 1, start, target.Position, angle, 1, &target, 50.f);

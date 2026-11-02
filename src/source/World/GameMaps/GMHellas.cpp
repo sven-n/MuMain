@@ -2,6 +2,7 @@
 //  GMHellas.cpp
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Engine/Object/ObjectPose.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -313,7 +314,7 @@ bool MoveHellasObjectSetting(int& objCount, int object)
     if (LastAmbientSoundPlay < WorldTime - AmbientSoundInterval)
     {
         LastAmbientSoundPlay = WorldTime;
-        PlayBuffer(static_cast<ESound>(SOUND_KALIMA_AMBIENT2 + rand() % 2));
+        PlayBuffer(static_cast<ESound>(SOUND_KALIMA_AMBIENT2 + Random::Rand() % 2));
     }
 
     if (GetHellasLevel(Hero->Class, CharacterAttribute->Level) == KUNDUN_ZONE)
@@ -324,13 +325,13 @@ bool MoveHellasObjectSetting(int& objCount, int object)
         if ((CurrX >= 25 && CurrY >= 44) && (CurrX <= 51 && CurrY <= 119) && (LastKundunSoundPlay < WorldTime - KundunSoundInterval))
         {
             LastKundunSoundPlay = WorldTime;
-            PlayBuffer(static_cast<ESound>(SOUND_KUNDUN_AMBIENT1 + rand() % 2));
+            PlayBuffer(static_cast<ESound>(SOUND_KUNDUN_AMBIENT1 + Random::Rand() % 2));
         }
     }
 
     if (rand_fps_check(10) && object)
     {
-        objCount = rand() % object;
+        objCount = Random::Rand() % object;
         return true;
     }
 
@@ -340,13 +341,13 @@ bool MoveHellasObjectSetting(int& objCount, int object)
 
         Vector(0.3f, 0.8f, 1.f, Light);
 
-        Position[0] = Hero->Object.Position[0] + rand() % 800 - 400.f;
-        Position[1] = Hero->Object.Position[1] + rand() % 800 - 400.f;
+        Position[0] = Hero->Object.Position[0] + Random::Rand() % 800 - 400.f;
+        Position[1] = Hero->Object.Position[1] + Random::Rand() % 800 - 400.f;
         Position[2] = Hero->Object.Position[2] + 50.f;
 
         CreateParticle(BITMAP_LIGHT, Position, Hero->Object.Angle, Light, 7, 1.f, &Hero->Object);
 
-        if (rand() % 15 == 0)
+        if (Random::Rand() % 15 == 0)
         {
             vec3_t Angle = { 0.f, 0.f, 0.f };
             Position[2] = Hero->Object.Position[2] + 800.f;
@@ -489,7 +490,7 @@ bool UpdateHellasObjectEffects(OBJECT* o, BMD* b)
         break;
     case 39:
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticleFpsChecked(BITMAP_WATERFALL_3 + (rand() % 2), o->Position, o->Angle, Light, 0);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_3 + (Random::Rand() % 2), o->Position, o->Angle, Light, 0);
         o->Scale = 0.5f;
         break;
     case 40:
@@ -598,12 +599,12 @@ int CreateBigMon(OBJECT* o)
         o->Live = true;
         OpenMonsterModel(MONSTER_MODEL_BAHAMUT);
         o->Type = MODEL_BAHAMUT;
-        o->Scale = 2.5f + (float)(rand() % 3 + 6) * 0.05f;
+        o->Scale = 2.5f + (float)(Random::Rand() % 3 + 6) * 0.05f;
         o->Alpha = 1.f;
         o->AlphaTarget = o->Alpha;
         o->LightEnable = false;
-        o->Velocity = (float)(rand() % 10 + 10) * 0.04f;
-        o->Gravity = rand() % 3 - 1.5f;
+        o->Velocity = (float)(Random::Rand() % 10 + 10) * 0.04f;
+        o->Gravity = Random::Rand() % 3 - 1.5f;
         o->LightEnable = true;
         o->AlphaEnable = false;
         o->SubType = 0;
@@ -612,10 +613,9 @@ int CreateBigMon(OBJECT* o)
         o->LifeTime = 200;
         o->CurrentAction = MONSTER01_WALK;
         SetAction(o, o->CurrentAction);
-        Vector(0.f, 0.f, 90.f - rand() % 30 - 15, o->Angle);
-        Vector(Hero->Object.Position[0] - 1000 - rand() % 200,
-            Hero->Object.Position[1] - 500 + rand() % 200,
-            Hero->Object.Position[2] - 800.f, o->Position);
+        Vector(0.f, 0.f, 90.f - Random::Rand() % 30 - 15, o->Angle);
+        Vector(Hero->Object.Position[0] - 1000 - Random::Rand() % 200,
+               Hero->Object.Position[1] - 500 + Random::Rand() % 200, Hero->Object.Position[2] - 800.f, o->Position);
     }
     else
     {
@@ -671,7 +671,7 @@ void CreateMonsterSkill_Poison(OBJECT* o, int AttackTime, BYTE time)
         float  Matrix[3][4];
         vec3_t Angle, Light, Position, p;
 
-        Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+        Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
         Vector(0.f, 300.f, 0.f, p);
         Vector(0.8f, 0.5f, 0.1f, Light);
         for (int i = 0; i < 5; i++)
@@ -796,7 +796,7 @@ void UpdateHellasObjectMeshEffects(OBJECT* o, BMD* b)
                 PlayBuffer(SOUND_KUNDUN_SHUDDER);
             }
             o->LifeTime = 10;
-            EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
+            EarthQuake = (float)(Random::Rand() % 8 - 8) * 0.1f;
             if (rand_fps_check(1))
             {
                 vec3_t p, Position;
@@ -845,7 +845,7 @@ void UpdateHellasObjectMeshEffects(OBJECT* o, BMD* b)
                     {
                         Angle[0] = -10.f;
                         Angle[1] = 0.f;
-                        Angle[2] = i * (10.f + rand() % 10);
+                        Angle[2] = i * (10.f + Random::Rand() % 10);
 
                         vec3_t Position;
                         VectorCopy(o->Position, Position);
@@ -855,7 +855,7 @@ void UpdateHellasObjectMeshEffects(OBJECT* o, BMD* b)
                     }
                 }
 
-                EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
+                EarthQuake = (float)(Random::Rand() % 8 - 8) * 0.1f;
             }
             if (o->LifeTime >= 90)
             {
@@ -1198,8 +1198,8 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
 
                 for (int i = 0; i < 3; ++i)
                 {
-                    Position[0] = Hero->Object.Position[0] + (rand() % 200 - 100);
-                    Position[1] = Hero->Object.Position[1] + (rand() % 200 - 100);
+                    Position[0] = Hero->Object.Position[0] + (Random::Rand() % 200 - 100);
+                    Position[1] = Hero->Object.Position[1] + (Random::Rand() % 200 - 100);
                     Position[2] = Hero->Object.Position[2];
 
                     CreateEffect(MODEL_FIRE, Position, o->Angle, Light, 7, NULL, 0);
@@ -1356,7 +1356,8 @@ void MonsterMoveWaterSmoke(OBJECT* o)
     if (o->CurrentAction == MONSTER01_WALK)
     {
         vec3_t Position;
-        Vector(o->Position[0] + rand() % 200 - 100, o->Position[1] + rand() % 200 - 100, o->Position[2], Position);
+        Vector(o->Position[0] + Random::Rand() % 200 - 100, o->Position[1] + Random::Rand() % 200 - 100, o->Position[2],
+               Position);
         CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
     }
 }
@@ -1368,9 +1369,9 @@ void MonsterDieWaterSmoke(OBJECT* o)
         for (int i = 0; i < 20; i++)
         {
             Vector(1.f, 1.f, 1.f, o->Light);
-            Vector(o->Position[0] + (float)(rand() % 64 - 32),
-                o->Position[1] + (float)(rand() % 64 - 32),
-                o->Position[2] + (float)(rand() % 32 - 16), Position);
+            Vector(o->Position[0] + (float)(Random::Rand() % 64 - 32),
+                   o->Position[1] + (float)(Random::Rand() % 64 - 32),
+                   o->Position[2] + (float)(Random::Rand() % 32 - 16), Position);
             CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light, 1);
         }
     }
@@ -1386,8 +1387,8 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
     case MODEL_WARCRAFT:
         if (o->CurrentAction == 0)
         {
-            Position[0] = o->Position[0] + rand() % 200 - 100;
-            Position[1] = o->Position[1] + rand() % 100 - 50;
+            Position[0] = o->Position[0] + Random::Rand() % 200 - 100;
+            Position[1] = o->Position[1] + Random::Rand() % 100 - 50;
             Position[2] = o->Position[2];
 
             CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
@@ -1631,7 +1632,7 @@ bool UpdateHellasMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
                 }
                 if (o->AnimationFrame > 3.0f)
                 {
-                    EarthQuake = (float)(rand() % 8 - 8) * 0.2f;
+                    EarthQuake = (float)(Random::Rand() % 8 - 8) * 0.2f;
                 }
                 if (gMapManager.InHellas() && o->AnimationFrame > 3.0f && o->AnimationFrame < 14.0f)
                 {
@@ -1640,8 +1641,8 @@ bool UpdateHellasMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
                     vec3_t Angle = { 0.f, 0.f, 0.f };
                     for (int i = 0; i < 2; ++i)
                     {
-                        auto fAngle = float(rand() % 360);
-                        auto fDistance = float(rand() % 600 + 200);
+                        auto fAngle = float(Random::Rand() % 360);
+                        auto fDistance = float(Random::Rand() % 600 + 200);
                         Position[0] = o->Position[0] + sinf(fAngle) * fDistance;
                         Position[1] = o->Position[1] + cosf(fAngle) * fDistance;
                         Position[2] = o->Position[2] + 800.f;
@@ -1712,7 +1713,7 @@ bool UpdateHellasMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
                 }
                 if (o->AnimationFrame > 6.0f)
                 {
-                    EarthQuake = (float)(rand() % 16 - 16) * 0.1f;
+                    EarthQuake = (float)(Random::Rand() % 16 - 16) * 0.1f;
                 }
             }
         }
@@ -1788,10 +1789,10 @@ bool UpdateHellasMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
             Vector(0.7f, 0.6f, 1, Light);
             b->TransformPosition(o->BoneTransform[3], p, Position, true);
             CreateSprite(BITMAP_LIGHT, Position, 1.7f, Light, o, 0.f);
-            CreateSprite(BITMAP_SHINY + 1, Position, 1.f, Light, o, (float)(rand() % 360));
+            CreateSprite(BITMAP_SHINY + 1, Position, 1.f, Light, o, (float)(Random::Rand() % 360));
             b->TransformPosition(o->BoneTransform[4], p, Position, true);
             CreateSprite(BITMAP_LIGHT, Position, 1.7f, Light, o, 0.f);
-            CreateSprite(BITMAP_SHINY + 1, Position, 1.f, Light, o, (float)(rand() % 360));
+            CreateSprite(BITMAP_SHINY + 1, Position, 1.f, Light, o, (float)(Random::Rand() % 360));
 
             vec3_t pos1, pos2;
             Vector(0, 0, 0, p);
@@ -1891,8 +1892,8 @@ bool UpdateHellasMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 
                 if ((o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2) && rand_fps_check(50))
                 {
-                    Angle[0] = (float)(rand() % 360);
-                    Angle[2] = (float)(rand() % 360);
+                    Angle[0] = (float)(Random::Rand() % 360);
+                    Angle[2] = (float)(Random::Rand() % 360);
                     CreateJoint(BITMAP_FLARE + 1, Position, pos, Angle, 5, NULL, 20.f);
                 }
             }

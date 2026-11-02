@@ -547,10 +547,11 @@ TEST_CASE("A wing's item effect spawns its lights on the bones it is given, and 
     wing.Type = MODEL_WING_OF_ETERNAL;
 
     int level = 0;
+    float alpha = 1.f;
     CheckDrawSpawnsNone(
         [&]
         {
-            CHECK(Render::Items::ItemEffects::Apply(b, &wing, MODEL_WING_OF_ETERNAL, 1.f, level) ==
+            CHECK(Render::Items::ItemEffects::Apply(b, &wing, MODEL_WING_OF_ETERNAL, alpha, level) ==
                   Render::Items::ItemEffects::Result::Applied);
         });
     for (int i = 0; i < MAX_SPRITES; ++i)
@@ -840,6 +841,66 @@ TEST_CASE("Creating a sprite while drawing is counted as a violation [effects]")
     CHECK(Diagnostics::DrawSpawnCheck::Violations() == 1);
     Diagnostics::DrawSpawnCheck::ResetViolations();
     FenrirScope::ClearSpawns();
+}
+
+TEST_CASE("Drawing an item's effect or style again and again leaves the look on its object as it was [effects]")
+{
+    FenrirScope scope;
+    ItemModelDatabaseScope restoreModels;
+    Data::Items::ItemModelDefinition eye;
+    eye.group = 14;
+    eye.number = 17;
+    eye.file = "Data/Item/EventBullCatEye.bmd";
+    eye.itemEffect = "devilsEye";
+    Data::Items::ItemModelDefinition bone;
+    bone.group = 13;
+    bone.number = 17;
+    bone.file = "Data/Item/BloodBone.bmd";
+    bone.renderStyle = "bloodBone";
+    g_ItemModelDatabase.Build(std::vector<Data::Items::ItemModelDefinition>{eye, bone},
+                              Data::Effects::GlowColorList{});
+    const int eyeModel = Data::Items::ToModelSlot(Data::Items::MakeItemType(14, 17));
+    const int boneModel = Data::Items::ToModelSlot(Data::Items::MakeItemType(13, 17));
+    const double previousTime = WorldTime;
+    WorldTime = 1000.0;
+
+    for (const int model : {eyeModel, boneModel})
+    {
+        CAPTURE(model);
+        Models[model].BodyScale = 1.f;
+        OBJECT item;
+        item.Type = model;
+        item.Alpha = 0.6f;
+        item.BlendMesh = -1;
+        item.BlendMeshLight = 0.25f;
+        item.BlendMeshTexCoordU = 0.125f;
+        item.BlendMeshTexCoordV = 0.125f;
+        item.HiddenMesh = -2;
+        vec3_t light = {1.f, 1.f, 1.f};
+        // The ground item's passes, each taking its alpha from the item.
+        CheckDrawSpawnsNone(
+            [&]
+            {
+                for (int pass = 0; pass < 3; ++pass)
+                    RenderPartObjectEffect(&item, model, light, item.Alpha, 0, 0, 0, 0, RENDER_TEXTURE);
+            });
+        CHECK(item.Alpha == 0.6f);
+        CHECK(item.BlendMesh == -1);
+        CHECK(item.BlendMeshLight == 0.25f);
+        CHECK(item.BlendMeshTexCoordU == 0.125f);
+        CHECK(item.BlendMeshTexCoordV == 0.125f);
+        CHECK(item.HiddenMesh == -2);
+    }
+
+    // The eye is still drawn bright: its effect hands the draw its alpha.
+    OBJECT item;
+    item.Type = eyeModel;
+    float alpha = 0.6f;
+    int level = 0;
+    CHECK(ApplyPartObjectEffect(&Models[eyeModel], &item, eyeModel, alpha, level, 0) ==
+          Render::Items::ItemEffects::Result::Applied);
+    CHECK(alpha == 2.f);
+    WorldTime = previousTime;
 }
 
 TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and its draw spawns none [effects]")

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #include "ItemEffects.h"
 #include "ItemModelTable.h"
@@ -18,8 +19,9 @@ namespace Render::Items::ItemEffects
 namespace
 {
 // An effect runs before the model is drawn, and may change the level the
-// model glows like. Drawn: it drew the model itself, nothing more is drawn.
-using EffectFunction = Result (*)(BMD* b, OBJECT* o, int Type, float Alpha, int& Level);
+// model glows like and the alpha it is drawn with. Drawn: it drew the model
+// itself, nothing more is drawn.
+using EffectFunction = Result (*)(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level);
 // Spawns the effect's sprites, particles and lightning from the model's pose, in the update.
 using SpawnFunction = void (*)(BMD* b, OBJECT* o, vec34_t* bones);
 
@@ -33,12 +35,12 @@ struct ItemEffect
 // ------------------------------------------------ the effects
 
 // For effects that only spawn: the model is drawn as usual.
-Result ApplyNothing(BMD*, OBJECT*, int, float, int&)
+Result ApplyNothing(BMD*, OBJECT*, int, float&, int&)
 {
     return Result::Applied;
 }
 
-Result ApplyBillOfBalrog(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyBillOfBalrog(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     Vector(0.5f, 0.5f, 1.5f, b->BodyLight);
     b->StreamMesh = 0;
@@ -48,7 +50,7 @@ Result ApplyBillOfBalrog(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     return Result::Applied;
 }
 
-Result ApplyMeshesPerLevel(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyMeshesPerLevel(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     Vector(1.f, 1.f, 1.f, b->BodyLight);
     b->StreamMesh = 0;
@@ -75,7 +77,7 @@ Result ApplyMeshesPerLevel(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     return Result::Drawn;
 }
 
-Result ApplyFirecracker(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyFirecracker(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     b->StreamMesh = 0;
     o->BlendMeshLight = 1.f;
@@ -91,19 +93,18 @@ Result ApplyFirecracker(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     return Result::Drawn;
 }
 
-Result ApplyGmGift(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyGmGift(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     Vector(1.f, 1.f, 1.f, b->BodyLight);
     b->RenderBody(RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
     b->LightEnable = true;
     Vector(0.1f, 0.6f, 0.4f, b->BodyLight);
-    o->Alpha = 0.5f;
-    b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU,
+    b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, 0.5f, -1, o->BlendMeshLight, o->BlendMeshTexCoordU,
                   o->BlendMeshTexCoordV);
     return Result::Drawn;
 }
 
-Result ApplyDarkLordScroll(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyDarkLordScroll(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     b->BeginRender(o->Alpha);
     o->BlendMeshLight = 1.f;
@@ -118,7 +119,7 @@ Result ApplyDarkLordScroll(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     return Result::Drawn;
 }
 
-Result ApplySpirit(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplySpirit(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     b->RenderBody(RENDER_TEXTURE, Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
                   o->HiddenMesh);
@@ -138,14 +139,14 @@ Result ApplySpirit(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     return Result::Drawn;
 }
 
-Result ApplyPotion(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyPotion(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     if (Level > 0)
         Level = 7;
     return Result::Applied;
 }
 
-Result ApplyFruits(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyFruits(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     switch (Level)
     {
@@ -169,14 +170,14 @@ Result ApplyFruits(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
     return Result::Drawn;
 }
 
-Result ApplyDevilsEye(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyDevilsEye(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     float sine = (float)sinf(WorldTime * 0.002f) * 10.f + 15.65f;
 
     o->BlendMesh = 1;
     o->BlendMeshLight = sine;
     o->BlendMeshTexCoordV = (int)WorldTime % 2000 * 0.0005f;
-    o->Alpha = 2.0f;
+    Alpha = 2.0f;
     return Result::Applied;
 }
 
@@ -232,37 +233,37 @@ void SpawnRena(BMD* b, OBJECT* o, vec34_t* bones)
     CreateSprite(BITMAP_SPARK + 1, o->Position, 2.5f, EffLight, o);
 }
 
-Result ApplyWingsOfDragon(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyWingsOfDragon(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     o->BlendMeshLight = (float)(sinf(WorldTime * 0.001f) + 1.f) / 4.f;
     return Result::Applied;
 }
 
-Result ApplyWingsOfSoul(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyWingsOfSoul(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     o->BlendMeshLight = (float)sinf(WorldTime * 0.001f) + 1.1f;
     return Result::Applied;
 }
 
-Result ApplyRedSpirit(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyRedSpirit(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     o->BlendMeshLight = sinf(WorldTime * 0.001f) * 0.4f + 0.6f;
     return Result::Applied;
 }
 
-Result ApplyStaffOfKundun(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyStaffOfKundun(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     o->BlendMeshLight = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
     return Result::Applied;
 }
 
-Result ApplyDivineSet(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyDivineSet(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     o->BlendMeshLight = 1.f;
     return Result::Applied;
 }
 
-Result ApplyHiddenMeshByLevel(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyHiddenMeshByLevel(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     switch (Level)
     {
@@ -276,7 +277,7 @@ Result ApplyHiddenMeshByLevel(BMD* b, OBJECT* o, int Type, float Alpha, int& Lev
     return Result::Applied;
 }
 
-Result ApplyHideMesh1(BMD* b, OBJECT* o, int Type, float Alpha, int& Level)
+Result ApplyHideMesh1(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level)
 {
     o->HiddenMesh = 1;
     return Result::Applied;
@@ -335,7 +336,7 @@ void SpawnWingOfStorm(BMD* b, OBJECT* o, vec34_t* bones)
     for (int i = 0; i < 25; ++i)
     {
         b->TransformPosition(bones[iBone[i]], vRelativePos, vPos, true);
-        fScale = 0.5f; // (rand()%10) * 0.05f + 0.3f;
+        fScale = 0.5f; // (Random::Rand()%10) * 0.05f + 0.3f;
         CreateSprite(BITMAP_CLUD64, vPos, fScale, vLight, o, WorldTime * 0.01f, 1);
     }
 
@@ -345,7 +346,7 @@ void SpawnWingOfStorm(BMD* b, OBJECT* o, vec34_t* bones)
         for (int i = 0; i < 6; ++i)
         {
             b->TransformPosition(bones[iBoneThunder[i]], vRelativePos, vPos, true);
-            if (rand() % 20 == 0)
+            if (Random::Rand() % 20 == 0)
             {
                 Vector(0.6f, 0.6f, 0.9f, vLight);
                 CreateEffect(MODEL_FENRIR_THUNDER, vPos, o->Angle, vLight, 1, o);
@@ -598,7 +599,7 @@ std::span<const std::string_view> GetNames()
     return names;
 }
 
-Result Apply(BMD* b, OBJECT* o, int modelType, float alpha, int& level)
+Result Apply(BMD* b, OBJECT* o, int modelType, float& alpha, int& level)
 {
     const ItemEffect* effect = g_itemEffects.Find(modelType);
     return effect != nullptr ? effect->apply(b, o, modelType, alpha, level) : Result::None;

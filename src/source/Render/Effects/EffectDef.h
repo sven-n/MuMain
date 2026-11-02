@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include "Core/Utilities/Random.h"
 #include <cstdint>
 #include <optional>
 #include <vector>
@@ -123,7 +124,7 @@ struct CreateParams
 using CreateHook = void (*)(OBJECT* o);
 
 // Per-frame update. `luminosity` is the per-frame flicker value MoveEffect
-// computes once for every effect (so handlers don't draw an extra rand()).
+// computes once for every effect (so handlers don't draw an extra Random::Rand()).
 // Returns true to run MoveEffect's shared tail (lifetime decrement, particle
 // trail, destruction); false to skip it, mirroring the handful of legacy
 // cases that `return` early out of the move switch.

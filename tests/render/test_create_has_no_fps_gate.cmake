@@ -24,7 +24,7 @@ foreach(entry IN LISTS MU_EFFECT_SOURCES)
 
     string(FIND "${body}" "rand_fps_check(" gate)
     if(NOT gate EQUAL -1)
-        message(FATAL_ERROR "${function} uses rand_fps_check; it runs once per spawn, so use a plain rand() pick")
+        message(FATAL_ERROR "${function} uses rand_fps_check; it runs once per spawn, so use a plain Random::Rand() pick")
     endif()
 
     # The trail length still makes up for tails laid once per move.

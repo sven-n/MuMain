@@ -5,20 +5,22 @@
 #include <algorithm>
 #include <array>
 #include <cstdio>
+#include <cstdlib>
 #include <map>
 #include <mutex>
 #include <set>
 #include <tuple>
 
-#if defined(MU_ENABLE_CONTROL_SOCKET) || !defined(NDEBUG)
-#define MU_DRAW_SPAWN_LOG
 #include "Core/Utilities/Log/ErrorReport.h"
-#endif
 
-#if defined(MU_DRAW_SPAWN_LOG) && defined(_WIN32)
+#ifdef _WIN32
 #include <windows.h>
 #include <dbghelp.h>
 #pragma comment(lib, "dbghelp.lib")
+#else
+#include <cxxabi.h>
+#include <dlfcn.h>
+#include <execinfo.h>
 #endif
 
 namespace Diagnostics::DrawSpawnCheck
@@ -29,13 +31,15 @@ constexpr int CallerDepth = 3;
 using Callers = std::array<void*, CallerDepth>;
 
 std::mutex s_mutex;
-int s_drawDepth = 0;
+// Per thread: the frame draws on one thread, and what other threads do meanwhile is theirs.
+thread_local int s_drawDepth = 0;
 int s_violations = 0;
+const char* s_lastKind = "";
+void* s_lastCaller = nullptr;
 bool s_listing = false;
 int s_draws = 0;
 std::map<std::tuple<const char*, Callers>, int> s_counts;
 
-#ifdef MU_DRAW_SPAWN_LOG
 std::string FunctionAt(void* address)
 {
 #ifdef _WIN32
@@ -53,6 +57,16 @@ std::string FunctionAt(void* address)
         if (SymFromAddr(GetCurrentProcess(), reinterpret_cast<DWORD64>(address), nullptr, symbol))
             return symbol->Name;
     }
+#else
+    Dl_info info{};
+    if (address != nullptr && dladdr(address, &info) != 0 && info.dli_sname != nullptr)
+    {
+        int status = 0;
+        char* demangled = abi::__cxa_demangle(info.dli_sname, nullptr, nullptr, &status);
+        std::string name = status == 0 ? demangled : info.dli_sname;
+        free(demangled);
+        return name;
+    }
 #endif
     char hex[32];
     snprintf(hex, sizeof(hex), "%p", address);
@@ -64,10 +78,9 @@ void LogViolation(const char* kind, const Callers& callers)
     static std::set<void*> logged;
     if (!logged.insert(callers[0]).second)
         return;
-    g_ErrorReport.Write(L"[DrawSpawnCheck] the draw spawned a %hs from %hs; spawn it in the update\r\n", kind,
+    g_ErrorReport.Write(L"[DrawSpawnCheck] the draw did a %hs from %hs; do it in the update\r\n", kind,
                         FunctionAt(callers[0]).c_str());
 }
-#endif
 } // namespace
 
 DrawScope::DrawScope()
@@ -87,30 +100,45 @@ void Note([[maybe_unused]] const char* kind)
 {
     if (s_drawDepth == 0)
         return;
-    ++s_violations;
-#ifdef MU_DRAW_SPAWN_LOG
+    // The noting function's callers, nearest first: skips Note and the noting function itself.
     Callers callers{};
 #ifdef _WIN32
-    // Skips Note and the spawn function itself.
     CaptureStackBackTrace(2, CallerDepth, callers.data(), nullptr);
+#else
+    std::array<void*, CallerDepth + 2> frames{};
+    const int count = backtrace(frames.data(), static_cast<int>(frames.size()));
+    for (int i = 2; i < count; ++i)
+        callers[i - 2] = frames[i];
 #endif
     std::lock_guard lock(s_mutex);
+    ++s_violations;
+    s_lastKind = kind;
+    s_lastCaller = callers[0];
     LogViolation(kind, callers);
 #ifdef MU_ENABLE_CONTROL_SOCKET
     if (s_listing)
         ++s_counts[{kind, callers}];
 #endif
-#endif
 }
 
 int Violations()
 {
+    std::lock_guard lock(s_mutex);
     return s_violations;
 }
 
 void ResetViolations()
 {
+    std::lock_guard lock(s_mutex);
     s_violations = 0;
+    s_lastKind = "";
+    s_lastCaller = nullptr;
+}
+
+Violation LastViolation()
+{
+    std::lock_guard lock(s_mutex);
+    return {s_lastKind, s_lastCaller != nullptr ? FunctionAt(s_lastCaller) : std::string(), s_lastCaller};
 }
 
 #ifdef MU_ENABLE_CONTROL_SOCKET

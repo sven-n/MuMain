@@ -935,9 +935,9 @@ void CompareArray(Record& record, const char* name, const vec3_t after, const st
 // How many values a generator gave since it was seeded: the next two values
 // after the call are searched for in the seeded sequence; "more than N" when
 // the call drew more than the limit. The same draws give the same count on
-// every platform, but rand() and the distributions give other values per
-// standard library, so a case whose number of draws depends on a drawn value
-// can count differently elsewhere.
+// every platform. Random::Rand() gives the same values everywhere, but the
+// distributions give other values per standard library, so a case whose number
+// of draws depends on a value they drew can count differently elsewhere.
 constexpr int DrawLimit = 100000;
 
 template <typename Reseed, typename Draw> std::string CountDraws(Reseed reseed, Draw draw)
@@ -958,7 +958,7 @@ template <typename Reseed, typename Draw> std::string CountDraws(Reseed reseed, 
 
 std::string CountRandDraws()
 {
-    return CountDraws([] { std::srand(RecordSeed); }, [] { return std::rand(); });
+    return CountDraws([] { Random::SeedRand(RecordSeed); }, [] { return Random::Rand(); });
 }
 
 // RangeInt over 2^31 values takes exactly one value of the 32-bit engine on
@@ -1046,7 +1046,7 @@ Record RecordCall(const EffectCall& call, const Conditions& conditions)
     vec3_t position{call.position[0], call.position[1], call.position[2]};
     vec3_t angle{call.angle[0], call.angle[1], call.angle[2]};
     vec3_t light{call.light[0], call.light[1], call.light[2]};
-    std::srand(RecordSeed);
+    Random::SeedRand(RecordSeed);
     Random::Seed(RecordSeed);
     CreateEffect(call.type, position, angle, light, call.subType, OwnerObject(call.owner), call.pkKey, call.skillIndex,
                  call.skill, call.skillSerialNum, call.scale, call.targetIndex);

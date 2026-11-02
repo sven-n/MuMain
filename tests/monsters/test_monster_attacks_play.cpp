@@ -432,13 +432,13 @@ TEST_CASE("Monster attacks: the random Kanturu 1st monsters draw 50/50 at any fr
         CHARACTER& character = scope.Create(number);
         for (const unsigned int seed : {1u, 2u, 3u, 4u, 5u, 6u})
         {
-            std::srand(seed);
-            const int expected = MONSTER01_ATTACK1 + std::rand() % 2;
+            Random::SeedRand(seed);
+            const int expected = MONSTER01_ATTACK1 + Random::Rand() % 2;
             // Before, the chance of attack 1 fell with the frame rate.
             for (const float fps : {1.0f, 0.25f})
             {
                 FPS_ANIMATION_FACTOR = fps;
-                std::srand(seed);
+                Random::SeedRand(seed);
                 Random::Seed(seed);
                 CHECK(Attack(character, NoMonsterSkill) == expected);
             }
@@ -537,7 +537,7 @@ TEST_CASE("Monster sounds: a monster with SubType 9 plays its second set's slot 
     // slot, but needs the hero's equipment).
     const float savedFps = FPS_ANIMATION_FACTOR;
     FPS_ANIMATION_FACTOR = 1.0f;
-    std::srand(1);
+    Random::SeedRand(1);
     Random::Seed(1);
     for (int i = 0; i < 200; ++i)
     {

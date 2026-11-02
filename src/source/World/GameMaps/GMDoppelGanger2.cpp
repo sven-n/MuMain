@@ -1,6 +1,7 @@
 ﻿// GMDoppelGanger2.cpp: implementation of the GMDoppelGanger2 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Engine/Object/ObjectPose.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
@@ -143,8 +144,8 @@ bool CGMDoppelGanger2::MoveMonsterVisual(OBJECT* o, BMD* b)
                     for (i = 0; i < 6; ++i)
                     {
                         VectorCopy(o->Position, vPos);
-                        vPos[0] += (float)(rand() % 140 - 70);
-                        vPos[1] += (float)(rand() % 140 - 70);
+                        vPos[0] += (float)(Random::Rand() % 140 - 70);
+                        vPos[1] += (float)(Random::Rand() % 140 - 70);
                         Vector(0.2f, 1.0f, 0.3f, vLight);
                         CreateEffectFpsChecked(BITMAP_CLOUD, vPos, o->Angle, vLight, 0, NULL, -1, 0, 0, 0, 2.0f);
                     }
@@ -152,28 +153,28 @@ bool CGMDoppelGanger2::MoveMonsterVisual(OBJECT* o, BMD* b)
                     Vector(0.4f, 1.0f, 0.6f, vLight);
                     for (i = 0; i < 3; ++i)
                     {
-                        vPos[0] = o->Position[0] + (rand() % 100 - 50) * 1.0f;
-                        vPos[1] = o->Position[1] + (rand() % 100 - 50) * 1.0f;
-                        vPos[2] = o->Position[2] + 10.f + (rand() % 20) * 10.0f;
+                        vPos[0] = o->Position[0] + (Random::Rand() % 100 - 50) * 1.0f;
+                        vPos[1] = o->Position[1] + (Random::Rand() % 100 - 50) * 1.0f;
+                        vPos[2] = o->Position[2] + 10.f + (Random::Rand() % 20) * 10.0f;
                         CreateParticleFpsChecked(BITMAP_EXPLOTION_MONO, vPos, o->Angle, vLight, 0,
-                                                 (rand() % 8 + 7) * 0.1f);
+                                                 (Random::Rand() % 8 + 7) * 0.1f);
                     }
 
                     Vector(0.0f, 0.5f, 0.0f, vLight);
                     for (i = 0; i < 15; ++i)
                     {
-                        vPos[0] = o->Position[0] + (rand() % 200 - 100) * 1.0f;
-                        vPos[1] = o->Position[1] + (rand() % 200 - 100) * 1.0f;
-                        vPos[2] = o->Position[2] + (rand() % 10) * 10.0f;
+                        vPos[0] = o->Position[0] + (Random::Rand() % 200 - 100) * 1.0f;
+                        vPos[1] = o->Position[1] + (Random::Rand() % 200 - 100) * 1.0f;
+                        vPos[2] = o->Position[2] + (Random::Rand() % 10) * 10.0f;
                         CreateEffectFpsChecked(MODEL_DOPPELGANGER_SLIME_CHIP, vPos, o->Angle, vLight, 0, o, 0, 0);
                     }
 
                     Vector(0.2f, 0.9f, 0.3f, vLight);
                     for (i = 0; i < 30; ++i)
                     {
-                        vPos[0] = o->Position[0] + (rand() % 300 - 150) * 1.0f;
-                        vPos[1] = o->Position[1] + (rand() % 300 - 150) * 1.0f;
-                        vPos[2] = o->Position[2] + 20.0f + (rand() % 10) * 10.0f;
+                        vPos[0] = o->Position[0] + (Random::Rand() % 300 - 150) * 1.0f;
+                        vPos[1] = o->Position[1] + (Random::Rand() % 300 - 150) * 1.0f;
+                        vPos[2] = o->Position[2] + 20.0f + (Random::Rand() % 10) * 10.0f;
                         CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 31);
                     }
 
@@ -401,7 +402,7 @@ bool CGMDoppelGanger2::UpdateObjectEffects(OBJECT* o, BMD* b)
         o->HiddenMesh = -2;
         if (rand_fps_check(4))
         {
-            float fRed = (rand() % 3) * 0.01f + 0.015f;
+            float fRed = (Random::Rand() % 3) * 0.01f + 0.015f;
             Vector(fRed, 0.0f, 0.0f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 11, o->Scale, o);
         }
@@ -414,7 +415,7 @@ bool CGMDoppelGanger2::UpdateObjectEffects(OBJECT* o, BMD* b)
         vec3_t vAngle;
         if (rand_fps_check(3))
         {
-            Vector((float)(rand() % 40 + 120), 0.f, (float)(rand() % 30), vAngle);
+            Vector((float)(Random::Rand() % 40 + 120), 0.f, (float)(Random::Rand() % 30), vAngle);
             VectorAdd(vAngle, o->Angle, vAngle);
             CreateJoint(BITMAP_JOINT_SPARK, o->Position, o->Position, vAngle, 4, o, o->Scale);
             CreateParticle(BITMAP_SPARK, o->Position, vAngle, Light, 9, o->Scale);
@@ -442,7 +443,7 @@ bool CGMDoppelGanger2::UpdateObjectEffects(OBJECT* o, BMD* b)
         vec3_t vLight;
         Vector(1.0f, 1.0f, 1.0f, vLight);
 
-        switch (rand() % 3)
+        switch (Random::Rand() % 3)
         {
         case 0:
             CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
@@ -460,7 +461,7 @@ bool CGMDoppelGanger2::UpdateObjectEffects(OBJECT* o, BMD* b)
     {
         vec3_t vLight;
         Vector(0.1f, 0.4f, 1.0f, vLight);
-        switch (rand() % 3)
+        switch (Random::Rand() % 3)
         {
         case 0:
             CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, o->Position, o->Angle, vLight, 2, o->Scale);
@@ -482,8 +483,8 @@ bool CGMDoppelGanger2::UpdateObjectEffects(OBJECT* o, BMD* b)
             Vector(0.6f, 0.8f, 1.0f, Light);
             VectorCopy(o->Position, vPos);
             int iScale = o->Scale * 60;
-            vPos[0] += rand() % iScale - iScale / 2;
-            vPos[1] += rand() % iScale - iScale / 2;
+            vPos[0] += Random::Rand() % iScale - iScale / 2;
+            vPos[1] += Random::Rand() % iScale - iScale / 2;
             CreateParticle(BITMAP_LIGHT, vPos, o->Angle, Light, 15, o->Scale, o);
         }
         return true;
@@ -510,7 +511,7 @@ bool CGMDoppelGanger2::UpdateObjectEffects(OBJECT* o, BMD* b)
         {
             o->AnimationFrame = 1;
 
-            int test = rand() % 1000;
+            int test = Random::Rand() % 1000;
             if (test >= 0 && test < 2)
             {
                 o->PKKey = 1;
@@ -522,7 +523,7 @@ bool CGMDoppelGanger2::UpdateObjectEffects(OBJECT* o, BMD* b)
         }
         vec3_t p, Pos, Light;
         Vector(0.4f, 0.1f, 0.1f, Light);
-        // Vector(rand()%20-30.0f, rand()%20-30.0f, 0.0f, p);
+        // Vector(Random::Rand()%20-30.0f, Random::Rand()%20-30.0f, 0.0f, p);
         Vector(-150.0f, 0.0f, 0.0f, p);
         b->TransformPosition(bones()[4], p, Pos, false);
         if (o->AnimationFrame >= 35.0f && o->AnimationFrame < 50.0f)
@@ -546,7 +547,7 @@ bool CGMDoppelGanger2::UpdateObjectEffects(OBJECT* o, BMD* b)
         vec3_t p, Pos, Light;
         // Vector(0.08f, 0.08f, 0.08f, Light);
         Vector(0.3f, 0.1f, 0.1f, Light);
-        Vector(rand() % 20 - 30.0f, rand() % 20 - 30.0f, 0.0f, p);
+        Vector(Random::Rand() % 20 - 30.0f, Random::Rand() % 20 - 30.0f, 0.0f, p);
         b->TransformPosition(bones()[4], p, Pos, false);
         if (o->AnimationFrame >= 7.0f && o->AnimationFrame < 13.0f)
             CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 18, o->Scale * 1.5f);
@@ -575,8 +576,9 @@ bool CGMDoppelGanger2::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
         }
         if (c->Dead == 0 && rand_fps_check(4))
         {
-            Vector(o->Position[0] + (float)(rand() % 64 - 32), o->Position[1] + (float)(rand() % 64 - 32),
-                   o->Position[2] + (float)(rand() % 32 - 16), vPos);
+            Vector(o->Position[0] + (float)(Random::Rand() % 64 - 32),
+                   o->Position[1] + (float)(Random::Rand() % 64 - 32),
+                   o->Position[2] + (float)(Random::Rand() % 32 - 16), vPos);
             CreateParticle(BITMAP_SMOKE + 1, vPos, o->Angle, vLight, 0);
         }
 
@@ -601,12 +603,12 @@ bool CGMDoppelGanger2::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
             Vector(1.0f, 1.0f, 1.0f, vLight);
             for (int i = 0; i < 30; ++i)
             {
-                b->TransformByObjectBone(vPos, o, rand() % 50);
-                vPos[0] += rand() % 10 - 20;
-                vPos[1] += rand() % 10 - 20;
-                vPos[2] += rand() % 10 - 20;
+                b->TransformByObjectBone(vPos, o, Random::Rand() % 50);
+                vPos[0] += Random::Rand() % 10 - 20;
+                vPos[1] += Random::Rand() % 10 - 20;
+                vPos[2] += Random::Rand() % 10 - 20;
 
-                switch (rand() % 3)
+                switch (Random::Rand() % 3)
                 {
                 case 0:
                     CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 0, fScale);
@@ -680,24 +682,24 @@ bool CGMDoppelGanger2::CreateFireSpark(PARTICLE* o)
         return false;
     }
     o->Type = BITMAP_FIRE_SNUFF;
-    o->Scale = rand() % 50 / 100.f + 0.4f;
+    o->Scale = Random::Rand() % 50 / 100.f + 0.4f;
     vec3_t Position;
-    Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800),
-           Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
-           Hero->Object.Position[2] + (float)(rand() % 300 + 50), Position);
+    Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 1600 - 800),
+           Hero->Object.Position[1] + (float)(Random::Rand() % 1400 - 500),
+           Hero->Object.Position[2] + (float)(Random::Rand() % 300 + 50), Position);
 
     VectorCopy(Position, o->Position);
     VectorCopy(Position, o->StartPosition);
-    o->Velocity[0] = -(float)(rand() % 64 + 64) * 0.1f;
+    o->Velocity[0] = -(float)(Random::Rand() % 64 + 64) * 0.1f;
     if (Position[1] < g_Camera.Position[1] + 400.f)
     {
         o->Velocity[0] = -o->Velocity[0] + 2.2f;
     }
-    o->Velocity[1] = (float)(rand() % 32 - 16) * 0.1f;
-    o->Velocity[2] = (float)(rand() % 32 - 16) * 0.1f;
-    o->TurningForce[0] = (float)(rand() % 16 - 8) * 0.1f;
-    o->TurningForce[1] = (float)(rand() % 64 - 32) * 0.1f;
-    o->TurningForce[2] = (float)(rand() % 16 - 8) * 0.1f;
+    o->Velocity[1] = (float)(Random::Rand() % 32 - 16) * 0.1f;
+    o->Velocity[2] = (float)(Random::Rand() % 32 - 16) * 0.1f;
+    o->TurningForce[0] = (float)(Random::Rand() % 16 - 8) * 0.1f;
+    o->TurningForce[1] = (float)(Random::Rand() % 64 - 32) * 0.1f;
+    o->TurningForce[2] = (float)(Random::Rand() % 16 - 8) * 0.1f;
 
     Vector(1.f, 0.f, 0.f, o->Light);
 

@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include <cstdint>
 // u_char is used below. On glibc it arrives transitively through other
@@ -2236,7 +2237,7 @@ void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* o
                 }
                 else if (iSubType == 3)
                 {
-                    CreateEffect(MODEL_STONE_COFFIN + rand() % 2, VertexTransform[i][vi], angle, Light, 4);
+                    CreateEffect(MODEL_STONE_COFFIN + Random::Rand() % 2, VertexTransform[i][vi], angle, Light, 4);
                 }
                 break;
             case MODEL_GATE:
@@ -2268,21 +2269,21 @@ void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* o
             case MODEL_BIG_STONE_PART1:
                 if (rand_fps_check(3))
                 {
-                    CreateEffect(MODEL_BIG_STONE_PART1 + rand() % 2, VertexTransform[i][vi], angle, Light, 1);
+                    CreateEffect(MODEL_BIG_STONE_PART1 + Random::Rand() % 2, VertexTransform[i][vi], angle, Light, 1);
                 }
                 break;
 
             case MODEL_BIG_STONE_PART2:
                 if (rand_fps_check(3))
                 {
-                    CreateEffect(MODEL_BIG_STONE_PART1 + rand() % 2, VertexTransform[i][vi], angle, Light);
+                    CreateEffect(MODEL_BIG_STONE_PART1 + Random::Rand() % 2, VertexTransform[i][vi], angle, Light);
                 }
                 break;
 
             case MODEL_WALL_PART1:
                 if (rand_fps_check(3))
                 {
-                    CreateEffect(MODEL_WALL_PART1 + rand() % 2, VertexTransform[i][vi], angle, Light);
+                    CreateEffect(MODEL_WALL_PART1 + Random::Rand() % 2, VertexTransform[i][vi], angle, Light);
                 }
                 break;
 
@@ -2333,9 +2334,9 @@ void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* o
                     {
                         auto* o = static_cast<OBJECT*>(obj);
 
-                        angle[0] = -(float)(rand() % 90);
+                        angle[0] = -(float)(Random::Rand() % 90);
                         angle[1] = 0.f;
-                        angle[2] = Angle[2] + (float)(rand() % 120 - 60);
+                        angle[2] = Angle[2] + (float)(Random::Rand() % 120 - 60);
                         CreateJoint(BITMAP_JOINT_SPIRIT, VertexTransform[i][vi], o->Position, angle, 13, o, 20.f, 0, 0);
                     }
                 }

@@ -1,5 +1,6 @@
 ﻿
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -96,7 +97,7 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
     switch (pObject->Type)
     {
     case 0:
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
         pObject->HiddenMesh = -2;
@@ -128,7 +129,7 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
         pObject->HiddenMesh = -2;
         break;
     case 61:
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity * 0.2f, Luminosity * 0.6f, Luminosity, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
         pObject->HiddenMesh = -2;
@@ -174,7 +175,7 @@ bool GMNewTown::MoveObject(OBJECT* pObject)
                         pBoid->ShadowScale = 0.f;
                 pBoid->HiddenMesh = -1;
                 pBoid->BlendMesh = -1;
-                pBoid->Timer = (float)(rand() % 314) * 0.01f;
+                pBoid->Timer = (float)(Random::Rand() % 314) * 0.01f;
                 pBoid->Type = MODEL_EAGLE;
                 Vector(0.f, 0.f, 0.f, pBoid->Angle);
                 VectorCopy(pObject->Position, pBoid->Position);
@@ -315,8 +316,8 @@ bool GMNewTown::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
         Vector(0.f, 0.f, 70.f, p);
         if (rand_fps_check(2))
         {
-            p[0] = (float)cosf(WorldTime * 0.03f) * (30.f + rand() % 5);
-            p[1] = (float)sinf(WorldTime * 0.03f) * (30.f + rand() % 5);
+            p[0] = (float)cosf(WorldTime * 0.03f) * (30.f + Random::Rand() % 5);
+            p[1] = (float)sinf(WorldTime * 0.03f) * (30.f + Random::Rand() % 5);
             pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[0], p, Position, false);
             CreateParticle(BITMAP_LIGHT, Position, pObject->Angle, Light, 11, 0.6f, pObject);
         }
@@ -566,7 +567,7 @@ bool GMNewTown::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
 
             SetPlayerAttack(pCharacter);
             pNewObject->PriorAnimationFrame = pNewObject->AnimationFrame =
-                rand() % Models[pNewObject->Type].Actions[pNewObject->CurrentAction].NumAnimationKeys;
+                Random::Rand() % Models[pNewObject->Type].Actions[pNewObject->CurrentAction].NumAnimationKeys;
             pObject->Owner = pNewObject;
             pObject->SubType = icntIndex;
         }
@@ -607,7 +608,7 @@ bool GMNewTown::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
             if (Models[pNewObject->Type].Actions[MONSTER01_ATTACK1].NumAnimationKeys > 0)
             {
                 pNewObject->PriorAnimationFrame = pNewObject->AnimationFrame =
-                    rand() % Models[pNewObject->Type].Actions[MONSTER01_ATTACK1].NumAnimationKeys;
+                    Random::Rand() % Models[pNewObject->Type].Actions[MONSTER01_ATTACK1].NumAnimationKeys;
             }
             else
             {
@@ -711,7 +712,7 @@ bool GMNewTown::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
             {
                 if (pObject->Type == 153)
                 {
-                    int iRand = rand() % 3;
+                    int iRand = Random::Rand() % 3;
                     if (iRand == 0) SetAction(pObject->Owner, MONSTER01_ATTACK1);
                     else if (iRand == 1)  SetAction(pObject->Owner, MONSTER01_ATTACK2);
                     else SetAction(pObject->Owner, MONSTER01_SHOCK);
@@ -1003,11 +1004,12 @@ bool GMNewTown::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD
     case MODEL_ELBELAND_RHEA:
         if (pObject->CurrentAction == 0 && rand_fps_check(5))
         {
-            Vector((rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, Light);
-            fScale = (rand() % 5 + 5) * 0.1f;
+            Vector((Random::Rand() % 90 + 10) * 0.01f, (Random::Rand() % 90 + 10) * 0.01f,
+                   (Random::Rand() % 90 + 10) * 0.01f, Light);
+            fScale = (Random::Rand() % 5 + 5) * 0.1f;
             Vector(0.f, 0.f, 0.f, vRelative);
-            vRelative[0] = 20 + (rand() % 1000 - 500) * 0.1f;
-            vRelative[1] = (rand() % 300 - 150) * 0.1f;
+            vRelative[0] = 20 + (Random::Rand() % 1000 - 500) * 0.1f;
+            vRelative[1] = (Random::Rand() % 300 - 150) * 0.1f;
             pModel->TransformPosition(pObject->BoneTransform[35], vRelative, vPos, true);
             CreateParticle(BITMAP_LIGHT, vPos, pObject->Angle, Light, 13, fScale, pObject);
             CreateParticle(BITMAP_LIGHT, vPos, pObject->Angle, Light, 12, fScale, pObject);
@@ -1030,7 +1032,7 @@ bool GMNewTown::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD
     case MODEL_CURSED_LICH:
         for (int i = 0; i < 4; ++i)
         {
-            Vector(0, (rand() % 300 - 150) * 0.1f, (rand() % 200 - 100) * 0.1f, vRelative);
+            Vector(0, (Random::Rand() % 300 - 150) * 0.1f, (Random::Rand() % 200 - 100) * 0.1f, vRelative);
             pModel->TransformPosition(pObject->BoneTransform[30], vRelative, vPos, true);
             CreateParticleFpsChecked(BITMAP_FIRE_CURSEDLICH, vPos, pObject->Angle, pObject->Light, 0, 1, pObject);
         }
@@ -1039,7 +1041,8 @@ bool GMNewTown::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD
         if (pObject->CurrentAction == MONSTER01_WALK)
         {
             vec3_t Position;
-            Vector(pObject->Position[0] + rand() % 200 - 100, pObject->Position[1] + rand() % 200 - 100, pObject->Position[2], Position);
+            Vector(pObject->Position[0] + Random::Rand() % 200 - 100, pObject->Position[1] + Random::Rand() % 200 - 100,
+                   pObject->Position[2], Position);
             CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, pObject->Angle, pObject->Light);
         }
         if (pObject->CurrentAction == MONSTER01_DIE)
@@ -1077,8 +1080,8 @@ bool GMNewTown::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD
 
                 for (int i = 0; i < 6; ++i)
                 {
-                    vWorldPos[0] = vRelativePos[0] + rand() % 160 - 80;
-                    vWorldPos[1] = vRelativePos[1] + rand() % 160 - 80;
+                    vWorldPos[0] = vRelativePos[0] + Random::Rand() % 160 - 80;
+                    vWorldPos[1] = vRelativePos[1] + Random::Rand() % 160 - 80;
                     vWorldPos[2] = vRelativePos[2];
                     CreateParticle(BITMAP_LEAF_TOTEMGOLEM, vWorldPos, pObject->Angle, Light, 0, 1.0f);
                 }
@@ -1087,9 +1090,9 @@ bool GMNewTown::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD
 
                 for (int i = 0; i < 20; ++i)
                 {
-                    vWorldPos[0] = vRelativePos[0] + rand() % 160 - 80;
-                    vWorldPos[1] = vRelativePos[1] + rand() % 160 - 80;
-                    vWorldPos[2] = vRelativePos[2] + (rand() % 150) - 50;
+                    vWorldPos[0] = vRelativePos[0] + Random::Rand() % 160 - 80;
+                    vWorldPos[1] = vRelativePos[1] + Random::Rand() % 160 - 80;
+                    vWorldPos[2] = vRelativePos[2] + (Random::Rand() % 150) - 50;
                     CreateParticle(BITMAP_SMOKE, vWorldPos, pObject->Angle, Light, 48, 1.0f);
                 }
             }

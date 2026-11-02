@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "App/Control/ControlTaps.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "UI/Chat/Chat.h"
@@ -1141,7 +1142,7 @@ int GetJoinMapServerStage(std::span<const BYTE> packet)
 BOOL ReceiveJoinMapServer(std::span<const BYTE> ReceiveBuffer)
 {
     MouseLButton = false;
-    HeroIndex = rand() % MAX_CHARACTERS_CLIENT;
+    HeroIndex = Random::Rand() % MAX_CHARACTERS_CLIENT;
     CHARACTER* c = &CharactersClient[HeroIndex];
 
     CharacterAttribute->Ability = 0;
@@ -2926,10 +2927,10 @@ void AppearMonster(CHARACTER* c)
             vec3_t vPos;
             Vector(c->Object.Position[0] + 20.0f, c->Object.Position[1] + 20.0f, c->Object.Position[2], vPos);
 
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + Random::Rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + Random::Rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + Random::Rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + Random::Rand() % 10);
 
             CreateParticle(BITMAP_SMOKE + 4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
             CreateParticle(BITMAP_SMOKE + 4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
@@ -3352,7 +3353,7 @@ void ReceiveAttackDamageCastle(CHARACTER* c, OBJECT* o, const bool success, cons
         }
         else
         {
-            if (c->MonsterIndex != MONSTER_ILLUSION_OF_KUNDUN_7 && (rand() % 2 == 0))
+            if (c->MonsterIndex != MONSTER_ILLUSION_OF_KUNDUN_7 && (Random::Rand() % 2 == 0))
             {
                 SetPlayerShock(c, damage);
             }
@@ -3434,7 +3435,7 @@ void ReceiveAttackDamage(CHARACTER* c, OBJECT* o, const bool success, const int 
         }
         else
         {
-            if (c->MonsterIndex != MONSTER_ILLUSION_OF_KUNDUN_7 && (rand() % 2 == 0))
+            if (c->MonsterIndex != MONSTER_ILLUSION_OF_KUNDUN_7 && (Random::Rand() % 2 == 0))
             {
                 SetPlayerShock(c, damage);
             }
@@ -4283,7 +4284,7 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         for (int i = 0; i < 2; ++i)
         {
             int iNumBones = Models[o->Type].NumBones;
-            Models[o->Type].TransformByObjectBone(vFirePosition, o, rand() % iNumBones);
+            Models[o->Type].TransformByObjectBone(vFirePosition, o, Random::Rand() % iNumBones);
             CreateEffect(BITMAP_FLARE, vFirePosition, o->Angle, Light, 3);
         }
     }
@@ -4930,8 +4931,8 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
         float addx, addz;
         for (int iaa = 0; iaa < 3; iaa++)
         {
-            addx = rand() % 160;
-            addz = rand() % 160;
+            addx = Random::Rand() % 160;
+            addz = Random::Rand() % 160;
             Vector(to->Position[0] + addx, to->Position[1] + addz, to->Position[2], Pos);
 
             CreateBomb(Pos, true);
@@ -5069,8 +5070,8 @@ BOOL ReceiveMagic(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 
         for (int i = 0; i < 8; i++)
         {
-            Position[0] = (o->Position[0] - 119.f) + (float)(rand() % 240);
-            Position[2] = (o->Position[2] + 49.f) + (float)(rand() % 60);
+            Position[0] = (o->Position[0] - 119.f) + (float)(Random::Rand() % 240);
+            Position[2] = (o->Position[2] + 49.f) + (float)(Random::Rand() % 60);
             CreateJoint(BITMAP_2LINE_GHOST, Position, o->Position, o->Angle, 0, o, 20.f, o->PKKey, 0,
                         o->m_bySkillSerialNum);
         }
@@ -5422,8 +5423,8 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
 
                 for (int i = 0; i < 8; i++)
                 {
-                    Position[0] = (o->Position[0] - 119.f) + (float)(rand() % 240);
-                    Position[2] = (o->Position[2] + 49.f) + (float)(rand() % 60);
+                    Position[0] = (o->Position[0] - 119.f) + (float)(Random::Rand() % 240);
+                    Position[2] = (o->Position[2] + 49.f) + (float)(Random::Rand() % 60);
                     CreateJoint(BITMAP_2LINE_GHOST, Position, o->Position, o->Angle, 0, o, 20.f, o->PKKey, 0,
                                 o->m_bySkillSerialNum);
                 }
@@ -5518,7 +5519,7 @@ BOOL ReceiveMagicContinue(const BYTE* ReceiveBuffer, int Size, BOOL bEncrypted)
                 for (int i = 0; i < 2; ++i)
                 {
                     int iNumBones = Models[o->Type].NumBones;
-                    Models[o->Type].TransformByObjectBone(vFirePosition, o, rand() % iNumBones);
+                    Models[o->Type].TransformByObjectBone(vFirePosition, o, Random::Rand() % iNumBones);
                     CreateEffect(BITMAP_FLARE, vFirePosition, o->Angle, Light, 3);
                 }
                 PlayBuffer(SOUND_SKILL_RECOVER);
@@ -5710,7 +5711,7 @@ void ReceiveMagicPosition(const BYTE* ReceiveBuffer, int Size)
         int TargetKey = ((int)(Data2->KeyH) << 8) + Data2->KeyL;
         CHARACTER* tc = &CharactersClient[FindCharacterIndex(TargetKey)];
         OBJECT* to = &tc->Object;
-        if (rand() % 2 == 0)
+        if (Random::Rand() % 2 == 0)
             SetPlayerShock(tc, tc->Hit);
         if (tc->Hit > 0)
         {
@@ -5934,8 +5935,8 @@ void FallingStartCharacter(CHARACTER* c, OBJECT* o)
     {
         c->StormTime = 0;
         o->m_bActionStart = true;
-        o->Gravity = rand() % 10 + 10.f;
-        o->Velocity -= rand() % 3 + 3.f;
+        o->Gravity = Random::Rand() % 10 + 10.f;
+        o->Velocity -= Random::Rand() % 3 + 3.f;
 
         Vector(0.f, 0.f, 1.f, o->Direction);
         VectorCopy(o->Position, o->m_vDeadPosition);
@@ -5946,9 +5947,9 @@ void FallingStartCharacter(CHARACTER* c, OBJECT* o)
     {
         c->StormTime = 0;
         o->m_bActionStart = true;
-        o->Gravity = rand() % 10 + 10.f;
-        o->Velocity = rand() % 20 + 20.f;
-        float angle = rand() % 10 + 85.f;
+        o->Gravity = Random::Rand() % 10 + 10.f;
+        o->Velocity = Random::Rand() % 20 + 20.f;
+        float angle = Random::Rand() % 10 + 85.f;
 
         if ((TerrainWall[WallIndex + 1] & TW_NOGROUND) == TW_NOGROUND)
         {
@@ -5960,7 +5961,7 @@ void FallingStartCharacter(CHARACTER* c, OBJECT* o)
         }
 
         o->Angle[2] = o->m_vDownAngle[2];
-        Vector(rand() % 6 + 8.f, -rand() % 2 + 13.f, 5.f, o->Direction);
+        Vector(Random::Rand() % 6 + 8.f, -Random::Rand() % 2 + 13.f, 5.f, o->Direction);
         VectorCopy(o->Position, o->m_vDeadPosition);
     }
 
@@ -6012,10 +6013,10 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
         case AT_SKILL_COMBO:
             o->m_bActionStart = true;
             c->StormTime = 0;
-            o->Velocity = (rand() % 5 + 10.f) * 0.1f;
+            o->Velocity = (Random::Rand() % 5 + 10.f) * 0.1f;
             o->m_bySkillCount = 0;
 
-            Vector(0.f, rand() % 15 + 40.f, 0.f, o->Direction);
+            Vector(0.f, Random::Rand() % 15 + 40.f, 0.f, o->Direction);
             VectorCopy(o->Position, o->m_vDeadPosition);
             break;
         }
@@ -11812,7 +11813,7 @@ void ReceivePreviewPort(std::span<const BYTE> ReceiveBuffer)
             c->PositionY = pData2->m_byPosY;
             c->TargetX = pData2->m_byPosX;
             c->TargetY = pData2->m_byPosY;
-            c->Object.Angle[2] = rand() % 360;
+            c->Object.Angle[2] = Random::Rand() % 360;
 
             c->m_iDeleteTime = 150;
 
@@ -11841,7 +11842,7 @@ void ReceivePreviewPort(std::span<const BYTE> ReceiveBuffer)
             c->PositionY = pData2->m_byPosY;
             c->TargetX = pData2->m_byPosX;
             c->TargetY = pData2->m_byPosY;
-            c->Object.Angle[2] = rand() % 360;
+            c->Object.Angle[2] = Random::Rand() % 360;
 
             c->m_iDeleteTime = 150;
 

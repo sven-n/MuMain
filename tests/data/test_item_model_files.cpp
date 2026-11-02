@@ -1774,10 +1774,11 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
     // A model without meshes draws nothing, so only the values change here.
     BMD model;
     OBJECT object;
+    float alpha = 1.f;
     const auto apply = [&](int itemType, int& level)
     {
         object.Type = MODEL_ITEM + itemType;
-        return ItemEffects::Apply(&model, &object, object.Type, 1.f, level);
+        return ItemEffects::Apply(&model, &object, object.Type, alpha, level);
     };
 
     // Potions with a level glow like +7.
@@ -1805,7 +1806,7 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
     // Items without an effect, and models that are not items.
     CHECK(apply(ITEM_KRIS, level) == Result::None);
     object.Type = MODEL_PLAYER;
-    CHECK(ItemEffects::Apply(&model, &object, MODEL_PLAYER, 1.f, level) == Result::None);
+    CHECK(ItemEffects::Apply(&model, &object, MODEL_PLAYER, alpha, level) == Result::None);
 
     // The effects follow the database when it is built again.
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
@@ -1870,21 +1871,22 @@ TEST_CASE("The item effect of a model is the one of its item, or of its event mo
     BMD model;
     OBJECT object;
     int level = 3;
+    float alpha = 1.f;
     // An item with an effect: its effect, whatever the object is.
     object.Type = MODEL_EVENT + 11;
-    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_ITEM + MakeItemType(14, 0), 1.f, level, 3) == Result::Applied);
+    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_ITEM + MakeItemType(14, 0), alpha, level, 3) == Result::Applied);
     CHECK(level == 7);
     // The event models of level variants have theirs in the drawing code: they
     // only run when the item has no effect.
     object.Type = MODEL_EVENT + 11;
-    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_ITEM + ITEM_KRIS, 1.f, level, 0) == Result::Drawn);
+    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_ITEM + ITEM_KRIS, alpha, level, 0) == Result::Drawn);
     object.Type = MODEL_EVENT + 18;
     object.BlendMesh = -1;
-    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_EVENT + 18, 1.f, level, 0) == Result::Applied);
+    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_EVENT + 18, alpha, level, 0) == Result::Applied);
     CHECK(object.BlendMesh == 1);
     // Neither.
     object.Type = MODEL_ITEM + ITEM_KRIS;
-    CHECK(ApplyPartObjectEffect(&model, &object, object.Type, 1.f, level, 0) == Result::None);
+    CHECK(ApplyPartObjectEffect(&model, &object, object.Type, alpha, level, 0) == Result::None);
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
