@@ -408,7 +408,7 @@ TEST_CASE("Server List window: a double-click on an offline channel's load types
     OfflinePreviewOn preview;
     constexpr int ServerId = 3;
     const ImRect slider = RenderOfflineChannel(ServerId);
-    const ImGuiID sliderId = OfflineChannelId("##OfflineLoad");
+    const ImGuiID sliderId = OfflineChannelId(MuEditor::ServerList::OfflinePreview::ChannelLoadLabel);
     REQUIRE(slider.GetWidth() > 0.0f);
 
     // At a quarter of the slider: a click alone would set about 35 %. The text field opens in the frame after the
@@ -433,7 +433,7 @@ TEST_CASE("Server List window: a load typed and left with Escape keeps an offlin
     constexpr int ServerId = 3;
     const auto render = [&] { RenderOfflineChannel(ServerId); };
     const ImRect slider = RenderOfflineChannel(ServerId);
-    const ImGuiID sliderId = OfflineChannelId("##OfflineLoad");
+    const ImGuiID sliderId = OfflineChannelId(MuEditor::ServerList::OfflinePreview::ChannelLoadLabel);
     REQUIRE(slider.GetWidth() > 0.0f);
 
     CtrlClick(slider.GetCenter(), render);
@@ -517,7 +517,7 @@ TEST_CASE("Server List window: the x next to an offline channel's own load goes 
     g_ServerListManager->SetOfflineServerLoad(ServerId, 120);
     RenderOfflineChannel(ServerId);
 
-    ImGui::ActivateItemByID(OfflineChannelId("\xC3\x97##DropOwnLoad"));
+    ImGui::ActivateItemByID(OfflineChannelId(MuEditor::ServerList::OfflinePreview::DropOwnLoadLabel));
     RenderOfflineChannel(ServerId);
     CHECK_FALSE(g_ServerListManager->GetOfflineServerLoad(ServerId).has_value());
 }

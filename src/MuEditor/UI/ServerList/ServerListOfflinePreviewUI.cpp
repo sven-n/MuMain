@@ -15,11 +15,12 @@
 
 namespace
 {
+using MuEditor::ServerList::OfflinePreview::ChannelLoadLabel;
+using MuEditor::ServerList::OfflinePreview::DropOwnLoadLabel;
+
 // Pixel widths before the editor UI scale.
 constexpr float SwitchLoadWidth = 140.0f;
 constexpr float ChannelLoadWidth = 90.0f;
-// "×" (UTF-8): drops a channel's own load.
-constexpr const char* DropOwnLoadLabel = "\xC3\x97##DropOwnLoad";
 constexpr const char* LoadFormat = "%d %%";
 
 // The load slider a click last started an edit on, when, and its value before that click (nothing: it followed
@@ -114,7 +115,7 @@ bool RenderOwnLoad(int serverId)
 {
     std::optional<int> ownLoad = g_ServerListManager->GetOfflineServerLoad(serverId);
     bool changed = false;
-    if (LoadSlider("##OfflineLoad", ownLoad, g_ServerListManager->GetOfflineServerPercent(), ChannelLoadWidth))
+    if (LoadSlider(ChannelLoadLabel, ownLoad, g_ServerListManager->GetOfflineServerPercent(), ChannelLoadWidth))
     {
         g_ServerListManager->SetOfflineServerLoad(serverId, ownLoad);
         changed = true;

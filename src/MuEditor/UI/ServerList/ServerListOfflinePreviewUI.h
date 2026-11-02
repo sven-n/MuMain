@@ -10,6 +10,11 @@
 // preview is not part of the list.
 namespace MuEditor::ServerList::OfflinePreview
 {
+// The IDs of an offline channel's load slider and of the "×" (UTF-8) next to it that drops its own load, in the
+// channel's row.
+inline constexpr const char* ChannelLoadLabel = "##OfflineLoad";
+inline constexpr const char* DropOwnLoadLabel = "\xC3\x97##DropOwnLoad";
+
 // "Show offline servers in the game" and "Their load", which MuEditor.ini keeps.
 bool RenderSwitch();
 // All and None for the offline channels of the group `groupId`, while the preview is on. `sent`: the channels
