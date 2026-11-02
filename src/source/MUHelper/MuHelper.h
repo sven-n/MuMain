@@ -70,7 +70,7 @@ namespace MUHelper
 		int ObtainItem();
 		int SelectItemToObtain();
         bool ShouldObtainItem(int iItemId, std::chrono::steady_clock::time_point now);
-		ActionSkillType GetHealingSkill();
+        ActionSkillType GetHealingSkill();
 		ActionSkillType GetDrainLifeSkill();
 		bool HasAssignedBuffSkill();
 		bool IsSelfPositionSkill(ActionSkillType iSkill);
@@ -84,7 +84,7 @@ namespace MUHelper
 		std::set<int> m_setTargetsAttacking;
 		std::set<int> m_setItems;
         std::map<int, std::chrono::steady_clock::time_point> m_itemRetryAt;
-		int m_iCurrentItem;
+        int m_iCurrentItem;
 		int m_iCurrentTarget;
 		int m_iCurrentBuffIndex;
 		int m_iCurrentBuffPartyIndex;
@@ -112,4 +112,4 @@ namespace MUHelper
     };
 
     extern CMuHelper g_MuHelper;
-}
+    } // namespace MUHelper
