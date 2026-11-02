@@ -12,25 +12,35 @@ foreach(dir IN LISTS MU_SOURCE_DIRS)
     list(APPEND sources ${found_sources})
 endforeach()
 list(FILTER sources EXCLUDE REGEX "/(ThirdParty|Dotnet)/")
+# A guard that reads nothing passes nothing.
+if(NOT sources)
+    message(FATAL_ERROR "No sources under ${MU_SOURCE_DIRS}")
+endif()
+
+# What is not code, whichever starts first, as a tokenizer reads it: a raw string, a string, a character literal (a
+# few characters, so a digit separator opens none), a line comment, a block comment, an include line.
+set(not_code "R\"\\([^)]*(\\)[^)\"][^)]*)*\\)\"")
+string(APPEND not_code "|\"[^\"\\\\\n]*(\\\\.[^\"\\\\\n]*)*\"")
+string(APPEND not_code "|'(\\\\.|[^'\\\\\n])[^'\\\\\n]?[^'\\\\\n]?[^'\\\\\n]?'")
+string(APPEND not_code "|//[^\n]*")
+string(APPEND not_code "|/\\*[^*]*\\*+([^/*][^*]*\\*+)*/")
+string(APPEND not_code "|#[ \t]*include[^\n]*")
 
 set(found "")
 foreach(path IN LISTS sources)
-    file(STRINGS "${path}" lines REGEX "rand")
-    foreach(line IN LISTS lines)
-        # The code of the line: no string or character literals, no comments.
-        string(REGEX REPLACE "\"([^\"\\\\]|\\\\.)*\"" "\"\"" code "${line}")
-        string(REGEX REPLACE "'([^'\\\\]|\\\\.)*'" "''" code "${code}")
-        string(REGEX REPLACE "/\\*.*\\*/" "" code "${code}")
-        string(REGEX REPLACE "//.*$" "" code "${code}")
-        if(code MATCHES "^[ \t]*(\\*|/\\*|#[ \t]*include)")
-            continue()
-        endif()
-        # rand or srand as a name of its own, or qualified by std:: or the global ::, however it is spelled.
-        if(code MATCHES "(^|[^A-Za-z0-9_.>:])s?rand([^A-Za-z0-9_]|$)" OR
-           code MATCHES "(^|[^A-Za-z0-9_])(std)?[ \t]*::[ \t]*s?rand([^A-Za-z0-9_]|$)")
-            string(STRIP "${line}" line)
-            list(APPEND found "${path}: ${line}")
-        endif()
+    file(STRINGS "${path}" mentions REGEX "rand")
+    if(NOT mentions)
+        continue()
+    endif()
+    file(READ "${path}" text)
+    string(REGEX REPLACE "${not_code}" " " code "${text}")
+    string(APPEND code "\n")
+    # rand or srand as a name of its own, or qualified by std:: or the global ::, however it is spelled.
+    string(REGEX MATCHALL "(^|[^A-Za-z0-9_.>:])s?rand[^A-Za-z0-9_]" bare "${code}")
+    string(REGEX MATCHALL "(^|[^A-Za-z0-9_])(std)?[ \t]*::[ \t]*s?rand[^A-Za-z0-9_]" qualified "${code}")
+    foreach(use IN LISTS bare qualified)
+        string(STRIP "${use}" use)
+        list(APPEND found "${path}: ${use}")
     endforeach()
 endforeach()
 
