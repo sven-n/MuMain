@@ -9547,7 +9547,7 @@ void RenderWingCarriedModels(CHARACTER* c, bool Translate)
     o->Scale = scale;
 }
 
-void RenderChristmasCompanions(CHARACTER* c, bool Translate, int Select)
+void RenderChristmasCompanions(CHARACTER* c, vec3_t light, bool Translate, int Select)
 {
     OBJECT* o = &c->Object;
     // Three copies around the character, each on the ground where it stands; the character stays where it is.
@@ -9559,7 +9559,7 @@ void RenderChristmasCompanions(CHARACTER* c, bool Translate, int Select)
         o->Position[0] = standing[0] + offset[0];
         o->Position[1] = standing[1] + offset[1];
         o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
-        RenderPartObject(o, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+        RenderPartObject(o, o->SubType, NULL, light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
     }
     VectorCopy(standing, o->Position);
 }
@@ -9581,9 +9581,8 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
     Vector(0.f, 0.f, 0.f, p);
     Vector(1.f, 1.f, 1.f, Light);
-    // The body draws in a light of its own; the update's light is back for the rest of the draw and after it.
-    vec3_t preparedLight;
-    VectorCopy(c->Light, preparedLight);
+    // The body draws in a light of its own; the rest of the draw uses the update's.
+    vec3_t bodyLight;
 
     BYTE byRender = CHARACTER_NONE;
 
@@ -9775,7 +9774,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     }
     else if (c->MonsterIndex == MONSTER_ALQUAMOS)
     {
-        // Tints c->Light below.
+        // Tints the body light below.
         const float Luminosity = (float)(Random::DrawRand(o, 1) % 30 + 70) * 0.01f;
         Vector(Luminosity * 0.6f, Luminosity * 0.7f, Luminosity * 0.8f, Light);
     }
@@ -9789,7 +9788,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     }
     else if (c->MonsterIndex == MONSTER_DRAKAN || c->MonsterIndex == MONSTER_GREAT_DRAKAN)
     {
-        // Tints c->Light below.
+        // Tints the body light below.
         if (c->MonsterIndex == MONSTER_DRAKAN)
             Vector(0.1f, 0.1f, 1.f, Light);
 
@@ -9839,7 +9838,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
 
     if (o->Type == MODEL_NPC_CHERRYBLOSSOM)
     {
-        // Tints c->Light below.
+        // Tints the body light below.
         const float Luminosity = absf(sinf(WorldTime * 0.002f)) * 0.4f;
         Vector(0.5f + Luminosity, 0.0f + Luminosity, 0.0f + Luminosity, Light);
     }
@@ -9865,10 +9864,10 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         Render::Lighting::LightMood::CorrectFigureTerrainLight(o->Position[0], o->Position[1], Light);
     }
 
-    VectorAdd(Light, o->Light, c->Light);
+    VectorAdd(Light, o->Light, bodyLight);
     if (o->Type == MODEL_DARK_PHEONIX_SHIELD)
     {
-        Vector(.6f, .6f, .6f, c->Light);
+        Vector(.6f, .6f, .6f, bodyLight);
     }
 
     else if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
@@ -9876,11 +9875,11 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         // Its shadow, alpha, blend mesh and rise are set by the update.
         if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
         {
-            Vector(0.5f, 0.7f, 1.0f, c->Light);
+            Vector(0.5f, 0.7f, 1.0f, bodyLight);
         }
         else if (o->CurrentAction != PLAYER_DIE1)
         {
-            Vector(1.0f, 0.3f, 0.1f, c->Light);
+            Vector(1.0f, 0.3f, 0.1f, bodyLight);
         }
         else
         {
@@ -9888,7 +9887,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             if (fAlpha < 0)
                 fAlpha = 0;
 
-            Vector(1.0f * fAlpha, 0.3f * fAlpha, 0.1f * fAlpha, c->Light);
+            Vector(1.0f * fAlpha, 0.3f * fAlpha, 0.1f * fAlpha, bodyLight);
         }
     }
 
@@ -9922,16 +9921,16 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         if (SceneFlag == CHARACTER_SCENE)
         {
             Vector(0.5f, 0.5f, 0.5f, Light);
-            VectorAdd(Light, o->Light, c->Light);
+            VectorAdd(Light, o->Light, bodyLight);
         }
         else
-            Render::Lighting::LightMood::ScaleOwnHeroLight(o->Position[0], o->Position[1], AbilityLight, c->Light);
+            Render::Lighting::LightMood::ScaleOwnHeroLight(o->Position[0], o->Position[1], AbilityLight, bodyLight);
     }
 
     if (o->Kind == KIND_NPC && gMapManager.WorldActive == WD_0LORENCIA && o->Type == MODEL_PLAYER &&
         (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
     {
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, c->Level, 0, 0, false, false, Translate,
+        RenderPartObject(&c->Object, o->SubType, NULL, bodyLight, o->Alpha, c->Level, 0, 0, false, false, Translate,
                          Select);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER &&
@@ -9946,24 +9945,24 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         PART_t* p = &skin;
         if (o->CurrentAction == PLAYER_SKILL_DRAGONKICK)
         {
-            RenderCharacter_AfterImage(c, p, Translate, Select, 2.5f, 1.0f);
+            RenderCharacter_AfterImage(c, p, bodyLight, Translate, Select, 2.5f, 1.0f);
         }
         else if (o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY || o->CurrentAction == PLAYER_SKILL_DARKSIDE_ATTACK)
         {
             OBJECT* pObj = &c->Object;
             if (pObj->m_sTargetIndex < 0 || c->JumpTime > 0)
             {
-                RenderPartObject(&c->Object, o->SubType, p, c->Light, o->Alpha, 0, 0, 0, false, false, Translate,
+                RenderPartObject(&c->Object, o->SubType, p, bodyLight, o->Alpha, 0, 0, 0, false, false, Translate,
                                  Select);
             }
             else
             {
-                g_CMonkSystem.DarksideRendering(c, p, Translate, Select, &c->BodyPart[BODYPART_HEAD]);
+                g_CMonkSystem.DarksideRendering(c, p, bodyLight, Translate, Select, &c->BodyPart[BODYPART_HEAD]);
             }
         }
         else
         {
-            RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate,
+            RenderPartObject(&c->Object, o->SubType, NULL, bodyLight, o->Alpha, 0, 0, 0, false, false, Translate,
                              Select);
         }
 
@@ -9974,37 +9973,37 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_PCBANG)
     {
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+        RenderPartObject(&c->Object, o->SubType, NULL, bodyLight, o->Alpha, 0, 0, 0, false, false, Translate, Select);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_HALLOWEEN)
     {
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+        RenderPartObject(&c->Object, o->SubType, NULL, bodyLight, o->Alpha, 0, 0, 0, false, false, Translate, Select);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_CURSEDTEMPLE_ALLIED_PLAYER)
     {
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+        RenderPartObject(&c->Object, o->SubType, NULL, bodyLight, o->Alpha, 0, 0, 0, false, false, Translate, Select);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_CURSEDTEMPLE_ILLUSION_PLAYER)
     {
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+        RenderPartObject(&c->Object, o->SubType, NULL, bodyLight, o->Alpha, 0, 0, 0, false, false, Translate, Select);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_PANDA)
     {
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+        RenderPartObject(&c->Object, o->SubType, NULL, bodyLight, o->Alpha, 0, 0, 0, false, false, Translate, Select);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_SKELETON_CHANGED)
     {
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+        RenderPartObject(&c->Object, o->SubType, NULL, bodyLight, o->Alpha, 0, 0, 0, false, false, Translate, Select);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_XMAS_EVENT_CHANGE_GIRL)
     {
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+        RenderPartObject(&c->Object, o->SubType, NULL, bodyLight, o->Alpha, 0, 0, 0, false, false, Translate, Select);
 
         RenderParts(c);
     }
     else if (o->Kind == KIND_PLAYER && o->Type == MODEL_PLAYER && o->SubType == MODEL_GM_CHARACTER)
     {
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+        RenderPartObject(&c->Object, o->SubType, NULL, bodyLight, o->Alpha, 0, 0, 0, false, false, Translate, Select);
 
         if (!g_isCharacterBuff(o, eBuff_Cloaking))
         {
@@ -10029,11 +10028,11 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
              (o->SubType == MODEL_XMAS_EVENT_CHA_SSANTA || o->SubType == MODEL_XMAS_EVENT_CHA_SNOWMAN ||
               o->SubType == MODEL_XMAS_EVENT_CHA_DEER))
     {
-        RenderChristmasCompanions(c, Translate, Select);
+        RenderChristmasCompanions(c, bodyLight, Translate, Select);
     }
     else if (o->Type == MODEL_PLAYER && (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
     {
-        RenderPartObject(&c->Object, o->SubType, NULL, c->Light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+        RenderPartObject(&c->Object, o->SubType, NULL, bodyLight, o->Alpha, 0, 0, 0, false, false, Translate, Select);
     }
     else if (!c->Change)
     {
@@ -10053,24 +10052,24 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             if ((o->CurrentAction == PLAYER_SKILL_DRAGONKICK) &&
                 (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
             {
-                RenderCharacter_AfterImage(c, p, Translate, Select, 2.5f, 1.0f);
+                RenderCharacter_AfterImage(c, p, bodyLight, Translate, Select, 2.5f, 1.0f);
             }
             else if ((gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
             {
                 OBJECT* pObj = &c->Object;
                 if (pObj->m_sTargetIndex < 0 || c->JumpTime > 0)
                 {
-                    RenderPartObject(&c->Object, MODEL_ANGEL, p, c->Light, o->Alpha, 0, 0, 0, false, false, Translate,
+                    RenderPartObject(&c->Object, MODEL_ANGEL, p, bodyLight, o->Alpha, 0, 0, 0, false, false, Translate,
                                      Select, RenderType);
                 }
                 else
                 {
-                    g_CMonkSystem.DarksideRendering(c, p, Translate, Select, &c->BodyPart[BODYPART_HEAD]);
+                    g_CMonkSystem.DarksideRendering(c, p, bodyLight, Translate, Select, &c->BodyPart[BODYPART_HEAD]);
                 }
             }
             else
             {
-                RenderPartObject(&c->Object, MODEL_ANGEL, p, c->Light, o->Alpha, 0, 0, 0, false, false, Translate,
+                RenderPartObject(&c->Object, MODEL_ANGEL, p, bodyLight, o->Alpha, 0, 0, 0, false, false, Translate,
                                  Select, RenderType);
             }
         }
@@ -10128,14 +10127,14 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     if (c->MonsterIndex >= MONSTER_TERRIBLE_BUTCHER && c->MonsterIndex <= MONSTER_DOPPELGANGER_SUM)
                     {
                         if (gMapManager.WorldActive == WD_65DOPPLEGANGER1)
-                            RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level, p->ExcellentFlags,
+                            RenderPartObject(&c->Object, Type, p, bodyLight, o->Alpha, p->Level, p->ExcellentFlags,
                                              p->AncientDiscriminator, false, false, Translate, Select,
                                              RENDER_DOPPELGANGER | RENDER_TEXTURE);
                         else
-                            RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level, p->ExcellentFlags,
+                            RenderPartObject(&c->Object, Type, p, bodyLight, o->Alpha, p->Level, p->ExcellentFlags,
                                              p->AncientDiscriminator, false, false, Translate, Select,
                                              RENDER_DOPPELGANGER | RENDER_BRIGHT | RENDER_TEXTURE);
-                        // 						RenderPartObject(&c->Object,Type,p,c->Light,o->Alpha,p->Level<<3,p->Option1,p->ExtOption,false,false,Translate,
+                        // 						RenderPartObject(&c->Object,Type,p,bodyLight,o->Alpha,p->Level<<3,p->Option1,p->ExtOption,false,false,Translate,
                         // 							Select,RENDER_DOPPELGANGER|RENDER_BRIGHT|RENDER_CHROME);
                     }
                     else
@@ -10143,24 +10142,24 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                         if ((o->CurrentAction == PLAYER_SKILL_DRAGONKICK) &&
                             (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
                         {
-                            RenderCharacter_AfterImage(c, p, Translate, Select, 2.5f, 1.0f);
+                            RenderCharacter_AfterImage(c, p, bodyLight, Translate, Select, 2.5f, 1.0f);
                         }
                         else if ((o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY) &&
                                  (gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
                         {
                             if (o->m_sTargetIndex < 0 || c->JumpTime > 0)
                             {
-                                RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level, p->ExcellentFlags,
+                                RenderPartObject(&c->Object, Type, p, bodyLight, o->Alpha, p->Level, p->ExcellentFlags,
                                                  p->AncientDiscriminator, false, false, Translate, Select);
                             }
                             else
                             {
-                                g_CMonkSystem.DarksideRendering(c, p, Translate, Select);
+                                g_CMonkSystem.DarksideRendering(c, p, bodyLight, Translate, Select);
                             }
                         }
                         else
                         {
-                            RenderPartObject(&c->Object, Type, p, c->Light, o->Alpha, p->Level, p->ExcellentFlags,
+                            RenderPartObject(&c->Object, Type, p, bodyLight, o->Alpha, p->Level, p->ExcellentFlags,
                                              p->AncientDiscriminator, false, false, Translate, Select);
                         }
                     }
@@ -10211,7 +10210,6 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         }
     }
 
-    VectorCopy(preparedLight, c->Light);
 
     if (DrawsNextGradeObjects(c))
         NextGradeObjectRender(c);

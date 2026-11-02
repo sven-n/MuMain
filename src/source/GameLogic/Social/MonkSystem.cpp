@@ -964,13 +964,14 @@ const std::vector<CMonkSystem::DarksidePlacement>* CMonkSystem::DarksidePlacemen
     return nullptr;
 }
 
-void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Translate, int Select, const PART_t* key)
+void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, vec3_t light, bool Translate, int Select,
+                                    const PART_t* key)
 {
     OBJECT* pObj = &pCha->Object;
     const int Type = pPart->Type;
     const auto render = [&]
     {
-        RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
+        RenderPartObject(pObj, Type, pPart, light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
                          pPart->AncientDiscriminator, false, false, Translate, Select);
     };
 

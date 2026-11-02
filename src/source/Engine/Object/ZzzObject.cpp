@@ -3444,7 +3444,8 @@ void RenderObject_AfterImage(const OBJECT* o, bool Translate, int Select, int Ex
     RenderObject(o, Translate, Select, 0);
 }
 
-void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate, int Select, float AniInterval1, float AniInterval2)
+void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, vec3_t light, bool Translate, int Select,
+                                float AniInterval1, float AniInterval2)
 {
     OBJECT* pObj = &pCha->Object;
     float fAnimationFrame = pObj->AnimationFrame;
@@ -3471,7 +3472,8 @@ void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate, 
         VectorAdd(vStartPos, vPos, vPos);
         VectorCopy(vPos, pObj->Position);
         Calc_ObjectAnimation(pObj, Translate, Select);
-        RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
+        RenderPartObject(pObj, Type, pPart, light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
+                         pPart->AncientDiscriminator, false, false, Translate, Select);
     }
 
     VectorCopy(vOrgPos, vPos);
@@ -3486,14 +3488,15 @@ void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate, 
         VectorAdd(vStartPos, vPos, vPos);
         VectorCopy(vPos, pObj->Position);
         Calc_ObjectAnimation(pObj, Translate, Select);
-        RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags, pPart->AncientDiscriminator, false, false, Translate, Select);
+        RenderPartObject(pObj, Type, pPart, light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
+                         pPart->AncientDiscriminator, false, false, Translate, Select);
     }
 
     VectorCopy(vOrgPos, pObj->Position);
     pObj->Alpha = alpha;
     pObj->AnimationFrame = fAnimationFrame;
     Calc_ObjectAnimation(pObj, Translate, Select);
-    RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
+    RenderPartObject(pObj, Type, pPart, light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
                      pPart->AncientDiscriminator, false, false, Translate, Select);
 }
 

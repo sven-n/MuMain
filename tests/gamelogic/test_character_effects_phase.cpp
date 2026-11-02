@@ -834,7 +834,7 @@ TEST_CASE(
         [c, &parts]
         {
             for (PART_t* part : parts)
-                g_CMonkSystem.DarksideRendering(c, part);
+                g_CMonkSystem.DarksideRendering(c, part, c->Light);
         });
     CHECK(o->Angle[2] == 0.f);
     CHECK(o->Position[0] == 1000.f);
@@ -1193,7 +1193,7 @@ TEST_CASE("A Dragon Kick afterimage leaves the fading character's alpha, place a
     PART_t* part = &c->BodyPart[BODYPART_ARMOR];
     part->Type = MODEL_SWORD;
 
-    RepeatedDraws::CheckChangesNothing([c, part] { RenderCharacter_AfterImage(c, part, true, 0, 2.5f, 1.0f); });
+    RepeatedDraws::CheckChangesNothing([c, part] { RenderCharacter_AfterImage(c, part, c->Light, true, 0, 2.5f, 1.0f); });
     CHECK(o->Alpha == 0.4f);
     CHECK(o->AnimationFrame == 4.f);
     CHECK(o->Position[0] == 1000.f);
@@ -1246,7 +1246,7 @@ TEST_CASE("Drawing a Christmas companion's three copies leaves the companion whe
 
     for (int pass = 0; pass < 2; ++pass)
     {
-        CheckDrawSpawnsNone([c] { RenderChristmasCompanions(c, true, 0); });
+        CheckDrawSpawnsNone([c] { RenderChristmasCompanions(c, c->Light, true, 0); });
         CHECK(o->Position[0] == 1000.f);
         CHECK(o->Position[1] == 1200.f);
         CHECK(o->Position[2] == 30.f);

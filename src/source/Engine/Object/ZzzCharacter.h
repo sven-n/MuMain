@@ -32,7 +32,7 @@ struct WingCarriedModel
 };
 int WingCarriedModels(const CHARACTER* c, WingCarriedModel (&models)[2]);
 void RenderWingCarriedModels(CHARACTER* c, bool Translate);
-void RenderChristmasCompanions(CHARACTER* c, bool Translate, int Select);
+void RenderChristmasCompanions(CHARACTER* c, vec3_t light, bool Translate, int Select);
 void RenderCharacter(CHARACTER* c, OBJECT* o, int Select = 0);
 void RenderCharactersClient();
 // Whether RenderCharactersClient draws the character this frame.

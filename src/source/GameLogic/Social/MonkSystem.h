@@ -227,7 +227,7 @@ public:
     std::uint64_t DarksideStateHash() const;
     // Draws the part where the update's last step placed it; `key` is the part the update stepped for it, when the
     // draw hands over a stand-in (a skin or an angel drawn as one model).
-    void DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0,
+    void DarksideRendering(CHARACTER* pCha, PART_t* pPart, vec3_t light, bool Translate = false, int Select = 0,
                            const PART_t* key = nullptr);
     bool CalculateDarksideTrans(OBJECT* _pObj, vec3_t _vPos, float _fAni, float _fNextAni = 0);
     int GetDarksideEffectTotal();
