@@ -1455,11 +1455,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
         flag <<= 3;
 
     int i;
-    vec3_t* vtx[4];
-    vtx[0] = (vec3_t*)v1;
-    vtx[1] = (vec3_t*)v2;
-    vtx[2] = (vec3_t*)v3;
-    vtx[3] = (vec3_t*)v4;
+    const float* vtx[4] = {v1, v2, v3, v4};
 
     int j = n - 1;
     switch (flag)
@@ -1467,7 +1463,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 1:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[1] - y) * ((*vtx[j])[2] - z) - ((*vtx[j])[1] - y) * ((*vtx[i])[2] - z);
+            float d = (vtx[i][1] - y) * (vtx[j][2] - z) - (vtx[j][1] - y) * (vtx[i][2] - z);
             if (d <= 0.f)
                 return false;
         }
@@ -1475,7 +1471,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 2:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[2] - z) * ((*vtx[j])[0] - x) - ((*vtx[j])[2] - z) * ((*vtx[i])[0] - x);
+            float d = (vtx[i][2] - z) * (vtx[j][0] - x) - (vtx[j][2] - z) * (vtx[i][0] - x);
             if (d <= 0.f)
                 return false;
         }
@@ -1483,7 +1479,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 4:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[0] - x) * ((*vtx[j])[1] - y) - ((*vtx[j])[0] - x) * ((*vtx[i])[1] - y);
+            float d = (vtx[i][0] - x) * (vtx[j][1] - y) - (vtx[j][0] - x) * (vtx[i][1] - y);
             if (d <= 0.f)
                 return false;
         }
@@ -1491,7 +1487,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 8:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[1] - y) * ((*vtx[j])[2] - z) - ((*vtx[j])[1] - y) * ((*vtx[i])[2] - z);
+            float d = (vtx[i][1] - y) * (vtx[j][2] - z) - (vtx[j][1] - y) * (vtx[i][2] - z);
             if (d >= 0.f)
                 return false;
         }
@@ -1499,7 +1495,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 16:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[2] - z) * ((*vtx[j])[0] - x) - ((*vtx[j])[2] - z) * ((*vtx[i])[0] - x);
+            float d = (vtx[i][2] - z) * (vtx[j][0] - x) - (vtx[j][2] - z) * (vtx[i][0] - x);
             if (d >= 0.f)
                 return false;
         }
@@ -1507,7 +1503,7 @@ int InsideTest(float x, float y, float z, int n, float* v1, float* v2, float* v3
     case 32:
         for (i = 0; i < n; j = i, i++)
         {
-            float d = ((*vtx[i])[0] - x) * ((*vtx[j])[1] - y) - ((*vtx[j])[0] - x) * ((*vtx[i])[1] - y);
+            float d = (vtx[i][0] - x) * (vtx[j][1] - y) - (vtx[j][0] - x) * (vtx[i][1] - y);
             if (d >= 0.f)
                 return false;
         }
