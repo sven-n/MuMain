@@ -7217,7 +7217,7 @@ static Render::Items::ItemEffects::Result ApplyEventModelEffect(BMD* b, OBJECT* 
 
 // Items have the item effect of their model entry; the event models of level
 // variants have theirs in ApplyEventModelEffect.
-Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, OBJECT* o, int Type, float Alpha, int& Level,
+Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, OBJECT* o, int Type, float& Alpha, int& Level,
                                                          int ItemLevel)
 {
     const Render::Items::ItemEffects::Result effect = Render::Items::ItemEffects::Apply(b, o, Type, Alpha, Level);
@@ -7283,9 +7283,44 @@ void RefreshStunSkull(OBJECT* o, vec3_t Light)
 
 extern float g_Luminosity;
 
+namespace
+{
+// The item effects and styles set the look of the part they draw on its object; the object gets its own look back.
+class PartLookScope
+{
+public:
+    explicit PartLookScope(OBJECT& o)
+        : m_o(o), m_alpha(o.Alpha), m_blendMesh(o.BlendMesh), m_blendMeshLight(o.BlendMeshLight),
+          m_texCoordU(o.BlendMeshTexCoordU), m_texCoordV(o.BlendMeshTexCoordV), m_hiddenMesh(o.HiddenMesh)
+    {
+    }
+    ~PartLookScope()
+    {
+        m_o.Alpha = m_alpha;
+        m_o.BlendMesh = m_blendMesh;
+        m_o.BlendMeshLight = m_blendMeshLight;
+        m_o.BlendMeshTexCoordU = m_texCoordU;
+        m_o.BlendMeshTexCoordV = m_texCoordV;
+        m_o.HiddenMesh = m_hiddenMesh;
+    }
+    PartLookScope(const PartLookScope&) = delete;
+    PartLookScope& operator=(const PartLookScope&) = delete;
+
+private:
+    OBJECT& m_o;
+    float m_alpha;
+    int m_blendMesh;
+    float m_blendMeshLight;
+    float m_texCoordU;
+    float m_texCoordV;
+    int m_hiddenMesh;
+};
+} // namespace
+
 void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int ItemLevel, int ExcellentFlags,
                             int ancientDiscriminator, int Select, int RenderType)
 {
+    const PartLookScope look(*o);
     int Level = ItemLevel;
     // Without the option window (headless, or before the UI exists) everything is drawn at the highest level.
     const int renderLevel = g_pOption != nullptr ? g_pOption->GetRenderLevel() : 4;

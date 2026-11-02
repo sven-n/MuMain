@@ -32,8 +32,8 @@ enum class Result
 
 // Runs the item effect before the model is drawn (the item effects are
 // taken from the item model database after each build of it). It may change
-// the level the model glows like.
-Result Apply(BMD* b, OBJECT* o, int modelType, float alpha, int& level);
+// the level the model glows like and the alpha it is drawn with.
+Result Apply(BMD* b, OBJECT* o, int modelType, float& alpha, int& level);
 
 // Whether the item effect of a model spawns sprites, particles or lightning.
 bool Spawns(int modelType);
