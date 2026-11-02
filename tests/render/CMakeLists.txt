@@ -316,6 +316,13 @@ add_test(
 )
 
 add_test(
+    NAME game_random_is_owned
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_SOURCE_DIRS=${CMAKE_SOURCE_DIR}/src/source\;${CMAKE_SOURCE_DIR}/src/MuEditor"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_game_random_is_owned.cmake"
+)
+
+add_test(
     NAME renderer_pipeline_fail_fast
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_RENDERER_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRendererSDLGpu.cpp"

@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Network/Server/WSclient.h"
 #include "UI/Core/UIManager.h"
 #include "Audio/DSPlaySound.h"
@@ -124,7 +125,7 @@ namespace battleCastle
 
         if (InArea(Position[0], Position[1], o->Position, Range) && o->CurrentAction != AniType)
         {
-            //            if ( Range<=350.f && rand()%(int)(100-(Range-350.f)/10) )
+            //            if ( Range<=350.f && Random::Rand()%(int)(100-(Range-350.f)/10) )
             if (Hero->Helper.Type == MODEL_HORN_OF_FENRIR && AniType == PLAYER_HIGH_SHOCK)
             {
                 SetAction_Fenrir_Damage(Hero, o);
@@ -147,7 +148,7 @@ namespace battleCastle
             {
                 if (InArea(Position[0], Position[1], o->Position, Range))
                 {
-                    //                    if ( Range<=350.f && rand()%(int)(100-(Range-350.f)/10) )
+                    //                    if ( Range<=350.f && Random::Rand()%(int)(100-(Range-350.f)/10) )
                     {
                         SetAction(o, AniType);
                     }
@@ -618,30 +619,34 @@ namespace battleCastle
         }
 
         o->Type = BITMAP_FIRE_SNUFF;
-        o->Scale = rand() % 50 / 100.f + 0.5f;
+        o->Scale = Random::Rand() % 50 / 100.f + 0.5f;
         vec3_t Position;
 
         if (gMapManager.WorldActive == WD_55LOGINSCENE)
         {
-            Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800), Hero->Object.Position[1] + (float)(rand() % 1400 - 500), Hero->Object.Position[2] + (float)(rand() % 1000 + 50), Position);
+            Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 1600 - 800),
+                   Hero->Object.Position[1] + (float)(Random::Rand() % 1400 - 500),
+                   Hero->Object.Position[2] + (float)(Random::Rand() % 1000 + 50), Position);
         }
         else
         {
-            Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800), Hero->Object.Position[1] + (float)(rand() % 1400 - 500), Hero->Object.Position[2] + (float)(rand() % 300 + 50), Position);
+            Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 1600 - 800),
+                   Hero->Object.Position[1] + (float)(Random::Rand() % 1400 - 500),
+                   Hero->Object.Position[2] + (float)(Random::Rand() % 300 + 50), Position);
         }
 
         VectorCopy(Position, o->Position);
         VectorCopy(Position, o->StartPosition);
-        o->Velocity[0] = -(float)(rand() % 64 + 64) * 0.1f;
+        o->Velocity[0] = -(float)(Random::Rand() % 64 + 64) * 0.1f;
         if (Position[1] < g_Camera.Position[1] + 400.f)
         {
             o->Velocity[0] = -o->Velocity[0] + 3.2f;
         }
-        o->Velocity[1] = (float)(rand() % 32 - 16) * 0.1f;
-        o->Velocity[2] = (float)(rand() % 32 - 16) * 0.1f;
-        o->TurningForce[0] = (float)(rand() % 16 - 8) * 0.1f;
-        o->TurningForce[1] = (float)(rand() % 64 - 32) * 0.1f;
-        o->TurningForce[2] = (float)(rand() % 16 - 8) * 0.1f;
+        o->Velocity[1] = (float)(Random::Rand() % 32 - 16) * 0.1f;
+        o->Velocity[2] = (float)(Random::Rand() % 32 - 16) * 0.1f;
+        o->TurningForce[0] = (float)(Random::Rand() % 16 - 8) * 0.1f;
+        o->TurningForce[1] = (float)(Random::Rand() % 64 - 32) * 0.1f;
+        o->TurningForce[2] = (float)(Random::Rand() % 16 - 8) * 0.1f;
 
         Vector(1.f, 0.f, 0.f, o->Light);
 
@@ -737,23 +742,23 @@ namespace battleCastle
         PlayBuffer(SOUND_BC_AMBIENT);
         if (IsBattleCastleStart() && rand_fps_check(10))
         {
-            if (rand() % 100 == 0)
+            if (Random::Rand() % 100 == 0)
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE1);
             }
-            if (rand() % 100 == 0)
+            if (Random::Rand() % 100 == 0)
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE2);
             }
-            if (rand() % 100 == 0)
+            if (Random::Rand() % 100 == 0)
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE3);
             }
-            if (rand() % 100 == 0)
+            if (Random::Rand() % 100 == 0)
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE4);
             }
-            if (rand() % 100 == 0)
+            if (Random::Rand() % 100 == 0)
             {
                 PlayBuffer(SOUND_BC_AMBIENT_BATTLE5);
             }
@@ -765,17 +770,19 @@ namespace battleCastle
             {
                 LastStoneFlyEffect = WorldTime;
                 int HeroY = (Hero->PositionY);
-                if (rand() % 3)
+                if (Random::Rand() % 3)
                 {
                     if (HeroY > 50 && HeroY < 131)
                     {
-                        int dx = rand() % 1000 - 500;
+                        int dx = Random::Rand() % 1000 - 500;
                         vec3_t Position;
                         vec3_t Angle = { 0.f, 0.f, 0.f };
                         vec3_t Light = { 1.f, 1.f, 1.f };
 
-                        if (dx < 30 && dx>0) dx = 100 + rand() % 30;
-                        else if (dx > -30 && dx < 0) dx -= 100 + rand() % 30;
+                        if (dx < 30 && dx > 0)
+                            dx = 100 + Random::Rand() % 30;
+                        else if (dx > -30 && dx < 0)
+                            dx -= 100 + Random::Rand() % 30;
 
                         Position[0] = Hero->Object.Position[0] + dx;
                         Position[2] = 500.f;
@@ -787,9 +794,9 @@ namespace battleCastle
                         }
                         else
                         {
-                            SiegePositionY = HeroY - (rand() % 10 + 10);
+                            SiegePositionY = HeroY - (Random::Rand() % 10 + 10);
                         }
-                        Position[1] = SiegePositionY * TERRAIN_SCALE + (rand() % 40 - 20);
+                        Position[1] = SiegePositionY * TERRAIN_SCALE + (Random::Rand() % 40 - 20);
                         CreateEffect(MODEL_FLY_BIG_STONE1, Position, Angle, Light, 0);
                     }
                 }
@@ -797,13 +804,15 @@ namespace battleCastle
                 {
                     if (HeroY > 70 && HeroY < 177)
                     {
-                        int dx = rand() % 1000 - 500;
+                        int dx = Random::Rand() % 1000 - 500;
                         vec3_t Position;
                         vec3_t Angle = { 0.f, 0.f, 0.f };
                         vec3_t Light = { 1.f, 1.f, 1.f };
 
-                        if (dx < 100 && dx>0) dx = 100 + rand() % 30;
-                        else if (dx > -100 && dx < 0) dx -= 100 + rand() % 30;
+                        if (dx < 100 && dx > 0)
+                            dx = 100 + Random::Rand() % 30;
+                        else if (dx > -100 && dx < 0)
+                            dx -= 100 + Random::Rand() % 30;
 
                         Position[0] = Hero->Object.Position[0] + dx;
                         Position[2] = 500.f;
@@ -815,9 +824,9 @@ namespace battleCastle
                         }
                         else
                         {
-                            SiegePositionY = HeroY - (rand() % 10 + 10);
+                            SiegePositionY = HeroY - (Random::Rand() % 10 + 10);
                         }
-                        Position[1] = SiegePositionY * TERRAIN_SCALE - (rand() % 40 - 20);
+                        Position[1] = SiegePositionY * TERRAIN_SCALE - (Random::Rand() % 40 - 20);
                         CreateEffect(MODEL_FLY_BIG_STONE2, Position, Angle, Light, 0);
                     }
                 }
@@ -829,11 +838,13 @@ namespace battleCastle
                 if (LastArrowEffectOnBattlefield < WorldTime - ArrowEffectOnBattlefieldInterval)
                 {
                     LastArrowEffectOnBattlefield = WorldTime;
-                    int length = (rand() % 4 + 2) / 2;
-                    int dx = (rand() % 1400 - 700) - 60.f * length;
+                    int length = (Random::Rand() % 4 + 2) / 2;
+                    int dx = (Random::Rand() % 1400 - 700) - 60.f * length;
 
-                    if (dx < 100 && dx>0) dx = 100 + rand() % 30;
-                    else if (dx > -100 && dx < 0) dx -= 100 + rand() % 30;
+                    if (dx < 100 && dx > 0)
+                        dx = 100 + Random::Rand() % 30;
+                    else if (dx > -100 && dx < 0)
+                        dx -= 100 + Random::Rand() % 30;
 
                     vec3_t Position;
                     vec3_t Angle = { 0.f, 0.f, 0.f };
@@ -845,7 +856,7 @@ namespace battleCastle
                         Position[0] = Hero->Object.Position[0] + dx;
                         Position[2] = 350.f;
 
-                        bool attArrow = rand() % 2;
+                        bool attArrow = Random::Rand() % 2;
                         if (HeroY < 113)
                         {
                             attArrow = true;
@@ -857,16 +868,16 @@ namespace battleCastle
 
                         if (attArrow)
                         {
-                            int SiegePositionY = HeroY - (rand() % 1 + 10);
-                            Position[1] = SiegePositionY * TERRAIN_SCALE/*+(rand()%60-30)*/;
+                            int SiegePositionY = HeroY - (Random::Rand() % 1 + 10);
+                            Position[1] = SiegePositionY * TERRAIN_SCALE /*+(Random::Rand()%60-30)*/;
 
                             Angle[2] = 180.f;
                             CreateEffect(MODEL_ARROW, Position, Angle, Light, 4);
                         }
                         else
                         {
-                            int SiegePositionY = HeroY + (rand() % 1 + 10);
-                            Position[1] = SiegePositionY * TERRAIN_SCALE/*-(rand()%60-30)*/;
+                            int SiegePositionY = HeroY + (Random::Rand() % 1 + 10);
+                            Position[1] = SiegePositionY * TERRAIN_SCALE /*-(Random::Rand()%60-30)*/;
 
                             CreateEffect(MODEL_ARROW, Position, Angle, Light, 4);
                         }
@@ -883,9 +894,11 @@ namespace battleCastle
                     vec3_t Angle = { 0.f, 0.f, 0.f };
                     vec3_t Light = { 1.f, 1.f, 1.f };
 
-                    int dx = rand() % 1400 - 700;
-                    if (dx < 100 && dx>0) dx = 100 + rand() % 30;
-                    else if (dx > -100 && dx < 0) dx -= 100 + rand() % 30;
+                    int dx = Random::Rand() % 1400 - 700;
+                    if (dx < 100 && dx > 0)
+                        dx = 100 + Random::Rand() % 30;
+                    else if (dx > -100 && dx < 0)
+                        dx -= 100 + Random::Rand() % 30;
 
                     Position[0] = Hero->Object.Position[0] + dx;
                     Position[2] = 350.f;
@@ -900,7 +913,7 @@ namespace battleCastle
                         }
                     }
 
-                    bool attArrow = rand() % 2;
+                    bool attArrow = Random::Rand() % 2;
                     if (HeroY < 82)
                     {
                         attArrow = true;
@@ -912,16 +925,16 @@ namespace battleCastle
 
                     if (attArrow)
                     {
-                        int SiegePositionY = HeroY - (rand() % 3 + 10);
-                        Position[1] = SiegePositionY * TERRAIN_SCALE + (rand() % 60 - 30);
+                        int SiegePositionY = HeroY - (Random::Rand() % 3 + 10);
+                        Position[1] = SiegePositionY * TERRAIN_SCALE + (Random::Rand() % 60 - 30);
 
                         Angle[2] = 180.f;
                         CreateEffect(MODEL_ARROW, Position, Angle, Light, subtype);
                     }
                     else
                     {
-                        int SiegePositionY = HeroY + (rand() % 3 + 10);
-                        Position[1] = SiegePositionY * TERRAIN_SCALE - (rand() % 60 - 30);
+                        int SiegePositionY = HeroY + (Random::Rand() % 3 + 10);
+                        Position[1] = SiegePositionY * TERRAIN_SCALE - (Random::Rand() % 60 - 30);
 
                         CreateEffect(MODEL_ARROW, Position, Angle, Light, subtype);
                     }
@@ -1040,7 +1053,7 @@ namespace battleCastle
             break;
 
         case 41:
-            o->Timer = float(rand() % 1000) * 0.01f;
+            o->Timer = float(Random::Rand() % 1000) * 0.01f;
             break;
 
         case 77:
@@ -1083,7 +1096,7 @@ namespace battleCastle
         case    0:
             if (IsBattleCastleStart() == false)
             {
-                Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+                Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
                 Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
                 AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
             }
@@ -1093,7 +1106,7 @@ namespace battleCastle
         case 53:
             if (IsBattleCastleStart())
             {
-                Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+                Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
                 Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
                 AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
             }
@@ -1177,7 +1190,7 @@ namespace battleCastle
             if (IsBattleCastleStart() == false)
             {
                 Vector(1.f, 1.f, 1.f, Light);
-                CreateParticleFpsChecked(BITMAP_WATERFALL_3 + (rand() % 2), o->Position, o->Angle, Light, 0);
+                CreateParticleFpsChecked(BITMAP_WATERFALL_3 + (Random::Rand() % 2), o->Position, o->Angle, Light, 0);
             }
             break;
         }
@@ -1383,7 +1396,7 @@ namespace battleCastle
             c = CreateCharacter(Key, MODEL_NPC_CLERK, PositionX, PositionY);
             c->NotRotateOnMagicHit = true;
             c->Object.Scale = 1.f;
-            c->Object.SubType = rand() % 2 + 10;
+            c->Object.SubType = Random::Rand() % 2 + 10;
             c->Weapon[0].Type = -1;
             c->Weapon[1].Type = -1;
             break;
@@ -1831,7 +1844,7 @@ namespace battleCastle
                 VectorCopy(o->Position, Position);
                 Position[2] += 50.f;
                 CreateSprite(BITMAP_LIGHT, Position, 4.f, Light, NULL);
-                CreateSprite(BITMAP_SHINY + 1, Position, 2.5f, Light, NULL, rand() % 360);
+                CreateSprite(BITMAP_SHINY + 1, Position, 2.5f, Light, NULL, Random::Rand() % 360);
             }
             return true;
 
@@ -1847,7 +1860,7 @@ namespace battleCastle
                 Position[2] += sinf(WorldTime * 0.001f) * 60.f + 60.f;
 
                 CreateSprite(BITMAP_LIGHT, Position, 3.f, Light, NULL);
-                CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, NULL, rand() % 360);
+                CreateSprite(BITMAP_SHINY + 1, Position, 1.5f, Light, NULL, Random::Rand() % 360);
 
                 b->TransformPosition(o->BoneTransform[2], p, Position, true);
                 CreateSprite(BITMAP_LIGHT, Position, 4.f, Light, NULL);
@@ -2092,9 +2105,10 @@ namespace battleCastle
                 {
                     Position[0] = o->Position[0];
                     Position[1] = o->Position[1];
-                    Position[2] = o->Position[2] + 200 + rand() % 30;
+                    Position[2] = o->Position[2] + 200 + Random::Rand() % 30;
 
-                    CreateEffect(MODEL_GATE_PART1 + rand() % 3, Position, o->Angle, o->Light, rand() % 2 + 1);
+                    CreateEffect(MODEL_GATE_PART1 + Random::Rand() % 3, Position, o->Angle, o->Light,
+                                 Random::Rand() % 2 + 1);
                 }
             }
         }
@@ -2109,7 +2123,7 @@ namespace battleCastle
                 {
                     Position[0] = o->Position[0];
                     Position[1] = o->Position[1];
-                    Position[2] = o->Position[2] + 200 + rand() % 30;
+                    Position[2] = o->Position[2] + 200 + Random::Rand() % 30;
 
                     CreateEffect(MODEL_STONE_COFFIN + 1, Position, o->Angle, o->Light);
                 }

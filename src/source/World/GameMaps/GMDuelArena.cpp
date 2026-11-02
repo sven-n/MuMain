@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -70,7 +71,7 @@ bool CGMDuelArena::MoveObject(OBJECT* o)
     break;
     case 34:
     {
-        float Luminosity = (float)(rand() % 3 + 5) * 0.1f;
+        float Luminosity = (float)(Random::Rand() % 3 + 5) * 0.1f;
         vec3_t Light;
         Vector(Luminosity * 0.9f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
@@ -138,7 +139,7 @@ bool CGMDuelArena::UpdateObjectEffects(OBJECT* o, BMD* b)
         vec3_t vLight;
         Vector(1.0f, 1.0f, 1.0f, vLight);
 
-        switch (rand() % 3)
+        switch (Random::Rand() % 3)
         {
         case 0:
             CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);

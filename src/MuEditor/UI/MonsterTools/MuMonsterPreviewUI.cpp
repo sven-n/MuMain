@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #ifdef _EDITOR
 
@@ -82,14 +83,14 @@ std::optional<int> SoundSlotOf(int animation)
     case MONSTER01_STOP1:
     case MONSTER01_STOP2:
     case MONSTER01_WALK:
-        return IdleSlot + std::rand() % 2;
+        return IdleSlot + Random::Rand() % 2;
     case MONSTER01_ATTACK1:
     case MONSTER01_ATTACK2:
     case MONSTER01_ATTACK3:
     case MONSTER01_ATTACK4:
     case MONSTER01_ATTACK5:
     case MONSTER01_SHOCK:
-        return AttackSlot + std::rand() % 2;
+        return AttackSlot + Random::Rand() % 2;
     case MONSTER01_DIE:
         return DieSlot;
     default:

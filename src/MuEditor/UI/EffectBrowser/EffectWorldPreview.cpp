@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #ifdef _EDITOR
 
@@ -366,7 +367,7 @@ void EffectWorldPreview::Create(const EffectPools& pools)
     vec3_t position = {front[0], front[1], RequestTerrainHeight(front[0], front[1]) + call.height};
     vec3_t angle = {0.0f, 0.0f, hero.Angle[2]};
     if (call.randomAngle)
-        Vector(static_cast<float>(rand() % 360), 0.0f, static_cast<float>(rand() % 360), angle);
+        Vector(static_cast<float>(Random::Rand() % 360), 0.0f, static_cast<float>(Random::Rand() % 360), angle);
     vec3_t light = {call.light[0], call.light[1], call.light[2]};
     OBJECT* target = TargetOf(call);
     m_tracker.BeginCreate(pools);

@@ -296,7 +296,7 @@ TEST_CASE("Monster sounds: the traps' attacks play their sounds, the Iron Stick'
     CHECK(scope.Creation().Load().TakePlayedSounds() == Sounds({SOUND_FLAME}));
 }
 
-// Q-MN29: the shipped events draw with rand(), as the Hellas monsters'
+// Q-MN29: the shipped events draw with Random::Rand(), as the Hellas monsters'
 // attacks: a chance of one in n and a pick of one of two come out the same at
 // any frame rate; with rand_fps_check they came out less often the higher the
 // frame rate.
@@ -310,13 +310,13 @@ TEST_CASE("Monster sounds: the shipped chances and picks are the same at any fra
     for (unsigned seed = 0; seed < Seeds; ++seed)
     {
         // The Ice Giant's step plays one time in a hundred.
-        std::srand(seed);
+        Random::SeedRand(seed);
         const std::vector<PlayedSound> expected =
-            std::rand() % 100 == 0 ? Sounds({SOUND_RAKLION_ICEGIANT_MOVE}) : std::vector<PlayedSound>{};
+            Random::Rand() % 100 == 0 ? Sounds({SOUND_RAKLION_ICEGIANT_MOVE}) : std::vector<PlayedSound>{};
         steps += expected.empty() ? 0 : 1;
         for (const float fps : Factors)
         {
-            std::srand(seed);
+            Random::SeedRand(seed);
             Random::Seed(seed);
             FPS_ANIMATION_FACTOR = fps;
             INFO("seed " << seed << ", factor " << fps);
@@ -330,12 +330,12 @@ TEST_CASE("Monster sounds: the shipped chances and picks are the same at any fra
     int first = 0;
     for (unsigned seed = 0; seed < Seeds; ++seed)
     {
-        std::srand(seed);
-        const bool firstSound = std::rand() % 2 == 0;
+        Random::SeedRand(seed);
+        const bool firstSound = Random::Rand() % 2 == 0;
         first += firstSound ? 1 : 0;
         for (const float fps : Factors)
         {
-            std::srand(seed);
+            Random::SeedRand(seed);
             Random::Seed(seed);
             FPS_ANIMATION_FACTOR = fps;
             INFO("seed " << seed << ", factor " << fps);

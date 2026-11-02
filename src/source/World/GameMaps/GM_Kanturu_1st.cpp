@@ -2,6 +2,7 @@
 // File: GM_kanturu_1st.cpp
 //*****************************************************************************
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
@@ -68,14 +69,14 @@ bool M37Kanturu1st::MoveKanturu1stObject(OBJECT* pObject)
         ::PlayBuffer(SOUND_KANTURU_1ST_BG_WHEEL);
         break;
     case 60:
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity * 0.9f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3,
             PrimaryTerrainLight);
         pObject->HiddenMesh = -2;
         break;
     case 61:
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3,
             PrimaryTerrainLight);
@@ -218,7 +219,7 @@ bool M37Kanturu1st::UpdateKanturu1stObjectEffects(OBJECT* pObject, BMD* pModel)
         Vector(0.f, 0.f, 0.f, EndRelative);
         pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[1], EndRelative, StartPos, false);
         pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[2], EndRelative, EndPos, false);
-        if (rand() % 30 == 1)
+        if (Random::Rand() % 30 == 1)
             CreateJoint(BITMAP_JOINT_THUNDER, StartPos, EndPos,
                 pObject->Angle, 18, NULL, 50.f);
     }
@@ -248,10 +249,10 @@ bool M37Kanturu1st::UpdateKanturu1stObjectEffects(OBJECT* pObject, BMD* pModel)
         VectorCopy(Position, StartPos);
         VectorCopy(Position, EndPos);
         StartPos[0] -= 50.f;
-        StartPos[0] -= rand() % 100;
-        EndPos[0] += rand() % 80;
-        StartPos[1] -= rand() % 50;
-        EndPos[1] += rand() % 50;
+        StartPos[0] -= Random::Rand() % 100;
+        EndPos[0] += Random::Rand() % 80;
+        StartPos[1] -= Random::Rand() % 50;
+        EndPos[1] += Random::Rand() % 50;
         StartPos[2] += 10.0f;
         EndPos[2] += 10.f;
         if (rand_fps_check(20))
@@ -486,7 +487,7 @@ CHARACTER* M37Kanturu1st::CreateKanturu1stMonster(int iType, int PosX, int PosY,
         pCharacter = CreateCharacter(Key, MODEL_BLADE_HUNTER, PosX, PosY);
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Object.Gravity = 0.0f;
-        pCharacter->Object.Distance = (float)(rand() % 20) / 10.0f;
+        pCharacter->Object.Distance = (float)(Random::Rand() % 20) / 10.0f;
         pCharacter->Object.Angle[0] = 0.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -623,9 +624,9 @@ bool M37Kanturu1st::AttackEffectKanturu1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             vec3_t vPos, vRelative;
             vec3_t vLight = { 0.8f, 1.0f, 0.8f };
             Vector(0.f, 0.f, 0.f, vRelative);
-            vRelative[0] = (float)(4 - rand() % 5);
-            vRelative[1] = (float)(4 - rand() % 5);
-            vRelative[2] = (float)(4 - rand() % 5);
+            vRelative[0] = (float)(4 - Random::Rand() % 5);
+            vRelative[1] = (float)(4 - Random::Rand() % 5);
+            vRelative[2] = (float)(4 - Random::Rand() % 5);
             BoneManager::GetBonePosition(o, L"IRON_RIDER_BOW_6", vRelative, vPos);
             CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 10, 4.0f);
         }
@@ -1021,14 +1022,14 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_ATTACK1 + Random::Rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1070,7 +1071,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GIGAN_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GIGAN_ATTACK1 + Random::Rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1112,14 +1113,14 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_ATTACK1 + Random::Rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1142,7 +1143,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
             CreateParticle(
                 BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, o->Scale);
 
-            CreateEffect(MODEL_STONE1 + rand() % 2, vPos, o->Angle, o->Light);
+            CreateEffect(MODEL_STONE1 + Random::Rand() % 2, vPos, o->Angle, o->Light);
         }
         return true;
     }
@@ -1154,14 +1155,14 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SWOLF_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SWOLF_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SWOLF_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SWOLF_ATTACK1 + Random::Rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1182,9 +1183,9 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
             vec3_t vPos, vRelative;
             vec3_t vLight = { 0.8f, 1.0f, 0.8f };
             Vector(0.f, 0.f, 0.f, vRelative);
-            vRelative[0] = (float)(4 - rand() % 5);
-            vRelative[1] = (float)(4 - rand() % 5);
-            vRelative[2] = (float)(4 - rand() % 5);
+            vRelative[0] = (float)(4 - Random::Rand() % 5);
+            vRelative[1] = (float)(4 - Random::Rand() % 5);
+            vRelative[2] = (float)(4 - Random::Rand() % 5);
             BoneManager::GetBonePosition(o, L"IRON_RIDER_BOW_15", vRelative, vPos);
             CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 10, 4.0f);
             BoneManager::GetBonePosition(o, L"IRON_RIDER_BOW_16", vRelative, vPos);
@@ -1193,14 +1194,14 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
             if (o->CurrentAction == MONSTER01_WALK)
             {
                 if (rand_fps_check(15))
-                    PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_IR_MOVE1 + rand() % 2));
+                    PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_IR_MOVE1 + Random::Rand() % 2));
             }
             else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
             {
                 if (o->SubType == FALSE)
                 {
                     o->SubType = TRUE;
-                    PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_IR_ATTACK1 + rand() % 2));
+                    PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_IR_ATTACK1 + Random::Rand() % 2));
                 }
             }
         }
@@ -1226,14 +1227,14 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SATI_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SATI_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SATI_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_SATI_ATTACK1 + Random::Rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1261,7 +1262,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
                 if (gMapManager.WorldActive != WD_39KANTURU_3RD)
                     CreateParticle(BITMAP_SMOKE + 1, o->Position, o->Angle, o->Light);
 
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BLADE_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BLADE_MOVE1 + Random::Rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
@@ -1269,7 +1270,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BLADE_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BLADE_ATTACK1 + Random::Rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1287,14 +1288,14 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_ATTACK1 + Random::Rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1337,14 +1338,14 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_BER_ATTACK1 + Random::Rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1376,14 +1377,14 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_KENTA_ATTACK1 + Random::Rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1435,7 +1436,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GIGAN_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GIGAN_ATTACK1 + Random::Rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1474,14 +1475,14 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
         if (o->CurrentAction == MONSTER01_WALK)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1 || o->CurrentAction == MONSTER01_ATTACK2)
         {
             if (o->SubType == FALSE)
             {
                 o->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_1ST_GENO_ATTACK1 + Random::Rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -1504,7 +1505,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
             CreateParticle(
                 BITMAP_SMOKE + 1, vPos, o->Angle, o->Light, 1, o->Scale);
 
-            CreateEffect(MODEL_STONE1 + rand() % 2, vPos, o->Angle, o->Light);
+            CreateEffect(MODEL_STONE1 + Random::Rand() % 2, vPos, o->Angle, o->Light);
         }
     }
     return true;

@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #include "ItemEffects.h"
 #include "ItemModelTable.h"
@@ -335,7 +336,7 @@ void SpawnWingOfStorm(BMD* b, OBJECT* o, vec34_t* bones)
     for (int i = 0; i < 25; ++i)
     {
         b->TransformPosition(bones[iBone[i]], vRelativePos, vPos, true);
-        fScale = 0.5f; // (rand()%10) * 0.05f + 0.3f;
+        fScale = 0.5f; // (Random::Rand()%10) * 0.05f + 0.3f;
         CreateSprite(BITMAP_CLUD64, vPos, fScale, vLight, o, WorldTime * 0.01f, 1);
     }
 
@@ -345,7 +346,7 @@ void SpawnWingOfStorm(BMD* b, OBJECT* o, vec34_t* bones)
         for (int i = 0; i < 6; ++i)
         {
             b->TransformPosition(bones[iBoneThunder[i]], vRelativePos, vPos, true);
-            if (rand() % 20 == 0)
+            if (Random::Rand() % 20 == 0)
             {
                 Vector(0.6f, 0.6f, 0.9f, vLight);
                 CreateEffect(MODEL_FENRIR_THUNDER, vPos, o->Angle, vLight, 1, o);

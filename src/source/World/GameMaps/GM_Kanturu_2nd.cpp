@@ -1,5 +1,6 @@
 ﻿
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
@@ -71,7 +72,7 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Object.Angle[0] = 0.0f;
         pCharacter->Object.Gravity = 0.0f;
-        pCharacter->Object.Distance = (float)(rand() % 20) / 10.0f;
+        pCharacter->Object.Distance = (float)(Random::Rand() % 20) / 10.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
@@ -87,7 +88,7 @@ CHARACTER* M38Kanturu2nd::Create_Kanturu2nd_Monster(int iType, int PosX, int Pos
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Object.Angle[0] = 0.0f;
         pCharacter->Object.Gravity = 0.0f;
-        pCharacter->Object.Distance = (float)(rand() % 20) / 10.0f;
+        pCharacter->Object.Distance = (float)(Random::Rand() % 20) / 10.0f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
 
@@ -347,10 +348,10 @@ bool M38Kanturu2nd::Update_Kanturu2nd_ObjectEffects(OBJECT* o, BMD* b)
         VectorCopy(Position, StartPos);
         VectorCopy(Position, EndPos);
         StartPos[0] -= 50.f;
-        StartPos[0] -= rand() % 100;
-        EndPos[0] += rand() % 80;
-        StartPos[1] -= rand() % 50;
-        EndPos[1] += rand() % 50;
+        StartPos[0] -= Random::Rand() % 100;
+        EndPos[0] += Random::Rand() % 80;
+        StartPos[1] -= Random::Rand() % 50;
+        EndPos[1] += Random::Rand() % 50;
         StartPos[2] += 10.0f;
         EndPos[2] += 10.f;
         if (rand_fps_check(20))
@@ -437,7 +438,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_ObjectEffects(OBJECT* o, BMD* b)
     {
         if (rand_fps_check(3))
         {
-            float fBlue = (rand() % 3) * 0.01f + 0.02f;
+            float fBlue = (Random::Rand() % 3) * 0.01f + 0.02f;
             vec3_t Light;
             Vector(0.0f, 0.01f, fBlue, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 11, o->Scale, o);
@@ -448,7 +449,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_ObjectEffects(OBJECT* o, BMD* b)
     {
         if (rand_fps_check(3))
         {
-            float fRed = (rand() % 3) * 0.01f + 0.01f;
+            float fRed = (Random::Rand() % 3) * 0.01f + 0.01f;
             vec3_t Light;
             Vector(fRed, 0.00f, 0.0f, Light);
             CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 11, o->Scale, o);
@@ -477,7 +478,8 @@ bool M38Kanturu2nd::Update_Kanturu2nd_ObjectEffects(OBJECT* o, BMD* b)
     {
         if (rand_fps_check(20))
         {
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, o->Position, o->Position, o->Angle, 8, NULL, 30.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, o->Position, o->Position, o->Angle, 8, NULL,
+                        30.f + Random::Rand() % 10);
         }
     }
     break;
@@ -494,7 +496,8 @@ bool M38Kanturu2nd::Update_Kanturu2nd_ObjectEffects(OBJECT* o, BMD* b)
     {
         if (rand_fps_check(10))
         {
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, o->Position, o->Position, o->Angle, 9, NULL, 30.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, o->Position, o->Position, o->Angle, 9, NULL,
+                        30.f + Random::Rand() % 10);
         }
     }
     break;
@@ -502,7 +505,8 @@ bool M38Kanturu2nd::Update_Kanturu2nd_ObjectEffects(OBJECT* o, BMD* b)
     {
         if (rand_fps_check(10))
         {
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, o->Position, o->Position, o->Angle, 10, NULL, 30.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, o->Position, o->Position, o->Angle, 10, NULL,
+                        30.f + Random::Rand() % 10);
         }
     }
     break;
@@ -781,7 +785,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
         {
             if (rand_fps_check(15))
             {
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_2ND_PERSO_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_2ND_PERSO_MOVE1 + Random::Rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -814,7 +818,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
 
         vec3_t vPos;
         vec3_t vLight = {1.0f, 1.0f, 1.0f};
-        float Luminosity = (float)(rand() % 30 + 70) * 0.01f;
+        float Luminosity = (float)(Random::Rand() % 30 + 70) * 0.01f;
         Vector(Luminosity * 0.5f, Luminosity * 0.6f, Luminosity * 1.0f, vLight);
 
         BoneManager::GetBonePosition(o, L"PRSona_A1", vPos);
@@ -850,7 +854,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
             int i;
             for (int j = 0; j < 2; j++)
             {
-                i = rand() % 4;
+                i = Random::Rand() % 4;
                 vec3_t vAngle;
                 Vector(0.f, 0.f, i * 90.f, vAngle);
 
@@ -870,7 +874,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
 
             for (int i = 0; i < 5; i++)
             {
-                int j = rand() % 90;
+                int j = Random::Rand() % 90;
                 vec3_t p;
                 Vector(0.f, 0.f, 0.f, p);
                 Vector(0.5f, 0.5f, 0.5f, vLight);
@@ -951,7 +955,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
                 }
                 o->m_dwTime = timeGetTime();
 
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_2ND_TWIN_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_2ND_TWIN_MOVE1 + Random::Rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_DIE)
@@ -995,7 +999,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
         {
             if (rand_fps_check(15))
             {
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_2ND_DRED_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_2ND_DRED_MOVE1 + Random::Rand() % 2));
             }
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
@@ -1060,7 +1064,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
         }
 
         Vector(0.25f, 0.7f, 0.6f, vLight);
-        fScale = (rand() % 10 - 5) * 0.01f;
+        fScale = (Random::Rand() % 10 - 5) * 0.01f;
         BoneManager::GetBonePosition(o, L"Dreadfear_Eye52", vPos);
         CreateSprite(BITMAP_LIGHT + 1, vPos, 0.5f + fScale, vLight, o);
         BoneManager::GetBonePosition(o, L"Dreadfear_Eye54", vPos);
@@ -1148,9 +1152,9 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
                 VectorCopy(o->Position, vPos2);
                 vPos2[2] += 290.f;
                 VectorCopy(o->Position, vPos);
-                vPos[0] += (rand() % 600 - 300.f);
-                vPos[1] -= (rand() % 200 + 350.f);
-                vPos[2] += (rand() % 600 - 100.f);
+                vPos[0] += (Random::Rand() % 600 - 300.f);
+                vPos[1] -= (Random::Rand() % 200 + 350.f);
+                vPos[2] += (Random::Rand() % 600 - 100.f);
                 CreateJoint(BITMAP_JOINT_ENERGY, vPos, vPos2, o->Angle, 42, o, 10.f);
                 CreateJoint(BITMAP_JOINT_ENERGY, vPos, vPos2, o->Angle, 42, o, 10.f);
             }
@@ -1172,7 +1176,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
             if (iAnimationFrame >= 1 && iAnimationFrame <= 20)
             {
                 vec3_t vAngle;
-                Vector((float)(rand() % 60 + 290), 0.f, (float)(rand() % 30 + 90), vAngle);
+                Vector((float)(Random::Rand() % 60 + 290), 0.f, (float)(Random::Rand() % 30 + 90), vAngle);
                 CreateJoint(BITMAP_JOINT_SPARK, vPos, vPos, vAngle, 0);
             }
 
@@ -1449,7 +1453,8 @@ void CTrapCanon::Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
         Vector(2.0f + fLumi, 1.0f + fLumi, 1.0f + fLumi, vLight);
         CreateSprite(BITMAP_POUNDING_BALL, vPos, 0.7f + fLumi, vLight, o, (WorldTime / 10.0f));
         fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 1.0f;
-        Vector(2.0f + (rand() % 10) * 0.03f, 0.4f + (rand() % 10) * 0.03f, 0.4f + (rand() % 10) * 0.03f, vLight);
+        Vector(2.0f + (Random::Rand() % 10) * 0.03f, 0.4f + (Random::Rand() % 10) * 0.03f,
+               0.4f + (Random::Rand() % 10) * 0.03f, vLight);
         CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, o, -(WorldTime * 0.1f));
         CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLight, o, (WorldTime * 0.12f));
 

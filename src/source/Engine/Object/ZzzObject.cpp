@@ -175,8 +175,8 @@ void ActionObject(OBJECT* o)
                             {
                                 for (int i = 0; i < 10; ++i)
                                 {
-                                    Position[0] = o->Position[0] + (rand() % 300 - 150.f);
-                                    Position[1] = o->Position[1] - (rand() % 20 + 600.f);
+                                    Position[0] = o->Position[0] + (Random::Rand() % 300 - 150.f);
+                                    Position[1] = o->Position[1] - (Random::Rand() % 20 + 600.f);
                                     CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
                                 }
                             }
@@ -2094,7 +2094,7 @@ void UpdateRenderObjectEffects(OBJECT* o)
         CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, 0.7f, vLight, o, Rotation);
         CreateSprite(BITMAP_LIGHTMARKS, vWorldPos, 1.3f, vLight, o, Rotation);
 
-        if (rand() % 50 <= 5)
+        if (Random::Rand() % 50 <= 5)
         {
             CreateParticle(BITMAP_LIGHT + 3, o->Position, o->Angle, vLight, 0, 1.0f);
         }
@@ -2243,8 +2243,8 @@ void UpdateRenderObjectEffects(OBJECT* o)
 
             if (o->CurrentAction == MONSTER01_WALK)
             {
-                vRelativePos[0] = o->Position[0] + sinf(((rand() % 360) * 6.12)) * 40.0f;
-                vRelativePos[1] = o->Position[1] + sinf(((rand() % 360) * 6.12)) * 40.0f;
+                vRelativePos[0] = o->Position[0] + sinf(((Random::Rand() % 360) * 6.12)) * 40.0f;
+                vRelativePos[1] = o->Position[1] + sinf(((Random::Rand() % 360) * 6.12)) * 40.0f;
                 vRelativePos[2] = o->Position[2];
                 CreateParticleFpsChecked(BITMAP_SMOKE, vRelativePos, o->Angle, o->Light);
             }
@@ -2308,12 +2308,13 @@ void UpdateRenderObjectEffects(OBJECT* o)
         switch (o->CurrentAction)
         {
         case 1:
-            vRelativePos[0] = 20 + (rand() % 500 - 250) * 0.1f;
-            vRelativePos[1] = (rand() % 300 - 150) * 0.1f;
+            vRelativePos[0] = 20 + (Random::Rand() % 500 - 250) * 0.1f;
+            vRelativePos[1] = (Random::Rand() % 300 - 150) * 0.1f;
             b->TransformPosition(o->BoneTransform[16], vRelativePos, vWorldPos, true);
 
-            Vector((rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, Light);
-            fScale = (rand() % 5 + 5) * 0.1f;
+            Vector((Random::Rand() % 90 + 10) * 0.01f, (Random::Rand() % 90 + 10) * 0.01f,
+                   (Random::Rand() % 90 + 10) * 0.01f, Light);
+            fScale = (Random::Rand() % 5 + 5) * 0.1f;
             CreateParticleFpsChecked(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 13, fScale, o);
             CreateParticleFpsChecked(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 13, fScale, o);
             CreateParticleFpsChecked(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 13, fScale, o);
@@ -2371,13 +2372,14 @@ void UpdateRenderObjectEffects(OBJECT* o)
                         CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, o->Angle, vLight, 28);
                     }
 
-                    Vector(vPos[0] + (rand() % 100 - 50), vPos[1] + (rand() % 100 - 50), vPos[2], Position);
-                    CreateSprite(BITMAP_DS_SHOCK, Position, rand() % 10 * 0.1f + 1.5f, o->Light, o);
+                    Vector(vPos[0] + (Random::Rand() % 100 - 50), vPos[1] + (Random::Rand() % 100 - 50), vPos[2],
+                           Position);
+                    CreateSprite(BITMAP_DS_SHOCK, Position, Random::Rand() % 10 * 0.1f + 1.5f, o->Light, o);
 
                     for (int i = 0; i < 60; i++)
                     {
-                        Vector(0.3f + (rand() % 700) * 0.001f, 0.3f + (rand() % 700) * 0.001f,
-                               0.3f + (rand() % 700) * 0.001f, vLight);
+                        Vector(0.3f + (Random::Rand() % 700) * 0.001f, 0.3f + (Random::Rand() % 700) * 0.001f,
+                               0.3f + (Random::Rand() % 700) * 0.001f, vLight);
                         CreateParticleFpsChecked(BITMAP_SHINY, vPos, o->Angle, vLight, 9);
                     }
 
@@ -2386,8 +2388,8 @@ void UpdateRenderObjectEffects(OBJECT* o)
                     for (int i = 0; i < 3; ++i)
                     {
                         CreateEffectFpsChecked(MODEL_HALLOWEEN_CANDY_STAR, vPos, o->Angle, vLight, 1);
-                        CreateEffectFpsChecked(rand() % 4 + MODEL_XMAS_EVENT_BOX, vPos, o->Angle, vLight, 0, o);
-                        CreateEffectFpsChecked(rand() % 4 + MODEL_XMAS_EVENT_BOX, vPos, o->Angle, vLight, 0, o);
+                        CreateEffectFpsChecked(Random::Rand() % 4 + MODEL_XMAS_EVENT_BOX, vPos, o->Angle, vLight, 0, o);
+                        CreateEffectFpsChecked(Random::Rand() % 4 + MODEL_XMAS_EVENT_BOX, vPos, o->Angle, vLight, 0, o);
                     }
                 }
 
@@ -2405,14 +2407,14 @@ void UpdateRenderObjectEffects(OBJECT* o)
                 if (o->WeaponLevel == 0)
                 {
                     o->WeaponLevel = 1;
-                    o->Position[0] = o->StartPosition[0] + (rand() % 20 + 20) * 0.1f;
-                    o->Position[1] = o->StartPosition[1] + (rand() % 20 + 20) * 0.1f;
+                    o->Position[0] = o->StartPosition[0] + (Random::Rand() % 20 + 20) * 0.1f;
+                    o->Position[1] = o->StartPosition[1] + (Random::Rand() % 20 + 20) * 0.1f;
                 }
                 else
                 {
                     o->WeaponLevel = 0;
-                    o->Position[0] = o->StartPosition[0] - (rand() % 20 + 20) * 0.1f;
-                    o->Position[1] = o->StartPosition[1] - (rand() % 20 + 20) * 0.1f;
+                    o->Position[0] = o->StartPosition[0] - (Random::Rand() % 20 + 20) * 0.1f;
+                    o->Position[1] = o->StartPosition[1] - (Random::Rand() % 20 + 20) * 0.1f;
                 }
             }
             else
@@ -2423,9 +2425,9 @@ void UpdateRenderObjectEffects(OBJECT* o)
                     vec3_t Position;
                     for (int i = 0; i < 36; ++i)
                     {
-                        Vector(0.f, 0.f, (float)(rand() % 360), Angle);
-                        Position[0] = o->Position[0] + rand() % 200 - 100;
-                        Position[1] = o->Position[1] + rand() % 200 - 100;
+                        Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
+                        Position[0] = o->Position[0] + Random::Rand() % 200 - 100;
+                        Position[1] = o->Position[1] + Random::Rand() % 200 - 100;
                         Position[2] = o->Position[2];
 
                         CreateJoint(BITMAP_FLARE, Position, Position, Angle, 2, NULL, 40);
@@ -2436,14 +2438,14 @@ void UpdateRenderObjectEffects(OBJECT* o)
                 if (o->WeaponLevel == 0)
                 {
                     o->WeaponLevel = 1;
-                    o->Position[0] = o->StartPosition[0] + (rand() % 40 + 40) * 0.1f;
-                    o->Position[1] = o->StartPosition[1] + (rand() % 40 + 40) * 0.1f;
+                    o->Position[0] = o->StartPosition[0] + (Random::Rand() % 40 + 40) * 0.1f;
+                    o->Position[1] = o->StartPosition[1] + (Random::Rand() % 40 + 40) * 0.1f;
                 }
                 else
                 {
                     o->WeaponLevel = 0;
-                    o->Position[0] = o->StartPosition[0] - (rand() % 40 + 40) * 0.1f;
-                    o->Position[1] = o->StartPosition[1] - (rand() % 40 + 40) * 0.1f;
+                    o->Position[0] = o->StartPosition[0] - (Random::Rand() % 40 + 40) * 0.1f;
+                    o->Position[1] = o->StartPosition[1] - (Random::Rand() % 40 + 40) * 0.1f;
                 }
             }
         }
@@ -2470,7 +2472,8 @@ void UpdateRenderObjectEffects(OBJECT* o)
                 CreateSprite(BITMAP_LIGHT, vPos, 3.0f, vLightFire, o);
 
                 fScale = 0.8f;
-                Vector((rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, vRelative);
+                Vector((Random::Rand() % 10 - 5) * 1.0f, (Random::Rand() % 10 - 5) * 1.0f,
+                       (Random::Rand() % 10 - 5) * 1.0f, vRelative);
                 b->TransformByObjectBone(vPos, o, iBones[i], vRelative);
             }
             else
@@ -2479,10 +2482,11 @@ void UpdateRenderObjectEffects(OBJECT* o)
                 CreateSprite(BITMAP_LIGHT, vPos, 2.0f, vLightFire, o);
 
                 fScale = 0.6f;
-                Vector((rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, vRelative);
+                Vector((Random::Rand() % 10 - 5) * 1.0f, (Random::Rand() % 10 - 5) * 1.0f,
+                       (Random::Rand() % 10 - 5) * 1.0f, vRelative);
                 b->TransformByObjectBone(vPos, o, iBones[i], vRelative);
             }
-            switch (rand() % 3)
+            switch (Random::Rand() % 3)
             {
             case 0:
                 CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, o->Angle, vLight, 3, fScale);
@@ -2506,7 +2510,7 @@ void UpdateRenderObjectEffects(OBJECT* o)
         Vector(0.f, 0.f, 0.f, vRelativePos);
         Vector(0.8f, 0.8f, 0.8f, Light);
         b->TransformPosition(o->BoneTransform[41], vRelativePos, vWorldPos, true);
-        CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vWorldPos, o->Angle, Light, 1, 0.6f, o);
+        CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vWorldPos, o->Angle, Light, 1, 0.6f, o);
         CreateParticleFpsChecked(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 6, 0.6f, o);
 
         Vector(0.5f, 0.5f, 0.5f, Light);
@@ -2529,8 +2533,8 @@ void UpdateRenderObjectEffects(OBJECT* o)
             vec3_t vPos, vLight;
             for (int i = 0; i < 1; ++i)
             {
-                vPos[0] = o->Position[0] + rand() % 120 - 60;
-                vPos[1] = o->Position[1] + rand() % 120 - 60;
+                vPos[0] = o->Position[0] + Random::Rand() % 120 - 60;
+                vPos[1] = o->Position[1] + Random::Rand() % 120 - 60;
                 vPos[2] = o->Position[2];
                 Vector(0.3f, 0.3f, 0.3f, vLight);
                 CreateParticleFpsChecked(BITMAP_SMOKE, vPos, o->Angle, vLight, 54, 2.0f);
@@ -2540,12 +2544,12 @@ void UpdateRenderObjectEffects(OBJECT* o)
 
             if (rand_fps_check(2))
             {
-                vPos[0] = o->Position[0] + rand() % 80 - 40;
-                vPos[1] = o->Position[1] + rand() % 80 - 40;
-                vPos[2] = o->Position[2] + rand() % 50 + 10;
+                vPos[0] = o->Position[0] + Random::Rand() % 80 - 40;
+                vPos[1] = o->Position[1] + Random::Rand() % 80 - 40;
+                vPos[2] = o->Position[2] + Random::Rand() % 50 + 10;
                 Vector(0.2f, 0.5f, 1.0f, vLight);
                 CreateParticle(BITMAP_PIN_LIGHT, vPos, o->Angle, vLight, 2, 1.0f, o);
-                vPos[2] = o->Position[2] + rand() % 50 + 10;
+                vPos[2] = o->Position[2] + Random::Rand() % 50 + 10;
                 Vector(1.0f, 0.8f, 0.5f, vLight);
                 CreateParticle(BITMAP_PIN_LIGHT, vPos, o->Angle, vLight, 3, 0.2f, o);
             }
@@ -2586,7 +2590,7 @@ void UpdateRenderObjectEffects(OBJECT* o)
         if (o->CurrentAction == FENRIR_ATTACK_SKILL)
         {
             Vector(1.0f, 0.0f, 0.0f, vLight);
-            Vector((float)(rand() % 10 - 10) * 0.5f, 0.f, (float)(rand() % 40 - 20) * 0.5f, vPos);
+            Vector((float)(Random::Rand() % 10 - 10) * 0.5f, 0.f, (float)(Random::Rand() % 40 - 20) * 0.5f, vPos);
             b->TransformPosition(bones()[14], vPos, vPosition, false);
             CreateParticleFpsChecked(BITMAP_SPARK + 1, vPosition, o->Angle, vLight, 15, 0.7f + (fLuminosity * 0.05f));
         }
@@ -2684,8 +2688,8 @@ void UpdateRenderObjectEffects(OBJECT* o)
         CreateSprite(BITMAP_LIGHT, o->EyeLeft, 1.f, Light, o);
         CreateSprite(BITMAP_LIGHT, o->EyeRight, 1.f, Light, o);
         Vector(0.5f, 0.5f, 0.5f, Light);
-        CreateSprite(BITMAP_SHINY + 1, o->EyeLeft, 0.5f, Light, o, (float)(rand() % 360));
-        CreateSprite(BITMAP_SHINY + 1, o->EyeRight, 0.5f, Light, o, (float)(rand() % 360));
+        CreateSprite(BITMAP_SHINY + 1, o->EyeLeft, 0.5f, Light, o, (float)(Random::Rand() % 360));
+        CreateSprite(BITMAP_SHINY + 1, o->EyeRight, 0.5f, Light, o, (float)(Random::Rand() % 360));
         break;
     }
     case MODEL_ARROW_AUTOLOAD:
@@ -2779,10 +2783,10 @@ void UpdateRenderObjectEffects(OBJECT* o)
         Vector(0.f, 0.f, 0.f, p);
         b->TransformPosition(bones[1], p, Position);
         CreateSprite(BITMAP_SHINY + 1, Position, (float)(sinf(WorldTime * 0.002f) * 0.3f + 1.3f), Light, o,
-                     (float)(rand() % 360));
+                     (float)(Random::Rand() % 360));
         CreateSprite(BITMAP_LIGHT, Position, 1.5f, Light, o, 90.f);
         CreateSprite(BITMAP_SHINY + 1, Position, (float)(sinf(WorldTime * 0.002f) * 0.3f + 1.3f), Light, o,
-                     (float)(rand() % 360));
+                     (float)(Random::Rand() % 360));
         CreateParticleFpsChecked(BITMAP_SPARK, Position, o->Angle, Light);
         break;
     }
@@ -2821,11 +2825,12 @@ void UpdateRenderObjectEffects(OBJECT* o)
         if (o->CurrentAction == 0 && rand_fps_check(5))
         {
             Vector(0.f, 0.f, 0.f, vWorldPos);
-            Vector((rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, (rand() % 90 + 10) * 0.01f, Light);
-            fScale = (rand() % 5 + 5) * 0.1f;
+            Vector((Random::Rand() % 90 + 10) * 0.01f, (Random::Rand() % 90 + 10) * 0.01f,
+                   (Random::Rand() % 90 + 10) * 0.01f, Light);
+            fScale = (Random::Rand() % 5 + 5) * 0.1f;
             Vector(0.f, 0.f, 0.f, vRelativePos);
-            vRelativePos[0] = -5 + (rand() % 1000 - 500) * 0.01f;
-            vRelativePos[1] = (rand() % 300 - 150) * 0.01f;
+            vRelativePos[0] = -5 + (Random::Rand() % 1000 - 500) * 0.01f;
+            vRelativePos[1] = (Random::Rand() % 300 - 150) * 0.01f;
             b->TransformPosition(o->BoneTransform[127], vRelativePos, vWorldPos, true);
             CreateParticle(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 13, fScale, o);
             CreateParticle(BITMAP_LIGHT, vWorldPos, o->Angle, Light, 12, fScale * 0.1f, o);
@@ -3108,7 +3113,7 @@ void UpdateObjectVisual(OBJECT* o)
     const auto bones = [o, b] { return Engine::Object::Pose::World(o, b); };
     vec3_t p, Position;
     vec3_t Light;
-    float Luminosity = (float)(rand() % 30 + 70) * 0.01f;
+    float Luminosity = (float)(Random::Rand() % 30 + 70) * 0.01f;
     int Bitmap;
     float Scale;
     float Rotation;
@@ -3160,10 +3165,10 @@ void UpdateObjectVisual(OBJECT* o)
             o->BlendMeshTexCoordV = -(int)WorldTime % 1000 * 0.001f;
             if (rand_fps_check(2))
             {
-                Vector((float)(rand() % 32 - 16), -20.f, (float)(rand() % 32 - 16), p);
+                Vector((float)(Random::Rand() % 32 - 16), -20.f, (float)(Random::Rand() % 32 - 16), p);
                 b->TransformPosition(bones()[1], p, Position);
                 CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light);
-                Vector((float)(rand() % 32 - 16), -80.f, (float)(rand() % 32 - 16), p);
+                Vector((float)(Random::Rand() % 32 - 16), -80.f, (float)(Random::Rand() % 32 - 16), p);
                 b->TransformPosition(bones()[4], p, Position);
                 CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light);
             }
@@ -3262,7 +3267,7 @@ void UpdateObjectVisual(OBJECT* o)
 
                 for (int i = 0; i < 8; i++)
                 {
-                    Vector((float)(rand() % 60 + 60), 90.f + 50.f, (float)(rand() % 30), Angle);
+                    Vector((float)(Random::Rand() % 60 + 60), 90.f + 50.f, (float)(Random::Rand() % 30), Angle);
                     CreateJoint(BITMAP_JOINT_SPARK, Position, Position, Angle);
                     CreateParticle(BITMAP_SPARK, Position, Angle, Light);
                 }
@@ -3312,8 +3317,8 @@ void UpdateObjectVisual(OBJECT* o)
                     for ( int i = 0; i < 3; ++i)
                     {
                         VectorCopy( o->Position, Position);
-                        Position[0] += ( float)( 2 * i - 2) / 2.f * 100.f + ( float)( rand() % 31 - 15);
-                        Position[1] += ( float)( 2 * j - 1) / 1.f * 70.f-80.f + ( float)( rand() % 31 - 15);
+                        Position[0] += ( float)( 2 * i - 2) / 2.f * 100.f + ( float)( Random::Rand() % 31 - 15);
+                        Position[1] += ( float)( 2 * j - 1) / 1.f * 70.f-80.f + ( float)( Random::Rand() % 31 - 15);
                         VectorCopy( Position, p);
                         p[2] += 300.f;
                         CreateJoint(BITMAP_JOINT_LASER+1,Position,p,o->Angle,0,o,50.f);
@@ -3396,11 +3401,11 @@ void UpdateObjectVisual(OBJECT* o)
                     CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, o->Light, 8, o->Scale);
                     if (rand_fps_check(3))
                     {
-                        Position[0] = o->Position[0] + (rand() % 128 - 64);
-                        Position[1] = o->Position[1] + (rand() % 128 - 64);
+                        Position[0] = o->Position[0] + (Random::Rand() % 128 - 64);
+                        Position[1] = o->Position[1] + (Random::Rand() % 128 - 64);
                         Position[2] = o->Position[2];
                         CreateParticle(BITMAP_SMOKE, Position, o->Angle, o->Light, 4, o->Scale * 0.5f);
-                        CreateEffect(MODEL_STONE1 + rand() % 2, o->Position, o->Angle, o->Light);
+                        CreateEffect(MODEL_STONE1 + Random::Rand() % 2, o->Position, o->Angle, o->Light);
                     }
                 }
             }
@@ -3603,10 +3608,8 @@ void UpdateObjectVisual(OBJECT* o)
 
             if (iTimeCheck >= 7950)
             {
-                Vector(o->Position[0] + (rand() % 2048 - 1024),
-                    o->Position[1] + (rand() % 2048 - 1024),
-                    o->Position[2] + (3000 + rand() % 600),
-                    Position);
+                Vector(o->Position[0] + (Random::Rand() % 2048 - 1024), o->Position[1] + (Random::Rand() % 2048 - 1024),
+                       o->Position[2] + (3000 + Random::Rand() % 600), Position);
                 CreateEffectFpsChecked(MODEL_FIRE, Position, o->Angle, o->Light, 9);
             }
         }
@@ -4132,12 +4135,11 @@ void MoveObject(OBJECT* o)
         if ((int)WorldTime % 4000 < 1000)
             if (rand_fps_check(100))
             {
-                float Luminosity = (float)(rand() % 12 + 4) * 0.1f;
+                float Luminosity = (float)(Random::Rand() % 12 + 4) * 0.1f;
                 vec3_t Light;
                 Vector(Luminosity * 0.2f, Luminosity * 0.3f, Luminosity * 0.5f, Light);
-                AddTerrainLight(Hero->Object.Position[0] + rand() % 1200 - 600,
-                    Hero->Object.Position[1] + rand() % 1200 - 600,
-                    Light, 12, PrimaryTerrainLight);
+                AddTerrainLight(Hero->Object.Position[0] + Random::Rand() % 1200 - 600,
+                                Hero->Object.Position[1] + Random::Rand() % 1200 - 600, Light, 12, PrimaryTerrainLight);
                 //PlayBuffer(SOUND_THUNDER01);
             }
         PlayBuffer(SOUND_RAIN01, NULL, true);
@@ -4226,7 +4228,7 @@ void MoveObject(OBJECT* o)
                 {
                 for(int i=0;i<100;i++)
                 {
-                Vector((float)(rand()%200-100),(float)(rand()%40-20),(float)(rand()%200-100),Position);
+                Vector((float)(Random::Rand()%200-100),(float)(Random::Rand()%40-20),(float)(Random::Rand()%200-100),Position);
                 VectorAdd(Position,o->Position,Position);
                 Vector(1.f,1.f,1.f,Light);
                 CreateParticle(BITMAP_SPARK,Position,o->Angle,Light);
@@ -4250,7 +4252,7 @@ void MoveObject(OBJECT* o)
             break;
         case MODEL_HOUSE01 + 2:
         case MODEL_HOUSE_WALL01 + 1:
-            o->BlendMeshLight = (float)(rand() % 4 + 4) * 0.1f;
+            o->BlendMeshLight = (float)(Random::Rand() % 4 + 4) * 0.1f;
             break;
         case MODEL_LIGHT01:
             CreateFire(0, o, 0.f, 0.f, 0.f);
@@ -4279,13 +4281,13 @@ void MoveObject(OBJECT* o)
             CreateFire(0, o, 0.f, -30.f, 60.f);
             break;
         case MODEL_STREET_LIGHT:
-            Luminosity = (float)(rand() % 2 + 6) * 0.1f;
+            Luminosity = (float)(Random::Rand() % 2 + 6) * 0.1f;
             Vector(Luminosity, Luminosity * 0.8f, Luminosity * 0.6f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
             break;
         case MODEL_BONFIRE:
             CreateFire(0, o, 0.f, 0.f, 60.f);
-            o->BlendMeshLight = (float)(rand() % 6 + 4) * 0.1f;
+            o->BlendMeshLight = (float)(Random::Rand() % 6 + 4) * 0.1f;
             //CreateBonfire(o->Position,o->Angle);
             break;
             /*	case MODEL_FIREPLACE01:
@@ -4308,7 +4310,7 @@ void MoveObject(OBJECT* o)
             break;
         }*/
         case MODEL_CANDLE:
-            Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+            Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
             Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
             break;
@@ -4357,7 +4359,7 @@ void MoveObject(OBJECT* o)
         switch (o->Type)
         {
         case 78:
-            o->BlendMeshLight = (float)(rand() % 4 + 4) * 0.1f;
+            o->BlendMeshLight = (float)(Random::Rand() % 4 + 4) * 0.1f;
             break;
         case 30:
         {
@@ -4367,8 +4369,8 @@ void MoveObject(OBJECT* o)
             Position[2] = o->Position[2] + 160.f;
             CreateParticleFpsChecked(BITMAP_TRUE_FIRE, Position, o->Angle,
                 o->Light, 0, o->Scale);
-            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle,
-                o->Light, 21, 0.5f + ((rand() % 9) * 0.1f));
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, o->Light, 21,
+                                     0.5f + ((Random::Rand() % 9) * 0.1f));
         }
         break;
         case 66:
@@ -4492,7 +4494,7 @@ void MoveObject(OBJECT* o)
             break;
         case 3:
             o->BlendMesh = 0;
-            o->BlendMeshLight = (float)(rand() % 4 + 6) * 0.1f;
+            o->BlendMeshLight = (float)(Random::Rand() % 4 + 6) * 0.1f;
             break;
         }
         break;
@@ -4717,11 +4719,11 @@ int MoveHeavenThunder(void)
     {
         vec3_t  position, Angle;
 
-        position[0] = Hero->Object.Position[0] + rand() % 300 - 150.f;
+        position[0] = Hero->Object.Position[0] + Random::Rand() % 300 - 150.f;
         position[1] = Hero->Object.Position[1];
-        position[2] = Hero->Object.Position[2] + rand() % 300 - 150.f;
+        position[2] = Hero->Object.Position[2] + Random::Rand() % 300 - 150.f;
 
-        Luminosity = (float)(rand() % 4 + 4) * 0.05f;
+        Luminosity = (float)(Random::Rand() % 4 + 4) * 0.05f;
         Vector(Luminosity * 0.3f, Luminosity * 0.3f, Luminosity * 0.081f, Light);
         AddTerrainLight(position[0], position[1], Light, 2, PrimaryTerrainLight);
         Vector(0.f, 0.f, 0.f, Angle);
@@ -4729,10 +4731,10 @@ int MoveHeavenThunder(void)
 
         if (visibleObject)
         {
-            objectCount = rand() % visibleObject;
+            objectCount = Random::Rand() % visibleObject;
         }
 
-        if (rand() % 5 == 0)
+        if (Random::Rand() % 5 == 0)
         {
             float Matrix1[3][4];
             float Matrix2[3][4];
@@ -4742,7 +4744,7 @@ int MoveHeavenThunder(void)
             Vector(0.f, 0.f, -45.f, angle);
             AngleMatrix(angle, Matrix1);
 
-            switch (rand() % 4)
+            switch (Random::Rand() % 4)
             {
             case 0:
                 Vector(-400.f, -1000.f, 0.f, position);
@@ -4788,8 +4790,8 @@ int MoveHeavenThunder(void)
             position[2] -= 300.f;
             position2[2] -= 300.f;
             angle[2] = 0;
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, position, position2, angle, 0, NULL, 40.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, position, position2, angle, 0, NULL, 40.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, position, position2, angle, 0, NULL, 40.f + Random::Rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, position, position2, angle, 0, NULL, 40.f + Random::Rand() % 10);
         }
     }
 
@@ -4806,12 +4808,12 @@ void MoveObjectSetting(int& objCount)
     {
         objCount = MoveHeavenThunder();
 
-        if (0 == (rand() % 10))
+        if (0 == (Random::Rand() % 10))
         {
             vec3_t Position;
-            Vector(Hero->Object.Position[0] + (float)(rand() % 5000 - 2500),
-                Hero->Object.Position[1] + (float)(rand() % 5000 - 2500),
-                Hero->Object.Position[2] - 1000.f, Position);
+            Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 5000 - 2500),
+                   Hero->Object.Position[1] + (float)(Random::Rand() % 5000 - 2500), Hero->Object.Position[2] - 1000.f,
+                   Position);
             vec3_t Light = { 1.f, 1.f, 1.f };
             vec3_t Angle = { 0.f, 0.f, 0.f };
             CreateEffect(BITMAP_LIGHT, Position, Angle, Light);
@@ -4826,9 +4828,9 @@ void MoveObjectSetting(int& objCount)
         Vector(0.f, 0.f, 0.f, Angle);
         Vector(1.f, 1.f, 1.f, Light);
 
-        Vector(Hero->Object.Position[0] + (float)(rand() % 900 - 300),
-            Hero->Object.Position[1] + (float)(rand() % 900 - 300),
-            Hero->Object.Position[2] + rand() % 50 + 250.f, Position);
+        Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 900 - 300),
+               Hero->Object.Position[1] + (float)(Random::Rand() % 900 - 300),
+               Hero->Object.Position[2] + Random::Rand() % 50 + 250.f, Position);
 
         if (rand_fps_check(4))
         {
@@ -4848,10 +4850,10 @@ void MoveObjectOnEffect(OBJECT* o, int& objCount, int& visObject)
         {
             if (rand_fps_check(10) && o->Type >= 0 && o->Type <= 5)
             {
-                Vector(rand() % 10 / 50.f, rand() % 10 / 50.f, rand() % 10 / 50.f, Light);
+                Vector(Random::Rand() % 10 / 50.f, Random::Rand() % 10 / 50.f, Random::Rand() % 10 / 50.f, Light);
                 CreateSprite(BITMAP_CLOUD + 1, o->Position, 0.5f, Light, &Hero->Object);
-                CreateJoint(BITMAP_JOINT_THUNDER, o->Position, o->Position, o->Angle, 6, o, rand() % 20 + 10.f);
-                CreateJoint(BITMAP_JOINT_THUNDER, o->Position, o->Position, o->Angle, 6, o, rand() % 20 + 10.f);
+                CreateJoint(BITMAP_JOINT_THUNDER, o->Position, o->Position, o->Angle, 6, o, Random::Rand() % 20 + 10.f);
+                CreateJoint(BITMAP_JOINT_THUNDER, o->Position, o->Position, o->Angle, 6, o, Random::Rand() % 20 + 10.f);
             }
             else
             {
@@ -5708,7 +5710,7 @@ void ItemObjectAttribute(OBJECT* o)
         break;
     case MODEL_CHAOS_LIGHTNING_STAFF:
         o->BlendMesh = 1;
-        o->BlendMeshLight = (float)(rand() % 11) * 0.1f;
+        o->BlendMeshLight = (float)(Random::Rand() % 11) * 0.1f;
         break;
     case MODEL_STAFF_OF_RESURRECTION:
         o->BlendMesh = -2;
@@ -5744,8 +5746,8 @@ void ItemObjectAttribute(OBJECT* o)
         break;
     case MODEL_LEGENDARY_SHIELD:
         o->BlendMesh = 1;
-        o->BlendMeshTexCoordU = (float)(rand() % 10) * 0.1f;
-        o->BlendMeshTexCoordV = (float)(rand() % 10) * 0.1f;
+        o->BlendMeshTexCoordU = (float)(Random::Rand() % 10) * 0.1f;
+        o->BlendMeshTexCoordV = (float)(Random::Rand() % 10) * 0.1f;
         break;
     case MODEL_ELEMENTAL_SHIELD:
         o->HiddenMesh = 2;
@@ -5764,8 +5766,8 @@ void ItemObjectAttribute(OBJECT* o)
         break;
     case MODEL_LEGENDARY_STAFF:
         o->BlendMesh = 2;
-        o->BlendMeshTexCoordU = (float)(rand() % 10) * 0.1f;
-        o->BlendMeshTexCoordV = (float)(rand() % 10) * 0.1f;
+        o->BlendMeshTexCoordU = (float)(Random::Rand() % 10) * 0.1f;
+        o->BlendMeshTexCoordV = (float)(Random::Rand() % 10) * 0.1f;
         break;
     case MODEL_ETC:
         o->Scale = 0.7f;
@@ -5778,7 +5780,7 @@ void ItemObjectAttribute(OBJECT* o)
         break;
     case MODEL_LIGHTING_SWORD:
         o->BlendMesh = 1;
-        o->BlendMeshTexCoordU = (float)(rand() % 10) * 0.1f;
+        o->BlendMeshTexCoordU = (float)(Random::Rand() % 10) * 0.1f;
         o->BlendMeshLight = sinf(WorldTime * 0.004f) * 0.3f + 0.7f;
         break;
     case MODEL_LIGHT_SABER:
@@ -6093,7 +6095,7 @@ void CreateShiny(OBJECT* o)
     {
         float Matrix[3][4];
         AngleMatrix(o->Angle, Matrix);
-        Vector((float)(rand() % 32 + 16), 0.f, (float)(rand() % 32 + 16), p);
+        Vector((float)(Random::Rand() % 32 + 16), 0.f, (float)(Random::Rand() % 32 + 16), p);
         VectorRotate(p, Matrix, Position);
         VectorAdd(o->Position, Position, Position);
         vec3_t Light;
@@ -6596,18 +6598,18 @@ void UpdateTransformSkinEffects(OBJECT* o)
 
         vPos[2] -= 5.0f;
         float fLumi;
-        fLumi = (float)(rand() % 5 + 10) * 0.1f;
+        fLumi = (float)(Random::Rand() % 5 + 10) * 0.1f;
         Vector(fLumi + 0.5f, fLumi * 0.3f + 0.1f, 0.f, vLight);
         CreateSprite(BITMAP_LIGHT, vPos, 1.0f + fLumi * 0.1f, vLight, o);
 
         if (rand_fps_check(8))
         {
             vPos[2] -= 10.0f;
-            fLumi = (float)(rand() % 100) * 0.01f;
+            fLumi = (float)(Random::Rand() % 100) * 0.01f;
             vLight[0] = fLumi;
-            fLumi = (float)(rand() % 100) * 0.01f;
+            fLumi = (float)(Random::Rand() % 100) * 0.01f;
             vLight[1] = fLumi;
-            fLumi = (float)(rand() % 100) * 0.01f;
+            fLumi = (float)(Random::Rand() % 100) * 0.01f;
             vLight[2] = fLumi;
             CreateParticle(BITMAP_SHINY, vPos, o->Angle, vLight, 4, 0.8f);
         }
@@ -6624,11 +6626,11 @@ void UpdateTransformSkinEffects(OBJECT* o)
                 CreateParticleFpsChecked(BITMAP_SPARK + 2, vPos, o->Angle, vLight, 0, 0.6f);
                 for (int i = 0; i < 20; ++i)
                 {
-                    fLumi = (float)(rand() % 100) * 0.01f;
+                    fLumi = (float)(Random::Rand() % 100) * 0.01f;
                     vLight[0] = fLumi;
-                    fLumi = (float)(rand() % 100) * 0.01f;
+                    fLumi = (float)(Random::Rand() % 100) * 0.01f;
                     vLight[1] = fLumi;
-                    fLumi = (float)(rand() % 100) * 0.01f;
+                    fLumi = (float)(Random::Rand() % 100) * 0.01f;
                     vLight[2] = fLumi;
                     CreateParticleFpsChecked(BITMAP_SHINY, vPos, o->Angle, vLight, 4, 0.8f);
                 }
@@ -6658,11 +6660,11 @@ void UpdateTransformSkinEffects(OBJECT* o)
                 CreateParticleFpsChecked(BITMAP_SPARK + 2, vPos, o->Angle, vLight, 0, 0.6f);
                 for (int i = 0; i < 20; ++i)
                 {
-                    fLumi = (float)(rand() % 100) * 0.01f;
+                    fLumi = (float)(Random::Rand() % 100) * 0.01f;
                     vLight[0] = fLumi;
-                    fLumi = (float)(rand() % 100) * 0.01f;
+                    fLumi = (float)(Random::Rand() % 100) * 0.01f;
                     vLight[1] = fLumi;
-                    fLumi = (float)(rand() % 100) * 0.01f;
+                    fLumi = (float)(Random::Rand() % 100) * 0.01f;
                     vLight[2] = fLumi;
                     CreateParticleFpsChecked(BITMAP_SHINY, vPos, o->Angle, vLight, 4, 0.8f);
                 }
@@ -6714,7 +6716,7 @@ void UpdateTransformSkinEffects(OBJECT* o)
         {
             if (iAnimationFrame == 4 || iAnimationFrame == 8 || iAnimationFrame == 12)
             {
-                int iEffectType = rand() % 4 + MODEL_XMAS_EVENT_BOX;
+                int iEffectType = Random::Rand() % 4 + MODEL_XMAS_EVENT_BOX;
                 vec3_t vPos;
                 vec3_t vLight;
                 Vector(1.f, 1.f, 1.f, vLight);
@@ -7056,12 +7058,13 @@ void SpawnNextGradeWeaponEffects(CHARACTER* c)
             CreateSprite(BITMAP_MAGIC, vPos, 0.35f, vLight, &c->Object);
 
             Vector(1.0f, 1.0f, 1.0f, vLight);
-            fScale = (float)(rand() % 60) * 0.01f;
+            fScale = (float)(Random::Rand() % 60) * 0.01f;
             CreateSprite(BITMAP_FLARE_RED, vPos, 0.6f * fScale + 0.4f, vLight, &c->Object);
 
             Vector(1.0f, 0.2f, 0.0f, vLight);
-            fScale = (float)(rand() % 80 + 10) * 0.01f * 1.0f;
-            CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, c->Object.Angle, vLight, 0, fScale);
+            fScale = (float)(Random::Rand() % 80 + 10) * 0.01f * 1.0f;
+            CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + Random::Rand() % 3, vPos, c->Object.Angle, vLight, 0,
+                                     fScale);
         }break;
         }//switch
     } //for

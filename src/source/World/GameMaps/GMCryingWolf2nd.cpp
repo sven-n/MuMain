@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -37,7 +38,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndObject(OBJECT* pObject)
         pObject->HiddenMesh = -2;
         break;
     case 3:
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
         pObject->HiddenMesh = -2;
@@ -239,7 +240,7 @@ bool M34CryingWolf2nd::MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pMod
     {
         vec3_t Position, Light;
 
-        auto Rotation = (float)(rand() % 360);
+        auto Rotation = (float)(Random::Rand() % 360);
         float Luminosity = sinf(WorldTime * 0.0012f) * 0.8f + 1.3f;
 
         float fScalePercent = 1.f;

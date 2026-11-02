@@ -39,9 +39,9 @@ template <typename Draw> void CheckChangesNothing(Draw draw, int passes = 2)
 {
     const std::vector<unsigned char> before = Pools();
     constexpr unsigned int seed = 914;
-    std::srand(seed);
-    const int next = std::rand();
-    std::srand(seed);
+    Random::SeedRand(seed);
+    const int next = Random::Rand();
+    Random::SeedRand(seed);
     const std::mt19937 engine = Random::Snapshot();
 
     Diagnostics::DrawSpawnCheck::ResetViolations();
@@ -52,7 +52,7 @@ template <typename Draw> void CheckChangesNothing(Draw draw, int passes = 2)
     }
 
     CHECK(Diagnostics::DrawSpawnCheck::Violations() == 0);
-    CHECK(std::rand() == next);
+    CHECK(Random::Rand() == next);
     CHECK(Random::Snapshot() == engine);
     CHECK(Pools() == before);
 }

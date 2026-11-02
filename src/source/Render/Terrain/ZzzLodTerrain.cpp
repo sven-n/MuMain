@@ -3,6 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
@@ -131,7 +132,7 @@ void InitTerrainMappingLayer()
         TerrainMappingLayer1[i] = 0;
         TerrainMappingLayer2[i] = 255;
         TerrainMappingAlpha[i] = 0.0f;
-        TerrainGrassTexture[i] = static_cast<float>(rand() % 4) / 4.0f;
+        TerrainGrassTexture[i] = static_cast<float>(Random::Rand() % 4) / 4.0f;
 #ifdef ASG_ADD_MAP_KARUTAN
         g_fTerrainGrassWind1[i] = 0.0f;
 #endif
@@ -1578,8 +1579,8 @@ void FaceTexture(int Texture, float xf, float yf, bool Water, bool Scale)
         {
             if (rand_fps_check(50))
             {
-                float sx = xf * TERRAIN_SCALE + (float)((rand() % 100 + 1) * 1.0f);
-                float sy = yf * TERRAIN_SCALE + (float)((rand() % 100 + 1) * 1.0f);
+                float sx = xf * TERRAIN_SCALE + (float)((Random::Rand() % 100 + 1) * 1.0f);
+                float sy = yf * TERRAIN_SCALE + (float)((Random::Rand() % 100 + 1) * 1.0f);
                 Vector(sx, sy, Hero->Object.Position[2] + 10.f, Pos);
                 CreateParticle(BITMAP_SPOT_WATER, Pos, Hero->Object.Angle, Light, 0);
             }

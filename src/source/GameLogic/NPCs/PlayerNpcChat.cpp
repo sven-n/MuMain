@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #include "GameLogic/NPCs/PlayerNpcChat.h"
 
@@ -47,7 +48,7 @@ const wchar_t* LineAtStop(int world, bool actionChanged)
         return nullptr;
 
     if (actionChanged)
-        worldLines->lastLine = worldLines->lines[rand() % worldLines->lines.size()];
+        worldLines->lastLine = worldLines->lines[Random::Rand() % worldLines->lines.size()];
     return *worldLines->lastLine;
 }
 } // namespace GameLogic::Npcs::PlayerNpcChat

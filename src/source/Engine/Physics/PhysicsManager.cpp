@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "PhysicsManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -587,11 +588,11 @@ BOOL CPhysicsCloth::Move(float fTime)
     switch (PCT_MASK_ELASTIC & m_dwType)
     {
     case PCT_RUBBER2:
-        m_fWind = ((rand() % m_byWindMax + m_byWindMin) / 100.f);
+        m_fWind = ((Random::Rand() % m_byWindMax + m_byWindMin) / 100.f);
         break;
     default:
         if (gMapManager.WorldActive == 55)
-            m_fWind = (float)(rand() % 40 + 10) / 50.0f;
+            m_fWind = (float)(Random::Rand() % 40 + 10) / 50.0f;
         else
             m_fWind = CPhysicsManager::s_fWind;
         break;
@@ -599,7 +600,7 @@ BOOL CPhysicsCloth::Move(float fTime)
     switch (PCT_MASK_SHAPE_EXT & m_dwType)
     {
     case PCT_CYLINDER:
-        m_fWind = (float)(rand() % 10 + 25) / 50.0f;
+        m_fWind = (float)(Random::Rand() % 10 + 25) / 50.0f;
         break;
     }
 
@@ -1335,7 +1336,7 @@ void CPhysicsManager::Clear(void)
 
 void CPhysicsManager::Move(float fTime)
 {
-    float fPlus = ((rand() % 200) - 100) * 0.001f;
+    float fPlus = ((Random::Rand() % 200) - 100) * 0.001f;
     s_fWind += fPlus * FPS_ANIMATION_FACTOR;
     s_fWind = std::clamp(s_fWind, -0.2f, 1.0f);
 

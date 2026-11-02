@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -80,7 +81,7 @@ bool GMSwampOfQuiet::MoveObject(OBJECT* pObject)
     {
     case 57:
         pObject->HiddenMesh = -2;
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
         break;
@@ -479,8 +480,9 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
                 vec3_t vSmokePosition;
                 for (int i = 0; i < 2; ++i)
                 {
-                    Vector(vPosition[0] + (rand() % 20 - 10) * 1.0f,
-                        vPosition[1] + (rand() % 20 - 10) * 1.0f, vPosition[2] + (rand() % 20 - 10) * 1.0f, vSmokePosition);
+                    Vector(vPosition[0] + (Random::Rand() % 20 - 10) * 1.0f,
+                           vPosition[1] + (Random::Rand() % 20 - 10) * 1.0f,
+                           vPosition[2] + (Random::Rand() % 20 - 10) * 1.0f, vSmokePosition);
                     CreateParticleFpsChecked(BITMAP_SMOKE, vSmokePosition, pObject->Angle, vLight, 51);
                 }
                 if (pObject->AnimationFrame < End_Frame)
@@ -536,7 +538,8 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
         switch (pObject->CurrentAction)
         {
         case MONSTER01_WALK:
-            Vector(pObject->Position[0] + rand() % 200 - 100, pObject->Position[1] + rand() % 200 - 100, pObject->Position[2], vPos);
+            Vector(pObject->Position[0] + Random::Rand() % 200 - 100, pObject->Position[1] + Random::Rand() % 200 - 100,
+                   pObject->Position[2], vPos);
             CreateParticleFpsChecked(BITMAP_SMOKE + 1, vPos, pObject->Angle, pObject->Light);
             break;
 
@@ -558,7 +561,7 @@ bool GMSwampOfQuiet::MoveMonsterVisual(OBJECT* pObject, BMD* pModel)
                     {
                         if (i == 1 && rand_fps_check(2)) continue;
 
-                        switch (rand() % 3)
+                        switch (Random::Rand() % 3)
                         {
                         case 0:
                             CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, vPos, vAngle, vColor, 4, pObject->Scale, pObject);
@@ -845,10 +848,11 @@ bool GMSwampOfQuiet::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject
         Vector(1.0f, 0.1f, 0.1f, vLight);
         for (int i = 0; i < 6; ++i)
         {
-            if (rand() % 6 > 0) continue;
+            if (Random::Rand() % 6 > 0)
+                continue;
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
             CreateParticleFpsChecked(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.0f);
-            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos, pObject->Angle, vLight, 0, 1.0f);
         }
     }
     if (pObject->CurrentAction == MONSTER01_DIE)
@@ -888,10 +892,11 @@ bool GMSwampOfQuiet::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject
         Vector(0.3f, 0.6f, 1.0f, vLight);
         for (int i = 0; i < 6; ++i)
         {
-            if (rand() % 6 > 0) continue;
+            if (Random::Rand() % 6 > 0)
+                continue;
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
             CreateParticleFpsChecked(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.0f);
-            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.0f);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos, pObject->Angle, vLight, 0, 1.0f);
         }
     }
     if (pObject->CurrentAction == MONSTER01_DIE)
@@ -931,10 +936,11 @@ bool GMSwampOfQuiet::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject
         Vector(0.5f, 1.0f, 0.5f, vLight);
         for (int i = 0; i < 6; ++i)
         {
-            if (rand() % 6 > 0) continue;
+            if (Random::Rand() % 6 > 0)
+                continue;
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
             CreateParticleFpsChecked(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.5f);
-            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.1f);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos, pObject->Angle, vLight, 0, 1.1f);
         }
     }
     if (pObject->CurrentAction == MONSTER01_DIE)
@@ -979,11 +985,14 @@ bool GMSwampOfQuiet::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject
         {
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
             CreateSprite(BITMAP_LIGHT, vPos, 2.2f, vLightFlare, pObject);
-            if (rand() % 3 > 0) continue;
-            Vector((rand() % 30 - 15) * 1.0f, (rand() % 30 - 15) * 1.0f, (rand() % 30 - 15) * 1.0f, vRelative);
+            if (Random::Rand() % 3 > 0)
+                continue;
+            Vector((Random::Rand() % 30 - 15) * 1.0f, (Random::Rand() % 30 - 15) * 1.0f,
+                   (Random::Rand() % 30 - 15) * 1.0f, vRelative);
             pModel->TransformByObjectBone(vPos, pObject, iBones[i], vRelative);
-            fScale = (float)(rand() % 80 + 32) * 0.01f * 1.0f;
-            CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + rand() % 3, vPos, pObject->Angle, vLight, 0, fScale);
+            fScale = (float)(Random::Rand() % 80 + 32) * 0.01f * 1.0f;
+            CreateParticleFpsChecked(BITMAP_LIGHTNING_MEGA1 + Random::Rand() % 3, vPos, pObject->Angle, vLight, 0,
+                                     fScale);
         }
     }
     break;
@@ -994,7 +1003,8 @@ bool GMSwampOfQuiet::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject
         for (int i = 0; i < 7; ++i)
         {
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
-            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 1, 1.0f, pObject);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos, pObject->Angle, vLight, 1, 1.0f,
+                                     pObject);
             CreateParticleFpsChecked(BITMAP_CLUD64, vPos, pObject->Angle, vLight, 6, 1.0f, pObject);
         }
     }
@@ -1014,7 +1024,8 @@ bool GMSwampOfQuiet::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject
                 CreateSprite(BITMAP_LIGHT, vPos, 1.0f, vLightFire, pObject);
 
                 fScale = 0.7f;
-                Vector((rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, vRelative);
+                Vector((Random::Rand() % 10 - 5) * 1.0f, (Random::Rand() % 10 - 5) * 1.0f,
+                       (Random::Rand() % 10 - 5) * 1.0f, vRelative);
                 pModel->TransformByObjectBone(vPos, pObject, iBones[i], vRelative);
             }
             else
@@ -1022,11 +1033,12 @@ bool GMSwampOfQuiet::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject
                 pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
                 CreateSprite(BITMAP_LIGHT, vPos, 4.0f, vLightFire, pObject);
 
-                Vector((rand() % 20 - 10) * 1.0f, (rand() % 20 - 10) * 1.0f, (rand() % 20 - 10) * 1.0f, vRelative);
+                Vector((Random::Rand() % 20 - 10) * 1.0f, (Random::Rand() % 20 - 10) * 1.0f,
+                       (Random::Rand() % 20 - 10) * 1.0f, vRelative);
                 pModel->TransformByObjectBone(vPos, pObject, iBones[i], vRelative);
             }
 
-            switch (rand() % 3)
+            switch (Random::Rand() % 3)
             {
             case 0:
                 CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, pObject->Angle, vLight, 0, fScale);
@@ -1102,12 +1114,13 @@ bool GMSwampOfQuiet::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject
         Vector(0.25f, 1.0f, 0.0f, vColor);
         for (int i = 0; i < 3; ++i)
         {
-            if (rand() % 6 > 0) continue;
+            if (Random::Rand() % 6 > 0)
+                continue;
             if (i % 5 == 0)
             {
                 pModel->TransformByObjectBone(vPos, pObject, temp[i]);
                 CreateParticleFpsChecked(BITMAP_SMOKE, vPos, pObject->Angle, vColor, 50, 1.0f);
-                CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vColor, 0, 1.0f);
+                CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos, pObject->Angle, vColor, 0, 1.0f);
             }
         }
 
@@ -1159,7 +1172,8 @@ bool GMSwampOfQuiet::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject
                 CreateSprite(BITMAP_LIGHT, vPos, 1.0f, vLightFire, pObject);
 
                 fScale = 0.7f;
-                Vector((rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, (rand() % 10 - 5) * 1.0f, vRelative);
+                Vector((Random::Rand() % 10 - 5) * 1.0f, (Random::Rand() % 10 - 5) * 1.0f,
+                       (Random::Rand() % 10 - 5) * 1.0f, vRelative);
                 pModel->TransformByObjectBone(vPos, pObject, iBones[i], vRelative);
             }
             else
@@ -1167,12 +1181,13 @@ bool GMSwampOfQuiet::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject
                 pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
                 CreateSprite(BITMAP_LIGHT, vPos, 4.0f, vLightFire, pObject);
 
-                Vector((rand() % 20 - 10) * 1.0f, (rand() % 20 - 10) * 1.0f, (rand() % 20 - 10) * 1.0f, vRelative);
+                Vector((Random::Rand() % 20 - 10) * 1.0f, (Random::Rand() % 20 - 10) * 1.0f,
+                       (Random::Rand() % 20 - 10) * 1.0f, vRelative);
                 pModel->TransformByObjectBone(vPos, pObject, iBones[i], vRelative);
             }
             Vector(0.25f, 0.6f, 0.7f, vLight);
 
-            switch (rand() % 3)
+            switch (Random::Rand() % 3)
             {
             case 0:
                 CreateParticleFpsChecked(BITMAP_FIRE_HIK1, vPos, pObject->Angle, vLight, 0, fScale);
@@ -1193,10 +1208,11 @@ bool GMSwampOfQuiet::UpdateMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject
         Vector(1.0f, 1.0f, 1.f, vLight);
         for (int i = 0; i < 6; ++i)
         {
-            if (rand() % 6 > 0) continue;
+            if (Random::Rand() % 6 > 0)
+                continue;
             pModel->TransformByObjectBone(vPos, pObject, iBones[i]);
             CreateParticleFpsChecked(BITMAP_SMOKE, vPos, pObject->Angle, vLight, 50, 1.5f);
-            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vPos, pObject->Angle, vLight, 0, 1.1f);
+            CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPos, pObject->Angle, vLight, 0, 1.1f);
         }
     }
     if (pObject->CurrentAction == MONSTER01_DIE)

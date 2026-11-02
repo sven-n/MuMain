@@ -2,6 +2,7 @@
 //
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #include "GameLogic/Social/MonkSystem.h"
 #include "Core/Utilities/Fnv1aHash.h"
@@ -1159,7 +1160,7 @@ void CMonkSystem::RenderRepeatedly(int _Key, OBJECT* pObj)
         }
 
         Position[1] += (_index % 2 == 0) ? -40.0f : 40.0f;
-        Position[2] -= (rand() % 10 + 15.0f);
+        Position[2] -= (Random::Rand() % 10 + 15.0f);
     }
     m_nRepeatedlyCnt = 0;
 }

@@ -54,6 +54,14 @@ inline bool FpsCheck(std::int32_t referenceFrames)
     return FpsCheck(referenceFrames, 1.0);
 }
 
+/// The game's legacy sequence: rand() as the Windows CRT gives it, the same values on every platform, one sequence per
+/// thread starting at seed 1. The game draws from it where it called rand().
+std::int32_t Rand();
+/// srand() for the legacy sequence of the calling thread.
+void SeedRand(std::uint32_t seed);
+/// The calling thread's legacy state, to tell whether something drew from the sequence.
+std::uint32_t RandState();
+
 /// Restarts the calling thread's sequence from a fixed seed, so that a test
 /// can repeat it (the effect recorder). The game does not call it.
 void Seed(std::uint32_t seed);

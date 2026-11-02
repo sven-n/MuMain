@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
 
@@ -139,21 +140,21 @@ int ResolveAttackAnimation(const Data::Monsters::MonsterAttacks& attacks,
     return animation;
 }
 
-// The old code's draws, which call rand() and rand_fps_check() as it did.
+// The old code's draws, which call Random::Rand() and rand_fps_check() as it did.
 int DrawAttack(Data::Monsters::MonsterAttackRandom random)
 {
     switch (random)
     {
     case Data::Monsters::MonsterAttackRandom::Rand:
-        return MONSTER01_ATTACK1 + std::rand() % 2;
+        return MONSTER01_ATTACK1 + Random::Rand() % 2;
     case Data::Monsters::MonsterAttackRandom::RandFps:
         return rand_fps_check(2) ? MONSTER01_ATTACK1 : MONSTER01_ATTACK2;
     case Data::Monsters::MonsterAttackRandom::Bali:
     {
-        const int action = std::rand() % 8;
+        const int action = Random::Rand() % 8;
         if (action > 2)
         {
-            return MONSTER01_ATTACK1 + std::rand() % 2;
+            return MONSTER01_ATTACK1 + Random::Rand() % 2;
         }
         return action > 0 ? MONSTER01_ATTACK3 : MONSTER01_ATTACK4;
     }

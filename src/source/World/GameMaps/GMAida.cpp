@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -56,14 +57,14 @@ bool M33Aida::MoveAidaObject(OBJECT* pObject)
     break;
     case 30:
     {
-        Luminosity = (float)(rand() % 5) * 0.01f;
+        Luminosity = (float)(Random::Rand() % 5) * 0.01f;
         Vector(Luminosity + 0.4f, Luminosity + 0.6f, Luminosity + 0.4f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 2, PrimaryTerrainLight);
     }
     break;
     case 71:
     {
-        Luminosity = (float)(rand() % 5) * 0.01f;
+        Luminosity = (float)(Random::Rand() % 5) * 0.01f;
         Vector(Luminosity + 0.9f, Luminosity + 0.2f, Luminosity + 0.2f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 2, PrimaryTerrainLight);
     }
@@ -738,7 +739,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
     case MODEL_WITCH_QUEEN:
     {
         vec3_t Position, Light, Angle;
-        float Random_Light = (float)(rand() % 30) / 100.0f + 0.6f;
+        float Random_Light = (float)(Random::Rand() % 30) / 100.0f + 0.6f;
         Vector(Random_Light + 0.5f, Random_Light - 0.05f, Random_Light + 0.5f, Light);
 
         BoneManager::GetBonePosition(pObject, L"Monster100_L_Hand", Position);
@@ -760,7 +761,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_WITCHQUEEN_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_WITCHQUEEN_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -775,7 +776,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
             if (pObject->SubType == FALSE)
             {
                 pObject->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + Random::Rand() % 2));
                 PlayBuffer(SOUND_AIDA_WITCHQUEEN_ATTACK1);
             }
         }
@@ -847,7 +848,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_BLUEGOLEM_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_BLUEGOLEM_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -915,7 +916,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
     {
         vec3_t Relative, Position, Light, Angle = {0.0f, 0.0f, 0.0f};
 
-        float Random_Light = (float)(rand() % 10) / 100.0f + 0.2f;
+        float Random_Light = (float)(Random::Rand() % 10) / 100.0f + 0.2f;
         Vector(60.0f, -30.0f, 0.0f, Relative);
         Vector(0.0f, Random_Light, 0.0f, Light);
 
@@ -926,7 +927,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHRAIDER_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHRAIDER_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -963,7 +964,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_FORESTORC_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_FORESTORC_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -999,7 +1000,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHTREE_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHTREE_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1033,7 +1034,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         {
             wchar_t Bone_Name[256];
             mu_swprintf(Bone_Name, L"Monster104_Horn%d", i);
-            Random_Light = (float)(rand() % 10) / 100.0f + 0.8f;
+            Random_Light = (float)(Random::Rand() % 10) / 100.0f + 0.8f;
             Vector(0.4f, Random_Light, 0.5f, Light);
             BoneManager::GetBonePosition(pObject, Bone_Name, Position);
             CreateSprite(BITMAP_LIGHT + 1, Position, 0.4f, Light, pObject);
@@ -1055,7 +1056,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         vec3_t Relative, Position, Light, Angle = {0.0f, 0.0f, 0.0f};
         float Random_Light;
 
-        Random_Light = (float)(rand() % 8) / 10.0f + 0.6f;
+        Random_Light = (float)(Random::Rand() % 8) / 10.0f + 0.6f;
         Vector(Random_Light, 0.0f, 0.0f, Light);
 
         BoneManager::GetBonePosition(pObject, L"Monster105_R_Eye", Position);
@@ -1076,7 +1077,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_HELL_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_HELL_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1143,7 +1144,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_FORESTORC_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_FORESTORC_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1178,7 +1179,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
     {
         vec3_t Relative, Position, Light, Angle = {0.0f, 0.0f, 0.0f};
 
-        float Random_Light = (float)(rand() % 10) / 100.0f + 0.2f;
+        float Random_Light = (float)(Random::Rand() % 10) / 100.0f + 0.2f;
         Vector(60.0f, -30.0f, 0.0f, Relative);
         Vector(0.0f, Random_Light, 0.0f, Light);
 
@@ -1189,7 +1190,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHRAIDER_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHRAIDER_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1236,7 +1237,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_BLUEGOLEM_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_BLUEGOLEM_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1303,7 +1304,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
     case MODEL_BLOODY_WITCH_QUEEN:
     {
         vec3_t Position, Light, Angle;
-        float Random_Light = (float)(rand() % 30) / 100.0f + 0.6f;
+        float Random_Light = (float)(Random::Rand() % 30) / 100.0f + 0.6f;
         Vector(Random_Light + 0.5f, Random_Light - 0.05f, Random_Light + 0.5f, Light);
 
         BoneManager::GetBonePosition(pObject, L"Monster100_L_Hand", Position);
@@ -1325,7 +1326,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_WITCHQUEEN_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_WITCHQUEEN_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1340,7 +1341,7 @@ bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, B
             if (pObject->SubType == FALSE)
             {
                 pObject->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + Random::Rand() % 2));
                 PlayBuffer(SOUND_AIDA_WITCHQUEEN_ATTACK1);
             }
         }

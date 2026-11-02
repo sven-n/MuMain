@@ -1,6 +1,7 @@
 ﻿// GMEmpireGuardian2.cpp: implementation of the GMEmpireGuardian2 class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
@@ -591,7 +592,7 @@ bool GMEmpireGuardian2::UpdateObjectEffects(OBJECT* o, BMD* b)
             vec3_t Angle;
             for (int i = 0; i < 4; ++i)
             {
-                Vector((float)(rand() % 60 + 60 + 90), 0.f, o->Angle[2] + 180, Angle);
+                Vector((float)(Random::Rand() % 60 + 60 + 90), 0.f, o->Angle[2] + 180, Angle);
                 CreateJointFpsChecked(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
             }
             CreateParticleFpsChecked(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
@@ -601,7 +602,7 @@ bool GMEmpireGuardian2::UpdateObjectEffects(OBJECT* o, BMD* b)
             vec3_t Angle;
             for (int i = 0; i < 4; ++i)
             {
-                Vector((float)(rand() % 60 + 60 + 90), 0.f, o->Angle[2], Angle);
+                Vector((float)(Random::Rand() % 60 + 60 + 90), 0.f, o->Angle[2], Angle);
                 CreateJointFpsChecked(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
             }
             CreateParticleFpsChecked(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
@@ -647,7 +648,7 @@ bool GMEmpireGuardian2::UpdateObjectEffects(OBJECT* o, BMD* b)
             vec3_t Angle;
             for (int i = 0; i < 4; ++i)
             {
-                Vector((float)(rand() % 60 + 60 + 90), 0.f, o->Angle[2] + 180, Angle);
+                Vector((float)(Random::Rand() % 60 + 60 + 90), 0.f, o->Angle[2] + 180, Angle);
                 CreateJointFpsChecked(BITMAP_JOINT_SPARK, o->Position, o->Position, Angle, 5, o);
             }
             CreateParticleFpsChecked(BITMAP_SPARK, o->Position, Angle, o->Light, 11);
@@ -686,7 +687,7 @@ bool GMEmpireGuardian2::UpdateObjectEffects(OBJECT* o, BMD* b)
         vec3_t vLight;
         Vector(1.0f, 1.0f, 1.0f, vLight);
 
-        switch (rand() % 3)
+        switch (Random::Rand() % 3)
         {
         case 0:
             CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
@@ -741,7 +742,7 @@ bool GMEmpireGuardian2::UpdateObjectEffects(OBJECT* o, BMD* b)
 
         if (iRemainder >= 0 && iRemainder <= 1)
         {
-            int iRand = rand() % 4 + 4;
+            int iRand = Random::Rand() % 4 + 4;
             for (int i = 0; i < iRand; ++i)
             {
                 CreateEffectFpsChecked(BITMAP_FLAME, o->Position, o->Angle, vLight, 6, NULL, -1, 0, o->Scale);
@@ -887,13 +888,14 @@ bool GMEmpireGuardian2::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
             Vector(1.0f, 0.1f, 0.1f, vLightRage);
             for (int i = 0; i < iBoneCount; ++i)
             {
-                if (rand() % 6 > 0)
+                if (Random::Rand() % 6 > 0)
                     continue;
                 if (i % 5 == 0)
                 {
                     b->TransformByObjectBone(vPosRage, o, i);
                     CreateParticle(BITMAP_SMOKE, vPosRage, o->Angle, vLightRage, 50, 1.0f);                  // 연기
-                    CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPosRage, o->Angle, vLightRage, 0, 1.0f); // 3종 연기
+                    CreateParticle(BITMAP_SMOKELINE1 + Random::Rand() % 3, vPosRage, o->Angle, vLightRage, 0,
+                                   1.0f); // 3종 연기
                 }
             }
         }
@@ -1090,7 +1092,8 @@ bool GMEmpireGuardian2::AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else if (c->MonsterSkill == 52)
         {
-            Vector(o->Position[0] + rand() % 1024 - 512, o->Position[1] + rand() % 1024 - 512, o->Position[2], vPos);
+            Vector(o->Position[0] + Random::Rand() % 1024 - 512, o->Position[1] + Random::Rand() % 1024 - 512,
+                   o->Position[2], vPos);
             CreateEffect(MODEL_FIRE, vPos, o->Angle, o->Light);
             PlayBuffer(SOUND_METEORITE01);
         }

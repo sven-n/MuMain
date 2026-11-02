@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -146,7 +147,7 @@ bool M39Kanturu3rd::MoveKanturu3rdObject(OBJECT* o)
         if (rand_fps_check(3))
         {
             o->HiddenMesh = -2;
-            Luminosity = (float)(rand() % 4 + 3) * 0.3f;
+            Luminosity = (float)(Random::Rand() % 4 + 3) * 0.3f;
             Vector(Luminosity, Luminosity, Luminosity, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 1 + o->Scale / 2.0f, PrimaryTerrainLight);
         }
@@ -161,7 +162,7 @@ bool M39Kanturu3rd::MoveKanturu3rdObject(OBJECT* o)
     {
         if (rand_fps_check(3))
         {
-            Luminosity = (float)(rand() % 10) * 0.2f;
+            Luminosity = (float)(Random::Rand() % 10) * 0.2f;
             Vector(Luminosity, Luminosity, Luminosity, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 1 + o->Scale, PrimaryTerrainLight);
         }
@@ -172,7 +173,7 @@ bool M39Kanturu3rd::MoveKanturu3rdObject(OBJECT* o)
         if (o->HiddenMesh == -1)
         {
             o->HiddenMesh = -2;
-            Luminosity = (float)(rand() % 4 + 3) * 0.3f;
+            Luminosity = (float)(Random::Rand() % 4 + 3) * 0.3f;
             Vector(Luminosity, Luminosity, Luminosity, Light);
             AddTerrainLight(o->Position[0], o->Position[1], Light, 1 + o->Scale / 2.0f, PrimaryTerrainLight);
         }
@@ -253,7 +254,7 @@ bool M39Kanturu3rd::UpdateKanturu3rdObjectEffects(OBJECT* o, BMD* b)
                 o->Position[2] = -749.5f;
             }
 
-            EarthQuake = (float)(rand() % 6 - 3) * 2.0f;
+            EarthQuake = (float)(Random::Rand() % 6 - 3) * 2.0f;
             o->Position[2] += 13.0f * FPS_ANIMATION_FACTOR;
 
             PlayBuffer(SOUND_KANTURU_3RD_MAYA_INTRO);
@@ -261,7 +262,7 @@ bool M39Kanturu3rd::UpdateKanturu3rdObjectEffects(OBJECT* o, BMD* b)
         else
         {
             Vector(0.08f, 0.08f, 0.08f, Light);
-            Vector(rand() % 20 - 30.0f, rand() % 20 - 30.0f, 0.0f, p);
+            Vector(Random::Rand() % 20 - 30.0f, Random::Rand() % 20 - 30.0f, 0.0f, p);
             b->TransformPosition(Engine::Object::Pose::World(o, b)[34], p, Pos, false);
             if (o->AnimationFrame >= 5.0f && o->AnimationFrame < 12.5f)
                 CreateParticleFpsChecked(BITMAP_SMOKE, Pos, o->Angle, Light, 43, 1.5f);
@@ -800,7 +801,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_3RD_NIGHTMARE_IDLE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_KANTURU_3RD_NIGHTMARE_IDLE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -840,12 +841,12 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
 
         if (o->CurrentAction == MONSTER01_ATTACK3)
         {
-            Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+            Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
 
             for (int i = 0; i < 2; i++)
             {
-                Position[0] = o->StartPosition[0] + rand() % 440 - 220;
-                Position[1] = o->StartPosition[1] + rand() % 440 - 220;
+                Position[0] = o->StartPosition[0] + Random::Rand() % 440 - 220;
+                Position[1] = o->StartPosition[1] + Random::Rand() % 440 - 220;
                 Position[2] = o->StartPosition[2];
                 CreateJoint(BITMAP_FLARE, Position, Position, Angle, 2, NULL, 40);
             }
@@ -854,7 +855,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
         {
             float Matrix[3][4];
             Vector(0.0f, 0.0f, 0.0f, Angle);
-            Vector(0.0f, -rand() % 20 - 40.0f, 0.0f, Direction);
+            Vector(0.0f, -Random::Rand() % 20 - 40.0f, 0.0f, Direction);
             AngleMatrix(Angle, Matrix);
             VectorRotate(Direction, Matrix, Position);
 
@@ -871,8 +872,9 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
             CreateParticle(BITMAP_SMOKE + 3, Position, o->Angle, Light, 3, 1.5f);
 
             vec3_t Angle;
-            Vector((float)(rand() % 100) - 50.0f, (float)(rand() % 100) - 50.0f, (float)(rand() % 360), Angle);
-            float Scale = (float)(rand() % 40) + 30.0f;
+            Vector((float)(Random::Rand() % 100) - 50.0f, (float)(Random::Rand() % 100) - 50.0f,
+                   (float)(Random::Rand() % 360), Angle);
+            float Scale = (float)(Random::Rand() % 40) + 30.0f;
             CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 8, NULL, Scale, 0, 0);
         }
         else if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2)
@@ -891,7 +893,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
 
             for (int i = 0; i < 5; i++)
             {
-                b->TransformPosition(o->BoneTransform[rand() % 45], Position, Pos, true);
+                b->TransformPosition(o->BoneTransform[Random::Rand() % 45], Position, Pos, true);
                 CreateParticle(BITMAP_WATERFALL_3, Pos, o->Angle, Light, 6, 2.f, o);
             }
         }
@@ -920,7 +922,7 @@ bool M39Kanturu3rd::MoveKanturu3rdMonsterVisual(OBJECT* o, BMD* b)
 
             for (int i = 0; i < 5; i++)
             {
-                b->TransformPosition(o->BoneTransform[rand() % 45], Position, Pos, true);
+                b->TransformPosition(o->BoneTransform[Random::Rand() % 45], Position, Pos, true);
                 CreateParticle(BITMAP_WATERFALL_3, Pos, o->Angle, Light, 6, 2.f, o);
             }
         }
@@ -1220,9 +1222,9 @@ bool M39Kanturu3rd::UpdateKanturu3rdMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
     case MODEL_SMELTING_NPC:
     {
         o->Scale = 2.5f;
-        Position[0] = o->Position[0] + (float)(rand() % 250 - 125);
-        Position[1] = o->Position[1] + (float)(rand() % 250 - 125);
-        Position[2] = o->Position[2] - (float)(rand() % 100) + 50.0f;
+        Position[0] = o->Position[0] + (float)(Random::Rand() % 250 - 125);
+        Position[1] = o->Position[1] + (float)(Random::Rand() % 250 - 125);
+        Position[2] = o->Position[2] - (float)(Random::Rand() % 100) + 50.0f;
 
         if (rand_fps_check(10))
         {
@@ -1521,7 +1523,7 @@ void M39Kanturu3rd::MayaAction(OBJECT* o, BMD* b)
         float Matrix[3][4];
 
         Vector(0.0f, 0.0f, 0.0f, Angle);
-        Vector(-200.0f + (rand() % 60 + 50.0f), 0.0f, 0.0f, Direction);
+        Vector(-200.0f + (Random::Rand() % 60 + 50.0f), 0.0f, 0.0f, Direction);
         AngleMatrix(Angle, Matrix);
         VectorRotate(Direction, Matrix, Position);
 
@@ -1532,10 +1534,10 @@ void M39Kanturu3rd::MayaAction(OBJECT* o, BMD* b)
         for (int i = 0; i < 100; i++)
         {
             Vector(1.0f, 1.0f, 1.0f, Light);
-            Pos[0] = Hero->Object.Position[0] + (float)(rand() % 20 - 10) * 90.0f;
-            Pos[1] = Hero->Object.Position[1] + (float)(rand() % 20 - 10) * 90.0f;
-            Pos[2] = Hero->Object.Position[2] - (float)(rand() % 5) * 100.0f - 500.0f;
-            CreateEffect(MODEL_STONE1 + rand() % 2, Pos, o->Angle, Light, 2);
+            Pos[0] = Hero->Object.Position[0] + (float)(Random::Rand() % 20 - 10) * 90.0f;
+            Pos[1] = Hero->Object.Position[1] + (float)(Random::Rand() % 20 - 10) * 90.0f;
+            Pos[2] = Hero->Object.Position[2] - (float)(Random::Rand() % 5) * 100.0f - 500.0f;
+            CreateEffect(MODEL_STONE1 + Random::Rand() % 2, Pos, o->Angle, Light, 2);
         }
         iMayaAction = -1;
 
@@ -1550,11 +1552,11 @@ void M39Kanturu3rd::MayaAction(OBJECT* o, BMD* b)
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    Pos[0] = Hero->Object.Position[0] + (float)(rand() % 20 - 10) * 80.0f + 500.0f;
-                    Pos[1] = Hero->Object.Position[1] + (float)(rand() % 20 - 10) * 80.0f;
-                    Pos[2] = Hero->Object.Position[2] + 300.0f + (float)(rand() % 10) * 100.0f;
-                    float Scale = 5.0f + rand() % 10 / 3.0f;
-                    int index = MODEL_MAYASTONE1 + rand() % 3;
+                    Pos[0] = Hero->Object.Position[0] + (float)(Random::Rand() % 20 - 10) * 80.0f + 500.0f;
+                    Pos[1] = Hero->Object.Position[1] + (float)(Random::Rand() % 20 - 10) * 80.0f;
+                    Pos[2] = Hero->Object.Position[2] + 300.0f + (float)(Random::Rand() % 10) * 100.0f;
+                    float Scale = 5.0f + Random::Rand() % 10 / 3.0f;
+                    int index = MODEL_MAYASTONE1 + Random::Rand() % 3;
                     Vector(1.0f, 1.0f, 1.0f, Light);
                     CreateEffect(index, Pos, o->Angle, Light, 0, NULL, -1, 0, 0, 0, Scale);
                     CreateEffect(MODEL_MAYASTONEFIRE, Pos, o->Angle, Light, index, NULL, -1, 0, 0, 0, Scale);
@@ -1584,11 +1586,12 @@ void M39Kanturu3rd::MayaAction(OBJECT* o, BMD* b)
                 {
                     for (int j = 0; j < 3; j++)
                     {
-                        Vector(rand() % 20 - 10.0f, rand() % 20 - 10.0f, rand() % 20 - 10.0f, Position);
+                        Vector(Random::Rand() % 20 - 10.0f, Random::Rand() % 20 - 10.0f, Random::Rand() % 20 - 10.0f,
+                               Position);
                         Vector(0.0f, 0.0f, 0.0f, Position);
                         Vector(1.0f, 1.0f, 1.0f, Light);
-                        b->TransformPosition(BoneTransform[33 + rand() % 42], Position, Pos, false);
-                        CreateParticle(BITMAP_EXPLOTION, Pos, o->Angle, Light, 1, (1.5f + rand() % 10 / 20.0f));
+                        b->TransformPosition(BoneTransform[33 + Random::Rand() % 42], Position, Pos, false);
+                        CreateParticle(BITMAP_EXPLOTION, Pos, o->Angle, Light, 1, (1.5f + Random::Rand() % 10 / 20.0f));
                     }
                 }
 
@@ -1625,14 +1628,17 @@ void M39Kanturu3rd::MayaAction(OBJECT* o, BMD* b)
                 for (int i = 0; i < 3; i++)
                 {
                     Vector(1.0f, 1.0f, 1.0f, Light);
-                    Vector(rand() % 100 - 50.0f, rand() % 100 - 50.0f, rand() % 100 - 50.0f, Position);
-                    b->TransformPosition(BoneTransform[Index[rand() % 11]], Position, Pos, false);
-                    CreateParticle(BITMAP_EXPLOTION, Pos, o->Angle, Light, 1, 1.0f + (i * 1.5f) + rand() % 10 / 10.0f);
+                    Vector(Random::Rand() % 100 - 50.0f, Random::Rand() % 100 - 50.0f, Random::Rand() % 100 - 50.0f,
+                           Position);
+                    b->TransformPosition(BoneTransform[Index[Random::Rand() % 11]], Position, Pos, false);
+                    CreateParticle(BITMAP_EXPLOTION, Pos, o->Angle, Light, 1,
+                                   1.0f + (i * 1.5f) + Random::Rand() % 10 / 10.0f);
 
                     Vector(1.0f, 0.5f, 0.3f, Light);
-                    Vector(rand() % 200 - 100.0f, rand() % 200 - 100.0f, rand() % 200 - 100.0f, Position);
-                    b->TransformPosition(BoneTransform[Index[rand() % 11]], Position, Pos, false);
-                    CreateParticle(BITMAP_SMOKE, Pos, o->Angle, Light, 47, 1.5f + rand() % 4);
+                    Vector(Random::Rand() % 200 - 100.0f, Random::Rand() % 200 - 100.0f, Random::Rand() % 200 - 100.0f,
+                           Position);
+                    b->TransformPosition(BoneTransform[Index[Random::Rand() % 11]], Position, Pos, false);
+                    CreateParticle(BITMAP_SMOKE, Pos, o->Angle, Light, 47, 1.5f + Random::Rand() % 4);
                 }
 
                 if (g_Time.GetTimeCheck(2, 1200))

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Data/GameData/EffectData/EffectCreateParams.h"
+#include "Core/Utilities/Random.h"
 
 #include <array>
 #include <cstdint>
@@ -18,7 +19,7 @@
 // A record holds every field that changed in every slot of the effect pools
 // (effects, skill effects, sprites, particles, joints), in the hero and the
 // monster owner and in the call's own position, angle and light, plus how many
-// values rand() and Random:: gave. The world is pinned (the seeds, the frame
+// values Random::Rand() and Random:: gave. The world is pinned (the seeds, the frame
 // factor, WorldTime, the scene, the map, the hero), and every pool slot starts
 // from pattern A or pattern B, so a case that keeps or reads an old value of a
 // slot shows up.

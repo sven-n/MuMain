@@ -630,7 +630,7 @@ void CSPetDarkSpirit::MovePet(void)
             c->AttackTime = 15;
         }
     }
-    if (rand_fps_check(100) && rand() % 60 == 0)
+    if (rand_fps_check(100) && Random::Rand() % 60 == 0)
     {
         PlayBuffer(SOUND_DSPIRIT_SHOUT, o);
     }

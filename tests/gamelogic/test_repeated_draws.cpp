@@ -152,17 +152,17 @@ TEST_CASE("A draw's random value is the same in every pass of a frame and takes 
           "[effects]")
 {
     int key = 0;
-    std::srand(914);
-    const int next = std::rand();
-    std::srand(914);
+    Random::SeedRand(914);
+    const int next = Random::Rand();
+    Random::SeedRand(914);
     const std::mt19937 engine = Random::Snapshot();
 
     const int first = Random::DrawRand(&key, 1);
     CHECK(Random::DrawRand(&key, 1) == first);
-    CHECK(std::rand() == next);
+    CHECK(Random::Rand() == next);
     CHECK(Random::Snapshot() == engine);
 
-    // Over frames it spreads like rand() does.
+    // Over frames it spreads like Random::Rand() does.
     int changed = 0;
     long long sum = 0;
     for (int frame = 0; frame < 1000; ++frame)
@@ -250,7 +250,7 @@ TEST_CASE("The update marks the map objects the frame's view shows, and only tho
 }
 
 #ifdef MU_ENABLE_CONTROL_SOCKET
-TEST_CASE("The draw purity check counts a draw pass that draws from the update's random engine [effects]")
+TEST_CASE("The draw purity check counts a draw pass that draws from the update's random sequences [effects]")
 {
     namespace Purity = Diagnostics::DrawPurityCheck;
     const auto counted = [](const char* what)
@@ -268,9 +268,13 @@ TEST_CASE("The draw purity check counts a draw pass that draws from the update's
     Purity::BeforeDraw();
     Purity::AfterDraw();
     Purity::BeforeDraw();
+    (void)Random::Rand();
+    Purity::AfterDraw();
+    Purity::BeforeDraw();
     (void)Random::Unit();
     Purity::AfterDraw();
 
+    CHECK(counted("random legacy sequence") == 1);
     CHECK(counted("random engine") == 1);
 }
 
@@ -353,18 +357,37 @@ TEST_CASE("A cloth vertex's fingerprint follows the move it has pending for the 
 TEST_CASE("The draw purity check draws nothing from the update's random sequences itself [effects]")
 {
     namespace Purity = Diagnostics::DrawPurityCheck;
-    std::srand(914);
-    const int next = std::rand();
+    Random::SeedRand(914);
+    const int next = Random::Rand();
     const std::mt19937 engine = Random::Snapshot();
 
-    std::srand(914);
+    Random::SeedRand(914);
     Purity::Start();
     for (int pass = 0; pass < 2; ++pass)
     {
         Purity::BeforeDraw();
         Purity::AfterDraw();
     }
-    CHECK(std::rand() == next);
+    CHECK(Random::Rand() == next);
     CHECK(Random::Snapshot() == engine);
 }
 #endif
+
+TEST_CASE("The game's legacy sequence gives what the Windows CRT's rand() gives, on every platform [effects]")
+{
+    Random::SeedRand(1);
+    CHECK(Random::Rand() == 41);
+    CHECK(Random::Rand() == 18467);
+    Random::SeedRand(914);
+    for (const int expected : {3023, 1362, 30627, 8977, 31960})
+        CHECK(Random::Rand() == expected);
+#ifdef _WIN32
+    Random::SeedRand(77);
+    std::srand(77);
+    for (int i = 0; i < 1000; ++i)
+        CHECK(Random::Rand() == std::rand());
+#endif
+    // Reading the state draws nothing.
+    const std::uint32_t state = Random::RandState();
+    CHECK(Random::RandState() == state);
+}

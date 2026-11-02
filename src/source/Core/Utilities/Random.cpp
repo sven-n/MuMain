@@ -30,6 +30,8 @@ std::mt19937& GetThreadEngine()
 
 std::uint64_t s_drawFrame = 0;
 
+thread_local std::uint32_t s_randState = 1;
+
 // splitmix64's finalizer: every input bit reaches every output bit.
 std::uint64_t Mix(std::uint64_t x)
 {
@@ -46,6 +48,23 @@ double ChanceOf(std::int32_t referenceFrames, double animationFactor)
 }
 
 } // anonymous namespace
+
+std::int32_t Rand()
+{
+    // The Windows CRT's linear congruential generator.
+    s_randState = s_randState * 214013u + 2531011u;
+    return static_cast<std::int32_t>((s_randState >> 16) & 0x7FFF);
+}
+
+void SeedRand(std::uint32_t seed)
+{
+    s_randState = seed;
+}
+
+std::uint32_t RandState()
+{
+    return s_randState;
+}
 
 // The distributions are made per call: they are cheap and keep no state, so
 // the engine alone decides the sequence and Seed repeats it.

@@ -415,7 +415,8 @@ int s_draws = 0;
 std::unordered_map<const void*, Entry> s_before;
 std::unordered_map<const void*, Entry> s_after;
 std::map<std::string, int> s_counts;
-// The engine is compared whole; copying it draws nothing from it.
+// Both sequences are compared by their state; reading it draws nothing from them.
+std::uint32_t s_randState = 0;
 std::mt19937 s_engine;
 
 void Count(const Entry& e, const char* field)
@@ -429,6 +430,7 @@ void BeforeDraw()
     if (!s_listing)
         return;
     Snapshot(s_before);
+    s_randState = Random::RandState();
     s_engine = Random::Snapshot();
 }
 
@@ -437,6 +439,8 @@ void AfterDraw()
     if (!s_listing)
         return;
     ++s_draws;
+    if (Random::RandState() != s_randState)
+        ++s_counts["random legacy sequence"];
     if (Random::Snapshot() != s_engine)
         ++s_counts["random engine"];
     Snapshot(s_after);

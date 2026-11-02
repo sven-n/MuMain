@@ -1,5 +1,6 @@
 ﻿
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -71,7 +72,7 @@ bool SEASON3A::CGM3rdChangeUp::MoveObject(OBJECT* pObject)
         pObject->HiddenMesh = -2;
         break;
     case 3:
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
         pObject->HiddenMesh = -2;
@@ -186,7 +187,7 @@ bool SEASON3A::CGM3rdChangeUp::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
         {
             if ((int)((pObject->Timer += FPS_ANIMATION_FACTOR) + 2) % 4 == 0)
             {
-                if (rand() % 2 == 0)
+                if (Random::Rand() % 2 == 0)
                 {
                     Vector(0.f, 0.0f, 0.0f, Light);
                     CreateParticle(BITMAP_ADV_SMOKE + 1, pObject->Position, pObject->Angle, Light, 1, pObject->Scale);
@@ -215,7 +216,7 @@ bool SEASON3A::CGM3rdChangeUp::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
     case 89:
         if (rand_fps_check(4))
         {
-            float fRed = (rand() % 3) * 0.01f + 0.015f;
+            float fRed = (Random::Rand() % 3) * 0.01f + 0.015f;
             Vector(fRed, 0.0f, 0.0f, Light);
             CreateParticle(BITMAP_CLOUD, pObject->Position, pObject->Angle, Light, 11, pObject->Scale, pObject);
         }
@@ -226,7 +227,7 @@ bool SEASON3A::CGM3rdChangeUp::UpdateObjectEffects(OBJECT* pObject, BMD* pModel)
         vec3_t vAngle;
         if (rand_fps_check(3))
         {
-            Vector((float)(rand() % 40 + 120), 0.f, (float)(rand() % 30), vAngle);
+            Vector((float)(Random::Rand() % 40 + 120), 0.f, (float)(Random::Rand() % 30), vAngle);
             VectorAdd(vAngle, pObject->Angle, vAngle);
             CreateJoint(BITMAP_JOINT_SPARK, pObject->Position, pObject->Position, vAngle, 4, pObject, pObject->Scale);
             CreateParticle(BITMAP_SPARK, pObject->Position, vAngle, Light, 9, pObject->Scale);
@@ -329,24 +330,24 @@ bool SEASON3A::CGM3rdChangeUp::CreateFireSnuff(PARTICLE* o)
     if (IsBalgasRefugeMap() == true)
     {
         o->Type = BITMAP_FIRE_SNUFF;
-        o->Scale = rand() % 50 / 100.f + 0.4f;
+        o->Scale = Random::Rand() % 50 / 100.f + 0.4f;
         vec3_t Position;
-        Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800),
-               Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
-               Hero->Object.Position[2] + (float)(rand() % 300 + 50), Position);
+        Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 1600 - 800),
+               Hero->Object.Position[1] + (float)(Random::Rand() % 1400 - 500),
+               Hero->Object.Position[2] + (float)(Random::Rand() % 300 + 50), Position);
 
         VectorCopy(Position, o->Position);
         VectorCopy(Position, o->StartPosition);
-        o->Velocity[0] = -(float)(rand() % 64 + 64) * 0.1f;
+        o->Velocity[0] = -(float)(Random::Rand() % 64 + 64) * 0.1f;
         if (Position[1] < g_Camera.Position[1] + 400.f)
         {
             o->Velocity[0] = -o->Velocity[0] + 2.2f;
         }
-        o->Velocity[1] = (float)(rand() % 32 - 16) * 0.1f;
-        o->Velocity[2] = (float)(rand() % 32 - 16) * 0.1f;
-        o->TurningForce[0] = (float)(rand() % 16 - 8) * 0.1f;
-        o->TurningForce[1] = (float)(rand() % 64 - 32) * 0.1f;
-        o->TurningForce[2] = (float)(rand() % 16 - 8) * 0.1f;
+        o->Velocity[1] = (float)(Random::Rand() % 32 - 16) * 0.1f;
+        o->Velocity[2] = (float)(Random::Rand() % 32 - 16) * 0.1f;
+        o->TurningForce[0] = (float)(Random::Rand() % 16 - 8) * 0.1f;
+        o->TurningForce[1] = (float)(Random::Rand() % 64 - 32) * 0.1f;
+        o->TurningForce[2] = (float)(Random::Rand() % 16 - 8) * 0.1f;
         return true;
     }
     return false;
@@ -358,7 +359,7 @@ void SEASON3A::CGM3rdChangeUp::PlayEffectSound(OBJECT* o)
     {
     case 74:
     case 75:
-        ::PlayBuffer(static_cast<ESound>(SOUND_3RD_CHANGE_UP_BG_CAGE1 + rand() % 2));
+        ::PlayBuffer(static_cast<ESound>(SOUND_3RD_CHANGE_UP_BG_CAGE1 + Random::Rand() % 2));
         break;
     case 79:
         ::PlayBuffer(SOUND_3RD_CHANGE_UP_BG_VOLCANO);
@@ -657,7 +658,7 @@ void SEASON3A::CGM3rdChangeUp::MoveBalgasBarrackBlurEffect(CHARACTER* c, OBJECT*
                 VectorRotate(p, Matrix, Position);
                 VectorAdd(Position, o->Position, p2);
                 o->Angle[2] -= 18;
-                Vector((float)(rand() % 60 + 60 - 90), 0.f, (float)(rand() % 30 + 90), Angle);
+                Vector((float)(Random::Rand() % 60 + 60 - 90), 0.f, (float)(Random::Rand() % 30 + 90), Angle);
                 VectorAdd(Angle, o->Angle, Angle);
                 VectorCopy(p2, Position);
 
@@ -797,7 +798,7 @@ bool SEASON3A::CGM3rdChangeUp::UpdateBalgasBarrackMonsterEffects(CHARACTER* c, O
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_BALRAM_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_BALRAM_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -832,7 +833,7 @@ bool SEASON3A::CGM3rdChangeUp::UpdateBalgasBarrackMonsterEffects(CHARACTER* c, O
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_DEATHSPIRIT_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_DEATHSPIRIT_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -863,9 +864,9 @@ bool SEASON3A::CGM3rdChangeUp::UpdateBalgasBarrackMonsterEffects(CHARACTER* c, O
             o->SubType = FALSE;
 
         vec3_t Position, Light;
-        int dummy = rand() % 14;
+        int dummy = Random::Rand() % 14;
         auto Data = (float)((float)dummy / (float)100);
-        auto Rot = (float)(rand() % 360);
+        auto Rot = (float)(Random::Rand() % 360);
         Vector(1.0f, 1.0f, 1.0f, Light);
         BoneManager::GetBonePosition(o, L"Monster94_zx", Position);
         CreateSprite(BITMAP_DS_EFFECT, Position, 1.5f, Light, o);
@@ -878,7 +879,7 @@ bool SEASON3A::CGM3rdChangeUp::UpdateBalgasBarrackMonsterEffects(CHARACTER* c, O
         BoneManager::GetBonePosition(o, L"Monster94_zx01", Position);
         Vector(0.1f, 0.0f, 0.6f, Light);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.8f, Light, o, Rot);
-        if (rand() % 2 == 0)
+        if (Random::Rand() % 2 == 0)
         {
             Vector(0.7f, 0.7f, 1.0f, Light);
             CreateSprite(BITMAP_SHINY + 1, Position, 0.8f, Light, o, 360.f - Rot);
@@ -891,7 +892,7 @@ bool SEASON3A::CGM3rdChangeUp::UpdateBalgasBarrackMonsterEffects(CHARACTER* c, O
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SORAM_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SORAM_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -925,7 +926,7 @@ bool SEASON3A::CGM3rdChangeUp::UpdateBalgasBarrackMonsterEffects(CHARACTER* c, O
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_DARKELF_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_DARKELF_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -981,7 +982,7 @@ bool SEASON3A::CGM3rdChangeUp::UpdateBalgasBarrackMonsterEffects(CHARACTER* c, O
             for (int i = 0; i < 10; ++i)
             {
                 b->TransformPosition(o->BoneTransform[iBoneThunder[i]], vRelativePos, vPos, true);
-                if (rand() % 2 == 0)
+                if (Random::Rand() % 2 == 0)
                 {
                     CreateEffect(MODEL_FENRIR_THUNDER, vPos, o->Angle, vLight, 1, o);
                 }
