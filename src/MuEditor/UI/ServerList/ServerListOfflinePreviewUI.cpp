@@ -23,13 +23,14 @@ constexpr float ChannelLoadWidth = 90.0f;
 constexpr const char* DropOwnLoadLabel = "\xC3\x97##DropOwnLoad";
 constexpr const char* LoadFormat = "%d %%";
 
-// The load slider a click last started an edit on, when, and its value before that click: a double-click's first
-// click already moved the slider.
+// The load slider a click last started an edit on, when, and its value before that click (nothing: it followed
+// another load). A double-click's first click already moved the slider; an edit that ends at the value it started
+// from leaves the slider as it was.
 struct EditStart
 {
     ImGuiID slider = 0;
     double time = 0.0;
-    int percent = 0;
+    std::optional<int> load;
 };
 EditStart s_editStart;
 
@@ -49,36 +50,54 @@ bool IsDoubleClickOnSlider()
            ImGui::GetTime() - s_editStart.time <= ImGui::GetIO().MouseDoubleClickTime;
 }
 
-// A load slider from 0 to the preview's highest load that also takes a typed value: a double-click or Ctrl+click
-// turns it into a text field. `greyed`: the value is one it only follows. True when the value changed.
-bool LoadSlider(const char* label, int& percent, float width, bool greyed)
+// After a load slider: a double-click on it gives back its value from before the first click and opens its text
+// field; an edit that ends at the value it started from leaves a slider that followed `follows` following it again.
+void TrackEdit(std::optional<int>& load, const std::optional<int>& before, int follows)
 {
-    const int before = percent;
+    const ImGuiID id = ImGui::GetItemID();
+    if (IsDoubleClickOnSlider())
+    {
+        load = s_editStart.load;
+        OpenTextField(id);
+    }
+    else if (ImGui::IsItemActivated())
+    {
+        s_editStart = {id, ImGui::GetTime(), before};
+    }
+    else if (ImGui::IsItemDeactivated() && s_editStart.slider == id && !s_editStart.load && load == follows)
+    {
+        load.reset();
+    }
+}
+
+// A load slider from 0 to the preview's highest load that also takes a typed value: a double-click or Ctrl+click
+// turns it into a text field. `load`: its own value, or nothing while it follows `follows` (shown greyed). True when
+// `load` changed.
+bool LoadSlider(const char* label, std::optional<int>& load, int follows, float width)
+{
+    const std::optional<int> before = load;
+    int percent = load.value_or(follows);
     ImGui::SetNextItemWidth(width * g_MuEditorCore.GetUIScale());
-    if (greyed)
+    if (!before)
     {
         ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
     }
     ImGui::SliderInt(label, &percent, 0, CServerListManager::MaxOfflineServerPercent, LoadFormat,
                      ImGuiSliderFlags_AlwaysClamp);
-    if (greyed)
+    if (!before)
     {
         ImGui::PopStyleColor();
     }
-    if (IsDoubleClickOnSlider())
+    if (percent != before.value_or(follows))
     {
-        percent = s_editStart.percent;
-        OpenTextField(ImGui::GetItemID());
+        load = percent;
     }
-    else if (ImGui::IsItemActivated())
-    {
-        s_editStart = {ImGui::GetItemID(), ImGui::GetTime(), before};
-    }
+    TrackEdit(load, before, follows);
     if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayNormal))
     {
         ImGui::SetTooltip("%s", I18N::Editor::LoadSliderNote);
     }
-    return percent != before;
+    return load != before;
 }
 
 // MuEditor.ini keeps the switch and the load once they stop changing, not at each step of the slider.
@@ -95,12 +114,11 @@ void KeepSwitch(bool show, int percent)
 
 bool RenderOwnLoad(int serverId)
 {
-    const std::optional<int> ownLoad = g_ServerListManager->GetOfflineServerLoad(serverId);
-    int percent = ownLoad.value_or(g_ServerListManager->GetOfflineServerPercent());
+    std::optional<int> ownLoad = g_ServerListManager->GetOfflineServerLoad(serverId);
     bool changed = false;
-    if (LoadSlider("##OfflineLoad", percent, ChannelLoadWidth, !ownLoad.has_value()))
+    if (LoadSlider("##OfflineLoad", ownLoad, g_ServerListManager->GetOfflineServerPercent(), ChannelLoadWidth))
     {
-        g_ServerListManager->SetOfflineServerLoad(serverId, percent);
+        g_ServerListManager->SetOfflineServerLoad(serverId, ownLoad);
         changed = true;
     }
     if (!ownLoad.has_value())
@@ -147,7 +165,10 @@ bool RenderSwitch()
     if (show)
     {
         ImGui::SameLine();
-        changed |= LoadSlider(I18N::Editor::TheirLoad, percent, SwitchLoadWidth, false);
+        // Their load follows no other load: it always has a value of its own.
+        std::optional<int> load = percent;
+        changed |= LoadSlider(I18N::Editor::TheirLoad, load, percent, SwitchLoadWidth);
+        percent = load.value_or(percent);
     }
     if (changed)
     {

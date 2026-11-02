@@ -255,6 +255,32 @@ template <typename Frame> void DoubleClick(ImVec2 at, Frame frame)
         frame();
     }
 }
+
+// A Ctrl+click at `at`, with a frame after each step: it opens a slider's text field.
+template <typename Frame> void CtrlClick(ImVec2 at, Frame frame)
+{
+    ImGuiIO& io = ImGui::GetIO();
+    io.AddMousePosEvent(at.x, at.y);
+    io.AddKeyEvent(ImGuiMod_Ctrl, true);
+    frame();
+    for (const bool down : {true, false})
+    {
+        io.AddMouseButtonEvent(ImGuiMouseButton_Left, down);
+        frame();
+    }
+    io.AddKeyEvent(ImGuiMod_Ctrl, false);
+    frame();
+}
+
+// The key pressed and released, with a frame after each step.
+template <typename Frame> void PressKey(ImGuiKey key, Frame frame)
+{
+    for (const bool down : {true, false})
+    {
+        ImGui::GetIO().AddKeyEvent(key, down);
+        frame();
+    }
+}
 } // namespace
 
 TEST_CASE("Server List window: a typed name is a step of its own before a button moves the group [editor]")
@@ -369,20 +395,40 @@ TEST_CASE("Server List window: a double-click on an offline channel's load types
     REQUIRE(slider.GetWidth() > 0.0f);
 
     // At a quarter of the slider: a click alone would set about 35 %. The text field opens in the frame after the
-    // double-click, with the load from before the first click.
+    // double-click, with the channel as it was before the first click: following Their load.
     DoubleClick(ImVec2(slider.Min.x + slider.GetWidth() / 4.0f, slider.GetCenter().y),
                 [&] { RenderOfflineChannel(ServerId); });
     CHECK(ImGui::TempInputIsActive(sliderId));
-    CHECK(g_ServerListManager->GetOfflineServerLoad(ServerId) == OfflinePreviewOn::Load);
+    CHECK_FALSE(g_ServerListManager->GetOfflineServerLoad(ServerId).has_value());
 
     ImGui::GetIO().AddInputCharactersUTF8("120");
     RenderOfflineChannel(ServerId);
-    ImGui::GetIO().AddKeyEvent(ImGuiKey_Enter, true);
-    RenderOfflineChannel(ServerId);
-    ImGui::GetIO().AddKeyEvent(ImGuiKey_Enter, false);
-    RenderOfflineChannel(ServerId);
+    PressKey(ImGuiKey_Enter, [&] { RenderOfflineChannel(ServerId); });
     CHECK_FALSE(ImGui::TempInputIsActive(sliderId));
     CHECK(g_ServerListManager->GetOfflineServerLoad(ServerId) == 120);
+}
+
+TEST_CASE("Server List window: a load typed and left with Escape keeps an offline channel on Their load [editor]")
+{
+    I18N::SetLocale("en");
+    TestImGuiContext context;
+    OfflinePreviewOn preview;
+    constexpr int ServerId = 3;
+    const auto render = [&] { RenderOfflineChannel(ServerId); };
+    const ImRect slider = RenderOfflineChannel(ServerId);
+    const ImGuiID sliderId = OfflineChannelId("##OfflineLoad");
+    REQUIRE(slider.GetWidth() > 0.0f);
+
+    CtrlClick(slider.GetCenter(), render);
+    REQUIRE(ImGui::TempInputIsActive(sliderId));
+    // The login screen shows a typed load right away.
+    ImGui::GetIO().AddInputCharactersUTF8("120");
+    render();
+    CHECK(g_ServerListManager->GetOfflineServerLoad(ServerId) == 120);
+
+    PressKey(ImGuiKey_Escape, render);
+    CHECK_FALSE(ImGui::TempInputIsActive(sliderId));
+    CHECK_FALSE(g_ServerListManager->GetOfflineServerLoad(ServerId).has_value());
 }
 
 TEST_CASE("Server List window: a double-click on Their load's label leaves the load as it is [editor]")
