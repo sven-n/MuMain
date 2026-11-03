@@ -1633,3 +1633,34 @@ TEST_CASE("The name row Item Tooltip shows is the tooltip's [data][items][toolti
     CHECK(nameOf(14, 13).nameLine == std::optional<size_t>(0));
     CHECK_FALSE(nameOf(0, 0).nameLine.has_value());
 }
+
+// A label style's background alpha is the alpha the game draws the label's box with.
+TEST_CASE("A ground label's background takes its style's alpha [data][items][tooltip]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    const Data::Items::GroundLabelFile shipped = g_ItemDatabase.GetGroundLabels();
+    const auto ticketLabel = []
+    {
+        ITEM item;
+        FillItemFromParameters(item, Engine::Items::TooltipSnapshot::FullItemParameters(13, 46));
+        OBJECT object{};
+        object.Type = Data::Items::ToModelSlot(item.Type);
+        return DescribeGroundItemLabel(&object, &item);
+    };
+    // The Devil Square Ticket's style, "ticket", is opaque black behind its text.
+    CHECK(ticketLabel().backgroundColor == 0xFF000000u);
+
+    Data::Items::GroundLabelFile seeThrough = shipped;
+    const auto ticket = std::find_if(seeThrough.styles.begin(), seeThrough.styles.end(),
+                                     [](const Data::Items::GroundLabelStyle& style) { return style.name == "ticket"; });
+    REQUIRE(ticket != seeThrough.styles.end());
+    ticket->background = {0x10, 0x20, 0x30};
+    ticket->backgroundAlpha = 0x80;
+    g_ItemDatabase.SetGroundLabels(seeThrough);
+    CHECK(ticketLabel().backgroundColor == 0x80302010u);
+    g_ItemDatabase.SetGroundLabels(shipped);
+}

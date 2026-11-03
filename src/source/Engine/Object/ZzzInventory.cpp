@@ -2706,7 +2706,8 @@ void ApplyGroundLabelStyle(GroundItemLabelDescriptor& descriptor, const Data::It
         return;
     }
     descriptor.TextColor = MakeRgba(style->color[0], style->color[1], style->color[2]);
-    descriptor.BgColor = MakeRgba(style->background[0], style->background[1], style->background[2]);
+    descriptor.BgColor =
+        MakeRgba(style->background[0], style->background[1], style->background[2], style->backgroundAlpha);
     descriptor.Bold = style->bold;
     descriptor.Style = style;
 }

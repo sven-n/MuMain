@@ -58,7 +58,7 @@ std::optional<Data::Items::GroundLabelStyle> GroundLabelStyleDialog::Render()
     }
     GroundLabelWidgets::RenderStyleFields(m_style);
     GroundLabelWidgets::RenderLabel(m_style.name.empty() ? I18N::Editor::NewLabelStyle : m_style.name.c_str(),
-                                    m_style.color, m_style.background, m_style.bold);
+                                    m_style.color, m_style.background, m_style.bold, m_style.backgroundAlpha);
     ImGui::Separator();
     ImGui::BeginDisabled(!canCreate);
     if (ImGui::Button(I18N::Editor::Add))

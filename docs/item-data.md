@@ -502,7 +502,7 @@ Budge Dragon.
 The name above an item on the ground (while the pointer is over it, or with
 Alt for every item) is its name line's text, Zen's with its amount. Its look
 comes from a **label style** of `Tooltips/GroundLabels.json`: a text color, a
-background (black when left out) and bold.
+background (opaque black when left out) and bold.
 
 ```json
 {
@@ -511,7 +511,8 @@ background (black when left out) and bold.
     "ticket": {"color": "#e58721"},
     "jewel": {"color": "#ffcc19", "bold": true},
     "setItem": {"color": "#00ff00", "background": "#3c3cc8", "bold": true},
-    "level0": {"color": "#b2b2b2"}
+    "level0": {"color": "#b2b2b2"},
+    "faint": {"color": "#ffffff", "background": "#00000080"}
   },
   "standard": [
     {"when": ["setItem"], "style": "setItem"},
@@ -537,7 +538,10 @@ background (black when left out) and bold.
   white on black.
 - **Only a label of the standard rules** has the set's name in front of the
   name and " +Skill", " +Option" and " +Luck" after it.
-- Colors are `"#rrggbb"`, red, green and blue from `00` to `ff`.
+- Colors are `"#rrggbb"`, red, green and blue from `00` to `ff`. A
+  background may also have its alpha, `"#rrggbbaa"`: `80` draws it half
+  transparent, `00` not at all (the text alone); without it, it is opaque, as
+  the original client draws every label.
 - The first styles are named by role and keep the looks of the original
   client: `ticket`, `seal`, `pet`, `jewel`, `cashShopItem`, `giftBoxRed`, …
   Two of them don't match their kind and are left as they were: the Open Access
@@ -551,7 +555,7 @@ changes its own rules. The labels on the ground take a change at once, and
 Save Items writes the file.
 
 **Errors** when the item data loads: a style without a color or with a color
-that is not `"#rrggbb"`, a rule or an item naming a style the file doesn't have
+that is not `"#rrggbb"` (`"#rrggbbaa"` for a background), a rule or an item naming a style the file doesn't have
 (the message suggests the name meant for a typo), and an unknown condition.
 **Warnings**: a style neither a rule nor an item names, a standard rule without
 conditions that isn't the last (the warning is on that rule: it always holds,
@@ -1460,7 +1464,7 @@ step of the undo history; renaming a color is left out.
 
 The Ground labels root lists the [label styles](#ground-labels), each with how
 many items name it in their own rules. A picked style's text color,
-background and bold are changed in its fields, under which the selected
+background (with its alpha, over a checkerboard) and bold are changed in its fields, under which the selected
 item's name is shown in that look, and **Apply to the style** takes them;
 when items name the style, the change lists them first. The labels on the
 ground take it at once. **New label style** adds one: a name of letters and

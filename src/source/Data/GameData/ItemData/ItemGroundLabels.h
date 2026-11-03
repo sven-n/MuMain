@@ -23,9 +23,9 @@
 //     ]
 //   }
 //
-// A label style is a text color, a background (black when left out) and bold. An item names its styles in its item
-// file ("groundLabels"); at a level none of them is for, its label takes the first standard rule whose conditions hold
-// (ItemTooltipConditions.h).
+// A label style is a text color, a background (black when left out; "#rrggbbaa" with its alpha, 00 for none) and bold.
+// An item names its styles in its item file ("groundLabels"); at a level none of them is for, its label takes the first
+// standard rule whose conditions hold (ItemTooltipConditions.h).
 namespace Data::Items
 {
 // Red, green and blue from 0 to 255, written "#rrggbb".
@@ -36,6 +36,8 @@ struct GroundLabelStyle
     std::string name;
     GroundLabelColor color{255, 255, 255};
     GroundLabelColor background{0, 0, 0};
+    // How opaque the background is, from 0 (none: the text alone) to 255 (opaque, as the original labels).
+    BYTE backgroundAlpha = 255;
     bool bold = false;
 
     bool operator==(const GroundLabelStyle&) const = default;
@@ -81,4 +83,7 @@ std::string WriteGroundLabelsJson(const GroundLabelFile& file);
 // "#rrggbb" of a color, and back (false for a text that is not one).
 std::string WriteGroundLabelColor(const GroundLabelColor& color);
 bool ReadGroundLabelColor(std::string_view text, GroundLabelColor& color);
+// A color with its alpha: "#rrggbb" when it is opaque (255), else "#rrggbbaa"; reading takes both, "#rrggbb" as opaque.
+std::string WriteGroundLabelColor(const GroundLabelColor& color, BYTE alpha);
+bool ReadGroundLabelColor(std::string_view text, GroundLabelColor& color, BYTE& alpha);
 } // namespace Data::Items

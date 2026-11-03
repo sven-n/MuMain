@@ -94,7 +94,9 @@ std::string StyleOfLabel(const GroundItemLabel& label)
     const auto looksLike = [&label](const Data::Items::GroundLabelStyle& style)
     {
         return style.color == GroundLabelWidgets::FromGameColor(label.textColor) &&
-               style.background == GroundLabelWidgets::FromGameColor(label.backgroundColor) && style.bold == label.bold;
+               style.background == GroundLabelWidgets::FromGameColor(label.backgroundColor) &&
+               style.backgroundAlpha == GroundLabelWidgets::AlphaOfGameColor(label.backgroundColor) &&
+               style.bold == label.bold;
     };
     const auto same = std::ranges::find_if(styles, looksLike);
     if (same != styles.end())
@@ -190,7 +192,8 @@ void CMuItemTooltipUI::RenderPreview(const ItemDefinition& item, int itemType)
     caption(I18N::Editor::OnTheGround);
     GroundLabelWidgets::RenderLabel(Core::Text::ToUtf8(label.text.c_str()).c_str(),
                                     GroundLabelWidgets::FromGameColor(label.textColor),
-                                    GroundLabelWidgets::FromGameColor(label.backgroundColor), label.bold);
+                                    GroundLabelWidgets::FromGameColor(label.backgroundColor), label.bold,
+                                    GroundLabelWidgets::AlphaOfGameColor(label.backgroundColor));
     const auto own =
         std::ranges::find_if(item.groundLabels, [this](const ItemGroundLabel& rule) { return rule.HoldsAt(m_level); });
     const std::string source =

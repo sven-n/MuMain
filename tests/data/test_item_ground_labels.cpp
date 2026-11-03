@@ -314,3 +314,51 @@ TEST_CASE("The styles the items and the standard rules name are in the ground la
         CHECK(neverUsed({{"giftBoxPink", true, 0, 15}, {"white"}}).empty());
     }
 }
+
+// A style's background may have an alpha, "#rrggbbaa" (00 none, ff opaque); "#rrggbb" stays opaque, so the file keeps
+// its look. The text color has no alpha.
+TEST_CASE("A label style's background can have an alpha [data][items]")
+{
+    GroundLabelColor color{};
+    BYTE alpha = 0;
+    CHECK(ReadGroundLabelColor("#00000080", color, alpha));
+    CHECK(color == GroundLabelColor{0, 0, 0});
+    CHECK(alpha == 0x80);
+    CHECK(ReadGroundLabelColor("#3c3cc8", color, alpha));
+    CHECK(color == GroundLabelColor{0x3c, 0x3c, 0xc8});
+    CHECK(alpha == 255);
+    CHECK(WriteGroundLabelColor(color, 255) == "#3c3cc8");
+    CHECK(WriteGroundLabelColor(GroundLabelColor{0, 0, 0}, 0x80) == "#00000080");
+    for (const char* wrong : {"#0000008", "#000000800", "#0000008g", "00000080"})
+    {
+        CAPTURE(wrong);
+        CHECK_FALSE(ReadGroundLabelColor(wrong, color, alpha));
+    }
+    // A text color is "#rrggbb".
+    CHECK_FALSE(ReadGroundLabelColor("#00000080", color));
+
+    const std::string text = R"({
+  "formatVersion": 1,
+  "styles": {
+    "ticket": {"color": "#e58721"},
+    "seal": {"color": "#ffcc19", "background": "#00000080"},
+    "clear": {"color": "#ffffff", "background": "#00000000"}
+  },
+  "standard": [
+    {"style": "ticket"}
+  ]
+}
+)";
+    const LabelReadResult read = ReadLabels(text);
+    CHECK(read.issues.empty());
+    REQUIRE(read.file.styles.size() == 3);
+    CHECK(read.file.styles[0].backgroundAlpha == 255);
+    CHECK(read.file.styles[1].backgroundAlpha == 0x80);
+    CHECK(read.file.styles[2].background == GroundLabelColor{0, 0, 0});
+    CHECK(read.file.styles[2].backgroundAlpha == 0);
+    CHECK(WriteGroundLabelsJson(read.file) == text);
+
+    const LabelReadResult seeThroughText =
+        ReadStylesAndRules(R"("ghost": {"color": "#ffffff99"})", R"({"style": "ghost"})");
+    CHECK(HasIssue(seeThroughText.issues, ItemDataIssueSeverity::Fatal, "styles.ghost.color"));
+}
