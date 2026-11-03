@@ -5,6 +5,9 @@ set -eu
 
 cd "$(git rev-parse --show-toplevel)"
 
+# Nested checks create throwaway repositories; Git hook-local variables must not escape.
+unset $(git rev-parse --local-env-vars)
+
 cmake=$(command -v cmake 2>/dev/null || true)
 # Windows: Visual Studio's bundled CMake is usually not on PATH.
 vswhere="/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe"

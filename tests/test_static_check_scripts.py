@@ -124,6 +124,44 @@ class StaticCheckScriptTests(unittest.TestCase):
         return self.bash(".githooks/pre-push", env=env)
 
     @unittest.skipUnless(CMAKE, "cmake is required")
+    def test_hook_does_not_leak_its_repository_environment_to_checks(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            child = Path(temporary) / "child"
+            local_names = self.git("rev-parse", "--local-env-vars").splitlines()
+            clean = {key: value for key, value in os.environ.items() if key not in local_names}
+            subprocess.run(["git", "clone", "-q", "--no-hardlinks", str(self.repo), str(child)],
+                           env=clean, check=True, capture_output=True)
+            self.write("tests/static/CMakeLists.txt",
+                       'cmake_minimum_required(VERSION 3.25)\nproject(Fake NONE)\nenable_testing()\n'
+                       'add_test(NAME guard COMMAND "${CMAKE_COMMAND}" -P '
+                       '"${CMAKE_CURRENT_SOURCE_DIR}/probe.cmake")\n')
+            self.write("tests/static/probe.cmake",
+                       'cmake_minimum_required(VERSION 3.25)\n'
+                       f'set(child [===[{child.as_posix()}]===])\n'
+                       'foreach(kind branch tag)\n'
+                       '  execute_process(COMMAND git -C "${child}" ${kind} hook-env-sentinel HEAD\n'
+                       '                  RESULT_VARIABLE result)\n'
+                       '  if(NOT result EQUAL 0)\n'
+                       '    message(FATAL_ERROR "Child Git mutation failed: ${result}")\n'
+                       '  endif()\nendforeach()\n')
+            def snapshot():
+                status = self.git("status", "--porcelain=v1", "--untracked-files=no")
+                return (self.git("rev-parse", "HEAD"), self.git("show-ref"),
+                        (self.repo / ".git/index").read_bytes(), status)
+            before = snapshot()
+            env = dict(clean, GIT_DIR=str(self.repo / ".git"), GIT_WORK_TREE=str(self.repo),
+                       GIT_INDEX_FILE=str(self.repo / ".git/index"), MU_PUSH_BASE=self.base)
+            env["PATH"] = str(Path(CMAKE).parent) + os.pathsep + env["PATH"]
+            # The real hook's CTest consumer deliberately inherits this environment unchanged.
+            result = self.bash(".githooks/pre-push", env=env)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertEqual(snapshot(), before)
+            for ref in ("refs/heads/hook-env-sentinel", "refs/tags/hook-env-sentinel"):
+                actual = subprocess.check_output(["git", "-C", str(child), "rev-parse", ref],
+                                                 env=clean, text=True).strip()
+                self.assertEqual(actual, self.base)
+
+    @unittest.skipUnless(CMAKE, "cmake is required")
     def test_hook_blocks_a_failing_static_check(self):
         result = self.hook(guard="false")
         self.assertNotEqual(result.returncode, 0)
