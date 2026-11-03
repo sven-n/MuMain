@@ -1277,7 +1277,8 @@ TEST_CASE("Sound Mixer: a sound the Sound Editor named shows its name in its cel
     CHECK(ShownSoundText(SOUND_CLICK01) == "Button click");
     CHECK(ShownSoundText(SOUND_RAIN01) == SoundText(SOUND_RAIN01));
     HeardFilter filter;
-    filter.text = "BUTTON";
+    // In the name only, not in the file.
+    filter.text = "N CL";
     CHECK(Passes(row, filter));
     filter.text = "ibuttonclick";
     CHECK(Passes(row, filter));

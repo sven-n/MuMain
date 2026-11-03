@@ -20,12 +20,14 @@
 #include "UI/SoundEditor/SoundEditorEdits.h"
 #include "UI/SoundEditor/SoundEditorRows.h"
 #include "UI/SoundEditor/SoundFilePicker.h"
+#include "World/MapInfra/MapManager.h"
 #include "imgui.h"
 #include "imgui_internal.h"
 
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <set>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -263,6 +265,34 @@ TEST_CASE("Sound Editor: the rows list the code's sounds, the sets' and the map 
     CHECK(MuEditor::SoundEditor::NameOfNumber(static_cast<int>(SOUND_CLICK01)) == "Button click");
     CHECK(MuEditor::SoundEditor::NameOfNumber(static_cast<int>(SOUND_RAIN01)).empty());
     CHECK(MuEditor::SoundEditor::NameOfNumber(rows[4].number) == "Death Tree attack");
+}
+
+TEST_CASE("Sound Editor: the session notes where LoadGameSound loaded a sound, at start or for the map being "
+          "entered, and the sounds PlayBuffer was asked for that nothing loaded (Q-SE1) [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(
+        std::vector<SoundFile>{Code("SOUND_CLICK01", SOUND_CLICK01, "Data/Sound/EditorTest/ok.wav"),
+                               Code("SOUND_RAIN01", SOUND_RAIN01, "Data/Sound/EditorTest/Other.wav")});
+    LoadGameSound(SOUND_CLICK01);
+    {
+        const Audio::SoundLoads::ScopedLoadWhere crywolf(WD_34CRYWOLF_1ST);
+        LoadGameSound(SOUND_RAIN01);
+        // A later load keeps the first one's place.
+        LoadGameSound(SOUND_CLICK01);
+    }
+    CHECK(Audio::SoundLoads::WhereLoaded(static_cast<int>(SOUND_CLICK01)) == Audio::SoundLoads::AtStart);
+    CHECK(Audio::SoundLoads::WhereLoaded(static_cast<int>(SOUND_RAIN01)) == WD_34CRYWOLF_1ST);
+    CHECK_FALSE(Audio::SoundLoads::WhereLoaded(static_cast<int>(SOUND_WIND01)).has_value());
+
+    PlayBuffer(SOUND_FENRIR_DAMAGE_2);
+    PlayBuffer(SOUND_CLICK01);
+    CHECK(Audio::SoundLoads::PlayedUnloaded() == std::set<int>{static_cast<int>(SOUND_FENRIR_DAMAGE_2)});
+    // A load later takes it off the list.
+    g_SoundFileDatabase.Build(
+        std::vector<SoundFile>{Code("SOUND_FENRIR_DAMAGE_2", SOUND_FENRIR_DAMAGE_2, "Data/Sound/EditorTest/ok.wav")});
+    LoadGameSound(SOUND_FENRIR_DAMAGE_2);
+    CHECK(Audio::SoundLoads::PlayedUnloaded().empty());
 }
 
 TEST_CASE("Sound Editor: a code sound's change reaches its table at once, a loaded one loads again, and undo and "
