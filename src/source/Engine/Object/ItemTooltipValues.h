@@ -77,7 +77,8 @@ struct ItemTooltipValues
     // The item's ancient discriminator names one of its sets, so its name starts with the set's (GetSetItemName);
     // `ancient` is any discriminator.
     bool setItem = false;
-    // Every class can use the item (its classRequirements name all of them): its tooltip has no class lines.
+    // Every class can use the item from its first class (its classRequirements name all of them at level 1): its
+    // tooltip has no class lines.
     bool allClasses = false;
     // Boots (group 11) or gloves (group 10).
     bool boots = false;

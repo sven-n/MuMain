@@ -1411,6 +1411,17 @@ TEST_CASE("The tooltip's class lines and the boots' and gloves' lines come from 
     const std::vector<ItemTooltipLine> kris = lines(0, 0, 0);
     CHECK(std::none_of(kris.begin(), kris.end(),
                        [](const ItemTooltipLine& line) { return line.text.starts_with(L"Can be equipped by"); }));
+    // The Horn of Fenrir names every class too, but four of them at their second class: not every class can use it
+    // from its first class, so the class lines would say so (its preset hides them). The original client left the
+    // class lines out only for an item every class can use from level 1.
+    const auto allClasses = [](int group, int number)
+    {
+        ITEM item{};
+        FillItemFromParameters(item, Engine::Items::TooltipSnapshot::FullItemParameters(group, number));
+        return Engine::Items::TooltipValues::ComputeItemTooltipValues(item).allClasses;
+    };
+    CHECK(allClasses(0, 0));
+    CHECK_FALSE(allClasses(13, 37));
 
     MakeNewDarkWizard(hero.Hero());
     ::Hero->Class = hero.Hero().Class;

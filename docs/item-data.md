@@ -280,7 +280,7 @@ A layout line has:
   level the item needs (Dark Knight, Blade Knight or Blade Master) and the state
   `classUsable` for that class. The default layout's class lines are such a
   line: white for the hero who can use the item, dark red for the others, and
-  none when every class can (`allClasses`).
+  none when every class can from its first class (`allClasses`).
 
 The **states** a condition can name:
 
@@ -302,7 +302,7 @@ The **states** a condition can name:
 | `setItem` | An ancient item of a set: its discriminator names one of the item's sets, whose name the item's name starts with (`ancient` is any discriminator) |
 | `socketItem` | An item that can have sockets |
 | `upperTierWings` | Wings or a cape of the second or third tier (`wingTier`) |
-| `allClasses` | Every class can use the item (its `classRequirements` name all seven) |
+| `allClasses` | Every class can use the item from its first class: its `classRequirements` name all seven at level 1, the original client's rule. An item that a class can use only from its second or third class shows its class lines |
 | `classUsable` | On a line with `forEachClass`: the hero is that class at the level the item needs or above |
 | `boots`, `gloves` | Boots (group 11) or gloves (group 10) |
 | `expired` | A timed item whose time is up |

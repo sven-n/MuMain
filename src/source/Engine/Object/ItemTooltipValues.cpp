@@ -182,8 +182,10 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item, TooltipValueScope s
     values.skillLuckOrOption = item.HasSkill || item.HasLuck || item.OptionLevel > 0;
     wchar_t setName[64]{};
     values.setItem = g_csItemOption.GetSetItemName(setName, item.Type, item.AncientDiscriminator);
+    // As the original client (RequireClass): an item that some class can use only from its second or third class
+    // keeps its class lines, which say so.
     values.allClasses = std::all_of(std::begin(attribute->RequireClass), std::end(attribute->RequireClass),
-                                    [](BYTE level) { return level != 0; });
+                                    [](BYTE level) { return level == 1; });
     values.boots = type >= ITEM_BOOTS && type < ITEM_BOOTS + MAX_ITEM_INDEX;
     values.gloves = type >= ITEM_GLOVES && type < ITEM_GLOVES + MAX_ITEM_INDEX;
     values.expired = item.bPeriodItem && item.bExpiredPeriod;
