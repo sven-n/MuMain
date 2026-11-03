@@ -27,7 +27,7 @@ get_filename_component(tool "${MU_SYMBOL_TOOL}" NAME_WE)
 string(TOLOWER "${tool}" tool)
 if(tool STREQUAL "link")
     # Every object's symbol table after its "Dump of file" line; the CRT functions are imported (__imp_rand) or not.
-    list(TRANSFORM objects REPLACE "^(.*)$" "\"\\1\"" OUTPUT_VARIABLE quoted)
+    list(TRANSFORM objects REPLACE "^(.+)$" "\"\\1\"" OUTPUT_VARIABLE quoted)
     list(JOIN quoted "\n" quoted)
     file(WRITE "${MU_OUTPUT}.rsp" "${quoted}\n")
     # The tables run to hundreds of megabytes: only the object headers and the lines that name a rand go on.

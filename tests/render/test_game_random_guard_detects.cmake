@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+
 # The owned-random guard (test_game_random_is_owned.cmake) flags every compiled fixture that calls the CRT's rand() or
 # srand(), however its source spells the call, and none that only mentions them or has a rand() of its own.
 foreach(name MU_GUARD MU_SYMBOL_TOOL MU_USES MU_CLEAN MU_WORK)
