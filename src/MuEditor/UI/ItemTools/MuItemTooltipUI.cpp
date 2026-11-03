@@ -302,8 +302,7 @@ void CMuItemTooltipUI::RenderLayout(ItemDefinition& item)
     ImGui::SeparatorText(I18N::Editor::TooltipLayout);
     RenderNote(I18N::Editor::TooltipLayoutNote);
     // An item that names no layout uses the default one.
-    const std::string current =
-        item.tooltipLayout.empty() ? std::string(Data::Items::DefaultTooltipLayout) : item.tooltipLayout;
+    const std::string current(Data::Items::GetItemTooltipLayoutName(item));
     bool changed = false;
     ImGui::SetNextItemWidth(LayoutComboWidth * g_MuEditorCore.GetUIScale());
     if (ImGui::BeginCombo("##TooltipLayout", current.c_str()))

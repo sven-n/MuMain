@@ -870,7 +870,7 @@ void BuildTooltipLayout(const ItemTooltipFile& file, std::string_view name, std:
 void BuildItemTooltipLayout(const ItemTooltipFile& file, const ItemDefinition& definition,
                             std::vector<BuiltTooltipLine>& lines)
 {
-    BuildTooltipLayout(file, definition.tooltipLayout.empty() ? DefaultTooltipLayout : definition.tooltipLayout, lines);
+    BuildTooltipLayout(file, GetItemTooltipLayoutName(definition), lines);
     const ItemTooltipLayoutChanges& changes = definition.tooltipLayoutChanges;
     ApplyLayoutChanges(lines, std::span<const std::string>(changes.hide),
                        std::span<const ItemTooltipLayoutAddition>(changes.add),
@@ -897,11 +897,17 @@ bool HasTooltipLine(std::span<const BuiltTooltipLine> lines, std::string_view id
     return std::any_of(lines.begin(), lines.end(), [&](const BuiltTooltipLine& line) { return line.GetId() == id; });
 }
 
+std::string_view GetItemTooltipLayoutName(const ItemDefinition& definition)
+{
+    return definition.tooltipLayout.empty() ? std::string_view(DefaultTooltipLayout)
+                                            : std::string_view(definition.tooltipLayout);
+}
+
 std::vector<std::pair<std::string, std::string>> CheckItemTooltipLayout(const ItemTooltipFile& file,
                                                                         const ItemDefinition& definition)
 {
     std::vector<std::pair<std::string, std::string>> problems;
-    const std::string name = definition.tooltipLayout.empty() ? DefaultTooltipLayout : definition.tooltipLayout;
+    const std::string name(GetItemTooltipLayoutName(definition));
     // A file without the default layout has that error of its own.
     if (definition.tooltipLayout.empty() && file.FindLayout(name) == nullptr)
     {
@@ -926,6 +932,11 @@ std::vector<std::pair<std::string, std::string>> CheckItemTooltipLayout(const It
 std::vector<std::pair<std::string, std::string>>
 CheckTooltipLayoutChanges(const ItemTooltipFile& file, std::string_view name, const ItemTooltipLayoutChanges& changes)
 {
+    // Most items change nothing: no layout to build for them.
+    if (changes.IsEmpty())
+    {
+        return {};
+    }
     std::vector<BuiltTooltipLine> lines;
     BuildTooltipLayout(file, name, lines);
     if (lines.empty())

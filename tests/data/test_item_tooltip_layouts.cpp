@@ -426,6 +426,14 @@ TEST_CASE("An item of a kind without class lines warns when its layout has them 
     CHECK(warns(elixir));
     elixir.tooltipLayout = "noClassLines";
     CHECK_FALSE(warns(elixir));
+    // Its own changes leaving them out do too, and its own lines added after them have no id.
+    ItemDefinition ownChanges = elixir;
+    ownChanges.tooltipLayout.clear();
+    ownChanges.tooltipLayoutChanges.hide = {"classLines"};
+    CHECK_FALSE(warns(ownChanges));
+    ownChanges.tooltipLayoutChanges.hide.clear();
+    ownChanges.tooltipLayoutChanges.add = {{"classLines", {ItemDescriptionLine{}}}};
+    CHECK(warns(ownChanges));
     // Any other item may show its class lines.
     ItemDefinition sword = elixir;
     sword.tags = {};

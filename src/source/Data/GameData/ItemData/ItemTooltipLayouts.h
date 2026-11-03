@@ -164,6 +164,8 @@ void BuildItemTooltipLayout(const ItemTooltipFile& file, const ItemDefinition& d
                             std::vector<BuiltTooltipLine>& lines);
 // Whether the built lines have a line of that id.
 bool HasTooltipLine(std::span<const BuiltTooltipLine> lines, std::string_view id);
+// The name of the layout an item uses: its "tooltipLayout", or the default layout without one.
+std::string_view GetItemTooltipLayoutName(const ItemDefinition& definition);
 
 // The warning for a line without "forEachClass" that names what only such a line fills in: {className}, which is empty
 // there, or the state classUsable, which never holds there; empty when it names neither. For a layout line, and for an

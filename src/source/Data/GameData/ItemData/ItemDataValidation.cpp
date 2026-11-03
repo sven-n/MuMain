@@ -351,9 +351,10 @@ constexpr ItemTag KindsWithoutClassLines[] = {
     ItemTag::GuardianPet};
 
 // An item of one of those kinds whose layout has the class lines shows them in its tooltip, unlike the others: an
-// item added later of a kind that used to get it from the list.
-void ValidateClassLines(const ItemDefinition& definition, const ItemTooltipFile& tooltips,
-                        std::vector<ItemDataIssue>& issues)
+// item added later of a kind that used to get it from the list. `layoutOf` gives a layout of the file as built; the
+// item's own changes can hide the class lines, but add no line with an id.
+template <typename TLayoutOf>
+void ValidateClassLines(const ItemDefinition& definition, TLayoutOf&& layoutOf, std::vector<ItemDataIssue>& issues)
 {
     const auto kind = std::find_if(std::begin(KindsWithoutClassLines), std::end(KindsWithoutClassLines),
                                    [&](ItemTag tag) { return definition.tags.Has(tag); });
@@ -361,9 +362,9 @@ void ValidateClassLines(const ItemDefinition& definition, const ItemTooltipFile&
     {
         return;
     }
-    std::vector<BuiltTooltipLine> layout;
-    BuildItemTooltipLayout(tooltips, definition, layout);
-    if (HasTooltipLine(layout, ClassLinesId))
+    const std::vector<std::string>& hidden = definition.tooltipLayoutChanges.hide;
+    if (HasTooltipLine(layoutOf(GetItemTooltipLayoutName(definition)), ClassLinesId) &&
+        std::find(hidden.begin(), hidden.end(), ClassLinesId) == hidden.end())
     {
         AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
                  std::string("has the tag ") + FindEnumName(*kind) +
@@ -827,6 +828,18 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
         textNames.push_back(name);
     }
     std::set<std::string, std::less<>> used;
+    // The layouts the items name, each built once for the pass: they name one of a few.
+    std::map<std::string, std::vector<BuiltTooltipLine>, std::less<>> builtLayouts;
+    const auto layoutOf = [&](std::string_view name) -> std::span<const BuiltTooltipLine>
+    {
+        auto built = builtLayouts.find(name);
+        if (built == builtLayouts.end())
+        {
+            built = builtLayouts.emplace(std::string(name), std::vector<BuiltTooltipLine>()).first;
+            BuildTooltipLayout(tooltips, name, built->second);
+        }
+        return built->second;
+    };
     for (const TooltipLayout& layout : tooltips.layouts)
     {
         for (const TooltipLayoutLine& line : layout.lines)
@@ -880,7 +893,7 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
         {
             issues.push_back({ItemDataIssueSeverity::Fatal, "", definition.group, definition.number, field, message});
         }
-        ValidateClassLines(definition, tooltips, issues);
+        ValidateClassLines(definition, layoutOf, issues);
         for (const ItemLevelValues& levelValues : definition.levelValues)
         {
             for (size_t level = 0; level < levelValues.values.size(); ++level)
