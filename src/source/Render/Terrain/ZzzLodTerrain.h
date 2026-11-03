@@ -107,6 +107,8 @@ void RenderDebugBox(const vec3_t origin, float sizeX, float sizeY, float sizeZ, 
 bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi, bool Flag);
 
 void RenderTerrain(bool EditFlag);
+// Spawns the water spots on the Crywolf water the last terrain pass drew.
+void UpdateTerrainWaterSpots();
 
 void RenderTerrainTile_After(float xf, float yf, int xi, int yi, float lodf, int lodi, bool Flag);
 void RenderTerrain_After(bool EditFlag);

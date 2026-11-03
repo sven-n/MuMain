@@ -94,7 +94,6 @@ bool RenderWaterTerrain(void)
         return g_pCSWaterTerrain != NULL;
     if (g_pCSWaterTerrain != NULL)
     {
-        g_pCSWaterTerrain->Update();
         g_pCSWaterTerrain->Render();
         return true;
     }

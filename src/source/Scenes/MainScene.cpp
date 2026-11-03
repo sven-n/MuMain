@@ -327,7 +327,9 @@ static void UpdateGameEntities()
         UpdateMountEffects();
         UpdateEffectModelEffects();
         UpdateTerrainEffects();
+        UpdateTerrainWaterSpots();
     }
+    MoveWaterTerrain();
 
     g_Direction.CheckDirection();
 
