@@ -91,6 +91,13 @@ private:
 class RecordingDrawer final : public Render::ModelDrawing::ModelDrawer
 {
 public:
+    explicit RecordingDrawer(bool drawsLater = false) : m_drawsLater(drawsLater) {}
+
+    [[nodiscard]] bool DrawsLater() const override
+    {
+        return m_drawsLater;
+    }
+
     void DrawMesh(const MeshDraw& draw) override
     {
         draws.push_back(draw);
@@ -99,6 +106,9 @@ public:
     void DrawShadow(const Render::ModelDrawing::ShadowDraw&) override {}
 
     std::vector<MeshDraw> draws;
+
+private:
+    bool m_drawsLater;
 };
 
 struct DrawerScope
@@ -365,6 +375,18 @@ TEST_CASE("The preview's drawer draws the other meshes of the item's model see-t
     // Another model untouched.
     CHECK(recorder.draws[2].model == &other.Model());
     CHECK(recorder.draws[2].flags == RENDER_TEXTURE);
+}
+
+TEST_CASE("The preview's drawer draws later when the drawer it replaced does [editor][items][mesh_list]")
+{
+    TestModel item(1);
+    for (const bool drawsLater : {false, true})
+    {
+        RecordingDrawer recorder(drawsLater);
+        const DrawerScope scope(recorder);
+        const CItemMeshPreviewDrawer drawer(&item.Model(), 0, std::nullopt);
+        CHECK(drawer.DrawsLater() == drawsLater);
+    }
 }
 
 TEST_CASE("Without a shown mesh the preview's drawer draws the item as it is [editor][items][mesh_list]")

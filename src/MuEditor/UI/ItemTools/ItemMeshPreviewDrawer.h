@@ -29,6 +29,12 @@ public:
     CItemMeshPreviewDrawer(const CItemMeshPreviewDrawer&) = delete;
     CItemMeshPreviewDrawer& operator=(const CItemMeshPreviewDrawer&) = delete;
 
+    // As the drawer it replaced: a draw for one that draws later takes what it reads (BMD::RenderMesh).
+    [[nodiscard]] bool DrawsLater() const override
+    {
+        return m_next.DrawsLater();
+    }
+
     void DrawMesh(const Render::ModelDrawing::MeshDraw& draw) override;
     void DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) override;
 
