@@ -131,14 +131,15 @@ option(ENABLE_CONTROL_SOCKET "Developer control socket for scripted clients (nev
 # In-game tests (docs/in-game-tests.md): publishes the tester, which plays test
 # scenarios with the client through the control socket, next to Main, and adds
 # the InGameTests / InGameTestsGui targets. Developers only, like the socket.
-# The tester needs the socket, so turning the tests on turns the socket on. The
-# cache entry itself changes, so tests/ sees the socket too; the player presets
-# set ENABLE_IN_GAME_TESTS=OFF, so a build folder reused for a player build
-# drops both again.
+# The tester needs the socket, so while the tests are on, the socket is on too.
+# Only for this configure: the cache keeps ENABLE_CONTROL_SOCKET as it was set,
+# so turning the tests off again drops the socket. PARENT_SCOPE hands the value
+# to tests/, which the top-level CMakeLists.txt adds after src/.
 option(ENABLE_IN_GAME_TESTS "Publish the in-game tester next to Main (turns on ENABLE_CONTROL_SOCKET)" OFF)
 if(ENABLE_IN_GAME_TESTS AND NOT ENABLE_CONTROL_SOCKET)
   message(STATUS "ENABLE_IN_GAME_TESTS turns on ENABLE_CONTROL_SOCKET: the tester drives the client through it")
-  set(ENABLE_CONTROL_SOCKET ON CACHE BOOL "Developer control socket for scripted clients (never for player builds)" FORCE)
+  set(ENABLE_CONTROL_SOCKET ON)
+  set(ENABLE_CONTROL_SOCKET ON PARENT_SCOPE)
 endif()
 
 # ---------------------------------------------------------------------------
