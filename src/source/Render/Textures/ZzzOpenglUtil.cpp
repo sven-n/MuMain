@@ -6,6 +6,7 @@
 #include "ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Drawing/LegacyCalls.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Render/Renderer/Overlay2DRecorder.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Renderer/RenderUtils.h"
@@ -972,7 +973,8 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
         {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, c[2][0], c[2][1], color},
         {p[3][0], p[3][1], p[3][2], 0.f, 0.f, 0.f, c[3][0], c[3][1], color},
     };
-    mu::GetRenderer().RenderQuad3D(vertices, static_cast<std::uint32_t>(Texture));
+    Render::EffectDrawing::ActiveEffectDrawer().DrawQuads(
+        {.vertices = vertices, .texture = static_cast<std::uint32_t>(Texture)});
 }
 
 void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, float(*UV)[2], vec3_t Light[4], float Alpha)
@@ -1004,7 +1006,8 @@ void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, flo
         {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, UV[2][0], UV[2][1], mu::PackABGR(Light[2][0], Light[2][1], Light[2][2], Alpha)},
         {p[3][0], p[3][1], p[3][2], 0.f, 0.f, 0.f, UV[3][0], UV[3][1], mu::PackABGR(Light[3][0], Light[3][1], Light[3][2], Alpha)},
     };
-    mu::GetRenderer().RenderQuad3D(vertices, static_cast<std::uint32_t>(Texture));
+    Render::EffectDrawing::ActiveEffectDrawer().DrawQuads(
+        {.vertices = vertices, .texture = static_cast<std::uint32_t>(Texture)});
 }
 
 void RenderNumber(const vec3_t Position, int Num, const vec3_t Color, float Alpha, float Scale)

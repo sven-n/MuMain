@@ -655,3 +655,27 @@ TEST_CASE("Reorderable ranges and the sprite matrix drawn later hold the draws a
     };
     CheckDrawnLaterAsAtOnce(scene, "CachedSkinned");
 }
+
+TEST_CASE("Damage numbers drawn later are drawn with the state and matrix they were asked for in [draw-parity]")
+{
+    // In front of a camera that looks down the view axis.
+    float savedCamera[3][4];
+    std::memcpy(savedCamera, g_Camera.Matrix, sizeof(savedCamera));
+    const float identity[3][4] = {{1.f, 0.f, 0.f, 0.f}, {0.f, 1.f, 0.f, 0.f}, {0.f, 0.f, 1.f, 0.f}};
+    std::memcpy(g_Camera.Matrix, identity, sizeof(identity));
+    // As RenderPoints draws them: in view space, alpha tested, over everything.
+    const auto scene = []
+    {
+        BeginSprite();
+        EnableAlphaTest();
+        DisableDepthTest();
+        const vec3_t position = {10.f, 20.f, -300.f};
+        const vec3_t color = {1.f, 0.5f, 0.f};
+        RenderNumber(position, 1234, color, 1.f, 10.f);
+        RenderNumber(position, -2, color, 1.f, 10.f);
+        EnableDepthTest();
+        EndSprite();
+    };
+    CheckDrawnLaterAsAtOnce(scene, "Quad3D");
+    std::memcpy(g_Camera.Matrix, savedCamera, sizeof(savedCamera));
+}
