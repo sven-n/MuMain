@@ -541,7 +541,7 @@ void ReadCues(const OrderedJson& json, std::vector<MonsterModelCue>& cues, Model
     }
 }
 
-// The timers of the model's animations, which its draw code and sound events
+// The timers of the model's animations, which its map's code and sound events
 // share (Q-MN91).
 void ReadTimers(const OrderedJson& json, std::vector<MonsterModelTimer>& timers, ModelIssues& issues)
 {

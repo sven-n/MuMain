@@ -801,8 +801,9 @@ namespace
 constexpr int WitchQueen = 304;
 constexpr int DeathRider = 306;
 
-// Draws the character `frames` frames in the animation, as RenderCharacter
-// does (FinishDrawnFrame after the maps' draw code), and returns the sounds.
+// Draws the character `frames` frames in the animation, as
+// UpdateDrawnCharacterEffects does (FinishDrawnFrame after the maps' monster
+// effects), and returns the sounds.
 std::vector<PlayedSound> Draw(SoundScope& scope, CHARACTER& character, int animation, int frames = 1)
 {
     character.Object.CurrentAction = static_cast<unsigned short>(animation);
@@ -962,7 +963,7 @@ TEST_CASE("Monster sounds: once events of one animation play together: the Witch
     CHECK(sounds[1].id == SoundOf(set, "SOUND_AIDA_WITCHQUEEN_ATTACK1"));
 }
 
-TEST_CASE("Monster sounds: RenderCharacter plays a drawn frame's events unless the map's draw code did, once a frame "
+TEST_CASE("Monster sounds: FinishDrawnFrame plays a drawn frame's events unless the map's code did, once a frame "
           "[monsters][sounds]")
 {
     using namespace GameLogic::Monsters::SoundEvents;
@@ -971,11 +972,11 @@ TEST_CASE("Monster sounds: RenderCharacter plays a drawn frame's events unless t
     const int move1 = SoundOf(SetOf(DeathRider), "SOUND_AIDA_DEATHRAIDER_MOVE1");
     const std::unique_ptr<CHARACTER> rider = MakeCharacter(DeathRider);
     rider->Object.CurrentAction = MONSTER01_WALK;
-    // The Aida draw code's call, then RenderCharacter's: one frame, one sound.
+    // The Aida effects' call, then FinishDrawnFrame: one frame, one sound.
     CHECK(PlayDrawn(*rider));
     FinishDrawnFrame(*rider);
     CHECK(scope.Take() == Sounds({move1}));
-    // A frame without the draw code's call: RenderCharacter plays it.
+    // A frame without the map's call: FinishDrawnFrame plays it.
     FinishDrawnFrame(*rider);
     CHECK(scope.Take() == Sounds({move1}));
     // A set without events of drawn frames plays nothing.
@@ -1090,7 +1091,7 @@ TEST_CASE("Monster sounds: a model timer ticks in its animation each time more t
     CHECK(Advance(timers, MONSTER01_WALK, 0x100u, last) == 1u);
 }
 
-TEST_CASE("Monster sounds: a drawn frame asks the model's timers once, the draw code and the sound events get the "
+TEST_CASE("Monster sounds: a drawn frame asks the model's timers once, the map's code and the sound events get the "
           "same tick, and a timer event plays on it (Q-MN91) [monsters][sounds]")
 {
     using namespace GameLogic::Monsters;
@@ -1111,7 +1112,7 @@ TEST_CASE("Monster sounds: a drawn frame asks the model's timers once, the draw 
     rider->Object.CurrentAction = MONSTER01_WALK;
     rider->ModelTimerLastTicks.fill(0);
     g_timerClock = 1000;
-    // The draw code asks first; the frame's sound events get the same tick.
+    // The map's code asks first; the frame's sound events get the same tick.
     CHECK(ModelTimers::Ticked(*rider, "hair swing"));
     CHECK(ModelTimers::Ticked(*rider, "hair swing"));
     CHECK_FALSE(ModelTimers::Ticked(*rider, "tail"));
@@ -1275,7 +1276,7 @@ TEST_CASE("Monster sounds: the Sound Mixer's overlay marks a drawn monster of a 
 }
 #endif // _EDITOR
 
-TEST_CASE("Monster sounds: PlayDrawn says whether an event of the frame played, for the draw code's effects that "
+TEST_CASE("Monster sounds: PlayDrawn says whether an event of the frame played, for the map's effects that "
           "come with a sound: Blade Hunter's smoke with its step (Q-MN92) [monsters][sounds]")
 {
     using GameLogic::Monsters::SoundEvents::PlayDrawn;

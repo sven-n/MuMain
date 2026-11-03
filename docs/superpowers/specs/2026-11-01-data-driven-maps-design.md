@@ -97,8 +97,9 @@ file that is not in the client folder (the sound is silent), unknown fields.
 `CMapManager::LoadWorld` loads the map; after `Load()` the object sounds of
 the map the server sent (`GetServerMap`, `GetServerStage`) load: each entry
 naming it loads its file under its file's number, and a table of object type
-to sound is built. `RenderObjectVisual` asks the table for each drawn object
-and plays its sound on a free channel. Editing in the Map Editor rebuilds the
+to sound is built. `UpdateObjectVisual`, which runs in the update for each
+object the last frame drew (ADR 0003), asks the table and plays its sound on a
+free channel. Editing in the Map Editor rebuilds the
 table and loads a new file at once.
 
 ### Editor

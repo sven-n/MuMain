@@ -16,7 +16,7 @@ namespace World::MapObjectSounds
 // sounds). A change of the table (the Map Editor) loads them again.
 void LoadForMap(int serverMap, int stage);
 
-// The object is drawn this frame (RenderObjectVisual): plays its type's
+// The last frame drew the object (UpdateObjectVisual): plays its type's
 // sound on a free channel, if an entry of the map names the type, and the
 // sounds of the map's entries without objects (any object, Q-MP8).
 void OnObjectDrawn(const OBJECT& object);

@@ -214,8 +214,8 @@ TEST_CASE("Monster sounds: the Aida monsters' models load the sounds the Aida ma
         {SOUND_AIDA_WITCHQUEEN_ATTACK2, L"Data\\Sound\\w34\\wq_attack2.wav"},
         {SOUND_AIDA_WITCHQUEEN_DIE, L"Data\\Sound\\w34\\wq_death.wav"},
     };
-    // The models and the first of the sounds their drawing code plays
-    // (M33Aida::RenderAidaMonsterVisual): five each, six for the Hell Maine.
+    // The models and the first of the sounds their map's code plays
+    // (M33Aida::UpdateAidaMonsterEffects): five each, six for the Hell Maine.
     struct ModelSounds
     {
         int slot = 0;

@@ -462,7 +462,7 @@ void MuMonsterModelUI::RenderCues(MonsterModelDefinition& model, int slot)
     }
 }
 
-// The timers of the model's animations (Q-MN91), which its draw code and sound
+// The timers of the model's animations (Q-MN91), which its map's code and sound
 // events share: name, animation and interval, added and removed here.
 void MuMonsterModelUI::RenderTimers(MonsterModelDefinition& model, int slot)
 {

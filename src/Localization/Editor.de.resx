@@ -3335,7 +3335,7 @@
     <value>Timer</value>
   </data>
   <data name="Model timers note" xml:space="preserve">
-    <value>Timer der Animationen des Modells: einer tickt, solange das Monster in seiner Animation ist, jedes Mal, wenn mehr als sein Abstand seit seinem letzten Tick vergangen ist. Der Zeichencode des Modells (Twintails Haarschwung) und Geräuschereignisse (Monstergeräusche, Wann: Timer von) ticken mit demselben Timer.</value>
+    <value>Timer der Animationen des Modells: einer tickt, solange das Monster in seiner Animation ist, jedes Mal, wenn mehr als sein Abstand seit seinem letzten Tick vergangen ist. Der Kartencode des Modells (Twintails Haarschwung) und Geräuschereignisse (Monstergeräusche, Wann: Timer von) ticken mit demselben Timer.</value>
   </data>
   <data name="The model has no timers" xml:space="preserve">
     <value>Das Modell hat keine Timer.</value>
@@ -3347,7 +3347,7 @@
     <value>ms</value>
   </data>
   <data name="Remove timer note" xml:space="preserve">
-    <value>Der Zeichencode kann einen Timer über seinen Namen abfragen (Twintails "hair swing"); ohne ihn hört auf, was er taktet.</value>
+    <value>Der Kartencode kann einen Timer über seinen Namen abfragen (Twintails "hair swing"); ohne ihn hört auf, was er taktet.</value>
   </data>
   <data name="Step what timer {0}" xml:space="preserve">
     <value>Timer {0}</value>

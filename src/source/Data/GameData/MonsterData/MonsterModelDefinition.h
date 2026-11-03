@@ -35,8 +35,8 @@ constexpr int MaxModelTimerMs = 60000;
 
 // A timer of one of the model's animations (monsters design, Q-MN91): it
 // ticks while the character is in the animation, each time more than
-// `everyMs` passed since its last tick. The model's draw code and its sound
-// events share it: Twintail's hair swings and its walk sound.
+// `everyMs` passed since its last tick. The map's code for the model and its
+// sound events share it: Twintail's hair swings and its walk sound.
 struct MonsterModelTimer
 {
     std::string name;

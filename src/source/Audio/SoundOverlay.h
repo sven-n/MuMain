@@ -11,9 +11,9 @@
 class CameraState;
 
 // The Sound Mixer's overlay (docs/superpowers/specs/2026-11-01-sound-mixer-design.md,
-// Q-SM9, Q-SM10): while it is on, the game's draw code notes the sound sources
-// it draws with the ranges the data gives them, and the editor draws them over
-// the game once a frame.
+// Q-SM9, Q-SM10): while it is on, the game notes the sound sources it draws
+// (in the update, for what the last frame drew) with the ranges the data gives
+// them, and the editor draws them over the game once a frame.
 namespace Audio::Overlay
 {
 // A sound source drawn this frame.

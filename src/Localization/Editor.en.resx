@@ -3554,7 +3554,7 @@
     <value>Timers</value>
   </data>
   <data name="Model timers note" xml:space="preserve">
-    <value>Timers of the model's animations: one ticks while the monster is in its animation, each time more than its interval passed since its last tick. The model's draw code (Twintail's hair swing) and sound events (Monster Sounds, When: Timers of) tick on the same timer.</value>
+    <value>Timers of the model's animations: one ticks while the monster is in its animation, each time more than its interval passed since its last tick. The map's code for the model (Twintail's hair swing) and sound events (Monster Sounds, When: Timers of) tick on the same timer.</value>
   </data>
   <data name="The model has no timers" xml:space="preserve">
     <value>The model has no timers.</value>
@@ -3566,7 +3566,7 @@
     <value>ms</value>
   </data>
   <data name="Remove timer note" xml:space="preserve">
-    <value>The draw code may ask for a timer by its name (Twintail's "hair swing"); without it, what it times stops.</value>
+    <value>The map's code may ask for a timer by its name (Twintail's "hair swing"); without it, what it times stops.</value>
   </data>
   <data name="Step what timer {0}" xml:space="preserve">
     <value>timer {0}</value>
