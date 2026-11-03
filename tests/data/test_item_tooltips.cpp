@@ -1588,6 +1588,42 @@ TEST_CASE("The lines an item adds to its tooltip layout have rows of their own [
     CHECK(rest == beforeTexts);
 }
 
+// A tooltip is built every frame it shows and keeps its item's built layout between them: the layout is built again
+// once the item changes, and once it changes back.
+TEST_CASE("A tooltip's layout follows a change of its item [data][items][tooltip]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TextMeasureScope measure(&FixedWidthMeasure);
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    ::Hero->Class = hero.Hero().Class;
+    const auto hasOwnLine = []()
+    {
+        const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(
+            Engine::Items::TooltipSnapshot::FullItemParameters(14, 13));
+        return std::any_of(lines.begin(), lines.end(), [](const ItemTooltipLine& line) { return line.text == L"Own"; });
+    };
+
+    const Data::Items::ItemDefinition* stored = g_ItemDatabase.Find(Data::Items::MakeItemType(14, 13));
+    REQUIRE(stored != nullptr);
+    CHECK_FALSE(hasOwnLine());
+    {
+        Data::Items::ItemDefinition jewel = *stored;
+        Data::Items::ItemDescriptionLine own;
+        own.text.Set("en", "Own");
+        jewel.tooltipLayoutChanges.add = {{"blankAfterName", {own}}};
+        const ItemDefinitionScope changed(*stored, jewel);
+        CHECK(hasOwnLine());
+        // The next frame's tooltip, from the kept layout.
+        CHECK(hasOwnLine());
+    }
+    CHECK_FALSE(hasOwnLine());
+}
+
 // MuEditor's Item Tooltip shows the tooltip's name row: DescribeItemTooltipName gives the row the tooltip writes, for
 // every item at every level, plain and with every option, and the name line that gives it.
 TEST_CASE("The name row Item Tooltip shows is the tooltip's [data][items][tooltip]")

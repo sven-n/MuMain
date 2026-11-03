@@ -1565,11 +1565,20 @@ static void WriteItemDescription(const ITEM& item, int level, const ItemTooltipV
     WriteItemDescriptionLines(*definition, level, values, afterOptions, rowsLeft, UseItemOwnLineFont());
 }
 
-// The tooltip layout of the item of `definition` (none: the default layout) as built, its preset and its own changes;
-// the lines point into the item data. Kept between tooltips, so a tooltip drawn every frame reuses its room.
-static std::span<const Data::Items::BuiltTooltipLine> ItemTooltipLayoutOf(const Data::Items::ItemDefinition* definition)
+// The tooltip layout of the item of `itemType` and `definition` (none: the default layout) as built, its preset and its
+// own changes; the lines point into the item data. A tooltip is built every frame it shows, so the layout is built
+// again only for another item or when the items or the tooltip file change (both count in the database's version).
+static std::span<const Data::Items::BuiltTooltipLine> ItemTooltipLayoutOf(int itemType,
+                                                                          const Data::Items::ItemDefinition* definition)
 {
     static std::vector<Data::Items::BuiltTooltipLine> layout;
+    static int builtItemType = -1;
+    static int builtVersion = -1;
+    const int version = g_ItemDatabase.GetVersion();
+    if (itemType == builtItemType && version == builtVersion)
+    {
+        return layout;
+    }
     if (definition != nullptr)
     {
         Data::Items::BuildItemTooltipLayout(g_ItemDatabase.GetTooltipFile(), *definition, layout);
@@ -1578,6 +1587,8 @@ static std::span<const Data::Items::BuiltTooltipLine> ItemTooltipLayoutOf(const 
     {
         Data::Items::BuildTooltipLayout(g_ItemDatabase.GetTooltipFile(), Data::Items::DefaultTooltipLayout, layout);
     }
+    builtItemType = itemType;
+    builtVersion = version;
     return layout;
 }
 
@@ -1770,7 +1781,7 @@ static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype,
     // The numbers of the stat lines, the built-in placeholders of the descriptions.
     const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(*ip);
     const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(ip->Type);
-    const std::span<const Data::Items::BuiltTooltipLine> layout = ItemTooltipLayoutOf(definition);
+    const std::span<const Data::Items::BuiltTooltipLine> layout = ItemTooltipLayoutOf(ip->Type, definition);
     // The rows of the lines the item adds to its layout itself, wherever it adds them.
     int addedRowsLeft = MaxItemAddedLineRows;
     const auto writeLayoutLines = [&](Data::Items::TooltipSection after)
