@@ -113,8 +113,8 @@ bool TextureHasHoles(const BMD* b, int meshIndex)
 // have the look. A mesh whose texture has holes gets the chrome under its texture: solid and on both faces, so it
 // fills the holes (the Magic Gladiator sets' grooves) and the texture covers the rest. A mesh whose texture has none
 // gets the chrome added over its texture, and so do a glowing mesh (it adds its light, as RenderBody's two passes
-// drew it) and every mesh of a see-through model (the doppelgangers of the Doppelganger map), where a solid layer
-// would show through the texture.
+// drew it) and every mesh of a see-through model (a character fading out after death), where a solid layer would
+// show through the texture. Doppelgangers are drawn plainly.
 void RenderSetChrome(BMD* b, const DrawLook& look, const std::optional<ChromeTint>& tint)
 {
     const bool seeThrough = look.alpha < 0.99f;
