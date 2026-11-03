@@ -3,15 +3,18 @@
 #include "Render/Drawing/DeferredDraws.h"
 
 #include <algorithm>
+#include <optional>
 #include <type_traits>
 
 namespace Render::Drawing
 {
 DeferredDraws::DeferredDraws()
-    : m_models(&ModelDrawing::ActiveModelDrawer()), m_effects(&EffectDrawing::ActiveEffectDrawer())
+    : m_models(&ModelDrawing::ActiveModelDrawer()), m_effects(&EffectDrawing::ActiveEffectDrawer()),
+      m_states(ActiveStateCallRecorder())
 {
     ModelDrawing::SetModelDrawer(this);
     EffectDrawing::SetEffectDrawer(this);
+    SetStateCallRecorder(this);
 }
 
 DeferredDraws::~DeferredDraws()
@@ -26,37 +29,49 @@ void DeferredDraws::Flush()
     m_flushed = true;
     ModelDrawing::SetModelDrawer(m_models);
     EffectDrawing::SetEffectDrawer(m_effects);
-    for (const Draw& draw : m_draws)
+    SetStateCallRecorder(m_states);
+    for (const Recorded& record : m_draws)
     {
+        std::optional<mu::ScopedBloomExclusion> exclusion;
+        if (record.bloomExcluded && !mu::GetRenderer().IsBloomExcluded())
+            exclusion.emplace();
         std::visit(
             [this](const auto& recorded)
             {
-                using Recorded = std::decay_t<decltype(recorded)>;
-                if constexpr (std::is_same_v<Recorded, ModelDrawing::MeshDraw>)
+                using Kind = std::decay_t<decltype(recorded)>;
+                if constexpr (std::is_same_v<Kind, ModelDrawing::MeshDraw>)
                     m_models->DrawMesh(recorded);
-                else if constexpr (std::is_same_v<Recorded, ModelDrawing::ShadowDraw>)
+                else if constexpr (std::is_same_v<Kind, ModelDrawing::ShadowDraw>)
                     m_models->DrawShadow(recorded);
-                else if constexpr (std::is_same_v<Recorded, EffectDrawing::EffectState>)
+                else if constexpr (std::is_same_v<Kind, EffectDrawing::EffectState>)
                     m_effects->SetState(recorded);
-                else if constexpr (std::is_same_v<Recorded, EffectDrawing::SpriteDraw>)
+                else if constexpr (std::is_same_v<Kind, EffectDrawing::SpriteDraw>)
                     m_effects->DrawSprite(recorded);
-                else if constexpr (std::is_same_v<Recorded, Quads>)
+                else if constexpr (std::is_same_v<Kind, Quads>)
                     m_effects->DrawQuads({.vertices = std::span(m_vertices).subspan(recorded.first, recorded.count),
                                           .texture = recorded.texture});
-                else if constexpr (std::is_same_v<Recorded, EffectDrawing::DecalDraw>)
+                else if constexpr (std::is_same_v<Kind, EffectDrawing::DecalDraw>)
                     m_effects->DrawDecal(recorded);
-                else if constexpr (std::is_same_v<Recorded, EffectDrawing::CircleDraw>)
+                else if constexpr (std::is_same_v<Kind, EffectDrawing::CircleDraw>)
                     m_effects->DrawCircle(recorded);
-                else
+                else if constexpr (std::is_same_v<Kind, EffectDrawing::PlaneDraw>)
                     m_effects->DrawPlane(recorded);
+                else
+                    MakeStateCall(recorded.call, recorded.argument);
             },
-            draw);
+            record.draw);
     }
     m_draws.clear();
     m_vertices.clear();
     m_kept.clear();
     m_keptBones.clear();
     m_keptShadowMeshes.clear();
+    m_keptClothes.clear();
+}
+
+template <typename T> void DeferredDraws::Record(const T& draw)
+{
+    m_draws.push_back({.draw = draw, .bloomExcluded = mu::GetRenderer().IsBloomExcluded()});
 }
 
 const float* DeferredDraws::Keep(const float* values, std::size_t count)
@@ -95,7 +110,7 @@ void DeferredDraws::DrawMesh(const ModelDrawing::MeshDraw& draw)
         kept.cpu.normals = reinterpret_cast<const float (*)[3]>(Keep(&kept.cpu.normals[0][0], normals * 3u));
         kept.cpu.intensities = Keep(kept.cpu.intensities, normals);
     }
-    m_draws.emplace_back(kept);
+    Record(kept);
 }
 
 void DeferredDraws::DrawShadow(const ModelDrawing::ShadowDraw& draw)
@@ -115,37 +130,54 @@ void DeferredDraws::DrawShadow(const ModelDrawing::ShadowDraw& draw)
         }
         kept.cpu = {meshes.get(), kept.cpu.size()};
     }
-    m_draws.emplace_back(kept);
+    if (!kept.clothes.empty())
+    {
+        auto& clothes = m_keptClothes.emplace_back(std::make_unique<ModelDrawing::ClothShadow[]>(kept.clothes.size()));
+        for (std::size_t i = 0; i < kept.clothes.size(); ++i)
+        {
+            clothes[i] = kept.clothes[i];
+            const auto points =
+                static_cast<std::size_t>(clothes[i].columns) * static_cast<std::size_t>(clothes[i].rows);
+            clothes[i].points = reinterpret_cast<const float (*)[3]>(Keep(&clothes[i].points[0][0], points * 3u));
+        }
+        kept.clothes = {clothes.get(), kept.clothes.size()};
+    }
+    Record(kept);
 }
 
 void DeferredDraws::SetState(const EffectDrawing::EffectState& state)
 {
-    m_draws.emplace_back(state);
+    Record(state);
 }
 
 void DeferredDraws::DrawSprite(const EffectDrawing::SpriteDraw& draw)
 {
-    m_draws.emplace_back(draw);
+    Record(draw);
 }
 
 void DeferredDraws::DrawQuads(const EffectDrawing::QuadsDraw& draw)
 {
-    m_draws.emplace_back(Quads{.first = m_vertices.size(), .count = draw.vertices.size(), .texture = draw.texture});
+    Record(Quads{.first = m_vertices.size(), .count = draw.vertices.size(), .texture = draw.texture});
     m_vertices.insert(m_vertices.end(), draw.vertices.begin(), draw.vertices.end());
 }
 
 void DeferredDraws::DrawDecal(const EffectDrawing::DecalDraw& draw)
 {
-    m_draws.emplace_back(draw);
+    Record(draw);
 }
 
 void DeferredDraws::DrawCircle(const EffectDrawing::CircleDraw& draw)
 {
-    m_draws.emplace_back(draw);
+    Record(draw);
 }
 
 void DeferredDraws::DrawPlane(const EffectDrawing::PlaneDraw& draw)
 {
-    m_draws.emplace_back(draw);
+    Record(draw);
+}
+
+void DeferredDraws::RecordStateCall(StateCall call, int argument)
+{
+    Record(State{.call = call, .argument = argument});
 }
 } // namespace Render::Drawing

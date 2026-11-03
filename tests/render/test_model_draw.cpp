@@ -2,6 +2,7 @@
 
 #include <doctest.h>
 
+#include "Engine/Physics/PhysicsManager.h"
 #include "Render/Models/ModelDraw.h"
 #include "Render/Models/ZzzBMD.h"
 
@@ -25,6 +26,25 @@ public:
 
     std::vector<Render::ModelDrawing::MeshDraw> draws;
     std::vector<Render::ModelDrawing::ShadowDraw> shadows;
+};
+
+// A cloth of 2 by 3 points placed at x, without a simulation.
+class GridCloth final : public CPhysicsCloth
+{
+public:
+    explicit GridCloth(float x)
+    {
+        m_iNumHor = 2;
+        m_iNumVer = 3;
+        m_iNumVertices = m_iNumHor * m_iNumVer;
+        m_pVertices = new CPhysicsVertex[m_iNumVertices];
+        for (int i = 0; i < m_iNumVertices; ++i)
+            m_pVertices[i].Init(x + static_cast<float>(i % 2) * 10.f, static_cast<float>(i / 2) * 10.f, 50.f);
+    }
+    ~GridCloth() override
+    {
+        Destroy();
+    }
 };
 
 struct DrawerScope
@@ -123,12 +143,12 @@ TEST_CASE("RenderBodyShadow hands the active drawer the call and the model state
     Vector(100.f, 200.f, 300.f, model->BodyOrigin);
     model->BodyScale = 1.25f;
     model->ActiveLod = 2;
-    int clothes = 0;
+    GridCloth clothes[2] = {GridCloth(0.f), GridCloth(100.f)};
 
     RecordingDrawer drawer;
     {
         DrawerScope scope(drawer);
-        model->RenderBodyShadow(2, 3, 4, 5, &clothes, 6, 0.5f);
+        model->RenderBodyShadow(2, 3, 4, 5, clothes, 2, 0.5f);
     }
 
     REQUIRE(drawer.shadows.size() == 1);
@@ -138,8 +158,12 @@ TEST_CASE("RenderBodyShadow hands the active drawer the call and the model state
     CHECK(draw.hiddenMesh == 3);
     CHECK(draw.startMesh == 4);
     CHECK(draw.endMesh == 5);
-    CHECK(draw.clothes == &clothes);
-    CHECK(draw.clothesCount == 6);
+    // The cloth's points as the simulation left them, not the simulation.
+    REQUIRE(draw.clothes.size() == 2);
+    CHECK(draw.clothes[1].columns == 3);
+    CHECK(draw.clothes[1].rows == 2);
+    CHECK(draw.clothes[1].points[5][0] == doctest::Approx(110.f));
+    CHECK(draw.clothes[1].points[5][1] == doctest::Approx(20.f));
     CHECK(draw.alpha == doctest::Approx(0.5f));
     CHECK(draw.bodyOrigin[2] == doctest::Approx(300.f));
     CHECK(draw.bodyScale == doctest::Approx(1.25f));

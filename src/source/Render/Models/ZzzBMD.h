@@ -5,6 +5,7 @@
 #include <vector>
 #include <cstdint>
 #include <memory>
+#include <span>
 #include <string>
 #include <string_view>
 #include "Render/Sprites/TextureScript.h"
@@ -14,6 +15,7 @@ namespace Render::ModelDrawing
 struct MeshDraw;
 struct ModelSkin;
 struct ShadowDraw;
+struct ClothShadow;
 } // namespace Render::ModelDrawing
 
 struct BITMAP_t;
@@ -485,8 +487,8 @@ private:
     // The shadow streams the renderer keeps for the meshes of this slot.
     void ReleaseShadowStreams();
 
-    void AddClothesShadowTriangles(void* pClothes, int clothesCount, const float* origin, float sx, float sy,
-                                   std::uint32_t color) const;
+    void AddClothesShadowTriangles(std::span<const Render::ModelDrawing::ClothShadow> clothes, const float* origin,
+                                   float sx, float sy, std::uint32_t color) const;
     // Whether VertexTransform[mesh] holds this model's vertices now: skinned on the CPU, or written by the cloth.
     [[nodiscard]] bool OwnsCpuVertices(int mesh) const;
     // Whether a shadow casts a mesh's own CPU vertices instead of skinning it on the GPU.
