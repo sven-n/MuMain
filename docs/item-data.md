@@ -1512,9 +1512,11 @@ of `Tooltips/Tooltip.json`: `default` or a preset such as `noClassLines`
 (`tooltipLayout`). A layout the item's own changes don't fit (a line they
 hide or add after that it doesn't have) is greyed out, with the reason when
 the pointer is on it: the item could not be saved with it. The item's own
-changes (`tooltipLayoutChanges`), the line ids it hides and how many lines it
-adds, are shown under it; they are changed in the item file. Item Checks
-opens Item Tooltip for a problem of either.
+changes (`tooltipLayoutChanges`) are shown under it: the line ids it hides,
+and each line it adds under the line it follows, numbered from 1 as Item
+Checks counts them from 0 (`add[0].lines[1]` is the second line under the
+first), in the UI's language with its levels; they are changed in the item
+file. Item Checks opens Item Tooltip for a problem of either.
 
 ### Item Formulas
 

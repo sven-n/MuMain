@@ -5,6 +5,7 @@
 #include "MuItemTooltipUI.h"
 
 #include "ItemEdits.h"
+#include "ItemLayoutChangeNotes.h"
 #include "ItemSelection.h"
 #include "ItemToolWindow.h"
 #include "TooltipLineLooks.h"
@@ -329,25 +330,19 @@ void CMuItemTooltipUI::RenderLayout(ItemDefinition& item)
         ImGui::EndCombo();
     }
     m_draft.AfterChange(changed, I18N::Editor::ChangeTheTooltipLayout);
-    // Its own changes (tooltipLayoutChanges), on top of that layout.
-    const Data::Items::ItemTooltipLayoutChanges& own = item.tooltipLayoutChanges;
-    if (!own.hide.empty())
+    // Its own changes (tooltipLayoutChanges), on top of that layout: what it hides and each line it adds.
+    for (const ItemLayoutChangeNote& note : DescribeItemLayoutChanges(
+             item.tooltipLayoutChanges, g_ItemDatabase.GetTooltipFile(), I18N::GetCurrentLocale()))
     {
-        std::string ids;
-        for (const std::string& id : own.hide)
+        if (note.indented)
         {
-            ids += (ids.empty() ? "" : ", ") + id;
+            ImGui::Indent();
         }
-        RenderNote(I18N::Format(I18N::Editor::ItsOwnChangesHide0, {ids}).c_str());
-    }
-    size_t added = 0;
-    for (const Data::Items::ItemTooltipLayoutAddition& addition : own.add)
-    {
-        added += addition.lines.size();
-    }
-    if (added > 0)
-    {
-        RenderNote(I18N::Format(I18N::Editor::ItAdds0LinesOfItsOwn, {std::to_string(added)}).c_str());
+        RenderNote(note.text.c_str());
+        if (note.indented)
+        {
+            ImGui::Unindent();
+        }
     }
 }
 

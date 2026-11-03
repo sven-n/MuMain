@@ -1561,8 +1561,14 @@
   <data name="Its own changes do not fit this layout {0}" xml:space="preserve">
     <value>Seine eigenen Änderungen passen nicht zu diesem Layout: {0}</value>
   </data>
-  <data name="It adds {0} lines of its own" xml:space="preserve">
-    <value>Es fügt {0} eigene Zeilen hinzu</value>
+  <data name="It adds after the line {0}" xml:space="preserve">
+    <value>Es fügt nach der Zeile {0} hinzu:</value>
+  </data>
+  <data name="A blank line" xml:space="preserve">
+    <value>(eine Leerzeile)</value>
+  </data>
+  <data name="At levels {0} to {1}" xml:space="preserve">
+    <value>(+{0} bis +{1})</value>
   </data>
   <data name="In the tooltip" xml:space="preserve">
     <value>Im Tooltip</value>

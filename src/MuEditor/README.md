@@ -50,6 +50,7 @@ stores it when a field is left.
 - **ItemCheckArea** - The items in Data Checks: the checks of a save, each leading to its item and field (ItemCheckTargets)
 - **MuItemTooltipUI** - Item Tooltip: the item's name in the tooltip and on the ground (its ground label), previewed at a level and with options by the game's own functions, and the item's own label rules
 - **TooltipLineLooks.h/cpp** - The legacy theme's tooltip colors of each TEXT_COLOR_* (themes/legacy/tooltip.rcss), for Item Tooltip's tooltip row
+- **ItemLayoutChangeNotes.h/cpp** - Item Tooltip's rows for an item's own tooltip layout changes: the line ids it hides and each line it adds, numbered under the line it follows
 - **MuItemSyncUI** - Import and Export of the item exchange file with OpenMU: the import's diff of the items and formulas with a box per field (ItemSyncDiff, which also keeps the known differences), applied as one undo step after a confirmation; the export of the client's data, confirmed when it replaces a file (ItemSyncApply); and a read-only comparison of two files
 - **ItemToolWindow** - What every item tool window shares: its title, the selected item, and the item edit history as the editor bar's undo target
 

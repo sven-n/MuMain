@@ -53,6 +53,7 @@
 #include "UI/ItemTools/ItemEdits.h"
 #include "UI/ItemTools/ItemFieldWidgets.h"
 #include "UI/ItemTools/ItemHeldByCharacter.h"
+#include "UI/ItemTools/ItemLayoutChangeNotes.h"
 #include "UI/ItemTools/ItemLookUseCounts.h"
 #include "UI/ItemTools/ItemNamesakes.h"
 #include "UI/ItemTools/ItemRequirementTable.h"
@@ -4721,6 +4722,39 @@ TEST_CASE("Item Tooltip picks the item's tooltip layout as an undo step [data][i
     pick("noDurabilityLine");
     CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout == "noClassLines");
     g_ItemEdits.GetHistory().Clear();
+}
+
+// Item Tooltip lists an item's own changes to its layout: what it hides, and each line it adds under the line it
+// follows, numbered as Item Checks names them (tooltipLayoutChanges.add[1].lines[1] is the second under the second).
+TEST_CASE("Item Tooltip lists the lines an item adds to its tooltip layout [data][items][editor]")
+{
+    I18N::SetLocale("en");
+    ItemTooltipLayoutChanges changes;
+    changes.hide = {"durability", "blankAfterOptions"};
+    ItemDescriptionLine own;
+    own.text.Set("en", "Own");
+    own.text.Set("de", "Eigen");
+    own.minLevel = 3;
+    ItemDescriptionLine shared;
+    shared.textName = "canBeEquippedBy";
+    ItemDescriptionLine missing;
+    missing.textName = "nothing";
+    changes.add = {{"classLines", {own, ItemDescriptionLine{}}}, {"firstRow", {shared, missing}}};
+
+    std::vector<std::string> texts;
+    std::vector<bool> indented;
+    for (const MuEditor::Items::ItemLayoutChangeNote& note :
+         MuEditor::Items::DescribeItemLayoutChanges(changes, ShippedTooltips(), "de"))
+    {
+        texts.push_back(note.text);
+        indented.push_back(note.indented);
+    }
+    CHECK(texts == std::vector<std::string>{"Its own changes hide: durability, blankAfterOptions",
+                                            "It adds after the line classLines:", "1. Eigen (+3 to +15)",
+                                            "2. (a blank line)", "It adds after the line firstRow:",
+                                            "1. Kann von {className} ausgerüstet werden", "2. @nothing"});
+    CHECK(indented == std::vector<bool>{false, false, true, true, false, true, true});
+    CHECK(MuEditor::Items::DescribeItemLayoutChanges({}, ShippedTooltips(), "en").empty());
 }
 
 // Item Tooltip draws the tooltip's name row in the colors the legacy theme's tooltip gives each TEXT_COLOR_*: its table
