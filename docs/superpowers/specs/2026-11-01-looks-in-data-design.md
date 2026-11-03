@@ -85,7 +85,7 @@ Made while reviewing sven-n/MuMain#915, 2026-11-01.
 - A model entry's `renderStyle` names one of 140 code styles
   (`ItemRenderStyles.cpp`, names at the end of the file), and `itemEffect`
   names one of the item effects (`ItemEffects.cpp`). See
-  `docs/item-data.md:983`.
+  `docs/item-data.md:988`.
 - Many styles draw the whole model, then an extra pass on one mesh:
   - `lordScepter` (`ItemRenderStyles.cpp:691`): the model, then a pulsing
     glowing chrome pass on mesh 1.
