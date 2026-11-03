@@ -150,6 +150,12 @@ ends when the window is closed:
 
 ```sh
 cmake --build --preset windows-x64-in-game-tests-gui
+```
+
+A `-mueditor` build folder has no `-gui` build preset; there, build the target
+itself:
+
+```sh
 cmake --build out/build/windows-x64-mueditor --config Release --target InGameTestsGui
 ```
 
@@ -216,10 +222,11 @@ run deletes once the report has them.
 ### The command line
 
 The `InGameTests` build target builds `Main`, recreates the test server and
-plays the scenarios:
+plays the scenarios. Every build folder with the tester has it, an in-game
+tests one like a `-mueditor` one:
 
 ```sh
-cmake --build out/build/windows-x64-mueditor --config Release --target InGameTests
+cmake --build out/build/windows-x64-in-game-tests --config Release --target InGameTests
 ```
 
 Cache variables choose what it runs; set them once with `-D` when configuring,
@@ -234,7 +241,7 @@ or in CLion's CMake options:
 | `MU_IN_GAME_TEST_FRESH_SERVER` | recreate the test server before every run; default `ON`; turn it off for another server |
 
 ```sh
-cmake -B out/build/windows-x64-mueditor "-DMU_IN_GAME_TEST_SCENARIOS=trade" "-DMU_IN_GAME_TEST_STEP_DELAY=1000"
+cmake -B out/build/windows-x64-in-game-tests "-DMU_IN_GAME_TEST_SCENARIOS=trade" "-DMU_IN_GAME_TEST_STEP_DELAY=1000"
 ```
 
 Keep the quotes in PowerShell, which otherwise splits a value like
