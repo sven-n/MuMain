@@ -1473,8 +1473,8 @@ void WriteItemTooltipLayoutRow(const Data::Items::TooltipLayoutLine& line, const
         SkipNum++;
         return;
     }
-    TextListColor[TextNum] = static_cast<int>(
-        Engine::Items::TooltipValues::GetTooltipColor(line.colors, line.color, item.Type, level, values));
+    TextListColor[TextNum] =
+        static_cast<int>(Engine::Items::TooltipValues::GetTooltipLineColor(line, item.Type, level, values));
     TextBold[TextNum] = line.bold;
     TextNum++;
 }
