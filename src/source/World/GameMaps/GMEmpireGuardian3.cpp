@@ -1111,7 +1111,7 @@ bool GMEmpireGuardian3::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-bool GMEmpireGuardian3::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool GMEmpireGuardian3::RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
 {
     if (o->Type == MODEL_DUAL_BERSERKER)
     {

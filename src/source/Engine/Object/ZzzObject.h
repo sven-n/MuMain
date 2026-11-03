@@ -59,8 +59,10 @@ void UpdateTransformSkinEffects(OBJECT* o);
 void StepPartCloth(OBJECT* o, PART_t* p, int Type, int ItemLevel, bool Translate);
 // The sparks of a character's +15 weapons, on its own pose; RenderCharacter draws its +15 armor pieces.
 void SpawnNextGradeWeaponEffects(CHARACTER* c);
-void NextGradeObjectRender(CHARACTER* c);
+void NextGradeObjectRender(const CHARACTER* c);
 // The character's +15 armor pieces RenderCharacter attaches: the body part each plays on, its model and bone.
+void ForEachNextGradeObject(const CHARACTER* c,
+                            const std::function<void(const PART_t* part, int type, int bone)>& visit);
 void ForEachNextGradeObject(CHARACTER* c, const std::function<void(PART_t* part, int type, int bone)>& visit);
 // What Calc_RenderObject did to each object it drew, for the update to do once per frame to the objects the last frame
 // drew: the hero's fall in Chaos Castle fades them, and a stunned or sleeping owner holds them at their first frame.
@@ -68,13 +70,30 @@ void UpdateDrawnObjectHold(OBJECT* o);
 // Keeps the stun skull around an object whose stun tint its part draw shows, as that draw recreated it.
 void RefreshStunSkull(OBJECT* o, vec3_t Light);
 void RenderObject_AfterImage(const OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
-void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0,
-                                float AniInterval1 = 1.4f, float AniInterval2 = 0.7f);
-void RenderObject_AfterCharacter(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
+void RenderCharacter_AfterImage(const CHARACTER* pCha, const PART_t* pPart, vec3_t light, bool Translate = false,
+                                int Select = 0, float AniInterval1 = 1.4f, float AniInterval2 = 0.7f);
+void RenderObject_AfterCharacter(const OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void Draw_RenderObject_AfterCharacter(const OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderObjects_AfterCharacter();
 // Starts a frame's object draws: clears the after-character sends and keeps the LODs drawn last frame.
 void BeginObjectDraws();
+// A shadow pass of a character's draw: the parts drawn while it lasts draw their shadows. With a hidden mesh, the
+// body's shadow leaves out that mesh instead of the object's.
+class ShadowPass
+{
+public:
+    static constexpr int ObjectHiddenMesh = -2;
+    explicit ShadowPass(int hiddenMesh = ObjectHiddenMesh);
+    ~ShadowPass();
+    ShadowPass(const ShadowPass&) = delete;
+    ShadowPass& operator=(const ShadowPass&) = delete;
+
+private:
+    bool previous_;
+    int previousHiddenMesh_;
+};
+// Whether `o` draws its shadow: set on it, or in a ShadowPass.
+[[nodiscard]] bool DrawsShadow(const OBJECT* o);
 // The map objects and effects this frame's draws send to the after-character passes; the boids are sent by their
 // update (m_bRenderAfterCharacter).
 void SendAfterCharacter(const OBJECT* o);
@@ -131,9 +150,10 @@ Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, const OBJECT* o
 // model's pose with SpawnPartObjectEffect, b placed where the model is drawn.
 bool PartObjectSpawns(const OBJECT* o, int Type);
 void SpawnPartObjectEffect(BMD* b, OBJECT* o, int Type, vec34_t* bones);
-void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha = 0.f, int Level = 0, int ExcellentFlags = 0,
-                            int ancientDiscriminator = 0, int Select = 0, int RenderType = RENDER_TEXTURE);
-void RenderPartObject(OBJECT* o, int Type, void* p, vec3_t Light, float Alpha = 0.f, int Level = 0,
+void RenderPartObjectEffect(const OBJECT* o, int Type, const vec3_t Light, float Alpha = 0.f, int Level = 0,
+                            int ExcellentFlags = 0, int ancientDiscriminator = 0, int Select = 0,
+                            int RenderType = RENDER_TEXTURE);
+void RenderPartObject(const OBJECT* o, int Type, const void* p, const vec3_t Light, float Alpha = 0.f, int Level = 0,
                       int ExcellentFlags = 0, int ancientDiscriminator = 0, bool GlobalTransform = false,
                       bool HideSkin = false, bool Translate = false, int Select = 0, int RenderType = RENDER_TEXTURE);
 
@@ -163,10 +183,10 @@ void BodyLight(const OBJECT* o, BMD* b);
 // origin: where to draw the model instead of where the object stands.
 bool Calc_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon, const float* origin = nullptr,
                        const ObjectGhost* ghost = nullptr);
-bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select);
-// Calc_ObjectAnimation's pose into the caller's bones, for a draw that shows the object where it does not stand; the
-// object keeps its own pose.
-bool Calc_ObjectAnimationInto(OBJECT* o, bool Translate, vec34_t* bones);
+bool Calc_ObjectAnimation(const OBJECT* o, bool Translate, int Select);
+// The bones `o` is drawn with this frame: those a draw posed it into when the update's pose was not current,
+// otherwise its own. For the draw only.
+[[nodiscard]] vec34_t* DrawnPose(const OBJECT* o);
 void Draw_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon, const ObjectGhost* ghost = nullptr);
 
 bool IsPartyMemberBuff(int partyindex, eBuffState buffstate);
@@ -177,7 +197,7 @@ bool isPartyMemberBuff(int partyindex);
 // toggle); callers that want a visible highlight (e.g. Map Editor selection/hover)
 // pass their own - typically the same bright color for all three so the box reads
 // as one flat outline instead of the subtle pseudo-3D shading the debug default gives.
-void RenderBoundingBox(OBJECT* pObj, std::uint32_t darkColor = 0xFF333333u, std::uint32_t midColor = 0xFF999999u,
+void RenderBoundingBox(const OBJECT* pObj, std::uint32_t darkColor = 0xFF333333u, std::uint32_t midColor = 0xFF999999u,
                        std::uint32_t lightColor = 0xFF666666u);
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX
 

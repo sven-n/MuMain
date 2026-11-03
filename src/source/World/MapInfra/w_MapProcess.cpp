@@ -490,7 +490,7 @@ bool MapProcess::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-bool MapProcess::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool MapProcess::RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
 {
     for (auto iter = m_MapList.begin(); iter != m_MapList.end();)
     {

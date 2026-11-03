@@ -1973,7 +1973,7 @@ bool UpdateHellasMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-bool RenderHellasMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate, int Select)
+bool RenderHellasMonsterCloth(const CHARACTER* c, const OBJECT* o, bool Translate, int Select)
 {
     return false;
 }

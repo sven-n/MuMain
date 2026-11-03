@@ -50,7 +50,7 @@ public:
     // 몬스터 스킬 블러 이펙트
     virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
     // 몬스터 이펙트 ( 일반 )
-    virtual bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
+    virtual bool RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b);
     // 몬스터 이펙트 ( 스킬 )
     virtual bool AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b);
     // 스킬 애니메이션 관련 함수

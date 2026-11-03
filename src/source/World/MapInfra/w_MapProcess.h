@@ -33,7 +33,7 @@ public:
     bool MoveMonsterVisual(OBJECT* o, BMD* b);
     void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
     bool UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
-    bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
+    bool RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b);
     bool AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b);
     bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
 

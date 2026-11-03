@@ -1211,7 +1211,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
     return false;
 }
 
-bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool M38Kanturu2nd::Render_Kanturu2nd_MonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {

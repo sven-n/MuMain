@@ -763,6 +763,50 @@ TEST_CASE("Drawing a part the update has not advanced yet, again and again, adva
 
 extern OBJECT g_ItemObject[];
 
+TEST_CASE("The draw's full-set check sets nothing; the update's sets the set level and defense [effects]")
+{
+    CharacterScope scope(MODEL_PLAYER);
+    CHARACTER* c = &scope.character();
+    c->Class = CLASS_KNIGHT;
+    // A +11 set: helm, armor, pants, gloves and boots of the same number.
+    for (int part = BODYPART_HELM; part <= BODYPART_BOOTS; ++part)
+    {
+        c->BodyPart[part].Type = Data::Items::ToModelSlot(Data::Items::MakeItemType(7 + part - BODYPART_HELM, 1));
+        c->BodyPart[part].Level = 11;
+    }
+    EquipmentLevelSet = 0;
+    g_bAddDefense = false;
+
+    CHECK(IsFullSet(c));
+    CHECK(EquipmentLevelSet == 0);
+    CHECK_FALSE(g_bAddDefense);
+
+    CHECK(CheckFullSet(c));
+    CHECK(EquipmentLevelSet == 11);
+    CHECK(g_bAddDefense);
+    EquipmentLevelSet = 0;
+    g_bAddDefense = false;
+}
+
+TEST_CASE("A shadow pass draws shadows while it lasts and leaves the object's own flag alone [effects]")
+{
+    OBJECT o;
+    CHECK_FALSE(DrawsShadow(&o));
+    {
+        const ShadowPass shadow(2);
+        CHECK(DrawsShadow(&o));
+        {
+            const ShadowPass inner;
+            CHECK(DrawsShadow(&o));
+        }
+        CHECK(DrawsShadow(&o));
+    }
+    CHECK_FALSE(DrawsShadow(&o));
+    CHECK_FALSE(o.EnableShadow);
+    o.EnableShadow = true;
+    CHECK(DrawsShadow(&o));
+}
+
 TEST_CASE("Drawing a held part sets up its own item object and leaves the shared one as it stands [effects]")
 {
     CharacterScope scope(MODEL_PLAYER);
@@ -834,7 +878,7 @@ TEST_CASE(
         [c, &parts]
         {
             for (PART_t* part : parts)
-                g_CMonkSystem.DarksideRendering(c, part);
+                g_CMonkSystem.DarksideRendering(c, part, c->Light);
         });
     CHECK(o->Angle[2] == 0.f);
     CHECK(o->Position[0] == 1000.f);
@@ -1137,6 +1181,39 @@ TEST_CASE("Drawing an object whose pose the update has not built leaves its pose
     CHECK(rock.BoneTransform[0][0][3] == before);
 }
 
+TEST_CASE("A character drawn before the update posed it is posed into draw bones its parts use; its own stay [effects]")
+{
+    FenrirScope scope;
+    OBJECT body;
+    body.Live = true;
+    body.Type = 78;
+    body.Scale = 1.f;
+    body.Alpha = 1.f;
+    body.AnimationFrame = 2.5f;
+    body.BoneTransform = scope.bones.get();
+    body.EnableBoneMatrix = true;
+    BMD* b = &Models[body.Type];
+    REQUIRE_FALSE(Engine::Object::Pose::IsCurrent(&body, b, false));
+    const float before = body.BoneTransform[0][0][3];
+
+    BeginObjectDraws();
+    Engine::Object::Attachments::BeginFrame();
+    CHECK(DrawnPose(&body) == body.BoneTransform);
+    CheckDrawSpawnsNone([&] { CHECK(Calc_ObjectAnimation(&body, true, 0)); });
+    CHECK(DrawnPose(&body) != body.BoneTransform);
+    CHECK_FALSE(Engine::Object::Pose::IsCurrent(&body, b, false));
+    CHECK(body.BoneTransform[0][0][3] == before);
+
+    // A later draw in the frame that finds the update's pose (as after a ghost's) is back on the object's bones.
+    Engine::Object::Pose::Record(&body, b, false);
+    CHECK(Calc_ObjectAnimation(&body, true, 0));
+    CHECK(DrawnPose(&body) == body.BoneTransform);
+
+    // The next frame's draws start from the object's own bones again.
+    BeginObjectDraws();
+    CHECK(DrawnPose(&body) == body.BoneTransform);
+}
+
 TEST_CASE("Cursed Castle Water lights the bone it is given from the update, and its draw spawns none [effects]")
 {
     FenrirScope scope;
@@ -1193,7 +1270,7 @@ TEST_CASE("A Dragon Kick afterimage leaves the fading character's alpha, place a
     PART_t* part = &c->BodyPart[BODYPART_ARMOR];
     part->Type = MODEL_SWORD;
 
-    RepeatedDraws::CheckChangesNothing([c, part] { RenderCharacter_AfterImage(c, part, true, 0, 2.5f, 1.0f); });
+    RepeatedDraws::CheckChangesNothing([c, part] { RenderCharacter_AfterImage(c, part, c->Light, true, 0, 2.5f, 1.0f); });
     CHECK(o->Alpha == 0.4f);
     CHECK(o->AnimationFrame == 4.f);
     CHECK(o->Position[0] == 1000.f);
@@ -1246,11 +1323,47 @@ TEST_CASE("Drawing a Christmas companion's three copies leaves the companion whe
 
     for (int pass = 0; pass < 2; ++pass)
     {
-        CheckDrawSpawnsNone([c] { RenderChristmasCompanions(c, true, 0); });
+        CheckDrawSpawnsNone([c] { RenderChristmasCompanions(c, c->Light, true, 0); });
         CHECK(o->Position[0] == 1000.f);
         CHECK(o->Position[1] == 1200.f);
         CHECK(o->Position[2] == 30.f);
     }
+}
+
+TEST_CASE("A Guardian Statue's dark aurora pulse is set on its light by its update, outside a siege only [effects]")
+{
+    CharacterScope scope(MODEL_GUARDIAN_STATUE);
+    const int world = gMapManager.WorldActive;
+    const double previousTime = WorldTime;
+    const bool siege = battleCastle::IsBattleCastleStart();
+    WorldTime = 1000.0;
+    OBJECT* o = &scope.character().Object;
+    BMD* b = &Models[o->Type];
+    // The siege is switched off the castle's map: on it, the switch loads the castle's terrain.
+    const auto inCastle = [world](bool siegeOn)
+    {
+        gMapManager.WorldActive = world == WD_30BATTLECASTLE ? WD_0LORENCIA : world;
+        battleCastle::SetBattleCastleStart(siegeOn);
+        gMapManager.WorldActive = WD_30BATTLECASTLE;
+    };
+
+    inCastle(false);
+    Vector(0.5f, 0.5f, 0.5f, o->Light);
+    CHECK(battleCastle::MoveBattleCastleMonsterVisual(o, b));
+    const float pulse = sinf(1000.f * 0.0015f) * 0.3f + 0.7f;
+    CHECK(o->Light[0] == doctest::Approx((1.f - pulse) * pulse));
+    CHECK(o->Light[2] == doctest::Approx((1.f - pulse) * pulse));
+
+    // During a siege its aurora is bright, which left its light alone.
+    inCastle(true);
+    Vector(0.5f, 0.5f, 0.5f, o->Light);
+    CHECK(battleCastle::MoveBattleCastleMonsterVisual(o, b));
+    CHECK(o->Light[0] == 0.5f);
+
+    gMapManager.WorldActive = world == WD_30BATTLECASTLE ? WD_0LORENCIA : world;
+    battleCastle::SetBattleCastleStart(siege);
+    WorldTime = previousTime;
+    gMapManager.WorldActive = world;
 }
 
 TEST_CASE("Character passes leave a standing siege gate's collision; the update finishes the siege census [effects]")

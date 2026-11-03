@@ -161,7 +161,7 @@ unsigned int CHARACTER::PostMoveProcess_GetCurProcessCount()
     return m_pPostMoveProcess->uiProcessingCount_PostMoveEvent;
 }
 
-bool CHARACTER::PostMoveProcess_IsProcessing()
+bool CHARACTER::PostMoveProcess_IsProcessing() const
 {
     if (m_pPostMoveProcess == NULL)
     {

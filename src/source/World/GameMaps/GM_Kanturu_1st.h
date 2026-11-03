@@ -30,7 +30,7 @@ namespace M37Kanturu1st
     bool RenderKanturu1stMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b,
                                            int ExtraMon); // 몬스터 오브젝트 렌더링
     bool UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
-    bool RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);	// 몬스터 효과 렌더링
+    bool RenderKanturu1stMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b); // 몬스터 효과 렌더링
 };
 
 #endif	// _GM_KANTURU_1ST_H_

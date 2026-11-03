@@ -359,6 +359,15 @@ void PetProcess::UpdatePets()
     }
 }
 
+void PetProcess::CullPets()
+{
+    for (const auto& pet : m_petsList)
+    {
+        if (pet)
+            pet->Cull();
+    }
+}
+
 void PetProcess::RenderPets()
 {
     for (auto iter = m_petsList.begin(); iter != m_petsList.end(); )

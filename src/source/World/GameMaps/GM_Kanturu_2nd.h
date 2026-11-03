@@ -30,7 +30,7 @@ namespace M38Kanturu2nd
     bool Render_Kanturu2nd_MonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b,
                                              int ExtraMon); // 몬스터 오브젝트 렌더링
     bool Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
-    bool	Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);	// 몬스터 효과 렌더링
+    bool Render_Kanturu2nd_MonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b); // 몬스터 효과 렌더링
 
     // 칸투루내부 맵 관련
     bool		Is_Kanturu2nd();						// 칸투루내부 맵인가?

@@ -158,7 +158,7 @@ bool CGMDuelArena::UpdateObjectEffects(OBJECT* o, BMD* b)
     return false;
 }
 
-bool CGMDuelArena::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool CGMDuelArena::RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
 {
     // 	vec3_t vPos, vRelative, vLight;
     //

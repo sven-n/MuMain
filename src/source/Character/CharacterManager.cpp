@@ -209,7 +209,7 @@ BYTE CCharacterManager::GetStepClass(const CLASS_TYPE byClass)
     }
 }
 
-int CCharacterManager::GetEquipedBowType(CHARACTER* pChar)
+int CCharacterManager::GetEquipedBowType(const CHARACTER* pChar)
 {
     if (GameLogic::Items::IsBowModel(pChar->Weapon[1].Type))
     {
@@ -287,8 +287,9 @@ void CCharacterManager::GetMagicSkillDamage(int iType, int* piMinDamage, int* pi
     *piMinDamage = CharacterMachine->Character.MagicDamageMin + Damage;
     *piMaxDamage = CharacterMachine->Character.MagicDamageMax + Damage + Damage / 2;
 
-    Damage = 0;
-    g_csItemOption.PlusSpecial((WORD*)&Damage, AT_SET_OPTION_IMPROVE_MAGIC_POWER);
+    WORD magicPower = 0;
+    g_csItemOption.PlusSpecial(&magicPower, AT_SET_OPTION_IMPROVE_MAGIC_POWER);
+    Damage = magicPower;
     if (Damage != 0)
     {
         float fratio = 1.f + (float)Damage / 100.f;
@@ -298,7 +299,9 @@ void CCharacterManager::GetMagicSkillDamage(int iType, int* piMinDamage, int* pi
 
     Damage = 0;
     g_csItemOption.PlusMastery(&Damage, p->MasteryType);
-    g_csItemOption.PlusSpecial((WORD*)&Damage, AT_SET_OPTION_IMPROVE_SKILL_ATTACK);
+    WORD skillAttack = 0;
+    g_csItemOption.PlusSpecial(&skillAttack, AT_SET_OPTION_IMPROVE_SKILL_ATTACK);
+    Damage += skillAttack;
     *piMinDamage += Damage;
     *piMaxDamage += Damage;
 }
@@ -332,7 +335,9 @@ void CCharacterManager::GetSkillDamage(int iType, int* piMinDamage, int* piMaxDa
 
     Damage = 0;
     g_csItemOption.PlusMastery(&Damage, p->MasteryType);
-    g_csItemOption.PlusSpecial((WORD*)&Damage, AT_SET_OPTION_IMPROVE_SKILL_ATTACK);
+    WORD skillAttack = 0;
+    g_csItemOption.PlusSpecial(&skillAttack, AT_SET_OPTION_IMPROVE_SKILL_ATTACK);
+    Damage += skillAttack;
     *piMinDamage += Damage;
     *piMaxDamage += Damage;
 }

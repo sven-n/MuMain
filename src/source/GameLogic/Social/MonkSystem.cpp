@@ -317,16 +317,17 @@ std::uint64_t CMonkSystem::DarksideStateHash() const
     return hash.Value();
 }
 
-void CMonkSystem::RenderPhoenixGloves(CHARACTER* _pCha, BYTE _Hand)
+void CMonkSystem::RenderPhoenixGloves(const CHARACTER* _pCha, BYTE _Hand)
 {
-    PART_t* w = &_pCha->Weapon[_Hand];
+    const PART_t* w = &_pCha->Weapon[_Hand];
     const LinkOffset at = PhoenixGloveOffset(_Hand);
     RenderLinkObject(at.x, at.y, at.z, _pCha, w, MODEL_SWORD_35_WING, 0, 0, true, true, 0, 1, PhoenixGloveBone(_Hand));
 }
 
-void CMonkSystem::RenderSwordformGloves(CHARACTER* _pCha, int _ModelType, int _Hand, float _Alpha, bool _Translate, int _Select)
+void CMonkSystem::RenderSwordformGloves(const CHARACTER* _pCha, int _ModelType, int _Hand, float _Alpha,
+                                        bool _Translate, int _Select)
 {
-    PART_t* w = &_pCha->Weapon[_Hand];
+    const PART_t* w = &_pCha->Weapon[_Hand];
     RenderPartObject(&_pCha->Object, ModifyTypeSwordformGloves(_ModelType, _Hand), w, _pCha->Light, _Alpha, w->Level, w->ExcellentFlags, w->AncientDiscriminator, false, false, _Translate, _Select);
 }
 
@@ -564,7 +565,7 @@ bool CMonkSystem::SendAttackPacket(CHARACTER* _pCha, int _nMoveTarget, int _nSki
     return false;
 }
 
-bool CMonkSystem::RageFighterEffect(OBJECT* _pObj, int _Type)
+bool CMonkSystem::RageFighterEffect(const OBJECT* _pObj, int _Type)
 {
     BMD* b = &Models[_Type];
     if (_pObj->CurrentAction == PLAYER_SKILL_DARKSIDE_READY)
@@ -964,47 +965,33 @@ const std::vector<CMonkSystem::DarksidePlacement>* CMonkSystem::DarksidePlacemen
     return nullptr;
 }
 
-void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Translate, int Select, const PART_t* key)
+void CMonkSystem::DarksideRendering(const CHARACTER* pCha, const PART_t* pPart, vec3_t light, bool Translate,
+                                    int Select, const PART_t* key)
 {
-    OBJECT* pObj = &pCha->Object;
+    const OBJECT* pObj = &pCha->Object;
     const int Type = pPart->Type;
     const auto render = [&]
     {
-        RenderPartObject(pObj, Type, pPart, pCha->Light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
+        RenderPartObject(pObj, Type, pPart, light, pObj->Alpha, pPart->Level, pPart->ExcellentFlags,
                          pPart->AncientDiscriminator, false, false, Translate, Select);
     };
 
     if (const std::vector<DarksidePlacement>* placements = DarksidePlacementsOf(pCha, key != nullptr ? key : pPart))
     {
-        // Each placement is posed into bones of its own: the character keeps its pose for the rest of its draw.
-        static vec34_t bones[MAX_BONES];
-        vec34_t* const ownBones = pObj->BoneTransform;
-        const unsigned short action = pObj->CurrentAction;
-        const float alpha = pObj->Alpha;
-        const float animationFrame = pObj->AnimationFrame;
-        vec3_t position, startPosition, angle;
-        VectorCopy(pObj->Position, position);
-        VectorCopy(pObj->StartPosition, startPosition);
-        VectorCopy(pObj->Angle, angle);
+        // Each placement is drawn from a copy of the character, posed for it; the character stays as it stands.
+        OBJECT ghost = *pObj;
         for (const DarksidePlacement& at : *placements)
         {
-            VectorCopy(at.position, pObj->Position);
-            VectorCopy(at.startPosition, pObj->StartPosition);
-            VectorCopy(at.angle, pObj->Angle);
-            pObj->Alpha = at.alpha;
-            pObj->AnimationFrame = at.animationFrame;
-            pObj->CurrentAction = PLAYER_SKILL_DARKSIDE_ATTACK;
-            Calc_ObjectAnimationInto(pObj, Translate, bones);
-            pObj->BoneTransform = bones;
-            render();
-            pObj->BoneTransform = ownBones;
+            VectorCopy(at.position, ghost.Position);
+            VectorCopy(at.startPosition, ghost.StartPosition);
+            VectorCopy(at.angle, ghost.Angle);
+            ghost.Alpha = at.alpha;
+            ghost.AnimationFrame = at.animationFrame;
+            ghost.CurrentAction = PLAYER_SKILL_DARKSIDE_ATTACK;
+            Calc_ObjectAnimation(&ghost, Translate, Select);
+            RenderPartObject(&ghost, Type, pPart, light, ghost.Alpha, pPart->Level, pPart->ExcellentFlags,
+                             pPart->AncientDiscriminator, false, false, Translate, Select);
         }
-        pObj->CurrentAction = action;
-        pObj->Alpha = alpha;
-        pObj->AnimationFrame = animationFrame;
-        VectorCopy(position, pObj->Position);
-        VectorCopy(startPosition, pObj->StartPosition);
-        VectorCopy(angle, pObj->Angle);
     }
     render();
 }

@@ -270,7 +270,7 @@ bool M34CryingWolf2nd::RenderCryingWolf2ndMonsterObjectMesh(const OBJECT* pObjec
     return false;
 }
 
-bool M34CryingWolf2nd::RenderCryingWolf2ndMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
+bool M34CryingWolf2nd::RenderCryingWolf2ndMonsterVisual(const CHARACTER* pCharacter, const OBJECT* pObject, BMD* pModel)
 {
     return false;
 }
