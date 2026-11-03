@@ -354,6 +354,9 @@ public:
     // are read as the same ambient globals/members Transform() itself reads.
     void SkinVertex(int mesh, int vertexIndex, float (*BoneMatrix)[3][4], bool Translate, float _Scale,
                     vec3_t out) const;
+    // The same, from a draw's skin and where its body stands instead of the model's last Transform.
+    void SkinVertex(int mesh, int vertexIndex, const Render::ModelDrawing::ModelSkin& skin, float bodyScale,
+                    const float bodyOrigin[3], vec3_t out) const;
     // Batch form: skins every vertex of `mesh` into the corresponding slice of the global
     // VertexTransform[mesh] array -- the same side effect Transform()'s loop has for that one mesh,
     // without touching any other mesh or computing normals/lighting.
@@ -421,6 +424,9 @@ public:
                                     BITMAP_t*& texture) const;
     // Whether a draw is a faded bright or chrome pass that dims the model's light, for it and the meshes after it.
     [[nodiscard]] bool DimsLight(const Render::ModelDrawing::MeshDraw& draw) const;
+    // Whether DrawMesh draws the mesh with vertices skinned on the CPU (not on the GPU, and not nothing);
+    // readsNormals gets whether it reads their normals too (for its light, chrome or wave).
+    [[nodiscard]] bool DrawsOnCpu(const Render::ModelDrawing::MeshDraw& draw, bool& readsNormals) const;
     void BeginRenderCoinHeap();
     int AddToCoinHeap(int coinIndex, int target_vertex_index);
     void EndRenderCoinHeap(int coinCount);
@@ -432,8 +438,8 @@ public:
     using ShadowProjection = void (*)(float position[3], const void* context);
     // The planar shadow of model file mesh `mesh` (BMD::GltfModel) at the LOD
     // of `draw` (the LODs share the skin), placed by `draw`:
-    // `vertices` gets its vertices, each skinned once (LOD 0: the
-    // VertexTransform of EnsureCpuVertices; a coarser LOD: its own vertices with
+    // `vertices` gets its vertices, each skinned once (LOD 0: those of
+    // ShadowVertices; a coarser LOD: its own vertices with
     // the same arithmetic) and projected once; `indices` its triangles' corners
     // in triangle order, as indices into `vertices`. Both are replaced; both
     // empty for a mesh the LOD does not draw. With a pure `project` the corners
@@ -481,8 +487,16 @@ private:
 
     void AddClothesShadowTriangles(void* pClothes, int clothesCount, const float* origin, float sx, float sy,
                                    std::uint32_t color) const;
-    void AddMeshShadowTriangles(int blendMesh, int hiddenMesh, int startMesh, int endMesh, const float* origin,
-                                float sx, float sy, std::uint32_t color) const;
+    // Whether VertexTransform[mesh] holds this model's vertices now: skinned on the CPU, or written by the cloth.
+    [[nodiscard]] bool OwnsCpuVertices(int mesh) const;
+    // Whether a shadow casts a mesh's own CPU vertices instead of skinning it on the GPU.
+    [[nodiscard]] bool ShadowOwnsVertices(const Render::ModelDrawing::ShadowDraw& draw, int mesh) const;
+    // The vertices a shadow casts for a mesh: as taken for the draw, else the model's own CPU vertices, else the
+    // mesh skinned from the draw's skin without writing the scratch (valid until the next call).
+    [[nodiscard]] const vec3_t* ShadowVertices(const Render::ModelDrawing::ShadowDraw& draw, int mesh) const;
+    void AddMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw& draw, int blendMesh, int hiddenMesh,
+                                int startMesh, int endMesh, const float* origin, float sx, float sy,
+                                std::uint32_t color) const;
     // The same shadow from a cached rest-pose stream skinned on the GPU; false leaves it to the CPU.
     [[nodiscard]] bool RenderGpuMeshShadow(const Render::ModelDrawing::ShadowDraw& draw, int startMesh, int endMesh,
                                            float sx, float sy, std::uint32_t color) const;
