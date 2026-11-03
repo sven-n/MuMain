@@ -4727,6 +4727,9 @@ TEST_CASE("Item Tooltip picks the item's tooltip layout as an undo step [data][i
 // follows, numbered as Item Checks names them (tooltipLayoutChanges.add[1].lines[1] is the second under the second).
 TEST_CASE("Item Tooltip lists the lines an item adds to its tooltip layout [data][items][editor]")
 {
+    // A language change fills the item attributes again once the item data was loaded (CItemDataHandler's locale
+    // observer), so it needs the attributes a client data scope gives.
+    ClientDataScope client(ShippedClientDirectory);
     I18N::SetLocale("en");
     ItemTooltipLayoutChanges changes;
     changes.hide = {"durability", "blankAfterOptions"};
