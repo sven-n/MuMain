@@ -171,6 +171,12 @@ public:
         Destroy();
     }
 
+    // How the cloth blends (PCT_MASK_BLIT, PCT_MASK_BLEND, ...), which it sets before drawing its faces.
+    void SetDrawType(DWORD type)
+    {
+        m_dwType = type;
+    }
+
     void Place(float x)
     {
         for (int i = 0; i < m_iNumVertices; ++i)
@@ -589,6 +595,8 @@ TEST_CASE("A cloth drawn later is drawn with the state it was asked for in [draw
     GridCloth otherCape;
     cape.Place(100.f);
     otherCape.Place(400.f);
+    // Blended, it glows; drawn when asked for instead of in its place, it would take the state before it.
+    otherCape.SetDrawType(PCT_MASK_BLEND);
     const auto scene = [&]
     {
         EnableAlphaBlend();
