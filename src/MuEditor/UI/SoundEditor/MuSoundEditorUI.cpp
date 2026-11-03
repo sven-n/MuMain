@@ -36,11 +36,12 @@ using MuEditor::SoundEditor::RowProblem;
 using MuEditor::SoundEditor::RowSource;
 using MuEditor::SoundEditor::SoundRow;
 
-constexpr int Columns = 9;
+constexpr int Columns = 10;
 constexpr float TypeWidth = 130.0f;
 const ImVec4 SelectedRowColor(0.26f, 0.42f, 0.66f, 0.55f);
 constexpr float FilterWidth = 220.0f;
 constexpr float NameWidth = 200.0f;
+constexpr float FileWidth = 320.0f;
 constexpr float ChannelsWidth = 46.0f;
 constexpr float PickerWidth = 420.0f;
 constexpr float PickerHeight = 300.0f;
@@ -545,18 +546,27 @@ void MuSoundEditorUI::RenderFilterBar(const std::vector<SoundRow>& rows, size_t 
 
 void MuSoundEditorUI::RenderTable(const std::vector<const SoundRow*>& rows)
 {
+    // Every column has a width of its own, so a column's border moves only that column; the
+    // table scrolls sideways when they are wider than the window, the names stay.
     constexpr ImGuiTableFlags Flags = ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV |
-                                      ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY |
+                                      ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
                                       ImGuiTableFlags_SizingFixedFit;
     if (!ImGui::BeginTable("##Sounds", Columns, Flags, ImVec2(0.0f, ImGui::GetContentRegionAvail().y)))
     {
         return;
     }
     const float scale = g_MuEditorCore.GetUIScale();
-    ImGui::TableSetupScrollFreeze(0, 1);
-    ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumnName, ImGuiTableColumnFlags_WidthFixed, NameWidth * scale);
+    // Play and the names stay when the table scrolls sideways (Q-SE7); the folders indent the
+    // names, not the play arrows.
+    ImGui::TableSetupScrollFreeze(2, 1);
+    ImGui::TableSetupColumn("##Play",
+                            ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize |
+                                ImGuiTableColumnFlags_IndentDisable,
+                            ImGui::GetFrameHeight());
+    ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumnName,
+                            ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_IndentEnable, NameWidth * scale);
     ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumnId);
-    ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumnFile, ImGuiTableColumnFlags_WidthStretch);
+    ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumnFile, ImGuiTableColumnFlags_WidthFixed, FileWidth * scale);
     ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumnChannels);
     ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumn3D);
     ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumnType);
@@ -619,6 +629,7 @@ void MuSoundEditorUI::RenderFolder(const Data::Sounds::SoundFolder& folder,
     ImGui::PushID(folder.name.c_str());
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
+    ImGui::TableNextColumn();
     const bool onPath = !m_openPath.empty() && m_openPath.size() >= path.size() &&
                         std::equal(path.begin(), path.end(), m_openPath.begin());
     if (filtered || onPath)
@@ -666,6 +677,7 @@ void MuSoundEditorUI::RenderNotSorted(const std::vector<const SoundRow*>& rows)
         return;
     }
     ImGui::TableNextRow();
+    ImGui::TableNextColumn();
     ImGui::TableNextColumn();
     const bool selectedHere = m_follow && std::any_of(rows.begin(), rows.end(), [](const SoundRow* row)
                                                       { return row->number == MuEditor::SoundSelection::Get(); });
@@ -782,6 +794,15 @@ void MuSoundEditorUI::RenderRow(const SoundRow& row)
     using MuEditor::SoundEditor::RowValues;
     ImGui::PushID(row.key.c_str());
     ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    // Listen first: the file once at full level, past the Sound Mixer (Q-SE5, Q-SE7).
+    ImGui::BeginDisabled(!MuEditor::SoundEditor::CanPlay(row));
+    if (ImGui::ArrowButton("##Play", ImGuiDir_Right))
+    {
+        MuEditor::SoundEditor::PreviewFile(row.file, row.channels, row.spatial);
+    }
+    ImGui::EndDisabled();
+    Tooltip(I18N::Editor::SoundEditorPlayTip);
     ImGui::TableNextColumn();
     RenderNameCell(row);
     if (row.number >= 0 && row.number == MuEditor::SoundSelection::Get())
@@ -911,15 +932,6 @@ void MuSoundEditorUI::RenderNameCell(const SoundRow& row)
 
 void MuSoundEditorUI::RenderFileCell(const SoundRow& row)
 {
-    // Listen first: the file once at full level, past the Sound Mixer.
-    ImGui::BeginDisabled(!MuEditor::SoundEditor::CanPlay(row));
-    if (ImGui::SmallButton(I18N::Editor::PlayThisSound))
-    {
-        MuEditor::SoundEditor::PreviewFile(row.file, row.channels, row.spatial);
-    }
-    ImGui::EndDisabled();
-    Tooltip(I18N::Editor::SoundEditorPlayTip);
-    ImGui::SameLine();
     const bool problem = row.problem != RowProblem::None;
     if (problem)
     {

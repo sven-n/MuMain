@@ -999,4 +999,118 @@ TEST_CASE("Sound Editor: the window draws the rows, filtered and with only the p
     }
     CHECK(ImGui::FindWindowByName("Sound Editor###SoundEditor") != nullptr);
 }
+
+TEST_CASE("Sound Editor: the play arrow at the start of a row plays its file (Q-SE7) [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(
+        std::vector<SoundFile>{Code("SOUND_CLICK01", SOUND_CLICK01, "Data/Sound/EditorTest/ok.wav", "Click")});
+    // Selected, so that Not sorted opens on it.
+    MuEditor::SoundSelection::Set(static_cast<int>(SOUND_CLICK01));
+    TestImGuiContext context;
+    ImGuiIO& io = ImGui::GetIO();
+    const auto frame = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(1400.0f, 600.0f));
+        g_MuSoundEditorUI.Render(&open);
+        ImGui::Render();
+    };
+    for (int index = 0; index < 4; ++index)
+    {
+        frame();
+    }
+    ImGuiTable* table = nullptr;
+    ImGuiContext& g = *ImGui::GetCurrentContext();
+    for (int index = 0; index < g.Tables.GetMapSize(); ++index)
+    {
+        if (ImGuiTable* found = g.Tables.TryGetMapData(index); found != nullptr && found->ColumnsCount == 10)
+        {
+            table = found;
+        }
+    }
+    REQUIRE(table != nullptr);
+    const size_t before = scope.audio.loads.size();
+    // Down the play column, from below the rows up, until a click plays.
+    const float x = (table->Columns[0].MinX + table->Columns[0].MaxX) * 0.5f;
+    bool played = false;
+    for (float y = table->OuterRect.Min.y + 120.0f; y > table->OuterRect.Min.y && !played; y -= 4.0f)
+    {
+        io.AddMousePosEvent(x, y);
+        frame();
+        io.AddMouseButtonEvent(0, true);
+        frame();
+        io.AddMouseButtonEvent(0, false);
+        frame();
+        played = scope.audio.loads.size() > before;
+    }
+    REQUIRE(played);
+    CHECK(std::get<1>(scope.audio.loads.back()).find(L"ok.wav") != std::wstring::npos);
+    MuEditor::SoundSelection::Set(-1);
+}
+
+TEST_CASE("Sound Editor: a drag on the File column's border widens the File column, not its neighbour, and the "
+          "names stay while the table scrolls sideways [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(
+        std::vector<SoundFile>{Code("SOUND_CLICK01", SOUND_CLICK01, "Data/Sound/EditorTest/ok.wav", "Click"),
+                               Code("SOUND_WIND01", SOUND_WIND01, "Data/Sound/EditorTest/gone.wav")});
+    TestImGuiContext context;
+    ImGuiIO& io = ImGui::GetIO();
+    const auto frame = []
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(1400.0f, 600.0f));
+        g_MuSoundEditorUI.Render(&open);
+        ImGui::Render();
+    };
+    const auto soundsTable = []() -> ImGuiTable*
+    {
+        ImGuiContext& g = *ImGui::GetCurrentContext();
+        for (int index = 0; index < g.Tables.GetMapSize(); ++index)
+        {
+            if (ImGuiTable* table = g.Tables.TryGetMapData(index); table != nullptr && table->ColumnsCount == 10)
+            {
+                return table;
+            }
+        }
+        return nullptr;
+    };
+    for (int index = 0; index < 4; ++index)
+    {
+        frame();
+    }
+    ImGuiTable* table = soundsTable();
+    REQUIRE(table != nullptr);
+    // Play and Name stay when the table scrolls sideways (ImGui counts them as frozen once it does);
+    // the folders indent the names (Q-SE7).
+    CHECK(table->FreezeColumnsRequest == 2);
+    CHECK((table->Columns[0].Flags & ImGuiTableColumnFlags_IndentDisable) != 0);
+    CHECK((table->Columns[1].Flags & ImGuiTableColumnFlags_IndentEnable) != 0);
+    constexpr int File = 3;
+    const float file = table->Columns[File].WidthGiven;
+    const float channels = table->Columns[File + 1].WidthGiven;
+    // On the header row, at the File column's right border.
+    const float x = table->Columns[File].MaxX;
+    const float y = table->OuterRect.Min.y + 6.0f;
+    io.AddMousePosEvent(x, y);
+    frame();
+    frame();
+    io.AddMouseButtonEvent(0, true);
+    frame();
+    io.AddMousePosEvent(x + 120.0f, y);
+    frame();
+    frame();
+    io.AddMouseButtonEvent(0, false);
+    frame();
+    frame();
+    CHECK(table->Columns[File].WidthGiven == doctest::Approx(file + 120.0f).epsilon(0.02));
+    CHECK(table->Columns[File + 1].WidthGiven == doctest::Approx(channels));
+}
+
 #endif // _EDITOR

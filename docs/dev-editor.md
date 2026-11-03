@@ -230,8 +230,10 @@ at once; **Save** writes the files that changed, **Revert** reads them again,
   entered, with its monster, not loaded yet) and the file it lives in. A
   click on the file's **...** picks another file of `Data/Sound` (a search,
   and a play button to listen first); the files on disk are never changed.
-  **Play**, before each file, plays it once at full volume, past the Sound
-  Mixer.
+  The play arrow at the start of each row (it stays with the names when the
+  table scrolls sideways) plays the file once at full volume, past the Sound
+  Mixer. Each column keeps its own width: dragging a border moves only that
+  column.
   Search finds names, ids, sets and files; **Only problems** leaves the files
   that are not in the client folder, a file two code sounds load and the
   sounds the game played that nothing loads.
