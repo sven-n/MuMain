@@ -9570,6 +9570,7 @@ void RenderChristmasCompanions(const CHARACTER* c, vec3_t light, bool Translate,
     // Three copies around the character, each on the ground where it stands, drawn from a copy of the character.
     constexpr float offsets[3][2] = {{50.f, 50.f}, {-50.f, -50.f}, {50.f, -50.f}};
     OBJECT companion = *o;
+    const Random::DrawnAs drawnAs(&companion, o);
     // The copy's address has no drawn pose of its own, so it carries the character's.
     companion.BoneTransform = DrawnPose(o);
     for (const auto& offset : offsets)
@@ -9822,10 +9823,12 @@ void RenderCharacter(const CHARACTER* c, const OBJECT* o, int Select)
         // Its blend mesh light is set by the update. Its outlines draw without the blend mesh, and its second model
         // (its type + 1) over the body: both from copies of the object.
         OBJECT outline = *o;
+        const Random::DrawnAs outlineDrawnAs(&outline, o);
         outline.BlendMesh = 0;
         RenderObject(&outline, Translate, 2, 0);
         RenderObject(&outline, Translate, 3, 0);
         OBJECT second = *o;
+        const Random::DrawnAs secondDrawnAs(&second, o);
         ++second.Type;
         RenderObject(&second, Translate, Select, 0);
 

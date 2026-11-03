@@ -412,3 +412,26 @@ TEST_CASE("The game's legacy sequence gives what the Windows CRT's rand() gives,
     const std::uint32_t state = Random::RandState();
     CHECK(Random::RandState() == state);
 }
+
+TEST_CASE("A copy drawn in place of an object draws as that object while its scope lasts [effects]")
+{
+    OBJECT source{};
+    OBJECT copy{};
+    const int alone = Random::DrawRand(&copy, 1);
+    {
+        const Random::DrawnAs drawnAs(&copy, &source);
+        CHECK(Random::DrawKey(&copy) == &source);
+        CHECK(Random::DrawRand(&copy, 1) == Random::DrawRand(&source, 1));
+        // A copy of the copy is the source too.
+        OBJECT inner{};
+        const Random::DrawnAs innerDrawnAs(&inner, &copy);
+        CHECK(Random::DrawKey(&inner) == &source);
+
+        BeginObjectDraws();
+        SendAfterCharacter(&copy);
+        CHECK(IsSentAfterCharacter(&source));
+    }
+    CHECK(Random::DrawKey(&copy) == &copy);
+    CHECK(Random::DrawRand(&copy, 1) == alone);
+    BeginObjectDraws();
+}

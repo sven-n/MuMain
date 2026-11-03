@@ -980,6 +980,7 @@ void CMonkSystem::DarksideRendering(const CHARACTER* pCha, const PART_t* pPart, 
     {
         // Each placement is drawn from a copy of the character, posed for it; the character stays as it stands.
         OBJECT ghost = *pObj;
+        const Random::DrawnAs drawnAs(&ghost, pObj);
         for (const DarksidePlacement& at : *placements)
         {
             VectorCopy(at.position, ghost.Position);
