@@ -81,6 +81,12 @@ bool DetailLowEnable = false;
 
 char            LodBuffer[64 * 64];
 vec3_t          TerrainNormal[TERRAIN_SIZE * TERRAIN_SIZE];
+// The terrain light, one value per cell, from the map file to the frame:
+// TerrainLight: the map's painted lightmap, as loaded.
+// BackTerrainLight: the static light, the lightmap × the sun's slope shading × the light mood
+//   (CreateStaticLightCell); rebuilt when the sun or the mood changes.
+// PrimaryTerrainLight: this frame's light, the static light plus the frame's dynamic lights (game
+//   code adds them through AddTerrainLight); what the ground and the models sample.
 vec3_t          PrimaryTerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
 vec3_t          BackTerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
 vec3_t          TerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
@@ -546,6 +552,7 @@ void CreateTerrainNormal_Part(int xi, int yi)
 // How much of each cell keeps its Classic brightness under the light mood (its
 // bright weight, the same in all three channels so the grid sampler reads it).
 static vec3_t StaticLightBrightWeight[TERRAIN_SIZE * TERRAIN_SIZE];
+// The static light figures stand in: BackTerrainLight with the mood's figure scale instead of its base.
 static vec3_t FigureStaticTerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
 
 // The static light of one cell: the baked light, shaded by the slope towards
@@ -2883,6 +2890,7 @@ extern int EnableEvent;
 
 void InitTerrainLight()
 {
+    Render::Lighting::UpdateFrameSun();
     // The sun moved (dynamic.shadowAngle): the slope shading follows it.
     if (const glm::vec3 sun = TerrainSunVector();
         glm::any(glm::greaterThan(glm::abs(sun - s_terrainLightSun), glm::vec3(1e-4f))))
