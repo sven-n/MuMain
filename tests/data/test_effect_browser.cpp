@@ -312,6 +312,9 @@ bool IsSendCallAt(const std::string& text, size_t at)
     size_t j = at + 4;
     while (j < text.size() && IsIdentifierChar(text[j]))
         ++j;
+    // This local render queue does not send a packet (Engine/Object/ZzzObject.cpp).
+    if (std::string_view(text).substr(at, j - at) == "SendAfterCharacter")
+        return false;
     j = SkipSpaces(text, j);
     return j < text.size() && text[j] == '(';
 }
@@ -720,6 +723,10 @@ TEST_CASE("The effect preview animates the models that MoveEffect's shared code 
 TEST_CASE("The world preview refuses every type whose code changes the character or tells the server "
           "[data][effects][editor]")
 {
+    CHECK_FALSE(IsSendCallAt("SendAfterCharacter(o);", 0));
+    CHECK(IsSendCallAt("SendAfterCharacterRequest(o);", 0));
+    CHECK(IsSendCallAt("SendWeaponExplosionRequest(0);", 0));
+
     constexpr std::array<std::string_view, 11> Markers = {
         // Takes its owner for lightning.
         "(JOINT*)o->Owner",
