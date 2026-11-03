@@ -28,7 +28,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Camera/CameraProjection.h"
 #include "UI/Scaling/UITransform.h"
-
+#include "Render/Effects/EffectDraw.h"
 
 extern  int     WaterTextureNumber;
 extern  char* NUM_MUSIC;
@@ -299,14 +299,16 @@ namespace battleCastle
             Vector(Luminosity * Light[0], Luminosity * Light[1], Luminosity * Light[2], Light);
         }
 
-        RenderTerrainAlphaBitmap(Type, x, y, sx, sy, Light, WorldTime * 0.01f);
+        Render::EffectDrawing::ActiveEffectDrawer().DrawDecal(
+            Render::EffectDrawing::Decal(Type, x, y, sx, sy, Light, WorldTime * 0.01f));
 
         if (RenderType == RENDER_DARK)
         {
             Luminosity = 1.f - Luminosity;
             Vector(Luminosity * Light[0], Luminosity * Light[1], Luminosity * Light[2], Light);
         }
-        RenderTerrainAlphaBitmap(Type, x, y, sx, sy, Light, -WorldTime * 0.01f);
+        Render::EffectDrawing::ActiveEffectDrawer().DrawDecal(
+            Render::EffectDrawing::Decal(Type, x, y, sx, sy, Light, -WorldTime * 0.01f));
     }
 
     void SetBuildTimeLocation(OBJECT* o)

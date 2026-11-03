@@ -858,3 +858,41 @@ TEST_CASE("A cloth's shadow drawn later falls where the cloth was when it was as
     };
     CheckDrawnLaterAsAtOnce(scene, "Triangles");
 }
+
+TEST_CASE("A cloth drawn later is drawn with the state it was asked for in [draw-parity]")
+{
+    GridCloth cape;
+    GridCloth otherCape;
+    cape.Place(100.f);
+    otherCape.Place(400.f);
+    const auto scene = [&]
+    {
+        EnableAlphaBlend();
+        cape.Render();
+        DisableAlphaBlend();
+        BindTexture(BITMAP_LIGHT);
+        otherCape.Render();
+    };
+    CheckDrawnLaterAsAtOnce(scene, "Quad3D");
+}
+
+TEST_CASE("Guild marks drawn later are drawn where their characters stand [draw-parity]")
+{
+    PlayerModels models;
+    static float firstBones[MAX_BONES][3][4];
+    static float secondBones[MAX_BONES][3][4];
+    OBJECT first;
+    OBJECT second;
+    Place(first, 100.f, 2.5f, firstBones);
+    Place(second, 400.f, 5.5f, secondBones);
+    AnimateCharacterBones(&first);
+    AnimateCharacterBones(&second);
+    BeginObjectDraws();
+    Engine::Object::Attachments::BeginFrame();
+    const auto scene = [&]
+    {
+        RenderGuild(&first, MODEL_BODY_ARMOR);
+        RenderGuild(&second, MODEL_BODY_ARMOR);
+    };
+    CheckDrawnLaterAsAtOnce(scene);
+}

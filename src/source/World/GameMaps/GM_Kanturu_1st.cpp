@@ -18,7 +18,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Render/Models/BoneManager.h"
 #include "Audio/DSPlaySound.h"
-
+#include "Render/Effects/EffectDraw.h"
 
 bool M40GMArea::IsGmArea()
 {
@@ -1525,10 +1525,12 @@ bool M37Kanturu1st::RenderKanturu1stMonsterVisual(const CHARACTER* c, const OBJE
             Light[2] = 0.6f - (Scale / 5.0f);
 
             EnableAlphaBlend();
-            RenderTerrainAlphaBitmap(BITMAP_ENERGY_RING, o->Position[0], o->Position[1], Scale, Scale, Light, Angle);
+            Render::EffectDrawing::ActiveEffectDrawer().DrawDecal(Render::EffectDrawing::Decal(
+                BITMAP_ENERGY_RING, o->Position[0], o->Position[1], Scale, Scale, Light, Angle));
 
             Vector(0.5f, 0.5f, 0.5f, Light);
-            RenderTerrainAlphaBitmap(BITMAP_ENERGY_FIELD, o->Position[0], o->Position[1], 2.0f, 2.0f, Light, Angle);
+            Render::EffectDrawing::ActiveEffectDrawer().DrawDecal(Render::EffectDrawing::Decal(
+                BITMAP_ENERGY_FIELD, o->Position[0], o->Position[1], 2.0f, 2.0f, Light, Angle));
         }
         break;
     }
