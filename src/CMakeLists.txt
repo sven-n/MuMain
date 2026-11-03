@@ -1127,6 +1127,10 @@ if (DOTNET_EXECUTABLE)
 else()
   message(WARNING ".NET SDK not found. MUnique.Client.Library.dll will NOT be built. "
     "The game will run but cannot connect to the server. Install .NET SDK 10.0+ to enable.")
+  if (ENABLE_IN_GAME_TESTS)
+    message(WARNING "ENABLE_IN_GAME_TESTS: without the .NET SDK there is no in-game tester and no "
+      "InGameTests / InGameTestsGui targets, so the -gui build presets fail. Install .NET SDK 10.0+.")
+  endif()
 endif()
 
 # DXP-10 step 4: state-wrapper monopoly guard. Fails the build if a raw gl*()
