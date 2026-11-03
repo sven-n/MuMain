@@ -7,6 +7,7 @@
 #include "ItemMeshFocus.h"
 #include "ItemToolWindow.h"
 
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "I18N/All.h"
 #include "Render/Models/ZzzBMD.h"
@@ -30,6 +31,8 @@ constexpr float ExtraRows = 1.5f;
 constexpr const char* NumberColumn = "#";
 constexpr const char* Separator = ", ";
 constexpr const char* LabelSeparator = ": ";
+// No data version: the rows are read again.
+constexpr long long NotRead = -1;
 
 // A grey line that wraps at the window's edge.
 void RenderNote(const char* text)
@@ -130,6 +133,12 @@ void CItemMeshList::Refresh(int itemType, const BMD& model)
     m_meshCount = model.NumMeshs;
     m_dataVersion = dataVersion;
     m_rows = DescribeMeshes(model);
+    // An edit's model is opened again between frames, often into the same memory, so nothing above changes: the
+    // rows read before that are read again in the next frame.
+    if (g_ItemDataHandler.HasModelsToReopen())
+    {
+        m_dataVersion = NotRead;
+    }
     m_marks.clear();
     m_marks.reserve(m_rows.size());
     for (const ItemMeshRow& row : m_rows)
