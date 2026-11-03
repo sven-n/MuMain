@@ -61,6 +61,9 @@ public:
     // Read from the active texture pack, not from Data: a later re-read of the
     // pixels (CGlobalBitmap::ReadBitmapPixels) reads the same file.
     bool fromTexturePack = false;
+    // An image with alpha (a .tga, a model file's image) that has pixels the alpha test drops
+    // (Render/Textures/AlphaTestHoles.h): a mesh drawn with it has holes.
+    bool hasHoles = false;
 };
 
 // A texture file as the loaders read it.
