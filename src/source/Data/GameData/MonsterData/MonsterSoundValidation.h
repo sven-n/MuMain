@@ -31,7 +31,9 @@ std::span<const std::string_view> GetDrawnLookModels(int number);
 // for a monster or a random variant that names a set that is not there and
 // for a random variant whose look the code never draws; warnings for an
 // event's cue that the model of a monster that plays the set lacks (the
-// event never plays for it) and for a set that no monster plays.
+// event never plays for it), for a set with sound files on a monster whose
+// model is not in the model list (no model loads them: the player model, a
+// map object) and for a set that no monster plays.
 // `monstersSource` and `soundsSource` name the files in the problems.
 void ValidateMonsterSoundLinks(std::span<const MonsterDefinition> monsters,
                                std::span<const MonsterModelDefinition> models, std::span<const MonsterSoundSet> sets,

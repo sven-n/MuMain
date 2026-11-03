@@ -392,7 +392,9 @@ TEST_CASE("Monster sounds: the links between monsters, models and sets are check
     raymond.cues = {{"step 1", MONSTER01_WALK, {1.0f, 2.0f}}};
     MonsterModelDefinition hound;
     hound.slot = "MONSTER_MODEL_HOUND";
-    const std::vector<MonsterModelDefinition> models = {raymond, hound};
+    MonsterModelDefinition elfModel;
+    elfModel.slot = "MONSTER_MODEL_CHAOSCASTLE_ELF";
+    const std::vector<MonsterModelDefinition> models = {raymond, hound, elfModel};
 
     MonsterDefinition stepper = Monster(506, "MONSTER_MODEL_RAYMOND", "Raymond");
     // The Raymond set on a model without its cue: the event never plays for it.
@@ -403,7 +405,9 @@ TEST_CASE("Monster sounds: the links between monsters, models and sets are check
     // A random variant on a monster whose look the code does not draw.
     MonsterDefinition drawnNot = Monster(2, "MONSTER_MODEL_HOUND", "Raymond");
     drawnNot.randomVariants = {{"MONSTER_MODEL_BUDGE_DRAGON", std::nullopt}};
-    const std::vector<MonsterDefinition> monsters = {borrower, drawnNot, lost, elf, stepper};
+    // A player-shaped monster: no model of the list loads its set's sounds.
+    MonsterDefinition guard = Monster(4, "player", "Raymond");
+    const std::vector<MonsterDefinition> monsters = {borrower, drawnNot, guard, lost, elf, stepper};
     const std::vector<MonsterSoundSet> sets = {SetOf("Raymond", {OnCue("step 1")}), SetOf("Unused")};
     std::vector<ItemDataIssue> issues;
 
@@ -416,14 +420,24 @@ TEST_CASE("Monster sounds: the links between monsters, models and sets are check
     CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Error, "monster 2 randomVariants[0].model",
                         "never shows the monster with MONSTER_MODEL_BUDGE_DRAGON"));
     CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "sound set Raymond soundEvents[0].cues",
-                        "the model of monster 1, 2, 163 has no cue \"step 1\""));
+                        "the model of monster 1, 2, 4, 163 has no cue \"step 1\""));
     CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "sound set Unused name", "no monster plays the set"));
-    CHECK(issues.size() == 5);
+    CHECK(HasIssueAbout(issues, ItemDataIssueSeverity::Warning, "monster 4 soundSet",
+                        "player is no model of the model list, which loads the sounds of \"Raymond\""));
+    CHECK(issues.size() == 6);
     // The Error of a monster has its number, so Data Checks selects it.
     const auto lostIssue =
         std::find_if(issues.begin(), issues.end(), [](const ItemDataIssue& issue) { return issue.number == 5; });
     REQUIRE(lostIssue != issues.end());
     CHECK(lostIssue->source == "Monsters.json");
+
+    // A set without sound files loads nothing anyway.
+    issues.clear();
+    Data::Monsters::ValidateMonsterSoundLinks(std::vector<MonsterDefinition>{guard}, models,
+                                              std::vector<MonsterSoundSet>{MonsterSoundSet{"Raymond", {}, {}, {}}},
+                                              "Monsters.json", "Sounds.json", issues);
+    INFO(Messages(issues));
+    CHECK(issues.empty());
 }
 
 TEST_CASE("Monster sounds: a random variant without a set of its own plays the entry's on its model, whose cues "

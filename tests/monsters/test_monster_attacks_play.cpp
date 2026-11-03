@@ -13,6 +13,8 @@
 #include "Data/DataHandler/MonsterData/MonsterJsonStorage.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
+#include "Data/GameData/MonsterData/MonsterSoundMoments.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "GameLogic/Monsters/MonsterAttackPlay.h"
@@ -31,6 +33,7 @@
 #include <iterator>
 #include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 // The end of a monster's animation (MoveCharacter calls it).
@@ -631,4 +634,69 @@ TEST_CASE("Monster sounds: the hero transformed into a monster hears its walk's 
     bull.Run = run;
     bull.Class = characterClass;
     bull.Helper.Type = helper;
+}
+
+TEST_CASE("Monster sounds: a player-shaped monster plays the moments of its set too [monsters][sounds]")
+{
+    AttackScope scope(WD_0LORENCIA);
+    // The skeleton names a set that plays one sound at every moment, for the
+    // life of the test.
+    struct RestoreSets
+    {
+        std::vector<Data::Monsters::MonsterSoundSet> sets;
+        ~RestoreSets()
+        {
+            g_MonsterSoundSetDatabase.Build(sets);
+        }
+    } restore;
+    for (const Data::Monsters::MonsterSoundSet* set : g_MonsterSoundSetDatabase.GetAll())
+    {
+        restore.sets.push_back(*set);
+    }
+    Data::Monsters::MonsterSoundEvent event;
+    event.moments = {Data::Monsters::AllMonsterSoundMoments.begin(), Data::Monsters::AllMonsterSoundMoments.end()};
+    event.heardAnywhere = true;
+    event.sounds = {"SOUND_MONSTER_BULLATTACK1"};
+    Data::Monsters::MonsterSoundSet bones;
+    bones.name = "Test bones";
+    bones.soundEvents = {event};
+    std::vector<Data::Monsters::MonsterSoundSet> sets = restore.sets;
+    sets.push_back(bones);
+    g_MonsterSoundSetDatabase.Build(sets);
+    std::vector<Data::Monsters::MonsterDefinition> monsters;
+    for (int number = 0; number < Data::Monsters::MonsterNumberCount; ++number)
+    {
+        if (const Data::Monsters::MonsterDefinition* monster = g_MonsterDatabase.Find(number))
+        {
+            monsters.push_back(*monster);
+            if (number == MONSTER_SKELETON_WARRIOR)
+            {
+                monsters.back().soundSet = bones.name;
+            }
+        }
+    }
+    g_MonsterDatabase.Build(monsters, "en");
+
+    CHARACTER& skeleton = scope.Create(MONSTER_SKELETON_WARRIOR);
+    REQUIRE(skeleton.Object.Type == MODEL_PLAYER);
+    // Without its sword: the player poses read the item table for a weapon,
+    // which the test does not load. The walk and the attack read it also
+    // without one, so they are not played here.
+    const auto weapons = std::make_pair(skeleton.Weapon[0].Type, skeleton.Weapon[1].Type);
+    skeleton.Weapon[0].Type = -1;
+    skeleton.Weapon[1].Type = -1;
+    scope.TakePlayedSounds();
+    const auto played = [&] { return CountOf(scope.TakePlayedSounds(), {SOUND_MONSTER_BULLATTACK1}); };
+
+    SetPlayerStop(&skeleton);
+    CHECK(played() == 1);
+    skeleton.Object.CurrentAction = MONSTER01_STOP1;
+    skeleton.Object.AnimationFrame = 0.0f;
+    SetPlayerShock(&skeleton, 1);
+    CHECK(played() == 1);
+    skeleton.Object.AnimationFrame = 0.0f;
+    SetPlayerDie(&skeleton);
+    CHECK(played() == 1);
+    skeleton.Weapon[0].Type = weapons.first;
+    skeleton.Weapon[1].Type = weapons.second;
 }

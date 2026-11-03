@@ -189,7 +189,16 @@ void ValidateMonsterSoundLinks(std::span<const MonsterDefinition> monsters,
                      "\"" + name + "\" is no sound set of Sounds.json; the monster plays no sounds there");
             return;
         }
-        users[name].push_back({number, FindMonsterModelReference(model)});
+        const std::optional<int> slot = FindMonsterModelReference(model);
+        // A model loads the sounds of its monsters' sets when it opens; the
+        // game opens no other one (the player model, a map object).
+        if ((!slot || !bySlot.contains(*slot)) && !byName.at(name)->sounds.empty())
+        {
+            AddIssue(issues, ItemDataIssueSeverity::Warning, monstersSource, number, MonsterField(number, field),
+                     model + " is no model of the model list, which loads the sounds of \"" + name +
+                         "\": only the SOUND_ ids that the game loads play");
+        }
+        users[name].push_back({number, slot});
     };
     for (const MonsterDefinition& monster : monsters)
     {

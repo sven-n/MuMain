@@ -337,6 +337,11 @@ game reaches them, whatever the animation:
 | `stand` | The character is set to stand: a walk ends, the server stops it (SetPlayerStop) |
 | `walk` | Each step of a walk (SetPlayerWalk) without a mount's sound; for the hero (a player transformed into the monster) one time in 64, which the game draws in place of the events' chance, as the original client did |
 
+Every character whose monster names a set plays its moments, a player-shaped
+monster (model `player`) too. Only a model of the model list loads a set's
+sound files when it opens, so a set on a monster of another model (`player`,
+a map object) plays only the `SOUND_*` ids the game loads; Data Checks warns.
+
 An event is heard only within 500 units of the hero and on the set's `maps`,
 unless it is `heardAnywhere`:
 

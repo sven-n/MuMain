@@ -87,24 +87,32 @@ namespace
         GameLogic::Monsters::SoundEvents::PlayMoment(*c, moment, chanceDrawn);
     }
 
-    // The walk moment of a monster, where its idle slot sound played: when no
-    // mount sound plays, for the hero one time in 64 in place of the events'
-    // chance.
-    void PlayWalkMoment(CHARACTER* c)
-    {
-        if (c != Hero)
-        {
-            PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Walk);
-        }
-        else if (rand_fps_check(HeroWalkIdleOneIn))
-        {
-            PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Walk, true);
-        }
-    }
-
     bool IsSkeleton(const OBJECT* o)
     {
         return o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3;
+    }
+
+    // The idle sounds of a step without a mount's sound, where the sound slots
+    // played them: the walk moment of the character's set (players have
+    // none), for the hero one time in 64 in place of the events' chance, and
+    // a skeleton's bone sound one time in 16.
+    void PlayWalkIdle(CHARACTER* c, OBJECT* o)
+    {
+        if (c == Hero)
+        {
+            if (rand_fps_check(HeroWalkIdleOneIn))
+            {
+                if (IsSkeleton(o))
+                    PlayBuffer(SOUND_BONE1, o);
+                PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Walk, true);
+            }
+            return;
+        }
+        if (o->Type == MODEL_PLAYER && rand_fps_check(WalkIdleOneIn) && IsSkeleton(o))
+        {
+            PlayBuffer(SOUND_BONE1, o);
+        }
+        PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Walk);
     }
 }
 
@@ -455,11 +463,10 @@ void SetPlayerStop(CHARACTER* c)
             SetAction(&c->Object, MONSTER01_STOP1);
     }
 
-    if (o->Type != MODEL_PLAYER)
-    {
-        PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Stand);
-    }
-    else if (rand_fps_check(16) && !IsSkeleton(o) && c->Helper.Type == MODEL_HORN_OF_FENRIR)
+    // Every character whose monster names a set, also a player-shaped one;
+    // players have none.
+    PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Stand);
+    if (o->Type == MODEL_PLAYER && rand_fps_check(16) && !IsSkeleton(o) && c->Helper.Type == MODEL_HORN_OF_FENRIR)
     {
         if (Random::Rand() % 3 == 0)
         {
@@ -802,14 +809,9 @@ void SetPlayerWalk(CHARACTER* c)
     {
         PlayBuffer(static_cast<ESound>(SOUND_FENRIR_RUN_1 + Random::Rand() % 2), o);
     }
-    else if (o->Type != MODEL_PLAYER)
+    else
     {
-        PlayWalkMoment(c);
-    }
-    else if ((c == Hero && rand_fps_check(HeroWalkIdleOneIn)) || (c != Hero && rand_fps_check(WalkIdleOneIn)))
-    {
-        if (IsSkeleton(o))
-            PlayBuffer(SOUND_BONE1, o);
+        PlayWalkIdle(c, o);
     }
 }
 
@@ -1277,7 +1279,6 @@ void SetPlayerAttack(CHARACTER* c)
             {
                 if (IsSkeleton(o))
                     PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + Random::Rand() % 2), o);
-                PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Attack);
             }
             else
             {
@@ -1296,6 +1297,7 @@ void SetPlayerAttack(CHARACTER* c)
                 else if (c->Weapon[0].Type != -1 || c->Weapon[1].Type != -1)
                     PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + Random::Rand() % 2), o);
             }
+            PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Attack);
         }
     c->SwordCount++;
 }
@@ -1395,8 +1397,6 @@ void SetPlayerShock(CHARACTER* c, int Hit)
             {
                 if (IsSkeleton(o))
                     PlayBuffer(SOUND_BONE1, o);
-                else
-                    PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Hit);
             }
             else
             {
@@ -1410,6 +1410,7 @@ void SetPlayerShock(CHARACTER* c, int Hit)
                 else
                     PlayBuffer(static_cast<ESound>(SOUND_FEMALE_SCREAM01 + Random::Rand() % 2), o);
             }
+            PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Hit);
         }
 
         if (o->Type == MODEL_CASTLE_GATE)
@@ -1516,10 +1517,7 @@ void SetPlayerDie(CHARACTER* c)
     {
         PlayMonsterSound(c);
         const bool monsterSounds = o->Type != MODEL_PLAYER || IsSkeleton(o);
-        if (monsterSounds)
-        {
-            PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Death);
-        }
+        PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Death);
         if (gMapManager.InChaosCastle() == true)
         {
             PlayBuffer(static_cast<ESound>(SOUND_CHAOS_MOB_BOOM01 + Random::Rand() % 2), o);
