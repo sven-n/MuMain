@@ -97,6 +97,12 @@ public:
     // Casts body shadows on the GPU (RenderCachedSkinnedShadow); otherwise the models project them on the CPU.
     bool gpuShadows = false;
 
+    // What the draws and state calls leave after the last draw, which the next draws in the frame inherit.
+    void NoteFinalState()
+    {
+        calls.push_back("final" + State());
+    }
+
     void RenderQuad2D(std::span<const mu::Vertex2D> v, std::uint32_t texture) override
     {
         Note("Quad2D", texture, HashSpan(v));
@@ -327,6 +333,7 @@ template <typename Scene> void Draw(CallLog& log, Scene scene, bool later)
     {
         scene();
     }
+    log.NoteFinalState();
     mu::SetRendererOverride(nullptr);
 }
 
