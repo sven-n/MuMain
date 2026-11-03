@@ -33,6 +33,20 @@ struct MonsterMapVariant
     bool operator==(const MonsterMapVariant&) const = default;
 };
 
+// Another look the monster can appear with, drawn when it appears (monsters
+// design, D63, Q-MN83): it names the model of the look and what it changes.
+// The code still draws the look until MN4 (the Chaos Castle elf or wizard);
+// the variant whose model it drew applies.
+struct MonsterRandomVariant
+{
+    // The model of the look, as MonsterDefinition::model names it.
+    std::string model;
+    // The sound set the look plays; nullopt: the entry's.
+    std::optional<std::string> soundSet;
+
+    bool operator==(const MonsterRandomVariant&) const = default;
+};
+
 // What the client knows about one monster number (monsters design, D45).
 struct MonsterDefinition
 {
@@ -50,6 +64,10 @@ struct MonsterDefinition
     std::optional<MonsterAttacks> attacks;
     // What the monster does differently on some maps; no map is in two.
     std::vector<MonsterMapVariant> mapVariants;
+    // The sound set it plays (MonsterSoundSet::name, Q-MN78); empty: none.
+    std::string soundSet;
+    // Its other looks; no model is in two.
+    std::vector<MonsterRandomVariant> randomVariants;
 
     bool operator==(const MonsterDefinition& other) const = default;
 };
@@ -58,6 +76,11 @@ struct MonsterDefinition
 // those of the map variant that names the map and has attacks, else the
 // entry's own.
 const std::optional<MonsterAttacks>& GetAttacksOnMap(const MonsterDefinition& monster, int map, int stage = 0);
+
+// The sound set a monster plays when it appears with the model in `slot`: the
+// one of the random variant with that model when it names one, else the
+// entry's; empty for none.
+const std::string& GetSoundSetWithModel(const MonsterDefinition& monster, int slot);
 
 // The maps and stages of the map variant at `variant` that another variant of
 // the monster names too (Data::Maps::Overlaps); a map in two variants is

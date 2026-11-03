@@ -229,4 +229,25 @@ TEST_CASE("Monster data: the editor saves the table and reverts to the file [dat
     }
 }
 
+TEST_CASE("Monster data: a save of the three lists that one refuses lists the problems of what they name of each "
+          "other too [data][monsters][editor]")
+{
+    TemporaryMonsterFolder folder;
+    ClientDataScope scope(folder.Path());
+    MonsterDefinition broken = Monster(7, "Budge||Dragon");
+    broken.soundSet = "Nobody";
+    const std::array monsters = {broken};
+    g_MonsterDatabase.Build(monsters, "en");
+    std::vector<ItemDataIssue> issues;
+
+    CHECK_FALSE(g_MonsterDataHandler.SaveAll(issues));
+
+    CHECK(Data::Items::HasFatal(issues));
+    const auto lost = std::find_if(issues.begin(), issues.end(),
+                                   [](const ItemDataIssue& issue) { return issue.field == "monster 7 soundSet"; });
+    REQUIRE(lost != issues.end());
+    CHECK(lost->severity == ItemDataIssueSeverity::Error);
+    g_MonsterDatabase.Build({}, "en");
+}
+
 #endif // _EDITOR

@@ -60,8 +60,6 @@ void SetActiveBoneTransform(const float (*ptr)[3][4]);
 #define RNDEXT_OIL          2
 #define RNDEXT_RISE			4
 
-#define MAX_MONSTER_SOUND   10
-
 typedef struct
 {
     vec3_t Position;
@@ -228,7 +226,6 @@ public:
     unsigned short PriorAction;
     float         CurrentAnimation;
     short         CurrentAnimationFrame;
-    short         Sounds[MAX_MONSTER_SOUND];
     int           renderCount;
     float		  fTransformedSize;
 

@@ -13,6 +13,7 @@
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
 #include "Data/GameData/MonsterData/MonsterModelDatabase.h"
+#include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "I18N/All.h"
 
 #include <string>
@@ -89,7 +90,8 @@ UndoTarget& GetUndoTarget()
 
 int GetDataVersion()
 {
-    return g_MonsterDatabase.GetVersion() + g_MonsterModelDatabase.GetVersion();
+    return g_MonsterDatabase.GetVersion() + g_MonsterModelDatabase.GetVersion() +
+           g_MonsterSoundSetDatabase.GetVersion();
 }
 } // namespace MuEditor::Monsters::ToolWindow
 

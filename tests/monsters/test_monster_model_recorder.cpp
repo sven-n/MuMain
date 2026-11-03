@@ -47,11 +47,10 @@ TEST_CASE("The monster recorder records what opening a monster model changes")
     REQUIRE(bitmap != nullptr);
     CHECK(bitmap->starts_with("data\\monster\\"));
     // The Hound's sounds have no SOUND_ id: they get the number of their
-    // file, and the first sound slot names the first of them.
+    // file.
     const int hound1 = Audio::SoundNumbers::ForFile(L"Data/Sound/mHound1.wav");
     CHECK(*Find(record, "sound event 0") ==
           "load " + std::to_string(hound1) + " data\\sound\\mhound1.wav channels 2 3d");
-    CHECK(*Find(record, SlotPath(MODEL_HOUND, "sound 0")) == std::to_string(hound1 - SOUND_MONSTER));
 }
 
 TEST_CASE("The monster recorder records the same load the same way in another scope")
