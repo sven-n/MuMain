@@ -1499,8 +1499,9 @@ luck, an option, the excellent options and a set (one of the item's sets),
 and shows such an item's name in two rows:
 
 - **In the tooltip**: the name row its tooltip writes, bold, in the colors the
-  active UI theme's tooltip gives it (the line classes of its `tooltip.rcss`,
-  or of the theme it inherits it from), with what gives it: one of its
+  game's tooltip has in the active UI theme (its line's color and highlight
+  bar as RmlUi computes them from the theme's style sheets, on the tooltip's
+  box), with what gives it: one of its
   [name lines](#name-lines) ("Name line 2"), or the standard name and color.
 - **On the ground**: the [ground label](#ground-labels) the game draws for such
   a drop, with the rule that gives it: one of the item's own, or the standard

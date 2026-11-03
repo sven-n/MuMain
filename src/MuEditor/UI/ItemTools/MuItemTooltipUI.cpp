@@ -56,9 +56,6 @@ void StoreItem(const std::string& label, const ItemDefinition& item)
     g_ItemEdits.SetItem(label, item);
 }
 
-// The tooltip's box behind a line without a highlight bar.
-constexpr Data::Items::GroundLabelColor TooltipBox{0, 0, 0};
-
 // A grey line that wraps at the window's edge.
 void RenderNote(const char* text)
 {
@@ -177,10 +174,14 @@ void CMuItemTooltipUI::RenderPreview(const ItemDefinition& item, int itemType)
 
     // In the tooltip: the name row as the tooltip writes it, always bold, in the active theme's tooltip colors.
     const ItemTooltipNameRow name = DescribeItemTooltipName(preview);
-    const MuEditor::Items::TooltipLineLook& look = MuEditor::Items::GetTooltipLineLook(name.color);
+    const MuEditor::Items::TooltipLooks& looks = MuEditor::Items::GetTooltipLooks();
+    const MuEditor::Items::TooltipLineLook& look = MuEditor::Items::GetTooltipLineLook(looks, name.color);
+    // Its bar, or the tooltip's box where it has none.
+    const bool bar = look.backgroundAlpha != 0;
     caption(I18N::Editor::InTheTooltip);
     GroundLabelWidgets::RenderLabel(Core::Text::ToUtf8(name.text.c_str()).c_str(), look.text,
-                                    look.background.value_or(TooltipBox), true);
+                                    bar ? look.background : looks.box, true,
+                                    bar ? look.backgroundAlpha : looks.boxAlpha);
     const std::string nameSource = name.nameLine
                                        ? I18N::Format(I18N::Editor::NameLine0, {std::to_string(*name.nameLine + 1)})
                                        : std::string(I18N::Editor::StandardName);

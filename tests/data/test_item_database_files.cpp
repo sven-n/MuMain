@@ -75,6 +75,7 @@
 #include "UI/ItemTools/MuItemTooltipUI.h"
 #include "UI/ItemTools/TooltipLineLooks.h"
 #include "UI/ItemTranslations/MuItemTranslationsUI.h"
+#include "../ui/RmlLayoutFixture.h"
 #include "UI/MapEditor/MapEditorUI.h"
 #include "TestModelSlots.h"
 #include "imgui.h"
@@ -4759,51 +4760,67 @@ TEST_CASE("Item Tooltip lists the lines an item adds to its tooltip layout [data
     CHECK(MuEditor::Items::DescribeItemLayoutChanges({}, ShippedTooltips(), "en").empty());
 }
 
-// Item Tooltip draws the tooltip's name row in the colors the active theme's tooltip gives each TEXT_COLOR_*, read
-// from its tooltip.rcss: each line class's color, and the bar behind the four highlight colors.
+// Item Tooltip draws the tooltip's name row in the colors the active theme's tooltip gives each TEXT_COLOR_*, as
+// RmlUi computes them from the theme's style sheets: each line class's color, the bar behind the four highlight colors,
+// and the box behind the lines.
 TEST_CASE("Item Tooltip's tooltip row has the theme's tooltip colors [editor][items]")
 {
     using Data::Items::GroundLabelColor;
+    // Without the RmlUi runtime (no game): white lines on a black box.
+    CHECK(MuEditor::Items::GetTooltipLooks().lines[TEXT_COLOR_BLUE].text == GroundLabelColor{255, 255, 255});
+    CHECK(MuEditor::Items::GetTooltipLooks().boxAlpha == 255);
+
+    UI::Tests::RmlLayoutFixture fixture;
     for (const char* theme : {"legacy", "modern"})
     {
         INFO(theme);
-        const std::string rcss =
-            TestFiles::ReadWholeFile(ShippedClientDirectory / "Data/Interface/RmlUi/themes" / theme / "tooltip.rcss");
-        REQUIRE_FALSE(rcss.empty());
-        const auto looks = MuEditor::Items::ReadTooltipLineLooks(rcss);
-        CHECK(looks[TEXT_COLOR_WHITE].text == GroundLabelColor{255, 255, 255});
-        CHECK_FALSE(looks[TEXT_COLOR_WHITE].background.has_value());
-        CHECK(looks[TEXT_COLOR_BLUE].text == GroundLabelColor{0x80, 0xb3, 0xff});
-        CHECK_FALSE(looks[TEXT_COLOR_BLUE].background.has_value());
-        CHECK(looks[TEXT_COLOR_ORANGE].text == GroundLabelColor{0xe6, 0x6b, 0x0a});
-        CHECK(looks[TEXT_COLOR_DARKRED].text == GroundLabelColor{255, 255, 255});
-        CHECK(looks[TEXT_COLOR_DARKRED].background == GroundLabelColor{160, 0, 0});
-        CHECK(looks[TEXT_COLOR_GREEN_BLUE].text == GroundLabelColor{0, 255, 0});
-        CHECK(looks[TEXT_COLOR_GREEN_BLUE].background == GroundLabelColor{60, 60, 200});
-        // Every line class has its rule there, so none is left white by a name the sheet doesn't have.
-        for (size_t color = TEXT_COLOR_BLUE; color < looks.size(); ++color)
+        Rml::ElementDocument* document = fixture.Load(theme, "tooltip");
+        Rml::Element* panel = document->GetElementById("tooltip_panel");
+        REQUIRE(panel != nullptr);
+        const int children = panel->GetNumChildren(true);
+        const MuEditor::Items::TooltipLooks looks = MuEditor::Items::ComputeTooltipLooks(*document);
+        const auto& lines = looks.lines;
+        CHECK(lines[TEXT_COLOR_WHITE].text == GroundLabelColor{255, 255, 255});
+        CHECK(lines[TEXT_COLOR_WHITE].backgroundAlpha == 0);
+        CHECK(lines[TEXT_COLOR_BLUE].text == GroundLabelColor{0x80, 0xb3, 0xff});
+        CHECK(lines[TEXT_COLOR_BLUE].backgroundAlpha == 0);
+        CHECK(lines[TEXT_COLOR_ORANGE].text == GroundLabelColor{0xe6, 0x6b, 0x0a});
+        CHECK(lines[TEXT_COLOR_DARKRED].text == GroundLabelColor{255, 255, 255});
+        CHECK(lines[TEXT_COLOR_DARKRED].background == GroundLabelColor{160, 0, 0});
+        CHECK(lines[TEXT_COLOR_DARKRED].backgroundAlpha == 255);
+        CHECK(lines[TEXT_COLOR_GREEN_BLUE].text == GroundLabelColor{0, 255, 0});
+        CHECK(lines[TEXT_COLOR_GREEN_BLUE].background == GroundLabelColor{60, 60, 200});
+        // A box behind the lines (the modern theme's is a token of its own), and the probe lines are gone again: the
+        // panel's children are the tooltip's lines.
+        CHECK(looks.boxAlpha != 0);
+        CHECK(panel->GetNumChildren(true) == children);
+        if (std::string_view(theme) == "legacy")
         {
-            INFO(looks[color].className);
-            CHECK(rcss.find(".tt-line." + std::string(looks[color].className)) != std::string::npos);
+            // RenderTipTextList()'s box: black at 80%.
+            CHECK(looks.box == GroundLabelColor{0, 0, 0});
+            CHECK(looks.boxAlpha == 204);
         }
+        document->Close();
     }
 
-    // The later rule wins, a selector list names each, comments are left out, and rgb() is a color too.
-    const auto looks = MuEditor::Items::ReadTooltipLineLooks(R"(/* .tt-line.tt-gray { color: #000000; } */
-.tt-line { color: #fefefe; height: 2px; }
-.tt-line.tt-blue, .tt-line.tt-red { color: rgb(1, 2, 3); }
-.tt-line.tt-blue { color: #102030; }
-.tt-line.tt-hl-darkblue { background-color: rgba(4, 5, 6, 255); }
-.tt-line.tt-gray { color: red; })");
-    CHECK(looks[TEXT_COLOR_WHITE].text == GroundLabelColor{0xfe, 0xfe, 0xfe});
-    CHECK(looks[TEXT_COLOR_BLUE].text == GroundLabelColor{0x10, 0x20, 0x30});
-    CHECK(looks[TEXT_COLOR_RED].text == GroundLabelColor{1, 2, 3});
-    CHECK(looks[TEXT_COLOR_DARKBLUE].background == GroundLabelColor{4, 5, 6});
-    CHECK(looks[TEXT_COLOR_DARKBLUE].text == GroundLabelColor{255, 255, 255});
-    // A color it doesn't read keeps white.
-    CHECK(looks[TEXT_COLOR_GRAY].text == GroundLabelColor{255, 255, 255});
+    // As the theme draws them: ".tt-line"'s color is every line's whose class sets none, a bar keeps its alpha, and a
+    // color may be short.
+    Rml::ElementDocument* custom = fixture.LoadMarkup(R"(<rml><head><style>
+        .tt-line { color: #fefefe; }
+        .tt-line.tt-hl-darkblue { background-color: rgba(4, 5, 6, 128); }
+        .tt-line.tt-gray { color: #abc; }
+        #tooltip_panel { background-color: #10203040; }
+        </style></head><body><div id="tooltip_panel"/></body></rml>)");
+    const MuEditor::Items::TooltipLooks own = MuEditor::Items::ComputeTooltipLooks(*custom);
+    CHECK(own.lines[TEXT_COLOR_DARKBLUE].text == GroundLabelColor{0xfe, 0xfe, 0xfe});
+    CHECK(own.lines[TEXT_COLOR_DARKBLUE].background == GroundLabelColor{4, 5, 6});
+    CHECK(own.lines[TEXT_COLOR_DARKBLUE].backgroundAlpha == 128);
+    CHECK(own.lines[TEXT_COLOR_GRAY].text == GroundLabelColor{0xaa, 0xbb, 0xcc});
+    CHECK(own.box == GroundLabelColor{0x10, 0x20, 0x30});
+    CHECK(own.boxAlpha == 0x40);
     // A number that is no color takes white's.
-    CHECK(MuEditor::Items::GetTooltipLineLook(99).className == "tt-line");
+    CHECK(MuEditor::Items::GetTooltipLineLook(own, 99).className == "tt-line");
+    custom->Close();
 }
 
 TEST_CASE("A description placeholder that names no table stops the save [editor][items]")
