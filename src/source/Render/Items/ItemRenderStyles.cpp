@@ -102,18 +102,19 @@ struct ChromeTint
 constexpr ChromeTint ThunderHawkChromeTint{0.85f, 0.85f, 1.2f};
 constexpr ChromeTint HurricaneChromeTint{0.3f, 0.8f, 1.f};
 
-bool TextureHasAlpha(const BMD* b, int meshIndex)
+// Pixels the alpha test drops (BITMAP_t::hasHoles), not only an alpha channel: a .tga can be solid.
+bool TextureHasHoles(const BMD* b, int meshIndex)
 {
-    return Bitmaps.GetTexture(b->IndexTexture[b->Meshs[meshIndex].Texture])->Components == 4;
+    return Bitmaps.GetTexture(b->IndexTexture[b->Meshs[meshIndex].Texture])->hasHoles;
 }
 
 // Draws the model with a chrome layer (BITMAP_CHROME + 1) in the tint of the model's light, or in the model's own
 // light without a tint, mesh by mesh with RenderBody's rules (texture scripts, the hidden mesh), so any model can
-// have the look. A mesh whose texture has alpha gets the chrome under its texture: solid and on both faces, so it
-// fills the holes the alpha cuts (the Magic Gladiator sets' grooves) and the texture covers the rest. A mesh with an
-// opaque texture gets the chrome added over its texture, and so do a glowing mesh (it adds its light, as RenderBody's
-// two passes drew it) and every mesh of a see-through model (the doppelgangers of the Doppelganger map), where a
-// solid layer would show through the texture.
+// have the look. A mesh whose texture has holes gets the chrome under its texture: solid and on both faces, so it
+// fills the holes (the Magic Gladiator sets' grooves) and the texture covers the rest. A mesh whose texture has none
+// gets the chrome added over its texture, and so do a glowing mesh (it adds its light, as RenderBody's two passes
+// drew it) and every mesh of a see-through model (the doppelgangers of the Doppelganger map), where a solid layer
+// would show through the texture.
 void RenderSetChrome(BMD* b, const DrawLook& look, const std::optional<ChromeTint>& tint)
 {
     const bool seeThrough = look.alpha < 0.99f;
@@ -150,7 +151,7 @@ void RenderSetChrome(BMD* b, const DrawLook& look, const std::optional<ChromeTin
         {
             continue;
         }
-        if (!seeThrough && !b->IsMeshGlowing(i, look.blendMesh) && TextureHasAlpha(b, i))
+        if (!seeThrough && !b->IsMeshGlowing(i, look.blendMesh) && TextureHasHoles(b, i))
         {
             chrome(i, RENDER_TWOSIDED);
             texture(i);
