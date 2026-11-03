@@ -95,10 +95,11 @@ MeshDraw CItemMeshPreviewDrawer::SeeThrough(const MeshDraw& draw)
     return seeThrough;
 }
 
-// The mesh's vertices as this draw poses them (the model's current skin), tested once per mesh.
+// The mesh's vertices as this draw poses them (the model's current skin), tested once per mesh. VertexTransform has
+// MAX_MESH meshes; EnsureCpuVertices skins none past them.
 void CItemMeshPreviewDrawer::Pick(const MeshDraw& draw)
 {
-    if (draw.mesh < 0 || static_cast<std::size_t>(draw.mesh) >= MeshSlots || m_tested.test(draw.mesh))
+    if (draw.mesh < 0 || draw.mesh >= MAX_MESH || m_tested.test(draw.mesh))
     {
         return;
     }

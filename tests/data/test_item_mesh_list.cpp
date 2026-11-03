@@ -450,6 +450,29 @@ TEST_CASE("A see-through mesh keeps the holes of its texture [editor][items][mes
     CHECK_FALSE(glIsEnabled(GL_ALPHA_TEST));
 }
 
+TEST_CASE("A click on the preview finds no mesh past MAX_MESH [editor][items][mesh_list]")
+{
+    // A triangle under the ray, at the first mesh number VertexTransform has no room for.
+    constexpr int Mesh = MAX_MESH;
+    TestModel item(Mesh + 1);
+    std::array<Triangle_t, 1> triangles{};
+    triangles[0].Polygon = 3;
+    triangles[0].VertexIndex[1] = 1;
+    triangles[0].VertexIndex[2] = 2;
+    item.Mesh(Mesh).NumVertices = 3;
+    item.Mesh(Mesh).NumTriangles = 1;
+    item.Mesh(Mesh).Triangles = triangles.data();
+    RecordingDrawer recorder;
+    const DrawerScope scope(recorder);
+    {
+        CItemMeshPreviewDrawer drawer(&item.Model(), std::nullopt, Downward(1.0f, 1.0f, 10.0f));
+        drawer.DrawMesh(DrawOf(item.Model(), Mesh, RENDER_TEXTURE));
+        CHECK_FALSE(drawer.HitMesh());
+    }
+    // Still drawn.
+    CHECK(recorder.draws.size() == 1);
+}
+
 TEST_CASE("The preview's drawer draws later when the drawer it replaced does [editor][items][mesh_list]")
 {
     TestModel item(1);
