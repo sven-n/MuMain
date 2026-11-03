@@ -293,7 +293,9 @@ A layout line has:
   Master); a level above `3` names none and writes no line, and the item data
   warns about it. The default layout's class lines are such a
   line: white for the hero who can use the item, dark red for the others, and
-  none when every class can from its first class (`allClasses`).
+  none when every class can from its first class (`allClasses`). On any other
+  line, a layout's, an item's own or a ground label rule, `{className}` is
+  empty and `classUsable` never holds, so naming them there is a warning.
 
 The **states** a condition can name:
 
@@ -379,7 +381,8 @@ bases go round in a circle), a `hide` or `after` id its base doesn't have, and
 an item's `tooltipLayout` the file doesn't have or a `tooltipLayoutChanges` id
 its layout doesn't have. The messages suggest the name meant for a typo.
 **Warnings**: a shared text that neither a layout nor a description uses, a
-`values` entry the text does not have (a layout's or a description's line), and
+`values` entry the text does not have (a layout's or a description's line),
+`{className}` or `classUsable` on a line without `forEachClass`, and
 a translation in a language the game has no texts in (as for item names).
 
 ### Flight equipment

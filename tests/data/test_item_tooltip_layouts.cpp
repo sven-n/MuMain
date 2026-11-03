@@ -423,6 +423,52 @@ TEST_CASE("A tooltip file warns about a line value its text does not have [data]
     CHECK(result.Has(ItemDataIssueSeverity::Warning, "layouts[0].lines[1].values.missing", "has no {missing}"));
 }
 
+// {className} and classUsable are a class line's ("forEachClass"): on another line, a layout's or an item's own, the
+// one is always empty and the other never holds.
+TEST_CASE("A line without forEachClass warns about className and classUsable [data][items][tooltip]")
+{
+    const std::string texts = R"("equipped": "Can be equipped by {className}")";
+    const auto warns = [&](const std::string& line)
+    {
+        INFO(line);
+        const ReadResult result = Read(TooltipFile(texts, line + ","));
+        CHECK_FALSE(HasFatal(result.issues));
+        return result.Has(ItemDataIssueSeverity::Warning, "layouts[0].lines[1]", "only a layout line with") ||
+               result.Has(ItemDataIssueSeverity::Warning, "layouts[0].lines[1]", "holds only on a layout line with");
+    };
+    CHECK(warns(R"({"text": "Class: {className}"})"));
+    CHECK(warns(R"({"text": "@equipped"})"));
+    CHECK(warns(R"({"text": "Class: {who}", "values": {"who": "className"}})"));
+    CHECK(warns(R"({"text": "", "when": ["!classUsable"]})"));
+    CHECK(warns(R"({"text": "", "colors": [{"when": ["classUsable"], "color": "red"}]})"));
+    CHECK_FALSE(warns(R"({"text": "@equipped", "forEachClass": true, "when": ["!classUsable"]})"));
+    // A placeholder of that name that its "values" points at another value shows that one.
+    CHECK_FALSE(warns(R"({"text": "{className}", "values": {"className": "defense"}})"));
+
+    // An item's own lines never have "forEachClass".
+    const ReadResult tooltips = Read(TooltipFile(texts, ""));
+    REQUIRE_FALSE(HasFatal(tooltips.issues));
+    ItemDefinition item;
+    item.group = 0;
+    item.number = 1;
+    item.names.Set("en", "Kris");
+    ItemDescriptionLine own;
+    own.textName = "equipped";
+    item.description = {own};
+    ItemNameLine name;
+    name.when = {TooltipCondition{}};
+    std::string error;
+    REQUIRE(ReadTooltipCondition("classUsable", name.when[0], error));
+    item.nameLines = {name};
+    ItemDescriptionLine added;
+    added.text.Set("en", "{className}");
+    item.tooltipLayoutChanges.add = {{"first", {added}}};
+    const std::vector<ItemDataIssue> issues = TextIssuesOf(item, tooltips.file);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "description[0]", "it is empty here"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "nameLines[0]", "it never holds here"));
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "tooltipLayoutChanges.add[0].lines[0]", "it is empty here"));
+}
+
 TEST_CASE("A shared text is used by a layout or an item description [data][items][tooltip]")
 {
     const ReadResult tooltips = Read(

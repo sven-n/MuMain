@@ -875,6 +875,11 @@ void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemT
             {
                 check(line->textName, field + ".text", false);
             }
+            if (const std::string warning = CheckClassOnlyValues(*line, tooltips); !warning.empty())
+            {
+                issues.push_back(
+                    {ItemDataIssueSeverity::Warning, "", definition.group, definition.number, field, warning});
+            }
         }
         for (const auto& [field, message] : CheckItemTooltipLayout(tooltips, definition))
         {

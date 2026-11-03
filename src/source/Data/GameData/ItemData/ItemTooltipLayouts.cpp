@@ -144,6 +144,48 @@ std::string_view FindRepeatedId(std::span<const BuiltTooltipLine> lines)
     return {};
 }
 
+constexpr const char* ClassNameOutsideMessage =
+    "has {className}, which only a layout line with \"forEachClass\" fills in: it is empty here";
+constexpr const char* ClassUsableOutsideMessage =
+    "names classUsable, which holds only on a layout line with \"forEachClass\": it never holds here";
+
+bool NamesClassUsable(std::span<const TooltipCondition> conditions)
+{
+    return std::any_of(
+        conditions.begin(), conditions.end(), [](const TooltipCondition& condition)
+        { return condition.kind == TooltipCondition::Kind::State && condition.state == TooltipState::ClassUsable; });
+}
+
+// CheckClassOnlyValues for a layout line or an item's own line: its conditions and color rules, then the
+// placeholders of its text, each showing the value its "values" names for it, else the built-in value of its name.
+template <typename TLine> std::string CheckLineClassOnlyValues(const TLine& line, const ItemTooltipFile& file)
+{
+    const bool colorNamesIt = std::any_of(line.colors.begin(), line.colors.end(),
+                                          [](const TooltipColorRule& rule) { return NamesClassUsable(rule.when); });
+    if (NamesClassUsable(line.when) || colorNamesIt)
+    {
+        return ClassUsableOutsideMessage;
+    }
+    const LocalizedString* text = line.textName.empty() ? &line.text : file.FindText(line.textName);
+    if (text == nullptr)
+    {
+        return {};
+    }
+    const PlaceholderScan scan = ScanPlaceholders(text->GetNeutral());
+    for (const std::string& placeholder : scan.names)
+    {
+        const auto named = std::find_if(line.values.begin(), line.values.end(),
+                                        [&](const auto& value) { return value.first == placeholder; });
+        const std::string_view shown =
+            named != line.values.end() ? std::string_view(named->second) : std::string_view(placeholder);
+        if (FindBuiltInPlaceholder(shown) == TooltipValue::ClassName)
+        {
+            return ClassNameOutsideMessage;
+        }
+    }
+    return {};
+}
+
 std::string ListNames(const std::set<std::string>& names)
 {
     if (names.empty())
@@ -494,6 +536,10 @@ void ItemTooltipReader::ReadLine(const OrderedJson& json, const std::string& fie
         ReadLineValues(*values, field + "." + Keys::Values, line);
     }
     CheckLinePlaceholders(line, file, field);
+    if (const std::string warning = CheckClassOnlyValues(line, file); !warning.empty())
+    {
+        AddIssue(ItemDataIssueSeverity::Warning, field, warning);
+    }
     WarnAboutUnknownKeys(json, LineKeys, field + ".");
 }
 
@@ -778,6 +824,21 @@ void BuildItemTooltipLayout(const ItemTooltipFile& file, const ItemDefinition& d
     ApplyLayoutChanges(lines, std::span<const std::string>(changes.hide),
                        std::span<const ItemTooltipLayoutAddition>(changes.add),
                        [](const ItemDescriptionLine& added) { return BuiltTooltipLine{nullptr, &added}; });
+}
+
+std::string CheckClassOnlyValues(const TooltipLayoutLine& line, const ItemTooltipFile& file)
+{
+    return line.forEachClass ? std::string() : CheckLineClassOnlyValues(line, file);
+}
+
+std::string CheckClassOnlyValues(const ItemDescriptionLine& line, const ItemTooltipFile& file)
+{
+    return CheckLineClassOnlyValues(line, file);
+}
+
+std::string CheckClassOnlyConditions(std::span<const TooltipCondition> conditions)
+{
+    return NamesClassUsable(conditions) ? ClassUsableOutsideMessage : std::string();
 }
 
 bool HasTooltipLine(std::span<const BuiltTooltipLine> lines, std::string_view id)

@@ -5,6 +5,7 @@
 #include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemTooltipConditionsJson.h"
+#include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -151,6 +152,10 @@ void ReadRules(const OrderedJson& json, const std::string& source, GroundLabelFi
         if (!read)
         {
             continue;
+        }
+        if (const std::string warning = CheckClassOnlyConditions(rule.when); !warning.empty())
+        {
+            AddWarning(issues, source, field + "." + WhenKey, warning);
         }
         if (rule.when.empty() && index + 1 < json.size())
         {

@@ -165,6 +165,14 @@ void BuildItemTooltipLayout(const ItemTooltipFile& file, const ItemDefinition& d
 // Whether the built lines have a line of that id.
 bool HasTooltipLine(std::span<const BuiltTooltipLine> lines, std::string_view id);
 
+// The warning for a line without "forEachClass" that names what only such a line fills in: {className}, which is empty
+// there, or the state classUsable, which never holds there; empty when it names neither. For a layout line, and for an
+// item's own line (a description, name or added line), which never has "forEachClass".
+std::string CheckClassOnlyValues(const TooltipLayoutLine& line, const ItemTooltipFile& file);
+std::string CheckClassOnlyValues(const ItemDescriptionLine& line, const ItemTooltipFile& file);
+// The same warning for conditions alone (a ground label rule's): empty when they don't name classUsable.
+std::string CheckClassOnlyConditions(std::span<const TooltipCondition> conditions);
+
 // The problems of the layout an item names, each a field of the item and its message: a layout the tooltip file
 // doesn't have, an id its changes hide or add after that the layout doesn't have; none when it is fine.
 std::vector<std::pair<std::string, std::string>> CheckItemTooltipLayout(const ItemTooltipFile& file,

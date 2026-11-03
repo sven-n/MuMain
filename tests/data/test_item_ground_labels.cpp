@@ -185,6 +185,18 @@ TEST_CASE("The ground label file is checked [data][items]")
         CHECK(HasIssue(read.issues, ItemDataIssueSeverity::Fatal, "standard[1]"));
         CHECK(HasIssue(read.issues, ItemDataIssueSeverity::Fatal, "standard[2]"));
     }
+    SUBCASE("a rule's classUsable never holds: it is a tooltip class line's")
+    {
+        const LabelReadResult read = ReadStylesAndRules(
+            R"("ticket": {"color": "#ffffff"})",
+            R"({"when": ["excellent", "!classUsable"], "style": "ticket"}, {"when": ["level=0"], "style": "ticket"})");
+        CHECK_FALSE(HasFatal(read.issues));
+        const ItemDataIssue* warning = FindIssue(read.issues, "standard[0].when");
+        REQUIRE(warning != nullptr);
+        CHECK(warning->severity == ItemDataIssueSeverity::Warning);
+        CHECK(warning->message.find("never holds") != std::string::npos);
+        CHECK(FindIssue(read.issues, "standard[1].when") == nullptr);
+    }
     SUBCASE("rules after one without conditions are never used")
     {
         const LabelReadResult read = ReadStylesAndRules(R"("ticket": {"color": "#ffffff"})",
