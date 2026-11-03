@@ -305,15 +305,23 @@ void ResetLegacyState();
 struct DrawParityReport
 {
     bool done = false;
-    std::size_t atOnce = 0;
-    std::size_t later = 0;
-    // Calls that differ in place, and the first few of them: what drawing at once and later made.
-    std::size_t differences = 0;
-    std::vector<std::pair<std::string, std::string>> first;
+    // Whether the second log was drawn later; false draws both at once, the baseline of drawing the pass twice.
+    bool later = true;
+    std::size_t atOnceCalls = 0;
+    std::size_t laterCalls = 0;
+    // The first call that differs in place (the number of calls when none does), and what each log made there.
+    std::size_t firstDifference = 0;
+    std::pair<std::string, std::string> first;
+    // Calls one log has more often than the other, whatever their place, and a few of each.
+    std::size_t onlyAtOnce = 0;
+    std::size_t onlyLater = 0;
+    std::vector<std::string> onlyAtOnceExamples;
+    std::vector<std::string> onlyLaterExamples;
 };
-void RequestDrawParity();
-// True once per request.
-[[nodiscard]] bool TakeDrawParityRequest();
+// `later` false draws the second log at once too.
+void RequestDrawParity(bool later = true);
+// True once per request; `later` gets how the second log is drawn.
+[[nodiscard]] bool TakeDrawParityRequest(bool& later);
 void ReportDrawParity(const std::vector<std::string>& atOnce, const std::vector<std::string>& later);
 [[nodiscard]] const DrawParityReport& LastDrawParityReport();
 } // namespace Render::Drawing

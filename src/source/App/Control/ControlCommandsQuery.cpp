@@ -535,22 +535,27 @@ std::string DrawParity(const Request& request, std::unique_ptr<Act>&)
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "start must be a boolean");
     }
+    bool later = true;
+    if (request.Has("later") && !request.GetBool("later", later))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "later must be a boolean");
+    }
     if (start)
     {
-        Render::Drawing::RequestDrawParity();
+        Render::Drawing::RequestDrawParity(later);
     }
     const Render::Drawing::DrawParityReport& report = Render::Drawing::LastDrawParityReport();
-    json first = json::array();
-    for (const auto& [atOnce, later] : report.first)
-    {
-        first.push_back({{"at_once", atOnce}, {"later", later}});
-    }
     json result;
     result["done"] = report.done;
-    result["at_once"] = report.atOnce;
     result["later"] = report.later;
-    result["differences"] = report.differences;
-    result["first"] = first;
+    result["at_once_calls"] = report.atOnceCalls;
+    result["later_calls"] = report.laterCalls;
+    result["first_difference"] = report.firstDifference;
+    result["first"] = {{"at_once", report.first.first}, {"later", report.first.second}};
+    result["only_at_once"] = report.onlyAtOnce;
+    result["only_later"] = report.onlyLater;
+    result["only_at_once_examples"] = report.onlyAtOnceExamples;
+    result["only_later_examples"] = report.onlyLaterExamples;
     return EncodeResult(request.EncodedId(), result.dump());
 }
 

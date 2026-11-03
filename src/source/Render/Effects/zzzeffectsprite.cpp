@@ -53,6 +53,16 @@ std::array<bool, MAX_SPRITES> s_spriteBloomExcluded{};
 std::array<bool, MAX_SPRITES> s_spriteDrawn{};
 } // namespace
 
+std::vector<bool> SpritesDrawnThisFrame()
+{
+    return {s_spriteDrawn.begin(), s_spriteDrawn.end()};
+}
+
+void SetSpritesDrawnThisFrame(const std::vector<bool>& drawn)
+{
+    std::copy_n(drawn.begin(), std::min(drawn.size(), s_spriteDrawn.size()), s_spriteDrawn.begin());
+}
+
 void ClearSprites()
 {
     for (OBJECT& sprite : Sprites)

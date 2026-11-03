@@ -707,16 +707,20 @@ static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
 // stand in for the renderer, so the frame shows the pass once.
 static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
 {
-    if (Render::Drawing::TakeDrawParityRequest())
+    bool secondLater = true;
+    if (Render::Drawing::TakeDrawParityRequest(secondLater))
     {
         const bool drawsLater = Render::Drawing::DrawsWorldLater();
+        // Each run starts from the sprites the frame drew so far, as the frame's own pass does.
+        const std::vector<bool> spritesDrawn = SpritesDrawnThisFrame();
         Render::Drawing::DrawCallLog atOnce;
         Render::Drawing::DrawCallLog later;
         for (Render::Drawing::DrawCallLog* log : {&atOnce, &later})
         {
-            Render::Drawing::SetDrawsWorldLater(log == &later);
+            Render::Drawing::SetDrawsWorldLater(secondLater && log == &later);
             mu::SetRendererOverride(log);
             Render::Drawing::ResetLegacyState();
+            SetSpritesDrawnThisFrame(spritesDrawn);
             BYTE waterMap = byWaterMap;
             RenderGameWorldPass(waterMap, width, height);
             log->NoteFinalState();
@@ -725,6 +729,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         Render::Drawing::SetDrawsWorldLater(drawsLater);
         // The legacy calls' caches followed the logs: tell the renderer again.
         Render::Drawing::ResetLegacyState();
+        SetSpritesDrawnThisFrame(spritesDrawn);
         Render::Drawing::ReportDrawParity(atOnce.calls, later.calls);
     }
     RenderGameWorldPass(byWaterMap, width, height);
