@@ -10,11 +10,11 @@ namespace Render::Drawing
 {
 DeferredDraws::DeferredDraws()
     : m_models(&ModelDrawing::ActiveModelDrawer()), m_effects(&EffectDrawing::ActiveEffectDrawer()),
-      m_states(ActiveStateCallRecorder())
+      m_states(ActiveLegacyCallRecorder())
 {
     ModelDrawing::SetModelDrawer(this);
     EffectDrawing::SetEffectDrawer(this);
-    SetStateCallRecorder(this);
+    SetLegacyCallRecorder(this);
 }
 
 DeferredDraws::~DeferredDraws()
@@ -29,7 +29,7 @@ void DeferredDraws::Flush()
     m_flushed = true;
     ModelDrawing::SetModelDrawer(m_models);
     EffectDrawing::SetEffectDrawer(m_effects);
-    SetStateCallRecorder(m_states);
+    SetLegacyCallRecorder(m_states);
     for (const Recorded& record : m_draws)
     {
         std::optional<mu::ScopedBloomExclusion> exclusion;
@@ -57,7 +57,7 @@ void DeferredDraws::Flush()
                 else if constexpr (std::is_same_v<Kind, EffectDrawing::PlaneDraw>)
                     m_effects->DrawPlane(recorded);
                 else
-                    MakeStateCall(recorded.call, recorded.argument);
+                    MakeLegacyCall(recorded.call, recorded.argument);
             },
             record.draw);
     }
@@ -176,7 +176,7 @@ void DeferredDraws::DrawPlane(const EffectDrawing::PlaneDraw& draw)
     Record(draw);
 }
 
-void DeferredDraws::RecordStateCall(StateCall call, int argument)
+void DeferredDraws::RecordLegacyCall(LegacyCall call, int argument)
 {
     Record(State{.call = call, .argument = argument});
 }

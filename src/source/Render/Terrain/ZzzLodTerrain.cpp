@@ -54,6 +54,7 @@
 #include "Camera/ConvexHull2D.h"
 #include "Engine/Object/CullingConstants.h"
 #include "UI/Scaling/UITransform.h"
+#include "Render/Drawing/LegacyCalls.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -3270,6 +3271,8 @@ bool g_bMapEditorFullTerrain = false;
 
 void RenderTerrain(bool EditFlag)
 {
+    if (Render::Drawing::RecordsLegacyCall(Render::Drawing::LegacyCall::RenderTerrain, EditFlag))
+        return;
     if (g_bMapEditorFullTerrain)
         ResetFrustrumBoundsFullTerrain();
 

@@ -9,6 +9,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "Render/Drawing/DeferredDraws.h"
+#include "Render/Drawing/LegacyCalls.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Models/Gltf/SkinnedModel.h"
@@ -222,6 +223,14 @@ public:
     {
         return m_bloomExclusions > 0;
     }
+    [[nodiscard]] std::size_t BeginReorderableDraws() override
+    {
+        return m_reorderable++;
+    }
+    void EndReorderableDraws(std::size_t mark) override
+    {
+        m_reorderable = mark;
+    }
     void PushMatrix() override
     {
         m_matrices.push_back(m_matrices.back());
@@ -274,7 +283,9 @@ private:
     int m_bound = -1;
     int m_textureMode = 0;
     int m_bloomExclusions = 0;
-    std::vector<std::string> m_matrices{std::string()};
+    std::size_t m_reorderable = 0;
+    // The scene's camera, which the sprite matrix replaces.
+    std::vector<std::string> m_matrices{std::string(" camera")};
 
     // The state a draw is drawn with.
     [[nodiscard]] std::string State() const
@@ -283,7 +294,8 @@ private:
                std::to_string(m_depthMask) + " cull " + std::to_string(m_cullFace) + " alphaTest " +
                std::to_string(m_alphaTest) + " texture " + std::to_string(m_texture2D) + " " + std::to_string(m_bound) +
                " mode " + std::to_string(m_textureMode) + " fog " + std::to_string(m_fog) + " bloomExcluded " +
-               std::to_string(m_bloomExclusions > 0) + " matrix" + m_matrices.back();
+               std::to_string(m_bloomExclusions > 0) + " reorderable " + std::to_string(m_reorderable) + " matrix" +
+               m_matrices.back();
     }
 
     void Note(const char* name, long long value, std::uint64_t contents = 0)
@@ -895,4 +907,31 @@ TEST_CASE("Guild marks drawn later are drawn where their characters stand [draw-
         RenderGuild(&second, MODEL_BODY_ARMOR);
     };
     CheckDrawnLaterAsAtOnce(scene);
+}
+
+TEST_CASE("Reorderable ranges and the sprite matrix drawn later hold the draws asked for in them [draw-parity]")
+{
+    PlayerModels models;
+    static float firstBones[MAX_BONES][3][4];
+    OBJECT first;
+    Place(first, 100.f, 2.5f, firstBones);
+    AnimateCharacterBones(&first);
+    BeginObjectDraws();
+    Engine::Object::Attachments::BeginFrame();
+    const vec3_t light = {1.f, 1.f, 1.f};
+    const auto scene = [&]
+    {
+        {
+            const Render::Drawing::ScopedReorderableDraws reorderable;
+            RenderPartObject(&first, MODEL_BODY_ARMOR, nullptr, light, 1.f, 0, 0, 0, false, false, true);
+        }
+        // Sprites are drawn in view space.
+        BeginSprite();
+        const float position[3] = {10.f, 20.f, 30.f};
+        Render::EffectDrawing::ActiveEffectDrawer().DrawSprite(
+            Render::EffectDrawing::Sprite(BITMAP_LIGHT, position, 2.f, 3.f, light));
+        EndSprite();
+        RenderPartObject(&first, MODEL_BODY_ARMOR, nullptr, light, 1.f, 0, 0, 0, false, false, true);
+    };
+    CheckDrawnLaterAsAtOnce(scene, "CachedSkinned");
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Render/Drawing/StateCalls.h"
+#include "Render/Drawing/LegacyCalls.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Render/Models/ModelDraw.h"
 
@@ -20,7 +20,7 @@ namespace Render::Drawing
 // another thread.
 class DeferredDraws final : public ModelDrawing::ModelDrawer,
                             public EffectDrawing::EffectDrawer,
-                            public StateCallRecorder
+                            public LegacyCallRecorder
 {
 public:
     // Stands in for the active model and effect drawers and records the state calls until Flush.
@@ -48,7 +48,7 @@ public:
     void DrawCircle(const EffectDrawing::CircleDraw& draw) override;
     void DrawPlane(const EffectDrawing::PlaneDraw& draw) override;
 
-    void RecordStateCall(StateCall call, int argument) override;
+    void RecordLegacyCall(LegacyCall call, int argument) override;
 
 private:
     // Quads keep where their vertices start in m_vertices: the caller's buffer is gone by the flush.
@@ -60,7 +60,7 @@ private:
     };
     struct State
     {
-        StateCall call{};
+        LegacyCall call{};
         int argument = 0;
     };
     using Draw = std::variant<ModelDrawing::MeshDraw, ModelDrawing::ShadowDraw, EffectDrawing::EffectState,
@@ -87,7 +87,7 @@ private:
     std::vector<std::unique_ptr<ModelDrawing::ClothShadow[]>> m_keptClothes;
     ModelDrawing::ModelDrawer* m_models = nullptr;
     EffectDrawing::EffectDrawer* m_effects = nullptr;
-    StateCallRecorder* m_states = nullptr;
+    LegacyCallRecorder* m_states = nullptr;
     bool m_flushed = false;
 };
 } // namespace Render::Drawing

@@ -44,6 +44,7 @@
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
 #include "Core/Input/ImeInput.h"
+#include "Render/Drawing/LegacyCalls.h"
 #ifdef _EDITOR
 #include "Camera/FrustumRenderer.h"
 #include "Camera/CameraDebugLog.h"
@@ -577,7 +578,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
                 {
                     FRAME_PROFILE(Objects);
                     Render::Lighting::LightSourceScope mapLights(Render::Lighting::LightSource::Map);
-                    mu::ScopedReorderableDraws reorderable;
+                    Render::Drawing::ScopedReorderableDraws reorderable;
                     RenderObjects();
                 }
                 { FRAME_PROFILE(Terrain); RenderTerrain(false); }
@@ -588,7 +589,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     {
         FRAME_PROFILE(Objects);
         Render::Lighting::LightSourceScope mapLights(Render::Lighting::LightSource::Map);
-        mu::ScopedReorderableDraws reorderable;
+        Render::Drawing::ScopedReorderableDraws reorderable;
         RenderObjects();
     }
 
@@ -622,7 +623,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     if (renderStatic)
     {
         FRAME_PROFILE(Objects);
-        mu::ScopedReorderableDraws reorderable;
+        Render::Drawing::ScopedReorderableDraws reorderable;
         RenderObjects_AfterCharacter();
     }
 
