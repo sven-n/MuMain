@@ -2666,7 +2666,7 @@ void AppendGroundItemLabelText(wchar_t(&buffer)[BufferSize], const wchar_t* form
 // The label's look comes from the ground label styles (D68): the item's own rule for its level ("groundLabels" in its
 // item file), else the first standard rule whose conditions hold. Only a label of the standard rules shows the set's
 // name in front and the options after the name.
-void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescriptor& descriptor)
+void BuildGroundItemLabelDescriptor(const OBJECT* o, ITEM* ip, GroundItemLabelDescriptor& descriptor)
 {
     descriptor.Bold = false;
     descriptor.TextColor = MakeRgba(255, 255, 255, 255);
@@ -2758,14 +2758,14 @@ void ApplyGroundItemLabelDescriptor(const GroundItemLabelDescriptor& descriptor)
 
 }
 
-GroundItemLabel DescribeGroundItemLabel(OBJECT* o, ITEM* ip)
+GroundItemLabel DescribeGroundItemLabel(const OBJECT* o, ITEM* ip)
 {
     GroundItemLabelDescriptor descriptor;
     BuildGroundItemLabelDescriptor(o, ip, descriptor);
     return {descriptor.Name, descriptor.TextColor, descriptor.BgColor, descriptor.Bold};
 }
 
-void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
+void RenderItemName(int i, const OBJECT* o, ITEM* ip, bool Sort)
 {
     (void)i;
 

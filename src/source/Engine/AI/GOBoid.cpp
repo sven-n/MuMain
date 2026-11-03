@@ -721,7 +721,7 @@ void CullMounts()
     }
 }
 
-bool RenderMount(OBJECT* o, bool bForceRender)
+bool RenderMount(const OBJECT* o, bool bForceRender)
 {
     // A forced mount (a preview's) draws wherever it stands, at the scale its owner gave it.
     if (!o->Live || (!bForceRender && !o->Visible) || !IsMountDrawn(o))

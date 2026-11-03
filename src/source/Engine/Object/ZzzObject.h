@@ -72,7 +72,7 @@ void RefreshStunSkull(OBJECT* o, vec3_t Light);
 void RenderObject_AfterImage(const OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderCharacter_AfterImage(const CHARACTER* pCha, const PART_t* pPart, vec3_t light, bool Translate = false,
                                 int Select = 0, float AniInterval1 = 1.4f, float AniInterval2 = 0.7f);
-void RenderObject_AfterCharacter(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
+void RenderObject_AfterCharacter(const OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void Draw_RenderObject_AfterCharacter(const OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderObjects_AfterCharacter();
 // Starts a frame's object draws: clears the after-character sends and keeps the LODs drawn last frame.
@@ -197,7 +197,7 @@ bool isPartyMemberBuff(int partyindex);
 // toggle); callers that want a visible highlight (e.g. Map Editor selection/hover)
 // pass their own - typically the same bright color for all three so the box reads
 // as one flat outline instead of the subtle pseudo-3D shading the debug default gives.
-void RenderBoundingBox(OBJECT* pObj, std::uint32_t darkColor = 0xFF333333u, std::uint32_t midColor = 0xFF999999u,
+void RenderBoundingBox(const OBJECT* pObj, std::uint32_t darkColor = 0xFF333333u, std::uint32_t midColor = 0xFF999999u,
                        std::uint32_t lightColor = 0xFF666666u);
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX
 

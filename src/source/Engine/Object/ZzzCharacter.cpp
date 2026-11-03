@@ -11401,9 +11401,9 @@ void UpdatePlayerEffects(CHARACTER* c, OBJECT* o, BMD* b)
 namespace
 {
 // A cloaked character of another siege side than the hero's, which the hero doesn't see during the castle siege.
-bool IsHiddenBySiegeCloak(CHARACTER* c)
+bool IsHiddenBySiegeCloak(const CHARACTER* c)
 {
-    OBJECT* o = &c->Object;
+    const OBJECT* o = &c->Object;
     if (c == Hero || !battleCastle::IsBattleCastleStart() || !g_isCharacterBuff(o, eBuff_Cloaking))
         return false;
 

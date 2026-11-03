@@ -31,6 +31,7 @@
 #include "Render/Models/SideHair.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "Engine/AI/GOBoid.h"
+#include "GameLogic/Pets/w_PetProcess.h"
 #include "Character/CSParts.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Events/CSChaosCastle.h"
@@ -4384,7 +4385,7 @@ void RenderObjects()
 #endif
 }
 
-void RenderObject_AfterCharacter(OBJECT* o, bool Translate, int Select, int ExtraMon)
+void RenderObject_AfterCharacter(const OBJECT* o, bool Translate, int Select, int ExtraMon)
 {
     if (Calc_RenderObject(o, Translate, Select, ExtraMon) == false)
     {
@@ -6797,6 +6798,7 @@ void CullWorld()
     CullObjects();
     CullItems();
     CullMounts();
+    ThePetProcess().CullPets();
     CullBoids();
     CullEffects();
 }
@@ -8493,7 +8495,7 @@ bool isPartyMemberBuff(int partyindex)
 }
 
 #ifdef CSK_DEBUG_RENDER_BOUNDINGBOX
-void RenderBoundingBox(OBJECT* pObj, std::uint32_t darkColor, std::uint32_t midColor, std::uint32_t lightColor)
+void RenderBoundingBox(const OBJECT* pObj, std::uint32_t darkColor, std::uint32_t midColor, std::uint32_t lightColor)
 {
     EnableAlphaBlend();
     mu::GetRenderer().PushMatrix();

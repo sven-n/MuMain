@@ -274,7 +274,7 @@ struct GroundItemLabel
     DWORD backgroundColor;
     bool bold;
 };
-GroundItemLabel DescribeGroundItemLabel(OBJECT* o, ITEM* ip);
+GroundItemLabel DescribeGroundItemLabel(const OBJECT* o, ITEM* ip);
 void RenderSkillInfo(int sx, int sy, int Type, int SkillNum = 0, int iRenderPoint = STRP_NONE);
 void RequireClass(ITEM_ATTRIBUTE* p);
 unsigned int getGoldColor(DWORD Gold);
@@ -285,7 +285,7 @@ bool IsMoneyItem(ITEM* pItem);
 
 void ComputeItemInfo(int iHelpItem);
 void SetGroundItemLabelBuildBudget(int buildBudget);
-void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort);
+void RenderItemName(int i, const OBJECT* o, ITEM* ip, bool Sort);
 
 BYTE CaculateFreeTicketLevel(int iType);
 
