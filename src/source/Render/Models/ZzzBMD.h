@@ -436,6 +436,15 @@ public:
     void EndRenderCoinHeap(int coinCount);
 
     void RenderBody(int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int HiddenMesh = -1, int Texture = -1);
+    // RenderBody's rules for one mesh, for looks that draw the meshes one by one. Hidden: by its texture script
+    // (_H) or as `hiddenMesh`.
+    [[nodiscard]] bool IsMeshHidden(int mesh, int hiddenMesh) const;
+    // Glowing: by its texture script (_R), or as `blendMesh`.
+    [[nodiscard]] bool IsMeshGlowing(int mesh, int blendMesh) const;
+    // Draws one mesh as RenderBody does: a mesh that glows by its texture script blends itself, and a shadow
+    // script (_DC, _DT) adds its shadow pass.
+    void RenderScriptedMesh(int mesh, int renderFlag, float alpha, int blendMesh, float blendMeshLight,
+                            float blendMeshTexCoordU, float blendMeshTexCoordV, int texture = -1);
     void RenderBodyShadow(int blendMesh = -1, int hiddenMesh = -1, int startMeshNumber = -1,
         int endMeshNumber = -1, void* pClothes = nullptr, int clothesCount = 0, float alpha = 1.f);
     // Moves a skinned position onto the ground for the planar shadow (with `context`).

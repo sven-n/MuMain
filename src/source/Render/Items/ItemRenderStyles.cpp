@@ -108,11 +108,12 @@ bool TextureHasAlpha(const BMD* b, int meshIndex)
 }
 
 // Draws the model with a chrome layer (BITMAP_CHROME + 1) in the tint of the model's light, or in the model's own
-// light without a tint. A mesh whose texture has alpha gets the chrome under its texture: solid and on both faces, so
-// it fills the holes the alpha cuts (the Magic Gladiator sets' grooves) and the texture covers the rest. A mesh with
-// an opaque texture gets the chrome added over its texture, and so does every mesh of a see-through model (the
-// doppelgangers of the Doppelganger map), where a solid layer would show through the texture. These sets' textures
-// have no texture scripts, so the meshes are drawn one by one without RenderBody.
+// light without a tint, mesh by mesh with RenderBody's rules (texture scripts, the hidden mesh), so any model can
+// have the look. A mesh whose texture has alpha gets the chrome under its texture: solid and on both faces, so it
+// fills the holes the alpha cuts (the Magic Gladiator sets' grooves) and the texture covers the rest. A mesh with an
+// opaque texture gets the chrome added over its texture, and so do a glowing mesh (it adds its light, as RenderBody's
+// two passes drew it) and every mesh of a see-through model (the doppelgangers of the Doppelganger map), where a
+// solid layer would show through the texture.
 void RenderSetChrome(BMD* b, const DrawLook& look, const std::optional<ChromeTint>& tint)
 {
     const bool seeThrough = look.alpha < 0.99f;
@@ -129,8 +130,8 @@ void RenderSetChrome(BMD* b, const DrawLook& look, const std::optional<ChromeTin
         {
             Vector(tint->red * Light[0], tint->green * Light[1], tint->blue * Light[2], b->BodyLight);
         }
-        b->RenderMesh(meshIndex, RENDER_TEXTURE | RENDER_CHROME | flags, look.alpha, look.blendMesh,
-                      look.blendMeshLight, look.blendMeshU, look.blendMeshV, BITMAP_CHROME + 1);
+        b->RenderScriptedMesh(meshIndex, RENDER_TEXTURE | RENDER_CHROME | flags, look.alpha, look.blendMesh,
+                              look.blendMeshLight, look.blendMeshU, look.blendMeshV, BITMAP_CHROME + 1);
         if (keepLight)
         {
             VectorCopy(Light, b->BodyLight);
@@ -138,18 +139,18 @@ void RenderSetChrome(BMD* b, const DrawLook& look, const std::optional<ChromeTin
     };
     const auto texture = [&](int meshIndex)
     {
-        b->RenderMesh(meshIndex, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
-                      look.blendMeshV);
+        b->RenderScriptedMesh(meshIndex, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
+                              look.blendMeshU, look.blendMeshV);
     };
 
     b->BeginRender(look.alpha);
     for (int i = 0; i < b->NumMeshs; ++i)
     {
-        if (i == look.hiddenMesh)
+        if (b->IsMeshHidden(i, look.hiddenMesh))
         {
             continue;
         }
-        if (!seeThrough && TextureHasAlpha(b, i))
+        if (!seeThrough && !b->IsMeshGlowing(i, look.blendMesh) && TextureHasAlpha(b, i))
         {
             chrome(i, RENDER_TWOSIDED);
             texture(i);
