@@ -3,6 +3,26 @@
   "folders": [
     {
       "name": "Your character",
+      "folders": [
+        {
+          "name": "Attacks",
+          "sounds": [
+            "SOUND_BRANDISH_SWORD01",
+            "SOUND_BRANDISH_SWORD02",
+            "SOUND_BRANDISH_SWORD03",
+            "SOUND_ATTACK_MELEE_HIT1",
+            "SOUND_ATTACK_MELEE_HIT2",
+            "SOUND_ATTACK_MELEE_HIT3",
+            "SOUND_ATTACK_MELEE_HIT4",
+            "SOUND_ATTACK_MISSILE_HIT1",
+            "SOUND_ATTACK_MISSILE_HIT2",
+            "SOUND_ATTACK_MISSILE_HIT3",
+            "SOUND_ATTACK_MISSILE_HIT4",
+            "SOUND_BOW01",
+            "SOUND_CROSSBOW01"
+          ]
+        }
+      ],
       "sounds": [
         "SOUND_HUMAN_WALK_GROUND",
         "SOUND_HUMAN_WALK_GRASS",
@@ -38,149 +58,507 @@
         "SOUND_FENRIR_IDLE_2",
         "SOUND_FENRIR_DAMAGE_1",
         "SOUND_FENRIR_DAMAGE_2",
-        "SOUND_FENRIR_SKILL"
+        "SOUND_FENRIR_SKILL",
+        "SOUND_CHANGE_UP",
+        "SOUND_SHIELDCLASH"
       ]
     },
     {
       "name": "Skills",
       "folders": [
         {
+          "name": "Dark Wizard",
+          "folders": [
+            {
+              "name": "Aqua Beam",
+              "sounds": [
+                "SOUND_FLASH"
+              ]
+            },
+            {
+              "name": "Decay",
+              "sounds": [
+                "SOUND_DEATH_POISON1",
+                "SOUND_DEATH_POISON2"
+              ]
+            },
+            {
+              "name": "Energy Ball",
+              "sounds": [
+                "SOUND_MAGIC"
+              ]
+            },
+            {
+              "name": "Evil Spirit",
+              "sounds": [
+                "SOUND_EVIL"
+              ]
+            },
+            {
+              "name": "Expansion of Wizardry",
+              "sounds": [
+                "SOUND_SKILL_SWELL_OF_MAGICPOWER"
+              ]
+            },
+            {
+              "name": "Flame",
+              "sounds": [
+                "SOUND_FLAME"
+              ]
+            },
+            {
+              "name": "Hellfire",
+              "sounds": [
+                "SOUND_HELLFIRE"
+              ]
+            },
+            {
+              "name": "Ice",
+              "sounds": [
+                "SOUND_ICE"
+              ]
+            },
+            {
+              "name": "Ice Storm",
+              "sounds": [
+                "SOUND_SUDDEN_ICE1",
+                "SOUND_SUDDEN_ICE2"
+              ]
+            },
+            {
+              "name": "Lightning",
+              "sounds": [
+                "SOUND_THUNDER01"
+              ]
+            },
+            {
+              "name": "Meteorite",
+              "sounds": [
+                "SOUND_EXPLOTION01",
+                "SOUND_METEORITE01"
+              ]
+            },
+            {
+              "name": "Nova",
+              "sounds": [
+                "SOUND_NUKE1",
+                "SOUND_NUKE2"
+              ]
+            },
+            {
+              "name": "Soul Barrier",
+              "sounds": [
+                "SOUND_SOULBARRIER"
+              ]
+            },
+            {
+              "name": "Teleport Ally",
+              "sounds": [
+                "SOUND_TELEKINESIS"
+              ]
+            },
+            {
+              "name": "Twister",
+              "sounds": [
+                "SOUND_STORM"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Dark Knight",
+          "folders": [
+            {
+              "name": "Combo",
+              "sounds": [
+                "SOUND_COMBO"
+              ]
+            },
+            {
+              "name": "Impale",
+              "sounds": [
+                "SOUND_RIDINGSPEAR"
+              ]
+            },
+            {
+              "name": "Rageful Blow",
+              "sounds": [
+                "SOUND_FURY_STRIKE1",
+                "SOUND_FURY_STRIKE2",
+                "SOUND_FURY_STRIKE3"
+              ]
+            },
+            {
+              "name": "Strike of Destruction",
+              "sounds": [
+                "SOUND_SKILL_BLOWOFDESTRUCTION"
+              ]
+            },
+            {
+              "name": "Swell Life",
+              "sounds": [
+                "SOUND_SWELLLIFE"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Fairy Elf",
+          "folders": [
+            {
+              "name": "Ice Arrow",
+              "sounds": [
+                "SOUND_ICEARROW"
+              ]
+            },
+            {
+              "name": "Infinity Arrow",
+              "sounds": [
+                "SOUND_INFINITYARROW"
+              ]
+            },
+            {
+              "name": "Multi-Shot",
+              "sounds": [
+                "SOUND_SKILL_MULTI_SHOT"
+              ]
+            },
+            {
+              "name": "Penetration",
+              "sounds": [
+                "SOUND_PIERCING"
+              ]
+            },
+            {
+              "name": "Recovery",
+              "sounds": [
+                "SOUND_SKILL_RECOVER"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Magic Gladiator",
+          "folders": [
+            {
+              "name": "Fire Slash",
+              "sounds": [
+                "SOUND_BLOODATTACK"
+              ]
+            },
+            {
+              "name": "Flame Strike",
+              "sounds": [
+                "SOUND_SKILL_FLAME_STRIKE"
+              ]
+            },
+            {
+              "name": "Gigantic Storm",
+              "sounds": [
+                "SOUND_SKILL_GIGANTIC_STORM"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Dark Lord",
+          "folders": [
+            {
+              "name": "Chaotic Diseier",
+              "sounds": [
+                "SOUND_SKILL_CAOTIC"
+              ]
+            },
+            {
+              "name": "Earthshake",
+              "sounds": [
+                "SOUND_EARTH_QUAKE"
+              ]
+            },
+            {
+              "name": "Electric Spike",
+              "sounds": [
+                "SOUND_ELEC_STRIKE_READY",
+                "SOUND_ELEC_STRIKE"
+              ]
+            },
+            {
+              "name": "Fire Burst",
+              "sounds": [
+                "SOUND_ATTACK_FIRE_BUST",
+                "SOUND_ATTACK_FIRE_BUST_EXP"
+              ]
+            },
+            {
+              "name": "Fire Scream",
+              "sounds": [
+                "SOUND_FIRE_SCREAM"
+              ]
+            },
+            {
+              "name": "Force",
+              "sounds": [
+                "SOUND_ATTACK_SPEAR"
+              ]
+            },
+            {
+              "name": "Increase Critical Damage",
+              "sounds": [
+                "SOUND_CRITICAL"
+              ]
+            },
+            {
+              "name": "Summon",
+              "sounds": [
+                "SOUND_PART_TELEPORT"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Summoner",
+          "folders": [
+            {
+              "name": "Berserker",
+              "sounds": [
+                "SOUND_SKILL_BERSERKER"
+              ]
+            },
+            {
+              "name": "Blind",
+              "sounds": [
+                "SOUND_SUMMON_SKILL_BLIND"
+              ]
+            },
+            {
+              "name": "Chain Lightning",
+              "sounds": [
+                "SOUND_SKILL_CHAIN_LIGHTNING"
+              ]
+            },
+            {
+              "name": "Damage Reflection",
+              "sounds": [
+                "SOUND_SUMMON_SKILL_THORNS"
+              ]
+            },
+            {
+              "name": "Drain Life",
+              "sounds": [
+                "SOUND_SKILL_DRAIN_LIFE"
+              ]
+            },
+            {
+              "name": "Explosion",
+              "sounds": [
+                "SOUND_SUMMON_SAHAMUTT",
+                "SOUND_SUMMON_EXPLOSION"
+              ]
+            },
+            {
+              "name": "Innovation",
+              "sounds": [
+                "SOUND_SKILL_ENERVATION"
+              ]
+            },
+            {
+              "name": "Lightning Orb",
+              "sounds": [
+                "SOUND_SUMMON_SKILL_LIGHTORB"
+              ]
+            },
+            {
+              "name": "Lightning Shock",
+              "sounds": [
+                "SOUND_SKILL_LIGHTNING_SHOCK"
+              ]
+            },
+            {
+              "name": "Pollution",
+              "sounds": [
+                "SOUND_SUMMOM_RARGLE"
+              ]
+            },
+            {
+              "name": "Requiem",
+              "sounds": [
+                "SOUND_SUMMON_NEIL",
+                "SOUND_SUMMON_REQUIEM"
+              ]
+            },
+            {
+              "name": "Sleep",
+              "sounds": [
+                "SOUND_SUMMON_SKILL_SLEEP"
+              ]
+            },
+            {
+              "name": "Weakness",
+              "sounds": [
+                "SOUND_SKILL_WEAKNESS"
+              ]
+            }
+          ]
+        },
+        {
           "name": "Rage Fighter",
-          "sounds": [
-            "SOUND_RAGESKILL_THRUST",
-            "SOUND_RAGESKILL_THRUST_ATTACK",
-            "SOUND_RAGESKILL_STAMP",
-            "SOUND_RAGESKILL_STAMP_ATTACK",
-            "SOUND_RAGESKILL_GIANTSWING",
-            "SOUND_RAGESKILL_GIANTSWING_ATTACK",
-            "SOUND_RAGESKILL_DARKSIDE",
-            "SOUND_RAGESKILL_DARKSIDE_ATTACK",
-            "SOUND_RAGESKILL_DRAGONLOWER",
-            "SOUND_RAGESKILL_DRAGONLOWER_ATTACK",
-            "SOUND_RAGESKILL_DRAGONKICK",
-            "SOUND_RAGESKILL_DRAGONKICK_ATTACK",
-            "SOUND_RAGESKILL_BUFF_1",
-            "SOUND_RAGESKILL_BUFF_2"
+          "folders": [
+            {
+              "name": "Beast Uppercut",
+              "sounds": [
+                "SOUND_RAGESKILL_STAMP",
+                "SOUND_RAGESKILL_STAMP_ATTACK"
+              ]
+            },
+            {
+              "name": "Chain Drive",
+              "sounds": [
+                "SOUND_RAGESKILL_GIANTSWING",
+                "SOUND_RAGESKILL_GIANTSWING_ATTACK"
+              ]
+            },
+            {
+              "name": "Dark Side",
+              "sounds": [
+                "SOUND_RAGESKILL_DARKSIDE",
+                "SOUND_RAGESKILL_DARKSIDE_ATTACK"
+              ]
+            },
+            {
+              "name": "Dragon Roar",
+              "sounds": [
+                "SOUND_RAGESKILL_DRAGONLOWER",
+                "SOUND_RAGESKILL_DRAGONLOWER_ATTACK"
+              ]
+            },
+            {
+              "name": "Dragon Slasher",
+              "sounds": [
+                "SOUND_RAGESKILL_DRAGONKICK",
+                "SOUND_RAGESKILL_DRAGONKICK_ATTACK"
+              ]
+            },
+            {
+              "name": "Ignore Defense / Increase Health / Increase Block",
+              "sounds": [
+                "SOUND_RAGESKILL_BUFF_1",
+                "SOUND_RAGESKILL_BUFF_2"
+              ]
+            },
+            {
+              "name": "Killing Blow",
+              "sounds": [
+                "SOUND_RAGESKILL_THRUST",
+                "SOUND_RAGESKILL_THRUST_ATTACK"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Shared",
+          "folders": [
+            {
+              "name": "Cyclone",
+              "sounds": [
+                "SOUND_SKILL_SWORD4"
+              ]
+            },
+            {
+              "name": "Defense",
+              "sounds": [
+                "SOUND_SKILL_DEFENSE"
+              ]
+            },
+            {
+              "name": "Falling Slash",
+              "sounds": [
+                "SOUND_SKILL_SWORD1"
+              ]
+            },
+            {
+              "name": "Lunge",
+              "sounds": [
+                "SOUND_SKILL_SWORD2"
+              ]
+            },
+            {
+              "name": "Uppercut",
+              "sounds": [
+                "SOUND_SKILL_SWORD3"
+              ]
+            }
           ]
         }
-      ],
-      "sounds": [
-        "SOUND_SKILL_DEFENSE",
-        "SOUND_SKILL_SWORD1",
-        "SOUND_SKILL_SWORD2",
-        "SOUND_SKILL_SWORD3",
-        "SOUND_SKILL_SWORD4",
-        "SOUND_STORM",
-        "SOUND_EVIL",
-        "SOUND_MAGIC",
-        "SOUND_HELLFIRE",
-        "SOUND_ICE",
-        "SOUND_FLAME",
-        "SOUND_FLASH",
-        "SOUND_ATTACK_SPEAR",
-        "SOUND_ELEC_STRIKE_READY",
-        "SOUND_ELEC_STRIKE",
-        "SOUND_EARTH_QUAKE",
-        "SOUND_CRITICAL",
-        "SOUND_SHIELDCLASH",
-        "SOUND_MOONRABBIT_WALK",
-        "SOUND_MOONRABBIT_DAMAGE",
-        "SOUND_MOONRABBIT_DEAD",
-        "SOUND_MOONRABBIT_EXPLOSION",
-        "SOUND_SUMMON_SAHAMUTT",
-        "SOUND_SUMMON_EXPLOSION",
-        "SOUND_SUMMON_NEIL",
-        "SOUND_SUMMON_REQUIEM",
-        "SOUND_SUMMON_SKILL_LIGHTORB",
-        "SOUND_SUMMON_SKILL_SLEEP",
-        "SOUND_SUMMON_SKILL_BLIND",
-        "SOUND_SUMMON_SKILL_THORNS",
-        "SOUND_SKILL_CHAIN_LIGHTNING",
-        "SOUND_SKILL_DRAIN_LIFE",
-        "SOUND_SKILL_WEAKNESS",
-        "SOUND_SKILL_ENERVATION",
-        "SOUND_SKILL_SWELL_OF_MAGICPOWER"
       ]
     },
     {
-      "name": "Effects",
-      "sounds": [
-        "SOUND_BRANDISH_SWORD01",
-        "SOUND_BRANDISH_SWORD02",
-        "SOUND_BRANDISH_SWORD03",
-        "SOUND_EXPLOTION01",
-        "SOUND_METEORITE01",
-        "SOUND_BREAK01",
-        "SOUND_JEWEL01",
-        "SOUND_ATTACK_MELEE_HIT1",
-        "SOUND_ATTACK_MELEE_HIT2",
-        "SOUND_ATTACK_MELEE_HIT3",
-        "SOUND_ATTACK_MELEE_HIT4",
-        "SOUND_ATTACK_MELEE_HIT5",
-        "SOUND_ATTACK_MISSILE_HIT1",
-        "SOUND_ATTACK_MISSILE_HIT2",
-        "SOUND_ATTACK_MISSILE_HIT3",
-        "SOUND_ATTACK_MISSILE_HIT4",
-        "SOUND_THUNDER01",
-        "SOUND_BOW01",
-        "SOUND_CROSSBOW01",
-        "SOUND_MIX01",
-        "SOUND_FIRECRACKER1",
-        "SOUND_FIRECRACKER2",
-        "SOUND_MEDAL",
-        "SOUND_CHAOS_MOB_BOOM01",
-        "SOUND_CHAOS_MOB_BOOM02",
-        "SOUND_CHAOS_FALLING_STONE",
-        "SOUND_PHOENIXEXP",
-        "SOUND_RIDINGSPEAR",
-        "SOUND_RAIDSHOOT",
-        "SOUND_SWELLLIFE",
-        "SOUND_PIERCING",
-        "SOUND_ICEARROW",
-        "SOUND_TELEKINESIS",
-        "SOUND_SOULBARRIER",
-        "SOUND_BLOODATTACK",
-        "SOUND_HIT_GATE",
-        "SOUND_HIT_GATE2",
-        "SOUND_HIT_CRISTAL",
-        "SOUND_DOWN_GATE",
-        "SOUND_CROW",
-        "SOUND_DEATH_POISON1",
-        "SOUND_DEATH_POISON2",
-        "SOUND_SUDDEN_ICE1",
-        "SOUND_SUDDEN_ICE2",
-        "SOUND_NUKE1",
-        "SOUND_NUKE2",
-        "SOUND_COMBO",
-        "SOUND_FURY_STRIKE1",
-        "SOUND_FURY_STRIKE2",
-        "SOUND_FURY_STRIKE3",
-        "SOUND_CHAOS_THUNDER01",
-        "SOUND_CHAOS_THUNDER02",
-        "SOUND_ATTACK_FIRE_BUST",
-        "SOUND_ATTACK_FIRE_BUST_EXP",
-        "SOUND_PART_TELEPORT"
+      "name": "Items",
+      "folders": [
+        {
+          "name": "Gemstone",
+          "sounds": [
+            "SOUND_JEWEL02"
+          ]
+        },
+        {
+          "name": "Jewels",
+          "sounds": [
+            "SOUND_JEWEL01"
+          ]
+        },
+        {
+          "name": "Lost Map",
+          "sounds": [
+            "SOUND_KUNDUN_ITEM_SOUND"
+          ]
+        },
+        {
+          "name": "Silver Medal / Gold Medal",
+          "sounds": [
+            "SOUND_MEDAL"
+          ]
+        },
+        {
+          "name": "Transfer Christmas Ring",
+          "sounds": [
+            "SOUND_XMAS_JUMP_SANTA",
+            "SOUND_XMAS_JUMP_DEER",
+            "SOUND_XMAS_JUMP_SNOWMAN",
+            "SOUND_XMAS_TURN"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Pets",
+      "folders": [
+        {
+          "name": "Dark Raven",
+          "sounds": [
+            "SOUND_DSPIRIT_MISSILE",
+            "SOUND_DSPIRIT_SHOUT",
+            "SOUND_DSPIRIT_RUSH"
+          ]
+        }
       ]
     },
     {
       "name": "Interface",
+      "folders": [
+        {
+          "name": "Friends",
+          "sounds": [
+            "SOUND_FRIEND_CHAT_ALERT",
+            "SOUND_FRIEND_MAIL_ALERT",
+            "SOUND_FRIEND_LOGIN_ALERT"
+          ]
+        }
+      ],
       "sounds": [
-        "SOUND_TITLE01",
         "SOUND_CLICK01",
-        "SOUND_ERROR01",
-        "SOUND_MENU01",
         "SOUND_INTERFACE01",
         "SOUND_REPAIR",
-        "SOUND_WHISPER",
-        "SOUND_FRIEND_CHAT_ALERT",
-        "SOUND_FRIEND_MAIL_ALERT",
-        "SOUND_FRIEND_LOGIN_ALERT",
-        "SOUND_RING_EVENT_READY",
-        "SOUND_RING_EVENT_START",
-        "SOUND_RING_EVENT_END",
-        "SOUND_OPEN_DUELWINDOW",
-        "SOUND_START_DUEL",
-        "SOUND_INFINITYARROW"
+        "SOUND_WHISPER"
       ]
     },
     {
@@ -204,13 +582,8 @@
         "SOUND_THUNDERS02",
         "SOUND_THUNDERS03",
         "SOUND_CHAOS_ENVIR",
-        "SOUND_CHAOS_END"
-      ]
-    },
-    {
-      "name": "NPCs",
-      "sounds": [
-        "SOUND_CHANGE_UP"
+        "SOUND_CHAOS_END",
+        "SOUND_DESERT01"
       ]
     },
     {
@@ -265,7 +638,8 @@
           "sounds": [
             "set:Assassin:Data/Sound/mAssassinAttack1.wav",
             "set:Assassin:Data/Sound/mAssassinAttack2.wav",
-            "set:Assassin:Data/Sound/mAssassinDie.wav"
+            "set:Assassin:Data/Sound/mAssassinDie.wav",
+            "SOUND_ASSASSIN"
           ]
         },
         {
@@ -425,7 +799,9 @@
         {
           "name": "Castle Gate",
           "sounds": [
-            "set:Castle Gate:Data/Sound/BattleCastle/oCDoorDis.wav"
+            "set:Castle Gate:Data/Sound/BattleCastle/oCDoorDis.wav",
+            "SOUND_HIT_GATE",
+            "SOUND_HIT_GATE2"
           ]
         },
         {
@@ -463,7 +839,9 @@
         {
           "name": "Chaos Goblin",
           "sounds": [
-            "set:Chaos Goblin:SOUND_NPC_MIX"
+            "set:Chaos Goblin:SOUND_NPC_MIX",
+            "SOUND_BREAK01",
+            "SOUND_MIX01"
           ]
         },
         {
@@ -736,6 +1114,15 @@
           ]
         },
         {
+          "name": "Fire Flame Ghost",
+          "sounds": [
+            "SOUND_UMBRELLA_MONSTER_WALK1",
+            "SOUND_UMBRELLA_MONSTER_WALK2",
+            "SOUND_UMBRELLA_MONSTER_DAMAGE",
+            "SOUND_UMBRELLA_MONSTER_DEAD"
+          ]
+        },
+        {
           "name": "Forest Monster",
           "sounds": [
             "set:Forest Monster:Data/Sound/mWoodMon1.wav",
@@ -767,7 +1154,8 @@
           "sounds": [
             "set:Gaion Kharein:SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_MOVE",
             "set:Gaion Kharein:SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_DEATH",
-            "set:Gaion Kharein:SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_RAGE"
+            "set:Gaion Kharein:SOUND_EMPIREGUARDIAN_BOSS_GAION_MONSTER_RAGE",
+            "SOUND_ATTACK_MELEE_HIT5"
           ]
         },
         {
@@ -1123,6 +1511,15 @@
           ]
         },
         {
+          "name": "Lunar Rabbit",
+          "sounds": [
+            "SOUND_MOONRABBIT_WALK",
+            "SOUND_MOONRABBIT_DAMAGE",
+            "SOUND_MOONRABBIT_DEAD",
+            "SOUND_MOONRABBIT_EXPLOSION"
+          ]
+        },
+        {
           "name": "Magic Skeleton",
           "sounds": [
             "set:Magic Skeleton:SOUND_MONSTER_MAGICSKULL1",
@@ -1236,6 +1633,12 @@
           "sounds": [
             "set:Polluted Butterfly:SOUND_ELBELAND_BUTTERFLYPOLLUTION_MOVE01",
             "set:Polluted Butterfly:SOUND_ELBELAND_BUTTERFLYPOLLUTION_DEATH01"
+          ]
+        },
+        {
+          "name": "Pouch of Blessing",
+          "sounds": [
+            "SOUND_NEWYEARSDAY_DIE"
           ]
         },
         {
@@ -1377,7 +1780,8 @@
             "set:Shadow:Data/Sound/mShadow2.wav",
             "set:Shadow:Data/Sound/mShadowAttack1.wav",
             "set:Shadow:SOUND_MONSTER_SHADOWATTACK2",
-            "set:Shadow:Data/Sound/mShadowDie.wav"
+            "set:Shadow:Data/Sound/mShadowDie.wav",
+            "SOUND_MONSTER_SHADOWATTACK2"
           ]
         },
         {
@@ -1419,6 +1823,13 @@
           ]
         },
         {
+          "name": "Skeleton",
+          "sounds": [
+            "SOUND_BONE1",
+            "SOUND_BONE2"
+          ]
+        },
+        {
           "name": "Slaughterer",
           "sounds": [
             "set:Slaughterer:SOUND_DOPPELGANGER_BUGBEAR_ATTACK",
@@ -1439,6 +1850,12 @@
             "set:Splinter Wolf:SOUND_KANTURU_1ST_SWOLF_ATTACK1",
             "set:Splinter Wolf:SOUND_KANTURU_1ST_SWOLF_ATTACK2",
             "set:Splinter Wolf:SOUND_KANTURU_1ST_SWOLF_DIE"
+          ]
+        },
+        {
+          "name": "Statue of Saint",
+          "sounds": [
+            "SOUND_HIT_CRISTAL"
           ]
         },
         {
@@ -1590,16 +2007,6 @@
       ]
     },
     {
-      "name": "Monster code",
-      "sounds": [
-        "SOUND_ASSASSIN",
-        "SOUND_BONE1",
-        "SOUND_BONE2",
-        "SOUND_MONSTER_SHADOWATTACK2",
-        "SOUND_SKILL_MULTI_SHOT"
-      ]
-    },
-    {
       "name": "Maps",
       "folders": [
         {
@@ -1620,7 +2027,19 @@
         {
           "name": "Blood Castle",
           "sounds": [
-            "SOUND_BLOODCASTLE"
+            "SOUND_BLOODCASTLE",
+            "SOUND_DOWN_GATE",
+            "SOUND_CROW"
+          ]
+        },
+        {
+          "name": "Chaos Castle",
+          "sounds": [
+            "SOUND_CHAOS_MOB_BOOM01",
+            "SOUND_CHAOS_MOB_BOOM02",
+            "SOUND_CHAOS_FALLING_STONE",
+            "SOUND_CHAOS_THUNDER01",
+            "SOUND_CHAOS_THUNDER02"
           ]
         },
         {
@@ -1859,51 +2278,50 @@
       "name": "Events",
       "folders": [
         {
-          "name": "Christmas",
+          "name": "Battle Soccer",
           "sounds": [
-            "SOUND_XMAS_FIRECRACKER"
+            "SOUND_MENU01",
+            "SOUND_FIRECRACKER1",
+            "SOUND_FIRECRACKER2"
           ]
-        }
-      ],
-      "sounds": [
-        "SOUND_XMAS_JUMP_SANTA",
-        "SOUND_XMAS_JUMP_DEER",
-        "SOUND_XMAS_JUMP_SNOWMAN",
-        "SOUND_XMAS_TURN",
-        "SOUND_NEWYEARSDAY_DIE",
-        "SOUND_UMBRELLA_MONSTER_WALK1",
-        "SOUND_UMBRELLA_MONSTER_WALK2",
-        "SOUND_UMBRELLA_MONSTER_DAMAGE",
-        "SOUND_UMBRELLA_MONSTER_DEAD"
-      ]
-    },
-    {
-      "name": "Other",
-      "folders": [
+        },
         {
-          "name": "cherryblossom",
+          "name": "Cherry Blossom",
           "sounds": [
             "SOUND_CHERRYBLOSSOM_EFFECT0",
             "SOUND_CHERRYBLOSSOM_EFFECT1"
           ]
+        },
+        {
+          "name": "Duel",
+          "sounds": [
+            "SOUND_OPEN_DUELWINDOW",
+            "SOUND_START_DUEL"
+          ]
+        },
+        {
+          "name": "Fireworks",
+          "sounds": [
+            "SOUND_XMAS_FIRECRACKER"
+          ]
+        },
+        {
+          "name": "Ring event (server announcement)",
+          "sounds": [
+            "SOUND_RING_EVENT_READY",
+            "SOUND_RING_EVENT_START",
+            "SOUND_RING_EVENT_END"
+          ]
         }
-      ],
+      ]
+    },
+    {
+      "name": "Loaded, never played",
       "sounds": [
-        "SOUND_DESERT01",
-        "SOUND_DSPIRIT_MISSILE",
-        "SOUND_DSPIRIT_SHOUT",
-        "SOUND_DSPIRIT_RUSH",
-        "SOUND_JEWEL02",
-        "SOUND_KUNDUN_ITEM_SOUND",
-        "SOUND_FIRE_SCREAM",
-        "SOUND_SUMMOM_RARGLE",
-        "SOUND_SKILL_BERSERKER",
-        "SOUND_SKILL_BLOWOFDESTRUCTION",
-        "SOUND_SKILL_FLAME_STRIKE",
-        "SOUND_SKILL_GIGANTIC_STORM",
-        "SOUND_SKILL_LIGHTNING_SHOCK",
-        "SOUND_SKILL_RECOVER",
-        "SOUND_SKILL_CAOTIC"
+        "SOUND_TITLE01",
+        "SOUND_ERROR01",
+        "SOUND_PHOENIXEXP",
+        "SOUND_RAIDSHOOT"
       ]
     }
   ]
