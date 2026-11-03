@@ -172,6 +172,10 @@ bool HasTooltipLine(std::span<const BuiltTooltipLine> lines, std::string_view id
 // doesn't have, an id its changes hide or add after that the layout doesn't have; none when it is fine.
 std::vector<std::pair<std::string, std::string>> CheckItemTooltipLayout(const ItemTooltipFile& file,
                                                                         const ItemDefinition& definition);
+// The problems of an item's own changes on the layout of `name`, as CheckItemTooltipLayout gives them: an id they hide
+// or add after that the layout doesn't have; none when they fit it, or when the file has no such layout.
+std::vector<std::pair<std::string, std::string>>
+CheckTooltipLayoutChanges(const ItemTooltipFile& file, std::string_view name, const ItemTooltipLayoutChanges& changes);
 
 // Reads the file into `file` and adds its problems to `issues`; with fatal problems the file must not be used. `source`
 // names the file in messages. Whether every shared text is used is checked with the items (ValidateDescriptionTexts).

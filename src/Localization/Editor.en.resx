@@ -1579,6 +1579,9 @@
   <data name="Its own changes hide {0}" xml:space="preserve">
     <value>Its own changes hide: {0}</value>
   </data>
+  <data name="Its own changes do not fit this layout {0}" xml:space="preserve">
+    <value>Its own changes don't fit this layout: {0}</value>
+  </data>
   <data name="It adds {0} lines of its own" xml:space="preserve">
     <value>It adds {0} lines of its own</value>
   </data>

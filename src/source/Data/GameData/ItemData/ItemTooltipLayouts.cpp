@@ -816,15 +816,26 @@ std::vector<std::pair<std::string, std::string>> CheckItemTooltipLayout(const It
                                   (suggestion.empty() ? "" : "; did you mean \"" + suggestion + "\"?"));
         return problems;
     }
+    return CheckTooltipLayoutChanges(file, name, definition.tooltipLayoutChanges);
+}
+
+std::vector<std::pair<std::string, std::string>>
+CheckTooltipLayoutChanges(const ItemTooltipFile& file, std::string_view name, const ItemTooltipLayoutChanges& changes)
+{
+    std::vector<std::pair<std::string, std::string>> problems;
     std::vector<BuiltTooltipLine> lines;
     BuildTooltipLayout(file, name, lines);
-    const ItemTooltipLayoutChanges& changes = definition.tooltipLayoutChanges;
+    if (lines.empty())
+    {
+        return problems;
+    }
+    const std::string layout(name);
     for (size_t index = 0; index < changes.hide.size(); ++index)
     {
         if (!HasTooltipLine(lines, changes.hide[index]))
         {
             problems.emplace_back("tooltipLayoutChanges.hide[" + std::to_string(index) + "]",
-                                  "the layout \"" + name + "\" has no line with the id \"" + changes.hide[index] +
+                                  "the layout \"" + layout + "\" has no line with the id \"" + changes.hide[index] +
                                       "\"");
         }
     }
@@ -835,8 +846,8 @@ std::vector<std::pair<std::string, std::string>> CheckItemTooltipLayout(const It
         if (!HasTooltipLine(lines, changes.add[index].after))
         {
             problems.emplace_back("tooltipLayoutChanges.add[" + std::to_string(index) + "].after",
-                                  "the layout \"" + name + "\" has no line with the id \"" + changes.add[index].after +
-                                      "\" (or the item hides it)");
+                                  "the layout \"" + layout + "\" has no line with the id \"" +
+                                      changes.add[index].after + "\" (or the item hides it)");
         }
     }
     return problems;

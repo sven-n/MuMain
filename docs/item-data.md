@@ -1501,9 +1501,12 @@ file.
 
 **Tooltip layout** picks the layout the item's tooltip uses from the layouts
 of `Tooltips/Tooltip.json`: `default` or a preset such as `noClassLines`
-(`tooltipLayout`). The item's own changes (`tooltipLayoutChanges`), the line
-ids it hides and how many lines it adds, are shown under it; they are changed
-in the item file. Item Checks opens Item Tooltip for a problem of either.
+(`tooltipLayout`). A layout the item's own changes don't fit (a line they
+hide or add after that it doesn't have) is greyed out, with the reason when
+the pointer is on it: the item could not be saved with it. The item's own
+changes (`tooltipLayoutChanges`), the line ids it hides and how many lines it
+adds, are shown under it; they are changed in the item file. Item Checks
+opens Item Tooltip for a problem of either.
 
 ### Item Formulas
 

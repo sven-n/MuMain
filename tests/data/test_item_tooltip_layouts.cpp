@@ -351,6 +351,14 @@ TEST_CASE("An item's tooltip layout is its preset with its own changes [data][it
     sharedTypo.tooltipLayoutChanges.add[0].lines[0].textName = "nothing";
     CHECK(HasIssue(TextIssuesOf(sharedTypo, tooltips.file), ItemDataIssueSeverity::Fatal,
                    "tooltipLayoutChanges.add[0].lines[0].text", "is not a text of Tooltip.json"));
+
+    // Whether the item's own changes fit another layout (Item Tooltip offers only those): its hidden "second" and its
+    // line after "first" fit the default layout, not "short", which hides "first" itself.
+    CHECK(CheckTooltipLayoutChanges(tooltips.file, DefaultTooltipLayout, item.tooltipLayoutChanges).empty());
+    const auto onShort = CheckTooltipLayoutChanges(tooltips.file, "short", item.tooltipLayoutChanges);
+    REQUIRE(onShort.size() == 1);
+    CHECK(onShort[0].first == "tooltipLayoutChanges.add[0].after");
+    CHECK(CheckTooltipLayoutChanges(tooltips.file, "missing", item.tooltipLayoutChanges).empty());
 }
 
 // The kinds the original client gave no class lines (its list, now the preset noClassLines): an item of them whose

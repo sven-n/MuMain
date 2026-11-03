@@ -1558,6 +1558,9 @@
   <data name="Its own changes hide {0}" xml:space="preserve">
     <value>Seine eigenen Änderungen blenden aus: {0}</value>
   </data>
+  <data name="Its own changes do not fit this layout {0}" xml:space="preserve">
+    <value>Seine eigenen Änderungen passen nicht zu diesem Layout: {0}</value>
+  </data>
   <data name="It adds {0} lines of its own" xml:space="preserve">
     <value>Es fügt {0} eigene Zeilen hinzu</value>
   </data>

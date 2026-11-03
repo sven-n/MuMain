@@ -306,12 +306,24 @@ void CMuItemTooltipUI::RenderLayout(ItemDefinition& item)
     ImGui::SetNextItemWidth(LayoutComboWidth * g_MuEditorCore.GetUIScale());
     if (ImGui::BeginCombo("##TooltipLayout", current.c_str()))
     {
-        for (const Data::Items::TooltipLayout& layout : g_ItemDatabase.GetTooltipFile().layouts)
+        const Data::Items::ItemTooltipFile& file = g_ItemDatabase.GetTooltipFile();
+        for (const Data::Items::TooltipLayout& layout : file.layouts)
         {
+            // A layout the item's own changes don't fit (a line they hide or add after that it doesn't have) can't be
+            // picked: the item could not be saved with it.
+            const auto problems = Data::Items::CheckTooltipLayoutChanges(file, layout.name, item.tooltipLayoutChanges);
+            ImGui::BeginDisabled(!problems.empty());
             if (ImGui::Selectable(layout.name.c_str(), layout.name == current) && layout.name != current)
             {
                 item.tooltipLayout = layout.name == Data::Items::DefaultTooltipLayout ? std::string() : layout.name;
                 changed = true;
+            }
+            ImGui::EndDisabled();
+            if (!problems.empty() && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+            {
+                ImGui::SetTooltip(
+                    "%s",
+                    I18N::Format(I18N::Editor::ItsOwnChangesDoNotFitThisLayout0, {problems.front().second}).c_str());
             }
         }
         ImGui::EndCombo();

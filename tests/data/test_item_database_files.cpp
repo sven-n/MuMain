@@ -4710,6 +4710,16 @@ TEST_CASE("Item Tooltip picks the item's tooltip layout as an undo step [data][i
     CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout == "noClassLines");
     REQUIRE(g_ItemEdits.Undo());
     CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout.empty());
+
+    // A layout the item's own changes don't fit can't be picked, as the item could not be saved with it: a Kris that
+    // hides its durability line itself takes noClassLines, not noDurabilityLine, which has no such line.
+    ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    kris.tooltipLayoutChanges.hide = {"durability"};
+    g_ItemDatabase.Set(kris);
+    pick("noClassLines");
+    CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout == "noClassLines");
+    pick("noDurabilityLine");
+    CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout == "noClassLines");
     g_ItemEdits.GetHistory().Clear();
 }
 
