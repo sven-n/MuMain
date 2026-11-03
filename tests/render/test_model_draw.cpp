@@ -5,6 +5,7 @@
 #include "Engine/Physics/PhysicsManager.h"
 #include "Render/Models/ModelDraw.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Sprites/TextureScript.h"
 
 #include <memory>
 #include <vector>
@@ -209,4 +210,66 @@ TEST_CASE("Without a drawer set, the default drawer draws [render][model_draw]")
     CHECK(&Render::ModelDrawing::ActiveModelDrawer() == &drawer);
     Render::ModelDrawing::SetModelDrawer(nullptr);
     CHECK(&Render::ModelDrawing::ActiveModelDrawer() != &drawer);
+}
+
+// RenderBody's rules, which RenderScriptedMesh and IsMeshHidden share with looks that draw mesh by mesh.
+TEST_CASE("RenderBody skips hidden meshes, lets a glowing one blend itself and adds the shadow pass [render][model_draw]")
+{
+    char hiddenName[32] = "body_H.jpg";
+    char glowingName[32] = "body_R.jpg";
+    char shadowName[32] = "body_DC.jpg";
+    TextureScriptParsing hidden;
+    TextureScriptParsing glowing;
+    TextureScriptParsing shadow;
+    REQUIRE(hidden.parsingTScriptA(hiddenName));
+    REQUIRE(glowing.parsingTScriptA(glowingName));
+    REQUIRE(shadow.parsingTScriptA(shadowName));
+
+    // Mesh 0 plain, 1 hidden by its script, 2 glowing, 3 with a shadow pass, 4 the hidden mesh of the call.
+    Mesh_t meshes[5]{};
+    for (int i = 0; i < 5; ++i)
+    {
+        meshes[i].NumTriangles = 1;
+        meshes[i].Texture = static_cast<short>(i);
+        meshes[i].NoneBlendMesh = false;
+    }
+    meshes[1].m_csTScript = &hidden;
+    meshes[2].m_csTScript = &glowing;
+    meshes[3].m_csTScript = &shadow;
+    GLuint textures[5] = {BITMAP_CHROME, BITMAP_CHROME, BITMAP_CHROME, BITMAP_CHROME, BITMAP_CHROME};
+    BMD model;
+    model.NumMeshs = 5;
+    model.Meshs = meshes;
+    model.IndexTexture = textures;
+
+    CHECK(model.IsMeshHidden(1, -1));
+    CHECK(model.IsMeshHidden(4, 4));
+    CHECK_FALSE(model.IsMeshHidden(0, 4));
+    CHECK(model.IsMeshGlowing(2, -1));
+    CHECK(model.IsMeshGlowing(0, 0));
+    CHECK_FALSE(model.IsMeshGlowing(3, 0));
+
+    RecordingDrawer drawer;
+    {
+        DrawerScope scope(drawer);
+        model.RenderBody(RENDER_TEXTURE, 1.f, 0, 1.f, 0.f, 0.f, 4);
+    }
+
+    REQUIRE(drawer.draws.size() == 4);
+    CHECK(drawer.draws[0].mesh == 0);
+    CHECK(drawer.draws[0].blendMesh == 0);
+    CHECK(drawer.draws[1].mesh == 2);
+    CHECK(drawer.draws[1].blendMesh == 2);
+    CHECK(drawer.draws[2].mesh == 3);
+    CHECK(drawer.draws[2].flags == RENDER_TEXTURE);
+    CHECK(drawer.draws[3].mesh == 3);
+    CHECK(drawer.draws[3].flags == (RENDER_COLOR | RENDER_SHADOWMAP));
+
+    for (Mesh_t& mesh : meshes)
+    {
+        mesh.m_csTScript = nullptr;
+    }
+    model.NumMeshs = 0;
+    model.Meshs = nullptr;
+    model.IndexTexture = nullptr;
 }

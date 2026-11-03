@@ -9,9 +9,11 @@
 #include "Engine/Object/w_ObjectInfo.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Sprites/GlobalBitmap.h"
 
 #include <algorithm>
 #include <cmath>
+#include <optional>
 #include <string_view>
 #include <vector>
 
@@ -89,25 +91,99 @@ bool RenderPlainly(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alph
     return false;
 }
 
+// The light a set's chrome layer is drawn in: a share of the model's light, per channel.
+struct ChromeTint
+{
+    float red;
+    float green;
+    float blue;
+};
+
+constexpr ChromeTint ThunderHawkChromeTint{0.85f, 0.85f, 1.2f};
+constexpr ChromeTint HurricaneChromeTint{0.3f, 0.8f, 1.f};
+
+// Pixels the alpha test drops (BITMAP_t::hasHoles), not only an alpha channel: a .tga can be solid.
+bool TextureHasHoles(const BMD* b, int meshIndex)
+{
+    return Bitmaps.GetTexture(b->IndexTexture[b->Meshs[meshIndex].Texture])->hasHoles;
+}
+
+// Draws the model with a chrome layer (BITMAP_CHROME + 1) in the tint of the model's light, or in the model's own
+// light without a tint, mesh by mesh with RenderBody's rules (texture scripts, the hidden mesh), so any model can
+// have the look. A mesh whose texture has holes gets the chrome under its texture: solid and on both faces, so it
+// fills the holes (the Magic Gladiator sets' grooves) and the texture covers the rest. A mesh whose texture has none
+// gets the chrome added over its texture, and so do a glowing mesh (it adds its light, as RenderBody's two passes
+// drew it) and every mesh of a see-through model (a character fading out after death), where a solid layer would
+// show through the texture. Doppelgangers are drawn plainly.
+void RenderSetChrome(BMD* b, const DrawLook& look, const std::optional<ChromeTint>& tint)
+{
+    const bool seeThrough = look.alpha < 0.99f;
+    // An added chrome layer on a see-through model scales BodyLight by the alpha, so the light is put back then too.
+    const bool keepLight = tint.has_value() || seeThrough;
+    vec3_t Light;
+    if (keepLight)
+    {
+        VectorCopy(b->BodyLight, Light);
+    }
+    const auto chrome = [&](int meshIndex, int flags)
+    {
+        if (tint)
+        {
+            Vector(tint->red * Light[0], tint->green * Light[1], tint->blue * Light[2], b->BodyLight);
+        }
+        b->RenderScriptedMesh(meshIndex, RENDER_TEXTURE | RENDER_CHROME | flags, look.alpha, look.blendMesh,
+                              look.blendMeshLight, look.blendMeshU, look.blendMeshV, BITMAP_CHROME + 1);
+        if (keepLight)
+        {
+            VectorCopy(Light, b->BodyLight);
+        }
+    };
+    const auto texture = [&](int meshIndex)
+    {
+        b->RenderScriptedMesh(meshIndex, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
+                              look.blendMeshU, look.blendMeshV);
+    };
+
+    b->BeginRender(look.alpha);
+    for (int i = 0; i < b->NumMeshs; ++i)
+    {
+        if (b->IsMeshHidden(i, look.hiddenMesh))
+        {
+            continue;
+        }
+        if (!seeThrough && !b->IsMeshGlowing(i, look.blendMesh) && TextureHasHoles(b, i))
+        {
+            chrome(i, RENDER_TWOSIDED);
+            texture(i);
+        }
+        else
+        {
+            texture(i);
+            chrome(i, RENDER_BRIGHT);
+        }
+    }
+    b->EndRender();
+}
+
 bool RenderStormCrow(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
 {
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    b->RenderBody(RENDER_TEXTURE | RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                  look.blendMeshU, look.blendMeshV, look.hiddenMesh, BITMAP_CHROME + 1);
+    // Doppelgangers are drawn plainly.
+    if (RenderType & RENDER_DOPPELGANGER)
+    {
+        return false;
+    }
+    RenderSetChrome(b, look, std::nullopt);
     return true;
 }
 
 bool RenderThunderHawk(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
 {
-    vec3_t Light;
-    VectorCopy(b->BodyLight, Light);
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    Vector(0.85f * Light[0], 0.85f * Light[1], 1.2f * Light[2], b->BodyLight);
-    b->RenderBody(RENDER_TEXTURE | RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                  look.blendMeshU, look.blendMeshV, look.hiddenMesh, BITMAP_CHROME + 1);
-    VectorCopy(Light, b->BodyLight);
+    // Doppelgangers are drawn plainly.
+    if (RenderType & RENDER_DOPPELGANGER)
+    {
+        return false;
+    }
+    RenderSetChrome(b, look, ThunderHawkChromeTint);
     return true;
 }
 
@@ -726,15 +802,12 @@ bool RenderDarkReignBlade(BMD* b, const OBJECT* o, DrawLook& look, int Type, flo
 
 bool RenderHurricane(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType)
 {
-    float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.5f;
-    vec3_t Light;
-    VectorCopy(b->BodyLight, Light);
-    b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
-                  look.hiddenMesh);
-    Vector(Light[0] * 0.3f, Light[1] * 0.8f, Light[1] * 1.f, b->BodyLight);
-    b->RenderBody(RENDER_TEXTURE | RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
-                  look.blendMeshU, look.blendMeshV, look.hiddenMesh, BITMAP_CHROME + 1);
-    VectorCopy(Light, b->BodyLight);
+    // Doppelgangers are drawn plainly.
+    if (RenderType & RENDER_DOPPELGANGER)
+    {
+        return false;
+    }
+    RenderSetChrome(b, look, HurricaneChromeTint);
     return true;
 }
 

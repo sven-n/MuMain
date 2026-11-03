@@ -10,6 +10,7 @@
 #include "GlobalBitmapPath.h"
 
 #include "Render/RmlUi/RmlPremultiply.h"
+#include "Render/Textures/AlphaTestHoles.h"
 #include "Render/Textures/MipChain.h"
 #include "Render/Textures/OztFile.h"
 #include "Render/Textures/TextureFiltering.h"
@@ -746,6 +747,8 @@ bool CGlobalBitmap::LoadTgaFile(GLuint uiBitmapIndex, const std::wstring& filena
     const std::size_t BufferSize = pNewBitmap->BufferStorage.size();
 
     Ozt::CopyPixels(pakBuffer, header, std::span<std::uint8_t>(pNewBitmap->Buffer, BufferSize), Width);
+    pNewBitmap->hasHoles = Render::Textures::HasAlphaTestHoles(
+        std::span<const std::uint8_t>(pNewBitmap->Buffer, BufferSize), header.width, header.height, Width);
     if (premultiplyAlpha)
     {
         Render::RmlUi::PremultiplyAlpha(pNewBitmap->Buffer, BufferSize / Ozt::BytesPerPixel);
@@ -851,6 +854,7 @@ GLuint CGlobalBitmap::LoadImagePixels(const std::wstring& name, std::span<const 
     bitmap->Components = hasAlpha ? static_cast<int>(RgbaComponents) : static_cast<int>(RgbComponents);
     if (hasAlpha)
     {
+        bitmap->hasHoles = Render::Textures::HasAlphaTestHoles(rgba, width, height, width);
         bitmap->BufferStorage.assign(rgba.begin(), rgba.end());
     }
     else
