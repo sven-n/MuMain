@@ -32,6 +32,23 @@ glm::vec3 SunDirection(float fallAngleDegrees, float fallPerHeight)
     return glm::normalize(glm::vec3(-std::cos(angle) * fallPerHeight, -std::sin(angle) * fallPerHeight, 1.0f));
 }
 
+glm::vec3 FollowSun(const glm::vec3& baked, const glm::vec3& bakedSun, const glm::vec3& sun)
+{
+    const float length = glm::length(baked);
+    if (sun == bakedSun || length == 0.0f)
+    {
+        return baked;
+    }
+    const auto azimuth = [](const glm::vec3& v) { return std::atan2(v.y, v.x); };
+    const auto elevation = [](const glm::vec3& v) { return std::atan2(v.z, std::hypot(v.x, v.y)); };
+    const float maxElevation = glm::radians(89.0f);
+    const float turned = azimuth(baked) + azimuth(sun) - azimuth(bakedSun);
+    const float raised =
+        std::clamp(elevation(baked) + elevation(sun) - elevation(bakedSun), -maxElevation, maxElevation);
+    return length *
+           glm::vec3(std::cos(raised) * std::cos(turned), std::cos(raised) * std::sin(turned), std::sin(raised));
+}
+
 SunShadowView BuildSunShadowView(const glm::vec3& toSun, const glm::mat4& sceneViewProjection, float groundLow,
                                  float groundHigh, std::uint32_t resolution)
 {

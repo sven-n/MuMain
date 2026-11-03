@@ -51,6 +51,7 @@
 #include "Scenes/MainScene.h"
 #include "Render/Lighting/LightMoodSetting.h"
 #include "Render/Lighting/DynamicLightsSetting.h"
+#include "Render/Lighting/ModelLight.h"
 #include "Render/Lighting/LightShadowCasters.h"
 #include "Render/Lighting/WorldDynamicLights.h"
 #include "Render/Look/LookProfileSetting.h"
@@ -615,27 +616,10 @@ void BMD::TransformCheap(float (*BoneMatrix)[3][4], const vec3_t BoundingBoxMin,
 
     if (LightEnable)
     {
-        vec3_t Position;
-
-        float Matrix[3][4];
-        if (HighLight)
-        {
-            Vector(1.3f, 0.f, 2.f, Position);
-        }
-        else if (gMapManager.InBattleCastle())
-        {
-            Vector(0.5f, -1.f, 1.f, Position);
-            Vector(0.f, 0.f, -45.f, ShadowAngle);
-        }
-        else
-        {
-            Vector(0.f, -1.5f, 0.f, Position);
-        }
-
-        // The light mood's sun scales the directional part of the model light.
-        Render::Lighting::LightMood::ScaleSunDirection(Render::Lighting::LightMood::Active(), Position);
-        AngleMatrix(ShadowAngle, Matrix);
-        VectorIRotate(Position, Matrix, m_LastLightPosition); // for RenderMesh's GPU-skinned in-shader lighting
+        // For RenderMesh's lighting, CPU and GPU-skinned: normals are world-oriented (the root bone
+        // carries the object's angle), so one world vector lights every model alike.
+        const glm::vec3 light = Render::Lighting::ModelLightVector(HighLight);
+        Vector(light.x, light.y, light.z, m_LastLightPosition);
     }
 
     // Release/gameplay OBB: from the caller-supplied bounding box args, not a vertex-loop-derived

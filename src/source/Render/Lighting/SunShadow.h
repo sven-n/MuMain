@@ -19,6 +19,16 @@ inline constexpr float kSunShadowCasterHeight = 3000.0f;
 // world +x, as dynamic.shadowAngle) and `fallPerHeight` units per unit of height.
 [[nodiscard]] glm::vec3 SunDirection(float fallAngleDegrees, float fallPerHeight);
 
+// The dynamic.shadowAngle the maps' baked light implies: its terrain sun, (0.5, -0.5, 0.5), stands at
+// azimuth 315°, so shadows fall towards 135°.
+inline constexpr float kBakedSunShadowAngle = 135.0f;
+
+// A baked light vector (the terrain's slope shading, the models' light) moved as far as the sun has
+// moved from `bakedSun`, the sun the bake implies: its azimuth and elevation each change by the
+// sun's, its length stays, and its elevation stays within ±89°. Exactly `baked` while the sun is
+// `bakedSun`, so the maps keep their look at the baked angle.
+[[nodiscard]] glm::vec3 FollowSun(const glm::vec3& baked, const glm::vec3& bakedSun, const glm::vec3& sun);
+
 // The square, texel-snapped area of the shadow map: light-space x and y from `origin`, `size` wide,
 // depth from `nearDistance` to `farDistance` along the sun's rays.
 struct SunShadowBox

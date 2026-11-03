@@ -48,6 +48,8 @@ enum class Pass : int
     UpdateEffects,
     // Inside RendererReplay: the sun shadow map.
     SunShadow,
+    // Inside the terrain's frame start: the static terrain light built again for a moved sun.
+    TerrainBake,
     Count_
 };
 
@@ -56,6 +58,7 @@ inline constexpr const char* kPassNames[static_cast<int>(Pass::Count_)] = {
     "MovePart",  "Skinning", "UI",        "RenderBegin", "RenderEnd", "Submit",  "UIUpdate", "RmlInput",
     "UILayout",  "Flush",    "Sprites",   "Particles",   "Joints",    "Overlay", "RmlUpd",   "RmlRend",
     "EndOffscr", "EndStage", "EndReplay", "EndPostUI",   "ObjAnim",   "ObjDraw", "UpdateFx", "SunShadow",
+    "TerrainBake",
 };
 
 enum class Counter : int
