@@ -136,6 +136,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # The pinned submodule commits only; CMake's own init clones their full history (SDL alone 78 s).
+          submodules: true
 
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
@@ -512,6 +515,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # The pinned submodule commits only; CMake's own init clones their full history (SDL alone 78 s).
+          submodules: true
 
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
@@ -647,6 +653,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # The pinned submodule commits only; CMake's own init clones their full history (SDL alone 78 s).
+          submodules: true
 
       - name: Setup .NET 10
         uses: actions/setup-dotnet@v4
