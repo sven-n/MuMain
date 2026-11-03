@@ -203,7 +203,7 @@ bool GetUseLostMap(bool bDrawAlert)
     return false;
 }
 
-int RenderHellasItemInfo(ITEM* ip, int textNum)
+int RenderHellasItemInfo(const ITEM* ip, int textNum)
 {
     int TextNum = textNum;
     switch (ip->Type)
@@ -730,7 +730,7 @@ static void UpdateDestroy_Def(OBJECT* o, BMD* b)
         if (o->AI == ACTION_DESTROY_WIZ_DEF)
         {
             SkinObjectMeshes(o, b, true);
-            b->RenderMeshEffect(6, MODEL_STONE_COFFIN, 1);
+            b->SpawnMeshEffects(6, MODEL_STONE_COFFIN, 1);
             o->AI = 0;
 
             PlayBuffer(SOUND_HIT_CRISTAL);
@@ -738,7 +738,7 @@ static void UpdateDestroy_Def(OBJECT* o, BMD* b)
         else if (o->AI == ACTION_DESTROY_DEF)
         {
             SkinObjectMeshes(o, b, true);
-            b->RenderMeshEffect(6, MODEL_STONE_COFFIN, 2);
+            b->SpawnMeshEffects(6, MODEL_STONE_COFFIN, 2);
             o->AI = 0;
 
             PlayBuffer(SOUND_HIT_CRISTAL);
@@ -881,7 +881,7 @@ void UpdateHellasObjectMeshEffects(OBJECT* o, BMD* b)
         if (o->CurrentAction == MONSTER01_DIE && o->Alpha < 0.5f)
         {
             SkinObjectMeshes(o, b, true);
-            b->RenderMeshEffect(0, BITMAP_BUBBLE);
+            b->SpawnMeshEffects(0, BITMAP_BUBBLE);
         }
         if ((o->Type == MODEL_DEATH_CENTURION && o->SubType == 9) || o->Type == MODEL_SHRIKER)
         {

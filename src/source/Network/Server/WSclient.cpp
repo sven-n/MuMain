@@ -3509,7 +3509,7 @@ void ReceiveAttackDamage(CHARACTER* c, OBJECT* o, const bool success, const int 
             g_CMonkSystem.SetRepeatedly(damage, damageType, bDoubleEnable, bEndRepeatedly);
             if (bEndRepeatedly)
             {
-                g_CMonkSystem.RenderRepeatedly(key, o);
+                g_CMonkSystem.CreateRepeatedDamagePoints(key, o);
             }
         }
         else if (damage == 0 && !SuppressOptionalPresentation)

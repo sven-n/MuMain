@@ -55,8 +55,8 @@ public:
     void Open_TrapCanon();
     CHARACTER* Create_TrapCanon(int iPosX, int iPosY, int iKey);
     void Render_Object(const OBJECT* o, DrawLook& look, BMD* b);
-    void Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b);
-    void Render_AttackEffect(CHARACTER* c, OBJECT* o, BMD* b);
+    void Spawn_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b);
+    void Spawn_AttackEffect(CHARACTER* c, OBJECT* o, BMD* b);
 };
 
 extern CTrapCanon g_TrapCanon;

@@ -17,7 +17,7 @@ if [ -z "$cmake" ] && [ -f "$vswhere" ]; then
 fi
 if [ -n "$cmake" ]; then
   "$cmake" -S tests/static -B out/static-checks >/dev/null
-  "$(dirname "$cmake")/ctest" --test-dir out/static-checks -C Release --parallel 4 --output-on-failure --no-tests=error
+  "$(dirname "$cmake")/ctest" --test-dir out/static-checks -C Release --parallel 8 --output-on-failure --no-tests=error
 else
   echo "pre-push: cmake not found, static checks skipped (CI still runs them)" >&2
 fi

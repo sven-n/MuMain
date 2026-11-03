@@ -816,7 +816,7 @@ bool GMEmpireGuardian1::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             if (o->AnimationFrame >= 3.4f && o->AnimationFrame <= 9.0f)
             {
-                RenderSkillEarthQuake(c, o, b, 12);
+                SpawnSkillEarthQuake(c, o, b, 12);
             }
 
             if (2.0f <= o->AnimationFrame && o->AnimationFrame < 15.0f)
@@ -1068,7 +1068,7 @@ bool GMEmpireGuardian1::MoveMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         {
             if (o->AnimationFrame >= 3.4f && o->AnimationFrame <= 9.0f)
             {
-                RenderSkillEarthQuake(c, o, b, 12);
+                SpawnSkillEarthQuake(c, o, b, 12);
             }
         }
         break;

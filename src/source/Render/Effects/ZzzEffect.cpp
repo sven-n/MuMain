@@ -5761,7 +5761,7 @@ void MoveEffect(OBJECT* o, int iIndex)
         {
             o->HiddenMesh = -2;
             SkinObjectMeshes(o, &Models[o->Type], false);
-            Models[o->Type].RenderMeshEffect(0, MODEL_WALL_PART1);
+            Models[o->Type].SpawnMeshEffects(0, MODEL_WALL_PART1);
         }
         break;
 
@@ -7703,7 +7703,7 @@ void RenderWheelWeapon(const OBJECT* effect)
 
     float Alpha = o->Alpha;
 
-    int Type = Data::Items::ToModelSlot(o->Owner->Weapon);
+    int Type = Data::Items::ToModelSlot(effect->Owner->Weapon);
     BMD* b = &Models[Type];
     b->CurrentAction = 0;
     b->Skin = gCharacterManager.GetBaseClass(Hero->Class);
@@ -7716,7 +7716,7 @@ void RenderWheelWeapon(const OBJECT* effect)
     vec3_t Light;
     RequestModelTerrainLight(o->Position[0], o->Position[1], Light);
     VectorAdd(Light, o->Light, Light);
-    RenderPartObject(o, Type, NULL, Light, Alpha, o->Owner->WeaponLevel, 0, 0, true, true, true);
+    RenderPartObject(o, Type, NULL, Light, Alpha, effect->Owner->WeaponLevel, 0, 0, true, true, true);
 }
 
 void RenderFuryStrike(const OBJECT* effect)
@@ -7731,7 +7731,7 @@ void RenderFuryStrike(const OBJECT* effect)
 
         Vector(0.f, 100.f, 0.f, p);
 
-        int Type = Data::Items::ToModelSlot(o->Owner->Weapon);
+        int Type = Data::Items::ToModelSlot(effect->Owner->Weapon);
         BMD* b = &Models[Type];
         b->CurrentAction = 0;
         b->Skin = gCharacterManager.GetBaseClass(Hero->Class);
@@ -7748,7 +7748,7 @@ void RenderFuryStrike(const OBJECT* effect)
         VectorCopy(o->Angle, Angle);
 
         b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, Angle, o->HeadAngle, false, false);
-        RenderPartObject(o, Type, NULL, Light, Alpha, o->Owner->WeaponLevel, 0, 0, true, true, true);
+        RenderPartObject(o, Type, NULL, Light, Alpha, effect->Owner->WeaponLevel, 0, 0, true, true, true);
     }
 }
 
@@ -8271,7 +8271,7 @@ void RenderEffects(bool bRenderBlendMesh)
                     {
                         const OBJECT* pObject = o;
                         BMD* pModel = &Models[pObject->Type];
-                        OBJECT* pOwner = pObject->Owner;
+                        const OBJECT* pOwner = pObject->Owner;
                         BMD* pOwnerModel = &Models[pOwner->Type];
 
                         vec3_t vPos, p;
@@ -8910,7 +8910,7 @@ void RenderAfterEffects()
     int iEffectSize = MAX_EFFECTS + g_SkillEffects.GetSize();
     for (int i = 0; i < iEffectSize; ++i)
     {
-        OBJECT* o;
+        const OBJECT* o;
         if (i < MAX_EFFECTS)
         {
             o = &Effects[i];
@@ -9332,7 +9332,7 @@ void RenderEffectShadows()
     int iEffectSize = MAX_EFFECTS + g_SkillEffects.GetSize();
     for (int i = 0; i < iEffectSize; ++i)
     {
-        OBJECT* o;
+        const OBJECT* o;
         if (i < MAX_EFFECTS)
         {
             o = &Effects[i];

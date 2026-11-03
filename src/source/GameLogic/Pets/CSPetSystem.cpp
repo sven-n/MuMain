@@ -798,7 +798,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
                 if (to != NULL)
                 {
                     SkinObjectMeshes(o, b, false);
-                    b->RenderMeshEffect(1, BITMAP_LIGHT, 1, o->Angle, to);
+                    b->SpawnMeshEffects(1, BITMAP_LIGHT, 1, o->Angle, to);
                 }
 
                 SetAI(PET_FLYING);

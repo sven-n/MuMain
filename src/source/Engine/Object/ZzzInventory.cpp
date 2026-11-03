@@ -1593,7 +1593,7 @@ enum class ItemTooltipBuild
 
 // Writes the lines of an item's tooltip into TextList, TextListColor and TextBold (TextNum, SkipNum), without drawing
 // them; RenderItemInfo draws them.
-static ItemTooltipBuild BuildItemTooltipText(ITEM* ip, bool Sell, int Inventype, bool bItemTextListBoxUse)
+static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inventype, bool bItemTextListBoxUse)
 {
     if (ip->Type == -1)
         return ItemTooltipBuild::Nothing;
@@ -2304,8 +2304,8 @@ std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inve
 }
 
 // (sx, sy) in the screen's 640x480 stretch, `screen`.
-static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell, int Inventype,
-                           bool bItemTextListBoxUse)
+static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, const ITEM* ip, bool Sell,
+                           int Inventype, bool bItemTextListBoxUse)
 {
     // Unconditional: the early returns below (and the pet-item delegation further down, which
     // renders its own tooltip via giPetManager::RenderPetItemInfo() instead) used to mean "this
@@ -2382,7 +2382,7 @@ static void RenderItemInfo(const UI::Scaling::Transform& screen, int sx, int sy,
     }
 }
 
-RepairInfoText BuildRepairInfoText(ITEM* ip)
+RepairInfoText BuildRepairInfoText(const ITEM* ip)
 {
     RepairInfoText info;
     if (GameLogic::Items::IsRepairBan(ip) == true)
@@ -2462,7 +2462,7 @@ RepairInfoText BuildRepairInfoText(ITEM* ip)
 }
 
 // (sx, sy) in the screen's 640x480 stretch, `screen`.
-static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* ip, bool Sell)
+static void RenderRepairInfo(const UI::Scaling::Transform& screen, int sx, int sy, const ITEM* ip, bool Sell)
 {
     (void)Sell;
     // Unconditional: an item without a repair tooltip used to mean "this frame draws nothing" under
@@ -2511,13 +2511,13 @@ template <typename Render> void InScreenSpace(float x, float y, Render render)
 }
 } // namespace
 
-void RenderItemInfoAtPx(float x, float y, ITEM* ip, bool Sell, int Inventype, bool bItemTextListBoxUse)
+void RenderItemInfoAtPx(float x, float y, const ITEM* ip, bool Sell, int Inventype, bool bItemTextListBoxUse)
 {
     InScreenSpace(x, y, [&](const UI::Scaling::Transform& screen, int sx, int sy)
                   { RenderItemInfo(screen, sx, sy, ip, Sell, Inventype, bItemTextListBoxUse); });
 }
 
-void RenderRepairInfoAtPx(float x, float y, ITEM* ip, bool Sell)
+void RenderRepairInfoAtPx(float x, float y, const ITEM* ip, bool Sell)
 {
     InScreenSpace(x, y, [&](const UI::Scaling::Transform& screen, int sx, int sy)
                   { RenderRepairInfo(screen, sx, sy, ip, Sell); });
@@ -2669,7 +2669,7 @@ void AppendGroundItemLabelText(wchar_t(&buffer)[BufferSize], const wchar_t* form
 // The label's look comes from the ground label styles (D68): the item's own rule for its level ("groundLabels" in its
 // item file), else the first standard rule whose conditions hold. Only a label of the standard rules shows the set's
 // name in front and the options after the name.
-void BuildGroundItemLabelDescriptor(const OBJECT* o, ITEM* ip, GroundItemLabelDescriptor& descriptor)
+void BuildGroundItemLabelDescriptor(const OBJECT* o, const ITEM* ip, GroundItemLabelDescriptor& descriptor)
 {
     descriptor.Bold = false;
     descriptor.TextColor = MakeRgba(255, 255, 255, 255);
@@ -2761,7 +2761,7 @@ void ApplyGroundItemLabelDescriptor(const GroundItemLabelDescriptor& descriptor)
 
 }
 
-GroundItemLabel DescribeGroundItemLabel(const OBJECT* o, ITEM* ip)
+GroundItemLabel DescribeGroundItemLabel(const OBJECT* o, const ITEM* ip)
 {
     GroundItemLabelDescriptor descriptor;
     BuildGroundItemLabelDescriptor(o, ip, descriptor);
@@ -2769,7 +2769,7 @@ GroundItemLabel DescribeGroundItemLabel(const OBJECT* o, ITEM* ip)
             descriptor.Style != nullptr ? descriptor.Style->name : std::string()};
 }
 
-void RenderItemName(int i, const OBJECT* o, ITEM* ip, bool Sort)
+void RenderItemName(int i, const OBJECT* o, const ITEM* ip, bool Sort)
 {
     (void)i;
 
@@ -3235,7 +3235,7 @@ void RenderEqiupmentBox()
 
 void RenderEqiupmentPart3D(int Index, float sx, float sy, float Width, float Height)
 {
-    ITEM* p = &CharacterMachine->Equipment[Index];
+    const ITEM* p = &CharacterMachine->Equipment[Index];
     if (p->Type != -1)
     {
         if (p->Number > 0)

@@ -4802,7 +4802,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
                     }
                     PlayBuffer(SOUND_HIT_CRISTAL);
                 }
-                battleCastle::RenderMonsterHitEffect(to);
+                battleCastle::SpawnMonsterHitEffect(to);
             }
             if (o->CurrentAction >= PLAYER_ATTACK_SKILL_SWORD1 && o->CurrentAction <= PLAYER_ATTACK_SKILL_SWORD5)
             {
@@ -6585,7 +6585,7 @@ void RenderGuild(const OBJECT* o, int Type, vec3_t vPos)
     DisableCullFace();
 }
 
-void RenderBrightEffect(BMD* b, vec34_t* bones, int Bitmap, int Link, float Scale, vec3_t Light, OBJECT* o)
+void SpawnBrightSprite(BMD* b, vec34_t* bones, int Bitmap, int Link, float Scale, vec3_t Light, OBJECT* o)
 {
     vec3_t p, Position;
     Vector(0.f, 0.f, 0.f, p);
@@ -7264,23 +7264,23 @@ void SpawnLinkedPartEffects(CHARACTER* c, int Type, OBJECT* Object, vec34_t* bon
             Vector(Luminosity * 0.6f, Luminosity * 1.f, Luminosity * 0.8f, Light);
 
             for (int i = 13; i <= 18; i++)
-                RenderBrightEffect(b, bones, BITMAP_SHINY + 1, i, 1.f, Light, o);
+                SpawnBrightSprite(b, bones, BITMAP_SHINY + 1, i, 1.f, Light, o);
         }
         else if (Type == MODEL_CELESTIAL_BOW)
         {
             Vector(Luminosity * 0.5f, Luminosity * 0.5f, Luminosity * 0.8f, Light);
 
             for (int i = 13; i <= 18; i++)
-                RenderBrightEffect(b, bones, BITMAP_SHINY + 1, i, 1.f, Light, o);
+                SpawnBrightSprite(b, bones, BITMAP_SHINY + 1, i, 1.f, Light, o);
 
             for (int i = 5; i <= 8; i++)
-                RenderBrightEffect(b, bones, BITMAP_SHINY + 1, i, 1.f, Light, o);
+                SpawnBrightSprite(b, bones, BITMAP_SHINY + 1, i, 1.f, Light, o);
         }
         else
         {
             Vector(Luminosity * 1.f, Luminosity * 0.6f, Luminosity * 0.2f, Light);
-            RenderBrightEffect(b, bones, BITMAP_SHINY + 1, 2, 1.f, Light, o);
-            RenderBrightEffect(b, bones, BITMAP_SHINY + 1, 6, 1.f, Light, o);
+            SpawnBrightSprite(b, bones, BITMAP_SHINY + 1, 2, 1.f, Light, o);
+            SpawnBrightSprite(b, bones, BITMAP_SHINY + 1, 6, 1.f, Light, o);
         }
         break;
     case MODEL_DIVINE_STAFF_OF_ARCHANGEL:
@@ -8633,7 +8633,7 @@ void SpawnLinkedPartEffects(CHARACTER* c, int Type, OBJECT* Object, vec34_t* bon
 }
 } // namespace
 
-void RenderLight(OBJECT* o, int Texture, float Scale, int Bone, float x, float y, float z)
+void SpawnBoneLight(OBJECT* o, int Texture, float Scale, int Bone, float x, float y, float z)
 {
     BMD* b = &Models[o->Type];
     vec3_t p, Position;
@@ -8645,7 +8645,7 @@ void RenderLight(OBJECT* o, int Texture, float Scale, int Bone, float x, float y
     CreateSprite(Texture, Position, Scale, Light, o);
 }
 
-void RenderEye(OBJECT* o, int Left, int Right, float fSize = 1.0f)
+void SpawnEyeLights(OBJECT* o, int Left, int Right, float fSize = 1.0f)
 {
     BMD* b = &Models[o->Type];
     vec3_t p, Position;
@@ -8681,43 +8681,43 @@ bool UpdateCharacterTypeEffects(CHARACTER* c, OBJECT* o, BMD* b)
     case MODEL_BULL_FIGHTER:
     case MODEL_DEATH_COW:
         if ((o->Type == MODEL_BULL_FIGHTER && c->Level == 1) || (o->Type == MODEL_DEATH_COW))
-            RenderEye(o, 22, 23);
+            SpawnEyeLights(o, 22, 23);
         break;
     case MODEL_CRUST:
-        RenderEye(o, 26, 27, 2.0f);
+        SpawnEyeLights(o, 26, 27, 2.0f);
         break;
     case MODEL_HYDRA:
-        RenderLight(o, BITMAP_LIGHTNING + 1, 1.f, 63, 0.f, 0.f, 20.f);
-        RenderLight(o, BITMAP_SHINY + 2, 4.f, 63, 0.f, 0.f, 20.f);
+        SpawnBoneLight(o, BITMAP_LIGHTNING + 1, 1.f, 63, 0.f, 0.f, 20.f);
+        SpawnBoneLight(o, BITMAP_SHINY + 2, 4.f, 63, 0.f, 0.f, 20.f);
         break;
     case MODEL_VEPAR:
-        RenderLight(o, BITMAP_LIGHTNING + 1, 0.5f, 30, 0.f, 0.f, -5.f);
-        RenderLight(o, BITMAP_LIGHTNING + 1, 0.5f, 39, 0.f, 0.f, -5.f);
-        RenderLight(o, BITMAP_SPARK, 4.f, 30, 0.f, 0.f, -5.f);
-        RenderLight(o, BITMAP_SPARK, 4.f, 39, 0.f, 0.f, -5.f);
-        RenderLight(o, BITMAP_SHINY + 2, 2.f, 30, 0.f, 0.f, -5.f);
-        RenderLight(o, BITMAP_SHINY + 2, 2.f, 39, 0.f, 0.f, -5.f);
+        SpawnBoneLight(o, BITMAP_LIGHTNING + 1, 0.5f, 30, 0.f, 0.f, -5.f);
+        SpawnBoneLight(o, BITMAP_LIGHTNING + 1, 0.5f, 39, 0.f, 0.f, -5.f);
+        SpawnBoneLight(o, BITMAP_SPARK, 4.f, 30, 0.f, 0.f, -5.f);
+        SpawnBoneLight(o, BITMAP_SPARK, 4.f, 39, 0.f, 0.f, -5.f);
+        SpawnBoneLight(o, BITMAP_SHINY + 2, 2.f, 30, 0.f, 0.f, -5.f);
+        SpawnBoneLight(o, BITMAP_SHINY + 2, 2.f, 39, 0.f, 0.f, -5.f);
         break;
     case MODEL_LIZARD:
-        RenderEye(o, 42, 43);
-        RenderLight(o, BITMAP_SPARK, 2.f, 26, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SPARK, 2.f, 31, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SPARK, 2.f, 36, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SPARK, 2.f, 41, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SHINY + 2, 1.f, 26, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SHINY + 2, 1.f, 31, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SHINY + 2, 1.f, 36, 0.f, 0.f, 0.f);
-        RenderLight(o, BITMAP_SHINY + 2, 1.f, 41, 0.f, 0.f, 0.f);
+        SpawnEyeLights(o, 42, 43);
+        SpawnBoneLight(o, BITMAP_SPARK, 2.f, 26, 0.f, 0.f, 0.f);
+        SpawnBoneLight(o, BITMAP_SPARK, 2.f, 31, 0.f, 0.f, 0.f);
+        SpawnBoneLight(o, BITMAP_SPARK, 2.f, 36, 0.f, 0.f, 0.f);
+        SpawnBoneLight(o, BITMAP_SPARK, 2.f, 41, 0.f, 0.f, 0.f);
+        SpawnBoneLight(o, BITMAP_SHINY + 2, 1.f, 26, 0.f, 0.f, 0.f);
+        SpawnBoneLight(o, BITMAP_SHINY + 2, 1.f, 31, 0.f, 0.f, 0.f);
+        SpawnBoneLight(o, BITMAP_SHINY + 2, 1.f, 36, 0.f, 0.f, 0.f);
+        SpawnBoneLight(o, BITMAP_SHINY + 2, 1.f, 41, 0.f, 0.f, 0.f);
         break;
     case MODEL_BAHAMUT:
-        RenderLight(o, BITMAP_SPARK, 4.f, 9, 0.f, 0.f, 5.f);
-        RenderLight(o, BITMAP_SHINY + 2, 3.f, 9, 0.f, 0.f, 5.f);
+        SpawnBoneLight(o, BITMAP_SPARK, 4.f, 9, 0.f, 0.f, 5.f);
+        SpawnBoneLight(o, BITMAP_SHINY + 2, 3.f, 9, 0.f, 0.f, 5.f);
         break;
     case MODEL_MIX_NPC:
-        RenderLight(o, BITMAP_LIGHT, 1.5f, 32, 0.f, 0.f, 0.f);
+        SpawnBoneLight(o, BITMAP_LIGHT, 1.5f, 32, 0.f, 0.f, 0.f);
         break;
     case MODEL_NPC_SEVINA:
-        RenderLight(o, BITMAP_LIGHT, 2.5f, 6, 0.f, 0.f, 0.f);
+        SpawnBoneLight(o, BITMAP_LIGHT, 2.5f, 6, 0.f, 0.f, 0.f);
         break;
     case MODEL_NPC_DEVILSQUARE:
     {
@@ -9351,7 +9351,7 @@ bool DrawsNextGradeObjects(const CHARACTER* c)
 }
 
 // Whether RenderCharacter's transformation chain reaches the player's own body parts.
-bool DrawsPlayerBodyParts(CHARACTER* c, OBJECT* o)
+bool DrawsPlayerBodyParts(const CHARACTER* c, const OBJECT* o)
 {
     const int sub = o->SubType;
     if (o->Kind == KIND_NPC && gMapManager.WorldActive == WD_0LORENCIA && o->Type == MODEL_PLAYER &&
@@ -11719,11 +11719,11 @@ void SpawnHeldWeaponGlow(CHARACTER* c, PART_t* w, vec34_t* weaponBones, float Lu
         case MODEL_CHAOS_LIGHTNING_STAFF:
             Success = false;
             Vector(Luminosity * 0.4f, Luminosity * 0.6f, Luminosity * 1.f, Light);
-            RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 27, 2.f, Light, o);
+            SpawnBrightSprite(b, weaponBones, BITMAP_SHINY + 1, 27, 2.f, Light, o);
 
             for (int j = 28; j <= 37; j++)
             {
-                RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, 1.5f, Light, o);
+                SpawnBrightSprite(b, weaponBones, BITMAP_LIGHT, j, 1.5f, Light, o);
             }
             break;
         case MODEL_STAFF_OF_RESURRECTION:
@@ -11780,7 +11780,7 @@ void SpawnHeldWeaponGlow(CHARACTER* c, PART_t* w, vec34_t* weaponBones, float Lu
             Vector(0.5f + Luminosity, 0.2f + Luminosity, 0.9f + Luminosity, Light);
 
             for (int j = 1; j <= 4; ++j)
-                RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
+                SpawnBrightSprite(b, weaponBones, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
             break;
         case MODEL_DEMONIC_STICK:
             Success = false;
@@ -11790,11 +11790,11 @@ void SpawnHeldWeaponGlow(CHARACTER* c, PART_t* w, vec34_t* weaponBones, float Lu
 
             for (int j = 1; j <= 2; ++j)
             {
-                RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, j, Scale + 1.0f, Light, o);
-                RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
+                SpawnBrightSprite(b, weaponBones, BITMAP_SHINY + 1, j, Scale + 1.0f, Light, o);
+                SpawnBrightSprite(b, weaponBones, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
             }
             Vector(0.8f + Luminosity, 0.6f + Luminosity, 0.3f + Luminosity, Light);
-            RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, 3, Scale + 1.0f, Light, o);
+            SpawnBrightSprite(b, weaponBones, BITMAP_LIGHT, 3, Scale + 1.0f, Light, o);
             break;
         case MODEL_STORM_BLITZ_STICK:
             Success = false;
@@ -11803,10 +11803,10 @@ void SpawnHeldWeaponGlow(CHARACTER* c, PART_t* w, vec34_t* weaponBones, float Lu
             Vector(0.5f + Luminosity, 0.2f + Luminosity, 0.9f + Luminosity, Light);
 
             for (int j = 2; j <= 3; ++j)
-                RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
+                SpawnBrightSprite(b, weaponBones, BITMAP_LIGHT, j, Scale + 1.0f, Light, o);
 
             Vector(0.8f + Luminosity, 0.6f + Luminosity, 0.3f + Luminosity, Light);
-            RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 2, 2, Scale + 1.0f, Light, o);
+            SpawnBrightSprite(b, weaponBones, BITMAP_SHINY + 2, 2, Scale + 1.0f, Light, o);
             break;
         case MODEL_ETERNAL_WING_STICK:
             Success = false;
@@ -11816,7 +11816,7 @@ void SpawnHeldWeaponGlow(CHARACTER* c, PART_t* w, vec34_t* weaponBones, float Lu
             CreateSprite(BITMAP_EVENT_CLOUD, p, 0.25f, Light, o, -(int)WorldTime * 0.1f);
             CreateSprite(BITMAP_EVENT_CLOUD, p, 0.25f, Light, o, -(int)WorldTime * 0.2f);
             Vector(1.0f, 0.4f, 0.3f, Light);
-            RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 2, 1.0f, Light, o);
+            SpawnBrightSprite(b, weaponBones, BITMAP_SHINY + 1, 2, 1.0f, Light, o);
             Vector(1.0f, 0.2f, 0.0f, Light);
             if (rand_fps_check(1))
             {
@@ -11828,7 +11828,7 @@ void SpawnHeldWeaponGlow(CHARACTER* c, PART_t* w, vec34_t* weaponBones, float Lu
             if (rand_fps_check(20))
                 CreateParticle(BITMAP_SPARK + 1, p, o->Angle, Light, 20, 1.0f);
             Vector(1.0f, 0.0f, 0.0f, Light);
-            RenderBrightEffect(b, weaponBones, BITMAP_LIGHT, 2, 3.0f, Light, o);
+            SpawnBrightSprite(b, weaponBones, BITMAP_LIGHT, 2, 3.0f, Light, o);
 #endif // ASG_ADD_ETERNALWING_STICK_EFFECT
             break;
         case MODEL_SAINT_CROSSBOW:
@@ -11871,8 +11871,8 @@ void SpawnHeldWeaponGlow(CHARACTER* c, PART_t* w, vec34_t* weaponBones, float Lu
                 CreateSprite(BITMAP_SHINY + 1, p, 1.f, Light, o);
             }
             Vector(Scale * 0.5f, Scale * 0.1f, Scale * 0.05f, Light);
-            RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 2, 1.f, Light, o);
-            RenderBrightEffect(b, weaponBones, BITMAP_SHINY + 1, 6, 1.f, Light, o);
+            SpawnBrightSprite(b, weaponBones, BITMAP_SHINY + 1, 2, 1.f, Light, o);
+            SpawnBrightSprite(b, weaponBones, BITMAP_SHINY + 1, 6, 1.f, Light, o);
             break;
         case MODEL_BLUEWING_CROSSBOW:
         case MODEL_AQUAGOLD_CROSSBOW:
@@ -12330,8 +12330,8 @@ void RenderCharactersClient()
     const mu::ScopedBloomExclusion classicCharacters;
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
     {
-        CHARACTER* c = &CharactersClient[i];
-        OBJECT* o = &c->Object;
+        const CHARACTER* c = &CharactersClient[i];
+        const OBJECT* o = &c->Object;
 
         // The update cleared a target the siege cloak hides, and moved a hidden GM's pick box away.
         if (IsHiddenBySiegeCloak(c) || IsHiddenGameMaster(c))
@@ -15788,9 +15788,9 @@ void ImpOffset(const CHARACTER* c, vec3_t offset)
     }
 }
 
-bool DrawsAttachments(CHARACTER* c)
+bool DrawsAttachments(const CHARACTER* c)
 {
-    OBJECT* o = &c->Object;
+    const OBJECT* o = &c->Object;
     return !g_isCharacterBuff(o, eBuff_CrywolfNPCHide) && Models[o->Type].NumActions != 0;
 }
 

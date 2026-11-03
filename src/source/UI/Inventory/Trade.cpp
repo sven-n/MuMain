@@ -361,7 +361,7 @@ void CTrade::RenderWarningArrow()
     ::EnableAlphaTest();
 
     int nYourItems = m_pYourInvenCtrl->GetNumberOfItems();
-    ITEM* pYourItemObj;
+    const ITEM* pYourItemObj;
     for (int i = 0; i < nYourItems; ++i)
     {
         pYourItemObj = m_pYourInvenCtrl->GetItem(i);

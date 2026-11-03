@@ -153,7 +153,7 @@ bool CharacterAnimation(CHARACTER* c, OBJECT* o);
 bool AttackStage(CHARACTER* c, OBJECT* o);
 
 void RenderGuild(const OBJECT* o, int Type = -1, vec3_t vPos = NULL);
-void RenderLight(OBJECT* o, int Texture, float Scale, int Bone, float x, float y, float z);
+void SpawnBoneLight(OBJECT* o, int Texture, float Scale, int Bone, float x, float y, float z);
 void SpawnProtectGuildMark(CHARACTER* c);
 
 void MakeElfHelper(CHARACTER* c);
@@ -190,7 +190,7 @@ PART_t BackWeaponPart(const CHARACTER* c);
 // Where the Imp hangs: higher on a Rage Fighter's armor.
 void ImpOffset(const CHARACTER* c, vec3_t offset);
 // Whether RenderCharacter gets to the character's attachments.
-bool DrawsAttachments(CHARACTER* c);
+bool DrawsAttachments(const CHARACTER* c);
 bool IsBackItem(const CHARACTER* c, int iType);
 
 bool IsPlayer(CHARACTER* c);
