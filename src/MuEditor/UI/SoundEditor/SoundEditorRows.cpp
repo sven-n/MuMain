@@ -224,6 +224,11 @@ std::string IdText(const SoundRow& row)
     return row.set;
 }
 
+bool CanPlay(const SoundRow& row)
+{
+    return !row.file.empty() && row.problem != RowProblem::MissingFile;
+}
+
 bool Matches(const SoundRow& row, std::string_view text)
 {
     if (text.empty())

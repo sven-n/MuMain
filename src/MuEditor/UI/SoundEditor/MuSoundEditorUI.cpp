@@ -849,6 +849,15 @@ void MuSoundEditorUI::RenderNameCell(const SoundRow& row)
 
 void MuSoundEditorUI::RenderFileCell(const SoundRow& row)
 {
+    // Listen first: the file once at full level, past the Sound Mixer.
+    ImGui::BeginDisabled(!MuEditor::SoundEditor::CanPlay(row));
+    if (ImGui::SmallButton(I18N::Editor::PlayThisSound))
+    {
+        MuEditor::SoundEditor::PreviewFile(row.file, row.channels, row.spatial);
+    }
+    ImGui::EndDisabled();
+    Tooltip(I18N::Editor::SoundEditorPlayTip);
+    ImGui::SameLine();
     const bool problem = row.problem != RowProblem::None;
     if (problem)
     {

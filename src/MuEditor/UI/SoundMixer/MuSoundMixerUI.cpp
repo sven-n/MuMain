@@ -545,6 +545,10 @@ std::string SoundCellTip(const HeardRow& row, int copied)
     {
         return I18N::Format(I18N::Editor::SoundMixerCopied0, {row.file});
     }
+    if (Audio::Mixer::IsMusicNumber(row.sound.number))
+    {
+        return I18N::Editor::SoundMixerCopyMusicTip;
+    }
     if (!row.name.empty())
     {
         return I18N::Format(I18N::Editor::SoundMixerCopyNamedTip01, {std::to_string(row.sound.number), row.file});
@@ -598,7 +602,11 @@ bool RenderSoundCell(const HeardRow& row, int& copied)
     {
         ImGui::SetClipboardText(row.file.c_str());
         copied = row.sound.number;
-        MuEditor::SoundSelection::Set(row.sound.number);
+        // A music track is no sound of the Sound Editor.
+        if (!Audio::Mixer::IsMusicNumber(row.sound.number))
+        {
+            MuEditor::SoundSelection::Set(row.sound.number);
+        }
     }
     if (ImGui::IsItemHovered())
     {
@@ -616,12 +624,19 @@ HeardRow MakeRow(const Audio::Mixer::HeardSound& sound)
 {
     HeardRow row;
     row.sound = sound;
+    row.changed = Audio::Mixer::SoundControl(sound.number).IsChanged();
+    row.source = SourceText(sound);
+    if (Audio::Mixer::IsMusicNumber(sound.number))
+    {
+        // Q-SM17: the track's file; its length is not known.
+        row.file = MuEditor::SoundOverlay::MusicText(Audio::Mixer::MusicOf(sound.number));
+        row.playing = Audio::Mixer::IsMusicPlaying(sound.number);
+        return row;
+    }
     row.file = SoundText(sound.number);
     row.name = MuEditor::SoundEditor::NameOfNumber(sound.number);
-    row.source = SourceText(sound);
     row.length = LengthOf(sound.number);
     row.playing = IsPlaying(sound.number);
-    row.changed = Audio::Mixer::SoundControl(sound.number).IsChanged();
     return row;
 }
 

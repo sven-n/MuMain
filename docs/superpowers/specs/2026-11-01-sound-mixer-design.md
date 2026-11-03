@@ -1,6 +1,6 @@
 # Sound Mixer (editor) design
 
-> Status: agreed with the owner on 2026-11-01 (Q-SM1 to Q-SM12), 2026-11-02 (Q-SM13 to Q-SM15). The last step
+> Status: agreed with the owner on 2026-11-01 (Q-SM1 to Q-SM12), 2026-11-02 (Q-SM13 to Q-SM15), 2026-11-03 (Q-SM16, Q-SM17). The last step
 > moves what lasts into `docs/dev-editor.md` and removes this document.
 
 ## Goal
@@ -31,6 +31,8 @@ one effect and one music volume (0 to 10).
 | Q-SM13 | *(2026-11-02, after an audit found sounds with no marker: players', skills from the server, drops, birds, the interface.)* Which types does the mixer list? | **12 types**: music, map ambience, map object sounds, monsters, NPCs, your character, other players, effects, items, creatures (birds, bats, mice, fish), interface, everything else. A sound's type comes from where it plays: the data's source, else the code's place (the monster, NPC, player, map object or effect whose code runs; the caster of a skill the server sends), else the object the game passes along, else map ambience for a loop, else everything else. An effect counts for whoever made it (your fireball: your character; Charon's sparks: NPCs); one nobody made is an effect. Not chosen: 9 types (players together; effects, items and creatures together), 7 types (the five plus NPCs and players). |
 | Q-SM14 | What does a type's checkbox do? | **Hear and Show**: two boxes per type. Hear off mutes the type (it replaces the type's Mute button; the reminder counts it); Show off draws nothing of the type in the world and in the top-left list, but it is still heard. Volume and Solo stay. Not chosen: Hear only, a row of Hear boxes above the old table. |
 | Q-SM15 | How do the sounds without a place show? (Interface, ambience loops, music, some server messages.) | **A log at the top left** of the game while Show in world is on: the last 10 starts without a place, newest on top, each with how long ago ("0.2 s  iButtonClick.wav (Interface)"); every start gets its line, a loop once when it starts, a music track when it starts. Lines stay until newer ones push them out and follow the Show boxes and the table's filters. (The owner first picked a live list of what plays, with times, then the log.) Not chosen: a live list while each plays, a section in the mixer window only. |
+| Q-SM16 | What does Clear all do with the changed sounds? (The owner, after trying it, 2026-11-03.) | **Clear all puts them back too**: the list empties and every sound's own Mute, Solo and volume are normal again; the types' controls stay (Reset all puts everything back). Before: the changed sounds stayed listed with no plays, so that a muted sound could be found again. |
+| Q-SM17 | How does music show in the table? (Self-decided, 2026-11-03: the owner saw no row while the login music played; music only had its type's controls and a log line.) | **A row per track**: each track heard gets a row of type Music: its file below `Data/Music`, its starts, "playing" while it is the music. Its Mute, Solo and volume act on the music while that track plays, times the Music type's; a track keeps its row number for the session, so its controls come back with it. Its Sound cell copies the file and selects nothing in the Sound Editor, which has no music. The log's music lines follow the table's filters like a row. |
 
 ## Design
 
@@ -95,7 +97,8 @@ mixer says. The effect preview's mute (`Audio::EditorMute`) stays as it is.
   without a file), the kind and source of its last play, how often it
   started, its length, when it last started ("playing", a green row, while it
   plays), a slider, Mute and Solo. **Clear all** empties the list and counts
-  again; the sounds whose controls are changed stay listed. (Changed after
+  again; the sounds whose controls are changed stay listed (changed
+  2026-11-03, see Q-SM16: Clear all also puts their controls back). (Changed after
   trying it, 2026-11-01: in the first "heard just now" list of the last 10
   seconds, newest first, the rows came, went and moved, so a sound was hard
   to mute. The backend counts the starts, so a sound asked for each frame is

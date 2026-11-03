@@ -788,6 +788,19 @@ TEST_CASE("Sound Editor: the window draws the folders as a tree, the sounds no f
     MuEditor::SoundSelection::Set(-1);
 }
 
+TEST_CASE("Sound Editor: a row plays when it has a file that is in the client folder [sounds][editor]")
+{
+    using MuEditor::SoundEditor::CanPlay;
+    MuEditor::SoundEditor::SoundRow row;
+    CHECK_FALSE(CanPlay(row));
+    row.file = "Data/Sound/eMeteorite.wav";
+    CHECK(CanPlay(row));
+    row.problem = MuEditor::SoundEditor::RowProblem::SharedFile;
+    CHECK(CanPlay(row));
+    row.problem = MuEditor::SoundEditor::RowProblem::MissingFile;
+    CHECK_FALSE(CanPlay(row));
+}
+
 TEST_CASE("Sound Editor: the Events tab writes numbers as ranges and reads them back, names the events and a rule's "
           "sounds, and adds and takes out sounds (Q-SE1) [sounds][editor]")
 {

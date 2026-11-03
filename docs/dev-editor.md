@@ -154,13 +154,14 @@ only.
   file, so a sound two types play (a swing of yours and of another player)
   follows the type of its latest start.
 - **Sounds heard**: one row per sound, in the order they were first heard,
-  so that a row stays where it is: its file below `Data/Sound` (or its
-  number), its kind and source (the set and monster, the map object type),
+  so that a row stays where it is (a music track too, with its file below
+  `Data/Music`: its Mute, Solo and volume act on the music while that track
+  plays): its file below `Data/Sound` (or its number), its kind and source (the set and monster, the map object type),
   how often it started (a loop or a map object's sound that is asked for each
   frame counts once per start), its length ("loop" for a loop) and when it
   last started ("playing" while it plays; the row is green then). **Clear
-  all** empties the list and counts again from 0; the sounds whose controls
-  are changed stay listed. A click on a column header sorts by it, a second
+  all** empties the list, counts again from 0 and puts every sound's own
+  Mute, Solo and volume back; the types' controls stay. A click on a column header sorts by it, a second
   one reverses, a third goes back to the order of first hearing. The filter
   bar above the table leaves the rows whose file or source contains a text,
   of one type, playing now or changed only, loops or one-shots, or played at
@@ -229,6 +230,8 @@ at once; **Save** writes the files that changed, **Revert** reads them again,
   entered, with its monster, not loaded yet) and the file it lives in. A
   click on the file's **...** picks another file of `Data/Sound` (a search,
   and a play button to listen first); the files on disk are never changed.
+  **Play**, before each file, plays it once at full volume, past the Sound
+  Mixer.
   Search finds names, ids, sets and files; **Only problems** leaves the files
   that are not in the client folder, a file two code sounds load and the
   sounds the game played that nothing loads.

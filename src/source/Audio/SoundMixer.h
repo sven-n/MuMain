@@ -62,7 +62,7 @@ struct PlacedStart
 // music track, some of the server's messages. The overlay logs them.
 struct PlacelessStart
 {
-    // -1 for a music track.
+    // A music track's row number (IsMusicNumber) for a track.
     int number = -1;
     SoundKind kind = SoundKind::Other;
     // The music's file; "" for a sound.
@@ -75,9 +75,23 @@ struct PlacelessStart
 Control& KindControl(SoundKind kind);
 Control& SoundControl(int number);
 
-// The gain of a sound of the kind, and of the music.
+// The gain of a sound of the kind, and of the music: the type's controls
+// and the controls of the track that plays now.
 float GainFor(int number, SoundKind kind);
 float MusicGain();
+
+// A music track's row (Q-SM17): each track heard this session gets a number
+// below -1 of its own, kept until the game ends (also after Clear all), so
+// its controls work like a sound's.
+bool IsMusicNumber(int number);
+// The track's file; "" for any other number.
+std::string MusicOf(int number);
+// Whether the track is the music asked for last and still plays.
+bool IsMusicPlaying(int number);
+
+// PlayMp3 is about to ask the backend for a track: it is the music now, and
+// the backend gets its gain when it changes (its row may be muted).
+void OnMusicPlay(const std::string& music);
 
 // A sound is about to play (PlayBuffer, PlayBufferOnFreeChannel): its type is
 // the living source's, else the innermost living place's, else the place of
@@ -99,6 +113,7 @@ void OnPlayed(int number, double now);
 std::vector<SoundKind> KindsHeard(int number);
 
 // A music track started (PlayMp3): a start without a place.
+// The backend started a track: its row counts a start, the log a line.
 void OnMusicStarted(const std::string& music, double now);
 
 // The latest starts without a place, newest first; a few dozen are kept.
@@ -116,9 +131,9 @@ std::vector<PlacedStart> RecentStarts(double now, double seconds);
 // while it plays or for a second after it started, by sound number.
 std::vector<PlacedStart> CodeSounds(double now);
 
-// The window's "Clear all": empties the list and starts the counts again. The
-// sounds whose controls are changed stay listed, with no plays, so that what
-// is muted can be found again.
+// The window's "Clear all": empties the list, starts the counts again and puts
+// every sound's own controls back (unmuted, no solo, full volume); the types'
+// controls stay.
 void ClearHeard();
 
 struct Changes

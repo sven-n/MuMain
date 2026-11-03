@@ -3676,6 +3676,9 @@
   <data name="Sound editor 3D tip" xml:space="preserve">
     <value>In 3D an dem Objekt platziert, an dem es spielt.</value>
   </data>
+  <data name="Sound editor play tip" xml:space="preserve">
+    <value>Spielt die Datei einmal in voller Lautstärke; der Sound-Mixer ändert sie nicht. Grau, wenn die Datei nicht im Client-Ordner liegt.</value>
+  </data>
   <data name="Sound editor pick tip" xml:space="preserve">
     <value>Eine andere Datei aus Data/Sound wählen; mit ihrem Abspielknopf vorher anhören.</value>
   </data>
@@ -3775,6 +3778,9 @@
   <data name="Sound mixer copy named tip {0} {1}" xml:space="preserve">
     <value>#{0}, {1}, Klick kopiert den Dateinamen</value>
   </data>
+  <data name="Sound mixer copy music tip" xml:space="preserve">
+    <value>Ein Musikstück, Klick kopiert den Dateinamen</value>
+  </data>
   <data name="Sound mixer copied {0}" xml:space="preserve">
     <value>Kopiert: {0}</value>
   </data>
@@ -3812,7 +3818,7 @@
     <value>Alle löschen</value>
   </data>
   <data name="Sound mixer clear all tip" xml:space="preserve">
-    <value>Leert die Liste und zählt wieder ab 0. Stumme, solo und leiser geschaltete Geräusche bleiben stehen.</value>
+    <value>Leert die Liste und zählt wieder ab 0. Stumme, solo und leiser geschaltete Geräusche werden zurückgesetzt; die Typen oben bleiben, wie sie sind.</value>
   </data>
   <data name="Sound mixer column sound" xml:space="preserve">
     <value>Geräusch</value>

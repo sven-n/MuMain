@@ -80,6 +80,10 @@ std::string ShownName(const SoundRow& row);
 // that shows it already.
 std::string IdText(const SoundRow& row);
 
+// Whether the row's Play button plays something: it has a file, and the file
+// is in the client folder.
+bool CanPlay(const SoundRow& row);
+
 // Whether the row's name, id, set or file contains `text`, whatever the case;
 // always for "".
 bool Matches(const SoundRow& row, std::string_view text);

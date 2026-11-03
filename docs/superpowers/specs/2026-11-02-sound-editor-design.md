@@ -1,6 +1,6 @@
 # Sound Editor design
 
-> Status: agreed with the owner on 2026-11-02 (Q-SE1 to Q-SE4). The last step
+> Status: agreed with the owner on 2026-11-02 (Q-SE1 to Q-SE4), 2026-11-03 (Q-SE5 and on). The last step
 > moves what lasts into `docs/dev-editor.md` and removes this document.
 
 ## Goal
@@ -30,6 +30,7 @@ Castle files the code names are not in the client (`oProtectionDis.wav`,
 | Q-SE2 | What is a sound's type in the editor? | **A stored fallback type**: a type per code sound in data, used only when no source or place names one (level up, quest prize, trade, whisper alerts get a type), next to the live "heard as" of this session. Not chosen: heard as only, a stored type that always wins. |
 | Q-SE3 | How do the Sound Mixer and the Sound Editor follow each other? | **Quietly**: a click on a sound in either window selects it in both; a closed or hidden window is not opened or raised, it shows the sound selected when it is looked at. The mixer's copy on click stays. Not chosen: open and raise the other window, a menu item per row. |
 | Q-SE4 | How are sounds grouped? | **Folders**, as in the Colors window: nested folders, each sound in exactly one (else "Not sorted"), new, rename, remove (contents move up), move, drag and drop; seeded from what is known (the monster sets, the maps' loads, the files' prefixes `i` interface, `p` player, `s` skill, `m` monster, `e` effect, `a` ambience, `n` NPC). Editor only: `Data/Audio/SoundFolders.json`, which the game never reads. Not chosen: tags, groups from data only. |
+| Q-SE5 | Can a sound be heard from its row? (The owner, after trying it, 2026-11-03.) | **A Play button on every row**, before the file: the file once at full volume, past the Sound Mixer, as the picker's play button does; greyed out without a file or when the file is not in the client folder. |
 
 ## Design
 

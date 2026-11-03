@@ -251,7 +251,7 @@ TEST_CASE("Sound Mixer: a sound's type is its source's, a loop's map ambience, e
 }
 
 TEST_CASE("Sound Mixer: the heard list keeps each sound where it was first heard and counts the backend's starts; "
-          "Clear all keeps the changed sounds [audio][mixer][editor]")
+          "Clear all also unmutes and drops the changed sounds [audio][mixer][editor]")
 {
     MixerScope scope;
     using namespace Audio::Mixer;
@@ -284,27 +284,35 @@ TEST_CASE("Sound Mixer: the heard list keeps each sound where it was first heard
     OnPlayed(1, 8.0);
     CHECK(Heard()[0].plays == 2);
 
-    // Clear all: the lowered sound stays, with no plays; the other goes.
+    // Clear all: every row goes, a muted and a lowered one too, and their
+    // controls are back to normal; the types' controls stay.
+    SoundControl(1).muted = true;
     SoundControl(2).volume = 0.4f;
+    KindControl(SoundKind::Monster).muted = true;
+    scope.audio.gains.clear();
     ClearHeard();
-    heard = Heard();
-    REQUIRE(heard.size() == 1);
-    CHECK(heard[0].number == 2);
-    CHECK(heard[0].plays == 0);
-    CHECK(heard[0].lastStarted < 0.0);
-    // The sounds heard after it come after it, a cleared one as new.
+    CHECK(Heard().empty());
+    CHECK_FALSE(SoundControl(1).muted);
+    CHECK(SoundControl(2).volume == 1.0f);
+    CHECK(KindControl(SoundKind::Monster).muted);
+    CHECK(CountChanges().muted == 1);
+    // The backend hears it at once: sound 1 plays again.
+    REQUIRE_FALSE(scope.audio.gains.empty());
+    CHECK(std::find(scope.audio.gains.begin(), scope.audio.gains.end(), std::pair<int, float>{1, 1.0f}) !=
+          scope.audio.gains.end());
+    KindControl(SoundKind::Monster).muted = false;
+    // The sounds heard after it are listed as new.
     play(3, 9.0, true);
     play(1, 10.0, true);
     heard = Heard();
-    REQUIRE(heard.size() == 3);
-    CHECK(heard[0].number == 2);
-    CHECK(heard[1].number == 3);
-    CHECK(heard[2].number == 1);
-    CHECK(heard[2].plays == 1);
+    REQUIRE(heard.size() == 2);
+    CHECK(heard[0].number == 3);
+    CHECK(heard[1].number == 1);
+    CHECK(heard[1].plays == 1);
 
     // A cleared sound still gets its gain: it may play on.
     ClearHeard();
-    REQUIRE(Heard().size() == 1);
+    CHECK(Heard().empty());
     scope.audio.gains.clear();
     KindControl(SoundKind::Other).muted = true;
     Apply();
@@ -835,7 +843,8 @@ TEST_CASE("Sound Mixer: without a source or place a sound gets the type and plac
 
     const std::vector<PlacelessStart> logged = PlacelessStarts();
     REQUIRE(logged.size() == 5);
-    CHECK(logged[0].number == -1);
+    CHECK(IsMusicNumber(logged[0].number));
+    CHECK(MusicOf(logged[0].number) == "Data\\Music\\MuTheme.mp3");
     CHECK(logged[0].kind == SoundKind::Music);
     CHECK(logged[0].music == "Data\\Music\\MuTheme.mp3");
     CHECK(logged[1].number == 9);
@@ -873,6 +882,79 @@ TEST_CASE("Sound Mixer: PlayMp3 logs a track when the backend starts it (Q-SM15)
     CHECK(logged[0].music == "Data\\Music\\Devias.mp3");
     CHECK(logged[0].kind == SoundKind::Music);
     CHECK(logged[1].music == "Data\\Music\\MuTheme.mp3");
+}
+
+TEST_CASE("Sound Mixer: each music track heard gets a row, counted like a sound, and its controls mute the music "
+          "while it plays (Q-SM17) [audio][mixer][editor]")
+{
+    MixerScope scope;
+    using namespace Audio::Mixer;
+    // The login scene asks for its track each frame: one start, one row.
+    PlayMp3("Data\\Music\\login_theme.mp3", TRUE);
+    PlayMp3("Data\\Music\\login_theme.mp3", TRUE);
+    std::vector<HeardSound> heard = Heard();
+    REQUIRE(heard.size() == 1);
+    const int login = heard[0].number;
+    CHECK(IsMusicNumber(login));
+    CHECK_FALSE(IsMusicNumber(-1));
+    CHECK_FALSE(IsMusicNumber(0));
+    CHECK(MusicOf(login) == "Data\\Music\\login_theme.mp3");
+    CHECK(MusicOf(5).empty());
+    CHECK(heard[0].kind == SoundKind::Music);
+    CHECK(heard[0].plays == 1);
+    CHECK(heard[0].lastStarted >= 0.0);
+
+    // The window's row: the file without its folder, the type, no length.
+    const MuEditor::SoundMixer::HeardRow row = MuEditor::SoundMixer::MakeRow(heard[0]);
+    CHECK(row.file == "login_theme.mp3");
+    CHECK(row.source == "Music");
+    CHECK(row.length == 0.0f);
+    CHECK_FALSE(row.playing);
+
+    // Muting the row mutes the music while that track plays.
+    scope.audio.musicGains.clear();
+    SoundControl(login).muted = true;
+    Apply();
+    REQUIRE_FALSE(scope.audio.musicGains.empty());
+    CHECK(scope.audio.musicGains.back() == 0.0f);
+    CHECK(MuEditor::SoundMixer::MakeRow(Heard()[0]).changed);
+    // Another track plays at full gain, from before it starts.
+    PlayMp3("Data\\Music\\MuTheme.mp3", TRUE);
+    CHECK(scope.audio.musicGains.back() == 1.0f);
+    REQUIRE(Heard().size() == 2);
+    const int theme = Heard()[1].number;
+    CHECK(theme != login);
+    CHECK(IsMusicNumber(theme));
+    // Back to the muted one: silent again, before the backend starts it.
+    scope.audio.musicGains.clear();
+    PlayMp3("Data\\Music\\login_theme.mp3", TRUE);
+    REQUIRE_FALSE(scope.audio.musicGains.empty());
+    CHECK(scope.audio.musicGains.front() == 0.0f);
+    CHECK(FindHeard(Heard(), login)->plays == 2);
+
+    // Solo of the track: the music plays, the sounds do not.
+    SoundControl(login).muted = false;
+    SoundControl(login).solo = true;
+    CHECK(MusicGain() == 1.0f);
+    CHECK(GainFor(7, SoundKind::Monster) == 0.0f);
+    // Solo of a sound silences the music.
+    SoundControl(login).solo = false;
+    SoundControl(7).solo = true;
+    CHECK(MusicGain() == 0.0f);
+    SoundControl(7).solo = false;
+    // The type's volume and the track's multiply.
+    KindControl(SoundKind::Music).volume = 0.5f;
+    SoundControl(login).volume = 0.5f;
+    CHECK(MusicGain() == doctest::Approx(0.25f));
+
+    // Clear all: the rows go; a track keeps its number for the session.
+    ClearHeard();
+    CHECK(Heard().empty());
+    CHECK(MusicGain() == doctest::Approx(0.5f));
+    PlayMp3("Data\\Music\\MuTheme.mp3", TRUE);
+    REQUIRE(Heard().size() == 1);
+    CHECK(Heard()[0].number == theme);
+    CHECK(Heard()[0].plays == 1);
 }
 
 TEST_CASE("Sound Mixer: a character's sounds are typed by its kind, the hero's as your character, and an effect's "

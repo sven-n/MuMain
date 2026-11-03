@@ -128,7 +128,19 @@ struct State
     // Every type each sound was heard as this session (the Sound Editor's
     // "heard as").
     std::map<int, std::set<SoundKind>> kindsHeard;
+    // The music tracks heard this session: the row number of the one at
+    // `index` is MusicNumberAt(index) (Q-SM17).
+    std::vector<std::string> musicTracks;
+    // The row number of the track asked for last; -1 before any.
+    int currentMusic = -1;
 };
+
+constexpr int FirstMusicNumber = -2;
+
+int MusicNumberAt(size_t index)
+{
+    return FirstMusicNumber - static_cast<int>(index);
+}
 
 State& Mixer()
 {
@@ -166,6 +178,17 @@ Origin Resolve(int number, bool looped, const SoundPlace* objectPlace)
     return Origin{looped ? SoundKind::MapAmbience : SoundKind::Other, {}, -1, std::nullopt, true};
 }
 
+int MusicNumberOf(State& state, const std::string& music)
+{
+    const auto found = std::find(state.musicTracks.begin(), state.musicTracks.end(), music);
+    if (found != state.musicTracks.end())
+    {
+        return MusicNumberAt(static_cast<size_t>(found - state.musicTracks.begin()));
+    }
+    state.musicTracks.push_back(music);
+    return MusicNumberAt(state.musicTracks.size() - 1);
+}
+
 void KeepPlaceless(State& state, PlacelessStart start)
 {
     state.placeless.push_front(std::move(start));
@@ -189,12 +212,6 @@ float Level(float volume)
 std::uint32_t StartsOf(int number)
 {
     return g_platformAudio != nullptr ? g_platformAudio->GetSoundStarts(static_cast<ESound>(number)) : 0;
-}
-
-bool IsChanged(const State& state, int number)
-{
-    const auto control = state.sounds.find(number);
-    return control != state.sounds.end() && control->second.IsChanged();
 }
 
 void Count(const Control& control, Changes& changes)
@@ -248,13 +265,44 @@ float GainFor(int number, SoundKind kind)
 
 float MusicGain()
 {
+    return GainFor(Mixer().currentMusic, SoundKind::Music);
+}
+
+bool IsMusicNumber(int number)
+{
+    return number <= FirstMusicNumber;
+}
+
+std::string MusicOf(int number)
+{
     const State& state = Mixer();
-    const Control& music = state.kinds[IndexOf(SoundKind::Music)];
-    if (music.muted || (AnySolo(state) && !music.solo))
+    if (!IsMusicNumber(number))
     {
-        return 0.0f;
+        return {};
     }
-    return Level(music.volume);
+    const auto index = static_cast<size_t>(FirstMusicNumber - number);
+    return index < state.musicTracks.size() ? state.musicTracks[index] : std::string{};
+}
+
+bool IsMusicPlaying(int number)
+{
+    return IsMusicNumber(number) && Mixer().currentMusic == number && g_platformAudio != nullptr &&
+           !g_platformAudio->IsEndMusic();
+}
+
+void OnMusicPlay(const std::string& music)
+{
+    State& state = Mixer();
+    const int number = MusicNumberOf(state, music);
+    if (number == state.currentMusic)
+    {
+        return;
+    }
+    state.currentMusic = number;
+    if (g_platformAudio != nullptr)
+    {
+        g_platformAudio->SetMusicMixGain(MusicGain());
+    }
 }
 
 float OnPlay(int number, bool looped, const SoundPlace* objectPlace)
@@ -365,7 +413,20 @@ std::vector<SoundKind> KindsHeard(int number)
 
 void OnMusicStarted(const std::string& music, double now)
 {
-    KeepPlaceless(Mixer(), PlacelessStart{-1, SoundKind::Music, music, true, now});
+    State& state = Mixer();
+    const int number = MusicNumberOf(state, music);
+    state.currentMusic = number;
+    const auto [row, added] = state.listed.try_emplace(number);
+    if (added)
+    {
+        row->second.order = state.nextOrder++;
+    }
+    HeardSound& heard = row->second.sound;
+    heard.number = number;
+    heard.kind = SoundKind::Music;
+    ++heard.plays;
+    heard.lastStarted = now;
+    KeepPlaceless(state, PlacelessStart{number, SoundKind::Music, music, true, now});
 }
 
 std::vector<PlacelessStart> PlacelessStarts()
@@ -397,19 +458,9 @@ std::vector<HeardSound> Heard()
 void ClearHeard()
 {
     State& state = Mixer();
-    for (auto row = state.listed.begin(); row != state.listed.end();)
-    {
-        if (IsChanged(state, row->first))
-        {
-            row->second.sound.plays = 0;
-            row->second.sound.lastStarted = -1.0;
-            ++row;
-        }
-        else
-        {
-            row = state.listed.erase(row);
-        }
-    }
+    state.listed.clear();
+    state.sounds.clear();
+    Apply();
 }
 
 Changes CountChanges()
