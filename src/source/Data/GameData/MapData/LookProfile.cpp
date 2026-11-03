@@ -22,6 +22,8 @@ constexpr const char* DefaultKey = "default";
 constexpr const char* MapsKey = "maps";
 constexpr const char* WorldKey = "world";
 constexpr const char* NameKey = "name";
+constexpr const char* EnvironmentsKey = "environments";
+constexpr const char* EnvironmentKey = "environment";
 
 // The built-in values are the renderer's behaviour before the profile existed; a doctest checks
 // each against the constant it replaces.
@@ -155,7 +157,7 @@ bool CheckRootKeys(const OrderedJson& root, IssueList& issues)
     bool valid = true;
     for (const auto& [key, value] : root.items())
     {
-        if (key != Items::Json::Keys::FormatVersion && key != DefaultKey && key != MapsKey)
+        if (key != Items::Json::Keys::FormatVersion && key != DefaultKey && key != MapsKey && key != EnvironmentsKey)
         {
             issues.Fatal(key, "unknown field");
             valid = false;
@@ -177,6 +179,35 @@ bool ReadDefault(const OrderedJson& root, LookOverrides& overrides, IssueList& i
         return false;
     }
     return ReadOverrides(*json, DefaultKey, {}, overrides, issues);
+}
+
+bool ReadEnvironments(const OrderedJson& root, LookProfileData& data, IssueList& issues)
+{
+    const auto json = root.find(EnvironmentsKey);
+    if (json == root.end())
+    {
+        return true;
+    }
+    if (!json->is_object())
+    {
+        issues.Fatal(EnvironmentsKey, "must be an object of named environments");
+        return false;
+    }
+    bool valid = true;
+    for (const auto& [name, values] : json->items())
+    {
+        const std::string object = Field(EnvironmentsKey, name);
+        if (!values.is_object())
+        {
+            issues.Fatal(object, "must be an object of look values");
+            valid = false;
+            continue;
+        }
+        EnvironmentLookOverrides environment{name, {}};
+        valid = ReadOverrides(values, object, {}, environment.overrides, issues) && valid;
+        data.environments.push_back(std::move(environment));
+    }
+    return valid;
 }
 
 bool ReadWorld(const OrderedJson& json, const std::string& object, int& world, IssueList& issues)
@@ -219,7 +250,21 @@ bool ReadMap(const OrderedJson& json, size_t index, std::set<int>& worlds, LookP
         issues.Fatal(Field(object, NameKey), "must be text");
         return false;
     }
-    if (!ReadOverrides(json, object, {WorldKey, NameKey}, map.overrides, issues))
+    if (const auto environment = json.find(EnvironmentKey); environment != json.end())
+    {
+        const auto known = environment->is_string()
+                               ? std::find_if(data.environments.begin(), data.environments.end(),
+                                              [&environment](const EnvironmentLookOverrides& entry)
+                                              { return entry.name == environment->get<std::string>(); })
+                               : data.environments.end();
+        if (known == data.environments.end())
+        {
+            issues.Fatal(Field(object, EnvironmentKey), "must name one of \"environments\"");
+            return false;
+        }
+        map.environment = static_cast<std::size_t>(known - data.environments.begin());
+    }
+    if (!ReadOverrides(json, object, {WorldKey, NameKey, EnvironmentKey}, map.overrides, issues))
     {
         return false;
     }
@@ -291,14 +336,23 @@ LookValues BuiltInLookValues()
     return builtIn;
 }
 
+const MapLookOverrides* LookProfileData::FindMap(int world) const
+{
+    const auto map =
+        std::find_if(maps.begin(), maps.end(), [world](const MapLookOverrides& entry) { return entry.world == world; });
+    return map != maps.end() ? &*map : nullptr;
+}
+
 LookValues LookProfileData::ForWorld(int world) const
 {
     LookValues values = BuiltInLookValues();
     defaultOverrides.ApplyTo(values);
-    const auto map =
-        std::find_if(maps.begin(), maps.end(), [world](const MapLookOverrides& entry) { return entry.world == world; });
-    if (map != maps.end())
+    if (const MapLookOverrides* map = FindMap(world))
     {
+        if (map->environment && *map->environment < environments.size())
+        {
+            environments[*map->environment].overrides.ApplyTo(values);
+        }
         map->overrides.ApplyTo(values);
     }
     return values;
@@ -319,8 +373,10 @@ void ReadLookProfileJson(std::string_view text, const std::string& source, LookP
     // Non-short-circuit: every problem of the file is reported.
     const bool keys = CheckRootKeys(root, list);
     const bool defaults = ReadDefault(root, read.defaultOverrides, list);
+    // Before the maps, which name them.
+    const bool environments = ReadEnvironments(root, read, list);
     const bool maps = ReadMaps(root, read, list);
-    if (keys && defaults && maps)
+    if (keys && defaults && environments && maps)
     {
         data = std::move(read);
     }

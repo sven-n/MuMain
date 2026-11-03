@@ -81,10 +81,13 @@ public:
     void DestroyPipelines();
     [[nodiscard]] bool IsAvailable() const;
 
-    // The scene, bloom source and bloom chain textures for frames of `size`, the scene and bloom
-    // source in `sceneFormat` (INVALID: the frame's format; another one makes an HDR scene, which
-    // the composite tone maps and dithers), recreated when either changed.
+    // The scene texture for frames of `size` in `sceneFormat` (INVALID: the frame's format; another
+    // one makes an HDR scene, which the composite tone maps and dithers), recreated when either changed.
     [[nodiscard]] bool EnsureTargets(SdlGpuTargetSize size, SDL_GPUTextureFormat sceneFormat);
+    // The bloom source (in the scene's format) and the bloom chain, at the scene's size; only bloom
+    // uses them. False when they cannot be created.
+    [[nodiscard]] bool EnsureBloomTargets();
+    void ReleaseBloomTargets();
     [[nodiscard]] bool IsHdrScene() const;
     [[nodiscard]] SDL_GPUTexture* GetSceneTexture() const;
     [[nodiscard]] SDL_GPUTexture* GetBloomSourceTexture() const;

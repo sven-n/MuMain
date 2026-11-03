@@ -29,6 +29,16 @@ inline constexpr float kBakedSunShadowAngle = 135.0f;
 // `bakedSun`, so the maps keep their look at the baked angle.
 [[nodiscard]] glm::vec3 FollowSun(const glm::vec3& baked, const glm::vec3& bakedSun, const glm::vec3& sun);
 
+// A flat (sheared) shadow cast by a light towards `toSun`: the projection's axis angle in radians
+// (mu::ShadowProjection::axisAngle, the shadow's direction plus a half turn) and how far it falls per
+// unit of height, at most `maxFall`.
+struct FlatShadowCast
+{
+    float axisAngle = 0.0f;
+    float fallPerHeight = 0.0f;
+};
+[[nodiscard]] FlatShadowCast FlatShadowFromSun(const glm::vec3& toSun, float maxFall);
+
 // The square, texel-snapped area of the shadow map: light-space x and y from `origin`, `size` wide,
 // depth from `nearDistance` to `farDistance` along the sun's rays.
 struct SunShadowBox

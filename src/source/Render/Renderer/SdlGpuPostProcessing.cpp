@@ -228,9 +228,30 @@ bool SdlGpuPostProcessing::EnsureTargets(SdlGpuTargetSize size, SDL_GPUTextureFo
     ReleaseTargets();
     m_sceneFormat = sceneFormat;
     m_sceneTexture = CreateTarget(m_device, m_sceneFormat, size);
-    m_bloomSourceTexture = CreateTarget(m_device, m_sceneFormat, size);
-    SdlGpuTargetSize levelSize = HalfSize(size);
-    bool created = m_sceneTexture && m_bloomSourceTexture;
+    if (!m_sceneTexture)
+    {
+        log::Get("render")->error("SDL_gpu -- post-processing targets failed ({}x{}): {}", size.width, size.height,
+                                  SDL_GetError());
+        ReleaseTargets();
+        return false;
+    }
+    m_targetSize = size;
+    return true;
+}
+
+bool SdlGpuPostProcessing::EnsureBloomTargets()
+{
+    if (m_bloomSourceTexture)
+    {
+        return true;
+    }
+    if (!m_sceneTexture)
+    {
+        return false;
+    }
+    m_bloomSourceTexture = CreateTarget(m_device, m_sceneFormat, m_targetSize);
+    SdlGpuTargetSize levelSize = HalfSize(m_targetSize);
+    bool created = m_bloomSourceTexture != nullptr;
     for (BloomLevel& level : m_bloomLevels)
     {
         level.size = levelSize;
@@ -240,13 +261,23 @@ bool SdlGpuPostProcessing::EnsureTargets(SdlGpuTargetSize size, SDL_GPUTextureFo
     }
     if (!created)
     {
-        log::Get("render")->error("SDL_gpu -- post-processing targets failed ({}x{}): {}", size.width, size.height,
-                                  SDL_GetError());
-        ReleaseTargets();
+        log::Get("render")->error("SDL_gpu -- bloom targets failed ({}x{}): {}", m_targetSize.width,
+                                  m_targetSize.height, SDL_GetError());
+        ReleaseBloomTargets();
         return false;
     }
-    m_targetSize = size;
     return true;
+}
+
+void SdlGpuPostProcessing::ReleaseBloomTargets()
+{
+    ReleaseTexture(m_device, m_bloomSourceTexture);
+    for (BloomLevel& level : m_bloomLevels)
+    {
+        ReleaseTexture(m_device, level.texture);
+        level.size = {};
+    }
+    m_bloomRendered = false;
 }
 
 bool SdlGpuPostProcessing::IsHdrScene() const
@@ -267,14 +298,8 @@ SDL_GPUTexture* SdlGpuPostProcessing::GetBloomSourceTexture() const
 void SdlGpuPostProcessing::ReleaseTargets()
 {
     ReleaseTexture(m_device, m_sceneTexture);
-    ReleaseTexture(m_device, m_bloomSourceTexture);
-    for (BloomLevel& level : m_bloomLevels)
-    {
-        ReleaseTexture(m_device, level.texture);
-        level.size = {};
-    }
+    ReleaseBloomTargets();
     m_targetSize = {};
-    m_bloomRendered = false;
 }
 
 void SdlGpuPostProcessing::RunBloomPass(SDL_GPUCommandBuffer* commandBuffer, SDL_GPUGraphicsPipeline* pipeline,

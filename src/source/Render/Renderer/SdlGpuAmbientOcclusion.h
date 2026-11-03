@@ -46,10 +46,11 @@ public:
 
     // Everything, at shutdown.
     void Release();
+    // The targets, while the pass is off.
+    void ReleaseTargets();
 
 private:
     [[nodiscard]] bool EnsureTargets(SdlGpuTargetSize size);
-    void ReleaseTargets();
     // False when the pass could not be opened.
     [[nodiscard]] bool RunPass(SDL_GPUCommandBuffer* commandBuffer, SDL_GPUGraphicsPipeline* pipeline,
                                SDL_GPUTexture* target, const SDL_GPUTextureSamplerBinding* inputs, Uint32 inputCount,

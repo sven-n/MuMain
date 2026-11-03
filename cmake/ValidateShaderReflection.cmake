@@ -290,7 +290,7 @@ set(shader_specs
     "skinned_weighted_shadow.vert|vert|0,3,4,6,7|0|2|2"
     "skinned_lit.frag|frag||3|0|3"
     "world_lit.vert|vert|0,1,2|0|0|1"
-    "world_lit.frag|frag||3|0|3"
+    "world_lit.frag|frag||4|0|3"
     "shadow_mask.frag|frag||0|0|0"
     "post_fullscreen.vert|vert||0|0|0"
     "post_bloom_down.frag|frag||1|0|1"

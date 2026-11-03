@@ -141,12 +141,15 @@ float4 main(FSInput input) : SV_Target
     const float sunLight = 1.0 - sunShadowParameters.x * (1.0 - sunVisible);
     // Shade turns towards the sky's blue.
     const float3 skyShade = lerp(float3(1.0, 1.0, 1.0), skyFill.rgb, skyFill.w * (1.0 - sunVisible));
-    const float luminosity = max(lightDot * diffuseCurve.x * sunLight + diffuseCurve.y, diffuseCurve.z);
+    // Shadow dims the light a face receives, never the darkening of faces turned away.
+    const float luminosity =
+        max(lightDot * diffuseCurve.x * (lightDot > 0.0 ? sunLight : 1.0) + diffuseCurve.y, diffuseCurve.z);
     const float3 dynamicLight =
         inWorld ? DynamicLighting(input.worldPositionAndDynamicLights.xyz, litNormal) : float3(0.0, 0.0, 0.0);
-    float3 diffuse = saturate(objectLight * skyShade * luminosity + dynamicLight);
+    const float3 lit = objectLight * skyShade * luminosity + dynamicLight;
+    float3 diffuse = saturate(lit);
     if (RollsOffHighlight(diffuseCurve.w))
-        diffuse = RollOffHighlight(objectLight * skyShade * luminosity + dynamicLight, diffuseCurve.w);
+        diffuse = RollOffHighlight(lit, diffuseCurve.w);
 
     // Two-sided meshes show back faces; |dot| keeps their interiors from rim-lighting.
     const float facing = saturate(abs(dot(normal, view)));
@@ -154,7 +157,7 @@ float4 main(FSInput input) : SV_Target
     if (inWorld && sunTowards.w > 0.0)
     {
         // The rim follows the sun: brighter and sun-coloured on the side facing it, gone in its shadow.
-        const float towardsSun = saturate(dot(worldNormal, normalize(sunTowards.xyz)) * 0.75 + 0.25) * sunVisible;
+        const float towardsSun = saturate(dot(litNormal, normalize(sunTowards.xyz)) * 0.75 + 0.25) * sunVisible;
         rim = lerp(rim, rim * sunColor.rgb * (2.0 * towardsSun), sunTowards.w);
     }
 

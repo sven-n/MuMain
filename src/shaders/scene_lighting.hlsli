@@ -24,6 +24,7 @@ cbuffer SceneLighting : register(b1, space3)
     float4 cameraPosition;
     float4x4 sunViewProjection; // world to the sun shadow map's clip space
     float4 sunShadowParameters; // darkness (0: no shadow map), softness in texels, 1 / map size, texel in world units
+    float4 lightingParameters;  // y: 1 when the terrain's direct-sunlight grid is bound; x, z, w unused
     float4 cloudParameters;     // x: cloud strength (0: none), y: 1 / pattern size, z: sky cover
     float4 cloudOffset;         // xy: the clouds' drift plus the sun's slant
     float4 skyFill;             // rgb: the sky's tint of the shade, w: how far shade takes it

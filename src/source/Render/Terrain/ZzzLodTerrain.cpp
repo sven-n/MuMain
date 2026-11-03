@@ -561,6 +561,9 @@ static vec3_t FigureStaticTerrainLight[TERRAIN_SIZE * TERRAIN_SIZE];
 // The static light of one cell: the baked light, shaded by the slope towards
 // the sun and darkened by the map's light mood: by its base where the baked
 // light is dark, less towards its shadow keep.
+// Per cell, the direct sunlight inside BackTerrainLight (RGBA8): what Enhanced clouds take away.
+static std::vector<std::uint8_t> s_terrainSunLight(TERRAIN_SIZE * TERRAIN_SIZE * 4, 0);
+
 static void CreateStaticLightCell(int Index, const vec3_t Sun, const Render::Lighting::LightMood::Scales& scales)
 {
     float Luminosity = VectorDotProduct(TerrainNormal[Index], Sun) + 0.5f;
@@ -568,6 +571,8 @@ static void CreateStaticLightCell(int Index, const vec3_t Sun, const Render::Lig
         Luminosity = 0.f;
     else if (Luminosity > 1.f)
         Luminosity = 1.f;
+    // The sun's share: the slope term above the half Classic gives every face.
+    const float direct = std::max(Luminosity - 0.5f, 0.f);
     vec3_t undarkened;
     for (int i = 0; i < 3; i++)
     {
@@ -582,6 +587,11 @@ static void CreateStaticLightCell(int Index, const vec3_t Sun, const Render::Lig
         BackTerrainLight[Index][i] = undarkened[i] * factor[i];
     }
     Vector(weight, weight, weight, StaticLightBrightWeight[Index]);
+    for (int i = 0; i < 3; i++)
+    {
+        const float value = TerrainLight[Index][i] * direct * factor[i];
+        s_terrainSunLight[Index * 4 + i] = static_cast<std::uint8_t>(std::clamp(value, 0.f, 1.f) * 255.f + 0.5f);
+    }
     VectorCopy(BackTerrainLight[Index], FigureStaticTerrainLight[Index]);
     Render::Lighting::LightMood::CorrectFigureLight(scales, undarkened, FigureStaticTerrainLight[Index], weight);
 }
@@ -613,10 +623,13 @@ static glm::vec3 TerrainSunVector()
 
 // The vector BackTerrainLight was last built with.
 static glm::vec3 s_terrainLightSun{0.f};
+// The light mood revision the static light was last built with.
+static std::uint32_t s_bakedMoodRevision = 0;
 
 void CreateTerrainLight()
 {
     s_terrainLightSun = TerrainSunVector();
+    s_bakedMoodRevision = Render::Lighting::LightMood::Revision();
     const vec3_t Light = {s_terrainLightSun.x, s_terrainLightSun.y, s_terrainLightSun.z};
     const Render::Lighting::LightMood::Scales& scales = Render::Lighting::LightMood::Active();
     for (int y = 0; y < TERRAIN_SIZE; y++)
@@ -626,6 +639,7 @@ void CreateTerrainLight()
             CreateStaticLightCell(TERRAIN_INDEX(x, y), Light, scales);
         }
     }
+    mu::GetRenderer().SetTerrainSunLight(s_terrainSunLight);
 }
 
 void CreateTerrainLight_Part(int xi, int yi)
@@ -2894,9 +2908,11 @@ extern int EnableEvent;
 void InitTerrainLight()
 {
     Render::Lighting::UpdateFrameSun();
-    // The sun moved (dynamic.shadowAngle): the slope shading follows it.
-    if (const glm::vec3 sun = TerrainSunVector();
-        glm::any(glm::greaterThan(glm::abs(sun - s_terrainLightSun), glm::vec3(1e-4f))))
+    // The sun moved (dynamic.shadowAngle), or look values or the tint source changed the mood's scales since
+    // the last build: the static light follows.
+    const glm::vec3 sun = TerrainSunVector();
+    if (glm::any(glm::greaterThan(glm::abs(sun - s_terrainLightSun), glm::vec3(1e-4f))) ||
+        Render::Lighting::LightMood::Revision() != s_bakedMoodRevision)
     {
         FRAME_PROFILE(TerrainBake);
         CreateTerrainLight();

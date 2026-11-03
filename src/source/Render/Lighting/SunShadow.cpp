@@ -98,4 +98,15 @@ SunShadowView BuildSunShadowView(const glm::vec3& toSun, const glm::mat4& sceneV
     return view;
 }
 
+FlatShadowCast FlatShadowFromSun(const glm::vec3& toSun, float maxFall)
+{
+    const float horizontal = std::hypot(toSun.x, toSun.y);
+    if (horizontal <= 0.0f)
+    {
+        return {0.0f, 0.0f};
+    }
+    const float fall = toSun.z > 0.0f ? std::min(horizontal / toSun.z, maxFall) : maxFall;
+    return {std::atan2(toSun.y, toSun.x), fall};
+}
+
 } // namespace Render::Lighting

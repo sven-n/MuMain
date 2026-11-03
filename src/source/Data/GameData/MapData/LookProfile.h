@@ -15,15 +15,19 @@
 //
 //   { "formatVersion": 1,
 //     "default": { "lighting.rim.strength": 0.35, "bloom.strength": 0.6 },
-//     "maps": [ { "world": 1, "name": "Dungeon", "grading.strength": 0.8 } ] }
+//     "environments": { "enclosed": { "sun.shadow": 0 } },
+//     "maps": [ { "world": 1, "name": "Dungeon", "environment": "enclosed", "grading.strength": 0.8 } ] }
 //
 // Every value has a built-in value (the renderer's behaviour without the file)
 // and a range. The values apply in the order built-in, "default", the map's
-// entry; either may name any subset of them. "world" is the map number as in
-// LightMood.json, "name" is for the reader only. A file with an unknown name, a
-// value of the wrong type or out of range, a missing or unsupported
-// formatVersion, a duplicate world or a world outside 0 to 255 is unusable as a
-// whole: the built-in values apply everywhere.
+// environment, the map's entry; each may name any subset of them. "world" is
+// the map number as in LightMood.json, "name" is for the reader only.
+// "environment" names one of "environments": the kind of place a map is.
+//
+// A file with an unknown name, a value of the wrong type or out of range, a
+// missing or unsupported formatVersion, a duplicate world, a world outside 0 to
+// 255 or an unknown environment is unusable as a whole: the built-in values
+// apply everywhere.
 namespace Data::Maps
 {
 enum class LookValue : std::uint8_t
@@ -120,9 +124,19 @@ struct LookOverrides
     bool operator==(const LookOverrides&) const = default;
 };
 
+struct EnvironmentLookOverrides
+{
+    std::string name;
+    LookOverrides overrides;
+
+    bool operator==(const EnvironmentLookOverrides&) const = default;
+};
+
 struct MapLookOverrides
 {
     int world = 0;
+    // Index into LookProfileData::environments.
+    std::optional<std::size_t> environment;
     LookOverrides overrides;
 
     bool operator==(const MapLookOverrides&) const = default;
@@ -131,10 +145,12 @@ struct MapLookOverrides
 struct LookProfileData
 {
     LookOverrides defaultOverrides;
+    std::vector<EnvironmentLookOverrides> environments;
     std::vector<MapLookOverrides> maps;
 
-    // Built-in, then the default, then the world's entry.
+    // Built-in, then the default, the world's environment and the world's entry.
     [[nodiscard]] LookValues ForWorld(int world) const;
+    [[nodiscard]] const MapLookOverrides* FindMap(int world) const;
     bool operator==(const LookProfileData&) const = default;
 };
 

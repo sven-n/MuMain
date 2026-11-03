@@ -403,6 +403,11 @@ public:
     // The frame's point lights for Enhanced-lit draws (Enhanced dynamic lights). The last set in a
     // frame is the one all of that frame's draws use; set an empty block to turn them off.
     virtual void SetDynamicLights(const DynamicLightsUniform& /*lights*/) {}
+    // The terrain's direct sunlight per cell, 256x256 RGBA8 (Enhanced clouds dim only that part of the
+    // ground's light). Kept until replaced.
+    virtual void SetTerrainSunLight(std::span<const std::uint8_t> /*rgba*/) {}
+    // True between BeginScreenSpaceSampling and EndScreenSpaceSampling (3D models shown in the UI).
+    [[nodiscard]] virtual bool InScreenSpaceSampling() const { return false; }
 
     // Select Enhanced (per-pixel lighting and fog) or Classic pipelines for the following frames.
     // Returns false when Enhanced lighting was requested but this backend could not build it; the
