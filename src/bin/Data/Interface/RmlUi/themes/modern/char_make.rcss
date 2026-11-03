@@ -176,7 +176,7 @@
 }
 .stat-label {
 	display: block;
-	width: 52px;
+	width: 48px;
 	color: token(text-secondary);
 	font-size: 9px;
 	font-family: "token(font-body)";

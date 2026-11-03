@@ -109,7 +109,7 @@
 }
 .stat-label {
 	display: block;
-	width: 52px;
+	width: 48px;
 	color: token(text-primary);
 }
 .stat-label-text {
