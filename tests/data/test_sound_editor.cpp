@@ -852,6 +852,46 @@ TEST_CASE("Sound Editor: the Events tab writes numbers as ranges and reads them 
     CHECK(event.rules.size() == 1);
 }
 
+TEST_CASE("Sound Editor: the Events tab writes and reads click kinds and shows each event's own fields (Q-UI1) "
+          "[sounds][editor]")
+{
+    using namespace MuEditor::SoundEditor;
+    CHECK(KindsText({"confirm", "cancel"}) == "confirm, cancel");
+    CHECK(KindsText({}).empty());
+    CHECK(ParseKinds(" menu ,confirm, menu") == std::vector<std::string>{"menu", "confirm"});
+    CHECK(ParseKinds("") == std::vector<std::string>{});
+    CHECK(ParseKinds("tab-2") == std::vector<std::string>{"tab-2"});
+    CHECK_FALSE(ParseKinds("Confirm").has_value());
+    CHECK_FALSE(ParseKinds("ok cancel").has_value());
+    CHECK_FALSE(ParseKinds("a,,b").has_value());
+    CHECK(EventTitle("interfaceClick") == "A click on a button, by the click kind its theme gives it (click-sound)");
+    CHECK(EventTitle("characterSelected") == "A click on a character in the character select scene");
+
+    Data::Sounds::SoundEvent event;
+    event.event = "heroFootstep";
+    CHECK(FieldsOf(event) == EventFields{true, true, true, false, false});
+    event.event = "playerAttackSwing";
+    CHECK(FieldsOf(event) == EventFields{false, false, false, true, false});
+    event.event = "interfaceClick";
+    CHECK(FieldsOf(event) == EventFields{false, false, false, false, true});
+    event.event = "characterSelected";
+    CHECK(FieldsOf(event) == EventFields{});
+    event.event = "someEvent";
+    CHECK(FieldsOf(event) == EventFields{true, true, true, true, true});
+    // A field a rule uses shows, whatever the event.
+    event.event = "characterSelected";
+    Data::Sounds::SoundEventRule rule;
+    rule.worlds = {0};
+    rule.holds = Data::Sounds::HeldWeapon::Bow;
+    event.rules = {rule};
+    CHECK(FieldsOf(event) == EventFields{true, false, false, true, false});
+    event.rules[0] = {};
+    event.rules[0].tiles = {1};
+    event.rules[0].safeZone = true;
+    event.rules[0].kinds = {"menu"};
+    CHECK(FieldsOf(event) == EventFields{false, true, true, false, true});
+}
+
 TEST_CASE("Sound Editor: a change of the sound events reaches the game's table at once, is a step of the history and "
           "is what Save writes (Q-SE1) [sounds][editor]")
 {
@@ -899,7 +939,19 @@ TEST_CASE("Sound Editor: the Events tab draws each event's rules (Q-SE1) [sounds
     bow.holds = Data::Sounds::HeldWeapon::Bow;
     MuEditor::SoundEditor::AddPlay(bow, "SOUND_BOW01");
     swing.rules = {bow};
-    g_SoundEventDatabase.Build(std::vector<Data::Sounds::SoundEvent>{swing});
+    // A click's rules have a kinds column and no world's (Q-UI1).
+    Data::Sounds::SoundEvent click;
+    click.event = "interfaceClick";
+    Data::Sounds::SoundEventRule confirm;
+    confirm.kinds = {"confirm"};
+    MuEditor::SoundEditor::AddPlay(confirm, "SOUND_CLICK01");
+    click.rules = {confirm};
+    Data::Sounds::SoundEvent selected;
+    selected.event = "characterSelected";
+    Data::Sounds::SoundEventRule any;
+    MuEditor::SoundEditor::AddPlay(any, "SOUND_CLICK01");
+    selected.rules = {any};
+    g_SoundEventDatabase.Build(std::vector<Data::Sounds::SoundEvent>{swing, click, selected});
     TestImGuiContext context;
     for (int frame = 0; frame < 3; ++frame)
     {

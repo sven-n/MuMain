@@ -27,11 +27,12 @@ constexpr const char* Worlds = "worlds";
 constexpr const char* Tiles = "tiles";
 constexpr const char* SafeZone = "safeZone";
 constexpr const char* Holds = "holds";
+constexpr const char* Kinds = "kinds";
 constexpr const char* Plays = "plays";
 } // namespace Keys
 
 const Items::Json::KeySet EventKeys{Keys::Event, Keys::Rules};
-const Items::Json::KeySet RuleKeys{Keys::Worlds, Keys::Tiles, Keys::SafeZone, Keys::Holds, Keys::Plays};
+const Items::Json::KeySet RuleKeys{Keys::Worlds, Keys::Tiles, Keys::SafeZone, Keys::Holds, Keys::Kinds, Keys::Plays};
 
 constexpr std::array<std::pair<HeldWeapon, std::string_view>, 6> WeaponWords{{
     {HeldWeapon::None, "none"},
@@ -148,6 +149,25 @@ private:
                             "must be none, bow, crossbow, magicCrossbow, saberOrSpear or other");
             }
         }
+        if (const auto kinds = json.find(Keys::Kinds); kinds != json.end())
+        {
+            if (!kinds->is_array())
+            {
+                return Fail(key + "." + Keys::Kinds, "must be a list of click kinds");
+            }
+            for (size_t index = 0; index < kinds->size(); ++index)
+            {
+                const OrderedJson& word = (*kinds)[index];
+                if (!word.is_string() || !IsClickKindWord(word.get_ref<const std::string&>()) ||
+                    std::find(rule.kinds.begin(), rule.kinds.end(), word.get_ref<const std::string&>()) !=
+                        rule.kinds.end())
+                {
+                    return Fail(key + "." + Keys::Kinds + "[" + std::to_string(index) + "]",
+                                "must be a click kind, once (lower-case letters, digits and -)");
+                }
+                rule.kinds.push_back(word.get<std::string>());
+            }
+        }
         const auto plays = json.find(Keys::Plays);
         if (plays == json.end() || !plays->is_array() || plays->empty())
         {
@@ -197,6 +217,10 @@ OrderedJson WriteRule(const SoundEventRule& rule)
     if (rule.holds)
     {
         json[Keys::Holds] = std::string(HeldWeaponWord(*rule.holds));
+    }
+    if (!rule.kinds.empty())
+    {
+        json[Keys::Kinds] = rule.kinds;
     }
     json[Keys::Plays] = rule.plays;
     return json;
@@ -265,12 +289,19 @@ const SoundEventRule* MatchRule(const SoundEvent& event, const SoundEventContext
     for (const SoundEventRule& rule : event.rules)
     {
         if (Allows(rule.worlds, context.world) && Allows(rule.tiles, context.tile) &&
-            (!rule.safeZone || *rule.safeZone == context.safeZone) && (!rule.holds || *rule.holds == context.holds))
+            (!rule.safeZone || *rule.safeZone == context.safeZone) && (!rule.holds || *rule.holds == context.holds) &&
+            (rule.kinds.empty() || std::find(rule.kinds.begin(), rule.kinds.end(), context.kind) != rule.kinds.end()))
         {
             return &rule;
         }
     }
     return nullptr;
+}
+
+bool IsClickKindWord(std::string_view word)
+{
+    return !word.empty() && std::all_of(word.begin(), word.end(), [](char c)
+                                        { return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '-'; });
 }
 
 std::string_view HeldWeaponWord(HeldWeapon weapon)

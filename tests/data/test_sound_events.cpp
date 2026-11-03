@@ -107,9 +107,49 @@ TEST_CASE("Sound events: a rule reads its worlds, tiles, safe zone, what is held
     fatal(R"({"tiles": [256], "plays": ["SOUND_MAGIC"]})", "events[0].rules[0].tiles[0]");
     fatal(R"({"safeZone": 1, "plays": ["SOUND_MAGIC"]})", "events[0].rules[0].safeZone");
     fatal(R"({"holds": "sword", "plays": ["SOUND_MAGIC"]})", "events[0].rules[0].holds");
+    fatal(R"({"kinds": "confirm", "plays": ["SOUND_MAGIC"]})", "events[0].rules[0].kinds");
+    fatal(R"({"kinds": ["Confirm"], "plays": ["SOUND_MAGIC"]})", "events[0].rules[0].kinds[0]");
+    fatal(R"({"kinds": [""], "plays": ["SOUND_MAGIC"]})", "events[0].rules[0].kinds[0]");
+    fatal(R"({"kinds": ["menu", "menu"], "plays": ["SOUND_MAGIC"]})", "events[0].rules[0].kinds[1]");
     std::vector<ItemDataIssue> twice;
     CHECK(Read(File(R"({"event": "e", "rules": []}, {"event": "e", "rules": []})"), twice).size() == 1);
     CHECK(HasFatal(twice, "events[1].event"));
+}
+
+TEST_CASE("Sound events: a rule's click kinds read, write back and match the clicked button's kind; a rule "
+          "without kinds plays for any (Q-UI1) [data][sounds]")
+{
+    std::vector<ItemDataIssue> issues;
+    const std::vector<SoundEvent> events = Read(File(R"({"event": "interfaceClick", "rules": [)"
+                                                     R"({"kinds": ["menu", "tab-2"], "plays": ["SOUND_MENU01"]},)"
+                                                     R"({"plays": ["SOUND_CLICK01"]}]})"),
+                                                issues);
+    CHECK(issues.empty());
+    REQUIRE(events.size() == 1);
+    REQUIRE(events[0].rules.size() == 2);
+    CHECK(events[0].rules[0].kinds == std::vector<std::string>{"menu", "tab-2"});
+    CHECK(events[0].rules[1].kinds.empty());
+    const std::string text = Data::Sounds::WriteSoundEventsJson(events);
+    CHECK(text.find(R"({"kinds": ["menu", "tab-2"], "plays": ["SOUND_MENU01"]})") != std::string::npos);
+    std::vector<ItemDataIssue> again;
+    CHECK(Read(text, again) == events);
+    const auto match = [&events](std::string_view kind)
+    {
+        SoundEventContext context;
+        context.kind = kind;
+        const SoundEventRule* rule = Data::Sounds::MatchRule(events[0], context);
+        return rule == nullptr ? -1 : static_cast<int>(rule - events[0].rules.data());
+    };
+    CHECK(match("menu") == 0);
+    CHECK(match("tab-2") == 0);
+    CHECK(match("confirm") == 1);
+    CHECK(match("") == 1);
+    CHECK(Data::Sounds::IsClickKindWord("confirm"));
+    CHECK(Data::Sounds::IsClickKindWord("tab-2"));
+    CHECK_FALSE(Data::Sounds::IsClickKindWord(""));
+    CHECK_FALSE(Data::Sounds::IsClickKindWord("Confirm"));
+    CHECK_FALSE(Data::Sounds::IsClickKindWord("ok cancel"));
+    CHECK_FALSE(Data::Sounds::IsClickKindWord("a_b"));
 }
 
 TEST_CASE("Sound events: the first rule that matches the world, tile, safe zone and what is held plays (Q-SE1) "
@@ -157,10 +197,24 @@ TEST_CASE("Sound events: the shipped file reads with no problem, has the footste
     std::vector<ItemDataIssue> issues;
     const std::vector<SoundEvent> events = Read(text, issues);
     CHECK(issues.empty());
-    REQUIRE(events.size() == 2);
+    REQUIRE(events.size() == 4);
     CHECK(events[0].event == Data::Sounds::HeroFootstepEvent);
     CHECK(events[1].event == Data::Sounds::PlayerAttackSwingEvent);
     CHECK(Data::Sounds::WriteSoundEventsJson(events) == text);
+    // The clicks play the click the login's OK and Cancel played (Q-UI1).
+    CHECK(events[2].event == Data::Sounds::InterfaceClickEvent);
+    for (const std::string_view kind : {"confirm", "cancel", "select", "menu"})
+    {
+        SoundEventContext context;
+        context.kind = kind;
+        const SoundEventRule* rule = Data::Sounds::MatchRule(events[2], context);
+        REQUIRE(rule != nullptr);
+        CHECK(rule->kinds == std::vector<std::string>{std::string(kind)});
+        CHECK(rule->numbers == std::vector<int>{static_cast<int>(SOUND_CLICK01)});
+    }
+    CHECK(events[3].event == Data::Sounds::CharacterSelectedEvent);
+    REQUIRE(events[3].rules.size() == 1);
+    CHECK(events[3].rules[0].numbers == std::vector<int>{static_cast<int>(SOUND_CLICK01)});
 }
 
 TEST_CASE("Sound events: PickEventSound plays a rule's one sound without a draw and picks one of more with "

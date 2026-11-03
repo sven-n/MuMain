@@ -217,87 +217,82 @@ void MuSoundEditorUI::RenderEventRules(const std::vector<Data::Sounds::SoundEven
     };
     constexpr ImGuiTableFlags Flags =
         ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit;
-    if (ImGui::BeginTable("##Rules", 7, Flags))
+    // Only the fields the event's code fills in (Q-UI1): a click knows no world.
+    const MuEditor::SoundEditor::EventFields fields = MuEditor::SoundEditor::FieldsOf(event);
+    const int columns = 3 + static_cast<int>(fields.worlds) + static_cast<int>(fields.tiles) +
+                        static_cast<int>(fields.safeZone) + static_cast<int>(fields.holds) +
+                        static_cast<int>(fields.kinds);
+    if (ImGui::BeginTable("##Rules", columns, Flags))
     {
         ImGui::TableSetupColumn("#");
-        ImGui::TableSetupColumn(I18N::Editor::SoundEventColumnWorlds);
-        ImGui::TableSetupColumn(I18N::Editor::SoundEventColumnTiles);
-        ImGui::TableSetupColumn(I18N::Editor::SoundEventColumnSafeZone);
-        ImGui::TableSetupColumn(I18N::Editor::SoundEventColumnHolds);
+        const std::pair<bool, const char*> headers[] = {{fields.worlds, I18N::Editor::SoundEventColumnWorlds},
+                                                        {fields.tiles, I18N::Editor::SoundEventColumnTiles},
+                                                        {fields.safeZone, I18N::Editor::SoundEventColumnSafeZone},
+                                                        {fields.holds, I18N::Editor::SoundEventColumnHolds},
+                                                        {fields.kinds, I18N::Editor::SoundEventColumnKinds}};
+        for (const auto& [shown, header] : headers)
+        {
+            if (shown)
+            {
+                ImGui::TableSetupColumn(header);
+            }
+        }
         ImGui::TableSetupColumn(I18N::Editor::SoundEventColumnPlays, ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableSetupColumn("##Buttons");
         ImGui::TableHeadersRow();
         for (size_t index = 0; index < event.rules.size(); ++index)
         {
             const SoundEventRule& rule = event.rules[index];
+            const auto changeRule = [&](const SoundEventRule& after) { change(index, after); };
             ImGui::PushID(static_cast<int>(index));
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
             ImGui::Text("%zu", index + 1);
-            ImGui::TableNextColumn();
-            if (const auto worlds = RenderNumbersField("##Worlds", rule.worlds, 255))
+            if (fields.worlds)
             {
-                SoundEventRule after = rule;
-                after.worlds = *worlds;
-                change(index, after);
-            }
-            Tooltip(I18N::Editor::SoundEventWorldsTip);
-            ImGui::TableNextColumn();
-            if (const auto tiles = RenderNumbersField("##Tiles", rule.tiles, 255))
-            {
-                SoundEventRule after = rule;
-                after.tiles = *tiles;
-                change(index, after);
-            }
-            Tooltip(I18N::Editor::SoundEventTilesTip);
-            ImGui::TableNextColumn();
-            const char* zone = !rule.safeZone   ? I18N::Editor::SoundEventAny
-                               : *rule.safeZone ? I18N::Editor::SoundEventInSafeZone
-                                                : I18N::Editor::SoundEventOutsideSafeZone;
-            ImGui::SetNextItemWidth(TypeWidth * g_MuEditorCore.GetUIScale());
-            if (ImGui::BeginCombo("##SafeZone", zone))
-            {
-                const std::pair<const char*, std::optional<bool>> choices[] = {
-                    {I18N::Editor::SoundEventAny, std::nullopt},
-                    {I18N::Editor::SoundEventInSafeZone, true},
-                    {I18N::Editor::SoundEventOutsideSafeZone, false}};
-                for (const auto& [text, value] : choices)
-                {
-                    if (ImGui::Selectable(text, rule.safeZone == value))
-                    {
-                        SoundEventRule after = rule;
-                        after.safeZone = value;
-                        change(index, after);
-                    }
-                }
-                ImGui::EndCombo();
-            }
-            ImGui::TableNextColumn();
-            const std::string holds =
-                rule.holds ? std::string(Data::Sounds::HeldWeaponWord(*rule.holds)) : I18N::Editor::SoundEventAny;
-            ImGui::SetNextItemWidth(TypeWidth * g_MuEditorCore.GetUIScale());
-            if (ImGui::BeginCombo("##Holds", holds.c_str()))
-            {
-                if (ImGui::Selectable(I18N::Editor::SoundEventAny, !rule.holds))
+                ImGui::TableNextColumn();
+                if (const auto worlds = RenderNumbersField("##Worlds", rule.worlds, 255))
                 {
                     SoundEventRule after = rule;
-                    after.holds.reset();
-                    change(index, after);
+                    after.worlds = *worlds;
+                    changeRule(after);
                 }
-                for (const Data::Sounds::HeldWeapon weapon :
-                     {Data::Sounds::HeldWeapon::None, Data::Sounds::HeldWeapon::Bow, Data::Sounds::HeldWeapon::Crossbow,
-                      Data::Sounds::HeldWeapon::MagicCrossbow, Data::Sounds::HeldWeapon::SaberOrSpear,
-                      Data::Sounds::HeldWeapon::Other})
+                Tooltip(I18N::Editor::SoundEventWorldsTip);
+            }
+            if (fields.tiles)
+            {
+                ImGui::TableNextColumn();
+                if (const auto tiles = RenderNumbersField("##Tiles", rule.tiles, 255))
                 {
-                    if (ImGui::Selectable(std::string(Data::Sounds::HeldWeaponWord(weapon)).c_str(),
-                                          rule.holds == weapon))
+                    SoundEventRule after = rule;
+                    after.tiles = *tiles;
+                    changeRule(after);
+                }
+                Tooltip(I18N::Editor::SoundEventTilesTip);
+            }
+            if (fields.safeZone)
+            {
+                ImGui::TableNextColumn();
+                RenderSafeZoneCell(rule, changeRule);
+            }
+            if (fields.holds)
+            {
+                ImGui::TableNextColumn();
+                RenderHoldsCell(rule, changeRule);
+            }
+            if (fields.kinds)
+            {
+                ImGui::TableNextColumn();
+                if (const auto text = RenderListField("##Kinds", MuEditor::SoundEditor::KindsText(rule.kinds)))
+                {
+                    if (const auto kinds = MuEditor::SoundEditor::ParseKinds(*text))
                     {
                         SoundEventRule after = rule;
-                        after.holds = weapon;
-                        change(index, after);
+                        after.kinds = *kinds;
+                        changeRule(after);
                     }
                 }
-                ImGui::EndCombo();
+                Tooltip(I18N::Editor::SoundEventKindsTip);
             }
             ImGui::TableNextColumn();
             ImGui::TextUnformatted(MuEditor::SoundEditor::PlaysText(rule).c_str());
@@ -310,7 +305,7 @@ void MuSoundEditorUI::RenderEventRules(const std::vector<Data::Sounds::SoundEven
             Tooltip(I18N::Editor::SoundEventPlaysTip);
             if (ImGui::BeginPopup("##Plays"))
             {
-                RenderPlaysPicker(rule, [&](const SoundEventRule& after) { change(index, after); });
+                RenderPlaysPicker(rule, changeRule);
                 ImGui::EndPopup();
             }
             ImGui::TableNextColumn();
@@ -341,11 +336,68 @@ void MuSoundEditorUI::RenderEventRules(const std::vector<Data::Sounds::SoundEven
     }
 }
 
-std::optional<std::vector<int>> MuSoundEditorUI::RenderNumbersField(const char* id, const std::vector<int>& numbers,
-                                                                    int highest)
+void MuSoundEditorUI::RenderSafeZoneCell(const Data::Sounds::SoundEventRule& rule,
+                                         const std::function<void(const Data::Sounds::SoundEventRule&)>& change)
+{
+    using Data::Sounds::SoundEventRule;
+    const char* zone = !rule.safeZone   ? I18N::Editor::SoundEventAny
+                       : *rule.safeZone ? I18N::Editor::SoundEventInSafeZone
+                                        : I18N::Editor::SoundEventOutsideSafeZone;
+    ImGui::SetNextItemWidth(TypeWidth * g_MuEditorCore.GetUIScale());
+    if (ImGui::BeginCombo("##SafeZone", zone))
+    {
+        const std::pair<const char*, std::optional<bool>> choices[] = {
+            {I18N::Editor::SoundEventAny, std::nullopt},
+            {I18N::Editor::SoundEventInSafeZone, true},
+            {I18N::Editor::SoundEventOutsideSafeZone, false}};
+        for (const auto& [text, value] : choices)
+        {
+            if (ImGui::Selectable(text, rule.safeZone == value))
+            {
+                SoundEventRule after = rule;
+                after.safeZone = value;
+                change(after);
+            }
+        }
+        ImGui::EndCombo();
+    }
+}
+
+void MuSoundEditorUI::RenderHoldsCell(const Data::Sounds::SoundEventRule& rule,
+                                      const std::function<void(const Data::Sounds::SoundEventRule&)>& change)
+{
+    using Data::Sounds::SoundEventRule;
+    const std::string holds =
+        rule.holds ? std::string(Data::Sounds::HeldWeaponWord(*rule.holds)) : I18N::Editor::SoundEventAny;
+    ImGui::SetNextItemWidth(TypeWidth * g_MuEditorCore.GetUIScale());
+    if (ImGui::BeginCombo("##Holds", holds.c_str()))
+    {
+        if (ImGui::Selectable(I18N::Editor::SoundEventAny, !rule.holds))
+        {
+            SoundEventRule after = rule;
+            after.holds.reset();
+            change(after);
+        }
+        for (const Data::Sounds::HeldWeapon weapon :
+             {Data::Sounds::HeldWeapon::None, Data::Sounds::HeldWeapon::Bow, Data::Sounds::HeldWeapon::Crossbow,
+              Data::Sounds::HeldWeapon::MagicCrossbow, Data::Sounds::HeldWeapon::SaberOrSpear,
+              Data::Sounds::HeldWeapon::Other})
+        {
+            if (ImGui::Selectable(std::string(Data::Sounds::HeldWeaponWord(weapon)).c_str(), rule.holds == weapon))
+            {
+                SoundEventRule after = rule;
+                after.holds = weapon;
+                change(after);
+            }
+        }
+        ImGui::EndCombo();
+    }
+}
+
+std::optional<std::string> MuSoundEditorUI::RenderListField(const char* id, const std::string& shown)
 {
     const std::string key = std::string(id) + "@" + std::to_string(ImGui::GetID(id));
-    std::string text = m_numbersEditKey == key ? m_numbersEdit : MuEditor::SoundEditor::NumbersText(numbers);
+    std::string text = m_numbersEditKey == key ? m_numbersEdit : shown;
     ImGui::SetNextItemWidth(TypeWidth * g_MuEditorCore.GetUIScale());
     MuEditor::Items::InputStringWithHint(id, I18N::Editor::SoundEventAny, text);
     if (ImGui::IsItemActive())
@@ -353,17 +405,27 @@ std::optional<std::vector<int>> MuSoundEditorUI::RenderNumbersField(const char* 
         m_numbersEditKey = key;
         m_numbersEdit = text;
     }
-    std::optional<std::vector<int>> parsed;
+    std::optional<std::string> edited;
     if (ImGui::IsItemDeactivatedAfterEdit())
     {
-        parsed = MuEditor::SoundEditor::ParseNumbers(text, highest);
+        edited = text;
         m_numbersEditKey.clear();
     }
     else if (!ImGui::IsItemActive() && m_numbersEditKey == key)
     {
         m_numbersEditKey.clear();
     }
-    return parsed;
+    return edited;
+}
+
+std::optional<std::vector<int>> MuSoundEditorUI::RenderNumbersField(const char* id, const std::vector<int>& numbers,
+                                                                    int highest)
+{
+    if (const std::optional<std::string> text = RenderListField(id, MuEditor::SoundEditor::NumbersText(numbers)))
+    {
+        return MuEditor::SoundEditor::ParseNumbers(*text, highest);
+    }
+    return std::nullopt;
 }
 
 void MuSoundEditorUI::RenderPlaysPicker(const Data::Sounds::SoundEventRule& rule,

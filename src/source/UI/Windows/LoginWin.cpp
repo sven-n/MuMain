@@ -35,6 +35,7 @@
 #include "Data/GameConfig/GameConfigConstants.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlClickSounds.h"
 #include "UI/RmlBridge/RmlDocumentVisibility.h"
 #include "UI/RmlBridge/RmlNativeText.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -236,28 +237,32 @@ void CLoginWin::RmlToggleSavePassword()
 
 bool CLoginWin::UpdateWhileActive()
 {
-	if (CInput::Instance().IsKeyDown(VK_RETURN))
-	{
-		SubmitLogin();
-		return true;
-	}
+    // Enter and Escape sound like the OK and Cancel buttons they stand for:
+    // their theme's click kind (Q-UI1).
+    if (CInput::Instance().IsKeyDown(VK_RETURN))
+    {
+        PlayKeyClick(".btn-ok");
+        SubmitLogin();
+        return true;
+    }
 
-	if (CInput::Instance().IsKeyDown(VK_ESCAPE))
-	{
-		SubmitCancel();
-		return true;
-	}
+    if (CInput::Instance().IsKeyDown(VK_ESCAPE))
+    {
+        PlayKeyClick(".btn-cancel");
+        SubmitCancel();
+        return true;
+    }
 
-	return true;
+    return true;
 }
 
 // Called both from the immediate RmlUi click callbacks and from UpdateWhileActive()'s keyboard
-// polling, so each re-checks the "remember password" prompt's Pending state itself.
+// polling, so each re-checks the "remember password" prompt's Pending state itself. A click's
+// sound is the button's style's (Q-UI1), a key's PlayKeyClick().
 void CLoginWin::SubmitLogin()
 {
 	if (UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending)
 		return;
-	PlayBuffer(SOUND_CLICK01);
 	RequestLogin();
 }
 
@@ -265,8 +270,17 @@ void CLoginWin::SubmitCancel()
 {
 	if (UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending)
 		return;
-	PlayBuffer(SOUND_CLICK01);
 	CancelLogin();
+}
+
+// The remember-password prompt takes the key while it waits, silently (it is modal, so a click
+// cannot reach the buttons then either).
+void CLoginWin::PlayKeyClick(const char* button)
+{
+    if (UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending)
+        return;
+    if (Rml::ElementDocument* document = m_RmlView.Document())
+        UI::RmlBridge::PlayClickSoundOf(document->QuerySelector(button));
 }
 
 void CLoginWin::ApplyRememberMeChange()

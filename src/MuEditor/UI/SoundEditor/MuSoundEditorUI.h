@@ -30,6 +30,12 @@ private:
     // A field of numbers ("7, 24-29"); the numbers when an edit ends and they
     // read.
     std::optional<std::vector<int>> RenderNumbersField(const char* id, const std::vector<int>& numbers, int highest);
+    // A text field of a list ("7, 24-29", "confirm, cancel"): its text when an edit ends.
+    std::optional<std::string> RenderListField(const char* id, const std::string& shown);
+    void RenderSafeZoneCell(const Data::Sounds::SoundEventRule& rule,
+                            const std::function<void(const Data::Sounds::SoundEventRule&)>& change);
+    void RenderHoldsCell(const Data::Sounds::SoundEventRule& rule,
+                         const std::function<void(const Data::Sounds::SoundEventRule&)>& change);
     void RenderPlaysPicker(const Data::Sounds::SoundEventRule& rule,
                            const std::function<void(const Data::Sounds::SoundEventRule&)>& change);
     void RenderFilterBar(const std::vector<MuEditor::SoundEditor::SoundRow>& rows, size_t shown);

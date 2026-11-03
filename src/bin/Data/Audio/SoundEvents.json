@@ -22,6 +22,21 @@
         {"holds": "saberOrSpear", "plays": ["SOUND_BRANDISH_SWORD03"]},
         {"holds": "other", "plays": ["SOUND_BRANDISH_SWORD01", "SOUND_BRANDISH_SWORD02"]}
       ]
+    },
+    {
+      "event": "interfaceClick",
+      "rules": [
+        {"kinds": ["confirm"], "plays": ["SOUND_CLICK01"]},
+        {"kinds": ["cancel"], "plays": ["SOUND_CLICK01"]},
+        {"kinds": ["select"], "plays": ["SOUND_CLICK01"]},
+        {"kinds": ["menu"], "plays": ["SOUND_CLICK01"]}
+      ]
+    },
+    {
+      "event": "characterSelected",
+      "rules": [
+        {"plays": ["SOUND_CLICK01"]}
+      ]
     }
   ]
 }

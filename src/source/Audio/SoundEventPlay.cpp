@@ -2,6 +2,8 @@
 
 #include "Audio/SoundEventPlay.h"
 
+#include "Audio/SoundPlaces.h"
+
 #include "Character/CharacterManager.h"
 #include "Core/Utilities/Random.h"
 #include "Data/GameData/SoundData/SoundEventDatabase.h"
@@ -24,6 +26,15 @@ std::optional<ESound> PickEventSound(std::string_view event, const Data::Sounds:
     // One sound draws nothing, as the code played it.
     const size_t pick = rule->numbers.size() > 1 ? static_cast<size_t>(Random::Rand()) % rule->numbers.size() : 0;
     return static_cast<ESound>(rule->numbers[pick]);
+}
+
+void PlayInterfaceEventSound(std::string_view event, const Data::Sounds::SoundEventContext& context)
+{
+    if (const std::optional<ESound> sound = PickEventSound(event, context))
+    {
+        const ScopedSoundPlace ui(SoundKind::Interface, -1, nullptr);
+        PlayBuffer(*sound);
+    }
 }
 
 Data::Sounds::HeldWeapon HeldWeaponOf(const CHARACTER& c)

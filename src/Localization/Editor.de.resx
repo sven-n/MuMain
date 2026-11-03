@@ -3586,6 +3586,18 @@
   <data name="Sound event hero footstep" xml:space="preserve">
     <value>Deine Schritte (jeder Schritt beim Gehen, nicht beim Fliegen)</value>
   </data>
+  <data name="Sound event interface click" xml:space="preserve">
+    <value>Ein Klick auf einen Knopf, nach der Klickart, die sein Theme ihm gibt (click-sound)</value>
+  </data>
+  <data name="Sound event character selected" xml:space="preserve">
+    <value>Ein Klick auf einen Charakter in der Charakterauswahl</value>
+  </data>
+  <data name="Sound event column kinds" xml:space="preserve">
+    <value>Klickarten</value>
+  </data>
+  <data name="Sound event kinds tip" xml:space="preserve">
+    <value>Die Klickarten, für die diese Regel spielt, wie die Themes sie den Knöpfen geben (click-sound: confirm). Die Themes nutzen confirm, cancel, select und menu. Leer: jede Art.</value>
+  </data>
   <data name="Sound event player attack swing" xml:space="preserve">
     <value>Der Schwung eines Spielers zu Beginn eines Angriffs</value>
   </data>

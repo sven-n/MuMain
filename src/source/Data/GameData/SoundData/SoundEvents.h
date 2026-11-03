@@ -17,7 +17,9 @@
 //     "events": [
 //       { "event": "heroFootstep", "rules": [
 //           { "worlds": [0], "tiles": [0], "plays": ["SOUND_HUMAN_WALK_GRASS"] },
-//           { "plays": ["SOUND_HUMAN_WALK_GROUND"] } ] } ] }
+//           { "plays": ["SOUND_HUMAN_WALK_GROUND"] } ] },
+//       { "event": "interfaceClick", "rules": [
+//           { "kinds": ["confirm"], "plays": ["SOUND_CLICK01"] } ] } ] }
 namespace Data::Sounds
 {
 constexpr int SoundEventsFormatVersion = 1;
@@ -25,6 +27,11 @@ constexpr int SoundEventsFormatVersion = 1;
 // The events the code names.
 inline constexpr std::string_view HeroFootstepEvent = "heroFootstep";
 inline constexpr std::string_view PlayerAttackSwingEvent = "playerAttackSwing";
+// A click on a button whose style names a click kind (the themes'
+// `click-sound: confirm`, Q-UI1), or a key that stands for one.
+inline constexpr std::string_view InterfaceClickEvent = "interfaceClick";
+// A click on a character of the character select scene.
+inline constexpr std::string_view CharacterSelectedEvent = "characterSelected";
 
 // What a player holds at an attack's start, as the code tells it: the first
 // that fits.
@@ -53,6 +60,8 @@ struct SoundEventRule
     std::optional<bool> safeZone;
     // Only for what the player holds; none: anything.
     std::optional<HeldWeapon> holds;
+    // Only for buttons of these click kinds (IsClickKindWord); empty: any.
+    std::vector<std::string> kinds;
     // The SOUND_ ids of the sounds: one plays, picked at random (Random::Rand() %
     // count) when there are more.
     std::vector<std::string> plays;
@@ -77,7 +86,13 @@ struct SoundEventContext
     int tile = -1;
     bool safeZone = false;
     HeldWeapon holds = HeldWeapon::None;
+    // The clicked button's click kind.
+    std::string_view kind;
 };
+
+// A click kind as the themes and the file write it: lower-case letters,
+// digits and '-', at least one ("confirm", "tab-select").
+bool IsClickKindWord(std::string_view word);
 
 // Reads the events into `events`. An event or rule with a value of the wrong
 // form, a SOUND_ id that is none, a rule that plays nothing or an event named

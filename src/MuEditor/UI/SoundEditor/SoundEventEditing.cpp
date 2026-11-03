@@ -94,6 +94,37 @@ std::optional<std::vector<int>> ParseNumbers(std::string_view text, int highest)
     return std::vector<int>(numbers.begin(), numbers.end());
 }
 
+std::string KindsText(const std::vector<std::string>& kinds)
+{
+    std::string text;
+    for (const std::string& kind : kinds)
+    {
+        text += (text.empty() ? "" : ", ") + kind;
+    }
+    return text;
+}
+
+std::optional<std::vector<std::string>> ParseKinds(std::string_view text)
+{
+    std::vector<std::string> kinds;
+    text = Trimmed(text);
+    while (!text.empty())
+    {
+        const size_t comma = text.find(',');
+        const std::string_view part = Trimmed(text.substr(0, comma));
+        text = comma == std::string_view::npos ? std::string_view() : text.substr(comma + 1);
+        if (!Data::Sounds::IsClickKindWord(part))
+        {
+            return std::nullopt;
+        }
+        if (std::find(kinds.begin(), kinds.end(), part) == kinds.end())
+        {
+            kinds.emplace_back(part);
+        }
+    }
+    return kinds;
+}
+
 std::string EventTitle(std::string_view event)
 {
     if (event == Data::Sounds::HeroFootstepEvent)
@@ -104,7 +135,45 @@ std::string EventTitle(std::string_view event)
     {
         return I18N::Editor::SoundEventPlayerAttackSwing;
     }
+    if (event == Data::Sounds::InterfaceClickEvent)
+    {
+        return I18N::Editor::SoundEventInterfaceClick;
+    }
+    if (event == Data::Sounds::CharacterSelectedEvent)
+    {
+        return I18N::Editor::SoundEventCharacterSelected;
+    }
     return std::string(event);
+}
+
+EventFields FieldsOf(const Data::Sounds::SoundEvent& event)
+{
+    EventFields fields;
+    if (event.event == Data::Sounds::HeroFootstepEvent)
+    {
+        fields.worlds = fields.tiles = fields.safeZone = true;
+    }
+    else if (event.event == Data::Sounds::PlayerAttackSwingEvent)
+    {
+        fields.holds = true;
+    }
+    else if (event.event == Data::Sounds::InterfaceClickEvent)
+    {
+        fields.kinds = true;
+    }
+    else if (event.event != Data::Sounds::CharacterSelectedEvent)
+    {
+        fields = {true, true, true, true, true};
+    }
+    for (const Data::Sounds::SoundEventRule& rule : event.rules)
+    {
+        fields.worlds = fields.worlds || !rule.worlds.empty();
+        fields.tiles = fields.tiles || !rule.tiles.empty();
+        fields.safeZone = fields.safeZone || rule.safeZone.has_value();
+        fields.holds = fields.holds || rule.holds.has_value();
+        fields.kinds = fields.kinds || !rule.kinds.empty();
+    }
+    return fields;
 }
 
 std::string PlaysText(const Data::Sounds::SoundEventRule& rule)

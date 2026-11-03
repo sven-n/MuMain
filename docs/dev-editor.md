@@ -256,7 +256,12 @@ at once; **Save** writes the files that changed, **Revert** reads them again,
   and the safe zone; a player's swing at an attack's start
   (`playerAttackSwing`) matches what the player holds (a bow, a crossbow,
   the bow group's items 13 and 14, a Light Saber or Spear, another weapon,
-  nothing). An empty field matches anything.
+  nothing). A click on a button (`interfaceClick`) matches its click kind,
+  which the button's theme gives it (`click-sound: confirm`,
+  [building-new-ui.md](rmlui-ui-system/building-new-ui.md)); a click on a
+  character in the character select scene is `characterSelected`. An empty
+  field matches anything; each event shows only the fields its code fills
+  in.
 
 ---
 

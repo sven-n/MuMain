@@ -158,3 +158,8 @@ body {
 	font-size: calc(6.5 * var(--px));
 	line-height: calc(7.5 * var(--px));
 }
+
+/* The buttons' click kinds (click-sound, UI/RmlBridge/RmlClickSounds.h): the Sound
+   Editor's Events tab gives each kind its sound (interfaceClick). */
+.btn-ok { click-sound: confirm; }
+.btn-cancel { click-sound: cancel; }

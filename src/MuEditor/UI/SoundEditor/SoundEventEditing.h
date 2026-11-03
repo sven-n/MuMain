@@ -20,9 +20,31 @@ std::string NumbersText(const std::vector<int>& numbers);
 // {} for "". Nullopt for anything else ("a", "5-2", a number past `highest`).
 std::optional<std::vector<int>> ParseNumbers(std::string_view text, int highest);
 
+// "confirm, cancel"; "" for none.
+std::string KindsText(const std::vector<std::string>& kinds);
+
+// The click kinds of such a text, each once, in its order; {} for "".
+// Nullopt for anything else ("Confirm", "a b", "a,,b").
+std::optional<std::vector<std::string>> ParseKinds(std::string_view text);
+
 // What the tab calls an event: "Your footsteps", "A player's swing"; its name
 // for one it does not know.
 std::string EventTitle(std::string_view event);
+
+// The fields of an event's rules the tab shows: the ones its code fills in
+// (the footsteps' world, tile and safe zone; a click's kind), every field
+// for an event it does not know, and any field a rule of it uses.
+struct EventFields
+{
+    bool worlds = false;
+    bool tiles = false;
+    bool safeZone = false;
+    bool holds = false;
+    bool kinds = false;
+
+    bool operator==(const EventFields&) const = default;
+};
+EventFields FieldsOf(const Data::Sounds::SoundEvent& event);
 
 // The rule's sounds by the names the Sound Editor gave them, else their ids.
 std::string PlaysText(const Data::Sounds::SoundEventRule& rule);

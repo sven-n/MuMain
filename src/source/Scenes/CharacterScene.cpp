@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "CharacterScene.h"
 #include "SceneCore.h"
+#include "Audio/SoundEventPlay.h"
 #include "Character/CharacterManager.h"
 #include "World/MapInfra/MapManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -267,7 +268,8 @@ static void MoveCharacterSceneState()
             || g_SysMenuWin.IsVisible())
             && SelectedHero > -1 && SelectedHero < MAX_CHARACTERS_PER_ACCOUNT)
         {
-            ::PlayBuffer(SOUND_CLICK01);
+            // Enter is the Connect button: its theme's click kind (Q-UI1).
+            g_CharSelMainWin.PlayButtonClick("btn_connect");
 
             if (SelectedCharacter >= 0)
                 SelectedHero = SelectedCharacter;
@@ -304,7 +306,11 @@ static void MoveCharacterSceneState()
         if (SelectedCharacter < 0 || SelectedCharacter >= MAX_CHARACTERS_PER_ACCOUNT)
             SelectedHero = -1;
         else
+        {
             SelectedHero = SelectedCharacter;
+            // A click on a character (Q-UI1).
+            Audio::PlayInterfaceEventSound(Data::Sounds::CharacterSelectedEvent, {});
+        }
         g_CharSelMainWin.UpdateDisplay();
     }
 

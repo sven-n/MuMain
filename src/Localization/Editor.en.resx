@@ -3805,6 +3805,18 @@
   <data name="Sound event hero footstep" xml:space="preserve">
     <value>Your footsteps (each step of a walk, not while flying)</value>
   </data>
+  <data name="Sound event interface click" xml:space="preserve">
+    <value>A click on a button, by the click kind its theme gives it (click-sound)</value>
+  </data>
+  <data name="Sound event character selected" xml:space="preserve">
+    <value>A click on a character in the character select scene</value>
+  </data>
+  <data name="Sound event column kinds" xml:space="preserve">
+    <value>Click kinds</value>
+  </data>
+  <data name="Sound event kinds tip" xml:space="preserve">
+    <value>The click kinds this rule plays for, as the themes give them to buttons (click-sound: confirm). The themes use confirm, cancel, select and menu. Empty: any kind.</value>
+  </data>
   <data name="Sound event player attack swing" xml:space="preserve">
     <value>A player's swing at the start of an attack</value>
   </data>

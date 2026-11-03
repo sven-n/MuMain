@@ -17,6 +17,10 @@ namespace Audio
 // no rule or no such event.
 std::optional<ESound> PickEventSound(std::string_view event, const Data::Sounds::SoundEventContext& context);
 
+// Plays PickEventSound's sound, if any, as an interface sound (no place in
+// the world): the clicks of buttons and of characters (Q-UI1).
+void PlayInterfaceEventSound(std::string_view event, const Data::Sounds::SoundEventContext& context);
+
 // What the player holds, as the swing at an attack's start tells it: a bow,
 // a crossbow, the bow group's items 13 and 14, a Light Saber or Spear in the
 // right hand, any other weapon, nothing.
