@@ -121,6 +121,13 @@ using Json::ReadWholeList;
 using Json::WriteAnimationList;
 using Json::WriteFloat;
 
+// How the problems of a model name it: "model MONSTER_MODEL_HOUND", then the
+// field (MonsterModelField).
+std::string ModelEntry(std::string_view slot)
+{
+    return "model " + std::string(slot);
+}
+
 bool EndsWithIgnoringCase(std::string_view text, std::string_view end)
 {
     if (text.size() < end.size())
@@ -592,7 +599,7 @@ std::optional<MonsterModelDefinition> ReadModel(const OrderedJson& json, size_t 
     }
     MonsterModelDefinition model;
     model.slot = slot->get<std::string>();
-    ModelIssues modelIssues(source, "model " + model.slot, issues);
+    ModelIssues modelIssues(source, ModelEntry(model.slot), issues);
     ReadModelFields(json, model, modelIssues);
     Items::Json::WarnAboutUnknownKeys(json, ModelKeys, "", [&](const std::string& unknown, const std::string& message)
                                       { modelIssues.Warning(unknown, message); });
@@ -801,7 +808,7 @@ int SortSlot(const MonsterModelDefinition& model)
 
 std::string MonsterModelField(std::string_view slot, std::string_view key)
 {
-    return "model " + std::string(slot) + " " + std::string(key);
+    return ModelEntry(slot) + " " + std::string(key);
 }
 
 void ReadMonsterModelsJson(std::string_view text, const std::string& source,
