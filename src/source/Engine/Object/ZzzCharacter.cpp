@@ -92,6 +92,14 @@ namespace
         return o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3;
     }
 
+    // A character that sounds as a monster, not a player, when it attacks, is
+    // hit or dies (no weapon swing, no voice): of a monster model, or a
+    // skeleton of the player model.
+    bool SoundsAsMonster(const OBJECT* o)
+    {
+        return o->Type != MODEL_PLAYER || IsSkeleton(o);
+    }
+
     // The idle sounds of a step without a mount's sound, where the sound slots
     // played them: the walk moment of the character's set (players have
     // none), for the hero one time in 64 in place of the events' chance, and
@@ -1275,7 +1283,7 @@ void SetPlayerAttack(CHARACTER* c)
         {
             PlayMonsterSound(c);
 
-            if (o->Type != MODEL_PLAYER || (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
+            if (SoundsAsMonster(o))
             {
                 if (IsSkeleton(o))
                     PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + Random::Rand() % 2), o);
@@ -1393,7 +1401,7 @@ void SetPlayerShock(CHARACTER* c, int Hit)
         {
             PlayMonsterSound(c);
 
-            if (o->Type != MODEL_PLAYER || (o->SubType >= MODEL_SKELETON1 && o->SubType <= MODEL_SKELETON3))
+            if (SoundsAsMonster(o))
             {
                 if (IsSkeleton(o))
                     PlayBuffer(SOUND_BONE1, o);
@@ -1516,7 +1524,7 @@ void SetPlayerDie(CHARACTER* c)
     if (c->Object.AnimationFrame == 0.f)
     {
         PlayMonsterSound(c);
-        const bool monsterSounds = o->Type != MODEL_PLAYER || IsSkeleton(o);
+        const bool monsterSounds = SoundsAsMonster(o);
         PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Death);
         if (gMapManager.InChaosCastle() == true)
         {
