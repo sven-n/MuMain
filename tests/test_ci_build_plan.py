@@ -137,6 +137,21 @@ class BuildPlanTests(unittest.TestCase):
             base = self.prepare_renamed_repository(repo)
             self.assertEqual(self.run_plan(repo, "push", {"before": base})["linux"], "true")
 
+    def test_pull_request_diffs_against_current_main_not_stale_base_sha(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as temporary:
+            repo = Path(temporary)
+            stale = self.prepare_renamed_repository(repo)
+            main = self.git(repo, "rev-parse", "HEAD")
+            self.git(repo, "checkout", "-q", "-b", "pr", stale)
+            (repo / "docs").mkdir()
+            (repo / "docs/note.md").write_text("note", encoding="utf-8")
+            self.git(repo, "add", "docs/note.md")
+            self.git(repo, "commit", "-m", "docs: add note")
+            self.git(repo, "checkout", "-q", "--detach", main)
+            self.git(repo, "merge", "--no-ff", "-m", "merge", "pr")
+            plan = self.run_plan(repo, "pull_request", {"pull_request": {"draft": False, "base": {"sha": stale}}})
+            self.assertEqual(plan["linux"], "false")
+
     def test_nightly_skips_idle_and_non_release_commits_but_manual_forces_build(self):
         with tempfile.TemporaryDirectory(dir=ROOT) as temporary:
             repo = Path(temporary)

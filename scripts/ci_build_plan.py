@@ -115,7 +115,8 @@ def write_plan():
     event = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text(encoding="utf-8"))
     event_name = os.environ["GITHUB_EVENT_NAME"]
     if event_name == "pull_request":
-        base = event["pull_request"]["base"]["sha"]
+        # The checkout is GitHub's merge commit on current main; the event's base.sha can be weeks stale.
+        base = "HEAD^1"
     elif event_name == "push":
         base = event["before"]
     else:
