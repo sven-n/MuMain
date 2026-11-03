@@ -93,8 +93,10 @@
 	top: 72dp;
 	cursor: pointer;
 	pointer-events: auto;
-	color: token(text-primary);
+	color: #efba58;
 	font-family: "token(font-body)";
+	font-weight: bold;
+	font-effect: outline(1px black);
 	line-height: 30dp;
 	text-align: center;
 }

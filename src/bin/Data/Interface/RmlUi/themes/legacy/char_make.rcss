@@ -2,6 +2,14 @@
    frames are reproduced. Stat/description panels were flat CSprite fills originally, so they're
    plain background-color here too. */
 
+@spritesheet charmake-input-sheet
+{
+	src: "../../../cha_id.tga";
+	charmake-input-image: 0px 0px 346px 38px;
+	charmake-tab-left:  40px 17px 7px 18px;
+	charmake-tab-mid:   62px 17px 1px 18px;
+	charmake-tab-right: 63px 17px 6px 18px;
+}
 @spritesheet charmake-job-sheet
 {
 	src: "../../../cha_bt.tga";
@@ -31,7 +39,7 @@
 
 #stat_panel  { left: 346px; top: 24px;  }
 #desc_panel  { left: 0px;   top: 355px; }
-#input_frame { left: 0px;   top: 325px; }
+#input_frame { left: 0px;   top: 317px; }
 #btn_ok      { left: 346px; top: 325px; }
 #btn_cancel  { left: 400px; top: 325px; }
 
@@ -120,21 +128,27 @@
 
 .input-frame {
 	position: absolute;
-	width: 344px;
-	height: 28px;
-	background-color: token(surface-overlay);
-	border: 1px token(border-control);
+	width: 346px;
+	height: 38px;
+	decorator: image(charmake-input-image);
 	pointer-events: none;
 }
 
-/* Preserve the name-field row while rendering its label as localizable text. */
+/* Cover the painted "ID" tab with matching art, then draw the translated label over it. */
 .input-label {
 	position: absolute;
-	left: 12px;
-	top: 332px;
+	left: 40px;
+	top: 334px;
+	height: 18px;
+	padding: 0 8px 0 6px;
+	line-height: 18px;
+	white-space: nowrap;
 	font-family: "token(font-body)";
 	font-size: 12px;
-	color: token(text-primary);
+	font-weight: bold;
+	color: #ffe96c;
+	font-effect: outline(1px black);
+	decorator: tiled-horizontal(charmake-tab-left, charmake-tab-mid, charmake-tab-right);
 }
 
 /* modern-only decorative backdrops/kickers (char_make.rml's own comment) -- real legacy sprite art
@@ -143,12 +157,12 @@
 	display: none;
 }
 
-/* Name field aligns with its translated label inside the existing identity row. */
+/* Start after the widest translated tab while staying inside the original identity row. */
 .char-make-name-field {
 	position: absolute;
-	left: 78px;
-	top: 332px;
-	width: 200px;
+	left: 120px;
+	top: 338px;
+	width: 160px;
 	height: 20px;
 	padding: 0;
 	color: token(text-narrative);
@@ -165,7 +179,9 @@
 	line-height: 30px;
 	cursor: pointer;
 	pointer-events: auto;
-	color: token(text-primary);
+	color: #efba58;
+	font-weight: bold;
+	font-effect: outline(1px black);
 }
 
 .btn-text {
