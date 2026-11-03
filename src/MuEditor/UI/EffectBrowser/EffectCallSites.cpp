@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #ifdef _EDITOR
 
@@ -243,7 +244,7 @@ const std::unordered_map<std::string, int>& NumbersOf(EffectKind kind)
 }
 
 // The types a call's first argument names: a code, a code plus a number, or
-// a code plus rand() % N (any of N types).
+// a code plus Random::Rand() % N (any of N types).
 std::vector<int> TypesOf(EffectKind kind, std::string_view argument)
 {
     const std::unordered_map<std::string, int>& codes = NumbersOf(kind);
@@ -255,9 +256,9 @@ std::vector<int> TypesOf(EffectKind kind, std::string_view argument)
         const auto found = codes.find(std::string(text));
         return found != codes.end() ? std::optional<int>(found->second) : std::nullopt;
     };
-    for (const std::string_view random : {std::string_view("rand()%"), std::string_view("(rand()%")})
+    for (const std::string_view random : {std::string_view("Random::Rand()%"), std::string_view("(Random::Rand()%")})
     {
-        // NAME+rand()%N or NAME+(rand()%N)
+        // NAME+Random::Rand()%N or NAME+(Random::Rand()%N)
         if (const size_t plus = compact.find("+" + std::string(random)); plus != std::string::npos)
         {
             const std::optional<int> base = codeAt(std::string_view(compact).substr(0, plus));
@@ -274,13 +275,14 @@ std::vector<int> TypesOf(EffectKind kind, std::string_view argument)
             }
         }
     }
-    // rand()%N+NAME
-    if (compact.rfind("rand()%", 0) == 0)
+    // Random::Rand()%N+NAME
+    constexpr std::string_view pick = "Random::Rand()%";
+    if (compact.rfind(pick, 0) == 0)
     {
         const size_t plus = compact.find('+');
         if (plus != std::string::npos)
         {
-            const std::optional<int> n = IntegerOf(std::string_view(compact).substr(7, plus - 7));
+            const std::optional<int> n = IntegerOf(std::string_view(compact).substr(pick.size(), plus - pick.size()));
             const std::optional<int> base = codeAt(std::string_view(compact).substr(plus + 1));
             if (base && n && *n > 0)
             {

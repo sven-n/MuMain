@@ -1,5 +1,6 @@
 ﻿
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "w_CursedTemple.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -118,10 +119,10 @@ bool CursedTemple::GetInterfaceState(int type, int subtype)
 
 bool CursedTemple::IsPartyMember(DWORD selectcharacterindex)
 {
-    if (PartyNumber == 0) return false;
+    if (PartyNumber == 0 || selectcharacterindex >= MAX_CHARACTERS_CLIENT)
+        return false;
 
     CHARACTER* c = &CharactersClient[selectcharacterindex];
-    if (c == NULL) return false;
 
     for (int i = 0; i < PartyNumber; ++i)
     {
@@ -499,7 +500,7 @@ void CursedTemple::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     }
 }
 
-bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
+bool CursedTemple::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     if (!gMapManager.IsCursedTemple()) return false;
 
@@ -533,7 +534,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         {
             if (rand_fps_check(3))
             {
-                float fLumi = (rand() % 10) * 0.007f + 0.03f;
+                float fLumi = (Random::Rand() % 10) * 0.007f + 0.03f;
                 Vector(54.f / 256.f * fLumi, 177.f / 256.f * fLumi, 150.f / 256.f * fLumi, Light);
                 CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
             }
@@ -543,7 +544,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         {
             if (rand_fps_check(3))
             {
-                float fLumi = (rand() % 10) * 0.007f + 0.03f;
+                float fLumi = (Random::Rand() % 10) * 0.007f + 0.03f;
                 Vector(221.f / 256.f * fLumi, 121.f / 256.f * fLumi, 201.f / 256.f * fLumi, Light);
                 CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
             }
@@ -553,7 +554,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         {
             if (rand_fps_check(3))
             {
-                float fLumi = (rand() % 10) * 0.007f + 0.03f;
+                float fLumi = (Random::Rand() % 10) * 0.007f + 0.03f;
                 Vector(54.f / 256.f * fLumi, 177.f / 256.f * fLumi, 150.f / 256.f * fLumi, Light);
                 CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
                 Vector(221.f / 256.f * fLumi, 121.f / 256.f * fLumi, 201.f / 256.f * fLumi, Light);
@@ -565,7 +566,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         {
             if (rand_fps_check(3))
             {
-                float fLumi = (rand() % 10) * 0.002f + 0.03f;
+                float fLumi = (Random::Rand() % 10) * 0.002f + 0.03f;
                 Vector(1.2f * fLumi, 1.2f * fLumi, 1.2f * fLumi, Light);
                 CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 15, o->Scale, o);
             }
@@ -582,9 +583,9 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         return true;
         case 75:
         {
-            if (rand() % 35 == 5)
+            if (Random::Rand() % 35 == 5)
             {
-                float fLumi = (rand() % 10) * 0.05f + 0.03f;
+                float fLumi = (Random::Rand() % 10) * 0.05f + 0.03f;
                 Vector(256.f / 256.f * fLumi, 256.f / 256.f * fLumi, 256.f / 256.f * fLumi, Light);
                 CreateParticleFpsChecked(BITMAP_GHOST_CLOUD1, o->Position, o->Angle, Light, 0, o->Scale, o);
             }
@@ -592,7 +593,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         return true;
         case 76:
         {
-            float fLumi = (rand() % 100) * 0.01;
+            float fLumi = (Random::Rand() % 100) * 0.01;
             //Vector(180.f/255.f+fLumi, 71.f/255.f, 55.f/255.f, Light);
             Vector(180.f / 255.f + fLumi, 71.f / 255.f, 55.f / 255.f, Light);
             vec3_t vPos;
@@ -608,7 +609,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         return true;
         case 77:
         {
-            float fLumi = (rand() % 100) * 0.005;
+            float fLumi = (Random::Rand() % 100) * 0.005;
             Vector(55.f / 256.f, 71.f / 256.f, 180.f / 256.f + fLumi, Light);
             //Vector(54.f/256.f, 177.f/256.f+fLumi, 150.f/256.f, Light);
             vec3_t vPos;
@@ -625,8 +626,8 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
         case 78:
         {
             int iTime = timeGetTime() % 500;
-            int iRand = rand() % 485;
-            if (iTime >= iRand + (rand() % 5) && iTime < iRand + (rand() % 10 + 5))
+            int iRand = Random::Rand() % 485;
+            if (iTime >= iRand + (Random::Rand() % 5) && iTime < iRand + (Random::Rand() % 10 + 5))
             {
                 Vector(1.f, 0.8f, 0.8f, Light);
                 for (int i = 0; i < 4; ++i)
@@ -637,9 +638,9 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
                 Vector(0.7f, 0.7f, 0.8f, Light);
                 vec3_t vPos;
                 VectorCopy(o->Position, vPos);
-                vPos[0] += (float)(rand() % 80 - 40);
-                vPos[1] += (float)(rand() % 80 - 40);
-                CreateParticleFpsChecked(BITMAP_WATERFALL_3 + (rand() % 2), vPos, o->Angle, Light, 2);
+                vPos[0] += (float)(Random::Rand() % 80 - 40);
+                vPos[1] += (float)(Random::Rand() % 80 - 40);
+                CreateParticleFpsChecked(BITMAP_WATERFALL_3 + (Random::Rand() % 2), vPos, o->Angle, Light, 2);
                 Vector(0.9f, 0.0f, 0.0f, Light);
                 CreateParticleFpsChecked(BITMAP_SMOKE, o->Position, o->Angle, Light, 0, 1.5f);
             }
@@ -651,7 +652,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
             {
                 for (int i = 0; i < 5; ++i)
                 {
-                    float fLumi = (rand() % 10) * 0.03f + 0.008f;
+                    float fLumi = (Random::Rand() % 10) * 0.03f + 0.008f;
                     Vector(100.f / 256.f * fLumi, 110.f / 256.f * fLumi, 160.f / 256.f * fLumi, Light);
                     CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 17, o->Scale, o);
                 }
@@ -665,7 +666,7 @@ bool CursedTemple::RenderObjectVisual(OBJECT* o, BMD* b)
     return false;
 }
 
-bool CursedTemple::RenderObject_AfterCharacter(OBJECT* o, BMD* b)
+bool CursedTemple::RenderObject_AfterCharacter(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (!gMapManager.IsCursedTemple()) return false;
 
@@ -678,7 +679,8 @@ bool CursedTemple::RenderObject_AfterCharacter(OBJECT* o, BMD* b)
     {
         if (o->Type == 64 || o->Type == 65 || o->Type == 66 || o->Type == 80)
         {
-            b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         }
     }
     return true;
@@ -687,7 +689,7 @@ bool CursedTemple::RenderObject_AfterCharacter(OBJECT* o, BMD* b)
     return false;
 }
 
-bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool CursedTemple::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     vec3_t Light;
 
@@ -711,22 +713,26 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
         for (int j = 0; j < 3; ++j)
         {
-            int randtemp = rand() % 4;
+            int randtemp = Random::Rand() % 4;
             if (randtemp == 0)
             {
-                Vector(static_cast<float>(rand() % 120), static_cast<float>(rand() % 70), static_cast<float>(rand() % 50), vRelativePos);
+                Vector(static_cast<float>(Random::Rand() % 120), static_cast<float>(Random::Rand() % 70),
+                       static_cast<float>(Random::Rand() % 50), vRelativePos);
             }
             else if (randtemp == 1)
             {
-                Vector(-static_cast<float>(rand() % 120), -static_cast<float>(rand() % 70), static_cast<float>(rand() % 50), vRelativePos);
+                Vector(-static_cast<float>(Random::Rand() % 120), -static_cast<float>(Random::Rand() % 70),
+                       static_cast<float>(Random::Rand() % 50), vRelativePos);
             }
             else if (randtemp == 2)
             {
-                Vector(static_cast<float>(rand() % 120), -static_cast<float>(rand() % 70), static_cast<float>(rand() % 50), vRelativePos);
+                Vector(static_cast<float>(Random::Rand() % 120), -static_cast<float>(Random::Rand() % 70),
+                       static_cast<float>(Random::Rand() % 50), vRelativePos);
             }
             else if (randtemp == 3)
             {
-                Vector(-static_cast<float>(rand() % 120), static_cast<float>(rand() % 70), static_cast<float>(rand() % 50), vRelativePos);
+                Vector(-static_cast<float>(Random::Rand() % 120), static_cast<float>(Random::Rand() % 70),
+                       static_cast<float>(Random::Rand() % 50), vRelativePos);
             }
 
             b->TransformPosition(o->BoneTransform[1], vRelativePos, vWorldPos, true);
@@ -750,9 +756,9 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 Vector(0.8f, 0.8f, 1.0f, Light);
                 CreateParticleFpsChecked(BITMAP_LIGHT + 2, vWorldPos, o->Angle, Light, 2, 0.7f);
 
-                Light[0] = static_cast<float>((rand() % 100) * 0.01f);
-                Light[1] = static_cast<float>((rand() % 100) * 0.01f);
-                Light[2] = static_cast<float>((rand() % 100) * 0.01f);
+                Light[0] = static_cast<float>((Random::Rand() % 100) * 0.01f);
+                Light[1] = static_cast<float>((Random::Rand() % 100) * 0.01f);
+                Light[2] = static_cast<float>((Random::Rand() % 100) * 0.01f);
 
                 CreateParticleFpsChecked(BITMAP_SHINY, vWorldPos, o->Angle, Light, 3, 0.8f);
             }
@@ -877,23 +883,23 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             if (o->PKKey == 0)
             {
                 o->PKKey = 1;
-                EarthQuake = (float)(rand() % 16 - 8) * 0.1f;
+                EarthQuake = (float)(Random::Rand() % 16 - 8) * 0.1f;
                 vWorldPos[2] = vRelativePos[2] + 250;
                 CreateEffectFpsChecked(MODEL_CURSEDTEMPLE_STATUE_PART2, vWorldPos, o->Angle, Light, 0, o, 0, 0);
                 for (int i = 0; i < 60; ++i)
                 {
-                    vWorldPos[0] = vRelativePos[0] + rand() % 80 - 40;
-                    vWorldPos[1] = vRelativePos[1] + rand() % 80 - 40;
-                    vWorldPos[2] = vRelativePos[2] + (rand() % 250);
+                    vWorldPos[0] = vRelativePos[0] + Random::Rand() % 80 - 40;
+                    vWorldPos[1] = vRelativePos[1] + Random::Rand() % 80 - 40;
+                    vWorldPos[2] = vRelativePos[2] + (Random::Rand() % 250);
                     CreateEffectFpsChecked(MODEL_CURSEDTEMPLE_STATUE_PART1, vWorldPos, o->Angle, Light, 0, o, 0, 0);
                 }
                 Vector(0.5f, 0.5f, 0.5f, Light);
 
                 for (int i = 0; i < 160; ++i)
                 {
-                    vWorldPos[0] = vRelativePos[0] + rand() % 140 - 70;
-                    vWorldPos[1] = vRelativePos[1] + rand() % 140 - 70;
-                    vWorldPos[2] = vRelativePos[2] + (rand() % 400) - 100;
+                    vWorldPos[0] = vRelativePos[0] + Random::Rand() % 140 - 70;
+                    vWorldPos[1] = vRelativePos[1] + Random::Rand() % 140 - 70;
+                    vWorldPos[2] = vRelativePos[2] + (Random::Rand() % 400) - 100;
                     CreateParticleFpsChecked(BITMAP_SMOKE, vWorldPos, o->Angle, Light, 48, 1.0f);
                 }
             }
@@ -901,7 +907,7 @@ bool CursedTemple::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         else
         {
             vec3_t vRelativePos, vWorldPos, Light;
-            Vector(0.2f, 0.3f, 0.4f + (rand() % 3) * 0.1f, Light);
+            Vector(0.2f, 0.3f, 0.4f + (Random::Rand() % 3) * 0.1f, Light);
             Vector(0.f, 0.f, 0.f, vRelativePos);
             b->TransformPosition(o->BoneTransform[13], vRelativePos, vWorldPos, true);
             CreateParticleFpsChecked(BITMAP_FLARE + 1, vWorldPos, o->Angle, Light, 0, 0.15f);
@@ -1001,7 +1007,7 @@ bool CursedTemple::IsGaugebarEnabled()
     return m_bGaugebarEnabled;
 }
 
-bool CursedTemple::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool CursedTemple::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (!gMapManager.IsCursedTemple()) return false;
 
@@ -1010,68 +1016,98 @@ bool CursedTemple::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     case MODEL_CURSEDTEMPLE_STATUE:
         if (o->CurrentAction != MONSTER01_DIE)
         {
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(4, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         }
         return true;
     case MODEL_CURSEDTEMPLE_ALLIED_BASKET:
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         return true;
     case MODEL_CURSEDTEMPLE_ILLUSION__BASKET:
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         return true;
     case MODEL_CURSEDTEMPLE_ILLUSION_NPC:
     {
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
         float fLumi2 = (sinf(WorldTime * 0.002f) + 1.f);
 
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 5, fLumi2, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CURSEDTEMPLE_NPC_MESH_EFFECT);
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 2, fLumi);
+        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 5, fLumi2, look.blendMeshU, look.blendMeshV,
+                      BITMAP_CURSEDTEMPLE_NPC_MESH_EFFECT);
+        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 2, fLumi);
     }
     break;
     case MODEL_CURSEDTEMPLE_ENTER_NPC:
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->RenderMesh(0, RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
 
         Vector(10.f, 10.f, 10.f, b->BodyLight);
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 3, o->BlendMeshLight, o->BlendMeshTexCoordU, (int)WorldTime % 2000 * 0.001f);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 3, look.blendMeshLight, look.blendMeshU,
+                      (int)WorldTime % 2000 * 0.001f);
     }
     return true;
     case MODEL_ILLUSION_SORCERER_SPIRIT_LIGHTNING:
     case MODEL_ILLUSION_SORCERER_SPIRIT_ICE:
     {
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.8f;
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, WorldTime * 0.02f, 0, fLumi * 4.f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, WorldTime * 0.02f, 0, fLumi * 4.f, look.blendMeshU,
+                      look.blendMeshV);
         fLumi = (sinf(WorldTime * 0.006f) + 1.f) * 0.9f;
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, WorldTime * 0.02f, 0, fLumi * 3.f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, WorldTime * 0.002f, 0, o->BlendMeshLight * 2.f, -WorldTime * 0.002f, WorldTime * 0.02f);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, WorldTime * 0.02f, 0, fLumi * 3.f, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, WorldTime * 0.002f, 0, look.blendMeshLight * 2.f,
+                      -WorldTime * 0.002f, WorldTime * 0.02f);
     }
     return true;
     case 54:
     {
         float fLumi = (sinf(WorldTime * 0.002f) + 1.f) * 0.4f;
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, fLumi + 0.3f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 2);
-        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, fLumi + 0.3f, look.blendMeshU, look.blendMeshV, 2);
+        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
     }
     return true;
     }

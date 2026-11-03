@@ -2,6 +2,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -75,7 +77,8 @@ std::array<physics_vertex, FLAG_HEIGHT * FLAG_WIDTH> g_flagVertices{};
 std::array<physics_face, (FLAG_HEIGHT - 1) * (FLAG_WIDTH - 1)> g_flagFaces{};
 
 template <typename BlurType>
-void RenderBlurSegment(const BlurType& blur, int segment, float firstLight, float secondLight)
+void DescribeBlurSegment(const BlurType& blur, int segment, float firstLight, float secondLight,
+                         Render::EffectDrawing::EffectDrawer& out)
 {
     const float firstU = segment / static_cast<float>(blur.Number);
     const float secondU = (segment + 1) / static_cast<float>(blur.Number);
@@ -95,7 +98,7 @@ void RenderBlurSegment(const BlurType& blur, int segment, float firstLight, floa
     const mu::Vertex3D vertices[4] = {
         firstTop, firstBottom, secondBottom, secondTop,
     };
-    mu::GetRenderer().RenderQuad3D(vertices, 0u);
+    out.DrawQuads({vertices, 0u});
 }
 
 void RenderFlagFace(OBJECT* object, const vec3_t light, int texture, const float texCoord[4][2],
@@ -158,6 +161,7 @@ void AddBlur(Blur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
 
 void CreateBlur(CHARACTER* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short, int SubType)
 {
+    Diagnostics::DrawSpawnCheck::Note("blur");
     Blur* freeBlur = nullptr;
     for (auto& blur : g_blurs)
     {
@@ -228,6 +232,8 @@ void MoveBlurs()
 
 void RenderBlurs()
 {
+    using Render::EffectDrawing::Blend;
+    Render::EffectDrawing::EffectDrawer& out = Render::EffectDrawing::ActiveEffectDrawer();
     int Type;
     for (auto& blur : g_blurs)
     {
@@ -253,11 +259,11 @@ void RenderBlurs()
         }
         if (blur.Owner->Level == 0 && (Type <= 3 || (Type >= 5 && Type <= 10)))
         {
-            EnableAlphaBlend();
+            out.SetState({.blend = Blend::Glow});
         }
         else
         {
-            EnableAlphaBlendMinus();
+            out.SetState({.blend = Blend::Subtract});
         }
 
         if (Type > 2)
@@ -266,7 +272,7 @@ void RenderBlurs()
         }
         if (blur.Number >= 2)
         {
-            BindTexture(nTexture);
+            out.SetState({.texture = nTexture});
             for (int j = 0; j < blur.Number - 1; j++)
             {
                 float firstLight;
@@ -279,7 +285,7 @@ void RenderBlurs()
                     secondLight = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
                 else
                     secondLight = 1.f;
-                RenderBlurSegment(blur, j, firstLight, secondLight);
+                DescribeBlurSegment(blur, j, firstLight, secondLight, out);
             }
         }
     }
@@ -303,6 +309,7 @@ void AddObjectBlur(ObjectBlur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
 
 void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short, int SubType, int iLimitLifeTime)
 {
+    Diagnostics::DrawSpawnCheck::Note("object-blur");
     ObjectBlur* freeBlur = nullptr;
     for (auto& blur : g_objectBlurs)
     {
@@ -380,6 +387,8 @@ void MoveObjectBlurs()
 
 void RenderObjectBlurs()
 {
+    using Render::EffectDrawing::Blend;
+    Render::EffectDrawing::EffectDrawer& out = Render::EffectDrawing::ActiveEffectDrawer();
     int Type;
     for (auto& blur : g_objectBlurs)
     {
@@ -403,7 +412,7 @@ void RenderObjectBlurs()
             nTexture = BITMAP_LAVA;
         }
 
-        EnableAlphaBlend();
+        out.SetState({.blend = Blend::Glow});
 
         if (Type > 2)
         {
@@ -411,7 +420,7 @@ void RenderObjectBlurs()
         }
         if (blur.Number >= 2)
         {
-            BindTexture(nTexture);
+            out.SetState({.texture = nTexture});
             for (int j = 0; j < blur.Number - 1; j++)
             {
                 const float Data = 300.f;
@@ -426,7 +435,7 @@ void RenderObjectBlurs()
 
                 const float firstLight = (blur.Number - j) / static_cast<float>(blur.Number);
                 const float secondLight = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
-                RenderBlurSegment(blur, j, firstLight, secondLight);
+                DescribeBlurSegment(blur, j, firstLight, secondLight, out);
             }
         }
     }

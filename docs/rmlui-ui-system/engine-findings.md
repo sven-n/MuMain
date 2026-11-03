@@ -64,6 +64,13 @@ implementation findings, not general policy; recheck them when updating the engi
   explicit `width`** — left to shrink-to-fit, the width computation undersizes to the longest
   *word*, not the longest *line*.
 
+- **A shrink-to-fit width leaves out the vertical scrollbar.** `LayoutDetails::GetShrinkToFitWidth()`
+  and a flex container's max-content size measure the content alone; when the box then scrolls,
+  its scrollbar takes its width out of that content and squeezes it. Give the scrollbar a negative
+  `margin-left` as wide as itself (`ElementScroll::EnableScrollbar()` counts its margins in the
+  width it takes) and the box a right padding as wide: the scrollbar then sits in the padding
+  (`server_select.rcss`'s `#server_col`).
+
 - **The default `display` is `inline`, not `block`, for every element including `<div>`**
   (`StyleSheetSpecification.cpp`; there is no user-agent stylesheet). Absolute positioning makes a
   block box anyway, which hides it; in-flow stacked content (e.g. `data-for` lines) runs together
@@ -89,8 +96,10 @@ implementation findings, not general policy; recheck them when updating the engi
   backdrop blur costs a blur pass every frame it is visible.
 
 - **`decorator: image(...)` does not stretch a sprite rect to a box of a different size;
-  `ninepatch(...)` with a declared inner rect does.** `server_select.rcss`'s `.server-row`/
-  `.group-btn` use `ninepatch(legacy-btn-idle, legacy-btn-idle-inner)`. Legacy's plain `.gmd-btn`
+  `ninepatch(...)` with a declared inner rect does, and so does `tiled-box(...)` with a sprite per
+  corner and edge**, which can take an edge from another part of the art: legacy `base.rcss`'s
+  server rows (`.server-option-btn`) take their bottom edge from beside the art's gauge track.
+  Legacy's plain `.gmd-btn`
   (128 dp / 64 dp over a 108×30 sprite) has the same width mismatch and has not been visually
   checked; `.gmd-btn.cols-2` uses the ninepatch fix.
 

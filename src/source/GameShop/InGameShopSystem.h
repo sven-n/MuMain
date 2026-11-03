@@ -175,9 +175,7 @@ protected:
     wchar_t m_szScriptIPAddress[20];
     wchar_t m_szBannerIPAddress[20];
     wchar_t m_szScriptRemotePath[MAX_TEXT_LENGTH];
-    wchar_t m_szScriptLocalPath[MAX_TEXT_LENGTH];
     wchar_t m_szBannerRemotePath[MAX_TEXT_LENGTH];
-    wchar_t m_szBannerLocalPath[MAX_TEXT_LENGTH];
 
     CShopCategory m_SelectedZone;
     CShopCategory m_SelectedCategory;

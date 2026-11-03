@@ -10,6 +10,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Core/Utilities/BaseCls.h"
+#include "Core/Utilities/Fnv1aHash.h"
 
 #define PVS_NORMAL (0x00)
 #define PVS_FIXEDPOS (0x01)
@@ -38,7 +39,9 @@ public:
     void Move(float fTime);
 
 public:
-    void GetPosition(vec3_t* pPos);
+    void GetPosition(vec3_t* pPos) const;
+    // Adds what the next step reads (force, velocity, position, state, the pending move) to a fingerprint.
+    void AddStateTo(Fnv1aHash& hash) const;
     float GetDistance(CPhysicsVertex* pVertex2, vec3_t* pDistance);
 
 protected:
@@ -85,6 +88,8 @@ public:
     void GetCenter(vec3_t vCenter);
     void GetCenterBeforeTransform(vec3_t vCenter);
     virtual void ProcessCollision(CPhysicsVertex* pVertex);
+    // Adds the collider's definition to a fingerprint; its center is rebuilt every step.
+    virtual void AddStateTo(Fnv1aHash& hash) const;
 };
 
 class CPhysicsColSphere : public CPhysicsCollision
@@ -106,6 +111,7 @@ public:
 
     void Init(float fXPos, float fYPos, float fZPos, float fRadius, int iBone);
     virtual void ProcessCollision(CPhysicsVertex* pVertex);
+    void AddStateTo(Fnv1aHash& hash) const override;
     float GetRadius(void)
     {
         return (m_fRadius);
@@ -208,7 +214,14 @@ protected:
 public:
     BOOL Move2(float fTime, int iCount);
     BOOL Move(float fTime);
-    void GetPosition(int index, vec3_t* pPos);
+    void GetPosition(int index, vec3_t* pPos) const;
+    int GetNumVertices() const
+    {
+        return m_iNumVertices;
+    }
+    // Adds what the next simulation step reads to a fingerprint: the settings, wind limits, vertices, links and
+    // colliders.
+    virtual void AddStateTo(Fnv1aHash& hash) const;
     int GetVerticesCount() const
     {
         return m_iNumVertices;
@@ -228,6 +241,8 @@ protected:
     BOOL PreventFromStretching(void);
 
 public:
+    // A glowing cloth's lights on its simulated vertices; the update spawns them after stepping it.
+    void SpawnLights();
     virtual void Render(vec3_t* pvColor = NULL, int iLevel = 0);
 
 protected:
@@ -253,11 +268,11 @@ public:
     CPhysicsClothMesh();
     virtual ~CPhysicsClothMesh();
     virtual void Clear(void);
+    void AddStateTo(Fnv1aHash& hash) const override;
 
 protected:
-    int m_iMesh;
-    int m_iBoneForFixed;
-    int m_iBMDType;
+    int m_iMesh = -1;
+    int m_iBMDType = -1;
 
 public:
     virtual BOOL Create(OBJECT* o, int iMesh, int iBone, DWORD dwType = 0, int iBMDType = -1);

@@ -24,6 +24,7 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Engine/Object/ObjectPose.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Scenes/SceneCore.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -189,6 +190,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
         m_BoneTransforms.reset();
         o->BoneTransform = nullptr;
     }
+    Engine::Object::Pose::Invalidate(o);
 
     int i;
     for (i = 0; i < 2; i++)
@@ -628,7 +630,7 @@ void CSPetDarkSpirit::MovePet(void)
             c->AttackTime = 15;
         }
     }
-    if (rand_fps_check(100) && rand() % 60 == 0)
+    if (rand_fps_check(100) && Random::Rand() % 60 == 0)
     {
         PlayBuffer(SOUND_DSPIRIT_SHOUT, o);
     }
@@ -650,6 +652,13 @@ void CSPetDarkSpirit::MovePet(void)
 
 void CSPetDarkSpirit::CalcPetInformation(const PET_INFO& Petinfo) {}
 
+void CSPetDarkSpirit::CullPet()
+{
+    OBJECT* o = &m_PetCharacter.Object;
+    if (o->Live)
+        o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f);
+}
+
 void CSPetDarkSpirit::RenderPet(int PetState)
 {
     CHARACTER* c = &m_PetCharacter;
@@ -660,29 +669,47 @@ void CSPetDarkSpirit::RenderPet(int PetState)
         return;
     }
 
-    if (m_pPetInfo)
-        o->WeaponLevel = static_cast<std::uint8_t>(m_pPetInfo->m_wLevel & 0xFF);
-
     if (o->Live)
     {
-        o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f);
         if (o->Visible)
         {
             if (m_PetOwner->Object.Type != MODEL_PLAYER && o->Type != MODEL_DARK_SPIRIT)
                 return;
 
             RenderObject(o, false, 0, PetState);
-            AttackEffect(c, o);
-        }
-        else
-        {
-            o->Velocity = 3.f;
-            if (o->AI != PET_STAND_START)
-            {
-                o->AI = PET_FLYING;
-            }
         }
     }
+}
+
+void CSPetDarkSpirit::UpdatePetEffects()
+{
+    CHARACTER* c = &m_PetCharacter;
+    OBJECT* o = &c->Object;
+
+    if (m_pPetInfo)
+        o->WeaponLevel = static_cast<std::uint8_t>(m_pPetInfo->m_wLevel & 0xFF);
+
+    if (!o->Live)
+        return;
+
+    if (!o->Visible)
+    {
+        o->Velocity = 3.f;
+        if (o->AI != PET_STAND_START)
+        {
+            o->AI = PET_FLYING;
+        }
+        return;
+    }
+
+    if (m_PetOwner->Object.Type != MODEL_PLAYER && o->Type != MODEL_DARK_SPIRIT)
+        return;
+
+    // The world pose its draw would build, which the draw then reuses.
+    BMD* b = &Models[o->Type];
+    PlaceObjectModel(o, b);
+    Engine::Object::Pose::World(o, b);
+    AttackEffect(c, o);
 }
 
 void CSPetDarkSpirit::Eff_LevelUp(void)
@@ -770,6 +797,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
 
                 if (to != NULL)
                 {
+                    SkinObjectMeshes(o, b, false);
                     b->RenderMeshEffect(1, BITMAP_LIGHT, 1, o->Angle, to);
                 }
 

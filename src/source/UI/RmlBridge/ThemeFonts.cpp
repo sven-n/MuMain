@@ -237,4 +237,10 @@ std::optional<std::string> ResolveThemeFontToken(const ThemeInheritance& theme, 
 {
     return ResolveToken(theme, token, 0);
 }
+
+bool ThemeFontHasItalic(const ThemeInheritance& theme, const std::string& token)
+{
+    const auto family = ResolveThemeFontToken(theme, token);
+    return family && FamilyAvailable(*family, Rml::Style::FontStyle::Italic);
+}
 } // namespace UI::RmlBridge

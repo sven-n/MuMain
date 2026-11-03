@@ -225,22 +225,32 @@ static std::uint8_t g_tabBar = 0;
         }
     }
 
+    void CullPet(CHARACTER* c)
+    {
+        if (auto* petSystem = ResolvePetSystem(c))
+            petSystem->CullPet();
+    }
+
     void RenderPet(CHARACTER* c)
     {
         OBJECT* o = &c->Object;
         if (auto* petSystem = ResolvePetSystem(c))
         {
-            if (g_isCharacterBuff(o, eBuff_Cloaking))
-            {
-                petSystem->RenderPet(10);
-            }
-            else
+            petSystem->RenderPet(g_isCharacterBuff(o, eBuff_Cloaking) ? 10 : 0);
+        }
+    }
+
+    void UpdatePetEffects(CHARACTER* c)
+    {
+        OBJECT* o = &c->Object;
+        if (auto* petSystem = ResolvePetSystem(c))
+        {
+            if (!g_isCharacterBuff(o, eBuff_Cloaking))
             {
                 ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
-                PET_INFO* pPetInfo = giPetManager::GetPetInfo(pEquipmentItemSlot);
-                petSystem->SetPetInfo(pPetInfo);
-                petSystem->RenderPet();
+                petSystem->SetPetInfo(giPetManager::GetPetInfo(pEquipmentItemSlot));
             }
+            petSystem->UpdatePetEffects();
         }
     }
 

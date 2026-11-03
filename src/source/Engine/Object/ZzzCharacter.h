@@ -1,6 +1,7 @@
 #ifndef __ZZCHARACTER_H__
 #define __ZZCHARACTER_H__
 
+#include "Engine/Object/CharacterAttachments.h"
 #include "Render/Models/ZzzBMD.h"
 #include <span>
 
@@ -14,10 +15,45 @@ DWORD GetGuildRelationShipBGColor(BYTE GuildRelationShip);
 CHARACTER* FindCharacterByID(wchar_t* szName);
 CHARACTER* FindCharacterByKey(int Key);
 
-void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1, bool Link,
-                      bool Translate, int RenderType = 0, bool bRightHandItem = true);
+// Draws a linked part and returns the bones it posed it into.
+vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1,
+                          bool Link, bool Translate, int RenderType = 0, bool bRightHandItem = true, int linkBone = -1);
+bool RendersWingCarriedModels(const CHARACTER* c);
+// A model a Red Dragon or a Saint statue carries on its wing part: where it hangs, and the character's scale for it.
+struct WingCarriedModel
+{
+    int type;
+    float x;
+    float y;
+    float z;
+    bool link;
+    int bone;
+    float scale;
+};
+int WingCarriedModels(const CHARACTER* c, WingCarriedModel (&models)[2]);
+void RenderWingCarriedModels(CHARACTER* c, bool Translate);
+void RenderChristmasCompanions(CHARACTER* c, bool Translate, int Select);
 void RenderCharacter(CHARACTER* c, OBJECT* o, int Select = 0);
 void RenderCharactersClient();
+// Whether RenderCharactersClient draws the character this frame.
+bool IsCharacterDrawn(CHARACTER* c);
+// The effects, sounds and state changes of the characters drawn this frame, after every Move* of the frame: their
+// bones are final, and what they spawn is drawn this frame.
+void UpdateCharacterEffects();
+// A preview's update (a character outside CharactersClient, tracked by Engine::Object::Attachments::Track): its parts,
+// cloth and transformation, which its draw only draws. Its owner calls it in its update, before drawing it.
+void UpdatePreviewCharacter(CHARACTER* c);
+// What a character's draw used to set while drawing it, set before the draw: its light, a Doppelganger's look and
+// rise, a Blood Castle corpse held to the ground, the blend mesh lights it draws with.
+void PrepareCharacterForDraw(CHARACTER* c);
+// PrepareCharacterForDraw for the client characters drawn this frame; also clears a target the siege cloak hides and
+// moves a hidden GM's pick box away. Part of CullWorld.
+void PrepareCharactersForDraw();
+// Hands the camera a shake UpdateCharacterEffects requested last frame; call before the frame's damping.
+void ApplyCharacterEffectsEarthQuake();
+// A shake the update requests for the camera after its next damping, as when the draw set it; a character effect's
+// shake wins, as the characters drew later.
+void RequestEarthQuake(float value);
 
 /**
  * @brief Builds a generous axis-aligned pick box for the character selection screen.
@@ -37,20 +73,25 @@ extern size_t g_LastActiveCharacterCount;
 extern bool g_LastAnimationWasParallel;
 
 #ifdef MU_ENABLE_CONTROL_SOCKET
-// Render's recompute against the pre-pass bones of each drawn client character, while enabled.
+// The poses drawn client characters reuse, against a fresh animation of their state, while enabled.
 struct PrepassBoneCheck
 {
     bool enabled = false;
     int checked = 0;
     int players = 0;
     int mismatched = 0;
+    // Draws that animated the character again: its state changed after the update built the pose.
+    int rebuilt = 0;
+    // Draws of a client character's own part: reusing the update's animation step, or advancing it themselves
+    // (an attachment's first frame; steadily rising when update and draw disagree).
+    int partsReused = 0;
+    int partsDrawnUnadvanced = 0;
     float maxDelta = 0.f;
 };
 extern PrepassBoneCheck g_PrepassBoneCheck;
 void RecordPrepassBones(const float (*prepass)[3][4], const float (*rendered)[3][4], int numBones, bool player);
-// Around render's Animation() call: Begin keeps the pre-pass bones, End compares render's with them.
-bool BeginPrepassBoneCheck(const OBJECT* o, int numBones);
-void EndPrepassBoneCheck(const OBJECT* o, int numBones);
+// Called by a draw that reused o's pose, or animated o again.
+void CheckCharacterPose(const OBJECT* o, BMD* model, bool reused);
 #endif
 
 void MoveEye(OBJECT* o, BMD* b, int Right, int Left, int Right2 = -1, int Left2 = -1, int Right3 = -1, int Left3 = -1);
@@ -103,7 +144,7 @@ bool AttackStage(CHARACTER* c, OBJECT* o);
 
 void RenderGuild(OBJECT* o, int Type = -1, vec3_t vPos = NULL);
 void RenderLight(OBJECT* o, int Texture, float Scale, int Bone, float x, float y, float z);
-void RenderProtectGuildMark(CHARACTER* c);
+void SpawnProtectGuildMark(CHARACTER* c);
 
 void MakeElfHelper(CHARACTER* c);
 int GetFenrirType(CHARACTER* c);
@@ -118,7 +159,28 @@ void CreateJointFpsChecked(int Type, vec3_t Position, vec3_t TargetPosition, vec
                            OBJECT* Target = NULL, float Scale = 10.f, short PK = -1, WORD SkillIndex = 0,
                            WORD SkillSerialNum = 0, int iChaIndex = -1, const float* vColor = NULL,
                            short int sTargetIndex = -1);
+// Whether the character carries its weapons on its back instead of in hand.
+bool AreWeaponsOnBack(const CHARACTER* c, const OBJECT* o);
 bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate);
+bool DrawsWeaponOnBack(CHARACTER* c, const OBJECT* o, int index);
+void PrepareCarriedParts(CHARACTER* c);
+bool IsFlying(const OBJECT* o);
+// The capes that hang from the shoulders (bone 19) and link to the body.
+bool IsLinkedCape(int type);
+// The Archangel quest item a Blood Castle player carries on the back, or 0.
+int BloodCastleQuestItem(const CHARACTER* c);
+// The quest item plays on the wing part, at its own speed.
+float QuestItemPlaySpeed(const OBJECT* o);
+// A Lorencia skeleton guard, which carries a golden crossbow on the back.
+bool IsSkeletonGuard(const OBJECT* o);
+// The model RenderCharacterBackItem shows for weapon `index` on the back.
+int BackWeaponType(const CHARACTER* c, const OBJECT* o, int index);
+// The part a weapon on the back is drawn with: the wing's, at rest.
+PART_t BackWeaponPart(const CHARACTER* c);
+// Where the Imp hangs: higher on a Rage Fighter's armor.
+void ImpOffset(const CHARACTER* c, vec3_t offset);
+// Whether RenderCharacter gets to the character's attachments.
+bool DrawsAttachments(CHARACTER* c);
 bool IsBackItem(CHARACTER* c, int iType);
 
 bool IsPlayer(CHARACTER* c);

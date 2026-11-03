@@ -188,12 +188,17 @@ void AddItemModelFiles(const ItemModelSave& models, std::vector<FileToSave>& fil
     }
     if (models.glowColorsChanged)
     {
-        files.push_back({models.glowColorsFile, Effects::WriteGlowColorsJson(models.glowColors)});
+        files.push_back(
+            {models.glowColorsFile, Effects::WriteGlowColorsJson(models.glowColors, models.glowColorFolders)});
     }
 #ifdef _EDITOR
     if (models.statsChanged && models.stats != nullptr)
     {
         files.push_back({models.statsFile, WriteItemStatsJson(*models.stats)});
+    }
+    if (models.groundLabelsChanged && models.groundLabels != nullptr)
+    {
+        files.push_back({models.groundLabelsFile, WriteGroundLabelsJson(*models.groundLabels)});
     }
 #endif
 }
@@ -291,6 +296,25 @@ ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file)
     return result;
 }
 
+std::filesystem::path GetGroundLabelsFile()
+{
+    return GetItemDataDirectory() / "Tooltips" / GroundLabelsFileName;
+}
+
+GroundLabelsLoadResult LoadGroundLabelsFile(const std::filesystem::path& file)
+{
+    GroundLabelsLoadResult result;
+    const std::string source = file.generic_string();
+    const std::optional<std::string> text = ReadTextFile(file);
+    if (!text)
+    {
+        AddFatal(result.issues, source, "could not be read");
+        return result;
+    }
+    ReadGroundLabelsJson(*text, source, result.file, result.issues);
+    return result;
+}
+
 std::filesystem::path GetGlowColorsFile()
 {
     return std::filesystem::path(Effects::GlowColorsFile);
@@ -306,7 +330,7 @@ GlowColorsLoadResult LoadGlowColorsFile(const std::filesystem::path& file)
         AddFatal(result.issues, source, "could not be read");
         return result;
     }
-    Effects::ReadGlowColorsJson(*text, source, result.colors, result.issues);
+    Effects::ReadGlowColorsJson(*text, source, result.colors, result.folders, result.issues);
     return result;
 }
 
@@ -385,6 +409,15 @@ void ValidateItemStatsAsWritten(const ItemStatFile& file, std::vector<ItemDataIs
     ItemStatFile readBack;
     std::vector<ItemDataIssue> readIssues;
     ReadItemStatsJson(WriteItemStatsJson(file), GetItemStatsFile().generic_string(), readBack, readIssues);
+    std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
+                 [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Fatal; });
+}
+
+void ValidateGroundLabelsAsWritten(const GroundLabelFile& file, std::vector<ItemDataIssue>& issues)
+{
+    GroundLabelFile readBack;
+    std::vector<ItemDataIssue> readIssues;
+    ReadGroundLabelsJson(WriteGroundLabelsJson(file), GetGroundLabelsFile().generic_string(), readBack, readIssues);
     std::copy_if(readIssues.begin(), readIssues.end(), std::back_inserter(issues),
                  [](const ItemDataIssue& issue) { return issue.severity == ItemDataIssueSeverity::Fatal; });
 }

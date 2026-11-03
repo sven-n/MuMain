@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #ifdef PJH_ADD_PANDA_PET
 
@@ -578,7 +579,7 @@ bool PetActionCollecterSkeleton::Effect(OBJECT* obj, CHARACTER* Owner, int targe
             if (i == 1 && rand_fps_check(2))
                 continue;
 
-            switch (rand() % 3)
+            switch (Random::Rand() % 3)
             {
             case 0:
                 CreateParticleFpsChecked(BITMAP_FIRE_HIK1_MONO, vPosition, vAngle, vLight, 4, obj->Scale, obj);

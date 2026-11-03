@@ -1579,10 +1579,11 @@ TEST_CASE("Render styles that are not for every drawing leave it to the drawing 
     // A model without meshes draws nothing, so the styles only decide here.
     BMD model;
     OBJECT object;
+    DrawLook look;
     const auto drawsWithStyle = [&](int modelType, int renderType)
     {
         object.Type = modelType;
-        return Styles::Render(&model, &object, modelType, 1.f, renderType);
+        return Styles::Render(&model, &object, look, modelType, 1.f, renderType);
     };
 
     // Doppelgangers are drawn plainly.
@@ -1630,10 +1631,11 @@ TEST_CASE("The second models of the Rage Fighter gloves are drawn like their glo
     g_ItemModelDatabase.Build(ShippedModels().models, Data::Effects::GlowColorList{});
     BMD model;
     OBJECT object;
+    DrawLook look;
     // They take the style of their glove.
     object.Type = MODEL_SWORD_35_LEFT;
-    CHECK(Styles::Render(&model, &object, MODEL_SWORD_35_LEFT, 1.f, RENDER_TEXTURE));
-    CHECK(Styles::Render(&model, &object, MODEL_SWORD_35_RIGHT, 1.f, RENDER_TEXTURE));
+    CHECK(Styles::Render(&model, &object, look, MODEL_SWORD_35_LEFT, 1.f, RENDER_TEXTURE));
+    CHECK(Styles::Render(&model, &object, look, MODEL_SWORD_35_RIGHT, 1.f, RENDER_TEXTURE));
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
 
@@ -1646,12 +1648,13 @@ TEST_CASE("The glow pass of the Deadly Staff is the one of its render style [dat
     // items glow with their "glow" values.
     BMD model;
     OBJECT object;
-    object.BlendMesh = -1;
-    Glow::RenderGlow(&model, &object, MODEL_ITEM + ITEM_DEADLY_STAFF, 1.f, RENDER_TEXTURE, BITMAP_CHROME);
-    CHECK(object.BlendMesh == 1);
-    object.BlendMesh = -1;
-    Glow::RenderGlow(&model, &object, MODEL_ITEM + ITEM_KRIS, 1.f, RENDER_TEXTURE, BITMAP_CHROME);
-    CHECK(object.BlendMesh == -1);
+    DrawLook look;
+    look.blendMesh = -1;
+    Glow::RenderGlow(&model, &object, look, MODEL_ITEM + ITEM_DEADLY_STAFF, 1.f, RENDER_TEXTURE, BITMAP_CHROME);
+    CHECK(look.blendMesh == 1);
+    look.blendMesh = -1;
+    Glow::RenderGlow(&model, &object, look, MODEL_ITEM + ITEM_KRIS, 1.f, RENDER_TEXTURE, BITMAP_CHROME);
+    CHECK(look.blendMesh == -1);
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
@@ -1698,17 +1701,18 @@ TEST_CASE("Styles that pick something per item draw other items plainly [data][i
     BMD model;
     model.HideSkin = true;
     OBJECT object;
+    DrawLook look;
     for (const Case& item : cases)
     {
         INFO("(" << item.group << "," << item.number << ") " << item.renderStyle);
         object.Type = MODEL_ITEM + MakeItemType(item.group, item.number);
-        CHECK(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE) == item.drawnWithStyle);
+        CHECK(Styles::Render(&model, &object, look, object.Type, 1.f, RENDER_TEXTURE) == item.drawnWithStyle);
     }
 
     // The styles follow the database when it is built again.
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
     object.Type = MODEL_ITEM + MakeItemType(12, 65);
-    CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
+    CHECK_FALSE(Styles::Render(&model, &object, look, object.Type, 1.f, RENDER_TEXTURE));
 }
 
 TEST_CASE("The item effects of shipped item models exist [data][items]")
@@ -1774,10 +1778,12 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
     // A model without meshes draws nothing, so only the values change here.
     BMD model;
     OBJECT object;
+    DrawLook look;
+    float alpha = 1.f;
     const auto apply = [&](int itemType, int& level)
     {
         object.Type = MODEL_ITEM + itemType;
-        return ItemEffects::Apply(&model, &object, object.Type, 1.f, level);
+        return ItemEffects::Apply(&model, &object, look, object.Type, alpha, level);
     };
 
     // Potions with a level glow like +7.
@@ -1790,10 +1796,10 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
     // The siege potion hides a mesh by level.
     level = 0;
     CHECK(apply(MakeItemType(14, 7), level) == Result::Applied);
-    CHECK(object.HiddenMesh == 1);
+    CHECK(look.hiddenMesh == 1);
     level = 1;
     CHECK(apply(MakeItemType(14, 7), level) == Result::Applied);
-    CHECK(object.HiddenMesh == 0);
+    CHECK(look.hiddenMesh == 0);
     // Some effects draw the model themselves.
     level = 2;
     CHECK(apply(MakeItemType(14, 27), level) == Result::Drawn);
@@ -1805,7 +1811,7 @@ TEST_CASE("Item effects run before the model is drawn [data][items]")
     // Items without an effect, and models that are not items.
     CHECK(apply(ITEM_KRIS, level) == Result::None);
     object.Type = MODEL_PLAYER;
-    CHECK(ItemEffects::Apply(&model, &object, MODEL_PLAYER, 1.f, level) == Result::None);
+    CHECK(ItemEffects::Apply(&model, &object, look, MODEL_PLAYER, alpha, level) == Result::None);
 
     // The effects follow the database when it is built again.
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
@@ -1856,8 +1862,9 @@ TEST_CASE("Some render styles shine below +3 like the old drawing code [data][it
     CHECK(shineOf(12, 37) == nullptr);
     BMD model;
     OBJECT object;
+    DrawLook look;
     object.Type = MODEL_ITEM + MakeItemType(14, 42);
-    CHECK_FALSE(Styles::Render(&model, &object, object.Type, 1.f, RENDER_TEXTURE));
+    CHECK_FALSE(Styles::Render(&model, &object, look, object.Type, 1.f, RENDER_TEXTURE));
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }
@@ -1869,22 +1876,25 @@ TEST_CASE("The item effect of a model is the one of its item, or of its event mo
 
     BMD model;
     OBJECT object;
+    DrawLook look;
     int level = 3;
+    float alpha = 1.f;
     // An item with an effect: its effect, whatever the object is.
     object.Type = MODEL_EVENT + 11;
-    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_ITEM + MakeItemType(14, 0), 1.f, level, 3) == Result::Applied);
+    CHECK(ApplyPartObjectEffect(&model, &object, look, MODEL_ITEM + MakeItemType(14, 0), alpha, level, 3) ==
+          Result::Applied);
     CHECK(level == 7);
     // The event models of level variants have theirs in the drawing code: they
     // only run when the item has no effect.
     object.Type = MODEL_EVENT + 11;
-    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_ITEM + ITEM_KRIS, 1.f, level, 0) == Result::Drawn);
+    CHECK(ApplyPartObjectEffect(&model, &object, look, MODEL_ITEM + ITEM_KRIS, alpha, level, 0) == Result::Drawn);
     object.Type = MODEL_EVENT + 18;
-    object.BlendMesh = -1;
-    CHECK(ApplyPartObjectEffect(&model, &object, MODEL_EVENT + 18, 1.f, level, 0) == Result::Applied);
-    CHECK(object.BlendMesh == 1);
+    look.blendMesh = -1;
+    CHECK(ApplyPartObjectEffect(&model, &object, look, MODEL_EVENT + 18, alpha, level, 0) == Result::Applied);
+    CHECK(look.blendMesh == 1);
     // Neither.
     object.Type = MODEL_ITEM + ITEM_KRIS;
-    CHECK(ApplyPartObjectEffect(&model, &object, object.Type, 1.f, level, 0) == Result::None);
+    CHECK(ApplyPartObjectEffect(&model, &object, look, object.Type, alpha, level, 0) == Result::None);
 
     g_ItemModelDatabase.Build({}, Data::Effects::GlowColorList{});
 }

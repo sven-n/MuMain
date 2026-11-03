@@ -2,6 +2,8 @@
 #include "UI/Inventory/ItemMng.h"
 #include "Render/Items/ItemEffects.h"
 
+#include <functional>
+
 extern OBJECT_BLOCK ObjectBlock[256];
 extern OBJECT Mounts[];
 extern OBJECT Boids[];
@@ -22,15 +24,61 @@ void CreateShadowAngle();
 
 OBJECT* CollisionDetectObjects(OBJECT* PickObject);
 
-void RenderObject(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
+// A ghost of an object: drawn at another alpha and animation frame than it stands in.
+struct ObjectGhost
+{
+    float alpha;
+    float animationFrame;
+};
+void RenderObject(const OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0,
+                  const ObjectGhost* ghost = nullptr);
+// Marks the map objects the frame's view shows, in the order they draw; part of CullWorld.
+void CullObjects();
+// Marks what the frame's view shows (map objects, items, mounts, boids, effects) for the draw and the next update;
+// the last step of the update, after the view.
+void CullWorld();
 void RenderObjects();
+// Spawns the effects of the map objects the last RenderObjects drew; call once per update, after the objects moved.
+void UpdateObjectEffects();
+// The effects and state changes of a character's body draw (Draw_RenderObject), for a character the last frame
+// drew; its bones are the pose the update built.
+void UpdateRenderObjectEffects(OBJECT* o);
+// Where an object's model stands, as its draw places it.
+void ObjectModelOrigin(const OBJECT* o, vec3_t origin);
+// The pick box a draw's transform used to leave on the object: its bounding box at `origin`; the update places it.
+void PlaceObjectBounds(OBJECT* o, const vec3_t origin);
+// Places an object's model where its draw poses and draws it.
+void PlaceObjectModel(const OBJECT* o, BMD* b);
+// Skins an object's meshes as its draw would, for BMD::RenderMeshEffect's spawns: characters pass Translate true
+// (their own model-space pose), effects false (their world pose).
+void SkinObjectMeshes(OBJECT* o, BMD* b, bool Translate);
+// The spawns, state and cloth of a player transformation's draw (RenderPartObjectBody), for a character the last
+// frame drew; its bones are the character's pose.
+void UpdateTransformSkinEffects(OBJECT* o);
+// Creates, steps and drops a body part's cloth as one RenderPartObject call with that part did; the draw renders it.
+void StepPartCloth(OBJECT* o, PART_t* p, int Type, int ItemLevel, bool Translate);
+// The sparks of a character's +15 weapons, on its own pose; RenderCharacter draws its +15 armor pieces.
+void SpawnNextGradeWeaponEffects(CHARACTER* c);
 void NextGradeObjectRender(CHARACTER* c);
-void RenderObject_AfterImage(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
+// The character's +15 armor pieces RenderCharacter attaches: the body part each plays on, its model and bone.
+void ForEachNextGradeObject(CHARACTER* c, const std::function<void(PART_t* part, int type, int bone)>& visit);
+// What Calc_RenderObject did to each object it drew, for the update to do once per frame to the objects the last frame
+// drew: the hero's fall in Chaos Castle fades them, and a stunned or sleeping owner holds them at their first frame.
+void UpdateDrawnObjectHold(OBJECT* o);
+// Keeps the stun skull around an object whose stun tint its part draw shows, as that draw recreated it.
+void RefreshStunSkull(OBJECT* o, vec3_t Light);
+void RenderObject_AfterImage(const OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0,
                                 float AniInterval1 = 1.4f, float AniInterval2 = 0.7f);
 void RenderObject_AfterCharacter(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
-void Draw_RenderObject_AfterCharacter(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
+void Draw_RenderObject_AfterCharacter(const OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderObjects_AfterCharacter();
+// Starts a frame's object draws: clears the after-character sends and keeps the LODs drawn last frame.
+void BeginObjectDraws();
+// The map objects and effects this frame's draws send to the after-character passes; the boids are sent by their
+// update (m_bRenderAfterCharacter).
+void SendAfterCharacter(const OBJECT* o);
+[[nodiscard]] bool IsSentAfterCharacter(const OBJECT* o);
 
 void MoveObjects();
 void DeleteObjectTile(int x, int y);
@@ -63,24 +111,35 @@ void CreateMoneyDrop(ITEM_t* ip, int amount, vec3_t position, bool isFreshDrop);
 void PartObjectColor(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon = false);
 void PartObjectColor2(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon = false);
 
-void RenderPartObjectBodyColor(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float Bright, int Texture = -1,
-                               int iMonsterIndex = -1);
-void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float Bright,
+void RenderPartObjectBodyColor(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType,
+                               float Bright, int Texture = -1, int iMonsterIndex = -1);
+void RenderPartObjectBodyColor2(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType,
+                                float Bright, int Texture = -1);
+// Drawn outside a part draw: with the object's own look.
+void RenderPartObjectBodyColor(BMD* b, const OBJECT* o, int Type, float Alpha, int RenderType, float Bright,
+                               int Texture = -1, int iMonsterIndex = -1);
+void RenderPartObjectBodyColor2(BMD* b, const OBJECT* o, int Type, float Alpha, int RenderType, float Bright,
                                 int Texture = -1);
-void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType);
+void RenderPartObjectBody(BMD* b, const OBJECT* o, DrawLook& look, int Type, float Alpha, int RenderType);
 
 // Runs the item effect of the model before it is drawn: the one of its item's
 // model entry, or for the event models of level variants theirs. It may
-// change the level the model glows like.
-Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, OBJECT* o, int Type, float Alpha, int& Level,
-                                                         int ItemLevel);
+// change the level the model glows like and the alpha it is drawn with.
+Render::Items::ItemEffects::Result ApplyPartObjectEffect(BMD* b, const OBJECT* o, DrawLook& look, int Type,
+                                                         float& Alpha, int& Level, int ItemLevel);
+// Whether the item effect of the drawn model spawns sprites, particles or lightning; the update spawns them from the
+// model's pose with SpawnPartObjectEffect, b placed where the model is drawn.
+bool PartObjectSpawns(const OBJECT* o, int Type);
+void SpawnPartObjectEffect(BMD* b, OBJECT* o, int Type, vec34_t* bones);
 void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha = 0.f, int Level = 0, int ExcellentFlags = 0,
                             int ancientDiscriminator = 0, int Select = 0, int RenderType = RENDER_TEXTURE);
 void RenderPartObject(OBJECT* o, int Type, void* p, vec3_t Light, float Alpha = 0.f, int Level = 0,
                       int ExcellentFlags = 0, int ancientDiscriminator = 0, bool GlobalTransform = false,
                       bool HideSkin = false, bool Translate = false, int Select = 0, int RenderType = RENDER_TEXTURE);
 
-void RenderPartObjectEdge(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale);
+// bones: the pose drawn; none for the object's own (or the shared bones without a bone matrix).
+void RenderPartObjectEdge(BMD* b, const OBJECT* o, int Flag, bool Translate, float Scale,
+                          float (*bones)[3][4] = nullptr, const DrawLook* look = nullptr);
 void RenderPartObjectEdge2(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale, OBB_t* OBB);
 
 void RenderPartObjectEdgeLight(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale);
@@ -99,11 +158,16 @@ void ClearActionObject();
 void SetActionObject(int iWorld, int iType, int iLifeTime, int iVel = -1);
 void ActionObject(OBJECT* o);
 
-void BodyLight(OBJECT* o, BMD* b);
+void BodyLight(const OBJECT* o, BMD* b);
 
-bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon);
+// origin: where to draw the model instead of where the object stands.
+bool Calc_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon, const float* origin = nullptr,
+                       const ObjectGhost* ghost = nullptr);
 bool Calc_ObjectAnimation(OBJECT* o, bool Translate, int Select);
-void Draw_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon);
+// Calc_ObjectAnimation's pose into the caller's bones, for a draw that shows the object where it does not stand; the
+// object keeps its own pose.
+bool Calc_ObjectAnimationInto(OBJECT* o, bool Translate, vec34_t* bones);
+void Draw_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon, const ObjectGhost* ghost = nullptr);
 
 bool IsPartyMemberBuff(int partyindex, eBuffState buffstate);
 bool isPartyMemberBuff(int partyindex);

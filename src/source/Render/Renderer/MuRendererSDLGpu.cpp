@@ -7379,10 +7379,22 @@ private:
 // MU_USE_OPENGL_BACKEND removed — SDL_gpu is the only backend.
 // ---------------------------------------------------------------------------
 
+namespace
+{
+IMuRenderer* s_rendererOverride = nullptr;
+} // namespace
+
 [[nodiscard]] IMuRenderer& GetRenderer()
 {
     static MuRendererSDLGpu s_instance;
+    if (s_rendererOverride)
+        return *s_rendererOverride;
     return s_instance;
+}
+
+void SetRendererOverride(IMuRenderer* renderer)
+{
+    s_rendererOverride = renderer;
 }
 
 Render::Renderer::BitmapGpuResources::Result UploadBitmapPixels(std::span<const std::uint8_t> pixels, int width,

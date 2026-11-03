@@ -3,6 +3,7 @@
 #include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
+#include "Data/GameData/ItemData/ItemGroundLabels.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
@@ -78,9 +79,22 @@ std::filesystem::path GetItemTooltipFile();
 
 ItemTooltipLoadResult LoadItemTooltipFile(const std::filesystem::path& file);
 
+struct GroundLabelsLoadResult
+{
+    GroundLabelFile file;
+    std::vector<ItemDataIssue> issues;
+};
+
+// Data/Items/Tooltips/GroundLabels.json, relative to the client folder: the looks of the item names on the ground, see
+// ItemGroundLabels.h. Next to the tooltip file.
+std::filesystem::path GetGroundLabelsFile();
+
+GroundLabelsLoadResult LoadGroundLabelsFile(const std::filesystem::path& file);
+
 struct GlowColorsLoadResult
 {
     std::vector<Effects::GlowColor> colors;
+    std::vector<Colors::ColorFolder> folders;
     std::vector<ItemDataIssue> issues;
 };
 
@@ -129,12 +143,17 @@ struct ItemModelSave
     // Written to glowColorsFile (GetGlowColorsFile) when glowColorsChanged.
     std::filesystem::path glowColorsFile;
     std::span<const Effects::GlowColor> glowColors;
+    std::span<const Colors::ColorFolder> glowColorFolders;
     bool glowColorsChanged = false;
 #ifdef _EDITOR
     // Written to statsFile (GetItemStatsFile) when statsChanged.
     std::filesystem::path statsFile;
     const ItemStatFile* stats = nullptr;
     bool statsChanged = false;
+    // Written to groundLabelsFile (GetGroundLabelsFile) when groundLabelsChanged.
+    std::filesystem::path groundLabelsFile;
+    const GroundLabelFile* groundLabels = nullptr;
+    bool groundLabelsChanged = false;
 #endif
 };
 
@@ -173,6 +192,9 @@ void ValidateGlowColorsAsWritten(std::span<const Effects::GlowColor> colors, std
 // The same for the item stat file (the changes of Item Formulas), read back
 // from ItemStats.json as the save would write it.
 void ValidateItemStatsAsWritten(const ItemStatFile& file, std::vector<ItemDataIssue>& issues);
+// The same for the ground label file (the styles the Colors window changed),
+// read back from GroundLabels.json as the save would write it.
+void ValidateGroundLabelsAsWritten(const GroundLabelFile& file, std::vector<ItemDataIssue>& issues);
 #endif
 
 // A model file that is not in the client folder (relative to the working

@@ -33,6 +33,43 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_effect_draw
+    SOURCES
+        test_effect_draw.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_character_effects_phase
+    SOURCES
+        test_character_effects_phase.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+# The draw guard on the gameplay random sequences: no control socket code, so it builds and runs without the socket.
+mu_add_test(
+    NAME test_draw_random_guard
+    SOURCES
+        test_draw_random_guard.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME test_repeated_draws
+    SOURCES
+        test_repeated_draws.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_reference_frame_steps
     SOURCES
         test_reference_frame_steps.cpp
@@ -72,4 +109,12 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
+)
+
+mu_add_test(
+    NAME test_helper_actions
+    SOURCES
+        test_helper_actions.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
 )

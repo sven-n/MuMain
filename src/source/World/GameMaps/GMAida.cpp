@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -56,14 +57,14 @@ bool M33Aida::MoveAidaObject(OBJECT* pObject)
     break;
     case 30:
     {
-        Luminosity = (float)(rand() % 5) * 0.01f;
+        Luminosity = (float)(Random::Rand() % 5) * 0.01f;
         Vector(Luminosity + 0.4f, Luminosity + 0.6f, Luminosity + 0.4f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 2, PrimaryTerrainLight);
     }
     break;
     case 71:
     {
-        Luminosity = (float)(rand() % 5) * 0.01f;
+        Luminosity = (float)(Random::Rand() % 5) * 0.01f;
         Vector(Luminosity + 0.9f, Luminosity + 0.2f, Luminosity + 0.2f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 2, PrimaryTerrainLight);
     }
@@ -93,7 +94,7 @@ bool M33Aida::MoveAidaObject(OBJECT* pObject)
     return true;
 }
 
-bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
+bool M33Aida::UpdateAidaObjectEffects(OBJECT* pObject, BMD* pModel)
 {
     if (!IsInAida())
         return false;
@@ -105,62 +106,46 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
     case 30: // 풀
     {
         Vector(0.0f, -3.0f, 1.0f, p);
-        pModel->TransformPosition(BoneTransform[6], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[6], p, Position, false);
         Vector(0.1f, 0.1f, 0.3f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 5.5f, Light, pObject);
         Vector(0.15f, 0.15f, 0.15f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(0.0f, -3.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[7], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[7], p, Position, false);
         Vector(0.1f, 0.1f, 0.3f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 4.5f, Light, pObject);
         Vector(0.15f, 0.15f, 0.15f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(0.0f, -3.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[8], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[8], p, Position, false);
         Vector(0.1f, 0.1f, 0.3f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 4.0f, Light, pObject);
         Vector(0.15f, 0.15f, 0.15f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(-3.0f, -1.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[12], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[12], p, Position, false);
         Vector(0.1f, 0.1f, 0.3f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 4.5f, Light, pObject);
         Vector(0.15f, 0.15f, 0.15f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(-3.0f, -3.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[13], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[13], p, Position, false);
         Vector(0.1f, 0.1f, 0.3f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 4.0f, Light, pObject);
         Vector(0.15f, 0.15f, 0.15f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(0.0f, 2.0f, -8.0f, p);
-        pModel->TransformPosition(BoneTransform[17], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[17], p, Position, false);
         Vector(0.1f, 0.1f, 0.3f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 4.0f, Light, pObject);
         Vector(0.15f, 0.15f, 0.15f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
-    }
-    break;
-    case 41:
-    {
-        pModel->BeginRender(1.0f);
-
-        pModel->BodyLight[0] = 0.52f;
-        pModel->BodyLight[1] = 0.52f;
-        pModel->BodyLight[2] = 0.52f;
-
-        pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->StreamMesh = -1;
-
-        pModel->EndRender();
     }
     break;
     case 56:
@@ -228,19 +213,6 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
             }
         }
         break;
-    case 65:
-    case 66:
-    {
-        pModel->BeginRender(1.0f);
-
-        pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           -(int)WorldTime % 100000 * 0.00005f, pObject->BlendMeshTexCoordV);
-        pModel->StreamMesh = -1;
-
-        pModel->EndRender();
-    }
-    break;
     case 67:
         Vector(0.3f, 0.3f, 0.3f, pObject->Light);
         CreateParticleFpsChecked(BITMAP_FLAME, pObject->Position, pObject->Angle, pObject->Light, 7, pObject->Scale);
@@ -258,42 +230,42 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
     case 71:
     {
         Vector(0.0f, -3.0f, 1.0f, p);
-        pModel->TransformPosition(BoneTransform[6], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[6], p, Position, false);
         Vector(0.5f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 6.0f, Light, pObject);
         Vector(0.15f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(0.0f, -3.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[7], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[7], p, Position, false);
         Vector(0.25f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 5.5f, Light, pObject);
         Vector(0.15f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(0.0f, -3.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[8], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[8], p, Position, false);
         Vector(0.25f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 5.0f, Light, pObject);
         Vector(0.15f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(-3.0f, -1.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[12], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[12], p, Position, false);
         Vector(0.25f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 5.5f, Light, pObject);
         Vector(0.15f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(-3.0f, -3.0f, 0.0f, p);
-        pModel->TransformPosition(BoneTransform[13], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[13], p, Position, false);
         Vector(0.25f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 5.0f, Light, pObject);
         Vector(0.15f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 3.0f, Light, pObject);
 
         Vector(0.0f, 2.0f, -8.0f, p);
-        pModel->TransformPosition(BoneTransform[17], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[17], p, Position, false);
         Vector(0.25f, 0.0f, 0.0f, Light);
         CreateSprite(BITMAP_SPARK + 1, Position, 5.0f, Light, pObject);
         Vector(0.15f, 0.0f, 0.0f, Light);
@@ -303,11 +275,52 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
     case 75:
     {
         Vector(0.f, 0.f, 0.f, p);
-        pModel->TransformPosition(BoneTransform[4], p, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[4], p, Position, false);
         float fLumi = (sinf(WorldTime * 0.002f) + 1.0f) * 0.5f;
         Vector(fLumi, fLumi, fLumi, Light);
         Vector(1.0f, 1.0f, 1.f, Light);
         CreateSprite(BITMAP_FLARE, Position, 3.0f, Light, pObject, (WorldTime / 10.0f));
+    }
+    break;
+    }
+
+    return true;
+}
+
+bool M33Aida::RenderAidaObjectVisual(const OBJECT* pObject, DrawLook& look, BMD* pModel)
+{
+    if (!IsInAida())
+        return false;
+
+    switch (pObject->Type)
+    {
+    case 41:
+    {
+        pModel->BeginRender(1.0f);
+
+        pModel->BodyLight[0] = 0.52f;
+        pModel->BodyLight[1] = 0.52f;
+        pModel->BodyLight[2] = 0.52f;
+
+        pModel->StreamMesh = 0;
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                           look.blendMeshU, look.blendMeshV);
+        pModel->StreamMesh = -1;
+
+        pModel->EndRender();
+    }
+    break;
+    case 65:
+    case 66:
+    {
+        pModel->BeginRender(1.0f);
+
+        pModel->StreamMesh = 0;
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
+                           -(int)WorldTime % 100000 * 0.00005f, look.blendMeshV);
+        pModel->StreamMesh = -1;
+
+        pModel->EndRender();
     }
     break;
     case 77:
@@ -315,8 +328,8 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
     {
         pModel->BeginRender(1.0f);
         pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           (int)WorldTime % 100000 * 0.0002f, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
+                           (int)WorldTime % 100000 * 0.0002f, look.blendMeshV);
         pModel->StreamMesh = -1;
         pModel->EndRender();
     }
@@ -325,13 +338,13 @@ bool M33Aida::RenderAidaObjectVisual(OBJECT* pObject, BMD* pModel)
 
     return true;
 }
-bool M33Aida::RenderAidaObjectMesh(OBJECT* pObject, BMD* pModel, bool ExtraMon)
+bool M33Aida::RenderAidaObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon)
 {
     if (IsInAida())
     {
     }
 
-    return RenderAidaMonsterObjectMesh(pObject, pModel, ExtraMon);
+    return RenderAidaMonsterObjectMesh(pObject, look, pModel, ExtraMon);
 }
 
 CHARACTER* M33Aida::CreateAidaMonster(int iType, int PosX, int PosY, int Key)
@@ -719,14 +732,14 @@ void M33Aida::MoveAidaBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
     }
 }
 
-bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
+bool M33Aida::UpdateAidaMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
 {
     switch (pObject->Type)
     {
     case MODEL_WITCH_QUEEN:
     {
         vec3_t Position, Light, Angle;
-        float Random_Light = (float)(rand() % 30) / 100.0f + 0.6f;
+        float Random_Light = (float)(Random::Rand() % 30) / 100.0f + 0.6f;
         Vector(Random_Light + 0.5f, Random_Light - 0.05f, Random_Light + 0.5f, Light);
 
         BoneManager::GetBonePosition(pObject, L"Monster100_L_Hand", Position);
@@ -748,7 +761,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_WITCHQUEEN_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_WITCHQUEEN_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -763,7 +776,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             if (pObject->SubType == FALSE)
             {
                 pObject->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + Random::Rand() % 2));
                 PlayBuffer(SOUND_AIDA_WITCHQUEEN_ATTACK1);
             }
         }
@@ -835,7 +848,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_BLUEGOLEM_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_BLUEGOLEM_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -903,7 +916,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
     {
         vec3_t Relative, Position, Light, Angle = {0.0f, 0.0f, 0.0f};
 
-        float Random_Light = (float)(rand() % 10) / 100.0f + 0.2f;
+        float Random_Light = (float)(Random::Rand() % 10) / 100.0f + 0.2f;
         Vector(60.0f, -30.0f, 0.0f, Relative);
         Vector(0.0f, Random_Light, 0.0f, Light);
 
@@ -914,7 +927,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHRAIDER_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHRAIDER_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -951,7 +964,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_FORESTORC_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_FORESTORC_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -987,7 +1000,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHTREE_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHTREE_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1021,7 +1034,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         {
             wchar_t Bone_Name[256];
             mu_swprintf(Bone_Name, L"Monster104_Horn%d", i);
-            Random_Light = (float)(rand() % 10) / 100.0f + 0.8f;
+            Random_Light = (float)(Random::Rand() % 10) / 100.0f + 0.8f;
             Vector(0.4f, Random_Light, 0.5f, Light);
             BoneManager::GetBonePosition(pObject, Bone_Name, Position);
             CreateSprite(BITMAP_LIGHT + 1, Position, 0.4f, Light, pObject);
@@ -1043,7 +1056,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         vec3_t Relative, Position, Light, Angle = {0.0f, 0.0f, 0.0f};
         float Random_Light;
 
-        Random_Light = (float)(rand() % 8) / 10.0f + 0.6f;
+        Random_Light = (float)(Random::Rand() % 8) / 10.0f + 0.6f;
         Vector(Random_Light, 0.0f, 0.0f, Light);
 
         BoneManager::GetBonePosition(pObject, L"Monster105_R_Eye", Position);
@@ -1064,7 +1077,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_HELL_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_HELL_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1131,7 +1144,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_FORESTORC_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_FORESTORC_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1166,7 +1179,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
     {
         vec3_t Relative, Position, Light, Angle = {0.0f, 0.0f, 0.0f};
 
-        float Random_Light = (float)(rand() % 10) / 100.0f + 0.2f;
+        float Random_Light = (float)(Random::Rand() % 10) / 100.0f + 0.2f;
         Vector(60.0f, -30.0f, 0.0f, Relative);
         Vector(0.0f, Random_Light, 0.0f, Light);
 
@@ -1177,7 +1190,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHRAIDER_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_DEATHRAIDER_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1224,7 +1237,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_BLUEGOLEM_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_BLUEGOLEM_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1291,7 +1304,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
     case MODEL_BLOODY_WITCH_QUEEN:
     {
         vec3_t Position, Light, Angle;
-        float Random_Light = (float)(rand() % 30) / 100.0f + 0.6f;
+        float Random_Light = (float)(Random::Rand() % 30) / 100.0f + 0.6f;
         Vector(Random_Light + 0.5f, Random_Light - 0.05f, Random_Light + 0.5f, Light);
 
         BoneManager::GetBonePosition(pObject, L"Monster100_L_Hand", Position);
@@ -1313,7 +1326,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
         if (pObject->CurrentAction == MONSTER01_WALK || pObject->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_AIDA_WITCHQUEEN_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_AIDA_WITCHQUEEN_MOVE1 + Random::Rand() % 2));
         }
         else if (pObject->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1328,7 +1341,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
             if (pObject->SubType == FALSE)
             {
                 pObject->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + Random::Rand() % 2));
                 PlayBuffer(SOUND_AIDA_WITCHQUEEN_ATTACK1);
             }
         }
@@ -1389,7 +1402,7 @@ bool M33Aida::RenderAidaMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BM
     return false;
 }
 
-bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool ExtraMon)
+bool M33Aida::RenderAidaMonsterObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon)
 {
     switch (pObject->Type)
     {
@@ -1402,13 +1415,13 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         pModel->BodyLight[2] = 0.9f;
 
         pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
                            -(int)WorldTime % 10000 * 0.0003f, -(int)WorldTime % 10000 * 0.0003f);
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh,
+                           look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         pModel->StreamMesh = -1;
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
 
         pModel->EndRender();
 
@@ -1423,17 +1436,17 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         pModel->BodyLight[1] = 0.9f;
         pModel->BodyLight[2] = 0.9f;
 
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
+        pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
         pModel->StreamMesh = 0;
-        pModel->RenderMesh(3, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
+        pModel->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
                            -(int)WorldTime % 10000 * 0.0006f, -(int)WorldTime % 10000 * 0.0006f);
-        pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh,
+                           look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         pModel->StreamMesh = -1;
 
         pModel->EndRender();
@@ -1450,29 +1463,29 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         pModel->BodyLight[2] = 1.0f;
 
         pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
         pModel->BodyLight[0] = 1.0f;
         pModel->BodyLight[1] = 0.0f;
         pModel->BodyLight[2] = 0.0f;
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh,
+                           look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         pModel->StreamMesh = -1;
 
         pModel->BodyLight[0] = 1.0f;
         pModel->BodyLight[1] = 1.0f;
         pModel->BodyLight[2] = 1.0f;
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
 
         pModel->StreamMesh = 1;
-        pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
         pModel->BodyLight[0] = 0.5f;
         pModel->BodyLight[1] = 0.0f;
         pModel->BodyLight[2] = 0.0f;
-        pModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh,
+                           look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         pModel->StreamMesh = -1;
 
         pModel->EndRender();
@@ -1488,17 +1501,17 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         pModel->BodyLight[1] = 0.9f;
         pModel->BodyLight[2] = 0.9f;
 
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
+        pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
         pModel->StreamMesh = 0;
-        pModel->RenderMesh(3, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
+        pModel->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
                            -(int)WorldTime % 10000 * 0.0006f, -(int)WorldTime % 10000 * 0.0006f);
-        pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh,
+                           look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         pModel->StreamMesh = -1;
 
         pModel->EndRender();
@@ -1515,13 +1528,13 @@ bool M33Aida::RenderAidaMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool Ext
         pModel->BodyLight[2] = 0.9f;
 
         pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
                            -(int)WorldTime % 10000 * 0.0003f, -(int)WorldTime % 10000 * 0.0003f);
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh,
+                           look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         pModel->StreamMesh = -1;
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
 
         pModel->EndRender();
 

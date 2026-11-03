@@ -156,6 +156,8 @@ public:
     {
         return {m_overflow, m_generation};
     }
+    // A fingerprint of the queued calls and the followed lights, to tell whether anything changed them.
+    [[nodiscard]] std::uint64_t StateHash() const;
 
 private:
     struct Followed

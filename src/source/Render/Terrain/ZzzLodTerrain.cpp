@@ -3,6 +3,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #ifdef __APPLE__
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -130,7 +132,7 @@ void InitTerrainMappingLayer()
         TerrainMappingLayer1[i] = 0;
         TerrainMappingLayer2[i] = 255;
         TerrainMappingAlpha[i] = 0.0f;
-        TerrainGrassTexture[i] = static_cast<float>(rand() % 4) / 4.0f;
+        TerrainGrassTexture[i] = static_cast<float>(Random::Rand() % 4) / 4.0f;
 #ifdef ASG_ADD_MAP_KARUTAN
         g_fTerrainGrassWind1[i] = 0.0f;
 #endif
@@ -1080,6 +1082,7 @@ void AddFrameHistoryLights()
 // light mood's gain is applied first, so the terrain and the models get the same light.
 void AddTerrainLight(float xf, float yf, vec3_t SourceLight, int Range, vec3_t* Buffer)
 {
+    Diagnostics::DrawSpawnCheck::Note("terrain-light");
     if (Buffer == PrimaryTerrainLight && UseLightHistory())
     {
         Render::Lighting::LightCall call;
@@ -1104,6 +1107,7 @@ void AddTerrainLight(float xf, float yf, vec3_t SourceLight, int Range, vec3_t* 
 
 void AddTerrainLightClip(float xf, float yf, vec3_t SourceLight, int Range, vec3_t* Buffer)
 {
+    Diagnostics::DrawSpawnCheck::Note("terrain-light");
     vec3_t Light;
     ApplyDynamicGain(SourceLight, Buffer, Light);
     auto rf = (float)Range;
@@ -1575,8 +1579,8 @@ void FaceTexture(int Texture, float xf, float yf, bool Water, bool Scale)
         {
             if (rand_fps_check(50))
             {
-                float sx = xf * TERRAIN_SCALE + (float)((rand() % 100 + 1) * 1.0f);
-                float sy = yf * TERRAIN_SCALE + (float)((rand() % 100 + 1) * 1.0f);
+                float sx = xf * TERRAIN_SCALE + (float)((Random::Rand() % 100 + 1) * 1.0f);
+                float sy = yf * TERRAIN_SCALE + (float)((Random::Rand() % 100 + 1) * 1.0f);
                 Vector(sx, sy, Hero->Object.Position[2] + 10.f, Pos);
                 CreateParticle(BITMAP_SPOT_WATER, Pos, Hero->Object.Angle, Light, 0);
             }
@@ -1609,7 +1613,7 @@ int WaterTextureNumber = 0;
 
 void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
 {
-    RenderTerrainVisual(xi, yi);
+    NoteDrawnTerrain(xi, yi);
 
     if (TerrainFlag != TERRAIN_MAP_GRASS)
     {
@@ -2196,7 +2200,7 @@ static void ExpandHullOutward(float offset)
     ComputeIterationBoundsFromHull();
 }
 
-void CreateFrustrum2D(vec3_t Position)
+void CreateFrustrum2D()
 {
     CameraMode currentMode = CameraManager::Instance().GetCurrentMode();
     // Default joins the Orbital natural-hull path so the cull hull is built
@@ -2231,7 +2235,7 @@ void CreateFrustrum2D(vec3_t Position)
             }
         }
 #endif
-        // Orbital mode: build 2D hull from the ACTUAL GL modelview matrix,
+        // Orbital mode: build 2D hull from the camera's view matrix,
         // then clip against the far-clip plane at ground level (Z=0).
         //
         // The hull extends to fogEnd distance (= terrainCullRange) so terrain is only
@@ -2353,7 +2357,7 @@ void CreateFrustrum2D(vec3_t Position)
             Vector(-halfW,     -halfH,     -terrainDist, viewPts[7]);
 
             // Transform to world space using the actual GL modelview matrix
-            // (g_Camera.Matrix was set by CameraProjection::GetOpenGLMatrix in BeginOpengl)
+            // (g_Camera.Matrix is the view CameraProjection::UpdateView built)
             float px[8], py[8];
             for (int i = 0; i < 8; i++)
             {
@@ -2442,7 +2446,7 @@ void CreateFrustrum2D(vec3_t Position)
 
 }
 
-void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
+void CreateFrustrum(float xAspect, float yAspect)
 {
     const auto fovv = tanf(g_Camera.FOV * Q_PI / 360.f);
     float Distance = g_Camera.ViewFar;
@@ -2460,12 +2464,10 @@ void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
     float FrustrumMinY = (float)TERRAIN_SIZE * TERRAIN_SCALE;
     float FrustrumMaxX = 0.f;
     float FrustrumMaxY = 0.f;
-    float OGLMatrix[3][4];
-    CameraProjection::GetOpenGLMatrix(OGLMatrix);
     for (int i = 0; i < 5; i++)
     {
         vec3_t t;
-        VectorIRotate(Temp[i], OGLMatrix, t);
+        VectorIRotate(Temp[i], g_Camera.Matrix, t);
         VectorAdd(t, g_Camera.Position, FrustrumVertex[i]);
         if (FrustrumMinX > FrustrumVertex[i][0]) FrustrumMinX = FrustrumVertex[i][0];
         if (FrustrumMinY > FrustrumVertex[i][1]) FrustrumMinY = FrustrumVertex[i][1];
@@ -2494,7 +2496,7 @@ void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
     FrustrumFaceD[3] = -VectorDotProduct(FrustrumVertex[0], FrustrumFaceNormal[3]);
     FrustrumFaceD[4] = -VectorDotProduct(FrustrumVertex[1], FrustrumFaceNormal[4]);
 
-    CreateFrustrum2D(position);
+    CreateFrustrum2D();
 
 #ifdef _EDITOR
     // In FreeFly spectator mode, override 3D frustum planes with spectated camera's

@@ -127,10 +127,10 @@ void CQuestMng::LoadQuestWordsScript()
 
     while (0 != ::fread(&sQuestWordsHeader, nSize, 1, fp))
     {
-        ::BuxConvert((BYTE*)&sQuestWordsHeader, nSize);
+        ::BuxConvert(reinterpret_cast<BYTE*>(&sQuestWordsHeader), nSize);
 
         ::fread(rawWords, sQuestWordsHeader.m_nWordsLen, 1, fp);
-        ::BuxConvert((BYTE*)rawWords, sQuestWordsHeader.m_nWordsLen);
+        ::BuxConvert(reinterpret_cast<BYTE*>(rawWords), sQuestWordsHeader.m_nWordsLen);
         CMultiLanguage::ConvertFromUtf8(szWords, rawWords, 1024);
 
         std::wstring strWords = szWords;
@@ -841,7 +841,7 @@ bool CQuestMng::IsQuestByEtc(DWORD dwQuestIndex)
         return false;
 }
 
-void CQuestMng::SetQuestIndexByEtcList(DWORD* adwSrcQuestIndex, int nIndexCount)
+void CQuestMng::SetQuestIndexByEtcList(const DWORD* adwSrcQuestIndex, int nIndexCount)
 {
     m_listQuestIndexByEtc.clear();
 
@@ -885,7 +885,7 @@ void CQuestMng::DelQuestIndexByEtcList(DWORD dwQuestIndex)
     }
 }
 
-void CQuestMng::SetCurQuestIndexList(DWORD* adwCurQuestIndex, int nIndexCount)
+void CQuestMng::SetCurQuestIndexList(const DWORD* adwCurQuestIndex, int nIndexCount)
 {
     m_listCurQuestIndex.clear();
 

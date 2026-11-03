@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "GameLogic/Combat/ClassAttack.h"
 #include "GameLogic/Combat/CombatTarget.h"
 #include "GameLogic/Combat/SkillCast.h"
@@ -771,8 +772,8 @@ void AttackKnight(CHARACTER* c, ActionSkillType Skill, float Distance)
 
                     for (int i = 0; i < 8; i++)
                     {
-                        Position[0] = (o->Position[0] - 119.f) + (float)(rand() % 240);
-                        Position[2] = (o->Position[2] + 49.f) + (float)(rand() % 60);
+                        Position[0] = (o->Position[0] - 119.f) + (float)(Random::Rand() % 240);
+                        Position[2] = (o->Position[2] + 49.f) + (float)(Random::Rand() % 60);
                         CreateJoint(BITMAP_2LINE_GHOST, Position, o->Position, o->Angle, 0, o, 20.f, o->PKKey, 0, o->m_bySkillSerialNum);
                     }
                     if (c == Hero && SelectedCharacter >= 0 && SelectedCharacter < MAX_CHARACTERS_CLIENT)
@@ -1451,8 +1452,8 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
                     while (1)
                     {
-                        indexX = rand() % 3;
-                        indexY = rand() % 3;
+                        indexX = Random::Rand() % 3;
+                        indexY = Random::Rand() % 3;
 
                         if (indexX != 1 || indexY != 1)
                         {

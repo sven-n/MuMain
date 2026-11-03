@@ -108,3 +108,43 @@ TEST_CASE("RmlModelBinder::Create keeps its model when the build step runs again
     Rml::Shutdown();
     Rml::SetRenderInterface(nullptr);
 }
+
+// A window that measures the elements a field's change builds (the server select window's load texts)
+// has to wait for RmlUi's next update: until then the document still shows the field's last value.
+TEST_CASE("RmlModelBinder::IsDirty is true until RmlUi has shown the change [ui][rml-model-binder]")
+{
+    NullRenderer renderer;
+    Rml::SetRenderInterface(&renderer);
+    REQUIRE(Rml::Initialise());
+    auto* context = Rml::CreateContext("rml-model-binder-dirty", {320, 240});
+    REQUIRE(context != nullptr);
+
+    RmlModelBinder<BinderTestModel> binder;
+    // No model yet: nothing to show.
+    CHECK_FALSE(binder.IsDirty("rows"));
+    REQUIRE(binder.Create(context, "binder_test", RegisterBinderTestModel));
+    auto* document = context->LoadDocumentFromMemory(kBinderTestDocument);
+    REQUIRE(document != nullptr);
+    document->Show();
+    context->Update();
+    CHECK_FALSE(binder.IsDirty("rows"));
+
+    binder.GetModel().rows = {{"first"}, {"second"}};
+    binder.MarkDirty("rows");
+    CHECK(binder.IsDirty("rows"));
+    CHECK_FALSE(binder.IsDirty("title"));
+    // Not built yet: the rows are the old ones (none).
+    CHECK(document->GetElementById("rows")->GetInnerRML().find("first") == Rml::String::npos);
+
+    context->Update();
+    CHECK_FALSE(binder.IsDirty("rows"));
+    CHECK(document->GetElementById("rows")->GetInnerRML().find("first") != Rml::String::npos);
+
+    context->UnloadDocument(document);
+    context->Update();
+    binder.Destroy(context);
+    CHECK_FALSE(binder.IsDirty("rows"));
+    Rml::RemoveContext("rml-model-binder-dirty");
+    Rml::Shutdown();
+    Rml::SetRenderInterface(nullptr);
+}

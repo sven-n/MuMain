@@ -122,19 +122,72 @@ void CreatePartsFactory(CHARACTER* c)
     }
 }
 
-void RenderParts(CHARACTER* c)
+namespace
+{
+bool ArePartsShown(CHARACTER* c)
+{
+    return !g_isCharacterBuff((&c->Object), eBuff_Cloaking) && !ShouldHideCastleMarks(*c);
+}
+
+// The Christmas earring's two lights, on its bone as its draw poses it.
+void SpawnPartLights(OBJECT* o)
+{
+    if (o->Type != MODEL_XMAS_EVENT_EARRING || o->Alpha < kRenderableAlphaThreshold)
+        return;
+
+    BMD* b = &Models[o->Type];
+    static vec34_t bones[MAX_BONES];
+    PlaceObjectModel(o, b);
+    b->Animation(bones, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false,
+                 false);
+
+    vec3_t vPos, vRelativePos, vLight;
+    Vector(1.f, 1.f, 1.f, vLight);
+    float fLumi = (sinf(WorldTime * 0.004f) + 1.0f) * 0.05f;
+    Vector(0.8f + fLumi, 0.8f + fLumi, 0.3f + fLumi, o->Light);
+    for (float x : {18.f, -18.f})
+    {
+        Vector(x, 0.f, 6.f, vRelativePos);
+        b->TransformPosition(bones[0], vRelativePos, vPos, true);
+        CreateSprite(BITMAP_LIGHT, vPos, 0.4f, o->Light, o, 0.5f);
+        if (rand_fps_check(15))
+        {
+            CreateParticle(BITMAP_SHINY, vPos, o->Angle, vLight, 5, 0.5f);
+        }
+    }
+}
+} // namespace
+
+void UpdateParts(CHARACTER* c)
 {
     if (c == nullptr)
     {
         return;
     }
 
-    if (g_isCharacterBuff((&c->Object), eBuff_Cloaking))
+    CreatePartsFactory(c);
+    if (!ArePartsShown(c))
     {
         return;
     }
 
-    if (ShouldHideCastleMarks(*c))
+    if (c->m_pTempParts != nullptr)
+    {
+        static_cast<CSIPartsMDL*>(c->m_pTempParts)->IUpdate(c);
+        UpdateDrawnObjectHold(static_cast<CSIPartsMDL*>(c->m_pTempParts)->GetObject());
+        SpawnPartLights(static_cast<CSIPartsMDL*>(c->m_pTempParts)->GetObject());
+    }
+    if (c->m_pParts != nullptr)
+    {
+        static_cast<CSIPartsMDL*>(c->m_pParts)->IUpdate(c);
+        UpdateDrawnObjectHold(static_cast<CSIPartsMDL*>(c->m_pParts)->GetObject());
+        SpawnPartLights(static_cast<CSIPartsMDL*>(c->m_pParts)->GetObject());
+    }
+}
+
+void RenderParts(CHARACTER* c)
+{
+    if (c == nullptr || !ArePartsShown(c))
     {
         return;
     }
@@ -182,7 +235,7 @@ CSParts::CSParts(int Type, int BoneNumber, bool bBillBoard, float x, float y, fl
     Vector(ax, ay, az, m_pObj.Angle);
 }
 
-void CSParts::IRender(CHARACTER* c)
+void CSParts::IUpdate(CHARACTER* c)
 {
     if (c == nullptr)
     {
@@ -215,8 +268,16 @@ void CSParts::IRender(CHARACTER* c)
 
     const float speed = m_pObj.Velocity;
     b->PlayAnimation(&m_pObj.AnimationFrame, &m_pObj.PriorAnimationFrame, &m_pObj.PriorAction, speed, m_pObj.Position, m_pObj.Angle);
+}
 
-    Vector(1.f, 1.f, 1.f, b->BodyLight);
+void CSParts::IRender(CHARACTER* c)
+{
+    if (c == nullptr || m_pObj.Alpha < kRenderableAlphaThreshold)
+    {
+        return;
+    }
+
+    Vector(1.f, 1.f, 1.f, Models[m_pObj.Type].BodyLight);
     RenderObject(&m_pObj, true);
 }
 
@@ -246,7 +307,7 @@ void CSAnimationParts::Animation(CHARACTER* c)
     b->PlayAnimation(&m_pObj.AnimationFrame, &m_pObj.PriorAnimationFrame, &m_pObj.PriorAction, fSpeed, m_pObj.Position, m_pObj.Angle);
 }
 
-void CSAnimationParts::IRender(CHARACTER* c)
+void CSAnimationParts::IUpdate(CHARACTER* c)
 {
     if (c == nullptr)
     {
@@ -270,6 +331,15 @@ void CSAnimationParts::IRender(CHARACTER* c)
     }
 
     Animation(c);
+}
+
+void CSAnimationParts::IRender(CHARACTER* c)
+{
+    if (c == nullptr || m_pObj.Alpha < kRenderableAlphaThreshold)
+    {
+        return;
+    }
+
     RenderObject(&m_pObj, true);
 }
 
@@ -285,7 +355,7 @@ CSParts2D::CSParts2D(int Type, int SubType, int BoneNumber, float x, float y, fl
     m_pObj.SubType = SubType;
 }
 
-void CSParts2D::IRender(CHARACTER* c)
+void CSParts2D::IUpdate(CHARACTER* c)
 {
     if (c == nullptr)
     {
@@ -326,3 +396,6 @@ void CSParts2D::IRender(CHARACTER* c)
 
     CreateSprite(m_pObj.Type, m_pObj.Position, 1.f, m_pObj.Light, nullptr, 0, bSubType);
 }
+
+// A billboard sprite, which IUpdate spawns.
+void CSParts2D::IRender(CHARACTER*) {}

@@ -307,6 +307,7 @@
           "levels": [1, 1]
         }
       ],
+      "groundLabels": [{"style": "white"}],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -518,6 +519,7 @@
           "levels": [5, 5]
         }
       ],
+      "groundLabels": [{"style": "white"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -565,6 +567,7 @@
           "levels": [1, 1]
         }
       ],
+      "groundLabels": [{"style": "white"}],
       "width": 1,
       "height": 1,
       "durability": 255,
@@ -713,6 +716,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "eventItem", "levels": [1, 1]}, {"style": "jewel"}],
       "width": 1,
       "height": 2,
       "statProfile": "helper",
@@ -905,6 +909,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "eventItem"}],
       "width": 1,
       "height": 1,
       "repairable": false,
@@ -1665,6 +1670,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "eventItem", "levels": [0, 3]}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -2093,6 +2099,7 @@
           "levels": [1, 1]
         }
       ],
+      "groundLabels": [{"style": "eventItem"}],
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -2890,6 +2897,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "seal"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -2936,6 +2944,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "seal"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -2990,6 +2999,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "seal"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -3046,6 +3056,7 @@
           "text": "@usableTimes"
         }
       ],
+      "groundLabels": [{"style": "ticket"}],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -3101,6 +3112,7 @@
           "text": "@usableTimes"
         }
       ],
+      "groundLabels": [{"style": "ticket"}],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -3156,6 +3168,7 @@
           "text": "@usableTimes"
         }
       ],
+      "groundLabels": [{"style": "ticket"}],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -3200,6 +3213,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 1,
       "height": 1,
       "repairable": false,
@@ -3239,6 +3253,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 1,
       "height": 2,
       "repairable": false,
@@ -3278,6 +3293,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "questItem"}],
       "width": 2,
       "height": 2,
       "durability": 1,
@@ -3363,6 +3379,7 @@
         "pt": "Reiniciar força da fruta"
       },
       "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
+      "groundLabels": [{"style": "resetFruit"}],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -3390,6 +3407,7 @@
         "pt": "Reiniciar rapidez da fruta"
       },
       "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
+      "groundLabels": [{"style": "resetFruit"}],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -3417,6 +3435,7 @@
         "pt": "Reiniciar saúde da Fruta"
       },
       "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
+      "groundLabels": [{"style": "resetFruit"}],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -3444,6 +3463,7 @@
         "pt": "Reiniciar energia da fruta"
       },
       "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
+      "groundLabels": [{"style": "resetFruit"}],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -3471,6 +3491,7 @@
         "pt": "Reiniciar controle da fruta"
       },
       "tags": ["cashShop", "noDurabilityLine", "noClassLines"],
+      "groundLabels": [{"style": "resetFruit"}],
       "width": 1,
       "height": 1,
       "durability": 100,
@@ -3516,6 +3537,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "seal"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3560,6 +3582,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "cashShopItem"}],
       "width": 1,
       "height": 2,
       "tradable": false,
@@ -3614,6 +3637,7 @@
           "text": "@usableTimes"
         }
       ],
+      "groundLabels": [{"style": "ticket"}],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -3695,6 +3719,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "seal"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3771,6 +3796,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "seal"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -3823,6 +3849,7 @@
           "when": ["!timed"]
         }
       ],
+      "groundLabels": [{"style": "pet"}],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -3895,6 +3922,7 @@
           "when": ["!timed"]
         }
       ],
+      "groundLabels": [{"style": "pet"}],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -3953,6 +3981,7 @@
           "after": "options"
         }
       ],
+      "groundLabels": [{"style": "santaInvitation"}],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -3986,6 +4015,7 @@
           "when": ["!timed"]
         }
       ],
+      "groundLabels": [{"style": "pet"}],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -4022,6 +4052,7 @@
           "after": "options"
         }
       ],
+      "groundLabels": [{"style": "transformationRing"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -4363,6 +4394,7 @@
           "after": "options"
         }
       ],
+      "groundLabels": [{"style": "transformationRing"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -4427,6 +4459,7 @@
           "when": ["!timed"]
         }
       ],
+      "groundLabels": [{"style": "pet"}],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -4626,6 +4659,7 @@
           "when": ["durability"]
         }
       ],
+      "groundLabels": [{"style": "talismanOfWings"}],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -4663,6 +4697,7 @@
           "when": ["durability"]
         }
       ],
+      "groundLabels": [{"style": "talismanOfWings"}],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -4700,6 +4735,7 @@
           "when": ["durability"]
         }
       ],
+      "groundLabels": [{"style": "talismanOfWings"}],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -4737,6 +4773,7 @@
           "when": ["durability"]
         }
       ],
+      "groundLabels": [{"style": "talismanOfWings"}],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -4774,6 +4811,7 @@
           "when": ["durability"]
         }
       ],
+      "groundLabels": [{"style": "talismanOfWings"}],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -4811,6 +4849,7 @@
           "when": ["durability"]
         }
       ],
+      "groundLabels": [{"style": "talismanOfWings"}],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -4848,6 +4887,7 @@
           "when": ["durability"]
         }
       ],
+      "groundLabels": [{"style": "talismanOfWings"}],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -4885,6 +4925,7 @@
           "when": ["durability"]
         }
       ],
+      "groundLabels": [{"style": "talismanOfWings"}],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -4922,6 +4963,7 @@
           "when": ["durability"]
         }
       ],
+      "groundLabels": [{"style": "talismanOfWings"}],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -4959,6 +5001,7 @@
           "when": ["durability"]
         }
       ],
+      "groundLabels": [{"style": "talismanOfWings"}],
       "width": 1,
       "height": 1,
       "droppable": false,
@@ -4997,6 +5040,7 @@
           "when": ["durability"]
         }
       ],
+      "groundLabels": [{"style": "seal"}],
       "width": 1,
       "height": 1,
       "tradable": false,
@@ -5101,6 +5145,7 @@
         "es": "Tarjeta de Personaje del Gladiador Mago",
         "pt": "Carta de Personagem - Gladiador Mágico"
       },
+      "groundLabels": [{"style": "cashShopService"}],
       "tradable": false,
       "droppable": false,
       "personalShopSellable": false
@@ -5113,6 +5158,7 @@
         "es": "Tarjeta de Personaje del Señor Oscuro",
         "pt": "Carta de Personagem - Lorde Sombrio"
       },
+      "groundLabels": [{"style": "cashShopService"}],
       "tradable": false,
       "droppable": false,
       "personalShopSellable": false
@@ -5125,6 +5171,7 @@
         "es": "Clave de Ranura de Personaje",
         "pt": "Fenda de Chave de Personagem"
       },
+      "groundLabels": [{"style": "cashShopService"}],
       "slot": "mainHand",
       "tradable": false,
       "droppable": false,
@@ -5301,6 +5348,7 @@
           "when": ["!timed"]
         }
       ],
+      "groundLabels": [{"style": "pet"}],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -5398,6 +5446,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "eventJewelry"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -5446,6 +5495,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "eventJewelry"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -5494,6 +5544,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "eventJewelry"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -5542,6 +5593,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "eventJewelry"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -5590,6 +5642,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "eventJewelry"}],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -5638,6 +5691,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "eventJewelry"}],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -5674,6 +5728,7 @@
           "text": "@increasesAcquisitionRateOfManaAfterHuntingMonstersMana8"
         }
       ],
+      "groundLabels": [{"style": "eventJewelry"}],
       "width": 1,
       "height": 1,
       "slot": "pendant",
@@ -5720,6 +5775,7 @@
           "color": "blue"
         }
       ],
+      "groundLabels": [{"style": "seal"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -5858,6 +5914,7 @@
           "when": ["timed"]
         }
       ],
+      "groundLabels": [{"style": "eventItem"}],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -5968,6 +6025,7 @@
           "after": "options"
         }
       ],
+      "groundLabels": [{"style": "transformationRing"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -6082,6 +6140,7 @@
           "after": "options"
         }
       ],
+      "groundLabels": [{"style": "pet"}],
       "width": 1,
       "height": 1,
       "slot": "pet",
@@ -6200,6 +6259,7 @@
           "text": "@usableTimes"
         }
       ],
+      "groundLabels": [{"style": "ticket"}],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -6266,6 +6326,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "ticket"}],
       "width": 1,
       "height": 1,
       "durability": 10,
@@ -6332,6 +6393,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "ticket"}],
       "width": 1,
       "height": 1,
       "durability": 3,
@@ -6358,6 +6420,7 @@
         "es": "Figura de Halcón",
         "pt": "Estatueta de falcão"
       },
+      "groundLabels": [{"style": "charm"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -6380,6 +6443,7 @@
         "es": "Figura de Cabra",
         "pt": "Estatueta de bode"
       },
+      "groundLabels": [{"style": "charm"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -6402,6 +6466,7 @@
         "es": "Amuleto de Roble",
         "pt": "Amuleto de carvalho"
       },
+      "groundLabels": [{"style": "charm"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -6424,6 +6489,7 @@
         "es": "Amuleto de Arce",
         "pt": "Amuleto de bordo"
       },
+      "groundLabels": [{"style": "charm"}],
       "width": 1,
       "height": 1,
       "slot": "ring",
@@ -6446,6 +6512,7 @@
         "es": "Amuleto Dorado de Roble",
         "pt": "Amuleto de carvalho dourado"
       },
+      "groundLabels": [{"style": "charm"}],
       "width": 1,
       "height": 2,
       "slot": "ring",
@@ -6468,6 +6535,7 @@
         "es": "Amuleto Dorado de Arce",
         "pt": "Amuleto de bordo dourado"
       },
+      "groundLabels": [{"style": "charm"}],
       "width": 1,
       "height": 2,
       "slot": "ring",
@@ -6490,6 +6558,7 @@
         "es": "Herradura usada",
         "pt": "Ferradura gasta"
       },
+      "groundLabels": [{"style": "charm"}],
       "width": 1,
       "height": 1,
       "slot": "ring",

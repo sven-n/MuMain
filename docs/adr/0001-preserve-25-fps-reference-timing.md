@@ -77,8 +77,8 @@ Players do not need to change VSync or their FPS limit for the intended flight a
 - `rand_fps_check(n)` is the per-frame form of the original `rand() % n == 0`
   and belongs only on chances rolled every frame. A pick between variants, or
   a chance rolled once per event (spawn setup in `CreateEffect`,
-  `CreateJoint`, `CreateParticle`, packet handlers), stays a plain `rand()`
-  pick. A gate nested in another gate, or around a `*FpsChecked` spawn,
+  `CreateJoint`, `CreateParticle`, packet handlers), stays a plain
+  `Random::Rand()` pick (the game's own copy of the legacy `rand()` sequence). A gate nested in another gate, or around a `*FpsChecked` spawn,
   scales the chance twice. Where the original rolled `rand() % n`, keep that
   `n`: it is the intended rate at 25 FPS.
 - A value set once, when an effect, joint or particle is created, never

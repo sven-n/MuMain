@@ -161,7 +161,7 @@ private:
     bool m_attrStrokeActive = false;
     bool m_bAttrHasUndo = false;
     std::vector<unsigned short> m_attrUndo;   // TerrainWall snapshot before a stroke
-    int  m_serverMapOverride = -1;    // -1 = auto (gMapManager.WorldActive)
+    int  m_serverMapOverride = -1;    // -1 = auto (gMapManager.GetServerMap())
     std::string m_attrStatus;
 
     // Server export is a MERGE onto the server's current TerrainData, because the two

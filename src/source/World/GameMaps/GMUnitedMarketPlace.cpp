@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -215,7 +216,7 @@ void GMUnitedMarketPlace::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     // 	} //switch end
 }
 
-bool GMUnitedMarketPlace::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+bool GMUnitedMarketPlace::RenderObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (IsUnitedMarketPlace() == false)
     {
@@ -226,14 +227,14 @@ bool GMUnitedMarketPlace::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
     {
     case 8:
     case 30:
-        o->m_bRenderAfterCharacter = true;
+        SendAfterCharacter(o);
         return true;
     }
 
     return false;
 }
 
-bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
+bool GMUnitedMarketPlace::UpdateObjectEffects(OBJECT* o, BMD* b)
 {
     if (IsUnitedMarketPlace() == false)
         return false;
@@ -251,7 +252,7 @@ bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
         {
             vec3_t vLightPosition, vRelativePos;
             Vector(0.0f, 0.0f, 0.0f, vRelativePos);
-            b->TransformPosition(BoneTransform[i], vRelativePos, vLightPosition, false);
+            b->TransformPosition(Engine::Object::Pose::World(o, b)[i], vRelativePos, vLightPosition, false);
 
             float fLumi = (sinf(WorldTime * 0.002f) + 1.0f) * 0.2f + 0.6f;
             vec3_t vLightFire;
@@ -265,7 +266,7 @@ bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
     {
         vec3_t vLightPosition, vRelativePos;
         Vector(0.0f, 0.0f, 0.0f, vRelativePos);
-        b->TransformPosition(BoneTransform[2], vRelativePos, vLightPosition, false);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[2], vRelativePos, vLightPosition, false);
 
         float fLumi = (sinf(WorldTime * 0.039f) + 1.0f) * 0.2f + 0.6f;
         vec3_t vLightFire;
@@ -302,7 +303,7 @@ bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
         vec3_t vLight;
         Vector(1.0f, 1.0f, 1.0f, vLight);
 
-        switch (rand() % 3)
+        switch (Random::Rand() % 3)
         {
         case 0:
             CreateParticleFpsChecked(BITMAP_FIRE_HIK1, o->Position, o->Angle, vLight, 0, o->Scale);
@@ -330,7 +331,7 @@ bool GMUnitedMarketPlace::RenderObjectVisual(OBJECT* o, BMD* b)
     return false;
 }
 
-bool GMUnitedMarketPlace::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
+bool GMUnitedMarketPlace::RenderMonster(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     switch (o->Type)
     {
@@ -338,8 +339,8 @@ bool GMUnitedMarketPlace::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     {
         if (o->CurrentAction != MONSTER01_DIE)
         {
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
         }
     }
         return true;
@@ -348,7 +349,7 @@ bool GMUnitedMarketPlace::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     return false;
 }
 
-bool GMUnitedMarketPlace::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool GMUnitedMarketPlace::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {
@@ -365,7 +366,7 @@ bool GMUnitedMarketPlace::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         vec3_t vAngle;
         Vector(10.0f, 0.0f, 0.0f, vAngle);
         b->TransformPosition(o->BoneTransform[43], vRelativePos, vWorldPos, true);
-        CreateParticleFpsChecked(BITMAP_SMOKELINE1 + rand() % 3, vWorldPos, o->Angle, Light, 1, 0.6f, o);
+        CreateParticleFpsChecked(BITMAP_SMOKELINE1 + Random::Rand() % 3, vWorldPos, o->Angle, Light, 1, 0.6f, o);
         CreateParticleFpsChecked(BITMAP_CLUD64, vWorldPos, o->Angle, Light, 6, 0.6f, o);
 
         Vector(1.0f, 1.0f, 1.0f, Light);
@@ -405,7 +406,7 @@ bool GMUnitedMarketPlace::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-void GMUnitedMarketPlace::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
+void GMUnitedMarketPlace::RenderAfterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, bool ExtraMon)
 {
     if (IsUnitedMarketPlace() == false)
         return;
@@ -414,20 +415,20 @@ void GMUnitedMarketPlace::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon
     {
     case 8:
     {
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight);
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight);
-        b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
+        b->RenderMesh(4, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight);
         float fFlow_u = sinf(WorldTime * 0.0007f) * 0.05f;
         float fFlow_v = sinf(WorldTime * 0.001f) * 0.05f;
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, 0.3f, o->BlendMeshTexCoordU,
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 1, 0.3f, look.blendMeshU,
                       -(int)WorldTime % 10000 * 0.001f);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, 0.3f, fFlow_u, fFlow_v);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 0, 0.3f, fFlow_u, fFlow_v);
     }
     break;
     case 30:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
     break;
     }
@@ -471,12 +472,12 @@ bool GMUnitedMarketPlace::CreateRain(PARTICLE* o)
     }
 
     o->Type = BITMAP_RAIN;
-    Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800),
-           Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
-           Hero->Object.Position[2] + (float)(rand() % 200 + 200), o->Position);
+    Vector(Hero->Object.Position[0] + (float)(Random::Rand() % 1600 - 800),
+           Hero->Object.Position[1] + (float)(Random::Rand() % 1400 - 500),
+           Hero->Object.Position[2] + (float)(Random::Rand() % 200 + 200), o->Position);
     Vector(-30.f, 0.f, 0.f, o->Angle);
     vec3_t Velocity;
-    Vector(0.f, 0.f, -(float)(rand() % 24 + 20), Velocity);
+    Vector(0.f, 0.f, -(float)(Random::Rand() % 24 + 20), Velocity);
     float Matrix[3][4];
     AngleMatrix(o->Angle, Matrix);
     VectorRotate(Velocity, Matrix, o->Velocity);
@@ -509,14 +510,14 @@ bool GMUnitedMarketPlace::MoveRain(PARTICLE* o)
     }
     else
     {
-        o->Velocity[0] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
-        o->Velocity[1] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
-        o->Velocity[2] += (float)(rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[0] += (float)(Random::Rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[1] += (float)(Random::Rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
+        o->Velocity[2] += (float)(Random::Rand() % 16 - 8) * 0.1f * FPS_ANIMATION_FACTOR;
         VectorAddScaled(o->Position, o->Velocity, o->Position, FPS_ANIMATION_FACTOR);
 
-        o->TurningForce[0] += (float)(rand() % 8 - 4) * 0.02f * FPS_ANIMATION_FACTOR;
-        o->TurningForce[1] += (float)(rand() % 16 - 8) * 0.02f * FPS_ANIMATION_FACTOR;
-        o->TurningForce[2] += (float)(rand() % 8 - 4) * 0.02f * FPS_ANIMATION_FACTOR;
+        o->TurningForce[0] += (float)(Random::Rand() % 8 - 4) * 0.02f * FPS_ANIMATION_FACTOR;
+        o->TurningForce[1] += (float)(Random::Rand() % 16 - 8) * 0.02f * FPS_ANIMATION_FACTOR;
+        o->TurningForce[2] += (float)(Random::Rand() % 8 - 4) * 0.02f * FPS_ANIMATION_FACTOR;
         VectorAdd(o->Angle, o->TurningForce, o->Angle);
 
         vec3_t Range;

@@ -91,3 +91,20 @@ body { --px: calc(100vh / 480); }
 .mode-both #btn_cancel { left: calc(121 * var(--px)); }
 .mode-input #btn_ok { left: calc(110 * var(--px)); width: calc(40 * var(--px)); }
 .mode-input #btn_cancel { left: calc(160 * var(--px)); width: calc(40 * var(--px)); }
+
+/* Captions other than OK/Cancel (the login screen's Reconnect/Exit) can't use the lettered plates:
+   they get the plain plate with the text on it (as generic_confirm_dialog.rcss), as a wider pair. */
+@spritesheet classic-msgwin-plate-sheet { src: ../../../Classic/Bar.jpg; classic-msgwin-plate: 0px 0px 40px 18px; }
+.own-captions #btn_ok, .own-captions #btn_cancel {
+	width: calc(90 * var(--px));
+	line-height: calc(21 * var(--px));
+	text-align: center;
+	color: #ffffff;
+	decorator: image(classic-msgwin-plate fill);
+}
+.own-captions #btn_ok:hover, .own-captions #btn_cancel:hover {
+	decorator: image(classic-msgwin-plate fill);
+	image-color: #ffe6b4;
+}
+.own-captions.mode-both #btn_ok { left: calc(12 * var(--px)); }
+.own-captions.mode-both #btn_cancel { left: calc(111 * var(--px)); }

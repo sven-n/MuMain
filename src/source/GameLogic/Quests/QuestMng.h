@@ -147,12 +147,12 @@ public:
     bool IsEPRequestRewardState(DWORD dwQuestIndex);
     bool IsQuestByEtc(DWORD dwQuestIndex);
 
-    void SetQuestIndexByEtcList(DWORD* adwSrcQuestIndex, int nIndexCount);
+    void SetQuestIndexByEtcList(const DWORD* adwSrcQuestIndex, int nIndexCount);
     bool IsQuestIndexByEtcListEmpty();
     void SendQuestIndexByEtcSelection();
     void DelQuestIndexByEtcList(DWORD dwQuestIndex);
 
-    void SetCurQuestIndexList(DWORD* adwCurQuestIndex, int nIndexCount);
+    void SetCurQuestIndexList(const DWORD* adwCurQuestIndex, int nIndexCount);
     void AddCurQuestIndexList(DWORD dwQuestIndex);
     void RemoveCurQuestIndexList(DWORD dwQuestIndex);
     bool IsIndexInCurQuestIndexList(DWORD dwQuestIndex);

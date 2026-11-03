@@ -4,11 +4,15 @@
 
 #include "TestModelSlots.h"
 
+#include "Engine/Object/ObjectPose.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/ZzzObject.h"
+#include "Render/Effects/ZzzEffect.h"
 
 #include <cmath>
 #include <cstring>
 #include <filesystem>
+#include <memory>
 #include <span>
 
 namespace
@@ -99,6 +103,124 @@ TEST_CASE("The pre-pass animates characters at render's height, not one an item 
     CHECK(std::memcmp(bones, rendered, sizeof(float) * 12 * model.NumBones) == 0);
 }
 
+TEST_CASE("A character's pose stays current until its animation state changes [data][animation]")
+{
+    TestModelSlots slots;
+    BMD& model = Models[MODEL_PLAYER];
+    const std::wstring folder = PlayerFolder.wstring() + L"/";
+    REQUIRE(model.Open2(folder.c_str(), L"player.bmd"));
+
+    static float bones[MAX_BONES][3][4];
+    OBJECT o;
+    PlaceCharacter(o, 100.f, 1.f, bones);
+    CHECK_FALSE(Engine::Object::Pose::IsCurrent(&o, &model, false));
+    AnimateCharacterBones(&o);
+    CHECK(Engine::Object::Pose::IsCurrent(&o, &model, false));
+
+    const auto changed = [&](auto change)
+    {
+        OBJECT copy = o;
+        change(copy);
+        return !Engine::Object::Pose::IsCurrent(&copy, &model, false);
+    };
+    CHECK(changed([](OBJECT& c) { c.Type = MODEL_PLAYER + 1; }));
+    CHECK(changed([](OBJECT& c) { c.CurrentAction = 2; }));
+    CHECK(changed([](OBJECT& c) { c.PriorAction = 1; }));
+    CHECK(changed([](OBJECT& c) { c.AnimationFrame += 0.25f; }));
+    CHECK(changed([](OBJECT& c) { c.PriorAnimationFrame += 0.25f; }));
+    CHECK(changed([](OBJECT& c) { c.Angle[2] += 1.f; }));
+    CHECK(changed([](OBJECT& c) { c.HeadAngle[0] += 1.f; }));
+
+    Engine::Object::Pose::Invalidate(&o);
+    CHECK_FALSE(Engine::Object::Pose::IsCurrent(&o, &model, false));
+}
+
+TEST_CASE("A draw reuses the pose the update built, and animates it after a change [data][animation]")
+{
+    TestModelSlots slots;
+    BMD& model = Models[MODEL_PLAYER];
+    const std::wstring folder = PlayerFolder.wstring() + L"/";
+    REQUIRE(model.Open2(folder.c_str(), L"player.bmd"));
+
+    static float bones[MAX_BONES][3][4];
+    static float fresh[MAX_BONES][3][4];
+    OBJECT o;
+    PlaceCharacter(o, 100.f, 1.f, bones);
+    o.Alpha = 1.f;
+    AnimateCharacterBones(&o);
+
+    // A marker the draw would overwrite if it animated the unchanged pose again.
+    bones[0][0][3] = 12345.f;
+    REQUIRE(Calc_ObjectAnimation(&o, true, 0));
+    CHECK(bones[0][0][3] == 12345.f);
+
+    // A change during the draw, like SetPlayerStop, gets its own pose.
+    o.AnimationFrame += 0.5f;
+    REQUIRE(Calc_ObjectAnimation(&o, true, 0));
+    model.Animation(fresh, o.AnimationFrame, o.PriorAnimationFrame, o.PriorAction, o.Angle, o.HeadAngle, false, false,
+                    nullptr, o.CurrentAction);
+    CHECK(std::memcmp(bones, fresh, sizeof(float) * 12 * model.NumBones) == 0);
+    CHECK(Engine::Object::Pose::IsCurrent(&o, &model, false));
+}
+
+TEST_CASE("The pre-pass leaves a current pose alone [data][animation]")
+{
+    TestModelSlots slots;
+    BMD& model = Models[MODEL_PLAYER];
+    const std::wstring folder = PlayerFolder.wstring() + L"/";
+    REQUIRE(model.Open2(folder.c_str(), L"player.bmd"));
+
+    static float bones[MAX_BONES][3][4];
+    OBJECT o;
+    PlaceCharacter(o, 100.f, 1.f, bones);
+    AnimateCharacterBones(&o);
+    bones[0][0][3] = 12345.f;
+    AnimateCharacterBones(&o);
+    CHECK(bones[0][0][3] == 12345.f);
+
+    o.AnimationFrame += 0.5f;
+    AnimateCharacterBones(&o);
+    CHECK(bones[0][0][3] != 12345.f);
+}
+
+TEST_CASE("A map object gets its own world-space pose when its effects read it [data][animation]")
+{
+    TestModelSlots slots;
+    BMD& model = Models[MODEL_PLAYER];
+    const std::wstring folder = PlayerFolder.wstring() + L"/";
+    REQUIRE(model.Open2(folder.c_str(), L"player.bmd"));
+
+    static float fresh[MAX_BONES][3][4];
+    OBJECT o;
+    PlaceCharacter(o, 100.f, 1.f, nullptr);
+    VectorCopy(o.Position, model.BodyOrigin);
+    model.BodyScale = 1.5f;
+    model.BodyHeight = 0.f;
+
+    float (*bones)[3][4] = Engine::Object::Pose::World(&o, &model);
+    REQUIRE(bones != nullptr);
+    CHECK(o.OwnsBoneTransform);
+    CHECK(o.EnableBoneMatrix);
+    model.Animation(fresh, o.AnimationFrame, o.PriorAnimationFrame, o.PriorAction, o.Angle, o.HeadAngle, false, true,
+                    nullptr, o.CurrentAction);
+    CHECK(std::memcmp(bones, fresh, sizeof(float) * 12 * model.NumBones) == 0);
+
+    bones[0][0][3] = 12345.f;
+    Engine::Object::Pose::World(&o, &model);
+    CHECK(bones[0][0][3] == 12345.f);
+
+    // The placement is part of a world-space pose.
+    model.BodyOrigin[0] += 100.f;
+    Engine::Object::Pose::World(&o, &model);
+    CHECK(bones[0][0][3] != 12345.f);
+    CHECK_FALSE(Engine::Object::Pose::IsCurrent(&o, &model, false));
+
+    Engine::Object::Pose::Release(&o);
+    CHECK(o.BoneTransform == nullptr);
+    CHECK_FALSE(o.OwnsBoneTransform);
+    CHECK_FALSE(o.EnableBoneMatrix);
+}
+
 #ifdef MU_ENABLE_CONTROL_SOCKET
 TEST_CASE("The bones check counts a character whose bone differs [data][animation]")
 {
@@ -116,3 +238,55 @@ TEST_CASE("The bones check counts a character whose bone differs [data][animatio
     g_PrepassBoneCheck = PrepassBoneCheck{};
 }
 #endif
+
+TEST_CASE("A preview's update poses it before its effects read the pose, with no draw before it [data][animation]")
+{
+    TestModelSlots slots;
+    BMD& model = Models[MODEL_PLAYER];
+    const std::wstring folder = PlayerFolder.wstring() + L"/";
+    REQUIRE(model.Open2(folder.c_str(), L"player.bmd"));
+    REQUIRE(model.NumBones > 34);
+
+    static float bones[MAX_BONES][3][4];
+    static float expected[MAX_BONES][3][4];
+    std::memset(bones, 0, sizeof(bones));
+    auto preview = std::make_unique<CHARACTER>();
+    for (PART_t& part : preview->BodyPart)
+        part.Type = -1;
+    preview->Weapon[0].Type = preview->Weapon[1].Type = preview->Wing.Type = -1;
+    preview->Helper.Type = MODEL_IMP;
+    OBJECT& o = preview->Object;
+    PlaceCharacter(o, 100.f, 0.7f, bones);
+    o.Live = true;
+    // Another object of the same model was drawn last somewhere else.
+    Vector(5000.f, 5000.f, 500.f, model.BodyOrigin);
+    model.BodyScale = 3.f;
+    for (int i = 0; i < MAX_SPRITES; ++i)
+        Sprites[i].Live = false;
+
+    UpdatePreviewCharacter(preview.get());
+
+    VectorCopy(o.Position, model.BodyOrigin);
+    model.BodyScale = o.Scale;
+    model.Animation(expected, o.AnimationFrame, o.PriorAnimationFrame, o.PriorAction, o.Angle, o.HeadAngle, false,
+                    false, nullptr, o.CurrentAction);
+    CHECK(std::memcmp(bones, expected, sizeof(float) * 12 * model.NumBones) == 0);
+
+    // The Imp's light sits on the preview's own bone, where the preview stands.
+    vec3_t relative{20.f, 0.f, 15.f};
+    vec3_t at;
+    model.TransformPosition(expected[34], relative, at, true);
+    int lights = 0;
+    for (int i = 0; i < MAX_SPRITES; ++i)
+    {
+        if (!Sprites[i].Live || Sprites[i].Owner != &o)
+            continue;
+        ++lights;
+        for (int axis = 0; axis < 3; ++axis)
+            CHECK(Sprites[i].Position[axis] == doctest::Approx(at[axis]));
+    }
+    CHECK(lights == 1);
+    for (int i = 0; i < MAX_SPRITES; ++i)
+        Sprites[i].Live = false;
+    o.BoneTransform = nullptr;
+}

@@ -13,6 +13,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
+#include "GameLogic/Events/CSChaosCastle.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Input/Selection.h"
@@ -203,6 +204,7 @@ static void InitializeMainScene()
  */
 static void InitializeSceneFrame()
 {
+    ApplyCharacterEffectsEarthQuake();
     // Decays per reference frame, like DefaultCamera samples it.
     if (REFERENCE_FRAME_STEP > 0)
     {
@@ -313,12 +315,38 @@ static void UpdateGameEntities()
         MoveParticles();
     }
     MovePointers();
+    {
+        FRAME_PROFILE(UpdateEffects);
+        UpdateCharacterEffects();
+        UpdateObjectEffects();
+        UpdateMountEffects();
+        UpdateEffectModelEffects();
+        UpdateTerrainEffects();
+    }
 
     g_Direction.CheckDirection();
 
 #ifdef ENABLE_EDIT
     Editor::EditObjects();
 #endif //ENABLE_EDIT
+}
+
+/**
+ * @brief Moves the camera after everything it follows, builds the view the frame draws and picks with, culls the
+ * map objects and the effects against it, and replays the frame's lights.
+ */
+static void UpdateMainSceneView()
+{
+    MoveMainCamera();
+
+    const auto viewport = UI::Scaling::WorldViewport(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
+    CameraProjection::UpdateView(g_Camera, viewport.x, viewport.y, viewport.width, viewport.height);
+    CreateFrustrum(static_cast<float>(viewport.width) / WindowWidth,
+                   static_cast<float>(viewport.height) / WindowHeight);
+    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
+    CullWorld();
+    // The frame's lights, from every light the update added; the draw only shows them.
+    AddFrameHistoryLights();
 }
 
 /**
@@ -331,6 +359,7 @@ static void UpdateGameEntities()
  * 3. InitializeSceneFrame() - Per-frame state reset
  * 4. UpdateUIAndInput() - UI and input processing
  * 5. UpdateGameEntities() - Game world and entity updates
+ * 6. UpdateMainSceneView() - Camera and the frame's view
  *
  * @note Returns early if EnableMainRender is false (waiting for server join).
  */
@@ -351,6 +380,8 @@ void MoveMainScene()
         return;
     }
 
+    // Picks what the cursor is over in what the last frame drew, and highlights it.
+    Input::Selection::SelectObjects();
     InitializeSceneFrame();
 
     // While the reconnect dialog is up it's modal: block world clicks so they
@@ -366,6 +397,10 @@ void MoveMainScene()
     UpdateGameEntities();
 
     g_ConsoleDebug->UpdateMainScene();
+
+    // The draw keeps the loading screen up until the world is back, and the camera waits with it.
+    if (LoadingWorld <= 30)
+        UpdateMainSceneView();
 }
 
 /**
@@ -374,9 +409,8 @@ void MoveMainScene()
  * @param outWidth Output screen width
  * @param outHeight Output screen height
  * @param outByWaterMap Output water map flag (0=normal, 1=hellas water, 2=water terrain)
- * @param cameraPos Camera position for frustum
  */
-static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWaterMap, vec3_t cameraPos)
+static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWaterMap)
 {
     outByWaterMap = 0;
 
@@ -388,8 +422,6 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
     // All background colors are now centralized in SceneManager.cpp
 
     BeginOpenglPhysical(viewport.x, viewport.y, viewport.width, viewport.height);
-    CreateFrustrum(static_cast<float>(viewport.width) / WindowWidth,
-                   static_cast<float>(viewport.height) / WindowHeight, cameraPos);
 
     // Setup fog for battle castle
     if (gMapManager.InBattleCastle())
@@ -402,7 +434,6 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
         // Don't disable fog - let BeginOpengl() handle it based on FogEnable
     }
     Scenes::Lighting::SubmitSceneLighting();
-    CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
     App::Control::Frames::RecordWorldCamera();
 }
 
@@ -662,7 +693,6 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
  */
 static void RenderMainSceneUI()
 {
-    Input::Selection::SelectObjects();
     BeginBitmap();
     // Recorded into the world-label layer instead when it is available (CNameWindow).
     if (g_pNameWindow == nullptr || !g_pNameWindow->RecordsInterfaceOverlays())
@@ -699,10 +729,9 @@ static void RenderMainSceneUI()
  * @brief Main rendering function for the game scene.
  *
  * Orchestrates the complete rendering pipeline:
- * 1. Determines camera position based on camera mode
- * 2. Sets up viewport and clear color
- * 3. Renders 3D world (terrain, objects, characters, effects)
- * 4. Renders UI and overlays
+ * 1. Sets up viewport and clear color
+ * 2. Renders 3D world (terrain, objects, characters, effects)
+ * 3. Renders UI and overlays
  *
  * @return true if rendering succeeded, false if rendering was skipped
  */
@@ -754,27 +783,10 @@ bool RenderMainScene()
     }
 #endif
 
-    vec3_t cameraPos;
     int width, height;
     BYTE byWaterMap;
 
-    // Determine camera position
-    if (MoveMainCamera() == true)
-    {
-        VectorCopy(Hero->Object.StartPosition, cameraPos);
-    }
-    else
-    {
-        g_pCatapultWindow->GetCameraPos(cameraPos);
-
-        if (g_Direction.IsDirection() && g_Direction.m_bDownHero == false)
-        {
-            g_Direction.GetCameraPosition(cameraPos);
-        }
-    }
-
-    SetupMainSceneViewport(width, height, byWaterMap, cameraPos);
-    AddFrameHistoryLights();
+    SetupMainSceneViewport(width, height, byWaterMap);
     RenderGameWorld(byWaterMap, width, height);
 
 #ifdef _EDITOR

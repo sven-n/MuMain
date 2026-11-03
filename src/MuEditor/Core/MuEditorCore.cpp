@@ -17,6 +17,7 @@
 #include "Core/Input/KeyState.h"
 #include "Core/Input/SyntheticInput.h"
 #include "../Config/MuEditorConfig.h"
+#include "../MuEditor/UI/Colors/MuColorsUI.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
 #include "../MuEditor/UI/DataChecks/MuDataChecksUI.h"
 #include "../MuEditor/UI/ItemTools/ItemHeldByCharacter.h"
@@ -25,7 +26,7 @@
 #include "../MuEditor/UI/ItemTools/MuItemCategoriesUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemFormulasUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemSyncUI.h"
-#include "../MuEditor/UI/ItemTools/MuItemGlowColorsUI.h"
+#include "../MuEditor/UI/ItemTools/MuItemTooltipUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemModelUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemRequirementsUI.h"
 #include "../MuEditor/UI/ItemTools/MuItemRulesUI.h"
@@ -40,6 +41,7 @@
 #include "../MuEditor/UI/MonsterTools/MuMonsterPreviewUI.h"
 #include "../MuEditor/UI/MonsterTools/MuMonsterTranslationsUI.h"
 #include "../MuEditor/UI/ServerList/MuServerListUI.h"
+#include "Network/Server/ServerListManager.h"
 #include "../UI/Common/MuEditorUI.h"
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
@@ -468,6 +470,9 @@ void CMuEditorCore::Initialize(SDL_Window* window)
     // Winmain before we got here; do not touch I18N::SetLocale from editor
     // init or it'll overwrite the game-side selection.
     g_MuEditorConfig.Load();
+    // The Server List window's preview of the offline servers, as it was left.
+    g_ServerListManager->SetOfflinePreview(g_MuEditorConfig.GetShowOfflineServers(),
+                                           g_MuEditorConfig.GetOfflineServerLoad());
     // The item checks know the looks; they are drawing code.
     g_ItemDataHandler.SetLookNames(Render::Items::Styles::Exists, Render::Items::ItemEffects::Exists);
     g_MuEditorConsoleUI.LogEditor(std::string("Active locale: ") + I18N::GetCurrentLocale());
@@ -607,9 +612,14 @@ void CMuEditorCore::RenderItemTools()
     {
         g_MuItemModelUI.Render(&m_windows.itemModel);
     }
-    if (m_windows.itemGlowColors)
+    // The named colors: a root per use, all of them item edits for now.
+    if (m_windows.colors)
     {
-        g_MuItemGlowColorsUI.Render(&m_windows.itemGlowColors);
+        g_MuColorsUI.Render(&m_windows.colors);
+    }
+    if (m_windows.itemTooltip)
+    {
+        g_MuItemTooltipUI.Render(&m_windows.itemTooltip);
     }
     if (m_windows.itemFormulas)
     {

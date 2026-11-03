@@ -9,6 +9,15 @@
 #include <string_view>
 #include "Render/Sprites/TextureScript.h"
 
+namespace Render::ModelDrawing
+{
+struct MeshDraw;
+struct ModelSkin;
+struct ShadowDraw;
+} // namespace Render::ModelDrawing
+
+struct BITMAP_t;
+
 extern const float (*g_pActiveBoneTransform)[3][4];
 // Bumped by every SetActiveBoneTransform() call — lets BoneUBO detect "the pointer is
 // the same address as last upload, but the content underneath it has changed" (e.g. a
@@ -239,9 +248,9 @@ public:
     // Render::Models in this header would hide the global Models[] from code
     // inside namespace Render.
     std::shared_ptr<const void> GltfModel;
-    // The LOD of a model from a glTF binary that GPU-skinned draws use (0: the
-    // BMD's meshes); set per object around its draw (RenderObject) and 0
-    // otherwise. Draws on the CPU path keep LOD 0.
+    // The LOD of a model from a glTF binary (0: the BMD's meshes) that
+    // RenderMesh and RenderBodyShadow put in their draws; set per object around
+    // its draw (RenderObject) and 0 otherwise. Draws on the CPU path keep LOD 0.
     int ActiveLod = 0;
 
     float (*m_pCurrentBoneTransform)[3][4]; // Active bone matrix palette stored during Transform()
@@ -328,15 +337,16 @@ public:
     // never carry a previous model's matrices; callers passing a buffer smaller than MAX_BONES
     // (e.g. the internal new vec34_t[NumBones] scratch arrays) MUST pass their real capacity.
     void Animation(float (*BoneTransform)[3][4], float AnimationFrame, float PriorAnimationFrame,
-                   unsigned short PriorAction, vec3_t Angle, vec3_t HeadAngle, bool Parent = false,
+                   unsigned short PriorAction, const vec3_t Angle, const vec3_t HeadAngle, bool Parent = false,
                    bool Translate = true, const float (*ExtParentMatrix)[4] = nullptr, short CurrentAction = -1,
                    int BoneMatrixCapacity = MAX_BONES);
     void InterpolationTrans(float(*Mat1)[4], float(*TransMat2)[4], float _Scale);
-    void Transform(float(*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB, bool Translate = false, float _Scale = 0.0f);
+    void Transform(float (*BoneMatrix)[3][4], const vec3_t BoundingBoxMin, const vec3_t BoundingBoxMax, OBB_t* OBB,
+                   bool Translate = false, float _Scale = 0.0f);
     // DXP-20 increment 2: the state-stash + OBB-from-args portion of Transform(), without the
     // expensive per-mesh vertex/normal loop. Only equivalent to Transform() when EditFlag != 2 and
     // not a _DEBUG build -- those need the vertex-loop-derived OBB Transform() itself still computes.
-    void TransformCheap(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB,
+    void TransformCheap(float (*BoneMatrix)[3][4], const vec3_t BoundingBoxMin, const vec3_t BoundingBoxMax, OBB_t* OBB,
                         bool Translate = false, float _Scale = 0.0f);
     // DXP-20 increment 2: skins ONE vertex from BoneMatrix, replicating Transform()'s per-vertex
     // math exactly (position only -- no normals, lighting, or bounding box). `_Scale`/`Translate`
@@ -395,40 +405,45 @@ public:
     void Chrome(float*, int, vec3_t);
 
     //render
-    void RenderBone(float (*BoneTransform)[3][4]);
     void RenderObjectBoundingBox();
-    void BeginRender(float);
-    void EndRender();
+    void BeginRender(float) const;
+    void EndRender() const;
 
     void RenderMeshEffect(int i, int iType, int iSubType = 0, vec3_t Angle = 0, VOID* obj = NULL);
 
     void RenderMesh(int meshIndex, int renderFlags, float alpha = 1.f, int blendMeshIndex = -1, float blendMeshAlpha = 1.f, float blendMeshTextureCoordU = 0.f, float blendMeshTextureCoordV = 0.f, int textureIndex = -1);
+    // The skinning the last Transform() set up, as RenderMesh and RenderBodyShadow put it in their draws.
+    [[nodiscard]] Render::ModelDrawing::ModelSkin CurrentSkin() const;
+    // The default drawer's draw of one mesh (Render/Models/ModelDraw.h).
+    void DrawMesh(const Render::ModelDrawing::MeshDraw& draw) const;
+    // The mesh a draw shows, or nullptr when the draw shows nothing; textureIndex and texture get what it shows.
+    [[nodiscard]] Mesh_t* DrawnMesh(const Render::ModelDrawing::MeshDraw& draw, int& textureIndex,
+                                    BITMAP_t*& texture) const;
+    // Whether a draw is a faded bright or chrome pass that dims the model's light, for it and the meshes after it.
+    [[nodiscard]] bool DimsLight(const Render::ModelDrawing::MeshDraw& draw) const;
     void BeginRenderCoinHeap();
     int AddToCoinHeap(int coinIndex, int target_vertex_index);
     void EndRenderCoinHeap(int coinCount);
 
-    void RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFlag, float Alpha = 1.f,
-                               int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f,
-                               float BlendMeshTexCoordV = 0.f, int Texture = -1);
     void RenderBody(int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int HiddenMesh = -1, int Texture = -1);
-    void RenderBodyAlternative(int iRndExtFlag, int iParam, int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int HiddenMesh = -1, int Texture = -1);
-    void RenderMeshTranslate(int i, int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int Texture = -1);
-    void RenderBodyTranslate(int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int HiddenMesh = -1, int Texture = -1);
     void RenderBodyShadow(int blendMesh = -1, int hiddenMesh = -1, int startMeshNumber = -1,
         int endMeshNumber = -1, void* pClothes = nullptr, int clothesCount = 0, float alpha = 1.f);
     // Moves a skinned position onto the ground for the planar shadow (with `context`).
     using ShadowProjection = void (*)(float position[3], const void* context);
     // The planar shadow of model file mesh `mesh` (BMD::GltfModel) at the LOD
-    // being drawn (ActiveLod; the LODs share the skin): `vertices` gets its
-    // vertices, each skinned once (LOD 0: the VertexTransform of
-    // EnsureCpuVertices; a coarser LOD: its own vertices with the same
-    // arithmetic) and projected once; `indices` its triangles' corners in
-    // triangle order, as indices into `vertices`. Both are replaced; both empty
-    // for a mesh the LOD does not draw. With a pure `project` the corners equal
-    // those of projecting every corner, as AddMeshShadowTriangles does for a BMD.
-    void ProjectWeightedShadowMesh(int mesh, ShadowProjection project, const void* context,
-                                   std::vector<std::array<float, 3>>& vertices,
+    // of `draw` (the LODs share the skin), placed by `draw`:
+    // `vertices` gets its vertices, each skinned once (LOD 0: the
+    // VertexTransform of EnsureCpuVertices; a coarser LOD: its own vertices with
+    // the same arithmetic) and projected once; `indices` its triangles' corners
+    // in triangle order, as indices into `vertices`. Both are replaced; both
+    // empty for a mesh the LOD does not draw. With a pure `project` the corners
+    // equal those of projecting every corner, as AddMeshShadowTriangles does for
+    // a BMD.
+    void ProjectWeightedShadowMesh(const Render::ModelDrawing::ShadowDraw& draw, int mesh, ShadowProjection project,
+                                   const void* context, std::vector<std::array<float, 3>>& vertices,
                                    std::vector<std::uint32_t>& indices) const;
+    // The default drawer's draw of a shadow (Render/Models/ModelDraw.h).
+    void DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) const;
 
     void SetBodyLight(vec3_t right) { VectorCopy(right, BodyLight); }
 
@@ -464,21 +479,21 @@ private:
     // The shadow streams the renderer keeps for the meshes of this slot.
     void ReleaseShadowStreams();
 
-    void AddClothesShadowTriangles(void* pClothes, int clothesCount, float sx, float sy,
-        std::uint32_t color) const;
-    void AddMeshShadowTriangles(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx, float sy,
-        std::uint32_t color) const;
+    void AddClothesShadowTriangles(void* pClothes, int clothesCount, const float* origin, float sx, float sy,
+                                   std::uint32_t color) const;
+    void AddMeshShadowTriangles(int blendMesh, int hiddenMesh, int startMesh, int endMesh, const float* origin,
+                                float sx, float sy, std::uint32_t color) const;
+    // The same shadow from a cached rest-pose stream skinned on the GPU; false leaves it to the CPU.
+    [[nodiscard]] bool RenderGpuMeshShadow(const Render::ModelDrawing::ShadowDraw& draw, int startMesh, int endMesh,
+                                           float sx, float sy, std::uint32_t color) const;
     // AddMeshShadowTriangles of a model file: the meshes' shadows
     // (ProjectWeightedShadowMesh) drawn indexed, in mesh and triangle order.
-    void AddWeightedMeshShadowTriangles(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx, float sy,
-                                        std::uint32_t color) const;
-    // The same shadow from a cached rest-pose stream skinned on the GPU; false leaves it to the CPU.
-    [[nodiscard]] bool RenderGpuMeshShadow(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx,
-        float sy, std::uint32_t color) const;
+    void AddWeightedMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw& draw, int startMesh, int endMesh,
+                                        float sx, float sy, std::uint32_t color) const;
     // A model file's shadow, each mesh from the mesh its body draw caches on the GPU; a mesh the GPU cannot
     // draw gets its CPU shadow (AddWeightedMeshShadowTriangles).
-    void RenderWeightedMeshShadow(int blendMesh, int hiddenMesh, int startMesh, int endMesh, float sx, float sy,
-                                  std::uint32_t color) const;
+    void RenderWeightedMeshShadow(const Render::ModelDrawing::ShadowDraw& draw, int startMesh, int endMesh, float sx,
+                                  float sy, std::uint32_t color) const;
 };
 
 extern BMD* Models;

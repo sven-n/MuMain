@@ -405,3 +405,9 @@ typedef void(CORECLR_DELEGATE_CALLTYPE* SendDuelChannelJoinRequest)(int32_t, BYT
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendDuelChannelQuitRequest)(int32_t);
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatCommandListRequest)(int32_t);
+
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendDiscordIntegrationInfoRequest)(int32_t);
+
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendDiscordLinkCodeRequest)(int32_t);
+
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendDiscordUnlinkRequest)(int32_t);

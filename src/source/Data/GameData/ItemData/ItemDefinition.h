@@ -165,6 +165,24 @@ struct ItemLevelValues
     bool operator==(const ItemLevelValues& other) const = default;
 };
 
+// One of an item's ground label rules ("groundLabels"): the style of Data/Items/Tooltips/GroundLabels.json its name
+// on the ground takes at these item levels, both included; without levels at every level, also above +15 (Zen's
+// amount is its level).
+struct ItemGroundLabel
+{
+    std::string style;
+    bool hasLevels = false;
+    int minLevel = 0;
+    int maxLevel = ItemLevelCount - 1;
+
+    bool HoldsAt(int level) const
+    {
+        return !hasLevels || (level >= minLevel && level <= maxLevel);
+    }
+
+    bool operator==(const ItemGroundLabel& other) const = default;
+};
+
 // What a player may do with an item. See the rule flags in ItemDefinition.
 enum class ItemAction : BYTE
 {
@@ -283,6 +301,9 @@ struct ItemDefinition
     std::vector<ItemNameLine> nameLines;
     // The values of the description's own placeholders by item level ("levelValues").
     std::vector<ItemLevelValues> levelValues;
+    // The styles of its name on the ground, by level: the first rule that holds at the item's level gives the style;
+    // at a level none holds at (or with none), the standard rules of the ground label file do.
+    std::vector<ItemGroundLabel> groundLabels;
 
     const ItemLevelValues* FindLevelValues(std::string_view name) const
     {

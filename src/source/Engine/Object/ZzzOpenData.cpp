@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Core/Utilities/Random.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -111,7 +112,7 @@ void OpenModels(int Model, wchar_t* FileName, int i)
 void OpenPlayers()
 {
     ModelsDump = new BMD[MAX_MODELS + 1024];
-    Models = ModelsDump + (rand() % 1024);
+    Models = ModelsDump + (Random::Rand() % 1024);
     ZeroMemory(Models, MAX_MODELS * sizeof(BMD));
 
     gLoadData.AccessModel(MODEL_PLAYER, L"Data\\Player\\", L"Player");
@@ -836,7 +837,6 @@ void OpenSkills()
     gLoadData.AccessModel(MODEL_LACEARROW, L"Data\\Skill\\", L"LaceArrow");
     gLoadData.OpenTexture(MODEL_LACEARROW, L"Item\\", GL_CLAMP_TO_EDGE);
 
-    gLoadData.AccessModel(MODEL_MANY_FLAG, L"Data\\Skill\\", L"ManyFlag");
     gLoadData.AccessModel(MODEL_WEBZEN_MARK, L"Data\\Skill\\", L"MuSign");
     gLoadData.AccessModel(MODEL_STUN_STONE, L"Data\\Skill\\", L"GroundCrystal");
     gLoadData.AccessModel(MODEL_SKIN_SHELL, L"Data\\Skill\\", L"skinshell");
@@ -900,7 +900,6 @@ void OpenSkills()
     gLoadData.OpenTexture(MODEL_GROUND_STONE2, L"Skill\\");
     gLoadData.OpenTexture(MODEL_WATER_WAVE, L"Skill\\", GL_CLAMP_TO_EDGE);
     gLoadData.OpenTexture(MODEL_SKULL, L"Skill\\", GL_CLAMP_TO_EDGE);
-    gLoadData.OpenTexture(MODEL_MANY_FLAG, L"Skill\\");
     gLoadData.OpenTexture(MODEL_WEBZEN_MARK, L"Skill\\");
 
     gLoadData.OpenTexture(MODEL_FLY_BIG_STONE1, L"Npc\\");
@@ -1149,15 +1148,11 @@ void OpenSkills()
     LoadBitmap(L"Effect\\Kwave2.jpg", BITMAP_KWAVE2, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\Damage2.jpg", BITMAP_DAMAGE2, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\volcano_core.jpg", BITMAP_VOLCANO_CORE, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    gLoadData.AccessModel(MODEL_SHOCKWAVE03, L"Data\\Effect\\", L"shockwave03");
-    gLoadData.OpenTexture(MODEL_SHOCKWAVE03, L"Effect\\");
     LoadBitmap(L"Effect\\ground_smoke.tga", BITMAP_GROUND_SMOKE, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\knightSt_blue.jpg", BITMAP_KNIGHTST_BLUE, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
     gLoadData.AccessModel(MODEL_PHOENIX_SHOT, L"Data\\Effect\\", L"phoenix_shot_effect");
     gLoadData.OpenTexture(MODEL_PHOENIX_SHOT, L"Effect\\");
-    gLoadData.AccessModel(MODEL_WINDSPIN01, L"Data\\Effect\\", L"wind_spin01");
-    gLoadData.OpenTexture(MODEL_WINDSPIN01, L"Effect\\");
     gLoadData.AccessModel(MODEL_WINDSPIN02, L"Data\\Effect\\", L"wind_spin02");
     gLoadData.OpenTexture(MODEL_WINDSPIN02, L"Effect\\");
     gLoadData.AccessModel(MODEL_WINDSPIN03, L"Data\\Effect\\", L"wind_spin03");

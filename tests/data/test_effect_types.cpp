@@ -825,7 +825,6 @@ TEST_CASE("The effect registry takes creation values from the catalogue, handler
     CHECK(blood->create.has_value());
     CHECK(blood->onCreate == nullptr);
     CHECK(blood->move == nullptr);
-    CHECK(blood->render == nullptr);
 
     // A creation hook and a move handler, no creation values.
     const Render::Effects::EffectDescriptor* mayaStone = Render::Effects::Lookup(MODEL_MAYASTONE4);

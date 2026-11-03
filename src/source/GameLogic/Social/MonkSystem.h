@@ -11,7 +11,11 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 
+#include <cstdint>
 #include <set>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 class CItemEqualType
 {
@@ -64,6 +68,8 @@ public:
     float GetAniFrame();
     float GetAlpha();
     void CalDummyPosition(vec3_t vOutPos, float& fAni, bool bChange = false);
+    // A fingerprint of everything the next step reads, to tell whether anything changed it.
+    std::uint64_t StateHash() const;
 };
 typedef std::map<int, CDummyUnit> tm_DummyUnit;
 
@@ -71,6 +77,25 @@ typedef std::map<int, CItemEqualType> tm_ItemEqualType;
 typedef std::list<int> list_ItemType;
 typedef std::vector<WORD> vec_DarkIndex;
 typedef std::vector<int> vec_DarkTargetIndex;
+
+// The bone a Phoenix Soul Star glove hangs from: the left hand (0) or the right (1).
+constexpr int PhoenixGloveBone(int hand)
+{
+    return hand ? 37 : 28;
+}
+
+struct LinkOffset
+{
+    float x;
+    float y;
+    float z;
+};
+
+// Where a Phoenix Soul Star glove's wing hangs from that bone.
+constexpr LinkOffset PhoenixGloveOffset(int hand)
+{
+    return {hand ? 100.f : 80.f, 10.f, -75.f};
+}
 
 class CMonkSystem
 {
@@ -89,15 +114,15 @@ private:
     };
 
     DamageInfo m_arrRepeatedly[MAX_REPEATEDLY];
-    int m_nRepeatedlyCnt;
+    int m_nRepeatedlyCnt = 0;
 
-    int m_nTotalCnt;
+    int m_nTotalCnt = 0;
     tm_ItemEqualType m_mapItemEqualType;
     std::set<int> m_subItemModels;
     CItemEqualType m_cItemEqualType;
     list_ItemType m_listGloveformSword;
 
-    int m_nDarksideCnt;
+    int m_nDarksideCnt = 0;
     vec_DarkIndex m_DarksideIndex;
     vec_DarkTargetIndex m_DarkTargetIndex;
 
@@ -108,27 +133,44 @@ private:
         FRAME_SECONDATT = 2,
     };
 
-    float m_fFirstFrame;
-    float m_fSecondFrame;
-    BYTE m_btAttState;
+    float m_fFirstFrame = 0.f;
+    float m_fSecondFrame = 0.f;
+    BYTE m_btAttState = NONE_ATT;
 
-    float m_fDistanceFrame;
-    int m_nDarksideEffectTotal;
-    int m_nDarksideEffectAttCnt;
+    float m_fDistanceFrame = 0.f;
+    int m_nDarksideEffectTotal = 0;
+    int m_nDarksideEffectAttCnt = 0;
 
-    float m_fOtherAniFrame;
-    float m_fDistanceNextFrame;
-    bool m_bDarkSideEffOnce;
-    bool m_bDarkSideEffOnce2;
+    float m_fOtherAniFrame = 0.f;
+    float m_fDistanceNextFrame = 0.f;
+    bool m_bDarkSideEffOnce = false;
+    bool m_bDarkSideEffOnce2 = false;
 
     CDummyUnit m_CDummyUnit;
     tm_DummyUnit m_tmDummyUnit;
-    float m_fDummyAniFrame;
+    float m_fDummyAniFrame = 0.f;
 
-    int m_nDummyIndex;
+    int m_nDummyIndex = 0;
 
-    bool m_bUseEffectOnce;
-    int m_nLowerEffCnt;
+public:
+    // Where one Dark Side step places the character for a part's draw: the dash pose or an afterimage.
+    struct DarksidePlacement
+    {
+        vec3_t position;
+        vec3_t startPosition;
+        vec3_t angle;
+        float alpha;
+        float animationFrame;
+    };
+
+private:
+    using DarksideParts = std::vector<std::pair<const PART_t*, std::vector<DarksidePlacement>>>;
+    // Per character in Dark Side, the placements of the last step of each part its draw hands over.
+    std::unordered_map<const CHARACTER*, DarksideParts> m_DarksideParts;
+    void StepDarkside(CHARACTER* pCha, std::vector<DarksidePlacement>& placed);
+
+    bool m_bUseEffectOnce = false;
+    int m_nLowerEffCnt = 0;
 
 public:
     CMonkSystem();
@@ -175,7 +217,18 @@ public:
     void SetDarksideCnt();
     bool SendDarksideAtt(OBJECT* _pObj);
     void InitDarksideTarget();
-    void DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0);
+    // Steps the character's Dark Side once for each part its draw hands over, in draw order, as many times as the
+    // frame has reference frames; an empty `parts` ends it for the character.
+    void UpdateDarkside(CHARACTER* pCha, const std::vector<PART_t*>& parts);
+    // Where the update's last step placed the character for the part's draw; nullptr when it placed none.
+    const std::vector<DarksidePlacement>* DarksidePlacementsOf(const CHARACTER* pCha, const PART_t* pPart) const;
+    // A fingerprint of the skill state the update steps (hits, targets, dash, placements), to tell whether anything
+    // changed it.
+    std::uint64_t DarksideStateHash() const;
+    // Draws the part where the update's last step placed it; `key` is the part the update stepped for it, when the
+    // draw hands over a stand-in (a skin or an angel drawn as one model).
+    void DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0,
+                           const PART_t* key = nullptr);
     bool CalculateDarksideTrans(OBJECT* _pObj, vec3_t _vPos, float _fAni, float _fNextAni = 0);
     int GetDarksideEffectTotal();
     void InitDummyCal();

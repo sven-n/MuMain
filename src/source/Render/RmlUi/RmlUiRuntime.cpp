@@ -85,6 +85,9 @@ void LoadBundledFonts()
     // family; selecting an unavailable family still needs the UI layer's font-token fallback.
     Rml::LoadFontFace("fonts/LiberationSans-Regular.ttf", true);
     Rml::LoadFontFace("fonts/LiberationSans-Bold.ttf");
+    // Italic text (a server's load text) needs faces of its own: RmlUi draws none without them.
+    Rml::LoadFontFace("fonts/LiberationSans-Italic.ttf");
+    Rml::LoadFontFace("fonts/LiberationSans-BoldItalic.ttf");
 
     // Second, explicitly-named face (not a fallback_face) -- CCreditWin's scrolling credit text is
     // the first RmlUi content to need it, matching the font family the legacy GDI path names via
@@ -107,6 +110,8 @@ void LoadBundledFonts()
     // NanumGothic mostly don't have, but DejaVu Sans does.
     Rml::LoadFontFace("fonts/DejaVuSans.ttf");
     Rml::LoadFontFace("fonts/DejaVuSans-Bold.ttf");
+    Rml::LoadFontFace("fonts/DejaVuSans-Oblique.ttf");
+    Rml::LoadFontFace("fonts/DejaVuSans-BoldOblique.ttf");
 
     // Japanese map names name this face (the themes' font-map-name-ja); as a fallback behind the
     // Chinese faces it would mix Chinese and Japanese forms in one name.

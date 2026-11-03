@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include <array>
+#include <memory>
 #include <cmath>
 #include <cstdint>
 #include <vector>
@@ -1008,4 +1009,21 @@ TEST_CASE(
     CHECK(lingering[0].color[0] == Approx(lingering[1].color[0]));
     CHECK(lingering[0].x == Approx(100.f));
     CHECK(lingering[1].x == Approx(5000.f));
+}
+
+TEST_CASE("the history's fingerprint follows what its queued calls hold, not only their count [render][lighthistory]")
+{
+    auto first = std::make_unique<DynamicLightHistory>();
+    auto second = std::make_unique<DynamicLightHistory>();
+    first->BeginTick();
+    second->BeginTick();
+    REQUIRE(first->Record(LightCall{100.f, 100.f, {1.f, 0.f, 0.f}, 2, LightSource::Effect}));
+    REQUIRE(second->Record(LightCall{900.f, 100.f, {0.f, 1.f, 0.f}, 3, LightSource::Map}));
+    CHECK(first->StateHash() != second->StateHash());
+
+    // A tick that replaces the queued call with another leaves the counts as they were.
+    const std::uint64_t before = first->StateHash();
+    first->BeginTick();
+    REQUIRE(first->Record(LightCall{900.f, 100.f, {0.f, 1.f, 0.f}, 3, LightSource::Map}));
+    CHECK(first->StateHash() != before);
 }

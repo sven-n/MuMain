@@ -6,6 +6,7 @@
 
 #include "MuEditorToolWindows.h"
 #include "MuEditorWindowIds.h"
+#include "../MuEditor/UI/Colors/MuColorsUI.h"
 #include "I18N/All.h"
 
 #include <array>
@@ -14,13 +15,37 @@ namespace MuEditor
 {
 namespace
 {
-const std::array<ToolWindowEntry, 9> ItemToolEntries = {{
+void ShowGlowColors()
+{
+    g_MuColorsUI.Show(Colors::ColorsRoot::Glow);
+}
+
+bool IsGlowColorsShown()
+{
+    return g_MuColorsUI.GetShownRoot() == Colors::ColorsRoot::Glow;
+}
+
+void ShowGroundLabelStyles()
+{
+    g_MuColorsUI.Show(Colors::ColorsRoot::GroundLabels);
+}
+
+bool IsGroundLabelStylesShown()
+{
+    return g_MuColorsUI.GetShownRoot() == Colors::ColorsRoot::GroundLabels;
+}
+
+const std::array<ToolWindowEntry, 11> ItemToolEntries = {{
     {WindowIds::ItemBasics, &I18N::Editor::ItemBasics, &ToolWindows::itemBasics},
     {WindowIds::ItemRequirements, &I18N::Editor::ItemRequirements, &ToolWindows::itemRequirements},
     {WindowIds::ItemRules, &I18N::Editor::ItemRules, &ToolWindows::itemRules},
     {WindowIds::ItemCategories, &I18N::Editor::ItemCategories, &ToolWindows::itemCategories},
     {WindowIds::ItemModel, &I18N::Editor::ItemModel, &ToolWindows::itemModel},
-    {WindowIds::ItemGlowColors, &I18N::Editor::GlowColors, &ToolWindows::itemGlowColors},
+    // Tabs of the Colors window, which docks with the item tools.
+    {WindowIds::Colors, &I18N::Editor::GlowColors, &ToolWindows::colors, &ShowGlowColors, &IsGlowColorsShown},
+    {WindowIds::Colors, &I18N::Editor::GroundLabelStyles, &ToolWindows::colors, &ShowGroundLabelStyles,
+     &IsGroundLabelStylesShown},
+    {WindowIds::ItemTooltip, &I18N::Editor::ItemTooltip, &ToolWindows::itemTooltip},
     {WindowIds::ItemFormulas, &I18N::Editor::ItemFormulas, &ToolWindows::itemFormulas},
     {WindowIds::ItemSync, &I18N::Editor::ItemSync, &ToolWindows::itemSync},
     {WindowIds::ItemTranslations, &I18N::Editor::ItemTranslations, &ToolWindows::itemTranslations},

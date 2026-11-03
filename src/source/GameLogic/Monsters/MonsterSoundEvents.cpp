@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #include "GameLogic/Monsters/MonsterSoundEvents.h"
 
@@ -38,14 +39,14 @@ bool IsFarFromHero(const OBJECT& object)
     return std::sqrt(x * x + y * y) > HearingDistance;
 }
 
-// The old hooks' draws: rand_fps_check, or rand().
+// The old hooks' draws: rand_fps_check, or Random::Rand().
 bool Draw(MonsterSoundDraw draw, int oneIn)
 {
     if (draw == MonsterSoundDraw::RandFps)
     {
         return rand_fps_check(oneIn);
     }
-    return std::rand() % oneIn == 0;
+    return Random::Rand() % oneIn == 0;
 }
 
 void PlaySound(const MonsterModelDefinition& model, const std::string& sound, const std::function<void(int)>& play)

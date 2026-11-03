@@ -59,11 +59,11 @@ bool ReadComparison(std::string_view text, TooltipCondition& condition)
     return false;
 }
 
-constexpr std::array<std::string_view, 16> States = {
-    "hasDamage",          "skillBook",           "twoHanded",      "excellent",       "ancient",
-    "damageHarmonyBonus", "defenseHarmonyBonus", "armour",         "strengthReduced", "dexterityReduced",
-    "strengthRequired",   "dexterityRequired",   "wizardryWeapon", "hasDurability",   "timed",
-    "hasOptions",
+constexpr std::array<std::string_view, 20> States = {
+    "hasDamage",          "skillBook",           "twoHanded",      "excellent",         "ancient",
+    "damageHarmonyBonus", "defenseHarmonyBonus", "armour",         "strengthReduced",   "dexterityReduced",
+    "strengthRequired",   "dexterityRequired",   "wizardryWeapon", "hasDurability",     "timed",
+    "hasOptions",         "socketItem",          "upperTierWings", "skillLuckOrOption", "setItem",
 };
 static_assert(States.size() == static_cast<size_t>(TooltipState::Count), "a name for every TooltipState, in order");
 } // namespace

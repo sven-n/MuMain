@@ -20,7 +20,10 @@ namespace giPetManager
     void    CreatePetDarkSpirit_Now(CHARACTER* c);
 
     void    MovePet(CHARACTER* c);
+    void CullPet(CHARACTER* c);
     void    RenderPet(CHARACTER* c);
+    // The pet's draw effects and state, for a character the last frame drew.
+    void UpdatePetEffects(CHARACTER* c);
     void    DeletePet(CHARACTER* c);
 
     void    InitItemBackup(void);

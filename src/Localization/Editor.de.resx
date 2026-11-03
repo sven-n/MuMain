@@ -1453,14 +1453,104 @@
   <data name="A name of letters and digits that no other glow color has" xml:space="preserve">
     <value>Ein Name aus Buchstaben und Ziffern, den keine andere Leuchtfarbe hat</value>
   </data>
+  <data name="Colors" xml:space="preserve">
+    <value>Farben</value>
+  </data>
+  <data name="Ground labels" xml:space="preserve">
+    <value>Bodenbeschriftungen</value>
+  </data>
+  <data name="Ground Label Styles" xml:space="preserve">
+    <value>Bodenbeschriftungsstile</value>
+  </data>
+  <data name="Item Tooltip" xml:space="preserve">
+    <value>Gegenstand: Tooltip</value>
+  </data>
+  <data name="New label style" xml:space="preserve">
+    <value>Neuer Beschriftungsstil</value>
+  </data>
+  <data name="Items name these styles in their ground label rules" xml:space="preserve">
+    <value>Gegenstände nennen diese Stile in ihren eigenen Bodenbeschriftungsregeln (Gegenstand: Tooltip); die Standardregeln nennen die übrigen.</value>
+  </data>
+  <data name="Apply to the style" xml:space="preserve">
+    <value>Auf den Stil anwenden</value>
+  </data>
+  <data name="Change a label style" xml:space="preserve">
+    <value>Beschriftungsstil ändern</value>
+  </data>
+  <data name="Remove a label style" xml:space="preserve">
+    <value>Beschriftungsstil entfernen</value>
+  </data>
+  <data name="Remove unused label styles" xml:space="preserve">
+    <value>Unbenutzte Beschriftungsstile entfernen</value>
+  </data>
+  <data name="No item uses these label styles: {0}" xml:space="preserve">
+    <value>Kein Gegenstand nutzt diese Beschriftungsstile: {0}</value>
+  </data>
+  <data name="A style of the standard rules" xml:space="preserve">
+    <value>Ein Stil der Standardregeln: ein Gegenstand ohne eigene Regel für eine Stufe nimmt ihn dort.</value>
+  </data>
+  <data name="A name of letters and digits that no other label style has" xml:space="preserve">
+    <value>Ein Name aus Buchstaben und Ziffern, den kein anderer Beschriftungsstil hat</value>
+  </data>
+  <data name="Text color" xml:space="preserve">
+    <value>Textfarbe</value>
+  </data>
+  <data name="Background" xml:space="preserve">
+    <value>Hintergrund</value>
+  </data>
+  <data name="Bold" xml:space="preserve">
+    <value>Fett</value>
+  </data>
+  <data name="Skill" xml:space="preserve">
+    <value>Fertigkeit</value>
+  </data>
+  <data name="Luck" xml:space="preserve">
+    <value>Glück</value>
+  </data>
+  <data name="Option" xml:space="preserve">
+    <value>Option</value>
+  </data>
+  <data name="No set" xml:space="preserve">
+    <value>Kein Set</value>
+  </data>
+  <data name="Set {0}: {1}" xml:space="preserve">
+    <value>Set {0}: {1}</value>
+  </data>
+  <data name="Ground label" xml:space="preserve">
+    <value>Bodenbeschriftung</value>
+  </data>
+  <data name="All levels" xml:space="preserve">
+    <value>Alle Stufen</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>Von</value>
+  </data>
+  <data name="To" xml:space="preserve">
+    <value>Bis</value>
+  </data>
+  <data name="Add rule" xml:space="preserve">
+    <value>Regel hinzufügen</value>
+  </data>
+  <data name="Change the ground label rules" xml:space="preserve">
+    <value>Bodenbeschriftungsregeln ändern</value>
+  </data>
+  <data name="The first rule whose levels hold gives the style" xml:space="preserve">
+    <value>Die erste Regel, deren Stufen zutreffen, gibt den Stil; bei den übrigen Stufen tun es die Standardregeln.</value>
+  </data>
+  <data name="No rules of its own" xml:space="preserve">
+    <value>Keine eigenen Regeln: die Standardregeln geben den Stil.</value>
+  </data>
+  <data name="Its own rule {0}" xml:space="preserve">
+    <value>Eigene Regel {0}</value>
+  </data>
+  <data name="The standard rules" xml:space="preserve">
+    <value>Die Standardregeln</value>
+  </data>
   <data name="Glow Colors" xml:space="preserve">
     <value>Leuchtfarben</value>
   </data>
   <data name="The item models name these colors; the model tool picks an item's colors." xml:space="preserve">
     <value>Die Gegenstandsmodelle nennen diese Farben; im Modell-Werkzeug wählen Sie die Farben eines Gegenstands.</value>
-  </data>
-  <data name="Pick a color in the list." xml:space="preserve">
-    <value>Wählen Sie eine Farbe in der Liste.</value>
   </data>
   <data name="Apply to the glow color" xml:space="preserve">
     <value>Auf die Leuchtfarbe anwenden</value>
@@ -1930,26 +2020,11 @@
   <data name="Channel" xml:space="preserve">
     <value>Kanal</value>
   </data>
-  <data name="Type" xml:space="preserve">
-    <value>Art</value>
-  </data>
   <data name="On the login screen" xml:space="preserve">
     <value>Auf dem Anmeldebildschirm</value>
   </data>
   <data name="Connect server" xml:space="preserve">
     <value>Connect-Server</value>
-  </data>
-  <data name="Normal" xml:space="preserve">
-    <value>Normal</value>
-  </data>
-  <data name="Non-PvP" xml:space="preserve">
-    <value>Kein PvP</value>
-  </data>
-  <data name="Gold PvP" xml:space="preserve">
-    <value>Gold-PvP</value>
-  </data>
-  <data name="Gold" xml:space="preserve">
-    <value>Gold</value>
   </data>
   <data name="Sent, {0}% load" xml:space="preserve">
     <value>Gemeldet, {0} % Last</value>
@@ -1966,8 +2041,8 @@
   <data name="Server list order note" xml:space="preserve">
     <value>Die Reihenfolge der Liste ist die der Schaltflächen auf dem Anmeldebildschirm, der jede Änderung sofort zeigt. Speichern schreibt {0}.</value>
   </data>
-  <data name="Save off after fatal read problems" xml:space="preserve">
-    <value>Die Datei hatte beim Lesen fatale Probleme, daher enthält die Liste nur die Gruppen, die gelesen werden konnten. Speichern bleibt aus, bis die Datei korrigiert ist und Zurücksetzen sie neu einliest; es würde die anderen Gruppen aus der Datei entfernen.</value>
+  <data name="Save off after a read that left something out" xml:space="preserve">
+    <value>Beim Lesen der Datei wurde wegen Problemen etwas ausgelassen (siehe die Probleme unten): eine Gruppe, ein VIP-Typ oder eine Farbe mit einem fatalen Problem, oder eine Regel, ein Farbton, der VIP-Typ eines Kanals oder eine Farbe, die die Liste nicht verwenden konnte. Speichern bleibt aus, bis die Datei korrigiert ist und Zurücksetzen sie neu einliest; es würde diese Einträge aus der Datei entfernen oder ersetzen.</value>
   </data>
   <data name="Step add" xml:space="preserve">
     <value>{0} hinzufügen</value>
@@ -2922,5 +2997,113 @@
   </data>
   <data name="Not saved yet: the changes are only in the editor" xml:space="preserve">
     <value>Noch nicht gespeichert: Die Änderungen sind nur im Editor, bis Sie die Gegenstände speichern.</value>
+  </data>
+  <data name="New folder" xml:space="preserve">
+    <value>Neuer Ordner</value>
+  </data>
+  <data name="New color" xml:space="preserve">
+    <value>Neue Farbe</value>
+  </data>
+  <data name="Folder name" xml:space="preserve">
+    <value>Ordnername</value>
+  </data>
+  <data name="A folder name of 1 to 32 characters that no other folder here has." xml:space="preserve">
+    <value>Ein Ordnername mit 1 bis 32 Zeichen, den kein anderer Ordner hier hat.</value>
+  </data>
+  <data name="New color folder" xml:space="preserve">
+    <value>Neuer Farbordner</value>
+  </data>
+  <data name="Rename a color folder" xml:space="preserve">
+    <value>Farbordner umbenennen</value>
+  </data>
+  <data name="Remove a color folder" xml:space="preserve">
+    <value>Farbordner entfernen</value>
+  </data>
+  <data name="Move a color folder" xml:space="preserve">
+    <value>Farbordner verschieben</value>
+  </data>
+  <data name="Move a color" xml:space="preserve">
+    <value>Farbe verschieben</value>
+  </data>
+  <data name="Colors tree note" xml:space="preserve">
+    <value>Eine Wurzel enthält die Farben einer Verwendung. Ordner sortieren sie nur: Ziehe eine Farbe oder einen Ordner auf einen Ordner oder auf seine Wurzel. Eine Farbe bleibt in ihrer Wurzel.</value>
+  </data>
+  <data name="Folder note" xml:space="preserve">
+    <value>Wird ein Ordner entfernt, kommt sein Inhalt in den Ordner darüber.</value>
+  </data>
+  <data name="It holds {0} colors and {1} folders." xml:space="preserve">
+    <value>Er enthält {0} Farben und {1} Ordner.</value>
+  </data>
+  <data name="Folders go at most {0} levels deep." xml:space="preserve">
+    <value>Ordner gehen höchstens {0} Ebenen tief.</value>
+  </data>
+  <data name="Edit colors..." xml:space="preserve">
+    <value>Farben bearbeiten...</value>
+  </data>
+  <data name="Server list colors note" xml:space="preserve">
+    <value>Die eigenen Farben der Liste, jede mit einem Farbton je Theme. Die Regeln der Schaltflächenfarben und die Auslastung nennen sie über ihre ID; Speichern im Serverlisten-Fenster schreibt sie.</value>
+  </data>
+  <data name="Remove a color" xml:space="preserve">
+    <value>Farbe entfernen</value>
+  </data>
+  <data name="Remove unused colors" xml:space="preserve">
+    <value>Ungenutzte Farben entfernen</value>
+  </data>
+  <data name="Apply to the color" xml:space="preserve">
+    <value>Auf die Farbe anwenden</value>
+  </data>
+  <data name="Change a color" xml:space="preserve">
+    <value>Farbe ändern</value>
+  </data>
+  <data name="Used by {0} rules and load parts" xml:space="preserve">
+    <value>Von {0} Regeln und Auslastungsteilen genutzt</value>
+  </data>
+  <data name="The change reaches these {0} rules and load parts:" xml:space="preserve">
+    <value>Die Änderung betrifft diese {0} Regeln und Auslastungsteile:</value>
+  </data>
+  <data name="No rule and no load part uses these colors: {0}" xml:space="preserve">
+    <value>Keine Regel und kein Auslastungsteil nutzt diese Farben: {0}</value>
+  </data>
+  <data name="Show offline servers in the game" xml:space="preserve">
+    <value>Offline-Server im Spiel zeigen</value>
+  </data>
+  <data name="Their load" xml:space="preserve">
+    <value>Ihre Auslastung</value>
+  </data>
+  <data name="Offline servers note" xml:space="preserve">
+    <value>Nur im Editor: Der Anmeldebildschirm zeigt auch jeden Kanal 1 bis 20 jeder Gruppe, den der Verbindungsserver nicht gesendet hat, mit dieser Auslastung, damit du Name, Farbe und Auslastungsbalken siehst. Beitreten kann man ihm nicht. In der Kanalliste einer Gruppe lässt sich jeder weglassen oder mit eigener Auslastung zeigen, bis das Spiel beendet wird.</value>
+  </data>
+  <data name="Only the editor shows this server; the connect server did not send it." xml:space="preserve">
+    <value>Nur der Editor zeigt diesen Server; der Verbindungsserver hat ihn nicht gesendet.</value>
+  </data>
+  <data name="Offline channels:" xml:space="preserve">
+    <value>Offline-Kanäle:</value>
+  </data>
+  <data name="All offline channels" xml:space="preserve">
+    <value>Alle</value>
+  </data>
+  <data name="No offline channel" xml:space="preserve">
+    <value>Keine</value>
+  </data>
+  <data name="Show offline channel" xml:space="preserve">
+    <value>Zeigen</value>
+  </data>
+  <data name="Offline channel note" xml:space="preserve">
+    <value>Nur im Editor: ob der Anmeldebildschirm diesen Kanal zeigt, den der Verbindungsserver nicht gesendet hat, und mit welcher Auslastung. Ohne eigene Auslastung hat er „Ihre Auslastung“. Gilt, bis das Spiel beendet wird.</value>
+  </data>
+  <data name="Load slider note" xml:space="preserve">
+    <value>Ziehen, oder mit Doppelklick oder Strg+Klick einen Wert eingeben.</value>
+  </data>
+  <data name="Use Their load again" xml:space="preserve">
+    <value>Wieder „Ihre Auslastung“ nehmen</value>
+  </data>
+  <data name="from {0}" xml:space="preserve">
+    <value>von {0}</value>
+  </data>
+  <data name="Could not write the tokens.ini of: {0}" xml:space="preserve">
+    <value>Konnte die tokens.ini nicht schreiben von: {0}</value>
+  </data>
+  <data name="Theme color note" xml:space="preserve">
+    <value>Eine Theme-Farbe: Die tokens.ini jedes Theme-Ordners setzt sie, und ein Theme, das auf einem anderen aufbaut, übernimmt dessen Wert, bis es einen eigenen setzt. Übernehmen schreibt die tokens.ini der geänderten Themes sofort, und das Spiel zeichnet damit neu; Rückgängig nimmt es nicht zurück.</value>
   </data>
 </root>

@@ -11,8 +11,17 @@ extern int TargetY;
 
 namespace GameLogic::Automation
 {
+bool IsWalkInProgress()
+{
+    return Hero != nullptr && Hero->Movement && Hero->Path.PathNum > 1 &&
+           Hero->Path.CurrentPath < Hero->Path.PathNum - 1;
+}
+
 MoveResult WalkTo(int tileX, int tileY)
 {
+    if (IsWalkInProgress())
+        return MoveResult::Walking;
+
     // The arrival test and the path finder both read the target globals, so
     // they are set first; the movement mode follows only when a walk is
     // actually starting, so a refused call leaves the character's current

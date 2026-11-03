@@ -7,6 +7,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Render/Renderer/MuRenderer.h"
 
 extern float EarthQuake;
 
@@ -143,6 +144,15 @@ void PetObject::Update(bool bForceRender)
     UpdateModel(tick, bForceRender);
     UpdateMove(tick, bForceRender);
     UpdateSound(tick, bForceRender);
+
+    // For the pet the last frame drew; its sprites stay out of the bloom like its draw.
+    if (m_obj->Visible)
+    {
+        const mu::ScopedBloomExclusion classicPets;
+        UpdateDrawnObjectHold(m_obj);
+        PlaceObjectModel(m_obj, &Models[m_obj->Type]);
+        CreateEffect(tick, bForceRender);
+    }
 }
 
 void PetObject::Render(bool bForceRender)
@@ -158,8 +168,6 @@ void PetObject::Render(bool bForceRender)
             int State = g_isCharacterBuff(m_obj->Owner, eBuff_Cloaking) ? 10 : 0;
 
             RenderObject(m_obj, FALSE, 0, State);
-
-            CreateEffect(m_timer->GetTimeElapsed(), bForceRender);
         }
     }
 }

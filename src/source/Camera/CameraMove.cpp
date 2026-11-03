@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -665,7 +666,7 @@ BOOL CCameraMove::SetTourMode(BOOL bFlag, BOOL bRandomStart, int index)
 
     if (bRandomStart)
     {
-        m_dwCurrentIndex = static_cast<DWORD>(std::rand() % waypointCount);
+        m_dwCurrentIndex = static_cast<DWORD>(Random::Rand() % waypointCount);
     }
     else
     {

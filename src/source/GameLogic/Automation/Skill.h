@@ -18,7 +18,7 @@ enum class SkillResult : std::uint8_t
     Cast,
     // Out of range: a step towards the target was taken instead.
     Approaching,
-    // A swing is still playing; try again on a later frame.
+    // A walk or swing is still playing; try again on a later frame.
     Busy,
     // A target is required but none was given.
     NoTarget,

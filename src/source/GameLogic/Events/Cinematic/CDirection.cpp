@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "GameLogic/Items/CComGem.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -234,10 +235,10 @@ void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angl
             vec3_t vPos;
             Vector(c->Object.Position[0] + 20.0f, c->Object.Position[1] + 20.0f, c->Object.Position[2], vPos);
 
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + rand() % 10);
-            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + Random::Rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + Random::Rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 50.f + Random::Rand() % 10);
+            CreateJoint(BITMAP_JOINT_THUNDER + 1, vPos, vPos, c->Object.Angle, 7, nullptr, 60.f + Random::Rand() % 10);
 
             CreateParticle(BITMAP_SMOKE + 4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
             CreateParticle(BITMAP_SMOKE + 4, c->Object.Position, c->Object.Angle, c->Object.Light, 1, 5.0f);
@@ -375,18 +376,18 @@ void CDirection::HeroFallingDownDirection()
 void CDirection::FaillingEffect()
 {
     vec3_t Pos, Light;
-    float Scale = 1.3f + rand() % 10 / 30.0f;
+    float Scale = 1.3f + Random::Rand() % 10 / 30.0f;
     Vector(0.05f, 0.05f, 0.08f, Light);
 
-    Pos[0] = Hero->Object.Position[0] + (float)(rand() % 20 - 10) * 70.0f;
-    Pos[1] = Hero->Object.Position[1] + (float)(rand() % 20 - 10) * 70.0f;
-    Pos[2] = Hero->Object.Position[2] - rand() % 200 - 500.0f;
+    Pos[0] = Hero->Object.Position[0] + (float)(Random::Rand() % 20 - 10) * 70.0f;
+    Pos[1] = Hero->Object.Position[1] + (float)(Random::Rand() % 20 - 10) * 70.0f;
+    Pos[2] = Hero->Object.Position[2] - Random::Rand() % 200 - 500.0f;
 
     CreateParticleFpsChecked(BITMAP_CLOUD, Pos, Hero->Object.Angle, Light, 13, Scale);
 
-    Pos[0] = Hero->Object.Position[0] + (float)(rand() % 20 - 10) * 70.0f;
-    Pos[1] = Hero->Object.Position[1] + (float)(rand() % 20 - 10) * 70.0f;
-    Pos[2] = Hero->Object.Position[2] - rand() % 200 - 500.0f;
+    Pos[0] = Hero->Object.Position[0] + (float)(Random::Rand() % 20 - 10) * 70.0f;
+    Pos[1] = Hero->Object.Position[1] + (float)(Random::Rand() % 20 - 10) * 70.0f;
+    Pos[2] = Hero->Object.Position[2] - Random::Rand() % 200 - 500.0f;
 
     Vector(0.05f, 0.05f, 0.05f, Light);
     CreateParticleFpsChecked(BITMAP_CLOUD, Pos, Hero->Object.Angle, Light, 13, Scale);

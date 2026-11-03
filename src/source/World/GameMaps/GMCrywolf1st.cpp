@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -424,7 +425,7 @@ bool M34CryWolf1st::MoveCryWolf1stObject(OBJECT* o)
     case 71:
     case 57:
     {
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
         AddTerrainLight(o->Position[0], o->Position[1], Light, 3, PrimaryTerrainLight);
     }
@@ -441,13 +442,14 @@ bool M34CryWolf1st::MoveCryWolf1stObject(OBJECT* o)
     return true;
 }
 
-bool M34CryWolf1st::RenderCryWolf1stObjectVisual(OBJECT* o, BMD* b)
+bool M34CryWolf1st::UpdateCryWolf1stObjectEffects(OBJECT* o, BMD* b)
 {
     if (!IsCyrWolf1st())
         return false;
 
     vec3_t Light, p;
-    float Scale;//,Luminosity;
+    float Scale;
+    float Luminosity;
     Vector(0.f, 0.f, 0.f, p);
     static int Change_weather = 0;
 
@@ -455,7 +457,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectVisual(OBJECT* o, BMD* b)
 
     if (Change_weather > 70000)
     {
-        weather = rand() % 3;
+        weather = Random::Rand() % 3;
         Change_weather = 0;
     }
     switch (o->Type)
@@ -482,6 +484,93 @@ bool M34CryWolf1st::RenderCryWolf1stObjectVisual(OBJECT* o, BMD* b)
         CreateSprite(BITMAP_FLARE, p, Scale, Light, o, Ro);
     }
     break;
+    case 56:
+    {
+        if (m_OccupationState == CRYWOLF_OCCUPATION_STATE_PEACE)
+        {
+            float Color = (int)Random::Rand() % 10000 * 0.0001f;
+
+            Vector(Color, Color, Color, Light);
+
+            if (rand_fps_check(3))
+                CreateEffect(BITMAP_MAGIC, o->Position, o->Angle, Light, 3, o, 4.0f);
+        }
+    }
+    break;
+    case 57:
+    {
+        if (rand_fps_check(3))
+        {
+            Vector(1.f, 1.f, 1.f, Light);
+            CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, o->Scale);
+            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, o->Scale);
+        }
+    }
+    break;
+    case 71:
+    {
+        if (rand_fps_check(3))
+        {
+            Vector(1.f, 1.f, 1.f, Light);
+            CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, o->Scale);
+        }
+    }
+    break;
+    case 72:
+    {
+        if (rand_fps_check(10))
+        {
+            vec3_t Position;
+            VectorCopy(o->Position, Position);
+            Position[2] += 50.0f;
+            Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
+            Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
+            CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 33, o->Scale);
+        }
+    }
+    break;
+    case 73:
+    {
+        if (weather == 0)
+            ashies = true;
+    }
+    break;
+    case 74:
+    {
+        if (rand_fps_check(3) && m_OccupationState == CRYWOLF_OCCUPATION_STATE_OCCUPIED)
+        {
+            Vector(1.f, 1.f, 1.f, Light);
+            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, o->Scale);
+        }
+    }
+    break;
+    case 77:
+    {
+        if (rand_fps_check(6))
+        {
+            //	Vector(0.02f,0.02f,0.03f,Light);
+            Vector(0.02f, 0.03f, 0.02f, Light);
+            CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 9, o->Scale, o);
+        }
+    }
+    break;
+    case 78:
+    {
+        if (rand_fps_check(6))
+        {
+            Vector(0.03f, 0.06f, 0.05f, Light);
+            CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 9, o->Scale, o);
+        }
+    }
+    break;
+    case 81:
+    {
+        if (m_OccupationState == CRYWOLF_OCCUPATION_STATE_WAR)
+        {
+            o->Scale = 1.03f;
+        }
+    }
+    break;
     case 37:
     {
     }
@@ -497,7 +586,7 @@ bool M34CryWolf1st::RenderCryWolf1stObjectVisual(OBJECT* o, BMD* b)
 
     return true;
 }
-bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
+bool M34CryWolf1st::RenderCryWolf1stObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon)
 {
     if (!IsCyrWolf1st())
     {
@@ -514,105 +603,41 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
         if (m_OccupationState == CRYWOLF_OCCUPATION_STATE_PEACE)
         {
             Vector(0.4f, 0.4f, 0.4f, b->BodyLight);
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
         }
         else
         {
             Vector(0.4f, 0.4f, 0.4f, b->BodyLight);
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
         }
     }
-    return true;
+        return true;
     case 56:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        if (m_OccupationState == CRYWOLF_OCCUPATION_STATE_PEACE)
-        {
-            float Color = (int)rand() % 10000 * 0.0001f;
-
-            Vector(Color, Color, Color, Light);
-
-            if (rand_fps_check(3))
-                CreateEffect(BITMAP_MAGIC, o->Position, o->Angle, Light, 3, o, 4.0f);
-        }
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
-    return true;
+        return true;
     case 41:
         Vector(0.2f, 0.7f, 0.f, Light);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         return true;
+    // Fires, smoke and mist only: UpdateCryWolf1stObjectEffects spawns them.
     case 57:
-    {
-        if (rand_fps_check(3))
-        {
-            Vector(1.f, 1.f, 1.f, Light);
-            CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, o->Scale);
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, o->Scale);
-        }
-    }
-    return true;
     case 71:
-    {
-        if (rand_fps_check(3))
-        {
-            Vector(1.f, 1.f, 1.f, Light);
-            CreateParticle(BITMAP_TRUE_FIRE, o->Position, o->Angle, Light, 5, o->Scale);
-        }
-    }
-    return true;
     case 72:
-    {
-        if (rand_fps_check(10))
-        {
-            vec3_t Position;
-            VectorCopy(o->Position, Position);
-            Position[2] += 50.0f;
-            Luminosity = (float)(rand() % 4 + 3) * 0.1f;
-            Vector(Luminosity, Luminosity * 0.6f, Luminosity * 0.2f, Light);
-            CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 33, o->Scale);
-        }
-    }
-    return true;
     case 73:
-    {
-        if (weather == 0)
-            ashies = true;
-    }
-    return true;
     case 74:
-    {
-        if (rand_fps_check(3) && m_OccupationState == CRYWOLF_OCCUPATION_STATE_OCCUPIED)
-        {
-            Vector(1.f, 1.f, 1.f, Light);
-            CreateParticle(BITMAP_SMOKE, o->Position, o->Angle, Light, 21, o->Scale);
-        }
-    }
-    return true;
     case 77:
-    {
-        if (rand_fps_check(6))
-        {
-            //	Vector(0.02f,0.02f,0.03f,Light);
-            Vector(0.02f, 0.03f, 0.02f, Light);
-            CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 9, o->Scale, o);
-        }
-    }
-    return true;
     case 78:
-    {
-        if (rand_fps_check(6))
-        {
-            Vector(0.03f, 0.06f, 0.05f, Light);
-            CreateParticle(BITMAP_CLOUD, o->Position, o->Angle, Light, 9, o->Scale, o);
-        }
-    }
-    return true;
+        return true;
     case 81:
     {
         if (m_OccupationState == CRYWOLF_OCCUPATION_STATE_WAR)
         {
-            o->Scale = 1.03f;
-
             float fTemp = 0.1f;
 
             if (m_StatueHP <= 10) fTemp = 1.0f;
@@ -621,24 +646,27 @@ bool M34CryWolf1st::RenderCryWolf1stObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
             b->BodyLight[2] = m_StatueHP / 20.0f - 0.5f;
 
             b->StreamMesh = 0;
-            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
             b->StreamMesh = -1;
 
             b->StreamMesh = 1;
-            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME2, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_BRIGHT | RENDER_CHROME2, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV);
             b->StreamMesh = -1;
         }
     }
-    return true;
+        return true;
     case MODEL_SKILL_FURY_STRIKE:
     {
         Vector(0.0f, 0.0f, 0.9f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
     }
     return true;
     }
 
-    return RenderCryWolf1stMonsterObjectMesh(o, b, ExtraMon);
+    return RenderCryWolf1stMonsterObjectMesh(o, look, b, ExtraMon);
 }
 
 CHARACTER* M34CryWolf1st::CreateCryWolf1stMonster(int iType, int PosX, int PosY, int Key)
@@ -1004,7 +1032,7 @@ bool M34CryWolf1st::MoveCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     {
         vec3_t Position, Light;
 
-        auto Rotation = (float)(rand() % 360);
+        auto Rotation = (float)(Random::Rand() % 360);
         float Luminosity = sinf(WorldTime * 0.0012f) * 0.8f + 1.3f;
 
         float fScalePercent = 1.f;
@@ -1121,7 +1149,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             int Hand = 0;
             if (i >= 3) Hand = 1;
             b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);
-            Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+            Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
 
             if (to != NULL)
             {
@@ -1140,7 +1168,7 @@ bool M34CryWolf1st::AttackEffectCryWolf1stMonster(CHARACTER* c, OBJECT* o, BMD* 
             int Hand = 0;
             if (i >= 2) Hand = 1;
             b->TransformPosition(o->BoneTransform[c->Weapon[Hand].LinkBone], p, Position, true);
-            Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+            Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
             if (to != NULL)
                 CreateJointFpsChecked(BITMAP_JOINT_LASER + 1, Position, to->Position, Angle, 0, to, 50.f);
             CreateParticleFpsChecked(BITMAP_FIRE, Position, o->Angle, o->Light);
@@ -1210,21 +1238,21 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 
                 o->Angle[2] -= 18;//
 
-                Vector((float)(rand() % 60 + 60 - 90), 0.f, (float)(rand() % 30 + 90), Angle);
+                Vector((float)(Random::Rand() % 60 + 60 - 90), 0.f, (float)(Random::Rand() % 30 + 90), Angle);
                 VectorAdd(Angle, o->Angle, Angle);
                 VectorCopy(p2, Position);
-                //					Position[0] += rand()%20-10;
-                //					Position[1] += rand()%20-10;
+                //					Position[0] += Random::Rand()%20-10;
+                //					Position[1] += Random::Rand()%20-10;
 
-                                    /*
-                                    b->TransformPosition(BoneTransform[39],StartRelative,StartPos,false);
-                                    b->TransformPosition(BoneTransform[41],EndRelative,EndPos,false);
-                                    CreateBlur(c,StartPos,EndPos,Light,3,true,24);
+                /*
+                b->TransformPosition(BoneTransform[39],StartRelative,StartPos,false);
+                b->TransformPosition(BoneTransform[41],EndRelative,EndPos,false);
+                CreateBlur(c,StartPos,EndPos,Light,3,true,24);
 
-                                    b->TransformPosition(BoneTransform[43],StartRelative,StartPos,false);
-                                    b->TransformPosition(BoneTransform[45],EndRelative,EndPos,false);
-                                    CreateBlur(c,StartPos,EndPos,Light,3,true,25);
-                */
+                b->TransformPosition(BoneTransform[43],StartRelative,StartPos,false);
+                b->TransformPosition(BoneTransform[45],EndRelative,EndPos,false);
+                CreateBlur(c,StartPos,EndPos,Light,3,true,25);
+*/
                 fAnimationFrame += fSpeedPerFrame;
             }
             VectorCopy(TempAngle, o->Angle);
@@ -1304,11 +1332,11 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
                                     VectorRotate(EndPos,Matrix,Position);
                                     VectorAdd(Position,o->Position,p2);
                 //					o->Angle[2] -= 18;//
-                                    Vector((float)(rand()%60+60-90),0.f,(float)(rand()%30+90),Angle);
+                                    Vector((float)(Random::Rand()%60+60-90),0.f,(float)(Random::Rand()%30+90),Angle);
                                     VectorAdd(Angle,o->Angle,Angle);
                                     VectorCopy(p2,Position);
-                                    Position[0] += rand()%20-10;
-                                    Position[1] += rand()%20-10;
+                                    Position[0] += Random::Rand()%20-10;
+                                    Position[1] += Random::Rand()%20-10;
                                     if(o->AnimationFrame > 3.5f && o->AnimationFrame < 4.5f)
                                     CreateJoint(BITMAP_JOINT_SPARK,Position,Position,Angle);
                 */
@@ -1477,15 +1505,16 @@ void M34CryWolf1st::MoveCryWolf1stBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     }
 }
 
-bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int ExtraMon)
+bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b, int ExtraMon)
 {
     switch (o->Type)
     {
     case MODEL_SORAM:
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->BeginRender(o->Alpha);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
+        b->BeginRender(look.alpha);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      5);
         b->EndRender();
         return true;
     }
@@ -1493,11 +1522,13 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     case MODEL_BALGASS:
     {
         Vector(1.f, 1.f, 1.f, b->BodyLight);
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         for (int i = 0; i < Models[o->Type].NumMeshs; i++)
         {
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(i, RENDER_CHROME2 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME3);
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(i, RENDER_CHROME2 | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME3);
         }
         b->EndRender();
         return true;
@@ -1505,13 +1536,14 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     break;
     case MODEL_BALRAM:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      5);
         return true;
     }
     break;
     case MODEL_DEATH_SPIRIT:
     {
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         static float aaa = 0.f;
         aaa += 0.1f;
         if (aaa > 1.0f)
@@ -1520,22 +1552,23 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         {
             if (i == 2)
             {
-                if (o->Alpha > 0.3f)
-                    o->Alpha = 0.3f;
+                if (look.alpha > 0.3f)
+                    look.alpha = 0.3f;
 
-                o->BlendMesh = -2;
+                look.blendMesh = -2;
                 b->EndRender();
-                b->BeginRender(o->Alpha);
+                b->BeginRender(look.alpha);
                 Models[o->Type].StreamMesh = i;
             }
             else
-                o->BlendMesh = -1;
+                look.blendMesh = -1;
 
-            o->BlendMeshTexCoordU = (int)WorldTime % 10000 * 0.0005f;
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            look.blendMeshU = (int)WorldTime % 10000 * 0.0005f;
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
         }
         b->EndRender();
-        o->Alpha = 1.0f;
+        look.alpha = 1.0f;
         return true;
     }
     break;
@@ -1544,16 +1577,19 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         if (ExtraMon)
         {
             Vector(0.5f, 0.5f, 0.6f, b->BodyLight);
-            b->BeginRender(o->Alpha);
+            b->BeginRender(look.alpha);
             for (int i = 0; i < Models[o->Type].NumMeshs; i++)
             {
-                b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+                b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV);
+                b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                              look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
             }
             b->EndRender();
         }
         else
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, 5);
         return true;
     }
     break;
@@ -1562,27 +1598,32 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
         if (ExtraMon)
         {
             Vector(0.5f, 0.5f, 0.8f, b->BodyLight);
-            b->BeginRender(o->Alpha);
+            b->BeginRender(look.alpha);
             for (int i = 0; i < Models[o->Type].NumMeshs; i++)
             {
-                b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-                b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+                b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV);
+                b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                              look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
             }
             b->EndRender();
         }
         else
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, 5);
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, 5);
         return true;
     }
     break;
     case MODEL_TANTALLOS:
     {
         Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         for (int i = 0; i < Models[o->Type].NumMeshs; i++)
         {
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         b->EndRender();
         return true;
@@ -1591,11 +1632,13 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     case MODEL_BLOODY_WOLF:
     {
         Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         for (int i = 0; i < Models[o->Type].NumMeshs; i++)
         {
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         b->EndRender();
         return true;
@@ -1604,11 +1647,13 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     case MODEL_BEAM_KNIGHT:	//318
     {
         Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         for (int i = 0; i < Models[o->Type].NumMeshs; i++)
         {
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         b->EndRender();
         return true;
@@ -1617,11 +1662,13 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     case MODEL_DRAGON_:	//319
     {
         Vector(0.6f, 0.8f, 0.6f, b->BodyLight);
-        b->BeginRender(o->Alpha);
+        b->BeginRender(look.alpha);
         for (int i = 0; i < Models[o->Type].NumMeshs; i++)
         {
-            b->RenderMesh(i, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+            b->RenderMesh(i, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
+            b->RenderMesh(i, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         b->EndRender();
         return true;
@@ -1631,7 +1678,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterObjectMesh(OBJECT* o, BMD* b, int Ext
     return false;
 }
 
-bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool M34CryWolf1st::UpdateCryWolf1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (!IsCyrWolf1st() && !(gMapManager.InDevilSquare()))
         return false;
@@ -1643,54 +1690,20 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     case MODEL_CRYWOLF_ALTAR3:
     case MODEL_CRYWOLF_ALTAR4:
     case MODEL_CRYWOLF_ALTAR5:
-    {
-        vec3_t Light;
-        float fRotation1, fRotation2;
-        float Luminosity = sinf(WorldTime * 0.002f) * 0.1f + 0.28f;
-        float Luminosity2 = sinf(WorldTime * 0.002f) * 0.04f + 0.2f;
-
-        EnableAlphaBlend();
-
         if (g_isCharacterBuff(o, eBuff_CrywolfAltarContracted))
         {
-            Vector(Luminosity2, Luminosity2, 0.05f, Light);
-            fRotation1 = WorldTime * 0.01f;
-            fRotation2 = -WorldTime * 0.01f;
             Vector(0.09f, 0.09f, 0.04f, o->Light);
 
             CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light);
             CreateParticleFpsChecked(BITMAP_EFFECT, o->Position, o->Angle, o->Light, 1);
         }
-        if (g_isCharacterBuff(o, eBuff_CrywolfAltarOccufied))
-        {
-            Vector(Luminosity, 0.1f, 0.1f, Light);
-        }
-        if (g_isCharacterBuff(o, eBuff_CrywolfAltarDisable))
-        {
-            Vector(Luminosity, 0.1f, 0.1f, Light);
-        }
-        if (g_isCharacterBuff(o, eBuff_CrywolfAltarEnable) || g_isCharacterBuff(o, eBuff_CrywolfAltarAttempt))
-        {
-            fRotation1 = WorldTime * 0.01f;
-            Vector(0.15f, 0.15f, Luminosity, Light);
-        }
-
-        Vector(Light[0] * 2.0f, Light[1] * 2.0f, Light[2] * 2.0f, Light);
-
-        RenderTerrainAlphaBitmap(BITMAP_MAGIC_CIRCLE, o->Position[0], o->Position[1], 2.8f, 2.8f, Light, fRotation1);
-        RenderTerrainAlphaBitmap(BITMAP_MAGIC_CIRCLE, o->Position[0], o->Position[1], 3.6f, 3.6f, Light, fRotation2);
-        DisableAlphaBlend();
-
-        if (fRotation1 >= 360.0f) fRotation1 = 0.0f;
-        if (fRotation2 >= 360.0f) fRotation2 = 0.0f;
-    }
-    break;
+        break;
     case MODEL_BALGASS:
     {
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_BALGAS_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_BALGAS_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1737,7 +1750,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_DARKELF_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_DARKELF_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1805,7 +1818,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_DEATHSPIRIT_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_DEATHSPIRIT_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1833,9 +1846,9 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
             o->SubType = FALSE;
 
         vec3_t Position, Light;
-        int dummy = rand() % 14;
+        int dummy = Random::Rand() % 14;
         auto Data = (float)((float)dummy / (float)100);
-        auto Rot = (float)(rand() % 360);
+        auto Rot = (float)(Random::Rand() % 360);
         Vector(1.0f, 1.0f, 1.0f, Light);
         BoneManager::GetBonePosition(o, L"Monster94_zx", Position);
         CreateSprite(BITMAP_DS_EFFECT, Position, 1.5f, Light, o);
@@ -1848,7 +1861,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         BoneManager::GetBonePosition(o, L"Monster94_zx01", Position);
         Vector(0.1f, 0.0f, 0.6f, Light);
         CreateSprite(BITMAP_SHINY + 1, Position, 0.8f, Light, o, Rot);
-        if (rand() % 2 == 0)
+        if (Random::Rand() % 2 == 0)
         {
             Vector(0.7f, 0.7f, 1.0f, Light);
             CreateSprite(BITMAP_SHINY + 1, Position, 0.8f, Light, o, 360.f - Rot);
@@ -1862,7 +1875,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_BALRAM_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_BALRAM_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1894,7 +1907,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SORAM_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SORAM_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1943,7 +1956,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_WWOLF_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_WWOLF_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -1986,7 +1999,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SCOUT2_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SCOUT2_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -2017,7 +2030,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     {
         vec3_t Position, Light;
 
-        auto Rotation = (float)(rand() % 360);
+        auto Rotation = (float)(Random::Rand() % 360);
         float Luminosity = sinf(WorldTime * 0.0012f) * 0.8f + 1.3f;
 
         float fScalePercent = 1.f;
@@ -2041,7 +2054,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SCOUT3_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SCOUT3_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -2074,7 +2087,7 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
         if (o->CurrentAction == MONSTER01_WALK || o->CurrentAction == MONSTER01_RUN)
         {
             if (rand_fps_check(15))
-                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SCOUT1_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_CRY1ST_SCOUT1_MOVE1 + Random::Rand() % 2));
         }
         else if (o->CurrentAction == MONSTER01_ATTACK1)
         {
@@ -2105,6 +2118,62 @@ bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* 
     return false;
 }
 
+bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+{
+    if (!IsCyrWolf1st() && !(gMapManager.InDevilSquare()))
+        return false;
+
+    switch (o->Type)
+    {
+    case MODEL_CRYWOLF_ALTAR1:
+    case MODEL_CRYWOLF_ALTAR2:
+    case MODEL_CRYWOLF_ALTAR3:
+    case MODEL_CRYWOLF_ALTAR4:
+    case MODEL_CRYWOLF_ALTAR5:
+    {
+        vec3_t Light;
+        float fRotation1, fRotation2;
+        float Luminosity = sinf(WorldTime * 0.002f) * 0.1f + 0.28f;
+        float Luminosity2 = sinf(WorldTime * 0.002f) * 0.04f + 0.2f;
+
+        EnableAlphaBlend();
+
+        if (g_isCharacterBuff(o, eBuff_CrywolfAltarContracted))
+        {
+            Vector(Luminosity2, Luminosity2, 0.05f, Light);
+            fRotation1 = WorldTime * 0.01f;
+            fRotation2 = -WorldTime * 0.01f;
+        }
+        if (g_isCharacterBuff(o, eBuff_CrywolfAltarOccufied))
+        {
+            Vector(Luminosity, 0.1f, 0.1f, Light);
+        }
+        if (g_isCharacterBuff(o, eBuff_CrywolfAltarDisable))
+        {
+            Vector(Luminosity, 0.1f, 0.1f, Light);
+        }
+        if (g_isCharacterBuff(o, eBuff_CrywolfAltarEnable) || g_isCharacterBuff(o, eBuff_CrywolfAltarAttempt))
+        {
+            fRotation1 = WorldTime * 0.01f;
+            Vector(0.15f, 0.15f, Luminosity, Light);
+        }
+
+        Vector(Light[0] * 2.0f, Light[1] * 2.0f, Light[2] * 2.0f, Light);
+
+        RenderTerrainAlphaBitmap(BITMAP_MAGIC_CIRCLE, o->Position[0], o->Position[1], 2.8f, 2.8f, Light, fRotation1);
+        RenderTerrainAlphaBitmap(BITMAP_MAGIC_CIRCLE, o->Position[0], o->Position[1], 3.6f, 3.6f, Light, fRotation2);
+        DisableAlphaBlend();
+
+        if (fRotation1 >= 360.0f)
+            fRotation1 = 0.0f;
+        if (fRotation2 >= 360.0f)
+            fRotation2 = 0.0f;
+    }
+    break;
+    }
+    return false;
+}
+
 bool M34CryWolf1st::CreateMist(PARTICLE* pParticleObj)
 {
     if (!IsCyrWolf1st())
@@ -2116,39 +2185,39 @@ bool M34CryWolf1st::CreateMist(PARTICLE* pParticleObj)
         int ff = 200.0f;
 
         vec3_t TargetPosition = { 0.f, 0.f, 400.f }, TargetAngle = { 0.f, 0.f, 0.f };
-        switch (rand() % 8)
+        switch (Random::Rand() % 8)
         {
         case 0:
-            TargetPosition[0] = Hero->Object.Position[0] + (300 - ff + rand() % 250);
-            TargetPosition[1] = Hero->Object.Position[1] + (300 - ff + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] + (300 - ff + Random::Rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] + (300 - ff + Random::Rand() % 250);
             break;
         case 1:
-            TargetPosition[0] = Hero->Object.Position[0] + (250 - ff + rand() % 250);
-            TargetPosition[1] = Hero->Object.Position[1] - (250 - ff + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] + (250 - ff + Random::Rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] - (250 - ff + Random::Rand() % 250);
             break;
         case 2:
-            TargetPosition[0] = Hero->Object.Position[0] - (200 - ff + rand() % 250);
-            TargetPosition[1] = Hero->Object.Position[1] + (200 - ff + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] - (200 - ff + Random::Rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] + (200 - ff + Random::Rand() % 250);
             break;
         case 3:
-            TargetPosition[0] = Hero->Object.Position[0] - (300 - ff + rand() % 250);
-            TargetPosition[1] = Hero->Object.Position[1] - (300 - ff + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] - (300 - ff + Random::Rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] - (300 - ff + Random::Rand() % 250);
             break;
         case 4:
-            TargetPosition[0] = Hero->Object.Position[0] + (400 - ff + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] + (400 - ff + Random::Rand() % 250);
             TargetPosition[1] = Hero->Object.Position[1];
             break;
         case 5:
-            TargetPosition[0] = Hero->Object.Position[0] - (400 - ff + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] - (400 - ff + Random::Rand() % 250);
             TargetPosition[1] = Hero->Object.Position[1];
             break;
         case 6:
             TargetPosition[0] = Hero->Object.Position[0];
-            TargetPosition[1] = Hero->Object.Position[1] + (400 - ff + rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] + (400 - ff + Random::Rand() % 250);
             break;
         case 7:
             TargetPosition[0] = Hero->Object.Position[0];
-            TargetPosition[1] = Hero->Object.Position[1] - (400 - ff + rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] - (400 - ff + Random::Rand() % 250);
             break;
         }
 
@@ -2161,7 +2230,7 @@ bool M34CryWolf1st::CreateMist(PARTICLE* pParticleObj)
             VectorRotate(Velocity, Matrix, Direction);
             VectorAdd(TargetPosition, Direction, TargetPosition);
         }
-        if (Hero->Movement || (rand() % 2 == 0))
+        if (Hero->Movement || (Random::Rand() % 2 == 0))
         {
             CreateParticle(BITMAP_CLOUD, TargetPosition, TargetAngle, Light, 8, 0.4f);
         }

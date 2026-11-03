@@ -1,6 +1,6 @@
 # rand_fps_check and the *FpsChecked spawns each scale a chance by the frame time once. A second one in
 # the same condition, or a *FpsChecked spawn under a rand_fps_check, scales it twice: at 250 FPS it fires
-# a tenth as often per second as at 25 FPS. The inner chance stays a plain rand() pick.
+# a tenth as often per second as at 25 FPS. The inner chance stays a plain Random::Rand() pick.
 if(NOT DEFINED MU_SOURCE_DIR)
     message(FATAL_ERROR "MU_SOURCE_DIR is required")
 endif()

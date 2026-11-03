@@ -104,6 +104,19 @@ namespace UI::RmlBridge
         return ActiveThemeNameStorage();
     }
 
+    std::optional<std::string> GetActiveThemeToken(const std::string& token)
+    {
+        const auto setting = ActiveThemeInheritance().GetSetting("Tokens", token);
+        if (!setting)
+            return std::nullopt;
+        return setting->value;
+    }
+
+    bool ActiveThemeFontHasItalic(const std::string& token)
+    {
+        return ThemeFontHasItalic(ActiveThemeInheritance(), token);
+    }
+
     std::string ResolveStartupThemeName(const std::string& savedName)
     {
         const std::string name = ToLower(savedName);

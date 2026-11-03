@@ -90,7 +90,7 @@ class MapNameFixture : public UI::Tests::RmlLayoutFixture
 public:
     MapNameFixture()
         : m_Directory(std::filesystem::current_path()), m_Locale(I18N::GetCurrentLocale()),
-          m_World(gMapManager.WorldActive), m_NonPvp(g_ServerListManager->m_byNonPvP)
+          m_World(gMapManager.WorldActive), m_Channel(g_ServerListManager->m_selectChannel)
     {
         std::filesystem::current_path(MU_BIN_DIR);
         m_Theme = UI::RmlBridge::GetActiveThemeName();
@@ -99,7 +99,7 @@ public:
         REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/NotoSansTC-Regular.otf", true));
         REQUIRE(Rml::LoadFontFace(std::string(MU_FONT_DIR) + "/NotoSansJP-Regular.otf"));
         I18N::SetLocale("en");
-        g_ServerListManager->m_byNonPvP = 0;
+        g_ServerListManager->m_selectChannel = {};
     }
 
     ~MapNameFixture()
@@ -108,7 +108,7 @@ public:
         UI::RmlBridge::SetActiveThemeName(m_Theme);
         I18N::SetLocale(m_Locale.c_str());
         gMapManager.WorldActive = m_World;
-        g_ServerListManager->m_byNonPvP = m_NonPvp;
+        g_ServerListManager->m_selectChannel = m_Channel;
         std::filesystem::current_path(m_Directory);
     }
 
@@ -117,7 +117,7 @@ private:
     std::string m_Theme;
     std::string m_Locale;
     int m_World;
-    BYTE m_NonPvp;
+    Data::ServerList::ChannelSettings m_Channel;
 };
 
 void CheckName(int mapId, const wchar_t* expected)
@@ -253,13 +253,13 @@ TEST_CASE("same-map activation resets fade and refreshes Gens without artwork [u
     banner.Render();
     CHECK(banner.Model().strife);
     CHECK(banner.Model().strifeSource.empty());
-    g_ServerListManager->m_byNonPvP = 1;
+    g_ServerListManager->m_selectChannel.pvp = false;
     banner.ShowMapName();
     CHECK(banner.Alpha() == doctest::Approx(0.2f));
     banner.Render();
     CHECK_FALSE(banner.Model().strife);
     CHECK(banner.Model().strifeSource.empty());
-    g_ServerListManager->m_byNonPvP = 0;
+    g_ServerListManager->m_selectChannel.pvp = true;
     banner.ShowMapName();
     banner.Render();
     REQUIRE(banner.Model().strife);

@@ -4,20 +4,19 @@
 #pragma once
 #include "ServerGroup.h"
 
-#include "Data/GameData/ServerListData/ServerListGroup.h"
+#include "Data/GameData/ServerListData/ButtonColors.h"
+#include "Data/GameData/ServerListData/ChannelNameBuilder.h"
+#include "Data/GameData/ServerListData/ServerListData.h"
 
-#include <span>
+#include <array>
+#include <cstddef>
+#include <map>
+#include <optional>
+#include <set>
 #include <string>
+#include <string_view>
 #include <vector>
 
-// A group of Data/Local/ServerList.json, with its place in the list.
-struct SServerGroupInfo
-{
-    Data::ServerList::ServerGroup group;
-    int sequence = 0;
-};
-
-typedef std::map<int, SServerGroupInfo> ServerListScriptMap;
 typedef std::map<int, CServerGroup*> type_mapServerGroup;
 
 class CServerListManager
@@ -36,19 +35,60 @@ public:
     // Reads Data/Local/ServerList.json. False when it has fatal problems; they are in
     // errorMessage then, for the player.
     bool LoadServerListScript(std::string& errorMessage);
-    // The groups the login screen names the servers with, in their order.
-    void SetServerGroups(std::span<const Data::ServerList::ServerGroup> groups);
+    // The list the login screen names the servers with: the groups in their
+    // order, the VIP types and the texts. The selected channel follows it
+    // (SetSelectServerInfo).
+    void SetServerList(const Data::ServerList::ServerListData& list);
     void SetFirst();
     bool GetNext(OUT CServerGroup*& pServerGroup);
     CServerGroup* GetServerGroupByBtnPos(int iBtnPos);
+    // The server the connect server knows by this ID (CServerInfo::m_iConnectIndex), and the
+    // group it is in. nullptr (and no group) when the list doesn't have it.
+    CServerInfo* FindServer(int iConnectIndex, CServerGroup*& pServerGroup);
 
     int GetServerGroupSize();
 
-    void SetSelectServerInfo(wchar_t* pszName, int iIndex, BYTE byNonPvP);
+    // The channel the player joined: channel `iIndex` of the group `groupId` (its name `pszName`), with its PvP and
+    // VIP type. While the list has the group, its name and the channel's settings follow the list
+    // (SetServerList: MuEditor changes them while the game runs).
+    void SetSelectServerInfo(int groupId, const wchar_t* pszName, int iIndex,
+                             const Data::ServerList::ChannelSettings& channel);
     wchar_t* GetSelectServerName();
     int GetSelectServerIndex();
-    BYTE GetNonPVPInfo();
+    // Whether the selected channel has PvP off.
     bool IsNonPvP();
+    // The selected channel as `place` names it, in the game's language:
+    // "[Valhalla-1 (Gold Non-PvP)]". `character` fills {character} (the
+    // screenshot message).
+    std::wstring GetSelectServerTitle(Data::ServerList::ChannelNamePlace place, const wchar_t* character = L"");
+    // The same at `place`, in UTF-8, for the windows that show it every frame (login, character
+    // info): built again only when the list, the selected channel or the game's language changed.
+    const std::string& GetSelectServerTitleUtf8(Data::ServerList::ChannelNamePlace place);
+    // The load text the server's button shows on its load bar, in the game's language: the list's text of
+    // a full or overloaded server ("(Full)"); none while it can be joined or the button template has no
+    // {load} (Data::ServerList::GetButtonLoadText).
+    std::string GetServerLoadText(const CServerInfo& server) const;
+    // A channel's button text without its load text, for the channel `index` (1 to MAX_SERVER_PER_GROUP) of
+    // `group`, whether or not the connect server sent it: "Valhalla-4 (Gold Non-PvP)". The login screen shows the
+    // load text apart from it, at the button's right.
+    std::string GetServerButtonName(const CServerGroup& group, int index) const;
+    // A load text a button can show, in the game's language, and its look.
+    struct ButtonLoadText
+    {
+        std::string text;
+        bool bold = false;
+        bool italic = false;
+    };
+    // The list's load texts of a full and of an overloaded server, those not empty; none when the button
+    // template has no {load}.
+    std::vector<ButtonLoadText> GetButtonLoadTexts() const;
+    // The groups, VIP types, colors and texts the channels are named with.
+    const Data::ServerList::ServerListData& GetServerList() const
+    {
+        return m_serverList;
+    }
+    // Its color there in the theme folder `theme`, by the list's button color rules.
+    Data::ServerList::ButtonColor GetServerButtonColor(const CServerInfo& server, std::string_view theme) const;
     void SetTotalServer(int iTotalServer);
     int GetTotalServer();
 
@@ -71,29 +111,87 @@ public:
         return m_receivedServersVersion;
     }
     // Builds the groups of the last list the connect server sent again, with
-    // the groups SetServerGroups set since.
+    // the groups SetServerList set since.
     void RebuildServerGroups();
+    // The highest load the preview of the offline servers takes: an overloaded server's.
+    static constexpr int MaxOfflineServerPercent = 140;
+    // MuEditor's preview of the servers that are offline: every channel 1 to 20 of every group of the list
+    // that the connect server didn't send is shown too (unless SetOfflineServerShown left it out), at `percent`
+    // load or its own, and can't be joined (m_offline). It takes effect with the next RebuildServerGroups.
+    void SetOfflinePreview(bool show, int percent);
+    bool IsShowingOfflineServers() const
+    {
+        return m_showOffline;
+    }
+    int GetOfflineServerPercent() const
+    {
+        return m_offlinePercent;
+    }
+    // One offline channel of the preview, by its server ID: each one is shown until it is left out, and has the
+    // preview's load until it gets its own (nothing: the preview's again). Kept while the game runs, with the
+    // channel's group (KeepOfflineServersWithGroups).
+    void SetOfflineServerShown(int connectIndex, bool shown);
+    bool IsOfflineServerShown(int connectIndex) const;
+    void SetOfflineServerLoad(int connectIndex, std::optional<int> percent);
+    std::optional<int> GetOfflineServerLoad(int connectIndex) const;
+    // Every offline channel of the preview shown again, at the preview's load.
+    void ResetOfflineServers();
 #endif
 
 protected:
-    const SServerGroupInfo* GetServerGroupInfoInScript(int iServerGroupIndex);
+    // The selected channel's group name and settings as the list has them now; kept when the list has no such group.
+    void FollowSelectedChannel();
+    // The list's group with the ID, and its place in the list from 1 (`sequence`); nullptr when the list has none.
+    const Data::ServerList::ServerGroup* FindListGroup(int groupId, int& sequence) const;
     bool MakeServerGroup(IN int iServerGroupIndex, OUT CServerGroup* pServerGroup);
+    // The group of the server with this connect index, made when the list has it; nullptr when it doesn't.
+    CServerGroup* FindOrMakeGroup(int iConnectIndex);
     void InsertServer(CServerGroup* pServerGroup, int iConnectIndex, int iServerPercent);
+#ifdef _EDITOR
+    // A server of the preview the connect server didn't send, at its own load or the preview's.
+    void InsertOfflineServer(int iConnectIndex);
+    // After SetServerList (`previousGroups`: the group IDs it had before): when one group ID left the list as
+    // another came, a group's ID changed, and the preview's offline channels of the old ID go to the new one. Those
+    // of a group the list no longer has are dropped, so a group that takes its ID later starts with all shown.
+    void KeepOfflineServersWithGroups(const std::map<int, size_t>& previousGroups);
+    // The preview's offline channels of the group `fromGroupId` (shown or not, their own loads) go to `toGroupId`.
+    void MoveOfflineServers(int fromGroupId, int toGroupId);
+#endif
 
 public:
     type_mapServerGroup m_mapServerGroup;
     type_mapServerGroup::iterator m_iterServerGroup;
 
     int m_iTotalServer;
+    // The selected channel's group (its ID, -1 for none, and name), its number and settings.
+    int m_iSelectServerGroupId = -1;
     wchar_t m_szSelectServerName[MAX_TEXT_LENGTH];
     int m_iSelectServerIndex;
-    BYTE m_byNonPvP;
+    Data::ServerList::ChannelSettings m_selectChannel;
 
 protected:
-    ServerListScriptMap m_mapServerListScript;
+    // The groups, VIP types, colors and texts the channels are named with.
+    Data::ServerList::ServerListData m_serverList;
+    // The index of each group of m_serverList by its ID.
+    std::map<int, size_t> m_groupIndexById;
+    // A title of GetSelectServerTitleUtf8, as it was built.
+    struct CachedTitle
+    {
+        int version = -1;
+        std::string locale;
+        std::string text;
+    };
+    std::array<CachedTitle, Data::ServerList::ChannelNamePlaceCount> m_titles;
+    // Changes with the list and the selected channel: a cached title older than it is built again.
+    int m_titleVersion = 0;
 #ifdef _EDITOR
     std::vector<ReceivedServer> m_receivedServers;
     int m_receivedServersVersion = 0;
+    bool m_showOffline = false;
+    int m_offlinePercent = 50;
+    // The offline channels the preview leaves out, and the ones with a load of their own, by server ID.
+    std::set<int> m_hiddenOffline;
+    std::map<int, int> m_offlineLoads;
 #endif
 };
 

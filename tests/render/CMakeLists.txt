@@ -36,6 +36,15 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME camera_view_tests
+    SOURCES
+        test_camera_view.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME skinned_bone_palette_tests
     SOURCES
         test_skinned_bone_palette.cpp
@@ -206,6 +215,16 @@ target_compile_definitions(glb_model_tests PRIVATE
     MU_TEST_GLB_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data"
 )
 
+# BMD::RenderMesh -> the model drawer seam; BMD needs the client globals of Winmain.cpp.
+mu_add_test(
+    NAME model_draw_tests
+    SOURCES
+        test_model_draw.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
 mu_add_test(
     NAME dynamic_lights_tests
     SOURCES
@@ -294,6 +313,47 @@ add_test(
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_SOURCE_DIR=${CMAKE_SOURCE_DIR}/src/source"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/test_no_nested_fps_gate.cmake"
+)
+
+# The owned-random guard reads the compiled objects: the game's (the editor's too, when it is built) and two fixture
+# sets, one that calls the CRT's rand() or srand() in every spelling and one that does not.
+if(MSVC)
+    set(MU_SYMBOL_TOOL "${CMAKE_LINKER}")
+else()
+    set(MU_SYMBOL_TOOL "${CMAKE_NM}")
+endif()
+file(GLOB MU_CRT_RANDOM_USES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/crt_random/uses/*.cpp")
+file(GLOB MU_CRT_RANDOM_CLEAN CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/crt_random/clean/*.cpp")
+add_library(crt_random_uses OBJECT ${MU_CRT_RANDOM_USES})
+add_library(crt_random_clean OBJECT ${MU_CRT_RANDOM_CLEAN})
+foreach(fixtures IN ITEMS crt_random_uses crt_random_clean)
+    target_compile_features(${fixtures} PRIVATE cxx_std_20)
+endforeach()
+file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/game_random_objects_$<CONFIG>.txt"
+     CONTENT "$<JOIN:$<TARGET_OBJECTS:MuClient>;$<TARGET_OBJECTS:Main>,\n>\n")
+file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/crt_random_uses_$<CONFIG>.txt"
+     CONTENT "$<JOIN:$<TARGET_OBJECTS:crt_random_uses>,\n>\n")
+file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/crt_random_clean_$<CONFIG>.txt"
+     CONTENT "$<JOIN:$<TARGET_OBJECTS:crt_random_clean>,\n>\n")
+
+add_test(
+    NAME game_random_is_owned
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_OBJECT_LIST=${CMAKE_CURRENT_BINARY_DIR}/game_random_objects_$<CONFIG>.txt"
+        "-DMU_SYMBOL_TOOL=${MU_SYMBOL_TOOL}"
+        "-DMU_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/game_random_symbols_$<CONFIG>.txt"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_game_random_is_owned.cmake"
+)
+
+add_test(
+    NAME game_random_guard_detects
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_GUARD=${CMAKE_CURRENT_SOURCE_DIR}/test_game_random_is_owned.cmake"
+        "-DMU_SYMBOL_TOOL=${MU_SYMBOL_TOOL}"
+        "-DMU_USES=${CMAKE_CURRENT_BINARY_DIR}/crt_random_uses_$<CONFIG>.txt"
+        "-DMU_CLEAN=${CMAKE_CURRENT_BINARY_DIR}/crt_random_clean_$<CONFIG>.txt"
+        "-DMU_WORK=${CMAKE_CURRENT_BINARY_DIR}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_game_random_guard_detects.cmake"
 )
 
 add_test(

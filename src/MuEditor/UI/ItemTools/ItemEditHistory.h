@@ -4,6 +4,7 @@
 
 #include "Data/GameData/EffectData/GlowColors.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
+#include "Data/GameData/ItemData/ItemGroundLabels.h"
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/SharedItemModel.h"
@@ -14,6 +15,7 @@
 #include <optional>
 #include <span>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace MuEditor::Items
@@ -50,6 +52,11 @@ struct ItemEditStep
         GlowColors,
         // The item stat file went from `statFileBefore` to `statFileAfter`.
         StatFile,
+        // The ground label styles went from `stylesBefore` to `stylesAfter`.
+        GroundLabelStyles,
+        // The folders of the Colors window's root `folderRoot` (ItemEdits::GlowFolders, ...) went from
+        // `foldersBefore` to `foldersAfter`.
+        ColorFolders,
     };
 
     Kind kind = Kind::Slot;
@@ -64,6 +71,11 @@ struct ItemEditStep
     // Shared, so the other steps do not each carry two stat files.
     std::shared_ptr<const Data::Items::ItemStatFile> statFileBefore;
     std::shared_ptr<const Data::Items::ItemStatFile> statFileAfter;
+    std::vector<Data::Items::GroundLabelStyle> stylesBefore;
+    std::vector<Data::Items::GroundLabelStyle> stylesAfter;
+    std::string folderRoot;
+    std::vector<Data::Colors::ColorFolder> foldersBefore;
+    std::vector<Data::Colors::ColorFolder> foldersAfter;
 };
 
 // What one action of a tool changed, undone and redone as a whole: an edited
@@ -110,6 +122,13 @@ public:
         // The item stat file, and putting one back (the items take its profiles).
         std::function<Data::Items::ItemStatFile()> readStatFile;
         std::function<void(const Data::Items::ItemStatFile& file)> restoreStatFile;
+        // The ground label styles, and putting them back (the labels take them).
+        std::function<std::vector<Data::Items::GroundLabelStyle>()> readGroundLabelStyles;
+        std::function<void(std::span<const Data::Items::GroundLabelStyle> styles)> restoreGroundLabelStyles;
+        // The folders of a Colors window root, and putting them back. Optional.
+        std::function<std::vector<Data::Colors::ColorFolder>(std::string_view root)> readColorFolders;
+        std::function<void(std::string_view root, std::span<const Data::Colors::ColorFolder> folders)>
+            restoreColorFolders;
     };
 
     // Why the last Undo or Redo did nothing.

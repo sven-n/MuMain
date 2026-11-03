@@ -38,7 +38,8 @@ bar.
 The editor opens in a window of its own, beside the game window where the
 screen has room (else over its right side), and stays in front of the game. Its
 **Windows** menu opens the tool windows: Item, Monster
-([monster-data.md](monster-data.md)), Data Checks ([below](#data-checks)), Server List
+([monster-data.md](monster-data.md)), Colors ([item-data.md](item-data.md#colors)),
+Data Checks ([below](#data-checks)), Server List
 ([server-list.md](server-list.md)), Skill, Dev and Map Editor, the Effect
 Browser and the console. They open as tabs docked in the editor window, the
 console along the bottom. Drag a tab out to float a tool window anywhere, over

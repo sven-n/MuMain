@@ -3,6 +3,7 @@
 
 #include "GameLogic/Combat/CombatTarget.h"
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "SummonSystem.h"
 
 #include "Audio/DSPlaySound.h"
@@ -141,14 +142,14 @@ void CSummonSystem::CreateSummonObject(int iSkill, CHARACTER* pCharacter, OBJECT
     {
         vec3_t vPos;
         VectorCopy(pObject->Position, vPos);
-        if (rand() % 2 == 0)
-            vPos[0] += rand() % 300 + 150;
+        if (Random::Rand() % 2 == 0)
+            vPos[0] += Random::Rand() % 300 + 150;
         else
-            vPos[0] -= rand() % 250 + 150;
-        if (rand() % 2 == 0)
-            vPos[1] += rand() % 300 + 150;
+            vPos[0] -= Random::Rand() % 250 + 150;
+        if (Random::Rand() % 2 == 0)
+            vPos[1] += Random::Rand() % 300 + 150;
         else
-            vPos[1] -= rand() % 250 + 150;
+            vPos[1] -= Random::Rand() % 250 + 150;
 
         vec3_t vTargetPos;
         Vector(fTargetPos_X, fTargetPos_Y, RequestTerrainHeight(fTargetPos_X, fTargetPos_Y), vTargetPos);
@@ -340,7 +341,7 @@ void CSummonSystem::CreateEquipEffect_WristRing(CHARACTER* pCharacter, int iItem
     }
     if (iItemLevel >= 13)
     {
-        if (rand() % 4)
+        if (Random::Rand() % 4)
         {
             CreateParticleFpsChecked(BITMAP_SPARK + 1, vPos, pObject->Angle, vLight, 23, 0.5f, pObject);
         }
@@ -374,7 +375,7 @@ void CSummonSystem::CreateEquipEffect_Summon(CHARACTER* pCharacter, int iItemTyp
     auto iter = m_EquipEffectRandom.find(pCharacter->Key);
     if (iter == m_EquipEffectRandom.end())
     {
-        byRandom = rand() % 256;
+        byRandom = Random::Rand() % 256;
         m_EquipEffectRandom.insert(std::pair<SHORT, BYTE>(pCharacter->Key, byRandom));
     }
     else

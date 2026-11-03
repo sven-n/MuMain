@@ -616,6 +616,7 @@
           "levels": [6, 6]
         }
       ],
+      "groundLabels": [{"style": "orbOfSummoning"}],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -719,6 +720,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 12,
@@ -956,6 +958,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -1005,6 +1008,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 30,
@@ -1039,6 +1043,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "giftBoxRed"}],
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -1072,6 +1077,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "giftBoxGreen"}],
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -1105,6 +1111,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "giftBoxBlue"}],
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -1131,6 +1138,7 @@
           }
         }
       ],
+      "groundLabels": [{"style": "white"}],
       "width": 1,
       "height": 2,
       "statProfile": "orb",
@@ -1771,6 +1779,7 @@
         "es": "Rollo de Diseier Caótico",
         "pt": "Pergaminho Diseier Caótico"
       },
+      "groundLabels": [{"style": "white"}],
       "width": 1,
       "height": 2,
       "statProfile": "orb",
@@ -1942,6 +1951,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -1973,6 +1983,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -2004,6 +2015,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -2035,6 +2047,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -2066,6 +2079,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -2097,6 +2111,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 150,
@@ -2128,6 +2143,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 102,
@@ -2159,6 +2175,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 122,
@@ -2190,6 +2207,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 132,
@@ -2231,6 +2249,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -2262,6 +2281,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -2293,6 +2313,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -2324,6 +2345,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -2355,6 +2377,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -2386,6 +2409,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 1,
@@ -2417,6 +2441,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -2448,6 +2473,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -2479,6 +2505,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -2510,6 +2537,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -2541,6 +2569,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -2572,6 +2601,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 2,
@@ -2603,6 +2633,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -2634,6 +2665,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -2665,6 +2697,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -2696,6 +2729,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -2727,6 +2761,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -2758,6 +2793,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "level": 3,
@@ -2789,6 +2825,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "slot": "mainHand"
@@ -2810,6 +2847,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "slot": "mainHand"
@@ -2831,6 +2869,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "slot": "mainHand"
@@ -2852,6 +2891,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "slot": "mainHand"
@@ -2873,6 +2913,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "slot": "mainHand"
@@ -2894,6 +2935,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "slot": "mainHand"
@@ -2915,6 +2957,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "slot": "mainHand"
@@ -2936,6 +2979,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "slot": "mainHand"
@@ -2957,6 +3001,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "slot": "mainHand"
@@ -2978,6 +3023,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "slot": "mainHand"
@@ -2999,6 +3045,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "slot": "mainHand"
@@ -3020,6 +3067,7 @@
           "color": "violet"
         }
       ],
+      "groundLabels": [{"style": "seedsAndSpheres"}],
       "width": 1,
       "height": 1,
       "slot": "mainHand"
@@ -3046,6 +3094,7 @@
           "text": "@increaseSpeed"
         }
       ],
+      "groundLabels": [{"style": "smallWings"}],
       "width": 2,
       "height": 2,
       "slot": "wings",
@@ -3089,6 +3138,7 @@
           "text": "@increaseSpeed"
         }
       ],
+      "groundLabels": [{"style": "smallWings"}],
       "width": 3,
       "height": 2,
       "slot": "wings",
@@ -3132,6 +3182,7 @@
           "text": "@increaseSpeed"
         }
       ],
+      "groundLabels": [{"style": "smallWings"}],
       "width": 3,
       "height": 2,
       "slot": "wings",
@@ -3175,6 +3226,7 @@
           "text": "@increaseSpeed"
         }
       ],
+      "groundLabels": [{"style": "smallWings"}],
       "width": 3,
       "height": 2,
       "slot": "wings",
@@ -3219,6 +3271,7 @@
           "text": "@increaseSpeed"
         }
       ],
+      "groundLabels": [{"style": "smallWings"}],
       "width": 3,
       "height": 2,
       "slot": "wings",
@@ -3263,6 +3316,7 @@
           "text": "@increaseSpeed"
         }
       ],
+      "groundLabels": [{"style": "smallWings"}],
       "width": 2,
       "height": 2,
       "slot": "wings",
@@ -3321,6 +3375,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 72,
@@ -3371,6 +3426,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 78,
@@ -3421,6 +3477,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 75,
@@ -3471,6 +3528,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -3521,6 +3579,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -3571,6 +3630,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 12,
@@ -3621,6 +3681,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 25,
@@ -3671,6 +3732,7 @@
           "color": "yellow"
         }
       ],
+      "groundLabels": [{"style": "jewel"}],
       "width": 1,
       "height": 1,
       "level": 25,

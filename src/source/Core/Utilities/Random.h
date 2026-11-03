@@ -7,6 +7,7 @@
 #pragma once
 
 #include <cstdint>
+#include <random>
 
 namespace Random
 {
@@ -53,8 +54,29 @@ inline bool FpsCheck(std::int32_t referenceFrames)
     return FpsCheck(referenceFrames, 1.0);
 }
 
+/// The game's legacy sequence: rand() as the Windows CRT gives it, the same values on every platform, one sequence per
+/// thread starting at seed 1. The game draws from it where it called rand().
+std::int32_t Rand();
+/// srand() for the legacy sequence of the calling thread.
+void SeedRand(std::uint32_t seed);
+/// The calling thread's legacy state, to tell whether something drew from the sequence.
+std::uint32_t RandState();
+
 /// Restarts the calling thread's sequence from a fixed seed, so that a test
 /// can repeat it (the effect recorder). The game does not call it.
 void Seed(std::uint32_t seed);
+
+/// A copy of the calling thread's engine, to tell whether something drew from its sequence.
+std::mt19937 Snapshot();
+
+/// Starts the frame the draws' random values come from; the last step of the update.
+void NextDrawFrame();
+
+/// A draw's random value in [0, 32767], as rand() gives: fixed for the frame, the key and the salt, so every pass of
+/// a frame draws the same, and no sequence the update draws from moves.
+std::int32_t DrawRand(const void* key, std::uint32_t salt);
+
+/// FpsCheck for a draw, from DrawRand: the same in every pass of a frame.
+bool DrawFpsCheck(std::int32_t referenceFrames, double animationFactor, const void* key, std::uint32_t salt);
 
 } // namespace Random

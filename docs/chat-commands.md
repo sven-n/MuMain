@@ -52,6 +52,26 @@ A value marked with `*` is required - the command isn't sent without it.
 - Everything else is **typed**. Values which are numbers only accept digits.
 - **Enter** finishes a box, **Escape** leaves it.
 
+Newer servers also tell the client what a value means and which numbers it
+accepts. With such a server, the value page helps a bit more:
+
+- An empty box shows the accepted range when it's a small one, e.g. `0 - 255`
+  for a coordinate.
+- A number outside of the accepted range is marked red like a missing value,
+  and the command isn't sent until it's corrected.
+- A number which stands for something is named right of it: the map of a map
+  number, the monster of a monster number, the item of an item group and
+  number, and the character or monster of an object id - as long as it's in
+  sight.
+- **mine** right of a value fills in what your own character has: its name,
+  its guild, the map it's on, its coordinates, or the language of the client.
+  For `/move`, clicking it for the map and both coordinates gives the spot
+  you're standing on.
+
+The names come from the data of your client. If the server is configured
+differently, a name may be missing or wrong - the number you entered is sent
+as it is.
+
 **Execute** sends the command. It is also added to your chat history, so the
 arrow keys in the chat box repeat it without opening the window again.
 

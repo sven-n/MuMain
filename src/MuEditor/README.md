@@ -46,9 +46,9 @@ stores it when a field is left.
 - **MuItemRulesUI** - The rule flags of many items at once (ItemRulesTable, ItemRuleFlags)
 - **MuItemCategoriesUI** - The items of a tag
 - **MuItemModelUI** - The model entry with a preview, file picker, shared models and looks (ItemModelPreview, ItemModelFilePicker, ItemSharedModelForm, ItemModelForms)
-- **MuItemGlowColorsUI** - The glow color list: new colors, changed values and unused colors removed (GlowColorDialog, which the model tool's color fields open too)
 - **MuItemFormulasUI** - The item stat file: drop level bonus, default, profiles, level bonus tables and profile rules, changed on a copy and applied after the list of the items it reaches (ItemStatTermFields, ItemStatFileChange)
 - **ItemCheckArea** - The items in Data Checks: the checks of a save, each leading to its item and field (ItemCheckTargets)
+- **MuItemTooltipUI** - Item Tooltip: the item's ground label previewed at a level and with options (drawn by the game's own label function), and the item's own label rules
 - **MuItemSyncUI** - Import and Export of the item exchange file with OpenMU: the import's diff of the items and formulas with a box per field (ItemSyncDiff, which also keeps the known differences), applied as one undo step after a confirmation; the export of the client's data, confirmed when it replaces a file (ItemSyncApply); and a read-only comparison of two files
 - **ItemToolWindow** - What every item tool window shares: its title, the selected item, and the item edit history as the editor bar's undo target
 
@@ -58,6 +58,14 @@ stores it when a field is left.
 
 ### Item Translations
 - **MuItemTranslationsUI.h/cpp** - Item names as a grid of items and languages, with missing counts, on the shared names grid with ItemNameRows as its rows (docs/translation-system.md)
+
+### Colors (UI/Colors)
+- **MuColorsUI.h/cpp** - The Colors window: the named colors as a tree, a root per use with the user's folders (Data/GameData/ColorFolders), drag and drop within a root (Windows > Colors, Items > Glow Colors, Items > Ground Label Styles and the Server List window's Edit colors on their root); it docks with the item tools, and each root's changes go to its own history
+- **NamedColorList.h/cpp** - The panel the picked entry of any root is drawn with: its value with Apply, Revert and Remove, its users, the list of the users a change reaches, and for a picked root the unused entries removed at once; a root gives it its entries through **NamedColorSource.h**
+- **GlowColorsRoot.h/cpp** - The Glow root: new colors, changed values and unused colors removed (GlowColorDialog, which the model tool's color fields open too)
+- **GroundLabelStylesRoot.h/cpp** - The Ground labels root: new label styles (GroundLabelStyleDialog), changed looks and unused styles removed; the styles of the standard rules stay
+- **ServerListColorsRoot.h/cpp** - The Server list root: the themes' colors the list uses (written into each theme's tokens.ini on Apply) and the server list's own colors with a shade per theme, used by the button color rules and the load; the own colors' changes are steps of the Server List window's history
+- **GroundLabelWidgets.h/cpp** - A label style's fields, a label drawn in a style, its swatch and the style combo, for the Ground labels root and Item Tooltip
 
 ### Monster Tools (UI/MonsterTools)
 One selected monster (**MonsterSelection**) is shown by every monster tool.
@@ -87,8 +95,9 @@ Parts the item tools and the monster tools both use:
 - **CodeTokenLine.h/cpp**, **CodeRanges.h/cpp**, **CodeReference.h**, **CodeReferenceList.h/cpp** - Reading the sources for the lines that name an item or a monster, and their list in the remove dialogs
 
 ### Server List (UI/ServerList)
-- **MuServerListUI.h/cpp** - The server groups of the login screen (Data/Local/ServerList.json): order, names, test server and channel types, shown on the login screen right away (docs/server-list.md)
+- **MuServerListUI.h/cpp** - The server groups of the login screen (Data/Local/ServerList.json): order, names, test server, the channels' PvP and VIP type, the VIP types and the texts that name a channel, shown on the login screen right away (docs/server-list.md)
 - **ServerListEdits.h/cpp** - The groups being changed, what the file has, and their undo history (the editor bar's Undo and Redo while the window was used last)
+- **ServerListOfflinePreviewUI.h/cpp** - The preview of the servers the connect server didn't send: the toolbar's switch and Their load, and each offline channel's Show box and own load in the channel list
 - **ServerListStepLabel.h/cpp** - What each undo step did ("Remove Helheim", "Valhalla: channel 3"), for the tooltips of the editor bar's Undo and Redo
 
 ### Input Management

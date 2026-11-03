@@ -18,7 +18,9 @@ bool CreateChaosCastleObject(OBJECT* o);
 bool MoveChaosCastleObjectSetting(int& objCount, int object);
 bool MoveChaosCastleObject(OBJECT* o, int& object, int& visibleObject);
 bool MoveChaosCastleAllObject(OBJECT* o);
-bool RenderChaosCastleVisual(OBJECT* o, BMD* b);
-void RenderTerrainVisual(int xi, int yi);
+bool UpdateChaosCastleObjectEffects(OBJECT* o, BMD* b);
+// The draw notes the terrain tiles it drew; the next update spawns the limit areas' smoke on them.
+void NoteDrawnTerrain(int xi, int yi);
+void UpdateTerrainEffects();
 
 #endif // __CSCHAOS_CASTLE_H__

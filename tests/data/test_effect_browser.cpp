@@ -168,9 +168,8 @@ std::map<Stage, std::set<int>> ReadAllCases()
 }
 
 // Whether the registry handles the stage of `type`, so its switch case would
-// never run. RenderEffectShadows never asks the registry. RenderAfterEffects
-// draws what the case of RenderEffects asked for, so a draw handler leaves its
-// case behind: the handler has to take that drawing along.
+// never run. The registry only creates and moves effects; the drawing passes
+// never ask it.
 bool RegistryHandles(Stage stage, int type)
 {
     const Render::Effects::EffectDescriptor* descriptor = Render::Effects::Lookup(type);
@@ -182,9 +181,9 @@ bool RegistryHandles(Stage stage, int type)
         return descriptor->create.has_value() || descriptor->onCreate != nullptr;
     case Stage::Move:
         return descriptor->move != nullptr;
+    // The registry draws nothing: every drawing stage stays in the switches.
     case Stage::Render:
     case Stage::AfterCharacters:
-        return descriptor->render != nullptr;
     case Stage::Ground:
         break;
     }
@@ -929,9 +928,8 @@ TEST_CASE("The effect browser takes a stage from the registry, then the legacy c
 
     descriptor.create = Render::Effects::CreateParams{};
     descriptor.move = &Render::Effects::Behaviors::MoveSpear;
-    descriptor.render = &Render::Effects::Behaviors::RenderDefault;
-    CHECK(DescribeEffectStages(BITMAP_LIGHT, &descriptor, allCases) ==
-          EffectStages{CreateStage::Data, MoveStage::Handler, RenderStage::Handler});
+    CHECK(DescribeEffectStages(BITMAP_LIGHT, &descriptor, allCases).move == MoveStage::Handler);
+    CHECK(DescribeEffectStages(BITMAP_LIGHT, &descriptor, allCases).create == CreateStage::Data);
     descriptor.onCreate = &Render::Effects::Behaviors::CreateMayaStone45;
     CHECK(DescribeEffectStages(BITMAP_LIGHT, &descriptor, 0).create == CreateStage::DataThenHook);
     descriptor.create.reset();
@@ -959,7 +957,7 @@ TEST_CASE("The effect browser lists the types of every kind with name, code, sta
     CHECK(model.FindRow(EffectKind::Particle, MODEL_CUNDUN_GHOST) == nullptr);
 
     CHECK(model.FindRow(EffectKind::Effect, MODEL_MAYASTONE4)->stages.create == CreateStage::Hook);
-    CHECK(model.FindRow(EffectKind::Effect, MODEL_DESAIR)->stages.render == RenderStage::Handler);
+    CHECK(model.FindRow(EffectKind::Effect, MODEL_DESAIR)->stages.render == RenderStage::DrawnAsModel);
     const EffectBrowserRow* fallingStone = model.FindRow(EffectKind::Effect, MODEL_KALIMA_FALLING_STONE);
     CHECK(fallingStone->stages == EffectStages{CreateStage::Switch, MoveStage::Switch, RenderStage::Switch});
     CHECK(IsWorldObjectSlot(fallingStone->assetSlot, fallingStone->type));
@@ -1004,9 +1002,6 @@ TEST_CASE("The effect browser filters by search, stage and loaded asset [data][e
     // Particles have no stages; the stage filters leave them all.
     CHECK(model.Filter(EffectKind::Particle, filter).size() == model.GetRows(EffectKind::Particle).size());
     filter.create.reset();
-    filter.render = RenderStage::Handler;
-    CHECK(NamesOf(model, EffectKind::Effect, model.Filter(EffectKind::Effect, filter)) ==
-          std::vector<std::string_view>{"desair"});
     // "On the ground" also lists the effects drawn there besides another stage.
     filter.render = RenderStage::OnGround;
     const std::span<const EffectLegacyCases> cases = GetEffectLegacyCases();

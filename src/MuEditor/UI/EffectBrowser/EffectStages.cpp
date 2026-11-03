@@ -36,10 +36,8 @@ MoveStage DescribeMove(const Render::Effects::EffectDescriptor* descriptor, std:
 
 // RenderEffects' default draws the models of the skill range with
 // RenderObject and nothing else.
-RenderStage DescribeRendering(int type, const Render::Effects::EffectDescriptor* descriptor, std::uint8_t legacyCases)
+RenderStage DescribeRendering(int type, std::uint8_t legacyCases)
 {
-    if (descriptor != nullptr && descriptor->render != nullptr)
-        return RenderStage::Handler;
     if ((legacyCases & RenderCase) != 0)
         return RenderStage::Switch;
     if (type >= MODEL_SKILL_BEGIN && type < MODEL_SKILL_END)
@@ -52,7 +50,7 @@ EffectStages DescribeEffectStages(int type, const Render::Effects::EffectDescrip
                                   std::uint8_t legacyCases)
 {
     return {DescribeCreation(descriptor, legacyCases), DescribeMove(descriptor, legacyCases),
-            DescribeRendering(type, descriptor, legacyCases), (legacyCases & GroundCase) != 0,
+            DescribeRendering(type, legacyCases), (legacyCases & GroundCase) != 0,
             (legacyCases & AfterCharactersCase) != 0};
 }
 } // namespace MuEditor::Effects
