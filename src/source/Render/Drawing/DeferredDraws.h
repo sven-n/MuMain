@@ -63,6 +63,7 @@ private:
     std::vector<mu::Vertex3D> m_vertices;
     std::vector<std::unique_ptr<float[]>> m_kept;
     std::map<std::pair<const void*, std::uint32_t>, const float (*)[3][4]> m_keptBones;
+    std::vector<std::unique_ptr<ModelDrawing::CpuShadowMesh[]>> m_keptShadowMeshes;
     ModelDrawing::ModelDrawer* m_models = nullptr;
     EffectDrawing::EffectDrawer* m_effects = nullptr;
     bool m_flushed = false;

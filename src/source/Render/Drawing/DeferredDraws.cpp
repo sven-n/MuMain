@@ -56,6 +56,7 @@ void DeferredDraws::Flush()
     m_vertices.clear();
     m_kept.clear();
     m_keptBones.clear();
+    m_keptShadowMeshes.clear();
 }
 
 const float* DeferredDraws::Keep(const float* values, std::size_t count)
@@ -86,8 +87,11 @@ void DeferredDraws::DrawMesh(const ModelDrawing::MeshDraw& draw)
     if (kept.cpu.vertices != nullptr)
     {
         const auto vertices = static_cast<std::size_t>(kept.cpu.vertexCount) * 3u;
-        const auto normals = static_cast<std::size_t>(kept.cpu.normalCount);
         kept.cpu.vertices = reinterpret_cast<const float (*)[3]>(Keep(&kept.cpu.vertices[0][0], vertices));
+    }
+    if (kept.cpu.normals != nullptr)
+    {
+        const auto normals = static_cast<std::size_t>(kept.cpu.normalCount);
         kept.cpu.normals = reinterpret_cast<const float (*)[3]>(Keep(&kept.cpu.normals[0][0], normals * 3u));
         kept.cpu.intensities = Keep(kept.cpu.intensities, normals);
     }
@@ -98,6 +102,19 @@ void DeferredDraws::DrawShadow(const ModelDrawing::ShadowDraw& draw)
 {
     ModelDrawing::ShadowDraw kept = draw;
     KeepBones(kept.skin);
+    if (!kept.cpu.empty())
+    {
+        auto& meshes =
+            m_keptShadowMeshes.emplace_back(std::make_unique<ModelDrawing::CpuShadowMesh[]>(kept.cpu.size()));
+        for (std::size_t i = 0; i < kept.cpu.size(); ++i)
+        {
+            meshes[i] = kept.cpu[i];
+            if (meshes[i].vertices != nullptr)
+                meshes[i].vertices = reinterpret_cast<const float (*)[3]>(
+                    Keep(&meshes[i].vertices[0][0], static_cast<std::size_t>(meshes[i].vertexCount) * 3u));
+        }
+        kept.cpu = {meshes.get(), kept.cpu.size()};
+    }
     m_draws.emplace_back(kept);
 }
 

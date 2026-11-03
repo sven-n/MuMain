@@ -10,6 +10,7 @@
 #include "Render/Drawing/DeferredDraws.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Render/Effects/ZzzEffect.h"
+#include "Render/Models/Gltf/SkinnedModel.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
@@ -44,11 +45,55 @@ template <typename T> std::uint64_t HashSpan(std::span<const T> values)
     return Hash(values.data(), values.size_bytes());
 }
 
+template <typename T> void HashInto(std::uint64_t& hash, const T& value)
+{
+    hash = Hash(&value, sizeof(value), hash);
+}
+
+// What a GPU-skinned draw is drawn with, field by field: the palette version and the bones' address are cache keys,
+// the matrices themselves are compared.
+std::uint64_t HashOf(const mu::SkinningParameters& p)
+{
+    std::uint64_t hash = HashSpan(p.boneMatrices);
+    HashInto(hash, p.bodyOrigin);
+    HashInto(hash, p.bodyScale);
+    HashInto(hash, p.boneScale);
+    HashInto(hash, p.restPoseScale);
+    HashInto(hash, p.lightDirection);
+    HashInto(hash, p.highlightKnee);
+    HashInto(hash, p.textureCoordinateOffset);
+    HashInto(hash, p.chromeWave);
+    HashInto(hash, p.chromeWave2);
+    HashInto(hash, p.chromeLight);
+    HashInto(hash, p.chromeTimeTerm);
+    HashInto(hash, p.textureCoordinates);
+    HashInto(hash, p.translate);
+    HashInto(hash, p.lightEnabled);
+    HashInto(hash, p.specularStrength);
+    HashInto(hash, p.normalTextureId);
+    HashInto(hash, p.normalMapScale);
+    return hash;
+}
+
+std::uint64_t HashOf(const mu::ShadowProjection& projection)
+{
+    std::uint64_t hash = Hash(projection.origin, sizeof(projection.origin));
+    HashInto(hash, projection.shearX);
+    HashInto(hash, projection.shearHeight);
+    HashInto(hash, projection.specialHeight);
+    HashInto(hash, projection.terrain);
+    return hash;
+}
+
 // Every call that reaches the renderer, with a hash of what it draws, skinned draws' bones included.
 class CallLog final : public mu::IMuRenderer
 {
 public:
     std::vector<std::string> calls;
+    // The vertices of each RenderTriangles call.
+    std::vector<std::vector<mu::Vertex3D>> triangles;
+    // Casts body shadows on the GPU (RenderCachedSkinnedShadow); otherwise the models project them on the CPU.
+    bool gpuShadows = false;
 
     void RenderQuad2D(std::span<const mu::Vertex2D> v, std::uint32_t texture) override
     {
@@ -57,6 +102,7 @@ public:
     void RenderTriangles(std::span<const mu::Vertex3D> v, std::uint32_t texture) override
     {
         Note("Triangles", texture, HashSpan(v));
+        triangles.emplace_back(v.begin(), v.end());
     }
     void RenderQuad3D(std::span<const mu::Vertex3D> v, std::uint32_t texture) override
     {
@@ -99,6 +145,20 @@ public:
     {
         const auto cached = m_cached.find(mesh);
         return cached != m_cached.end() && Skinned("CachedSkinned", cached->second, color, texture, p);
+    }
+    [[nodiscard]] bool SetTerrainHeights(std::span<const float>, std::span<const std::uint16_t>, std::uint32_t) override
+    {
+        return gpuShadows;
+    }
+    [[nodiscard]] bool RenderCachedSkinnedShadow(const void* mesh, std::uint32_t color, const mu::SkinningParameters& p,
+                                                 const mu::ShadowProjection& projection) override
+    {
+        const auto cached = m_cached.find(mesh);
+        if (!gpuShadows || cached == m_cached.end())
+            return false;
+        calls.push_back("CachedShadow " + std::to_string(color) + " " + std::to_string(cached->second) + " " +
+                        std::to_string(HashOf(p)) + " " + std::to_string(HashOf(projection)));
+        return true;
     }
     void SetBlendMode(mu::BlendMode mode) override
     {
@@ -157,34 +217,25 @@ private:
         return true;
     }
 
-    // The palette version is a cache key, not what is drawn: the bone matrices themselves are compared.
     bool Skinned(const char* name, std::uint64_t vertices, std::uint32_t color, std::uint32_t texture,
                  const mu::SkinningParameters& p)
     {
-        std::uint64_t hash = HashSpan(p.boneMatrices);
-        hash = Hash(p.bodyOrigin, sizeof(p.bodyOrigin), hash);
-        hash = Hash(&p.bodyScale, sizeof(float) * 3, hash);
-        hash = Hash(p.lightDirection, sizeof(p.lightDirection), hash);
-        hash = Hash(&p.highlightKnee, sizeof(float), hash);
-        hash = Hash(p.textureCoordinateOffset, sizeof(p.textureCoordinateOffset), hash);
-        hash = Hash(&p.chromeWave, sizeof(float) * 5, hash);
-        hash = Hash(&p.textureCoordinates, sizeof(p.textureCoordinates), hash);
         calls.push_back(std::string(name) + " " + std::to_string(texture) + " " + std::to_string(color) + " " +
-                        std::to_string(vertices) + " " + std::to_string(hash));
+                        std::to_string(vertices) + " " + std::to_string(HashOf(p)));
         return true;
     }
 };
 
-// The calls a scene makes, drawn at once or later.
-template <typename Scene> std::vector<std::string> CallsOf(Scene scene, bool later)
+// Draws a scene into `log`, at once or later.
+template <typename Scene> void Draw(CallLog& log, Scene scene, bool later)
 {
-    CallLog log;
     mu::SetRendererOverride(&log);
     // Both runs start from the same state: the legacy state calls skip what they think is set already.
     DisableAlphaBlend();
     EnableDepthTest();
     EnableDepthMask();
     log.calls.clear();
+    log.triangles.clear();
     if (later)
     {
         Render::Drawing::DeferredDraws deferred;
@@ -196,15 +247,23 @@ template <typename Scene> std::vector<std::string> CallsOf(Scene scene, bool lat
         scene();
     }
     mu::SetRendererOverride(nullptr);
+}
+
+// The calls a scene makes, drawn at once or later.
+template <typename Scene> std::vector<std::string> CallsOf(Scene scene, bool later, bool gpuShadows)
+{
+    CallLog log;
+    log.gpuShadows = gpuShadows;
+    Draw(log, scene, later);
     return log.calls;
 }
 
 // `path` names the call the path under test makes ("CachedSkinned" on the GPU, "Triangles" for the vertices the model
 // skins on the CPU), so the check shows that path ran.
-template <typename Scene> void CheckDrawnLaterAsAtOnce(Scene scene, const char* path = nullptr)
+template <typename Scene> void CheckDrawnLaterAsAtOnce(Scene scene, const char* path = nullptr, bool gpuShadows = false)
 {
-    const std::vector<std::string> atOnce = CallsOf(scene, false);
-    const std::vector<std::string> later = CallsOf(scene, true);
+    const std::vector<std::string> atOnce = CallsOf(scene, false, gpuShadows);
+    const std::vector<std::string> later = CallsOf(scene, true, gpuShadows);
     REQUIRE_FALSE(atOnce.empty());
     if (path != nullptr)
     {
@@ -249,6 +308,60 @@ void Place(OBJECT& o, float x, float frame, float bones[MAX_BONES][3][4])
     Vector(x, 300.f, 0.f, o.Position);
     Vector(0.f, 0.f, 45.f, o.Angle);
     Vector(0.f, 0.f, 0.f, o.HeadAngle);
+}
+
+// Poses `model` for `o` from the shared bones, as an object's draw does, without drawing it.
+void Pose(BMD& model, const OBJECT& o)
+{
+    Models[MODEL_PLAYER].Animation(BoneTransform, o.AnimationFrame, o.PriorAnimationFrame, o.PriorAction, o.Angle,
+                                   o.HeadAngle, false, false);
+    const vec3_t box = {0.f, 0.f, 0.f};
+    model.BodyScale = 1.f;
+    VectorCopy(o.Position, model.BodyOrigin);
+    Vector(1.f, 1.f, 1.f, model.BodyLight);
+    model.Transform(BoneTransform, box, box, nullptr, true);
+}
+
+// What the cloth simulation of a part writes into its mesh (CPhysicsClothMesh::Render): a height no skin gives.
+constexpr float ClothHeight = 20000.f;
+void WriteCloth(const BMD& model, int mesh)
+{
+    for (int j = 0; j < model.Meshs[mesh].NumVertices; ++j)
+        VertexTransform[mesh][j][1] = ClothHeight;
+    model.MarkCpuVerticesExternallyWritten(mesh);
+}
+
+bool DrewCloth(const CallLog& log)
+{
+    return std::any_of(log.triangles.begin(), log.triangles.end(),
+                       [](const std::vector<mu::Vertex3D>& vertices)
+                       {
+                           return std::any_of(vertices.begin(), vertices.end(),
+                                              [](const mu::Vertex3D& v) { return v.y == ClothHeight; });
+                       });
+}
+
+// A model file's skin for a BMD: every vertex on its own bone with weight 1, so it skins as the BMD does.
+std::shared_ptr<const void> OneJointSkin(const BMD& model)
+{
+    auto skin = std::make_shared<Render::Models::Gltf::SkinnedModel>();
+    skin->meshVertices.resize(static_cast<std::size_t>(model.NumMeshs));
+    for (int i = 0; i < model.NumMeshs; ++i)
+    {
+        const Mesh_t& mesh = model.Meshs[i];
+        auto& vertices = skin->meshVertices[static_cast<std::size_t>(i)];
+        vertices.resize(static_cast<std::size_t>(std::max(mesh.NumVertices, mesh.NumNormals)));
+        for (int j = 0; j < mesh.NumVertices; ++j)
+        {
+            const Vertex_t& source = mesh.Vertices[j];
+            auto& vertex = vertices[static_cast<std::size_t>(j)];
+            vertex.count = 1;
+            vertex.joints[0] = source.Node;
+            vertex.weights[0] = 1.f;
+            vertex.positions[0] = {source.Position[0], source.Position[1], source.Position[2]};
+        }
+    }
+    return skin;
 }
 } // namespace
 
@@ -362,4 +475,131 @@ TEST_CASE("Shadows of objects posed into the shared bones and drawn later fall i
         }
     };
     CheckDrawnLaterAsAtOnce(scene, "Triangles");
+}
+
+TEST_CASE("Shadows of meshes the cloth wrote cast what the cloth wrote, drawn at once or later [draw-parity]")
+{
+    PlayerModels models;
+    BMD& armor = Models[MODEL_BODY_ARMOR];
+    OBJECT first;
+    OBJECT second;
+    Place(first, 100.f, 2.5f, nullptr);
+    Place(second, 400.f, 5.5f, nullptr);
+    // The second pose takes the scratch the first one's cloth wrote before the shadows are drawn later.
+    const auto scene = [&]
+    {
+        for (OBJECT* o : {&first, &second})
+        {
+            Pose(armor, *o);
+            if (o == &first)
+                WriteCloth(armor, 0);
+            armor.RenderBodyShadow();
+        }
+    };
+    SUBCASE("the shadow casts the cloth")
+    {
+        for (const bool later : {false, true})
+        {
+            CAPTURE(later);
+            CallLog log;
+            Draw(log, scene, later);
+            CHECK(DrewCloth(log));
+        }
+    }
+    SUBCASE("projected on the CPU")
+    {
+        CheckDrawnLaterAsAtOnce(scene, "Triangles");
+    }
+    SUBCASE("cast on the GPU but for the cloth")
+    {
+        CheckDrawnLaterAsAtOnce(scene, "CachedShadow", true);
+    }
+}
+
+TEST_CASE("Shadows of a model file posed into the shared bones and drawn later fall in their own poses [draw-parity]")
+{
+    PlayerModels models;
+    BMD& armor = Models[MODEL_BODY_ARMOR];
+    armor.GltfModel = OneJointSkin(armor);
+    OBJECT first;
+    OBJECT second;
+    Place(first, 100.f, 2.5f, nullptr);
+    Place(second, 400.f, 5.5f, nullptr);
+    bool cloth = false;
+    const auto scene = [&]
+    {
+        for (OBJECT* o : {&first, &second})
+        {
+            Pose(armor, *o);
+            if (cloth && o == &first)
+                WriteCloth(armor, 0);
+            armor.RenderBodyShadow();
+        }
+    };
+    SUBCASE("skinned on the CPU")
+    {
+        CheckDrawnLaterAsAtOnce(scene, "Triangles");
+    }
+    SUBCASE("a mesh the cloth wrote")
+    {
+        cloth = true;
+        CheckDrawnLaterAsAtOnce(scene, "Triangles");
+        CallLog log;
+        Draw(log, scene, true);
+        CHECK(DrewCloth(log));
+    }
+    armor.GltfModel = nullptr;
+}
+
+TEST_CASE("A mesh drawn later leaves what a later pass of the model reads as drawing it at once does [draw-parity]")
+{
+    PlayerModels models;
+    BMD& armor = Models[MODEL_BODY_ARMOR];
+    OBJECT o;
+    Place(o, 100.f, 2.5f, nullptr);
+    const auto scene = [&]
+    {
+        armor.LightEnable = true;
+        Pose(armor, o);
+        std::fill_n(IntensityTransform[0], MAX_VERTICES, 0.f);
+        // An unlit pass that reads no normals, then a lit pass of the same pose that does.
+        armor.LightEnable = false;
+        armor.RenderMesh(0, RENDER_COLOR | RENDER_SHADOWMAP);
+        armor.LightEnable = true;
+        armor.RenderMesh(0, RENDER_TEXTURE | RENDER_WAVE);
+    };
+    CheckDrawnLaterAsAtOnce(scene, "Triangles");
+}
+
+TEST_CASE("The parity log tells GPU draws apart by every skinning parameter [draw-parity]")
+{
+    static float bones[MAX_BONES][3][4];
+    static float sameBones[MAX_BONES][3][4];
+    const std::vector<mu::SkinnedVertex3D> vertices(3);
+    const auto logOf = [&](const mu::SkinningParameters& p)
+    {
+        CallLog log;
+        CHECK(log.RenderSkinnedTriangles(vertices, 0xffffffffu, 0u, p));
+        return log.calls;
+    };
+    const mu::SkinningParameters drawn{.boneMatrices = {&bones[0][0][0], MAX_BONES * 12u},
+                                       .bodyOrigin = {100.f, 200.f, 300.f}};
+
+    mu::SkinningParameters elsewhere = drawn;
+    elsewhere.boneMatrices = {&sameBones[0][0][0], MAX_BONES * 12u};
+    elsewhere.paletteVersion = 7;
+    CHECK(logOf(elsewhere) == logOf(drawn));
+
+    const auto differs = [&](auto change)
+    {
+        mu::SkinningParameters changed = drawn;
+        change(changed);
+        return logOf(changed) != logOf(drawn);
+    };
+    CHECK(differs([](mu::SkinningParameters& p) { p.translate = true; }));
+    CHECK(differs([](mu::SkinningParameters& p) { p.lightEnabled = true; }));
+    CHECK(differs([](mu::SkinningParameters& p) { p.specularStrength = 0.5f; }));
+    CHECK(differs([](mu::SkinningParameters& p) { p.normalTextureId = 3u; }));
+    CHECK(differs([](mu::SkinningParameters& p) { p.normalMapScale = 1.f; }));
+    CHECK(differs([](mu::SkinningParameters& p) { p.chromeTimeTerm = 1.f; }));
 }

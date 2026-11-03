@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <span>
 
 class BMD;
 
@@ -66,6 +67,17 @@ struct MeshDraw
     CpuMesh cpu;
 };
 
+// The vertices a mesh casts its shadow from, taken when the shadow was described for a drawer that draws later.
+struct CpuShadowMesh
+{
+    // Null for a mesh the shadow leaves out.
+    const float (*vertices)[3] = nullptr;
+    int vertexCount = 0;
+    // The mesh had vertices of its own then (skinned on the CPU, or written by the cloth simulation): the shadow casts
+    // them instead of skinning the mesh on the GPU.
+    bool ownVertices = false;
+};
+
 // One model's shadow projected on the ground: the call's arguments and the model state the draw reads.
 struct ShadowDraw
 {
@@ -85,6 +97,8 @@ struct ShadowDraw
     // The LOD of a model file whose meshes cast the shadow (0: the BMD's meshes).
     int lod = 0;
     ModelSkin skin;
+    // One entry per mesh of the model. Empty: the model's vertices as they are when the shadow is drawn.
+    std::span<const CpuShadowMesh> cpu;
 };
 
 class ModelDrawer
