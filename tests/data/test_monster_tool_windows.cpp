@@ -804,6 +804,51 @@ TEST_CASE("Monster Sounds edits the cues of the shown look's model only with the
     g_MonsterDatabase.Build({}, "en");
 }
 
+TEST_CASE("Monster Sounds shows the set Data Checks or a cue tag asks for, also after the selection changed while it "
+          "was closed [editor][monsters]")
+{
+    MonsterDefinition hound = Monster(3, "Hound");
+    hound.model = "MONSTER_MODEL_HOUND";
+    hound.soundSet = "Hound";
+    const std::array monsters = {hound};
+    g_MonsterDatabase.Build(monsters, "en");
+    Data::Monsters::MonsterModelDefinition model;
+    model.slot = "MONSTER_MODEL_HOUND";
+    model.load.file = "Data/Monster/Monster02.bmd";
+    model.load.textureFolders = {"Monster"};
+    const std::array models = {model};
+    g_MonsterModelDatabase.Build(models);
+    std::vector<Data::Monsters::MonsterSoundSet> sets(2);
+    sets[0].name = "Hound";
+    sets[1].name = "Raymond";
+    g_MonsterSoundSetDatabase.Build(sets);
+    TestImGuiContext context;
+    const auto draw = [&]
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        g_MuMonsterSoundsUI.Render(&open);
+        ImGui::Render();
+    };
+
+    // The Hound is selected while the tool is not drawn, then a problem of
+    // Raymond's set is clicked: the tool shows Raymond's set, not the Hound's
+    // (whose model draft it would show).
+    g_MonsterSelection.Select(3);
+    g_MuMonsterSoundsUI.ShowEvent("Raymond", std::nullopt);
+    draw();
+    CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) == nullptr);
+    // A selection after that shows the monster's set again.
+    g_MonsterSelection.Select(3);
+    draw();
+    CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) != nullptr);
+
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
+    g_MonsterModelDatabase.Build({});
+    g_MonsterSoundSetDatabase.Build({});
+    g_MonsterDatabase.Build({}, "en");
+}
+
 TEST_CASE("Monster Preview marks the cues of Monster Sounds' draft, also while Monster Model shows the model "
           "(Q-MN81) [editor][monsters]")
 {

@@ -142,6 +142,10 @@ void MuMonsterSoundsUI::ShowEvent(const std::string& set, std::optional<size_t> 
 {
     m_shown = set;
     m_focusEvent = event;
+    // The selection as it is now counts as followed: else the next Render
+    // shows the selected monster's set instead when the selection changed
+    // while the tool was closed or hidden.
+    RememberSelection();
     g_MuEditorCore.GetToolWindows().monsterSounds = true;
     ImGui::SetWindowFocus(WindowIds::MonsterSounds);
 }
@@ -188,16 +192,19 @@ const std::map<std::string, std::vector<int>, std::less<>>& MuMonsterSoundsUI::G
     return m_users;
 }
 
-void MuMonsterSoundsUI::FollowSelection(const MonsterDefinition* monster)
+bool MuMonsterSoundsUI::RememberSelection()
 {
+    const MonsterDefinition* monster = g_MonsterDatabase.Find(g_MonsterSelection.GetNumber());
     const int variant = monster != nullptr ? ShownModel::GetShownVariant(*monster) : -1;
-    if (g_MonsterSelection.GetSerial() == m_shownSerial && variant == m_shownVariant)
-    {
-        return;
-    }
+    const bool changed = g_MonsterSelection.GetSerial() != m_shownSerial || variant != m_shownVariant;
     m_shownSerial = g_MonsterSelection.GetSerial();
     m_shownVariant = variant;
-    if (monster == nullptr)
+    return changed;
+}
+
+void MuMonsterSoundsUI::FollowSelection(const MonsterDefinition* monster)
+{
+    if (!RememberSelection() || monster == nullptr)
     {
         return;
     }

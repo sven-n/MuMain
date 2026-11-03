@@ -45,6 +45,11 @@ public:
 private:
     MuMonsterSoundsUI();
 
+    // Remembers the selection and the look shown; true when either changed
+    // since it was remembered last.
+    bool RememberSelection();
+    // Shows the set of the selected monster's look once the selection or the
+    // look changed.
     void FollowSelection(const Data::Monsters::MonsterDefinition* monster);
     void RenderMonster(const Data::Monsters::MonsterDefinition& monster);
     void RenderVariants(const Data::Monsters::MonsterDefinition& monster);
