@@ -3,6 +3,7 @@
 #include "Render/Lighting/LightMoodSetting.h"
 
 #include "Core/Utilities/Log/MuLogger.h"
+#include "Render/Lighting/DynamicLightsSetting.h"
 #include "Render/Look/LookProfileSetting.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "World/MapInfra/MapManager.h"
@@ -57,6 +58,13 @@ void Recompute(int world)
     s_state.scales = s_state.enabled && IsWorldMap(world) ? Blend(s_state.data.ForWorld(world), s_state.strength,
                                                                   Look::Value(Data::Maps::LookValue::HighlightKnee))
                                                           : Scales{};
+    // Under a sun that casts shadows the sky fill tints the shade (the lit shaders): no second blue here.
+    if (s_state.enabled && IsWorldMap(world) && DynamicLightsActive() &&
+        Look::Value(Data::Maps::LookValue::SunShadowStrength) > 0.0f &&
+        Look::Value(Data::Maps::LookValue::SkyFill) > 0.0f)
+    {
+        s_state.scales.shadeCool = 0.f;
+    }
 }
 
 void RebuildStaticLight()

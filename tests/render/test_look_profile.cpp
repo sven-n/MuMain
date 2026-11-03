@@ -236,6 +236,12 @@ TEST_CASE("the developer tuning commands name their look values [render][look]")
     single(L"$bloom falloff 0.6", LookValue::BloomLevelFalloff, 0.6);
     single(L"$bloom 0.9", LookValue::BloomStrength, 0.9);
     single(L"$ao radius 80", LookValue::AmbientOcclusionRadius, 80.0);
+    single(L"$clouds scale 4000", LookValue::CloudScale, 4000.0);
+    single(L"$clouds speed 60", LookValue::CloudSpeed, 60.0);
+    single(L"$clouds cover 0.5", LookValue::CloudCover, 0.5);
+    single(L"$clouds 0.3", LookValue::CloudStrength, 0.3);
+    single(L"$sky 0.5", LookValue::SkyFill, 0.5);
+    single(L"$rim sun 1", LookValue::RimSunFollow, 1.0);
     single(L"$ao 0.5", LookValue::AmbientOcclusionStrength, 0.5);
     single(L"$sun softness 1.5", LookValue::SunShadowSoftness, 1.5);
     single(L"$sun resolution 4096", LookValue::SunShadowResolution, 4096.0);

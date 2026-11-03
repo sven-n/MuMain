@@ -53,6 +53,12 @@ constexpr std::array<LookValueInfo, LookValueCount> Infos = {{
     {LookValue::SunShadowSoftness, "sun.softness", 1.0, 0.0, 2.0},
     {LookValue::SunShadowResolution, "sun.resolution", 2048.0, 1024.0, 4096.0},
     {LookValue::FlatSunShadow, "dynamic.flatSunShadow", 1.0, 0.0, 1.0},
+    {LookValue::CloudStrength, "clouds.strength", 0.0, 0.0, 1.0},
+    {LookValue::CloudScale, "clouds.scale", 3000.0, 500.0, 10000.0},
+    {LookValue::CloudSpeed, "clouds.speed", 40.0, 0.0, 300.0},
+    {LookValue::CloudCover, "clouds.cover", 0.45, 0.0, 1.0},
+    {LookValue::SkyFill, "sky.fill", 0.0, 0.0, 1.0},
+    {LookValue::RimSunFollow, "lighting.rim.sunFollow", 0.0, 0.0, 1.0},
 }};
 
 constexpr bool InfosFollowLookValueOrder()

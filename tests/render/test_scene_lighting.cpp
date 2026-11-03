@@ -6,7 +6,7 @@
 
 TEST_CASE("scene lighting uniform matches the HLSL cbuffer registers [render][scene_lighting]")
 {
-    CHECK(sizeof(mu::SceneLightingUniform) == 208);
+    CHECK(sizeof(mu::SceneLightingUniform) == 288);
     CHECK(offsetof(mu::SceneLightingUniform, lightDirection) == 0);
     CHECK(offsetof(mu::SceneLightingUniform, lightColor) == 16);
     CHECK(offsetof(mu::SceneLightingUniform, diffuseCurve) == 32);

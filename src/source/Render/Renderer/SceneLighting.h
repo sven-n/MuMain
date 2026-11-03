@@ -54,6 +54,17 @@ struct SceneLighting
     std::uint32_t sunShadowResolution = 2048;
     float groundLow = 0.0f;
     float groundHigh = 0.0f;
+    // Enhanced cloud shadows: how much a cloud dims the sun's light (0: none), the pattern's size in
+    // world units, the share of sky covered and the pattern's offset (drift and the sun's slant).
+    float cloudStrength = 0.0f;
+    float cloudScale = 3000.0f;
+    float cloudCover = 0.45f;
+    float cloudOffset[2]{};
+    // How far the shade takes the sky's blue (0: not at all), and how far the rim light follows the sun.
+    float skyFill = 0.0f;
+    float rimSunFollow = 0.0f;
+    // The sun's colour.
+    float sunColor[3]{1.0f, 1.0f, 1.0f};
 };
 
 // The frame's fog as configured through IMuRenderer::SetFog() when the scene lighting was set.
@@ -79,6 +90,11 @@ struct SceneLightingUniform
     float cameraPosition[4];     // xyz world space, w unused
     float sunViewProjection[16]; // column-major, world to the sun shadow map's clip space
     float sunShadowParameters[4]; // darkness (0: no shadow map), softness in texels, 1 / map size, texel size
+    float cloudParameters[4];     // strength (0: no clouds), 1 / pattern size, sky cover, unused
+    float cloudOffset[4];         // xy: drift plus the sun's slant through the clouds, zw unused
+    float skyFill[4];             // rgb: the sky's tint of the shade, w: how far shade takes it
+    float sunTowards[4];          // xyz: towards the sun, w: how far the rim follows it
+    float sunColor[4];            // rgb: the sun's colour, w unused
 };
 
 inline constexpr std::size_t kSceneLightingRegisterSize = 16;
@@ -92,7 +108,9 @@ static_assert(offsetof(SceneLightingUniform, fogParameters) == 6 * kSceneLightin
 static_assert(offsetof(SceneLightingUniform, cameraPosition) == 7 * kSceneLightingRegisterSize);
 static_assert(offsetof(SceneLightingUniform, sunViewProjection) == 8 * kSceneLightingRegisterSize);
 static_assert(offsetof(SceneLightingUniform, sunShadowParameters) == 12 * kSceneLightingRegisterSize);
-static_assert(sizeof(SceneLightingUniform) == 13 * kSceneLightingRegisterSize);
+static_assert(offsetof(SceneLightingUniform, cloudParameters) == 13 * kSceneLightingRegisterSize);
+static_assert(offsetof(SceneLightingUniform, sunColor) == 17 * kSceneLightingRegisterSize);
+static_assert(sizeof(SceneLightingUniform) == 18 * kSceneLightingRegisterSize);
 
 [[nodiscard]] SceneLightingUniform PackSceneLightingUniform(const SceneLighting& lighting, const SceneFog& fog);
 

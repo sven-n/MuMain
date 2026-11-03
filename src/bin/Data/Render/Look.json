@@ -27,7 +27,13 @@
     "sun.shadow": 1,
     "sun.softness": 1,
     "sun.resolution": 2048,
-    "dynamic.flatSunShadow": 1
+    "dynamic.flatSunShadow": 1,
+    "clouds.strength": 0,
+    "clouds.scale": 3000,
+    "clouds.speed": 40,
+    "clouds.cover": 0.45,
+    "sky.fill": 0,
+    "lighting.rim.sunFollow": 0
   },
   "maps": [
     {
