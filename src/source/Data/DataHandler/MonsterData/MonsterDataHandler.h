@@ -104,7 +104,8 @@ public:
     // problems to `issues`.
     void Validate(std::vector<Items::ItemDataIssue>& issues) const;
     // The checks of LoadModels on the model table as it is: the names it
-    // holds (sound ids and slots, bitmap and part slots, part effects) and
+    // holds (bitmap and part slots, part effects; the sounds are the sets',
+    // ValidateSounds) and
     // the model and part files that are not in the client folder, as
     // problems of the model list file. Appends them to `issues`.
     void ValidateModels(std::vector<Items::ItemDataIssue>& issues) const;
