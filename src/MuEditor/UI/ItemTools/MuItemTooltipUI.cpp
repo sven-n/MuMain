@@ -13,6 +13,7 @@
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 #include "Data/GameData/ItemData/ItemType.h"
 #include "Engine/Object/ItemDropModel.h"
 #include "Engine/Object/ItemTooltipSnapshot.h"
@@ -35,6 +36,7 @@ namespace
 constexpr float LevelSliderWidth = 160.0f;
 constexpr float LevelFieldWidth = 40.0f;
 constexpr float SetComboWidth = 200.0f;
+constexpr float LayoutComboWidth = 240.0f;
 constexpr int MaxLevel = Data::Items::ItemLevelCount - 1;
 // Every excellent option: the label only asks whether the item has one.
 constexpr BYTE AllExcellentOptions = 0x3F;
@@ -132,6 +134,7 @@ void CMuItemTooltipUI::Render(bool* open)
             ImGui::PushID(itemType);
             RenderPreview(*item, itemType);
             RenderRules(*item);
+            RenderLayout(*item);
             ImGui::PopID();
         }
         m_draft.End();
@@ -256,6 +259,50 @@ void CMuItemTooltipUI::RenderRules(ItemDefinition& item)
     {
         AddRule(item);
         m_draft.AfterChange(true, step);
+    }
+}
+
+void CMuItemTooltipUI::RenderLayout(ItemDefinition& item)
+{
+    ImGui::SeparatorText(I18N::Editor::TooltipLayout);
+    RenderNote(I18N::Editor::TooltipLayoutNote);
+    // An item that names no layout uses the default one.
+    const std::string current =
+        item.tooltipLayout.empty() ? std::string(Data::Items::DefaultTooltipLayout) : item.tooltipLayout;
+    bool changed = false;
+    ImGui::SetNextItemWidth(LayoutComboWidth * g_MuEditorCore.GetUIScale());
+    if (ImGui::BeginCombo("##TooltipLayout", current.c_str()))
+    {
+        for (const Data::Items::TooltipLayout& layout : g_ItemDatabase.GetTooltipFile().layouts)
+        {
+            if (ImGui::Selectable(layout.name.c_str(), layout.name == current) && layout.name != current)
+            {
+                item.tooltipLayout = layout.name == Data::Items::DefaultTooltipLayout ? std::string() : layout.name;
+                changed = true;
+            }
+        }
+        ImGui::EndCombo();
+    }
+    m_draft.AfterChange(changed, I18N::Editor::ChangeTheTooltipLayout);
+    // Its own changes (tooltipLayoutChanges), on top of that layout.
+    const Data::Items::ItemTooltipLayoutChanges& own = item.tooltipLayoutChanges;
+    if (!own.hide.empty())
+    {
+        std::string ids;
+        for (const std::string& id : own.hide)
+        {
+            ids += (ids.empty() ? "" : ", ") + id;
+        }
+        RenderNote(I18N::Format(I18N::Editor::ItsOwnChangesHide0, {ids}).c_str());
+    }
+    size_t added = 0;
+    for (const Data::Items::ItemTooltipLayoutAddition& addition : own.add)
+    {
+        added += addition.lines.size();
+    }
+    if (added > 0)
+    {
+        RenderNote(I18N::Format(I18N::Editor::ItAdds0LinesOfItsOwn, {std::to_string(added)}).c_str());
     }
 }
 

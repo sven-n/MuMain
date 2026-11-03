@@ -1567,6 +1567,21 @@
   <data name="The standard rules" xml:space="preserve">
     <value>The standard rules</value>
   </data>
+  <data name="Tooltip layout" xml:space="preserve">
+    <value>Tooltip layout</value>
+  </data>
+  <data name="Tooltip layout note" xml:space="preserve">
+    <value>Which lines the tooltip shows besides the item's own: the default layout, or a preset that leaves some of them out (the class lines, the durability line).</value>
+  </data>
+  <data name="Change the tooltip layout" xml:space="preserve">
+    <value>Change the tooltip layout</value>
+  </data>
+  <data name="Its own changes hide {0}" xml:space="preserve">
+    <value>Its own changes hide: {0}</value>
+  </data>
+  <data name="It adds {0} lines of its own" xml:space="preserve">
+    <value>It adds {0} lines of its own</value>
+  </data>
   <data name="Glow Colors" xml:space="preserve">
     <value>Glow Colors</value>
   </data>

@@ -4672,6 +4672,45 @@ TEST_CASE("Item Tooltip adds the standard rules' style for an item without rules
     g_ItemEdits.GetHistory().Clear();
 }
 
+// Item Tooltip (D73): the item's tooltip layout is picked from the tooltip file's layouts, as an undo step; the default
+// layout is the one the item names none of.
+TEST_CASE("Item Tooltip picks the item's tooltip layout as an undo step [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TestImGuiContext context;
+    g_ItemEdits.GetHistory().Clear();
+    REQUIRE(g_ItemDatabase.Find(KrisType)->tooltipLayout.empty());
+    REQUIRE(g_ItemDatabase.GetTooltipFile().FindLayout("noClassLines") != nullptr);
+    g_ItemSelection.Select(KrisType);
+    const auto pick = [](const char* layout)
+    {
+        RenderItemTool(g_MuItemTooltipUI, true);
+        ImGui::ActivateItemByID(ItemToolFieldId(MuEditor::WindowIds::ItemTooltip, {KrisType}, "##TooltipLayout"));
+        RenderItemTool(g_MuItemTooltipUI, true);
+        const ImGuiWindow* list = OpenPopupWindow();
+        REQUIRE(list != nullptr);
+        ImGui::ActivateItemByID(ImGui::GetIDWithSeed(layout, nullptr, list->ID));
+        RenderItemTool(g_MuItemTooltipUI, true);
+        RenderItemTool(g_MuItemTooltipUI, true);
+    };
+
+    pick("noClassLines");
+    CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout == "noClassLines");
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == I18N::Editor::ChangeTheTooltipLayout);
+    pick(DefaultTooltipLayout);
+    CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout.empty());
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout == "noClassLines");
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout.empty());
+    g_ItemEdits.GetHistory().Clear();
+}
+
 TEST_CASE("A description placeholder that names no table stops the save [editor][items]")
 {
     TemporaryClientFolder folder;

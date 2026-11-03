@@ -1471,7 +1471,8 @@ The editor has no bold font, so it draws a bold label twice, a pixel apart.
 
 ### Item Tooltip
 
-How the selected item is shown, for now its [ground label](#ground-labels).
+How the selected item is shown, for now its [ground label](#ground-labels)
+and its [tooltip layout](#presets).
 The preview takes a level, skill, luck, an option, the excellent options and
 a set (one of the item's sets), and draws the label the game draws for such a
 drop, with the rule that gives it: one of the item's own, or the standard
@@ -1484,6 +1485,12 @@ previewed level with the style the label has there (the item's own rule's,
 else the one the standard rules give), before the item's rule that holds at
 that level (a rule after it would not be used there). Every change is a step
 of the undo history, and Save Items writes it to the item file.
+
+**Tooltip layout** picks the layout the item's tooltip uses from the layouts
+of `Tooltips/Tooltip.json`: `default` or a preset such as `noClassLines`
+(`tooltipLayout`). The item's own changes (`tooltipLayoutChanges`), the line
+ids it hides and how many lines it adds, are shown under it; they are changed
+in the item file. Item Checks opens Item Tooltip for a problem of either.
 
 ### Item Formulas
 
