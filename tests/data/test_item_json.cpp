@@ -391,22 +391,55 @@ TEST_CASE("An item's tooltip layout changes are read as they are written or are 
 
 // An item file from before the tooltip layout presets (D73): a tag that only picked tooltip lines says what the file
 // writes instead.
-TEST_CASE("A removed tooltip tag says what the item file writes instead [data][items]")
+TEST_CASE("A removed tooltip tag is read as what the item file writes instead [data][items]")
 {
-    const auto message = [](const std::string& tag)
+    // The item of a file with these tags and other fields of the item.
+    const auto read = [](const std::string& tags, const std::string& fields = "")
+    { return Read(GroupFile(0, R"({"number": 1, "name": "Kris", "tags": [)" + tags + "]" + fields + "}")); };
+    const auto warning = [](const ReadResult& result)
     {
-        const ReadResult result = Read(GroupFile(0, R"({"number": 1, "name": "Kris", "tags": [")" + tag + R"("]})"));
         const auto issue =
             std::find_if(result.issues.begin(), result.issues.end(), [](const ItemDataIssue& found)
-                         { return found.severity == ItemDataIssueSeverity::Fatal && found.field == "tags"; });
+                         { return found.severity == ItemDataIssueSeverity::Warning && found.field == "tags"; });
         return issue != result.issues.end() ? issue->message : std::string();
     };
-    CHECK(message("noClassLines").find(R"("tooltipLayout": "noClassLines")") != std::string::npos);
-    CHECK(message("noDurabilityLine").find(R"("tooltipLayout": "noDurabilityLine")") != std::string::npos);
-    CHECK(message("noLevelRequirement").find(R"("hide": ["requiredLevel", "lackingLevel"])") != std::string::npos);
-    CHECK(message("noBlankAfterOptions").find(R"("hide": ["blankAfterOptions"])") != std::string::npos);
+
+    ReadResult result = read(R"("noClassLines", "valuable")");
+    REQUIRE(result.items.size() == 1);
+    CHECK_FALSE(HasFatal(result.issues));
+    CHECK(warning(result).find(R"(read as "tooltipLayout": "noClassLines")") != std::string::npos);
+    CHECK(result.items[0].tooltipLayout == "noClassLines");
+    CHECK(result.items[0].tags.Has(ItemTag::Valuable));
+    // A save writes the preset, not the tag.
+    const std::string written = WriteItemGroupJson(0, result.items);
+    CHECK(written.find(R"("tooltipLayout": "noClassLines")") != std::string::npos);
+    CHECK(written.find(R"("noClassLines"])") == std::string::npos);
+
+    result = read(R"("noDurabilityLine", "noClassLines")");
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items[0].tooltipLayout == "noClassOrDurabilityLines");
+
+    result = read(R"("noLevelRequirement")", R"(, "tooltipLayoutChanges": {"hide": ["lackingLevel"]})");
+    REQUIRE(result.items.size() == 1);
+    CHECK(warning(result).find(R"("hide": ["requiredLevel", "lackingLevel"])") != std::string::npos);
+    CHECK(result.items[0].tooltipLayoutChanges.hide == std::vector<std::string>{"lackingLevel", "requiredLevel"});
+
+    // The Pet Skeleton's two: its preset and its own hidden line.
+    result = read(R"("noDurabilityLine", "noBlankAfterOptions")");
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items[0].tooltipLayout == "noDurabilityLine");
+    CHECK(result.items[0].tooltipLayoutChanges.hide == std::vector<std::string>{"blankAfterOptions"});
+
+    // An item that names another layout itself is an error: which one it means is the author's call.
+    result = read(R"("noClassLines")", R"(, "tooltipLayout": "noDurabilityLine")");
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "tags"));
+    // Its own layout already leaving the lines out is fine.
+    result = read(R"("noClassLines")", R"(, "tooltipLayout": "noClassLines")");
+    CHECK_FALSE(HasFatal(result.issues));
+
     // Another name gets the list of the tags there are.
-    CHECK(message("noSuchTag").find("tags are") != std::string::npos);
+    result = read(R"("noSuchTag")");
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "tags"));
 }
 
 TEST_CASE("Item tags, wing tier, potion priority and rule flags are kept through write and read [data][items]")

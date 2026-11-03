@@ -413,6 +413,7 @@ private:
     void ReadTooltipLayoutChanges(const OrderedJson& json, ItemTooltipLayoutChanges& changes);
     void ReadTooltipLayoutAddition(const OrderedJson& entry, const std::string& field,
                                    ItemTooltipLayoutChanges& changes);
+    void ApplyRemovedTooltipTags(ItemDefinition& definition);
     bool ReadLevelRange(const OrderedJson& json, const std::string& field, int& first, int& last);
     bool ReadLine(const OrderedJson& entry, const std::string& field, size_t maxLength, ItemDescriptionLine& line);
     void ReadDescriptionLevels(const OrderedJson& json, const std::string& field, ItemDescriptionLine& line);
@@ -438,6 +439,8 @@ private:
     int m_number = ItemDataIssue::NoItem;
     bool m_hasFatal = false;
     std::vector<ItemDataIssue>& m_issues;
+    // The tags of the item that the tooltip layout presets replaced, read as their replacements.
+    std::vector<const RemovedTooltipTag*> m_removedTags;
     // An item file's entry without a name has none, and so has an item of an exchange file
     // that does not carry the names.
     bool m_nameRequired = true;
@@ -554,8 +557,8 @@ constexpr RemovedTooltipTag RemovedTooltipTags[] = {
     {"noBlankAfterOptions", {}, {}, BlankAfterOptionsLineIds},
 };
 
-// What an item file writes instead of a removed tag: "tooltipLayout": "noClassLines" (...), or
-// "tooltipLayoutChanges": {"hide": ["requiredLevel", "lackingLevel"]}.
+// What an item file writes instead of a removed tag, and what the reader takes it as: "tooltipLayout": "noClassLines"
+// (...), or "tooltipLayoutChanges": {"hide": ["requiredLevel", "lackingLevel"]}.
 std::string DescribeReplacement(const RemovedTooltipTag& removed)
 {
     if (!removed.preset.empty())
@@ -575,23 +578,17 @@ std::string DescribeReplacement(const RemovedTooltipTag& removed)
     return R"("tooltipLayoutChanges": {"hide": [)" + ids + "]}";
 }
 
-// The message for a tags entry that is no tag.
-std::string DescribeUnknownTag(const OrderedJson& entry)
+// The removed tag a tags entry names; nullptr for another entry.
+const RemovedTooltipTag* FindRemovedTooltipTag(const OrderedJson& entry)
 {
-    if (entry.is_string())
+    if (!entry.is_string())
     {
-        const std::string name = entry.get<std::string>();
-        for (const RemovedTooltipTag& removed : RemovedTooltipTags)
-        {
-            if (name == removed.tag)
-            {
-                return entry.dump() +
-                       " is no tag any more: the item's tooltip layout leaves those lines out, so write " +
-                       DescribeReplacement(removed) + " instead (docs/item-data.md, Presets)";
-            }
-        }
+        return nullptr;
     }
-    return entry.dump() + " is not a tag; tags are " + JoinEnumNames<ItemTag>();
+    const auto& name = entry.get_ref<const std::string&>();
+    const auto removed = std::find_if(std::begin(RemovedTooltipTags), std::end(RemovedTooltipTags),
+                                      [&](const RemovedTooltipTag& tag) { return name == tag.tag; });
+    return removed != std::end(RemovedTooltipTags) ? &*removed : nullptr;
 }
 
 void ItemReader::ReadTags(const OrderedJson& json, ItemTagSet& tags)
@@ -609,14 +606,60 @@ void ItemReader::ReadTags(const OrderedJson& json, ItemTagSet& tags)
 
     for (const OrderedJson& entry : *list)
     {
+        if (const RemovedTooltipTag* removed = FindRemovedTooltipTag(entry))
+        {
+            // A file from before the presets: the tag is read as what replaces it (ApplyRemovedTooltipTags).
+            m_removedTags.push_back(removed);
+            AddIssue(ItemDataIssueSeverity::Warning, Keys::Tags,
+                     entry.dump() + " is no tag any more: it is read as " + DescribeReplacement(*removed) +
+                         ", which saving writes instead (docs/item-data.md, Presets)");
+            continue;
+        }
         ItemTag tag{};
         if (!entry.is_string() || !FindEnumValue(entry.get<std::string>(), tag))
         {
-            AddIssue(ItemDataIssueSeverity::Fatal, Keys::Tags, DescribeUnknownTag(entry));
+            AddIssue(ItemDataIssueSeverity::Fatal, Keys::Tags,
+                     entry.dump() + " is not a tag; tags are " + JoinEnumNames<ItemTag>());
             continue;
         }
         tags.Set(tag);
     }
+}
+
+// The removed tags the item file still has, as what replaces them (D73): the preset they leave the lines out with (for
+// both noClassLines and noDurabilityLine the one that leaves out both), and the line ids they hide among the item's
+// own changes. An item that names another layout itself keeps it, and the tag is an error: which of the two layouts
+// it means is the author's call.
+void ItemReader::ApplyRemovedTooltipTags(ItemDefinition& definition)
+{
+    std::string_view preset;
+    std::vector<std::string>& hide = definition.tooltipLayoutChanges.hide;
+    for (const RemovedTooltipTag* removed : m_removedTags)
+    {
+        for (const std::string_view id : removed->hide)
+        {
+            if (std::find(hide.begin(), hide.end(), id) == hide.end())
+            {
+                hide.emplace_back(id);
+            }
+        }
+        if (!removed->preset.empty())
+        {
+            preset = preset.empty() || preset == removed->preset ? removed->preset : removed->bothPreset;
+        }
+    }
+    if (preset.empty() || definition.tooltipLayout == preset)
+    {
+        return;
+    }
+    if (!definition.tooltipLayout.empty())
+    {
+        AddIssue(ItemDataIssueSeverity::Fatal, Keys::Tags,
+                 "the removed tags are read as the layout \"" + std::string(preset) + "\", but the item names \"" +
+                     definition.tooltipLayout + "\": write the layout it uses without the tags");
+        return;
+    }
+    definition.tooltipLayout = preset;
 }
 
 void ItemReader::ReadDescription(const OrderedJson& json, std::vector<ItemDescriptionLine>& description)
@@ -1234,6 +1277,7 @@ bool ItemReader::Read(const OrderedJson& json, ItemDefinition& definition)
         ReadValue(*layout, Keys::TooltipLayout, definition.tooltipLayout);
     }
     ReadTooltipLayoutChanges(json, definition.tooltipLayoutChanges);
+    ApplyRemovedTooltipTags(definition);
     ReadStats(json, definition);
     ReadRequirements(json, definition);
     ReadRequirementsByLevel(json, definition);

@@ -45,7 +45,7 @@ std::span<const char* const> GetClassKeys();
 // A tag that only picked tooltip lines, gone since the tooltip layout presets (D73), and what an item file writes
 // instead: the preset its "tooltipLayout" names (`bothPreset` for an item that had both noClassLines and
 // noDurabilityLine), or, without one, the line ids its "tooltipLayoutChanges" hides. An item file that still has the
-// tag is an error that says so.
+// tag is read as that, with a warning that says so; a save writes it.
 struct RemovedTooltipTag
 {
     std::string_view tag;

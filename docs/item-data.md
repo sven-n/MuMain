@@ -196,7 +196,12 @@ Wings need no tag: an item is a wing when its `slot` is `wings`. Which lines an
 item's tooltip leaves out (its class lines, its durability line, …) is no tag
 but its [tooltip layout](#presets). An item file that still has one of the
 former tags `noClassLines`, `noDurabilityLine`, `noLevelRequirement` or
-`noBlankAfterOptions` is an error that names what to write instead.
+`noBlankAfterOptions` still loads: the tag is read as what replaces it (the
+preset `noClassLines`, `noDurabilityLine` or, with both, `noClassOrDurabilityLines`;
+the line ids `requiredLevel` and `lackingLevel`, or `blankAfterOptions`, among
+the item's own `hide`), with a warning, and Save Items writes that instead.
+An item that names another layout itself is an error, since which of the two
+it means is the author's call.
 
 ### Tooltip layouts
 
