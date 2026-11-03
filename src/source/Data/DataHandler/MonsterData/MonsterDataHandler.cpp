@@ -368,11 +368,11 @@ bool MonsterDataHandler::SaveAll(std::vector<Items::ItemDataIssue>& issues)
         MakeMonsterModelsFileText(GetMonsterModelsFile(), CollectModels(), issues);
     const std::vector<MonsterSoundSet> sets = CollectSoundSets();
     const std::optional<std::string> soundsText = MakeMonsterSoundsFileText(GetMonsterSoundsFile(), sets, issues);
+    ValidateLinks(monsters, sets, issues);
     if (!monstersText || !modelsText || !soundsText)
     {
         return false;
     }
-    ValidateLinks(monsters, sets, issues);
     // All files or none: the new monster list next to the old model list or
     // sound sets may name a model or a set they lack.
     const std::array<TextFileToWrite, 3> files{{{GetMonstersFile(), *monstersText},
