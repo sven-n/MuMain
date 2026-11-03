@@ -28,6 +28,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
 #include "Render/Terrain/TerrainHeightGrid.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Render/Lighting/DynamicLightHistory.h"
 #include "Render/Lighting/DynamicLightList.h"
 #include "Render/Lighting/DynamicLightsSetting.h"
@@ -593,17 +594,20 @@ float RequestStaticLightBrightWeight(float xf, float yf)
     return weight[0];
 }
 
+// The sun the slope shading leans towards: the map's baked one, following the frame's sun.
+static glm::vec3 TerrainSunVector()
+{
+    const glm::vec3 baked = gMapManager.InBattleCastle() ? glm::vec3(0.5f, -1.f, 1.f) : glm::vec3(0.5f, -0.5f, 0.5f);
+    return Render::Lighting::FollowFrameSun(baked);
+}
+
+// The vector BackTerrainLight was last built with.
+static glm::vec3 s_terrainLightSun{0.f};
+
 void CreateTerrainLight()
 {
-    vec3_t Light;
-    if (gMapManager.InBattleCastle())
-    {
-        Vector(0.5f, -1.f, 1.f, Light);
-    }
-    else
-    {
-        Vector(0.5f, -0.5f, 0.5f, Light);
-    }
+    s_terrainLightSun = TerrainSunVector();
+    const vec3_t Light = {s_terrainLightSun.x, s_terrainLightSun.y, s_terrainLightSun.z};
     const Render::Lighting::LightMood::Scales& scales = Render::Lighting::LightMood::Active();
     for (int y = 0; y < TERRAIN_SIZE; y++)
     {
@@ -622,8 +626,7 @@ void CreateTerrainLight_Part(int xi, int yi)
     if (yi > TERRAIN_SIZE - 4) yi = TERRAIN_SIZE - 4;
     else if (yi < 4)         yi = 4;
 
-    vec3_t Light;
-    Vector(0.5f, -0.5f, 0.5f, Light);
+    const vec3_t Light = {s_terrainLightSun.x, s_terrainLightSun.y, s_terrainLightSun.z};
     const Render::Lighting::LightMood::Scales& scales = Render::Lighting::LightMood::Active();
     for (int y = yi - 4; y < yi + 4; y++)
     {
@@ -2880,6 +2883,13 @@ extern int EnableEvent;
 
 void InitTerrainLight()
 {
+    // The sun moved (dynamic.shadowAngle): the slope shading follows it.
+    if (const glm::vec3 sun = TerrainSunVector();
+        glm::any(glm::greaterThan(glm::abs(sun - s_terrainLightSun), glm::vec3(1e-4f))))
+    {
+        FRAME_PROFILE(TerrainBake);
+        CreateTerrainLight();
+    }
     Render::Lighting::FrameDynamicLights().Clear();
     Render::Lighting::FrameWorldDynamicLights().Clear();
     s_groundLightBuilt = false;

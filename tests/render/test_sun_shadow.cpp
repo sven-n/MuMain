@@ -105,3 +105,35 @@ TEST_CASE("a camera moving less than a texel keeps the shadow map where it is [r
     CHECK(steps.x == doctest::Approx(std::round(steps.x)).epsilon(1e-3));
     CHECK(steps.y == doctest::Approx(std::round(steps.y)).epsilon(1e-3));
 }
+
+TEST_CASE("a baked light vector follows the sun's turn and rise, and is the same at the baked sun [render][sun]")
+{
+    using Render::Lighting::FollowSun;
+    const glm::vec3 bakedSun = SunDirection(Render::Lighting::kBakedSunShadowAngle, 0.5f);
+    const glm::vec3 terrain(0.5f, -0.5f, 0.5f);
+    const glm::vec3 model(0.0f, -1.5f, 0.0f);
+
+    // At the baked sun: exactly the old vectors.
+    CHECK(FollowSun(terrain, bakedSun, bakedSun) == terrain);
+    CHECK(FollowSun(model, bakedSun, bakedSun) == model);
+
+    // The sun a quarter turn round (shadows towards 225 degrees instead of 135): so is the vector, as long.
+    const glm::vec3 turned = FollowSun(terrain, bakedSun, SunDirection(225.0f, 0.5f));
+    CHECK(glm::length(turned) == doctest::Approx(glm::length(terrain)));
+    CHECK(turned.x == doctest::Approx(0.5f));
+    CHECK(turned.y == doctest::Approx(0.5f));
+    CHECK(turned.z == doctest::Approx(0.5f));
+
+    // A higher sun (shorter shadows) raises a level vector by as much.
+    const glm::vec3 higherSun = SunDirection(Render::Lighting::kBakedSunShadowAngle, 0.25f);
+    const float rise = std::atan2(higherSun.z, std::hypot(higherSun.x, higherSun.y)) -
+                       std::atan2(bakedSun.z, std::hypot(bakedSun.x, bakedSun.y));
+    const glm::vec3 raised = FollowSun(model, bakedSun, higherSun);
+    CHECK(std::atan2(raised.z, std::hypot(raised.x, raised.y)) == doctest::Approx(rise));
+    CHECK(glm::length(raised) == doctest::Approx(1.5f));
+
+    // Never past straight up.
+    const glm::vec3 steep = FollowSun(glm::vec3(0.0f, 0.0f, 1.0f) + glm::vec3(0.01f, 0.0f, 0.0f), bakedSun,
+                                      SunDirection(Render::Lighting::kBakedSunShadowAngle, 0.01f));
+    CHECK(std::atan2(steep.z, std::hypot(steep.x, steep.y)) <= glm::radians(89.0f) + 1e-5f);
+}

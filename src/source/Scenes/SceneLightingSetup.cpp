@@ -16,7 +16,6 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/SceneLighting.h"
 #include "Scenes/SceneCore.h"
-#include "World/MapInfra/MapManager.h"
 
 #include <chrono>
 #include <cstddef>
@@ -56,15 +55,13 @@ void SubmitSceneLighting()
     lighting.cameraPosition[2] = g_Camera.Position[2];
     Render::Lighting::ApplyTuning(lighting);
     lighting.highlightKnee = Render::Lighting::LightMood::Active().highlightKnee;
-    if (Render::Lighting::SunShadowsActive() && Hero)
+    const std::optional<Render::Lighting::FrameSunDirections> sun = Render::Lighting::FrameSun();
+    if (Render::Lighting::SunShadowsActive() && Hero && sun)
     {
         using Data::Maps::LookValue;
         // The sun stands where the flat character shadows said it did: they fall towards
         // dynamic.shadowAngle, as long as before.
-        const glm::vec3 toSun =
-            Render::Lighting::SunDirection(Render::Look::Value(LookValue::GroundShadowAngle),
-                                           gMapManager.InBattleCastle() ? Render::Lighting::kSunShadowFallBattleCastle
-                                                                        : Render::Lighting::kSunShadowFall);
+        const glm::vec3 toSun = sun->sun;
         lighting.sunDirection[0] = toSun.x;
         lighting.sunDirection[1] = toSun.y;
         lighting.sunDirection[2] = toSun.z;

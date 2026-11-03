@@ -52,7 +52,7 @@ for the reader.
 | `figures` | the baked light on characters, monsters and NPCs, and the fixed light of the player's own character | `base` to 1 |
 | `dynamicGain` | the light candles, fires, skills and effects add each frame | 0.5 to 2 |
 | `background` | the clear and fog colour behind the scene | 0 to 1 |
-| `sun` | how much brighter a model face turned to the sun is than one turned away (1 is Classic, 0 leaves only the even fill light) | 0 to 1 |
+| `sun` | how much brighter a model face turned to the sun is than one turned away (1 is Classic, 0 leaves only the even fill light); with Enhanced dynamic lights the direction follows `dynamic.shadowAngle` | 0 to 1 |
 | `shadowKeep` | optional: the baked light at which a place keeps its full brightness; `base` and `figures` then darken the shade only, fading out towards this light (sunlit ground stays day). 0 (the default) darkens everything evenly | 0 to 1.5 |
 | `brightScale` | optional, with a shadow keep: the scale places at the shadow keep get, never below `base` (figures: never below `figures`) | 0.3 to 1 (default) |
 | `shadeCool` | optional: how much bluer the darkened shade gets | 0 (default) to 0.5 |

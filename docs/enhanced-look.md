@@ -212,7 +212,7 @@ for the whole file.
 | `dynamic.effectCap` | 2.5 | 0 (none) | 0–8 | the most light overlapping spell lights may add up to |
 | `dynamic.shadowOpacity` | 0.6 | 0.6 | 0–1 | how much characters' shadows darken the ground's own light; overlapping shadows darken it once, and point lights still light shadowed ground |
 | `dynamic.shadowLights` | 2 | 0 | 0–4 | how many of the strongest point lights near a character cast its shadow away from them; each darkens the point light on the ground by its share of the character's point light, and a light at the character casts none |
-| `dynamic.shadowAngle` | 135 | 180 | 0–360 | which way characters' shadows fall, in degrees counter-clockwise from world +x; 135 falls away from the sun that shades the terrain's slopes, 180 is the Classic direction |
+| `dynamic.shadowAngle` | 135 | 180 | 0–360 | which way characters' shadows fall, in degrees counter-clockwise from world +x; 135 falls away from the sun the maps' baked light was made for, 180 is the Classic direction. The sun turns with it: its shadow map, the terrain's slope shading and the models' light all follow, each keeping the offset the map's baked light has from that sun, so at 135 every map looks as it always did |
 | `bloom.strength` | 1.0 (Icarus 0.3) | 0.6 | 0–2 | how strong the halo around light effects is |
 | `bloom.levelFalloff` | 0.6 | 0.5 | 0.25–1 | how wide the halo spreads |
 | `grading.strength` | 1 | 1 | 0–1 | how much of a map's grading table applies; 0 grades nothing while the bloom stays |
