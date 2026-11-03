@@ -7,6 +7,7 @@
 #include "Core/Input/SyntheticInput.h"
 #include "App/Control/DrawPurityCheck.h"
 #include "Render/Drawing/DeferredDraws.h"
+#include "Render/Drawing/DrawCallLog.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include "Data/GameData/EffectData/EffectTypeSymbols.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -524,6 +525,32 @@ std::string DrawLater(const Request& request, std::unique_ptr<Act>&)
     Render::Drawing::SetDrawsWorldLater(on);
     json result;
     result["on"] = on;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string DrawParity(const Request& request, std::unique_ptr<Act>&)
+{
+    bool start = false;
+    if (request.Has("start") && !request.GetBool("start", start))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "start must be a boolean");
+    }
+    if (start)
+    {
+        Render::Drawing::RequestDrawParity();
+    }
+    const Render::Drawing::DrawParityReport& report = Render::Drawing::LastDrawParityReport();
+    json first = json::array();
+    for (const auto& [atOnce, later] : report.first)
+    {
+        first.push_back({{"at_once", atOnce}, {"later", later}});
+    }
+    json result;
+    result["done"] = report.done;
+    result["at_once"] = report.atOnce;
+    result["later"] = report.later;
+    result["differences"] = report.differences;
+    result["first"] = first;
     return EncodeResult(request.EncodedId(), result.dump());
 }
 

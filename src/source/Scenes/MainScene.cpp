@@ -45,6 +45,7 @@
 #include "Camera/CameraMode.h"
 #include "Core/Input/ImeInput.h"
 #include "Render/Drawing/DeferredDraws.h"
+#include "Render/Drawing/DrawCallLog.h"
 #include "Render/Drawing/LegacyCalls.h"
 
 #include <optional>
@@ -550,7 +551,7 @@ bool IsWingExtraLayersDisabledDebug()
  * @param width Screen width for water terrain rendering
  * @param height Screen height for water terrain rendering
  */
-static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
+static void RenderGameWorldPass(BYTE& byWaterMap, int width, int height)
 {
 #ifdef _EDITOR
     // DevEditor render toggle checks
@@ -700,6 +701,33 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
             battleCastle::EndFog();
         }
     }
+}
+
+// Draws the world pass, after drawing it at once and later into two logs when "drawparity" asked for it. The logs
+// stand in for the renderer, so the frame shows the pass once.
+static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
+{
+    if (Render::Drawing::TakeDrawParityRequest())
+    {
+        const bool drawsLater = Render::Drawing::DrawsWorldLater();
+        Render::Drawing::DrawCallLog atOnce;
+        Render::Drawing::DrawCallLog later;
+        for (Render::Drawing::DrawCallLog* log : {&atOnce, &later})
+        {
+            Render::Drawing::SetDrawsWorldLater(log == &later);
+            mu::SetRendererOverride(log);
+            Render::Drawing::ResetLegacyState();
+            BYTE waterMap = byWaterMap;
+            RenderGameWorldPass(waterMap, width, height);
+            log->NoteFinalState();
+            mu::SetRendererOverride(nullptr);
+        }
+        Render::Drawing::SetDrawsWorldLater(drawsLater);
+        // The legacy calls' caches followed the logs: tell the renderer again.
+        Render::Drawing::ResetLegacyState();
+        Render::Drawing::ReportDrawParity(atOnce.calls, later.calls);
+    }
+    RenderGameWorldPass(byWaterMap, width, height);
 }
 
 /**
