@@ -37,6 +37,7 @@
 #include "Scenes/SceneCore.h"
 #include "Scenes/MainScene.h"
 #include "Audio/DSPlaySound.h"
+#include "Audio/SoundEventPlay.h"
 #include "Audio/SoundPlaces.h"
 #include "I18N/All.h"
 
@@ -1292,20 +1293,15 @@ void SetPlayerAttack(CHARACTER* c)
             }
             else
             {
-                if (gCharacterManager.GetEquipedBowType(c) == BOWTYPE_BOW)
+                // What the player holds plays which swing: the sound events
+                // (Q-SE1).
+                Data::Sounds::SoundEventContext context;
+                context.holds = Audio::HeldWeaponOf(*c);
+                if (const std::optional<ESound> sound =
+                        Audio::PickEventSound(Data::Sounds::PlayerAttackSwingEvent, context))
                 {
-                    PlayBuffer(SOUND_BOW01, o);
+                    PlayBuffer(*sound, o);
                 }
-                else if (gCharacterManager.GetEquipedBowType(c) == BOWTYPE_CROSSBOW)
-                {
-                    PlayBuffer(SOUND_CROSSBOW01, o);
-                }
-                else if (c->Weapon[0].Type >= MODEL_BLUEWING_CROSSBOW && c->Weapon[0].Type < MODEL_ARROWS)
-                    PlayBuffer(SOUND_MAGIC, o);
-                else if (c->Weapon[0].Type == MODEL_LIGHT_SABER || c->Weapon[0].Type == MODEL_SPEAR)
-                    PlayBuffer(SOUND_BRANDISH_SWORD03, o);
-                else if (c->Weapon[0].Type != -1 || c->Weapon[1].Type != -1)
-                    PlayBuffer(static_cast<ESound>(SOUND_BRANDISH_SWORD01 + Random::Rand() % 2), o);
             }
             PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Attack);
         }
@@ -5274,33 +5270,14 @@ void PlayWalkSound()
     }
     else
     {
-        if (gMapManager.WorldActive == WD_2DEVIAS && (HeroTile != 3 && HeroTile < 10))
+        // Which step plays on which ground: the sound events (Q-SE1).
+        Data::Sounds::SoundEventContext context;
+        context.world = gMapManager.WorldActive;
+        context.tile = HeroTile;
+        context.safeZone = Hero->SafeZone;
+        if (const std::optional<ESound> sound = Audio::PickEventSound(Data::Sounds::HeroFootstepEvent, context))
         {
-            PlayBuffer(SOUND_HUMAN_WALK_SNOW);
-        }
-        else if (gMapManager.WorldActive == WD_0LORENCIA && HeroTile == 0)
-        {
-            PlayBuffer(SOUND_HUMAN_WALK_GRASS);
-        }
-        else if (gMapManager.WorldActive == WD_3NORIA && HeroTile == 0)
-        {
-            PlayBuffer(SOUND_HUMAN_WALK_GRASS);
-        }
-        else if ((gMapManager.WorldActive == WD_7ATLANSE || gMapManager.InHellas() || gMapManager.WorldActive == WD_67DOPPLEGANGER3) && !Hero->SafeZone)
-        {
-            PlayBuffer(SOUND_HUMAN_WALK_SWIM);
-        }
-        else if (IsIceCity())
-        {
-            PlayBuffer(SOUND_HUMAN_WALK_SNOW);
-        }
-        else if (IsSantaTown())
-        {
-            PlayBuffer(SOUND_HUMAN_WALK_SNOW);
-        }
-        else
-        {
-            PlayBuffer(SOUND_HUMAN_WALK_GROUND);
+            PlayBuffer(*sound);
         }
     }
 }

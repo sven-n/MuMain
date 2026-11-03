@@ -38,6 +38,7 @@
 #include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
 #include "Data/DataHandler/MonsterData/MonsterModelLoader.h"
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
+#include "Data/DataHandler/SoundData/SoundEventStorage.h"
 #include "Data/DataHandler/SoundData/SoundFileStorage.h"
 #include "Data/GameData/MonsterData/MonsterModelSlots.h"
 #include "Audio/SoundNumbers.h"
@@ -420,11 +421,12 @@ static void OpenMonsterData()
 }
 
 // Loads the files of the code's sounds (Data/Audio/SoundFiles.json), which
-// LoadGameSound loads by their id; errors stop the game.
+// LoadGameSound loads by their id, and the sound events (Data/Audio/
+// SoundEvents.json), which say which plays when; errors stop the game.
 static void OpenSoundData()
 {
     std::string errorMessage;
-    if (!Data::Sounds::LoadSoundFiles(errorMessage))
+    if (!Data::Sounds::LoadSoundFiles(errorMessage) || !Data::Sounds::LoadSoundEvents(errorMessage))
     {
         StopOnDataError("Sound data error", errorMessage);
     }

@@ -58,6 +58,7 @@ mu_add_test(
     NAME sound_data_tests
     SOURCES
         test_sound_files.cpp
+        test_sound_events.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
