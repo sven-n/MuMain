@@ -858,6 +858,18 @@ TEST_CASE("Monster Sounds shows the set Data Checks or a cue tag asks for, also 
     CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) != nullptr);
     g_MonsterEdits.GetHistory().Clear();
 
+    // Monster Preview does not show the Hound's model (it is not open), and
+    // a frame later not at all: its animation and frame are no cue's to take.
+    ImGui::NewFrame();
+    bool open = true;
+    g_MuMonsterPreviewUI.Render(&open);
+    ImGui::Render();
+    CHECK_FALSE(g_MuMonsterPreviewUI.ShowsSlot(MODEL_HOUND));
+    draw();
+    draw();
+    CHECK_FALSE(g_MuMonsterPreviewUI.ShowsSlot(MODEL_HOUND));
+    CHECK_FALSE(g_MuMonsterPreviewUI.ShowsSlot(-1));
+
     g_MonsterSelection.Select(MonsterSelection::NoMonster);
     g_MonsterModelDatabase.Build({});
     g_MonsterSoundSetDatabase.Build({});

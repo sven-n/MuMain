@@ -3463,6 +3463,9 @@
   <data name="Use the preview frame note" xml:space="preserve">
     <value>The cue starts at the frame Monster Preview shows, in its animation, and keeps its length.</value>
   </data>
+  <data name="Preview frame needs the preview" xml:space="preserve">
+    <value>Monster Preview does not show this monster's model: open it there to take its frame.</value>
+  </data>
   <data name="Remove the cue" xml:space="preserve">
     <value>Remove the cue</value>
   </data>

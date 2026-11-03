@@ -3244,6 +3244,9 @@
   <data name="Use the preview frame note" xml:space="preserve">
     <value>Die Marke beginnt am Bild, das Monster-Vorschau zeigt, in deren Animation, und behält ihre Länge.</value>
   </data>
+  <data name="Preview frame needs the preview" xml:space="preserve">
+    <value>Die Monster-Vorschau zeigt das Modell dieses Monsters nicht: öffne es dort, um ihr Bild zu nehmen.</value>
+  </data>
   <data name="Remove the cue" xml:space="preserve">
     <value>Marke entfernen</value>
   </data>

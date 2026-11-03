@@ -285,7 +285,17 @@ private:
         const float frame = g_MuMonsterPreviewUI.GetFrame();
         const std::string label = I18N::Format(I18N::Editor::SoundEventNewCueAt01,
                                                {Data::Monsters::GetMonsterAnimationName(animation), FrameText(frame)});
-        if (ImGui::Selectable(label.c_str()))
+        // Its animation and frame are another model's while the preview
+        // shows another one (or is closed).
+        const bool previewShows = g_MuMonsterPreviewUI.ShowsSlot(m_context.slot);
+        ImGui::BeginDisabled(!previewShows);
+        const bool added = ImGui::Selectable(label.c_str());
+        ImGui::EndDisabled();
+        if (!previewShows && ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+        {
+            ImGui::SetTooltip("%s", I18N::Editor::PreviewFrameNeedsThePreview);
+        }
+        if (added && previewShows)
         {
             const MonsterModelCue cue = MakeCue(*m_context.model, animation, frame);
             const std::string step =
@@ -360,7 +370,9 @@ private:
             }
             m_context.modelDraft->AfterField(label);
             ImGui::SameLine();
-            if (ImGui::SmallButton(I18N::Editor::UseThePreviewFrame))
+            const bool previewShows = g_MuMonsterPreviewUI.ShowsSlot(m_context.slot);
+            ImGui::BeginDisabled(!previewShows);
+            if (ImGui::SmallButton(I18N::Editor::UseThePreviewFrame) && previewShows)
             {
                 const float length = to - from;
                 cue->animation = g_MuMonsterPreviewUI.GetAnimation();
@@ -368,9 +380,11 @@ private:
                 to = from + length;
                 m_context.modelDraft->AfterChange(true, label);
             }
-            if (ImGui::IsItemHovered())
+            ImGui::EndDisabled();
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
             {
-                ImGui::SetTooltip("%s", I18N::Editor::UseThePreviewFrameNote);
+                ImGui::SetTooltip("%s", previewShows ? I18N::Editor::UseThePreviewFrameNote
+                                                     : I18N::Editor::PreviewFrameNeedsThePreview);
             }
             ImGui::TextDisabled("%s", I18N::Format(I18N::Editor::SoundEventCueOf01,
                                                    {m_context.model->slot, std::to_string(m_context.modelMonsters)})

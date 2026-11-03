@@ -273,6 +273,7 @@ void MuMonsterPreviewUI::RenderPreview(int slot)
         m_once = false;
         Restart(slot);
     }
+    m_shownFrame = ImGui::GetFrameCount();
     // An edit may leave the model with fewer animations.
     if (m_animation >= Models[slot].NumActions)
     {
@@ -523,6 +524,11 @@ void MuMonsterPreviewUI::RenderAddSoundPopup(int slot)
         ImGui::CloseCurrentPopup();
     }
     ImGui::EndPopup();
+}
+
+bool MuMonsterPreviewUI::ShowsSlot(int slot) const
+{
+    return slot >= 0 && slot == m_slot && m_shownFrame >= ImGui::GetFrameCount() - 1;
 }
 
 float MuMonsterPreviewUI::SpeedFactor(int slot) const

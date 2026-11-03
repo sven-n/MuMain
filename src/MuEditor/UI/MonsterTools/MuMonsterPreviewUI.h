@@ -57,6 +57,10 @@ public:
     {
         return m_frame;
     }
+    // Whether the preview showed the model in `slot` in this frame or the one
+    // before (it may draw after a tool in a frame): only then are the
+    // animation and frame that model's.
+    bool ShowsSlot(int slot) const;
     bool IsPlaying() const
     {
         return m_playing;
@@ -99,6 +103,8 @@ private:
     // The slot the camera was framed for, and the animation shown.
     int m_framedSlot = -1;
     int m_slot = -1;
+    // The ImGui frame the preview last showed m_slot animating in.
+    int m_shownFrame = -1;
     int m_animation = 0;
     float m_frame = 0.0f;
     float m_turnDegrees = 0.0f;
