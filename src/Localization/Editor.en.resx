@@ -3799,7 +3799,7 @@
   <data name="Sound editor tab events" xml:space="preserve">
     <value>Events</value>
   </data>
-  <data name="Sound events note" xml:space="preserve">
+  <data name="Sound editor events note" xml:space="preserve">
     <value>Which sound the game plays when (Data/Audio/SoundEvents.json): for each event, the first rule that matches plays one of its sounds, picked at random when there are more. An empty field matches anything. Changes reach the game at once; Save writes the file.</value>
   </data>
   <data name="Sound event hero footstep" xml:space="preserve">

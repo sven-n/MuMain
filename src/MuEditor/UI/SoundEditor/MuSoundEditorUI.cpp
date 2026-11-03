@@ -168,7 +168,7 @@ void MuSoundEditorUI::Render(bool* open)
 void MuSoundEditorUI::RenderEvents()
 {
     ImGui::PushTextWrapPos(0.0f);
-    ImGui::TextDisabled("%s", I18N::Editor::SoundEventsNote);
+    ImGui::TextDisabled("%s", I18N::Editor::SoundEditorEventsNote);
     ImGui::PopTextWrapPos();
     // A copy: a change replaces the table while it draws.
     const std::vector<Data::Sounds::SoundEvent> events = g_SoundEventDatabase.GetAll();

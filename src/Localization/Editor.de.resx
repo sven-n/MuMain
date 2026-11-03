@@ -3580,7 +3580,7 @@
   <data name="Sound editor tab events" xml:space="preserve">
     <value>Ereignisse</value>
   </data>
-  <data name="Sound events note" xml:space="preserve">
+  <data name="Sound editor events note" xml:space="preserve">
     <value>Welches Geräusch das Spiel wann spielt (Data/Audio/SoundEvents.json): je Ereignis spielt die erste passende Regel eines ihrer Geräusche, zufällig gewählt, wenn es mehrere sind. Ein leeres Feld passt immer. Änderungen wirken sofort im Spiel; Speichern schreibt die Datei.</value>
   </data>
   <data name="Sound event hero footstep" xml:space="preserve">
