@@ -40,7 +40,7 @@ screen has room (else over its right side), and stays in front of the game. Its
 **Windows** menu opens the tool windows: Item, Monster
 ([monster-data.md](monster-data.md)), Colors ([item-data.md](item-data.md#colors)),
 Data Checks ([below](#data-checks)), the Sound Mixer ([below](#sound-mixer)),
-Server List
+the Sound Editor ([below](#sound-editor)), Server List
 ([server-list.md](server-list.md)), Skill, Dev and Map Editor, the Effect
 Browser and the console. They open as tabs docked in the editor window, the
 console along the bottom. Drag a tab out to float a tool window anywhere, over
@@ -202,6 +202,58 @@ The game's own volumes stay as they are, and the editor's previews (the Play
 buttons of Monster Sounds and the Map Editor, Monster Preview, the effect
 preview) play at their own volume, whatever the mixer says. The effect
 preview's **Mute** still silences the game's one-shot sounds while it runs.
+
+A sound selected in the Sound Mixer (a click on its Sound cell) is selected in
+the Sound Editor too, and the other way round; a window that is closed or
+behind another tab is not opened or raised, it shows the sound when you look
+at it.
+
+### Sound Editor
+
+**Windows > Sound Editor** shows every sound the game loads and edits what
+it is: its name, its file, its channels and 3D, its type, the folder it is
+in, and which sound the game's code plays when. Every change reaches the game
+at once; **Save** writes the files that changed, **Revert** reads them again,
+**Undo** and **Redo** step through the changes.
+
+- **Where sounds live.** The code's sounds, which C++ loads by their `SOUND_`
+  id (`LoadGameSound`), take their file, channels and 3D from
+  `Data/Audio/SoundFiles.json`; the monster sound sets' from
+  `Data/Monsters/Sounds.json`, the map object sounds' from
+  `Data/Maps/ObjectSounds.json`. `Data/Audio` and not `Data/Sound`: a build
+  folder's `Data/Sound` links the shared client folder, which is not in git.
+- **The Sounds tab** is a tree of folders with one row per sound: its name
+  (edited in the cell; without one the id, or the set and file), the id or
+  set in grey, the file, channels, 3D, the type if no place, the types it
+  was heard as this session, when it loaded this session (at start, the map
+  entered, with its monster, not loaded yet) and the file it lives in. A
+  click on the file's **...** picks another file of `Data/Sound` (a search,
+  and a play button to listen first); the files on disk are never changed.
+  Search finds names, ids, sets and files; **Only problems** leaves the files
+  that are not in the client folder, a file two code sounds load and the
+  sounds the game played that nothing loads.
+- **Names.** The `SOUND_` id stays a sound's identity, which C++ and the
+  data point at; its name is only what the editor shows (the Sound Mixer,
+  its overlay and log, the Monster Sounds event combo too), so a rename
+  never breaks anything. Names are optional `"name"` fields in the three
+  files; the game reads and ignores them.
+- **Type if no place.** A code sound's `"type"` in `SoundFiles.json` is what
+  the Sound Mixer counts it as when nothing names its source or place (a
+  sound of the server's messages); who plays a sound still decides first.
+- **Folders** (`Data/Audio/SoundFolders.json`, read only by the editor):
+  folders in folders, each sound in one, else under **Not sorted**. **New
+  folder**, **Rename**, **Remove** (its folders and sounds move up), **Move
+  up** and **Move down** act on the folder clicked; drag a sound by its id
+  onto a folder. A filter opens the folders that hold what it shows, a
+  selection the ones that hold the sound.
+- **The Events tab** (`Data/Audio/SoundEvents.json`) decides which sound the
+  code plays when: for each event the first rule that matches plays one of
+  its sounds (at random when it has more). Your footsteps (`heroFootstep`)
+  match the world (`WD_*` numbers, "7, 24-29, 36"), the hero's ground tile
+  and the safe zone; a player's swing at an attack's start
+  (`playerAttackSwing`) matches what the player holds (a bow, a crossbow,
+  the bow group's items 13 and 14, a Light Saber or Spear, another weapon,
+  nothing). An empty field matches anything.
 
 ---
 
