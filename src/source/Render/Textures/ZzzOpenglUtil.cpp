@@ -5,6 +5,7 @@
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/Drawing/StateCalls.h"
 #include "Render/Renderer/Overlay2DRecorder.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Renderer/RenderUtils.h"
@@ -149,6 +150,88 @@ int  GrabScreen = 0;
 // opengl render util
 ///////////////////////////////////////////////////////////////////////////////
 
+namespace
+{
+Render::Drawing::StateCallRecorder* s_stateCallRecorder = nullptr;
+
+// While a drawer that draws later records, a state call is recorded with its draws instead of made now.
+bool RecordsStateCall(Render::Drawing::StateCall call, int argument)
+{
+    if (s_stateCallRecorder == nullptr)
+        return false;
+    s_stateCallRecorder->RecordStateCall(call, argument);
+    return true;
+}
+} // namespace
+
+namespace Render::Drawing
+{
+void SetStateCallRecorder(StateCallRecorder* recorder)
+{
+    s_stateCallRecorder = recorder;
+}
+
+StateCallRecorder* ActiveStateCallRecorder()
+{
+    return s_stateCallRecorder;
+}
+
+void MakeStateCall(StateCall call, int argument)
+{
+    switch (call)
+    {
+    case StateCall::BindTexture:
+        BindTexture(argument);
+        break;
+    case StateCall::EnableDepthTest:
+        EnableDepthTest();
+        break;
+    case StateCall::DisableDepthTest:
+        DisableDepthTest();
+        break;
+    case StateCall::EnableDepthMask:
+        EnableDepthMask();
+        break;
+    case StateCall::DisableDepthMask:
+        DisableDepthMask();
+        break;
+    case StateCall::EnableCullFace:
+        EnableCullFace();
+        break;
+    case StateCall::DisableCullFace:
+        DisableCullFace();
+        break;
+    case StateCall::DisableTexture:
+        DisableTexture(argument != 0);
+        break;
+    case StateCall::DisableAlphaBlend:
+        DisableAlphaBlend();
+        break;
+    case StateCall::EnableAlphaTest:
+        EnableAlphaTest(argument != 0);
+        break;
+    case StateCall::EnableAlphaBlend:
+        EnableAlphaBlend();
+        break;
+    case StateCall::EnableAlphaBlendMinus:
+        EnableAlphaBlendMinus();
+        break;
+    case StateCall::EnableAlphaBlend2:
+        EnableAlphaBlend2();
+        break;
+    case StateCall::EnableAlphaBlend3:
+        EnableAlphaBlend3();
+        break;
+    case StateCall::EnableAlphaBlend4:
+        EnableAlphaBlend4();
+        break;
+    case StateCall::EnableLightMap:
+        EnableLightMap();
+        break;
+    }
+}
+} // namespace Render::Drawing
+
 int  CachTexture = -1;
 bool TextureEnable;
 bool DepthTestEnable;
@@ -159,6 +242,8 @@ int  AlphaBlendType;
 
 void BindTexture(int tex)
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::BindTexture, tex))
+        return;
     // Always forward to the renderer. In the deferred SDL renderer this only
     // updates logical state, and caching can desync when callers bind directly.
     mu::GetRenderer().BindTexture(tex);
@@ -246,6 +331,8 @@ void FlushGL()
 
 void EnableDepthTest()
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::EnableDepthTest, 0))
+        return;
     if (!DepthTestEnable)
     {
         DepthTestEnable = true;
@@ -255,6 +342,8 @@ void EnableDepthTest()
 
 void DisableDepthTest()
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::DisableDepthTest, 0))
+        return;
     if (DepthTestEnable)
     {
         DepthTestEnable = false;
@@ -264,6 +353,8 @@ void DisableDepthTest()
 
 void EnableDepthMask()
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::EnableDepthMask, 0))
+        return;
     if (!DepthMaskEnable)
     {
         DepthMaskEnable = true;
@@ -273,6 +364,8 @@ void EnableDepthMask()
 
 void DisableDepthMask()
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::DisableDepthMask, 0))
+        return;
     if (DepthMaskEnable)
     {
         DepthMaskEnable = false;
@@ -282,6 +375,8 @@ void DisableDepthMask()
 
 void EnableCullFace()
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::EnableCullFace, 0))
+        return;
     if (!CullFaceEnable)
     {
         CullFaceEnable = true;
@@ -291,6 +386,8 @@ void EnableCullFace()
 
 void DisableCullFace()
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::DisableCullFace, 0))
+        return;
     if (CullFaceEnable)
     {
         CullFaceEnable = false;
@@ -300,6 +397,8 @@ void DisableCullFace()
 
 void DisableTexture(bool AlphaTest)
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::DisableTexture, AlphaTest))
+        return;
     EnableDepthMask();
     if (AlphaTest == true)
     {
@@ -326,6 +425,8 @@ void DisableTexture(bool AlphaTest)
 
 void DisableAlphaBlend()
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::DisableAlphaBlend, 0))
+        return;
     if (AlphaBlendType != 0)
     {
         AlphaBlendType = 0;
@@ -349,6 +450,8 @@ void DisableAlphaBlend()
 
 void EnableAlphaTest(bool DepthMask)
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::EnableAlphaTest, DepthMask))
+        return;
     if (AlphaBlendType != 2)
     {
         AlphaBlendType = 2;
@@ -373,6 +476,8 @@ void EnableAlphaTest(bool DepthMask)
 
 void EnableAlphaBlend()
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::EnableAlphaBlend, 0))
+        return;
     if (AlphaBlendType != 3)
     {
         AlphaBlendType = 3;
@@ -396,6 +501,8 @@ void EnableAlphaBlend()
 
 void EnableAlphaBlendMinus()
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::EnableAlphaBlendMinus, 0))
+        return;
     if (AlphaBlendType != 4)
     {
         AlphaBlendType = 4;
@@ -419,6 +526,8 @@ void EnableAlphaBlendMinus()
 
 void EnableAlphaBlend2()
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::EnableAlphaBlend2, 0))
+        return;
     if (AlphaBlendType != 5)
     {
         AlphaBlendType = 5;
@@ -442,6 +551,8 @@ void EnableAlphaBlend2()
 
 void EnableAlphaBlend3()
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::EnableAlphaBlend3, 0))
+        return;
     if (AlphaBlendType != 6)
     {
         AlphaBlendType = 6;
@@ -465,6 +576,8 @@ void EnableAlphaBlend3()
 
 void EnableAlphaBlend4()
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::EnableAlphaBlend4, 0))
+        return;
     if (AlphaBlendType != 7)
     {
         AlphaBlendType = 7;
@@ -488,6 +601,8 @@ void EnableAlphaBlend4()
 
 void EnableLightMap()
 {
+    if (RecordsStateCall(Render::Drawing::StateCall::EnableLightMap, 0))
+        return;
     if (AlphaBlendType != 1)
     {
         AlphaBlendType = 1;

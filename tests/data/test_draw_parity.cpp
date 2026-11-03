@@ -7,6 +7,7 @@
 #include "Engine/Object/CharacterAttachments.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Engine/Physics/PhysicsManager.h"
 #include "Render/Drawing/DeferredDraws.h"
 #include "Render/Effects/EffectDraw.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -85,7 +86,8 @@ std::uint64_t HashOf(const mu::ShadowProjection& projection)
     return hash;
 }
 
-// Every call that reaches the renderer, with a hash of what it draws, skinned draws' bones included.
+// Every draw that reaches the renderer, with a hash of what it draws (skinned draws' bones included) and the state
+// it is drawn with.
 class CallLog final : public mu::IMuRenderer
 {
 public:
@@ -157,44 +159,95 @@ public:
         if (!gpuShadows || cached == m_cached.end())
             return false;
         calls.push_back("CachedShadow " + std::to_string(color) + " " + std::to_string(cached->second) + " " +
-                        std::to_string(HashOf(p)) + " " + std::to_string(HashOf(projection)));
+                        std::to_string(HashOf(p)) + " " + std::to_string(HashOf(projection)) + State());
         return true;
     }
+    // State calls set what the following draws are drawn with; a draw is logged with it, as the SDL_GPU renderer
+    // records it with each command.
     void SetBlendMode(mu::BlendMode mode) override
     {
-        Note("Blend", static_cast<int>(mode));
+        m_blend = static_cast<int>(mode);
     }
     void DisableBlend() override
     {
-        Note("DisableBlend", 0);
+        m_blend = -1;
     }
     void SetDepthTest(bool on) override
     {
-        Note("DepthTest", on);
+        m_depthTest = on;
     }
     void SetDepthMask(bool on) override
     {
-        Note("DepthMask", on);
+        m_depthMask = on;
     }
     void SetCullFace(bool on) override
     {
-        Note("CullFace", on);
+        m_cullFace = on;
     }
     void SetAlphaTest(bool on) override
     {
-        Note("AlphaTest", on);
+        m_alphaTest = on;
     }
     void SetTexture2D(bool on) override
     {
-        Note("Texture2D", on);
+        m_texture2D = on;
     }
     void SetFogEnabled(bool on) override
     {
-        Note("Fog", on);
+        m_fog = on;
     }
     void BindTexture(int texture) override
     {
-        Note("Bind", texture);
+        m_bound = texture;
+    }
+    void SetTexEnv(int, int, int mode) override
+    {
+        m_textureMode = mode;
+    }
+    void BeginBloomExclusion() override
+    {
+        ++m_bloomExclusions;
+    }
+    void EndBloomExclusion() override
+    {
+        --m_bloomExclusions;
+    }
+    [[nodiscard]] bool IsBloomExcluded() const override
+    {
+        return m_bloomExclusions > 0;
+    }
+    void PushMatrix() override
+    {
+        m_matrices.push_back(m_matrices.back());
+    }
+    void PopMatrix() override
+    {
+        m_matrices.pop_back();
+    }
+    void LoadIdentity() override
+    {
+        m_matrices.back().clear();
+    }
+    void Translate(float x, float y, float z) override
+    {
+        m_matrices.back() += " T" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z);
+    }
+    void Rotate(float angle, float x, float y, float z) override
+    {
+        m_matrices.back() +=
+            " R" + std::to_string(angle) + "," + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z);
+    }
+    void Scale(float x, float y, float z) override
+    {
+        m_matrices.back() += " S" + std::to_string(x) + "," + std::to_string(y) + "," + std::to_string(z);
+    }
+    void MultMatrix(const float* m) override
+    {
+        m_matrices.back() += " M" + std::to_string(Hash(m, sizeof(float) * 16));
+    }
+    void LoadMatrix(const float* m) override
+    {
+        m_matrices.back() = " L" + std::to_string(Hash(m, sizeof(float) * 16));
     }
     void SetFog(const mu::FogParams&) override {}
     void BeginScene(int, int, int, int) override {}
@@ -205,10 +258,31 @@ public:
 
 private:
     std::map<const void*, std::uint64_t> m_cached;
+    int m_blend = 0;
+    bool m_depthTest = true;
+    bool m_depthMask = true;
+    bool m_cullFace = true;
+    bool m_alphaTest = false;
+    bool m_texture2D = true;
+    bool m_fog = false;
+    int m_bound = -1;
+    int m_textureMode = 0;
+    int m_bloomExclusions = 0;
+    std::vector<std::string> m_matrices{std::string()};
+
+    // The state a draw is drawn with.
+    [[nodiscard]] std::string State() const
+    {
+        return " | blend " + std::to_string(m_blend) + " depth " + std::to_string(m_depthTest) +
+               std::to_string(m_depthMask) + " cull " + std::to_string(m_cullFace) + " alphaTest " +
+               std::to_string(m_alphaTest) + " texture " + std::to_string(m_texture2D) + " " + std::to_string(m_bound) +
+               " mode " + std::to_string(m_textureMode) + " fog " + std::to_string(m_fog) + " bloomExcluded " +
+               std::to_string(m_bloomExclusions > 0) + " matrix" + m_matrices.back();
+    }
 
     void Note(const char* name, long long value, std::uint64_t contents = 0)
     {
-        calls.push_back(std::string(name) + " " + std::to_string(value) + " " + std::to_string(contents));
+        calls.push_back(std::string(name) + " " + std::to_string(value) + " " + std::to_string(contents) + State());
     }
 
     bool Cache(const void* mesh, std::uint64_t contents)
@@ -221,7 +295,7 @@ private:
                  const mu::SkinningParameters& p)
     {
         calls.push_back(std::string(name) + " " + std::to_string(texture) + " " + std::to_string(color) + " " +
-                        std::to_string(vertices) + " " + std::to_string(HashOf(p)));
+                        std::to_string(vertices) + " " + std::to_string(HashOf(p)) + State());
         return true;
     }
 };
@@ -230,10 +304,17 @@ private:
 template <typename Scene> void Draw(CallLog& log, Scene scene, bool later)
 {
     mu::SetRendererOverride(&log);
-    // Both runs start from the same state: the legacy state calls skip what they think is set already.
+    // Both runs start from the same state, told to the log: the legacy state calls skip what they think is set
+    // already, so each is set the other way first.
+    EnableAlphaTest();
+    DisableTexture();
+    DisableDepthTest();
+    DisableDepthMask();
+    DisableCullFace();
+    EnableAlphaBlend();
     DisableAlphaBlend();
     EnableDepthTest();
-    EnableDepthMask();
+    BindTexture(0);
     log.calls.clear();
     log.triangles.clear();
     if (later)
@@ -342,6 +423,29 @@ bool DrewCloth(const CallLog& log)
                                               [](const mu::Vertex3D& v) { return v.y == ClothHeight; });
                        });
 }
+
+// A cloth of 2 by 3 points, placed by the test instead of a simulation.
+class GridCloth final : public CPhysicsCloth
+{
+public:
+    GridCloth()
+    {
+        m_iNumHor = 2;
+        m_iNumVer = 3;
+        m_iNumVertices = m_iNumHor * m_iNumVer;
+        m_pVertices = new CPhysicsVertex[m_iNumVertices];
+    }
+    ~GridCloth() override
+    {
+        Destroy();
+    }
+
+    void Place(float x)
+    {
+        for (int i = 0; i < m_iNumVertices; ++i)
+            m_pVertices[i].Init(x + static_cast<float>(i % 2) * 10.f, 300.f + static_cast<float>(i / 2) * 10.f, 50.f);
+    }
+};
 
 // A model file's skin for a BMD: every vertex on its own bone with weight 1, so it skins as the BMD does.
 std::shared_ptr<const void> OneJointSkin(const BMD& model)
@@ -646,4 +750,104 @@ TEST_CASE("A shadow drawn later leaves the vertices a later pass of the model re
         CHECK(HashSpan(std::span<const mu::Vertex3D>(onCpu.triangles.back())) ==
               HashSpan(std::span<const mu::Vertex3D>(onGpu.triangles.back())));
     }
+}
+
+TEST_CASE("State a caller sets between model draws drawn later reaches each draw as when drawn at once "
+          "[draw-parity]")
+{
+    PlayerModels models;
+    BMD& armor = Models[MODEL_BODY_ARMOR];
+    OBJECT o;
+    Place(o, 100.f, 2.5f, nullptr);
+    // Flags 0 give a mesh no material of its own: it is drawn with what the caller and the draws before it left.
+    const auto scene = [&]
+    {
+        Pose(armor, o);
+        // A glow pass turns the depth mask off; the caller turns blending off again, which turns it back on.
+        armor.RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT);
+        DisableAlphaBlend();
+        armor.RenderMesh(0, 0);
+        BindTexture(BITMAP_LIGHT);
+        armor.RenderMesh(0, 0);
+        DisableDepthTest();
+        armor.RenderMesh(0, RENDER_TEXTURE);
+        EnableDepthTest();
+        EnableAlphaTest(false);
+        armor.RenderMesh(0, 0);
+        DisableAlphaBlend();
+    };
+    CheckDrawnLaterAsAtOnce(scene, "CachedSkinned");
+}
+
+TEST_CASE("State a caller sets between effect draws drawn later reaches each draw as when drawn at once "
+          "[draw-parity]")
+{
+    using namespace Render::EffectDrawing;
+    const auto scene = []
+    {
+        EffectDrawer& out = ActiveEffectDrawer();
+        const float light[3] = {1.f, 0.5f, 0.25f};
+        const float position[3] = {10.f, 20.f, 30.f};
+        std::vector<mu::Vertex3D> quad(4, {1.f, 2.f, 3.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0xffffffffu});
+        EnableAlphaBlend();
+        out.DrawSprite(Sprite(BITMAP_LIGHT, position, 2.f, 3.f, light));
+        DisableAlphaBlend();
+        DisableDepthMask();
+        out.DrawQuads({.vertices = quad, .texture = 7u});
+        EnableDepthMask();
+        // Quads that name no texture draw with the bound one.
+        BindTexture(BITMAP_LIGHT);
+        out.DrawQuads({.vertices = quad});
+    };
+    CheckDrawnLaterAsAtOnce(scene, "Quad3D");
+}
+
+TEST_CASE("Draws asked for inside a bloom exclusion and drawn later are drawn inside one [draw-parity]")
+{
+    PlayerModels models;
+    static float firstBones[MAX_BONES][3][4];
+    static float secondBones[MAX_BONES][3][4];
+    OBJECT first;
+    OBJECT second;
+    Place(first, 100.f, 2.5f, firstBones);
+    Place(second, 400.f, 5.5f, secondBones);
+    AnimateCharacterBones(&first);
+    AnimateCharacterBones(&second);
+    BeginObjectDraws();
+    Engine::Object::Attachments::BeginFrame();
+
+    const vec3_t light = {1.f, 1.f, 1.f};
+    const auto scene = [&]
+    {
+        {
+            // As a character is drawn in Classic, so post-processing leaves it alone.
+            const mu::ScopedBloomExclusion classic;
+            RenderPartObject(&first, MODEL_BODY_ARMOR, nullptr, light, 1.f, 0, 0, 0, false, false, true, 0,
+                             RENDER_TEXTURE | RENDER_BRIGHT);
+        }
+        RenderPartObject(&second, MODEL_BODY_ARMOR, nullptr, light, 1.f, 0, 0, 0, false, false, true, 0,
+                         RENDER_TEXTURE | RENDER_BRIGHT);
+    };
+    CheckDrawnLaterAsAtOnce(scene, "CachedSkinned");
+}
+
+TEST_CASE("A cloth's shadow drawn later falls where the cloth was when it was asked for [draw-parity]")
+{
+    PlayerModels models;
+    BMD& armor = Models[MODEL_BODY_ARMOR];
+    OBJECT o;
+    Place(o, 100.f, 2.5f, nullptr);
+    GridCloth cape;
+    GridCloth otherCape;
+    const auto scene = [&]
+    {
+        cape.Place(100.f);
+        otherCape.Place(700.f);
+        Pose(armor, o);
+        armor.RenderBodyShadow(-1, -1, -1, -1, &cape, 1);
+        armor.RenderBodyShadow(-1, -1, -1, -1, &otherCape, 1);
+        // The next update moves the cloth before this frame is drawn, as on a render thread.
+        cape.Place(400.f);
+    };
+    CheckDrawnLaterAsAtOnce(scene, "Triangles");
 }

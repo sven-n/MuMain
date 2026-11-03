@@ -78,6 +78,14 @@ struct CpuShadowMesh
     bool ownVertices = false;
 };
 
+// A cloth that casts a shadow: its points as the simulation left them, `rows` to a column.
+struct ClothShadow
+{
+    const float (*points)[3] = nullptr;
+    int columns = 0;
+    int rows = 0;
+};
+
 // One model's shadow projected on the ground: the call's arguments and the model state the draw reads.
 struct ShadowDraw
 {
@@ -87,9 +95,8 @@ struct ShadowDraw
     // -1 for the first and past the last mesh.
     int startMesh = -1;
     int endMesh = -1;
-    // The cloth simulation's CPhysicsCloth array; when set, the cloth casts the shadow instead of the meshes.
-    void* clothes = nullptr;
-    int clothesCount = 0;
+    // Set: the cloth casts the shadow instead of the meshes.
+    std::span<const ClothShadow> clothes;
     float alpha = 1.f;
 
     float bodyOrigin[3] = {};

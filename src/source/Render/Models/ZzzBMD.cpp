@@ -2543,24 +2543,24 @@ __forceinline void CalcShadowPosition(vec3_t* position, const vec3_t origin, con
     VectorCopy(result, *position);
 }
 
-__forceinline void GetClothShadowPosition(vec3_t* target, CPhysicsCloth* pCloth, const int index, const vec3_t origin, const float sx, const float sy)
+__forceinline void GetClothShadowPosition(vec3_t* target, const Render::ModelDrawing::ClothShadow& cloth,
+                                          const int index, const vec3_t origin, const float sx, const float sy)
 {
-    pCloth->GetPosition(index, target);
+    VectorCopy(cloth.points[index], *target);
     CalcShadowPosition(target, origin, sx, sy);
 }
 
-void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, const float* origin, const float sx,
-                                    const float sy, const std::uint32_t color) const
+void BMD::AddClothesShadowTriangles(std::span<const Render::ModelDrawing::ClothShadow> clothes, const float* origin,
+                                    const float sx, const float sy, const std::uint32_t color) const
 {
     auto vertices = RenderArrayVertices;
     int target_vertex_index = -1;
-    
-    for (int i = 0; i < clothesCount; i++)
+
+    for (const Render::ModelDrawing::ClothShadow& cloth : clothes)
     {
-        auto* const pCloth = &static_cast<CPhysicsCloth*>(pClothes)[i];
-        auto const columns = pCloth->GetVerticalCount();
-        auto const rows = pCloth->GetHorizontalCount();
-        
+        auto const columns = cloth.columns;
+        auto const rows = cloth.rows;
+
         for (int col = 0; col < columns - 1; ++col)
         {
             for (int row = 0; row < rows - 1; ++row)
@@ -2574,10 +2574,10 @@ void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, cons
 
                 vec3_t posA, posB, posC, posD;
 
-                GetClothShadowPosition(&posA, pCloth, a, origin, sx, sy);
-                GetClothShadowPosition(&posB, pCloth, b, origin, sx, sy);
-                GetClothShadowPosition(&posC, pCloth, c, origin, sx, sy);
-                GetClothShadowPosition(&posD, pCloth, d, origin, sx, sy);
+                GetClothShadowPosition(&posA, cloth, a, origin, sx, sy);
+                GetClothShadowPosition(&posB, cloth, b, origin, sx, sy);
+                GetClothShadowPosition(&posC, cloth, c, origin, sx, sy);
+                GetClothShadowPosition(&posD, cloth, d, origin, sx, sy);
 
                 // A-Triangle:
                 target_vertex_index++;
@@ -3003,13 +3003,36 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
                                           .hiddenMesh = hiddenMesh,
                                           .startMesh = startMeshNumber,
                                           .endMesh = endMeshNumber,
-                                          .clothes = pClothes,
-                                          .clothesCount = clothesCount,
                                           .alpha = alpha,
                                           .bodyScale = BodyScale,
                                           .lod = ActiveLod,
                                           .skin = CurrentSkin()};
     VectorCopy(BodyOrigin, draw.bodyOrigin);
+    // The cloth's points as plain data: the draw reads no simulation, and a drawer that draws later copies them.
+    static thread_local std::vector<Render::ModelDrawing::ClothShadow> clothes;
+    static thread_local std::vector<std::array<float, 3>> clothPoints;
+    if (clothesCount > 0)
+    {
+        auto* const cloths = static_cast<const CPhysicsCloth*>(pClothes);
+        std::size_t total = 0;
+        for (int i = 0; i < clothesCount; i++)
+            total += static_cast<std::size_t>(std::max(cloths[i].GetNumVertices(), 0));
+        clothPoints.resize(total);
+        clothes.clear();
+        std::size_t next = 0;
+        for (int i = 0; i < clothesCount; i++)
+        {
+            auto* const points = reinterpret_cast<float (*)[3]>(clothPoints.data() + next);
+            for (int j = 0; j < cloths[i].GetNumVertices(); j++)
+            {
+                cloths[i].GetPosition(j, &points[j]);
+            }
+            clothes.push_back(
+                {.points = points, .columns = cloths[i].GetVerticalCount(), .rows = cloths[i].GetHorizontalCount()});
+            next += static_cast<std::size_t>(std::max(cloths[i].GetNumVertices(), 0));
+        }
+        draw.clothes = clothes;
+    }
     Render::ModelDrawing::ModelDrawer& drawer = Render::ModelDrawing::ActiveModelDrawer();
     if (drawer.DrawsLater() && clothesCount == 0 && draw.skin.bones != nullptr)
     {
@@ -3051,7 +3074,7 @@ void BMD::DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) const
         return;
     }
 
-    if (NumMeshs == 0 && draw.clothesCount == 0)
+    if (NumMeshs == 0 && draw.clothes.empty())
     {
         return;
     }
@@ -3068,11 +3091,11 @@ void BMD::DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) const
     const float sy = 4000.f;
     const std::uint32_t shadowColor = PackABGR(0.f, 0.f, 0.f, std::clamp(draw.alpha, 0.f, 1.f));
 
-    if (draw.clothesCount == 0 && Render::Models::Gltf::SkinnedModelOf(*this))
+    if (draw.clothes.empty() && Render::Models::Gltf::SkinnedModelOf(*this))
     {
         RenderWeightedMeshShadow(draw, startMesh, endMesh, sx, sy, shadowColor);
     }
-    else if (draw.clothesCount == 0)
+    else if (draw.clothes.empty())
     {
         if (!RenderGpuMeshShadow(draw, startMesh, endMesh, sx, sy, shadowColor))
         {
@@ -3082,7 +3105,7 @@ void BMD::DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) const
     }
     else
     {
-        AddClothesShadowTriangles(draw.clothes, draw.clothesCount, draw.bodyOrigin, sx, sy, shadowColor);
+        AddClothesShadowTriangles(draw.clothes, draw.bodyOrigin, sx, sy, shadowColor);
     }
 
     EndRender();
