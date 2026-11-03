@@ -74,6 +74,11 @@
 	color: token(text-disabled);
 	cursor: default;
 }
+.job-label {
+	display: block;
+	width: 100%;
+	white-space: nowrap;
+}
 
 .stat-panel, .desc-panel {
 	position: absolute;
@@ -103,7 +108,14 @@
 	left: 22px;
 }
 .stat-label {
+	display: block;
+	width: 52px;
 	color: token(text-primary);
+}
+.stat-label-text {
+	display: block;
+	width: 100%;
+	white-space: nowrap;
 }
 .stat-value {
 	position: absolute;

@@ -23,15 +23,15 @@
 
 		<div class="job-btn" data-for="job : jobs" data-class-checked="job.checked" data-class-disabled="job.disabled"
 		     data-attr-job="job.key"
-		     data-event-click="charmake_select_job(it_index)">{{job.label}}</div>
+		     data-event-click="charmake_select_job(it_index)"><span class="job-label text-fit">{{job.label}}</span></div>
 
 		<div id="stat_panel" class="stat-panel">
 			<div class="stat-bg" data-class-tall="dark_lord_extra"></div>
-			<div class="stat-row stat-row-0"><span class="stat-label">{{stat_label0}}</span><span class="stat-value">{{stat_value0}}</span></div>
-			<div class="stat-row stat-row-1"><span class="stat-label">{{stat_label1}}</span><span class="stat-value">{{stat_value1}}</span></div>
-			<div class="stat-row stat-row-2"><span class="stat-label">{{stat_label2}}</span><span class="stat-value">{{stat_value2}}</span></div>
-			<div class="stat-row stat-row-3"><span class="stat-label">{{stat_label3}}</span><span class="stat-value">{{stat_value3}}</span></div>
-			<div class="stat-row stat-row-4" data-class-hidden="!dark_lord_extra"><span class="stat-label">{{stat_label4}}</span><span class="stat-value">25</span></div>
+			<div class="stat-row stat-row-0"><span class="stat-label"><span class="stat-label-text text-fit">{{stat_label0}}</span></span><span class="stat-value">{{stat_value0}}</span></div>
+			<div class="stat-row stat-row-1"><span class="stat-label"><span class="stat-label-text text-fit">{{stat_label1}}</span></span><span class="stat-value">{{stat_value1}}</span></div>
+			<div class="stat-row stat-row-2"><span class="stat-label"><span class="stat-label-text text-fit">{{stat_label2}}</span></span><span class="stat-value">{{stat_value2}}</span></div>
+			<div class="stat-row stat-row-3"><span class="stat-label"><span class="stat-label-text text-fit">{{stat_label3}}</span></span><span class="stat-value">{{stat_value3}}</span></div>
+			<div class="stat-row stat-row-4" data-class-hidden="!dark_lord_extra"><span class="stat-label"><span class="stat-label-text text-fit">{{stat_label4}}</span></span><span class="stat-value">25</span></div>
 		</div>
 
 		<!-- desc-line-1/-2 use classes, not inline style like stat-row, so modern can add

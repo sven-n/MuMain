@@ -127,6 +127,11 @@
 	border-color: token(border-recessed);
 	opacity: 0.7;
 }
+.job-label {
+	display: block;
+	width: 100%;
+	white-space: nowrap;
+}
 
 .stat-panel, .desc-panel {
 	position: absolute;
@@ -170,9 +175,16 @@
 	border-bottom: 1px token(border-recessed);
 }
 .stat-label {
+	display: block;
+	width: 52px;
 	color: token(text-secondary);
 	font-size: 9px;
 	font-family: "token(font-body)";
+}
+.stat-label-text {
+	display: block;
+	width: 100%;
+	white-space: nowrap;
 }
 .stat-value {
 	position: absolute;
