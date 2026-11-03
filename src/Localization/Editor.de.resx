@@ -469,6 +469,63 @@
   <data name="Looks" xml:space="preserve">
     <value>Aussehen</value>
   </data>
+  <data name="Meshes" xml:space="preserve">
+    <value>Meshes</value>
+  </data>
+  <data name="Mesh list note" xml:space="preserve">
+    <value>Zeigt die Maus auf eine Zeile, zeigt die Vorschau ihr Mesh allein und die anderen durchsichtig; ein Klick hält es fest, ein zweiter lässt es los. Ein Klick auf einen Teil der Vorschau findet seine Zeile.</value>
+  </data>
+  <data name="No meshes loaded" xml:space="preserve">
+    <value>Das Modell ist nicht geladen, es gibt keine Meshes.</value>
+  </data>
+  <data name="Mesh texture" xml:space="preserve">
+    <value>Textur</value>
+  </data>
+  <data name="Mesh marks" xml:space="preserve">
+    <value>Merkmale</value>
+  </data>
+  <data name="Mesh used by" xml:space="preserve">
+    <value>Verwendet von</value>
+  </data>
+  <data name="Mesh hidden" xml:space="preserve">
+    <value>versteckt</value>
+  </data>
+  <data name="Mesh glows" xml:space="preserve">
+    <value>leuchtet</value>
+  </data>
+  <data name="Mesh scrolls" xml:space="preserve">
+    <value>läuft</value>
+  </data>
+  <data name="Mesh no chrome" xml:space="preserve">
+    <value>kein Chrom</value>
+  </data>
+  <data name="Mesh holes" xml:space="preserve">
+    <value>Löcher</value>
+  </data>
+  <data name="Mesh all but this one" xml:space="preserve">
+    <value>alle außer diesem</value>
+  </data>
+  <data name="Mesh texture file 0" xml:space="preserve">
+    <value>Geladen aus {0}</value>
+  </data>
+  <data name="Mesh texture size 0 1" xml:space="preserve">
+    <value>{0} x {1}, wie das Spiel sie nutzt</value>
+  </data>
+  <data name="Mesh texture not loaded" xml:space="preserve">
+    <value>Die Textur ist nicht geladen.</value>
+  </data>
+  <data name="Mesh counts 0 1" xml:space="preserve">
+    <value>{0} Eckpunkte, {1} Dreiecke</value>
+  </data>
+  <data name="Mesh never drawn" xml:space="preserve">
+    <value>Wird nie gezeichnet; die Vorschau kann es nicht allein zeigen.</value>
+  </data>
+  <data name="Mesh code looks note" xml:space="preserve">
+    <value>Darstellungsstil und Gegenstandseffekt sind Zeichencode: welche Meshes sie zeichnen, steht hier, sobald sie Daten sind.</value>
+  </data>
+  <data name="Preview pick note" xml:space="preserve">
+    <value>Ein Klick auf einen Teil findet sein Mesh in der Mesh-Liste.</value>
+  </data>
   <data name="Model file" xml:space="preserve">
     <value>Modelldatei</value>
   </data>

@@ -4,15 +4,21 @@
 
 #include "ItemModelPreview.h"
 
+#include "ItemMeshFocus.h"
+#include "ItemMeshPreviewDrawer.h"
+
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewInput.h"
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewSubject.h"
+#include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "I18N/All.h"
+#include "Render/Models/ZzzBMD.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "UI/Common/ScopedOffscreenCapture.h"
 #include "imgui.h"
 
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 
 namespace MuEditor::Items
@@ -25,6 +31,35 @@ constexpr float MinViewHeight = 160.0f;
 constexpr float MaxViewHeight = 360.0f;
 constexpr int MaxItemLevel = 15;
 constexpr float LevelWidth = 120.0f;
+
+// After the view: a left click that did not turn it gives the ray through the clicked point.
+std::optional<MeshPicking::Ray> ClickedRay(const MuEditor::Effects::EffectPreviewCamera& camera, const ImVec2& min,
+                                           const ImVec2& max)
+{
+    if (!ImGui::IsItemDeactivated() || !ImGui::IsMouseReleased(ImGuiMouseButton_Left))
+    {
+        return std::nullopt;
+    }
+    const ImGuiIO& io = ImGui::GetIO();
+    const float threshold = io.MouseDragThreshold;
+    if (io.MouseDragMaxDistanceSqr[ImGuiMouseButton_Left] > threshold * threshold)
+    {
+        return std::nullopt;
+    }
+    const float width = max.x - min.x;
+    const float height = max.y - min.y;
+    if (width <= 0.0f || height <= 0.0f)
+    {
+        return std::nullopt;
+    }
+    const float viewX = (io.MousePos.x - min.x) / width * 2.0f - 1.0f;
+    const float viewY = 1.0f - (io.MousePos.y - min.y) / height * 2.0f;
+    if (std::abs(viewX) > 1.0f || std::abs(viewY) > 1.0f)
+    {
+        return std::nullopt;
+    }
+    return MeshPicking::RayThroughView(camera, width / height, viewX, viewY);
+}
 } // namespace
 
 void CItemModelPreview::Render(int itemType)
@@ -88,6 +123,12 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
     MuEditor::Effects::PreviewInput::RenderView("##ModelView", width, height, m_camera);
     const ImVec2 min = ImGui::GetItemRectMin();
     const ImVec2 max = ImGui::GetItemRectMax();
+    const std::optional<MeshPicking::Ray> pickRay = ClickedRay(m_camera, min, max);
+    if (ImGui::IsItemHovered() && !ImGui::IsItemActive())
+    {
+        // Over the effect browser's controls text, which RenderView set.
+        ImGui::SetTooltip("%s %s", I18N::Editor::PreviewControls, I18N::Editor::PreviewPickNote);
+    }
     const MuEditor::Effects::PreviewFraming framing = m_scene.Prepare(request);
     if (m_framedItemType != request.itemType)
     {
@@ -113,7 +154,7 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
             return;
         }
         const MuEditor::ScopedOffscreenCapture endCapture;
-        m_scene.Draw(request, m_camera, width / height);
+        DrawScene(request, width / height, pickRay);
     }
     else
     {
@@ -123,6 +164,22 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
     if (void* pointer = texture != 0 ? mu::GetRenderer().GetTexturePointer(texture) : nullptr)
     {
         ImGui::GetWindowDrawList()->AddImage((ImTextureID)(intptr_t)pointer, min, max);
+    }
+}
+
+void CItemModelPreview::DrawScene(const MuEditor::Effects::EffectPreviewRequest& request, float aspect,
+                                  const std::optional<MeshPicking::Ray>& pickRay)
+{
+    const BMD* model = &Models[Data::Items::ToModelSlot(request.itemType)];
+    std::optional<int> hitMesh;
+    {
+        CItemMeshPreviewDrawer drawer(model, g_ItemMeshFocus.Shown(), pickRay);
+        m_scene.Draw(request, m_camera, aspect);
+        hitMesh = drawer.HitMesh();
+    }
+    if (pickRay)
+    {
+        g_ItemMeshFocus.Pick(hitMesh);
     }
 }
 } // namespace MuEditor::Items

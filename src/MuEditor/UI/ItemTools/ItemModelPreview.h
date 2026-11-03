@@ -5,6 +5,9 @@
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewCamera.h"
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewScene.h"
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewTarget.h"
+#include "ItemMeshPicking.h"
+
+#include <optional>
 
 namespace MuEditor::Items
 {
@@ -13,7 +16,8 @@ namespace MuEditor::Items
 // turns it or as it lies on the ground: drawn like the effect browser draws an
 // item (EffectPreviewScene), into a texture. The mouse turns the camera
 // (EffectPreviewInput: the middle button moves the picture, the wheel zooms,
-// a double click puts it back).
+// a double click puts it back). The mesh the mesh list or a mesh field shows is drawn alone, the others
+// see-through, and a click on a part keeps its mesh (g_ItemMeshFocus).
 class CItemModelPreview
 {
 public:
@@ -42,6 +46,8 @@ public:
 private:
     void RenderControls();
     void RenderView(const MuEditor::Effects::EffectPreviewRequest& request);
+    void DrawScene(const MuEditor::Effects::EffectPreviewRequest& request, float aspect,
+                   const std::optional<MeshPicking::Ray>& pickRay);
 
     MuEditor::Effects::EffectPreviewCamera m_camera;
     MuEditor::Effects::EffectPreviewScene m_scene;
