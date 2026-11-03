@@ -241,7 +241,6 @@ jobs:
           --output-on-failure
           --no-tests=error
           --label-exclude static
-          --parallel 4
 
       - name: Stage MSVC redistributable runtime
         shell: pwsh
@@ -535,7 +534,7 @@ jobs:
             out/build/linux-ci/_deps/*-src
             out/build/linux-ci/_deps/*-subbuild
             .nuget
-          key: linux-x64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          key: linux-x64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: linux-x64-release-dep-sources-
 
       - name: Configure CMake
@@ -659,7 +658,7 @@ jobs:
             out/build/macos-ci/_deps/*-src
             out/build/macos-ci/_deps/*-subbuild
             .nuget
-          key: macos-arm64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          key: macos-arm64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'cmake/patches/**', 'cmake/ApplyGitPatch.cmake', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: macos-arm64-release-dep-sources-
 
       - name: Configure CMake
