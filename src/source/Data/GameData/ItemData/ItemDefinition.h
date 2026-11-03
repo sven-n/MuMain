@@ -447,4 +447,25 @@ struct ItemDefinition
     // All fields; the item editor's undo compares definitions with it.
     bool operator==(const ItemDefinition& other) const = default;
 };
+
+// Calls `visit` with each line of the item's own that its tooltip writes: its description lines, its name lines and
+// the lines it adds to its tooltip layout. `definition` may be const or not, and so is each line then.
+template <typename TDefinition, typename TVisit> void ForEachItemTooltipLine(TDefinition& definition, TVisit&& visit)
+{
+    for (auto& line : definition.description)
+    {
+        visit(line);
+    }
+    for (auto& line : definition.nameLines)
+    {
+        visit(line);
+    }
+    for (auto& addition : definition.tooltipLayoutChanges.add)
+    {
+        for (auto& line : addition.lines)
+        {
+            visit(line);
+        }
+    }
+}
 } // namespace Data::Items

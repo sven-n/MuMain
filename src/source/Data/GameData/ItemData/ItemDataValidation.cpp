@@ -75,7 +75,8 @@ struct TooltipLineOf
     std::string field;
 };
 
-// The item's description lines, then its name lines.
+// The lines ForEachItemTooltipLine walks (the description lines, the name lines, the added lines), each with its
+// field in the item file.
 std::vector<TooltipLineOf> TooltipLinesOf(const ItemDefinition& definition)
 {
     std::vector<TooltipLineOf> lines;
@@ -108,12 +109,6 @@ std::string TextField(const std::string& lineField, std::string_view locale)
         field += "." + std::string(locale);
     }
     return field;
-}
-
-// The field of a description line's text in one language.
-std::string DescriptionTextField(size_t line, std::string_view locale)
-{
-    return TextField("description[" + std::to_string(line) + "]", locale);
 }
 
 std::string ListPlaceholders(const std::set<std::string>& names)
@@ -1021,23 +1016,9 @@ void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const 
                 }
             }
         };
-        for (size_t index = 0; index < definition.description.size(); ++index)
+        for (const auto& [line, field] : TooltipLinesOf(definition))
         {
-            warnAbout(definition.description[index].text, DescriptionTextField(index, LocalizedString::NeutralLocale));
-        }
-        for (size_t index = 0; index < definition.nameLines.size(); ++index)
-        {
-            warnAbout(definition.nameLines[index].text, "nameLines[" + std::to_string(index) + "].text");
-        }
-        const std::vector<ItemTooltipLayoutAddition>& additions = definition.tooltipLayoutChanges.add;
-        for (size_t addition = 0; addition < additions.size(); ++addition)
-        {
-            for (size_t index = 0; index < additions[addition].lines.size(); ++index)
-            {
-                warnAbout(additions[addition].lines[index].text, "tooltipLayoutChanges.add[" +
-                                                                     std::to_string(addition) + "].lines[" +
-                                                                     std::to_string(index) + "].text");
-            }
+            warnAbout(line->text, TextField(field, LocalizedString::NeutralLocale));
         }
         for (const ItemLevelValues& levelValues : definition.levelValues)
         {
