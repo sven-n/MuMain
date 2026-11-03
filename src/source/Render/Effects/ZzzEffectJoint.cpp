@@ -6739,7 +6739,7 @@ void MoveJoint(JOINT* o, int iIndex)
                             BMD* b = &Models[MODEL_SHADOW_BODY];
                             b->Animation(BoneTransform, 0.f, 0.f, 0, o->Target->Angle, o->Target->HeadAngle, false, true);
                             // DXP-20 increment 2: this Transform() call feeds nothing but
-                            // RenderMeshEffect(0, ...)'s read of mesh 0's positions below -- no other
+                            // SpawnMeshEffects(0, ...)'s read of mesh 0's positions below -- no other
                             // draw or OBB dependency for this model, so it's a genuine standalone win.
                             // Map editor keeps the full path for OBB accuracy (o->Target->OBB is a
                             // real game object's picking box).
@@ -6757,11 +6757,11 @@ void MoveJoint(JOINT* o, int iIndex)
 
                             if (o->SubType == 0)
                             {
-                                b->RenderMeshEffect(0, MODEL_SKIN_SHELL);
+                                b->SpawnMeshEffects(0, MODEL_SKIN_SHELL);
                             }
                             else if (o->SubType == 1)
                             {
-                                b->RenderMeshEffect(0, MODEL_SKIN_SHELL, 1);
+                                b->SpawnMeshEffects(0, MODEL_SKIN_SHELL, 1);
                             }
                         }
                     }

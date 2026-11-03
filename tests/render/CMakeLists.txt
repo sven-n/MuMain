@@ -319,11 +319,28 @@ add_test(
 set(MU_DRAW_WRITES_FIXTURES "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/draw_writes")
 add_test(NAME draws_take_game_objects_read_only
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_draws_read_only.py" "${CMAKE_SOURCE_DIR}/src/source")
-foreach(fixture IN ITEMS writable_parameter writable_local)
+# Each fixture with the offence the check must report for it (a crash would not match).
+foreach(case IN ITEMS
+        "writable_parameter|takes a writable OBJECT[*] o"
+        "const_pointer_parameter|takes a writable OBJECT[*] const o"
+        "indented_member|RenderThing takes a writable"
+        "indented_namespace|RenderThing takes a writable OBJECT[*] o"
+        "comment_hides_parameter|takes a writable OBJECT[*] p"
+        "writable_local|declares a writable CHARACTER[*] c"
+        "auto_pointer|declares a writable auto[*] o"
+        "auto_reference|declares a writable auto& c"
+        "copy_reaches_owner|reaches Owner through its copy copy"
+        "copy_owner_address|declares a writable OBJECT[*] owner = &copy.Owner"
+        "copy_out_of_scope|declares a writable OBJECT[*] p = &live"
+        "comment_brace|declares a writable OBJECT[*] o = &Objects"
+        "comment_value|declares a writable OBJECT[*] o = &global")
+    string(REPLACE "|" ";" case "${case}")
+    list(GET case 0 fixture)
+    list(GET case 1 offence)
     add_test(NAME draws_read_only_check_catches_${fixture}
         COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_draws_read_only.py"
                 "${MU_DRAW_WRITES_FIXTURES}/${fixture}")
-    set_tests_properties(draws_read_only_check_catches_${fixture} PROPERTIES WILL_FAIL TRUE)
+    set_tests_properties(draws_read_only_check_catches_${fixture} PROPERTIES PASS_REGULAR_EXPRESSION "${offence}")
 endforeach()
 add_test(NAME draws_read_only_check_passes_copies
     COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_draws_read_only.py"

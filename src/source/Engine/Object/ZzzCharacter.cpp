@@ -4802,7 +4802,7 @@ void MoveCharacter(CHARACTER* c, OBJECT* o)
                     }
                     PlayBuffer(SOUND_HIT_CRISTAL);
                 }
-                battleCastle::RenderMonsterHitEffect(to);
+                battleCastle::SpawnMonsterHitEffect(to);
             }
             if (o->CurrentAction >= PLAYER_ATTACK_SKILL_SWORD1 && o->CurrentAction <= PLAYER_ATTACK_SKILL_SWORD5)
             {

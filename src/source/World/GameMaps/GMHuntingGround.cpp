@@ -377,13 +377,13 @@ bool M31HuntingGround::UpdateHuntingGroundMonsterEffects(CHARACTER* pCharacter, 
         {
         case MODEL_FIRE_GOLEM:
             SkinObjectMeshes(pObject, pModel, true);
-            pModel->RenderMeshEffect(0, MODEL_GOLEM_STONE);
+            pModel->SpawnMeshEffects(0, MODEL_GOLEM_STONE);
             pObject->Live = false;
             PlayBuffer(SOUND_BC_FIREGOLEM_DIE);
             break;
         case MODEL_POISON_GOLEM:
             SkinObjectMeshes(pObject, pModel, true);
-            pModel->RenderMeshEffect(0, MODEL_GOLEM_STONE, 1);
+            pModel->SpawnMeshEffects(0, MODEL_GOLEM_STONE, 1);
             pObject->Live = false;
             PlayBuffer(SOUND_BC_POISONGOLEM_DIE);
             break;

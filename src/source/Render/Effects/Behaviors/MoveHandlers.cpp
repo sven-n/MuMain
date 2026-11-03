@@ -4096,7 +4096,7 @@ namespace Render::Effects::Behaviors
         case 3:
             if (o->LifeTime < 250 + 50 + (34 - o->Skill) * 5)
             {
-                //RenderMeshEffect
+                // SpawnMeshEffects
                 if (o->Position[2] > 350)//o->StartPosition[2])
                 {
                     if (o->Direction[0] == 0 && o->Direction[1] == 0 && o->Direction[2] == 0)

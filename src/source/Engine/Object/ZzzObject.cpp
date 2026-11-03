@@ -2601,7 +2601,7 @@ void UpdateRenderObjectEffects(OBJECT* o)
 
             PlayBuffer(SOUND_HIT_GATE2);
             SkinObjectMeshes(o, b, true);
-            b->RenderMeshEffect(0, MODEL_STONE_COFFIN);
+            b->SpawnMeshEffects(0, MODEL_STONE_COFFIN);
         }
         break;
     case MODEL_CASTLE_GATE:
@@ -2611,7 +2611,7 @@ void UpdateRenderObjectEffects(OBJECT* o)
 
             PlayBuffer(SOUND_HIT_GATE2);
             SkinObjectMeshes(o, b, true);
-            b->RenderMeshEffect(0, MODEL_GATE);
+            b->SpawnMeshEffects(0, MODEL_GATE);
         }
         break;
     case MODEL_FLY_BIG_STONE1:
@@ -2620,7 +2620,7 @@ void UpdateRenderObjectEffects(OBJECT* o)
         {
             o->HiddenMesh = -2;
             SkinObjectMeshes(o, b, false);
-            b->RenderMeshEffect(0, o->Type == MODEL_FLY_BIG_STONE1 ? MODEL_BIG_STONE_PART1 : MODEL_BIG_STONE_PART2);
+            b->SpawnMeshEffects(0, o->Type == MODEL_FLY_BIG_STONE1 ? MODEL_BIG_STONE_PART1 : MODEL_BIG_STONE_PART2);
         }
         break;
     case MODEL_VALKYRIE:
@@ -6636,13 +6636,11 @@ void ItemHeight(int Type, BMD* b)
     b->BodyHeight = Render::Items::Display::GetGroundDisplay(Type).bodyHeight;
 }
 
-void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
+void RenderZen(int itemIndex, const ITEM_t* item, vec3_t light)
 {
     constexpr int MaxRenderedZenCoins = 12;
-    auto o = &item->Object;
+    const auto* o = &item->Object;
     auto k = itemIndex;
-    vec3_t tempPosition;
-    VectorCopy(o->Position, tempPosition);
 
     int coinCount = static_cast<int>(sqrtf(static_cast<float>(Items[k].Item.Level))) / 2;
 
@@ -6676,8 +6674,8 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
         AngleMatrix(randomAngle, angleMatrix);
         VectorRotate(randomRadius, angleMatrix, randomPosition);
 
-        VectorAdd(tempPosition, randomPosition, o->Position);
-        VectorCopy(o->Position, b->BodyOrigin);
+        // Each coin is drawn at its own place around the item.
+        VectorAdd(o->Position, randomPosition, b->BodyOrigin);
         b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, true);
 
         target_vertex_index = b->AddToCoinHeap(i, target_vertex_index);
@@ -6685,8 +6683,6 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
 
     b->EndRenderCoinHeap(coinCount);
     b->EndRender();
-
-    VectorCopy(tempPosition, o->Position);
 }
 
 // Render dropped items and fall animation and camera rotation for items on the ground
