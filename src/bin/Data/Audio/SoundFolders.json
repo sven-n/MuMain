@@ -175,9 +175,21 @@
               ]
             },
             {
+              "name": "Falling Slash",
+              "sounds": [
+                "SOUND_SKILL_SWORD1"
+              ]
+            },
+            {
               "name": "Impale",
               "sounds": [
                 "SOUND_RIDINGSPEAR"
+              ]
+            },
+            {
+              "name": "Lunge",
+              "sounds": [
+                "SOUND_SKILL_SWORD2"
               ]
             },
             {
@@ -198,6 +210,18 @@
               "name": "Swell Life",
               "sounds": [
                 "SOUND_SWELLLIFE"
+              ]
+            },
+            {
+              "name": "Twisting Slash",
+              "sounds": [
+                "SOUND_SKILL_SWORD4"
+              ]
+            },
+            {
+              "name": "Uppercut",
+              "sounds": [
+                "SOUND_SKILL_SWORD3"
               ]
             }
           ]
@@ -458,33 +482,9 @@
           "name": "Shared",
           "folders": [
             {
-              "name": "Cyclone",
-              "sounds": [
-                "SOUND_SKILL_SWORD4"
-              ]
-            },
-            {
               "name": "Defense",
               "sounds": [
                 "SOUND_SKILL_DEFENSE"
-              ]
-            },
-            {
-              "name": "Falling Slash",
-              "sounds": [
-                "SOUND_SKILL_SWORD1"
-              ]
-            },
-            {
-              "name": "Lunge",
-              "sounds": [
-                "SOUND_SKILL_SWORD2"
-              ]
-            },
-            {
-              "name": "Uppercut",
-              "sounds": [
-                "SOUND_SKILL_SWORD3"
               ]
             }
           ]
