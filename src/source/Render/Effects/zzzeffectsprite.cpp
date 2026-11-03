@@ -200,7 +200,7 @@ void RenderSprites(BYTE byRenderOneMore)
 
     for (int i = 0; i < MAX_SPRITES; i++)
     {
-        OBJECT* o = &Sprites[i];
+        const OBJECT* o = &Sprites[i];
         if (byRenderOneMore == 1)
         {
             if (o->Position[2] > 350.f)

@@ -42,7 +42,6 @@ void RenderSprites(BYTE byRenderOneMore = 0);
 Render::EffectDrawing::SpriteDraw DescribeSprite(const OBJECT& sprite, bool bloomExcluded);
 
 void AnimationFlag();
-void RenderFlag(OBJECT* o, vec3_t Light, int Tex1, int Tex2);
 
 int CreateParticle(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0, float Scale = 1.f,
                    OBJECT* Owner = NULL);

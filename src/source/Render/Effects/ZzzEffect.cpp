@@ -8271,7 +8271,7 @@ void RenderEffects(bool bRenderBlendMesh)
                     {
                         const OBJECT* pObject = o;
                         BMD* pModel = &Models[pObject->Type];
-                        OBJECT* pOwner = pObject->Owner;
+                        const OBJECT* pOwner = pObject->Owner;
                         BMD* pOwnerModel = &Models[pOwner->Type];
 
                         vec3_t vPos, p;
@@ -8910,7 +8910,7 @@ void RenderAfterEffects()
     int iEffectSize = MAX_EFFECTS + g_SkillEffects.GetSize();
     for (int i = 0; i < iEffectSize; ++i)
     {
-        OBJECT* o;
+        const OBJECT* o;
         if (i < MAX_EFFECTS)
         {
             o = &Effects[i];
@@ -9332,7 +9332,7 @@ void RenderEffectShadows()
     int iEffectSize = MAX_EFFECTS + g_SkillEffects.GetSize();
     for (int i = 0; i < iEffectSize; ++i)
     {
-        OBJECT* o;
+        const OBJECT* o;
         if (i < MAX_EFFECTS)
         {
             o = &Effects[i];

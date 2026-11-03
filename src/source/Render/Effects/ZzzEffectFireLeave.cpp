@@ -573,7 +573,7 @@ void RenderLeaves()
     for (int i = 0; i < MAX_LEAVES; i++)
 #endif // DEVIAS_XMAS_EVENT
     {
-        PARTICLE* o = &Leaves[i];
+        const PARTICLE* o = &Leaves[i];
         if (o->Live
             && Bitmaps.FindTexture(o->Type)
             )

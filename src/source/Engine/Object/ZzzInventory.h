@@ -238,7 +238,8 @@ std::wstring GetItemDisplayName(ITEM* pItem);
 void GetSpecialOptionText(int Type, wchar_t* Text, WORD Option, BYTE Value, int iMana);
 // The item's information and repair tooltips, anchored in window pixels: their layout runs in the
 // screen's 640x480 stretch, the space the original computed it in, whichever window asks.
-void RenderItemInfoAtPx(float x, float y, ITEM* ip, bool Sell, int Inventype = 0, bool bItemTextListBoxUse = false);
+void RenderItemInfoAtPx(float x, float y, const ITEM* ip, bool Sell, int Inventype = 0,
+                        bool bItemTextListBoxUse = false);
 // One line of an item's information tooltip as RenderItemInfoAtPx builds it: its text ("\n" for a blank line), its
 // TEXT_COLOR_* and whether it is bold.
 struct ItemTooltipLine
@@ -254,7 +255,7 @@ void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure);
 // no tooltip or the pet manager draws its own (the Dark Lord's pets).
 std::vector<ItemTooltipLine> BuildItemTooltipLines(ITEM* ip, bool Sell, int Inventype = 0,
                                                    bool bItemTextListBoxUse = false);
-void RenderRepairInfoAtPx(float x, float y, ITEM* ip, bool Sell);
+void RenderRepairInfoAtPx(float x, float y, const ITEM* ip, bool Sell);
 // What BuildRepairInfoText built: the count of lines, and what a click on the item does in repair mode.
 struct RepairInfoText
 {
@@ -265,7 +266,7 @@ struct RepairInfoText
 };
 // Fills TextList, TextListColor and TextBold with the repair tooltip's lines for the item, as RenderRepairInfoAtPx
 // shows them; leaves RepairEnable to the caller that draws them.
-RepairInfoText BuildRepairInfoText(ITEM* ip);
+RepairInfoText BuildRepairInfoText(const ITEM* ip);
 // A drop's name on the ground (Alt, or the pointer over it): its text, colors and whether its font is bold.
 struct GroundItemLabel
 {
@@ -274,7 +275,7 @@ struct GroundItemLabel
     DWORD backgroundColor;
     bool bold;
 };
-GroundItemLabel DescribeGroundItemLabel(const OBJECT* o, ITEM* ip);
+GroundItemLabel DescribeGroundItemLabel(const OBJECT* o, const ITEM* ip);
 void RenderSkillInfo(int sx, int sy, int Type, int SkillNum = 0, int iRenderPoint = STRP_NONE);
 void RequireClass(ITEM_ATTRIBUTE* p);
 unsigned int getGoldColor(DWORD Gold);
@@ -285,7 +286,7 @@ bool IsMoneyItem(ITEM* pItem);
 
 void ComputeItemInfo(int iHelpItem);
 void SetGroundItemLabelBuildBudget(int buildBudget);
-void RenderItemName(int i, const OBJECT* o, ITEM* ip, bool Sort);
+void RenderItemName(int i, const OBJECT* o, const ITEM* ip, bool Sort);
 
 BYTE CaculateFreeTicketLevel(int iType);
 

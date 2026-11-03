@@ -315,6 +315,20 @@ add_test(
         -P "${CMAKE_CURRENT_SOURCE_DIR}/test_no_nested_fps_gate.cmake"
 )
 
+# Draws take the game's objects read-only (ADR 0003): the game's sources, and fixtures the check must catch or pass.
+set(MU_DRAW_WRITES_FIXTURES "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/draw_writes")
+add_test(NAME draws_take_game_objects_read_only
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_draws_read_only.py" "${CMAKE_SOURCE_DIR}/src/source")
+foreach(fixture IN ITEMS writable_parameter writable_local)
+    add_test(NAME draws_read_only_check_catches_${fixture}
+        COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_draws_read_only.py"
+                "${MU_DRAW_WRITES_FIXTURES}/${fixture}")
+    set_tests_properties(draws_read_only_check_catches_${fixture} PROPERTIES WILL_FAIL TRUE)
+endforeach()
+add_test(NAME draws_read_only_check_passes_copies
+    COMMAND "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/check_draws_read_only.py"
+            "${MU_DRAW_WRITES_FIXTURES}/clean")
+
 # The owned-random guard reads the compiled objects: the game's (the editor's too, when it is built) and two fixture
 # sets, one that calls the CRT's rand() or srand() in every spelling and one that does not.
 if(MSVC)

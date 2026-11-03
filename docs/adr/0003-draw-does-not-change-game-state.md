@@ -131,6 +131,11 @@ drawer, and the renderer applies the active look per draw.
 - The Battle Castle Guardian Statue and Cannon Tower take the pulse their
   dark aurora's draw wrote into their light from their update, one frame
   earlier than they did.
+- The name tags of the selected NPC or player (every player's, for a GM
+  observing) are kept by the name window's update, not its draw.
+- A Dark Horse's tooltip shows its defense option from a copy; hovering the
+  item no longer adds the option to it. The update adds it to the equipped
+  one, as before.
 
 ## Consequences
 
@@ -156,9 +161,13 @@ drawer, and the renderer applies the active look per draw.
   bones of its own. Nothing a draw does reaches the plan, so no pass can
   choose what the next update advances or how.
 - Visibility, drawn-frame marks and pick boxes come from the cull at the end
-  of the update. A draw may still set its own parameters on the object it is
-  drawing and put them back (a mesh to hide, a light for one part); D5 turns
-  those into locals when the draws take their objects as read-only.
+  of the update.
+- A draw takes the objects it draws as `const`. A look for one draw (a light,
+  a mesh to hide, a shadow pass) is the draw's own value, handed down; an
+  object drawn somewhere else, turned or as something else is drawn from a
+  copy, which `Random::DrawnAs` keys as the object for the draw's randomness
+  and records. A draw that needs to change something is update code: it moves
+  to the update, and a function named for drawing that only spawns is renamed.
 
 ## Enforcement
 
@@ -171,6 +180,11 @@ drawer, and the renderer applies the active look per draw.
   sequence's state and the draws' own `DrawRand` / `DrawFpsCheck` report
   nothing. Every build logs each offending caller once to the error log, with
   or without the control socket. Tests read the count and the last caller.
+- **Every test run:** `draws_take_game_objects_read_only` reads the game's
+  sources: a function named `Render*`, `Draw*` or `Describe*` takes no writable
+  object, character, part, joint, particle or item, and declares no writable
+  pointer to one except to a copy of its own. Fixtures check that it catches
+  both.
 - **The compiled game:** `game_random_is_owned` reads the undefined symbols
   of the game's objects and fails if any calls the CRT's `rand()` or
   `srand()`, a second sequence nothing can see.

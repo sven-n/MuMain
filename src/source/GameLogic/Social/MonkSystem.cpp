@@ -1080,7 +1080,7 @@ bool CMonkSystem::IsConsecutiveAtt(float _fAttFrame)
     return false;
 }
 
-void CMonkSystem::RenderRepeatedly(int _Key, OBJECT* pObj)
+void CMonkSystem::CreateRepeatedDamagePoints(int _Key, OBJECT* pObj)
 {
     vec3_t Position, Light, Light2;
     VectorCopy(pObj->Position, Position);

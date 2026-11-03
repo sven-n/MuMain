@@ -203,7 +203,7 @@ bool GetUseLostMap(bool bDrawAlert)
     return false;
 }
 
-int RenderHellasItemInfo(ITEM* ip, int textNum)
+int RenderHellasItemInfo(const ITEM* ip, int textNum)
 {
     int TextNum = textNum;
     switch (ip->Type)

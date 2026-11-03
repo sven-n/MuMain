@@ -160,7 +160,7 @@ bool M38Kanturu2nd::AttackEffect_Kanturu2nd_Monster(CHARACTER* c, OBJECT* o, BMD
     break;
     case MODEL_TRAP_CANON:
     {
-        g_TrapCanon.Render_AttackEffect(c, o, b);
+        g_TrapCanon.Spawn_AttackEffect(c, o, b);
         return true;
     }
     break;
@@ -1204,7 +1204,7 @@ bool M38Kanturu2nd::Update_Kanturu2nd_MonsterEffects(CHARACTER* c, OBJECT* o, BM
     break;
     case MODEL_TRAP_CANON:
     {
-        g_TrapCanon.Render_Object_Visual(c, o, b);
+        g_TrapCanon.Spawn_Object_Visual(c, o, b);
     }
     break;
     }
@@ -1431,7 +1431,7 @@ void CTrapCanon::Render_Object(const OBJECT* o, DrawLook& look, BMD* b)
     b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, 2, fLumi, look.blendMeshU, look.blendMeshV);
 }
 
-void CTrapCanon::Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
+void CTrapCanon::Spawn_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (c->AttackTime < 1)
     {
@@ -1454,7 +1454,7 @@ void CTrapCanon::Render_Object_Visual(CHARACTER* c, OBJECT* o, BMD* b)
     }
 }
 
-void CTrapCanon::Render_AttackEffect(CHARACTER* c, OBJECT* o, BMD* b)
+void CTrapCanon::Spawn_AttackEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
     if (c->CheckAttackTime(1))
     {

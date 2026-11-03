@@ -546,9 +546,9 @@ void Draw_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon
 
             for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
             {
-                CHARACTER* c = &CharactersClient[i];
-                OBJECT* oa = &c->Object;
-                OBJECT* ob = o->Owner;
+                const CHARACTER* c = &CharactersClient[i];
+                const OBJECT* oa = &c->Object;
+                const OBJECT* ob = o->Owner;
 
                 if (oa == ob)
                 {
@@ -4329,7 +4329,7 @@ void RenderObjects()
     g_ObjectThumbnail.ProcessPendingRequests();
 #endif
 
-    for (OBJECT* o : s_objectsToDraw)
+    for (const OBJECT* o : s_objectsToDraw)
     {
         RenderObject(o);
         RenderObjectVisual(o);
@@ -4340,7 +4340,7 @@ void RenderObjects()
     {
         if (!ob.Visible && !g_Camera.TopViewEnable)
             continue;
-        for (OBJECT* o = ob.Head; o != nullptr; o = o->Next)
+        for (const OBJECT* o = ob.Head; o != nullptr; o = o->Next)
         {
             if (!o->Live)
                 continue;
@@ -4494,7 +4494,7 @@ void RenderObjects_AfterCharacter()
 
             if (g_Direction.m_CKanturu.IsMayaScene())
             {
-                OBJECT* o = ob->Head;
+                const OBJECT* o = ob->Head;
 
                 while (1)
                 {
@@ -4521,7 +4521,7 @@ void RenderObjects_AfterCharacter()
                 || IsDoppelGanger2()
                 )
             {
-                OBJECT* o = ob->Head;
+                const OBJECT* o = ob->Head;
 
                 while (1)
                 {
@@ -4557,7 +4557,7 @@ void RenderObjects_AfterCharacter()
 
             if (ob->Visible || g_Camera.TopViewEnable)
             {
-                OBJECT* o = ob->Head;
+                const OBJECT* o = ob->Head;
                 while (1)
                 {
                     if (o != NULL)
@@ -6735,7 +6735,7 @@ void RenderItems()
     const mu::ScopedBloomExclusion classicItems;
     for (int i = 0; i < MAX_ITEMS; i++)
     {
-        OBJECT* o = &Items[i].Object;
+        const OBJECT* o = &Items[i].Object;
         if (o->Live)
         {
 #ifdef _EDITOR
@@ -6777,17 +6777,15 @@ void RenderItems()
                     Vector(1.0f, 1.0f, 1.0f, Light);
                 }
 
-                vec3_t vBackup;
-                VectorCopy(o->Position, vBackup);
-                DrawnItemPosition(i, vBackup, o->Position);
-
-                RenderPartObject(o, o->Type, NULL, Light, o->Alpha, DrawnItemLevel(Items[i].Item),
+                // Drawn from a copy at the item's drawn place.
+                OBJECT drawn = *o;
+                const Random::DrawnAs drawnAs(&drawn, o);
+                DrawnItemPosition(i, o->Position, drawn.Position);
+                RenderPartObject(&drawn, o->Type, NULL, Light, o->Alpha, DrawnItemLevel(Items[i].Item),
                                  Items[i].Item.ExcellentFlags, Items[i].Item.AncientDiscriminator, true, true, true);
-                VectorCopy(vBackup, o->Position);
 
 #ifdef _EDITOR
                 // Debug visualization: OBB used by SelectItem for ray-vs-pickup test.
-                // Drawn after RenderPartObject because that's what refreshes o->OBB this frame.
                 if (s_bShowItemPickBoxes)
                 {
                     RenderDebugBox(o->OBB.StartPos,
@@ -8103,26 +8101,6 @@ void RenderPartObjectEdge(BMD* b, const OBJECT* o, int Flag, bool Translate, flo
     }
 
     BoneScale = 1.f;
-}
-
-void RenderPartObjectEdge2(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale, OBB_t* OBB)
-{
-    vec3_t tmp;
-
-    b->LightEnable = false;
-
-    BoneScale = Scale;
-    b->Transform(BoneTransform, tmp, tmp, OBB, Translate);
-    b->RenderBody(Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-    BoneScale = 1.f;
-}
-
-void RenderPartObjectEdgeLight(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale)
-{
-    float Luminosity = sinf(WorldTime * 0.001f) * 0.5f + 0.5f;
-    Vector(Luminosity * 1.f, Luminosity * 0.8f, Luminosity * 0.3f, b->BodyLight);
-    RenderPartObjectEdge(b, o, Flag, Translate, Scale);
 }
 
 // Which cloth a body part's model carries: 0 for none.

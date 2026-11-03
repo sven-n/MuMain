@@ -18,7 +18,7 @@ void    RenderWaterTerrain(int Texture, float xf, float yf, float SizeX, float S
 void    SettingHellasColor(void);
 BYTE    GetHellasLevel(CLASS_TYPE Class, int Level);
 bool    GetUseLostMap(bool bDrawAlert = false);
-int     RenderHellasItemInfo(ITEM* ip, int textNum);
+int RenderHellasItemInfo(const ITEM* ip, int textNum);
 bool	EnableKalima(CLASS_TYPE Class, int Level, int ItemLevel);
 
 void    AddObjectDescription(wchar_t* Text, vec3_t position);

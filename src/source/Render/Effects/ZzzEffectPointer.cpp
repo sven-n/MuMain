@@ -99,7 +99,7 @@ void RenderPointers()
     out.SetState({.blend = Blend::Glow});
     for (int i = 0; i < MAX_POINTERS; i++)
     {
-        PARTICLE* o = &Pointers[i];
+        const PARTICLE* o = &Pointers[i];
         if (o->Live)
         {
             out.SetState({.blend = Bitmaps[o->Type].Components == 3 ? Blend::Glow : Blend::AlphaTest});

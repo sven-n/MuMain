@@ -7374,7 +7374,7 @@ void RenderJoints(BYTE bRenderOneMore)
     }
     for (int i = 0; i < MAX_JOINTS; i++)
     {
-        JOINT* o = &Joints[i];
+        const JOINT* o = &Joints[i];
         if (o->Type == BITMAP_JOINT_ENERGY && o->SubType == 54 && o->Target->CurrentAction != MONSTER01_ATTACK1)
             continue;
         if (o->Live && o->NumTails > 0 && o->RenderFace != 0)
