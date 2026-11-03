@@ -8,23 +8,38 @@ report each scenario as passed or failed.
 
 ## Quick start
 
-1. Build a developer client: a `-mueditor` preset, e.g.
-   `cmake --preset windows-x64-mueditor` and
-   `cmake --build out/build/windows-x64-mueditor --config Release`.
-2. Start `InGameTests` next to the new `Main`, e.g.
-   `out/build/windows-x64-mueditor/src/Release/InGameTests.exe`.
-3. In its window, leave **Recreate the test server** checked (it needs podman
+1. Build the client with the tester, with the in-game tests preset of your
+   platform, e.g. `cmake --preset windows-x64-in-game-tests` and
+   `cmake --build --preset windows-x64-in-game-tests-gui`. This builds `Main`
+   and the tester and opens the tester's window.
+2. In the window, leave **Recreate the test server** checked (it needs podman
    or docker), check the scenarios, and press **Run and write report**;
    **Open report** shows every step with screenshots, in one file, and **Open
    report folder** shows that file, to attach it to a pull request.
+3. Later, start `InGameTests` next to `Main` again, e.g.
+   `out/build/windows-x64-in-game-tests/src/Release/InGameTests.exe`, or build
+   with the `-gui` preset again.
 
 The rest of this page explains each part.
 
 ## What you need
 
-- A developer build of the client: a `-mueditor` preset, which turns on
-  `ENABLE_CONTROL_SOCKET` and `ENABLE_IN_GAME_TESTS`. Player builds have
-  neither, so the tester never reaches players.
+- A developer build of the client with `ENABLE_IN_GAME_TESTS`, which also
+  turns on `ENABLE_CONTROL_SOCKET`. Player builds have neither, so the tester
+  never reaches players. Two kinds of preset have both:
+
+  | Preset | What it builds |
+  |---|---|
+  | `windows-x64-in-game-tests`, `linux-x64-in-game-tests`, `macos-arm64-in-game-tests` | the developer build without the editor: the control socket and the tester |
+  | `windows-x64-mueditor`, `windows-x86-mueditor`, `linux-x64-mueditor` | the developer build with the editor, the control socket and the tester |
+
+  The in-game tests presets have two build presets each: `-release` builds,
+  and `-gui` builds and then opens the tester's window. So far the scenarios
+  have been run with the `-mueditor` presets: on Windows, and `trade` on
+  Linux. With `linux-x64-in-game-tests`, `trade` and `trade-inventory-full`
+  fail where the item is clicked into the trade window (`trade` on X11 as on
+  Wayland). Whether the scenarios pass with the Windows and macOS in-game
+  tests presets is not known yet.
 - podman or docker with compose for the test server below (on Windows and
   macOS a running `podman machine`), or any other
   [OpenMU](https://github.com/MUnique/OpenMU) server with its test data.
@@ -40,14 +55,16 @@ The rest of this page explains each part.
 With `ENABLE_IN_GAME_TESTS` the build publishes the tester as one file next to
 the client: `InGameTests.exe` next to `Main.exe` on Windows, `InGameTests`
 next to `Main` on Linux and next to `Main.app` on macOS, e.g.
-`out/build/windows-x64-mueditor/src/Release/InGameTests.exe`. It is published
+`out/build/windows-x64-in-game-tests/src/Release/InGameTests.exe`. It is published
 again only when its sources change.
 
 Start it without anything (a double-click, or `./InGameTests`) and it opens
 its window with the client next to it; the reports go to
 `in-game-test-results` next to it. The file can also be copied next to
-another developer build of the same platform. `ENABLE_IN_GAME_TESTS` needs
-`ENABLE_CONTROL_SOCKET`; CMake stops when only the first is on.
+another developer build of the same platform. The tester drives the client
+through the control socket, so `ENABLE_IN_GAME_TESTS` turns on
+`ENABLE_CONTROL_SOCKET` too (CMake says so when it does); the player presets
+turn both off.
 
 ## The test server
 
@@ -131,7 +148,15 @@ in the game without OpenMU's admin panel.
 ### The window
 
 Start the tester next to the client, or let the `InGameTestsGui` build target
-build everything and open it:
+build everything and open it; the `-gui` build presets do just that. The build
+ends when the window is closed:
+
+```sh
+cmake --build --preset windows-x64-in-game-tests-gui
+```
+
+A `-mueditor` build folder has no `-gui` build preset; there, build the target
+itself:
 
 ```sh
 cmake --build out/build/windows-x64-mueditor --config Release --target InGameTestsGui
@@ -200,10 +225,11 @@ run deletes once the report has them.
 ### The command line
 
 The `InGameTests` build target builds `Main`, recreates the test server and
-plays the scenarios:
+plays the scenarios. Every build folder with the tester has it, an in-game
+tests one like a `-mueditor` one:
 
 ```sh
-cmake --build out/build/windows-x64-mueditor --config Release --target InGameTests
+cmake --build out/build/windows-x64-in-game-tests --config Release --target InGameTests
 ```
 
 Cache variables choose what it runs; set them once with `-D` when configuring,
@@ -218,7 +244,7 @@ or in CLion's CMake options:
 | `MU_IN_GAME_TEST_FRESH_SERVER` | recreate the test server before every run; default `ON`; turn it off for another server |
 
 ```sh
-cmake -B out/build/windows-x64-mueditor "-DMU_IN_GAME_TEST_SCENARIOS=trade" "-DMU_IN_GAME_TEST_STEP_DELAY=1000"
+cmake -B out/build/windows-x64-in-game-tests "-DMU_IN_GAME_TEST_SCENARIOS=trade" "-DMU_IN_GAME_TEST_STEP_DELAY=1000"
 ```
 
 Keep the quotes in PowerShell, which otherwise splits a value like

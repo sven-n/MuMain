@@ -65,24 +65,29 @@ test scripts need to drive the client (see `docs/control-socket.md`); it is
 
 ### Using the presets
 
-`CMakePresets.json` carries the same two configurations, with a
+`CMakePresets.json` carries these configurations, with a
 `Ninja Multi-Config` generator and `CMAKE_EXPORT_COMPILE_COMMANDS=ON`:
 
 ```bash
 # Configure (pick one)
 cmake --preset linux-x64                  # player build: ENABLE_EDITOR=OFF, ENABLE_CONTROL_SOCKET=OFF
 cmake --preset linux-x64-mueditor         # developer build: ENABLE_EDITOR=ON, ENABLE_CONTROL_SOCKET=ON
+cmake --preset linux-x64-in-game-tests    # developer build: control socket + in-game tester; no editor, no unit tests
 
-# Build (pick the matching Debug/Release build preset)
+# Build (pick the matching build preset)
 cmake --build --preset linux-x64-mueditor-debug
 cmake --build --preset linux-x64-mueditor-release
+cmake --build --preset linux-x64-in-game-tests-gui    # builds, then opens the tester
 ```
 
-Each preset builds into `out/build/<preset-name>/`, so the two configurations
+Each preset builds into `out/build/<preset-name>/`, so the configurations
 never share a build tree. The plain preset is the player configuration: it
 contains neither the editor nor the control socket, and the `control_socket_leak`
 test in its test suite proves the latter. To get the socket without the editor,
-configure by hand: `cmake --preset linux-x64 -DENABLE_CONTROL_SOCKET=ON`.
+configure by hand: `cmake --preset linux-x64 -DENABLE_CONTROL_SOCKET=ON`, or use
+`linux-x64-in-game-tests` for the socket and the in-game tester; its build
+presets are `-release` and `-gui` (see [in-game tests](../../in-game-tests.md);
+its trade scenarios still fail on Linux).
 
 Because `src/MuEditor/` is only added to the target when `ENABLE_EDITOR=ON`, the
 `linux-x64` compile database contains no editor translation units and clangd
