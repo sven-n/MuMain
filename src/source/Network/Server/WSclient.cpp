@@ -3638,6 +3638,18 @@ void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
     App::Control::Events::RecordAttackDamage(AttackPlayer, Key, Damage, ShieldDamage, DamageType);
 }
 
+namespace
+{
+void StartReceivedAttack(CHARACTER* character, int targetIndex)
+{
+    SetPlayerAttack(character);
+    character->AttackTime = 1;
+    character->Object.AnimationFrame = 0;
+    character->TargetCharacter =
+        static_cast<short>(targetIndex >= 0 && targetIndex < MAX_CHARACTERS_CLIENT ? targetIndex : -1);
+}
+} // namespace
+
 void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
 {
     auto Data = (LPPRECEIVE_ACTION)ReceiveBuffer;
@@ -3673,11 +3685,7 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
         break;
     case AT_ATTACK1:
     case AT_ATTACK2:
-        SetPlayerAttack(c);
-        c->AttackTime = 1;
-        c->Object.AnimationFrame = 0;
-
-        c->TargetCharacter = HeroIndex;
+        StartReceivedAttack(c, iTargetIndex);
         if (IsMonster(c))
         {
             MUHelper::g_MuHelper.AddTarget(Key, iTargetKey == HeroKey);
