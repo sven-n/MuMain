@@ -56,17 +56,7 @@ function(mu_add_test)
 endfunction()
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
-add_test(
-    NAME windows_workflow_contract
-    COMMAND "${Python3_EXECUTABLE}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/test_windows_workflow_contract.py"
-            "${CMAKE_SOURCE_DIR}"
-)
-add_test(
-    NAME ci_build_plan
-    COMMAND "${Python3_EXECUTABLE}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/test_ci_build_plan.py"
-)
+add_subdirectory(static)
 add_subdirectory(benchmark)
 
 add_subdirectory(text)

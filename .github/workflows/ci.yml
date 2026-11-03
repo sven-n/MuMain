@@ -38,10 +38,11 @@ jobs:
         id: plan
         run: python3 scripts/ci_build_plan.py
 
-      - name: Check workflow contracts and build selection
+      # Architecture guards and contracts that only read the source; native jobs skip the `static` label.
+      - name: Run static checks
         run: |
-          python3 tests/test_windows_workflow_contract.py
-          python3 tests/test_ci_build_plan.py
+          cmake -S tests/static -B out/static-checks
+          ctest --test-dir out/static-checks -C Release --parallel 4 --output-on-failure --no-tests=error
 
       - name: Validate game data inputs
         run: |
@@ -68,9 +69,7 @@ jobs:
         env:
           DIFF_BASE: ${{ steps.plan.outputs.diff_base }}
         run: |
-          CHANGED=$(git diff --name-only --diff-filter=d "${DIFF_BASE}...HEAD" -- \
-            'src/source/*.cpp' 'src/source/*.h' 'src/source/*.hpp' \
-            | grep -v ThirdParty/ | grep -v 'src/source/Dotnet/' || true)
+          CHANGED=$(bash scripts/changed_cpp_files.sh "$DIFF_BASE")
           echo "diff_base=$DIFF_BASE" >> "$GITHUB_OUTPUT"
           if [ -z "$CHANGED" ]; then
             echo "count=0" >> "$GITHUB_OUTPUT"
@@ -86,29 +85,7 @@ jobs:
         if: steps.changed.outputs.count != '0'
         run: |
           echo "Checking ${{ steps.changed.outputs.count }} files..."
-          base="${{ steps.changed.outputs.diff_base }}"
-          while IFS= read -r file; do
-            format_args=()
-            while read -r start count; do
-              if [ -z "$start" ]; then
-                continue
-              fi
-              if [ -z "$count" ]; then
-                count=1
-              fi
-              if [ "$count" -eq 0 ]; then
-                continue
-              fi
-              end=$((start + count - 1))
-              format_args+=(--lines="${start}:${end}")
-            done < <(
-              git diff --unified=0 --no-color "${base}...HEAD" -- "$file" \
-                | sed -nE 's/^@@ -[0-9]+(,[0-9]+)? \+([0-9]+)(,([0-9]+))? @@.*/\2 \4/p'
-            )
-            if [ "${#format_args[@]}" -ne 0 ]; then
-              clang-format --dry-run --Werror "${format_args[@]}" "$file"
-            fi
-          done < /tmp/changed-cpp-files.txt
+          bash scripts/check_format.sh "${{ steps.changed.outputs.diff_base }}" < /tmp/changed-cpp-files.txt
 
       - name: Static analysis
         if: steps.changed.outputs.count != '0'
@@ -265,6 +242,7 @@ jobs:
           ctest --test-dir out/build/windows-ci-x64-release --build-config Release
           --output-on-failure
           --no-tests=error
+          --label-exclude static
 
       - name: Stage MSVC redistributable runtime
         shell: pwsh
@@ -592,6 +570,7 @@ jobs:
           ctest --test-dir out/build/linux-ci --build-config Release
           --output-on-failure
           --no-tests=error
+          --label-exclude static
 
       - name: Validate runtime
         run: |
@@ -639,6 +618,12 @@ jobs:
     if: needs.quality.outputs.macos == 'true'
     runs-on: macos-latest
     timeout-minutes: 90
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      # /usr/bin/clang++ is an xcrun shim, so hashing its content would miss Xcode updates.
+      CCACHE_COMPILERCHECK: '%compiler% -v'
+      CCACHE_MAXSIZE: 1G
 
     steps:
       - name: Checkout repository
@@ -650,7 +635,19 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Install build tools
-        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp
+        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp ccache
+
+      - name: Identify compiler cache
+        id: compiler
+        run: echo "identity=$(shasum -a 256 "$(xcrun -f clang)" "$(xcrun -f clang++)" | shasum -a 256 | cut -c1-16)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache macOS compilation
+        id: ccache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-macos-arm64-${{ steps.compiler.outputs.identity }}-${{ github.sha }}
+          restore-keys: ccache-macos-arm64-${{ steps.compiler.outputs.identity }}-
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -669,15 +666,33 @@ jobs:
           -DMU_COPY_RUNTIME_ASSETS=OFF
           -DBUILD_TESTING=ON
           -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Build
-        run: cmake --build out/build/macos-ci --config Release
+        run: |
+          ccache --zero-stats
+          cmake --build out/build/macos-ci --config Release
+
+      - name: Report compiler cache
+        if: always()
+        run: |
+          if command -v ccache >/dev/null; then
+            ccache --show-stats
+            {
+              echo '### macOS compiler cache'
+              echo '```text'
+              ccache --show-stats
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Run tests
         run: >
           ctest --test-dir out/build/macos-ci --build-config Release
           --output-on-failure
           --no-tests=error
+          --label-exclude static
 
       - name: Validate runtime
         run: |
@@ -699,6 +714,14 @@ jobs:
               exit 1
             fi
           done
+
+      # macOS skips main pushes, so the nightly/manual release run is its only main-scoped cache writer.
+      - name: Save macOS compilation cache
+        if: needs.quality.outputs.release == 'true' && steps.ccache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.ccache.outputs.cache-primary-key }}
 
       - name: Archive runtime
         if: needs.quality.outputs.release == 'true'

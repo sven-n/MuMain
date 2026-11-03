@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Runs the source-only checks that Quality Gates runs, before anything is pushed.
+# Enable once per clone with scripts/install-hooks.sh; skip one push with `git push --no-verify`.
+set -eu
+
+cd "$(git rev-parse --show-toplevel)"
+
+cmake=$(command -v cmake 2>/dev/null || true)
+# Windows: Visual Studio's bundled CMake is usually not on PATH.
+vswhere="/c/Program Files (x86)/Microsoft Visual Studio/Installer/vswhere.exe"
+if [ -z "$cmake" ] && [ -f "$vswhere" ]; then
+  vs=$("$vswhere" -latest -property installationPath | tr -d '\r')
+  candidate="$(cygpath -u "$vs")/Common7/IDE/CommonExtensions/Microsoft/CMake/CMake/bin/cmake.exe"
+  if [ -f "$candidate" ]; then
+    cmake=$candidate
+  fi
+fi
+if [ -n "$cmake" ]; then
+  "$cmake" -S tests/static -B out/static-checks >/dev/null
+  "$(dirname "$cmake")/ctest" --test-dir out/static-checks -C Release --parallel 8 --output-on-failure --no-tests=error
+else
+  echo "pre-push: cmake not found, static checks skipped (CI still runs them)" >&2
+fi
+
+# A different clang-format version formats differently, so check only with the version CI pins.
+wanted=$(sed -n 's/.*clang-format==\([0-9.]*\).*/\1/p' .github/workflows/ci.yml | head -n 1)
+found=$(clang-format --version 2>/dev/null | sed -n 's/.*version \([0-9.]*\).*/\1/p' || true)
+# shortcut: diffs HEAD against origin/main (override with MU_PUSH_BASE), not each pushed ref.
+base=$(git merge-base HEAD "${MU_PUSH_BASE:-origin/main}" 2>/dev/null || true)
+if [ "$found" != "$wanted" ]; then
+  echo "pre-push: formatting skipped, needs clang-format $wanted (pip install clang-format==$wanted), found ${found:-none}" >&2
+elif [ -z "$base" ]; then
+  echo "pre-push: formatting skipped, no merge base with ${MU_PUSH_BASE:-origin/main}" >&2
+else
+  # Captured first so set -e stops on a failed diff instead of formatting an empty list.
+  files=$(bash scripts/changed_cpp_files.sh "$base")
+  if [ -n "$files" ]; then
+    printf '%s\n' "$files" | bash scripts/check_format.sh "$base"
+  fi
+fi
