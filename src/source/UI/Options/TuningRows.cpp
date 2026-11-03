@@ -62,6 +62,18 @@ ControlTexts TextsOf(TuningControlId id)
         return {I18N::Game::TuningShadowDirection, I18N::Game::TuningShadowDirectionHelp};
     case TuningControlId::SunShadowStrength:
         return {I18N::Game::TuningSunShadows, I18N::Game::TuningSunShadowsHelp};
+    case TuningControlId::CloudStrength:
+        return {I18N::Game::TuningCloudStrength, I18N::Game::TuningCloudStrengthHelp};
+    case TuningControlId::CloudScale:
+        return {I18N::Game::TuningCloudScale, I18N::Game::TuningCloudScaleHelp};
+    case TuningControlId::CloudSpeed:
+        return {I18N::Game::TuningCloudSpeed, I18N::Game::TuningCloudSpeedHelp};
+    case TuningControlId::CloudCover:
+        return {I18N::Game::TuningCloudCover, I18N::Game::TuningCloudCoverHelp};
+    case TuningControlId::SkyFill:
+        return {I18N::Game::TuningSkyFill, I18N::Game::TuningSkyFillHelp};
+    case TuningControlId::RimSunFollow:
+        return {I18N::Game::TuningRimSunFollow, I18N::Game::TuningRimSunFollowHelp};
     case TuningControlId::FlatSunShadow:
         return {I18N::Game::TuningFlatSunShadow, I18N::Game::TuningFlatSunShadowHelp};
     case TuningControlId::SunShadowSoftness:

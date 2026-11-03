@@ -34,6 +34,12 @@
 //   $bloom falloff <f>             bloom.levelFalloff
 //   $bloom <v>                     bloom.strength
 //   $ao radius <r>                 ao.radius
+//   $clouds scale <units>          clouds.scale
+//   $clouds speed <units/s>        clouds.speed
+//   $clouds cover <f>              clouds.cover
+//   $clouds <strength>             clouds.strength
+//   $sky <f>                       sky.fill
+//   $rim sun <f>                   lighting.rim.sunFollow
 //   $ao <v>                        ao.strength
 //   $sun softness <f>              sun.softness
 //   $sun resolution <texels>       sun.resolution

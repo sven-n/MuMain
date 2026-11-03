@@ -1219,6 +1219,42 @@
   <data name="Tuning Contact Shadow Reach Help" xml:space="preserve">
     <value>How far from a surface nearby geometry still darkens it, in world units (a terrain cell is 100).</value>
   </data>
+  <data name="Tuning Cloud Strength" xml:space="preserve">
+    <value>Cloud shadows</value>
+  </data>
+  <data name="Tuning Cloud Strength Help" xml:space="preserve">
+    <value>How much a passing cloud dims the sunlight on the ground and characters. 0 for a clear sky. Needs sun shadows.</value>
+  </data>
+  <data name="Tuning Cloud Scale" xml:space="preserve">
+    <value>Cloud size</value>
+  </data>
+  <data name="Tuning Cloud Scale Help" xml:space="preserve">
+    <value>How large the clouds are, in world units (a terrain cell is 100).</value>
+  </data>
+  <data name="Tuning Cloud Speed" xml:space="preserve">
+    <value>Cloud speed</value>
+  </data>
+  <data name="Tuning Cloud Speed Help" xml:space="preserve">
+    <value>How fast the clouds drift, in world units per second. 0 holds them still.</value>
+  </data>
+  <data name="Tuning Cloud Cover" xml:space="preserve">
+    <value>Cloud cover</value>
+  </data>
+  <data name="Tuning Cloud Cover Help" xml:space="preserve">
+    <value>How much of the sky the clouds cover, from clear to overcast.</value>
+  </data>
+  <data name="Tuning Sky Fill" xml:space="preserve">
+    <value>Sky-blue shade</value>
+  </data>
+  <data name="Tuning Sky Fill Help" xml:space="preserve">
+    <value>How blue the shade turns, lit by the sky instead of the sun; sunlit places keep the sun's colour. Needs sun shadows.</value>
+  </data>
+  <data name="Tuning Rim Sun Follow" xml:space="preserve">
+    <value>Rim light follows the sun</value>
+  </data>
+  <data name="Tuning Rim Sun Follow Help" xml:space="preserve">
+    <value>How much the edge light on characters comes from the sun: brighter and sun-coloured on its side, gone in shade. 0 keeps the even edge light.</value>
+  </data>
   <data name="Tuning Flat Sun Shadow" xml:space="preserve">
     <value>Flat sun shadow</value>
   </data>

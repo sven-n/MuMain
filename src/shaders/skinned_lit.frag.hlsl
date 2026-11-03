@@ -23,6 +23,7 @@ SamplerComparisonState sunShadowSampler : register(s2, space2);
 
 #include "scene_lighting.hlsli"
 #include "dynamic_lighting.hlsli"
+#include "clouds.hlsli"
 
 // The light mood's highlight shoulder (Render::Lighting::LightMood::RollOffHighlight): a lit
 // colour channel above the knee approaches 1 smoothly instead of being cut off there. Only a knee
@@ -131,19 +132,31 @@ float4 main(FSInput input) : SV_Target
     const bool inWorld = input.worldPositionAndDynamicLights.w > 0.5;
     const float3 litNormal = SafeNormalize(worldNormal);
     // The sun's shadow takes away the direct sunlight only: the ambient part and the point lights stay.
-    const float sunLight = inWorld ? 1.0 - sunShadowParameters.x *
-                                               (1.0 - SunVisibility(input.worldPositionAndDynamicLights.xyz, litNormal))
-                                   : 1.0;
+    // Clouds dim the sunlight as shadows do.
+    const float sunVisible =
+        inWorld && sunShadowParameters.x > 0.0
+            ? SunVisibility(input.worldPositionAndDynamicLights.xyz, litNormal) *
+                  CloudLight(input.worldPositionAndDynamicLights.xy, cloudParameters, cloudOffset.xy)
+            : 1.0;
+    const float sunLight = 1.0 - sunShadowParameters.x * (1.0 - sunVisible);
+    // Shade turns towards the sky's blue.
+    const float3 skyShade = lerp(float3(1.0, 1.0, 1.0), skyFill.rgb, skyFill.w * (1.0 - sunVisible));
     const float luminosity = max(lightDot * diffuseCurve.x * sunLight + diffuseCurve.y, diffuseCurve.z);
     const float3 dynamicLight =
         inWorld ? DynamicLighting(input.worldPositionAndDynamicLights.xyz, litNormal) : float3(0.0, 0.0, 0.0);
-    float3 diffuse = saturate(objectLight * luminosity + dynamicLight);
+    float3 diffuse = saturate(objectLight * skyShade * luminosity + dynamicLight);
     if (RollsOffHighlight(diffuseCurve.w))
-        diffuse = RollOffHighlight(objectLight * luminosity + dynamicLight, diffuseCurve.w);
+        diffuse = RollOffHighlight(objectLight * skyShade * luminosity + dynamicLight, diffuseCurve.w);
 
     // Two-sided meshes show back faces; |dot| keeps their interiors from rim-lighting.
     const float facing = saturate(abs(dot(normal, view)));
-    const float3 rim = rimParameters.x * pow(1.0 - facing, rimParameters.y) * objectLight;
+    float3 rim = rimParameters.x * pow(1.0 - facing, rimParameters.y) * objectLight;
+    if (inWorld && sunTowards.w > 0.0)
+    {
+        // The rim follows the sun: brighter and sun-coloured on the side facing it, gone in its shadow.
+        const float towardsSun = saturate(dot(worldNormal, normalize(sunTowards.xyz)) * 0.75 + 0.25) * sunVisible;
+        rim = lerp(rim, rim * sunColor.rgb * (2.0 * towardsSun), sunTowards.w);
+    }
 
     const float specularStrength = input.lightDirectionAndSpecular.w * specularParameters.x;
     float3 specular = float3(0.0, 0.0, 0.0);

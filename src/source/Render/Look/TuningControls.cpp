@@ -90,6 +90,18 @@ constexpr std::array<ControlSpec, TuningControlCount> Specs = {{
      TuningUnit::None, 1.0, TuningZero::Plain},
     {TuningControlId::FlatSunShadow, TuningGroup::DynamicLights, true, LookValue::FlatSunShadow, 0.05,
      TuningUnit::Percent, 100.0, TuningZero::Plain},
+    {TuningControlId::CloudStrength, TuningGroup::DynamicLights, false, LookValue::CloudStrength, 0.05,
+     TuningUnit::Percent, 100.0, TuningZero::Plain},
+    {TuningControlId::CloudScale, TuningGroup::DynamicLights, true, LookValue::CloudScale, 250.0, TuningUnit::None,
+     1.0, TuningZero::Plain},
+    {TuningControlId::CloudSpeed, TuningGroup::DynamicLights, true, LookValue::CloudSpeed, 5.0, TuningUnit::None, 1.0,
+     TuningZero::Plain},
+    {TuningControlId::CloudCover, TuningGroup::DynamicLights, true, LookValue::CloudCover, 0.05, TuningUnit::Percent,
+     100.0, TuningZero::Plain},
+    {TuningControlId::SkyFill, TuningGroup::DynamicLights, false, LookValue::SkyFill, 0.05, TuningUnit::Percent, 100.0,
+     TuningZero::Plain},
+    {TuningControlId::RimSunFollow, TuningGroup::DynamicLights, true, LookValue::RimSunFollow, 0.05,
+     TuningUnit::Percent, 100.0, TuningZero::Plain},
 }};
 
 constexpr bool SpecsFollowIdOrder()

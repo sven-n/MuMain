@@ -16,6 +16,7 @@ Texture2D groundShadowMask : register(t1, space2);
 SamplerState groundShadowSampler : register(s1, space2);
 #include "scene_lighting.hlsli"
 #include "dynamic_lighting.hlsli"
+#include "clouds.hlsli"
 struct FSInput
 {
     float4 pos : SV_Position;
@@ -52,9 +53,15 @@ float4 main(FSInput input) : SV_Target
         groundShadowMask.Sample(groundShadowSampler, input.pos.xy / float2(maskWidth, maskHeight)).rg;
     // The sun's shadows dim the ground's own light, the point lights' shadows the point lights.
     float2 shadow = 1.0 - groundShadowOpacity * (1.0 - visibility);
-    shadow.x *= 1.0 - sunShadowParameters.x * (1.0 - SunVisibility(input.worldPosition, float3(0.0, 0.0, 1.0)));
+    // Clouds dim the sunlight as shadows do; shade, from either, turns towards the sky's blue.
+    const float sunVisible = sunShadowParameters.x > 0.0
+                                 ? SunVisibility(input.worldPosition, float3(0.0, 0.0, 1.0)) *
+                                       CloudLight(input.worldPosition.xy, cloudParameters, cloudOffset.xy)
+                                 : 1.0;
+    shadow.x *= 1.0 - sunShadowParameters.x * (1.0 - sunVisible);
+    const float3 skyShade = lerp(float3(1.0, 1.0, 1.0), skyFill.rgb, skyFill.w * (1.0 - sunVisible));
     const float3 light =
-        saturate(input.color.rgb * shadow.x + WorldDynamicLighting(input.worldPosition) * shadow.y);
+        saturate(input.color.rgb * skyShade * shadow.x + WorldDynamicLighting(input.worldPosition) * shadow.y);
     float4 color = float4(texel.rgb * light, texel.a * input.color.a);
     if (alphaToCoverage)
     {

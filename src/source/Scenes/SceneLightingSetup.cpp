@@ -17,7 +17,9 @@
 #include "Render/Renderer/SceneLighting.h"
 #include "Scenes/SceneCore.h"
 
+#include <algorithm>
 #include <chrono>
+#include <cmath>
 #include <cstddef>
 
 namespace Scenes::Lighting
@@ -47,6 +49,18 @@ void SelectionReference(float (&reference)[3])
 }
 } // namespace
 
+// How far the clouds have drifted at `speed` world units per second, along one fixed wind.
+// shortcut: wraps every 2^20 world units (a jump every few hours of play); fine while clouds stay subtle.
+static glm::vec2 CloudDrift(float speed)
+{
+    constexpr float WindDegrees = 30.0f;
+    constexpr double Wrap = 1048576.0;
+    const double seconds = std::chrono::duration<double>(std::chrono::steady_clock::now().time_since_epoch()).count();
+    const float along = static_cast<float>(std::fmod(seconds * speed, Wrap));
+    const float wind = glm::radians(WindDegrees);
+    return glm::vec2(std::cos(wind), std::sin(wind)) * along;
+}
+
 void SubmitSceneLighting()
 {
     mu::SceneLighting lighting{};
@@ -73,6 +87,31 @@ void SubmitSceneLighting()
         constexpr float GroundReach = 400.0f;
         lighting.groundLow = Hero->Object.Position[2] - GroundReach;
         lighting.groundHigh = Hero->Object.Position[2] + GroundReach;
+    }
+    if (sun)
+    {
+        if (!Render::Lighting::SunShadowsActive())
+        {
+            lighting.sunDirection[0] = sun->sun.x;
+            lighting.sunDirection[1] = sun->sun.y;
+            lighting.sunDirection[2] = sun->sun.z;
+        }
+    }
+    // Clouds, the sky's tint of the shade and the sun-following rim: only under a sun that casts shadows.
+    if (Render::Lighting::SunShadowsActive() && sun)
+    {
+        using Data::Maps::LookValue;
+        lighting.cloudStrength = Render::Look::Value(LookValue::CloudStrength);
+        lighting.cloudScale = Render::Look::Value(LookValue::CloudScale);
+        lighting.cloudCover = Render::Look::Value(LookValue::CloudCover);
+        const glm::vec2 drift = CloudDrift(Render::Look::Value(LookValue::CloudSpeed));
+        // The cloud layer stands this high: its shadow falls slanted by the sun.
+        constexpr float CloudHeight = 2000.0f;
+        const glm::vec2 slant = glm::vec2(sun->sun.x, sun->sun.y) * (CloudHeight / std::max(sun->sun.z, 0.2f));
+        lighting.cloudOffset[0] = drift.x + slant.x;
+        lighting.cloudOffset[1] = drift.y + slant.y;
+        lighting.skyFill = Render::Look::Value(LookValue::SkyFill);
+        lighting.rimSunFollow = Render::Look::Value(LookValue::RimSunFollow);
     }
     mu::GetRenderer().SetSceneLighting(lighting);
 }
