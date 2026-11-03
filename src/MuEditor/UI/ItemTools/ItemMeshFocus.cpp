@@ -32,12 +32,26 @@ void CItemMeshFocus::Point(int mesh)
 void CItemMeshFocus::ToggleKept(int mesh)
 {
     m_kept = m_kept == mesh ? std::nullopt : std::optional<int>(mesh);
+    m_keptBeforePick.reset();
 }
 
 void CItemMeshFocus::Pick(std::optional<int> mesh)
 {
+    m_keptBeforePick.emplace(m_kept);
     m_kept = mesh;
     m_picked = mesh.has_value();
+}
+
+void CItemMeshFocus::TakeBackPick()
+{
+    if (!m_keptBeforePick)
+    {
+        return;
+    }
+    m_kept = *m_keptBeforePick;
+    m_keptBeforePick.reset();
+    // Its row is scrolled to again.
+    m_picked = m_kept.has_value();
 }
 
 void CItemMeshFocus::ForgetMeshesFrom(int meshCount)
@@ -52,6 +66,10 @@ void CItemMeshFocus::ForgetMeshesFrom(int meshCount)
     forget(m_pointedNow);
     forget(m_pointedBefore);
     forget(m_kept);
+    if (m_keptBeforePick)
+    {
+        forget(*m_keptBeforePick);
+    }
 }
 
 std::optional<int> CItemMeshFocus::Shown() const

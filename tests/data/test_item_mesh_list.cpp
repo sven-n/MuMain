@@ -243,6 +243,42 @@ TEST_CASE("A click on the preview keeps the mesh it hit, or lets go [editor][ite
     CHECK_FALSE(focus.TakePicked());
 }
 
+TEST_CASE("A double click on the preview takes back the pick of its first click [editor][items][mesh_list]")
+{
+    CItemMeshFocus focus;
+    focus.BeginFrame(100);
+    focus.ToggleKept(1);
+    focus.Pick(4);
+    CHECK(focus.TakePicked());
+    focus.TakeBackPick();
+    CHECK(focus.Kept() == 1);
+    // Its row is scrolled to again.
+    CHECK(focus.TakePicked());
+    // Only the last pick is taken back.
+    focus.TakeBackPick();
+    CHECK(focus.Kept() == 1);
+
+    // A first click on nothing let the kept mesh go.
+    focus.Pick(std::nullopt);
+    CHECK_FALSE(focus.Kept());
+    focus.TakeBackPick();
+    CHECK(focus.Kept() == 1);
+
+    // A row clicked since the pick stays kept.
+    focus.Pick(2);
+    focus.ToggleKept(3);
+    focus.TakeBackPick();
+    CHECK(focus.Kept() == 3);
+
+    // A mesh the model lost is not taken back.
+    focus.ToggleKept(3);
+    focus.ToggleKept(6);
+    focus.Pick(2);
+    focus.ForgetMeshesFrom(5);
+    focus.TakeBackPick();
+    CHECK_FALSE(focus.Kept());
+}
+
 TEST_CASE("A mesh the model no longer has, or another item, is forgotten [editor][items][mesh_list]")
 {
     CItemMeshFocus focus;

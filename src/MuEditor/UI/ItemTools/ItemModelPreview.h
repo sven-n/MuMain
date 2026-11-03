@@ -7,6 +7,7 @@
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewTarget.h"
 #include "ItemMeshPicking.h"
 
+#include <limits>
 #include <optional>
 
 namespace MuEditor::Items
@@ -50,6 +51,7 @@ private:
     void RenderView(const MuEditor::Effects::EffectPreviewRequest& request);
     void DrawScene(const MuEditor::Effects::EffectPreviewRequest& request, float aspect,
                    const std::optional<MeshPicking::Ray>& pickRay);
+    void TakeBackPickOnDoubleClick() const;
 
     MuEditor::Effects::EffectPreviewCamera m_camera;
     MuEditor::Effects::EffectPreviewScene m_scene;
@@ -60,6 +62,8 @@ private:
     bool m_ancient = false;
     bool m_turn = true;
     MuEditor::Effects::PreviewItemPose m_pose = MuEditor::Effects::PreviewItemPose::Inventory;
+    // ImGui::GetTime() of the last click that picked a mesh; long ago before the first one.
+    double m_pickTime = std::numeric_limits<double>::lowest();
 };
 } // namespace MuEditor::Items
 

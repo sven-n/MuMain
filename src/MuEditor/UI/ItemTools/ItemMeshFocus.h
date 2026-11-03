@@ -21,6 +21,8 @@ public:
     void ToggleKept(int mesh);
     // A click on the preview: keeps the mesh it hit; a click that hit nothing lets the kept one go.
     void Pick(std::optional<int> mesh);
+    // A double click puts the view back: its first click keeps the mesh that was kept before it.
+    void TakeBackPick();
     // A model opened again can have fewer meshes.
     void ForgetMeshesFrom(int meshCount);
 
@@ -39,6 +41,8 @@ private:
     std::optional<int> m_pointedBefore;
     std::optional<int> m_kept;
     bool m_picked = false;
+    // The kept mesh before the last pick, while nothing else changed it.
+    std::optional<std::optional<int>> m_keptBeforePick;
 };
 } // namespace MuEditor::Items
 

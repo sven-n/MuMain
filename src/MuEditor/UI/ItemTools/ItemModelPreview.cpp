@@ -33,7 +33,8 @@ constexpr float MaxViewHeight = 360.0f;
 constexpr int MaxItemLevel = 15;
 constexpr float LevelWidth = 120.0f;
 
-// After the view: a left click that did not turn it gives the ray through the clicked point.
+// After the view: a left click that did not turn it gives the ray through the clicked point. The second click of a
+// double click puts the view back (EffectPreviewInput) and gives none.
 std::optional<MeshPicking::Ray> ClickedRay(const MuEditor::Effects::EffectPreviewCamera& camera, const ImVec2& min,
                                            const ImVec2& max)
 {
@@ -42,6 +43,10 @@ std::optional<MeshPicking::Ray> ClickedRay(const MuEditor::Effects::EffectPrevie
         return std::nullopt;
     }
     const ImGuiIO& io = ImGui::GetIO();
+    if (io.MouseClickedLastCount[ImGuiMouseButton_Left] > 1)
+    {
+        return std::nullopt;
+    }
     const float threshold = io.MouseDragThreshold;
     if (io.MouseDragMaxDistanceSqr[ImGuiMouseButton_Left] > threshold * threshold)
     {
@@ -139,6 +144,7 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
     const float widthWithoutScrollbar = ImGui::GetWindowWidth() - 2.0f * style.WindowPadding.x - style.ScrollbarSize;
     const float height = std::clamp(widthWithoutScrollbar * ViewAspect, MinViewHeight * scale, MaxViewHeight * scale);
     MuEditor::Effects::PreviewInput::RenderView("##ModelView", width, height, m_camera);
+    TakeBackPickOnDoubleClick();
     const ImVec2 min = ImGui::GetItemRectMin();
     const ImVec2 max = ImGui::GetItemRectMax();
     const std::optional<MeshPicking::Ray> pickRay = ClickedRay(m_camera, min, max);
@@ -200,6 +206,21 @@ void CItemModelPreview::DrawScene(const MuEditor::Effects::EffectPreviewRequest&
     if (pickRay && model != nullptr)
     {
         g_ItemMeshFocus.Pick(hitMesh);
+        m_pickTime = ImGui::GetTime();
+    }
+}
+
+// After the view, as EffectPreviewInput puts the view back on a double click: the mesh its first click picked is
+// taken back, so the double click leaves the kept mesh as it was.
+void CItemModelPreview::TakeBackPickOnDoubleClick() const
+{
+    if (!ImGui::IsItemHovered() || !ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+    {
+        return;
+    }
+    if (ImGui::GetTime() - m_pickTime <= ImGui::GetIO().MouseDoubleClickTime)
+    {
+        g_ItemMeshFocus.TakeBackPick();
     }
 }
 } // namespace MuEditor::Items
