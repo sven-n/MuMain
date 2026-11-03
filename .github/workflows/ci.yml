@@ -29,13 +29,14 @@ jobs:
       release: ${{ steps.plan.outputs.release }}
 
     steps:
-      # Full commit history for the diffs and release tags, without every past asset version; git fetches the few
-      # old file versions a diff needs on demand.
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          filter: blob:none
+
+      # Commits, tags and file lists for the diffs and release check, without every past asset version; git fetches
+      # the few old file versions a diff needs on demand. A blob:none checkout fetches the current files that way
+      # too, which took minutes, so the files come from the shallow checkout above.
+      - name: Fetch history
+        run: git fetch --quiet --filter=blob:none --unshallow --tags origin
 
       - name: Select native builds
         id: plan
