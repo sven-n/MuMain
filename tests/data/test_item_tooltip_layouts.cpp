@@ -294,7 +294,14 @@ TEST_CASE("A tooltip layout preset hides and adds lines of its base [data][items
     error(R"(, {"name": "short", "base": "default", "hide": ["frist"]})", "layouts[1].hide[0]",
           "has no line with the id \"frist\"");
     error(R"(, {"name": "short", "base": "default", "hide": ["first"], "add": [{"after": "first", "lines": []}]})",
-          "layouts[1].add[0].after", "(or the preset hides it)");
+          "layouts[1].add[0].after", "the preset hides the line \"first\" itself");
+    // A line a base preset leaves out is named with it.
+    error(R"(, {"name": "short", "base": "default", "hide": ["first"]},
+             {"name": "shorter", "base": "short", "hide": ["first"], "add": [{"after": "first", "lines": []}]})",
+          "layouts[2].hide[0]", R"(the layout "short" has no line with the id "first" (the preset "short" leaves it)");
+    error(R"(, {"name": "short", "base": "default", "hide": ["first"]},
+             {"name": "shorter", "base": "short", "add": [{"after": "first", "lines": []}]})",
+          "layouts[2].add[0].after", R"((the preset "short" leaves it out))");
     error(R"(, {"name": "short", "base": "default",
                 "add": [{"after": "second", "lines": [{"id": "first", "text": ""}]}]})",
           "layouts[1].add", "which its layout has already");
@@ -371,7 +378,18 @@ TEST_CASE("An item's tooltip layout is its preset with its own changes [data][it
     ItemDefinition hiddenAfter = item;
     hiddenAfter.tooltipLayoutChanges.hide = {"first"};
     CHECK(HasIssue(TextIssuesOf(hiddenAfter, tooltips.file), ItemDataIssueSeverity::Fatal,
-                   "tooltipLayoutChanges.add[0].after", "(or the item hides it)"));
+                   "tooltipLayoutChanges.add[0].after", "the item hides the line \"first\" itself"));
+    // A line its preset leaves out is the preset's doing, not the item's.
+    ItemDefinition presetHides = item;
+    presetHides.tooltipLayout = "short";
+    presetHides.tooltipLayoutChanges.hide = {"first"};
+    const std::vector<ItemDataIssue> presetIssues = TextIssuesOf(presetHides, tooltips.file);
+    CHECK(HasIssue(presetIssues, ItemDataIssueSeverity::Fatal, "tooltipLayoutChanges.hide[0]",
+                   R"(the layout "short" has no line with the id "first" (the preset "short" leaves it out))"));
+    CHECK(HasIssue(presetIssues, ItemDataIssueSeverity::Fatal, "tooltipLayoutChanges.add[0].after",
+                   R"((the preset "short" leaves it out))"));
+    CHECK_FALSE(
+        HasIssue(presetIssues, ItemDataIssueSeverity::Fatal, "tooltipLayoutChanges.add[0].after", "the item hides"));
     // The added lines are checked as the item's other lines are.
     ItemDefinition sharedTypo = item;
     sharedTypo.tooltipLayoutChanges.add[0].lines[0].textName = "nothing";

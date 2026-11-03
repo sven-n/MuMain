@@ -40,6 +40,8 @@ constexpr const char* After = "after";
 } // namespace Keys
 
 constexpr std::string_view TextReference = "@";
+// The item file's field of an item's own layout changes, in their problems' fields.
+constexpr const char* ItemLayoutChangesField = "tooltipLayoutChanges";
 
 // Same order as TooltipSection, after None.
 constexpr std::array<std::string_view, 6> SectionNames = {"name",    "itemCases", "description",
@@ -128,6 +130,67 @@ bool AppendLayout(const ItemTooltipFile& file, std::string_view name, std::vecto
                        std::span<const TooltipLayoutAddition>(layout->add),
                        [](const TooltipLayoutLine& added) { return BuiltTooltipLine{&added, nullptr}; });
     return true;
+}
+
+// " (the preset "P" leaves it out)" when the layout `name` is a preset that hides the line `id`, itself or through one
+// of its bases; empty else.
+std::string DescribePresetHiding(const ItemTooltipFile& file, std::string_view name, std::string_view id)
+{
+    const TooltipLayout* layout = file.FindLayout(name);
+    // No more bases than the file has layouts: bases that go round in a circle have their own error.
+    for (size_t depth = 0; layout != nullptr && layout->IsPreset() && depth < file.layouts.size(); ++depth)
+    {
+        if (std::find(layout->hide.begin(), layout->hide.end(), id) != layout->hide.end())
+        {
+            return " (the preset \"" + layout->name + "\" leaves it out)";
+        }
+        layout = file.FindLayout(layout->base);
+    }
+    return {};
+}
+
+// The problems of changes to the layout `name` whose built lines are `lines` (a preset's changes to its base, an
+// item's to the layout it names), each a field after the changes' own ("hide[0]", "add[1].after") and its message: an
+// id `hide` names that the lines don't have, and an id an addition comes after that they don't have once those are
+// hidden. `changer` names who makes the changes ("the preset", "the item"), for a line it hides itself.
+template <typename TAddition>
+std::vector<std::pair<std::string, std::string>>
+CheckLayoutChanges(const ItemTooltipFile& file, std::string_view name, std::vector<BuiltTooltipLine> lines,
+                   std::span<const std::string> hide, std::span<const TAddition> additions, std::string_view changer)
+{
+    std::vector<std::pair<std::string, std::string>> problems;
+    const auto noSuchLine = [&](const std::string& id)
+    {
+        return "the layout \"" + std::string(name) + "\" has no line with the id \"" + id + "\"" +
+               DescribePresetHiding(file, name, id);
+    };
+    for (size_t index = 0; index < hide.size(); ++index)
+    {
+        if (!HasTooltipLine(lines, hide[index]))
+        {
+            problems.emplace_back("hide[" + std::to_string(index) + "]", noSuchLine(hide[index]));
+        }
+    }
+    // Whether the layout has each addition's line before the changes hide theirs.
+    std::vector<char> inLayout;
+    for (const TAddition& addition : additions)
+    {
+        inLayout.push_back(HasTooltipLine(lines, addition.after));
+    }
+    HideTooltipLines(lines, hide);
+    for (size_t index = 0; index < additions.size(); ++index)
+    {
+        const std::string& after = additions[index].after;
+        if (HasTooltipLine(lines, after))
+        {
+            continue;
+        }
+        problems.emplace_back("add[" + std::to_string(index) + "].after",
+                              inLayout[index] ? std::string(changer) + " hides the line \"" + after +
+                                                    "\" itself, so no line can come after it"
+                                              : noSuchLine(after));
+    }
+    return problems;
 }
 
 // The first id the lines have twice, or empty.
@@ -715,23 +778,11 @@ void ItemTooltipReader::CheckPresets(const ItemTooltipFile& file)
                                                "this file");
             continue;
         }
-        for (size_t hidden = 0; hidden < layout.hide.size(); ++hidden)
+        for (const auto& [changeField, message] :
+             CheckLayoutChanges(file, layout.base, std::move(base), std::span<const std::string>(layout.hide),
+                                std::span<const TooltipLayoutAddition>(layout.add), "the preset"))
         {
-            if (!HasTooltipLine(base, layout.hide[hidden]))
-            {
-                AddFatal(field + "." + Keys::Hide + "[" + std::to_string(hidden) + "]",
-                         "\"" + layout.base + "\" has no line with the id \"" + layout.hide[hidden] + "\"");
-            }
-        }
-        HideTooltipLines(base, layout.hide);
-        for (size_t added = 0; added < layout.add.size(); ++added)
-        {
-            if (!HasTooltipLine(base, layout.add[added].after))
-            {
-                AddFatal(field + "." + Keys::Add + "[" + std::to_string(added) + "]." + Keys::After,
-                         "\"" + layout.base + "\" has no line with the id \"" + layout.add[added].after +
-                             "\" (or the preset hides it)");
-            }
+            AddFatal(field + "." + changeField, message);
         }
         std::vector<BuiltTooltipLine> built;
         BuildTooltipLayout(file, layout.name, built);
@@ -875,32 +926,18 @@ std::vector<std::pair<std::string, std::string>> CheckItemTooltipLayout(const It
 std::vector<std::pair<std::string, std::string>>
 CheckTooltipLayoutChanges(const ItemTooltipFile& file, std::string_view name, const ItemTooltipLayoutChanges& changes)
 {
-    std::vector<std::pair<std::string, std::string>> problems;
     std::vector<BuiltTooltipLine> lines;
     BuildTooltipLayout(file, name, lines);
     if (lines.empty())
     {
-        return problems;
+        return {};
     }
-    const std::string layout(name);
-    for (size_t index = 0; index < changes.hide.size(); ++index)
+    std::vector<std::pair<std::string, std::string>> problems =
+        CheckLayoutChanges(file, name, std::move(lines), std::span<const std::string>(changes.hide),
+                           std::span<const ItemTooltipLayoutAddition>(changes.add), "the item");
+    for (auto& [field, message] : problems)
     {
-        if (!HasTooltipLine(lines, changes.hide[index]))
-        {
-            problems.emplace_back("tooltipLayoutChanges.hide[" + std::to_string(index) + "]",
-                                  "the layout \"" + layout + "\" has no line with the id \"" + changes.hide[index] +
-                                      "\"");
-        }
-    }
-    HideTooltipLines(lines, changes.hide);
-    for (size_t index = 0; index < changes.add.size(); ++index)
-    {
-        if (!HasTooltipLine(lines, changes.add[index].after))
-        {
-            problems.emplace_back("tooltipLayoutChanges.add[" + std::to_string(index) + "].after",
-                                  "the layout \"" + layout + "\" has no line with the id \"" +
-                                      changes.add[index].after + "\" (or the item hides it)");
-        }
+        field = std::string(ItemLayoutChangesField) + "." + field;
     }
     return problems;
 }
