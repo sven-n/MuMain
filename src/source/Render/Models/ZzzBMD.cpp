@@ -1991,6 +1991,10 @@ void BMD::DrawMesh(const Render::ModelDrawing::MeshDraw& draw) const
             EnableDepthMask();
         }
     }
+    if (renderFlags & RENDER_TWOSIDED)
+    {
+        DisableCullFace();
+    }
 
     const bool shadowMap = (renderFlags & RENDER_SHADOWMAP) == RENDER_SHADOWMAP;
     const float colorScale = useBlendMeshColor ? blendMeshAlpha : 1.0f;
