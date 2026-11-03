@@ -390,7 +390,6 @@ static void RenderCharacterScene3D()
     Scenes::PostProcessing::RenderPetsWithoutBloom();
     RenderBoids();
     RenderObjects_AfterCharacter();
-    CheckSprites();
 }
 
 /**

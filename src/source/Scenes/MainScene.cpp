@@ -634,7 +634,6 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         RenderEffects();
         RenderBlurs();
     }
-    CheckSprites();
     BeginSprite();
 
     if (ShouldRenderLeaves())
@@ -663,7 +662,6 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         RenderWaterTerrain();
         { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
         { FRAME_PROFILE(Effects); RenderEffects(true); RenderBlurs(); }
-        CheckSprites();
         BeginSprite();
 
         if (gMapManager.WorldActive == WD_2DEVIAS && HeroTile != 3 && HeroTile < 10)

@@ -80,6 +80,7 @@ int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* O
             s_spriteBloomExcluded[i] = mu::GetRenderer().IsBloomExcluded();
             s_spriteDrawn[i] = false;
             o->AnimationFrame = 1.f;
+            o->Visible = true;
             o->Scale = Scale;
             o->Angle[2] = Rotation;
             VectorCopy(Position, o->Position);
@@ -224,23 +225,6 @@ void RenderSprites(BYTE byRenderOneMore)
             {
                 s_spriteDrawn[i] = true;
             }
-        }
-    }
-}
-
-void CheckSprites()
-{
-    if (!g_pOption->GetRenderAllEffects())
-    {
-        return;
-    }
-
-    for (int i = 0; i < MAX_SPRITES; i++)
-    {
-        OBJECT* o = &Sprites[i];
-        if (o->Live)
-        {
-            o->Visible = true;
         }
     }
 }

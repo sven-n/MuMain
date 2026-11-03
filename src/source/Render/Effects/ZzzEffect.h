@@ -40,7 +40,6 @@ void ClearSprites();
 void RenderSprites(BYTE byRenderOneMore = 0);
 // The draw a live sprite asks for: its quad, its blend and whether bloom leaves it alone.
 Render::EffectDrawing::SpriteDraw DescribeSprite(const OBJECT& sprite, bool bloomExcluded);
-void CheckSprites();
 
 void AnimationFlag();
 void RenderFlag(OBJECT* o, vec3_t Light, int Tex1, int Tex2);

@@ -171,7 +171,6 @@ int GetScreenWidth();
 int GetScreenLeft();
 void ClearItems();
 
-void RenderCloudLowLevel(int index, int Type);
 void SortInBlockByType();
 
 void ClearActionObject();
@@ -207,7 +206,7 @@ void RenderBoundingBox(const OBJECT* pObj, std::uint32_t darkColor = 0xFF333333u
 // the sliver that pokes out past the object's real (separately drawn)
 // silhouette survives the renderer's back-face culling - a thin, mesh-shaped
 // outline rather than a bounding-box cube. See definition for details.
-void RenderObjectOutline(OBJECT* pObj, std::uint32_t color);
+void RenderObjectOutline(const OBJECT* pObj, std::uint32_t color);
 
 // Map Editor Place-new-mode preview: draws the model that would be placed on
 // a click, translucent, at g_MapEditorPlacementPreviewPos - see the globals'

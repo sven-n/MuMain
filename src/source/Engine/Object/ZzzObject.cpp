@@ -6072,81 +6072,6 @@ void SaveTrapObjects(wchar_t* FileName)
     fclose(fp);
 }
 
-OBJECT  g_CloudsLow;
-void    RenderCloudLowLevel(int index, int Type)
-{
-    OBJECT* o = &g_CloudsLow;
-
-    o->Alpha = 1.f;
-    o->Live = true;
-    o->Type = Type;
-    o->SubType = 0;
-    o->Scale = 10.f;
-
-    if (o->LifeTime != 10)
-    {
-        Vector(0.f, 0.f, 0.f, o->StartPosition);
-        Vector(0.f, 0.f, 0.f, o->Position);
-    }
-    o->LifeTime = 10;
-
-    Vector(0.f, 0.f, 0.f, o->Angle);
-    Vector(0.f, 0.f, 0.f, o->HeadAngle);
-    Vector(0.f, 0.f, 0.f, o->HeadTargetAngle);
-
-    o->EnableBoneMatrix = false;
-    o->CurrentAction = 0;
-    o->PriorAction = 0;
-    o->AnimationFrame = 1.f;
-    o->PriorAnimationFrame = 1.f;
-
-    o->BlendMeshLight = 1.f;
-    o->LightEnable = true;
-
-    o->HiddenMesh = -1;
-
-    if (index != 0)
-    {
-        vec3_t  delPosition;
-        delPosition[0] = (Hero->Object.Position[0] - o->Position[0]);
-        delPosition[1] = (Hero->Object.Position[1] - o->Position[1]);
-        delPosition[2] = 0.f;
-
-        float Matrix[3][4];
-        vec3_t angle;
-
-        Vector(0.f, 0.f, -45.f, angle);
-        AngleMatrix(angle, Matrix);
-        VectorRotate(delPosition, Matrix, delPosition);
-
-        if (index == 1)
-        {
-            o->StartPosition[0] -= sinf(WorldTime * 0.0002f) * 0.001f;
-            o->StartPosition[1] += cosf(WorldTime * 0.0002f) * 0.001f;
-        }
-        else
-        {
-            o->StartPosition[0] += sinf(WorldTime * 0.0002f) * 0.001f;
-            o->StartPosition[1] -= cosf(WorldTime * 0.0002f) * 0.001f;
-        }
-
-        if (index == 1)
-        {
-            o->BlendMesh = -1;
-        }
-        else
-        {
-            o->BlendMeshLight = 1.f;
-            o->BlendMesh = 0;
-        }
-        o->BlendMeshTexCoordU = o->StartPosition[0];
-        o->BlendMeshTexCoordV = o->StartPosition[1];
-        Vector(Hero->Object.Position[0], Hero->Object.Position[1], Hero->Object.Position[2] - 150.f + (index * 20), o->Position);
-
-        RenderObject(o);
-    }
-}
-
 void ClearItems()
 {
     for (int i = 0; i < MAX_ITEMS; i++)
@@ -8560,7 +8485,7 @@ void RenderBoundingBox(const OBJECT* pObj, std::uint32_t darkColor, std::uint32_
 // the camera - leaving only the sliver that pokes out past the real
 // silhouette, i.e. a thin outline shaped like the actual model instead of a
 // bounding-box cube.
-void RenderObjectOutline(OBJECT* pObj, std::uint32_t color)
+void RenderObjectOutline(const OBJECT* pObj, std::uint32_t color)
 {
     if (pObj == nullptr || pObj->Type < 0)
         return;
