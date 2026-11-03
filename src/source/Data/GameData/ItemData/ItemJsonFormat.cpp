@@ -5,6 +5,7 @@
 #include "ItemEnumNames.h"
 #include "ItemJsonCommon.h"
 #include "ItemTooltipConditionsJson.h"
+#include "ItemTooltipLayouts.h"
 #include "ItemType.h"
 
 #include <algorithm>
@@ -1232,6 +1233,12 @@ bool ItemReader::Read(const OrderedJson& json, ItemDefinition& definition)
     if (const auto layout = json.find(Keys::TooltipLayout); layout != json.end())
     {
         ReadValue(*layout, Keys::TooltipLayout, definition.tooltipLayout);
+        // The layout of an item that names none, so it is read as none: a removed tag's preset stands in for it, and a
+        // save leaves it out.
+        if (definition.tooltipLayout == DefaultTooltipLayout)
+        {
+            definition.tooltipLayout.clear();
+        }
     }
     ReadTooltipLayoutChanges(json, definition.tooltipLayoutChanges);
     ApplyRemovedTooltipTags(definition);

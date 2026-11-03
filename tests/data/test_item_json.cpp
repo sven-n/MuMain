@@ -456,6 +456,15 @@ TEST_CASE("A removed tooltip tag is read as what the item file writes instead [d
     // Its own layout already leaving the lines out is fine.
     result = read(R"("noClassLines")", R"(, "tooltipLayout": "noClassLines")");
     CHECK_FALSE(HasFatal(result.issues));
+    // So is "default", the layout of an item that names none.
+    result = read(R"("noClassLines")", R"(, "tooltipLayout": "default")");
+    CHECK_FALSE(HasFatal(result.issues));
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items[0].tooltipLayout == "noClassLines");
+    result = read("", R"(, "tooltipLayout": "default")");
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items[0].tooltipLayout.empty());
+    CHECK(WriteItemGroupJson(0, result.items).find("tooltipLayout") == std::string::npos);
 
     // Another name gets the list of the tags there are.
     result = read(R"("noSuchTag")");
