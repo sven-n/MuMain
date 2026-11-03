@@ -1,5 +1,5 @@
 # Extra checks that sven-n/MuMain does not run automatically, to save its
-# Actions minutes: ci.yml builds Windows only on pushes to main and never
+# Actions minutes: ci.yml builds Windows only for nightly/manual releases and never
 # builds the editor. On every pull request of a fork, which uses its own
 # minutes, this workflow adds the game's Windows build:
 #
@@ -29,6 +29,10 @@ name: Fork CI
 on:
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
   workflow_dispatch:
     inputs:
       editor:
@@ -46,7 +50,7 @@ permissions:
 jobs:
   windows:
     name: Windows x64 Release, editor ${{ matrix.editor }}
-    if: github.repository != 'sven-n/MuMain' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' || (github.repository != 'sven-n/MuMain' && !github.event.pull_request.draft)
     runs-on: windows-latest
     timeout-minutes: 90
     strategy:
@@ -98,14 +102,20 @@ jobs:
           key: fork-windows-x64-editor-${{ matrix.editor }}-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: fork-windows-x64-editor-${{ matrix.editor }}-deps-
 
+      - name: Identify vcpkg toolchain
+        id: vcpkg
+        shell: pwsh
+        run: ./scripts/ci_vcpkg_cache_key.ps1
+
       - name: Cache vcpkg packages
         uses: actions/cache@v4
         with:
           path: |
             C:/vcpkg/installed
             C:/vcpkg/packages
-          key: vcpkg-windows-x64-${{ hashFiles('vcpkg.json') }}
-          restore-keys: vcpkg-windows-x64-
+            ~/AppData/Local/vcpkg/archives
+          key: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-${{ hashFiles('vcpkg.json', 'toolchain-x64.cmake') }}
+          restore-keys: vcpkg-windows-x64-v2-
 
       - name: Configure CMake
         run: >
