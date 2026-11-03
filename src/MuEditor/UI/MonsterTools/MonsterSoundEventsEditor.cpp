@@ -54,6 +54,8 @@ constexpr int NewChance = 2;
 // A new cue is this many frames long; a cue at least this.
 constexpr float NewCueFrames = 1.0f;
 constexpr float MinCueFrames = 0.1f;
+// The cue question's text wraps at this many font sizes.
+constexpr float QuestionWrapFontSizes = 30.0f;
 constexpr ImU32 FocusColor = IM_COL32(90, 140, 60, 110);
 constexpr ImVec4 MissingCueColor = ImVec4(1.0f, 0.45f, 0.4f, 1.0f);
 
@@ -592,7 +594,7 @@ void RenderRemoveCuePopup(MonsterSoundSet& set, SetDraft& draft, const Context& 
     }
     ImGui::TextUnformatted(I18N::Editor::RemoveTheCue);
     ImGui::Separator();
-    ImGui::PushTextWrapPos(ImGui::GetFontSize() * 30.0f);
+    ImGui::PushTextWrapPos(ImGui::GetFontSize() * QuestionWrapFontSizes);
     ImGui::TextUnformatted(I18N::Format(I18N::Editor::RemoveTheCueQuestion01, {cues, context.model->slot}).c_str());
     ImGui::PopTextWrapPos();
     if (ImGui::Button(I18N::Editor::RemoveTheCueToo))
