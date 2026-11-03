@@ -163,6 +163,7 @@ if(MU_ENABLE_SHADER_COMPILATION)
         set(MU_SHADER_BLOBS "${MU_SHADER_BLOBS}" "${spv}" "${msl}" "${dxil}" PARENT_SCOPE)
     endfunction()
 
+    file(GLOB MU_SHADER_INCLUDES CONFIGURE_DEPENDS "${MU_SHADER_SOURCE_DIR}/*.hlsli")
     set(MU_SHADER_BLOBS)
     foreach(shader_stage IN LISTS MU_SHADER_STAGE_NAMES)
         string(REGEX REPLACE "\\.[^.]+$" "" shader_name "${shader_stage}")

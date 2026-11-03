@@ -22,12 +22,16 @@ void SetDynamicLightsEnabled(bool enabled);
 
 // This frame's sun (towards it): from dynamic.shadowAngle and the map's shadow length, and the sun the
 // map's baked light implies (kBakedSunShadowAngle). None without Enhanced dynamic lights (Classic).
+// Taken once per frame (UpdateFrameSun), so every part of a frame sees the same sun.
 struct FrameSunDirections
 {
     glm::vec3 sun{0.0f, 0.0f, 1.0f};
     glm::vec3 baked{0.0f, 0.0f, 1.0f};
 };
 [[nodiscard]] std::optional<FrameSunDirections> FrameSun();
+
+// Takes this frame's sun; called first thing each frame (InitTerrainLight).
+void UpdateFrameSun();
 
 // `baked` (a world-space light vector of the baked light) following this frame's sun (FollowSun);
 // unchanged without one.
