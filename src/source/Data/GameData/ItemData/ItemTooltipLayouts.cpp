@@ -56,6 +56,17 @@ const KeySet SectionLineKeys = {Keys::Section};
 const KeySet ColorRuleKeys = {Keys::When, Keys::Color};
 const KeySet AdditionKeys = {Keys::After, Keys::Lines};
 
+// A layout's lines without those whose id `hide` names.
+void HideTooltipLines(std::vector<BuiltTooltipLine>& lines, std::span<const std::string> hide)
+{
+    if (hide.empty())
+    {
+        return;
+    }
+    std::erase_if(lines, [&](const BuiltTooltipLine& line)
+                  { return !line.GetId().empty() && std::find(hide.begin(), hide.end(), line.GetId()) != hide.end(); });
+}
+
 // A layout's lines without those `hide` names, and each addition's lines right after the line of its `after` id (the
 // additions for one line in their order): the changes of a preset or an item (D73). `makeEntry` makes the built line
 // of an addition's line.
@@ -63,12 +74,7 @@ template <typename TAddition, typename TMakeEntry>
 void ApplyLayoutChanges(std::vector<BuiltTooltipLine>& lines, std::span<const std::string> hide,
                         std::span<const TAddition> additions, TMakeEntry&& makeEntry)
 {
-    if (hide.empty() && additions.empty())
-    {
-        return;
-    }
-    std::erase_if(lines, [&](const BuiltTooltipLine& line)
-                  { return !line.GetId().empty() && std::find(hide.begin(), hide.end(), line.GetId()) != hide.end(); });
+    HideTooltipLines(lines, hide);
     if (additions.empty())
     {
         return;
@@ -671,8 +677,7 @@ void ItemTooltipReader::CheckPresets(const ItemTooltipFile& file)
                          "\"" + layout.base + "\" has no line with the id \"" + layout.hide[hidden] + "\"");
             }
         }
-        ApplyLayoutChanges(base, std::span<const std::string>(layout.hide), std::span<const TooltipLayoutAddition>(),
-                           [](const TooltipLayoutLine& added) { return BuiltTooltipLine{&added, nullptr}; });
+        HideTooltipLines(base, layout.hide);
         for (size_t added = 0; added < layout.add.size(); ++added)
         {
             if (!HasTooltipLine(base, layout.add[added].after))
@@ -826,8 +831,7 @@ CheckTooltipLayoutChanges(const ItemTooltipFile& file, std::string_view name, co
                                       "\"");
         }
     }
-    ApplyLayoutChanges(lines, std::span<const std::string>(changes.hide), std::span<const ItemTooltipLayoutAddition>(),
-                       [](const ItemDescriptionLine& added) { return BuiltTooltipLine{nullptr, &added}; });
+    HideTooltipLines(lines, changes.hide);
     for (size_t index = 0; index < changes.add.size(); ++index)
     {
         if (!HasTooltipLine(lines, changes.add[index].after))
