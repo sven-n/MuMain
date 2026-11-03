@@ -34,6 +34,7 @@
       "cacheVariables": {
         "ENABLE_EDITOR": "OFF",
         "ENABLE_CONTROL_SOCKET": "OFF",
+        "ENABLE_IN_GAME_TESTS": "OFF",
         "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/toolchain-x86.cmake",
         "VCPKG_TARGET_TRIPLET": "x86-windows"
       }
@@ -69,6 +70,7 @@
       "cacheVariables": {
         "ENABLE_EDITOR": "OFF",
         "ENABLE_CONTROL_SOCKET": "OFF",
+        "ENABLE_IN_GAME_TESTS": "OFF",
         "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/toolchain-x64.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-windows"
       }
@@ -90,6 +92,22 @@
         "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/toolchain-x64.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-windows"
       }
+    },
+    {
+      "name": "in-game-tests-base",
+      "hidden": true,
+      "description": "What the -in-game-tests presets add to a player preset: the control socket and the in-game tester, without the unit tests (docs/in-game-tests.md)",
+      "cacheVariables": {
+        "ENABLE_CONTROL_SOCKET": "ON",
+        "ENABLE_IN_GAME_TESTS": "ON",
+        "BUILD_TESTING": "OFF"
+      }
+    },
+    {
+      "name": "windows-x64-in-game-tests",
+      "displayName": "Windows x64 In-game tests",
+      "description": "Developer build without the editor: the control socket and the in-game tester (docs/in-game-tests.md)",
+      "inherits": ["in-game-tests-base", "windows-x64"]
     },
     {
       "name": "linux-base",
@@ -115,7 +133,8 @@
       "toolchainFile": "${sourceDir}/cmake/toolchains/linux-x64.cmake",
       "cacheVariables": {
         "ENABLE_EDITOR": "OFF",
-        "ENABLE_CONTROL_SOCKET": "OFF"
+        "ENABLE_CONTROL_SOCKET": "OFF",
+        "ENABLE_IN_GAME_TESTS": "OFF"
       }
     },
     {
@@ -128,6 +147,12 @@
         "ENABLE_CONTROL_SOCKET": "ON",
         "ENABLE_IN_GAME_TESTS": "ON"
       }
+    },
+    {
+      "name": "linux-x64-in-game-tests",
+      "displayName": "Linux x86_64 In-game tests",
+      "description": "Native Linux x64 developer build without the editor: the control socket and the in-game tester (docs/in-game-tests.md)",
+      "inherits": ["in-game-tests-base", "linux-x64"]
     },
     {
       "name": "macos-base",
@@ -153,8 +178,15 @@
       "toolchainFile": "${sourceDir}/cmake/toolchains/macos-arm64.cmake",
       "cacheVariables": {
         "ENABLE_EDITOR": "OFF",
-        "ENABLE_CONTROL_SOCKET": "OFF"
+        "ENABLE_CONTROL_SOCKET": "OFF",
+        "ENABLE_IN_GAME_TESTS": "OFF"
       }
+    },
+    {
+      "name": "macos-arm64-in-game-tests",
+      "displayName": "macOS arm64 In-game tests",
+      "description": "Native macOS Apple Silicon developer build without the editor: the control socket and the in-game tester (docs/in-game-tests.md)",
+      "inherits": ["in-game-tests-base", "macos-arm64"]
     }
   ],
   "buildPresets": [
@@ -213,6 +245,20 @@
       "configuration": "Release"
     },
     {
+      "name": "windows-x64-in-game-tests-release",
+      "displayName": "x64 In-game tests Release",
+      "configurePreset": "windows-x64-in-game-tests",
+      "configuration": "Release"
+    },
+    {
+      "name": "windows-x64-in-game-tests-gui",
+      "displayName": "x64 In-game tests Release + window",
+      "description": "Builds like -release, then opens the in-game tester's window; the build ends when the window is closed",
+      "configurePreset": "windows-x64-in-game-tests",
+      "configuration": "Release",
+      "targets": ["InGameTestsGui"]
+    },
+    {
       "name": "linux-x64-debug",
       "displayName": "Linux x64 Debug",
       "configurePreset": "linux-x64",
@@ -237,6 +283,20 @@
       "configuration": "Release"
     },
     {
+      "name": "linux-x64-in-game-tests-release",
+      "displayName": "Linux x64 In-game tests Release",
+      "configurePreset": "linux-x64-in-game-tests",
+      "configuration": "Release"
+    },
+    {
+      "name": "linux-x64-in-game-tests-gui",
+      "displayName": "Linux x64 In-game tests Release + window",
+      "description": "Builds like -release, then opens the in-game tester's window; the build ends when the window is closed",
+      "configurePreset": "linux-x64-in-game-tests",
+      "configuration": "Release",
+      "targets": ["InGameTestsGui"]
+    },
+    {
       "name": "macos-arm64-debug",
       "displayName": "macOS arm64 Debug",
       "configurePreset": "macos-arm64",
@@ -247,6 +307,20 @@
       "displayName": "macOS arm64 Release",
       "configurePreset": "macos-arm64",
       "configuration": "Release"
+    },
+    {
+      "name": "macos-arm64-in-game-tests-release",
+      "displayName": "macOS arm64 In-game tests Release",
+      "configurePreset": "macos-arm64-in-game-tests",
+      "configuration": "Release"
+    },
+    {
+      "name": "macos-arm64-in-game-tests-gui",
+      "displayName": "macOS arm64 In-game tests Release + window",
+      "description": "Builds like -release, then opens the in-game tester's window; the build ends when the window is closed",
+      "configurePreset": "macos-arm64-in-game-tests",
+      "configuration": "Release",
+      "targets": ["InGameTestsGui"]
     }
   ]
 }

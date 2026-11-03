@@ -8,6 +8,7 @@
 #include <RmlUi/Core/ElementText.h>
 
 #include <algorithm>
+#include <chrono>
 #include <filesystem>
 #include <fstream>
 #include <map>
@@ -50,7 +51,10 @@ public:
         context = Rml::CreateContext("world-label-layer", {640, 480});
         REQUIRE(context != nullptr);
         UI::RmlBridge::SetContextResolver([this](std::string_view) { return context; });
-        m_Folder = std::filesystem::temp_directory_path() / "world_label_layer_tests";
+        // One folder per process: parallel test runs would otherwise delete each other's files.
+        m_Folder =
+            std::filesystem::temp_directory_path() /
+            ("world_label_layer_tests_" + std::to_string(std::chrono::steady_clock::now().time_since_epoch().count()));
         std::filesystem::remove_all(m_Folder);
         std::filesystem::create_directories(m_Folder / "Data/Interface/RmlUi/themes/legacy");
         std::ofstream(m_Folder / "Data/Interface/RmlUi/world_labels.rml") << "<rml><head></head><body></body></rml>";

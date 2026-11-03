@@ -9,8 +9,9 @@ on Linux.
 ## Turning it on
 
 The socket is a build-time feature. It exists only in a client configured
-with `ENABLE_CONTROL_SOCKET=ON` — the `-mueditor` presets and hand-configured
-developer builds; the plain presets (`linux-x64`, `windows-x64`, …) and any
+with `ENABLE_CONTROL_SOCKET=ON` — the `-mueditor` and `-in-game-tests` presets
+and hand-configured developer builds (`ENABLE_IN_GAME_TESTS` turns it on too,
+see [in-game tests](in-game-tests.md)); the plain presets (`linux-x64`, `windows-x64`, …) and any
 build that does not opt in compile none of it, and the `control_socket_leak`
 test in their test suite proves it. A player build ignores the variable
 below entirely: no socket, no log line, no change of behaviour.
