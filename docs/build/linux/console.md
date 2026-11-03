@@ -86,8 +86,8 @@ contains neither the editor nor the control socket, and the `control_socket_leak
 test in its test suite proves the latter. To get the socket without the editor,
 configure by hand: `cmake --preset linux-x64 -DENABLE_CONTROL_SOCKET=ON`, or use
 `linux-x64-in-game-tests` for the socket and the in-game tester; its build
-presets are `-release` and `-gui` (see [in-game tests](../../in-game-tests.md),
-not yet run on Linux).
+presets are `-release` and `-gui` (see [in-game tests](../../in-game-tests.md);
+its trade scenarios still fail on Linux).
 
 Because `src/MuEditor/` is only added to the target when `ENABLE_EDITOR=ON`, the
 `linux-x64` compile database contains no editor translation units and clangd

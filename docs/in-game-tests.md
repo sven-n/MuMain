@@ -35,8 +35,11 @@ The rest of this page explains each part.
 
   The in-game tests presets have two build presets each: `-release` builds,
   and `-gui` builds and then opens the tester's window. So far the scenarios
-  have been run on Windows; the Linux and macOS presets set up the same build,
-  but whether the scenarios pass there is not known yet.
+  have been run with the `-mueditor` presets: on Windows, and `trade` on
+  Linux. With `linux-x64-in-game-tests`, `trade` and `trade-inventory-full`
+  fail where the item is clicked into the trade window (`trade` on X11 as on
+  Wayland). Whether the scenarios pass with the Windows and macOS in-game
+  tests presets is not known yet.
 - podman or docker with compose for the test server below (on Windows and
   macOS a running `podman machine`), or any other
   [OpenMU](https://github.com/MUnique/OpenMU) server with its test data.
