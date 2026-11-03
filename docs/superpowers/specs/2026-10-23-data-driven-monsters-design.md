@@ -998,7 +998,9 @@ phase.
   - `stand`: `SetPlayerStop`, when the monster is set to stand (a walk
     ends, the server stops it); `walk`: each `SetPlayerWalk` (not for the
     Balrog, which plays its bone sound there). Both with the draw the game
-    makes, one in 16 by `rand_fps_check`.
+    makes, one in 16 by `rand_fps_check`. The walk's stays where the slot
+    played, after the mounts' sounds, and the hero (transformed) keeps the
+    one in 64 the game drew for it, in place of the events' chance.
   - `attack`: `SetPlayerAttack` at frame 0; `hit`: `SetPlayerShock` at
     frame 0 (the Assassin's event has no `hit`, as its slot played none);
     `death`: `SetPlayerDie` at frame 0, on every map: Chaos Castle's

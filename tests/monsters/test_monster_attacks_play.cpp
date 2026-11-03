@@ -566,3 +566,69 @@ TEST_CASE("Monster sounds: a monster plays the sound events of its set when it i
     CHECK(castle[0] == die);
     CHECK(CountOf({castle[1]}, {SOUND_CHAOS_MOB_BOOM01, SOUND_CHAOS_MOB_BOOM02}) == 1);
 }
+
+TEST_CASE("Monster sounds: the hero transformed into a monster hears its walk's idle sounds one time in 64, and none "
+          "next to its mount's sound, as the sound slots played them [monsters][sounds]")
+{
+    AttackScope scope(WD_0LORENCIA);
+    CHARACTER& bull = scope.Create(MONSTER_BULL_FIGHTER);
+    const int idle1 = SoundOf(bull, "Data/Sound/mBull1.wav");
+    const int idle2 = SoundOf(bull, "Data/Sound/mBull2.wav");
+    scope.TakePlayedSounds();
+    // The hero and the frame rate are the test's until it ends.
+    struct Restore
+    {
+        CHARACTER* hero = Hero;
+        float fps = FPS_ANIMATION_FACTOR;
+        ~Restore()
+        {
+            Hero = hero;
+            FPS_ANIMATION_FACTOR = fps;
+        }
+    } restore;
+    FPS_ANIMATION_FACTOR = 1.0f;
+    Hero = &bull;
+    constexpr int Steps = 400;
+
+    // The slots' draws: one in 64 for the hero, then one of the pair.
+    Random::Seed(1);
+    Random::SeedRand(1);
+    std::vector<int> expected;
+    for (int i = 0; i < Steps; ++i)
+    {
+        if (rand_fps_check(64))
+        {
+            expected.push_back(Random::Rand() % 2 == 0 ? idle1 : idle2);
+        }
+    }
+    REQUIRE_FALSE(expected.empty());
+    Random::Seed(1);
+    Random::SeedRand(1);
+    bull.SafeZone = true;
+    for (int i = 0; i < Steps; ++i)
+    {
+        SetPlayerWalk(&bull);
+    }
+    CHECK(scope.TakePlayedSounds() == expected);
+
+    // A Dark Lord on its dark horse outside a safe zone hears the horse, not
+    // its monster's idle sound. A run of 40 steps or more reads no equipment.
+    const auto run = bull.Run;
+    const auto characterClass = bull.Class;
+    const auto helper = bull.Helper.Type;
+    bull.SafeZone = false;
+    bull.Run = 40;
+    bull.Class = CLASS_DARK_LORD;
+    bull.Helper.Type = MODEL_DARK_HORSE_ITEM;
+    for (int i = 0; i < Steps; ++i)
+    {
+        SetPlayerWalk(&bull);
+    }
+    const std::vector<int> mounted = scope.TakePlayedSounds();
+    CHECK(CountOf(mounted, {idle1, idle2}) == 0);
+    CHECK(CountOf(mounted, {SOUND_RUN_DARK_HORSE_1, SOUND_RUN_DARK_HORSE_2, SOUND_RUN_DARK_HORSE_3}) ==
+          static_cast<long long>(Steps));
+    bull.Run = run;
+    bull.Class = characterClass;
+    bull.Helper.Type = helper;
+}

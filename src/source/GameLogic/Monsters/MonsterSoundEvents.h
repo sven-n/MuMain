@@ -28,6 +28,9 @@ struct Situation
     // Within 500 units of the hero and on the set's maps; an event that is
     // not heard anywhere plays only then.
     bool heard = true;
+    // The caller drew the chance already: the events' own chance is not
+    // drawn (the hero's walk, PlayMoment).
+    bool chanceDrawn = false;
 };
 
 // The sound set the character plays: the one its monster (MonsterIndex) names
@@ -42,8 +45,11 @@ const Data::Monsters::MonsterSoundSet* FindSoundSet(const CHARACTER& character);
 bool Play(CHARACTER& character);
 
 // Plays the sound events of the character's set at `moment`, whatever its
-// animation. False, with nothing done, when the set has no sound events.
-bool PlayMoment(CHARACTER& character, Data::Monsters::MonsterSoundMoment moment);
+// animation. With `chanceDrawn` the caller drew the chance in place of the
+// events' own: SetPlayerWalk draws one in 64 for the hero (a transformed
+// player), as the original client did, where the sets' idle events have one
+// in 16. False, with nothing done, when the set has no sound events.
+bool PlayMoment(CHARACTER& character, Data::Monsters::MonsterSoundMoment moment, bool chanceDrawn = false);
 
 // The set's sound events that play in `situation`, in order, each event's
 // chance drawn and its pick picked; `cues` are those of the model the

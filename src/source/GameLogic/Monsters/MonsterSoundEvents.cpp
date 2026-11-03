@@ -100,9 +100,10 @@ bool Applies(const MonsterSoundEvent& event, std::span<const MonsterModelCue> cu
     return event.heardAnywhere || situation.heard;
 }
 
-void PlayEvent(const MonsterSoundSet& set, const MonsterSoundEvent& event, const std::function<void(int, bool)>& play)
+void PlayEvent(const MonsterSoundSet& set, const MonsterSoundEvent& event, const Situation& situation,
+               const std::function<void(int, bool)>& play)
 {
-    if (event.chance && !Draw(event.chance->draw, event.chance->oneIn))
+    if (event.chance && !situation.chanceDrawn && !Draw(event.chance->draw, event.chance->oneIn))
     {
         return;
     }
@@ -125,8 +126,8 @@ void PlayEvent(const MonsterSoundSet& set, const MonsterSoundEvent& event, const
 }
 
 // Plays the events of the character's set in the situation of its animation,
-// or at `moment`.
-bool PlayFor(CHARACTER& character, std::optional<MonsterSoundMoment> moment)
+// or at `moment`; `chanceDrawn` as PlayMoment.
+bool PlayFor(CHARACTER& character, std::optional<MonsterSoundMoment> moment, bool chanceDrawn)
 {
     const MonsterSoundSet* set = FindSoundSet(character);
     if (set == nullptr || set->soundEvents.empty())
@@ -141,6 +142,7 @@ bool PlayFor(CHARACTER& character, std::optional<MonsterSoundMoment> moment)
     situation.animation = object.CurrentAction;
     situation.frame = object.AnimationFrame;
     situation.moment = moment;
+    situation.chanceDrawn = chanceDrawn;
     situation.deathEffectArmed = object.LifeTime == ArmedDeathEffect;
     situation.heard =
         !IsFarFromHero(object) &&
@@ -158,12 +160,12 @@ const MonsterSoundSet* FindSoundSet(const CHARACTER& character)
 
 bool Play(CHARACTER& character)
 {
-    return PlayFor(character, std::nullopt);
+    return PlayFor(character, std::nullopt, false);
 }
 
-bool PlayMoment(CHARACTER& character, MonsterSoundMoment moment)
+bool PlayMoment(CHARACTER& character, MonsterSoundMoment moment, bool chanceDrawn)
 {
-    return PlayFor(character, moment);
+    return PlayFor(character, moment, chanceDrawn);
 }
 
 void PlayEvents(const MonsterSoundSet& set, std::span<const MonsterModelCue> cues, const Situation& situation,
@@ -173,7 +175,7 @@ void PlayEvents(const MonsterSoundSet& set, std::span<const MonsterModelCue> cue
     {
         if (Applies(event, cues, situation))
         {
-            PlayEvent(set, event, play);
+            PlayEvent(set, event, situation, play);
         }
     }
 }

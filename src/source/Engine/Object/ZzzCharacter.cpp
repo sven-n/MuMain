@@ -73,11 +73,33 @@ namespace
     constexpr float CHARSCENE_PICK_MIN_HEIGHT = 300.0f;
     constexpr float CHARSCENE_PICK_HALF_WIDTH = 72.0f;
 
+    // The draws the original client made for an idle sound while walking:
+    // one in 64 for the hero (a transformed player hears its own monster
+    // sounds), one in 16 for others, which the sets' idle events keep.
+    constexpr int HeroWalkIdleOneIn = 64;
+    constexpr int WalkIdleOneIn = 16;
+
     // The sound events of the monster's sound set at the moment (monsters
-    // design, Q-MN76, Q-MN78), where the sound slots played.
-    void PlayMonsterMoment(CHARACTER* c, Data::Monsters::MonsterSoundMoment moment)
+    // design, Q-MN76, Q-MN78), where the sound slots played; `chanceDrawn`
+    // as SoundEvents::PlayMoment.
+    void PlayMonsterMoment(CHARACTER* c, Data::Monsters::MonsterSoundMoment moment, bool chanceDrawn = false)
     {
-        GameLogic::Monsters::SoundEvents::PlayMoment(*c, moment);
+        GameLogic::Monsters::SoundEvents::PlayMoment(*c, moment, chanceDrawn);
+    }
+
+    // The walk moment of a monster, where its idle slot sound played: when no
+    // mount sound plays, for the hero one time in 64 in place of the events'
+    // chance.
+    void PlayWalkMoment(CHARACTER* c)
+    {
+        if (c != Hero)
+        {
+            PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Walk);
+        }
+        else if (rand_fps_check(HeroWalkIdleOneIn))
+        {
+            PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Walk, true);
+        }
     }
 
     bool IsSkeleton(const OBJECT* o)
@@ -754,10 +776,6 @@ void SetPlayerWalk(CHARACTER* c)
         SetAction(&c->Object, MONSTER01_WALK);
     }
     PlayMonsterSound(c);
-    if (o->Type != MODEL_PLAYER)
-    {
-        PlayMonsterMoment(c, Data::Monsters::MonsterSoundMoment::Walk);
-    }
     if (o->Type == MODEL_BALROG)
         PlayBuffer(SOUND_BONE2, o);
     else if (gCharacterManager.GetBaseClass(c->Class) == CLASS_DARK_LORD && c->Helper.Type == MODEL_DARK_HORSE_ITEM && !c->SafeZone)
@@ -784,7 +802,11 @@ void SetPlayerWalk(CHARACTER* c)
     {
         PlayBuffer(static_cast<ESound>(SOUND_FENRIR_RUN_1 + Random::Rand() % 2), o);
     }
-    else if (o->Type == MODEL_PLAYER && ((c == Hero && rand_fps_check(64)) || (c != Hero && rand_fps_check(16))))
+    else if (o->Type != MODEL_PLAYER)
+    {
+        PlayWalkMoment(c);
+    }
+    else if ((c == Hero && rand_fps_check(HeroWalkIdleOneIn)) || (c != Hero && rand_fps_check(WalkIdleOneIn)))
     {
         if (IsSkeleton(o))
             PlayBuffer(SOUND_BONE1, o);

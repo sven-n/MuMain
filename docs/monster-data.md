@@ -335,7 +335,7 @@ game reaches them, whatever the animation:
 | `hit` | The character is hit (SetPlayerShock) |
 | `death` | The character dies (SetPlayerDie), also in Chaos Castle, next to its explosion |
 | `stand` | The character is set to stand: a walk ends, the server stops it (SetPlayerStop) |
-| `walk` | Each step of a walk (SetPlayerWalk) |
+| `walk` | Each step of a walk (SetPlayerWalk) without a mount's sound; for the hero (a player transformed into the monster) one time in 64, which the game draws in place of the events' chance, as the original client did |
 
 An event is heard only within 500 units of the hero and on the set's `maps`,
 unless it is `heardAnywhere`:
