@@ -2794,8 +2794,20 @@ const vec3_t* BMD::ShadowVertices(const Render::ModelDrawing::ShadowDraw& draw, 
     {
         return draw.cpu[static_cast<std::size_t>(mesh)].vertices;
     }
-    EnsureCpuVertices(mesh);
-    return VertexTransform[mesh];
+    if (OwnsCpuVertices(mesh) || draw.skin.bones == nullptr)
+    {
+        EnsureCpuVertices(mesh);
+        return VertexTransform[mesh];
+    }
+    // Skinned apart from the scratch, as the GPU shadow leaves it: a later pass finds the cache as before the shadow.
+    // Valid until the next call on this thread.
+    static thread_local std::vector<std::array<float, 3>> skinned;
+    skinned.resize(static_cast<std::size_t>(std::max<short>(Meshs[mesh].NumVertices, 0)));
+    for (int j = 0; j < Meshs[mesh].NumVertices; j++)
+    {
+        SkinVertex(mesh, j, draw.skin, draw.bodyScale, draw.bodyOrigin, skinned[static_cast<std::size_t>(j)].data());
+    }
+    return reinterpret_cast<const vec3_t*>(skinned.data());
 }
 
 void BMD::AddMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw& draw, const int blendMesh,
@@ -3001,8 +3013,7 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
     Render::ModelDrawing::ModelDrawer& drawer = Render::ModelDrawing::ActiveModelDrawer();
     if (drawer.DrawsLater() && clothesCount == 0 && draw.skin.bones != nullptr)
     {
-        // Drawn later, the shadow takes the vertices it casts now, as drawing it now would find them, without
-        // skinning into the scratch: what a later pass finds there stays as drawing at once leaves it.
+        // Drawn later, the shadow takes the vertices it casts now, as drawing it now would find them.
         static thread_local std::vector<Render::ModelDrawing::CpuShadowMesh> meshes;
         static thread_local std::vector<std::array<float, 3>> positions;
         const auto [startMesh, endMesh] = ResolveMeshRange(NumMeshs, startMeshNumber, endMeshNumber);
@@ -3019,20 +3030,13 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
             if (!casts(i))
                 continue;
             auto* taken = reinterpret_cast<float (*)[3]>(positions.data() + next);
-            const bool own = OwnsCpuVertices(i);
+            const vec3_t* cast = ShadowVertices(draw, i);
             for (int j = 0; j < Meshs[i].NumVertices; j++)
             {
-                if (own)
-                {
-                    VectorCopy(VertexTransform[i][j], taken[j]);
-                }
-                else
-                {
-                    SkinVertex(i, j, draw.skin, draw.bodyScale, draw.bodyOrigin, taken[j]);
-                }
+                VectorCopy(cast[j], taken[j]);
             }
             meshes[static_cast<std::size_t>(i)] = {
-                .vertices = taken, .vertexCount = Meshs[i].NumVertices, .ownVertices = own};
+                .vertices = taken, .vertexCount = Meshs[i].NumVertices, .ownVertices = OwnsCpuVertices(i)};
             next += static_cast<std::size_t>(Meshs[i].NumVertices);
         }
         draw.cpu = meshes;

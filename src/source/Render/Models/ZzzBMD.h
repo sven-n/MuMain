@@ -491,7 +491,8 @@ private:
     [[nodiscard]] bool OwnsCpuVertices(int mesh) const;
     // Whether a shadow casts a mesh's own CPU vertices instead of skinning it on the GPU.
     [[nodiscard]] bool ShadowOwnsVertices(const Render::ModelDrawing::ShadowDraw& draw, int mesh) const;
-    // The vertices a shadow casts for a mesh: as taken for the draw, else the model's (EnsureCpuVertices).
+    // The vertices a shadow casts for a mesh: as taken for the draw, else the model's own CPU vertices, else the
+    // mesh skinned from the draw's skin without writing the scratch (valid until the next call).
     [[nodiscard]] const vec3_t* ShadowVertices(const Render::ModelDrawing::ShadowDraw& draw, int mesh) const;
     void AddMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw& draw, int blendMesh, int hiddenMesh,
                                 int startMesh, int endMesh, const float* origin, float sx, float sy,

@@ -326,6 +326,8 @@ void Pose(BMD& model, const OBJECT& o)
 constexpr float ClothHeight = 20000.f;
 void WriteCloth(const BMD& model, int mesh)
 {
+    // Whole positions of this pose, as the cloth writes them, whatever an earlier scene left in the scratch.
+    model.EnsureCpuVertices(mesh);
     for (int j = 0; j < model.Meshs[mesh].NumVertices; ++j)
         VertexTransform[mesh][j][1] = ClothHeight;
     model.MarkCpuVerticesExternallyWritten(mesh);
@@ -602,4 +604,46 @@ TEST_CASE("The parity log tells GPU draws apart by every skinning parameter [dra
     CHECK(differs([](mu::SkinningParameters& p) { p.normalTextureId = 3u; }));
     CHECK(differs([](mu::SkinningParameters& p) { p.normalMapScale = 1.f; }));
     CHECK(differs([](mu::SkinningParameters& p) { p.chromeTimeTerm = 1.f; }));
+}
+
+TEST_CASE("A shadow drawn later leaves the vertices a later pass of the model reads as drawing it at once does "
+          "[draw-parity]")
+{
+    PlayerModels models;
+    BMD& armor = Models[MODEL_BODY_ARMOR];
+    OBJECT o;
+    Place(o, 100.f, 2.5f, nullptr);
+    bool secondShadow = true;
+    // The model moves without a new pose between the passes, as an object's shadow placed on the terrain does.
+    const auto scene = [&]
+    {
+        Pose(armor, o);
+        armor.RenderBodyShadow(-1, -1, 0, 1);
+        armor.BodyOrigin[0] += 300.f;
+        if (secondShadow)
+            armor.RenderBodyShadow(-1, -1, 0, 1);
+        else
+            armor.RenderMesh(0, RENDER_TEXTURE | RENDER_WAVE);
+    };
+    SUBCASE("another shadow")
+    {
+        CheckDrawnLaterAsAtOnce(scene, "Triangles");
+        CheckDrawnLaterAsAtOnce(scene, "CachedShadow", true);
+    }
+    SUBCASE("a mesh skinned on the CPU")
+    {
+        secondShadow = false;
+        CheckDrawnLaterAsAtOnce(scene, "Triangles");
+        CheckDrawnLaterAsAtOnce(scene, "Triangles", true);
+        // Drawn at once, the later pass is the same whether the GPU or the CPU cast the shadow before it.
+        CallLog onCpu;
+        CallLog onGpu;
+        onGpu.gpuShadows = true;
+        Draw(onCpu, scene, false);
+        Draw(onGpu, scene, false);
+        REQUIRE_FALSE(onCpu.triangles.empty());
+        REQUIRE_FALSE(onGpu.triangles.empty());
+        CHECK(HashSpan(std::span<const mu::Vertex3D>(onCpu.triangles.back())) ==
+              HashSpan(std::span<const mu::Vertex3D>(onGpu.triangles.back())));
+    }
 }
