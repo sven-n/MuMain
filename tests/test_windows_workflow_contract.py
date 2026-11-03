@@ -273,6 +273,11 @@ macos_job = job(ci, "build-macos")
 release_job = job(ci, "release")
 required_job = job(ci, "required")
 
+quality_checkout = step(quality_job, "quality", "Checkout repository")
+check(
+    "fetch-depth: 0" in quality_checkout and "filter: blob:none" in quality_checkout,
+    "Quality Gates must fetch full commit history without past file versions",
+)
 quality_detection = step(quality_job, "quality", "Detect changed C++ files")
 check(
     "DIFF_BASE: ${{ steps.plan.outputs.diff_base }}" in quality_detection,
