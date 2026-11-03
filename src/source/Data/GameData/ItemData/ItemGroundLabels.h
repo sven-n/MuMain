@@ -68,7 +68,10 @@ struct GroundLabelFile
     bool operator==(const GroundLabelFile&) const = default;
 };
 
-constexpr int GroundLabelsFormatVersion = 1;
+// The highest version of the file this client reads: 2 since a background may have an alpha ("#rrggbbaa"). A file
+// without one is written as version 1 (GroundLabelsOpaqueFormatVersion), which a client from before still reads.
+constexpr int GroundLabelsFormatVersion = 2;
+constexpr int GroundLabelsOpaqueFormatVersion = 1;
 // The file's name in the item tooltip folder (Data/Items/Tooltips).
 constexpr const char* GroundLabelsFileName = "GroundLabels.json";
 

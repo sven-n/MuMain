@@ -514,7 +514,7 @@ background (opaque black when left out) and bold.
 
 ```json
 {
-  "formatVersion": 1,
+  "formatVersion": 2,
   "styles": {
     "ticket": {"color": "#e58721"},
     "jewel": {"color": "#ffcc19", "bold": true},
@@ -549,7 +549,9 @@ background (opaque black when left out) and bold.
 - Colors are `"#rrggbb"`, red, green and blue from `00` to `ff`. A
   background may also have its alpha, `"#rrggbbaa"`: `80` draws it half
   transparent, `00` not at all (the text alone); without it, it is opaque, as
-  the original client draws every label.
+  the original client draws every label. A file with such a background is
+  `"formatVersion": 2`, which Save Items writes; without one it stays `1`, so
+  a client from before the alpha still reads it.
 - The first styles are named by role and keep the looks of the original
   client: `ticket`, `seal`, `pet`, `jewel`, `cashShopItem`, `giftBoxRed`, …
   Two of them don't match their kind and are left as they were: the Open Access

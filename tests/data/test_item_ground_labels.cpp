@@ -338,7 +338,7 @@ TEST_CASE("A label style's background can have an alpha [data][items]")
     CHECK_FALSE(ReadGroundLabelColor("#00000080", color));
 
     const std::string text = R"({
-  "formatVersion": 1,
+  "formatVersion": 2,
   "styles": {
     "ticket": {"color": "#e58721"},
     "seal": {"color": "#ffcc19", "background": "#00000080"},
@@ -357,6 +357,15 @@ TEST_CASE("A label style's background can have an alpha [data][items]")
     CHECK(read.file.styles[2].background == GroundLabelColor{0, 0, 0});
     CHECK(read.file.styles[2].backgroundAlpha == 0);
     CHECK(WriteGroundLabelsJson(read.file) == text);
+    // Version 2 says so to a reader: a client from before reads up to 1, and a file without an alpha stays 1 for it.
+    LabelReadResult opaque = read;
+    opaque.file.styles[1].backgroundAlpha = 255;
+    opaque.file.styles[2].backgroundAlpha = 255;
+    CHECK(WriteGroundLabelsJson(opaque.file).find(R"("formatVersion": 1)") != std::string::npos);
+    std::string newer = text;
+    const std::string version = R"("formatVersion": 2)";
+    newer.replace(newer.find(version), version.size(), R"("formatVersion": 3)");
+    CHECK(HasIssue(ReadLabels(newer).issues, ItemDataIssueSeverity::Fatal, "formatVersion"));
 
     const LabelReadResult seeThroughText =
         ReadStylesAndRules(R"("ghost": {"color": "#ffffff99"})", R"({"style": "ghost"})");

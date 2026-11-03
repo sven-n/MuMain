@@ -306,8 +306,11 @@ std::string WriteGroundLabelsJson(const GroundLabelFile& file)
         entry[StyleKey] = rule.style;
         standard.push_back(std::move(entry));
     }
+    // Version 2 only when a reader needs it: a client from before reads version 1, and has no alpha.
+    const bool hasAlpha = std::any_of(file.styles.begin(), file.styles.end(), [](const GroundLabelStyle& style)
+                                      { return style.backgroundAlpha != OpaqueAlpha; });
     OrderedJson root;
-    root[Json::Keys::FormatVersion] = GroundLabelsFormatVersion;
+    root[Json::Keys::FormatVersion] = hasAlpha ? GroundLabelsFormatVersion : GroundLabelsOpaqueFormatVersion;
     if (!file.folders.empty())
     {
         root[Colors::ColorFoldersKey] = Colors::WriteColorFolders(file.folders, [&file](std::string_view name)
