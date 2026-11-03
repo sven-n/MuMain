@@ -276,9 +276,17 @@ namespace battleCastle
         }
     }
 
-    void RenderAurora(int Type, int RenderType, float x, float y, float sx, float sy, vec3_t Light)
+    // The pulse of a dark aurora: its second pass is lit by (1 - pulse) x pulse.
+    static float AuroraPulse()
     {
-        float   Luminosity = sinf(WorldTime * 0.0015f) * 0.3f + 0.7f;
+        return sinf(WorldTime * 0.0015f) * 0.3f + 0.7f;
+    }
+
+    void RenderAurora(int Type, int RenderType, float x, float y, float sx, float sy, const vec3_t light)
+    {
+        vec3_t Light;
+        VectorCopy(light, Light);
+        float Luminosity = AuroraPulse();
 
         if (RenderType == RENDER_DARK)
         {
@@ -1775,6 +1783,14 @@ namespace battleCastle
         }
     }
 
+    // The light a dark aurora's draw left on the body it stands under, which its next draw lit the body with.
+    static void SetDarkAuroraBodyLight(OBJECT* o)
+    {
+        const float pulse = AuroraPulse();
+        const float light = (1.f - pulse) * pulse;
+        Vector(light, light, light, o->Light);
+    }
+
     bool MoveBattleCastleMonsterVisual(OBJECT* o, BMD* b)
     {
         if (gMapManager.InBattleCastle() == false) return false;
@@ -1805,6 +1821,8 @@ namespace battleCastle
 
         case MODEL_GUARDIAN_STATUE:
             o->Angle[2] = 0.f;
+            if (!IsBattleCastleStart())
+                SetDarkAuroraBodyLight(o);
 
             Luminosity = sinf(WorldTime * 0.0005) * 0.58f + 0.42f;
             Vector(Luminosity * 0.2f, Luminosity * 0.7f, Luminosity * 1.f, Light);
@@ -1829,6 +1847,8 @@ namespace battleCastle
 
         case MODEL_CANON_TOWER:
             o->Angle[2] = 45.f;
+            if (IsBattleCastleStart())
+                SetDarkAuroraBodyLight(o);
             return true;
         }
 
@@ -1903,7 +1923,7 @@ namespace battleCastle
         return false;
     }
 
-    bool RenderBattleCastleMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+    bool RenderBattleCastleMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
     {
         if (gMapManager.InBattleCastle() == false)
             return false;
@@ -1943,7 +1963,7 @@ namespace battleCastle
         return false;
     }
 
-    bool    RenderBattleCastleMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate, int Select)
+    bool RenderBattleCastleMonsterCloth(const CHARACTER* c, const OBJECT* o, bool Translate, int Select)
     {
         return false;
     }
@@ -1961,7 +1981,7 @@ namespace battleCastle
                 o->Live = false;
                 PlayBuffer(SOUND_HIT_GATE2);
                 SkinObjectMeshes(o, b, true);
-                b->RenderMeshEffect(0, MODEL_GATE_PART1);
+                b->SpawnMeshEffects(0, MODEL_GATE_PART1);
             }
             break;
 
@@ -1977,7 +1997,7 @@ namespace battleCastle
 
                     PlayBuffer(SOUND_BC_GUARD_STONE_DIS);
                     SkinObjectMeshes(o, b, true);
-                    b->RenderMeshEffect(0, MODEL_STONE_COFFIN);
+                    b->SpawnMeshEffects(0, MODEL_STONE_COFFIN);
                 }
             }
             break;
@@ -2100,7 +2120,7 @@ namespace battleCastle
         return success;
     }
 
-    void RenderMonsterHitEffect(OBJECT* o)
+    void SpawnMonsterHitEffect(OBJECT* o)
     {
         if (gMapManager.InBattleCastle() == false) return;
 

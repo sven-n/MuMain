@@ -117,7 +117,7 @@ public:
     PET_INFO* GetEquipedPetInfo(int iPetType);
     void			PostMoveProcess_Active(unsigned int uiLimitCount);
     unsigned int	PostMoveProcess_GetCurProcessCount();
-    bool			PostMoveProcess_IsProcessing();
+    bool PostMoveProcess_IsProcessing() const;
     bool			PostMoveProcess_Process();
     bool			Blood;
     bool			Ride;

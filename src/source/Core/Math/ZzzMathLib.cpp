@@ -78,7 +78,7 @@ vec_t Q_rint(vec_t in)
     return floorf(in + 0.5f);
 }
 
-void VectorMul(vec3_t va, vec3_t vb, vec3_t vc)
+void VectorMul(const vec3_t va, const vec3_t vb, vec3_t vc)
 {
     vc[0] = va[0] * vb[0];
     vc[1] = va[1] * vb[1];

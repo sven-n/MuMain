@@ -21,20 +21,20 @@ namespace giPetManager
 
     void    MovePet(CHARACTER* c);
     void CullPet(CHARACTER* c);
-    void    RenderPet(CHARACTER* c);
+    void RenderPet(const CHARACTER* c);
     // The pet's draw effects and state, for a character the last frame drew.
     void UpdatePetEffects(CHARACTER* c);
     void    DeletePet(CHARACTER* c);
 
     void    InitItemBackup(void);
     void SetPetInfo(std::uint8_t InvType, std::uint8_t InvPos, PET_INFO* pPetinfo);
-    PET_INFO* GetPetInfo(ITEM* pItem);
+    PET_INFO* GetPetInfo(const ITEM* pItem);
     void CalcPetInfo(PET_INFO* pPetInfo);
     void SetPetItemConvert(ITEM* ip, PET_INFO* pPetInfo);
     std::uint32_t GetPetItemValue(PET_INFO* pPetInfo);
     bool RequestPetInfo(int sx, int sy, ITEM* pItem);
     // (sx, sy) in the screen's 640x480 stretch, `screen`.
-    bool RenderPetItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, ITEM* pItem, int iInvenType);
+    bool RenderPetItemInfo(const UI::Scaling::Transform& screen, int sx, int sy, const ITEM* pItem, int iInvenType);
 
     bool    SelectPetCommand(void);
     void    MovePetCommand(CHARACTER* c);

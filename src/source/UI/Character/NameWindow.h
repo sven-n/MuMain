@@ -42,6 +42,7 @@ namespace mu::ui::window
         // drawn natively otherwise.
         void RenderLabels();
         void RenderName();
+        void RefreshNameTags();
 
         UI::Character::WorldLabelLayer m_labelLayer;
         UI::Hud::StatusTexts m_statusTexts;

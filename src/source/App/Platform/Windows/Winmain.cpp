@@ -191,7 +191,7 @@ void CheckHack()
     }
 
     const int dwTick = GetTickCount();
-    SocketClient->ToGameServer()->SendPing(dwTick, attackSpeed);
+    SocketClient->ToGameServer()->SendPing(dwTick, attackSpeed, magicSpeed);
 
     if (!First)
     {

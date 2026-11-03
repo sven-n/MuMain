@@ -9364,7 +9364,7 @@ void RenderParticles(BYTE byRenderOneMore)
     for (std::size_t drawIndex = 0; drawIndex < drawCount; drawIndex++)
     {
         const int i = sortDraws ? drawOrder[drawIndex].particleIndex : static_cast<int>(drawIndex);
-        PARTICLE* o = &Particles[i];
+        const PARTICLE* o = &Particles[i];
         if (o->Live)
         {
             if (byRenderOneMore == 1)

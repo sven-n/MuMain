@@ -721,7 +721,7 @@ void CullMounts()
     }
 }
 
-bool RenderMount(OBJECT* o, bool bForceRender)
+bool RenderMount(const OBJECT* o, bool bForceRender)
 {
     // A forced mount (a preview's) draws wherever it stands, at the scale its owner gave it.
     if (!o->Live || (!bForceRender && !o->Visible) || !IsMountDrawn(o))
@@ -742,7 +742,7 @@ void RenderMount()
     const mu::ScopedBloomExclusion classicMounts;
     for (int i = 0; i < MAX_MOUNTS; i++)
     {
-        OBJECT* o = &Mounts[i];
+        const OBJECT* o = &Mounts[i];
         if (RenderMount(o) == FALSE)
         {
             return;
@@ -829,7 +829,7 @@ void UpdateDarkHorseSkill(OBJECT* o, BMD* b)
     }
 }
 
-void RenderSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill)
+void SpawnSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill)
 {
     if (c == NULL)	return;
     if (o == NULL)	return;
@@ -1691,22 +1691,22 @@ void RenderBoids(bool bAfterCharacter)
 
     for (int i = 0; i < MAX_BOIDS; i++)
     {
-        OBJECT* o = &Boids[i];
-        if (o->m_bRenderAfterCharacter != bAfterCharacter) continue;
-        // Drawn a quarter turn round; the angle goes back exactly, not by subtracting the turn.
-        const float angle = o->Angle[2];
-        if (MODEL_SPEARSKILL != o->Type)
+        const OBJECT& boid = Boids[i];
+        if (boid.m_bRenderAfterCharacter != bAfterCharacter)
+            continue;
+        if (boid.Live)
         {
-            o->Angle[2] += 90.f;
-        }
-        if (o->Live)
-        {
-            if (o->Visible)
+            if (boid.Visible)
             {
-                if (MODEL_SPEARSKILL == o->Type)
+                if (MODEL_SPEARSKILL == boid.Type)
                 {
                     continue;
                 }
+                // Drawn a quarter turn round, from a copy.
+                OBJECT turned = boid;
+                const Random::DrawnAs drawnAs(&turned, &boid);
+                turned.Angle[2] += 90.f;
+                const OBJECT* o = &turned;
                 RenderObject(o, true);
 
                 BMD* b = &Models[o->Type];
@@ -1737,7 +1737,6 @@ void RenderBoids(bool bAfterCharacter)
                 }
             }
         }
-        o->Angle[2] = angle;
     }
 }
 
@@ -1750,13 +1749,16 @@ void RenderFishs()
 
     for (int i = 0; i < MAX_FISHS; i++)
     {
-        OBJECT* o = &Fishs[i];
-        const float angle = o->Angle[2];
-        o->Angle[2] += 90.f;
-        if (o->Live)
+        const OBJECT& fish = Fishs[i];
+        if (fish.Live)
         {
-            if (o->Visible && o->Type != -1)
+            if (fish.Visible && fish.Type != -1)
             {
+                // Drawn a quarter turn round, from a copy.
+                OBJECT turned = fish;
+                const Random::DrawnAs drawnAs(&turned, &fish);
+                turned.Angle[2] += 90.f;
+                const OBJECT* o = &turned;
                 RenderObject(o);
 
                 if (o->Type == MODEL_FISH01 + 7 || o->Type == MODEL_FISH01 + 8)
@@ -1777,7 +1779,6 @@ void RenderFishs()
                 }
             }
         }
-        o->Angle[2] = angle;
     }
 }
 

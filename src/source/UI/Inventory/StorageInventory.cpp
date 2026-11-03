@@ -68,7 +68,7 @@ std::uint64_t MaxWithdrawNow()
                 g_pGenericConfirmDialog->KeepOpen();
                 return;
             }
-            SocketClient->ToGameServer()->SendUnlockVault((WORD)_wtoi(strText.c_str()));
+            SocketClient->ToGameServer()->SendUnlockVault((WORD)_wtoi(strText.c_str()), u"");
         };
         cfg.onCancel = []
         {

@@ -412,3 +412,89 @@ TEST_CASE("The game's legacy sequence gives what the Windows CRT's rand() gives,
     const std::uint32_t state = Random::RandState();
     CHECK(Random::RandState() == state);
 }
+
+TEST_CASE("A copy drawn in place of an object draws as that object while its scope lasts [effects]")
+{
+    OBJECT source{};
+    OBJECT copy{};
+    const int alone = Random::DrawRand(&copy, 1);
+    {
+        const Random::DrawnAs drawnAs(&copy, &source);
+        CHECK(Random::DrawKey(&copy) == &source);
+        CHECK(Random::DrawRand(&copy, 1) == Random::DrawRand(&source, 1));
+        // A copy of the copy is the source too.
+        OBJECT inner{};
+        const Random::DrawnAs innerDrawnAs(&inner, &copy);
+        CHECK(Random::DrawKey(&inner) == &source);
+
+        BeginObjectDraws();
+        SendAfterCharacter(&copy);
+        CHECK(IsSentAfterCharacter(&source));
+    }
+    CHECK(Random::DrawKey(&copy) == &copy);
+    CHECK(Random::DrawRand(&copy, 1) == alone);
+    BeginObjectDraws();
+}
+
+TEST_CASE("A sprite is visible from its creation; its draw sets nothing on it [effects]")
+{
+    for (int i = 0; i < MAX_SPRITES; ++i)
+        Sprites[i].Live = false;
+    vec3_t position{0.f, 0.f, 0.f};
+    vec3_t light{1.f, 1.f, 1.f};
+    Sprites[0].Visible = false;
+    CreateSprite(BITMAP_LIGHT, position, 1.f, light, nullptr);
+    REQUIRE(Sprites[0].Live);
+    CHECK(Sprites[0].Visible);
+    Sprites[0].Live = false;
+}
+
+TEST_CASE("An effect drawn as its owner's weapon draws a copy; the effect stays as the update left it [effects]")
+{
+    ClearEffects();
+    const std::unique_ptr<BMD[]> models(new BMD[MAX_MODELS]);
+    BMD* previousModels = Models;
+    Models = models.get();
+    const auto owner = std::make_unique<CHARACTER>();
+    owner->Object.Weapon = 0;
+    CHARACTER* previousHero = Hero;
+    Hero = owner.get();
+    for (int type : {MODEL_SKILL_WHEEL1, MODEL_SKILL_FURY_STRIKE})
+    {
+        OBJECT& effect = Effects[0];
+        effect.Live = true;
+        effect.Visible = true;
+        effect.Type = type;
+        effect.Kind = 0;
+        effect.LifeTime = 20;
+        effect.Alpha = 1.f;
+        effect.Owner = &owner->Object;
+        Vector(100.f, 200.f, 0.f, effect.Position);
+        Vector(0.f, 0.f, 10.f, effect.Angle);
+        Vector(0.f, 0.f, 5.f, effect.Direction);
+
+        RepeatedDraws::CheckChangesNothing([] { RenderEffects(); }, 3);
+        CHECK(effect.Type == type);
+        CHECK(effect.Position[2] == 0.f);
+        CHECK(effect.Angle[2] == 10.f);
+    }
+    Hero = previousHero;
+    Models = previousModels;
+    ClearEffects();
+}
+
+TEST_CASE("A Skill Spear's blend mesh light is set where it is created, not by its draw [effects]")
+{
+    ClearEffects();
+    vec3_t position{100.f, 200.f, 0.f};
+    vec3_t angle{0.f, 0.f, 0.f};
+    vec3_t light{1.f, 1.f, 1.f};
+    CreateEffect(MODEL_SPEARSKILL, position, angle, light);
+    int spear = -1;
+    for (int i = 0; i < MAX_EFFECTS; ++i)
+        if (Effects[i].Live && Effects[i].Type == MODEL_SPEARSKILL)
+            spear = i;
+    REQUIRE(spear >= 0);
+    CHECK(Effects[spear].BlendMeshLight == 1.f);
+    ClearEffects();
+}

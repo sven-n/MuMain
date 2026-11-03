@@ -344,7 +344,7 @@ void mu::ui::window::CItemHotKey::SetSlotIconsShown(bool shown)
 
 void mu::ui::window::CItemHotKey::RenderSlot(int iSlotIndex, const Rml::Vector2f& offset, const Rml::Vector2f& size)
 {
-    if (ITEM* pItem = GetSlotItem(iSlotIndex))
+    if (const ITEM* pItem = GetSlotItem(iSlotIndex))
         RenderItem3DWithHover(offset.x, offset.y, size.x, size.y, pItem->Type, pItem->Level, 0, 0, m_iHoveredSlot == iSlotIndex);
 }
 

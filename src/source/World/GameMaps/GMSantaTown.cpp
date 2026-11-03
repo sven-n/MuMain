@@ -178,7 +178,7 @@ bool CGMSantaTown::UpdateObjectEffects(OBJECT* o, BMD* b)
     return false;
 }
 
-bool CGMSantaTown::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool CGMSantaTown::RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
 {
     // 	vec3_t vPos, vRelative, vLight;
     //

@@ -65,7 +65,7 @@ public: // Character
     {
         return false;
     }
-    virtual bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+    virtual bool RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
     {
         return false;
     }

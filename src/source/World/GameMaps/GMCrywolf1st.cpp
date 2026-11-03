@@ -2118,7 +2118,7 @@ bool M34CryWolf1st::UpdateCryWolf1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
     return false;
 }
 
-bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool M34CryWolf1st::RenderCryWolf1stMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
 {
     if (!IsCyrWolf1st() && !(gMapManager.InDevilSquare()))
         return false;

@@ -659,10 +659,10 @@ void CSPetDarkSpirit::CullPet()
         o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f);
 }
 
-void CSPetDarkSpirit::RenderPet(int PetState)
+void CSPetDarkSpirit::RenderPet(int PetState) const
 {
-    CHARACTER* c = &m_PetCharacter;
-    OBJECT* o = &c->Object;
+    const CHARACTER* c = &m_PetCharacter;
+    const OBJECT* o = &c->Object;
 
     if (c == nullptr || o == nullptr)
     {
@@ -798,7 +798,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
                 if (to != NULL)
                 {
                     SkinObjectMeshes(o, b, false);
-                    b->RenderMeshEffect(1, BITMAP_LIGHT, 1, o->Angle, to);
+                    b->SpawnMeshEffects(1, BITMAP_LIGHT, 1, o->Angle, to);
                 }
 
                 SetAI(PET_FLYING);

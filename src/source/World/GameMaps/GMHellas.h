@@ -18,7 +18,7 @@ void    RenderWaterTerrain(int Texture, float xf, float yf, float SizeX, float S
 void    SettingHellasColor(void);
 BYTE    GetHellasLevel(CLASS_TYPE Class, int Level);
 bool    GetUseLostMap(bool bDrawAlert = false);
-int     RenderHellasItemInfo(ITEM* ip, int textNum);
+int RenderHellasItemInfo(const ITEM* ip, int textNum);
 bool	EnableKalima(CLASS_TYPE Class, int Level, int ItemLevel);
 
 void    AddObjectDescription(wchar_t* Text, vec3_t position);
@@ -49,6 +49,6 @@ bool    AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJEC
 void    MonsterMoveWaterSmoke(OBJECT* o);
 void    MonsterDieWaterSmoke(OBJECT* o);
 bool    MoveHellasMonsterVisual(OBJECT* o, BMD* b);
-bool    RenderHellasMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate = true, int Select = 0);
+bool RenderHellasMonsterCloth(const CHARACTER* c, const OBJECT* o, bool Translate = true, int Select = 0);
 bool RenderHellasMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
 bool UpdateHellasMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);

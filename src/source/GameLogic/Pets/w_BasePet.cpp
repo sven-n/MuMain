@@ -155,21 +155,19 @@ void PetObject::Update(bool bForceRender)
     }
 }
 
-void PetObject::Render(bool bForceRender)
+void PetObject::Cull()
 {
     if (m_obj->Live)
-    {
-        m_obj->Visible =
-            (bForceRender == FALSE ? TestFrustrum2D(m_obj->Position[0] * 0.01f, m_obj->Position[1] * 0.01f, -20.f)
-                                   : TRUE);
+        m_obj->Visible = TestFrustrum2D(m_obj->Position[0] * 0.01f, m_obj->Position[1] * 0.01f, -20.f);
+}
 
-        if (m_obj->Visible)
-        {
-            int State = g_isCharacterBuff(m_obj->Owner, eBuff_Cloaking) ? 10 : 0;
-
-            RenderObject(m_obj, FALSE, 0, State);
-        }
-    }
+void PetObject::Render(bool bForceRender) const
+{
+    // A forced pet draws wherever it stands.
+    if (!m_obj->Live || (!bForceRender && !m_obj->Visible))
+        return;
+    const int State = g_isCharacterBuff(m_obj->Owner, eBuff_Cloaking) ? 10 : 0;
+    RenderObject(m_obj, FALSE, 0, State);
 }
 
 bool PetObject::IsSameOwner(OBJECT* Owner)

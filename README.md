@@ -46,6 +46,7 @@ Remaining Season 6 work includes Lucky Items.
 
 Hosted releases provide Windows native x64 Release, Linux x64 Release and macOS arm64 Release
 builds with the editor disabled; Semantic Release publishes all three as GitHub Release assets.
+Release builds run nightly or manually from main; merging a PR does not publish immediately.
 Each runtime excludes `Data/` and `fonts/`: its **Compatible game data** link points to the
 separate data release tagged `data-<id>`. Follow the platform-specific assembly steps in the
 [release instructions](docs/build/README.md#hosted-releases).

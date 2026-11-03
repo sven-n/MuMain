@@ -11,6 +11,8 @@
 
 #include <algorithm>
 #include <random>
+#include <utility>
+#include <vector>
 
 namespace Random
 {
@@ -147,9 +149,33 @@ void NextDrawFrame()
     ++s_drawFrame;
 }
 
+namespace
+{
+// The copies drawn as other objects on this thread, innermost last.
+thread_local std::vector<std::pair<const void*, const void*>> s_drawnAs;
+} // namespace
+
+DrawnAs::DrawnAs(const void* copy, const void* source)
+{
+    s_drawnAs.emplace_back(copy, DrawKey(source));
+}
+
+DrawnAs::~DrawnAs()
+{
+    s_drawnAs.pop_back();
+}
+
+const void* DrawKey(const void* key)
+{
+    for (auto it = s_drawnAs.rbegin(); it != s_drawnAs.rend(); ++it)
+        if (it->first == key)
+            return it->second;
+    return key;
+}
+
 std::int32_t DrawRand(const void* key, std::uint32_t salt)
 {
-    const auto at = static_cast<std::uint64_t>(reinterpret_cast<std::uintptr_t>(key));
+    const auto at = static_cast<std::uint64_t>(reinterpret_cast<std::uintptr_t>(DrawKey(key)));
     return static_cast<std::int32_t>(Mix(Mix(s_drawFrame ^ (static_cast<std::uint64_t>(salt) << 32)) ^ at) & 0x7fff);
 }
 

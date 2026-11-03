@@ -15,9 +15,16 @@ DWORD GetGuildRelationShipBGColor(BYTE GuildRelationShip);
 CHARACTER* FindCharacterByID(wchar_t* szName);
 CHARACTER* FindCharacterByKey(int Key);
 
+// A linked part's own scale and light, where they are not its owner's.
+struct LinkedPartLook
+{
+    float ownerScale;
+    const float* light;
+};
 // Draws a linked part and returns the bones it posed it into.
-vec34_t* RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Type, int Level, int Option1,
-                          bool Link, bool Translate, int RenderType = 0, bool bRightHandItem = true, int linkBone = -1);
+vec34_t* RenderLinkObject(float x, float y, float z, const CHARACTER* c, const PART_t* f, int Type, int Level,
+                          int Option1, bool Link, bool Translate, int RenderType = 0, bool bRightHandItem = true,
+                          int linkBone = -1, const LinkedPartLook* look = nullptr);
 bool RendersWingCarriedModels(const CHARACTER* c);
 // A model a Red Dragon or a Saint statue carries on its wing part: where it hangs, and the character's scale for it.
 struct WingCarriedModel
@@ -31,9 +38,9 @@ struct WingCarriedModel
     float scale;
 };
 int WingCarriedModels(const CHARACTER* c, WingCarriedModel (&models)[2]);
-void RenderWingCarriedModels(CHARACTER* c, bool Translate);
-void RenderChristmasCompanions(CHARACTER* c, bool Translate, int Select);
-void RenderCharacter(CHARACTER* c, OBJECT* o, int Select = 0);
+void RenderWingCarriedModels(const CHARACTER* c, bool Translate);
+void RenderChristmasCompanions(const CHARACTER* c, vec3_t light, bool Translate, int Select);
+void RenderCharacter(const CHARACTER* c, const OBJECT* o, int Select = 0);
 void RenderCharactersClient();
 // Whether RenderCharactersClient draws the character this frame.
 bool IsCharacterDrawn(CHARACTER* c);
@@ -97,7 +104,10 @@ void CheckCharacterPose(const OBJECT* o, BMD* model, bool reused);
 void MoveEye(OBJECT* o, BMD* b, int Right, int Left, int Right2 = -1, int Left2 = -1, int Right3 = -1, int Left3 = -1);
 void DeleteCloth(CHARACTER* c, OBJECT* o = NULL, PART_t* p2 = NULL);
 
+// Whether c wears a full set; also sets EquipmentLevelSet and g_bAddDefense, and in Chaos Castle its unit.
 bool CheckFullSet(CHARACTER* c);
+// The same check for a draw: it sets nothing.
+[[nodiscard]] bool IsFullSet(const CHARACTER* c);
 
 void MoveCharacterPosition(CHARACTER* c);
 void ChangeCharacterExt(int Key, BYTE* Equipment, CHARACTER* pCharacter = NULL, OBJECT* pHelper = NULL);
@@ -142,8 +152,8 @@ float CharacterMoveSpeed(CHARACTER* c);
 bool CharacterAnimation(CHARACTER* c, OBJECT* o);
 bool AttackStage(CHARACTER* c, OBJECT* o);
 
-void RenderGuild(OBJECT* o, int Type = -1, vec3_t vPos = NULL);
-void RenderLight(OBJECT* o, int Texture, float Scale, int Bone, float x, float y, float z);
+void RenderGuild(const OBJECT* o, int Type = -1, vec3_t vPos = NULL);
+void SpawnBoneLight(OBJECT* o, int Texture, float Scale, int Bone, float x, float y, float z);
 void SpawnProtectGuildMark(CHARACTER* c);
 
 void MakeElfHelper(CHARACTER* c);
@@ -161,8 +171,8 @@ void CreateJointFpsChecked(int Type, vec3_t Position, vec3_t TargetPosition, vec
                            short int sTargetIndex = -1);
 // Whether the character carries its weapons on its back instead of in hand.
 bool AreWeaponsOnBack(const CHARACTER* c, const OBJECT* o);
-bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate);
-bool DrawsWeaponOnBack(CHARACTER* c, const OBJECT* o, int index);
+bool RenderCharacterBackItem(const CHARACTER* c, const OBJECT* o, bool bTranslate);
+bool DrawsWeaponOnBack(const CHARACTER* c, const OBJECT* o, int index);
 void PrepareCarriedParts(CHARACTER* c);
 bool IsFlying(const OBJECT* o);
 // The capes that hang from the shoulders (bone 19) and link to the body.
@@ -180,8 +190,8 @@ PART_t BackWeaponPart(const CHARACTER* c);
 // Where the Imp hangs: higher on a Rage Fighter's armor.
 void ImpOffset(const CHARACTER* c, vec3_t offset);
 // Whether RenderCharacter gets to the character's attachments.
-bool DrawsAttachments(CHARACTER* c);
-bool IsBackItem(CHARACTER* c, int iType);
+bool DrawsAttachments(const CHARACTER* c);
+bool IsBackItem(const CHARACTER* c, int iType);
 
 bool IsPlayer(CHARACTER* c);
 bool IsMonster(CHARACTER* c);

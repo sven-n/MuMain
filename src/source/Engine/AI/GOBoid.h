@@ -12,14 +12,14 @@ bool MoveMount(OBJECT* o, bool bForceRender = false);
 void MoveMounts(void);
 // Marks the mounts the frame's view shows and sets their drawn scale; part of CullWorld.
 void CullMounts();
-bool RenderMount(OBJECT* o, bool bForceRender = false);
+bool RenderMount(const OBJECT* o, bool bForceRender = false);
 void RenderMount(void);
 // Spawns the effects of the mounts the last RenderMount drew; call once per update, after the mounts moved.
 void UpdateMountEffects();
 // The effects of one mount its last draw drew.
 void UpdateDrawnMountEffects(OBJECT* o);
 void UpdateDarkHorseSkill(OBJECT* o, BMD* b);
-void RenderSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill = 30);
+void SpawnSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill = 30);
 void DeleteMount(OBJECT* Owner);
 // �������� �� �������ΰ�?
 bool IsMount(ITEM* pItem);

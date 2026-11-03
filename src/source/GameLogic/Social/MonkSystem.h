@@ -185,8 +185,8 @@ public:
     int ModifyTypeCommonItemMonk(int _OrginalType);
     bool IsRagefighterCommonWeapon(CLASS_TYPE _Class, int _Type);
     bool IsSwordformGloves(int _Type);
-    void RenderPhoenixGloves(CHARACTER* _pCha, BYTE slot = 0);
-    void RenderSwordformGloves(CHARACTER* _pCha, int _ModelType, int _Hand, float _Alpha, bool _Translate = false,
+    void RenderPhoenixGloves(const CHARACTER* _pCha, BYTE slot = 0);
+    void RenderSwordformGloves(const CHARACTER* _pCha, int _ModelType, int _Hand, float _Alpha, bool _Translate = false,
                                int _Select = 0);
     int ModifyTypeSwordformGloves(int _ModelType, int _LeftHand);
     int EqualItemModelType(int _Type);
@@ -210,7 +210,7 @@ public:
     bool SetRageSkillAni(int _nSkill, OBJECT* _pObj);
     bool IsRageHalfwaySkillAni(int _nSkill);
     bool SendAttackPacket(CHARACTER* _pCha, int _nMoveTarget, int _nSkill);
-    bool RageFighterEffect(OBJECT* _pObj, int _Type);
+    bool RageFighterEffect(const OBJECT* _pObj, int _Type);
     void SetDarksideTargetIndex(WORD* _pTargetIndex, ActionSkillType skill);
     WORD GetDarksideTargetIndex(int _nIndex);
     int GetDarksideCnt();
@@ -227,8 +227,8 @@ public:
     std::uint64_t DarksideStateHash() const;
     // Draws the part where the update's last step placed it; `key` is the part the update stepped for it, when the
     // draw hands over a stand-in (a skin or an angel drawn as one model).
-    void DarksideRendering(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0,
-                           const PART_t* key = nullptr);
+    void DarksideRendering(const CHARACTER* pCha, const PART_t* pPart, vec3_t light, bool Translate = false,
+                           int Select = 0, const PART_t* key = nullptr);
     bool CalculateDarksideTrans(OBJECT* _pObj, vec3_t _vPos, float _fAni, float _fNextAni = 0);
     int GetDarksideEffectTotal();
     void InitDummyCal();
@@ -237,7 +237,7 @@ public:
     bool IsDummyRender(vec3_t vOutPos, vec3_t Target, float& fAni, int DummyIndex, bool Change = false);
     void InitConsecutiveState(float _fFirstFrame = 0, float _fSecondFrame = 0, BYTE _btAttState = NONE_ATT);
     bool IsConsecutiveAtt(float _fAttFrame);
-    void RenderRepeatedly(int _Key, OBJECT* pObj);
+    void CreateRepeatedDamagePoints(int _Key, OBJECT* pObj);
     bool IsRideNotUseSkill(int _nSkill, short _Type);
     bool IsSwordformGlovesUseSkill(int _nSkill);
     bool IsChangeringNotUseSkill(short _LType, short _RType, int _LLevel, int _RLevel);

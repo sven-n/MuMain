@@ -26,10 +26,9 @@ namespace   battleCastle
     void    CollisionTempCharacter(vec3_t Position, float Range, int AniType);
     bool    CollisionEffectToObject(OBJECT* eff, float Range, float RangeZ, bool bCollisionGround, bool bRealCollision = false);
     void    SetCastleGate_Attribute(int x, int y, BYTE Operator, bool bAllClear = false);
-    void    RenderAurora(int Type, int RenderType, float x, float y, float sx, float sy, vec3_t Light);
+    void RenderAurora(int Type, int RenderType, float x, float y, float sx, float sy, const vec3_t light);
     void    SetBuildTimeLocation(OBJECT* o);
     void    RenderBuildTimes(void);
-    void    RenderBuffMagicIcon(CHARACTER* c);
     void    InitEtcSetting(void);
     void    StartFog(vec3_t Color);
     void    EndFog(void);
@@ -52,12 +51,12 @@ namespace   battleCastle
     bool    AttackEffect_BattleCastleMonster(CHARACTER* c, OBJECT* o, BMD* b);
     bool    MoveBattleCastleMonsterVisual(OBJECT* o, BMD* b);
     bool UpdateBattleCastleMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b);
-    bool    RenderBattleCastleMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
-    bool    RenderBattleCastleMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate, int Select);
+    bool RenderBattleCastleMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b);
+    bool RenderBattleCastleMonsterCloth(const CHARACTER* c, const OBJECT* o, bool Translate, int Select);
     // The vertex spawns and state changes of RenderBattleCastleObjectMesh, for an object the last frame drew.
     void UpdateBattleCastleObjectMeshEffects(OBJECT* o, BMD* b);
     bool RenderBattleCastleMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b);
-    void    RenderMonsterHitEffect(OBJECT* o);
+    void SpawnMonsterHitEffect(OBJECT* o);
 }
 
 using namespace battleCastle;

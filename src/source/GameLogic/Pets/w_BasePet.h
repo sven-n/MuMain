@@ -38,7 +38,9 @@ public:
     bool Create(int itemType, int modelType, vec3_t Position, CHARACTER* Owner, int SubType, int LinkBone);
     void Release();
     void Update(bool bForceRender = false);
-    void Render(bool bForceRender = false);
+    // Whether the frame's view shows it; part of CullWorld.
+    void Cull();
+    void Render(bool bForceRender = false) const;
 
 private:
     bool UpdateMove(double tick, bool bForceRender = false);

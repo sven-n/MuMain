@@ -443,7 +443,6 @@ bool NewRenderLogInScene(HDC hDC)
         }
         { FRAME_PROFILE(Effects); RenderJoints(); }
         { FRAME_PROFILE(Effects); RenderEffects(); }
-        { FRAME_PROFILE(Effects); CheckSprites(); }
         { FRAME_PROFILE(Effects); RenderLeaves(); }
         { FRAME_PROFILE(Effects); RenderBoids(); }
         {

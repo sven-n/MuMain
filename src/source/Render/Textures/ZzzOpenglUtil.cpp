@@ -969,7 +969,7 @@ void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, flo
     mu::GetRenderer().RenderQuad3D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
-void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha, float Scale)
+void RenderNumber(const vec3_t Position, int Num, const vec3_t Color, float Alpha, float Scale)
 {
     vec3_t p;
     VectorCopy(Position, p);

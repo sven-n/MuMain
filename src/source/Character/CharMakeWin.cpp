@@ -621,7 +621,7 @@ void CCharMakeWin::RenderPreviewInto(std::uint32_t width, std::uint32_t height)
     // The scene camera is moved to frame the preview, and given back afterwards.
     const CameraState sceneCamera = g_Camera;
 
-    OBJECT* o = &CharacterView.Object;
+    const OBJECT* o = &CharacterView.Object;
     vec3_t Position, Angle;
 
     // The class's offset in the frame moves the camera the other way, so the character stays where it stands.
