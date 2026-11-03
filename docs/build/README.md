@@ -141,8 +141,9 @@ Run the client from that directory so it finds its assets and the library.
 
 ## Hosted releases
 
-Feature branches target `main`. Ready code PRs run Quality Gates, then Linux x64
-and macOS arm64 Release builds and tests. Draft PRs defer native builds until
+Feature branches target `main`. Every PR runs Quality Gates, which include the
+[static checks](reference-tests.md#static-checks-and-the-pre-push-hook); ready code
+PRs then run Linux x64 and macOS arm64 Release builds and tests. Draft PRs defer native builds until
 **Ready for review**; documentation-only changes run the cheap checks without
 native compilation. Mixed changes, build files, shaders, tests and asset PRs still
 get native builds; asset tests load game data and render shipped documents.

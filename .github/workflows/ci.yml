@@ -38,10 +38,11 @@ jobs:
         id: plan
         run: python3 scripts/ci_build_plan.py
 
-      - name: Check workflow contracts and build selection
+      # Architecture guards and contracts that only read the source; native jobs skip the `static` label.
+      - name: Run static checks
         run: |
-          python3 tests/test_windows_workflow_contract.py
-          python3 tests/test_ci_build_plan.py
+          cmake -S tests/static -B out/static-checks
+          ctest --test-dir out/static-checks -C Release --parallel 4 --output-on-failure --no-tests=error
 
       - name: Validate game data inputs
         run: |
@@ -68,9 +69,7 @@ jobs:
         env:
           DIFF_BASE: ${{ steps.plan.outputs.diff_base }}
         run: |
-          CHANGED=$(git diff --name-only --diff-filter=d "${DIFF_BASE}...HEAD" -- \
-            'src/source/*.cpp' 'src/source/*.h' 'src/source/*.hpp' \
-            | grep -v ThirdParty/ | grep -v 'src/source/Dotnet/' || true)
+          CHANGED=$(bash scripts/changed_cpp_files.sh "$DIFF_BASE")
           echo "diff_base=$DIFF_BASE" >> "$GITHUB_OUTPUT"
           if [ -z "$CHANGED" ]; then
             echo "count=0" >> "$GITHUB_OUTPUT"
@@ -86,29 +85,7 @@ jobs:
         if: steps.changed.outputs.count != '0'
         run: |
           echo "Checking ${{ steps.changed.outputs.count }} files..."
-          base="${{ steps.changed.outputs.diff_base }}"
-          while IFS= read -r file; do
-            format_args=()
-            while read -r start count; do
-              if [ -z "$start" ]; then
-                continue
-              fi
-              if [ -z "$count" ]; then
-                count=1
-              fi
-              if [ "$count" -eq 0 ]; then
-                continue
-              fi
-              end=$((start + count - 1))
-              format_args+=(--lines="${start}:${end}")
-            done < <(
-              git diff --unified=0 --no-color "${base}...HEAD" -- "$file" \
-                | sed -nE 's/^@@ -[0-9]+(,[0-9]+)? \+([0-9]+)(,([0-9]+))? @@.*/\2 \4/p'
-            )
-            if [ "${#format_args[@]}" -ne 0 ]; then
-              clang-format --dry-run --Werror "${format_args[@]}" "$file"
-            fi
-          done < /tmp/changed-cpp-files.txt
+          bash scripts/check_format.sh "${{ steps.changed.outputs.diff_base }}" < /tmp/changed-cpp-files.txt
 
       - name: Static analysis
         if: steps.changed.outputs.count != '0'
@@ -265,6 +242,7 @@ jobs:
           ctest --test-dir out/build/windows-ci-x64-release --build-config Release
           --output-on-failure
           --no-tests=error
+          --label-exclude static
 
       - name: Stage MSVC redistributable runtime
         shell: pwsh
@@ -592,6 +570,7 @@ jobs:
           ctest --test-dir out/build/linux-ci --build-config Release
           --output-on-failure
           --no-tests=error
+          --label-exclude static
 
       - name: Validate runtime
         run: |
@@ -713,6 +692,7 @@ jobs:
           ctest --test-dir out/build/macos-ci --build-config Release
           --output-on-failure
           --no-tests=error
+          --label-exclude static
 
       - name: Validate runtime
         run: |

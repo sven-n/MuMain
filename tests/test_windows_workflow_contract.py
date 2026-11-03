@@ -22,6 +22,9 @@ COPY_RUNTIME_ASSETS = ROOT / "cmake/CopyRuntimeAssets.cmake"
 SRC_CMAKE = ROOT / "src/CMakeLists.txt"
 SOURCE_ROOT = ROOT / "src/source"
 NETWORK_TEST_CMAKE = ROOT / "tests/network/CMakeLists.txt"
+STATIC_CMAKE = ROOT / "tests/static/CMakeLists.txt"
+PRE_PUSH_HOOK = ROOT / ".githooks/pre-push"
+FORMAT_SCRIPT = ROOT / "scripts/check_format.sh"
 BUILD_GUIDE = ROOT / "docs/build/README.md"
 LINUX_GUIDE = ROOT / "docs/build/linux/console.md"
 README = ROOT / "README.md"
@@ -275,11 +278,23 @@ check(
     "DIFF_BASE: ${{ steps.plan.outputs.diff_base }}" in quality_detection,
     "Quality detection must use the event's pinned diff base",
 )
-quality_contracts = step(quality_job, "quality", "Check workflow contracts and build selection")
-for script in ("test_windows_workflow_contract.py", "test_ci_build_plan.py"):
-    check(script in quality_contracts, f"Cheap quality checks must run {script}")
+check("bash scripts/changed_cpp_files.sh" in quality_detection, "Quality detection must share the hook's file list")
+quality_static = step(quality_job, "quality", "Run static checks")
+for required in ("cmake -S tests/static -B out/static-checks", "ctest --test-dir out/static-checks"):
+    check(required in quality_static, f"Static checks must run before native builds: {required}")
+static_cmake = STATIC_CMAKE.read_text(encoding="utf-8")
+for test_name in ("windows_workflow_contract", "ci_build_plan"):
+    check(f"NAME {test_name}" in static_cmake, f"Static checks must include {test_name}")
+check("PROPERTIES LABELS static" in static_cmake, "Static checks must carry the label native jobs exclude")
+pre_push = PRE_PUSH_HOOK.read_text(encoding="utf-8")
+for required in ("-S tests/static -B out/static-checks", "scripts/changed_cpp_files.sh", "scripts/check_format.sh"):
+    check(required in pre_push, f"pre-push hook must run what Quality Gates runs: {required}")
 for platform, platform_job in (("windows", native_job), ("linux", linux_job), ("macos", macos_job)):
     check("needs: quality" in platform_job, f"{platform} must wait for Quality Gates")
+    check(
+        "--label-exclude static" in step(platform_job, platform, "Run tests"),
+        f"{platform} must not repeat the static checks Quality Gates already ran",
+    )
     check(
         f"if: needs.quality.outputs.{platform} == 'true'" in platform_job,
         f"{platform} must follow the tested build plan",
@@ -290,12 +305,14 @@ for required in ("name: CI Required", "if: always()", "needs: [quality, build-wi
     check(required in required_job, f"Required CI check missing {required}")
 check("if: needs.quality.outputs.release == 'true'" in release_job, "Publishing must follow the release plan")
 quality_formatting = step(quality_job, "quality", "Check formatting")
+check("bash scripts/check_format.sh" in quality_formatting, "Formatting gate must share the hook's script")
+format_script = FORMAT_SCRIPT.read_text(encoding="utf-8")
 for required in (
     "git diff --unified=0 --no-color",
     'format_args+=(--lines="${start}:${end}")',
     'clang-format --dry-run --Werror "${format_args[@]}" "$file"',
 ):
-    check(required in quality_formatting, f"Formatting gate missing {required}")
+    check(required in format_script, f"Formatting gate missing {required}")
 
 check("strategy:" not in native_job, "Main Windows asset job must not use a matrix")
 check("matrix." not in native_job, "Main Windows asset job must use fixed values")

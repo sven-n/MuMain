@@ -1,11 +1,7 @@
-#!/bin/bash
-# Install git hooks for the MuMain repository.
+#!/usr/bin/env bash
+# Enables the repository's git hooks (.githooks/) for this clone and all its worktrees.
 # Run from any directory inside the repo.
+set -eu
 
-REPO_ROOT=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
-HOOKS_DIR="$REPO_ROOT/.git/hooks"
-
-cp "$(dirname "$0")/pre-commit" "$HOOKS_DIR/pre-commit"
-chmod +x "$HOOKS_DIR/pre-commit"
-
-echo "Git hooks installed successfully."
+git -C "$(dirname "$0")" config core.hooksPath .githooks
+echo "Git hooks enabled from .githooks/ (pre-push runs the static checks)."

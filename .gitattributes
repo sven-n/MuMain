@@ -50,3 +50,6 @@ tests/effects/baseline/*.txt text eol=lf
 *.[Oo][Gg][Gg]   binary
 *.[Mm][Pp]3      binary
 *.[Gg][Ll][Bb]   binary
+# Shell scripts and git hooks run under bash on every platform; CRLF breaks them.
+*.sh text eol=lf
+.githooks/* text eol=lf
