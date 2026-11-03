@@ -141,13 +141,53 @@ Run the client from that directory so it finds its assets and the library.
 
 ## Hosted releases
 
+Feature branches target `main`. Ready code PRs run Quality Gates, then Linux x64
+and macOS arm64 Release builds and tests. Draft PRs defer native builds until
+**Ready for review**; documentation-only changes run the cheap checks without
+native compilation. Mixed changes, build files, shaders, tests and asset PRs still
+get native builds; asset tests load game data and render shipped documents.
+Code merges to main run Linux integration checks. Newer revisions cancel older
+PR/integration runs; release runs are serialized separately.
+
+Full Windows/Linux/macOS release builds run daily at approximately **02:17 UTC+8**
+(18:17 UTC) and on demand. In **Actions > CI > Run workflow**, select **main** to
+build and publish a release without waiting for the nightly run. All jobs use the
+same revision selected when the workflow is triggered. Semantic Release publishes only
+when commits since the previous release warrant a version change; main merges
+no longer publish immediately. Windows integration failures may first appear in
+the nightly run. The separate Data Assets workflow still publishes data on merge.
+
+### Required PR check (maintainer setup)
+
+After merging this workflow change, an administrator must edit the existing main
+branch ruleset in **Settings > Rules > Rulesets**, enable **Require status checks
+to pass**, and require **CI Required** from GitHub Actions. Preserve the existing
+pull-request, deletion and force-push protections. Repository files cannot enable
+this GitHub setting. If the check is not listed yet, run a PR with the new workflow
+first, then select it.
+
+`CI Required` verifies Quality Gates and every native job selected for the change.
+It rejects failures, cancellations and unexpected skips, while allowing the
+intentional native-build skips above. Require this aggregate check instead of
+individual platform jobs, which do not run on every event. Do not enable **Require
+branches to be up to date** just to reduce builds: it can force another build after
+each main merge. Update a PR when its integration state needs revalidation.
+
+Linux uses a compiler-cache trial. Its job log and **Linux compiler cache** step
+summary show hits and misses; compare the Build step duration on a warm run with
+the first run. A clean cache is expected after a compiler change. Windows vcpkg
+cache keys include the runner image, compiler, vcpkg revision, manifest and
+toolchain; binary archives are cached alongside installed packages.
+
+### Download artifacts
+
 Actions expose builds through CI artifacts and two coordinated release streams:
 
 - Semantic Release publishes these no-data runtime archives:
   `MuMain-windows-native-x64-release-editor-off-no-data.tar.gz`,
   `MuMain-linux-native-x64-release-editor-off-no-data.tar.gz`, and
   `MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz`.
-- Each main-branch CI run also uploads
+- Each nightly/manual release build also uploads
   `mu-client-windows-native-x64-release-editor-off-no-data-main`,
   `mu-client-linux-native-x64-release-editor-off-no-data-main`, and
   `mu-client-macos-native-arm64-release-editor-off-no-data-main` artifacts;

@@ -102,6 +102,7 @@ EXPECTED_WINDOWS_OS_DLLS = {
 CI_ONLY_LINUX_PACKAGES = {
     "gcc": "the guide installs build-essential",
     "g++": "the guide installs build-essential",
+    "ccache": "CI-only compiler cache trial",
 }
 
 EXPECTED_RELEASE_ASSETS = [
@@ -254,24 +255,40 @@ jobs_block = jobs_block_match.group(1) if jobs_block_match else ""
 job_names = re.findall(r"(?m)^  ([\w-]+):\n", jobs_block)
 check(
     job_names
-    == ["quality", "build-windows", "build-linux", "build-macos", "release"],
-    "CI jobs must be quality, build-windows, build-linux, build-macos, "
+    == ["quality", "build-windows", "build-linux", "build-macos", "required", "release"],
+    "CI jobs must be quality, build-windows, build-linux, build-macos, required, "
     f"release; found {job_names}",
 )
-for ignored_path in ("src/bin/Data/**", "src/bin/fonts/**"):
-    check(
-        "paths-ignore:" in ci and ignored_path in ci,
-        f"Code CI must ignore data-only pushes: {ignored_path}",
-    )
+check("paths-ignore:" not in ci, "Required CI must report checks even for docs/data-only PRs")
+for required in ("branches: [main]", "ready_for_review", "schedule:", "workflow_dispatch:"):
+    check(required in ci, f"CI trigger missing {required}")
 
 quality_job = job(ci, "quality")
 native_job = job(ci, "build-windows")
 linux_job = job(ci, "build-linux")
 macos_job = job(ci, "build-macos")
 release_job = job(ci, "release")
+required_job = job(ci, "required")
 
 quality_detection = step(quality_job, "quality", "Detect changed C++ files")
-check("diff_base=$DIFF_BASE" in quality_detection, "Quality detection must expose its diff base")
+check(
+    "DIFF_BASE: ${{ steps.plan.outputs.diff_base }}" in quality_detection,
+    "Quality detection must use the event's pinned diff base",
+)
+quality_contracts = step(quality_job, "quality", "Check workflow contracts and build selection")
+for script in ("test_windows_workflow_contract.py", "test_ci_build_plan.py"):
+    check(script in quality_contracts, f"Cheap quality checks must run {script}")
+for platform, platform_job in (("windows", native_job), ("linux", linux_job), ("macos", macos_job)):
+    check("needs: quality" in platform_job, f"{platform} must wait for Quality Gates")
+    check(
+        f"if: needs.quality.outputs.{platform} == 'true'" in platform_job,
+        f"{platform} must follow the tested build plan",
+    )
+    check("timeout-minutes: 90" in platform_job, f"{platform} must bound job duration")
+for required in ("name: CI Required", "if: always()", "needs: [quality, build-windows, build-linux, build-macos]",
+                 "CI_JOB_RESULTS: ${{ toJSON(needs) }}", "python3 scripts/ci_build_plan.py check"):
+    check(required in required_job, f"Required CI check missing {required}")
+check("if: needs.quality.outputs.release == 'true'" in release_job, "Publishing must follow the release plan")
 quality_formatting = step(quality_job, "quality", "Check formatting")
 for required in (
     "git diff --unified=0 --no-color",
@@ -285,7 +302,6 @@ check("matrix." not in native_job, "Main Windows asset job must use fixed values
 for required in (
     "name: Windows Native Build (x64, Release, editor OFF)",
     "runs-on: windows-latest",
-    "if: github.event_name == 'push' && github.ref == 'refs/heads/main'",
 ):
     check(required in native_job, f"Main Windows job missing {required}")
 
@@ -415,13 +431,12 @@ for (
     for required in (
         f"name: {display_name}",
         f"runs-on: {runner}",
-        "if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'",
     ):
         check(required in platform_job, f"{display_name} missing {required}")
     platform_archive = step(platform_job, job_name, "Archive runtime")
     check(
-        "if: github.event_name == 'push'" in platform_archive,
-        f"{display_name} must archive only for artifact-producing pushes",
+        "if: needs.quality.outputs.release == 'true'" in platform_archive,
+        f"{display_name} must archive only for scheduled/manual releases",
     )
     check(
         archive_command in platform_archive,
@@ -429,7 +444,7 @@ for (
     )
     platform_upload = step(platform_job, job_name, "Upload runtime artifact")
     for required in (
-        "if: github.event_name == 'push'",
+        "if: needs.quality.outputs.release == 'true'",
         "uses: actions/upload-artifact@v4",
         f"name: {artifact_name}",
         f"path: {archive_name}",
@@ -448,6 +463,8 @@ for required in (
     "-DENABLE_EDITOR=OFF",
     "-DMU_COPY_RUNTIME_ASSETS=OFF",
     "-DBUILD_TESTING=ON",
+    "-DCMAKE_C_COMPILER_LAUNCHER=ccache",
+    "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
 ):
     check(required in linux_configure, f"Linux configure missing {required}")
 check(
@@ -475,6 +492,16 @@ linux_ci_jobs = [("ci.yml", linux_job, "build-linux")]
 fork_ci = read_optional(FORK_CI_WORKFLOW)
 if fork_ci:
     linux_ci_jobs.append(("fork-ci.yml", job(fork_ci, "linux-editor"), "linux-editor"))
+    for windows_job in (native_job, job(fork_ci, "windows")):
+        cache_key = step(windows_job, "windows", "Identify vcpkg toolchain")
+        check("scripts/ci_vcpkg_cache_key.ps1" in cache_key, "Windows must identify its actual toolchain")
+        cache = step(windows_job, "windows", "Cache vcpkg packages")
+        for required in ("steps.vcpkg.outputs.identity", "toolchain-x64.cmake", "~/AppData/Local/vcpkg/archives"):
+            check(required in cache, f"vcpkg cache missing {required}")
+linux_cache = step(linux_job, "build-linux", "Cache Linux compilation")
+for required in ("steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
+    check(required in linux_cache, f"Compiler cache missing {required}")
+check("ccache --show-stats" in linux_job, "Compiler cache trial must report hit statistics")
 all_linux_ci_packages = set()
 for workflow_name, ci_job, job_name in linux_ci_jobs:
     ci_packages = apt_packages(step(ci_job, job_name, "Install build tools"))
