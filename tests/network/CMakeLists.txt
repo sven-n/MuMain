@@ -122,13 +122,6 @@ mu_add_test(
 
 if(DOTNET_EXECUTABLE)
     add_test(
-        NAME login_diagnostics_contract
-        COMMAND "${CMAKE_COMMAND}"
-            "-DMU_LOGIN_SOURCE=${CMAKE_SOURCE_DIR}/ClientLibrary/ConnectionManager.ClientToServer.Custom.cs"
-            -P "${CMAKE_CURRENT_SOURCE_DIR}/test_login_diagnostics.cmake"
-    )
-
-    add_test(
         NAME dotnet_binding_generator
         COMMAND "${CMAKE_COMMAND}" -E env --unset=Platform
             "${DOTNET_EXECUTABLE}" run

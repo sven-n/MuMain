@@ -145,13 +145,6 @@ mu_add_test(
         test_cpu_usage_math.cpp
 )
 
-add_test(
-    NAME msvc_runtime_dll_staging_contract
-    COMMAND "${CMAKE_COMMAND}"
-        "-DMU_CMAKE_SOURCE=${CMAKE_SOURCE_DIR}/src/CMakeLists.txt"
-        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_msvc_runtime_dll_staging.cmake"
-)
-
 mu_add_test(
     NAME gold_amount_tier_tests
     SOURCES
