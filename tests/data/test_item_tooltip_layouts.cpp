@@ -8,6 +8,7 @@
 #include "Data/DataHandler/ItemData/ItemJsonStorage.h"
 #include "Data/GameData/ItemData/ItemDataValidation.h"
 #include "Data/GameData/ItemData/ItemDatabase.h"
+#include "Data/GameData/ItemData/ItemJsonFormat.h"
 #include "Data/GameData/ItemData/ItemStatFile.h"
 #include "Data/GameData/ItemData/ItemStatProfiles.h"
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
@@ -98,6 +99,35 @@ TEST_CASE("The shipped tooltip file loads without problems [data][items][tooltip
         CHECK(false);
     }
     REQUIRE(result.file.FindLayout(DefaultTooltipLayout) != nullptr);
+}
+
+// An item file with a tag the presets replaced is told what to write instead (ItemJsonFormat): the presets and line
+// ids it names are the shipped file's.
+TEST_CASE("The shipped tooltip file has what the removed tags' errors name [data][items][tooltip]")
+{
+    const ItemTooltipLoadResult result = LoadItemTooltipFile(ClientDirectory / GetItemTooltipFile());
+    std::vector<BuiltTooltipLine> defaultLines;
+    BuildTooltipLayout(result.file, DefaultTooltipLayout, defaultLines);
+    REQUIRE_FALSE(defaultLines.empty());
+    REQUIRE_FALSE(GetRemovedTooltipTags().empty());
+    for (const RemovedTooltipTag& removed : GetRemovedTooltipTags())
+    {
+        INFO(std::string(removed.tag));
+        CHECK(removed.preset.empty() != removed.hide.empty());
+        for (const std::string_view preset : {removed.preset, removed.bothPreset})
+        {
+            if (!preset.empty())
+            {
+                INFO(std::string(preset));
+                CHECK(result.file.FindLayout(preset) != nullptr);
+            }
+        }
+        for (const std::string_view id : removed.hide)
+        {
+            INFO(std::string(id));
+            CHECK(HasTooltipLine(defaultLines, id));
+        }
+    }
 }
 
 TEST_CASE("A tooltip layout line has its text, conditions, colors, style and values [data][items][tooltip]")

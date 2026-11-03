@@ -11,6 +11,7 @@
 #include <array>
 #include <limits>
 #include <set>
+#include <string_view>
 #include <type_traits>
 
 namespace Data::Items
@@ -543,6 +544,56 @@ bool ItemReader::ReadNames(const OrderedJson& json, LocalizedString& names)
                                      { AddIssue(ItemDataIssueSeverity::Fatal, field, message); });
 }
 
+// The presets and line ids of the shipped Tooltip.json that replace the tags (a test checks that the file has them).
+constexpr std::string_view LevelRequirementLineIds[] = {"requiredLevel", "lackingLevel"};
+constexpr std::string_view BlankAfterOptionsLineIds[] = {"blankAfterOptions"};
+constexpr RemovedTooltipTag RemovedTooltipTags[] = {
+    {"noClassLines", "noClassLines", "noClassOrDurabilityLines", {}},
+    {"noDurabilityLine", "noDurabilityLine", "noClassOrDurabilityLines", {}},
+    {"noLevelRequirement", {}, {}, LevelRequirementLineIds},
+    {"noBlankAfterOptions", {}, {}, BlankAfterOptionsLineIds},
+};
+
+// What an item file writes instead of a removed tag: "tooltipLayout": "noClassLines" (...), or
+// "tooltipLayoutChanges": {"hide": ["requiredLevel", "lackingLevel"]}.
+std::string DescribeReplacement(const RemovedTooltipTag& removed)
+{
+    if (!removed.preset.empty())
+    {
+        std::string text = R"("tooltipLayout": ")" + std::string(removed.preset) + "\"";
+        if (!removed.bothPreset.empty())
+        {
+            text += R"( (with both noClassLines and noDurabilityLine: ")" + std::string(removed.bothPreset) + "\")";
+        }
+        return text;
+    }
+    std::string ids;
+    for (const std::string_view id : removed.hide)
+    {
+        ids += (ids.empty() ? "\"" : ", \"") + std::string(id) + "\"";
+    }
+    return R"("tooltipLayoutChanges": {"hide": [)" + ids + "]}";
+}
+
+// The message for a tags entry that is no tag.
+std::string DescribeUnknownTag(const OrderedJson& entry)
+{
+    if (entry.is_string())
+    {
+        const std::string name = entry.get<std::string>();
+        for (const RemovedTooltipTag& removed : RemovedTooltipTags)
+        {
+            if (name == removed.tag)
+            {
+                return entry.dump() +
+                       " is no tag any more: the item's tooltip layout leaves those lines out, so write " +
+                       DescribeReplacement(removed) + " instead (docs/item-data.md, Presets)";
+            }
+        }
+    }
+    return entry.dump() + " is not a tag; tags are " + JoinEnumNames<ItemTag>();
+}
+
 void ItemReader::ReadTags(const OrderedJson& json, ItemTagSet& tags)
 {
     const auto list = json.find(Keys::Tags);
@@ -561,8 +612,7 @@ void ItemReader::ReadTags(const OrderedJson& json, ItemTagSet& tags)
         ItemTag tag{};
         if (!entry.is_string() || !FindEnumValue(entry.get<std::string>(), tag))
         {
-            AddIssue(ItemDataIssueSeverity::Fatal, Keys::Tags,
-                     entry.dump() + " is not a tag; tags are " + JoinEnumNames<ItemTag>());
+            AddIssue(ItemDataIssueSeverity::Fatal, Keys::Tags, DescribeUnknownTag(entry));
             continue;
         }
         tags.Set(tag);
@@ -1231,6 +1281,11 @@ void ReadItemGroupJson(std::string_view text, const std::string& source, std::ve
 std::span<const char* const> GetClassKeys()
 {
     return ClassKeys;
+}
+
+std::span<const RemovedTooltipTag> GetRemovedTooltipTags()
+{
+    return RemovedTooltipTags;
 }
 
 std::string WriteItemGroupJson(int group, std::span<const ItemDefinition> items)

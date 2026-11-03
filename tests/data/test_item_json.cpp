@@ -389,6 +389,26 @@ TEST_CASE("An item's tooltip layout changes are read as they are written or are 
     CHECK(HasIssue(read(R"({"show": []})").issues, ItemDataIssueSeverity::Warning, "tooltipLayoutChanges.show"));
 }
 
+// An item file from before the tooltip layout presets (D73): a tag that only picked tooltip lines says what the file
+// writes instead.
+TEST_CASE("A removed tooltip tag says what the item file writes instead [data][items]")
+{
+    const auto message = [](const std::string& tag)
+    {
+        const ReadResult result = Read(GroupFile(0, R"({"number": 1, "name": "Kris", "tags": [")" + tag + R"("]})"));
+        const auto issue =
+            std::find_if(result.issues.begin(), result.issues.end(), [](const ItemDataIssue& found)
+                         { return found.severity == ItemDataIssueSeverity::Fatal && found.field == "tags"; });
+        return issue != result.issues.end() ? issue->message : std::string();
+    };
+    CHECK(message("noClassLines").find(R"("tooltipLayout": "noClassLines")") != std::string::npos);
+    CHECK(message("noDurabilityLine").find(R"("tooltipLayout": "noDurabilityLine")") != std::string::npos);
+    CHECK(message("noLevelRequirement").find(R"("hide": ["requiredLevel", "lackingLevel"])") != std::string::npos);
+    CHECK(message("noBlankAfterOptions").find(R"("hide": ["blankAfterOptions"])") != std::string::npos);
+    // Another name gets the list of the tags there are.
+    CHECK(message("noSuchTag").find("tags are") != std::string::npos);
+}
+
 TEST_CASE("Item tags, wing tier, potion priority and rule flags are kept through write and read [data][items]")
 {
     ItemDefinition wing = MakeKris();

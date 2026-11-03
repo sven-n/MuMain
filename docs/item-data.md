@@ -194,7 +194,9 @@ can have several tags; the file lists them in the order below.
 
 Wings need no tag: an item is a wing when its `slot` is `wings`. Which lines an
 item's tooltip leaves out (its class lines, its durability line, …) is no tag
-but its [tooltip layout](#presets).
+but its [tooltip layout](#presets). An item file that still has one of the
+former tags `noClassLines`, `noDurabilityLine`, `noLevelRequirement` or
+`noBlankAfterOptions` is an error that names what to write instead.
 
 ### Tooltip layouts
 
