@@ -28,22 +28,33 @@ set(CMAKE_GET_RUNTIME_DEPENDENCIES_PLATFORM "windows+pe")
 set(CMAKE_GET_RUNTIME_DEPENDENCIES_TOOL "dumpbin")
 set(CMAKE_GET_RUNTIME_DEPENDENCIES_COMMAND "${DUMPBIN}")
 
-file(GET_RUNTIME_DEPENDENCIES
-  EXECUTABLES "${EXE}"
-  DIRECTORIES "${DLL_DIR}"
-  PRE_EXCLUDE_REGEXES "^api-ms-" "^ext-ms-"
-  # Don't walk into the OS DLLs: that runs dumpbin on hundreds of files, and
-  # their imports must never be shadowed by a same-named vcpkg DLL.
-  POST_EXCLUDE_REGEXES "^[A-Za-z]:[/\\\\][Ww][Ii][Nn][Dd][Oo][Ww][Ss][/\\\\]"
-  RESOLVED_DEPENDENCIES_VAR resolved
-)
-
 # Match by file name rather than resolved path: a DLL staged by an earlier
-# build resolves next to EXE and must still be refreshed from DLL_DIR.
+# build resolves next to EXE and must still be refreshed from DLL_DIR. The
+# scan reads those old copies, so scan again after refreshing them until no
+# new name turns up; an updated DLL may import a DLL the old one didn't.
 get_filename_component(exe_dir "${EXE}" DIRECTORY)
-foreach(dependency IN LISTS resolved)
-  get_filename_component(dll_name "${dependency}" NAME)
-  if(EXISTS "${DLL_DIR}/${dll_name}")
-    file(COPY_FILE "${DLL_DIR}/${dll_name}" "${exe_dir}/${dll_name}" ONLY_IF_DIFFERENT)
+set(staged "")
+while(TRUE)
+  file(GET_RUNTIME_DEPENDENCIES
+    EXECUTABLES "${EXE}"
+    DIRECTORIES "${DLL_DIR}"
+    PRE_EXCLUDE_REGEXES "^api-ms-" "^ext-ms-"
+    # Don't walk into the OS DLLs: that runs dumpbin on hundreds of files, and
+    # their imports must never be shadowed by a same-named vcpkg DLL.
+    POST_EXCLUDE_REGEXES "^[A-Za-z]:[/\\\\][Ww][Ii][Nn][Dd][Oo][Ww][Ss][/\\\\]"
+    RESOLVED_DEPENDENCIES_VAR resolved
+  )
+  set(refreshed FALSE)
+  foreach(dependency IN LISTS resolved)
+    get_filename_component(dll_name "${dependency}" NAME)
+    string(TOLOWER "${dll_name}" dll_key)
+    if(EXISTS "${DLL_DIR}/${dll_name}" AND NOT dll_key IN_LIST staged)
+      file(COPY_FILE "${DLL_DIR}/${dll_name}" "${exe_dir}/${dll_name}" ONLY_IF_DIFFERENT)
+      list(APPEND staged "${dll_key}")
+      set(refreshed TRUE)
+    endif()
+  endforeach()
+  if(NOT refreshed)
+    break()
   endif()
-endforeach()
+endwhile()
