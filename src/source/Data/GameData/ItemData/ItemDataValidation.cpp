@@ -1024,6 +1024,16 @@ void ValidateNameLocales(std::span<const ItemDefinition> items, std::span<const 
         {
             warnAbout(definition.nameLines[index].text, "nameLines[" + std::to_string(index) + "].text");
         }
+        const std::vector<ItemTooltipLayoutAddition>& additions = definition.tooltipLayoutChanges.add;
+        for (size_t addition = 0; addition < additions.size(); ++addition)
+        {
+            for (size_t index = 0; index < additions[addition].lines.size(); ++index)
+            {
+                warnAbout(additions[addition].lines[index].text, "tooltipLayoutChanges.add[" +
+                                                                     std::to_string(addition) + "].lines[" +
+                                                                     std::to_string(index) + "].text");
+            }
+        }
         for (const ItemLevelValues& levelValues : definition.levelValues)
         {
             for (size_t level = 0; level < levelValues.values.size(); ++level)
