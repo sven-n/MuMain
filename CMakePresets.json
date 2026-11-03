@@ -149,7 +149,8 @@
       "inherits": "linux-x64",
       "cacheVariables": {
         "ENABLE_CONTROL_SOCKET": "ON",
-        "ENABLE_IN_GAME_TESTS": "ON"
+        "ENABLE_IN_GAME_TESTS": "ON",
+        "BUILD_TESTING": "OFF"
       }
     },
     {
@@ -187,7 +188,8 @@
       "inherits": "macos-arm64",
       "cacheVariables": {
         "ENABLE_CONTROL_SOCKET": "ON",
-        "ENABLE_IN_GAME_TESTS": "ON"
+        "ENABLE_IN_GAME_TESTS": "ON",
+        "BUILD_TESTING": "OFF"
       }
     }
   ],

@@ -72,7 +72,7 @@ test scripts need to drive the client (see `docs/control-socket.md`); it is
 # Configure (pick one)
 cmake --preset linux-x64                  # player build: ENABLE_EDITOR=OFF, ENABLE_CONTROL_SOCKET=OFF
 cmake --preset linux-x64-mueditor         # developer build: ENABLE_EDITOR=ON, ENABLE_CONTROL_SOCKET=ON
-cmake --preset linux-x64-in-game-tests    # player build + control socket + in-game tester, no editor
+cmake --preset linux-x64-in-game-tests    # player build + control socket + in-game tester; no editor, no unit tests
 
 # Build (pick the matching build preset)
 cmake --build --preset linux-x64-mueditor-debug
