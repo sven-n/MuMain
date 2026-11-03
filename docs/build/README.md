@@ -185,7 +185,9 @@ each main merge. Update a PR when its integration state needs revalidation.
 Linux uses a compiler-cache trial. Its job log and **Linux compiler cache** step
 summary show hits and misses; compare the Build step duration on a warm run with
 the first run. All builds restore the compiler cache; only successful main pushes
-save it, so PR-only entries do not displace shared caches. Windows vcpkg primary
+save it, so PR-only entries do not displace shared caches. macOS uses the same
+compiler cache (**macOS compiler cache** summary); main pushes skip macOS, so
+successful nightly/manual release builds save it instead. Windows vcpkg primary
 keys include the runner image, compiler, vcpkg revision, manifest and toolchain.
 A broader fallback also restores older binary archives; vcpkg checks compatibility
 before reusing packages across image or compiler updates.

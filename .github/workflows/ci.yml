@@ -639,6 +639,12 @@ jobs:
     if: needs.quality.outputs.macos == 'true'
     runs-on: macos-latest
     timeout-minutes: 90
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      # /usr/bin/clang++ is an xcrun shim, so hashing its content would miss Xcode updates.
+      CCACHE_COMPILERCHECK: '%compiler% -v'
+      CCACHE_MAXSIZE: 1G
 
     steps:
       - name: Checkout repository
@@ -650,7 +656,19 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Install build tools
-        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp
+        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp ccache
+
+      - name: Identify compiler cache
+        id: compiler
+        run: echo "identity=$(shasum -a 256 "$(xcrun -f clang)" "$(xcrun -f clang++)" | shasum -a 256 | cut -c1-16)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache macOS compilation
+        id: ccache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-macos-arm64-${{ steps.compiler.outputs.identity }}-${{ github.sha }}
+          restore-keys: ccache-macos-arm64-${{ steps.compiler.outputs.identity }}-
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -669,9 +687,26 @@ jobs:
           -DMU_COPY_RUNTIME_ASSETS=OFF
           -DBUILD_TESTING=ON
           -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
 
       - name: Build
-        run: cmake --build out/build/macos-ci --config Release
+        run: |
+          ccache --zero-stats
+          cmake --build out/build/macos-ci --config Release
+
+      - name: Report compiler cache
+        if: always()
+        run: |
+          if command -v ccache >/dev/null; then
+            ccache --show-stats
+            {
+              echo '### macOS compiler cache'
+              echo '```text'
+              ccache --show-stats
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Run tests
         run: >
@@ -699,6 +734,14 @@ jobs:
               exit 1
             fi
           done
+
+      # macOS skips main pushes, so the nightly/manual release run is its only main-scoped cache writer.
+      - name: Save macOS compilation cache
+        if: needs.quality.outputs.release == 'true' && steps.ccache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.ccache.outputs.cache-primary-key }}
 
       - name: Archive runtime
         if: needs.quality.outputs.release == 'true'

@@ -536,8 +536,18 @@ for required in (
     "-DMU_COPY_RUNTIME_ASSETS=OFF",
     "-DBUILD_TESTING=ON",
     "-DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)",
+    "-DCMAKE_C_COMPILER_LAUNCHER=ccache",
+    "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache",
 ):
     check(required in macos_configure, f"macOS configure missing {required}")
+macos_cache = step(macos_job, "build-macos", "Cache macOS compilation")
+for required in ("uses: actions/cache/restore@v4", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
+    check(required in macos_cache, f"macOS compiler cache missing {required}")
+macos_cache_save = step(macos_job, "build-macos", "Save macOS compilation cache")
+for required in ("uses: actions/cache/save@v4", "needs.quality.outputs.release == 'true'",
+                 "steps.ccache.outputs.cache-primary-key"):
+    check(required in macos_cache_save, f"macOS compiler cache must save only validated release builds: {required}")
+check("ccache --show-stats" in macos_job, "macOS compiler cache must report hit statistics")
 check(
     "cmake --build out/build/macos-ci --config Release"
     in step(macos_job, "build-macos", "Build"),
