@@ -1163,7 +1163,8 @@ void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJ
 
             tc = &CharactersClient[selectcharacterindex];
         }
-        SocketClient->ToGameServer()->SendIllusionTempleSkillRequest(CursedTempleCurSkillType, static_cast<BYTE>(tc->Key), Distance);
+        SocketClient->ToGameServer()->SendIllusionTempleSkillRequest(CursedTempleCurSkillType,
+                                                                     static_cast<uint16_t>(tc->Key), Distance);
         Hero->m_CursedTempleCurSkillPacket = true;
         MouseRButtonPush = false;
 
