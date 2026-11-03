@@ -2225,7 +2225,7 @@ void BMD::DrawMesh(const Render::ModelDrawing::MeshDraw& draw) const
     mu::GetRenderer().RenderTriangles(rendererVertices.first(renderedVertexCount), 0u);
 }
 
-void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* obj)
+void BMD::SpawnMeshEffects(int i, int iType, int iSubType, vec3_t Angle, VOID* obj)
 {
     if (i >= NumMeshs || i < 0) return;
 

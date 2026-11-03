@@ -547,9 +547,9 @@ void Draw_RenderObject(const OBJECT* o, bool Translate, int Select, int ExtraMon
 
             for (int i = 0; i < MAX_CHARACTERS_CLIENT; ++i)
             {
-                CHARACTER* c = &CharactersClient[i];
-                OBJECT* oa = &c->Object;
-                OBJECT* ob = o->Owner;
+                const CHARACTER* c = &CharactersClient[i];
+                const OBJECT* oa = &c->Object;
+                const OBJECT* ob = o->Owner;
 
                 if (oa == ob)
                 {
@@ -2602,7 +2602,7 @@ void UpdateRenderObjectEffects(OBJECT* o)
 
             PlayBuffer(SOUND_HIT_GATE2);
             SkinObjectMeshes(o, b, true);
-            b->RenderMeshEffect(0, MODEL_STONE_COFFIN);
+            b->SpawnMeshEffects(0, MODEL_STONE_COFFIN);
         }
         break;
     case MODEL_CASTLE_GATE:
@@ -2612,7 +2612,7 @@ void UpdateRenderObjectEffects(OBJECT* o)
 
             PlayBuffer(SOUND_HIT_GATE2);
             SkinObjectMeshes(o, b, true);
-            b->RenderMeshEffect(0, MODEL_GATE);
+            b->SpawnMeshEffects(0, MODEL_GATE);
         }
         break;
     case MODEL_FLY_BIG_STONE1:
@@ -2621,7 +2621,7 @@ void UpdateRenderObjectEffects(OBJECT* o)
         {
             o->HiddenMesh = -2;
             SkinObjectMeshes(o, b, false);
-            b->RenderMeshEffect(0, o->Type == MODEL_FLY_BIG_STONE1 ? MODEL_BIG_STONE_PART1 : MODEL_BIG_STONE_PART2);
+            b->SpawnMeshEffects(0, o->Type == MODEL_FLY_BIG_STONE1 ? MODEL_BIG_STONE_PART1 : MODEL_BIG_STONE_PART2);
         }
         break;
     case MODEL_VALKYRIE:
@@ -4330,7 +4330,7 @@ void RenderObjects()
     g_ObjectThumbnail.ProcessPendingRequests();
 #endif
 
-    for (OBJECT* o : s_objectsToDraw)
+    for (const OBJECT* o : s_objectsToDraw)
     {
         RenderObject(o);
         RenderObjectVisual(o);
@@ -4341,7 +4341,7 @@ void RenderObjects()
     {
         if (!ob.Visible && !g_Camera.TopViewEnable)
             continue;
-        for (OBJECT* o = ob.Head; o != nullptr; o = o->Next)
+        for (const OBJECT* o = ob.Head; o != nullptr; o = o->Next)
         {
             if (!o->Live)
                 continue;
@@ -4495,7 +4495,7 @@ void RenderObjects_AfterCharacter()
 
             if (g_Direction.m_CKanturu.IsMayaScene())
             {
-                OBJECT* o = ob->Head;
+                const OBJECT* o = ob->Head;
 
                 while (1)
                 {
@@ -4522,7 +4522,7 @@ void RenderObjects_AfterCharacter()
                 || IsDoppelGanger2()
                 )
             {
-                OBJECT* o = ob->Head;
+                const OBJECT* o = ob->Head;
 
                 while (1)
                 {
@@ -4558,7 +4558,7 @@ void RenderObjects_AfterCharacter()
 
             if (ob->Visible || g_Camera.TopViewEnable)
             {
-                OBJECT* o = ob->Head;
+                const OBJECT* o = ob->Head;
                 while (1)
                 {
                     if (o != NULL)
@@ -6498,13 +6498,11 @@ void ItemHeight(int Type, BMD* b)
     b->BodyHeight = Render::Items::Display::GetGroundDisplay(Type).bodyHeight;
 }
 
-void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
+void RenderZen(int itemIndex, const ITEM_t* item, vec3_t light)
 {
     constexpr int MaxRenderedZenCoins = 12;
-    auto o = &item->Object;
+    const auto* o = &item->Object;
     auto k = itemIndex;
-    vec3_t tempPosition;
-    VectorCopy(o->Position, tempPosition);
 
     int coinCount = static_cast<int>(sqrtf(static_cast<float>(Items[k].Item.Level))) / 2;
 
@@ -6538,8 +6536,8 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
         AngleMatrix(randomAngle, angleMatrix);
         VectorRotate(randomRadius, angleMatrix, randomPosition);
 
-        VectorAdd(tempPosition, randomPosition, o->Position);
-        VectorCopy(o->Position, b->BodyOrigin);
+        // Each coin is drawn at its own place around the item.
+        VectorAdd(o->Position, randomPosition, b->BodyOrigin);
         b->Transform(BoneTransform, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, true);
 
         target_vertex_index = b->AddToCoinHeap(i, target_vertex_index);
@@ -6547,8 +6545,6 @@ void RenderZen(int itemIndex, ITEM_t* item, vec3_t light)
 
     b->EndRenderCoinHeap(coinCount);
     b->EndRender();
-
-    VectorCopy(tempPosition, o->Position);
 }
 
 // Render dropped items and fall animation and camera rotation for items on the ground
@@ -6597,7 +6593,7 @@ void RenderItems()
     const mu::ScopedBloomExclusion classicItems;
     for (int i = 0; i < MAX_ITEMS; i++)
     {
-        OBJECT* o = &Items[i].Object;
+        const OBJECT* o = &Items[i].Object;
         if (o->Live)
         {
 #ifdef _EDITOR
@@ -6639,17 +6635,15 @@ void RenderItems()
                     Vector(1.0f, 1.0f, 1.0f, Light);
                 }
 
-                vec3_t vBackup;
-                VectorCopy(o->Position, vBackup);
-                DrawnItemPosition(i, vBackup, o->Position);
-
-                RenderPartObject(o, o->Type, NULL, Light, o->Alpha, DrawnItemLevel(Items[i].Item),
+                // Drawn from a copy at the item's drawn place.
+                OBJECT drawn = *o;
+                const Random::DrawnAs drawnAs(&drawn, o);
+                DrawnItemPosition(i, o->Position, drawn.Position);
+                RenderPartObject(&drawn, o->Type, NULL, Light, o->Alpha, DrawnItemLevel(Items[i].Item),
                                  Items[i].Item.ExcellentFlags, Items[i].Item.AncientDiscriminator, true, true, true);
-                VectorCopy(vBackup, o->Position);
 
 #ifdef _EDITOR
                 // Debug visualization: OBB used by SelectItem for ray-vs-pickup test.
-                // Drawn after RenderPartObject because that's what refreshes o->OBB this frame.
                 if (s_bShowItemPickBoxes)
                 {
                     RenderDebugBox(o->OBB.StartPos,
@@ -7965,26 +7959,6 @@ void RenderPartObjectEdge(BMD* b, const OBJECT* o, int Flag, bool Translate, flo
     }
 
     BoneScale = 1.f;
-}
-
-void RenderPartObjectEdge2(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale, OBB_t* OBB)
-{
-    vec3_t tmp;
-
-    b->LightEnable = false;
-
-    BoneScale = Scale;
-    b->Transform(BoneTransform, tmp, tmp, OBB, Translate);
-    b->RenderBody(Flag, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-    BoneScale = 1.f;
-}
-
-void RenderPartObjectEdgeLight(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale)
-{
-    float Luminosity = sinf(WorldTime * 0.001f) * 0.5f + 0.5f;
-    Vector(Luminosity * 1.f, Luminosity * 0.8f, Luminosity * 0.3f, b->BodyLight);
-    RenderPartObjectEdge(b, o, Flag, Translate, Scale);
 }
 
 // Which cloth a body part's model carries: 0 for none.

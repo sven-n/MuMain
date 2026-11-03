@@ -101,28 +101,6 @@ void DescribeBlurSegment(const BlurType& blur, int segment, float firstLight, fl
     out.DrawQuads({vertices, 0u});
 }
 
-void RenderFlagFace(OBJECT* object, const vec3_t light, int texture, const float texCoord[4][2],
-                    const physics_face& face, bool reverse)
-{
-    BindTexture(texture);
-    mu::Vertex3D vertices[4];
-    for (int output = 0; output < 4; ++output)
-    {
-        const int source = reverse ? 3 - output : output;
-        const physics_vertex& vertex = g_flagVertices[face.vlist[source]];
-        vec3_t localPosition;
-        vec3_t worldPosition;
-        Vector(vertex.p[0] + 9.f, vertex.p[1] - 12.f, vertex.p[2] - 35.f, localPosition);
-        Models[object->Type].TransformPosition(object->BoneTransform[19], localPosition, worldPosition, true);
-        vertices[output] = {
-            worldPosition[0], worldPosition[1], worldPosition[2], 0.f, 0.f, 1.f,
-            texCoord[source][0], texCoord[source][1],
-            mu::PackABGR(light[0] * vertex.light, light[1] * vertex.light, light[2] * vertex.light, 1.f),
-        };
-    }
-    mu::GetRenderer().RenderQuad3D(vertices, 0u);
-}
-
 // Callers submit several interpolated poses per frame. Only a reference frame ages the trail, so until
 // then each frame's poses replace the previous frame's instead of piling up behind them.
 template <typename BlurType> void AddBlurSample(BlurType& blur, vec3_t p1, vec3_t p2, int maxTails)
@@ -642,72 +620,3 @@ void AnimationFlag()
     }
 }
 
-void RenderFlagFace(OBJECT* o, int x, int y, vec3_t Light, int Tex1, int Tex2)
-{
-    int n = 4;
-    float su = (float)x / 6.f;
-    float sv = (float)y / 9.f;
-    float TexCoord[4][2];
-    TexCoord[0][0] = su;
-    TexCoord[0][1] = sv;
-    TexCoord[1][0] = su;
-    TexCoord[1][1] = sv + 1.f / 9.f;
-    TexCoord[2][0] = su + 1.f / 6.f;
-    TexCoord[2][1] = sv + 1.f / 9.f;
-    TexCoord[3][0] = su + 1.f / 6.f;
-    TexCoord[3][1] = sv;
-
-    float minz = 65536.f; //louis
-    physics_face* f = &g_flagFaces[y * (FLAG_WIDTH - 1) + x];
-
-    for (int i = 0; i < n; i++)
-    {
-        int vlist = f->vlist[i];
-        physics_vertex* v = &g_flagVertices[vlist];
-        v->light = (-v->normal[0] + v->normal[1]) * 0.5f + 0.5f;
-    }
-
-    RenderFlagFace(o, Light, Tex2, TexCoord, *f, false);
-    RenderFlagFace(o, Light, Tex1, TexCoord, *f, true);
-}
-
-void RenderFlag(OBJECT* o, vec3_t Light, int Tex1, int Tex2)
-{
-    for (int y = 0; y < FLAG_HEIGHT - 1; y++)
-    {
-        for (int x = 0; x < FLAG_WIDTH - 1; x++)
-        {
-            physics_face* f = &g_flagFaces[y * (FLAG_WIDTH - 1) + x];
-            FaceNormalize(g_flagVertices[f->vlist[0]].p,
-                g_flagVertices[f->vlist[1]].p,
-                g_flagVertices[f->vlist[2]].p,
-                f->normal);
-        }
-    }
-    for (int y = 0; y < FLAG_HEIGHT; y++)
-    {
-        for (int x = 0; x < FLAG_WIDTH; x++)
-        {
-            physics_vertex* v = &g_flagVertices[y * FLAG_WIDTH + x];
-            float num = 0.f;
-            if (y < FLAG_HEIGHT - 1 && x < FLAG_WIDTH - 1)
-            {
-                VectorCopy(g_flagFaces[y * (FLAG_WIDTH - 1) + x].normal, v->normal);
-            }
-            else
-            {
-                v->normal[0] = 0.f;
-                v->normal[1] = 0.f;
-                v->normal[2] = 0.f;
-            }
-        }
-    }
-
-    for (int y = 0; y < FLAG_HEIGHT - 1; y++)
-    {
-        for (int x = 0; x < FLAG_WIDTH - 1; x++)
-        {
-            RenderFlagFace(o, x, y, Light, Tex1, Tex2);
-        }
-    }
-}

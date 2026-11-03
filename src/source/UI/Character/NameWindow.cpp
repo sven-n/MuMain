@@ -143,7 +143,54 @@ bool mu::ui::window::CNameWindow::UpdateKeyEvent()
 
 bool mu::ui::window::CNameWindow::Update()
 {
+    RefreshNameTags();
     return true;
+}
+
+// The chat shows the selected NPC's or player's name (every player's, for a GM observing) while this keeps its tag.
+void mu::ui::window::CNameWindow::RefreshNameTags()
+{
+    if (g_bGMObservation == true)
+    {
+        for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
+        {
+            CHARACTER* c = &CharactersClient[i];
+            if (c->Object.Live && c->Object.Kind == KIND_PLAYER && IsShopTitleVisible(c) == false)
+            {
+                UI::Chat::CreateChat(c->ID, L"", c);
+            }
+        }
+    }
+
+#ifndef GUILD_WAR_EVENT
+    if (gMapManager.InChaosCastle() == true && (SelectedNpc != -1 || SelectedCharacter != -1))
+    {
+        return;
+    }
+#endif // GUILD_WAR_EVENT
+
+    if (SelectedItem != -1 || SelectedNpc != -1 || SelectedCharacter != -1)
+    {
+        if (SelectedNpc != -1)
+        {
+            CHARACTER* c = &CharactersClient[SelectedNpc];
+            UI::Chat::CreateChat(c->ID, L"", c);
+        }
+        else if (SelectedCharacter != -1)
+        {
+            CHARACTER* c = &CharactersClient[SelectedCharacter];
+            if (c->Object.Kind != KIND_MONSTER
+#ifdef ASG_ADD_GENS_SYSTEM
+#ifndef PBG_MOD_STRIFE_GENSMARKRENDER
+                && (!::IsStrifeMap(World) || Hero->m_byGensInfluence == c->m_byGensInfluence)
+#endif // PBG_MOD_STRIFE_GENSMARKRENDER
+#endif // ASG_ADD_GENS_SYSTEM
+                && IsShopTitleVisible(c) == false)
+            {
+                UI::Chat::CreateChat(c->ID, L"", c);
+            }
+        }
+    }
 }
 
 void mu::ui::window::CNameWindow::Show(bool bShow)
@@ -214,22 +261,6 @@ void mu::ui::window::CNameWindow::RenderLabels()
 
 void mu::ui::window::CNameWindow::RenderName()
 {
-    if (g_bGMObservation == true)
-    {
-        for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
-        {
-            CHARACTER* c = &CharactersClient[i];
-            OBJECT* o = &c->Object;
-            if (o->Live && o->Kind == KIND_PLAYER)
-            {
-                if (IsShopTitleVisible(c) == false)
-                {
-                    UI::Chat::CreateChat(c->ID, L"", c);
-                }
-            }
-        }
-    }
-
 #ifndef GUILD_WAR_EVENT
     if (gMapManager.InChaosCastle() == true && (SelectedNpc != -1 || SelectedCharacter != -1))
     {
@@ -237,51 +268,29 @@ void mu::ui::window::CNameWindow::RenderName()
     }
 #endif//GUILD_WAR_EVENT
 
-    if (SelectedItem != -1 || SelectedNpc != -1 || SelectedCharacter != -1)
+    // The selected NPC's and player's names are chat tags (RefreshNameTags); a monster's is drawn here.
+    if (SelectedNpc == -1 && SelectedCharacter != -1)
     {
-        if (SelectedNpc != -1)
+        const CHARACTER* c = &CharactersClient[SelectedCharacter];
+        if (c->Object.Kind == KIND_MONSTER)
         {
-            CHARACTER* c = &CharactersClient[SelectedNpc];
-            OBJECT* o = &c->Object;
-            UI::Chat::CreateChat(c->ID, L"", c);
-        }
-        else if (SelectedCharacter != -1)
-        {
-            CHARACTER* c = &CharactersClient[SelectedCharacter];
+            g_pRenderText->SetTextColor(255, 230, 200, 255);
+            g_pRenderText->SetBgColor(100, 0, 0, 255);
+            g_pRenderText->RenderText(320, 2, c->ID, 0, 0, RT3_WRITE_CENTER);
 
-            OBJECT* o = &c->Object;
-            if (o->Kind == KIND_MONSTER)
+            if (UI::Combat::HealthBar::ShouldRenderSelected(c->HealthStatus))
             {
-                g_pRenderText->SetTextColor(255, 230, 200, 255);
-                g_pRenderText->SetBgColor(100, 0, 0, 255);
-                g_pRenderText->RenderText(320, 2, c->ID, 0, 0, RT3_WRITE_CENTER);
-
-                if (UI::Combat::HealthBar::ShouldRenderSelected(c->HealthStatus))
-                {
-                    // Full-width bar centered under the selected monster's name.
-                    DrawHealthBar(320, 15, c->HealthStatus, 20, 1.f);
-                }
+                // Full-width bar centered under the selected monster's name.
+                DrawHealthBar(320, 15, c->HealthStatus, 20, 1.f);
             }
-            else
-#ifdef ASG_ADD_GENS_SYSTEM
-#ifndef PBG_MOD_STRIFE_GENSMARKRENDER
-                if (!::IsStrifeMap(World) || Hero->m_byGensInfluence == c->m_byGensInfluence)
-#endif //PBG_MOD_STRIFE_GENSMARKRENDER
-#endif	// ASG_ADD_GENS_SYSTEM
-                {
-                    if (IsShopTitleVisible(c) == false)
-                    {
-                        UI::Chat::CreateChat(c->ID, L"", c);
-                    }
-                }
         }
-        else if (SelectedItem != -1)
-        {
+    }
+    else if (SelectedNpc == -1 && SelectedItem != -1)
+    {
 #ifdef _EDITOR
-            if (DevEditor_ShouldRenderItemLabels())
+        if (DevEditor_ShouldRenderItemLabels())
 #endif
-                RenderItemName(SelectedItem, &Items[SelectedItem].Object, &Items[SelectedItem].Item, false);
-        }
+            RenderItemName(SelectedItem, &Items[SelectedItem].Object, &Items[SelectedItem].Item, false);
     }
 
     if (m_bShowItemName || mu::ui::window::IsRepeat(VK_MENU))
@@ -296,7 +305,7 @@ void mu::ui::window::CNameWindow::RenderName()
         {
             for (int i = 0; i < MAX_ITEMS; i++)
             {
-                OBJECT* o = &Items[i].Object;
+                const OBJECT* o = &Items[i].Object;
                 if (o->Live)
                 {
                     if (o->Visible && i != SelectedItem)
@@ -316,8 +325,8 @@ void mu::ui::window::CNameWindow::RenderMonsterHealthBars()
 
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
     {
-        CHARACTER* c = &CharactersClient[i];
-        OBJECT* o = &c->Object;
+        const CHARACTER* c = &CharactersClient[i];
+        const OBJECT* o = &c->Object;
 
         if (!o->Live || !o->Visible || o->Alpha <= 0.f || c->Dead > 0 || o->Kind != KIND_MONSTER)
             continue;

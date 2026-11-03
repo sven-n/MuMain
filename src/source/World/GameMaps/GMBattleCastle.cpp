@@ -1963,7 +1963,7 @@ namespace battleCastle
         return false;
     }
 
-    bool    RenderBattleCastleMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate, int Select)
+    bool RenderBattleCastleMonsterCloth(const CHARACTER* c, const OBJECT* o, bool Translate, int Select)
     {
         return false;
     }
@@ -1981,7 +1981,7 @@ namespace battleCastle
                 o->Live = false;
                 PlayBuffer(SOUND_HIT_GATE2);
                 SkinObjectMeshes(o, b, true);
-                b->RenderMeshEffect(0, MODEL_GATE_PART1);
+                b->SpawnMeshEffects(0, MODEL_GATE_PART1);
             }
             break;
 
@@ -1997,7 +1997,7 @@ namespace battleCastle
 
                     PlayBuffer(SOUND_BC_GUARD_STONE_DIS);
                     SkinObjectMeshes(o, b, true);
-                    b->RenderMeshEffect(0, MODEL_STONE_COFFIN);
+                    b->SpawnMeshEffects(0, MODEL_STONE_COFFIN);
                 }
             }
             break;
@@ -2120,7 +2120,7 @@ namespace battleCastle
         return success;
     }
 
-    void RenderMonsterHitEffect(OBJECT* o)
+    void SpawnMonsterHitEffect(OBJECT* o)
     {
         if (gMapManager.InBattleCastle() == false) return;
 

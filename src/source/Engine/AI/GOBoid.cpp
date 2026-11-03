@@ -742,7 +742,7 @@ void RenderMount()
     const mu::ScopedBloomExclusion classicMounts;
     for (int i = 0; i < MAX_MOUNTS; i++)
     {
-        OBJECT* o = &Mounts[i];
+        const OBJECT* o = &Mounts[i];
         if (RenderMount(o) == FALSE)
         {
             return;
@@ -829,7 +829,7 @@ void UpdateDarkHorseSkill(OBJECT* o, BMD* b)
     }
 }
 
-void RenderSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill)
+void SpawnSkillEarthQuake(CHARACTER* c, OBJECT* o, BMD* b, int iMaxSkill)
 {
     if (c == NULL)	return;
     if (o == NULL)	return;

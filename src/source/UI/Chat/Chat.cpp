@@ -615,7 +615,7 @@ void RenderBooleans()
             int ScreenX, ScreenY;
             if (ci->Owner != NULL)
             {
-                OBJECT* o = &ci->Owner->Object;
+                const OBJECT* o = &ci->Owner->Object;
                 Vector(o->Position[0], o->Position[1], o->Position[2] + o->BoundingBoxMax[2] + 60.f, Position);
 
                 if (o->Type >= MODEL_LITTLESANTA && o->Type <= MODEL_LITTLESANTA_END)

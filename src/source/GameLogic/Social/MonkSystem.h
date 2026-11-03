@@ -237,7 +237,7 @@ public:
     bool IsDummyRender(vec3_t vOutPos, vec3_t Target, float& fAni, int DummyIndex, bool Change = false);
     void InitConsecutiveState(float _fFirstFrame = 0, float _fSecondFrame = 0, BYTE _btAttState = NONE_ATT);
     bool IsConsecutiveAtt(float _fAttFrame);
-    void RenderRepeatedly(int _Key, OBJECT* pObj);
+    void CreateRepeatedDamagePoints(int _Key, OBJECT* pObj);
     bool IsRideNotUseSkill(int _nSkill, short _Type);
     bool IsSwordformGlovesUseSkill(int _nSkill);
     bool IsChangeringNotUseSkill(short _LType, short _RType, int _LLevel, int _RLevel);

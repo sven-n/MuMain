@@ -79,8 +79,8 @@ static void PhotoMakeTranslation(float x, float y, float z, float* out)
 
 void CUIPhotoViewer::RenderPhotoCharacter(float aspect)
 {
-    CHARACTER* c = &m_PhotoChar;
-    OBJECT* o = &c->Object;
+    const CHARACTER* c = &m_PhotoChar;
+    const OBJECT* o = &c->Object;
 
     // The photo's projection and view replace the world camera's for this pass only.
     SaveCameraPerspective();

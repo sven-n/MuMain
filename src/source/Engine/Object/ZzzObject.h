@@ -49,7 +49,7 @@ void ObjectModelOrigin(const OBJECT* o, vec3_t origin);
 void PlaceObjectBounds(OBJECT* o, const vec3_t origin);
 // Places an object's model where its draw poses and draws it.
 void PlaceObjectModel(const OBJECT* o, BMD* b);
-// Skins an object's meshes as its draw would, for BMD::RenderMeshEffect's spawns: characters pass Translate true
+// Skins an object's meshes as its draw would, for BMD::SpawnMeshEffects's spawns: characters pass Translate true
 // (their own model-space pose), effects false (their world pose).
 void SkinObjectMeshes(OBJECT* o, BMD* b, bool Translate);
 // The spawns, state and cloth of a player transformation's draw (RenderPartObjectBody), for a character the last
@@ -160,9 +160,7 @@ void RenderPartObject(const OBJECT* o, int Type, const void* p, const vec3_t Lig
 // bones: the pose drawn; none for the object's own (or the shared bones without a bone matrix).
 void RenderPartObjectEdge(BMD* b, const OBJECT* o, int Flag, bool Translate, float Scale,
                           float (*bones)[3][4] = nullptr, const DrawLook* look = nullptr);
-void RenderPartObjectEdge2(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale, OBB_t* OBB);
 
-void RenderPartObjectEdgeLight(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale);
 
 void RenderItems();
 void MoveItems();

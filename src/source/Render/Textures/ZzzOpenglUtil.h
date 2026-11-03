@@ -127,7 +127,7 @@ void RenderBox(float Matrix[3][4]);
 void RenderPlane3D(float Width, float Height, float Matrix[3][4]);
 void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_t Light, float Angle = 0.f, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f);
 void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, float(*UV)[2], vec3_t Light[4], float Alpha = 1.f);
-void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha = 1.f, float Scale = 15.f);
+void RenderNumber(const vec3_t Position, int Num, const vec3_t Color, float Alpha = 1.f, float Scale = 15.f);
 float RenderNumber2D(float x, float y, int Num, float Width, float Height,
     unsigned int color = 0xFFFFFFFFu);
 void SetRenderColor(BYTE red, BYTE green, BYTE blue, BYTE alpha);

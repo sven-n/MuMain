@@ -833,7 +833,7 @@ void SetItemAttributes(ITEM* ip)
     CalcExcellentOptions(ip);
 }
 
-int64_t ItemValue(ITEM* ip, int goldType)
+int64_t ItemValue(const ITEM* ip, int goldType)
 {
     if (ip->Type == -1) return 0;
 

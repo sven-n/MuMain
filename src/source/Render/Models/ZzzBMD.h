@@ -409,7 +409,7 @@ public:
     void BeginRender(float) const;
     void EndRender() const;
 
-    void RenderMeshEffect(int i, int iType, int iSubType = 0, vec3_t Angle = 0, VOID* obj = NULL);
+    void SpawnMeshEffects(int i, int iType, int iSubType = 0, vec3_t Angle = 0, VOID* obj = NULL);
 
     void RenderMesh(int meshIndex, int renderFlags, float alpha = 1.f, int blendMeshIndex = -1, float blendMeshAlpha = 1.f, float blendMeshTextureCoordU = 0.f, float blendMeshTextureCoordV = 0.f, int textureIndex = -1);
     // The skinning the last Transform() set up, as RenderMesh and RenderBodyShadow put it in their draws.

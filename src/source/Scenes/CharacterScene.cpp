@@ -400,7 +400,7 @@ static void RenderSelectedCharacterEffects()
     if (SelectedHero == -1)
         return;
 
-    OBJECT* o = &CharactersClient[SelectedHero].Object;
+    const OBJECT* o = &CharactersClient[SelectedHero].Object;
     if (!o->Live)
         return;
 

@@ -2679,7 +2679,7 @@ bool TestFrustrum2D(float x, float y, float Range)
     return true;
 }
 
-bool TestFrustrum(vec3_t Position, float Range)
+bool TestFrustrum(const vec3_t Position, float Range)
 {
     extern EGameScene SceneFlag;
     if (SceneFlag == LOG_IN_SCENE)
