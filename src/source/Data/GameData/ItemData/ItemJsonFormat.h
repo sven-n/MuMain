@@ -54,6 +54,11 @@ struct RemovedTooltipTag
     std::span<const std::string_view> hide;
 };
 std::span<const RemovedTooltipTag> GetRemovedTooltipTags();
+// The removed tag of that name; nullptr for another name.
+const RemovedTooltipTag* FindRemovedTooltipTag(std::string_view tag);
+// What an item file writes instead of the tag: "tooltipLayout": "noClassLines" (...), or "tooltipLayoutChanges":
+// {"hide": ["requiredLevel", "lackingLevel"]}.
+std::string DescribeRemovedTooltipTag(const RemovedTooltipTag& removed);
 
 // One item as the item files have it, without its group, which the file has. The item
 // exchange file with OpenMU (ItemExchangeFile) has its items so too.

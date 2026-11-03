@@ -143,6 +143,14 @@ bool ReadTooltipCondition(std::string_view text, TooltipCondition& condition, st
     {
         name.remove_prefix(TagPrefix.size());
         condition.kind = TooltipCondition::Kind::Tag;
+        if (const RemovedTooltipTag* removed = FindRemovedTooltipTag(name))
+        {
+            // Unlike in an item's tags, nothing in a condition stands for it: what it said is the item's layout now.
+            error = "\"" + std::string(text) + "\" names a tag the tooltip layouts replaced: the items that had it " +
+                    "have " + DescribeRemovedTooltipTag(*removed) +
+                    ", so a line it left out for them needs no condition (docs/item-data.md, Presets)";
+            return false;
+        }
         if (!FindEnumValue(name, condition.tag))
         {
             error = "\"" + std::string(text) + "\" names no item tag (docs/item-data.md, \"Tags\")";

@@ -557,38 +557,10 @@ constexpr RemovedTooltipTag RemovedTooltipTags[] = {
     {"noBlankAfterOptions", {}, {}, BlankAfterOptionsLineIds},
 };
 
-// What an item file writes instead of a removed tag, and what the reader takes it as: "tooltipLayout": "noClassLines"
-// (...), or "tooltipLayoutChanges": {"hide": ["requiredLevel", "lackingLevel"]}.
-std::string DescribeReplacement(const RemovedTooltipTag& removed)
-{
-    if (!removed.preset.empty())
-    {
-        std::string text = R"("tooltipLayout": ")" + std::string(removed.preset) + "\"";
-        if (!removed.bothPreset.empty())
-        {
-            text += R"( (with both noClassLines and noDurabilityLine: ")" + std::string(removed.bothPreset) + "\")";
-        }
-        return text;
-    }
-    std::string ids;
-    for (const std::string_view id : removed.hide)
-    {
-        ids += (ids.empty() ? "\"" : ", \"") + std::string(id) + "\"";
-    }
-    return R"("tooltipLayoutChanges": {"hide": [)" + ids + "]}";
-}
-
 // The removed tag a tags entry names; nullptr for another entry.
-const RemovedTooltipTag* FindRemovedTooltipTag(const OrderedJson& entry)
+const RemovedTooltipTag* FindRemovedTagEntry(const OrderedJson& entry)
 {
-    if (!entry.is_string())
-    {
-        return nullptr;
-    }
-    const auto& name = entry.get_ref<const std::string&>();
-    const auto removed = std::find_if(std::begin(RemovedTooltipTags), std::end(RemovedTooltipTags),
-                                      [&](const RemovedTooltipTag& tag) { return name == tag.tag; });
-    return removed != std::end(RemovedTooltipTags) ? &*removed : nullptr;
+    return entry.is_string() ? FindRemovedTooltipTag(entry.get_ref<const std::string&>()) : nullptr;
 }
 
 void ItemReader::ReadTags(const OrderedJson& json, ItemTagSet& tags)
@@ -606,12 +578,12 @@ void ItemReader::ReadTags(const OrderedJson& json, ItemTagSet& tags)
 
     for (const OrderedJson& entry : *list)
     {
-        if (const RemovedTooltipTag* removed = FindRemovedTooltipTag(entry))
+        if (const RemovedTooltipTag* removed = FindRemovedTagEntry(entry))
         {
             // A file from before the presets: the tag is read as what replaces it (ApplyRemovedTooltipTags).
             m_removedTags.push_back(removed);
             AddIssue(ItemDataIssueSeverity::Warning, Keys::Tags,
-                     entry.dump() + " is no tag any more: it is read as " + DescribeReplacement(*removed) +
+                     entry.dump() + " is no tag any more: it is read as " + DescribeRemovedTooltipTag(*removed) +
                          ", which saving writes instead (docs/item-data.md, Presets)");
             continue;
         }
@@ -1315,6 +1287,33 @@ std::span<const char* const> GetClassKeys()
 std::span<const RemovedTooltipTag> GetRemovedTooltipTags()
 {
     return RemovedTooltipTags;
+}
+
+const RemovedTooltipTag* FindRemovedTooltipTag(std::string_view tag)
+{
+    const auto removed = std::find_if(std::begin(RemovedTooltipTags), std::end(RemovedTooltipTags),
+                                      [&](const RemovedTooltipTag& entry) { return tag == entry.tag; });
+    return removed != std::end(RemovedTooltipTags) ? &*removed : nullptr;
+}
+
+// Also what the item reader takes the tag as.
+std::string DescribeRemovedTooltipTag(const RemovedTooltipTag& removed)
+{
+    if (!removed.preset.empty())
+    {
+        std::string text = R"("tooltipLayout": ")" + std::string(removed.preset) + "\"";
+        if (!removed.bothPreset.empty())
+        {
+            text += R"( (with both noClassLines and noDurabilityLine: ")" + std::string(removed.bothPreset) + "\")";
+        }
+        return text;
+    }
+    std::string ids;
+    for (const std::string_view id : removed.hide)
+    {
+        ids += (ids.empty() ? "\"" : ", \"") + std::string(id) + "\"";
+    }
+    return R"("tooltipLayoutChanges": {"hide": [)" + ids + "]}";
 }
 
 std::string WriteItemGroupJson(int group, std::span<const ItemDefinition> items)

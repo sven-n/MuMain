@@ -184,6 +184,12 @@ TEST_CASE("A tooltip file's typos are errors with the name meant [data][items][t
           "did you mean excellent?");
     error(defense, R"({"text": "@defense", "when": ["tag:sceptres"]},)", "layouts[0].lines[1].when[0]",
           "names no item tag");
+    // A tag the layouts replaced says what replaced it.
+    error(defense, R"({"text": "@defense", "when": ["!tag:noDurabilityLine"]},)", "layouts[0].lines[1].when[0]",
+          R"(replaced: the items that had it have "tooltipLayout": "noDurabilityLine")");
+    error(defense, R"({"text": "@defense", "colors": [{"when": ["tag:noLevelRequirement"], "color": "red"}]},)",
+          "layouts[0].lines[1].colors[0].when[0]",
+          R"(have "tooltipLayoutChanges": {"hide": ["requiredLevel", "lackingLevel"]})");
     error("", R"({"text": "Defense: {defence}"},)", "layouts[0].lines[1].text", "did you mean {defense}?");
     error(R"("lacking": "Lacking {missing}")", R"({"text": "@lacking"},)", "layouts[0].lines[1].text",
           "unknown placeholder {missing}");

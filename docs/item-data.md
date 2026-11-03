@@ -201,7 +201,10 @@ preset `noClassLines`, `noDurabilityLine` or, with both, `noClassOrDurabilityLin
 the line ids `requiredLevel` and `lackingLevel`, or `blankAfterOptions`, among
 the item's own `hide`), with a warning, and Save Items writes that instead.
 An item that names another layout itself is an error, since which of the two
-it means is the author's call.
+it means is the author's call. A condition can't name them either
+(`"!tag:noDurabilityLine"`): nothing in a condition stands for the item's
+layout, so it is an error that says what replaced the tag; the line it left out
+for those items needs no condition, as their layout leaves it out.
 
 ### Tooltip layouts
 
