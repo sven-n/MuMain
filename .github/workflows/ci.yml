@@ -11,6 +11,7 @@ on:
   workflow_dispatch:
 
 concurrency:
+  # Coalesce releases: finish the running revision and keep only the newest pending trigger.
   group: ci-${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'release' || github.ref }}
   cancel-in-progress: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' }}
 
@@ -197,7 +198,7 @@ jobs:
             C:/vcpkg/packages
             ~/AppData/Local/vcpkg/archives
           key: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-${{ hashFiles('vcpkg.json', 'toolchain-x64.cmake') }}
-          restore-keys: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-
+          restore-keys: vcpkg-windows-x64-v2-
 
       - name: Configure CMake
         run: >
@@ -542,7 +543,8 @@ jobs:
         run: echo "identity=$(sha256sum /usr/bin/gcc /usr/bin/g++ | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
 
       - name: Cache Linux compilation
-        uses: actions/cache@v4
+        id: ccache
+        uses: actions/cache/restore@v4
         with:
           path: ${{ env.CCACHE_DIR }}
           key: ccache-linux-x64-${{ steps.compiler.outputs.identity }}-${{ github.sha }}
@@ -611,6 +613,13 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Save Linux compilation cache
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.ccache.outputs.cache-primary-key }}
 
       - name: Archive runtime
         if: needs.quality.outputs.release == 'true'
@@ -719,7 +728,7 @@ jobs:
 
   release:
     name: Semantic Release
-    needs: [quality, build-windows, build-linux, build-macos]
+    needs: [quality, build-windows, build-linux, build-macos, required]
     if: needs.quality.outputs.release == 'true'
     runs-on: ubuntu-latest
     permissions:
@@ -779,6 +788,10 @@ jobs:
             conventional-changelog-conventionalcommits@8.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check unpublished release revision
+        if: steps.semantic.outputs.new_release_published != 'true'
+        run: python3 scripts/ci_build_plan.py check-release
 
       - name: Link compatible data release
         if: steps.semantic.outputs.new_release_published == 'true'

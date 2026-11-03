@@ -3,6 +3,7 @@
 
 import json
 import os
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -14,6 +15,44 @@ RELEASE_EVENTS = {"schedule", "workflow_dispatch"}
 DATA_PREFIXES = ("src/bin/Data/", "src/bin/fonts/")
 NON_NATIVE_PREFIXES = ("docs/", *DATA_PREFIXES)
 NON_NATIVE_FILES = {"LICENSE"}
+
+
+def commit_needs_release(message, release_types):
+    message = message.strip()
+    header = re.match(r"(\w+)(?:\([^\r\n]*\))?(!)?: ", message)
+    return bool(
+        (header and (header[1] in release_types or header[2]))
+        or re.search(r"(?m)^[ \t|*]*BREAKING[ -]CHANGE(?::|[ \t])", message)
+        or message.startswith('Revert "')
+    )
+
+
+def scheduled_release_needed():
+    tags = subprocess.check_output(
+        ["git", "tag", "--merged", "HEAD", "--list", "v*", "--sort=-version:refname"],
+        text=True, encoding="utf-8",
+    ).splitlines()
+    latest = next((tag for tag in tags if re.fullmatch(r"v\d+\.\d+\.\d+", tag)), None)
+    if latest is None:
+        return True
+    config = json.loads((Path(__file__).resolve().parents[1] / ".releaserc.json").read_text(encoding="utf-8"))
+    analyzer = next(plugin[1] for plugin in config["plugins"]
+                    if isinstance(plugin, list) and plugin[0] == "@semantic-release/commit-analyzer")
+    if analyzer.get("preset") != "conventionalcommits" or "parserOpts" in analyzer:
+        return True
+    release_types = {"feat", "fix", "perf", "revert", "FEAT", "FIX"}
+    for rule in analyzer["releaseRules"]:
+        # shortcut: type-only release rules; more complex rules force builds until this preflight supports them.
+        if set(rule) != {"type", "release"} or not re.fullmatch(r"\w+", rule["type"]):
+            return True
+        if rule["release"] is False:
+            release_types.discard(rule["type"])
+        else:
+            release_types.add(rule["type"])
+    messages = subprocess.check_output(
+        ["git", "log", "--format=%B%x00", f"{latest}..HEAD"], text=True, encoding="utf-8",
+    ).split("\0")
+    return any(commit_needs_release(message, release_types) for message in messages)
 
 
 def needs_native_build(paths):
@@ -31,6 +70,8 @@ def build_plan(event_name, ref, repository, event, paths):
     if event_name in RELEASE_EVENTS and ref != MAIN_REF:
         raise ValueError("Run scheduled/manual release builds from main only")
     release = event_name in RELEASE_EVENTS and repository == UPSTREAM_REPOSITORY
+    if release and event_name == "schedule":
+        release = scheduled_release_needed()
     pull_request = event_name == "pull_request"
     draft = pull_request and event["pull_request"]["draft"]
     # Asset PRs still need native tests that load data and render shipped documents.
@@ -60,6 +101,16 @@ def check_results(needs):
             raise ValueError(f"{platform}: expected {expected}, got {actual}")
 
 
+def check_release_revision():
+    head = subprocess.check_output(["git", "rev-parse", "HEAD"], text=True).strip()
+    remote = subprocess.check_output(
+        ["git", "ls-remote", "origin", MAIN_REF], text=True,
+    ).split()
+    if not remote or remote[0] != head:
+        raise ValueError("No release was published and main advanced during the build; rerun CI manually from main")
+    print("No release published; main still matches the tested revision")
+
+
 def write_plan():
     event = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text(encoding="utf-8"))
     event_name = os.environ["GITHUB_EVENT_NAME"]
@@ -86,7 +137,9 @@ if __name__ == "__main__":
     if sys.argv[1:] == ["check"]:
         check_results(json.loads(os.environ["CI_JOB_RESULTS"]))
         print("All applicable CI checks passed")
+    elif sys.argv[1:] == ["check-release"]:
+        check_release_revision()
     elif not sys.argv[1:]:
         write_plan()
     else:
-        sys.exit("Usage: ci_build_plan.py [check]")
+        sys.exit("Usage: ci_build_plan.py [check|check-release]")

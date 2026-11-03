@@ -498,9 +498,21 @@ if fork_ci:
         cache = step(windows_job, "windows", "Cache vcpkg packages")
         for required in ("steps.vcpkg.outputs.identity", "toolchain-x64.cmake", "~/AppData/Local/vcpkg/archives"):
             check(required in cache, f"vcpkg cache missing {required}")
+        check(
+            "restore-keys: vcpkg-windows-x64-v2-\n" in cache,
+            "vcpkg binary archives must remain available across runner image updates",
+        )
 linux_cache = step(linux_job, "build-linux", "Cache Linux compilation")
-for required in ("steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
+for required in ("uses: actions/cache/restore@v4", "steps.compiler.outputs.identity", "github.sha", "restore-keys:"):
     check(required in linux_cache, f"Compiler cache missing {required}")
+linux_cache_save = step(linux_job, "build-linux", "Save Linux compilation cache")
+for required in ("uses: actions/cache/save@v4", "github.event_name == 'push'", "github.ref == 'refs/heads/main'",
+                 "steps.ccache.outputs.cache-primary-key"):
+    check(required in linux_cache_save, f"Compiler cache must save only validated main builds: {required}")
+check(
+    "uses: actions/cache@v4" not in linux_cache,
+    "PR compilation must restore without creating isolated cache entries",
+)
 check("ccache --show-stats" in linux_job, "Compiler cache trial must report hit statistics")
 all_linux_ci_packages = set()
 for workflow_name, ci_job, job_name in linux_ci_jobs:
@@ -547,8 +559,8 @@ for required in (
     check(required in macos_validation, f"macOS validation missing {required}")
 
 check(
-    "needs: [quality, build-windows, build-linux, build-macos]" in release_job,
-    "Release must need quality and all hosted platform checks",
+    "needs: [quality, build-windows, build-linux, build-macos, required]" in release_job,
+    "Release must need quality, all hosted platform checks and CI Required",
 )
 for platform, artifact_name in (
     ("Windows", "mu-client-windows-native-x64-release-editor-off-no-data-main"),
@@ -579,6 +591,10 @@ check(
     "Release must use Semantic Release",
 )
 check("id: semantic" in release_semantic, "Semantic Release must expose action outputs")
+unpublished_check = step(release_job, "release", "Check unpublished release revision")
+for required in ("if: steps.semantic.outputs.new_release_published != 'true'",
+                 "python3 scripts/ci_build_plan.py check-release"):
+    check(required in unpublished_check, f"A stale unpublished release must fail explicitly: {required}")
 data_link = step(release_job, "release", "Link compatible data release")
 for required in (
     "if: steps.semantic.outputs.new_release_published == 'true'",

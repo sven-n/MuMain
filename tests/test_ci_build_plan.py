@@ -8,18 +8,20 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
 POWERSHELL = shutil.which("pwsh") or shutil.which("powershell")
 sys.path.insert(0, str(ROOT / "scripts"))
-from ci_build_plan import build_plan, check_results, needs_native_build
+from ci_build_plan import build_plan, check_results, needs_native_build, scheduled_release_needed
 
 
 class BuildPlanTests(unittest.TestCase):
     def plan(self, event_name="pull_request", paths=("src/source/Main.cpp",), draft=False,
              repository="sven-n/MuMain", ref="refs/heads/main"):
-        return build_plan(event_name, ref, repository, {"pull_request": {"draft": draft}}, paths)
+        with patch("ci_build_plan.scheduled_release_needed", return_value=True):
+            return build_plan(event_name, ref, repository, {"pull_request": {"draft": draft}}, paths)
 
     def test_code_pr_builds_both_platforms(self):
         self.assertEqual(self.plan(), dict(linux=True, macos=True, windows=False, release=False))
@@ -97,10 +99,7 @@ class BuildPlanTests(unittest.TestCase):
 
     def prepare_renamed_repository(self, repo):
         def git(*args):
-            return subprocess.check_output(
-                ["git", "-C", str(repo), "-c", "commit.gpgsign=false", *args],
-                stderr=subprocess.STDOUT,
-            ).decode().strip()
+            return self.git(repo, *args)
         git("init")
         git("config", "user.email", "ci@example.invalid")
         git("config", "user.name", "CI test")
@@ -114,19 +113,90 @@ class BuildPlanTests(unittest.TestCase):
         git("commit", "-m", "rename and delete")
         return base
 
+    def git(self, repo, *args):
+        return subprocess.check_output(
+            ["git", "-C", str(repo), "-c", "commit.gpgsign=false", *args],
+            stderr=subprocess.STDOUT,
+        ).decode().strip()
+
+    def run_plan(self, repo, event_name, event):
+        event_path = repo / "event.json"
+        event_path.write_text(json.dumps(event), encoding="utf-8")
+        output = repo / "output.txt"
+        output.write_text("", encoding="utf-8")
+        env = dict(os.environ, GITHUB_EVENT_PATH=str(event_path), GITHUB_EVENT_NAME=event_name,
+                   GITHUB_REF="refs/heads/main", GITHUB_REPOSITORY="sven-n/MuMain",
+                   GITHUB_OUTPUT=str(output))
+        subprocess.run([sys.executable, str(ROOT / "scripts/ci_build_plan.py")],
+                       cwd=repo, env=env, check=True, capture_output=True)
+        return dict(line.split("=", 1) for line in output.read_text(encoding="utf-8").splitlines())
+
     def test_git_diff_uses_both_sides_of_a_rename_and_keeps_deletions(self):
         with tempfile.TemporaryDirectory(dir=ROOT) as temporary:
             repo = Path(temporary)
             base = self.prepare_renamed_repository(repo)
-            event = repo / "event.json"
-            event.write_text(json.dumps({"before": base}), encoding="utf-8")
-            output = repo / "output.txt"
-            env = dict(os.environ, GITHUB_EVENT_PATH=str(event), GITHUB_EVENT_NAME="push",
-                       GITHUB_REF="refs/heads/main", GITHUB_REPOSITORY="sven-n/MuMain",
-                       GITHUB_OUTPUT=str(output))
-            subprocess.run([sys.executable, str(ROOT / "scripts/ci_build_plan.py")],
-                           cwd=repo, env=env, check=True, capture_output=True)
-            self.assertIn("linux=true", output.read_text(encoding="utf-8"))
+            self.assertEqual(self.run_plan(repo, "push", {"before": base})["linux"], "true")
+
+    def test_nightly_skips_idle_and_non_release_commits_but_manual_forces_build(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as temporary:
+            repo = Path(temporary)
+            self.prepare_renamed_repository(repo)
+            self.git(repo, "tag", "v1.2.3")
+            self.assertEqual(self.run_plan(repo, "schedule", {})["release"], "false")
+            for kind in ("docs", "chore", "ci", "test", "build", "style"):
+                self.git(repo, "commit", "--allow-empty", "-m", f"{kind}(ci): update files")
+                plan = self.run_plan(repo, "schedule", {})
+                self.assertTrue(all(plan[platform] == "false" for platform in ("linux", "macos", "windows", "release")))
+            self.assertEqual(self.run_plan(repo, "workflow_dispatch", {})["release"], "true")
+
+    def test_nightly_checks_entire_release_range_and_scoped_changes(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as temporary:
+            repo = Path(temporary)
+            self.prepare_renamed_repository(repo)
+            self.git(repo, "tag", "v1.2.3")
+            for message in ("fix(network): correct packet", "docs: explain correction"):
+                self.git(repo, "commit", "--allow-empty", "-m", message)
+            self.assertEqual(self.run_plan(repo, "schedule", {})["release"], "true")
+            self.git(repo, "tag", "v1.2.4")
+            self.assertEqual(self.run_plan(repo, "schedule", {})["release"], "false")
+
+    def test_nightly_builds_breaking_changes_and_initial_release(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as temporary:
+            repo = Path(temporary)
+            self.prepare_renamed_repository(repo)
+            self.assertEqual(self.run_plan(repo, "schedule", {})["release"], "true")
+            for index, message in enumerate(("feat(ui): add layout", "perf(render): reduce draws", "refactor(network): split parser",
+                                             "feat(ui)!: replace layout", "feat: new format\n\nBREAKING CHANGE: replace format",
+                                             "feat: new format\n\nBREAKING-CHANGE: replace format", 'Revert "fix: previous change"',
+                                             "custom: new format\n\n* BREAKING CHANGE: replace format",
+                                             "FEAT: older convention", "FIX: older convention")):
+                self.git(repo, "tag", f"v1.2.{index}")
+                self.git(repo, "commit", "--allow-empty", "-m", message)
+                self.assertEqual(self.run_plan(repo, "schedule", {})["release"], "true")
+
+    def test_unpublished_release_rejects_main_advancing_during_build(self):
+        with tempfile.TemporaryDirectory(dir=ROOT) as temporary:
+            repo = Path(temporary)
+            base = self.prepare_renamed_repository(repo)
+            latest = self.git(repo, "rev-parse", "HEAD")
+            self.git(repo, "checkout", "--detach", base)
+            self.git(repo, "branch", "-f", "main", base)
+            self.git(repo, "remote", "add", "origin", str(repo))
+            command = [sys.executable, str(ROOT / "scripts/ci_build_plan.py"), "check-release"]
+            subprocess.run(command, cwd=repo, check=True, capture_output=True)
+            self.git(repo, "branch", "-f", "main", latest)
+            result = subprocess.run(command, cwd=repo, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("main advanced", result.stderr)
+
+    def test_unknown_release_rules_build_conservatively(self):
+        config = {"plugins": [["@semantic-release/commit-analyzer", {
+            "preset": "conventionalcommits",
+            "releaseRules": [{"scope": "new-policy", "release": "minor"}],
+        }]]}
+        with patch("ci_build_plan.subprocess.check_output", return_value="v1.2.3\n"), \
+                patch("ci_build_plan.Path.read_text", return_value=json.dumps(config)):
+            self.assertTrue(scheduled_release_needed())
 
     @unittest.skipUnless(POWERSHELL, "PowerShell is required for the Windows cache-key test")
     def test_vcpkg_cache_tracks_image_compiler_and_vcpkg(self):

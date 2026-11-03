@@ -147,15 +147,24 @@ and macOS arm64 Release builds and tests. Draft PRs defer native builds until
 native compilation. Mixed changes, build files, shaders, tests and asset PRs still
 get native builds; asset tests load game data and render shipped documents.
 Code merges to main run Linux integration checks. Newer revisions cancel older
-PR/integration runs; release runs are serialized separately.
+PR/integration runs. Releases finish the running revision and keep only the newest
+pending trigger; another nightly/manual trigger can replace an older pending one.
+This deliberately coalesces work rather than guaranteeing a run for every request.
 
 Full Windows/Linux/macOS release builds run daily at approximately **02:17 UTC+8**
 (18:17 UTC) and on demand. In **Actions > CI > Run workflow**, select **main** to
-build and publish a release without waiting for the nightly run. All jobs use the
-same revision selected when the workflow is triggered. Semantic Release publishes only
-when commits since the previous release warrant a version change; main merges
+force a full build without waiting for the nightly run. Before scheduled builds,
+CI scans commits since the latest reachable version tag and skips all native jobs
+when no release-producing change exists. It reads the configured release types,
+checks scoped subjects and breaking-change notes, and builds conservatively for
+an initial release or unsupported release rules. Manual dispatch bypasses this skip.
+All jobs use the same revision selected when the workflow is triggered. Semantic
+Release publishes only when those commits warrant a version change; main merges
 no longer publish immediately. Windows integration failures may first appear in
 the nightly run. The separate Data Assets workflow still publishes data on merge.
+Publishing also waits for **CI Required**. If no release is published and main has
+advanced during the build, the release job fails with a manual-rerun instruction
+instead of silently reporting success. It never substitutes untested newer code.
 
 ### Required PR check (maintainer setup)
 
@@ -175,9 +184,11 @@ each main merge. Update a PR when its integration state needs revalidation.
 
 Linux uses a compiler-cache trial. Its job log and **Linux compiler cache** step
 summary show hits and misses; compare the Build step duration on a warm run with
-the first run. A clean cache is expected after a compiler change. Windows vcpkg
-cache keys include the runner image, compiler, vcpkg revision, manifest and
-toolchain; binary archives are cached alongside installed packages.
+the first run. All builds restore the compiler cache; only successful main pushes
+save it, so PR-only entries do not displace shared caches. Windows vcpkg primary
+keys include the runner image, compiler, vcpkg revision, manifest and toolchain.
+A broader fallback also restores older binary archives; vcpkg checks compatibility
+before reusing packages across image or compiler updates.
 
 ### Download artifacts
 

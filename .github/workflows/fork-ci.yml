@@ -115,7 +115,7 @@ jobs:
             C:/vcpkg/packages
             ~/AppData/Local/vcpkg/archives
           key: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-${{ hashFiles('vcpkg.json', 'toolchain-x64.cmake') }}
-          restore-keys: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-
+          restore-keys: vcpkg-windows-x64-v2-
 
       - name: Configure CMake
         run: >
