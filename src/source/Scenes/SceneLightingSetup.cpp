@@ -14,6 +14,7 @@
 #include "Render/Lighting/WorldDynamicLights.h"
 #include "Render/Look/LookProfileSetting.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/Lighting/SunShadow.h"
 #include "Render/Renderer/SceneLighting.h"
 #include "Scenes/SceneCore.h"
 

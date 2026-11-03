@@ -638,6 +638,9 @@ static bool s_frameHasWorldLit = false;
 static bool s_groundShadowMaskReady = false;
 // Per pixel, 1 minus the darkest shadow alpha drawn there; single-sample, at the frame's size.
 static SDL_GPUTexture* s_groundShadowMask = nullptr;
+// The terrain's direct sunlight per cell (SetTerrainSunLight), which clouds dim; null until the first one.
+static SDL_GPUTexture* s_terrainSunLight = nullptr;
+static constexpr Uint32 kTerrainSunLightSize = 256;
 static Uint32 s_groundShadowMaskW = 0;
 static Uint32 s_groundShadowMaskH = 0;
 // The mask's pipelines, [point light][skinned]: GPU-skinned shadows, and the CPU and cloth shadows
@@ -2186,6 +2189,11 @@ public:
         }
 
         ReleaseSunShadowResources();
+        if (s_terrainSunLight)
+        {
+            SDL_ReleaseGPUTexture(s_device, s_terrainSunLight);
+            s_terrainSunLight = nullptr;
+        }
 
         // Release the independently owned white fallback texture.
         if (s_whiteTexture)
@@ -2680,10 +2688,17 @@ public:
     {
         SDL_GPUTexture* const sunShadow = s_sunShadowMap.Bound();
         SDL_GPUSampler* const sunShadowSampler = s_sunShadowMap.Sampler();
+        // Slot 3, the terrain's direct sunlight (world_lit reads it only while lightingParameters.y is 1).
+        SDL_GPUTexture* const terrainSun = s_terrainSunLight ? s_terrainSunLight : s_whiteTexture;
+        const SDL_GPUTextureSamplerBinding terrainSunBinding{terrainSun, s_defaultSampler};
         if (sunShadow && sunShadowSampler)
         {
-            const SDL_GPUTextureSamplerBinding binding{sunShadow, sunShadowSampler};
-            SDL_BindGPUFragmentSamplers(s_renderPass, k_FragmentSamplerSlotSunShadow, &binding, 1);
+            const SDL_GPUTextureSamplerBinding bindings[] = {{sunShadow, sunShadowSampler}, terrainSunBinding};
+            SDL_BindGPUFragmentSamplers(s_renderPass, k_FragmentSamplerSlotSunShadow, bindings, 2);
+        }
+        else
+        {
+            SDL_BindGPUFragmentSamplers(s_renderPass, k_FragmentSamplerSlotSunShadow + 1, &terrainSunBinding, 1);
         }
     }
 
@@ -2953,6 +2968,7 @@ public:
         ReplayView view = FullFrameView();
         RenderSunShadowMap(sceneEnd, boneDataReady);
         RenderGroundShadowMask(sceneEnd, boneDataReady);
+        const bool sceneView = s_postProcessingView == mu::PostProcessingView::Scene;
         // The scene texture's format says whether this frame's scene is HDR (EnsureTargets).
         s_hdrScenePass = s_postProcessing.IsHdrScene();
 
@@ -2968,13 +2984,12 @@ public:
         ReplayCommands(0u, sceneEnd, boneDataReady, ReplaySelection::AllCommands, view);
         EndReplayPass();
 
-        if (s_postProcessingLook.bloomStrength > 0.0f)
+        if (s_postProcessingLook.bloomStrength > 0.0f && s_postProcessing.EnsureBloomTargets())
         {
             RenderBloomSources(sceneEnd, boneDataReady);
         }
         s_hdrScenePass = false;
 
-        const bool sceneView = s_postProcessingView == mu::PostProcessingView::Scene;
         SDL_GPUTexture* const sceneDepth = s_postProcessingLook.ambientOcclusionStrength > 0.0f && sceneView
                                                ? RenderSceneDepth(sceneEnd, boneDataReady)
                                                : nullptr;
@@ -3377,6 +3392,15 @@ public:
         std::optional<FrameProfiler::Scope> replayScope(std::in_place, FrameProfiler::Pass::RendererReplay);
         const Render::PostProcessing::FrameSplit split =
             s_sceneBoundary.Split(s_renderCmds.size(), IsPostProcessingActive());
+        // Passes that will not run this frame free their targets, whichever way the frame is drawn.
+        {
+            const bool scene = split.postProcessed && s_postProcessingView == mu::PostProcessingView::Scene;
+            if (!scene || s_postProcessingLook.ambientOcclusionStrength <= 0.0f)
+                s_ambientOcclusion.ReleaseTargets();
+            // The bloom views show the bloom too.
+            if (!split.postProcessed || s_postProcessingLook.bloomStrength <= 0.0f)
+                s_postProcessing.ReleaseBloomTargets();
+        }
         if (s_mainColorPassOpenedThisFrame && frameColorTexture == FrameColorTexture())
         {
             // FlushRenderCommands already drew part of this frame into its target with one
@@ -5416,6 +5440,7 @@ public:
         fog.color[1] = m_fogUniform.fogColor[1];
         fog.color[2] = m_fogUniform.fogColor[2];
         s_sceneLightingUniform = PackSceneLightingUniform(lighting, fog);
+        s_sceneLightingUniform.lightingParameters[1] = s_terrainSunLight ? 1.0f : 0.0f;
         // The scene sets its lighting right after its camera, so the model-view is the view and the
         // projection the scene's.
         m_worldFromViewMatrix = glm::inverse(m_modelViewMatrix);
@@ -5445,6 +5470,44 @@ public:
     {
         return s_enhancedLightingAvailable && s_sunShadowPipelines[0] && s_sunShadowPipelines[1] &&
                s_sunShadowMap.IsAvailable();
+    }
+
+    void SetTerrainSunLight(std::span<const std::uint8_t> rgba) override
+    {
+        if (rgba.size() != kTerrainSunLightSize * kTerrainSunLightSize * 4u || !s_device)
+        {
+            return;
+        }
+        if (!s_terrainSunLight)
+        {
+            SDL_GPUTextureCreateInfo info{};
+            info.type = SDL_GPU_TEXTURETYPE_2D;
+            info.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
+            info.usage = SDL_GPU_TEXTUREUSAGE_SAMPLER;
+            info.width = kTerrainSunLightSize;
+            info.height = kTerrainSunLightSize;
+            info.layer_count_or_depth = 1;
+            info.num_levels = 1;
+            info.sample_count = SDL_GPU_SAMPLECOUNT_1;
+            s_terrainSunLight = SDL_CreateGPUTexture(s_device, &info);
+            if (!s_terrainSunLight)
+            {
+                return;
+            }
+        }
+        DiscardQueuedTextureUpdates(s_terrainSunLight);
+        TextureUpdateCmd cmd{};
+        cmd.gpuTexture = s_terrainSunLight;
+        cmd.pixelsCopy.assign(rgba.begin(), rgba.end());
+        cmd.width = kTerrainSunLightSize;
+        cmd.height = kTerrainSunLightSize;
+        cmd.bytesPerRow = kTerrainSunLightSize * 4u;
+        s_textureUpdates.push_back(std::move(cmd));
+    }
+
+    [[nodiscard]] bool InScreenSpaceSampling() const override
+    {
+        return s_screenSpaceSamplingDepth > 0;
     }
 
     void SetDynamicLights(const DynamicLightsUniform& lights) override
@@ -6114,7 +6177,7 @@ private:
         s_vertShaderWorldLit = createShader("world_lit", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 1, /*fatal=*/false);
         // world_lit.frag also samples the sun shadow map (s1) and the ground shadow mask (s2).
         s_fragShaderWorldLit =
-            createShader("world_lit", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 3, 0, 3, /*fatal=*/false);
+            createShader("world_lit", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 4, 0, 3, /*fatal=*/false);
         s_fragShaderShadowMask =
             createShader("shadow_mask", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 0, 0, 0, /*fatal=*/false);
         // Sun shadows: the draw's texture (t0) for its alpha test, FogUniforms (b0).

@@ -8,7 +8,7 @@ change performance behavior by OS.
 |----|----------------|--------------------|
 | macOS | Metal | Identical |
 | Linux | Vulkan | Identical |
-| Windows | D3D12 | Identical |
+| Windows | Vulkan (D3D12 via `[Render] Backend`) | Identical |
 
 Native drivers, GPUs, and font rasterizers can still expose platform-specific
 driver defects. Runtime parity therefore requires measurements on each target;

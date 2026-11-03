@@ -5,6 +5,8 @@
 #include "Core/Math/ZzzMathLib.h"
 #include "Render/Lighting/DynamicLightsSetting.h"
 #include "Render/Lighting/LightMoodSetting.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Scenes/SceneCore.h"
 #include "World/MapInfra/MapManager.h"
 
 namespace Render::Lighting
@@ -35,7 +37,13 @@ glm::vec3 ModelLightVector(bool highlight)
     vec3_t light;
     VectorIRotate(position, matrix, light);
     const glm::vec3 vector(light[0], light[1], light[2]);
-    return highlight ? vector : FollowFrameSun(vector);
+    // Models shown in the UI keep their light; in the world it follows the frame's sun. (The game draws
+    // every model with the highlight light.)
+    if (!FrameSun() || SceneFlag != MAIN_SCENE || mu::GetRenderer().InScreenSpaceSampling())
+    {
+        return vector;
+    }
+    return FollowFrameSun(vector);
 }
 
 } // namespace Render::Lighting

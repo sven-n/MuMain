@@ -90,6 +90,7 @@ struct SceneLightingUniform
     float cameraPosition[4];     // xyz world space, w unused
     float sunViewProjection[16]; // column-major, world to the sun shadow map's clip space
     float sunShadowParameters[4]; // darkness (0: no shadow map), softness in texels, 1 / map size, texel size
+    float lightingParameters[4];  // unused, terrain sunlight grid bound, unused, unused
     float cloudParameters[4];     // strength (0: no clouds), 1 / pattern size, sky cover, unused
     float cloudOffset[4];         // xy: drift plus the sun's slant through the clouds, zw unused
     float skyFill[4];             // rgb: the sky's tint of the shade, w: how far shade takes it
@@ -108,9 +109,10 @@ static_assert(offsetof(SceneLightingUniform, fogParameters) == 6 * kSceneLightin
 static_assert(offsetof(SceneLightingUniform, cameraPosition) == 7 * kSceneLightingRegisterSize);
 static_assert(offsetof(SceneLightingUniform, sunViewProjection) == 8 * kSceneLightingRegisterSize);
 static_assert(offsetof(SceneLightingUniform, sunShadowParameters) == 12 * kSceneLightingRegisterSize);
-static_assert(offsetof(SceneLightingUniform, cloudParameters) == 13 * kSceneLightingRegisterSize);
-static_assert(offsetof(SceneLightingUniform, sunColor) == 17 * kSceneLightingRegisterSize);
-static_assert(sizeof(SceneLightingUniform) == 18 * kSceneLightingRegisterSize);
+static_assert(offsetof(SceneLightingUniform, lightingParameters) == 13 * kSceneLightingRegisterSize);
+static_assert(offsetof(SceneLightingUniform, cloudParameters) == 14 * kSceneLightingRegisterSize);
+static_assert(offsetof(SceneLightingUniform, sunColor) == 18 * kSceneLightingRegisterSize);
+static_assert(sizeof(SceneLightingUniform) == 19 * kSceneLightingRegisterSize);
 
 [[nodiscard]] SceneLightingUniform PackSceneLightingUniform(const SceneLighting& lighting, const SceneFog& fog);
 

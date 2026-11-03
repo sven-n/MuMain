@@ -52,6 +52,7 @@
 #include "Render/Lighting/LightMoodSetting.h"
 #include "Render/Lighting/DynamicLightsSetting.h"
 #include "Render/Lighting/ModelLight.h"
+#include "Render/Lighting/SunShadow.h"
 #include "Render/Lighting/LightShadowCasters.h"
 #include "Render/Lighting/WorldDynamicLights.h"
 #include "Render/Look/LookProfileSetting.h"
@@ -3111,9 +3112,16 @@ void BMD::DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) const
         }
     };
     // The sun shadow map shadows the ground itself; only the flat shadow is drawn without it, as dark
-    // as the map lets it be (dynamic.flatSunShadow: none indoors).
-    const float flatSunShadow =
-        Render::Lighting::DynamicLightsActive() ? Render::Look::Value(Data::Maps::LookValue::FlatSunShadow) : 1.f;
+    // as the map lets it be (dynamic.flatSunShadow: none indoors), falling away from the sun.
+    const std::optional<Render::Lighting::FrameSunDirections> sun = Render::Lighting::FrameSun();
+    if (sun)
+    {
+        constexpr float MaxFlatShadowFall = 3.0f;
+        const Render::Lighting::FlatShadowCast cast = Render::Lighting::FlatShadowFromSun(sun->sun, MaxFlatShadowFall);
+        projection.axisAngle = cast.axisAngle;
+        projection.shearX = projection.shearHeight * cast.fallPerHeight;
+    }
+    const float flatSunShadow = sun ? Render::Look::Value(Data::Maps::LookValue::FlatSunShadow) : 1.f;
     if (!Render::Lighting::SunShadowsActive() && flatSunShadow > 0.f)
     {
         const mu::ScopedGroundShadow groundShadow;

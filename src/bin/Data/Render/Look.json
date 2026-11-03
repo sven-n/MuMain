@@ -35,35 +35,86 @@
     "sky.fill": 0.5,
     "lighting.rim.sunFollow": 1
   },
+  "environments": {
+    "outdoor": {},
+    "outdoorDense": {},
+    "sky": {},
+    "underwater": {
+      "sun.softness": 2
+    },
+    "enclosed": {
+      "sun.shadow": 0,
+      "dynamic.flatSunShadow": 0
+    },
+    "fixed": {}
+  },
   "maps": [
-    {
-      "world": 1,
-      "name": "Dungeon",
-      "sun.shadow": 0,
-      "dynamic.flatSunShadow": 0
-    },
-    {
-      "world": 4,
-      "name": "Lost Tower",
-      "sun.shadow": 0,
-      "dynamic.flatSunShadow": 0
-    },
-    {
-      "world": 10,
-      "name": "Icarus",
-      "bloom.strength": 0.3
-    },
-    {
-      "world": 38,
-      "name": "Kanturu Relics",
-      "sun.shadow": 0,
-      "dynamic.flatSunShadow": 0
-    },
-    {
-      "world": 39,
-      "name": "Refinery Tower",
-      "sun.shadow": 0,
-      "dynamic.flatSunShadow": 0
-    }
+    {"world": 0, "name": "Lorencia", "environment": "outdoor"},
+    {"world": 1, "name": "Dungeon", "environment": "enclosed"},
+    {"world": 2, "name": "Devias", "environment": "outdoor"},
+    {"world": 3, "name": "Noria", "environment": "outdoor"},
+    {"world": 4, "name": "Lost Tower", "environment": "enclosed"},
+    {"world": 6, "name": "Arena", "environment": "fixed"},
+    {"world": 7, "name": "Atlans", "environment": "underwater"},
+    {"world": 8, "name": "Tarkan", "environment": "outdoor"},
+    {"world": 9, "name": "Devil Square", "environment": "enclosed"},
+    {"world": 10, "name": "Icarus", "environment": "sky", "bloom.strength": 0.3},
+    {"world": 11, "name": "Blood Castle 1", "environment": "fixed"},
+    {"world": 12, "name": "Blood Castle 2", "environment": "fixed"},
+    {"world": 13, "name": "Blood Castle 3", "environment": "fixed"},
+    {"world": 14, "name": "Blood Castle 4", "environment": "fixed"},
+    {"world": 15, "name": "Blood Castle 5", "environment": "fixed"},
+    {"world": 16, "name": "Blood Castle 6", "environment": "fixed"},
+    {"world": 17, "name": "Blood Castle 7", "environment": "fixed"},
+    {"world": 18, "name": "Chaos Castle 1", "environment": "enclosed"},
+    {"world": 19, "name": "Chaos Castle 2", "environment": "enclosed"},
+    {"world": 20, "name": "Chaos Castle 3", "environment": "enclosed"},
+    {"world": 21, "name": "Chaos Castle 4", "environment": "enclosed"},
+    {"world": 22, "name": "Chaos Castle 5", "environment": "enclosed"},
+    {"world": 23, "name": "Chaos Castle 6", "environment": "enclosed"},
+    {"world": 24, "name": "Kalima 1", "environment": "fixed"},
+    {"world": 25, "name": "Kalima 2", "environment": "fixed"},
+    {"world": 26, "name": "Kalima 3", "environment": "fixed"},
+    {"world": 27, "name": "Kalima 4", "environment": "fixed"},
+    {"world": 28, "name": "Kalima 5", "environment": "fixed"},
+    {"world": 29, "name": "Kalima 6", "environment": "fixed"},
+    {"world": 30, "name": "Valley of Loren", "environment": "outdoor"},
+    {"world": 31, "name": "Land of Trials", "environment": "outdoor"},
+    {"world": 32, "name": "Devil Square", "environment": "enclosed"},
+    {"world": 33, "name": "Aida", "environment": "outdoorDense"},
+    {"world": 34, "name": "Crywolf", "environment": "outdoor"},
+    {"world": 35, "name": "Crywolf", "environment": "outdoor"},
+    {"world": 36, "name": "Lost Kalima", "environment": "fixed"},
+    {"world": 37, "name": "Kanturu Ruins", "environment": "outdoorDense"},
+    {"world": 38, "name": "Kanturu Relics", "environment": "enclosed"},
+    {"world": 39, "name": "Refinery Tower", "environment": "enclosed"},
+    {"world": 41, "name": "Barracks of Balgass", "environment": "fixed"},
+    {"world": 42, "name": "Balgass Refuge", "environment": "enclosed"},
+    {"world": 45, "name": "Illusion Temple 1", "environment": "enclosed"},
+    {"world": 46, "name": "Illusion Temple 2", "environment": "enclosed"},
+    {"world": 47, "name": "Illusion Temple 3", "environment": "enclosed"},
+    {"world": 48, "name": "Illusion Temple 4", "environment": "enclosed"},
+    {"world": 49, "name": "Illusion Temple 5", "environment": "enclosed"},
+    {"world": 50, "name": "Illusion Temple 6", "environment": "enclosed"},
+    {"world": 51, "name": "Elbeland", "environment": "outdoor"},
+    {"world": 52, "name": "Blood Castle 8", "environment": "fixed"},
+    {"world": 53, "name": "Chaos Castle 7", "environment": "enclosed"},
+    {"world": 56, "name": "Swamp of Calmness", "environment": "outdoorDense"},
+    {"world": 57, "name": "Raklion", "environment": "outdoorDense"},
+    {"world": 58, "name": "Raklion boss cave", "environment": "enclosed"},
+    {"world": 62, "name": "Santa Village", "environment": "fixed"},
+    {"world": 63, "name": "Vulcanus", "environment": "outdoorDense"},
+    {"world": 64, "name": "Duel Arena", "environment": "fixed"},
+    {"world": 65, "name": "Doppelganger 1", "environment": "enclosed"},
+    {"world": 66, "name": "Doppelganger 2", "environment": "enclosed"},
+    {"world": 67, "name": "Doppelganger 3", "environment": "enclosed"},
+    {"world": 68, "name": "Doppelganger 4", "environment": "enclosed"},
+    {"world": 69, "name": "Imperial Guardian 1", "environment": "enclosed"},
+    {"world": 70, "name": "Imperial Guardian 2", "environment": "enclosed"},
+    {"world": 71, "name": "Imperial Guardian 3", "environment": "enclosed"},
+    {"world": 72, "name": "Imperial Guardian 4", "environment": "enclosed"},
+    {"world": 79, "name": "Loren Market", "environment": "outdoor"},
+    {"world": 80, "name": "Karutan 1", "environment": "outdoor"},
+    {"world": 81, "name": "Karutan 2", "environment": "outdoor"}
   ]
 }

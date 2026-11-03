@@ -137,3 +137,17 @@ TEST_CASE("a baked light vector follows the sun's turn and rise, and is the same
                                       SunDirection(Render::Lighting::kBakedSunShadowAngle, 0.01f));
     CHECK(std::atan2(steep.z, std::hypot(steep.x, steep.y)) <= glm::radians(89.0f) + 1e-5f);
 }
+
+TEST_CASE("a flat shadow falls away from the sun, as long as its slant [render][sun]")
+{
+    using Render::Lighting::FlatShadowFromSun;
+    // The baked sun: shadows towards 135 degrees, half a unit per unit of height.
+    const Render::Lighting::FlatShadowCast baked = FlatShadowFromSun(Render::Lighting::SunDirection(135.0f, 0.5f), 3.0f);
+    CHECK(baked.fallPerHeight == doctest::Approx(0.5f));
+    CHECK(std::cos(baked.axisAngle) == doctest::Approx(std::cos(glm::radians(315.0f))).epsilon(1e-4));
+    CHECK(std::sin(baked.axisAngle) == doctest::Approx(std::sin(glm::radians(315.0f))).epsilon(1e-4));
+    // A low sun: long, but bounded.
+    CHECK(FlatShadowFromSun(Render::Lighting::SunDirection(90.0f, 10.0f), 3.0f).fallPerHeight == doctest::Approx(3.0f));
+    // Straight overhead: no slant.
+    CHECK(FlatShadowFromSun(glm::vec3(0.0f, 0.0f, 1.0f), 3.0f).fallPerHeight == 0.0f);
+}

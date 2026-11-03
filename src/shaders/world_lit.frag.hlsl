@@ -14,6 +14,10 @@ SamplerComparisonState sunShadowSampler : register(s2, space2);
 // without shadows).
 Texture2D groundShadowMask : register(t1, space2);
 SamplerState groundShadowSampler : register(s1, space2);
+// Per terrain cell, the direct sunlight inside the vertex colour (the rest is the painted ambient light
+// and point lights): what a cloud's shadow takes away. Used while lightingParameters.y is 1.
+Texture2D terrainSunLight : register(t3, space2);
+SamplerState terrainSunSampler : register(s3, space2);
 #include "scene_lighting.hlsli"
 #include "dynamic_lighting.hlsli"
 #include "clouds.hlsli"
@@ -53,15 +57,23 @@ float4 main(FSInput input) : SV_Target
         groundShadowMask.Sample(groundShadowSampler, input.pos.xy / float2(maskWidth, maskHeight)).rg;
     // The sun's shadows dim the ground's own light, the point lights' shadows the point lights.
     float2 shadow = 1.0 - groundShadowOpacity * (1.0 - visibility);
-    // Clouds dim the sunlight as shadows do; shade, from either, turns towards the sky's blue.
-    const float sunVisible = sunShadowParameters.x > 0.0
-                                 ? SunVisibility(input.worldPosition, float3(0.0, 0.0, 1.0)) *
-                                       CloudLight(input.worldPosition.xy, cloudParameters, cloudOffset.xy)
-                                 : 1.0;
+    const bool sunShadows = sunShadowParameters.x > 0.0;
+    const float sunVisible = sunShadows ? SunVisibility(input.worldPosition, float3(0.0, 0.0, 1.0)) : 1.0;
     shadow.x *= 1.0 - sunShadowParameters.x * (1.0 - sunVisible);
-    const float3 skyShade = lerp(float3(1.0, 1.0, 1.0), skyFill.rgb, skyFill.w * (1.0 - sunVisible));
-    const float3 light =
-        saturate(input.color.rgb * skyShade * shadow.x + WorldDynamicLighting(input.worldPosition) * shadow.y);
+    // A cloud takes away direct sunlight only, where the sun reaches.
+    const float cloud = sunShadows ? CloudLight(input.worldPosition.xy, cloudParameters, cloudOffset.xy) : 1.0;
+    float3 ground = input.color.rgb * shadow.x;
+    if (cloud < 1.0 && lightingParameters.y > 0.0)
+    {
+        // Cell centres: the terrain's 256 cells of 100 world units (TERRAIN_SIZE, TERRAIN_SCALE).
+        const float2 cellUv = (input.worldPosition.xy / 100.0 + 0.5) / 256.0;
+        const float3 direct = terrainSunLight.Sample(terrainSunSampler, cellUv).rgb;
+        ground = max(ground - direct * sunVisible * (1.0 - cloud), 0.0);
+    }
+    // Shade, from shadows and clouds, turns towards the sky's blue.
+    const float3 skyShade = lerp(float3(1.0, 1.0, 1.0), skyFill.rgb, skyFill.w * (1.0 - sunVisible * cloud));
+    const float3 pointLight = WorldDynamicLighting(input.worldPosition) * shadow.y;
+    const float3 light = saturate(ground * skyShade + pointLight);
     float4 color = float4(texel.rgb * light, texel.a * input.color.a);
     if (alphaToCoverage)
     {

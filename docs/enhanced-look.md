@@ -190,7 +190,8 @@ Classic uses neither file.
 {
   "formatVersion": 1,
   "default": { "bloom.strength": 1.0, "dynamic.effectCap": 2.5 },
-  "maps": [ { "world": 10, "name": "Icarus", "bloom.strength": 0.3 } ]
+  "environments": { "enclosed": { "sun.shadow": 0 } },
+  "maps": [ { "world": 10, "name": "Icarus", "environment": "sky", "bloom.strength": 0.3 } ]
 }
 ```
 
@@ -227,7 +228,7 @@ for the whole file.
 | `ao.radius` | 60 | 60 | 10–300 | how far, in world units, nearby geometry still darkens a surface |
 | `sun.shadow` | 1 | 0 | 0–1 | how dark the sun's shadows are, on top of `dynamic.shadowOpacity`. Everything solid (the terrain, buildings, trees, characters) is drawn from the sun into a shadow map, so shadows fall onto slopes, walls and other characters. The sun stands opposite `dynamic.shadowAngle`, as high as the flat character shadows were long. On models it takes away only the direct sunlight, not the ambient light. Characters' see-through parts (wings, capes, auras) cast a lighter shadow by their opacity, or glowing, their brightness. Above 0, characters cast no flat sun shadow; point-light shadows stay flat. Needs dynamic lights; drawn with anti-aliasing too |
 | `sun.softness` | 1 | 1 | 0–2 | how many shadow-map texels the sun shadows' edges blur over |
-| `dynamic.flatSunShadow` | 1 (Dungeon, Lost Tower, Kanturu Relics, Refinery Tower: 0) | 1 | 0–1 | how dark the flat shadow under characters is while sun shadows are off (`sun.shadow` 0), on top of the shadow's own darkness. The indoor and underground maps set both to 0: no sun there, so only torches and spells cast character shadows. Classic always draws it |
+| `dynamic.flatSunShadow` | 1 (Dungeon, Lost Tower, Kanturu Relics, Refinery Tower: 0) | 1 | 0–1 | how dark the flat shadow under characters is while sun shadows are off (`sun.shadow` 0); it falls away from the frame's sun, as long as the sun's slant (at most 3 units per unit of height), on top of the shadow's own darkness. The indoor and underground maps set both to 0: no sun there, so only torches and spells cast character shadows. Classic always draws it |
 | `clouds.strength` | 0.35 | 0 | 0–1 | how much a passing cloud dims the sun's light on the ground and characters; drifting procedural clouds whose shadows fall slanted by the sun. Only with sun shadows |
 | `clouds.scale` | 3000 | 3000 | 500–10000 | the cloud pattern's size in world units |
 | `clouds.speed` | 40 | 40 | 0–300 | how fast the clouds drift along a fixed wind, in world units per second |
@@ -235,6 +236,24 @@ for the whole file.
 | `sky.fill` | 0.5 | 0 | 0–1 | how far shade (from shadows and clouds) turns towards the sky's blue while sunlit places keep the sun's colour; replaces the light mood's `shadeCool` while sun shadows are on. Only with sun shadows |
 | `lighting.rim.sunFollow` | 1 | 0 | 0–1 | how much the characters' edge light comes from the sun: brighter and sun-coloured on its side, gone in its shadow; 0 the even Enhanced rim |
 | `sun.resolution` | 2048 | 2048 | 1024–4096 | the sun shadow map's size in texels (1024, 2048 or 4096): sharper shadows for more graphics memory and time |
+
+## Environments
+
+`environments` names kinds of place; a map entry picks one
+with `"environment"`. Their values apply between the default and the map's
+own. The shipped ones:
+
+| Environment | What it sets | Maps |
+|---|---|---|
+| `outdoor` | nothing yet | Lorencia, Devias, Noria, Tarkan, Valley of Loren, Land of Trials, Crywolf, Elbeland, Loren Market, Karutan |
+| `outdoorDense` | nothing yet | Aida, Kanturu Ruins, Swamp of Calmness, Raklion, Vulcanus |
+| `sky` | nothing yet | Icarus |
+| `underwater` | softer sun shadows | Atlans |
+| `enclosed` | no sun shadows | Dungeon, Lost Tower, Devil Square, Chaos Castle, Kanturu Relics, Refinery Tower, Balgass Refuge, Illusion Temple, Raklion boss cave, Doppelganger, Imperial Guardian |
+| `fixed` | nothing (open air) | Arena, Blood Castle, Kalima, Barracks of Balgass, Santa Village, Duel Arena |
+
+[enhanced-look-map-environments.md](enhanced-look-map-environments.md) lists
+every map with its world number and why it has its environment.
 
 ## Developer commands
 

@@ -5,6 +5,7 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Render/Lighting/DynamicLightsSetting.h"
 #include "Render/Look/LookProfileSetting.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "World/MapInfra/MapManager.h"
 
@@ -29,6 +30,8 @@ struct State
     int world = NoWorld;
     std::uint32_t lookRevision = 0;
     Scales scales;
+    // Bumped whenever the scales change: the static light built with older ones is stale.
+    std::uint32_t revision = 0;
 };
 
 State s_state;
@@ -53,17 +56,23 @@ void LogScales(const char* event)
 
 void Recompute(int world)
 {
+    const Scales previous = s_state.scales;
     s_state.world = world;
     s_state.lookRevision = Look::Revision();
     s_state.scales = s_state.enabled && IsWorldMap(world) ? Blend(s_state.data.ForWorld(world), s_state.strength,
                                                                   Look::Value(Data::Maps::LookValue::HighlightKnee))
                                                           : Scales{};
-    // Under a sun that casts shadows the sky fill tints the shade (the lit shaders): no second blue here.
+    // Where the sky fill tints the shade (the lit shaders, under sun shadows the renderer can draw), no
+    // second blue here.
     if (s_state.enabled && IsWorldMap(world) && DynamicLightsActive() &&
-        Look::Value(Data::Maps::LookValue::SunShadowStrength) > 0.0f &&
+        Look::Value(Data::Maps::LookValue::SunShadowStrength) > 0.0f && mu::GetRenderer().SunShadowsAvailable() &&
         Look::Value(Data::Maps::LookValue::SkyFill) > 0.0f)
     {
         s_state.scales.shadeCool = 0.f;
+    }
+    if (!(s_state.scales == previous))
+    {
+        ++s_state.revision;
     }
 }
 
@@ -141,6 +150,12 @@ void ScaleOwnHeroLight(float x, float y, const float classicLight[3], float ligh
     const Scales& scales = Active();
     ScaleFixedFigureLight(scales, classicLight, light,
                           scales.shadowKeep > 0.f ? RequestStaticLightBrightWeight(x, y) : 0.f);
+}
+
+std::uint32_t Revision()
+{
+    (void)Active();
+    return s_state.revision;
 }
 
 } // namespace Render::Lighting::LightMood
