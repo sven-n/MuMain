@@ -5,6 +5,7 @@
 #include "MuSoundEditorUI.h"
 
 #include "SoundEditorEdits.h"
+#include "SoundEventEditing.h"
 #include "SoundFilePicker.h"
 #include "SoundFolderTree.h"
 #include "SoundSelection.h"
@@ -16,12 +17,14 @@
 #include "../MuEditor/UI/SoundMixer/MuSoundMixerUI.h"
 #include "Audio/SoundMixer.h"
 #include "Data/GameData/MapData/MapObjectSoundDatabase.h"
+#include "Data/GameData/SoundData/SoundEventDatabase.h"
 #include "Data/GameData/SoundData/SoundFileDatabase.h"
 #include "I18N/All.h"
 #include "imgui.h"
 
 #include <algorithm>
 #include <cfloat>
+#include <functional>
 #include <set>
 #include <unordered_map>
 
@@ -128,23 +131,285 @@ void MuSoundEditorUI::Render(bool* open)
             taken = true;
         }
         RenderToolbar();
-        ImGui::PushTextWrapPos(0.0f);
-        ImGui::TextDisabled("%s", I18N::Editor::SoundEditorNote);
-        ImGui::PopTextWrapPos();
-        const std::vector<SoundRow> rows = SoundEditor::BuildRows();
-        std::vector<const SoundRow*> shown;
-        for (const SoundRow& row : rows)
+        if (ImGui::BeginTabBar("##SoundEditorTabs"))
         {
-            if (SoundEditor::Matches(row, m_filterText.data()) && (!m_onlyProblems || row.problem != RowProblem::None))
+            if (ImGui::BeginTabItem(I18N::Editor::SoundEditorTabSounds))
             {
-                shown.push_back(&row);
+                ImGui::PushTextWrapPos(0.0f);
+                ImGui::TextDisabled("%s", I18N::Editor::SoundEditorNote);
+                ImGui::PopTextWrapPos();
+                const std::vector<SoundRow> rows = SoundEditor::BuildRows();
+                std::vector<const SoundRow*> shown;
+                for (const SoundRow& row : rows)
+                {
+                    if (SoundEditor::Matches(row, m_filterText.data()) &&
+                        (!m_onlyProblems || row.problem != RowProblem::None))
+                    {
+                        shown.push_back(&row);
+                    }
+                }
+                RenderFolderBar();
+                RenderFilterBar(rows, shown.size());
+                RenderTable(shown);
+                ImGui::EndTabItem();
             }
+            if (ImGui::BeginTabItem(I18N::Editor::SoundEditorTabEvents))
+            {
+                RenderEvents();
+                ImGui::EndTabItem();
+            }
+            ImGui::EndTabBar();
         }
-        RenderFolderBar();
-        RenderFilterBar(rows, shown.size());
-        RenderTable(shown);
     }
     ImGui::End();
+}
+
+void MuSoundEditorUI::RenderEvents()
+{
+    ImGui::PushTextWrapPos(0.0f);
+    ImGui::TextDisabled("%s", I18N::Editor::SoundEventsNote);
+    ImGui::PopTextWrapPos();
+    // A copy: a change replaces the table while it draws.
+    const std::vector<Data::Sounds::SoundEvent> events = g_SoundEventDatabase.GetAll();
+    for (size_t index = 0; index < events.size(); ++index)
+    {
+        ImGui::PushID(static_cast<int>(index));
+        if (ImGui::CollapsingHeader(MuEditor::SoundEditor::EventTitle(events[index].event).c_str(),
+                                    ImGuiTreeNodeFlags_DefaultOpen))
+        {
+            RenderEventRules(events, index);
+        }
+        ImGui::PopID();
+    }
+}
+
+void MuSoundEditorUI::RenderEventRules(const std::vector<Data::Sounds::SoundEvent>& events, size_t eventIndex)
+{
+    using Data::Sounds::SoundEventRule;
+    const Data::Sounds::SoundEvent& event = events[eventIndex];
+    const std::string label =
+        I18N::Format(I18N::Editor::SoundEventStep0, {MuEditor::SoundEditor::EventTitle(event.event)});
+    const auto change = [&](size_t rule, const std::optional<SoundEventRule>& after, int move = 0)
+    {
+        std::vector<Data::Sounds::SoundEvent> all = events;
+        std::vector<SoundEventRule>& rules = all[eventIndex].rules;
+        if (!after)
+        {
+            if (!MuEditor::SoundEditor::RemoveRule(all[eventIndex], rule))
+            {
+                return;
+            }
+        }
+        else if (rule >= rules.size())
+        {
+            rules.push_back(*after);
+        }
+        else
+        {
+            rules[rule] = *after;
+            const auto to = static_cast<std::ptrdiff_t>(rule) + move;
+            if (move != 0 && to >= 0 && to < static_cast<std::ptrdiff_t>(rules.size()))
+            {
+                std::swap(rules[rule], rules[static_cast<size_t>(to)]);
+            }
+        }
+        g_SoundEdits.ChangeEvents(label, std::move(all));
+    };
+    constexpr ImGuiTableFlags Flags =
+        ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_SizingFixedFit;
+    if (ImGui::BeginTable("##Rules", 7, Flags))
+    {
+        ImGui::TableSetupColumn("#");
+        ImGui::TableSetupColumn(I18N::Editor::SoundEventColumnWorlds);
+        ImGui::TableSetupColumn(I18N::Editor::SoundEventColumnTiles);
+        ImGui::TableSetupColumn(I18N::Editor::SoundEventColumnSafeZone);
+        ImGui::TableSetupColumn(I18N::Editor::SoundEventColumnHolds);
+        ImGui::TableSetupColumn(I18N::Editor::SoundEventColumnPlays, ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("##Buttons");
+        ImGui::TableHeadersRow();
+        for (size_t index = 0; index < event.rules.size(); ++index)
+        {
+            const SoundEventRule& rule = event.rules[index];
+            ImGui::PushID(static_cast<int>(index));
+            ImGui::TableNextRow();
+            ImGui::TableNextColumn();
+            ImGui::Text("%zu", index + 1);
+            ImGui::TableNextColumn();
+            if (const auto worlds = RenderNumbersField("##Worlds", rule.worlds, 255))
+            {
+                SoundEventRule after = rule;
+                after.worlds = *worlds;
+                change(index, after);
+            }
+            Tooltip(I18N::Editor::SoundEventWorldsTip);
+            ImGui::TableNextColumn();
+            if (const auto tiles = RenderNumbersField("##Tiles", rule.tiles, 255))
+            {
+                SoundEventRule after = rule;
+                after.tiles = *tiles;
+                change(index, after);
+            }
+            Tooltip(I18N::Editor::SoundEventTilesTip);
+            ImGui::TableNextColumn();
+            const char* zone = !rule.safeZone   ? I18N::Editor::SoundEventAny
+                               : *rule.safeZone ? I18N::Editor::SoundEventInSafeZone
+                                                : I18N::Editor::SoundEventOutsideSafeZone;
+            ImGui::SetNextItemWidth(TypeWidth * g_MuEditorCore.GetUIScale());
+            if (ImGui::BeginCombo("##SafeZone", zone))
+            {
+                const std::pair<const char*, std::optional<bool>> choices[] = {
+                    {I18N::Editor::SoundEventAny, std::nullopt},
+                    {I18N::Editor::SoundEventInSafeZone, true},
+                    {I18N::Editor::SoundEventOutsideSafeZone, false}};
+                for (const auto& [text, value] : choices)
+                {
+                    if (ImGui::Selectable(text, rule.safeZone == value))
+                    {
+                        SoundEventRule after = rule;
+                        after.safeZone = value;
+                        change(index, after);
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::TableNextColumn();
+            const std::string holds =
+                rule.holds ? std::string(Data::Sounds::HeldWeaponWord(*rule.holds)) : I18N::Editor::SoundEventAny;
+            ImGui::SetNextItemWidth(TypeWidth * g_MuEditorCore.GetUIScale());
+            if (ImGui::BeginCombo("##Holds", holds.c_str()))
+            {
+                if (ImGui::Selectable(I18N::Editor::SoundEventAny, !rule.holds))
+                {
+                    SoundEventRule after = rule;
+                    after.holds.reset();
+                    change(index, after);
+                }
+                for (const Data::Sounds::HeldWeapon weapon :
+                     {Data::Sounds::HeldWeapon::None, Data::Sounds::HeldWeapon::Bow, Data::Sounds::HeldWeapon::Crossbow,
+                      Data::Sounds::HeldWeapon::MagicCrossbow, Data::Sounds::HeldWeapon::SaberOrSpear,
+                      Data::Sounds::HeldWeapon::Other})
+                {
+                    if (ImGui::Selectable(std::string(Data::Sounds::HeldWeaponWord(weapon)).c_str(),
+                                          rule.holds == weapon))
+                    {
+                        SoundEventRule after = rule;
+                        after.holds = weapon;
+                        change(index, after);
+                    }
+                }
+                ImGui::EndCombo();
+            }
+            ImGui::TableNextColumn();
+            ImGui::TextUnformatted(MuEditor::SoundEditor::PlaysText(rule).c_str());
+            ImGui::SameLine();
+            if (ImGui::SmallButton("..."))
+            {
+                m_pickerText.fill('\0');
+                ImGui::OpenPopup("##Plays");
+            }
+            Tooltip(I18N::Editor::SoundEventPlaysTip);
+            if (ImGui::BeginPopup("##Plays"))
+            {
+                RenderPlaysPicker(rule, [&](const SoundEventRule& after) { change(index, after); });
+                ImGui::EndPopup();
+            }
+            ImGui::TableNextColumn();
+            if (ImGui::SmallButton(I18N::Editor::SoundEditorMoveUp))
+            {
+                change(index, rule, -1);
+            }
+            ImGui::SameLine();
+            if (ImGui::SmallButton(I18N::Editor::SoundEditorMoveDown))
+            {
+                change(index, rule, 1);
+            }
+            ImGui::SameLine();
+            ImGui::BeginDisabled(event.rules.size() == 1);
+            if (ImGui::SmallButton(I18N::Editor::SoundEditorRemoveFolder))
+            {
+                change(index, std::nullopt);
+            }
+            ImGui::EndDisabled();
+            ImGui::PopID();
+        }
+        ImGui::EndTable();
+    }
+    if (ImGui::Button(I18N::Editor::SoundEventAddRule) && !event.rules.empty())
+    {
+        // A copy of the last rule, to change.
+        change(event.rules.size(), event.rules.back());
+    }
+}
+
+std::optional<std::vector<int>> MuSoundEditorUI::RenderNumbersField(const char* id, const std::vector<int>& numbers,
+                                                                    int highest)
+{
+    const std::string key = std::string(id) + "@" + std::to_string(ImGui::GetID(id));
+    std::string text = m_numbersEditKey == key ? m_numbersEdit : MuEditor::SoundEditor::NumbersText(numbers);
+    ImGui::SetNextItemWidth(TypeWidth * g_MuEditorCore.GetUIScale());
+    MuEditor::Items::InputStringWithHint(id, I18N::Editor::SoundEventAny, text);
+    if (ImGui::IsItemActive())
+    {
+        m_numbersEditKey = key;
+        m_numbersEdit = text;
+    }
+    std::optional<std::vector<int>> parsed;
+    if (ImGui::IsItemDeactivatedAfterEdit())
+    {
+        parsed = MuEditor::SoundEditor::ParseNumbers(text, highest);
+        m_numbersEditKey.clear();
+    }
+    else if (!ImGui::IsItemActive() && m_numbersEditKey == key)
+    {
+        m_numbersEditKey.clear();
+    }
+    return parsed;
+}
+
+void MuSoundEditorUI::RenderPlaysPicker(const Data::Sounds::SoundEventRule& rule,
+                                        const std::function<void(const Data::Sounds::SoundEventRule&)>& change)
+{
+    // The sounds it plays, each taken out with its button.
+    for (size_t index = 0; index < rule.plays.size(); ++index)
+    {
+        ImGui::PushID(static_cast<int>(index));
+        Data::Sounds::SoundEventRule after = rule;
+        if (ImGui::SmallButton("x") && MuEditor::SoundEditor::RemovePlay(after, index))
+        {
+            change(after);
+        }
+        ImGui::SameLine();
+        const std::string name =
+            MuEditor::SoundEditor::NameOfNumber(index < rule.numbers.size() ? rule.numbers[index] : -1);
+        ImGui::TextUnformatted((name.empty() ? rule.plays[index] : name + " (" + rule.plays[index] + ")").c_str());
+        ImGui::PopID();
+    }
+    ImGui::Separator();
+    ImGui::SetNextItemWidth(PickerWidth * g_MuEditorCore.GetUIScale());
+    ImGui::InputTextWithHint("##Search", I18N::Editor::SoundEditorFilterHint, m_pickerText.data(), m_pickerText.size());
+    if (ImGui::BeginChild("##Sounds",
+                          ImVec2(PickerWidth * g_MuEditorCore.GetUIScale(), PickerHeight * g_MuEditorCore.GetUIScale()),
+                          ImGuiChildFlags_Borders))
+    {
+        for (const Data::Sounds::SoundFile& sound : g_SoundFileDatabase.GetAll())
+        {
+            const std::string shown = sound.name.empty() ? sound.id : sound.name + " (" + sound.id + ")";
+            MuEditor::SoundEditor::SoundRow probe;
+            probe.id = sound.id;
+            probe.name = sound.name;
+            probe.file = sound.file;
+            if (!MuEditor::SoundEditor::Matches(probe, m_pickerText.data()))
+            {
+                continue;
+            }
+            Data::Sounds::SoundEventRule after = rule;
+            if (ImGui::Selectable(shown.c_str()) && MuEditor::SoundEditor::AddPlay(after, sound.id))
+            {
+                change(after);
+            }
+        }
+    }
+    ImGui::EndChild();
 }
 
 void MuSoundEditorUI::RenderToolbar()

@@ -3574,6 +3574,60 @@
   <data name="Sound editor column lives in" xml:space="preserve">
     <value>Steht in</value>
   </data>
+  <data name="Sound editor tab sounds" xml:space="preserve">
+    <value>Geräusche</value>
+  </data>
+  <data name="Sound editor tab events" xml:space="preserve">
+    <value>Ereignisse</value>
+  </data>
+  <data name="Sound events note" xml:space="preserve">
+    <value>Welches Geräusch das Spiel wann spielt (Data/Audio/SoundEvents.json): je Ereignis spielt die erste passende Regel eines ihrer Geräusche, zufällig gewählt, wenn es mehrere sind. Ein leeres Feld passt immer. Änderungen wirken sofort im Spiel; Speichern schreibt die Datei.</value>
+  </data>
+  <data name="Sound event hero footstep" xml:space="preserve">
+    <value>Deine Schritte (jeder Schritt beim Gehen, nicht beim Fliegen)</value>
+  </data>
+  <data name="Sound event player attack swing" xml:space="preserve">
+    <value>Der Schwung eines Spielers zu Beginn eines Angriffs</value>
+  </data>
+  <data name="Sound event step {0}" xml:space="preserve">
+    <value>Geräusch-Ereignis: {0}</value>
+  </data>
+  <data name="Sound event column worlds" xml:space="preserve">
+    <value>Welten</value>
+  </data>
+  <data name="Sound event column tiles" xml:space="preserve">
+    <value>Bodenfelder</value>
+  </data>
+  <data name="Sound event column safe zone" xml:space="preserve">
+    <value>Sichere Zone</value>
+  </data>
+  <data name="Sound event column holds" xml:space="preserve">
+    <value>Hält</value>
+  </data>
+  <data name="Sound event column plays" xml:space="preserve">
+    <value>Spielt</value>
+  </data>
+  <data name="Sound event any" xml:space="preserve">
+    <value>(beliebig)</value>
+  </data>
+  <data name="Sound event in safe zone" xml:space="preserve">
+    <value>darin</value>
+  </data>
+  <data name="Sound event outside safe zone" xml:space="preserve">
+    <value>außerhalb</value>
+  </data>
+  <data name="Sound event worlds tip" xml:space="preserve">
+    <value>Die Welten, auf denen es spielt, als Nummern: "7, 24-29, 36". Leer: alle.</value>
+  </data>
+  <data name="Sound event tiles tip" xml:space="preserve">
+    <value>Die Bodenfelder des Helden als Nummern: "0-2, 4-9". Leer: alle.</value>
+  </data>
+  <data name="Sound event plays tip" xml:space="preserve">
+    <value>Die Geräusche wählen: eines spielt, zufällig, wenn es mehrere sind.</value>
+  </data>
+  <data name="Sound event add rule" xml:space="preserve">
+    <value>Regel hinzufügen</value>
+  </data>
   <data name="Sound editor not sorted" xml:space="preserve">
     <value>Nicht einsortiert</value>
   </data>

@@ -6,8 +6,11 @@
 #include "SoundFolderTree.h"
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
+#include "Data/GameData/SoundData/SoundEvents.h"
 
 #include <array>
+#include <functional>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -22,6 +25,13 @@ public:
 
 private:
     void RenderToolbar();
+    void RenderEvents();
+    void RenderEventRules(const std::vector<Data::Sounds::SoundEvent>& events, size_t eventIndex);
+    // A field of numbers ("7, 24-29"); the numbers when an edit ends and they
+    // read.
+    std::optional<std::vector<int>> RenderNumbersField(const char* id, const std::vector<int>& numbers, int highest);
+    void RenderPlaysPicker(const Data::Sounds::SoundEventRule& rule,
+                           const std::function<void(const Data::Sounds::SoundEventRule&)>& change);
     void RenderFilterBar(const std::vector<MuEditor::SoundEditor::SoundRow>& rows, size_t shown);
     void RenderTable(const std::vector<const MuEditor::SoundEditor::SoundRow*>& rows);
     void RenderFolderBar();
@@ -54,6 +64,9 @@ private:
     // The folder the toolbar acts on ({} for the top), and the rename's text.
     MuEditor::SoundEditor::FolderPath m_selectedFolder;
     std::string m_folderName;
+    // The numbers field being typed in, and which one.
+    std::string m_numbersEdit;
+    std::string m_numbersEditKey;
 };
 
 extern MuSoundEditorUI g_MuSoundEditorUI;

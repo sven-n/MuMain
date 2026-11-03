@@ -7,6 +7,7 @@
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/MapData/MapObjectSound.h"
 #include "Data/GameData/MonsterData/MonsterSoundSet.h"
+#include "Data/GameData/SoundData/SoundEvents.h"
 #include "Data/GameData/SoundData/SoundFile.h"
 #include "Data/GameData/SoundData/SoundFolders.h"
 
@@ -47,6 +48,8 @@ struct SoundEdit
     std::optional<std::vector<Data::Maps::MapObjectSound>> objectsAfter;
     std::optional<std::vector<Data::Sounds::SoundFolder>> foldersBefore;
     std::optional<std::vector<Data::Sounds::SoundFolder>> foldersAfter;
+    std::optional<std::vector<Data::Sounds::SoundEvent>> eventsBefore;
+    std::optional<std::vector<Data::Sounds::SoundEvent>> eventsAfter;
 };
 
 class SoundEdits
@@ -67,6 +70,10 @@ public:
     // differs.
     bool ChangeFolders(std::string label, std::vector<Data::Sounds::SoundFolder> after);
 
+    // Replaces the sound events (the Events tab, Q-SE1) as one step of the
+    // history; the game plays by them at once. False when nothing differs.
+    bool ChangeEvents(std::string label, std::vector<Data::Sounds::SoundEvent> after);
+
     bool CanUndo() const
     {
         return !m_undo.empty();
@@ -82,8 +89,8 @@ public:
     bool IsModified() const;
     // Writes the files whose tables changed: SoundFiles.json, the monster
     // data (the monster tools' Save, all three of its files),
-    // ObjectSounds.json and SoundFolders.json. False when one was refused
-    // (the problems in `issues`); the others are written.
+    // ObjectSounds.json, SoundFolders.json and SoundEvents.json. False when
+    // one was refused (the problems in `issues`); the others are written.
     bool Save(std::vector<Data::Items::ItemDataIssue>& issues);
     // Reads the files whose tables changed again (a monster set: as it was
     // saved) and the folders; the history goes.
@@ -107,6 +114,7 @@ private:
     std::optional<std::vector<Data::Maps::MapObjectSound>> m_savedObjects;
     std::optional<std::vector<Data::Sounds::SoundFolder>> m_folders;
     std::optional<std::vector<Data::Sounds::SoundFolder>> m_savedFolders;
+    std::optional<std::vector<Data::Sounds::SoundEvent>> m_savedEvents;
 };
 } // namespace MuEditor::SoundEditor
 

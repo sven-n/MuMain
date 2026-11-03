@@ -8,10 +8,12 @@
 #include "../MuEditor/UI/MonsterTools/MonsterEdits.h"
 #include "Audio/DSPlaySound.h"
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
+#include "Data/DataHandler/SoundData/SoundEventStorage.h"
 #include "Data/DataHandler/SoundData/SoundFileStorage.h"
 #include "Data/DataHandler/SoundData/SoundFolderStorage.h"
 #include "Data/GameData/MapData/MapObjectSoundDatabase.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
+#include "Data/GameData/SoundData/SoundEventDatabase.h"
 #include "Data/GameData/SoundData/SoundFileDatabase.h"
 #include "I18N/All.h"
 
@@ -198,6 +200,26 @@ bool SoundEdits::ChangeFolders(std::string label, std::vector<Data::Sounds::Soun
     return true;
 }
 
+bool SoundEdits::ChangeEvents(std::string label, std::vector<Data::Sounds::SoundEvent> after)
+{
+    if (!m_savedCode)
+    {
+        TakeSaved();
+    }
+    if (after == g_SoundEventDatabase.GetAll())
+    {
+        return false;
+    }
+    SoundEdit edit;
+    edit.label = std::move(label);
+    edit.eventsBefore = g_SoundEventDatabase.GetAll();
+    edit.eventsAfter = std::move(after);
+    Apply(edit, true);
+    m_undo.push_back(std::move(edit));
+    m_redo.clear();
+    return true;
+}
+
 void SoundEdits::Apply(const SoundEdit& edit, bool forward)
 {
     if (edit.codeBefore && edit.codeAfter)
@@ -219,6 +241,10 @@ void SoundEdits::Apply(const SoundEdit& edit, bool forward)
     if (edit.foldersBefore && edit.foldersAfter)
     {
         m_folders = forward ? *edit.foldersAfter : *edit.foldersBefore;
+    }
+    if (edit.eventsBefore && edit.eventsAfter)
+    {
+        g_SoundEventDatabase.Build(forward ? *edit.eventsAfter : *edit.eventsBefore);
     }
 }
 
@@ -253,7 +279,8 @@ bool SoundEdits::IsModified() const
     const bool code = m_savedCode && *m_savedCode != g_SoundFileDatabase.GetAll();
     const bool objects = m_savedObjects && *m_savedObjects != g_MapObjectSoundDatabase.GetAll();
     const bool folders = m_folders && m_savedFolders && *m_folders != *m_savedFolders;
-    return code || objects || folders || SetsDiffer(m_savedSets);
+    const bool events = m_savedEvents && *m_savedEvents != g_SoundEventDatabase.GetAll();
+    return code || objects || folders || events || SetsDiffer(m_savedSets);
 }
 
 bool SoundEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
@@ -304,6 +331,17 @@ bool SoundEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
             saved = false;
         }
     }
+    if (m_savedEvents && *m_savedEvents != g_SoundEventDatabase.GetAll())
+    {
+        if (Data::Sounds::SaveSoundEvents(issues))
+        {
+            m_savedEvents = g_SoundEventDatabase.GetAll();
+        }
+        else
+        {
+            saved = false;
+        }
+    }
     return saved;
 }
 
@@ -342,6 +380,10 @@ bool SoundEdits::Revert(std::vector<Data::Items::ItemDataIssue>& issues)
             reverted = false;
         }
     }
+    if (m_savedEvents && *m_savedEvents != g_SoundEventDatabase.GetAll() && !Data::Sounds::RevertSoundEvents(issues))
+    {
+        reverted = false;
+    }
     // The folders as the file has them.
     m_folders.reset();
     Folders();
@@ -358,6 +400,7 @@ void SoundEdits::TakeSaved()
     m_savedObjects = g_MapObjectSoundDatabase.GetAll();
     Folders();
     m_savedFolders = m_folders;
+    m_savedEvents = g_SoundEventDatabase.GetAll();
 }
 
 void SoundEdits::Clear()
@@ -369,6 +412,7 @@ void SoundEdits::Clear()
     m_savedObjects.reset();
     m_folders.reset();
     m_savedFolders.reset();
+    m_savedEvents.reset();
 }
 } // namespace MuEditor::SoundEditor
 

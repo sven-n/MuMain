@@ -3793,6 +3793,60 @@
   <data name="Sound editor column lives in" xml:space="preserve">
     <value>Lives in</value>
   </data>
+  <data name="Sound editor tab sounds" xml:space="preserve">
+    <value>Sounds</value>
+  </data>
+  <data name="Sound editor tab events" xml:space="preserve">
+    <value>Events</value>
+  </data>
+  <data name="Sound events note" xml:space="preserve">
+    <value>Which sound the game plays when (Data/Audio/SoundEvents.json): for each event, the first rule that matches plays one of its sounds, picked at random when there are more. An empty field matches anything. Changes reach the game at once; Save writes the file.</value>
+  </data>
+  <data name="Sound event hero footstep" xml:space="preserve">
+    <value>Your footsteps (each step of a walk, not while flying)</value>
+  </data>
+  <data name="Sound event player attack swing" xml:space="preserve">
+    <value>A player's swing at the start of an attack</value>
+  </data>
+  <data name="Sound event step {0}" xml:space="preserve">
+    <value>Sound event: {0}</value>
+  </data>
+  <data name="Sound event column worlds" xml:space="preserve">
+    <value>Worlds</value>
+  </data>
+  <data name="Sound event column tiles" xml:space="preserve">
+    <value>Ground tiles</value>
+  </data>
+  <data name="Sound event column safe zone" xml:space="preserve">
+    <value>Safe zone</value>
+  </data>
+  <data name="Sound event column holds" xml:space="preserve">
+    <value>Holds</value>
+  </data>
+  <data name="Sound event column plays" xml:space="preserve">
+    <value>Plays</value>
+  </data>
+  <data name="Sound event any" xml:space="preserve">
+    <value>(any)</value>
+  </data>
+  <data name="Sound event in safe zone" xml:space="preserve">
+    <value>in it</value>
+  </data>
+  <data name="Sound event outside safe zone" xml:space="preserve">
+    <value>outside</value>
+  </data>
+  <data name="Sound event worlds tip" xml:space="preserve">
+    <value>The worlds it plays on, by number: "7, 24-29, 36". Empty: any.</value>
+  </data>
+  <data name="Sound event tiles tip" xml:space="preserve">
+    <value>The hero's ground tiles, by number: "0-2, 4-9". Empty: any.</value>
+  </data>
+  <data name="Sound event plays tip" xml:space="preserve">
+    <value>Pick the sounds: one plays, at random when there are more.</value>
+  </data>
+  <data name="Sound event add rule" xml:space="preserve">
+    <value>Add a rule</value>
+  </data>
   <data name="Sound editor not sorted" xml:space="preserve">
     <value>Not sorted</value>
   </data>

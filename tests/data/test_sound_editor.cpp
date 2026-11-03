@@ -17,6 +17,7 @@
 #include "Data/GameData/MonsterData/MonsterSoundsJson.h"
 #include "Data/DataHandler/SoundData/SoundFolderStorage.h"
 #include "Data/GameData/MapData/MapObjectSoundsJson.h"
+#include "Data/GameData/SoundData/SoundEventDatabase.h"
 #include "Data/GameData/SoundData/SoundFileDatabase.h"
 #include "Data/GameData/SoundData/SoundFilesJson.h"
 #include "Data/GameData/SoundData/SoundFolders.h"
@@ -24,6 +25,7 @@
 #include "UI/SoundEditor/MuSoundEditorUI.h"
 #include "UI/SoundEditor/SoundEditorEdits.h"
 #include "UI/SoundEditor/SoundEditorRows.h"
+#include "UI/SoundEditor/SoundEventEditing.h"
 #include "UI/SoundEditor/SoundFilePicker.h"
 #include "UI/SoundEditor/SoundFolderTree.h"
 #include "UI/SoundEditor/SoundSelection.h"
@@ -784,6 +786,134 @@ TEST_CASE("Sound Editor: the window draws the folders as a tree, the sounds no f
     }
     CHECK(open >= 2);
     MuEditor::SoundSelection::Set(-1);
+}
+
+TEST_CASE("Sound Editor: the Events tab writes numbers as ranges and reads them back, names the events and a rule's "
+          "sounds, and adds and takes out sounds (Q-SE1) [sounds][editor]")
+{
+    using namespace MuEditor::SoundEditor;
+    CHECK(NumbersText({7, 24, 25, 26, 27, 28, 29, 36, 67}) == "7, 24-29, 36, 67");
+    CHECK(NumbersText({0, 1, 2, 4, 5, 6, 7, 8, 9}) == "0-2, 4-9");
+    CHECK(NumbersText({3, 1, 2, 1}) == "1-3");
+    CHECK(NumbersText({4, 5}) == "4, 5");
+    CHECK(NumbersText({}).empty());
+    CHECK(ParseNumbers("7, 24-29, 36, 67", 255) == std::vector<int>{7, 24, 25, 26, 27, 28, 29, 36, 67});
+    CHECK(ParseNumbers(" 9,1 , 1 ", 255) == std::vector<int>{1, 9});
+    CHECK(ParseNumbers("", 255) == std::vector<int>{});
+    CHECK_FALSE(ParseNumbers("a", 255).has_value());
+    CHECK_FALSE(ParseNumbers("5-2", 255).has_value());
+    CHECK_FALSE(ParseNumbers("256", 255).has_value());
+    CHECK_FALSE(ParseNumbers("1,,2", 255).has_value());
+    CHECK(EventTitle("heroFootstep") == "Your footsteps (each step of a walk, not while flying)");
+    CHECK(EventTitle("someEvent") == "someEvent");
+
+    EditorScope scope;
+    g_SoundFileDatabase.Build(std::vector<SoundFile>{
+        Code("SOUND_BRANDISH_SWORD01", SOUND_BRANDISH_SWORD01, "Data/Sound/EditorTest/ok.wav", "Swing 1")});
+    Data::Sounds::SoundEventRule rule;
+    REQUIRE(AddPlay(rule, "SOUND_BRANDISH_SWORD01"));
+    CHECK_FALSE(AddPlay(rule, "SOUND_BRANDISH_SWORD01"));
+    CHECK_FALSE(AddPlay(rule, "SOUND_NONE"));
+    REQUIRE(AddPlay(rule, "SOUND_BRANDISH_SWORD02"));
+    CHECK(rule.numbers ==
+          std::vector<int>{static_cast<int>(SOUND_BRANDISH_SWORD01), static_cast<int>(SOUND_BRANDISH_SWORD02)});
+    CHECK(PlaysText(rule) == "Swing 1, SOUND_BRANDISH_SWORD02");
+    REQUIRE(RemovePlay(rule, 0));
+    CHECK(rule.plays == std::vector<std::string>{"SOUND_BRANDISH_SWORD02"});
+    CHECK(rule.numbers == std::vector<int>{static_cast<int>(SOUND_BRANDISH_SWORD02)});
+    // A rule plays one sound at least.
+    CHECK_FALSE(RemovePlay(rule, 0));
+    CHECK_FALSE(RemovePlay(rule, 3));
+
+    // An event keeps one rule at least, which "Add rule" copies.
+    Data::Sounds::SoundEvent event;
+    event.event = "playerAttackSwing";
+    Data::Sounds::SoundEventRule other = rule;
+    other.holds = Data::Sounds::HeldWeapon::Bow;
+    event.rules = {other, rule};
+    CHECK_FALSE(RemoveRule(event, 2));
+    REQUIRE(RemoveRule(event, 0));
+    CHECK(event.rules == std::vector<Data::Sounds::SoundEventRule>{rule});
+    CHECK_FALSE(RemoveRule(event, 0));
+    CHECK_FALSE(RemoveRule(event, 1));
+    CHECK(event.rules.size() == 1);
+}
+
+TEST_CASE("Sound Editor: a change of the sound events reaches the game's table at once, is a step of the history and "
+          "is what Save writes (Q-SE1) [sounds][editor]")
+{
+    EditorScope scope;
+    const std::vector<Data::Sounds::SoundEvent> previous = g_SoundEventDatabase.GetAll();
+    Data::Sounds::SoundEvent footsteps;
+    footsteps.event = "heroFootstep";
+    Data::Sounds::SoundEventRule ground;
+    MuEditor::SoundEditor::AddPlay(ground, "SOUND_HUMAN_WALK_GROUND");
+    footsteps.rules = {ground};
+    g_SoundEventDatabase.Build(std::vector<Data::Sounds::SoundEvent>{footsteps});
+    g_SoundEdits.TakeSaved();
+    Data::Sounds::SoundEvent after = footsteps;
+    Data::Sounds::SoundEventRule grass;
+    grass.worlds = {0};
+    grass.tiles = {0};
+    MuEditor::SoundEditor::AddPlay(grass, "SOUND_HUMAN_WALK_GRASS");
+    after.rules.insert(after.rules.begin(), grass);
+    REQUIRE(g_SoundEdits.ChangeEvents("Sound event", std::vector<Data::Sounds::SoundEvent>{after}));
+    CHECK_FALSE(g_SoundEdits.ChangeEvents("Sound event", std::vector<Data::Sounds::SoundEvent>{after}));
+    REQUIRE(g_SoundEventDatabase.Find("heroFootstep") != nullptr);
+    CHECK(g_SoundEventDatabase.Find("heroFootstep")->rules.size() == 2);
+    CHECK(g_SoundEdits.IsModified());
+    REQUIRE(g_SoundEdits.Undo());
+    CHECK(g_SoundEventDatabase.Find("heroFootstep")->rules.size() == 1);
+    CHECK_FALSE(g_SoundEdits.IsModified());
+    REQUIRE(g_SoundEdits.Redo());
+    std::filesystem::create_directories("Data/Audio");
+    std::vector<Data::Items::ItemDataIssue> issues;
+    REQUIRE(g_SoundEdits.Save(issues));
+    CHECK_FALSE(g_SoundEdits.IsModified());
+    std::vector<Data::Sounds::SoundEvent> written;
+    Data::Sounds::ReadSoundEventsJson(FileText("Data/Audio/SoundEvents.json"), "SoundEvents.json", written, issues);
+    CHECK(written == std::vector<Data::Sounds::SoundEvent>{after});
+    g_SoundEventDatabase.Build(previous);
+}
+
+TEST_CASE("Sound Editor: the Events tab draws each event's rules (Q-SE1) [sounds][editor]")
+{
+    EditorScope scope;
+    const std::vector<Data::Sounds::SoundEvent> previous = g_SoundEventDatabase.GetAll();
+    Data::Sounds::SoundEvent swing;
+    swing.event = "playerAttackSwing";
+    Data::Sounds::SoundEventRule bow;
+    bow.holds = Data::Sounds::HeldWeapon::Bow;
+    MuEditor::SoundEditor::AddPlay(bow, "SOUND_BOW01");
+    swing.rules = {bow};
+    g_SoundEventDatabase.Build(std::vector<Data::Sounds::SoundEvent>{swing});
+    TestImGuiContext context;
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        ImGui::NewFrame();
+        bool open = true;
+        ImGui::SetNextWindowSize(ImVec2(900.0f, 400.0f));
+        g_MuSoundEditorUI.Render(&open);
+        // The second tab, from the second frame on.
+        if (frame == 0)
+        {
+            ImGuiTabBar* bar = nullptr;
+            for (int index = 0; index < ImGui::GetCurrentContext()->TabBars.GetMapSize(); ++index)
+            {
+                if (ImGuiTabBar* found = ImGui::GetCurrentContext()->TabBars.TryGetMapData(index))
+                {
+                    bar = found;
+                }
+            }
+            if (bar != nullptr && bar->Tabs.Size == 2)
+            {
+                bar->NextSelectedTabId = bar->Tabs[1].ID;
+            }
+        }
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    }
+    g_SoundEventDatabase.Build(previous);
 }
 
 TEST_CASE("Sound Editor: the window draws the rows, filtered and with only the problems (Q-SE1) "
