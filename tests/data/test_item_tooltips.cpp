@@ -1442,8 +1442,30 @@ TEST_CASE("The tooltip's class lines and the boots' and gloves' lines come from 
     CHECK_FALSE(has(lines(10, 0, 5), L"Increases moving speed"));
 }
 
-// The item is changed with SetItem, an item edit of the editor: the editor builds run it.
-#ifdef _EDITOR
+namespace
+{
+// Puts a changed item into the item database (ItemDatabase::Set, which every build has) and the item as it was back
+// at the end, also when a check stops the test.
+class ItemDefinitionScope
+{
+public:
+    ItemDefinitionScope(Data::Items::ItemDefinition original, const Data::Items::ItemDefinition& changed)
+        : m_original(std::move(original))
+    {
+        g_ItemDatabase.Set(changed);
+    }
+    ~ItemDefinitionScope()
+    {
+        g_ItemDatabase.Set(m_original);
+    }
+    ItemDefinitionScope(const ItemDefinitionScope&) = delete;
+    ItemDefinitionScope& operator=(const ItemDefinitionScope&) = delete;
+
+private:
+    Data::Items::ItemDefinition m_original;
+};
+} // namespace
+
 // D73: a line an item adds to its layout itself shows where it says, at its levels.
 TEST_CASE("A line an item adds to its tooltip layout shows after its line [data][items][tooltip]")
 {
@@ -1457,14 +1479,20 @@ TEST_CASE("A line an item adds to its tooltip layout shows after its line [data]
     MakeBladeMaster(hero.Hero());
     ::Hero->Class = hero.Hero().Class;
 
-    Data::Items::ItemDefinition helm = *g_ItemDatabase.Find(Data::Items::MakeItemType(7, 1));
+    const Data::Items::ItemDefinition* stored = g_ItemDatabase.Find(Data::Items::MakeItemType(7, 1));
+    REQUIRE(stored != nullptr);
+    Data::Items::ItemDefinition helm = *stored;
     Data::Items::ItemDescriptionLine own;
     own.text.Set("en", "A line of its own");
     own.color = Data::Items::ItemTextColor::Green;
     own.minLevel = 3;
+    const std::wstring longText = L"A long line of its own, which the tooltip wraps to its width as it wraps the "
+                                  L"item's description lines, not cut off";
+    Data::Items::ItemDescriptionLine longLine;
+    longLine.text.Set("en", Core::Text::ToUtf8(longText.c_str()));
     helm.tooltipLayoutChanges.hide = {"classLinesBlank"};
-    helm.tooltipLayoutChanges.add = {{"classLines", {own}}};
-    g_ItemDataHandler.SetItem(helm);
+    helm.tooltipLayoutChanges.add = {{"classLines", {own, longLine}}};
+    const ItemDefinitionScope changed(*stored, helm);
     const auto lines = [](int level)
     {
         ItemCreationParams parameters = Engine::Items::TooltipSnapshot::FullItemParameters(7, 1);
@@ -1478,11 +1506,67 @@ TEST_CASE("A line an item adds to its tooltip layout shows after its line [data]
     REQUIRE(std::next(knight) != tooltip.end());
     CHECK(std::next(knight)->text == L"A line of its own");
     CHECK(std::next(knight)->color == TEXT_COLOR_GREEN);
+    // Written as its description lines are: wrapped to the tooltip's width (50 letters of the test's measure), not cut
+    // at the end of a row (99 letters).
+    std::wstring joined;
+    for (auto row = std::next(knight, 2); row != tooltip.end() && joined.size() < longText.size(); ++row)
+    {
+        CHECK(row->text.size() <= 50);
+        joined += (joined.empty() ? L"" : L" ") + row->text;
+    }
+    CHECK(joined == longText);
     // The blank row before the class lines is hidden.
     CHECK(std::prev(knight)->text != L"\n");
     const std::vector<ItemTooltipLine> low = lines(2);
     CHECK(std::none_of(low.begin(), low.end(), [](const ItemTooltipLine& line) { return line.text == L"A line of its own"; }));
-    // The item data is loaded again by the next test that needs it.
-    REQUIRE(g_ItemDataHandler.Load(errorMessage));
 }
-#endif // _EDITOR
+
+// D73: the lines an item adds have rows of their own (MaxItemAddedLineRows), wherever it adds them: added before the
+// description, they take none of its rows, and the rest of the tooltip stays.
+TEST_CASE("The lines an item adds to its tooltip layout have rows of their own [data][items][tooltip]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TextMeasureScope measure(&FixedWidthMeasure);
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    ::Hero->Class = hero.Hero().Class;
+    const auto tooltipOfJewel = []()
+    {
+        return Engine::Items::TooltipSnapshot::TooltipOfParameters(
+            Engine::Items::TooltipSnapshot::FullItemParameters(14, 13));
+    };
+
+    // The Jewel of Bless has a description.
+    const Data::Items::ItemDefinition* stored = g_ItemDatabase.Find(Data::Items::MakeItemType(14, 13));
+    REQUIRE(stored != nullptr);
+    REQUIRE_FALSE(stored->description.empty());
+    const std::vector<ItemTooltipLine> before = tooltipOfJewel();
+    Data::Items::ItemDefinition jewel = *stored;
+    Data::Items::ItemDescriptionLine own;
+    own.text.Set("en", "Own");
+    jewel.tooltipLayoutChanges.add = {
+        {"blankAfterName", std::vector<Data::Items::ItemDescriptionLine>(MaxItemAddedLineRows + 4, own)}};
+    const ItemDefinitionScope changed(*stored, jewel);
+    const std::vector<ItemTooltipLine> after = tooltipOfJewel();
+
+    const auto isOwn = [](const ItemTooltipLine& line) { return line.text == L"Own"; };
+    CHECK(std::count_if(after.begin(), after.end(), isOwn) == MaxItemAddedLineRows);
+    std::vector<std::wstring> beforeTexts;
+    for (const ItemTooltipLine& line : before)
+    {
+        beforeTexts.push_back(line.text);
+    }
+    std::vector<std::wstring> rest;
+    for (const ItemTooltipLine& line : after)
+    {
+        if (!isOwn(line))
+        {
+            rest.push_back(line.text);
+        }
+    }
+    CHECK(rest == beforeTexts);
+}

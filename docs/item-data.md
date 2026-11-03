@@ -450,7 +450,9 @@ In the tooltip:
 - **Language:** the UI's language, also when the item names stay English
   ("Translate item names" off).
 - **Size:** at most 32 rows. The description has them to itself, so a long
-  one never takes the room of the tooltip's other lines.
+  one never takes the room of the tooltip's other lines. The lines an item
+  adds to its [tooltip layout](#presets) (`tooltipLayoutChanges`) are wrapped
+  as its description lines are, in 16 rows of their own.
 - **Dark Horse and Dark Raven:** they show it only in shops; elsewhere the
   pet window writes their tooltip.
 

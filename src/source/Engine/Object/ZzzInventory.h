@@ -89,7 +89,10 @@ extern int AllRepairGold;
 // The rows an item's description may write into a tooltip, on top of the original client's 50: the description
 // gets rows of its own, so it never takes the room the rest of the tooltip needs.
 constexpr int MaxItemDescriptionRows = 32;
-constexpr int MaxTextListRows = 50 + MaxItemDescriptionRows;
+// The rows of the lines an item adds to its tooltip layout itself ("tooltipLayoutChanges"), written as its
+// description lines are: rows of their own too, so they take neither the description's room nor the rest's.
+constexpr int MaxItemAddedLineRows = 16;
+constexpr int MaxTextListRows = 50 + MaxItemDescriptionRows + MaxItemAddedLineRows;
 
 extern wchar_t TextList[MaxTextListRows][100];
 extern int TextListColor[MaxTextListRows];
