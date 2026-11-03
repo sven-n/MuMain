@@ -7,7 +7,7 @@
 <body class="scene-bar-scale" data-model="char_sel_main">
 	<!-- #panel spans the full screen as a pure positioning container (pointer-events:none);
 	     deco/info-bar anchor via base.rcss's anchor-* classes. .btn-icon-item only shows a caption
-	     in modern theme -- in legacy text is inside each button, so captions do not interfere with
+	     in modern theme -- in legacy it is placed over its button, so captions do not interfere with
 	     each button's own #btn_create-style absolute positioning.
 
 	     Labels use DejaVu Sans Unicode glyphs (base.rcss's .btn-icon-label) except Create's "+",

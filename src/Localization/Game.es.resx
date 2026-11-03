@@ -1225,6 +1225,9 @@
   <data name="Password" xml:space="preserve">
     <value>Contraseña</value>
   </data>
+  <data name="Connect" xml:space="preserve">
+    <value>Conectar</value>
+  </data>
   <data name="Exit" xml:space="preserve">
     <value>Salida</value>
   </data>
