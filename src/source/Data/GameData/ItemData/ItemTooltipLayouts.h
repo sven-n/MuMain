@@ -107,13 +107,7 @@ struct TooltipLayoutLine
 };
 
 // Lines a preset puts after the line of `after`'s id.
-struct TooltipLayoutAddition
-{
-    std::string after;
-    std::vector<TooltipLayoutLine> lines;
-
-    bool operator==(const TooltipLayoutAddition& other) const = default;
-};
+using TooltipLayoutAddition = TooltipLineAddition<TooltipLayoutLine>;
 
 struct TooltipLayout
 {

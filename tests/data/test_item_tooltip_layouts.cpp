@@ -281,6 +281,12 @@ TEST_CASE("A tooltip layout preset hides and adds lines of its base [data][items
     error(R"(, {"name": "short", "base": "default", "add": [{"after": "second", "lines": [{"section": "name"}]}]})",
           "layouts[1].add[0].lines[0]", "can't add a section");
     error(R"(, {"name": "short", "base": "default", "lines": []})", "layouts[1].lines", "has no lines of its own");
+    // Its changes are read as an item's are (Json::ReadLineIds, ReadLineAddition): ids and "after" are names.
+    error(R"(, {"name": "short", "base": "default", "hide": ["first line"]})", "layouts[1].hide", "list of line ids");
+    error(R"(, {"name": "short", "base": "default", "add": [{"after": "first line", "lines": []}]})",
+          "layouts[1].add[0]", R"(must be {"after")");
+    error(R"(, {"name": "short", "base": "default", "add": {"after": "first", "lines": []}})", "layouts[1].add",
+          "must be a list of");
     error(R"(, {"name": "full", "lines": [{"section": "name"}], "hide": ["first"]})", "layouts[1].hide",
           "only a preset");
     CHECK(Read(TooltipFile("", R"({"id": "first", "text": ""}, {"id": "first", "text": ""},)"))

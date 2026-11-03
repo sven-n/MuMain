@@ -165,15 +165,17 @@ struct ItemLevelValues
     bool operator==(const ItemLevelValues& other) const = default;
 };
 
-// Lines an item adds to its tooltip layout after the line of `after`'s id; written as its description lines are,
-// without "after": "options".
-struct ItemTooltipLayoutAddition
+// Lines put into a tooltip layout after the line of `after`'s id ("add": [{"after": "classLines", "lines": [...]}],
+// D73): a preset's, which are layout lines (TooltipLayoutAddition), or an item's own.
+template <typename TLine> struct TooltipLineAddition
 {
     std::string after;
-    std::vector<ItemDescriptionLine> lines;
+    std::vector<TLine> lines;
 
-    bool operator==(const ItemTooltipLayoutAddition& other) const = default;
+    bool operator==(const TooltipLineAddition& other) const = default;
 };
+// Lines an item adds to its tooltip layout, written as its description lines are, without "after": "options".
+using ItemTooltipLayoutAddition = TooltipLineAddition<ItemDescriptionLine>;
 
 // An item's own changes to the tooltip layout it uses ("tooltipLayoutChanges", D73): the ids of the layout lines it
 // leaves out, and the lines it adds.

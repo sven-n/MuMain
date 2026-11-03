@@ -79,6 +79,17 @@ template <typename TAddIssue> bool ReadNumber(const OrderedJson& json, int& numb
 // Names in the data (e.g. glow colors) have only letters and digits.
 bool IsName(std::string_view text);
 
+// The changes a tooltip layout preset and an item make to a layout (D73), read alike: "hide", a list of line ids, and
+// each entry of "add", {"after": "<line id>", "lines": [...]}; the messages for what is neither.
+constexpr const char* LineIdsMessage = "must be a list of line ids";
+constexpr const char* LineAdditionMessage = R"(must be {"after": "<line id>", "lines": [...]})";
+constexpr const char* LineAdditionsMessage = R"(must be a list of {"after": "<line id>", "lines": [...]})";
+// A "hide" list into `ids`; false (and `ids` as it was) for anything but a list of names.
+bool ReadLineIds(const OrderedJson& json, std::vector<std::string>& ids);
+// An "add" entry's line id into `after`, and its list of lines; nullptr (and `after` as it was) for an entry that is
+// not an object with a name "after" and a list "lines".
+const OrderedJson* ReadLineAddition(const OrderedJson& entry, std::string& after);
+
 // A text with translations (item names, table captions): English first, then the
 // translations sorted by locale.
 OrderedJson WriteLocalizedString(const LocalizedString& text);

@@ -595,20 +595,9 @@ void ItemTooltipReader::ReadPreset(const OrderedJson& json, const std::string& f
         AddFatal(field + "." + Keys::Lines, "a preset has no lines of its own: it changes its base with "
                                             "\"hide\" and \"add\"");
     }
-    if (const auto hide = json.find(Keys::Hide); hide != json.end())
+    if (const auto hide = json.find(Keys::Hide); hide != json.end() && !Json::ReadLineIds(*hide, layout.hide))
     {
-        if (!hide->is_array() || !std::all_of(hide->begin(), hide->end(), [](const OrderedJson& id)
-                                              { return id.is_string() && Json::IsName(id.get<std::string>()); }))
-        {
-            AddFatal(field + "." + Keys::Hide, "must be a list of line ids");
-        }
-        else
-        {
-            for (const OrderedJson& id : *hide)
-            {
-                layout.hide.push_back(id.get<std::string>());
-            }
-        }
+        AddFatal(field + "." + Keys::Hide, Json::LineIdsMessage);
     }
     const auto add = json.find(Keys::Add);
     if (add == json.end())
@@ -617,22 +606,20 @@ void ItemTooltipReader::ReadPreset(const OrderedJson& json, const std::string& f
     }
     if (!add->is_array())
     {
-        AddFatal(field + "." + Keys::Add, R"(must be a list of {"after": "<line id>", "lines": [...]})");
+        AddFatal(field + "." + Keys::Add, Json::LineAdditionsMessage);
         return;
     }
     for (size_t index = 0; index < add->size(); ++index)
     {
         const OrderedJson& entry = (*add)[index];
         const std::string entryField = field + "." + Keys::Add + "[" + std::to_string(index) + "]";
-        const auto after = entry.is_object() ? entry.find(Keys::After) : entry.end();
-        const auto lines = entry.is_object() ? entry.find(Keys::Lines) : entry.end();
-        if (after == entry.end() || !after->is_string() || lines == entry.end() || !lines->is_array())
+        TooltipLayoutAddition addition;
+        const OrderedJson* lines = Json::ReadLineAddition(entry, addition.after);
+        if (lines == nullptr)
         {
-            AddFatal(entryField, R"(must be {"after": "<line id>", "lines": [...]})");
+            AddFatal(entryField, Json::LineAdditionMessage);
             continue;
         }
-        TooltipLayoutAddition addition;
-        addition.after = after->get<std::string>();
         for (size_t lineIndex = 0; lineIndex < lines->size(); ++lineIndex)
         {
             const OrderedJson& lineJson = (*lines)[lineIndex];

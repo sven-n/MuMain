@@ -785,27 +785,15 @@ void ItemReader::ReadTooltipLayoutChanges(const OrderedJson& json, ItemTooltipLa
                  R"(must be {"hide": ["<line id>", ...], "add": [{"after": "<line id>", "lines": [...]}]})");
         return;
     }
-    if (const auto hide = found->find(Keys::Hide); hide != found->end())
+    if (const auto hide = found->find(Keys::Hide); hide != found->end() && !Json::ReadLineIds(*hide, changes.hide))
     {
-        if (!hide->is_array() || !std::all_of(hide->begin(), hide->end(), [](const OrderedJson& id)
-                                              { return id.is_string() && Json::IsName(id.get<std::string>()); }))
-        {
-            AddIssue(ItemDataIssueSeverity::Fatal, field + "." + Keys::Hide, "must be a list of line ids");
-        }
-        else
-        {
-            for (const OrderedJson& id : *hide)
-            {
-                changes.hide.push_back(id.get<std::string>());
-            }
-        }
+        AddIssue(ItemDataIssueSeverity::Fatal, field + "." + Keys::Hide, Json::LineIdsMessage);
     }
     if (const auto add = found->find(Keys::Add); add != found->end())
     {
         if (!add->is_array())
         {
-            AddIssue(ItemDataIssueSeverity::Fatal, field + "." + Keys::Add,
-                     R"(must be a list of {"after": "<line id>", "lines": [...]})");
+            AddIssue(ItemDataIssueSeverity::Fatal, field + "." + Keys::Add, Json::LineAdditionsMessage);
         }
         else
         {
@@ -822,16 +810,13 @@ void ItemReader::ReadTooltipLayoutChanges(const OrderedJson& json, ItemTooltipLa
 void ItemReader::ReadTooltipLayoutAddition(const OrderedJson& entry, const std::string& field,
                                            ItemTooltipLayoutChanges& changes)
 {
-    const auto after = entry.is_object() ? entry.find(Keys::After) : entry.end();
-    const auto lines = entry.is_object() ? entry.find(Keys::Lines) : entry.end();
-    if (after == entry.end() || !after->is_string() || !Json::IsName(after->get<std::string>()) ||
-        lines == entry.end() || !lines->is_array())
+    ItemTooltipLayoutAddition addition;
+    const OrderedJson* lines = Json::ReadLineAddition(entry, addition.after);
+    if (lines == nullptr)
     {
-        AddIssue(ItemDataIssueSeverity::Fatal, field, R"(must be {"after": "<line id>", "lines": [...]})");
+        AddIssue(ItemDataIssueSeverity::Fatal, field, Json::LineAdditionMessage);
         return;
     }
-    ItemTooltipLayoutAddition addition;
-    addition.after = after->get<std::string>();
     for (size_t index = 0; index < lines->size(); ++index)
     {
         const OrderedJson& lineJson = (*lines)[index];
