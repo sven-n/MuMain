@@ -39,4 +39,9 @@ void ValidateMonsterSoundLinks(std::span<const MonsterDefinition> monsters,
                                std::span<const MonsterModelDefinition> models, std::span<const MonsterSoundSet> sets,
                                const std::string& monstersSource, const std::string& soundsSource,
                                std::vector<Items::ItemDataIssue>& issues);
+// The same on the entries of the tables, which it does not copy.
+void ValidateMonsterSoundLinks(std::span<const MonsterDefinition* const> monsters,
+                               std::span<const MonsterModelDefinition* const> models,
+                               std::span<const MonsterSoundSet> sets, const std::string& monstersSource,
+                               const std::string& soundsSource, std::vector<Items::ItemDataIssue>& issues);
 } // namespace Data::Monsters

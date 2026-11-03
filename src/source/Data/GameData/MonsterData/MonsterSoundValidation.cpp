@@ -167,17 +167,35 @@ void ValidateMonsterSoundLinks(std::span<const MonsterDefinition> monsters,
                                const std::string& monstersSource, const std::string& soundsSource,
                                std::vector<ItemDataIssue>& issues)
 {
+    std::vector<const MonsterDefinition*> monsterEntries;
+    for (const MonsterDefinition& monster : monsters)
+    {
+        monsterEntries.push_back(&monster);
+    }
+    std::vector<const MonsterModelDefinition*> modelEntries;
+    for (const MonsterModelDefinition& model : models)
+    {
+        modelEntries.push_back(&model);
+    }
+    ValidateMonsterSoundLinks(monsterEntries, modelEntries, sets, monstersSource, soundsSource, issues);
+}
+
+void ValidateMonsterSoundLinks(std::span<const MonsterDefinition* const> monsters,
+                               std::span<const MonsterModelDefinition* const> models,
+                               std::span<const MonsterSoundSet> sets, const std::string& monstersSource,
+                               const std::string& soundsSource, std::vector<ItemDataIssue>& issues)
+{
     std::map<std::string, const MonsterSoundSet*, std::less<>> byName;
     for (const MonsterSoundSet& set : sets)
     {
         byName.emplace(set.name, &set);
     }
     std::map<int, const MonsterModelDefinition*> bySlot;
-    for (const MonsterModelDefinition& model : models)
+    for (const MonsterModelDefinition* model : models)
     {
-        if (const std::optional<int> slot = FindMonsterModelSlot(model.slot))
+        if (const std::optional<int> slot = FindMonsterModelSlot(model->slot))
         {
-            bySlot.emplace(*slot, &model);
+            bySlot.emplace(*slot, model);
         }
     }
     std::map<std::string, std::vector<SetUser>, std::less<>> users;
@@ -200,8 +218,9 @@ void ValidateMonsterSoundLinks(std::span<const MonsterDefinition> monsters,
         }
         users[name].push_back({number, slot});
     };
-    for (const MonsterDefinition& monster : monsters)
+    for (const MonsterDefinition* entry : monsters)
     {
+        const MonsterDefinition& monster = *entry;
         if (!monster.soundSet.empty())
         {
             use(monster.soundSet, "soundSet", monster.number, monster.model);

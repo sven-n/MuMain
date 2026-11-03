@@ -34,6 +34,24 @@ constexpr std::string_view MonsterModelsName = "monster model list";
 constexpr std::string_view MonsterSoundsLabel = "Monster sounds";
 constexpr std::string_view MonsterSoundsName = "monster sound sets";
 
+// What the monster table, the model table and these sound sets name of each
+// other: the game loads them one after the other. The tables' entries are
+// read in place.
+void ValidateLinks(std::span<const MonsterSoundSet> sets, std::vector<Items::ItemDataIssue>& issues)
+{
+    std::vector<const MonsterDefinition*> monsters;
+    for (int number = 0; number < MonsterNumberCount; ++number)
+    {
+        if (const MonsterDefinition* monster = g_MonsterDatabase.Find(number))
+        {
+            monsters.push_back(monster);
+        }
+    }
+    ValidateMonsterSoundLinks(monsters, g_MonsterModelDatabase.GetAll(), sets, GetMonstersFile().generic_string(),
+                              GetMonsterSoundsFile().generic_string(), issues);
+}
+
+#ifdef _EDITOR
 // The entries of the table, sorted by number.
 std::vector<MonsterDefinition> CollectMonsters()
 {
@@ -48,21 +66,6 @@ std::vector<MonsterDefinition> CollectMonsters()
     return monsters;
 }
 
-// What the monster list, the model list and the sound sets name of each
-// other: the game loads them one after the other.
-void ValidateLinks(std::span<const MonsterDefinition> monsters, std::span<const MonsterSoundSet> sets,
-                   std::vector<Items::ItemDataIssue>& issues)
-{
-    std::vector<MonsterModelDefinition> models;
-    for (const MonsterModelDefinition* model : g_MonsterModelDatabase.GetAll())
-    {
-        models.push_back(*model);
-    }
-    ValidateMonsterSoundLinks(monsters, models, sets, GetMonstersFile().generic_string(),
-                              GetMonsterSoundsFile().generic_string(), issues);
-}
-
-#ifdef _EDITOR
 // The sets of the set table, sorted by name.
 std::vector<MonsterSoundSet> CollectSoundSets()
 {
@@ -160,7 +163,7 @@ bool MonsterDataHandler::LoadSounds(std::string& errorMessage)
     MonsterSoundsLoadResult result = LoadMonsterSoundsFile(GetMonsterSoundsFile());
     if (!Items::HasFatal(result.issues))
     {
-        ValidateLinks(CollectMonsters(), result.sets, result.issues);
+        ValidateLinks(result.sets, result.issues);
     }
     LogDataIssues(MonsterSoundsLabel, result.issues);
     if (Items::HasFatal(result.issues))
@@ -263,7 +266,7 @@ void MonsterDataHandler::ValidateSounds(std::vector<Items::ItemDataIssue>& issue
 {
     const std::vector<MonsterSoundSet> sets = CollectSoundSets();
     ValidateMonsterSoundSetNames(sets, GetMonsterSoundsFile().generic_string(), issues);
-    ValidateLinks(CollectMonsters(), sets, issues);
+    ValidateLinks(sets, issues);
 }
 
 void MonsterDataHandler::Validate(std::vector<Items::ItemDataIssue>& issues) const
@@ -368,7 +371,7 @@ bool MonsterDataHandler::SaveAll(std::vector<Items::ItemDataIssue>& issues)
         MakeMonsterModelsFileText(GetMonsterModelsFile(), CollectModels(), issues);
     const std::vector<MonsterSoundSet> sets = CollectSoundSets();
     const std::optional<std::string> soundsText = MakeMonsterSoundsFileText(GetMonsterSoundsFile(), sets, issues);
-    ValidateLinks(monsters, sets, issues);
+    ValidateLinks(sets, issues);
     if (!monstersText || !modelsText || !soundsText)
     {
         return false;
