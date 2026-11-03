@@ -29,12 +29,23 @@ jobs:
       release: ${{ steps.plan.outputs.release }}
 
     steps:
+      # Game data except what the gates read (RmlUi documents, fonts, Dec2.dat) is about 700 MB that only the native
+      # tests use; downloading it took 30 s to 3 min depending on GitHub.
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/src/bin/*
+            /src/bin/fonts/
+            /src/bin/Data/
+            !/src/bin/Data/*
+            /src/bin/Data/Interface/
+            /src/bin/Data/Dec2.dat
 
       # Commits, tags and file lists for the diffs and release check, without every past asset version; git fetches
-      # the few old file versions a diff needs on demand. A blob:none checkout fetches the current files that way
-      # too, which took minutes, so the files come from the shallow checkout above.
+      # the few old file versions a diff needs on demand.
       - name: Fetch history
         run: git fetch --quiet --filter=blob:none --unshallow --tags origin
 
