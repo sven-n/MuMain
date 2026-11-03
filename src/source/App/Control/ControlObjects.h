@@ -6,11 +6,24 @@
 
 #include "App/Control/ControlEvents.h"
 
+#include <optional>
 #include <string>
+#include <string_view>
 #include <utility>
+
+class CHARACTER;
 
 namespace App::Control
 {
+// The `kind` the control socket reports for an engine object kind
+// (OBJECT::Kind): player, monster, npc, trap, pet, other or unknown. Monster,
+// npc, trap and other are the kinds of the monster list (Monsters.json).
+[[nodiscard]] std::string_view ObjectKindName(int objectKind);
+
+// The monster number the server created a character with, as it sent it
+// (also one the monster list has no entry for); empty for a player.
+[[nodiscard]] std::optional<int> MonsterNumberOf(const CHARACTER& character);
+
 // Describes a character, monster, NPC or pet by its server-assigned key.
 // An object the client does not know is reported with `known == false`,
 // its id and kind `unknown`.

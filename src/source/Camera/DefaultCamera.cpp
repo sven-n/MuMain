@@ -664,7 +664,13 @@ void DefaultCamera::SetCameraAngle()
         m_State.Angle[0] = -48.5f;
     }
 
-    m_State.Angle[0] += EarthQuake;
+    // Effects roll a new shake every rendered frame; take one per reference frame, as at 25 FPS.
+    static float s_earthQuake = 0.f;
+    if (REFERENCE_FRAME_STEP > 0)
+    {
+        s_earthQuake = EarthQuake;
+    }
+    m_State.Angle[0] += s_earthQuake;
 }
 
 void DefaultCamera::UpdateCustomCameraDistance()
@@ -822,14 +828,9 @@ void DefaultCamera::HandleEditorMode()
         if (IsHeroValid())
         {
             // Apply rotation and movement
-            auto& renderer = mu::GetRenderer();
-            renderer.SetMatrixMode(GL_MODELVIEW);
-            renderer.PushMatrix();
-            renderer.LoadIdentity();
-            renderer.Rotate(-m_State.Angle[2], 0.f, 0.f, 1.f);
+            const vec3_t yaw = {0.f, 0.f, -m_State.Angle[2]};
             float Matrix[3][4];
-            CameraProjection::GetOpenGLMatrix(Matrix);
-            renderer.PopMatrix();
+            AngleMatrix(yaw, Matrix);
             VectorRotate(p1, Matrix, p2);
             VectorAdd(Hero->Object.Position, p2, Hero->Object.Position);
         }

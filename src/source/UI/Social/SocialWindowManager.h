@@ -203,6 +203,14 @@ public:
     {
         return m_bRenderFrame;
     }
+#ifdef _EDITOR
+    // The windows of the family, also hidden ones: the item editor drops the
+    // cloth of the letters' photo characters before an opened model changes.
+    const WndMap& GetWindows() const
+    {
+        return m_WindowMap;
+    }
+#endif
 
 protected:
     void HandleMessage();
@@ -233,7 +241,7 @@ protected:
     int m_iLastFriendWindowTabIndex;
 
     BOOL m_bServerEnable;
-    int m_iFriendMainWindowTitleNumber;
+    const wchar_t* const* m_pFriendMainWindowTitle;
 };
 
 // The friend family's open chat rooms, pending chat requests and new-chat and new-mail alerts. Once

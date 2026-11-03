@@ -6,31 +6,31 @@
 // holds the localized display label for this field.
 // This is the SINGLE SOURCE OF TRUTH for field definitions.
 
-#define ITEM_FIELDS_SIMPLE(X) \
-    X(TwoHand, Bool, 1, 70.0f, TwoHand) \
-    X(Level, Word, 1, 60.0f, Level) \
-    X(m_byItemSlot, Byte, 1, 60.0f, Slot) \
-    X(m_wSkillIndex, Word, 1, 60.0f, Skill) \
-    X(Width, Byte, 1, 60.0f, Width) \
-    X(Height, Byte, 1, 60.0f, Height) \
-    X(DamageMin, Byte, 1, 70.0f, MinDamage) \
-    X(DamageMax, Byte, 1, 70.0f, MaxDamage) \
-    X(SuccessfulBlocking, Byte, 1, 70.0f, BlockRate) \
-    X(Defense, Byte, 1, 70.0f, Defense) \
-    X(MagicDefense, Byte, 1, 80.0f, MagicDefense) \
-    X(WeaponSpeed, Byte, 1, 80.0f, AttackSpeed) \
-    X(WalkSpeed, Byte, 1, 80.0f, MoveSpeed) \
-    X(Durability, Byte, 1, 70.0f, Durability) \
-    X(MagicDur, Byte, 1, 90.0f, MagicDurability) \
-    X(MagicPower, Byte, 1, 80.0f, MagicPower) \
-    X(RequireStrength, Word, 1, 80.0f, ReqStrength) \
-    X(RequireDexterity, Word, 1, 80.0f, ReqDexterity) \
-    X(RequireEnergy, Word, 1, 80.0f, ReqEnergy) \
-    X(RequireVitality, Word, 1, 80.0f, ReqVitality) \
-    X(RequireCharisma, Word, 1, 90.0f, ReqLeadership) \
-    X(RequireLevel, Word, 1, 70.0f, ReqLevel) \
-    X(Value, Byte, 1, 70.0f, SellValue) \
-    X(iZen, Int, 1, 80.0f, BuyPrice) \
+#define ITEM_FIELDS_SIMPLE(X)                                                                                          \
+    X(TwoHand, Bool, 1, 70.0f, TwoHand)                                                                                \
+    X(Level, Word, 1, 60.0f, Level)                                                                                    \
+    X(m_byItemSlot, Byte, 1, 60.0f, Slot)                                                                              \
+    X(m_wSkillIndex, Word, 1, 60.0f, Skill)                                                                            \
+    X(Width, Byte, 1, 60.0f, Width)                                                                                    \
+    X(Height, Byte, 1, 60.0f, Height)                                                                                  \
+    X(DamageMin, ByteInFile, 1, 70.0f, MinDamage)                                                                      \
+    X(DamageMax, ByteInFile, 1, 70.0f, MaxDamage)                                                                      \
+    X(SuccessfulBlocking, Byte, 1, 70.0f, BlockRate)                                                                   \
+    X(Defense, Byte, 1, 70.0f, Defense)                                                                                \
+    X(MagicDefense, Byte, 1, 80.0f, MagicDefense)                                                                      \
+    X(WeaponSpeed, Byte, 1, 80.0f, AttackSpeed)                                                                        \
+    X(WalkSpeed, Byte, 1, 80.0f, MoveSpeed)                                                                            \
+    X(Durability, Byte, 1, 70.0f, Durability)                                                                          \
+    X(MagicDur, Byte, 1, 90.0f, MagicDurability)                                                                       \
+    X(MagicPower, ByteInFile, 1, 80.0f, MagicPower)                                                                    \
+    X(RequireStrength, Word, 1, 80.0f, ReqStrength)                                                                    \
+    X(RequireDexterity, Word, 1, 80.0f, ReqDexterity)                                                                  \
+    X(RequireEnergy, Word, 1, 80.0f, ReqEnergy)                                                                        \
+    X(RequireVitality, Word, 1, 80.0f, ReqVitality)                                                                    \
+    X(RequireCharisma, Word, 1, 90.0f, ReqLeadership)                                                                  \
+    X(RequireLevel, Word, 1, 70.0f, ReqLevel)                                                                          \
+    X(Value, Byte, 1, 70.0f, SellValue)                                                                                \
+    X(iZen, Int, 1, 80.0f, BuyPrice)                                                                                   \
     X(AttType, Byte, 1, 80.0f, AttackType)
 
 // Array fields defined with index notation for metadata
@@ -58,10 +58,21 @@
 #define FIELD_TYPE_Word WORD
 #define FIELD_TYPE_Int int
 #define FIELD_TYPE_DWord DWORD
+// Two bytes in the game, one in the .bmd item files (damage and magic power: later items pass 255).
+#define FIELD_TYPE_ByteInFile WORD
+
+// The types of the .bmd item file structures.
+#define FILE_FIELD_TYPE_Bool bool
+#define FILE_FIELD_TYPE_Byte BYTE
+#define FILE_FIELD_TYPE_Word WORD
+#define FILE_FIELD_TYPE_Int int
+#define FILE_FIELD_TYPE_DWord DWORD
+#define FILE_FIELD_TYPE_ByteInFile BYTE
 
 // Generate struct field declarations from X-macro. The i18nName parameter
 // only matters for descriptor generation; the struct layout ignores it.
 #define DECLARE_FIELD(name, type, arraySize, width, i18nName) FIELD_TYPE_##type name;
+#define DECLARE_FILE_FIELD(name, type, arraySize, width, i18nName) FILE_FIELD_TYPE_##type name;
 
 // Macro to generate all non-array fields for struct definition
 #define ITEM_ATTRIBUTE_FIELDS \
@@ -69,8 +80,8 @@
     BYTE RequireClass[MAX_CLASS]; \
     BYTE Resistance[MAX_RESISTANCE + 1];
 
-// ============================================================================
-// EDITOR METADATA - Defined in ItemFieldMetadata.h (after ITEM_ATTRIBUTE is defined)
-// ============================================================================
-// Note: Editor-specific types (EItemFieldType, FieldDescriptor, etc.) are defined
-// in ItemFieldMetadata.h to avoid circular dependencies
+// The same for the .bmd item file structures.
+#define ITEM_ATTRIBUTE_FILE_FIELDS                                                                                     \
+    ITEM_FIELDS_SIMPLE(DECLARE_FILE_FIELD)                                                                             \
+    BYTE RequireClass[MAX_CLASS];                                                                                      \
+    BYTE Resistance[MAX_RESISTANCE + 1];

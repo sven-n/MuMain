@@ -14,7 +14,8 @@
 	     data-class-mode-cancel-only="mode_cancel_only"
 	     data-class-mode-ok-only="mode_ok_only"
 	     data-class-mode-both="mode_both"
-	     data-class-mode-input="mode_input">
+	     data-class-mode-input="mode_input"
+	     data-class-own-captions="own_captions">
 		<div class="modern-header-rivet"></div>
 		<div id="msg_line1" class="msg-line" data-class-multi-line="!line2_hidden">{{line1}}</div>
 		<div id="msg_line2" class="msg-line" data-class-hidden="line2_hidden">{{line2}}</div>

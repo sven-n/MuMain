@@ -21,6 +21,7 @@
 #include "miniaudio.h"
 
 #include <array>
+#include <deque>
 #include <string>
 #include <vector>
 
@@ -44,6 +45,7 @@ public:
     // Sound effects
     void LoadSound(ESound buffer, const wchar_t* filename, int channels = MAX_CHANNEL, bool enable3D = false) override;
     [[nodiscard]] bool PlaySound(ESound buffer, const void* pObject = nullptr, bool looped = false) override;
+    [[nodiscard]] bool PlaySoundAtLevel(ESound buffer, float level) override;
     void StopSound(ESound buffer, bool resetPosition) override;
     void AllStopSound() override;
     void ReleaseSound(ESound buffer) override;
@@ -64,6 +66,9 @@ public:
     [[nodiscard]] float GetSFXVolume() const override;
 
 private:
+    // PlaySound at `volume`.
+    bool StartSound(ESound buffer, const void* pObject, bool looped, float volume);
+
     // Convert DirectSound volume (dB * 100, range -10000..0) to linear 0.0..1.0
     static float DbToLinear(long dsVol);
 
@@ -73,27 +78,24 @@ private:
 
     ma_engine m_engine{};
 
-    // Per-sound polyphonic slots: [ESound index][channel index]
-    // MAX_BUFFER is the last ESound enum entry — used as the array size.
-    std::array<std::array<ma_sound, MAX_CHANNEL>, MAX_BUFFER> m_sounds{};
-    std::array<bool, MAX_BUFFER> m_soundLoaded{};
-    std::array<int, MAX_BUFFER> m_activeChannel{};
-    std::array<bool, MAX_BUFFER> m_sound3DEnabled{};
+    // Whether `buffer` has a slot; LoadSound adds the slots up to a number
+    // after the SOUND_* list.
+    bool HasSlot(int buffer) const;
+    bool AddSlotsUpTo(int buffer);
+    int GetSlotCount() const;
+
+    // Per-sound polyphonic slots: [sound number][channel index]. One for each
+    // SOUND_* id (MAX_BUFFER) from the start; LoadSound adds the slots of the
+    // numbers that sounds without an id get (Audio/SoundNumbers.h). Deques,
+    // because miniaudio keeps pointers to the sounds: adding moves none.
+    std::deque<std::array<ma_sound, MAX_CHANNEL>> m_sounds = std::deque<std::array<ma_sound, MAX_CHANNEL>>(MAX_BUFFER);
+    std::deque<bool> m_soundLoaded = std::deque<bool>(MAX_BUFFER);
+    std::deque<int> m_activeChannel = std::deque<int>(MAX_BUFFER);
     // CRITICAL-1 fix: tracks how many polyphonic slots were actually initialised by
     // LoadSound(). PlaySound/StopSound/AllStopSound must iterate only these slots —
     // iterating all MAX_CHANNEL slots when numChannels < MAX_CHANNEL calls miniaudio
     // APIs on uninitialized ma_sound handles (UB).
-    std::array<int, MAX_BUFFER> m_loadedChannels{};
-
-    // Per-slot object pointer for per-frame 3D position updates (Story 5.2.2).
-    // Stores the most recent pObject passed to PlaySound() for each 3D-enabled buffer slot.
-    // Lifetime: game engine guarantees object outlives the attached sound (same assumption
-    // as DirectSoundManager::attachedObjects in DSplaysound.cpp). Raw pointer is intentional —
-    // adding lifetime management here would require an engine-wide refactor.
-    // nullptr = no object attached to this slot (safe — Set3DSoundPosition() checks before deref).
-    // Story 7.8.1: Changed from const OBJECT* to const void* for cross-platform portability.
-    // Cast back to const OBJECT* in Set3DSoundPosition() when accessing position data.
-    std::array<const void*, MAX_BUFFER> m_soundObjects{};
+    std::deque<int> m_loadedChannels = std::deque<int>(MAX_BUFFER);
 
     float m_bgmVolume = 1.0f; // BGM volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1
     float m_sfxVolume = 1.0f; // SFX volume: 0.0 (mute) to 1.0 (full) — Story 5.4.1

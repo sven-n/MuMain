@@ -2,6 +2,9 @@
 
 #include "LocalizedString.h"
 
+#include <algorithm>
+#include <cctype>
+
 namespace Data
 {
 namespace
@@ -55,6 +58,17 @@ const std::string& LocalizedString::Get(std::string_view locale) const
     return translation != m_translations.end() ? translation->second : m_neutral;
 }
 
+const std::string& LocalizedString::GetOwn(std::string_view locale) const
+{
+    static const std::string none;
+    if (locale == NeutralLocale)
+    {
+        return m_neutral;
+    }
+    const auto translation = m_translations.find(locale);
+    return translation != m_translations.end() ? translation->second : none;
+}
+
 void LocalizedString::Set(std::string_view locale, std::string text)
 {
     if (locale == NeutralLocale)
@@ -74,5 +88,17 @@ void LocalizedString::Set(std::string_view locale, std::string text)
     }
 
     m_translations.insert_or_assign(std::string(locale), std::move(text));
+}
+
+bool LocalizedString::ContainsSeparator(std::string_view text)
+{
+    return text.find(Separator) != std::string_view::npos;
+}
+
+bool LocalizedString::IsValidLocaleCode(std::string_view locale)
+{
+    return !locale.empty() &&
+           std::all_of(locale.begin(), locale.end(), [](char character)
+                       { return std::isalnum(static_cast<unsigned char>(character)) || character == '-'; });
 }
 } // namespace Data

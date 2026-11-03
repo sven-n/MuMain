@@ -19,7 +19,7 @@ public:
     }
     CLASS_SKIN_INDEX GetSkinModelIndex(const CLASS_TYPE byClass);
     BYTE GetStepClass(const CLASS_TYPE byClass);
-    int GetEquipedBowType(CHARACTER* pChar);
+    int GetEquipedBowType(const CHARACTER* pChar);
     int GetEquipedBowType();
     int GetEquipedBowType(ITEM* pItem);
     int GetEquipedBowType_Skill();

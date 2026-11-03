@@ -12,6 +12,8 @@ extern vec3_t CollisionPosition;
 extern double  FPS;
 extern double  FPS_AVG;
 extern float  FPS_ANIMATION_FACTOR;
+extern int REFERENCE_FRAME_STEP;
+extern unsigned int RENDERED_FRAME;
 extern double  WorldTime;
 extern bool   FogEnable;
 extern bool   TextureEnable;
@@ -89,6 +91,8 @@ float ConvertX(float x);
 float ConvertY(float y);
 float ConvertPositionX(float x);
 float ConvertPositionY(float y);
+// Builds g_Camera's view for the viewport BeginOpengl() is later given, in the update.
+void UpdateCameraView(int x = 0, int y = 0, int Width = REFERENCE_WIDTH, int Height = REFERENCE_HEIGHT);
 void BeginOpengl(int x = 0, int y = 0, int Width = REFERENCE_WIDTH, int Height = REFERENCE_HEIGHT);
 void BeginOpenglPhysical(int x, int y, int width, int height);
 // BeginOpenglPhysical() without the viewport, for a render target's drawer: the capture brings its
@@ -114,7 +118,6 @@ bool EnableVSync();
 bool DisableVSync();
 int GetFPSLimit();
 
-void UpdateMousePositionn();
 inline void TEXCOORD(float* c, float u, float v)
 {
     c[0] = u;

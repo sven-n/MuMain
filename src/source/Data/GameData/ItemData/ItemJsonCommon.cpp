@@ -165,7 +165,7 @@ bool IsName(std::string_view text)
 void AddFileIssue(std::vector<ItemDataIssue>& issues, const std::string& source, int group, const std::string& field,
                   const std::string& message)
 {
-    issues.push_back({ItemDataIssueSeverity::Error, source, group, ItemDataIssue::NoItem, field, message});
+    issues.push_back({ItemDataIssueSeverity::Fatal, source, group, ItemDataIssue::NoItem, field, message});
 }
 
 bool ReadFileVersion(std::string_view text, const std::string& source, int maxFormatVersion, OrderedJson& root,
@@ -186,6 +186,12 @@ bool ReadFileVersion(std::string_view text, const std::string& source, int maxFo
 std::optional<std::string> ReadTextFile(const std::filesystem::path& path)
 {
     constexpr std::string_view Utf8ByteOrderMark = "\xEF\xBB\xBF";
+    // Only a regular file: on Linux a folder opens, and reading it throws.
+    std::error_code error;
+    if (!std::filesystem::is_regular_file(path, error))
+    {
+        return std::nullopt;
+    }
     std::ifstream file(path, std::ios::binary);
     if (!file)
     {
@@ -205,6 +211,17 @@ bool ReadFileHeader(std::string_view text, const std::string& source, int maxFor
     return ReadFileVersion(text, source, maxFormatVersion, root, issues) && ReadGroup(root, source, group, issues);
 }
 
+OrderedJson WriteLocalizedString(const LocalizedString& text)
+{
+    OrderedJson json = OrderedJson::object();
+    json[std::string(LocalizedString::NeutralLocale)] = text.GetNeutral();
+    for (const auto& [locale, translation] : text.GetTranslations())
+    {
+        json[locale] = translation;
+    }
+    return json;
+}
+
 std::string PutListsOnOneLine(const std::string& text, std::string_view key)
 {
     return PutValuesOnOneLine(text, key, '[', ']');
@@ -213,5 +230,94 @@ std::string PutListsOnOneLine(const std::string& text, std::string_view key)
 std::string PutObjectsOnOneLine(const std::string& text, std::string_view key)
 {
     return PutValuesOnOneLine(text, key, '{', '}');
+}
+
+std::string PutListEntriesOnOneLine(const std::string& text, std::string_view key)
+{
+    const std::string listStart = "\"" + std::string(key) + "\": [";
+    std::string result;
+    size_t position = 0;
+    while (true)
+    {
+        const size_t start = text.find(listStart, position);
+        if (start == std::string::npos)
+        {
+            result.append(text, position, std::string::npos);
+            return result;
+        }
+        result.append(text, position, start + listStart.size() - position);
+        position = start + listStart.size();
+        // The newlines and indentation between the entries stay.
+        while (position < text.size() && text[position] != ']')
+        {
+            const char character = text[position];
+            if (character == '{' || character == '[')
+            {
+                result += character;
+                position = AppendOnOneLine(text, position + 1, character, character == '{' ? '}' : ']', result);
+                continue;
+            }
+            result += character;
+            ++position;
+            if (character == '"')
+            {
+                // A text entry, kept as it is.
+                for (; position < text.size(); ++position)
+                {
+                    result += text[position];
+                    if (text[position] == '\\' && position + 1 < text.size())
+                    {
+                        result += text[++position];
+                    }
+                    else if (text[position] == '"')
+                    {
+                        ++position;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+std::vector<std::string> FindRepeatedKeys(std::string_view text, std::string_view rootKey)
+{
+    // The keys of an object that the parser is in; only those of the root key's object count.
+    struct ObjectKeys
+    {
+        bool isList = false;
+        std::set<std::string> keys;
+    };
+    constexpr int RootKeyDepth = 1;
+    std::vector<std::string> repeated;
+    std::vector<ObjectKeys> objects;
+    std::string lastRootKey;
+    const OrderedJson::parser_callback_t callback =
+        [&](int depth, OrderedJson::parse_event_t event, OrderedJson& parsed)
+    {
+        if (event == OrderedJson::parse_event_t::object_start)
+        {
+            objects.push_back({depth == RootKeyDepth && lastRootKey == rootKey, {}});
+        }
+        else if (event == OrderedJson::parse_event_t::object_end && !objects.empty())
+        {
+            objects.pop_back();
+        }
+        else if (event == OrderedJson::parse_event_t::key)
+        {
+            const std::string key = parsed.get<std::string>();
+            if (depth == RootKeyDepth)
+            {
+                lastRootKey = key;
+            }
+            else if (!objects.empty() && objects.back().isList && !objects.back().keys.insert(key).second)
+            {
+                repeated.push_back(key);
+            }
+        }
+        return true;
+    };
+    static_cast<void>(OrderedJson::parse(text, callback, false));
+    return repeated;
 }
 } // namespace Data::Items::Json

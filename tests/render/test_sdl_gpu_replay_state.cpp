@@ -73,6 +73,22 @@ TEST_CASE("viewport scissor and editor invalidation are explicit [render][sdl_gp
     CHECK(state.SelectScissor(scissor));
 }
 
+TEST_CASE("the normal map slot is cached like the texture and invalidated with the pipeline [render][sdl_gpu_replay_state]")
+{
+    Render::SdlGpuReplayState state;
+    state.SelectPipeline(Pointer<SDL_GPUGraphicsPipeline>(1));
+    CHECK(state.SelectNormalMapSampler(Pointer<SDL_GPUTexture>(8), Pointer<SDL_GPUSampler>(9)));
+    CHECK_FALSE(state.SelectNormalMapSampler(Pointer<SDL_GPUTexture>(8), Pointer<SDL_GPUSampler>(9)));
+    // The texture slot is independent of it.
+    CHECK(state.SelectFragmentSampler(Pointer<SDL_GPUTexture>(8), Pointer<SDL_GPUSampler>(9)));
+    CHECK(state.SelectNormalMapSampler(Pointer<SDL_GPUTexture>(10), Pointer<SDL_GPUSampler>(9)));
+
+    state.SelectPipeline(Pointer<SDL_GPUGraphicsPipeline>(2));
+    CHECK(state.SelectNormalMapSampler(Pointer<SDL_GPUTexture>(10), Pointer<SDL_GPUSampler>(9)));
+    state.Invalidate();
+    CHECK(state.SelectNormalMapSampler(Pointer<SDL_GPUTexture>(10), Pointer<SDL_GPUSampler>(9)));
+}
+
 TEST_CASE("the vertex buffer is bound once per vertex size [render][sdl_gpu_replay_state]")
 {
     Render::SdlGpuReplayState state;

@@ -107,7 +107,7 @@ void mu::ui::window::CCursedTempleResult::UpdateResult()
     if (m_WinState == 0)
         return;
 
-    m_ResultEffectAlph += 0.015f;
+    m_ResultEffectAlph += 0.015f * FPS_ANIMATION_FACTOR;
     if (1.0f < m_ResultEffectAlph)
     {
         m_ResultEffectAlph = 1.0f;

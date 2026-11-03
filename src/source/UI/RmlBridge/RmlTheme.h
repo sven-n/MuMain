@@ -1,7 +1,9 @@
 #pragma once
 
 #include <functional>
+#include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace Rml
@@ -33,6 +35,13 @@ namespace UI::RmlBridge
     // modder-supplied folder name -- not a closed set). Reflects the live cache SetActiveThemeName()
     // writes to, not necessarily GameConfig's current value.
     const std::string& GetActiveThemeName();
+
+    // A token of the active theme's tokens.ini, or of the theme it inherits from ("#00BD8B" for
+    // server-load-base); nothing when none of them has it.
+    std::optional<std::string> GetActiveThemeToken(const std::string& token);
+    // Whether the active theme's font for the token ("font-body") has an italic face
+    // (ThemeFontHasItalic).
+    bool ActiveThemeFontHasItalic(const std::string& token);
 
     // Validates a saved selection; falls back to legacy, or returns empty if neither is usable.
     std::string ResolveStartupThemeName(const std::string& savedName);
@@ -103,6 +112,12 @@ namespace UI::RmlBridge
     // as the document's z-index. Every themed document gets it when it loads; call it only for a
     // document loaded some other way.
     void ApplyStackingDepth(Rml::ElementDocument* document, const std::string& documentName);
+
+    class ThemeInheritance;
+    // `documentName`'s depth under `theme`: the theme's own, when its theme.ini lists the document
+    // under [Stacking] (inherited like any setting; e.g. `chat_input.rml=10.65` for an input box
+    // drawn over the HUD), else the stacking table's. None when neither knows the document.
+    std::optional<float> ThemedStackingDepth(const ThemeInheritance& theme, std::string_view documentName);
 
     // Scene gate (RmlStackingOrder.h, DocumentScene). The original drew CNewUIManager's windows
     // only while the main scene ran; the main-scene windows sync their documents from their own

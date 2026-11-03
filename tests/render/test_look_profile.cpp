@@ -175,15 +175,16 @@ TEST_CASE(
     "grading.strength: blend of graded and ungraded colour, off without a table or in a diagnostic view [render][look]")
 {
     const Data::Maps::LookValueInfo& grading = Info(LookValue::GradingStrength);
-    CHECK(grading.min == 0.1);
+    CHECK(grading.min == 0.0);
     CHECK(grading.max == 1.0);
 
-    // CPU mirror of the composite's lerp at the range ends and halfway.
+    // CPU mirror of the composite's lerp at the range ends and halfway; 0 is the ungraded colour.
     CHECK(Post::BlendGrading(0.8f, 0.4f, 1.0f) == Approx(0.4f));
     CHECK(Post::BlendGrading(0.8f, 0.4f, 0.1f) == Approx(0.76f));
     CHECK(Post::BlendGrading(0.8f, 0.4f, 0.5f) == Approx(0.6f));
+    CHECK(Post::BlendGrading(0.8f, 0.4f, 0.0f) == 0.8f);
     // A table that never brightens stays not brighter at any strength.
-    for (float strength = 0.1f; strength <= 1.0f; strength += 0.1f)
+    for (float strength = 0.0f; strength <= 1.0f; strength += 0.1f)
     {
         CHECK(Post::BlendGrading(0.8f, 0.4f, strength) <= 0.8f);
     }
@@ -193,6 +194,9 @@ TEST_CASE(
     CHECK(Post::CompositeGradingStrength(true, false, 1.0f) == 1.0f);
     CHECK(Post::CompositeGradingStrength(false, false, 0.8f) == 0.0f);
     CHECK(Post::CompositeGradingStrength(true, true, 0.8f) == 0.0f);
+    // A strength of 0 with a table is ungraded too: the composite skips the table (strength > 0)
+    // while the bloom keeps its own scale, so bloom stays on without any grading.
+    CHECK(Post::CompositeGradingStrength(true, false, 0.0f) == 0.0f);
 
     // The strength replaces the former gradingEnabled flag in the last register lane.
     CHECK(offsetof(mu::SdlGpuCompositeUniform, bloomScale) == 8);

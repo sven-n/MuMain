@@ -81,6 +81,7 @@ void GameConfig::Load()
     m_chatCommandTemplates = ReadStringList(L"ChatCommands", L"Template");
 
     m_uiLocale = ReadString(CfgSectionUI, CfgKeyUILocale, CfgDefaultUILocale);
+    m_translateItemNames = ReadBool(CfgSectionUI, CfgKeyTranslateItemNames, CfgDefaultTranslateItemNames);
     m_fontSelection = ReadString(CfgSectionUI, CfgKeyFont, CfgDefaultFont);
     m_rmlTheme = ReadString(CfgSectionUI, CfgKeyRmlTheme, CfgDefaultRmlTheme);
     m_uiScalePercent = std::clamp(ReadInt(CfgSectionUI, CfgKeyUIScalePercent, CfgDefaultUIScalePercent),
@@ -111,6 +112,7 @@ void GameConfig::Load()
     m_disableWingShadow = ReadBool(CfgSectionRender, CfgKeyDisableWingShadow, CfgDefaultDisableWingShadow);
     m_disableBodyShadows = ReadBool(CfgSectionRender, CfgKeyDisableBodyShadows, CfgDefaultDisableBodyShadows);
     m_fpsCap = ReadInt(CfgSectionRender, CfgKeyFpsCap, CfgDefaultFpsCap);
+    m_texturePack = ReadString(CfgSectionRender, CfgKeyTexturePack, CfgDefaultTexturePack);
 
     // Strip keys/sections we used to write but no longer use, so user config
     // files don't accumulate orphans. Append one line per retired key — no
@@ -152,6 +154,7 @@ void GameConfig::Save()
     WriteStringList(L"ChatCommands", L"Template", m_chatCommandTemplates);
 
     WriteString(CfgSectionUI, CfgKeyUILocale, m_uiLocale);
+    WriteBool(CfgSectionUI, CfgKeyTranslateItemNames, m_translateItemNames);
     WriteString(CfgSectionUI, CfgKeyFont, m_fontSelection);
     WriteString(CfgSectionUI, CfgKeyRmlTheme, m_rmlTheme);
     WriteInt(CfgSectionUI, CfgKeyUIScalePercent, m_uiScalePercent);
@@ -172,6 +175,7 @@ void GameConfig::Save()
     WriteBool(CfgSectionRender, CfgKeyDisableWingShadow, m_disableWingShadow);
     WriteBool(CfgSectionRender, CfgKeyDisableBodyShadows, m_disableBodyShadows);
     WriteInt(CfgSectionRender, CfgKeyFpsCap, m_fpsCap);
+    WriteString(CfgSectionRender, CfgKeyTexturePack, m_texturePack);
 }
 
 LookPreset ReadLookPreset(const std::filesystem::path& configFile)
@@ -296,6 +300,11 @@ void GameConfig::SetFpsCap(int fps)
     m_fpsCap = fps;
 }
 
+void GameConfig::SetTexturePack(const std::wstring& pack)
+{
+    m_texturePack = pack;
+}
+
 void GameConfig::SetRememberMe(bool remember)
 {
     m_rememberMe = remember;
@@ -322,6 +331,11 @@ void GameConfig::SetLanguageSelection(const std::wstring& lang)
 void GameConfig::SetUILocale(const std::wstring& locale)
 {
     m_uiLocale = locale;
+}
+
+void GameConfig::SetTranslateItemNames(bool translate)
+{
+    m_translateItemNames = translate;
 }
 
 void GameConfig::SetFontSelection(const std::wstring& font)

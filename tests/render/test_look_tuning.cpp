@@ -106,7 +106,7 @@ FakeFileSystem Shipped()
 LookFiles Load(FakeFileSystem& fileSystem)
 {
     Render::Look::LookFilesLoad loaded = Render::Look::LoadLookFiles(fileSystem, LookFile, MoodFile);
-    REQUIRE_FALSE(Data::Items::HasErrors(loaded.issues));
+    REQUIRE_FALSE(Data::Items::HasFatal(loaded.issues));
     return loaded.files;
 }
 
@@ -176,7 +176,7 @@ TEST_CASE("$look set refuses an unknown name, a value out of range and figures b
     CHECK_FALSE(unknown.applied);
     CHECK_MESSAGE(unknown.error.find("bloom.strenght") != std::string::npos, unknown.error);
 
-    const LookEditResult range = Set(files, "grading.strength", 0.05);
+    const LookEditResult range = Set(files, "grading.strength", -0.05);
     CHECK_FALSE(range.applied);
     CHECK_MESSAGE(range.error.find("grading.strength") != std::string::npos, range.error);
     CHECK_FALSE(Set(files, "mood.dynamicGain", 3.0).applied);

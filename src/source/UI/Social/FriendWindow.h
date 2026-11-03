@@ -31,6 +31,13 @@ namespace mu::ui::window
 
         void Reset();
         UI::Social::FriendDialogs& Dialogs() { return m_Dialogs; }
+#ifdef _EDITOR
+        // The family's window manager; nullptr outside Create and Release.
+        const CUIWindowMgr* GetWindowMgr() const
+        {
+            return m_pFriendWindowMgr;
+        }
+#endif
 
         void SendUIMessage(int iMessage, int iParam1, int iParam2) { m_pFriendWindowMgr->SendUIMessage(iMessage, iParam1, iParam2); }
         void SendUIMessageToWindow(DWORD dwUIID, int iMessage, int iParam1, int iParam2)

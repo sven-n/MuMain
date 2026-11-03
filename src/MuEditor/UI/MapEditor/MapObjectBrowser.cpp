@@ -10,6 +10,7 @@
 #include "Render/Renderer/MuRenderer.h"    // mu::GetRenderer().GetTexturePointer
 
 #include "imgui.h"
+#include "../MuEditor/UI/Common/KeyboardSelection.h"
 
 #include <algorithm>
 #include <cctype>
@@ -247,7 +248,7 @@ void CMapObjectBrowser::Render(int currentWorld, int* outImportedType)
             ImGui::PopStyleColor();
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%s", name.c_str());
-        if (clicked)
+        if (clicked || MuEditor::KeyboardSelection::MovedOnto())
             m_selected = i;
         ImGui::PopID();
     }

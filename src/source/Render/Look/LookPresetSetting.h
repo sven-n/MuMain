@@ -2,6 +2,7 @@
 
 #include "Render/Look/LookPreset.h"
 
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -28,6 +29,10 @@ enum class EnhancedFeature
 [[nodiscard]] bool EnhancedFeatureChosen(EnhancedFeature feature);
 // Saves the choice and applies it while the Enhanced look is active.
 void ChooseEnhancedFeature(EnhancedFeature feature, bool enabled);
+// The player's light mood strength (0 to 100 percent, nothing for the full mood), saved by the
+// caller ([EnhancedTuning] mood.strengthPercent); applied while the Enhanced look is active, under
+// a developer's `$lightmood <0-100>`.
+void ChooseLightMoodStrength(std::optional<int> percent);
 
 // The session overrides: applied, never saved, cleared by applying a preset.
 [[nodiscard]] FeatureOverrides SessionOverrides();

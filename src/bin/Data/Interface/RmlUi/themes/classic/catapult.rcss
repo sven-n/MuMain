@@ -1,0 +1,160 @@
+/* Classic theme for the catapult (CCatapultWindow). 0.97 has no Castle Siege; the Season 1 client's
+   (0043e500, docked at x 450): the 0.97 frame, the title bold (220, 220, 220) centred at
+   y 12, the three instructions at y 60, 75 and 90, 0.97's divider (Trading_line) at y 110 and 290,
+   no table; each target a 0.97 item cell (Item_box; InventoryBox2 once chosen) in a 1-unit
+   (1, 0.8, 0.6) border, tinted that orange under the mouse or chosen, its label bold
+   (220, 220, 220) centred on it: attack 32 x 32 at (20, 140), (78, 140), (136, 140), defence
+   54 x 42 at (20, 140), (115, 140), and the big one 90 x 64 at (50, 200); Fire on a 0.97 text plate
+   (Message_box, 150 x 48 at (20, 325)), grey (0.5) until a target is chosen, its label 15 under its
+   top; the 0.97 Close at (20, 395). Legacy's rules first, then the classic ones. */
+
+/* Legacy theme for CCatapultWindow, reproducing its RenderFrame()/RenderTexts()/RenderButtons():
+   the docked_panel_frame.rcss frame (linked first; newui_item_back01 top), the title and three
+   lines bold (220, 220, 220) centred on 190 units at y 13 / 50 / 65 / 80, the item table from
+   (12, 116), the area buttons (newui_Btn_gate 46 x 36, newui_Btn_round 77 x 47: up / over / down),
+   the chosen one and a locked Shoot tinted (100, 100, 100) with a grey label and never hovered,
+   Shoot (newui_btn_empty 108 x 29) at (41, 250), the exit button. Reference px inside #panel. */
+
+@spritesheet cp-gate-sheet
+{
+	src: "../../../newui_Btn_gate.tga";
+	cp-gate-up: 0px 0px 46px 36px;
+	cp-gate-over: 0px 36px 46px 36px;
+	cp-gate-down: 0px 72px 46px 36px;
+}
+@spritesheet cp-round-sheet
+{
+	src: "../../../newui_Btn_round.tga";
+	cp-round-up: 0px 0px 77px 47px;
+	cp-round-over: 0px 47px 77px 47px;
+	cp-round-down: 0px 94px 77px 47px;
+}
+@spritesheet cp-fire-sheet
+{
+	src: "../../../newui_btn_empty.tga";
+	cp-fire-up: 0px 0px 108px 29px;
+	cp-fire-over: 0px 29px 108px 29px;
+	cp-fire-down: 0px 58px 108px 29px;
+}
+@spritesheet cp-edge-top-sheet { src: "../../../newui_item_table03(Up).tga"; cp-edge-top: 0px 0px 1px 14px; }
+@spritesheet cp-edge-bottom-sheet { src: "../../../newui_item_table03(Dw).tga"; cp-edge-bottom: 0px 0px 1px 14px; }
+@spritesheet cp-edge-left-sheet { src: "../../../newui_item_table03(L).tga"; cp-edge-left: 0px 0px 14px 1px; }
+@spritesheet cp-edge-right-sheet { src: "../../../newui_item_table03(R).tga"; cp-edge-right: 0px 0px 14px 1px; }
+
+.frame-top { decorator: image(docked-bg-top-b); }
+#panel { pointer-events: auto; }
+
+.sharp-text { display: block; position: absolute; white-space: nowrap; text-align: center; pointer-events: none; }
+.cp-title { left: 0; top: 13px; font-weight: bold; color: #dcdcdc; }
+.cp-line { left: 0; font-weight: bold; color: #dcdcdc; }
+.cp-lines { position: static; }
+.cp-line:nth-child(1) { top: 50px; }
+.cp-line:nth-child(2) { top: 65px; }
+.cp-line:nth-child(3) { top: 80px; }
+
+.t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right, .t-corner { position: absolute; }
+.t-edge-top { height: 14px; decorator: image(cp-edge-top); }
+.t-edge-bottom { height: 14px; decorator: image(cp-edge-bottom); }
+.t-edge-left { width: 14px; decorator: image(cp-edge-left); }
+.t-edge-right { width: 14px; decorator: image(cp-edge-right); }
+.t-corner { width: 14px; height: 14px; }
+.t-tl { decorator: image(docked-corner-tl); }
+.t-tr { decorator: image(docked-corner-tr); }
+.t-bl { decorator: image(docked-corner-bl); }
+.t-br { decorator: image(docked-corner-br); }
+
+.cp-area { display: block; position: absolute; width: 46px; height: 36px; decorator: image(cp-gate-up); pointer-events: auto; }
+.cp-area:hover { decorator: image(cp-gate-over); }
+.cp-area:active { decorator: image(cp-gate-down); }
+.cp-area.big { width: 77px; height: 47px; decorator: image(cp-round-up); }
+.cp-area.big:hover { decorator: image(cp-round-over); }
+.cp-area.big:active { decorator: image(cp-round-down); }
+.cp-area.locked, .cp-area.locked:hover, .cp-area.locked:active { decorator: image(cp-gate-up); image-color: #646464; }
+.cp-area.big.locked, .cp-area.big.locked:hover, .cp-area.big.locked:active { decorator: image(cp-round-up); image-color: #646464; }
+
+#btn_fire { display: block; position: absolute; left: 41px; top: 250px; width: 108px; height: 29px; decorator: image(cp-fire-up); pointer-events: auto; }
+#btn_fire:hover { decorator: image(cp-fire-over); }
+#btn_fire:active { decorator: image(cp-fire-down); }
+#btn_fire.locked, #btn_fire.locked:hover, #btn_fire.locked:active { decorator: image(cp-fire-up); image-color: #646464; }
+
+.cp-label { left: 0; color: #ffffff; }
+.locked .cp-label { color: #646464; }
+
+/* The two modes' own target areas (kAttackAreas / kDefenseAreas). A label is centred on its
+   button, where C++ used to measure the text and halve the remainder. */
+.cp-areas { position: static; }
+.cp-area-label { left: 0; text-align: center; }
+.cp-areas.attack .cp-area:nth-child(1) { left: 22px; top: 135px; }
+.cp-areas.attack .cp-area:nth-child(2) { left: 74px; top: 135px; }
+.cp-areas.attack .cp-area:nth-child(3) { left: 126px; top: 135px; }
+.cp-areas.attack .cp-area:nth-child(4) { left: 59px; top: 182px; }
+.cp-areas.defense .cp-area:nth-child(1) { left: 18px; top: 125px; }
+.cp-areas.defense .cp-area:nth-child(2) { left: 97px; top: 125px; }
+.cp-areas.defense .cp-area:nth-child(3) { left: 56px; top: 179px; }
+
+/* The target table's frame, the shape the original drew it as. */
+.t-tl { left: 12px; top: 116px; }
+.t-tr { left: 166px; top: 116px; }
+.t-edge-top { left: 25px; top: 116px; width: 141px; }
+.t-edge-left { left: 12px; top: 129px; height: 100px; }
+.t-edge-right { left: 166px; top: 129px; height: 100px; }
+.t-bl { left: 12px; top: 223px; }
+.t-br { left: 166px; top: 223px; }
+.t-edge-bottom { left: 25px; top: 223px; width: 141px; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.cp-title { width: calc(100% * var(--root-scale)); }
+.cp-line { width: calc(100% * var(--root-scale)); }
+#btn_fire .cp-label { width: calc(108px * var(--root-scale)); }
+
+/* --- Classic ---------------------------------------------------------------------------------- */
+@spritesheet cp-classic-line-sheet  { src: ../../../Classic/Trading_line.jpg; cp-classic-line: 0px 0px 190px 10px; }
+@spritesheet cp-classic-plate-sheet { src: ../../../Classic/Message_box.jpg; cp-classic-plate: 0px 0px 213px 64px; }
+@spritesheet cp-classic-cell-sheet  { src: ../../../Classic/Item_box.jpg; cp-classic-cell: 0px 0px 32px 32px; }
+@spritesheet cp-classic-cell2-sheet { src: ../../../Classic/Inventorybox2.jpg; cp-classic-cell-chosen: 0px 0px 32px 32px; }
+.cp-title { top: 12px; }
+.cp-line:nth-child(1) { top: 60px; }
+.cp-line:nth-child(2) { top: 75px; }
+.cp-line:nth-child(3) { top: 90px; }
+.t-edge-top, .t-edge-bottom, .t-edge-left, .t-edge-right, .t-corner { display: none; }
+.frame-right, .frame-bottom { display: block; left: 0; width: 190px; height: 10px; decorator: image(cp-classic-line); }
+.frame-right { top: 110px; }
+.frame-bottom { top: 290px; }
+
+.cp-area, .cp-area:hover, .cp-area:active, .cp-area.big, .cp-area.big:hover, .cp-area.big:active {
+	box-sizing: border-box;
+	border-width: 1px;
+	border-color: rgb(255, 204, 153);
+	decorator: image(cp-classic-cell fill);
+	image-color: #ffffff;
+}
+.cp-area:hover, .cp-area.big:hover { image-color: rgb(255, 204, 153); }
+.cp-area.locked, .cp-area.locked:hover, .cp-area.locked:active,
+.cp-area.big.locked, .cp-area.big.locked:hover, .cp-area.big.locked:active { decorator: image(cp-classic-cell-chosen fill); image-color: rgb(255, 204, 153); }
+.cp-area-label { font-weight: bold; color: #dcdcdc; }
+.locked .cp-area-label { color: #dcdcdc; }
+/* The drawn cells, 1 unit larger each way for the border. */
+.cp-area { width: 34px; height: 34px; }
+.cp-area.big { width: 92px; height: 66px; }
+.cp-areas.attack .cp-area:nth-child(1) { left: 19px; top: 139px; }
+.cp-areas.attack .cp-area:nth-child(2) { left: 77px; top: 139px; }
+.cp-areas.attack .cp-area:nth-child(3) { left: 135px; top: 139px; }
+.cp-areas.attack .cp-area:nth-child(4) { left: 49px; top: 199px; }
+.cp-areas.defense .cp-area:nth-child(1), .cp-areas.defense .cp-area:nth-child(2) { width: 56px; height: 44px; }
+.cp-areas.defense .cp-area:nth-child(3) { width: 92px; height: 66px; }
+/* Each label centred on its own cell (Season 1 centred it on the cell's middle). */
+/* A 120-unit box whose middle is the cell's, so a longer label spills to both sides. */
+.cp-area-label { left: -43px; width: calc(120px * var(--root-scale)); }
+.cp-area.big .cp-area-label { left: -14px; }
+.cp-areas.defense .cp-area:nth-child(1) .cp-area-label, .cp-areas.defense .cp-area:nth-child(2) .cp-area-label { left: -32px; }
+.cp-areas.defense .cp-area:nth-child(3) .cp-area-label { left: -14px; }
+.cp-areas.defense .cp-area:nth-child(1) { left: 19px; top: 139px; }
+.cp-areas.defense .cp-area:nth-child(2) { left: 114px; top: 139px; }
+.cp-areas.defense .cp-area:nth-child(3) { left: 49px; top: 199px; }
+
+#btn_fire, #btn_fire:hover, #btn_fire:active { left: 20px; top: 325px; width: 150px; height: 48px; decorator: image(cp-classic-plate fill); image-color: #ffffff; }
+#btn_fire.locked, #btn_fire.locked:hover, #btn_fire.locked:active { decorator: image(cp-classic-plate fill); image-color: #808080; }
+#btn_fire .cp-label { top: 15px; transform-origin: left top; transform: scale(calc(1 / var(--root-scale, 1))); font-weight: bold; color: #ffffff; }
+#btn_fire.locked .cp-label { color: #ffffff; }
+#btn_fire .cp-label { width: calc(150px * var(--root-scale)); }
+#btn_exit { left: 20px; top: 395px; }

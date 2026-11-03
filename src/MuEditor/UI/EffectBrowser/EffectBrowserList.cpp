@@ -9,6 +9,7 @@
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "I18N/All.h"
 #include "imgui.h"
+#include "../MuEditor/UI/Common/KeyboardSelection.h"
 
 #include <algorithm>
 #include <array>
@@ -71,7 +72,8 @@ bool RenderRow(const EffectBrowserRow& row, bool withStages, bool selected)
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
     ImGui::PushID(row.type);
-    const bool clicked = ImGui::Selectable(row.name.c_str(), selected, ImGuiSelectableFlags_SpanAllColumns);
+    const bool clicked = ImGui::Selectable(row.name.c_str(), selected,
+                                           ImGuiSelectableFlags_SpanAllColumns | MuEditor::KeyboardSelection::RowFlags);
     ImGui::PopID();
     ImGui::TableNextColumn();
     ImGui::TextUnformatted(row.code.data(), row.code.data() + row.code.size());

@@ -2,6 +2,8 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
+#include "Render/Effects/EffectDraw.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -75,7 +77,8 @@ std::array<physics_vertex, FLAG_HEIGHT * FLAG_WIDTH> g_flagVertices{};
 std::array<physics_face, (FLAG_HEIGHT - 1) * (FLAG_WIDTH - 1)> g_flagFaces{};
 
 template <typename BlurType>
-void RenderBlurSegment(const BlurType& blur, int segment, float firstLight, float secondLight)
+void DescribeBlurSegment(const BlurType& blur, int segment, float firstLight, float secondLight,
+                         Render::EffectDrawing::EffectDrawer& out)
 {
     const float firstU = segment / static_cast<float>(blur.Number);
     const float secondU = (segment + 1) / static_cast<float>(blur.Number);
@@ -95,7 +98,7 @@ void RenderBlurSegment(const BlurType& blur, int segment, float firstLight, floa
     const mu::Vertex3D vertices[4] = {
         firstTop, firstBottom, secondBottom, secondTop,
     };
-    mu::GetRenderer().RenderQuad3D(vertices, 0u);
+    out.DrawQuads({vertices, 0u});
 }
 
 void RenderFlagFace(OBJECT* object, const vec3_t light, int texture, const float texCoord[4][2],
@@ -120,24 +123,45 @@ void RenderFlagFace(OBJECT* object, const vec3_t light, int texture, const float
     mu::GetRenderer().RenderQuad3D(vertices, 0u);
 }
 
+// Callers submit several interpolated poses per frame. Only a reference frame ages the trail, so until
+// then each frame's poses replace the previous frame's instead of piling up behind them.
+template <typename BlurType> void AddBlurSample(BlurType& blur, vec3_t p1, vec3_t p2, int maxTails)
+{
+    if (blur.Frame != RENDERED_FRAME)
+    {
+        const int replaced = blur.FrameSamples;
+        for (int i = 0; i + replaced < blur.Number; ++i)
+        {
+            VectorCopy(blur.P1[i + replaced], blur.P1[i]);
+            VectorCopy(blur.P2[i + replaced], blur.P2[i]);
+        }
+        blur.Number -= replaced;
+        blur.Frame = RENDERED_FRAME;
+        blur.FrameSamples = 0;
+    }
+    for (int i = blur.Number - 1; i >= 0; --i)
+    {
+        VectorCopy(blur.P1[i], blur.P1[i + 1]);
+        VectorCopy(blur.P2[i], blur.P2[i + 1]);
+    }
+    VectorCopy(p1, blur.P1[0]);
+    VectorCopy(p2, blur.P2[0]);
+    blur.Number = std::min<int>(blur.Number + 1, maxTails - 1);
+    blur.FrameSamples = std::min<int>(blur.FrameSamples + 1, blur.Number);
+}
+
 } // namespace
 
 void AddBlur(Blur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
 {
     b->Type = Type;
     VectorCopy(Light, b->Light);
-    for (int i = b->Number - 1; i >= 0; --i)
-    {
-        VectorCopy(b->P1[i], b->P1[i + 1]);
-        VectorCopy(b->P2[i], b->P2[i + 1]);
-    }
-    VectorCopy(p1, b->P1[0]);
-    VectorCopy(p2, b->P2[0]);
-    b->Number = std::min<int>(b->Number + 1, MAX_BLUR_TAILS - 1);
+    AddBlurSample(*b, p1, p2, MAX_BLUR_TAILS);
 }
 
 void CreateBlur(CHARACTER* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short, int SubType)
 {
+    Diagnostics::DrawSpawnCheck::Note("blur");
     Blur* freeBlur = nullptr;
     for (auto& blur : g_blurs)
     {
@@ -164,6 +188,7 @@ void CreateBlur(CHARACTER* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, 
         freeBlur->Live = true;
         freeBlur->Owner = Owner;
         freeBlur->Number = 0;
+        freeBlur->FrameSamples = 0;
         freeBlur->LifeTime = Short ? 15 : MAX_BLUR_LIFETIME;
         freeBlur->SubType = SubType;
         AddBlur(freeBlur, p1, p2, Light, Type);
@@ -172,6 +197,10 @@ void CreateBlur(CHARACTER* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, 
 
 void MoveBlurs()
 {
+    if (REFERENCE_FRAME_STEP == 0)
+    {
+        return;
+    }
     for (auto& blur : g_blurs)
     {
         if (!blur.Live)
@@ -179,6 +208,7 @@ void MoveBlurs()
             continue;
         }
 
+        blur.FrameSamples = 0;
         blur.LifeTime--;
         blur.Number = std::max<int>(blur.Number - 1, 0);
 
@@ -202,6 +232,8 @@ void MoveBlurs()
 
 void RenderBlurs()
 {
+    using Render::EffectDrawing::Blend;
+    Render::EffectDrawing::EffectDrawer& out = Render::EffectDrawing::ActiveEffectDrawer();
     int Type;
     for (auto& blur : g_blurs)
     {
@@ -227,11 +259,11 @@ void RenderBlurs()
         }
         if (blur.Owner->Level == 0 && (Type <= 3 || (Type >= 5 && Type <= 10)))
         {
-            EnableAlphaBlend();
+            out.SetState({.blend = Blend::Glow});
         }
         else
         {
-            EnableAlphaBlendMinus();
+            out.SetState({.blend = Blend::Subtract});
         }
 
         if (Type > 2)
@@ -240,7 +272,7 @@ void RenderBlurs()
         }
         if (blur.Number >= 2)
         {
-            BindTexture(nTexture);
+            out.SetState({.texture = nTexture});
             for (int j = 0; j < blur.Number - 1; j++)
             {
                 float firstLight;
@@ -253,7 +285,7 @@ void RenderBlurs()
                     secondLight = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
                 else
                     secondLight = 1.f;
-                RenderBlurSegment(blur, j, firstLight, secondLight);
+                DescribeBlurSegment(blur, j, firstLight, secondLight, out);
             }
         }
     }
@@ -272,19 +304,12 @@ void AddObjectBlur(ObjectBlur* b, vec3_t p1, vec3_t p2, vec3_t Light, int Type)
 {
     b->Type = Type;
     VectorCopy(Light, b->Light);
-
-    for (int i = b->Number - 1; i >= 0; --i)
-    {
-        VectorCopy(b->P1[i], b->P1[i + 1]);
-        VectorCopy(b->P2[i], b->P2[i + 1]);
-    }
-    VectorCopy(p1, b->P1[0]);
-    VectorCopy(p2, b->P2[0]);
-    b->Number = std::min<int>(b->Number + 1, MAX_OBJECT_BLUR_TAILS - 1);
+    AddBlurSample(*b, p1, p2, MAX_OBJECT_BLUR_TAILS);
 }
 
 void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Type, bool Short, int SubType, int iLimitLifeTime)
 {
+    Diagnostics::DrawSpawnCheck::Note("object-blur");
     ObjectBlur* freeBlur = nullptr;
     for (auto& blur : g_objectBlurs)
     {
@@ -311,6 +336,7 @@ void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Typ
         freeBlur->Live = true;
         freeBlur->Owner = Owner;
         freeBlur->Number = 0;
+        freeBlur->FrameSamples = 0;
         if (iLimitLifeTime > -1)
         {
             freeBlur->LifeTime = iLimitLifeTime;
@@ -329,6 +355,10 @@ void CreateObjectBlur(OBJECT* Owner, vec3_t p1, vec3_t p2, vec3_t Light, int Typ
 
 void MoveObjectBlurs()
 {
+    if (REFERENCE_FRAME_STEP == 0)
+    {
+        return;
+    }
     for (auto& blur : g_objectBlurs)
     {
         if (!blur.Live)
@@ -336,6 +366,7 @@ void MoveObjectBlurs()
             continue;
         }
 
+        blur.FrameSamples = 0;
         blur.LifeTime--;
         blur.Number = std::max<int>(blur.Number - 1, 0);
 
@@ -356,6 +387,8 @@ void MoveObjectBlurs()
 
 void RenderObjectBlurs()
 {
+    using Render::EffectDrawing::Blend;
+    Render::EffectDrawing::EffectDrawer& out = Render::EffectDrawing::ActiveEffectDrawer();
     int Type;
     for (auto& blur : g_objectBlurs)
     {
@@ -379,7 +412,7 @@ void RenderObjectBlurs()
             nTexture = BITMAP_LAVA;
         }
 
-        EnableAlphaBlend();
+        out.SetState({.blend = Blend::Glow});
 
         if (Type > 2)
         {
@@ -387,7 +420,7 @@ void RenderObjectBlurs()
         }
         if (blur.Number >= 2)
         {
-            BindTexture(nTexture);
+            out.SetState({.texture = nTexture});
             for (int j = 0; j < blur.Number - 1; j++)
             {
                 const float Data = 300.f;
@@ -402,7 +435,7 @@ void RenderObjectBlurs()
 
                 const float firstLight = (blur.Number - j) / static_cast<float>(blur.Number);
                 const float secondLight = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
-                RenderBlurSegment(blur, j, firstLight, secondLight);
+                DescribeBlurSegment(blur, j, firstLight, secondLight, out);
             }
         }
     }

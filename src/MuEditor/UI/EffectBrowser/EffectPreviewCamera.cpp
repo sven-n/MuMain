@@ -28,10 +28,18 @@ constexpr float NearShare = 0.02f;
 constexpr float FarMargin = 4000.0f;
 constexpr float FarRadii = 8.0f;
 constexpr float MinRadius = 1.0f;
+// How far Pan can move the center from the framed one, in framed radii.
+constexpr float MaxPanRadii = 3.0f;
+
+float TanHalfFieldOfView()
+{
+    return std::tan(EffectPreviewCamera::FieldOfViewDegrees * 0.5f * DegreesToRadians);
+}
 } // namespace
 
 void EffectPreviewCamera::Frame(const PreviewVector& center, float radius)
 {
+    m_framedCenter = center;
     m_center = center;
     m_radius = std::max(radius, MinRadius);
     m_distance = FramedDistance();
@@ -41,6 +49,33 @@ void EffectPreviewCamera::Turn(float dxPixels, float dyPixels)
 {
     m_yaw = std::fmod(m_yaw - dxPixels * TurnDegreesPerPixel, 360.0f);
     m_pitch = std::clamp(m_pitch + dyPixels * TurnDegreesPerPixel, -PitchLimitDegrees, PitchLimitDegrees);
+}
+
+void EffectPreviewCamera::Pan(float dxPixels, float dyPixels, float viewHeightPixels)
+{
+    if (viewHeightPixels <= 0.0f)
+    {
+        return;
+    }
+    // The height the view shows at the center's distance.
+    const float unitsPerPixel = 2.0f * m_distance * TanHalfFieldOfView() / viewHeightPixels;
+    // The picture follows the mouse, so the center moves the other way; screen
+    // y grows downward.
+    const float right = -dxPixels * unitsPerPixel;
+    const float up = dyPixels * unitsPerPixel;
+    const Basis basis = GetBasis();
+    PreviewVector offset{};
+    for (size_t axis = 0; axis < offset.size(); ++axis)
+    {
+        offset[axis] = m_center[axis] - m_framedCenter[axis] + basis.right[axis] * right + basis.up[axis] * up;
+    }
+    const float length = std::sqrt(offset[0] * offset[0] + offset[1] * offset[1] + offset[2] * offset[2]);
+    const float limit = m_radius * MaxPanRadii;
+    const float keep = length > limit ? limit / length : 1.0f;
+    for (size_t axis = 0; axis < offset.size(); ++axis)
+    {
+        m_center[axis] = m_framedCenter[axis] + offset[axis] * keep;
+    }
 }
 
 void EffectPreviewCamera::Zoom(float wheelSteps)
@@ -54,6 +89,7 @@ void EffectPreviewCamera::Reset()
     m_yaw = DefaultYawDegrees;
     m_pitch = DefaultPitchDegrees;
     m_distance = FramedDistance();
+    m_center = m_framedCenter;
 }
 
 PreviewVector EffectPreviewCamera::Eye() const
@@ -95,7 +131,7 @@ PreviewVector EffectPreviewCamera::Direction() const
 
 float EffectPreviewCamera::FramedDistance() const
 {
-    return m_radius / std::tan(FieldOfViewDegrees * 0.5f * DegreesToRadians) * FrameMargin;
+    return m_radius / TanHalfFieldOfView() * FrameMargin;
 }
 } // namespace MuEditor::Effects
 

@@ -2,16 +2,18 @@ name: CI
 
 on:
   push:
-    branches: ['*']
-    paths-ignore:
-      - 'src/bin/Data/**'
-      - 'src/bin/fonts/**'
+    branches: [main]
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, ready_for_review]
+  schedule:
+    - cron: '17 18 * * *' # 02:17 UTC+8
+  workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  # Coalesce releases: finish the running revision and keep only the newest pending trigger.
+  group: ci-${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && 'release' || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'schedule' && github.event_name != 'workflow_dispatch' }}
 
 permissions:
   contents: read
@@ -20,12 +22,31 @@ jobs:
   quality:
     name: Quality Gates
     runs-on: ubuntu-latest
+    outputs:
+      linux: ${{ steps.plan.outputs.linux }}
+      macos: ${{ steps.plan.outputs.macos }}
+      windows: ${{ steps.plan.outputs.windows }}
+      release: ${{ steps.plan.outputs.release }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
+      - name: Select native builds
+        id: plan
+        run: python3 scripts/ci_build_plan.py
+
+      - name: Check workflow contracts and build selection
+        run: |
+          python3 tests/test_windows_workflow_contract.py
+          python3 tests/test_ci_build_plan.py
+
+      - name: Validate game data inputs
+        run: |
+          test -f src/bin/Data/Dec2.dat
+          test -f src/bin/fonts/DejaVuSans.ttf
 
       - name: Cache quality tools
         uses: actions/cache@v4
@@ -44,13 +65,9 @@ jobs:
 
       - name: Detect changed C++ files
         id: changed
+        env:
+          DIFF_BASE: ${{ steps.plan.outputs.diff_base }}
         run: |
-          if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
-            # On main push, diff against the previous commit
-            DIFF_BASE=HEAD~1
-          else
-            DIFF_BASE=origin/main
-          fi
           CHANGED=$(git diff --name-only --diff-filter=d "${DIFF_BASE}...HEAD" -- \
             'src/source/*.cpp' 'src/source/*.h' 'src/source/*.hpp' \
             | grep -v ThirdParty/ | grep -v 'src/source/Dotnet/' || true)
@@ -118,8 +135,10 @@ jobs:
 
   build-windows:
     name: Windows Native Build (x64, Release, editor OFF)
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: quality
+    if: needs.quality.outputs.windows == 'true'
     runs-on: windows-latest
+    timeout-minutes: 90
 
     steps:
       - name: Checkout repository
@@ -166,14 +185,20 @@ jobs:
           key: windows-x64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
           restore-keys: windows-x64-release-deps-
 
+      - name: Identify vcpkg toolchain
+        id: vcpkg
+        shell: pwsh
+        run: ./scripts/ci_vcpkg_cache_key.ps1
+
       - name: Cache vcpkg packages
         uses: actions/cache@v4
         with:
           path: |
             C:/vcpkg/installed
             C:/vcpkg/packages
-          key: vcpkg-windows-x64-${{ hashFiles('vcpkg.json') }}
-          restore-keys: vcpkg-windows-x64-
+            ~/AppData/Local/vcpkg/archives
+          key: vcpkg-windows-x64-v2-${{ steps.vcpkg.outputs.identity }}-${{ hashFiles('vcpkg.json', 'toolchain-x64.cmake') }}
+          restore-keys: vcpkg-windows-x64-v2-
 
       - name: Configure CMake
         run: >
@@ -448,40 +473,22 @@ jobs:
             throw "Missing runtime imports:`n$($missingImports -join "`n")"
           }
 
-          $expectedShaders = @(
-            "basic_colored.frag.dxil"
-            "basic_colored.frag.msl"
-            "basic_colored.frag.spv"
-            "basic_colored.vert.dxil"
-            "basic_colored.vert.msl"
-            "basic_colored.vert.spv"
-            "basic_textured.frag.dxil"
-            "basic_textured.frag.msl"
-            "basic_textured.frag.spv"
-            "basic_textured.vert.dxil"
-            "basic_textured.vert.msl"
-            "basic_textured.vert.spv"
-            "shadow_volume.vert.dxil"
-            "shadow_volume.vert.msl"
-            "shadow_volume.vert.spv"
-            "skinned_textured.vert.dxil"
-            "skinned_textured.vert.msl"
-            "skinned_textured.vert.spv"
+          # The shader list lives in cmake/ValidateShaderBlobs.cmake, which the
+          # build already runs on its own shader output. Running it on the
+          # runtime copy checks that every listed .spv, .msl and .dxil blob is
+          # there and valid and that no unlisted one is.
+          $shaderDirectory = (Resolve-Path -LiteralPath "$runtimeDirectory/shaders").Path.Replace('\', '/')
+          cmake "-DMU_SHADER_BLOB_DIR=$shaderDirectory" -P cmake/ValidateShaderBlobs.cmake
+          if ($LASTEXITCODE -ne 0) {
+            throw "Runtime shaders do not match cmake/ValidateShaderBlobs.cmake (exit code $LASTEXITCODE)."
+          }
+          $otherShaderEntries = @(
+            Get-ChildItem -LiteralPath $shaderDirectory -Force -Recurse |
+              Where-Object { $_.PSIsContainer -or $_.Extension -notin @(".spv", ".msl", ".dxil") } |
+              ForEach-Object { $_.FullName }
           )
-          $shaderDirectory = "$runtimeDirectory/shaders"
-          $actualShaders = @(
-            Get-ChildItem -LiteralPath $shaderDirectory -Force -File -Recurse |
-              ForEach-Object {
-                [IO.Path]::GetRelativePath($shaderDirectory, $_.FullName).Replace('\', '/')
-              } |
-              Sort-Object
-          )
-          $shaderDifference = @(
-            Compare-Object -ReferenceObject $expectedShaders -DifferenceObject $actualShaders
-          )
-          if ($shaderDifference.Count -ne 0) {
-            Write-Host ($shaderDifference | Format-Table -AutoSize | Out-String)
-            throw "Runtime shader manifest differs from the exact 18-file manifest."
+          if ($otherShaderEntries.Count -ne 0) {
+            throw "Unexpected entries in the runtime shader directory:`n$($otherShaderEntries -join "`n")"
           }
 
           Write-Host "Validated native x64 runtime directory: $runtimeDirectory"
@@ -498,8 +505,15 @@ jobs:
 
   build-linux:
     name: Linux Native Build (x64, Release, editor OFF)
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    needs: quality
+    if: needs.quality.outputs.linux == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_BASEDIR: ${{ github.workspace }}
+      CCACHE_COMPILERCHECK: content
+      CCACHE_MAXSIZE: 1G
 
     steps:
       - name: Checkout repository
@@ -514,15 +528,27 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y \
-            cmake ninja-build gcc g++ \
+            cmake ninja-build gcc g++ ccache \
             libgl1-mesa-dev libglu1-mesa-dev \
-            libx11-dev libxext-dev libxrandr-dev libxinerama-dev \
-            libxcursor-dev libxi-dev libxss-dev libxtst-dev libxxf86vm-dev \
+            libx11-dev libxext-dev libxrandr-dev \
+            libxcursor-dev libxi-dev libxss-dev libxtst-dev \
             libwayland-dev libxkbcommon-dev wayland-protocols \
             libasound2-dev libpulse-dev \
-            libssl-dev libcurl4-openssl-dev libturbojpeg0-dev \
+            libssl-dev libcurl4-openssl-dev libturbojpeg0-dev libcrypto++-dev \
             glslang-tools spirv-cross \
             pkg-config
+
+      - name: Identify compiler cache
+        id: compiler
+        run: echo "identity=$(sha256sum /usr/bin/gcc /usr/bin/g++ | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Linux compilation
+        id: ccache
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ccache-linux-x64-${{ steps.compiler.outputs.identity }}-${{ github.sha }}
+          restore-keys: ccache-linux-x64-${{ steps.compiler.outputs.identity }}-
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -537,12 +563,29 @@ jobs:
         run: >
           cmake --preset linux-x64
           -B out/build/linux-ci
+          -DCMAKE_C_COMPILER_LAUNCHER=ccache
+          -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           -DENABLE_EDITOR=OFF
           -DMU_COPY_RUNTIME_ASSETS=OFF
           -DBUILD_TESTING=ON
 
       - name: Build
-        run: cmake --build out/build/linux-ci --config Release
+        run: |
+          ccache --zero-stats
+          cmake --build out/build/linux-ci --config Release
+
+      - name: Report compiler cache
+        if: always()
+        run: |
+          if command -v ccache >/dev/null; then
+            ccache --show-stats
+            {
+              echo '### Linux compiler cache'
+              echo '```text'
+              ccache --show-stats
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Run tests
         run: >
@@ -571,12 +614,19 @@ jobs:
             fi
           done
 
+      - name: Save Linux compilation cache
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.ccache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.CCACHE_DIR }}
+          key: ${{ steps.ccache.outputs.cache-primary-key }}
+
       - name: Archive runtime
-        if: github.event_name == 'push'
+        if: needs.quality.outputs.release == 'true'
         run: tar -czf MuMain-linux-native-x64-release-editor-off-no-data.tar.gz -C out/build/linux-ci/src/Release .
 
       - name: Upload runtime artifact
-        if: github.event_name == 'push'
+        if: needs.quality.outputs.release == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: mu-client-linux-native-x64-release-editor-off-no-data-main
@@ -585,8 +635,10 @@ jobs:
 
   build-macos:
     name: macOS Native Build (arm64, Release, editor OFF)
-    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    needs: quality
+    if: needs.quality.outputs.macos == 'true'
     runs-on: macos-latest
+    timeout-minutes: 90
 
     steps:
       - name: Checkout repository
@@ -598,7 +650,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Install build tools
-        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross
+        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross cryptopp
 
       - name: Cache dependencies
         uses: actions/cache@v4
@@ -649,21 +701,35 @@ jobs:
           done
 
       - name: Archive runtime
-        if: github.event_name == 'push'
+        if: needs.quality.outputs.release == 'true'
         run: tar -czf MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz -C out/build/macos-ci/src/Release Main.app
 
       - name: Upload runtime artifact
-        if: github.event_name == 'push'
+        if: needs.quality.outputs.release == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: mu-client-macos-native-arm64-release-editor-off-no-data-main
           path: MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz
           if-no-files-found: error
 
+  required:
+    name: CI Required
+    needs: [quality, build-windows, build-linux, build-macos]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Verify applicable checks
+        env:
+          CI_JOB_RESULTS: ${{ toJSON(needs) }}
+        run: python3 scripts/ci_build_plan.py check
+
   release:
     name: Semantic Release
-    needs: [quality, build-windows, build-linux, build-macos]
-    if: github.repository == 'sven-n/MuMain' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [quality, build-windows, build-linux, build-macos, required]
+    if: needs.quality.outputs.release == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -719,11 +785,13 @@ jobs:
         uses: cycjimmy/semantic-release-action@v4
         with:
           extra_plugins: |
-            @semantic-release/changelog
-            @semantic-release/git
             conventional-changelog-conventionalcommits@8.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check unpublished release revision
+        if: steps.semantic.outputs.new_release_published != 'true'
+        run: python3 scripts/ci_build_plan.py check-release
 
       - name: Link compatible data release
         if: steps.semantic.outputs.new_release_published == 'true'

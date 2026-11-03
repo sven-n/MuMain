@@ -1,8 +1,24 @@
-/* Keep the map artwork's proportions and vertical anchor in step with the legacy theme.
-   dp makes the entry banner follow UI scale. */
-
+/* Layout and text use dp directly: glyphs rasterize at their final screen size.
+   Long names have room to retain the face's proportions; text-fit changes font size only. */
 body { pointer-events: none; }
-
-#banner { top: 45.8333%; width: 166dp; height: 90dp; pointer-events: none; }
-#name { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
-#strife { position: absolute; left: 0; top: -28dp; width: 100%; height: 28dp; }
+#banner { position: absolute; left: 0; right: 0; margin-left: auto; margin-right: auto; top: 45.8333%; width: 384dp; max-width: 90%; height: 90dp; pointer-events: none; }
+#ornaments { width: 166dp; height: 90dp; }
+.ornament { position: absolute; }
+#swirl_left { left: 2dp; top: 46dp; width: 54dp; height: 26dp; }
+#swirl_right { left: 109dp; top: 46dp; width: 55dp; height: 27dp; }
+#name_room {
+    position: absolute; left: 0; right: 0; top: -2dp; height: 50dp;
+    font-family: token(font-map-name); font-size: 50dp; font-weight: normal; font-style: token(font-map-name-style);
+}
+/* The layer's own line, at the room's full font size, holds the baseline: a name text-fit shrinks
+   sits on the same baseline as the others instead of dropping toward the swirls. */
+.name-layer { position: absolute; left: 0; right: 0; bottom: 0; line-height: 1; }
+.text-fit { display: inline-block; width: 100%; line-height: 1; text-align: center; white-space: nowrap; }
+/* Japanese names in the Japanese face: drawn from the fallback faces, they would mix the Chinese and
+   Japanese forms of the same characters. The layer's line keeps the baseline. */
+#name_room.lang-ja .text-fit { font-family: token(font-map-name-ja); font-style: token(font-map-name-ja-style); }
+/* A single thin screen-pixel edge preserves contrast without a blurred halo. */
+#name { color: #8e8b86; font-effect: outline(2px #100f0e); }
+/* em keeps the silver gradient aligned when the shared fitter reduces the font size. */
+#name_shine { color: #fafafa; mask-image: linear-gradient(to bottom, #ffffff 0.415em, #ffffff00 0.81em); }
+#strife { top: -28dp; width: 166dp; height: 28dp; }

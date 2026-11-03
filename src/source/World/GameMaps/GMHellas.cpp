@@ -2,6 +2,9 @@
 //  GMHellas.cpp
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
+#include "Engine/Object/ObjectPose.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -10,6 +13,7 @@
 #include "Scenes/SceneCore.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/ZzzAI.h"
+#include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Physics/PhysicsManager.h"
@@ -24,9 +28,6 @@
 #include "Render/Text/CUIRenderText.h"
 
 extern  int  WaterTextureNumber;
-extern	wchar_t TextList[50][100];
-extern  int  TextListColor[50];
-extern	int  TextBold[50];
 
 static  CSWaterTerrain* g_pCSWaterTerrain = NULL;
 static  std::queue<ObjectDescript> g_qObjDes;
@@ -313,7 +314,7 @@ bool MoveHellasObjectSetting(int& objCount, int object)
     if (LastAmbientSoundPlay < WorldTime - AmbientSoundInterval)
     {
         LastAmbientSoundPlay = WorldTime;
-        PlayBuffer(static_cast<ESound>(SOUND_KALIMA_AMBIENT2 + rand() % 2));
+        PlayBuffer(static_cast<ESound>(SOUND_KALIMA_AMBIENT2 + Random::Rand() % 2));
     }
 
     if (GetHellasLevel(Hero->Class, CharacterAttribute->Level) == KUNDUN_ZONE)
@@ -324,13 +325,13 @@ bool MoveHellasObjectSetting(int& objCount, int object)
         if ((CurrX >= 25 && CurrY >= 44) && (CurrX <= 51 && CurrY <= 119) && (LastKundunSoundPlay < WorldTime - KundunSoundInterval))
         {
             LastKundunSoundPlay = WorldTime;
-            PlayBuffer(static_cast<ESound>(SOUND_KUNDUN_AMBIENT1 + rand() % 2));
+            PlayBuffer(static_cast<ESound>(SOUND_KUNDUN_AMBIENT1 + Random::Rand() % 2));
         }
     }
 
     if (rand_fps_check(10) && object)
     {
-        objCount = rand() % object;
+        objCount = Random::Rand() % object;
         return true;
     }
 
@@ -340,13 +341,13 @@ bool MoveHellasObjectSetting(int& objCount, int object)
 
         Vector(0.3f, 0.8f, 1.f, Light);
 
-        Position[0] = Hero->Object.Position[0] + rand() % 800 - 400.f;
-        Position[1] = Hero->Object.Position[1] + rand() % 800 - 400.f;
+        Position[0] = Hero->Object.Position[0] + Random::Rand() % 800 - 400.f;
+        Position[1] = Hero->Object.Position[1] + Random::Rand() % 800 - 400.f;
         Position[2] = Hero->Object.Position[2] + 50.f;
 
         CreateParticle(BITMAP_LIGHT, Position, Hero->Object.Angle, Light, 7, 1.f, &Hero->Object);
 
-        if (rand_fps_check(15))
+        if (Random::Rand() % 15 == 0)
         {
             vec3_t Angle = { 0.f, 0.f, 0.f };
             Position[2] = Hero->Object.Position[2] + 800.f;
@@ -426,7 +427,7 @@ void CheckGrass(OBJECT* o)
     }
 }
 
-bool RenderHellasVisual(OBJECT* o, BMD* b)
+bool UpdateHellasObjectEffects(OBJECT* o, BMD* b)
 {
     if (gMapManager.InHellas() == false) return false;
 
@@ -441,7 +442,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
 
         Vector(0.6f, 0.6f, 1.f, Light);
         Vector(0.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[5], p, Position);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[5], p, Position);
         CreateSprite(BITMAP_LIGHT, Position, Luminosity + 0.2f, Light, o);
         break;
     case 15:
@@ -455,7 +456,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
 
         Vector(0.6f, 0.6f, 1.f, Light);
         Vector(0.f, 0.f, 0.f, p);
-        b->TransformPosition(BoneTransform[5], p, Position);
+        b->TransformPosition(Engine::Object::Pose::World(o, b)[5], p, Position);
         CreateSprite(BITMAP_LIGHT, Position, Luminosity + 0.2f, Light, o);
         o->Position[2] = GetWaterTerrain(o->Position[0], o->Position[1]) + 180;
         break;
@@ -489,7 +490,7 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
         break;
     case 39:
         Vector(1.f, 1.f, 1.f, Light);
-        CreateParticleFpsChecked(BITMAP_WATERFALL_3 + (rand() % 2), o->Position, o->Angle, Light, 0);
+        CreateParticleFpsChecked(BITMAP_WATERFALL_3 + (Random::Rand() % 2), o->Position, o->Angle, Light, 0);
         o->Scale = 0.5f;
         break;
     case 40:
@@ -505,12 +506,13 @@ bool RenderHellasVisual(OBJECT* o, BMD* b)
     return true;
 }
 
-bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
+bool RenderHellasObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     if (o->Type == MODEL_BAHAMUT && gMapManager.InHellas())
     {
         Vector(0.0f, 0.0f, 0.0f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         Vector(1.f, 1.f, 1.f, b->BodyLight);
         return true;
     }
@@ -524,68 +526,33 @@ bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
         {
             Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
         }
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         return true;
     }
     else if (o->Type == MODEL_CUNDUN_DRAGON_HEAD)
     {
         Vector(0.3f, 0.3f, 0.3f, b->BodyLight);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-        float Luminosity = (float)sin(WorldTime * 0.003f) * 0.2f + 0.8f;
-        vec3_t p, Light, Position;
-        Vector(0, 0, 0, p);
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        b->TransformPosition(BoneTransform[3], p, Position, false);
-        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
-
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        b->TransformPosition(BoneTransform[4], p, Position, false);
-        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
-
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         return true;
     }
     else if (o->Type == MODEL_CUNDUN_GHOST)
     {
         Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
-        if (o->AnimationFrame > 3 && o->Alpha > 0.2f)
-            o->Alpha -= 0.02f;
-        b->RenderBody(RENDER_TEXTURE | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderBody(RENDER_TEXTURE | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE | RENDER_DARK, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderBody(RENDER_TEXTURE | RENDER_DARK, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
         Vector(0.0f, 0.0f, 0.0f, b->BodyLight);
         RenderPartObjectEdge(b, o, RENDER_COLOR, true, 0.7f);
 
-        float Luminosity = (float)sin(WorldTime * 0.003f) * 0.2f + 0.8f;
-        vec3_t p, Light, Position;
-
-        Vector(0, 0, 0, p);
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        b->TransformPosition(BoneTransform[8], p, Position, false);
-        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
-
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        b->TransformPosition(BoneTransform[9], p, Position, false);
-        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
-        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
-        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
-
-        {
-            Vector(2.f, 10.f, 0.f, p);
-            b->TransformPosition(BoneTransform[6], p, Position, false);
-            Vector(1.0f, 0.2f, 0.0f, Light);
-            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17, 3.0f);
-        }
         return true;
     }
     else if (gMapManager.InHellas() == true && (o->Type >= MODEL_WORLD_OBJECT && o->Type < MAX_WORLD_OBJECTS))
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
 
         if (o->Type >= 0 && o->Type <= 66)
         {
@@ -594,15 +561,17 @@ bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
             {
                 float Luminosity = sinf(WorldTime * 0.002f) * 0.1f + 0.3f;
                 Vector(Luminosity, Luminosity, Luminosity, b->BodyLight);
-                b->RenderBody(RENDER_TEXTURE, 0.3f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh, BITMAP_WATER + WaterTextureNumber);
+                b->RenderBody(RENDER_TEXTURE, 0.3f, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                              look.blendMeshV, look.hiddenMesh, BITMAP_WATER + WaterTextureNumber);
             }
 
             if (o->Type == 34)
             {
                 if (b->NumMeshs > 1)
                 {
-                    b->BeginRender(o->Alpha);
-                    b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                    b->BeginRender(look.alpha);
+                    b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                                  look.blendMeshU, look.blendMeshV, look.hiddenMesh);
                     b->EndRender();
                 }
             }
@@ -611,7 +580,8 @@ bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
             {
                 DisableAlphaBlend();
                 Vector(0.1f, 0.1f, 0.1f, b->BodyLight);
-                b->RenderBody(RENDER_TEXTURE | RENDER_SHADOWMAP, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                b->RenderBody(RENDER_TEXTURE | RENDER_SHADOWMAP, look.alpha, look.blendMesh, look.blendMeshLight,
+                              look.blendMeshU, look.blendMeshV, look.hiddenMesh);
                 Vector(1.f, 1.f, 1.f, b->BodyLight);
             }
         }
@@ -619,7 +589,7 @@ bool RenderHellasObjectMesh(OBJECT* o, BMD* b)
     }
     else
     {
-        return RenderHellasMonsterObjectMesh(o, b);
+        return RenderHellasMonsterObjectMesh(o, look, b);
     }
 
     return false;
@@ -638,12 +608,12 @@ int CreateBigMon(OBJECT* o)
         o->Live = true;
         OpenMonsterModel(MONSTER_MODEL_BAHAMUT);
         o->Type = MODEL_BAHAMUT;
-        o->Scale = 2.5f + (float)(rand() % 3 + 6) * 0.05f;
+        o->Scale = 2.5f + (float)(Random::Rand() % 3 + 6) * 0.05f;
         o->Alpha = 1.f;
         o->AlphaTarget = o->Alpha;
         o->LightEnable = false;
-        o->Velocity = (float)(rand() % 10 + 10) * 0.04f;
-        o->Gravity = rand() % 3 - 1.5f;
+        o->Velocity = (float)(Random::Rand() % 10 + 10) * 0.04f;
+        o->Gravity = Random::Rand() % 3 - 1.5f;
         o->LightEnable = true;
         o->AlphaEnable = false;
         o->SubType = 0;
@@ -652,10 +622,9 @@ int CreateBigMon(OBJECT* o)
         o->LifeTime = 200;
         o->CurrentAction = MONSTER01_WALK;
         SetAction(o, o->CurrentAction);
-        Vector(0.f, 0.f, 90.f - rand() % 30 - 15, o->Angle);
-        Vector(Hero->Object.Position[0] - 1000 - rand() % 200,
-            Hero->Object.Position[1] - 500 + rand() % 200,
-            Hero->Object.Position[2] - 800.f, o->Position);
+        Vector(0.f, 0.f, 90.f - Random::Rand() % 30 - 15, o->Angle);
+        Vector(Hero->Object.Position[0] - 1000 - Random::Rand() % 200,
+               Hero->Object.Position[1] - 500 + Random::Rand() % 200, Hero->Object.Position[2] - 800.f, o->Position);
     }
     else
     {
@@ -711,7 +680,7 @@ void CreateMonsterSkill_Poison(OBJECT* o, int AttackTime, BYTE time)
         float  Matrix[3][4];
         vec3_t Angle, Light, Position, p;
 
-        Vector(0.f, 0.f, (float)(rand() % 360), Angle);
+        Vector(0.f, 0.f, (float)(Random::Rand() % 360), Angle);
         Vector(0.f, 300.f, 0.f, p);
         Vector(0.8f, 0.5f, 0.1f, Light);
         for (int i = 0; i < 5; i++)
@@ -754,12 +723,13 @@ void SetActionDestroy_Def(OBJECT* o)
     }
 }
 
-void RenderDestroy_Def(OBJECT* o, BMD* b)
+static void UpdateDestroy_Def(OBJECT* o, BMD* b)
 {
     if (o->Type != MODEL_PLAYER)
     {
         if (o->AI == ACTION_DESTROY_WIZ_DEF)
         {
+            SkinObjectMeshes(o, b, true);
             b->RenderMeshEffect(6, MODEL_STONE_COFFIN, 1);
             o->AI = 0;
 
@@ -767,11 +737,157 @@ void RenderDestroy_Def(OBJECT* o, BMD* b)
         }
         else if (o->AI == ACTION_DESTROY_DEF)
         {
+            SkinObjectMeshes(o, b, true);
             b->RenderMeshEffect(6, MODEL_STONE_COFFIN, 2);
             o->AI = 0;
 
             PlayBuffer(SOUND_HIT_CRISTAL);
         }
+    }
+}
+
+void UpdateHellasObjectMeshEffects(OBJECT* o, BMD* b)
+{
+    const auto bones = [o, b] { return Engine::Object::Pose::World(o, b); };
+    switch (o->Type)
+    {
+    case MODEL_CUNDUN_DRAGON_HEAD:
+    {
+        float Luminosity = (float)sin(WorldTime * 0.003f) * 0.2f + 0.8f;
+        vec3_t p, Light, Position;
+        Vector(0, 0, 0, p);
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        b->TransformPosition(bones()[3], p, Position, false);
+        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
+
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        b->TransformPosition(bones()[4], p, Position, false);
+        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
+    }
+    break;
+    case MODEL_CUNDUN_GHOST:
+    {
+        if (o->AnimationFrame > 3 && o->Alpha > 0.2f)
+            o->Alpha -= 0.02f * FPS_ANIMATION_FACTOR;
+        float Luminosity = (float)sin(WorldTime * 0.003f) * 0.2f + 0.8f;
+        vec3_t p, Light, Position;
+
+        Vector(0, 0, 0, p);
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        b->TransformPosition(bones()[8], p, Position, false);
+        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
+
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        b->TransformPosition(bones()[9], p, Position, false);
+        CreateSprite(BITMAP_ENERGY, Position, 0.2f, Light, o, 0.f);
+        Vector(Luminosity * 1.0f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
+        CreateSprite(BITMAP_SHINY + 1, Position, 0.5f, Light, o, 0.f);
+
+        {
+            Vector(2.f, 10.f, 0.f, p);
+            b->TransformPosition(bones()[6], p, Position, false);
+            Vector(1.0f, 0.2f, 0.0f, Light);
+            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17, 3.0f);
+        }
+    }
+    break;
+    case MODEL_ILLUSION_OF_KUNDUN:
+        if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 14.8f && (int)o->LifeTime == 90)
+        {
+            if (o->LifeTime != 10)
+            {
+                PlayBuffer(SOUND_KUNDUN_SHUDDER);
+            }
+            o->LifeTime = 10;
+            EarthQuake = (float)(Random::Rand() % 8 - 8) * 0.1f;
+            if (rand_fps_check(1))
+            {
+                vec3_t p, Position;
+                Vector(39.0f, -7.5f, -0.5, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART8, Position, o->Angle, o->Light, 3, o, -130, 3);
+                Vector(24.0f, -7.5f, 32.5f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART1, Position, o->Angle, o->Light, 3, o, -130, 4);
+                Vector(24.0f, -8.5f, -32.5f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART2, Position, o->Angle, o->Light, 3, o, -130, 5);
+                Vector(-0.5f, 4.0f, 0.5f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART3, Position, o->Angle, o->Light, 2, o, -130, 6);
+                Vector(-2.5f, -22.0f, 54.0f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART4, Position, o->Angle, o->Light, 3, o, -130, 1);
+                Vector(-4.5f, -24.5f, -53, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART5, Position, o->Angle, o->Light, 3, o, -130, 2);
+                Vector(-136.0f, -153.5f, 0, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART6, Position, o->Angle, o->Light, 4, o, -10, 2);
+                Vector(-135.0f, -153.0f, 0.0f, p);
+                b->TransformPosition(o->BoneTransform[4], p, Position, true);
+                CreateEffect(MODEL_CUNDUN_PART7, Position, o->Angle, o->Light, 5, o, -130, 2);
+
+                CreateEffect(MODEL_CUNDUN_SKILL, o->Position, o->Angle, o->Light, 2);
+            }
+        }
+        else
+        {
+            if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame >= 8 && o->LifeTime >= 100)
+            {
+                if (o->LifeTime != 90)
+                {
+                    PlayBuffer(SOUND_KUNDUN_DESTROY);
+                }
+                o->LifeTime = 90;
+                if (rand_fps_check(1))
+                {
+                    vec3_t Angle = {0.0f, 0.0f, 0.0f};
+                    int iCount = 86;
+                    for (int i = 0; i < iCount; ++i)
+                    {
+                        Angle[0] = -10.f;
+                        Angle[1] = 0.f;
+                        Angle[2] = i * (10.f + Random::Rand() % 10);
+
+                        vec3_t Position;
+                        VectorCopy(o->Position, Position);
+                        Position[2] += 200.f;
+                        CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
+                        CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
+                    }
+                }
+
+                EarthQuake = (float)(Random::Rand() % 8 - 8) * 0.1f;
+            }
+            if (o->LifeTime >= 90)
+            {
+                o->Alpha = 1.0f;
+            }
+        }
+        break;
+    case MODEL_DEATH_ANGEL:
+    case MODEL_BLOOD_SOLDIER:
+    case MODEL_AEGIS:
+    case MODEL_DEATH_CENTURION:
+    case MODEL_NECRON:
+    case MODEL_SHRIKER:
+        if (o->CurrentAction == MONSTER01_DIE && o->Alpha < 0.5f)
+        {
+            SkinObjectMeshes(o, b, true);
+            b->RenderMeshEffect(0, BITMAP_BUBBLE);
+        }
+        if ((o->Type == MODEL_DEATH_CENTURION && o->SubType == 9) || o->Type == MODEL_SHRIKER)
+        {
+            UpdateDestroy_Def(o, b);
+        }
+        break;
     }
 }
 
@@ -926,140 +1042,6 @@ CHARACTER* CreateHellasMonster(EMonsterType Type, int PositionX, int PositionY, 
     }
 
     return c;
-}
-
-bool    SettingHellasMonsterLinkBone(CHARACTER* c, int Type)
-{
-    switch (Type)
-    {
-    case MODEL_ILLUSION_OF_KUNDUN:
-        c->Weapon[0].LinkBone = 29;
-        c->Weapon[1].LinkBone = 49;
-        return true;
-    case MODEL_AEGIS:
-        c->Weapon[0].LinkBone = 13;
-        c->Weapon[1].LinkBone = 14;
-        return true;
-    case MODEL_DEATH_CENTURION:
-        c->Weapon[0].LinkBone = 56;
-        c->Weapon[1].LinkBone = 42;
-        return true;
-    case MODEL_NECRON:
-        c->Weapon[0].LinkBone = 60;
-        c->Weapon[1].LinkBone = 60;
-        return true;
-    case MODEL_SHRIKER:
-        c->Weapon[0].LinkBone = 41;
-        c->Weapon[1].LinkBone = 51;
-        return true;
-    }
-
-    return false;
-}
-
-bool SetCurrentAction_HellasMonster(CHARACTER* c, OBJECT* o)
-{
-    switch (c->MonsterIndex)
-    {
-    case MONSTER_DEATH_CENTURION_1:
-    case MONSTER_DEATH_CENTURION_2:
-    case MONSTER_DEATH_CENTURION_3:
-    case MONSTER_DEATH_CENTURION_4:
-    case MONSTER_DEATH_CENTURION_5:
-    case MONSTER_DEATH_CENTURION_6:
-        switch ((c->Skill))
-        {
-        case AT_SKILL_ENERGYBALL:
-        case AT_SKILL_FIRE_SLASH:
-        case AT_SKILL_FIRE_SLASH_STR:
-        case AT_SKILL_POISON:
-        case AT_SKILL_POISON_STR:
-        case AT_SKILL_MONSTER_SUMMON:
-        case AT_SKILL_MONSTER_MAGIC_DEF:
-        case AT_SKILL_MONSTER_PHY_DEF:
-            SetAction(o, MONSTER01_ATTACK2);
-            break;
-
-        default:
-            SetAction(o, MONSTER01_ATTACK1);
-            break;
-        }
-        return true;
-
-    case MONSTER_AEGIS_1:
-    case MONSTER_AEGIS_2:
-    case MONSTER_AEGIS_3:
-    case MONSTER_AEGIS_4:
-    case MONSTER_AEGIS_5:
-    case MONSTER_AEGIS_6:
-        switch ((c->Skill))
-        {
-        case AT_SKILL_ENERGYBALL:
-            SetAction(o, MONSTER01_ATTACK2);
-            break;
-
-        default:
-            SetAction(o, MONSTER01_ATTACK1);
-            break;
-        }
-        return true;
-
-    case MONSTER_ROGUE_CENTURION_1:
-    case MONSTER_ROGUE_CENTURION_2:
-    case MONSTER_ROGUE_CENTURION_3:
-    case MONSTER_ROGUE_CENTURION_4:
-    case MONSTER_ROGUE_CENTURION_5:
-    case MONSTER_ROGUE_CENTURION_6:
-        switch ((c->Skill))
-        {
-        case AT_SKILL_ENERGYBALL:
-            SetAction(o, MONSTER01_ATTACK2);
-            break;
-
-        default:
-            SetAction(o, MONSTER01_ATTACK1);
-            break;
-        }
-        return true;
-
-    case MONSTER_NECRON_1:
-    case MONSTER_NECRON_2:
-    case MONSTER_NECRON_3:
-    case MONSTER_NECRON_4:
-    case MONSTER_NECRON_5:
-    case MONSTER_NECRON_6:
-        switch ((c->Skill))
-        {
-        case AT_SKILL_POISON:
-        case AT_SKILL_POISON_STR:
-            SetAction(o, MONSTER01_ATTACK2);
-            break;
-
-        case AT_SKILL_ENERGYBALL:
-            SetAction(o, MONSTER01_ATTACK1);
-            break;
-        }
-        return true;
-
-    case MONSTER_SCHRIKER_1:
-    case MONSTER_SCHRIKER_2:
-    case MONSTER_SCHRIKER_3:
-    case MONSTER_SCHRIKER_4:
-    case MONSTER_SCHRIKER_5:
-    case MONSTER_SCHRIKER_6:
-    case MONSTER_ILLUSION_OF_KUNDUN_1:
-    case MONSTER_ILLUSION_OF_KUNDUN_2:
-    case MONSTER_ILLUSION_OF_KUNDUN_3:
-    case MONSTER_ILLUSION_OF_KUNDUN_4:
-    case MONSTER_ILLUSION_OF_KUNDUN_5:
-        SetAction(o, MONSTER01_ATTACK1 + rand() % 2);
-        return true;
-
-    case MONSTER_ILLUSION_OF_KUNDUN_7:
-        SetAction(o, MONSTER01_ATTACK1 + rand() % 2);
-        return true;
-    }
-    return false;
 }
 
 bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* to, BMD* b)
@@ -1225,8 +1207,8 @@ bool AttackEffect_HellasMonster(CHARACTER* c, CHARACTER* tc, OBJECT* o, OBJECT* 
 
                 for (int i = 0; i < 3; ++i)
                 {
-                    Position[0] = Hero->Object.Position[0] + (rand() % 200 - 100);
-                    Position[1] = Hero->Object.Position[1] + (rand() % 200 - 100);
+                    Position[0] = Hero->Object.Position[0] + (Random::Rand() % 200 - 100);
+                    Position[1] = Hero->Object.Position[1] + (Random::Rand() % 200 - 100);
                     Position[2] = Hero->Object.Position[2];
 
                     CreateEffect(MODEL_FIRE, Position, o->Angle, Light, 7, NULL, 0);
@@ -1383,7 +1365,8 @@ void MonsterMoveWaterSmoke(OBJECT* o)
     if (o->CurrentAction == MONSTER01_WALK)
     {
         vec3_t Position;
-        Vector(o->Position[0] + rand() % 200 - 100, o->Position[1] + rand() % 200 - 100, o->Position[2], Position);
+        Vector(o->Position[0] + Random::Rand() % 200 - 100, o->Position[1] + Random::Rand() % 200 - 100, o->Position[2],
+               Position);
         CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
     }
 }
@@ -1395,9 +1378,9 @@ void MonsterDieWaterSmoke(OBJECT* o)
         for (int i = 0; i < 20; i++)
         {
             Vector(1.f, 1.f, 1.f, o->Light);
-            Vector(o->Position[0] + (float)(rand() % 64 - 32),
-                o->Position[1] + (float)(rand() % 64 - 32),
-                o->Position[2] + (float)(rand() % 32 - 16), Position);
+            Vector(o->Position[0] + (float)(Random::Rand() % 64 - 32),
+                   o->Position[1] + (float)(Random::Rand() % 64 - 32),
+                   o->Position[2] + (float)(Random::Rand() % 32 - 16), Position);
             CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light, 1);
         }
     }
@@ -1413,8 +1396,8 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
     case MODEL_WARCRAFT:
         if (o->CurrentAction == 0)
         {
-            Position[0] = o->Position[0] + rand() % 200 - 100;
-            Position[1] = o->Position[1] + rand() % 100 - 50;
+            Position[0] = o->Position[0] + Random::Rand() % 200 - 100;
+            Position[1] = o->Position[1] + Random::Rand() % 100 - 50;
             Position[2] = o->Position[2];
 
             CreateParticleFpsChecked(BITMAP_SMOKE + 1, Position, o->Angle, o->Light);
@@ -1436,7 +1419,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
             Vector(2.f, 30.f, 0.f, p);
             b->TransformPosition(o->BoneTransform[6], p, Position, true);
             Vector(1.0f, 0.2f, 0.0f, Light);
-            CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17);
+            CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 17);
         }
         return true;
 
@@ -1468,7 +1451,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
                 {
                     Vector(0.0f, 0.3f, 1.0f, Light);
                 }
-                CreateParticleFpsChecked(BITMAP_SMOKE, Position, o->Angle, Light, 17);
+                CreateParticle(BITMAP_SMOKE, Position, o->Angle, Light, 17);
             }
         }
         return true;
@@ -1477,7 +1460,7 @@ bool MoveHellasMonsterVisual(OBJECT* o, BMD* b)
     return false;
 }
 
-bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool UpdateHellasMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
 {
     vec3_t Position, Light, p;
     float  Luminosity;
@@ -1596,22 +1579,26 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 if (o->CurrentAction == MONSTER01_SHOCK)
                 {
                     if (o->AnimationFrame > 10.0f && o->PKKey > 10)
-                        o->PKKey -= 1;
+                        o->PKKey -= REFERENCE_FRAME_STEP;
                     else if (o->AnimationFrame > 4.0f)
-                        o->PKKey += 1;
+                        o->PKKey += REFERENCE_FRAME_STEP;
                     else o->PKKey = 10;
 
                     fRoar = o->PKKey * 0.15f;
                     if (o->AnimationFrame > 4.0f && o->AnimationFrame < 6.0f)
                     {
-                        if (o->AnimationFrame < 5.0f) o->Skill += 3;
-                        else if (o->Skill > 3) o->Skill -= 3;
+                        if (o->AnimationFrame < 5.0f)
+                            o->Skill += 3 * REFERENCE_FRAME_STEP;
+                        else if (o->Skill > 3)
+                            o->Skill -= 3 * REFERENCE_FRAME_STEP;
                         fRoar += o->Skill * 0.15f;
                     }
                     else if (o->AnimationFrame > 8.0f && o->AnimationFrame < 10.0f)
                     {
-                        if (o->AnimationFrame < 9.0f) o->Skill += 3;
-                        else if (o->Skill > 3) o->Skill -= 3;
+                        if (o->AnimationFrame < 9.0f)
+                            o->Skill += 3 * REFERENCE_FRAME_STEP;
+                        else if (o->Skill > 3)
+                            o->Skill -= 3 * REFERENCE_FRAME_STEP;
                         fRoar += o->Skill * 0.15f;
                     }
                     else
@@ -1654,7 +1641,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 }
                 if (o->AnimationFrame > 3.0f)
                 {
-                    EarthQuake = (float)(rand() % 8 - 8) * 0.2f;
+                    EarthQuake = (float)(Random::Rand() % 8 - 8) * 0.2f;
                 }
                 if (gMapManager.InHellas() && o->AnimationFrame > 3.0f && o->AnimationFrame < 14.0f)
                 {
@@ -1663,8 +1650,8 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                     vec3_t Angle = { 0.f, 0.f, 0.f };
                     for (int i = 0; i < 2; ++i)
                     {
-                        auto fAngle = float(rand() % 360);
-                        auto fDistance = float(rand() % 600 + 200);
+                        auto fAngle = float(Random::Rand() % 360);
+                        auto fDistance = float(Random::Rand() % 600 + 200);
                         Position[0] = o->Position[0] + sinf(fAngle) * fDistance;
                         Position[1] = o->Position[1] + cosf(fAngle) * fDistance;
                         Position[2] = o->Position[2] + 800.f;
@@ -1735,7 +1722,7 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
                 }
                 if (o->AnimationFrame > 6.0f)
                 {
-                    EarthQuake = (float)(rand() % 16 - 16) * 0.1f;
+                    EarthQuake = (float)(Random::Rand() % 16 - 16) * 0.1f;
                 }
             }
         }
@@ -1811,10 +1798,10 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             Vector(0.7f, 0.6f, 1, Light);
             b->TransformPosition(o->BoneTransform[3], p, Position, true);
             CreateSprite(BITMAP_LIGHT, Position, 1.7f, Light, o, 0.f);
-            CreateSprite(BITMAP_SHINY + 1, Position, 1.f, Light, o, (float)(rand() % 360));
+            CreateSprite(BITMAP_SHINY + 1, Position, 1.f, Light, o, (float)(Random::Rand() % 360));
             b->TransformPosition(o->BoneTransform[4], p, Position, true);
             CreateSprite(BITMAP_LIGHT, Position, 1.7f, Light, o, 0.f);
-            CreateSprite(BITMAP_SHINY + 1, Position, 1.f, Light, o, (float)(rand() % 360));
+            CreateSprite(BITMAP_SHINY + 1, Position, 1.f, Light, o, (float)(Random::Rand() % 360));
 
             vec3_t pos1, pos2;
             Vector(0, 0, 0, p);
@@ -1914,8 +1901,8 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
 
                 if ((o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2) && rand_fps_check(50))
                 {
-                    Angle[0] = (float)(rand() % 360);
-                    Angle[2] = (float)(rand() % 360);
+                    Angle[0] = (float)(Random::Rand() % 360);
+                    Angle[2] = (float)(Random::Rand() % 360);
                     CreateJoint(BITMAP_FLARE + 1, Position, pos, Angle, 5, NULL, 20.f);
                 }
             }
@@ -1986,122 +1973,56 @@ bool RenderHellasMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-bool RenderHellasMonsterCloth(CHARACTER* c, OBJECT* o, bool Translate, int Select)
+bool RenderHellasMonsterCloth(const CHARACTER* c, const OBJECT* o, bool Translate, int Select)
 {
     return false;
 }
 
-bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
+bool RenderHellasMonsterObjectMesh(const OBJECT* o, DrawLook& look, BMD* b)
 {
     bool    success = false;
     if (o->Type == MODEL_DEATH_ANGEL)
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->Alpha < 0.5f)
-            {
-                b->RenderMeshEffect(0, BITMAP_BUBBLE);
-            }
-        }
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_METAL | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
+        b->RenderMesh(0, RENDER_METAL | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, BITMAP_CHROME);
         success = true;
     }
     else if (o->Type == MODEL_ILLUSION_OF_KUNDUN)
     {
-        if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame > 14.8f && (int)o->LifeTime == 90)
+        // UpdateHellasObjectMeshEffects runs its death; it shows until it bursts.
+        if (o->LifeTime >= 90)
         {
-            if (o->LifeTime != 10)
-            {
-                PlayBuffer(SOUND_KUNDUN_SHUDDER);
-            }
-            o->LifeTime = 10;
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
+            b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            Vector(0.4f, 0.4f, 0.3f, b->BodyLight);
+            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(3, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(4, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(5, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(6, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
 
-            if (rand_fps_check(1))
+            if (o->CurrentAction == MONSTER01_SHOCK)
             {
-                vec3_t p, Position;
-                Vector(39.0f, -7.5f, -0.5, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART8, Position, o->Angle, o->Light, 3, o, -130, 3);
-                Vector(24.0f, -7.5f, 32.5f, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART1, Position, o->Angle, o->Light, 3, o, -130, 4);
-                Vector(24.0f, -8.5f, -32.5f, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART2, Position, o->Angle, o->Light, 3, o, -130, 5);
-                Vector(-0.5f, 4.0f, 0.5f, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART3, Position, o->Angle, o->Light, 2, o, -130, 6);
-                Vector(-2.5f, -22.0f, 54.0f, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART4, Position, o->Angle, o->Light, 3, o, -130, 1);
-                Vector(-4.5f, -24.5f, -53, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART5, Position, o->Angle, o->Light, 3, o, -130, 2);
-                Vector(-136.0f, -153.5f, 0, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART6, Position, o->Angle, o->Light, 4, o, -10, 2);
-                Vector(-135.0f, -153.0f, 0.0f, p);
-                b->TransformPosition(o->BoneTransform[4], p, Position, true);
-                CreateEffect(MODEL_CUNDUN_PART7, Position, o->Angle, o->Light, 5, o, -130, 2);
-
-                CreateEffect(MODEL_CUNDUN_SKILL, o->Position, o->Angle, o->Light, 2);
-            }
-        }
-        else
-        {
-            if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame >= 8 && o->LifeTime >= 100)
-            {
-                if (o->LifeTime != 90)
+                if ((o->AnimationFrame > 3.5f && o->AnimationFrame < 6.0f) ||
+                    (o->AnimationFrame > 8.0f && o->AnimationFrame < 11.0f))
                 {
-                    PlayBuffer(SOUND_KUNDUN_DESTROY);
-                }
-                o->LifeTime = 90;
-                if (rand_fps_check(1))
-                {
-                    vec3_t Angle = { 0.0f, 0.0f, 0.0f };
-                    int iCount = 86;
-                    for (int i = 0; i < iCount; ++i)
-                    {
-                        Angle[0] = -10.f;
-                        Angle[1] = 0.f;
-                        Angle[2] = i * (10.f + rand() % 10);
-
-                        vec3_t Position;
-                        VectorCopy(o->Position, Position);
-                        Position[2] += 200.f;
-                        CreateJoint(BITMAP_JOINT_SPIRIT, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
-                        CreateJoint(BITMAP_JOINT_SPIRIT2, Position, Position, Angle, 3, NULL, 50.f, 0, 0);
-                    }
-                }
-
-                EarthQuake = (float)(rand() % 8 - 8) * 0.1f;
-            }
-
-            if (o->LifeTime >= 90)
-            {
-                o->Alpha = 1.0f;
-                b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                Vector(0.4f, 0.4f, 0.3f, b->BodyLight);
-                b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(3, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(4, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(5, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(6, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-                if (o->CurrentAction == MONSTER01_SHOCK)
-                {
-                    if ((o->AnimationFrame > 3.5f && o->AnimationFrame < 6.0f) ||
-                        (o->AnimationFrame > 8.0f && o->AnimationFrame < 11.0f))
-                    {
-                        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                        b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                        b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                    }
+                    b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                                  look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+                    b->RenderMesh(2, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                                  look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+                    b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                                  look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+                    b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                                  look.blendMeshU, look.blendMeshV, look.hiddenMesh);
                 }
             }
         }
@@ -2110,49 +2031,35 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
     else if (o->Type == MODEL_CUNDUN_PART1 || o->Type == MODEL_CUNDUN_PART2 || o->Type == MODEL_CUNDUN_PART3 ||
         o->Type == MODEL_CUNDUN_PART4 || o->Type == MODEL_CUNDUN_PART5 || o->Type == MODEL_CUNDUN_PART8)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         Vector(0.4f, 0.4f, 0.3f, b->BodyLight);
-        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
         success = true;
     }
     else if (o->Type == MODEL_BLOOD_SOLDIER)
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->Alpha < 0.5f)
-            {
-                b->RenderMeshEffect(0, BITMAP_BUBBLE);
-            }
-        }
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         Vector(0.5f, 0.1f, 0.0f, b->BodyLight);
-        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         success = true;
     }
     else if (o->Type == MODEL_AEGIS)
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->Alpha < 0.5f)
-            {
-                b->RenderMeshEffect(0, BITMAP_BUBBLE);
-            }
-        }
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         Vector(0.25f, 0.2f, 0.1f, b->BodyLight);
-        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         success = true;
     }
     else if (o->Type == MODEL_DEATH_CENTURION)
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->Alpha < 0.5f)
-            {
-                b->RenderMeshEffect(0, BITMAP_BUBBLE);
-            }
-        }
         if (o->SubType == 9)
         {
             Vector(0.3f, 0.1f, 0.1f, b->BodyLight);
@@ -2160,96 +2067,95 @@ bool RenderHellasMonsterObjectMesh(OBJECT* o, BMD* b)
         else
         {
         }
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(2, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
         if (o->SubType == 9)
         {
             Vector(1.f, 0.6f, 0.3f, b->BodyLight);
-            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.5f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.5f, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
             Vector(1.f, 1.f, 1.f, b->BodyLight);
-            b->RenderMesh(1, RENDER_CHROME2 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(1, RENDER_CHROME2 | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                          look.blendMeshU, look.blendMeshV, look.hiddenMesh);
             Vector(1.f, 0.6f, 0.1f, b->BodyLight);
         }
         else
         {
             Vector(0.1f, 0.6f, 1.f, b->BodyLight);
         }
-        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-
-        if (o->SubType == 9)
-        {
-            RenderDestroy_Def(o, b);
-        }
+        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         success = true;
     }
     else if (o->Type == MODEL_NECRON)
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->Alpha < 0.5f)
-            {
-                b->RenderMeshEffect(0, BITMAP_BUBBLE);
-            }
-        }
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
 
         float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.7f;
         Vector(0.5f, Luminosity, 0.5f, b->BodyLight);
-        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 0.8f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, 0.8f, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
         success = true;
     }
     else if (o->Type == MODEL_SHRIKER)
     {
-        if (o->CurrentAction == MONSTER01_DIE)
-        {
-            if (o->Alpha < 0.5f)
-            {
-                b->RenderMeshEffect(0, BITMAP_BUBBLE);
-            }
-        }
         b->BeginRender(1.f);
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(5, RENDER_TEXTURE, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(3, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
+        b->RenderMesh(5, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
 
         float Luminosity = sinf(WorldTime * 0.002f) * 0.3f + 0.7f;
         if (o->SubType == 9)
         {
-            o->BlendMeshLight = 0.5f;
+            look.blendMeshLight = 0.5f;
 
             Vector(Luminosity, Luminosity * 0.4f, Luminosity * 0.4f, b->BodyLight);
         }
         else
         {
-            o->BlendMeshLight = 1.f;
+            look.blendMeshLight = 1.f;
             Vector(Luminosity * 0.3f, Luminosity * 0.6f, Luminosity * 1.f, b->BodyLight);
         }
-        b->RenderMesh(2, RENDER_WAVE | RENDER_BRIGHT, o->Alpha, 2, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(4, RENDER_WAVE | RENDER_BRIGHT, o->Alpha, 4, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(2, RENDER_WAVE | RENDER_BRIGHT, look.alpha, 2, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
+        b->RenderMesh(4, RENDER_WAVE | RENDER_BRIGHT, look.alpha, 4, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV, look.hiddenMesh);
 
         if (o->SubType == 9)
         {
             Vector(1.f, 1.f, 1.f, b->BodyLight);
-            b->RenderMesh(0, RENDER_METAL | RENDER_BRIGHT, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_METAL | RENDER_BRIGHT, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(3, RENDER_METAL | RENDER_BRIGHT, o->Alpha, -1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(0, RENDER_METAL | RENDER_BRIGHT, look.alpha, -1, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(1, RENDER_METAL | RENDER_BRIGHT, look.alpha, -1, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(3, RENDER_METAL | RENDER_BRIGHT, look.alpha, -1, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV, look.hiddenMesh);
         }
         else
         {
             float Light = sinf(WorldTime * 0.002f) * 0.3f + 0.7f;
-            b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, 2, Light, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, 4, Light, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(2, RENDER_TEXTURE, look.alpha, 2, Light, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
+            b->RenderMesh(4, RENDER_TEXTURE, look.alpha, 4, Light, look.blendMeshU, look.blendMeshV, look.hiddenMesh);
         }
 
-        o->BlendMeshLight = sinf(WorldTime * 0.002f) * 0.1f + 0.05f;
-        b->RenderMesh(6, RENDER_TEXTURE, o->Alpha, 6, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        look.blendMeshLight = sinf(WorldTime * 0.002f) * 0.1f + 0.05f;
+        b->RenderMesh(6, RENDER_TEXTURE, look.alpha, 6, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                      look.hiddenMesh);
         b->EndRender();
-
-        RenderDestroy_Def(o, b);
         success = true;
     }
     if (success)

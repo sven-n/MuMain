@@ -15,10 +15,20 @@ It takes effect on the next frame, without a map reload. The login and
 character selection scenes, the UI and effects that carry their own light are
 never changed.
 
+Under the options window's "Darker map light" row, **Mood strength** (0 to
+100 %, default 100 %) blends each map's whole mood as `$lightmood <0-100>` does:
+0 % is the map's original light while the rest of the Enhanced look stays on,
+values between blend every value of the map's mood, the dynamic gain included,
+so candles, fires and skill lights get less of the mood's boost too. It is
+saved as `mood.strengthPercent` in `[EnhancedTuning]` of `config.ini`
+([enhanced-look.md](enhanced-look.md)); Reset returns to the full mood.
+Dragging it rebuilds the map's baked light at most once per frame.
+
 Developer builds (control socket or DevEditor) also have, for the session
 only and cleared by choosing a look: `$lightmood on|off` and
 `$lightmood <0-100>` (the strength: 0 looks Classic, 100 applies the map's
-full mood, values between blend), and `$lightmood knee <k>` (the look
+full mood, values between blend; it wins over the player's Mood strength until
+a look is chosen), and `$lightmood knee <k>` (the look
 profile's `lighting.highlightKnee`).
 
 ## The moods: `Data/Maps/LightMood.json`

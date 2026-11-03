@@ -1,0 +1,236 @@
+/* Classic (0.97) Chaos Machine (CMixInventory), from the 0.97 client's 004f27f0: Item_Back01 over Item_Back02 and the Mix
+   button 0.97 drew -- mix_button1 (44x32, mix_button2 while pressed), lowered from 0.97's (75, 300)
+   to legacy's y 380 (see .mix-btn). MuMain's recipe texts keep their S6 places, which are 0.97's
+   in the main: success rate and zen from y 49, the 8x4 grid at (15, 110), the lists from 203.
+   The rest is legacy's. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 433px;
+	font-family: "token(font-body)";
+}
+
+/* Native RenderFrame() draws every text line bold, the title and tax rate in (220,220,220). */
+#title {
+	position: absolute;
+	/* 0.97: a 120-wide box at x 35, y 12, centred. */
+	left: 35px;
+	top: 12px;
+	width: calc(120px * var(--root-scale));
+	text-align: center;
+	color: #dcdcdc;
+	font-weight: bold;
+	font-size: 1em;
+}
+#title.low { top: 12px; }
+
+/* Native shrinks the tax line to its 160 box (tax_rate_fit, a transform) rather than wrapping it. */
+/* 0.97 has no tax line. */
+.mix-tax-rate.sharp-text { display: none; }
+.mix-tax-rate {
+	position: absolute;
+	left: 15px;
+	top: 25px;
+	width: calc(160px * var(--root-scale));
+	white-space: nowrap;
+	text-align: center;
+	color: #dcdcdc;
+	font-weight: bold;
+	font-size: 1em;
+}
+/* The tax line and the descriptions are text layers (.sharp-text, mix_inventory.rml); inside them
+   .mix-fit shrinks the line to its box around the box's centre (left edge when left-aligned). */
+.mix-fit { display: block; transform-origin: center top; }
+.mix-description.left .mix-fit { transform-origin: left top; }
+
+/* Recipe name (two 10px rows, the second kept even when empty), then success rate and required
+   zen (20px each, when shown) -- left-aligned at native's fPos_x, over a translucent band. */
+.mix-head {
+	position: absolute;
+	left: 15px;
+	top: 49px;
+	width: calc(160px * var(--root-scale));
+}
+/* .mix-head is a text layer: its row heights are physical (end of file). */
+.mix-row {
+	display: block;
+	white-space: nowrap;
+	font-weight: bold;
+	font-size: 1em;
+	color: #d2e6ff;
+}
+.mix-row.hidden { display: none; }
+.mix-text { background-color: rgba(40, 40, 40, 128); }
+
+/* Prediction / source checklist / status (fixed top 203, 15px rows -- 10 in the socket mixes --,
+   wrapping like native's CutStr() at ~156px), then the advice after one
+   blank row. */
+.mix-list {
+	position: absolute;
+	left: 15px;
+	top: 203px;
+	width: calc(156px * var(--root-scale));
+	line-height: calc(15px * var(--root-scale));
+}
+.mix-list.socket-prompt { line-height: calc(10px * var(--root-scale)); }
+.mix-list.hidden, .mix-head.hidden, .mix-descriptions.hidden { display: none; }
+.mix-list-line {
+	display: block;
+	font-weight: bold;
+	font-size: 1em;
+	color: #dcdcdc;
+}
+.mix-list-line.hidden { display: none; }
+/* The lists are at the native text size, which does not shrink with the window: per unit of the
+   window it is 7.5 at a dp ratio of 2 but 9.6 at 1.25 and 11.7 at 0.94 (800x600, or 1280x720 at
+   75%). There the long recipes (seed extraction) wrapped into more lines and ran down under the
+   Mix button; on these small canvases the lists' lines are drawn smaller, back to about 8.7 units
+   (on the lines: the list itself takes C++'s native size inline). */
+@media (max-resolution: 1.3x) { .mix-list .mix-list-line { font-size: 0.85em; } }
+@media (max-resolution: 1x)   { .mix-list .mix-list-line { font-size: 0.75em; } }
+/* Native cuts only the prediction and source lines (CutStr); status and advice run on. */
+/* One native line each, cut at the frame's inner edge (x 182):
+   nothing covers what native runs on past its frame. */
+.mix-unwrapped { white-space: nowrap; overflow: hidden; }
+.mix-advice { display: block; margin-top: calc(15px * var(--root-scale)); }
+.mix-advice.socket-prompt { margin-top: calc(10px * var(--root-scale)); }
+
+/* RenderMixDescriptions(): each line at its own native top (d.top), centred in 160px at x=15 or
+   left-aligned from x=5, no band, shrunk to fit its box like native (d.fit, as a transform on
+   .mix-fit: a continuous scale, where font-size steps would be coarse). Native's left box is 200
+   wide and runs past the window; here it stays inside it (180). A line still too long at the
+   minimum size is cut at its box, as native's window cuts it. */
+.mix-descriptions {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 190px;
+}
+.mix-description {
+	position: absolute;
+	left: 5px;   /* native's 160 box at x=15, widened to the frame around the same centre (95): */
+	width: calc(180px * var(--root-scale)); /* the fit still targets 160 (MixInventory.cpp), the cut is at the frame */
+	text-align: center;
+	white-space: nowrap;
+	overflow: hidden;
+	font-weight: bold;
+	font-size: 1em;
+}
+.mix-description.left { left: 5px; width: calc(180px * var(--root-scale)); text-align: left; }
+
+.mix-socket-prompt {
+	position: absolute;
+	left: 15px;
+	top: 280px;
+	width: calc(160px * var(--root-scale));
+	text-align: center;
+	color: #c8c8c8;
+	font-weight: bold;
+	font-size: 1em;
+}
+.mix-socket-prompt.hidden { display: none; }
+/* The socket pane counter-scales so scrollbar input uses physical pixels. */
+.socket-list-box { position: absolute; left: 14px; top: 294px; width: 161px; height: 67px; background-color: rgba(0, 0, 0, 102); }
+#socket_list { position: absolute; left: 15px; top: 295px; transform-origin: left top; overflow: hidden scroll; }
+.socket-row { position: relative; display: block; pointer-events: auto; }
+.socket-row-back { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.socket-row.selected .socket-row-back { background-color: rgba(0, 0, 0, 102); }
+.socket-line-text { position: absolute; left: 5.4%; top: 0; white-space: nowrap; color: #e6dcc8; }
+.socket-row.selected .socket-line-text { color: #000000; }
+
+/* 44x35 crop of the top-left ("up") frame of the native 2-frame vertical button sheet
+   (CMixInventory::Create()'s former ChangeButtonInfo(..., 44.f, 35.f)) -- hover uses a CSS
+   brightness filter instead of the sheet's own "down"/"over" frames, same convention as every
+   other migrated inv-btn/ext-btn. Centered: (190-44)/2 = 73, top matches the native
+   `m_Pos.y + 380`. */
+@spritesheet mix-classic-btn1-sheet { src: ../../../Classic/Mix_button1.jpg; mix-classic-btn: 0px 0px 44px 32px; }
+@spritesheet mix-classic-btn2-sheet { src: ../../../Classic/Mix_button2.jpg; mix-classic-btn-pressed: 0px 0px 44px 32px; }
+/* 0.97 drew it at (75, 300), where its short texts ended; MuMain's lists (from 203, up to about
+   nine 15-unit lines) and descriptions (to 367) run past that, so it sits at legacy's y 380, under
+   them, keeping 0.97's x (the Close at (25, 395) is left of it). */
+.mix-btn {
+	position: absolute;
+	left: 75px;
+	top: 380px;
+	width: 44px;
+	height: 32px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(mix-classic-btn);
+}
+.mix-btn:active { decorator: image(mix-classic-btn-pressed); }
+.mix-btn.hidden { display: none; }
+.mix-btn.locked { pointer-events: none; image-color: #808080; }
+
+
+/* What each line is telling the player -- the colours native RenderMixDescriptions() and the
+   source list set, now the theme's. */
+.mix-recipe { color: rgb(255, 48, 48); }
+.mix-recipe.ready { color: rgb(255, 255, 48); }
+.mix-success { color: rgb(210, 230, 255); }
+.mix-success.boosted { color: rgb(255, 255, 48); }
+/* Native left the recipe colour set for the zen line unless a success line reset it. */
+.mix-zen { color: rgb(255, 48, 48); }
+.mix-zen.ready { color: rgb(255, 255, 48); }
+.mix-zen.after-success { color: rgb(210, 230, 255); }
+.mix-kind.missing { color: rgb(255, 50, 20); }
+.mix-kind.partial { color: rgb(210, 230, 255); }
+.mix-kind.ready { color: rgb(255, 255, 48); }
+.mix-kind.normal { color: #ffffff; }
+.mix-kind.warning { color: rgb(255, 40, 20); }
+.mix-kind.loss { color: rgb(255, 0, 0); }
+.mix-kind.dim { color: rgb(200, 200, 200); }
+
+/* RenderMixDescriptions()'s own block: 13-unit rows from y 250, a row lower for castle senior. */
+.mix-description.row-0 { top: 250px; }
+.mix-description.row-1 { top: 263px; }
+.mix-description.row-2 { top: 276px; }
+.mix-description.row-3 { top: 289px; }
+.mix-description.row-4 { top: 302px; }
+.mix-description.row-5 { top: 315px; }
+.mix-description.row-6 { top: 328px; }
+.mix-description.row-7 { top: 341px; }
+.mix-description.row-8 { top: 354px; }
+.mix-descriptions.lowered .mix-description.row-0 { top: 270px; }
+.mix-descriptions.lowered .mix-description.row-1 { top: 283px; }
+.mix-descriptions.lowered .mix-description.row-2 { top: 296px; }
+.mix-descriptions.lowered .mix-description.row-3 { top: 309px; }
+.mix-descriptions.lowered .mix-description.row-4 { top: 322px; }
+.mix-descriptions.lowered .mix-description.row-5 { top: 335px; }
+.mix-descriptions.lowered .mix-description.row-6 { top: 348px; }
+.mix-descriptions.lowered .mix-description.row-7 { top: 361px; }
+.mix-descriptions.lowered .mix-description.row-8 { top: 374px; }
+
+/* Native item grid: the first cell's top-left, in #panel's units. */
+.native-anchor { position: absolute; pointer-events: none; }
+#item_view { height: 473px; }
+#item_grid, #item_grid_counts { left: 15px; top: 110px; width: calc(8 * var(--item-cell)); height: calc(4 * var(--item-cell)); }
+
+/* The frame. */
+
+.bg-fill, .bg-top, .bg-left, .bg-right, .bg-bottom {
+	position: absolute;
+	pointer-events: none;
+}
+
+@spritesheet mix-classic-back1-sheet { src: ../../../Classic/Item_back01.jpg; mix-classic-back1: 0px 0px 190px 256px; }
+@spritesheet mix-classic-back2-sheet { src: ../../../Classic/Item_Back02.jpg; mix-classic-back2: 0px 0px 190px 177px; }
+.bg-top  { left: 0; top: 0;     width: 190px; height: 256px; decorator: image(mix-classic-back1); }
+.bg-fill { left: 0; top: 256px; width: 190px; height: 177px; decorator: image(mix-classic-back2); }
+.bg-left, .bg-right, .bg-bottom { display: none; }
+
+/* Lengths inside counter-scaled layers: reference px times the panel's --root-scale. */
+.mix-row { height: calc(10px * var(--root-scale)); }
+.mix-row.mix-row-wide { height: calc(20px * var(--root-scale)); }
+.mix-row.mix-row-wide.mix-required-zen { height: calc(20px * var(--root-scale)); }
+.mix-list-line.mix-unwrapped { width: calc(167px * var(--root-scale)); }
+#socket_list { width: calc(160px * var(--root-scale)); height: calc(65px * var(--root-scale)); }
+.socket-row { width: calc(148px * var(--root-scale)); height: calc(13px * var(--root-scale)); }
+
+/* The grid's clicks are native (CInventoryCtrl), so the placed panel takes no pointer events; its
+   controls take their own. (Legacy's rule, which this copy predated.) */
+#panel.slot-placed { pointer-events: none; }
+/* Legacy's #panel font-size (calc(var(--text-px) / var(--root-scale))) is left out: the lists'
+   lines are sized in em above, placed at 0.97's y 203, and that rule moves them 4 units down. */

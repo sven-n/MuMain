@@ -11,7 +11,8 @@ namespace MuEditor::Effects
 using PreviewVector = std::array<float, 3>;
 
 // The camera of the effect preview: it looks at the previewed type from a
-// direction the mouse turns and a distance the wheel changes. MU is Z-up.
+// direction the mouse turns and a distance the wheel changes, at a point the
+// middle mouse button moves. MU is Z-up.
 class EffectPreviewCamera
 {
 public:
@@ -30,9 +31,14 @@ public:
     void Frame(const PreviewVector& center, float radius);
     // Turns around the center by mouse movement in pixels.
     void Turn(float dxPixels, float dyPixels);
+    // Moves the center across the view by mouse movement in pixels, in a view
+    // `viewHeightPixels` high, so the picture follows the mouse; turning and
+    // zooming then go around the new center. It stays within a few framed
+    // radii of the framed center.
+    void Pan(float dxPixels, float dyPixels, float viewHeightPixels);
     // Moves closer for positive wheel steps, further for negative ones.
     void Zoom(float wheelSteps);
-    // The first direction and the framed distance again.
+    // The first direction, the framed distance and the framed center again.
     void Reset();
 
     PreviewVector Eye() const;
@@ -54,6 +60,8 @@ private:
     PreviewVector Direction() const;
     float FramedDistance() const;
 
+    // What Frame looks at; Pan moves m_center away from it.
+    PreviewVector m_framedCenter{};
     PreviewVector m_center{};
     float m_radius = 100.0f;
     float m_yaw = DefaultYawDegrees;

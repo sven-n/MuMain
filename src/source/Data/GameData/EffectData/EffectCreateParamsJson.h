@@ -13,7 +13,7 @@
 //     "lifeTime": 20,
 //     "angle": {"y": 0},
 //     "offset": {
-//       "position": {"z": {"value": 280, "timesFrameFactor": true}}
+//       "position": {"z": 280}
 //     },
 //     "copy": {
 //       "startPosition": "position"
@@ -34,11 +34,9 @@ constexpr const char* CreateKey = "create";
 constexpr const char* CreateLightKey = "light";
 constexpr std::array<const char*, 4> CreateVectorKeys = {"position", "angle", "direction", "startPosition"};
 constexpr const char* CreateSubTypesKey = "subTypes";
-// The lifeTime offset, when it is {"value": n, "timesFrameFactor": true}.
-constexpr const char* CreateLifeTimeKey = "lifeTime";
 
 // Reads the "create" object `json`; the issues name the fields as
-// "<objectKey>.<field>". Values with errors stay unset.
+// "<objectKey>.<field>". Values with fatal problems stay unset.
 EffectCreateParams ReadEffectCreateParams(const Items::Json::OrderedJson& json, const std::string& objectKey,
                                           const Items::ModelJson::ReportIssue& report);
 

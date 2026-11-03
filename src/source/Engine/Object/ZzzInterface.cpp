@@ -118,7 +118,6 @@ int   InputFrame = 0;
 int   EditFlag = EDIT_NONE;
 wchar_t  ColorTable[][10] = { L"White", L"Black", L"Red", L"Yellow", L"Green", L"Cyan", L"Blue", L"Magenta" };
 
-int   SelectMonster = 0;
 int   SelectModel = 0;
 int   SelectMapping = 0;
 int   SelectColor = 0;
@@ -1242,7 +1241,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
         int Right = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
         int Left = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 
-        if (Right >= ITEM_SPEAR && Right < ITEM_SPEAR + MAX_ITEM_INDEX)
+        if (GameLogic::Items::IsSpearType(Right))
         {
             Range = 2.2f;
         }
@@ -2651,7 +2650,7 @@ void Attack(CHARACTER* c)
 
     if (o->Teleport == TELEPORT_BEGIN)
     {
-        o->Alpha -= 0.1f;
+        o->Alpha -= 0.1f * FPS_ANIMATION_FACTOR;
         if (o->Alpha < 0.1f)
         {
             o->Teleport = TELEPORT;
@@ -3189,10 +3188,7 @@ void MoveHero()
             mu::ui::window::CPickedItem* pPickedItem = mu::ui::window::CInventoryCtrl::GetPickedItem();
 
             if (!pPickedItem && RightType == -1 &&
-                ((LeftType >= ITEM_SWORD && LeftType < ITEM_MACE + MAX_ITEM_INDEX)
-                    || (LeftType >= ITEM_STAFF && LeftType < ITEM_STAFF + MAX_ITEM_INDEX
-                        && !GameLogic::Items::IsSummonerBookType(LeftType)
-                        )))
+                (GameLogic::Items::IsSwordAxeMaceOrGloveType(LeftType) || GameLogic::Items::IsStaffType(LeftType)))
             {
                 if (g_pMyInventory->IsEquipable(EQUIPMENT_WEAPON_LEFT, &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT]))
                 {
@@ -3263,7 +3259,9 @@ void MoveHero()
                     }
                 }
             }
-            else if (SelectedOperate != -1 && (c->SafeZone || (c->Helper.Type<MODEL_HORN_OF_UNIRIA || c->Helper.Type>MODEL_DARK_HORSE_ITEM || c->Helper.Type != MODEL_HORN_OF_FENRIR)))
+            // Riders can operate objects too: the rider check here (as in the Season 6
+            // client) was always true.
+            else if (SelectedOperate != -1)
             {
                 TargetX = (int)(Operates[SelectedOperate].Owner->Position[0] / TERRAIN_SCALE);
                 TargetY = (int)(Operates[SelectedOperate].Owner->Position[1] / TERRAIN_SCALE);
@@ -3479,7 +3477,10 @@ void SendMacroChat(wchar_t* Text)
 {
     if (!CheckCommand(Text, true))
     {
-        if ((Hero->Helper.Type<MODEL_HORN_OF_UNIRIA || Hero->Helper.Type>MODEL_DARK_HORSE_ITEM) || Hero->SafeZone)
+        // Not while riding, outside the safe zone; the Horn of Fenrir was never in this check.
+        const bool riding =
+            GameLogic::Items::IsRideableMountModel(Hero->Helper.Type) && Hero->Helper.Type != MODEL_HORN_OF_FENRIR;
+        if (!riding || Hero->SafeZone)
         {
             // Send animation for specific texts
             UI::Chat::CheckChatText(Text);
@@ -3619,10 +3620,6 @@ bool CheckSkillUseCondition(OBJECT* o, int Type)
     return true;
 }
 
-extern wchar_t TextList[50][100];
-extern int  TextListColor[50];
-extern int  TextBold[50];
-
 void GetTime(DWORD time, std::wstring& timeText, bool isSecond)
 {
     wchar_t buff[100];
@@ -3724,7 +3721,7 @@ void CollectCrownSwitchLines(std::wstring (&lines)[2])
             wchar_t szSwitch[64]{};
             _snwprintf_s(szSwitch, std::size(szSwitch), _TRUNCATE, I18N::Game::CrownSwitchD, i + 1);
             mu_swprintf(Buff, L"%ls / %ls / %ls", szSwitch, Switch_Info[i].m_szGuildName, Switch_Info[i].m_szUserName);
-            lines[i] = Buff;
+            lines[i].assign(Buff);
         }
     }
 }
@@ -4058,9 +4055,6 @@ void ForwardSelectModel()
     }
 }
 
-extern int  EditMonsterNumber;
-
-extern int MonsterKey;
 
 
 int TotalPacketSize = 0;
@@ -4102,14 +4096,6 @@ void RenderDebugWindow()
         g_pRenderText->RenderText(REFERENCE_WIDTH - 100, 0, L"Garbage");
         CMultiLanguage::ConvertFromUtf8(Text, Models[SelectModel].Name, sizeof Models[SelectModel].Name);
         g_pRenderText->RenderText(0, 0, Text);
-    }
-    if (EditFlag == EDIT_MONSTER)
-    {
-        for (int i = 0; i < EditMonsterNumber; i++)
-        {
-            mu_swprintf(Text, L"%2d: %ls", MonsterScript[i].Type, MonsterScript[i].Name);
-            g_pRenderText->RenderText(REFERENCE_WIDTH - 100, i * 10, Text);
-        }
     }
     if (EditFlag == EDIT_LIGHT)
     {

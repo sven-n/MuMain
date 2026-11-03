@@ -82,12 +82,12 @@ struct CameraConfig
     /**
      * Aspect ratio (width / height) - calculated dynamically from viewport dimensions
      *
-     * This value is NOT used directly! BeginOpengl() calculates aspect ratio every frame
-     * from the current viewport (Width / Height) and passes it to SetupPerspective().
+     * This value is NOT used directly! The view (CameraProjection::UpdateView/ApplyView) takes
+     * the aspect ratio from the viewport (Width / Height) every frame.
      * This field is kept for reference/compatibility but the live aspect comes from window size.
      *
      * Window resizing (WM_SIZE) automatically updates WindowWidth/WindowHeight, and the
-     * next BeginOpengl() call will use the new dimensions to calculate the correct aspect ratio.
+     * next frame's view uses the new dimensions.
      */
     float aspectRatio = 1.33f;
 

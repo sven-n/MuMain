@@ -143,6 +143,16 @@ void LookPresetController::SetChoices(const FeatureOverrides& choices)
     }
 }
 
+void LookPresetController::SetMoodStrengthChoice(std::optional<int> percent)
+{
+    m_choices.lightMoodStrength = percent;
+    const auto& hook = m_hooks.applyMood ? m_hooks.applyMood : m_hooks.apply;
+    if (hook)
+    {
+        hook(Effective());
+    }
+}
+
 LookFeatures LookPresetController::Effective() const
 {
     LookFeatures features = PresetFeatures(m_preset);

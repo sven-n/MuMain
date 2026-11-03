@@ -17,6 +17,37 @@ add_test(
 )
 
 mu_add_test(
+    NAME map_name_tests
+    SOURCES
+        test_map_name.cpp
+        test_map_name_ornament.cpp
+        test_text_fit.cpp
+        RmlLayoutFixture.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient Freetype::Freetype
+)
+
+target_compile_definitions(map_name_tests PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+    MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin"
+)
+
+mu_add_test(
+    NAME cursed_temple_skill_tests
+    SOURCES
+        test_cursed_temple_skill.cpp
+        RmlLayoutFixture.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
+)
+target_compile_definitions(cursed_temple_skill_tests PRIVATE
+    MU_BIN_DIR="${CMAKE_SOURCE_DIR}/src/bin"
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
+)
+
+mu_add_test(
     NAME rml_image_crop_tests
     SOURCES test_rml_image_crop.cpp
     LINK_LIBS RmlUi::Core
@@ -48,6 +79,14 @@ mu_add_test(
     SOURCES
         test_storage_item_selection.cpp
         ${CMAKE_SOURCE_DIR}/src/source/GameShop/StorageItemSelection.cpp
+)
+
+mu_add_test(
+    NAME shop_script_list_tests
+    SOURCES
+        test_shop_script_list.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS MuClient
 )
 
 mu_add_test(
@@ -83,6 +122,16 @@ mu_add_test(
     LINK_LIBS MuClient
 )
 
+# The options window's tuning rows of the Enhanced look, and their markup in both bundled themes.
+mu_add_test(
+    NAME tuning_rows_tests
+    SOURCES test_tuning_rows.cpp
+    LINK_LIBS MuClient
+)
+target_compile_definitions(tuning_rows_tests PRIVATE
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+)
+
 mu_add_test(
     NAME guild_mark_palette_tests
     SOURCES
@@ -115,6 +164,11 @@ target_compile_definitions(rml_stacking_order_tests PRIVATE
 )
 
 mu_add_test(
+    NAME character_class_step_tests
+    SOURCES test_character_class_step.cpp
+)
+
+mu_add_test(
     NAME party_list_layout_tests
     SOURCES
         test_party_list_layout.cpp
@@ -140,13 +194,6 @@ add_test(
     COMMAND ${CMAKE_COMMAND}
         -DMU_INVENTORY_SOURCE=${CMAKE_SOURCE_DIR}/src/source/UI/Inventory/MyInventory.cpp
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_inventory_mouse_capture.cmake
-)
-
-add_test(
-    NAME npc_name_assets
-    COMMAND "${Python3_EXECUTABLE}"
-            "${CMAKE_CURRENT_SOURCE_DIR}/test_npc_name_assets.py"
-            "${CMAKE_SOURCE_DIR}"
 )
 
 mu_add_test(
@@ -183,7 +230,9 @@ add_test(
     NAME display_settings_contract
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_CONFIG_CONSTANTS=${CMAKE_SOURCE_DIR}/src/source/Data/GameConfig/GameConfigConstants.h"
+        "-DMU_CONFIG_HEADER=${CMAKE_SOURCE_DIR}/src/source/Data/GameConfig/GameConfig.h"
         "-DMU_CONFIG_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Data/GameConfig/GameConfig.cpp"
+        "-DMU_LOOK_SETTING_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Look/LookPresetSetting.cpp"
         "-DMU_WINMAIN_SOURCE=${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp"
         "-DMU_CONSOLE_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Core/Utilities/Log/muConsoleDebug.cpp"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/test_display_settings_contract.cmake"

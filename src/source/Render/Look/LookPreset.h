@@ -7,10 +7,11 @@
 #include <string>
 #include <string_view>
 
-// The look preset: the player's only look setting ([Render] Look, Classic or Enhanced). Enhanced
-// switches on texture filtering, Enhanced lighting, dynamic model lights, the light mood at full
-// strength, post-processing and multisample anti-aliasing (at the [Render] Antialiasing sample
-// count); Classic switches all of them off, as the game always looked. The anisotropy level is a
+// The look preset ([Render] Look, Classic or Enhanced). Enhanced switches on texture filtering,
+// Enhanced lighting, dynamic model lights, the light mood at full strength, post-processing and
+// multisample anti-aliasing (at the [Render] Antialiasing sample count); Classic switches all of
+// them off, as the game always looked. The player can switch Enhanced lighting, dynamic lights,
+// the light mood and post-processing off one by one (SetChoices). The anisotropy level is a
 // setting of its own (it acts only with texture filtering).
 //
 // Developer builds (MU_ENABLE_CONTROL_SOCKET or _EDITOR) can override one feature, or the light
@@ -66,6 +67,8 @@ public:
         std::function<void(LookPreset)> persist;
         // Switches the features from the next frame on.
         std::function<void(const LookFeatures&)> apply;
+        // Applies only the light mood's switch and strength; without it, `apply` is used.
+        std::function<void(const LookFeatures&)> applyMood;
     };
 
     // `choices`: the Enhanced features the player switched off (SetChoices).
@@ -81,6 +84,9 @@ public:
     // The player's Enhanced features, saved by the caller: they act on Enhanced only, under the
     // developer overrides, and applying a preset keeps them.
     void SetChoices(const FeatureOverrides& choices);
+    // The player's light mood strength (a choice like the switches): only the light mood is
+    // applied again, so dragging the strength does not switch the other features each time.
+    void SetMoodStrengthChoice(std::optional<int> percent);
 
     [[nodiscard]] LookPreset Preset() const
     {

@@ -1,6 +1,9 @@
 #pragma once
 
+#include <span>
 #include <string_view>
+
+#include "Render/Models/DrawLook.h"
 
 class BMD;
 class OBJECT;
@@ -16,6 +19,9 @@ namespace Render::Items::ItemEffects
 // of the model entries with it.
 bool Exists(std::string_view name);
 
+// The names of all item effects, sorted, for the item editor's lists.
+std::span<const std::string_view> GetNames();
+
 enum class Result
 {
     // The item has no effect that runs before the model is drawn.
@@ -28,6 +34,12 @@ enum class Result
 
 // Runs the item effect before the model is drawn (the item effects are
 // taken from the item model database after each build of it). It may change
-// the level the model glows like.
-Result Apply(BMD* b, OBJECT* o, int modelType, float alpha, int& level);
+// the level the model glows like and the alpha it is drawn with.
+Result Apply(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float& alpha, int& level);
+
+// Whether the item effect of a model spawns sprites, particles or lightning.
+bool Spawns(int modelType);
+
+// Spawns them from the model's pose, in the update; b is placed where the model is drawn.
+void Spawn(BMD* b, OBJECT* o, int modelType, float (*bones)[3][4]);
 } // namespace Render::Items::ItemEffects

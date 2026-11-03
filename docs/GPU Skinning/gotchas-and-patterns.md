@@ -109,8 +109,17 @@
 
 ## Animation synchronization
 
-- `AnimationTaskPool` workers may update bone transforms asynchronously. Callers
-  must honor the established wait barrier before reading shared palettes.
+- Each visible client character's `o->BoneTransform` is built at the end of
+  `MoveCharactersClient` by `AnimateCharacterBones`, sequentially or on
+  `AnimationTaskPool` workers, and awaited before that function returns. The
+  effect, joint and particle passes after it read the current frame's bones.
+- Those bones are model space (`Translate = false`), the same as render's
+  `Calc_RenderObject` builds. Bone readers such as `TransformByObjectBone` add
+  the object's position and scale themselves. Never bake `BMD::BodyOrigin` or
+  `BodyScale` into bones outside render: they belong to whichever object of that
+  model was drawn last.
+- Render still animates each character again. In developer builds, the control
+  socket's `bones` query checks that the two match.
 - Render-frequency code must not advance fixed-step simulation once per rendered
   frame. Existing timing controls preserve animation and cloth cadence when FPS
   changes.

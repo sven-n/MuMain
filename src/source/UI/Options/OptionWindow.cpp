@@ -3,11 +3,20 @@
 #include "UI/Options/OptionWindow.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/RmlBridge/RmlPointer.h"
+#include "Render/Textures/TexturePack.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Audio/DSPlaySound.h"
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Render/Look/LookPresetSetting.h"
+#include "Render/Look/LookProfileSetting.h"
+#include "Render/Look/TuningSetting.h"
+#include "Render/Lighting/DynamicLightsSetting.h"
+#include "Render/Lighting/EnhancedLightingSetting.h"
+#include "Render/Lighting/LightMoodScales.h"
+#include "Render/PostProcessing/PostProcessingSetting.h"
+#include "UI/Options/TuningRows.h"
 #include "Audio/AudioPlayer.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlDraggable.h"
@@ -22,7 +31,9 @@
 #include "UI/Core/SceneUICoordinator.h"
 #include "UI/Windows/RememberPasswordPrompt.h"
 #include <algorithm>
+#include <cmath>
 #include <cstdlib>
+#include <optional>
 #include <cstring>
 #include "I18N/All.h"
 
@@ -133,9 +144,9 @@ int UI::Options::FindClosestUIScaleIndex(int percent)
 
 // I18N locale codes paired with each language's display name in that language, held as wide
 // strings so the label vector can be rebuilt without per-frame conversions.
+// clang-format off
 static const struct { const char* code; const wchar_t* label; } s_Languages[] = {
     { "en",    L"English" },
-    // Non-ASCII names use universal-character-name escapes for charset-safe MSVC compilation.
     { "de",    L"Deutsch" },
     { "es",    L"Español" },                                                  // Español
     { "id",    L"Bahasa Indonesia" },
@@ -145,8 +156,10 @@ static const struct { const char* code; const wchar_t* label; } s_Languages[] = 
     { "ru",    L"Русский" },                   // Русский
     { "tl",    L"Tagalog" },
     { "uk",    L"Українська" }, // Українська
+    { "zh-CN", L"简体中文" },
     { "zh-TW", L"繁體中文" },                                      // 繁體中文
 };
+// clang-format on
 static const int s_NumLanguages = sizeof(s_Languages) / sizeof(s_Languages[0]);
 
 // UI font families offered by the font row. `name` is the GameConfig font family value; empty =
@@ -166,6 +179,7 @@ static const FontOption s_Fonts[] = {
     {L"Liberation Sans", L"Liberation Sans"},
     {L"DejaVu Sans", L"DejaVu Sans"},
     {L"Noto Sans TC", L"Noto Sans TC"},
+    {L"Noto Sans SC", L"Noto Sans SC"},
 };
 static const int s_NumFonts = sizeof(s_Fonts) / sizeof(s_Fonts[0]);
 
@@ -203,6 +217,80 @@ template <std::size_t N> std::vector<Rml::String> MultiplierLabels(const int (&v
         labels.push_back(std::to_string(values[i]) + "x");
     return labels;
 }
+
+// A level no tuning track has (they start at 0), for ApplyLevelGaugeEvent's current level. The
+// sliders bind no wheel event, the only one the gauge would step from it.
+constexpr int kNoTuningLevel = -1;
+
+bool ValidTuningGroup(int group)
+{
+    return group >= 0 && group < static_cast<int>(Render::Look::TuningGroupCount);
+}
+
+bool ValidTuningControl(int control)
+{
+    return control >= 0 && control < static_cast<int>(Render::Look::TuningControlCount);
+}
+
+// What a tuning slider shows: what applies. A developer's session strength of the light mood goes
+// over the player's value, which goes over the look profile's and the map's.
+double CurrentTuningValue(const Render::Look::TuningControl& control)
+{
+    if (!control.lookValue)
+        if (const std::optional<int> session = Render::Look::SessionOverrides().lightMoodStrength)
+            return static_cast<double>(*session);
+    if (const std::optional<double> value = Render::Look::PersonalTuningSession().Override(control.id))
+        return *value;
+    if (control.lookValue)
+        return Render::Look::Active()[*control.lookValue];
+    return Render::Lighting::LightMood::MaxStrength;
+}
+
+UI::Options::TuningLock TuningLockOf(int group)
+{
+    using Render::Look::EnhancedFeature;
+    using Render::Look::EnhancedFeatureChosen;
+    const auto feature = static_cast<EnhancedFeature>(group);
+    const Render::Look::FeatureOverrides session = Render::Look::SessionOverrides();
+    UI::Options::TuningFeatureState state;
+    state.chosen = EnhancedFeatureChosen(feature);
+    switch (feature)
+    {
+    case EnhancedFeature::Lighting:
+        state.active = Render::Lighting::EnhancedLightingActive();
+        state.sessionOff = session.enhancedLighting == false;
+        break;
+    case EnhancedFeature::DynamicLights:
+        state.active = Render::Lighting::DynamicLightsActive();
+        state.sessionOff = session.dynamicLights == false || session.enhancedLighting == false;
+        break;
+    case EnhancedFeature::LightMood:
+        state.sessionOff = session.lightMood == false;
+        state.sessionSet = session.lightMoodStrength.has_value();
+        break;
+    case EnhancedFeature::PostProcessing:
+        state.active = Render::PostProcessing::PostProcessingActive();
+        state.sessionOff = session.postProcessing == false;
+        break;
+    }
+    return UI::Options::TuningGroupLock(static_cast<Render::Look::TuningGroup>(group),
+                                        Render::Look::ActiveLookPreset() == LookPreset::Enhanced,
+                                        EnhancedFeatureChosen(EnhancedFeature::Lighting), state);
+}
+
+Rml::String TuningStateClass(UI::Options::TuningRowState state)
+{
+    switch (state)
+    {
+    case UI::Options::TuningRowState::Custom:
+        return "custom";
+    case UI::Options::TuningRowState::Unsaved:
+        return "unsaved";
+    case UI::Options::TuningRowState::Inherited:
+        break;
+    }
+    return "inherited";
+}
 } // namespace
 
 //////////////////////////////////////////////////////////////////////
@@ -223,6 +311,7 @@ mu::ui::window::COptionWindow::COptionWindow()
     m_iResolutionIndex = 0;
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
     m_iLanguageIndex = FindCurrentLanguageIndex();
+    m_bTranslateItemNames = GameConfig::GetInstance().GetTranslateItemNames();
     m_iFontIndex = FindCurrentFontIndex();
 
     m_iActiveTab = 0;
@@ -238,6 +327,7 @@ mu::ui::window::COptionWindow::COptionWindow()
     m_bDisableBodyShadows = GameConfig::GetInstance().GetDisableBodyShadows();
 
     m_iThemeIndex = -1;
+    m_iTexturePackIndex = 0;
     m_iUIScaleIndex = FindCurrentUIScaleIndex();
 }
 
@@ -256,6 +346,7 @@ bool mu::ui::window::COptionWindow::Create(CManager* pNewUIMng)
     InitResolutionCombo();
     InitLanguageCombo();
     InitFontCombo();
+    RefreshTexturePackChoices();
 
     BuildRmlUi();
 
@@ -312,6 +403,8 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("language_index", &model.languageIndex);
     c.Bind("language_row_label", &model.languageRowLabel);
     c.Bind("language_value_label", &model.languageValueLabel);
+    c.Bind("translate_item_names", &model.translateItemNames);
+    c.Bind("translate_item_names_label", &model.translateItemNamesLabel);
     c.Bind("font_labels", &model.fontLabels);
     c.Bind("font_index", &model.fontIndex);
     c.Bind("font_row_label", &model.fontRowLabel);
@@ -354,6 +447,32 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("look_light_mood_label", &model.lookLightMoodLabel);
     c.Bind("look_post_processing_label", &model.lookPostProcessingLabel);
     c.Bind("enhanced_graphics_label", &model.enhancedGraphicsLabel);
+    auto tuningRow = c.RegisterStruct<TuningRowModel>();
+    tuningRow.RegisterMember("control", &TuningRowModel::control);
+    tuningRow.RegisterMember("label", &TuningRowModel::label);
+    tuningRow.RegisterMember("help", &TuningRowModel::help);
+    tuningRow.RegisterMember("value_text", &TuningRowModel::valueText);
+    tuningRow.RegisterMember("min_text", &TuningRowModel::minText);
+    tuningRow.RegisterMember("max_text", &TuningRowModel::maxText);
+    tuningRow.RegisterMember("state_text", &TuningRowModel::stateText);
+    tuningRow.RegisterMember("state", &TuningRowModel::state);
+    tuningRow.RegisterMember("fill_percent", &TuningRowModel::fillPercent);
+    c.RegisterArray<std::vector<TuningRowModel>>();
+    for (std::size_t group = 0; group < TuningGroupCount; ++group)
+    {
+        const std::string suffix = "_" + std::to_string(group);
+        c.Bind("tuning_rows" + suffix, &model.tuningRows[group]);
+        c.Bind("tuning_more_rows" + suffix, &model.tuningMoreRows[group]);
+        c.Bind("tuning_expanded" + suffix, &model.tuningExpanded[group]);
+        c.Bind("tuning_more_expanded" + suffix, &model.tuningMoreExpanded[group]);
+        c.Bind("tuning_locked" + suffix, &model.tuningLocked[group]);
+        c.Bind("tuning_reason" + suffix, &model.tuningReason[group]);
+    }
+    c.Bind("tuning_more_label", &model.tuningMoreLabel);
+    c.Bind("tuning_reset_label", &model.tuningResetLabel);
+    c.Bind("tuning_reset_group_label", &model.tuningResetGroupLabel);
+    c.Bind("tuning_reset_all_label", &model.tuningResetAllLabel);
+    c.Bind("tuning_save_message", &model.tuningSaveMessage);
     c.Bind("antialiasing_labels", &model.antialiasingLabels);
     c.Bind("antialiasing_index", &model.antialiasingIndex);
     c.Bind("antialiasing_row_label", &model.antialiasingRowLabel);
@@ -379,6 +498,11 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
     c.Bind("ui_scale_row_label", &model.uiScaleRowLabel);
     c.Bind("ui_scale_value_label", &model.uiScaleValueLabel);
     c.Bind("ui_scale_tooltip", &model.uiScaleTooltip);
+    c.Bind("texture_pack_labels", &model.texturePackLabels);
+    c.Bind("texture_pack_index", &model.texturePackIndex);
+    c.Bind("texture_pack_row_label", &model.texturePackRowLabel);
+    c.Bind("texture_pack_value_label", &model.texturePackValueLabel);
+    c.Bind("texture_pack_tooltip", &model.texturePackTooltip);
 
     c.BindEventCallback("option_click_close",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
@@ -400,6 +524,9 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleRenderAllEffects(); });
     c.BindEventCallback("option_toggle_windowed_mode",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleWindowedMode(); });
+    c.BindEventCallback("option_toggle_translate_item_names",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                        { RmlToggleTranslateItemNames(); });
 
     c.BindEventCallback("option_gauge",
         [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList& args)
@@ -448,6 +575,34 @@ void mu::ui::window::COptionWindow::BindRmlModel(Rml::DataModelConstructor& c, O
             if (arguments.size() == 1)
                 RmlToggleEnhancedFeature(arguments[0].Get<int>(-1));
         });
+
+    const auto intArgument = [](const Rml::VariantList& arguments)
+    { return arguments.size() == 1 ? arguments[0].Get<int>(-1) : -1; };
+    c.BindEventCallback("option_toggle_tuning_group",
+                        [this, intArgument](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        { RmlToggleTuningGroup(intArgument(arguments)); });
+    c.BindEventCallback("option_toggle_tuning_more",
+                        [this, intArgument](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        { RmlToggleTuningMore(intArgument(arguments)); });
+    c.BindEventCallback("option_tuning_pointer",
+                        [this, intArgument](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& arguments)
+                        { RmlTuningPointer(event, intArgument(arguments)); });
+    c.BindEventCallback("option_tuning_key",
+                        [this, intArgument](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& arguments)
+                        { RmlTuningKey(event, intArgument(arguments)); });
+    c.BindEventCallback("option_tuning_commit",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlTuningCommit(); });
+    c.BindEventCallback("option_reset_tuning",
+                        [this, intArgument](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& arguments)
+                        {
+                            event.StopPropagation();
+                            RmlResetTuning(intArgument(arguments));
+                        });
+    c.BindEventCallback("option_reset_tuning_group",
+                        [this, intArgument](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                        { RmlResetTuningGroup(intArgument(arguments)); });
+    c.BindEventCallback("option_reset_all_tuning",
+                        [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlResetAllTuning(); });
 
     c.BindEventCallback("option_toggle_show_fps_counter",
         [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleShowFpsCounter(); });
@@ -530,6 +685,9 @@ void mu::ui::window::COptionWindow::Show(bool bShow)
         else
             m_RmlView.Document()->Hide();
     }
+    // Closing the window ends a tuning interaction too (a slider still held or focused).
+    if (!bShow)
+        FinishTuningInteraction();
 }
 
 bool mu::ui::window::COptionWindow::UpdateMouseEvent()
@@ -623,6 +781,7 @@ void mu::ui::window::COptionWindow::OpenningProcess()
     // exposed through, so opening this window always reflects the current live truth.
     InitResolutionCombo();
     m_iLanguageIndex = FindCurrentLanguageIndex();
+    m_bTranslateItemNames = GameConfig::GetInstance().GetTranslateItemNames();
     m_iFontIndex = FindCurrentFontIndex();
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
 
@@ -638,6 +797,7 @@ void mu::ui::window::COptionWindow::OpenningProcess()
 
     RefreshThemeChoices();
     m_iUIScaleIndex = FindCurrentUIScaleIndex();
+    RefreshTexturePackChoices();
 }
 
 void mu::ui::window::COptionWindow::ClosingProcess()
@@ -677,7 +837,7 @@ void mu::ui::window::COptionWindow::SyncImpliedEffectRows(OptionRmlModel& model)
 
 void mu::ui::window::COptionWindow::RmlToggleDropdown(int dropdownId)
 {
-    if (dropdownId < 0 || dropdownId > 7)
+    if (dropdownId < 0 || dropdownId >= DropdownCount)
         return;
     // Toggle: clicking the currently-open one's own value box closes it; clicking any other
     // (including a different dropdown's) overwrites m_iOpenDropdown, which closes whatever else
@@ -692,29 +852,32 @@ void mu::ui::window::COptionWindow::RmlDropdownOptionClick(int dropdownId, int o
 {
     switch (dropdownId)
     {
-    case 0:
+    case DropdownResolution:
         RmlResolutionChanged(optionIndex);
         break;
-    case 1:
+    case DropdownFpsCap:
         RmlFpsCapChanged(optionIndex);
         break;
-    case 2:
+    case DropdownTheme:
         RmlThemeChanged(optionIndex);
         break;
-    case 3:
+    case DropdownLanguage:
         RmlLanguageChanged(optionIndex);
         break;
-    case 4:
+    case DropdownFont:
         RmlFontChanged(optionIndex);
         break;
-    case 5:
+    case DropdownUIScale:
         RmlUIScaleChanged(optionIndex);
         break;
-    case 6:
+    case DropdownAntialiasing:
         RmlAntialiasingChanged(optionIndex);
         break;
-    case 7:
+    case DropdownAnisotropy:
         RmlAnisotropyChanged(optionIndex);
+        break;
+    case DropdownTexturePack:
+        RmlTexturePackChanged(optionIndex);
         break;
     default:
         break;
@@ -820,6 +983,14 @@ void mu::ui::window::COptionWindow::RmlLanguageChanged(int index)
         return;
     m_iLanguageIndex = index;
     ApplyLanguage();
+}
+
+void mu::ui::window::COptionWindow::RmlToggleTranslateItemNames()
+{
+    m_bTranslateItemNames = !m_bTranslateItemNames;
+    GameConfig::GetInstance().SetTranslateItemNames(m_bTranslateItemNames);
+    GameConfig::GetInstance().Save();
+    g_ItemDataHandler.SetTranslateItemNames(m_bTranslateItemNames);
 }
 
 void mu::ui::window::COptionWindow::RmlFontChanged(int index)
@@ -947,6 +1118,172 @@ void mu::ui::window::COptionWindow::RmlToggleEnhancedFeature(int feature)
     Render::Look::ChooseEnhancedFeature(chosen, !Render::Look::EnhancedFeatureChosen(chosen));
 }
 
+void mu::ui::window::COptionWindow::RmlToggleTuningGroup(int group)
+{
+    if (!ValidTuningGroup(group))
+        return;
+    m_tuningExpanded[group] = !m_tuningExpanded[group];
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void mu::ui::window::COptionWindow::RmlToggleTuningMore(int group)
+{
+    if (!ValidTuningGroup(group))
+        return;
+    m_tuningMoreExpanded[group] = !m_tuningMoreExpanded[group];
+    PlayBuffer(SOUND_CLICK01);
+}
+
+bool mu::ui::window::COptionWindow::TuningGroupUnlocked(int group) const
+{
+    return ValidTuningGroup(group) && TuningLockOf(group) == UI::Options::TuningLock::None;
+}
+
+void mu::ui::window::COptionWindow::RmlTuningPointer(Rml::Event& event, int control)
+{
+    if (!ValidTuningControl(control))
+        return;
+    const Render::Look::TuningControl& tuning =
+        Render::Look::Control(static_cast<Render::Look::TuningControlId>(control));
+    if (!TuningGroupUnlocked(static_cast<int>(tuning.group)))
+        return;
+    // The track as a level gauge with one level per step. The gauge is told no level is current
+    // (kNoTuningLevel), so it reports the pointer's level every time; whether that changes the value
+    // is decided against the exact value, which an inherited one between two steps may not be on.
+    const int steps = Render::Look::TuningStepCount(tuning);
+    const auto fromPointer = [steps](float x, float width)
+    { return x < 0.f ? 0 : static_cast<int>(std::lround(static_cast<float>(steps) * x / width)); };
+    const std::optional<int> level = UI::RmlBridge::ApplyLevelGaugeEvent(event, kNoTuningLevel, steps, fromPointer);
+    if (!level)
+        return;
+    const std::optional<double> next = Render::Look::TuningPointerValue(tuning, CurrentTuningValue(tuning), *level);
+    if (next && Render::Look::PersonalTuningSession().Preview(tuning.id, *next))
+        m_tuningPreviewPending = true;
+}
+
+void mu::ui::window::COptionWindow::RmlTuningKey(Rml::Event& event, int control)
+{
+    if (!ValidTuningControl(control))
+        return;
+    const Render::Look::TuningControl& tuning =
+        Render::Look::Control(static_cast<Render::Look::TuningControlId>(control));
+    // The gauge decodes the key and keeps it; the value steps from the exact value, which an
+    // inherited one between two steps may not be on.
+    const std::optional<UI::RmlBridge::LevelGaugeKeyMove> move = UI::RmlBridge::LevelGaugeKey(event);
+    if (!move || !TuningGroupUnlocked(static_cast<int>(tuning.group)))
+        return;
+    using To = UI::RmlBridge::LevelGaugeKeyMove::To;
+    const double next = move->to == To::Min ? tuning.min
+                        : move->to == To::Max
+                            ? tuning.max
+                            : Render::Look::StepTuningValue(tuning, CurrentTuningValue(tuning), move->steps);
+    if (Render::Look::PersonalTuningSession().Preview(tuning.id, next))
+        m_tuningPreviewPending = true;
+}
+
+void mu::ui::window::COptionWindow::RmlTuningCommit()
+{
+    FinishTuningInteraction();
+}
+
+void mu::ui::window::COptionWindow::FinishTuningInteraction()
+{
+    // Saves only; a pending Mood strength is applied by the frame loop (ApplyPendingTuning()).
+    Render::Look::TuningSession& session = Render::Look::PersonalTuningSession();
+    // A failed save is tried again when the window closes, never per frame.
+    if (m_tuningPreviewPending || (!IsVisible() && session.SaveState() != Render::Look::TuningSaveState::Saved))
+    {
+        m_tuningPreviewPending = false;
+        (void)session.Commit();
+    }
+}
+
+void mu::ui::window::COptionWindow::RmlResetTuning(int control)
+{
+    if (!ValidTuningControl(control))
+        return;
+    Render::Look::PersonalTuningSession().Reset(static_cast<Render::Look::TuningControlId>(control));
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void mu::ui::window::COptionWindow::RmlResetTuningGroup(int group)
+{
+    if (!ValidTuningGroup(group))
+        return;
+    Render::Look::PersonalTuningSession().ResetGroup(static_cast<Render::Look::TuningGroup>(group));
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void mu::ui::window::COptionWindow::RmlResetAllTuning()
+{
+    Render::Look::PersonalTuningSession().ResetAll();
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void mu::ui::window::COptionWindow::SyncTuningModel(OptionRmlModel& model)
+{
+    const auto syncText = [this](Rml::String& field, const std::string& name, const std::string& value)
+    {
+        if (field != value)
+        {
+            field = value;
+            m_RmlView.MarkDirty(name);
+        }
+    };
+    const auto syncFlag = [this](bool& field, const std::string& name, bool value)
+    {
+        if (field != value)
+        {
+            field = value;
+            m_RmlView.MarkDirty(name);
+        }
+    };
+    syncText(model.tuningMoreLabel, "tuning_more_label", UI::Options::TuningMoreSettingsLabel());
+    syncText(model.tuningResetLabel, "tuning_reset_label", UI::Options::TuningResetLabel());
+    syncText(model.tuningResetGroupLabel, "tuning_reset_group_label", UI::Options::TuningResetGroupLabel());
+    syncText(model.tuningResetAllLabel, "tuning_reset_all_label", UI::Options::TuningResetAllLabel());
+
+    const Render::Look::TuningSession& session = Render::Look::PersonalTuningSession();
+    syncText(model.tuningSaveMessage, "tuning_save_message", UI::Options::TuningSaveMessage(session));
+
+    std::array<std::vector<TuningRowModel>, TuningGroupCount> rows;
+    std::array<std::vector<TuningRowModel>, TuningGroupCount> moreRows;
+    for (const Render::Look::TuningControl& control : Render::Look::TuningControls())
+    {
+        const UI::Options::TuningRow row = UI::Options::BuildTuningRow(control, CurrentTuningValue(control),
+                                                                       UI::Options::TuningStateOf(session, control.id));
+        const TuningRowModel bound{static_cast<int>(control.id),
+                                   row.label,
+                                   row.help,
+                                   row.valueText,
+                                   row.minText,
+                                   row.maxText,
+                                   row.stateText,
+                                   TuningStateClass(row.state),
+                                   row.fillPercent};
+        (control.specialist ? moreRows : rows)[static_cast<std::size_t>(control.group)].push_back(bound);
+    }
+    for (std::size_t group = 0; group < TuningGroupCount; ++group)
+    {
+        const std::string suffix = "_" + std::to_string(group);
+        if (model.tuningRows[group] != rows[group])
+        {
+            model.tuningRows[group] = std::move(rows[group]);
+            m_RmlView.MarkDirty("tuning_rows" + suffix);
+        }
+        if (model.tuningMoreRows[group] != moreRows[group])
+        {
+            model.tuningMoreRows[group] = std::move(moreRows[group]);
+            m_RmlView.MarkDirty("tuning_more_rows" + suffix);
+        }
+        syncFlag(model.tuningExpanded[group], "tuning_expanded" + suffix, m_tuningExpanded[group]);
+        syncFlag(model.tuningMoreExpanded[group], "tuning_more_expanded" + suffix, m_tuningMoreExpanded[group]);
+        const UI::Options::TuningLock lock = TuningLockOf(static_cast<int>(group));
+        syncFlag(model.tuningLocked[group], "tuning_locked" + suffix, lock != UI::Options::TuningLock::None);
+        syncText(model.tuningReason[group], "tuning_reason" + suffix, UI::Options::TuningLockReason(lock));
+    }
+}
+
 // MuSetAntialiasingPreference saves the count and applies it while the Enhanced look is active.
 void mu::ui::window::COptionWindow::RmlAntialiasingChanged(int index)
 {
@@ -966,6 +1303,23 @@ void mu::ui::window::COptionWindow::RmlAnisotropyChanged(int index)
     if (index < 0 || index >= static_cast<int>(std::size(s_AnisotropyValues)))
         return;
     MuSetAnisotropyPreference(s_AnisotropyValues[index]);
+}
+
+void mu::ui::window::COptionWindow::RmlTexturePackChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= static_cast<int>(m_texturePackNames.size()))
+        return;
+    m_iTexturePackIndex = index;
+    // Compared with the saved name, not the shown index: a saved pack that is no longer installed
+    // shows as Original, and choosing Original has to clear it.
+    const std::wstring& chosen = m_texturePackNames[index];
+    if (chosen == GameConfig::GetInstance().GetTexturePack())
+        return;
+    GameConfig::GetInstance().SetTexturePack(chosen);
+    GameConfig::GetInstance().Save();
 }
 
 void mu::ui::window::COptionWindow::RmlToggleShowFpsCounter()
@@ -1206,6 +1560,38 @@ int mu::ui::window::COptionWindow::FindCurrentFpsCapIndex()
     return s_NumFpsCapValues - 1;  // "Uncapped" -- last entry, matches CfgDefaultFpsCap (-1)
 }
 
+void mu::ui::window::COptionWindow::RefreshTexturePackChoices()
+{
+    m_texturePackNames = Render::Textures::TexturePack::ListInstalledPacks();
+    m_texturePackNames.insert(m_texturePackNames.begin(), std::wstring());
+    m_iTexturePackIndex = FindCurrentTexturePackIndex();
+
+    // Pack names are folder names, so they only change here. The first entry is the localized
+    // "Original", which SyncRmlModel() keeps following a live language switch.
+    auto& model = m_RmlView.GetModel();
+    model.texturePackLabels.clear();
+    model.texturePackLabels.reserve(m_texturePackNames.size());
+    model.texturePackLabels.push_back(StringUtils::WideToNarrow(I18N::Game::OriginalTextures));
+    for (size_t i = 1; i < m_texturePackNames.size(); ++i)
+        model.texturePackLabels.push_back(StringUtils::WideToNarrow(m_texturePackNames[i].c_str()));
+    m_RmlView.MarkDirty("texture_pack_labels");
+}
+
+// Folder names compare in any case, as the loader opens them. A saved pack that is no longer
+// installed shows as the original textures, which is what the loader falls back to.
+int mu::ui::window::COptionWindow::FindCurrentTexturePackIndex()
+{
+    const std::wstring current = GameConfig::GetInstance().GetTexturePack();
+    if (current.empty())
+        return 0;
+    const auto found =
+        std::find_if(m_texturePackNames.begin() + 1, m_texturePackNames.end(), [&current](const std::wstring& name)
+                     { return Render::Textures::TexturePack::SameName(name, current); });
+    if (found == m_texturePackNames.end())
+        return 0;
+    return static_cast<int>(found - m_texturePackNames.begin());
+}
+
 int mu::ui::window::COptionWindow::FindCurrentThemeIndex()
 {
     const std::string& active = UI::RmlBridge::GetActiveThemeName();
@@ -1281,6 +1667,16 @@ void mu::ui::window::COptionWindow::ApplyWindowModeToggle()
     GameConfig::GetInstance().Save();
 }
 
+void mu::ui::window::COptionWindow::SyncLabel(Rml::String& field, const char* fieldName, const wchar_t* text)
+{
+    const Rml::String narrow = StringUtils::WideToNarrow(text);
+    if (field != narrow)
+    {
+        field = narrow;
+        m_RmlView.MarkDirty(fieldName);
+    }
+}
+
 void mu::ui::window::COptionWindow::SyncRmlModel()
 {
     if (!m_RmlView.Document())
@@ -1301,15 +1697,6 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     // Re-fetched every sync, not just once at BuildRmlUi() time -- native re-rendered every one of
     // these from the live I18N::Game::* pointer every frame, so a language switch made from this
     // very window relabels it immediately rather than only on next reopen.
-    const auto syncLabel = [this](Rml::String& field, const char* fieldName, const wchar_t* text)
-    {
-        const Rml::String narrow = StringUtils::WideToNarrow(text);
-        if (field != narrow)
-        {
-            field = narrow;
-            m_RmlView.MarkDirty(fieldName);
-        }
-    };
     // .option-dropdown's own closed-state box shows this instead of a {{}} array-index expression
     // -- see model.resolutionValueLabel's own comment (OptionWindow.h) for why.
     const auto syncDropdownValue = [this](Rml::String& field, const char* fieldName,
@@ -1323,50 +1710,51 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
             m_RmlView.MarkDirty(fieldName);
         }
     };
-    syncLabel(model.title, "title", I18N::Game::Option385);
-    syncLabel(model.closeLabel, "close_label", I18N::Game::Close);
-    syncLabel(model.tabGameplayLabel, "tab_gameplay_label", I18N::Game::Gameplay);
-    syncLabel(model.tabAudioLabel, "tab_audio_label", I18N::Game::Audio);
-    syncLabel(model.tabDisplayLabel, "tab_display_label", I18N::Game::Display);
-    syncLabel(model.tabGraphicsLabel, "tab_graphics_label", I18N::Game::Graphics);
-    syncLabel(model.tabInterfaceLabel, "tab_interface_label", I18N::Game::Interface);
-    syncLabel(model.sectionQualityLabel, "section_quality_label", I18N::Game::Quality);
-    syncLabel(model.sectionEffectsLabel, "section_effects_label", I18N::Game::Effects);
-    syncLabel(model.sectionShadowsLabel, "section_shadows_label", I18N::Game::Shadows);
-    syncLabel(model.autoAttackLabel, "auto_attack_label", I18N::Game::AutomaticAttack);
-    syncLabel(model.whisperSoundLabel, "whisper_sound_label", I18N::Game::BeepSoundForWhispering);
-    syncLabel(model.slideHelpLabel, "slide_help_label", I18N::Game::SlideHelp);
-    syncLabel(model.renderAllEffectsLabel, "render_all_effects_label", I18N::Game::RenderFullEffects);
-    syncLabel(model.windowedModeLabel, "windowed_mode_label", I18N::Game::WindowedMode);
-    syncLabel(model.soundVolumeLabel, "sound_volume_label", I18N::Game::SoundVolume);
-    syncLabel(model.musicVolumeLabel, "music_volume_label", I18N::Game::MusicVolume);
-    syncLabel(model.renderLevelLabel, "render_level_label", I18N::Game::EffectLimitation);
-    syncLabel(model.resolutionRowLabel, "resolution_row_label", I18N::Game::Resolution);
-    syncLabel(model.languageRowLabel, "language_row_label", I18N::Game::Language);
-    syncLabel(model.fontRowLabel, "font_row_label", I18N::Game::Font);
-    syncLabel(model.vsyncLabel, "vsync_label", I18N::Game::VSync);
-    syncLabel(model.fpsCapRowLabel, "fps_cap_row_label", I18N::Game::FPSLimit);
-    syncLabel(model.disableEffectsLabel, "disable_effects_label", I18N::Game::DisableEffects);
-    syncLabel(model.disableParticlesLabel, "disable_particles_label", I18N::Game::DisableParticles);
-    syncLabel(model.disableSkillEffectModelsLabel, "disable_skill_effect_models_label",
+    SyncLabel(model.title, "title", I18N::Game::Option385);
+    SyncLabel(model.closeLabel, "close_label", I18N::Game::Close);
+    SyncLabel(model.tabGameplayLabel, "tab_gameplay_label", I18N::Game::Gameplay);
+    SyncLabel(model.tabAudioLabel, "tab_audio_label", I18N::Game::Audio);
+    SyncLabel(model.tabDisplayLabel, "tab_display_label", I18N::Game::Display);
+    SyncLabel(model.tabGraphicsLabel, "tab_graphics_label", I18N::Game::Graphics);
+    SyncLabel(model.tabInterfaceLabel, "tab_interface_label", I18N::Game::Interface);
+    SyncLabel(model.sectionQualityLabel, "section_quality_label", I18N::Game::Quality);
+    SyncLabel(model.sectionEffectsLabel, "section_effects_label", I18N::Game::Effects);
+    SyncLabel(model.sectionShadowsLabel, "section_shadows_label", I18N::Game::Shadows);
+    SyncLabel(model.autoAttackLabel, "auto_attack_label", I18N::Game::AutomaticAttack);
+    SyncLabel(model.whisperSoundLabel, "whisper_sound_label", I18N::Game::BeepSoundForWhispering);
+    SyncLabel(model.slideHelpLabel, "slide_help_label", I18N::Game::SlideHelp);
+    SyncLabel(model.renderAllEffectsLabel, "render_all_effects_label", I18N::Game::RenderFullEffects);
+    SyncLabel(model.windowedModeLabel, "windowed_mode_label", I18N::Game::WindowedMode);
+    SyncLabel(model.soundVolumeLabel, "sound_volume_label", I18N::Game::SoundVolume);
+    SyncLabel(model.musicVolumeLabel, "music_volume_label", I18N::Game::MusicVolume);
+    SyncLabel(model.renderLevelLabel, "render_level_label", I18N::Game::EffectLimitation);
+    SyncLabel(model.resolutionRowLabel, "resolution_row_label", I18N::Game::Resolution);
+    SyncLabel(model.languageRowLabel, "language_row_label", I18N::Game::Language);
+    SyncLabel(model.translateItemNamesLabel, "translate_item_names_label", I18N::Game::TranslateItemNames);
+    SyncLabel(model.fontRowLabel, "font_row_label", I18N::Game::Font);
+    SyncLabel(model.vsyncLabel, "vsync_label", I18N::Game::VSync);
+    SyncLabel(model.fpsCapRowLabel, "fps_cap_row_label", I18N::Game::FPSLimit);
+    SyncLabel(model.disableEffectsLabel, "disable_effects_label", I18N::Game::DisableEffects);
+    SyncLabel(model.disableParticlesLabel, "disable_particles_label", I18N::Game::DisableParticles);
+    SyncLabel(model.disableSkillEffectModelsLabel, "disable_skill_effect_models_label",
               I18N::Game::DisableSkillEffectModels);
-    syncLabel(model.disableBoidsLabel, "disable_boids_label", I18N::Game::DisableAmbientWildlife);
-    syncLabel(model.disableWingShadowLabel, "disable_wing_shadow_label", I18N::Game::DisableWingShadow);
-    syncLabel(model.disableBodyShadowsLabel, "disable_body_shadows_label", I18N::Game::DisableShadows);
-    syncLabel(model.enhancedGraphicsLabel, "enhanced_graphics_label", I18N::Game::EnhancedGraphics);
-    syncLabel(model.lookLightingLabel, "look_lighting_label", I18N::Game::EnhancedLighting);
-    syncLabel(model.lookDynamicLightsLabel, "look_dynamic_lights_label", I18N::Game::DynamicLights);
-    syncLabel(model.lookLightMoodLabel, "look_light_mood_label", I18N::Game::LightMood);
-    syncLabel(model.lookPostProcessingLabel, "look_post_processing_label", I18N::Game::BloomAndColourGrading);
-    syncLabel(model.antialiasingRowLabel, "antialiasing_row_label", I18N::Game::AntiAliasing);
-    syncLabel(model.antialiasingTooltip, "antialiasing_tooltip", I18N::Game::AntiAliasingTooltip);
-    syncLabel(model.anisotropyRowLabel, "anisotropy_row_label", I18N::Game::AnisotropicFiltering);
-    syncLabel(model.anisotropyTooltip, "anisotropy_tooltip", I18N::Game::AnisotropicFilteringTooltip);
-    syncLabel(model.showFpsCounterLabel, "show_fps_counter_label", I18N::Game::ShowFPSCounter);
-    syncLabel(model.showDebugInfoLabel, "show_debug_info_label", I18N::Game::ShowDebugInfo);
-    syncLabel(model.themeRowLabel, "theme_row_label", I18N::Game::UITheme);
-    syncLabel(model.uiScaleRowLabel, "ui_scale_row_label", I18N::Game::UIScale);
-    syncLabel(model.uiScaleTooltip, "ui_scale_tooltip", I18N::Game::UIScaleTooltip);
+    SyncLabel(model.disableBoidsLabel, "disable_boids_label", I18N::Game::DisableAmbientWildlife);
+    SyncLabel(model.disableWingShadowLabel, "disable_wing_shadow_label", I18N::Game::DisableWingShadow);
+    SyncLabel(model.disableBodyShadowsLabel, "disable_body_shadows_label", I18N::Game::DisableShadows);
+    SyncLabel(model.enhancedGraphicsLabel, "enhanced_graphics_label", I18N::Game::EnhancedGraphics);
+    SyncLabel(model.lookLightingLabel, "look_lighting_label", I18N::Game::EnhancedLighting);
+    SyncLabel(model.lookDynamicLightsLabel, "look_dynamic_lights_label", I18N::Game::DynamicLights);
+    SyncLabel(model.lookLightMoodLabel, "look_light_mood_label", I18N::Game::LightMood);
+    SyncLabel(model.lookPostProcessingLabel, "look_post_processing_label", I18N::Game::BloomAndColourGrading);
+    SyncLabel(model.antialiasingRowLabel, "antialiasing_row_label", I18N::Game::AntiAliasing);
+    SyncLabel(model.antialiasingTooltip, "antialiasing_tooltip", I18N::Game::AntiAliasingTooltip);
+    SyncLabel(model.anisotropyRowLabel, "anisotropy_row_label", I18N::Game::AnisotropicFiltering);
+    SyncLabel(model.anisotropyTooltip, "anisotropy_tooltip", I18N::Game::AnisotropicFilteringTooltip);
+    SyncLabel(model.showFpsCounterLabel, "show_fps_counter_label", I18N::Game::ShowFPSCounter);
+    SyncLabel(model.showDebugInfoLabel, "show_debug_info_label", I18N::Game::ShowDebugInfo);
+    SyncLabel(model.themeRowLabel, "theme_row_label", I18N::Game::UITheme);
+    SyncLabel(model.uiScaleRowLabel, "ui_scale_row_label", I18N::Game::UIScale);
+    SyncLabel(model.uiScaleTooltip, "ui_scale_tooltip", I18N::Game::UIScaleTooltip);
 
     // positioned/root_x/root_y stay at their model defaults (false/0/0, see OptionRmlModel's own
     // comment): window_shell's `.center-both` CSS places the window, a drag moves it.
@@ -1402,6 +1790,11 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     }
     if (model.languageIndex != m_iLanguageIndex) { model.languageIndex = m_iLanguageIndex; m_RmlView.MarkDirty("language_index"); }
     syncDropdownValue(model.languageValueLabel, "language_value_label", model.languageLabels, model.languageIndex);
+    if (model.translateItemNames != m_bTranslateItemNames)
+    {
+        model.translateItemNames = m_bTranslateItemNames;
+        m_RmlView.MarkDirty("translate_item_names");
+    }
 
     // Rebuilt every sync (not just once) so the localized "Default" entry follows a live language
     // switch, same as native's own GetFontLabels().
@@ -1470,6 +1863,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         syncFlag(model.lookFeaturesLocked, "look_features_locked", !enhancedGraphics);
         syncFlag(model.lookDynamicLightsLocked, "look_dynamic_lights_locked", !enhancedGraphics || !lighting);
     }
+    SyncTuningModel(model);
 
     // Rebuilt every sync for the localized "Off", as the FPS Limit row's "Uncapped".
     const auto syncMultiplierRow = [&](std::vector<Rml::String>& labels, const char* labelsName, int& index,
@@ -1521,4 +1915,18 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         m_RmlView.MarkDirty("ui_scale_index");
     }
     syncDropdownValue(model.uiScaleValueLabel, "ui_scale_value_label", model.uiScaleLabels, model.uiScaleIndex);
+
+    // The pack labels are built in RefreshTexturePackChoices(); only the localized "Original"
+    // entry can change here.
+    SyncLabel(model.texturePackRowLabel, "texture_pack_row_label", I18N::Game::TexturePack);
+    SyncLabel(model.texturePackTooltip, "texture_pack_tooltip", I18N::Game::TexturePackTooltip);
+    if (!model.texturePackLabels.empty())
+        SyncLabel(model.texturePackLabels.front(), "texture_pack_labels", I18N::Game::OriginalTextures);
+    if (model.texturePackIndex != m_iTexturePackIndex)
+    {
+        model.texturePackIndex = m_iTexturePackIndex;
+        m_RmlView.MarkDirty("texture_pack_index");
+    }
+    syncDropdownValue(model.texturePackValueLabel, "texture_pack_value_label", model.texturePackLabels,
+                      model.texturePackIndex);
 }

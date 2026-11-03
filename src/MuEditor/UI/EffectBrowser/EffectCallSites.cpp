@@ -1,18 +1,18 @@
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 
 #ifdef _EDITOR
 
 #include "EffectCallSites.h"
 
 #include "Data/GameData/EffectData/EffectTypeSymbols.h"
+#include "UI/Common/SourceText.h"
 
 #include <algorithm>
 #include <array>
 #include <cctype>
 #include <charconv>
-#include <fstream>
 #include <iterator>
-#include <sstream>
 #include <system_error>
 #include <tuple>
 #include <unordered_map>
@@ -23,6 +23,9 @@ namespace MuEditor::Effects
 namespace
 {
 using Data::Effects::EffectKind;
+using SourceText::Blank;
+using SourceText::IsIdentifierChar;
+using SourceText::Trimmed;
 
 // What each create function takes, by argument index (-1: none). The light
 // of lightning is its colour, which most calls leave out.
@@ -45,60 +48,12 @@ constexpr std::array<CallShape, 4> Shapes = {{
     {"CreateSprite", EffectKind::Sprite, 3, 6, 4, 2, -1, -1},
 }};
 
-bool IsIdentifierChar(char c)
-{
-    return std::isalnum(static_cast<unsigned char>(c)) != 0 || c == '_';
-}
-
 std::string WithoutSpaces(std::string_view text)
 {
     std::string result;
     std::copy_if(text.begin(), text.end(), std::back_inserter(result),
                  [](char c) { return std::isspace(static_cast<unsigned char>(c)) == 0; });
     return result;
-}
-
-// The text with comments and string and character literals blanked out;
-// line breaks stay, so positions keep their lines.
-std::string Blank(std::string_view source)
-{
-    std::string text(source);
-    for (size_t i = 0; i < text.size();)
-    {
-        if (text.compare(i, 2, "//") == 0)
-        {
-            const size_t end = text.find('\n', i);
-            std::fill(text.begin() + static_cast<std::ptrdiff_t>(i),
-                      end == std::string::npos ? text.end() : text.begin() + static_cast<std::ptrdiff_t>(end), ' ');
-            i = end == std::string::npos ? text.size() : end;
-        }
-        else if (text.compare(i, 2, "/*") == 0)
-        {
-            const size_t close = text.find("*/", i + 2);
-            const size_t end = close == std::string::npos ? text.size() : close + 2;
-            for (size_t k = i; k < end; ++k)
-            {
-                if (text[k] != '\n')
-                    text[k] = ' ';
-            }
-            i = end;
-        }
-        else if (text[i] == '"' || text[i] == '\'')
-        {
-            const char quote = text[i];
-            size_t k = i + 1;
-            while (k < text.size() && text[k] != quote && text[k] != '\n')
-                k += text[k] == '\\' ? 2 : 1;
-            for (size_t j = i + 1; j < k && j < text.size(); ++j)
-                text[j] = ' ';
-            i = k + 1;
-        }
-        else
-        {
-            ++i;
-        }
-    }
-    return text;
 }
 
 size_t SkipSpaces(std::string_view text, size_t at)
@@ -289,7 +244,7 @@ const std::unordered_map<std::string, int>& NumbersOf(EffectKind kind)
 }
 
 // The types a call's first argument names: a code, a code plus a number, or
-// a code plus rand() % N (any of N types).
+// a code plus Random::Rand() % N (any of N types).
 std::vector<int> TypesOf(EffectKind kind, std::string_view argument)
 {
     const std::unordered_map<std::string, int>& codes = NumbersOf(kind);
@@ -301,9 +256,9 @@ std::vector<int> TypesOf(EffectKind kind, std::string_view argument)
         const auto found = codes.find(std::string(text));
         return found != codes.end() ? std::optional<int>(found->second) : std::nullopt;
     };
-    for (const std::string_view random : {std::string_view("rand()%"), std::string_view("(rand()%")})
+    for (const std::string_view random : {std::string_view("Random::Rand()%"), std::string_view("(Random::Rand()%")})
     {
-        // NAME+rand()%N or NAME+(rand()%N)
+        // NAME+Random::Rand()%N or NAME+(Random::Rand()%N)
         if (const size_t plus = compact.find("+" + std::string(random)); plus != std::string::npos)
         {
             const std::optional<int> base = codeAt(std::string_view(compact).substr(0, plus));
@@ -320,13 +275,14 @@ std::vector<int> TypesOf(EffectKind kind, std::string_view argument)
             }
         }
     }
-    // rand()%N+NAME
-    if (compact.rfind("rand()%", 0) == 0)
+    // Random::Rand()%N+NAME
+    constexpr std::string_view pick = "Random::Rand()%";
+    if (compact.rfind(pick, 0) == 0)
     {
         const size_t plus = compact.find('+');
         if (plus != std::string::npos)
         {
-            const std::optional<int> n = IntegerOf(std::string_view(compact).substr(7, plus - 7));
+            const std::optional<int> n = IntegerOf(std::string_view(compact).substr(pick.size(), plus - pick.size()));
             const std::optional<int> base = codeAt(std::string_view(compact).substr(plus + 1));
             if (base && n && *n > 0)
             {
@@ -392,15 +348,6 @@ std::vector<std::string_view> ArgumentsAt(std::string_view text, size_t open)
         }
     }
     return {};
-}
-
-std::string Trimmed(std::string_view text)
-{
-    const size_t first = text.find_first_not_of(" \t\r\n");
-    if (first == std::string_view::npos)
-        return {};
-    const size_t last = text.find_last_not_of(" \t\r\n");
-    return std::string(text.substr(first, last - first + 1));
 }
 
 bool IsWordAt(std::string_view text, size_t at, std::string_view word)
@@ -726,14 +673,6 @@ std::vector<EffectCallSite> ReadEffectCallSites(std::string_view source, std::st
 
 namespace
 {
-std::string ReadFile(const std::filesystem::path& path)
-{
-    std::ifstream stream(path, std::ios::binary);
-    std::ostringstream text;
-    text << stream.rdbuf();
-    return text.str();
-}
-
 // The macros the #define lines of a text define, and those its #ifdef and
 // #if defined lines test.
 void NoteMacros(std::string_view text, std::unordered_set<std::string>& defined,
@@ -765,17 +704,12 @@ bool EffectCallSiteIndex::Load(const std::filesystem::path& sourceDirectory)
     std::vector<std::pair<std::string, std::string>> sources;
     std::unordered_set<std::string> defined;
     std::unordered_set<std::string> tested;
-    for (std::filesystem::recursive_directory_iterator entry(sourceDirectory, error), end; !error && entry != end;
-         entry.increment(error))
+    for (const SourceText::SourceFile& file : SourceText::FindSourceFiles(sourceDirectory))
     {
-        const std::filesystem::path extension = entry->path().extension();
-        std::error_code entryError;
-        if ((extension != ".cpp" && extension != ".h") || !entry->is_regular_file(entryError))
-            continue;
-        std::string text = ReadFile(entry->path());
+        std::string text = SourceText::ReadFile(file.path);
         NoteMacros(text, defined, tested);
-        if (extension == ".cpp")
-            sources.emplace_back(entry->path().lexically_relative(sourceDirectory).generic_string(), std::move(text));
+        if (file.path.extension() == ".cpp")
+            sources.emplace_back(file.relative, std::move(text));
     }
     // What the build defines is named in its files beside the sources;
     // compiler and platform macros begin with '_' or are common names.
@@ -783,7 +717,7 @@ bool EffectCallSiteIndex::Load(const std::filesystem::path& sourceDirectory)
     for (const std::filesystem::path& file : {sourceDirectory.parent_path() / "CMakeLists.txt",
                                               sourceDirectory.parent_path().parent_path() / "CMakeLists.txt",
                                               sourceDirectory.parent_path().parent_path() / "CMakePresets.json"})
-        build += ReadFile(file);
+        build += SourceText::ReadFile(file);
     constexpr std::array<std::string_view, 4> Platform = {"WIN32", "NDEBUG", "DEBUG", "UNICODE"};
     std::unordered_set<std::string> macrosOff;
     for (const std::string& macro : tested)

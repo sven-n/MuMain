@@ -10,13 +10,17 @@ namespace Render::PostProcessing
 {
 namespace
 {
+bool s_postProcessingActive = false;
+
 bool ApplyToRenderer(bool enabled)
 {
     if (mu::GetRenderer().SetPostProcessing(enabled))
     {
+        s_postProcessingActive = enabled;
         mu::log::Get("render")->info("Post-processing {}", enabled ? "on" : "off");
         return true;
     }
+    s_postProcessingActive = false;
     mu::log::Get("render")->warn("Post-processing requested but unavailable; frames stay unprocessed");
     return false;
 }
@@ -25,6 +29,11 @@ bool ApplyToRenderer(bool enabled)
 bool SetPostProcessingEnabled(bool enabled)
 {
     return ApplyToRenderer(enabled);
+}
+
+bool PostProcessingActive()
+{
+    return s_postProcessingActive;
 }
 
 bool SetPostProcessingView(std::wstring_view name)

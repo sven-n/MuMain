@@ -513,6 +513,16 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         SetDisableJoints(false);
         return true;
     }
+    else if (strCommand.compare(L"$effects culling off") == 0)
+    {
+        SetDisableEffectCulling(true);
+        return true;
+    }
+    else if (strCommand.compare(L"$effects culling on") == 0)
+    {
+        SetDisableEffectCulling(false);
+        return true;
+    }
     // MODEL_WING_OF_RUIN draws its mesh 3x per frame (base + 2 glow-layer passes,
     // ZzzObject.cpp ~7001-7007). Skips the 2 extra passes to test if triple mesh-draw is the cost.
     // Visibly changes the wing's look (removes glow layers) while active -- measurement tool only.

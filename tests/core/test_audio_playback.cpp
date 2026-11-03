@@ -13,6 +13,7 @@
 #include "Core/Platform/Audio/MiniAudioBackend.h"
 #undef private
 
+#include "Audio/SoundNumbers.h"
 #include "Scenes/SceneCore.h"
 #ifdef _EDITOR
 #include "Audio/DSPlaySound.h"
@@ -101,6 +102,49 @@ TEST_CASE("an active one-channel sound is not restarted [audio][ambient]")
     ma_audio_buffer_uninit(&audioBuffer);
 }
 
+// The editor's sound previews have their own level: they are heard while the
+// game's effect volume is 0.
+TEST_CASE("a sound played at a level ignores the effect volume [audio][volume]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+
+    ma_engine_config engineConfig = ma_engine_config_init();
+    engineConfig.noDevice = MA_TRUE;
+    engineConfig.channels = 1;
+    engineConfig.sampleRate = 48000;
+    REQUIRE(ma_engine_init(&engineConfig, &backend->m_engine) == MA_SUCCESS);
+    backend->m_initialized = true;
+
+    constexpr ma_uint64 sourceFrameCount = 1024;
+    std::array<float, sourceFrameCount> sourceFrames{};
+    sourceFrames.fill(0.25f);
+    ma_audio_buffer_config bufferConfig =
+        ma_audio_buffer_config_init(ma_format_f32, 1, sourceFrameCount, sourceFrames.data(), nullptr);
+    ma_audio_buffer audioBuffer{};
+    REQUIRE(ma_audio_buffer_init(&bufferConfig, &audioBuffer) == MA_SUCCESS);
+
+    constexpr ESound soundId = SOUND_CLICK01;
+    const int soundIndex = static_cast<int>(soundId);
+    ma_sound& sound = backend->m_sounds[soundIndex][0];
+    REQUIRE(ma_sound_init_from_data_source(&backend->m_engine, reinterpret_cast<ma_data_source*>(&audioBuffer), 0,
+                                           nullptr, &sound) == MA_SUCCESS);
+    backend->m_soundLoaded[soundIndex] = true;
+    backend->m_loadedChannels[soundIndex] = 1;
+    backend->m_activeChannel[soundIndex] = 0;
+    backend->SetSFXVolume(0.0f);
+
+    REQUIRE(backend->PlaySoundAtLevel(soundId, 0.6f));
+    CHECK(ma_sound_get_volume(&sound) == doctest::Approx(0.6f));
+
+    // The game's sounds keep the effect volume.
+    ma_sound_stop(&sound);
+    REQUIRE(backend->PlaySound(soundId, nullptr, false));
+    CHECK(ma_sound_get_volume(&sound) == doctest::Approx(0.0f));
+
+    backend->Shutdown();
+    ma_audio_buffer_uninit(&audioBuffer);
+}
+
 TEST_CASE("sound effects resolve Windows-spelled asset paths [audio][paths]")
 {
     auto backend = std::make_unique<mu::MiniAudioBackend>();
@@ -166,6 +210,39 @@ std::filesystem::path CreateMusicAsset()
     return testDirectory;
 }
 } // namespace
+
+TEST_CASE("sound effects requested as 3D load without spatialization [audio][3d]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitNoDeviceEngine(*backend);
+
+    constexpr std::array<unsigned char, 46> wav = {
+        'R',  'I',  'F',  'F',  0x26, 0x00, 0x00, 0x00, 'W',  'A',  'V',  'E',  'f',  'm',  't',  ' ',
+        0x10, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x40, 0x1f, 0x00, 0x00, 0x80, 0x3e, 0x00, 0x00,
+        0x02, 0x00, 0x10, 0x00, 'd',  'a',  't',  'a',  0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
+    };
+    const auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
+    const std::filesystem::path testDirectory =
+        std::filesystem::temp_directory_path() / ("mu_audio_3d_" + std::to_string(timestamp));
+    const std::filesystem::path assetPath = testDirectory / "Data" / "Sound" / "iButtonClick.wav";
+    REQUIRE(std::filesystem::create_directories(assetPath.parent_path()));
+    {
+        std::ofstream file(assetPath, std::ios::binary);
+        REQUIRE(file.write(reinterpret_cast<const char*>(wav.data()), wav.size()).good());
+    }
+
+    // Monster models request 3D; a spatialized sound at a world position would be inaudible.
+    const int soundIndex = static_cast<int>(SOUND_CLICK01);
+    backend->LoadSound(SOUND_CLICK01, assetPath.wstring().c_str(), 2, true);
+
+    REQUIRE(backend->m_soundLoaded[soundIndex]);
+    for (int ch = 0; ch < backend->m_loadedChannels[soundIndex]; ++ch)
+    {
+        CHECK_FALSE(ma_sound_is_spatialization_enabled(&backend->m_sounds[soundIndex][ch]));
+    }
+    backend->Shutdown();
+    std::filesystem::remove_all(testDirectory);
+}
 
 TEST_CASE("a named music stop matches a Windows-spelled track name [audio][music]")
 {
@@ -368,10 +445,75 @@ TEST_CASE("the editor's mute starts no sound effect played once, and lets looped
     CHECK(audio.playedLooped == 1);
     CHECK(audio.stopped == 1);
 
+    // A preview at its own level is muted too.
+    PlayBufferAtLevel(SOUND_CLICK01, 1.0f);
+    CHECK(audio.played == 0);
+
     Audio::EditorMute::SetMuted(false);
     PlayBuffer(SOUND_CLICK01, nullptr, FALSE);
     CHECK(audio.played == 1);
+    PlayBufferAtLevel(SOUND_CLICK01, 0.5f);
+    CHECK(audio.played == 2);
 
     g_platformAudio = previous;
 }
 #endif // _EDITOR
+
+namespace
+{
+// Writes Data/Sound/<name>.wav under a fresh temp directory and returns the file.
+std::filesystem::path CreateSoundAsset(const std::string& name)
+{
+    constexpr std::array<unsigned char, 46> wav = {
+        'R',  'I',  'F',  'F',  0x26, 0x00, 0x00, 0x00, 'W',  'A',  'V',  'E',  'f',  'm',  't',  ' ',
+        0x10, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x40, 0x1f, 0x00, 0x00, 0x80, 0x3e, 0x00, 0x00,
+        0x02, 0x00, 0x10, 0x00, 'd',  'a',  't',  'a',  0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
+    };
+    const auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
+    const std::filesystem::path assetPath = std::filesystem::temp_directory_path() /
+                                            ("mu_audio_sound_" + std::to_string(timestamp)) / "Data" / "Sound" /
+                                            (name + ".wav");
+    REQUIRE(std::filesystem::create_directories(assetPath.parent_path()));
+    std::ofstream file(assetPath, std::ios::binary);
+    REQUIRE(file.write(reinterpret_cast<const char*>(wav.data()), wav.size()).good());
+    return assetPath;
+}
+} // namespace
+
+TEST_CASE("a sound with a number after the SOUND_* list loads, plays and is released [audio]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitNoDeviceEngine(*backend);
+    const std::filesystem::path asset = CreateSoundAsset("numbered");
+    const int number = static_cast<int>(MAX_BUFFER) + 3;
+
+    backend->LoadSound(static_cast<ESound>(number), asset.wstring().c_str(), 2, true);
+
+    CHECK(backend->m_soundLoaded.size() == static_cast<size_t>(number) + 1);
+    CHECK(backend->m_soundLoaded[static_cast<size_t>(number)]);
+    CHECK(backend->m_loadedChannels[static_cast<size_t>(number)] == 2);
+    CHECK(backend->PlaySound(static_cast<ESound>(number), nullptr, false));
+    backend->ReleaseSound(static_cast<ESound>(number));
+    CHECK_FALSE(backend->m_soundLoaded[static_cast<size_t>(number)]);
+    // The SOUND_* ids before it keep their slots.
+    CHECK_FALSE(backend->m_soundLoaded[static_cast<size_t>(SOUND_CLICK01)]);
+
+    // No number beyond the sounds that can be given numbers: what ForFile
+    // gives when all are taken.
+    backend->LoadSound(Audio::SoundNumbers::NoNumber, asset.wstring().c_str(), 1, false);
+    CHECK(backend->m_soundLoaded.size() == static_cast<size_t>(number) + 1);
+
+    backend->Shutdown();
+    std::filesystem::remove_all(asset.parent_path().parent_path().parent_path());
+}
+
+TEST_CASE("sound files get one number each after the SOUND_* list [audio]")
+{
+    const ESound first = Audio::SoundNumbers::ForFile(L"Data/Sound/TestNumbersOne.wav");
+    const ESound second = Audio::SoundNumbers::ForFile(L"Data/Sound/TestNumbersTwo.wav");
+
+    CHECK(static_cast<int>(first) >= static_cast<int>(MAX_BUFFER));
+    CHECK(second != first);
+    // The same file, as the game opens it: without case, \ and / alike.
+    CHECK(Audio::SoundNumbers::ForFile(L"data\\sound\\testnumbersone.wav") == first);
+}

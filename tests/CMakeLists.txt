@@ -62,10 +62,17 @@ add_test(
             "${CMAKE_CURRENT_SOURCE_DIR}/test_windows_workflow_contract.py"
             "${CMAKE_SOURCE_DIR}"
 )
+add_test(
+    NAME ci_build_plan
+    COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/test_ci_build_plan.py"
+)
 add_subdirectory(benchmark)
 
 add_subdirectory(text)
 add_subdirectory(effects)
+
+add_subdirectory(monsters)
 
 add_subdirectory(ui)
 

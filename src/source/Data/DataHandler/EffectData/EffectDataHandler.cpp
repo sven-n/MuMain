@@ -22,9 +22,9 @@ bool LoadEffectTypes(std::string& errorMessage)
     const auto loadStart = std::chrono::steady_clock::now();
     const EffectTypesLoadResult result = LoadEffectTypeFiles(GetEffectDataDirectory());
     LogDataIssues(EffectDataLabel, result.issues);
-    if (Items::HasErrors(result.issues))
+    if (Items::HasFatal(result.issues))
     {
-        errorMessage = DescribeDataErrors(EffectDataName, GetEffectDataDirectory(), result.issues);
+        errorMessage = DescribeFatalIssues(EffectDataName, GetEffectDataDirectory(), result.issues);
         return false;
     }
 

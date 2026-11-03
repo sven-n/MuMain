@@ -2,6 +2,7 @@
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 #include "Data/GameData/ItemData/ItemDefinition.h"
+#include "Data/GameData/ItemData/ItemJsonCommon.h"
 
 #include <span>
 #include <string>
@@ -30,10 +31,25 @@ namespace Data::Items
 constexpr int ItemJsonFormatVersion = 1;
 
 // Reads one group file. Appends the items it could read to `items` and the
-// problems to `issues`. `source` names the file in messages.
+// problems to `issues`. `source` names the file in messages. An entry without
+// a name ({"number": 73}) is read with entryWithoutName.
 void ReadItemGroupJson(std::string_view text, const std::string& source, std::vector<ItemDefinition>& items,
                        std::vector<ItemDataIssue>& issues);
 
-// Writes the items of `group` (other items are ignored).
+// Writes the items of `group` and its entries without a name (other items are ignored).
 std::string WriteItemGroupJson(int group, std::span<const ItemDefinition> items);
+
+// The names of the classes in "classRequirements", in the order of their numbers (CLASS_WIZARD, ...).
+std::span<const char* const> GetClassKeys();
+
+// One item as the item files have it, without its group, which the file has. The item
+// exchange file with OpenMU (ItemExchangeFile) has its items so too.
+Json::OrderedJson WriteItemJson(const ItemDefinition& definition);
+// Reads what WriteItemJson writes into `definition`, an item of `group`; false with fatal problems.
+// The problems are added to `issues`. Without `nameRequired`, an item without a name is read
+// with none (an exchange file that does not carry the names).
+bool ReadItemJson(const Json::OrderedJson& json, const std::string& source, int group, ItemDefinition& definition,
+                  std::vector<ItemDataIssue>& issues, bool nameRequired = true);
+// The layout of the item files (some lists and objects on one line) for a text with items.
+std::string LayOutItemJsonText(const std::string& text);
 } // namespace Data::Items

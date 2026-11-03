@@ -24,6 +24,7 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Engine/Object/ObjectPose.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Scenes/SceneCore.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -32,18 +33,47 @@
 
 namespace
 {
+constexpr float RavenMagicTurnDegrees = 40.f;
+constexpr float RavenRecoveryHeight = 250.f;
+constexpr float RavenMinimumFlightTurnDegrees = 5.f;
+constexpr float RavenMaximumFlightTurnDegrees = 19.f;
+constexpr float RavenMaximumCourseChangeDegrees = 59.f;
+
 bool IsValidCharacterIndex(int index)
 {
     return index >= 0 && index < MAX_CHARACTERS_CLIENT;
+}
+
+void MoveFlyingPet(OBJECT* pet)
+{
+    AngleMatrix(pet->Angle, pet->Matrix);
+
+    vec3_t direction;
+    VectorRotate(pet->Direction, pet->Matrix, direction);
+    VectorAddScaled(pet->Position, direction, pet->Position, FPS_ANIMATION_FACTOR);
+}
+
+void CreateRavenAttackTrail(OBJECT* pet)
+{
+    if (!rand_fps_check(1))
+    {
+        return; // Emit at the reference rate, even when the attack spans many rendered frames.
+    }
+
+    constexpr int jointCount = 10;
+    constexpr float minimumLength = 20.f;
+    constexpr float maximumLength = 59.f;
+    for (int i = 0; i < jointCount; ++i)
+    {
+        CreateJoint(BITMAP_LIGHT, pet->Position, pet->Position, pet->Angle, 1, nullptr,
+                    Random::RangeFloat(minimumLength, maximumLength));
+    }
 }
 } // namespace
 
 extern bool g_PetEnableDuel;
 
 extern double WorldTime;
-extern wchar_t TextList[50][100];
-extern int TextListColor[50];
-extern int TextBold[50];
 
 CSPetSystem::CSPetSystem()
     : m_PetOwner(nullptr), m_PetTarget(nullptr), m_PetCharacter(), m_PetType(PET_TYPE_NONE), m_pPetInfo(nullptr),
@@ -160,6 +190,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
         m_BoneTransforms.reset();
         o->BoneTransform = nullptr;
     }
+    Engine::Object::Pose::Invalidate(o);
 
     int i;
     for (i = 0; i < 2; i++)
@@ -449,18 +480,16 @@ void CSPetDarkSpirit::MovePet(void)
         if (Distance >= FlyRange * FlyRange)
         {
             float Angle = CreateAngle2D(o->Position, TargetPosition);
-            o->Angle[2] = TurnAngle2(o->Angle[2], Angle, Random::RangeFloat(0, 14) + 5.f);
+            const float referenceTurn =
+                Random::RangeFloat(RavenMinimumFlightTurnDegrees, RavenMaximumFlightTurnDegrees);
+            o->Angle[2] = TurnAngle2(o->Angle[2], Angle, referenceTurn * FPS_ANIMATION_FACTOR);
         }
-        AngleMatrix(o->Angle, o->Matrix);
-
-        vec3_t Direction;
-        VectorRotate(o->Direction, o->Matrix, Direction);
-        VectorAdd(o->Position, Direction, o->Position);
+        MoveFlyingPet(o);
 
         int speedRandom = 28;
         int CharacterHeight = 250;
 
-        if (m_PetOwner->Helper.Type == ITEM_DARK_HORSE_ITEM || gMapManager.WorldActive == WD_55LOGINSCENE)
+        if (m_PetOwner->Helper.Type == MODEL_DARK_HORSE_ITEM || gMapManager.WorldActive == WD_55LOGINSCENE)
         {
             CharacterHeight = 350;
         }
@@ -469,14 +498,14 @@ void CSPetDarkSpirit::MovePet(void)
         if (o->Position[2] < Height)
         {
             speedRandom = 10;
-            o->Angle[0] -= 2.f;
+            o->Angle[0] -= 2.f * FPS_ANIMATION_FACTOR;
             if (o->Angle[0] < -15.f)
                 o->Angle[0] = -15.f;
         }
         else if (o->Position[2] > Height + 100)
         {
             speedRandom = 20;
-            o->Angle[0] += 2.f;
+            o->Angle[0] += 2.f * FPS_ANIMATION_FACTOR;
             if (o->Angle[0] > 15.f)
                 o->Angle[0] = 15.f;
         }
@@ -491,10 +520,11 @@ void CSPetDarkSpirit::MovePet(void)
             else
             {
                 Speed = -(Random::RangeFloat(0, 7) + 32.f) * 0.1f;
-                o->Angle[2] += Random::RangeFloat(0, 59) * FPS_ANIMATION_FACTOR;
+                // The gate already limits these course changes to the reference rate.
+                o->Angle[2] += Random::RangeFloat(0, RavenMaximumCourseChangeDegrees);
             }
 
-            Speed += o->Direction[1] * FPS_ANIMATION_FACTOR;
+            Speed += o->Direction[1];
             Speed = Speed / 2.f;
 
             o->Direction[0] = 0.f;
@@ -525,7 +555,7 @@ void CSPetDarkSpirit::MovePet(void)
 
         if (o->AI == PET_ATTACK)
         {
-            TargetPosition[2] += 50.f * FPS_ANIMATION_FACTOR;
+            TargetPosition[2] += 50.f;
             float Distance = MoveHumming(o->Position, o->Angle, TargetPosition, o->Velocity);
             if (Distance < 20 || o->LifeTime > 20)
             {
@@ -559,7 +589,7 @@ void CSPetDarkSpirit::MovePet(void)
             OBJECT* to = &tc->Object;
 
             float Angle = CreateAngle2D(o->Position, to->Position);
-            o->Angle[2] = TurnAngle2(o->Angle[2], Angle, 40.f);
+            o->Angle[2] = TurnAngle2(o->Angle[2], Angle, RavenMagicTurnDegrees * FPS_ANIMATION_FACTOR);
         }
     }
     else if (o->AI == PET_STAND)
@@ -586,7 +616,7 @@ void CSPetDarkSpirit::MovePet(void)
         b->TransformPosition(Owner->BoneTransform[42], p, Pos, true);
 
         float Distance = MoveHumming(o->Position, o->Angle, Pos, o->Velocity);
-        o->Velocity++;
+        o->Velocity += FPS_ANIMATION_FACTOR;
         if (Distance < 50)
         {
             SetAI(PET_STAND);
@@ -600,7 +630,7 @@ void CSPetDarkSpirit::MovePet(void)
             c->AttackTime = 15;
         }
     }
-    if (rand_fps_check(100) && rand_fps_check(60))
+    if (rand_fps_check(100) && Random::Rand() % 60 == 0)
     {
         PlayBuffer(SOUND_DSPIRIT_SHOUT, o);
     }
@@ -616,45 +646,70 @@ void CSPetDarkSpirit::MovePet(void)
     {
         o->LifeTime = 0;
         VectorCopy(TargetPosition, o->Position);
-        o->Position[2] += 250.f * FPS_ANIMATION_FACTOR;
+        o->Position[2] += RavenRecoveryHeight;
     }
 }
 
 void CSPetDarkSpirit::CalcPetInformation(const PET_INFO& Petinfo) {}
 
-void CSPetDarkSpirit::RenderPet(int PetState)
+void CSPetDarkSpirit::CullPet()
 {
-    CHARACTER* c = &m_PetCharacter;
-    OBJECT* o = &c->Object;
+    OBJECT* o = &m_PetCharacter.Object;
+    if (o->Live)
+        o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f);
+}
+
+void CSPetDarkSpirit::RenderPet(int PetState) const
+{
+    const CHARACTER* c = &m_PetCharacter;
+    const OBJECT* o = &c->Object;
 
     if (c == nullptr || o == nullptr)
     {
         return;
     }
 
-    if (m_pPetInfo)
-        o->WeaponLevel = static_cast<std::uint8_t>(m_pPetInfo->m_wLevel & 0xFF);
-
     if (o->Live)
     {
-        o->Visible = TestFrustrum2D(o->Position[0] * 0.01f, o->Position[1] * 0.01f, -20.f);
         if (o->Visible)
         {
             if (m_PetOwner->Object.Type != MODEL_PLAYER && o->Type != MODEL_DARK_SPIRIT)
                 return;
 
             RenderObject(o, false, 0, PetState);
-            AttackEffect(c, o);
-        }
-        else
-        {
-            o->Velocity = 3.f;
-            if (o->AI != PET_STAND_START)
-            {
-                o->AI = PET_FLYING;
-            }
         }
     }
+}
+
+void CSPetDarkSpirit::UpdatePetEffects()
+{
+    CHARACTER* c = &m_PetCharacter;
+    OBJECT* o = &c->Object;
+
+    if (m_pPetInfo)
+        o->WeaponLevel = static_cast<std::uint8_t>(m_pPetInfo->m_wLevel & 0xFF);
+
+    if (!o->Live)
+        return;
+
+    if (!o->Visible)
+    {
+        o->Velocity = 3.f;
+        if (o->AI != PET_STAND_START)
+        {
+            o->AI = PET_FLYING;
+        }
+        return;
+    }
+
+    if (m_PetOwner->Object.Type != MODEL_PLAYER && o->Type != MODEL_DARK_SPIRIT)
+        return;
+
+    // The world pose its draw would build, which the draw then reuses.
+    BMD* b = &Models[o->Type];
+    PlaceObjectModel(o, b);
+    Engine::Object::Pose::World(o, b);
+    AttackEffect(c, o);
 }
 
 void CSPetDarkSpirit::Eff_LevelUp(void)
@@ -692,11 +747,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
     case PET_ATTACK:
         if (c->AttackTime >= 0 && c->AttackTime <= 2 && m_PetTarget != NULL)
         {
-            for (int i = 0; i < 10; i++)
-            {
-                CreateJoint(BITMAP_LIGHT, o->Position, o->Position, o->Angle, 1, NULL,
-                            (Random::RangeFloat(0, 39) + 20.f));
-            }
+            CreateRavenAttackTrail(o);
 
             if (c->CheckAttackTime(1))
             {
@@ -746,6 +797,7 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
 
                 if (to != NULL)
                 {
+                    SkinObjectMeshes(o, b, false);
                     b->RenderMeshEffect(1, BITMAP_LIGHT, 1, o->Angle, to);
                 }
 

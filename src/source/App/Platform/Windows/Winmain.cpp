@@ -1,12 +1,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Input/SyntheticInput.h"
 #include "Core/Platform/GameWindow.h"
 #include "Core/Input/UiInputRouter.h"
 #include "App/Control/ControlServer.h"
+#include "App/Control/DrawPurityCheck.h"
+#include "Core/Utilities/DrawSpawnCheck.h"
 #include "Core/Text/Utf8.h"
 #include "App/Platform/DiagnosticFrameCaptureSchedule.h"
 #include "App/Platform/DiagnosticFrameCaptureWriter.h"
@@ -26,6 +29,9 @@
 #include <utility>
 #include <vector>
 #include "Core/Platform/WinIni.h" // private-profile (.ini) API
+#include "Data/DataHandler/ItemData/ItemDataHandler.h"
+#include "Data/DataHandler/MonsterData/MonsterDataHandler.h"
+#include "GameLogic/Monsters/MonsterNames.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -33,6 +39,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Look/LookPresetSetting.h"
 #include "Render/Look/LookProfileSetting.h"
+#include "Render/Look/TuningSetting.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlRuntimeHooks.h"
 #include "Engine/Object/ZzzOpenData.h"
@@ -102,7 +109,6 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Scaling/UITransform.h"
 #include "Camera/CameraConfig.h"
-#include "Camera/CameraProjection.h"
 #include "I18N/All.h"
 
 #ifdef _EDITOR
@@ -123,7 +129,7 @@ CUIMapName* g_pUIMapName = nullptr; // rozy
 
 float Time_Effect = 0;
 bool ashies = false;
-int weather = rand() % 3;
+int weather = Random::Rand() % 3;
 
 HWND g_hWnd = nullptr;
 HINSTANCE g_hInst = nullptr;
@@ -185,7 +191,7 @@ void CheckHack()
     }
 
     const int dwTick = GetTickCount();
-    SocketClient->ToGameServer()->SendPing(dwTick, attackSpeed);
+    SocketClient->ToGameServer()->SendPing(dwTick, attackSpeed, magicSpeed);
 
     if (!First)
     {
@@ -680,15 +686,13 @@ int g_iMousePopPosition_y = 0;
 extern int TimeRemain;
 extern bool EnableFastInput;
 
-// The legacy Win32 message handler. SDL owns the event loop on Linux and only
-// bridges to this via the Windows-only message hook, so guard it off there.
+// Legacy game-message side effects, reached through the Windows-only SDL hook.
 #ifdef _WIN32
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    // F10 zoom-lock toggle. Handled before the ImGui forwarder so editor-open
-    // sessions still get the toggle (ImGui captures keyboard messages while a
-    // window has focus). Bit 30 of lParam = previous key state — skip
-    // auto-repeat ticks so a held key only toggles once.
+    // F10 zoom-lock toggle. The native hook runs before SDL event routing, so
+    // editor-open sessions still get the toggle. Bit 30 of lParam = previous
+    // key state — skip auto-repeat ticks so a held key only toggles once.
     constexpr LPARAM PREVIOUS_KEY_STATE_MASK = 1 << 30;
     if (msg == WM_SYSKEYDOWN && wParam == VK_F10 && (lParam & PREVIOUS_KEY_STATE_MASK) == 0)
     {
@@ -703,8 +707,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     {
     case WM_SYSKEYDOWN:
     {
-        // F10 is handled above (intercepted before ImGui). Other system keys
-        // are silenced here — returning 0 prevents the OS menu activation.
+        // F10 auto-repeat needs no legacy work. The hook ignores this return
+        // value and lets SDL continue processing the system-key message.
         return 0;
     }
     break;
@@ -986,26 +990,31 @@ void SetMaxMessagePerCycle(int messages)
 }
 
 #ifdef _WIN32
-// Transitional bridge (issue #442): SDL owns the window, but the existing
-// WndProc still handles input, IME, the legacy Win32 EDIT-control text boxes,
-// the cursor, and shutdown. SDL invokes this for every Win32 message it pumps;
-// forward to WndProc and return true so SDL continues its own processing (which
-// also dispatches the child EDIT controls). Removed once input/IME are
-// SDL-native and the legacy text boxes are replaced (issue #447).
+// Transitional bridge (issue #442): SDL owns message dispatch and default
+// handling. Forward only the remaining queued game-input/shutdown messages;
+// default/non-client messages can otherwise enter Win32 button tracking twice
+// and stall Minimize/Close. Removed once input/IME are SDL-native and the legacy
+// text boxes are replaced (issue #447).
 static bool SDLCALL Win32MessageHook(void* /*userdata*/, MSG* msg)
 {
     // Let SDL own window close. Forwarding WM_CLOSE to WndProc would reach
     // DefWindowProc, which destroys the window synchronously and out from under
-    // SDL. SDL turns the close into SDL_EVENT_QUIT, which the main loop handles.
+    // SDL. The main loop handles SDL's window-close event instead.
     if (msg->message == WM_CLOSE)
         return true;
-#ifdef _EDITOR
-    // The editor's own windows are not the game's: SDL alone handles theirs.
+    // Child controls, editor windows and other windows on this thread keep
+    // their own handling in every build, including normal player builds.
     if (msg->hwnd != nullptr && msg->hwnd != g_hWnd)
         return true;
-#endif
 
-    WndProc(msg->hwnd, msg->message, msg->wParam, msg->lParam);
+    // Only F10's zoom lock, Enter's legacy input flag and posted WM_DESTROY
+    // shutdown requests need this bridge. SDL dispatches everything else.
+    const bool isZoomLockKey = msg->message == WM_SYSKEYDOWN && msg->wParam == VK_F10;
+    const bool isEnterKey = msg->message == WM_CHAR && msg->wParam == VK_RETURN;
+    if (isZoomLockKey || isEnterKey || msg->message == WM_DESTROY)
+    {
+        WndProc(msg->hwnd, msg->message, msg->wParam, msg->lParam);
+    }
     return true;
 }
 #endif
@@ -1468,15 +1477,19 @@ MSG MainLoop()
         SDL_Event event;
         int messageProcessed = 0;
 
+        // Wait for the GPU before reading input, not after: with VSync the frame then uses input as fresh as
+        // the CPU work allows, and the wait isn't counted as the renderer's CPU time.
+        mu::GetRenderer().WaitForSwapchain();
+
         // Per-frame mouse-state reset (was done per-message in WndProc): clear a
         // stale double-click and a pop whose position the cursor has moved off.
         MouseLButtonDBClick = false;
         if (MouseLButtonPop && (g_iMousePopPosition_x != MouseX || g_iMousePopPosition_y != MouseY))
             MouseLButtonPop = false;
 
-        // Pumping SDL also drives the Win32 message hook (-> WndProc) for the
-        // input still on it (IME, the legacy EDIT text boxes); mouse and window
-        // events are handled here, off the hook.
+        // The Windows hook bridges F10, Enter and posted game-shutdown messages.
+        // SDL dispatches child EDIT controls itself; mouse/window events and
+        // the editor's input are routed below.
         while (SDL_PollEvent(&event))
         {
 #ifdef _EDITOR
@@ -1502,10 +1515,8 @@ MSG MainLoop()
                 Destroy = true;
                 break;
             case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
-                // Titlebar X / Alt+F4. Close on this event directly instead of relying
-                // solely on the SDL_EVENT_QUIT SDL derives from it - depending on that
-                // indirection left the first close press with no visible effect, only
-                // closing the window on a second press (#535).
+                // Titlebar X / Alt+F4: request shutdown directly on SDL's close
+                // event, without relying on a subsequent SDL_EVENT_QUIT (#535).
                 Destroy = true;
                 break;
             case SDL_EVENT_MOUSE_MOTION:
@@ -1620,6 +1631,9 @@ MSG MainLoop()
                 ApplyPendingVSyncPreference();
                 // Between frames: a texture replaced mid-frame would drop the frame's draws.
                 Bitmaps.UpdateTextureFiltering();
+                // The player's Mood strength, at most one map light rebuild per frame however often
+                // it moved (options open or closed).
+                Render::Look::ApplyPendingTuning();
                 RenderProfiledFrame();
 #ifdef _EDITOR
                 // The editor's own windows, now that the game's frame went to the GPU.
@@ -1870,13 +1884,6 @@ void UpdateCursorClip()
 // Update camera state when window resolution changes
 void UpdateResolutionDependentSystems()
 {
-    // Force camera state update with new viewport dimensions
-    // This updates ScreenCenterX/Y and PerspectiveX/Y used for 3D item positioning
-    extern CameraState g_Camera;
-    float aspectRatio = (float)WindowWidth / (float)WindowHeight;
-    CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio, g_Camera.ViewNear,
-                                       g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
-
     // Reposition old-style CWin-based UI for the current scene. Without this,
     // login/character-scene info boxes stay anchored to the old screen size
     // until the player re-enters the scene.
@@ -2185,16 +2192,19 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     Bitmaps.SetTextureFiltering(Render::Look::PresetFeatures(GameConfig::GetInstance().GetLook()).textureFiltering,
                                 GameConfig::GetInstance().GetAnisotropy());
     Bitmaps.UpdateTextureFiltering();
+    // Also before the first texture loads: the pack is read once, so a new choice takes effect after a
+    // restart.
+    Bitmaps.SetTexturePack(GameConfig::GetInstance().GetTexturePack());
 
 #ifdef _WIN32
-    // Bridge SDL's native handles so the remaining Win32 code (IME, DirectSound,
-    // cursor, the legacy EDIT-control text boxes) keeps working.
+    // Expose SDL's native handles for remaining Windows integrations, including
+    // DirectSound and the legacy EDIT-control text boxes.
     g_hWnd = static_cast<HWND>(
         SDL_GetPointerProperty(SDL_GetWindowProperties(g_sdlWindow), SDL_PROP_WINDOW_WIN32_HWND_POINTER, nullptr));
     g_hDC = GetDC(g_hWnd);
     g_hRC = nullptr;
 
-    // Drive the existing WndProc from SDL's Win32 messages (transitional, #442).
+    // Bridge the remaining queued game messages only (transitional, #442/#447).
     SDL_SetWindowsMessageHook(Win32MessageHook, nullptr);
 #endif // _WIN32
 
@@ -2204,7 +2214,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 #ifndef _WIN32
     // The engine hid the OS cursor (it draws its own) before the SDL video
     // subsystem existed, so that call could not reach SDL. Apply the pending
-    // state now that the window is up. On Windows WM_SETCURSOR keeps doing this.
+    // state now that the window is up.
     MuApplyCursorVisibility();
 #endif
 
@@ -2245,7 +2255,11 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     mu::GetRenderer().SetOffscreenRenderCallback([]
     {
         FRAME_PROFILE(UI);
+        // A draw pass like the scene's: what the previews draw was updated by their owners.
+        const Diagnostics::DrawSpawnCheck::DrawScope drawing;
+        Diagnostics::DrawPurityCheck::BeforeDraw();
         UI::RmlBridge::RenderTarget::RenderAll();
+        Diagnostics::DrawPurityCheck::AfterDraw();
     });
 
     mu::GetRenderer().SetPostRmlUiCallback(
@@ -2288,6 +2302,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         std::string uiLocale(uiLocaleW.begin(), uiLocaleW.end());
         I18N::SetLocale(uiLocale.c_str());
     }
+    g_ItemDataHandler.SetTranslateItemNames(GameConfig::GetInstance().GetTranslateItemNames());
+    g_MonsterDataHandler.SetNamesChangedCallback(&GameLogic::Monsters::Names::RefreshShownNames);
 
 #ifdef _EDITOR
     // Initialize MU Editor with the live SDL GPU window.
@@ -2309,6 +2325,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     InitVSync();
     ApplyVSyncPreferenceNow(GameConfig::GetInstance().GetVSyncEnabled());
     Render::Look::LoadProfile();
+    Render::Look::LoadPersonalTuning();
     Render::Look::ApplyLookPreset(GameConfig::GetInstance().GetLook());
 
     // Apply persisted DXP-23 effect-cost toggles (Options window's Graphics tab, formerly only
@@ -2384,18 +2401,18 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     timers.SetRepeating(MUHELPER_TIMER, 250 /* ms */,
                         [] { MUHelper::CMuHelper::TimerProc(nullptr, 0, MUHELPER_TIMER, 0); });
 
-    srand((unsigned)time(nullptr));
+    Random::SeedRand((unsigned)time(nullptr));
 
     for (int& i : RandomTable)
-        i = rand() % 360;
+        i = Random::Rand() % 360;
 
-    RendomMemoryDump = new BYTE[rand() % 100 + 1];
+    RendomMemoryDump = new BYTE[Random::Rand() % 100 + 1];
     GateAttribute = new GATE_ATTRIBUTE[MAX_GATES]{};
     SkillAttribute = new SKILL_ATTRIBUTE[MAX_SKILLS]{};
     ItemAttRibuteMemoryDump = new ITEM_ATTRIBUTE[MAX_ITEM + 1024]{};
-    ItemAttribute = ItemAttRibuteMemoryDump + rand() % 1024;
+    ItemAttribute = ItemAttRibuteMemoryDump + Random::Rand() % 1024;
     CharacterMemoryDump = new CHARACTER[MAX_CHARACTERS_CLIENT + 1 + 128]{};
-    CharactersClient = CharacterMemoryDump + rand() % 128;
+    CharactersClient = CharacterMemoryDump + Random::Rand() % 128;
     CharacterMachine = new CHARACTER_MACHINE;
 
     memset(GateAttribute, 0, sizeof(GATE_ATTRIBUTE) * (MAX_GATES));

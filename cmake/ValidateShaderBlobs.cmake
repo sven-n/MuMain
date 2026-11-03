@@ -15,7 +15,9 @@ set(MU_SHADER_STAGE_NAMES
     basic_colored.vert
     basic_colored.frag
     skinned_textured.vert
+    skinned_weighted.vert
     skinned_shadow.vert
+    skinned_weighted_shadow.vert
     skinned_lit.frag
     shadow_volume.vert
     post_fullscreen.vert

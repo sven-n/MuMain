@@ -21,14 +21,14 @@ public:
     void UnRegisterBuff(eBuffState buffstate);
     void UnRegisterBuff(std::list<eBuffState> buffstate);
 
-    bool isBuff();
-    bool isBuff(eBuffState buffstate);
-    const eBuffState isBuff(std::list<eBuffState> buffstatelist);
+    bool isBuff() const;
+    bool isBuff(eBuffState buffstate) const;
+    const eBuffState isBuff(std::list<eBuffState> buffstatelist) const;
     void TokenBuff(eBuffState curbufftype);
 
 public:
-    const DWORD GetBuffSize();
-    const eBuffState GetBuff(int iterindex);
+    const DWORD GetBuffSize() const;
+    const eBuffState GetBuff(int iterindex) const;
     const DWORD GetBuffCount(eBuffState buffstate);
     void ClearBuff();
     bool IsEqualBuffType(IN int iBuffType, OUT wchar_t* szBuffName);

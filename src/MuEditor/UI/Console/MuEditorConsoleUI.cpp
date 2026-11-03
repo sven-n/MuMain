@@ -303,8 +303,10 @@ void CMuEditorConsoleUI::Render(bool* open)
     ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.1f, 0.1f, 0.1f, 0.9f));
 
     MuEditor::Layout::PrepareToolWindow();
-    if (ImGui::Begin(MuEditor::WindowIds::Console, open, flags))
+    if (ImGui::Begin(MuEditor::WindowIds::Console, open,
+                     flags | MuEditor::Layout::ToolWindowBarFlags(MuEditor::WindowIds::Console)))
     {
+        MuEditor::Layout::RenderToolWindowBar();
         // Check if hovering this window or any of its children
         if (ImGui::IsWindowHovered(ImGuiHoveredFlags_ChildWindows | ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
         {

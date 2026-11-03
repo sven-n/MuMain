@@ -129,3 +129,15 @@
 .mode-cancel-only #btn_cancel, .mode-both #btn_cancel, .mode-input #btn_cancel { display: block; }
 .mode-both #btn_cancel { left: 200dp; }
 .mode-input #btn_cancel { left: 264dp; }
+
+/* Captions other than OK/Cancel (the login screen's Reconnect/Exit) can't use the lettered art:
+   they get base.rcss's plain button in its full width, as a centred pair. */
+.own-captions #btn_ok, .own-captions #btn_cancel {
+	width: 108dp;
+	color: token(text-primary);
+	decorator: image(legacy-btn-idle);
+}
+.own-captions #btn_ok:hover, .own-captions #btn_cancel:hover { decorator: image(legacy-btn-hover); }
+.own-captions #btn_ok:active, .own-captions #btn_cancel:active { decorator: image(legacy-btn-active); }
+.own-captions.mode-both #btn_ok { left: 60dp; }
+.own-captions.mode-both #btn_cancel { left: 184dp; }

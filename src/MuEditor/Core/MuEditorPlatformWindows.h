@@ -14,14 +14,17 @@ namespace MuEditor::PlatformWindows
 // windows appear without taking the keyboard where ImGui says so, and one that
 // cannot be seen counts as minimized; a maximized
 // or full-screen window ImGui moves or sizes turns normal first; one closed
-// while full screen keeps its windowed place.
+// while full screen keeps its windowed place; one ImGui places over its whole
+// monitor (title bar above the screen) goes into the monitor's usable area.
 void Install();
 
-// Once per frame, after the platform backend's NewFrame and before ImGui's: on
-// macOS keeps the editor's windows in front of the game while MU is the
-// active app, and tells ImGui which of them the mouse is over (the backend
-// cannot there); on Linux drops a mouse position SDL may hold stale while no
-// window of the game is under the mouse.
+// Once per frame, after the platform backend's NewFrame and before ImGui's:
+// holds imgui.ini's save while an editor window is full screen, so its
+// full-screen rect is not saved as its place; on macOS keeps the editor's
+// windows in front of the game while MU is the active app, and tells ImGui
+// which of them the mouse is over (the backend cannot there); on Linux drops
+// a mouse position SDL may hold stale while no window of the game is under
+// the mouse.
 void BeforeNewFrame();
 
 // Frees what the editor's windows share, at shutdown.
@@ -46,6 +49,8 @@ bool IsMouseOverOsWindow();
 bool IsMinimized(const ImGuiViewport* viewport);
 
 bool IsFullscreen(SDL_Window* window);
+// Into full screen on its monitor, or back into its windowed place with the
+// title bar on the screen.
 void ToggleFullscreen(SDL_Window* window);
 } // namespace MuEditor::PlatformWindows
 

@@ -39,9 +39,9 @@ bool HasIssue(const std::vector<ItemDataIssue>& issues, ItemDataIssueSeverity se
     });
 }
 
-bool HasError(const std::string& model, const std::string& field)
+bool HasFatalIssue(const std::string& model, const std::string& field)
 {
-    return HasIssue(Read(GroupFile(13, model)).issues, ItemDataIssueSeverity::Error, field);
+    return HasIssue(Read(GroupFile(13, model)).issues, ItemDataIssueSeverity::Fatal, field);
 }
 
 ItemModelDefinition MakeDarkHorse()
@@ -118,38 +118,42 @@ TEST_CASE("Folder names with spaces stay intact on one line [data][items]")
 
 TEST_CASE("A model needs a number and a .bmd file [data][items]")
 {
-    CHECK(HasError(R"({"file": "Data/Item/Ring01.bmd"})", "number"));
-    CHECK(HasError(R"({"number": 512, "file": "Data/Item/Ring01.bmd"})", "number"));
-    CHECK(HasError(R"({"number": 8})", "file"));
-    CHECK(HasError(R"({"number": 8, "file": ""})", "file"));
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.ozj"})", "file"));
-    CHECK(HasError(R"({"number": 8, "file": "Data\\Item\\Ring01.bmd"})", "file"));
+    CHECK(HasFatalIssue(R"({"file": "Data/Item/Ring01.bmd"})", "number"));
+    CHECK(HasFatalIssue(R"({"number": 512, "file": "Data/Item/Ring01.bmd"})", "number"));
+    CHECK(HasFatalIssue(R"({"number": 8})", "file"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": ""})", "file"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.ozj"})", "file"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data\\Item\\Ring01.bmd"})", "file"));
     CHECK(Read(GroupFile(13, R"({"number": 8, "file": "Data/Item/Ring01.BMD"})")).issues.empty());
 }
 
 TEST_CASE("Model paths stay inside the game folder [data][items]")
 {
-    CHECK(HasError(R"({"number": 8, "file": "/Data/Item/Ring01.bmd"})", "file"));
-    CHECK(HasError(R"({"number": 8, "file": "C:/Mu/Data/Item/Ring01.bmd"})", "file"));
-    CHECK(HasError(R"({"number": 8, "file": "Data/../../Ring01.bmd"})", "file"));
-    CHECK(HasError(R"({"number": 8, "file": "Data//Item/Ring01.bmd"})", "file"));
-    CHECK(
-        HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "textureFolders": ["../Item"]})", "textureFolders"));
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "textureFolders": ["/Item"]})", "textureFolders"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "/Data/Item/Ring01.bmd"})", "file"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "C:/Mu/Data/Item/Ring01.bmd"})", "file"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/../../Ring01.bmd"})", "file"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data//Item/Ring01.bmd"})", "file"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "textureFolders": ["../Item"]})",
+                        "textureFolders"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "textureFolders": ["/Item"]})",
+                        "textureFolders"));
     CHECK(Read(GroupFile(13, R"({"number": 8, "file": "Data/Item/..Ring01.bmd", "textureFolders": ["Item/xmas"]})"))
               .issues.empty());
 }
 
 TEST_CASE("Texture folders and none-blend meshes are checked [data][items]")
 {
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "textureFolders": "Item"})", "textureFolders"));
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "textureFolders": [""]})", "textureFolders"));
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "textureFolders": ["Item/"]})",
-                   "textureFolders"));
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "textureFolders": ["Item\\xmas"]})",
-                   "textureFolders"));
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "noneBlendMeshes": [-1]})", "noneBlendMeshes"));
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "noneBlendMeshes": ["1"]})", "noneBlendMeshes"));
+    CHECK(
+        HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "textureFolders": "Item"})", "textureFolders"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "textureFolders": [""]})", "textureFolders"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "textureFolders": ["Item/"]})",
+                        "textureFolders"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "textureFolders": ["Item\\xmas"]})",
+                        "textureFolders"));
+    CHECK(
+        HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "noneBlendMeshes": [-1]})", "noneBlendMeshes"));
+    CHECK(
+        HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "noneBlendMeshes": ["1"]})", "noneBlendMeshes"));
 
     const ReadResult result = Read(GroupFile(13, R"({"number": 8, "file": "Data/Item/Ring01.bmd"})"));
     REQUIRE(result.models.size() == 1);
@@ -181,12 +185,12 @@ TEST_CASE("A model can name a shared model instead of its file [data][items]")
 
 TEST_CASE("A model with a shared model leaves out its file, texture folders and none-blend meshes [data][items]")
 {
-    CHECK(HasError(R"({"number": 8, "model": "ring", "file": "Data/Item/Ring01.bmd"})", "file"));
-    CHECK(HasError(R"({"number": 8, "model": "ring", "textureFolders": ["Item"]})", "textureFolders"));
-    CHECK(HasError(R"({"number": 8, "model": "ring", "noneBlendMeshes": [1]})", "noneBlendMeshes"));
-    CHECK(HasError(R"({"number": 8, "model": "transformation ring"})", "model"));
-    CHECK(HasError(R"({"number": 8, "model": ""})", "model"));
-    CHECK(HasError(R"({"number": 8, "model": 3})", "model"));
+    CHECK(HasFatalIssue(R"({"number": 8, "model": "ring", "file": "Data/Item/Ring01.bmd"})", "file"));
+    CHECK(HasFatalIssue(R"({"number": 8, "model": "ring", "textureFolders": ["Item"]})", "textureFolders"));
+    CHECK(HasFatalIssue(R"({"number": 8, "model": "ring", "noneBlendMeshes": [1]})", "noneBlendMeshes"));
+    CHECK(HasFatalIssue(R"({"number": 8, "model": "transformation ring"})", "model"));
+    CHECK(HasFatalIssue(R"({"number": 8, "model": ""})", "model"));
+    CHECK(HasFatalIssue(R"({"number": 8, "model": 3})", "model"));
 }
 
 TEST_CASE("The render style of a model is a name [data][items]")
@@ -194,9 +198,10 @@ TEST_CASE("The render style of a model is a name [data][items]")
     const std::string text = WriteItemModelGroupJson(13, std::vector<ItemModelDefinition>{MakeDarkHorse()});
     CHECK(text.find(R"("renderStyle": "darkHorse")") != std::string::npos);
 
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "renderStyle": 3})", "renderStyle"));
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "renderStyle": "chrome mesh"})", "renderStyle"));
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "renderStyle": ""})", "renderStyle"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "renderStyle": 3})", "renderStyle"));
+    CHECK(
+        HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "renderStyle": "chrome mesh"})", "renderStyle"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "renderStyle": ""})", "renderStyle"));
 
     // Without a style the model is drawn plainly.
     const ReadResult result = Read(GroupFile(13, R"({"number": 8, "file": "Data/Item/Ring01.bmd"})"));
@@ -211,9 +216,9 @@ TEST_CASE("The item effect of a model is a name [data][items]")
     // The item effect comes after the render style.
     CHECK(text.find(R"("renderStyle")") < text.find(R"("itemEffect")"));
 
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "itemEffect": ["sparks"]})", "itemEffect"));
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "itemEffect": "red sparks"})", "itemEffect"));
-    CHECK(HasError(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "itemEffect": ""})", "itemEffect"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "itemEffect": ["sparks"]})", "itemEffect"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "itemEffect": "red sparks"})", "itemEffect"));
+    CHECK(HasFatalIssue(R"({"number": 8, "file": "Data/Item/Ring01.bmd", "itemEffect": ""})", "itemEffect"));
 
     // Without an item effect the model is only drawn.
     const ReadResult result = Read(GroupFile(13, R"({"number": 8, "file": "Data/Item/Ring01.bmd"})"));
@@ -236,16 +241,16 @@ TEST_CASE("Unknown model fields are warnings [data][items]")
     const ReadResult result = Read(GroupFile(13, R"({"number": 8, "file": "Data/Item/Ring01.bmd", "scale": 2})"));
 
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "scale"));
-    CHECK_FALSE(HasErrors(result.issues));
+    CHECK_FALSE(HasFatal(result.issues));
     CHECK(result.models.size() == 1);
 }
 
 TEST_CASE("Invalid item model files are reported [data][items]")
 {
-    CHECK(HasErrors(Read("{").issues));
-    CHECK(HasErrors(Read(R"({"formatVersion": 2, "group": 13, "models": []})").issues));
-    CHECK(HasErrors(Read(R"({"formatVersion": 1, "group": 16, "models": []})").issues));
-    CHECK(HasIssue(Read(R"({"formatVersion": 1, "group": 13})").issues, ItemDataIssueSeverity::Error, "models"));
+    CHECK(HasFatal(Read("{").issues));
+    CHECK(HasFatal(Read(R"({"formatVersion": 2, "group": 13, "models": []})").issues));
+    CHECK(HasFatal(Read(R"({"formatVersion": 1, "group": 16, "models": []})").issues));
+    CHECK(HasIssue(Read(R"({"formatVersion": 1, "group": 13})").issues, ItemDataIssueSeverity::Fatal, "models"));
 }
 
 TEST_CASE("Item model validation finds items with two models [data][items]")
@@ -258,6 +263,27 @@ TEST_CASE("Item model validation finds items with two models [data][items]")
     REQUIRE(issues.size() == 1);
     CHECK(issues[0].group == 13);
     CHECK(issues[0].number == 4);
+}
+
+TEST_CASE("A model needs an entry in the item file at its number [data][items]")
+{
+    const std::vector<ItemModelDefinition> models{MakeDarkHorse()};
+    std::vector<ItemDataIssue> issues;
+
+    ValidateModelsHaveItemEntries(std::vector<ItemDefinition>{}, models, issues);
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Error);
+    CHECK(issues[0].group == 13);
+    CHECK(issues[0].number == 4);
+
+    // An entry without a name is enough.
+    ItemDefinition entry;
+    entry.group = 13;
+    entry.number = 4;
+    entry.entryWithoutName = true;
+    issues.clear();
+    ValidateModelsHaveItemEntries(std::vector<ItemDefinition>{entry}, models, issues);
+    CHECK(issues.empty());
 }
 
 TEST_CASE("The item model database finds models by item type [data][items]")
@@ -306,10 +332,10 @@ SharedReadResult ReadShared(const std::string& text)
     return result;
 }
 
-bool HasSharedError(const std::string& model, const std::string& field)
+bool HasSharedFatalIssue(const std::string& model, const std::string& field)
 {
     return HasIssue(ReadShared(R"({"formatVersion": 1, "models": [)" + model + "]}").issues,
-                    ItemDataIssueSeverity::Error, field);
+                    ItemDataIssueSeverity::Fatal, field);
 }
 
 SharedItemModel MakeSkillParchment()
@@ -351,28 +377,28 @@ TEST_CASE("Shared model JSON keeps every value through write and read, sorted by
 TEST_CASE("A shared model needs a name and a .bmd file [data][items]")
 {
     // Without a name the position in the list names the entry.
-    CHECK(HasSharedError(R"({"file": "Data/Item/Ring01.bmd"})", "models[0].name"));
-    CHECK(HasSharedError(R"({"name": "a ring", "file": "Data/Item/Ring01.bmd"})", "models[0].name"));
-    CHECK(HasSharedError(R"({"name": "ring", "file": "Data/Item/Ring01.bmd"}, {"file": "Data/Item/Ring02.bmd"})",
-                         "models[1].name"));
-    CHECK(HasSharedError(R"(3)", "models[0]"));
+    CHECK(HasSharedFatalIssue(R"({"file": "Data/Item/Ring01.bmd"})", "models[0].name"));
+    CHECK(HasSharedFatalIssue(R"({"name": "a ring", "file": "Data/Item/Ring01.bmd"})", "models[0].name"));
+    CHECK(HasSharedFatalIssue(R"({"name": "ring", "file": "Data/Item/Ring01.bmd"}, {"file": "Data/Item/Ring02.bmd"})",
+                              "models[1].name"));
+    CHECK(HasSharedFatalIssue(R"(3)", "models[0]"));
     // The fields of a shared model are named after it.
-    CHECK(HasSharedError(R"({"name": "ring"})", "ring.file"));
-    CHECK(HasSharedError(R"({"name": "ring", "file": "Data/Item/Ring01.ozj"})", "ring.file"));
-    CHECK(HasSharedError(R"({"name": "ring", "file": "Data/Item/Ring01.bmd", "textureFolders": ["../Item"]})",
-                         "ring.textureFolders"));
-    CHECK(HasSharedError(R"({"name": "ring", "file": "Data/Item/Ring01.bmd", "noneBlendMeshes": [-1]})",
-                         "ring.noneBlendMeshes"));
+    CHECK(HasSharedFatalIssue(R"({"name": "ring"})", "ring.file"));
+    CHECK(HasSharedFatalIssue(R"({"name": "ring", "file": "Data/Item/Ring01.ozj"})", "ring.file"));
+    CHECK(HasSharedFatalIssue(R"({"name": "ring", "file": "Data/Item/Ring01.bmd", "textureFolders": ["../Item"]})",
+                              "ring.textureFolders"));
+    CHECK(HasSharedFatalIssue(R"({"name": "ring", "file": "Data/Item/Ring01.bmd", "noneBlendMeshes": [-1]})",
+                              "ring.noneBlendMeshes"));
 
     const SharedReadResult result =
         ReadShared(R"({"formatVersion": 1, "models": [{"name": "ring", "file": "Data/Item/Ring01.bmd", "glow": {}}]})");
     CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Warning, "ring.glow"));
-    CHECK_FALSE(HasErrors(result.issues));
+    CHECK_FALSE(HasFatal(result.issues));
     CHECK(result.models.size() == 1);
 
-    CHECK(HasErrors(ReadShared("{").issues));
-    CHECK(HasErrors(ReadShared(R"({"formatVersion": 2, "models": []})").issues));
-    CHECK(HasIssue(ReadShared(R"({"formatVersion": 1})").issues, ItemDataIssueSeverity::Error, "models"));
+    CHECK(HasFatal(ReadShared("{").issues));
+    CHECK(HasFatal(ReadShared(R"({"formatVersion": 2, "models": []})").issues));
+    CHECK(HasIssue(ReadShared(R"({"formatVersion": 1})").issues, ItemDataIssueSeverity::Fatal, "models"));
 }
 
 TEST_CASE("The items that name a shared model get its file, texture folders and none-blend meshes [data][items]")
@@ -402,9 +428,9 @@ TEST_CASE("The items that name a shared model get its file, texture folders and 
     };
     // A name that is not a shared model.
     CHECK(models[1].file.empty());
-    CHECK(hasIssue(ItemDataIssueSeverity::Error, "", 20, "model"));
+    CHECK(hasIssue(ItemDataIssueSeverity::Fatal, "", 20, "model"));
     // A shared model defined twice.
-    CHECK(hasIssue(ItemDataIssueSeverity::Error, SharedSource, ItemDataIssue::NoItem, "seedSphere1"));
+    CHECK(hasIssue(ItemDataIssueSeverity::Fatal, SharedSource, ItemDataIssue::NoItem, "seedSphere1"));
     // A shared model that no item uses.
     CHECK(hasIssue(ItemDataIssueSeverity::Warning, SharedSource, ItemDataIssue::NoItem, "skillParchment"));
     CHECK(issues.size() == 3);

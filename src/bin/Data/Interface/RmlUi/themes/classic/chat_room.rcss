@@ -1,0 +1,176 @@
+/* Classic theme for a chat room: the Season 1 client's window (CUIChatWindow, the code this client's
+   own native window ran before its RmlUi port; same frame and palette as friend_shell.rcss, which
+   says where they come from). 0.97 has no friend chat. Inside the frame (5 units in, 21 down):
+   - the log from the top down to 16 above the bottom; with the participants shown (more than two,
+     or the invite list open), an 80-wide column at the right behind a 5-unit line (106,97,88 /
+     37,37,37 three units / 106,97,88), and with the invite list another one left of it;
+   - a 106,97,88 line 16 above the bottom, then a black foot 15 high: the text field (no back) and
+     the invite button (win_button, 53x13, 54 from the right; the invite list's send button, 73x13,
+     74 from the right). The window and its buttons are wider than Season 1's for longer captions.
+   1dp is one of the window's units. */
+
+@spritesheet cr-titlebar-sheet { src: "../../../win_titlebar.jpg"; cr-titlebar: 0px 0px 4px 15px; }
+@spritesheet cr-size-sheet
+{
+	src: "../../../win_size.jpg";
+	cr-minimize: 0px 0px 9px 9px;
+	cr-maximize: 9px 0px 9px 9px;
+	cr-restore:  9px 9px 9px 9px;
+	cr-close:    0px 9px 9px 9px;
+}
+@spritesheet cr-resize-sheet { src: "../../../win_resize.tga"; cr-resize-grip: 0px 0px 9px 9px; }
+@spritesheet cr-button-sheet { src: "../../../win_button.tga"; cr-button: 0px 0px 49px 16px; }
+@spritesheet cr-scroll-sheet
+{
+	src: "../../../win_scrollbar.jpg";
+	cr-scroll-thumb: 0px 1px 11px 1px;
+	cr-scroll-up: 0px 3px 13px 13px;
+	cr-scroll-down: 0px 16px 13px 13px;
+}
+
+/* An id beats .center-both's own transform (see legacy's chat_room.rcss). */
+#panel { transform: none; }
+/* CUIChatWindow::Init(): SetSize(250, 170), SetLimitSize(250, 150), widened to 300 (min 290).
+   font-size 1rem, never dp: the theme sizes text natively. */
+#panel { width: 300dp; height: 170dp; min-width: 290dp; min-height: 150dp; max-width: 100%; max-height: 100%; font-family: "token(font-body)"; font-size: 1rem; color: rgb(230, 220, 200); }
+
+/* Season 1's frame (friend_shell.rcss): body black at 179, the 5-unit outline drawn in
+   CUIBaseWindow::DrawOutLine()'s order (the inner lines crossing into the corners), a dot in each
+   corner but the bottom-right one, where this resizeable window has its grip, and the title bar. */
+.window-shell-sprite-back {
+	left: 0;
+	right: 0;
+	top: 5dp;
+	bottom: 5dp;
+	background-color: rgba(0, 0, 0, 179);
+	decorator: linear-gradient(to right, transparent 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, transparent 4dp),
+	           linear-gradient(to left, transparent 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, transparent 4dp);
+}
+.window-shell-sprite-top {
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	height: auto;
+	decorator: linear-gradient(to bottom, rgb(146, 134, 121) 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp),
+	           linear-gradient(to top, rgb(146, 134, 121) 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp);
+}
+.window-shell-sprite-middle {
+	left: 0;
+	right: 0;
+	top: 1dp;
+	bottom: 1dp;
+	decorator: linear-gradient(to right, rgb(146, 134, 121) 1dp, transparent 1dp, transparent 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp),
+	           linear-gradient(to left, rgb(146, 134, 121) 1dp, transparent 1dp, transparent 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp);
+}
+.window-shell-sprite-bottom {
+	left: 2dp;
+	right: 2dp;
+	top: 2dp;
+	bottom: auto;
+	height: 1dp;
+	decorator: linear-gradient(to right, rgb(173, 167, 150) 1dp, transparent 1dp),
+	           linear-gradient(to left, rgb(173, 167, 150) 1dp, transparent 1dp);
+}
+#window_shell_footer {
+	left: 2dp;
+	right: auto;
+	top: auto;
+	bottom: 2dp;
+	width: 1dp;
+	height: 1dp;
+	background-color: rgb(173, 167, 150);
+}
+.window-shell-header-rail {
+	left: 5dp;
+	right: 5dp;
+	top: 5dp;
+	height: 16dp;
+	box-sizing: border-box;
+	border-left: 1dp rgb(136, 138, 147);
+	border-right: 1dp rgb(0, 0, 8);
+	border-bottom: 1dp rgb(106, 97, 88);
+	decorator: image(cr-titlebar fill);
+}
+.window-shell-header-title { left: 9dp; right: 50dp; top: 8dp; text-align: left; white-space: nowrap; overflow: hidden; color: rgb(230, 220, 200); }
+
+/* The client area: 5 units in from the sides and the bottom, 21 down. Each interactive part opts
+   back into pointer events. */
+.window-shell-content, .window-shell-content.has-title
+{
+	left: 5dp;
+	right: 5dp;
+	top: 21dp;
+	bottom: 5dp;
+	padding: 0;
+	display: block;
+	pointer-events: none;
+}
+
+div { display: block; }
+button { font-family: "token(font-body)"; font-size: 1rem; color: rgb(230, 220, 200); cursor: pointer; pointer-events: auto; }
+
+#window_controls { position: absolute; right: 2dp; top: -13dp; z-index: 10; pointer-events: auto; white-space: nowrap; }
+#window_controls button { display: inline-block; width: 9dp; height: 9dp; margin-left: 2dp; padding: 0; box-sizing: border-box; }
+#btn_minimize { decorator: image(cr-minimize); }
+#btn_maximize { decorator: image(cr-maximize); }
+#btn_maximize.restore { decorator: image(cr-restore); }
+#btn_close { decorator: image(cr-close); }
+
+/* win_button stretched whole, pressed one unit in. */
+.btn { position: relative; display: inline-block; box-sizing: border-box; width: auto; height: 13dp; padding: 0 2dp; line-height: 13dp; vertical-align: top; text-align: center; overflow: hidden; pointer-events: auto; decorator: image(cr-button fill); }
+/* base.rcss's .btn:hover / :active swap in legacy's button art; these keep win_button. */
+.btn:hover, .btn:active { decorator: image(cr-button fill); }
+.btn:active { padding-top: 1dp; padding-left: 3dp; }
+.hidden { display: none; }
+
+/* The log down to the foot; the participant and invite columns 80 wide, each behind its 5-unit
+   line (the column starts at it). */
+.scroll-pane { position: absolute; top: 0; bottom: 16dp; overflow: hidden scroll; background-color: transparent; pointer-events: auto; }
+#chat_log { left: 0; right: 0; }
+#chat_log.with-pals { right: 80dp; }
+#chat_log.with-invite { right: 160dp; }
+#pal_pane, #invite_pane {
+	width: 80dp;
+	padding-left: 5dp;
+	box-sizing: border-box;
+	decorator: linear-gradient(to right, rgb(106, 97, 88) 1dp, rgb(37, 37, 37) 1dp, rgb(37, 37, 37) 4dp, rgb(106, 97, 88) 4dp, rgb(106, 97, 88) 5dp, transparent 5dp);
+}
+#pal_pane { right: 0; }
+#pal_pane.with-invite { right: 80dp; }
+#invite_pane { right: 0; }
+
+.line { padding: 0 4dp; }
+.speaker { display: inline-block; color: rgb(255, 200, 50); }
+.speaker:after { content: ": "; }
+.say { display: inline-block; color: rgb(239, 220, 205); }
+/* CUISimpleChatListBox::RenderDataLine()'s own colour table. */
+.say.t0 { color: rgb(0, 0, 0); background-color: rgb(255, 200, 50); }
+.say.t1 { color: rgb(100, 150, 255); }
+.say.t2 { color: rgb(255, 30, 0); }
+.say.t4 { color: rgb(0, 0, 0); background-color: rgb(0, 200, 255); }
+.say.t5 { color: rgb(0, 0, 0); background-color: rgb(0, 255, 150); }
+
+.pal { height: 13dp; line-height: 13dp; padding: 0 3dp; white-space: nowrap; overflow: hidden; cursor: pointer; }
+.pal:hover { background-color: rgb(106, 97, 88); }
+.pal.selected { background-color: rgb(146, 134, 121); color: rgb(0, 0, 0); }
+
+/* The foot: the line 16 above the bottom, black below it, the field from x 2 and the buttons at
+   the right. */
+#footer { position: absolute; left: 0; right: 0; bottom: 0; height: 16dp; padding: 1dp 1dp 0 2dp; box-sizing: border-box; white-space: nowrap; border-top: 1dp rgb(106, 97, 88); background-color: rgb(0, 0, 0); }
+#chat_field { display: inline-block; box-sizing: border-box; width: 62%; height: 14dp; margin-right: 1%; vertical-align: top; background-color: transparent; border-width: 0; pointer-events: auto; }
+#footer .btn { width: 64dp; margin-left: 1dp; }
+#btn_invite_send { width: 84dp; }
+
+/* win_scrollbar, as the friend window's lists. */
+.scroll-pane scrollbarvertical { width: 13dp; margin: 0; }
+.scroll-pane scrollbarvertical slidertrack { decorator: none; box-sizing: border-box; border-left: 1dp rgb(106, 97, 88); border-right: 1dp rgb(106, 97, 88); }
+.scroll-pane scrollbarvertical sliderbar { height: auto; min-height: 6dp; margin: 0 1dp; decorator: image(cr-scroll-thumb fill); }
+.scroll-pane scrollbarvertical sliderarrowdec,
+.scroll-pane scrollbarvertical sliderarrowinc { width: 100%; height: 13dp; pointer-events: auto; }
+.scroll-pane scrollbarvertical sliderarrowdec { decorator: image(cr-scroll-up); }
+.scroll-pane scrollbarvertical sliderarrowinc { decorator: image(cr-scroll-down); }
+.scroll-pane scrollbarvertical sliderarrowdec:active,
+.scroll-pane scrollbarvertical sliderarrowinc:active { filter: brightness(0.7); }
+
+#resize { display: block; position: absolute; right: -4dp; bottom: -4dp; width: 9dp; height: 9dp; z-index: 10; pointer-events: auto; decorator: image(cr-resize-grip); cursor: resize; }

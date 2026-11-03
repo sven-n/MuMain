@@ -1,0 +1,42 @@
+/* Classic Golden Archer windows (CGoldBowmanWindow, CGoldBowmanLena), over event_item_entry.rcss.
+   The current client's look (Main.dll GoldenArcher.cpp, which replaced 0.97's Lucky Number window;
+   ): the 0.97 frame, the title in
+   its 120 box at (35, 12), texts in (255, 230, 210), Message_box plates 120x22 as buttons (lit
+   (0.8, 0.6, 0.4) under the mouse, darkened 0.4 while locked) and the 0.97 Close at (25, 395).
+   Each document's _rows.rcss places its own lines and buttons. */
+
+@spritesheet gb-classic-plate-sheet { src: ../../../Classic/Message_box.jpg; gb-classic-plate: 0px 0px 213px 64px; }
+@spritesheet gb-classic-exit-sheet  { src: ../../../Classic/Exit_01.jpg; gb-classic-exit: 0px 0px 24px 24px; }
+@spritesheet gb-classic-exit2-sheet { src: ../../../Classic/Exit_02.jpg; gb-classic-exit-pressed: 0px 0px 24px 24px; }
+@spritesheet gb-classic-money-sheet { src: ../../../Classic/Item_money.jpg; gb-classic-money: 0px 0px 113px 18px; }
+@spritesheet gb-classic-box-sheet   { src: ../../../Classic/Level_box.jpg; gb-classic-box: 0px 0px 75px 21px; }
+
+.frame-top { decorator: image(docked-bg-top-a); }
+.entry-text .sharp-text { white-space: pre; }
+.entry-label { color: #ffffff; }
+.entry-btn.locked .entry-label { color: #808080; }
+
+/* The register plate and the exit plate (the first and second buttons in both documents). */
+.entry-btn:nth-child(1) { left: 35px; width: 120px; height: 22px; decorator: image(gb-classic-plate); }
+.entry-btn:nth-child(1):hover, .entry-btn:nth-child(1):active { image-color: #ffd9b3; }
+.entry-btn:nth-child(1).locked, .entry-btn:nth-child(1).locked:hover, .entry-btn:nth-child(1).locked:active { image-color: #666666; }
+.entry-btn:nth-child(2) { left: 25px; top: 395px; width: 24px; height: 24px; decorator: image(gb-classic-exit); }
+.entry-btn:nth-child(2):active { decorator: image(gb-classic-exit-pressed); }
+.entry-btn:nth-child(2) .entry-label { display: none; }
+
+/* The lucky number field on the Item_Money bar. */
+#serial_back { position: absolute; left: 40px; top: 190px; width: 113px; height: 18px; decorator: image(gb-classic-money); }
+#serial_field {
+	text-align: left;
+	left: 48px;
+	top: 192px;
+	padding: 0;
+	border-width: 0;
+	border-radius: 0;
+	background-color: transparent;
+	color: rgb(255, 230, 210);
+	pointer-events: auto;
+	width: calc(100px * var(--root-scale));
+	height: calc(14px * var(--root-scale));
+	line-height: calc(14px * var(--root-scale));
+}

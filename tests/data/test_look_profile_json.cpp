@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-using Data::Items::HasErrors;
+using Data::Items::HasFatal;
 using Data::Items::ItemDataIssue;
 using Data::Maps::BuiltInLookValues;
 using Data::Maps::LookProfileData;
@@ -56,7 +56,7 @@ bool Mentions(const std::vector<ItemDataIssue>& issues, const std::string& text)
 // A rejected file leaves no partial profile: every world gets the built-in values.
 void CheckBuiltInEverywhere(const ReadResult& result)
 {
-    CHECK(HasErrors(result.issues));
+    CHECK(HasFatal(result.issues));
     CHECK(result.data == LookProfileData{});
     CHECK(result.data.ForWorld(Lorencia) == BuiltInLookValues());
     CHECK(result.data.ForWorld(Dungeon) == BuiltInLookValues());
@@ -160,10 +160,10 @@ TEST_CASE("a value out of range makes the whole file unusable [data][look]")
     const ReadResult result = Read(R"({
       "formatVersion": 1,
       "default": { "bloom.strength": 0.6 },
-      "maps": [ { "world": 1, "grading.strength": 0.05 } ]
+      "maps": [ { "world": 1, "grading.strength": -0.05 } ]
     })");
 
-    CHECK_MESSAGE(Mentions(result.issues, "Look.json: maps[world 1].grading.strength: is 0.05, must be from 0.1 to 1"),
+    CHECK_MESSAGE(Mentions(result.issues, "Look.json: maps[world 1].grading.strength: is -0.05, must be from 0 to 1"),
                   Messages(result.issues));
     CheckBuiltInEverywhere(result);
 
@@ -172,7 +172,7 @@ TEST_CASE("a value out of range makes the whole file unusable [data][look]")
       "formatVersion": 1,
       "default": { "dynamic.wrap": 0, "lighting.highlightKnee": 0.9, "bloom.levelFalloff": 0.25 },
       "maps": [ { "world": 1, "dynamic.wrap": 0.5, "lighting.highlightKnee": 0.5, "bloom.levelFalloff": 1,
-                  "grading.strength": 0.1 } ]
+                  "grading.strength": 0 } ]
     })");
     CHECK_MESSAGE(ends.issues.empty(), Messages(ends.issues));
     CheckBuiltInEverywhere(Read(R"({ "formatVersion": 1, "default": { "dynamic.wrap": 0.51 } })"));
@@ -215,7 +215,7 @@ TEST_CASE("a missing look profile file gives the built-in values [data][look]")
     const Data::Maps::LookProfileLoadResult missing =
         Data::Maps::LoadLookProfileFile(std::filesystem::temp_directory_path() / "mu_no_such_look_profile.json");
 
-    CHECK_FALSE(HasErrors(missing.issues));
+    CHECK_FALSE(HasFatal(missing.issues));
     CHECK_MESSAGE(Mentions(missing.issues, "not found"), Messages(missing.issues));
     CHECK(missing.data.ForWorld(Lorencia) == BuiltInLookValues());
 }
@@ -227,7 +227,7 @@ TEST_CASE("a look profile file whose existence cannot be checked is an error, no
     const std::filesystem::path file = std::filesystem::temp_directory_path() / (std::string(300, 'x') + ".json");
     const Data::Maps::LookProfileLoadResult loaded = Data::Maps::LoadLookProfileFile(file);
 
-    CHECK(HasErrors(loaded.issues));
+    CHECK(HasFatal(loaded.issues));
     CHECK_MESSAGE(Mentions(loaded.issues, "could not be read"), Messages(loaded.issues));
     CHECK_FALSE(Mentions(loaded.issues, "not found"));
     CHECK(loaded.data.ForWorld(Lorencia) == BuiltInLookValues());

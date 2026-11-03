@@ -4,6 +4,7 @@
 
 #include <vector>
 
+#include "imgui.h"
 #include "MapObjectPlace.h"  // Editor::ObjectPlace::ModelEntry
 
 class OBJECT;
@@ -34,6 +35,14 @@ public:
     // the mouse-button state for the active tool and suppress the click from
     // reaching the game, so the character doesn't walk/attack while editing.
     void CaptureInputForPainting();
+
+    // The Map Editor's Ctrl+Z and Delete: while its window has the focus, and
+    // while the game window has the keyboard, as after a click into the world
+    // (it leaves no editor window focused). Not while a text field of the
+    // game's is typed in; a text field of the editor's keeps its own keys.
+    // While the game has the keyboard the item tools take no Ctrl+Z, also one
+    // that still looks focused (after Alt+Tab), so the map edit is undone.
+    static bool Shortcut(ImGuiKeyChord keyChord);
 
 private:
     CMapEditorUI() = default;
@@ -152,7 +161,7 @@ private:
     bool m_attrStrokeActive = false;
     bool m_bAttrHasUndo = false;
     std::vector<unsigned short> m_attrUndo;   // TerrainWall snapshot before a stroke
-    int  m_serverMapOverride = -1;    // -1 = auto (gMapManager.WorldActive)
+    int  m_serverMapOverride = -1;    // -1 = auto (gMapManager.GetServerMap())
     std::string m_attrStatus;
 
     // Server export is a MERGE onto the server's current TerrainData, because the two

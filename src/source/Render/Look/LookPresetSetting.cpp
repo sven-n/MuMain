@@ -8,6 +8,7 @@
 #include "Render/Lighting/DynamicLightsSetting.h"
 #include "Render/Lighting/EnhancedLightingSetting.h"
 #include "Render/Lighting/LightMoodSetting.h"
+#include "Render/Look/LookProfileSetting.h"
 #include "Render/PostProcessing/PostProcessingSetting.h"
 
 namespace Render::Look
@@ -21,16 +22,33 @@ void SaveLook(LookPreset preset)
     config.Save();
 }
 
-// Enhanced lighting before dynamic lights, which only act while it is on.
+// In Render::Look::ApplyLookFeatures' order: the player's values follow what the renderer accepted,
+// so the light mood rebuilt from them never reads the value of a feature it could not draw.
 void ApplyFeatures(const LookFeatures& features)
 {
-    MuSetTextureFilteringEnabled(features.textureFiltering);
-    (void)Lighting::SetEnhancedLightingEnabled(features.enhancedLighting);
-    Lighting::SetDynamicLightsEnabled(features.dynamicLights);
-    Lighting::LightMood::SetMoodSwitch(features.lightMood, features.lightMoodStrength);
-    (void)PostProcessing::SetPostProcessingEnabled(features.postProcessing);
-    MuSetAntialiasingActive(features.antialiasing);
+    ApplyLookFeatures(features, {MuSetTextureFilteringEnabled,
+                                 [](bool enabled)
+                                 {
+                                     (void)Lighting::SetEnhancedLightingEnabled(enabled);
+                                     return Lighting::EnhancedLightingActive();
+                                 },
+                                 [](bool enabled)
+                                 {
+                                     (void)PostProcessing::SetPostProcessingEnabled(enabled);
+                                     return PostProcessing::PostProcessingActive();
+                                 },
+                                 Lighting::SetDynamicLightsEnabled, SetPersonalTuningGroups,
+                                 Lighting::LightMood::SetMoodSwitch, MuSetAntialiasingActive});
 }
+
+void ApplyMood(const LookFeatures& features)
+{
+    Lighting::LightMood::SetMoodSwitch(features.lightMood, features.lightMoodStrength);
+}
+
+// The player's light mood strength; nothing follows the preset (the full mood).
+std::optional<int> s_moodStrengthChoice;
+bool s_controllerCreated = false;
 
 // Only a feature switched off is a choice; one left on follows the preset.
 FeatureOverrides SavedChoices()
@@ -42,12 +60,14 @@ FeatureOverrides SavedChoices()
     choices.dynamicLights = offOnly(config.GetDynamicLights());
     choices.lightMood = offOnly(config.GetLightMood());
     choices.postProcessing = offOnly(config.GetPostProcessing());
+    choices.lightMoodStrength = s_moodStrengthChoice;
     return choices;
 }
 
 LookPresetController& Controller()
 {
-    static LookPresetController controller({SaveLook, ApplyFeatures}, SavedChoices());
+    static LookPresetController controller({SaveLook, ApplyFeatures, ApplyMood}, SavedChoices());
+    s_controllerCreated = true;
     return controller;
 }
 } // namespace
@@ -100,6 +120,16 @@ void ChooseEnhancedFeature(EnhancedFeature feature, bool enabled)
     }
     config.Save();
     Controller().SetChoices(SavedChoices());
+}
+
+void ChooseLightMoodStrength(std::optional<int> percent)
+{
+    s_moodStrengthChoice = percent;
+    // Before start-up applies the preset, the choice only waits for it.
+    if (s_controllerCreated)
+    {
+        Controller().SetMoodStrengthChoice(percent);
+    }
 }
 
 bool HandleLookPresetCommand(std::wstring_view command)

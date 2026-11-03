@@ -120,6 +120,45 @@ TEST_CASE("the player's Enhanced choices act on Enhanced only, survive a preset 
     CHECK(recorder.applied.back() == AllOn);
 }
 
+TEST_CASE("the player's light mood strength applies only the mood, on Enhanced only, under a developer's strength "
+          "[render][look][preset]")
+{
+    Recorder recorder;
+    std::vector<LookFeatures> moodApplied;
+    LookPresetController controller(
+        {[&recorder](LookPreset preset) { recorder.saved.push_back(preset); },
+         [&recorder](const LookFeatures& features) { recorder.applied.push_back(features); },
+         [&moodApplied](const LookFeatures& features) { moodApplied.push_back(features); }});
+    controller.ApplyPreset(LookPreset::Enhanced);
+    const std::size_t applied = recorder.applied.size();
+
+    // Dragging the strength switches no other feature.
+    controller.SetMoodStrengthChoice(40);
+    CHECK(recorder.applied.size() == applied);
+    REQUIRE(moodApplied.size() == 1);
+    CHECK(moodApplied.back().lightMood);
+    CHECK(moodApplied.back().lightMoodStrength == 40);
+
+    // Kept through the presets; Classic ignores it.
+    controller.ApplyPreset(LookPreset::Classic);
+    CHECK(recorder.applied.back() == AllOff);
+    controller.ApplyPreset(LookPreset::Enhanced);
+    CHECK(recorder.applied.back().lightMoodStrength == 40);
+
+    // A developer's `$lightmood 80` wins for the session, then the player's strength returns.
+    FeatureOverrides developer;
+    developer.lightMoodStrength = 80;
+    controller.Override(developer);
+    CHECK(recorder.applied.back().lightMoodStrength == 80);
+    controller.ReplaceOverrides({});
+    CHECK(recorder.applied.back().lightMoodStrength == 40);
+
+    // Reset: the full mood again.
+    controller.SetMoodStrengthChoice(std::nullopt);
+    CHECK(moodApplied.back().lightMoodStrength == 100);
+    CHECK(controller.Effective() == AllOn);
+}
+
 TEST_CASE("replacing the overrides drops the ones left out [render][look][preset]")
 {
     Recorder recorder;

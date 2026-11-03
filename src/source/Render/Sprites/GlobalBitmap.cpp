@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "Render/Sprites/GlobalBitmap.h"
-#include "Core/Platform/PathResolve.h"
 #include "GlobalBitmapPath.h"
 
 #include <algorithm>
@@ -27,19 +26,6 @@ constexpr std::uint32_t RangeFor(std::uint32_t begin, std::uint32_t end)
 }
 
 } // namespace
-
-namespace Render::Sprites
-{
-std::string NarrowBitmapPath(const std::wstring& wide)
-{
-    const std::string utf8 = mu_wchar_to_utf8(wide.c_str());
-#ifdef _WIN32
-    return utf8;
-#else
-    return MuResolvePath(utf8.c_str());
-#endif
-}
-} // namespace Render::Sprites
 
 bool CBitmapCache::Create()
 {

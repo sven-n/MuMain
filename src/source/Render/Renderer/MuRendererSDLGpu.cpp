@@ -11,7 +11,7 @@
 //   - BeginFrame() / EndFrame() are instance methods called from MuMain.cpp game loop.
 //   - Real HLSL shaders loaded from MU_SHADER_DIR blobs (set by CMake).
 //   - Fog uniform buffer (s_fogUniformBuf) is created in Init() and updated in SetFog().
-//   - Separate 2D/3D pipeline sets: s_pipelines2D / s_pipelines3D.
+//   - Separate 2D/3D pipeline sets: s_pipelines2D / the world sets (WorldPipelineSets()).
 //   - Deferred draw command recording: vertices collected during frame, copied to GPU
 //     in EndFrame() BEFORE the render pass, then draw commands replayed.
 //
@@ -66,6 +66,9 @@
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+
+#include "Render/Renderer/ReorderableDrawRuns.h"
+#include "Render/Renderer/SkinnedBonePalette.h"
 #include <utility>
 #include <vector>
 
@@ -114,7 +117,7 @@ struct SkinningVertexUniforms
     float fogParameters[4]{};
     std::uint32_t textureCoordinates[4]{};
     float chromeParameters[4]{};
-    float textureCoordinateParameters[4]{};
+    float textureCoordinateParameters[4]{}; // offset u, v; chrome time term; normal map scale (0: none)
     float eyePositionAndSpecular[4]{};
     // Enhanced lighting: rows of the affine transform from this draw's vertex space to world space.
     float vertexToWorldRows[3][4]{};
@@ -124,6 +127,11 @@ static_assert(offsetof(SkinningVertexUniforms, eyePositionAndSpecular) == 192,
               "eyePositionAndSpecular must follow textureCoordinateParameters (HLSL cbuffer Skinning)");
 static_assert(offsetof(SkinningVertexUniforms, vertexToWorldRows) == 208,
               "vertexToWorldRows must follow eyePositionAndSpecular (HLSL cbuffer Skinning)");
+
+// skinned_lit.frag's normal map (t1, s1 in space2): bound for every draw with that shader.
+constexpr Uint32 k_FragmentSamplerSlotNormalMap = 1u;
+// The flat tangent-space normal (0, 0, 1) as RGBA8: the normal map of draws without one.
+constexpr Uint32 k_FlatNormalPixel = 0xFFFF8080u; // R = G = 128, B = A = 255 (little-endian RGBA)
 
 // Skinning cbuffer palette.w: how skinned_textured.vert.hlsl lights the vertex colour.
 constexpr std::uint32_t k_SkinningLightingNone = 0u;
@@ -136,7 +144,7 @@ constexpr Uint32 k_FragmentUniformSlotFog = 0u;
 constexpr Uint32 k_FragmentUniformSlotSceneLighting = 1u;
 constexpr Uint32 k_FragmentUniformSlotDynamicLights = 2u;
 
-using EnhancedPipelineSet = Render::WorldPipelineSet<SDL_GPUGraphicsPipeline, k_PipelineCount>;
+using WorldPipelines = Render::WorldPipelineSet<SDL_GPUGraphicsPipeline, k_PipelineCount>;
 
 // skinned_shadow.vert's Shadow cbuffer.
 struct ShadowVertexUniforms
@@ -330,7 +338,7 @@ static SDL_GPUCommandBuffer* s_cmdBuf = nullptr;
 static SDL_GPURenderPass* s_renderPass = nullptr;
 static SDL_GPUTexture* s_swapchainTexture = nullptr;
 
-// Swapchain dimensions in physical pixels (from SDL_AcquireGPUSwapchainTexture).
+// Swapchain dimensions in physical pixels (from SDL_WaitAndAcquireGPUSwapchainTexture).
 // Used for viewport calculations — distinct from logical window size on HiDPI/Retina.
 static Uint32 s_swapW = 0u;
 static Uint32 s_swapH = 0u;
@@ -568,34 +576,34 @@ static void ConfigureD3D12Diagnostics(const char* driverName)
     }
 }
 
-// Separate pipeline sets for 2D (Vertex2D) and 3D (Vertex3D) geometry.
-// DepthReadOnly variants (depth test ON, depth write OFF) support particles.
+// Pipeline sets, one pipeline per blend mode: the index matches BlendMode cast to int; index 8 =
+// disabled (no-blend).
 // s_pipelines2D: depth ON (test+write), Vertex2D layout (pitch=20).
 // s_pipelines2DDepthOff: depth OFF, Vertex2D layout.
-// s_pipelines3D: depth ON (test+write), Vertex3D layout (pitch=40).
-// s_pipelines3DDepthOff: depth OFF, Vertex3D layout.
-// s_pipelines3DDepthReadOnly: depth test ON, write OFF — for transparent/additive particles.
-// Index matches BlendMode enum cast to int; index 8 = disabled (no-blend).
 static SDL_GPUGraphicsPipeline* s_pipelines2D[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelines2DDepthOff[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelines3D[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelines3DNoCull[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelines3DDepthOff[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelines3DDepthReadOnly[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelinesSkinned[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedNoCull[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedDepthOff[k_PipelineCount] = {};
-static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedDepthReadOnly[k_PipelineCount] = {};
 // Body shadows (skinned_shadow.vert): the depth states RenderBodyShadow() draws with.
 static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedShadow[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedShadowDepthOff[k_PipelineCount] = {};
+// The same two for SkinnedWeightedVertex3D (skinned_weighted_shadow.vert).
+static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedWeightedShadow[k_PipelineCount] = {};
+static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedWeightedShadowDepthOff[k_PipelineCount] = {};
 
+// The world sets: 3D (Vertex3D, pitch=40) and GPU-skinned geometry in the four depth/cull states,
+// depth-read-only for transparent and additive draws such as particles. Every world set is listed
+// once in WorldPipelineSets(), from which they are built, released and enumerated.
+static WorldPipelines s_pipelines3D;
+static WorldPipelines s_pipelinesSkinned;
 // Enhanced lighting: per-pixel exponential fog for 3D and unlit skinned draws, per-pixel lighting
 // for lit skinned draws. Optional — when any is incomplete, Enhanced lighting stays unavailable and
 // every draw keeps the Classic sets above.
-static EnhancedPipelineSet s_pipelines3DEnhancedFog;
-static EnhancedPipelineSet s_pipelinesSkinnedEnhancedFog;
-static EnhancedPipelineSet s_pipelinesSkinnedLit;
+static WorldPipelines s_pipelines3DEnhancedFog;
+static WorldPipelines s_pipelinesSkinnedEnhancedFog;
+static WorldPipelines s_pipelinesSkinnedLit;
+// The same three for SkinnedWeightedVertex3D (glTF models).
+static WorldPipelines s_pipelinesSkinnedWeighted;
+static WorldPipelines s_pipelinesSkinnedWeightedEnhancedFog;
+static WorldPipelines s_pipelinesSkinnedWeightedLit;
 static bool s_enhancedLightingAvailable = false;
 static bool s_enhancedLightingEnabled = false;
 // The frame's scene lighting, pushed once per render pass to fragment uniform slot 1.
@@ -612,11 +620,10 @@ static mu::PostProcessingView s_postProcessingView = mu::PostProcessingView::Sce
 static Render::PostProcessing::SceneBoundary s_sceneBoundary;
 static int s_bloomExclusionDepth = 0;
 
-// Alpha-to-coverage variants of the depth-writing 3D and skinned pipelines,
-// used while anti-aliasing is on by alpha-tested cutout draws (foliage, hair,
-// fences) instead of their alpha test with blending: see ChooseAlphaCoverage.
-// Each variant replaces the set's blending-off and Alpha-blend pipelines; it
-// is built only multisampled.
+// Alpha-to-coverage variants of the depth-writing world pipelines (each world set's culled and
+// no-cull states), used while anti-aliasing is on by alpha-tested cutout draws (foliage, hair,
+// fences) instead of their alpha test with blending: see ChooseAlphaCoverage. Each variant
+// replaces its state's blending-off and Alpha-blend pipelines; they exist only multisampled.
 struct AlphaCoveragePipeline
 {
     SDL_GPUGraphicsPipeline** opaque;
@@ -624,21 +631,7 @@ struct AlphaCoveragePipeline
     SDL_GPUGraphicsPipeline* variant;
 };
 constexpr int k_PipelineAlpha = static_cast<int>(mu::BlendMode::Alpha);
-static AlphaCoveragePipeline s_alphaCoveragePipelines[] = {
-    {&s_pipelines3D[k_PipelineDisabled], &s_pipelines3D[k_PipelineAlpha], nullptr},
-    {&s_pipelines3DNoCull[k_PipelineDisabled], &s_pipelines3DNoCull[k_PipelineAlpha], nullptr},
-    {&s_pipelinesSkinned[k_PipelineDisabled], &s_pipelinesSkinned[k_PipelineAlpha], nullptr},
-    {&s_pipelinesSkinnedNoCull[k_PipelineDisabled], &s_pipelinesSkinnedNoCull[k_PipelineAlpha], nullptr},
-    // Enhanced lighting's sets, when they were built.
-    {&s_pipelines3DEnhancedFog.culled[k_PipelineDisabled], &s_pipelines3DEnhancedFog.culled[k_PipelineAlpha], nullptr},
-    {&s_pipelines3DEnhancedFog.noCull[k_PipelineDisabled], &s_pipelines3DEnhancedFog.noCull[k_PipelineAlpha], nullptr},
-    {&s_pipelinesSkinnedEnhancedFog.culled[k_PipelineDisabled], &s_pipelinesSkinnedEnhancedFog.culled[k_PipelineAlpha],
-     nullptr},
-    {&s_pipelinesSkinnedEnhancedFog.noCull[k_PipelineDisabled], &s_pipelinesSkinnedEnhancedFog.noCull[k_PipelineAlpha],
-     nullptr},
-    {&s_pipelinesSkinnedLit.culled[k_PipelineDisabled], &s_pipelinesSkinnedLit.culled[k_PipelineAlpha], nullptr},
-    {&s_pipelinesSkinnedLit.noCull[k_PipelineDisabled], &s_pipelinesSkinnedLit.noCull[k_PipelineAlpha], nullptr},
-};
+static std::vector<AlphaCoveragePipeline> s_alphaCoveragePipelines;
 
 // Single pre-frame vertex upload.
 // Draws accumulate in growable CPU memory before one GPU upload.
@@ -692,9 +685,12 @@ static bool StageAppended(SDL_GPUTransferBuffer* transfer, SDL_GPUBuffer* buffer
     return true;
 }
 
-// Rest-pose vertices of cached skinned meshes (CacheSkinnedMesh), sub-allocated from a few large vertex buffers in
-// whole vertices. A draw then uploads only its colour.
-constexpr Uint32 k_SkinnedMeshBlockVertices = 4u * 1024u * 1024u / sizeof(mu::SkinnedVertex3D);
+// Rest-pose vertices of cached skinned meshes (CacheSkinnedMesh, CacheWeightedSkinnedMesh), sub-allocated from a few
+// large vertex buffers in units that both vertex sizes fill exactly. A draw then uploads only its colour.
+constexpr Uint32 k_SkinnedMeshUnitBytes = 8u;
+static_assert(sizeof(mu::SkinnedVertex3D) % k_SkinnedMeshUnitBytes == 0 &&
+              sizeof(mu::SkinnedWeightedVertex3D) % k_SkinnedMeshUnitBytes == 0);
+constexpr Uint32 k_SkinnedMeshBlockUnits = 4u * 1024u * 1024u / k_SkinnedMeshUnitBytes;
 // A released range stays untouched until no frame still in flight can read it.
 constexpr std::uint64_t k_SkinnedMeshFreeDelayFrames = 3u;
 
@@ -707,14 +703,18 @@ struct SkinnedMeshBlock
 struct CachedSkinnedMesh
 {
     Uint32 block;
-    Uint32 firstVertex;
+    Uint32 firstUnit;
+    Uint32 unitCount;
     Uint32 vertexCount;
+    Uint32 stride; // sizeof(SkinnedVertex3D) or sizeof(SkinnedWeightedVertex3D)
+    // One past the highest bone the vertices index; 0 when unknown.
+    Uint32 bonesUsed = 0u;
 };
 
 struct PendingSkinnedMeshUpload
 {
     CachedSkinnedMesh range;
-    std::size_t stagingFirst; // into s_skinnedMeshStaging
+    std::size_t stagingFirst; // byte offset into s_skinnedMeshStaging
 };
 
 struct DeferredSkinnedMeshFree
@@ -726,7 +726,7 @@ struct DeferredSkinnedMeshFree
 static std::vector<SkinnedMeshBlock> s_skinnedMeshBlocks;
 static std::unordered_map<const void*, CachedSkinnedMesh> s_skinnedMeshes;
 // Meshes cached since the last StageDeferredGpuData, waiting for its copy pass.
-static std::vector<mu::SkinnedVertex3D> s_skinnedMeshStaging;
+static std::vector<std::byte> s_skinnedMeshStaging;
 static std::vector<PendingSkinnedMeshUpload> s_pendingSkinnedMeshUploads;
 static std::vector<DeferredSkinnedMeshFree> s_deferredSkinnedMeshFrees;
 static SDL_GPUTransferBuffer* s_skinnedMeshTransferBuf = nullptr;
@@ -742,6 +742,10 @@ static const float* s_lastBonePalette = nullptr;
 static std::size_t s_lastBonePaletteSize = 0u;
 static std::uint32_t s_lastBonePaletteVersion = 0u;
 static Uint32 s_lastBonePaletteRowOffset = 0u;
+// Bones of the last palette uploaded; a draw indexing more uploads it again, longer.
+static Uint32 s_lastBonePaletteBones = 0u;
+// The skinned draw keys seen this frame, for the DistinctSkinnedDraws counter.
+static std::unordered_set<std::uint64_t> s_skinnedDrawKeys;
 
 // The Render::TerrainHeightGrid that ground-following shaders read (SetTerrainHeights).
 static SDL_GPUTransferBuffer* s_terrainHeightTransferBuf = nullptr;
@@ -782,6 +786,9 @@ struct RenderCmd
     SDL_GPUGraphicsPipeline* pipeline;
     SDL_GPUTexture* texture;
     SDL_GPUSampler* sampler;
+    // skinned_lit.frag's second texture (the normal map, or the flat default); null for other draws.
+    SDL_GPUTexture* normalTexture = nullptr;
+    SDL_GPUSampler* normalSampler = nullptr;
     SDL_GPUBuffer* vtxBuffer = nullptr; // null: the frame's s_vtxGpuBuf
     Uint32 vtxOffset;      // in bytes, a multiple of vtxStride
     Uint32 vtxStride;
@@ -789,6 +796,9 @@ struct RenderCmd
     Uint32 vtxCount;       // for DrawTriangles
     Uint32 idxCount;       // for DrawIndexed*
     Uint32 stripIdxOffset; // byte offset into strip index scratch buffer
+    // DrawTriangles / DrawSkinnedTriangles drawn through idxCount indices of the
+    // strip index scratch at stripIdxOffset (RenderIndexed*Triangles).
+    bool trianglesIndexed{};
     VertexUniforms vu;
     Uint32 skinningIndex = 0u; // into s_skinningUniforms, for DrawSkinnedTriangles
     Uint32 shadowIndex = ~0u;  // into s_shadowUniforms when a DrawSkinnedTriangles is a body shadow
@@ -988,6 +998,7 @@ static bool BindReplayPipeline(SDL_GPUGraphicsPipeline* pipeline, Render::SdlGpu
     SDL_BindGPUGraphicsPipeline(s_renderPass, pipeline);
     SDL_SetGPUScissor(s_renderPass, &scissor);
     ++s_dbgPipelineBindsThisFrame;
+    FrameProfiler::Count(FrameProfiler::Counter::PipelineBinds);
     return true;
 }
 
@@ -1024,12 +1035,19 @@ static void PushSceneLightingUniforms()
 
 static void BindReplayFragmentSampler(const RenderCmd& command, Render::SdlGpuReplayState& state)
 {
+    if (command.normalTexture && state.SelectNormalMapSampler(command.normalTexture, command.normalSampler))
+    {
+        const SDL_GPUTextureSamplerBinding normalBinding{command.normalTexture, command.normalSampler};
+        SDL_BindGPUFragmentSamplers(s_renderPass, k_FragmentSamplerSlotNormalMap, &normalBinding, 1);
+        ++s_dbgSamplerBindsThisFrame;
+    }
     if (!state.SelectFragmentSampler(command.texture, command.sampler))
         return;
 
     const SDL_GPUTextureSamplerBinding samplerBinding{command.texture, command.sampler};
     SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
     ++s_dbgSamplerBindsThisFrame;
+    FrameProfiler::Count(FrameProfiler::Counter::SamplerBinds);
 }
 
 static void BindReplayIndexBuffer(SDL_GPUBuffer* buffer, Uint32 offset, SDL_GPUIndexElementSize elementSize,
@@ -1110,7 +1128,7 @@ static void ReplayDrawCommand(const RenderCmd& command, SDL_GPUGraphicsPipeline*
     Uint32 firstIndex = 0u;
     if (command.type == RenderCmdType::DrawIndexedQuads)
         BindReplayIndexBuffer(s_quadIdxBuf, 0, SDL_GPU_INDEXELEMENTSIZE_16BIT, state);
-    else if (command.type == RenderCmdType::DrawIndexedStrip)
+    else if (command.type == RenderCmdType::DrawIndexedStrip || command.trianglesIndexed)
     {
         BindReplayIndexBuffer(s_stripIdxBuf, 0, SDL_GPU_INDEXELEMENTSIZE_16BIT, state);
         firstIndex = command.stripIdxOffset / sizeof(Uint16);
@@ -1119,7 +1137,8 @@ static void ReplayDrawCommand(const RenderCmd& command, SDL_GPUGraphicsPipeline*
     BindReplayFragmentSampler(command, state);
     PushReplayFragmentUniforms(command.fogUniform, state);
 
-    if (command.type == RenderCmdType::DrawIndexedQuads || command.type == RenderCmdType::DrawIndexedStrip)
+    if (command.type == RenderCmdType::DrawIndexedQuads || command.type == RenderCmdType::DrawIndexedStrip ||
+        command.trianglesIndexed)
         SDL_DrawGPUIndexedPrimitives(s_renderPass, command.idxCount, 1, firstIndex, static_cast<Sint32>(firstVertex), 0);
     else
         SDL_DrawGPUPrimitives(s_renderPass, command.vtxCount, 1, firstVertex, firstInstance);
@@ -1149,6 +1168,8 @@ static std::vector<TextureUpdateCmd> s_textureUpdates;
 
 // Default white 1×1 texture used for textureId==0 and unknown IDs.
 static SDL_GPUTexture* s_whiteTexture = nullptr;
+// 1×1 flat normal map (k_FlatNormalPixel) bound to skinned_lit.frag for draws without a map.
+static SDL_GPUTexture* s_flatNormalTexture = nullptr;
 
 // Shader handles for basic_textured (2D path) and basic_colored — released after pipeline creation.
 static SDL_GPUShader* s_vertShader2D = nullptr;      // basic_textured.vert
@@ -1157,7 +1178,9 @@ static SDL_GPUShader* s_vertShader2DCol = nullptr;   // basic_colored.vert
 static SDL_GPUShader* s_fragShaderCol = nullptr;     // basic_colored.frag
 static SDL_GPUShader* s_vertShaderShadow = nullptr;  // shadow_volume.vert
 static SDL_GPUShader* s_vertShaderSkinned = nullptr; // skinned_textured.vert
+static SDL_GPUShader* s_vertShaderSkinnedWeighted = nullptr; // skinned_weighted.vert
 static SDL_GPUShader* s_vertShaderSkinnedShadow = nullptr; // skinned_shadow.vert
+static SDL_GPUShader* s_vertShaderSkinnedWeightedShadow = nullptr; // skinned_weighted_shadow.vert
 static SDL_GPUShader* s_fragShaderTexFog = nullptr;  // basic_textured_fog.frag (Enhanced, optional)
 static SDL_GPUShader* s_fragShaderLit = nullptr;     // skinned_lit.frag (Enhanced, optional)
 // Post-processing (optional): without them post-processing is unavailable.
@@ -1212,6 +1235,17 @@ struct PendingOffscreenCapture
     Uint32 height;
 };
 static std::vector<PendingOffscreenCapture> s_pendingOffscreenCaptures;
+
+static bool s_drawReorderingEnabled = true;
+// What a reorderable block must not span: a flush, or an offscreen capture's start or end.
+struct ReorderableDrawsMark
+{
+    std::size_t firstCommand = 0u;
+    std::size_t replayedCommands = 0u;
+    std::size_t pendingCaptures = 0u;
+    std::uint32_t captureTexture = 0u;
+};
+static ReorderableDrawsMark s_reorderableDraws;
 static std::size_t s_offscreenCaptureStart = 0u;
 static std::uint32_t s_offscreenCaptureTextureId = 0u;
 // SetOffscreen2DRect()'s projection for the open capture's 2D draws.
@@ -1910,6 +1944,11 @@ public:
                 SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
                 s_whiteTexture = nullptr;
             }
+            if (s_flatNormalTexture)
+            {
+                SDL_ReleaseGPUTexture(s_device, s_flatNormalTexture);
+                s_flatNormalTexture = nullptr;
+            }
             SDL_ReleaseGPUSampler(s_device, s_defaultSampler);
             s_defaultSampler = nullptr;
             DestroyQuadIndexBuffer();
@@ -2011,6 +2050,11 @@ public:
             SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
             s_whiteTexture = nullptr;
         }
+        if (s_flatNormalTexture)
+        {
+            SDL_ReleaseGPUTexture(s_device, s_flatNormalTexture);
+            s_flatNormalTexture = nullptr;
+        }
 
         if (s_defaultSampler)
         {
@@ -2073,6 +2117,19 @@ public:
         s_disableD3D12TriangleMerging = false;
 
         mu::log::Get("render")->info("SDL_gpu -- Shutdown complete");
+    }
+
+    // Waits on the same frame-in-flight fence as BeginFrame's acquire, so the acquire after it returns at once.
+    void WaitForSwapchain() override
+    {
+        if (!s_device || !s_window)
+        {
+            return;
+        }
+        if (!SDL_WaitForGPUSwapchain(s_device, s_window))
+        {
+            mu::log::Get("render")->error("SDL_gpu -- SDL_WaitForGPUSwapchain failed: {}", SDL_GetError());
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -2138,6 +2195,7 @@ public:
         s_lastBonePaletteSize = 0u;
         s_lastBonePaletteVersion = 0u;
         s_lastBonePaletteRowOffset = 0u;
+        s_lastBonePaletteBones = 0u;
         // Before the reset below, so these invalidate nothing this frame records.
         for (const std::uint32_t textureId : s_pendingRenderTargetReleases)
         {
@@ -2166,6 +2224,7 @@ public:
         s_dbgRealTextureDrawsThisFrame = 0u;
         s_dbgPipelineBindsThisFrame = 0u;
         s_dbgSamplerBindsThisFrame = 0u;
+        s_skinnedDrawKeys.clear();
         s_dbgVertexUniformPushesThisFrame = 0u;
         s_dbgFragmentUniformPushesThisFrame = 0u;
         ++s_dbgFrameCount;
@@ -2174,22 +2233,27 @@ public:
         s_swapH = 0u;
         s_swapchainTexture = nullptr;
 
-        if (!SDL_AcquireGPUSwapchainTexture(s_cmdBuf, s_window, &s_swapchainTexture, &s_swapW, &s_swapH))
+        // Waits until a swapchain texture is free: with VSync on and no lower FPS cap, that wait is what holds the
+        // game loop to the display's refresh rate. SDL_AcquireGPUSwapchainTexture returns no texture instead while
+        // the frames in flight are full, and the loop ran on without drawing, several times per displayed frame on
+        // Vulkan and Direct3D 12 alike. The game loop already waited in WaitForSwapchain, before reading input, so
+        // this returns at once there; it still paces the frames drawn outside it (the title and loading screens).
+        if (!SDL_WaitAndAcquireGPUSwapchainTexture(s_cmdBuf, s_window, &s_swapchainTexture, &s_swapW, &s_swapH))
         {
-            mu::log::Get("render")->error("SDL_gpu -- SDL_AcquireGPUSwapchainTexture failed: {}", SDL_GetError());
+            mu::log::Get("render")->error("SDL_gpu -- SDL_WaitAndAcquireGPUSwapchainTexture failed: {}",
+                                          SDL_GetError());
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
             FailPendingFrameReadback();
             return;
         }
 
-        // If swapchain texture is null, window is minimized/occluded — skip frame.
+        // If swapchain texture is null, skip the frame: a hidden window, or on Vulkan a minimized one whose
+        // surface the driver reports as 0x0 (Direct3D 12 keeps rendering a minimized window).
         if (!s_swapchainTexture)
         {
-            // Debug-level only — this happens normally when window is minimized,
-            // and now and then for a visible window while too many frames are in
-            // flight. A requested readback stays pending for the next frame that
-            // renders; its consumer decides how long to wait.
+            // A requested readback stays pending for the next frame that renders;
+            // its consumer decides how long to wait.
             SDL_CancelGPUCommandBuffer(s_cmdBuf);
             s_cmdBuf = nullptr;
             return;
@@ -2266,27 +2330,11 @@ public:
         }
 
         const auto index = static_cast<std::size_t>(command.blendMode);
-        struct DepthWritingSet
+        for (const WorldPipelineSetSpec& spec : WorldPipelineSets())
         {
-            SDL_GPUGraphicsPipeline* culled;
-            SDL_GPUGraphicsPipeline* noCull;
-            SDL_GPUGraphicsPipeline* readOnly;
-        };
-        const DepthWritingSet sets[] = {
-            {s_pipelines3D[index], s_pipelines3DNoCull[index], s_pipelines3DDepthReadOnly[index]},
-            {s_pipelinesSkinned[index], s_pipelinesSkinnedNoCull[index], s_pipelinesSkinnedDepthReadOnly[index]},
-            {s_pipelines3DEnhancedFog.culled[index], s_pipelines3DEnhancedFog.noCull[index],
-             s_pipelines3DEnhancedFog.depthReadOnly[index]},
-            {s_pipelinesSkinnedEnhancedFog.culled[index], s_pipelinesSkinnedEnhancedFog.noCull[index],
-             s_pipelinesSkinnedEnhancedFog.depthReadOnly[index]},
-            {s_pipelinesSkinnedLit.culled[index], s_pipelinesSkinnedLit.noCull[index],
-             s_pipelinesSkinnedLit.depthReadOnly[index]},
-        };
-        for (const DepthWritingSet& set : sets)
-        {
-            if (command.pipeline && (command.pipeline == set.culled || command.pipeline == set.noCull))
+            if (SDL_GPUGraphicsPipeline* readOnly = spec.set->DepthReadOnlyFor(command.pipeline, index))
             {
-                return set.readOnly;
+                return readOnly;
             }
         }
         return nullptr;
@@ -2574,16 +2622,15 @@ public:
     // pending for the next call.
     [[nodiscard]] static bool StageSkinnedMeshes(std::vector<BufferUpload>& uploads)
     {
-        constexpr Uint32 stride = sizeof(SkinnedVertex3D);
-        if (s_skinnedMeshStaging.size() > std::numeric_limits<Uint32>::max() / stride)
+        if (s_skinnedMeshStaging.size() > std::numeric_limits<Uint32>::max())
         {
             return false;
         }
-        const Uint32 bytes = static_cast<Uint32>(s_skinnedMeshStaging.size()) * stride;
+        const Uint32 bytes = static_cast<Uint32>(s_skinnedMeshStaging.size());
         if (s_skinnedMeshTransferCapacity < bytes)
         {
             const Uint32 capacity =
-                std::max({bytes, k_SkinnedMeshBlockVertices * stride, s_skinnedMeshTransferCapacity * 2u});
+                std::max({bytes, k_SkinnedMeshBlockUnits * k_SkinnedMeshUnitBytes, s_skinnedMeshTransferCapacity * 2u});
             SDL_GPUTransferBufferCreateInfo transferInfo{};
             transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
             transferInfo.size = capacity;
@@ -2613,8 +2660,9 @@ public:
         for (const PendingSkinnedMeshUpload& pending : s_pendingSkinnedMeshUploads)
         {
             uploads.push_back({s_skinnedMeshTransferBuf, s_skinnedMeshBlocks[pending.range.block].buffer,
-                               pending.range.firstVertex * stride, pending.range.vertexCount * stride, false,
-                               static_cast<Uint32>(pending.stagingFirst) * stride});
+                               pending.range.firstUnit * k_SkinnedMeshUnitBytes,
+                               pending.range.vertexCount * pending.range.stride, false,
+                               static_cast<Uint32>(pending.stagingFirst)});
         }
         s_pendingSkinnedMeshUploads.clear();
         s_skinnedMeshStaging.clear();
@@ -3135,8 +3183,8 @@ public:
                       {
                           if (s_submittedFrames < released.releasedAtFrame + k_SkinnedMeshFreeDelayFrames)
                               return false;
-                          s_skinnedMeshBlocks[released.range.block].ranges.Free(released.range.firstVertex,
-                                                                                released.range.vertexCount);
+                          s_skinnedMeshBlocks[released.range.block].ranges.Free(released.range.firstUnit,
+                                                                                released.range.unitCount);
                           return true;
                       });
 
@@ -3507,6 +3555,51 @@ public:
     [[nodiscard]] int GetAntialiasingSamples() const override
     {
         return s_sampleCount;
+    }
+
+    [[nodiscard]] std::size_t BeginReorderableDraws() override
+    {
+        s_reorderableDraws = {s_renderCmds.size(), s_replayedCmdCount, s_pendingOffscreenCaptures.size(),
+                              s_offscreenCaptureTextureId};
+        return s_renderCmds.size();
+    }
+
+    void EndReorderableDraws(std::size_t mark) override
+    {
+        const ReorderableDrawsMark& begun = s_reorderableDraws;
+        if (!s_drawReorderingEnabled || mark != begun.firstCommand || mark >= s_renderCmds.size() ||
+            begun.replayedCommands != s_replayedCmdCount ||
+            begun.pendingCaptures != s_pendingOffscreenCaptures.size() ||
+            begun.captureTexture != s_offscreenCaptureTextureId)
+        {
+            return;
+        }
+        const auto reorderable = [](const RenderCmd& command)
+        {
+            return command.type == RenderCmdType::DrawSkinnedTriangles && command.shadowIndex == ~0u &&
+                   !command.blendEnabled && command.depthTestEnabled && command.depthMaskEnabled;
+        };
+        const auto stateKey = [](const RenderCmd& command)
+        {
+            return std::tuple{
+                reinterpret_cast<std::uintptr_t>(command.pipeline), reinterpret_cast<std::uintptr_t>(command.texture),
+                reinterpret_cast<std::uintptr_t>(command.sampler), reinterpret_cast<std::uintptr_t>(command.vtxBuffer)};
+        };
+        Render::GroupReorderableFirst(std::span(s_renderCmds).subspan(mark), reorderable,
+                                      [&](const RenderCmd& left, const RenderCmd& right)
+                                      { return stateKey(left) < stateKey(right); });
+        // A later draw must not merge into a command that moved.
+        s_previousDrawCommands.fill(kNoDrawCommand);
+    }
+
+    void SetDrawReorderingEnabled(bool enabled) override
+    {
+        s_drawReorderingEnabled = enabled;
+    }
+
+    [[nodiscard]] bool IsDrawReorderingEnabled() const override
+    {
+        return s_drawReorderingEnabled;
     }
 
     void EndSceneGeometry() override
@@ -4233,12 +4326,45 @@ public:
     // -----------------------------------------------------------------------
     void RenderTriangles(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
     {
+        RecordTriangles(vertices, {}, textureId);
+    }
+
+    void RenderIndexedTriangles(std::span<const Vertex3D> vertices, std::span<const std::uint16_t> indices,
+                                std::uint32_t textureId) override
+    {
+        if (indices.empty() || !ValidTriangleIndices(vertices.size(), indices))
+        {
+            return;
+        }
+        RecordTriangles(vertices, indices, textureId);
+    }
+
+    // Indices that make whole triangles of vertices that exist.
+    [[nodiscard]] static bool ValidTriangleIndices(std::size_t vertexCount, std::span<const std::uint16_t> indices)
+    {
+        return indices.size() % 3 == 0 && std::all_of(indices.begin(), indices.end(), [vertexCount](std::uint16_t index)
+                                                      { return index < vertexCount; });
+    }
+
+    // Appends `indices` to the frame's strip index scratch and makes `cmd` draw them.
+    static void RecordTriangleIndices(RenderCmd& cmd, std::span<const std::uint16_t> indices)
+    {
+        cmd.trianglesIndexed = true;
+        cmd.idxCount = static_cast<Uint32>(indices.size());
+        cmd.stripIdxOffset = static_cast<Uint32>(s_stripIdxScratch.size() * sizeof(Uint16));
+        s_stripIdxScratch.insert(s_stripIdxScratch.end(), indices.begin(), indices.end());
+    }
+
+    // RenderTriangles, of `indices` into `vertices` when there are indices.
+    void RecordTriangles(std::span<const Vertex3D> vertices, std::span<const std::uint16_t> indices,
+                         std::uint32_t textureId)
+    {
         if (vertices.empty() || !s_frameActive || !m_colorWriteEnabled || m_stencilTestEnabled)
         {
             return;
         }
 
-        if (vertices.size() % 3 != 0)
+        if (indices.empty() && vertices.size() % 3 != 0)
         {
             mu::log::Get("render")->warn("SDL_gpu::RenderTriangles -- vertex count {} not divisible by 3",
                                          vertices.size());
@@ -4300,7 +4426,16 @@ public:
         FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, cmd.vtxCount);
         std::size_t& previousCommand =
             Render::PreviousDrawCommand(s_previousDrawCommands, Render::DrawCommandFamily::Triangles3D);
-        if (!s_disableD3D12TriangleMerging && MergeAdjacentTriangleCommand(cmd, previousCommand, sizeof(Vertex3D)))
+        if (!indices.empty())
+        {
+            // An indexed draw merges with nothing, before or after it.
+            RecordTriangleIndices(cmd, indices);
+            s_renderCmds.push_back(cmd);
+            previousCommand = kNoDrawCommand;
+            FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
+            FrameProfiler::Count(FrameProfiler::Counter::BatchDraws);
+        }
+        else if (!s_disableD3D12TriangleMerging && MergeAdjacentTriangleCommand(cmd, previousCommand, sizeof(Vertex3D)))
         {
             ++s_dbgMergedDrawsThisFrame;
             FrameProfiler::Count(FrameProfiler::Counter::MergedDraws);
@@ -4433,11 +4568,47 @@ public:
         }
     }
 
+    // skinned_lit.frag's normal map for a draw: the draw's map with its scale, or the flat
+    // default with scale 0 (the shader then lights the unperturbed normal).
+    static void BindNormalMap(RenderCmd& cmd, SkinningVertexUniforms& skinningVu, const SkinningParameters& parameters)
+    {
+        cmd.normalTexture = s_flatNormalTexture;
+        cmd.normalSampler = s_defaultSampler;
+        skinningVu.textureCoordinateParameters[3] = 0.0f;
+        if (parameters.normalMapScale == 0.0f || parameters.normalTextureId == 0u)
+        {
+            return;
+        }
+        auto* normalTexture = static_cast<SDL_GPUTexture*>(LookupTextureForDraw(parameters.normalTextureId));
+        if (!normalTexture)
+        {
+            return;
+        }
+        void* normalSampler = LookupWorldSampler(parameters.normalTextureId);
+        cmd.normalTexture = normalTexture;
+        cmd.normalSampler = normalSampler ? static_cast<SDL_GPUSampler*>(normalSampler) : s_defaultSampler;
+        skinningVu.textureCoordinateParameters[3] = parameters.normalMapScale;
+    }
+
     [[nodiscard]] bool RenderSkinnedTriangles(std::span<const SkinnedVertex3D> vertices, std::uint32_t color,
                                               std::uint32_t textureId, const SkinningParameters& parameters) override
     {
-        return RecordSkinnedDraw(vertices.data(), {}, static_cast<Uint32>(vertices.size()), color, textureId,
-                                 parameters);
+        return RecordSkinnedDraw(vertices.data(), Render::BonesIndexed(vertices), FrameMesh(vertices),
+                                 static_cast<Uint32>(vertices.size()), color, textureId, parameters);
+    }
+
+    [[nodiscard]] bool RenderWeightedSkinnedTriangles(std::span<const SkinnedWeightedVertex3D> vertices,
+                                                      std::uint32_t color, std::uint32_t textureId,
+                                                      const SkinningParameters& parameters) override
+    {
+        return RecordSkinnedDraw(vertices.data(), Render::BonesIndexed(vertices), FrameMesh(vertices),
+                                 static_cast<Uint32>(vertices.size()), color, textureId, parameters);
+    }
+
+    // What RecordSkinnedDraw needs of vertices uploaded with the frame: their count and stride.
+    template <typename Vertex> [[nodiscard]] static CachedSkinnedMesh FrameMesh(std::span<const Vertex> vertices)
+    {
+        return CachedSkinnedMesh{0u, 0u, 0u, static_cast<Uint32>(vertices.size()), sizeof(Vertex)};
     }
 
     [[nodiscard]] bool IsSkinnedMeshCached(const void* mesh) const override
@@ -4447,44 +4618,60 @@ public:
 
     [[nodiscard]] bool CacheSkinnedMesh(const void* mesh, std::span<const SkinnedVertex3D> vertices) override
     {
-        if (!s_device || vertices.empty() || vertices.size() > std::numeric_limits<Uint32>::max() ||
+        return CacheMesh(mesh, vertices);
+    }
+
+    [[nodiscard]] bool CacheWeightedSkinnedMesh(const void* mesh,
+                                                std::span<const SkinnedWeightedVertex3D> vertices) override
+    {
+        return CacheMesh(mesh, vertices);
+    }
+
+    template <typename Vertex> [[nodiscard]] bool CacheMesh(const void* mesh, std::span<const Vertex> vertices)
+    {
+        constexpr Uint32 stride = sizeof(Vertex);
+        if (!s_device || vertices.empty() || vertices.size() > std::numeric_limits<Uint32>::max() / stride ||
             s_skinnedMeshes.contains(mesh))
         {
             return false;
         }
 
         const Uint32 vertexCount = static_cast<Uint32>(vertices.size());
+        const Uint32 unitCount = vertexCount * (stride / k_SkinnedMeshUnitBytes);
+        const Uint32 bonesUsed = Render::BonesIndexed(vertices);
         std::optional<CachedSkinnedMesh> range;
         for (Uint32 block = 0u; block < s_skinnedMeshBlocks.size() && !range; ++block)
         {
-            if (const auto first = s_skinnedMeshBlocks[block].ranges.Allocate(vertexCount))
-                range = CachedSkinnedMesh{block, *first, vertexCount};
+            if (const auto first = s_skinnedMeshBlocks[block].ranges.Allocate(unitCount))
+                range = CachedSkinnedMesh{block, *first, unitCount, vertexCount, stride, bonesUsed};
         }
         if (!range)
         {
             // shortcut: blocks are never released before Shutdown, fine while the loaded meshes fit a few blocks;
             // release empty ones if a long session keeps growing them.
-            const Uint32 blockVertices = std::max(k_SkinnedMeshBlockVertices, vertexCount);
-            if (blockVertices > std::numeric_limits<Uint32>::max() / sizeof(SkinnedVertex3D))
-            {
-                return false;
-            }
+            const Uint32 blockUnits = std::max(k_SkinnedMeshBlockUnits, unitCount);
             SDL_GPUBufferCreateInfo bufferInfo{};
             bufferInfo.usage = SDL_GPU_BUFFERUSAGE_VERTEX;
-            bufferInfo.size = blockVertices * static_cast<Uint32>(sizeof(SkinnedVertex3D));
+            bufferInfo.size = blockUnits * k_SkinnedMeshUnitBytes;
             SDL_GPUBuffer* buffer = SDL_CreateGPUBuffer(s_device, &bufferInfo);
             if (!buffer)
             {
                 mu::log::Get("render")->error("SDL_gpu -- skinned mesh buffer creation failed: {}", SDL_GetError());
                 return false;
             }
-            s_skinnedMeshBlocks.push_back({buffer, Render::RangeAllocator(blockVertices)});
-            const auto first = s_skinnedMeshBlocks.back().ranges.Allocate(vertexCount);
-            range = CachedSkinnedMesh{static_cast<Uint32>(s_skinnedMeshBlocks.size() - 1u), *first, vertexCount};
+            s_skinnedMeshBlocks.push_back({buffer, Render::RangeAllocator(blockUnits)});
+            const auto first = s_skinnedMeshBlocks.back().ranges.Allocate(unitCount);
+            range = CachedSkinnedMesh{static_cast<Uint32>(s_skinnedMeshBlocks.size() - 1u),
+                                      *first,
+                                      unitCount,
+                                      vertexCount,
+                                      stride,
+                                      bonesUsed};
         }
 
         s_pendingSkinnedMeshUploads.push_back({*range, s_skinnedMeshStaging.size()});
-        s_skinnedMeshStaging.insert(s_skinnedMeshStaging.end(), vertices.begin(), vertices.end());
+        const auto bytes = std::as_bytes(vertices);
+        s_skinnedMeshStaging.insert(s_skinnedMeshStaging.end(), bytes.begin(), bytes.end());
         s_skinnedMeshes.emplace(mesh, *range);
         return true;
     }
@@ -4497,7 +4684,7 @@ public:
         {
             return false;
         }
-        return RecordSkinnedDraw(nullptr, cached->second, cached->second.vertexCount, color, textureId, parameters);
+        return RecordSkinnedDraw(nullptr, 0u, cached->second, cached->second.vertexCount, color, textureId, parameters);
     }
 
     [[nodiscard]] bool RenderCachedSkinnedShadow(const void* mesh, std::uint32_t color,
@@ -4509,7 +4696,7 @@ public:
         {
             return false;
         }
-        return RecordSkinnedDraw(nullptr, cached->second, cached->second.vertexCount, color, 0u, parameters,
+        return RecordSkinnedDraw(nullptr, 0u, cached->second, cached->second.vertexCount, color, 0u, parameters,
                                  &projection);
     }
 
@@ -4907,11 +5094,12 @@ public:
     }
 
 private:
-    // Records one skinned draw. `frameVertices` are uploaded with this frame's vertices; without them the draw
-    // reads `cached`, already on the GPU. With `shadow`, it is drawn as that ground shadow.
-    [[nodiscard]] bool RecordSkinnedDraw(const SkinnedVertex3D* frameVertices, const CachedSkinnedMesh& cached,
-                                         Uint32 vertexCount, std::uint32_t color, std::uint32_t textureId,
-                                         const SkinningParameters& parameters,
+    // Records one skinned draw. `frameVertices` (indexing `frameBonesUsed` bones) are uploaded with this frame's
+    // vertices; without them the draw reads `cached`, already on the GPU. `cached.stride` names the vertex type.
+    // With `shadow`, it is drawn as that ground shadow.
+    [[nodiscard]] bool RecordSkinnedDraw(const void* frameVertices, Uint32 frameBonesUsed,
+                                         const CachedSkinnedMesh& cached, Uint32 vertexCount, std::uint32_t color,
+                                         std::uint32_t textureId, const SkinningParameters& parameters,
                                          const ShadowProjection* shadow = nullptr)
     {
         if (vertexCount == 0u || vertexCount % 3 != 0 || !s_frameActive || !m_colorWriteEnabled ||
@@ -4929,21 +5117,15 @@ private:
 
         const int pipelineIdx = GetActivePipelineIndex();
         const bool cullFaceEnabled = m_cullFaceEnabled && !s_disableD3D12Culling;
-        SDL_GPUGraphicsPipeline* pipeline =
-            m_depthTestEnabled
-                ? (m_depthMaskEnabled
-                       ? (cullFaceEnabled ? s_pipelinesSkinned[pipelineIdx] : s_pipelinesSkinnedNoCull[pipelineIdx])
-                       : s_pipelinesSkinnedDepthReadOnly[pipelineIdx])
-                : s_pipelinesSkinnedDepthOff[pipelineIdx];
         const bool enhanced = !shadow && UsesEnhancedLighting();
         const bool enhancedLit = enhanced && parameters.lightEnabled;
-        if (enhanced)
-        {
-            const EnhancedPipelineSet& enhancedSet =
-                enhancedLit ? s_pipelinesSkinnedLit : s_pipelinesSkinnedEnhancedFog;
-            pipeline = enhancedSet.Select(static_cast<std::size_t>(pipelineIdx), m_depthTestEnabled, m_depthMaskEnabled,
-                                          cullFaceEnabled);
-        }
+        const bool weighted = cached.stride == sizeof(SkinnedWeightedVertex3D);
+        const WorldPipelines& set =
+            !enhanced     ? (weighted ? s_pipelinesSkinnedWeighted : s_pipelinesSkinned)
+            : enhancedLit ? (weighted ? s_pipelinesSkinnedWeightedLit : s_pipelinesSkinnedLit)
+                          : (weighted ? s_pipelinesSkinnedWeightedEnhancedFog : s_pipelinesSkinnedEnhancedFog);
+        SDL_GPUGraphicsPipeline* pipeline =
+            set.Select(static_cast<std::size_t>(pipelineIdx), m_depthTestEnabled, m_depthMaskEnabled, cullFaceEnabled);
         // One colour for the whole draw: its alpha is the vertices' alpha.
         const AlphaCoverageChoice coverage =
             shadow ? AlphaCoverageChoice{pipeline, false}
@@ -4953,9 +5135,13 @@ private:
         if (shadow)
         {
             // Only the states the CPU shadow is drawn in; the heights must be on the GPU.
+            SDL_GPUGraphicsPipeline* const* depthOn =
+                weighted ? s_pipelinesSkinnedWeightedShadow : s_pipelinesSkinnedShadow;
+            SDL_GPUGraphicsPipeline* const* depthOff =
+                weighted ? s_pipelinesSkinnedWeightedShadowDepthOff : s_pipelinesSkinnedShadowDepthOff;
             pipeline = !s_terrainHeightVersion ? nullptr
-                       : !m_depthTestEnabled   ? s_pipelinesSkinnedShadowDepthOff[pipelineIdx]
-                       : !m_depthMaskEnabled   ? s_pipelinesSkinnedShadow[pipelineIdx]
+                       : !m_depthTestEnabled   ? depthOff[pipelineIdx]
+                       : !m_depthMaskEnabled   ? depthOn[pipelineIdx]
                                                : nullptr;
         }
         if (!pipeline)
@@ -4963,18 +5149,19 @@ private:
             return false;
         }
 
-        const Uint32 paletteRowOffset = RecordBonePalette(parameters);
-        if (paletteRowOffset == ~0u)
+        const Uint32 bonesUsed = frameVertices ? frameBonesUsed : cached.bonesUsed;
+        const std::optional<BonePaletteSlot> palette = RecordBonePalette(parameters, bonesUsed);
+        if (!palette)
         {
             return false;
         }
 
         Uint32 byteSize = 0u;
-        Uint32 vtxOffset = cached.firstVertex * static_cast<Uint32>(sizeof(SkinnedVertex3D));
+        Uint32 vtxOffset = cached.firstUnit * k_SkinnedMeshUnitBytes;
         if (frameVertices)
         {
-            byteSize = vertexCount * static_cast<Uint32>(sizeof(SkinnedVertex3D));
-            vtxOffset = UploadVertices(frameVertices, byteSize, sizeof(SkinnedVertex3D));
+            byteSize = vertexCount * cached.stride;
+            vtxOffset = UploadVertices(frameVertices, byteSize, cached.stride);
             if (vtxOffset == ~0u)
             {
                 return false;
@@ -4997,7 +5184,7 @@ private:
         cmd.sampler = sampler ? static_cast<SDL_GPUSampler*>(sampler) : s_defaultSampler;
         cmd.vtxBuffer = frameVertices ? nullptr : s_skinnedMeshBlocks[cached.block].buffer;
         cmd.vtxOffset = vtxOffset;
-        cmd.vtxStride = sizeof(SkinnedVertex3D);
+        cmd.vtxStride = cached.stride;
         cmd.colorOffset = colorOffset;
         cmd.vtxCount = vertexCount;
         skinningVu.mvp = m_mvpMatrix;
@@ -5007,8 +5194,8 @@ private:
         skinningVu.bodyOriginAndScale[3] = parameters.bodyScale;
         skinningVu.skinningScales[0] = parameters.boneScale;
         skinningVu.skinningScales[1] = parameters.restPoseScale;
-        skinningVu.palette[0] = paletteRowOffset;
-        skinningVu.palette[1] = static_cast<std::uint32_t>(parameters.boneMatrices.size() / 12);
+        skinningVu.palette[0] = palette->rowOffset;
+        skinningVu.palette[1] = palette->bones;
         skinningVu.palette[2] = parameters.translate ? 1u : 0u;
         skinningVu.palette[3] = enhancedLit               ? EnhancedSkinningLighting()
                                 : parameters.lightEnabled ? k_SkinningLightingClassic
@@ -5029,6 +5216,7 @@ private:
         skinningVu.textureCoordinateParameters[2] = parameters.chromeTimeTerm;
         if (enhancedLit)
         {
+            BindNormalMap(cmd, skinningVu, parameters);
             const glm::vec4 eyePosition = glm::inverse(m_modelViewMatrix) * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
             skinningVu.eyePositionAndSpecular[0] = eyePosition.x;
             skinningVu.eyePositionAndSpecular[1] = eyePosition.y;
@@ -5052,6 +5240,20 @@ private:
         cmd.fogUniform.alphaToCoverage = coverage.alphaToCoverage ? 1u : 0u;
         RecordDrawState(cmd);
         s_renderCmds.push_back(cmd);
+
+        if (FrameProfiler::g_CountersEnabled)
+        {
+            // shortcut: a hash of the key, not the key; a collision only undercounts by one.
+            const auto mix = [](std::uint64_t seed, std::uint64_t value)
+            { return seed ^ (value + 0x9e3779b97f4a7c15ull + (seed << 6) + (seed >> 2)); };
+            std::uint64_t key = static_cast<std::uint64_t>(FrameProfiler::CurrentPass());
+            key = mix(key, reinterpret_cast<std::uintptr_t>(cmd.vtxBuffer));
+            key = mix(key, cmd.vtxOffset);
+            key = mix(key, reinterpret_cast<std::uintptr_t>(cmd.texture));
+            key = mix(key, reinterpret_cast<std::uintptr_t>(cmd.pipeline));
+            if (s_skinnedDrawKeys.insert(key).second)
+                FrameProfiler::Count(FrameProfiler::Counter::DistinctSkinnedDraws);
+        }
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
@@ -5143,22 +5345,9 @@ private:
 
     [[nodiscard]] SDL_GPUGraphicsPipeline* GetActive3DPipeline() const
     {
-        const int pipelineIdx = GetActivePipelineIndex();
-        if (UsesEnhancedLighting())
-        {
-            return s_pipelines3DEnhancedFog.Select(static_cast<std::size_t>(pipelineIdx), m_depthTestEnabled,
-                                                   m_depthMaskEnabled, m_cullFaceEnabled && !s_disableD3D12Culling);
-        }
-        if (!m_depthTestEnabled)
-        {
-            return s_pipelines3DDepthOff[pipelineIdx];
-        }
-        if (!m_depthMaskEnabled)
-        {
-            return s_pipelines3DDepthReadOnly[pipelineIdx];
-        }
-        return m_cullFaceEnabled && !s_disableD3D12Culling ? s_pipelines3D[pipelineIdx]
-                                                           : s_pipelines3DNoCull[pipelineIdx];
+        const WorldPipelines& set = UsesEnhancedLighting() ? s_pipelines3DEnhancedFog : s_pipelines3D;
+        return set.Select(static_cast<std::size_t>(GetActivePipelineIndex()), m_depthTestEnabled, m_depthMaskEnabled,
+                          m_cullFaceEnabled && !s_disableD3D12Culling);
     }
 
     // Alpha-to-coverage for an alpha-tested cutout while anti-aliasing is on
@@ -5268,32 +5457,46 @@ private:
         return alignedOffset;
     }
 
-    [[nodiscard]] static Uint32 RecordBonePalette(const SkinningParameters& parameters)
+    struct BonePaletteSlot
     {
-        const auto bones = parameters.boneMatrices;
-        if (bones.empty() || bones.size() % 12 != 0)
+        Uint32 rowOffset;
+        Uint32 bones;
+    };
+
+    // Uploads the bones the draw indexes (`bonesUsed`, 0 when unknown: all of them). Meshes of one
+    // object share the upload while it holds every bone they index.
+    [[nodiscard]] static std::optional<BonePaletteSlot> RecordBonePalette(const SkinningParameters& parameters,
+                                                                          Uint32 bonesUsed)
+    {
+        const auto palette = parameters.boneMatrices;
+        if (palette.empty() || palette.size() % 12 != 0)
         {
-            return ~0u;
+            return std::nullopt;
         }
-        if (bones.data() == s_lastBonePalette && bones.size() == s_lastBonePaletteSize &&
-            parameters.paletteVersion == s_lastBonePaletteVersion)
+        const Uint32 bones = Render::PaletteBonesToUpload(static_cast<Uint32>(palette.size() / 12), bonesUsed);
+        if (palette.data() == s_lastBonePalette && palette.size() == s_lastBonePaletteSize &&
+            parameters.paletteVersion == s_lastBonePaletteVersion && bones <= s_lastBonePaletteBones)
         {
-            return s_lastBonePaletteRowOffset;
+            return BonePaletteSlot{s_lastBonePaletteRowOffset, s_lastBonePaletteBones};
         }
 
+        const std::size_t floats = static_cast<std::size_t>(bones) * 12u;
         const std::size_t rowOffset = s_boneRowScratch.size() / 4;
         if (rowOffset > std::numeric_limits<Uint32>::max() ||
-            bones.size() > std::numeric_limits<Uint32>::max() / sizeof(float) - s_boneRowScratch.size())
+            floats > std::numeric_limits<Uint32>::max() / sizeof(float) - s_boneRowScratch.size())
         {
-            return ~0u;
+            return std::nullopt;
         }
 
-        s_boneRowScratch.insert(s_boneRowScratch.end(), bones.begin(), bones.end());
-        s_lastBonePalette = bones.data();
-        s_lastBonePaletteSize = bones.size();
+        s_boneRowScratch.insert(s_boneRowScratch.end(), palette.begin(), palette.begin() + floats);
+        FrameProfiler::Count(FrameProfiler::Counter::BonePaletteBytes,
+                             static_cast<std::uint32_t>(floats * sizeof(float)));
+        s_lastBonePalette = palette.data();
+        s_lastBonePaletteSize = palette.size();
         s_lastBonePaletteVersion = parameters.paletteVersion;
         s_lastBonePaletteRowOffset = static_cast<Uint32>(rowOffset);
-        return s_lastBonePaletteRowOffset;
+        s_lastBonePaletteBones = bones;
+        return BonePaletteSlot{s_lastBonePaletteRowOffset, bones};
     }
 
     // -----------------------------------------------------------------------
@@ -5407,18 +5610,29 @@ private:
             ReleaseShaders();
             return false;
         }
+        // glTF geometry: the same resources, plus the joints, weights and tangent of each vertex.
+        s_vertShaderSkinnedWeighted =
+            createShader("skinned_weighted", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 1, 1, /*fatal=*/true);
+        if (!s_vertShaderSkinnedWeighted)
+        {
+            ReleaseShaders();
+            return false;
+        }
 
         // Body shadows: bone rows and terrain heights, then the skinning and shadow uniforms. Without it,
         // shadows stay on the CPU.
         s_vertShaderSkinnedShadow =
             createShader("skinned_shadow", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 2, 2, /*fatal=*/false);
+        s_vertShaderSkinnedWeightedShadow =
+            createShader("skinned_weighted_shadow", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 2, 2, /*fatal=*/false);
 
         // Enhanced lighting — non-fatal: without them Enhanced lighting is unavailable.
         // Uniform buffers: FogUniforms (b0) per draw, SceneLighting (b1) per frame.
         s_fragShaderTexFog =
             createShader("basic_textured_fog", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 2, /*fatal=*/false);
         // skinned_lit.frag also reads the frame's point lights, DynamicLights (b2).
-        s_fragShaderLit = createShader("skinned_lit", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 3, /*fatal=*/false);
+        // skinned_lit.frag samples the texture and the normal map (k_FragmentSamplerSlotNormalMap).
+        s_fragShaderLit = createShader("skinned_lit", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 2, 0, 3, /*fatal=*/false);
 
         // Post-processing — non-fatal: without them post-processing is unavailable.
         // Bloom passes: source texture (t0) and BloomUniforms (b0); composite: scene, bloom and
@@ -5472,10 +5686,20 @@ private:
             SDL_ReleaseGPUShader(s_device, s_vertShaderSkinned);
             s_vertShaderSkinned = nullptr;
         }
+        if (s_vertShaderSkinnedWeighted)
+        {
+            SDL_ReleaseGPUShader(s_device, s_vertShaderSkinnedWeighted);
+            s_vertShaderSkinnedWeighted = nullptr;
+        }
         if (s_vertShaderSkinnedShadow)
         {
             SDL_ReleaseGPUShader(s_device, s_vertShaderSkinnedShadow);
             s_vertShaderSkinnedShadow = nullptr;
+        }
+        if (s_vertShaderSkinnedWeightedShadow)
+        {
+            SDL_ReleaseGPUShader(s_device, s_vertShaderSkinnedWeightedShadow);
+            s_vertShaderSkinnedWeightedShadow = nullptr;
         }
         if (s_fragShaderTexFog)
         {
@@ -5507,7 +5731,9 @@ private:
         TwoDimensional,
         ThreeDimensional,
         Skinned,
-        SkinnedShadow, // the skinned layout, with skinned_shadow.vert
+        SkinnedWeighted,       // SkinnedWeightedVertex3D, with skinned_weighted.vert
+        SkinnedShadow,         // the skinned layout, with skinned_shadow.vert
+        SkinnedWeightedShadow, // the weighted layout, with skinned_weighted_shadow.vert
     };
 
     enum class FragmentShader
@@ -5529,6 +5755,84 @@ private:
         FragmentShader fragmentShader = FragmentShader::Textured;
         bool alphaToCoverage = false;
     };
+
+    // The world sets built together, and what a failed pipeline means for them.
+    enum class WorldSetFamily
+    {
+        Classic,          // required: a failed pipeline fails the renderer
+        EnhancedLighting, // optional: Enhanced lighting is available only when every set of it is complete
+    };
+
+    // One world set: the four depth/cull states of 3D or skinned world geometry with one fragment
+    // shader. Its pipelines are named "<name>-culled", "<name>-no-cull", "<name>-depth-off" and
+    // "<name>-depth-read-only", its alpha-to-coverage variants "<name>-culled-alpha-coverage" and
+    // "<name>-no-cull-alpha-coverage".
+    struct WorldPipelineSetSpec
+    {
+        WorldPipelines* set;
+        const char* name;
+        VertexLayout vertexLayout;
+        FragmentShader fragmentShader;
+        WorldSetFamily family;
+    };
+
+    // Every world set. Building, releasing, the replay slots, the alpha-to-coverage variants and the
+    // bloom sources all walk this list, so a new world set is one row here.
+    [[nodiscard]] static std::span<const WorldPipelineSetSpec> WorldPipelineSets()
+    {
+        static constexpr WorldPipelineSetSpec sets[] = {
+            {&s_pipelines3D, "3d", VertexLayout::ThreeDimensional, FragmentShader::Textured, WorldSetFamily::Classic},
+            {&s_pipelinesSkinned, "skinned", VertexLayout::Skinned, FragmentShader::Textured, WorldSetFamily::Classic},
+            {&s_pipelines3DEnhancedFog, "3d-enhanced-fog", VertexLayout::ThreeDimensional,
+             FragmentShader::TexturedEnhancedFog, WorldSetFamily::EnhancedLighting},
+            {&s_pipelinesSkinnedEnhancedFog, "skinned-enhanced-fog", VertexLayout::Skinned,
+             FragmentShader::TexturedEnhancedFog, WorldSetFamily::EnhancedLighting},
+            {&s_pipelinesSkinnedLit, "skinned-lit", VertexLayout::Skinned, FragmentShader::SkinnedLit,
+             WorldSetFamily::EnhancedLighting},
+            {&s_pipelinesSkinnedWeighted, "skinned-weighted", VertexLayout::SkinnedWeighted, FragmentShader::Textured,
+             WorldSetFamily::Classic},
+            {&s_pipelinesSkinnedWeightedEnhancedFog, "skinned-weighted-enhanced-fog", VertexLayout::SkinnedWeighted,
+             FragmentShader::TexturedEnhancedFog, WorldSetFamily::EnhancedLighting},
+            {&s_pipelinesSkinnedWeightedLit, "skinned-weighted-lit", VertexLayout::SkinnedWeighted,
+             FragmentShader::SkinnedLit, WorldSetFamily::EnhancedLighting},
+        };
+        return sets;
+    }
+
+    // The depth/cull states of every world set, with their name suffix and pipeline state.
+    struct WorldStateSpec
+    {
+        WorldPipelines::States WorldPipelines::* states;
+        const char* suffix;
+        bool depthTestEnabled;
+        bool depthWriteEnabled;
+        bool cullFaceEnabled;
+    };
+    static constexpr WorldStateSpec kWorldStates[] = {
+        {&WorldPipelines::culled, "culled", true, true, true},
+        {&WorldPipelines::noCull, "no-cull", true, true, false},
+        {&WorldPipelines::depthOff, "depth-off", false, false, false},
+        {&WorldPipelines::depthReadOnly, "depth-read-only", true, false, false},
+    };
+
+    [[nodiscard]] static bool IsWorldFamilyComplete(WorldSetFamily family)
+    {
+        return std::ranges::all_of(WorldPipelineSets(), [family](const WorldPipelineSetSpec& spec)
+                                   { return spec.family != family || spec.set->IsComplete(); });
+    }
+
+    static void ReleaseWorldFamily(WorldSetFamily family)
+    {
+        const auto release = [](SDL_GPUGraphicsPipeline* pipeline)
+        { SDL_ReleaseGPUGraphicsPipeline(s_device, pipeline); };
+        for (const WorldPipelineSetSpec& spec : WorldPipelineSets())
+        {
+            if (spec.family == family)
+            {
+                spec.set->Release(release);
+            }
+        }
+    }
 
     [[nodiscard]] static SDL_GPUShader* GetFragmentShader(FragmentShader shader)
     {
@@ -5593,7 +5897,7 @@ private:
         colorTargetDesc.format = swapchainFmt;
         colorTargetDesc.blend_state = blendState;
 
-        SDL_GPUVertexAttribute vertexAttribs[6];
+        SDL_GPUVertexAttribute vertexAttribs[9];
         Uint32 numAttribs = 0;
         SDL_GPUVertexBufferDescription vtxBufDescs[2]{};
         SDL_GPUVertexBufferDescription& vtxBufDesc = vtxBufDescs[0];
@@ -5700,6 +6004,32 @@ private:
 
             vtxBufDesc.pitch = sizeof(SkinnedVertex3D);
             numAttribs = 6;
+
+            // The weighted vertex starts with the same fields.
+            if (description.vertexLayout == VertexLayout::SkinnedWeighted ||
+                description.vertexLayout == VertexLayout::SkinnedWeightedShadow)
+            {
+                vertexAttribs[6] = {};
+                vertexAttribs[6].location = 6;
+                vertexAttribs[6].buffer_slot = 0;
+                vertexAttribs[6].format = SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4;
+                vertexAttribs[6].offset = static_cast<Uint32>(offsetof(SkinnedWeightedVertex3D, joints));
+
+                vertexAttribs[7] = {};
+                vertexAttribs[7].location = 7;
+                vertexAttribs[7].buffer_slot = 0;
+                vertexAttribs[7].format = SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM;
+                vertexAttribs[7].offset = static_cast<Uint32>(offsetof(SkinnedWeightedVertex3D, weights));
+
+                vertexAttribs[8] = {};
+                vertexAttribs[8].location = 8;
+                vertexAttribs[8].buffer_slot = 0;
+                vertexAttribs[8].format = SDL_GPU_VERTEXELEMENTFORMAT_SHORT4_NORM;
+                vertexAttribs[8].offset = static_cast<Uint32>(offsetof(SkinnedWeightedVertex3D, tangent));
+
+                vtxBufDesc.pitch = sizeof(SkinnedWeightedVertex3D);
+                numAttribs = 9;
+            }
         }
 
         SDL_GPUVertexInputState vtxInputState{};
@@ -5724,9 +6054,12 @@ private:
         rasterState.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
 
         SDL_GPUGraphicsPipelineCreateInfo pipelineInfo{};
-        pipelineInfo.vertex_shader = description.vertexLayout == VertexLayout::Skinned         ? s_vertShaderSkinned
-                                     : description.vertexLayout == VertexLayout::SkinnedShadow ? s_vertShaderSkinnedShadow
-                                                                                               : s_vertShader2D;
+        pipelineInfo.vertex_shader =
+            description.vertexLayout == VertexLayout::Skinned                 ? s_vertShaderSkinned
+            : description.vertexLayout == VertexLayout::SkinnedWeighted       ? s_vertShaderSkinnedWeighted
+            : description.vertexLayout == VertexLayout::SkinnedShadow         ? s_vertShaderSkinnedShadow
+            : description.vertexLayout == VertexLayout::SkinnedWeightedShadow ? s_vertShaderSkinnedWeightedShadow
+                                                                              : s_vertShader2D;
         pipelineInfo.fragment_shader = GetFragmentShader(description.fragmentShader);
         pipelineInfo.vertex_input_state = vtxInputState;
         pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
@@ -5757,10 +6090,12 @@ private:
         const char* layoutName = description.vertexLayout == VertexLayout::TwoDimensional     ? "2D"
                                  : description.vertexLayout == VertexLayout::ThreeDimensional ? "3D"
                                                                                               : "skinned";
-        const char* vertexShaderName = description.vertexLayout == VertexLayout::Skinned ? "skinned_textured.vert"
-                                       : description.vertexLayout == VertexLayout::SkinnedShadow
-                                           ? "skinned_shadow.vert"
-                                           : "basic_textured.vert";
+        const char* vertexShaderName =
+            description.vertexLayout == VertexLayout::Skinned                 ? "skinned_textured.vert"
+            : description.vertexLayout == VertexLayout::SkinnedWeighted       ? "skinned_weighted.vert"
+            : description.vertexLayout == VertexLayout::SkinnedShadow         ? "skinned_shadow.vert"
+            : description.vertexLayout == VertexLayout::SkinnedWeightedShadow ? "skinned_weighted_shadow.vert"
+                                                                              : "basic_textured.vert";
         const char* fragmentShaderName = GetFragmentShaderName(description.fragmentShader);
         const char* cullMode = description.cullFaceEnabled ? "back" : "none";
         if (required)
@@ -5872,38 +6207,38 @@ private:
             }
         };
 
-        struct EnhancedSetNames
+        // A Classic set is required; an optional family is skipped without its fragment shader.
+        const auto buildWorldSet = [&](const WorldPipelineSetSpec& spec, SDL_GPUColorTargetBlendState blendState,
+                                       int blendIndex, const char* blendName)
         {
-            const char* culled;
-            const char* noCull;
-            const char* depthOff;
-            const char* depthReadOnly;
-        };
-        const auto buildEnhancedSet = [&](EnhancedPipelineSet& set, SDL_GPUColorTargetBlendState blendState,
-                                          int blendIndex, const char* blendName, VertexLayout layout,
-                                          FragmentShader fragment, const EnhancedSetNames& names)
-        {
-            if (!GetFragmentShader(fragment))
+            const bool required = spec.family == WorldSetFamily::Classic;
+            if (!required && !GetFragmentShader(spec.fragmentShader))
             {
                 return;
             }
             const auto index = static_cast<std::size_t>(blendIndex);
-            buildOptionalPipeline(set.culled[index], blendState,
-                                  {names.culled, blendName, blendIndex, true, true, layout, true, fragment});
-            buildOptionalPipeline(set.noCull[index], blendState,
-                                  {names.noCull, blendName, blendIndex, true, true, layout, false, fragment});
-            buildOptionalPipeline(set.depthOff[index], blendState,
-                                  {names.depthOff, blendName, blendIndex, false, false, layout, false, fragment});
-            buildOptionalPipeline(set.depthReadOnly[index], blendState,
-                                  {names.depthReadOnly, blendName, blendIndex, true, false, layout, false, fragment});
+            for (const WorldStateSpec& state : kWorldStates)
+            {
+                const std::string setName = std::string(spec.name) + "-" + state.suffix;
+                const PipelineBuildDescription description{setName.c_str(),
+                                                           blendName,
+                                                           blendIndex,
+                                                           state.depthTestEnabled,
+                                                           state.depthWriteEnabled,
+                                                           spec.vertexLayout,
+                                                           state.cullFaceEnabled,
+                                                           spec.fragmentShader};
+                SDL_GPUGraphicsPipeline*& destination = (spec.set->*state.states)[index];
+                if (required)
+                {
+                    buildRequiredPipeline(destination, blendState, description);
+                }
+                else
+                {
+                    buildOptionalPipeline(destination, blendState, description);
+                }
+            }
         };
-        constexpr EnhancedSetNames k3DEnhancedFogNames{"3d-enhanced-fog-culled", "3d-enhanced-fog-no-cull",
-                                                       "3d-enhanced-fog-depth-off", "3d-enhanced-fog-depth-read-only"};
-        constexpr EnhancedSetNames kSkinnedEnhancedFogNames{
-            "skinned-enhanced-fog-culled", "skinned-enhanced-fog-no-cull", "skinned-enhanced-fog-depth-off",
-            "skinned-enhanced-fog-depth-read-only"};
-        constexpr EnhancedSetNames kSkinnedLitNames{"skinned-lit-culled", "skinned-lit-no-cull",
-                                                    "skinned-lit-depth-off", "skinned-lit-depth-read-only"};
 
         for (int i = 0; i < k_PipelineCount; ++i)
         {
@@ -5921,26 +6256,10 @@ private:
             buildRequiredPipeline(
                 s_pipelines2DDepthOff[i], blendState,
                 {"2d-depth-off", table[i].name, i, false, false, VertexLayout::TwoDimensional, false});
-            buildRequiredPipeline(s_pipelines3D[i], blendState,
-                                  {"3d-culled", table[i].name, i, true, true, VertexLayout::ThreeDimensional, true});
-            buildRequiredPipeline(s_pipelines3DNoCull[i], blendState,
-                                  {"3d-no-cull", table[i].name, i, true, true, VertexLayout::ThreeDimensional, false});
-            buildRequiredPipeline(
-                s_pipelines3DDepthOff[i], blendState,
-                {"3d-depth-off", table[i].name, i, false, false, VertexLayout::ThreeDimensional, false});
-            buildRequiredPipeline(
-                s_pipelines3DDepthReadOnly[i], blendState,
-                {"3d-depth-read-only", table[i].name, i, true, false, VertexLayout::ThreeDimensional, false});
-
-            buildRequiredPipeline(s_pipelinesSkinned[i], blendState,
-                                  {"skinned-culled", table[i].name, i, true, true, VertexLayout::Skinned, true});
-            buildRequiredPipeline(s_pipelinesSkinnedNoCull[i], blendState,
-                                  {"skinned-no-cull", table[i].name, i, true, true, VertexLayout::Skinned, false});
-            buildRequiredPipeline(s_pipelinesSkinnedDepthOff[i], blendState,
-                                  {"skinned-depth-off", table[i].name, i, false, false, VertexLayout::Skinned, false});
-            buildRequiredPipeline(
-                s_pipelinesSkinnedDepthReadOnly[i], blendState,
-                {"skinned-depth-read-only", table[i].name, i, true, false, VertexLayout::Skinned, false});
+            for (const WorldPipelineSetSpec& spec : WorldPipelineSets())
+            {
+                buildWorldSet(spec, blendState, i, table[i].name);
+            }
 
             if (s_vertShaderSkinnedShadow)
             {
@@ -5951,16 +6270,18 @@ private:
                     s_pipelinesSkinnedShadowDepthOff[i], blendState,
                     {"skinned-shadow-depth-off", table[i].name, i, false, false, VertexLayout::SkinnedShadow, false});
             }
-            buildEnhancedSet(s_pipelines3DEnhancedFog, blendState, i, table[i].name, VertexLayout::ThreeDimensional,
-                             FragmentShader::TexturedEnhancedFog, k3DEnhancedFogNames);
-            buildEnhancedSet(s_pipelinesSkinnedEnhancedFog, blendState, i, table[i].name, VertexLayout::Skinned,
-                             FragmentShader::TexturedEnhancedFog, kSkinnedEnhancedFogNames);
-            buildEnhancedSet(s_pipelinesSkinnedLit, blendState, i, table[i].name, VertexLayout::Skinned,
-                             FragmentShader::SkinnedLit, kSkinnedLitNames);
+            if (s_vertShaderSkinnedWeightedShadow)
+            {
+                buildOptionalPipeline(s_pipelinesSkinnedWeightedShadow[i], blendState,
+                                      {"skinned-weighted-shadow", table[i].name, i, true, false,
+                                       VertexLayout::SkinnedWeightedShadow, false});
+                buildOptionalPipeline(s_pipelinesSkinnedWeightedShadowDepthOff[i], blendState,
+                                      {"skinned-weighted-shadow-depth-off", table[i].name, i, false, false,
+                                       VertexLayout::SkinnedWeightedShadow, false});
+            }
         }
 
-        s_enhancedLightingAvailable = s_pipelines3DEnhancedFog.IsComplete() &&
-                                      s_pipelinesSkinnedEnhancedFog.IsComplete() && s_pipelinesSkinnedLit.IsComplete();
+        s_enhancedLightingAvailable = IsWorldFamilyComplete(WorldSetFamily::EnhancedLighting);
         if (s_enhancedLightingAvailable)
         {
             mu::log::Get("render")->info("SDL_gpu -- Enhanced lighting pipelines ready for driver {}", driverName);
@@ -5984,11 +6305,7 @@ private:
 
     static void DestroyEnhancedPipelines()
     {
-        const auto release = [](SDL_GPUGraphicsPipeline* pipeline)
-        { SDL_ReleaseGPUGraphicsPipeline(s_device, pipeline); };
-        s_pipelines3DEnhancedFog.Release(release);
-        s_pipelinesSkinnedEnhancedFog.Release(release);
-        s_pipelinesSkinnedLit.Release(release);
+        ReleaseWorldFamily(WorldSetFamily::EnhancedLighting);
         s_enhancedLightingAvailable = false;
     }
 
@@ -5997,67 +6314,18 @@ private:
         DestroySingleSamplePipelines();
         s_pipelinesMultisampled = false;
         DestroyEnhancedPipelines();
-        for (int i = 0; i < k_PipelineCount; ++i)
+        ReleaseWorldFamily(WorldSetFamily::Classic);
+        for (SDL_GPUGraphicsPipeline** set :
+             {s_pipelines2D, s_pipelines2DDepthOff, s_pipelinesSkinnedShadow, s_pipelinesSkinnedShadowDepthOff,
+              s_pipelinesSkinnedWeightedShadow, s_pipelinesSkinnedWeightedShadowDepthOff})
         {
-            if (s_pipelines2D[i])
+            for (int i = 0; i < k_PipelineCount; ++i)
             {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines2D[i]);
-                s_pipelines2D[i] = nullptr;
-            }
-            if (s_pipelines2DDepthOff[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines2DDepthOff[i]);
-                s_pipelines2DDepthOff[i] = nullptr;
-            }
-            if (s_pipelines3D[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines3D[i]);
-                s_pipelines3D[i] = nullptr;
-            }
-            if (s_pipelines3DNoCull[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines3DNoCull[i]);
-                s_pipelines3DNoCull[i] = nullptr;
-            }
-            if (s_pipelines3DDepthOff[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines3DDepthOff[i]);
-                s_pipelines3DDepthOff[i] = nullptr;
-            }
-            if (s_pipelines3DDepthReadOnly[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines3DDepthReadOnly[i]);
-                s_pipelines3DDepthReadOnly[i] = nullptr;
-            }
-            if (s_pipelinesSkinned[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinned[i]);
-                s_pipelinesSkinned[i] = nullptr;
-            }
-            if (s_pipelinesSkinnedNoCull[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedNoCull[i]);
-                s_pipelinesSkinnedNoCull[i] = nullptr;
-            }
-            if (s_pipelinesSkinnedDepthOff[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedDepthOff[i]);
-                s_pipelinesSkinnedDepthOff[i] = nullptr;
-            }
-            if (s_pipelinesSkinnedDepthReadOnly[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedDepthReadOnly[i]);
-                s_pipelinesSkinnedDepthReadOnly[i] = nullptr;
-            }
-            if (s_pipelinesSkinnedShadow[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedShadow[i]);
-                s_pipelinesSkinnedShadow[i] = nullptr;
-            }
-            if (s_pipelinesSkinnedShadowDepthOff[i])
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedShadowDepthOff[i]);
-                s_pipelinesSkinnedShadowDepthOff[i] = nullptr;
+                if (set[i])
+                {
+                    SDL_ReleaseGPUGraphicsPipeline(s_device, set[i]);
+                    set[i] = nullptr;
+                }
             }
         }
         DestroyAlphaCoveragePipelines();
@@ -6206,21 +6474,19 @@ private:
     {
         std::vector<SDL_GPUGraphicsPipeline**> slots;
         for (SDL_GPUGraphicsPipeline** set :
-             {s_pipelines2D, s_pipelines2DDepthOff, s_pipelines3D, s_pipelines3DNoCull, s_pipelines3DDepthOff,
-              s_pipelines3DDepthReadOnly, s_pipelinesSkinned, s_pipelinesSkinnedNoCull, s_pipelinesSkinnedDepthOff,
-              s_pipelinesSkinnedDepthReadOnly, s_pipelinesSkinnedShadow, s_pipelinesSkinnedShadowDepthOff})
+             {s_pipelines2D, s_pipelines2DDepthOff, s_pipelinesSkinnedShadow, s_pipelinesSkinnedShadowDepthOff,
+              s_pipelinesSkinnedWeightedShadow, s_pipelinesSkinnedWeightedShadowDepthOff})
         {
             for (int i = 0; i < k_PipelineCount; ++i)
             {
                 slots.push_back(&set[i]);
             }
         }
-        for (EnhancedPipelineSet* set :
-             {&s_pipelines3DEnhancedFog, &s_pipelinesSkinnedEnhancedFog, &s_pipelinesSkinnedLit})
+        for (const WorldPipelineSetSpec& spec : WorldPipelineSets())
         {
-            for (auto* states : {&set->culled, &set->noCull, &set->depthOff, &set->depthReadOnly})
+            for (const WorldStateSpec& state : kWorldStates)
             {
-                for (SDL_GPUGraphicsPipeline*& pipeline : *states)
+                for (SDL_GPUGraphicsPipeline*& pipeline : spec.set->*state.states)
                 {
                     slots.push_back(&pipeline);
                 }
@@ -6319,39 +6585,11 @@ private:
     // Optional: a variant that fails leaves its draws on the opaque pipeline.
     static void CreateAlphaCoveragePipelines()
     {
+        DestroyAlphaCoveragePipelines();
         if (s_sampleCount == Render::Antialiasing::OffSampleCount)
         {
             return;
         }
-
-        struct VariantDescription
-        {
-            const char* setName;
-            bool depthTestEnabled;
-            bool depthWriteEnabled;
-            VertexLayout vertexLayout;
-            bool cullFaceEnabled;
-            FragmentShader fragmentShader;
-        };
-        // Same order as s_alphaCoveragePipelines.
-        static constexpr VariantDescription descriptions[] = {
-            {"3d-culled-alpha-coverage", true, true, VertexLayout::ThreeDimensional, true, FragmentShader::Textured},
-            {"3d-no-cull-alpha-coverage", true, true, VertexLayout::ThreeDimensional, false, FragmentShader::Textured},
-            {"skinned-culled-alpha-coverage", true, true, VertexLayout::Skinned, true, FragmentShader::Textured},
-            {"skinned-no-cull-alpha-coverage", true, true, VertexLayout::Skinned, false, FragmentShader::Textured},
-            {"3d-enhanced-fog-culled-alpha-coverage", true, true, VertexLayout::ThreeDimensional, true,
-             FragmentShader::TexturedEnhancedFog},
-            {"3d-enhanced-fog-no-cull-alpha-coverage", true, true, VertexLayout::ThreeDimensional, false,
-             FragmentShader::TexturedEnhancedFog},
-            {"skinned-enhanced-fog-culled-alpha-coverage", true, true, VertexLayout::Skinned, true,
-             FragmentShader::TexturedEnhancedFog},
-            {"skinned-enhanced-fog-no-cull-alpha-coverage", true, true, VertexLayout::Skinned, false,
-             FragmentShader::TexturedEnhancedFog},
-            {"skinned-lit-culled-alpha-coverage", true, true, VertexLayout::Skinned, true, FragmentShader::SkinnedLit},
-            {"skinned-lit-no-cull-alpha-coverage", true, true, VertexLayout::Skinned, false,
-             FragmentShader::SkinnedLit},
-        };
-        static_assert(std::size(descriptions) == std::size(s_alphaCoveragePipelines));
 
         SDL_GPUColorTargetBlendState opaque{};
         opaque.src_color_blendfactor = SDL_GPU_BLENDFACTOR_ONE;
@@ -6365,27 +6603,30 @@ private:
         const char* deviceDriver = SDL_GetGPUDeviceDriver(s_device);
         int built = 0;
         int wanted = 0;
-        for (std::size_t i = 0; i < std::size(descriptions); ++i)
+        for (const WorldPipelineSetSpec& spec : WorldPipelineSets())
         {
-            // A set Enhanced lighting could not build has nothing to replace.
-            if (!*s_alphaCoveragePipelines[i].opaque)
+            for (const WorldStateSpec& state : kWorldStates)
             {
-                continue;
-            }
-            ++wanted;
-            const VariantDescription& variant = descriptions[i];
-            const PipelineBuildResult result =
-                BuildBlendPipeline(opaque, {variant.setName, "disabled", k_PipelineDisabled, variant.depthTestEnabled,
-                                            variant.depthWriteEnabled, variant.vertexLayout, variant.cullFaceEnabled,
-                                            variant.fragmentShader, true});
-            s_alphaCoveragePipelines[i].variant = result.pipeline;
-            if (result.pipeline)
-            {
+                WorldPipelines::States& states = spec.set->*state.states;
+                // Only the depth-writing states draw cutouts; a set that was not built has nothing to replace.
+                if (!state.depthWriteEnabled || !states[k_PipelineDisabled])
+                {
+                    continue;
+                }
+                ++wanted;
+                const std::string setName = std::string(spec.name) + "-" + state.suffix + "-alpha-coverage";
+                const PipelineBuildResult result =
+                    BuildBlendPipeline(opaque, {setName.c_str(), "disabled", k_PipelineDisabled, state.depthTestEnabled,
+                                                state.depthWriteEnabled, spec.vertexLayout, state.cullFaceEnabled,
+                                                spec.fragmentShader, true});
+                if (!result.pipeline)
+                {
+                    LogPipelineFailure(deviceDriver ? deviceDriver : "unknown", result, false);
+                    continue;
+                }
                 ++built;
-            }
-            else
-            {
-                LogPipelineFailure(deviceDriver ? deviceDriver : "unknown", result, false);
+                s_alphaCoveragePipelines.push_back(
+                    {&states[k_PipelineDisabled], &states[k_PipelineAlpha], result.pipeline});
             }
         }
         s_alphaCoverageDrawLogged = false;
@@ -6395,14 +6636,11 @@ private:
 
     static void DestroyAlphaCoveragePipelines()
     {
-        for (AlphaCoveragePipeline& entry : s_alphaCoveragePipelines)
+        for (const AlphaCoveragePipeline& entry : s_alphaCoveragePipelines)
         {
-            if (entry.variant)
-            {
-                SDL_ReleaseGPUGraphicsPipeline(s_device, entry.variant);
-                entry.variant = nullptr;
-            }
+            SDL_ReleaseGPUGraphicsPipeline(s_device, entry.variant);
         }
+        s_alphaCoveragePipelines.clear();
     }
 
     static void ReleaseMultisampleColorTexture()
@@ -7026,9 +7264,10 @@ private:
         return true;
     }
 
-    [[nodiscard]] static bool CreateWhiteTexture()
+    // A 1×1 RGBA8 texture of one pixel (`pixel`, little-endian RGBA), uploaded at once; nullptr
+    // (logged) when it cannot be created.
+    [[nodiscard]] static SDL_GPUTexture* CreateSolidTexture(Uint32 pixel, const char* what)
     {
-        // Upload a 1×1 RGBA white pixel as the default fallback texture.
         SDL_GPUTextureCreateInfo texInfo{};
         texInfo.type = SDL_GPU_TEXTURETYPE_2D;
         texInfo.format = SDL_GPU_TEXTUREFORMAT_R8G8B8A8_UNORM;
@@ -7039,15 +7278,13 @@ private:
         texInfo.num_levels = 1;
         texInfo.sample_count = SDL_GPU_SAMPLECOUNT_1;
 
-        s_whiteTexture = SDL_CreateGPUTexture(s_device, &texInfo);
-        if (!s_whiteTexture)
+        SDL_GPUTexture* texture = SDL_CreateGPUTexture(s_device, &texInfo);
+        if (!texture)
         {
-            mu::log::Get("render")->error("SDL_gpu -- white texture creation failed: {}", SDL_GetError());
-            return false;
+            mu::log::Get("render")->error("SDL_gpu -- {} texture creation failed: {}", what, SDL_GetError());
+            return nullptr;
         }
 
-        // Upload white pixel data.
-        constexpr Uint32 kWhitePixel = 0xFFFFFFFFu; // RGBA = 255,255,255,255
         constexpr Uint32 kPixelByteSize = 4u;
 
         SDL_GPUTransferBufferCreateInfo tbInfo{};
@@ -7056,40 +7293,36 @@ private:
         SDL_GPUTransferBuffer* pixelTransfer = SDL_CreateGPUTransferBuffer(s_device, &tbInfo);
         if (!pixelTransfer)
         {
-            mu::log::Get("render")->error("SDL_gpu -- white texture transfer buffer failed: {}", SDL_GetError());
-            SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
-            s_whiteTexture = nullptr;
-            return false;
+            mu::log::Get("render")->error("SDL_gpu -- {} texture transfer buffer failed: {}", what, SDL_GetError());
+            SDL_ReleaseGPUTexture(s_device, texture);
+            return nullptr;
         }
 
         void* pMapped = SDL_MapGPUTransferBuffer(s_device, pixelTransfer, false);
         if (!pMapped)
         {
             SDL_ReleaseGPUTransferBuffer(s_device, pixelTransfer);
-            SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
-            s_whiteTexture = nullptr;
-            return false;
+            SDL_ReleaseGPUTexture(s_device, texture);
+            return nullptr;
         }
-        std::memcpy(pMapped, &kWhitePixel, kPixelByteSize);
+        std::memcpy(pMapped, &pixel, kPixelByteSize);
         SDL_UnmapGPUTransferBuffer(s_device, pixelTransfer);
 
         SDL_GPUCommandBuffer* uploadCmd = SDL_AcquireGPUCommandBuffer(s_device);
         if (!uploadCmd)
         {
             SDL_ReleaseGPUTransferBuffer(s_device, pixelTransfer);
-            SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
-            s_whiteTexture = nullptr;
-            return false;
+            SDL_ReleaseGPUTexture(s_device, texture);
+            return nullptr;
         }
 
         SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(uploadCmd);
         if (!copyPass)
         {
             SDL_ReleaseGPUTransferBuffer(s_device, pixelTransfer);
-            SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
-            s_whiteTexture = nullptr;
+            SDL_ReleaseGPUTexture(s_device, texture);
             SDL_CancelGPUCommandBuffer(uploadCmd);
-            return false;
+            return nullptr;
         }
 
         SDL_GPUTextureTransferInfo texTransferInfo{};
@@ -7099,7 +7332,7 @@ private:
         texTransferInfo.rows_per_layer = 1;
 
         SDL_GPUTextureRegion texRegion{};
-        texRegion.texture = s_whiteTexture;
+        texRegion.texture = texture;
         texRegion.mip_level = 0;
         texRegion.layer = 0;
         texRegion.x = 0;
@@ -7114,6 +7347,25 @@ private:
         SDL_SubmitGPUCommandBuffer(uploadCmd);
 
         SDL_ReleaseGPUTransferBuffer(s_device, pixelTransfer);
+        return texture;
+    }
+
+    // The default textures: white (textureId 0) and the flat normal map of skinned_lit.frag.
+    [[nodiscard]] static bool CreateWhiteTexture()
+    {
+        constexpr Uint32 kWhitePixel = 0xFFFFFFFFu; // RGBA = 255,255,255,255
+        s_whiteTexture = CreateSolidTexture(kWhitePixel, "white");
+        if (!s_whiteTexture)
+        {
+            return false;
+        }
+        s_flatNormalTexture = CreateSolidTexture(k_FlatNormalPixel, "flat normal map");
+        if (!s_flatNormalTexture)
+        {
+            SDL_ReleaseGPUTexture(s_device, s_whiteTexture);
+            s_whiteTexture = nullptr;
+            return false;
+        }
 
         // Register the white texture as textureId=0 (sentinel for "no texture").
         RegisterTexture(0u, s_whiteTexture);
@@ -7127,10 +7379,22 @@ private:
 // MU_USE_OPENGL_BACKEND removed — SDL_gpu is the only backend.
 // ---------------------------------------------------------------------------
 
+namespace
+{
+IMuRenderer* s_rendererOverride = nullptr;
+} // namespace
+
 [[nodiscard]] IMuRenderer& GetRenderer()
 {
     static MuRendererSDLGpu s_instance;
+    if (s_rendererOverride)
+        return *s_rendererOverride;
     return s_instance;
+}
+
+void SetRendererOverride(IMuRenderer* renderer)
+{
+    s_rendererOverride = renderer;
 }
 
 Render::Renderer::BitmapGpuResources::Result UploadBitmapPixels(std::span<const std::uint8_t> pixels, int width,

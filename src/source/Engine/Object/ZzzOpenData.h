@@ -16,6 +16,10 @@ void ReleaseCharacterSceneData();
 
 void OpenPlayerTextures();
 void OpenItemTextures();
+// Makes mesh 2 of the Grand Soul pants' model the grid their cloth moves
+// (OpenItems once the item models are open; the item editor again after their
+// slot took other data).
+void PrepareGrandSoulPantsClothMesh();
 
 void SaveOptions();
 void SaveMacro(const wchar_t* FileName);

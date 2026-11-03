@@ -41,15 +41,19 @@ enum class Pass : int
     RendererStage,
     RendererReplay,
     RendererPostUi,
+    // The two halves of a map object inside Objects: its animation and bones, and its draws.
+    ObjectsAnimate,
+    ObjectsDraw,
+    // The update's effect spawns and poses for the drawn characters and map objects.
+    UpdateEffects,
     Count_
 };
 
 inline constexpr const char* kPassNames[static_cast<int>(Pass::Count_)] = {
-    "Terrain", "Objects", "Chars", "Items", "Effects", "Other", "CharWait", "MoveFx", "MovePart",
-    "Skinning", "UI", "RenderBegin", "RenderEnd", "Submit", "UIUpdate", "RmlInput", "UILayout", "Flush",
-    "Sprites", "Particles", "Joints", "Overlay",
-    "RmlUpd", "RmlRend",
-    "EndOffscr", "EndStage", "EndReplay", "EndPostUI",
+    "Terrain",   "Objects",  "Chars",     "Items",       "Effects",   "Other",   "CharWait", "MoveFx",
+    "MovePart",  "Skinning", "UI",        "RenderBegin", "RenderEnd", "Submit",  "UIUpdate", "RmlInput",
+    "UILayout",  "Flush",    "Sprites",   "Particles",   "Joints",    "Overlay", "RmlUpd",   "RmlRend",
+    "EndOffscr", "EndStage", "EndReplay", "EndPostUI",   "ObjAnim",   "ObjDraw", "UpdateFx",
 };
 
 enum class Counter : int
@@ -73,6 +77,15 @@ enum class Counter : int
     BatchBreakMatrix,
     BatchBreakDraw,
     BatchBreakOther,
+    // Bone palette bytes uploaded.
+    BonePaletteBytes,
+    PipelineBinds,
+    SamplerBinds,
+    // Skinned draws whose mesh, texture and pipeline no earlier draw in the pass had this frame.
+    DistinctSkinnedDraws,
+    // Joint trail segments and particles not drawn because they lie outside the view frustum.
+    JointSegmentsCulled,
+    ParticlesCulled,
     Count_
 };
 
@@ -96,6 +109,12 @@ inline constexpr const char* kCounterNames[static_cast<int>(Counter::Count_)] = 
     "BatchBreakMatrix",
     "BatchBreakDraw",
     "BatchBreakOther",
+    "BonePaletteBytes",
+    "PipelineBinds",
+    "SamplerBinds",
+    "DistinctSkinnedDraws",
+    "JointSegmentsCulled",
+    "ParticlesCulled",
 };
 static_assert(kCounterNames[static_cast<int>(Counter::Count_) - 1] != nullptr, "a counter without a name");
 

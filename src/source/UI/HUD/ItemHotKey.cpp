@@ -25,6 +25,7 @@
 #include "Core/Time/CTimCheck.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "GameLogic/Items/ItemCategories.h"
+#include "Data/GameData/ItemData/ItemDatabase.h"
 
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #include "GameShop/InGameShopSystem.h"
@@ -113,80 +114,99 @@ bool mu::ui::window::CItemHotKey::UpdateKeyEvent()
     return true;
 }
 
-int mu::ui::window::CItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
+namespace
 {
-    int iStartItemType = 0, iEndItemType = 0;
-    int i, j;
+// Items a hotkey takes only of the type it is bound to; Remedy of Love only at level 0.
+bool IsSingleHotKeyItem(int itemType, int itemLevel)
+{
+    switch (itemType)
+    {
+    case ITEM_SIEGE_POTION:
+    case ITEM_ANTIDOTE:
+    case ITEM_ALE:
+    case ITEM_TOWN_PORTAL_SCROLL:
+    case ITEM_REMEDY_OF_LOVE:
+    case ITEM_JACK_OLANTERN_BLESSINGS:
+    case ITEM_JACK_OLANTERN_WRATH:
+    case ITEM_JACK_OLANTERN_CRY:
+    case ITEM_JACK_OLANTERN_FOOD:
+    case ITEM_JACK_OLANTERN_DRINK:
+    case ITEM_ELITE_HEALING_POTION:
+    case ITEM_ELITE_MANA_POTION:
+    case ITEM_ELIXIR_OF_STRENGTH:
+    case ITEM_ELIXIR_OF_AGILITY:
+    case ITEM_ELIXIR_OF_HEALTH:
+    case ITEM_ELIXIR_OF_ENERGY:
+    case ITEM_ELIXIR_OF_CONTROL:
+    case ITEM_MEDIUM_ELITE_HEALING_POTION:
+    case ITEM_CHERRY_BLOSSOM_WINE:
+    case ITEM_CHERRY_BLOSSOM_RICE_CAKE:
+    case ITEM_CHERRY_BLOSSOM_FLOWER_PETAL:
+    case ITEM_ELITE_SD_POTION:
+        return itemType != ITEM_REMEDY_OF_LOVE || itemLevel == 0;
+    default:
+        return false;
+    }
+}
 
-    switch (iType)
+mu::ui::window::HotKeyItemTypes ItemTypesInUseOrder(Data::Items::ItemTag tag)
+{
+    return mu::ui::window::HotKeyItemTypes(g_ItemDatabase.GetItemTypesWithTagInUseOrder(tag));
+}
+} // namespace
+
+mu::ui::window::HotKeyItemTypes mu::ui::window::GetHotKeyItemTypes(int hotKey, int boundType, int boundLevel)
+{
+    using Data::Items::ItemTag;
+
+    if (IsSingleHotKeyItem(boundType, boundLevel))
+    {
+        return HotKeyItemTypes(boundType);
+    }
+    if (GameLogic::Items::IsShieldPotionType(boundType))
+    {
+        return ItemTypesInUseOrder(ItemTag::ShieldPotion);
+    }
+    if (GameLogic::Items::IsComplexPotionType(boundType))
+    {
+        return ItemTypesInUseOrder(ItemTag::ComplexPotion);
+    }
+
+    // Q and W take the healing or mana potions, E and R also something else when bound to neither.
+    const bool healing = GameLogic::Items::IsHealingPotionType(boundType);
+    const bool mana = GameLogic::Items::IsManaPotionType(boundType);
+    switch (hotKey)
     {
     case HOTKEY_Q:
-        if (GetHotKeyCommonItem(iType, iStartItemType, iEndItemType) == false)
-        {
-            if (GameLogic::Items::IsManaPotionType(m_iHotKeyItemType[iType]))
-            {
-                iStartItemType = ITEM_LARGE_MANA_POTION; iEndItemType = ITEM_SMALL_MANA_POTION;
-            }
-            else
-            {
-                iStartItemType = ITEM_LARGE_HEALING_POTION; iEndItemType = ITEM_APPLE;
-            }
-        }
-        break;
+        return ItemTypesInUseOrder(mana ? ItemTag::ManaPotion : ItemTag::HealingPotion);
     case HOTKEY_W:
-        if (GetHotKeyCommonItem(iType, iStartItemType, iEndItemType) == false)
-        {
-            if (GameLogic::Items::IsHealingPotionType(m_iHotKeyItemType[iType]))
-            {
-                iStartItemType = ITEM_LARGE_HEALING_POTION; iEndItemType = ITEM_APPLE;
-            }
-            else
-            {
-                iStartItemType = ITEM_LARGE_MANA_POTION; iEndItemType = ITEM_SMALL_MANA_POTION;
-            }
-        }
-        break;
+        return ItemTypesInUseOrder(healing ? ItemTag::HealingPotion : ItemTag::ManaPotion);
     case HOTKEY_E:
-        if (GetHotKeyCommonItem(iType, iStartItemType, iEndItemType) == false)
+        if (healing || mana)
         {
-            if (GameLogic::Items::IsHealingPotionType(m_iHotKeyItemType[iType]))
-            {
-                iStartItemType = ITEM_LARGE_HEALING_POTION; iEndItemType = ITEM_APPLE;
-            }
-            else if (GameLogic::Items::IsManaPotionType(m_iHotKeyItemType[iType]))
-            {
-                iStartItemType = ITEM_LARGE_MANA_POTION; iEndItemType = ITEM_SMALL_MANA_POTION;
-            }
-            else
-            {
-                iStartItemType = ITEM_ANTIDOTE; iEndItemType = ITEM_ANTIDOTE;
-            }
+            return ItemTypesInUseOrder(healing ? ItemTag::HealingPotion : ItemTag::ManaPotion);
         }
-        break;
+        return HotKeyItemTypes(ITEM_ANTIDOTE);
     case HOTKEY_R:
-        if (GetHotKeyCommonItem(iType, iStartItemType, iEndItemType) == false)
+        if (healing || mana)
         {
-            if (GameLogic::Items::IsHealingPotionType(m_iHotKeyItemType[iType]))
-            {
-                iStartItemType = ITEM_LARGE_HEALING_POTION; iEndItemType = ITEM_APPLE;
-            }
-            else if (GameLogic::Items::IsManaPotionType(m_iHotKeyItemType[iType]))
-            {
-                iStartItemType = ITEM_LARGE_MANA_POTION; iEndItemType = ITEM_SMALL_MANA_POTION;
-            }
-            else
-            {
-                iStartItemType = ITEM_LARGE_SHIELD_POTION; iEndItemType = ITEM_SMALL_SHIELD_POTION;
-            }
+            return ItemTypesInUseOrder(healing ? ItemTag::HealingPotion : ItemTag::ManaPotion);
         }
-        break;
+        return ItemTypesInUseOrder(ItemTag::ShieldPotion);
+    default:
+        return HotKeyItemTypes(std::span<const int>());
     }
+}
+
+int mu::ui::window::CItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
+{
+    int j;
 
     int iItemCount = 0;
     ITEM* pItem = NULL;
 
     int iNumberofItems = g_pMyInventory->GetInventoryCtrl()->GetNumberOfItems();
-    for (i = iStartItemType; i >= iEndItemType; --i)
+    for (const int i : GetHotKeyItemTypes(iType, m_iHotKeyItemType[iType], m_iHotKeyItemLevel[iType]))
     {
         if (bItemCount)
         {
@@ -250,54 +270,6 @@ int mu::ui::window::CItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
     }
 
     return -1;
-}
-
-bool mu::ui::window::CItemHotKey::GetHotKeyCommonItem(IN int iHotKey, OUT int& iStart, OUT int& iEnd)
-{
-    switch (m_iHotKeyItemType[iHotKey])
-    {
-    case ITEM_SIEGE_POTION:
-    case ITEM_ANTIDOTE:
-    case ITEM_ALE:
-    case ITEM_TOWN_PORTAL_SCROLL:
-    case ITEM_REMEDY_OF_LOVE:
-    case ITEM_JACK_OLANTERN_BLESSINGS:
-    case ITEM_JACK_OLANTERN_WRATH:
-    case ITEM_JACK_OLANTERN_CRY:
-    case ITEM_JACK_OLANTERN_FOOD:
-    case ITEM_JACK_OLANTERN_DRINK:
-    case ITEM_ELITE_HEALING_POTION:
-    case ITEM_ELITE_MANA_POTION:
-    case ITEM_ELIXIR_OF_STRENGTH:
-    case ITEM_ELIXIR_OF_AGILITY:
-    case ITEM_ELIXIR_OF_HEALTH:
-    case ITEM_ELIXIR_OF_ENERGY:
-    case ITEM_ELIXIR_OF_CONTROL:
-    case ITEM_MEDIUM_ELITE_HEALING_POTION:
-    case ITEM_CHERRY_BLOSSOM_WINE:
-    case ITEM_CHERRY_BLOSSOM_RICE_CAKE:
-    case ITEM_CHERRY_BLOSSOM_FLOWER_PETAL:
-    case ITEM_ELITE_SD_POTION:
-        if (m_iHotKeyItemType[iHotKey] != ITEM_REMEDY_OF_LOVE || m_iHotKeyItemLevel[iHotKey] == 0)
-        {
-            iStart = iEnd = m_iHotKeyItemType[iHotKey];
-            return true;
-        }
-        break;
-    default:
-        if (m_iHotKeyItemType[iHotKey] >= ITEM_SMALL_SHIELD_POTION && m_iHotKeyItemType[iHotKey] <= ITEM_LARGE_SHIELD_POTION)
-        {
-            iStart = ITEM_LARGE_SHIELD_POTION; iEnd = ITEM_SMALL_SHIELD_POTION;
-            return true;
-        }
-        else if (GameLogic::Items::IsComplexPotionType(m_iHotKeyItemType[iHotKey]))
-        {
-            iStart = ITEM_LARGE_COMPLEX_POTION; iEnd = ITEM_SMALL_COMPLEX_POTION;
-            return true;
-        }
-        break;
-    }
-    return false;
 }
 
 int mu::ui::window::CItemHotKey::GetHotKeyItemCount(int iType)

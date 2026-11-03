@@ -1,5 +1,12 @@
 #ifndef __ZZZ_EFFECT_H__
 #define __ZZZ_EFFECT_H__
+#include "Core/Utilities/Random.h"
+
+namespace Render::EffectDrawing
+{
+struct SpriteDraw;
+class EffectDrawer;
+} // namespace Render::EffectDrawing
 
 extern OBJECT Effects[];
 extern OBJECT Sprites[];
@@ -26,8 +33,13 @@ void CreateBlood(OBJECT* o);
 
 int CreateSprite(int Type, vec3_t Position, float Scale, vec3_t Light, OBJECT* Owner, float Rotation = 0.f,
                  int SubType = 0);
+// Whether the sprite was created inside a bloom exclusion.
+bool IsSpriteBloomExcluded(int sprite);
+// Sprites are drawn for one frame: the update clears last frame's before anything spawns new ones.
+void ClearSprites();
 void RenderSprites(BYTE byRenderOneMore = 0);
-void CheckSprites();
+// The draw a live sprite asks for: its quad, its blend and whether bloom leaves it alone.
+Render::EffectDrawing::SpriteDraw DescribeSprite(const OBJECT& sprite, bool bloomExcluded);
 
 void AnimationFlag();
 void RenderFlag(OBJECT* o, vec3_t Light, int Tex1, int Tex2);
@@ -38,6 +50,9 @@ int CreateParticleFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Lig
                              OBJECT* Owner = NULL);
 
 void RenderParticles(BYTE byRenderOneMore = 0);
+// Hands the sprites and state changes a live particle draws with to `out`; `slot` is its index in Particles.
+void DescribeParticle(const PARTICLE& particle, int slot, float width, float height,
+                      Render::EffectDrawing::EffectDrawer& out);
 void MoveParticles();
 bool DeleteParticle(int iType);
 
@@ -62,9 +77,15 @@ BOOL FindSameEffectOfSameOwner(int iType, OBJECT* pOwner);
 
 void CheckClientArrow(OBJECT* o);
 
+// Marks the effects the frame's view holds, for the draw and the next update; the last step of the update.
+void CullEffects();
 void RenderEffects(bool bRenderBlendMesh = false);
+// Spawns the effects of the effect models the last cull marked; call once per update, after the effects moved.
+void UpdateEffectModelEffects();
 void RenderAfterEffects();
 void RenderEffectShadows();
+// Hands the ground marks and rings a visible effect lays under itself to `out`.
+void DescribeEffectShadow(const OBJECT& effect, Render::EffectDrawing::EffectDrawer& out);
 void CreateEffectFpsChecked(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0,
                             OBJECT* Target = NULL, short PKKey = -1, WORD SkillIndex = 0, WORD Skill = 0,
                             WORD SkillSerialNum = 0, float Scale = 0.0f, short int sTargetIndex = -1);
@@ -110,15 +131,19 @@ void CreateTailAxis(JOINT* o, float Matrix[3][4], BYTE axis = 0);
 void MoveJoint(JOINT* o, int iIndex);
 void MoveJoints();
 void RenderJoints(BYTE bRenderOneMore = 0);
+// Hands the state changes, trail quads and ground mark a live joint draws with to `out`.
+void DescribeJoint(const JOINT& joint, Render::EffectDrawing::EffectDrawer& out);
 
 void GetMagicScrew(int iParam, vec3_t vResult, float fSpeedRate = 1.0f);
+void GetMagicScrewAt(double frame, vec3_t vResult, float fSpeedRate = 1.0f);
+double ReferenceFrameClock();
 
 inline void GetNearRandomPos(vec3_t Pos, int iRange, vec3_t NewPos)
 {
     VectorCopy(Pos, NewPos);
-    NewPos[0] += (float)(rand() % (iRange * 2 + 1) - iRange);
-    NewPos[1] += (float)(rand() % (iRange * 2 + 1) - iRange);
-    NewPos[2] += (float)(rand() % (iRange * 2 + 1) - iRange);
+    NewPos[0] += (float)(Random::Rand() % (iRange * 2 + 1) - iRange);
+    NewPos[1] += (float)(Random::Rand() % (iRange * 2 + 1) - iRange);
+    NewPos[2] += (float)(Random::Rand() % (iRange * 2 + 1) - iRange);
 }
 
 void CreateForce(OBJECT* o, vec3_t Pos);

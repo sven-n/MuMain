@@ -30,6 +30,30 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME reorderable_draw_runs_tests
+    SOURCES
+        test_reorderable_draw_runs.cpp
+)
+
+mu_add_test(
+    NAME camera_view_tests
+    SOURCES
+        test_camera_view.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
+    NAME skinned_bone_palette_tests
+    SOURCES
+        test_skinned_bone_palette.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME overlay2d_recorder_tests
     SOURCES
         test_overlay2d_recorder.cpp
@@ -54,6 +78,7 @@ mu_add_test(
     SOURCES
         test_texture_filtering.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TextureFiltering.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/AssetPath.cpp
 )
 
 mu_add_test(
@@ -95,6 +120,16 @@ mu_add_test(
         test_terrain_height_grid.cpp
 )
 
+# The decryption of version 14 BMD models, round-tripped against an encryption built the way the files are.
+mu_add_test(
+    NAME bmd_modulus_cipher_tests
+    SOURCES
+        test_bmd_modulus_cipher.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Models/BmdModulusCipher.cpp
+    LINK_LIBS
+        MuCryptopp
+)
+
 # The OZT reader of CGlobalBitmap::OpenTga, without the renderer. It also reads
 # the OZT files shipped in src/bin/Data.
 mu_add_test(
@@ -115,6 +150,18 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/UpscaleMarker.cpp
 )
 
+# The texture packs whose files CGlobalBitmap reads before those in Data.
+mu_add_test(
+    NAME texture_pack_tests
+    SOURCES
+        test_texture_pack.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TexturePack.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/TexturePackFiles.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/AssetPath.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Sprites/GlobalBitmapPath.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/PathResolve.cpp
+)
+
 mu_add_test(
     NAME sdl_gpu_validation_tests
     SOURCES
@@ -131,6 +178,51 @@ mu_add_test(
     NAME gpu_skinning_path_tests
     SOURCES
         test_gpu_skinning_path.cpp
+)
+
+# The playback rule: the plan per case, and BMD::Animation against MU's pose
+# code on a synthetic skeleton. BMD::Animation comes with the client globals
+# of Winmain.cpp.
+mu_add_test(
+    NAME animation_sampling_tests
+    SOURCES
+        test_animation_sampling.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Models/AnimationSampling.cpp
+)
+
+mu_add_test(
+    NAME animation_playback_rule_tests
+    SOURCES
+        test_animation_playback_rule.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+# Monster models read from glTF binaries (Render/Models/Gltf): the Elite Yeti,
+# Bull Fighter and Bali exported from their BMDs (data/Monster{14,01,33}.glb)
+# against the BMDs themselves.
+mu_add_test(
+    NAME glb_model_tests
+    SOURCES
+        test_glb_model.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(glb_model_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+    MU_TEST_GLB_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data"
+)
+
+# BMD::RenderMesh -> the model drawer seam; BMD needs the client globals of Winmain.cpp.
+mu_add_test(
+    NAME model_draw_tests
+    SOURCES
+        test_model_draw.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
 )
 
 mu_add_test(
@@ -171,8 +263,16 @@ mu_add_test(
         test_look_profile.cpp
         test_look_tuning.cpp
         test_look_preset.cpp
+        test_tuning_controls.cpp
+        test_tuning_session.cpp
+        test_look_layers.cpp
     LINK_LIBS
         MuClient
+)
+# The player tuning tests copy the shipped look and mood files to check they stay untouched, and read
+# the sources for the one place that applies a pending light mood strength.
+target_compile_definitions(look_profile_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
 # The light mood against the real terrain light buffers; they come with the
@@ -191,6 +291,69 @@ add_test(
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_SOURCE_DIR=${CMAKE_SOURCE_DIR}/src"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/test_imgui_sdlgpu_backend.cmake"
+)
+
+add_test(
+    NAME particle_cull_keeps_depth_state
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_PARTICLE_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Effects/ZzzEffectParticle.cpp"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_particle_cull_state.cmake"
+)
+
+set(MU_EFFECTS_DIR "${CMAKE_SOURCE_DIR}/src/source/Render/Effects")
+add_test(
+    NAME create_functions_have_no_fps_gate
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_EFFECT_SOURCES=CreateEffect=${MU_EFFECTS_DIR}/ZzzEffect.cpp\;CreateJoint=${MU_EFFECTS_DIR}/ZzzEffectJoint.cpp\;CreateParticle=${MU_EFFECTS_DIR}/ZzzEffectParticle.cpp"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_create_has_no_fps_gate.cmake"
+)
+
+add_test(
+    NAME fps_gates_are_not_nested
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_SOURCE_DIR=${CMAKE_SOURCE_DIR}/src/source"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_no_nested_fps_gate.cmake"
+)
+
+# The owned-random guard reads the compiled objects: the game's (the editor's too, when it is built) and two fixture
+# sets, one that calls the CRT's rand() or srand() in every spelling and one that does not.
+if(MSVC)
+    set(MU_SYMBOL_TOOL "${CMAKE_LINKER}")
+else()
+    set(MU_SYMBOL_TOOL "${CMAKE_NM}")
+endif()
+file(GLOB MU_CRT_RANDOM_USES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/crt_random/uses/*.cpp")
+file(GLOB MU_CRT_RANDOM_CLEAN CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/fixtures/crt_random/clean/*.cpp")
+add_library(crt_random_uses OBJECT ${MU_CRT_RANDOM_USES})
+add_library(crt_random_clean OBJECT ${MU_CRT_RANDOM_CLEAN})
+foreach(fixtures IN ITEMS crt_random_uses crt_random_clean)
+    target_compile_features(${fixtures} PRIVATE cxx_std_20)
+endforeach()
+file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/game_random_objects_$<CONFIG>.txt"
+     CONTENT "$<JOIN:$<TARGET_OBJECTS:MuClient>;$<TARGET_OBJECTS:Main>,\n>\n")
+file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/crt_random_uses_$<CONFIG>.txt"
+     CONTENT "$<JOIN:$<TARGET_OBJECTS:crt_random_uses>,\n>\n")
+file(GENERATE OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/crt_random_clean_$<CONFIG>.txt"
+     CONTENT "$<JOIN:$<TARGET_OBJECTS:crt_random_clean>,\n>\n")
+
+add_test(
+    NAME game_random_is_owned
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_OBJECT_LIST=${CMAKE_CURRENT_BINARY_DIR}/game_random_objects_$<CONFIG>.txt"
+        "-DMU_SYMBOL_TOOL=${MU_SYMBOL_TOOL}"
+        "-DMU_OUTPUT=${CMAKE_CURRENT_BINARY_DIR}/game_random_symbols_$<CONFIG>.txt"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_game_random_is_owned.cmake"
+)
+
+add_test(
+    NAME game_random_guard_detects
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_GUARD=${CMAKE_CURRENT_SOURCE_DIR}/test_game_random_is_owned.cmake"
+        "-DMU_SYMBOL_TOOL=${MU_SYMBOL_TOOL}"
+        "-DMU_USES=${CMAKE_CURRENT_BINARY_DIR}/crt_random_uses_$<CONFIG>.txt"
+        "-DMU_CLEAN=${CMAKE_CURRENT_BINARY_DIR}/crt_random_clean_$<CONFIG>.txt"
+        "-DMU_WORK=${CMAKE_CURRENT_BINARY_DIR}"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_game_random_guard_detects.cmake"
 )
 
 add_test(

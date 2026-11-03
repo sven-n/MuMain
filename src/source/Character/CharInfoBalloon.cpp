@@ -34,16 +34,29 @@ namespace
     struct GuildStatusText
     {
         std::uint8_t status;
-        int textIndex;
+        const wchar_t* const* text;
     };
 
-    constexpr std::array<GuildStatusText, 5> kGuildStatusTexts{ {
-        {   0, 1330 },
-        {  32, 1302 },
-        {  64, 1301 },
-        { 128, 1300 },
-        { 255, 488 },
-    } };
+    constexpr GuildStatusText kGuildStatusTexts[] = {
+        {0, &I18N::Game::Members},  {32, &I18N::Game::BattleM},   {64, &I18N::Game::AssistM},
+        {128, &I18N::Game::Master}, {255, &I18N::Game::Commoner},
+    };
+    // GetGuildStatusText searches the table with std::lower_bound.
+    static_assert(std::adjacent_find(std::begin(kGuildStatusTexts), std::end(kGuildStatusTexts),
+                                     [](const GuildStatusText& left, const GuildStatusText& right)
+                                     { return left.status >= right.status; }) == std::end(kGuildStatusTexts),
+                  "kGuildStatusTexts is sorted by status, each status once");
+
+    // The guild rank shown in the balloon for a character's GuildStatus, in the current language;
+    // nullptr for a status that is no rank.
+    const wchar_t* GetGuildStatusText(std::uint8_t guildStatus)
+    {
+        const auto it =
+            std::lower_bound(std::begin(kGuildStatusTexts), std::end(kGuildStatusTexts), guildStatus,
+                             [](const GuildStatusText& entry, std::uint8_t status) { return entry.status < status; });
+
+        return (it != std::end(kGuildStatusTexts) && it->status == guildStatus) ? *it->text : nullptr;
+    }
 
     BalloonNameStatus ResolveNameStatus(std::uint8_t controlCode)
     {
@@ -57,17 +70,6 @@ namespace
             return BalloonNameStatus::Operator;
 
         return BalloonNameStatus::Normal;
-    }
-
-    int ResolveGuildTextIndex(std::uint8_t guildStatus)
-    {
-        const auto it = std::lower_bound(
-            kGuildStatusTexts.begin(),
-            kGuildStatusTexts.end(),
-            guildStatus,
-            [](const GuildStatusText& entry, std::uint8_t status) { return entry.status < status; });
-
-        return (it != kGuildStatusTexts.end() && it->status == guildStatus) ? it->textIndex : 0;
     }
 }
 
@@ -142,8 +144,12 @@ void CCharInfoBalloon::SetInfo()
 
     CopyWideString(m_szName, m_pCharInfo->ID);
 
-    const int guildTextIndex = ResolveGuildTextIndex(m_pCharInfo->GuildStatus);
-    mu_swprintf_s(m_szGuild, L"(%ls)", I18N::Game::Lookup(guildTextIndex));
+    // A guild status without a rank text (OpenMU sends only the five ranks) shows no rank.
+    const wchar_t* guildStatusText = GetGuildStatusText(m_pCharInfo->GuildStatus);
+    if (guildStatusText != nullptr)
+        mu_swprintf_s(m_szGuild, L"(%ls)", guildStatusText);
+    else
+        m_szGuild[0] = L'\0';
     mu_swprintf_s(m_szClass, L"%ls %d",
         gCharacterManager.GetCharacterClassText(m_pCharInfo->Class),
         m_pCharInfo->Level);

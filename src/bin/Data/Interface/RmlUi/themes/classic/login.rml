@@ -1,0 +1,38 @@
+<rml>
+<head>
+	<title>Login</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="login.rcss"/>
+</head>
+<body class="scene-window-scale">
+	<!-- Classic (0.97) login box. The original sits at the bottom centre of the screen and slides up
+	     into place, so it does not live inside #panel, which LoginWin.cpp moves to the legacy
+	     layout's spot: #panel stays as an empty anchor and #classic_box carries the controls.
+	     Keep the ids, data-model and event names in sync with ../../login.rml (LoginWin.cpp binds
+	     them by name). The 0.97 box has no "remember me"/"save password" options (login.rcss places them
+	     on the box's blank plates) and no server name. -->
+	<div id="panel"></div>
+	<div id="classic_box" data-model="login">
+		<span class="label label-account native-text">{{account_label}}</span>
+		<span class="label label-password native-text">{{password_label}}</span>
+
+		<input id="input_account" type="text" class="text-field login-field login-field-account native-text"
+		       data-value="username"/>
+		<input id="input_password" type="password" class="text-field login-field login-field-password native-text"
+		       data-value="password"/>
+
+		<!-- Not in the 0.97 box: login.rcss puts them on its blank plates. -->
+		<div class="checkbox-row checkbox-remember-me" data-event-click="login_toggle_remember_me">
+			<div class="checkbox-box" data-class-checked="remember_me_checked"></div>
+			<span class="checkbox-label">{{remember_me_label}}</span>
+		</div>
+		<div class="checkbox-row checkbox-save-password" data-event-click="login_toggle_save_password">
+			<div class="checkbox-box" data-class-checked="save_password_checked"></div>
+			<span class="checkbox-label">{{save_password_label}}</span>
+		</div>
+
+		<div class="btn btn-ok" data-event-click="login_ok_click"><span class="btn-text native-text">{{ok_label}}</span></div>
+		<div class="btn btn-cancel" data-event-click="login_cancel_click"><span class="btn-text native-text">{{cancel_label}}</span></div>
+	</div>
+</body>
+</rml>

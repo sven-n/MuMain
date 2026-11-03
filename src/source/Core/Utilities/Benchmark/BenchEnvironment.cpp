@@ -6,6 +6,7 @@
 #include "Core/Utilities/PlatformInfo.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Render/Look/LookPresetSetting.h"
+#include "Render/Look/TuningSetting.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -20,12 +21,6 @@
 #include <ctime>
 #include <string>
 #include <thread>
-
-#if defined(_MSC_VER)
-#include <intrin.h>
-#elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
-#include <cpuid.h>
-#endif
 
 namespace Core::Benchmark::Environment
 {
@@ -55,49 +50,6 @@ std::string UtcTimestamp()
     char buffer[32];
     std::strftime(buffer, sizeof(buffer), "%Y-%m-%dT%H:%M:%SZ", &utc);
     return buffer;
-}
-
-// CPUID leaves 0x80000002..0x80000004 hold the processor brand string on every x86 part that
-// reports it. Empty elsewhere -- an unknown CPU is more useful in a report than a wrong one.
-std::string CpuBrand()
-{
-#if defined(_MSC_VER) || (defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)))
-    int registers[4] = {};
-    char brand[49] = {};
-    for (int leaf = 0; leaf < 3; leaf++)
-    {
-#if defined(_MSC_VER)
-        __cpuid(registers, (int)(0x80000002u + leaf));
-#else
-        __get_cpuid(0x80000002u + leaf, (unsigned*)&registers[0], (unsigned*)&registers[1], (unsigned*)&registers[2],
-                    (unsigned*)&registers[3]);
-#endif
-        memcpy(brand + leaf * sizeof(registers), registers, sizeof(registers));
-    }
-
-    std::string result = brand;
-    // The brand string is space-padded to a fixed width on many parts.
-    while (!result.empty() && result.back() == ' ')
-        result.pop_back();
-    return result;
-#else
-    return std::string();
-#endif
-}
-
-uint64_t SystemMemoryMB()
-{
-#if defined(_WIN32)
-    MEMORYSTATUSEX status = {};
-    status.dwLength = sizeof(status);
-    if (!GlobalMemoryStatusEx(&status))
-        return 0;
-
-    constexpr uint64_t kBytesPerMB = 1024ull * 1024ull;
-    return status.ullTotalPhys / kBytesPerMB;
-#else
-    return 0;
-#endif
 }
 
 void CaptureBuild(EnvironmentInfo& info)
@@ -139,6 +91,20 @@ void CaptureGraphics(EnvironmentInfo& info)
         add(EnhancedFeature::LightMood, "mood");
         add(EnhancedFeature::PostProcessing, "post");
     }
+    // The player's own values change what Enhanced costs (light ranges and caps, bloom), so a run
+    // records them; they apply only to the Enhanced look.
+    const Data::Config::PersonalTuning& tuning = Render::Look::PersonalTuningSession().Persisted();
+    const auto addTuning = [&info](std::string_view key, const std::string& value)
+    {
+        if (!info.enhancedTuning.empty())
+            info.enhancedTuning += ' ';
+        info.enhancedTuning += std::string(key) + "=" + value;
+    };
+    for (const Data::Maps::LookValueInfo& value : Data::Maps::LookValueInfos())
+        if (const std::optional<double>& set = tuning.look[value.value])
+            addTuning(value.name, Data::Config::FormatTuningNumber(*set));
+    if (tuning.moodStrengthPercent)
+        addTuning(Data::Config::MoodStrengthKey, std::to_string(*tuning.moodStrengthPercent));
     // Samples per pixel the frames render with; 1 is off.
     const int samples = mu::GetRenderer().GetAntialiasingSamples();
     info.antialiasingSamples = samples > 1 ? samples : 0;
@@ -165,9 +131,9 @@ EnvironmentInfo Capture()
     EnvironmentInfo info;
     info.timestampUtc = UtcTimestamp();
     info.osVersion = Narrow(Core::Platform::GetOSVersionString());
-    info.cpu = CpuBrand();
+    info.cpu = Core::Platform::GetProcessorName();
     info.cpuThreads = (int)std::thread::hardware_concurrency();
-    info.systemMemoryMB = SystemMemoryMB();
+    info.systemMemoryMB = static_cast<uint64_t>(Core::Platform::GetSystemMemoryMB());
 
     CaptureBuild(info);
     CaptureGraphics(info);

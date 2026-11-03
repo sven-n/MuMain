@@ -1,11 +1,13 @@
 ﻿#include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/ZzzAI.h"
+#include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Audio/DSPlaySound.h"
 #include "World/MapInfra/MapManager.h"
@@ -35,7 +37,7 @@ bool M31HuntingGround::CreateHuntingGroundObject(OBJECT* pObject)
     {
     case 27:
     case 54:
-        pObject->Timer = float(rand() % 1000) * 0.01f;
+        pObject->Timer = float(Random::Rand() % 1000) * 0.01f;
         break;
     }
 
@@ -99,7 +101,7 @@ bool M31HuntingGround::MoveHuntingGroundObject(OBJECT* pObject)
     break;
     case 42:
     {
-        Luminosity = (float)(rand() % 4 + 3) * 0.1f;
+        Luminosity = (float)(Random::Rand() % 4 + 3) * 0.1f;
         Vector(Luminosity * 0.9f, Luminosity * 0.2f, Luminosity * 0.1f, Light);
         AddTerrainLight(pObject->Position[0], pObject->Position[1], Light, 3, PrimaryTerrainLight);
         pObject->HiddenMesh = -2;
@@ -116,7 +118,7 @@ bool M31HuntingGround::MoveHuntingGroundObject(OBJECT* pObject)
     return true;
 }
 
-bool M31HuntingGround::RenderHuntingGroundObjectVisual(OBJECT* pObject, BMD* pModel)
+bool M31HuntingGround::UpdateHuntingGroundObjectEffects(OBJECT* pObject, BMD* pModel)
 {
     if (!IsInHuntingGround())
         return false;
@@ -143,21 +145,21 @@ bool M31HuntingGround::RenderHuntingGroundObjectVisual(OBJECT* pObject, BMD* pMo
     {
         vec3_t Relative, Position;
         Vector(0.f, -10.f, 0.f, Relative);
-        pModel->TransformPosition(BoneTransform[3], Relative, Position, false);
+        pModel->TransformPosition(Engine::Object::Pose::World(pObject, pModel)[3], Relative, Position, false);
 
         Vector(1.f, 0.f, 0.f, Light);
         float Luminosity = (float)sinf((WorldTime) * 0.002f) * 0.35f + 0.65f;
         CreateSprite(BITMAP_LIGHT, Position, Luminosity * 1.2f + 0.3f, Light, pObject);
         CreateSprite(BITMAP_LIGHT, Position, 0.5f, Light, pObject);
         Vector(0.3f, 0.3f, 0.3f, Light);
-        CreateSprite(BITMAP_SHINY + 1, Position, 1.2f, Light, NULL, rand() % 360);
+        CreateSprite(BITMAP_SHINY + 1, Position, 1.2f, Light, NULL, Random::Rand() % 360);
     }
     break;
     }
 
     return true;
 }
-bool M31HuntingGround::RenderHuntingGroundObjectMesh(OBJECT* pObject, BMD* pModel, bool ExtraMon)
+bool M31HuntingGround::RenderHuntingGroundObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel, bool ExtraMon)
 {
     if (IsInHuntingGround())
     {
@@ -169,8 +171,8 @@ bool M31HuntingGround::RenderHuntingGroundObjectMesh(OBJECT* pObject, BMD* pMode
             pModel->BodyLight[0] *= Luminosity;
             pModel->BodyLight[1] *= Luminosity;
             pModel->BodyLight[2] *= Luminosity;
-            pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                               pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
+            pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                               look.blendMeshV, look.hiddenMesh);
 
             VectorCopy(LightBackup, pModel->BodyLight); //. restore
 
@@ -181,8 +183,8 @@ bool M31HuntingGround::RenderHuntingGroundObjectMesh(OBJECT* pObject, BMD* pMode
             pModel->BodyLight[0] = 0.56f;
             pModel->BodyLight[1] = 0.80f;
             pModel->BodyLight[2] = 0.81f;
-            pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                               pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
+            pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                               look.blendMeshV, look.hiddenMesh);
             return true;
         }
         if (pObject->Type == 52)
@@ -191,11 +193,11 @@ bool M31HuntingGround::RenderHuntingGroundObjectMesh(OBJECT* pObject, BMD* pMode
             pModel->BodyLight[0] *= Luminosity;
             pModel->BodyLight[1] *= Luminosity;
             pModel->BodyLight[2] *= Luminosity;
-            pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                               pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, pObject->HiddenMesh);
+            pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                               look.blendMeshV, look.hiddenMesh);
         }
     }
-    return RenderHuntingGroundMonsterObjectMesh(pObject, pModel, ExtraMon);
+    return RenderHuntingGroundMonsterObjectMesh(pObject, look, pModel, ExtraMon);
 }
 
 CHARACTER* M31HuntingGround::CreateHuntingGroundMonster(int iType, int PosX, int PosY, int Key)
@@ -367,8 +369,27 @@ void M31HuntingGround::MoveHuntingGroundBlurEffect(CHARACTER* pCharacter, OBJECT
     break;
     }
 }
-bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
+bool M31HuntingGround::UpdateHuntingGroundMonsterEffects(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel)
 {
+    if (pObject->CurrentAction == MONSTER01_DIE)
+    {
+        switch (pObject->Type)
+        {
+        case MODEL_FIRE_GOLEM:
+            SkinObjectMeshes(pObject, pModel, true);
+            pModel->RenderMeshEffect(0, MODEL_GOLEM_STONE);
+            pObject->Live = false;
+            PlayBuffer(SOUND_BC_FIREGOLEM_DIE);
+            break;
+        case MODEL_POISON_GOLEM:
+            SkinObjectMeshes(pObject, pModel, true);
+            pModel->RenderMeshEffect(0, MODEL_GOLEM_STONE, 1);
+            pObject->Live = false;
+            PlayBuffer(SOUND_BC_POISONGOLEM_DIE);
+            break;
+        }
+    }
+
     switch (pObject->Type)
     {
     case MODEL_LIZARD_WARRIOR:
@@ -384,7 +405,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         {
             if (rand_fps_check(15))
             {
-                PlayBuffer(static_cast<ESound>(SOUND_BC_LIZARDWARRIOR_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_BC_LIZARDWARRIOR_MOVE1 + Random::Rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
@@ -392,7 +413,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             if (pObject->SubType == FALSE)
             {
                 pObject->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_BC_LIZARDWARRIOR_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_BC_LIZARDWARRIOR_ATTACK1 + Random::Rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_DIE)
@@ -415,13 +436,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         vec3_t Position, Relative;
 
         //. Dying Scene Processing
-        if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            pModel->RenderMeshEffect(0, MODEL_GOLEM_STONE);
-            pObject->Live = false;
-            PlayBuffer(SOUND_BC_FIREGOLEM_DIE);
-        }
-        else if (rand_fps_check(1))
+        if (pObject->CurrentAction != MONSTER01_DIE && rand_fps_check(1))
         {
             Vector(5.f, 10.f, 5.f, Relative);
             BoneManager::GetBonePosition(pObject, L"Monster82_LHand", Relative, Position);
@@ -440,9 +455,9 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             BoneManager::GetBonePosition(pObject, L"Monster82_Back", Position);
             CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 21, 0.8f);
 
-            if (rand_fps_check(20))
+            if (Random::Rand() % 20 == 0)
             {
-                PlayBuffer(static_cast<ESound>(SOUND_BC_FIREGOLEM_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_BC_FIREGOLEM_MOVE1 + Random::Rand() % 2));
             }
         }
 
@@ -508,7 +523,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             if (pObject->SubType == FALSE)
             {
                 pObject->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_BC_QUEENBEE_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_BC_QUEENBEE_MOVE1 + Random::Rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
@@ -516,7 +531,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             if (pObject->SubType == FALSE)
             {
                 pObject->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_BC_QUEENBEE_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_BC_QUEENBEE_ATTACK1 + Random::Rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_DIE)
@@ -530,7 +545,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
         if (pObject->CurrentAction == MONSTER01_ATTACK2)
         {
             vec3_t Position, Relative;
-            Vector(rand() % 12 - 6, rand() % 12 - 6, rand() % 12 - 6, Relative);
+            Vector(Random::Rand() % 12 - 6, Random::Rand() % 12 - 6, Random::Rand() % 12 - 6, Relative);
             BoneManager::GetBonePosition(pObject, L"Monster83_Tail", Relative, Position);
 
             vec3_t Light;
@@ -557,16 +572,8 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             if (pObject->SubType == FALSE)
             {
                 pObject->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_BC_POISONGOLEM_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_BC_POISONGOLEM_MOVE1 + Random::Rand() % 2));
             }
-        }
-
-        //. Dying Scene Processing
-        if (pObject->CurrentAction == MONSTER01_DIE)
-        {
-            pModel->RenderMeshEffect(0, MODEL_GOLEM_STONE, 1);
-            pObject->Live = false;
-            PlayBuffer(SOUND_BC_POISONGOLEM_DIE);
         }
 
         //. Attack Scene Processing
@@ -582,11 +589,12 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             Vector(-55.f, sinf(WorldTime * 0.03f) * 45.f, pObject->Angle[2], Angle);
             if (rand_fps_check(2))
             {
-                if (rand_fps_check(2))
+                if (Random::Rand() % 2 == 0)
                     BoneManager::GetBonePosition(pObject, L"Monster84_PoisonRight", Position);
                 else
                     BoneManager::GetBonePosition(pObject, L"Monster84_PoisonLeft", Position);
-                CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 11, (float)(rand() % 32 + 50) * 0.025f);
+                CreateParticle(BITMAP_SMOKE, Position, pObject->Angle, Light, 11,
+                               (float)(Random::Rand() % 32 + 50) * 0.025f);
             }
             CreateEffectFpsChecked(MODEL_BIG_STONE_PART2, Position, Angle, Light, 3);
         }
@@ -596,18 +604,18 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             if (pObject->SubType == FALSE)
             {
                 pObject->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_BC_POISONGOLEM_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_BC_POISONGOLEM_ATTACK1 + Random::Rand() % 2));
             }
 
             BoneManager::GetBonePosition(pObject, L"Monster84_RightHand", Position);
             Position[2] = pObject->Position[2];
             CreateParticleFpsChecked(BITMAP_SMOKE, Position, pObject->Angle, Light, 11,
-                                     (float)(rand() % 32 + 50) * 0.05f);
+                                     (float)(Random::Rand() % 32 + 50) * 0.05f);
 
             BoneManager::GetBonePosition(pObject, L"Monster84_LeftHand", Position);
             Position[2] = pObject->Position[2];
             CreateParticleFpsChecked(BITMAP_SMOKE, Position, pObject->Angle, Light, 11,
-                                     (float)(rand() % 32 + 50) * 0.05f);
+                                     (float)(Random::Rand() % 32 + 50) * 0.05f);
         }
 
         if (rand_fps_check(10))
@@ -645,7 +653,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             if (rand_fps_check(10))
             {
                 CreateParticle(BITMAP_SMOKE + 1, pObject->Position, pObject->Angle, Light);
-                PlayBuffer(static_cast<ESound>(SOUND_BC_AXEWARRIOR_MOVE1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_BC_AXEWARRIOR_MOVE1 + Random::Rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_ATTACK1 || pObject->CurrentAction == MONSTER01_ATTACK2)
@@ -653,7 +661,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             if (pObject->SubType == FALSE)
             {
                 pObject->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_BC_AXEWARRIOR_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_BC_AXEWARRIOR_ATTACK1 + Random::Rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_DIE)
@@ -685,7 +693,7 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
             if (pObject->SubType == FALSE)
             {
                 pObject->SubType = TRUE;
-                PlayBuffer(static_cast<ESound>(SOUND_BC_EROHIM_ATTACK1 + rand() % 2));
+                PlayBuffer(static_cast<ESound>(SOUND_BC_EROHIM_ATTACK1 + Random::Rand() % 2));
             }
         }
         if (pObject->CurrentAction == MONSTER01_DIE)
@@ -717,20 +725,21 @@ bool M31HuntingGround::RenderHuntingGroundMonsterVisual(CHARACTER* pCharacter, O
     }
     return false;
 }
-bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD* pModel, bool ExtraMon)
+bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel,
+                                                            bool ExtraMon)
 {
     switch (pObject->Type)
     {
     case MODEL_LIZARD_WARRIOR:
     {
-        pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, 1);
+        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV, 1);
         pModel->BeginRender(1.f);
         vec3_t LightBackup;
         VectorCopy(pModel->BodyLight, LightBackup); //. backup
         Vector(0.6f, 0.4f, 0.4f, pModel->BodyLight);
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
         VectorCopy(LightBackup, pModel->BodyLight); //. restore
         pModel->EndRender();
         return true;
@@ -750,16 +759,16 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         pModel->BodyLight[2] *= Luminosity;
 
         pModel->StreamMesh = 0;
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
                            (int)WorldTime % 10000 * 0.0002f, (int)WorldTime % 10000 * 0.0002f);
-        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                           look.blendMeshU, look.blendMeshV);
         pModel->StreamMesh = -1;
 
         VectorCopy(LightBackup, pModel->BodyLight); //. restore
 
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
         pModel->EndRender();
         return true;
     }
@@ -768,20 +777,18 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
     {
         pModel->BeginRender(1.f);
 
-        pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, 0);
+        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV, 0);
 
         vec3_t LightBackup;
         VectorCopy(pModel->BodyLight, LightBackup); //. backup
 
         // Vector ( 0.7f, 0.7f, 0.7f, pModel->BodyLight );
         Vector(1.f, 1.f, 1.f, pModel->BodyLight);
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, -1, 1.f, pObject->BlendMeshTexCoordU,
-                           pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, -1, 1.f, look.blendMeshU, look.blendMeshV);
         // Vector ( 0.75f, 0.65f, 0.5f, pModel->BodyLight );
         Vector(0.8f, 0.6f, 1.f, pModel->BodyLight);
-        pModel->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, pObject->Alpha, -1, 1.f, pObject->BlendMeshTexCoordU,
-                           pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, -1, 1.f, look.blendMeshU, look.blendMeshV);
 
         VectorCopy(LightBackup, pModel->BodyLight); //. restore
 
@@ -807,40 +814,35 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         pModel->BodyLight[2] *= (Luminosity * 0.1f);
 
         pModel->StreamMesh = 1;
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight,
                            (int)WorldTime % 10000 * 0.0002f, (int)WorldTime % 10000 * 0.0002f);
 
         if (ExtraMon)
         {
-            pModel->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
-                               pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV,
-                               BITMAP_CHROME);
+            pModel->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                               look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         else
-            pModel->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
-                               pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+            pModel->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                               look.blendMeshU, look.blendMeshV);
 
         pModel->StreamMesh = -1;
 
         VectorCopy(LightBackup, pModel->BodyLight); //. restore
 
-        pModel->RenderMesh(0, RENDER_TEXTURE, sinf(WorldTime * 0.0012f) * 0.2f + 0.8f, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE, sinf(WorldTime * 0.0012f) * 0.2f + 0.8f, look.blendMesh,
+                           look.blendMeshLight, look.blendMeshU, look.blendMeshV);
         if (ExtraMon)
         {
-            pModel->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
-                               pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV,
-                               BITMAP_CHROME);
+            pModel->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                               look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         pModel->StreamMesh = 2;
-        pModel->RenderMesh(2, RENDER_TEXTURE, pObject->Alpha, 2, 0.5f, pObject->BlendMeshTexCoordU,
-                           pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(2, RENDER_TEXTURE, look.alpha, 2, 0.5f, look.blendMeshU, look.blendMeshV);
         if (ExtraMon)
         {
-            pModel->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
-                               pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV,
-                               BITMAP_CHROME);
-            pObject->Scale = pModel->BodyScale;
+            pModel->RenderMesh(2, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                               look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
         }
         pModel->StreamMesh = -1;
         pModel->EndRender();
@@ -859,22 +861,20 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         pModel->BodyLight[0] *= 0.5f;
         pModel->BodyLight[1] *= 0.6f;
         pModel->BodyLight[2] *= 0.8f;
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
 
         if (ExtraMon)
-            pModel->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
-                               pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV,
-                               BITMAP_CHROME);
+            pModel->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                               look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
 
         Vector(0.5f, 0.8f, 0.6f, pModel->BodyLight);
-        pModel->RenderMesh(1, RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(1, RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV);
 
         if (ExtraMon)
-            pModel->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
-                               pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV,
-                               BITMAP_CHROME);
+            pModel->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                               look.blendMeshU, look.blendMeshV, BITMAP_CHROME);
 
         VectorCopy(LightBackup, pModel->BodyLight); //. restore
         pModel->EndRender();
@@ -883,35 +883,34 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
     break;
     case MODEL_EROHIM:
     {
-        pModel->RenderBody(RENDER_TEXTURE, pObject->Alpha, pObject->BlendMesh, pObject->BlendMeshLight,
-                           pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV, 5);
+        pModel->RenderBody(RENDER_TEXTURE, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                           look.blendMeshV, 5);
 
         pModel->BeginRender(1.f);
 
-        pObject->Alpha = 1.0f;
-        pModel->RenderMesh(5, RENDER_TEXTURE, pObject->Alpha, -1, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU,
-                           pObject->BlendMeshTexCoordV, BITMAP_HGBOSS_WING);
-        pModel->RenderMesh(5, RENDER_TEXTURE, pObject->Alpha, -1, pObject->BlendMeshLight, pObject->BlendMeshTexCoordU,
-                           pObject->BlendMeshTexCoordV);
+        look.alpha = 1.0f;
+        pModel->RenderMesh(5, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
+                           BITMAP_HGBOSS_WING);
+        pModel->RenderMesh(5, RENDER_TEXTURE, look.alpha, -1, look.blendMeshLight, look.blendMeshU, look.blendMeshV);
 
         vec3_t LightBackup;
         VectorCopy(pModel->BodyLight, LightBackup); //. backup
 
         Vector(1.f, 0.5f, 0.f, pModel->BodyLight);
-        pModel->RenderMesh(4, RENDER_CHROME | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(4, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                           look.blendMeshU, look.blendMeshV);
 
         Vector(0.75f, 0.65f, 0.5f, pModel->BodyLight);
-        pModel->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(3, RENDER_CHROME | RENDER_BRIGHT, pObject->Alpha, pObject->BlendMesh,
-                           pObject->BlendMeshLight, pObject->BlendMeshTexCoordU, pObject->BlendMeshTexCoordV);
+        pModel->RenderMesh(0, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                           look.blendMeshU, look.blendMeshV);
+        pModel->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                           look.blendMeshU, look.blendMeshV);
+        pModel->RenderMesh(3, RENDER_CHROME | RENDER_BRIGHT, look.alpha, look.blendMesh, look.blendMeshLight,
+                           look.blendMeshU, look.blendMeshV);
 
         float Luminosity = sinf(WorldTime * 0.0012f) * 0.3f + 0.6f;
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, 0, Luminosity, pObject->BlendMeshTexCoordU,
-                           pObject->BlendMeshTexCoordV, BITMAP_HGBOSS_PATTERN);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, 0, Luminosity, look.blendMeshU, look.blendMeshV,
+                           BITMAP_HGBOSS_PATTERN);
 
         VectorCopy(LightBackup, pModel->BodyLight); //. restore
 
@@ -925,10 +924,9 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
         pModel->BeginRender(1.f);
 
         Vector(1.f, 1.f, 1.f, pModel->BodyLight);
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, -1, 1.f, pObject->BlendMeshTexCoordU,
-                           pObject->BlendMeshTexCoordV);
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, 0, 1.f, pObject->BlendMeshTexCoordU,
-                           pObject->BlendMeshTexCoordV, BITMAP_FISSURE_FIRE);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, -1, 1.f, look.blendMeshU, look.blendMeshV);
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, 0, 1.f, look.blendMeshU, look.blendMeshV,
+                           BITMAP_FISSURE_FIRE);
 
         pModel->EndRender();
 
@@ -941,10 +939,9 @@ bool M31HuntingGround::RenderHuntingGroundMonsterObjectMesh(OBJECT* pObject, BMD
 
         Vector(1.f, 1.f, 1.f, pModel->BodyLight);
 
-        pObject->BlendMeshTexCoordU = sinf(WorldTime * 0.00008f) * 2.5f;
-        pModel->RenderMesh(0, RENDER_TEXTURE, pObject->Alpha, 0, 1.f, pObject->BlendMeshTexCoordU,
-                           pObject->BlendMeshTexCoordV);
-        pObject->BlendMeshTexCoordU = 1.f;
+        look.blendMeshU = sinf(WorldTime * 0.00008f) * 2.5f;
+        pModel->RenderMesh(0, RENDER_TEXTURE, look.alpha, 0, 1.f, look.blendMeshU, look.blendMeshV);
+        look.blendMeshU = 1.f;
 
         pModel->EndRender();
         return true;
@@ -975,29 +972,6 @@ bool M31HuntingGround::AttackEffectHuntingGroundMonster(CHARACTER* pCharacter, O
     }
     return false;
 }
-bool M31HuntingGround::SetCurrentActionHuntingGroundMonster(CHARACTER* pCharacter, OBJECT* pObject)
-{
-    if (!IsInHuntingGround())
-        return false;
-
-    switch (pCharacter->MonsterIndex)
-    {
-    case MONSTER_FIRE_GOLEM:
-        if (pCharacter->Skill == AT_SKILL_BOSS)
-        {
-            SetAction(pObject, MONSTER01_ATTACK1);
-        }
-        else
-        {
-            SetAction(pObject, MONSTER01_ATTACK2);
-        }
-
-        return true;
-    }
-
-    return false;
-}
-
 bool M31HuntingGround::CreateMist(PARTICLE* pParticleObj)
 {
     if (!IsInHuntingGround())
@@ -1011,39 +985,39 @@ bool M31HuntingGround::CreateMist(PARTICLE* pParticleObj)
         Vector(0.05f, 0.05f, 0.1f, Light);
 
         vec3_t TargetPosition = {0.f, 0.f, 0.f}, TargetAngle = {0.f, 0.f, 0.f};
-        switch (rand() % 8)
+        switch (Random::Rand() % 8)
         {
         case 0:
-            TargetPosition[0] = Hero->Object.Position[0] + (300 + rand() % 250);
-            TargetPosition[1] = Hero->Object.Position[1] + (300 + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] + (300 + Random::Rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] + (300 + Random::Rand() % 250);
             break;
         case 1:
-            TargetPosition[0] = Hero->Object.Position[0] + (250 + rand() % 250);
-            TargetPosition[1] = Hero->Object.Position[1] - (250 + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] + (250 + Random::Rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] - (250 + Random::Rand() % 250);
             break;
         case 2:
-            TargetPosition[0] = Hero->Object.Position[0] - (200 + rand() % 250);
-            TargetPosition[1] = Hero->Object.Position[1] + (200 + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] - (200 + Random::Rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] + (200 + Random::Rand() % 250);
             break;
         case 3:
-            TargetPosition[0] = Hero->Object.Position[0] - (300 + rand() % 250);
-            TargetPosition[1] = Hero->Object.Position[1] - (300 + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] - (300 + Random::Rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] - (300 + Random::Rand() % 250);
             break;
         case 4:
-            TargetPosition[0] = Hero->Object.Position[0] + (400 + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] + (400 + Random::Rand() % 250);
             TargetPosition[1] = Hero->Object.Position[1];
             break;
         case 5:
-            TargetPosition[0] = Hero->Object.Position[0] - (400 + rand() % 250);
+            TargetPosition[0] = Hero->Object.Position[0] - (400 + Random::Rand() % 250);
             TargetPosition[1] = Hero->Object.Position[1];
             break;
         case 6:
             TargetPosition[0] = Hero->Object.Position[0];
-            TargetPosition[1] = Hero->Object.Position[1] + (400 + rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] + (400 + Random::Rand() % 250);
             break;
         case 7:
             TargetPosition[0] = Hero->Object.Position[0];
-            TargetPosition[1] = Hero->Object.Position[1] - (400 + rand() % 250);
+            TargetPosition[1] = Hero->Object.Position[1] - (400 + Random::Rand() % 250);
             break;
         }
 
@@ -1054,11 +1028,11 @@ bool M31HuntingGround::CreateMist(PARTICLE* pParticleObj)
             vec3_t Velocity, Direction;
             Vector(0.f, -45.f * CharacterMoveSpeed(Hero), 0.f, Velocity);
             VectorRotate(Velocity, Matrix, Direction);
-            VectorAddScaled(TargetPosition, Direction, TargetPosition, FPS_ANIMATION_FACTOR);
+            VectorAdd(TargetPosition, Direction, TargetPosition);
         }
-        if (Hero->Movement || (rand_fps_check(2)))
+        if (Hero->Movement || (Random::Rand() % 2 == 0))
         {
-            TargetPosition[2] = (rand() % 20) + RequestTerrainHeight(TargetPosition[0], TargetPosition[1]);
+            TargetPosition[2] = (Random::Rand() % 20) + RequestTerrainHeight(TargetPosition[0], TargetPosition[1]);
             CreateParticle(BITMAP_CLOUD, TargetPosition, TargetAngle, Light, 8, 0.4f);
         }
         pParticleObj->Live = false;

@@ -9,6 +9,8 @@
 #include "EffectPreviewGeometry.h"
 #include "EffectPreviewItems.h"
 #include "EffectPreviewObject.h"
+#include "PreviewInventoryPose.h"
+#include "PreviewModelPose.h"
 #include "SavedGameRenderState.h"
 #include "Core/Globals/_TextureIndex.h"
 #include "Core/Globals/_define.h"
@@ -74,94 +76,6 @@ float RadiusOf(const PreviewVector& min, const PreviewVector& max)
 float CubeEdge(float subjectRadius)
 {
     return std::clamp(subjectRadius, MinCubeEdge, MaxCubeEdge);
-}
-
-// The fields of a model the preview sets. The game sets them before each of
-// its own draws; the preview puts them back anyway.
-class ScopedModelState
-{
-public:
-    explicit ScopedModelState(BMD& model)
-        : m_model(model), m_lightEnable(model.LightEnable), m_contrastEnable(model.ContrastEnable),
-          m_hideSkin(model.HideSkin), m_bodyScale(model.BodyScale), m_bodyHeight(model.BodyHeight),
-          m_currentAction(model.CurrentAction)
-    {
-        VectorCopy(model.BodyLight, m_bodyLight);
-        VectorCopy(model.BodyOrigin, m_bodyOrigin);
-    }
-
-    ~ScopedModelState()
-    {
-        m_model.LightEnable = m_lightEnable;
-        m_model.ContrastEnable = m_contrastEnable;
-        m_model.HideSkin = m_hideSkin;
-        m_model.BodyScale = m_bodyScale;
-        m_model.BodyHeight = m_bodyHeight;
-        m_model.CurrentAction = m_currentAction;
-        VectorCopy(m_bodyLight, m_model.BodyLight);
-        VectorCopy(m_bodyOrigin, m_model.BodyOrigin);
-    }
-
-    ScopedModelState(const ScopedModelState&) = delete;
-    ScopedModelState& operator=(const ScopedModelState&) = delete;
-
-private:
-    BMD& m_model;
-    bool m_lightEnable;
-    bool m_contrastEnable;
-    bool m_hideSkin;
-    float m_bodyScale;
-    float m_bodyHeight;
-    unsigned short m_currentAction;
-    vec3_t m_bodyLight;
-    vec3_t m_bodyOrigin;
-};
-
-// Places the bones of `o`'s model as RenderObject does before it draws
-// (Calc_RenderObject), without the terrain light.
-void PoseLikeRenderObject(OBJECT& o, BMD& b)
-{
-    b.BodyHeight = 0.0f;
-    b.ContrastEnable = o.ContrastEnable;
-    b.LightEnable = o.LightEnable;
-    VectorCopy(o.Light, b.BodyLight);
-    b.BodyScale = o.Scale;
-    b.CurrentAction = o.CurrentAction;
-    VectorCopy(o.Position, b.BodyOrigin);
-    b.Animation(BoneTransform, o.AnimationFrame, o.PriorAnimationFrame, o.PriorAction, o.Angle, o.HeadAngle, false,
-                true);
-    BoneScale = 1.0f;
-}
-
-// The extent of `o`'s model at its first frame, around its origin; false
-// for a model without actions, whose bones would stay those of another.
-bool MeasureModel(OBJECT& o, PreviewVector& min, PreviewVector& max)
-{
-    BMD& b = Models[o.Type];
-    if (b.NumActions <= 0)
-        return false;
-    const ScopedModelState saved(b);
-    const float savedBoneScale = BoneScale;
-    PoseLikeRenderObject(o, b);
-    min = {FLT_MAX, FLT_MAX, FLT_MAX};
-    max = {-FLT_MAX, -FLT_MAX, -FLT_MAX};
-    for (int mesh = 0; mesh < b.NumMeshs; ++mesh)
-    {
-        if (mesh == o.HiddenMesh)
-            continue;
-        for (int vertex = 0; vertex < b.Meshs[mesh].NumVertices; ++vertex)
-        {
-            vec3_t p;
-            b.SkinVertex(mesh, vertex, BoneTransform, false, 0.0f, p);
-            for (int axis = 0; axis < 3; ++axis)
-            {
-                min[axis] = std::min(min[axis], p[axis]);
-                max[axis] = std::max(max[axis], p[axis]);
-            }
-        }
-    }
-    BoneScale = savedBoneScale;
-    return min[0] <= max[0];
 }
 
 void ApplySpriteBlend(PreviewSpriteBlend blend)
@@ -343,8 +257,9 @@ void EffectPreviewScene::DrawBase(const EffectPreviewRequest& request, float sub
 }
 
 // As the inventory draws an item (RenderObjectScreen), at the origin and with
-// the turn and scale it has on the ground. The item's own sprites, particles
-// and effects are removed again.
+// the scale it has on the ground: turned as it lies on the ground, or upright
+// as the inventory turns it, facing the camera. The item's own sprites,
+// particles and effects are removed again.
 void EffectPreviewScene::DrawItem(const EffectPreviewRequest& request)
 {
     const PreviewItemModels models = GetPreviewItemModels(request.itemType, request.itemLevel);
@@ -365,17 +280,56 @@ void EffectPreviewScene::DrawItem(const EffectPreviewRequest& request)
     item.Class = CLASS_ELF;
     if (ground.scale)
         o->Scale = *ground.scale;
-    Vector(ground.rotation[0], ground.rotation[1], ground.rotation[2] + m_turnDegrees, o->Angle);
     Vector(0.0f, 0.0f, 0.0f, o->Position);
     b.CurrentAction = 0;
-    b.BodyHeight = ground.bodyHeight;
-    b.Animation(BoneTransform, 0.0f, 0.0f, 0, o->Angle, o->HeadAngle, false, false);
+    if (request.itemPose == PreviewItemPose::Inventory)
+    {
+        // The inventory's turn under the matrix that stands its view up in
+        // the scene.
+        const Render::Items::Display::InventoryDisplay inventory =
+            Render::Items::Display::GetInventoryDisplay(models.model);
+        vec3_t inventoryAngle = {inventory.rotation[0], inventory.rotation[1], inventory.rotation[2]};
+        float inventoryMatrix[3][4];
+        float sceneMatrix[3][4];
+        float root[3][4];
+        AngleMatrix(inventoryAngle, inventoryMatrix);
+        InventoryViewToScene(m_turnDegrees, sceneMatrix);
+        R_ConcatTransforms(sceneMatrix, inventoryMatrix, root);
+        b.BodyHeight = inventory.bodyHeight;
+        b.Animation(BoneTransform, 0.0f, 0.0f, 0, o->Angle, o->HeadAngle, true, false, root);
+    }
+    else
+    {
+        Vector(ground.rotation[0], ground.rotation[1], ground.rotation[2] + m_turnDegrees, o->Angle);
+        b.BodyHeight = ground.bodyHeight;
+        b.Animation(BoneTransform, 0.0f, 0.0f, 0, o->Angle, o->HeadAngle, false, false);
+        if (request.itemGroundPlane)
+        {
+            DrawGroundUnderItem(models.model);
+        }
+    }
 
     vec3_t light = {1.0f, 1.0f, 1.0f};
     const EffectPoolGuard removeItemEffects;
-    RenderPartObject(o, models.model, nullptr, light, o->Alpha, request.itemLevel,
+    RenderPartObject(o, models.model, nullptr, light, o->Alpha, models.drawLevel,
                      request.itemExcellent ? ExcellentFlags : 0, request.itemAncient ? AncientDiscriminator : 0, true,
                      true, true);
+}
+
+// The ground a dropped item lies above (HandleItemOnGround): the item is at
+// the origin, the ground that far below it.
+void EffectPreviewScene::DrawGroundUnderItem(int modelType)
+{
+    float height = Render::Items::Display::DroppedItemHeight;
+    if (Render::Items::Display::IsLiftedOnGround(modelType))
+        height += Render::Items::Display::DroppedWeaponLift;
+    DisableAlphaBlend();
+    DisableTexture();
+    DisableCullFace();
+    EnableDepthTest();
+    const PreviewGeometry::PlaneQuads plane =
+        PreviewGeometry::Plane(std::max(ItemHalfSize * PlaneRadii * 2.0f, MinPlaneSize), -height);
+    mu::GetRenderer().RenderQuad3D(plane, 0u);
 }
 
 void EffectPreviewScene::DrawSubject(const EffectPreviewRequest& request, const EffectPreviewCamera& camera)

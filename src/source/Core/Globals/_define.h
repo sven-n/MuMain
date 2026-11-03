@@ -188,10 +188,6 @@ enum struct STORAGE_TYPE
     LUCKYITEM_REFINERY = 16,
 };
 
-// Lucky Set armor constants - verified as indices 62-72 (Phoenix Soul is at 73)
-constexpr int LUCKY_SET_ARMOR_START_INDEX = 62;
-constexpr int LUCKY_SET_ARMOR_COUNT = 11;  // Indices 62-72
-
 #define EQUIPMENT_WEAPON_RIGHT 0
 #define EQUIPMENT_WEAPON_LEFT  1
 #define EQUIPMENT_HELM         2
@@ -265,7 +261,6 @@ constexpr int LUCKY_SET_ARMOR_COUNT = 11;  // Indices 62-72
 #define EDIT_HEIGHT  4
 #define EDIT_LIGHT   5
 #define EDIT_SOUND   6
-#define EDIT_MONSTER 7
 
 #define IME_CONVERSIONMODE  1
 #define IME_SENTENCEMODE    2
@@ -305,7 +300,6 @@ constexpr int LUCKY_SET_ARMOR_COUNT = 11;  // Indices 62-72
 
 #define CHAR_DEL_LIMIT_LV	300
 
-#define MAX_TEXTS               3000
 #define MAX_GLOBAL_TEXT_STRING	300
 #define MAX_FILTERS 1000
 

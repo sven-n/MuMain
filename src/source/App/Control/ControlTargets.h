@@ -1,10 +1,12 @@
-// The `target` field several control commands take: an object id or a
-// character name, resolved against what the client sees.
+// The `target` field several control commands take: an object id, a
+// character name, or {"monster": <number>} for the nearest living monster or
+// NPC with that monster number, resolved against what the client sees.
 #pragma once
 
 #include "App/Control/ControlProtocol.h"
 
 #include <cstdint>
+#include <map>
 #include <string>
 #include <string_view>
 
@@ -20,9 +22,15 @@ enum class TargetLookup : std::uint8_t
     Found,
 };
 
-// Server-assigned id of the object a command names, by id or by character
-// name.
+// Server-assigned id of the object a command names, by id, by character name
+// or by monster number.
 [[nodiscard]] TargetLookup ResolveTarget(const Request& request, int& key);
+
+// The monster number of a target written as {"monster": <number>}: false
+// unless `monster` is the only field and a whole number from 0 to 1023
+// (251 or 251.0; the fields cannot tell the string "251" from the number, so it
+// counts too).
+[[nodiscard]] bool ReadMonsterNumber(const std::map<std::string, std::string>& fields, int& number);
 
 // The error a lookup that did not find an object deserves, or an empty
 // string when it did. `required` says whether the command needs one.

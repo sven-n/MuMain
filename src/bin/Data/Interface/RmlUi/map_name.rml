@@ -5,12 +5,20 @@
 	<link type="text/rcss" href="map_name.rcss"/>
 </head>
 <body data-model="map_name">
-	<!-- The map name image and optional Gens strife banner fade together. The theme owns their
-	     size and position; the background context keeps them behind other windows. The game loads
-	     each art padded to a power of two; the rects crop it to the art, as the original did. -->
-	<div id="banner" class="center-x" data-style-opacity="alpha">
-		<img id="strife" data-if="strife" data-attr-src="strife_source" rect="0 0 166 28"/>
-		<img id="name" data-attr-src="image_source" rect="0 0 166 90"/>
+	<!-- The original map-name image rebuilt from its pieces: the swirls shared by every map, the
+	     map's own icon between them and the localized name above, fading with the optional Gens
+	     warning. This HUD stays behind game windows and lets pointer input pass through. -->
+	<div id="banner" data-style-opacity="alpha">
+		<img id="strife" class="center-x" data-if="strife" data-attr-src="strife_source" rect="0 0 166 28"/>
+		<div id="ornaments" class="center-x">
+			<img id="swirl_left" class="ornament" src="/Data/Interface/MapNameOrnament/SwirlLeft.tga"/>
+			<img id="swirl_right" class="ornament" src="/Data/Interface/MapNameOrnament/SwirlRight.tga"/>
+			<img id="icon" class="ornament" data-if="icon" data-attr-src="icon_source" data-attr-style="icon_style"/>
+		</div>
+		<div id="name_room" data-class-lang-ja="language == 'ja'">
+			<div id="name" class="name-layer"><span id="name_text" class="text-fit">{{map_name}}</span></div>
+			<div id="name_shine_host" class="name-layer"><span id="name_shine" class="text-fit">{{map_name}}</span></div>
+		</div>
 	</div>
 </body>
 </rml>

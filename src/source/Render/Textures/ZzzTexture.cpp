@@ -315,6 +315,11 @@ void PopUpErrorCheckMsgBox(const wchar_t* szErrorMsg, bool bForceDestroy)
 
 void PopUpErrorCheckMsgBox(const std::string& title, const std::string& message, bool canContinue)
 {
+    if (const Render::Textures::TextureErrorCollector collector = Render::Textures::GetTextureErrorCollector())
+    {
+        collector(message);
+        return;
+    }
     const Render::Textures::TextureErrorActions actions{
         [](const std::string& dialogTitle, const std::string& dialogMessage, bool forceDestroy)
         {

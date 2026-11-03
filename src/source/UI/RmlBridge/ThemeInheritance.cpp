@@ -58,6 +58,21 @@ bool ThemeInheritance::IsValidName(const std::string& name)
         { return (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' || c == '-'; });
 }
 
+ThemeInheritance::IniLine ThemeInheritance::ParseIniLine(std::string line)
+{
+    if (line.starts_with("\xef\xbb\xbf"))
+        line.erase(0, 3);
+    line = Trim(std::move(line));
+    if (line.empty() || line.front() == ';' || line.front() == '#')
+        return {};
+    if (line.front() == '[' && line.back() == ']')
+        return {Lower(Trim(line.substr(1, line.size() - 2))), std::nullopt, {}};
+    const auto equals = line.find('=');
+    if (equals == std::string::npos)
+        return {};
+    return {std::nullopt, Lower(Trim(line.substr(0, equals))), Trim(line.substr(equals + 1))};
+}
+
 ThemeInheritance::Values ThemeInheritance::ReadValues(const std::filesystem::path& directory)
 {
     Values values;
@@ -67,20 +82,15 @@ ThemeInheritance::Values ThemeInheritance::ReadValues(const std::filesystem::pat
         std::string section, line;
         while (std::getline(input, line))
         {
-            if (line.starts_with("\xef\xbb\xbf"))
-                line.erase(0, 3);
-            line = Trim(std::move(line));
-            if (line.empty() || line.front() == ';' || line.front() == '#')
-                continue;
-            if (line.front() == '[' && line.back() == ']')
+            IniLine parsed = ParseIniLine(std::move(line));
+            if (parsed.section)
             {
-                section = Lower(Trim(line.substr(1, line.size() - 2)));
+                section = std::move(*parsed.section);
                 continue;
             }
-            const auto equals = line.find('=');
             const bool tokensFile = std::string_view(name) == "tokens.ini";
-            if (equals != std::string::npos && !section.empty() && (!tokensFile || section == "tokens"))
-                values[section][Lower(Trim(line.substr(0, equals)))] = Trim(line.substr(equals + 1));
+            if (parsed.key && !section.empty() && (!tokensFile || section == "tokens"))
+                values[section][*parsed.key] = std::move(parsed.value);
         }
     }
     return values;
@@ -172,9 +182,22 @@ std::map<std::string, ThemeInheritance::Setting> ThemeInheritance::Section(const
 std::optional<ThemeInheritance::Setting> ThemeInheritance::GetSetting(const std::string& section,
                                                                     const std::string& key) const
 {
-    const auto entries = Section(section);
-    const auto found = entries.find(Lower(key));
-    return found == entries.end() ? std::nullopt : std::optional(found->second);
+    if (!IsValid())
+        return std::nullopt;
+    // The first theme of the chain that has the key, as Section() takes it, without copying the whole section: the
+    // editor's swatches and the server select window read tokens this way many times a frame.
+    const std::string sectionName = Lower(section);
+    const std::string keyName = Lower(key);
+    for (size_t i = 0; i < m_Values.size(); ++i)
+    {
+        const auto found = m_Values[i].find(sectionName);
+        if (found == m_Values[i].end())
+            continue;
+        const auto value = found->second.find(keyName);
+        if (value != found->second.end())
+            return Setting{value->second, m_Directories[i]};
+    }
+    return std::nullopt;
 }
 
 std::optional<std::filesystem::path> ThemeDirectoryForResource(const std::string& path)

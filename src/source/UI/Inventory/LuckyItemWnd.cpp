@@ -1,5 +1,6 @@
 ﻿
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "I18N/All.h"
 
 #include "UI/Inventory/LuckyItemWnd.h"
@@ -94,13 +95,7 @@ int CLuckyItemWnd::SetActAction()
 void CLuckyItemWnd::RenderMixEffect()
 {
     if (m_nMixEffectTimer <= 0)
-    {
         return;
-    }
-    else
-    {
-        --m_nMixEffectTimer;
-    }
 
     EnableAlphaBlend();
     for (int i = 0; i < (int)m_pNewInventoryCtrl->GetNumberOfItems(); ++i)
@@ -112,16 +107,19 @@ void CLuckyItemWnd::RenderMixEffect()
         {
             for (int w = 0; w < iWidth; ++w)
             {
-                const BYTE red = static_cast<BYTE>((rand() % 6 + 6) * 0.1f * 255.f);
-                const BYTE green = static_cast<BYTE>((rand() % 4 + 4) * 0.1f * 255.f);
+                // Every pass of the frame draws the cell's sparkle alike.
+                const void* item = m_pNewInventoryCtrl->GetItem(i);
+                const auto salt = static_cast<std::uint32_t>((h * 16 + w) * 8);
+                const BYTE red = static_cast<BYTE>((Random::DrawRand(item, salt) % 6 + 6) * 0.1f * 255.f);
+                const BYTE green = static_cast<BYTE>((Random::DrawRand(item, salt + 1) % 4 + 4) * 0.1f * 255.f);
                 const DWORD sparkleColor = RGBA(red, green, 51, 255);
                 float Rotate = (float)((int)(WorldTime) % 100) * 20.f;
                 const UI::Items::GridRect cell = m_pNewInventoryCtrl->Geometry().CellsRect(
                     m_pNewInventoryCtrl->GetItem(i)->x + w, m_pNewInventoryCtrl->GetItem(i)->y + h, 1, 1);
                 // The original's sizes, for its 20-unit cell, at the cell's drawn size.
-                float Scale = (5.f + (rand() % 10)) * cell.width / 20.f;
-                float x = cell.x + (rand() % (std::max)(1, static_cast<int>(cell.width)));
-                float y = cell.y + (rand() % (std::max)(1, static_cast<int>(cell.height)));
+                float Scale = (5.f + (Random::DrawRand(item, salt + 2) % 10)) * cell.width / 20.f;
+                float x = cell.x + (Random::DrawRand(item, salt + 3) % (std::max)(1, static_cast<int>(cell.width)));
+                float y = cell.y + (Random::DrawRand(item, salt + 4) % (std::max)(1, static_cast<int>(cell.height)));
                 RenderBitmapRotate(BITMAP_SHINY, x, y, Scale, Scale, 0, 0.f, 0.f, 1.f, 1.f, sparkleColor);
                 RenderBitmapRotate(BITMAP_SHINY, x, y, Scale, Scale, Rotate, 0.f, 0.f, 1.f, 1.f, sparkleColor);
                 RenderBitmapRotate(BITMAP_SHINY + 1, x, y, Scale * 3.f, Scale * 3.f, Rotate,
@@ -137,7 +135,7 @@ void CLuckyItemWnd::RenderMixEffect()
 void CLuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const BYTE> pbyItemPacket)
 {
     int		nDefault = -1;
-    int		nMessage = nDefault;
+    const wchar_t* const* pMessage = nullptr;
     int		nPlaySound = nDefault;
     int		nAddInven = -1;
     bool	bInitInven = false;
@@ -162,7 +160,7 @@ void CLuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const BYTE>
         {
             if (m_eType == eLuckyItemType_Trade)
             {
-                nMessage = 3303;
+                pMessage = &I18N::Game::UnequippbleItemsCannotBeCombined;
             }
             else if (m_eType == eLuckyItemType_Refinery)
             {
@@ -175,7 +173,8 @@ void CLuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const BYTE>
         break;
     }
 
-    if (nMessage > nDefault)	g_pChatListBox->AddText(L"", I18N::Game::Lookup(nMessage), mu::ui::window::TYPE_ERROR_MESSAGE);
+    if (pMessage != nullptr)
+        g_pChatListBox->AddText(L"", *pMessage, mu::ui::window::TYPE_ERROR_MESSAGE);
     if (nPlaySound > nDefault)	PlayBuffer(static_cast<ESound>(nPlaySound));
     if (bInitInven)			g_pLuckyItemWnd->Process_InventoryCtrl_DeleteItem(-1);
     if (nAddInven > nDefault)	Process_InventoryCtrl_InsertItem(nAddInven, pbyItemPacket);
@@ -202,7 +201,7 @@ bool CLuckyItemWnd::Create(CManager* pNewUIMng)
 
     for (int i = 0; i < LUCKYITEMMAXLINE; i++)
     {
-        m_sText[i].s_nTextIndex = -1;
+        m_sText[i].s_pText = nullptr;
         m_sText[i].s_dwColor = 0;
         m_sText[i].s_nLine = false;
     }
@@ -262,7 +261,7 @@ void CLuckyItemWnd::OpeningProcess(void)
 {
     for (int i = 0; i < LUCKYITEMMAXLINE; i++)
     {
-        m_sText[i].s_nTextIndex = -1;
+        m_sText[i].s_pText = nullptr;
         m_sText[i].s_dwColor = 0;
         m_sText[i].s_nLine = false;
     }
@@ -272,19 +271,24 @@ void CLuckyItemWnd::OpeningProcess(void)
     {
     case eLuckyItemType_Trade:
         mu_swprintf(m_szSubject, L"%ls", I18N::Game::ExchangeLuckyItem);
-        AddText(3291, 0xFF0000FF, RT3_SORT_LEFT), AddText(0), AddText(0), AddText(3292), AddText(3293), AddText(3294);
-        AddText(0), AddText(0);
-        AddText(2223, 0xFF00FFFF);
-        AddText(0);
-        AddText(3295, 0xFF0000FF), AddText(3296, 0xFF0000FF);
+        AddText(&I18N::Game::PlaceATicketItem, 0xFF0000FF, RT3_SORT_LEFT), AddText(nullptr), AddText(nullptr);
+        AddText(&I18N::Game::OnlyATicketItemCanBeCombined);
+        AddText(&I18N::Game::AnItemUsableForThePlayerCharacterSClass);
+        AddText(&I18N::Game::WillBeCreated);
+        AddText(nullptr), AddText(nullptr);
+        AddText(&I18N::Game::Warning2223, 0xFF00FFFF);
+        AddText(nullptr);
+        AddText(&I18N::Game::IfYouAreADarkWizardExclusiveItem, 0xFF0000FF);
+        AddText(&I18N::Game::ForDarkWizardWillBeCreated, 0xFF0000FF);
         // Mix button tooltip text is now derived from m_eType directly in SyncRmlModel().
         break;
     case eLuckyItemType_Refinery:
         mu_swprintf(m_szSubject, L"%ls", I18N::Game::RefineLuckyItem);
-        AddText(2346, 0xFF0000FF, RT3_SORT_LEFT), AddText(0), AddText(0);
-        AddText(3300), AddText(3301);
-        AddText(0), AddText(0), AddText(0);
-        AddText(3302, 0xFF0000FF);
+        AddText(&I18N::Game::PleaseUploadTheAssemblyItems, 0xFF0000FF, RT3_SORT_LEFT);
+        AddText(nullptr), AddText(nullptr);
+        AddText(&I18N::Game::YouCanCombineAnExclusiveRefiningStone), AddText(&I18N::Game::ByRefiningTheLuckyItem);
+        AddText(nullptr), AddText(nullptr), AddText(nullptr);
+        AddText(&I18N::Game::MaterialUsedForCombiningWillDisappear, 0xFF0000FF);
         // Mix button tooltip text is now derived from m_eType directly in SyncRmlModel().
         break;
     }
@@ -297,22 +301,23 @@ void CLuckyItemWnd::SetFrame_Text(eLUCKYITEM _eType)
     case eLuckyItem_End:
         for (int i = 0; i < LUCKYITEMMAXLINE; i++)
         {
-            m_sText[i].s_nTextIndex = -1;
+            m_sText[i].s_pText = nullptr;
             m_sText[i].s_dwColor = 0;
             m_sText[i].s_nLine = false;
         }
         m_nTextMaxLine = 0;
-        AddText(0);
-        if (m_eType == eLuckyItemType_Trade)			AddText(1888);
+        AddText(nullptr);
+        if (m_eType == eLuckyItemType_Trade)
+            AddText(&I18N::Game::ExchangeHasBeenMade);
         else if (m_eType == eLuckyItemType_Refinery) {}
         break;
     }
 }
 
-void CLuckyItemWnd::AddText(int _nGlobalTextIndex, DWORD _dwColor, int _nLine)
+void CLuckyItemWnd::AddText(const wchar_t* const* _pText, DWORD _dwColor, int _nLine)
 {
     if (m_nTextMaxLine >= LUCKYITEMMAXLINE)	return;
-    m_sText[m_nTextMaxLine].s_nTextIndex = _nGlobalTextIndex;
+    m_sText[m_nTextMaxLine].s_pText = _pText;
     m_sText[m_nTextMaxLine].s_dwColor = _dwColor;
     m_sText[m_nTextMaxLine].s_nLine = _nLine;
     m_nTextMaxLine++;
@@ -383,13 +388,7 @@ bool CLuckyItemWnd::Check_LuckyItem_Trade(ITEM* _pItem)
 
 bool CLuckyItemWnd::Check_LuckyItem_Refinery(ITEM* _pItem)
 {
-    if (_pItem->Type >= ITEM_ARMOR + 62 && _pItem->Type <= ITEM_ARMOR + 72)		return true;
-    else if (_pItem->Type >= ITEM_HELM + 62 && _pItem->Type <= ITEM_HELM + 72)		return true;
-    else if (_pItem->Type >= ITEM_BOOTS + 62 && _pItem->Type <= ITEM_BOOTS + 72)		return true;
-    else if (_pItem->Type >= ITEM_GLOVES + 62 && _pItem->Type <= ITEM_GLOVES + 72)	return true;
-    else if (_pItem->Type >= ITEM_PANTS + 62 && _pItem->Type <= ITEM_PANTS + 72)		return true;
-
-    return false;
+    return GameLogic::Items::IsLuckyItemType(_pItem->Type);
 }
 
 bool CLuckyItemWnd::Process_InventoryCtrl(void)
@@ -455,18 +454,18 @@ bool CLuckyItemWnd::Process_BTN_Action(void)
     }
 
     {
-        int nTextIndex[10] = { 0, };
+        const wchar_t* pszText[10] = {};
         switch (g_pLuckyItemWnd->GetAct())
         {
         case eLuckyItemType_Trade:
-            nTextIndex[0] = 3288;
-            nTextIndex[1] = 3297;
-            nTextIndex[2] = 3298;
-            nTextIndex[3] = 3299;
+            pszText[0] = I18N::Game::ExchangeLuckyItem;
+            pszText[1] = I18N::Game::WillBeExchangedWithAnItemUsableFor;
+            pszText[2] = I18N::Game::ThePlayerCharacter;
+            pszText[3] = I18N::Game::DoYouWantToExchange;
             break;
         case eLuckyItemType_Refinery:
-            nTextIndex[0] = 3289;
-            nTextIndex[1] = 539;
+            pszText[0] = I18N::Game::RefineLuckyItem;
+            pszText[1] = I18N::Game::DoYouWantToCombineYourItems;
             break;
         default:
             return false;
@@ -474,12 +473,12 @@ bool CLuckyItemWnd::Process_BTN_Action(void)
 
         mu::ui::window::GenericDialogConfig cfg;
         cfg.showCancel = true;
-        cfg.lines.push_back({ I18N::Game::Lookup(nTextIndex[0]), true });
+        cfg.lines.push_back({pszText[0], true});
         for (int i = 1; i < 10; ++i)
         {
-            if (nTextIndex[i] <= 0)
+            if (pszText[i] == nullptr)
                 break;
-            cfg.lines.push_back({ I18N::Game::Lookup(nTextIndex[i]), false });
+            cfg.lines.push_back({pszText[i], false});
         }
         cfg.onPrimary = [] { SocketClient->ToGameServer()->SendChaosMachineMixRequest(static_cast<ChaosMachineMixType>(g_pLuckyItemWnd->SetActAction()), 0); };
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
@@ -527,6 +526,10 @@ bool CLuckyItemWnd::Update(void)
 {
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->Update())
         return false;
+
+    // The mix sparkle runs down while it shows.
+    if (IsVisible() && m_nMixEffectTimer > 0)
+        m_nMixEffectTimer -= REFERENCE_FRAME_STEP;
 
     SyncRmlModel();
     return true;
@@ -584,15 +587,18 @@ void CLuckyItemWnd::SyncRmlModel()
     syncBool(&LuckyItemRmlModel::mixVisible, "mix_visible", m_eEnd != eLuckyItem_End);
 
     // Former Render_Frame()'s m_sText[]/AddText() text loop. One entry per slot in
-    // [0, m_nTextMaxLine), including blank spacer slots (s_nTextIndex == 0), so line spacing in
+    // [0, m_nTextMaxLine), including blank spacer slots (no s_pText), so line spacing in
     // normal document flow matches the original's fixed per-slot vertical rhythm. s_dwColor is
     // packed the same way CUIRenderTextSDLTtf::SetTextColor(DWORD) unpacks it (mu::sdlttf::
     // PackColorDWORD: alpha<<24 | blue<<16 | green<<8 | red), not classic 0xAARRGGBB.
     std::vector<LuckyLine> textLines;
     for (int i = 0; i < m_nTextMaxLine; ++i)
     {
-        if (m_sText[i].s_nTextIndex < 0) break;
-        if (m_sText[i].s_nTextIndex == 0) { textLines.push_back({}); continue; }
+        if (m_sText[i].s_pText == nullptr)
+        {
+            textLines.push_back({});
+            continue;
+        }
 
         const DWORD dwColor = m_sText[i].s_dwColor;
         const int r = dwColor & 0xFF;
@@ -602,11 +608,8 @@ void CLuckyItemWnd::SyncRmlModel()
         wchar_t colorBuf[32];
         mu_swprintf(colorBuf, L"rgba(%d,%d,%d,%d)", r, g, b, a);
 
-        textLines.push_back({
-            StringUtils::WideToNarrow(I18N::Game::Lookup(m_sText[i].s_nTextIndex)),
-            StringUtils::WideToNarrow(colorBuf),
-            m_sText[i].s_nLine == RT3_SORT_LEFT ? "left" : "center"
-        });
+        textLines.push_back({StringUtils::WideToNarrow(*m_sText[i].s_pText), StringUtils::WideToNarrow(colorBuf),
+                             m_sText[i].s_nLine == RT3_SORT_LEFT ? "left" : "center"});
     }
     syncLines(&LuckyItemRmlModel::textLines, "text_lines", std::move(textLines));
 }

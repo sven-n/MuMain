@@ -120,6 +120,14 @@ public:
 
     void SetNPC(int nNPCIndex);
     int GetNPCIndex();
+#ifdef _EDITOR
+    // The NPC dialogues by NPC number * 0x10000 + dialogue state, for the
+    // editor's monster tools.
+    const NPCDialogueMap& GetNPCDialogues() const
+    {
+        return m_mapNPCDialogue;
+    }
+#endif
     const wchar_t* GetNPCName();
 
     void SetCurQuestProgress(DWORD dwQuestIndex);
@@ -139,12 +147,12 @@ public:
     bool IsEPRequestRewardState(DWORD dwQuestIndex);
     bool IsQuestByEtc(DWORD dwQuestIndex);
 
-    void SetQuestIndexByEtcList(DWORD* adwSrcQuestIndex, int nIndexCount);
+    void SetQuestIndexByEtcList(const DWORD* adwSrcQuestIndex, int nIndexCount);
     bool IsQuestIndexByEtcListEmpty();
     void SendQuestIndexByEtcSelection();
     void DelQuestIndexByEtcList(DWORD dwQuestIndex);
 
-    void SetCurQuestIndexList(DWORD* adwCurQuestIndex, int nIndexCount);
+    void SetCurQuestIndexList(const DWORD* adwCurQuestIndex, int nIndexCount);
     void AddCurQuestIndexList(DWORD dwQuestIndex);
     void RemoveCurQuestIndexList(DWORD dwQuestIndex);
     bool IsIndexInCurQuestIndexList(DWORD dwQuestIndex);

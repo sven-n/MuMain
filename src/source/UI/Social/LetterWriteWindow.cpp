@@ -87,6 +87,7 @@ BOOL CUILetterWriteWindow::DoAction(BOOL messageOnly)
         GetUIMessage();
         HandleMessage();
     }
+    m_Photo.Update();
     if (!messageOnly)
     {
         m_View->ProcessActions();

@@ -2,6 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Random.h"
 #include "PhysicsManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -128,7 +129,7 @@ void CPhysicsVertex::Move(float fTime)
     }
 }
 
-void CPhysicsVertex::GetPosition(vec3_t* pPos)
+void CPhysicsVertex::GetPosition(vec3_t* pPos) const
 {
     for (int i = 0; i < 3; ++i)
     {
@@ -587,11 +588,11 @@ BOOL CPhysicsCloth::Move(float fTime)
     switch (PCT_MASK_ELASTIC & m_dwType)
     {
     case PCT_RUBBER2:
-        m_fWind = ((rand() % m_byWindMax + m_byWindMin) / 100.f);
+        m_fWind = ((Random::Rand() % m_byWindMax + m_byWindMin) / 100.f);
         break;
     default:
         if (gMapManager.WorldActive == 55)
-            m_fWind = (float)(rand() % 40 + 10) / 50.0f;
+            m_fWind = (float)(Random::Rand() % 40 + 10) / 50.0f;
         else
             m_fWind = CPhysicsManager::s_fWind;
         break;
@@ -599,7 +600,7 @@ BOOL CPhysicsCloth::Move(float fTime)
     switch (PCT_MASK_SHAPE_EXT & m_dwType)
     {
     case PCT_CYLINDER:
-        m_fWind = (float)(rand() % 10 + 25) / 50.0f;
+        m_fWind = (float)(Random::Rand() % 10 + 25) / 50.0f;
         break;
     }
 
@@ -621,7 +622,72 @@ BOOL CPhysicsCloth::Move(float fTime)
     return (TRUE);
 }
 
-void CPhysicsCloth::GetPosition(int index, vec3_t* pPos)
+void CPhysicsVertex::AddStateTo(Fnv1aHash& hash) const
+{
+    for (int k = 0; k < 3; ++k)
+    {
+        hash.Add(m_vForce[k]);
+        hash.Add(m_vVel[k]);
+        hash.Add(m_vPos[k]);
+        hash.Add(m_vOneTimeMove[k]);
+    }
+    hash.Add(m_byState);
+    hash.Add(m_iCountOneTimeMove);
+}
+
+void CPhysicsCollision::AddStateTo(Fnv1aHash& hash) const
+{
+    hash.Add(m_iBone);
+    for (const float axis : m_vCenterBeforeTransform)
+        hash.Add(axis);
+}
+
+void CPhysicsColSphere::AddStateTo(Fnv1aHash& hash) const
+{
+    CPhysicsCollision::AddStateTo(hash);
+    hash.Add(static_cast<int>(CLT_SPHERE));
+    hash.Add(m_fRadius);
+}
+
+void CPhysicsCloth::AddStateTo(Fnv1aHash& hash) const
+{
+    hash.Add(m_oOwner);
+    hash.Add(m_iBone);
+    hash.Add(m_iTexFront);
+    hash.Add(m_iTexBack);
+    hash.Add(m_dwType);
+    for (const float value : {m_fxPos, m_fyPos, m_fzPos, m_fWidth, m_fHeight, m_fUnitWidth, m_fUnitHeight})
+        hash.Add(value);
+    hash.Add(m_iNumHor);
+    hash.Add(m_iNumVer);
+    hash.Add(m_byWindMax);
+    hash.Add(m_byWindMin);
+    hash.Add(m_iNumVertices);
+    for (int i = 0; m_pVertices != nullptr && i < m_iNumVertices; ++i)
+        m_pVertices[i].AddStateTo(hash);
+    hash.Add(m_iNumLink);
+    for (int i = 0; m_pLink != nullptr && i < m_iNumLink; ++i)
+    {
+        const St_PhysicsLink& link = m_pLink[i];
+        hash.Add(link.m_nVertices[0]);
+        hash.Add(link.m_nVertices[1]);
+        hash.Add(link.m_fDistance[0]);
+        hash.Add(link.m_fDistance[1]);
+        hash.Add(link.m_byStyle);
+    }
+    hash.Add(m_lstCollision.GetCount());
+    for (const CNode<CPhysicsCollision*>* node = m_lstCollision.FindHead(); node; node = m_lstCollision.GetNext(node))
+        node->GetData()->AddStateTo(hash);
+}
+
+void CPhysicsClothMesh::AddStateTo(Fnv1aHash& hash) const
+{
+    CPhysicsCloth::AddStateTo(hash);
+    hash.Add(m_iMesh);
+    hash.Add(m_iBMDType);
+}
+
+void CPhysicsCloth::GetPosition(int index, vec3_t* pPos) const
 {
     m_pVertices[index].GetPosition(pPos);
 }
@@ -756,6 +822,33 @@ BOOL CPhysicsCloth::PreventFromStretching(void)
     return (TRUE);
 }
 
+void CPhysicsCloth::SpawnLights()
+{
+    if (!(PCT_MASK_LIGHT & m_dwType))
+    {
+        return;
+    }
+    float Lum = sinf(WorldTime * 0.001f) * 0.1f + 0.4f;
+    float Lum2;
+    vec3_t Light;
+    vec3_t Position;
+    int iOffset = 0;
+    float fScale = 0.f;
+    for (int i = 0; i < m_iNumHor; i++)
+    {
+        for (int j = 0; j < m_iNumVer; j++)
+        {
+            fScale = i * 0.2f + 0.4f;
+            Lum2 = Lum * (m_iNumHor - i) / 5.f;
+
+            Vector(Lum2, Lum2, Lum2, Light);
+            m_pVertices[iOffset].GetPosition(&Position);
+            CreateSprite(BITMAP_LIGHT, Position, fScale, Light, NULL);
+            iOffset++;
+        }
+    }
+}
+
 void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
 {
     auto* pvRenderPos = new vec3_t[m_iNumVertices];
@@ -785,23 +878,6 @@ void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
 
     if (PCT_MASK_LIGHT & m_dwType)
     {
-        float  Lum = sinf(WorldTime * 0.001f) * 0.1f + 0.4f;
-        float  Lum2;
-        vec3_t Light;
-        int    iOffset = 0;
-        float  fScale = 0.f;
-        for (int i = 0; i < m_iNumHor; i++)
-        {
-            for (int j = 0; j < m_iNumVer; j++)
-            {
-                fScale = i * 0.2f + 0.4f;
-                Lum2 = Lum * (m_iNumHor - i) / 5.f;
-
-                Vector(Lum2, Lum2, Lum2, Light);
-                CreateSprite(BITMAP_LIGHT, pvRenderPos[iOffset], fScale, Light, NULL);
-                iOffset++;
-            }
-        }
         EnableAlphaBlend();
     }
 #ifdef RENDER_CLOTH
@@ -1260,7 +1336,7 @@ void CPhysicsManager::Clear(void)
 
 void CPhysicsManager::Move(float fTime)
 {
-    float fPlus = ((rand() % 200) - 100) * 0.001f;
+    float fPlus = ((Random::Rand() % 200) - 100) * 0.001f;
     s_fWind += fPlus * FPS_ANIMATION_FACTOR;
     s_fWind = std::clamp(s_fWind, -0.2f, 1.0f);
 

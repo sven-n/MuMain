@@ -126,6 +126,10 @@ private:
     struct CharMakeRmlModel
     {
         std::vector<JobButtonEntry> jobs;
+        // The enabled classes before and after the selected one (-1: none), for a theme that steps
+        // through the classes with arrows (UI::CharacterCreation::StepToEnabledClass()).
+        int jobPrevious = -1;
+        int jobNext = -1;
 
         bool darkLordExtra = false;
         Rml::String statLabel0, statLabel1, statLabel2, statLabel3, statLabel4;

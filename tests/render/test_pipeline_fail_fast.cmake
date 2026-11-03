@@ -83,13 +83,21 @@ require_source("${renderer_source}" "constexpr[ \t]+int[ \t]+k_PipelineCount[ \t
 require_shader_load_assignment(s_vertShader2D basic_textured vert VERTEX)
 require_shader_load_assignment(s_fragShaderTex basic_textured frag FRAGMENT)
 require_shader_load_assignment(s_vertShaderSkinned skinned_textured vert VERTEX)
+require_shader_load_assignment(s_vertShaderSkinnedWeighted skinned_weighted vert VERTEX)
 require_shader_load_assignment(s_vertShaderSkinnedShadow skinned_shadow vert VERTEX)
+require_shader_load_assignment(s_vertShaderSkinnedWeightedShadow skinned_weighted_shadow vert VERTEX)
 require_source("${executable_load_source}"
     "s_vertShaderSkinnedShadow[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_shadow\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*false[ \t\r\n]*\\);"
     "skinned_shadow.vert must be optional")
 require_source("${executable_load_source}"
+    "s_vertShaderSkinnedWeightedShadow[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_weighted_shadow\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*false[ \t\r\n]*\\);"
+    "skinned_weighted_shadow.vert must be optional")
+require_source("${executable_load_source}"
     "s_vertShaderSkinned[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_textured\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*true[ \t\r\n]*\\);"
     "skinned_textured.vert must be fatal")
+require_source("${executable_load_source}"
+    "s_vertShaderSkinnedWeighted[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_weighted\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*true[ \t\r\n]*\\);"
+    "skinned_weighted.vert must be fatal")
 require_shader_load_assignment(s_fragShaderTexFog basic_textured_fog frag FRAGMENT)
 require_shader_load_assignment(s_fragShaderLit skinned_lit frag FRAGMENT)
 require_source("${executable_load_source}"
@@ -109,36 +117,57 @@ string(REGEX MATCHALL "buildRequiredPipeline[ \t\r\n]*\\(" required_calls "${cre
 string(REGEX MATCHALL "buildOptionalPipeline[ \t\r\n]*\\(" optional_calls "${create_source}")
 list(LENGTH required_calls required_call_count)
 list(LENGTH optional_calls optional_call_count)
-# Nine required Classic sets; optional: the 2D depth-on set, the two GPU body-shadow sets, and the four
-# calls of one Enhanced lighting family (buildEnhancedSet), which builds the three Enhanced families.
-if(NOT required_call_count EQUAL 9 OR NOT optional_call_count EQUAL 7)
-    message(FATAL_ERROR "CreatePipelines must build exactly nine required sets and the optional 2D, shadow and Enhanced sets")
+# Required: the 2D depth-off set and the world sets' required build. Optional: the 2D depth-on set,
+# the four GPU body-shadow sets (BMD and weighted vertices) and the world sets' optional build.
+if(NOT required_call_count EQUAL 2 OR NOT optional_call_count EQUAL 6)
+    message(FATAL_ERROR "CreatePipelines must build the required 2D and world sets and the optional 2D, shadow and world sets")
 endif()
-string(REGEX MATCHALL "buildEnhancedSet[ \t\r\n]*\\([ \t\r\n]*s_pipelines[A-Za-z0-9]+" enhanced_calls "${create_source}")
-set(expected_enhanced_calls)
-foreach(enhanced_set IN ITEMS s_pipelines3DEnhancedFog s_pipelinesSkinnedEnhancedFog s_pipelinesSkinnedLit)
-    string(REGEX MATCH "buildEnhancedSet[ \t\r\n]*\\([ \t\r\n]*${enhanced_set}[ \t\r\n]*," enhanced_call "${create_source}")
-    if(NOT enhanced_call)
-        message(FATAL_ERROR "CreatePipelines must build the Enhanced lighting set ${enhanced_set}")
-    endif()
-endforeach()
-list(LENGTH enhanced_calls enhanced_call_count)
-if(NOT enhanced_call_count EQUAL 3)
-    message(FATAL_ERROR "CreatePipelines must build exactly three Enhanced lighting sets")
-endif()
-require_source("${create_source}" "s_enhancedLightingAvailable[ \t\r\n]*=[^;]*IsComplete"
+
+# Every world set is one row of WorldPipelineSets(): its pipelines' name prefix, layout, fragment shader
+# and family. The Classic family is required; Enhanced lighting is one optional family.
+function(require_world_set set name layout fragment family)
+    string(CONCAT pattern
+        "\\{[ \t\r\n]*&${set}[ \t\r\n]*,[ \t\r\n]*\"${name}\"[ \t\r\n]*,[ \t\r\n]*VertexLayout::${layout}[ \t\r\n]*,[ \t\r\n]*"
+        "FragmentShader::${fragment}[ \t\r\n]*,[ \t\r\n]*WorldSetFamily::${family}[ \t\r\n]*\\}")
+    require_source("${renderer_source}" "${pattern}"
+        "${set} must remain the world set ${name} (${layout}, ${fragment}, ${family})")
+endfunction()
+require_world_set(s_pipelines3D "3d" ThreeDimensional Textured Classic)
+require_world_set(s_pipelinesSkinned "skinned" Skinned Textured Classic)
+require_world_set(s_pipelines3DEnhancedFog "3d-enhanced-fog" ThreeDimensional TexturedEnhancedFog EnhancedLighting)
+require_world_set(s_pipelinesSkinnedEnhancedFog "skinned-enhanced-fog" Skinned TexturedEnhancedFog EnhancedLighting)
+require_world_set(s_pipelinesSkinnedLit "skinned-lit" Skinned SkinnedLit EnhancedLighting)
+
+# The four depth/cull states every world set is built in: suffix, depth test, depth write, culling.
+function(require_world_state member suffix depth_test depth_write cull)
+    string(CONCAT pattern
+        "\\{[ \t\r\n]*&WorldPipelines::${member}[ \t\r\n]*,[ \t\r\n]*\"${suffix}\"[ \t\r\n]*,[ \t\r\n]*"
+        "${depth_test}[ \t\r\n]*,[ \t\r\n]*${depth_write}[ \t\r\n]*,[ \t\r\n]*${cull}[ \t\r\n]*\\}")
+    require_source("${renderer_source}" "${pattern}"
+        "the world state ${member} must remain ${suffix} with its exact depth and cull state")
+endfunction()
+require_world_state(culled "culled" true true true)
+require_world_state(noCull "no-cull" true true false)
+require_world_state(depthOff "depth-off" false false false)
+require_world_state(depthReadOnly "depth-read-only" true false false)
+
+require_source("${create_source}"
+    "for[ \t\r\n]*\\([ \t\r\n]*const[ \t\r\n]+WorldPipelineSetSpec&[ \t\r\n]+spec[ \t\r\n]*:[ \t\r\n]*WorldPipelineSets\\(\\)[ \t\r\n]*\\)[ \t\r\n]*\\{[ \t\r\n]*buildWorldSet\\("
+    "CreatePipelines must build every world set of WorldPipelineSets()")
+require_source("${create_source}"
+    "required[ \t\r\n]*=[ \t\r\n]*spec\\.family[ \t\r\n]*==[ \t\r\n]*WorldSetFamily::Classic;"
+    "the Classic world sets must be the required ones")
+require_source("${create_source}"
+    "if[ \t\r\n]*\\([ \t\r\n]*!required[ \t\r\n]*&&[ \t\r\n]*!GetFragmentShader\\(spec\\.fragmentShader\\)[ \t\r\n]*\\)"
+    "an optional world set must be skipped without its fragment shader")
+require_source("${create_source}"
+    "s_enhancedLightingAvailable[ \t\r\n]*=[ \t\r\n]*IsWorldFamilyComplete\\(WorldSetFamily::EnhancedLighting\\)"
     "Enhanced lighting must be available only when every Enhanced set is complete")
+require_source("${renderer_source}" "spec\\.family[ \t\r\n]*!=[ \t\r\n]*family[ \t\r\n]*\\|\\|[ \t\r\n]*spec\\.set->IsComplete\\(\\)"
+    "a world family is complete only when each of its sets is")
 
 require_pipeline_descriptor(buildOptionalPipeline s_pipelines2D "2d-depth-on" true true TwoDimensional false)
 require_pipeline_descriptor(buildRequiredPipeline s_pipelines2DDepthOff "2d-depth-off" false false TwoDimensional false)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelines3D "3d-culled" true true ThreeDimensional true)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelines3DNoCull "3d-no-cull" true true ThreeDimensional false)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelines3DDepthOff "3d-depth-off" false false ThreeDimensional false)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelines3DDepthReadOnly "3d-depth-read-only" true false ThreeDimensional false)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinned "skinned-culled" true true Skinned true)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinnedNoCull "skinned-no-cull" true true Skinned false)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinnedDepthOff "skinned-depth-off" false false Skinned false)
-require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinnedDepthReadOnly "skinned-depth-read-only" true false Skinned false)
 require_pipeline_descriptor(buildOptionalPipeline s_pipelinesSkinnedShadow "skinned-shadow" true false SkinnedShadow false)
 require_pipeline_descriptor(buildOptionalPipeline s_pipelinesSkinnedShadowDepthOff "skinned-shadow-depth-off" false false SkinnedShadow false)
 reject_source("${create_source}" "if[ \t\r\n]*\\([ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*\\)"
@@ -159,7 +188,7 @@ require_source("${renderer_source}" "depth_write=\\{\\}" "pipeline diagnostics m
 require_source("${renderer_source}" "cull=\\{\\}" "pipeline diagnostics must include cull state")
 require_source("${renderer_source}" "error=\\{\\}" "pipeline diagnostics must include the SDL error")
 require_source("${build_source}"
-    "pipelineInfo\\.vertex_shader[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinnedShadow[ \t\r\n]*:[ \t\r\n]*s_vertShader2D"
+    "pipelineInfo\\.vertex_shader[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedWeighted[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinnedWeighted[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinnedShadow[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedWeightedShadow[ \t\r\n]*\\?[ \t\r\n]*s_vertShaderSkinnedWeightedShadow[ \t\r\n]*:[ \t\r\n]*s_vertShader2D"
     "pipeline vertex shader handles must remain selected from the pipeline layout")
 require_source("${build_source}"
     "pipelineInfo\\.fragment_shader[ \t\r\n]*=[ \t\r\n]*GetFragmentShader\\(description\\.fragmentShader\\)"
@@ -181,7 +210,7 @@ require_source("${depth_state_source}" "\\.compare_op[ \t\r\n]*=[ \t\r\n]*SDL_GP
 reject_source("${renderer_source}" "SDL_GPU_COMPAREOP_LESS([^_]|$)"
     "no pipeline may compare depth with strict LESS")
 require_source("${log_source}"
-    "vertexShaderName[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*\"skinned_textured\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*\"skinned_shadow\\.vert\"[ \t\r\n]*:[ \t\r\n]*\"basic_textured\\.vert\""
+    "vertexShaderName[ \t\r\n]*=[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::Skinned[ \t\r\n]*\\?[ \t\r\n]*\"skinned_textured\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedWeighted[ \t\r\n]*\\?[ \t\r\n]*\"skinned_weighted\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedShadow[ \t\r\n]*\\?[ \t\r\n]*\"skinned_shadow\\.vert\"[ \t\r\n]*:[ \t\r\n]*description\\.vertexLayout[ \t\r\n]*==[ \t\r\n]*VertexLayout::SkinnedWeightedShadow[ \t\r\n]*\\?[ \t\r\n]*\"skinned_weighted_shadow\\.vert\"[ \t\r\n]*:[ \t\r\n]*\"basic_textured\\.vert\""
     "pipeline diagnostics must map the built vertex layout to its exact shader identifier")
 require_source("${log_source}"
     "fragmentShaderName[ \t\r\n]*=[ \t\r\n]*GetFragmentShaderName\\(description\\.fragmentShader\\)"
@@ -235,7 +264,7 @@ if(cleanup_position EQUAL -1
 endif()
 
 string(FIND "${renderer_source}" "RenderSkinnedTriangles(std::span" skinned_start)
-string(FIND "${renderer_source}" "const Uint32 paletteRowOffset" skinned_pipeline_end)
+string(FIND "${renderer_source}" "const std::optional<BonePaletteSlot> palette" skinned_pipeline_end)
 if(skinned_start EQUAL -1 OR skinned_pipeline_end LESS skinned_start)
     message(FATAL_ERROR "RenderSkinnedTriangles pipeline selection is missing")
 endif()

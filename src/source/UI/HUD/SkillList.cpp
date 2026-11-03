@@ -250,23 +250,7 @@ int mu::ui::window::CSkillList::GetHotKey(int iHotKey)
 
 int mu::ui::window::CSkillList::GetSkillIndex(int iSkillType)
 {
-    // special handling for skills with different skill id for the trigger
-    if (iSkillType == AT_SKILL_NOVA_BEGIN)
-    {
-        iSkillType = AT_SKILL_NOVA;
-    }
-
-    int iReturn = -1;
-    for (int i = 0; i < MAX_MAGIC; ++i)
-    {
-        if (CharacterAttribute->Skill[i] == iSkillType)
-        {
-            iReturn = i;
-            break;
-        }
-    }
-
-    return iReturn;
+    return gSkillManager.FindSkillIndex(iSkillType);
 }
 
 void mu::ui::window::CSkillList::UseHotKey(int iHotKey)
@@ -420,8 +404,7 @@ bool HasOneHandedOrMeleeWeapon()
 {
     const int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
     const int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-    return iTypeR != -1 && (iTypeR < ITEM_STAFF || iTypeR >= ITEM_STAFF + MAX_ITEM_INDEX) &&
-           (iTypeL < ITEM_STAFF || iTypeL >= ITEM_STAFF + MAX_ITEM_INDEX);
+    return iTypeR != -1 && !GameLogic::Items::IsStaffOrBookType(iTypeR) && !GameLogic::Items::IsStaffOrBookType(iTypeL);
 }
 
 // The original RenderSkillIcon()'s checks that chose the grey icon: equipment, mount, buffs,
@@ -455,7 +438,7 @@ bool IsHudSkillUsable(ActionSkillType bySkillType)
     {
         int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
         int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-        if ((iTypeL < ITEM_SPEAR || iTypeL >= ITEM_BOW) && (iTypeR < ITEM_SPEAR || iTypeR >= ITEM_BOW))
+        if (!GameLogic::Items::IsSpearType(iTypeL) && !GameLogic::Items::IsSpearType(iTypeR))
         {
             bCantSkill = true;
         }
@@ -529,11 +512,7 @@ bool IsHudSkillUsable(ActionSkillType bySkillType)
         {
             bCantSkill = true;
         }
-        int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
-        int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-
-        if (!(iTypeR != -1 && (iTypeR < ITEM_STAFF || iTypeR >= ITEM_STAFF + MAX_ITEM_INDEX) &&
-              (iTypeL < ITEM_STAFF || iTypeL >= ITEM_STAFF + MAX_ITEM_INDEX)))
+        if (!HasOneHandedOrMeleeWeapon())
         {
             bCantSkill = true;
         }
@@ -562,11 +541,7 @@ bool IsHudSkillUsable(ActionSkillType bySkillType)
         bySkillType == AT_SKILL_RAGEFUL_BLOW_MASTERY || bySkillType == AT_SKILL_DEATHSTAB ||
         bySkillType == AT_SKILL_DEATHSTAB_STR)
     {
-        int iTypeL = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
-        int iTypeR = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
-
-        if (!(iTypeR != -1 && (iTypeR < ITEM_STAFF || iTypeR >= ITEM_STAFF + MAX_ITEM_INDEX) &&
-              (iTypeL < ITEM_STAFF || iTypeL >= ITEM_STAFF + MAX_ITEM_INDEX)))
+        if (!HasOneHandedOrMeleeWeapon())
         {
             bCantSkill = true;
         }

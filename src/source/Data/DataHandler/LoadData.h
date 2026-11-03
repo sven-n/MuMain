@@ -33,6 +33,11 @@ public:
     // the slot `OwnerType` (BMD::ShareFrom); the last of them to let go frees
     // it.
     void ShareModel(int Type, int OwnerType);
+    // Swaps the loaded data of two slots (BMD::SwapData, so nothing is
+    // opened again) and what the slots remember about it, for the item
+    // editor, which moves an item's model with the item. Either slot may be
+    // empty.
+    void SwapModels(int First, int Second);
     // A texture the folder does not have is shown as an error.
     void OpenTexture(int Model, const wchar_t* SubFolder, int Wrap = GL_REPEAT, int Type = GL_NEAREST,
                      bool Check = true);

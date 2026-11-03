@@ -12,6 +12,7 @@
 #include "Render/Models/ZzzBMD.h"
 
 #include <algorithm>
+#include <optional>
 #include <utility>
 
 namespace MuEditor::Effects
@@ -55,9 +56,20 @@ bool PreviewItemModels::CanDraw() const
 
 PreviewItemModels GetPreviewItemModels(int itemType, int level)
 {
-    const int model = Render::Items::Display::GetDrawnModel(Data::Items::ToModelSlot(itemType), level);
+    // The item's own model, or the one the inventory draws at this level
+    // instead (a level variant: the Box of Luck, the Wizard's Ring); nothing
+    // at a level the inventory draws nothing at.
+    const std::optional<Render::Items::Display::InventoryModel> drawn =
+        Render::Items::Display::FindInventoryModel(itemType, level);
+    if (!drawn)
+    {
+        return {};
+    }
+    const bool levelVariant = drawn->modelType != Render::Items::Display::GetInventoryModel(itemType);
+    const int slot = levelVariant ? drawn->modelType : Data::Items::ToModelSlot(itemType);
+    const int model = Render::Items::Display::GetDrawnModel(slot, level);
     const int skeleton = Render::Items::Display::IsDrawnOnCharacterSkeleton(model) ? MODEL_PLAYER : model;
-    return {model, skeleton};
+    return {model, skeleton, drawn->drawLevel < 0 ? 0 : level};
 }
 } // namespace MuEditor::Effects
 

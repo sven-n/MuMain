@@ -9,10 +9,13 @@ namespace Render
 
 template <typename Pipeline, std::size_t BlendModeCount> struct WorldPipelineSet
 {
-    std::array<Pipeline*, BlendModeCount> culled{};
-    std::array<Pipeline*, BlendModeCount> noCull{};
-    std::array<Pipeline*, BlendModeCount> depthOff{};
-    std::array<Pipeline*, BlendModeCount> depthReadOnly{};
+    // One depth/cull state: a pipeline per blend mode.
+    using States = std::array<Pipeline*, BlendModeCount>;
+
+    States culled{};
+    States noCull{};
+    States depthOff{};
+    States depthReadOnly{};
 
     // Same precedence as the Classic sets: no depth test, then read-only depth, then culling.
     [[nodiscard]] Pipeline* Select(std::size_t blendIndex, bool depthTest, bool depthWrite, bool cull) const
@@ -26,6 +29,17 @@ template <typename Pipeline, std::size_t BlendModeCount> struct WorldPipelineSet
             return depthReadOnly[blendIndex];
         }
         return cull ? culled[blendIndex] : noCull[blendIndex];
+    }
+
+    // The depth-read-only pipeline of the blend mode when `pipeline` is the depth-writing one (culled
+    // or not) of that blend mode, else null: a depth-writing draw replayed over its own depth.
+    [[nodiscard]] Pipeline* DepthReadOnlyFor(const Pipeline* pipeline, std::size_t blendIndex) const
+    {
+        if (!pipeline || (pipeline != culled[blendIndex] && pipeline != noCull[blendIndex]))
+        {
+            return nullptr;
+        }
+        return depthReadOnly[blendIndex];
     }
 
     [[nodiscard]] bool IsComplete() const

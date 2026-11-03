@@ -1,0 +1,626 @@
+/* Classic (0.97) theme for the settings window. A theme's stylesheet replaces its base's whole file,
+   so this is legacy's option_window.rcss (its layout, scrolling settings area and tuning rows, with
+   legacy's comments) followed by the classic parts at the end.
+
+   0.97 has no settings window: its Esc menu's "Options" opens a box in the Esc menu's own style
+   (0051af50): the title "Options" centred at y 35, then 0.97 text plates (Message_box, 120x22) at
+   y 60, 90 and 120 for "Automatic Attack: On/Off", "Sound on Whisper: On/Off" and "Close", lit warm
+   under the mouse. MuMain's window has more to set (five tabs and the tuning of each Enhanced
+   feature), so it takes 0.97's parts rather than its layout: the dialog stone of 0.97's boxes
+   (Message_box1, edged by Message_box2), the title centred at the top, the tabs and the tuning's
+   Reset buttons as text plates lit like 0.97's, and the check boxes, scrollbar and close cross of
+   the classic social windows. The gauges and sliders are legacy's. */
+
+#panel {
+	width: 440dp;
+	height: 310dp;
+	max-height: 96%;
+	font-family: "token(font-body)";
+	font-size: 1rem;
+	color: token(text-input);
+}
+
+/* window_shell.rcss draws the msgbox caps with image(), which only fits its 230dp art. Here the same
+   sprites are ninepatches (the slices chat_room.rcss uses), so the corners and border thickness keep
+   their size at this width, and the back fill repeats its texture instead of stretching it. Scoped
+   to this document. */
+@spritesheet option-cap-top-sheet    { src: "../../../newui_msgbox_top.tga";    option-cap-top:    0px 0px 230px 67px; option-cap-top-inner:    12px 12px 206px 43px; }
+@spritesheet option-cap-middle-sheet { src: "../../../newui_msgbox_middle.tga"; option-cap-middle: 0px 0px 230px 15px; option-cap-middle-inner: 12px  4px 206px  7px; }
+@spritesheet option-cap-bottom-sheet { src: "../../../newui_msgbox_bottom.tga"; option-cap-bottom: 0px 0px 230px 50px; option-cap-bottom-inner: 12px 12px 206px 26px; }
+@spritesheet option-back-sheet       { src: "../../../newui_msgbox_back.jpg";   option-back:       0px 0px 222px 250px; }
+.window-shell-sprite-back   { decorator: image(option-back repeat left top); }
+.window-shell-sprite-top    { decorator: ninepatch(option-cap-top, option-cap-top-inner); }
+.window-shell-sprite-middle { decorator: ninepatch(option-cap-middle, option-cap-middle-inner); }
+.window-shell-sprite-bottom { decorator: ninepatch(option-cap-bottom, option-cap-bottom-inner); }
+
+/* The content well: the tab row at its top and the settings area below it
+   (.option-tab-scroll). An ID selector, so it wins over window_shell.rcss's own
+   .window-shell-content insets regardless of link order. */
+#content {
+	left: 18dp;
+	right: 18dp;
+	top: 30dp;
+	bottom: 18dp;
+	display: block;
+}
+
+/* One row of tab buttons -- reuses my_quest_info.rcss's own tab sprite family
+   (Quest_tab01/02.tga) rather than a hand-rolled boxed-button look, per that window already being
+   the established "tabbed legacy window" reference. Not a pixel-for-pixel port though:
+   my_quest_info.rcss's own .tab-row/.tab-btn are fixed reference-px position:absolute with
+   3 unequal-width tabs (48/48/72px) hand-placed to match its own fixed 190px frame -- this window
+   has 6 equal-width tabs across a differently-sized flex/dp row, needing each sprite resized to a
+   box different from its own native pixel size. `decorator: image(...)` does NOT stretch a sprite
+   to a mismatched box in this RmlUi build (most of the box stays unpainted instead of the art
+   scaling); `ninepatch(...)` does, correctly, in both directions, same fix already used for
+   .gmd-btn.cols-2/.server-row's own resized reuse of a fixed-size sprite. Inner rects below are a
+   conservative uniform inset (not pixel-verified against the source art, unlike legacy-btn-idle's
+   own inner rect) -- revisit if the stretched edges show visible seams/artifacts. Redeclared
+   spritesheets (RmlUi spritesheets are per-document, can't share my_quest_info.rcss's own). */
+@spritesheet option-tab-back-sheet   { src: "../../../Quest_tab01.tga"; option-tab-back:   0px 0px 166px 22px; option-tab-back-inner:   6px 4px 154px 14px; }
+@spritesheet option-tab-active-sheet { src: "../../../Quest_tab02.tga"; option-tab-active: 0px 0px 48px 22px;  option-tab-active-inner: 4px 4px 40px 14px; }
+.option-tab-row {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	display: flex;
+	height: 22dp;
+	decorator: ninepatch(option-tab-back, option-tab-back-inner);
+}
+/* Sized by their labels (not equal cells): "Gameplay" and "Graphics" need more room than
+   "UI", and equal cells cut them off. */
+.option-tab-btn {
+	flex: 1 1 auto;
+	padding: 0 4dp;
+	height: 22dp;
+	line-height: 22dp;
+	text-align: center;
+	font-size: 1rem;
+	white-space: nowrap;
+	overflow: hidden;
+	cursor: pointer;
+	pointer-events: auto;
+	color: token(text-muted);
+}
+.option-tab-btn:hover {
+	color: token(text-input);
+}
+.option-tab-btn.active-tab {
+	color: token(text-primary);
+	decorator: ninepatch(option-tab-active, option-tab-active-inner);
+}
+
+/* The settings of the active tab, below the tab row. It scrolls with the chat log's scrollbar
+   (base.rcss's .scroll-pane) when its rows don't fit; the tabs and the close cross stay where they
+   are. A tab's last dropdown opens its list upwards (.option-opens-up), so it stays inside this area. */
+.option-tab-scroll {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 30dp;
+	bottom: 0;
+}
+
+/* One tab's rows, top to bottom. The .hidden override is needed because this display:flex would
+   otherwise tie with base.rcss's .hidden{display:none} and win by load order. */
+.option-tab-panel {
+	display: flex;
+	flex-direction: column;
+	padding: 2dp 10dp 0 4dp;
+}
+.option-tab-panel.hidden {
+	display: none;
+}
+
+/* A label column and a control column. A row is as tall as its label, which wraps when a
+   translation or a larger font needs a second line, and at least as tall as its control. */
+.option-row {
+	position: relative;
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	min-height: 20dp;
+	margin-bottom: 6dp;
+}
+/* A part of the row above it: indented under its label, its control still in the column. */
+.option-sub-row .option-row-label {
+	margin-right: -12dp;
+	padding-left: 12dp;
+}
+
+/* A heading over a group of rows. */
+.option-section {
+	flex-shrink: 0;
+	margin: 6dp 0 6dp;
+	padding-bottom: 2dp;
+	border-bottom: 1dp #5a4a2a;
+	color: token(text-primary);
+}
+.option-section:first-child {
+	margin-top: 0;
+}
+.option-checkbox-row {
+	cursor: pointer;
+	pointer-events: auto;
+}
+/* Not base.rcss's own .checkbox-label -- that's position:absolute, glyph-first (built for
+   login.rml's standalone checkboxes), which doesn't line up with a column of sibling rows. This
+   row uses .option-row-label (below) instead, label-first in the markup, same as every other row
+   type -- see option_window.rml's own comment. */
+.checkbox-box {
+	flex-shrink: 0;
+}
+/* Tick is baked into the checked-state sprite art (base.rcss's .checkbox-box.checked), same as
+   login.rcss's own legacy checkbox -- .checkbox-tick draws nothing here. */
+.checkbox-tick {
+	display: none;
+}
+
+/* The label column: 44% of the row, the controls start where it ends in every row. */
+.option-row-label {
+	width: 44%;
+	flex-shrink: 0;
+	padding-right: 8dp;
+	white-space: normal;
+	line-height: 1.3em;
+	color: token(text-input);
+}
+
+/* Volume and effect-limit gauges: base.rcss's .level-gauge at native's sizes (the volume bars
+   124x16, the effect bar drawn 70x15), beside their labels. Native's volume hit area began 8
+   units before the bar. */
+.option-gauge {
+	position: relative;
+	flex-shrink: 0;
+	width: 124dp;
+	height: 14dp;
+}
+.option-gauge.effect-gauge {
+	width: 70dp;
+	height: 15dp;
+}
+.option-gauge .level-gauge-fill {
+	left: 0;
+	top: 0;
+	bottom: 0;
+}
+.option-gauge-hit {
+	left: -8dp;
+	right: 0;
+}
+
+/* Custom dropdown -- NOT RmlUi's native <select>/<option> (WidgetDropDown). That was tried first
+   and never reliably worked in this engine: the widget's own generated
+   selectvalue/selectbox/selectarrow sub-elements need CSS this
+   theme never fully gave them (no `position` set programmatically the way WidgetSlider forces
+   `drag` on its own sub-elements), and even once styled, option clicks still didn't reliably reach
+   this window's own change callback. This reuses the exact data-for/data-class/data-event-click
+   mechanism .option-tab-btn above already proves reliable, plus a single shared
+   model.openDropdown field (OptionWindow.h) so opening one dropdown closes any other automatically
+   -- no separate exclusivity logic needed. position:relative so .option-dropdown-list's own
+   position:absolute (below) resolves against ITS box. */
+.option-dropdown {
+	position: relative;
+	flex: 1 1 auto;
+	max-width: 200dp;
+	height: 18dp;
+}
+/* border-box: width 100% plus the padding and border ran past the frame's right edge. */
+.option-dropdown-value {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	padding: 0 4dp;
+	line-height: 18dp;
+	white-space: nowrap;
+	overflow: hidden;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: token(surface-control);
+	border-width: 1dp;
+	border-color: token(border-control);
+	color: token(text-input);
+}
+/* Floating popup -- top:100% (not a hardcoded dp offset) so it always sits flush under the value
+   box regardless of that row's own height. max-height+overflow-y:auto caps a long list
+   (Resolution has ~25 entries) with a real scrollbar instead of growing past the panel. Needs the
+   .hidden override below: this file loads after base.rcss, so its own display:block would
+   otherwise tie with (and silently beat) base.rcss's global .hidden{display:none} at equal
+   specificity -- same cascade-tie bug .option-tab-panel's own comment already covers.
+
+   z-index:1 -- without it, this absolutely-positioned popup paints/hit-tests at its own plain DOM
+   position among .option-row siblings, i.e. BEHIND whichever row comes later in markup order (an
+   .option-row without its own z-index just participates in normal top-to-bottom paint order, same
+   as any other sibling): a dropdown opened above a lower row would render behind it, and clicking
+   an option that visually overlaps a checkbox row would trigger that checkbox instead.
+   RmlUi's own native <select> (WidgetDropDown.cpp) sets this same 1 on its generated
+   selectbox for the identical reason -- this is the custom-dropdown equivalent of that. */
+.option-dropdown-list {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 100%;
+	box-sizing: border-box;
+	width: 100%;
+	max-height: 90dp;
+	overflow-y: auto;
+	z-index: 1;
+	background-color: token(surface-control);
+	border-width: 1dp;
+	border-color: token(border-control);
+	pointer-events: auto;
+}
+.option-dropdown-list.hidden {
+	display: none;
+}
+/* Explicit scrollbar sizing, same reasoning generic_confirm_dialog.rcss's own .gcd-text-col
+   comment already gives for its own overflow:auto well -- an unstyled scrollbarvertical isn't
+   just visually wrong, its own (also unstyled) hit-test area can cover most/all of the option
+   row's width instead of a slim strip at the edge, silently swallowing clicks meant for the
+   option text beneath it as a scrollbar drag instead. Arrow buttons collapsed to 0, same
+   drag/click-only affordance as every other scrollbar in this codebase. */
+.option-dropdown-list scrollbarvertical {
+	width: 6dp;
+	margin: 0;
+}
+.option-dropdown-list scrollbarvertical slidertrack {
+	background-color: token(surface-recessed);
+}
+.option-dropdown-list scrollbarvertical sliderbar {
+	background-color: token(control-thumb);
+}
+.option-dropdown-list scrollbarvertical sliderbar:hover,
+.option-dropdown-list scrollbarvertical sliderbar:active {
+	background-color: token(control-thumb-hover);
+}
+.option-dropdown-list scrollbarvertical sliderarrowdec,
+.option-dropdown-list scrollbarvertical sliderarrowinc {
+	width: 0;
+	height: 0;
+}
+.option-dropdown-option {
+	display: block;
+	width: 100%;
+	padding: 2dp 4dp;
+	white-space: nowrap;
+	cursor: pointer;
+	pointer-events: auto;
+	color: token(text-input);
+}
+.option-dropdown-option:hover {
+	color: token(text-primary);
+	background-color: token(border-control);
+}
+.option-dropdown-option.selected {
+	color: token(text-primary);
+	background-color: #8f6922;
+}
+
+/* A row with a hint (data-hint) takes the pointer itself, so the hint shows anywhere on the row:
+   body's pointer-events: none would leave only its control hoverable. */
+.option-row-tipped {
+	pointer-events: auto;
+}
+/* A tab's last dropdown opens its list upwards, over the rows above. */
+.option-opens-up .option-dropdown-list {
+	top: auto;
+	bottom: 100%;
+}
+
+/* Close is the window-control cross the friend and chat windows use, in the frame's top-right corner
+   (#content's top-right, pulled out over its inset). Drawn larger than its 9px art, in proportion to
+   this wider frame: a ninepatch whose inner rect is the whole sprite scales it evenly, where image()
+   would not stretch it. */
+@spritesheet option-close-sheet { src: "../../../win_size.jpg"; option-close: 0px 9px 9px 9px; option-close-inner: 0px 9px 9px 9px; }
+.option-close-btn {
+	position: absolute;
+	right: -5dp;
+	top: -18dp;
+	width: 14dp;
+	height: 14dp;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: ninepatch(option-close, option-close-inner);
+}
+.option-close-btn:hover {
+	image-color: rgba(255, 255, 255, 220);
+}
+
+/* The original's options window has no title banner, only the plain top cap: the shell's title
+   (bound to "Option" for the modern theme) is not shown here. It used to be invisible by accident
+   (its font was an unsubstituted token in window_shell.rcss). */
+.window-shell-header-rail,
+.window-shell-header-title { display: none; }
+
+/* A setting another one already covers (OptionWindow.h's OptionRmlModel): shown ticked, dimmed, and
+   not clickable. */
+.option-checkbox-row.locked {
+	opacity: 0.45;
+	cursor: default;
+}
+
+/* The player's tuning of each Enhanced feature (OptionWindow.h's tuning rows), under the feature's
+   row. The feature's label and chevron expand its sliders; only the checkbox switches the feature.
+   A locked feature dims its checkbox, not its label, which still expands the tuning. */
+.option-tuning-group-row {
+	cursor: default;
+}
+.option-tuning-group-row.locked {
+	opacity: 1;
+}
+.option-tuning-group-row.locked .checkbox-box {
+	opacity: 0.45;
+}
+.option-tuning-group-row .checkbox-box {
+	cursor: pointer;
+}
+.option-tuning-group-label {
+	cursor: pointer;
+}
+.option-tuning-group-label:hover {
+	color: token(text-primary);
+}
+/* A small arrow before the label: pointing right while collapsed, down while expanded. */
+.option-tuning-chevron {
+	display: inline-block;
+	width: 5dp;
+	height: 5dp;
+	margin: 0 6dp 1dp -10dp;
+	border-right: 1dp token(text-secondary);
+	border-bottom: 1dp token(text-secondary);
+	transform: rotate(-45deg);
+}
+.option-tuning-chevron.expanded {
+	transform: rotate(45deg);
+}
+/* .hidden ties with these rules' display at equal specificity, so it is restated. */
+.option-tuning-group,
+.option-tuning-more,
+.option-tuning-rows {
+	display: block;
+	flex-shrink: 0;
+}
+.option-tuning-group {
+	margin: -2dp 0 8dp 12dp;
+	padding-left: 6dp;
+	border-left: 1dp #5a4a2a;
+}
+.option-tuning-group.hidden,
+.option-tuning-more.hidden,
+.option-tuning-reason.hidden,
+.option-tuning-error.hidden {
+	display: none;
+}
+.option-tuning-reason {
+	display: block;
+	margin-bottom: 4dp;
+	color: token(semantic-warning);
+}
+.option-tuning-row {
+	display: block;
+	margin-bottom: 6dp;
+}
+.option-tuning-head {
+	display: flex;
+	align-items: center;
+}
+.option-tuning-label {
+	flex: 1 1 auto;
+	color: token(text-input);
+}
+.option-tuning-value {
+	flex: 0 0 auto;
+	margin-left: 6dp;
+	color: token(text-primary);
+}
+.option-tuning-state {
+	flex: 0 0 auto;
+	margin-left: 6dp;
+	color: token(text-muted);
+}
+.option-tuning-state.custom {
+	color: token(accent-gold);
+}
+.option-tuning-state.unsaved {
+	color: token(semantic-warning);
+}
+.option-tuning-reset {
+	flex: 0 0 auto;
+	margin-left: 6dp;
+	padding: 0 4dp;
+	cursor: pointer;
+	pointer-events: auto;
+	color: token(text-muted);
+	border-width: 1dp;
+	border-color: token(border-control);
+	background-color: token(surface-control);
+}
+.option-tuning-reset:hover {
+	color: token(text-primary);
+}
+.option-tuning-track {
+	display: flex;
+	align-items: center;
+	margin-top: 2dp;
+}
+.option-tuning-bound {
+	flex: 0 0 auto;
+	width: 52dp;
+	white-space: nowrap;
+	color: token(text-muted);
+}
+.option-tuning-track .option-tuning-bound:last-child {
+	text-align: right;
+}
+/* The volume gauge's art: its rail, and its full fill at its own size, cut off at the value as
+   native draws it (scale-none crops the image to the fill's width). */
+.option-tuning-slider {
+	margin: 0 6dp;
+}
+.option-tuning-fill {
+	decorator: image(level-gauge-fill-10 scale-none left center);
+}
+.option-tuning-hit {
+	left: -6dp;
+	right: -6dp;
+	top: -5dp;
+	bottom: -5dp;
+}
+.option-tuning-hit:focus {
+	border-width: 1dp;
+	border-color: token(accent-gold);
+}
+.option-tuning-group.locked .option-tuning-track {
+	opacity: 0.45;
+}
+.option-tuning-group.locked .option-tuning-hit {
+	cursor: default;
+}
+.option-tuning-more-head {
+	display: block;
+	margin: 2dp 0 6dp;
+	cursor: pointer;
+	pointer-events: auto;
+	color: token(text-secondary);
+}
+.option-tuning-more-head .option-tuning-chevron {
+	margin-left: 0;
+}
+.option-tuning-more-head:hover {
+	color: token(text-primary);
+}
+.option-tuning-actions {
+	display: flex;
+	flex-shrink: 0;
+	justify-content: flex-end;
+	margin-bottom: 4dp;
+}
+.option-tuning-all {
+	margin: 0 0 8dp;
+}
+.option-tuning-error {
+	display: block;
+	flex-shrink: 0;
+	margin-bottom: 8dp;
+	color: token(semantic-danger);
+}
+
+/* ---- Classic (0.97) parts ------------------------------------------------------------------- */
+
+@spritesheet classic-opt-stone-sheet { src: ../../../Classic/Message_box1_440x300.jpg; classic-opt-stone: 0px 0px 440px 300px; }
+@spritesheet classic-opt-edge-sheet  { src: ../../../Classic/Message_box2_440.jpg;     classic-opt-edge: 0px 0px 440px 5px; }
+@spritesheet classic-opt-plate-sheet { src: ../../../Classic/Message_box.jpg;  classic-opt-plate: 0px 0px 213px 64px; }
+@spritesheet classic-opt-check-sheet { src: "../../../win_check.tga";           classic-opt-check: 0px 0px 5px 5px; }
+@spritesheet classic-opt-scroll-sheet
+{
+	src: "../../../win_scrollbar.jpg";
+	classic-opt-scroll-thumb: 0px 1px 11px 1px;
+	classic-opt-scroll-up: 0px 3px 13px 13px;
+	classic-opt-scroll-down: 0px 16px 13px 13px;
+}
+
+#panel {
+	color: rgb(230, 220, 200);
+}
+/* Room above the tabs for the title. */
+#content {
+	top: 34dp;
+}
+
+/* The box, in place of legacy's message box caps: 0.97's dialog stone (Message_box1, 213x40) in
+   rows between two edge strips (Message_box2, 213x5). Stretched to this 440 width, their 5-texel
+   sides blurred into wide bands, so both come widened ahead of time
+   (tools/classic_theme/make_classic_derived_textures.py): the sides keep their width and only the
+   stone between them stretches, in proportion, in rows down to the 300 between the edges. */
+.window-shell-sprite-back {
+	left: 0;
+	right: 0;
+	top: 5dp;
+	bottom: 5dp;
+	height: auto;
+	decorator: image(classic-opt-stone fill);
+}
+.window-shell-sprite-middle { decorator: none; }
+.window-shell-sprite-top { left: 0; right: 0; top: 0; height: 5dp; decorator: image(classic-opt-edge fill); }
+.window-shell-sprite-bottom { left: 0; right: 0; bottom: 0; height: 5dp; decorator: image(classic-opt-edge fill); }
+
+/* The title, centred near the top as 0.97's "Options" (its rail art is not 0.97's). */
+.window-shell-header-title { display: block; top: 12dp; color: #ffffff; }
+.window-shell-header-title.hidden { display: none; }
+
+/* The tabs: one row of 0.97 text plates, each sized by its label, the active one and the one under
+   the mouse lit as 0.97 lit its plates (additive 0.8, 0.6, 0.4: brightened and warmed). */
+.option-tab-row { decorator: none; }
+.option-tab-btn {
+	margin-right: 1dp;
+	padding: 0 3dp;
+	color: rgb(200, 190, 170);
+	decorator: image(classic-opt-plate fill);
+}
+.option-tab-btn:last-child { margin-right: 0; }
+.option-tab-btn:hover,
+.option-tab-btn.active-tab { color: #ffffff; image-color: #ffe3c6; filter: brightness(1.7); decorator: image(classic-opt-plate fill); }
+
+/* Text on 0.97's colours; headings and the tuning's guide line on the classic line colour. */
+.option-row-label,
+.option-tuning-label { color: rgb(230, 220, 200); }
+.option-section { color: #ffffff; border-bottom-color: rgb(106, 97, 88); }
+.option-tuning-group { border-left-color: rgb(106, 97, 88); }
+.option-tuning-value { color: #ffffff; }
+.option-tuning-group-label:hover,
+.option-tuning-more-head:hover { color: #ffffff; }
+.option-tuning-more-head { color: rgb(200, 190, 170); }
+.option-tuning-chevron { border-right-color: rgb(146, 134, 121); border-bottom-color: rgb(146, 134, 121); }
+.option-tuning-group-label:hover .option-tuning-chevron,
+.option-tuning-more-head:hover .option-tuning-chevron { border-right-color: #ffffff; border-bottom-color: #ffffff; }
+
+/* The classic social windows' check box: 106,97,88 inside a 146,134,121 line, the win_check mark
+   when set (themes/classic/friend_shell.rcss). */
+.option-checkbox-row .checkbox-box {
+	width: 11dp;
+	height: 11dp;
+	box-sizing: border-box;
+	border: 1dp rgb(146, 134, 121);
+	background-color: rgb(37, 37, 37);
+	decorator: none;
+}
+.option-checkbox-row .checkbox-box.checked { decorator: image(classic-opt-check fill); background-color: rgb(106, 97, 88); }
+.option-checkbox-row:hover .option-row-label { color: #ffffff; }
+
+/* The lists on 0.97's text colours, on black with the classic line colour. */
+.option-dropdown-value, .option-dropdown-list { background-color: rgba(0, 0, 0, 200); border-color: rgb(146, 134, 121); color: rgb(230, 220, 200); }
+.option-dropdown-option { color: rgb(230, 220, 200); }
+.option-dropdown-option:hover { color: #ffffff; background-color: rgb(106, 97, 88); }
+.option-dropdown-option.selected { color: #000000; background-color: rgb(146, 134, 121); }
+
+/* Reset (a setting, or a whole feature): small 0.97 text plates, lit under the mouse. */
+.option-tuning-reset {
+	height: 16dp;
+	line-height: 16dp;
+	padding: 0 8dp;
+	border-width: 0;
+	background-color: transparent;
+	color: rgb(230, 220, 200);
+	decorator: image(classic-opt-plate fill);
+}
+.option-tuning-reset:hover { color: #ffffff; image-color: #ffe3c6; filter: brightness(1.7); }
+.option-tuning-hit:focus { border-color: rgb(146, 134, 121); }
+
+/* The settings area scrolls with the Season 1 client's win_scrollbar (as the classic social windows
+   and dialogs): 13x13 arrows at both ends, the track between two 106,97,88 lines, a grey thumb. */
+.scroll-pane scrollbarvertical { width: 13dp; margin: 0; }
+.scroll-pane scrollbarvertical slidertrack { decorator: none; box-sizing: border-box; border-left: 1dp rgb(106, 97, 88); border-right: 1dp rgb(106, 97, 88); }
+.scroll-pane scrollbarvertical sliderbar { height: auto; min-height: 6dp; margin: 0 1dp; decorator: image(classic-opt-scroll-thumb fill); }
+.scroll-pane scrollbarvertical sliderbar:active { filter: none; }
+.scroll-pane scrollbarvertical sliderarrowdec,
+.scroll-pane scrollbarvertical sliderarrowinc { width: 100%; height: 13dp; pointer-events: auto; }
+.scroll-pane scrollbarvertical sliderarrowdec { decorator: image(classic-opt-scroll-up); }
+.scroll-pane scrollbarvertical sliderarrowinc { decorator: image(classic-opt-scroll-down); }
+.scroll-pane scrollbarvertical sliderarrowdec:active,
+.scroll-pane scrollbarvertical sliderarrowinc:active { filter: brightness(0.7); }
+
+/* Close: legacy's cross (win_size, the classic social windows' close), in the stone's top-right
+   corner below the edge strip. */
+.option-close-btn { top: -26dp; right: -10dp; }

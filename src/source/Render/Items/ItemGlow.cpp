@@ -55,12 +55,12 @@ bool IsPhoenixSoulInventoryModel(int modelType)
     return modelType == MODEL_ARMORINVEN_74;
 }
 
-void RenderPhoenixSoulInventoryMesh(BMD* b, OBJECT* o, float alpha, int renderType, int draws)
+void RenderPhoenixSoulInventoryMesh(BMD* b, const OBJECT* o, DrawLook& look, float alpha, int renderType, int draws)
 {
     for (int draw = 0; draw < draws; ++draw)
     {
-        b->RenderMesh(PhoenixSoulInventoryGlowMesh, renderType, alpha, o->BlendMesh, o->BlendMeshLight,
-                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(PhoenixSoulInventoryGlowMesh, renderType, alpha, look.blendMesh, look.blendMeshLight,
+                      look.blendMeshU, look.blendMeshV);
     }
 }
 
@@ -72,19 +72,20 @@ const Colors& GetItemColors(int itemType)
     return colors != nullptr ? *colors : OtherModelColors;
 }
 
-void RenderMeshes(BMD* b, OBJECT* o, const ItemGlowMeshes& meshes, float alpha, int renderType, int texture)
+void RenderMeshes(BMD* b, const OBJECT* o, DrawLook& look, const ItemGlowMeshes& meshes, float alpha, int renderType,
+                  int texture)
 {
     if (!meshes.only.empty())
     {
         // Single meshes are drawn with the alpha of the object.
         for (const int mesh : meshes.only)
         {
-            b->RenderMesh(mesh, renderType, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                          o->BlendMeshTexCoordV);
+            b->RenderMesh(mesh, renderType, look.alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                          look.blendMeshV);
         }
         return;
     }
-    b->RenderBody(renderType, alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
+    b->RenderBody(renderType, alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU, look.blendMeshV,
                   meshes.hidden.value_or(-1), texture);
 }
 } // namespace
@@ -145,36 +146,36 @@ bool HasExcellentGlow(int modelType)
     return Get(modelType).excellent;
 }
 
-void RenderGlow(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, int texture)
+void RenderGlow(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType, int texture)
 {
-    if (Styles::RenderGlow(b, o, modelType, alpha, renderType, texture))
+    if (Styles::RenderGlow(b, o, look, modelType, alpha, renderType, texture))
     {
         return;
     }
     if (IsPhoenixSoulInventoryModel(modelType))
     {
-        RenderPhoenixSoulInventoryMesh(b, o, alpha, renderType,
+        RenderPhoenixSoulInventoryMesh(b, o, look, alpha, renderType,
                                        (renderType & RENDER_METAL) ? PhoenixSoulInventoryMetalDraws : 1);
         return;
     }
-    RenderMeshes(b, o, Get(modelType).meshes, alpha, renderType, texture);
+    RenderMeshes(b, o, look, Get(modelType).meshes, alpha, renderType, texture);
 }
 
-void RenderShine(BMD* b, OBJECT* o, int modelType, float alpha, int renderType, int texture)
+void RenderShine(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha, int renderType, int texture)
 {
     if (IsPhoenixSoulInventoryModel(modelType))
     {
-        RenderPhoenixSoulInventoryMesh(b, o, alpha, renderType, 1);
+        RenderPhoenixSoulInventoryMesh(b, o, look, alpha, renderType, 1);
         return;
     }
-    RenderMeshes(b, o, Get(modelType).shineMeshes, alpha, renderType, texture);
+    RenderMeshes(b, o, look, Get(modelType).shineMeshes, alpha, renderType, texture);
 }
 
-void RenderExcellentGlow(BMD* b, OBJECT* o, int modelType, float alpha)
+void RenderExcellentGlow(BMD* b, const OBJECT* o, DrawLook& look, int modelType, float alpha)
 {
     if (IsPhoenixSoulInventoryModel(modelType))
     {
-        RenderPhoenixSoulInventoryMesh(b, o, alpha, ExcellentGlowRenderType, 1);
+        RenderPhoenixSoulInventoryMesh(b, o, look, alpha, ExcellentGlowRenderType, 1);
         return;
     }
 
@@ -190,11 +191,11 @@ void RenderExcellentGlow(BMD* b, OBJECT* o, int modelType, float alpha)
 
     if (mesh)
     {
-        b->RenderMesh(*mesh, ExcellentGlowRenderType, alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                      o->BlendMeshTexCoordV);
+        b->RenderMesh(*mesh, ExcellentGlowRenderType, alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                      look.blendMeshV);
         return;
     }
-    b->RenderBody(ExcellentGlowRenderType, alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
-                  o->BlendMeshTexCoordV);
+    b->RenderBody(ExcellentGlowRenderType, alpha, look.blendMesh, look.blendMeshLight, look.blendMeshU,
+                  look.blendMeshV);
 }
 } // namespace Render::Items::Glow

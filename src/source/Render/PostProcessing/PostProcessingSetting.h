@@ -11,6 +11,8 @@ namespace Render::PostProcessing
 // false when it was turned on but the renderer cannot post-process; frames then
 // stay unprocessed.
 bool SetPostProcessingEnabled(bool enabled);
+// True while frames are post-processed (requested and available).
+[[nodiscard]] bool PostProcessingActive();
 
 // Hands the look profile's bloom and grading values of the active world to the
 // renderer. Call once per frame, before the scene's end.
