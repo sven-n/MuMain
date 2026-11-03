@@ -46,6 +46,13 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME trade_change_warning_tests
+    SOURCES
+        test_trade_change_warning.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/UI/Inventory/TradeChangeWarning.cpp
+)
+
+mu_add_test(
     NAME jewel_unmix_selection_tests
     SOURCES
         test_jewel_unmix_selection.cpp
