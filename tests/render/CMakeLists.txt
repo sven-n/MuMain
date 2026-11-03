@@ -333,7 +333,17 @@ foreach(case IN ITEMS
         "copy_owner_address|declares a writable OBJECT[*] owner = &copy.Owner"
         "copy_out_of_scope|declares a writable OBJECT[*] p = &live"
         "comment_brace|declares a writable OBJECT[*] o = &Objects"
-        "comment_value|declares a writable OBJECT[*] o = &global")
+        "comment_value|declares a writable OBJECT[*] o = &global"
+        "auto_const_pointer|declares a writable const auto owner = Hero"
+        "auto_pointer_const|declares a writable auto[*] const owner = Hero"
+        "alias_reaches_owner|reaches Owner through its copy alias"
+        "extern_object|declares a writable OBJECT[*] pointer = &live"
+        "wide_character_brace|declares a writable OBJECT[*] pointer = &Objects"
+        "continued_comment|declares a writable OBJECT[*] pointer = &Objects"
+        "attributed_function|RenderThing takes a writable OBJECT[*] object"
+        "attributed_member|DrawThing takes a writable CHARACTER[*] character"
+        "split_return_type|RenderThing takes a writable OBJECT[*] object"
+        "split_return_namespace|DescribeThing takes a writable PARTICLE[*] particle")
     string(REPLACE "|" ";" case "${case}")
     list(GET case 0 fixture)
     list(GET case 1 offence)

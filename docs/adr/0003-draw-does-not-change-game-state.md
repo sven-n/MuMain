@@ -181,13 +181,16 @@ drawer, and the renderer applies the active look per draw.
   nothing. Every build logs each offending caller once to the error log, with
   or without the control socket. Tests read the count and the last caller.
 - **Every test run:** `draws_take_game_objects_read_only` reads the game's
-  sources, comments and strings left out: a function named `Render*`, `Draw*`
-  or `Describe*`, at any indent, takes no writable object, character, part,
-  joint, particle or item (`OBJECT* const` included). It declares no writable
-  pointer or reference to one, `auto` included, except to a copy of its own
-  still in scope or one of the copy's value members, and reaches no other
-  object through a copy's pointer members (its owner, its bones). Fixtures
-  check that it catches each case and passes copies.
+  sources as the compiler does (comments, literals and preprocessor lines
+  left out; declarations found across lines and attributes): a function
+  named `Render*`, `Draw*` or `Describe*` takes no writable object,
+  character, part, joint, particle or item (`OBJECT* const` included). It
+  declares no pointer or reference, `auto` included, through which it could
+  write one, unless it leads to a copy of its own still in scope (not
+  `extern`) or one of the copy's value members, and it reaches no other
+  object through a copy's pointer members (its owner, its bones). The check
+  follows the types of the expressions it reads and what `auto` deduces.
+  Fixtures check that it catches each case and passes copies.
 - **The compiled game:** `game_random_is_owned` reads the undefined symbols
   of the game's objects and fails if any calls the CRT's `rand()` or
   `srand()`, a second sequence nothing can see.

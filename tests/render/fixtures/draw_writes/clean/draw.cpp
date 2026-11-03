@@ -34,3 +34,29 @@ void RenderSplit(const
     OBJECT* body = &copy.Object;
     body->Alpha = 0.5f;
 }
+
+struct Note
+{
+    int* Owner;
+};
+
+void RenderDeduced(const CHARACTER* source)
+{
+    auto* object = &source->Object;
+    float local = 0;
+    auto* value = &local;
+    OBJECT copy = *source->Object.Owner;
+    OBJECT& alias = copy;
+    alias.Alpha = 0.f;
+    {
+        Note copy{};
+        int seen = *copy.Owner;
+    }
+    const int big = 1'000'000;
+    const int mask = 0xFF'FF;
+    const char32_t brace = U'}';
+    // A continued comment hides the next line \
+    OBJECT* hidden = &Objects[0];
+    if (Hero != nullptr)
+        RenderThing(Hero, item);
+}
