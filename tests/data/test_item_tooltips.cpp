@@ -1431,6 +1431,8 @@ TEST_CASE("The tooltip's class lines and the boots' and gloves' lines come from 
     CHECK_FALSE(has(lines(10, 0, 5), L"Increases moving speed"));
 }
 
+// The item is changed with SetItem, an item edit of the editor: the editor builds run it.
+#ifdef _EDITOR
 // D73: a line an item adds to its layout itself shows where it says, at its levels.
 TEST_CASE("A line an item adds to its tooltip layout shows after its line [data][items][tooltip]")
 {
@@ -1472,3 +1474,4 @@ TEST_CASE("A line an item adds to its tooltip layout shows after its line [data]
     // The item data is loaded again by the next test that needs it.
     REQUIRE(g_ItemDataHandler.Load(errorMessage));
 }
+#endif // _EDITOR
