@@ -35,6 +35,9 @@
 //   $bloom <v>                     bloom.strength
 //   $ao radius <r>                 ao.radius
 //   $ao <v>                        ao.strength
+//   $sun softness <f>              sun.softness
+//   $sun resolution <texels>       sun.resolution
+//   $sun <v>                       sun.shadow
 namespace Render::Look
 {
 

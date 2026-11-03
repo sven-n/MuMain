@@ -33,6 +33,9 @@ const CommandForm CommandForms[] = {
     {L"$bloom falloff ", {LookValue::BloomLevelFalloff}},
     {L"$ao radius ", {LookValue::AmbientOcclusionRadius}},
     {L"$ao ", {LookValue::AmbientOcclusionStrength}},
+    {L"$sun softness ", {LookValue::SunShadowSoftness}},
+    {L"$sun resolution ", {LookValue::SunShadowResolution}},
+    {L"$sun ", {LookValue::SunShadowStrength}},
     {L"$bloom ", {LookValue::BloomStrength}},
 };
 

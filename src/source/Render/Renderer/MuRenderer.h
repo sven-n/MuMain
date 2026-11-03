@@ -456,6 +456,15 @@ public:
     // Scopes nest; use ScopedGroundShadow.
     virtual void BeginGroundShadow(GroundShadowSource /*source*/) {}
     virtual void EndGroundShadow(GroundShadowSource /*source*/) {}
+    // Draws between BeginCharacterDraws and EndCharacterDraws are the characters, apart from the world's
+    // objects. Scopes nest; use ScopedCharacterDraws.
+    virtual void BeginCharacterDraws() {}
+    virtual void EndCharacterDraws() {}
+    // Whether SetSceneLighting's sun shadow settings draw a shadow map.
+    [[nodiscard]] virtual bool SunShadowsAvailable() const
+    {
+        return false;
+    }
     // True while a bloom exclusion is open: what is queued now and drawn later
     // (a character's glow sprites) can be drawn inside one too.
     [[nodiscard]] virtual bool IsBloomExcluded() const
@@ -903,6 +912,20 @@ public:
     }
     ScopedWorldLitGeometry(const ScopedWorldLitGeometry&) = delete;
     ScopedWorldLitGeometry& operator=(const ScopedWorldLitGeometry&) = delete;
+};
+class ScopedCharacterDraws
+{
+public:
+    ScopedCharacterDraws()
+    {
+        GetRenderer().BeginCharacterDraws();
+    }
+    ~ScopedCharacterDraws()
+    {
+        GetRenderer().EndCharacterDraws();
+    }
+    ScopedCharacterDraws(const ScopedCharacterDraws&) = delete;
+    ScopedCharacterDraws& operator=(const ScopedCharacterDraws&) = delete;
 };
 class ScopedGroundShadow
 {

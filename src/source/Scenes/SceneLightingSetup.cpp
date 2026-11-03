@@ -8,6 +8,7 @@
 #include "Render/Lighting/DynamicLightList.h"
 #include "Render/Lighting/DynamicLightSelection.h"
 #include "Render/Lighting/DynamicLightsSetting.h"
+#include "Render/Lighting/SunShadow.h"
 #include "Render/Lighting/EnhancedLightingSetting.h"
 #include "Render/Lighting/LightMoodSetting.h"
 #include "Render/Lighting/WorldDynamicLights.h"
@@ -15,6 +16,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/SceneLighting.h"
 #include "Scenes/SceneCore.h"
+#include "World/MapInfra/MapManager.h"
 
 #include <chrono>
 #include <cstddef>
@@ -54,6 +56,27 @@ void SubmitSceneLighting()
     lighting.cameraPosition[2] = g_Camera.Position[2];
     Render::Lighting::ApplyTuning(lighting);
     lighting.highlightKnee = Render::Lighting::LightMood::Active().highlightKnee;
+    if (Render::Lighting::SunShadowsActive() && Hero)
+    {
+        using Data::Maps::LookValue;
+        // The sun stands where the flat character shadows said it did: they fall towards
+        // dynamic.shadowAngle, as long as before.
+        const glm::vec3 toSun =
+            Render::Lighting::SunDirection(Render::Look::Value(LookValue::GroundShadowAngle),
+                                           gMapManager.InBattleCastle() ? Render::Lighting::kSunShadowFallBattleCastle
+                                                                        : Render::Lighting::kSunShadowFall);
+        lighting.sunDirection[0] = toSun.x;
+        lighting.sunDirection[1] = toSun.y;
+        lighting.sunDirection[2] = toSun.z;
+        lighting.sunShadowDarkness =
+            Render::Look::Value(LookValue::SunShadowStrength) * Render::Look::Value(LookValue::GroundShadowOpacity);
+        lighting.sunShadowSoftness = Render::Look::Value(LookValue::SunShadowSoftness);
+        lighting.sunShadowResolution = static_cast<std::uint32_t>(Render::Look::Value(LookValue::SunShadowResolution));
+        // Around the hero: the ground the camera sees lies within these heights.
+        constexpr float GroundReach = 400.0f;
+        lighting.groundLow = Hero->Object.Position[2] - GroundReach;
+        lighting.groundHigh = Hero->Object.Position[2] + GroundReach;
+    }
     mu::GetRenderer().SetSceneLighting(lighting);
 }
 
@@ -70,6 +93,7 @@ void PinWorldDynamicLights()
 
 void SubmitDynamicLights()
 {
+
     if (!Render::Lighting::DynamicLightsActive())
     {
         mu::GetRenderer().SetDynamicLights({});

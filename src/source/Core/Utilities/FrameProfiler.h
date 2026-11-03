@@ -46,6 +46,8 @@ enum class Pass : int
     ObjectsDraw,
     // The update's effect spawns and poses for the drawn characters and map objects.
     UpdateEffects,
+    // Inside RendererReplay: the sun shadow map.
+    SunShadow,
     Count_
 };
 
@@ -53,7 +55,7 @@ inline constexpr const char* kPassNames[static_cast<int>(Pass::Count_)] = {
     "Terrain",   "Objects",  "Chars",     "Items",       "Effects",   "Other",   "CharWait", "MoveFx",
     "MovePart",  "Skinning", "UI",        "RenderBegin", "RenderEnd", "Submit",  "UIUpdate", "RmlInput",
     "UILayout",  "Flush",    "Sprites",   "Particles",   "Joints",    "Overlay", "RmlUpd",   "RmlRend",
-    "EndOffscr", "EndStage", "EndReplay", "EndPostUI",   "ObjAnim",   "ObjDraw", "UpdateFx",
+    "EndOffscr", "EndStage", "EndReplay", "EndPostUI",   "ObjAnim",   "ObjDraw", "UpdateFx", "SunShadow",
 };
 
 enum class Counter : int

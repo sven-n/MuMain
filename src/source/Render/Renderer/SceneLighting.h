@@ -45,6 +45,15 @@ struct SceneLighting
     float specularPower = kDefaultSpecularPower;
     // World-space camera position.
     float cameraPosition[3]{};
+    // Enhanced sun shadows: the direction towards the sun, how much a shadow darkens (0: no shadow
+    // map), how many texels its edges blur over, the map's size in texels, and the heights between
+    // which the camera's view meets the ground.
+    float sunDirection[3]{0.0f, 0.0f, 1.0f};
+    float sunShadowDarkness = 0.0f;
+    float sunShadowSoftness = 1.0f;
+    std::uint32_t sunShadowResolution = 2048;
+    float groundLow = 0.0f;
+    float groundHigh = 0.0f;
 };
 
 // The frame's fog as configured through IMuRenderer::SetFog() when the scene lighting was set.
@@ -68,6 +77,8 @@ struct SceneLightingUniform
     float fogColor[4];           // rgb, w = 1 when the scene has fog
     float fogParameters[4];      // start, end, Enhanced density, unused
     float cameraPosition[4];     // xyz world space, w unused
+    float sunViewProjection[16]; // column-major, world to the sun shadow map's clip space
+    float sunShadowParameters[4]; // darkness (0: no shadow map), softness in texels, 1 / map size, texel size
 };
 
 inline constexpr std::size_t kSceneLightingRegisterSize = 16;
@@ -79,7 +90,9 @@ static_assert(offsetof(SceneLightingUniform, specularParameters) == 4 * kSceneLi
 static_assert(offsetof(SceneLightingUniform, fogColor) == 5 * kSceneLightingRegisterSize);
 static_assert(offsetof(SceneLightingUniform, fogParameters) == 6 * kSceneLightingRegisterSize);
 static_assert(offsetof(SceneLightingUniform, cameraPosition) == 7 * kSceneLightingRegisterSize);
-static_assert(sizeof(SceneLightingUniform) == 8 * kSceneLightingRegisterSize);
+static_assert(offsetof(SceneLightingUniform, sunViewProjection) == 8 * kSceneLightingRegisterSize);
+static_assert(offsetof(SceneLightingUniform, sunShadowParameters) == 12 * kSceneLightingRegisterSize);
+static_assert(sizeof(SceneLightingUniform) == 13 * kSceneLightingRegisterSize);
 
 [[nodiscard]] SceneLightingUniform PackSceneLightingUniform(const SceneLighting& lighting, const SceneFog& fog);
 

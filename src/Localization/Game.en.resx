@@ -1219,6 +1219,24 @@
   <data name="Tuning Contact Shadow Reach Help" xml:space="preserve">
     <value>How far from a surface nearby geometry still darkens it, in world units (a terrain cell is 100).</value>
   </data>
+  <data name="Tuning Sun Shadows" xml:space="preserve">
+    <value>Sun shadows</value>
+  </data>
+  <data name="Tuning Sun Shadows Help" xml:space="preserve">
+    <value>How dark the sun's shadows are. Everything solid casts them onto the ground, walls and characters, in the shadow direction. 0 turns them off and draws the flat character shadows instead.</value>
+  </data>
+  <data name="Tuning Sun Shadow Softness" xml:space="preserve">
+    <value>Sun shadow softness</value>
+  </data>
+  <data name="Tuning Sun Shadow Softness Help" xml:space="preserve">
+    <value>How soft the edges of the sun's shadows are.</value>
+  </data>
+  <data name="Tuning Sun Shadow Resolution" xml:space="preserve">
+    <value>Sun shadow resolution</value>
+  </data>
+  <data name="Tuning Sun Shadow Resolution Help" xml:space="preserve">
+    <value>How sharp the sun's shadows are: 1024, 2048 or 4096. Higher costs more graphics memory and time.</value>
+  </data>
   <data name="Tuning Colour Grading Strength Help" xml:space="preserve">
     <value>How much of the map's colour grading applies. 0 % applies none, while bloom stays on.</value>
   </data>

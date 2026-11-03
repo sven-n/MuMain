@@ -51,6 +51,9 @@ enum class LookValue : std::uint8_t
     GradingStrength,
     AmbientOcclusionStrength,
     AmbientOcclusionRadius,
+    SunShadowStrength,
+    SunShadowSoftness,
+    SunShadowResolution,
     Count,
 };
 

@@ -8,6 +8,9 @@
 
 Texture2D tex : register(t0, space2);
 SamplerState s : register(s0, space2);
+// The sun shadow map's depth (Enhanced sun shadows; a far 1x1 map without them).
+Texture2D sunShadowMap : register(t2, space2);
+SamplerComparisonState sunShadowSampler : register(s2, space2);
 // Per pixel, 1 minus the darkest ground shadow there: red the sun's, green the point lights' (white
 // without shadows).
 Texture2D groundShadowMask : register(t1, space2);
@@ -32,6 +35,8 @@ cbuffer SceneLighting : register(b1, space3)
     float4 sceneFogColor;
     float4 sceneFogParameters;
     float4 cameraPosition;
+    float4x4 sunViewProjection; // world to the sun shadow map's clip space
+    float4 sunShadowParameters; // darkness (0: no shadow map), softness in texels, 1 / map size, texel in world units
 };
 static const uint MaxDynamicLights = 32; // mu::kMaxDynamicLights
 cbuffer DynamicLights : register(b2, space3)
@@ -60,7 +65,32 @@ float EnhancedFogAmount(float eyeDepth)
     return saturate(1.0 - exp(-scaledDistance * scaledDistance));
 }
 
-// The terrain light's linear falloff over the horizontal distance, as the grid adds it.
+// How much sun reaches `worldPosition` (Enhanced sun shadows): 1 lit, 0 in the shadow of what stands
+// between it and the sun, softened over sunShadowParameters.y texels. 1 without a shadow map or
+// outside it. `worldNormal` pushes the lookup off the surface so that it does not shadow itself.
+float SunVisibility(float3 worldPosition, float3 worldNormal)
+{
+    if (sunShadowParameters.x <= 0.0)
+        return 1.0;
+    const float3 lifted = worldPosition + worldNormal * (1.5 * sunShadowParameters.w);
+    const float4 clip = mul(sunViewProjection, float4(lifted, 1.0));
+    const float3 ndc = clip.xyz / clip.w;
+    const float2 uv = float2(ndc.x * 0.5 + 0.5, 0.5 - ndc.y * 0.5);
+    if (any(uv < 0.0) || any(uv > 1.0) || ndc.z >= 1.0)
+        return 1.0;
+    const float2 step = sunShadowParameters.zz * sunShadowParameters.y;
+    float visible = 0.0;
+    [unroll]
+    for (int y = -1; y <= 1; ++y)
+    {
+        [unroll]
+        for (int x = -1; x <= 1; ++x)
+            visible += sunShadowMap.SampleCmpLevelZero(sunShadowSampler, uv + float2(x, y) * step, ndc.z);
+    }
+    return visible / 9.0;
+}
+
+// The frame's first point lights, which the ground's vertex colour leaves out.
 float3 WorldDynamicLighting(float3 worldPosition)
 {
     float3 light = float3(0.0, 0.0, 0.0);
@@ -88,7 +118,8 @@ float4 main(FSInput input) : SV_Target
     const float2 visibility =
         groundShadowMask.Sample(groundShadowSampler, input.pos.xy / float2(maskWidth, maskHeight)).rg;
     // The sun's shadows dim the ground's own light, the point lights' shadows the point lights.
-    const float2 shadow = 1.0 - groundShadowOpacity * (1.0 - visibility);
+    float2 shadow = 1.0 - groundShadowOpacity * (1.0 - visibility);
+    shadow.x *= 1.0 - sunShadowParameters.x * (1.0 - SunVisibility(input.worldPosition, float3(0.0, 0.0, 1.0)));
     const float3 light =
         saturate(input.color.rgb * shadow.x + WorldDynamicLighting(input.worldPosition) * shadow.y);
     float4 color = float4(texel.rgb * light, texel.a * input.color.a);

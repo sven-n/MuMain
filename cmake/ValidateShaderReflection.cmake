@@ -288,9 +288,9 @@ set(shader_specs
     "skinned_weighted.vert|vert|0,1,2,3,4,5,6,7,8|0|1|1"
     "skinned_shadow.vert|vert|0,3,4|0|2|2"
     "skinned_weighted_shadow.vert|vert|0,3,4,6,7|0|2|2"
-    "skinned_lit.frag|frag||2|0|3"
+    "skinned_lit.frag|frag||3|0|3"
     "world_lit.vert|vert|0,1,2|0|0|1"
-    "world_lit.frag|frag||2|0|3"
+    "world_lit.frag|frag||3|0|3"
     "shadow_mask.frag|frag||0|0|0"
     "post_fullscreen.vert|vert||0|0|0"
     "post_bloom_down.frag|frag||1|0|1"
@@ -298,6 +298,7 @@ set(shader_specs
     "post_composite.frag|frag||5|0|1"
     "post_ao.frag|frag||1|0|1"
     "post_ao_blur.frag|frag||2|0|1"
+    "sun_depth.frag|frag||1|0|1"
 )
 
 foreach(shader_spec IN LISTS shader_specs)

@@ -12,4 +12,8 @@ void SetDynamicLightsEnabled(bool enabled);
 // draws Enhanced lighting.
 [[nodiscard]] bool DynamicLightsActive();
 
+// True when the sun's shadows come from the shadow map: in the game, with dynamic lights active,
+// sun.shadow above 0 and a renderer that can draw it. Characters then cast no flat sun shadow.
+[[nodiscard]] bool SunShadowsActive();
+
 } // namespace Render::Lighting

@@ -79,6 +79,9 @@ enum class TuningControlId : std::uint8_t
     GradingStrength,
     AmbientOcclusionStrength,
     AmbientOcclusionRadius,
+    SunShadowStrength,
+    SunShadowSoftness,
+    SunShadowResolution,
     Count,
 };
 inline constexpr std::size_t TuningControlCount = static_cast<std::size_t>(TuningControlId::Count);
