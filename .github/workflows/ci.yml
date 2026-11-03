@@ -34,6 +34,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
+          # A pull request diffs against the merge commit's first parent, so it needs only one commit of history.
+          fetch-depth: 2
           sparse-checkout-cone-mode: false
           sparse-checkout: |
             /*
@@ -47,6 +49,7 @@ jobs:
       # Commits, tags and file lists for the diffs and release check, without every past asset version; git fetches
       # the few old file versions a diff needs on demand.
       - name: Fetch history
+        if: github.event_name != 'pull_request'
         run: git fetch --quiet --filter=blob:none --unshallow --tags origin
 
       - name: Select native builds
