@@ -54,10 +54,8 @@ jobs:
         with:
           path: |
             ~/.cache/pip
-            /usr/bin/cppcheck
-            /usr/share/cppcheck
-          key: quality-tools-cppcheck-${{ runner.os }}-v2
-          restore-keys: quality-tools-cppcheck-${{ runner.os }}-
+          key: quality-tools-pip-${{ runner.os }}-v1
+          restore-keys: quality-tools-pip-${{ runner.os }}-
 
       - name: Install quality tools
         run: |
@@ -243,6 +241,7 @@ jobs:
           --output-on-failure
           --no-tests=error
           --label-exclude static
+          --parallel 4
 
       - name: Stage MSVC redistributable runtime
         shell: pwsh
@@ -532,10 +531,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            out/build/linux-ci/_deps
+            # Downloaded sources only: ninja recompiles restored *-build folders, and ccache covers that.
+            out/build/linux-ci/_deps/*-src
+            out/build/linux-ci/_deps/*-subbuild
             .nuget
-          key: linux-x64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
-          restore-keys: linux-x64-release-deps-
+          key: linux-x64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: linux-x64-release-dep-sources-
 
       - name: Configure CMake
         run: >
@@ -571,6 +572,7 @@ jobs:
           --output-on-failure
           --no-tests=error
           --label-exclude static
+          --parallel 4
 
       - name: Validate runtime
         run: |
@@ -653,10 +655,12 @@ jobs:
         uses: actions/cache@v4
         with:
           path: |
-            out/build/macos-ci/_deps
+            # Downloaded sources only: ninja recompiles restored *-build folders, and ccache covers that.
+            out/build/macos-ci/_deps/*-src
+            out/build/macos-ci/_deps/*-subbuild
             .nuget
-          key: macos-arm64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
-          restore-keys: macos-arm64-release-deps-
+          key: macos-arm64-release-dep-sources-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: macos-arm64-release-dep-sources-
 
       - name: Configure CMake
         run: >
@@ -693,6 +697,7 @@ jobs:
           --output-on-failure
           --no-tests=error
           --label-exclude static
+          --parallel 4
 
       - name: Validate runtime
         run: |

@@ -41,8 +41,22 @@ set(MU_TEST_CASE_TIMEOUT_SECONDS 120)
 #   mu_add_test(NAME <test_name> SOURCES a.cpp b.cpp LINK_LIBS lib1 lib2)
 # Registers each TEST_CASE inside the binary as its own CTest entry, so
 # failures point at the specific case in CI logs.
+set(MU_TEST_WINMAIN "${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp")
+# Most tests need the client globals of Winmain.cpp; compile it once for all of them, not per test.
+add_library(mu_test_winmain OBJECT "${MU_TEST_WINMAIN}")
+target_link_libraries(mu_test_winmain PUBLIC MuClient)
+target_include_directories(mu_test_winmain PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
+if(MSVC)
+    target_compile_options(mu_test_winmain PRIVATE /utf-8)
+endif()
+
 function(mu_add_test)
     cmake_parse_arguments(MAT "" "NAME" "SOURCES;LINK_LIBS" ${ARGN})
+    list(FIND MAT_SOURCES "${MU_TEST_WINMAIN}" winmain_index)
+    if(NOT winmain_index EQUAL -1)
+        list(REMOVE_AT MAT_SOURCES ${winmain_index})
+        list(APPEND MAT_LINK_LIBS mu_test_winmain)
+    endif()
     add_executable(${MAT_NAME} ${MAT_SOURCES})
     target_link_libraries(${MAT_NAME} PRIVATE mu_test_main ${MAT_LINK_LIBS})
     target_include_directories(${MAT_NAME} PRIVATE
@@ -52,7 +66,8 @@ function(mu_add_test)
     if(MSVC)
         target_compile_options(${MAT_NAME} PRIVATE /utf-8)
     endif()
-    doctest_discover_tests(${MAT_NAME} PROPERTIES TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS})
+    # Cases of one binary share fixed temp paths, so `ctest --parallel` runs them one at a time; binaries overlap.
+    doctest_discover_tests(${MAT_NAME} PROPERTIES TIMEOUT ${MU_TEST_CASE_TIMEOUT_SECONDS} RESOURCE_LOCK ${MAT_NAME})
 endfunction()
 
 find_package(Python3 COMPONENTS Interpreter REQUIRED)
