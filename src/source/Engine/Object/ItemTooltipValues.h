@@ -3,11 +3,16 @@
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 
 #include <array>
+#include <cstddef>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
 #include <vector>
+
+// The room of a timed item's end date ({expireDate}, "2026-11-30  18:00"), its end included: the date has 17
+// characters, a year with more digits the rest.
+constexpr size_t ItemExpireDateLength = 24;
 
 // The values the item tooltip's stat lines show for an item and the hero, each computed as RenderItemInfo always has:
 // the built-in placeholders of the item descriptions ({damageMin}, {requiredStrength}, ...), and the states the
@@ -92,7 +97,7 @@ struct ItemTooltipValues
     bool classUsable = false;
     // When a timed item that isn't expired ends, in local time ("2026-11-30  18:00"); empty for another item, and with
     // the Basics values.
-    std::array<wchar_t, 24> expireDate{};
+    std::array<wchar_t, ItemExpireDateLength> expireDate{};
     // The hero's level.
     int heroLevel = 0;
     // The item's name as its data has it, which {name} writes only for a line showing it, its level + 1, and its

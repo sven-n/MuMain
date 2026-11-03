@@ -201,8 +201,8 @@ ItemTooltipValues ComputeItemTooltipValues(const ITEM& item, TooltipValueScope s
         const time_t expireTime = item.lExpireTime;
         if (const tm* expire = localtime(&expireTime))
         {
-            mu_swprintf(values.expireDate.data(), L"%d-%02d-%02d  %02d:%02d", expire->tm_year + 1900,
-                        expire->tm_mon + 1, expire->tm_mday, expire->tm_hour, expire->tm_min);
+            mu_swprintf_s(values.expireDate.data(), values.expireDate.size(), L"%d-%02d-%02d  %02d:%02d",
+                          expire->tm_year + 1900, expire->tm_mon + 1, expire->tm_mday, expire->tm_hour, expire->tm_min);
         }
     }
 
