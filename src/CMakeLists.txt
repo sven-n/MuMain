@@ -131,9 +131,15 @@ option(ENABLE_CONTROL_SOCKET "Developer control socket for scripted clients (nev
 # In-game tests (docs/in-game-tests.md): publishes the tester, which plays test
 # scenarios with the client through the control socket, next to Main, and adds
 # the InGameTests / InGameTestsGui targets. Developers only, like the socket.
-option(ENABLE_IN_GAME_TESTS "Publish the in-game tester next to Main (developer builds with the control socket)" OFF)
+# The tester needs the socket, so while the tests are on, the socket is on too.
+# Only for this configure: the cache keeps ENABLE_CONTROL_SOCKET as it was set,
+# so turning the tests off again drops the socket. PARENT_SCOPE hands the value
+# to tests/, which the top-level CMakeLists.txt adds after src/.
+option(ENABLE_IN_GAME_TESTS "Publish the in-game tester next to Main (turns on ENABLE_CONTROL_SOCKET)" OFF)
 if(ENABLE_IN_GAME_TESTS AND NOT ENABLE_CONTROL_SOCKET)
-  message(FATAL_ERROR "ENABLE_IN_GAME_TESTS needs ENABLE_CONTROL_SOCKET: the tester drives the client through it")
+  message(STATUS "ENABLE_IN_GAME_TESTS turns on ENABLE_CONTROL_SOCKET: the tester drives the client through it")
+  set(ENABLE_CONTROL_SOCKET ON)
+  set(ENABLE_CONTROL_SOCKET ON PARENT_SCOPE)
 endif()
 
 # ---------------------------------------------------------------------------
@@ -625,8 +631,16 @@ file(MAKE_DIRECTORY "${MU_NUGET_CACHE_DIR}")
 # same package the .NET ClientLibrary consumes (see MUnique.Client.Library.csproj).
 # Sourcing from NuGet means a single versioned dependency instead of vendoring
 # the entire OpenMU repository as a submodule.
-set(OPENMU_PACKETS_VERSION "0.10.1" CACHE STRING
-    "Version of MUnique.OpenMU.Network.Packets to source packet XML from")
+# The version the ClientLibrary builds against, so the guards check the same packet definitions.
+set(_packets_version_source "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
+# A version bump must reconfigure, or an existing build keeps checking the old packets.
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_packets_version_source}")
+file(STRINGS "${_packets_version_source}" _packets_version REGEX "<OpenMuPacketsVersion>")
+string(REGEX REPLACE ".*<OpenMuPacketsVersion>([^<]+)</OpenMuPacketsVersion>.*" "\\1"
+       OPENMU_PACKETS_VERSION "${_packets_version}")
+if (NOT OPENMU_PACKETS_VERSION MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+")
+  message(FATAL_ERROR "Could not read <OpenMuPacketsVersion> from MUnique.Client.Library.csproj")
+endif()
 set(OPENMU_PACKETS_XML
     "${MU_NUGET_CACHE_DIR}/munique.openmu.network.packets/${OPENMU_PACKETS_VERSION}/contentFiles/any/net10.0/ServerToClient/ServerToClientPackets.xml")
 
@@ -1157,6 +1171,10 @@ if (DOTNET_EXECUTABLE)
 else()
   message(WARNING ".NET SDK not found. MUnique.Client.Library.dll will NOT be built. "
     "The game will run but cannot connect to the server. Install .NET SDK 10.0+ to enable.")
+  if (ENABLE_IN_GAME_TESTS)
+    message(WARNING "ENABLE_IN_GAME_TESTS: without the .NET SDK there is no in-game tester and no "
+      "InGameTests / InGameTestsGui targets, so the -gui build presets fail. Install .NET SDK 10.0+.")
+  endif()
 endif()
 
 # DXP-10 step 4: state-wrapper monopoly guard. Fails the build if a raw gl*()

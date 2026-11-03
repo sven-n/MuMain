@@ -352,9 +352,8 @@ add_executable(rml_text_layout_tests
     test_rml_text_layout.cpp
     RmlTextLayoutAudit.cpp
     RmlLayoutFixture.cpp
-    ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
 )
-target_link_libraries(rml_text_layout_tests PRIVATE mu_test_main MuClient)
+target_link_libraries(rml_text_layout_tests PRIVATE mu_test_main mu_test_winmain)
 target_include_directories(rml_text_layout_tests PRIVATE ${CMAKE_SOURCE_DIR}/src/source)
 if(MSVC)
     target_compile_options(rml_text_layout_tests PRIVATE /utf-8)
