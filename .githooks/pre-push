@@ -32,5 +32,9 @@ if [ "$found" != "$wanted" ]; then
 elif [ -z "$base" ]; then
   echo "pre-push: formatting skipped, no merge base with ${MU_PUSH_BASE:-origin/main}" >&2
 else
-  bash scripts/changed_cpp_files.sh "$base" | bash scripts/check_format.sh "$base"
+  # Captured first so set -e stops on a failed diff instead of formatting an empty list.
+  files=$(bash scripts/changed_cpp_files.sh "$base")
+  if [ -n "$files" ]; then
+    printf '%s\n' "$files" | bash scripts/check_format.sh "$base"
+  fi
 fi

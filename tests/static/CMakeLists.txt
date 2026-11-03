@@ -22,6 +22,10 @@ add_test(
     COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_ci_build_plan.py"
 )
 add_test(
+    NAME static_check_scripts
+    COMMAND "${Python3_EXECUTABLE}" "${MU_TESTS}/test_static_check_scripts.py" "${CMAKE_COMMAND}"
+)
+add_test(
     NAME msvc_runtime_dll_staging_contract
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_CMAKE_SOURCE=${MU_REPO_ROOT}/src/CMakeLists.txt"
