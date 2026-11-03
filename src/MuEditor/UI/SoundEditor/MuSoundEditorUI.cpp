@@ -6,6 +6,7 @@
 
 #include "SoundEditorEdits.h"
 #include "SoundFilePicker.h"
+#include "SoundFolderTree.h"
 #include "SoundSelection.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -21,6 +22,8 @@
 
 #include <algorithm>
 #include <cfloat>
+#include <set>
+#include <unordered_map>
 
 MuSoundEditorUI g_MuSoundEditorUI;
 
@@ -39,6 +42,35 @@ constexpr float ChannelsWidth = 46.0f;
 constexpr float PickerWidth = 420.0f;
 constexpr float PickerHeight = 300.0f;
 const ImVec4 ProblemColor(0.94f, 0.58f, 0.58f, 1.0f);
+const ImVec4 FolderColor(0.80f, 0.88f, 1.0f, 1.0f);
+// What a row's drag carries: its key.
+constexpr const char* SoundPayload = "MU_SOUND_KEY";
+constexpr float FolderNameWidth = 220.0f;
+
+void CollectKeys(const std::vector<Data::Sounds::SoundFolder>& folders, std::set<std::string>& keys)
+{
+    for (const Data::Sounds::SoundFolder& folder : folders)
+    {
+        keys.insert(folder.sounds.begin(), folder.sounds.end());
+        CollectKeys(folder.folders, keys);
+    }
+}
+
+// The shown rows in the folder and below.
+size_t CountShown(const Data::Sounds::SoundFolder& folder,
+                  const std::unordered_map<std::string, const SoundRow*>& shown)
+{
+    size_t count = 0;
+    for (const std::string& key : folder.sounds)
+    {
+        count += shown.contains(key) ? 1 : 0;
+    }
+    for (const Data::Sounds::SoundFolder& child : folder.folders)
+    {
+        count += CountShown(child, shown);
+    }
+    return count;
+}
 
 const char* ProblemText(RowProblem problem)
 {
@@ -108,6 +140,7 @@ void MuSoundEditorUI::Render(bool* open)
                 shown.push_back(&row);
             }
         }
+        RenderFolderBar();
         RenderFilterBar(rows, shown.size());
         RenderTable(shown);
     }
@@ -204,36 +237,217 @@ void MuSoundEditorUI::RenderTable(const std::vector<const SoundRow*>& rows)
     ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumnLoads);
     ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumnLivesIn);
     ImGui::TableHeadersRow();
-    // The selection changed since the table last showed it: scroll to it once.
-    const bool follow = m_seenSelection != MuEditor::SoundSelection::GetVersion();
-    std::optional<int> selectedIndex;
-    for (size_t index = 0; index < rows.size(); ++index)
+    std::unordered_map<std::string, const SoundRow*> shown;
+    for (const SoundRow* row : rows)
     {
-        if (rows[index]->number >= 0 && rows[index]->number == MuEditor::SoundSelection::Get())
-        {
-            selectedIndex = static_cast<int>(index);
-            break;
-        }
+        shown.emplace(row->key, row);
     }
-    ImGuiListClipper clipper;
-    clipper.Begin(static_cast<int>(rows.size()));
-    if (follow && selectedIndex)
+    // The selection changed since the table last showed it: its folders open
+    // and the table scrolls to it once.
+    m_follow = m_seenSelection != MuEditor::SoundSelection::GetVersion();
+    m_openPath.clear();
+    if (m_follow)
     {
-        clipper.IncludeItemByIndex(*selectedIndex);
-    }
-    while (clipper.Step())
-    {
-        for (int index = clipper.DisplayStart; index < clipper.DisplayEnd; ++index)
+        for (const SoundRow* row : rows)
         {
-            RenderRow(*rows[static_cast<size_t>(index)]);
-            if (follow && selectedIndex == index)
+            if (row->number >= 0 && row->number == MuEditor::SoundSelection::Get())
             {
-                ImGui::SetScrollHereY(0.5f);
+                m_openPath = Data::Sounds::FindSoundFolder(g_SoundEdits.Folders(), row->key)
+                                 .value_or(MuEditor::SoundEditor::FolderPath{});
+                break;
             }
         }
     }
+    // A copy: a drop or a toolbar button changes the folders while they draw.
+    const std::vector<Data::Sounds::SoundFolder> folders = g_SoundEdits.Folders();
+    for (const Data::Sounds::SoundFolder& folder : folders)
+    {
+        RenderFolder(folder, {folder.name}, shown);
+    }
+    std::set<std::string> sorted;
+    CollectKeys(folders, sorted);
+    std::vector<const SoundRow*> unsorted;
+    for (const SoundRow* row : rows)
+    {
+        if (!sorted.contains(row->key))
+        {
+            unsorted.push_back(row);
+        }
+    }
+    RenderNotSorted(unsorted);
     ImGui::EndTable();
     m_seenSelection = MuEditor::SoundSelection::GetVersion();
+}
+
+void MuSoundEditorUI::RenderFolder(const Data::Sounds::SoundFolder& folder,
+                                   const MuEditor::SoundEditor::FolderPath& path,
+                                   const std::unordered_map<std::string, const SoundRow*>& shown)
+{
+    const size_t count = CountShown(folder, shown);
+    const bool filtered = m_filterText[0] != '\0' || m_onlyProblems;
+    if (filtered && count == 0)
+    {
+        return;
+    }
+    ImGui::PushID(folder.name.c_str());
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    const bool onPath = !m_openPath.empty() && m_openPath.size() >= path.size() &&
+                        std::equal(path.begin(), path.end(), m_openPath.begin());
+    if (filtered || onPath)
+    {
+        ImGui::SetNextItemOpen(true);
+    }
+    ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_OpenOnArrow;
+    if (m_selectedFolder == path)
+    {
+        flags |= ImGuiTreeNodeFlags_Selected;
+    }
+    ImGui::PushStyleColor(ImGuiCol_Text, FolderColor);
+    const bool open = ImGui::TreeNodeEx("##Folder", flags, "%s (%zu)", folder.name.c_str(), count);
+    ImGui::PopStyleColor();
+    if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen())
+    {
+        m_selectedFolder = path;
+    }
+    DropSoundOn(path);
+    if (open)
+    {
+        for (const Data::Sounds::SoundFolder& child : folder.folders)
+        {
+            MuEditor::SoundEditor::FolderPath childPath = path;
+            childPath.push_back(child.name);
+            RenderFolder(child, childPath, shown);
+        }
+        for (const std::string& key : folder.sounds)
+        {
+            if (const auto row = shown.find(key); row != shown.end())
+            {
+                RenderRow(*row->second);
+            }
+        }
+        ImGui::TreePop();
+    }
+    ImGui::PopID();
+}
+
+void MuSoundEditorUI::RenderNotSorted(const std::vector<const SoundRow*>& rows)
+{
+    const bool filtered = m_filterText[0] != '\0' || m_onlyProblems;
+    if (rows.empty() && filtered)
+    {
+        return;
+    }
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    const bool selectedHere = m_follow && std::any_of(rows.begin(), rows.end(), [](const SoundRow* row)
+                                                      { return row->number == MuEditor::SoundSelection::Get(); });
+    if (filtered || selectedHere)
+    {
+        ImGui::SetNextItemOpen(true);
+    }
+    const bool open = ImGui::TreeNodeEx("##NotSorted", ImGuiTreeNodeFlags_SpanAllColumns, "%s (%zu)",
+                                        I18N::Editor::SoundEditorNotSorted, rows.size());
+    DropSoundOn({});
+    if (open)
+    {
+        for (const SoundRow* row : rows)
+        {
+            RenderRow(*row);
+        }
+        ImGui::TreePop();
+    }
+}
+
+void MuSoundEditorUI::DropSoundOn(const MuEditor::SoundEditor::FolderPath& path)
+{
+    if (!ImGui::BeginDragDropTarget())
+    {
+        return;
+    }
+    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload(SoundPayload))
+    {
+        const std::string key(static_cast<const char*>(payload->Data));
+        std::vector<Data::Sounds::SoundFolder> after = g_SoundEdits.Folders();
+        if (MuEditor::SoundEditor::MoveSound(after, key, path))
+        {
+            g_SoundEdits.ChangeFolders(I18N::Editor::SoundEditorStepFolders, std::move(after));
+        }
+    }
+    ImGui::EndDragDropTarget();
+}
+
+void MuSoundEditorUI::RenderFolderBar()
+{
+    using MuEditor::SoundEditor::FolderPath;
+    const auto change = [](std::vector<Data::Sounds::SoundFolder> after)
+    { g_SoundEdits.ChangeFolders(I18N::Editor::SoundEditorStepFolders, std::move(after)); };
+    if (ImGui::Button(I18N::Editor::SoundEditorNewFolder))
+    {
+        std::vector<Data::Sounds::SoundFolder> after = g_SoundEdits.Folders();
+        const FolderPath added =
+            MuEditor::SoundEditor::AddFolder(after, m_selectedFolder, I18N::Editor::SoundEditorNewFolderName);
+        if (!added.empty())
+        {
+            change(std::move(after));
+            m_selectedFolder = added;
+        }
+    }
+    ImGui::SameLine();
+    ImGui::BeginDisabled(m_selectedFolder.empty());
+    if (ImGui::Button(I18N::Editor::SoundEditorRenameFolder))
+    {
+        m_folderName = m_selectedFolder.back();
+        ImGui::OpenPopup("##RenameFolder");
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(I18N::Editor::SoundEditorRemoveFolder))
+    {
+        std::vector<Data::Sounds::SoundFolder> after = g_SoundEdits.Folders();
+        if (MuEditor::SoundEditor::RemoveFolder(after, m_selectedFolder))
+        {
+            change(std::move(after));
+            m_selectedFolder.pop_back();
+        }
+    }
+    Tooltip(I18N::Editor::SoundEditorRemoveFolderTip);
+    ImGui::SameLine();
+    for (const auto& [label, by] :
+         {std::pair{I18N::Editor::SoundEditorMoveUp, -1}, std::pair{I18N::Editor::SoundEditorMoveDown, 1}})
+    {
+        if (ImGui::Button(label))
+        {
+            std::vector<Data::Sounds::SoundFolder> after = g_SoundEdits.Folders();
+            if (MuEditor::SoundEditor::MoveFolder(after, m_selectedFolder, by))
+            {
+                change(std::move(after));
+            }
+        }
+        ImGui::SameLine();
+    }
+    ImGui::EndDisabled();
+    ImGui::TextDisabled("%s", I18N::Editor::SoundEditorDragTip);
+    if (ImGui::BeginPopup("##RenameFolder"))
+    {
+        if (ImGui::IsWindowAppearing())
+        {
+            ImGui::SetKeyboardFocusHere();
+        }
+        ImGui::SetNextItemWidth(FolderNameWidth * g_MuEditorCore.GetUIScale());
+        const bool entered =
+            MuEditor::Items::InputString("##FolderName", m_folderName, ImGuiInputTextFlags_EnterReturnsTrue);
+        if (entered || ImGui::Button(I18N::Editor::SoundEditorRenameFolder))
+        {
+            std::vector<Data::Sounds::SoundFolder> after = g_SoundEdits.Folders();
+            if (MuEditor::SoundEditor::RenameFolder(after, m_selectedFolder, m_folderName))
+            {
+                change(std::move(after));
+                m_selectedFolder.back() = m_folderName;
+            }
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
 }
 
 void MuSoundEditorUI::RenderRow(const SoundRow& row)
@@ -252,12 +466,24 @@ void MuSoundEditorUI::RenderRow(const SoundRow& row)
     // fields over the row stay clickable.
     const std::string id = MuEditor::SoundEditor::IdText(row);
     ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
-    if (ImGui::Selectable((id + "##Select").c_str(), row.number == MuEditor::SoundSelection::Get(),
+    const bool selected = row.number >= 0 && row.number == MuEditor::SoundSelection::Get();
+    if (ImGui::Selectable((id + "##Select").c_str(), selected,
                           ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap))
     {
         MuEditor::SoundSelection::Set(row.number);
     }
     ImGui::PopStyleColor();
+    if (selected && m_follow)
+    {
+        ImGui::SetScrollHereY(0.5f);
+    }
+    // Dragged onto a folder (or Not sorted), the sound moves there (Q-SE4).
+    if (Editable(row) && ImGui::BeginDragDropSource())
+    {
+        ImGui::SetDragDropPayload(SoundPayload, row.key.c_str(), row.key.size() + 1);
+        ImGui::TextUnformatted(MuEditor::SoundEditor::ShownName(row).c_str());
+        ImGui::EndDragDropSource();
+    }
     ImGui::TableNextColumn();
     RenderFileCell(row);
     ImGui::TableNextColumn();

@@ -76,6 +76,9 @@ mu_add_test(
     LINK_LIBS
         MuClient
 )
+target_compile_definitions(sound_editor_tests PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
 
 # The editor's Sound Mixer: its rules, sources, heard list and window. The
 # window needs the client globals of Winmain.cpp.

@@ -3,11 +3,13 @@
 #ifdef _EDITOR
 
 #include "SoundEditorRows.h"
+#include "SoundFolderTree.h"
 
 #include "Data/GameData/ItemData/ItemDataIssue.h"
 
 #include <array>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 // The Sound Editor window (Windows menu, sound editor design Q-SE1): every
@@ -22,6 +24,11 @@ private:
     void RenderToolbar();
     void RenderFilterBar(const std::vector<MuEditor::SoundEditor::SoundRow>& rows, size_t shown);
     void RenderTable(const std::vector<const MuEditor::SoundEditor::SoundRow*>& rows);
+    void RenderFolderBar();
+    void RenderFolder(const Data::Sounds::SoundFolder& folder, const MuEditor::SoundEditor::FolderPath& path,
+                      const std::unordered_map<std::string, const MuEditor::SoundEditor::SoundRow*>& shown);
+    void RenderNotSorted(const std::vector<const MuEditor::SoundEditor::SoundRow*>& rows);
+    void DropSoundOn(const MuEditor::SoundEditor::FolderPath& path);
     void RenderRow(const MuEditor::SoundEditor::SoundRow& row);
     void RenderNameCell(const MuEditor::SoundEditor::SoundRow& row);
     void RenderTypeCell(const MuEditor::SoundEditor::SoundRow& row);
@@ -39,8 +46,14 @@ private:
     std::array<char, 128> m_pickerText{};
     // The last Save's or Revert's result.
     std::string m_status;
-    // The shared selection's version the table last showed (Q-SE3).
+    // The shared selection's version the table last showed (Q-SE3), and in
+    // this frame: whether to scroll to it, the folders that hold it.
     int m_seenSelection = -1;
+    bool m_follow = false;
+    MuEditor::SoundEditor::FolderPath m_openPath;
+    // The folder the toolbar acts on ({} for the top), and the rename's text.
+    MuEditor::SoundEditor::FolderPath m_selectedFolder;
+    std::string m_folderName;
 };
 
 extern MuSoundEditorUI g_MuSoundEditorUI;

@@ -15,12 +15,17 @@
 #include "Data/GameData/MapData/MapObjectSoundsJson.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "Data/GameData/MonsterData/MonsterSoundsJson.h"
+#include "Data/DataHandler/SoundData/SoundFolderStorage.h"
+#include "Data/GameData/MapData/MapObjectSoundsJson.h"
 #include "Data/GameData/SoundData/SoundFileDatabase.h"
+#include "Data/GameData/SoundData/SoundFilesJson.h"
+#include "Data/GameData/SoundData/SoundFolders.h"
 #include "TestImGuiContext.h"
 #include "UI/SoundEditor/MuSoundEditorUI.h"
 #include "UI/SoundEditor/SoundEditorEdits.h"
 #include "UI/SoundEditor/SoundEditorRows.h"
 #include "UI/SoundEditor/SoundFilePicker.h"
+#include "UI/SoundEditor/SoundFolderTree.h"
 #include "UI/SoundEditor/SoundSelection.h"
 #include "World/MapInfra/MapManager.h"
 #include "imgui.h"
@@ -30,6 +35,7 @@
 #include <filesystem>
 #include <fstream>
 #include <set>
+#include <sstream>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -171,6 +177,8 @@ Data::Monsters::MonsterSoundSet DeathTree()
     idle.spatial = true;
     Data::Monsters::MonsterSound attack;
     attack.file = "Data/Sound/EditorTest/attack.wav";
+    // Played by its id: the set's events and the folders name it so.
+    attack.id = "SOUND_MONSTER_MAGICSKULL1";
     attack.name = "Death Tree attack";
     set.sounds = {idle, attack};
     Data::Monsters::MonsterSoundEvent event;
@@ -215,7 +223,7 @@ TEST_CASE("Sound Editor: the rows list the code's sounds, the sets' and the map 
     REQUIRE(rows.size() == 7);
     CHECK(rows[0].key == "SOUND_CLICK01");
     CHECK(rows[3].key == "set:Death Tree:Data/Sound/EditorTest/ok.wav");
-    CHECK(rows[5].key == "objects:0");
+    CHECK(rows[5].key == "objects:Data/Sound/EditorTest/ok.wav");
     CHECK(rows[6].key == "SOUND_FENRIR_DAMAGE_2");
 
     const SoundRow& click = rows[0];
@@ -242,8 +250,9 @@ TEST_CASE("Sound Editor: the rows list the code's sounds, the sets' and the map 
     CHECK(MuEditor::SoundEditor::ShownName(idle) == "Death Tree: ok.wav");
     CHECK(idle.loads == "with its monster");
     CHECK(idle.livesIn == "Data/Monsters/Sounds.json");
+    CHECK(rows[4].key == "set:Death Tree:SOUND_MONSTER_MAGICSKULL1");
     CHECK(MuEditor::SoundEditor::ShownName(rows[4]) == "Death Tree attack");
-    CHECK(MuEditor::SoundEditor::IdText(rows[4]) == "Death Tree");
+    CHECK(MuEditor::SoundEditor::IdText(rows[4]) == "Death Tree, SOUND_MONSTER_MAGICSKULL1");
     CHECK(rows[4].problem == RowProblem::MissingFile);
 
     const SoundRow& waterfall = rows[5];
@@ -525,6 +534,256 @@ TEST_CASE("Sound Editor: the picker lists a folder's sound files sorted, finds t
     // Loaded once: a second preview plays it again.
     MuEditor::SoundEditor::PreviewFile("Data/Sound/EditorTest/ok.wav", 2, false);
     CHECK(scope.audio.loads.size() == 1);
+}
+
+namespace
+{
+using Data::Sounds::SoundFolder;
+using MuEditor::SoundEditor::FolderPath;
+
+SoundFolder Folder(std::string name, std::vector<std::string> sounds = {}, std::vector<SoundFolder> folders = {})
+{
+    return SoundFolder{std::move(name), std::move(folders), std::move(sounds)};
+}
+
+std::vector<SoundFolder> ReadFolders(const std::string& text, std::vector<Data::Items::ItemDataIssue>& issues)
+{
+    std::vector<SoundFolder> folders;
+    Data::Sounds::ReadSoundFoldersJson(text, "SoundFolders.json", folders, issues);
+    return folders;
+}
+
+bool HasIssue(const std::vector<Data::Items::ItemDataIssue>& issues, Data::Items::ItemDataIssueSeverity severity,
+              const std::string& field)
+{
+    return std::any_of(issues.begin(), issues.end(), [&](const Data::Items::ItemDataIssue& issue)
+                       { return issue.severity == severity && issue.field == field; });
+}
+
+std::string FileText(const std::string& path)
+{
+    std::ifstream in(path, std::ios::binary);
+    std::stringstream buffer;
+    buffer << in.rdbuf();
+    std::string text = buffer.str();
+    text.erase(std::remove(text.begin(), text.end(), '\r'), text.end());
+    return text;
+}
+} // namespace
+
+TEST_CASE("Sound Editor: the folders' file reads folders in folders with their sounds and writes them back; a name "
+          "twice among siblings is fatal, a sound twice stays in its first folder (Q-SE4) [sounds][editor]")
+{
+    const std::vector<SoundFolder> folders{
+        Folder("Monsters", {}, {Folder("Death Tree", {"set:Death Tree:Data/Sound/w34/dt_idle1.wav"})}),
+        Folder("Interface", {"SOUND_CLICK01", "SOUND_INTERFACE01"})};
+    const std::string text = Data::Sounds::WriteSoundFoldersJson(folders);
+    std::vector<Data::Items::ItemDataIssue> issues;
+    CHECK(ReadFolders(text, issues) == folders);
+    CHECK(issues.empty());
+    // No empty lists are written.
+    CHECK(text.find("\"folders\": []") == std::string::npos);
+    CHECK(text.find("\"sounds\": []") == std::string::npos);
+    CHECK(*Data::Sounds::FindSoundFolder(folders, "set:Death Tree:Data/Sound/w34/dt_idle1.wav") ==
+          std::vector<std::string>{"Monsters", "Death Tree"});
+    CHECK(*Data::Sounds::FindSoundFolder(folders, "SOUND_INTERFACE01") == std::vector<std::string>{"Interface"});
+    CHECK_FALSE(Data::Sounds::FindSoundFolder(folders, "SOUND_RAIN01").has_value());
+
+    issues.clear();
+    CHECK(ReadFolders(R"({"formatVersion": 1, "folders": [{"name": "A"}, {"name": "A"}]})", issues).empty());
+    CHECK(HasIssue(issues, Data::Items::ItemDataIssueSeverity::Fatal, "folders[1].name"));
+    issues.clear();
+    CHECK(ReadFolders(R"({"formatVersion": 1, "folders": [{"name": ""}]})", issues).empty());
+    CHECK(HasIssue(issues, Data::Items::ItemDataIssueSeverity::Fatal, "folders[0].name"));
+    issues.clear();
+    const std::vector<SoundFolder> twice =
+        ReadFolders(R"({"formatVersion": 1, "folders": [{"name": "A", "sounds": ["SOUND_CLICK01"]},)"
+                    R"( {"name": "B", "sounds": ["SOUND_CLICK01", "SOUND_RAIN01"], "colour": 1}]})",
+                    issues);
+    REQUIRE(twice.size() == 2);
+    CHECK(twice[0].sounds == std::vector<std::string>{"SOUND_CLICK01"});
+    CHECK(twice[1].sounds == std::vector<std::string>{"SOUND_RAIN01"});
+    CHECK(HasIssue(issues, Data::Items::ItemDataIssueSeverity::Warning, "folders[1].sounds[0]"));
+    CHECK(HasIssue(issues, Data::Items::ItemDataIssueSeverity::Warning, "folders[1].colour"));
+    CHECK_FALSE(Data::Items::HasFatal(issues));
+}
+
+TEST_CASE("Sound Editor: folders are added with a free name, renamed, removed with their contents moving up, moved "
+          "among their siblings, and sounds moved between them (Q-SE4) [sounds][editor]")
+{
+    using namespace MuEditor::SoundEditor;
+    std::vector<SoundFolder> folders{Folder("Monsters", {"SOUND_A"}, {Folder("Aida", {"SOUND_B"}), Folder("Old")}),
+                                     Folder("Old", {"SOUND_C"})};
+    CHECK(FindFolder(folders, {"Monsters", "Aida"})->sounds == std::vector<std::string>{"SOUND_B"});
+    CHECK(FindFolder(folders, {"Monsters", "None"}) == nullptr);
+    CHECK(FindFolder(folders, {}) == nullptr);
+
+    CHECK(AddFolder(folders, {}, "New folder") == FolderPath{"New folder"});
+    CHECK(AddFolder(folders, {}, "New folder") == FolderPath{"New folder 2"});
+    CHECK(FreeFolderName(folders, "New folder 2") == "New folder 3");
+    CHECK(AddFolder(folders, {"Monsters"}, "Old") == FolderPath{"Monsters", "Old 2"});
+    CHECK(AddFolder(folders, {"Nowhere"}, "X").empty());
+
+    CHECK(RenameFolder(folders, {"New folder 2"}, "Maps"));
+    CHECK(FindFolder(folders, {"Maps"}) != nullptr);
+    CHECK_FALSE(RenameFolder(folders, {"Maps"}, "Monsters"));
+    CHECK_FALSE(RenameFolder(folders, {"Maps"}, ""));
+    CHECK_FALSE(RenameFolder(folders, {"Nowhere"}, "X"));
+
+    // Removing Monsters: its folders take its place, a name its new siblings
+    // have gets a free one; its sounds are not sorted then (it was at the top).
+    REQUIRE(RemoveFolder(folders, {"Monsters"}));
+    REQUIRE(folders.size() == 6);
+    CHECK(folders[0].name == "Aida");
+    CHECK(folders[1].name == "Old 2");
+    CHECK(folders[2].name == "Old 3");
+    CHECK(folders[3].name == "Old");
+    CHECK_FALSE(Data::Sounds::FindSoundFolder(folders, "SOUND_A").has_value());
+    // A folder below the top: its sounds go to its parent.
+    CHECK(MoveSound(folders, "SOUND_D", {"Maps"}));
+    AddFolder(folders, {"Maps"}, "Kalima");
+    CHECK(MoveSound(folders, "SOUND_D", {"Maps", "Kalima"}));
+    REQUIRE(RemoveFolder(folders, {"Maps", "Kalima"}));
+    CHECK(FindFolder(folders, {"Maps"})->sounds == std::vector<std::string>{"SOUND_D"});
+
+    CHECK(MoveFolder(folders, {"Aida"}, 1));
+    CHECK(folders[1].name == "Aida");
+    CHECK_FALSE(MoveFolder(folders, {"Aida"}, -2));
+    CHECK_FALSE(MoveFolder(folders, {folders.back().name}, 1));
+
+    CHECK(MoveSound(folders, "SOUND_B", {"Old"}));
+    CHECK(*Data::Sounds::FindSoundFolder(folders, "SOUND_B") == std::vector<std::string>{"Old"});
+    CHECK(FindFolder(folders, {"Aida"})->sounds.empty());
+    CHECK_FALSE(MoveSound(folders, "SOUND_B", {"Old"}));
+    CHECK_FALSE(MoveSound(folders, "SOUND_B", {"Nowhere"}));
+    CHECK(MoveSound(folders, "SOUND_B", {}));
+    CHECK_FALSE(Data::Sounds::FindSoundFolder(folders, "SOUND_B").has_value());
+    CHECK_FALSE(MoveSound(folders, "SOUND_B", {}));
+
+    CHECK(DropStaleSounds(folders, {"SOUND_C"}) == 1);
+    CHECK(*Data::Sounds::FindSoundFolder(folders, "SOUND_C") == std::vector<std::string>{"Old"});
+    CHECK_FALSE(Data::Sounds::FindSoundFolder(folders, "SOUND_D").has_value());
+}
+
+TEST_CASE("Sound Editor: a change of the folders is a step of the history, Save writes their file and Revert reads "
+          "it again (Q-SE4) [sounds][editor]")
+{
+    EditorScope scope;
+    // No file yet: no folders.
+    CHECK(g_SoundEdits.Folders().empty());
+    g_SoundEdits.TakeSaved();
+    std::vector<SoundFolder> after{Folder("Interface", {"SOUND_CLICK01"})};
+    REQUIRE(g_SoundEdits.ChangeFolders("Sound folders", after));
+    CHECK_FALSE(g_SoundEdits.ChangeFolders("Sound folders", after));
+    CHECK(g_SoundEdits.Folders() == after);
+    CHECK(g_SoundEdits.IsModified());
+    REQUIRE(g_SoundEdits.Undo());
+    CHECK(g_SoundEdits.Folders().empty());
+    CHECK_FALSE(g_SoundEdits.IsModified());
+    REQUIRE(g_SoundEdits.Redo());
+    std::filesystem::create_directories("Data/Audio");
+    std::vector<Data::Items::ItemDataIssue> issues;
+    REQUIRE(g_SoundEdits.Save(issues));
+    CHECK_FALSE(g_SoundEdits.IsModified());
+    const Data::Sounds::SoundFoldersLoadResult saved =
+        Data::Sounds::LoadSoundFoldersFile(Data::Sounds::GetSoundFoldersFile());
+    CHECK(saved.folders == after);
+    CHECK(saved.issues.empty());
+    // Changed, then read again from the file.
+    REQUIRE(g_SoundEdits.ChangeFolders("Sound folders", std::vector<SoundFolder>{}));
+    REQUIRE(g_SoundEdits.Revert(issues));
+    CHECK(g_SoundEdits.Folders() == after);
+    CHECK_FALSE(g_SoundEdits.CanUndo());
+}
+
+TEST_CASE("Sound Editor: the shipped folders hold every sound of the shipped files once, by their keys, and write "
+          "back the same (Q-SE4) [sounds][editor]")
+{
+    const std::string dir = MU_TEST_DATA_DIR;
+    const std::string text = FileText(dir + "/Audio/SoundFolders.json");
+    std::vector<Data::Items::ItemDataIssue> issues;
+    const std::vector<SoundFolder> folders = ReadFolders(text, issues);
+    CHECK(issues.empty());
+    CHECK(Data::Sounds::WriteSoundFoldersJson(folders) == text);
+
+    std::set<std::string> keys;
+    std::vector<Data::Sounds::SoundFile> code;
+    Data::Sounds::ReadSoundFilesJson(FileText(dir + "/Audio/SoundFiles.json"), "SoundFiles.json", code, issues);
+    for (const Data::Sounds::SoundFile& sound : code)
+    {
+        keys.insert(sound.id);
+    }
+    std::vector<Data::Monsters::MonsterSoundSet> sets;
+    Data::Monsters::ReadMonsterSoundsJson(FileText(dir + "/Monsters/Sounds.json"), "Sounds.json", sets, issues);
+    for (const Data::Monsters::MonsterSoundSet& set : sets)
+    {
+        for (const Data::Monsters::MonsterSound& sound : set.sounds)
+        {
+            keys.insert("set:" + set.name + ":" + Data::Monsters::SoundNameOf(sound));
+        }
+    }
+    std::vector<Data::Maps::MapObjectSound> objects;
+    Data::Maps::ReadMapObjectSoundsJson(FileText(dir + "/Maps/ObjectSounds.json"), "ObjectSounds.json", objects,
+                                        issues);
+    for (const Data::Maps::MapObjectSound& sound : objects)
+    {
+        keys.insert("objects:" + sound.file);
+    }
+    CHECK_FALSE(Data::Items::HasFatal(issues));
+    REQUIRE(keys.size() > 900);
+    size_t held = 0;
+    for (const std::string& key : keys)
+    {
+        INFO(key);
+        CHECK(Data::Sounds::FindSoundFolder(folders, key).has_value());
+        held += Data::Sounds::FindSoundFolder(folders, key) ? 1 : 0;
+    }
+    CHECK(held == keys.size());
+    // Death Tree's sounds in its own folder, by their ids.
+    CHECK(Data::Sounds::FindSoundFolder(folders, "set:Death Tree:SOUND_AIDA_DEATHTREE_MOVE1") ==
+          std::vector<std::string>{"Monsters", "Death Tree"});
+}
+
+TEST_CASE("Sound Editor: the window draws the folders as a tree, the sounds no folder holds under Not sorted, and "
+          "opens the folders of the selected sound (Q-SE3, Q-SE4) [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(
+        std::vector<SoundFile>{Code("SOUND_CLICK01", SOUND_CLICK01, "Data/Sound/EditorTest/ok.wav", "Button click"),
+                               Code("SOUND_RAIN01", SOUND_RAIN01, "Data/Sound/EditorTest/ok.wav")});
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{});
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{});
+    REQUIRE(g_SoundEdits.ChangeFolders(
+        "Sound folders", std::vector<SoundFolder>{Folder("Game", {}, {Folder("Interface", {"SOUND_CLICK01"})})}));
+    MuEditor::SoundSelection::Set(static_cast<int>(SOUND_CLICK01));
+    TestImGuiContext context;
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowSize(ImVec2(900.0f, 400.0f));
+        bool open = true;
+        g_MuSoundEditorUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    }
+    // Both folders on the selected sound's path are open.
+    const ImGuiWindow* table = nullptr;
+    for (ImGuiWindow* window : ImGui::GetCurrentContext()->Windows)
+    {
+        if (std::string(window->Name).find("##Sounds") != std::string::npos)
+        {
+            table = window;
+        }
+    }
+    REQUIRE(table != nullptr);
+    const ImGuiStorage& storage = table->DC.StateStorage != nullptr ? *table->DC.StateStorage : table->StateStorage;
+    size_t open = 0;
+    for (const ImGuiStoragePair& pair : storage.Data)
+    {
+        open += pair.val_i != 0 ? 1 : 0;
+    }
+    CHECK(open >= 2);
+    MuEditor::SoundSelection::Set(-1);
 }
 
 TEST_CASE("Sound Editor: the window draws the rows, filtered and with only the problems (Q-SE1) "

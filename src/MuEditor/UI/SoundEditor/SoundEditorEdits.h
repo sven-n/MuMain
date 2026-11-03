@@ -8,6 +8,7 @@
 #include "Data/GameData/MapData/MapObjectSound.h"
 #include "Data/GameData/MonsterData/MonsterSoundSet.h"
 #include "Data/GameData/SoundData/SoundFile.h"
+#include "Data/GameData/SoundData/SoundFolders.h"
 
 #include <map>
 #include <optional>
@@ -44,6 +45,8 @@ struct SoundEdit
     std::optional<Data::Monsters::MonsterSoundSet> setAfter;
     std::optional<std::vector<Data::Maps::MapObjectSound>> objectsBefore;
     std::optional<std::vector<Data::Maps::MapObjectSound>> objectsAfter;
+    std::optional<std::vector<Data::Sounds::SoundFolder>> foldersBefore;
+    std::optional<std::vector<Data::Sounds::SoundFolder>> foldersAfter;
 };
 
 class SoundEdits
@@ -56,6 +59,13 @@ public:
     // differs, the row is gone or its file would refuse the change (the
     // monster tools' checks).
     bool Change(const SoundRow& row, const RowValues& values);
+
+    // The folders (Q-SE4), read from Data/Audio/SoundFolders.json the first
+    // time.
+    const std::vector<Data::Sounds::SoundFolder>& Folders();
+    // Replaces the folders as one step of the history; false when nothing
+    // differs.
+    bool ChangeFolders(std::string label, std::vector<Data::Sounds::SoundFolder> after);
 
     bool CanUndo() const
     {
@@ -71,12 +81,12 @@ public:
     // Whether a file's table differs from what was last read or saved.
     bool IsModified() const;
     // Writes the files whose tables changed: SoundFiles.json, the monster
-    // data (the monster tools' Save, all three of its files) and
-    // ObjectSounds.json. False when one was refused (the problems in
-    // `issues`); the others are written.
+    // data (the monster tools' Save, all three of its files),
+    // ObjectSounds.json and SoundFolders.json. False when one was refused
+    // (the problems in `issues`); the others are written.
     bool Save(std::vector<Data::Items::ItemDataIssue>& issues);
-    // Reads the changed files again (a monster set: as it was saved); the
-    // history goes.
+    // Reads the files whose tables changed again (a monster set: as it was
+    // saved) and the folders; the history goes.
     bool Revert(std::vector<Data::Items::ItemDataIssue>& issues);
     // The tables as they are now are what Save and Revert compare with.
     void TakeSaved();
@@ -95,6 +105,8 @@ private:
     // The sets changed since the last save, as they were then.
     std::map<std::string, Data::Monsters::MonsterSoundSet> m_savedSets;
     std::optional<std::vector<Data::Maps::MapObjectSound>> m_savedObjects;
+    std::optional<std::vector<Data::Sounds::SoundFolder>> m_folders;
+    std::optional<std::vector<Data::Sounds::SoundFolder>> m_savedFolders;
 };
 } // namespace MuEditor::SoundEditor
 

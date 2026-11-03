@@ -41,8 +41,10 @@ enum class RowProblem
 struct SoundRow
 {
     RowSource source = RowSource::Code;
-    // Unique among the rows: "SOUND_CLICK01", "set:Death Tree:Data/Sound/w34/dt_idle1.wav",
-    // "objects:3".
+    // Unique among the rows, and what a folder names the sound by (Q-SE4):
+    // "SOUND_CLICK01", "set:Death Tree:Data/Sound/w34/dt_idle1.wav" (a set's
+    // sound by its id, else its file),
+    // "objects:Data/Sound/aKalimaWaterFall.wav".
     std::string key;
     // The SOUND_ id, or "" (a set's sound without one, a map object sound).
     std::string id;

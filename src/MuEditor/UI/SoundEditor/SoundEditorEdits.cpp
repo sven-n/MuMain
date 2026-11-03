@@ -9,6 +9,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Data/DataHandler/MapData/MapObjectSoundStorage.h"
 #include "Data/DataHandler/SoundData/SoundFileStorage.h"
+#include "Data/DataHandler/SoundData/SoundFolderStorage.h"
 #include "Data/GameData/MapData/MapObjectSoundDatabase.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "Data/GameData/SoundData/SoundFileDatabase.h"
@@ -167,6 +168,36 @@ bool SoundEdits::Change(const SoundRow& row, const RowValues& values)
     return true;
 }
 
+const std::vector<Data::Sounds::SoundFolder>& SoundEdits::Folders()
+{
+    if (!m_folders)
+    {
+        m_folders = Data::Sounds::LoadSoundFoldersFile(Data::Sounds::GetSoundFoldersFile()).folders;
+        m_savedFolders = m_folders;
+    }
+    return *m_folders;
+}
+
+bool SoundEdits::ChangeFolders(std::string label, std::vector<Data::Sounds::SoundFolder> after)
+{
+    if (!m_savedCode)
+    {
+        TakeSaved();
+    }
+    if (after == Folders())
+    {
+        return false;
+    }
+    SoundEdit edit;
+    edit.label = std::move(label);
+    edit.foldersBefore = Folders();
+    edit.foldersAfter = std::move(after);
+    Apply(edit, true);
+    m_undo.push_back(std::move(edit));
+    m_redo.clear();
+    return true;
+}
+
 void SoundEdits::Apply(const SoundEdit& edit, bool forward)
 {
     if (edit.codeBefore && edit.codeAfter)
@@ -184,6 +215,10 @@ void SoundEdits::Apply(const SoundEdit& edit, bool forward)
     {
         // The map's object sounds follow the table's version (MapObjectSounds).
         g_MapObjectSoundDatabase.Build(forward ? *edit.objectsAfter : *edit.objectsBefore);
+    }
+    if (edit.foldersBefore && edit.foldersAfter)
+    {
+        m_folders = forward ? *edit.foldersAfter : *edit.foldersBefore;
     }
 }
 
@@ -217,7 +252,8 @@ bool SoundEdits::IsModified() const
 {
     const bool code = m_savedCode && *m_savedCode != g_SoundFileDatabase.GetAll();
     const bool objects = m_savedObjects && *m_savedObjects != g_MapObjectSoundDatabase.GetAll();
-    return code || objects || SetsDiffer(m_savedSets);
+    const bool folders = m_folders && m_savedFolders && *m_folders != *m_savedFolders;
+    return code || objects || folders || SetsDiffer(m_savedSets);
 }
 
 bool SoundEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
@@ -257,20 +293,35 @@ bool SoundEdits::Save(std::vector<Data::Items::ItemDataIssue>& issues)
             saved = false;
         }
     }
+    if (m_folders && m_savedFolders && *m_folders != *m_savedFolders)
+    {
+        if (Data::Sounds::SaveSoundFolders(Data::Sounds::GetSoundFoldersFile(), *m_folders, issues))
+        {
+            m_savedFolders = m_folders;
+        }
+        else
+        {
+            saved = false;
+        }
+    }
     return saved;
 }
 
 bool SoundEdits::Revert(std::vector<Data::Items::ItemDataIssue>& issues)
 {
     bool reverted = true;
+    // Only the files whose tables changed are read again.
     const std::vector<SoundFile> before = g_SoundFileDatabase.GetAll();
-    if (Data::Sounds::RevertSoundFiles(issues))
+    if (m_savedCode && *m_savedCode != before)
     {
-        ReloadChanged(before, g_SoundFileDatabase.GetAll());
-    }
-    else
-    {
-        reverted = false;
+        if (Data::Sounds::RevertSoundFiles(issues))
+        {
+            ReloadChanged(before, g_SoundFileDatabase.GetAll());
+        }
+        else
+        {
+            reverted = false;
+        }
     }
     for (const auto& [name, set] : m_savedSets)
     {
@@ -291,6 +342,9 @@ bool SoundEdits::Revert(std::vector<Data::Items::ItemDataIssue>& issues)
             reverted = false;
         }
     }
+    // The folders as the file has them.
+    m_folders.reset();
+    Folders();
     m_undo.clear();
     m_redo.clear();
     TakeSaved();
@@ -302,6 +356,8 @@ void SoundEdits::TakeSaved()
     m_savedCode = g_SoundFileDatabase.GetAll();
     m_savedSets.clear();
     m_savedObjects = g_MapObjectSoundDatabase.GetAll();
+    Folders();
+    m_savedFolders = m_folders;
 }
 
 void SoundEdits::Clear()
@@ -311,6 +367,8 @@ void SoundEdits::Clear()
     m_savedCode.reset();
     m_savedSets.clear();
     m_savedObjects.reset();
+    m_folders.reset();
+    m_savedFolders.reset();
 }
 } // namespace MuEditor::SoundEditor
 

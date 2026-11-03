@@ -3574,6 +3574,36 @@
   <data name="Sound editor column lives in" xml:space="preserve">
     <value>Steht in</value>
   </data>
+  <data name="Sound editor not sorted" xml:space="preserve">
+    <value>Nicht einsortiert</value>
+  </data>
+  <data name="Sound editor new folder" xml:space="preserve">
+    <value>Neuer Ordner</value>
+  </data>
+  <data name="Sound editor new folder name" xml:space="preserve">
+    <value>Neuer Ordner</value>
+  </data>
+  <data name="Sound editor rename folder" xml:space="preserve">
+    <value>Umbenennen</value>
+  </data>
+  <data name="Sound editor remove folder" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="Sound editor remove folder tip" xml:space="preserve">
+    <value>Entfernt den Ordner; seine Ordner und Geräusche rücken in den Ordner darüber.</value>
+  </data>
+  <data name="Sound editor move up" xml:space="preserve">
+    <value>Nach oben</value>
+  </data>
+  <data name="Sound editor move down" xml:space="preserve">
+    <value>Nach unten</value>
+  </data>
+  <data name="Sound editor drag tip" xml:space="preserve">
+    <value>Ein Geräusch an seiner ID auf einen Ordner ziehen.</value>
+  </data>
+  <data name="Sound editor step folders" xml:space="preserve">
+    <value>Geräusch-Ordner</value>
+  </data>
   <data name="Sound editor column type" xml:space="preserve">
     <value>Typ ohne Ort</value>
   </data>

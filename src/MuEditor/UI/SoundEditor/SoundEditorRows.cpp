@@ -94,7 +94,8 @@ void AddSetRows(std::vector<SoundRow>& rows)
             const Data::Monsters::MonsterSound& sound = set->sounds[index];
             SoundRow row;
             row.source = RowSource::MonsterSet;
-            row.key = "set:" + set->name + ":" + sound.file;
+            // The name the set's events give the sound: its id, else its file.
+            row.key = "set:" + set->name + ":" + Data::Monsters::SoundNameOf(sound);
             row.id = sound.id;
             row.set = set->name;
             row.index = index;
@@ -119,7 +120,7 @@ void AddObjectRows(std::vector<SoundRow>& rows)
         const Data::Maps::MapObjectSound& sound = sounds[index];
         SoundRow row;
         row.source = RowSource::MapObject;
-        row.key = "objects:" + std::to_string(index);
+        row.key = "objects:" + sound.file;
         row.index = index;
         row.name = sound.name;
         row.file = sound.file;

@@ -3793,6 +3793,36 @@
   <data name="Sound editor column lives in" xml:space="preserve">
     <value>Lives in</value>
   </data>
+  <data name="Sound editor not sorted" xml:space="preserve">
+    <value>Not sorted</value>
+  </data>
+  <data name="Sound editor new folder" xml:space="preserve">
+    <value>New folder</value>
+  </data>
+  <data name="Sound editor new folder name" xml:space="preserve">
+    <value>New folder</value>
+  </data>
+  <data name="Sound editor rename folder" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="Sound editor remove folder" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="Sound editor remove folder tip" xml:space="preserve">
+    <value>Removes the folder; its folders and sounds move up into its parent.</value>
+  </data>
+  <data name="Sound editor move up" xml:space="preserve">
+    <value>Move up</value>
+  </data>
+  <data name="Sound editor move down" xml:space="preserve">
+    <value>Move down</value>
+  </data>
+  <data name="Sound editor drag tip" xml:space="preserve">
+    <value>Drag a sound by its id onto a folder.</value>
+  </data>
+  <data name="Sound editor step folders" xml:space="preserve">
+    <value>Sound folders</value>
+  </data>
   <data name="Sound editor column type" xml:space="preserve">
     <value>Type if no place</value>
   </data>
