@@ -70,28 +70,10 @@
           "name": "Dark Wizard",
           "folders": [
             {
-              "name": "Aqua Beam",
-              "sounds": [
-                "SOUND_FLASH"
-              ]
-            },
-            {
               "name": "Decay",
               "sounds": [
                 "SOUND_DEATH_POISON1",
                 "SOUND_DEATH_POISON2"
-              ]
-            },
-            {
-              "name": "Energy Ball",
-              "sounds": [
-                "SOUND_MAGIC"
-              ]
-            },
-            {
-              "name": "Evil Spirit",
-              "sounds": [
-                "SOUND_EVIL"
               ]
             },
             {
@@ -101,41 +83,10 @@
               ]
             },
             {
-              "name": "Flame",
-              "sounds": [
-                "SOUND_FLAME"
-              ]
-            },
-            {
-              "name": "Hellfire",
-              "sounds": [
-                "SOUND_HELLFIRE"
-              ]
-            },
-            {
-              "name": "Ice",
-              "sounds": [
-                "SOUND_ICE"
-              ]
-            },
-            {
               "name": "Ice Storm",
               "sounds": [
                 "SOUND_SUDDEN_ICE1",
                 "SOUND_SUDDEN_ICE2"
-              ]
-            },
-            {
-              "name": "Lightning",
-              "sounds": [
-                "SOUND_THUNDER01"
-              ]
-            },
-            {
-              "name": "Meteorite",
-              "sounds": [
-                "SOUND_EXPLOTION01",
-                "SOUND_METEORITE01"
               ]
             },
             {
@@ -156,12 +107,6 @@
               "sounds": [
                 "SOUND_TELEKINESIS"
               ]
-            },
-            {
-              "name": "Twister",
-              "sounds": [
-                "SOUND_STORM"
-              ]
             }
           ]
         },
@@ -172,24 +117,6 @@
               "name": "Combo",
               "sounds": [
                 "SOUND_COMBO"
-              ]
-            },
-            {
-              "name": "Falling Slash",
-              "sounds": [
-                "SOUND_SKILL_SWORD1"
-              ]
-            },
-            {
-              "name": "Impale",
-              "sounds": [
-                "SOUND_RIDINGSPEAR"
-              ]
-            },
-            {
-              "name": "Lunge",
-              "sounds": [
-                "SOUND_SKILL_SWORD2"
               ]
             },
             {
@@ -210,18 +137,6 @@
               "name": "Swell Life",
               "sounds": [
                 "SOUND_SWELLLIFE"
-              ]
-            },
-            {
-              "name": "Twisting Slash",
-              "sounds": [
-                "SOUND_SKILL_SWORD4"
-              ]
-            },
-            {
-              "name": "Uppercut",
-              "sounds": [
-                "SOUND_SKILL_SWORD3"
               ]
             }
           ]
@@ -482,9 +397,119 @@
           "name": "Shared",
           "folders": [
             {
-              "name": "Defense",
-              "sounds": [
-                "SOUND_SKILL_DEFENSE"
+              "name": "Dark Wizard + Magic Gladiator",
+              "folders": [
+                {
+                  "name": "Aqua Beam",
+                  "sounds": [
+                    "SOUND_FLASH"
+                  ]
+                },
+                {
+                  "name": "Energy Ball",
+                  "sounds": [
+                    "SOUND_MAGIC"
+                  ]
+                },
+                {
+                  "name": "Evil Spirit",
+                  "sounds": [
+                    "SOUND_EVIL"
+                  ]
+                },
+                {
+                  "name": "Flame",
+                  "sounds": [
+                    "SOUND_FLAME"
+                  ]
+                },
+                {
+                  "name": "Hellfire",
+                  "sounds": [
+                    "SOUND_HELLFIRE"
+                  ]
+                },
+                {
+                  "name": "Lightning",
+                  "sounds": [
+                    "SOUND_THUNDER01"
+                  ]
+                },
+                {
+                  "name": "Twister",
+                  "sounds": [
+                    "SOUND_STORM"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Dark Knight + Magic Gladiator",
+              "folders": [
+                {
+                  "name": "Impale",
+                  "sounds": [
+                    "SOUND_RIDINGSPEAR"
+                  ]
+                },
+                {
+                  "name": "Twisting Slash",
+                  "sounds": [
+                    "SOUND_SKILL_SWORD4"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Dark Wizard + Magic Gladiator + Summoner",
+              "folders": [
+                {
+                  "name": "Ice",
+                  "sounds": [
+                    "SOUND_ICE"
+                  ]
+                },
+                {
+                  "name": "Meteorite",
+                  "sounds": [
+                    "SOUND_EXPLOTION01",
+                    "SOUND_METEORITE01"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Dark Knight + Magic Gladiator + Dark Lord",
+              "folders": [
+                {
+                  "name": "Defense",
+                  "sounds": [
+                    "SOUND_SKILL_DEFENSE"
+                  ]
+                },
+                {
+                  "name": "Lunge",
+                  "sounds": [
+                    "SOUND_SKILL_SWORD2"
+                  ]
+                },
+                {
+                  "name": "Uppercut",
+                  "sounds": [
+                    "SOUND_SKILL_SWORD3"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "Dark Knight + Magic Gladiator + Dark Lord + Rage Fighter",
+              "folders": [
+                {
+                  "name": "Falling Slash",
+                  "sounds": [
+                    "SOUND_SKILL_SWORD1"
+                  ]
+                }
               ]
             }
           ]
