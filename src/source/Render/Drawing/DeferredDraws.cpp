@@ -8,6 +8,21 @@
 
 namespace Render::Drawing
 {
+namespace
+{
+bool s_drawsWorldLater = false;
+} // namespace
+
+bool DrawsWorldLater()
+{
+    return s_drawsWorldLater;
+}
+
+void SetDrawsWorldLater(bool later)
+{
+    s_drawsWorldLater = later;
+}
+
 DeferredDraws::DeferredDraws()
     : m_models(&ModelDrawing::ActiveModelDrawer()), m_effects(&EffectDrawing::ActiveEffectDrawer()),
       m_states(ActiveLegacyCallRecorder())

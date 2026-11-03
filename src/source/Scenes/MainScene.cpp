@@ -44,7 +44,10 @@
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
 #include "Core/Input/ImeInput.h"
+#include "Render/Drawing/DeferredDraws.h"
 #include "Render/Drawing/LegacyCalls.h"
+
+#include <optional>
 #ifdef _EDITOR
 #include "Camera/FrustumRenderer.h"
 #include "Camera/CameraDebugLog.h"
@@ -563,6 +566,10 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     bool renderDroppedItems = true;
     bool renderWeatherEffects = true;
 #endif
+    // Described first and drawn at the end of the pass when the developer switch is on.
+    std::optional<Render::Drawing::DeferredDraws> later;
+    if (Render::Drawing::DrawsWorldLater())
+        later.emplace();
 
     if (IsWaterTerrain() == false && renderTerrain)
     {
@@ -653,6 +660,8 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     EndSprite();
 
     RenderAfterEffects();
+    if (later)
+        later->Flush();
 
     if (IsWaterTerrain() == true)
     {
@@ -660,6 +669,10 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
 
         EndOpengl();
         BeginOpenglPhysical(0, 0, width, height);
+        // The water pass changes the camera: a segment of its own.
+        std::optional<Render::Drawing::DeferredDraws> waterLater;
+        if (Render::Drawing::DrawsWorldLater())
+            waterLater.emplace();
         RenderWaterTerrain();
         { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
         { FRAME_PROFILE(Effects); RenderEffects(true); RenderBlurs(); }
@@ -673,6 +686,8 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         RenderPoints(byWaterMap);
 
         EndSprite();
+        if (waterLater)
+            waterLater->Flush();
         EndOpengl();
 
         BeginOpenglPhysical(0, 0, width, height);

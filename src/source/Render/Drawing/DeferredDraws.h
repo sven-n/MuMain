@@ -18,6 +18,11 @@ namespace Render::Drawing
 // draw keeps whether it was asked for inside a bloom exclusion. What a draw refers to must not change before the
 // flush; the parity tests compare its calls with drawing at once. The base of a render thread, which would flush on
 // another thread.
+// The developer switch that draws the world pass later through a DeferredDraws, as a render thread would
+// (control socket "drawlater").
+[[nodiscard]] bool DrawsWorldLater();
+void SetDrawsWorldLater(bool later);
+
 class DeferredDraws final : public ModelDrawing::ModelDrawer,
                             public EffectDrawing::EffectDrawer,
                             public LegacyCallRecorder

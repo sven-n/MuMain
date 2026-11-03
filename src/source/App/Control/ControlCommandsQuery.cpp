@@ -6,6 +6,7 @@
 #include "App/Control/ControlState.h"
 #include "Core/Input/SyntheticInput.h"
 #include "App/Control/DrawPurityCheck.h"
+#include "Render/Drawing/DeferredDraws.h"
 #include "Core/Utilities/DrawSpawnCheck.h"
 #include "Data/GameData/EffectData/EffectTypeSymbols.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -510,6 +511,19 @@ std::string DrawPurity(const Request& request, std::unique_ptr<Act>&)
     json result;
     result["draws"] = draws;
     result["changes"] = changes;
+    return EncodeResult(request.EncodedId(), result.dump());
+}
+
+std::string DrawLater(const Request& request, std::unique_ptr<Act>&)
+{
+    bool on = Render::Drawing::DrawsWorldLater();
+    if (request.Has("on") && !request.GetBool("on", on))
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "on must be a boolean");
+    }
+    Render::Drawing::SetDrawsWorldLater(on);
+    json result;
+    result["on"] = on;
     return EncodeResult(request.EncodedId(), result.dump());
 }
 

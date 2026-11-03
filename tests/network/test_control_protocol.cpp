@@ -120,6 +120,7 @@ TEST_CASE("Control protocol serves the documented command vocabulary [network][c
         "bones",
         "drawspawns",
         "drawpurity",
+        "drawlater",
         "spawn-effect",
         "tooltip",
         "tooltip-snapshot",
