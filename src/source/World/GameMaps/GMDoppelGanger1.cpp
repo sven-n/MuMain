@@ -558,7 +558,7 @@ bool CGMDoppelGanger1::UpdateMonsterEffects(CHARACTER* c, OBJECT* o, BMD* b)
     return false;
 }
 
-bool CGMDoppelGanger1::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool CGMDoppelGanger1::RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {

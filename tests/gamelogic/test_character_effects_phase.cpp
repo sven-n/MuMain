@@ -1330,6 +1330,42 @@ TEST_CASE("Drawing a Christmas companion's three copies leaves the companion whe
     }
 }
 
+TEST_CASE("A Guardian Statue's dark aurora pulse is set on its light by its update, outside a siege only [effects]")
+{
+    CharacterScope scope(MODEL_GUARDIAN_STATUE);
+    const int world = gMapManager.WorldActive;
+    const double previousTime = WorldTime;
+    const bool siege = battleCastle::IsBattleCastleStart();
+    WorldTime = 1000.0;
+    OBJECT* o = &scope.character().Object;
+    BMD* b = &Models[o->Type];
+    // The siege is switched off the castle's map: on it, the switch loads the castle's terrain.
+    const auto inCastle = [world](bool siegeOn)
+    {
+        gMapManager.WorldActive = world == WD_30BATTLECASTLE ? WD_0LORENCIA : world;
+        battleCastle::SetBattleCastleStart(siegeOn);
+        gMapManager.WorldActive = WD_30BATTLECASTLE;
+    };
+
+    inCastle(false);
+    Vector(0.5f, 0.5f, 0.5f, o->Light);
+    CHECK(battleCastle::MoveBattleCastleMonsterVisual(o, b));
+    const float pulse = sinf(1000.f * 0.0015f) * 0.3f + 0.7f;
+    CHECK(o->Light[0] == doctest::Approx((1.f - pulse) * pulse));
+    CHECK(o->Light[2] == doctest::Approx((1.f - pulse) * pulse));
+
+    // During a siege its aurora is bright, which left its light alone.
+    inCastle(true);
+    Vector(0.5f, 0.5f, 0.5f, o->Light);
+    CHECK(battleCastle::MoveBattleCastleMonsterVisual(o, b));
+    CHECK(o->Light[0] == 0.5f);
+
+    gMapManager.WorldActive = world == WD_30BATTLECASTLE ? WD_0LORENCIA : world;
+    battleCastle::SetBattleCastleStart(siege);
+    WorldTime = previousTime;
+    gMapManager.WorldActive = world;
+}
+
 TEST_CASE("Character passes leave a standing siege gate's collision; the update finishes the siege census [effects]")
 {
     CharacterScope scope(MODEL_PLAYER);

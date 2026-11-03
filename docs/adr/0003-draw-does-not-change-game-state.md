@@ -128,6 +128,9 @@ drawer, and the renderer applies the active look per draw.
 - A character's draw no longer sets the full-set level and defense bonus
   globals or, in Chaos Castle, its unit (helper, friend windows, weapons);
   the update's full-set check, which ran for the same characters, still does.
+- The Battle Castle Guardian Statue and Cannon Tower take the pulse their
+  dark aurora's draw wrote into their light from their update, one frame
+  earlier than they did.
 
 ## Consequences
 

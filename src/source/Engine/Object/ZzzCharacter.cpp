@@ -7027,8 +7027,11 @@ void PoseLinkedPart(const CHARACTER* c, int Type, bool Link, const Engine::Objec
 } // namespace
 
 vec34_t* RenderLinkObject(float x, float y, float z, const CHARACTER* c, const PART_t* f, int Type, int Level,
-                          int Option1, bool Link, bool Translate, int RenderType, bool bRightHandItem, int linkBone)
+                          int Option1, bool Link, bool Translate, int RenderType, bool bRightHandItem, int linkBone,
+                          const LinkedPartLook* look)
 {
+    const float ownerScale = look != nullptr ? look->ownerScale : c->Object.Scale;
+    const float* light = look != nullptr ? look->light : c->Light;
     // A bone the call hangs the part from, where it differs from the part's own.
     const auto bone = static_cast<unsigned char>(linkBone >= 0 ? linkBone : f->LinkBone);
     const OBJECT* o = &c->Object;
@@ -7044,7 +7047,7 @@ vec34_t* RenderLinkObject(float x, float y, float z, const CHARACTER* c, const P
 
     // CopyShadowAngle(f,b);
     b->ContrastEnable = o->ContrastEnable;
-    b->BodyScale = o->Scale;
+    b->BodyScale = ownerScale;
     b->CurrentAction = LinkedPartAction(c, f);
     b->BodyHeight = 0.f;
 
@@ -7066,7 +7069,7 @@ vec34_t* RenderLinkObject(float x, float y, float z, const CHARACTER* c, const P
     OBB_t OBB;
 
     const LinkPlacement placement =
-        PlaceLinkedPart(x, y, z, c, bone, o->Scale, Type, Link, bRightHandItem, DrawnPose(o));
+        PlaceLinkedPart(x, y, z, c, bone, ownerScale, Type, Link, bRightHandItem, DrawnPose(o));
     std::memcpy(ParentMatrix, placement.parent, sizeof(placement.parent));
     VectorCopy(placement.origin, b->BodyOrigin);
     VectorCopy(placement.angle, Object->Angle);
@@ -7127,7 +7130,11 @@ vec34_t* RenderLinkObject(float x, float y, float z, const CHARACTER* c, const P
         && Type != MODEL_WING + 135 // Small Cape of Fighter
         )
     {
-        RenderPartObjectEffect(Object, Type, c->Light, o->Alpha, Level, Option1, false, 0, RenderType | ((c->MonsterIndex == MONSTER_METAL_BALROG || c->MonsterIndex == MONSTER_ORC_ARCHER_OF_DOOM) ? (RENDER_EXTRA | RENDER_TEXTURE) : RENDER_TEXTURE));
+        RenderPartObjectEffect(
+            Object, Type, light, o->Alpha, Level, Option1, false, 0,
+            RenderType | ((c->MonsterIndex == MONSTER_METAL_BALROG || c->MonsterIndex == MONSTER_ORC_ARCHER_OF_DOOM)
+                              ? (RENDER_EXTRA | RENDER_TEXTURE)
+                              : RENDER_TEXTURE));
     }
 
     // Restore the caller's active bone transform — the linked item render above overwrote
@@ -9543,45 +9550,36 @@ int WingCarriedModels(const CHARACTER* c, WingCarriedModel (&models)[2])
 
 // The Red Dragon's head and the princess it carries, or a Saint statue's archangel weapon: models that play on the
 // wing part, whose animation the update sets (PrepareCarriedParts).
-void RenderWingCarriedModels(CHARACTER* c, bool Translate)
+void RenderWingCarriedModels(const CHARACTER* c, bool Translate)
 {
-    OBJECT* o = &c->Object;
-    const float scale = o->Scale;
-    vec3_t light;
-    VectorCopy(c->Light, light);
+    static const vec3_t white = {1.f, 1.f, 1.f};
     WingCarriedModel models[2];
     const int count = WingCarriedModels(c, models);
     for (int i = 0; i < count; ++i)
     {
         const WingCarriedModel& m = models[i];
         // The princess is lit white.
-        if (m.type == MODEL_PRINCESS)
-            Vector(1.f, 1.f, 1.f, c->Light);
-        o->Scale = m.scale;
-        RenderLinkObject(m.x, m.y, m.z, c, &c->Wing, m.type, 0, 0, m.link, Translate, 0, true, m.bone);
+        const LinkedPartLook look{m.scale, m.type == MODEL_PRINCESS ? white : c->Light};
+        RenderLinkObject(m.x, m.y, m.z, c, &c->Wing, m.type, 0, 0, m.link, Translate, 0, true, m.bone, &look);
     }
-    VectorCopy(light, c->Light);
-    o->Scale = scale;
 }
 
-void RenderChristmasCompanions(CHARACTER* c, vec3_t light, bool Translate, int Select)
+void RenderChristmasCompanions(const CHARACTER* c, vec3_t light, bool Translate, int Select)
 {
-    OBJECT* o = &c->Object;
-    // Three copies around the character, each on the ground where it stands; the character stays where it is.
+    const OBJECT* o = &c->Object;
+    // Three copies around the character, each on the ground where it stands, drawn from a copy of the character.
     constexpr float offsets[3][2] = {{50.f, 50.f}, {-50.f, -50.f}, {50.f, -50.f}};
-    vec3_t standing;
-    VectorCopy(o->Position, standing);
+    OBJECT companion = *o;
     for (const auto& offset : offsets)
     {
-        o->Position[0] = standing[0] + offset[0];
-        o->Position[1] = standing[1] + offset[1];
-        o->Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
-        RenderPartObject(o, o->SubType, NULL, light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
+        companion.Position[0] = o->Position[0] + offset[0];
+        companion.Position[1] = o->Position[1] + offset[1];
+        companion.Position[2] = RequestTerrainHeight(companion.Position[0], companion.Position[1]);
+        RenderPartObject(&companion, o->SubType, NULL, light, o->Alpha, 0, 0, 0, false, false, Translate, Select);
     }
-    VectorCopy(standing, o->Position);
 }
 
-void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
+void RenderCharacter(const CHARACTER* c, const OBJECT* o, int Select)
 {
     if (g_isCharacterBuff(o, eBuff_CrywolfNPCHide))
     {
@@ -9646,7 +9644,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             const ShadowPass shadow;
             for (int i = MAX_BODYPART - 1; i >= 0; i--)
             {
-                PART_t* p = &c->BodyPart[i];
+                const PART_t* p = &c->BodyPart[i];
                 if (p->Type != -1)
                 {
                     int Type = p->Type;
@@ -9667,7 +9665,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
                     continue;
                 }
 
-                PART_t* p = &c->Weapon[i];
+                const PART_t* p = &c->Weapon[i];
 
                 if (p->Type != -1 && c->SafeZone == false)
                 {
@@ -9961,7 +9959,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         }
         else if (o->CurrentAction == PLAYER_SKILL_DARKSIDE_READY || o->CurrentAction == PLAYER_SKILL_DARKSIDE_ATTACK)
         {
-            OBJECT* pObj = &c->Object;
+            const OBJECT* pObj = &c->Object;
             if (pObj->m_sTargetIndex < 0 || c->JumpTime > 0)
             {
                 RenderPartObject(&c->Object, o->SubType, p, bodyLight, o->Alpha, 0, 0, 0, false, false, Translate,
@@ -10068,7 +10066,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
             }
             else if ((gCharacterManager.GetBaseClass(c->Class) == CLASS_RAGEFIGHTER))
             {
-                OBJECT* pObj = &c->Object;
+                const OBJECT* pObj = &c->Object;
                 if (pObj->m_sTargetIndex < 0 || c->JumpTime > 0)
                 {
                     RenderPartObject(&c->Object, MODEL_ANGEL, p, bodyLight, o->Alpha, 0, 0, 0, false, false, Translate,
@@ -10090,7 +10088,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         {
             for (int i = MAX_BODYPART - 1; i >= 0; i--)
             {
-                PART_t* p = &c->BodyPart[i];
+                const PART_t* p = &c->BodyPart[i];
                 if (p->Type != -1)
                 {
                     int Type = p->Type;
@@ -10243,7 +10241,7 @@ void RenderCharacter(CHARACTER* c, OBJECT* o, int Select)
         {
             if (!DrawsHeldWeapon(c, i))
                 continue;
-            PART_t* w = &c->Weapon[i];
+            const PART_t* w = &c->Weapon[i];
             if (g_CMonkSystem.IsSwordformGloves(w->Type))
                 g_CMonkSystem.RenderSwordformGloves(c, w->Type, i, o->Alpha, Translate, Select);
             else
@@ -15601,7 +15599,7 @@ CHARACTER* CreateHellGate(char* ID, int Key, EMonsterType Index, int x, int y, i
     return portal;
 }
 
-bool IsBackItem(CHARACTER* c, int iType)
+bool IsBackItem(const CHARACTER* c, int iType)
 {
     int iBowType = gCharacterManager.GetEquipedBowType(c);
     if (iBowType != BOWTYPE_NONE)
@@ -15649,7 +15647,7 @@ bool AreWeaponsOnBack(const CHARACTER* c, const OBJECT* o)
 
 // Whether RenderCharacterBackItem draws weapon `index` on the back: an earlier weapon on the back keeps the later
 // ones there, ammunition always goes there, and the rest only where the weapons are bound to the back.
-bool DrawsWeaponOnBack(CHARACTER* c, const OBJECT* o, int index)
+bool DrawsWeaponOnBack(const CHARACTER* c, const OBJECT* o, int index)
 {
     if (o->Type != MODEL_PLAYER || c->Weapon[index].Type < 0)
         return false;
@@ -15876,7 +15874,7 @@ void PlanAttachments(CHARACTER* c)
 }
 } // namespace
 
-bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
+bool RenderCharacterBackItem(const CHARACTER* c, const OBJECT* o, bool bTranslate)
 {
     const bool bBindBack = AreWeaponsOnBack(c, o);
 
@@ -15906,10 +15904,6 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
 
             if (bBack && iType != -1)
             {
-                PART_t* w = &c->Wing;
-
-                float fAnimationFrameBackUp = w->AnimationFrame;
-
                 // Carried on the back bone, whatever the wing hangs from.
                 constexpr int backBone = 47;
                 PART_t t_Part = BackWeaponPart(c);
@@ -15930,8 +15924,6 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
                     RenderLinkObject(0.f, 0.f, 15.f, c, &t_Part, iType, iLevel, iOption1, true, bTranslate, 0,
                                      bRightHandItem, backBone);
                 }
-
-                w->AnimationFrame = fAnimationFrameBackUp;
             }
 
             iBackupType = iType;
@@ -15945,7 +15937,7 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
 
         if (gMapManager.InChaosCastle() == false)
         {
-            PART_t* w = &c->Wing;
+            const PART_t* w = &c->Wing;
             if (w->Type != -1)
             {
                 // Its bone is the one PrepareCarriedParts set.
@@ -15959,7 +15951,7 @@ bool RenderCharacterBackItem(CHARACTER* c, OBJECT* o, bool bTranslate)
             int iOption1 = 0;
             if (iType == MODEL_IMP)
             {
-                PART_t* w = &c->Helper;
+                const PART_t* w = &c->Helper;
                 iOption1 = w->ExcellentFlags;
                 vec3_t at;
                 ImpOffset(c, at);

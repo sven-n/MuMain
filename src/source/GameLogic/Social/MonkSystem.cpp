@@ -317,16 +317,17 @@ std::uint64_t CMonkSystem::DarksideStateHash() const
     return hash.Value();
 }
 
-void CMonkSystem::RenderPhoenixGloves(CHARACTER* _pCha, BYTE _Hand)
+void CMonkSystem::RenderPhoenixGloves(const CHARACTER* _pCha, BYTE _Hand)
 {
-    PART_t* w = &_pCha->Weapon[_Hand];
+    const PART_t* w = &_pCha->Weapon[_Hand];
     const LinkOffset at = PhoenixGloveOffset(_Hand);
     RenderLinkObject(at.x, at.y, at.z, _pCha, w, MODEL_SWORD_35_WING, 0, 0, true, true, 0, 1, PhoenixGloveBone(_Hand));
 }
 
-void CMonkSystem::RenderSwordformGloves(CHARACTER* _pCha, int _ModelType, int _Hand, float _Alpha, bool _Translate, int _Select)
+void CMonkSystem::RenderSwordformGloves(const CHARACTER* _pCha, int _ModelType, int _Hand, float _Alpha,
+                                        bool _Translate, int _Select)
 {
-    PART_t* w = &_pCha->Weapon[_Hand];
+    const PART_t* w = &_pCha->Weapon[_Hand];
     RenderPartObject(&_pCha->Object, ModifyTypeSwordformGloves(_ModelType, _Hand), w, _pCha->Light, _Alpha, w->Level, w->ExcellentFlags, w->AncientDiscriminator, false, false, _Translate, _Select);
 }
 
@@ -964,10 +965,10 @@ const std::vector<CMonkSystem::DarksidePlacement>* CMonkSystem::DarksidePlacemen
     return nullptr;
 }
 
-void CMonkSystem::DarksideRendering(CHARACTER* pCha, PART_t* pPart, vec3_t light, bool Translate, int Select,
-                                    const PART_t* key)
+void CMonkSystem::DarksideRendering(const CHARACTER* pCha, const PART_t* pPart, vec3_t light, bool Translate,
+                                    int Select, const PART_t* key)
 {
-    OBJECT* pObj = &pCha->Object;
+    const OBJECT* pObj = &pCha->Object;
     const int Type = pPart->Type;
     const auto render = [&]
     {

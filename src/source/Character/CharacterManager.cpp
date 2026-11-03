@@ -209,7 +209,7 @@ BYTE CCharacterManager::GetStepClass(const CLASS_TYPE byClass)
     }
 }
 
-int CCharacterManager::GetEquipedBowType(CHARACTER* pChar)
+int CCharacterManager::GetEquipedBowType(const CHARACTER* pChar)
 {
     if (GameLogic::Items::IsBowModel(pChar->Weapon[1].Type))
     {

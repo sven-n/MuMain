@@ -1508,7 +1508,7 @@ bool M37Kanturu1st::UpdateKanturu1stMonsterEffects(CHARACTER* c, OBJECT* o, BMD*
     return false;
 }
 
-bool M37Kanturu1st::RenderKanturu1stMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool M37Kanturu1st::RenderKanturu1stMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
 {
     switch (o->Type)
     {

@@ -18,7 +18,7 @@ namespace M34CryingWolf2nd
 
     bool MoveCryingWolf2ndMonsterVisual(OBJECT* pObject, BMD* pModel);
     bool RenderCryingWolf2ndMonsterObjectMesh(const OBJECT* pObject, DrawLook& look, BMD* pModel);
-    bool RenderCryingWolf2ndMonsterVisual(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
+    bool RenderCryingWolf2ndMonsterVisual(const CHARACTER* pCharacter, const OBJECT* pObject, BMD* pModel);
 
     void MoveCryingWolf2ndBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pModel);
 

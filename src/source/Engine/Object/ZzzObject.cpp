@@ -3428,10 +3428,10 @@ void RenderObject_AfterImage(const OBJECT* o, bool Translate, int Select, int Ex
     RenderObject(o, Translate, Select, 0);
 }
 
-void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, vec3_t light, bool Translate, int Select,
+void RenderCharacter_AfterImage(const CHARACTER* pCha, const PART_t* pPart, vec3_t light, bool Translate, int Select,
                                 float AniInterval1, float AniInterval2)
 {
-    OBJECT* pObj = &pCha->Object;
+    const OBJECT* pObj = &pCha->Object;
     const int Type = pPart->Type;
     const float keys = Models[pObj->Type].Actions[pObj->CurrentAction].NumAnimationKeys;
     // Two ghosts on the way from where the move started, at earlier frames and fainter, drawn from a copy of the
@@ -8291,7 +8291,7 @@ void StepPartCloth(OBJECT* o, PART_t* p, int Type, int ItemLevel, bool Translate
     }
 }
 
-void RenderPartObject(const OBJECT* o, int Type, void* p2, const vec3_t Light, float Alpha, int ItemLevel,
+void RenderPartObject(const OBJECT* o, int Type, const void* p2, const vec3_t Light, float Alpha, int ItemLevel,
                       int ExcellentFlags, int ancientDiscriminator, bool GlobalTransform, bool HideSkin, bool Translate,
                       int Select, int RenderType)
 {
@@ -8300,7 +8300,7 @@ void RenderPartObject(const OBJECT* o, int Type, void* p2, const vec3_t Light, f
         return;
     }
 
-    auto* p = (PART_t*)p2;
+    const auto* p = static_cast<const PART_t*>(p2);
 
     Type = Render::Items::Display::GetDrawnModel(Type, ItemLevel);
 

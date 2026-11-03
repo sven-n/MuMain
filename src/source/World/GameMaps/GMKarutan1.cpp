@@ -696,7 +696,7 @@ void CGMKarutan1::MoveBlurEffect(CHARACTER* pCharacter, OBJECT* pObject, BMD* pM
     }
 }
 
-bool CGMKarutan1::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
+bool CGMKarutan1::RenderMonsterVisual(const CHARACTER* c, const OBJECT* o, BMD* b)
 {
     return false;
 }

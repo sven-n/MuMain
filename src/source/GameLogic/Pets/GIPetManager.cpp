@@ -168,7 +168,7 @@ namespace
         return CInput::Instance().IsKeyDown(virtualKey);
     }
 
-    CSPetSystem* ResolvePetSystem(CHARACTER* character)
+    CSPetSystem* ResolvePetSystem(const CHARACTER* character)
     {
         return HasActivePet(character) ? static_cast<CSPetSystem*>(character->m_pPet) : nullptr;
     }
@@ -231,9 +231,9 @@ static std::uint8_t g_tabBar = 0;
             petSystem->CullPet();
     }
 
-    void RenderPet(CHARACTER* c)
+    void RenderPet(const CHARACTER* c)
     {
-        OBJECT* o = &c->Object;
+        const OBJECT* o = &c->Object;
         if (auto* petSystem = ResolvePetSystem(c))
         {
             petSystem->RenderPet(g_isCharacterBuff(o, eBuff_Cloaking) ? 10 : 0);

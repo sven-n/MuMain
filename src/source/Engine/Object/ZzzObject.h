@@ -70,8 +70,8 @@ void UpdateDrawnObjectHold(OBJECT* o);
 // Keeps the stun skull around an object whose stun tint its part draw shows, as that draw recreated it.
 void RefreshStunSkull(OBJECT* o, vec3_t Light);
 void RenderObject_AfterImage(const OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
-void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, vec3_t light, bool Translate = false, int Select = 0,
-                                float AniInterval1 = 1.4f, float AniInterval2 = 0.7f);
+void RenderCharacter_AfterImage(const CHARACTER* pCha, const PART_t* pPart, vec3_t light, bool Translate = false,
+                                int Select = 0, float AniInterval1 = 1.4f, float AniInterval2 = 0.7f);
 void RenderObject_AfterCharacter(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void Draw_RenderObject_AfterCharacter(const OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderObjects_AfterCharacter();
@@ -153,7 +153,7 @@ void SpawnPartObjectEffect(BMD* b, OBJECT* o, int Type, vec34_t* bones);
 void RenderPartObjectEffect(const OBJECT* o, int Type, const vec3_t Light, float Alpha = 0.f, int Level = 0,
                             int ExcellentFlags = 0, int ancientDiscriminator = 0, int Select = 0,
                             int RenderType = RENDER_TEXTURE);
-void RenderPartObject(const OBJECT* o, int Type, void* p, const vec3_t Light, float Alpha = 0.f, int Level = 0,
+void RenderPartObject(const OBJECT* o, int Type, const void* p, const vec3_t Light, float Alpha = 0.f, int Level = 0,
                       int ExcellentFlags = 0, int ancientDiscriminator = 0, bool GlobalTransform = false,
                       bool HideSkin = false, bool Translate = false, int Select = 0, int RenderType = RENDER_TEXTURE);
 
