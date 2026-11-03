@@ -104,6 +104,8 @@ private:
     int m_hoveredFrame = -1;
     // The sound whose file was copied last, for its cell's tooltip.
     int m_copied = -1;
+    // The shared selection's version the table last showed (Q-SE3).
+    int m_seenSelection = -1;
 };
 
 extern MuSoundMixerUI g_MuSoundMixerUI;
@@ -152,9 +154,9 @@ const std::string& CellText(const HeardRow& row);
 // copies the file, or, once `copied` is the row's sound, that it was.
 std::string SoundCellTip(const HeardRow& row, int copied);
 
-// A row's Sound cell: its file, which a click copies (to quote it
-// elsewhere), and its tooltip. `copied`: the sound copied last. Whether this
-// frame's click copied it.
+// A row's Sound cell: its name or file, which a click copies (to quote it
+// elsewhere) and selects in the Sound Editor too (Q-SE3), and its tooltip.
+// `copied`: the sound copied last. Whether this frame's click copied it.
 bool RenderSoundCell(const HeardRow& row, int& copied);
 
 // The sound's row: its texts, length, whether it plays and is changed.

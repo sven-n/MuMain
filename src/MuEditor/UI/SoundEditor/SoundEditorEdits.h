@@ -27,6 +27,8 @@ struct RowValues
     std::string file;
     int channels = 1;
     bool spatial = false;
+    // A code sound's only.
+    std::optional<Audio::SoundKind> type;
 };
 
 // The row's values as they are.

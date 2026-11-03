@@ -7,6 +7,7 @@
 #include "MuSoundOverlay.h"
 
 #include "../MuEditor/UI/SoundEditor/SoundEditorRows.h"
+#include "../MuEditor/UI/SoundEditor/SoundSelection.h"
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "../MuEditor/UI/Common/MuEditorToolWindows.h"
@@ -54,6 +55,8 @@ const ImVec4 MutedColor(0.66f, 0.29f, 0.23f, 1.0f);
 const ImVec4 SoloColor(0.23f, 0.48f, 0.29f, 1.0f);
 // A row whose sound plays.
 const ImVec4 PlayingRowColor(0.23f, 0.48f, 0.29f, 0.35f);
+// The row of the sound selected here or in the Sound Editor (Q-SE3).
+const ImVec4 SelectedRowColor(0.26f, 0.42f, 0.66f, 0.55f);
 
 // A volume slider, Mute (unless a Hear box is its mute) and Solo for one
 // control.
@@ -387,6 +390,14 @@ void MuSoundMixerUI::RenderHeard()
         {
             ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(PlayingRowColor));
         }
+        if (row.sound.number == MuEditor::SoundSelection::Get())
+        {
+            ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(SelectedRowColor));
+            if (m_seenSelection != MuEditor::SoundSelection::GetVersion())
+            {
+                ImGui::SetScrollHereY(0.5f);
+            }
+        }
         ImGui::TableNextColumn();
         MuEditor::SoundMixer::RenderSoundCell(row, m_copied);
         ImGui::TableNextColumn();
@@ -409,6 +420,7 @@ void MuSoundMixerUI::RenderHeard()
         RenderControl(std::to_string(row.sound.number).c_str(), Audio::Mixer::SoundControl(row.sound.number));
     }
     ImGui::EndTable();
+    m_seenSelection = MuEditor::SoundSelection::GetVersion();
 }
 
 namespace MuEditor::SoundMixer
@@ -586,6 +598,7 @@ bool RenderSoundCell(const HeardRow& row, int& copied)
     {
         ImGui::SetClipboardText(row.file.c_str());
         copied = row.sound.number;
+        MuEditor::SoundSelection::Set(row.sound.number);
     }
     if (ImGui::IsItemHovered())
     {

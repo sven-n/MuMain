@@ -82,7 +82,9 @@ float MusicGain();
 // A sound is about to play (PlayBuffer, PlayBufferOnFreeChannel): its type is
 // the living source's, else the innermost living place's, else the place of
 // the object it plays at (`objectPlace`, or nullptr), else map ambience for a
-// loop, else everything else (Q-SM13). Lists it, gives the backend its gain
+// loop, else everything else (Q-SM13); before the loop's rule, a code sound
+// takes the type Data/Audio/SoundFiles.json stores (Q-SE2). Lists it, gives
+// the backend its gain
 // before it starts and returns the gain.
 float OnPlay(int number, bool looped, const SoundPlace* objectPlace = nullptr);
 
@@ -91,6 +93,10 @@ float OnPlay(int number, bool looped, const SoundPlace* objectPlace = nullptr);
 // OnPlay found (a source, a place of the game's own code), else as a start
 // without a place.
 void OnPlayed(int number, double now);
+
+// Every type the sound was heard as this session, in the types' order; also
+// after Clear all.
+std::vector<SoundKind> KindsHeard(int number);
 
 // A music track started (PlayMp3): a start without a place.
 void OnMusicStarted(const std::string& music, double now);

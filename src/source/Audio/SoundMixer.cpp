@@ -5,6 +5,7 @@
 #include "Audio/SoundMixer.h"
 
 #include "Core/Platform/IPlatformAudio.h"
+#include "Data/GameData/SoundData/SoundFileDatabase.h"
 
 #include <algorithm>
 #include <array>
@@ -13,6 +14,7 @@
 #include <deque>
 #include <map>
 #include <optional>
+#include <set>
 #include <string>
 #include <utility>
 
@@ -123,6 +125,9 @@ struct State
     std::map<int, PlacedStart> codeStarts;
     // The latest starts without a place, newest first.
     std::deque<PlacelessStart> placeless;
+    // Every type each sound was heard as this session (the Sound Editor's
+    // "heard as").
+    std::map<int, std::set<SoundKind>> kindsHeard;
 };
 
 State& Mixer()
@@ -137,8 +142,9 @@ size_t IndexOf(SoundKind kind)
 }
 
 // The living source, else the innermost living place, else the object's
-// place, else a loop is map ambience and the rest everything else (Q-SM13).
-Origin Resolve(bool looped, const SoundPlace* objectPlace)
+// place, else the type the Sound Editor stored for the sound (Q-SE2), else a
+// loop is map ambience and the rest everything else (Q-SM13).
+Origin Resolve(int number, bool looped, const SoundPlace* objectPlace)
 {
     if (const SoundSource* source = CurrentSoundSource())
     {
@@ -152,6 +158,10 @@ Origin Resolve(bool looped, const SoundPlace* objectPlace)
     if (place != nullptr)
     {
         return Origin{place->kind, {}, place->number, place->position, true};
+    }
+    if (const Data::Sounds::SoundFile* sound = g_SoundFileDatabase.Find(number); sound != nullptr && sound->type)
+    {
+        return Origin{*sound->type, {}, -1, std::nullopt, true};
     }
     return Origin{looped ? SoundKind::MapAmbience : SoundKind::Other, {}, -1, std::nullopt, true};
 }
@@ -258,8 +268,9 @@ float OnPlay(int number, bool looped, const SoundPlace* objectPlace)
     HeardSound& heard = row->second.sound;
     heard.number = number;
     heard.looped = looped;
-    state.origin = Resolve(looped, objectPlace);
+    state.origin = Resolve(number, looped, objectPlace);
     heard.kind = state.origin.kind;
+    state.kindsHeard[number].insert(heard.kind);
     heard.name = state.origin.name;
     heard.sourceNumber = state.origin.sourceNumber;
     state.kindOf[number] = heard.kind;
@@ -339,6 +350,17 @@ std::vector<PlacedStart> CodeSounds(double now)
         }
     }
     return sounds;
+}
+
+std::vector<SoundKind> KindsHeard(int number)
+{
+    const State& state = Mixer();
+    const auto found = state.kindsHeard.find(number);
+    if (found == state.kindsHeard.end())
+    {
+        return {};
+    }
+    return {found->second.begin(), found->second.end()};
 }
 
 void OnMusicStarted(const std::string& music, double now)

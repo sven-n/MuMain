@@ -77,6 +77,7 @@ void AddCodeRows(std::vector<SoundRow>& rows)
         row.file = sound.file;
         row.channels = sound.channels;
         row.spatial = sound.spatial;
+        row.type = sound.type;
         row.number = sound.number;
         row.loads = LoadsText(sound.number);
         row.livesIn = SoundFilesFile;

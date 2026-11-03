@@ -3574,6 +3574,18 @@
   <data name="Sound editor column lives in" xml:space="preserve">
     <value>Steht in</value>
   </data>
+  <data name="Sound editor column type" xml:space="preserve">
+    <value>Typ ohne Ort</value>
+  </data>
+  <data name="Sound editor column heard as" xml:space="preserve">
+    <value>Gehört als</value>
+  </data>
+  <data name="Sound editor no type" xml:space="preserve">
+    <value>(keiner)</value>
+  </data>
+  <data name="Sound editor type tip" xml:space="preserve">
+    <value>Der Typ, als der ein Geräusch des Codes zählt, wenn nichts seine Quelle oder seinen Ort nennt, etwa ein Geräusch der Servernachrichten. Wer es spielt, entscheidet weiter zuerst.</value>
+  </data>
   <data name="Sound editor channels tip" xml:space="preserve">
     <value>Kanäle: wie viele Kopien des Geräuschs zugleich spielen (1 bis 4).</value>
   </data>

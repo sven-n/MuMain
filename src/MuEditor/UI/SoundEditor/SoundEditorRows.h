@@ -55,6 +55,8 @@ struct SoundRow
     std::string file;
     int channels = 1;
     bool spatial = false;
+    // A code sound's stored type where no source or place names one (Q-SE2).
+    std::optional<Audio::SoundKind> type;
     // The sound number the game plays it as; -1 for none.
     int number = -1;
     // When it loads, as the session saw it (code sounds), or what loads it.

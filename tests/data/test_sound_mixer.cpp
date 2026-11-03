@@ -21,6 +21,7 @@
 #include "Data/GameData/SoundData/SoundFileDatabase.h"
 #include "TestImGuiContext.h"
 #include "UI/Common/MuEditorToolWindows.h"
+#include "UI/SoundEditor/SoundSelection.h"
 #include "UI/SoundMixer/MuSoundMixerUI.h"
 #include "UI/SoundMixer/MuSoundOverlay.h"
 #include "imgui.h"
@@ -1292,6 +1293,81 @@ TEST_CASE("Sound Mixer: a sound the Sound Editor named shows its name in its cel
     CHECK(rows[0].name == "Button click");
     ForgetLoadedSounds();
     g_SoundFileDatabase.Build(previous);
+}
+
+TEST_CASE("Sound Mixer: a code sound without a source or place takes the type the Sound Editor stored, and each "
+          "sound keeps every type it was heard as (Q-SE2) [audio][mixer][editor]")
+{
+    MixerScope scope;
+    using namespace Audio::Mixer;
+    const std::vector<Data::Sounds::SoundFile> previous = g_SoundFileDatabase.GetAll();
+    Data::Sounds::SoundFile levelUp;
+    levelUp.id = "SOUND_LEVEL_UP";
+    levelUp.number = static_cast<int>(SOUND_LEVEL_UP);
+    levelUp.file = "Data/Sound/pLevelUp.wav";
+    levelUp.type = SoundKind::Hero;
+    Data::Sounds::SoundFile wind = levelUp;
+    wind.id = "SOUND_WIND01";
+    wind.number = static_cast<int>(SOUND_WIND01);
+    wind.type.reset();
+    g_SoundFileDatabase.Build(std::vector<Data::Sounds::SoundFile>{levelUp, wind});
+    const int level = static_cast<int>(SOUND_LEVEL_UP);
+    OnPlay(level, false);
+    CHECK(FindHeard(Heard(), level)->kind == SoundKind::Hero);
+    // Who plays it still decides first.
+    const float at[3] = {1.0f, 2.0f, 3.0f};
+    {
+        const Audio::ScopedSoundPlace place(SoundKind::Player, -1, at);
+        OnPlay(level, false);
+    }
+    CHECK(FindHeard(Heard(), level)->kind == SoundKind::Player);
+    // Without a stored type: the loop's rule.
+    OnPlay(static_cast<int>(SOUND_WIND01), true);
+    CHECK(FindHeard(Heard(), static_cast<int>(SOUND_WIND01))->kind == SoundKind::MapAmbience);
+    CHECK(KindsHeard(level) == std::vector<SoundKind>{SoundKind::Hero, SoundKind::Player});
+    ClearHeard();
+    CHECK(KindsHeard(level).size() == 2);
+    CHECK(KindsHeard(static_cast<int>(SOUND_RAIN01)).empty());
+    g_SoundFileDatabase.Build(previous);
+}
+
+TEST_CASE("Sound Mixer: a click on a Sound cell selects the sound for the Sound Editor too (Q-SE3) "
+          "[audio][mixer][editor]")
+{
+    MuEditor::SoundSelection::Set(-1);
+    const int version = MuEditor::SoundSelection::GetVersion();
+    MuEditor::SoundSelection::Set(-1);
+    CHECK(MuEditor::SoundSelection::GetVersion() == version);
+    MuEditor::SoundSelection::Set(42);
+    CHECK(MuEditor::SoundSelection::Get() == 42);
+    CHECK(MuEditor::SoundSelection::GetVersion() == version + 1);
+    TestImGuiContext context;
+    ImGuiIO& io = ImGui::GetIO();
+    HeardRow cell = Row(120, "penergy.wav", "", 0);
+    int copied = -1;
+    ImVec2 center;
+    const auto frame = [&]
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(ImVec2(300.0f, 200.0f));
+        ImGui::Begin("Cell");
+        MuEditor::SoundMixer::RenderSoundCell(cell, copied);
+        center = ImVec2((ImGui::GetItemRectMin().x + ImGui::GetItemRectMax().x) * 0.5f,
+                        (ImGui::GetItemRectMin().y + ImGui::GetItemRectMax().y) * 0.5f);
+        ImGui::End();
+        ImGui::Render();
+    };
+    frame();
+    io.AddMousePosEvent(center.x, center.y);
+    frame();
+    frame();
+    io.AddMouseButtonEvent(ImGuiMouseButton_Left, true);
+    frame();
+    io.AddMouseButtonEvent(ImGuiMouseButton_Left, false);
+    frame();
+    CHECK(MuEditor::SoundSelection::Get() == 120);
+    MuEditor::SoundSelection::Set(-1);
 }
 
 TEST_CASE("Sound Mixer: the window draws its kinds and the sounds heard, the reminder opens it (Q-SM1, Q-SM5) "

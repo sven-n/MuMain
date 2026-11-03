@@ -61,7 +61,7 @@ bool SetsDiffer(const std::map<std::string, Data::Monsters::MonsterSoundSet>& sa
 
 RowValues ValuesOf(const SoundRow& row)
 {
-    return RowValues{row.name, row.file, row.channels, row.spatial};
+    return RowValues{row.name, row.file, row.channels, row.spatial, row.type};
 }
 
 SoundEdits& SoundEdits::GetInstance()
@@ -92,6 +92,7 @@ bool SoundEdits::Change(const SoundRow& row, const RowValues& values)
         sound->file = values.file;
         sound->channels = values.channels;
         sound->spatial = values.spatial;
+        sound->type = values.type;
         if (*sound == old)
         {
             return false;

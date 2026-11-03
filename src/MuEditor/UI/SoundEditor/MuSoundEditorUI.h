@@ -24,6 +24,7 @@ private:
     void RenderTable(const std::vector<const MuEditor::SoundEditor::SoundRow*>& rows);
     void RenderRow(const MuEditor::SoundEditor::SoundRow& row);
     void RenderNameCell(const MuEditor::SoundEditor::SoundRow& row);
+    void RenderTypeCell(const MuEditor::SoundEditor::SoundRow& row);
     void RenderFileCell(const MuEditor::SoundEditor::SoundRow& row);
     void RenderPicker(const MuEditor::SoundEditor::SoundRow& row);
     void SetStatus(bool done, const char* doneText, const std::vector<Data::Items::ItemDataIssue>& issues);
@@ -38,6 +39,8 @@ private:
     std::array<char, 128> m_pickerText{};
     // The last Save's or Revert's result.
     std::string m_status;
+    // The shared selection's version the table last showed (Q-SE3).
+    int m_seenSelection = -1;
 };
 
 extern MuSoundEditorUI g_MuSoundEditorUI;

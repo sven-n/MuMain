@@ -8,6 +8,7 @@
 
 #ifdef _EDITOR
 #include "Audio/DSPlaySound.h"
+#include "Audio/SoundIds.h"
 #include "Audio/SoundLoads.h"
 #include "Core/Platform/IPlatformAudio.h"
 #include "Data/GameData/MapData/MapObjectSoundDatabase.h"
@@ -20,6 +21,7 @@
 #include "UI/SoundEditor/SoundEditorEdits.h"
 #include "UI/SoundEditor/SoundEditorRows.h"
 #include "UI/SoundEditor/SoundFilePicker.h"
+#include "UI/SoundEditor/SoundSelection.h"
 #include "World/MapInfra/MapManager.h"
 #include "imgui.h"
 #include "imgui_internal.h"
@@ -375,6 +377,79 @@ TEST_CASE("Sound Editor: a set's sound changes through the monster tools, the ev
     REQUIRE(g_SoundEdits.Undo());
     CHECK(*g_MonsterSoundSetDatabase.Find("Death Tree") == DeathTree());
     CHECK_FALSE(g_SoundEdits.IsModified());
+}
+
+TEST_CASE("Sound Editor: a code sound's stored type is set and cleared in its row and undone; other rows have "
+          "none (Q-SE2) [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(
+        std::vector<SoundFile>{Code("SOUND_LEVEL_UP", SOUND_LEVEL_UP, "Data/Sound/EditorTest/ok.wav")});
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{});
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{});
+    SoundRow row = MuEditor::SoundEditor::BuildRows().front();
+    CHECK_FALSE(row.type.has_value());
+    MuEditor::SoundEditor::RowValues values = MuEditor::SoundEditor::ValuesOf(row);
+    values.type = Audio::SoundKind::Hero;
+    REQUIRE(g_SoundEdits.Change(row, values));
+    CHECK(g_SoundFileDatabase.Find(static_cast<int>(SOUND_LEVEL_UP))->type == Audio::SoundKind::Hero);
+    row = MuEditor::SoundEditor::BuildRows().front();
+    CHECK(row.type == Audio::SoundKind::Hero);
+    // A rename keeps the type.
+    values = MuEditor::SoundEditor::ValuesOf(row);
+    values.name = "Level up";
+    REQUIRE(g_SoundEdits.Change(row, values));
+    CHECK(g_SoundFileDatabase.Find(static_cast<int>(SOUND_LEVEL_UP))->type == Audio::SoundKind::Hero);
+    row = MuEditor::SoundEditor::BuildRows().front();
+    values = MuEditor::SoundEditor::ValuesOf(row);
+    values.type.reset();
+    REQUIRE(g_SoundEdits.Change(row, values));
+    CHECK_FALSE(g_SoundFileDatabase.Find(static_cast<int>(SOUND_LEVEL_UP))->type.has_value());
+    REQUIRE(g_SoundEdits.Undo());
+    CHECK(g_SoundFileDatabase.Find(static_cast<int>(SOUND_LEVEL_UP))->type == Audio::SoundKind::Hero);
+}
+
+TEST_CASE("Sound Editor: the window draws the selected sound's row, also when it was selected while the window "
+          "was closed (Q-SE3) [sounds][editor]")
+{
+    EditorScope scope;
+    std::vector<SoundFile> many;
+    for (int i = 0; i < 300; ++i)
+    {
+        const auto number = static_cast<ESound>(static_cast<int>(SOUND_WIND01) + i);
+        const std::string_view name = Audio::SoundIds::NameOf(number);
+        if (!name.empty())
+        {
+            many.push_back(Code(std::string(name).c_str(), number, "Data/Sound/EditorTest/ok.wav"));
+        }
+    }
+    g_SoundFileDatabase.Build(many);
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{});
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{});
+    // Selected far down, before the window draws.
+    MuEditor::SoundSelection::Set(many.back().number);
+    TestImGuiContext context;
+    for (int frame = 0; frame < 3; ++frame)
+    {
+        ImGui::NewFrame();
+        ImGui::SetNextWindowSize(ImVec2(900.0f, 400.0f));
+        bool open = true;
+        g_MuSoundEditorUI.Render(&open);
+        ImGui::Render();
+        CHECK(ImGui::GetCurrentContext()->ErrorCountCurrentFrame == 0);
+    }
+    // The table scrolled down to it.
+    const ImGuiWindow* table = nullptr;
+    for (ImGuiWindow* window : ImGui::GetCurrentContext()->Windows)
+    {
+        if (std::string(window->Name).find("##Sounds") != std::string::npos)
+        {
+            table = window;
+        }
+    }
+    REQUIRE(table != nullptr);
+    CHECK(table->Scroll.y > 0.0f);
+    MuEditor::SoundSelection::Set(-1);
 }
 
 TEST_CASE("Sound Editor: a map object sound's name, file and channels change its table, which the map follows; it "

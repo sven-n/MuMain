@@ -6,11 +6,14 @@
 
 #include "SoundEditorEdits.h"
 #include "SoundFilePicker.h"
+#include "SoundSelection.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Common/MuEditorLayout.h"
 #include "../MuEditor/UI/Common/MuEditorWindowIds.h"
 #include "../MuEditor/UI/ItemTools/ItemTextInput.h"
+#include "../MuEditor/UI/SoundMixer/MuSoundMixerUI.h"
+#include "Audio/SoundMixer.h"
 #include "Data/GameData/MapData/MapObjectSoundDatabase.h"
 #include "Data/GameData/SoundData/SoundFileDatabase.h"
 #include "I18N/All.h"
@@ -27,7 +30,9 @@ using MuEditor::SoundEditor::RowProblem;
 using MuEditor::SoundEditor::RowSource;
 using MuEditor::SoundEditor::SoundRow;
 
-constexpr int Columns = 7;
+constexpr int Columns = 9;
+constexpr float TypeWidth = 130.0f;
+const ImVec4 SelectedRowColor(0.26f, 0.42f, 0.66f, 0.55f);
 constexpr float FilterWidth = 220.0f;
 constexpr float NameWidth = 200.0f;
 constexpr float ChannelsWidth = 46.0f;
@@ -62,6 +67,16 @@ void Tooltip(const char* text)
 bool Editable(const SoundRow& row)
 {
     return row.source != RowSource::NotLoaded;
+}
+
+std::string HeardText(int number)
+{
+    std::string text;
+    for (const Audio::SoundKind kind : Audio::Mixer::KindsHeard(number))
+    {
+        text += (text.empty() ? "" : ", ") + std::string(MuEditor::SoundMixer::KindName(kind));
+    }
+    return text;
 }
 } // namespace
 
@@ -184,19 +199,41 @@ void MuSoundEditorUI::RenderTable(const std::vector<const SoundRow*>& rows)
     ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumnFile, ImGuiTableColumnFlags_WidthStretch);
     ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumnChannels);
     ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumn3D);
+    ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumnType);
+    ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumnHeardAs);
     ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumnLoads);
     ImGui::TableSetupColumn(I18N::Editor::SoundEditorColumnLivesIn);
     ImGui::TableHeadersRow();
+    // The selection changed since the table last showed it: scroll to it once.
+    const bool follow = m_seenSelection != MuEditor::SoundSelection::GetVersion();
+    std::optional<int> selectedIndex;
+    for (size_t index = 0; index < rows.size(); ++index)
+    {
+        if (rows[index]->number >= 0 && rows[index]->number == MuEditor::SoundSelection::Get())
+        {
+            selectedIndex = static_cast<int>(index);
+            break;
+        }
+    }
     ImGuiListClipper clipper;
     clipper.Begin(static_cast<int>(rows.size()));
+    if (follow && selectedIndex)
+    {
+        clipper.IncludeItemByIndex(*selectedIndex);
+    }
     while (clipper.Step())
     {
         for (int index = clipper.DisplayStart; index < clipper.DisplayEnd; ++index)
         {
             RenderRow(*rows[static_cast<size_t>(index)]);
+            if (follow && selectedIndex == index)
+            {
+                ImGui::SetScrollHereY(0.5f);
+            }
         }
     }
     ImGui::EndTable();
+    m_seenSelection = MuEditor::SoundSelection::GetVersion();
 }
 
 void MuSoundEditorUI::RenderRow(const SoundRow& row)
@@ -206,8 +243,21 @@ void MuSoundEditorUI::RenderRow(const SoundRow& row)
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
     RenderNameCell(row);
+    if (row.number >= 0 && row.number == MuEditor::SoundSelection::Get())
+    {
+        ImGui::TableSetBgColor(ImGuiTableBgTarget_RowBg1, ImGui::GetColorU32(SelectedRowColor));
+    }
     ImGui::TableNextColumn();
-    ImGui::TextDisabled("%s", MuEditor::SoundEditor::IdText(row).c_str());
+    // The id's cell selects the row, here and in the Sound Mixer (Q-SE3); the
+    // fields over the row stay clickable.
+    const std::string id = MuEditor::SoundEditor::IdText(row);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
+    if (ImGui::Selectable((id + "##Select").c_str(), row.number == MuEditor::SoundSelection::Get(),
+                          ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowOverlap))
+    {
+        MuEditor::SoundSelection::Set(row.number);
+    }
+    ImGui::PopStyleColor();
     ImGui::TableNextColumn();
     RenderFileCell(row);
     ImGui::TableNextColumn();
@@ -233,10 +283,44 @@ void MuSoundEditorUI::RenderRow(const SoundRow& row)
     Tooltip(I18N::Editor::SoundEditor3DTip);
     ImGui::EndDisabled();
     ImGui::TableNextColumn();
+    RenderTypeCell(row);
+    ImGui::TableNextColumn();
+    ImGui::TextUnformatted(HeardText(row.number).c_str());
+    ImGui::TableNextColumn();
     ImGui::TextUnformatted(row.loads.c_str());
     ImGui::TableNextColumn();
     ImGui::TextDisabled("%s", row.livesIn.c_str());
     ImGui::PopID();
+}
+
+void MuSoundEditorUI::RenderTypeCell(const SoundRow& row)
+{
+    if (row.source != RowSource::Code)
+    {
+        return;
+    }
+    const char* shown = row.type ? MuEditor::SoundMixer::KindName(*row.type) : I18N::Editor::SoundEditorNoType;
+    ImGui::SetNextItemWidth(TypeWidth * g_MuEditorCore.GetUIScale());
+    if (ImGui::BeginCombo("##Type", shown))
+    {
+        MuEditor::SoundEditor::RowValues values = MuEditor::SoundEditor::ValuesOf(row);
+        if (ImGui::Selectable(I18N::Editor::SoundEditorNoType, !row.type))
+        {
+            values.type.reset();
+            g_SoundEdits.Change(row, values);
+        }
+        for (int kind = 0; kind < Audio::SoundKindCount; ++kind)
+        {
+            const auto type = static_cast<Audio::SoundKind>(kind);
+            if (ImGui::Selectable(MuEditor::SoundMixer::KindName(type), row.type == type))
+            {
+                values.type = type;
+                g_SoundEdits.Change(row, values);
+            }
+        }
+        ImGui::EndCombo();
+    }
+    Tooltip(I18N::Editor::SoundEditorTypeTip);
 }
 
 void MuSoundEditorUI::RenderNameCell(const SoundRow& row)

@@ -3793,6 +3793,18 @@
   <data name="Sound editor column lives in" xml:space="preserve">
     <value>Lives in</value>
   </data>
+  <data name="Sound editor column type" xml:space="preserve">
+    <value>Type if no place</value>
+  </data>
+  <data name="Sound editor column heard as" xml:space="preserve">
+    <value>Heard as</value>
+  </data>
+  <data name="Sound editor no type" xml:space="preserve">
+    <value>(none)</value>
+  </data>
+  <data name="Sound editor type tip" xml:space="preserve">
+    <value>The type a sound of the code counts as when nothing names its source or place: a sound of the server's messages, say. Who plays it still decides first.</value>
+  </data>
   <data name="Sound editor channels tip" xml:space="preserve">
     <value>Channels: how many copies of the sound play at once (1 to 4).</value>
   </data>
