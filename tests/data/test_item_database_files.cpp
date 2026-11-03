@@ -85,7 +85,6 @@
 #include <array>
 #include <cstring>
 #include <filesystem>
-#include <regex>
 #include <fstream>
 #include <initializer_list>
 #include <memory>
@@ -4757,49 +4756,49 @@ TEST_CASE("Item Tooltip lists the lines an item adds to its tooltip layout [data
     CHECK(MuEditor::Items::DescribeItemLayoutChanges({}, ShippedTooltips(), "en").empty());
 }
 
-// Item Tooltip draws the tooltip's name row in the colors the legacy theme's tooltip gives each TEXT_COLOR_*: its table
-// is that of the theme's tooltip.rcss.
-TEST_CASE("Item Tooltip's tooltip row has the legacy theme's tooltip colors [editor][items]")
+// Item Tooltip draws the tooltip's name row in the colors the active theme's tooltip gives each TEXT_COLOR_*, read
+// from its tooltip.rcss: each line class's color, and the bar behind the four highlight colors.
+TEST_CASE("Item Tooltip's tooltip row has the theme's tooltip colors [editor][items]")
 {
-    const std::string rcss =
-        TestFiles::ReadWholeFile(ShippedClientDirectory / "Data/Interface/RmlUi/themes/legacy/tooltip.rcss");
-    REQUIRE_FALSE(rcss.empty());
-    const auto rgb = [](const std::smatch& match, size_t first)
+    using Data::Items::GroundLabelColor;
+    for (const char* theme : {"legacy", "modern"})
     {
-        return Data::Items::GroundLabelColor{static_cast<BYTE>(std::stoi(match[first].str())),
-                                             static_cast<BYTE>(std::stoi(match[first + 1].str())),
-                                             static_cast<BYTE>(std::stoi(match[first + 2].str()))};
-    };
-    const auto hex = [](const std::string& text)
-    {
-        return Data::Items::GroundLabelColor{static_cast<BYTE>(std::stoi(text.substr(0, 2), nullptr, 16)),
-                                             static_cast<BYTE>(std::stoi(text.substr(2, 2), nullptr, 16)),
-                                             static_cast<BYTE>(std::stoi(text.substr(4, 2), nullptr, 16))};
-    };
-    for (int color = TEXT_COLOR_WHITE; color <= TEXT_COLOR_ORANGE; ++color)
-    {
-        const MuEditor::Items::TooltipLineLook& look = MuEditor::Items::GetTooltipLineLook(color);
-        INFO(look.className);
-        // White is the line's own color; the others are a class on the line.
-        const std::string selector = look.className == "tt-line" ? std::string(R"(\.tt-line)")
-                                                                  : R"(\.tt-line\.)" + std::string(look.className);
-        std::smatch block;
-        REQUIRE(std::regex_search(rcss, block, std::regex(selector + R"(\s*\{([^}]*)\})")));
-        const std::string rules = block[1].str();
-        std::smatch text;
-        REQUIRE(std::regex_search(rules, text, std::regex(R"((?:^|[^-])color:\s*#([0-9a-fA-F]{6}))")));
-        CHECK(look.text == hex(text[1].str()));
-        std::smatch background;
-        if (std::regex_search(rules, background, std::regex(R"(background-color:\s*rgba\((\d+),\s*(\d+),\s*(\d+))")))
+        INFO(theme);
+        const std::string rcss =
+            TestFiles::ReadWholeFile(ShippedClientDirectory / "Data/Interface/RmlUi/themes" / theme / "tooltip.rcss");
+        REQUIRE_FALSE(rcss.empty());
+        const auto looks = MuEditor::Items::ReadTooltipLineLooks(rcss);
+        CHECK(looks[TEXT_COLOR_WHITE].text == GroundLabelColor{255, 255, 255});
+        CHECK_FALSE(looks[TEXT_COLOR_WHITE].background.has_value());
+        CHECK(looks[TEXT_COLOR_BLUE].text == GroundLabelColor{0x80, 0xb3, 0xff});
+        CHECK_FALSE(looks[TEXT_COLOR_BLUE].background.has_value());
+        CHECK(looks[TEXT_COLOR_ORANGE].text == GroundLabelColor{0xe6, 0x6b, 0x0a});
+        CHECK(looks[TEXT_COLOR_DARKRED].text == GroundLabelColor{255, 255, 255});
+        CHECK(looks[TEXT_COLOR_DARKRED].background == GroundLabelColor{160, 0, 0});
+        CHECK(looks[TEXT_COLOR_GREEN_BLUE].text == GroundLabelColor{0, 255, 0});
+        CHECK(looks[TEXT_COLOR_GREEN_BLUE].background == GroundLabelColor{60, 60, 200});
+        // Every line class has its rule there, so none is left white by a name the sheet doesn't have.
+        for (size_t color = TEXT_COLOR_BLUE; color < looks.size(); ++color)
         {
-            REQUIRE(look.background.has_value());
-            CHECK(*look.background == rgb(background, 1));
-        }
-        else
-        {
-            CHECK_FALSE(look.background.has_value());
+            INFO(looks[color].className);
+            CHECK(rcss.find(".tt-line." + std::string(looks[color].className)) != std::string::npos);
         }
     }
+
+    // The later rule wins, a selector list names each, comments are left out, and rgb() is a color too.
+    const auto looks = MuEditor::Items::ReadTooltipLineLooks(R"(/* .tt-line.tt-gray { color: #000000; } */
+.tt-line { color: #fefefe; height: 2px; }
+.tt-line.tt-blue, .tt-line.tt-red { color: rgb(1, 2, 3); }
+.tt-line.tt-blue { color: #102030; }
+.tt-line.tt-hl-darkblue { background-color: rgba(4, 5, 6, 255); }
+.tt-line.tt-gray { color: red; })");
+    CHECK(looks[TEXT_COLOR_WHITE].text == GroundLabelColor{0xfe, 0xfe, 0xfe});
+    CHECK(looks[TEXT_COLOR_BLUE].text == GroundLabelColor{0x10, 0x20, 0x30});
+    CHECK(looks[TEXT_COLOR_RED].text == GroundLabelColor{1, 2, 3});
+    CHECK(looks[TEXT_COLOR_DARKBLUE].background == GroundLabelColor{4, 5, 6});
+    CHECK(looks[TEXT_COLOR_DARKBLUE].text == GroundLabelColor{255, 255, 255});
+    // A color it doesn't read keeps white.
+    CHECK(looks[TEXT_COLOR_GRAY].text == GroundLabelColor{255, 255, 255});
     // A number that is no color takes white's.
     CHECK(MuEditor::Items::GetTooltipLineLook(99).className == "tt-line");
 }

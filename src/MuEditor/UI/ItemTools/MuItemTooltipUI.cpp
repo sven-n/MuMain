@@ -175,7 +175,7 @@ void CMuItemTooltipUI::RenderPreview(const ItemDefinition& item, int itemType)
         ImGui::SameLine(valueX);
     };
 
-    // In the tooltip: the name row as the tooltip writes it, always bold, in the legacy theme's colors.
+    // In the tooltip: the name row as the tooltip writes it, always bold, in the active theme's tooltip colors.
     const ItemTooltipNameRow name = DescribeItemTooltipName(preview);
     const MuEditor::Items::TooltipLineLook& look = MuEditor::Items::GetTooltipLineLook(name.color);
     caption(I18N::Editor::InTheTooltip);
