@@ -67,6 +67,8 @@ TEST_CASE("the look profile's built-in values are the renderer's values before i
     // Ambient occlusion: off, at the renderer's default reach.
     CHECK(BuiltIn(LookValue::AmbientOcclusionStrength) == 0.0);
     CHECK(BuiltInFloat(LookValue::AmbientOcclusionRadius) == mu::PostProcessingLook{}.ambientOcclusionRadius);
+    // Sun shadows: off.
+    CHECK(BuiltIn(LookValue::SunShadowStrength) == 0.0);
 }
 
 TEST_CASE("dynamic.wrap: the point-light diffuse from Lambert to half-Lambert [render][look]")
@@ -235,6 +237,9 @@ TEST_CASE("the developer tuning commands name their look values [render][look]")
     single(L"$bloom 0.9", LookValue::BloomStrength, 0.9);
     single(L"$ao radius 80", LookValue::AmbientOcclusionRadius, 80.0);
     single(L"$ao 0.5", LookValue::AmbientOcclusionStrength, 0.5);
+    single(L"$sun softness 1.5", LookValue::SunShadowSoftness, 1.5);
+    single(L"$sun resolution 4096", LookValue::SunShadowResolution, 4096.0);
+    single(L"$sun 0.5", LookValue::SunShadowStrength, 0.5);
 
     const std::optional<Render::Look::LookTuningCommand> diffuse =
         ParseLookTuningCommand(L"$lighting diffuse 1.0 0.3 0.15");

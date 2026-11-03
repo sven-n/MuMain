@@ -266,7 +266,7 @@ TEST_CASE("the shipped look profile holds the tuned Enhanced values [data][look]
         {LookValue::DynamicEffectCap, 2.5},    {LookValue::BloomStrength, 1.0},
         {LookValue::BloomLevelFalloff, 0.6},   {LookValue::GroundShadowAngle, 135},
         {LookValue::GroundShadowLights, 2},    {LookValue::AmbientOcclusionStrength, 0.8},
-        {LookValue::SpecularScale, 0.8},
+        {LookValue::SpecularScale, 0.8},       {LookValue::SunShadowStrength, 1.0},
     };
     for (const Data::Maps::LookValueInfo& info : Data::Maps::LookValueInfos())
     {

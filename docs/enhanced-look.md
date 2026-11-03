@@ -86,6 +86,9 @@ window.
 | Dynamic lights | Map-light smoothing | `dynamic.mapSmoothing` | 0–2 s | 0.05 s | 0.5 s | More settings |
 | Dynamic lights | Maximum skill radius | `dynamic.effectRangeMax` | 0–16 cells | 1 cell | 8 cells | More settings |
 | Dynamic lights | Shadow direction | `dynamic.shadowAngle` | 0–360° | 5° | 135° | More settings |
+| Dynamic lights | Sun shadows | `sun.shadow` | 0–100 % | 5 % | 100 % | common |
+| Dynamic lights | Sun shadow softness | `sun.softness` | 0–2 | 0.1 | 1 | More settings |
+| Dynamic lights | Sun shadow resolution | `sun.resolution` | 1024–4096 | 1024 | 2048 | More settings |
 | Darker map light | Mood strength | `mood.strengthPercent` | 0–100 % | 1 % | 100 % | common |
 | Bloom and colour grading | Bloom intensity | `bloom.strength` | 0–2 | 0.05 | 1 (Icarus 0.3) | common |
 | Bloom and colour grading | Bloom spread | `bloom.levelFalloff` | 0.25–1 | 0.05 | 0.6 | common |
@@ -215,6 +218,9 @@ for the whole file.
 | `grading.strength` | 1 | 1 | 0–1 | how much of a map's grading table applies; 0 grades nothing while the bloom stays |
 | `ao.strength` | 0.8 | 0 | 0–2 | how much screen-space ambient occlusion darkens corners, wall bases and the ground under objects; additive effects are left alone; not drawn while anti-aliasing is on |
 | `ao.radius` | 60 | 60 | 10–300 | how far, in world units, nearby geometry still darkens a surface |
+| `sun.shadow` | 1 | 0 | 0–1 | how dark the sun's shadows are, on top of `dynamic.shadowOpacity`. Everything solid (the terrain, buildings, trees, characters) is drawn from the sun into a shadow map, so shadows fall onto slopes, walls and other characters. The sun stands opposite `dynamic.shadowAngle`, as high as the flat character shadows were long. On models it takes away only the direct sunlight, not the ambient light. Characters' see-through parts (wings, capes, auras) cast a lighter shadow by their opacity, or glowing, their brightness. Above 0, characters cast no flat sun shadow; point-light shadows stay flat. Needs dynamic lights; drawn with anti-aliasing too |
+| `sun.softness` | 1 | 1 | 0–2 | how many shadow-map texels the sun shadows' edges blur over |
+| `sun.resolution` | 2048 | 2048 | 1024–4096 | the sun shadow map's size in texels (1024, 2048 or 4096): sharper shadows for more graphics memory and time |
 
 ## Developer commands
 
@@ -243,7 +249,7 @@ Shorter forms of `$look set`: `$lighting rim <v>`, `$lighting specular <v>`,
 `$lighting diffuse <scale> <ambient> <floor>`, `$lightmood knee <k>`,
 `$dynlights wrap <w>`, `$dynlights smooth <s>`,
 `$dynlights spell <gain> <range> <fade>`, `$dynlights cap <c>`,
-`$dynlights reach <cells>`, `$dynlights shadow <opacity>`, `$dynlights shadowangle <degrees>`, `$dynlights shadowlights <n>`, `$bloom falloff <f>`, `$bloom <strength>`, `$ao <strength>`, `$ao radius <r>`.
+`$dynlights reach <cells>`, `$dynlights shadow <opacity>`, `$dynlights shadowangle <degrees>`, `$dynlights shadowlights <n>`, `$bloom falloff <f>`, `$bloom <strength>`, `$ao <strength>`, `$ao radius <r>`, `$sun <strength>`, `$sun softness <f>`, `$sun resolution <texels>`.
 The DevEditor has the same values in its Look panel.
 
 Feature overrides, to compare one feature on and off. They last for the

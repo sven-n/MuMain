@@ -3126,6 +3126,8 @@ void BMD::DrawShadow(const Render::ModelDrawing::ShadowDraw& draw) const
             AddMeshShadowTriangles(draw, draw.blendMesh, draw.hiddenMesh, startMesh, endMesh, projection, shadowColor);
         }
     };
+    // The sun shadow map shadows the ground itself; only the flat shadow is drawn without it.
+    if (!Render::Lighting::SunShadowsActive())
     {
         const mu::ScopedGroundShadow groundShadow;
         drawShadow(draw.alpha);

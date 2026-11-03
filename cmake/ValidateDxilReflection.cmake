@@ -25,9 +25,9 @@ set(shader_specs
     "skinned_weighted.vert|cb0,space1+t0,space0"
     "skinned_shadow.vert|cb0,space1+cb1,space1+t0,space0+t1,space0"
     "skinned_weighted_shadow.vert|cb0,space1+cb1,space1+t0,space0+t1,space0"
-    "skinned_lit.frag|cb0,space3+cb1,space3+cb2,space3+s0,space2+s1,space2+t0,space2+t1,space2"
+    "skinned_lit.frag|cb0,space3+cb1,space3+cb2,space3+s0,space2+s1,space2+s2,space2+t0,space2+t1,space2+t2,space2"
     "world_lit.vert|cb0,space1"
-    "world_lit.frag|cb0,space3+cb1,space3+cb2,space3+s0,space2+s1,space2+t0,space2+t1,space2"
+    "world_lit.frag|cb0,space3+cb1,space3+cb2,space3+s0,space2+s1,space2+s2,space2+t0,space2+t1,space2+t2,space2"
     "shadow_mask.frag|-"
     "post_fullscreen.vert|-"
     "post_bloom_down.frag|cb0,space3+s0,space2+t0,space2"
@@ -35,6 +35,7 @@ set(shader_specs
     "post_composite.frag|cb0,space3+s0,space2+s1,space2+s2,space2+s3,space2+s4,space2+t0,space2+t1,space2+t2,space2+t3,space2+t4,space2"
     "post_ao.frag|cb0,space3+s0,space2+t0,space2"
     "post_ao_blur.frag|cb0,space3+s0,space2+s1,space2+t0,space2+t1,space2"
+    "sun_depth.frag|cb0,space3+s0,space2+t0,space2"
 )
 
 foreach(shader_spec IN LISTS shader_specs)
