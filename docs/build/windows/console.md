@@ -28,7 +28,7 @@ cmake --preset windows-x64-in-game-tests  # 64-bit + control socket + in-game te
 cmake --preset windows-x86                # 32-bit player build
 cmake --preset windows-x86-mueditor       # 32-bit + editor + control socket
 
-# Build (pick the matching Debug/Release build preset)
+# Build (pick the matching build preset)
 cmake --build --preset windows-x64-mueditor-debug
 cmake --build --preset windows-x64-mueditor-release
 cmake --build --preset windows-x64-in-game-tests-gui    # builds, then opens the tester
