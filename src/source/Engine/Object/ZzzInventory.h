@@ -250,6 +250,16 @@ struct ItemTooltipLine
     int color = 0;
     bool bold = false;
 };
+// The name row of an item's tooltip (always bold): its text in the item names' language, its TEXT_COLOR_*, and the name
+// line of the item data that gives them (its index in nameLines; none for the standard name and color).
+struct ItemTooltipNameRow
+{
+    std::wstring text;
+    int color = 0;
+    std::optional<size_t> nameLine;
+};
+// The name row the tooltip of `item` writes (MuEditor's Item Tooltip shows it).
+ItemTooltipNameRow DescribeItemTooltipName(const ITEM& item);
 // How the tooltip measures a description piece for wrapping: the game's font (g_pRenderText), unless a test sets
 // a measure of its own, which needs no font; nullptr puts the font back.
 void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure);

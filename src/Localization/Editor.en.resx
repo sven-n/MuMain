@@ -1582,6 +1582,15 @@
   <data name="It adds {0} lines of its own" xml:space="preserve">
     <value>It adds {0} lines of its own</value>
   </data>
+  <data name="In the tooltip" xml:space="preserve">
+    <value>In the tooltip</value>
+  </data>
+  <data name="Name line {0}" xml:space="preserve">
+    <value>Name line {0}</value>
+  </data>
+  <data name="Standard name" xml:space="preserve">
+    <value>Standard name</value>
+  </data>
   <data name="Glow Colors" xml:space="preserve">
     <value>Glow Colors</value>
   </data>

@@ -7,6 +7,7 @@
 #include "ItemEdits.h"
 #include "ItemSelection.h"
 #include "ItemToolWindow.h"
+#include "TooltipLineLooks.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/Colors/GroundLabelWidgets.h"
@@ -53,6 +54,9 @@ void StoreItem(const std::string& label, const ItemDefinition& item)
 {
     g_ItemEdits.SetItem(label, item);
 }
+
+// The tooltip's box behind a line without a highlight bar.
+constexpr Data::Items::GroundLabelColor TooltipBox{0, 0, 0};
 
 // A grey line that wraps at the window's edge.
 void RenderNote(const char* text)
@@ -156,11 +160,37 @@ void CMuItemTooltipUI::RenderPreview(const ItemDefinition& item, int itemType)
     ImGui::Checkbox(I18N::Editor::Excellent, &m_excellent);
     RenderSetCombo(itemType);
 
-    const GroundItemLabel label = DescribePreviewLabel(itemType);
+    // The two places the item's name shows, each a row with its caption in front and where its look comes from after.
+    const ITEM preview = MakePreviewItem(itemType);
+    const float valueX =
+        std::max(ImGui::CalcTextSize(I18N::Editor::InTheTooltip).x, ImGui::CalcTextSize(I18N::Editor::OnTheGround).x) +
+        2.0f * ImGui::GetStyle().ItemSpacing.x;
+    const auto caption = [valueX](const char* text)
+    {
+        ImGui::AlignTextToFramePadding();
+        ImGui::TextUnformatted(text);
+        ImGui::SameLine(valueX);
+    };
+
+    // In the tooltip: the name row as the tooltip writes it, always bold, in the legacy theme's colors.
+    const ItemTooltipNameRow name = DescribeItemTooltipName(preview);
+    const MuEditor::Items::TooltipLineLook& look = MuEditor::Items::GetTooltipLineLook(name.color);
+    caption(I18N::Editor::InTheTooltip);
+    GroundLabelWidgets::RenderLabel(Core::Text::ToUtf8(name.text.c_str()).c_str(), look.text,
+                                    look.background.value_or(TooltipBox), true);
+    const std::string nameSource = name.nameLine
+                                       ? I18N::Format(I18N::Editor::NameLine0, {std::to_string(*name.nameLine + 1)})
+                                       : std::string(I18N::Editor::StandardName);
+    ImGui::SameLine();
+    ImGui::TextDisabled("%s", nameSource.c_str());
+
+    // On the ground: the label, and which rule gives it at the level: the item's own (the first whose levels hold) or
+    // the standard rules.
+    const GroundItemLabel label = DescribePreviewLabel(preview);
+    caption(I18N::Editor::OnTheGround);
     GroundLabelWidgets::RenderLabel(Core::Text::ToUtf8(label.text.c_str()).c_str(),
                                     GroundLabelWidgets::FromGameColor(label.textColor),
                                     GroundLabelWidgets::FromGameColor(label.backgroundColor), label.bold);
-    // Which rule gives the label at the level: the item's own (the first whose levels hold) or the standard rules.
     const auto own =
         std::ranges::find_if(item.groundLabels, [this](const ItemGroundLabel& rule) { return rule.HoldsAt(m_level); });
     const std::string source =
@@ -356,7 +386,7 @@ void CMuItemTooltipUI::AddRule(ItemDefinition& item) const
     item.groundLabels.insert(own, rule);
 }
 
-GroundItemLabel CMuItemTooltipUI::DescribePreviewLabel(int itemType) const
+ITEM CMuItemTooltipUI::MakePreviewItem(int itemType) const
 {
     ItemCreationParams params = Engine::Items::TooltipSnapshot::FullItemParameters(
         Data::Items::GetItemGroup(itemType), Data::Items::GetItemNumber(itemType));
@@ -371,11 +401,22 @@ GroundItemLabel CMuItemTooltipUI::DescribePreviewLabel(int itemType) const
     params.AncientDiscriminator = static_cast<BYTE>(m_set);
     ITEM item;
     FillItemFromParameters(item, params);
+    return item;
+}
+
+GroundItemLabel CMuItemTooltipUI::DescribePreviewLabel(int itemType) const
+{
+    return DescribePreviewLabel(MakePreviewItem(itemType));
+}
+
+GroundItemLabel CMuItemTooltipUI::DescribePreviewLabel(const ITEM& item) const
+{
     // Drawn with the model a drop of it has: a tag condition reads the drawn model's item (the Weapon of Archangel at
     // +0 to +2 is drawn as a divine archangel weapon).
     OBJECT object{};
     object.Type = Engine::Items::Drops::DrawnModel(item.Type, item.Level);
-    return DescribeGroundItemLabel(&object, &item);
+    ITEM drop = item;
+    return DescribeGroundItemLabel(&object, &drop);
 }
 
 #endif // _EDITOR

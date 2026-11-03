@@ -1643,12 +1643,16 @@ static std::optional<std::wstring> ItemNameLineText(const Data::Items::ItemNameL
 // The item's name in the item names' language and its color, as its tooltip and the repair window write it: the first
 // of its name lines whose levels and conditions hold gives them (the standard name where the line has no text, the
 // standard color where it has no color, then its color rules); without one, the standard name and color.
-static ItemTooltipName GetItemTooltipName(const ITEM& item, int level, const ItemTooltipValues& values)
+// `usedLine`, when given, takes the name line that gave them (nullptr for none).
+static ItemTooltipName GetItemTooltipName(const ITEM& item, int level, const ItemTooltipValues& values,
+                                          const Data::Items::ItemNameLine** usedLine = nullptr)
 {
     ItemTooltipName name{StandardItemName(item, level, true), StandardItemNameColor(item, level)};
     const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(item.Type);
     const Data::Items::ItemNameLine* line =
         definition != nullptr ? FindItemNameLine(*definition, item.Type, level, values) : nullptr;
+    if (usedLine != nullptr)
+        *usedLine = line;
     if (line == nullptr)
         return name;
     if (std::optional<std::wstring> text = ItemNameLineText(*line, *definition, level, values))
@@ -1657,6 +1661,19 @@ static ItemTooltipName GetItemTooltipName(const ITEM& item, int level, const Ite
     name.color =
         static_cast<int>(Engine::Items::TooltipValues::GetTooltipColor(line->colors, base, item.Type, level, values));
     return name;
+}
+
+ItemTooltipNameRow DescribeItemTooltipName(const ITEM& item)
+{
+    const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(item);
+    const Data::Items::ItemNameLine* line = nullptr;
+    ItemTooltipName name = GetItemTooltipName(item, item.Level, values, &line);
+    ItemTooltipNameRow row{std::move(name.text), name.color, std::nullopt};
+    if (line != nullptr)
+    {
+        row.nameLine = static_cast<size_t>(line - g_ItemDatabase.Find(item.Type)->nameLines.data());
+    }
+    return row;
 }
 
 std::wstring GetItemNameText(int type, int level, const ITEM* item)

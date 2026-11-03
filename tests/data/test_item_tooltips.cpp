@@ -1570,3 +1570,66 @@ TEST_CASE("The lines an item adds to its tooltip layout have rows of their own [
     }
     CHECK(rest == beforeTexts);
 }
+
+// MuEditor's Item Tooltip shows the tooltip's name row: DescribeItemTooltipName gives the row the tooltip writes, for
+// every item at every level, plain and with every option, and the name line that gives it.
+TEST_CASE("The name row Item Tooltip shows is the tooltip's [data][items][tooltip]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TextMeasureScope measure(&FixedWidthMeasure);
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    ::Hero->Class = hero.Hero().Class;
+    int compared = 0;
+    for (const Data::Items::ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        for (const bool full : {false, true})
+        {
+            for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
+            {
+                ItemCreationParams parameters =
+                    Engine::Items::TooltipSnapshot::FullItemParameters(definition.group, definition.number);
+                parameters.Level = static_cast<BYTE>(level);
+                parameters.WithLuck = parameters.WithSkill = parameters.WithOption = full;
+                parameters.OptionLevel = full ? 4 : 0;
+                parameters.HasExcellentOption = full;
+                parameters.ExcellentFlags = full ? 63 : 0;
+                const std::vector<ItemTooltipLine> lines =
+                    Engine::Items::TooltipSnapshot::TooltipOfParameters(parameters);
+                // Without a tooltip (a timed item without its end, the Dark Lord's pets): nothing to compare.
+                if (lines.size() < 2)
+                {
+                    continue;
+                }
+                ITEM item;
+                FillItemFromParameters(item, parameters);
+                const ItemTooltipNameRow name = DescribeItemTooltipName(item);
+                INFO(definition.group << "/" << definition.number << " +" << level << (full ? " full" : ""));
+                // After the first row.
+                CHECK(name.text == lines[1].text);
+                CHECK(name.color == lines[1].color);
+                CHECK(lines[1].bold);
+                ++compared;
+            }
+        }
+    }
+    CHECK(compared > 20000);
+
+    // The Jewel of Bless's yellow is its first name line's; the Kris has none.
+    const auto nameOf = [](int group, int number)
+    {
+        ITEM item;
+        FillItemFromParameters(item, Engine::Items::TooltipSnapshot::FullItemParameters(group, number));
+        return DescribeItemTooltipName(item);
+    };
+    CHECK(nameOf(14, 13).nameLine == std::optional<size_t>(0));
+    CHECK_FALSE(nameOf(0, 0).nameLine.has_value());
+}

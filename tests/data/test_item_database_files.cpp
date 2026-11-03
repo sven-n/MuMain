@@ -72,6 +72,7 @@
 #include "UI/ItemTools/MuItemRulesUI.h"
 #include "UI/ItemTools/MuItemSyncUI.h"
 #include "UI/ItemTools/MuItemTooltipUI.h"
+#include "UI/ItemTools/TooltipLineLooks.h"
 #include "UI/ItemTranslations/MuItemTranslationsUI.h"
 #include "UI/MapEditor/MapEditorUI.h"
 #include "TestModelSlots.h"
@@ -83,6 +84,7 @@
 #include <array>
 #include <cstring>
 #include <filesystem>
+#include <regex>
 #include <fstream>
 #include <initializer_list>
 #include <memory>
@@ -4709,6 +4711,53 @@ TEST_CASE("Item Tooltip picks the item's tooltip layout as an undo step [data][i
     REQUIRE(g_ItemEdits.Undo());
     CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout.empty());
     g_ItemEdits.GetHistory().Clear();
+}
+
+// Item Tooltip draws the tooltip's name row in the colors the legacy theme's tooltip gives each TEXT_COLOR_*: its table
+// is that of the theme's tooltip.rcss.
+TEST_CASE("Item Tooltip's tooltip row has the legacy theme's tooltip colors [editor][items]")
+{
+    const std::string rcss =
+        TestFiles::ReadWholeFile(ShippedClientDirectory / "Data/Interface/RmlUi/themes/legacy/tooltip.rcss");
+    REQUIRE_FALSE(rcss.empty());
+    const auto rgb = [](const std::smatch& match, size_t first)
+    {
+        return Data::Items::GroundLabelColor{static_cast<BYTE>(std::stoi(match[first].str())),
+                                             static_cast<BYTE>(std::stoi(match[first + 1].str())),
+                                             static_cast<BYTE>(std::stoi(match[first + 2].str()))};
+    };
+    const auto hex = [](const std::string& text)
+    {
+        return Data::Items::GroundLabelColor{static_cast<BYTE>(std::stoi(text.substr(0, 2), nullptr, 16)),
+                                             static_cast<BYTE>(std::stoi(text.substr(2, 2), nullptr, 16)),
+                                             static_cast<BYTE>(std::stoi(text.substr(4, 2), nullptr, 16))};
+    };
+    for (int color = TEXT_COLOR_WHITE; color <= TEXT_COLOR_ORANGE; ++color)
+    {
+        const MuEditor::Items::TooltipLineLook& look = MuEditor::Items::GetTooltipLineLook(color);
+        INFO(look.className);
+        // White is the line's own color; the others are a class on the line.
+        const std::string selector = look.className == "tt-line" ? std::string(R"(\.tt-line)")
+                                                                  : R"(\.tt-line\.)" + std::string(look.className);
+        std::smatch block;
+        REQUIRE(std::regex_search(rcss, block, std::regex(selector + R"(\s*\{([^}]*)\})")));
+        const std::string rules = block[1].str();
+        std::smatch text;
+        REQUIRE(std::regex_search(rules, text, std::regex(R"((?:^|[^-])color:\s*#([0-9a-fA-F]{6}))")));
+        CHECK(look.text == hex(text[1].str()));
+        std::smatch background;
+        if (std::regex_search(rules, background, std::regex(R"(background-color:\s*rgba\((\d+),\s*(\d+),\s*(\d+))")))
+        {
+            REQUIRE(look.background.has_value());
+            CHECK(*look.background == rgb(background, 1));
+        }
+        else
+        {
+            CHECK_FALSE(look.background.has_value());
+        }
+    }
+    // A number that is no color takes white's.
+    CHECK(MuEditor::Items::GetTooltipLineLook(99).className == "tt-line");
 }
 
 TEST_CASE("A description placeholder that names no table stops the save [editor][items]")

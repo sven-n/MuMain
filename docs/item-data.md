@@ -1471,20 +1471,29 @@ The editor has no bold font, so it draws a bold label twice, a pixel apart.
 
 ### Item Tooltip
 
-How the selected item is shown, for now its [ground label](#ground-labels)
-and its [tooltip layout](#presets).
-The preview takes a level, skill, luck, an option, the excellent options and
-a set (one of the item's sets), and draws the label the game draws for such a
-drop, with the rule that gives it: one of the item's own, or the standard
-rules.
+How the selected item is shown, for now its name in the tooltip and on the
+ground, and its [tooltip layout](#presets). The preview takes a level, skill,
+luck, an option, the excellent options and a set (one of the item's sets),
+and shows such an item's name in two rows:
 
-Under it are the item's own rules, the first whose levels hold giving the
-style: a style, **All levels** or the levels from and to, and buttons to move
-a rule up or down and to remove it. **Add rule** adds a rule for the
-previewed level with the style the label has there (the item's own rule's,
-else the one the standard rules give), before the item's rule that holds at
-that level (a rule after it would not be used there). Every change is a step
-of the undo history, and Save Items writes it to the item file.
+- **In the tooltip**: the name row its tooltip writes, bold, in the colors the
+  legacy theme's tooltip gives it, with what gives it: one of its
+  [name lines](#name-lines) ("Name line 2"), or the standard name and color.
+- **On the ground**: the [ground label](#ground-labels) the game draws for such
+  a drop, with the rule that gives it: one of the item's own, or the standard
+  rules.
+
+The two differ: the tooltip says "Excellent" and leaves out the options, the
+label leaves out "Excellent" and adds " +Skill", " +Option" and " +Luck".
+
+Under them, in **Ground label**, are the item's own label rules, the first
+whose levels hold giving the style: a style, **All levels** or the levels from
+and to, and buttons to move a rule up or down and to remove it. **Add rule**
+adds a rule for the previewed level with the style the label has there (the
+item's own rule's, else the one the standard rules give), before the item's
+rule that holds at that level (a rule after it would not be used there). Every
+change is a step of the undo history, and Save Items writes it to the item
+file.
 
 **Tooltip layout** picks the layout the item's tooltip uses from the layouts
 of `Tooltips/Tooltip.json`: `default` or a preset such as `noClassLines`
