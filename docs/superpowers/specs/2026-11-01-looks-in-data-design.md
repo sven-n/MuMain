@@ -75,6 +75,7 @@ Made while reviewing sven-n/MuMain#915, 2026-11-01.
 | L27 | Looks outside the two lists (Q-L11, 2026-11-01) | **All of them join this work.** (1) The glow values `ItemObjectAttribute` (`ZzzObject.cpp:6085-6235`) sets per item type, for the hand, the inventory, the ground and the previews: a glow mesh, a pulsing or random glow strength, a scroll or a hidden mesh, for 39 item types (e.g. the Saint Crossbow, the Staff of Kundun, the Chaos Lightning Staff, the Rune Blade, Wings of Elf and the orbs). They are item values before drawing, the item effect kind (L13), and move in pull request 3 with the item effects; items that already have an item effect (`staffOfKundun`, `redSpirit`) get them in that effect. (2) The bone effects of held and worn items: sprites, particles and lights on the item by its type. Since #931 they spawn in the update, in `SpawnLinkedPartEffects` (`ZzzCharacter.cpp:7204-8633`, 62 item-type cases, about 300 spawn calls) and `SpawnHeldWeaponGlow` (`:11595-11905`, 30 cases); `RenderLinkObject` (`:7029-7200`) and `RenderCharacter` (`:9585-10277`) keep only what the draw decides (refresh, 2026-11-02; before, about 75 item types in those two draw functions). They move in a **sixth work pull request, after step 3**, with a survey of their own first that sorts looks from other code. (3) The 3 looks inside `RenderModelWithoutStyle` (`ZzzObject.cpp:6712-6767`) for 11 models without model entries (the +15 armor objects, `MODEL_SWORD_35_WING`, `MODEL_ARMORINVEN_74`) join once those models have entries (how: Q-L13). This adds to L26: a pull request 5 for (2) after pull request 4, and "the end" (the docs, this document deleted) moves to the last pull request of the work. Not looks, only noted: `ItemObjectAttribute` also sets a scale for some items on the ground (spears, staffs, the Rena), which is ground display data. Glow values only, and all three later, were weighed. |
 | L28 | Entries for the models of the plain drawing's looks (Q-L13, 2026-11-01) | **Entries for the models only, in this work.** The 11 models are no items: 9 decorations that every worn armor piece gets at +15, at fixed bones (`class15_*.bmd`, `ForEachNextGradeObject`, `ZzzObject.cpp:7369-7443`; their sparks spawn in `SpawnLinkedPartEffects`), the wing attached to the held Phoenix Soul Star (0,35) (`sword36wing.bmd`, `ZzzCharacter.cpp:6645`), and a Rage Fighter armor's own inventory model (`MODEL_ARMORINVEN_74`). Pull request 3 gives them entries in a small list of part models, `Data/Items/Models/PartModels.json`: a name, the file, the texture folders and the render style, edited like the shared models (where exactly in the editor: with pull request 3's editor work); their 3 looks move with them. The code keeps deciding when and where they are drawn (which slot gets which part model at which bone, the wing's offset, which armor uses an inventory model): that is item logic, not a look, and can become data later without changing these entries. The model entries the item docs plan for effect and event models can use the same list. Entries where each model belongs with when and where (three new kinds of data), and waiting for those planned entries, were weighed. |
 | L29 | Things on bones in render styles (Q-L14, 2026-11-03) | **Only item effects have things on bones**, as L13 decided. On main since #931 render styles also have a spawn part in the update (`ItemRenderStyles.h:33-38`): `pumpkinOfLuck` (three lights on bones 8, 10 and 11) and `cursedCastleWater` (a light on bone 1 and the model's animation step at speed 2/7). When step 3 moves them (pull request 4), each gets an item effect of the same name with those things on bones, the water's animation speed with them; its render style keeps only the drawing, and the model entries (14,45) and (14,64) gain an `itemEffect`. L23's fatal check for bones in a render style stays. Both kinds with bones, as on main, and a third kind "bone effect" with its own file and dropdown were weighed. |
+| L30 | A render style's own glow and shine (Q-L15, 2026-11-03) | **Into the item's glow data.** Two extras of the level glow hang on render style entries today (`ItemRenderStyles.cpp:31-66`): the shine below +3 of 10 items (`ZzzObject.cpp:7709-7731`: at +0 to +2 the look is drawn with the item's light times a factor, then a fast sweep at opacity 1.5 and a swirl, both glowing, in the item's shine color on its shine meshes), named `HarmonyShine` (Jewel of Harmony, Moonstone Pendant, Illusion Sorcerer Covenant), `SealShine` (the six Seals and Master Seals, light times 0.9) and `CursedCastleWaterShine` (the model's light, a texture glow at 0.5, then a swirl); and the Deadly Staff's own +7 glow pass (`ItemGlow.cpp:151`: the whole staff glows, then mesh 1 again in white). The Glow section of a model entry gets a **shine below +3**, which names one of these shines from a small shared list of named shines in `Data/Effects/` (a light factor and two passes each; the file is pull request 3's), and the Deadly Staff gets **glow again in white on mesh 1**. The style `harmonyShine`, which draws plainly and only carried the shine, goes away. The 11 model entries change in pull request 3, compared by the draw recorder at every level. Layers of the render style with level conditions (three new blocks for 11 items, and looks split by level), and leaving both as code for later, were weighed. |
 
 ## Current state
 
@@ -100,7 +101,7 @@ Made while reviewing sven-n/MuMain#915, 2026-11-01.
   the look drawn with its light times a factor, then two bright passes),
   named `HarmonyShine` (`illusionSorcererCovenant`, and `harmonyShine`, a
   style that draws plainly and exists for the shine), `SealShine` (the
-  three seals) and `CursedCastleWaterShine`. Q-L15.
+  three seals) and `CursedCastleWaterShine`. L30.
 - **Since the draw refactors (ADR 0003):** `RenderMesh` describes each draw
   as a `MeshDraw` (mesh, flags, opacity, glow mesh and strength, scrolling,
   texture, the model's light, lighting, hidden skin, scrolling mesh, the
@@ -413,6 +414,10 @@ same code for the texture scripts:
   reflections and the level glow off a mesh, as today;
 - `_DC` / `_DT` add their shadow pass, as in `RenderBody`.
 
+**The level glow** stays the glow code's, drawn after the look from the
+item's glow data, now with the shine below +3 and the Deadly Staff's second
+glow pass among its values (L30).
+
 **Under the holes (L8, as #915 draws it).** On a mesh whose texture has
 holes, a reflection marked "under the holes" is drawn before the texture,
 solid and on both faces, so it fills the holes and the texture covers the
@@ -427,14 +432,18 @@ textures. #915 is asked to add it; if it doesn't, pull request 2 does.
 
 Model entries keep `renderStyle` and `itemEffect` (L13, L15) and gain the
 values per item. During the move a name is looked up in the look files
-first, then in the code list (L14). Three groups of entries do change, because their look changes kind or
-gains a part (follows from L13, L27 and L29; the exception to L14's "model
-entries never change"):
+first, then in the code list (L14). Four groups of entries do change, because their look changes kind or
+gains a part (follows from L13, L27, L29 and L30; the exception to L14's
+"model entries never change"):
 - in pull request 3, the 12 items whose item effect draws (the 7 effects of L13) name it as
   their render style instead; none of them has a render style today;
 - in pull request 3, the items with `ItemObjectAttribute` glow values (L27)
   get an item effect holding them; `staffOfKundun` and `redSpirit` get them
   in their own;
+- in pull request 3, the 10 items with a shine below +3 name it in their
+  glow data, the Jewel of Harmony and the Moonstone Pendant lose the render
+  style `harmonyShine`, and the Deadly Staff gets its second glow pass as a
+  glow value (L30);
 - in pull request 4, the Pumpkin of Luck (14,45) and Cursed Castle Water
   (14,64) gain an item effect of the same name that holds their things on
   bones (L29).
@@ -465,7 +474,8 @@ item; values an item sets that its look doesn't offer; unknown fields; a
 look no item uses; a model entry naming a look that exists nowhere). They
 show in Data Checks in the areas Render styles and Item effects, and in the
 Style Editor under the picked look, whose Apply is off while a fatal one is
-left.
+left. A glow naming a shine below +3 that doesn't exist is reported like an
+unknown glow color (L30).
 
 ### 7. The editor
 
@@ -482,9 +492,10 @@ left.
   excellent, ancient, inventory or ground, turning), showing changes before
   they are applied, plus stopping and moving time, an eye per layer, and
   "Draw as: doppelganger".
-- **Item Model window** (L12, L21, L22, L24): the section **Style and
+- **Item Model window** (L12, L21, L22, L24, L30): the section **Style and
   effect** with the two dropdowns, "Values for this item" with Reset, and
-  "Open in Style Editor". Under Model file the **mesh list**: a row per mesh
+  "Open in Style Editor". The Glow section gets "Shine below +3" and "Glow
+  again in white on mesh". Under Model file the **mesh list**: a row per mesh
   with its number, texture, marks (hidden, glows, scrolls, no chrome, holes)
   and "used by", a tooltip with the texture's size and folder and the mesh's
   vertices and triangles. Pointing at a row or at a number in a mesh field
@@ -528,7 +539,7 @@ shown live in the Style Editor. The bone effects of held and worn items
 | 0 | This design, for review (L26) | – |
 | 1 | The mesh list and showing a mesh (L21, L22), the names of L24 | – |
 | 2 | Step 1 part 1: loader, the two look files, layer drawing with the shared mesh rules, the holes flag if #915 has none, the draw recorder, the checks, the Style Editor; L17's groups 1 and 2 (103 render styles) | – |
-| 3 | Step 1 part 2: L17's groups 3 to 5 (50 looks), `ItemObjectAttribute`'s glow values, the part models with the 3 looks of `RenderModelWithoutStyle` | #915 merged |
+| 3 | Step 1 part 2: L17's groups 3 to 5 (50 looks), `ItemObjectAttribute`'s glow values, the part models with the 3 looks of `RenderModelWithoutStyle`, the shines below +3 and the Deadly Staff's glow pass as glow data (L30) | #915 merged |
 | 4 | Steps 2 and 3: FX1.7c, the 12 looks with things on bones | – |
 | 5 | The bone effects of held and worn items, after their survey; then task 8 (the docs, this document deleted) | PR 4 |
 
@@ -552,14 +563,10 @@ Answered one by one, each with the current state, every option with an
 example, and a recommendation.
 
 Answered: Q-L1 (L7), Q-L2a (L8), Q-L2b (L9, L10), Q-L2c (L11), Q-L3 (L12),
-Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), Q-L6a to Q-L6c (L18 to L20), Q-L7a and Q-L7b (L21, L22), Q-L8 (L23), Q-L12 (L24), Q-L9 (L25), Q-L10 (L26), Q-L11 (L27), Q-L13 (L28), all on 2026-11-01; Q-L14 (L29) on 2026-11-03.
+Q-L4a (L13), Q-L4b (L14), Q-L4c (L15), Q-L5a (L16), Q-L5b (L17), Q-L6a to Q-L6c (L18 to L20), Q-L7a and Q-L7b (L21, L22), Q-L8 (L23), Q-L12 (L24), Q-L9 (L25), Q-L10 (L26), Q-L11 (L27), Q-L13 (L28), all on 2026-11-01; Q-L14 (L29) and Q-L15 (L30) on 2026-11-03.
 
 Open since the refreshes against main (2026-11-02 and 2026-11-03):
 
-- **Q-L15, a render style's own glow and shine.** The +7 glow pass of
-  `deadlyStaff` and the shines below +3 of 6 styles (`harmonyShine` exists
-  only for its shine): layers of the render style, the item's glow data,
-  or later?
 - **Q-L16, the Style Editor's list.** Glow Colors, which L18 copies, became
   the Colors tree with roots and user folders (#926). Does the Style Editor
   follow it (roots Render styles and Item effects, folders), or keep tabs
@@ -578,7 +585,8 @@ The design, then the pull requests of L26 and L27:
    groups 1 and 2.
 5. [ ] Pull request 3, step 1 part 2: L17's groups 3 to 5 (after #915 is
    merged), with `ItemObjectAttribute`'s glow values (L27), and the part
-   models with the 3 looks of `RenderModelWithoutStyle` (L28).
+   models with the 3 looks of `RenderModelWithoutStyle` (L28), and the
+   shines below +3 and the Deadly Staff's glow pass as glow data (L30).
 6. [ ] Pull request 4, steps 2 and 3: FX1.7c, the 12 looks with things on
    bones.
 7. [ ] Pull request 5: the bone effects of held and worn items (L27), after a
