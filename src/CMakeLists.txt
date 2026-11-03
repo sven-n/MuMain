@@ -631,8 +631,16 @@ file(MAKE_DIRECTORY "${MU_NUGET_CACHE_DIR}")
 # same package the .NET ClientLibrary consumes (see MUnique.Client.Library.csproj).
 # Sourcing from NuGet means a single versioned dependency instead of vendoring
 # the entire OpenMU repository as a submodule.
-set(OPENMU_PACKETS_VERSION "0.10.1" CACHE STRING
-    "Version of MUnique.OpenMU.Network.Packets to source packet XML from")
+# The version the ClientLibrary builds against, so the guards check the same packet definitions.
+set(_packets_version_source "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
+# A version bump must reconfigure, or an existing build keeps checking the old packets.
+set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_packets_version_source}")
+file(STRINGS "${_packets_version_source}" _packets_version REGEX "<OpenMuPacketsVersion>")
+string(REGEX REPLACE ".*<OpenMuPacketsVersion>([^<]+)</OpenMuPacketsVersion>.*" "\\1"
+       OPENMU_PACKETS_VERSION "${_packets_version}")
+if (NOT OPENMU_PACKETS_VERSION MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+")
+  message(FATAL_ERROR "Could not read <OpenMuPacketsVersion> from MUnique.Client.Library.csproj")
+endif()
 set(OPENMU_PACKETS_XML
     "${MU_NUGET_CACHE_DIR}/munique.openmu.network.packets/${OPENMU_PACKETS_VERSION}/contentFiles/any/net10.0/ServerToClient/ServerToClientPackets.xml")
 

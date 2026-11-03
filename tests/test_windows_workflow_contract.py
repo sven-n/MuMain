@@ -273,6 +273,16 @@ macos_job = job(ci, "build-macos")
 release_job = job(ci, "release")
 required_job = job(ci, "required")
 
+quality_history = step(quality_job, "quality", "Fetch history")
+check(
+    "--filter=blob:none --unshallow --tags" in quality_history,
+    "Quality Gates must fetch full commit history without past file versions",
+)
+check(
+    "fetch-depth: 2" in step(quality_job, "quality", "Checkout repository")
+    and "if: github.event_name != 'pull_request'" in quality_history,
+    "Pull requests diff against HEAD^1 and need no history beyond it",
+)
 quality_detection = step(quality_job, "quality", "Detect changed C++ files")
 check(
     "DIFF_BASE: ${{ steps.plan.outputs.diff_base }}" in quality_detection,
