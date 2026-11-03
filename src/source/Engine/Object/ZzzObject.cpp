@@ -8137,7 +8137,7 @@ void RenderPartObjectEdge(BMD* b, const OBJECT* o, int Flag, bool Translate, flo
     BoneScale = Scale;
     const bool own = o->EnableBoneMatrix == 1;
     if (bones == nullptr)
-        bones = own ? o->BoneTransform : BoneTransform;
+        bones = own ? DrawnPose(o) : BoneTransform;
     b->Transform(bones, o->BoundingBoxMin, o->BoundingBoxMax, nullptr, own && Translate);
 
     if (o->Type == MODEL_WARCRAFT)

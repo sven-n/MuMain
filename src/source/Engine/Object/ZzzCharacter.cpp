@@ -6577,7 +6577,7 @@ void RenderGuild(const OBJECT* o, int Type, vec3_t vPos)
         Matrix[2][3] = vPos[2];
     }
 
-    R_ConcatTransforms(o->BoneTransform[26], Matrix, ParentMatrix);
+    R_ConcatTransforms(DrawnPose(o)[26], Matrix, ParentMatrix);
     mu::GetRenderer().Translate(o->Position[0], o->Position[1], o->Position[2]);
     RenderPlane3D(5.f, 7.f, ParentMatrix);
 
@@ -9570,6 +9570,8 @@ void RenderChristmasCompanions(const CHARACTER* c, vec3_t light, bool Translate,
     // Three copies around the character, each on the ground where it stands, drawn from a copy of the character.
     constexpr float offsets[3][2] = {{50.f, 50.f}, {-50.f, -50.f}, {50.f, -50.f}};
     OBJECT companion = *o;
+    // The copy's address has no drawn pose of its own, so it carries the character's.
+    companion.BoneTransform = DrawnPose(o);
     for (const auto& offset : offsets)
     {
         companion.Position[0] = o->Position[0] + offset[0];

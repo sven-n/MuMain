@@ -8,6 +8,7 @@
 #include "Engine/Object/ObjectPose.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzObject.h"
+#include "Render/Models/ModelDraw.h"
 #include "Render/Effects/ZzzEffect.h"
 
 #include <cmath>
@@ -15,6 +16,9 @@
 #include <filesystem>
 #include <memory>
 #include <span>
+#include <vector>
+
+extern thread_local float ParentMatrix[3][4];
 
 namespace
 {
@@ -165,6 +169,64 @@ TEST_CASE("A draw reuses the pose the update built, and poses a change into bone
     CHECK(std::memcmp(DrawnPose(&o), fresh, sizeof(float) * 12 * model.NumBones) == 0);
     CHECK(bones[0][0][3] == 12345.f);
     CHECK_FALSE(Engine::Object::Pose::IsCurrent(&o, &model, false));
+}
+
+TEST_CASE("A draw's outlines, guild mark and Christmas copies use the pose its body is drawn with [data][animation]")
+{
+    struct SkinRecorder final : Render::ModelDrawing::ModelDrawer
+    {
+        void DrawMesh(const Render::ModelDrawing::MeshDraw& draw) override
+        {
+            bones.push_back(draw.skin.bones);
+        }
+        void DrawShadow(const Render::ModelDrawing::ShadowDraw&) override {}
+        std::vector<const float (*)[3][4]> bones;
+    };
+
+    TestModelSlots slots;
+    BMD& model = Models[MODEL_PLAYER];
+    const std::wstring folder = PlayerFolder.wstring() + L"/";
+    REQUIRE(model.Open2(folder.c_str(), L"player.bmd"));
+    // The skeleton has no meshes; a body part drawn on it does.
+    REQUIRE(Models[MODEL_BODY_ARMOR].Open2(folder.c_str(), L"ArmorClass01.bmd"));
+
+    static float bones[MAX_BONES][3][4];
+    const auto c = std::make_unique<CHARACTER>();
+    OBJECT& o = c->Object;
+    PlaceCharacter(o, 100.f, 1.f, bones);
+    o.Alpha = 1.f;
+    o.SubType = MODEL_BODY_ARMOR;
+    o.HiddenMesh = o.BlendMesh = -1; // as a created character's
+    AnimateCharacterBones(&o);
+
+    // Changed after the update built its pose: the draw poses it into bones of its own.
+    o.AnimationFrame += 0.5f;
+    BeginObjectDraws();
+    Engine::Object::Attachments::BeginFrame();
+    REQUIRE(Calc_ObjectAnimation(&o, true, 1));
+    const float (*drawn)[3][4] = DrawnPose(&o);
+    REQUIRE(drawn != o.BoneTransform);
+
+    const vec3_t light = {1.f, 1.f, 1.f};
+    SkinRecorder recorder;
+    Render::ModelDrawing::SetModelDrawer(&recorder);
+    RenderPartObject(&o, MODEL_BODY_ARMOR, nullptr, light, 1.f, 0, 0, 0, false, false, true, 1);
+    RenderChristmasCompanions(c.get(), o.Light, true, 0);
+    Render::ModelDrawing::SetModelDrawer(nullptr);
+    // Two outlines and the body, then three companions.
+    CHECK(recorder.bones.size() == 6u * Models[MODEL_BODY_ARMOR].NumMeshs);
+    for (const auto* skinned : recorder.bones)
+        CHECK(skinned == drawn);
+
+    // The guild mark hangs from the drawn pose: as a copy carrying those bones places it.
+    OBJECT posed = o;
+    posed.BoneTransform = const_cast<vec34_t*>(drawn);
+    float expected[3][4];
+    RenderGuild(&posed);
+    std::memcpy(expected, ParentMatrix, sizeof(expected));
+    RenderGuild(&o);
+    CHECK(std::memcmp(ParentMatrix, expected, sizeof(expected)) == 0);
+    CHECK(std::memcmp(drawn[26], bones[26], sizeof(expected)) != 0);
 }
 
 TEST_CASE("The pre-pass leaves a current pose alone [data][animation]")
