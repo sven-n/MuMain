@@ -118,7 +118,7 @@ void CMuItemModelUI::RenderModel(ItemModelDefinition* model, int itemType)
     {
         ModelForms::RenderOwnFile(m_draft, *model);
     }
-    m_meshList.Render(itemType, *model);
+    m_meshList.Render(itemType, *model, m_preview.ShowsListedModel(itemType));
     if (ImGui::CollapsingHeader(I18N::Editor::InTheInventory, ImGuiTreeNodeFlags_DefaultOpen))
     {
         RenderInventory(*model, itemType);

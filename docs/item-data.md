@@ -1349,7 +1349,9 @@ number that has a model but no item:
   file and size and the mesh's vertices and triangles. Pointing at a row,
   or at a number in one of those mesh fields, draws that mesh in the preview
   as it is and the others see-through; a click on a row keeps it so until
-  it is clicked again. Which meshes a render style or item effect draws is
+  it is clicked again. At a level the preview draws with another model (the
+  Box of Luck's levels, for example), the list says so and the preview
+  shows none of its meshes. Which meshes a render style or item effect draws is
   still drawing code and not listed.
 - The inventory display as sliders, each with a number field to type the
   value (a drag is one undo step) beside the item in an inventory grid of

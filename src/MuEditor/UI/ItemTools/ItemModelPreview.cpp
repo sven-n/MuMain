@@ -9,6 +9,7 @@
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewInput.h"
+#include "../MuEditor/UI/EffectBrowser/EffectPreviewItems.h"
 #include "../MuEditor/UI/EffectBrowser/EffectPreviewSubject.h"
 #include "Data/GameData/ItemData/ItemModelSlots.h"
 #include "I18N/All.h"
@@ -60,7 +61,24 @@ std::optional<MeshPicking::Ray> ClickedRay(const MuEditor::Effects::EffectPrevie
     }
     return MeshPicking::RayThroughView(camera, width / height, viewX, viewY);
 }
+
+// The item's own model, which the mesh list lists, when the preview draws it at `level`; nothing for a level drawn
+// with another model (the Box of Luck's levels, (14,12) at +0 and +2), which has none of the listed meshes.
+const BMD* ListedModelInView(int itemType, int level)
+{
+    const int listed = Data::Items::ToModelSlot(itemType);
+    if (MuEditor::Effects::GetPreviewItemModels(itemType, level).model != listed)
+    {
+        return nullptr;
+    }
+    return &Models[listed];
+}
 } // namespace
+
+bool CItemModelPreview::ShowsListedModel(int itemType) const
+{
+    return ListedModelInView(itemType, m_level) != nullptr;
+}
 
 void CItemModelPreview::Render(int itemType)
 {
@@ -170,14 +188,16 @@ void CItemModelPreview::RenderView(const MuEditor::Effects::EffectPreviewRequest
 void CItemModelPreview::DrawScene(const MuEditor::Effects::EffectPreviewRequest& request, float aspect,
                                   const std::optional<MeshPicking::Ray>& pickRay)
 {
-    const BMD* model = &Models[Data::Items::ToModelSlot(request.itemType)];
+    const BMD* model = ListedModelInView(request.itemType, request.itemLevel);
     std::optional<int> hitMesh;
     {
+        // Without the listed model the drawer leaves every draw alone.
         CItemMeshPreviewDrawer drawer(model, g_ItemMeshFocus.Shown(), pickRay);
         m_scene.Draw(request, m_camera, aspect);
         hitMesh = drawer.HitMesh();
     }
-    if (pickRay)
+    // A click on another model finds none of the listed meshes, so it keeps the kept one.
+    if (pickRay && model != nullptr)
     {
         g_ItemMeshFocus.Pick(hitMesh);
     }

@@ -36,6 +36,8 @@ public:
     {
         return m_ancient;
     }
+    // Whether the preview draws the item's own model at the chosen level, the one whose meshes the mesh list lists.
+    [[nodiscard]] bool ShowsListedModel(int itemType) const;
 
     // Between frames: the texture can only be released then.
     void BeforeFrame()

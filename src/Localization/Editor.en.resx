@@ -499,6 +499,9 @@
   <data name="Mesh list note" xml:space="preserve">
     <value>Point at a row to see its mesh alone in the preview, the others see-through; a click keeps it, another click lets it go. A click on a part of the preview finds its row.</value>
   </data>
+  <data name="Meshes not in preview note" xml:space="preserve">
+    <value>At this level the preview draws another model, so it can't show these meshes, and a click on it finds none of them.</value>
+  </data>
   <data name="No meshes loaded" xml:space="preserve">
     <value>The model is not loaded, so there are no meshes to list.</value>
   </data>

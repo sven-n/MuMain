@@ -94,7 +94,7 @@ void RenderTooltip(const ItemMeshRow& row)
 }
 } // namespace
 
-void CItemMeshList::Render(int itemType, const ItemModelDefinition& entry)
+void CItemMeshList::Render(int itemType, const ItemModelDefinition& entry, bool inPreview)
 {
     Refresh(itemType, Models[Data::Items::ToModelSlot(itemType)]);
     // Also while the list is folded: a kept mesh the model lost would leave every mesh see-through.
@@ -108,7 +108,7 @@ void CItemMeshList::Render(int itemType, const ItemModelDefinition& entry)
         RenderNote(I18N::Editor::NoMeshesLoaded);
         return;
     }
-    RenderNote(I18N::Editor::MeshListNote);
+    RenderNote(inPreview ? I18N::Editor::MeshListNote : I18N::Editor::MeshesNotInPreviewNote);
     RenderTable(entry);
     if (!entry.renderStyle.empty() || !entry.itemEffect.empty())
     {

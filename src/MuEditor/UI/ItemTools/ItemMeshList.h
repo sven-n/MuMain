@@ -19,7 +19,8 @@ namespace MuEditor::Items
 class CItemMeshList
 {
 public:
-    void Render(int itemType, const Data::Items::ItemModelDefinition& entry);
+    // `inPreview`: the preview draws this model at its level (CItemModelPreview::ShowsListedModel).
+    void Render(int itemType, const Data::Items::ItemModelDefinition& entry, bool inPreview);
 
 private:
     // The rows are read again when the model was opened again or the item changed.

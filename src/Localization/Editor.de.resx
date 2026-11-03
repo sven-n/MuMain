@@ -478,6 +478,9 @@
   <data name="Mesh list note" xml:space="preserve">
     <value>Zeigt die Maus auf eine Zeile, zeigt die Vorschau ihr Mesh allein und die anderen durchsichtig; ein Klick hält es fest, ein zweiter lässt es los. Ein Klick auf einen Teil der Vorschau findet seine Zeile.</value>
   </data>
+  <data name="Meshes not in preview note" xml:space="preserve">
+    <value>Auf dieser Stufe zeigt die Vorschau ein anderes Modell; diese Meshes kann sie nicht zeigen, und ein Klick darauf findet keines davon.</value>
+  </data>
   <data name="No meshes loaded" xml:space="preserve">
     <value>Das Modell ist nicht geladen, es gibt keine Meshes.</value>
   </data>
