@@ -6,6 +6,7 @@
 #include "Data/GameData/MonsterData/MonsterModelDefinition.h"
 #include "Data/GameData/MonsterData/MonsterSoundSet.h"
 
+#include <cstddef>
 #include <optional>
 #include <string>
 #include <utility>
@@ -69,6 +70,11 @@ bool IsCueUsed(int slot, const std::string& cue, const std::string& exceptSet, s
 // The model's cues that no event of a set that the monsters play with the
 // model in `slot` names, in the model's order: Monster Model removes them.
 std::vector<std::string> FindUnusedCues(const Data::Monsters::MonsterModelDefinition& model, int slot);
+
+// Whether the set's event at `index` is `event`: the question whether a cue
+// goes too removes the event it was asked for only while it is still there.
+bool IsSameEventAt(const Data::Monsters::MonsterSoundSet& set, size_t index,
+                   const Data::Monsters::MonsterSoundEvent& event);
 
 // What the event table edits besides the set: the model of the shown
 // monster's look, whose cues the cue rows show and change.

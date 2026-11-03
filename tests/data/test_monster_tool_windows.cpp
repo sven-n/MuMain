@@ -1132,4 +1132,31 @@ TEST_CASE("Monster Sounds: Play plays all of an event's sounds, or one of a pick
     CHECK(PreviewSounds(event, 1) == Sounds{"SOUND_MONSTER_DSIDLE1"});
 }
 
+TEST_CASE("Monster Sounds: the question whether a cue goes too removes only the event it was asked for (Q-MN82) "
+          "[editor][monsters]")
+{
+    using MuEditor::Monsters::SoundEventsEditor::IsSameEventAt;
+    Data::Monsters::MonsterSoundEvent step;
+    step.cues = {"step 1"};
+    step.sounds = {"SOUND_MONSTER_DSIDLE1"};
+    Data::Monsters::MonsterSoundEvent attack;
+    attack.animations = {MONSTER01_ATTACK1};
+    attack.sounds = {"SOUND_MONSTER_DSIDLE2"};
+    Data::Monsters::MonsterSoundSet set;
+    set.name = "Raymond";
+    set.soundEvents = {attack, step};
+    CHECK(IsSameEventAt(set, 1, step));
+
+    // An undo or another edit moved the events meanwhile: the answer removes
+    // nothing.
+    set.soundEvents = {step, attack};
+    CHECK_FALSE(IsSameEventAt(set, 1, step));
+    set.soundEvents = {attack};
+    CHECK_FALSE(IsSameEventAt(set, 1, step));
+    // The event changed meanwhile.
+    set.soundEvents = {attack, step};
+    set.soundEvents[1].sounds = {"SOUND_MONSTER_DSIDLE2"};
+    CHECK_FALSE(IsSameEventAt(set, 1, step));
+}
+
 #endif // _EDITOR

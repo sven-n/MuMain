@@ -62,8 +62,14 @@ struct PendingRemoval
 {
     std::string set;
     size_t event = 0;
+    // The event as it was when Remove was clicked: an answer removes it only
+    // while it is still the set's event at `event`.
+    MonsterSoundEvent removed;
     std::vector<std::string> cues;
     int slot = -1;
+    // The question was opened; closed without an answer (Escape, a click
+    // elsewhere), it removes nothing.
+    bool asked = false;
 };
 std::optional<PendingRemoval> g_pendingRemoval;
 constexpr const char* RemoveCuePopup = "##RemoveTheCue";
@@ -537,20 +543,27 @@ void RemoveEvent(MonsterSoundSet& set, size_t index, SetDraft& draft)
 }
 
 // The question of Q-MN82: removing a cue's last event asks whether the cue
-// goes too.
+// goes too. Cancel, Escape or a click elsewhere remove nothing; an answer
+// after the set's events changed removes nothing either.
 void RenderRemoveCuePopup(MonsterSoundSet& set, SetDraft& draft, const Context& context)
 {
-    if (g_pendingRemoval && !ImGui::IsPopupOpen(RemoveCuePopup))
-    {
-        ImGui::OpenPopup(RemoveCuePopup);
-    }
-    if (!ImGui::BeginPopup(RemoveCuePopup))
+    if (!g_pendingRemoval)
     {
         return;
     }
-    const bool valid = g_pendingRemoval && g_pendingRemoval->set == set.name &&
-                       g_pendingRemoval->event < set.soundEvents.size() && context.model != nullptr &&
-                       g_pendingRemoval->slot == context.slot;
+    if (!g_pendingRemoval->asked)
+    {
+        ImGui::OpenPopup(RemoveCuePopup);
+        g_pendingRemoval->asked = true;
+    }
+    if (!ImGui::BeginPopup(RemoveCuePopup))
+    {
+        g_pendingRemoval.reset();
+        return;
+    }
+    const bool valid = g_pendingRemoval->set == set.name &&
+                       IsSameEventAt(set, g_pendingRemoval->event, g_pendingRemoval->removed) &&
+                       context.model != nullptr && g_pendingRemoval->slot == context.slot;
     if (!valid)
     {
         g_pendingRemoval.reset();
@@ -588,6 +601,12 @@ void RenderRemoveCuePopup(MonsterSoundSet& set, SetDraft& draft, const Context& 
     if (ImGui::Button(I18N::Editor::KeepTheCue))
     {
         RemoveEvent(set, g_pendingRemoval->event, draft);
+        g_pendingRemoval.reset();
+        ImGui::CloseCurrentPopup();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button(I18N::Editor::Cancel))
+    {
         g_pendingRemoval.reset();
         ImGui::CloseCurrentPopup();
     }
@@ -742,6 +761,11 @@ std::vector<std::string> FindUnusedCues(const MonsterModelDefinition& model, int
     return unused;
 }
 
+bool IsSameEventAt(const MonsterSoundSet& set, size_t index, const MonsterSoundEvent& event)
+{
+    return index < set.soundEvents.size() && set.soundEvents[index] == event;
+}
+
 void Render(MonsterSoundSet& set, SetDraft& draft, const Context& context)
 {
     ImGui::PushTextWrapPos(0.0f);
@@ -792,7 +816,8 @@ void Render(MonsterSoundSet& set, SetDraft& draft, const Context& context)
                 }
                 else
                 {
-                    g_pendingRemoval = PendingRemoval{set.name, *removed, std::move(alone), context.slot};
+                    g_pendingRemoval =
+                        PendingRemoval{set.name, *removed, set.soundEvents[*removed], std::move(alone), context.slot};
                 }
             }
         }
