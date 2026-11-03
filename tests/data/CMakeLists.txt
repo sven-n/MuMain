@@ -161,6 +161,19 @@ target_compile_definitions(test_character_bones PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
 )
 
+# Drawing later (DeferredDraws) against drawing at once, for models posed from the shipped player files.
+mu_add_test(
+    NAME test_draw_parity
+    SOURCES
+        test_draw_parity.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+target_compile_definitions(test_draw_parity PRIVATE
+    MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
+)
+
 # The effect catalogue (Data/Effects): the format, the compiled symbol lists
 # and the shipped files. The registry check pulls in the effect code, which
 # needs the client globals of Winmain.cpp. The effect browser test reads the

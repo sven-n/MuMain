@@ -27,6 +27,17 @@ struct ModelSkin
     float lightDirection[3] = {};
 };
 
+// The vertices, normals and light intensities a mesh drawn on the CPU is drawn with, taken when the draw was
+// described for a drawer that draws later. Null: the shared scratch, as the model's last Transform left it.
+struct CpuMesh
+{
+    const float (*vertices)[3] = nullptr;
+    const float (*normals)[3] = nullptr;
+    const float* intensities = nullptr;
+    int vertexCount = 0;
+    int normalCount = 0;
+};
+
 // One mesh draw: the call's arguments and the model state the draw reads.
 struct MeshDraw
 {
@@ -52,6 +63,7 @@ struct MeshDraw
     // The LOD of a model file to draw (0: the BMD's meshes).
     int lod = 0;
     ModelSkin skin;
+    CpuMesh cpu;
 };
 
 // One model's shadow projected on the ground: the call's arguments and the model state the draw reads.
@@ -79,6 +91,14 @@ class ModelDrawer
 {
 public:
     virtual ~ModelDrawer() = default;
+
+    // Whether the drawer draws after the call returns (DeferredDraws): the draw then keeps what it refers to alive
+    // until the end of the frame.
+    [[nodiscard]] virtual bool DrawsLater() const
+    {
+        return false;
+    }
+
     virtual void DrawMesh(const MeshDraw& draw) = 0;
     virtual void DrawShadow(const ShadowDraw& draw) = 0;
 };

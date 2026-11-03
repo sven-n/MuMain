@@ -354,6 +354,9 @@ public:
     // are read as the same ambient globals/members Transform() itself reads.
     void SkinVertex(int mesh, int vertexIndex, float (*BoneMatrix)[3][4], bool Translate, float _Scale,
                     vec3_t out) const;
+    // The same, from a draw's skin and where its body stands instead of the model's last Transform.
+    void SkinVertex(int mesh, int vertexIndex, const Render::ModelDrawing::ModelSkin& skin, float bodyScale,
+                    const float bodyOrigin[3], vec3_t out) const;
     // Batch form: skins every vertex of `mesh` into the corresponding slice of the global
     // VertexTransform[mesh] array -- the same side effect Transform()'s loop has for that one mesh,
     // without touching any other mesh or computing normals/lighting.
@@ -421,6 +424,8 @@ public:
                                     BITMAP_t*& texture) const;
     // Whether a draw is a faded bright or chrome pass that dims the model's light, for it and the meshes after it.
     [[nodiscard]] bool DimsLight(const Render::ModelDrawing::MeshDraw& draw) const;
+    // Whether DrawMesh draws the mesh with vertices skinned on the CPU (not on the GPU, and not nothing).
+    [[nodiscard]] bool DrawsOnCpu(const Render::ModelDrawing::MeshDraw& draw) const;
     void BeginRenderCoinHeap();
     int AddToCoinHeap(int coinIndex, int target_vertex_index);
     void EndRenderCoinHeap(int coinCount);
@@ -481,8 +486,9 @@ private:
 
     void AddClothesShadowTriangles(void* pClothes, int clothesCount, const float* origin, float sx, float sy,
                                    std::uint32_t color) const;
-    void AddMeshShadowTriangles(int blendMesh, int hiddenMesh, int startMesh, int endMesh, const float* origin,
-                                float sx, float sy, std::uint32_t color) const;
+    void AddMeshShadowTriangles(const Render::ModelDrawing::ShadowDraw& draw, int blendMesh, int hiddenMesh,
+                                int startMesh, int endMesh, const float* origin, float sx, float sy,
+                                std::uint32_t color) const;
     // The same shadow from a cached rest-pose stream skinned on the GPU; false leaves it to the CPU.
     [[nodiscard]] bool RenderGpuMeshShadow(const Render::ModelDrawing::ShadowDraw& draw, int startMesh, int endMesh,
                                            float sx, float sy, std::uint32_t color) const;
