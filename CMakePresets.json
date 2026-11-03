@@ -94,14 +94,20 @@
       }
     },
     {
+      "name": "in-game-tests-base",
+      "hidden": true,
+      "description": "What the -in-game-tests presets add to a player preset: the control socket and the in-game tester, without the unit tests (docs/in-game-tests.md)",
+      "cacheVariables": {
+        "ENABLE_CONTROL_SOCKET": "ON",
+        "ENABLE_IN_GAME_TESTS": "ON",
+        "BUILD_TESTING": "OFF"
+      }
+    },
+    {
       "name": "windows-x64-in-game-tests",
       "displayName": "Windows x64 In-game tests",
       "description": "Player build plus the control socket and the in-game tester, no editor (docs/in-game-tests.md)",
-      "inherits": "windows-x64",
-      "cacheVariables": {
-        "ENABLE_CONTROL_SOCKET": "ON",
-        "ENABLE_IN_GAME_TESTS": "ON"
-      }
+      "inherits": ["in-game-tests-base", "windows-x64"]
     },
     {
       "name": "linux-base",
@@ -146,12 +152,7 @@
       "name": "linux-x64-in-game-tests",
       "displayName": "Linux x86_64 In-game tests",
       "description": "Native Linux x64 player build plus the control socket and the in-game tester, no editor (docs/in-game-tests.md)",
-      "inherits": "linux-x64",
-      "cacheVariables": {
-        "ENABLE_CONTROL_SOCKET": "ON",
-        "ENABLE_IN_GAME_TESTS": "ON",
-        "BUILD_TESTING": "OFF"
-      }
+      "inherits": ["in-game-tests-base", "linux-x64"]
     },
     {
       "name": "macos-base",
@@ -185,12 +186,7 @@
       "name": "macos-arm64-in-game-tests",
       "displayName": "macOS arm64 In-game tests",
       "description": "Native macOS Apple Silicon player build plus the control socket and the in-game tester, no editor (docs/in-game-tests.md)",
-      "inherits": "macos-arm64",
-      "cacheVariables": {
-        "ENABLE_CONTROL_SOCKET": "ON",
-        "ENABLE_IN_GAME_TESTS": "ON",
-        "BUILD_TESTING": "OFF"
-      }
+      "inherits": ["in-game-tests-base", "macos-arm64"]
     }
   ],
   "buildPresets": [
