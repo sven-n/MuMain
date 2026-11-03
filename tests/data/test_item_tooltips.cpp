@@ -30,6 +30,7 @@
 #include "UI/Inventory/ItemMng.h"
 
 #include <algorithm>
+#include <array>
 #include <iterator>
 #include <clocale>
 #include <ctime>
@@ -1422,6 +1423,22 @@ TEST_CASE("The tooltip's class lines and the boots' and gloves' lines come from 
     };
     CHECK(allClasses(0, 0));
     CHECK_FALSE(allClasses(13, 37));
+
+    // A level the class skips names its next class, the first that can use the item (a Magic Gladiator's second is
+    // the Dual Master); a level above the third names no class, so the row is left out.
+    BYTE(&required)[MAX_CLASS] = ItemAttribute[Data::Items::MakeItemType(7, 1)].RequireClass;
+    std::array<BYTE, MAX_CLASS> savedClasses{};
+    std::copy(std::begin(required), std::end(required), savedClasses.begin());
+    required[CLASS_DARK] = 2;
+    required[CLASS_DARK_LORD] = 4;
+    const std::vector<ItemTooltipLine> skipping = lines(7, 1, 0);
+    std::copy(savedClasses.begin(), savedClasses.end(), std::begin(required));
+    const auto knightRow = find(skipping, L"Can be equipped by Dark Knight");
+    REQUIRE(knightRow != skipping.end());
+    REQUIRE(std::next(knightRow) != skipping.end());
+    CHECK(std::next(knightRow)->text == L"Can be equipped by Dual Master");
+    CHECK(std::count_if(skipping.begin(), skipping.end(),
+                        [](const ItemTooltipLine& line) { return line.text.starts_with(L"Can be equipped by"); }) == 2);
 
     MakeNewDarkWizard(hero.Hero());
     ::Hero->Class = hero.Hero().Class;

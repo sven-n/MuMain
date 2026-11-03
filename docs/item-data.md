@@ -153,7 +153,7 @@ variants or option words. An online keyword need not select the same items offli
 | `buyPrice` | Fixed price; when set, it replaces the calculated price |
 | `requirements` | `level`, `strength`, `dexterity`, `energy`, `vitality`, `leadership`. The stat requirements of the orbs, crystals and scrolls (groups 12 and 15, without a slot) are the values the game asks for, as OpenMU stores them: their profiles keep them as they are. The original client's bmd files hold weights for them, which Import from bmd turns into the values and Export as bmd and Export as S6E3 turn back (the smallest weight that gives each value). Which ones convert follows the item's profile: a requirement it keeps as it is while the default grows it (an orb given the default profile holds weights like any item) |
 | `requirementsByLevel` | A requirement for each item level 0 to 15 (one number for all of them, or 16), instead of the [item stat file's](#item-stats-by-level) formula; above +15 the +15 value counts. The Orb of Summoning has `{"energy": [30, 60, 90, 130, 170, 210, 300, 500, 0, ...]}` and the Transformation Ring `{"level": [20, 20, 20, 50, ...]}`. The base value of that requirement is not used. The bmd import keeps it |
-| `classRequirements` | Per class (`darkWizard`, `darkKnight`, `fairyElf`, `magicGladiator`, `darkLord`, `summoner`, `rageFighter`): 0 = cannot use, otherwise the class level needed |
+| `classRequirements` | Per class (`darkWizard`, `darkKnight`, `fairyElf`, `magicGladiator`, `darkLord`, `summoner`, `rageFighter`): 0 = cannot use, otherwise the class level needed, 1 to 3 (first to third class; above 3 is a warning, as no character reaches it) |
 | `resistances` | `ice`, `poison`, `lightning`, `fire`, `earth`, `wind`, `water` |
 | `tradable`, `droppable`, `storable`, `sellable`, `personalShopSellable`, `repairable` | What a player may do with the item; see [Rules](#rules). Only `false` is written |
 | `droppableWhileRented`, `personalShopSellableWhileRented`, `sellableWhenRentalExpired` | What changes for a rented item; see [Rules](#rules) |
@@ -285,7 +285,10 @@ A layout line has:
 - **`forEachClass`**: `true` writes the line once for each class the item's
   `classRequirements` name, in their order, with `{className}` the class at the
   level the item needs (Dark Knight, Blade Knight or Blade Master) and the state
-  `classUsable` for that class. The default layout's class lines are such a
+  `classUsable` for that class. A level the class skips names its next one,
+  the first that can use the item (a Magic Gladiator's `2` is the Dual
+  Master); a level above `3` names none and writes no line, and the item data
+  warns about it. The default layout's class lines are such a
   line: white for the hero who can use the item, dark red for the others, and
   none when every class can from its first class (`allClasses`).
 

@@ -149,6 +149,26 @@ TEST_CASE("An item file entry without a name is kept through read and write [dat
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "number"));
 }
 
+// A class level goes up to the third class: above it no character of the class can use the item, and its tooltip
+// names no class for it.
+TEST_CASE("A class requirement above the third class warns [data][items]")
+{
+    const std::span<const char* const> keys = GetClassKeys();
+    const auto darkLord = static_cast<size_t>(
+        std::find_if(keys.begin(), keys.end(), [](const char* key) { return std::string(key) == "darkLord"; }) -
+        keys.begin());
+    REQUIRE(darkLord < keys.size());
+    ItemDefinition kris = MakeKris();
+    kris.classRequirements[darkLord] = 3;
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{kris}, issues);
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "classRequirements.darkLord"));
+    kris.classRequirements[darkLord] = 4;
+    ValidateItems(std::vector<ItemDefinition>{kris}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "classRequirements.darkLord"));
+    CHECK_FALSE(HasFatal(issues));
+}
+
 TEST_CASE("An empty item name is not an entry without a name [data][items]")
 {
     for (const std::string name : {R"("")", "{}", R"({"en": ""})"})

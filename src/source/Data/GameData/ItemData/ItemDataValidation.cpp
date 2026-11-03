@@ -4,6 +4,7 @@
 #include "ItemAttributeConversion.h"
 #include "ItemDescriptionPlaceholders.h"
 #include "ItemEnumNames.h"
+#include "ItemJsonFormat.h"
 #include "ItemType.h"
 #include "Core/Text/Utf8.h"
 
@@ -325,6 +326,29 @@ void ValidatePotionPriority(const ItemDefinition& definition, std::vector<ItemDa
     }
 }
 
+// The highest level an item can need of a class: its third class.
+constexpr BYTE ThirdClassLevel = 3;
+
+// A class requirement above the third class: no character of that class can use the item, and its tooltip names no
+// class for it.
+void ValidateClassRequirements(const ItemDefinition& definition, std::vector<ItemDataIssue>& issues)
+{
+    const std::span<const char* const> keys = GetClassKeys();
+    for (size_t index = 0; index < definition.classRequirements.size() && index < keys.size(); ++index)
+    {
+        const BYTE level = definition.classRequirements[index];
+        if (level > ThirdClassLevel)
+        {
+            const std::string field = std::string("classRequirements.") + keys[index];
+            AddIssue(issues, ItemDataIssueSeverity::Warning, definition,
+                     "is " + std::to_string(level) +
+                         ", above the third class (3): no character of the class can use the item, and its tooltip "
+                         "names no class for it",
+                     field.c_str());
+        }
+    }
+}
+
 // The kinds the original client named by these tags in its list of items without class lines
 // (IsRequireClassRenderItem); every item of them uses a layout without the class lines.
 constexpr ItemTag KindsWithoutClassLines[] = {
@@ -382,6 +406,7 @@ void ValidateItems(std::span<const ItemDefinition> items, std::vector<ItemDataIs
         ValidateDescription(definition, issues);
         ValidateSlot(definition, issues);
         ValidatePotionPriority(definition, issues);
+        ValidateClassRequirements(definition, issues);
         ValidateExcellentBonus(definition, issues);
         ValidateExcellentRaisesLevel(definition, issues);
         ValidateRequirementsByLevel(definition, issues);

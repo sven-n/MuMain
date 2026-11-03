@@ -67,6 +67,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "Network/Server/ServerListManager.h"
 #include <algorithm>
+#include <array>
 #include <time.h>
 #include <unordered_set>
 #include <vector>
@@ -1408,13 +1409,22 @@ void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, in
 namespace
 {
 // A class at the level an item needs of it, as the class lines name it ({className}: "Can be equipped by Dark
-// Knight"); nullptr for a level the class doesn't have.
+// Knight"). A level the class skips names its next one, the first that can use the item (a Magic Gladiator's 2 is
+// the Dual Master); nullptr above the third class, which no character reaches.
 const wchar_t* ClassLineName(int characterClass, int classLevel)
 {
     const auto byLevel = [classLevel](const wchar_t* first, const wchar_t* second,
                                       const wchar_t* third) -> const wchar_t*
     {
-        return classLevel == 1 ? first : classLevel == 2 ? second : classLevel == 3 ? third : nullptr;
+        const std::array<const wchar_t*, 3> names = {first, second, third};
+        for (size_t level = static_cast<size_t>(std::max(classLevel, 1)); level <= names.size(); ++level)
+        {
+            if (names[level - 1] != nullptr)
+            {
+                return names[level - 1];
+            }
+        }
+        return nullptr;
     };
     switch (characterClass)
     {
@@ -1487,6 +1497,11 @@ void WriteItemTooltipClassRows(const Data::Items::TooltipLayoutLine& line, const
         }
         ItemTooltipValues classValues = values;
         classValues.className = ClassLineName(characterClass, needed);
+        // A level no character reaches names no class (the item data warns about it).
+        if (classValues.className == nullptr)
+        {
+            continue;
+        }
         classValues.classUsable = characterClass == heroClass && needed <= heroClassLevel;
         WriteItemTooltipLayoutRow(line, item, level, classValues);
     }
