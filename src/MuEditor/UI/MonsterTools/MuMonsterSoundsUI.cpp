@@ -204,7 +204,10 @@ bool MuMonsterSoundsUI::RememberSelection()
 
 void MuMonsterSoundsUI::FollowSelection(const MonsterDefinition* monster)
 {
-    if (!RememberSelection() || monster == nullptr)
+    // A set shown that is gone (an undo of its adding or renaming, a revert)
+    // gives way to the monster's too.
+    const bool shownGone = !m_shown.empty() && g_MonsterSoundSetDatabase.Find(m_shown) == nullptr;
+    if ((!RememberSelection() && !shownGone) || monster == nullptr)
     {
         return;
     }

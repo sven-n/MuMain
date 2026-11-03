@@ -843,6 +843,21 @@ TEST_CASE("Monster Sounds shows the set Data Checks or a cue tag asks for, also 
     draw();
     CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) != nullptr);
 
+    // A set that is gone (its adding undone) gives way to the monster's set.
+    // The step names no monster, so the undo selects none.
+    g_MonsterEdits.GetHistory().Clear();
+    Data::Monsters::MonsterSoundSet added;
+    added.name = "New sound set";
+    REQUIRE(g_MonsterEdits.SetSoundSet("Add", added, -1));
+    g_MuMonsterSoundsUI.ShowEvent(added.name, std::nullopt);
+    draw();
+    CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) == nullptr);
+    REQUIRE(g_MonsterEdits.Undo());
+    REQUIRE(g_MonsterSoundSetDatabase.Find(added.name) == nullptr);
+    draw();
+    CHECK(g_MuMonsterSoundsUI.GetShownModelDraft(MODEL_HOUND) != nullptr);
+    g_MonsterEdits.GetHistory().Clear();
+
     g_MonsterSelection.Select(MonsterSelection::NoMonster);
     g_MonsterModelDatabase.Build({});
     g_MonsterSoundSetDatabase.Build({});

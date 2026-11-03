@@ -49,7 +49,7 @@ private:
     // since it was remembered last.
     bool RememberSelection();
     // Shows the set of the selected monster's look once the selection or the
-    // look changed.
+    // look changed, or the set shown is gone.
     void FollowSelection(const Data::Monsters::MonsterDefinition* monster);
     void RenderMonster(const Data::Monsters::MonsterDefinition& monster);
     void RenderVariants(const Data::Monsters::MonsterDefinition& monster);
