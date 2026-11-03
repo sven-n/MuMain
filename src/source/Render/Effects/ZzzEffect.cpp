@@ -531,6 +531,7 @@ void CreateEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int Sub
             case MODEL_SPEARSKILL:
                 o->LifeTime = 20;
                 o->Scale = 1.5f;
+                o->BlendMeshLight = 1.f;
                 o->Direction[0] = 5.0f * sinf(o->Angle[2] * Q_PI / 180.0f);
                 o->Direction[1] = -5.0f * cosf(o->Angle[2] * Q_PI / 180.0f);
                 break;
@@ -7690,78 +7691,12 @@ void MoveEffects()
     g_SkillEffects.MoveEffects();
 }
 
-namespace
+// An effect drawn as its owner's weapon draws a copy that takes the weapon item's attributes.
+void RenderWheelWeapon(const OBJECT* effect)
 {
-// An effect drawn as its owner's weapon takes the weapon item's attributes for the draw, and gets its own back after.
-class DrawnAsWeapon
-{
-public:
-    explicit DrawnAsWeapon(OBJECT* o) : m_o(o) {}
-    ~DrawnAsWeapon()
-    {
-        Restore();
-    }
-    DrawnAsWeapon(const DrawnAsWeapon&) = delete;
-    DrawnAsWeapon& operator=(const DrawnAsWeapon&) = delete;
-
-private:
-    void Restore()
-    {
-        m_o->Type = m_type;
-        m_o->Alpha = m_alpha;
-        m_o->AlphaEnable = m_alphaEnable;
-        m_o->AnimationFrame = m_animationFrame;
-        m_o->PriorAnimationFrame = m_priorAnimationFrame;
-        m_o->CurrentAction = m_currentAction;
-        m_o->PriorAction = m_priorAction;
-        m_o->BlendMesh = m_blendMesh;
-        m_o->BlendMeshLight = m_blendMeshLight;
-        m_o->BlendMeshTexCoordU = m_blendMeshTexCoordU;
-        m_o->BlendMeshTexCoordV = m_blendMeshTexCoordV;
-        m_o->CollisionRange = m_collisionRange;
-        m_o->EnableShadow = m_enableShadow;
-        m_o->Gravity = m_gravity;
-        m_o->HiddenMesh = m_hiddenMesh;
-        m_o->LightEnable = m_lightEnable;
-        m_o->Scale = m_scale;
-        m_o->Velocity = m_velocity;
-        for (int i = 0; i < 3; ++i)
-        {
-            m_o->Light[i] = m_light[i];
-            m_o->Position[i] = m_position[i];
-            m_o->Angle[i] = m_angle[i];
-        }
-    }
-
-    OBJECT* m_o;
-    // The object's own values, taken before it draws.
-    decltype(OBJECT::Type) m_type = m_o->Type;
-    decltype(OBJECT::Alpha) m_alpha = m_o->Alpha;
-    decltype(OBJECT::AlphaEnable) m_alphaEnable = m_o->AlphaEnable;
-    decltype(OBJECT::AnimationFrame) m_animationFrame = m_o->AnimationFrame;
-    decltype(OBJECT::PriorAnimationFrame) m_priorAnimationFrame = m_o->PriorAnimationFrame;
-    decltype(OBJECT::CurrentAction) m_currentAction = m_o->CurrentAction;
-    decltype(OBJECT::PriorAction) m_priorAction = m_o->PriorAction;
-    decltype(OBJECT::BlendMesh) m_blendMesh = m_o->BlendMesh;
-    decltype(OBJECT::BlendMeshLight) m_blendMeshLight = m_o->BlendMeshLight;
-    decltype(OBJECT::BlendMeshTexCoordU) m_blendMeshTexCoordU = m_o->BlendMeshTexCoordU;
-    decltype(OBJECT::BlendMeshTexCoordV) m_blendMeshTexCoordV = m_o->BlendMeshTexCoordV;
-    decltype(OBJECT::CollisionRange) m_collisionRange = m_o->CollisionRange;
-    decltype(OBJECT::EnableShadow) m_enableShadow = m_o->EnableShadow;
-    decltype(OBJECT::Gravity) m_gravity = m_o->Gravity;
-    decltype(OBJECT::HiddenMesh) m_hiddenMesh = m_o->HiddenMesh;
-    decltype(OBJECT::LightEnable) m_lightEnable = m_o->LightEnable;
-    decltype(OBJECT::Scale) m_scale = m_o->Scale;
-    decltype(OBJECT::Velocity) m_velocity = m_o->Velocity;
-    vec3_t m_light = {m_o->Light[0], m_o->Light[1], m_o->Light[2]};
-    vec3_t m_position = {m_o->Position[0], m_o->Position[1], m_o->Position[2]};
-    vec3_t m_angle = {m_o->Angle[0], m_o->Angle[1], m_o->Angle[2]};
-};
-} // namespace
-
-void RenderWheelWeapon(OBJECT* o)
-{
-    const DrawnAsWeapon drawn(o);
+    OBJECT weapon = *effect;
+    const Random::DrawnAs drawnAs(&weapon, effect);
+    OBJECT* o = &weapon;
     o->Angle[2] += o->Direction[2];
     o->Angle[1] = 90;
     o->Position[2] += 100.f;
@@ -7784,11 +7719,13 @@ void RenderWheelWeapon(OBJECT* o)
     RenderPartObject(o, Type, NULL, Light, Alpha, o->Owner->WeaponLevel, 0, 0, true, true, true);
 }
 
-void RenderFuryStrike(OBJECT* o)
+void RenderFuryStrike(const OBJECT* effect)
 {
-    if (o->LifeTime > 10.f && o->Kind == 0)
+    if (effect->LifeTime > 10.f && effect->Kind == 0)
     {
-        const DrawnAsWeapon drawn(o);
+        OBJECT weapon = *effect;
+        const Random::DrawnAs drawnAs(&weapon, effect);
+        OBJECT* o = &weapon;
         vec3_t p, Light, Angle;
         float Alpha = o->Alpha;
 
@@ -7801,7 +7738,6 @@ void RenderFuryStrike(OBJECT* o)
         b->CurrentAction = o->CurrentAction;
         VectorCopy(o->Position, b->BodyOrigin);
 
-        float TempType = o->Type;
         float tempGravity = o->Gravity;
         o->Type = Type;
         ItemObjectAttribute(o);
@@ -7813,18 +7749,13 @@ void RenderFuryStrike(OBJECT* o)
 
         b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, Angle, o->HeadAngle, false, false);
         RenderPartObject(o, Type, NULL, Light, Alpha, o->Owner->WeaponLevel, 0, 0, true, true, true);
-
-        o->Type = (short)TempType;
     }
 }
 
-void RenderSkillSpear(OBJECT* o)
+void RenderSkillSpear(const OBJECT* o)
 {
     BMD* b = &Models[MODEL_SPEARSKILL];
     b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, false);
-    //o->BlendMeshLight = .5f;
-    //RenderPartObject(o,MODEL_SPEARSKILL,NULL,o->Light,( float)( o->LifeTime) * 0.05f,0,0,true,true,true,false,RENDER_BRIGHT|RENDER_TEXTURE);
-    o->BlendMeshLight = 1.0f;
     vec3_t Light;
     for (int i = 0; i < 3; ++i)
         Light[i] = o->Light[i] * o->LifeTime * 0.05f;
@@ -7860,7 +7791,7 @@ void RenderEffects(bool bRenderBlendMesh)
 
     for (int i = 0; i < iEffectSize; ++i)
     {
-        OBJECT* o;
+        const OBJECT* o;
         if (i < MAX_EFFECTS)
         {
             o = &Effects[i];
@@ -8142,10 +8073,10 @@ void RenderEffects(bool bRenderBlendMesh)
                     RenderObject(o);
 
                     // Its mirror image above the gate.
-                    const float height = o->Position[2];
-                    o->Position[2] = o->StartPosition[2] + 400.f - (o->Position[2] - o->StartPosition[2]);
-                    RenderObject(o);
-                    o->Position[2] = height;
+                    OBJECT mirror = *o;
+                    const Random::DrawnAs drawnAs(&mirror, o);
+                    mirror.Position[2] = o->StartPosition[2] + 400.f - (o->Position[2] - o->StartPosition[2]);
+                    RenderObject(&mirror);
                 }
                 break;
 
@@ -8338,7 +8269,7 @@ void RenderEffects(bool bRenderBlendMesh)
                 {
                     if (o->SubType == 0)
                     {
-                        OBJECT* pObject = o;
+                        const OBJECT* pObject = o;
                         BMD* pModel = &Models[pObject->Type];
                         OBJECT* pOwner = pObject->Owner;
                         BMD* pOwnerModel = &Models[pOwner->Type];

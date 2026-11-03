@@ -3333,12 +3333,12 @@ float ModelScreenHeight(const Render::Models::Gltf::SkinnedModel& model, const O
 }
 
 // The LOD each object's model file was drawn with, this frame and the last: the draw's hysteresis history.
-std::unordered_map<const OBJECT*, unsigned char> s_drawnLods;
-std::unordered_map<const OBJECT*, unsigned char> s_lastFrameLods;
+std::unordered_map<const void*, unsigned char> s_drawnLods;
+std::unordered_map<const void*, unsigned char> s_lastFrameLods;
 
-int DrawnLod(const std::unordered_map<const OBJECT*, unsigned char>& lods, const OBJECT& o)
+int DrawnLod(const std::unordered_map<const void*, unsigned char>& lods, const OBJECT& o)
 {
-    const auto it = lods.find(&o);
+    const auto it = lods.find(Random::DrawKey(&o));
     return it != lods.end() ? it->second : 0;
 }
 
@@ -3357,7 +3357,7 @@ public:
         }
         const int lod = Render::Models::SelectLod(ModelScreenHeight(*skinned, o), DrawnLod(s_lastFrameLods, o),
                                                   skinned->lodSettings, skinned->LodCount());
-        s_drawnLods[&o] = static_cast<unsigned char>(lod);
+        s_drawnLods[Random::DrawKey(&o)] = static_cast<unsigned char>(lod);
         model_.ActiveLod = lod;
     }
     ~ModelLodScope()
@@ -3445,6 +3445,7 @@ void RenderCharacter_AfterImage(const CHARACTER* pCha, const PART_t* pPart, vec3
     };
     const Ghost ghosts[] = {{0.3f, AniInterval1}, {0.5f, AniInterval2}};
     OBJECT ghost = *pObj;
+    const Random::DrawnAs drawnAs(&ghost, pObj);
     for (const Ghost& g : ghosts)
     {
         const float frame = pObj->AnimationFrame - g.interval;
@@ -4417,7 +4418,7 @@ void Draw_RenderObject_AfterCharacter(const OBJECT* o, bool Translate, int Selec
 namespace
 {
 // Draw-side bookkeeping for one frame, not object state.
-std::unordered_set<const OBJECT*> s_sentAfterCharacter;
+std::unordered_set<const void*> s_sentAfterCharacter;
 } // namespace
 
 namespace
@@ -4453,12 +4454,12 @@ void BeginObjectDraws()
 
 void SendAfterCharacter(const OBJECT* o)
 {
-    s_sentAfterCharacter.insert(o);
+    s_sentAfterCharacter.insert(Random::DrawKey(o));
 }
 
 bool IsSentAfterCharacter(const OBJECT* o)
 {
-    return s_sentAfterCharacter.contains(o);
+    return s_sentAfterCharacter.contains(Random::DrawKey(o));
 }
 
 void RenderObjects_AfterCharacter()
@@ -6070,81 +6071,6 @@ void SaveTrapObjects(wchar_t* FileName)
     }
     fwprintf(fp, L"end\n");
     fclose(fp);
-}
-
-OBJECT  g_CloudsLow;
-void    RenderCloudLowLevel(int index, int Type)
-{
-    OBJECT* o = &g_CloudsLow;
-
-    o->Alpha = 1.f;
-    o->Live = true;
-    o->Type = Type;
-    o->SubType = 0;
-    o->Scale = 10.f;
-
-    if (o->LifeTime != 10)
-    {
-        Vector(0.f, 0.f, 0.f, o->StartPosition);
-        Vector(0.f, 0.f, 0.f, o->Position);
-    }
-    o->LifeTime = 10;
-
-    Vector(0.f, 0.f, 0.f, o->Angle);
-    Vector(0.f, 0.f, 0.f, o->HeadAngle);
-    Vector(0.f, 0.f, 0.f, o->HeadTargetAngle);
-
-    o->EnableBoneMatrix = false;
-    o->CurrentAction = 0;
-    o->PriorAction = 0;
-    o->AnimationFrame = 1.f;
-    o->PriorAnimationFrame = 1.f;
-
-    o->BlendMeshLight = 1.f;
-    o->LightEnable = true;
-
-    o->HiddenMesh = -1;
-
-    if (index != 0)
-    {
-        vec3_t  delPosition;
-        delPosition[0] = (Hero->Object.Position[0] - o->Position[0]);
-        delPosition[1] = (Hero->Object.Position[1] - o->Position[1]);
-        delPosition[2] = 0.f;
-
-        float Matrix[3][4];
-        vec3_t angle;
-
-        Vector(0.f, 0.f, -45.f, angle);
-        AngleMatrix(angle, Matrix);
-        VectorRotate(delPosition, Matrix, delPosition);
-
-        if (index == 1)
-        {
-            o->StartPosition[0] -= sinf(WorldTime * 0.0002f) * 0.001f;
-            o->StartPosition[1] += cosf(WorldTime * 0.0002f) * 0.001f;
-        }
-        else
-        {
-            o->StartPosition[0] += sinf(WorldTime * 0.0002f) * 0.001f;
-            o->StartPosition[1] -= cosf(WorldTime * 0.0002f) * 0.001f;
-        }
-
-        if (index == 1)
-        {
-            o->BlendMesh = -1;
-        }
-        else
-        {
-            o->BlendMeshLight = 1.f;
-            o->BlendMesh = 0;
-        }
-        o->BlendMeshTexCoordU = o->StartPosition[0];
-        o->BlendMeshTexCoordV = o->StartPosition[1];
-        Vector(Hero->Object.Position[0], Hero->Object.Position[1], Hero->Object.Position[2] - 150.f + (index * 20), o->Position);
-
-        RenderObject(o);
-    }
 }
 
 void ClearItems()
@@ -8421,7 +8347,7 @@ void RenderBoundingBox(const OBJECT* pObj, std::uint32_t darkColor, std::uint32_
 // the camera - leaving only the sliver that pokes out past the real
 // silhouette, i.e. a thin outline shaped like the actual model instead of a
 // bounding-box cube.
-void RenderObjectOutline(OBJECT* pObj, std::uint32_t color)
+void RenderObjectOutline(const OBJECT* pObj, std::uint32_t color)
 {
     if (pObj == nullptr || pObj->Type < 0)
         return;

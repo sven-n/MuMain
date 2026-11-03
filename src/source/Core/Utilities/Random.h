@@ -76,6 +76,20 @@ void NextDrawFrame();
 /// a frame draws the same, and no sequence the update draws from moves.
 std::int32_t DrawRand(const void* key, std::uint32_t salt);
 
+/// While it lives, a copy drawn in place of an object is keyed as that object: its draw randomness and the draw's
+/// records of the object follow the object, not the copy's address.
+class DrawnAs
+{
+public:
+    DrawnAs(const void* copy, const void* source);
+    ~DrawnAs();
+    DrawnAs(const DrawnAs&) = delete;
+    DrawnAs& operator=(const DrawnAs&) = delete;
+};
+
+/// The key a draw records `key` under: the object a copy is drawn as, else the key itself.
+[[nodiscard]] const void* DrawKey(const void* key);
+
 /// FpsCheck for a draw, from DrawRand: the same in every pass of a frame.
 bool DrawFpsCheck(std::int32_t referenceFrames, double animationFactor, const void* key, std::uint32_t salt);
 
