@@ -24,7 +24,7 @@ $env:VCPKG_ROOT = "C:\vcpkg"
 # Configure (pick one)
 cmake --preset windows-x64                # 64-bit player build
 cmake --preset windows-x64-mueditor       # 64-bit + editor + control socket
-cmake --preset windows-x64-in-game-tests  # 64-bit player build + control socket + in-game tester
+cmake --preset windows-x64-in-game-tests  # 64-bit + control socket + in-game tester, no editor
 cmake --preset windows-x86                # 32-bit player build
 cmake --preset windows-x86-mueditor       # 32-bit + editor + control socket
 

@@ -82,9 +82,9 @@ Native builds also build the network library and stage game assets beside the ex
 Run from that output directory so the client finds its data and libraries.
 
 Player presets disable the editor and control socket. The `-mueditor` presets enable
-both, plus the in-game tester. The `-in-game-tests` presets are player builds plus the
-control socket and the [in-game tester](docs/in-game-tests.md). These configure-time
-choices are independent of Debug, Release or RelWithDebInfo; see
+both, plus the in-game tester. The `-in-game-tests` presets are developer builds without
+the editor: the control socket and the [in-game tester](docs/in-game-tests.md). These
+configure-time choices are independent of Debug, Release or RelWithDebInfo; see
 [build options](docs/build/README.md#build-options).
 
 ## Running the client

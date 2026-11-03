@@ -106,7 +106,7 @@
     {
       "name": "windows-x64-in-game-tests",
       "displayName": "Windows x64 In-game tests",
-      "description": "Player build plus the control socket and the in-game tester, no editor (docs/in-game-tests.md)",
+      "description": "Developer build without the editor: the control socket and the in-game tester (docs/in-game-tests.md)",
       "inherits": ["in-game-tests-base", "windows-x64"]
     },
     {
@@ -151,7 +151,7 @@
     {
       "name": "linux-x64-in-game-tests",
       "displayName": "Linux x86_64 In-game tests",
-      "description": "Native Linux x64 player build plus the control socket and the in-game tester, no editor (docs/in-game-tests.md)",
+      "description": "Native Linux x64 developer build without the editor: the control socket and the in-game tester (docs/in-game-tests.md)",
       "inherits": ["in-game-tests-base", "linux-x64"]
     },
     {
@@ -185,7 +185,7 @@
     {
       "name": "macos-arm64-in-game-tests",
       "displayName": "macOS arm64 In-game tests",
-      "description": "Native macOS Apple Silicon player build plus the control socket and the in-game tester, no editor (docs/in-game-tests.md)",
+      "description": "Native macOS Apple Silicon developer build without the editor: the control socket and the in-game tester (docs/in-game-tests.md)",
       "inherits": ["in-game-tests-base", "macos-arm64"]
     }
   ],

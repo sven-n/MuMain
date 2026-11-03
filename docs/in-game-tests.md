@@ -30,7 +30,7 @@ The rest of this page explains each part.
 
   | Preset | What it builds |
   |---|---|
-  | `windows-x64-in-game-tests`, `linux-x64-in-game-tests`, `macos-arm64-in-game-tests` | the player build plus the control socket and the tester, without the editor |
+  | `windows-x64-in-game-tests`, `linux-x64-in-game-tests`, `macos-arm64-in-game-tests` | the developer build without the editor: the control socket and the tester |
   | `windows-x64-mueditor`, `windows-x86-mueditor`, `linux-x64-mueditor` | the developer build with the editor, the control socket and the tester |
 
   The in-game tests presets have two build presets each: `-release` builds,
