@@ -58,6 +58,9 @@
 namespace Data::Items
 {
 constexpr int ItemTooltipJsonFormatVersion = 2;
+// The oldest version this client reads. Version 1 is from before the tooltip's code lines became layout lines (D72):
+// its layout has neither those lines nor the sections they go between.
+constexpr int ItemTooltipJsonOldestFormatVersion = 2;
 constexpr const char* ItemTooltipFileName = "Tooltip.json";
 // The layout of an item that names none.
 constexpr const char* DefaultTooltipLayout = "default";

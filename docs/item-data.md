@@ -359,7 +359,9 @@ the options directly. Every item with `elitePotion`, `buffScroll`, `elixir`,
 the class lines, as the original client's list did; one whose layout has them
 is a warning.
 
-**Errors** when the item data loads: a `@name` that is not a shared text (in a
+**Errors** when the item data loads: a `Tooltip.json` of `formatVersion` 1,
+from before the code lines became layout lines (its layout lacks them and their
+sections; copy its changes into this client's file), a `@name` that is not a shared text (in a
 layout or a description), an entry of `when` that is neither a value, a
 comparison of a value with a whole number, a state nor a known tag, an unknown
 color, a placeholder that is neither built in nor named by the line's

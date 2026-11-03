@@ -226,6 +226,20 @@ TEST_CASE("A tooltip layout has the six sections once each, in their order [data
               .Has(ItemDataIssueSeverity::Fatal, "layouts[0].lines[1].section", "must be one of the sections"));
 }
 
+// A file of version 1 (before the code lines became layout lines) is refused for its version, not read into errors
+// about the sections and lines it lacks.
+TEST_CASE("A tooltip file of version 1 is refused for its version [data][items][tooltip]")
+{
+    const ReadResult result = Read(R"({"formatVersion": 1, "layouts": [{"name": "default", "lines": [
+        {"section": "name"}, {"section": "description"},
+        {"text": "@durability", "when": ["hasDurability", "!tag:noDurabilityLine"]},
+        {"section": "classes"}, {"section": "options"}]}]})");
+    CHECK(result.Has(ItemDataIssueSeverity::Fatal, "formatVersion", "version 1 is from before"));
+    CHECK(result.issues.size() == 1);
+    CHECK(Read(R"({"formatVersion": 3, "layouts": []})")
+              .Has(ItemDataIssueSeverity::Fatal, "formatVersion", "this client reads up to 2"));
+}
+
 TEST_CASE("A tooltip file needs the default layout [data][items][tooltip]")
 {
     const ReadResult result = Read(R"({"formatVersion": 2, "layouts": []})");

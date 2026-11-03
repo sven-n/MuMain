@@ -852,6 +852,17 @@ void ReadItemTooltipJson(std::string_view text, const std::string& source, ItemT
     {
         return;
     }
+    // Read as this version, an older file only gives errors about what it lacks.
+    if (root[Keys::FormatVersion].get<int>() < ItemTooltipJsonOldestFormatVersion)
+    {
+        Json::AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::FormatVersion,
+                           "version " + root[Keys::FormatVersion].dump() +
+                               " is from before the tooltip's code lines became layout lines: its layout lacks them "
+                               "(the first row, the class lines, the boots' and gloves' texts, a timed item's end) "
+                               "and their sections, and names the tags they replaced; copy your changes into the "
+                               "Tooltip.json of this client (docs/item-data.md, Tooltip layouts)");
+        return;
+    }
     ItemTooltipReader(source, issues).Read(root, file);
 }
 void ValidateTooltipTextLocales(const ItemTooltipFile& file, std::span<const char* const> uiLocales,
