@@ -17,8 +17,8 @@ std::optional<int> FindSlot(const Data::Monsters::MonsterDefinition& monster);
 
 // The look the tools show of a monster with random variants (Q-MN83): -1 for
 // the entry's model, else the index of the variant whose model is shown. It
-// goes back to the entry when another monster is selected or the variant is
-// gone.
+// goes back to the entry when another monster is selected (MonsterSelection::
+// Select forgets it) or the variant is gone.
 int GetShownVariant(const Data::Monsters::MonsterDefinition& monster);
 void SetShownVariant(int number, int variant);
 

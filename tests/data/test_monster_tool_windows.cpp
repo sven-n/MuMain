@@ -932,6 +932,17 @@ TEST_CASE("The shown look of a monster with random variants is the entry's until
     CHECK(GetShownVariant(other) == -1);
     SetShownVariant(163, 3);
     CHECK(FindShownSlot(elf) == MODEL_CHAOS_CASTLE_ELF);
+
+    // Another monster selected: the entry's look also when the monster is
+    // selected again; the same one selected again (an undo) keeps the look.
+    g_MonsterSelection.Select(163);
+    SetShownVariant(163, 0);
+    g_MonsterSelection.Select(163);
+    CHECK(GetShownVariant(elf) == 0);
+    g_MonsterSelection.Select(165);
+    g_MonsterSelection.Select(163);
+    CHECK(GetShownVariant(elf) == -1);
+    g_MonsterSelection.Select(MonsterSelection::NoMonster);
     SetShownVariant(-1, -1);
     g_MonsterModelDatabase.Build({});
 }
