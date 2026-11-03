@@ -51,6 +51,7 @@ private:
     // At least MAX_MESH (ZzzBMD.h).
     static constexpr std::size_t MeshSlots = 64;
 
+    void DrawSeeThrough(const Render::ModelDrawing::MeshDraw& draw);
     void Pick(const Render::ModelDrawing::MeshDraw& draw);
 
     Render::ModelDrawing::ModelDrawer& m_next;

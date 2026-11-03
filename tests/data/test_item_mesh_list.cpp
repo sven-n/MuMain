@@ -13,9 +13,13 @@
 #include "Data/GameData/ItemData/ItemModelDefinition.h"
 #include "Render/Models/ModelDraw.h"
 #include "Render/Models/ZzzBMD.h"
+#include "Render/Sprites/GlobalBitmap.h"
+#include "Render/Sprites/GpuUploadSkip.h"
 #include "Render/Sprites/TextureScript.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <array>
+#include <cstdint>
 #include <cstring>
 #include <memory>
 #include <optional>
@@ -81,6 +85,11 @@ public:
         std::strncpy(m_textures[mesh].FileName, name, sizeof(m_textures[mesh].FileName) - 1);
     }
 
+    void SetLoadedTexture(int mesh, GLuint texture)
+    {
+        m_indexes[mesh] = texture;
+    }
+
 private:
     std::vector<Mesh_t> m_meshes;
     std::vector<Texture_t> m_textures;
@@ -101,14 +110,43 @@ public:
     void DrawMesh(const MeshDraw& draw) override
     {
         draws.push_back(draw);
+        alphaTests.push_back(glIsEnabled(GL_ALPHA_TEST) != 0);
     }
 
     void DrawShadow(const Render::ModelDrawing::ShadowDraw&) override {}
 
     std::vector<MeshDraw> draws;
+    // Whether the alpha test was on for each draw.
+    std::vector<bool> alphaTests;
 
 private:
     bool m_drawsLater;
+};
+
+// A 2 x 2 RGBA texture with a pixel the alpha test drops, loaded without a GPU.
+class TextureWithHoles
+{
+public:
+    static constexpr int Size = 2;
+
+    TextureWithHoles()
+    {
+        Render::Sprites::SetGpuUploadsSkipped(true);
+        std::vector<std::uint8_t> rgba(static_cast<std::size_t>(Size) * Size * 4, 255);
+        rgba[3] = 0;
+        index = Bitmaps.LoadImagePixels(L"Data\\Item\\test_mesh_list_holes.tga", rgba, Size, Size, true);
+    }
+
+    ~TextureWithHoles()
+    {
+        Bitmaps.UnloadImage(index, true);
+        Render::Sprites::SetGpuUploadsSkipped(false);
+    }
+
+    TextureWithHoles(const TextureWithHoles&) = delete;
+    TextureWithHoles& operator=(const TextureWithHoles&) = delete;
+
+    GLuint index = 0;
 };
 
 struct DrawerScope
@@ -375,6 +413,41 @@ TEST_CASE("The preview's drawer draws the other meshes of the item's model see-t
     // Another model untouched.
     CHECK(recorder.draws[2].model == &other.Model());
     CHECK(recorder.draws[2].flags == RENDER_TEXTURE);
+}
+
+TEST_CASE("A see-through mesh keeps the holes of its texture [editor][items][mesh_list]")
+{
+    const TextureWithHoles holes;
+    REQUIRE(Bitmaps.FindTexture(holes.index) != nullptr);
+    REQUIRE(Bitmaps.FindTexture(holes.index)->hasHoles);
+    // Meshes 0 and 1 with holes, 2 solid (no texture is loaded under it); 1 is shown.
+    TestModel item(3);
+    for (int mesh = 0; mesh < 3; ++mesh)
+    {
+        item.Mesh(mesh).NumTriangles = 1;
+    }
+    item.SetLoadedTexture(0, holes.index);
+    item.SetLoadedTexture(1, holes.index);
+    DisableAlphaTestRaw();
+    RecordingDrawer recorder;
+    const DrawerScope scope(recorder);
+    {
+        CItemMeshPreviewDrawer drawer(&item.Model(), 1, std::nullopt);
+        drawer.DrawMesh(DrawOf(item.Model(), 0, RENDER_TEXTURE));
+        drawer.DrawMesh(DrawOf(item.Model(), 1, RENDER_TEXTURE));
+        drawer.DrawMesh(DrawOf(item.Model(), 2, RENDER_TEXTURE));
+        drawer.DrawMesh(DrawOf(item.Model(), 0, RENDER_COLOR | RENDER_BRIGHT));
+    }
+
+    REQUIRE(recorder.alphaTests.size() == 4);
+    // Added light with the alpha test on.
+    CHECK(recorder.alphaTests[0]);
+    // The shown mesh as it is, its own draw sets the test.
+    CHECK_FALSE(recorder.alphaTests[1]);
+    CHECK_FALSE(recorder.alphaTests[2]);
+    // A color pass draws no texture.
+    CHECK_FALSE(recorder.alphaTests[3]);
+    CHECK_FALSE(glIsEnabled(GL_ALPHA_TEST));
 }
 
 TEST_CASE("The preview's drawer draws later when the drawer it replaced does [editor][items][mesh_list]")
