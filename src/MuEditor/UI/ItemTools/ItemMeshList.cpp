@@ -51,9 +51,10 @@ void Append(std::string& text, const char* part)
     text += part;
 }
 
-std::string MarksText(const ItemMeshRow& row)
+// The marks in the editor's language now: it can change while the rows stay.
+void BuildMarksText(const ItemMeshRow& row, std::string& marks)
 {
-    std::string marks;
+    marks.clear();
     const std::pair<bool, const char*> all[] = {
         {row.hidden, I18N::Editor::MeshHidden},   {row.glows, I18N::Editor::MeshGlows},
         {row.scrolls, I18N::Editor::MeshScrolls}, {row.noChrome, I18N::Editor::MeshNoChrome},
@@ -66,7 +67,6 @@ std::string MarksText(const ItemMeshRow& row)
             Append(marks, label);
         }
     }
-    return marks;
 }
 
 void RenderTooltip(const ItemMeshRow& row)
@@ -139,12 +139,6 @@ void CItemMeshList::Refresh(int itemType, const BMD& model)
     {
         m_dataVersion = NotRead;
     }
-    m_marks.clear();
-    m_marks.reserve(m_rows.size());
-    for (const ItemMeshRow& row : m_rows)
-    {
-        m_marks.push_back(MarksText(row));
-    }
 }
 
 void CItemMeshList::RenderTable(const ItemModelDefinition& entry)
@@ -197,7 +191,8 @@ void CItemMeshList::RenderRow(std::size_t index, MeshUses uses, bool scrollToKep
     ImGui::TableNextColumn();
     ImGui::TextUnformatted(row.texture.c_str());
     ImGui::TableNextColumn();
-    ImGui::TextUnformatted(m_marks[index].c_str());
+    BuildMarksText(row, m_marksText);
+    ImGui::TextUnformatted(m_marksText.c_str());
     ImGui::TableNextColumn();
     ImGui::TextUnformatted(UsesText(uses).c_str());
 }

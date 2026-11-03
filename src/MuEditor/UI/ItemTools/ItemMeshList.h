@@ -30,7 +30,8 @@ private:
     const std::string& UsesText(MeshUses uses);
 
     std::vector<ItemMeshRow> m_rows;
-    std::vector<std::string> m_marks;
+    // Built again for each row, into one reused string each.
+    std::string m_marksText;
     std::string m_usesText;
     int m_itemType = -1;
     const void* m_meshes = nullptr;
