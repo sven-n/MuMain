@@ -1365,9 +1365,9 @@ number that has a model but no item:
   those models by level (the Box of Luck, the Wizard's Ring, ...); the
   preview and the inventory grid show them at the chosen level, also for
   an item without a model entry.
-- The render style and the item effect, picked from their lists with how
-  many models use each, and the items that use the picked one (a click
-  selects one). What a look is made of is drawing code.
+- **Style and effect**: the render style and the item effect, picked from
+  their lists with how many models use each, and the items that use the
+  picked one (a click selects one). What they are made of is drawing code.
 
 A changed file, texture folder, mesh list or material is opened again
 before the next frame, so the game draws it at once. Models that the game

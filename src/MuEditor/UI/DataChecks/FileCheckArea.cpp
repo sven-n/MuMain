@@ -84,7 +84,7 @@ std::unique_ptr<DataCheckArea> CreateModelFileCheckArea()
 std::unique_ptr<DataCheckArea> CreateLookCheckArea()
 {
     return std::make_unique<FileCheckArea>(
-        &I18N::Editor::Looks,
+        &I18N::Editor::GraphicsLook,
         []
         {
             Render::Look::DiskLookFileSystem files;

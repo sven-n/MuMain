@@ -466,8 +466,11 @@
   <data name="Item data could not be written" xml:space="preserve">
     <value>Die Gegenstandsdateien konnten nicht geschrieben werden. Siehe Konsole.</value>
   </data>
-  <data name="Looks" xml:space="preserve">
-    <value>Aussehen</value>
+  <data name="Style and effect" xml:space="preserve">
+    <value>Stil und Effekt</value>
+  </data>
+  <data name="Graphics look" xml:space="preserve">
+    <value>Grafik-Look</value>
   </data>
   <data name="Meshes" xml:space="preserve">
     <value>Meshes</value>

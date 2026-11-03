@@ -487,8 +487,11 @@
   <data name="Look Save" xml:space="preserve">
     <value>Save</value>
   </data>
-  <data name="Looks" xml:space="preserve">
-    <value>Looks</value>
+  <data name="Style and effect" xml:space="preserve">
+    <value>Style and effect</value>
+  </data>
+  <data name="Graphics look" xml:space="preserve">
+    <value>Graphics look</value>
   </data>
   <data name="Meshes" xml:space="preserve">
     <value>Meshes</value>

@@ -108,7 +108,7 @@ TEST_CASE("Data Checks: a click on a file area's problem opens its window, the m
     Case cases[] = {
         {MuEditor::DataChecks::CreateServerListCheckArea(), &ToolWindows::serverList, I18N::Editor::ServerList},
         {MuEditor::DataChecks::CreateEffectCheckArea(), &ToolWindows::effectBrowser, I18N::Editor::Effects},
-        {MuEditor::DataChecks::CreateLookCheckArea(), &ToolWindows::devEditor, I18N::Editor::Looks},
+        {MuEditor::DataChecks::CreateLookCheckArea(), &ToolWindows::devEditor, I18N::Editor::GraphicsLook},
         {MuEditor::DataChecks::CreateModelFileCheckArea(), nullptr, I18N::Editor::ModelFiles},
     };
     for (Case& each : cases)

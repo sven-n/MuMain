@@ -125,7 +125,7 @@ void CMuItemModelUI::RenderModel(ItemModelDefinition* model, int itemType)
     }
     ModelForms::RenderGround(m_draft, *model);
     ModelForms::RenderGlow(m_draft, *model, m_counts, m_newGlowColor);
-    if (ImGui::CollapsingHeader(I18N::Editor::Looks, ImGuiTreeNodeFlags_DefaultOpen))
+    if (ImGui::CollapsingHeader(I18N::Editor::StyleAndEffect, ImGuiTreeNodeFlags_DefaultOpen))
     {
         ModelForms::RenderLooks(m_draft, *model, m_counts);
     }
