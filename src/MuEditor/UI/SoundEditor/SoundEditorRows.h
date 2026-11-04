@@ -30,7 +30,8 @@ enum class RowSource
 enum class RowProblem
 {
     None,
-    // Its file is not in the client folder: it is silent.
+    // Its file is not in the client folder (ClientSoundFiles, read once and
+    // after RefreshClientSoundFiles): it is silent.
     MissingFile,
     // Another sound of the code loads its file too.
     SharedFile,

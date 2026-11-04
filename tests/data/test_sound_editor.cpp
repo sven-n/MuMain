@@ -131,6 +131,8 @@ public:
         {
             std::ofstream(file, std::ios::binary) << "RIFF";
         }
+        // The rows check files against the list of this folder.
+        MuEditor::SoundEditor::RefreshClientSoundFiles();
     }
     ~EditorScope()
     {
@@ -144,6 +146,7 @@ public:
         std::filesystem::current_path(m_previousFolder);
         std::error_code error;
         std::filesystem::remove_all(m_folder, error);
+        MuEditor::SoundEditor::RefreshClientSoundFiles();
     }
     EditorScope(const EditorScope&) = delete;
     EditorScope& operator=(const EditorScope&) = delete;
@@ -279,6 +282,36 @@ TEST_CASE("Sound Editor: the rows list the code's sounds, the sets' and the map 
     CHECK(MuEditor::SoundEditor::NameOfNumber(static_cast<int>(SOUND_CLICK01)) == "Button click");
     CHECK(MuEditor::SoundEditor::NameOfNumber(static_cast<int>(SOUND_RAIN01)).empty());
     CHECK(MuEditor::SoundEditor::NameOfNumber(rows[4].number) == "Death Tree attack");
+}
+
+// The Sounds tab builds its rows each frame: their files are looked up in the
+// list of the client folder, which is read once, not on the disk per row.
+TEST_CASE("Sound Editor: the rows find a missing file in the client folder's list, which is read once and again "
+          "on request [sounds][editor]")
+{
+    EditorScope scope;
+    g_SoundFileDatabase.Build(
+        std::vector<SoundFile>{Code("SOUND_WIND01", SOUND_WIND01, "Data/Sound/EditorTest/new.wav")});
+    g_MonsterSoundSetDatabase.Build(std::vector<Data::Monsters::MonsterSoundSet>{});
+    g_MapObjectSoundDatabase.Build(std::vector<Data::Maps::MapObjectSound>{});
+    const auto problem = []
+    {
+        const std::vector<SoundRow> rows = MuEditor::SoundEditor::BuildRows();
+        const SoundRow* row = FindRow(rows, "SOUND_WIND01");
+        REQUIRE(row != nullptr);
+        return row->problem;
+    };
+    CHECK(problem() == RowProblem::MissingFile);
+
+    // A file copied in while the editor runs is found once the list is read again.
+    std::ofstream("Data/Sound/EditorTest/new.wav", std::ios::binary) << "RIFF";
+    CHECK(problem() == RowProblem::MissingFile);
+    MuEditor::SoundEditor::RefreshClientSoundFiles();
+    CHECK(problem() == RowProblem::None);
+
+    // Spelled as the game finds it: any case, either slash.
+    CHECK(MuEditor::SoundEditor::IsClientSoundFile("data\\sound\\EditorTest\\NEW.wav"));
+    CHECK_FALSE(MuEditor::SoundEditor::IsClientSoundFile("Data/Sound/EditorTest/gone.wav"));
 }
 
 TEST_CASE("Sound Editor: the session notes where LoadGameSound loaded a sound, at start or for the map being "

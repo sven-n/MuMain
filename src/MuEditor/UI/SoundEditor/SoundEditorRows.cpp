@@ -3,6 +3,7 @@
 #ifdef _EDITOR
 
 #include "SoundEditorRows.h"
+#include "SoundFilePicker.h"
 
 #include "../MuEditor/UI/Common/MapPicker.h"
 #include "Audio/DSPlaySound.h"
@@ -11,7 +12,6 @@
 #include "Audio/SoundNumbers.h"
 #include "Core/Text/Utf8.h"
 #include "Data/GameData/MapData/MapObjectSoundDatabase.h"
-#include "Data/GameData/MonsterData/MonsterModelValidation.h"
 #include "Data/GameData/MonsterData/MonsterSoundSetDatabase.h"
 #include "Data/GameData/SoundData/SoundFileDatabase.h"
 #include "I18N/All.h"
@@ -200,7 +200,7 @@ void FindProblems(std::vector<SoundRow>& rows)
         {
             continue;
         }
-        if (!Data::Monsters::IsInClientFolder(row.file))
+        if (!IsClientSoundFile(row.file))
         {
             row.problem = RowProblem::MissingFile;
         }

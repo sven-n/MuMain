@@ -15,6 +15,7 @@
 #include <iterator>
 #include <optional>
 #include <system_error>
+#include <unordered_set>
 
 namespace MuEditor::SoundEditor
 {
@@ -37,6 +38,19 @@ std::optional<std::vector<std::string>>& Cached()
 {
     static std::optional<std::vector<std::string>> files;
     return files;
+}
+
+// ClientSoundFiles as IsClientSoundFile looks them up: lowered, with '/'.
+std::optional<std::unordered_set<std::string>>& CachedLookup()
+{
+    static std::optional<std::unordered_set<std::string>> files;
+    return files;
+}
+
+std::string LookupKey(std::string file)
+{
+    std::replace(file.begin(), file.end(), '\\', '/');
+    return Lowered(std::move(file));
 }
 } // namespace
 
@@ -73,6 +87,21 @@ const std::vector<std::string>& ClientSoundFiles()
 void RefreshClientSoundFiles()
 {
     Cached().reset();
+    CachedLookup().reset();
+}
+
+bool IsClientSoundFile(const std::string& file)
+{
+    if (!CachedLookup())
+    {
+        std::unordered_set<std::string> files;
+        for (const std::string& listed : ClientSoundFiles())
+        {
+            files.insert(LookupKey(listed));
+        }
+        CachedLookup() = std::move(files);
+    }
+    return CachedLookup()->contains(LookupKey(file));
 }
 
 std::vector<std::string> FilterFiles(const std::vector<std::string>& files, std::string_view text)

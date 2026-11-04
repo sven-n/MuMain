@@ -16,6 +16,11 @@ namespace MuEditor::SoundEditor
 const std::vector<std::string>& ClientSoundFiles();
 void RefreshClientSoundFiles();
 
+// Whether a file the data names ("Data/Sound/w39/b.wav", with either slash)
+// is one of ClientSoundFiles, whatever the case, as the game finds it. The
+// rows ask each frame: the list is read once, not the disk for each file.
+bool IsClientSoundFile(const std::string& file);
+
 // The files below `folder` (as the game names them, "Data/Sound/..."),
 // sorted without case.
 std::vector<std::string> ListSoundFiles(const std::string& folder);
