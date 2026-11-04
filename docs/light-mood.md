@@ -36,7 +36,7 @@ profile's `lighting.highlightKnee`).
 ```json
 {
   "formatVersion": 1,
-  "default": { "base": 0.45, "figures": 0.7, "dynamicGain": 1.7, "background": 1.0, "sun": 0.8,
+  "default": { "base": 0.6, "figures": 0.7, "dynamicGain": 1.7, "background": 1.0, "sun": 0.8,
                "shadowKeep": 0.8, "brightScale": 0.8, "shadeCool": 0.1 },
   "maps": [ { "world": 7, "name": "Atlans", "base": 0.8, "figures": 0.8, "brightScale": 1.0, "sun": 1.0 } ]
 }
@@ -62,11 +62,12 @@ log every problem once (`render` log) and keep the whole world Classic; it
 never applies part of a file.
 
 The shipped values come from side-by-side review rounds over eleven scenes and
-a survey of 26 places: base 0.45 with the shadow keep at
+a survey of 26 places: base 0.6 with the shadow keep at
 0.8, so the shade darkens while sunlit ground keeps most of its light
 (`brightScale` 0.8), figures at 0.7 so characters stay readable, a slightly
 cooler shade, and dynamic lights 1.7 times as strong. Maps that had a weaker
-sun (indoors, underground, event maps) light models from the sun at 1.0. Maps that looked too dark
+sun (indoors, underground, event maps) light models from the sun at 1.0. The enclosed maps have
+no sunlight to keep: base 0.45 and no shadow keep, so their baked light darkens evenly. Maps that looked too dark
 have their own, lighter values (Atlans, Icarus, Raklion, Vulcanus, Karutan);
 Icarus draws no terrain, so its `background` of 0.7 darkens it instead.
 

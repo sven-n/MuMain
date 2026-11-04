@@ -81,7 +81,7 @@ window.
 | Dynamic lights | Skill fade | `dynamic.effectFade` | 0–2 s | 0.05 s | 0.5 s | common |
 | Dynamic lights | Overlapping-light cap | `dynamic.effectCap` | 0–8 | 0.1 | 2.5 | common |
 | Dynamic lights | Shadow darkness | `dynamic.shadowOpacity` | 0–100 % | 5 % | 60 % | common |
-| Dynamic lights | Light shadows | `dynamic.shadowLights` | 0–4 | 1 | 2 | common |
+| Dynamic lights | Light shadows | `dynamic.shadowLights` | 0–4 | 1 | 1 (indoors 2) | common |
 | Dynamic lights | Light wrap | `dynamic.wrap` | 0–0.5 | 0.05 | 0.3 | More settings |
 | Dynamic lights | Map-light smoothing | `dynamic.mapSmoothing` | 0–2 s | 0.05 s | 0.5 s | More settings |
 | Dynamic lights | Maximum skill radius | `dynamic.effectRangeMax` | 0–16 cells | 1 cell | 8 cells | More settings |
@@ -218,7 +218,7 @@ for the whole file.
 | `dynamic.effectFade` | 0.5 | 0 | 0–2 | seconds over which a spell's light fades out after it ends |
 | `dynamic.effectCap` | 2.5 | 0 (none) | 0–8 | the most light overlapping spell lights may add up to |
 | `dynamic.shadowOpacity` | 0.6 | 0.6 | 0–1 | how much characters' shadows darken the ground's own light; overlapping shadows darken it once, and point lights still light shadowed ground |
-| `dynamic.shadowLights` | 2 | 0 | 0–4 | how many of the strongest point lights near a character cast its shadow away from them; each darkens the point light on the ground by its share of the character's point light, and a light at the character casts none |
+| `dynamic.shadowLights` | 1 (`enclosed` 2) | 0 | 0–4 | how many of the strongest point lights near a character cast its shadow away from them; each darkens the point light on the ground by its share of the character's point light, and a light at the character casts none |
 | `dynamic.shadowAngle` | 135 | 180 | 0–360 | not a player slider, since painted shadows cannot follow it; which way characters' shadows fall, in degrees counter-clockwise from world +x; 135 falls away from the sun the maps' baked light was made for, 180 is the Classic direction. The sun turns with it: its shadow map, the terrain's slope shading and the models' light all follow, each keeping the offset the map's baked light has from that sun, so at 135 every map looks as it always did |
 | `bloom.strength` | 1.0 (Icarus 0.3) | 0.6 | 0–2 | how strong the halo around light effects is |
 | `bloom.levelFalloff` | 0.6 | 0.5 | 0.25–1 | how wide the halo spreads |
