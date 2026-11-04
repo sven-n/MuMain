@@ -50,6 +50,9 @@ class WarningLineTests(unittest.TestCase):
             "2026-11-04T01:26:43.0922614Z cc1plus: note: source object is likely at address",
             "WARNHarfBuzz has a Meson port and tries to migrate all the other build systems to it",
             "[WARN] cache miss",
+            "tools/wire_sizes.py:12: SyntaxWarning: invalid escape sequence '\\d'",
+            "x.py:3: UserWarning: the option is deprecated",
+            "warn : NU1603: Package A depends on B (>= 1.0)",
         ):
             with self.subTest(line=line):
                 self.assertIsNotNone(ci_warnings.find_problem(line))

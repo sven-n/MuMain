@@ -30,6 +30,10 @@ PATTERNS = (
     # libxml2's DTD check inside wayland-scanner: not fatal, but the protocol does not match the scanner.
     ("validity error", re.compile(r"\bvalidity error\b")),
     ("Node.js deprecation", re.compile(r"\bDeprecationWarning\b")),
+    # Python's warning categories, e.g. from the build's generator scripts: "gen.py:12: SyntaxWarning: ...".
+    ("Python warning", re.compile(r"\b[A-Z][A-Za-z]*Warning:")),
+    # NuGet outside MSBuild: "warn : NU1603: ...".
+    ("NuGet warning", re.compile(r"^\s*warn\s*:")),
     ("Clang warning count", re.compile(r"\b\d+ warnings? generated\b")),
     # A line that opens with an upper-case WARN: loggers ("WARN ", "[WARN]") and CMake's message() with a mode it
     # does not know, which it prints as text ("message(WARN \"x\")" -> "WARNx").
