@@ -220,7 +220,11 @@ public:
     }
     void PopMatrix() override
     {
-        m_matrices.pop_back();
+        // The water pass pops what the frame pushed before the log stood in.
+        if (m_matrices.size() > 1)
+            m_matrices.pop_back();
+        else
+            m_matrices.back() = " camera";
     }
     void LoadIdentity() override
     {

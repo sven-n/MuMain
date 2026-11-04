@@ -715,3 +715,15 @@ TEST_CASE("A mesh's own alpha threshold drawn later applies to that mesh only [d
     CHECK(later[0].find("alphaRef 0.000000") != std::string::npos);
     CHECK(later[1].find("alphaRef 0.250000") != std::string::npos);
 }
+
+TEST_CASE("The log takes a pass that pops what the frame pushed before the log stood in, as the water pass does "
+          "[draw-parity]")
+{
+    CallLog log;
+    log.PopMatrix();
+    log.PopMatrix();
+    const std::array<mu::Vertex3D, 4> quad{};
+    log.RenderQuad3D(quad, 0u);
+    REQUIRE(log.calls.size() == 1);
+    CHECK(log.calls[0].find("matrix camera") != std::string::npos);
+}
