@@ -52,13 +52,13 @@ void SetActiveBoneTransform(const float (*ptr)[3][4]);
 #define RENDER_CHROME6      0x00010000
 #define RENDER_CHROME7      0x00020000
 #define RENDER_DOPPELGANGER 0x00040000
+// Drawn on the faces turned away from the camera too.
+#define RENDER_TWOSIDED 0x00080000
 #define RENDER_WAVE_EXT		0x10000000
 #define RENDER_BYSCRIPT		0x80000000
 #define RNDEXT_WAVE			1
 #define RNDEXT_OIL          2
 #define RNDEXT_RISE			4
-
-#define MAX_MONSTER_SOUND   10
 
 typedef struct
 {
@@ -226,7 +226,6 @@ public:
     unsigned short PriorAction;
     float         CurrentAnimation;
     short         CurrentAnimationFrame;
-    short         Sounds[MAX_MONSTER_SOUND];
     int           renderCount;
     float		  fTransformedSize;
 
@@ -434,6 +433,15 @@ public:
     void EndRenderCoinHeap(int coinCount);
 
     void RenderBody(int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int HiddenMesh = -1, int Texture = -1);
+    // RenderBody's rules for one mesh, for looks that draw the meshes one by one. Hidden: by its texture script
+    // (_H) or as `hiddenMesh`.
+    [[nodiscard]] bool IsMeshHidden(int mesh, int hiddenMesh) const;
+    // Glowing: by its texture script (_R), or as `blendMesh`.
+    [[nodiscard]] bool IsMeshGlowing(int mesh, int blendMesh) const;
+    // Draws one mesh as RenderBody does: a mesh that glows by its texture script blends itself, and a shadow
+    // script (_DC, _DT) adds its shadow pass.
+    void RenderScriptedMesh(int mesh, int renderFlag, float alpha, int blendMesh, float blendMeshLight,
+                            float blendMeshTexCoordU, float blendMeshTexCoordV, int texture = -1);
     void RenderBodyShadow(int blendMesh = -1, int hiddenMesh = -1, int startMeshNumber = -1,
         int endMeshNumber = -1, void* pClothes = nullptr, int clothesCount = 0, float alpha = 1.f);
     // Moves a skinned position onto the ground for the planar shadow (with `context`).

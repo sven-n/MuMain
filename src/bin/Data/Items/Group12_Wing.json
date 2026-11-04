@@ -696,7 +696,7 @@
         "es": "Joya de Caos",
         "pt": "Joia do caos"
       },
-      "tags": ["jewel", "valuable", "noClassLines"],
+      "tags": ["jewel", "valuable"],
       "description": [
         {
           "text": {
@@ -721,6 +721,7 @@
         }
       ],
       "groundLabels": [{"style": "jewel"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "level": 12,
@@ -909,7 +910,7 @@
         "es": "gema del secreto",
         "pt": "gema do segredo"
       },
-      "tags": ["noClassLines"],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -929,7 +930,7 @@
         "es": "Fardo de Joyas de Bendición",
         "pt": "Lote de Joias da bênção"
       },
-      "tags": ["valuable", "noClassLines"],
+      "tags": ["valuable"],
       "description": [
         {
           "text": {
@@ -959,6 +960,7 @@
         }
       ],
       "groundLabels": [{"style": "jewel"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "level": 25,
@@ -979,7 +981,7 @@
         "es": "Fardo de Joyas de Alma",
         "pt": "Lote de Joias da alma"
       },
-      "tags": ["valuable", "noClassLines"],
+      "tags": ["valuable"],
       "description": [
         {
           "text": {
@@ -1009,6 +1011,7 @@
         }
       ],
       "groundLabels": [{"style": "jewel"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "level": 30,
@@ -1029,7 +1032,6 @@
         "es": "caja de moño rojo",
         "pt": "caixa de fita vermelha"
       },
-      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@throwForZenOrItems",
@@ -1044,6 +1046,7 @@
         }
       ],
       "groundLabels": [{"style": "giftBoxRed"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -1063,7 +1066,6 @@
         "es": "caja de moño verde",
         "pt": "caixa de fita verde"
       },
-      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@throwForZenOrItems",
@@ -1078,6 +1080,7 @@
         }
       ],
       "groundLabels": [{"style": "giftBoxGreen"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "classRequirements": {
@@ -1097,7 +1100,6 @@
         "es": "caja de moño azul",
         "pt": "caixa de fita azul"
       },
-      "tags": ["noClassLines"],
       "description": [
         {
           "text": "@throwForZenOrItems",
@@ -1112,6 +1114,7 @@
         }
       ],
       "groundLabels": [{"style": "giftBoxBlue"}],
+      "tooltipLayout": "noClassLines",
       "width": 1,
       "height": 1,
       "classRequirements": {

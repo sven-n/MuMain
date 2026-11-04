@@ -214,9 +214,6 @@
   <data name="Energy Requirement: %d" xml:space="preserve">
     <value>Kinakailangan ng Enerhiya: %d</value>
   </data>
-  <data name="Increases moving speed" xml:space="preserve">
-    <value>Pinapataas ang bilis ng paggalaw</value>
-  </data>
   <data name="Defend skill (Mana:%d)" xml:space="preserve">
     <value>Ipagtanggol ang kasanayan (Mana:%d)</value>
   </data>
@@ -255,9 +252,6 @@
   </data>
   <data name="Automatic HP recovery %d%%" xml:space="preserve">
     <value>Awtomatikong pagbawi ng HP %d%%</value>
-  </data>
-  <data name="Swimming speed increase" xml:space="preserve">
-    <value>Tumaas ang bilis ng paglangoy</value>
   </data>
   <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
     <value>Swerte (critical damage rate +5%%)</value>
@@ -1224,6 +1218,9 @@
   </data>
   <data name="Password" xml:space="preserve">
     <value>Password</value>
+  </data>
+  <data name="Connect" xml:space="preserve">
+    <value>Kumonekta</value>
   </data>
   <data name="Exit" xml:space="preserve">
     <value>Lumabas</value>
@@ -7659,12 +7656,6 @@
   </data>
   <data name="You have selected an incorrect W Coin type. Please select again." xml:space="preserve">
     <value>Pumili ka ng maling uri ng W Coin. Mangyaring pumili muli.</value>
-  </data>
-  <data name="Expiration Day" xml:space="preserve">
-    <value>Araw ng Pag-expire</value>
-  </data>
-  <data name="Expired Item" xml:space="preserve">
-    <value>Nag-expire na Item</value>
   </data>
   <data name="Click the item to see the quest information again." xml:space="preserve">
     <value>I-click ang item upang makita muli ang impormasyon sa paghahanap.</value>

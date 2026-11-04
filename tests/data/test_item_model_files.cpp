@@ -1588,7 +1588,8 @@ TEST_CASE("Render styles that are not for every drawing leave it to the drawing 
 
     // Doppelgangers are drawn plainly.
     for (const int itemType :
-         {ITEM_RUNE_BLADE, ITEM_GREAT_SCEPTER, ITEM_GRAND_SOUL_SHIELD, ITEM_MISTERY_HELM, ITEM_LILIUM_ARMOR})
+         {ITEM_RUNE_BLADE, ITEM_GREAT_SCEPTER, ITEM_GRAND_SOUL_SHIELD, ITEM_MISTERY_HELM, ITEM_LILIUM_ARMOR,
+          ITEM_STORM_CROW_ARMOR, ITEM_THUNDER_HAWK_ARMOR, ITEM_HURRICANE_ARMOR})
     {
         INFO("item type " << itemType);
         CHECK(drawsWithStyle(MODEL_ITEM + itemType, RENDER_TEXTURE));

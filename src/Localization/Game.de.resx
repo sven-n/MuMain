@@ -214,9 +214,6 @@
   <data name="Energy Requirement: %d" xml:space="preserve">
     <value>Benötigte Energie: %d</value>
   </data>
-  <data name="Increases moving speed" xml:space="preserve">
-    <value>Erhöht die Bewegungsgeschwindigkeit</value>
-  </data>
   <data name="Defend skill (Mana:%d)" xml:space="preserve">
     <value>Fähigkeit Defend (Mana:%d)</value>
   </data>
@@ -255,9 +252,6 @@
   </data>
   <data name="Automatic HP recovery %d%%" xml:space="preserve">
     <value>Automatische HP-Wiederherstellung %d%%</value>
-  </data>
-  <data name="Swimming speed increase" xml:space="preserve">
-    <value>Erhöhung der Schwimmgeschwindigkeit</value>
   </data>
   <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
     <value>Glück (kritische Schadensrate +5%%)</value>
@@ -1244,6 +1238,9 @@
   <data name="LoginSavePasswordWarningBody" xml:space="preserve">
     <value>Wenn das Passwort gespeichert wird, kann sich jeder, der diesen Computer benutzt, mit Ihrem Konto anmelden. Tun Sie dies nur auf einem PC, dem Sie vertrauen. Passwort speichern?</value>
     <comment>Remember-password confirmation dialog: body.</comment>
+  </data>
+  <data name="Connect" xml:space="preserve">
+    <value>Verbinden</value>
   </data>
   <data name="Exit" xml:space="preserve">
     <value>Beenden</value>
@@ -7679,12 +7676,6 @@
   </data>
   <data name="You have selected an incorrect W Coin type. Please select again." xml:space="preserve">
     <value>Sie haben eine falsche W-Coin-Art ausgewählt. Bitte wählen Sie erneut.</value>
-  </data>
-  <data name="Expiration Day" xml:space="preserve">
-    <value>Ablaufdatum</value>
-  </data>
-  <data name="Expired Item" xml:space="preserve">
-    <value>Abgelaufener Gegenstand</value>
   </data>
   <data name="Click the item to see the quest information again." xml:space="preserve">
     <value>Klicken Sie auf den Gegenstand, um die Questinformationen erneut anzuzeigen.</value>

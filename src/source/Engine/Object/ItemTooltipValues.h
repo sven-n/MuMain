@@ -3,11 +3,16 @@
 #include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 
 #include <array>
+#include <cstddef>
 #include <optional>
 #include <span>
 #include <string>
 #include <string_view>
 #include <vector>
+
+// The room of a timed item's end date ({expireDate}, "2026-11-30  18:00"), its end included: the date has 17
+// characters, a year with more digits the rest.
+constexpr size_t ItemExpireDateLength = 24;
 
 // The values the item tooltip's stat lines show for an item and the hero, each computed as RenderItemInfo always has:
 // the built-in placeholders of the item descriptions ({damageMin}, {requiredStrength}, ...), and the states the
@@ -77,6 +82,22 @@ struct ItemTooltipValues
     // The item's ancient discriminator names one of its sets, so its name starts with the set's (GetSetItemName);
     // `ancient` is any discriminator.
     bool setItem = false;
+    // Every class can use the item from its first class (its classRequirements name all of them at level 1): its
+    // tooltip has no class lines.
+    bool allClasses = false;
+    // Boots (group 11) or gloves (group 10).
+    bool boots = false;
+    bool gloves = false;
+    // A timed item whose time is up.
+    bool expired = false;
+    // For a line written once for each class (a layout line's "forEachClass"): the class at the level the item needs
+    // ({className}, "Dark Knight", "Blade Master", ...), and whether the hero is that class at that level or above
+    // (classUsable). No class and false on the other lines.
+    const wchar_t* className = nullptr;
+    bool classUsable = false;
+    // When a timed item that isn't expired ends, in local time ("2026-11-30  18:00"); empty for another item, and with
+    // the Basics values.
+    std::array<wchar_t, ItemExpireDateLength> expireDate{};
     // The hero's level.
     int heroLevel = 0;
     // The item's name as its data has it, which {name} writes only for a line showing it, its level + 1, and its
@@ -118,9 +139,10 @@ bool NeedsAllTooltipValues(Data::Items::TooltipState state);
 bool NeedsAllTooltipValues(std::span<const Data::Items::TooltipCondition> conditions);
 
 // The value of a built-in value that is a number, or nothing for {level} (the item's level, which the caller has) and
-// the texts ({name}, {addOptionDuration}).
+// the texts ({name}, {addOptionDuration}, {className}, {expireDate}).
 std::optional<int> GetItemTooltipValue(const ItemTooltipValues& values, Data::Items::TooltipValue value);
-// The text of a built-in value that is a text ({name}, {addOptionDuration}), or nullptr for another. The duration is
+// The text of a built-in value that is a text ({name}, {addOptionDuration}, {className}, {expireDate}), or nullptr for
+// another. The duration is
 // written here, for a line showing it, and kept until another time or another UI language is asked for; empty without
 // the buff system.
 const wchar_t* GetItemTooltipText(const ItemTooltipValues& values, Data::Items::TooltipValue value);

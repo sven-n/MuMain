@@ -28,11 +28,47 @@ namespace
 std::set<int> g_askedSlots;
 int g_askedWorld = -1;
 int g_askedVersion = -1;
+
+// The monster whose variant is shown, and the variant.
+int g_variantMonster = -1;
+int g_shownVariant = -1;
 } // namespace
 
 std::optional<int> FindSlot(const Data::Monsters::MonsterDefinition& monster)
 {
     const std::optional<int> slot = Data::Monsters::FindMonsterModelReference(monster.model);
+    if (!slot || g_MonsterModelDatabase.Find(*slot) == nullptr)
+    {
+        return std::nullopt;
+    }
+    return slot;
+}
+
+int GetShownVariant(const Data::Monsters::MonsterDefinition& monster)
+{
+    if (monster.number != g_variantMonster || g_shownVariant < 0 ||
+        g_shownVariant >= static_cast<int>(monster.randomVariants.size()))
+    {
+        return -1;
+    }
+    return g_shownVariant;
+}
+
+void SetShownVariant(int number, int variant)
+{
+    g_variantMonster = number;
+    g_shownVariant = variant;
+}
+
+std::optional<int> FindShownSlot(const Data::Monsters::MonsterDefinition& monster)
+{
+    const int variant = GetShownVariant(monster);
+    if (variant < 0)
+    {
+        return FindSlot(monster);
+    }
+    const std::optional<int> slot =
+        Data::Monsters::FindMonsterModelReference(monster.randomVariants[static_cast<size_t>(variant)].model);
     if (!slot || g_MonsterModelDatabase.Find(*slot) == nullptr)
     {
         return std::nullopt;

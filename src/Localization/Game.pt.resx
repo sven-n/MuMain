@@ -214,9 +214,6 @@
   <data name="Energy Requirement: %d" xml:space="preserve">
     <value>Requisito de energia: %d</value>
   </data>
-  <data name="Increases moving speed" xml:space="preserve">
-    <value>Aumenta a velocidade de movimento</value>
-  </data>
   <data name="Defend skill (Mana:%d)" xml:space="preserve">
     <value>Habilidade de defesa (Mana:%d)</value>
   </data>
@@ -255,9 +252,6 @@
   </data>
   <data name="Automatic HP recovery %d%%" xml:space="preserve">
     <value>Recuperação automática de HP %d%%</value>
-  </data>
-  <data name="Swimming speed increase" xml:space="preserve">
-    <value>Aumento da velocidade de natação</value>
   </data>
   <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
     <value>Sorte (taxa de dano crítico +5%%)</value>
@@ -1224,6 +1218,9 @@
   </data>
   <data name="Password" xml:space="preserve">
     <value>Senha</value>
+  </data>
+  <data name="Connect" xml:space="preserve">
+    <value>Conectar</value>
   </data>
   <data name="Exit" xml:space="preserve">
     <value>Saída</value>
@@ -7659,12 +7656,6 @@
   </data>
   <data name="You have selected an incorrect W Coin type. Please select again." xml:space="preserve">
     <value>Você selecionou um tipo incorreto de W Coin. Selecione novamente.</value>
-  </data>
-  <data name="Expiration Day" xml:space="preserve">
-    <value>Dia de expiração</value>
-  </data>
-  <data name="Expired Item" xml:space="preserve">
-    <value>Item expirado</value>
   </data>
   <data name="Click the item to see the quest information again." xml:space="preserve">
     <value>Clique no item para ver as informações da missão novamente.</value>

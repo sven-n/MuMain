@@ -85,6 +85,8 @@ mu_add_test(
         test_monster_model_files.cpp
         test_monster_model_values.cpp
         test_monster_models_json.cpp
+        test_monster_sound_files.cpp
+        test_monster_sounds_json.cpp
         test_monster_names.cpp
         test_monster_npc_name_files.cpp
         test_monster_tool_windows.cpp
@@ -129,6 +131,7 @@ mu_add_test(
         test_item_model_files.cpp
         test_item_requirement_weights.cpp
         test_item_rules.cpp
+        test_item_set_chrome.cpp
         test_item_stats.cpp
         test_item_tooltip_layouts.cpp
         test_item_sync_diff.cpp
@@ -136,6 +139,8 @@ mu_add_test(
         test_item_tooltip_text.cpp
         test_item_tooltips.cpp
         test_item_value_formulas.cpp
+        # Item Tooltip's tooltip row reads the line colors of the themes' tooltip documents with RmlUi.
+        ${CMAKE_SOURCE_DIR}/tests/ui/RmlLayoutFixture.cpp
         ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS
         MuClient
@@ -146,6 +151,8 @@ target_compile_definitions(test_item_database_files PRIVATE
     MU_TEST_DATA_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data"
     MU_TEST_TOOLTIP_SNAPSHOT="${CMAKE_CURRENT_SOURCE_DIR}/item_tooltip_snapshot.txt"
     MU_TEST_CHAIN_TEXTS_BEFORE="${CMAKE_CURRENT_SOURCE_DIR}/item_chain_texts_before.json"
+    MU_RMLUI_DIR="${CMAKE_SOURCE_DIR}/src/bin/Data/Interface/RmlUi"
+    MU_FONT_DIR="${CMAKE_SOURCE_DIR}/src/bin/fonts"
 )
 
 # Animates the shipped player model the way the character pre-pass does.

@@ -153,7 +153,7 @@ void GroundLabelStylesRoot::RenderEdit(const std::string& name)
     // The label of the selected item in the edited look; the style's name while no item is selected.
     const Data::Items::ItemDefinition* item = g_ItemDatabase.Find(g_ItemSelection.GetItemType());
     const std::string text = item != nullptr ? Core::Text::ToUtf8(item->name.c_str()) : m_edit.name;
-    GroundLabelWidgets::RenderLabel(text.c_str(), m_edit.color, m_edit.background, m_edit.bold);
+    GroundLabelWidgets::RenderLabel(text.c_str(), m_edit.color, m_edit.background, m_edit.bold, m_edit.backgroundAlpha);
 }
 
 bool GroundLabelStylesRoot::IsEdited(const std::string& name) const

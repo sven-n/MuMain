@@ -5,6 +5,7 @@
 #include "Data/GameData/ColorFolders/ColorFolders.h"
 #include "Data/GameData/ItemData/ItemJsonCommon.h"
 #include "Data/GameData/ItemData/ItemTooltipConditionsJson.h"
+#include "Data/GameData/ItemData/ItemTooltipLayouts.h"
 
 #include <algorithm>
 #include <cstdio>
@@ -23,6 +24,7 @@ constexpr const char* BoldKey = "bold";
 constexpr const char* WhenKey = "when";
 constexpr const char* StyleKey = "style";
 constexpr GroundLabelColor Black{0, 0, 0};
+constexpr BYTE OpaqueAlpha = 255;
 
 void AddFatal(std::vector<ItemDataIssue>& issues, const std::string& source, const std::string& field,
               const std::string& message)
@@ -86,7 +88,16 @@ void ReadStyle(const std::string& name, const OrderedJson& json, const std::stri
         }
     };
     readColor(ColorKey, style.color);
-    readColor(BackgroundKey, style.background);
+    if (const auto background = json.find(BackgroundKey); background != json.end())
+    {
+        if (!background->is_string() ||
+            !ReadGroundLabelColor(background->get<std::string>(), style.background, style.backgroundAlpha))
+        {
+            AddFatal(issues, source, field + "." + BackgroundKey,
+                     "must be a color \"#rrggbb\", or \"#rrggbbaa\" with its alpha (00 none to ff opaque)");
+            read = false;
+        }
+    }
     if (const auto bold = json.find(BoldKey); bold != json.end())
     {
         if (bold->is_boolean())
@@ -142,6 +153,10 @@ void ReadRules(const OrderedJson& json, const std::string& source, GroundLabelFi
         {
             continue;
         }
+        if (const std::string warning = CheckClassOnlyConditions(rule.when); !warning.empty())
+        {
+            AddWarning(issues, source, field + "." + WhenKey, warning);
+        }
         if (rule.when.empty() && index + 1 < json.size())
         {
             AddWarning(issues, source, field,
@@ -172,14 +187,32 @@ std::string WriteGroundLabelColor(const GroundLabelColor& color)
     return text;
 }
 
+std::string WriteGroundLabelColor(const GroundLabelColor& color, BYTE alpha)
+{
+    if (alpha == OpaqueAlpha)
+    {
+        return WriteGroundLabelColor(color);
+    }
+    char text[10];
+    std::snprintf(text, sizeof(text), "#%02x%02x%02x%02x", color[0], color[1], color[2], alpha);
+    return text;
+}
+
 bool ReadGroundLabelColor(std::string_view text, GroundLabelColor& color)
 {
-    if (text.size() != 7 || text[0] != '#')
+    BYTE alpha = OpaqueAlpha;
+    return text.size() == 7 && ReadGroundLabelColor(text, color, alpha);
+}
+
+bool ReadGroundLabelColor(std::string_view text, GroundLabelColor& color, BYTE& alpha)
+{
+    if ((text.size() != 7 && text.size() != 9) || text[0] != '#')
     {
         return false;
     }
-    GroundLabelColor read{};
-    for (size_t channel = 0; channel < read.size(); ++channel)
+    // Red, green, blue, and the alpha when written.
+    std::array<BYTE, 4> read{0, 0, 0, OpaqueAlpha};
+    for (size_t channel = 0; channel < (text.size() - 1) / 2; ++channel)
     {
         const int high = HexDigit(text[1 + channel * 2]);
         const int low = HexDigit(text[2 + channel * 2]);
@@ -189,7 +222,8 @@ bool ReadGroundLabelColor(std::string_view text, GroundLabelColor& color)
         }
         read[channel] = static_cast<BYTE>(high * 16 + low);
     }
-    color = read;
+    color = {read[0], read[1], read[2]};
+    alpha = read[3];
     return true;
 }
 
@@ -251,9 +285,9 @@ std::string WriteGroundLabelsJson(const GroundLabelFile& file)
     {
         OrderedJson entry;
         entry[ColorKey] = WriteGroundLabelColor(style.color);
-        if (style.background != Black)
+        if (style.background != Black || style.backgroundAlpha != OpaqueAlpha)
         {
-            entry[BackgroundKey] = WriteGroundLabelColor(style.background);
+            entry[BackgroundKey] = WriteGroundLabelColor(style.background, style.backgroundAlpha);
         }
         if (style.bold)
         {
@@ -277,8 +311,11 @@ std::string WriteGroundLabelsJson(const GroundLabelFile& file)
         entry[StyleKey] = rule.style;
         standard.push_back(std::move(entry));
     }
+    // Version 2 only when a reader needs it: a client from before reads version 1, and has no alpha.
+    const bool hasAlpha = std::any_of(file.styles.begin(), file.styles.end(), [](const GroundLabelStyle& style)
+                                      { return style.backgroundAlpha != OpaqueAlpha; });
     OrderedJson root;
-    root[Json::Keys::FormatVersion] = GroundLabelsFormatVersion;
+    root[Json::Keys::FormatVersion] = hasAlpha ? GroundLabelsFormatVersion : GroundLabelsOpaqueFormatVersion;
     if (!file.folders.empty())
     {
         root[Colors::ColorFoldersKey] = Colors::WriteColorFolders(file.folders, [&file](std::string_view name)

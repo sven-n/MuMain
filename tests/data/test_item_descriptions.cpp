@@ -289,6 +289,23 @@ TEST_CASE("Name line texts written in place are checked like description texts [
     CHECK(issues[1].field == "nameLines[1].text");
 }
 
+// A line an item adds to its tooltip layout is one of its texts too: a translation in a language the game has no
+// texts in is never shown.
+TEST_CASE("A line an item adds to its tooltip layout warns about a language the game lacks [data][items]")
+{
+    const char* uiLocales[] = {"en", "de"};
+    ItemDefinition jewel = MakeJewel();
+    ItemDescriptionLine own = Line("A line of its own");
+    own.text.Set("xx", "Xx");
+    jewel.tooltipLayoutChanges.add = {{"classLines", {Line("Shown"), own}}};
+    std::vector<ItemDataIssue> issues;
+    ValidateNameLocales(std::vector<ItemDefinition>{jewel}, uiLocales, issues);
+    std::erase_if(issues, [](const ItemDataIssue& issue) { return !issue.field.starts_with("tooltipLayoutChanges"); });
+    REQUIRE(issues.size() == 1);
+    CHECK(issues[0].severity == ItemDataIssueSeverity::Warning);
+    CHECK(issues[0].field == "tooltipLayoutChanges.add[0].lines[1].text");
+}
+
 TEST_CASE("A description is in the UI's language also when the item names stay English [data][items]")
 {
     ItemDefinition jewel = MakeJewel();

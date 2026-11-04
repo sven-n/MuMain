@@ -67,6 +67,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "Network/Server/ServerListManager.h"
 #include <algorithm>
+#include <array>
 #include <time.h>
 #include <unordered_set>
 #include <vector>
@@ -1307,6 +1308,21 @@ void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure)
     s_itemTooltipTextMeasure = measure;
 }
 
+// How wide a tooltip text is, in the font that is set or by a test's measure.
+static int MeasureItemTooltipText(const wchar_t* text, size_t length)
+{
+    return s_itemTooltipTextMeasure != nullptr ? s_itemTooltipTextMeasure(text, length)
+                                               : g_pRenderText->MeasureText(text, static_cast<int>(length)).cx;
+}
+
+// The measure of an item's own lines (its description and the lines it adds to its layout): the game's font, which it
+// sets for them, or a test's measure.
+static ItemTooltipTextMeasure UseItemOwnLineFont()
+{
+    g_pRenderText->SetFont(g_hFont);
+    return MeasureItemTooltipText;
+}
+
 std::optional<PetInfoRequest> GetPetInfoRequest(int itemType, int pointedIndex, int inventype)
 {
     const StorageType storage = static_cast<StorageType>(inventype);
@@ -1321,111 +1337,218 @@ std::optional<PetInfoRequest> GetPetInfoRequest(int itemType, int pointedIndex, 
                : std::nullopt;
 }
 
-void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, int level,
-                               const ItemTooltipValues& values, bool afterOptions, int& rowsLeft,
-                               ItemTooltipTextMeasure measure)
+// Writes one line of the item's own (of its description, or one it adds to its layout) as WriteItemDescriptionLines
+// does, when it is shown at `level` and its conditions hold: wrapped, at most `rowsLeft` rows, which it lowers by the
+// rows it wrote.
+static void WriteItemDescriptionLine(const Data::Items::ItemDefinition& definition,
+                                     const Data::Items::ItemDescriptionLine& line, int level,
+                                     const ItemTooltipValues& values, int& rowsLeft, ItemTooltipTextMeasure measure)
 {
+    const int itemType = Data::Items::MakeItemType(definition.group, definition.number);
+    if (!line.IsShownAt(level) ||
+        !Engine::Items::TooltipValues::AreTooltipConditionsMet(line.when, itemType, level, values))
+    {
+        return;
+    }
     const int firstRow = TextNum;
     const int lastRow = std::min(TextNum + rowsLeft, static_cast<int>(std::size(TextList)));
-    const int itemType = Data::Items::MakeItemType(definition.group, definition.number);
-    for (const Data::Items::ItemDescriptionLine& line : definition.description)
+    // A line may be a shared text of the tooltip file.
+    const Data::LocalizedString* lineText =
+        line.textName.empty() ? &line.text : g_ItemDatabase.GetTooltipFile().FindText(line.textName);
+    // In the UI's language, also when the item names stay English ("Translate item names" off).
+    const std::string_view locale = I18N::GetCurrentLocale();
+    // A longer text is cut here; reading the item warns about one (Data::Items::MaxDescriptionLineLength).
+    wchar_t filled[Data::Items::MaxDescriptionLineLength + 1];
+    const size_t length =
+        lineText == nullptr
+            ? 0
+            : TooltipText::Write(TooltipText::Compile(lineText->Get(locale), line.values, &definition, locale), level,
+                                 values, filled, std::size(filled));
+    const std::wstring text(filled, length);
+    // A blank line is one blank piece. So is a blank line inside a text (`\n\n`, or a text that starts with
+    // `\n`): a row left empty would end the tooltip there.
+    const std::vector<std::wstring> pieces =
+        text.empty() ? std::vector<std::wstring>(1) : WrapTextToWidth(text, ItemDescriptionWrapWidth, measure);
+    for (const std::wstring& piece : pieces)
     {
-        if (line.afterOptions != afterOptions || !line.IsShownAt(level) ||
-            !Engine::Items::TooltipValues::AreTooltipConditionsMet(line.when, itemType, level, values))
+        if (TextNum >= lastRow)
         {
-            continue;
+            break;
         }
-        // A line may be a shared text of the tooltip file.
-        const Data::LocalizedString* lineText =
-            line.textName.empty() ? &line.text : g_ItemDatabase.GetTooltipFile().FindText(line.textName);
-        // In the UI's language, also when the item names stay English ("Translate item names" off).
-        const std::string_view locale = I18N::GetCurrentLocale();
-        // A longer text is cut here; reading the item warns about one (Data::Items::MaxDescriptionLineLength).
-        wchar_t filled[Data::Items::MaxDescriptionLineLength + 1];
-        const size_t length =
-            lineText == nullptr
-                ? 0
-                : TooltipText::Write(TooltipText::Compile(lineText->Get(locale), line.values, &definition, locale),
-                                     level, values, filled, std::size(filled));
-        const std::wstring text(filled, length);
-        // A blank line is one blank piece. So is a blank line inside a text (`\n\n`, or a text that starts with
-        // `\n`): a row left empty would end the tooltip there.
-        const std::vector<std::wstring> pieces =
-            text.empty() ? std::vector<std::wstring>(1) : WrapTextToWidth(text, ItemDescriptionWrapWidth, measure);
-        for (const std::wstring& piece : pieces)
+        if (piece.empty())
         {
-            if (TextNum >= lastRow)
-            {
-                break;
-            }
-            if (piece.empty())
-            {
-                // As the tooltip writes its own blank rows.
-                mu_swprintf(TextList[TextNum], L"\n");
-                SkipNum++;
-            }
-            else
-            {
-                mu_swprintf(TextList[TextNum], L"%.*ls", static_cast<int>(std::size(TextList[0]) - 1), piece.c_str());
-            }
-            TextListColor[TextNum] = static_cast<int>(
-                Engine::Items::TooltipValues::GetTooltipColor(line.colors, line.color, itemType, level, values));
-            TextBold[TextNum] = line.bold;
-            TextNum++;
+            // As the tooltip writes its own blank rows.
+            mu_swprintf(TextList[TextNum], L"\n");
+            SkipNum++;
         }
+        else
+        {
+            mu_swprintf(TextList[TextNum], L"%.*ls", static_cast<int>(std::size(TextList[0]) - 1), piece.c_str());
+        }
+        TextListColor[TextNum] = static_cast<int>(
+            Engine::Items::TooltipValues::GetTooltipColor(line.colors, line.color, itemType, level, values));
+        TextBold[TextNum] = line.bold;
+        TextNum++;
     }
     rowsLeft -= TextNum - firstRow;
 }
 
-// Writes the lines of the item tooltip layout that come after its section `after`, up to its next section, into
-// TextList, TextListColor and TextBold: those whose conditions hold, with their placeholders filled in.
-static void WriteItemTooltipLayoutLines(const ITEM& item, int level, const ItemTooltipValues& values,
-                                        Data::Items::TooltipSection after)
+void WriteItemDescriptionLines(const Data::Items::ItemDefinition& definition, int level,
+                               const ItemTooltipValues& values, bool afterOptions, int& rowsLeft,
+                               ItemTooltipTextMeasure measure)
 {
-    const Data::Items::ItemTooltipFile& file = g_ItemDatabase.GetTooltipFile();
-    const Data::Items::TooltipLayout* layout = file.FindLayout(Data::Items::DefaultTooltipLayout);
-    if (layout == nullptr)
+    for (const Data::Items::ItemDescriptionLine& line : definition.description)
+    {
+        if (line.afterOptions == afterOptions)
+        {
+            WriteItemDescriptionLine(definition, line, level, values, rowsLeft, measure);
+        }
+    }
+}
+
+namespace
+{
+// A class at the level an item needs of it, as the class lines name it ({className}: "Can be equipped by Dark
+// Knight"). A level the class skips names its next one, the first that can use the item (a Magic Gladiator's 2 is
+// the Dual Master); nullptr above the third class, which no character reaches.
+const wchar_t* ClassLineName(int characterClass, int classLevel)
+{
+    const auto byLevel = [classLevel](const wchar_t* first, const wchar_t* second,
+                                      const wchar_t* third) -> const wchar_t*
+    {
+        const std::array<const wchar_t*, 3> names = {first, second, third};
+        for (size_t level = static_cast<size_t>(std::max(classLevel, 1)); level <= names.size(); ++level)
+        {
+            if (names[level - 1] != nullptr)
+            {
+                return names[level - 1];
+            }
+        }
+        return nullptr;
+    };
+    switch (characterClass)
+    {
+    case CLASS_WIZARD:
+        return byLevel(I18N::Game::DarkWizard, I18N::Game::SoulMaster, I18N::Game::GrandMaster);
+    case CLASS_KNIGHT:
+        return byLevel(I18N::Game::DarkKnight, I18N::Game::BladeKnight, I18N::Game::BladeMaster);
+    case CLASS_ELF:
+        return byLevel(I18N::Game::Elf, I18N::Game::MuseElf, I18N::Game::HighElf);
+    case CLASS_DARK:
+        return byLevel(I18N::Game::MagicGladiator, nullptr, I18N::Game::DualMaster);
+    case CLASS_DARK_LORD:
+        return byLevel(I18N::Game::DarkLord, nullptr, I18N::Game::LordEmperor);
+    case CLASS_SUMMONER:
+        return byLevel(I18N::Game::Summoner, I18N::Game::BloodySummoner, I18N::Game::DimensionMaster);
+    case CLASS_RAGEFIGHTER:
+        return byLevel(I18N::Game::RageFighter, nullptr, I18N::Game::FistMaster);
+    default:
+        return nullptr;
+    }
+}
+
+// Writes one row of a line of the tooltip file's layout into TextList, TextListColor and TextBold when its conditions
+// hold, with its placeholders filled in.
+void WriteItemTooltipLayoutRow(const Data::Items::TooltipLayoutLine& line, const ITEM& item, int level,
+                               const ItemTooltipValues& values)
+{
+    if (!Engine::Items::TooltipValues::AreTooltipConditionsMet(line.when, item.Type, level, values) ||
+        TextNum >= static_cast<int>(std::size(TextList)))
     {
         return;
     }
-    const auto first = std::find_if(layout->lines.begin(), layout->lines.end(),
-                                    [&](const Data::Items::TooltipLayoutLine& line) { return line.section == after; });
-    for (auto line = first == layout->lines.end() ? first : first + 1;
-         line != layout->lines.end() && line->section == Data::Items::TooltipSection::None; ++line)
+    const Data::LocalizedString* text =
+        line.textName.empty() ? &line.text : g_ItemDatabase.GetTooltipFile().FindText(line.textName);
+    // In the UI's language, also when the item names stay English ("Translate item names" off); written straight into
+    // the row, as the tooltip's own lines are.
+    const std::string_view locale = I18N::GetCurrentLocale();
+    if (text == nullptr || text->IsEmpty() ||
+        TooltipText::Write(TooltipText::Compile(text->Get(locale), line.values, nullptr, locale), level, values,
+                           TextList[TextNum], std::size(TextList[TextNum])) == 0)
     {
-        if (!Engine::Items::TooltipValues::AreTooltipConditionsMet(line->when, item.Type, level, values))
-        {
-            continue;
-        }
-        if (TextNum >= static_cast<int>(std::size(TextList)))
-        {
-            break;
-        }
-        const Data::LocalizedString* text = line->textName.empty() ? &line->text : file.FindText(line->textName);
-        if (text == nullptr || text->IsEmpty())
-        {
-            // A blank line, as the tooltip writes its own.
-            mu_swprintf(TextList[TextNum], L"\n");
-            TextNum++;
-            SkipNum++;
-            continue;
-        }
-        // In the UI's language, also when the item names stay English ("Translate item names" off); written straight
-        // into the row, as the tooltip's own lines are.
-        const std::string_view locale = I18N::GetCurrentLocale();
-        if (TooltipText::Write(TooltipText::Compile(text->Get(locale), line->values, nullptr, locale), level, values,
-                               TextList[TextNum], std::size(TextList[TextNum])) == 0)
-        {
-            // No text in the UI's language: a row left empty would end the tooltip there.
-            mu_swprintf(TextList[TextNum], L"\n");
-            TextNum++;
-            SkipNum++;
-            continue;
-        }
-        TextListColor[TextNum] =
-            static_cast<int>(Engine::Items::TooltipValues::GetTooltipLineColor(*line, item.Type, level, values));
-        TextBold[TextNum] = line->bold;
+        // A blank line, as the tooltip writes its own; so is a text without one in the UI's language: a row left
+        // empty would end the tooltip there.
+        mu_swprintf(TextList[TextNum], L"\n");
         TextNum++;
+        SkipNum++;
+        return;
+    }
+    TextListColor[TextNum] =
+        static_cast<int>(Engine::Items::TooltipValues::GetTooltipLineColor(line, item.Type, level, values));
+    TextBold[TextNum] = line.bold;
+    TextNum++;
+}
+
+// A line written once for each class the item's classRequirements name ("forEachClass"), in the classes' order, each
+// with that class's {className} and classUsable: white for the hero who can use it, dark red for the others in the
+// default layout.
+void WriteItemTooltipClassRows(const Data::Items::TooltipLayoutLine& line, const ITEM& item, int level,
+                               const ItemTooltipValues& values)
+{
+    const ITEM_ATTRIBUTE& attribute = ItemAttribute[item.Type];
+    const int heroClass = Hero != nullptr ? gCharacterManager.GetBaseClass(Hero->Class) : -1;
+    const int heroClassLevel = Hero != nullptr ? gCharacterManager.GetStepClass(Hero->Class) : 0;
+    for (int characterClass = 0; characterClass < MAX_CLASS; ++characterClass)
+    {
+        const BYTE needed = attribute.RequireClass[characterClass];
+        if (needed == 0)
+        {
+            continue;
+        }
+        ItemTooltipValues classValues = values;
+        classValues.className = ClassLineName(characterClass, needed);
+        // A level no character reaches names no class (the item data warns about it).
+        if (classValues.className == nullptr)
+        {
+            continue;
+        }
+        classValues.classUsable = characterClass == heroClass && needed <= heroClassLevel;
+        WriteItemTooltipLayoutRow(line, item, level, classValues);
+    }
+}
+} // namespace
+
+// Writes the lines of the item's tooltip layout, as built (BuildItemTooltipLayout), that come after its section
+// `after` (before the first section for None), up to its next section, into TextList, TextListColor and TextBold.
+// A line the item adds itself is written as its description lines are, from the rows of `addedRowsLeft`, which it
+// lowers (MaxItemAddedLineRows for a tooltip).
+static void WriteItemTooltipLayoutLines(std::span<const Data::Items::BuiltTooltipLine> layout,
+                                        const Data::Items::ItemDefinition* definition, const ITEM& item, int level,
+                                        const ItemTooltipValues& values, Data::Items::TooltipSection after,
+                                        int& addedRowsLeft)
+{
+    using Data::Items::TooltipSection;
+    size_t index = 0;
+    if (after != TooltipSection::None)
+    {
+        while (index < layout.size() && layout[index].GetSection() != after)
+        {
+            ++index;
+        }
+        // Past the section itself.
+        ++index;
+    }
+    // Set with the font at the first line the item adds.
+    ItemTooltipTextMeasure measure = nullptr;
+    for (; index < layout.size() && layout[index].GetSection() == TooltipSection::None; ++index)
+    {
+        const Data::Items::BuiltTooltipLine& line = layout[index];
+        if (line.item != nullptr)
+        {
+            if (definition != nullptr)
+            {
+                measure = measure != nullptr ? measure : UseItemOwnLineFont();
+                WriteItemDescriptionLine(*definition, *line.item, level, values, addedRowsLeft, measure);
+            }
+        }
+        else if (line.layout->forEachClass)
+        {
+            WriteItemTooltipClassRows(*line.layout, item, level, values);
+        }
+        else
+        {
+            WriteItemTooltipLayoutRow(*line.layout, item, level, values);
+        }
     }
 }
 
@@ -1439,14 +1562,34 @@ static void WriteItemDescription(const ITEM& item, int level, const ItemTooltipV
     {
         return;
     }
-    g_pRenderText->SetFont(g_hFont);
-    WriteItemDescriptionLines(*definition, level, values, afterOptions, rowsLeft,
-                              [](const wchar_t* text, size_t length) -> int
-                              {
-                                  return s_itemTooltipTextMeasure != nullptr
-                                             ? s_itemTooltipTextMeasure(text, length)
-                                             : g_pRenderText->MeasureText(text, static_cast<int>(length)).cx;
-                              });
+    WriteItemDescriptionLines(*definition, level, values, afterOptions, rowsLeft, UseItemOwnLineFont());
+}
+
+// The tooltip layout of the item of `itemType` and `definition` (none: the default layout) as built, its preset and its
+// own changes; the lines point into the item data. A tooltip is built every frame it shows, so the layout is built
+// again only for another item or when the items or the tooltip file change (both count in the database's version).
+static std::span<const Data::Items::BuiltTooltipLine> ItemTooltipLayoutOf(int itemType,
+                                                                          const Data::Items::ItemDefinition* definition)
+{
+    static std::vector<Data::Items::BuiltTooltipLine> layout;
+    static int builtItemType = -1;
+    static int builtVersion = -1;
+    const int version = g_ItemDatabase.GetVersion();
+    if (itemType == builtItemType && version == builtVersion)
+    {
+        return layout;
+    }
+    if (definition != nullptr)
+    {
+        Data::Items::BuildItemTooltipLayout(g_ItemDatabase.GetTooltipFile(), *definition, layout);
+    }
+    else
+    {
+        Data::Items::BuildTooltipLayout(g_ItemDatabase.GetTooltipFile(), Data::Items::DefaultTooltipLayout, layout);
+    }
+    builtItemType = itemType;
+    builtVersion = version;
+    return layout;
 }
 
 // The name the tooltip gives an item and its color.
@@ -1526,12 +1669,16 @@ static std::optional<std::wstring> ItemNameLineText(const Data::Items::ItemNameL
 // The item's name in the item names' language and its color, as its tooltip and the repair window write it: the first
 // of its name lines whose levels and conditions hold gives them (the standard name where the line has no text, the
 // standard color where it has no color, then its color rules); without one, the standard name and color.
-static ItemTooltipName GetItemTooltipName(const ITEM& item, int level, const ItemTooltipValues& values)
+// `usedLine`, when given, takes the name line that gave them (nullptr for none).
+static ItemTooltipName GetItemTooltipName(const ITEM& item, int level, const ItemTooltipValues& values,
+                                          const Data::Items::ItemNameLine** usedLine = nullptr)
 {
     ItemTooltipName name{StandardItemName(item, level, true), StandardItemNameColor(item, level)};
     const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(item.Type);
     const Data::Items::ItemNameLine* line =
         definition != nullptr ? FindItemNameLine(*definition, item.Type, level, values) : nullptr;
+    if (usedLine != nullptr)
+        *usedLine = line;
     if (line == nullptr)
         return name;
     if (std::optional<std::wstring> text = ItemNameLineText(*line, *definition, level, values))
@@ -1540,6 +1687,19 @@ static ItemTooltipName GetItemTooltipName(const ITEM& item, int level, const Ite
     name.color =
         static_cast<int>(Engine::Items::TooltipValues::GetTooltipColor(line->colors, base, item.Type, level, values));
     return name;
+}
+
+ItemTooltipNameRow DescribeItemTooltipName(const ITEM& item)
+{
+    const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(item);
+    const Data::Items::ItemNameLine* line = nullptr;
+    ItemTooltipName name = GetItemTooltipName(item, item.Level, values, &line);
+    ItemTooltipNameRow row{std::move(name.text), name.color, std::nullopt};
+    if (line != nullptr)
+    {
+        row.nameLine = static_cast<size_t>(line - g_ItemDatabase.Find(item.Type)->nameLines.data());
+    }
+    return row;
 }
 
 std::wstring GetItemNameText(int type, int level, const ITEM* item)
@@ -1598,18 +1758,10 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
     if (ip->Type == -1)
         return ItemTooltipBuild::Nothing;
 
-    tm* ExpireTime;
-    if (ip->bPeriodItem == true && ip->bExpiredPeriod == false)
-    {
-        _tzset();
-        if (ip->lExpireTime == 0)
-            return ItemTooltipBuild::Nothing;
+    // A timed item whose end time hasn't come yet shows no tooltip.
+    if (ip->bPeriodItem && !ip->bExpiredPeriod && ip->lExpireTime == 0)
+        return ItemTooltipBuild::Nothing;
 
-        const time_t expireTime = ip->lExpireTime;
-        ExpireTime = localtime(&expireTime);
-    }
-
-    ITEM_ATTRIBUTE* p = &ItemAttribute[ip->Type];
     TextNum = 0;
     SkipNum = 0;
 
@@ -1624,14 +1776,19 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
         return ItemTooltipBuild::DarkLordPet;
     }
 
-    mu_swprintf(TextList[TextNum], L"\n");
-    TextNum++;
-    SkipNum++;
-
     int Level = ip->Level;
 
     // The numbers of the stat lines, the built-in placeholders of the descriptions.
     const ItemTooltipValues values = Engine::Items::TooltipValues::ComputeItemTooltipValues(*ip);
+    const Data::Items::ItemDefinition* definition = g_ItemDatabase.Find(ip->Type);
+    const std::span<const Data::Items::BuiltTooltipLine> layout = ItemTooltipLayoutOf(ip->Type, definition);
+    // The rows of the lines the item adds to its layout itself, wherever it adds them.
+    int addedRowsLeft = MaxItemAddedLineRows;
+    const auto writeLayoutLines = [&](Data::Items::TooltipSection after)
+    { WriteItemTooltipLayoutLines(layout, definition, *ip, Level, values, after, addedRowsLeft); };
+    // The layout's lines before the name section: the first row.
+    writeLayoutLines(Data::Items::TooltipSection::None);
+
     const ItemTooltipName name = GetItemTooltipName(*ip, Level, values);
     const int Color = name.color;
 
@@ -1728,9 +1885,7 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
     TextListColor[TextNum] = Color;
     TextBold[TextNum] = true;
     TextNum++;
-    mu_swprintf(TextList[TextNum], L"\n");
-    TextNum++;
-    SkipNum++;
+    writeLayoutLines(Data::Items::TooltipSection::Name);
 
     // The item cases whose lines need the game (the reset points, the saved revive position, the socket system,
     // the signs still needed); the others' lines are their descriptions.
@@ -1819,7 +1974,7 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
         TextNum++;
     }
 
-    WriteItemTooltipLayoutLines(*ip, Level, values, Data::Items::TooltipSection::Name);
+    writeLayoutLines(Data::Items::TooltipSection::ItemCases);
     // The description's rows, for both of its parts (before and after the options) together.
     int descriptionRowsLeft = MaxItemDescriptionRows;
     WriteItemDescription(*ip, Level, values, false, descriptionRowsLeft);
@@ -1887,46 +2042,9 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
         TextNum++;
     }
 
-    WriteItemTooltipLayoutLines(*ip, Level, values, Data::Items::TooltipSection::Description);
-
-    if (!g_ItemDatabase.HasTag(ip->Type, Data::Items::ItemTag::NoClassLines))
-    {
-        RequireClass(p);
-    }
-
-    if (ip->Type >= ITEM_BOOTS && ip->Type < ITEM_BOOTS + MAX_ITEM_INDEX)
-    {
-        if (Level >= 5)
-        {
-            mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-            mu_swprintf(TextList[TextNum], I18N::Game::IncreasesMovingSpeed);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;
-        }
-    }
-
-    if (ip->Type >= ITEM_GLOVES && ip->Type < ITEM_GLOVES + MAX_ITEM_INDEX)
-    {
-        if (Level >= 5)
-        {
-            mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-
-            mu_swprintf(TextList[TextNum], I18N::Game::SwimmingSpeedIncrease);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE; TextBold[TextNum] = true; TextNum++;
-        }
-    }
-    WriteItemTooltipLayoutLines(*ip, Level, values, Data::Items::TooltipSection::Classes);
-
-    if (ip->SpecialNum > 0)
-    {
-        int iModelType = ip->Type;
-        int iStartModelType = ITEM_SAPPHIRE_RING;
-        int iEndModelType = ITEM_SAPPHIRE_NECKLACE;
-
-        if (!(ITEM_SAPPHIRE_RING <= ip->Type && ITEM_SAPPHIRE_NECKLACE >= ip->Type))
-        {
-            mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
-        }
-    }
+    writeLayoutLines(Data::Items::TooltipSection::Description);
+    // The class lines, the boots' and gloves' level texts and the blank row before the options.
+    writeLayoutLines(Data::Items::TooltipSection::Classes);
 
     if (ip->option_380 != 0)
     {
@@ -2053,12 +2171,8 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
         }
     }
 
-    if (!g_ItemDatabase.HasTag(ip->Type, Data::Items::ItemTag::NoBlankAfterOptions))
-    {
-        mu_swprintf(TextList[TextNum], L"\n");
-        TextNum++;
-        SkipNum++;
-    }
+    // The blank row after the options.
+    writeLayoutLines(Data::Items::TooltipSection::Options);
     WriteItemDescription(*ip, Level, values, true, descriptionRowsLeft);
 
     if (ip->Type == ITEM_HORN_OF_FENRIR)
@@ -2248,27 +2362,8 @@ static ItemTooltipBuild BuildItemTooltipText(const ITEM* ip, bool Sell, int Inve
     }
 #endif //LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 
-    if (ip->bPeriodItem == true)
-    {
-        if (ip->bExpiredPeriod == true)
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::ExpiredItem);
-            TextListColor[TextNum] = TEXT_COLOR_RED;
-        }
-        else
-        {
-            mu_swprintf(TextList[TextNum], I18N::Game::ExpirationDay);
-            TextListColor[TextNum] = TEXT_COLOR_ORANGE;
-            TextNum++;
-            SkipNum++;
-
-            mu_swprintf(TextList[TextNum], L"%d-%02d-%02d  %02d:%02d", ExpireTime->tm_year + 1900, ExpireTime->tm_mon + 1,
-                ExpireTime->tm_mday, ExpireTime->tm_hour, ExpireTime->tm_min);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-        }
-
-        TextNum++;
-    }
+    // The expiry lines.
+    writeLayoutLines(Data::Items::TooltipSection::AfterOptions);
 
     if (!bItemTextListBoxUse)
     {
@@ -2637,7 +2732,8 @@ void ApplyGroundLabelStyle(GroundItemLabelDescriptor& descriptor, const Data::It
         return;
     }
     descriptor.TextColor = MakeRgba(style->color[0], style->color[1], style->color[2]);
-    descriptor.BgColor = MakeRgba(style->background[0], style->background[1], style->background[2]);
+    descriptor.BgColor =
+        MakeRgba(style->background[0], style->background[1], style->background[2], style->backgroundAlpha);
     descriptor.Bold = style->bold;
     descriptor.Style = style;
 }

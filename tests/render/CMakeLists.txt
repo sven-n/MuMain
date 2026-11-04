@@ -130,12 +130,14 @@ mu_add_test(
         MuCryptopp
 )
 
-# The OZT reader of CGlobalBitmap::OpenTga, without the renderer. It also reads
-# the OZT files shipped in src/bin/Data.
+# The OZT reader of CGlobalBitmap::OpenTga, without the renderer, and the holes it finds in a texture's alpha.
+# It also reads the OZT files shipped in src/bin/Data.
 mu_add_test(
     NAME ozt_file_tests
     SOURCES
+        test_alpha_test_holes.cpp
         test_ozt_file.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/AlphaTestHoles.cpp
         ${CMAKE_SOURCE_DIR}/src/source/Render/Textures/OztFile.cpp
 )
 target_compile_definitions(ozt_file_tests PRIVATE

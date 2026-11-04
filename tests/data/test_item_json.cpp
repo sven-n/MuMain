@@ -149,6 +149,26 @@ TEST_CASE("An item file entry without a name is kept through read and write [dat
     CHECK(HasIssue(issues, ItemDataIssueSeverity::Fatal, "number"));
 }
 
+// A class level goes up to the third class: above it no character of the class can use the item, and its tooltip
+// names no class for it.
+TEST_CASE("A class requirement above the third class warns [data][items]")
+{
+    const std::span<const char* const> keys = GetClassKeys();
+    const auto darkLord = static_cast<size_t>(
+        std::find_if(keys.begin(), keys.end(), [](const char* key) { return std::string(key) == "darkLord"; }) -
+        keys.begin());
+    REQUIRE(darkLord < keys.size());
+    ItemDefinition kris = MakeKris();
+    kris.classRequirements[darkLord] = 3;
+    std::vector<ItemDataIssue> issues;
+    ValidateItems(std::vector<ItemDefinition>{kris}, issues);
+    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "classRequirements.darkLord"));
+    kris.classRequirements[darkLord] = 4;
+    ValidateItems(std::vector<ItemDefinition>{kris}, issues);
+    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "classRequirements.darkLord"));
+    CHECK_FALSE(HasFatal(issues));
+}
+
 TEST_CASE("An empty item name is not an entry without a name [data][items]")
 {
     for (const std::string name : {R"("")", "{}", R"({"en": ""})"})
@@ -346,24 +366,109 @@ TEST_CASE("Item name language codes must be codes [data][items]")
     CHECK_FALSE(HasFatal(issues));
 }
 
-TEST_CASE("An item of a kind without class lines warns when it lacks noClassLines [data][items]")
+// D73: the layout an item names and its own changes, an added line written as a description line.
+TEST_CASE("An item's tooltip layout and its changes are kept through write and read [data][items]")
 {
-    ItemDefinition elixir = MakeKris();
-    elixir.tags.Set(ItemTag::Elixir);
-    std::vector<ItemDataIssue> issues;
-    ValidateItems(std::vector<ItemDefinition>{elixir}, issues);
-    CHECK(HasIssue(issues, ItemDataIssueSeverity::Warning, "tags"));
-    CHECK_FALSE(HasFatal(issues));
+    ItemDefinition pet = MakeKris();
+    pet.tooltipLayout = "noDurabilityLine";
+    pet.tooltipLayoutChanges.hide = {"blankAfterOptions", "requiredLevel"};
+    ItemDescriptionLine own;
+    own.text.Set("en", "Own line");
+    own.color = ItemTextColor::Blue;
+    own.minLevel = 5;
+    pet.tooltipLayoutChanges.add = {{"classLines", {own, ItemDescriptionLine{}}}};
 
-    elixir.tags.Set(ItemTag::NoClassLines);
-    issues.clear();
-    ValidateItems(std::vector<ItemDefinition>{elixir}, issues);
-    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "tags"));
+    const std::string written = WriteItemGroupJson(0, std::vector<ItemDefinition>{pet});
+    CHECK(written.find(R"("tooltipLayout": "noDurabilityLine")") != std::string::npos);
+    CHECK(written.find(R"("hide": ["blankAfterOptions", "requiredLevel"])") != std::string::npos);
+    const ReadResult result = Read(written);
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.issues.empty());
+    CHECK(result.items[0].tooltipLayout == pet.tooltipLayout);
+    CHECK(result.items[0].tooltipLayoutChanges == pet.tooltipLayoutChanges);
 
-    // Any other item may show its class lines.
-    issues.clear();
-    ValidateItems(std::vector<ItemDefinition>{MakeKris()}, issues);
-    CHECK_FALSE(HasIssue(issues, ItemDataIssueSeverity::Warning, "tags"));
+    // Without them the item file has neither key.
+    const std::string plain = WriteItemGroupJson(0, std::vector<ItemDefinition>{MakeKris()});
+    CHECK(plain.find("tooltipLayout") == std::string::npos);
+}
+
+TEST_CASE("An item's tooltip layout changes are read as they are written or are errors [data][items]")
+{
+    const auto read = [](const std::string& changes)
+    {
+        return Read(std::string(R"({"formatVersion": )") + std::to_string(ItemJsonFormatVersion) +
+                    R"(, "group": 0, "items": [{"number": 1, "name": "Kris", "tooltipLayoutChanges": )" + changes +
+                    "}]}");
+    };
+    CHECK(read(R"({"hide": ["first"], "add": [{"after": "first", "lines": [{"text": ""}]}]})").issues.empty());
+    CHECK(HasIssue(read(R"({"hide": "first"})").issues, ItemDataIssueSeverity::Fatal, "tooltipLayoutChanges.hide"));
+    CHECK(HasIssue(read(R"({"add": [{"lines": []}]})").issues, ItemDataIssueSeverity::Fatal,
+                   "tooltipLayoutChanges.add[0]"));
+    CHECK(HasIssue(read(R"({"add": [{"after": "first", "lines": [{"text": "", "after": "options"}]}]})").issues,
+                   ItemDataIssueSeverity::Fatal, "tooltipLayoutChanges.add[0].lines[0].after"));
+    CHECK(HasIssue(read(R"({"show": []})").issues, ItemDataIssueSeverity::Warning, "tooltipLayoutChanges.show"));
+}
+
+// An item file from before the tooltip layout presets (D73): a tag that only picked tooltip lines says what the file
+// writes instead.
+TEST_CASE("A removed tooltip tag is read as what the item file writes instead [data][items]")
+{
+    // The item of a file with these tags and other fields of the item.
+    const auto read = [](const std::string& tags, const std::string& fields = "")
+    { return Read(GroupFile(0, R"({"number": 1, "name": "Kris", "tags": [)" + tags + "]" + fields + "}")); };
+    const auto warning = [](const ReadResult& result)
+    {
+        const auto issue =
+            std::find_if(result.issues.begin(), result.issues.end(), [](const ItemDataIssue& found)
+                         { return found.severity == ItemDataIssueSeverity::Warning && found.field == "tags"; });
+        return issue != result.issues.end() ? issue->message : std::string();
+    };
+
+    ReadResult result = read(R"("noClassLines", "valuable")");
+    REQUIRE(result.items.size() == 1);
+    CHECK_FALSE(HasFatal(result.issues));
+    CHECK(warning(result).find(R"(read as "tooltipLayout": "noClassLines")") != std::string::npos);
+    CHECK(result.items[0].tooltipLayout == "noClassLines");
+    CHECK(result.items[0].tags.Has(ItemTag::Valuable));
+    // A save writes the preset, not the tag.
+    const std::string written = WriteItemGroupJson(0, result.items);
+    CHECK(written.find(R"("tooltipLayout": "noClassLines")") != std::string::npos);
+    CHECK(written.find(R"("noClassLines"])") == std::string::npos);
+
+    result = read(R"("noDurabilityLine", "noClassLines")");
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items[0].tooltipLayout == "noClassOrDurabilityLines");
+
+    result = read(R"("noLevelRequirement")", R"(, "tooltipLayoutChanges": {"hide": ["lackingLevel"]})");
+    REQUIRE(result.items.size() == 1);
+    CHECK(warning(result).find(R"("hide": ["requiredLevel", "lackingLevel"])") != std::string::npos);
+    CHECK(result.items[0].tooltipLayoutChanges.hide == std::vector<std::string>{"lackingLevel", "requiredLevel"});
+
+    // The Pet Skeleton's two: its preset and its own hidden line.
+    result = read(R"("noDurabilityLine", "noBlankAfterOptions")");
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items[0].tooltipLayout == "noDurabilityLine");
+    CHECK(result.items[0].tooltipLayoutChanges.hide == std::vector<std::string>{"blankAfterOptions"});
+
+    // An item that names another layout itself is an error: which one it means is the author's call.
+    result = read(R"("noClassLines")", R"(, "tooltipLayout": "noDurabilityLine")");
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "tags"));
+    // Its own layout already leaving the lines out is fine.
+    result = read(R"("noClassLines")", R"(, "tooltipLayout": "noClassLines")");
+    CHECK_FALSE(HasFatal(result.issues));
+    // So is "default", the layout of an item that names none.
+    result = read(R"("noClassLines")", R"(, "tooltipLayout": "default")");
+    CHECK_FALSE(HasFatal(result.issues));
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items[0].tooltipLayout == "noClassLines");
+    result = read("", R"(, "tooltipLayout": "default")");
+    REQUIRE(result.items.size() == 1);
+    CHECK(result.items[0].tooltipLayout.empty());
+    CHECK(WriteItemGroupJson(0, result.items).find("tooltipLayout") == std::string::npos);
+
+    // Another name gets the list of the tags there are.
+    result = read(R"("noSuchTag")");
+    CHECK(HasIssue(result.issues, ItemDataIssueSeverity::Fatal, "tags"));
 }
 
 TEST_CASE("Item tags, wing tier, potion priority and rule flags are kept through write and read [data][items]")

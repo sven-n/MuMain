@@ -214,9 +214,6 @@
   <data name="Energy Requirement: %d" xml:space="preserve">
     <value>Zapotrzebowanie na energię: %d</value>
   </data>
-  <data name="Increases moving speed" xml:space="preserve">
-    <value>Zwiększa prędkość poruszania się</value>
-  </data>
   <data name="Defend skill (Mana:%d)" xml:space="preserve">
     <value>Umiejętność Defense (Mana: %d)</value>
   </data>
@@ -255,9 +252,6 @@
   </data>
   <data name="Automatic HP recovery %d%%" xml:space="preserve">
     <value>Automatyczne odzyskiwanie HP %d%%</value>
-  </data>
-  <data name="Swimming speed increase" xml:space="preserve">
-    <value>Zwiększenie prędkości pływania</value>
   </data>
   <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
     <value>Szczęście (wskaźnik obrażeń krytycznych +5%%)</value>
@@ -1520,6 +1514,9 @@
   <data name="LoginSavePasswordWarningBody" xml:space="preserve">
     <value>Zapisane hasło pozwoli każdemu, kto korzysta z tego komputera, zalogować się na twoje konto. Rób to tylko na komputerze, któremu ufasz. Zapisać hasło?</value>
     <comment>Remember-password confirmation dialog: body.</comment>
+  </data>
+  <data name="Connect" xml:space="preserve">
+    <value>Połącz</value>
   </data>
   <data name="Exit" xml:space="preserve">
     <value>Wyjdź</value>
@@ -7955,12 +7952,6 @@
   </data>
   <data name="You have selected an incorrect W Coin type. Please select again." xml:space="preserve">
     <value>Wybrano nieprawidłowy rodzaj WCoin. Wybierz ponownie.</value>
-  </data>
-  <data name="Expiration Day" xml:space="preserve">
-    <value>Dzień ważności</value>
-  </data>
-  <data name="Expired Item" xml:space="preserve">
-    <value>Przedmiot wygasły</value>
   </data>
   <data name="Click the item to see the quest information again." xml:space="preserve">
     <value>Kliknij przedmiot, aby ponownie wyświetlić informacje o zadaniu.</value>

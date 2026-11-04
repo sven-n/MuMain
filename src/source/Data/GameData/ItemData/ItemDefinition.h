@@ -165,6 +165,33 @@ struct ItemLevelValues
     bool operator==(const ItemLevelValues& other) const = default;
 };
 
+// Lines put into a tooltip layout after the line of `after`'s id ("add": [{"after": "classLines", "lines": [...]}],
+// D73): a preset's, which are layout lines (TooltipLayoutAddition), or an item's own.
+template <typename TLine> struct TooltipLineAddition
+{
+    std::string after;
+    std::vector<TLine> lines;
+
+    bool operator==(const TooltipLineAddition& other) const = default;
+};
+// Lines an item adds to its tooltip layout, written as its description lines are, without "after": "options".
+using ItemTooltipLayoutAddition = TooltipLineAddition<ItemDescriptionLine>;
+
+// An item's own changes to the tooltip layout it uses ("tooltipLayoutChanges", D73): the ids of the layout lines it
+// leaves out, and the lines it adds.
+struct ItemTooltipLayoutChanges
+{
+    std::vector<std::string> hide;
+    std::vector<ItemTooltipLayoutAddition> add;
+
+    bool IsEmpty() const
+    {
+        return hide.empty() && add.empty();
+    }
+
+    bool operator==(const ItemTooltipLayoutChanges& other) const = default;
+};
+
 // One of an item's ground label rules ("groundLabels"): the style of Data/Items/Tooltips/GroundLabels.json its name
 // on the ground takes at these item levels, both included; without levels at every level, also above +15 (Zen's
 // amount is its level).
@@ -304,6 +331,10 @@ struct ItemDefinition
     // The styles of its name on the ground, by level: the first rule that holds at the item's level gives the style;
     // at a level none holds at (or with none), the standard rules of the ground label file do.
     std::vector<ItemGroundLabel> groundLabels;
+    // The tooltip layout of Data/Items/Tooltips/Tooltip.json it uses (empty: the default one), and its own changes to
+    // it (D73).
+    std::string tooltipLayout;
+    ItemTooltipLayoutChanges tooltipLayoutChanges;
 
     const ItemLevelValues* FindLevelValues(std::string_view name) const
     {
@@ -416,4 +447,25 @@ struct ItemDefinition
     // All fields; the item editor's undo compares definitions with it.
     bool operator==(const ItemDefinition& other) const = default;
 };
+
+// Calls `visit` with each line of the item's own that its tooltip writes: its description lines, its name lines and
+// the lines it adds to its tooltip layout. `definition` may be const or not, and so is each line then.
+template <typename TDefinition, typename TVisit> void ForEachItemTooltipLine(TDefinition& definition, TVisit&& visit)
+{
+    for (auto& line : definition.description)
+    {
+        visit(line);
+    }
+    for (auto& line : definition.nameLines)
+    {
+        visit(line);
+    }
+    for (auto& addition : definition.tooltipLayoutChanges.add)
+    {
+        for (auto& line : addition.lines)
+        {
+            visit(line);
+        }
+    }
+}
 } // namespace Data::Items

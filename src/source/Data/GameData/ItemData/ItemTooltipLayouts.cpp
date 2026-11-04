@@ -31,20 +31,223 @@ constexpr const char* Color = "color";
 constexpr const char* Colors = "colors";
 constexpr const char* Bold = "bold";
 constexpr const char* Values = "values";
+constexpr const char* Id = "id";
+constexpr const char* ForEachClass = "forEachClass";
+constexpr const char* Base = "base";
+constexpr const char* Hide = "hide";
+constexpr const char* Add = "add";
+constexpr const char* After = "after";
 } // namespace Keys
 
 constexpr std::string_view TextReference = "@";
+// The item file's field of an item's own layout changes, in their problems' fields.
+constexpr const char* ItemLayoutChangesField = "tooltipLayoutChanges";
 
 // Same order as TooltipSection, after None.
-constexpr std::array<std::string_view, 4> SectionNames = {"name", "description", "classes", "options"};
+constexpr std::array<std::string_view, 6> SectionNames = {"name",    "itemCases", "description",
+                                                          "classes", "options",   "afterOptions"};
+constexpr const char* SectionList = "name, itemCases, description, classes, options and afterOptions";
 
 using Json::KeySet;
 
 const KeySet RootKeys = {Keys::FormatVersion, Keys::Texts, Keys::Layouts};
-const KeySet LayoutKeys = {Keys::Name, Keys::Lines};
-const KeySet LineKeys = {Keys::Text, Keys::When, Keys::Color, Keys::Colors, Keys::Bold, Keys::Values};
+const KeySet LayoutKeys = {Keys::Name, Keys::Lines, Keys::Base, Keys::Hide, Keys::Add};
+const KeySet LineKeys = {Keys::Id,     Keys::Text, Keys::When,   Keys::Color,
+                         Keys::Colors, Keys::Bold, Keys::Values, Keys::ForEachClass};
 const KeySet SectionLineKeys = {Keys::Section};
 const KeySet ColorRuleKeys = {Keys::When, Keys::Color};
+const KeySet AdditionKeys = {Keys::After, Keys::Lines};
+
+// A layout's lines without those whose id `hide` names.
+void HideTooltipLines(std::vector<BuiltTooltipLine>& lines, std::span<const std::string> hide)
+{
+    if (hide.empty())
+    {
+        return;
+    }
+    std::erase_if(lines, [&](const BuiltTooltipLine& line)
+                  { return !line.GetId().empty() && std::find(hide.begin(), hide.end(), line.GetId()) != hide.end(); });
+}
+
+// A layout's lines without those `hide` names, and each addition's lines right after the line of its `after` id (the
+// additions for one line in their order): the changes of a preset or an item (D73). `makeEntry` makes the built line
+// of an addition's line.
+template <typename TAddition, typename TMakeEntry>
+void ApplyLayoutChanges(std::vector<BuiltTooltipLine>& lines, std::span<const std::string> hide,
+                        std::span<const TAddition> additions, TMakeEntry&& makeEntry)
+{
+    HideTooltipLines(lines, hide);
+    if (additions.empty())
+    {
+        return;
+    }
+    std::vector<BuiltTooltipLine> changed;
+    changed.reserve(lines.size());
+    for (const BuiltTooltipLine& line : lines)
+    {
+        changed.push_back(line);
+        if (line.GetId().empty())
+        {
+            continue;
+        }
+        for (const TAddition& addition : additions)
+        {
+            if (addition.after == line.GetId())
+            {
+                for (const auto& added : addition.lines)
+                {
+                    changed.push_back(makeEntry(added));
+                }
+            }
+        }
+    }
+    lines = std::move(changed);
+}
+
+// Appends the built lines of the layout `name` (its bases' first); false for a layout the file doesn't have or bases
+// that go round in a circle (more of them than the file has layouts).
+bool AppendLayout(const ItemTooltipFile& file, std::string_view name, std::vector<BuiltTooltipLine>& lines,
+                  size_t depth)
+{
+    const TooltipLayout* layout = file.FindLayout(name);
+    if (layout == nullptr || depth > file.layouts.size())
+    {
+        return false;
+    }
+    if (!layout->IsPreset())
+    {
+        for (const TooltipLayoutLine& line : layout->lines)
+        {
+            lines.push_back({&line, nullptr});
+        }
+        return true;
+    }
+    if (!AppendLayout(file, layout->base, lines, depth + 1))
+    {
+        return false;
+    }
+    ApplyLayoutChanges(lines, std::span<const std::string>(layout->hide),
+                       std::span<const TooltipLayoutAddition>(layout->add),
+                       [](const TooltipLayoutLine& added) { return BuiltTooltipLine{&added, nullptr}; });
+    return true;
+}
+
+// " (the preset "P" leaves it out)" when the layout `name` is a preset that hides the line `id`, itself or through one
+// of its bases; empty else.
+std::string DescribePresetHiding(const ItemTooltipFile& file, std::string_view name, std::string_view id)
+{
+    const TooltipLayout* layout = file.FindLayout(name);
+    // No more bases than the file has layouts: bases that go round in a circle have their own error.
+    for (size_t depth = 0; layout != nullptr && layout->IsPreset() && depth < file.layouts.size(); ++depth)
+    {
+        if (std::find(layout->hide.begin(), layout->hide.end(), id) != layout->hide.end())
+        {
+            return " (the preset \"" + layout->name + "\" leaves it out)";
+        }
+        layout = file.FindLayout(layout->base);
+    }
+    return {};
+}
+
+// The problems of changes to the layout `name` whose built lines are `lines` (a preset's changes to its base, an
+// item's to the layout it names), each a field after the changes' own ("hide[0]", "add[1].after") and its message: an
+// id `hide` names that the lines don't have, and an id an addition comes after that they don't have once those are
+// hidden. `changer` names who makes the changes ("the preset", "the item"), for a line it hides itself.
+template <typename TAddition>
+std::vector<std::pair<std::string, std::string>>
+CheckLayoutChanges(const ItemTooltipFile& file, std::string_view name, std::vector<BuiltTooltipLine> lines,
+                   std::span<const std::string> hide, std::span<const TAddition> additions, std::string_view changer)
+{
+    std::vector<std::pair<std::string, std::string>> problems;
+    const auto noSuchLine = [&](const std::string& id)
+    {
+        return "the layout \"" + std::string(name) + "\" has no line with the id \"" + id + "\"" +
+               DescribePresetHiding(file, name, id);
+    };
+    for (size_t index = 0; index < hide.size(); ++index)
+    {
+        if (!HasTooltipLine(lines, hide[index]))
+        {
+            problems.emplace_back("hide[" + std::to_string(index) + "]", noSuchLine(hide[index]));
+        }
+    }
+    // Whether the layout has each addition's line before the changes hide theirs.
+    std::vector<char> inLayout;
+    for (const TAddition& addition : additions)
+    {
+        inLayout.push_back(HasTooltipLine(lines, addition.after));
+    }
+    HideTooltipLines(lines, hide);
+    for (size_t index = 0; index < additions.size(); ++index)
+    {
+        const std::string& after = additions[index].after;
+        if (HasTooltipLine(lines, after))
+        {
+            continue;
+        }
+        problems.emplace_back("add[" + std::to_string(index) + "].after",
+                              inLayout[index] ? std::string(changer) + " hides the line \"" + after +
+                                                    "\" itself, so no line can come after it"
+                                              : noSuchLine(after));
+    }
+    return problems;
+}
+
+// The first id the lines have twice, or empty.
+std::string_view FindRepeatedId(std::span<const BuiltTooltipLine> lines)
+{
+    std::set<std::string_view> ids;
+    for (const BuiltTooltipLine& line : lines)
+    {
+        if (!line.GetId().empty() && !ids.insert(line.GetId()).second)
+        {
+            return line.GetId();
+        }
+    }
+    return {};
+}
+
+constexpr const char* ClassNameOutsideMessage =
+    "has {className}, which only a layout line with \"forEachClass\" fills in: it is empty here";
+constexpr const char* ClassUsableOutsideMessage =
+    "names classUsable, which holds only on a layout line with \"forEachClass\": it never holds here";
+
+bool NamesClassUsable(std::span<const TooltipCondition> conditions)
+{
+    return std::any_of(
+        conditions.begin(), conditions.end(), [](const TooltipCondition& condition)
+        { return condition.kind == TooltipCondition::Kind::State && condition.state == TooltipState::ClassUsable; });
+}
+
+// CheckClassOnlyValues for a layout line or an item's own line: its conditions and color rules, then the
+// placeholders of its text, each showing the value its "values" names for it, else the built-in value of its name.
+template <typename TLine> std::string CheckLineClassOnlyValues(const TLine& line, const ItemTooltipFile& file)
+{
+    const bool colorNamesIt = std::any_of(line.colors.begin(), line.colors.end(),
+                                          [](const TooltipColorRule& rule) { return NamesClassUsable(rule.when); });
+    if (NamesClassUsable(line.when) || colorNamesIt)
+    {
+        return ClassUsableOutsideMessage;
+    }
+    const LocalizedString* text = line.textName.empty() ? &line.text : file.FindText(line.textName);
+    if (text == nullptr)
+    {
+        return {};
+    }
+    const PlaceholderScan scan = ScanPlaceholders(text->GetNeutral());
+    for (const std::string& placeholder : scan.names)
+    {
+        const auto named = std::find_if(line.values.begin(), line.values.end(),
+                                        [&](const auto& value) { return value.first == placeholder; });
+        const std::string_view shown =
+            named != line.values.end() ? std::string_view(named->second) : std::string_view(placeholder);
+        if (FindBuiltInPlaceholder(shown) == TooltipValue::ClassName)
+        {
+            return ClassNameOutsideMessage;
+        }
+    }
+    return {};
+}
 
 std::string ListNames(const std::set<std::string>& names)
 {
@@ -93,6 +296,11 @@ private:
     void ReadLayouts(const OrderedJson& root, ItemTooltipFile& file);
     void ReadLayout(const OrderedJson& json, const std::string& field, const ItemTooltipFile& file,
                     TooltipLayout& layout);
+    void ReadLines(const OrderedJson& json, const std::string& field, const ItemTooltipFile& file,
+                   TooltipLayout& layout);
+    void ReadPreset(const OrderedJson& json, const std::string& field, const ItemTooltipFile& file,
+                    TooltipLayout& layout);
+    void CheckPresets(const ItemTooltipFile& file);
     bool ReadSection(const OrderedJson& json, const std::string& field, TooltipSection& section);
     void ReadLine(const OrderedJson& json, const std::string& field, const ItemTooltipFile& file,
                   TooltipLayoutLine& line);
@@ -307,13 +515,35 @@ bool ItemTooltipReader::ReadSection(const OrderedJson& json, const std::string& 
             return true;
         }
     }
-    AddFatal(field, "must be \"name\", \"description\", \"classes\" or \"options\"");
+    AddFatal(field, std::string("must be one of the sections ") + SectionList);
     return false;
 }
 
 void ItemTooltipReader::ReadLine(const OrderedJson& json, const std::string& field, const ItemTooltipFile& file,
                                  TooltipLayoutLine& line)
 {
+    if (const auto id = json.find(Keys::Id); id != json.end())
+    {
+        if (id->is_string() && Json::IsName(id->get<std::string>()))
+        {
+            line.id = id->get<std::string>();
+        }
+        else
+        {
+            AddFatal(field + "." + Keys::Id, "must be a name of letters and digits");
+        }
+    }
+    if (const auto forEachClass = json.find(Keys::ForEachClass); forEachClass != json.end())
+    {
+        if (forEachClass->is_boolean())
+        {
+            line.forEachClass = forEachClass->get<bool>();
+        }
+        else
+        {
+            AddFatal(field + "." + Keys::ForEachClass, "must be true or false");
+        }
+    }
     const auto text = json.find(Keys::Text);
     if (text == json.end())
     {
@@ -369,6 +599,10 @@ void ItemTooltipReader::ReadLine(const OrderedJson& json, const std::string& fie
         ReadLineValues(*values, field + "." + Keys::Values, line);
     }
     CheckLinePlaceholders(line, file, field);
+    if (const std::string warning = CheckClassOnlyValues(line, file); !warning.empty())
+    {
+        AddIssue(ItemDataIssueSeverity::Warning, field, warning);
+    }
     WarnAboutUnknownKeys(json, LineKeys, field + ".");
 }
 
@@ -383,6 +617,26 @@ void ItemTooltipReader::ReadLayout(const OrderedJson& json, const std::string& f
     else
     {
         layout.name = name->get<std::string>();
+    }
+    if (json.contains(Keys::Base))
+    {
+        ReadPreset(json, field, file, layout);
+    }
+    else
+    {
+        ReadLines(json, field, file, layout);
+    }
+}
+
+void ItemTooltipReader::ReadLines(const OrderedJson& json, const std::string& field, const ItemTooltipFile& file,
+                                  TooltipLayout& layout)
+{
+    for (const char* key : {Keys::Hide, Keys::Add})
+    {
+        if (json.contains(key))
+        {
+            AddFatal(field + "." + key, "only a preset (a layout with a \"base\") has changes");
+        }
     }
     const auto lines = json.find(Keys::Lines);
     if (lines == json.end() || !lines->is_array())
@@ -411,30 +665,132 @@ void ItemTooltipReader::ReadLayout(const OrderedJson& json, const std::string& f
             if (line.section <= lastSection)
             {
                 AddFatal(lineField + "." + Keys::Section,
-                         "the sections come once each, in the order name, description, classes, options");
-            }
-            if (lastSection == TooltipSection::None && index != 0)
-            {
-                AddFatal(lineField + "." + Keys::Section, "the lines start after the name section");
+                         std::string("the sections come once each, in the order ") + SectionList);
             }
             lastSection = std::max(lastSection, line.section);
             WarnAboutUnknownKeys(entry, SectionLineKeys, lineField + ".");
         }
         else
         {
-            if (lastSection == TooltipSection::Options)
-            {
-                AddFatal(lineField, "the options section ends the tooltip, so no line comes after it");
-            }
             ReadLine(entry, lineField, file, line);
         }
         layout.lines.push_back(std::move(line));
     }
     const size_t sections = std::count_if(layout.lines.begin(), layout.lines.end(), [](const TooltipLayoutLine& line)
                                           { return line.section != TooltipSection::None; });
-    if (sections != SectionNames.size() || lastSection != TooltipSection::Options)
+    if (sections != SectionNames.size() || lastSection != TooltipSection::AfterOptions)
     {
-        AddFatal(field + "." + Keys::Lines, "must have the sections name, description, classes and options");
+        AddFatal(field + "." + Keys::Lines, std::string("must have the sections ") + SectionList);
+    }
+    std::vector<BuiltTooltipLine> built;
+    for (const TooltipLayoutLine& line : layout.lines)
+    {
+        built.push_back({&line, nullptr});
+    }
+    if (const std::string_view repeated = FindRepeatedId(built); !repeated.empty())
+    {
+        AddFatal(field + "." + Keys::Lines, "has more than one line with the id \"" + std::string(repeated) + "\"");
+    }
+}
+
+void ItemTooltipReader::ReadPreset(const OrderedJson& json, const std::string& field, const ItemTooltipFile& file,
+                                   TooltipLayout& layout)
+{
+    const auto base = json.find(Keys::Base);
+    if (!base->is_string() || !Json::IsName(base->get<std::string>()))
+    {
+        AddFatal(field + "." + Keys::Base, "must name the layout the preset changes");
+    }
+    else
+    {
+        layout.base = base->get<std::string>();
+    }
+    if (json.contains(Keys::Lines))
+    {
+        AddFatal(field + "." + Keys::Lines, "a preset has no lines of its own: it changes its base with "
+                                            "\"hide\" and \"add\"");
+    }
+    if (const auto hide = json.find(Keys::Hide); hide != json.end() && !Json::ReadLineIds(*hide, layout.hide))
+    {
+        AddFatal(field + "." + Keys::Hide, Json::LineIdsMessage);
+    }
+    const auto add = json.find(Keys::Add);
+    if (add == json.end())
+    {
+        return;
+    }
+    if (!add->is_array())
+    {
+        AddFatal(field + "." + Keys::Add, Json::LineAdditionsMessage);
+        return;
+    }
+    for (size_t index = 0; index < add->size(); ++index)
+    {
+        const OrderedJson& entry = (*add)[index];
+        const std::string entryField = field + "." + Keys::Add + "[" + std::to_string(index) + "]";
+        TooltipLayoutAddition addition;
+        const OrderedJson* lines = Json::ReadLineAddition(entry, addition.after);
+        if (lines == nullptr)
+        {
+            AddFatal(entryField, Json::LineAdditionMessage);
+            continue;
+        }
+        for (size_t lineIndex = 0; lineIndex < lines->size(); ++lineIndex)
+        {
+            const OrderedJson& lineJson = (*lines)[lineIndex];
+            const std::string lineField = entryField + "." + Keys::Lines + "[" + std::to_string(lineIndex) + "]";
+            if (!lineJson.is_object() || lineJson.contains(Keys::Section))
+            {
+                AddFatal(lineField, "must be a line: a preset can't add a section");
+                continue;
+            }
+            TooltipLayoutLine line;
+            ReadLine(lineJson, lineField, file, line);
+            addition.lines.push_back(std::move(line));
+        }
+        WarnAboutUnknownKeys(entry, AdditionKeys, entryField + ".");
+        layout.add.push_back(std::move(addition));
+    }
+}
+
+// Each preset's base is a layout of the file, its bases don't go round in a circle, and its changes name lines its
+// base has.
+void ItemTooltipReader::CheckPresets(const ItemTooltipFile& file)
+{
+    for (size_t index = 0; index < file.layouts.size(); ++index)
+    {
+        const TooltipLayout& layout = file.layouts[index];
+        if (!layout.IsPreset())
+        {
+            continue;
+        }
+        const std::string field = std::string(Keys::Layouts) + "[" + std::to_string(index) + "]";
+        if (file.FindLayout(layout.base) == nullptr)
+        {
+            AddFatal(field + "." + Keys::Base, "\"" + layout.base + "\" is not a layout of this file");
+            continue;
+        }
+        std::vector<BuiltTooltipLine> base;
+        BuildTooltipLayout(file, layout.base, base);
+        if (base.empty())
+        {
+            AddFatal(field + "." + Keys::Base, "its bases go round in a circle, or one of them is not a layout of "
+                                               "this file");
+            continue;
+        }
+        for (const auto& [changeField, message] :
+             CheckLayoutChanges(file, layout.base, std::move(base), std::span<const std::string>(layout.hide),
+                                std::span<const TooltipLayoutAddition>(layout.add), "the preset"))
+        {
+            AddFatal(field + "." + changeField, message);
+        }
+        std::vector<BuiltTooltipLine> built;
+        BuildTooltipLayout(file, layout.name, built);
+        if (const std::string_view repeated = FindRepeatedId(built); !repeated.empty())
+        {
+            AddFatal(field + "." + Keys::Add,
+                     "adds a line with the id \"" + std::string(repeated) + "\", which its layout has already");
+        }
     }
 }
 
@@ -463,10 +819,9 @@ void ItemTooltipReader::ReadLayouts(const OrderedJson& root, ItemTooltipFile& fi
             AddFatal(field + "." + Keys::Name, "the layout \"" + layout.name + "\" is defined more than once");
             continue;
         }
-        if (!layout.name.empty() && layout.name != DefaultTooltipLayout)
+        if (layout.name == DefaultTooltipLayout && layout.IsPreset())
         {
-            AddIssue(ItemDataIssueSeverity::Warning, field + "." + Keys::Name,
-                     "only the \"default\" layout is used for now");
+            AddFatal(field + "." + Keys::Base, "the default layout has lines of its own, it is no preset");
         }
         file.layouts.push_back(std::move(layout));
     }
@@ -474,6 +829,7 @@ void ItemTooltipReader::ReadLayouts(const OrderedJson& root, ItemTooltipFile& fi
     {
         AddFatal(Keys::Layouts, "must have the layout \"default\", which every item's tooltip uses");
     }
+    CheckPresets(file);
 }
 
 void ItemTooltipReader::Read(const OrderedJson& root, ItemTooltipFile& file)
@@ -502,12 +858,118 @@ const TooltipLayout* ItemTooltipFile::FindLayout(std::string_view name) const
     return found != layouts.end() ? &*found : nullptr;
 }
 
+void BuildTooltipLayout(const ItemTooltipFile& file, std::string_view name, std::vector<BuiltTooltipLine>& lines)
+{
+    lines.clear();
+    if (!AppendLayout(file, name, lines, 0))
+    {
+        lines.clear();
+    }
+}
+
+void BuildItemTooltipLayout(const ItemTooltipFile& file, const ItemDefinition& definition,
+                            std::vector<BuiltTooltipLine>& lines)
+{
+    BuildTooltipLayout(file, GetItemTooltipLayoutName(definition), lines);
+    const ItemTooltipLayoutChanges& changes = definition.tooltipLayoutChanges;
+    ApplyLayoutChanges(lines, std::span<const std::string>(changes.hide),
+                       std::span<const ItemTooltipLayoutAddition>(changes.add),
+                       [](const ItemDescriptionLine& added) { return BuiltTooltipLine{nullptr, &added}; });
+}
+
+std::string CheckClassOnlyValues(const TooltipLayoutLine& line, const ItemTooltipFile& file)
+{
+    return line.forEachClass ? std::string() : CheckLineClassOnlyValues(line, file);
+}
+
+std::string CheckClassOnlyValues(const ItemDescriptionLine& line, const ItemTooltipFile& file)
+{
+    return CheckLineClassOnlyValues(line, file);
+}
+
+std::string CheckClassOnlyConditions(std::span<const TooltipCondition> conditions)
+{
+    return NamesClassUsable(conditions) ? ClassUsableOutsideMessage : std::string();
+}
+
+bool HasTooltipLine(std::span<const BuiltTooltipLine> lines, std::string_view id)
+{
+    return std::any_of(lines.begin(), lines.end(), [&](const BuiltTooltipLine& line) { return line.GetId() == id; });
+}
+
+std::string_view GetItemTooltipLayoutName(const ItemDefinition& definition)
+{
+    return definition.tooltipLayout.empty() ? std::string_view(DefaultTooltipLayout)
+                                            : std::string_view(definition.tooltipLayout);
+}
+
+std::vector<std::pair<std::string, std::string>> CheckItemTooltipLayout(const ItemTooltipFile& file,
+                                                                        const ItemDefinition& definition)
+{
+    std::vector<std::pair<std::string, std::string>> problems;
+    const std::string name(GetItemTooltipLayoutName(definition));
+    // A file without the default layout has that error of its own.
+    if (definition.tooltipLayout.empty() && file.FindLayout(name) == nullptr)
+    {
+        return problems;
+    }
+    if (file.FindLayout(name) == nullptr)
+    {
+        std::vector<std::string> names;
+        for (const TooltipLayout& layout : file.layouts)
+        {
+            names.push_back(layout.name);
+        }
+        const std::string suggestion = SuggestPlaceholder(name, names);
+        problems.emplace_back("tooltipLayout",
+                              "\"" + name + "\" is not a layout of the tooltip file" +
+                                  (suggestion.empty() ? "" : "; did you mean \"" + suggestion + "\"?"));
+        return problems;
+    }
+    return CheckTooltipLayoutChanges(file, name, definition.tooltipLayoutChanges);
+}
+
+std::vector<std::pair<std::string, std::string>>
+CheckTooltipLayoutChanges(const ItemTooltipFile& file, std::string_view name, const ItemTooltipLayoutChanges& changes)
+{
+    // Most items change nothing: no layout to build for them.
+    if (changes.IsEmpty())
+    {
+        return {};
+    }
+    std::vector<BuiltTooltipLine> lines;
+    BuildTooltipLayout(file, name, lines);
+    if (lines.empty())
+    {
+        return {};
+    }
+    std::vector<std::pair<std::string, std::string>> problems =
+        CheckLayoutChanges(file, name, std::move(lines), std::span<const std::string>(changes.hide),
+                           std::span<const ItemTooltipLayoutAddition>(changes.add), "the item");
+    for (auto& [field, message] : problems)
+    {
+        field = std::string(ItemLayoutChangesField) + "." + field;
+    }
+    return problems;
+}
+
 void ReadItemTooltipJson(std::string_view text, const std::string& source, ItemTooltipFile& file,
                          std::vector<ItemDataIssue>& issues)
 {
     OrderedJson root;
     if (!Json::ReadFileVersion(text, source, ItemTooltipJsonFormatVersion, root, issues))
     {
+        return;
+    }
+    // Read as this version, an older file only gives errors about what it lacks.
+    if (root[Keys::FormatVersion].get<int>() < ItemTooltipJsonOldestFormatVersion)
+    {
+        Json::AddFileIssue(issues, source, ItemDataIssue::NoItem, Keys::FormatVersion,
+                           "version " + root[Keys::FormatVersion].dump() +
+                               " is from before the tooltip's code lines became layout lines: its layout lacks them "
+                               "(the first row, the class lines, the boots' and gloves' texts, a timed item's end) "
+                               "and their sections, and names the tags they replaced; copy your changes into the "
+                               "Tooltip.json of this client (docs/item-data.md, Tooltip layouts)");
         return;
     }
     ItemTooltipReader(source, issues).Read(root, file);
@@ -536,11 +998,20 @@ void ValidateTooltipTextLocales(const ItemTooltipFile& file, std::span<const cha
     // Named as the reader names them: by the layout's place in the list.
     for (size_t layout = 0; layout < file.layouts.size(); ++layout)
     {
+        const std::string field = std::string(Keys::Layouts) + "[" + std::to_string(layout) + "]";
         const std::vector<TooltipLayoutLine>& lines = file.layouts[layout].lines;
         for (size_t index = 0; index < lines.size(); ++index)
         {
-            warn(lines[index].text, std::string(Keys::Layouts) + "[" + std::to_string(layout) + "].lines[" +
-                                        std::to_string(index) + "].text");
+            warn(lines[index].text, field + ".lines[" + std::to_string(index) + "].text");
+        }
+        const std::vector<TooltipLayoutAddition>& additions = file.layouts[layout].add;
+        for (size_t addition = 0; addition < additions.size(); ++addition)
+        {
+            for (size_t index = 0; index < additions[addition].lines.size(); ++index)
+            {
+                warn(additions[addition].lines[index].text,
+                     field + ".add[" + std::to_string(addition) + "].lines[" + std::to_string(index) + "].text");
+            }
         }
     }
 }

@@ -30,6 +30,7 @@
 #include "UI/Inventory/ItemMng.h"
 
 #include <algorithm>
+#include <array>
 #include <iterator>
 #include <clocale>
 #include <ctime>
@@ -753,8 +754,8 @@ TEST_CASE("An item's lines drawn after its options follow them [data][items][too
     const std::vector<ItemTooltipLine> ring = Engine::Items::TooltipSnapshot::TooltipOfParameters(Engine::Items::TooltipSnapshot::FullItemParameters(13, 39));
     CHECK(indexOf(ring, L"vitality +" + std::to_wstring(hero.Hero().Level)) >= 0);
 
-    // The Pet Skeleton leaves out the blank line after the options (noBlankAfterOptions): one blank line, its options',
-    // comes before its lines, not two.
+    // The Pet Skeleton leaves out the blank line after the options (its own tooltip layout change hides
+    // blankAfterOptions): one blank line, its options', comes before its lines, not two.
     const std::vector<ItemTooltipLine> pet = Engine::Items::TooltipSnapshot::TooltipOfParameters(Engine::Items::TooltipSnapshot::FullItemParameters(13, 123));
     const int equipping = indexOf(pet, L"Equipping along with a Skeleton");
     REQUIRE(equipping > 1);
@@ -1362,3 +1363,357 @@ TEST_CASE("The item commands make a full item when the durability is left out [d
     SetItemTooltipTextMeasure(nullptr);
 }
 #endif
+
+// D72: the class lines are one layout line written for each class the item names (white for the hero who can use
+// it, dark red for the others, none when every class can), and the boots' and gloves' +5 lines are layout lines.
+TEST_CASE("The tooltip's class lines and the boots' and gloves' lines come from the layout [data][items][tooltip]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TextMeasureScope measure(&FixedWidthMeasure);
+    TooltipHeroScope hero;
+    const auto lines = [](int group, int number, int level)
+    {
+        ItemCreationParams parameters = Engine::Items::TooltipSnapshot::FullItemParameters(group, number);
+        parameters.Level = static_cast<BYTE>(level);
+        return Engine::Items::TooltipSnapshot::TooltipOfParameters(parameters);
+    };
+    const auto find = [](const std::vector<ItemTooltipLine>& tooltip, const std::wstring& text)
+    {
+        return std::find_if(tooltip.begin(), tooltip.end(), [&](const ItemTooltipLine& line) { return line.text == text; });
+    };
+    const auto has = [](const std::vector<ItemTooltipLine>& tooltip, const std::wstring& text)
+    {
+        return std::any_of(tooltip.begin(), tooltip.end(), [&](const ItemTooltipLine& line) { return line.text == text; });
+    };
+
+    MakeBladeMaster(hero.Hero());
+    ::Hero->Class = hero.Hero().Class;
+    // The Dragon Helm is the Dark Knight's.
+    std::vector<ItemTooltipLine> helm = lines(7, 1, 0);
+    auto knight = find(helm, L"Can be equipped by Dark Knight");
+    REQUIRE(knight != helm.end());
+    CHECK(knight->color == TEXT_COLOR_WHITE);
+    CHECK_FALSE(knight->bold);
+    // With the blank row before it.
+    CHECK(std::prev(knight)->text == L"\n");
+    // The Bronze Boots name three classes, in the classes' order.
+    const std::vector<ItemTooltipLine> boots = lines(11, 0, 0);
+    const auto first = find(boots, L"Can be equipped by Dark Knight");
+    REQUIRE(first != boots.end());
+    REQUIRE(std::next(first, 2) < boots.end());
+    CHECK(std::next(first)->text == L"Can be equipped by Magic Gladiator");
+    CHECK(std::next(first)->color == TEXT_COLOR_DARKRED);
+    CHECK(std::next(first, 2)->text == L"Can be equipped by Dark Lord");
+    // Every class can use the Kris: no class lines.
+    const std::vector<ItemTooltipLine> kris = lines(0, 0, 0);
+    CHECK(std::none_of(kris.begin(), kris.end(),
+                       [](const ItemTooltipLine& line) { return line.text.starts_with(L"Can be equipped by"); }));
+    // The Horn of Fenrir names every class too, but four of them at their second class: not every class can use it
+    // from its first class, so the class lines would say so (its preset hides them). The original client left the
+    // class lines out only for an item every class can use from level 1.
+    const auto allClasses = [](int group, int number)
+    {
+        ITEM item{};
+        FillItemFromParameters(item, Engine::Items::TooltipSnapshot::FullItemParameters(group, number));
+        return Engine::Items::TooltipValues::ComputeItemTooltipValues(item).allClasses;
+    };
+    CHECK(allClasses(0, 0));
+    CHECK_FALSE(allClasses(13, 37));
+
+    // A level the class skips names its next class, the first that can use the item (a Magic Gladiator's second is
+    // the Dual Master); a level above the third names no class, so the row is left out.
+    BYTE(&required)[MAX_CLASS] = ItemAttribute[Data::Items::MakeItemType(7, 1)].RequireClass;
+    std::array<BYTE, MAX_CLASS> savedClasses{};
+    std::copy(std::begin(required), std::end(required), savedClasses.begin());
+    required[CLASS_DARK] = 2;
+    required[CLASS_DARK_LORD] = 4;
+    const std::vector<ItemTooltipLine> skipping = lines(7, 1, 0);
+    std::copy(savedClasses.begin(), savedClasses.end(), std::begin(required));
+    const auto knightRow = find(skipping, L"Can be equipped by Dark Knight");
+    REQUIRE(knightRow != skipping.end());
+    REQUIRE(std::next(knightRow) != skipping.end());
+    CHECK(std::next(knightRow)->text == L"Can be equipped by Dual Master");
+    CHECK(std::count_if(skipping.begin(), skipping.end(),
+                        [](const ItemTooltipLine& line) { return line.text.starts_with(L"Can be equipped by"); }) == 2);
+
+    MakeNewDarkWizard(hero.Hero());
+    ::Hero->Class = hero.Hero().Class;
+    helm = lines(7, 1, 0);
+    knight = find(helm, L"Can be equipped by Dark Knight");
+    REQUIRE(knight != helm.end());
+    CHECK(knight->color == TEXT_COLOR_DARKRED);
+
+    // From +5 up, after the class lines and a blank row.
+    CHECK_FALSE(has(lines(11, 0, 4), L"Increases moving speed"));
+    const std::vector<ItemTooltipLine> fast = lines(11, 0, 5);
+    const auto moving = find(fast, L"Increases moving speed");
+    REQUIRE(moving != fast.end());
+    CHECK(moving->color == TEXT_COLOR_BLUE);
+    CHECK(moving->bold);
+    CHECK(std::prev(moving)->text == L"\n");
+    CHECK(has(lines(10, 0, 5), L"Swimming speed increase"));
+    CHECK_FALSE(has(lines(10, 0, 5), L"Increases moving speed"));
+}
+
+namespace
+{
+// Puts a changed item into the item database (ItemDatabase::Set, which every build has) and the item as it was back
+// at the end, also when a check stops the test.
+class ItemDefinitionScope
+{
+public:
+    ItemDefinitionScope(Data::Items::ItemDefinition original, const Data::Items::ItemDefinition& changed)
+        : m_original(std::move(original))
+    {
+        g_ItemDatabase.Set(changed);
+    }
+    ~ItemDefinitionScope()
+    {
+        g_ItemDatabase.Set(m_original);
+    }
+    ItemDefinitionScope(const ItemDefinitionScope&) = delete;
+    ItemDefinitionScope& operator=(const ItemDefinitionScope&) = delete;
+
+private:
+    Data::Items::ItemDefinition m_original;
+};
+} // namespace
+
+// D73: a line an item adds to its layout itself shows where it says, at its levels.
+TEST_CASE("A line an item adds to its tooltip layout shows after its line [data][items][tooltip]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TextMeasureScope measure(&FixedWidthMeasure);
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    ::Hero->Class = hero.Hero().Class;
+
+    const Data::Items::ItemDefinition* stored = g_ItemDatabase.Find(Data::Items::MakeItemType(7, 1));
+    REQUIRE(stored != nullptr);
+    Data::Items::ItemDefinition helm = *stored;
+    Data::Items::ItemDescriptionLine own;
+    own.text.Set("en", "A line of its own");
+    own.color = Data::Items::ItemTextColor::Green;
+    own.minLevel = 3;
+    const std::wstring longText = L"A long line of its own, which the tooltip wraps to its width as it wraps the "
+                                  L"item's description lines, not cut off";
+    Data::Items::ItemDescriptionLine longLine;
+    longLine.text.Set("en", Core::Text::ToUtf8(longText.c_str()));
+    helm.tooltipLayoutChanges.hide = {"classLinesBlank"};
+    helm.tooltipLayoutChanges.add = {{"classLines", {own, longLine}}};
+    const ItemDefinitionScope changed(*stored, helm);
+    const auto lines = [](int level)
+    {
+        ItemCreationParams parameters = Engine::Items::TooltipSnapshot::FullItemParameters(7, 1);
+        parameters.Level = static_cast<BYTE>(level);
+        return Engine::Items::TooltipSnapshot::TooltipOfParameters(parameters);
+    };
+    const std::vector<ItemTooltipLine> tooltip = lines(3);
+    const auto knight = std::find_if(tooltip.begin(), tooltip.end(), [](const ItemTooltipLine& line)
+                                     { return line.text == L"Can be equipped by Dark Knight"; });
+    REQUIRE(knight != tooltip.end());
+    REQUIRE(std::next(knight) != tooltip.end());
+    CHECK(std::next(knight)->text == L"A line of its own");
+    CHECK(std::next(knight)->color == TEXT_COLOR_GREEN);
+    // Written as its description lines are: wrapped to the tooltip's width (50 letters of the test's measure), not cut
+    // at the end of a row (99 letters).
+    std::wstring joined;
+    for (auto row = std::next(knight, 2); row != tooltip.end() && joined.size() < longText.size(); ++row)
+    {
+        CHECK(row->text.size() <= 50);
+        joined += (joined.empty() ? L"" : L" ") + row->text;
+    }
+    CHECK(joined == longText);
+    // The blank row before the class lines is hidden.
+    CHECK(std::prev(knight)->text != L"\n");
+    const std::vector<ItemTooltipLine> low = lines(2);
+    CHECK(std::none_of(low.begin(), low.end(), [](const ItemTooltipLine& line) { return line.text == L"A line of its own"; }));
+}
+
+// D73: the lines an item adds have rows of their own (MaxItemAddedLineRows), wherever it adds them: added before the
+// description, they take none of its rows, and the rest of the tooltip stays.
+TEST_CASE("The lines an item adds to its tooltip layout have rows of their own [data][items][tooltip]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TextMeasureScope measure(&FixedWidthMeasure);
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    ::Hero->Class = hero.Hero().Class;
+    const auto tooltipOfJewel = []()
+    {
+        return Engine::Items::TooltipSnapshot::TooltipOfParameters(
+            Engine::Items::TooltipSnapshot::FullItemParameters(14, 13));
+    };
+
+    // The Jewel of Bless has a description.
+    const Data::Items::ItemDefinition* stored = g_ItemDatabase.Find(Data::Items::MakeItemType(14, 13));
+    REQUIRE(stored != nullptr);
+    REQUIRE_FALSE(stored->description.empty());
+    const std::vector<ItemTooltipLine> before = tooltipOfJewel();
+    Data::Items::ItemDefinition jewel = *stored;
+    Data::Items::ItemDescriptionLine own;
+    own.text.Set("en", "Own");
+    jewel.tooltipLayoutChanges.add = {
+        {"blankAfterName", std::vector<Data::Items::ItemDescriptionLine>(MaxItemAddedLineRows + 4, own)}};
+    const ItemDefinitionScope changed(*stored, jewel);
+    const std::vector<ItemTooltipLine> after = tooltipOfJewel();
+
+    const auto isOwn = [](const ItemTooltipLine& line) { return line.text == L"Own"; };
+    CHECK(std::count_if(after.begin(), after.end(), isOwn) == MaxItemAddedLineRows);
+    std::vector<std::wstring> beforeTexts;
+    for (const ItemTooltipLine& line : before)
+    {
+        beforeTexts.push_back(line.text);
+    }
+    std::vector<std::wstring> rest;
+    for (const ItemTooltipLine& line : after)
+    {
+        if (!isOwn(line))
+        {
+            rest.push_back(line.text);
+        }
+    }
+    CHECK(rest == beforeTexts);
+}
+
+// A tooltip is built every frame it shows and keeps its item's built layout between them: the layout is built again
+// once the item changes, and once it changes back.
+TEST_CASE("A tooltip's layout follows a change of its item [data][items][tooltip]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TextMeasureScope measure(&FixedWidthMeasure);
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    ::Hero->Class = hero.Hero().Class;
+    const auto hasOwnLine = []()
+    {
+        const std::vector<ItemTooltipLine> lines = Engine::Items::TooltipSnapshot::TooltipOfParameters(
+            Engine::Items::TooltipSnapshot::FullItemParameters(14, 13));
+        return std::any_of(lines.begin(), lines.end(), [](const ItemTooltipLine& line) { return line.text == L"Own"; });
+    };
+
+    const Data::Items::ItemDefinition* stored = g_ItemDatabase.Find(Data::Items::MakeItemType(14, 13));
+    REQUIRE(stored != nullptr);
+    CHECK_FALSE(hasOwnLine());
+    {
+        Data::Items::ItemDefinition jewel = *stored;
+        Data::Items::ItemDescriptionLine own;
+        own.text.Set("en", "Own");
+        jewel.tooltipLayoutChanges.add = {{"blankAfterName", {own}}};
+        const ItemDefinitionScope changed(*stored, jewel);
+        CHECK(hasOwnLine());
+        // The next frame's tooltip, from the kept layout.
+        CHECK(hasOwnLine());
+    }
+    CHECK_FALSE(hasOwnLine());
+}
+
+// MuEditor's Item Tooltip shows the tooltip's name row: DescribeItemTooltipName gives the row the tooltip writes, for
+// every item at every level, plain and with every option, and the name line that gives it.
+TEST_CASE("The name row Item Tooltip shows is the tooltip's [data][items][tooltip]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    TextMeasureScope measure(&FixedWidthMeasure);
+    TooltipHeroScope hero;
+    MakeBladeMaster(hero.Hero());
+    ::Hero->Class = hero.Hero().Class;
+    int compared = 0;
+    for (const Data::Items::ItemDefinition& definition : g_ItemDatabase.GetAllSlots())
+    {
+        if (!definition.Exists())
+        {
+            continue;
+        }
+        for (const bool full : {false, true})
+        {
+            for (int level = 0; level < Data::Items::ItemLevelCount; ++level)
+            {
+                ItemCreationParams parameters =
+                    Engine::Items::TooltipSnapshot::FullItemParameters(definition.group, definition.number);
+                parameters.Level = static_cast<BYTE>(level);
+                parameters.WithLuck = parameters.WithSkill = parameters.WithOption = full;
+                parameters.OptionLevel = full ? 4 : 0;
+                parameters.HasExcellentOption = full;
+                parameters.ExcellentFlags = full ? 63 : 0;
+                const std::vector<ItemTooltipLine> lines =
+                    Engine::Items::TooltipSnapshot::TooltipOfParameters(parameters);
+                // Without a tooltip (a timed item without its end, the Dark Lord's pets): nothing to compare.
+                if (lines.size() < 2)
+                {
+                    continue;
+                }
+                ITEM item;
+                FillItemFromParameters(item, parameters);
+                const ItemTooltipNameRow name = DescribeItemTooltipName(item);
+                INFO(definition.group << "/" << definition.number << " +" << level << (full ? " full" : ""));
+                // After the first row.
+                CHECK(name.text == lines[1].text);
+                CHECK(name.color == lines[1].color);
+                CHECK(lines[1].bold);
+                ++compared;
+            }
+        }
+    }
+    CHECK(compared > 20000);
+
+    // The Jewel of Bless's yellow is its first name line's; the Kris has none.
+    const auto nameOf = [](int group, int number)
+    {
+        ITEM item;
+        FillItemFromParameters(item, Engine::Items::TooltipSnapshot::FullItemParameters(group, number));
+        return DescribeItemTooltipName(item);
+    };
+    CHECK(nameOf(14, 13).nameLine == std::optional<size_t>(0));
+    CHECK_FALSE(nameOf(0, 0).nameLine.has_value());
+}
+
+// A label style's background alpha is the alpha the game draws the label's box with.
+TEST_CASE("A ground label's background takes its style's alpha [data][items][tooltip]")
+{
+    ProcessLocaleScope locale;
+    ClientDataScope client(ClientDirectory);
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TooltipDataScope data;
+    const Data::Items::GroundLabelFile shipped = g_ItemDatabase.GetGroundLabels();
+    const auto ticketLabel = []
+    {
+        ITEM item;
+        FillItemFromParameters(item, Engine::Items::TooltipSnapshot::FullItemParameters(13, 46));
+        OBJECT object{};
+        object.Type = Data::Items::ToModelSlot(item.Type);
+        return DescribeGroundItemLabel(&object, &item);
+    };
+    // The Devil Square Ticket's style, "ticket", is opaque black behind its text.
+    CHECK(ticketLabel().backgroundColor == 0xFF000000u);
+
+    Data::Items::GroundLabelFile seeThrough = shipped;
+    const auto ticket = std::find_if(seeThrough.styles.begin(), seeThrough.styles.end(),
+                                     [](const Data::Items::GroundLabelStyle& style) { return style.name == "ticket"; });
+    REQUIRE(ticket != seeThrough.styles.end());
+    ticket->background = {0x10, 0x20, 0x30};
+    ticket->backgroundAlpha = 0x80;
+    g_ItemDatabase.SetGroundLabels(seeThrough);
+    CHECK(ticketLabel().backgroundColor == 0x80302010u);
+    g_ItemDatabase.SetGroundLabels(shipped);
+}

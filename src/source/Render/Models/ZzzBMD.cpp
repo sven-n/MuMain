@@ -1992,6 +1992,10 @@ void BMD::DrawMesh(const Render::ModelDrawing::MeshDraw& draw) const
             EnableDepthMask();
         }
     }
+    if (renderFlags & RENDER_TWOSIDED)
+    {
+        DisableCullFace();
+    }
 
     const bool shadowMap = (renderFlags & RENDER_SHADOWMAP) == RENDER_SHADOWMAP;
     const float colorScale = useBlendMeshColor ? blendMeshAlpha : 1.0f;
@@ -2478,48 +2482,53 @@ void BMD::RenderBody(int Flag, float Alpha, int BlendMesh, float BlendMeshLight,
 {
     if (NumMeshs == 0) return;
 
-    int iBlendMesh = BlendMesh;
     BeginRender(Alpha);
-    (void)LightEnable;
     for (int i = 0; i < NumMeshs; i++)
     {
-        iBlendMesh = BlendMesh;
-
-        Mesh_t* m = &Meshs[i];
-        if (m->m_csTScript != nullptr)
+        if (!IsMeshHidden(i, HiddenMesh))
         {
-            if (m->m_csTScript->getHiddenMesh() == false && i != HiddenMesh)
-            {
-                if (m->m_csTScript->getBright())
-                {
-                    iBlendMesh = i;
-                }
-                RenderMesh(i, Flag, Alpha, iBlendMesh, BlendMeshLight, BlendMeshTexCoordU, BlendMeshTexCoordV, Texture);
-
-                BYTE shadowType = m->m_csTScript->getShadowMesh();
-                if (shadowType == SHADOW_RENDER_COLOR)
-                {
-                    DisableAlphaBlend();
-
-                    RenderMesh(i, RENDER_COLOR | RENDER_SHADOWMAP, Alpha, iBlendMesh, BlendMeshLight, BlendMeshTexCoordU, BlendMeshTexCoordV);
-                }
-                else if (shadowType == SHADOW_RENDER_TEXTURE)
-                {
-                    DisableAlphaBlend();
-
-                    RenderMesh(i, RENDER_TEXTURE | RENDER_SHADOWMAP, Alpha, iBlendMesh, BlendMeshLight, BlendMeshTexCoordU, BlendMeshTexCoordV);
-                }
-            }
-        }
-        else
-        {
-            if (i != HiddenMesh)
-            {
-                RenderMesh(i, Flag, Alpha, iBlendMesh, BlendMeshLight, BlendMeshTexCoordU, BlendMeshTexCoordV, Texture);
-            }
+            RenderScriptedMesh(i, Flag, Alpha, BlendMesh, BlendMeshLight, BlendMeshTexCoordU, BlendMeshTexCoordV,
+                               Texture);
         }
     }
     EndRender();
+}
+
+bool BMD::IsMeshHidden(int mesh, int hiddenMesh) const
+{
+    TextureScript* script = Meshs[mesh].m_csTScript;
+    return mesh == hiddenMesh || (script != nullptr && script->getHiddenMesh());
+}
+
+bool BMD::IsMeshGlowing(int mesh, int blendMesh) const
+{
+    TextureScript* script = Meshs[mesh].m_csTScript;
+    return mesh == blendMesh || (script != nullptr && script->getBright());
+}
+
+void BMD::RenderScriptedMesh(int mesh, int renderFlag, float alpha, int blendMesh, float blendMeshLight,
+                             float blendMeshTexCoordU, float blendMeshTexCoordV, int texture)
+{
+    TextureScript* script = Meshs[mesh].m_csTScript;
+    const int ownBlendMesh = script != nullptr && script->getBright() ? mesh : blendMesh;
+    RenderMesh(mesh, renderFlag, alpha, ownBlendMesh, blendMeshLight, blendMeshTexCoordU, blendMeshTexCoordV, texture);
+    if (script == nullptr)
+    {
+        return;
+    }
+    const BYTE shadowType = script->getShadowMesh();
+    if (shadowType == SHADOW_RENDER_COLOR)
+    {
+        DisableAlphaBlend();
+        RenderMesh(mesh, RENDER_COLOR | RENDER_SHADOWMAP, alpha, ownBlendMesh, blendMeshLight, blendMeshTexCoordU,
+                   blendMeshTexCoordV);
+    }
+    else if (shadowType == SHADOW_RENDER_TEXTURE)
+    {
+        DisableAlphaBlend();
+        RenderMesh(mesh, RENDER_TEXTURE | RENDER_SHADOWMAP, alpha, ownBlendMesh, blendMeshLight, blendMeshTexCoordU,
+                   blendMeshTexCoordV);
+    }
 }
 
 __forceinline void CalcShadowPosition(vec3_t* position, const vec3_t origin, const float sx, const float sy)

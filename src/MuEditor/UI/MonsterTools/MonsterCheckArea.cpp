@@ -8,6 +8,7 @@
 #include "MonsterChecks.h"
 #include "MonsterSelection.h"
 #include "MuMonsterAttacksUI.h"
+#include "MuMonsterSoundsUI.h"
 
 #include "../MuEditor/Core/MuEditorCore.h"
 #include "Data/GameData/MonsterData/MonsterDatabase.h"
@@ -68,6 +69,11 @@ void MonsterCheckArea::Open(const ItemDataIssue& issue, bool clicked)
 {
     if (!IsAboutAMonster(issue))
     {
+        // A problem of a sound set opens the set in Monster Sounds.
+        if (const std::optional<std::string_view> set = GetSoundSetOfField(issue.field); set && clicked)
+        {
+            g_MuMonsterSoundsUI.ShowEvent(std::string(*set), std::nullopt);
+        }
         return;
     }
     g_MonsterSelection.Select(issue.number);
@@ -94,6 +100,11 @@ std::unique_ptr<DataChecks::DataCheckArea> CreateMonsterCheckArea()
 std::unique_ptr<DataChecks::DataCheckArea> CreateMonsterModelCheckArea()
 {
     return std::make_unique<MonsterCheckArea>(&I18N::Editor::MonsterModels, MonsterChecks::RunModels);
+}
+
+std::unique_ptr<DataChecks::DataCheckArea> CreateMonsterSoundCheckArea()
+{
+    return std::make_unique<MonsterCheckArea>(&I18N::Editor::MonsterSoundSets, MonsterChecks::RunSounds);
 }
 } // namespace MuEditor::Monsters
 

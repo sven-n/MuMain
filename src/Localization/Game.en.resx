@@ -214,9 +214,6 @@
   <data name="Energy Requirement: %d" xml:space="preserve">
     <value>Energy Requirement: %d</value>
   </data>
-  <data name="Increases moving speed" xml:space="preserve">
-    <value>Increases moving speed</value>
-  </data>
   <data name="Defend skill (Mana:%d)" xml:space="preserve">
     <value>Defend skill (Mana:%d)</value>
   </data>
@@ -255,9 +252,6 @@
   </data>
   <data name="Automatic HP recovery %d%%" xml:space="preserve">
     <value>Automatic HP recovery %d%%</value>
-  </data>
-  <data name="Swimming speed increase" xml:space="preserve">
-    <value>Swimming speed increase</value>
   </data>
   <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
     <value>Luck (critical damage rate +5%%)</value>
@@ -1529,6 +1523,9 @@
   <data name="LoginSavePasswordWarningBody" xml:space="preserve">
     <value>Saving the password lets anyone using this computer log into your account. Only do this on a PC you trust. Save the password?</value>
     <comment>Remember-password confirmation dialog: body.</comment>
+  </data>
+  <data name="Connect" xml:space="preserve">
+    <value>Connect</value>
   </data>
   <data name="Exit" xml:space="preserve">
     <value>Exit</value>
@@ -7965,12 +7962,6 @@
   <data name="You have selected an incorrect W Coin type. Please select again." xml:space="preserve">
     <value>You have selected an incorrect W Coin type. Please select again.</value>
   </data>
-  <data name="Expiration Day" xml:space="preserve">
-    <value>Expiration Day</value>
-  </data>
-  <data name="Expired Item" xml:space="preserve">
-    <value>Expired Item</value>
-  </data>
   <data name="Click the item to see the quest information again." xml:space="preserve">
     <value>Click the item to see the quest information again.</value>
   </data>
@@ -9530,5 +9521,11 @@
   </data>
   <data name="MagicStoneOfOwner" xml:space="preserve">
     <value>Magic stone of %ls</value>
+  </data>
+  <data name="Menu" xml:space="preserve">
+    <value>Menu</value>
+  </data>
+  <data name="Base Attributes" xml:space="preserve">
+    <value>Base Attributes</value>
   </data>
 </root>

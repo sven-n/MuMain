@@ -214,9 +214,6 @@
   <data name="Energy Requirement: %d" xml:space="preserve">
     <value>Потреба в енергії: %d</value>
   </data>
-  <data name="Increases moving speed" xml:space="preserve">
-    <value>Збільшує швидкість пересування</value>
-  </data>
   <data name="Defend skill (Mana:%d)" xml:space="preserve">
     <value>Захистити навик (мана:%d)</value>
   </data>
@@ -255,9 +252,6 @@
   </data>
   <data name="Automatic HP recovery %d%%" xml:space="preserve">
     <value>Автоматичне відновлення HP %d%%</value>
-  </data>
-  <data name="Swimming speed increase" xml:space="preserve">
-    <value>Збільшення швидкості плавання</value>
   </data>
   <data name="Luck (critical damage rate +5%%)" xml:space="preserve">
     <value>Удача (рівень критичної шкоди +5%%)</value>
@@ -1224,6 +1218,9 @@
   </data>
   <data name="Password" xml:space="preserve">
     <value>Пароль</value>
+  </data>
+  <data name="Connect" xml:space="preserve">
+    <value>Підключитися</value>
   </data>
   <data name="Exit" xml:space="preserve">
     <value>Вихід</value>
@@ -7659,12 +7656,6 @@
   </data>
   <data name="You have selected an incorrect W Coin type. Please select again." xml:space="preserve">
     <value>Ви вибрали неправильний тип W Coin. Виберіть ще раз.</value>
-  </data>
-  <data name="Expiration Day" xml:space="preserve">
-    <value>День придатності</value>
-  </data>
-  <data name="Expired Item" xml:space="preserve">
-    <value>Термін дії минув</value>
   </data>
   <data name="Click the item to see the quest information again." xml:space="preserve">
     <value>Натисніть предмет, щоб знову переглянути інформацію про квест.</value>

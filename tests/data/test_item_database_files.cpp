@@ -53,6 +53,7 @@
 #include "UI/ItemTools/ItemEdits.h"
 #include "UI/ItemTools/ItemFieldWidgets.h"
 #include "UI/ItemTools/ItemHeldByCharacter.h"
+#include "UI/ItemTools/ItemLayoutChangeNotes.h"
 #include "UI/ItemTools/ItemLookUseCounts.h"
 #include "UI/ItemTools/ItemNamesakes.h"
 #include "UI/ItemTools/ItemRequirementTable.h"
@@ -72,7 +73,9 @@
 #include "UI/ItemTools/MuItemRulesUI.h"
 #include "UI/ItemTools/MuItemSyncUI.h"
 #include "UI/ItemTools/MuItemTooltipUI.h"
+#include "UI/ItemTools/TooltipLineLooks.h"
 #include "UI/ItemTranslations/MuItemTranslationsUI.h"
+#include "../ui/RmlLayoutFixture.h"
 #include "UI/MapEditor/MapEditorUI.h"
 #include "TestModelSlots.h"
 #include "imgui.h"
@@ -3582,7 +3585,7 @@ TEST_CASE("The shared model form follows an undo of meshes typed without spaces 
 
 // Items with the same name: the lucky sets have a tag their namesakes do not,
 // the Seals of Wealth and the seed sphere tiers count up by number (13/44's
-// noClassLines only leaves tooltip lines out, so it does not tell them apart).
+// tooltip layout only leaves tooltip lines out, and is no tag).
 TEST_CASE("The item lists tell items with the same name apart [data][items][editor]")
 {
     ClientDataScope client(ShippedClientDirectory);
@@ -4670,6 +4673,154 @@ TEST_CASE("Item Tooltip adds the standard rules' style for an item without rules
     const ItemGroundLabel added{"level0", true, 0, 0};
     CHECK(g_ItemDatabase.Find(KrisType)->groundLabels == std::vector<ItemGroundLabel>{added});
     g_ItemEdits.GetHistory().Clear();
+}
+
+// Item Tooltip (D73): the item's tooltip layout is picked from the tooltip file's layouts, as an undo step; the default
+// layout is the one the item names none of.
+TEST_CASE("Item Tooltip picks the item's tooltip layout as an undo step [data][items][editor]")
+{
+    TemporaryClientFolder folder;
+    folder.CopyShippedItems();
+    ClientDataScope client(folder.Directory());
+    I18N::SetLocale("en");
+    std::string errorMessage;
+    REQUIRE(g_ItemDataHandler.Load(errorMessage));
+    TestImGuiContext context;
+    g_ItemEdits.GetHistory().Clear();
+    REQUIRE(g_ItemDatabase.Find(KrisType)->tooltipLayout.empty());
+    REQUIRE(g_ItemDatabase.GetTooltipFile().FindLayout("noClassLines") != nullptr);
+    g_ItemSelection.Select(KrisType);
+    const auto pick = [](const char* layout)
+    {
+        RenderItemTool(g_MuItemTooltipUI, true);
+        ImGui::ActivateItemByID(ItemToolFieldId(MuEditor::WindowIds::ItemTooltip, {KrisType}, "##TooltipLayout"));
+        RenderItemTool(g_MuItemTooltipUI, true);
+        const ImGuiWindow* list = OpenPopupWindow();
+        REQUIRE(list != nullptr);
+        ImGui::ActivateItemByID(ImGui::GetIDWithSeed(layout, nullptr, list->ID));
+        RenderItemTool(g_MuItemTooltipUI, true);
+        RenderItemTool(g_MuItemTooltipUI, true);
+    };
+
+    pick("noClassLines");
+    CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout == "noClassLines");
+    CHECK(g_ItemEdits.GetHistory().GetUndoLabel() == I18N::Editor::ChangeTheTooltipLayout);
+    pick(DefaultTooltipLayout);
+    CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout.empty());
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout == "noClassLines");
+    REQUIRE(g_ItemEdits.Undo());
+    CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout.empty());
+
+    // A layout the item's own changes don't fit can't be picked, as the item could not be saved with it: a Kris that
+    // hides its durability line itself takes noClassLines, not noDurabilityLine, which has no such line.
+    ItemDefinition kris = *g_ItemDatabase.Find(KrisType);
+    kris.tooltipLayoutChanges.hide = {"durability"};
+    g_ItemDatabase.Set(kris);
+    pick("noClassLines");
+    CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout == "noClassLines");
+    pick("noDurabilityLine");
+    CHECK(g_ItemDatabase.Find(KrisType)->tooltipLayout == "noClassLines");
+    g_ItemEdits.GetHistory().Clear();
+}
+
+// Item Tooltip lists an item's own changes to its layout: what it hides, and each line it adds under the line it
+// follows, numbered as Item Checks names them (tooltipLayoutChanges.add[1].lines[1] is the second under the second).
+TEST_CASE("Item Tooltip lists the lines an item adds to its tooltip layout [data][items][editor]")
+{
+    // A language change fills the item attributes again once the item data was loaded (CItemDataHandler's locale
+    // observer), so it needs the attributes a client data scope gives.
+    ClientDataScope client(ShippedClientDirectory);
+    I18N::SetLocale("en");
+    ItemTooltipLayoutChanges changes;
+    changes.hide = {"durability", "blankAfterOptions"};
+    ItemDescriptionLine own;
+    own.text.Set("en", "Own");
+    own.text.Set("de", "Eigen");
+    own.minLevel = 3;
+    ItemDescriptionLine shared;
+    shared.textName = "canBeEquippedBy";
+    ItemDescriptionLine missing;
+    missing.textName = "nothing";
+    changes.add = {{"classLines", {own, ItemDescriptionLine{}}}, {"firstRow", {shared, missing}}};
+
+    std::vector<std::string> texts;
+    std::vector<bool> indented;
+    for (const MuEditor::Items::ItemLayoutChangeNote& note :
+         MuEditor::Items::DescribeItemLayoutChanges(changes, ShippedTooltips(), "de"))
+    {
+        texts.push_back(note.text);
+        indented.push_back(note.indented);
+    }
+    CHECK(texts == std::vector<std::string>{"Its own changes hide: durability, blankAfterOptions",
+                                            "It adds after the line classLines:", "1. Eigen (+3 to +15)",
+                                            "2. (a blank line)", "It adds after the line firstRow:",
+                                            "1. Kann von {className} ausgerüstet werden", "2. @nothing"});
+    CHECK(indented == std::vector<bool>{false, false, true, true, false, true, true});
+    CHECK(MuEditor::Items::DescribeItemLayoutChanges({}, ShippedTooltips(), "en").empty());
+}
+
+// Item Tooltip draws the tooltip's name row in the colors the active theme's tooltip gives each TEXT_COLOR_*, as
+// RmlUi computes them from the theme's style sheets: each line class's color, the bar behind the four highlight colors,
+// and the box behind the lines.
+TEST_CASE("Item Tooltip's tooltip row has the theme's tooltip colors [editor][items]")
+{
+    using Data::Items::GroundLabelColor;
+    // Without the RmlUi runtime (no game): white lines on a black box.
+    CHECK(MuEditor::Items::GetTooltipLooks().lines[TEXT_COLOR_BLUE].text == GroundLabelColor{255, 255, 255});
+    CHECK(MuEditor::Items::GetTooltipLooks().boxAlpha == 255);
+
+    UI::Tests::RmlLayoutFixture fixture;
+    for (const char* theme : {"legacy", "modern"})
+    {
+        INFO(theme);
+        Rml::ElementDocument* document = fixture.Load(theme, "tooltip");
+        Rml::Element* panel = document->GetElementById("tooltip_panel");
+        REQUIRE(panel != nullptr);
+        const int children = panel->GetNumChildren(true);
+        const MuEditor::Items::TooltipLooks looks = MuEditor::Items::ComputeTooltipLooks(*document);
+        const auto& lines = looks.lines;
+        CHECK(lines[TEXT_COLOR_WHITE].text == GroundLabelColor{255, 255, 255});
+        CHECK(lines[TEXT_COLOR_WHITE].backgroundAlpha == 0);
+        CHECK(lines[TEXT_COLOR_BLUE].text == GroundLabelColor{0x80, 0xb3, 0xff});
+        CHECK(lines[TEXT_COLOR_BLUE].backgroundAlpha == 0);
+        CHECK(lines[TEXT_COLOR_ORANGE].text == GroundLabelColor{0xe6, 0x6b, 0x0a});
+        CHECK(lines[TEXT_COLOR_DARKRED].text == GroundLabelColor{255, 255, 255});
+        CHECK(lines[TEXT_COLOR_DARKRED].background == GroundLabelColor{160, 0, 0});
+        CHECK(lines[TEXT_COLOR_DARKRED].backgroundAlpha == 255);
+        CHECK(lines[TEXT_COLOR_GREEN_BLUE].text == GroundLabelColor{0, 255, 0});
+        CHECK(lines[TEXT_COLOR_GREEN_BLUE].background == GroundLabelColor{60, 60, 200});
+        // A box behind the lines (the modern theme's is a token of its own), and the probe lines are gone again: the
+        // panel's children are the tooltip's lines.
+        CHECK(looks.boxAlpha != 0);
+        CHECK(panel->GetNumChildren(true) == children);
+        if (std::string_view(theme) == "legacy")
+        {
+            // RenderTipTextList()'s box: black at 80%.
+            CHECK(looks.box == GroundLabelColor{0, 0, 0});
+            CHECK(looks.boxAlpha == 204);
+        }
+        document->Close();
+    }
+
+    // As the theme draws them: ".tt-line"'s color is every line's whose class sets none, a bar keeps its alpha, and a
+    // color may be short.
+    Rml::ElementDocument* custom = fixture.LoadMarkup(R"(<rml><head><style>
+        .tt-line { color: #fefefe; }
+        .tt-line.tt-hl-darkblue { background-color: rgba(4, 5, 6, 128); }
+        .tt-line.tt-gray { color: #abc; }
+        #tooltip_panel { background-color: #10203040; }
+        </style></head><body><div id="tooltip_panel"/></body></rml>)");
+    const MuEditor::Items::TooltipLooks own = MuEditor::Items::ComputeTooltipLooks(*custom);
+    CHECK(own.lines[TEXT_COLOR_DARKBLUE].text == GroundLabelColor{0xfe, 0xfe, 0xfe});
+    CHECK(own.lines[TEXT_COLOR_DARKBLUE].background == GroundLabelColor{4, 5, 6});
+    CHECK(own.lines[TEXT_COLOR_DARKBLUE].backgroundAlpha == 128);
+    CHECK(own.lines[TEXT_COLOR_GRAY].text == GroundLabelColor{0xaa, 0xbb, 0xcc});
+    CHECK(own.box == GroundLabelColor{0x10, 0x20, 0x30});
+    CHECK(own.boxAlpha == 0x40);
+    // A number that is no color takes white's.
+    CHECK(MuEditor::Items::GetTooltipLineLook(own, 99).className == "tt-line");
+    custom->Close();
 }
 
 TEST_CASE("A description placeholder that names no table stops the save [editor][items]")

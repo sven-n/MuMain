@@ -89,7 +89,10 @@ extern int AllRepairGold;
 // The rows an item's description may write into a tooltip, on top of the original client's 50: the description
 // gets rows of its own, so it never takes the room the rest of the tooltip needs.
 constexpr int MaxItemDescriptionRows = 32;
-constexpr int MaxTextListRows = 50 + MaxItemDescriptionRows;
+// The rows of the lines an item adds to its tooltip layout itself ("tooltipLayoutChanges"), written as its
+// description lines are: rows of their own too, so they take neither the description's room nor the rest's.
+constexpr int MaxItemAddedLineRows = 16;
+constexpr int MaxTextListRows = 50 + MaxItemDescriptionRows + MaxItemAddedLineRows;
 
 extern wchar_t TextList[MaxTextListRows][100];
 extern int TextListColor[MaxTextListRows];
@@ -248,6 +251,16 @@ struct ItemTooltipLine
     int color = 0;
     bool bold = false;
 };
+// The name row of an item's tooltip (always bold): its text in the item names' language, its TEXT_COLOR_*, and the name
+// line of the item data that gives them (its index in nameLines; none for the standard name and color).
+struct ItemTooltipNameRow
+{
+    std::wstring text;
+    int color = 0;
+    std::optional<size_t> nameLine;
+};
+// The name row the tooltip of `item` writes (MuEditor's Item Tooltip shows it).
+ItemTooltipNameRow DescribeItemTooltipName(const ITEM& item);
 // How the tooltip measures a description piece for wrapping: the game's font (g_pRenderText), unless a test sets
 // a measure of its own, which needs no font; nullptr puts the font back.
 void SetItemTooltipTextMeasure(ItemTooltipTextMeasure measure);

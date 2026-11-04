@@ -250,6 +250,7 @@ private:
         bool connectDisabled = false;
         bool deleteDisabled = false;
         bool accountBlockHidden = true;
+        Rml::String createLabel, menuLabel, connectLabel, deleteLabel;
         Rml::String accountBlockLine1;
         Rml::String accountBlockLine2;
     };
@@ -269,6 +270,7 @@ private:
     bool m_bRmlDeleteClicked = false;
 
     void SyncRmlModel();
+    void SyncRmlLabels();
 };
 
 // Replaces CUIMng's old `CCharSelMainWin m_CharSelMainWin;` member, same convention as

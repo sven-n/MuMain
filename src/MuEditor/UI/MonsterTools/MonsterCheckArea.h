@@ -9,10 +9,11 @@
 
 namespace MuEditor::Monsters
 {
-// The monsters or the monster models in Data Checks: the checks of Save
-// Monsters on the tables as the tools have them now. A problem of a monster
-// names it; a click selects it and opens the tool of its field. A problem of a
-// model names the model in its field.
+// The monsters, the monster models or the sound sets in Data Checks: the
+// checks of Save Monsters on the tables as the tools have them now. A problem
+// of a monster names it; a click selects it and opens the tool of its field.
+// A problem of a model names the model in its field, one of a sound set the
+// set ("sound set Raymond soundEvents[0].cues").
 class MonsterCheckArea final : public DataChecks::DataCheckArea
 {
 public:
@@ -29,7 +30,8 @@ public:
     void RenderSubject(const Data::Items::ItemDataIssue& issue) const override;
     // The monster is in the What column: "name.de", not "monster 2 name.de".
     std::string_view GetField(const Data::Items::ItemDataIssue& issue) const override;
-    // A problem that is not about one monster has nothing to open.
+    // A problem of a sound set opens the set in Monster Sounds when clicked;
+    // another problem that is not about one monster has nothing to open.
     void Open(const Data::Items::ItemDataIssue& issue, bool clicked) override;
 
 private:
@@ -41,6 +43,8 @@ private:
 std::unique_ptr<DataChecks::DataCheckArea> CreateMonsterCheckArea();
 // The model list.
 std::unique_ptr<DataChecks::DataCheckArea> CreateMonsterModelCheckArea();
+// The sound sets and what the monsters, models and sets name of each other.
+std::unique_ptr<DataChecks::DataCheckArea> CreateMonsterSoundCheckArea();
 } // namespace MuEditor::Monsters
 
 #endif // _EDITOR

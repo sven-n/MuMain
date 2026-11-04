@@ -60,7 +60,8 @@ void ValidateDescriptionPlaceholders(std::span<const ItemDefinition> items, cons
 // The shared texts ("@name") of the items' descriptions and level values against the tooltip file (`tooltipFile`
 // names it in messages): a text the file does not have is an error, with the nearest name when it looks like a typo
 // (their placeholders are checked by ValidateDescriptionPlaceholders). A level value has no placeholders. A shared text
-// that neither a layout nor a description uses is a warning.
+// that neither a layout nor a description uses is a warning. The layout an item names and its changes are checked
+// against the file too (CheckItemTooltipLayout), and an item of a kind without class lines whose layout has them warns.
 void ValidateDescriptionTexts(std::span<const ItemDefinition> items, const ItemTooltipFile& tooltips,
                               const std::string& tooltipFile, std::vector<ItemDataIssue>& issues);
 
