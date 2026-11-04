@@ -475,6 +475,9 @@ typedef struct {
 } PITEM_EXTENDED_BASE, * LPPITEM_EXTENDED_BASE;
 #pragma pack(pop)
 
+// The length of an item in the layout above, read from its option flags: where the next item of a packet starts.
+int CalcItemLength(std::span<const BYTE> ReceiveBuffer);
+
 ///////////////////////////////////////////////////////////////////////////////
 // trade
 ///////////////////////////////////////////////////////////////////////////////

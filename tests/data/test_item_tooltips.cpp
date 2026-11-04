@@ -24,6 +24,7 @@
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Network/Server/SocketSystem.h"
+#include "Network/Server/WSclient.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 #include "UI/Core/UIManager.h"
 #include "UI/Inventory/UIJewelHarmony.h"
@@ -602,11 +603,27 @@ TEST_CASE("An item from the server with a guardian option shows its 380 lines [d
     const ItemCreationParams plain = fromServer(optionAndExcellent);
     CHECK(guarded.HasGuardianOption);
     CHECK_FALSE(plain.HasGuardianOption);
-    // The flag takes no byte: the option bytes after it read the same either way.
     CHECK(guarded.OptionLevel == 2);
     CHECK(guarded.ExcellentFlags == 0x01);
-    CHECK(guarded.OptionLevel == plain.OptionLevel);
-    CHECK(guarded.ExcellentFlags == plain.ExcellentFlags);
+
+    // The flag takes no byte. The sockets are the only bytes read after it: they read the same with it, and the item
+    // is as long (CalcItemLength finds where the next item of a packet starts). Their first byte is the bonus option
+    // (high half) and the socket count (low half), then comes one byte per socket.
+    const auto socketed = [](ItemOptionFlags flags)
+    { return std::array<BYTE, 9>{0x00, 22, 9, 40, static_cast<BYTE>(flags), 0x02, 0x32, 0x0A, 0x0B}; };
+    const ItemOptionFlags optionAndSockets = ItemOptionFlags::HasOption | ItemOptionFlags::HasSockets;
+    for (const ItemOptionFlags flags : {optionAndSockets, optionAndSockets | ItemOptionFlags::HasGuardian})
+    {
+        CAPTURE(static_cast<int>(flags));
+        const std::array<BYTE, 9> itemData = socketed(flags);
+        CHECK(CalcItemLength(itemData) == static_cast<int>(itemData.size()));
+        const ItemCreationParams params = ParseItemData(itemData);
+        CHECK(params.HasGuardianOption == ((flags & ItemOptionFlags::HasGuardian) != 0));
+        CHECK(params.SocketBonusOption == 3);
+        CHECK(params.SocketCount == 2);
+        CHECK(params.SocketOptions[0] == 0x0A);
+        CHECK(params.SocketOptions[1] == 0x0B);
+    }
 
     ITEM withGuardian;
     FillItemFromParameters(withGuardian, guarded);
