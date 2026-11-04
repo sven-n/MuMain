@@ -209,6 +209,15 @@ std::filesystem::path CreateMusicAsset()
     REQUIRE(file.write(reinterpret_cast<const char*>(wav.data()), wav.size()).good());
     return testDirectory;
 }
+
+// Writes Data/Music/corrupt.wav, which no decoder accepts, next to CreateMusicAsset()'s track.
+std::filesystem::path CreateCorruptMusicFile(const std::filesystem::path& directory)
+{
+    const std::filesystem::path corrupt = directory / "Data" / "Music" / "corrupt.wav";
+    std::ofstream file(corrupt, std::ios::binary);
+    REQUIRE((file << "invalid audio").good());
+    return corrupt;
+}
 } // namespace
 
 TEST_CASE("sound effects requested as 3D load without spatialization [audio][3d]")
@@ -332,12 +341,8 @@ TEST_CASE("decoder failures are suppressed until explicitly retried [audio][musi
     InitNoDeviceEngine(*backend);
     const auto directory = CreateMusicAsset();
     const auto source = directory / "Data" / "Music" / "track.wav";
-    const auto corrupt = directory / "Data" / "Music" / "corrupt.wav";
+    const auto corrupt = CreateCorruptMusicFile(directory);
     const std::string name = corrupt.generic_string();
-    {
-        std::ofstream file(corrupt, std::ios::binary);
-        REQUIRE((file << "invalid audio").good());
-    }
     backend->PlayMusic(name.c_str(), false);
     CHECK(backend->IsEndMusic());
     REQUIRE(backend->m_failedMusicNames.size() == 1);
@@ -350,6 +355,33 @@ TEST_CASE("decoder failures are suppressed until explicitly retried [audio][musi
     backend->PlayMusic(name.c_str(), true);
     CHECK_FALSE(backend->IsEndMusic());
     CHECK(backend->m_failedMusicNames.empty());
+
+    backend->Shutdown();
+    std::filesystem::remove_all(directory);
+}
+
+// Unpatched miniaudio wrote to a failed stream after waking the caller, which had already freed it.
+// The next stream often reused that memory, and its load then waited forever. The write only lands
+// late when the job thread is preempted, so this is a smoke test: a regression shows up as a ctest
+// timeout some of the time. MiniAudioImpl.cpp's build check is what guarantees the patch.
+TEST_CASE("a failed stream load never stalls the next one [audio][music]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+    InitNoDeviceEngine(*backend);
+    const auto directory = CreateMusicAsset();
+    const std::string trackName = (directory / "Data" / "Music" / "track.wav").generic_string();
+    const std::string corruptName = CreateCorruptMusicFile(directory).generic_string();
+
+    constexpr int loadPairs = 200;
+    int startedTracks = 0;
+    for (int pair = 0; pair < loadPairs; ++pair)
+    {
+        backend->PlayMusic(corruptName.c_str(), true);
+        backend->PlayMusic(trackName.c_str(), true);
+        startedTracks += backend->IsEndMusic() ? 0 : 1;
+    }
+    CHECK(startedTracks == loadPairs);
+    CHECK(backend->m_failedMusicNames.size() == 1);
 
     backend->Shutdown();
     std::filesystem::remove_all(directory);
